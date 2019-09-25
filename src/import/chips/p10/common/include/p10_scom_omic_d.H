@@ -39,7 +39,10 @@ namespace omic
 #endif
 
 
-static const uint64_t CMN_CONFIG = 0x0c01174eull;
+//ERRCODE: // Some of the name targets not found in address targets: omic
+// No targets could be determined from the address.
+
+static const uint64_t CMN_CONFIG = 0x0c01140eull;
 
 static const uint32_t CMN_CONFIG_MESO_BUFFER_ENABLE = 0;
 static const uint32_t CMN_CONFIG_MESO_BUFFER_START = 1;

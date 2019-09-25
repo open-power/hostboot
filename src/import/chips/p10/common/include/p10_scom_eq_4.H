@@ -45,6 +45,18 @@ static const uint64_t CLK_ADJ_00_DCADJ_WRAP_SET_HOLD_MODE = 0x20018301ull;
 static const uint64_t CLK_ADJ_00_DCADJ_WRAP_SOFT_RESET = 0x20018305ull;
 // eq/reg00004.H
 
+static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CORE_PDLY_FSM_STATES = 0x2001833aull;
+
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CORE_PDLY_FSM_STATES_0 = 2;
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CORE_PDLY_FSM_STATES_0_LEN = 6;
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CORE_PDLY_FSM_STATES_1 = 10;
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CORE_PDLY_FSM_STATES_1_LEN = 6;
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CORE_PDLY_FSM_STATES_2 = 18;
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CORE_PDLY_FSM_STATES_2_LEN = 6;
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CORE_PDLY_FSM_STATES_3 = 26;
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CORE_PDLY_FSM_STATES_3_LEN = 6;
+// eq/reg00004.H
+
 static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_CHICKEN_SWITCHES = 0x20018335ull;
 
 static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_CHICKEN_SWITCHES_STOP_ON_ERROR = 0;
@@ -244,20 +256,36 @@ static const uint64_t OPCG_REG2 = 0x20030004ull;
 static const uint32_t OPCG_REG2_OPCG_GO2 = 0;
 static const uint32_t OPCG_REG2_PRPG_WEIGHTING = 1;
 static const uint32_t OPCG_REG2_PRPG_WEIGHTING_LEN = 3;
-static const uint32_t OPCG_REG2_PRPG_VALUE = 4;
-static const uint32_t OPCG_REG2_PRPG_VALUE_LEN = 12;
+static const uint32_t OPCG_REG2_PRPG_SEED = 4;
+static const uint32_t OPCG_REG2_PRPG_SEED_LEN = 12;
 static const uint32_t OPCG_REG2_PRPG_A_VAL = 16;
 static const uint32_t OPCG_REG2_PRPG_A_VAL_LEN = 12;
 static const uint32_t OPCG_REG2_PRPG_B_VAL = 28;
 static const uint32_t OPCG_REG2_PRPG_B_VAL_LEN = 12;
 static const uint32_t OPCG_REG2_PRPG_MODE = 40;
-static const uint32_t OPCG_REG2_SM_LBIST_CNTRL = 48;
-static const uint32_t OPCG_REG2_SM_LBIST_CNTRL_LEN = 16;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_WEIGHT_SEL_PRIM = 48;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_WEIGHT_SEL_PRIM_LEN = 4;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_WEIGHT_SEL_SEC_OR_APERTURE_MASK = 52;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_WEIGHT_SEL_SEC_OR_APERTURE_MASK_LEN = 4;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_MODE_SELECT = 56;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_PRPG_HOLD_MODE = 57;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_LOCAL_OVERRIDE = 58;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_LOAD_APERTURE_VALUE = 59;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_LOAD_APERTURE_SELECT = 60;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_LOAD_APERTURE_SELECT_LEN = 4;
 // eq/reg00004.H
 
 static const uint64_t PCB_OPCG_GO = 0x20030020ull;
 
 static const uint32_t PCB_OPCG_GO_PCB_OPCGGO = 0;
+// eq/reg00004.H
+
+static const uint64_t QMETRA0_TR0_CONFIG_4 = 0x20018407ull;
+
+static const uint32_t QMETRA0_TR0_CONFIG_4_A = 0;
+static const uint32_t QMETRA0_TR0_CONFIG_4_A_LEN = 24;
+static const uint32_t QMETRA0_TR0_CONFIG_4_B = 24;
+static const uint32_t QMETRA0_TR0_CONFIG_4_B_LEN = 24;
 // eq/reg00004.H
 
 static const uint64_t QME_EISTR = 0x200e0270ull;
@@ -284,8 +312,8 @@ static const uint32_t QME_FTXR_QOS_UPDATE_PENDING_LEN = 4;
 
 static const uint64_t QME_LFIRACT0 = 0x200e0008ull;
 
-static const uint32_t QME_LFIRACT0_FIR_ACTION1 = 0;
-static const uint32_t QME_LFIRACT0_FIR_ACTION1_LEN = 31;
+static const uint32_t QME_LFIRACT0_FIR_ACTION0 = 0;
+static const uint32_t QME_LFIRACT0_FIR_ACTION0_LEN = 34;
 // eq/reg00004.H
 
 static const uint64_t QME_PLSR = 0x200e0148ull;

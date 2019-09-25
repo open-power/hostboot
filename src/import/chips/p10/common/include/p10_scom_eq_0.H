@@ -83,6 +83,18 @@ static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_SYNC_ENABLE =
 static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_SYNC_ENABLE_CORE_SYNC_ENABLE_INVERT = 0;
 // eq/reg00000.H
 
+static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES = 0x2001133bull;
+
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_0 = 2;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_0_LEN = 6;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_1 = 10;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_1_LEN = 6;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_2 = 18;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_2_LEN = 6;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_3 = 26;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_3_LEN = 6;
+// eq/reg00000.H
+
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_CORE_OVERRIDE = 0x20011326ull;
 
 static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_CORE_OVERRIDE_ENABLE = 0;
@@ -172,10 +184,10 @@ static const uint32_t CPLT_CONF0_RESERVED_43G = 43;
 static const uint32_t CPLT_CONF0_TC_PCB_DBG_GLB_BRCST_EN = 44;
 static const uint32_t CPLT_CONF0_RESERVED_45G = 45;
 static const uint32_t CPLT_CONF0_TC_SKIT_CANARY_MODE_DC = 46;
-static const uint32_t CPLT_CONF0_FREE_USAGE_47G = 47;
+static const uint32_t CPLT_CONF0_TC_TOPOLOGY_MODE_DC = 47;
 static const uint32_t CPLT_CONF0_TC_TOPOLOGY_ID_DC = 48;
 static const uint32_t CPLT_CONF0_TC_TOPOLOGY_ID_DC_LEN = 4;
-static const uint32_t CPLT_CONF0_TC_TOPOLOGY_MODE_DC = 52;
+static const uint32_t CPLT_CONF0_FREE_USAGE_52G = 52;
 static const uint32_t CPLT_CONF0_FREE_USAGE_53G = 53;
 static const uint32_t CPLT_CONF0_FREE_USAGE_54G = 54;
 static const uint32_t CPLT_CONF0_FREE_USAGE_55G = 55;
@@ -552,6 +564,34 @@ static const uint32_t OPCG_ALIGN_OPCG_WAIT_CYCLES = 52;
 static const uint32_t OPCG_ALIGN_OPCG_WAIT_CYCLES_LEN = 12;
 // eq/reg00000.H
 
+static const uint64_t QMETRA0_TR0_CONFIG = 0x20018402ull;
+
+static const uint32_t QMETRA0_TR0_CONFIG_STORE_ON_TRIG_MODE = 0;
+static const uint32_t QMETRA0_TR0_CONFIG_WRITE_ON_RUN_MODE = 1;
+static const uint32_t QMETRA0_TR0_CONFIG_EXTEND_TRIG_MODE = 2;
+static const uint32_t QMETRA0_TR0_CONFIG_EXTEND_TRIG_MODE_LEN = 8;
+static const uint32_t QMETRA0_TR0_CONFIG_BANK_MODE = 10;
+static const uint32_t QMETRA0_TR0_CONFIG_ENH_TRACE_MODE = 11;
+static const uint32_t QMETRA0_TR0_CONFIG_LOCAL_CLOCK_GATE_CONTROL = 12;
+static const uint32_t QMETRA0_TR0_CONFIG_LOCAL_CLOCK_GATE_CONTROL_LEN = 2;
+static const uint32_t QMETRA0_TR0_CONFIG_TRACE_SELECT_CONTROL = 14;
+static const uint32_t QMETRA0_TR0_CONFIG_TRACE_SELECT_CONTROL_LEN = 4;
+static const uint32_t QMETRA0_TR0_CONFIG_TRACE_RUN_HOLD_OFF = 18;
+static const uint32_t QMETRA0_TR0_CONFIG_TRACE_RUN_STATUS = 19;
+static const uint32_t QMETRA0_TR0_CONFIG_TRACE_RUN_STICKY = 20;
+static const uint32_t QMETRA0_TR0_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
+static const uint32_t QMETRA0_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT = 22;
+static const uint32_t QMETRA0_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
+// eq/reg00000.H
+
+static const uint64_t QMETRA0_TR1_CONFIG_4 = 0x20018427ull;
+
+static const uint32_t QMETRA0_TR1_CONFIG_4_A = 0;
+static const uint32_t QMETRA0_TR1_CONFIG_4_A_LEN = 24;
+static const uint32_t QMETRA0_TR1_CONFIG_4_B = 24;
+static const uint32_t QMETRA0_TR1_CONFIG_4_B_LEN = 24;
+// eq/reg00000.H
+
 static const uint64_t QME_BCECSR = 0x200e0068ull;
 
 static const uint32_t QME_BCECSR_BUSY = 0;
@@ -593,6 +633,14 @@ static const uint32_t QME_PSREQ_QME_QMCR_CORE_PARTIAL_GOOD_LEN = 4;
 static const uint32_t QME_PSREQ_QME_QMCR_AUTO_PMCR_UPDATE = 52;
 static const uint32_t QME_PSREQ_QME_QMCR_PMCR_RECENT_MODE = 53;
 static const uint32_t QME_PSREQ_PMCR_PIG_PENDING = 55;
+// eq/reg00000.H
+
+static const uint64_t QME_QHTMODE = 0x200e01a0ull;
+
+static const uint32_t QME_QHTMODE_HTM_ENABLE = 0;
+static const uint32_t QME_QHTMODE_MODE_WRAP = 1;
+static const uint32_t QME_QHTMODE_DIS_TSTAMP = 2;
+static const uint32_t QME_QHTMODE_SINGLE_TSTAMP = 3;
 // eq/reg00000.H
 
 static const uint64_t QME_RCOCR = 0x200e017cull;

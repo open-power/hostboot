@@ -115,8 +115,16 @@ static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SINGLE_STEP_COUNT_STEP_COUNT_LEN = 1
 
 static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA = 0x20014339ull;
 
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_ORE_IS_LATE = 3;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_ACHE_IS_LATE = 7;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CORE_IS_LATE = 3;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CORE_IS_LATE_HIST = 4;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CORE_IS_LATE_HIST_LEN = 4;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CACHE_IS_LATE = 11;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CACHE_IS_LATE_HIST = 12;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CACHE_IS_LATE_HIST_LEN = 4;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CORE_PDLY_CONFIG = 16;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CORE_PDLY_CONFIG_LEN = 4;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CACHE_PDLY_CONFIG = 20;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CACHE_PDLY_CONFIG_LEN = 4;
 // eq/reg00008.H
 
 static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE = 0x20014321ull;
@@ -162,8 +170,16 @@ static const uint64_t CLK_ADJ_03_DCADJ_WRAP_SOFT_RESET = 0x20011305ull;
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES = 0x20011337ull;
 
-static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_INC_DEC_STATE = 28;
-static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_INC_DEC_STATE_LEN = 4;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_STATE = 0;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_STATE_LEN = 4;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_FMS_HIST_0 = 4;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_FMS_HIST_0_LEN = 4;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_FMS_HIST_1 = 8;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_FMS_HIST_1_LEN = 4;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_FMS_HIST_2 = 12;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_FMS_HIST_2_LEN = 4;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_FMS_HIST_3 = 16;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_FMS_HIST_3_LEN = 4;
 // eq/reg00008.H
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE = 0x20011322ull;
@@ -466,6 +482,64 @@ static const uint32_t SCAN_REGION_TYPE_SCAN_TYPE_BNDY = 56;
 static const uint32_t SCAN_REGION_TYPE_SCAN_TYPE_FARR = 57;
 static const uint32_t SCAN_REGION_TYPE_SCAN_TYPE_CMSK = 58;
 static const uint32_t SCAN_REGION_TYPE_SCAN_TYPE_INEX = 59;
+// eq/reg00008.H
+
+static const uint64_t WOF = 0x20040021ull;
+
+static const uint32_t WOF_ANY_WOF = 0;
+static const uint32_t WOF_RESERVED1W = 1;
+static const uint32_t WOF_ANY_LOCAL_XSTOP = 2;
+static const uint32_t WOF_RESERVED3W = 3;
+static const uint32_t WOF_PERV = 4;
+static const uint32_t WOF_IN05 = 5;
+static const uint32_t WOF_IN06 = 6;
+static const uint32_t WOF_IN07 = 7;
+static const uint32_t WOF_IN08 = 8;
+static const uint32_t WOF_IN09 = 9;
+static const uint32_t WOF_IN010 = 10;
+static const uint32_t WOF_IN011 = 11;
+static const uint32_t WOF_IN012 = 12;
+static const uint32_t WOF_IN013 = 13;
+static const uint32_t WOF_IN014 = 14;
+static const uint32_t WOF_IN015 = 15;
+static const uint32_t WOF_IN016 = 16;
+static const uint32_t WOF_IN017 = 17;
+static const uint32_t WOF_IN018 = 18;
+static const uint32_t WOF_IN019 = 19;
+static const uint32_t WOF_IN020 = 20;
+static const uint32_t WOF_IN021 = 21;
+static const uint32_t WOF_IN022 = 22;
+static const uint32_t WOF_IN023 = 23;
+static const uint32_t WOF_IN024 = 24;
+static const uint32_t WOF_IN025 = 25;
+static const uint32_t WOF_IN026 = 26;
+static const uint32_t WOF_IN027 = 27;
+static const uint32_t WOF_IN028 = 28;
+static const uint32_t WOF_IN029 = 29;
+static const uint32_t WOF_IN030 = 30;
+static const uint32_t WOF_IN031 = 31;
+static const uint32_t WOF_IN032 = 32;
+static const uint32_t WOF_IN033 = 33;
+static const uint32_t WOF_IN034 = 34;
+static const uint32_t WOF_IN035 = 35;
+static const uint32_t WOF_IN036 = 36;
+static const uint32_t WOF_IN037 = 37;
+static const uint32_t WOF_IN038 = 38;
+static const uint32_t WOF_IN039 = 39;
+static const uint32_t WOF_IN040 = 40;
+static const uint32_t WOF_IN041 = 41;
+static const uint32_t WOF_IN042 = 42;
+static const uint32_t WOF_IN043 = 43;
+static const uint32_t WOF_IN044 = 44;
+static const uint32_t WOF_IN045 = 45;
+static const uint32_t WOF_IN046 = 46;
+static const uint32_t WOF_IN047 = 47;
+static const uint32_t WOF_IN048 = 48;
+static const uint32_t WOF_IN049 = 49;
+static const uint32_t WOF_IN050 = 50;
+static const uint32_t WOF_IN051 = 51;
+static const uint32_t WOF_IN052 = 52;
+static const uint32_t WOF_IN053 = 53;
 // eq/reg00008.H
 
 static const uint64_t XSTOP3 = 0x2003000eull;

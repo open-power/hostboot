@@ -94,30 +94,6 @@ static const uint32_t AME_ATL_MISC_TEST_CERR_RPT_TEST_CERR_BITSEL = 59;
 static const uint32_t AME_ATL_MISC_TEST_CERR_RPT_TEST_CERR_BITSEL_LEN = 5;
 // pau/reg00001.H
 
-static const uint64_t ATS_REG_HOLD = 0x10010ab5ull;
-
-static const uint32_t ATS_REG_HOLD_TVT_ENTRY_INVALID_ESR = 0;
-static const uint32_t ATS_REG_HOLD_TVT_ADDR_RANGE_ERR_ESR = 1;
-static const uint32_t ATS_REG_HOLD_TCE_PAGE_ACCESS_ERR_ESR = 2;
-static const uint32_t ATS_REG_HOLD_TCE_CACHE_MULT_HIT_ERR_ESR = 3;
-static const uint32_t ATS_REG_HOLD_MLC_ACCESS_ERR_ESR = 4;
-static const uint32_t ATS_REG_HOLD_TCE_REQ_TO_ERR_ESR = 5;
-static const uint32_t ATS_REG_HOLD_TCD_PERR_ESR = 6;
-static const uint32_t ATS_REG_HOLD_TDR_PERR_ESR = 7;
-static const uint32_t ATS_REG_HOLD_AT_EA_UE_ESR = 8;
-static const uint32_t ATS_REG_HOLD_AT_EA_CE_ESR = 9;
-static const uint32_t ATS_REG_HOLD_AT_TDRMEM_UE_ESR = 10;
-static const uint32_t ATS_REG_HOLD_AT_TDRMEM_CE_ESR = 11;
-static const uint32_t ATS_REG_HOLD_RSPOUT_UE_ESR = 12;
-static const uint32_t ATS_REG_HOLD_RSPOUT_CE_ESR = 13;
-static const uint32_t ATS_REG_HOLD_TVT_PERR_ESR = 14;
-static const uint32_t ATS_REG_HOLD_IODA_ADDR_PERR_ESR = 15;
-static const uint32_t ATS_REG_HOLD_ATS_CTRLR_PERR_ESR = 16;
-static const uint32_t ATS_REG_HOLD_ATS_TOR_PERR_ESR = 17;
-static const uint32_t ATS_REG_HOLD_INVAL_IODA_TBL_SEL_ESR = 18;
-static const uint32_t ATS_REG_HOLD_ESR_RSVD_19 = 19;
-// pau/reg00001.H
-
 static const uint64_t CS_CTL_MISC_BDF2PE_3_CONFIG = 0x100109b3ull;
 
 static const uint32_t CS_CTL_MISC_BDF2PE_3_CONFIG_ENABLE = 0;
@@ -583,21 +559,6 @@ static const uint32_t MISC_REGS_HOLD_MISC_CNTL_ERRP = 7;
 static const uint32_t MISC_REGS_HOLD_RX00_FAULT = 8;
 static const uint32_t MISC_REGS_HOLD_RX01_FAULT = 9;
 static const uint32_t MISC_REGS_HOLD_RX20_FAULT = 10;
-// pau/reg00001.H
-
-static const uint64_t NTL1_REGS_CONFIG1 = 0x10010a18ull;
-
-static const uint32_t NTL1_REGS_CONFIG1_COMPRESSED_RSP_ENA = 0;
-static const uint32_t NTL1_REGS_CONFIG1_CONFIG1_RESERVED1 = 1;
-static const uint32_t NTL1_REGS_CONFIG1_CONFIG1_RESERVED1_LEN = 3;
-static const uint32_t NTL1_REGS_CONFIG1_CREQ_AE_ALWAYS = 4;
-static const uint32_t NTL1_REGS_CONFIG1_DGD_AE_ALWAYS = 5;
-static const uint32_t NTL1_REGS_CONFIG1_RSP_AE_ALWAYS = 6;
-static const uint32_t NTL1_REGS_CONFIG1_CONFIG1_RESERVED2 = 7;
-static const uint32_t NTL1_REGS_CONFIG1_NTL_RESET = 8;
-static const uint32_t NTL1_REGS_CONFIG1_NTL_RESET_LEN = 2;
-static const uint32_t NTL1_REGS_CONFIG1_CONFIG1_RESERVED3 = 10;
-static const uint32_t NTL1_REGS_CONFIG1_CONFIG1_RESERVED3_LEN = 54;
 // pau/reg00001.H
 
 static const uint64_t OTL0_MISC_CONFIG3 = 0x10010a3full;

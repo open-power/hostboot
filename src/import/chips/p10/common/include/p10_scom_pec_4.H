@@ -139,15 +139,23 @@ static const uint64_t OPCG_REG2 = 0x08030004ull;
 static const uint32_t OPCG_REG2_OPCG_GO2 = 0;
 static const uint32_t OPCG_REG2_PRPG_WEIGHTING = 1;
 static const uint32_t OPCG_REG2_PRPG_WEIGHTING_LEN = 3;
-static const uint32_t OPCG_REG2_PRPG_VALUE = 4;
-static const uint32_t OPCG_REG2_PRPG_VALUE_LEN = 12;
+static const uint32_t OPCG_REG2_PRPG_SEED = 4;
+static const uint32_t OPCG_REG2_PRPG_SEED_LEN = 12;
 static const uint32_t OPCG_REG2_PRPG_A_VAL = 16;
 static const uint32_t OPCG_REG2_PRPG_A_VAL_LEN = 12;
 static const uint32_t OPCG_REG2_PRPG_B_VAL = 28;
 static const uint32_t OPCG_REG2_PRPG_B_VAL_LEN = 12;
 static const uint32_t OPCG_REG2_PRPG_MODE = 40;
-static const uint32_t OPCG_REG2_SM_LBIST_CNTRL = 48;
-static const uint32_t OPCG_REG2_SM_LBIST_CNTRL_LEN = 16;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_WEIGHT_SEL_PRIM = 48;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_WEIGHT_SEL_PRIM_LEN = 4;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_WEIGHT_SEL_SEC_OR_APERTURE_MASK = 52;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_WEIGHT_SEL_SEC_OR_APERTURE_MASK_LEN = 4;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_MODE_SELECT = 56;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_PRPG_HOLD_MODE = 57;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_LOCAL_OVERRIDE = 58;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_LOAD_APERTURE_VALUE = 59;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_LOAD_APERTURE_SELECT = 60;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_LOAD_APERTURE_SELECT_LEN = 4;
 // pec/reg00004.H
 
 static const uint64_t PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG1 = 0x0301180dull;
@@ -180,14 +188,6 @@ static const uint32_t TRA0_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN = 52;
 static const uint32_t TRA0_TR0_TRACE_LO_DATA_REG_RUNNING = 53;
 static const uint32_t TRA0_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t TRA0_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
-// pec/reg00004.H
-
-static const uint64_t TRA0_TR1_CONFIG_4 = 0x08010447ull;
-
-static const uint32_t TRA0_TR1_CONFIG_4_A = 0;
-static const uint32_t TRA0_TR1_CONFIG_4_A_LEN = 24;
-static const uint32_t TRA0_TR1_CONFIG_4_B = 24;
-static const uint32_t TRA0_TR1_CONFIG_4_B_LEN = 24;
 // pec/reg00004.H
 
 static const uint64_t XSTOP1 = 0x0803000cull;

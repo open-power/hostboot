@@ -124,7 +124,10 @@ static const uint32_t TX_CTL_SM_REGS_CTLSM_STAT6_PG_TX_BIST_HS_FAIL = 50;
 static const uint32_t TX_CTL_SM_REGS_CTLSM_STAT6_PG_TX_IREF_PARITYCHK_CLOCK_RO_SIGNAL = 51;
 // omic/reg00008.H
 
-static const uint64_t TX_SYNC = 0x0c01174dull;
+//ERRCODE: // Some of the name targets not found in address targets: omic
+// No targets could be determined from the address.
+
+static const uint64_t TX_SYNC = 0x0c01140dull;
 
 static const uint32_t TX_SYNC_ENA = 31;
 static const uint32_t TX_SYNC_DL7_DELAY = 32;

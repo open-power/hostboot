@@ -85,6 +85,7 @@ static const uint32_t EPS_DBG_MODE_REG_STOP_ON_RECOV_ERR_SELECTION = 9;
 static const uint32_t EPS_DBG_MODE_REG_STOP_ON_SPATTN_SELECTION = 10;
 static const uint32_t EPS_DBG_MODE_REG_STOP_ON_HOSTATTN_SELECTION = 11;
 static const uint32_t EPS_DBG_MODE_REG_FREEZE_SEL_MODE = 12;
+static const uint32_t EPS_DBG_MODE_REG_MASTER_CLOCK_ENABLE = 13;
 static const uint32_t EPS_DBG_MODE_REG_TRACE_RUN_ON = 16;
 static const uint32_t EPS_DBG_MODE_REG_TRACE_RUN_STATUS = 17;
 static const uint32_t EPS_DBG_MODE_REG_TRACE_RUN_STATUS_LEN = 2;
@@ -157,21 +158,6 @@ static const uint64_t SCAN64CONTSCAN = 0x0803f000ull;
 
 static const uint32_t SCAN64CONTSCAN_SCAN64CONTSCAN_REG = 0;
 static const uint32_t SCAN64CONTSCAN_SCAN64CONTSCAN_REG_LEN = 64;
-// pec/reg00012.H
-
-static const uint64_t TRA0_TR1_TRACE_LO_DATA_REG = 0x08010441ull;
-
-static const uint32_t TRA0_TR1_TRACE_LO_DATA_REG_LO_DATA = 0;
-static const uint32_t TRA0_TR1_TRACE_LO_DATA_REG_LO_DATA_LEN = 32;
-static const uint32_t TRA0_TR1_TRACE_LO_DATA_REG_ADDRESS = 32;
-static const uint32_t TRA0_TR1_TRACE_LO_DATA_REG_ADDRESS_LEN = 10;
-static const uint32_t TRA0_TR1_TRACE_LO_DATA_REG_LAST_BANK = 42;
-static const uint32_t TRA0_TR1_TRACE_LO_DATA_REG_LAST_BANK_LEN = 9;
-static const uint32_t TRA0_TR1_TRACE_LO_DATA_REG_LAST_BANK_VALID = 51;
-static const uint32_t TRA0_TR1_TRACE_LO_DATA_REG_WRITE_ON_RUN = 52;
-static const uint32_t TRA0_TR1_TRACE_LO_DATA_REG_RUNNING = 53;
-static const uint32_t TRA0_TR1_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
-static const uint32_t TRA0_TR1_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
 // pec/reg00012.H
 
 static const uint64_t XSTOP_INTERRUPT_REG = 0x080f001cull;

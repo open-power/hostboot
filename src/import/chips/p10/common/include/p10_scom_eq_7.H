@@ -255,6 +255,14 @@ static const uint32_t OPCG_CAPT2_24_06ODD = 59;
 static const uint32_t OPCG_CAPT2_24_06ODD_LEN = 5;
 // eq/reg00007.H
 
+static const uint64_t QMETRA0_TR0_CONFIG_3 = 0x20018406ull;
+
+static const uint32_t QMETRA0_TR0_CONFIG_3_C = 0;
+static const uint32_t QMETRA0_TR0_CONFIG_3_C_LEN = 24;
+static const uint32_t QMETRA0_TR0_CONFIG_3_D = 24;
+static const uint32_t QMETRA0_TR0_CONFIG_3_D_LEN = 24;
+// eq/reg00007.H
+
 static const uint64_t QME_ERR = 0x200e0010ull;
 
 static const uint32_t QME_ERR_PPE_INTERNAL_ERROR = 0;
@@ -283,6 +291,13 @@ static const uint32_t QME_ERR_SPARE = 40;
 static const uint32_t QME_ERR_SPARE_LEN = 4;
 // eq/reg00007.H
 
+static const uint64_t QME_QHTTRIG = 0x200e01b0ull;
+
+static const uint32_t QME_QHTTRIG_START = 0;
+static const uint32_t QME_QHTTRIG_STOP = 1;
+static const uint32_t QME_QHTTRIG_PAUSE = 2;
+// eq/reg00007.H
+
 static const uint64_t QME_QMCR = 0x200e0088ull;
 static const uint64_t QME_QMCR_WO_CLEAR = 0x200e008bull;
 static const uint64_t QME_QMCR_WO_OR = 0x200e008aull;
@@ -292,7 +307,7 @@ static const uint32_t QME_QMCR_PSCR_OVERRIDE_EN = 1;
 static const uint32_t QME_QMCR_CHAR_REGS_READ_ENABLE = 2;
 static const uint32_t QME_QMCR_BCECSR_OVERRIDE_EN = 3;
 static const uint32_t QME_QMCR_PSREQ_SCOM_READ_EN = 4;
-static const uint32_t QME_QMCR_LOCK_PCB_ON_ERR = 5;
+static const uint32_t QME_QMCR_LOCK_QUEUE_ON_PCB_ERR = 5;
 static const uint32_t QME_QMCR_STOP_OVERRIDE_MODE = 6;
 static const uint32_t QME_QMCR_STOP_ACTIVE_MASK = 7;
 static const uint32_t QME_QMCR_AUTO_PMCR_UPDATE = 8;
@@ -378,6 +393,7 @@ static const uint32_t SYNC_CONFIG_DISABLE_PCB_ITR = 9;
 static const uint32_t SYNC_CONFIG_CONT_SCAN_DISABLE = 10;
 static const uint32_t SYNC_CONFIG_SYNC_PULSE_OUT_DIS = 11;
 static const uint32_t SYNC_CONFIG_REGION_PGOOD_OVERRIDE = 12;
+static const uint32_t SYNC_CONFIG_CONT_SCAN_SHORT_WAIT = 13;
 static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE_EN = 15;
 static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE = 16;
 static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE_LEN = 8;

@@ -74,7 +74,7 @@ fapi2::ReturnCode p10_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
     FAPI_DBG("check for VDN_PGOOD");
     FAPI_TRY(fapi2::getCfamRegister(i_target_chip, perv::FSXCOMP_FSXLOG_CBS_ENVSTAT_FSI,
                                     l_data32));
-    l_read_vdn_pgood_status = l_data32.getBit<perv::FSXCOMP_FSXLOG_CBS_ENVSTAT_CBS_ENVSTAT_C4_VDN_GPOOD>();
+    l_read_vdn_pgood_status = l_data32.getBit<perv::FSXCOMP_FSXLOG_CBS_ENVSTAT_CBS_ENVSTAT_C4_VDN_PGOOD>();
 
     FAPI_ASSERT(l_read_vdn_pgood_status,
                 fapi2::VDN_PGOOD_NOT_SET()

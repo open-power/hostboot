@@ -60,15 +60,15 @@ static const uint32_t CPMS_DDSR_STOP_STATE_OCCURRED = 62;
 static const uint32_t CPMS_DDSR_SAMPLE_DISABLE_OCCURRED = 63;
 // c/reg00009.H
 
-static const uint64_t CPMS_FDIR_RW = 0x200e0e44ull;
+static const uint64_t CPMS_FDIR = 0x200e0e44ull;
 static const uint64_t CPMS_FDIR_WO_CLEAR = 0x200e0e47ull;
 static const uint64_t CPMS_FDIR_WO_OR = 0x200e0e46ull;
 
 static const uint32_t CPMS_FDIR_INJECT_ENABLE = 0;
 static const uint32_t CPMS_FDIR_HALT_INJECT = 1;
 static const uint32_t CPMS_FDIR_HALT_TOGGLE_INJECT = 2;
-static const uint32_t CPMS_FDIR_FETCH_THROTTLE01_INJECT = 3;
-static const uint32_t CPMS_FDIR_FETCH_THROTTLE10_INJECT = 4;
+static const uint32_t CPMS_FDIR_FETCH_THROTTLE10_INJECT = 3;
+static const uint32_t CPMS_FDIR_FETCH_THROTTLE01_INJECT = 4;
 static const uint32_t CPMS_FDIR_ISSUE_NTC_INJECT = 5;
 static const uint32_t CPMS_FDIR_PREFETCH_THROTTLE_INJECT = 6;
 static const uint32_t CPMS_FDIR_PREFETCH_THROTTLE_INJECT_LEN = 2;
@@ -76,7 +76,7 @@ static const uint32_t CPMS_FDIR_SLOW_FETCH_INJECT = 8;
 static const uint32_t CPMS_FDIR_VECTOR_LIMIT_INJECT = 9;
 static const uint32_t CPMS_FDIR_VECTOR_LIMIT_INJECT_LEN = 3;
 static const uint32_t CPMS_FDIR_SLOW_COMPLETION_INJECT = 12;
-static const uint32_t CPMS_FDIR_SPARE = 13;
+static const uint32_t CPMS_FDIR_MMA_UARCH_ENABLE_INJECT = 13;
 static const uint32_t CPMS_FDIR_MMA_LIMIT = 14;
 static const uint32_t CPMS_FDIR_MMA_LIMIT_LEN = 2;
 static const uint32_t CPMS_FDIR_TOGGLE_HALT_AMOUNT = 16;
@@ -89,7 +89,7 @@ static const uint32_t CPMS_FDIR_IRRITATE_SMALL_SELECT = 24;
 static const uint32_t CPMS_FDIR_IRRITATE_SMALL_SELECT_LEN = 2;
 static const uint32_t CPMS_FDIR_IRRITATE_LARGE_SELECT = 26;
 static const uint32_t CPMS_FDIR_IRRITATE_LARGE_SELECT_LEN = 2;
-static const uint32_t CPMS_FDIR_IRRITATE_SPARE = 28;
+static const uint32_t CPMS_FDIR_EXCLUDE_LSU_HALT = 28;
 static const uint32_t CPMS_FDIR_IRRITATE_WEIGHT_SELECT = 29;
 static const uint32_t CPMS_FDIR_IRRITATE_WEIGHT_SELECT_LEN = 2;
 static const uint32_t CPMS_FDIR_INJECT_DPT_SUSPEND = 31;
@@ -153,6 +153,13 @@ static const uint64_t EC_PC_TRACE1_TR0_CONFIG_1 = 0x20020a44ull;
 
 static const uint32_t EC_PC_TRACE1_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t EC_PC_TRACE1_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
+// c/reg00009.H
+
+static const uint64_t L3_MISC_L3CERRS_BACKING_CTL_REG = 0x2001060full;
+
+static const uint32_t L3_MISC_L3CERRS_BACKING_CTL_REG_CASTOUT_TO_BACKING_L3_EN_CFG = 0;
+static const uint32_t L3_MISC_L3CERRS_BACKING_CTL_REG_BACKING_CNT_CFG = 1;
+static const uint32_t L3_MISC_L3CERRS_BACKING_CTL_REG_BACKING_CNT_CFG_LEN = 3;
 // c/reg00009.H
 
 static const uint64_t L3_MISC_L3CERRS_WR_EPSILON_CFG_REG = 0x2001062aull;

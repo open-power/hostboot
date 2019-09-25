@@ -146,6 +146,13 @@ static const uint32_t OPCG_CAPT2_24_06ODD = 59;
 static const uint32_t OPCG_CAPT2_24_06ODD_LEN = 5;
 // pec/reg00007.H
 
+static const uint64_t PB_PBAIB_REGS_PBAIBHWOVR_REG = 0x08010801ull;
+
+static const uint32_t PB_PBAIB_REGS_PBAIBHWOVR_REG_CS_FAST_TIMER = 0;
+static const uint32_t PB_PBAIB_REGS_PBAIBHWOVR_REG_CS_DISABLE_PEST = 1;
+static const uint32_t PB_PBAIB_REGS_PBAIBHWOVR_REG_CS_DISABLE_EARLY_ACK_RETRY = 2;
+// pec/reg00007.H
+
 static const uint64_t PB_PBAIB_REGS_PRDSTKOVR_REG = 0x08010802ull;
 
 static const uint32_t PB_PBAIB_REGS_PRDSTKOVR_REG_STK0 = 0;
@@ -186,17 +193,10 @@ static const uint32_t SYNC_CONFIG_DISABLE_PCB_ITR = 9;
 static const uint32_t SYNC_CONFIG_CONT_SCAN_DISABLE = 10;
 static const uint32_t SYNC_CONFIG_SYNC_PULSE_OUT_DIS = 11;
 static const uint32_t SYNC_CONFIG_REGION_PGOOD_OVERRIDE = 12;
+static const uint32_t SYNC_CONFIG_CONT_SCAN_SHORT_WAIT = 13;
 static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE_EN = 15;
 static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE = 16;
 static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE_LEN = 8;
-// pec/reg00007.H
-
-static const uint64_t TRA0_TR1_CONFIG_3 = 0x08010446ull;
-
-static const uint32_t TRA0_TR1_CONFIG_3_C = 0;
-static const uint32_t TRA0_TR1_CONFIG_3_C_LEN = 24;
-static const uint32_t TRA0_TR1_CONFIG_3_D = 24;
-static const uint32_t TRA0_TR1_CONFIG_3_D_LEN = 24;
 // pec/reg00007.H
 
 #ifndef __PPE_HCODE__

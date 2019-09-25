@@ -153,14 +153,6 @@ static const uint32_t TRA0_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t TRA0_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
 // pec/reg00001.H
 
-static const uint64_t TRA0_TR1_CONFIG_2 = 0x08010445ull;
-
-static const uint32_t TRA0_TR1_CONFIG_2_A = 0;
-static const uint32_t TRA0_TR1_CONFIG_2_A_LEN = 24;
-static const uint32_t TRA0_TR1_CONFIG_2_B = 24;
-static const uint32_t TRA0_TR1_CONFIG_2_B_LEN = 24;
-// pec/reg00001.H
-
 #ifndef __PPE_HCODE__
 }
 }

@@ -2427,1181 +2427,1134 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WDF_CMT_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_DF_CMT_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.insertFromRight<USTL_USTLERRPT_WDF_CMT_PAR_ERR,
+    return o_data.insertFromRight<USTL_USTLERRPT_DF_CMT_PAR_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_CMT_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_CMT_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WDF_CMT_PAR_ERR(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_DF_CMT_PAR_ERR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.insertFromRight<USTL_USTLERRPT_WDF_CMT_PAR_ERR,
+    return o_data.insertFromRight<USTL_USTLERRPT_DF_CMT_PAR_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_CMT_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_CMT_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WDF_CMT_PAR_ERR(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_DF_CMT_PAR_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.setBit<USTL_USTLERRPT_WDF_CMT_PAR_ERR>();
+    return o_data.setBit<USTL_USTLERRPT_DF_CMT_PAR_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_CMT_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_CMT_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLERRPT_WDF_CMT_PAR_ERR(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLERRPT_DF_CMT_PAR_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.clearBit<USTL_USTLERRPT_WDF_CMT_PAR_ERR>();
+    return o_data.clearBit<USTL_USTLERRPT_DF_CMT_PAR_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_CMT_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_CMT_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_WDF_CMT_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_DF_CMT_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return i_data.extractToRight<USTL_USTLERRPT_WDF_CMT_PAR_ERR,
+    return i_data.extractToRight<USTL_USTLERRPT_DF_CMT_PAR_ERR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_CMT_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_CMT_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_USTL_USTLERRPT_WDF_CMT_PAR_ERR(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_USTL_USTLERRPT_DF_CMT_PAR_ERR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return i_data.getBit<USTL_USTLERRPT_WDF_CMT_PAR_ERR>();
+    return i_data.getBit<USTL_USTLERRPT_DF_CMT_PAR_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_CMT_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_CMT_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WDF_CMD_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_DF_CMD_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.insertFromRight<USTL_USTLERRPT_WDF_CMD_PAR_ERR,
+    return o_data.insertFromRight<USTL_USTLERRPT_DF_CMD_PAR_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_CMD_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_CMD_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WDF_CMD_PAR_ERR(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_DF_CMD_PAR_ERR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.insertFromRight<USTL_USTLERRPT_WDF_CMD_PAR_ERR,
+    return o_data.insertFromRight<USTL_USTLERRPT_DF_CMD_PAR_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_CMD_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_CMD_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WDF_CMD_PAR_ERR(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_DF_CMD_PAR_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.setBit<USTL_USTLERRPT_WDF_CMD_PAR_ERR>();
+    return o_data.setBit<USTL_USTLERRPT_DF_CMD_PAR_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_CMD_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_CMD_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLERRPT_WDF_CMD_PAR_ERR(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLERRPT_DF_CMD_PAR_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.clearBit<USTL_USTLERRPT_WDF_CMD_PAR_ERR>();
+    return o_data.clearBit<USTL_USTLERRPT_DF_CMD_PAR_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_CMD_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_CMD_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_WDF_CMD_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_DF_CMD_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return i_data.extractToRight<USTL_USTLERRPT_WDF_CMD_PAR_ERR,
+    return i_data.extractToRight<USTL_USTLERRPT_DF_CMD_PAR_ERR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_CMD_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_CMD_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_USTL_USTLERRPT_WDF_CMD_PAR_ERR(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_USTL_USTLERRPT_DF_CMD_PAR_ERR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return i_data.getBit<USTL_USTLERRPT_WDF_CMD_PAR_ERR>();
+    return i_data.getBit<USTL_USTLERRPT_DF_CMD_PAR_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_CMD_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_CMD_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WDF_BUFF_MGR_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_DF_BUFF_MGR_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.insertFromRight<USTL_USTLERRPT_WDF_BUFF_MGR_PAR_ERR,
+    return o_data.insertFromRight<USTL_USTLERRPT_DF_BUFF_MGR_PAR_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_BUFF_MGR_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_BUFF_MGR_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WDF_BUFF_MGR_PAR_ERR(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_DF_BUFF_MGR_PAR_ERR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.insertFromRight<USTL_USTLERRPT_WDF_BUFF_MGR_PAR_ERR,
+    return o_data.insertFromRight<USTL_USTLERRPT_DF_BUFF_MGR_PAR_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_BUFF_MGR_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_BUFF_MGR_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WDF_BUFF_MGR_PAR_ERR(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_DF_BUFF_MGR_PAR_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.setBit<USTL_USTLERRPT_WDF_BUFF_MGR_PAR_ERR>();
+    return o_data.setBit<USTL_USTLERRPT_DF_BUFF_MGR_PAR_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_BUFF_MGR_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_BUFF_MGR_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLERRPT_WDF_BUFF_MGR_PAR_ERR(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLERRPT_DF_BUFF_MGR_PAR_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.clearBit<USTL_USTLERRPT_WDF_BUFF_MGR_PAR_ERR>();
+    return o_data.clearBit<USTL_USTLERRPT_DF_BUFF_MGR_PAR_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_BUFF_MGR_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_BUFF_MGR_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_WDF_BUFF_MGR_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_DF_BUFF_MGR_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return i_data.extractToRight<USTL_USTLERRPT_WDF_BUFF_MGR_PAR_ERR,
+    return i_data.extractToRight<USTL_USTLERRPT_DF_BUFF_MGR_PAR_ERR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_BUFF_MGR_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_BUFF_MGR_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_USTL_USTLERRPT_WDF_BUFF_MGR_PAR_ERR(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_USTL_USTLERRPT_DF_BUFF_MGR_PAR_ERR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return i_data.getBit<USTL_USTLERRPT_WDF_BUFF_MGR_PAR_ERR>();
+    return i_data.getBit<USTL_USTLERRPT_DF_BUFF_MGR_PAR_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_BUFF_MGR_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_BUFF_MGR_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WDF_NO_BUFF_ERR(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_DF_NO_BUFF_ERR(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.insertFromRight<USTL_USTLERRPT_WDF_NO_BUFF_ERR,
+    return o_data.insertFromRight<USTL_USTLERRPT_DF_NO_BUFF_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_NO_BUFF_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_NO_BUFF_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WDF_NO_BUFF_ERR(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_DF_NO_BUFF_ERR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.insertFromRight<USTL_USTLERRPT_WDF_NO_BUFF_ERR,
+    return o_data.insertFromRight<USTL_USTLERRPT_DF_NO_BUFF_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_NO_BUFF_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_NO_BUFF_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WDF_NO_BUFF_ERR(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_DF_NO_BUFF_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.setBit<USTL_USTLERRPT_WDF_NO_BUFF_ERR>();
+    return o_data.setBit<USTL_USTLERRPT_DF_NO_BUFF_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_NO_BUFF_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_NO_BUFF_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLERRPT_WDF_NO_BUFF_ERR(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLERRPT_DF_NO_BUFF_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.clearBit<USTL_USTLERRPT_WDF_NO_BUFF_ERR>();
+    return o_data.clearBit<USTL_USTLERRPT_DF_NO_BUFF_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_NO_BUFF_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_NO_BUFF_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_WDF_NO_BUFF_ERR(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_DF_NO_BUFF_ERR(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return i_data.extractToRight<USTL_USTLERRPT_WDF_NO_BUFF_ERR,
+    return i_data.extractToRight<USTL_USTLERRPT_DF_NO_BUFF_ERR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_NO_BUFF_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_NO_BUFF_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_USTL_USTLERRPT_WDF_NO_BUFF_ERR(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_USTL_USTLERRPT_DF_NO_BUFF_ERR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return i_data.getBit<USTL_USTLERRPT_WDF_NO_BUFF_ERR>();
+    return i_data.getBit<USTL_USTLERRPT_DF_NO_BUFF_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_NO_BUFF_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_NO_BUFF_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WDF_DSTL_WB_READ_TAG_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_DF_DSTL_WB_READ_TAG_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.insertFromRight<USTL_USTLERRPT_WDF_DSTL_WB_READ_TAG_PAR_ERR,
+    return o_data.insertFromRight<USTL_USTLERRPT_DF_DSTL_WB_READ_TAG_PAR_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_DSTL_WB_READ_TAG_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_DSTL_WB_READ_TAG_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WDF_DSTL_WB_READ_TAG_PAR_ERR(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_DF_DSTL_WB_READ_TAG_PAR_ERR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.insertFromRight<USTL_USTLERRPT_WDF_DSTL_WB_READ_TAG_PAR_ERR,
+    return o_data.insertFromRight<USTL_USTLERRPT_DF_DSTL_WB_READ_TAG_PAR_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_DSTL_WB_READ_TAG_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_DSTL_WB_READ_TAG_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WDF_DSTL_WB_READ_TAG_PAR_ERR(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_DF_DSTL_WB_READ_TAG_PAR_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.setBit<USTL_USTLERRPT_WDF_DSTL_WB_READ_TAG_PAR_ERR>();
+    return o_data.setBit<USTL_USTLERRPT_DF_DSTL_WB_READ_TAG_PAR_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_DSTL_WB_READ_TAG_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_DSTL_WB_READ_TAG_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLERRPT_WDF_DSTL_WB_READ_TAG_PAR_ERR(
-    fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLERRPT_DF_DSTL_WB_READ_TAG_PAR_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.clearBit<USTL_USTLERRPT_WDF_DSTL_WB_READ_TAG_PAR_ERR>();
+    return o_data.clearBit<USTL_USTLERRPT_DF_DSTL_WB_READ_TAG_PAR_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_DSTL_WB_READ_TAG_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_DSTL_WB_READ_TAG_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_WDF_DSTL_WB_READ_TAG_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_DF_DSTL_WB_READ_TAG_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return i_data.extractToRight<USTL_USTLERRPT_WDF_DSTL_WB_READ_TAG_PAR_ERR,
+    return i_data.extractToRight<USTL_USTLERRPT_DF_DSTL_WB_READ_TAG_PAR_ERR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_DSTL_WB_READ_TAG_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_DSTL_WB_READ_TAG_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_USTL_USTLERRPT_WDF_DSTL_WB_READ_TAG_PAR_ERR(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_USTL_USTLERRPT_DF_DSTL_WB_READ_TAG_PAR_ERR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return i_data.getBit<USTL_USTLERRPT_WDF_DSTL_WB_READ_TAG_PAR_ERR>();
+    return i_data.getBit<USTL_USTLERRPT_DF_DSTL_WB_READ_TAG_PAR_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WDF_DSTL_WB_READ_TAG_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_DF_DSTL_WB_READ_TAG_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WRT_NO_BUFF_ERR(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_RT_NO_BUFF_ERR(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.insertFromRight<USTL_USTLERRPT_WRT_NO_BUFF_ERR,
+    return o_data.insertFromRight<USTL_USTLERRPT_RT_NO_BUFF_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_NO_BUFF_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_NO_BUFF_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WRT_NO_BUFF_ERR(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_RT_NO_BUFF_ERR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.insertFromRight<USTL_USTLERRPT_WRT_NO_BUFF_ERR,
+    return o_data.insertFromRight<USTL_USTLERRPT_RT_NO_BUFF_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_NO_BUFF_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_NO_BUFF_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WRT_NO_BUFF_ERR(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_RT_NO_BUFF_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.setBit<USTL_USTLERRPT_WRT_NO_BUFF_ERR>();
+    return o_data.setBit<USTL_USTLERRPT_RT_NO_BUFF_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_NO_BUFF_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_NO_BUFF_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLERRPT_WRT_NO_BUFF_ERR(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLERRPT_RT_NO_BUFF_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.clearBit<USTL_USTLERRPT_WRT_NO_BUFF_ERR>();
+    return o_data.clearBit<USTL_USTLERRPT_RT_NO_BUFF_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_NO_BUFF_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_NO_BUFF_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_WRT_NO_BUFF_ERR(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_RT_NO_BUFF_ERR(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return i_data.extractToRight<USTL_USTLERRPT_WRT_NO_BUFF_ERR,
+    return i_data.extractToRight<USTL_USTLERRPT_RT_NO_BUFF_ERR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_NO_BUFF_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_NO_BUFF_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_USTL_USTLERRPT_WRT_NO_BUFF_ERR(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_USTL_USTLERRPT_RT_NO_BUFF_ERR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return i_data.getBit<USTL_USTLERRPT_WRT_NO_BUFF_ERR>();
+    return i_data.getBit<USTL_USTLERRPT_RT_NO_BUFF_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_NO_BUFF_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_NO_BUFF_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WRT_BUFF_MGR_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_RT_BUFF_MGR_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.insertFromRight<USTL_USTLERRPT_WRT_BUFF_MGR_PAR_ERR,
+    return o_data.insertFromRight<USTL_USTLERRPT_RT_BUFF_MGR_PAR_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_BUFF_MGR_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_BUFF_MGR_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WRT_BUFF_MGR_PAR_ERR(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_RT_BUFF_MGR_PAR_ERR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.insertFromRight<USTL_USTLERRPT_WRT_BUFF_MGR_PAR_ERR,
+    return o_data.insertFromRight<USTL_USTLERRPT_RT_BUFF_MGR_PAR_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_BUFF_MGR_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_BUFF_MGR_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WRT_BUFF_MGR_PAR_ERR(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_RT_BUFF_MGR_PAR_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.setBit<USTL_USTLERRPT_WRT_BUFF_MGR_PAR_ERR>();
+    return o_data.setBit<USTL_USTLERRPT_RT_BUFF_MGR_PAR_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_BUFF_MGR_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_BUFF_MGR_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLERRPT_WRT_BUFF_MGR_PAR_ERR(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLERRPT_RT_BUFF_MGR_PAR_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.clearBit<USTL_USTLERRPT_WRT_BUFF_MGR_PAR_ERR>();
+    return o_data.clearBit<USTL_USTLERRPT_RT_BUFF_MGR_PAR_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_BUFF_MGR_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_BUFF_MGR_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_WRT_BUFF_MGR_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_RT_BUFF_MGR_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return i_data.extractToRight<USTL_USTLERRPT_WRT_BUFF_MGR_PAR_ERR,
+    return i_data.extractToRight<USTL_USTLERRPT_RT_BUFF_MGR_PAR_ERR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_BUFF_MGR_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_BUFF_MGR_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_USTL_USTLERRPT_WRT_BUFF_MGR_PAR_ERR(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_USTL_USTLERRPT_RT_BUFF_MGR_PAR_ERR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return i_data.getBit<USTL_USTLERRPT_WRT_BUFF_MGR_PAR_ERR>();
+    return i_data.getBit<USTL_USTLERRPT_RT_BUFF_MGR_PAR_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_BUFF_MGR_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_BUFF_MGR_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WRT_MCS_SLICE0_WRITE_DISP_PAR_ERR(
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_RT_MCS_SLICE0_WRITE_DISP_PAR_ERR(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.insertFromRight<USTL_USTLERRPT_WRT_MCS_SLICE0_WRITE_DISP_PAR_ERR,
+    return o_data.insertFromRight<USTL_USTLERRPT_RT_MCS_SLICE0_WRITE_DISP_PAR_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_SLICE0_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_SLICE0_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WRT_MCS_SLICE0_WRITE_DISP_PAR_ERR(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_RT_MCS_SLICE0_WRITE_DISP_PAR_ERR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.insertFromRight<USTL_USTLERRPT_WRT_MCS_SLICE0_WRITE_DISP_PAR_ERR,
+    return o_data.insertFromRight<USTL_USTLERRPT_RT_MCS_SLICE0_WRITE_DISP_PAR_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_SLICE0_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_SLICE0_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WRT_MCS_SLICE0_WRITE_DISP_PAR_ERR(
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_RT_MCS_SLICE0_WRITE_DISP_PAR_ERR(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.setBit<USTL_USTLERRPT_WRT_MCS_SLICE0_WRITE_DISP_PAR_ERR>();
+    return o_data.setBit<USTL_USTLERRPT_RT_MCS_SLICE0_WRITE_DISP_PAR_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_SLICE0_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_SLICE0_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLERRPT_WRT_MCS_SLICE0_WRITE_DISP_PAR_ERR(
+static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLERRPT_RT_MCS_SLICE0_WRITE_DISP_PAR_ERR(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.clearBit<USTL_USTLERRPT_WRT_MCS_SLICE0_WRITE_DISP_PAR_ERR>();
+    return o_data.clearBit<USTL_USTLERRPT_RT_MCS_SLICE0_WRITE_DISP_PAR_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_SLICE0_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_SLICE0_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_WRT_MCS_SLICE0_WRITE_DISP_PAR_ERR(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
-#endif
-    return i_data.extractToRight<USTL_USTLERRPT_WRT_MCS_SLICE0_WRITE_DISP_PAR_ERR,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_SLICE0_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_USTL_USTLERRPT_WRT_MCS_SLICE0_WRITE_DISP_PAR_ERR(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
-#endif
-    return i_data.getBit<USTL_USTLERRPT_WRT_MCS_SLICE0_WRITE_DISP_PAR_ERR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_SLICE0_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WRT_MCS_SLICE1_WRITE_DISP_PAR_ERR(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
-#endif
-    return o_data.insertFromRight<USTL_USTLERRPT_WRT_MCS_SLICE1_WRITE_DISP_PAR_ERR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_SLICE1_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WRT_MCS_SLICE1_WRITE_DISP_PAR_ERR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
-#endif
-    return o_data.insertFromRight<USTL_USTLERRPT_WRT_MCS_SLICE1_WRITE_DISP_PAR_ERR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_SLICE1_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WRT_MCS_SLICE1_WRITE_DISP_PAR_ERR(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
-#endif
-    return o_data.setBit<USTL_USTLERRPT_WRT_MCS_SLICE1_WRITE_DISP_PAR_ERR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_SLICE1_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLERRPT_WRT_MCS_SLICE1_WRITE_DISP_PAR_ERR(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
-#endif
-    return o_data.clearBit<USTL_USTLERRPT_WRT_MCS_SLICE1_WRITE_DISP_PAR_ERR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_SLICE1_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_WRT_MCS_SLICE1_WRITE_DISP_PAR_ERR(
+static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_RT_MCS_SLICE0_WRITE_DISP_PAR_ERR(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return i_data.extractToRight<USTL_USTLERRPT_WRT_MCS_SLICE1_WRITE_DISP_PAR_ERR,
+    return i_data.extractToRight<USTL_USTLERRPT_RT_MCS_SLICE0_WRITE_DISP_PAR_ERR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_SLICE1_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_SLICE0_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_USTL_USTLERRPT_WRT_MCS_SLICE1_WRITE_DISP_PAR_ERR(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_USTL_USTLERRPT_RT_MCS_SLICE0_WRITE_DISP_PAR_ERR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return i_data.getBit<USTL_USTLERRPT_WRT_MCS_SLICE1_WRITE_DISP_PAR_ERR>();
+    return i_data.getBit<USTL_USTLERRPT_RT_MCS_SLICE0_WRITE_DISP_PAR_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_SLICE1_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_SLICE0_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WRT_MCS_SLICE2_WRITE_DISP_PAR_ERR(
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_RT_MCS_SLICE1_WRITE_DISP_PAR_ERR(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.insertFromRight<USTL_USTLERRPT_WRT_MCS_SLICE2_WRITE_DISP_PAR_ERR,
+    return o_data.insertFromRight<USTL_USTLERRPT_RT_MCS_SLICE1_WRITE_DISP_PAR_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_SLICE2_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_SLICE1_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WRT_MCS_SLICE2_WRITE_DISP_PAR_ERR(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_RT_MCS_SLICE1_WRITE_DISP_PAR_ERR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.insertFromRight<USTL_USTLERRPT_WRT_MCS_SLICE2_WRITE_DISP_PAR_ERR,
+    return o_data.insertFromRight<USTL_USTLERRPT_RT_MCS_SLICE1_WRITE_DISP_PAR_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_SLICE2_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_SLICE1_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WRT_MCS_SLICE2_WRITE_DISP_PAR_ERR(
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_RT_MCS_SLICE1_WRITE_DISP_PAR_ERR(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.setBit<USTL_USTLERRPT_WRT_MCS_SLICE2_WRITE_DISP_PAR_ERR>();
+    return o_data.setBit<USTL_USTLERRPT_RT_MCS_SLICE1_WRITE_DISP_PAR_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_SLICE2_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_SLICE1_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLERRPT_WRT_MCS_SLICE2_WRITE_DISP_PAR_ERR(
+static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLERRPT_RT_MCS_SLICE1_WRITE_DISP_PAR_ERR(
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.clearBit<USTL_USTLERRPT_WRT_MCS_SLICE2_WRITE_DISP_PAR_ERR>();
+    return o_data.clearBit<USTL_USTLERRPT_RT_MCS_SLICE1_WRITE_DISP_PAR_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_SLICE2_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_SLICE1_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_WRT_MCS_SLICE2_WRITE_DISP_PAR_ERR(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
-#endif
-    return i_data.extractToRight<USTL_USTLERRPT_WRT_MCS_SLICE2_WRITE_DISP_PAR_ERR,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_SLICE2_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_USTL_USTLERRPT_WRT_MCS_SLICE2_WRITE_DISP_PAR_ERR(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
-#endif
-    return i_data.getBit<USTL_USTLERRPT_WRT_MCS_SLICE2_WRITE_DISP_PAR_ERR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_SLICE2_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WRT_MCS_SLICE3_WRITE_DISP_PAR_ERR(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
-#endif
-    return o_data.insertFromRight<USTL_USTLERRPT_WRT_MCS_SLICE3_WRITE_DISP_PAR_ERR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_SLICE3_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WRT_MCS_SLICE3_WRITE_DISP_PAR_ERR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
-#endif
-    return o_data.insertFromRight<USTL_USTLERRPT_WRT_MCS_SLICE3_WRITE_DISP_PAR_ERR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_SLICE3_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WRT_MCS_SLICE3_WRITE_DISP_PAR_ERR(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
-#endif
-    return o_data.setBit<USTL_USTLERRPT_WRT_MCS_SLICE3_WRITE_DISP_PAR_ERR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_SLICE3_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLERRPT_WRT_MCS_SLICE3_WRITE_DISP_PAR_ERR(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
-#endif
-    return o_data.clearBit<USTL_USTLERRPT_WRT_MCS_SLICE3_WRITE_DISP_PAR_ERR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_SLICE3_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_WRT_MCS_SLICE3_WRITE_DISP_PAR_ERR(
+static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_RT_MCS_SLICE1_WRITE_DISP_PAR_ERR(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return i_data.extractToRight<USTL_USTLERRPT_WRT_MCS_SLICE3_WRITE_DISP_PAR_ERR,
+    return i_data.extractToRight<USTL_USTLERRPT_RT_MCS_SLICE1_WRITE_DISP_PAR_ERR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_SLICE3_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_SLICE1_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_USTL_USTLERRPT_WRT_MCS_SLICE3_WRITE_DISP_PAR_ERR(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_USTL_USTLERRPT_RT_MCS_SLICE1_WRITE_DISP_PAR_ERR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return i_data.getBit<USTL_USTLERRPT_WRT_MCS_SLICE3_WRITE_DISP_PAR_ERR>();
+    return i_data.getBit<USTL_USTLERRPT_RT_MCS_SLICE1_WRITE_DISP_PAR_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_SLICE3_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_SLICE1_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WRT_MCS_WB_DONE_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
-#endif
-    return o_data.insertFromRight<USTL_USTLERRPT_WRT_MCS_WB_DONE_PAR_ERR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_WB_DONE_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WRT_MCS_WB_DONE_PAR_ERR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
-#endif
-    return o_data.insertFromRight<USTL_USTLERRPT_WRT_MCS_WB_DONE_PAR_ERR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_WB_DONE_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WRT_MCS_WB_DONE_PAR_ERR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
-#endif
-    return o_data.setBit<USTL_USTLERRPT_WRT_MCS_WB_DONE_PAR_ERR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_WB_DONE_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLERRPT_WRT_MCS_WB_DONE_PAR_ERR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
-#endif
-    return o_data.clearBit<USTL_USTLERRPT_WRT_MCS_WB_DONE_PAR_ERR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_WB_DONE_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_WRT_MCS_WB_DONE_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
-#endif
-    return i_data.extractToRight<USTL_USTLERRPT_WRT_MCS_WB_DONE_PAR_ERR,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_WB_DONE_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_USTL_USTLERRPT_WRT_MCS_WB_DONE_PAR_ERR(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
-#endif
-    return i_data.getBit<USTL_USTLERRPT_WRT_MCS_WB_DONE_PAR_ERR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_MCS_WB_DONE_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WRT_DSTL_WB_READ_TAG_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
-#endif
-    return o_data.insertFromRight<USTL_USTLERRPT_WRT_DSTL_WB_READ_TAG_PAR_ERR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_DSTL_WB_READ_TAG_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WRT_DSTL_WB_READ_TAG_PAR_ERR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
-#endif
-    return o_data.insertFromRight<USTL_USTLERRPT_WRT_DSTL_WB_READ_TAG_PAR_ERR,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_DSTL_WB_READ_TAG_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_WRT_DSTL_WB_READ_TAG_PAR_ERR(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
-#endif
-    return o_data.setBit<USTL_USTLERRPT_WRT_DSTL_WB_READ_TAG_PAR_ERR>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_DSTL_WB_READ_TAG_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLERRPT_WRT_DSTL_WB_READ_TAG_PAR_ERR(
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_RT_MCS_SLICE2_WRITE_DISP_PAR_ERR(
+    fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.clearBit<USTL_USTLERRPT_WRT_DSTL_WB_READ_TAG_PAR_ERR>();
+    return o_data.insertFromRight<USTL_USTLERRPT_RT_MCS_SLICE2_WRITE_DISP_PAR_ERR,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_DSTL_WB_READ_TAG_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_SLICE2_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_WRT_DSTL_WB_READ_TAG_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_RT_MCS_SLICE2_WRITE_DISP_PAR_ERR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return i_data.extractToRight<USTL_USTLERRPT_WRT_DSTL_WB_READ_TAG_PAR_ERR,
+    return o_data.insertFromRight<USTL_USTLERRPT_RT_MCS_SLICE2_WRITE_DISP_PAR_ERR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_SLICE2_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_RT_MCS_SLICE2_WRITE_DISP_PAR_ERR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
+#endif
+    return o_data.setBit<USTL_USTLERRPT_RT_MCS_SLICE2_WRITE_DISP_PAR_ERR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_SLICE2_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLERRPT_RT_MCS_SLICE2_WRITE_DISP_PAR_ERR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
+#endif
+    return o_data.clearBit<USTL_USTLERRPT_RT_MCS_SLICE2_WRITE_DISP_PAR_ERR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_SLICE2_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_RT_MCS_SLICE2_WRITE_DISP_PAR_ERR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
+#endif
+    return i_data.extractToRight<USTL_USTLERRPT_RT_MCS_SLICE2_WRITE_DISP_PAR_ERR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_DSTL_WB_READ_TAG_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_SLICE2_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_USTL_USTLERRPT_WRT_DSTL_WB_READ_TAG_PAR_ERR(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_USTL_USTLERRPT_RT_MCS_SLICE2_WRITE_DISP_PAR_ERR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return i_data.getBit<USTL_USTLERRPT_WRT_DSTL_WB_READ_TAG_PAR_ERR>();
+    return i_data.getBit<USTL_USTLERRPT_RT_MCS_SLICE2_WRITE_DISP_PAR_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_WRT_DSTL_WB_READ_TAG_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_SLICE2_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_RESERVED(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_RT_MCS_SLICE3_WRITE_DISP_PAR_ERR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
+#endif
+    return o_data.insertFromRight<USTL_USTLERRPT_RT_MCS_SLICE3_WRITE_DISP_PAR_ERR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_SLICE3_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_RT_MCS_SLICE3_WRITE_DISP_PAR_ERR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.insertFromRight<USTL_USTLERRPT_RESERVED,
-           USTL_USTLERRPT_RESERVED_LEN>(i_data);
+    return o_data.insertFromRight<USTL_USTLERRPT_RT_MCS_SLICE3_WRITE_DISP_PAR_ERR,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RESERVED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_SLICE3_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_RESERVED(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_RT_MCS_SLICE3_WRITE_DISP_PAR_ERR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
+#endif
+    return o_data.setBit<USTL_USTLERRPT_RT_MCS_SLICE3_WRITE_DISP_PAR_ERR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_SLICE3_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLERRPT_RT_MCS_SLICE3_WRITE_DISP_PAR_ERR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
+#endif
+    return o_data.clearBit<USTL_USTLERRPT_RT_MCS_SLICE3_WRITE_DISP_PAR_ERR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_SLICE3_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_RT_MCS_SLICE3_WRITE_DISP_PAR_ERR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
+#endif
+    return i_data.extractToRight<USTL_USTLERRPT_RT_MCS_SLICE3_WRITE_DISP_PAR_ERR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_SLICE3_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_USTL_USTLERRPT_RT_MCS_SLICE3_WRITE_DISP_PAR_ERR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
+#endif
+    return i_data.getBit<USTL_USTLERRPT_RT_MCS_SLICE3_WRITE_DISP_PAR_ERR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_SLICE3_WRITE_DISP_PAR_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_RT_MCS_WB_DONE_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return o_data.insertFromRight<USTL_USTLERRPT_RESERVED,
-           USTL_USTLERRPT_RESERVED_LEN>(i_data);
+    return o_data.insertFromRight<USTL_USTLERRPT_RT_MCS_WB_DONE_PAR_ERR,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RESERVED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_WB_DONE_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_RESERVED(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_RT_MCS_WB_DONE_PAR_ERR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
+#endif
+    return o_data.insertFromRight<USTL_USTLERRPT_RT_MCS_WB_DONE_PAR_ERR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_WB_DONE_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_RT_MCS_WB_DONE_PAR_ERR(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
+#endif
+    return o_data.setBit<USTL_USTLERRPT_RT_MCS_WB_DONE_PAR_ERR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_WB_DONE_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLERRPT_RT_MCS_WB_DONE_PAR_ERR(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
+#endif
+    return o_data.clearBit<USTL_USTLERRPT_RT_MCS_WB_DONE_PAR_ERR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_WB_DONE_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_RT_MCS_WB_DONE_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
 #endif
-    return i_data.extractToRight<USTL_USTLERRPT_RESERVED,
-           USTL_USTLERRPT_RESERVED_LEN>(o_data);
+    return i_data.extractToRight<USTL_USTLERRPT_RT_MCS_WB_DONE_PAR_ERR,
+           1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RESERVED chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_WB_DONE_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_USTL_USTLERRPT_RT_MCS_WB_DONE_PAR_ERR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
+#endif
+    return i_data.getBit<USTL_USTLERRPT_RT_MCS_WB_DONE_PAR_ERR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_MCS_WB_DONE_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_RT_DSTL_WB_READ_TAG_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
+#endif
+    return o_data.insertFromRight<USTL_USTLERRPT_RT_DSTL_WB_READ_TAG_PAR_ERR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_DSTL_WB_READ_TAG_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_RT_DSTL_WB_READ_TAG_PAR_ERR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
+#endif
+    return o_data.insertFromRight<USTL_USTLERRPT_RT_DSTL_WB_READ_TAG_PAR_ERR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_DSTL_WB_READ_TAG_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLERRPT_RT_DSTL_WB_READ_TAG_PAR_ERR(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
+#endif
+    return o_data.setBit<USTL_USTLERRPT_RT_DSTL_WB_READ_TAG_PAR_ERR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_DSTL_WB_READ_TAG_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLERRPT_RT_DSTL_WB_READ_TAG_PAR_ERR(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
+#endif
+    return o_data.clearBit<USTL_USTLERRPT_RT_DSTL_WB_READ_TAG_PAR_ERR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_DSTL_WB_READ_TAG_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_USTL_USTLERRPT_RT_DSTL_WB_READ_TAG_PAR_ERR(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
+#endif
+    return i_data.extractToRight<USTL_USTLERRPT_RT_DSTL_WB_READ_TAG_PAR_ERR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_DSTL_WB_READ_TAG_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_USTL_USTLERRPT_RT_DSTL_WB_READ_TAG_PAR_ERR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLERRPT));
+#endif
+    return i_data.getBit<USTL_USTLERRPT_RT_DSTL_WB_READ_TAG_PAR_ERR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access USTL_USTLERRPT_RT_DSTL_WB_READ_TAG_PAR_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

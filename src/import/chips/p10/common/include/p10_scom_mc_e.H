@@ -152,6 +152,13 @@ static const uint32_t MBA_SCOMFIR_AACR_CHANNEL = 13;
 static const uint32_t MBA_SCOMFIR_AACR_CHANNEL_LEN = 2;
 // mc/reg00014.H
 
+static const uint64_t MBA_SCOMFIR_MCWATDATA0 = 0x0c010f9aull;
+
+static const uint32_t MBA_SCOMFIR_MCWATDATA0_DEBUG_COUNT_OVERFLOW = 47;
+static const uint32_t MBA_SCOMFIR_MCWATDATA0_DEBUG_COUNT = 48;
+static const uint32_t MBA_SCOMFIR_MCWATDATA0_DEBUG_COUNT_LEN = 16;
+// mc/reg00014.H
+
 static const uint64_t MBA_SCOMFIR_MISCFIRACT1 = 0x0c010f07ull;
 
 static const uint32_t MBA_SCOMFIR_MISCFIRACT1_MISCFIRACT1_FIR_ACTION1 = 0;

@@ -39,12 +39,26 @@ namespace omi
 #endif
 
 
-static const uint64_t CYA_BITS = 0x0c01175full;
+static const uint64_t CYA_BITS = 0x0c01141full;
 
-static const uint32_t CYA_BITS_BITS0 = 32;
-static const uint32_t CYA_BITS_BITS0_LEN = 17;
-static const uint32_t CYA_BITS_BITS1 = 32;
-static const uint32_t CYA_BITS_BITS1_LEN = 17;
+static const uint32_t CYA_BITS_BITS0_RSVD0 = 0;
+static const uint32_t CYA_BITS_BITS0_RSVD0_LEN = 23;
+static const uint32_t CYA_BITS_BITS1_RSVD0 = 0;
+static const uint32_t CYA_BITS_BITS1_RSVD0_LEN = 23;
+static const uint32_t CYA_BITS_RX_PN_SWAP_OVERRIDE_SELECT0 = 23;
+static const uint32_t CYA_BITS_RX_PN_SWAP_OVERRIDE_SELECT1 = 23;
+static const uint32_t CYA_BITS_RX_PN_SWAP_OVERRIDE0 = 24;
+static const uint32_t CYA_BITS_RX_PN_SWAP_OVERRIDE0_LEN = 8;
+static const uint32_t CYA_BITS_RX_PN_SWAP_OVERRIDE1 = 24;
+static const uint32_t CYA_BITS_RX_PN_SWAP_OVERRIDE1_LEN = 8;
+static const uint32_t CYA_BITS_BITS0_RSVD1 = 32;
+static const uint32_t CYA_BITS_BITS0_RSVD1_LEN = 15;
+static const uint32_t CYA_BITS_BITS1_RSVD1 = 32;
+static const uint32_t CYA_BITS_BITS1_RSVD1_LEN = 15;
+static const uint32_t CYA_BITS_FAST_RETRAIN_DISABLE0 = 47;
+static const uint32_t CYA_BITS_FAST_RETRAIN_DISABLE1 = 47;
+static const uint32_t CYA_BITS_BITS0_RSVD2 = 48;
+static const uint32_t CYA_BITS_BITS1_RSVD2 = 48;
 static const uint32_t CYA_BITS_KILL_CRC_REPLAY0 = 49;
 static const uint32_t CYA_BITS_KILL_CRC_REPLAY1 = 49;
 static const uint32_t CYA_BITS_RETRAIN_CRC_REPLAY0 = 50;
@@ -67,13 +81,26 @@ static const uint32_t CYA_BITS_CRC_RETRAIN0 = 58;
 static const uint32_t CYA_BITS_CRC_RETRAIN1 = 58;
 static const uint32_t CYA_BITS_CRC_RESET0 = 59;
 static const uint32_t CYA_BITS_CRC_RESET1 = 59;
-static const uint32_t CYA_BITS_RESERVED0 = 60;
-static const uint32_t CYA_BITS_RESERVED0_LEN = 4;
-static const uint32_t CYA_BITS_RESERVED1 = 60;
-static const uint32_t CYA_BITS_RESERVED1_LEN = 4;
+static const uint32_t CYA_BITS_BITS0_RSVD3 = 60;
+static const uint32_t CYA_BITS_BITS0_RSVD3_LEN = 4;
+static const uint32_t CYA_BITS_BITS1_RSVD3 = 60;
+static const uint32_t CYA_BITS_BITS1_RSVD3_LEN = 4;
 // omi/reg00014.H
 
-static const uint64_t ERROR_MASK = 0x0c011752ull;
+static const uint64_t DEBUG_AID = 0x0c01141eull;
+
+static const uint32_t DEBUG_AID_RX_LANE_INVERTED = 40;
+static const uint32_t DEBUG_AID_RX_LANE_INVERTED_LEN = 8;
+static const uint32_t DEBUG_AID_RSVD0 = 48;
+static const uint32_t DEBUG_AID_RSVD0_LEN = 5;
+static const uint32_t DEBUG_AID_PRBS_IS_DIS = 53;
+static const uint32_t DEBUG_AID_PRBS_OS_DIS = 54;
+static const uint32_t DEBUG_AID_RSVD1 = 55;
+static const uint32_t DEBUG_AID_PRBS_STS = 56;
+static const uint32_t DEBUG_AID_PRBS_STS_LEN = 8;
+// omi/reg00014.H
+
+static const uint64_t ERROR_MASK = 0x0c011412ull;
 
 static const uint32_t ERROR_MASK_47 = 16;
 static const uint32_t ERROR_MASK_46 = 17;
@@ -472,13 +499,17 @@ static const uint32_t RXPACKS_0_DEFAULT_RD_4_RX_DAC_REGS_CNTL7_PL_EN_DC = 48;
 static const uint32_t RXPACKS_0_DEFAULT_RD_4_RX_DAC_REGS_CNTL7_PL_PR_POS = 49;
 static const uint32_t RXPACKS_0_DEFAULT_RD_4_RX_DAC_REGS_CNTL7_PL_PR_POS_LEN = 5;
 static const uint32_t RXPACKS_0_DEFAULT_RD_4_RX_DAC_REGS_CNTL7_PL_PR_GRAY_ENCODE_DIS = 54;
+static const uint32_t RXPACKS_0_DEFAULT_RD_4_RX_DAC_REGS_CNTL7_PL_ATTEN_DC_SEL = 55;
+static const uint32_t RXPACKS_0_DEFAULT_RD_4_RX_DAC_REGS_CNTL7_PL_ATTEN_DC_SEL_LEN = 3;
+static const uint32_t RXPACKS_0_DEFAULT_RD_4_RX_DAC_REGS_CNTL7_PL_ATTEN_AC_SEL_DC = 58;
+static const uint32_t RXPACKS_0_DEFAULT_RD_4_RX_DAC_REGS_CNTL7_PL_ATTEN_AC_SEL_DC_LEN = 3;
 // omi/reg00014.H
 
 static const uint64_t RXPACKS_0_DEFAULT_RD_5_RX_DAC_REGS_LOFF_B_CNTLX67_PL = 0x8002184510012c3full;
 
 static const uint32_t RXPACKS_0_DEFAULT_RD_5_RX_DAC_REGS_LOFF_B_CNTLX67_PL_RX_BD_LATCH_DAC_E000 = 56;
 static const uint32_t RXPACKS_0_DEFAULT_RD_5_RX_DAC_REGS_LOFF_B_CNTLX67_PL_RX_BD_LATCH_DAC_E000_LEN = 8;
-// omi/reg00014.H
+// omi/reg00015.H
 
 static const uint64_t RXPACKS_0_DEFAULT_RD_5_RX_DAC_REGS_LOFF_B_CNTLX77_PL = 0x8002684510012c3full;
 
@@ -736,15 +767,14 @@ static const uint32_t TXPACKS_0_DEFAULT_DD_5_TX_BIT_REGS_CNTL7_PL_SEL_LEN = 5;
 
 static const uint64_t TXPACKS_0_DEFAULT_DD_5_TX_BIT_REGS_MODE1_PL = 0x80041c4510012c3full;
 
-static const uint32_t TXPACKS_0_DEFAULT_DD_5_TX_BIT_REGS_MODE1_PL_LANE_PDWN = 48;
-static const uint32_t TXPACKS_0_DEFAULT_DD_5_TX_BIT_REGS_MODE1_PL_LANE_INVERT = 49;
-static const uint32_t TXPACKS_0_DEFAULT_DD_5_TX_BIT_REGS_MODE1_PL_LANE_QUIESCE = 50;
+static const uint32_t TXPACKS_0_DEFAULT_DD_5_TX_BIT_REGS_MODE1_PL_LANE_INVERT = 48;
+static const uint32_t TXPACKS_0_DEFAULT_DD_5_TX_BIT_REGS_MODE1_PL_LANE_QUIESCE = 49;
 static const uint32_t TXPACKS_0_DEFAULT_DD_5_TX_BIT_REGS_MODE1_PL_LANE_QUIESCE_LEN = 2;
-static const uint32_t TXPACKS_0_DEFAULT_DD_5_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN = 52;
-static const uint32_t TXPACKS_0_DEFAULT_DD_5_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN = 53;
-static const uint32_t TXPACKS_0_DEFAULT_DD_5_TX_BIT_REGS_MODE1_PL_PSAVE_REQ_DIS = 54;
-static const uint32_t TXPACKS_0_DEFAULT_DD_5_TX_BIT_REGS_MODE1_PL_ERR_INJ_A_ENABLE = 55;
-static const uint32_t TXPACKS_0_DEFAULT_DD_5_TX_BIT_REGS_MODE1_PL_ERR_INJ_B_ENABLE = 56;
+static const uint32_t TXPACKS_0_DEFAULT_DD_5_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN = 51;
+static const uint32_t TXPACKS_0_DEFAULT_DD_5_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN = 52;
+static const uint32_t TXPACKS_0_DEFAULT_DD_5_TX_BIT_REGS_MODE1_PL_PSAVE_REQ_DIS = 53;
+static const uint32_t TXPACKS_0_DEFAULT_DD_5_TX_BIT_REGS_MODE1_PL_ERR_INJ_A_ENABLE = 54;
+static const uint32_t TXPACKS_0_DEFAULT_DD_5_TX_BIT_REGS_MODE1_PL_ERR_INJ_B_ENABLE = 55;
 static const uint32_t TXPACKS_0_DEFAULT_DD_5_TX_BIT_REGS_MODE1_PL_PL_SPARE_MODE_0 = 60;
 static const uint32_t TXPACKS_0_DEFAULT_DD_5_TX_BIT_REGS_MODE1_PL_PL_SPARE_MODE_1 = 61;
 static const uint32_t TXPACKS_0_DEFAULT_DD_5_TX_BIT_REGS_MODE1_PL_PL_SPARE_MODE_2 = 62;
@@ -773,6 +803,7 @@ static const uint32_t TXPACKS_1_DD_3_TX_BIT_REGS_CNTL3_PL_BIST_PRBS_ENABLE = 50;
 static const uint32_t TXPACKS_1_DD_3_TX_BIT_REGS_CNTL3_PL_BIST_PRBS_CLEAR = 51;
 static const uint32_t TXPACKS_1_DD_3_TX_BIT_REGS_CNTL3_PL_RXDET_ENABLE = 52;
 static const uint32_t TXPACKS_1_DD_3_TX_BIT_REGS_CNTL3_PL_RXDET_PULSE = 53;
+static const uint32_t TXPACKS_1_DD_3_TX_BIT_REGS_CNTL3_PL_EOL_MODE_DISABLE = 54;
 // omi/reg00015.H
 
 #ifndef __PPE_HCODE__

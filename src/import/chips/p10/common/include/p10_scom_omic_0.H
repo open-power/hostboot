@@ -75,7 +75,10 @@ static const uint32_t DATASM_REGS_RX_STAT8_PG_RX_SCAN_P_0_15_RO_SIGNAL = 48;
 static const uint32_t DATASM_REGS_RX_STAT8_PG_RX_SCAN_P_0_15_RO_SIGNAL_LEN = 16;
 // omic/reg00000.H
 
-static const uint64_t MC_OMI_FIR_WOF_REG = 0x0c011748ull;
+//ERRCODE: // Some of the name targets not found in address targets: omic
+// No targets could be determined from the address.
+
+static const uint64_t MC_OMI_FIR_WOF_REG = 0x0c011408ull;
 
 static const uint32_t MC_OMI_FIR_WOF_REG_MC_OMI_FIR_WOF = 0;
 static const uint32_t MC_OMI_FIR_WOF_REG_MC_OMI_FIR_WOF_LEN = 62;

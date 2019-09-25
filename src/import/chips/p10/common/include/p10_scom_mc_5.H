@@ -197,8 +197,9 @@ static const uint64_t SCOMFIR_MCSYNC = 0x0c010c15ull;
 static const uint32_t SCOMFIR_MCSYNC_RESERVED_0_15 = 0;
 static const uint32_t SCOMFIR_MCSYNC_RESERVED_0_15_LEN = 16;
 static const uint32_t SCOMFIR_MCSYNC_SYNC_GO = 16;
-static const uint32_t SCOMFIR_MCSYNC_RESERVED_17_24 = 17;
-static const uint32_t SCOMFIR_MCSYNC_RESERVED_17_24_LEN = 8;
+static const uint32_t SCOMFIR_MCSYNC_EN_SYNC_IN = 17;
+static const uint32_t SCOMFIR_MCSYNC_RESERVED_18_24 = 18;
+static const uint32_t SCOMFIR_MCSYNC_RESERVED_18_24_LEN = 7;
 // mc/reg00005.H
 
 static const uint64_t TRA0_TR0_CONFIG_2 = 0x0c010405ull;

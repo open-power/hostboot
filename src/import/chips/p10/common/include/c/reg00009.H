@@ -769,11 +769,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_CPMS_FDIR_RW(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_CPMS_FDIR(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = CPMS_FDIR_RW;
+    scomt::last_scom = CPMS_FDIR;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -783,14 +783,13 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_CPMS_FDIR_RW(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::ReturnCode GET_CPMS_FDIR(const fapi2::Target<K, M, V>& i_target, fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = CPMS_FDIR_RW;
+    scomt::last_scom = CPMS_FDIR;
 #endif
-    return fapi2::getScom(i_target, CPMS_FDIR_RW, o_data);
+    return fapi2::getScom(i_target, CPMS_FDIR, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -798,13 +797,13 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_CPMS_FDIR_RW(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+static inline fapi2::ReturnCode PUT_CPMS_FDIR(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
-    return fapi2::putScom(i_target, CPMS_FDIR_RW, i_data);
+    return fapi2::putScom(i_target, CPMS_FDIR, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -845,7 +844,7 @@ static inline fapi2::ReturnCode PUT_CPMS_FDIR_WO_CLEAR(const fapi2::Target<K, M,
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return fapi2::putScom(i_target, CPMS_FDIR_WO_CLEAR, i_data);
 #ifdef SCOM_CHECKING
@@ -888,7 +887,7 @@ static inline fapi2::ReturnCode PUT_CPMS_FDIR_WO_OR(const fapi2::Target<K, M, V>
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return fapi2::putScom(i_target, CPMS_FDIR_WO_OR, i_data);
 #ifdef SCOM_CHECKING
@@ -902,7 +901,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_INJECT_ENABLE(fapi2::buffer
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_INJECT_ENABLE,
            1>(i_data);
@@ -917,7 +916,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_INJECT_ENABLE(const uint64_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_INJECT_ENABLE,
            1>(i_data);
@@ -931,7 +930,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_INJECT_ENABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.setBit<CPMS_FDIR_INJECT_ENABLE>();
 #ifdef SCOM_CHECKING
@@ -944,7 +943,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_FDIR_INJECT_ENABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.clearBit<CPMS_FDIR_INJECT_ENABLE>();
 #ifdef SCOM_CHECKING
@@ -958,7 +957,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_INJECT_ENABLE(fapi2::buffer
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return i_data.extractToRight<CPMS_FDIR_INJECT_ENABLE,
            1>(o_data);
@@ -972,7 +971,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_FDIR_INJECT_ENABLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return i_data.getBit<CPMS_FDIR_INJECT_ENABLE>();
 #ifdef SCOM_CHECKING
@@ -986,7 +985,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_HALT_INJECT(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_HALT_INJECT,
            1>(i_data);
@@ -1001,7 +1000,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_HALT_INJECT(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_HALT_INJECT,
            1>(i_data);
@@ -1015,7 +1014,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_HALT_INJECT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.setBit<CPMS_FDIR_HALT_INJECT>();
 #ifdef SCOM_CHECKING
@@ -1028,7 +1027,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_FDIR_HALT_INJECT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.clearBit<CPMS_FDIR_HALT_INJECT>();
 #ifdef SCOM_CHECKING
@@ -1042,7 +1041,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_HALT_INJECT(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return i_data.extractToRight<CPMS_FDIR_HALT_INJECT,
            1>(o_data);
@@ -1056,7 +1055,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_FDIR_HALT_INJECT(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return i_data.getBit<CPMS_FDIR_HALT_INJECT>();
 #ifdef SCOM_CHECKING
@@ -1070,7 +1069,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_HALT_TOGGLE_INJECT(fapi2::b
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_HALT_TOGGLE_INJECT,
            1>(i_data);
@@ -1085,7 +1084,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_HALT_TOGGLE_INJECT(const ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_HALT_TOGGLE_INJECT,
            1>(i_data);
@@ -1099,7 +1098,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_HALT_TOGGLE_INJECT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.setBit<CPMS_FDIR_HALT_TOGGLE_INJECT>();
 #ifdef SCOM_CHECKING
@@ -1112,7 +1111,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_FDIR_HALT_TOGGLE_INJECT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.clearBit<CPMS_FDIR_HALT_TOGGLE_INJECT>();
 #ifdef SCOM_CHECKING
@@ -1126,7 +1125,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_HALT_TOGGLE_INJECT(fapi2::b
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return i_data.extractToRight<CPMS_FDIR_HALT_TOGGLE_INJECT,
            1>(o_data);
@@ -1140,7 +1139,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_FDIR_HALT_TOGGLE_INJECT(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return i_data.getBit<CPMS_FDIR_HALT_TOGGLE_INJECT>();
 #ifdef SCOM_CHECKING
@@ -1150,95 +1149,11 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_FETCH_THROTTLE01_INJECT(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
-#endif
-    return o_data.insertFromRight<CPMS_FDIR_FETCH_THROTTLE01_INJECT,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_FETCH_THROTTLE01_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_FETCH_THROTTLE01_INJECT(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
-#endif
-    return o_data.insertFromRight<CPMS_FDIR_FETCH_THROTTLE01_INJECT,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_FETCH_THROTTLE01_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_FETCH_THROTTLE01_INJECT(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
-#endif
-    return o_data.setBit<CPMS_FDIR_FETCH_THROTTLE01_INJECT>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_FETCH_THROTTLE01_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_FDIR_FETCH_THROTTLE01_INJECT(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
-#endif
-    return o_data.clearBit<CPMS_FDIR_FETCH_THROTTLE01_INJECT>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_FETCH_THROTTLE01_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_FETCH_THROTTLE01_INJECT(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
-#endif
-    return i_data.extractToRight<CPMS_FDIR_FETCH_THROTTLE01_INJECT,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_FETCH_THROTTLE01_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_CPMS_FDIR_FETCH_THROTTLE01_INJECT(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
-#endif
-    return i_data.getBit<CPMS_FDIR_FETCH_THROTTLE01_INJECT>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_FETCH_THROTTLE01_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
 static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_FETCH_THROTTLE10_INJECT(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_FETCH_THROTTLE10_INJECT,
            1>(i_data);
@@ -1253,7 +1168,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_FETCH_THROTTLE10_INJECT(con
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_FETCH_THROTTLE10_INJECT,
            1>(i_data);
@@ -1267,7 +1182,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_FETCH_THROTTLE10_INJECT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.setBit<CPMS_FDIR_FETCH_THROTTLE10_INJECT>();
 #ifdef SCOM_CHECKING
@@ -1280,7 +1195,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_FDIR_FETCH_THROTTLE10_INJECT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.clearBit<CPMS_FDIR_FETCH_THROTTLE10_INJECT>();
 #ifdef SCOM_CHECKING
@@ -1294,7 +1209,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_FETCH_THROTTLE10_INJECT(fap
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return i_data.extractToRight<CPMS_FDIR_FETCH_THROTTLE10_INJECT,
            1>(o_data);
@@ -1308,7 +1223,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_FDIR_FETCH_THROTTLE10_INJECT(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return i_data.getBit<CPMS_FDIR_FETCH_THROTTLE10_INJECT>();
 #ifdef SCOM_CHECKING
@@ -1318,11 +1233,95 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_FETCH_THROTTLE01_INJECT(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+#endif
+    return o_data.insertFromRight<CPMS_FDIR_FETCH_THROTTLE01_INJECT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_FDIR_FETCH_THROTTLE01_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_FETCH_THROTTLE01_INJECT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+#endif
+    return o_data.insertFromRight<CPMS_FDIR_FETCH_THROTTLE01_INJECT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_FDIR_FETCH_THROTTLE01_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_FETCH_THROTTLE01_INJECT(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+#endif
+    return o_data.setBit<CPMS_FDIR_FETCH_THROTTLE01_INJECT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_FDIR_FETCH_THROTTLE01_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_FDIR_FETCH_THROTTLE01_INJECT(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+#endif
+    return o_data.clearBit<CPMS_FDIR_FETCH_THROTTLE01_INJECT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_FDIR_FETCH_THROTTLE01_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_FETCH_THROTTLE01_INJECT(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+#endif
+    return i_data.extractToRight<CPMS_FDIR_FETCH_THROTTLE01_INJECT,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_FDIR_FETCH_THROTTLE01_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_CPMS_FDIR_FETCH_THROTTLE01_INJECT(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+#endif
+    return i_data.getBit<CPMS_FDIR_FETCH_THROTTLE01_INJECT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_FDIR_FETCH_THROTTLE01_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_ISSUE_NTC_INJECT(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_ISSUE_NTC_INJECT,
            1>(i_data);
@@ -1337,7 +1336,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_ISSUE_NTC_INJECT(const uint
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_ISSUE_NTC_INJECT,
            1>(i_data);
@@ -1351,7 +1350,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_ISSUE_NTC_INJECT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.setBit<CPMS_FDIR_ISSUE_NTC_INJECT>();
 #ifdef SCOM_CHECKING
@@ -1364,7 +1363,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_FDIR_ISSUE_NTC_INJECT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.clearBit<CPMS_FDIR_ISSUE_NTC_INJECT>();
 #ifdef SCOM_CHECKING
@@ -1378,7 +1377,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_ISSUE_NTC_INJECT(fapi2::buf
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return i_data.extractToRight<CPMS_FDIR_ISSUE_NTC_INJECT,
            1>(o_data);
@@ -1392,7 +1391,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_FDIR_ISSUE_NTC_INJECT(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return i_data.getBit<CPMS_FDIR_ISSUE_NTC_INJECT>();
 #ifdef SCOM_CHECKING
@@ -1406,7 +1405,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_PREFETCH_THROTTLE_INJECT(fa
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_PREFETCH_THROTTLE_INJECT,
            CPMS_FDIR_PREFETCH_THROTTLE_INJECT_LEN>(i_data);
@@ -1421,7 +1420,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_PREFETCH_THROTTLE_INJECT(co
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_PREFETCH_THROTTLE_INJECT,
            CPMS_FDIR_PREFETCH_THROTTLE_INJECT_LEN>(i_data);
@@ -1436,7 +1435,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_PREFETCH_THROTTLE_INJECT(fa
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return i_data.extractToRight<CPMS_FDIR_PREFETCH_THROTTLE_INJECT,
            CPMS_FDIR_PREFETCH_THROTTLE_INJECT_LEN>(o_data);
@@ -1451,7 +1450,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_SLOW_FETCH_INJECT(fapi2::bu
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_SLOW_FETCH_INJECT,
            1>(i_data);
@@ -1466,7 +1465,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_SLOW_FETCH_INJECT(const uin
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_SLOW_FETCH_INJECT,
            1>(i_data);
@@ -1480,7 +1479,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_SLOW_FETCH_INJECT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.setBit<CPMS_FDIR_SLOW_FETCH_INJECT>();
 #ifdef SCOM_CHECKING
@@ -1493,7 +1492,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_FDIR_SLOW_FETCH_INJECT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.clearBit<CPMS_FDIR_SLOW_FETCH_INJECT>();
 #ifdef SCOM_CHECKING
@@ -1507,7 +1506,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_SLOW_FETCH_INJECT(fapi2::bu
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return i_data.extractToRight<CPMS_FDIR_SLOW_FETCH_INJECT,
            1>(o_data);
@@ -1521,7 +1520,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_FDIR_SLOW_FETCH_INJECT(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return i_data.getBit<CPMS_FDIR_SLOW_FETCH_INJECT>();
 #ifdef SCOM_CHECKING
@@ -1535,7 +1534,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_VECTOR_LIMIT_INJECT(fapi2::
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_VECTOR_LIMIT_INJECT,
            CPMS_FDIR_VECTOR_LIMIT_INJECT_LEN>(i_data);
@@ -1550,7 +1549,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_VECTOR_LIMIT_INJECT(const u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_VECTOR_LIMIT_INJECT,
            CPMS_FDIR_VECTOR_LIMIT_INJECT_LEN>(i_data);
@@ -1565,7 +1564,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_VECTOR_LIMIT_INJECT(fapi2::
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return i_data.extractToRight<CPMS_FDIR_VECTOR_LIMIT_INJECT,
            CPMS_FDIR_VECTOR_LIMIT_INJECT_LEN>(o_data);
@@ -1580,7 +1579,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_SLOW_COMPLETION_INJECT(fapi
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_SLOW_COMPLETION_INJECT,
            1>(i_data);
@@ -1595,7 +1594,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_SLOW_COMPLETION_INJECT(cons
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_SLOW_COMPLETION_INJECT,
            1>(i_data);
@@ -1609,7 +1608,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_SLOW_COMPLETION_INJECT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.setBit<CPMS_FDIR_SLOW_COMPLETION_INJECT>();
 #ifdef SCOM_CHECKING
@@ -1622,7 +1621,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_FDIR_SLOW_COMPLETION_INJECT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.clearBit<CPMS_FDIR_SLOW_COMPLETION_INJECT>();
 #ifdef SCOM_CHECKING
@@ -1636,7 +1635,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_SLOW_COMPLETION_INJECT(fapi
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return i_data.extractToRight<CPMS_FDIR_SLOW_COMPLETION_INJECT,
            1>(o_data);
@@ -1650,7 +1649,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_FDIR_SLOW_COMPLETION_INJECT(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return i_data.getBit<CPMS_FDIR_SLOW_COMPLETION_INJECT>();
 #ifdef SCOM_CHECKING
@@ -1660,86 +1659,86 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_SPARE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_MMA_UARCH_ENABLE_INJECT(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_FDIR_SPARE,
+    return o_data.insertFromRight<CPMS_FDIR_MMA_UARCH_ENABLE_INJECT,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_FDIR_MMA_UARCH_ENABLE_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_SPARE(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_MMA_UARCH_ENABLE_INJECT(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_FDIR_SPARE,
+    return o_data.insertFromRight<CPMS_FDIR_MMA_UARCH_ENABLE_INJECT,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_FDIR_MMA_UARCH_ENABLE_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_SPARE(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_MMA_UARCH_ENABLE_INJECT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
-    return o_data.setBit<CPMS_FDIR_SPARE>();
+    return o_data.setBit<CPMS_FDIR_MMA_UARCH_ENABLE_INJECT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_FDIR_MMA_UARCH_ENABLE_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_FDIR_SPARE(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_FDIR_MMA_UARCH_ENABLE_INJECT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
-    return o_data.clearBit<CPMS_FDIR_SPARE>();
+    return o_data.clearBit<CPMS_FDIR_MMA_UARCH_ENABLE_INJECT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_FDIR_MMA_UARCH_ENABLE_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_SPARE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_MMA_UARCH_ENABLE_INJECT(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
-    return i_data.extractToRight<CPMS_FDIR_SPARE,
+    return i_data.extractToRight<CPMS_FDIR_MMA_UARCH_ENABLE_INJECT,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_FDIR_MMA_UARCH_ENABLE_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPMS_FDIR_SPARE(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPMS_FDIR_MMA_UARCH_ENABLE_INJECT(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
-    return i_data.getBit<CPMS_FDIR_SPARE>();
+    return i_data.getBit<CPMS_FDIR_MMA_UARCH_ENABLE_INJECT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_FDIR_MMA_UARCH_ENABLE_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -1748,7 +1747,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_MMA_LIMIT(fapi2::buffer<uin
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_MMA_LIMIT,
            CPMS_FDIR_MMA_LIMIT_LEN>(i_data);
@@ -1763,7 +1762,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_MMA_LIMIT(const uint64_t i_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_MMA_LIMIT,
            CPMS_FDIR_MMA_LIMIT_LEN>(i_data);
@@ -1778,7 +1777,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_MMA_LIMIT(fapi2::buffer<uin
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return i_data.extractToRight<CPMS_FDIR_MMA_LIMIT,
            CPMS_FDIR_MMA_LIMIT_LEN>(o_data);
@@ -1793,7 +1792,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_TOGGLE_HALT_AMOUNT(fapi2::b
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_TOGGLE_HALT_AMOUNT,
            CPMS_FDIR_TOGGLE_HALT_AMOUNT_LEN>(i_data);
@@ -1808,7 +1807,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_TOGGLE_HALT_AMOUNT(const ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_TOGGLE_HALT_AMOUNT,
            CPMS_FDIR_TOGGLE_HALT_AMOUNT_LEN>(i_data);
@@ -1823,7 +1822,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_TOGGLE_HALT_AMOUNT(fapi2::b
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return i_data.extractToRight<CPMS_FDIR_TOGGLE_HALT_AMOUNT,
            CPMS_FDIR_TOGGLE_HALT_AMOUNT_LEN>(o_data);
@@ -1838,7 +1837,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_IRRITATE_INJECT_RESPONSE(fa
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_IRRITATE_INJECT_RESPONSE,
            CPMS_FDIR_IRRITATE_INJECT_RESPONSE_LEN>(i_data);
@@ -1853,7 +1852,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_IRRITATE_INJECT_RESPONSE(co
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_IRRITATE_INJECT_RESPONSE,
            CPMS_FDIR_IRRITATE_INJECT_RESPONSE_LEN>(i_data);
@@ -1868,7 +1867,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_IRRITATE_INJECT_RESPONSE(fa
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return i_data.extractToRight<CPMS_FDIR_IRRITATE_INJECT_RESPONSE,
            CPMS_FDIR_IRRITATE_INJECT_RESPONSE_LEN>(o_data);
@@ -1883,7 +1882,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_IRRITATE_LFSR_SELECT(fapi2:
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_IRRITATE_LFSR_SELECT,
            CPMS_FDIR_IRRITATE_LFSR_SELECT_LEN>(i_data);
@@ -1898,7 +1897,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_IRRITATE_LFSR_SELECT(const 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_IRRITATE_LFSR_SELECT,
            CPMS_FDIR_IRRITATE_LFSR_SELECT_LEN>(i_data);
@@ -1913,7 +1912,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_IRRITATE_LFSR_SELECT(fapi2:
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return i_data.extractToRight<CPMS_FDIR_IRRITATE_LFSR_SELECT,
            CPMS_FDIR_IRRITATE_LFSR_SELECT_LEN>(o_data);
@@ -1928,7 +1927,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_IRRITATE_SMALL_SELECT(fapi2
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_IRRITATE_SMALL_SELECT,
            CPMS_FDIR_IRRITATE_SMALL_SELECT_LEN>(i_data);
@@ -1943,7 +1942,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_IRRITATE_SMALL_SELECT(const
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_IRRITATE_SMALL_SELECT,
            CPMS_FDIR_IRRITATE_SMALL_SELECT_LEN>(i_data);
@@ -1958,7 +1957,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_IRRITATE_SMALL_SELECT(fapi2
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return i_data.extractToRight<CPMS_FDIR_IRRITATE_SMALL_SELECT,
            CPMS_FDIR_IRRITATE_SMALL_SELECT_LEN>(o_data);
@@ -1973,7 +1972,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_IRRITATE_LARGE_SELECT(fapi2
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_IRRITATE_LARGE_SELECT,
            CPMS_FDIR_IRRITATE_LARGE_SELECT_LEN>(i_data);
@@ -1988,7 +1987,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_IRRITATE_LARGE_SELECT(const
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_IRRITATE_LARGE_SELECT,
            CPMS_FDIR_IRRITATE_LARGE_SELECT_LEN>(i_data);
@@ -2003,7 +2002,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_IRRITATE_LARGE_SELECT(fapi2
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return i_data.extractToRight<CPMS_FDIR_IRRITATE_LARGE_SELECT,
            CPMS_FDIR_IRRITATE_LARGE_SELECT_LEN>(o_data);
@@ -2014,86 +2013,86 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_IRRITATE_SPARE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_EXCLUDE_LSU_HALT(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_FDIR_IRRITATE_SPARE,
+    return o_data.insertFromRight<CPMS_FDIR_EXCLUDE_LSU_HALT,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_IRRITATE_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_FDIR_EXCLUDE_LSU_HALT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_IRRITATE_SPARE(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_EXCLUDE_LSU_HALT(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_FDIR_IRRITATE_SPARE,
+    return o_data.insertFromRight<CPMS_FDIR_EXCLUDE_LSU_HALT,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_IRRITATE_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_FDIR_EXCLUDE_LSU_HALT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_IRRITATE_SPARE(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_EXCLUDE_LSU_HALT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
-    return o_data.setBit<CPMS_FDIR_IRRITATE_SPARE>();
+    return o_data.setBit<CPMS_FDIR_EXCLUDE_LSU_HALT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_IRRITATE_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_FDIR_EXCLUDE_LSU_HALT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_FDIR_IRRITATE_SPARE(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_FDIR_EXCLUDE_LSU_HALT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
-    return o_data.clearBit<CPMS_FDIR_IRRITATE_SPARE>();
+    return o_data.clearBit<CPMS_FDIR_EXCLUDE_LSU_HALT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_IRRITATE_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_FDIR_EXCLUDE_LSU_HALT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_IRRITATE_SPARE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_EXCLUDE_LSU_HALT(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
-    return i_data.extractToRight<CPMS_FDIR_IRRITATE_SPARE,
+    return i_data.extractToRight<CPMS_FDIR_EXCLUDE_LSU_HALT,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_IRRITATE_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_FDIR_EXCLUDE_LSU_HALT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPMS_FDIR_IRRITATE_SPARE(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPMS_FDIR_EXCLUDE_LSU_HALT(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
-    return i_data.getBit<CPMS_FDIR_IRRITATE_SPARE>();
+    return i_data.getBit<CPMS_FDIR_EXCLUDE_LSU_HALT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_IRRITATE_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_FDIR_EXCLUDE_LSU_HALT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -2102,7 +2101,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_IRRITATE_WEIGHT_SELECT(fapi
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_IRRITATE_WEIGHT_SELECT,
            CPMS_FDIR_IRRITATE_WEIGHT_SELECT_LEN>(i_data);
@@ -2117,7 +2116,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_IRRITATE_WEIGHT_SELECT(cons
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_IRRITATE_WEIGHT_SELECT,
            CPMS_FDIR_IRRITATE_WEIGHT_SELECT_LEN>(i_data);
@@ -2132,7 +2131,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_IRRITATE_WEIGHT_SELECT(fapi
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return i_data.extractToRight<CPMS_FDIR_IRRITATE_WEIGHT_SELECT,
            CPMS_FDIR_IRRITATE_WEIGHT_SELECT_LEN>(o_data);
@@ -2147,7 +2146,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_INJECT_DPT_SUSPEND(fapi2::b
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_INJECT_DPT_SUSPEND,
            1>(i_data);
@@ -2162,7 +2161,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_INJECT_DPT_SUSPEND(const ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_FDIR_INJECT_DPT_SUSPEND,
            1>(i_data);
@@ -2176,7 +2175,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_INJECT_DPT_SUSPEND(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.setBit<CPMS_FDIR_INJECT_DPT_SUSPEND>();
 #ifdef SCOM_CHECKING
@@ -2189,7 +2188,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_FDIR_INJECT_DPT_SUSPEND(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return o_data.clearBit<CPMS_FDIR_INJECT_DPT_SUSPEND>();
 #ifdef SCOM_CHECKING
@@ -2203,7 +2202,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_INJECT_DPT_SUSPEND(fapi2::b
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return i_data.extractToRight<CPMS_FDIR_INJECT_DPT_SUSPEND,
            1>(o_data);
@@ -2217,7 +2216,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_FDIR_INJECT_DPT_SUSPEND(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_FDIR_RW, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
+    FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
     return i_data.getBit<CPMS_FDIR_INJECT_DPT_SUSPEND>();
 #ifdef SCOM_CHECKING
@@ -4380,6 +4379,196 @@ static inline fapi2::buffer<uint64_t>& GET_EC_PC_TRACE1_TR0_CONFIG_1_CMP_MSK_LT_
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access EC_PC_TRACE1_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87 chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_L3_MISC_L3CERRS_BACKING_CTL_REG(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = L3_MISC_L3CERRS_BACKING_CTL_REG;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_L3_MISC_L3CERRS_BACKING_CTL_REG(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = L3_MISC_L3CERRS_BACKING_CTL_REG;
+#endif
+    return fapi2::getScom(i_target, L3_MISC_L3CERRS_BACKING_CTL_REG, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_L3_MISC_L3CERRS_BACKING_CTL_REG(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(L3_MISC_L3CERRS_BACKING_CTL_REG));
+#endif
+    return fapi2::putScom(i_target, L3_MISC_L3CERRS_BACKING_CTL_REG, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_L3_MISC_L3CERRS_BACKING_CTL_REG_CASTOUT_TO_BACKING_L3_EN_CFG(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3_MISC_L3CERRS_BACKING_CTL_REG));
+#endif
+    return o_data.insertFromRight<L3_MISC_L3CERRS_BACKING_CTL_REG_CASTOUT_TO_BACKING_L3_EN_CFG,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3_MISC_L3CERRS_BACKING_CTL_REG_CASTOUT_TO_BACKING_L3_EN_CFG chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_L3_MISC_L3CERRS_BACKING_CTL_REG_CASTOUT_TO_BACKING_L3_EN_CFG(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3_MISC_L3CERRS_BACKING_CTL_REG));
+#endif
+    return o_data.insertFromRight<L3_MISC_L3CERRS_BACKING_CTL_REG_CASTOUT_TO_BACKING_L3_EN_CFG,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3_MISC_L3CERRS_BACKING_CTL_REG_CASTOUT_TO_BACKING_L3_EN_CFG chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_L3_MISC_L3CERRS_BACKING_CTL_REG_CASTOUT_TO_BACKING_L3_EN_CFG(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3_MISC_L3CERRS_BACKING_CTL_REG));
+#endif
+    return o_data.setBit<L3_MISC_L3CERRS_BACKING_CTL_REG_CASTOUT_TO_BACKING_L3_EN_CFG>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3_MISC_L3CERRS_BACKING_CTL_REG_CASTOUT_TO_BACKING_L3_EN_CFG chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_L3_MISC_L3CERRS_BACKING_CTL_REG_CASTOUT_TO_BACKING_L3_EN_CFG(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3_MISC_L3CERRS_BACKING_CTL_REG));
+#endif
+    return o_data.clearBit<L3_MISC_L3CERRS_BACKING_CTL_REG_CASTOUT_TO_BACKING_L3_EN_CFG>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3_MISC_L3CERRS_BACKING_CTL_REG_CASTOUT_TO_BACKING_L3_EN_CFG chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_L3_MISC_L3CERRS_BACKING_CTL_REG_CASTOUT_TO_BACKING_L3_EN_CFG(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3_MISC_L3CERRS_BACKING_CTL_REG));
+#endif
+    return i_data.extractToRight<L3_MISC_L3CERRS_BACKING_CTL_REG_CASTOUT_TO_BACKING_L3_EN_CFG,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3_MISC_L3CERRS_BACKING_CTL_REG_CASTOUT_TO_BACKING_L3_EN_CFG chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_L3_MISC_L3CERRS_BACKING_CTL_REG_CASTOUT_TO_BACKING_L3_EN_CFG(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3_MISC_L3CERRS_BACKING_CTL_REG));
+#endif
+    return i_data.getBit<L3_MISC_L3CERRS_BACKING_CTL_REG_CASTOUT_TO_BACKING_L3_EN_CFG>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3_MISC_L3CERRS_BACKING_CTL_REG_CASTOUT_TO_BACKING_L3_EN_CFG chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_L3_MISC_L3CERRS_BACKING_CTL_REG_BACKING_CNT_CFG(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3_MISC_L3CERRS_BACKING_CTL_REG));
+#endif
+    return o_data.insertFromRight<L3_MISC_L3CERRS_BACKING_CTL_REG_BACKING_CNT_CFG,
+           L3_MISC_L3CERRS_BACKING_CTL_REG_BACKING_CNT_CFG_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3_MISC_L3CERRS_BACKING_CTL_REG_BACKING_CNT_CFG chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_L3_MISC_L3CERRS_BACKING_CTL_REG_BACKING_CNT_CFG(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3_MISC_L3CERRS_BACKING_CTL_REG));
+#endif
+    return o_data.insertFromRight<L3_MISC_L3CERRS_BACKING_CTL_REG_BACKING_CNT_CFG,
+           L3_MISC_L3CERRS_BACKING_CTL_REG_BACKING_CNT_CFG_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3_MISC_L3CERRS_BACKING_CTL_REG_BACKING_CNT_CFG chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_L3_MISC_L3CERRS_BACKING_CTL_REG_BACKING_CNT_CFG(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(L3_MISC_L3CERRS_BACKING_CTL_REG));
+#endif
+    return i_data.extractToRight<L3_MISC_L3CERRS_BACKING_CTL_REG_BACKING_CNT_CFG,
+           L3_MISC_L3CERRS_BACKING_CTL_REG_BACKING_CNT_CFG_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access L3_MISC_L3CERRS_BACKING_CTL_REG_BACKING_CNT_CFG chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif

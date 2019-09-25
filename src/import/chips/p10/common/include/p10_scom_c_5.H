@@ -55,7 +55,9 @@ static const uint32_t ADDR_TRAP_REG_LAST_MASTERID = 35;
 static const uint32_t ADDR_TRAP_REG_LAST_MASTERID_LEN = 4;
 // c/reg00005.H
 
-static const uint64_t CPMS_FLMR = 0x200e0e48ull;
+static const uint64_t CPMS_FLMR_RW = 0x200e0e48ull;
+static const uint64_t CPMS_FLMR_WO_CLEAR = 0x200e0e4bull;
+static const uint64_t CPMS_FLMR_WO_OR = 0x200e0e4aull;
 
 static const uint32_t CPMS_FLMR_LARGE_INITIAL_CYCLES = 0;
 static const uint32_t CPMS_FLMR_LARGE_INITIAL_CYCLES_LEN = 6;
@@ -89,10 +91,29 @@ static const uint32_t CPMS_FLMR_PHASE2_RECOVERY_CYCLES_LEN = 8;
 static const uint32_t CPMS_FLMR_MMA_DROOP_PROTECT_ENABLE = 52;
 static const uint32_t CPMS_FLMR_MMA_DROOP_PREDICT_SELECT = 53;
 static const uint32_t CPMS_FLMR_MMA_DROOP_PREDICT_SELECT_LEN = 3;
-static const uint32_t CPMS_FLMR_CORE_QUIESCE_DROOP_IGNORE = 56;
+static const uint32_t CPMS_FLMR_CORE_UCODE_IDLE_DISABLE = 56;
 static const uint32_t CPMS_FLMR_CORE_UCODE_GRANT_SUPPRESS = 57;
-static const uint32_t CPMS_FLMR_CORE_UCODE_GRANT_INJECT = 58;
-static const uint32_t CPMS_FLMR_FTC_RESET = 59;
+static const uint32_t CPMS_FLMR_CORE_UCODE_GRANT_SUPPRESS_LEN = 2;
+static const uint32_t CPMS_FLMR_CORE_UCODE_GRANT_INJECT = 59;
+static const uint32_t CPMS_FLMR_FTC_RESET = 60;
+static const uint32_t CPMS_FLMR_IGNORE_IFU_THROTTLE_ACTIVE = 61;
+static const uint32_t CPMS_FLMR_PHASE1_DITHER_NTC = 62;
+static const uint32_t CPMS_FLMR_SPARE4 = 63;
+// c/reg00005.H
+
+static const uint64_t CPMS_WPCR = 0x200e0e94ull;
+
+static const uint32_t CPMS_WPCR_SPARE = 0;
+static const uint32_t CPMS_WPCR_SPARE_LEN = 2;
+static const uint32_t CPMS_WPCR_BASE_THROTTLE_INDEX = 2;
+static const uint32_t CPMS_WPCR_BASE_THROTTLE_INDEX_LEN = 6;
+static const uint32_t CPMS_WPCR_INTERVAL_PROXY_TARGET = 8;
+static const uint32_t CPMS_WPCR_INTERVAL_PROXY_TARGET_LEN = 24;
+static const uint32_t CPMS_WPCR_SPARE2 = 32;
+static const uint32_t CPMS_WPCR_PROXY_THRESH_SELECT = 33;
+static const uint32_t CPMS_WPCR_PROXY_THRESH_SELECT_LEN = 3;
+static const uint32_t CPMS_WPCR_PROXY_CARRYOUT_SEL = 36;
+static const uint32_t CPMS_WPCR_PROXY_CARRYOUT_SEL_LEN = 4;
 // c/reg00005.H
 
 static const uint64_t EC_LS_LSU_HOLD_OUT_REG8 = 0x200206c8ull;
@@ -113,8 +134,10 @@ static const uint32_t EC_LS_LSU_HOLD_OUT_REG8_1_FLSP1_HYPV_TRAP_DETECT_AND_NTC_E
 
 static const uint64_t EC_PC_PMU_SPRCOR_CORE_FUSES = 0x2002040eull;
 
-static const uint32_t EC_PC_PMU_SPRCOR_CORE_FUSES_FP_THROTTLE_EN = 0;
-static const uint32_t EC_PC_PMU_SPRCOR_CORE_FUSES_VMX_CRYPTO_DIS = 1;
+static const uint32_t EC_PC_PMU_SPRCOR_CORE_FUSES_EXT_MEMORY_DIS = 0;
+static const uint32_t EC_PC_PMU_SPRCOR_CORE_FUSES_FLOP_CONTROL = 1;
+static const uint32_t EC_PC_PMU_SPRCOR_CORE_FUSES_FLOP_CONTROL_LEN = 2;
+static const uint32_t EC_PC_PMU_SPRCOR_CORE_FUSES_VMX_CRYPTO_DIS = 3;
 // c/reg00005.H
 
 static const uint64_t EC_PC_SPURR_FREQ_REF = 0x200204a1ull;

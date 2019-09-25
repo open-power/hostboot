@@ -900,7 +900,7 @@ static const uint32_t DAT_MISC_CERR_PTY_HOLD_DEBUG1_CONFIG = 63;
 static const uint64_t FIR_ACTION1_REG_1 = 0x10010c47ull;
 
 static const uint32_t FIR_ACTION1_REG_1_FIR_ACTION1_1 = 0;
-static const uint32_t FIR_ACTION1_REG_1_FIR_ACTION1_1_LEN = 62;
+static const uint32_t FIR_ACTION1_REG_1_FIR_ACTION1_1_LEN = 64;
 // pau/reg00002.H
 
 static const uint64_t FIR_MASK_REG_1_RW = 0x10010c43ull;
@@ -908,7 +908,7 @@ static const uint64_t FIR_MASK_REG_1_WO_AND = 0x10010c44ull;
 static const uint64_t FIR_MASK_REG_1_WO_OR = 0x10010c45ull;
 
 static const uint32_t FIR_MASK_REG_1_FIR_MASK_1 = 0;
-static const uint32_t FIR_MASK_REG_1_FIR_MASK_1_LEN = 62;
+static const uint32_t FIR_MASK_REG_1_FIR_MASK_1_LEN = 64;
 // pau/reg00002.H
 
 static const uint64_t MISC_REGS_BDF2PE_0_CONFIG = 0x10010b50ull;
@@ -933,53 +933,6 @@ static const uint32_t MISC_REGS_ERROR_BRICK_GROUP_CONFIG2_1_LEN = 12;
 static const uint64_t MISC_REGS_PESTB_DATA_PE8 = 0x10010b78ull;
 
 static const uint32_t MISC_REGS_PESTB_DATA_PE8_DMA_STOPPED_STATE_PE8 = 0;
-// pau/reg00002.H
-
-static const uint64_t NTL1_REGS_CREQ_HA_PTR = 0x10010a10ull;
-
-static const uint32_t NTL1_REGS_CREQ_HA_PTR_RESERVED1 = 0;
-static const uint32_t NTL1_REGS_CREQ_HA_PTR_RESERVED1_LEN = 5;
-static const uint32_t NTL1_REGS_CREQ_HA_PTR_START = 5;
-static const uint32_t NTL1_REGS_CREQ_HA_PTR_START_LEN = 7;
-static const uint32_t NTL1_REGS_CREQ_HA_PTR_RESERVED2 = 12;
-static const uint32_t NTL1_REGS_CREQ_HA_PTR_RESERVED2_LEN = 5;
-static const uint32_t NTL1_REGS_CREQ_HA_PTR_END = 17;
-static const uint32_t NTL1_REGS_CREQ_HA_PTR_END_LEN = 7;
-// pau/reg00002.H
-
-static const uint64_t NTL1_REGS_DEBUG1_CONFIG = 0x10010a0dull;
-
-static const uint32_t NTL1_REGS_DEBUG1_CONFIG_POD0 = 0;
-static const uint32_t NTL1_REGS_DEBUG1_CONFIG_POD0_LEN = 5;
-static const uint32_t NTL1_REGS_DEBUG1_CONFIG_POD1 = 5;
-static const uint32_t NTL1_REGS_DEBUG1_CONFIG_POD1_LEN = 5;
-static const uint32_t NTL1_REGS_DEBUG1_CONFIG_POD2 = 10;
-static const uint32_t NTL1_REGS_DEBUG1_CONFIG_POD2_LEN = 5;
-static const uint32_t NTL1_REGS_DEBUG1_CONFIG_POD3 = 15;
-static const uint32_t NTL1_REGS_DEBUG1_CONFIG_POD3_LEN = 5;
-static const uint32_t NTL1_REGS_DEBUG1_CONFIG_POD4 = 20;
-static const uint32_t NTL1_REGS_DEBUG1_CONFIG_POD4_LEN = 5;
-static const uint32_t NTL1_REGS_DEBUG1_CONFIG_POD5 = 25;
-static const uint32_t NTL1_REGS_DEBUG1_CONFIG_POD5_LEN = 5;
-static const uint32_t NTL1_REGS_DEBUG1_CONFIG_POD6 = 30;
-static const uint32_t NTL1_REGS_DEBUG1_CONFIG_POD6_LEN = 5;
-static const uint32_t NTL1_REGS_DEBUG1_CONFIG_POD7 = 35;
-static const uint32_t NTL1_REGS_DEBUG1_CONFIG_POD7_LEN = 5;
-static const uint32_t NTL1_REGS_DEBUG1_CONFIG_POD8 = 40;
-static const uint32_t NTL1_REGS_DEBUG1_CONFIG_POD8_LEN = 5;
-static const uint32_t NTL1_REGS_DEBUG1_CONFIG_POD9 = 45;
-static const uint32_t NTL1_REGS_DEBUG1_CONFIG_POD9_LEN = 5;
-static const uint32_t NTL1_REGS_DEBUG1_CONFIG_POD10 = 50;
-static const uint32_t NTL1_REGS_DEBUG1_CONFIG_POD10_LEN = 5;
-static const uint32_t NTL1_REGS_DEBUG1_CONFIG_RESERVED1 = 55;
-static const uint32_t NTL1_REGS_DEBUG1_CONFIG_RESERVED1_LEN = 8;
-static const uint32_t NTL1_REGS_DEBUG1_CONFIG_ACT = 63;
-// pau/reg00002.H
-
-static const uint64_t NTL1_REGS_SCRATCH1 = 0x10010a1aull;
-
-static const uint32_t NTL1_REGS_SCRATCH1_IDIAL_SCRATCH1 = 0;
-static const uint32_t NTL1_REGS_SCRATCH1_IDIAL_SCRATCH1_LEN = 64;
 // pau/reg00002.H
 
 static const uint64_t OTL0_MISC_CONFIG_TLX_CREDITS = 0x10010a2aull;
@@ -1143,12 +1096,11 @@ static const uint32_t XTS_REG_CONFIG3_ATSD_ALIGN = 4;
 static const uint32_t XTS_REG_CONFIG3_MMIOSD_OCAPI = 5;
 static const uint32_t XTS_REG_CONFIG3_TLBIE_OVERLAP_OP2_EN = 6;
 static const uint32_t XTS_REG_CONFIG3_NVLINK_16CHIP_MODE = 7;
-// pau/reg00003.H
+// pau/reg00002.H
 
 #ifndef __PPE_HCODE__
 }
 }
 #include "pau/reg00002.H"
-#include "pau/reg00003.H"
 #endif
 #endif

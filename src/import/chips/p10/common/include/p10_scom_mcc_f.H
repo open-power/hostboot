@@ -66,9 +66,9 @@ static const uint32_t CRYPTO_ENCRYPT_CRYPTONONCEA_NONCEA_LEN = 64;
 static const uint64_t USTL_USTLLOLDROP = 0x0c010e11ull;
 
 static const uint32_t USTL_USTLLOLDROP_A_DROP_REASON = 0;
-static const uint32_t USTL_USTLLOLDROP_A_DROP_REASON_LEN = 19;
+static const uint32_t USTL_USTLLOLDROP_A_DROP_REASON_LEN = 22;
 static const uint32_t USTL_USTLLOLDROP_B_DROP_REASON = 32;
-static const uint32_t USTL_USTLLOLDROP_B_DROP_REASON_LEN = 19;
+static const uint32_t USTL_USTLLOLDROP_B_DROP_REASON_LEN = 22;
 // mcc/reg00015.H
 
 #ifndef __PPE_HCODE__

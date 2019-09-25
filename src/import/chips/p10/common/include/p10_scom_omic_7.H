@@ -63,13 +63,19 @@ static const uint32_t DATASM_REGS_RX_STAT22_PG_RX_DL_PHY_RECAL_REQ_16_23_RO_SIGN
 static const uint32_t DATASM_REGS_RX_STAT22_PG_RX_DL_PHY_RECAL_REQ_16_23_RO_SIGNAL_LEN = 8;
 // omic/reg00007.H
 
-static const uint64_t MC_OMI_FIR_ACTION0_REG = 0x0c011746ull;
+//ERRCODE: // Some of the name targets not found in address targets: omic
+// No targets could be determined from the address.
+
+static const uint64_t MC_OMI_FIR_ACTION0_REG = 0x0c011406ull;
 
 static const uint32_t MC_OMI_FIR_ACTION0_REG_MC_OMI_FIR_ACTION0 = 0;
 static const uint32_t MC_OMI_FIR_ACTION0_REG_MC_OMI_FIR_ACTION0_LEN = 62;
 // omic/reg00007.H
 
-static const uint64_t MC_OMI_FIR_ACTION1_REG = 0x0c011747ull;
+//ERRCODE: // Some of the name targets not found in address targets: omic
+// No targets could be determined from the address.
+
+static const uint64_t MC_OMI_FIR_ACTION1_REG = 0x0c011407ull;
 
 static const uint32_t MC_OMI_FIR_ACTION1_REG_MC_OMI_FIR_ACTION1 = 0;
 static const uint32_t MC_OMI_FIR_ACTION1_REG_MC_OMI_FIR_ACTION1_LEN = 62;

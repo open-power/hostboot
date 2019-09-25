@@ -274,12 +274,6 @@ static const uint32_t RECOV_IN52 = 52;
 static const uint32_t RECOV_IN53 = 53;
 // pec/reg00011.H
 
-static const uint64_t TRA0_TR1_CONFIG_1 = 0x08010444ull;
-
-static const uint32_t TRA0_TR1_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
-static const uint32_t TRA0_TR1_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
-// pec/reg00011.H
-
 static const uint64_t XSTOP4 = 0x08030014ull;
 
 static const uint32_t XSTOP4_ENABLE = 0;

@@ -245,12 +245,47 @@ static const uint32_t LOCAL_XSTOP_UNMASKED_IN = 1;
 static const uint32_t LOCAL_XSTOP_UNMASKED_IN_LEN = 15;
 // eq/reg00006.H
 
+static const uint64_t QMETRA0_TR0_TRACE_LO_DATA_REG = 0x20018401ull;
+
+static const uint32_t QMETRA0_TR0_TRACE_LO_DATA_REG_LO_DATA = 0;
+static const uint32_t QMETRA0_TR0_TRACE_LO_DATA_REG_LO_DATA_LEN = 32;
+static const uint32_t QMETRA0_TR0_TRACE_LO_DATA_REG_ADDRESS = 32;
+static const uint32_t QMETRA0_TR0_TRACE_LO_DATA_REG_ADDRESS_LEN = 10;
+static const uint32_t QMETRA0_TR0_TRACE_LO_DATA_REG_LAST_BANK = 42;
+static const uint32_t QMETRA0_TR0_TRACE_LO_DATA_REG_LAST_BANK_LEN = 9;
+static const uint32_t QMETRA0_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID = 51;
+static const uint32_t QMETRA0_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN = 52;
+static const uint32_t QMETRA0_TR0_TRACE_LO_DATA_REG_RUNNING = 53;
+static const uint32_t QMETRA0_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
+static const uint32_t QMETRA0_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
+// eq/reg00006.H
+
+static const uint64_t QMETRA0_TR1_CONFIG_5 = 0x20018428ull;
+
+static const uint32_t QMETRA0_TR1_CONFIG_5_C = 0;
+static const uint32_t QMETRA0_TR1_CONFIG_5_C_LEN = 24;
+static const uint32_t QMETRA0_TR1_CONFIG_5_D = 24;
+static const uint32_t QMETRA0_TR1_CONFIG_5_D_LEN = 24;
+// eq/reg00006.H
+
 static const uint64_t QME_PPEBAR = 0x200e0050ull;
 
 static const uint32_t QME_PPEBAR_BASE = 8;
 static const uint32_t QME_PPEBAR_BASE_LEN = 36;
 static const uint32_t QME_PPEBAR_SIZE = 61;
 static const uint32_t QME_PPEBAR_SIZE_LEN = 3;
+// eq/reg00006.H
+
+static const uint64_t QME_QHTMEM = 0x200e01a4ull;
+
+static const uint32_t QME_QHTMEM_ALLOC = 0;
+static const uint32_t QME_QHTMEM_SCOPE = 1;
+static const uint32_t QME_QHTMEM_SCOPE_LEN = 3;
+static const uint32_t QME_QHTMEM_PRIORITY = 4;
+static const uint32_t QME_QHTMEM_BASE = 8;
+static const uint32_t QME_QHTMEM_BASE_LEN = 32;
+static const uint32_t QME_QHTMEM_SIZE = 40;
+static const uint32_t QME_QHTMEM_SIZE_LEN = 9;
 // eq/reg00006.H
 
 static const uint64_t QME_RCTAR2 = 0x200e0198ull;

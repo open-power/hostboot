@@ -57,7 +57,7 @@ static const uint32_t REGS_CERR_RPT0_REG_CERR_RPT0_LEN = 64;
 static const uint64_t REGS_CERR_RPT1_REG = 0x0301184bull;
 
 static const uint32_t REGS_CERR_RPT1_REG_CERR_RPT1 = 0;
-static const uint32_t REGS_CERR_RPT1_REG_CERR_RPT1_LEN = 41;
+static const uint32_t REGS_CERR_RPT1_REG_CERR_RPT1_LEN = 42;
 // phb/reg00002.H
 
 static const uint64_t RSB_REGS_UVI_PHB5_SCOM_UV_OFFSET_CNTL = 0x08010905ull;

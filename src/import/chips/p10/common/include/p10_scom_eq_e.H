@@ -317,6 +317,41 @@ static const uint32_t OPCG_REG1_NSL_FILL_COUNT = 59;
 static const uint32_t OPCG_REG1_NSL_FILL_COUNT_LEN = 5;
 // eq/reg00014.H
 
+static const uint64_t QMETRA0_TR1_TRACE_LO_DATA_REG = 0x20018421ull;
+
+static const uint32_t QMETRA0_TR1_TRACE_LO_DATA_REG_LO_DATA = 0;
+static const uint32_t QMETRA0_TR1_TRACE_LO_DATA_REG_LO_DATA_LEN = 32;
+static const uint32_t QMETRA0_TR1_TRACE_LO_DATA_REG_ADDRESS = 32;
+static const uint32_t QMETRA0_TR1_TRACE_LO_DATA_REG_ADDRESS_LEN = 10;
+static const uint32_t QMETRA0_TR1_TRACE_LO_DATA_REG_LAST_BANK = 42;
+static const uint32_t QMETRA0_TR1_TRACE_LO_DATA_REG_LAST_BANK_LEN = 9;
+static const uint32_t QMETRA0_TR1_TRACE_LO_DATA_REG_LAST_BANK_VALID = 51;
+static const uint32_t QMETRA0_TR1_TRACE_LO_DATA_REG_WRITE_ON_RUN = 52;
+static const uint32_t QMETRA0_TR1_TRACE_LO_DATA_REG_RUNNING = 53;
+static const uint32_t QMETRA0_TR1_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
+static const uint32_t QMETRA0_TR1_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
+// eq/reg00014.H
+
+static const uint64_t QMETRA0_TR1_CONFIG = 0x20018422ull;
+
+static const uint32_t QMETRA0_TR1_CONFIG_STORE_ON_TRIG_MODE = 0;
+static const uint32_t QMETRA0_TR1_CONFIG_WRITE_ON_RUN_MODE = 1;
+static const uint32_t QMETRA0_TR1_CONFIG_EXTEND_TRIG_MODE = 2;
+static const uint32_t QMETRA0_TR1_CONFIG_EXTEND_TRIG_MODE_LEN = 8;
+static const uint32_t QMETRA0_TR1_CONFIG_BANK_MODE = 10;
+static const uint32_t QMETRA0_TR1_CONFIG_ENH_TRACE_MODE = 11;
+static const uint32_t QMETRA0_TR1_CONFIG_LOCAL_CLOCK_GATE_CONTROL = 12;
+static const uint32_t QMETRA0_TR1_CONFIG_LOCAL_CLOCK_GATE_CONTROL_LEN = 2;
+static const uint32_t QMETRA0_TR1_CONFIG_TRACE_SELECT_CONTROL = 14;
+static const uint32_t QMETRA0_TR1_CONFIG_TRACE_SELECT_CONTROL_LEN = 4;
+static const uint32_t QMETRA0_TR1_CONFIG_TRACE_RUN_HOLD_OFF = 18;
+static const uint32_t QMETRA0_TR1_CONFIG_TRACE_RUN_STATUS = 19;
+static const uint32_t QMETRA0_TR1_CONFIG_TRACE_RUN_STICKY = 20;
+static const uint32_t QMETRA0_TR1_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
+static const uint32_t QMETRA0_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT = 22;
+static const uint32_t QMETRA0_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
+// eq/reg00014.H
+
 static const uint64_t QME_CRCR = 0x200e0300ull;
 
 static const uint32_t QME_CRCR_COMPARE_VALUE = 0;
@@ -370,8 +405,11 @@ static const uint32_t QME_LFIR_PB_CE = 25;
 static const uint32_t QME_LFIR_PB_UE = 26;
 static const uint32_t QME_LFIR_PB_SUE = 27;
 static const uint32_t QME_LFIR_PB_INVALID_TOPOTABLE_ENTRY = 28;
-static const uint32_t QME_LFIR_SPARE29 = 29;
-static const uint32_t QME_LFIR_SPARE30 = 30;
+static const uint32_t QME_LFIR_PB_TAG_PERR = 29;
+static const uint32_t QME_LFIR_PIG_PROTOCOL_ERR = 30;
+static const uint32_t QME_LFIR_SPARE1 = 31;
+static const uint32_t QME_LFIR_SPARE2 = 32;
+static const uint32_t QME_LFIR_SPARE3 = 33;
 // eq/reg00014.H
 
 static const uint64_t QME_PCBSII = 0x200e0038ull;

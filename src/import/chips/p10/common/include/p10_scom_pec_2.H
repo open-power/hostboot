@@ -129,14 +129,6 @@ static const uint32_t SPATTN_IN34 = 34;
 static const uint32_t SPATTN_IN35 = 35;
 // pec/reg00002.H
 
-static const uint64_t TRA0_TR1_CONFIG_5 = 0x08010448ull;
-
-static const uint32_t TRA0_TR1_CONFIG_5_C = 0;
-static const uint32_t TRA0_TR1_CONFIG_5_C_LEN = 24;
-static const uint32_t TRA0_TR1_CONFIG_5_D = 24;
-static const uint32_t TRA0_TR1_CONFIG_5_D_LEN = 24;
-// pec/reg00002.H
-
 #ifndef __PPE_HCODE__
 }
 }

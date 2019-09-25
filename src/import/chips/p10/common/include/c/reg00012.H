@@ -3645,6 +3645,100 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_MACHINE_DRAINED(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_THRCTL_TCTLCOM_RAS_STATUS));
+#endif
+    return o_data.insertFromRight<EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_MACHINE_DRAINED,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_MACHINE_DRAINED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_MACHINE_DRAINED(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_THRCTL_TCTLCOM_RAS_STATUS));
+#endif
+    return o_data.insertFromRight<EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_MACHINE_DRAINED,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_MACHINE_DRAINED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_MACHINE_DRAINED(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_THRCTL_TCTLCOM_RAS_STATUS));
+#endif
+    return o_data.setBit<EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_MACHINE_DRAINED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_MACHINE_DRAINED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_MACHINE_DRAINED(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_THRCTL_TCTLCOM_RAS_STATUS));
+#endif
+    return o_data.clearBit<EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_MACHINE_DRAINED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_MACHINE_DRAINED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_MACHINE_DRAINED(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_THRCTL_TCTLCOM_RAS_STATUS));
+#endif
+    return i_data.extractToRight<EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_MACHINE_DRAINED,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_MACHINE_DRAINED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_MACHINE_DRAINED(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_THRCTL_TCTLCOM_RAS_STATUS));
+#endif
+    return i_data.getBit<EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_MACHINE_DRAINED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT0_MACHINE_DRAINED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
 static inline fapi2::buffer<uint64_t>& SET_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT1_CORE_MAINT(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -4098,6 +4192,100 @@ static inline bool GET_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT1_STEP_SUCCESS(fapi2::b
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT1_STEP_SUCCESS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT1_MACHINE_DRAINED(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_THRCTL_TCTLCOM_RAS_STATUS));
+#endif
+    return o_data.insertFromRight<EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT1_MACHINE_DRAINED,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT1_MACHINE_DRAINED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT1_MACHINE_DRAINED(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_THRCTL_TCTLCOM_RAS_STATUS));
+#endif
+    return o_data.insertFromRight<EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT1_MACHINE_DRAINED,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT1_MACHINE_DRAINED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT1_MACHINE_DRAINED(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_THRCTL_TCTLCOM_RAS_STATUS));
+#endif
+    return o_data.setBit<EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT1_MACHINE_DRAINED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT1_MACHINE_DRAINED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT1_MACHINE_DRAINED(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_THRCTL_TCTLCOM_RAS_STATUS));
+#endif
+    return o_data.clearBit<EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT1_MACHINE_DRAINED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT1_MACHINE_DRAINED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT1_MACHINE_DRAINED(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_THRCTL_TCTLCOM_RAS_STATUS));
+#endif
+    return i_data.extractToRight<EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT1_MACHINE_DRAINED,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT1_MACHINE_DRAINED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT1_MACHINE_DRAINED(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_THRCTL_TCTLCOM_RAS_STATUS));
+#endif
+    return i_data.getBit<EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT1_MACHINE_DRAINED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT1_MACHINE_DRAINED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif
@@ -4561,6 +4749,100 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT2_MACHINE_DRAINED(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_THRCTL_TCTLCOM_RAS_STATUS));
+#endif
+    return o_data.insertFromRight<EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT2_MACHINE_DRAINED,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT2_MACHINE_DRAINED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT2_MACHINE_DRAINED(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_THRCTL_TCTLCOM_RAS_STATUS));
+#endif
+    return o_data.insertFromRight<EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT2_MACHINE_DRAINED,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT2_MACHINE_DRAINED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT2_MACHINE_DRAINED(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_THRCTL_TCTLCOM_RAS_STATUS));
+#endif
+    return o_data.setBit<EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT2_MACHINE_DRAINED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT2_MACHINE_DRAINED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT2_MACHINE_DRAINED(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_THRCTL_TCTLCOM_RAS_STATUS));
+#endif
+    return o_data.clearBit<EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT2_MACHINE_DRAINED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT2_MACHINE_DRAINED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT2_MACHINE_DRAINED(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_THRCTL_TCTLCOM_RAS_STATUS));
+#endif
+    return i_data.extractToRight<EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT2_MACHINE_DRAINED,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT2_MACHINE_DRAINED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT2_MACHINE_DRAINED(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_THRCTL_TCTLCOM_RAS_STATUS));
+#endif
+    return i_data.getBit<EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT2_MACHINE_DRAINED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT2_MACHINE_DRAINED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
 static inline fapi2::buffer<uint64_t>& SET_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT3_CORE_MAINT(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -5014,6 +5296,100 @@ static inline bool GET_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT3_STEP_SUCCESS(fapi2::b
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT3_STEP_SUCCESS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT3_MACHINE_DRAINED(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_THRCTL_TCTLCOM_RAS_STATUS));
+#endif
+    return o_data.insertFromRight<EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT3_MACHINE_DRAINED,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT3_MACHINE_DRAINED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT3_MACHINE_DRAINED(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_THRCTL_TCTLCOM_RAS_STATUS));
+#endif
+    return o_data.insertFromRight<EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT3_MACHINE_DRAINED,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT3_MACHINE_DRAINED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT3_MACHINE_DRAINED(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_THRCTL_TCTLCOM_RAS_STATUS));
+#endif
+    return o_data.setBit<EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT3_MACHINE_DRAINED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT3_MACHINE_DRAINED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT3_MACHINE_DRAINED(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_THRCTL_TCTLCOM_RAS_STATUS));
+#endif
+    return o_data.clearBit<EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT3_MACHINE_DRAINED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT3_MACHINE_DRAINED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT3_MACHINE_DRAINED(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_THRCTL_TCTLCOM_RAS_STATUS));
+#endif
+    return i_data.extractToRight<EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT3_MACHINE_DRAINED,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT3_MACHINE_DRAINED chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT3_MACHINE_DRAINED(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_THRCTL_TCTLCOM_RAS_STATUS));
+#endif
+    return i_data.getBit<EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT3_MACHINE_DRAINED>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_THRCTL_TCTLCOM_RAS_STATUS_VT3_MACHINE_DRAINED chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif

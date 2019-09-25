@@ -117,17 +117,6 @@ static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2_B10_G2_SEL = 43;
 static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2_B10_G2_SEL_LEN = 2;
 // pau/reg00000.H
 
-static const uint64_t ATS_REG_PAU_AT_ECC = 0x10010ab2ull;
-
-static const uint32_t ATS_REG_PAU_AT_ECC_INJECT_MODE = 0;
-static const uint32_t ATS_REG_PAU_AT_ECC_INJECT_MODE_LEN = 2;
-static const uint32_t ATS_REG_PAU_AT_ECC_INJECT_TYPE = 2;
-static const uint32_t ATS_REG_PAU_AT_ECC_INJECT_TYPE_LEN = 2;
-static const uint32_t ATS_REG_PAU_AT_ECC_INJECT_ENABLE = 4;
-static const uint32_t ATS_REG_PAU_AT_ECC_ARRAY_SELECT = 5;
-static const uint32_t ATS_REG_PAU_AT_ECC_ARRAY_SELECT_LEN = 4;
-// pau/reg00000.H
-
 static const uint64_t CS_CTL_MISC_BDF2PE_15_CONFIG = 0x100109bfull;
 
 static const uint32_t CS_CTL_MISC_BDF2PE_15_CONFIG_ENABLE = 0;
@@ -1015,7 +1004,7 @@ static const uint32_t DAT_MISC_CERR_ECC_HOLD_OR_CE_LEN = 4;
 static const uint64_t FIR_ACTION0_REG_0 = 0x10010c06ull;
 
 static const uint32_t FIR_ACTION0_REG_0_FIR_ACTION0_0 = 0;
-static const uint32_t FIR_ACTION0_REG_0_FIR_ACTION0_0_LEN = 62;
+static const uint32_t FIR_ACTION0_REG_0_FIR_ACTION0_0_LEN = 64;
 // pau/reg00000.H
 
 static const uint64_t MISC_REGS_BDF2PE_12_CONFIG = 0x10010b5cull;
@@ -1087,104 +1076,6 @@ static const uint32_t MISC_REGS_PESTB_ADDR_PE3_DMA_STOPPED_STATE_ADDR_PE3_LEN = 
 static const uint64_t MISC_REGS_PESTB_DATA_PE0 = 0x10010b70ull;
 
 static const uint32_t MISC_REGS_PESTB_DATA_PE0_DMA_STOPPED_STATE_PE0 = 0;
-// pau/reg00000.H
-
-static const uint64_t NTL0_REGS_SCRATCH2 = 0x100109eaull;
-
-static const uint32_t NTL0_REGS_SCRATCH2_IDIAL_SCRATCH2 = 0;
-static const uint32_t NTL0_REGS_SCRATCH2_IDIAL_SCRATCH2_LEN = 64;
-// pau/reg00000.H
-
-static const uint64_t NTL1_REGS_ATR_HA_PTR = 0x10010a12ull;
-
-static const uint32_t NTL1_REGS_ATR_HA_PTR_RESERVED1 = 0;
-static const uint32_t NTL1_REGS_ATR_HA_PTR_RESERVED1_LEN = 5;
-static const uint32_t NTL1_REGS_ATR_HA_PTR_START = 5;
-static const uint32_t NTL1_REGS_ATR_HA_PTR_START_LEN = 7;
-static const uint32_t NTL1_REGS_ATR_HA_PTR_RESERVED2 = 12;
-static const uint32_t NTL1_REGS_ATR_HA_PTR_RESERVED2_LEN = 5;
-static const uint32_t NTL1_REGS_ATR_HA_PTR_END = 17;
-static const uint32_t NTL1_REGS_ATR_HA_PTR_END_LEN = 7;
-// pau/reg00000.H
-
-static const uint64_t NTL1_REGS_CERR_FIRST_MASK2 = 0x10010a09ull;
-
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_0 = 0;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_1 = 1;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_2 = 2;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_3 = 3;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_4 = 4;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_5 = 5;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_6 = 6;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_7 = 7;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_8 = 8;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_9 = 9;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_10 = 10;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_11 = 11;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_12 = 12;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_13 = 13;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_14 = 14;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_15 = 15;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_16 = 16;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_17 = 17;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_18 = 18;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_19 = 19;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_20 = 20;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_21 = 21;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_22 = 22;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_23 = 23;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_24 = 24;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_25 = 25;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_26 = 26;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_27 = 27;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_28 = 28;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_29 = 29;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_30 = 30;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_31 = 31;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_32 = 32;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_33 = 33;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_34 = 34;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_35 = 35;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_36 = 36;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_37 = 37;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_38 = 38;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_39 = 39;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_40 = 40;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_41 = 41;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_42 = 42;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_43 = 43;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_44 = 44;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_45 = 45;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_46 = 46;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_47 = 47;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_48 = 48;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_49 = 49;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_50 = 50;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_51 = 51;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_52 = 52;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_53 = 53;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_54 = 54;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_55 = 55;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_56 = 56;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_57 = 57;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_58 = 58;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_59 = 59;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_60 = 60;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_61 = 61;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_62 = 62;
-static const uint32_t NTL1_REGS_CERR_FIRST_MASK2_63 = 63;
-// pau/reg00000.H
-
-static const uint64_t NTL1_REGS_PERF_COUNT = 0x10010a0full;
-
-static const uint32_t NTL1_REGS_PERF_COUNT_0 = 0;
-static const uint32_t NTL1_REGS_PERF_COUNT_0_LEN = 16;
-static const uint32_t NTL1_REGS_PERF_COUNT_1 = 16;
-static const uint32_t NTL1_REGS_PERF_COUNT_1_LEN = 16;
-static const uint32_t NTL1_REGS_PERF_COUNT_2 = 32;
-static const uint32_t NTL1_REGS_PERF_COUNT_2_LEN = 16;
-static const uint32_t NTL1_REGS_PERF_COUNT_3 = 48;
-static const uint32_t NTL1_REGS_PERF_COUNT_3_LEN = 16;
 // pau/reg00000.H
 
 static const uint64_t OTL0_MISC_ALTER_CREDIT_COUNTERS = 0x10010a30ull;

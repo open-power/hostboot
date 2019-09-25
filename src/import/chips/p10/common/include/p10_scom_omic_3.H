@@ -103,9 +103,12 @@ static const uint32_t DATASM_REGS_RX_STAT6_PG_RX_SERVO_STATUS0_RO_SIGNAL = 48;
 static const uint32_t DATASM_REGS_RX_STAT6_PG_RX_SERVO_STATUS0_RO_SIGNAL_LEN = 16;
 // omic/reg00003.H
 
-static const uint64_t MC_OMI_FIR_MASK_REG_RW = 0x0c011743ull;
-static const uint64_t MC_OMI_FIR_MASK_REG_WO_AND = 0x0c011744ull;
-static const uint64_t MC_OMI_FIR_MASK_REG_WO_OR = 0x0c011745ull;
+//ERRCODE: // Some of the name targets not found in address targets: omic
+// No targets could be determined from the address.
+
+static const uint64_t MC_OMI_FIR_MASK_REG_RW = 0x0c011403ull;
+static const uint64_t MC_OMI_FIR_MASK_REG_WO_AND = 0x0c011404ull;
+static const uint64_t MC_OMI_FIR_MASK_REG_WO_OR = 0x0c011405ull;
 
 static const uint32_t MC_OMI_FIR_MASK_REG_DL0_FIR_ERROR_MASK = 0;
 static const uint32_t MC_OMI_FIR_MASK_REG_DL0_FIR_ERROR_MASK_LEN = 20;

@@ -3905,6 +3905,100 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_FIR_HOLD_OUT_STF_ERR_DURING_RECONFIG_HOLD_OUT(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_FIR_HOLD_OUT));
+#endif
+    return o_data.insertFromRight<EC_PC_FIR_HOLD_OUT_STF_ERR_DURING_RECONFIG_HOLD_OUT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_FIR_HOLD_OUT_STF_ERR_DURING_RECONFIG_HOLD_OUT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_FIR_HOLD_OUT_STF_ERR_DURING_RECONFIG_HOLD_OUT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_FIR_HOLD_OUT));
+#endif
+    return o_data.insertFromRight<EC_PC_FIR_HOLD_OUT_STF_ERR_DURING_RECONFIG_HOLD_OUT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_FIR_HOLD_OUT_STF_ERR_DURING_RECONFIG_HOLD_OUT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_FIR_HOLD_OUT_STF_ERR_DURING_RECONFIG_HOLD_OUT(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_FIR_HOLD_OUT));
+#endif
+    return o_data.setBit<EC_PC_FIR_HOLD_OUT_STF_ERR_DURING_RECONFIG_HOLD_OUT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_FIR_HOLD_OUT_STF_ERR_DURING_RECONFIG_HOLD_OUT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_FIR_HOLD_OUT_STF_ERR_DURING_RECONFIG_HOLD_OUT(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_FIR_HOLD_OUT));
+#endif
+    return o_data.clearBit<EC_PC_FIR_HOLD_OUT_STF_ERR_DURING_RECONFIG_HOLD_OUT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_FIR_HOLD_OUT_STF_ERR_DURING_RECONFIG_HOLD_OUT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_FIR_HOLD_OUT_STF_ERR_DURING_RECONFIG_HOLD_OUT(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_FIR_HOLD_OUT));
+#endif
+    return i_data.extractToRight<EC_PC_FIR_HOLD_OUT_STF_ERR_DURING_RECONFIG_HOLD_OUT,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_FIR_HOLD_OUT_STF_ERR_DURING_RECONFIG_HOLD_OUT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EC_PC_FIR_HOLD_OUT_STF_ERR_DURING_RECONFIG_HOLD_OUT(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_FIR_HOLD_OUT));
+#endif
+    return i_data.getBit<EC_PC_FIR_HOLD_OUT_STF_ERR_DURING_RECONFIG_HOLD_OUT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_FIR_HOLD_OUT_STF_ERR_DURING_RECONFIG_HOLD_OUT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_EC_PC_FIR_RAM_MODEREG(const fapi2::Target<K, M, V>& i_target)
 {

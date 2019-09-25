@@ -211,12 +211,6 @@ static const uint32_t TRA0_TR0_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
 static const uint32_t TRA0_TR0_CONFIG_9_SPARE_LT = 37;
 // pec/reg00013.H
 
-static const uint64_t TRA0_TR1_CONFIG_0 = 0x08010443ull;
-
-static const uint32_t TRA0_TR1_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
-static const uint32_t TRA0_TR1_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
-// pec/reg00013.H
-
 static const uint64_t XSTOP5 = 0x08030015ull;
 
 static const uint32_t XSTOP5_ENABLE = 0;

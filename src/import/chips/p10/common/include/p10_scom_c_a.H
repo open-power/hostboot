@@ -39,6 +39,29 @@ namespace c
 #endif
 
 
+static const uint64_t CPMS_DPMR = 0x200e0ea0ull;
+
+static const uint32_t CPMS_DPMR_POWER_PROXY_ENABLE = 0;
+static const uint32_t CPMS_DPMR_PROXY_CAL_MODE = 1;
+static const uint32_t CPMS_DPMR_ENERGY_PROXY_RESET_MODE = 2;
+static const uint32_t CPMS_DPMR_DDP_ENABLE = 3;
+static const uint32_t CPMS_DPMR_DDP_ACTIVATION_SELECT = 4;
+static const uint32_t CPMS_DPMR_DDP_ACTIVATION_SELECT_LEN = 2;
+static const uint32_t CPMS_DPMR_DDP_PROXY_SHIFT = 6;
+static const uint32_t CPMS_DPMR_DDP_PROXY_SHIFT_LEN = 2;
+static const uint32_t CPMS_DPMR_DDP_ADJ_CORE_SCALE = 8;
+static const uint32_t CPMS_DPMR_DDP_ADJ_CORE_SCALE_LEN = 4;
+static const uint32_t CPMS_DPMR_DDP_ADJ_GLOBAL_SCALE = 12;
+static const uint32_t CPMS_DPMR_DDP_ADJ_GLOBAL_SCALE_LEN = 4;
+static const uint32_t CPMS_DPMR_DDP_DDS_ADJUST_EN = 16;
+static const uint32_t CPMS_DPMR_DDP_DDS_ADJUST_SEL = 17;
+static const uint32_t CPMS_DPMR_DDP_DDS_ADJUST_SEL_LEN = 2;
+static const uint32_t CPMS_DPMR_PIL_ENABLE = 19;
+static const uint32_t CPMS_DPMR_PIL_THROTTLE_ENABLE = 20;
+static const uint32_t CPMS_DPMR_SPARE = 21;
+static const uint32_t CPMS_DPMR_SPARE_LEN = 3;
+// c/reg00010.H
+
 static const uint64_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT1 = 0x20020601ull;
 
 static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT1_16 = 0;
@@ -84,16 +107,16 @@ static const uint32_t EC_PC_FIR_CORE_WOF_SD_MCHK_AND_ME_EQ_0_ERROR = 14;
 static const uint32_t EC_PC_FIR_CORE_WOF_SD_L2_UE_ERROR = 15;
 static const uint32_t EC_PC_FIR_CORE_WOF_SD_L2_UE_OVER_THRES_ERROR = 16;
 static const uint32_t EC_PC_FIR_CORE_WOF_SD_L2_CI_UE_ERROR = 17;
-static const uint32_t EC_PC_FIR_CORE_WOF_MU_SRAM_PARITY_ERROR = 18;
-static const uint32_t EC_PC_FIR_CORE_WOF_UNUSED_19 = 19;
+static const uint32_t EC_PC_FIR_CORE_WOF_MU_TLB_P_ERROR = 18;
+static const uint32_t EC_PC_FIR_CORE_WOF_MU_SLB_P_ERROR = 19;
 static const uint32_t EC_PC_FIR_CORE_WOF_UNUSED_20 = 20;
-static const uint32_t EC_PC_FIR_CORE_WOF_MU_LOG_REC_ERROR = 21;
+static const uint32_t EC_PC_FIR_CORE_WOF_MU_CXT_P_ERROR = 21;
 static const uint32_t EC_PC_FIR_CORE_WOF_MU_LOG_XSTOP_ERROR = 22;
 static const uint32_t EC_PC_FIR_CORE_WOF_MU_SYS_XSTOP_ERROR = 23;
 static const uint32_t EC_PC_FIR_CORE_WOF_VS_LOG_REC_ERROR = 24;
 static const uint32_t EC_PC_FIR_CORE_WOF_VS_LOG_XSTOP_ERROR = 25;
 static const uint32_t EC_PC_FIR_CORE_WOF_PC_RECOV_IN_MAINT_ERROR = 26;
-static const uint32_t EC_PC_FIR_CORE_WOF_VS_DU_LOG_REC_ERROR = 27;
+static const uint32_t EC_PC_FIR_CORE_WOF_UNUSED_27 = 27;
 static const uint32_t EC_PC_FIR_CORE_WOF_PC_SYS_XSTOP_ERROR = 28;
 static const uint32_t EC_PC_FIR_CORE_WOF_LS_SRAM_PARITY_ERROR = 29;
 static const uint32_t EC_PC_FIR_CORE_WOF_LS_SETDELETE_ERROR = 30;
@@ -105,7 +128,7 @@ static const uint32_t EC_PC_FIR_CORE_WOF_LS_DERAT_MULTIHIT_ERROR = 35;
 static const uint32_t EC_PC_FIR_CORE_WOF_PC_FWD_PROGRESS_ERROR = 36;
 static const uint32_t EC_PC_FIR_CORE_WOF_LS_LOG_REC_ERROR = 37;
 static const uint32_t EC_PC_FIR_CORE_WOF_LS_LOG_XSTOP_ERROR = 38;
-static const uint32_t EC_PC_FIR_CORE_WOF_LS_NOT_MT_REC_ERROR = 39;
+static const uint32_t EC_PC_FIR_CORE_WOF_UNUSED_39 = 39;
 static const uint32_t EC_PC_FIR_CORE_WOF_UNUSED_40 = 40;
 static const uint32_t EC_PC_FIR_CORE_WOF_LS_SYS_XSTOP_ERROR = 41;
 static const uint32_t EC_PC_FIR_CORE_WOF_UNUSED_42 = 42;

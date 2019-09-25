@@ -130,44 +130,6 @@ static const uint32_t TRA0_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
 static const uint32_t TRA0_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
 // pec/reg00009.H
 
-static const uint64_t TRA0_TR1_TRACE_HI_DATA_REG = 0x08010440ull;
-
-static const uint32_t TRA0_TR1_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
-static const uint32_t TRA0_TR1_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
-// pec/reg00009.H
-
-static const uint64_t TRA0_TR1_CONFIG_9 = 0x08010449ull;
-
-static const uint32_t TRA0_TR1_CONFIG_9_DISABLE_COMPRESSION = 0;
-static const uint32_t TRA0_TR1_CONFIG_9_ERROR_BIT_COMPRESSION_CARE_MASK = 1;
-static const uint32_t TRA0_TR1_CONFIG_9_MATCHA_MUXSEL = 2;
-static const uint32_t TRA0_TR1_CONFIG_9_MATCHA_MUXSEL_LEN = 2;
-static const uint32_t TRA0_TR1_CONFIG_9_MATCHB_MUXSEL = 4;
-static const uint32_t TRA0_TR1_CONFIG_9_MATCHB_MUXSEL_LEN = 2;
-static const uint32_t TRA0_TR1_CONFIG_9_MATCHC_MUXSEL = 6;
-static const uint32_t TRA0_TR1_CONFIG_9_MATCHC_MUXSEL_LEN = 2;
-static const uint32_t TRA0_TR1_CONFIG_9_MATCHD_MUXSEL = 8;
-static const uint32_t TRA0_TR1_CONFIG_9_MATCHD_MUXSEL_LEN = 2;
-static const uint32_t TRA0_TR1_CONFIG_9_TRIG0_OR_MASK = 10;
-static const uint32_t TRA0_TR1_CONFIG_9_TRIG0_OR_MASK_LEN = 4;
-static const uint32_t TRA0_TR1_CONFIG_9_TRIG0_AND_MASK = 14;
-static const uint32_t TRA0_TR1_CONFIG_9_TRIG0_AND_MASK_LEN = 4;
-static const uint32_t TRA0_TR1_CONFIG_9_TRIG1_OR_MASK = 18;
-static const uint32_t TRA0_TR1_CONFIG_9_TRIG1_OR_MASK_LEN = 4;
-static const uint32_t TRA0_TR1_CONFIG_9_TRIG1_AND_MASK = 22;
-static const uint32_t TRA0_TR1_CONFIG_9_TRIG1_AND_MASK_LEN = 4;
-static const uint32_t TRA0_TR1_CONFIG_9_TRIG0_NOT_MODE = 26;
-static const uint32_t TRA0_TR1_CONFIG_9_TRIG1_NOT_MODE = 27;
-static const uint32_t TRA0_TR1_CONFIG_9_MATCH_NOT_MODE = 28;
-static const uint32_t TRA0_TR1_CONFIG_9_MATCH_NOT_MODE_LEN = 4;
-static const uint32_t TRA0_TR1_CONFIG_9_ERROR_CMP_MASK = 32;
-static const uint32_t TRA0_TR1_CONFIG_9_ERROR_CMP_PATTERN = 33;
-static const uint32_t TRA0_TR1_CONFIG_9_TRIG0_ERR_CMP = 34;
-static const uint32_t TRA0_TR1_CONFIG_9_TRIG1_ERR_CMP = 35;
-static const uint32_t TRA0_TR1_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
-static const uint32_t TRA0_TR1_CONFIG_9_SPARE_LT = 37;
-// pec/reg00009.H
-
 static const uint64_t XSTOP = 0x08040000ull;
 
 static const uint32_t XSTOP_ANY_XSTOP = 0;

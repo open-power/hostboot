@@ -115,8 +115,16 @@ static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SINGLE_STEP_COUNT_STEP_COUNT_LEN = 1
 
 static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA = 0x00014339ull;
 
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_ORE_IS_LATE = 3;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_ACHE_IS_LATE = 7;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CORE_IS_LATE = 3;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CORE_IS_LATE_HIST = 4;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CORE_IS_LATE_HIST_LEN = 4;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CACHE_IS_LATE = 11;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CACHE_IS_LATE_HIST = 12;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CACHE_IS_LATE_HIST_LEN = 4;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CORE_PDLY_CONFIG = 16;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CORE_PDLY_CONFIG_LEN = 4;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CACHE_PDLY_CONFIG = 20;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CACHE_PDLY_CONFIG_LEN = 4;
 // perv/reg00016.H
 
 static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE = 0x00014321ull;
@@ -162,8 +170,16 @@ static const uint64_t CLK_ADJ_03_DCADJ_WRAP_SOFT_RESET = 0x00011305ull;
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES = 0x00011337ull;
 
-static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_INC_DEC_STATE = 28;
-static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_INC_DEC_STATE_LEN = 4;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_STATE = 0;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_STATE_LEN = 4;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_FMS_HIST_0 = 4;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_FMS_HIST_0_LEN = 4;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_FMS_HIST_1 = 8;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_FMS_HIST_1_LEN = 4;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_FMS_HIST_2 = 12;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_FMS_HIST_2_LEN = 4;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_FMS_HIST_3 = 16;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_FMS_HIST_3_LEN = 4;
 // perv/reg00016.H
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE = 0x00011322ull;
@@ -174,7 +190,36 @@ static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE = 0x0
 static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE_CORE_IS_LATE_INVERT = 0;
 // perv/reg00016.H
 
-static const uint64_t COMP_P_0_CRSIM = 0x00030006ull;
+//ERRCODE: // Some of the name targets not found in address targets: perv
+
+static const uint64_t DPLL_CNTL_MISC_REGS_PFET = 0x00060080ull;
+
+static const uint32_t DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC = 0;
+static const uint32_t DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC = 1;
+static const uint32_t DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC = 2;
+static const uint32_t DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC = 3;
+static const uint32_t DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC = 4;
+static const uint32_t DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC = 5;
+static const uint32_t DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC = 6;
+static const uint32_t DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC = 7;
+static const uint32_t DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC = 8;
+static const uint32_t DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC = 9;
+static const uint32_t DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC = 10;
+static const uint32_t DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC = 11;
+static const uint32_t DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC = 12;
+static const uint32_t DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC = 13;
+static const uint32_t DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC = 14;
+static const uint32_t DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC = 15;
+static const uint32_t DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC = 16;
+static const uint32_t DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC = 17;
+static const uint32_t DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC = 18;
+static const uint32_t DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC = 19;
+static const uint32_t DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC = 20;
+static const uint32_t DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC = 21;
+static const uint32_t DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC = 22;
+static const uint32_t DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC = 23;
+static const uint32_t DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC = 24;
+static const uint32_t DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC = 25;
 // perv/reg00016.H
 
 static const uint64_t EDRAM_STATUS = 0x000f0029ull;
@@ -302,8 +347,8 @@ static const uint32_t EPS_PSC_PSCOM_ERROR_MASK_PARITY_ERROR_ON_P2S_MACHINE = 7;
 static const uint32_t EPS_PSC_PSCOM_ERROR_MASK_TIMEOUT_WHILE_WAITING_FOR_ULCCH = 8;
 static const uint32_t EPS_PSC_PSCOM_ERROR_MASK_TIMEOUT_WHILE_WAITING_FOR_DLDCH_RETURN = 9;
 static const uint32_t EPS_PSC_PSCOM_ERROR_MASK_TIMEOUT_WHILE_WAITING_FOR_ULDCH = 10;
-static const uint32_t EPS_PSC_PSCOM_ERROR_MASK_PSCOM_PARALLEL_WRITE_NVLD = 11;
-static const uint32_t EPS_PSC_PSCOM_ERROR_MASK_PSCOM_PARALLEL_READ_NVLD = 12;
+static const uint32_t EPS_PSC_PSCOM_ERROR_MASK_PSCOM_LOCK_ERR = 11;
+static const uint32_t EPS_PSC_PSCOM_ERROR_MASK_PSCOM_PARALLEL_READ_WRITE_NVLD = 12;
 static const uint32_t EPS_PSC_PSCOM_ERROR_MASK_PSCOM_PARALLEL_ADDR_INVALID = 13;
 static const uint32_t EPS_PSC_PSCOM_ERROR_MASK_PCB_COMMAND_PARITY_ERROR = 14;
 static const uint32_t EPS_PSC_PSCOM_ERROR_MASK_GENERAL_TIMEOUT = 15;
@@ -334,6 +379,7 @@ static const uint32_t ERROR_REG_PIB_ADDR_P_ERR = 6;
 static const uint32_t ERROR_REG_ADDR_BUFFER_ERROR = 6;
 static const uint32_t ERROR_REG_PIB_DATA_P_ERR = 7;
 static const uint32_t ERROR_REG_PCB_FSM_ERROR = 7;
+static const uint32_t ERROR_REG_DEC_MCAST_GRP_ERR = 8;
 static const uint32_t ERROR_REG_CL_FSM_ERROR = 8;
 static const uint32_t ERROR_REG_INT_RX_FSM_ERROR = 9;
 static const uint32_t ERROR_REG_INT_TX_FSM_ERROR = 10;
@@ -392,7 +438,7 @@ static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_15_MDA_M2A_DATA_AREA_15_LEN =
 
 static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_0_FSI = 0x00002900ull;
 static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_0_FSI_BYTE = 0x00002c00ull;
-static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_0_RW = 0x00050100ull;
+static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_0_RO = 0x00050100ull;
 
 static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_0_MDA_M2B_DATA_AREA_0 = 0;
 static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_0_MDA_M2B_DATA_AREA_0_LEN = 32;
@@ -1011,6 +1057,64 @@ static const uint64_t TRA6_TR0_CONFIG_1 = 0x00010704ull;
 
 static const uint32_t TRA6_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t TRA6_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
+// perv/reg00017.H
+
+static const uint64_t WOF = 0x00040021ull;
+
+static const uint32_t WOF_ANY_WOF = 0;
+static const uint32_t WOF_RESERVED1W = 1;
+static const uint32_t WOF_ANY_LOCAL_XSTOP = 2;
+static const uint32_t WOF_RESERVED3W = 3;
+static const uint32_t WOF_PERV = 4;
+static const uint32_t WOF_IN05 = 5;
+static const uint32_t WOF_IN06 = 6;
+static const uint32_t WOF_IN07 = 7;
+static const uint32_t WOF_IN08 = 8;
+static const uint32_t WOF_IN09 = 9;
+static const uint32_t WOF_IN010 = 10;
+static const uint32_t WOF_IN011 = 11;
+static const uint32_t WOF_IN012 = 12;
+static const uint32_t WOF_IN013 = 13;
+static const uint32_t WOF_IN014 = 14;
+static const uint32_t WOF_IN015 = 15;
+static const uint32_t WOF_IN016 = 16;
+static const uint32_t WOF_IN017 = 17;
+static const uint32_t WOF_IN018 = 18;
+static const uint32_t WOF_IN019 = 19;
+static const uint32_t WOF_IN020 = 20;
+static const uint32_t WOF_IN021 = 21;
+static const uint32_t WOF_IN022 = 22;
+static const uint32_t WOF_IN023 = 23;
+static const uint32_t WOF_IN024 = 24;
+static const uint32_t WOF_IN025 = 25;
+static const uint32_t WOF_IN026 = 26;
+static const uint32_t WOF_IN027 = 27;
+static const uint32_t WOF_IN028 = 28;
+static const uint32_t WOF_IN029 = 29;
+static const uint32_t WOF_IN030 = 30;
+static const uint32_t WOF_IN031 = 31;
+static const uint32_t WOF_IN032 = 32;
+static const uint32_t WOF_IN033 = 33;
+static const uint32_t WOF_IN034 = 34;
+static const uint32_t WOF_IN035 = 35;
+static const uint32_t WOF_IN036 = 36;
+static const uint32_t WOF_IN037 = 37;
+static const uint32_t WOF_IN038 = 38;
+static const uint32_t WOF_IN039 = 39;
+static const uint32_t WOF_IN040 = 40;
+static const uint32_t WOF_IN041 = 41;
+static const uint32_t WOF_IN042 = 42;
+static const uint32_t WOF_IN043 = 43;
+static const uint32_t WOF_IN044 = 44;
+static const uint32_t WOF_IN045 = 45;
+static const uint32_t WOF_IN046 = 46;
+static const uint32_t WOF_IN047 = 47;
+static const uint32_t WOF_IN048 = 48;
+static const uint32_t WOF_IN049 = 49;
+static const uint32_t WOF_IN050 = 50;
+static const uint32_t WOF_IN051 = 51;
+static const uint32_t WOF_IN052 = 52;
+static const uint32_t WOF_IN053 = 53;
 // perv/reg00017.H
 
 static const uint64_t XSTOP3 = 0x0003000eull;

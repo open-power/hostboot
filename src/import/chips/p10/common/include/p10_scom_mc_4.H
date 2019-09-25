@@ -151,15 +151,23 @@ static const uint64_t OPCG_REG2 = 0x0c030004ull;
 static const uint32_t OPCG_REG2_OPCG_GO2 = 0;
 static const uint32_t OPCG_REG2_PRPG_WEIGHTING = 1;
 static const uint32_t OPCG_REG2_PRPG_WEIGHTING_LEN = 3;
-static const uint32_t OPCG_REG2_PRPG_VALUE = 4;
-static const uint32_t OPCG_REG2_PRPG_VALUE_LEN = 12;
+static const uint32_t OPCG_REG2_PRPG_SEED = 4;
+static const uint32_t OPCG_REG2_PRPG_SEED_LEN = 12;
 static const uint32_t OPCG_REG2_PRPG_A_VAL = 16;
 static const uint32_t OPCG_REG2_PRPG_A_VAL_LEN = 12;
 static const uint32_t OPCG_REG2_PRPG_B_VAL = 28;
 static const uint32_t OPCG_REG2_PRPG_B_VAL_LEN = 12;
 static const uint32_t OPCG_REG2_PRPG_MODE = 40;
-static const uint32_t OPCG_REG2_SM_LBIST_CNTRL = 48;
-static const uint32_t OPCG_REG2_SM_LBIST_CNTRL_LEN = 16;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_WEIGHT_SEL_PRIM = 48;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_WEIGHT_SEL_PRIM_LEN = 4;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_WEIGHT_SEL_SEC_OR_APERTURE_MASK = 52;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_WEIGHT_SEL_SEC_OR_APERTURE_MASK_LEN = 4;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_MODE_SELECT = 56;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_PRPG_HOLD_MODE = 57;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_LOCAL_OVERRIDE = 58;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_LOAD_APERTURE_VALUE = 59;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_LOAD_APERTURE_SELECT = 60;
+static const uint32_t OPCG_REG2_SM_LBIST_CTRL_LOAD_APERTURE_SELECT_LEN = 4;
 // mc/reg00004.H
 
 static const uint64_t PCB_OPCG_GO = 0x0c030020ull;

@@ -57,12 +57,16 @@ static const uint32_t CPMS_ACCR_SPARE = 24;
 static const uint32_t CPMS_ACCR_SPARE_LEN = 2;
 // c/reg00015.H
 
-static const uint64_t CPMS_MMAR_RW = 0x200e0e38ull;
-static const uint64_t CPMS_MMAR_WO_CLEAR = 0x200e0e3bull;
-static const uint64_t CPMS_MMAR_WO_OR = 0x200e0e3aull;
+static const uint64_t CPMS_MMAR = 0x200e0e38ull;
+static const uint64_t CPMS_MMAR_SCOM1 = 0x200e0e3bull;
+static const uint64_t CPMS_MMAR_SCOM2 = 0x200e0e3aull;
 
 static const uint32_t CPMS_MMAR_AVAILABLE = 0;
 static const uint32_t CPMS_MMAR_FUNC_RESET = 1;
+static const uint32_t CPMS_MMAR_LIMIT = 2;
+static const uint32_t CPMS_MMAR_LIMIT_LEN = 2;
+static const uint32_t CPMS_MMAR_LIMIT_UPDATE_SELECT = 4;
+static const uint32_t CPMS_MMAR_DIRTY = 32;
 // c/reg00015.H
 
 static const uint64_t EC_PC_COMMON_SPR_SCOMD = 0x20020481ull;

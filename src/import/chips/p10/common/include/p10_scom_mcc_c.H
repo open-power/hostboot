@@ -97,14 +97,22 @@ static const uint32_t DSTL_DSTLTRACK_TLXDCP0_CREDIT_TOTAL_SHADOW_LEN = 7;
 
 static const uint64_t USTL_USTLDBG = 0x0c010e0dull;
 
-static const uint32_t USTL_USTLDBG_0 = 16;
-static const uint32_t USTL_USTLDBG_0_LEN = 2;
-static const uint32_t USTL_USTLDBG_1 = 18;
-static const uint32_t USTL_USTLDBG_1_LEN = 2;
-static const uint32_t USTL_USTLDBG_2 = 20;
-static const uint32_t USTL_USTLDBG_2_LEN = 2;
-static const uint32_t USTL_USTLDBG_3 = 22;
-static const uint32_t USTL_USTLDBG_3_LEN = 2;
+static const uint32_t USTL_USTLDBG_A_STOP_LOL = 0;
+static const uint32_t USTL_USTLDBG_A_STOP_LOL_LEN = 4;
+static const uint32_t USTL_USTLDBG_B_STOP_LOL = 4;
+static const uint32_t USTL_USTLDBG_B_STOP_LOL_LEN = 4;
+static const uint32_t USTL_USTLDBG_A_BYPASS_COLD_START = 8;
+static const uint32_t USTL_USTLDBG_A_BYPASS_COLD_START_LEN = 4;
+static const uint32_t USTL_USTLDBG_B_BYPASS_COLD_START = 12;
+static const uint32_t USTL_USTLDBG_B_BYPASS_COLD_START_LEN = 4;
+static const uint32_t USTL_USTLDBG_A_FAIL = 16;
+static const uint32_t USTL_USTLDBG_A_FAIL_LEN = 4;
+static const uint32_t USTL_USTLDBG_B_FAIL = 20;
+static const uint32_t USTL_USTLDBG_B_FAIL_LEN = 4;
+static const uint32_t USTL_USTLDBG_A_FORCE_BOGUS = 24;
+static const uint32_t USTL_USTLDBG_A_FORCE_BOGUS_LEN = 4;
+static const uint32_t USTL_USTLDBG_B_FORCE_BOGUS = 28;
+static const uint32_t USTL_USTLDBG_B_FORCE_BOGUS_LEN = 4;
 // mcc/reg00012.H
 
 #ifndef __PPE_HCODE__

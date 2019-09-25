@@ -51,7 +51,10 @@ static const uint32_t DATASM_REGS_RX_STAT21_PG_RX_DL_PHY_RECAL_REQ_0_15_RO_SIGNA
 static const uint32_t DATASM_REGS_RX_STAT21_PG_RX_DL_PHY_RECAL_REQ_0_15_RO_SIGNAL_LEN = 16;
 // omic/reg00009.H
 
-static const uint64_t PMU_CNTR = 0x0c01174full;
+//ERRCODE: // Some of the name targets not found in address targets: omic
+// No targets could be determined from the address.
+
+static const uint64_t PMU_CNTR = 0x0c01140full;
 
 static const uint32_t PMU_CNTR_3 = 0;
 static const uint32_t PMU_CNTR_3_LEN = 16;

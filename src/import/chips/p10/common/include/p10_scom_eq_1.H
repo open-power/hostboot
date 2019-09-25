@@ -113,6 +113,18 @@ static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_DCC_CONFIG = 24;
 static const uint32_t CLK_ADJ_02_DCADJ_WRAP_STATUS_BITS_DCC_CONFIG_LEN = 8;
 // eq/reg00001.H
 
+static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES = 0x2001233bull;
+
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_0 = 2;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_0_LEN = 6;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_1 = 10;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_1_LEN = 6;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_2 = 18;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_2_LEN = 6;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_3 = 26;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_3_LEN = 6;
+// eq/reg00001.H
+
 static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_STICK_CACHE_SYNC_DONE = 0x20012333ull;
 
 static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_STICK_CACHE_SYNC_DONE_CACHE_SYNC_DONE_STICK = 0;
@@ -277,6 +289,14 @@ static const uint32_t OPCG_CAPT3_12ODD = 59;
 static const uint32_t OPCG_CAPT3_12ODD_LEN = 5;
 // eq/reg00001.H
 
+static const uint64_t QMETRA0_TR0_CONFIG_2 = 0x20018405ull;
+
+static const uint32_t QMETRA0_TR0_CONFIG_2_A = 0;
+static const uint32_t QMETRA0_TR0_CONFIG_2_A_LEN = 24;
+static const uint32_t QMETRA0_TR0_CONFIG_2_B = 24;
+static const uint32_t QMETRA0_TR0_CONFIG_2_B_LEN = 24;
+// eq/reg00001.H
+
 static const uint64_t QME_EIPR_RW = 0x200e0268ull;
 static const uint64_t QME_EIPR_WO_CLEAR = 0x200e026bull;
 static const uint64_t QME_EIPR_WO_OR = 0x200e026aull;
@@ -290,7 +310,7 @@ static const uint64_t QME_LFIRMASK_WO_AND = 0x200e0005ull;
 static const uint64_t QME_LFIRMASK_WO_OR = 0x200e0006ull;
 
 static const uint32_t QME_LFIRMASK_FIR_MASK = 0;
-static const uint32_t QME_LFIRMASK_FIR_MASK_LEN = 31;
+static const uint32_t QME_LFIRMASK_FIR_MASK_LEN = 34;
 // eq/reg00001.H
 
 static const uint64_t QME_SCDR = 0x200e0144ull;

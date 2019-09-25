@@ -64,12 +64,11 @@ static const uint32_t CTL_REGS_RX_MODE22_PG_FILTER_DEPTH = 48;
 static const uint32_t CTL_REGS_RX_MODE22_PG_FILTER_DEPTH_LEN = 5;
 static const uint32_t CTL_REGS_RX_MODE22_PG_TIMEOUT = 53;
 static const uint32_t CTL_REGS_RX_MODE22_PG_TIMEOUT_LEN = 4;
-static const uint32_t CTL_REGS_RX_MODE22_PG_SERVO_RESTORE_PR = 57;
-static const uint32_t CTL_REGS_RX_MODE22_PG_VOTE_RATIO_CFG = 58;
+static const uint32_t CTL_REGS_RX_MODE22_PG_VOTE_RATIO_CFG = 57;
 static const uint32_t CTL_REGS_RX_MODE22_PG_VOTE_RATIO_CFG_LEN = 3;
-static const uint32_t CTL_REGS_RX_MODE22_PG_SERVO_THRESH4 = 61;
+static const uint32_t CTL_REGS_RX_MODE22_PG_SERVO_THRESH4 = 60;
 static const uint32_t CTL_REGS_RX_MODE22_PG_SERVO_THRESH4_LEN = 2;
-static const uint32_t CTL_REGS_RX_MODE22_PG_VOTE_WIN_BOTH = 63;
+static const uint32_t CTL_REGS_RX_MODE22_PG_VOTE_WIN_BOTH = 62;
 // omic/reg00001.H
 
 static const uint64_t CTL_REGS_RX_MODE7_PG = 0x8008384010012c3full;

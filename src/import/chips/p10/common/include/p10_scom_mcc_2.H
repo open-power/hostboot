@@ -93,7 +93,7 @@ static const uint32_t USTL_USTLFIR_WDF_TAG_PARITY_ERROR = 10;
 static const uint32_t USTL_USTLFIR_WDF_SCOM_SEQ_ERROR = 11;
 static const uint32_t USTL_USTLFIR_WDF_PWCTL_SEQ_ERROR = 12;
 static const uint32_t USTL_USTLFIR_WDF_MISC_REG_PARITY_ERROR = 13;
-static const uint32_t USTL_USTLFIR_RESERVED_14 = 14;
+static const uint32_t USTL_USTLFIR_WDF_CL_POP_PARITY_ERROR = 14;
 static const uint32_t USTL_USTLFIR_WDF_WR_DATA_SYNDROME_NE0 = 15;
 static const uint32_t USTL_USTLFIR_WDF_CMT_PARITY_ERROR = 16;
 static const uint32_t USTL_USTLFIR_READ_SPARE_1 = 17;
@@ -141,6 +141,12 @@ static const uint32_t USTL_USTLFIR_RECOV_REG_PARITY_ERROR = 58;
 static const uint32_t USTL_USTLFIR_CHANA_INVALID_DL_DP_COMBO = 59;
 static const uint32_t USTL_USTLFIR_CHANB_INVALID_DL_DP_COMBO = 60;
 static const uint32_t USTL_USTLFIR_SPARE_61 = 61;
+// mcc/reg00002.H
+
+static const uint64_t WDF_HCA_ACCUM_REG = 0x0c010f42ull;
+
+static const uint32_t WDF_HCA_ACCUM_REG_ACCUM_REG = 0;
+static const uint32_t WDF_HCA_ACCUM_REG_ACCUM_REG_LEN = 64;
 // mcc/reg00002.H
 
 static const uint64_t WDF_WBMGR_TAG_INFO = 0x0c010f43ull;

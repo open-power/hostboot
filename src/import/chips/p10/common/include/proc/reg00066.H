@@ -9490,6 +9490,90 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_MCD_BANK0_REC_FILTER_ADDR_DIS(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(MCD_BANK0_REC));
+#endif
+    return o_data.insertFromRight<MCD_BANK0_REC_FILTER_ADDR_DIS,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access MCD_BANK0_REC_FILTER_ADDR_DIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_MCD_BANK0_REC_FILTER_ADDR_DIS(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(MCD_BANK0_REC));
+#endif
+    return o_data.insertFromRight<MCD_BANK0_REC_FILTER_ADDR_DIS,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access MCD_BANK0_REC_FILTER_ADDR_DIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_MCD_BANK0_REC_FILTER_ADDR_DIS(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(MCD_BANK0_REC));
+#endif
+    return o_data.setBit<MCD_BANK0_REC_FILTER_ADDR_DIS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access MCD_BANK0_REC_FILTER_ADDR_DIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_MCD_BANK0_REC_FILTER_ADDR_DIS(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(MCD_BANK0_REC));
+#endif
+    return o_data.clearBit<MCD_BANK0_REC_FILTER_ADDR_DIS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access MCD_BANK0_REC_FILTER_ADDR_DIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_MCD_BANK0_REC_FILTER_ADDR_DIS(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(MCD_BANK0_REC));
+#endif
+    return i_data.extractToRight<MCD_BANK0_REC_FILTER_ADDR_DIS,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access MCD_BANK0_REC_FILTER_ADDR_DIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_MCD_BANK0_REC_FILTER_ADDR_DIS(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(MCD_BANK0_REC));
+#endif
+    return i_data.getBit<MCD_BANK0_REC_FILTER_ADDR_DIS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access MCD_BANK0_REC_FILTER_ADDR_DIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 static inline fapi2::buffer<uint64_t>& SET_MCD_BANK0_REC_RETRY_COUNT_EXCEED(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -14763,52 +14847,52 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_G_CMD_RATE_NEXT_EN3(
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_GP_CMD_RATE_NEXT_EN3(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT));
 #endif
-    return o_data.insertFromRight<PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_G_CMD_RATE_NEXT_EN3,
-           PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_G_CMD_RATE_NEXT_EN3_LEN>(i_data);
+    return o_data.insertFromRight<PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_GP_CMD_RATE_NEXT_EN3,
+           PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_GP_CMD_RATE_NEXT_EN3_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_G_CMD_RATE_NEXT_EN3 chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_GP_CMD_RATE_NEXT_EN3 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_G_CMD_RATE_NEXT_EN3(
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_GP_CMD_RATE_NEXT_EN3(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT));
 #endif
-    return o_data.insertFromRight<PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_G_CMD_RATE_NEXT_EN3,
-           PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_G_CMD_RATE_NEXT_EN3_LEN>(i_data);
+    return o_data.insertFromRight<PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_GP_CMD_RATE_NEXT_EN3,
+           PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_GP_CMD_RATE_NEXT_EN3_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_G_CMD_RATE_NEXT_EN3 chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_GP_CMD_RATE_NEXT_EN3 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_G_CMD_RATE_NEXT_EN3(
+static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_GP_CMD_RATE_NEXT_EN3(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT));
 #endif
-    return i_data.extractToRight<PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_G_CMD_RATE_NEXT_EN3,
-           PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_G_CMD_RATE_NEXT_EN3_LEN>(o_data);
+    return i_data.extractToRight<PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_GP_CMD_RATE_NEXT_EN3,
+           PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_GP_CMD_RATE_NEXT_EN3_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_G_CMD_RATE_NEXT_EN3 chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_GP_CMD_RATE_NEXT_EN3 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
@@ -15152,52 +15236,52 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_R_CMD_RATE_NEXT_EN3(
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_SP_CMD_RATE_NEXT_EN3(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT));
 #endif
-    return o_data.insertFromRight<PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_R_CMD_RATE_NEXT_EN3,
-           PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_R_CMD_RATE_NEXT_EN3_LEN>(i_data);
+    return o_data.insertFromRight<PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_SP_CMD_RATE_NEXT_EN3,
+           PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_SP_CMD_RATE_NEXT_EN3_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_R_CMD_RATE_NEXT_EN3 chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_SP_CMD_RATE_NEXT_EN3 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_R_CMD_RATE_NEXT_EN3(
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_SP_CMD_RATE_NEXT_EN3(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT));
 #endif
-    return o_data.insertFromRight<PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_R_CMD_RATE_NEXT_EN3,
-           PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_R_CMD_RATE_NEXT_EN3_LEN>(i_data);
+    return o_data.insertFromRight<PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_SP_CMD_RATE_NEXT_EN3,
+           PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_SP_CMD_RATE_NEXT_EN3_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_R_CMD_RATE_NEXT_EN3 chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_SP_CMD_RATE_NEXT_EN3 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_R_CMD_RATE_NEXT_EN3(
+static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_SP_CMD_RATE_NEXT_EN3(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT));
 #endif
-    return i_data.extractToRight<PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_R_CMD_RATE_NEXT_EN3,
-           PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_R_CMD_RATE_NEXT_EN3_LEN>(o_data);
+    return i_data.extractToRight<PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_SP_CMD_RATE_NEXT_EN3,
+           PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_SP_CMD_RATE_NEXT_EN3_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_R_CMD_RATE_NEXT_EN3 chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_COM_SCOM_EN3_STATION_HP_MODE1_NEXT_PB_CFG_MIN_SP_CMD_RATE_NEXT_EN3 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
@@ -31639,52 +31723,52 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_G_CMD_RATE_NEXT_EQ6(
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_GP_CMD_RATE_NEXT_EQ6(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT));
 #endif
-    return o_data.insertFromRight<PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_G_CMD_RATE_NEXT_EQ6,
-           PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_G_CMD_RATE_NEXT_EQ6_LEN>(i_data);
+    return o_data.insertFromRight<PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_GP_CMD_RATE_NEXT_EQ6,
+           PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_GP_CMD_RATE_NEXT_EQ6_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_G_CMD_RATE_NEXT_EQ6 chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_GP_CMD_RATE_NEXT_EQ6 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_G_CMD_RATE_NEXT_EQ6(
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_GP_CMD_RATE_NEXT_EQ6(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT));
 #endif
-    return o_data.insertFromRight<PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_G_CMD_RATE_NEXT_EQ6,
-           PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_G_CMD_RATE_NEXT_EQ6_LEN>(i_data);
+    return o_data.insertFromRight<PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_GP_CMD_RATE_NEXT_EQ6,
+           PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_GP_CMD_RATE_NEXT_EQ6_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_G_CMD_RATE_NEXT_EQ6 chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_GP_CMD_RATE_NEXT_EQ6 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_G_CMD_RATE_NEXT_EQ6(
+static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_GP_CMD_RATE_NEXT_EQ6(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT));
 #endif
-    return i_data.extractToRight<PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_G_CMD_RATE_NEXT_EQ6,
-           PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_G_CMD_RATE_NEXT_EQ6_LEN>(o_data);
+    return i_data.extractToRight<PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_GP_CMD_RATE_NEXT_EQ6,
+           PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_GP_CMD_RATE_NEXT_EQ6_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_G_CMD_RATE_NEXT_EQ6 chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_GP_CMD_RATE_NEXT_EQ6 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
@@ -32028,52 +32112,52 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_R_CMD_RATE_NEXT_EQ6(
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_SP_CMD_RATE_NEXT_EQ6(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT));
 #endif
-    return o_data.insertFromRight<PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_R_CMD_RATE_NEXT_EQ6,
-           PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_R_CMD_RATE_NEXT_EQ6_LEN>(i_data);
+    return o_data.insertFromRight<PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_SP_CMD_RATE_NEXT_EQ6,
+           PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_SP_CMD_RATE_NEXT_EQ6_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_R_CMD_RATE_NEXT_EQ6 chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_SP_CMD_RATE_NEXT_EQ6 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_R_CMD_RATE_NEXT_EQ6(
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_SP_CMD_RATE_NEXT_EQ6(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT));
 #endif
-    return o_data.insertFromRight<PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_R_CMD_RATE_NEXT_EQ6,
-           PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_R_CMD_RATE_NEXT_EQ6_LEN>(i_data);
+    return o_data.insertFromRight<PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_SP_CMD_RATE_NEXT_EQ6,
+           PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_SP_CMD_RATE_NEXT_EQ6_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_R_CMD_RATE_NEXT_EQ6 chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_SP_CMD_RATE_NEXT_EQ6 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_R_CMD_RATE_NEXT_EQ6(
+static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_SP_CMD_RATE_NEXT_EQ6(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT));
 #endif
-    return i_data.extractToRight<PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_R_CMD_RATE_NEXT_EQ6,
-           PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_R_CMD_RATE_NEXT_EQ6_LEN>(o_data);
+    return i_data.extractToRight<PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_SP_CMD_RATE_NEXT_EQ6,
+           PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_SP_CMD_RATE_NEXT_EQ6_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_R_CMD_RATE_NEXT_EQ6 chip: %x, ec: %x",
+    FAPI_ERR("Invalid dial access PB_COM_SCOM_EQ6_STATION_HP_MODE1_NEXT_PB_CFG_MIN_SP_CMD_RATE_NEXT_EQ6 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
