@@ -22,13 +22,18 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+
 ///
 /// @file p10_consts.H
-/// @brief Constants for P10
+/// @brief Constants for p10
 ///
-/// *HWP HW Maintainer: Louis Stermole <stermole@us.ibm.com>
-/// *HWP FW Maintainer: Christian Geddes <crgeddes@us.ibm.com>
-/// *HWP Consumed by: HB
+// *HWP HWP Owner: Andre A. Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: CI
+
 #ifndef _P10_CONSTS_H_
 #define _P10_CONSTS_H_
 
