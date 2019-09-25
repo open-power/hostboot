@@ -761,13 +761,13 @@ public:
         { scom_targets[myMCC1],    0x0C010D02,  0x0D010D42,  false,  MODEL_POWER10 },
         { scom_targets[myMCC1],    0x0FFFFFFF,  0x0FFFFFFF,  true,   MODEL_POWER10 },
 
-        { scom_targets[myOMI0],    0x0C011750,  0x0C011750,  false,  MODEL_POWER10 },
-        { scom_targets[myOMI1],    0x0C011750,  0x0D011B60,  false,  MODEL_POWER10 },
+        { scom_targets[myOMI0],    0x0C011410,  0x0C011410,  false,  MODEL_POWER10 },
+        { scom_targets[myOMI1],    0x0C011410,  0x0D011820,  false,  MODEL_POWER10 },
         { scom_targets[myOMI0],    0x0FFFFFFF,  0x0FFFFFFF,  true,   MODEL_POWER10 },
         { scom_targets[myOMI1],    0x0FFFFFFF,  0x0FFFFFFF,  true,   MODEL_POWER10 },
 
-        { scom_targets[myOMIC0],   0x0C011740,  0x0C011740,  false,  MODEL_POWER10 },
-        { scom_targets[myOMIC1],   0x0C011740,  0x0D011B40,  false,  MODEL_POWER10 },
+        { scom_targets[myOMIC0],   0x0C011400,  0x0C011400,  false,  MODEL_POWER10 },
+        { scom_targets[myOMIC1],   0x0C011400,  0x0D011800,  false,  MODEL_POWER10 },
         { scom_targets[myOMIC0],   0x0FFFFFFF,  0x0FFFFFFF,  true,   MODEL_POWER10 },
         { scom_targets[myOMIC1],   0x0FFFFFFF,  0x0FFFFFFF,  true,   MODEL_POWER10 },
     };

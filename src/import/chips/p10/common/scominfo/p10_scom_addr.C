@@ -698,7 +698,7 @@ extern "C"
              ( getEndpoint() == PSCOM_ENDPOINT )  &&   // 0x1
              ( getRingId() >= OMI0_RING_ID )      &&   // 0x5
              ( getRingId() <= OMI1_RING_ID )      &&   // 0x6
-             ( getSatId()  == MC_SAT_ID13 ) )          // 0xD (DL)
+             ( getSatId()  == MC_SAT_ID0 ) )           // 0x0 (DL)
         {
             if (((getSatOffset() >= 16) &&             // 16:31 (subchannel 0)
                  (getSatOffset() <= 47)) ||            // 32:47 (subchannel 1)
@@ -821,7 +821,7 @@ extern "C"
              ( getEndpoint() == PSCOM_ENDPOINT )  &&   // 0x1
              ( getRingId() >= OMI0_RING_ID )      &&   // 0x5
              ( getRingId() <= OMI1_RING_ID )      &&   // 0x6
-             ( getSatId()  == MC_SAT_ID13 )       &&   // 0xD (DL)
+             ( getSatId()  == MC_SAT_ID0 )        &&   // 0x0 (DL)
              ( getSatOffset() >= 0 )              &&   // shared regs 0-15
              ( getSatOffset() <= 15 ) )
         {
