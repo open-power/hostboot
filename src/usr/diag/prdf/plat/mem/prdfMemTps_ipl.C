@@ -295,53 +295,6 @@ uint32_t TpsEvent<TYPE_MCA>::startCmd()
     #undef PRDF_FUNC
 }
 
-template<>
-uint32_t TpsEvent<TYPE_OCMB_CHIP>::startCmd()
-{
-    #define PRDF_FUNC "[TpsEvent::startCmd] "
-
-    uint32_t o_rc = SUCCESS;
-
-    PRDF_ERR( PRDF_FUNC "Function not supported yet" );
-    /* TODO RTC 208263
-    // We don't need to set any stop-on-error conditions or thresholds for
-    // soft/inter/hard CEs during Memory Diagnostics. The design is to let the
-    // command continue to the end of the rank and we do diagnostics on the
-    // CE counts found in the per-symbol counters. Therefore, all we need to do
-    // is tell the hardware which CE types to count.
-
-    mss::mcbist::stop_conditions stopCond;
-
-    switch ( iv_phase )
-    {
-        case TD_PHASE_1:
-            // Set the per symbol counters to count only soft/inter CEs.
-            stopCond.set_nce_soft_symbol_count_enable( mss::ON);
-            stopCond.set_nce_inter_symbol_count_enable(mss::ON);
-            break;
-
-        case TD_PHASE_2:
-            // Set the per symbol counters to count only hard CEs.
-            stopCond.set_nce_hard_symbol_count_enable(mss::ON);
-            break;
-
-        default: PRDF_ASSERT( false ); // invalid phase
-    }
-
-    // Start the time based scrub procedure on this slave rank.
-    o_rc = startTdScrub<TYPE_MCA>( iv_chip, iv_rank, SLAVE_RANK, stopCond );
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
-                  iv_chip->getHuid(), getKey() );
-    }
-    */
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
 //##############################################################################
 //
 //                          Specializations for MBA
@@ -409,6 +362,56 @@ uint32_t TpsEvent<TYPE_MBA>::startCmd()
         }
 
     } while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//##############################################################################
+//
+//                          Specializations for OCMB
+//
+//##############################################################################
+
+template<>
+uint32_t TpsEvent<TYPE_OCMB_CHIP>::startCmd()
+{
+    #define PRDF_FUNC "[TpsEvent::startCmd] "
+
+    uint32_t o_rc = SUCCESS;
+
+    // We don't need to set any stop-on-error conditions or thresholds for
+    // soft/inter/hard CEs during Memory Diagnostics. The design is to let the
+    // command continue to the end of the rank and we do diagnostics on the
+    // CE counts found in the per-symbol counters. Therefore, all we need to do
+    // is tell the hardware which CE types to count.
+
+    mss::mcbist::stop_conditions<> stopCond;
+
+    switch ( iv_phase )
+    {
+        case TD_PHASE_1:
+            // Set the per symbol counters to count only soft/inter CEs.
+            stopCond.set_nce_soft_symbol_count_enable( mss::ON);
+            stopCond.set_nce_inter_symbol_count_enable(mss::ON);
+            break;
+
+        case TD_PHASE_2:
+            // Set the per symbol counters to count only hard CEs.
+            stopCond.set_nce_hard_symbol_count_enable(mss::ON);
+            break;
+
+        default: PRDF_ASSERT( false ); // invalid phase
+    }
+
+    // Start the time based scrub procedure on this slave rank.
+    o_rc = startTdScrub<TYPE_OCMB_CHIP>(iv_chip, iv_rank, SLAVE_RANK, stopCond);
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
+                  iv_chip->getHuid(), getKey() );
+    }
 
     return o_rc;
 
