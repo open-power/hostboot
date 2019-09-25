@@ -1137,18 +1137,18 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Begin scrub helper
+/// @brief Begin initialize memory
 /// @tparam MC the mc type of the T
-/// @tparam T fapi2::TargetType of the MCBIST engine
+/// @tparam T fapi2::TargetType of the MC engine
 /// @tparam TT the mcbistTraits associated with T
-/// @param[in] i_target MCBIST
+/// @param[in] i_target MC
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
-fapi2::ReturnCode mss_scrub_helper(const fapi2::Target<T>& i_target )
+fapi2::ReturnCode mss_initialize_memory(const fapi2::Target<T>& i_target )
 {
     using ET = mss::mcbistMCTraits<MC>;
-    FAPI_INF("Start mss_scrub_helper for %s", mss::c_str(i_target));
+    FAPI_INF("Start mss_initialize_memory for %s", mss::c_str(i_target));
 
     // If there are no DIMM we don't need to bother. In fact, we can't as we didn't setup
     // attributes for the PHY, etc.
@@ -1189,7 +1189,6 @@ fapi2::ReturnCode mss_scrub_helper(const fapi2::Target<T>& i_target )
 
         // Unmask firs and turn off FIFO mode before returning
         FAPI_TRY ( mss::unmask::after_memdiags<MC>( i_target ) );
-        FAPI_TRY ( mss::unmask::after_background_scrub<MC>( i_target ) );
         FAPI_TRY ( mss::reset_reorder_queue_settings<MC>(i_target) );
 
         return l_rc;
@@ -1214,20 +1213,11 @@ fapi2::ReturnCode mss_scrub_helper(const fapi2::Target<T>& i_target )
 
     FAPI_ASSERT( l_poll_results == true,
                  ET::memdiags_sf_init_failed_init().set_MC_TARGET(i_target),
-                 "p9_mss_scrub (init) timedout %s", mss::c_str(i_target) );
+                 "sf init for scrub/memdiags timedout %s", mss::c_str(i_target) );
 
     // Unmask firs after memdiags and turn off FIFO mode
     FAPI_TRY ( mss::unmask::after_memdiags<MC>( i_target ) );
     FAPI_TRY ( mss::reset_reorder_queue_settings<MC>(i_target) );
-
-    // Start background scrub
-    FAPI_TRY ( mss::memdiags::background_scrub<MC>( i_target,
-               mss::mcbist::stop_conditions<MC>(),
-               mss::mcbist::speed::BG_SCRUB,
-               mss::mcbist::address() ) );
-
-    // Unmask firs after background scrub is started
-    FAPI_TRY ( mss::unmask::after_background_scrub<MC>( i_target ) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -1238,7 +1228,7 @@ fapi_try_exit:
 /// @tparam MC the mc type of the T
 /// @tparam T fapi2::TargetType of the MCBIST engine
 /// @tparam TT the mcbistTraits associated with T
-/// @param[in] i_target MCBIST
+/// @param[in] i_target MC
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
