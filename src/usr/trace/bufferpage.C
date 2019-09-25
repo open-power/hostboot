@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,7 @@ namespace TRACE
         uint64_t l_usedSize = this->usedSize;
 
         // Verify there is enough space.
-        while ((usedSize + i_size) < (PAGESIZE - sizeof(BufferPage)))
+        while ((l_usedSize + i_size) < (PAGESIZE - sizeof(BufferPage)))
         {
             // Atomically attempt to claim i_size worth.
             uint64_t newSize = l_usedSize + i_size;
