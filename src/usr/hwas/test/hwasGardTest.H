@@ -51,7 +51,7 @@
 #define DISABLE_EX_UNIT_TESTS     1
 //$$#define DISABLE_UNIT_TESTS        0
 
-#define DISABLE_OMI_UNIT_TESTS    0
+#define DISABLE_OMI_UNIT_TESTS    1 
 
 #if DISABLE_OMI_UNIT_TESTS
 #define ENABLE_OMI_UNIT_TEST_1    0
