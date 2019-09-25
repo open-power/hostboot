@@ -557,7 +557,7 @@ errlHndl_t Bpm::readBslVersion()
             break;
         }
 
-        // Enter Bootstrap Loader (BSL) mode to perform firmware update
+        // Enter Bootstrap Loader (BSL) mode
         errl = enterBootstrapLoaderMode();
         if (errl != nullptr)
         {
@@ -885,7 +885,30 @@ errlHndl_t Bpm::runUpdate(BpmFirmwareLidImage i_fwImage,
                TARGETING::get_huid(iv_nvdimm));
 
     errlHndl_t errl = nullptr;
+    // Assume an update is necessary for the BPM and determine if it isn't.
+    bool shouldPerformUpdate = true;
+
+    // Get the sys target to check for attribute overrides.
+    TARGETING::Target* sys = nullptr;
+    TARGETING::targetService().getTopLevelTarget(sys);
+
+    auto updateOverride =
+        sys->getAttr<TARGETING::ATTR_BPM_UPDATE_OVERRIDE>();
+    uint16_t firmwareOverrideFlag = (updateOverride & 0xFF00);
+    uint16_t configOverrideFlag = (updateOverride & 0x00FF);
+
     do {
+
+        // First check if there is a BPM connected
+        errl = verifyGoodBpmState();
+        if (errl != nullptr)
+        {
+            // Either there isn't a BPM connected to this NVDIMM or it's not
+            // functional. Don't bother with updates.
+            shouldPerformUpdate = false;
+            iv_attemptAnotherUpdate = false;
+            break;
+        }
 
         // Check the version on the BPM against the version in the image.
         uint16_t bpmFwVersion = INVALID_VERSION;
@@ -897,17 +920,6 @@ errlHndl_t Bpm::runUpdate(BpmFirmwareLidImage i_fwImage,
                      "Skipping update.");
             break;
         }
-
-        // Get the sys target to check for attribute overrides.
-        TARGETING::Target* sys = nullptr;
-        TARGETING::targetService().getTopLevelTarget(sys);
-
-        auto updateOverride =
-            sys->getAttr<TARGETING::ATTR_BPM_UPDATE_OVERRIDE>();
-
-        // Determine if updates are necessary and save that decision to
-        // influence attribute override behavior.
-        bool shouldPerformUpdate = true;
 
         TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runUpdate(): "
                   "Firmware version on the BPM 0x%.4X, "
@@ -953,7 +965,6 @@ errlHndl_t Bpm::runUpdate(BpmFirmwareLidImage i_fwImage,
             break;
         }
 
-        uint16_t firmwareOverrideFlag = (updateOverride & 0xFF00);
         if ((shouldPerformUpdate
                 || (firmwareOverrideFlag == TARGETING::BPM_UPDATE_BEHAVIOR_FORCE_FW))
            && !(firmwareOverrideFlag == TARGETING::BPM_UPDATE_BEHAVIOR_SKIP_FW))
@@ -987,7 +998,6 @@ errlHndl_t Bpm::runUpdate(BpmFirmwareLidImage i_fwImage,
             }
         }
 
-        uint16_t configOverrideFlag = (updateOverride & 0x00FF);
         if ((shouldPerformUpdate
                 || (configOverrideFlag == TARGETING::BPM_UPDATE_BEHAVIOR_FORCE_CONFIG))
            && !(configOverrideFlag == TARGETING::BPM_UPDATE_BEHAVIOR_SKIP_CONFIG))
@@ -1022,93 +1032,99 @@ errlHndl_t Bpm::runUpdate(BpmFirmwareLidImage i_fwImage,
 
     } while(0);
 
-    // Reset controller and unlock encryption if necessary
-    errlHndl_t exitErrl = nvdimmResetController(iv_nvdimm);
-    if (exitErrl != nullptr)
+    if ((shouldPerformUpdate
+        || (configOverrideFlag == TARGETING::BPM_UPDATE_BEHAVIOR_FORCE_CONFIG)
+        || (firmwareOverrideFlag == TARGETING::BPM_UPDATE_BEHAVIOR_FORCE_FW))
+        && (updateOverride != TARGETING::BPM_UPDATE_BEHAVIOR_SKIP_ALL))
     {
-        TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runUpdate() "
-                 "Couldn't reset NVDIMM controller.");
-        handleMultipleErrors(errl, exitErrl);
-    }
-
-    // If the update was successful then we must wait for 15 seconds before
-    // polling the status of the BPM since it has to finish updating its
-    // firmware and resetting.
-    TRACFCOMP(g_trac_bpm, "Bpm::runUpdate(): "
-              "Wait for the BPM to finish update and reset procedure, "
-              "sleep for 15 seconds");
-    longSleep(15);
-
-    // Poll SCAP_STATUS register for BPM state before we check final
-    // firmware version.
-    exitErrl = verifyGoodBpmState();
-    if (exitErrl != nullptr)
-    {
-        TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runUpdate(): "
-                 "Could not verify that BPM was present and enabled!");
-        handleMultipleErrors(errl, exitErrl);
-    }
-
-    uint16_t bpmFwVersion = INVALID_VERSION;
-    exitErrl = getFwVersion(bpmFwVersion);
-    if (exitErrl != nullptr)
-    {
-        TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runUpdate(): "
-                 "Could not determine firmware version on the BPM");
-        handleMultipleErrors(errl, exitErrl);
-    }
-
-    TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runUpdate(): "
-              "Firmware version on the BPM 0x%.4X, "
-              "Firmware version of image 0x%.4X.",
-              bpmFwVersion, i_fwImage.getVersion());
-
-    if (i_fwImage.getVersion() == bpmFwVersion)
-    {
-        TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runUpdate(): "
-                 "Firmware version on the BPM matches the version in the "
-                 "image. Firmware Update Successful.");
-        iv_attemptAnotherUpdate = false;
-    }
-    else
-    {
-        // Attempt another update if one hasn't already been attempted.
-        setAttemptAnotherUpdate();
-        TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runUpdate(): "
-                 "Version on BPM didn't match image. %s ",
-                 iv_attemptAnotherUpdate ?
-                 "Attempt another update..."
-                 : "Attempts to update the BPM have failed.");
-        if (iv_attemptAnotherUpdate == false)
+        // Reset controller and unlock encryption if necessary
+        errlHndl_t exitErrl = nvdimmResetController(iv_nvdimm);
+        if (exitErrl != nullptr)
         {
-            /*@
-            * @errortype
-            * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid         BPM_RC::BPM_RUN_FW_UPDATES
-            * @reasoncode       BPM_RC::BPM_VERSION_MISMATCH
-            * @userdata1[00:31] Version on the BPM
-            * @userdata1[32:63] Version of the flash image
-            * @userdata2        NVDIMM Target HUID associated with this BPM
-            * @devdesc          The version on the BPM didn't match the
-            *                   version in the flash image.
-            * @custdesc         A problem occurred during IPL of the system.
-            */
-            exitErrl = new ERRORLOG::ErrlEntry(
-                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                       BPM_RC::BPM_RUN_FW_UPDATES,
-                                       BPM_RC::BPM_VERSION_MISMATCH,
-                                       TWO_UINT32_TO_UINT64(bpmFwVersion,
-                                           i_fwImage.getVersion()),
-                                       TARGETING::get_huid(iv_nvdimm));
-            exitErrl->collectTrace(BPM_COMP_NAME);
+            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runUpdate() "
+                     "Couldn't reset NVDIMM controller.");
             handleMultipleErrors(errl, exitErrl);
         }
-    }
 
-    TRACFCOMP(g_trac_bpm, EXIT_MRK"Bpm::runUpdate(): "
-              "Concluding BPM Update for NVDIMM 0x%.8X %s",
-              TARGETING::get_huid(iv_nvdimm),
-              (errl != nullptr) ? "with errors" : "without errors");
+        // If the update was successful then we must wait for 15 seconds before
+        // polling the status of the BPM since it has to finish updating its
+        // firmware and resetting.
+        TRACFCOMP(g_trac_bpm, "Bpm::runUpdate(): "
+                  "Wait for the BPM to finish update and reset procedure, "
+                  "sleep for 15 seconds");
+        longSleep(15);
+
+        // Poll SCAP_STATUS register for BPM state before we check final
+        // firmware version.
+        exitErrl = verifyGoodBpmState();
+        if (exitErrl != nullptr)
+        {
+            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runUpdate(): "
+                     "Could not verify that BPM was present and enabled!");
+            handleMultipleErrors(errl, exitErrl);
+        }
+
+        uint16_t bpmFwVersion = INVALID_VERSION;
+        exitErrl = getFwVersion(bpmFwVersion);
+        if (exitErrl != nullptr)
+        {
+            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runUpdate(): "
+                     "Could not determine firmware version on the BPM");
+            handleMultipleErrors(errl, exitErrl);
+        }
+
+        TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runUpdate(): "
+                  "Firmware version on the BPM 0x%.4X, "
+                  "Firmware version of image 0x%.4X.",
+                  bpmFwVersion, i_fwImage.getVersion());
+
+        if (i_fwImage.getVersion() == bpmFwVersion)
+        {
+            TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::runUpdate(): "
+                     "Firmware version on the BPM matches the version in the "
+                     "image. Firmware Update Successful.");
+            iv_attemptAnotherUpdate = false;
+        }
+        else
+        {
+            // Attempt another update if one hasn't already been attempted.
+            setAttemptAnotherUpdate();
+            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runUpdate(): "
+                     "Version on BPM didn't match image. %s ",
+                     iv_attemptAnotherUpdate ?
+                     "Attempt another update..."
+                     : "Attempts to update the BPM have failed.");
+            if (iv_attemptAnotherUpdate == false)
+            {
+                /*@
+                * @errortype
+                * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                * @moduleid         BPM_RC::BPM_RUN_FW_UPDATES
+                * @reasoncode       BPM_RC::BPM_VERSION_MISMATCH
+                * @userdata1[00:31] Version on the BPM
+                * @userdata1[32:63] Version of the flash image
+                * @userdata2        NVDIMM Target HUID associated with this BPM
+                * @devdesc          The version on the BPM didn't match the
+                *                   version in the flash image.
+                * @custdesc         A problem occurred during IPL of the system.
+                */
+                exitErrl = new ERRORLOG::ErrlEntry(
+                                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           BPM_RC::BPM_RUN_FW_UPDATES,
+                                           BPM_RC::BPM_VERSION_MISMATCH,
+                                           TWO_UINT32_TO_UINT64(bpmFwVersion,
+                                               i_fwImage.getVersion()),
+                                           TARGETING::get_huid(iv_nvdimm));
+                exitErrl->collectTrace(BPM_COMP_NAME);
+                handleMultipleErrors(errl, exitErrl);
+            }
+        }
+
+        TRACFCOMP(g_trac_bpm, EXIT_MRK"Bpm::runUpdate(): "
+                  "Concluding BPM Update for NVDIMM 0x%.8X %s",
+                  TARGETING::get_huid(iv_nvdimm),
+                  (errl != nullptr) ? "with errors" : "without errors");
+    }
 
     // An update has been attempted at least once. Set member variable to true
     // to dictate future update attempts. This variable should only be set at
@@ -3632,6 +3648,9 @@ errlHndl_t Bpm::verifyGoodBpmState()
                                    TARGETING::get_huid(iv_nvdimm),
                                    status.full);
         errl->collectTrace(BPM_COMP_NAME);
+        errl->addPartCallout(iv_nvdimm,
+                             HWAS::BPM_PART_TYPE,
+                             HWAS::SRCI_PRIORITY_HIGH);
         nvdimmAddPage4Regs(iv_nvdimm,errl);
         nvdimmAddVendorLog(iv_nvdimm, errl);
     }
