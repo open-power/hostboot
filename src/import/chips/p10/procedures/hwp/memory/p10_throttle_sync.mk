@@ -22,3 +22,10 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
+# Include the macros and things for MSS procedures
+-include 00p10_common.mk
+
+PROCEDURE=p10_throttle_sync
+$(eval $(call ADD_P10_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call BUILD_PROCEDURE)

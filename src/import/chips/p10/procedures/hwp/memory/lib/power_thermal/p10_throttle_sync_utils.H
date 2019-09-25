@@ -22,3 +22,39 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+///
+/// @file p10_throttle_sync_utils.H
+/// @brief throttle_sync function definitions for P10
+///
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Mark Pizzutillo <Mark.Pizzutillo@ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: HB:FSP
+
+#ifndef _P10_MSS_THROTTLE_SYNC_UTILS_H_
+#define _P10_MSS_THROTTLE_SYNC_UTILS_H_
+
+#include <fapi2.H>
+
+namespace mss
+{
+
+///
+/// @brief Enable sync operations
+/// @param[in] i_target the target to be programmed
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode enable_sync_operations(const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_target);
+
+///
+/// @brief Programming master MI
+/// @param[in] i_target the target to be programmed as master.
+/// @return FAPI2_RC_SUCCESS iff okay
+/// @note Writes SCOMFIR_MCSYNC reg to set the input MI as the master.
+///
+fapi2::ReturnCode setup_master(const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_target);
+
+}// mss
+
+#endif

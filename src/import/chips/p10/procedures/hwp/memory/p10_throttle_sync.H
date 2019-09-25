@@ -22,3 +22,36 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file p10_throttle_sync.H
+/// @brief p10_throttle_sync HWP
+/// @note The purpose of this procedure is to triggers sync command from a 'master'
+/// MC to other MCs that have attached memory in a processor.
+///
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup  : Mark Pizzutillo <Mark.Pizzutillo@ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: HB
+///
+#ifndef _P10_THROTTLE_SYNC_H_
+#define _P10_THROTTLE_SYNC_H_
+
+#include <fapi2.H>
+
+// Function pointer typedef definition for HWP call support
+typedef fapi2::ReturnCode (*p10_throttle_sync_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
+
+extern "C"
+{
+    ///
+    /// @brief p10_throttle_sync procedure
+    /// @param[in] i_target TARGET_TYPE_PROC_CHIP target
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    fapi2::ReturnCode p10_throttle_sync(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+
+} // extern "C"
+
+#endif  // _P10_THROTTLE_SYNC_H_
