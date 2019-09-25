@@ -42,6 +42,23 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_RUNN_SRESET_THREADS_BVEC</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Bitvector of which threads to sreset via decrementer in cache-contained or
+    chip-contained mode
+    Bitmap: 0bxxxx00000000
+    T0 -------'|||
+    T1 --------'||
+    T2 ---------'|
+    T3 ----------'
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_RUNN_CYCLE_COUNT</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
@@ -53,6 +70,7 @@
   </description>
   <valueType>uint64</valueType>
   <platInit/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
