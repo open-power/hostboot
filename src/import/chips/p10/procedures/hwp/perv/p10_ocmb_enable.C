@@ -123,7 +123,7 @@ p10_ocmb_enable(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 
         // Toggle the reset signal
         FAPI_TRY(GET_TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_RW(i_target, l_scom_buf));
-        CLEAR_TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_TP_IO_OCMB_RESET_B_EN(l_scom_buf);
+        CLEAR_TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_TPFSI_IO_OCMB_RESET_EN(l_scom_buf);
         FAPI_TRY(PUT_TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_RW(i_target, l_scom_buf));
 
     }
