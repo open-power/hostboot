@@ -475,9 +475,15 @@ fapi2::ReturnCode p10_adu_utils_setup_adu(
 
                 // Set TM_QUIESCE
                 SET_TP_TPBR_AD_ALTD_CMD_REG_FBC_ALTD_WITH_TM_QUIESCE(altd_cmd_reg_data);
+
                 // Set quiesce and init around a switch operation in option reg
                 FAPI_TRY(p10_adu_utils_set_quiesce_init(i_target),
                          "Error from p10_adu_utils_set_quiesce_init");
+
+                // Touch altd_cmd_reg again, set_quiesce_init above touches
+                // altd_option_reg so any following operations to altd_cmd_reg
+                // after this point would fail scom checking
+                FAPI_TRY(PREP_TP_TPBR_AD_ALTD_CMD_REG(i_target));
             }
             else if ( l_transSize == adu_operationFlag::TSIZE_2 )
             {
