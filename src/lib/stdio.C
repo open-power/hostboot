@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -31,7 +33,10 @@ class SprintfBuffer : public Util::ConsoleBufferInterface
         {
             if ('\b' == c)
             {
-                iv_pos--;
+                if (iv_pos > 0)
+                {
+                    iv_pos--;
+                }
             }
             else if (iv_pos < iv_size)
             {
@@ -42,6 +47,19 @@ class SprintfBuffer : public Util::ConsoleBufferInterface
                 iv_pos++;
             }
             return c;
+        }
+
+        void nullTerminate()
+        {
+            if (iv_size > 0)
+            {
+                if (iv_pos >= iv_size)
+                {
+                    iv_pos = iv_size - 1;
+                }
+
+                putc('\0');
+            }
         }
 
         explicit SprintfBuffer(char* buf, size_t size = UINT64_MAX) :
@@ -66,7 +84,7 @@ int sprintf(char *str, const char * format, ...)
     size_t count = vasprintf(console, format, args);
 
     va_end(args);
-    console.putc('\0');
+    console.nullTerminate();
     return count;
 }
 
@@ -81,7 +99,7 @@ int snprintf(char *str, size_t size, const char * format, ...)
     size_t count = vasprintf(console, format, args);
 
     va_end(args);
-    console.putc('\0');
+    console.nullTerminate();
     return count;
 }
 
@@ -92,7 +110,7 @@ int vsprintf(char *str, const char * format, va_list args)
     SprintfBuffer console(str);
     size_t count = vasprintf(console, format, args);
 
-    console.putc('\0');
+    console.nullTerminate();
     return count;
 }
 
@@ -101,6 +119,6 @@ int vsnprintf(char *str, size_t size, const char * format, va_list args)
     SprintfBuffer console(str, size);
     size_t count = vasprintf(console, format, args);
 
-    console.putc('\0');
+    console.nullTerminate();
     return count;
 }
