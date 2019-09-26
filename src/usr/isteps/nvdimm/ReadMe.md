@@ -145,3 +145,80 @@ then 6-7 are done that will produce unpredicable behavior. It is best run
 through the whole process for each. Reading the BSL version does not have this
 limitation. As long as steps 1-4 have been executed, the BSL version can be read
 at any time.
+
+-------------------------------------------------------------------------------
+# Node Controller (NC) Update Overview
+To support different firmware versions released by SMART, the nvdimm_update.C
+and nvdimm_update.H files were created to facilitate upgrades and downgrades of
+the firmware version of node controllers for NVDIMM. There are two kinds of
+NVDIMM node controllers: one that supports 16GB type NVDIMMs and one that
+supports 32GB type NVDIMMs.  Although they have separate image files, the update
+is functionally the same for each. This overview will not go into fine-grain
+detail on every process of the update. For more information see the comments in
+nvdimm_update.H, nvdimm_update.C and in the various supporting files.
+
+Supporting Files:
+* Two signed image files are provided by SMART.
+  The name contains the NC type (16GB or 32GB) + the version (v##)
+
+  Example:
+  nvc4_fpga_31mm_X4_16GB_A7_2TLC_GA6_IBM_JEDEC_2019_03_22_v30_r29325-SIGNED.bin
+  nvc4_fpga_31mm_X4_32GB_A7_2TLC_GA6_IBM_JEDEC_2019_03_22_v30_r29325-SIGNED.bin
+
+* Files checked into cmvc/build process
+  Note:  Each file contains two bytes that describe the NC type and version, so
+         we can use a generic name in CMVC
+  * NVDIMM_SRN7A2G4IBM26MP1SC.bin (16GB one)
+  * NVDIMM_SRN7A4G4IBM24KP2SB.bin (32GB one)
+
+* Build process creates lid files that are loaded on system
+  * 80d00025.lid (secure content LID)
+  * 81e00640.lid (signed 16GB)
+  * 81e00641.lid (signed 32GB)
+
+### NC Update Flow Overview
+The update procedure for the NC is fairly rigid. There are many steps that must
+occur in a precise order otherwise the update will fail.
+
+### Design points
+Three classes are used for the NC update
+* NvdimmsUpdate -- container/driver class
+  This is where all the functional NVDIMM NCs are checked and updated if necessary
+* NvdimmLidImage -- accessors for a given NC LID image (16 or 32)
+  This provides the LID content for easy checking and use during update
+* NvdimmInstalledImage -- accessor to current installed NC image
+  This is the main workhorse. It uses i2c communication to check what is
+  installed and performs the update to a new LID image level
+
+##### NvdimmsUpdate::runUpdate Flow
+1. Build up installed NVDIMM image lists (determine what NC types are installed)
+2. Using secure content lid, now call runUpdateUsingLid() for each LID type
+with the appropriate target NVDIMMs associated with that type.
+3. runUpdateUsingLid() cycles through each NVDIMM target and checks if the
+current NC level is different then the lid version level.
+Only update if the levels do not match to allow upgrade and downgrading.
+4. NvdimmInstalledImage::updateImage() is called on each NVDIMM node controller
+that requires an update
+5. updateImage runs through the steps outlined in 9.7 Firmware Update workflow
+in the JEDEC document JESD245B
+6. Basic steps of the update done one NVDIMM controller at a time
+   1. Validate module manufacturer ID and module product identifier (done before this)
+   2. Verify 'Operation In Progress' bit in the NVDIMM_CMD_STATUS0
+      register is cleared (ie. NV controller is NOT busy)
+   3. Make sure we start from a cleared state
+   4. Enable firmware update mode
+   5. Clear the Firmware Operation status
+   6. Clear the firmware data block to ensure there is no residual data
+   7. Send the first part (header + SMART signature) of the Firmware Image Data
+      Include sending data and checking checksum after data is sent
+   8. Command the module to validate that the firmware image is valid for
+      the module based on the header
+   9. Commit the first firmware data region
+   10. Send and commit the remaining firmware data in REGION_BLOCK_SIZE regions
+       - each block is 32 bytes
+       - each region contains upto REGION_BLOCK_SIZE blocks (currently 1,024)
+       - each region is verfied by checksum before next region is sent
+   11. Command the module to validate the firmware data
+   12. Disable firmware update mode
+   13. Switch from slot0 to slot1 which contains the new image code
+   14. Validate running new code level
