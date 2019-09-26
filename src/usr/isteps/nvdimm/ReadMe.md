@@ -222,3 +222,57 @@ in the JEDEC document JESD245B
    12. Disable firmware update mode
    13. Switch from slot0 to slot1 which contains the new image code
    14. Validate running new code level
+
+# NVDIMM Secure Erase Verify Flow
+DS8K lpar -> HBRT NVDIMM operation = factory_default + secure_erase_verify_start
+  HBRT executes factory_default and steps 1) and 2)
+DS8K lpar -> HBRT NVDIMM operation = secure_erase_verify_complete
+  HBRT executes step 3)
+  If secure erase verify has not completed, return status with verify_complete bit = 0
+     DS8K lpar is responsible for monitoring elapsed time (2/4 hours) and restart process (step 6)
+  If secure erase verify has completed
+     HBRT executes steps 4) and 5), generating error logs for any non-zero register values
+     Return status with verify_complete bit = 1
+
+## Procedure Flow for NVDIMM Secure Erase Verify
+  *Note: Secure Erase Verify should only be run after a Factory Default operation.
+      Secure Erase Verify is intended to verify whether all NAND blocks have been erased.
+  *Note: Full breakout of all Page 5 Secure Erase Verify registers can be found in
+      SMART document "JEDEC NVDIMM Vendor Page 2 Extensions".
+  1) Set Page 5 Register 0x1B to value "0x00"
+       // this clears the status register
+  2) Set Page 5 Register 0x1A to value "0xC0"
+       // this kicks off the erase verify operation
+  3) Wait for Page 5 Register 0x1A Bit 7 to be reset to value "0"
+       // i.e., the overall register value should be "0x40";
+          this means that erase verify has completed
+       a. If Page 5 Register 0x1A Bit 7 has not reset to value "0"
+          after 2 hours (16GB NVDIMM) or after 4 hours (32GB NVDIMM),
+          report a timeout error and skip to step (6)
+  4) Read Page 5 Register 0x1B; value should be "0x00"
+       // this is the erase verify status register
+       a. If Page 5 Register 0x1B value is not "0x00",
+          report any/all errors as outlined in the table at the end of this document,
+          then skip to step (6)
+  5) Read Page 5 Registers 0x1D (MSB) and 0x1C (LSB);
+       combined the two registers should have a value of "0x0000"
+       // this is the number of chunks failing Secure Erase Verify
+       a. If the combined value of the two registers is not "0x0000",
+          report a threshold exceeded error along with the combined value of the two registers,
+          then skip to step (6)
+  6) If any errors have been reported in steps (3), (4), or (5),
+       retry the secure erase verify operation starting again from step (1)
+       a. If the secure erase verify operation fails even after retrying,
+          report that secure erase verify operation has failed
+  7) If no errors have been reported, report that secure erase verify operation
+       has been completed successfully
+  *Addendum: Breakout of Page 5 Register 0x1B Erase Verify Status bit values referenced in step (4) above.
+   All these bits should return as "0". Any bits returning as "1" should be reported with the error name below.
+    Bits 7:6 - Reserved
+    Bit 5 - BAD BLOCK
+    Bit 4 - OTHER
+    Bit 3 - ENCRYPTION LOCKED
+    Bit 2 - INVALID PARAMETER
+    Bit 1 - INTERRUPTED
+    Bit 0 - NAND ERROR
+

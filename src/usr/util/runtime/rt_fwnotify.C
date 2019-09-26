@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -642,6 +642,57 @@ int doNvDimmOperation(const hostInterfaces::nvdimm_operation_t& i_nvDimmOp)
             {
                 TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
               "Call to do a NVM (non-volatile memory) health check succeeded.");
+            }
+        }
+
+        // Perform the factory default operation
+        if (i_nvDimmOp.opType & hostInterfaces::HBRT_FW_NVDIMM_FACTORY_DEFAULT)
+        {
+            if (!nvdimmFactoryDefault(l_nvDimmTargetList))
+            {
+                TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                 "Call to do NVDIMM Factory Default operation failed.");
+                rc = -1;
+                break;
+            }
+            else
+            {
+                TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                "Call to do NVDIMM Factory Default operation succeeded.");
+            }
+        }
+
+        // Perform the secure erase verify start operation
+        if (i_nvDimmOp.opType & hostInterfaces::HBRT_FW_NVDIMM_SECURE_EV_START)
+        {
+            if (!nvdimmSecureEraseVerifyStart(l_nvDimmTargetList))
+            {
+                TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                 "Call to do NVDIMM Secure Erase Verify Start failed.");
+                rc = -1;
+                break;
+            }
+            else
+            {
+                TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                "Call to do NVDIMM Secure Erase Verify Start succeeded.");
+            }
+        }
+
+        // Perform the secure erase verify status operation
+        if (i_nvDimmOp.opType & hostInterfaces::HBRT_FW_NVDIMM_SECURE_EV_STATUS)
+        {
+            if (!nvdimmSecureEraseVerifyStatus(l_nvDimmTargetList))
+            {
+                TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                 "Call to do NVDIMM Secure Erase Verify Status failed.");
+                rc = -1;
+                break;
+            }
+            else
+            {
+                TRACFCOMP(g_trac_runtime, "doNvDimmOperation: "
+                "Call to do NVDIMM Secure Erase Verify Status succeeded.");
             }
         }
 

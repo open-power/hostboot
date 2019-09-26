@@ -305,18 +305,23 @@ enum i2cReg : uint16_t
     BPM_PAYLOAD_LENGTH      = 0x442,
     BPM_REG_ERR_STATUS      = 0x443,
     BPM_REG_PAYLOAD_START   = 0x444,
-    ENCRYPTION_COMMAND = 0x51F,
-    ENCRYPTION_CONFIG_STATUS = 0x520,
-    ENCRYPTION_ACCESS_KEY_SET = 0x521,
-    ENCRYPTION_ACCESS_KEY_VERIFY = 0x522,
-    ENCRYPTION_ACCESS_KEY_UNLOCK = 0x523,
-    ENCRYPTION_RAMDOM_STRING_SET = 0x524,
-    ENCRYPTION_RANDOM_STRING_VERIFY = 0x525,
-    ENCRYPTION_ERASE_KEY_SET = 0x526,
-    ENCRYPTION_ERASE_KEY_VERIFY = 0x527,
-    ENCRYPTION_ERASE_KEY_TEST = 0x528,
+    ERASE_VERIFY_CONTROL             = 0x51A,
+    ERASE_VERIFY_STATUS              = 0x51B,
+    ERASE_VERIFY_RESULT_LSB          = 0x51C,
+    ERASE_VERIFY_RESULT_MSB          = 0x51D,
+    ERASE_VERIFY_TEST                = 0x51E,
+    ENCRYPTION_COMMAND               = 0x51F,
+    ENCRYPTION_CONFIG_STATUS         = 0x520,
+    ENCRYPTION_ACCESS_KEY_SET        = 0x521,
+    ENCRYPTION_ACCESS_KEY_VERIFY     = 0x522,
+    ENCRYPTION_ACCESS_KEY_UNLOCK     = 0x523,
+    ENCRYPTION_RAMDOM_STRING_SET     = 0x524,
+    ENCRYPTION_RANDOM_STRING_VERIFY  = 0x525,
+    ENCRYPTION_ERASE_KEY_SET         = 0x526,
+    ENCRYPTION_ERASE_KEY_VERIFY      = 0x527,
+    ENCRYPTION_ERASE_KEY_TEST        = 0x528,
     ENCRYPTION_ERASE_KEY_TEST_VERIFY = 0x529,
-    ENCRYPTION_KEY_VALIDATION = 0x52A,
+    ENCRYPTION_KEY_VALIDATION        = 0x52A,
 };
 
 // i2cReg macros
@@ -713,6 +718,17 @@ void nvdimmSetEncryptionError(TARGETING::Target *i_nvdimm);
  *                      the error log
  */
 errlHndl_t nvdimmResetController(TARGETING::Target *i_nvdimm);
+
+
+/**
+ * @brief Helper function to factory reset NVDIMM
+ *
+ * @param[in] i_nvdimm - nvdimm target
+ *
+ * @return errlHndl_t - Null if successful, otherwise a pointer to
+ *                      the error log
+ */
+errlHndl_t nvdimm_factory_reset(TARGETING::Target *i_nvdimm);
 
 
 #ifndef __HOSTBOOT_RUNTIME

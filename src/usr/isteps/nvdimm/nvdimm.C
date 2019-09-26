@@ -119,6 +119,8 @@ static constexpr uint8_t NV_STATUS_UNPROTECTED_SET   = 0x01;
 static constexpr uint8_t NV_STATUS_UNPROTECTED_CLR   = 0xFE;
 static constexpr uint8_t NV_STATUS_ENCRYPTION_SET    = 0x10;
 static constexpr uint8_t NV_STATUS_ENCRYPTION_CLR    = 0xEF;
+static constexpr uint8_t NV_STATUS_ERASE_VERIFY_SET  = 0x20;
+static constexpr uint8_t NV_STATUS_ERASE_VERIFY_CLR  = 0xDF;
 static constexpr uint8_t NV_STATUS_POSSIBLY_UNPROTECTED_SET = 0x40;
 
 // NVDIMM key consts
@@ -156,6 +158,11 @@ static constexpr uint8_t RUNNING_FW_SLOT = 0xF0;
 //       previous error logs may be lost and not reported
 static constexpr size_t ARM_MAX_RETRY_COUNT = 1;
 static constexpr uint8_t FW_OPS_UPDATE = 0x04;
+
+// Secure erase verify operations
+static constexpr uint8_t ERASE_VERIFY_CLEAR = 0x00;
+static constexpr uint8_t ERASE_VERIFY_START = 0xC0;
+static constexpr uint8_t ERASE_VERIFY_TRIGGER = 0x80;
 
 #ifndef __HOSTBOOT_RUNTIME
 // Warning thresholds
@@ -1954,95 +1961,6 @@ void nvdimm_restore(TargetHandleList &i_nvdimmList)
 }
 
 /**
- * @brief Force a factory reset of the NV logic and flash
- *
- * @param[in] i_nvdimm - NVDIMM Target
- */
-errlHndl_t nvdimm_factory_reset(Target *i_nvdimm)
-{
-    TRACFCOMP(g_trac_nvdimm, ENTER_MRK"nvdimm_factory_reset() nvdimm[%X]",
-              get_huid(i_nvdimm));
-    errlHndl_t l_err = nullptr;
-
-    do
-    {
-        // Send the reset command
-        l_err = nvdimmWriteReg(i_nvdimm, NVDIMM_FUNC_CMD, FACTORY_DEFAULT);
-        if( l_err )
-        {
-            break;
-        }
-
-        // Poll 2 minutes for completion
-        //   We could get the timeout value from the dimm but since we're
-        //   doing a hard reset anyway I just want to use a big number that
-        //   can handle any lies that the controller might tell us.
-        uint8_t l_data = 0;
-        constexpr uint64_t MAX_POLL_SECONDS = 120;
-        uint64_t poll = 0;
-        for( poll = 0; poll < MAX_POLL_SECONDS; poll++ )
-        {
-            l_err = nvdimmReadReg(i_nvdimm, NVDIMM_CMD_STATUS0, l_data);
-            if( l_err )
-            {
-                break;
-            }
-
-            if( l_data != FACTORY_RESET_IN_PROGRESS )
-            {
-                break;
-            }
-
-#ifndef __HOSTBOOT_RUNTIME
-            // kick the watchdog since this can take awhile
-            INITSERVICE::sendProgressCode();
-#endif
-
-            // sleep 1 second
-            nanosleep(1, 0);
-        }
-        if( l_err ) { break; }
-
-        // Make an error if it never finished
-        if( poll >= MAX_POLL_SECONDS )
-        {
-            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_factory_reset() nvdimm[%X] - factory reset never completed[%d]",
-                      get_huid(i_nvdimm), l_data);
-            /*@
-             *@errortype
-             *@reasoncode       NVDIMM_NOT_READY
-             *@severity         ERRORLOG_SEV_UNRECOVERABLE
-             *@moduleid         NVDIMM_FACTORY_RESET
-             *@userdata1[0:31]  Ret value from ready register
-             *@userdata1[32:63] Target Huid
-             *@userdata2        Number of seconds waited
-             *@devdesc          NVDIMM factory reset never completed
-             *@custdesc         NVDIMM still in reset
-             */
-            l_err = new ERRORLOG::ErrlEntry(
-                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                        NVDIMM_FACTORY_RESET,
-                        NVDIMM_NOT_READY,
-                        NVDIMM_SET_USER_DATA_1(l_data, get_huid(i_nvdimm)),
-                        MAX_POLL_SECONDS,
-                        ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
-
-            l_err->collectTrace(NVDIMM_COMP_NAME);
-            nvdimmAddVendorLog(i_nvdimm, l_err);
-
-            // If nvdimm is not ready for access by now, this is
-            // a failing indication on the NV controller
-            l_err->addPartCallout( i_nvdimm,
-                                   HWAS::NV_CONTROLLER_PART_TYPE,
-                                   HWAS::SRCI_PRIORITY_HIGH);
-            nvdimmAddPage4Regs(i_nvdimm,l_err);
-        }
-    } while(0);
-
-    return l_err;
-}
-
-/**
  * @brief NVDIMM initialization
  *        - Checks for ready state
  *        - Gathers timeout values
@@ -2542,6 +2460,96 @@ errlHndl_t nvdimm_getTPM(Target*& o_tpm)
 
 
 #endif
+
+
+/**
+ * @brief Force a factory reset of the NV logic and flash
+ *
+ * @param[in] i_nvdimm - NVDIMM Target
+ */
+errlHndl_t nvdimm_factory_reset(Target *i_nvdimm)
+{
+    TRACFCOMP(g_trac_nvdimm, ENTER_MRK"nvdimm_factory_reset() nvdimm[%X]",
+              get_huid(i_nvdimm));
+    errlHndl_t l_err = nullptr;
+
+    do
+    {
+        // Send the reset command
+        l_err = nvdimmWriteReg(i_nvdimm, NVDIMM_FUNC_CMD, FACTORY_DEFAULT);
+        if( l_err )
+        {
+            break;
+        }
+
+        // Poll 2 minutes for completion
+        //   We could get the timeout value from the dimm but since we're
+        //   doing a hard reset anyway I just want to use a big number that
+        //   can handle any lies that the controller might tell us.
+        uint8_t l_data = 0;
+        constexpr uint64_t MAX_POLL_SECONDS = 120;
+        uint64_t poll = 0;
+        for( poll = 0; poll < MAX_POLL_SECONDS; poll++ )
+        {
+            l_err = nvdimmReadReg(i_nvdimm, NVDIMM_CMD_STATUS0, l_data);
+            if( l_err )
+            {
+                break;
+            }
+
+            if( l_data != FACTORY_RESET_IN_PROGRESS )
+            {
+                break;
+            }
+
+#ifndef __HOSTBOOT_RUNTIME
+            // kick the watchdog since this can take awhile
+            INITSERVICE::sendProgressCode();
+#endif
+
+            // sleep 1 second
+            nanosleep(1, 0);
+        }
+        if( l_err ) { break; }
+
+        // Make an error if it never finished
+        if( poll >= MAX_POLL_SECONDS )
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_factory_reset() nvdimm[%X] - factory reset never completed[%d]",
+                      get_huid(i_nvdimm), l_data);
+            /*@
+             *@errortype
+             *@reasoncode       NVDIMM_NOT_READY
+             *@severity         ERRORLOG_SEV_UNRECOVERABLE
+             *@moduleid         NVDIMM_FACTORY_RESET
+             *@userdata1[0:31]  Ret value from ready register
+             *@userdata1[32:63] Target Huid
+             *@userdata2        Number of seconds waited
+             *@devdesc          NVDIMM factory reset never completed
+             *@custdesc         NVDIMM still in reset
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        NVDIMM_FACTORY_RESET,
+                        NVDIMM_NOT_READY,
+                        NVDIMM_SET_USER_DATA_1(l_data, get_huid(i_nvdimm)),
+                        MAX_POLL_SECONDS,
+                        ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+
+            l_err->collectTrace(NVDIMM_COMP_NAME);
+            nvdimmAddVendorLog(i_nvdimm, l_err);
+
+            // If nvdimm is not ready for access by now, this is
+            // a failing indication on the NV controller
+            l_err->addPartCallout( i_nvdimm,
+                                   HWAS::NV_CONTROLLER_PART_TYPE,
+                                   HWAS::SRCI_PRIORITY_HIGH);
+            nvdimmAddPage4Regs(i_nvdimm,l_err);
+        }
+    } while(0);
+
+    return l_err;
+}
 
 
 bool nvdimm_encrypt_unlock(TargetHandleList &i_nvdimmList)
@@ -3663,6 +3671,8 @@ errlHndl_t notifyNvdimmProtectionChange(Target* i_target,
             bool l_armed_change = false;
             bool l_set_encryption = false;
             bool l_clr_encryption = false;
+            bool l_sev_started = false;
+            bool l_sev_completed = false;
 
             switch (i_state)
             {
@@ -3694,6 +3704,12 @@ errlHndl_t notifyNvdimmProtectionChange(Target* i_target,
                     break;
                 case ENCRYPTION_DISABLED:
                     l_clr_encryption = true;
+                    break;
+                case ERASE_VERIFY_STARTED:
+                    l_sev_started = true;
+                    break;
+                case ERASE_VERIFY_COMPLETED:
+                    l_sev_completed = true;
                     break;
                 case SEND_NV_STATUS:
                     // no action, just send status
@@ -3735,6 +3751,18 @@ errlHndl_t notifyNvdimmProtectionChange(Target* i_target,
             if (l_clr_encryption)
             {
                 l_nv_status &= NV_STATUS_ENCRYPTION_CLR;
+            }
+
+            // Clear bit 5 if secure erase verify started
+            if (l_sev_started)
+            {
+                l_nv_status &= NV_STATUS_ERASE_VERIFY_CLR;
+            }
+
+            // Set bit 5 if secure erase verify comlpleted
+            if (l_sev_completed)
+            {
+                l_nv_status |= NV_STATUS_ERASE_VERIFY_SET;
             }
 
             // Set bit 6 if risky error
@@ -5585,7 +5613,263 @@ bool nvdimmDisarm(TargetHandleList &i_nvdimmTargetList)
 
     TRACFCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmDisarm() returning %d",
               o_disarm_successful);
-    return o_disarm_successful;
+
+     return o_disarm_successful;
+
+}
+
+
+/*
+ * @brief Wrapper function to return NVDIMMs to factory default
+ */
+bool nvdimmFactoryDefault(TargetHandleList &i_nvdimmList)
+{
+    errlHndl_t l_err = nullptr;
+    bool l_success = true;
+
+    // Factory default for all nvdimms in the list
+    for (const auto & l_nvdimm : i_nvdimmList)
+    {
+        l_err = nvdimm_factory_reset(l_nvdimm);
+        if (l_err)
+        {
+            l_success = false;
+            errlCommit( l_err, NVDIMM_COMP_ID );
+            continue;
+        }
+
+        // Update nvdimm status
+        l_err = notifyNvdimmProtectionChange(l_nvdimm, NVDIMM_DISARMED);
+        if (l_err)
+        {
+            errlCommit( l_err, NVDIMM_COMP_ID );
+        }
+    }
+
+    return l_success;
+}
+
+
+/*
+ * @brief Function to start secure erase verify of NVDIMMs
+ */
+bool nvdimmSecureEraseVerifyStart(TargetHandleList &i_nvdimmList)
+{
+    errlHndl_t l_err = nullptr;
+    bool l_success = true;
+
+    // Secure erase verify for all nvdimms in the list
+    for (const auto & l_nvdimm : i_nvdimmList)
+    {
+        // Clear the erase_verify_status reg
+        l_err = nvdimmWriteReg(l_nvdimm,
+                               ERASE_VERIFY_STATUS,
+                               ERASE_VERIFY_CLEAR);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                      "nvdimmSecureEraseVerifyStart() HUID 0x%X"
+                      "Failed to write ERASE_VERIFY_STATUS register",
+                      get_huid(l_nvdimm));
+            l_success = false;
+            errlCommit( l_err, NVDIMM_COMP_ID );
+            continue;
+        }
+
+        // Start the erase verify operation
+        l_err = nvdimmWriteReg(l_nvdimm,
+                               ERASE_VERIFY_CONTROL,
+                               ERASE_VERIFY_START);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                      "nvdimmSecureEraseVerifyStart() HUID 0x%X"
+                      "Failed to write ERASE_VERIFY_CONTROL register",
+                      get_huid(l_nvdimm));
+            l_success = false;
+            errlCommit( l_err, NVDIMM_COMP_ID );
+            continue;
+        }
+
+        // Call notify to clear NV_STATUS bit
+        l_err = notifyNvdimmProtectionChange(l_nvdimm,
+                                             ERASE_VERIFY_STARTED);
+        if (l_err)
+        {
+            l_success = false;
+            errlCommit(l_err, NVDIMM_COMP_ID);
+            continue;
+        }
+    }
+
+    return l_success;
+}
+
+
+/*
+ * @brief Function to check status of secure erase verify of NVDIMMs
+ */
+bool nvdimmSecureEraseVerifyStatus(TargetHandleList &i_nvdimmList)
+{
+    errlHndl_t l_err = nullptr;
+    bool l_success = true;
+    uint8_t l_data = 0;
+
+    // Check secure erase verify status for all nvdimms in the list
+    for (const auto & l_nvdimm : i_nvdimmList)
+    {
+        // Check if secure-erase-verify is already complete for this nvdimm
+        ATTR_NV_STATUS_FLAG_type l_nv_status =
+                l_nvdimm->getAttr<ATTR_NV_STATUS_FLAG>();
+        if (l_nv_status & NV_STATUS_ERASE_VERIFY_SET)
+        {
+            continue;
+        }
+
+        l_err = nvdimmReadReg(l_nvdimm, ERASE_VERIFY_CONTROL, l_data);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                      "nvdimmSecureEraseVerifyStatus() HUID 0x%X"
+                      "Failed to read ERASE_VERIFY_CONTROL register",
+                      get_huid(l_nvdimm));
+            l_success = false;
+            errlCommit( l_err, NVDIMM_COMP_ID );
+            continue;  // Continue to next nvdimm
+        }
+
+        // If trigger is set the operation is not yet complete
+        if (l_data & ERASE_VERIFY_TRIGGER)
+        {
+            continue;  // Continue to next nvdimm
+        }
+
+        // Secure erase verify on this nvdimm is complete
+        // Call notify to set NV_STATUS bit
+        l_err = notifyNvdimmProtectionChange(l_nvdimm,
+                                             ERASE_VERIFY_COMPLETED);
+        if (l_err)
+        {
+            l_success = false;
+            errlCommit(l_err, NVDIMM_COMP_ID);
+        }
+
+
+        // Check the status register
+        l_err = nvdimmReadReg(l_nvdimm, ERASE_VERIFY_STATUS, l_data);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                      "nvdimmSecureEraseVerifyStatus() HUID 0x%X"
+                      "Failed to read ERASE_VERIFY_STATUS register",
+                      get_huid(l_nvdimm));
+            l_success = false;
+            errlCommit( l_err, NVDIMM_COMP_ID );
+            continue;  // Continue to next nvdimm
+        }
+
+        // Non-zero status is an error
+        if (l_data)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmSecureEraseVerifyStatus() "
+                      "HUID 0x%X ERASE_VERIFY_STATUS returned non-zero status",
+                      get_huid(l_nvdimm));
+            /*@
+            *@errortype
+            *@reasoncode       NVDIMM_ERASE_VERIFY_STATUS_NONZERO
+            *@severity         ERRORLOG_SEV_PREDICTIVE
+            *@moduleid         NVDIMM_SECURE_ERASE_VERIFY_STATUS
+            *@userdata1        NVDIMM HUID
+            *@userdata2        ERASE_VERIFY_STATUS
+            *@devdesc          Error detected during secure erase verify
+            *@custdesc         NVDIMM erase error
+            */
+            l_err = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                NVDIMM_SECURE_ERASE_VERIFY_STATUS,
+                                NVDIMM_ERASE_VERIFY_STATUS_NONZERO,
+                                get_huid(l_nvdimm),
+                                l_data,
+                                ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+            l_err->collectTrace(NVDIMM_COMP_NAME);
+            l_err->addPartCallout( l_nvdimm,
+                                   HWAS::NV_CONTROLLER_PART_TYPE,
+                                   HWAS::SRCI_PRIORITY_HIGH);
+            nvdimmAddVendorLog(l_nvdimm, l_err);
+            errlCommit( l_err, NVDIMM_COMP_ID );
+            l_success = false;
+            continue;  // Continue to next nvdimm
+        }
+
+
+        // Check the result registers
+        uint16_t l_result = 0;
+        l_err = nvdimmReadReg(l_nvdimm, ERASE_VERIFY_RESULT_MSB, l_data);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                      "nvdimmSecureEraseVerifyStatus() HUID 0x%X"
+                      "Failed to read ERASE_VERIFY_RESULT_MSB register",
+                      get_huid(l_nvdimm));
+            l_success = false;
+            errlCommit( l_err, NVDIMM_COMP_ID );
+            continue;  // Continue to next nvdimm
+        }
+
+        // Save result
+        l_result = l_data << 8;
+
+        l_err = nvdimmReadReg(l_nvdimm, ERASE_VERIFY_RESULT_LSB, l_data);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                      "nvdimmSecureEraseVerifyStatus() HUID 0x%X"
+                      "Failed to read ERASE_VERIFY_RESULT_LSB register",
+                      get_huid(l_nvdimm));
+            l_success = false;
+            errlCommit( l_err, NVDIMM_COMP_ID );
+            continue;  // Continue to next nvdimm
+        }
+
+        // Save result
+        l_result |= l_data;
+
+        // Non-zero result is an error
+        if (l_result)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmSecureEraseVerifyStatus() "
+                      "HUID 0x%X ERASE_VERIFY_RESULT returned non-zero data",
+                      get_huid(l_nvdimm));
+            /*@
+            *@errortype
+            *@reasoncode       NVDIMM_ERASE_VERIFY_RESULT_NONZERO
+            *@severity         ERRORLOG_SEV_PREDICTIVE
+            *@moduleid         NVDIMM_SECURE_ERASE_VERIFY_STATUS
+            *@userdata1        NVDIMM HUID
+            *@userdata2        ERASE_VERIFY_RESULT
+            *@devdesc          Error detected during secure erase verify
+            *@custdesc         NVDIMM erase error
+            */
+            l_err = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                NVDIMM_SECURE_ERASE_VERIFY_STATUS,
+                                NVDIMM_ERASE_VERIFY_RESULT_NONZERO,
+                                get_huid(l_nvdimm),
+                                l_result,
+                                ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+            l_err->collectTrace(NVDIMM_COMP_NAME);
+            l_err->addPartCallout( l_nvdimm,
+                                   HWAS::NV_CONTROLLER_PART_TYPE,
+                                   HWAS::SRCI_PRIORITY_HIGH);
+            nvdimmAddVendorLog(l_nvdimm, l_err);
+            errlCommit( l_err, NVDIMM_COMP_ID );
+            l_success = false;
+            continue;  // Continue to next nvdimm
+        }
+
+    }
+
+    return l_success;
 }
 
 

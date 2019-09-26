@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -599,7 +599,15 @@ typedef struct hostInterfaces
         // Manufacturing(MNFG) energy source(ES) health check request
         HBRT_FW_MNFG_ES_HEALTH_CHECK      = 0x0020,
         // Manufacturing(MNFG) non-volatile memory(NVM) health check request
-        HBRT_FW_MNFG_NVM_HEALTH_CHECK     = 0x0040
+        HBRT_FW_MNFG_NVM_HEALTH_CHECK     = 0x0040,
+
+        /// The following operations pertain to the decommission of an NVDIMM
+        // Factory Default returns the NVDIMM to the factory default state
+        HBRT_FW_NVDIMM_FACTORY_DEFAULT    = 0x0080,
+        // Secure Erase Verify all NAND flash blocks have been erased
+        HBRT_FW_NVDIMM_SECURE_EV_START    = 0x0100,
+        // Secure Erase Verify Status checks if SEV operation has completed
+        HBRT_FW_NVDIMM_SECURE_EV_STATUS   = 0x0200,
     };
 
     // NVDIMM (PHYP -> HBRT) message to request NVDIMM operation(s)

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -130,6 +130,33 @@ bool nvdimm_encrypt_enable(TARGETING::TargetHandleList &i_nvdimmList);
  * @return true if no errors logged, else false
  */
 bool nvdimm_crypto_erase(TARGETING::TargetHandleList &i_nvdimmList);
+
+/**
+ * @brief Entry function to NVDIMM factory default
+ *
+ * @param[in] i_nvdimmList - list of nvdimm targets
+ *
+ * @return true if no errors logged, else false
+ */
+bool nvdimmFactoryDefault(TARGETING::TargetHandleList &i_nvdimmList);
+
+/**
+ * @brief Entry function to NVDIMM secure erase verify
+ *
+ * @param[in] i_nvdimmList - list of nvdimm targets
+ *
+ * @return true if no errors logged, else false
+ */
+bool nvdimmSecureEraseVerifyStart(TARGETING::TargetHandleList &i_nvdimmList);
+
+/**
+ * @brief Entry function to NVDIMM secure erase verify status
+ *
+ * @param[in] i_nvdimmList - list of nvdimm targets
+ *
+ * @return true if no errors logged, else false
+ */
+bool nvdimmSecureEraseVerifyStatus(TARGETING::TargetHandleList &i_nvdimmList);
 
 /**
  * @brief Helper function to get list of nvdimm target pointers
@@ -293,6 +320,8 @@ void nvdimmSendNvStatus();
  *                PROTECTED status until power is cycled again
  *        ENCRYPTION_ENABLED - contents of nvdimm are encrypted
  *        ENCRYPTION_DISABLED - contents of nvdimm are not encrypted
+ *        ERASE_VERIFY_STARTED - set secure_erase_verify_complete to 0
+ *        ERASE_VERIFY_COMPLETE = set secure_erase_verify_complete to 1
  */
 enum nvdimm_protection_t
 {
@@ -305,6 +334,8 @@ enum nvdimm_protection_t
     NVDIMM_ENCRYPTION_ERROR   = 6,
     ENCRYPTION_ENABLED        = 7,
     ENCRYPTION_DISABLED       = 8,
+    ERASE_VERIFY_STARTED      = 9,
+    ERASE_VERIFY_COMPLETED    = 10,
     SEND_NV_STATUS            = 11,
     /* deprecated, still used by PRD */
     UNPROTECTED_BECAUSE_ERROR = 4,
@@ -464,6 +495,7 @@ void nvdimmAddPage4Regs(TARGETING::Target *i_nvdimm, errlHndl_t& io_err);
  *      the error log.
  */
 void nvdimm_init(TARGETING::Target *i_nvdimm);
+
 
 }
 
