@@ -80,6 +80,7 @@ static bool myDataParse(\
     {\
         l_rc = true;\
         l_pParser->parse(i_ver, i_parser, i_buffer, i_buflen);\
+        delete l_pParser;\
     }\
     return l_rc;\
 }\
