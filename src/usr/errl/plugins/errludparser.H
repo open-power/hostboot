@@ -5,8 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
+/* [+] YADRO                                                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -84,6 +85,7 @@ static bool myDataParse(\
     {\
         l_rc = true;\
         l_pParser->parse(i_ver, i_parser, i_buffer, i_buflen);\
+        delete l_pParser;\
     }\
     return l_rc;\
 }\
