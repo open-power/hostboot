@@ -112,6 +112,8 @@ PRDR_ERROR_SIGNATURE(BelowWarnTh,   0xffff0099, "", "NVDIMM Below Warning Thresh
 PRDR_ERROR_SIGNATURE(IntNvdimmErr,  0xffff009A, "", "NVDIMM Intermittent error");
 PRDR_ERROR_SIGNATURE(NotifStatErr,  0xffff009B, "", "NVDIMM Set Event Notification Status Error");
 PRDR_ERROR_SIGNATURE(FirEvntGone,   0xffff009C, "", "NVDIMM Event Triggering the FIR no longer present");
+PRDR_ERROR_SIGNATURE(EsTmpWarnFa,   0xffff009D, "", "NVDIMM Energy Source Temperature Warning - False Alarm");
+PRDR_ERROR_SIGNATURE(EsTmpErrFa,    0xffff009E, "", "NVDIMM Energy Source Temperature Error - False Alarm");
 
 #endif // __prdfMemExtraSig_H
 

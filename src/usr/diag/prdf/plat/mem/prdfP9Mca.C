@@ -739,15 +739,18 @@ uint32_t __readTemp( TargetHandle_t i_dimm, uint16_t i_tempMsbReg,
  * @param  io_sc       The step code data struct.
  * @param  i_dimm      The target dimm.
  * @param  io_errFound Whether an error has already been found or not.
+ * @param  o_esTempErr A flag for whether we hit an ES TEMP error or not.
  * @return FAIL if unable to read register, else SUCCESS
  */
 uint32_t __analyzeErrorThrStatusReg( STEP_CODE_DATA_STRUCT & io_sc,
-                                     TargetHandle_t i_dimm, bool & io_errFound )
+                                     TargetHandle_t i_dimm, bool & io_errFound,
+                                     bool & o_esTempErr )
 {
     #define PRDF_FUNC "[__analyzeErrorThrStatusReg] "
 
     uint32_t o_rc = SUCCESS;
     uint8_t data = 0;
+    o_esTempErr = false;
 
     // Get MCA, for signatures
     TargetHandle_t mca = getConnectedParent( i_dimm, TYPE_MCA );
@@ -787,19 +790,27 @@ uint32_t __analyzeErrorThrStatusReg( STEP_CODE_DATA_STRUCT & io_sc,
         // BIT 2: ES Temperature Error
         if ( bitList.count(2) )
         {
+            // Sleep two seconds to avoid exiting PRD analysis faster than the
+            // ES_TEMP sample rate.
+            PlatServices::milliSleep( 2, 0 );
+
             // Read the ES_TEMP and ES_TEMP_ERROR_HIGH_THRESHOLD values
             uint16_t msbEsTempReg = NVDIMM::i2cReg::ES_TEMP1;
             uint16_t lsbEsTempReg = NVDIMM::i2cReg::ES_TEMP0;
-
             uint16_t esTemp = 0;
             o_rc = __readTemp( i_dimm, msbEsTempReg, lsbEsTempReg, esTemp );
             if ( SUCCESS != o_rc ) break;
 
             uint16_t msbThReg = NVDIMM::i2cReg::ES_TEMP_ERROR_HIGH_THRESHOLD1;
             uint16_t lsbThReg = NVDIMM::i2cReg::ES_TEMP_ERROR_HIGH_THRESHOLD0;
-
             uint16_t esTempHighTh = 0;
             o_rc = __readTemp( i_dimm, msbThReg, lsbThReg, esTempHighTh );
+            if ( SUCCESS != o_rc ) break;
+
+            msbThReg = NVDIMM::i2cReg::ES_TEMP_ERROR_LOW_THRESHOLD1;
+            lsbThReg = NVDIMM::i2cReg::ES_TEMP_ERROR_LOW_THRESHOLD0;
+            uint16_t esTempLowTh = 0;
+            o_rc = __readTemp( i_dimm, msbThReg, lsbThReg, esTempLowTh );
             if ( SUCCESS != o_rc ) break;
 
             // Check to see if the ES_TEMP is negative (bit 12)
@@ -814,11 +825,19 @@ uint32_t __analyzeErrorThrStatusReg( STEP_CODE_DATA_STRUCT & io_sc,
                 __addSignature( io_sc, mca, io_errFound,
                                 PRDFSIG_EsTmpErrHigh );
             }
-            // Else assume the warning is because of a low threshold.
-            else
+            // Else check if the error hit the low threshold, again with the
+            // same 2°C margin.
+            else if ( (esTemp <= (esTempLowTh + 0x0020)) || esTempNeg )
             {
                 __addSignature( io_sc, mca, io_errFound,
                                 PRDFSIG_EsTmpErrLow );
+            }
+            // Else the temperature must have gone back to a normal value, so
+            // we will label this as a false alarm case.
+            else
+            {
+                __addSignature( io_sc, mca, io_errFound,
+                                PRDFSIG_EsTmpErrFa );
             }
 
             // Callout BPM (backup power module) high
@@ -827,6 +846,8 @@ uint32_t __analyzeErrorThrStatusReg( STEP_CODE_DATA_STRUCT & io_sc,
 
             // Callout NVDIMM low, no gard
             io_sc.service_data->SetCallout( i_dimm, MRU_LOW, NO_GARD );
+
+            o_esTempErr = true;
             io_errFound = true;
         }
         // BIT 3:7: Reserved
@@ -1072,19 +1093,27 @@ uint32_t __analyzeWarningThrStatusReg(STEP_CODE_DATA_STRUCT & io_sc,
         // BIT 2: ES_TEMP_WARNING
         if ( bitList.count(2) )
         {
+            // Sleep two seconds to avoid exiting PRD analysis faster than the
+            // ES_TEMP sample rate.
+            PlatServices::milliSleep( 2, 0 );
+
             // Read the ES_TEMP and ES_TEMP_WARNING_HIGH_THRESHOLD values
             uint16_t msbEsTempReg = NVDIMM::i2cReg::ES_TEMP1;
             uint16_t lsbEsTempReg = NVDIMM::i2cReg::ES_TEMP0;
-
             uint16_t esTemp = 0;
             o_rc = __readTemp( i_dimm, msbEsTempReg, lsbEsTempReg, esTemp );
             if ( SUCCESS != o_rc ) break;
 
             uint16_t msbThReg = NVDIMM::i2cReg::ES_TEMP_WARNING_HIGH_THRESHOLD1;
             uint16_t lsbThReg = NVDIMM::i2cReg::ES_TEMP_WARNING_HIGH_THRESHOLD0;
-
             uint16_t esTempHighTh = 0;
             o_rc = __readTemp( i_dimm, msbThReg, lsbThReg, esTempHighTh );
+            if ( SUCCESS != o_rc ) break;
+
+            msbThReg = NVDIMM::i2cReg::ES_TEMP_WARNING_LOW_THRESHOLD1;
+            lsbThReg = NVDIMM::i2cReg::ES_TEMP_WARNING_LOW_THRESHOLD0;
+            uint16_t esTempLowTh = 0;
+            o_rc = __readTemp( i_dimm, msbThReg, lsbThReg, esTempLowTh );
             if ( SUCCESS != o_rc ) break;
 
             // Check to see if the ES_TEMP is negative (bit 12)
@@ -1099,11 +1128,19 @@ uint32_t __analyzeWarningThrStatusReg(STEP_CODE_DATA_STRUCT & io_sc,
                 __addSignature( io_sc, mca, io_errFound,
                                 PRDFSIG_EsTmpWarnHigh );
             }
-            // Else assume the warning is because of a low threshold.
-            else
+            // Else check if the warning hit the low threshold, again with the
+            // same 2°C margin.
+            else if ( (esTemp <= (esTempLowTh + 0x0020)) || esTempNeg )
             {
                 __addSignature( io_sc, mca, io_errFound,
                                 PRDFSIG_EsTmpWarnLow );
+            }
+            // Else the temperature must have gone back to a normal value, so
+            // we will label this as a false alarm case.
+            else
+            {
+                __addSignature( io_sc, mca, io_errFound,
+                                PRDFSIG_EsTmpWarnFa );
             }
 
             // Callout BPM (backup power module) high
@@ -1113,13 +1150,19 @@ uint32_t __analyzeWarningThrStatusReg(STEP_CODE_DATA_STRUCT & io_sc,
             // Callout NVDIMM low, no gard
             io_sc.service_data->SetCallout( i_dimm, MRU_LOW, NO_GARD );
 
-            // Make the log predictive and mask the FIR.
-            io_sc.service_data->SetThresholdMaskId(0);
+            // Because of the possibility of intermittent ES temperature
+            // false alarm readings, we will keep the log hidden. If there is
+            // an actual ES temperature problem, we assume we will continue
+            // to be called to handle the temperature warning and hit threshold.
 
-            // Send message to PHYP that save/restore may work
-            o_rc = PlatServices::nvdimmNotifyProtChange( i_dimm,
-                NVDIMM::NVDIMM_RISKY_HW_ERROR );
-            if ( SUCCESS != o_rc ) break;
+            // Only send the save/restore message to PHYP if we hit threshold.
+            if ( io_sc.service_data->IsAtThreshold() )
+            {
+                // Send message to PHYP that save/restore may work
+                o_rc = PlatServices::nvdimmNotifyProtChange( i_dimm,
+                        NVDIMM::NVDIMM_RISKY_HW_ERROR );
+                if ( SUCCESS != o_rc ) break;
+            }
 
             io_errFound = true;
         }
@@ -1348,8 +1391,13 @@ int32_t AnalyzeNvdimmHealthStatRegs( ExtensibleChip * i_chip,
             if ( SUCCESS != l_rc ) continue;
             l_rc = __analyzeHealthStatus1Reg( io_sc, dimm, errFound );
             if ( SUCCESS != l_rc ) continue;
-            l_rc = __analyzeErrorThrStatusReg( io_sc, dimm, errFound );
+            bool esTempErr = false;
+            l_rc = __analyzeErrorThrStatusReg(io_sc, dimm, errFound, esTempErr);
             if ( SUCCESS != l_rc ) continue;
+
+            // If we hit an ES temperature error and have not yet hit threshold,
+            // then keep the log hidden.
+            if ( esTempErr && !io_sc.service_data->IsAtThreshold() ) continue;
 
             // If we didn't find any error, then keep the log hidden.
             if ( !errFound )
