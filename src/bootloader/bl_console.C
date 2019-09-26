@@ -41,12 +41,13 @@
 #include <uartconfig.C>
 #include <p10_sbe_hb_structures.H>
 #include <util/align.H>
+#include <arch/ppc.H>
+#include <kernel/timemgr.H>
 
 using namespace CONSOLE;
 using namespace UARTREGS;
 
 bool bl_console::console_fail = false;
-const auto blConfigData = reinterpret_cast<BootloaderConfigData_t *>(SBE_HB_COMM_ADDR);
 
 void computeOpbmErrSev(OpbmErrReg_t i_opbmErrData,
                        ResetLevels &o_resetLevel)
@@ -154,14 +155,30 @@ bool checkForLpcErrors()
     return bl_console::console_fail;
 }
 
-// TODO: RTC 209583 addon commit to handle nanosleep functions
-static bool simple_delay(const uint64_t i_sec, const uint64_t i_nsec)
+static uint64_t convertSecToTicks(const uint64_t i_sec, const uint64_t i_nsec)
 {
-    //bool result = false;
+    // result = ((sec * 10^9 + nsec) * timebaseFreq Hz) / 10^9
+    uint64_t timebaseFreq = 512000000ULL;
+    uint64_t result = ((i_sec * 1000000000ULL) + i_nsec);
+    result *= (timebaseFreq / 1000000);
+    result /= 1000;
+    return result;
+}
 
-    //uint64_t delay = convert_sec_to_ticks(i_sec, i_nsec);
+// @TODO: RTC: 243863
+// Evaluate timing on real hardware and tweak constants as needed
+static void simpleDelay(const uint64_t i_sec, const uint64_t i_nsec)
+{
+    uint64_t delay = convertSecToTicks(i_sec, i_nsec);
+    uint64_t expire = getTB() + delay;
+    while (getTB() < expire)
+    {
+        // set low thread priority
+        asm volatile("or 1,1,1");
+    }
 
-    return true;
+    // set high thread priority
+    asm volatile("or 2,2,2");
 }
 
 void nanosleep(const uint64_t i_sec, const uint64_t i_nsec)
@@ -169,7 +186,7 @@ void nanosleep(const uint64_t i_sec, const uint64_t i_nsec)
     uint64_t l_sec = i_sec + i_nsec / NS_PER_SEC;
     uint64_t l_nsec = i_nsec % NS_PER_SEC;
 
-    simple_delay(l_sec, l_nsec);
+    simpleDelay(l_sec, l_nsec);
 }
 
 // TODO: RTC 209583 addon commit to handle error path
@@ -270,9 +287,11 @@ void bl_console::displayHex(const unsigned char* i_start_addr, const size_t i_si
 // Writes a character to console
 void bl_console::putChar(const char i_c)
 {
-    bool error = false;
     // Wait for transmit FIFO to have space
-    bool console_enable = blConfigData->lpcConsoleEnable == 1;
+    bool error = false;
+    const auto blConfigData = reinterpret_cast<BootloaderConfigData_t *>(SBE_HB_COMM_ADDR);
+    bool console_enable = (blConfigData->lpcConsoleEnable == 1);
+
     do
     {
         if (bl_console::console_fail || !console_enable)
