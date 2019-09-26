@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* [+] Artem Senichev                                                     */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -80,6 +83,7 @@ static bool myDataParse(\
     {\
         l_rc = true;\
         l_pParser->parse(i_ver, i_parser, i_buffer, i_buflen);\
+        delete l_pParser;\
     }\
     return l_rc;\
 }\
