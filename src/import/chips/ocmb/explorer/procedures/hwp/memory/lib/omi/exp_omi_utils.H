@@ -209,7 +209,7 @@ inline fapi2::ReturnCode write_dlx_config1( const fapi2::Target<fapi2::TARGET_TY
 /// @param[in] i_train_mode mode to use
 /// @param[in] i_dl_x4_backoff_en backoff enable bit
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
-/// @note Algorithm from p9a_omi_train.C
+/// @note Algorithm from p10_omi_train.C
 ///
 fapi2::ReturnCode setup_omi_dl0_config0(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,

@@ -625,7 +625,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
 /// @brief Traits for pre_data_engine
 /// @class attrEngineTraits
 /// @tparam P processor type
-/// @note AXONE, DIMM_TYPE_METADATA specialization
+/// @note P10, DIMM_TYPE_METADATA specialization
 ///
 template< proc_type P >
 struct attrEngineTraits<P, generic_metadata_fields, generic_metadata_fields::DIMM_TYPE_METADATA>

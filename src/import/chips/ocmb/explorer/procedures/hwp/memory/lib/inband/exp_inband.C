@@ -494,7 +494,7 @@ fapi2::ReturnCode host_fw_response_struct_from_little_endian(const fapi2::Target
                 mss::c_str(i_target), i_data.size(), sizeof(host_fw_response_struct));
 
 //TODO CQ: SW461052 Correct MMIO CRC responses
-#ifndef CONFIG_AXONE_BRING_UP
+#ifndef CONFIG_P10_BRING_UP
     FAPI_ASSERT(l_crc == o_response.response_header_crc,
                 fapi2::EXP_INBAND_RSP_CRC_ERR()
                 .set_COMPUTED(l_crc)
