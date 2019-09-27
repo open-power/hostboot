@@ -48,6 +48,7 @@
 #include <p10_tor.H>
 #include <p10_scan_compression.H>
 #include <scom/wakeup.H>
+#include <util/misc.H>
 
 //******************************************************************************
 // Trace descriptors
@@ -1114,7 +1115,12 @@ ReturnCode delay(uint64_t i_nanoSeconds,
                  bool i_fixed)
 {
     //Note: i_fixed is deliberately ignored
-    nanosleep( 0, i_nanoSeconds );
+
+    // We don't need to waste time for hardware delays if we're running in Simics
+    if( !Util::isSimicsRunning() )
+    {
+        nanosleep( 0, i_nanoSeconds );
+    }
     return FAPI2_RC_SUCCESS;
 }
 
