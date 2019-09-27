@@ -58,10 +58,11 @@ namespace exp
 ///
 enum msdg_dimm_types
 {
-    MSDG_UDIMM  = 0x0000,
-    MSDG_RDIMM  = 0x0001,
-    MSDG_LRDIMM = 0x0002,
-    MSDG_DDIMM  = 0x0003,
+    MSDG_UDIMM      = 0x0000,
+    MSDG_RDIMM      = 0x0001,
+    MSDG_LRDIMM     = 0x0002,
+    MSDG_MDS_LRDIMM = 0x0003,
+    MSDG_MDS        = 0x0004
 };
 
 ///
@@ -439,6 +440,14 @@ class phy_params
 
                 case fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_LRDIMM:
                     io_phy_params.DimmType = MSDG_LRDIMM;
+                    break;
+
+                case fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_MDS_LRDIMM:
+                    io_phy_params.DimmType = MSDG_MDS_LRDIMM;
+                    break;
+
+                case fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_MDS:
+                    io_phy_params.DimmType = MSDG_MDS;
                     break;
 
                 default:

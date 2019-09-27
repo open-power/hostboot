@@ -124,7 +124,9 @@ typedef struct __attribute__((packed)) user_input_msdg
     // Choose the Dimm type from one of below:
     // 0 = UDIMM
     // 1 = RDIMM
-    // 2 = LRDIMM
+    // 2 = LRDIMM (invalid for explorer)
+    // 3 = MDS-LRDIMM
+    // 4 = MDS
     uint16_t DimmType;
 
     // Indicates presence of DRAM at each chip select for PHY. Each
