@@ -51,6 +51,8 @@ extern "C"
     {
         FAPI_INF("%s Start thermal_init", mss::c_str(i_target));
 
+#if 0
+// Skip EXP_FW_TEMP_SENSOR_CONFIG_INTERVAL_READ until it's available in Explorer FW
         // Declare variables
         host_fw_command_struct l_cmd_sensor;
         host_fw_response_struct l_response;
@@ -68,7 +70,7 @@ extern "C"
 
         FAPI_TRY( mss::exp::check::sensor_response(i_target, l_response),
                   "Failed sensor_response() for  %s", mss::c_str(i_target) );
-
+#endif
         // Prior to starting OCC, we go into "safemode" throttling
         // After OCC is started, they can change throttles however they want
         FAPI_TRY (mss::exp::mc::setup_emergency_throttles(i_target));
