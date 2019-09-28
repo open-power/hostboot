@@ -544,4 +544,33 @@
     <initToZero/>
     <group>debug</group>
   </attribute>
+  <!-- *********************************************************************-->
+  <attribute>
+    <id>ATTR_QME_BOOT_CONTROL</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Control the mode of QME booting:
+    HCODE_ALLSCAN_BC: image length is Hcode and all scan rings; load via block copy (product mode)
+    HCODE_ALLSCAN_NOBC: image length is Hcode and all scan rings; load via block copy
+    HCODE_CMNSCAN_NOBC: image length is Hcode and common scan rings; load via direct SRAM insertion
+    HCODE_ONLY_NOBC: image length is Hcode with no scan rings; loaded via direct SRAM insertion
+    HCODE_ONLY_BC: image length is Hcode with no scan rings; loaded via block copy
+
+    Producer:  Override/Lab
+    Consumers: p10_hcode_image_build; p10_pm_qme_init
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+        HCODE_ALLSCAN_BC=0,
+        HCODE_ALLSCAN_NOBC=1,
+        HCODE_CMNSCAN_NOBC=2,
+        HCODE_ONLY_NOBC=3,
+        HCODE_ONLY_BC=4
+    </enum>
+    <writeable/>
+    <overrideOnly/>
+    <initToZero/>
+    <group>boot</group>
+  </attribute>
+  <!-- *********************************************************************-->
 </attributes>

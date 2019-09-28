@@ -6,6 +6,7 @@
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
 <!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
@@ -34,9 +35,25 @@
     aligned to a 4MB boundary
   </description>
   <valueType>uint64</valueType>
-  <platInit/>
+  <writeable/>
+  <initToZero/>
 </attribute>
 
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_QME_HCODE_OFFSET</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+   Offset within the CPMR where QME Hcode starts.It is used by HWP
+   p10_pm_qme_init to program QME's block copy engine to transfer
+   QME Hcode from HOMER to QME SRAM.
+  </description>
+  <valueType>uint32</valueType>
+  <writeable/>
+  <initToZero/>
+</attribute>
+
+<!-- ********************************************************************** -->
 <attribute>
   <id>ATTR_QME_HCODE_BLOCK_COUNT</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -47,6 +64,8 @@
   </description>
   <valueType>uint32</valueType>
   <writeable/>
-  <platInit/>
+  <initToZero/>
 </attribute>
+<!-- ********************************************************************** -->
+
 </attributes>
