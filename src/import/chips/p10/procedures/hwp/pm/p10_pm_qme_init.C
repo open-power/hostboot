@@ -1,0 +1,538 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/import/chips/p10/procedures/hwp/pm/p10_pm_qme_init.C $    */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+/// @file p10_pm_qme_init.C
+/// @brief Initializes all QMEs of the given proc chip.
+
+// *HWP HWP Owner       :   Greg Still <stillgs@us.ibm.com>
+// *HWP Backup Owner    :   David Du   <daviddu@us.ibm.com>
+// *HWP FW Owner        :   Prem S Jha <premjha2@in.ibm.com>
+// *HWP Team            :   PM
+// *HWP Level           :   2
+// *HWP Consumed by     :   HB
+
+///
+/// High-level procedure flow:
+/// @verbatim
+///   if PM_HALT
+///   - Halt the QME
+///   if PM_START
+///   - Clear error injection bits
+///   - Clear QME Flag bit to be polled on
+///   - Setup QME Block Copy to point to CPMR
+///     - Read QME BCEBAR0 and adjust the value to the CPMR
+///   - With a length value of the Hcode and common rings provided by
+///     hcode_image_build via an attribute,  kick-off the BCE and poll for
+///     completion
+///   - Start the QME to allow the Hcode to boot.
+///   - Poll QME Flag bit for QME boot completion
+///
+///   - QME Hcode itself (not this procedure) will use the Block Copy Engine
+///     to pull the Local Pstate Parameter Block and quad specific rings
+///     into QME SRAM
+/// @endverbatim
+
+// -----------------------------------------------------------------------------
+//  Includes
+// -----------------------------------------------------------------------------
+
+#include <vector>
+#include <algorithm>
+#include <p10_hcd_common.H>
+#include <p10_pm_hcd_flags.h>
+#include <p10_pm_qme_init.H>
+#include <p10_scom_proc_3.H>
+#include <p10_scom_proc_5.H>
+#include <p10_scom_eq.H>
+#include <multicast_group_defs.H>
+#include <p10_hcd_memmap_base.H>
+#include <p10_fbc_utils.H>
+
+// ----------------------------------------------------------------------
+// Constants
+// ----------------------------------------------------------------------
+
+enum
+{
+    QME_ACTIVE              =   p10hcd::QME_FLAGS_STOP_READY,
+    QME_TIMEOUT_MS          =   250,
+    QME_TIMEOUT_MCYCLES     =   100,
+    QME_POLLTIME_MS         =   1,
+    QME_POLLTIME_MCYCLES    =   1,
+    TIMEOUT_COUNT           =   QME_TIMEOUT_MS / QME_POLLTIME_MS,
+    SIM_TIMEOUT_COUNT       =   QME_TIMEOUT_MCYCLES / QME_POLLTIME_MCYCLES,
+    QME_BASE_ADDRESS        =   0,
+    QME_HALT                =   1,
+    HOMER_CPMR_OFFSET       =   0x200000,
+    BCE_START               =   2,  // this bit is not in generated headers
+    BCE_BUSY                =   scomt::eq::QME_BCECSR_BUSY,
+    BCE_ERROR               =   scomt::eq::QME_BCECSR_ERROR,
+    WRITE_TO_SRAM           =   scomt::eq::QME_BCECSR_RNW,
+    BCE_BAR0_SEL            =   0,
+    BCE_TYPE                =   0,
+    BCE_SBASE               =   0,
+    BCE_BAR_APERTURE_2_MB   =   0x01,
+    BCE_STALL_MAX           =   4,
+    CPMR_BASE               =   (2 * 1024 * 1024),
+    MBASE_SHIFT             =   5,
+};
+
+// -----------------------------------------------------------------------------
+//  Function prototypes
+// -----------------------------------------------------------------------------
+
+fapi2::ReturnCode qme_init(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+
+fapi2::ReturnCode qme_halt(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+
+fapi2::ReturnCode initQmeBoot( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target );
+
+fapi2::ReturnCode get_functional_chiplet_info(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target ,
+    std::vector<uint64_t>& o_ppe_addr_list,
+    std::vector< fapi2::Target<fapi2::TARGET_TYPE_EQ > >& o_eq_target_list );
+
+// -----------------------------------------------------------------------------
+//  Function definitions
+// -----------------------------------------------------------------------------
+
+/// @brief Initialize the  QME and related functions
+/// @param [in] i_target Chip target
+/// @param [in] i_mode   Control mode for the procedure
+///                      PM_INIT, PM_RESET
+/// @retval FAPI_RC_SUCCESS
+/// @retval ERROR defined in xml
+
+fapi2::ReturnCode p10_pm_qme_init(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const pm::PM_FLOW_MODE i_mode)
+{
+    FAPI_IMP(">> p10_pm_qme_init");
+
+    const char* PM_MODE_NAME_VAR;  //Defines storage for PM_MODE_NAME
+    FAPI_INF(" Execution mode %s", PM_MODE_NAME(i_mode));
+    uint8_t                 fusedModeState = 0;
+
+    // -------------------------------
+    // Initialization:  perform order or dynamic operations to initialize
+    // the STOP funciton using necessary Platform or Feature attributes.
+    if ( pm::PM_START == i_mode )
+    {
+        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FUSED_CORE_MODE,
+                               FAPI_SYSTEM,
+                               fusedModeState),
+                 "Error from FAPI_ATTR_GET for attribute ATTR_FUSED_CORE_MODE");
+
+        // Boot the QME
+        FAPI_TRY( qme_init( i_target ), "ERROR: Failed To Initialize  QME" );
+    }
+
+    //-------------------------------
+    // HALT: halt STOP function including the QME
+    // so that it can reconfigured and reinitialized
+    else if ( i_mode == pm::PM_HALT )
+    {
+        FAPI_TRY( qme_halt( i_target ), "ERROR: Failed To Reset QME");
+    }
+
+    // -------------------------------
+    // Unsupported Mode
+    else
+    {
+        FAPI_ERR("Unknown Mode Passed To p10_pm_qme_init. Mode %x ....", i_mode);
+        FAPI_ASSERT(false,
+                    fapi2::QME_BAD_MODE()
+                    .set_BADMODE(i_mode),
+                    "ERROR; Unknown Mode Passed To qme_init. Mode %x",
+                    i_mode);
+    }
+
+fapi_try_exit:
+    FAPI_IMP("<< p10_pm_qme_init");
+    return fapi2::current_err;
+}
+
+// -----------------------------------------------------------------------------
+//  QME Initialization Function
+// -----------------------------------------------------------------------------
+
+/// @brief Initializes the QME and related STOP functions on a chip
+/// @param [in] i_target    Chip target
+/// @retval FAPI_RC_SUCCESS else ERROR defined in xml
+
+fapi2::ReturnCode qme_init(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target )
+{
+    using namespace scomt::eq;
+    fapi2::buffer<uint64_t> l_qme_flag;
+    fapi2::buffer<uint64_t> l_xcr;
+    fapi2::buffer<uint64_t> l_xsr;
+    fapi2::buffer<uint64_t> l_iar;
+    fapi2::buffer<uint64_t> l_ir;
+    fapi2::buffer<uint64_t> l_dbg;
+    uint32_t                l_timeout = TIMEOUT_COUNT;
+
+    FAPI_IMP(">> qme_init");
+
+    auto l_eq_mc_or  = i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_OR >(fapi2::MCGROUP_GOOD_EQ);
+    auto l_eq_mc_and = i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_AND >(fapi2::MCGROUP_GOOD_EQ);
+    auto l_eq_vector = i_target.getChildren<fapi2::TARGET_TYPE_EQ> (fapi2::TARGET_STATE_FUNCTIONAL);
+
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_IS_SIMULATION_Type is_sim;
+    FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_IS_SIMULATION, FAPI_SYSTEM, is_sim));
+
+    if (is_sim)
+    {
+        l_timeout = SIM_TIMEOUT_COUNT;
+    }
+
+    // First check if QME_ACTIVE is not set in any OCCFLAG register
+    FAPI_TRY( getScom( l_eq_mc_or, QME_FLAGS_RW, l_qme_flag ) );
+
+    if( l_qme_flag.getBit<QME_ACTIVE>() == 1 )
+    {
+        FAPI_DBG("At least one ACTIVE bit found");
+
+        // See which EQ(s) are active and deal with them
+        for (auto& eq : l_eq_vector)
+        {
+            FAPI_TRY( getScom( eq, QME_FLAGS_RW, l_qme_flag ) );
+
+            if( l_qme_flag.getBit<QME_ACTIVE>() == 1 )
+            {
+                fapi2::ATTR_CHIP_UNIT_POS_Type eq_pos;
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                                       eq,
+                                       eq_pos),
+                         "fapiGetAttribute of ATTR_CHIP_UNIT_POS failed");
+                FAPI_INF( "WARNING: QME_ACTIVE Flag already set in QME Flag Register for QME %d. Continuing on after clear it.",
+                          eq_pos);
+                l_qme_flag.flush< 0 >();
+                l_qme_flag.setBit< QME_ACTIVE >();
+                FAPI_TRY( putScom( eq, QME_FLAGS_WO_CLEAR, l_qme_flag ),
+                          "ERROR: Failed To Clear QME Active Bit In QME Flag Register" );
+            }
+        }
+    }
+
+    FAPI_TRY( initQmeBoot( i_target ), "p10_pm_qme_init Failed To Copy QME Hcode In To QME's SRAM" );
+
+    FAPI_INF("Start the QMEs");
+    l_xcr.flush< 0 >().insertFromRight( XCR_HARD_RESET, 1, 3 );
+    FAPI_TRY( putScom( l_eq_mc_or, QME_SCOM_XIXCR, l_xcr ) );
+
+    l_xcr.flush< 0 >().insertFromRight( XCR_RESUME, 1, 3 );
+    FAPI_TRY( putScom( l_eq_mc_or, QME_SCOM_XIXCR, l_xcr ) );
+
+    l_qme_flag.flush< 0 >();
+    l_xsr.flush< 0 >();
+    l_ir.flush< 0 >();
+    l_dbg.flush< 0 >();
+
+    FAPI_INF("Poll for all QMEs going Active");
+
+    do
+    {
+        fapi2::delay( QME_POLLTIME_MS * 1000 * 1000, QME_POLLTIME_MCYCLES * 1000 * 1000 );
+
+        FAPI_TRY( getScom( l_eq_mc_and, QME_FLAGS_RW, l_qme_flag ) );
+        FAPI_TRY( getScom( l_eq_mc_or, QME_SCOM_XIDBGPRO, l_xsr ) );
+        FAPI_TRY( getScom( l_eq_mc_or, QME_SCOM_XIRAMEDR, l_ir ) );
+        FAPI_DBG( "Poll content: QME Flag: 0x%08llX; IR-EDR: 0x%016llX XSR-IAR: 0x%016llX DGB: 0x%016llX Timeout: %d",
+                  l_qme_flag,
+                  l_ir,
+                  l_xsr,
+                  l_dbg,
+                  l_timeout );
+    }
+    while(!((l_qme_flag.getBit<QME_ACTIVE>() == 1) ||
+            (l_xsr.getBit<XSR_HALTED_STATE>() == 1) ||
+            (--l_timeout == 0)));
+
+    FAPI_ASSERT( l_timeout != 0,
+                 fapi2::QME_START_TIMEOUT()
+                 .set_CHIP(i_target)
+                 .set_OCC_FLAG_REG_VAL( l_qme_flag )
+                 .set_XSR_REG_VAL( l_xsr )
+                 .set_PPE_STATE_MODE(XCR_RESUME),
+                 "QME start timed out");
+
+    if (l_xsr.getBit<XSR_HALTED_STATE>() == 1)
+    {
+        for (auto& eq : l_eq_vector)
+        {
+            FAPI_TRY( getScom( eq, QME_SCOM_XIDBGPRO, l_xsr ) );
+
+            if( l_xsr.getBit<XSR_HALTED_STATE>() == 1 )
+            {
+                fapi2::ATTR_CHIP_UNIT_POS_Type eq_pos;
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                                       eq,
+                                       eq_pos),
+                         "fapiGetAttribute of ATTR_CHIP_UNIT_POS failed");
+                FAPI_ERR( "QME %d Halted", eq_pos);
+            }
+        }
+
+        FAPI_ASSERT(false,
+                    fapi2::QME_START_HALTED()
+                    .set_CHIP(i_target)
+                    .set_OCC_FLAG_REG_VAL( l_qme_flag )
+                    .set_XSR_REG_VAL( l_xsr ),
+                    "QME start halted");
+    }
+
+    FAPI_INF( "QME was activated successfully!!!!" );
+
+fapi_try_exit:
+    FAPI_IMP("<< qme_init");
+    return fapi2::current_err;
+}
+
+// -----------------------------------------------------------------------------
+//   QME Function
+// -----------------------------------------------------------------------------
+
+/// @brief  halts the QME
+/// @param  [in] i_target    Chip target
+/// @retval FAPI_RC_SUCCESS
+/// @retval ERROR defined in xml
+
+fapi2::ReturnCode qme_halt(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    using namespace scomt;
+    using namespace eq;
+    fapi2::buffer<uint64_t> l_data64;
+    uint32_t                l_timeout_in_MS = 100;
+
+    FAPI_IMP(">> qme_halt...");
+
+    // mc_or target will be used for putscom too
+    auto l_eq_mc_or  =
+        i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_OR >(fapi2::MCGROUP_GOOD_EQ);
+    auto l_eq_mc_and =
+        i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_AND >(fapi2::MCGROUP_GOOD_EQ);
+
+    FAPI_INF("Send HALT command via XCR...");
+    l_data64.flush<0>().insertFromRight( XCR_HALT, 1, 3 );
+    FAPI_TRY( putScom( l_eq_mc_or, QME_SCOM_XIDBGPRO, l_data64 ) );
+
+    FAPI_INF("Poll for HALT State via XSR...");
+
+    do
+    {
+        FAPI_TRY( getScom( l_eq_mc_and, QME_SCOM_XIDBGPRO, l_data64 ) );
+        fapi2::delay( QME_POLLTIME_MS * 1000 * 1000, QME_POLLTIME_MCYCLES * 1000 * 1000 );
+    }
+    while( ( l_data64.getBit<XSR_HALTED_STATE>() == 0 ) && ( --l_timeout_in_MS != 0 ) );
+
+    if( 0 == l_timeout_in_MS )
+    {
+        FAPI_ASSERT( false,
+                     fapi2::QME_HALT_TIMEOUT()
+                     .set_CHIP(i_target)
+                     .set_PPE_STATE_MODE(XCR_HALT),
+                     "STOP Reset Timeout");
+    }
+
+    FAPI_INF("Clear QME_ACTIVE in OCC Flag Register...");
+    l_data64.flush<0>().setBit<QME_ACTIVE>();
+    FAPI_TRY( putScom( l_eq_mc_or, QME_FLAGS_RW, l_data64 ) );
+
+fapi_try_exit:
+    FAPI_IMP("<< qme_halt...");
+    return fapi2::current_err;
+}
+
+
+///
+/// @brief Initialize the QME topology id table entries
+/// @param[in] c                Reference to core target
+/// @param[in] topo_scoms       Vector where each element is the content to write
+///                             into the topology id table SCOM register.
+///                             topo_scoms[0] contains reg value for entries  0.. 7
+///                             topo_scoms[1] contains reg value for entries  8..15
+///                             topo_scoms[2] contains reg value for entries 16..23
+///                             topo_scoms[3] contains reg value for entries 24..31
+///                             assert(topo_scoms.size() == 4)
+/// @return fapi::ReturnCode    FAPI2_RC_SUCCESS on success, error otherwise
+///
+fapi2::ReturnCode init_topo_id_tables(
+    const fapi2::Target < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST > & eq,
+    const std::vector<uint64_t>& topo_scoms)
+{
+    using namespace scomt::eq;
+
+    FAPI_DBG(">> init_topo_id_tables");
+    PREP_QME_SCOM_PBTXTR0(eq);
+    FAPI_TRY(PUT_QME_SCOM_PBTXTR0(eq, topo_scoms[0]));
+    PREP_QME_SCOM_PBTXTR1(eq);
+    FAPI_TRY(PUT_QME_SCOM_PBTXTR1(eq, topo_scoms[1]));
+    PREP_QME_SCOM_PBTXTR2(eq);
+    FAPI_TRY(PUT_QME_SCOM_PBTXTR2(eq, topo_scoms[2]));
+    PREP_QME_SCOM_PBTXTR3(eq);
+    FAPI_TRY(PUT_QME_SCOM_PBTXTR3(eq, topo_scoms[3]));
+    FAPI_DBG("<< init_topo_id_tables");
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+/// @brief Kicks off the boot flow of QME.
+/// @param [in] i_target Chip target
+/// @retval FAPI_RC_SUCCESS
+/// @retval ERROR defined in xml
+fapi2::ReturnCode initQmeBoot(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target )
+{
+    using namespace scomt;
+    using namespace proc;
+    using namespace eq;
+    uint64_t l_cpmrBase         =   0;
+    uint32_t l_qmeHcodeBlock    =   0;
+    fapi2::buffer<uint64_t> l_bceBarReg;
+    fapi2::buffer<uint64_t> l_bceCsrReg;
+    fapi2::buffer<uint64_t> l_qmcrReg;
+    uint32_t l_bceTimeOut = TIMEOUT_COUNT;
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    std::vector<uint64_t> l_topo_scoms;
+
+    FAPI_INF(">> initQmeBoot");
+
+    // mc_or target will be used for putscom too
+    auto l_eq_mc_or  =
+        i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_OR >(fapi2::MCGROUP_GOOD_EQ);
+    auto l_eq_mc_cmp =
+        i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_COMPARE >(fapi2::MCGROUP_GOOD_EQ);
+
+    fapi2::ATTR_QME_BOOT_CONTROL_Type bootMode;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_QME_BOOT_CONTROL,
+                           i_target,
+                           bootMode),
+             "Error from FAPI_ATTR_GET for attribute ATTR_QME_BOOT_CONTROL");
+
+    do
+    {
+        // No Block Copy means the SRAM was inserted externally
+        if ( bootMode == fapi2::ENUM_ATTR_QME_BOOT_CONTROL_HCODE_ALLSCAN_NOBC ||
+             bootMode == fapi2::ENUM_ATTR_QME_BOOT_CONTROL_HCODE_CMNSCAN_NOBC ||
+             bootMode == fapi2::ENUM_ATTR_QME_BOOT_CONTROL_HCODE_ONLY_NOBC )
+        {
+            FAPI_INF("Skipping QME block copy");
+            break;
+        }
+
+        // Get the register values for the SCOMs to setup the topology id table
+        FAPI_TRY(topo::get_topology_table_scoms(i_target, l_topo_scoms));
+        FAPI_TRY(init_topo_id_tables(l_eq_mc_or, l_topo_scoms));
+
+        // The Base HOMER address it placed in BCEBAR0 by p10_pm_set_homer_bar
+        // and includes the region size. The hardware is read as some systems
+        // may move HOMER upon PM Restart actions.
+        FAPI_TRY(fapi2::getScom(l_eq_mc_cmp, QME_BCEBAR0, l_bceBarReg));
+        FAPI_DBG("l_bceBarReg BEFORE: 0x%016llX", l_bceBarReg);
+
+        // Clear the size field to set specifically for QME
+        l_bceBarReg.clearBit(61, 3);
+        l_cpmrBase |=  (l_bceBarReg | CPMR_BASE | BCE_BAR_APERTURE_2_MB);
+        FAPI_DBG("l_cpmrBase AFTER: 0x%016llX", l_cpmrBase);
+
+        FAPI_TRY( putScom( l_eq_mc_or, QME_BCEBAR0, l_cpmrBase ) );
+
+        // Check for invalid hardare state
+        FAPI_TRY( getScom( l_eq_mc_or, QME_BCECSR, l_bceCsrReg ) );
+
+        if (l_bceCsrReg.getBit( BCE_ERROR ))
+        {
+            FAPI_ASSERT( false,
+                         fapi2::QME_BCE_HW_ERR()
+                         .set_CHIP(i_target),
+                         "Block Copy Engine Found In Error State Before Initiating QME Hcode Transfer");
+        }
+
+        if (l_bceCsrReg.getBit( BCE_BUSY ))
+        {
+            FAPI_ASSERT( false,
+                         fapi2::QME_BCE_BUSY_ERR()
+                         .set_CHIP(i_target),
+                         "Block Copy Engine Found In Busy State Before Initiating QME Hcode Transfer");
+        }
+
+        // Determine how much to block copy
+        FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_QME_HCODE_BLOCK_COUNT,
+                                FAPI_SYSTEM,
+                                l_qmeHcodeBlock));
+        FAPI_DBG("Block copy count = %d (0x%X)", l_qmeHcodeBlock, l_qmeHcodeBlock);
+
+        l_bceCsrReg.flush<0>().setBit<BCE_START>().setBit<WRITE_TO_SRAM>();
+        l_bceCsrReg.insertFromRight( BCE_BAR0_SEL, QME_BCECSR_BARSEL, 1 );
+        l_bceCsrReg.insertFromRight( BCE_TYPE, QME_BCECSR_TYPE, QME_BCECSR_TYPE_LEN );
+        l_bceCsrReg.insertFromRight( l_qmeHcodeBlock, QME_BCECSR_NUM_BLOCKS, QME_BCECSR_NUM_BLOCKS_LEN );
+        l_bceCsrReg.insertFromRight( QME_IMAGE_CPMR_OFFSET >> MBASE_SHIFT, QME_BCECSR_MBASE, QME_BCECSR_MBASE_LEN );
+        FAPI_DBG("l_bceCsrReg AFTER: 0x%016llX", l_bceCsrReg);
+
+        //Kick off block copy
+        l_qmcrReg.flush<0>().setBit( QME_QMCR_BCECSR_OVERRIDE_EN );
+        FAPI_TRY( putScom( l_eq_mc_or, QME_QMCR_WO_OR, l_qmcrReg ) );
+
+        FAPI_TRY( putScom( l_eq_mc_or, QME_BCECSR, l_bceCsrReg ) );
+        FAPI_INF( "QME Hcode Transfer Initiated" );
+
+        // RTC: 243681:  HW505969 - read BCECSR as the first one is junk
+        FAPI_INF( "HW505969 BCECSR read" );
+        FAPI_TRY( getScom( l_eq_mc_or, QME_BCECSR, l_bceCsrReg ) );
+
+        uint32_t l_qmeRunningCount = l_qmeHcodeBlock;
+        uint32_t loop_count = 0;
+        FAPI_DBG("l_qmeRunningCount START: %u (0x%X)", l_qmeRunningCount, l_qmeRunningCount);
+
+        do
+        {
+            fapi2::delay(QME_POLLTIME_MS * 1000, QME_POLLTIME_MCYCLES * 1000 * 1000);
+            FAPI_TRY( getScom( l_eq_mc_or, QME_BCECSR, l_bceCsrReg ) );
+            l_bceCsrReg.extractToRight(l_qmeRunningCount, QME_BCECSR_NUM_BLOCKS, QME_BCECSR_NUM_BLOCKS_LEN );
+            FAPI_DBG("l_qmeRunningCount LOOP: %u (0x%X)", l_qmeRunningCount, l_qmeRunningCount);
+            ++loop_count;
+        }
+        while( ( l_bceCsrReg.getBit<BCE_BUSY>() == 1 ) && ( --l_bceTimeOut != 0 ) );
+
+        FAPI_DBG("After loop l_bceCsrReg: 0x%016llX", l_bceCsrReg );
+
+        FAPI_ASSERT( l_bceTimeOut,
+                     fapi2::QME_HCODE_TRANSFER_FAILED()
+                     .set_CHIP(i_target),
+                     "Block Copy Engine Failed To Complete Transfer of QME Hcode and Timed Out");
+
+        FAPI_INF( "QME Hcode Transfer Completed" );
+    }
+    while(0);
+
+fapi_try_exit:
+    FAPI_INF("<< initQmeBoot");
+    return fapi2::current_err;
+}
