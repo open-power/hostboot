@@ -47,7 +47,7 @@
 extern const char* PM_FLOW_MODE_NAME[];
 
 #define PM_FLOW_MODE_NAME_STRINGS   \
-    {                           \
+    {                       \
         "PM_HALT",              \
         "PM_START",             \
         "PM_SETUP",             \

@@ -149,6 +149,16 @@ HCD_HDR_PAD(IMG_HDR_ALIGN_SIZE);
 } __attribute__((packed, aligned(32))) QmeHeader_t;
 #endif
 
+#ifndef __ASSEMBLER__
+
+typedef struct QMEImageFlags
+{
+    uint32_t fused_mode     : 1;
+    uint32_t reserved0      : 31;
+} QMEImageFlags_t;
+
+#endif //__ASSEMBLER__
+
 #ifdef __ASSEMBLER__
 .macro  .ppmr_header
 .section ".ppmr" , "aw"
@@ -179,10 +189,9 @@ HCD_HDR_UINT32( iv_sramSize,            0);
 HCD_HDR_UINT32( iv_progCode,            0);
 HCD_HDR_UINT32( iv_wofTableOffset,      0);
 HCD_HDR_UINT32( iv_wofTableLength,      0);
-HCD_HDR_UINT32( iv_auxTaskOffset,       0);
-HCD_HDR_UINT32( iv_auxTaskLength,       0);
 HCD_HDR_UINT32( iv_deepOptraceOffset,   0);
 HCD_HDR_UINT32( iv_deepOptraceLength,   0);
+
 #ifdef __ASSEMBLER__
 .endm
 #else

@@ -811,7 +811,7 @@ fapi_try_exit:
  * @brief       builds QME image in CPMR section of HOMER
  * @param[in]   i_procTgt       fapi2 target for P10 proc chip
  * @param[in]   i_pImageIn      points to HW Image
- * @param[in]   i_pChipHomer    models HOMER region of memory
+ * @param[in]   i_pChibuildQmeRingpHomer    models HOMER region of memory
  * @param[in]   i_procFuncModel contains P10 chip configuration details.
  * @param[in]   i_imageRecord   an instance of ImageBuildRecord
  * @return      fapi2 return code.
@@ -866,6 +866,8 @@ fapi2::ReturnCode buildQmeRing( CONST_FAPI2_PROC& i_procTgt, void * const i_pIma
                               ( &i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion[l_qmeSectn.iv_sectnLength] - (uint8_t *)&i_pChipHomer->iv_cpmrRegion ),
                                 i_ringData.iv_ringBufSize );
 
+    FAPI_DBG("l_xipSection.iv_offset = 0x%08X, l_xipSection.iv_size = 0x%08X",
+             l_xipSection.iv_offset, l_xipSection.iv_size);
     fapi_try_exit:
     FAPI_INF( "<< buildQmeRing" );
     return fapi2::current_err;
@@ -1012,7 +1014,7 @@ fapi2::ReturnCode buildCpmrHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   
 
     if( !i_qmeBuildRecord.getSection( "QME Hcode", l_imgSectn ) )
     {
-        pCpmrHdr->iv_qmeImgOffset       =    htobe32( l_qmeHcodeOffset + l_imgSectn.iv_sectnOffset );
+        pCpmrHdr->iv_qmeImgOffset       =    htobe32( l_qmeHcodeOffset );
         pCpmrHdr->iv_qmeImgLength       =    htobe32( l_imgSectn.iv_sectnLength );
     }
 
@@ -1027,8 +1029,14 @@ fapi2::ReturnCode buildCpmrHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   
 
     if( !i_qmeBuildRecord.getSection( "QME Ring Blob", l_imgSectn ) )
     {
-        pCpmrHdr->iv_commonRingOffset   =   htobe32( l_imgSectn.iv_sectnOffset );
-        pCpmrHdr->iv_commonRingLength   =   htobe32( l_imgSectn.iv_sectnLength );
+        //pCpmrHdr->iv_commonRingOffset   =   htobe32( l_imgSectn.iv_sectnOffset );
+        pCpmrHdr->iv_commonRingOffset   =   htobe32( htobe32(pCpmrHdr->iv_qmeImgOffset) + htobe32(pCpmrHdr->iv_qmeImgLength));
+        // TODO enable scanning
+        // pCpmrHdr->iv_commonRingLength   =   htobe32( l_imgSectn.iv_sectnLength );
+        pCpmrHdr->iv_commonRingLength   =   0;
+
+        FAPI_INF( "Common Ring Offset       0x%08x", htobe32( pCpmrHdr->iv_commonRingOffset ) );
+        FAPI_INF( "Common Ring Length       0x%08x", htobe32( pCpmrHdr->iv_commonRingLength ) );
     }
 
     pCpmrHdr->iv_maxCoreL2ScomEntry   =     htobe32(MAX_CORE_SCOM_ENTRIES + MAX_L2_SCOM_ENTRIES);
@@ -1042,7 +1050,7 @@ fapi2::ReturnCode buildCpmrHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   
     FAPI_INF( "Max Cache L3 SCOM Entry      0x%08x",  htobe32( pCpmrHdr->iv_maxEqL3ScomEntry) );
 
  fapi_try_exit:
-    FAPI_INF( "<< buildQmeHeader" )
+    FAPI_INF( "<< buildCpmrHeader" )
     return fapi2::current_err;
 }
 
@@ -1058,18 +1066,29 @@ fapi2::ReturnCode initCpmrAttribute( Homerlayout_t   *i_pChipHomer,
                                      ImageBuildRecord & i_qmeBuildRecord )
 {
     ImgSectnSumm    l_imgSectn;
-    uint32_t        l_blockCount    =   0;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_QME_HCODE_OFFSET_Type l_qmeHcodeOffset;
+    fapi2::ATTR_QME_HCODE_BLOCK_COUNT_Type l_blockCount;
+
+    CpmrHeader_t* pCpmrHdr =
+        (CpmrHeader_t*) & ( i_pChipHomer->iv_cpmrRegion.iv_selfRestoreRegion.iv_CPMR_SR.elements.iv_CPMRHeader);
+
+    l_qmeHcodeOffset =  htobe32( pCpmrHdr->iv_qmeImgOffset );
+    FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_QME_HCODE_OFFSET,
+                             FAPI_SYSTEM,
+                             l_qmeHcodeOffset),
+              "Failed To Set ATTR_QME_HCODE_BLOCK_COUNT");
+
 
     i_qmeBuildRecord.getSection( "QME Hcode", l_imgSectn );
 
-    l_blockCount    =   l_imgSectn.iv_sectnLength >> QME_BLK_SIZE_SHIFT;
+    l_blockCount = l_imgSectn.iv_sectnLength >> QME_BLK_SIZE_SHIFT;
     FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_QME_HCODE_BLOCK_COUNT,
-                             FAPI_SYSTEM,
-                             l_blockCount),
+                            FAPI_SYSTEM,
+                            l_blockCount),
               "Failed To Set ATTR_QME_HCODE_BLOCK_COUNT");
 
-    fapi_try_exit:
+fapi_try_exit:
     return fapi2::current_err;
 }
 
@@ -1103,7 +1122,6 @@ fapi2::ReturnCode populateMagicWord( Homerlayout_t   *i_pChipHomer )
 }
 
 //----------------------------------------------------------------------------------------------
-
 /**
  * @brief   build CPMR region
  * @param[in]   i_procTgt       fapi2 target for P10 chip
