@@ -31,11 +31,11 @@
     Holds data and mask to be programmed into Memory BAR/configuration registers.
     These values are calculated by p10_mss_eff_grouping HWP.
 
-    Array arrangements: 4 MIs x 9 registers x 2 entries (data/mask)
-      [0][0][0] = [MI0][MCFGP0][data] .... [MI0][9][1] = [MI0][MCMODE0][mask]
-      [1][0][0] = [MI1][MCFGP0][data] .... [MI1][9][1] = [MI1][MCMODE0][mask]
-      [2][0][0] = [MI2][MCFGP0][data] .... [MI2][9][1] = [MI2][MCMODE0][mask]
-      [3][0][0] = [MI3][MCFGP0][data] .... [MI3][9][1] = [MI3][MCMODE0][mask]
+    Array arrangements: 4 MIs x 10 registers x 2 entries (data/mask)
+      [0][0][0] = [MI0][MCFGP0][data] .... [MI0][9][1] = [MI0][MCMODE2][mask]
+      [1][0][0] = [MI1][MCFGP0][data] .... [MI1][9][1] = [MI1][MCMODE2][mask]
+      [2][0][0] = [MI2][MCFGP0][data] .... [MI2][9][1] = [MI2][MCMODE2][mask]
+      [3][0][0] = [MI3][MCFGP0][data] .... [MI3][9][1] = [MI3][MCMODE2][mask]
 
     The BARs will be written by p10_sbe_exit_cache_contained HWP when
     called by Hostboot.
@@ -47,7 +47,7 @@
     Consumers: HB (p10_exit_cache_contaiend)
   </description>
   <valueType>uint64</valueType>
-  <array>4 9 2</array>
+  <array>4 10 2</array>
   <enum>
     MCFGP0         = 0,
     MCFGP1         = 1,
@@ -58,7 +58,8 @@
     MCFGPM0A       = 6,
     MCFGPM1A       = 7,
     MCMODE0        = 8,
-    NUM_BAR_REGS   = 9
+    MCMODE2        = 9,
+    NUM_BAR_REGS   = 10
   </enum>
   <writeable/>
   <initToZero/>

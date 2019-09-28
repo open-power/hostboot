@@ -77,10 +77,6 @@ revert_mc_hb_dcbz_config(
                             l_reg_states[fapi2::ENUM_ATTR_PROC_SBE_MCS_SETUP_REG_STATES_MCMODE1]),
              "Error from putScom (MCMODE1)");
 
-    FAPI_TRY(fapi2::putScom(i_target_mc, scomt::mc::SCOMFIR_MCMODE2,
-                            l_reg_states[fapi2::ENUM_ATTR_PROC_SBE_MCS_SETUP_REG_STATES_MCMODE2]),
-             "Error from putScom (MCMODE2)");
-
     FAPI_TRY(fapi2::putScom(i_target_mc, scomt::mc::SCOMFIR_MCPERF1,
                             l_reg_states[fapi2::ENUM_ATTR_PROC_SBE_MCS_SETUP_REG_STATES_MCPERF1]),
              "Error from putScom (MCPERF1)");

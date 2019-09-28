@@ -149,6 +149,7 @@ static const uint64_t MC_BAR_REG_SCOM_ADDRS[] =
     scomt::mc::SCOMFIR_MCFGPM0A,
     scomt::mc::SCOMFIR_MCFGPM1A,
     scomt::mc::SCOMFIR_MCMODE0,
+    scomt::mc::SCOMFIR_MCMODE2,
 };
 
 static const uint8_t ATTR_MEMORY_BAR_REGS_DATA_IDX = 0;

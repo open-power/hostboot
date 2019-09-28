@@ -598,6 +598,7 @@ struct EffGroupingData
     // Indicates if mirror group is to be created
     // from data of this non-mirror group
     uint8_t iv_mirrorOn[DATA_GROUPS / 2];
+
 };
 
 ///----------------------------------------------------------------------------
@@ -1516,7 +1517,7 @@ struct mcBarData_t
     inline mcBarData_t()
         : MCFGP_valid(false), MCFGP_chan_per_group(0),
           MCFGP_chan0_group_member_id(0), MCFGP_chan1_group_member_id(0),
-          MCFGP_group_size(0), MCFGP_groupBaseAddr(0),
+          MCFGP_group_size(0), MCFGP_groupBaseAddr(0), MCMODE2_subchannels_en(0),
           MCFGPM_valid(false), MCFGPM_group_size(0), MCFGPM_groupBaseAddr(0),
           MCFGPA_SMF_valid(0), MCFGPA_SMF_LOWER_addr(0), MCFGPA_SMF_UPPER_addr(0),
           MCFGPMA_SMF_valid(0), MCFGPMA_SMF_LOWER_addr(0), MCFGPMA_SMF_UPPER_addr(0)
@@ -1537,6 +1538,9 @@ struct mcBarData_t
     uint8_t  MCFGP_chan1_group_member_id;
     uint32_t MCFGP_group_size;
     uint32_t MCFGP_groupBaseAddr;
+
+    // Subchannel information
+    uint8_t  MCMODE2_subchannels_en;
 
     // Info to program MCFGPM reg
     bool     MCFGPM_valid;
@@ -1600,6 +1604,7 @@ struct mccGroupInfo_t
     uint8_t smfMemValid;
     uint32_t smfMemSize;
     uint32_t smfBaseAddr;
+
 };
 
 ///----------------------------------------------------------------------------
@@ -1671,6 +1676,7 @@ bool isGroupable(const EffGroupingMemInfo& i_memInfo,
         //   - They have the same (non-zeroed) memory amount installed
         //   - Their DIMM types are the same.
         //   - If Mirroring policy is 'REQUIRED', both sub-channels must be enabled.
+        //   - Grouped channels must have the same number of sub-channels enabled.
 
         // Check grouped MCC
         if ( (i_groupData.iv_mccGrouped[i_MCC_A_Id] == true) ||
@@ -1698,6 +1704,19 @@ bool isGroupable(const EffGroupingMemInfo& i_memInfo,
         {
             FAPI_DBG(" DIMM types are different: MCC_A type: %d, MCC_B type: %d",
                      i_memInfo.iv_dimmType[i_MCC_A_Id], i_memInfo.iv_dimmType[i_MCC_B_Id]);
+            break;
+        }
+
+        // Both channels need to have the same number of subchannels configured, if
+        // one has none it cannot be used
+        if ( ( (i_memInfo.iv_SubChannelsEnabled[i_MCC_A_Id] == OMISubChannelConfig::BOTH) !=
+               (i_memInfo.iv_SubChannelsEnabled[i_MCC_B_Id] == OMISubChannelConfig::BOTH) ) ||
+             (i_memInfo.iv_SubChannelsEnabled[i_MCC_A_Id] == OMISubChannelConfig::NONE) ||
+             (i_memInfo.iv_SubChannelsEnabled[i_MCC_B_Id] == OMISubChannelConfig::NONE) )
+        {
+            FAPI_DBG(" Sub-channels are not compatible: MCC_A sub-channel: %d, MCC_B sub-channel: %d",
+                     i_memInfo.iv_SubChannelsEnabled[i_MCC_A_Id],
+                     i_memInfo.iv_SubChannelsEnabled[i_MCC_B_Id]);
             break;
         }
 
@@ -4035,6 +4054,86 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Set subchannel enables in MCMODE2 register
+///
+/// @param[in]  i_mcBarDataPair  Target pair <MCC, mcBarData>
+/// @param[in]  i_memInfo        Memory information
+/// @param[out] o_memBarRegs     BAR register attribute data array
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode setMCMODE2regData(
+    const std::vector<std::pair<fapi2::Target<fapi2::TARGET_TYPE_MCC>, mcBarData_t>>& i_mcBarDataPair,
+    const EffGroupingMemInfo& i_memInfo,
+    fapi2::ATTR_MEMORY_BAR_REGS_Type o_memBarRegs)
+{
+    FAPI_DBG("Entering");
+
+    using namespace scomt;
+    using namespace scomt::mc;
+
+    uint8_t l_miPos = 0;
+    uint8_t l_mccPos = 0;
+    fapi2::buffer<uint64_t> l_mcmode2[NUM_MC_PER_PROC];
+    fapi2::buffer<uint64_t> l_mcmode2_mask = 0;
+
+    l_mcmode2_mask.setBit<SCOMFIR_MCMODE2_CHANNEL0_SUBCHANNEL0_ENABLE>();
+    l_mcmode2_mask.setBit<SCOMFIR_MCMODE2_CHANNEL0_SUBCHANNEL1_ENABLE>();
+    l_mcmode2_mask.setBit<SCOMFIR_MCMODE2_CHANNEL1_SUBCHANNEL0_ENABLE>();
+    l_mcmode2_mask.setBit<SCOMFIR_MCMODE2_CHANNEL1_SUBCHANNEL1_ENABLE>();
+
+    for (auto l_pair : i_mcBarDataPair)
+    {
+        auto l_target = l_pair.first;
+
+        fapi2::Target<fapi2::TARGET_TYPE_MI> l_mi_target = l_target.getParent<fapi2::TARGET_TYPE_MI>();
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mi_target, l_miPos),
+                 "Error getting MI ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_target, l_mccPos),
+                 "Error getting MCC ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
+
+        PREP_SCOMFIR_MCMODE2(l_mi_target);
+
+        if ((i_memInfo.iv_SubChannelsEnabled[l_mccPos] & OMISubChannelConfig::A) == OMISubChannelConfig::A)
+        {
+            if (l_mccPos % 2 == 0)
+            {
+                SET_SCOMFIR_MCMODE2_CHANNEL0_SUBCHANNEL0_ENABLE(l_mcmode2[l_miPos]);
+            }
+            else
+            {
+                SET_SCOMFIR_MCMODE2_CHANNEL1_SUBCHANNEL0_ENABLE(l_mcmode2[l_miPos]);
+            }
+        }
+
+        if ((i_memInfo.iv_SubChannelsEnabled[l_mccPos] & OMISubChannelConfig::B) == OMISubChannelConfig::B)
+        {
+            if (l_mccPos % 2 == 0)
+            {
+                SET_SCOMFIR_MCMODE2_CHANNEL0_SUBCHANNEL1_ENABLE(l_mcmode2[l_miPos]);
+            }
+            else
+            {
+                SET_SCOMFIR_MCMODE2_CHANNEL1_SUBCHANNEL1_ENABLE(l_mcmode2[l_miPos]);
+            }
+        }
+    }
+
+    for (l_miPos = 0; l_miPos < NUM_MC_PER_PROC; l_miPos++)
+    {
+        o_memBarRegs[l_miPos][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCMODE2][BAR_REGS_DATA_IDX] = l_mcmode2[l_miPos];
+        o_memBarRegs[l_miPos][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCMODE2][BAR_REGS_MASK_IDX] = l_mcmode2_mask;
+    }
+
+fapi_try_exit:
+    FAPI_DBG("Exit");
+    return fapi2::current_err;
+}
+
+///
 /// @brief Set MCFGP register data
 ///
 /// @param[in]  i_target         Reference to MCC chiplet target
@@ -4335,6 +4434,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode setBarRegsData(
     const std::vector<std::pair<fapi2::Target<fapi2::TARGET_TYPE_MCC>, mcBarData_t>>& i_mccBarDataPair,
+    const EffGroupingMemInfo& i_memInfo,
     fapi2::ATTR_MEMORY_BAR_REGS_Type o_memBarRegs)
 {
     FAPI_DBG("Entering");
@@ -4350,6 +4450,11 @@ fapi2::ReturnCode setBarRegsData(
             }
         }
     }
+
+    // 0. ---- Get MCMODE2 reg data -----
+    FAPI_TRY(setMCMODE2regData(i_mccBarDataPair, i_memInfo, o_memBarRegs),
+             "setMCMODE2regData() returns an error, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
 
     // 1. ---- Get MCMODE0 reg data -----
     FAPI_TRY(setMCMODE0regData(i_mccBarDataPair, o_memBarRegs),
@@ -4593,7 +4698,7 @@ fapi2::ReturnCode p10_mss_eff_grouping(
              (uint64_t)fapi2::current_err);
 
     // Set MC BAR registers data
-    FAPI_TRY(setBarRegsData(l_mccBarDataPair, l_memoryBarRegs),
+    FAPI_TRY(setBarRegsData(l_mccBarDataPair, l_memInfo, l_memoryBarRegs),
              "setBarRegsData() returns error, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
