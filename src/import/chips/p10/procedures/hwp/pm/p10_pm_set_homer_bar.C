@@ -191,7 +191,7 @@ fapi2::ReturnCode pm_qme_bar_config (
     uint64_t                l_work_size;
     uint32_t                l_bce_size_encode;
 
-    FAPI_DBG("  p10_pm_qme_bar_config: address 0x%016llX, size 0x%016llX",
+    FAPI_DBG("p10_pm_qme_bar_config: address 0x%016llX, size 0x%016llX",
              i_qme_bar_addr, i_qme_bar_size);
 
     auto l_eq_mc  =
