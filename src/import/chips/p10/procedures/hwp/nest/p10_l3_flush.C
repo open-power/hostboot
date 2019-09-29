@@ -46,7 +46,7 @@ const uint32_t P10_L3_FLUSH_HW_NS_DELAY     = 50000;
 const uint32_t P10_L3_FLUSH_SIM_CYCLE_DELAY = 1000000;
 
 // If the L3 purge is not completed in P10_L3_FLUSH_TIMEOUT delays, fail with error
-const uint32_t P10_L3_FLUSH_TIMEOUT_COUNT = 40;
+const uint32_t P10_L3_FLUSH_TIMEOUT_COUNT = 100;
 
 //--------------------------------------------------------------------------
 //  HWP entry point
