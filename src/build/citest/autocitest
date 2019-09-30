@@ -373,9 +373,15 @@ while [ $(($modsstarted)) -lt 1 -o $(($modsstarted)) -ne $(($modscompleted)) ]; 
     fi
 
     if [[ -z "${HOSTBOOT_PROFILE}" ]]; then
-        loop_timeout=150
+        if [[ "$CHIP" == "AXONE" ]]; then
+            # 75 minutes for axone
+            loop_timeout=225
+        else
+            # 50 minutes by default
+            loop_timeout=150
+        fi
     else
-        # Increase timeout for code coverage
+        # Increase timeout to 166 minutes for code coverage
         loop_timeout=500
     fi
 
