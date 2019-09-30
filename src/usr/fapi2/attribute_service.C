@@ -2081,6 +2081,7 @@ ReturnCode platGetDQAttrISDIMM(
     }
     else
     {
+        mutex_lock(&l_C4DQmutex);
         auto l_huid = TARGETING::get_huid(l_pTarget);
         auto l_iterator = std::find ( l_cachedC4DQValues.begin(),
                                       l_cachedC4DQValues.end(),
@@ -2093,14 +2094,13 @@ ReturnCode platGetDQAttrISDIMM(
             l_kvPair.huid = l_huid;
             rc = getDQAttrISDIMM(l_fapiTarget, l_kvPair.value);
             memcpy(o_vpdIsDimmTOC4DQVal, l_kvPair.value, sizeof(ATTR_CEN_VPD_ISDIMMTOC4DQ_Type));
-            mutex_lock(&l_C4DQmutex);
             l_cachedC4DQValues.push_back(l_kvPair);
-            mutex_unlock(&l_C4DQmutex);
         }
         else
         {
             memcpy(o_vpdIsDimmTOC4DQVal, (*l_iterator).value, sizeof(ATTR_CEN_VPD_ISDIMMTOC4DQ_Type));
         }
+        mutex_unlock(&l_C4DQmutex);
     }
 
     return rc;
@@ -2132,6 +2132,7 @@ ReturnCode platGetDQSAttrISDIMM(
     }
     else
     {
+        mutex_lock(&l_C4DQSmutex);
         auto l_huid = TARGETING::get_huid(l_pTarget);
         auto l_iterator = std::find ( l_cachedC4DQSValues.begin(),
                                       l_cachedC4DQSValues.end(),
@@ -2145,14 +2146,13 @@ ReturnCode platGetDQSAttrISDIMM(
             l_kvPair.huid = l_huid;
             rc = getDQSAttrISDIMM(l_fapiTarget, l_kvPair.value);
             memcpy(o_vpdIsDimmTOC4DQSVal, l_kvPair.value, sizeof(ATTR_CEN_VPD_ISDIMMTOC4DQS_Type));
-            mutex_lock(&l_C4DQSmutex);
             l_cachedC4DQSValues.push_back(l_kvPair);
-            mutex_unlock(&l_C4DQSmutex);
         }
         else
         {
             memcpy(o_vpdIsDimmTOC4DQSVal, (*l_iterator).value, sizeof(ATTR_CEN_VPD_ISDIMMTOC4DQS_Type));
         }
+        mutex_unlock(&l_C4DQSmutex);
     }
 
     return rc;
