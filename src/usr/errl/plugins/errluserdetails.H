@@ -5,8 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
+/* [+] YADRO                                                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -39,6 +40,88 @@ namespace ERRORLOG
 {
 
 /**
+ * @struct UnalignedData
+ * @brief Structure used for safe assigment from unaligned pointer, it forces
+ *        the compiler to generate extra instructions and satisfy architectural
+ *        alignment requirements.
+ */
+template<typename T> struct UnalignedData {
+    T value;
+} __attribute__ ((packed));
+
+/**
+ * @brief Read integral value from unaligned pointer.
+ *
+ * @param[in] i_pUint64 - Pointer to uint64_t value
+ *
+ * @return uint64_t value from specified pointer
+ */
+inline uint64_t UINT64_FROM_PTR(const void* i_pUint64)
+{
+    return reinterpret_cast<const UnalignedData<uint64_t>*>(i_pUint64)->value;
+}
+
+/**
+ * @brief Read integral value from unaligned pointer.
+ *
+ * @param[in] i_pUint32 - Pointer to uint32_t value
+ *
+ * @return uint32_t value from specified pointer
+ */
+inline uint32_t UINT32_FROM_PTR(const void* i_pUint32)
+{
+    return reinterpret_cast<const UnalignedData<uint32_t>*>(i_pUint32)->value;
+}
+
+/**
+ * @brief Read integral value from unaligned pointer.
+ *
+ * @param[in] i_pUint16 - Pointer to uint16_t value
+ *
+ * @return uint16_t value from specified pointer
+ */
+inline uint16_t UINT16_FROM_PTR(const void* i_pUint16)
+{
+    return reinterpret_cast<const UnalignedData<uint16_t>*>(i_pUint16)->value;
+}
+
+/**
+ * @brief Read integral value from unaligned pointer.
+ *
+ * @param[in] i_pInt64 - Pointer to int64_t value
+ *
+ * @return int64_t value from specified pointer
+ */
+inline int64_t INT64_FROM_PTR(const void* i_pInt64)
+{
+    return reinterpret_cast<const UnalignedData<int64_t>*>(i_pInt64)->value;
+}
+
+/**
+ * @brief Read integral value from unaligned pointer.
+ *
+ * @param[in] i_pInt32 - Pointer to int32_t value
+ *
+ * @return int32_t value from specified pointer
+ */
+inline int32_t INT32_FROM_PTR(const void* i_pInt32)
+{
+    return reinterpret_cast<const UnalignedData<int32_t>*>(i_pInt32)->value;
+}
+
+/**
+ * @brief Read integral value from unaligned pointer.
+ *
+ * @param[in] i_pInt16 - Pointer to int16_t value
+ *
+ * @return int16_t value from specified pointer
+ */
+inline int16_t INT16_FROM_PTR(const void* i_pInt16)
+{
+    return reinterpret_cast<const UnalignedData<int16_t>*>(i_pInt16)->value;
+}
+
+/**
  *  @brief Returns the uint64_t at the pointed to location in host byte order
  *
  *  @param[in] i_pUint64 Pointer to a uint64_t in network byte order
@@ -47,7 +130,7 @@ namespace ERRORLOG
  */
 inline uint64_t NTH_UINT64(const void* i_pUint64)
 {
-    return (ntohll(*(reinterpret_cast<const uint64_t*>(i_pUint64))));
+    return (ntohll(UINT64_FROM_PTR(i_pUint64)));
 }
 
 /**
@@ -59,7 +142,7 @@ inline uint64_t NTH_UINT64(const void* i_pUint64)
  */
 inline uint32_t NTH_UINT32(const void* i_pUint32)
 {
-    return (ntohl(*(reinterpret_cast<const uint32_t*>(i_pUint32))));
+    return (ntohl(UINT32_FROM_PTR(i_pUint32)));
 }
 
 /**
@@ -71,7 +154,7 @@ inline uint32_t NTH_UINT32(const void* i_pUint32)
  */
 inline uint16_t NTH_UINT16(const void* i_pUint16)
 {
-    return (ntohs(*(reinterpret_cast<const uint16_t*>(i_pUint16))));
+    return (ntohs(UINT16_FROM_PTR(i_pUint16)));
 }
 
 /**
