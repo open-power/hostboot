@@ -40,6 +40,7 @@
 
 #ifdef __HOSTBOOT_MODULE
 
+#include <prdfMemScrubUtils.H>
 #include <prdfMemTdFalseAlarm.H>
 #include <prdfMemThresholds.H>
 #include <prdfMemTdCtlr.H>
@@ -205,6 +206,12 @@ class OcmbDataBundle : public DataBundle
      *  is checked at the end of targeted diagnostics before background
      *  scrubbing is resumed. */
     bool iv_maskMainlineNceTce = false;
+
+    // These are used to limit the number of times a scrub command will stop
+    // on a UE or CE on a rank. This is to prevent potential flooding of
+    // maintenance UEs or CEs. The threshold will be 16 per rank for each.
+    ScrubResumeCounter iv_ueScrubStopCounter;
+    ScrubResumeCounter iv_ceScrubStopCounter;
 
     #else // IPL only
 

@@ -1693,21 +1693,53 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::canResumeBgScrub( bool & o_canResume )
     // can use the stop conditions, which should be unique for background scrub,
     // to determine if it has been configured.
 
-    SCAN_COMM_REGISTER_CLASS * reg = iv_chip->getRegister( "MBSTR" );
-    o_rc = reg->Read();
-    if ( SUCCESS != o_rc )
+    do
     {
-        PRDF_ERR( PRDF_FUNC "Read() failed on MBSTR: iv_chip=0x%08x",
-                  iv_chip->getHuid() );
-    }
-    else if ( 0xf != reg->GetBitFieldJustified(0,4) && // NCE int TH
-              0xf != reg->GetBitFieldJustified(4,4) && // NCE soft TH
-              0xf != reg->GetBitFieldJustified(8,4) && // NCE hard TH
-              reg->IsBitSet(34)                     && // pause on MPE
-              reg->IsBitSet(35)                     )  // pause on UE
-    {
-        o_canResume = true;
-    }
+        SCAN_COMM_REGISTER_CLASS * reg = iv_chip->getRegister( "MBSTR" );
+        o_rc = reg->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on MBSTR: iv_chip=0x%08x",
+                    iv_chip->getHuid() );
+            break;
+        }
+        // Note: The stop conditions for background scrubbing can now be
+        // variable depending on whether we have hit threshold for the number
+        // of UEs or CEs that we have stopped on on a rank.
+
+        // If we haven't hit CE or UE threshold, check the CE stop conditions
+        if ( !getOcmbDataBundle(iv_chip)->iv_ceScrubStopCounter.atTh() &&
+             !getOcmbDataBundle(iv_chip)->iv_ueScrubStopCounter.atTh() )
+        {
+            // If the stop conditions aren't set, just break out.
+            if ( !(0xf != reg->GetBitFieldJustified(0,4) && // NCE int TH
+                   0xf != reg->GetBitFieldJustified(4,4) && // NCE soft TH
+                   0xf != reg->GetBitFieldJustified(8,4)) ) // NCE hard TH
+            {
+                break;
+            }
+
+        }
+
+        // If we haven't hit UE threshold yet, check the UE stop condition
+        if ( !getOcmbDataBundle(iv_chip)->iv_ueScrubStopCounter.atTh() )
+        {
+            // If the stop condition isn't set, just break out
+            if ( !reg->IsBitSet(35) ) // pause on UE
+            {
+                break;
+            }
+        }
+
+        // Need to check the stop on mpe stop condition regardless of whether
+        // we hit the UE or CE threshold.
+        if ( reg->IsBitSet(34) ) // pause on MPE
+        {
+            // If we reach here, all the stop conditions are set for background
+            // scrub, so we can resume.
+            o_canResume = true;
+        }
+    }while(0);
 
     return o_rc;
 
