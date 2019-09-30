@@ -79,7 +79,7 @@ print TGFILE "void fapiParseHwpRc(ErrlUsrParser & i_parser,\n";
 print TGFILE "                    void * i_pBuffer,\n";
 print TGFILE "                    const uint32_t i_buflen)\n";
 print TGFILE "{\n";
-print TGFILE "    uint32_t l_rc = ntohl(*(static_cast<uint32_t *>(i_pBuffer)));\n\n";
+print TGFILE "    uint32_t l_rc = ntohl(UINT32_FROM_PTR(i_pBuffer));\n\n";
 print TGFILE "    switch(l_rc)\n";
 print TGFILE "    {\n";
 
@@ -150,7 +150,7 @@ print TGFILE "    uint8_t * l_pBuffer = static_cast<uint8_t *>(i_pBuffer);\n";
 print TGFILE "    uint32_t l_buflen = i_buflen;\n\n";
 print TGFILE "    // The first uint32_t is the FFDC ID\n";
 print TGFILE "    uint32_t * l_pFfdcId = static_cast<uint32_t *>(i_pBuffer);\n";
-print TGFILE "    uint32_t l_ffdcId = ntohl(*l_pFfdcId);\n";
+print TGFILE "    uint32_t l_ffdcId = ntohl(UINT32_FROM_PTR(l_pFfdcId));\n";
 print TGFILE "    l_pBuffer += sizeof(l_ffdcId);\n";
 print TGFILE "    l_buflen -= sizeof(l_ffdcId);\n";
 print TGFILE "    switch(l_ffdcId)\n";
@@ -217,7 +217,7 @@ foreach my $argnum (1 .. $#ARGV)
         print TGFILE "            if (l_buflen >= POS_LEN)\n";
         print TGFILE "            {\n";
         print TGFILE "                uint32_t * l_pBufferTemp = reinterpret_cast<uint32_t *>(l_pBuffer);\n";
-        print TGFILE "                i_parser.PrintNumber(\"Chip Position:\",\"%X\",ntohl(*l_pBufferTemp));\n";
+        print TGFILE "                i_parser.PrintNumber(\"Chip Position:\",\"%X\",ntohl(UINT32_FROM_PTR(l_pBufferTemp)));\n";
         print TGFILE "                l_pBufferTemp = NULL;\n";
         print TGFILE "                l_pBuffer+= POS_LEN;\n";
         print TGFILE "                l_buflen -= POS_LEN;\n";

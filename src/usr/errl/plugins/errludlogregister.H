@@ -79,7 +79,7 @@ public:
         {
             // first is the HUID
             uint32_t *pData = reinterpret_cast<uint32_t *>(pBuf);
-            if (ntohl(*pData) == 0xFFFFFFFF)
+            if (ntohl(UINT32_FROM_PTR(pData)) == 0xFFFFFFFF)
             {
                 i_parser.PrintString("LogRegister",
                             "Target: MASTER_PROCESSOR_CHIP_TARGET_SENTINEL");
@@ -87,7 +87,7 @@ public:
             else
             {
                 i_parser.PrintNumber( "LogRegister",
-                            "Target: HUID = 0x%08X", ntohl(*pData) );
+                            "Target: HUID = 0x%08X", ntohl(UINT32_FROM_PTR(pData)) );
             }
             pData++;
             pBuf += sizeof(*pData);
@@ -199,7 +199,7 @@ public:
                     for (int32_t i = 0;i < numArgs;i++)
                     {
                         std::vector<char> l_traceEntry(20);
-                        sprintf(&(l_traceEntry[0]),"0x%016llX", ntohll(*pData64));
+                        sprintf(&(l_traceEntry[0]),"0x%016llX", ntohll(UINT64_FROM_PTR(pData64)));
                         i_parser.PrintString(addrParams[i], &(l_traceEntry[0]));
 
                         pData64++;

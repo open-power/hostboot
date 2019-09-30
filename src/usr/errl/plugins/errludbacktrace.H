@@ -113,7 +113,7 @@ public:
         for( int i = 0; i < l_count; i++ )
         {
             // endian convert the stack address
-            uint64_t l_addr  = ntohll(*p64);
+            uint64_t l_addr  = ntohll(UINT64_FROM_PTR(p64));
 
             // get nearest symbol
             const char * l_pSymbol = symTab.nearestSymbol( l_addr );
