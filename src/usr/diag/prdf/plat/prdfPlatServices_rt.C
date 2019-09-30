@@ -37,6 +37,7 @@
 
 // Platform includes
 #include <prdfP9McbistDataBundle.H>
+#include <prdfOcmbDataBundle.H>
 #include <prdfMemScrubUtils.H>
 #include <prdfPlatServices.H>
 
@@ -287,10 +288,8 @@ uint32_t resumeBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
     uint32_t o_rc = SUCCESS;
 
     PRDF_TRAC( PRDF_FUNC "Function not supported yet" );
-
-    /* TODO RTC 207273 - no hwp support yet
-
-    // Get the OCMB_CHIP fapi target
+    /* TODO RTC 207273 - no HWP support yet
+    // Get the OCMB fapi target
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt ( i_chip->getTrgt() );
 
     do
@@ -304,9 +303,45 @@ uint32_t resumeBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
             break;
         }
 
+        // Check UE and CE stop counters to determine stop conditions
+        mss::mcbist::stop_conditions<> stopCond;
+        if ( getOcmbDataBundle(i_chip)->iv_ueScrubStopCounter.atTh() )
+        {
+            // If we've reached the limit of UEs we're allowed to stop on
+            // per rank, only set the stop on mpe stop condition.
+            stopCond.set_pause_on_mpe(mss::ON);
+        }
+        else if ( getOcmbDataBundle(i_chip)->iv_ceScrubStopCounter.atTh() )
+        {
+            // If we've reached the limit of CEs we're allowed to stop on
+            // per rank, set all the normal stop conditions except stop on CE
+            stopCond.set_pause_on_aue(mss::ON);
+
+            #ifdef CONFIG_HBRT_PRD
+
+            stopCond.set_pause_on_mpe(mss::ON)
+                    .set_pause_on_ue(mss::ON);
+
+            // In MNFG mode, stop on RCE_ETE to get an accurate callout for IUEs
+            if ( mfgMode() ) stopCond.set_thresh_rce(1);
+
+            #endif
+        }
+        else
+        {
+            // If we haven't reached threshold on the number of UEs or CEs we
+            // have stopped on, do not change the stop conditions.
+            stopCond = mss::mcbist::stop_conditions<>(
+                mss::mcbist::stop_conditions<>::DONT_CHANGE );
+        }
+
         // Resume the command on the next address.
+        // Note: we have to limit the number of times a command has been stopped
+        // because of a UE/CE. Therefore, we must always resume the command to
+        // the end of the current slave rank so we can reset the UE/CE counts.
         errlHndl_t errl;
-        FAPI_INVOKE_HWP( errl, mss::memdiags::continue_cmd, fapiTrgt );
+        FAPI_INVOKE_HWP( errl, mss::memdiags::continue_cmd, fapiTrgt,
+            mss::mcbist::STOP_AFTER_SLAVE_RANK, stopCond );
 
         if ( nullptr != errl )
         {
@@ -317,7 +352,6 @@ uint32_t resumeBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
         }
 
     } while (0);
-
     */
 
     return o_rc;

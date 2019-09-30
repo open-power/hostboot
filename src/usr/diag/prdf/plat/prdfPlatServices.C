@@ -40,6 +40,7 @@
 #include <prdfRegisterCache.H>
 
 #include <prdfP9McbistDataBundle.H>
+#include <prdfOcmbDataBundle.H>
 #include <prdfMemScrubUtils.H>
 
 #include <iipServiceDataCollector.h>
@@ -899,6 +900,12 @@ uint32_t startBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
     /* TODO RTC 207273 - no HWP support yet
     // Get the OCMB fapi target
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt (i_ocmb->getTrgt());
+
+    #ifdef __HOSTBOOT_RUNTIME
+    // Starting a new command. Clear the UE and CE scrub stop counters
+    getOcmbDataBundle( mcbChip )->iv_ueScrubStopCounter.reset();
+    getOcmbDataBundle( mcbChip )->iv_ceScrubStopCounter.reset();
+    #endif
 
     // Get the stop conditions.
     // NOTE: If HBRT_PRD is not configured, we want to use the defaults so that
