@@ -711,7 +711,7 @@ bool __queryUcsOmic( ExtensibleChip * i_omic, ExtensibleChip * i_mcc,
             uint8_t bitOff = omiPosRelOmic * 20;
 
             // Check if there is a UNIT_CS for the relevant bits in the OMIDLFIR
-            if ( fir->IsBitSet(bitOff)  && ~mask->IsBitSet(bitOff) &&
+            if ( fir->IsBitSet(bitOff)  && !mask->IsBitSet(bitOff) &&
                  act0->IsBitSet(bitOff) &&  act1->IsBitSet(bitOff) )
             {
                 o_activeAttn = true;
