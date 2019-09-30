@@ -5,8 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
+/* [+] YADRO                                                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -98,7 +99,7 @@ public:
         //       addWofCompareDataToErrl() in plat_wof_access.C
         if ((NULL != i_pBuffer) && (i_buflen >= sizeof(tableEntries)))
         {
-          tableEntries = ntohs(*(reinterpret_cast<uint16_t*>(i_pBuffer)));
+          tableEntries = ntohs(UINT16_FROM_PTR(i_pBuffer));
         }
 
         // How many entries are really present in this buffer?
