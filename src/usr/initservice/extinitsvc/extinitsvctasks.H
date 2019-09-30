@@ -208,6 +208,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
         },
 #endif
 
+#ifndef CONFIG_VPO_COMPILE
         /**
          * @brief   FSI SCOM Device Driver
          */
@@ -219,6 +220,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 EXT_IMAGE,                          // Extended Module
             }
         },
+#endif
 
         /**
          * @brief   SCAN Device Driver
@@ -305,7 +307,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
                EXT_IMAGE,                         // Extended Module
             }
         },
-#endif
 
         /**
          * @brief PRDF code library
@@ -318,6 +319,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
                EXT_IMAGE,                         // Extended Module
             }
         },
+#endif
 
         /**
          * @brief ATTN code library

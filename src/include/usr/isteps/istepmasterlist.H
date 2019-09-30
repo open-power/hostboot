@@ -139,7 +139,7 @@ const  ExtTaskInfo  g_isteps[]    =   {
         INITSERVICE::g_istep21TaskList                  //        IStep 21
         //
         // add further istep lists at the end.
-#endif
+#endif  //CONFIG_VPO_COMPILE
 };
 
 const   uint64_t    MAX_SUBSTEPS =  25;

@@ -238,7 +238,9 @@ const DepModInfo  g_istep06Dependancies = {
     {
       DEP_LIB(libistep06.so),
       DEP_LIB(libsbe.so),
+#ifndef CONFIG_VPO_COMPILE
       DEP_LIB(libpm.so),
+#endif
       DEP_LIB(libnestmemutils.so),
       DEP_LIB(libimageprocs.so),
       DEP_LIB(libp9_cpuWkup.so),
