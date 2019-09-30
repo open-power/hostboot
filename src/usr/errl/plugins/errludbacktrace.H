@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* [+] Artem Senichev                                                     */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -113,7 +116,7 @@ public:
         for( int i = 0; i < l_count; i++ )
         {
             // endian convert the stack address
-            uint64_t l_addr  = ntohll(*p64);
+            uint64_t l_addr  = ntohll(UINT64_FROM_PTR(p64));
 
             // get nearest symbol
             const char * l_pSymbol = symTab.nearestSymbol( l_addr );
