@@ -36,31 +36,26 @@
 #include <fapi2.H>
 #include <exp_mss_memdiag.H>
 #include <lib/shared/exp_defaults.H>
-#include <lib/dimm/exp_rank.H>
-#include <generic/memory/lib/utils/poll.H>
-#include <generic/memory/lib/utils/find.H>
-#include <generic/memory/lib/utils/count_dimm.H>
-#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_patterns.H>
 
-using fapi2::TARGET_TYPE_OCMB_CHIP;
-using fapi2::TARGET_TYPE_SYSTEM;
-using fapi2::TARGET_TYPE_MEM_PORT;
-using fapi2::FAPI2_RC_SUCCESS;
+#include <lib/dimm/exp_rank.H>
+#include <lib/mc/exp_port.H>
+#include <lib/mcbist/exp_memdiags.H>
+#include <lib/mcbist/exp_mcbist_traits.H>
 
 extern "C"
 {
     ///
-    /// @brief Begin background scrub and run pattern tests
+    /// @brief Initializes memory and sets firs
     /// @param[in] i_target OCMB Chip
     /// @return FAPI2_RC_SUCCESS iff ok
     ///
-    fapi2::ReturnCode exp_mss_memdiag( const fapi2::Target<TARGET_TYPE_OCMB_CHIP>& i_target )
+    fapi2::ReturnCode exp_mss_memdiag( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
     {
-        FAPI_INF("Start mss memdiags on: %s", mss::c_str( i_target ));
+        FAPI_INF("Start exp_mss_memdiag on: %s", mss::c_str( i_target ));
+        FAPI_TRY(mss::memdiags::mss_initialize_memory(i_target));
 
-        // TODO: Actually implement this.
-
-        FAPI_INF("End memdiag");
+    fapi_try_exit:
+        FAPI_INF("End exp_mss_memdiag on %s", mss::c_str( i_target ));
         return fapi2::current_err;
     }
 }
