@@ -232,7 +232,7 @@ errlHndl_t nvdimmArmPreCheck(Target* i_nvdimm)
         *@userdata1[32:39]  l_continue
         *@userdata1[40:47]  l_module_health
         *@userdata1[48:56]  l_ready
-        *@userdata1[57:63]  l_fwuupdate
+        *@userdata1[57:63]  l_fwupdate
         *@userdata2         <UNUSED>
         *@devdesc           NVDIMM threw an error or failed to set event
         *                   notifications during arming
@@ -296,6 +296,58 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
         if (l_err)
         {
             TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArm() failed arm precheck, exiting");
+            errlCommit(l_err, NVDIMM_COMP_ID);
+            return false;
+        }
+    }
+
+    // Encryption unlocked check
+    // Check one nvdimm at a time
+    for (auto const l_nvdimm : i_nvdimmTargetList)
+    {
+        // Unlock function will create an error log
+        // Create another here to make it clear that the arm failed
+        TargetHandleList l_nvdimmTargetList;
+        l_nvdimmTargetList.push_back(l_nvdimm);
+        if (!nvdimm_encrypt_unlock(l_nvdimmTargetList))
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArm() nvdimm[%X] - failed NVDimm Arm encryption unlock",
+                      get_huid(l_nvdimm));
+            /*@
+             *@errortype
+             *@reasoncode    NVDIMM_ARM_ENCRYPTION_UNLOCK_FAILED
+             *@severity      ERRORLOG_SEV_PREDICTIVE
+             *@moduleid      NVDIMM_ARM
+             *@userdata1     Target Huid
+             *@userdata2     <UNUSED>
+             *@devdesc       NVDIMM failed to unlock encryption during arming
+             *@custdesc      NVDIMM failed to ARM
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_PREDICTIVE,
+                            NVDIMM_ARM,
+                            NVDIMM_ARM_ENCRYPTION_UNLOCK_FAILED,
+                            get_huid(l_nvdimm),
+                            0x0,
+                            ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+
+            l_err->collectTrace( NVDIMM_COMP_NAME );
+
+            // Callout the dimm
+            l_err->addHwCallout( l_nvdimm,
+                                 HWAS::SRCI_PRIORITY_MED,
+                                 HWAS::DELAYED_DECONFIG,
+                                 HWAS::GARD_NULL);
+
+            // Read relevant regs for trace data
+            nvdimmTraceRegs(l_nvdimm, l_RegInfo);
+            nvdimmAddPage4Regs(l_nvdimm,l_err);
+            nvdimmAddVendorLog(l_nvdimm, l_err);
+
+            // Add reg traces to the error log
+            NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
+
+            // Commit the error then exit
             errlCommit(l_err, NVDIMM_COMP_ID);
             return false;
         }

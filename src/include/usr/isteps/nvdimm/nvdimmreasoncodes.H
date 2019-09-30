@@ -108,6 +108,7 @@ enum nvdimmModuleId
     NVDIMM_COMPARE_CKSUM                    = 0x3A,
     NVDIMM_CHECK_FW_SLOT                    = 0x3B,
     NVDIMM_ARM_PRE_CHECK                    = 0x3C,
+    NVDIMM_ARM                              = 0x3D,
 };
 
 /**
@@ -201,6 +202,7 @@ enum nvdimmReasonCode
     NVDIMM_INVALID_FW_SLOT                     = NVDIMM_COMP_ID | 0x50,
     NVDIMM_ERASE_ERROR                         = NVDIMM_COMP_ID | 0x51,
     NVDIMM_ARM_PRE_CHECK_FAILED                = NVDIMM_COMP_ID | 0x52,
+    NVDIMM_ARM_ENCRYPTION_UNLOCK_FAILED        = NVDIMM_COMP_ID | 0x53,
 };
 
 enum UserDetailsTypes
