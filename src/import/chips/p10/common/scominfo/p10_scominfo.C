@@ -686,7 +686,9 @@ extern "C"
         }
 
         // IOHS registers
-        if (l_scom.isIoHsTarget())
+        if (l_scom.isIoHsTarget() &&
+            // prevent matching on IOHS SCOMs in ENGD build mode
+            (i_mode != P10_ENGD_BUILD_MODE))
         {
             o_chipUnitRelated = true;
             // PU_IOHS_CHIPUNIT
@@ -749,7 +751,11 @@ extern "C"
         }
 
         // PAUC registers
-        if (l_scom.isPaucTarget())
+        if (l_scom.isPaucTarget() &&
+            // prevent matching on indirect SCOMs (physically targeting IOHS
+            // scan latches) in ENGD build mode
+            ((i_mode != P10_ENGD_BUILD_MODE) ||
+             (l_scom.isDirect())))
         {
             o_chipUnitRelated = true;
             // PU_PAUC_CHIPUNIT
