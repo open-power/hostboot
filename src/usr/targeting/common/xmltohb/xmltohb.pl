@@ -2980,7 +2980,7 @@ sub writeAttrErrlHFile {
     print $outFile "    for (; (l_ptr + sizeof(uint32_t)) <= ((uint8_t*)i_pBuffer + i_buflen); )\n";
     print $outFile "    {\n";
     print $outFile "        // first 4 bytes is the attr enum\n";
-    print $outFile "        uint32_t attrEnum = ntohl(*(uint32_t *)l_ptr);\n";
+    print $outFile "        uint32_t attrEnum = ntohl(UINT32_FROM_PTR(l_ptr));\n";
     print $outFile "        l_ptr += sizeof(attrEnum);\n";
     print $outFile "        char* tmplabel = NULL;\n";
     print $outFile "\n";
@@ -3112,21 +3112,21 @@ sub writeAttrErrlHFile {
             elsif (exists $attribute->{simpleType}->{uint16_t}) {
                 print $outFile "              l_traceEntry.resize(10+offset + $total_count * 7);\n";
                 print $outFile "              for (uint32_t i = 0;i<$total_count;i++) {\n";
-                print $outFile "                  sprintf(&(l_traceEntry[offset+i*7]), \"0x%.4X \", ntohs(*(((uint16_t *)l_ptr)+i)));\n";
+                print $outFile "                  sprintf(&(l_traceEntry[offset+i*7]), \"0x%.4X \", ntohs(UINT16_FROM_PTR(reinterpret_cast<const uint16_t*>(l_ptr) + i)));\n";
                 print $outFile "              }\n";
                 print $outFile "              l_ptr += $total_count * sizeof(uint16_t);\n";
             }
             elsif (exists $attribute->{simpleType}->{uint32_t}) {
                 print $outFile "              l_traceEntry.resize(10+offset + $total_count * 11);\n";
                 print $outFile "              for (uint32_t i = 0;i<$total_count;i++) {\n";
-                print $outFile "                  sprintf(&(l_traceEntry[offset+i*11]), \"0x%.8X \", ntohl(*(((uint32_t *)l_ptr)+i)));\n";
+                print $outFile "                  sprintf(&(l_traceEntry[offset+i*11]), \"0x%.8X \", ntohl(UINT32_FROM_PTR(reinterpret_cast<const uint32_t*>(l_ptr)+i)));\n";
                 print $outFile "              }\n";
                 print $outFile "              l_ptr += $total_count * sizeof(uint32_t);\n";
             }
             elsif (exists $attribute->{simpleType}->{uint64_t}) {
                 print $outFile "              l_traceEntry.resize(10+offset + $total_count * 19);\n";
                 print $outFile "              for (uint32_t i = 0;i<$total_count;i++) {\n";
-                print $outFile "                  sprintf(&(l_traceEntry[offset+i*19]), \"0x%.16llX \", ntohll(*(((uint64_t *)l_ptr)+i)));\n";
+                print $outFile "                  sprintf(&(l_traceEntry[offset+i*19]), \"0x%.16llX \", ntohll(UINT64_FROM_PTR(reinterpret_cast<const uint64_t*>(l_ptr)+i)));\n";
                 print $outFile "              }\n";
                 print $outFile "              l_ptr += $total_count * sizeof(uint64_t);\n";
             }
@@ -3140,21 +3140,21 @@ sub writeAttrErrlHFile {
             elsif (exists $attribute->{simpleType}->{int16_t}) {
                 print $outFile "              l_traceEntry.resize(10+offset + $total_count * 7);\n";
                 print $outFile "              for (uint32_t i = 0;i<$total_count;i++) {\n";
-                print $outFile "                  sprintf(&(l_traceEntry[offset+i*7]), \"0x%.4X \", ntohs(*(((int16_t *)l_ptr)+i)));\n";
+                print $outFile "                  sprintf(&(l_traceEntry[offset+i*7]), \"0x%.4X \", ntohs(INT16_FROM_PTR(reinterpret_cast<const int16_t*>(l_ptr)+i)));\n";
                 print $outFile "              }\n";
                 print $outFile "              l_ptr += $total_count * sizeof(int16_t);\n";
             }
             elsif (exists $attribute->{simpleType}->{int32_t}) {
                 print $outFile "              l_traceEntry.resize(10+offset + $total_count * 11);\n";
                 print $outFile "              for (uint32_t i = 0;i<$total_count;i++) {\n";
-                print $outFile "                  sprintf(&(l_traceEntry[offset+i*11]), \"0x%.8X \", ntohl(*(((int32_t *)l_ptr)+i)));\n";
+                print $outFile "                  sprintf(&(l_traceEntry[offset+i*11]), \"0x%.8X \", ntohl(INT32_FROM_PTR(reinterpret_cast<const int32_t*>(l_ptr)+i)));\n";
                 print $outFile "              }\n";
                 print $outFile "              l_ptr += $total_count * sizeof(int32_t);\n";
             }
             elsif (exists $attribute->{simpleType}->{int64_t}) {
                 print $outFile "              l_traceEntry.resize(10+offset + $total_count * 19);\n";
                 print $outFile "              for (uint32_t i = 0;i<$total_count;i++) {\n";
-                print $outFile "                  sprintf(&(l_traceEntry[offset+i*19]), \"0x%.16llX \", ntohll(*(((int64_t *)l_ptr)+i)));\n";
+                print $outFile "                  sprintf(&(l_traceEntry[offset+i*19]), \"0x%.16llX \", ntohll(INT64_FROM_PTR(reinterpret_cast<const int64_t*>(l_ptr)+i)));\n";
                 print $outFile "              }\n";
                 print $outFile "              l_ptr += $total_count * sizeof(int64_t);\n";
             }
@@ -3950,11 +3950,11 @@ sub writeTargetErrlHFile {
 
     print $outFile "        // first 4 are always the same\n";
     print $outFile "        if ((l_ptr32 + 4) <= (uint32_t *)((uint8_t*)i_pBuffer + i_buflen)) {\n";
-    print $outFile "            i_parser.PrintNumber( l_label, \"HUID = 0x%08X\", ntohl(*l_ptr32) );\n";
+    print $outFile "            i_parser.PrintNumber( l_label, \"HUID = 0x%08X\", ntohl(UINT32_FROM_PTR(l_ptr32)) );\n";
     print $outFile "            l_ptr32++;\n";
 
     # find CLASS
-    print $outFile "            switch (ntohl(*l_ptr32)) { // CLASS\n";
+    print $outFile "            switch (ntohl(UINT32_FROM_PTR(l_ptr32))) { // CLASS\n";
     foreach my $enumerationType (@{$attributes->{enumerationType}})
     {
       if( $enumerationType->{id} eq "CLASS" ) {
@@ -3973,7 +3973,7 @@ sub writeTargetErrlHFile {
     print $outFile "            l_ptr32++;\n";
 
     # find TYPE
-    print $outFile "            switch (ntohl(*l_ptr32)) { // TYPE\n";
+    print $outFile "            switch (ntohl(UINT32_FROM_PTR(l_ptr32))) { // TYPE\n";
     foreach my $enumerationType (@{$attributes->{enumerationType}})
     {
       if( $enumerationType->{id} eq "TYPE" ) {
@@ -3992,7 +3992,7 @@ sub writeTargetErrlHFile {
     print $outFile "            l_ptr32++;\n";
 
     # find MODEL
-    print $outFile "            switch (ntohl(*l_ptr32)) { // MODEL\n";
+    print $outFile "            switch (ntohl(UINT32_FROM_PTR(l_ptr32))) { // MODEL\n";
     foreach my $enumerationType (@{$attributes->{enumerationType}})
     {
       if( $enumerationType->{id} eq "MODEL" ) {
@@ -4030,7 +4030,7 @@ sub writeTargetErrlHFile {
         }
     }
 
-    print $outFile "                uint32_t l_pathType = ntohl(*l_ptr32);\n";
+    print $outFile "                uint32_t l_pathType = ntohl(UINT32_FROM_PTR(l_ptr32));\n";
     print $outFile "                if ((l_pathType == $attrPhysPath) || // ATTR_PHYS_PATH\n";
     print $outFile "                    (l_pathType == $attrAffinityPath))   // ATTR_AFFINITY_PATH\n";
     print $outFile "                {\n";
