@@ -2910,11 +2910,14 @@ ReturnCode p10_ipl_customize (
                                  "SBE image buffer would overflow before reaching the minimum required"
                                  " number of EC boot cores" );
 
+                    fapi2::current_err = FAPI2_RC_SUCCESS;
+                }
+                else
+                {
+                    fapi2::current_err = l_fapiRc;
                 }
 
-                fapi2::current_err = l_fapiRc;
                 goto fapi_try_exit;
-
             }
 
             // More size code sanity checks of section and image sizes.
