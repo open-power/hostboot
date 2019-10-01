@@ -25,7 +25,7 @@
 
 ///
 /// @file exp_decoder.C
-/// @brief Decode MSS_MRW_PWR_CURVE_SLOPE, PWR_CURVE_INTERCEPT, and THERMAL_POWER_LIMIT
+/// @brief Decode MRW attributes for DIMM power curves and power limits
 ///
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
@@ -63,9 +63,9 @@ const std::vector< std::pair<uint8_t , uint8_t> > throttle_traits<mss::mc_type::
 
 ///
 /// @brief Finds a value for the power curve slope attributes by matching the generated hashes
-/// @param[in] i_slope vector of generated key-values from POWER_CURVE_SLOPE
+/// @param[in] i_slope vector of generated key-values from MRW power curve attriutes
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff the encoding was successful
-/// @note populates iv_vddr_slope, iv_total_slop
+/// @note populates iv_vddr_slope, iv_total_slope
 ///
 template<>
 fapi2::ReturnCode decoder<mss::mc_type::EXPLORER>::find_slope (
@@ -74,7 +74,7 @@ fapi2::ReturnCode decoder<mss::mc_type::EXPLORER>::find_slope (
     using TT = throttle_traits<mss::mc_type::EXPLORER>;
 
     // For explorer, two attribute are used to get slope (i_slope[0], i_slope[1])
-    //   ATTR_MSS_MRW_OCMB_THERMAL_MEMORY_PWR_SLOPE is for thermal power slope
+    //   ATTR_MSS_MRW_OCMB_PWR_SLOPE is for thermal power slope
     //   ATTR_MSS_MRW_OCMB_CURRENT_CURVE_WITH_LIMIT is for power slope
     FAPI_ASSERT(i_slope.size() == 2,
                 fapi2::MSS_POWER_THERMAL_ATTR_VECTORS_INCORRECT()
@@ -88,7 +88,7 @@ fapi2::ReturnCode decoder<mss::mc_type::EXPLORER>::find_slope (
     // To get thermal power slope
     FAPI_TRY( (get_power_thermal_value<TT::THERMAL_START, TT::THERMAL_LENGTH, SLOPE>(
                    *i_slope[0],
-                   "ATTR_MSS_MRW_OCMB_THERMAL_MEMORY_PWR_SLOPE",
+                   "ATTR_MSS_MRW_OCMB_PWR_SLOPE",
                    iv_total_slope)) );
 
     // To get power slope
@@ -103,7 +103,7 @@ fapi_try_exit:
 
 ///
 /// @brief Finds a value for power curve intercept attributes by matching the generated hashes
-/// @param[in] i_intercept vector of generated key-values for ATTR_MSS_MRW_POWER_CURVE_INTERCEPT
+/// @param[in] i_intercept vector of generated key-values from MRW power curve attributes
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff the encoding was successful
 /// @note populates iv_vddr_intercept, iv_total_intercept
 ///
@@ -114,7 +114,7 @@ fapi2::ReturnCode decoder<mss::mc_type::EXPLORER>::find_intercept (
     using TT = throttle_traits<mss::mc_type::EXPLORER>;
 
     // For explorer, two attribute are used to get slope (i_slope[0], i_slope[1])
-    //   ATTR_MSS_MRW_OCMB_POWER_INTERCEPT is for thermal power intercept
+    //   ATTR_MSS_MRW_OCMB_PWR_INTERCEPT is for thermal power intercept
     //   ATTR_MSS_MRW_OCMB_CURRENT_CURVE_WITH_LIMIT is for power intercept
     FAPI_ASSERT(i_intercept.size() == 2,
                 fapi2::MSS_POWER_THERMAL_ATTR_VECTORS_INCORRECT()
@@ -128,7 +128,7 @@ fapi2::ReturnCode decoder<mss::mc_type::EXPLORER>::find_intercept (
     // To get thermal power intercept
     FAPI_TRY( (get_power_thermal_value<TT::THERMAL_START, TT::THERMAL_LENGTH, INTERCEPT>(
                    *i_intercept[0],
-                   "ATTR_MSS_MRW_OCMB_POWER_INTERCEPT",
+                   "ATTR_MSS_MRW_OCMB_PWR_INTERCEPT",
                    iv_total_intercept)) );
 
     // To get power intercept
@@ -143,10 +143,10 @@ fapi_try_exit:
 
 
 ///
-/// @brief Finds a value from ATTR_MSS_MRW_THERMAL_MEMORY_POWER_LIMIT and stores in iv variable
-/// @param[in] i_thermal_limits is a vector of the generated values from ATTR_MSS_MRW_THERMAL_POWER_LIMIT
+/// @brief Finds a value for the power limit attributes by matching the generated hashes
+/// @param[in] i_thermal_limits is a vector of the generated values from MRW power limit attributes
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff the encoding was successful
-/// @note populates thermal_power_limit.
+/// @note populates iv_thermal_power_limit, iv_power_limit
 ///
 template<>
 fapi2::ReturnCode decoder<mss::mc_type::EXPLORER>::find_thermal_power_limit (
@@ -172,7 +172,7 @@ fapi2::ReturnCode decoder<mss::mc_type::EXPLORER>::find_thermal_power_limit (
                    "ATTR_MSS_MRW_OCMB_THERMAL_MEMORY_POWER_LIMIT",
                    iv_thermal_power_limit)) );
 
-    // To get power intercept
+    // To get regulator power or current limit
     FAPI_TRY( (get_power_thermal_value<TT::POWER_LIMIT_START, TT::POWER_LIMIT_LENGTH, POWER_LIMIT>(
                    *i_thermal_limits[1],
                    "ATTR_MSS_MRW_OCMB_CURRENT_CURVE_WITH_LIMIT",
@@ -184,19 +184,19 @@ fapi_try_exit:
 
 
 ///
-/// @brief find the power curve attributes for each dimm on an MCS target
-/// @param[in] i_targets vector of MCS targets on which dimm attrs will be set
-/// @param[in] i_slope vector of generated hashes for encoding and values for MSS_MRW_POWER_SLOPE
-/// @param[in] i_intercept vector of generated hashes for encoding and values for MSS_MRW_POWER_INTERCEPT
-/// @param[in] i_thermal_power_limit vector of generated hashes for encoding and values for MSS_MRW_THERMAL_MEMORY_POWER_LIMIT
-/// @param[out] o_vddr_slope the VDDR power curve slope for each dimm
-/// @param[out] o_vddr_int the VDDR power curve intercept for each dimm
-/// @param[out] o_total_slope the VDDR+VPP power curve slope for each dimm
-/// @param[out] o_total_int the VDDR+VPP power curve intercept for each dimm
-/// @param[out] o_thermal_power the thermal power limit for the dimm
+/// @brief find the power curve attributes for each dimm on an MEM_PORT target
+/// @param[in] i_throttle_type specifies whether this is for power or thermal throttling
+/// @param[in] i_port vector of MEM_PORT targets on which dimm attrs will be set
+/// @param[in] i_slope vector of generated hashes for encoding the values for memory power curve slopes
+/// @param[in] i_intercept vector of generated hashes for encoding the values for memory power curve intercepts
+/// @param[in] i_thermal_power_limit vector of generated hashes for encoding the values for memory power limits
+/// @param[in] i_current_curve_with_limit vector of generated hashes for encoding the values for regulator power curves and limits
+/// @param[out] o_slope the power curve slope for each dimm
+/// @param[out] o_intercept the power curve intercept for each dimm
+/// @param[out] o_limit the power limit for the dimm
 /// @return FAPI2_RC_SUCCESS iff ok
 /// @note used to set power curve attributes in calling function
-/// @note decodes the attribute "encoding" to get the vddr and vddr/vpp power curves for a dimm
+/// @note decodes the attribute "encoding" to get the power curves and power limits for a dimm
 ///
 fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
                                    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
@@ -217,6 +217,13 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
         mss::power_thermal::decoder<> l_decoder(l_kind);
         fapi2::buffer<uint64_t> l_attr_value;
 
+        // DDIMMs mrw slope/intercept/limit attribute values are for whole DDIMM, so divide these by total number of virtual DIMMs
+        //   to get it to a DIMM level.  This will get the DIMM count to use in later calculations.
+        // ISDIMMs use a value of 1 since mrw attribute values are at the DIMM level
+        uint8_t l_number_dimm_for_attr_value = (l_kind.iv_dimm_type == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM) ?
+                                               mss::count_dimm(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_dimm)) :
+                                               1;
+
         FAPI_TRY( l_decoder.generate_encoding(), "%s Error in get_power_attrs", mss::c_str(l_dimm) );
 
         // The first entry into these arrays must be valid
@@ -228,7 +235,8 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
             FAPI_INF("%s ATTR_MSS_MRW_OCMB_PWR_SLOPE not found or has zero values", mss::c_str(l_dimm));
 
             o_slope[l_dimm_pos] =
-                (i_throttle_type == mss::throttle_type::POWER) ? TT::POWER_SLOPE : TT::TOTAL_SLOPE;
+                ((i_throttle_type == mss::throttle_type::POWER) ? TT::POWER_SLOPE : TT::TOTAL_SLOPE) /
+                l_number_dimm_for_attr_value;
         }
         else
         {
@@ -237,7 +245,8 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
             FAPI_TRY( l_decoder.find_slope(l_slope), "%s Error in get_power_attrs", mss::c_str(l_dimm) );
 
             o_slope[l_dimm_pos] =
-                (i_throttle_type == mss::throttle_type::POWER) ? l_decoder.iv_vddr_slope : l_decoder.iv_total_slope;
+                ((i_throttle_type == mss::throttle_type::POWER) ? l_decoder.iv_vddr_slope : l_decoder.iv_total_slope) /
+                l_number_dimm_for_attr_value;
         }
 
         l_attr_value = i_intercept[0];
@@ -247,7 +256,8 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
             FAPI_INF("%s ATTR_MSS_MRW_OCMB_PWR_INTERCEPT not found or has zero values", mss::c_str(l_dimm));
 
             o_intercept[l_dimm_pos] =
-                (i_throttle_type == mss::throttle_type::POWER) ? TT::POWER_INT : TT::TOTAL_INT;
+                ((i_throttle_type == mss::throttle_type::POWER) ? TT::POWER_INT : TT::TOTAL_INT) /
+                l_number_dimm_for_attr_value;
         }
         else
         {
@@ -256,7 +266,8 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
             FAPI_TRY( l_decoder.find_intercept(l_intercept), "%s Error in get_power_attrs", mss::c_str(l_dimm) );
 
             o_intercept[l_dimm_pos] =
-                (i_throttle_type == mss::throttle_type::POWER) ? l_decoder.iv_vddr_intercept : l_decoder.iv_total_intercept;
+                ((i_throttle_type == mss::throttle_type::POWER) ? l_decoder.iv_vddr_intercept : l_decoder.iv_total_intercept) /
+                l_number_dimm_for_attr_value;
         }
 
         l_attr_value = i_thermal_power_limit[0];
@@ -268,7 +279,8 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
             // The unit of limit and intercept is cA but limit is dA in mss::throttle_type::POWER
             // So we need to transfer them to the same unit
             o_limit[l_dimm_pos] =
-                (i_throttle_type == mss::throttle_type::POWER) ? TT::POWER_LIMIT * DECI_TO_CENTI : TT::THERMAL_LIMIT;
+                ((i_throttle_type == mss::throttle_type::POWER) ? TT::POWER_LIMIT* DECI_TO_CENTI : TT::THERMAL_LIMIT) /
+                l_number_dimm_for_attr_value;
         }
         else
         {
@@ -279,8 +291,10 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
             // The unit of limit and intercept is cA but limit is dA in mss::throttle_type::POWER
             // So we need to transfer them to the same unit
             o_limit[l_dimm_pos] =
-                (i_throttle_type == mss::throttle_type::POWER) ? l_decoder.iv_power_limit * DECI_TO_CENTI :
-                l_decoder.iv_thermal_power_limit;
+                ((i_throttle_type == mss::throttle_type::POWER) ?
+                 l_decoder.iv_power_limit* DECI_TO_CENTI : l_decoder.iv_thermal_power_limit
+                ) /
+                l_number_dimm_for_attr_value;
         }
     }
 
