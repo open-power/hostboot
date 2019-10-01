@@ -1626,7 +1626,8 @@ fapi2::ReturnCode EffGroupingBaseSizeData::set_HTM_OCC_base_addr(
     }
 
     // Update mem sizes with working array values
-    if (l_numRegions == NUM_NON_MIRROR_REGIONS)
+    if (i_sysAttrs.iv_selectiveMode ==
+        fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL)
     {
         memcpy(iv_memory_sizes, l_mem_sizes, sizeof(iv_memory_sizes));
     }
@@ -1827,7 +1828,8 @@ fapi2::ReturnCode EffGroupingBaseSizeData::setSMFBaseSizeData(
     }
 
     // Update mem sizes with working array values
-    if (l_numRegions == NUM_NON_MIRROR_REGIONS)
+    if (i_sysAttrs.iv_selectiveMode ==
+        fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL)
     {
         memcpy(iv_memory_sizes, l_mem_sizes, sizeof(iv_memory_sizes));
     }
