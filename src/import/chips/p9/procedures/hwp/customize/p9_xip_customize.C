@@ -2615,8 +2615,9 @@ ReturnCode p9_xip_customize (
 
                 if ((uint32_t)l_fapiRc == RC_XIPC_IMAGE_WOULD_OVERFLOW)
                 {
-                    FAPI_INF("p9_xip_customize(): Image is full. Ran out of space appending VPD rings"
-                             " to the .rings section");
+                    FAPI_INF("p9_xip_customize(): Image is full. Ran out of space appending VPD"
+                             " rings to the .rings section. Now checking if min required cores"
+                             " is satisfied.");
 
                     // Check the bootCoreMask to determine if enough cores have been configured.
                     uint8_t attrMinReqdEcs = 0;
@@ -2656,11 +2657,14 @@ ReturnCode p9_xip_customize (
                                  "Image buffer would overflow before reaching the minimum required"
                                  " number of EC boot cores" );
 
+                    fapi2::current_err = FAPI2_RC_SUCCESS;
+                }
+                else
+                {
+                    fapi2::current_err = l_fapiRc;
                 }
 
-                fapi2::current_err = l_fapiRc;
                 goto fapi_try_exit;
-
             }
 
             // More size code sanity checks of section and image sizes.
