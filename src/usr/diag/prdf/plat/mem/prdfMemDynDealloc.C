@@ -574,12 +574,12 @@ int32_t __getPortAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, MemAddr i_addr,
 //------------------------------------------------------------------------------
 
 template<TYPE T>
-void __getGrpPrms( ExtensibleChip * i_chip, uint8_t o_portPos,
+void __getGrpPrms( ExtensibleChip * i_chip, uint8_t & o_portPos,
                    SCAN_COMM_REGISTER_CLASS * &o_mcfgp,
                    SCAN_COMM_REGISTER_CLASS * &o_mcfgpm );
 
 template<>
-void __getGrpPrms<TYPE_MCA>( ExtensibleChip * i_chip, uint8_t o_portPos,
+void __getGrpPrms<TYPE_MCA>( ExtensibleChip * i_chip, uint8_t & o_portPos,
                              SCAN_COMM_REGISTER_CLASS * &o_mcfgp,
                              SCAN_COMM_REGISTER_CLASS * &o_mcfgpm )
 {
@@ -593,7 +593,7 @@ void __getGrpPrms<TYPE_MCA>( ExtensibleChip * i_chip, uint8_t o_portPos,
 }
 
 template<>
-void __getGrpPrms<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, uint8_t o_portPos,
+void __getGrpPrms<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, uint8_t & o_portPos,
                                    SCAN_COMM_REGISTER_CLASS * &o_mcfgp,
                                    SCAN_COMM_REGISTER_CLASS * &o_mcfgpm )
 {
