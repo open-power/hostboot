@@ -41,6 +41,7 @@
 #include <lib/mss_attribute_accessors.H>
 #include <lib/power_thermal/accessor_wrapper.H>
 #include <lib/power_thermal/throttle_traits.H>
+#include <lib/dimm/nimbus_kind.H>
 #include <generic/memory/lib/utils/power_thermal/gen_throttle.H>
 
 namespace mss

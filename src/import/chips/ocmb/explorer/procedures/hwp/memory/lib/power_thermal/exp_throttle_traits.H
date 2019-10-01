@@ -85,17 +85,16 @@ class throttle_traits<mss::mc_type::EXPLORER>
             //They are the default/ catch-all values from the power curve attributes
             //Shouldn't be used if system is set up correctly and attributes are available
             //This will throttle the DIMMs to ~76% dram data bus utilization
-            //(using the mrw regulator power limit of 1700 cW and thermal power limit here of 1940 cW).
-            // TODO: Need to fill the right value. The current value is from Nimbus
+            //(using the mrw regulator current limit of 100 dA cW and thermal power limit here of 2175 cW).
             // Thermal power (OCMB+DRAM)
-            TOTAL_SLOPE = 0x44C,
-            TOTAL_INT = 0x44C,
-            THERMAL_LIMIT = 0x794,
+            TOTAL_SLOPE = 0x462,
+            TOTAL_INT = 0x526,
+            THERMAL_LIMIT = 0x87F,
 
             // Power (PMIC)
-            POWER_SLOPE = 0x41A,
-            POWER_INT = 0x384,
-            POWER_LIMIT = 0x794,
+            POWER_SLOPE = 0x152,
+            POWER_INT = 0x94,
+            POWER_LIMIT = 0x64,
 
         };
 
