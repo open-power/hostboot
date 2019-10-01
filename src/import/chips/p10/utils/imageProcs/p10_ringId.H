@@ -47,7 +47,14 @@ enum Chiplets
     PAU1_TYPE,
     PAU2_TYPE,
     PAU3_TYPE,
-    AXON_TYPE,
+    AXON0_TYPE,
+    AXON1_TYPE,
+    AXON2_TYPE,
+    AXON3_TYPE,
+    AXON4_TYPE,
+    AXON5_TYPE,
+    AXON6_TYPE,
+    AXON7_TYPE,
     EQ_TYPE,
     SBE_NUM_CHIPLETS
 };
