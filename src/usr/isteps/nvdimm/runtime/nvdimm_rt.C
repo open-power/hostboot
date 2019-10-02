@@ -37,6 +37,7 @@
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
+#include <errl/errludstring.H>
 #include <util/runtime/rt_fwreq_helper.H>
 #include <targeting/common/attributes.H>
 #include <targeting/common/commontargeting.H>
@@ -50,6 +51,7 @@
 #include "../nvdimmErrorLog.H"
 #include <isteps/nvdimm/nvdimm.H>  // implements some of these
 #include "../nvdimm.H" // for g_trac_nvdimm
+#include <sys/time.h>
 
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
@@ -63,6 +65,7 @@ namespace NVDIMM
 static constexpr uint64_t DARN_ERROR_CODE = 0xFFFFFFFFFFFFFFFFull;
 static constexpr uint32_t MAX_DARN_ERRORS = 10;
 static constexpr uint8_t FW_OPS_UPDATE = 0x04;
+static constexpr size_t ARM_MAX_RETRY_COUNT = 1;
 /**
  * @brief This function polls the command status register for arm completion
  *        (does not indicate success or fail)
@@ -234,9 +237,8 @@ errlHndl_t nvdimmArmPreCheck(Target* i_nvdimm)
         *@userdata1[48:56]  l_ready
         *@userdata1[57:63]  l_fwupdate
         *@userdata2         <UNUSED>
-        *@devdesc           NVDIMM threw an error or failed to set event
-        *                   notifications during arming
-        *@custdesc          NVDIMM failed to enable event notificaitons
+        *@devdesc           NVDIMM failed arm precheck. Refer to FFDC for exact reason
+        *@custdesc          NVDIMM failed the arm precheck and is unable to arm
         */
         l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
                                          NVDIMM_ARM_PRE_CHECK,
@@ -422,112 +424,215 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
             break;
         }
 
-        l_err = NVDIMM::nvdimmChangeArmState(l_nvdimm, ARM_TRIGGER);
-        // If we run into any error here we will just
-        // commit the error log and move on. Let the
-        // system continue to boot and let the user
-        // salvage the data
-        if (l_err)
+        bool l_is_retryable = true;
+        //continue flag set by the retry loop to continue on the outer loop
+        bool l_continue_arm = false;
+        //break flag set by the retry loop to break on the outer loop
+        bool l_break = false;
+        errlHndl_t l_err_retry = nullptr;
+
+        // Attempt arm multiple times in case of glitches
+        for (size_t l_retry = 0; l_retry <= ARM_MAX_RETRY_COUNT; l_retry++)
         {
-            TRACFCOMP(g_trac_nvdimm, "nvdimmArm() nvdimm[%X] failed to trigger arm", get_huid(l_nvdimm));
 
-            nvdimmDisarm(i_nvdimmTargetList);
-
-            // Committing the error as we don't want this to interrupt
-            // the boot. This will notify the user that action is needed
-            // on this module
-            l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
-            l_err->collectTrace(NVDIMM_COMP_NAME);
-            errlCommit( l_err, NVDIMM_COMP_ID );
-            o_arm_successful = false;
-            continue;
-        }
-
-        // Arm happens one module at a time. No need to set any offset on the counter
-        uint32_t l_poll = 0;
-        l_err = nvdimmPollArmDone(l_nvdimm, l_poll);
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_nvdimm, "nvdimmArm() nvdimm[%X] arm command timed out", get_huid(l_nvdimm));
-            l_arm_timeout = true;
-
-            l_err_t = notifyNvdimmProtectionChange(l_nvdimm, NVDIMM_DISARMED);
-            if (l_err_t)
+            l_err = NVDIMM::nvdimmChangeArmState(l_nvdimm, ARM_TRIGGER);
+            // If we run into any error here we will just
+            // commit the error log and move on. Let the
+            // system continue to boot and let the user
+            // salvage the data
+            if (l_err)
             {
-                errlCommit( l_err_t, NVDIMM_COMP_ID );
-            }
+                TRACFCOMP(g_trac_nvdimm, "nvdimmArm() nvdimm[%X] failed to trigger arm", get_huid(l_nvdimm));
 
-            // Committing the error as we don't want this to interrupt
-            // the boot. This will notify the user that action is needed
-            // on this module
-            l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
-            l_err->collectTrace(NVDIMM_COMP_NAME);
-
-            errlCommit( l_err, NVDIMM_COMP_ID );
-            o_arm_successful = false;
-        }
-
-        // Pass l_arm_timeout value in for health status check
-        l_continue = l_arm_timeout;
-
-        // Check health status registers and exit if required
-        l_err = nvdimmHealthStatusCheck( l_nvdimm, HEALTH_PRE_ARM, l_continue );
-
-        // Check for health status failure
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_nvdimm, "nvdimmArm() nvdimm[%X] failed first health status check", get_huid(l_nvdimm));
-
-            // The arm timeout variable is used here as the continue variable for the
-            // health status check. This was done to include the timeout for use in the check
-            // If true either the arm timed out with a health status fail or the
-            // health status check failed with another disarm and exit condition
-            if (!l_continue)
-            {
-                errlCommit( l_err, NVDIMM_COMP_ID );
-
-                // Disarming all dimms due to error
                 nvdimmDisarm(i_nvdimmTargetList);
 
+                // Committing the error as we don't want this to interrupt
+                // the boot. This will notify the user that action is needed
+                // on this module
+                l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+                l_err->collectTrace(NVDIMM_COMP_NAME);
+                errlCommit( l_err, NVDIMM_COMP_ID );
                 o_arm_successful = false;
+
+                // Cause the main loop to skip the rest of the arm procedure
+                // and move to the next target
+                l_continue_arm = true;
                 break;
+            }
+
+            // Arm happens one module at a time. No need to set any offset on the counter
+            uint32_t l_poll = 0;
+            l_err = nvdimmPollArmDone(l_nvdimm, l_poll);
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm, "nvdimmArm() nvdimm[%X] arm command timed out", get_huid(l_nvdimm));
+                l_arm_timeout = true;
+
+                l_err_t = notifyNvdimmProtectionChange(l_nvdimm, NVDIMM_DISARMED);
+                if (l_err_t)
+                {
+                    errlCommit( l_err_t, NVDIMM_COMP_ID );
+                }
+
+                // Committing the error as we don't want this to interrupt
+                // the boot. This will notify the user that action is needed
+                // on this module
+                l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+                l_err->collectTrace(NVDIMM_COMP_NAME);
+
+                errlCommit( l_err, NVDIMM_COMP_ID );
+                o_arm_successful = false;
+            }
+
+            // Pass l_arm_timeout value in for health status check
+            l_continue = l_arm_timeout;
+
+            // Sleep for 1 second before checking the health status
+            // to let the glitches settle in case there were any
+            nanosleep(1, 0);
+
+            // Check health status registers and exit if required
+            l_err = nvdimmHealthStatusCheck( l_nvdimm, HEALTH_PRE_ARM, l_continue );
+
+            // Check for health status failure
+            // Any fail picked up by the health check is a legit fail
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm, "nvdimmArm() nvdimm[%X] failed first health status check", get_huid(l_nvdimm));
+
+                // The arm timeout variable is used here as the continue variable for the
+                // health status check. This was done to include the timeout for use in the check
+                // If true either the arm timed out with a health status fail or the
+                // health status check failed with another disarm and exit condition
+                if (!l_continue)
+                {
+                    errlCommit( l_err, NVDIMM_COMP_ID );
+
+                    // Disarming all dimms due to error
+                    nvdimmDisarm(i_nvdimmTargetList);
+                    o_arm_successful = false;
+
+                    // Cause the main loop to exit out of the main arm procedure
+                    l_break = true;
+                    break;
+                }
+                else
+                {
+                    errlCommit( l_err, NVDIMM_COMP_ID );
+
+                    // Cause the main loop to skip the rest of the arm procedure
+                    // and move to the next target
+                    l_continue_arm = true;
+                    break;
+                }
+            }
+
+            l_err = nvdimmCheckArmSuccess(l_nvdimm, l_arm_timeout);
+
+            // At this point we have passed the health check. If the arm were
+            // to fail now, it is likely it was due to some glitch. Let's retry
+            // the arm again as long as the fail is not due to timeout.
+            // A timeout would mean a charging issue, it would have been caught
+            // by the health check.
+            l_is_retryable = !l_arm_timeout && l_retry < ARM_MAX_RETRY_COUNT;
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm, "nvdimmArm() nvdimm[%X] failed to succesfully arm. %s retryable.",
+                            get_huid(l_nvdimm), l_is_retryable? "IS" : "NOT");
+
+                if (l_is_retryable)
+                {
+                    // Save the original error
+                    l_err_retry = l_err;
+
+                    /*@
+                    *@errortype
+                    *@reasoncode       NVDIMM_ARM_RETRY
+                    *@severity         ERRORLOG_SEV_INFORMATIONAL
+                    *@moduleid         NVDIMM_ARM_ERASE
+                    *@userdata1[0:31]  Target Huid
+                    *@userdata1[32:39] l_is_retryable
+                    *@userdata1[40:47] MAX arm retry count
+                    *@userdata2[0:31]  Original errlog plid
+                    *@userdata2[32:63] Original errlog reason code
+                    *@devdesc          NVDIMM encountered a glitch causing the initial
+                    *                  arm to fail. System firmware will retry the arm
+                    *@custdesc         NVDIMM requires an arm retry
+                    */
+                    l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                                     NVDIMM_ARM_ERASE,
+                                                     NVDIMM_ARM_RETRY,
+                                                     NVDIMM_SET_USER_DATA_1(TARGETING::get_huid(l_nvdimm),
+                                                     FOUR_UINT8_TO_UINT32(l_is_retryable, ARM_MAX_RETRY_COUNT,0,0)),
+                                                     TWO_UINT32_TO_UINT64(l_err_retry->plid(), l_err_retry->reasonCode()),
+                                                     ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+
+                    l_err->collectTrace( NVDIMM_COMP_NAME );
+
+                    // Callout the dimm
+                    l_err->addHwCallout( l_nvdimm,
+                                           HWAS::SRCI_PRIORITY_LOW,
+                                           HWAS::NO_DECONFIG,
+                                           HWAS::GARD_NULL);
+
+                    errlCommit( l_err, NVDIMM_COMP_ID );
+                }
+                else
+                {
+                    // Handle retryable error
+                    if (l_err_retry)
+                    {
+                        ERRORLOG::ErrlUserDetailsString("Arm RETRY failed").addToLog(l_err_retry);
+
+                        // Delete the current errlog and use the original errlog for callout
+                        delete l_err;
+                        l_err = l_err_retry;
+                        l_err_retry = nullptr;
+                    }
+
+                    // Disarming all dimms due to error
+                    nvdimmDisarm(i_nvdimmTargetList);
+
+                    l_err_t = notifyNvdimmProtectionChange(l_nvdimm, NVDIMM_DISARMED);
+                    if (l_err_t)
+                    {
+                        errlCommit( l_err_t, NVDIMM_COMP_ID );
+                    }
+
+                    // Committing the error as we don't want this to interrupt
+                    // the boot. This will notify the user that action is needed
+                    // on this module
+                    l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+                    l_err->collectTrace(NVDIMM_COMP_NAME);
+
+                    // Dump Traces for error logs
+                    nvdimmTraceRegs( l_nvdimm, l_RegInfo );
+                    nvdimmAddPage4Regs(l_nvdimm,l_err);
+
+                    // Add reg traces to the error log
+                    NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
+
+                    errlCommit(l_err, NVDIMM_COMP_ID);
+                    o_arm_successful = false;
+
+                    // Cause the main loop to exit out of the main arm procedure
+                    l_break = true;
+                    break;
+                }
             }
             else
             {
-                errlCommit( l_err, NVDIMM_COMP_ID );
-                continue;
-            }
-        }
+                // Arm worked. Exit the retry loop
+                break;
+            } // close nvdimmCheckArmSuccess check
+        } // close arm retry loop
 
-        l_err = nvdimmCheckArmSuccess(l_nvdimm, l_arm_timeout);
-        if (l_err)
+        if (l_continue_arm)
         {
-            TRACFCOMP(g_trac_nvdimm, "nvdimmArm() nvdimm[%X] failed to succesfully arm", get_huid(l_nvdimm));
-
-            // Disarming all dimms due to error
-            nvdimmDisarm(i_nvdimmTargetList);
-
-            l_err_t = notifyNvdimmProtectionChange(l_nvdimm, NVDIMM_DISARMED);
-            if (l_err_t)
-            {
-                errlCommit( l_err_t, NVDIMM_COMP_ID );
-            }
-
-            // Committing the error as we don't want this to interrupt
-            // the boot. This will notify the user that action is needed
-            // on this module
-            l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
-            l_err->collectTrace(NVDIMM_COMP_NAME);
-
-            // Dump Traces for error logs
-            nvdimmTraceRegs( l_nvdimm, l_RegInfo );
-            nvdimmAddPage4Regs(l_nvdimm,l_err);
-
-            // Add reg traces to the error log
-            NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
-
-            errlCommit(l_err, NVDIMM_COMP_ID);
-            o_arm_successful = false;
+            continue;
+        }
+        else if (l_break)
+        {
             break;
         }
 

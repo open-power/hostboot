@@ -203,6 +203,7 @@ enum nvdimmReasonCode
     NVDIMM_ERASE_ERROR                         = NVDIMM_COMP_ID | 0x51,
     NVDIMM_ARM_PRE_CHECK_FAILED                = NVDIMM_COMP_ID | 0x52,
     NVDIMM_ARM_ENCRYPTION_UNLOCK_FAILED        = NVDIMM_COMP_ID | 0x53,
+    NVDIMM_ARM_RETRY                           = NVDIMM_COMP_ID | 0x54,
 };
 
 enum UserDetailsTypes
