@@ -844,15 +844,6 @@ bool nvdimmDisarm(TargetHandleList &i_nvdimmTargetList)
 
     for (auto const l_nvdimm : i_nvdimmTargetList)
     {
-        // skip if the nvdimm is already disarmed
-        ATTR_NVDIMM_ARMED_type l_armed_state = {};
-        l_armed_state = l_nvdimm->getAttr<ATTR_NVDIMM_ARMED>();
-        if (!l_armed_state.armed)
-        {
-            TRACFCOMP(g_trac_nvdimm, "nvdimmDisarm() nvdimm[%X] called when already disarmed", get_huid(l_nvdimm));
-            continue;
-        }
-
         l_err = NVDIMM::nvdimmChangeArmState(l_nvdimm, DISARM_TRIGGER);
         // If we run into any error here we will just
         // commit the error log and move on. Let the

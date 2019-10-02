@@ -1402,7 +1402,7 @@ errlHndl_t nvdimmEraseCheck(Target *i_nvdimm, bool i_statusOnly)
             l_err = nvdimmReadReg ( i_nvdimm, ERASE_STATUS, l_data);
             if (l_err)
             {
-                nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR);
+                nvdimmSetStatusFlag(i_nvdimm, NSTD_VAL_DISARMED);
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm[%X], failed to read erase status",
                           get_huid(i_nvdimm));
                 break;
@@ -1421,7 +1421,7 @@ errlHndl_t nvdimmEraseCheck(Target *i_nvdimm, bool i_statusOnly)
                 l_err  = nvdimmValidImage( i_nvdimm, l_valid );
                 if (l_err)
                 {
-                    nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR);
+                    nvdimmSetStatusFlag(i_nvdimm, NSTD_VAL_DISARMED);
                     TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm[%X] Failed to detect valid image",
                               get_huid(i_nvdimm));
                     break;
@@ -1430,7 +1430,7 @@ errlHndl_t nvdimmEraseCheck(Target *i_nvdimm, bool i_statusOnly)
 
             if ( (l_data & ERASE_ERROR) || l_valid )
             {
-                nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR);
+                nvdimmSetStatusFlag(i_nvdimm, NSTD_VAL_DISARMED);
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm[%X] NVDimm Erase failed due to error (ERASE_STATUS: 0x%02X, Image %s)",
                           get_huid(i_nvdimm), l_data, l_valid?"not erased":"erased");
                 /*@
