@@ -448,6 +448,27 @@
         capture     group default;
     };
 
+    register MC_ADDR_TRANS
+    {
+        name        "P9 OCMB target address translation register0";
+        scomaddr    0x0801186F;
+        capture     group default;
+    };
+
+    register MC_ADDR_TRANS1
+    {
+        name        "P9 OCMB target address translation register1";
+        scomaddr    0x08011870;
+        capture     group default;
+    };
+
+    register MC_ADDR_TRANS2
+    {
+        name        "P9 OCMB target address translation register2";
+        scomaddr    0x08011871;
+        capture     group default;
+    };
+
     ############################################################################
     # Interrupt status register
     ############################################################################

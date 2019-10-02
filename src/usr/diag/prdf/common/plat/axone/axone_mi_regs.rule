@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -48,34 +48,66 @@
         capture     group default;
     };
 
-    register MCFGP
+    register MCFGP0
     {
-        name        "MCFGP";
-        scomaddr    0x501080A;
+        name        "MCFGP0";
+        scomaddr    0x0501080A;
         capture     group default;
         capture     group MirrorConfig;
     };
 
-    register MCFGPA
+    register MCFGP1
     {
-        name        "MCFGPA";
+        name        "MCFGP1";
         scomaddr    0x0501080B;
         capture     group default;
         capture     group MirrorConfig;
     };
 
-    register MCFGPM
+    register MCFGP0A
     {
-        name        "MCFGPM";
-        scomaddr    0x501080C;
+        name        "MCFGP0A";
+        scomaddr    0x0501080E;
         capture     group default;
         capture     group MirrorConfig;
     };
 
-    register MCFGPMA
+    register MCFGP1A
     {
-        name        "MCFGPMA";
-        scomaddr    0x0501080D;
+        name        "MCFGP1A";
+        scomaddr    0x0501080F;
+        capture     group default;
+        capture     group MirrorConfig;
+    };
+
+    register MCFGPM0
+    {
+        name        "MCFGPM0";
+        scomaddr    0x5010820;
+        capture     group default;
+        capture     group MirrorConfig;
+    };
+
+    register MCFGPM0A
+    {
+        name        "MCFGPM0A";
+        scomaddr    0x05010821;
+        capture     group default;
+        capture     group MirrorConfig;
+    };
+
+    register MCFGPM1
+    {
+        name        "MCFGPM1";
+        scomaddr    0x5010830;
+        capture     group default;
+        capture     group MirrorConfig;
+    };
+
+    register MCFGPM1A
+    {
+        name        "MCFGPM1A";
+        scomaddr    0x05010831;
         capture     group default;
         capture     group MirrorConfig;
     };
