@@ -63,6 +63,9 @@ extern "C"
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
+        // Disable PMICs and clear status bits so we are starting at a known off state
+        FAPI_TRY(mss::pmic::disable_and_reset_pmics(l_pmics));
+
         // // If we're enabling via internal settings, we can just run VR ENABLE down the line
         if (i_mode == mss::pmic::enable_mode::MANUAL)
         {

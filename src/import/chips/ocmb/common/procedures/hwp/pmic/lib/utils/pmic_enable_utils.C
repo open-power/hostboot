@@ -521,6 +521,41 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Disable PMICs and clear status bits in preparation for enable
+///
+/// @param[in] i_pmics vector of PMIC targets
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode disable_and_reset_pmics(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmics)
+{
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+    using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    for (const auto& l_pmic : i_pmics)
+    {
+        // Make sure PMIC is alive
+        FAPI_TRY(mss::pmic::poll_for_pbulk_good(l_pmic));
+
+        // First, disable
+        {
+            fapi2::buffer<uint8_t> l_reg_contents;
+
+            // Redundant clearBit, but just so it's clear what we're doing
+            l_reg_contents.clearBit<FIELDS::R32_VR_ENABLE>();
+
+            FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(l_pmic, REGS::R32, l_reg_contents));
+        }
+
+        // Now that it's disabled, let's clear the status bits so errors don't hang over into the next enable
+        {
+            FAPI_TRY(mss::pmic::status::clear(l_pmic));
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+///
 /// @brief Enable PMIC for SPD mode
 ///
 /// @param[in] i_pmics vector of PMICs sorted by mss::index

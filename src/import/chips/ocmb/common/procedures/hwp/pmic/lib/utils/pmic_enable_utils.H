@@ -765,6 +765,14 @@ fapi2::ReturnCode enable_chip_1U_2U(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>
                                     const uint16_t i_vendor_id);
 
 ///
+/// @brief Disable PMICs and clear status bits in preparation for enable
+///
+/// @param[in] i_pmics vector of PMIC targets
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode disable_and_reset_pmics(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmics);
+
+///
 /// @brief Enable PMIC for SPD mode
 ///
 /// @param[in] i_pmics vector of PMICs sorted by mss::index

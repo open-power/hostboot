@@ -296,6 +296,28 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Clear PMIC status registers
+///
+/// @param[in] i_pmic_target PMIC to clear
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode clear(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target)
+{
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+    using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    fapi2::buffer<uint8_t> l_reg_contents;
+    FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R14, l_reg_contents));
+
+    // Write to clear
+    l_reg_contents.setBit<FIELDS::R14_GLOBAL_CLEAR_STATUS>();
+    FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic_target, REGS::R14, l_reg_contents));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Check an individual set of PMIC status codes
 ///
 /// @param[in] i_pmic_target PMIC target

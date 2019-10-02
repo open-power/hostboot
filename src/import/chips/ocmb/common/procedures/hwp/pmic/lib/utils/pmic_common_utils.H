@@ -301,6 +301,14 @@ fapi2::ReturnCode check_all_pmics(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
 fapi2::ReturnCode check_pmic(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target, bool& o_error);
 
 ///
+/// @brief Clear PMIC status registers
+///
+/// @param[in] i_pmic_target PMIC to clear
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode clear(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
+
+///
 /// @brief Check the IDT specific status codes
 ///
 /// @param[in] i_pmic_target PMIC target
