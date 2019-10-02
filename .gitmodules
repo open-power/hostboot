@@ -6,13 +6,24 @@
 	# the Hostboot repo is recursively cloned, because not everyone
 	# will need to run with code coverage.
 	# This is pulled on-demand when users build an lcov report.
-    update = none
+	update = none
 
 [submodule "ppe"]
 	path = src/build/tools/extern/ppe
 	url = ssh://hostboot.gerrit/hw/ppe
 	update = none
 
-	# Ignore any change done in the repo,
+        # Ignore any change done in the repo (except
+        # for changes to the head commit)
 	# such as files created with "make install."
-	ignore = all
+	ignore = dirty
+
+[submodule "ekb"]
+	path = src/build/tools/extern/ekb
+	url = ssh://hostboot.gerrit/hw/ekb
+	update = none
+
+        # Ignore any change done in the repo (except
+        # for changes to the head commit)
+	# such as files created with "make install."
+	ignore = dirty

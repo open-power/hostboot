@@ -103,6 +103,14 @@ ppe: $(PPE_PATH)/Makefile
 $(PPE_PATH)/Makefile:
 	git submodule update --init --checkout -- $(PPE_PATH)
 
+EKB_PATH := $(ROOTPATH)/src/build/tools/extern/ekb
+
+.PHONY: ekb
+ekb: $(EKB_PATH)/ekb
+
+$(EKB_PATH)/ekb:
+	git submodule update --init --checkout -- $(EKB_PATH)
+
 .PHONY: gcda_clean
 gcda_clean:
 	find -name '*.gcda' -exec rm -f {} \;

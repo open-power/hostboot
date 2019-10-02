@@ -1,2 +1,3 @@
-# HCODE artifact ID used to assemble PNOR image
-export HCODE_ARTIFACT_ID=6973a406404d56f7da532a7fce0e5caf21e28dea
+# If this is uncommented, use this file for the HCODE image and
+# don't bother building the HCODE image.
+#export HCODE_OVERRIDE_IMAGE=/gsa/ausgsa/projects/h/hostboot/simbuild/dependencies/hcode/6973a406404d56f7da532a7fce0e5caf21e28dea/p9a.hw_ref_image.bin

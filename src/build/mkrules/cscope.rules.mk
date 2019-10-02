@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2018
+# Contributors Listed Below - COPYRIGHT 2013,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -41,5 +41,5 @@ ctags:
 	@mkdir -p $(ROOTPATH)/obj/cscope
 	$(C2) "    CTAGS"
 	$(C1)(cd $(ROOTPATH)/obj/cscope ; rm -f tags ; \
-	      ctags --recurse=yes --fields=+S ../../src)
+	      ctags --recurse=yes --exclude=*extern* --fields=+S ../../src)
 

@@ -38,14 +38,22 @@ assemble_setup()
 
     build-ffs-tools
 
-    # Clode PPE repo to ${PROJECT_ROOT}/src/build/tools/extern/ppe
+    # Clone PPE repo to ${PROJECT_ROOT}/src/build/tools/extern/ppe
     # PPE is tracked as a git module
     (cd ${PROJECT_ROOT} && make ppe $1)
+
 
     source ${PROJECT_ROOT}/src/build/citest/etc/sbe
     source ${PROJECT_ROOT}/src/build/citest/etc/hcode
     source ${PROJECT_ROOT}/src/build/citest/etc/occ
     source ${PROJECT_ROOT}/src/build/citest/etc/wof
+
+    # Clone EKB repo to ${PROJECT_ROOT}/src/build/tools/extern/ekb
+    # EKB is tracked as a git module
+    # This is skipped if user supplied an override image
+    if [[ -z ${HCODE_OVERRIDE_IMAGE} ]]; then
+        (cd ${PROJECT_ROOT} && make ekb $1)
+    fi
 
     if [ ! -z "${SECUREBOOT_KEY_TRANSITION_MODE}" ] &&
         [ ! -z "${CFM_TEST_IMAGE}" ]; then
@@ -126,10 +134,11 @@ simics_setup()
 }
 
 # Function that will take HB's bootloader image (hbbl.bin), copy it to the PPE
-# repo, and build repo to generate ECC enable SBE image
+# repo, and build repo to generate ECC enabled SBE image
 generate_sbe_image()
 {
 
+    echo -e "\n\nGenerating SBE image..."
     PPE_DIR=${PROJECT_ROOT}/src/build/tools/extern/ppe
 
     if [[ ! -f ${PPE_DIR}/Makefile ]];then
@@ -145,6 +154,26 @@ generate_sbe_image()
     ${PROJECT_ROOT}/standalone/simics/sbe_seeprom_p10.bin.ecc
     cd ${PROJECT_ROOT}
 
+}
+
+# Build the HCODE image inside the EKB repo
+generate_hcode_image()
+{
+    echo -e "\n\nGenerating HCODE image..."
+    EKB_DIR=${PROJECT_ROOT}/src/build/tools/extern/ekb
+
+    if [[ ! -f ${EKB_DIR}/ekb ]];then
+        echo "Could not find ekb script in EKB repo."
+        echo "Please run \"hb prime\" to clone EKB repo."
+        exit 1
+    fi
+
+    cd ${EKB_DIR}
+    CTEPATH=/afs/awd.austin.ibm.com/projects/cte PROJECT_ROOT=${EKB_DIR} \
+        ./ekb workon<<<'./ekb build p10.hw_image && exit'
+    cp ${EKB_DIR}/output/images/hw_image/p10.hw_image.bin \
+        ${PROJECT_ROOT}/standalone/staging/p10.hw_image.bin
+    cd ${PROJECT_ROOT}
 }
 
 FIRST_PARAM=$1
@@ -173,5 +202,8 @@ case ${FIRST_PARAM} in
     ;;
     "--generateSbeImage")
         generate_sbe_image $BUILD_PARAMS
+    ;;
+    "--generateHcodeImage")
+        generate_hcode_image
     ;;
 esac

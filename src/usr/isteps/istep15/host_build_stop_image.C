@@ -22,7 +22,10 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
+/**
+ *  @file host_build_stop_image.C
+ *  Contains code for building the runtime STOP images
+ */
 
 ////System
 #include    <sys/misc.h>
@@ -49,19 +52,17 @@
 //PNOR Resource Provider
 #include    <pnor/pnorif.H>
 
-/* FIXME RTC: 210975
 #include    <fapi2.H>
-*/
 #include    <kernel/cpumgr.H>
 
 //Targeting Support
 #include    <targeting/common/utilFilter.H>
-/* FIXME RTC: 210975
 #include    <fapi2/target.H>
 
 //HWP Invoker
 #include    <fapi2/plat_hwp_invoker.H>
 
+/* FIXME: RTC 208832 - P10 istep 15
 //Import directory (from EKB repository)
 #include    <p9_hcode_image_build.H>
 #include    <p9_stop_api.H>
@@ -85,10 +86,10 @@ using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   TARGETING;
 using   namespace   PNOR;
-/* FIXME RTC: 210975
+/* FIXME RTC: 208832 - P10 istep 15
 using   namespace   stopImageSection;
-using   namespace   fapi2;
 */
+using   namespace   fapi2;
 
 namespace ISTEP_15
 {
@@ -160,7 +161,7 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
 {
     errlHndl_t  l_errl = nullptr;
 
-// FIXME RTC: 210975
+// FIXME RTC: 208832 - P10 istep 15
 #if 0
     do
     {
@@ -405,8 +406,6 @@ void* host_build_stop_image (void *io_pArgs)
 {
     ISTEP_ERROR::IStepError     l_StepError;
 
-// FIXME RTC: 210975
-#if 0
     errlHndl_t  l_errl           = NULL;
 
     // unload of HCODE PNOR section only necessary if SECUREBOOT compiled in
@@ -415,18 +414,22 @@ void* host_build_stop_image (void *io_pArgs)
 #endif
 
     char*       l_pHcodeImage     = NULL;
-    void*       l_pRealMemBase   = NULL;
+    //void*       l_pRealMemBase   = NULL;
     void*       l_pVirtMemBase   = NULL;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_build_stop_image entry" );
 
+// FIXME RTC: 208832 - P10 istep 15
+#if 0
     // allocate four temporary work buffers
     void* l_temp_buffer1 = malloc(HW_IMG_RING_SIZE);
     void* l_temp_buffer2 = malloc(MAX_RING_BUF_SIZE);
     void* l_temp_buffer3 = malloc(MAX_RING_BUF_SIZE);
     void* l_temp_buffer4 = malloc(MAX_RING_BUF_SIZE);
-
+#endif
     do  {
+// FIXME RTC: 208832 - P10 istep 15
+#if 0
         //Determine top-level system target
         TARGETING::Target* l_sys = NULL;
         TARGETING::targetService().getTopLevelTarget(l_sys);
@@ -481,7 +484,7 @@ void* host_build_stop_image (void *io_pArgs)
         l_sys->setAttr<TARGETING::ATTR_OCC_COMMON_AREA_PHYS_ADDR>
             (reinterpret_cast<uint64_t>(l_pRealMemBase)
                 + VMM_HOMER_REGION_SIZE);
-
+#endif
         //  Continue, build hcode images
         //
         //Load the reference image from PNOR
@@ -498,6 +501,8 @@ void* host_build_stop_image (void *io_pArgs)
         unload_hcode_pnor_section = true;
 #endif
 
+// FIXME RTC: 208832 - P10 istep 15
+#if 0
         // Pull build information from XIP header and trace it
         Util::imageBuild_t l_imageBuild;
         Util::pullTraceBuildInfo(l_pHcodeImage,
@@ -730,6 +735,7 @@ void* host_build_stop_image (void *io_pArgs)
 
         } ;  // endfor
 
+#endif
     }  while (0);
     // @@@@@    END CUSTOM BLOCK:   @@@@@
 
@@ -742,11 +748,14 @@ void* host_build_stop_image (void *io_pArgs)
         errlCommit( l_errl, HWPF_COMP_ID );
     }
 
+// FIXME RTC: 208832 - P10 istep 15
+#if 0
     // delete working buffers
     if( l_temp_buffer1 ) { free(l_temp_buffer1); }
     if( l_temp_buffer2 ) { free(l_temp_buffer2); }
     if( l_temp_buffer3 ) { free(l_temp_buffer3); }
     if( l_temp_buffer4 ) { free(l_temp_buffer4); }
+#endif
 
 #ifdef CONFIG_SECUREBOOT
     // securely unload HCODE PNOR section, if necessary
@@ -806,7 +815,6 @@ void* host_build_stop_image (void *io_pArgs)
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "host_build_stop_image exit" );
 
-#endif
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();
 }

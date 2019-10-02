@@ -274,7 +274,14 @@ if [[ $HB_STANDALONE -eq 1 ]] && [ $PNOR_LAYOUT_SELECTED != "FSP" ];then
     source standaloneHelper --assembleSetup $BUILD_PARAMS
     source standaloneHelper --simicsSetup
 
-    # Run makefile
+    # Build the HCODE image for PNOR unless an override image was provided
+    if [[ -z ${HCODE_OVERRIDE_IMAGE} ]]; then
+        source standaloneHelper --generateHcodeImage
+    else
+        echo "Skipping build of HCODE due to user override"
+    fi
+
+    # Run makefile (generates PNOR)
     cd ${PROJECT_ROOT}/standalone/pnor
     make -rR ${DEBUG:=} -f ${PROJECT_ROOT}/src/build/mkrules/assemble.standalone.mk
 

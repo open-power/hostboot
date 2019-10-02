@@ -124,16 +124,22 @@ SBE_IMG := unprocessed.SBE.bin
 
 # Input image artifacts location
 SBE_ARTIFACTS_LOCATION := ${HB_SIM_DEPS_PATH}/sbe/${SBE_ARTIFACT_ID}/
-HCODE_ARTIFACT_LOCATION := ${HB_SIM_DEPS_PATH}/hcode/${HCODE_ARTIFACT_ID}/
 OCC_ARTIFACT_LOCATION := ${HB_SIM_DEPS_PATH}/occ/${OCC_ARTIFACT_ID}/
 WOF_ARTIFACT_LOCATION := ${HB_SIM_DEPS_PATH}/wof/${WOF_ARTIFACT_ID}/
 
 # Input Images
 HBD_IMG := ${BASEIMAGESDIR}/simics_P10_targeting.bin
 WOFDATA_IMG := ${call get_files_full_path, ${WOF_ARTIFACT_LOCATION}}
-HCODE_IMG := ${call get_files_full_path, ${HCODE_ARTIFACT_LOCATION}}
 OCC_IMG := ${call get_files_full_path, ${OCC_ARTIFACT_LOCATION}}
 SBE_ECs := ${call get_files_full_path, ${SBE_ARTIFACTS_LOCATION}}
+
+# Allow for overriding the HCODE image with a user supplied image
+ifndef HCODE_OVERRIDE_IMAGE
+HCODE_IMG := ${STAGINGDIR}/p10.hw_image.bin
+else
+$(info ***************** OVERIDING HCODE IMAGE WITH USER IMAGE ***********************)
+HCODE_IMG := ${HCODE_OVERRIDE_IMAGE}
+endif
 
 # Images that will be used for PNOR layout
 DEF_GEN_BIN_FILES := HBBL=${HBBL_IMG},HBB=${HBB_IMG},HBI=${HBI_IMG},\
