@@ -64,7 +64,7 @@ bool isEnabled()
              !isMfgAvpEnabled() && !isMfgHdatAvpEnabled() );
 }
 
-int32_t __getAddrConfig( ExtensibleChip * i_mcaChip, uint8_t i_dslct,
+int32_t __getAddrConfig( ExtensibleChip * i_chip, uint8_t i_dslct,
                          bool & o_twoDimmConfig, uint8_t & o_mrnkBits,
                          uint8_t & o_srnkBits, uint8_t & o_extraRowBits )
 {
@@ -72,12 +72,12 @@ int32_t __getAddrConfig( ExtensibleChip * i_mcaChip, uint8_t i_dslct,
 
     int32_t o_rc = SUCCESS;
 
-    SCAN_COMM_REGISTER_CLASS * reg = i_mcaChip->getRegister( "MC_ADDR_TRANS" );
+    SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister( "MC_ADDR_TRANS" );
     o_rc = reg->Read();
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC "Read failed on MC_ADDR_TRANS: i_mcaChip=0x%08x",
-                  i_mcaChip->getHuid() );
+        PRDF_ERR( PRDF_FUNC "Read failed on MC_ADDR_TRANS: i_chip=0x%08x",
+                  i_chip->getHuid() );
         return o_rc;
     }
 
@@ -98,8 +98,8 @@ int32_t __getAddrConfig( ExtensibleChip * i_mcaChip, uint8_t i_dslct,
     // for some reason B2 is valid, there is definitely a bug.
     if ( reg->IsBitSet(i_dslct ? 28:12) )
     {
-        PRDF_ERR( PRDF_FUNC "B2 enabled in MC_ADDR_TRANS: i_mcaChip=0x%08x "
-                  "i_dslct=%d", i_mcaChip->getHuid(), i_dslct );
+        PRDF_ERR( PRDF_FUNC "B2 enabled in MC_ADDR_TRANS: i_chip=0x%08x "
+                  "i_dslct=%d", i_chip->getHuid(), i_dslct );
         return FAIL;
     }
 
@@ -386,7 +386,7 @@ int32_t __getPortAddr<TYPE_MCA>( ExtensibleChip * i_chip, MemAddr i_addr,
     // Local vars for address fields
     uint64_t col   = reverseBits(i_addr.getCol(),  7);   // C9 C8 C7 C6 C5 C4 C3
     uint64_t row   = reverseBits(i_addr.getRow(), 18);   // R17 R16 R15 .. R1 R0
-    uint64_t bnk   = i_addr.getBank();                   //     BG0 BG1 B0 B1 B2
+    uint64_t bnk   = i_addr.getBank();                   //     B0 B1 B2 BG0 BG1
     uint64_t srnk  = i_addr.getRank().getSlave();        //             S0 S1 S2
     uint64_t mrnk  = i_addr.getRank().getRankSlct();     //                M0 M1
     uint64_t dslct = i_addr.getRank().getDimmSlct();     //                    D
@@ -473,18 +473,47 @@ int32_t __getPortAddr<TYPE_MCA>( ExtensibleChip * i_chip, MemAddr i_addr,
     return o_rc;
 }
 
+void __adjustCapiAddrBitPos( uint8_t & io_bitPos )
+{
+    // Note: the translation bitmaps are all 5 bits that are defined
+    // consistently as:
+    // 00000 = CAPI_Address(5)
+    // 00001 = CAPI_Address(6)
+    // 00010 = CAPI_Address(7)
+    // ...
+    // 01010 = CAPI_Address(15)
+    // 01011 = CAPI_Address(31)
+    // 01100 = CAPI_Address(32)
+    // ...
+    // 10011 = CAPI_Address(39)
+    // So the value from the regs can be converted to the CAPI address bit pos
+    // by adding 5 if the value is less than or equal to 10, or by adding 20
+    // if it is above 10.
+
+    if ( io_bitPos <= 10 )
+    {
+        io_bitPos += 5;
+    }
+    else
+    {
+        io_bitPos += 20;
+    }
+}
+
 template <>
 int32_t __getPortAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, MemAddr i_addr,
                                        uint64_t & o_addr )
 {
+    #define PRDF_FUNC "[MemDealloc::__getPortAddr<TYPE_OCMB_CHIP>] "
+
     int32_t o_rc = SUCCESS;
 
     o_addr = 0;
-    // TODO RTC 198756
+
     // Local vars for address fields
     uint64_t col   = reverseBits(i_addr.getCol(),  7);   // C9 C8 C7 C6 C5 C4 C3
     uint64_t row   = reverseBits(i_addr.getRow(), 18);   // R17 R16 R15 .. R1 R0
-    uint64_t bnk   = i_addr.getBank();                   //     BG0 BG1 B0 B1 B2
+    uint64_t bnk   = i_addr.getBank();                   //     B0 B1 B2 BG0 BG1
     uint64_t srnk  = i_addr.getRank().getSlave();        //             S0 S1 S2
     uint64_t mrnk  = i_addr.getRank().getRankSlct();     //                M0 M1
     uint64_t dslct = i_addr.getRank().getDimmSlct();     //                    D
@@ -505,70 +534,203 @@ int32_t __getPortAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, MemAddr i_addr,
     srnk = __maskBits( srnk, srnkBits );
     row  = __maskBits( row,  15 + extraRowBits );
 
-    // Combine master and slave ranks.
-    uint64_t rnk     = (mrnk << srnkBits) | srnk;
-    uint8_t  rnkBits = mrnkBits + srnkBits;
+    // Insert the needed bits based on the config defined in the MC Address
+    // Translation Registers.
 
-    // Now split the DIMM select and combined rank into components.
-    uint64_t rnk_pt1     = 0, rnk_pt2     = 0, rnk_pt3     = 0;
-    uint8_t  rnkBits_pt1 = 0, rnkBits_pt2 = 0, rnkBits_pt3 = 0;
-
-    if ( 0 == rnkBits )
-    {
-        if ( twoDimmConfig ) // The DIMM select goes into part 3.
-        {
-            rnk_pt3 = dslct; rnkBits_pt3 = 1;
-        }
-    }
-    else // At least one master or slave.
-    {
-        // Put the LSB of the combined rank in part 3 and the rest in part 2.
-        rnk_pt3 = rnk & 0x1; rnkBits_pt3 = 1;
-        rnk_pt2 = rnk >> 1;  rnkBits_pt2 = rnkBits - 1;
-
-        if ( twoDimmConfig ) // The DIMM select goes into part 1.
-        {
-            rnk_pt1 = dslct; rnkBits_pt1 = 1;
-        }
-    }
+    uint8_t bitPos = 0;
 
     // Split the row into its components.
-    uint64_t r17_r15 = (row & 0x38000) >> 15;
-    uint64_t r14     = (row & 0x04000) >> 14;
-    uint64_t r13     = (row & 0x02000) >> 13;
-    uint64_t r12_r0  = (row & 0x01fff);
+    uint8_t  r17    = (row & 0x20000) >> 17;
+    uint8_t  r16    = (row & 0x10000) >> 16;
+    uint8_t  r15    = (row & 0x08000) >> 15;
+    uint16_t r14_r0 = (row & 0x07fff);
 
-    // Split the column into its components.
-    uint64_t c9_c4 = (col & 0x7e) >> 1;
-    uint64_t c3    = (col & 0x01);
+    // Split the master rank and slave rank into their components
+    uint8_t m0 = (mrnk & 0x2) >> 1;
+    uint8_t m1 = (mrnk & 0x1);
 
-    // Split the bank into its components.
-    uint64_t b0      = (bnk & 0x10) >> 4;
-    uint64_t b1      = (bnk & 0x08) >> 3;
-    // NOTE: B2 is not supported on Nimbus.
-    uint64_t bg0_bg1 = (bnk & 0x03);
+    uint8_t s0 = (srnk & 0x4) >> 2;
+    uint8_t s1 = (srnk & 0x2) >> 1;
+    uint8_t s2 = (srnk & 0x1);
 
-    // Now start building the flexible part of the address (bits 0-7,23-33).
-    o_addr = (o_addr << rnkBits_pt1 ) | rnk_pt1;
-    o_addr = (o_addr << extraRowBits) | r17_r15;
-    o_addr = (o_addr << rnkBits_pt2 ) | rnk_pt2;
-    o_addr = (o_addr << 6           ) | c9_c4;
-    o_addr = (o_addr << 1           ) | b0;
-    o_addr = (o_addr << rnkBits_pt3 ) | rnk_pt3;
-    o_addr = (o_addr << 1           ) | b1;
-    o_addr = (o_addr << 2           ) | bg0_bg1;
-    o_addr = (o_addr << 1           ) | c3;
+    // Split the column into its components
+    uint8_t c9 = (col & 0x40) >> 6;
+    uint8_t c8 = (col & 0x20) >> 5;
+    uint8_t c7 = (col & 0x10) >> 4;
+    uint8_t c6 = (col & 0x08) >> 3;
+    uint8_t c5 = (col & 0x04) >> 2;
+    uint8_t c4 = (col & 0x02) >> 1;
+    uint8_t c3 = (col & 0x01);
 
-    // C2 is in bit 34, but the Nimbus physical address does not contain a C2.
-    // It will be set to 0 for now. Also, bits 35-39 are the rest of the cache
-    // line address, which we do not need. So, that will be set to 0 as well.
-    o_addr <<= 6;
+    // Split the bank and bank group into their components
+    // Note: B2 is not used for OCMB
+    uint8_t b0 = (bnk & 0x10) >> 4;
+    uint8_t b1 = (bnk & 0x08) >> 3;
 
-    // Finally, insert R14,R12-R0,R13 into bits 8-22.
-    o_addr  = ((o_addr & 0xfffffe0000ull) << 15) | (o_addr & 0x000001ffffull);
-    o_addr |= ((r14 << 14) | (r12_r0 << 1) | r13) << 17;
+    uint8_t bg0 = (bnk & 0x2) >> 1;
+    uint8_t bg1 = (bnk & 0x1);
+
+    // Row bits 14:0 are always at CAPI addr position 30:16
+    o_addr |= (r14_r0 << 16);
+
+    // Check MC_ADDR_TRANS0 register for bit positions
+    SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister( "MC_ADDR_TRANS" );
+    o_rc = reg->Read();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Read failed on MC_ADDR_TRANS: i_chip=0x%08x",
+                  i_chip->getHuid() );
+        return o_rc;
+    }
+
+    // If the DIMM select is valid, insert that bit
+    if ( twoDimmConfig )
+    {
+        // DIMM bitmap: MC_ADDR_TRANS0[33:37]
+        bitPos = reg->GetBitFieldJustified( 33, 5 );
+        __adjustCapiAddrBitPos( bitPos );
+        o_addr |= (dslct << bitPos);
+    }
+
+    // Insert any of the master rank bits that are valid
+    switch( mrnkBits )
+    {
+        case 2:
+            // Master rank 0 bitmap: MC_ADDR_TRANS0[38:42]
+            bitPos = reg->GetBitFieldJustified( 38, 5 );
+            __adjustCapiAddrBitPos( bitPos );
+            o_addr |= (m0 << bitPos);
+        case 1:
+            // Master rank 1 bitmap: MC_ADDR_TRANS0[43:47]
+            bitPos = reg->GetBitFieldJustified( 43, 5 );
+            __adjustCapiAddrBitPos( bitPos );
+            o_addr |= (m1 << bitPos);
+            break;
+    }
+
+    // Insert any extra row bits (17:15) that are valid
+    switch ( extraRowBits )
+    {
+        case 3:
+            // Row 17 bitmap: MC_ADDR_TRANS0[49:53]
+            bitPos = reg->GetBitFieldJustified( 49, 5 );
+            __adjustCapiAddrBitPos( bitPos );
+            o_addr |= (r17 << bitPos);
+        case 2:
+            // Row 16 bitmap: MC_ADDR_TRANS0[54:58]
+            bitPos = reg->GetBitFieldJustified( 54, 5 );
+            __adjustCapiAddrBitPos( bitPos );
+            o_addr |= (r16 << bitPos);
+        case 1:
+            // Row 15 bitmap: MC_ADDR_TRANS0[59:63]
+            bitPos = reg->GetBitFieldJustified( 59, 5 );
+            __adjustCapiAddrBitPos( bitPos );
+            o_addr |= (r15 << bitPos);
+            break;
+    }
+
+    // Check MC_ADDR_TRANS1 register for bit positions
+    reg = i_chip->getRegister( "MC_ADDR_TRANS1" );
+    o_rc = reg->Read();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Read failed on MC_ADDR_TRANS1: i_chip=0x%08x",
+                  i_chip->getHuid() );
+        return o_rc;
+    }
+
+    // Insert any of the slave rank bits that are valid
+    switch ( srnkBits )
+    {
+        case 3:
+            // Slave rank 0 bitmap: MC_ADDR_TRANS1[3:7]
+            bitPos = reg->GetBitFieldJustified( 3, 5 );
+            __adjustCapiAddrBitPos( bitPos );
+            o_addr |= (s0 << bitPos);
+        case 2:
+            // Slave rank 1 bitmap: MC_ADDR_TRANS1[11:15]
+            bitPos = reg->GetBitFieldJustified( 11, 5 );
+            __adjustCapiAddrBitPos( bitPos );
+            o_addr |= (s1 << bitPos);
+        case 1:
+            // Slave rank 2 bitmap: MC_ADDR_TRANS1[19:23]
+            bitPos = reg->GetBitFieldJustified( 19, 5 );
+            __adjustCapiAddrBitPos( bitPos );
+            o_addr |= (s2 << bitPos);
+            break;
+    }
+
+    // Column 3 bitmap: MC_ADDR_TRANS1[30:34]
+    bitPos = reg->GetBitFieldJustified( 30, 5 );
+    __adjustCapiAddrBitPos( bitPos );
+    o_addr |= (c3 << bitPos);
+
+    // Column 4 bitmap: MC_ADDR_TRANS1[35:39]
+    bitPos = reg->GetBitFieldJustified( 35, 5 );
+    __adjustCapiAddrBitPos( bitPos );
+    o_addr |= (c4 << bitPos);
+
+    // Column 5 bitmap: MC_ADDR_TRANS1[43:47]
+    bitPos = reg->GetBitFieldJustified( 43, 5 );
+    __adjustCapiAddrBitPos( bitPos );
+    o_addr |= (c5 << bitPos);
+
+    // Column 6 bitmap: MC_ADDR_TRANS1[51:55]
+    bitPos = reg->GetBitFieldJustified( 51, 5 );
+    __adjustCapiAddrBitPos( bitPos );
+    o_addr |= (c6 << bitPos);
+
+    // Column 7 bitmap: MC_ADDR_TRANS1[59:63]
+    bitPos = reg->GetBitFieldJustified( 59, 5 );
+    __adjustCapiAddrBitPos( bitPos );
+    o_addr |= (c7 << bitPos);
+
+    // Check MC_ADDR_TRANS2 register for bit positions
+    reg = i_chip->getRegister( "MC_ADDR_TRANS2" );
+    o_rc = reg->Read();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Read failed on MC_ADDR_TRANS2: i_chip=0x%08x",
+                  i_chip->getHuid() );
+        return o_rc;
+    }
+
+    // Column 8 bitmap: MC_ADDR_TRANS2[3:7]
+    bitPos = reg->GetBitFieldJustified( 3, 5 );
+    __adjustCapiAddrBitPos( bitPos );
+    o_addr |= (c8 << bitPos);
+
+    // Column 9 bitmap: MC_ADDR_TRANS2[11:15]
+    bitPos = reg->GetBitFieldJustified( 11, 5 );
+    __adjustCapiAddrBitPos( bitPos );
+    o_addr |= (c9 << bitPos);
+
+    // Bank 0 bitmap: MC_ADDR_TRANS2[19:23]
+    bitPos = reg->GetBitFieldJustified( 19, 5 );
+    __adjustCapiAddrBitPos( bitPos );
+    o_addr |= (b0 << bitPos );
+
+    // Bank 1 bitmap: MC_ADDR_TRANS2[27:31]
+    bitPos = reg->GetBitFieldJustified( 27, 5 );
+    __adjustCapiAddrBitPos( bitPos );
+    o_addr |= (b1 << bitPos);
+
+    // Bank 2 bitmap: MC_ADDR_TRANS2[35:39]
+    // Note: Bank2 not used for OCMB
+
+    // Bank group 0 bitmap: MC_ADDR_TRANS2[43:47]
+    bitPos = reg->GetBitFieldJustified( 43, 5 );
+    __adjustCapiAddrBitPos( bitPos );
+    o_addr |= (bg0 << bitPos);
+
+    // Bank group 1 bitmap: MC_ADDR_TRANS2[51:55]
+    bitPos = reg->GetBitFieldJustified( 51, 5 );
+    __adjustCapiAddrBitPos( bitPos );
+    o_addr |= (bg1 << bitPos);
 
     return o_rc;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
@@ -597,15 +759,25 @@ void __getGrpPrms<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, uint8_t & o_portPos,
                                    SCAN_COMM_REGISTER_CLASS * &o_mcfgp,
                                    SCAN_COMM_REGISTER_CLASS * &o_mcfgpm )
 {
-    PRDF_ERR( "__getGrpPrms: Function not supported yet" );
-    /* TODO RTC 198756
-    // Get the connected MCS chip and MCA target position.
-    ExtensibleChip * mcs_chip = getConnectedParent( i_chip, TYPE_MCS );
-    o_portPos = i_chip->getPos() % MAX_MCA_PER_MCS;
+    // Get the connected parent MI;
+    ExtensibleChip * mcc = getConnectedParent( i_chip, TYPE_MCC );
+    ExtensibleChip * mi  = getConnectedParent( mcc, TYPE_MI );
 
-    o_mcfgp  = mcs_chip->getRegister("MCFGP");
-    o_mcfgpm = mcs_chip->getRegister("MCFGPM");
-    */
+    // TODO RTC 210072 - support for multiple ports
+    o_portPos = 0;
+
+    // Get the position of the OCMB relative to the MCC (0:1)
+    uint8_t ocmbChnl = i_chip->getPos() % MAX_OCMB_PER_MCC;
+
+    char mcfgpName[64];
+    sprintf( mcfgpName, "MCFGP%d", ocmbChnl );
+
+    char mcfgpmName[64];
+    sprintf( mcfgpmName, "MCFGPM%d", ocmbChnl );
+
+    o_mcfgp  = mi->getRegister( mcfgpName );
+    o_mcfgpm = mi->getRegister( mcfgpmName );
+
 }
 
 template<TYPE T>
@@ -687,6 +859,60 @@ uint32_t __getGrpInfo( ExtensibleChip * i_chip, uint64_t & o_grpChnls,
             }
         }
         if ( SUCCESS != o_rc ) break;
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template<>
+uint32_t __getGrpInfo<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                       uint64_t & o_grpChnls,
+                                       uint64_t & o_grpId, uint64_t & o_grpSize,
+                                       uint64_t & o_grpBar )
+{
+    #define PRDF_FUNC "[MemDealloc::__getGrpInfo] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Get portPos and MCFGP/M registers
+        uint8_t portPos = 0xFF;
+        SCAN_COMM_REGISTER_CLASS * mcfgp  = nullptr;
+        SCAN_COMM_REGISTER_CLASS * mcfgpm = nullptr;
+        __getGrpPrms<TYPE_OCMB_CHIP>( i_chip, portPos, mcfgp, mcfgpm );
+
+        o_rc = mcfgp->Read();  if ( SUCCESS != o_rc ) break;
+
+        // Get the number of channels in this group: MCFGP[40:42]
+        uint8_t mcGrpCnfg = mcfgp->GetBitFieldJustified( 40, 3 );
+        switch ( mcGrpCnfg )
+        {
+            case 0: o_grpChnls = 8; break; // 8MCS
+            case 1: o_grpChnls = 1; break; // 1MCS
+            case 2: o_grpChnls = 2; break; // 2MCS
+            case 3: o_grpChnls = 3; break; // 3MCS
+            case 4: o_grpChnls = 4; break; // 4MCS
+            case 5: o_grpChnls = 6; break; // 6MCS
+            default:
+                PRDF_ERR( PRDF_FUNC "Invalid MC channels per group value: 0x%x "
+                          "on 0x%08x", mcGrpCnfg, i_chip->getHuid() );
+                o_rc = FAIL;
+        }
+        if ( SUCCESS != o_rc ) break;
+
+        // Get the group ID and group size.
+        o_grpId   = mcfgp->GetBitFieldJustified( 43, 3 );  // MCFGP[43:45]
+        o_grpSize = mcfgp->GetBitFieldJustified( 25, 15 ); // MCFGP[25:39]
+
+        // TODO RTC 210072 - support for multiple ports, see generic handling
+
+        // Get the base address (BAR).
+        // Channel 0 is always from the MCFGP.
+        o_grpBar = mcfgp->GetBitFieldJustified(1, 24); // MCFGP[1:24]
 
     } while (0);
 
