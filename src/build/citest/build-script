@@ -110,27 +110,30 @@ fi
 create-sandbox > create-sandbox.log 2>&1 &
 CREATESANDBOX_PID=$!
 
+# normal build is empty quotes
+build_opt=""
+# code coverage
+if [[ ! -z "${HOSTBOOT_PROFILE}" ]]; then
+    build_opt="gcov"
+# static analysis
+elif [[ ! -z "${HOSTBOOT_CPPCHECK}" ]]; then
+    build_opt="cppcheck"
+    COMPILE_ONLY=1
+fi
+# Build Hostboot
 start_time=$(date)
+echo "#--------------------------------"
+printf "\n\n$(date): STARTED running \"make -j32 $build_opt\"\n\n"
+echo "#--------------------------------"
+make -j32 $build_opt || exit -1
+make_rc=$?
+echo "#--------------------------------"
+printf "\n\nrc=$make_rc: $(date): FINISHED running (\"make -j32 $build_opt\" was started at $start_time)\n\n"
+echo "#--------------------------------"
 
-# Build Hostboot.
-if [[ -z "${HOSTBOOT_PROFILE}" ]]; then
-    echo "#--------------------------------"
-    printf "\n\n$start_time: STARTED running \"make -j32\"\n\n"
-    echo "#--------------------------------"
-    # if $POOL is defined then we are already in a vexec shell so do not vexec again
-    make -j32 || exit -1
-    echo "#--------------------------------"
-    printf "\n\nrc=$?: $(date): FINISHED running (\"make -j32\" was started at $start_time)\n\n"
-    echo "#--------------------------------"
-else
-    # Build with code coverage when HOSTBOOT_PROFILE=1
-    echo "#--------------------------------"
-    printf "\n\n$start_time: STARTED running \"make -j32 gcov\"\n\n"
-    echo "#--------------------------------"
-    make -j32 gcov || exit -1
-    echo "#--------------------------------"
-    printf "\n\nrc=$?: $(date): FINISHED running (\"make -j32 gcov\" was started at $start_time)\n\n"
-    echo "#--------------------------------"
+if [[ ! -z "${COMPILE_ONLY}" ]]; then
+    echo "Compile only"
+    exit $make_rc
 fi
 
 # Check sandbox create completion.
