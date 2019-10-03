@@ -165,6 +165,8 @@ fapi2::ReturnCode p10_perv_sbe_cmn_setup_putring(
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode p10_enable_ridi(const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target);
 
+fapi2::ReturnCode p10_perv_sbe_cmn_is_simulation_check(bool& is_simulation);
+
 fapi2::ReturnCode p10_perv_sbe_cmn_switch_mux_scom(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip, mux_type i_mux_setup);
 

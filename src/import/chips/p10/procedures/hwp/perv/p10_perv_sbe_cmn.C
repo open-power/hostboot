@@ -998,6 +998,36 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+
+/// @brief Check if the run is on sim or actual HW
+///
+/// @param[out]    is_simulation   Returns true if in Simulation, else false
+fapi2::ReturnCode p10_perv_sbe_cmn_is_simulation_check(bool& is_simulation)
+{
+    uint8_t l_attr_is_simulation;
+
+    FAPI_DBG("p10_perv_sbe_cmn_is_simulation_check : Entering");
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_attr_is_simulation));
+
+    if (l_attr_is_simulation)
+    {
+        FAPI_DBG("ATTR_IS_SIMULATION is true, in SIM mode");
+        is_simulation = true;
+    }
+    else
+    {
+        FAPI_DBG("ATTR_IS_SIMULATION is false, in HW mode");
+        is_simulation = false;
+    }
+
+    FAPI_DBG("p10_perv_sbe_cmn_is_simulation_check : Exiting");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 /// @brief mux setup
 //
 /// @param[in]     i_target_chip      Reference to TARGET_TYPE_PROC_CHIP
