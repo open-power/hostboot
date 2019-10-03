@@ -1681,7 +1681,6 @@ fapi2::ReturnCode writeMCBarData(
     FAPI_DBG("Entering");
 
     fapi2::buffer<uint64_t> l_scomData(0);
-
     fapi2::ATTR_MSS_INTERLEAVE_GRANULARITY_Type l_interleave_granule_size;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_INTERLEAVE_GRANULARITY,
                            fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
@@ -1724,11 +1723,13 @@ fapi2::ReturnCode writeMCBarData(
                                        MCS_MCFGP_GROUP_BASE_ADDRESS_LEN>(
                                            (l_data.MCFGP_groupBaseAddr >> 2));
 
+
             // configure interleave granularity if 2/4/8 MC per group only
-            if ((l_data.MCFGP_chan_per_group == 0b0100) || // 2 MC/group
-                (l_data.MCFGP_chan_per_group == 0b0101) ||
-                (l_data.MCFGP_chan_per_group == 0b0110) || // 4 MC/group
-                (l_data.MCFGP_chan_per_group == 0b1000))   // 8 MC/group
+            if (    (l_data.MCFGP_chan_per_group == 0b0100) || // 2 MC/group
+                    (l_data.MCFGP_chan_per_group == 0b0101) ||
+                    (l_data.MCFGP_chan_per_group == 0b0110) || // 4 MC/group
+                    (l_data.MCFGP_chan_per_group == 0b1000)    // 8 MC/group
+               )
             {
                 fapi2::buffer<uint64_t> l_mcmode0_scom_data;
                 FAPI_TRY(fapi2::getScom(l_target, MCS_MCMODE0, l_mcmode0_scom_data),
@@ -1988,33 +1989,6 @@ fapi2::ReturnCode writeMCCInterleaveGranularity(
         if (l_data.MCFGP_valid == true)
         {
             fapi2::Target<fapi2::TARGET_TYPE_MI> l_mi_target = l_target.getParent<fapi2::TARGET_TYPE_MI>();
-
-            // configure interleave granularity if 1/2/4/8 MC per group only
-            if ((l_data.MCFGP_chan_per_group == 0) || // 8 MC/group
-                (l_data.MCFGP_chan_per_group == 1) || // 1 MC/group
-                (l_data.MCFGP_chan_per_group == 2) || // 2 MC/group
-                (l_data.MCFGP_chan_per_group == 4))   // 4 MC/group
-            {
-                //Only set to true if the value for the target is not set yet
-                if (l_granule_supported.find(l_mi_target) == l_granule_supported.end())
-                {
-                    l_granule_supported[l_mi_target] = true;
-                }
-            }
-            else
-            {
-                //Always set to false if we find one channel that cannot support it.
-                l_granule_supported[l_mi_target] = false;
-            }
-        }
-    }
-
-    for ( auto l_it = l_granule_supported.begin(); l_it != l_granule_supported.end(); l_it++ )
-    {
-        if (l_it->second)
-        {
-            auto l_mi_target = l_it->first;
-
             fapi2::buffer<uint64_t> l_mcmode0_scom_data;
             FAPI_TRY(fapi2::getScom(l_mi_target, P9A_MI_MCMODE0, l_mcmode0_scom_data),
                      "Error reading from MCS_MCMODE0 reg");
