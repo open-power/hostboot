@@ -1,10 +1,12 @@
 config MEMVPD_READ_FROM_PNOR
     default y
+    default n if SUPPORT_EEPROM_CACHING
     help
         Read memory VPD data from PNOR cache
 
 config MEMVPD_READ_FROM_HW
     default n
+    default y if SUPPORT_EEPROM_CACHING
     depends on !PALMETTO_PASS1
     help
         Read memory VPD data from HW resources
@@ -17,12 +19,14 @@ config MEMVPD_READ
 
 config MEMVPD_WRITE_TO_PNOR
     default y if MEMVPD_READ_FROM_PNOR
+    default n if SUPPORT_EEPROM_CACHING
     depends on MEMVPD_READ_FROM_PNOR
     help
         Write memory VPD data to PNOR cache
 
 config MEMVPD_WRITE_TO_HW
     default y if MEMVPD_READ_FROM_HW
+    default y if SUPPORT_EEPROM_CACHING
     depends on !PALMETTO_PASS1 && MEMVPD_READ_FROM_HW
     help
         Write memory VPD data to HW resources
@@ -40,6 +44,7 @@ config PVPD_READ_FROM_PNOR
 
 config PVPD_READ_FROM_HW
     default n
+    default y if SUPPORT_EEPROM_CACHING
     help
         Read Planar VPD data from HW resources
 
@@ -51,17 +56,20 @@ config PVPD_WRITE_TO_PNOR
 
 config PVPD_WRITE_TO_HW
     default y if PVPD_READ_FROM_HW
+    default y if SUPPORT_EEPROM_CACHING
     depends on PVPD_READ_FROM_HW
     help
         Write Planar VPD data to HW resources
 
 config MVPD_READ_FROM_PNOR
     default y
+    default n if SUPPORT_EEPROM_CACHING
     help
         Read Module VPD data from PNOR cache
 
 config MVPD_READ_FROM_HW
     default n
+    default y if SUPPORT_EEPROM_CACHING
     help
         Read Module VPD data from HW resources
 
@@ -73,11 +81,13 @@ config MVPD_READ
 
 config MVPD_WRITE_TO_PNOR
     default y if MVPD_READ_FROM_PNOR
+    default n if SUPPORT_EEPROM_CACHING
     help
         Write Module VPD data to PNOR cache
 
 config MVPD_WRITE_TO_HW
     default y if MVPD_READ_FROM_HW
+    default y if SUPPORT_EEPROM_CACHING
     depends on MVPD_READ_FROM_HW
     help
         Write Module VPD data to HW resources
@@ -90,11 +100,13 @@ config MVPD_WRITE
 
 config DJVPD_READ_FROM_PNOR
     default y
+    default n if SUPPORT_EEPROM_CACHING
     help
         Read Dimm JEDEC VPD/SPD data from PNOR cache
 
 config DJVPD_READ_FROM_HW
     default n
+    default y if SUPPORT_EEPROM_CACHING
     help
         Read Dimm JEDEC VPD/SPD data from HW resources
 
@@ -106,6 +118,7 @@ config DJVPD_READ
 
 config DJVPD_WRITE_TO_PNOR
     default y if DJVPD_READ_FROM_PNOR
+    default n if SUPPORT_EEPROM_CACHING
     help
         Write Dimm JEDEC VPD/SPD data to PNOR cache
 
