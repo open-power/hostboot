@@ -30,6 +30,10 @@
 <entries>
   <!-- static: chip type and EC -->
   <entry>
+    <name>ATTR_IS_SIMULATION</name>
+    <value>0x0</value>
+  </entry>
+  <entry>
     <name>ATTR_NAME</name>
     <value>0xA</value>
   </entry>
