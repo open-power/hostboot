@@ -308,6 +308,7 @@ class freq_scoreboard
         /// @param[in] i_target MCBIST target
         /// @param[in] i_vpd_supported_freqs vector of hardware supported freqs -- from VPD
         /// @param[out] o_deconfigured vector of port positions that were deconfigured by this function
+        /// @param[out] o_deconfigured_targets vector of port targets that were deconfigured by this function
         /// @param[out] o_freqs vector of frequencies supported by all ports
         /// @return FAPI2_RC_SUCCESS if successful
         ///
@@ -315,6 +316,7 @@ class freq_scoreboard
         fapi2::ReturnCode resolve(const fapi2::Target<TT::FREQ_TARGET_TYPE>& i_target,
                                   const std::vector<std::vector<uint32_t>>& i_vpd_supported_freqs,
                                   std::vector<uint8_t>& o_deconfigured,
+                                  std::vector<fapi2::Target<TT::PORT_TARGET_TYPE>>& o_deconfigured_targets,
                                   std::vector<uint32_t>& o_freqs)
         {
             const auto l_ports = mss::find_targets<TT::PORT_TARGET_TYPE>(i_target);
@@ -358,10 +360,10 @@ class freq_scoreboard
             FAPI_TRY(callout_no_common_freq<P>(i_target, l_common_ports > l_empty_port_count, l_port_count));
 
             // Now find and deconfigure all ports that don't support our selected frequency
-            FAPI_TRY(deconfigure_ports<P>(i_target, l_ports, l_best_freq_index, o_deconfigured));
+            FAPI_TRY(deconfigure_ports<P>(i_target, l_ports, l_best_freq_index, o_deconfigured, o_deconfigured_targets));
 
             // Now find all the frequencies supported by the ports that are left over
-            FAPI_TRY(this->template resolve<P>(i_target, i_vpd_supported_freqs, o_deconfigured, o_freqs));
+            FAPI_TRY(this->template resolve<P>(i_target, i_vpd_supported_freqs, o_deconfigured, o_deconfigured_targets, o_freqs));
 
 #ifndef __HOSTBOOT_MODULE
 
@@ -461,15 +463,18 @@ class freq_scoreboard
         /// @param[in] i_ports vector of ports
         /// @param[in] i_best_freq_index index corresponding to the best case frequency
         /// @param[out] o_deconfigured vector of deconfigured port positions
+        /// @param[out] o_deconfigured_targets vector of deconfigured targets
         /// @return FAPI2_RC_SUCCESS iff ok
         ///
         template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
         fapi2::ReturnCode deconfigure_ports(const fapi2::Target<TT::FREQ_TARGET_TYPE>& i_target,
                                             const std::vector<fapi2::Target<TT::PORT_TARGET_TYPE>>& i_ports,
                                             const uint64_t i_best_freq_index,
-                                            std::vector<uint8_t>& o_deconfigured)
+                                            std::vector<uint8_t>& o_deconfigured,
+                                            std::vector<fapi2::Target<TT::PORT_TARGET_TYPE>>& o_deconfigured_targets)
         {
             o_deconfigured.clear();
+            o_deconfigured_targets.clear();
 
             for ( size_t l_pos = 0; l_pos < iv_num_ports; ++l_pos )
             {
@@ -478,7 +483,7 @@ class freq_scoreboard
                                                     i_ports.end(),
                                                     [l_pos]( const fapi2::Target<TT::PORT_TARGET_TYPE>& i_rhs) -> bool
                 {
-                    return (mss::relative_pos<TT::FREQ_TARGET_TYPE>(i_rhs) != l_pos);
+                    return (mss::relative_pos<TT::FREQ_TARGET_TYPE>(i_rhs) == l_pos);
                 });
 
                 // If we didn't find an port for a given position, there wasn't one configured there
@@ -497,6 +502,7 @@ class freq_scoreboard
                     auto& l_port_supported_freqs = iv_supported_port_freqs[l_pos];
 
                     o_deconfigured.push_back(l_pos);
+                    o_deconfigured_targets.push_back(p);
                     FAPI_ASSERT_NOEXIT( false,
                                         fapi2::MSS_PORT_DOES_NOT_SUPPORT_MAJORITY_FREQ()
                                         .set_FREQ_TARGET(i_target)
