@@ -156,4 +156,19 @@
         <mssAccessorName>ocmb_exp_boot_config_serdes_frequency</mssAccessorName>
     </attribute>
 
+    <attribute>
+        <id>ATTR_MSS_OCMB_EXP_BOOT_CONFIG_ADAPTATION_MODE</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Indicates whether to enable adaptation
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            DISABLE = 0,
+            ENABLE = 1
+        </enum>
+        <default>ENABLE</default>
+        <platInit/>
+        <mssAccessorName>ocmb_exp_boot_config_adaptation_mode</mssAccessorName>
+    </attribute>
 </attributes>
