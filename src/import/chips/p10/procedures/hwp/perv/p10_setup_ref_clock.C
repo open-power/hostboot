@@ -41,10 +41,12 @@
 #include "p10_scom_perv_b.H"
 #include "p10_scom_perv_d.H"
 #include "p10_scom_perv_e.H"
+#include "p10_scom_perv_f.H"
 
 enum P10_SETUP_REF_CLOCK_Private_Constants
 {
-    RCS_CONTRL_DC_CFAM_RESET_VAL = 0x0200004,
+    NS_DELAY = 10000000, // unit is nano seconds
+    SIM_CYCLE_DELAY = 1000, // unit is sim cycles
 };
 
 fapi2::ReturnCode p10_setup_ref_clock(const
@@ -55,8 +57,10 @@ fapi2::ReturnCode p10_setup_ref_clock(const
 
     fapi2::buffer<uint32_t> l_read_reg;
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::buffer<uint8_t> mux0_val;
     uint8_t l_sys0_term, l_sys1_term, l_pci0_term, l_pci1_term, l_cp_refclck_select ;
-    fapi2::buffer<uint8_t> l_attr_mux0_rcs_pll, l_attr_mux_dpll, l_attr_mux_omi_lcpll, l_attr_mux_input,
+    fapi2::buffer<uint8_t> l_attr_mux0a_rcs_pll, l_attr_mux0b_rcs_pll, l_attr_mux0c_rcs_pll, l_attr_mux0d_rcs_pll,
+          l_attr_mux_dpll, l_attr_mux_omi_lcpll, l_attr_mux_input,
           l_attr_clock_pll_mux_tod;
 
     FAPI_INF("p10_setup_ref_clock: Entering ...");
@@ -72,13 +76,24 @@ fapi2::ReturnCode p10_setup_ref_clock(const
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CP_REFCLOCK_SELECT, i_target_chip, l_cp_refclck_select),
              "Error from FAPI_ATTR_GET (ATTR_CP_REFCLOCK_SELECT)");
 
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_MUX0A_RCS_PLL_INPUT, i_target_chip, l_attr_mux0a_rcs_pll),
+             "Error from FAPI_ATTR_GET (ATTR_CLOCK_MUX0A_RCS_PLL)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_MUX0B_RCS_PLL_INPUT, i_target_chip, l_attr_mux0b_rcs_pll),
+             "Error from FAPI_ATTR_GET (ATTR_CLOCK_MUX0B_RCS_PLL)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_MUX0C_RCS_PLL_INPUT, i_target_chip, l_attr_mux0c_rcs_pll),
+             "Error from FAPI_ATTR_GET (ATTR_CLOCK_MUX0C_RCS_PLL)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_MUX0D_RCS_PLL_INPUT, i_target_chip, l_attr_mux0d_rcs_pll),
+             "Error from FAPI_ATTR_GET (ATTR_CLOCK_MUX0D_RCS_PLL)");
+
     FAPI_DBG("Disable Write Protection for Root/Perv Control registers");
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_GPWRP_FSI,
                                     p10SetupRefClock::DISABLE_WRITE_PROTECTION));
 
     FAPI_DBG("Assert PERST#");
     l_read_reg.flush<0>().setBit<FSXCOMP_FSXLOG_ROOT_CTRL1_TPFSI_TP_GLB_PERST_OVR_DC>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_FSI, l_read_reg));
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL1_SET_FSI, l_read_reg));
+
+    fapi2::delay(NS_DELAY, SIM_CYCLE_DELAY);
 
     // -----------------------------------------------------------------------------------
     // ROOT CONTROL 5 and its COPY
@@ -95,9 +110,8 @@ fapi2::ReturnCode p10_setup_ref_clock(const
         l_read_reg.setBit<FSXCOMP_FSXLOG_ROOT_CTRL5_FORCE_BYPASS_CLKSEL_DC>(); //Bit2 : RCS_BYPASS_CLKSEL = 1
     }
 
-    l_read_reg.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL5_CONTROL_DC,
-                               FSXCOMP_FSXLOG_ROOT_CTRL5_CONTROL_DC_LEN>
-                               (RCS_CONTRL_DC_CFAM_RESET_VAL); // Bit4:28 CFAM_RESET_VAL
+    mux0_val = (l_attr_mux0a_rcs_pll | l_attr_mux0b_rcs_pll | l_attr_mux0c_rcs_pll | l_attr_mux0d_rcs_pll);
+    l_read_reg.insertFromRight<30, 2>(mux0_val);
 
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL5_FSI, l_read_reg));
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_FSI, l_read_reg));
@@ -124,25 +138,17 @@ fapi2::ReturnCode p10_setup_ref_clock(const
     l_read_reg.flush<0>();
 
     // RC4 bits 0:7
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_MUX0A_RCS_PLL_INPUT, i_target_chip, l_attr_mux0_rcs_pll),
-             "Error from FAPI_ATTR_GET (ATTR_CLOCK_MUX0A_RCS_PLL)");
     l_read_reg.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL4_TP_AN_REFCLK_CLKMUX0A_CLKIN_SEL_DC,
-                               FSXCOMP_FSXLOG_ROOT_CTRL4_TP_AN_REFCLK_CLKMUX0A_CLKIN_SEL_DC_LEN>(l_attr_mux0_rcs_pll);
+                               FSXCOMP_FSXLOG_ROOT_CTRL4_TP_AN_REFCLK_CLKMUX0A_CLKIN_SEL_DC_LEN>(l_attr_mux0a_rcs_pll);
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_MUX0B_RCS_PLL_INPUT, i_target_chip, l_attr_mux0_rcs_pll),
-             "Error from FAPI_ATTR_GET (ATTR_CLOCK_MUX0B_RCS_PLL)");
     l_read_reg.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL4_TP_AN_REFCLK_CLKMUX0B_CLKIN_SEL_DC,
-                               FSXCOMP_FSXLOG_ROOT_CTRL4_TP_AN_REFCLK_CLKMUX0B_CLKIN_SEL_DC_LEN>(l_attr_mux0_rcs_pll);
+                               FSXCOMP_FSXLOG_ROOT_CTRL4_TP_AN_REFCLK_CLKMUX0B_CLKIN_SEL_DC_LEN>(l_attr_mux0b_rcs_pll);
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_MUX0C_RCS_PLL_INPUT, i_target_chip, l_attr_mux0_rcs_pll),
-             "Error from FAPI_ATTR_GET (ATTR_CLOCK_MUX0C_RCS_PLL)");
     l_read_reg.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL4_TP_AN_REFCLK_CLKMUX0C_CLKIN_SEL_DC,
-                               FSXCOMP_FSXLOG_ROOT_CTRL4_TP_AN_REFCLK_CLKMUX0C_CLKIN_SEL_DC_LEN>(l_attr_mux0_rcs_pll);
+                               FSXCOMP_FSXLOG_ROOT_CTRL4_TP_AN_REFCLK_CLKMUX0C_CLKIN_SEL_DC_LEN>(l_attr_mux0c_rcs_pll);
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_MUX0D_RCS_PLL_INPUT, i_target_chip, l_attr_mux0_rcs_pll),
-             "Error from FAPI_ATTR_GET (ATTR_CLOCK_MUX0D_RCS_PLL)");
     l_read_reg.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL4_TP_AN_REFCLK_CLKMUX0D_CLKIN_SEL_DC,
-                               FSXCOMP_FSXLOG_ROOT_CTRL4_TP_AN_REFCLK_CLKMUX0D_CLKIN_SEL_DC_LEN>(l_attr_mux0_rcs_pll);
+                               FSXCOMP_FSXLOG_ROOT_CTRL4_TP_AN_REFCLK_CLKMUX0D_CLKIN_SEL_DC_LEN>(l_attr_mux0d_rcs_pll);
 
     // RC4 bit 8
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_MUX10_PAU_DPLL_INPUT, i_target_chip, l_attr_mux_dpll),
