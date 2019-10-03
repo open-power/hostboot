@@ -54,7 +54,8 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
         pnor_img=${STANDALONE}/pnor/P10.pnor \
         sbe_seeprom_img=${SBE_STANDALONE_IMG} \
         sbe_boot_mem=seeprom \
-        enable_lpc_console=TRUE\
+        enable_lpc_console=TRUE \
+        fused_core=TRUE \
         xive_gen=2"
 
 else
@@ -76,7 +77,8 @@ else
             pnor_img=$SANDBOXBASE/obj/ppc/hbfw/img/p10.pnor \
             sbe_seeprom_img=${SBE_SEEPROM_IMG} \
             sbe_boot_mem=seeprom \
-            enable_lpc_console=TRUE\
+            enable_lpc_console=TRUE \
+            fused_core=TRUE \
             xive_gen=2"
     fi
 fi

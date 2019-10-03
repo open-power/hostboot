@@ -506,6 +506,7 @@ hb_startsimics()
             STARTSIMCMD+=(sbe_seeprom_img=${SBE_STANDALONE_IMG})
             STARTSIMCMD+=(sbe_boot_mem=seeprom)
             STARTSIMCMD+=(enable_lpc_console=TRUE)
+            STARTSIMCMD+=(fused_core=TRUE)
         else
             # This allows to not run SBE automatically
             STARTSIMCMD+=(sbe_boot_mem=pibmem)
