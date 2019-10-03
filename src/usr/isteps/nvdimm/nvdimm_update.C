@@ -2214,9 +2214,9 @@ errlHndl_t NvdimmsUpdate::isUpdateNeeded(bool & o_update_needed,
                  *@userdata1[32:63] NVDIMM Target Huid
                  *@userdata2        NVDIMM type (manufacturer and product)
                  *@devdesc          Unable to update an NVDIMM at this code level
-                 *@custdesc         NVDIMM not updated
+                 *@custdesc         Unsupported level of NVDIMM hardware
                  */
-                l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
+                l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            NVDIMM_IS_UPDATE_NEEDED,
                                            NVDIMM_UPDATE_NOT_SUPPORTED,
                                            TWO_UINT32_TO_UINT64(
@@ -2227,9 +2227,13 @@ errlHndl_t NvdimmsUpdate::isUpdateNeeded(bool & o_update_needed,
                 l_err->collectTrace( NVDIMM_UPD, 256 );
                 nvdimmAddVendorLog(const_cast<TARGETING::Target*>(l_dimm),
                                    l_err);
+                l_err->addHwCallout( l_dimm,
+                                     HWAS::SRCI_PRIORITY_HIGH,
+                                     HWAS::DECONFIG,
+                                     HWAS::GARD_Fatal);
                 l_err->addPartCallout( l_dimm,
                                        HWAS::NV_CONTROLLER_PART_TYPE,
-                                       HWAS::SRCI_PRIORITY_HIGH );
+                                       HWAS::SRCI_PRIORITY_MED );
                 l_err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
                                             HWAS::SRCI_PRIORITY_LOW );
                 break;
