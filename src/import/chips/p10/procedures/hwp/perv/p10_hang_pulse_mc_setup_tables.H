@@ -70,6 +70,7 @@ static const hang_pulse_t SETUP_HANG_COUNTERS_N1[] =
 static const hang_pulse_t SETUP_HANG_COUNTERS_PCI[] =
 {
     {0, 16, 0},
+    {1, 44, 0},
     {5, 6, 0},
     {6, 8, 0, 1}
 };
