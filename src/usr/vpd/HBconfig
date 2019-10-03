@@ -1,10 +1,12 @@
 config MEMVPD_READ_FROM_PNOR
     default y
+    default n if SUPPORT_EEPROM_CACHING
     help
         Read memory VPD data from PNOR cache
 
 config MEMVPD_READ_FROM_HW
     default n
+    default y if SUPPORT_EEPROM_CACHING
     depends on !PALMETTO_PASS1
     help
         Read memory VPD data from HW resources
@@ -17,12 +19,14 @@ config MEMVPD_READ
 
 config MEMVPD_WRITE_TO_PNOR
     default y if MEMVPD_READ_FROM_PNOR
+    default n if SUPPORT_EEPROM_CACHING
     depends on MEMVPD_READ_FROM_PNOR
     help
         Write memory VPD data to PNOR cache
 
 config MEMVPD_WRITE_TO_HW
     default y if MEMVPD_READ_FROM_HW
+    default y if SUPPORT_EEPROM_CACHING
     depends on !PALMETTO_PASS1 && MEMVPD_READ_FROM_HW
     help
         Write memory VPD data to HW resources
@@ -34,34 +38,42 @@ config MEMVPD_WRITE
         Ensure at least one of the MEMVPD WRITEs are enabled
 
 config PVPD_READ_FROM_PNOR
+    default n if !HAVE_PVPD
     default n
     help
         Read Planar VPD data from PNOR cache
 
 config PVPD_READ_FROM_HW
+    default n if !HAVE_PVPD
     default n
+    default y if SUPPORT_EEPROM_CACHING
     help
         Read Planar VPD data from HW resources
 
 config PVPD_WRITE_TO_PNOR
+    default n if !HAVE_PVPD
     default y if PVPD_READ_FROM_PNOR
     depends on PVPD_READ_FROM_PNOR && MEMVPD_WRITE_TO_PNOR
     help
         Write Planar VPD data to PNOR cache
 
 config PVPD_WRITE_TO_HW
+    default n if !HAVE_PVPD
     default y if PVPD_READ_FROM_HW
+    default y if SUPPORT_EEPROM_CACHING
     depends on PVPD_READ_FROM_HW
     help
         Write Planar VPD data to HW resources
 
 config MVPD_READ_FROM_PNOR
     default y
+    default n if SUPPORT_EEPROM_CACHING
     help
         Read Module VPD data from PNOR cache
 
 config MVPD_READ_FROM_HW
     default n
+    default y if SUPPORT_EEPROM_CACHING
     help
         Read Module VPD data from HW resources
 
@@ -73,11 +85,13 @@ config MVPD_READ
 
 config MVPD_WRITE_TO_PNOR
     default y if MVPD_READ_FROM_PNOR
+    default n if SUPPORT_EEPROM_CACHING
     help
         Write Module VPD data to PNOR cache
 
 config MVPD_WRITE_TO_HW
     default y if MVPD_READ_FROM_HW
+    default y if SUPPORT_EEPROM_CACHING
     depends on MVPD_READ_FROM_HW
     help
         Write Module VPD data to HW resources
@@ -90,11 +104,13 @@ config MVPD_WRITE
 
 config DJVPD_READ_FROM_PNOR
     default y
+    default n if SUPPORT_EEPROM_CACHING
     help
         Read Dimm JEDEC VPD/SPD data from PNOR cache
 
 config DJVPD_READ_FROM_HW
     default n
+    default y if SUPPORT_EEPROM_CACHING
     help
         Read Dimm JEDEC VPD/SPD data from HW resources
 
@@ -106,6 +122,7 @@ config DJVPD_READ
 
 config DJVPD_WRITE_TO_PNOR
     default y if DJVPD_READ_FROM_PNOR
+    default n if SUPPORT_EEPROM_CACHING
     help
         Write Dimm JEDEC VPD/SPD data to PNOR cache
 
@@ -121,21 +138,11 @@ config DJVPD_WRITE
     help
         Ensure at least one of the DJVPD WRITEs are enabled
 
-config HAVE_MBVPD
-    default y if MEMVPD_READ_FROM_PNOR || MEMVPD_READ_FROM_HW
-    depends on (MEMVPD_READ_FROM_PNOR || MEMVPD_READ_FROM_HW) && !PALMETTO_PASS1
-    help
-        Have MemBuff/Centaur VPD, PNOR or HW
-
 config HAVE_PVPD
-    default y if PVPD_READ_FROM_PNOR || PVPD_READ_FROM_HW
+    default n
+    depends on if PVPD_READ_FROM_PNOR || PVPD_READ_FROM_HW  
     help
         Have Planar VPD, PNOR or HW
-
-config PALMETTO_PASS1
-    default n
-    help
-        Palmetto pass1 specific changes
 
 config UPDATE_SN_FROM_BMC
     default n
