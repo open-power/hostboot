@@ -529,6 +529,22 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_REDUNDANCY</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          Redundant PMIC exists for PMIC0
+        </description>
+        <enum>
+          DISABLED = 0,
+          ENABLED = 1
+        </enum>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <initToZero></initToZero>
+        <mssAccessorName>pmic0_redundancy</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MEM_EFF_PMIC0_PHASE_COMB</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
@@ -538,6 +554,22 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssAccessorName>pmic0_phase_comb</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_REDUNDANCY</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          Redundant PMIC exists for PMIC1
+        </description>
+        <enum>
+          DISABLED = 0,
+          ENABLED = 1
+        </enum>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <initToZero></initToZero>
+        <mssAccessorName>pmic1_redundancy</mssAccessorName>
     </attribute>
 
     <attribute>

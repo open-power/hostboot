@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,41 +36,30 @@
 #include <fapi2.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/exp_mss_thermal_init_utils.H>
-#include <lib/inband/exp_inband.H>
 #include <exp_mss_thermal_init.H>
+#include <generic/memory/lib/utils/find.H>
 
 extern "C"
 {
 
-///
-/// @brief Initializes thermal sensor
-/// @param[in] i_target the controller target
-/// @return FAPI2_RC_SUCCESS iff ok
-///
+    ///
+    /// @brief Initializes thermal sensor
+    /// @param[in] i_target the controller target
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
     fapi2::ReturnCode exp_mss_thermal_init( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
     {
         FAPI_INF("%s Start thermal_init", mss::c_str(i_target));
 
-#if 0
-// Skip EXP_FW_TEMP_SENSOR_CONFIG_INTERVAL_READ until it's available in Explorer FW
-        // Declare variables
-        host_fw_command_struct l_cmd_sensor;
-        host_fw_response_struct l_response;
-        std::vector<uint8_t> l_rsp_data;
+        uint8_t l_interval_read_dis = 0;
+        FAPI_TRY(mss::attr::get_disable_therm_init_read(i_target, l_interval_read_dis));
 
-        // Sets up EXP_FW_TEMP_SENSOR_CONFIG_INTERVAL_READ cmd params
-        mss::exp::setup_sensor_interval_read_cmd_params(l_cmd_sensor);
-
-        // Enable sensors
-        FAPI_TRY( mss::exp::ib::putCMD(i_target, l_cmd_sensor),
-                  "Failed putCMD() for  %s", mss::c_str(i_target) );
-
-        FAPI_TRY( mss::exp::ib::getRSP(i_target, l_response, l_rsp_data),
-                  "Failed getRSP() for  %s", mss::c_str(i_target) );
-
-        FAPI_TRY( mss::exp::check::sensor_response(i_target, l_response),
-                  "Failed sensor_response() for  %s", mss::c_str(i_target) );
-#endif
+        // Attribute is 0 == enabled, 1 == disabled (enabled by default (0), make sure the disable is not set)
+        if (l_interval_read_dis == fapi2::ENUM_ATTR_MSS_OCMB_DISABLE_THERM_INIT_READ_ENABLED)
+        {
+            FAPI_TRY(mss::exp::sensor_interval_read(i_target),
+                     "Error performing EXP_FW_TEMP_SENSOR_CONFIG_INTERVAL_READ operation on %s", mss::c_str(i_target));
+        }
 
 #ifdef __HOSTBOOT_MODULE
         // Prior to starting OCC, we go into "safemode" throttling

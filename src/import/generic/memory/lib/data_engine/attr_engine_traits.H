@@ -61,8 +61,8 @@ struct setTimingTraits< attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TCC
 {
     static constexpr const char* TIMING_NAME = "TCCD_L";
 
-    static constexpr spd_facade_fptr get_timing_in_mtb = &spd::facade::min_tccd_l;
-    static constexpr spd_facade_fptr get_timing_in_ftb = &spd::facade::fine_offset_min_tccd_l;
+    static constexpr spd_facade_fptr<int64_t> get_timing_in_mtb = &spd::facade::min_tccd_l;
+    static constexpr spd_facade_fptr<int64_t> get_timing_in_ftb = &spd::facade::fine_offset_min_tccd_l;
 };
 
 ///
@@ -75,8 +75,8 @@ struct setTimingTraits< attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TWT
 {
     static constexpr const char* TIMING_NAME = "tWTR_L";
 
-    static constexpr spd_facade_fptr get_timing_in_mtb = &spd::facade::min_twtr_l;
-    static constexpr spd_facade_fptr get_timing_in_ftb = &spd::facade::fine_offset_min_twtr_l;
+    static constexpr spd_facade_fptr<int64_t> get_timing_in_mtb = &spd::facade::min_twtr_l;
+    static constexpr spd_facade_fptr<int64_t> get_timing_in_ftb = &spd::facade::fine_offset_min_twtr_l;
 };
 
 ///
@@ -89,8 +89,8 @@ struct setTimingTraits< attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TWT
 {
     static constexpr const char* TIMING_NAME = "tWTR_S";
 
-    static constexpr spd_facade_fptr get_timing_in_mtb = &spd::facade::min_twtr_s;
-    static constexpr spd_facade_fptr get_timing_in_ftb = &spd::facade::fine_offset_min_twtr_s;
+    static constexpr spd_facade_fptr<int64_t> get_timing_in_mtb = &spd::facade::min_twtr_s;
+    static constexpr spd_facade_fptr<int64_t> get_timing_in_ftb = &spd::facade::fine_offset_min_twtr_s;
 };
 
 ///
@@ -103,8 +103,8 @@ struct setTimingTraits< attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TFA
 {
     static constexpr const char* TIMING_NAME = "tFAW";
 
-    static constexpr spd_facade_fptr get_timing_in_mtb = &spd::facade::min_tfaw;
-    static constexpr spd_facade_fptr get_timing_in_ftb = &spd::facade::fine_offset_min_tfaw;
+    static constexpr spd_facade_fptr<int64_t> get_timing_in_mtb = &spd::facade::min_tfaw;
+    static constexpr spd_facade_fptr<int64_t> get_timing_in_ftb = &spd::facade::fine_offset_min_tfaw;
 };
 
 ///
@@ -117,8 +117,8 @@ struct setTimingTraits< attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TRC
 {
     static constexpr const char* TIMING_NAME = "trcd";
 
-    static constexpr spd_facade_fptr get_timing_in_mtb = &spd::facade::min_trcd;
-    static constexpr spd_facade_fptr get_timing_in_ftb = &spd::facade::fine_offset_min_trcd;
+    static constexpr spd_facade_fptr<int64_t> get_timing_in_mtb = &spd::facade::min_trcd;
+    static constexpr spd_facade_fptr<int64_t> get_timing_in_ftb = &spd::facade::fine_offset_min_trcd;
 };
 
 ///
@@ -131,8 +131,8 @@ struct setTimingTraits< attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TRP
 {
     static constexpr const char* TIMING_NAME = "tRP";
 
-    static constexpr spd_facade_fptr get_timing_in_mtb = &spd::facade::min_trp;
-    static constexpr spd_facade_fptr get_timing_in_ftb = &spd::facade::fine_offset_min_trp;
+    static constexpr spd_facade_fptr<int64_t> get_timing_in_mtb = &spd::facade::min_trp;
+    static constexpr spd_facade_fptr<int64_t> get_timing_in_ftb = &spd::facade::fine_offset_min_trp;
 };
 
 ///
@@ -145,8 +145,8 @@ struct setTimingTraits< attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TRA
 {
     static constexpr const char* TIMING_NAME = "tRAS";
 
-    static constexpr spd_facade_fptr get_timing_in_mtb = &spd::facade::min_tras;
-    static constexpr spd_facade_fptr get_timing_in_ftb = &spd::facade::fine_offset_min_tras;
+    static constexpr spd_facade_fptr<int64_t> get_timing_in_mtb = &spd::facade::min_tras;
+    static constexpr spd_facade_fptr<int64_t> get_timing_in_ftb = &spd::facade::fine_offset_min_tras;
 };
 
 ///
@@ -159,8 +159,8 @@ struct setTimingTraits< attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TWR
 {
     static constexpr const char* TIMING_NAME = "tWR";
 
-    static constexpr spd_facade_fptr get_timing_in_mtb = &spd::facade::min_twr;
-    static constexpr spd_facade_fptr get_timing_in_ftb = &spd::facade::fine_offset_min_twr;
+    static constexpr spd_facade_fptr<int64_t> get_timing_in_mtb = &spd::facade::min_twr;
+    static constexpr spd_facade_fptr<int64_t> get_timing_in_ftb = &spd::facade::fine_offset_min_twr;
 };
 
 ///
@@ -173,8 +173,8 @@ struct setTimingTraits< attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TRR
 {
     static constexpr const char* TIMING_NAME = "tRRD_S";
 
-    static constexpr spd_facade_fptr get_timing_in_mtb = &spd::facade::min_trrd_s;
-    static constexpr spd_facade_fptr get_timing_in_ftb = &spd::facade::fine_offset_min_trrd_s;
+    static constexpr spd_facade_fptr<int64_t> get_timing_in_mtb = &spd::facade::min_trrd_s;
+    static constexpr spd_facade_fptr<int64_t> get_timing_in_ftb = &spd::facade::fine_offset_min_trrd_s;
 };
 
 ///
@@ -187,8 +187,8 @@ struct setTimingTraits< attr_eff_engine_fields, attr_eff_engine_fields::DRAM_TRR
 {
     static constexpr const char* TIMING_NAME = "tRRD_L";
 
-    static constexpr spd_facade_fptr get_timing_in_mtb = &spd::facade::min_trrd_l;
-    static constexpr spd_facade_fptr get_timing_in_ftb = &spd::facade::fine_offset_min_trrd_l;
+    static constexpr spd_facade_fptr<int64_t> get_timing_in_mtb = &spd::facade::min_trrd_l;
+    static constexpr spd_facade_fptr<int64_t> get_timing_in_ftb = &spd::facade::fine_offset_min_trrd_l;
 };
 
 ///

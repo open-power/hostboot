@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,8 +64,8 @@ struct setTimingTraits< exp::attr_eff_engine_fields, exp::attr_eff_engine_fields
 {
     static constexpr const char* TIMING_NAME = "tAAmin";
 
-    static constexpr spd_facade_fptr get_timing_in_mtb = &spd::facade::min_taa;
-    static constexpr spd_facade_fptr get_timing_in_ftb = &spd::facade::fine_offset_min_taa;
+    static constexpr spd_facade_fptr<int64_t> get_timing_in_mtb = &spd::facade::min_taa;
+    static constexpr spd_facade_fptr<int64_t> get_timing_in_ftb = &spd::facade::fine_offset_min_taa;
 };
 
 ////////////////////////////////////////////////////////
@@ -618,6 +618,672 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
 
     fapi_try_exit:
         return fapi2::current_err;
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_eff_engine_fields, MODULE_THERMAL_SENSORS specialization
+///
+template< proc_type P >
+struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::MODULE_THERMAL_SENSORS>
+{
+    using attr_type = fapi2::ATTR_MEM_EFF_MODULE_THERMAL_SENSORS_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_MODULE_THERMAL_SENSORS_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_MODULE_THERMAL_SENSORS;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_module_thermal_sensors(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_module_thermal_sensors(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+            attr_integral_type& o_setting)
+    {
+        return i_spd_data.module_thermal_sensors(o_setting);
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_eff_engine_fields, THERM_SENSOR_0_AVAIL specialization
+///
+template< proc_type P >
+struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::THERM_SENSOR_0_AVAIL>
+{
+    using attr_type = fapi2::ATTR_MEM_EFF_THERM_SENSOR_0_AVAIL_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_THERM_SENSOR_0_AVAIL_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_THERM_SENSOR_0_AVAIL;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_therm_sensor_0_availability(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_therm_sensor_0_availability(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+            attr_integral_type& o_setting)
+    {
+        return mss::gen::spd_revision_check_0_3(i_spd_data, &spd::facade::therm_sensor_0_availability, o_setting);
+    }
+};
+
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_eff_engine_fields, THERM_SENSOR_0_TYPE specialization
+///
+template< proc_type P >
+struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::THERM_SENSOR_0_TYPE>
+{
+    using attr_type = fapi2::ATTR_MEM_EFF_THERM_SENSOR_0_TYPE_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_THERM_SENSOR_0_TYPE_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_THERM_SENSOR_0_TYPE;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_therm_sensor_0_type(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_therm_sensor_0_type(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+            attr_integral_type& o_setting)
+    {
+        return mss::gen::spd_revision_check_0_3(i_spd_data, &spd::facade::therm_sensor_0_type, o_setting);
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_eff_engine_fields, THERM_SENSOR_0_USAGE specialization
+///
+template< proc_type P >
+struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::THERM_SENSOR_0_USAGE>
+{
+    using attr_type = fapi2::ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_THERM_SENSOR_0_USAGE;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_therm_sensor_0_usage(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_therm_sensor_0_usage(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+            attr_integral_type& o_setting)
+    {
+        return mss::gen::spd_revision_check_0_3(i_spd_data, &spd::facade::therm_sensor_0_usage, o_setting);
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_eff_engine_fields, THERM_SENSOR_0_I2C_ADDR specialization
+///
+template< proc_type P >
+struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::THERM_SENSOR_0_I2C_ADDR>
+{
+    using attr_type = fapi2::ATTR_MEM_EFF_THERM_SENSOR_0_I2C_ADDR_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_THERM_SENSOR_0_I2C_ADDR_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_THERM_SENSOR_0_I2C_ADDR;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_therm_sensor_0_i2c_addr(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_therm_sensor_0_i2c_addr(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+            attr_integral_type& o_setting)
+    {
+        return mss::gen::spd_revision_check_0_3(i_spd_data, &spd::facade::therm_sensor_0_i2c_address, o_setting);
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_eff_engine_fields, THERM_SENSOR_1_AVAIL specialization
+///
+template< proc_type P >
+struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::THERM_SENSOR_1_AVAIL>
+{
+    using attr_type = fapi2::ATTR_MEM_EFF_THERM_SENSOR_1_AVAIL_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_THERM_SENSOR_1_AVAIL_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_THERM_SENSOR_1_AVAIL;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_therm_sensor_1_availability(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_therm_sensor_1_availability(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+            attr_integral_type& o_setting)
+    {
+        return mss::gen::spd_revision_check_0_3(i_spd_data, &spd::facade::therm_sensor_1_availability, o_setting);
+    }
+};
+
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_eff_engine_fields, THERM_SENSOR_1_TYPE specialization
+///
+template< proc_type P >
+struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::THERM_SENSOR_1_TYPE>
+{
+    using attr_type = fapi2::ATTR_MEM_EFF_THERM_SENSOR_1_TYPE_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_THERM_SENSOR_1_TYPE_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_THERM_SENSOR_1_TYPE;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_therm_sensor_1_type(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_therm_sensor_1_type(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+            attr_integral_type& o_setting)
+    {
+        return mss::gen::spd_revision_check_0_3(i_spd_data, &spd::facade::therm_sensor_1_type, o_setting);
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_eff_engine_fields, THERM_SENSOR_1_USAGE specialization
+///
+template< proc_type P >
+struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::THERM_SENSOR_1_USAGE>
+{
+    using attr_type = fapi2::ATTR_MEM_EFF_THERM_SENSOR_1_USAGE_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_THERM_SENSOR_1_USAGE_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_THERM_SENSOR_1_USAGE;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_therm_sensor_1_usage(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_therm_sensor_1_usage(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+            attr_integral_type& o_setting)
+    {
+        return mss::gen::spd_revision_check_0_3(i_spd_data, &spd::facade::therm_sensor_1_usage, o_setting);
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_eff_engine_fields, THERM_SENSOR_1_I2C_ADDR specialization
+///
+template< proc_type P >
+struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::THERM_SENSOR_1_I2C_ADDR>
+{
+    using attr_type = fapi2::ATTR_MEM_EFF_THERM_SENSOR_1_I2C_ADDR_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_THERM_SENSOR_1_I2C_ADDR_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_THERM_SENSOR_1_I2C_ADDR;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_therm_sensor_1_i2c_addr(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_therm_sensor_1_i2c_addr(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+            attr_integral_type& o_setting)
+    {
+        return mss::gen::spd_revision_check_0_3(i_spd_data, &spd::facade::therm_sensor_1_i2c_address, o_setting);
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_eff_engine_fields, THERM_SENSOR_DIFF_AVAIL specialization
+///
+template< proc_type P >
+struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::THERM_SENSOR_DIFF_AVAIL>
+{
+    using attr_type = fapi2::ATTR_MEM_EFF_THERM_SENSOR_DIFF_AVAIL_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_THERM_SENSOR_DIFF_AVAIL_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_THERM_SENSOR_DIFF_AVAIL;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_therm_sensor_differential_availability(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_therm_sensor_differential_availability(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+            attr_integral_type& o_setting)
+    {
+        return mss::gen::spd_revision_check_0_3(i_spd_data, &spd::facade::therm_sensor_differential_availability, o_setting);
+    }
+};
+
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_eff_engine_fields, THERM_SENSOR_DIFF_TYPE specialization
+///
+template< proc_type P >
+struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::THERM_SENSOR_DIFF_TYPE>
+{
+    using attr_type = fapi2::ATTR_MEM_EFF_THERM_SENSOR_DIFF_TYPE_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_THERM_SENSOR_DIFF_TYPE_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_THERM_SENSOR_DIFF_TYPE;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_therm_sensor_differential_type(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_therm_sensor_differential_type(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+            attr_integral_type& o_setting)
+    {
+        return mss::gen::spd_revision_check_0_3(i_spd_data, &spd::facade::therm_sensor_differential_type, o_setting);
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_eff_engine_fields, THERM_SENSOR_DIFF_USAGE specialization
+///
+template< proc_type P >
+struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::THERM_SENSOR_DIFF_USAGE>
+{
+    using attr_type = fapi2::ATTR_MEM_EFF_THERM_SENSOR_DIFF_USAGE_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_THERM_SENSOR_DIFF_USAGE_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_THERM_SENSOR_DIFF_USAGE;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_therm_sensor_differential_usage(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_therm_sensor_differential_usage(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+            attr_integral_type& o_setting)
+    {
+        return mss::gen::spd_revision_check_0_3(i_spd_data, &spd::facade::therm_sensor_differential_usage, o_setting);
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_eff_engine_fields, THERM_SENSOR_DIFF_I2C_ADDR specialization
+///
+template< proc_type P >
+struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::THERM_SENSOR_DIFF_I2C_ADDR>
+{
+    using attr_type = fapi2::ATTR_MEM_EFF_THERM_SENSOR_DIFF_I2C_ADDR_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_THERM_SENSOR_DIFF_I2C_ADDR_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_THERM_SENSOR_DIFF_I2C_ADDR;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_therm_sensor_differential_i2c_addr(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_therm_sensor_differential_i2c_addr(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+            attr_integral_type& o_setting)
+    {
+        return mss::gen::spd_revision_check_0_3(i_spd_data, &spd::facade::therm_sensor_differential_i2c_address, o_setting);
     }
 };
 

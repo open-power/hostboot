@@ -1503,6 +1503,17 @@ class dimm_module_decoder
         }
 
         ///
+        /// @brief Decodes PMIC0 Redundancy
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode pmic0_redundancy(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
         /// @brief Decodes PMIC0 Sequence Order
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
@@ -1514,11 +1525,154 @@ class dimm_module_decoder
         }
 
         ///
+        /// @brief Decodes PMIC1 Redundancy
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode pmic1_redundancy(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
         /// @brief Decodes PMIC1 Sequence Order
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
         virtual fapi2::ReturnCode sequence_pmic1(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Thermal Sensor 0 Availability
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_0_availability(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Thermal Sensor 0 Type
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_0_type(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Thermal Sensor 0 Usage
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_0_usage(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Thermal Sensor 0 I2C Address
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_0_i2c_address(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Thermal Sensor 1 Availability
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_1_availability(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Thermal Sensor 1 Type
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_1_type(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Thermal Sensor 1 Usage
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_1_usage(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Thermal Sensor 1 I2C Address
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_1_i2c_address(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Thermal Sensor Differential Availability
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_differential_availability(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Thermal Sensor Differential Type
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_differential_type(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Thermal Sensor Differential Usage
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_differential_usage(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Thermal Sensor Differential I2C Address
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_differential_i2c_address(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;

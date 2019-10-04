@@ -163,8 +163,11 @@ enum class attr_eff_engine_fields
     PMIC0_SEQUENCE                      = 45,
     PMIC1_SEQUENCE                      = 46,
 
+    PMIC0_REDUNDANCY                    = 47,
+    PMIC1_REDUNDANCY                    = 48,
+
     // Dispatcher set to last enum value
-    DISPATCHER = PMIC1_SEQUENCE,
+    DISPATCHER = PMIC1_REDUNDANCY,
 };
 
 ///
@@ -228,6 +231,9 @@ enum ffdc_codes
 
     SET_PMIC0_SEQUENCE                      = 0x107E,
     SET_PMIC1_SEQUENCE                      = 0x107F,
+
+    SET_PMIC0_REDUNDANCY                    = 0x1080,
+    SET_PMIC1_REDUNDANCY                    = 0x1081,
 };
 
 ///

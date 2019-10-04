@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -766,6 +766,19 @@
     <deconfigure>
       <target>OCMB_TARGET</target>
     </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_UNKNOWN_THERMAL_SENSOR</rc>
+    <description>
+      The thermal sensor type for the given port was not a known value
+    </description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
 
 </hwpErrors>

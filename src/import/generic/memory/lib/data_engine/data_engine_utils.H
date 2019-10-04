@@ -54,8 +54,10 @@ namespace mss
 
 ///
 /// @brief Alias for function pointer to spd_facade timing methods
+/// @tparam DT data type
 ///
-using spd_facade_fptr = fapi2::ReturnCode (spd::facade::*)(int64_t& o_timing_in_mtb) const;
+template <typename DT>
+using spd_facade_fptr = fapi2::ReturnCode (spd::facade::*)(DT& o_field) const;
 
 ///
 /// @brief Algorithm to calculate SPD timings in nCK
@@ -533,6 +535,37 @@ static inline uint8_t align_odt_field_to_attr(const uint8_t i_value)
     l_value.clearBit<ODT3_OLD>();
 
     return l_value();
+}
+
+///
+/// @brief Check for SPD Revision 0.3, set o_field accordingly, for use with thermal sensor fields
+///
+/// @tparam DT Data type (uint8_t, uint16_t, etc.)
+/// @param[in] i_spd_data SPD facade
+/// @param[in] i_spd_field_fp SPD field function pointer
+/// @param[out] o_field field to set with result
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+/// @note TK This should eventually be replaced with a proper SPD revision checking API
+///
+template <typename DT>
+static inline fapi2::ReturnCode spd_revision_check_0_3(
+    const spd::facade& i_spd_data,
+    spd_facade_fptr<DT> i_spd_field_fp,
+    DT& o_field)
+{
+    uint8_t l_revision = 0;
+    FAPI_TRY(i_spd_data.revision(l_revision));
+
+    // If >= 0.3, set to value, else, the bytes are garbage, set to 0
+    if (l_revision >= mss::spd::rev::V0_3)
+    {
+        return (i_spd_data.*i_spd_field_fp)(o_field);
+    }
+
+    o_field = 0;
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 }// gen

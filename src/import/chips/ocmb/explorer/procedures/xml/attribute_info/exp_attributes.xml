@@ -523,4 +523,21 @@
         <mssAccessorName>post_memdiags_read_subtest_fail_behavior</mssAccessorName>
     </attribute>
 
+    <attribute>
+        <id>ATTR_MSS_OCMB_DISABLE_THERM_INIT_READ</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Flag to disable exp_mss_thermal_init interval read command
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            ENABLED = 0,
+            DISABLED = 1
+        </enum>
+        <platInit/>
+        <overrideOnly/>
+        <initToZero/>
+        <mssAccessorName>disable_therm_init_read</mssAccessorName>
+    </attribute>
+
 </attributes>
