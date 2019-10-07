@@ -122,15 +122,11 @@ bool Target<K, M, V>::operator==(const Target& i_right) const
 template<TargetType K, MulticastType M, typename V>
 static constexpr void plat_apply_target_limits(void)
 {
-    static_assert(!(K & TARGET_TYPE_MULTICAST),
-        "Multicast targets are not supported on this platform");
 }
 
 template<TargetType K, MulticastType M, typename V>
 inline void Target<K, M, V>::mcUpdateHandle()
 {
-    static_assert(!(K & TARGET_TYPE_MULTICAST),
-        "Multicast targets are not supported on this platform");
 }
 
 ///
@@ -1488,6 +1484,52 @@ inline uint8_t Target< T_SELF, M, V >::getChipletNumber(void) const
         FAPI_ERR("ERROR: getChipletNumber: Can not read CHIPLET_ID attribute");
     }
     return l_chiplet_id;
+}
+
+
+///
+/// @brief Get a multicast target for a given chip
+/// @tparam T The type of target to return; TARGET_TYPE_MULTICAST is added
+///           automatically
+/// @tparam O The type of multicast read operation for the target;
+///         defaults to OR
+/// @param[in] i_group The abstract multicast group the target should point to
+/// @return The multicast target
+///
+template< TargetType K, MulticastType M, typename V>
+template< TargetType T, MulticastType O >
+inline Target<T | TARGET_TYPE_MULTICAST, O, V>
+Target<K, M, V>::getMulticast(const MulticastGroup i_group) const
+{
+    static_assert((K == TARGET_TYPE_PROC_CHIP), "Parent target must be the proc chip");
+    static_assert((T & TARGET_TYPE_MULTICASTABLE) != 0,
+                  "Requested target type must be part of TARGET_TYPE_MULTICASTABLE");
+    static_assert(bitCount<T>::count == 1,
+                  "Requested target type must be a single type, TARGET_TYPE_MULTICAST will be added automatically");
+    //TODO RTC: 203303 Incorporate i_group into the target wrapper
+
+    return Target < T | TARGET_TYPE_MULTICAST, O, V > ();
+}
+
+///
+/// @brief Get a multicast core target for a given chip
+/// @tparam O The type of multicast read operation for the target;
+///           defaults to OR
+/// @param[in] i_group The abstract multicast group (selecting EQs) the target
+///                    should point to
+/// @param[in] i_cores Which cores inside the selected EQ should be targeted
+/// @return The multicast target
+///
+template< TargetType K, MulticastType M, typename V>
+template< MulticastType O >
+inline Target<TARGET_TYPE_CORE | TARGET_TYPE_MULTICAST, O, V>
+Target<K, M, V>::getMulticast(const MulticastGroup i_group, const MulticastCoreSelect i_cores) const
+{
+    static_assert((K == TARGET_TYPE_PROC_CHIP), "Parent target must be the proc chip");
+
+    //TODO RTC: 203303 Incorporate i_group and i_cores into the target wrapper
+
+    return Target< K | TARGET_TYPE_MULTICAST, O, V > ();
 }
 
 } // End namespace fapi2

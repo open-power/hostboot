@@ -36,16 +36,15 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/customize/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/include/registers/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/utils/stopreg/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip
 
 #HWP_LIB_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
-#HWP_PM_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm
-#EXTRAINCDIR += ${HWP_PM_PATH}
+HWP_PM_PATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm/
+EXTRAINCDIR += ${HWP_PM_PATH}
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv
 #HWP_STOPUTIL_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/utils/stopreg/
 #EXTRAINCDIR += ${HWP_STOPUTIL_PATH}
@@ -65,13 +64,14 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/pnor/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/util/
 
 #common PM Complex functions between ipl and runtime
-OBJS += pm_common.o
-OBJS += occAccess.o
-OBJS += occCheckstop.o
+#OBJS += pm_common.o
+#OBJS += occAccess.o
+#OBJS += occCheckstop.o
 #OBJS += p9_setup_evid.o
 #OBJS += p9_avsbus_lib.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
+VPATH += ${HWP_PM_PATH}
 #VPATH += ${HWP_PM_PATH} ${HWP_CUST_PATH} ${HWP_ACC_PATH}
 #VPATH += ${HWP_LIB_PATH} ${HWP_STOPUTIL_PATH}
 #VPATH += ${NEST_UTIL_PATH}
@@ -80,7 +80,7 @@ OBJS += occCheckstop.o
 # TODO RTC: 164237
 # Take another look at PM lib
 
-#include ${ROOTPATH}/procedure.rules.mk
+include ${ROOTPATH}/procedure.rules.mk
 #include ${HWP_PM_PATH}/p9_pm_pba_bar_config.mk
 #include ${HWP_PM_PATH}/p9_pm_pba_init.mk
 #include ${HWP_PM_PATH}/p9_pm_pba_firinit.mk
@@ -120,5 +120,5 @@ OBJS += occCheckstop.o
 #include ${HWP_PM_PATH}/p9_pm_recovery_ffdc_occ.mk
 #include ${HWP_PM_PATH}/p9_cme_sram_access.mk
 #include ${HWP_PM_PATH}/p9_pm_callout.mk
-#include ${HWP_PM_PATH}/p9_setup_runtime_wakeup_mode.mk
 #include ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/p9_core_checkstop_handler.mk
+include ${HWP_PM_PATH}/p10_setup_runtime_wakeup_mode.mk

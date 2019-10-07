@@ -28,11 +28,9 @@ MODULE = pm
 
 SUBDIRS+=runtime.d
 
-# FIXME RTC: 210975
-
 ## Objects unique to HB IPL
-#OBJS += ../istepHelperFuncs.o
+OBJS += ../istepHelperFuncs.o
 ## Objects common to HB IPL and HBRT
-#include pm.mk
+include pm.mk
 
 include ${ROOTPATH}/config.mk
