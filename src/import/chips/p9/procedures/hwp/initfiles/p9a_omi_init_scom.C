@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,8 @@ fapi2::ReturnCode p9a_omi_init_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCC>&
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_ENABLE_DL_TMPL_7, TGT0, l_TGT0_ATTR_PROC_ENABLE_DL_TMPL_7));
         fapi2::ATTR_PROC_ENABLE_DL_TMPL_4_Type l_TGT0_ATTR_PROC_ENABLE_DL_TMPL_4;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_ENABLE_DL_TMPL_4, TGT0, l_TGT0_ATTR_PROC_ENABLE_DL_TMPL_4));
+        fapi2::ATTR_PROC_ENABLE_DL_TMPL_1_Type l_TGT0_ATTR_PROC_ENABLE_DL_TMPL_1;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_ENABLE_DL_TMPL_1, TGT0, l_TGT0_ATTR_PROC_ENABLE_DL_TMPL_1));
         fapi2::ATTR_PROC_TMPL_0_PACING_Type l_TGT0_ATTR_PROC_TMPL_0_PACING;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_TMPL_0_PACING, TGT0, l_TGT0_ATTR_PROC_TMPL_0_PACING));
         fapi2::ATTR_PROC_TMPL_1_PACING_Type l_TGT0_ATTR_PROC_TMPL_1_PACING;
@@ -62,6 +64,12 @@ fapi2::ReturnCode p9a_omi_init_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCC>&
             {
                 constexpr auto l_MCP_CHAN0_DSTL_DSTLCFG_TMPL4_DISABLE_ON = 0x1;
                 l_scom_buffer.insert<6, 1, 63, uint64_t>(l_MCP_CHAN0_DSTL_DSTLCFG_TMPL4_DISABLE_ON );
+            }
+
+            if ((l_TGT0_ATTR_PROC_ENABLE_DL_TMPL_1 == fapi2::ENUM_ATTR_PROC_ENABLE_DL_TMPL_1_DISABLED))
+            {
+                constexpr auto l_MCP_CHAN0_DSTL_DSTLCFG_TMPL1_DIS_ON = 0x1;
+                l_scom_buffer.insert<3, 1, 63, uint64_t>(l_MCP_CHAN0_DSTL_DSTLCFG_TMPL1_DIS_ON );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x701090bull, l_scom_buffer));

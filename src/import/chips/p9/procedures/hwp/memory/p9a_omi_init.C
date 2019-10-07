@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -90,20 +90,13 @@ fapi2::ReturnCode p9a_omi_init_enable_templates(const fapi2::Target<fapi2::TARGE
                            l_enable_tmpl_7),
              "Error from FAPI_ATTR_GET (ATTR_PROC_ENABLE_DL_TMPL_7)");
 
-    FAPI_ASSERT(l_enable_tmpl_1 != 0,
-                fapi2::PROC_DOWNSTREAM_TMPL1_REQUIRED_ERR()
-                .set_TARGET(i_target),
-                "Downstream template 1 is required.");
-
-    FAPI_ASSERT(l_enable_tmpl_4 != 0 || l_enable_tmpl_7 != 0,
-                fapi2::PROC_DOWNSTREAM_TMPL4OR7_REQUIRED_ERR()
-                .set_TARGET(i_target),
-                "Downstream template 4 and/or 7 is required.");
-
-    //Turn off temp0_only
-    FAPI_TRY(getScom(i_target, P9A_MCC_DSTLCFG, l_data));
-    l_data.clearBit<P9A_MCC_DSTLCFG_TMPL0_ONLY>();
-    FAPI_TRY(putScom(i_target, P9A_MCC_DSTLCFG, l_data));
+    if (l_enable_tmpl_1 || l_enable_tmpl_4 || l_enable_tmpl_7)
+    {
+        //Turn off temp0_only
+        FAPI_TRY(getScom(i_target, P9A_MCC_DSTLCFG, l_data));
+        l_data.clearBit<P9A_MCC_DSTLCFG_TMPL0_ONLY>();
+        FAPI_TRY(putScom(i_target, P9A_MCC_DSTLCFG, l_data));
+    }
 
 fapi_try_exit:
 
