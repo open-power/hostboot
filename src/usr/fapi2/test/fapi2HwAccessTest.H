@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,7 @@
 #include <fapi2.H>
 #include <hwpf_fapi2_reasoncodes.H>
 #include <fapi2TestUtils.H>
-#include <p9_hwtests.H>
+#include <p10_hwtests.H>
 #include <plat_hwp_invoker.H>
 
 
@@ -86,64 +86,64 @@ void test_fapi2HwAccess()
         Target<fapi2::TARGET_TYPE_PROC_CHIP> fapi2_procTarget(l_chipList[0]);
 
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_scomtest_getscom_fail, fapi2_procTarget);
+        FAPI_INVOKE_HWP(l_errl, p10_scomtest_getscom_fail, fapi2_procTarget);
         if(l_errl != nullptr)
         {
             delete l_errl; // delete expected error log
         }
         else
         {
-            TS_FAIL("No error from p9_scomtest_getscom_fail !!");
+            TS_FAIL("No error from p10_scomtest_getscom_fail !!");
             numFails++;
         }
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_scomtest_putscom_fail, fapi2_procTarget);
+        FAPI_INVOKE_HWP(l_errl, p10_scomtest_putscom_fail, fapi2_procTarget);
         if(l_errl != nullptr)
         {
             delete l_errl; // delete expected error log
         }
         else
         {
-            TS_FAIL("No error from p9_scomtest_putscom_fail !!");
+            TS_FAIL("No error from p10_scomtest_putscom_fail !!");
             numFails++;
         }
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_cfamtest_putcfam_fail, fapi2_procTarget);
+        FAPI_INVOKE_HWP(l_errl, p10_cfamtest_putcfam_fail, fapi2_procTarget);
         if(l_errl != nullptr)
         {
             delete l_errl; // delete expected error log
         }
         else
         {
-            TS_FAIL("No error from p9_cfamtest_putcfam_fail !!");
+            TS_FAIL("No error from p10_cfamtest_putcfam_fail !!");
             numFails++;
         }
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_cfamtest_getcfam_fail, fapi2_procTarget);
+        FAPI_INVOKE_HWP(l_errl, p10_cfamtest_getcfam_fail, fapi2_procTarget);
         if(l_errl != nullptr)
         {
             delete l_errl; // delete expected error log
         }
         else
         {
-            TS_FAIL("No error from p9_cfamtest_getcfam_fail !!");
+            TS_FAIL("No error from p10_cfamtest_getcfam_fail !!");
             numFails++;
         }
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_scomtest_getscom_pass, fapi2_procTarget);
+        FAPI_INVOKE_HWP(l_errl, p10_scomtest_getscom_pass, fapi2_procTarget);
         if(l_errl)
         {
-            TS_FAIL("Error from p9_scomtest_getscom_pass !!");
+            TS_FAIL("Error from p10_scomtest_getscom_pass !!");
             numFails++;
             errlCommit(l_errl,FAPI2_COMP_ID);
             delete l_errl; // delete unexpected error log so we dont get
                           // a false negative on the next case
         }
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_scomtest_putscom_pass, fapi2_procTarget);
+        FAPI_INVOKE_HWP(l_errl, p10_scomtest_putscom_pass, fapi2_procTarget);
         if(l_errl)
         {
-            TS_FAIL("Error from p9_scomtest_putscom_pass !!");
+            TS_FAIL("Error from p10_scomtest_putscom_pass !!");
             numFails++;
             errlCommit(l_errl,FAPI2_COMP_ID);
             delete l_errl; // delete unexpected error log so we dont get
@@ -159,10 +159,10 @@ void test_fapi2HwAccess()
 #if 0 //@fixme-RTC:170587
         //this test should not be run at runtime
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_platPutRingWRingId_t_pass);
+        FAPI_INVOKE_HWP(l_errl, p10_platPutRingWRingId_t_pass);
         if(l_errl)
         {
-            TS_FAIL("Error from p9_platPutRingWRingId_t_pass !!");
+            TS_FAIL("Error from p10_platPutRingWRingId_t_pass !!");
             numFails++;
             errlCommit(l_errl,FAPI2_COMP_ID);
             delete l_errl; // delete unexpected error log so we dont get
@@ -173,27 +173,27 @@ void test_fapi2HwAccess()
 #endif
 
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_ringtest_getring_fail, fapi2_procTarget);
+        FAPI_INVOKE_HWP(l_errl, p10_ringtest_getring_fail, fapi2_procTarget);
         if(l_errl != nullptr)
         {
             delete l_errl; // delete expected error log
         }
         else
         {
-            TS_FAIL("No error from p9_ringtest_getring_fail !!");
+            TS_FAIL("No error from p10_ringtest_getring_fail !!");
             numFails++;
         }
 
         numTests++;
         uint8_t failed = 0;
         FAPI_INVOKE_HWP(l_errl,
-                        p9_opmodetest_ignorehwerr,
+                        p10_opmodetest_ignorehwerr,
                         fapi2_procTarget,
                         failed );
 
         if(l_errl || failed)
         {
-            TS_FAIL("p9_opmodetest_ignorehwerr returned an error!!");
+            TS_FAIL("p10_opmodetest_ignorehwerr returned an error!!");
             numFails++;
             if(l_errl)
             {
@@ -202,42 +202,42 @@ void test_fapi2HwAccess()
         }
 
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_piberrmask_masktest, fapi2_procTarget);
+        FAPI_INVOKE_HWP(l_errl, p10_piberrmask_masktest, fapi2_procTarget);
         if(l_errl)
         {
-            TS_FAIL("p9_piberrmask_masktest returned an error!");
+            TS_FAIL("p10_piberrmask_masktest returned an error!");
             numFails++;
             errlCommit(l_errl,FAPI2_COMP_ID);
         }
 
 #if 0 // TODO-RTC:151428 - need simics support for these to pass
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_ringtest_modring_fail, fapi2_procTarget);
+        FAPI_INVOKE_HWP(l_errl, p10_ringtest_modring_fail, fapi2_procTarget);
         if(l_errl != nullptr)
         {
             delete l_errl; // delete expected error log
         }
         else
         {
-            TS_FAIL("No error from  p9_ringtest_modring_fail!!");
+            TS_FAIL("No error from  p10_ringtest_modring_fail!!");
             numFails++;
         }
 
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_ringtest_getring_pass, fapi2_procTarget);
+        FAPI_INVOKE_HWP(l_errl, p10_ringtest_getring_pass, fapi2_procTarget);
         if (l_errl)
         {
-            TS_FAIL("Error from  p9_ringtest_getring_pass!!");
+            TS_FAIL("Error from  p10_ringtest_getring_pass!!");
             numFails++;
             errlCommit(l_errl,FAPI2_COMP_ID);
             delete l_errl; // delete unexpected error log so we dont get
                            // a false negative on the next case
         }
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_ringtest_modring_pass, fapi2_procTarget);
+        FAPI_INVOKE_HWP(l_errl, p10_ringtest_modring_pass, fapi2_procTarget);
         if (l_errl)
         {
-            TS_FAIL("Error from  p9_ringtest_modring_pass!!");
+            TS_FAIL("Error from  p10_ringtest_modring_pass!!");
             numFails++;
             errlCommit(l_errl,FAPI2_COMP_ID);
             delete l_errl; // delete unexpected error log so we dont get

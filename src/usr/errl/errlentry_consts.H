@@ -120,7 +120,6 @@ struct epubBusTypeToSub_t
 const epubBusTypeToSub_t BUS_TO_SUBSYS_TABLE[] =
 {
     { HWAS::FSI_BUS_TYPE               , EPUB_CEC_HDW_CHIP_INTF    },
-    { HWAS::DMI_BUS_TYPE               , EPUB_MEMORY_BUS           },
     { HWAS::A_BUS_TYPE                 , EPUB_PROCESSOR_BUS_CTL    },
     { HWAS::X_BUS_TYPE                 , EPUB_PROCESSOR_BUS_CTL    },
     { HWAS::I2C_BUS_TYPE               , EPUB_CEC_HDW_I2C_DEVS     },

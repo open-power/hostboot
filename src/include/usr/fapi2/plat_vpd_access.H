@@ -36,22 +36,6 @@ namespace fapi2
 {
 
 /// @brief Return a blob of memory VPD data associated with the input target
-///
-/// Platform specific getVPD implmentation for MCS target type
-///
-/// @param[in] i_target, a valid fapi2 MCS target
-/// @param[in] io_vpd_info, fapi2::VPDInfo class that specifies which piece
-///            of data to return. Types MR and MT supported.
-/// @param[out] o_blob, the blob of raw data from the vpd
-/// @return FAPI2_RC_SUCCESS if there's no problem
-/// @note passing nullptr for o_blob will return the size of the keyword
-
-fapi2::ReturnCode platGetVPD(
-                    const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-                    VPDInfo<fapi2::TARGET_TYPE_MCS>& io_vpd_info,
-                    uint8_t* o_blob);
-
-/// @brief Return a blob of memory VPD data associated with the input target
 ///        If looking for blob to match keyword EFD, then search criteria
 ///        frequency and master rank must be supplied.
 ///

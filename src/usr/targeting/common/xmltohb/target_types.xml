@@ -2668,6 +2668,9 @@
       <id>PARENT_PERVASIVE</id>
     </attribute>
     <attribute>
+      <id>PEER_TARGET</id>
+    </attribute>
+    <attribute>
       <default>IOHS</default>
       <id>TYPE</id>
     </attribute>

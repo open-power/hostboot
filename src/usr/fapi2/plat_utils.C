@@ -259,29 +259,9 @@ void xlateTargetType(const fapi2::TargetType i_targetType,
             o_class = TARGETING::CLASS_CHIP;
             o_type = TARGETING::TYPE_PROC;
             break;
-        case fapi2::TARGET_TYPE_MEMBUF_CHIP:
-            o_class = TARGETING::CLASS_CHIP;
-            o_type = TARGETING::TYPE_MEMBUF;
-            break;
-        case fapi2::TARGET_TYPE_EX:
+        case fapi2::TARGET_TYPE_FC:
             o_class = TARGETING::CLASS_UNIT;
-            o_type = TARGETING::TYPE_EX;
-            break;
-        case fapi2::TARGET_TYPE_MBA:
-            o_class = TARGETING::CLASS_UNIT;
-            o_type = TARGETING::TYPE_MBA;
-            break;
-        case fapi2::TARGET_TYPE_MCS:
-            o_class = TARGETING::CLASS_UNIT;
-            o_type = TARGETING::TYPE_MCS;
-            break;
-        case fapi2::TARGET_TYPE_XBUS:
-            o_class = TARGETING::CLASS_UNIT;
-            o_type = TARGETING::TYPE_XBUS;
-            break;
-        case fapi2::TARGET_TYPE_L4:
-            o_class = TARGETING::CLASS_UNIT;
-            o_type = TARGETING::TYPE_L4;
+            o_type = TARGETING::TYPE_FC;
             break;
         case fapi2::TARGET_TYPE_CORE:
             o_class = TARGETING::CLASS_UNIT;
@@ -291,41 +271,9 @@ void xlateTargetType(const fapi2::TargetType i_targetType,
             o_class = TARGETING::CLASS_UNIT;
             o_type = TARGETING::TYPE_EQ;
             break;
-        case fapi2::TARGET_TYPE_MCA:
-            o_class = TARGETING::CLASS_UNIT;
-            o_type = TARGETING::TYPE_MCA;
-            break;
-        case fapi2::TARGET_TYPE_MCBIST:
-            o_class = TARGETING::CLASS_UNIT;
-            o_type = TARGETING::TYPE_MCBIST;
-            break;
         case fapi2::TARGET_TYPE_MI:
             o_class = TARGETING::CLASS_UNIT;
             o_type = TARGETING::TYPE_MI;
-            break;
-        case fapi2::TARGET_TYPE_CAPP:
-            o_class = TARGETING::CLASS_UNIT;
-            o_type = TARGETING::TYPE_CAPP;
-            break;
-        case fapi2::TARGET_TYPE_DMI:
-            o_class = TARGETING::CLASS_UNIT;
-            o_type = TARGETING::TYPE_DMI;
-            break;
-        case fapi2::TARGET_TYPE_OBUS:
-            o_class = TARGETING::CLASS_UNIT;
-            o_type = TARGETING::TYPE_OBUS;
-            break;
-        case fapi2::TARGET_TYPE_OBUS_BRICK:
-            o_class = TARGETING::CLASS_UNIT;
-            o_type = TARGETING::TYPE_OBUS_BRICK;
-            break;
-        case fapi2::TARGET_TYPE_SBE:
-            o_class = TARGETING::CLASS_UNIT;
-            o_type = TARGETING::TYPE_SBE;
-            break;
-        case fapi2::TARGET_TYPE_PPE:
-            o_class = TARGETING::CLASS_UNIT;
-            o_type = TARGETING::TYPE_PPE;
             break;
         case fapi2::TARGET_TYPE_PERV:
             o_class = TARGETING::CLASS_UNIT;
@@ -380,34 +328,20 @@ bool isPhysParentChild(const TargetType i_parentType,
     bool l_result = false;
     if (i_parentType == TARGET_TYPE_PROC_CHIP)
     {
-        if ( (i_childType & (TARGET_TYPE_EX     |
-                             TARGET_TYPE_MCS    |
-                             TARGET_TYPE_XBUS   |
-                             TARGET_TYPE_ABUS   |
+        if ( (i_childType & (TARGET_TYPE_FC     |
                              TARGET_TYPE_CORE   |
                              TARGET_TYPE_EQ     |
-                             TARGET_TYPE_MCA    |
-                             TARGET_TYPE_MCBIST |
                              TARGET_TYPE_MC     |
                              TARGET_TYPE_MCC    |
                              TARGET_TYPE_OMIC   |
                              TARGET_TYPE_OMI    |
                              TARGET_TYPE_MI     |
-                             TARGET_TYPE_CAPP   |
-                             TARGET_TYPE_DMI    |
-                             TARGET_TYPE_OBUS   |
-                             TARGET_TYPE_OBUS_BRICK     |
-                             TARGET_TYPE_SBE    |
-                             TARGET_TYPE_PPE    |
                              TARGET_TYPE_PERV   |
-                             TARGET_TYPE_PEC)) != 0 )
-        {
-            l_result = true;
-        }
-    }
-    else if (i_parentType == TARGET_TYPE_MEMBUF_CHIP)
-    {
-        if ( (i_childType & (TARGET_TYPE_MBA | TARGET_TYPE_L4)) != 0 )
+                             TARGET_TYPE_PEC    |
+                             TARGET_TYPE_PHB    |
+                             TARGET_TYPE_PAUC   |
+                             TARGET_TYPE_IOHS   |
+                             TARGET_TYPE_PAU)) != 0 )
         {
             l_result = true;
         }
@@ -583,15 +517,9 @@ void processEIBusCallouts(const ErrorInfo & i_errInfo,
         TARGETING::TYPE l_type1 = l_pTarget1->getAttr<TARGETING::ATTR_TYPE>();
         TARGETING::TYPE l_type2 = l_pTarget2->getAttr<TARGETING::ATTR_TYPE>();
 
-        if ( ((l_type1 == TARGETING::TYPE_MCS) &&
-              (l_type2 == TARGETING::TYPE_MEMBUF)) ||
-             ((l_type1 == TARGETING::TYPE_MEMBUF) &&
-              (l_type2 == TARGETING::TYPE_MCS)) )
-        {
-            l_busType = HWAS::DMI_BUS_TYPE;
-        }
-        else if ((l_type1 == TARGETING::TYPE_ABUS) &&
-                 (l_type2 == TARGETING::TYPE_ABUS))
+        /* @TODO RTC 245730: Implement for P10 and IOHS
+        if ((l_type1 == TARGETING::TYPE_ABUS) &&
+            (l_type2 == TARGETING::TYPE_ABUS))
         {
             l_busType = HWAS::A_BUS_TYPE;
         }
@@ -605,7 +533,9 @@ void processEIBusCallouts(const ErrorInfo & i_errInfo,
         {
             l_busType = HWAS::O_BUS_TYPE;
         }
-        else if ( ((l_type1 == TARGETING::TYPE_OMI) &&
+        else
+        */
+        if ( ((l_type1 == TARGETING::TYPE_OMI) &&
                    (l_type2 == TARGETING::TYPE_OCMB_CHIP)) ||
                   ((l_type1 == TARGETING::TYPE_OCMB_CHIP) &&
                    (l_type2 == TARGETING::TYPE_OMI)) )
@@ -676,7 +606,7 @@ void processEICDGs(const ErrorInfo & i_errInfo,
 /// @param[i] i_parentTarget FAPI2 Parent Target
 /// @param[i] i_childType    FAPI2 Child Type
 /// @param[i] i_childPort    Child Port Number
-///                            For DIMMs: MBA Port Number
+///                            For DIMMs: Port Number
 ///                            Else unused
 /// @param[i] i_childNum     Child Number
 ///                            For DIMMs: DIMM Socket Number

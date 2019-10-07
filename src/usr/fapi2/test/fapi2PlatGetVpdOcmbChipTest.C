@@ -35,12 +35,6 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
 {
     FAPI_INF(">>testGetVPD_EFD");
 
-    if(TARGETING::MODEL_AXONE != TARGETING::targetService().getProcessorModel())
-    {
-        FAPI_INF("<<testGetVPD_EFD: This is not AXONE. Skipping AXONE tests.");
-        return;
-    }
-
     // Find a valid target of type OCMB_CHIP
     TARGETING::TargetHandleList l_ocmbTargetList;
     TARGETING::getAllChips(l_ocmbTargetList, TARGETING::TYPE_OCMB_CHIP, true);
@@ -109,8 +103,8 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
         if (l_targetList)
         {
             ++l_numTests;
-            fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_ocmbChipTarget =
-                                                                 *l_targetList;
+            fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_ocmbChipTarget
+                = { *l_targetList };
             uint8_t* o_efdBuffer(nullptr);
 
             l_rc = platGetVPD(l_ocmbChipTarget, l_vpdInfo, o_efdBuffer);
@@ -129,8 +123,7 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
 
 
     // Initialize input data
-    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_ocmbChipTarget =
-                                                          l_ocmbTargetList[0];
+    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_ocmbChipTarget(l_ocmbTargetList[0]);
     uint8_t* o_efdBuffer{nullptr};
 
 

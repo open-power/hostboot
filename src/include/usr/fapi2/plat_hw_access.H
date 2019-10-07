@@ -216,8 +216,7 @@ ReturnCode platPutRing(const Target<T>& i_target,
     RingId_t l_ringID = reinterpret_cast<RingId_t>(i_ringID);
 
     // Extract the component pointer
-    TARGETING::Target* l_target =
-        reinterpret_cast<TARGETING::Target*>(i_target.get());
+    TARGETING::Target* l_target = i_target.get();
 
     // Grab the name of the target
     TARGETING::ATTR_FAPI_NAME_type l_targName = {0};

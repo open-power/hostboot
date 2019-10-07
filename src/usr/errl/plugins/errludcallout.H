@@ -204,7 +204,6 @@ case HWAS::_type: i_parser.PrintString( "GARD Error Type", #_type); break;
 #define case_BUS_TYPE(_type) \
 case HWAS::_type: i_parser.PrintString( "Bus Type", #_type); break;
                     case_BUS_TYPE(FSI_BUS_TYPE)
-                    case_BUS_TYPE(DMI_BUS_TYPE)
                     case_BUS_TYPE(A_BUS_TYPE)
                     case_BUS_TYPE(X_BUS_TYPE)
                     case_BUS_TYPE(I2C_BUS_TYPE)
@@ -411,4 +410,3 @@ private:
 }
 
 #endif
-

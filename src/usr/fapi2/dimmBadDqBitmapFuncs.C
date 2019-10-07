@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,32 +27,33 @@
 #include <attribute_service.H>
 #include <target.H>
 #include <errl/errlmanager.H>
+#include <p10_freq_traits.H>
 
 using namespace TARGETING;
 
 extern "C"
 {
 
+using namespace mss;
 
 //------------------------------------------------------------------------------
 // Utility function to check parameters and get the Bad DQ bitmap
 //------------------------------------------------------------------------------
-fapi2::ReturnCode dimmBadDqCheckParamGetBitmap( const fapi2::Target
-    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|fapi2::TARGET_TYPE_MEM_PORT>
-    & i_fapiTrgt,
+fapi2::ReturnCode dimmBadDqCheckParamGetBitmap(
+    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_fapiTrgt,
     const uint8_t i_port,
     const uint8_t i_dimm,
     const uint8_t i_rank,
     TARGETING::TargetHandle_t & o_dimmTrgt,
-    uint8_t (&o_dqBitmap)[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT])
+    uint8_t (&o_dqBitmap)[MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT])
 {
     fapi2::ReturnCode l_rc;
 
     do
     {
         // Check parameters.
-        if ( (i_dimm >= mss::MAX_DIMM_PER_PORT) ||
-             (i_rank >= mss::MAX_RANK_PER_DIMM) )
+        if ( (i_dimm >= frequency_traits<proc_type::P10>::MAX_DIMM_PER_PORT) ||
+             (i_rank >= frequency_traits<proc_type::P10>::MAX_PRIMARY_RANK_PER_DIMM) )
         {
             FAPI_ERR( "dimmBadDqCheckParamGetBitmap: Bad parameter. "
                       "i_dimm:%d i_rank:%d", i_dimm, i_rank );
@@ -94,8 +95,10 @@ fapi2::ReturnCode dimmBadDqCheckParamGetBitmap( const fapi2::Target
                 if ( l_dimm == i_dimm )
                 {
                     o_dimmTrgt = dimmTrgt;
+                    fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_fapi2DimmTrgt(dimmTrgt);
                     // Port and dimm are correct, get the Bad DQ bitmap
-                    l_rc = FAPI_ATTR_GET( fapi2::ATTR_BAD_DQ_BITMAP, dimmTrgt,
+                    l_rc = FAPI_ATTR_GET( fapi2::ATTR_BAD_DQ_BITMAP,
+                                          l_fapi2DimmTrgt,
                                           o_dqBitmap );
                     if ( l_rc ) break;
                 }
@@ -114,90 +117,88 @@ fapi2::ReturnCode dimmBadDqCheckParamGetBitmap( const fapi2::Target
 }
 
 //------------------------------------------------------------------------------
-fapi2::ReturnCode p9DimmGetBadDqBitmap( const fapi2::Target
-    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|fapi2::TARGET_TYPE_MEM_PORT>
-    & i_fapiTrgt,
+fapi2::ReturnCode p10DimmGetBadDqBitmap(
+    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
-    uint8_t (&o_data)[mss::BAD_DQ_BYTE_COUNT],
-    const uint8_t i_port )
+    uint8_t (&o_data)[BAD_DQ_BYTE_COUNT])
 {
-    FAPI_INF( ">>p9DimmGetBadDqBitmap. %d:%d", i_dimm, i_rank );
+    FAPI_INF( ">>p10DimmGetBadDqBitmap. %d:%d", i_dimm, i_rank );
 
     fapi2::ReturnCode l_rc;
 
     do
     {
-        uint8_t l_dqBitmap[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT];
+        uint8_t l_dqBitmap[MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT];
         TARGETING::TargetHandle_t l_dimmTrgt = nullptr;
 
         // Check parameters and get Bad Dq Bitmap
-        l_rc = dimmBadDqCheckParamGetBitmap( i_fapiTrgt, i_port, i_dimm, i_rank,
+        l_rc = dimmBadDqCheckParamGetBitmap( i_fapiTrgt, 0, i_dimm, i_rank,
                                              l_dimmTrgt, l_dqBitmap );
         if ( l_rc )
         {
-            FAPI_ERR( "p9DimmGetBadDqBitmap: Error from "
+            FAPI_ERR( "p10DimmGetBadDqBitmap: Error from "
                       "dimmBadDqCheckParamGetBitmap." );
             break;
         }
         // Write contents of DQ bitmap for specific rank to o_data.
-        memcpy( o_data, l_dqBitmap[i_rank], mss::BAD_DQ_BYTE_COUNT );
+        memcpy( o_data, l_dqBitmap[i_rank], BAD_DQ_BYTE_COUNT );
     }while(0);
 
-    FAPI_INF( "<<p9DimmGetBadDqBitmap" );
+    FAPI_INF( "<<p10DimmGetBadDqBitmap" );
 
     return l_rc;
 }
 
 //------------------------------------------------------------------------------
-fapi2::ReturnCode p9DimmSetBadDqBitmap( const fapi2::Target
-    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|fapi2::TARGET_TYPE_MEM_PORT>
-    & i_fapiTrgt,
+fapi2::ReturnCode p10DimmSetBadDqBitmap(
+    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
-    const uint8_t (&i_data)[mss::BAD_DQ_BYTE_COUNT],
-    const uint8_t i_port )
+    const uint8_t (&i_data)[BAD_DQ_BYTE_COUNT])
 {
-    FAPI_INF( ">>p9DimmSetBadDqBitmap. %d:%d", i_dimm, i_rank );
+    FAPI_INF( ">>p10DimmSetBadDqBitmap. %d:%d", i_dimm, i_rank );
 
     fapi2::ReturnCode l_rc;
 
     do
     {
         // Get the Bad DQ Bitmap by querying ATTR_BAD_DQ_BITMAP.
-        uint8_t l_dqBitmap[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT];
+        uint8_t l_dqBitmap[MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT];
         TARGETING::TargetHandle_t l_dimmTrgt = nullptr;
 
         // Check parameters and get Bad Dq Bitmap
-        l_rc = dimmBadDqCheckParamGetBitmap( i_fapiTrgt, i_port, i_dimm, i_rank,
+        l_rc = dimmBadDqCheckParamGetBitmap( i_fapiTrgt, 0, i_dimm, i_rank,
                                              l_dimmTrgt, l_dqBitmap );
         if ( l_rc )
         {
-            FAPI_ERR("p9DimmSetBadDqBitmap: Error getting ATTR_BAD_DQ_BITMAP.");
+            FAPI_ERR("p10DimmSetBadDqBitmap: Error getting ATTR_BAD_DQ_BITMAP.");
             break;
         }
         // Add the rank bitmap to the DIMM bitmap and write the bitmap.
-        memcpy( l_dqBitmap[i_rank], i_data, mss::BAD_DQ_BYTE_COUNT );
+        memcpy( l_dqBitmap[i_rank], i_data, BAD_DQ_BYTE_COUNT );
 
         errlHndl_t l_errl = nullptr;
         TARGETING::TargetHandle_t l_trgt = nullptr;
         l_errl = fapi2::platAttrSvc::getTargetingTarget(i_fapiTrgt, l_trgt);
         if ( l_errl )
         {
-            FAPI_ERR( "p9DimmSetBadDqBitmap: Error from getTargetingTarget" );
+            FAPI_ERR( "p10DimmSetBadDqBitmap: Error from getTargetingTarget" );
             break;
         }
 
-        l_rc = FAPI_ATTR_SET( fapi2::ATTR_BAD_DQ_BITMAP, l_dimmTrgt,
+        fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_fapi2DimmTrgt(l_dimmTrgt);
+
+        l_rc = FAPI_ATTR_SET( fapi2::ATTR_BAD_DQ_BITMAP, l_fapi2DimmTrgt,
                 l_dqBitmap );
 
         if ( l_rc )
         {
-            FAPI_ERR("p9DimmSetBadDqBitmap: Error setting ATTR_BAD_DQ_BITMAP.");
+            FAPI_ERR("p10DimmSetBadDqBitmap: Error setting ATTR_BAD_DQ_BITMAP.");
         }
     }while(0);
 
-    FAPI_INF( "<<p9DimmSetBadDqBitmap" );
+    FAPI_INF( "<<p10DimmSetBadDqBitmap" );
 
     return l_rc;
 }

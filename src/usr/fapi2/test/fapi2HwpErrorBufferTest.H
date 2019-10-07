@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,7 +63,7 @@ public:
             //Setup buffer for caller supplied information.
             fapi2::buffer<uint64_t> l_userBuffer{FAPI2_TEST_BUFFER_VALUE};
 
-            //Parameter type for the p9_collect_some_ffdc function.
+            //Parameter type for the p10_collect_some_ffdc function.
             //Can be 0x01 or 0x02. Has relevence for ErrorInfo objects
             //not related to this test
             uint32_t l_paramValue = 0x01;
@@ -274,7 +274,7 @@ fapi_try_exit:
             errlHndl_t l_err{};
 
             //invoke the simulated hardware function.
-            FAPI_INVOKE_HWP(l_err, p9ErrorWithBuffer, l_testTarget);
+            FAPI_INVOKE_HWP(l_err, p10ErrorWithBuffer, l_testTarget);
 
             if(!l_err)
             {
@@ -390,7 +390,7 @@ fapi_try_exit:
             errlHndl_t l_err{};
             //Call the simulated hardware function to generate an error.
             FAPI_INVOKE_HWP(l_err,
-                            p9ErrorWithVariableBuffer,
+                            p10ErrorWithVariableBuffer,
                             l_testTarget
                            );
 

@@ -81,7 +81,6 @@ void directOverride()
     }
 
 #ifndef __HOSTBOOT_RUNTIME
-    uint32_t l_targetType = TARGETING::TYPE_NA;
     // Apply the attribute override
     if (g_attrOverrideFapiTank)
     {
@@ -106,103 +105,10 @@ void directOverride()
     }
     else
     {
-        // Convert the FAPI targeting type to TARGETING
-
-        switch (g_attrOverrideHeader.iv_targetType)
-        {
-            case fapi2::TARGET_TYPE_SYSTEM:
-                l_targetType = TARGETING::TYPE_SYS;
-                break;
-            case fapi2::TARGET_TYPE_DIMM:
-                l_targetType = TARGETING::TYPE_DIMM;
-                break;
-            case fapi2::TARGET_TYPE_PROC_CHIP:
-                l_targetType = TARGETING::TYPE_PROC;
-                break;
-            case fapi2::TARGET_TYPE_MEMBUF_CHIP:
-                l_targetType = TARGETING::TYPE_MEMBUF;
-                break;
-            case fapi2::TARGET_TYPE_EX_CHIPLET:
-                l_targetType = TARGETING::TYPE_EX;
-                break;
-            case fapi2::TARGET_TYPE_MBA_CHIPLET:
-                l_targetType = TARGETING::TYPE_MBA;
-                break;
-            case fapi2::TARGET_TYPE_MCS_CHIPLET:
-                l_targetType = TARGETING::TYPE_MCS;
-                break;
-            case fapi2::TARGET_TYPE_XBUS_ENDPOINT:
-                l_targetType = TARGETING::TYPE_XBUS;
-                break;
-            case fapi2::TARGET_TYPE_ABUS_ENDPOINT:
-                l_targetType = TARGETING::TYPE_ABUS;
-                break;
-            case fapi2::TARGET_TYPE_L4:
-                l_targetType = TARGETING::TYPE_L4;
-                break;
-            case fapi2::TARGET_TYPE_CORE:
-                l_targetType = TARGETING::TYPE_CORE;
-                break;
-            case fapi2::TARGET_TYPE_EQ:
-                l_targetType = TARGETING::TYPE_EQ;
-                break;
-            case fapi2::TARGET_TYPE_MCA:
-                l_targetType = TARGETING::TYPE_MCA;
-                break;
-            case fapi2::TARGET_TYPE_MCBIST:
-                l_targetType = TARGETING::TYPE_MCBIST;
-                break;
-            case fapi2::TARGET_TYPE_CAPP:
-                l_targetType = TARGETING::TYPE_CAPP;
-                break;
-            case fapi2::TARGET_TYPE_MC:
-                l_targetType = TARGETING::TYPE_MC;
-                break;
-            case fapi2::TARGET_TYPE_MI:
-                l_targetType = TARGETING::TYPE_MI;
-                break;
-            case fapi2::TARGET_TYPE_DMI:
-                l_targetType = TARGETING::TYPE_DMI;
-                break;
-            case fapi2::TARGET_TYPE_OBUS:
-                l_targetType = TARGETING::TYPE_OBUS;
-                break;
-            case fapi2::TARGET_TYPE_OBUS_BRICK:
-                l_targetType = TARGETING::TYPE_OBUS_BRICK;
-                break;
-            case fapi2::TARGET_TYPE_SBE:
-                l_targetType = TARGETING::TYPE_SBE;
-                break;
-            case fapi2::TARGET_TYPE_PPE:
-                l_targetType = TARGETING::TYPE_PPE;
-                break;
-            case fapi2::TARGET_TYPE_PERV:
-                l_targetType = TARGETING::TYPE_PERV;
-                break;
-            case fapi2::TARGET_TYPE_PEC:
-                l_targetType = TARGETING::TYPE_PEC;
-                break;
-            case fapi2::TARGET_TYPE_PHB:
-                l_targetType = TARGETING::TYPE_PHB;
-                break;
-            case fapi2::TARGET_TYPE_OMI:
-                l_targetType = TARGETING::TYPE_OMI;
-                break;
-            case fapi2::TARGET_TYPE_OMIC:
-                l_targetType = TARGETING::TYPE_OMIC;
-                break;
-            case fapi2::TARGET_TYPE_MCC:
-                l_targetType = TARGETING::TYPE_MCC;
-                break;
-            case fapi2::TARGET_TYPE_OCMB_CHIP:
-                l_targetType = TARGETING::TYPE_OCMB_CHIP;
-                break;
-            case fapi2::TARGET_TYPE_MEM_PORT:
-                l_targetType = TARGETING::TYPE_MEM_PORT;
-                break;
-            default:
-                l_targetType = TARGETING::TYPE_NA;
-        }
+        const TargetType l_fapiTargetType
+            = static_cast<TargetType>(g_attrOverrideHeader.iv_targetType);
+        const TARGETING::TYPE l_targetType
+            = convertFapi2TypeToTargeting(l_fapiTargetType);
 
         FAPI_IMP("directOverride: Applying override to TARG tank "
             "Id: 0x%08x, TargType: 0x%08x, Pos: 0x%04x, UPos: 0x%02x",

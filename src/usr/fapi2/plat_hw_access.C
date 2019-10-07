@@ -825,7 +825,6 @@ ReturnCode platGetRing(const Target<TARGET_TYPE_ALL>& i_target,
 }
 
 
-// This will be used in future Cumulus code
 /// @brief Platform-level implementation called by putRing()
 inline ReturnCode platPutRing(const Target<TARGET_TYPE_ALL>& i_target,
                               const scanRingId_t i_address,

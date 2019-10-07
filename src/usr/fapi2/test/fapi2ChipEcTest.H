@@ -38,6 +38,8 @@ class Fapi2ChipEcTest : public CxxTest::TestSuite
 
   public:
 
+    // @TODO RTC 245731: Update EC feature testcases for P10
+#if 0
     // Simple test to validate ATTR_CHIP_EC_FEATURE_TEST1
     void  test_fapi2ChipEc_1()
     {
@@ -132,6 +134,8 @@ class Fapi2ChipEcTest : public CxxTest::TestSuite
         return;
 
     } // end main testcase driver
+
+#endif
 
 }; // end class
 

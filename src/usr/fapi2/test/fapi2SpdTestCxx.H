@@ -87,6 +87,11 @@ class SPDTest: public CxxTest::TestSuite
               // Expect to return the size or non failure
               if( !l_spdSize || (l_rc != fapi2::FAPI2_RC_SUCCESS) )
               {
+                  FAPI_ERR("fapi2::getSPD(l_fDim, NULL, l_spdSize) returned %d",
+                           l_rc);
+
+                  auto errl = fapi2::rcToErrl(l_rc);
+                  errlCommit(errl, CXXTEST_COMP_ID);
                   TS_FAIL("testGetSPD: Failed getting the size of the mem buffer - Dimm %.8X", TARGETING::get_huid(l_tDimm));
                   continue;
               }
@@ -98,6 +103,11 @@ class SPDTest: public CxxTest::TestSuite
               l_rc = fapi2::getSPD(l_fDimm,l_blobData, l_spdSize);
               if ( l_rc != fapi2::FAPI2_RC_SUCCESS )
               {
+                  FAPI_ERR("fapi2::getSPD(l_fDim, l_blobData, l_spdSize) returned %d",
+                           l_rc);
+
+                  auto errl = fapi2::rcToErrl(l_rc);
+                  errlCommit(errl, CXXTEST_COMP_ID);
                   TS_FAIL( "testGetSPD- Failed to read data from DIMM with HUID= 0x%x",
                            TARGETING::get_huid(l_tDimm));
                   continue;
@@ -140,10 +150,6 @@ class SPDTest: public CxxTest::TestSuite
               else if( (l_memModule != SPD::MEM_DDIMM) && (l_memGen == SPD::MEM_DDR4) )
               {
                   l_compareSize = SPD::DDR4_SPD_SIZE;
-              }
-              else if( l_memGen == SPD::MEM_DDR3 )
-              {
-                  l_compareSize = SPD::DDR3_SPD_SIZE;
               }
               else
               {

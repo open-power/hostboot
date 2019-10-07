@@ -78,11 +78,11 @@ errlHndl_t rcToErrl(ReturnCode & io_rc,
 ///
 /// @param[in] i_target
 ///              TARGET_TYPE_PROC_CHIP: Enables/Disables Special Wakeup on all
-///                cores (EX,EQ chiplets) of the specified chip target.
+///                cores (FC,EQ chiplets) of the specified chip target.
 ///              TARGET_TYPE_CORE: Enables/Disables Special Wakeup on the
-///                specified core target (EX,EQ chiplets)
-///              TARGET_TYPE_EX: Enables/Disables Special Wakeup on the
-///                specified EX target.
+///                specified core target (FC,EQ chiplets)
+///              TARGET_TYPE_FC: Enables/Disables Special Wakeup on the
+///                specified FC target.
 ///              TARGET_TYPE_EQ: Enables/Disables Special Wakeup on the
 ///                specified EQ target.
 ///
@@ -100,7 +100,7 @@ ReturnCode platSpecialWakeup( const Target<TARGET_TYPE_ALL>& i_target,
 /// @param[i] i_parentTarget FAPI2 Parent Target
 /// @param[i] i_childType    FAPI2 Child Type
 /// @param[i] i_childPort    Child Port Number
-///                            For DIMMs: MBA Port Number
+///                            For DIMMs: Port Number
 ///                            Else unused
 /// @param[i] i_childNum     Child Number
 ///                            For DIMMs: DIMM Socket Number

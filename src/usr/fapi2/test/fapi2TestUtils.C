@@ -38,13 +38,10 @@
     assert(TARGETING::targetService().toTarget(l_epath) != nullptr, \
            "sys0node0proc0 should be valid according to system xml"); \
 
-#define CAT(a,b) a b
-#define VAL(str) #str
-
 #define GENERATE_TARGET(PLAT_TARGET_TYPE, EPATH_STRING, TARGET_TEST_ENUM, POS) \
     l_epath.addLast(TARGETING::PLAT_TARGET_TYPE,POS); \
     assert(TARGETING::targetService().toTarget(l_epath) != nullptr, \
-          CAT(#EPATH_STRING, " should be valid according to system xml")); \
+           #EPATH_STRING " should be valid according to system xml"); \
     o_targetList[TARGET_TEST_ENUM] = \
         TARGETING::targetService().toTarget(l_epath);
 
@@ -62,7 +59,7 @@ void generateTargets(TARGETING::Target* i_pMasterProcChip,
         o_targetList[x] = nullptr;
     }
 
-    // Start generic P9 Target
+    // Start generic P10 Target
     // Use the GENERATE_TARGET macro to generate the target if the pos 0
     // unit exists in the simics test xml. This is true for most targets
 
@@ -70,10 +67,10 @@ void generateTargets(TARGETING::Target* i_pMasterProcChip,
     RESET_EPATH_TO_MASTER
     o_targetList[MY_PROC] = i_pMasterProcChip;
 
-    // Setup EQ, EX, and CORE targets which are common among all P9 Chips
+    // Setup EQ, FC, and CORE targets which are common among all P10 Chips
     GENERATE_TARGET(TYPE_EQ,sys0node0proc0eq0,MY_EQ,0)
-    GENERATE_TARGET(TYPE_EX,sys0node0proc0eq0ex0,MY_EX,0)
-    GENERATE_TARGET(TYPE_CORE,sys0node0proc0eq0ex0core0,MY_CORE,0)
+    GENERATE_TARGET(TYPE_FC,sys0node0proc0eq0fc0,MY_FC,0)
+    GENERATE_TARGET(TYPE_CORE,sys0node0proc0eq0fc0core0,MY_CORE,0)
 
     // Reset l_epath to master proc
     RESET_EPATH_TO_MASTER
@@ -85,146 +82,56 @@ void generateTargets(TARGETING::Target* i_pMasterProcChip,
     // Reset l_epath to master proc
     RESET_EPATH_TO_MASTER
 
-    //Setup XBUS
-    GENERATE_TARGET(TYPE_XBUS,sys0node0proc0xbus1,MY_XBUS,1)
-
-    // Reset l_epath to master proc
-    RESET_EPATH_TO_MASTER
-
-    //Setup OBUS, OBUS_BRICK
-    GENERATE_TARGET(TYPE_OBUS,sys0node0proc0obus0,MY_OBUS,0)
-    GENERATE_TARGET(TYPE_OBUS_BRICK,sys0node0proc0obus0obus_brick0,MY_OBUS_BRICK,0)
-
-    // Reset l_epath to master proc
-    RESET_EPATH_TO_MASTER
-
-    //Setup PPE
-    GENERATE_TARGET(TYPE_PPE,sys0node0proc0ppe0,MY_PPE,0)
-
-    // Reset l_epath to master proc
-    RESET_EPATH_TO_MASTER
-
-    //Setup CAPP
-    GENERATE_TARGET(TYPE_CAPP,sys0node0proc0capp0,MY_CAPP,0)
-
-    // Reset l_epath to master proc
-    RESET_EPATH_TO_MASTER
-
-    //Setup SBE
-    GENERATE_TARGET(TYPE_SBE,sys0node0proc0capp0,MY_SBE,0)
-
-    // Reset l_epath to master proc
-    RESET_EPATH_TO_MASTER
-
     //Setup PERV
-    GENERATE_TARGET(TYPE_PERV,sys0node0proc0perv1,MY_PERV,1)
-
-    // End generic P9 Target
+    GENERATE_TARGET(TYPE_PERV,sys0node0proc0perv1,MY_PERV,2)
 
     // Reset l_epath to master proc
     RESET_EPATH_TO_MASTER
 
+    // Setup MC, MI, MCC, OMI
+    GENERATE_TARGET(TYPE_MC,sys0node0proc0mc0,MY_MC,0)
+    GENERATE_TARGET(TYPE_MI,sys0node0proc0mc0mi0,MY_MI,0)
+    GENERATE_TARGET(TYPE_MCC,sys0node0proc0mc0mi0mcc0,MY_MCC,0)
+    GENERATE_TARGET(TYPE_OMI,sys0node0proc0mc0mi0mcc0omi0,MY_OMI,0)
 
-    // Start System Specific P9 Target
+    // Change epath type for both TYPE_OCMB_CHIP and TYPE_MEM_PORT
+    // so that targeting service will lookup the paths as type AFFINITY_PATH
+    // when looking up the target
+    l_epath.setType(TARGETING::EntityPath::PATH_AFFINITY);
 
-    // See src/usr/targeting/common/xmltohb/simics_NIMBUS.system.xml
-    if (TARGETING::MODEL_NIMBUS ==
-                i_pMasterProcChip->getAttr<TARGETING::ATTR_MODEL>())
-    {
-        //Setup MCBIST, MCS, and MCA
-        GENERATE_TARGET(TYPE_MCBIST,sys0node0proc0mcbist0,MY_MCBIST,0)
-        GENERATE_TARGET(TYPE_MCS,sys0node0proc0mcbist0mcs0,MY_MCS,0)
-        GENERATE_TARGET(TYPE_MCA,sys0node0proc0mcbist0mcs0mca0,MY_MCA,0)
-    }
-    // See src/usr/targeting/common/xmltohb/simics_CUMULUS.system.xml
-    else if (TARGETING::MODEL_CUMULUS ==
-                i_pMasterProcChip->getAttr<TARGETING::ATTR_MODEL>())
-    {
-        //Setup MC, MI, DMI
-        GENERATE_TARGET(TYPE_MC,sys0node0proc0mc0,MY_MC,0)
-        GENERATE_TARGET(TYPE_MI,sys0node0proc0mc0mi0,MY_MI,0)
-        GENERATE_TARGET(TYPE_DMI,sys0node0proc0mc0mi0dmi0,MY_DMI,0)
+    // Setup OCMB_CHIP and MEM_PORT
+    GENERATE_TARGET(TYPE_OCMB_CHIP,sys0node0ocmb0,MY_OCMB,0)
+    GENERATE_TARGET(TYPE_MEM_PORT,sys0node0ocmb0memport0,MY_MEM_PORT,0)
 
-    }
-    // See src/usr/targeting/common/xmltohb/simics_AXONE.system.xml
-    else if (TARGETING::MODEL_AXONE ==
-                i_pMasterProcChip->getAttr<TARGETING::ATTR_MODEL>())
-    {
-        // Setup MC, MI, MCC, OMI
-        GENERATE_TARGET(TYPE_MC,sys0node0proc0mc0,MY_MC,0)
-        GENERATE_TARGET(TYPE_MI,sys0node0proc0mc0mi0,MY_MI,0)
-        GENERATE_TARGET(TYPE_MCC,sys0node0proc0mc0mi0mcc0,MY_MCC,0)
-        GENERATE_TARGET(TYPE_OMI,sys0node0proc0mc0mi0mcc0omi0,MY_OMI,0)
+    // Set l_epath's type back to PATH_PHYSICAL
+    l_epath.setType(TARGETING::EntityPath::PATH_PHYSICAL);
 
-        // Change epath type for both TYPE_OCMB_CHIP and TYPE_MEM_PORT
-        // so that targeting service will lookup the paths as type AFFINITY_PATH
-        // when looking up the target
-        l_epath.setType(TARGETING::EntityPath::PATH_AFFINITY);
+    // Remove MEM_PORT, OCMB_CHIP, OMI, MCC, MI (5 targets)
+    l_epath.removeLast(); l_epath.removeLast();
+    l_epath.removeLast(); l_epath.removeLast();
+    l_epath.removeLast();
 
-        // Setup OCMB_CHIP and MEM_PORT
-        GENERATE_TARGET(TYPE_OCMB_CHIP,sys0node0ocmb0,MY_OCMB,0)
-        GENERATE_TARGET(TYPE_MEM_PORT,sys0node0ocmb0memport0,MY_MEM_PORT,0)
+    // Setup OMICs
+    GENERATE_TARGET(TYPE_OMIC,sys0node0proc0mc0omic0,MY_OMIC0,0)
+    l_epath.removeLast();
+    GENERATE_TARGET(TYPE_OMIC,sys0node0proc0mc0omic1,MY_OMIC1,1)
 
-        // Set l_epath's type back to PATH_PHYSICAL
-        l_epath.setType(TARGETING::EntityPath::PATH_PHYSICAL);
+    // Remove OMIC, MC
+    l_epath.removeLast(); l_epath.removeLast();
 
-        // Remove MEM_PORT, OCMB_CHIP, OMI, MCC, MI (5 targets)
-        l_epath.removeLast(); l_epath.removeLast();
-        l_epath.removeLast(); l_epath.removeLast();
-        l_epath.removeLast();
+    // Setup PAUC
+    GENERATE_TARGET(TYPE_PAUC,sys0node0proc0pauc0,MY_PAUC,0)
+    // Setup IOHS
+    GENERATE_TARGET(TYPE_IOHS,sys0node0proc0pauc0iohs0,MY_IOHS,0)
+    // Setup PAU
+    GENERATE_TARGET(TYPE_PAU,sys0node0proc0pauc0iohs0pau0,MY_PAU,0)
 
-        // Setup OMICs
-        GENERATE_TARGET(TYPE_OMIC,sys0node0proc0mc0omic0,MY_OMIC0,0)
-        l_epath.removeLast();
-        GENERATE_TARGET(TYPE_OMIC,sys0node0proc0mc0omic2,MY_OMIC2,2)
-    }
-
-    // End System Specific P9 Target
+    // End generic P10 Target
 }
 
 bool isHwValid(TARGETING::Target* i_procChip, uint8_t i_hwType)
 {
-    bool isValid = true;
-
-    // Only need to check model if this is NOT a common target for p9
-    if (!(i_hwType == MY_PROC || i_hwType == MY_EQ || i_hwType == MY_EX || i_hwType == MY_CORE ||
-        i_hwType == MY_PEC || i_hwType == MY_PHB || i_hwType == MY_XBUS || i_hwType == MY_OBUS ||
-        i_hwType == MY_OBUS_BRICK || i_hwType == MY_PPE || i_hwType == MY_PERV || i_hwType == MY_CAPP ||
-        i_hwType == MY_SBE))
-    {
-        auto l_model = i_procChip->getAttr<TARGETING::ATTR_MODEL>();
-        if (l_model == TARGETING::MODEL_CUMULUS)
-        {
-            if (i_hwType == MY_MCS || i_hwType == MY_MCA
-                || i_hwType == MY_MCBIST || i_hwType == MY_OMI
-                || i_hwType == MY_OMIC0 || i_hwType == MY_OMIC2
-                || i_hwType == MY_MCC || i_hwType == MY_OCMB
-                || i_hwType == MY_MEM_PORT)
-            {
-                isValid = false;
-            }
-        }
-        else if (l_model == TARGETING::MODEL_NIMBUS)
-        {
-            if (i_hwType == MY_MC || i_hwType == MY_MI
-                || i_hwType == MY_DMI || i_hwType == MY_OMI
-                || i_hwType == MY_OMIC0 || i_hwType == MY_OMIC2
-                || i_hwType == MY_MCC || i_hwType == MY_OCMB
-                || i_hwType == MY_MEM_PORT)
-            {
-                isValid = false;
-            }
-        }
-        else if (l_model == TARGETING::MODEL_AXONE)
-        {
-            if (i_hwType == MY_MCS || i_hwType == MY_MCA || i_hwType == MY_MCBIST ||
-                i_hwType == MY_DMI)
-            {
-                isValid = false;
-            }
-        }
-    }
-    return isValid;
+    return true;
 }
 
 } // End namespace fapi2

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,16 +37,6 @@
 
 namespace fapi2
 {
-
-// platform specialization for MCS target
-template<>
-inline fapi2::ReturnCode getVPD(
-                          const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-                          VPDInfo<fapi2::TARGET_TYPE_MCS>& io_vpd_info,
-                          uint8_t* o_blob)
-{
-    return platGetVPD( i_target, io_vpd_info, o_blob );
-}
 
 // platform specialization for OCMB target
 template<>

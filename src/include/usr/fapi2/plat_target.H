@@ -125,6 +125,19 @@ namespace fapi2
         }
 
         /**
+         * @brief Overloaded inequality operator
+         *
+         * @param[in] i_rhs the right side of inequality operation
+         *
+         * @return whether the passed pointer is not equal to the underlying
+         *         TARGETING::Target* pointer of plat_target_t
+         */
+        bool operator!=(const TARGETING::Target* const i_rhs) const
+        {
+            return (iv_pTarget != i_rhs);
+        }
+
+        /**
          * @brief Overloaded less than operator
          *
          * @param[in] i_rhs the right-side plat_target_handle_t

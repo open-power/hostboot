@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,73 +38,73 @@ extern const uint64_t FAPI2_TEST_BUFFER_VALUE;
 extern const uint32_t FAPI2_TEST_VARIABLE_BUFFER_VALUE[];
 
 //*****************************************************************************
-// p9_ffdc_fail. Returns a fapi2::ReturnCode with an ffdc entry
+// p10_ffdc_fail. Returns a fapi2::ReturnCode with an ffdc entry
 //*****************************************************************************
-fapi2::ReturnCode p9_ffdc_fail(void);
+fapi2::ReturnCode p10_ffdc_fail(void);
 
 
 //*****************************************************************************
-// p9_registerFfdc_fail.
+// p10_registerFfdc_fail.
 // Returns a fapi2::ReturnCode with registery reads of a target
 //*****************************************************************************
-fapi2::ReturnCode p9_registerFfdc_fail(
+fapi2::ReturnCode p10_registerFfdc_fail(
                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target);
 
 
 //*****************************************************************************
-// p9_procedureFfdc_fail.
+// p10_procedureFfdc_fail.
 // Cause a failure which calls a procedure that fills in some ffdc into the
 // fapi2::ReturnCode
 //*****************************************************************************
-fapi2::ReturnCode p9_procedureFfdc_fail(void);
+fapi2::ReturnCode p10_procedureFfdc_fail(void);
 
 //*****************************************************************************
-// p9_gardAndDeconfig
+// p10_gardAndDeconfig
 // Force a test return code that deconfigures the target and gards it
 //****************************************************************************
-fapi2::ReturnCode p9_gardAndDeconfig(
+fapi2::ReturnCode p10_gardAndDeconfig(
                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target);
 
 //*****************************************************************************
-// p9_deconfigCallout
+// p10_deconfigCallout
 // Force a test return code that deconfigures the target
 //*****************************************************************************
-fapi2::ReturnCode p9_deconfigCallout(
+fapi2::ReturnCode p10_deconfigCallout(
                fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm_target);
 
 //******************************************************************************
-// p9_deconfigCalloutNone
+// p10_deconfigCalloutNone
 // Force a test return code that deconfigures the target
 //******************************************************************************
-fapi2::ReturnCode p9_deconfigCalloutNone(
+fapi2::ReturnCode p10_deconfigCalloutNone(
               fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm_target);
 
 //*****************************************************************************
-// p9_procedureCallout
+// p10_procedureCallout
 // Force a test return code that creates a procedure callout
 //*****************************************************************************
-fapi2::ReturnCode p9_procedureCallout();
+fapi2::ReturnCode p10_procedureCallout();
 
 //*****************************************************************************
-// p9_hwCallout
+// p10_hwCallout
 // Force a test return code that creates a hw callout
 //*****************************************************************************
-fapi2::ReturnCode p9_hwCallout(
+fapi2::ReturnCode p10_hwCallout(
                fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_core_target);
 
 
 //****************************************************************************
-// p9ErrorWithBuffer
+// p10ErrorWithBuffer
 // Force an error that will use a caller populated fapi2::buffer<>
 //****************************************************************************
-fapi2::ReturnCode p9ErrorWithBuffer(
+fapi2::ReturnCode p10ErrorWithBuffer(
                     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 //*****************************************************************************
-// p9ErrorWithVariableBuffer
+// p10ErrorWithVariableBuffer
 // Force an error that will use a caller populated fapi2::variable_buffer
 //*****************************************************************************
-fapi2::ReturnCode p9ErrorWithVariableBuffer(
+fapi2::ReturnCode p10ErrorWithVariableBuffer(
                     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 #endif

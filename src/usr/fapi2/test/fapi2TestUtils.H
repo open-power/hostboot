@@ -33,64 +33,44 @@
 #ifndef FAPI2TESTUTILS_H_
 #define FAPI2TESTUTILS_H_
 
-#define EQ_PER_PROC          6
-#define EX_PER_EQ            2
-#define CORE_PER_EX          2
-#define MCS_PER_PROC         4
+#define EQ_PER_PROC          8
+#define FC_PER_EQ            2
+#define CORE_PER_FC          2
 #define MI_PER_PROC          4
-#define MCA_PER_MCS          2
-#define DMI_PER_MI           2
-#define MCBIST_PER_PROC      2
-#define MC_PER_PROC          2
-#define MCS_PER_MCBIST       2
-#define MI_PER_MC            2
-#define PERV_PER_PROC        43
-#define XBUS_PER_PROC        1
-#define OBUS_PER_PROC        2
+#define MC_PER_PROC          4
+#define MI_PER_MC            1
 #define MCC_PER_MI           2
 #define OMI_PER_MCC          2
-#define OMIC_PER_MC          3
+#define OMIC_PER_MC          2
 #define OCMB_PER_OMI         1
 #define MEM_PORT_PER_OCMB    1
-
-// Note that OMIC can either have 2 or 3 child OMI
-// targets. There are 3 OMIC targets per MC, OMIC0
-// and OMIC1 have 3 children, OMIC2 has 2 children
-#define MAX_OMI_PER_OMIC     3
 
 #define SIMULATED_GOOD_CORES 4
 
 // non-core and non-cache chiplet ids
-#define START_PERV_CHIPLET_NUM        0x01
-// CAPI Unit(0,1 => 0x02, 0x04)
-#define START_CAPP_CHIPLET_NUM        0x02
-// OBUS BRICK ({0-2}, {9,11} => 0x09, 0xC)
-#define START_OBUS_BRICK_CHIPLET_NUM  0x09
-// XBUS (0, 1 => 0x6)
-#define START_XBUS_CHIPLET_NUM        0x06
-// MCBIST (0, 1 => 0x07, 0x08)
-#define START_MCBIST_CHIPLET_NUM      0x07
-// MC (0, 1 => 0x07)
-#define START_MC_CHIPLET_NUM          0x07
-// MI (0, 1 => 0x07)
-#define START_MI_CHIPLET_NUM          0x07
-// DMI (0, 3 => 0x07, 0x08)
-#define START_DMI_CHIPLET_NUM         0x07
-// OMI (0, 16 => 0x07, 0x08)
-#define START_OMI_CHIPLET_NUM         0x07
-// OMIC (0, 5 => 0x07, 0x08)
-#define START_OMIC_CHIPLET_NUM        0x07
-// MCC (0, 8 => 0x07, 0x08)
-#define START_MCC_CHIPLET_NUM         0x07
-// OBUS (0, 3 => 0x09, 0x0C)
-#define START_OBUS_CHIPLET_NUM        0x09
-// PEC (0, 1, 2 => 0x0D, 0x0E, 0x0F)
-#define START_PEC_0_CHIPLET_NUM       0x0D
-#define START_PEC_1_CHIPLET_NUM       0x0E
-#define START_PEC_2_CHIPLET_NUM       0x0F
+#define START_PERV_CHIPLET_NUM        0x02
+// MC (0, 1, ... => 0x0C, 0x0D, ...)
+#define START_MC_CHIPLET_NUM          0x0C
+// MI (0, 1, ... => 0x0C, 0x0D, ...)
+#define START_MI_CHIPLET_NUM          0x0C
+// OMI (0-3, 4-7, ... => 0x0C, 0x0D, ...)
+#define START_OMI_CHIPLET_NUM         0x0C
+// OMIC (0-1, 2-3, ... => 0x0C, 0x0D, ...)
+#define START_OMIC_CHIPLET_NUM        0x0C
+// MCC (0-1, 2-3, ... => 0x0C, 0x0D, ...)
+#define START_MCC_CHIPLET_NUM         0x0C
+// IOHS (0, 1, ... => 0x18, 0x19, ...)
+#define START_IOHS_CHIPLET_NUM        0x18
+// PAU (0-1, 2-3, ... => 0x10, 0x11, ...)
+#define START_PAU_CHIPLET_NUM         0x10
+// PAUC (0, 1, ... => 0x10, 0x11, ...)
+#define START_PAUC_CHIPLET_NUM        0x10
+// PEC (0, 1 => 0x08, 0x09)
+#define START_PEC_0_CHIPLET_NUM       0x08
+#define START_PEC_1_CHIPLET_NUM       0x09
 
 // All Cache Chiplets
-#define START_EQ_CHIPLET_NUM      0x10
+#define START_EQ_CHIPLET_NUM      0x20
 
 // All Core Chiplets
 #define START_CORE_CHIPLET_NUM    0x20
@@ -106,29 +86,22 @@ namespace fapi2
 enum FAPI2_TEST_TARGET_ID {
     MY_PROC,
     MY_EQ,
-    MY_EX,
+    MY_FC,
     MY_CORE,
-    MY_MCS,
-    MY_MCA,
-    MY_MCBIST,
     MY_PEC,
     MY_PHB,
-    MY_XBUS,
-    MY_OBUS,
-    MY_OBUS_BRICK,
-    MY_PPE,
     MY_PERV,
-    MY_CAPP,
-    MY_SBE,
     MY_MC,
     MY_MI,
-    MY_DMI,
     MY_OMI,
     MY_OMIC0,
-    MY_OMIC2,
+    MY_OMIC1,
     MY_MCC,
     MY_OCMB,
     MY_MEM_PORT,
+    MY_IOHS,
+    MY_PAU,
+    MY_PAUC,
     NUM_TARGETS
 };
 
@@ -139,10 +112,8 @@ enum FAPI2_TEST_TARGET_ID {
 //
 // NOTE: This is expected to be called inside a do-while(0) wrapper
 // variables created : numTests, numFails, generationSuccess, l_proc, l_chipList, targeting_targets,
-//                     fapi2_procTarget, fapi2_eqTarget, fapi2_exTarget, fapi2_coreTarget, fapi2_pecTarget,
-//                     fapi2_phbTarget, fapi2_xbusTarget, fapi2_obusTarget, fapi2_oBrickTarget, fapi2_ppeTarget,
-//                     fapi2_pervTarget, fapi2_sbeTarget, fapi2_cappTarget, fapi2_mcsTarget, fapi2_mcaTarget,
-//                     fapi2_mcbistTarget, fapi2_mcTarget, fapi2_miTarget, fapi2_dmiTarget, fapi2_omiTarget,
+//                     fapi2_procTarget, fapi2_eqTarget, fapi2_fcTarget, fapi2_coreTarget, fapi2_pecTarget,
+//                     fapi2_phbTarget, fapi2_pervTarget, fapi2_mcsTarget, fapi2_mcTarget, fapi2_miTarget,
 //                     fapi2_omicTarget, fapi2_mccTarget
 // Keep in the same order as FAPI2_TEST_TARGET_ID for ease of read
 #define GENERATE_TEST_TARGETS(TEST_FUNCTION_NAME)                                                            \
@@ -158,7 +129,7 @@ if(l_chipList.size())                                                           
 }                                                                                                            \
 else                                                                                                         \
 {                                                                                                            \
-    TS_FAIL(#TEST_FUNCTION_NAME" Fail: could not find any proc, skipping tests");                             \
+    TS_FAIL(#TEST_FUNCTION_NAME" Fail: could not find any proc, skipping tests");                            \
     numFails++;                                                                                              \
     break;                                                                                                   \
 }                                                                                                            \
@@ -174,7 +145,7 @@ for( uint64_t x = 0; x < NUM_TARGETS; x++ )                                     
     }                                                                                                        \
     else if(targeting_targets[x] == nullptr)                                                                 \
     {                                                                                                        \
-        FAPI_ERR(#TEST_FUNCTION_NAME":: targeting_targets[%d] is null", x);                                   \
+        FAPI_ERR(#TEST_FUNCTION_NAME":: targeting_targets[%d] is null", x);                                  \
         generationSuccess = false;                                                                           \
     }                                                                                                        \
 }                                                                                                            \
@@ -182,35 +153,27 @@ numTests++;                                                                     
 if(!generationSuccess)                                                                                       \
 {                                                                                                            \
     numFails++;                                                                                              \
-    TS_FAIL(#TEST_FUNCTION_NAME" Fail : failed to correctly generate targets");                               \
+    TS_FAIL(#TEST_FUNCTION_NAME" Fail : failed to correctly generate targets");                              \
 }                                                                                                            \
 /* Common Targets  */                                                                                        \
 fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>  fapi2_procTarget(targeting_targets[MY_PROC]);                   \
 fapi2::Target<fapi2::TARGET_TYPE_EQ>         fapi2_eqTarget(targeting_targets[MY_EQ]);                       \
-fapi2::Target<fapi2::TARGET_TYPE_EX>         fapi2_exTarget(targeting_targets[MY_EX]);                       \
+fapi2::Target<fapi2::TARGET_TYPE_FC>         fapi2_fcTarget(targeting_targets[MY_FC]);                       \
 fapi2::Target<fapi2::TARGET_TYPE_CORE>       fapi2_coreTarget(targeting_targets[MY_CORE]);                   \
 fapi2::Target<fapi2::TARGET_TYPE_PEC>        fapi2_pecTarget(targeting_targets[MY_PEC]);                     \
 fapi2::Target<fapi2::TARGET_TYPE_PHB>        fapi2_phbTarget(targeting_targets[MY_PHB]);                     \
-fapi2::Target<fapi2::TARGET_TYPE_XBUS>       fapi2_xbusTarget(targeting_targets[MY_XBUS]);                   \
-fapi2::Target<fapi2::TARGET_TYPE_OBUS>       fapi2_obusTarget(targeting_targets[MY_OBUS]);                   \
-fapi2::Target<fapi2::TARGET_TYPE_OBUS_BRICK> fapi2_oBrickTarget(targeting_targets[MY_OBUS_BRICK]);           \
-fapi2::Target<fapi2::TARGET_TYPE_PPE>        fapi2_ppeTarget(targeting_targets[MY_PPE]);                     \
 fapi2::Target<fapi2::TARGET_TYPE_PERV>       fapi2_pervTarget(targeting_targets[MY_PERV]);                   \
-fapi2::Target<fapi2::TARGET_TYPE_SBE>        fapi2_sbeTarget(targeting_targets[MY_SBE]);                     \
-fapi2::Target<fapi2::TARGET_TYPE_CAPP>       fapi2_cappTarget(targeting_targets[MY_CAPP]);                   \
-/* Model Specific Targets */                                                                                 \
-fapi2::Target<fapi2::TARGET_TYPE_MCS>        fapi2_mcsTarget(targeting_targets[MY_MCS]);       /* Nimbus */  \
-fapi2::Target<fapi2::TARGET_TYPE_MCA>        fapi2_mcaTarget(targeting_targets[MY_MCA]);       /* Nimbus */  \
-fapi2::Target<fapi2::TARGET_TYPE_MCBIST>     fapi2_mcbistTarget(targeting_targets[MY_MCBIST]); /* Nimbus */  \
-fapi2::Target<fapi2::TARGET_TYPE_MC>         fapi2_mcTarget(targeting_targets[MY_MC]);   /* Cumulus / Axone*/\
-fapi2::Target<fapi2::TARGET_TYPE_MI>         fapi2_miTarget(targeting_targets[MY_MI]);   /* Cumulus / Axone*/\
-fapi2::Target<fapi2::TARGET_TYPE_DMI>        fapi2_dmiTarget(targeting_targets[MY_DMI]); /* Cumulus */       \
-fapi2::Target<fapi2::TARGET_TYPE_OMI>        fapi2_omiTarget(targeting_targets[MY_OMI]);          /* Axone */\
-fapi2::Target<fapi2::TARGET_TYPE_OMIC>       fapi2_omic0Target(targeting_targets[MY_OMIC0]);        /* Axone */\
-fapi2::Target<fapi2::TARGET_TYPE_OMIC>       fapi2_omic2Target(targeting_targets[MY_OMIC2]);        /* Axone */\
-fapi2::Target<fapi2::TARGET_TYPE_MCC>        fapi2_mccTarget(targeting_targets[MY_MCC]);          /* Axone */\
-fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>  fapi2_ocmbTarget(targeting_targets[MY_OCMB]);        /* Axone */\
-fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>   fapi2_memportTarget(targeting_targets[MY_MEM_PORT]); /* Axone */
+fapi2::Target<fapi2::TARGET_TYPE_MC>         fapi2_mcTarget(targeting_targets[MY_MC]);                       \
+fapi2::Target<fapi2::TARGET_TYPE_MI>         fapi2_miTarget(targeting_targets[MY_MI]);                       \
+fapi2::Target<fapi2::TARGET_TYPE_OMI>        fapi2_omiTarget(targeting_targets[MY_OMI]);                     \
+fapi2::Target<fapi2::TARGET_TYPE_OMIC>       fapi2_omic0Target(targeting_targets[MY_OMIC0]);                 \
+fapi2::Target<fapi2::TARGET_TYPE_OMIC>       fapi2_omic1Target(targeting_targets[MY_OMIC1]);                 \
+fapi2::Target<fapi2::TARGET_TYPE_MCC>        fapi2_mccTarget(targeting_targets[MY_MCC]);                     \
+fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>  fapi2_ocmbTarget(targeting_targets[MY_OCMB]);                   \
+fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>   fapi2_memportTarget(targeting_targets[MY_MEM_PORT]);            \
+fapi2::Target<fapi2::TARGET_TYPE_IOHS>       fapi2_iohsTarget(targeting_targets[MY_IOHS]);                   \
+fapi2::Target<fapi2::TARGET_TYPE_PAU>        fapi2_pauTarget(targeting_targets[MY_PAU]);                     \
+fapi2::Target<fapi2::TARGET_TYPE_PAUC>       fapi2_paucTarget(targeting_targets[MY_PAUC]);
 
 
 
@@ -219,27 +182,17 @@ fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>   fapi2_memportTarget(targeting_targe
  */
 enum PERVASIVE_CHILDREN {
     PERV_EQ_CHILDREN           = 1,
-    PERV_CORE_CHILDREN         = 1,
-    PERV_XBUS_NIMBUS_CHILDREN  = 2,
-    PERV_XBUS_CUMULUS_CHILDREN = 3,
-    PERV_OBUS_CHILDREN         = 1,
-    PERV_CAPP_NIMBUS_CHILDREN  = 1,
-    PERV_CAPP_CUMULUS_CHILDREN = 2,
-    PERV_OBUS_BRICK_CHILDREN   = 3,
-    PERV_MCBIST_CHILDREN       = 1,
-    PERV_MCS_CHILDREN          = 2,
-    PERV_MCA_CHILDREN          = 4,
+    PERV_CORE_CHILDREN         = 4,
     PERV_PEC_CHILDREN          = 1,
-    PERV_PEC0_PHB_CHILDREN     = 1,
-    PERV_PEC1_PHB_CHILDREN     = 2,
-    PERV_PEC2_PHB_CHILDREN     = 3,
+    PERV_PEC_PHB_CHILDREN      = 3,
     PERV_MC_CHILDREN           = 1,
-    PERV_MI_CHILDREN           = 2,
-    PERV_DMI_CHILDREN          = 4,
-    PERV_OCC_CHILDREN          = 4,
-    PERV_MCC_CHILDREN          = 4,
-    PERV_OMI_CHILDREN          = 8,
-    PERV_OMIC_CHILDREN         = 3,
+    PERV_MI_CHILDREN           = 1,
+    PERV_MCC_CHILDREN          = 2,
+    PERV_OMI_CHILDREN          = 4,
+    PERV_OMIC_CHILDREN         = 2,
+    PERV_PAU_LOW_CHILDREN      = 1,
+    PERV_PAU_HIGH_CHILDREN     = 2,
+    PERV_IOHS_CHILDREN         = 1,
 };
 
 /**
@@ -251,20 +204,19 @@ enum PERVASIVE_CHILDREN {
  *      EQ_LOW <= X <= EQ_HIGH .
  */
 enum PERVASIVE_RANGE {
-    EQ_LOW            = 16,
-    EQ_HIGH           = 21,
-    CORE_LOW          = 32,
-    CORE_HIGH         = 55,
-    XBUS_RANGE        = 6,
-    OBUS_LOW          = 9,
-    OBUS_HIGH         = 12,
-    CAPP0_RANGE       = 2,
-    CAPP1_RANGE       = 4,
-    MC_LOW            = 7,
-    MC_HIGH           = 8,
-    PEC_LOW           = 13,
-    PEC_MID           = 14,
-    PEC_HIGH          = 15,
+    EQ_LOW            = 0x20,
+    EQ_HIGH           = 0x20 + 8,
+    CORE_LOW          = 0x20,
+    CORE_HIGH         = 0x20 + 8,
+    MC_LOW            = 0xC,
+    MC_HIGH           = 0xF,
+    PEC_LOW           = 0x8,
+    PEC_HIGH          = 0x9,
+    PAUC_LOW          = 0x10,
+    PAUC_MID          = 0x11,
+    PAUC_HIGH         = 0x13,
+    IOHS_LOW          = 0x18,
+    IOHS_HIGH         = 0x21,
 };
 
 ///

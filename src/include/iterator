@@ -215,7 +215,7 @@ back_insert_iterator<BackInsertionSequence>
  *    vector<int> l_cpp_array (begin(c_array), end(c_array));
  */
 template <typename T, size_t size>
-T* begin(T (&c_array)[size])
+constexpr T* begin(T (&c_array)[size])
 {
     return &c_array[0];
 }
@@ -229,9 +229,93 @@ T* begin(T (&c_array)[size])
  *    vector<int> l_cpp_array (begin(c_array), end(c_array));
  */
 template <typename T, size_t size>
-T* end(T (&c_array)[size])
+constexpr T* end(T (&c_array)[size])
 {
     return &c_array[0] + size;
+}
+
+/**
+ * cbegin(array)
+ * Returns const pointer to beginning of array
+ *
+ * Example:
+ *    const int c_array[] = {0, 1, 2};
+ *    vector<int> l_cpp_array (cbegin(c_array), cend(c_array));
+ */
+template <typename T, size_t size>
+constexpr const T* cbegin(const T (&c_array)[size])
+{
+    return &c_array[0];
+}
+
+/**
+ * cend(array)
+ * Returns const pointer to end of array (i.e. the element after the last element)
+ *
+ * Example:
+ *    const int c_array[] = {0, 1, 2};
+ *    vector<int> l_cpp_array (cbegin(c_array), cend(c_array));
+ */
+template <typename T, size_t size>
+constexpr const T* cend(const T (&c_array)[size])
+{
+    return &c_array[0] + size;
+}
+
+/**
+ * begin(container)
+ * Returns iterator to beginning of container
+ *
+ * Example:
+ *    vector<int> old_array {0, 1, 2};
+ *    vector<int> new_array (begin(old_array), end(old_array));
+ */
+template <typename T>
+constexpr auto begin(T &container) -> decltype(container.begin())
+{
+    return container.begin();
+}
+
+/**
+ * end(container)
+ * Returns iterator to end of container
+ *
+ * Example:
+ *    vector<int> old_array {0, 1, 2};
+ *    vector<int> new_array (begin(old_array), end(old_array));
+ */
+template <typename T>
+constexpr auto end(T &container) -> decltype(container.end())
+{
+    return container.end();
+}
+
+/**
+ * cbegin(container)
+ * Returns const iterator to beginning of container
+ *
+ * Example:
+ *    const vector<int> old_array {0, 1, 2};
+ *    vector<int> new_array (cbegin(old_array), cend(old_array));
+ */
+template <typename T>
+constexpr auto cbegin(const T &container) -> decltype(container.cbegin())
+{
+    return container.cbegin();
+}
+
+/**
+ * cend(container)
+ * Returns const iterator to end of container
+ *
+ * Example:
+ *    const vector<int> old_array {0, 1, 2};
+ *    vector<int> new_array (cbegin(old_array), cend(old_array));
+ */
+template <typename T>
+constexpr auto cend(const T &container) -> decltype(container.cend())
+{
+    return container.cend();
 }
 
 }; // namespace std.

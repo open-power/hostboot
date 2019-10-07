@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,52 +98,9 @@ uint32_t verifyHwpPrdAssociaton()
 
 
     // ==============================================================
-    // Verify MCA target is good (we expect them)
-    // ==============================================================
-    TargetHandleList  l_mcaList;
-    getChildAffinityTargets( l_mcaList, l_masterProc,
-                             TARGETING::CLASS_UNIT,
-                             TARGETING::TYPE_MCA );
-
-    if (l_mcaList.size() >= 1)
-    {
-        FAPI_INF("...verifyHwpPrdAssociation MCA :%d",
-                 l_mcaList.size());
-
-        // Using masterProc target as FAPI core target for test
-        Target<fapi2::TARGET_TYPE_CORE> fapi2_mcaTarget(l_mcaList[0]);
-        // We have to pass a FAPI RC so make one up
-        l_fapiRc = verifyPrd_get_fapi2_error();
-
-        // Init the attribute so we know if it changes
-        l_mcaList[0]->setAttr<TARGETING::ATTR_PRD_HWP_PLID>( 0x87654321 );
-
-        // Create/commit elog associated with PRD PLID attribute
-        fapi2::log_related_error( fapi2_mcaTarget, l_fapiRc );
-
-        // Verify that PLID attribute changed
-        l_plid = l_mcaList[0]->getAttr<TARGETING::ATTR_PRD_HWP_PLID>();
-
-        if (0x87654321 == l_plid)
-        {   // PLID did not change so routine failed somehow
-            TS_FAIL(" verifyHwpPrdAssociation MCA No PLID change:%08X",
-                     l_plid);
-            l_rc = 1;
-        }
-        else
-        {   // PLID was altered, so that is good
-            TS_TRACE(" verifyHwpPrdAssociation GOOD on MCA");
-        }
-
-        FAPI_INF("...verifyHwpPrdAssociation MCA done: PLID %08X", l_plid);
-
-    } // end if any MCAs
-
-
-    // ==============================================================
     // Verify target we don't do anything with ... TYPE_EQ
     // ==============================================================
-    TargetHandleList  l_eqList;
+    TARGETING::TargetHandleList  l_eqList;
     getChildAffinityTargets( l_eqList, l_masterProc,
                              TARGETING::CLASS_UNIT,
                              TARGETING::TYPE_EQ );
@@ -222,25 +179,6 @@ uint32_t verifyHwpPrdAssociaton()
     {   // PLID was altered, so that is good
         TS_TRACE(" verifyHwpPrdAssociation PROC PLID cleared");
     }
-
-
-    // Verify that MCA target PLID attribute was cleared
-    if (l_mcaList.size() >= 1)
-    {
-        // Verify that PLID attribute changed
-        l_plid = l_mcaList[0]->getAttr<TARGETING::ATTR_PRD_HWP_PLID>();
-
-        if (0 != l_plid)
-        {   // PLID should have been cleared
-            TS_FAIL(" verifyHwpPrdAssociation MCA PLID not cleared:%08X",
-                    l_plid);
-            l_rc = 1;
-        }
-        else
-        {   // PLID was altered, so that is good
-            TS_TRACE(" verifyHwpPrdAssociation MCA PLID cleared");
-        }
-    } // end if any MCAs to check PLIDs on
 #endif
 
     // asdf tests  here

@@ -111,14 +111,6 @@ fapi2DdimmGetEfdTest::fapi2DdimmGetEfdTest()
 {
     FAPI_INF(">> fapi2DdimmGetEfdTest");
 
-    iv_attrModel = TARGETING::targetService().getProcessorModel();
-    if(TARGETING::MODEL_AXONE != iv_attrModel)
-    {
-        FAPI_INF("<< fapi2DdimmGetEfdTest: This is not AXONE. "
-                 "Skipping AXONE tests.");
-        return;
-    }
-
     // Find a valid target of type OCMB_CHIP
     TARGETING::TargetHandleList l_ocmbTargetList;
     TARGETING::getAllChips(l_ocmbTargetList, TARGETING::TYPE_OCMB_CHIP, true);
@@ -148,7 +140,7 @@ void fapi2DdimmGetEfdTest::testDdimmGetEfdHwpCall()
 {
     // If initialization process was unable to find an OCMB chip target, then
     // exit without running any tests.
-    if (TARGETING::MODEL_AXONE != iv_attrModel || !iv_ocmbChipTarget)
+    if (!iv_ocmbChipTarget)
     {
         return;
     }

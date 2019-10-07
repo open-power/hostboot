@@ -28,7 +28,7 @@
 #include <fapi2.H>
 #include <hwpf_fapi2_reasoncodes.H>
 #include <fapi2TestUtils.H>
-#include <p9_sample_procedure.H>
+#include <p10_sample_procedure.H>
 #include <plat_hwp_invoker.H>
 
 using namespace fapi2;
@@ -61,50 +61,30 @@ void test_fapi2Hwp()
             delete l_errl;                                                                      \
             l_errl = nullptr;                                                                   \
             numFails++;                                                                         \
-            TS_FAIL("Error occured in" #PROCEDURE_NAME "!!");                                   \
+            TS_FAIL("Error occured in " #PROCEDURE_NAME "!!");                                  \
         }                                                                                       \
 
         #define HWP_TEST_MODEL_SPECIFIC_MACRO(PROCEDURE_NAME, FAPI2_TARGET, TEST_TARGET)        \
         if (isHwValid(l_proc, TEST_TARGET))                                                     \
         {                                                                                       \
-            numTests++;                                                                         \
-            FAPI_INVOKE_HWP(l_errl, PROCEDURE_NAME, FAPI2_TARGET, scratchWriteValue);           \
-            if(l_errl != nullptr)                                                               \
-            {                                                                                   \
-                delete l_errl;                                                                  \
-                l_errl = nullptr;                                                               \
-                numFails++;                                                                     \
-                TS_FAIL("Error occured in" #PROCEDURE_NAME "!!");                               \
-            }                                                                                   \
+            HWP_TEST_COMMON_MACRO(PROCEDURE_NAME, FAPI2_TARGET)                                 \
         }                                                                                       \
 
-        // Common for all P9 Models
-        HWP_TEST_COMMON_MACRO(p9_sample_procedure_proc, fapi2_procTarget)
-        HWP_TEST_COMMON_MACRO(p9_sample_procedure_eq, fapi2_eqTarget)
-        HWP_TEST_COMMON_MACRO(p9_sample_procedure_ex, fapi2_exTarget)
-        HWP_TEST_COMMON_MACRO(p9_sample_procedure_core, fapi2_coreTarget)
-        HWP_TEST_COMMON_MACRO(p9_sample_procedure_pec, fapi2_pecTarget)
-        HWP_TEST_COMMON_MACRO(p9_sample_procedure_phb, fapi2_phbTarget)
-        HWP_TEST_COMMON_MACRO(p9_sample_procedure_xbus, fapi2_xbusTarget)
-        HWP_TEST_COMMON_MACRO(p9_sample_procedure_obus, fapi2_obusTarget)
-        HWP_TEST_COMMON_MACRO(p9_sample_procedure_obrick, fapi2_oBrickTarget)
-        HWP_TEST_COMMON_MACRO(p9_sample_procedure_ppe, fapi2_ppeTarget)
-        HWP_TEST_COMMON_MACRO(p9_sample_procedure_perv, fapi2_pervTarget)
-        HWP_TEST_COMMON_MACRO(p9_sample_procedure_sbe, fapi2_sbeTarget)
-        HWP_TEST_COMMON_MACRO(p9_sample_procedure_capp, fapi2_cappTarget)
-        // Targets that are only found in specific models
-        HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_mcs, fapi2_mcsTarget, MY_MCS)
-        HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_mca, fapi2_mcaTarget, MY_MCA)
-        HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_mcbist, fapi2_mcbistTarget, MY_MCBIST)
-        HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_mc, fapi2_mcTarget, MY_MC)
-        HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_mi, fapi2_miTarget, MY_MI)
-        HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_dmi, fapi2_dmiTarget, MY_DMI)
-        HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_omi, fapi2_omiTarget, MY_OMI)
-        HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_omic, fapi2_omic0Target, MY_OMIC0)
-        HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_omic, fapi2_omic2Target, MY_OMIC2)
-        HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_mcc, fapi2_mccTarget, MY_MCC)
-        HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_ocmb, fapi2_ocmbTarget, MY_OCMB)
-        HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_mem_port, fapi2_memportTarget, MY_MEM_PORT)
+        // Common for all P10 Models
+        HWP_TEST_COMMON_MACRO(p10_sample_procedure_proc, fapi2_procTarget)
+        HWP_TEST_COMMON_MACRO(p10_sample_procedure_eq, fapi2_eqTarget)
+        HWP_TEST_COMMON_MACRO(p10_sample_procedure_core, fapi2_coreTarget)
+        HWP_TEST_COMMON_MACRO(p10_sample_procedure_pec, fapi2_pecTarget)
+        HWP_TEST_COMMON_MACRO(p10_sample_procedure_phb, fapi2_phbTarget)
+        HWP_TEST_COMMON_MACRO(p10_sample_procedure_perv, fapi2_pervTarget)
+        HWP_TEST_MODEL_SPECIFIC_MACRO(p10_sample_procedure_mc, fapi2_mcTarget, MY_MC)
+        HWP_TEST_MODEL_SPECIFIC_MACRO(p10_sample_procedure_mi, fapi2_miTarget, MY_MI)
+        HWP_TEST_MODEL_SPECIFIC_MACRO(p10_sample_procedure_omi, fapi2_omiTarget, MY_OMI)
+        HWP_TEST_MODEL_SPECIFIC_MACRO(p10_sample_procedure_omic, fapi2_omic0Target, MY_OMIC0)
+        HWP_TEST_MODEL_SPECIFIC_MACRO(p10_sample_procedure_omic, fapi2_omic1Target, MY_OMIC1)
+        HWP_TEST_MODEL_SPECIFIC_MACRO(p10_sample_procedure_mcc, fapi2_mccTarget, MY_MCC)
+        HWP_TEST_MODEL_SPECIFIC_MACRO(p10_sample_procedure_ocmb, fapi2_ocmbTarget, MY_OCMB)
+        HWP_TEST_MODEL_SPECIFIC_MACRO(p10_sample_procedure_mem_port, fapi2_memportTarget, MY_MEM_PORT)
 
     }while(0);
     FAPI_INF("test_fapiHWP:: Test Complete. %d/%d fails",  numFails,numTests);

@@ -64,7 +64,7 @@ void test_fapi2GetParent()
 #define GET_PARENT_TEST_MACRO(TEST_TARGET_ID, SRC_TYPE, PARENT_TEST_TARGET_ID, PARENT_TYPE)                    \
     {                                                                                                          \
         fapi2::Target<SRC_TYPE> l_src(targeting_targets[TEST_TARGET_ID]);                                      \
-        TARGETING::Target * l_parent = static_cast<TARGETING::Target*>(l_src.getParent<PARENT_TYPE>());        \
+        TARGETING::Target * l_parent = l_src.getParent<PARENT_TYPE>().get(); \
         numTests++;                                                                                            \
         if(TARGETING::get_huid(targeting_targets[PARENT_TEST_TARGET_ID]) !=                                    \
             TARGETING::get_huid(l_parent))                                                                     \
@@ -80,66 +80,27 @@ void test_fapi2GetParent()
     //// Start Common Targets
     // EQ Parent Tests
     GET_PARENT_TEST_MACRO(MY_EQ, TARGET_TYPE_EQ, MY_PROC, TARGET_TYPE_PROC_CHIP)
-    // EX Parent Tests
-    GET_PARENT_TEST_MACRO(MY_EX, TARGET_TYPE_EX, MY_EQ,   TARGET_TYPE_EQ)
-    GET_PARENT_TEST_MACRO(MY_EX, TARGET_TYPE_EX, MY_PROC, TARGET_TYPE_PROC_CHIP)
+    // FC Parent Tests
+    GET_PARENT_TEST_MACRO(MY_FC, TARGET_TYPE_FC, MY_EQ,   TARGET_TYPE_EQ)
+    GET_PARENT_TEST_MACRO(MY_FC, TARGET_TYPE_FC, MY_PROC, TARGET_TYPE_PROC_CHIP)
     // Core Parent Tests
-    GET_PARENT_TEST_MACRO(MY_CORE, TARGET_TYPE_CORE, MY_EX,   TARGET_TYPE_EX)
+    GET_PARENT_TEST_MACRO(MY_CORE, TARGET_TYPE_CORE, MY_FC,   TARGET_TYPE_FC)
     GET_PARENT_TEST_MACRO(MY_CORE, TARGET_TYPE_CORE, MY_EQ,   TARGET_TYPE_EQ)
     GET_PARENT_TEST_MACRO(MY_CORE, TARGET_TYPE_CORE, MY_PROC, TARGET_TYPE_PROC_CHIP)
     // PHB Parent Test
     GET_PARENT_TEST_MACRO(MY_PHB, TARGET_TYPE_PHB, MY_PROC, TARGET_TYPE_PROC_CHIP)
     // PEC Parent Test
     GET_PARENT_TEST_MACRO(MY_PEC, TARGET_TYPE_PEC, MY_PROC, TARGET_TYPE_PROC_CHIP)
-    // XBUS Parent Test
-    GET_PARENT_TEST_MACRO(MY_XBUS, TARGET_TYPE_XBUS, MY_PROC, TARGET_TYPE_PROC_CHIP)
-    // OBUS Parent Test
-    GET_PARENT_TEST_MACRO(MY_OBUS, TARGET_TYPE_OBUS, MY_PROC, TARGET_TYPE_PROC_CHIP)
-    // OBUS Brick Parent Test
-    GET_PARENT_TEST_MACRO(MY_OBUS_BRICK, TARGET_TYPE_OBUS_BRICK, MY_PROC, TARGET_TYPE_PROC_CHIP)
-    GET_PARENT_TEST_MACRO(MY_OBUS_BRICK, TARGET_TYPE_OBUS_BRICK, MY_OBUS, TARGET_TYPE_OBUS)
-    // PPE Parent Test
-    GET_PARENT_TEST_MACRO(MY_PPE, TARGET_TYPE_PPE, MY_PROC, TARGET_TYPE_PROC_CHIP)
+    // PAUC Parent Test
+    GET_PARENT_TEST_MACRO(MY_PAUC, TARGET_TYPE_PAUC, MY_PROC, TARGET_TYPE_PROC_CHIP)
+    // IOHS Parent Test
+    GET_PARENT_TEST_MACRO(MY_IOHS, TARGET_TYPE_IOHS, MY_PAUC, TARGET_TYPE_PAUC)
+    // PAU Parent Test
+    GET_PARENT_TEST_MACRO(MY_PAU, TARGET_TYPE_PAU, MY_IOHS, TARGET_TYPE_IOHS)
     // PERV Parent Test
     GET_PARENT_TEST_MACRO(MY_PERV, TARGET_TYPE_PERV, MY_PROC, TARGET_TYPE_PROC_CHIP)
-    // CAPP Parent Test
-    GET_PARENT_TEST_MACRO(MY_CAPP, TARGET_TYPE_CAPP, MY_PROC, TARGET_TYPE_PROC_CHIP)
-    // SBE Parent Test
-    GET_PARENT_TEST_MACRO(MY_SBE, TARGET_TYPE_SBE, MY_PROC, TARGET_TYPE_PROC_CHIP)
     ////End Common Targets
 
-    //// Start Nimbus only Targets
-    // MCA Parent Tests
-    if (isHwValid(l_proc, MY_MCA))
-    {
-        // Check proc parent
-        GET_PARENT_TEST_MACRO(MY_MCA, TARGET_TYPE_MCA, MY_PROC, TARGET_TYPE_PROC_CHIP)
-        if(isHwValid(l_proc, MY_MCS))
-        {
-            // Check MCS parent
-            GET_PARENT_TEST_MACRO(MY_MCA, TARGET_TYPE_MCA, MY_MCS, TARGET_TYPE_MCS)
-        }
-        if(isHwValid(l_proc, MY_MCBIST))
-        {
-            // Check MCBIST parent
-            GET_PARENT_TEST_MACRO(MY_MCA, TARGET_TYPE_MCA, MY_MCBIST, TARGET_TYPE_MCBIST)
-        }
-    }
-    // MCS Parent Tests
-    if (isHwValid(l_proc, MY_MCBIST) &&
-        isHwValid(l_proc, MY_MCS))
-    {
-        GET_PARENT_TEST_MACRO(MY_MCS, TARGET_TYPE_MCS, MY_MCBIST, TARGET_TYPE_MCBIST)
-        GET_PARENT_TEST_MACRO(MY_MCS, TARGET_TYPE_MCS, MY_PROC, TARGET_TYPE_PROC_CHIP)
-    }
-    // MCBIST Parent Test
-    if (isHwValid(l_proc, MY_MCBIST))
-    {
-        GET_PARENT_TEST_MACRO(MY_MCBIST, TARGET_TYPE_MCBIST, MY_PROC, TARGET_TYPE_PROC_CHIP)
-    }
-    //// End NIMBUS targets
-
-    //// Start Cumulus/Axone common targets
     // MC Parent Test
     if (isHwValid(l_proc, MY_MC))
     {
@@ -155,28 +116,7 @@ void test_fapi2GetParent()
         // Check parent proc
         GET_PARENT_TEST_MACRO(MY_MI, TARGET_TYPE_MI, MY_PROC, TARGET_TYPE_PROC_CHIP)
     }
-    //// End Cumulus/Axone common targets
 
-    //// Start Cumulus only targets
-    // DMI Parent Tests
-    if (isHwValid(l_proc, MY_DMI))
-    {
-        // Check parent proc
-        GET_PARENT_TEST_MACRO(MY_DMI, TARGET_TYPE_DMI, MY_PROC, TARGET_TYPE_PROC_CHIP)
-        if(isHwValid(l_proc, MY_MI))
-        {
-            // Check parent MI
-            GET_PARENT_TEST_MACRO(MY_DMI, TARGET_TYPE_DMI, MY_MI, TARGET_TYPE_MI)
-        }
-        if(isHwValid(l_proc, MY_MC))
-        {
-            // Check parent MC
-            GET_PARENT_TEST_MACRO(MY_DMI, TARGET_TYPE_DMI, MY_MC, TARGET_TYPE_MC)
-        }
-    }
-    //// End Cumulus only targets
-
-    //// Start Axone only targets
     // MCC Parent Tests
     if (isHwValid(l_proc, MY_MCC))
     {
@@ -212,10 +152,10 @@ void test_fapi2GetParent()
             // Check parent MCC
             GET_PARENT_TEST_MACRO(MY_OMI, TARGET_TYPE_OMI, MY_MCC, TARGET_TYPE_MCC)
         }
-        if (isHwValid(l_proc, MY_OMIC2))
+        if (isHwValid(l_proc, MY_OMIC0))
         {
             // Check parent OMIC
-            GET_PARENT_TEST_MACRO(MY_OMI, TARGET_TYPE_OMI, MY_OMIC2, TARGET_TYPE_OMIC)
+            GET_PARENT_TEST_MACRO(MY_OMI, TARGET_TYPE_OMI, MY_OMIC0, TARGET_TYPE_OMIC)
         }
         if (isHwValid(l_proc, MY_MI))
         {
@@ -246,45 +186,8 @@ void test_fapi2GetParent()
             GET_PARENT_TEST_MACRO(MY_MEM_PORT, TARGET_TYPE_MEM_PORT, MY_OCMB, TARGET_TYPE_OCMB_CHIP)
         }
     }
-    // End Axone only targets
 
-        static pervasiveParentTestRec nimbusPervasiveParentTests [] = {
-             {targeting_targets[MY_EQ],
-             [](TARGETING::Target* i_pTarget)
-                 {return getPervasiveParent<TARGET_TYPE_EQ>(i_pTarget); }},
-            {targeting_targets[MY_CORE],
-             [](TARGETING::Target* i_pTarget)
-                 {return getPervasiveParent<TARGET_TYPE_CORE>(i_pTarget); }},
-            {targeting_targets[MY_MCS],
-             [](TARGETING::Target* i_pTarget)
-                 {return getPervasiveParent<TARGET_TYPE_MCS>(i_pTarget); }},
-            {targeting_targets[MY_MCA],
-             [](TARGETING::Target* i_pTarget)
-                 {return getPervasiveParent<TARGET_TYPE_MCA>(i_pTarget); }},
-            {targeting_targets[MY_MCBIST],
-             [](TARGETING::Target* i_pTarget)
-                 {return getPervasiveParent<TARGET_TYPE_MCBIST>(i_pTarget);}},
-            {targeting_targets[MY_PEC],
-             [](TARGETING::Target* i_pTarget)
-                 {return getPervasiveParent<TARGET_TYPE_PEC>(i_pTarget); }},
-            {targeting_targets[MY_PHB],
-             [](TARGETING::Target* i_pTarget)
-                 {return getPervasiveParent<TARGET_TYPE_PHB>(i_pTarget); }},
-            {targeting_targets[MY_XBUS],
-             [](TARGETING::Target* i_pTarget)
-                 {return getPervasiveParent<TARGET_TYPE_XBUS>(i_pTarget); }},
-            {targeting_targets[MY_OBUS],
-             [](TARGETING::Target* i_pTarget)
-                 {return getPervasiveParent<TARGET_TYPE_OBUS>(i_pTarget); }},
-            {targeting_targets[MY_OBUS_BRICK],
-             [](TARGETING::Target* i_pTarget)
-               {return getPervasiveParent<TARGET_TYPE_OBUS_BRICK>(i_pTarget);}},
-            {targeting_targets[MY_CAPP],
-             [](TARGETING::Target* i_pTarget)
-                 {return getPervasiveParent<TARGET_TYPE_CAPP>(i_pTarget); }},
-          };
-
-        static pervasiveParentTestRec cumulusPervasiveParentTests [] = {
+        static pervasiveParentTestRec p10PervasiveParentTests [] = {
             {targeting_targets[MY_EQ],
              [](TARGETING::Target* i_pTarget)
                  {return getPervasiveParent<TARGET_TYPE_EQ>(i_pTarget); }},
@@ -297,54 +200,6 @@ void test_fapi2GetParent()
             {targeting_targets[MY_PHB],
              [](TARGETING::Target* i_pTarget)
                  {return getPervasiveParent<TARGET_TYPE_PHB>(i_pTarget); }},
-            {targeting_targets[MY_XBUS],
-             [](TARGETING::Target* i_pTarget)
-                 {return getPervasiveParent<TARGET_TYPE_XBUS>(i_pTarget); }},
-            {targeting_targets[MY_OBUS],
-             [](TARGETING::Target* i_pTarget)
-                 {return getPervasiveParent<TARGET_TYPE_OBUS>(i_pTarget); }},
-            {targeting_targets[MY_OBUS_BRICK],
-             [](TARGETING::Target* i_pTarget)
-               {return getPervasiveParent<TARGET_TYPE_OBUS_BRICK>(i_pTarget);}},
-            {targeting_targets[MY_CAPP],
-             [](TARGETING::Target* i_pTarget)
-                 {return getPervasiveParent<TARGET_TYPE_CAPP>(i_pTarget); }},
-            {targeting_targets[MY_MC],
-             [](TARGETING::Target* i_pTarget)
-                 {return getPervasiveParent<TARGET_TYPE_MC>(i_pTarget); }},
-            {targeting_targets[MY_MI],
-             [](TARGETING::Target* i_pTarget)
-                 {return getPervasiveParent<TARGET_TYPE_MI>(i_pTarget); }},
-            {targeting_targets[MY_DMI],
-             [](TARGETING::Target* i_pTarget)
-                 {return getPervasiveParent<TARGET_TYPE_DMI>(i_pTarget); }},
-          };
-
-        static pervasiveParentTestRec axonePervasiveParentTests [] = {
-            {targeting_targets[MY_EQ],
-             [](TARGETING::Target* i_pTarget)
-                 {return getPervasiveParent<TARGET_TYPE_EQ>(i_pTarget); }},
-            {targeting_targets[MY_CORE],
-             [](TARGETING::Target* i_pTarget)
-                 {return getPervasiveParent<TARGET_TYPE_CORE>(i_pTarget); }},
-            {targeting_targets[MY_PEC],
-             [](TARGETING::Target* i_pTarget)
-                 {return getPervasiveParent<TARGET_TYPE_PEC>(i_pTarget); }},
-            {targeting_targets[MY_PHB],
-             [](TARGETING::Target* i_pTarget)
-                 {return getPervasiveParent<TARGET_TYPE_PHB>(i_pTarget); }},
-            {targeting_targets[MY_XBUS],
-             [](TARGETING::Target* i_pTarget)
-                 {return getPervasiveParent<TARGET_TYPE_XBUS>(i_pTarget); }},
-            {targeting_targets[MY_OBUS],
-             [](TARGETING::Target* i_pTarget)
-                 {return getPervasiveParent<TARGET_TYPE_OBUS>(i_pTarget); }},
-            {targeting_targets[MY_OBUS_BRICK],
-             [](TARGETING::Target* i_pTarget)
-               {return getPervasiveParent<TARGET_TYPE_OBUS_BRICK>(i_pTarget);}},
-            {targeting_targets[MY_CAPP],
-             [](TARGETING::Target* i_pTarget)
-                 {return getPervasiveParent<TARGET_TYPE_CAPP>(i_pTarget); }},
             {targeting_targets[MY_MC],
              [](TARGETING::Target* i_pTarget)
                  {return getPervasiveParent<TARGET_TYPE_MC>(i_pTarget); }},
@@ -362,24 +217,8 @@ void test_fapi2GetParent()
                  {return getPervasiveParent<TARGET_TYPE_OMIC>(i_pTarget); }},
           };
 
-        pervasiveParentTestRec* ptr;
-        int numPervTests = 0;
-        auto l_model = l_proc->getAttr<TARGETING::ATTR_MODEL>();
-        if (l_model == TARGETING::MODEL_NIMBUS)
-        {
-            numPervTests = sizeof(nimbusPervasiveParentTests) / sizeof(pervasiveParentTestRec);
-            ptr = nimbusPervasiveParentTests;
-        }
-        else if (l_model == TARGETING::MODEL_CUMULUS)
-        {
-            numPervTests = sizeof(cumulusPervasiveParentTests) / sizeof(pervasiveParentTestRec);
-            ptr = cumulusPervasiveParentTests;
-        }
-        else
-        {
-            numPervTests = sizeof(axonePervasiveParentTests) / sizeof(pervasiveParentTestRec);
-            ptr = axonePervasiveParentTests;
-        }
+        pervasiveParentTestRec* ptr = p10PervasiveParentTests;
+        int numPervTests = sizeof(p10PervasiveParentTests) / sizeof(pervasiveParentTestRec);
 
         // Test each type of target that can have exactly one pervasive parent
         for (int i = 0; i < numPervTests; ++i)
@@ -402,8 +241,7 @@ void test_fapi2GetParent()
                    == TARGETING::TYPE_PERV))
             {
                 Target<TARGET_TYPE_PERV> fapi2_pervTarg(l_tempTargetingParent);
-                pPervasiveParent = static_cast<TARGETING::Target*>(
-                    fapi2_pervTarg.getParent<TARGET_TYPE_PROC_CHIP>());
+                pPervasiveParent = fapi2_pervTarg.getParent<TARGET_TYPE_PROC_CHIP>().get();
             }
 
             // If the parent of the target under test was nullptr, or it was

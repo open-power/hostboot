@@ -70,26 +70,19 @@ class Fapi2IsFunctional : public CxxTest::TestSuite
                 }                                                                           \
 
             IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_EQ], fapi2_eqTarget)
-            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_EX], fapi2_exTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_FC], fapi2_fcTarget)
             IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_CORE], fapi2_coreTarget)
-            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_MCS], fapi2_mcsTarget)
-            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_MCBIST], fapi2_mcbistTarget)
-            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_MCA], fapi2_mcaTarget)
             IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_PEC], fapi2_pecTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_PAUC], fapi2_paucTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_IOHS], fapi2_iohsTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_PAU], fapi2_pauTarget)
             IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_PHB], fapi2_phbTarget)
-            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_XBUS], fapi2_xbusTarget)
-            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_OBUS], fapi2_obusTarget)
-            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_OBUS_BRICK], fapi2_oBrickTarget)
-            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_PPE], fapi2_ppeTarget)
             IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_PERV], fapi2_pervTarget)
-            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_SBE], fapi2_sbeTarget)
-            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_CAPP], fapi2_cappTarget)
             IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_MC], fapi2_mcTarget)
             IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_MI], fapi2_miTarget)
-            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_DMI], fapi2_dmiTarget)
             IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_OMI], fapi2_omiTarget)
             IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_OMIC0], fapi2_omic0Target)
-            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_OMIC2], fapi2_omic2Target)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_OMIC1], fapi2_omic1Target)
             IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_MCC], fapi2_mccTarget)
             IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_PROC], fapi2_procTarget)
             IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_OCMB], fapi2_ocmbTarget)
@@ -105,4 +98,3 @@ class Fapi2IsFunctional : public CxxTest::TestSuite
 }; // end class
 
 }// end namespace fapi2
-

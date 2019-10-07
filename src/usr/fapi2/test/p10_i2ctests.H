@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/fapi2/test/p9_i2ctests.H $                            */
+/* $Source: src/usr/fapi2/test/p10_i2ctests.H $                           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,33 +23,33 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 //------------------------------------------------------------------------------
-/// @file  p9_i2ctests.C
+/// @file  p10_i2ctests.C
 ///
 /// @brief These procedures test the fapi2 i2c_access interfaces.
 //------------------------------------------------------------------------------
-#ifndef _P9_I2CTESTS_H_
-#define _P9_I2CTESTS_H_
+#ifndef _P10_I2CTESTS_H_
+#define _P10_I2CTESTS_H_
 
 #include <fapi2.H>
 
-fapi2::ReturnCode p9_i2ctest_geti2c_fail(
+fapi2::ReturnCode p10_i2ctest_geti2c_fail(
                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 
-fapi2::ReturnCode p9_i2ctest_puti2c_fail(
+fapi2::ReturnCode p10_i2ctest_puti2c_fail(
                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 
-fapi2::ReturnCode p9_i2ctest_geti2c_pass(
+fapi2::ReturnCode p10_i2ctest_geti2c_pass(
                fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 
-fapi2::ReturnCode p9_i2ctest_puti2c_pass(
+fapi2::ReturnCode p10_i2ctest_puti2c_pass(
                fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 
-fapi2::ReturnCode p9_i2ctest_double_read_pass(
+fapi2::ReturnCode p10_i2ctest_double_read_pass(
                fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 
-fapi2::ReturnCode p9_i2ctest_write_read_pass(
+fapi2::ReturnCode p10_i2ctest_write_read_pass(
                fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 
 #endif

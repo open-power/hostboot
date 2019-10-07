@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,12 +59,19 @@ public:
      */
     void testFapi2ReturnCode2(void)
     {
+// FIXME RTC: 210975
+// RC_TEST_ERROR_A required, in p9 comes from src/import/chips/p9/procedures/
+// xml/error_info/proc_example_errors.xml
+// There's no equivalent file in ekb-p10 yet.
+#if 0
         uint32_t l_res = rcTestReturnCodeCreator();
 
         if (l_res != 0)
         {
             TS_FAIL("testFapi2ReturnCode2. Fail l_res=%d", l_res);
         }
+# endif
+return;
     }
 
 
@@ -222,15 +229,24 @@ public:
     }
 
 
+
     void testFapi2ReturnCodeAttrErrls(void)
     {
+// FIXME RTC: 210975
+// RC_TEST_ERROR_A required, in p9 comes from src/import/chips/p9/procedures/
+// xml/error_info/proc_example_errors.xml
+// There's no equivalent file in ekb-p10 yet.
+#if 0
         uint32_t l_res = rcTestReturnCodeAttrErrls();
 
         if (l_res != 0)
         {
             TS_FAIL("rcTestReturnCodeAttrErrls. Fail l_res=%d", l_res);
         }
+#endif
+return;
     }
+
 };
 
 #endif

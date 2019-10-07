@@ -5819,7 +5819,7 @@
   </attribute>
 
   <attribute>
-    <description>Peer target's address of a A/X-bus connection.
+    <description>Peer target's address of a bus (IOHS) connection.
                  NULL means address 0 for no peer target. If a
                  target instance overrides the default with the
                  peer target's PHYS_PATH. The target compiler will

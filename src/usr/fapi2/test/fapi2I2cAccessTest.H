@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,7 +36,7 @@
 #include <errl/errlentry.H>
 #include <fapi2.H>
 #include <fapi2TestUtils.H>
-#include <p9_i2ctests.H>
+#include <p10_i2ctests.H>
 #include <plat_hwp_invoker.H>
 
 using namespace fapi2;
@@ -65,7 +65,7 @@ void test_fapi2I2cIllegalAccess()
         Target<fapi2::TARGET_TYPE_PROC_CHIP> fapi2_procTarget( l_proc );
 
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_i2ctest_geti2c_fail, fapi2_procTarget);
+        FAPI_INVOKE_HWP(l_errl, p10_i2ctest_geti2c_fail, fapi2_procTarget);
         if(l_errl != nullptr)
         {
             delete l_errl; // delete expected error log
@@ -73,12 +73,12 @@ void test_fapi2I2cIllegalAccess()
         }
         else
         {
-            TS_FAIL("No error from p9_i2ctest_geti2c_fail !!");
+            TS_FAIL("No error from p10_i2ctest_geti2c_fail !!");
             numFails++;
         }
 
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_i2ctest_puti2c_fail, fapi2_procTarget);
+        FAPI_INVOKE_HWP(l_errl, p10_i2ctest_puti2c_fail, fapi2_procTarget);
         if(l_errl != nullptr)
         {
             delete l_errl; // delete expected error log
@@ -86,7 +86,7 @@ void test_fapi2I2cIllegalAccess()
         }
         else
         {
-            TS_FAIL("No error from p9_i2ctest_puti2c_fail !!");
+            TS_FAIL("No error from p10_i2ctest_puti2c_fail !!");
             numFails++;
         }
     }
@@ -117,10 +117,10 @@ void test_fapi2I2cAccess()
         Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi2_target( l_ocmb );
 
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_i2ctest_geti2c_pass, l_fapi2_target);
+        FAPI_INVOKE_HWP(l_errl, p10_i2ctest_geti2c_pass, l_fapi2_target);
         if(l_errl)
         {
-            TS_FAIL("Error from p9_i2ctest_geti2c_pass !!");
+            TS_FAIL("Error from p10_i2ctest_geti2c_pass !!");
             numFails++;
             errlCommit(l_errl,FAPI2_COMP_ID);
             delete l_errl; // delete unexpected error log so we dont get
@@ -129,10 +129,10 @@ void test_fapi2I2cAccess()
         }
 
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_i2ctest_puti2c_pass, l_fapi2_target);
+        FAPI_INVOKE_HWP(l_errl, p10_i2ctest_puti2c_pass, l_fapi2_target);
         if(l_errl)
         {
-            TS_FAIL("Error from p9_i2ctest_puti2c_pass !!");
+            TS_FAIL("Error from p10_i2ctest_puti2c_pass !!");
             numFails++;
             errlCommit(l_errl,FAPI2_COMP_ID);
             delete l_errl; // delete unexpected error log so we dont get
@@ -141,10 +141,10 @@ void test_fapi2I2cAccess()
         }
 
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_i2ctest_double_read_pass, l_fapi2_target);
+        FAPI_INVOKE_HWP(l_errl, p10_i2ctest_double_read_pass, l_fapi2_target);
         if(l_errl)
         {
-            TS_FAIL("Error from p9_i2ctest_double_read_pass !!");
+            TS_FAIL("Error from p10_i2ctest_double_read_pass !!");
             numFails++;
             errlCommit(l_errl,FAPI2_COMP_ID);
             delete l_errl; // delete unexpected error log so we dont get
@@ -153,10 +153,10 @@ void test_fapi2I2cAccess()
         }
 
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_i2ctest_write_read_pass, l_fapi2_target);
+        FAPI_INVOKE_HWP(l_errl, p10_i2ctest_write_read_pass, l_fapi2_target);
         if(l_errl)
         {
-            TS_FAIL("Error from p9_i2ctest_write_read_pass !!");
+            TS_FAIL("Error from p10_i2ctest_write_read_pass !!");
             numFails++;
             errlCommit(l_errl,FAPI2_COMP_ID);
             delete l_errl; // delete unexpected error log so we dont get

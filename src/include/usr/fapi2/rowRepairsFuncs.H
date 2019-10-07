@@ -27,7 +27,17 @@
 #define ROWREPAIRS_H_
 
 #include <fapi2.H>
-#include <../memory/lib/shared/mss_const.H>
+
+//FIXME RTC: 210975 This needs to be removed when the constants are either moved to P10 XML
+// or retired; it the latter case, the references to these constants need to be
+// removed too.
+namespace mss
+{
+enum sizes
+{
+    ROW_REPAIR_BYTE_COUNT = 4,
+};
+}
 
 extern "C"
 {
@@ -39,21 +49,18 @@ extern "C"
  * Row Repair Data getter procedure to get the DQ bitmap and returns the data
  * for the specified rank.
  *
- * @param[in]  i_fapiTrgt Reference to MCA/MBA/MEM_PORT/OCMB_CHIP Target
- * @param[in]  i_dimm MCA/MBA port DIMM number
+ * @param[in]  i_fapiTrgt Reference to OCMB_CHIP Target
+ * @param[in]  i_dimm DIMM number
  * @param[in]  i_rank DIMM rank number
  * @param[out] o_data Reference to data where Row Repair Data is copied to
- * @param[in]  i_port Optional port for MBA targets. Default is port 0.
  *
  * @return ReturnCode
  */
-fapi2::ReturnCode getRowRepair( const fapi2::Target
-    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|
-     fapi2::TARGET_TYPE_MEM_PORT|fapi2::TARGET_TYPE_OCMB_CHIP> & i_fapiTrgt,
+fapi2::ReturnCode getRowRepair(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> & i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
-    uint8_t (&o_data)[mss::ROW_REPAIR_BYTE_COUNT],
-    const uint8_t i_port = 0 );
+    uint8_t (&o_data)[mss::ROW_REPAIR_BYTE_COUNT]);
 
 /**
  * @brief FW Team Utility function that sets the Row Repair Data.
@@ -62,21 +69,18 @@ fapi2::ReturnCode getRowRepair( const fapi2::Target
  * Row Repair Data setter procedure to set the data
  * for the specified rank.
  *
- * @param[in]  i_fapiTrgt Reference to MCA/MBA/MEM_PORT/OCMB_CHIP Target
- * @param[in]  i_dimm MCA/MBA port DIMM number
+ * @param[in]  i_fapiTrgt Reference to OCMB_CHIP Target
+ * @param[in]  i_dimm DIMM number
  * @param[in]  i_rank DIMM rank number
  * @param[out] i_data Reference to data where Row Repair Data is
- * @param[in]  i_port Optional port for MBA targets. Default is port 0.
  *
  * @return ReturnCode
  */
-fapi2::ReturnCode setRowRepair( const fapi2::Target
-    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|
-     fapi2::TARGET_TYPE_MEM_PORT|fapi2::TARGET_TYPE_OCMB_CHIP> & i_fapiTrgt,
+fapi2::ReturnCode setRowRepair(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> & i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
-    uint8_t (&i_data)[mss::ROW_REPAIR_BYTE_COUNT],
-    const uint8_t i_port = 0 );
+    uint8_t (&i_data)[mss::ROW_REPAIR_BYTE_COUNT]);
 
 }
 

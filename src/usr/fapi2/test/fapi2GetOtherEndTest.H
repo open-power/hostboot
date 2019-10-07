@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,32 +55,32 @@ void test_fapi2GetOtherEnd()
         // Create a vector of TARGETING::Target pointers
         TARGETING::TargetHandleList chipListNonFunct;
 
-        // Get a list of all of the xbus chips present
+        // Get a list of all of the iohs chiplets present
         TARGETING::getChipletResources(chipListNonFunct,
-                                      TARGETING::TYPE_XBUS,
+                                      TARGETING::TYPE_IOHS,
                                       TARGETING::UTIL_FILTER_PRESENT_NON_FUNCTIONAL);
 
         FAPI_INF("list of present non-functional targets is size %d " , chipListNonFunct.size());
-        TARGETING::Target * l_peerTarget;
-        fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapi2_xbusTargetPeer;
+        TARGETING::Target * l_peerTarget = nullptr;
+        fapi2::Target<fapi2::TARGET_TYPE_IOHS> fapi2_iohsTargetPeer;
         for(uint32_t i = 0; i < chipListNonFunct.size(); i++)
         {
             chipListNonFunct[i]->
             tryGetAttr<TARGETING::ATTR_PEER_TARGET>(l_peerTarget);
-            const fapi2::Target<fapi2::TARGET_TYPE_XBUS>
-                            fapi2_xbusTargetPeerPlatform(l_peerTarget);
-            const fapi2::Target<fapi2::TARGET_TYPE_XBUS>
-                            fapi2_xbusTarget(chipListNonFunct[i]);
+            const fapi2::Target<fapi2::TARGET_TYPE_IOHS>
+                            fapi2_iohsTargetPeerPlatform(l_peerTarget);
+            const fapi2::Target<fapi2::TARGET_TYPE_IOHS>
+                            fapi2_iohsTarget(chipListNonFunct[i]);
 
             //Only check try to get the target's other end if the other end is present as well
             if(l_peerTarget && l_peerTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().present)
             {
                 numTests++;
-                if(fapi2_xbusTarget.getOtherEnd<TARGET_TYPE_XBUS>(fapi2_xbusTargetPeer,TARGET_STATE_PRESENT) == FAPI2_RC_SUCCESS)
+                if(fapi2_iohsTarget.getOtherEnd<TARGET_TYPE_IOHS>(fapi2_iohsTargetPeer,TARGET_STATE_PRESENT) == FAPI2_RC_SUCCESS)
                 {
-                    if(fapi2_xbusTargetPeerPlatform != fapi2_xbusTargetPeer)
+                    if(fapi2_iohsTargetPeerPlatform != fapi2_iohsTargetPeer)
                     {
-                        TS_FAIL("fapiGetOtherEnd::test 1 getOtherEnd returned the incorrect target! expected %x, instead got %x ", TARGETING::get_huid(l_peerTarget),  TARGETING::get_huid(static_cast<TARGETING::Target*>(fapi2_xbusTargetPeer)));
+                        TS_FAIL("fapiGetOtherEnd::test 1 getOtherEnd returned the incorrect target! expected %x, instead got %x ", TARGETING::get_huid(l_peerTarget),  TARGETING::get_huid(fapi2_iohsTargetPeer.get()));
                         numFails++;
                         break;
                     }
@@ -101,8 +101,8 @@ void test_fapi2GetOtherEnd()
         // Create a vector of TARGETING::Target pointers
         TARGETING::TargetHandleList chipListFunct;
 
-        // Get a list of all of the xbus chips that are functional
-        TARGETING::getAllChiplets(chipListFunct, TARGETING::TYPE_XBUS, true);
+        // Get a list of all of the iohs chiplets that are functional
+        TARGETING::getAllChiplets(chipListFunct, TARGETING::TYPE_IOHS, true);
 
         //NOTE: This Part of the test will fail if a certain target A's
         //      PEER_TARGET attr doesn't point to target B that
@@ -116,19 +116,19 @@ void test_fapi2GetOtherEnd()
         for(uint32_t i = 0; i < chipListFunct.size(); i++)
         {
             chipListFunct[i]->tryGetAttr<TARGETING::ATTR_PEER_TARGET>(l_peerTarget);
-            const fapi2::Target<fapi2::TARGET_TYPE_XBUS>
-                    fapi2_xbusTargetPeerPlatform(l_peerTarget);
-            const fapi2::Target<fapi2::TARGET_TYPE_XBUS>
-                    fapi2_xbusTarget(chipListFunct[i]);
+            const fapi2::Target<fapi2::TARGET_TYPE_IOHS>
+                    fapi2_iohsTargetPeerPlatform(l_peerTarget);
+            const fapi2::Target<fapi2::TARGET_TYPE_IOHS>
+                    fapi2_iohsTarget(chipListFunct[i]);
 
             if(l_peerTarget && l_peerTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
             {
                 numTests++;
-                if(fapi2_xbusTarget.getOtherEnd<TARGET_TYPE_XBUS>(fapi2_xbusTargetPeer,TARGET_STATE_FUNCTIONAL) == FAPI2_RC_SUCCESS)
+                if(fapi2_iohsTarget.getOtherEnd<TARGET_TYPE_IOHS>(fapi2_iohsTargetPeer,TARGET_STATE_FUNCTIONAL) == FAPI2_RC_SUCCESS)
                 {
-                    if(fapi2_xbusTargetPeerPlatform != fapi2_xbusTargetPeer)
+                    if(fapi2_iohsTargetPeerPlatform != fapi2_iohsTargetPeer)
                     {
-                        TS_FAIL("fapiGetOtherEnd::test 3 getOtherEnd returned the incorrect target! expected %x, instead got %x ", TARGETING::get_huid(l_peerTarget),  TARGETING::get_huid(static_cast<TARGETING::Target*>(fapi2_xbusTargetPeer)));
+                        TS_FAIL("fapiGetOtherEnd::test 3 getOtherEnd returned the incorrect target! expected %x, instead got %x ", TARGETING::get_huid(l_peerTarget),  TARGETING::get_huid(fapi2_iohsTargetPeer.get()));
                         numFails++;
                         break;
                     }

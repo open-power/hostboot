@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/fapi2/test/p9_mmiotests.C $                           */
+/* $Source: src/usr/fapi2/test/p10_mmiotests.C $                          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 //------------------------------------------------------------------------------
-/// @file  p9_mmiotests.C
+/// @file  p10_mmiotests.C
 ///
 /// @brief These procedures test the fapi2 mmio_access interfaces.
 //-----------------------------------------------------------------------------
@@ -37,11 +37,11 @@
 #include <sbe/sbe_common.H>
 
 
-fapi2::ReturnCode p9_mmiotest_getmmio_invalid_target(
+fapi2::ReturnCode p10_mmiotest_getmmio_invalid_target(
                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     // This will fail because PROC_CHIP not supported type
-    FAPI_INF("Entering p9_mmiotest_getmmio_invalid_target...");
+    FAPI_INF("Entering p10_mmiotest_getmmio_invalid_target...");
 
     std::vector<uint8_t> l_mmiodata;
     l_mmiodata.resize(8);
@@ -53,18 +53,18 @@ fapi2::ReturnCode p9_mmiotest_getmmio_invalid_target(
                             l_mmiodata));
  fapi_try_exit:
 
-    FAPI_INF("Exiting p9_mmiotest_getmmio_invalid_target...");
+    FAPI_INF("Exiting p10_mmiotest_getmmio_invalid_target...");
 
     return fapi2::current_err;
 
 }
 
 
-fapi2::ReturnCode p9_mmiotest_putmmio_invalid_target(
+fapi2::ReturnCode p10_mmiotest_putmmio_invalid_target(
                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     // This will fail because PROC_CHIP not supported type
-    FAPI_INF("Entering p9_mmiotest_putmmio_invalid_target...");
+    FAPI_INF("Entering p10_mmiotest_putmmio_invalid_target...");
 
     std::vector<uint8_t> l_mmiodata;
     l_mmiodata.push_back(1);
@@ -81,7 +81,7 @@ fapi2::ReturnCode p9_mmiotest_putmmio_invalid_target(
 
  fapi_try_exit:
 
-    FAPI_INF( "Exiting p9_mmiotest_putmmio_invalid_target... rc = 0x%.8X",
+    FAPI_INF( "Exiting p10_mmiotest_putmmio_invalid_target... rc = 0x%.8X",
               (uint64_t)fapi2::current_err );
 
     return fapi2::current_err;
@@ -89,11 +89,11 @@ fapi2::ReturnCode p9_mmiotest_putmmio_invalid_target(
 }
 
 
-fapi2::ReturnCode p9_mmiotest_indivisible_by_section_size(
+fapi2::ReturnCode p10_mmiotest_indivisible_by_section_size(
                fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
     // This will fail because data can not be divided evenly among multiple section size transfers
-    FAPI_INF("Entering p9_mmiotest_indivisible_by_section_size...");
+    FAPI_INF("Entering p10_mmiotest_indivisible_by_section_size...");
 
     std::vector<uint8_t> l_mmiodata;
     l_mmiodata.resize(10);
@@ -105,18 +105,18 @@ fapi2::ReturnCode p9_mmiotest_indivisible_by_section_size(
                             l_mmiodata));
  fapi_try_exit:
 
-    FAPI_INF("Exiting p9_mmiotest_indivisible_by_section_size...");
+    FAPI_INF("Exiting p10_mmiotest_indivisible_by_section_size...");
 
     return fapi2::current_err;
 
 }
 
 
-fapi2::ReturnCode p9_mmiotest_invalid_section_size(
+fapi2::ReturnCode p10_mmiotest_invalid_section_size(
                fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
     // This will fail because an invalid section transfer size is being requested
-    FAPI_INF("Entering p9_mmiotest_invalid_section_size...");
+    FAPI_INF("Entering p10_mmiotest_invalid_section_size...");
 
     std::vector<uint8_t> l_mmiodata;
     l_mmiodata.resize(12);
@@ -128,7 +128,7 @@ fapi2::ReturnCode p9_mmiotest_invalid_section_size(
                             l_mmiodata));
  fapi_try_exit:
 
-    FAPI_INF("Exiting p9_mmiotest_invalid_section_size...");
+    FAPI_INF("Exiting p10_mmiotest_invalid_section_size...");
 
     return fapi2::current_err;
 
@@ -137,12 +137,12 @@ fapi2::ReturnCode p9_mmiotest_invalid_section_size(
 ////////////////////////////////////////////////////////////////////////////////
 //
 ////////////////////////////////////////////////////////////////////////////////
-fapi2::ReturnCode p9_mmiotest_getmmio_pass(
+fapi2::ReturnCode p10_mmiotest_getmmio_pass(
                fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
     std::vector<uint8_t> l_mmiodata;
 
-    FAPI_INF("Entering p9_mmiotest_getmmio_pass...");
+    FAPI_INF("Entering p10_mmiotest_getmmio_pass...");
 
     const size_t l_mmiodataSize = 4;
     l_mmiodata.resize(l_mmiodataSize); // do a single mmio transaction
@@ -163,20 +163,20 @@ fapi2::ReturnCode p9_mmiotest_getmmio_pass(
 
  fapi_try_exit:
 
-    FAPI_INF("Exiting p9_mmiotest_getmmio_pass...");
+    FAPI_INF("Exiting p10_mmiotest_getmmio_pass...");
 
     return fapi2::current_err;
 
 }
 
 
-fapi2::ReturnCode p9_mmiotest_double_read_pass(
+fapi2::ReturnCode p10_mmiotest_double_read_pass(
                fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
     std::vector<uint8_t> l_1st_read;
     std::vector<uint8_t> l_2nd_read;
 
-    FAPI_INF("Entering p9_mmiotest_double_read_pass...");
+    FAPI_INF("Entering p10_mmiotest_double_read_pass...");
 
     const size_t l_mmioTransactionSize = 4;
     l_1st_read.resize(4);
@@ -210,16 +210,16 @@ fapi2::ReturnCode p9_mmiotest_double_read_pass(
 
  fapi_try_exit:
 
-    FAPI_INF("Exiting p9_mmiotest_double_read_pass...");
+    FAPI_INF("Exiting p10_mmiotest_double_read_pass...");
 
     return fapi2::current_err;
 }
 
 
-fapi2::ReturnCode p9_mmiotest_putmmio_pass(
+fapi2::ReturnCode p10_mmiotest_putmmio_pass(
                fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
-    FAPI_INF("Entering p9_mmiotest_putmmio_pass...");
+    FAPI_INF("Entering p10_mmiotest_putmmio_pass...");
 
     std::vector<uint8_t> l_mmiodata;
     l_mmiodata.push_back('P');
@@ -242,16 +242,16 @@ fapi2::ReturnCode p9_mmiotest_putmmio_pass(
                             l_mmiodata));
  fapi_try_exit:
 
-    FAPI_INF("Exiting p9_mmiotest_putmmio_pass...");
+    FAPI_INF("Exiting p10_mmiotest_putmmio_pass...");
 
     return fapi2::current_err;
 }
 
 
-fapi2::ReturnCode p9_mmiotest_write_read_pass(
+fapi2::ReturnCode p10_mmiotest_write_read_pass(
                fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
-    FAPI_INF("Entering p9_mmiotest_write_read_pass...");
+    FAPI_INF("Entering p10_mmiotest_write_read_pass...");
 
     const size_t l_mmioTransactionSize = 4;
     std::vector<uint8_t> l_mmio_data;
@@ -293,7 +293,7 @@ fapi2::ReturnCode p9_mmiotest_write_read_pass(
 
  fapi_try_exit:
 
-    FAPI_INF("Exiting p9_mmiotest_write_read_pass...");
+    FAPI_INF("Exiting p10_mmiotest_write_read_pass...");
 
     return fapi2::current_err;
 }

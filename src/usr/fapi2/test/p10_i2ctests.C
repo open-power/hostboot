@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/fapi2/test/p9_i2ctests.C $                            */
+/* $Source: src/usr/fapi2/test/p10_i2ctests.C $                           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 //------------------------------------------------------------------------------
-/// @file  p9_i2ctests.C
+/// @file  p10_i2ctests.C
 ///
 /// @brief These procedures test the fapi2 i2c_access interfaces.
 //-----------------------------------------------------------------------------
@@ -36,7 +36,7 @@
 #include <sbe/sbe_common.H>
 
 
-fapi2::ReturnCode p9_i2ctest_geti2c_fail(
+fapi2::ReturnCode p10_i2ctest_geti2c_fail(
                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     // This will fail because PROC_CHIP not supported type
@@ -45,7 +45,7 @@ fapi2::ReturnCode p9_i2ctest_geti2c_fail(
     l_cfgData.push_back(0);
     l_cfgData.push_back(1);
 
-    FAPI_INF("Entering p9_i2ctest_geti2c_fail...");
+    FAPI_INF("Entering p10_i2ctest_geti2c_fail...");
 
     FAPI_INF("Do getI2c on a proc target for 10 bytes");
     FAPI_TRY(fapi2::getI2c(i_target,
@@ -54,17 +54,17 @@ fapi2::ReturnCode p9_i2ctest_geti2c_fail(
                            l_i2cdata));
  fapi_try_exit:
 
-    FAPI_INF("Exiting p9_i2ctest_geti2c_fail...");
+    FAPI_INF("Exiting p10_i2ctest_geti2c_fail...");
 
     return fapi2::current_err;
 
 }
 
-fapi2::ReturnCode p9_i2ctest_puti2c_fail(
+fapi2::ReturnCode p10_i2ctest_puti2c_fail(
                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     // This will fail because PROC_CHIP not supported type
-    FAPI_INF("Entering p9_i2ctest_puti2c_fail...");
+    FAPI_INF("Entering p10_i2ctest_puti2c_fail...");
 
     std::vector<uint8_t> l_i2cdata;
     l_i2cdata.push_back(1);
@@ -80,7 +80,7 @@ fapi2::ReturnCode p9_i2ctest_puti2c_fail(
 
  fapi_try_exit:
 
-    FAPI_INF( "Exiting p9_i2ctest_puti2c_fail... rc = 0x%.8X",
+    FAPI_INF( "Exiting p10_i2ctest_puti2c_fail... rc = 0x%.8X",
               (uint64_t)fapi2::current_err );
 
     return fapi2::current_err;
@@ -91,13 +91,13 @@ fapi2::ReturnCode p9_i2ctest_puti2c_fail(
 // @todo RTC:198116 -- Need to update testcases to use OCMB target instead of PROC
 // Also update FAPI_I2C_CONTROL_INFO attribute on OCMB target
 ////////////////////////////////////////////////////////////////////////////////
-fapi2::ReturnCode p9_i2ctest_geti2c_pass(
+fapi2::ReturnCode p10_i2ctest_geti2c_pass(
                fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
     std::vector<uint8_t> l_i2cdata;
     std::vector<uint8_t> l_cfgData;
 
-    FAPI_INF("Entering p9_i2ctest_geti2c_pass...");
+    FAPI_INF("Entering p10_i2ctest_geti2c_pass...");
 /*
     const size_t l_i2cdataSize = 4;
     FAPI_INF("Do getI2c on a proc target");
@@ -108,14 +108,14 @@ fapi2::ReturnCode p9_i2ctest_geti2c_pass(
 
  fapi_try_exit:
 */
-    FAPI_INF("Exiting p9_i2ctest_geti2c_pass...");
+    FAPI_INF("Exiting p10_i2ctest_geti2c_pass...");
 
     return fapi2::current_err;
 
 }
 
 
-fapi2::ReturnCode p9_i2ctest_double_read_pass(
+fapi2::ReturnCode p10_i2ctest_double_read_pass(
                fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
 /*
@@ -123,7 +123,7 @@ fapi2::ReturnCode p9_i2ctest_double_read_pass(
     std::vector<uint8_t> l_1st_read;
     std::vector<uint8_t> l_2nd_read;
 
-    FAPI_INF("Entering p9_i2ctest_double_read_pass...");
+    FAPI_INF("Entering p10_i2ctest_double_read_pass...");
 
     const size_t l_expectedReadSize = sizeof(SBE::sbeSeepromVersionInfo_t);
     l_cfgData.push_back(0xFE);
@@ -157,16 +157,16 @@ fapi2::ReturnCode p9_i2ctest_double_read_pass(
 
  fapi_try_exit:
 */
-    FAPI_INF("Exiting p9_i2ctest_double_read_pass...");
+    FAPI_INF("Exiting p10_i2ctest_double_read_pass...");
 
     return fapi2::current_err;
 }
 
 
-fapi2::ReturnCode p9_i2ctest_puti2c_pass(
+fapi2::ReturnCode p10_i2ctest_puti2c_pass(
                fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
-    FAPI_INF("Entering p9_i2ctest_puti2c_pass...");
+    FAPI_INF("Entering p10_i2ctest_puti2c_pass...");
 /*
     std::vector<uint8_t> l_i2cdata;
 
@@ -193,16 +193,16 @@ fapi2::ReturnCode p9_i2ctest_puti2c_pass(
                            l_i2cdata));
  fapi_try_exit:
 */
-    FAPI_INF("Exiting p9_i2ctest_puti2c_pass...");
+    FAPI_INF("Exiting p10_i2ctest_puti2c_pass...");
 
     return fapi2::current_err;
 }
 
 
-fapi2::ReturnCode p9_i2ctest_write_read_pass(
+fapi2::ReturnCode p10_i2ctest_write_read_pass(
                fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
-    FAPI_INF("Entering p9_i2ctest_write_read_pass...");
+    FAPI_INF("Entering p10_i2ctest_write_read_pass...");
 /*
     std::vector<uint8_t> l_i2cdata;
     std::vector<uint8_t> l_read_i2cdata;
@@ -245,7 +245,7 @@ fapi2::ReturnCode p9_i2ctest_write_read_pass(
 
  fapi_try_exit:
 */
-    FAPI_INF("Exiting p9_i2ctest_write_read_pass...");
+    FAPI_INF("Exiting p10_i2ctest_write_read_pass...");
 
     return fapi2::current_err;
 }

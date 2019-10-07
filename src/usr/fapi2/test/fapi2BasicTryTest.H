@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,7 +26,7 @@
 #include <fapi2/plat_hwp_invoker.H>
 
 //--------------------------------------------------------------------------
-/// @file  p9_basicTry.C
+/// @file  fapi2BasicTryTest.H
 ///
 /// @brief This does tests of the FAPI try and FAPI assert MACROs without
 ///        needing full ReturnCode support.
@@ -41,20 +41,20 @@ class Fapi2BasicTryTest : public CxxTest::TestSuite
 
     // This is the basic function that allows us to set a return code
     // that we can use for  FAPI_TRY macro testing.
-    uint32_t  p9_forceTestUsingRc( uint32_t  i_rc )
+    uint32_t  p10_forceTestUsingRc( uint32_t  i_rc )
     {
-        FAPI_INF("p9_forceTestUsingRc  with RC = %d", i_rc );
+        FAPI_INF("p10_forceTestUsingRc  with RC = %d", i_rc );
 
         return(i_rc);
     }
 
 
     // Force a bad RC and see if FAPI_TRY will do the goto exit
-    fapi2::ReturnCode  p9_fapi_tryFailure(  )
+    fapi2::ReturnCode  p10_fapi_tryFailure(  )
     {
 
         FAPI_INF("Go for BAD TEST ");
-        FAPI_TRY( p9_forceTestUsingRc(0xFF) );
+        FAPI_TRY( p10_forceTestUsingRc(0xFF) );
 
         // Should never get here since we failed routine above
         // Hence, I want to fail testcase if we do
@@ -73,7 +73,7 @@ class Fapi2BasicTryTest : public CxxTest::TestSuite
 
 
     // Force the FAPI_ASSERT to fail and verify it will goto exit
-    fapi2::ReturnCode  p9_fapi_assertFailure(  )
+    fapi2::ReturnCode  p10_fapi_assertFailure(  )
     {
 
 
@@ -100,12 +100,12 @@ class Fapi2BasicTryTest : public CxxTest::TestSuite
     // FAPI_TRY with good RC so we should run thru all code.
     // If it doesn't work, we should have non-zero RC which
     // forces testcase failure.
-    fapi2::ReturnCode  p9_fapi_trySuccess(  )
+    fapi2::ReturnCode  p10_fapi_trySuccess(  )
     {
         fapi2::current_err = 0xFFFF;
 
         FAPI_INF("Go for GOOD TEST ");
-        FAPI_TRY( p9_forceTestUsingRc(0) );
+        FAPI_TRY( p10_forceTestUsingRc(0) );
         FAPI_INF("Completed GOOD TEST with CURRENT_ERROR: %d",
                 (uint64_t)(fapi2::current_err) );
         fapi2::current_err = 0;
@@ -120,7 +120,7 @@ class Fapi2BasicTryTest : public CxxTest::TestSuite
     // FAPI_ASSERT should succeed and run thru all code.
     // If it doesn't work, we should have non-zero RC which
     // forces testcase failure.
-    fapi2::ReturnCode  p9_fapi_assertSuccess(  )
+    fapi2::ReturnCode  p10_fapi_assertSuccess(  )
     {
         fapi2::current_err = 0xFFFF;
 
@@ -153,38 +153,38 @@ class Fapi2BasicTryTest : public CxxTest::TestSuite
         FAPI_INF("fapi2basicTry starting ... ");
 
         numTests++;
-        FAPI_INVOKE_HWP_RC(l_err,l_rc,p9_fapi_tryFailure);
+        FAPI_INVOKE_HWP_RC(l_err,l_rc,p10_fapi_tryFailure);
         if ( true == (bool)l_rc )
         {
             numFails++;
-            TS_FAIL(" p9_fapi_tryFailure returned error");
+            TS_FAIL(" p10_fapi_tryFailure returned error");
         }
         if( l_err ) { delete l_err; }
 
         numTests++;
-        FAPI_INVOKE_HWP_RC(l_err,l_rc,p9_fapi_assertFailure);
+        FAPI_INVOKE_HWP_RC(l_err,l_rc,p10_fapi_assertFailure);
         if ( true == (bool)l_rc )
         {
             numFails++;
-            TS_FAIL(" p9_fapi_assertFailure returned error");
+            TS_FAIL(" p10_fapi_assertFailure returned error");
         }
         if( l_err ) { delete l_err; }
 
         numTests++;
-        FAPI_INVOKE_HWP_RC(l_err,l_rc,p9_fapi_trySuccess);
+        FAPI_INVOKE_HWP_RC(l_err,l_rc,p10_fapi_trySuccess);
         if ( true == (bool)l_rc )
         {
             numFails++;
-            TS_FAIL(" p9_fapi_trySuccess returned error");
+            TS_FAIL(" p10_fapi_trySuccess returned error");
         }
         if( l_err ) { delete l_err; }
 
         numTests++;
-        FAPI_INVOKE_HWP_RC(l_err,l_rc,p9_fapi_assertSuccess);
+        FAPI_INVOKE_HWP_RC(l_err,l_rc,p10_fapi_assertSuccess);
         if ( true == (bool)l_rc )
         {
             numFails++;
-            TS_FAIL(" p9_fapi_assertSuccess returned error");
+            TS_FAIL(" p10_fapi_assertSuccess returned error");
         }
         if( l_err ) { delete l_err; }
 

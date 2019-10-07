@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,7 +36,7 @@
 #include <errl/errlentry.H>
 #include <fapi2.H>
 #include <fapi2TestUtils.H>
-#include <p9_mmiotests.H>
+#include <p10_mmiotests.H>
 #include <plat_hwp_invoker.H>
 #include <config.h>
 
@@ -66,7 +66,7 @@ void test_fapi2MmioInvalidTarget()
         Target<fapi2::TARGET_TYPE_PROC_CHIP> fapi2_procTarget( l_proc );
 
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_mmiotest_getmmio_invalid_target, fapi2_procTarget);
+        FAPI_INVOKE_HWP(l_errl, p10_mmiotest_getmmio_invalid_target, fapi2_procTarget);
         if(l_errl != nullptr)
         {
             delete l_errl; // delete expected error log
@@ -74,12 +74,12 @@ void test_fapi2MmioInvalidTarget()
         }
         else
         {
-            TS_FAIL("No error from p9_mmiotest_getmmio_invalid_target !!");
+            TS_FAIL("No error from p10_mmiotest_getmmio_invalid_target !!");
             numFails++;
         }
 
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_mmiotest_putmmio_invalid_target, fapi2_procTarget);
+        FAPI_INVOKE_HWP(l_errl, p10_mmiotest_putmmio_invalid_target, fapi2_procTarget);
         if(l_errl != nullptr)
         {
             delete l_errl; // delete expected error log
@@ -87,7 +87,7 @@ void test_fapi2MmioInvalidTarget()
         }
         else
         {
-            TS_FAIL("No error from p9_mmiotest_putmmio_invalid_target !!");
+            TS_FAIL("No error from p10_mmiotest_putmmio_invalid_target !!");
             numFails++;
         }
     }
@@ -115,7 +115,7 @@ void test_fapi2MmioInvalidSizes()
         Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapi2_ocmbTarget( l_ocmb );
 
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_mmiotest_indivisible_by_section_size, fapi2_ocmbTarget);
+        FAPI_INVOKE_HWP(l_errl, p10_mmiotest_indivisible_by_section_size, fapi2_ocmbTarget);
         if(l_errl != nullptr)
         {
             delete l_errl; // delete expected error log
@@ -123,12 +123,12 @@ void test_fapi2MmioInvalidSizes()
         }
         else
         {
-            TS_FAIL("No error from p9_mmiotest_indivisible_by_section_size !!");
+            TS_FAIL("No error from p10_mmiotest_indivisible_by_section_size !!");
             numFails++;
         }
 
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_mmiotest_invalid_section_size, fapi2_ocmbTarget);
+        FAPI_INVOKE_HWP(l_errl, p10_mmiotest_invalid_section_size, fapi2_ocmbTarget);
         if(l_errl != nullptr)
         {
             delete l_errl; // delete expected error log
@@ -136,7 +136,7 @@ void test_fapi2MmioInvalidSizes()
         }
         else
         {
-            TS_FAIL("No error from p9_mmiotest_invalid_section_size !!");
+            TS_FAIL("No error from p10_mmiotest_invalid_section_size !!");
             numFails++;
         }
     }
@@ -166,10 +166,10 @@ void test_fapi2MmioAccess()
         Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi2_target( l_ocmb );
 
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_mmiotest_getmmio_pass, l_fapi2_target);
+        FAPI_INVOKE_HWP(l_errl, p10_mmiotest_getmmio_pass, l_fapi2_target);
         if(l_errl)
         {
-            TS_FAIL("Error from p9_mmiotest_getmmio_pass !!");
+            TS_FAIL("Error from p10_mmiotest_getmmio_pass !!");
             numFails++;
             errlCommit(l_errl,FAPI2_COMP_ID);
             delete l_errl; // delete unexpected error log so we dont get
@@ -178,10 +178,10 @@ void test_fapi2MmioAccess()
         }
 
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_mmiotest_putmmio_pass, l_fapi2_target);
+        FAPI_INVOKE_HWP(l_errl, p10_mmiotest_putmmio_pass, l_fapi2_target);
         if(l_errl)
         {
-            TS_FAIL("Error from p9_mmiotest_putmmio_pass !!");
+            TS_FAIL("Error from p10_mmiotest_putmmio_pass !!");
             numFails++;
             errlCommit(l_errl,FAPI2_COMP_ID);
             delete l_errl; // delete unexpected error log so we dont get
@@ -190,10 +190,10 @@ void test_fapi2MmioAccess()
         }
 
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_mmiotest_double_read_pass, l_fapi2_target);
+        FAPI_INVOKE_HWP(l_errl, p10_mmiotest_double_read_pass, l_fapi2_target);
         if(l_errl)
         {
-            TS_FAIL("Error from p9_mmiotest_double_read_pass !!");
+            TS_FAIL("Error from p10_mmiotest_double_read_pass !!");
             numFails++;
             errlCommit(l_errl,FAPI2_COMP_ID);
             delete l_errl; // delete unexpected error log so we dont get
@@ -202,10 +202,10 @@ void test_fapi2MmioAccess()
         }
 
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_mmiotest_write_read_pass, l_fapi2_target);
+        FAPI_INVOKE_HWP(l_errl, p10_mmiotest_write_read_pass, l_fapi2_target);
         if(l_errl)
         {
-            TS_FAIL("Error from p9_mmiotest_write_read_pass !!");
+            TS_FAIL("Error from p10_mmiotest_write_read_pass !!");
             numFails++;
             errlCommit(l_errl,FAPI2_COMP_ID);
             delete l_errl; // delete unexpected error log so we dont get

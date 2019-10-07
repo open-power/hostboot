@@ -181,7 +181,6 @@ enum callOutPriority
 enum busTypeEnum
 {
     FSI_BUS_TYPE    = 1,
-    DMI_BUS_TYPE    = 2,
     A_BUS_TYPE      = 3,
     X_BUS_TYPE      = 4,
     I2C_BUS_TYPE    = 5,

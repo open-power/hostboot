@@ -42,6 +42,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/utils/shared/
 EXTRAINCDIR += ${HWP_PATH}
+EXTRAINCDIR += ${HWP_PATH_1}/hwp/memory/lib/freq
 EXTRAINCDIR += ${HWP_PATH_1}/hwp/memory/lib/rosetta_map
 EXTRAINCDIR += ${HWP_PATH_1}/hwp/perv
 EXTRAINCDIR += ${HWP_PATH_1}/hwp/pm
@@ -70,12 +71,11 @@ OBJS += target.o
 OBJS += plat_hw_access.o
 OBJS += plat_spd_access.o
 OBJS += plat_mvpd_access.o
-#OBJS += plat_mbvpd_access.o
 OBJS += plat_vpd_access.o
 #OBJS += plat_wof_access.o
-#OBJS += dimmBadDqBitmapFuncs.o
-#OBJS += rowRepairsFuncs.o
-#OBJS += plat_i2c_access.o
+OBJS += dimmBadDqBitmapFuncs.o
+OBJS += rowRepairsFuncs.o
+OBJS += plat_i2c_access.o
 OBJS += plat_mmio_access.o
 
 

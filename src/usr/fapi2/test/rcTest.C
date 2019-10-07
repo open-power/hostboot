@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -131,6 +131,12 @@ uint32_t rcTestDefaultConstructor()
 // rcTestReturnCodeCreator. Ensures that the ReturnCode creator reflects
 // the return code
 //******************************************************************************
+
+// FIXME RTC: 210975
+// RC_TEST_ERROR_A required, in p9 comes from src/import/chips/p9/procedures/
+// xml/error_info/proc_example_errors.xml
+// There's no equivalent file in ekb-p10 yet.
+#if 0
 uint32_t rcTestReturnCodeCreator()
 {
     uint32_t l_result = 0;
@@ -188,6 +194,7 @@ uint32_t rcTestReturnCodeCreator()
 
     return l_result;
 }
+#endif
 
 
 //******************************************************************************
@@ -517,7 +524,7 @@ uint32_t rcTestErrorInfo()
     // Add error information to the ReturnCode, the data is the same as that
     // produced by the fapiParseErrorInfo.pl script in fapiHwpErrorInfo.H
     const void * l_objects[] = {&l_ffdc, &l_target, &l_target2};
-    fapi2::ErrorInfoEntry l_entries[7];
+    fapi2::ErrorInfoEntry l_entries[6];
     l_entries[0].iv_type = fapi2::EI_TYPE_FFDC;
     l_entries[0].ffdc.iv_ffdcObjIndex = 0;
     l_entries[0].ffdc.iv_ffdcId = 0x22334455;
@@ -538,24 +545,16 @@ uint32_t rcTestErrorInfo()
     l_entries[3].target_cdg.iv_deconfigure = 1;
     l_entries[3].target_cdg.iv_gard = 0;
     l_entries[3].target_cdg.iv_calloutPriority = fapi2::CalloutPriorities::HIGH;
-    l_entries[4].iv_type = fapi2::EI_TYPE_CHILDREN_CDG;
-    l_entries[4].children_cdg.iv_parentObjIndex = 1;
-    l_entries[4].children_cdg.iv_callout = 0;
-    l_entries[4].children_cdg.iv_deconfigure = 1;
-    l_entries[4].children_cdg.iv_childType = fapi2::TARGET_TYPE_ABUS_ENDPOINT;
-    l_entries[4].children_cdg.iv_gard = 0;
-    l_entries[4].children_cdg.iv_calloutPriority =
-        fapi2::CalloutPriorities::HIGH;
+    l_entries[4].iv_type = fapi2::EI_TYPE_HW_CALLOUT;
+    l_entries[4].hw_callout.iv_hw = fapi2::HwCallouts::MEM_REF_CLOCK;
+    l_entries[4].hw_callout.iv_calloutPriority = fapi2::CalloutPriorities::LOW;
+    l_entries[4].hw_callout.iv_refObjIndex = 0xff;
     l_entries[5].iv_type = fapi2::EI_TYPE_HW_CALLOUT;
-    l_entries[5].hw_callout.iv_hw = fapi2::HwCallouts::MEM_REF_CLOCK;
+    l_entries[5].hw_callout.iv_hw = fapi2::HwCallouts::FLASH_CONTROLLER_PART;
     l_entries[5].hw_callout.iv_calloutPriority = fapi2::CalloutPriorities::LOW;
     l_entries[5].hw_callout.iv_refObjIndex = 0xff;
-    l_entries[6].iv_type = fapi2::EI_TYPE_HW_CALLOUT;
-    l_entries[6].hw_callout.iv_hw = fapi2::HwCallouts::FLASH_CONTROLLER_PART;
-    l_entries[6].hw_callout.iv_calloutPriority = fapi2::CalloutPriorities::LOW;
-    l_entries[6].hw_callout.iv_refObjIndex = 0xff;
 
-    l_rc.addErrorInfo(l_objects, l_entries, 7);
+    l_rc.addErrorInfo(l_objects, l_entries, 6);
 
     do
     {
@@ -604,7 +603,7 @@ uint32_t rcTestErrorInfo()
             l_result = 5;
             break;
         }
-        if (l_pErrInfo->iv_CDGs[0]->iv_target.get() != l_target)
+        if (l_pErrInfo->iv_CDGs[0]->iv_target != l_target)
         {
             FAPI_ERR("rcTestErrorInfo. CDG target mismatch");
             l_result = 6;
@@ -696,14 +695,14 @@ uint32_t rcTestErrorInfo()
             break;
         }
 
-        if (l_pErrInfo->iv_busCallouts[0]->iv_target1.get() != l_target)
+        if (l_pErrInfo->iv_busCallouts[0]->iv_target1 != l_target)
         {
             FAPI_ERR("rcTestErrorInfo. bus target mismatch 1");
             l_result = 17;
             break;
         }
 
-        if (l_pErrInfo->iv_busCallouts[0]->iv_target2.get() != l_target2)
+        if (l_pErrInfo->iv_busCallouts[0]->iv_target2 != l_target2)
         {
             FAPI_ERR("rcTestErrorInfo. bus target mismatch 2");
             l_result = 18;
@@ -719,57 +718,11 @@ uint32_t rcTestErrorInfo()
             break;
         }
 
-        if (l_pErrInfo->iv_childrenCDGs.size() != 1)
+        if (l_pErrInfo->iv_childrenCDGs.size() != 0)
         {
             FAPI_ERR("rcTestErrorInfo. %d children-cdgs",
                      l_pErrInfo->iv_childrenCDGs.size());
             l_result = 20;
-            break;
-        }
-
-        if (l_pErrInfo->iv_childrenCDGs[0]->iv_parent.get() != l_target)
-        {
-            FAPI_ERR("rcTestErrorInfo. parent chip mismatch");
-            l_result = 21;
-            break;
-        }
-
-        if (l_pErrInfo->iv_childrenCDGs[0]->iv_childType !=
-            fapi2::TARGET_TYPE_ABUS_ENDPOINT)
-        {
-            FAPI_ERR("rcTestErrorInfo. child type mismatch (0x%08x)",
-                     l_pErrInfo->iv_childrenCDGs[0]->iv_childType);
-            l_result = 22;
-            break;
-        }
-
-        if (l_pErrInfo->iv_childrenCDGs[0]->iv_calloutPriority !=
-            CalloutPriorities::HIGH)
-        {
-            FAPI_ERR("rcTestErrorInfo. child cdg priority mismatch (%d)",
-                     l_pErrInfo->iv_childrenCDGs[0]->iv_calloutPriority);
-            l_result = 23;
-            break;
-        }
-
-        if (l_pErrInfo->iv_childrenCDGs[0]->iv_callout != false)
-        {
-            FAPI_ERR("rcTestErrorInfo. child cdg callout set");
-            l_result = 24;
-            break;
-        }
-
-        if (l_pErrInfo->iv_childrenCDGs[0]->iv_deconfigure != true)
-        {
-            FAPI_ERR("rcTestErrorInfo. child cdg deconfigure not set");
-            l_result = 25;
-            break;
-        }
-
-        if (l_pErrInfo->iv_childrenCDGs[0]->iv_gard != false)
-        {
-            FAPI_ERR("rcTestErrorInfo. child cdg GARD set");
-            l_result = 26;
             break;
         }
 
@@ -871,7 +824,7 @@ uint32_t rcTestCopyConstructorwithErrorInfo()
             break;
         }
 
-        if (l_pErrInfo->iv_CDGs[0]->iv_target.get() != l_target)
+        if (l_pErrInfo->iv_CDGs[0]->iv_target != l_target)
         {
             FAPI_ERR("rcTestCopyConstructorwithErrorInfo. CDG target mismatch");
             l_result = 4;
@@ -969,7 +922,7 @@ uint32_t rcTestAssignmentOperatorwithErrorInfo()
             break;
         }
 
-        if (l_pErrInfo->iv_CDGs[0]->iv_target.get() != l_target)
+        if (l_pErrInfo->iv_CDGs[0]->iv_target != l_target)
         {
             FAPI_ERR("rcTestAssignmentOperatorwithErrorInfo. CDG target "
                         "mismatch");
@@ -1082,7 +1035,7 @@ uint32_t rcTestAddErrorInfo()
     // Add error information to the ReturnCode
     const void * l_objects[] = {&l_ffdc, &l_ffdc2, &l_target,
                                  &l_target2};
-    fapi2::ErrorInfoEntry l_entries[10];
+    fapi2::ErrorInfoEntry l_entries[8];
     l_entries[0].iv_type = fapi2::EI_TYPE_FFDC;
     l_entries[0].ffdc.iv_ffdcObjIndex = 0;
     l_entries[0].ffdc.iv_ffdcId = 0x22334455;
@@ -1124,24 +1077,8 @@ uint32_t rcTestAddErrorInfo()
     l_entries[7].bus_callout.iv_endpoint2ObjIndex = 3;
     l_entries[7].bus_callout.iv_calloutPriority =
                     fapi2::CalloutPriorities::HIGH;
-    l_entries[8].iv_type = fapi2::EI_TYPE_CHILDREN_CDG;
-    l_entries[8].children_cdg.iv_parentObjIndex = 2;
-    l_entries[8].children_cdg.iv_callout = 1;
-    l_entries[8].children_cdg.iv_deconfigure = 1;
-    l_entries[8].children_cdg.iv_childType = fapi2::TARGET_TYPE_ABUS_ENDPOINT;
-    l_entries[8].children_cdg.iv_gard = 0;
-    l_entries[8].children_cdg.iv_calloutPriority =
-        fapi2::CalloutPriorities::HIGH;
-    l_entries[9].iv_type = fapi2::EI_TYPE_CHILDREN_CDG;
-    l_entries[9].children_cdg.iv_parentObjIndex = 3;
-    l_entries[9].children_cdg.iv_callout = 1;
-    l_entries[9].children_cdg.iv_deconfigure = 0;
-    l_entries[9].children_cdg.iv_childType = fapi2::TARGET_TYPE_MBA_CHIPLET;
-    l_entries[9].children_cdg.iv_gard = 1;
-    l_entries[9].children_cdg.iv_calloutPriority =
-        fapi2::CalloutPriorities::MEDIUM;
 
-    l_rc.addErrorInfo(l_objects, l_entries, 10);
+    l_rc.addErrorInfo(l_objects, l_entries, 8);
 
     do
     {
@@ -1209,7 +1146,7 @@ uint32_t rcTestAddErrorInfo()
             break;
         }
 
-        if (l_pErrInfo->iv_CDGs[0]->iv_target.get() != l_target)
+        if (l_pErrInfo->iv_CDGs[0]->iv_target != l_target)
         {
             FAPI_ERR("rcTestAddErrorInfo. CDG[0] target mismatch");
             l_result = 8;
@@ -1245,7 +1182,7 @@ uint32_t rcTestAddErrorInfo()
             break;
         }
 
-        if (l_pErrInfo->iv_CDGs[1]->iv_target.get() != l_target2)
+        if (l_pErrInfo->iv_CDGs[1]->iv_target != l_target2)
         {
             FAPI_ERR("rcTestAddErrorInfo. CDG[1] target mismatch");
             l_result = 13;
@@ -1374,14 +1311,14 @@ uint32_t rcTestAddErrorInfo()
             break;
         }
 
-        if (l_pErrInfo->iv_busCallouts[0]->iv_target1.get() != l_target)
+        if (l_pErrInfo->iv_busCallouts[0]->iv_target1 != l_target)
         {
             FAPI_ERR("rcTestAddErrorInfo. bus target mismatch 1");
             l_result = 28;
             break;
         }
 
-        if (l_pErrInfo->iv_busCallouts[0]->iv_target2.get() != l_target2)
+        if (l_pErrInfo->iv_busCallouts[0]->iv_target2 != l_target2)
         {
             FAPI_ERR("rcTestAddErrorInfo. bus target mismatch 2");
             l_result = 29;
@@ -1397,14 +1334,14 @@ uint32_t rcTestAddErrorInfo()
             break;
         }
 
-        if (l_pErrInfo->iv_busCallouts[1]->iv_target1.get() != l_target)
+        if (l_pErrInfo->iv_busCallouts[1]->iv_target1 != l_target)
         {
             FAPI_ERR("rcTestAddErrorInfo. bus target mismatch 3");
             l_result = 31;
             break;
         }
 
-        if (l_pErrInfo->iv_busCallouts[1]->iv_target2.get() != l_target2)
+        if (l_pErrInfo->iv_busCallouts[1]->iv_target2 != l_target2)
         {
             FAPI_ERR("rcTestAddErrorInfo. bus target mismatch 4");
             l_result = 32;
@@ -1420,96 +1357,11 @@ uint32_t rcTestAddErrorInfo()
             break;
         }
 
-        if (l_pErrInfo->iv_childrenCDGs.size() != 2)
+        if (l_pErrInfo->iv_childrenCDGs.size() != 0)
         {
             FAPI_ERR("rcTestAddErrorInfo. %d children-cdgs",
                      l_pErrInfo->iv_childrenCDGs.size());
             l_result = 34;
-            break;
-        }
-
-        if (l_pErrInfo->iv_childrenCDGs[0]->iv_parent.get() != l_target)
-        {
-            FAPI_ERR("rcTestAddErrorInfo. parent chip mismatch 1");
-            l_result = 35;
-            break;
-        }
-
-        if (l_pErrInfo->iv_childrenCDGs[0]->iv_childType !=
-            fapi2::TARGET_TYPE_ABUS_ENDPOINT)
-        {
-            FAPI_ERR("rcTestAddErrorInfo. child type mismatch 1 (0x%08x)",
-                     l_pErrInfo->iv_childrenCDGs[0]->iv_childType);
-            l_result = 36;
-            break;
-        }
-
-        if (l_pErrInfo->iv_childrenCDGs[0]->iv_calloutPriority !=
-            CalloutPriorities::HIGH)
-        {
-            FAPI_ERR("rcTestAddErrorInfo. child cdg priority mismatch 1 (%d)",
-                     l_pErrInfo->iv_childrenCDGs[0]->iv_calloutPriority);
-            l_result = 37;
-            break;
-        }
-
-        if (l_pErrInfo->iv_childrenCDGs[0]->iv_callout != true)
-        {
-            FAPI_ERR("rcTestAddErrorInfo. child cdg callout not set 1");
-            l_result = 38;
-            break;
-        }
-
-        if (l_pErrInfo->iv_childrenCDGs[0]->iv_deconfigure != true)
-        {
-            FAPI_ERR("rcTestAddErrorInfo. child cdg deconfigure not set 1");
-            l_result = 39;
-            break;
-        }
-
-        if (l_pErrInfo->iv_childrenCDGs[0]->iv_gard != false)
-        {
-            FAPI_ERR("rcTestAddErrorInfo. child cdg GARD set 1");
-            l_result = 40;
-            break;
-        }
-
-        if (l_pErrInfo->iv_childrenCDGs[1]->iv_childType !=
-            fapi2::TARGET_TYPE_MBA_CHIPLET)
-        {
-            FAPI_ERR("rcTestAddErrorInfo. child type mismatch 2 (0x%08x)",
-                     l_pErrInfo->iv_childrenCDGs[1]->iv_childType);
-            l_result = 41;
-            break;
-        }
-
-        if (l_pErrInfo->iv_childrenCDGs[1]->iv_calloutPriority !=
-            CalloutPriorities::MEDIUM)
-        {
-            FAPI_ERR("rcTestAddErrorInfo. child cdg priority mismatch 2 (%d)",
-                     l_pErrInfo->iv_childrenCDGs[1]->iv_calloutPriority);
-            l_result = 42;
-            break;
-        }
-
-        if (l_pErrInfo->iv_childrenCDGs[1]->iv_callout != true)
-        {
-            FAPI_ERR("rcTestAddErrorInfo. child cdg callout not set 2");
-            l_result = 43;
-            break;
-        }
-
-        if (l_pErrInfo->iv_childrenCDGs[1]->iv_deconfigure != false)
-        {
-            FAPI_ERR("rcTestAddErrorInfo. child cdg deconfigure set 2");
-            l_result = 44;
-            break;
-        }
-
-        if (l_pErrInfo->iv_childrenCDGs[1]->iv_gard != true)
-        {
-            FAPI_ERR("rcTestAddErrorInfo. child cdg GARD not set 2");
-            l_result = 45;
             break;
         }
 
@@ -1673,7 +1525,11 @@ uint32_t rcTestRcToErrl()
 }
 #endif //fips
 
-
+// FIXME RTC: 210975
+// RC_TEST_ERROR_A required, in p9 comes from src/import/chips/p9/procedures/
+// xml/error_info/proc_example_errors.xml
+// There's no equivalent file in ekb-p10 yet.
+#if 0
 uint32_t rcTestReturnCodeAttrErrls()
 {
     uint32_t numTests = 0;
@@ -1707,30 +1563,30 @@ uint32_t rcTestReturnCodeAttrErrls()
 
 
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_ffdc_fail);
+        FAPI_INVOKE_HWP(l_errl, p10_ffdc_fail);
         if(l_errl != nullptr)
         {
-            FAPI_INF("p9_ffdc_fail returned errl");
+            FAPI_INF("p10_ffdc_fail returned errl");
             errlCommit(l_errl,CXXTEST_COMP_ID);
             l_errl = nullptr;
         }
         else
         {
-            TS_FAIL("No error from p9_ffdc_fail !!");
+            TS_FAIL("No error from p10_ffdc_fail !!");
             numFails++;
         }
 
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_procedureFfdc_fail);
+        FAPI_INVOKE_HWP(l_errl, p10_procedureFfdc_fail);
         if(l_errl != nullptr)
         {
-            FAPI_INF("p9_procedureFfdc_fail returned errl");
+            FAPI_INF("p10_procedureFfdc_fail returned errl");
             errlCommit(l_errl,CXXTEST_COMP_ID);
             l_errl = nullptr;
         }
         else
         {
-            TS_FAIL("No error from p9_procedureFfdc_fail !!");
+            TS_FAIL("No error from p10_procedureFfdc_fail !!");
             numFails++;
         }
 
@@ -1738,31 +1594,31 @@ uint32_t rcTestReturnCodeAttrErrls()
                 l_Proc);
 
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_registerFfdc_fail, fapi2_procTarget);
+        FAPI_INVOKE_HWP(l_errl, p10_registerFfdc_fail, fapi2_procTarget);
         if(l_errl != nullptr)
         {
-            FAPI_INF("p9_registerFfdc_fail returned errl");
+            FAPI_INF("p10_registerFfdc_fail returned errl");
             errlCommit(l_errl,CXXTEST_COMP_ID);
             l_errl = nullptr;
         }
         else
         {
-            TS_FAIL("No error from p9_registerFfdc_fail !!");
+            TS_FAIL("No error from p10_registerFfdc_fail !!");
             numFails++;
         }
 
         numTests++;
         fapi2::ReturnCode l_rc;
-        FAPI_INVOKE_HWP_RC(l_errl, l_rc, p9_registerFfdc_fail, fapi2_procTarget);
+        FAPI_INVOKE_HWP_RC(l_errl, l_rc, p10_registerFfdc_fail, fapi2_procTarget);
         if( (l_errl != nullptr) && (l_rc == (fapi2::ReturnCode)fapi2::RC_TEST_ERROR_A) )
         {
-            FAPI_INF("p9_registerFfdc_fail returned correct RC");
+            FAPI_INF("p10_registerFfdc_fail returned correct RC");
             delete l_errl;
             l_errl = nullptr;
         }
         else
         {
-            TS_FAIL("Wrong RC from p9_registerFfdc_fail !!");
+            TS_FAIL("Wrong RC from p10_registerFfdc_fail !!");
             numFails++;
         }
     } while (0);
@@ -1772,5 +1628,6 @@ uint32_t rcTestReturnCodeAttrErrls()
 
     return numFails;
 }
+#endif
 
 }

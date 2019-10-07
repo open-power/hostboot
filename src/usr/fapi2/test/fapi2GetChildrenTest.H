@@ -55,7 +55,6 @@ public:
             // Lambda function taking a pervasive target and returning the
             // number of children it has for a given FAPI type
             size_t (*actualSize)(Target<fapi2::TARGET_TYPE_PERV>&);
-
         };
 
 //******************************************************************************
@@ -76,53 +75,11 @@ void test_fapi2GetChildren()
 
         // Creates some vectors for later use
         std::vector<Target<fapi2::TARGET_TYPE_CORE> > l_childCores;
-        std::vector<Target<fapi2::TARGET_TYPE_MCA> > l_childMCAs;
         std::vector<Target<fapi2::TARGET_TYPE_EQ> > l_childEQs;
-        std::vector<Target<fapi2::TARGET_TYPE_EX> > l_childEXs;
-        std::vector<Target<fapi2::TARGET_TYPE_XBUS> > l_childXBUSs;
-        std::vector<Target<fapi2::TARGET_TYPE_DMI> > l_childDMIs;
+        std::vector<Target<fapi2::TARGET_TYPE_FC> > l_childFCs;
         std::vector<Target<fapi2::TARGET_TYPE_OMI> > l_childOMIs;
         std::vector<Target<fapi2::TARGET_TYPE_OCMB_CHIP> > l_childOCMBs;
         std::vector<Target<fapi2::TARGET_TYPE_MEM_PORT> > l_childMEMPORTs;
-
-
-        if (isHwValid(l_proc, MY_MCA)
-              && isHwValid(l_proc, MY_MCBIST)
-              && isHwValid(l_proc, MY_MCS))
-        {
-            l_childMCAs = fapi2_mcbistTarget.getChildren<fapi2::TARGET_TYPE_MCA>(TARGET_STATE_PRESENT);
-            l_targetHuid = TARGETING::get_huid(targeting_targets[MY_MCBIST]);
-            l_actualSize = l_childMCAs.size();
-
-            //Set expected size to be the number of MCAs per MCBIST
-            l_expectedSize = MCA_PER_MCS * MCS_PER_PROC / MCBIST_PER_PROC;
-            numTests++;
-            if(l_actualSize != l_expectedSize)
-            {
-                TS_FAIL("test_fapi2GetChildren:: MCAs per MCBIST mismatch");
-                numFails++;
-                break;
-            }
-        }
-
-        if (isHwValid(l_proc, MY_MC)
-              && isHwValid(l_proc, MY_MI)
-              && isHwValid(l_proc, MY_DMI))
-        {
-            l_childDMIs = fapi2_mcTarget.getChildren<fapi2::TARGET_TYPE_DMI>(TARGET_STATE_PRESENT);
-            l_targetHuid = TARGETING::get_huid(targeting_targets[MY_MC]);
-            l_actualSize = l_childDMIs.size();
-
-            //Set expected size to be the number of DMIs per MC
-            l_expectedSize = DMI_PER_MI * MI_PER_PROC / MC_PER_PROC;
-            numTests++;
-            if(l_actualSize != l_expectedSize)
-            {
-                TS_FAIL("test_fapi2GetChildren:: DMIs per MC mismatch");
-                numFails++;
-                break;
-            }
-        }
 
         if (isHwValid(l_proc, MY_MC)
             && isHwValid(l_proc, MY_MI)
@@ -149,7 +106,7 @@ void test_fapi2GetChildren()
         l_actualSize = l_childCores.size();
 
         //Set expected size to be the number of cores per proc
-        l_expectedSize = EQ_PER_PROC * EX_PER_EQ * CORE_PER_EX;
+        l_expectedSize = EQ_PER_PROC * FC_PER_EQ * CORE_PER_FC;
         numTests++;
         if(l_actualSize != l_expectedSize)
         {
@@ -173,44 +130,6 @@ void test_fapi2GetChildren()
             break;
         }
 
-        if (isHwValid(l_proc, MY_MCA)
-              && isHwValid(l_proc, MY_MCBIST)
-              && isHwValid(l_proc, MY_MCS))
-        {
-            l_childMCAs = fapi2_procTarget.getChildren<fapi2::TARGET_TYPE_MCA>(TARGET_STATE_PRESENT);
-            l_targetHuid = TARGETING::get_huid(l_proc) ;
-            l_actualSize = l_childMCAs.size();
-
-            //Set expected size to be the number of MCAs per proc
-            l_expectedSize = MCA_PER_MCS * MCS_PER_PROC;
-            numTests++;
-            if(l_actualSize != l_expectedSize)
-            {
-                TS_FAIL("test_fapi2GetChildren:: MCAs per proc mismatch");
-                numFails++;
-                break;
-            }
-        }
-
-        if (isHwValid(l_proc, MY_MC)
-              && isHwValid(l_proc, MY_MI)
-              && isHwValid(l_proc, MY_DMI))
-        {
-            l_childDMIs = fapi2_procTarget.getChildren<fapi2::TARGET_TYPE_DMI>(TARGET_STATE_PRESENT);
-            l_targetHuid = TARGETING::get_huid(l_proc);
-            l_actualSize = l_childDMIs.size();
-
-            //Set expected size to be the number of DMIs per proc
-            l_expectedSize = DMI_PER_MI * MI_PER_PROC;
-            numTests++;
-            if(l_actualSize != l_expectedSize)
-            {
-                TS_FAIL("test_fapi2GetChildren:: DMIs per proc mismatch");
-                numFails++;
-                break;
-            }
-        }
-
         if (isHwValid(l_proc, MY_MC)
             && isHwValid(l_proc, MY_MI)
             && isHwValid(l_proc, MY_MCC)
@@ -231,19 +150,18 @@ void test_fapi2GetChildren()
             }
         }
 
-        if (isHwValid(l_proc, MY_OMIC2)
+        if (isHwValid(l_proc, MY_MCC)
             && isHwValid(l_proc, MY_OMI))
         {
-            l_childOMIs = fapi2_omic2Target.getChildren<fapi2::TARGET_TYPE_OMI>(TARGET_STATE_PRESENT);
-            l_targetHuid = TARGETING::get_huid(targeting_targets[MY_OMIC2]);
+            l_childOMIs = fapi2_mccTarget.getChildren<fapi2::TARGET_TYPE_OMI>(TARGET_STATE_PRESENT);
+            l_targetHuid = TARGETING::get_huid(targeting_targets[MY_MCC]);
             l_actualSize = l_childOMIs.size();
 
-            // OMIC2 only has 2 OMIs (others have 3)
             l_expectedSize = 2;
             numTests++;
             if(l_actualSize != l_expectedSize)
             {
-                TS_FAIL("test_fapi2GetChildren:: # OMIs foound for OMIC0 proc is %d and not %d",
+                TS_FAIL("test_fapi2GetChildren:: # OMIs foound for MCC is %d and not %d",
                          l_actualSize, l_expectedSize);
                 numFails++;
                 break;
@@ -252,7 +170,7 @@ void test_fapi2GetChildren()
             bool l_foundme = false;
             for( auto omi : l_childOMIs )
             {
-                if( reinterpret_cast<TARGETING::Target*>(omi.get())
+                if( static_cast<TARGETING::Target*>(omi.get())
                     == targeting_targets[MY_OMI] )
                 {
                     l_foundme = true;
@@ -261,9 +179,9 @@ void test_fapi2GetChildren()
             }
             if( !l_foundme )
             {
-                TS_FAIL("OMI %.8X not found in child list for OMIC %.8X",
+                TS_FAIL("OMI %.8X not found in child list for MCC %.8X",
                         TARGETING::get_huid(targeting_targets[MY_OMI]),
-                        TARGETING::get_huid(targeting_targets[MY_OMIC2]));
+                        TARGETING::get_huid(targeting_targets[MY_MCC]));
             }
         }
 
@@ -304,16 +222,16 @@ void test_fapi2GetChildren()
         }
 
 
-        l_childCores = fapi2_exTarget.getChildren<fapi2::TARGET_TYPE_CORE>(TARGET_STATE_PRESENT);
-        l_targetHuid = TARGETING::get_huid(targeting_targets[MY_EX]) ;
+        l_childCores = fapi2_fcTarget.getChildren<fapi2::TARGET_TYPE_CORE>(TARGET_STATE_PRESENT);
+        l_targetHuid = TARGETING::get_huid(targeting_targets[MY_FC]) ;
         l_actualSize = l_childCores.size();
 
         //Set expected size to be the number of cores per ex
-        l_expectedSize = CORE_PER_EX;
+        l_expectedSize = CORE_PER_FC;
         numTests++;
         if(l_actualSize != l_expectedSize)
         {
-            TS_FAIL("test_fapi2GetChildren:: cores per EX mismatch");
+            TS_FAIL("test_fapi2GetChildren:: cores per FC mismatch");
             numFails++;
             break;
         }
@@ -324,7 +242,7 @@ void test_fapi2GetChildren()
         l_actualSize = l_childCores.size();
 
         //Set expected size to be the number of cores per eq
-        l_expectedSize = CORE_PER_EX * EX_PER_EQ;
+        l_expectedSize = CORE_PER_FC * FC_PER_EQ;
         numTests++;
         if(l_actualSize != l_expectedSize)
         {
@@ -334,17 +252,17 @@ void test_fapi2GetChildren()
         }
 
 
-        //Explicitly make sure getChildren for EX targets works
-        l_childEXs = fapi2_procTarget.getChildren<fapi2::TARGET_TYPE_EX>(TARGET_STATE_PRESENT);
+        //Explicitly make sure getChildren for FC targets works
+        l_childFCs = fapi2_procTarget.getChildren<fapi2::TARGET_TYPE_FC>(TARGET_STATE_PRESENT);
         l_targetHuid = TARGETING::get_huid(l_proc) ;
-        l_actualSize = l_childEXs.size();
+        l_actualSize = l_childFCs.size();
 
-        //Set expected size to be the number of Exs per proc
-        l_expectedSize = EQ_PER_PROC * EX_PER_EQ;
+        //Set expected size to be the number of Fcs per proc
+        l_expectedSize = EQ_PER_PROC * FC_PER_EQ;
         numTests++;
         if(l_actualSize != l_expectedSize)
         {
-            TS_FAIL("test_fapi2GetChildren:: EXs per proc mismatch");
+            TS_FAIL("test_fapi2GetChildren:: FCs per proc mismatch");
             numFails++;
             break;
         }
@@ -352,13 +270,7 @@ void test_fapi2GetChildren()
 
         // Test pervasive children
 
-        // Valid children for PERV:
-        // PERV -> EQ   // PERV -> CORE // PERV -> XBUS   // PERV -> OBUS
-        // PERV -> CAPP // PERV -> NV   // PERV -> MCBIST // PERV -> MCS
-        // PERV -> MCA  // PERV -> PEC  // PERV -> PHB    // PERV -> MI
-        // PERV -> DMI
-
-        static pervasiveChildTestRec nimbusPervasiveChildTests [] = {
+        static pervasiveChildTestRec p10PervasiveChildTests [] = {
 
             // EQ pervasive has 1 EQ child
             {PERV_EQ_CHILDREN,
@@ -366,72 +278,15 @@ void test_fapi2GetChildren()
                   { return ((i_unit >= EQ_LOW) && (i_unit <= EQ_HIGH)); },
              [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
                  { return i_perv.getChildren<fapi2::TARGET_TYPE_EQ>(
-                   TARGET_STATE_PRESENT).size(); } },
+                         TARGET_STATE_PRESENT).size(); } },
 
-            // CORE pervasive has 32 CORE child
+            // CORE pervasive has 4 CORE children
             {PERV_CORE_CHILDREN,
              [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
                  { return ((i_unit >= CORE_LOW) && (i_unit <= CORE_HIGH)); },
              [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
                  { return i_perv.getChildren<fapi2::TARGET_TYPE_CORE>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // XBUS pervasive has 1 XBUS children
-            {PERV_XBUS_NIMBUS_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return (i_unit == XBUS_RANGE); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                 { return i_perv.getChildren<fapi2::TARGET_TYPE_XBUS>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // OBUS pervasive has 3 OBUS child
-            {PERV_OBUS_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return ((i_unit >= OBUS_LOW) && (i_unit <= OBUS_HIGH)); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                 { return i_perv.getChildren<fapi2::TARGET_TYPE_OBUS>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // CAPP pervasive has 1 CAPP child
-            {PERV_CAPP_NIMBUS_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                { return ((i_unit == CAPP0_RANGE) || (i_unit == CAPP1_RANGE));},
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                 { return i_perv.getChildren<fapi2::TARGET_TYPE_CAPP>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // OBUS pervasive has 3 OBUS BRICK children
-            {PERV_OBUS_BRICK_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return ((i_unit >= OBUS_LOW) && (i_unit <= OBUS_HIGH)); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                  { return i_perv.getChildren<fapi2::TARGET_TYPE_OBUS_BRICK>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // MCBIST/MCS/MCA pervasive has 1 MCBIST child
-            {PERV_MCBIST_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return (   (i_unit >= MC_LOW)
-                            && (i_unit <= MC_HIGH)); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                  { return i_perv.getChildren<fapi2::TARGET_TYPE_MCBIST>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // MCBIST/MCS/MCA pervasive has 2 MCS children
-            {PERV_MCS_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return ((i_unit >= MC_LOW) && (i_unit <= MC_HIGH)); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                  { return i_perv.getChildren<fapi2::TARGET_TYPE_MCS>(
-                    TARGET_STATE_PRESENT).size(); } },
-
-            // MCBIST/MCS/MCA pervasive has 4 MCA children
-            {PERV_MCA_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return ((i_unit >= MC_LOW) && (i_unit <= MC_HIGH)); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                   { return i_perv.getChildren<fapi2::TARGET_TYPE_MCA>(
-                    TARGET_STATE_PRESENT).size(); } },
+                         TARGET_STATE_PRESENT).size(); } },
 
             // PEC/PHB pervasive has 1 PEC child
             {PERV_PEC_CHILDREN,
@@ -439,284 +294,87 @@ void test_fapi2GetChildren()
               { return ((i_unit >= PEC_LOW) && (i_unit <= PEC_HIGH)); },
              [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
                  { return i_perv.getChildren<fapi2::TARGET_TYPE_PEC>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // PEC/PHB pervasive with 1 PHB child
-            {PERV_PEC0_PHB_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return (i_unit == PEC_LOW); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                 { return i_perv.getChildren<fapi2::TARGET_TYPE_PHB>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // PEC/PHB pervasive with 2 PHB children
-            {PERV_PEC1_PHB_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return (i_unit == PEC_MID); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                 { return i_perv.getChildren<fapi2::TARGET_TYPE_PHB>(
-                   TARGET_STATE_PRESENT).size(); } },
+                         TARGET_STATE_PRESENT).size(); } },
 
             // PEC/PHB pervasive with 3 PHB children
-            {PERV_PEC2_PHB_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return (i_unit == PEC_HIGH); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                 { return i_perv.getChildren<fapi2::TARGET_TYPE_PHB>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // No MI or DMI units for Nimbus
-        };
-
-        static pervasiveChildTestRec cumulusPervasiveChildTests [] = {
-
-            // EQ pervasive has 1 EQ child
-            {PERV_EQ_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return ((i_unit >= EQ_LOW) && (i_unit <= EQ_HIGH)); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                 { return i_perv.getChildren<fapi2::TARGET_TYPE_EQ>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // CORE pervasive has 32 CORE child
-            {PERV_CORE_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                 { return ((i_unit >= CORE_LOW) && (i_unit <= CORE_HIGH)); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                 { return i_perv.getChildren<fapi2::TARGET_TYPE_CORE>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // XBUS pervasive has 1 XBUS children
-            {PERV_XBUS_CUMULUS_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return (i_unit == XBUS_RANGE); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                 { return i_perv.getChildren<fapi2::TARGET_TYPE_XBUS>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // OBUS pervasive has 3 OBUS child
-            {PERV_OBUS_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return ((i_unit >= OBUS_LOW) && (i_unit <= OBUS_HIGH)); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                 { return i_perv.getChildren<fapi2::TARGET_TYPE_OBUS>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // CAPP pervasive has 1 CAPP child
-            {PERV_CAPP_CUMULUS_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                { return ((i_unit == CAPP0_RANGE) || (i_unit == CAPP1_RANGE));},
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                 { return i_perv.getChildren<fapi2::TARGET_TYPE_CAPP>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // OBUS pervasive has 3 OBUS BRICK children
-            {PERV_OBUS_BRICK_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return ((i_unit >= OBUS_LOW) && (i_unit <= OBUS_HIGH)); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                  { return i_perv.getChildren<fapi2::TARGET_TYPE_OBUS_BRICK>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // PEC/PHB pervasive has 1 PEC child
-            {PERV_PEC_CHILDREN,
+            {PERV_PEC_PHB_CHILDREN,
              [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
               { return ((i_unit >= PEC_LOW) && (i_unit <= PEC_HIGH)); },
              [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                 { return i_perv.getChildren<fapi2::TARGET_TYPE_PEC>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // PEC/PHB pervasive with 1 PHB child
-            {PERV_PEC0_PHB_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return (i_unit == PEC_LOW); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
                  { return i_perv.getChildren<fapi2::TARGET_TYPE_PHB>(
-                   TARGET_STATE_PRESENT).size(); } },
+                         TARGET_STATE_PRESENT).size(); } },
 
-            // PEC/PHB pervasive with 2 PHB children
-            {PERV_PEC1_PHB_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return (i_unit == PEC_MID); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                 { return i_perv.getChildren<fapi2::TARGET_TYPE_PHB>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // PEC/PHB pervasive with 3 PHB children
-            {PERV_PEC2_PHB_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return (i_unit == PEC_HIGH); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                 { return i_perv.getChildren<fapi2::TARGET_TYPE_PHB>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // MC / MI / DMI pervasive has 1 MC Children
+            // MC / MI pervasive has 1 MC child
             {PERV_MC_CHILDREN,
              [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
                   { return (   (i_unit >= MC_LOW)
                             && (i_unit <= MC_HIGH)); },
              [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
                   { return i_perv.getChildren<fapi2::TARGET_TYPE_MC>(
-                   TARGET_STATE_PRESENT).size(); } },
+                          TARGET_STATE_PRESENT).size(); }  },
 
-            // MC / MI / DMI pervasive has 2 MI Children
+            // MC / MI pervasive has 1 MI child
             {PERV_MI_CHILDREN,
              [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
                   { return ((i_unit >= MC_LOW) && (i_unit <= MC_HIGH)); },
              [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
                   { return i_perv.getChildren<fapi2::TARGET_TYPE_MI>(
-                    TARGET_STATE_PRESENT).size(); } },
+                          TARGET_STATE_PRESENT).size(); } },
 
-            // MC / MI / DMI pervasive has 4 DMI children
-            {PERV_DMI_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return ((i_unit >= MC_LOW) && (i_unit <= MC_HIGH)); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                   { return i_perv.getChildren<fapi2::TARGET_TYPE_DMI>(
-                    TARGET_STATE_PRESENT).size(); } },
-        };
-
-        static pervasiveChildTestRec axonePervasiveChildTests [] = {
-
-            // EQ pervasive has 1 EQ child
-            {PERV_EQ_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return ((i_unit >= EQ_LOW) && (i_unit <= EQ_HIGH)); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                 { return i_perv.getChildren<fapi2::TARGET_TYPE_EQ>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // CORE pervasive has 32 children
-            {PERV_CORE_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                 { return ((i_unit >= CORE_LOW) && (i_unit <= CORE_HIGH)); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                 { return i_perv.getChildren<fapi2::TARGET_TYPE_CORE>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // XBUS pervasive has 1 XBUS children
-            {PERV_XBUS_CUMULUS_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return (i_unit == XBUS_RANGE); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                 { return i_perv.getChildren<fapi2::TARGET_TYPE_XBUS>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // OBUS pervasive has 3 OBUS child
-            {PERV_OBUS_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return ((i_unit >= OBUS_LOW) && (i_unit <= OBUS_HIGH)); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                 { return i_perv.getChildren<fapi2::TARGET_TYPE_OBUS>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // CAPP pervasive has 1 CAPP child
-            {PERV_CAPP_CUMULUS_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                { return ((i_unit == CAPP0_RANGE) || (i_unit == CAPP1_RANGE));},
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                 { return i_perv.getChildren<fapi2::TARGET_TYPE_CAPP>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // OBUS pervasive has 3 OBUS BRICK children
-            {PERV_OBUS_BRICK_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return ((i_unit >= OBUS_LOW) && (i_unit <= OBUS_HIGH)); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                  { return i_perv.getChildren<fapi2::TARGET_TYPE_OBUS_BRICK>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // PEC/PHB pervasive has 3 PEC child
-            {PERV_PEC_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-              { return ((i_unit >= PEC_LOW) && (i_unit <= PEC_HIGH)); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                 { return i_perv.getChildren<fapi2::TARGET_TYPE_PEC>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // PEC/PHB pervasive with 1 PHB child
-            {PERV_PEC0_PHB_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return (i_unit == PEC_LOW); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                 { return i_perv.getChildren<fapi2::TARGET_TYPE_PHB>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // PEC/PHB pervasive with 2 PHB children
-            {PERV_PEC1_PHB_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return (i_unit == PEC_MID); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                 { return i_perv.getChildren<fapi2::TARGET_TYPE_PHB>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // PEC/PHB pervasive with 3 PHB children
-            {PERV_PEC2_PHB_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return (i_unit == PEC_HIGH); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                 { return i_perv.getChildren<fapi2::TARGET_TYPE_PHB>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // MC / MI / DMI pervasive has 1 MC Children
-            {PERV_MC_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return (   (i_unit >= MC_LOW)
-                            && (i_unit <= MC_HIGH)); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                  { return i_perv.getChildren<fapi2::TARGET_TYPE_MC>(
-                   TARGET_STATE_PRESENT).size(); } },
-
-            // MC / MI / DMI pervasive has 2 MI Children
-            {PERV_MI_CHILDREN,
-             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return ((i_unit >= MC_LOW) && (i_unit <= MC_HIGH)); },
-             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
-                  { return i_perv.getChildren<fapi2::TARGET_TYPE_MI>(
-                    TARGET_STATE_PRESENT).size(); } },
-
-            // MC / MI / MCC / OMI pervasive has 4 MCC children
-            {PERV_OCC_CHILDREN,
+            // MC pervasive has 2 MI children
+            {PERV_MCC_CHILDREN,
              [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
                   { return ((i_unit >= MC_LOW) && (i_unit <= MC_HIGH)); },
              [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
                    { return i_perv.getChildren<fapi2::TARGET_TYPE_MCC>(
-                    TARGET_STATE_PRESENT).size(); } },
+                           TARGET_STATE_PRESENT).size(); }  },
 
-            // MC / MI / MCC / OMI pervasive has 8 OMI children
+            // MC / MI / MCC / OMI pervasive has 4 OMI children
             {PERV_OMI_CHILDREN,
              [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
                   { return ((i_unit >= MC_LOW) && (i_unit <= MC_HIGH)); },
              [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
                    { return i_perv.getChildren<fapi2::TARGET_TYPE_OMI>(
-                    TARGET_STATE_PRESENT).size(); } },
+                           TARGET_STATE_PRESENT).size(); }  },
 
+            // MC / MI pervasive has 2 OMIC children
             {PERV_OMIC_CHILDREN,
              [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
                   { return ((i_unit >= MC_LOW) && (i_unit <= MC_HIGH)); },
              [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
                    { return i_perv.getChildren<fapi2::TARGET_TYPE_OMIC>(
-                    TARGET_STATE_PRESENT).size(); } },
+                           TARGET_STATE_PRESENT).size(); }  },
+
+            // first two PAUC pervasives have 1 PAU child
+            {PERV_PAU_LOW_CHILDREN,
+             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
+                  { return ((i_unit >= PAUC_LOW) && (i_unit <= PAUC_MID)); },
+             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
+                   { return i_perv.getChildren<fapi2::TARGET_TYPE_PAU>(
+                           TARGET_STATE_PRESENT).size(); }  },
+
+            // second two PAUC pervasive have 2 PAU children
+            {PERV_PAU_HIGH_CHILDREN,
+             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
+                  { return ((i_unit > PAUC_MID) && (i_unit <= PAUC_HIGH)); },
+             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
+                   { return i_perv.getChildren<fapi2::TARGET_TYPE_PAU>(
+                           TARGET_STATE_PRESENT).size(); }  },
+
+            // IOHS pervasive has 1 IOHS children
+            {PERV_IOHS_CHILDREN,
+             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
+                  { return ((i_unit >= IOHS_LOW) && (i_unit <= IOHS_HIGH)); },
+             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
+                   { return i_perv.getChildren<fapi2::TARGET_TYPE_IOHS>(
+                           TARGET_STATE_PRESENT).size(); }  },
         };
 
         pervasiveChildTestRec* ptr = nullptr;
         int numPervTests = 0;
-        TARGETING::ATTR_MODEL_type l_model = l_proc->getAttr<TARGETING::ATTR_MODEL>();
-        if (l_model == TARGETING::MODEL_NIMBUS)
-        {
-            numPervTests = sizeof(nimbusPervasiveChildTests) / sizeof(pervasiveChildTestRec);
-            ptr = nimbusPervasiveChildTests;
-        }
-        else if(l_model == TARGETING::MODEL_CUMULUS)
-        {
-            numPervTests = sizeof(cumulusPervasiveChildTests) / sizeof(pervasiveChildTestRec);
-            ptr = cumulusPervasiveChildTests;
-        }
-        else if(l_model == TARGETING::MODEL_AXONE)
-        {
-            numPervTests = sizeof(axonePervasiveChildTests) / sizeof(pervasiveChildTestRec);
-            ptr = axonePervasiveChildTests;
-        }
+
+        numPervTests = sizeof(p10PervasiveChildTests) / sizeof(pervasiveChildTestRec);
+        ptr = p10PervasiveChildTests;
 
         // Build list of all pervasive targets in the blueprint
         TARGETING::TargetHandleList pervasiveTargets;
@@ -752,7 +410,7 @@ void test_fapi2GetChildren()
             {
                 TS_FAIL("test_fapi2GetChildren:: candidateTarget not found");
                 numFails++;
-                break;
+                continue;
             }
 
             l_targetHuid = TARGETING::get_huid(candidateTarget);
@@ -764,9 +422,12 @@ void test_fapi2GetChildren()
 
             if(l_actualSize != l_expectedSize)
             {
-                TS_FAIL("test_fapi2GetChildren:: children of pervasive mismatch");
+                TS_FAIL("test_fapi2GetChildren:: children of pervasive mismatch: "
+                        "HUID 0x%x, expected %d, got %d",
+                        l_targetHuid, l_expectedSize,
+                        l_actualSize);
                 numFails++;
-                break;
+                continue;
             }
 
         }
@@ -803,7 +464,7 @@ void test_fapi2GetChildren()
                                         l_targetHuid,
                                         true/*SW Error*/);
         errlCommit(l_err,HWPF_COMP_ID);
-        TS_FAIL("test_fapi2GetChildren Fail, for HUID: %d , expected %d children , found %d ", l_targetHuid,l_expectedSize,l_actualSize );
+        TS_FAIL("test_fapi2GetChildren Fail, for HUID: 0x%x , expected %d children , found %d ", l_targetHuid,l_expectedSize,l_actualSize );
     }
     FAPI_INF("fapi2GetChildrenTest:: Test Complete. %d/%d fails",  numFails , numTests);
 }
@@ -815,10 +476,12 @@ void test_fapi2GetChildrenFilter()
 {
     int numTests = 0;
     int numFails = 0;
+/* # FIXME RTC: 210975
     uint32_t l_targetHuid = 0xFFFFFFFF;
     uint32_t l_actualSize = 0;
     uint32_t l_expectedSize = 0;
     errlHndl_t l_err = nullptr;
+*/
     TARGETING::Target * l_proc = nullptr;
     TARGETING::TargetHandleList l_chipList;
     do
@@ -858,12 +521,17 @@ void test_fapi2GetChildrenFilter()
             }
         }
 
+        // Start of the Tests
+/*
+# FIXME RTC: 210975
+# src/import/chips/p10/common/include/target_filters.H has not yet defined
+# TARGET_FILTER_ALL_CORES, TARGET_FILTER_CORE1, and
+# TARGET_FILTER_SYNC_MODE_ALL_IO_EXCEPT_NEST which are used below.
+
         Target<fapi2::TARGET_TYPE_PROC_CHIP> fapi2_procTarget(
                 l_proc);
 
         std::vector<Target<fapi2::TARGET_TYPE_PERV> > l_childPERVs;
-
-        // Start of the Tests
 
         // PERV - TARGET_FILTER_ALL_CORES
         l_expectedSize = 24;
@@ -911,7 +579,6 @@ void test_fapi2GetChildrenFilter()
         }
 
         // PERV - SYNC_MODE_ALL_IO_EXCEPT_NEST
-        // NOTE:  2 of 4 OBUS are Cumulus only, so expect 8 instead of 10 returned
         l_expectedSize = 8;
         l_childPERVs = fapi2_procTarget.getChildren<fapi2::TARGET_TYPE_PERV>(
                                                              TARGET_FILTER_SYNC_MODE_ALL_IO_EXCEPT_NEST,
@@ -924,34 +591,36 @@ void test_fapi2GetChildrenFilter()
             numFails++;
             break;
         }
+*/
 
     }while(0);
 
-    if(l_actualSize != l_expectedSize)
-    {
-        /*@
-        * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
-        * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_CHILDREN_FILTER_TEST
-        * @reasoncode         fapi2::RC_INVALID_CHILD_COUNT
-        * @userdata1[0:31]    Expected Child Count
-        * @userdata1[32:63]   Actual Child Count
-        * @userdata2          Parent HUID
-        * @devdesc            Invalid amount of child cores found
-        *                     on a proc
-        */
-        l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                        fapi2::MOD_FAPI2_PLAT_GET_CHILDREN_FILTER_TEST,
-                                        fapi2::RC_INVALID_CHILD_COUNT,
-                                        TWO_UINT32_TO_UINT64(
-                                        TO_UINT32(
-                                        l_expectedSize),
-                                        TO_UINT32(
-                                        l_actualSize)),
-                                        l_targetHuid,
-                                        true/*SW Error*/);
-        errlCommit(l_err,HWPF_COMP_ID);
-        TS_FAIL("test_fapi2GetChildrenFilter Fail, for HUID: 0x%X , expected %d children , found %d ", l_targetHuid,l_expectedSize,l_actualSize );
-    }
+    // # FIXME RTC: 210975
+    // if(l_actualSize != l_expectedSize)
+    // {
+    //     /*@
+    //     * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
+    //     * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_CHILDREN_FILTER_TEST
+    //     * @reasoncode         fapi2::RC_INVALID_CHILD_COUNT
+    //     * @userdata1[0:31]    Expected Child Count
+    //     * @userdata1[32:63]   Actual Child Count
+    //     * @userdata2          Parent HUID
+    //     * @devdesc            Invalid amount of child cores found
+    //     *                     on a proc
+    //     */
+    //     l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+    //                                     fapi2::MOD_FAPI2_PLAT_GET_CHILDREN_FILTER_TEST,
+    //                                     fapi2::RC_INVALID_CHILD_COUNT,
+    //                                     TWO_UINT32_TO_UINT64(
+    //                                     TO_UINT32(
+    //                                     l_expectedSize),
+    //                                     TO_UINT32(
+    //                                     l_actualSize)),
+    //                                     l_targetHuid,
+    //                                     true/*SW Error*/);
+    //     errlCommit(l_err,HWPF_COMP_ID);
+    //     TS_FAIL("test_fapi2GetChildrenFilter Fail, for HUID: 0x%X , expected %d children , found %d ", l_targetHuid,l_expectedSize,l_actualSize );
+    // }
 
     FAPI_INF("test_fapi2GetChildrenFilter: Test Complete. %d/%d fails",  numFails , numTests);
 }
@@ -967,11 +636,7 @@ void test_fapi2getChildTargetsForCDG()
     TARGETING::Target * l_proc = nullptr;
     size_t l_expectedDimms = 0;
     TARGETING::TargetHandleList l_chipList;
-// These port and socket arguments are not valid for Axone targets
-#ifndef CONFIG_AXONE
-    size_t l_expectedDimmsUnderPort0 = 0;
-    size_t l_expectedDimmsUnderPort1 = 0;
-#endif
+
     do
     {
         FAPI_DBG("start of test_fapi2getChildTargetsForCDG()");
@@ -991,36 +656,7 @@ void test_fapi2getChildTargetsForCDG()
             break;
         }
 
-        if (l_proc->getAttr<TARGETING::ATTR_MODEL>() == TARGETING::MODEL_NIMBUS)
-        {
-            l_expectedDimms = 16;
-// These port and socket arguments are not valid for Axone targets
-#ifndef CONFIG_AXONE
-            l_expectedDimmsUnderPort0 = l_expectedDimms;
-            l_expectedDimmsUnderPort1 = 0;
-#endif
-        }
-        else if (l_proc->getAttr<TARGETING::ATTR_MODEL>() == TARGETING::MODEL_CUMULUS)
-        {
-            l_expectedDimms = 8;
-// These port and socket arguments are not valid for Axone targets
-#ifndef CONFIG_AXONE
-            l_expectedDimmsUnderPort0 = l_expectedDimms/2;
-            l_expectedDimmsUnderPort1 = l_expectedDimms/2;
-#endif
-        }
-        else if (l_proc->getAttr<TARGETING::ATTR_MODEL>() == TARGETING::MODEL_AXONE)
-        {
-            l_expectedDimms = 9;
-        }
-        else //both are nullptr
-        {
-            // Should never get here since error should have been returned
-            // above
-            TS_FAIL("fapi2getChildTargetsForCDG: Never Should Happen");
-            numFails++;
-            break;
-        }
+        l_expectedDimms = 4;
 
         Target<fapi2::TARGET_TYPE_PROC_CHIP> fapi2_procTarget(l_proc);
         // Now get all dimms under this processor
@@ -1040,76 +676,6 @@ void test_fapi2getChildTargetsForCDG()
                     l_dimmList.size(),l_expectedDimms);
             numFails++;
         }
-
-// These port and socket arguments are not valid for Axone targets
-// so skip testing them
-#ifndef CONFIG_AXONE
-        // All dimms under port 0
-        fapi2::getChildTargetsForCDG(fapi2_procTarget,
-                fapi2::TARGET_TYPE_DIMM,
-                0x0,   // Port 0
-                0xff,  // All sockets
-                l_dimmList);
-        FAPI_INF("test_fapi2getChildTargetsForCDG: Dimms under proc 0x%.08X port 0 is %d",
-                TARGETING::get_huid(l_proc),l_dimmList.size());
-        numTests++;
-
-        if(l_dimmList.size() != l_expectedDimmsUnderPort0)
-        {
-            TS_FAIL("test_fapi2getChildTargetsForCDG: Dimm count %d under port 0 not equal expected %d",
-                    l_dimmList.size(),l_expectedDimmsUnderPort0);
-            numFails++;
-        }
-
-        // All dimms under port 1
-        fapi2::getChildTargetsForCDG(fapi2_procTarget,
-                fapi2::TARGET_TYPE_DIMM,
-                0x1,   // Port 1
-                0xff,  // All sockets
-                l_dimmList);
-        FAPI_INF("test_fapi2getChildTargetsForCDG: Dimms under proc 0x%.08X port 1 is %d",
-                TARGETING::get_huid(l_proc),l_dimmList.size());
-        numTests++;
-
-        if(l_dimmList.size() != l_expectedDimmsUnderPort1)
-        {
-            TS_FAIL("test_fapi2getChildTargetsForCDG: Dimm count %d under port 1 not equal expected %d",
-                    l_dimmList.size(),l_expectedDimmsUnderPort1);
-            numFails++;
-        }
-
-        // All dimms under socket 0
-        fapi2::getChildTargetsForCDG(fapi2_procTarget,
-                fapi2::TARGET_TYPE_DIMM,
-                0xff,  // All ports
-                0x0,   // Socket 0
-                l_dimmList);
-        FAPI_INF("test_fapi2getChildTargetsForCDG: Dimms under proc 0x%.08X socket 0 is %d",
-                TARGETING::get_huid(l_proc),l_dimmList.size());
-        numTests++;
-        if(l_dimmList.size() != l_expectedDimms)
-        {
-            TS_FAIL("test_fapi2getChildTargetsForCDG: Dimm count %d under socket 0x0, all ports, not equal expected %d",
-                    l_dimmList.size(),l_expectedDimms);
-            numFails++;
-        }
-
-        // All dimms under socket 1
-        fapi2::getChildTargetsForCDG(fapi2_procTarget,
-                fapi2::TARGET_TYPE_DIMM,
-                0xff,  // All ports
-                0x1,   // Socket 1
-                l_dimmList);
-        FAPI_INF("test_fapi2getChildTargetsForCDG: Dimms under proc 0x%.08X socket 1 is %d",
-                TARGETING::get_huid(l_proc),l_dimmList.size());
-        numTests++;
-        if(l_dimmList.size() != 0)
-        {
-            TS_FAIL("test_fapi2getChildTargetsForCDG: Dimm count %d under socket 1 not equal expected %d",
-                    l_dimmList.size(),0);
-            numFails++;
-        }
-#endif
 
     }while(0);
 

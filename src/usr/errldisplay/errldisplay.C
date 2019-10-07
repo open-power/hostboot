@@ -319,7 +319,6 @@ case HWAS::_type: CONSOLE::displayf(NULL, "  Part Type                : %s", #_t
 #define case_BUS_TYPE(_type) \
 case HWAS::_type: CONSOLE::displayf(NULL, "  Bus Type                 : %s", #_type); break;
                     case_BUS_TYPE(FSI_BUS_TYPE)
-                    case_BUS_TYPE(DMI_BUS_TYPE)
                     case_BUS_TYPE(A_BUS_TYPE)
                     case_BUS_TYPE(X_BUS_TYPE)
                     case_BUS_TYPE(I2C_BUS_TYPE)
@@ -765,4 +764,3 @@ errlHndl_t ErrLogDisplay::init()
 }
 
 } // End namespace
-

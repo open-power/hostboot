@@ -60,50 +60,58 @@ const uint32_t VARIABLE_BUFFER_ELEMENTS =
 
 
 //******************************************************************************
-// p9_ffdc_fail. Returns a fapi2::ReturnCode with an ffdc entry
+// p10_ffdc_fail. Returns a fapi2::ReturnCode with an ffdc entry
 //******************************************************************************
-fapi2::ReturnCode p9_ffdc_fail(void)
+fapi2::ReturnCode p10_ffdc_fail(void)
 {
     uint8_t thread_id = 4;
-    FAPI_INF("Enter p9_ffdc_fail...");
+    FAPI_INF("Enter p10_ffdc_fail...");
     FAPI_ASSERT(false,
-                fapi2::P9_RAM_THREAD_NOT_STOP_ERR()
+                fapi2::P10_RAM_THREAD_NOT_STOP_ERR()
                 .set_THREAD(thread_id),
-                "p9_ffdc_fail worked");
+                "p10_ffdc_fail worked");
  fapi_try_exit:
 
-    FAPI_INF("Exiting p9_ffdc_fail...");
+    FAPI_INF("Exiting p10_ffdc_fail...");
 
     return fapi2::current_err;
 }
 
 
 //******************************************************************************
-// p9_registerFfdc_fail.
+// p10_registerFfdc_fail.
 // Returns a fapi2::ReturnCode with registery reads of a target
 //******************************************************************************
-fapi2::ReturnCode p9_registerFfdc_fail(
+fapi2::ReturnCode p10_registerFfdc_fail(
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target)
 {
-    FAPI_INF("Enter p9_registerFfdc_fail...");
+    FAPI_INF("Enter p10_registerFfdc_fail...");
+
+/* FIXME RTC: 210975
+    // TEST_ERROR_A needs src/import/chips/p9/procedures/xml/error_info/
+    proc_example_errors.xml to be run through platCreateHwpErrParser.pl in
+    fapi2.mk but it contains usage of p9_collect_some_ffdc.
+    At the moment there's no p10 counterpart to src/import/chips/p9/procedures/
+    xml/error_info/proc_example_errors.xml
 
     FAPI_ASSERT(0, fapi2::TEST_ERROR_A().set_TARGET(i_proc_target));
 
 fapi_try_exit:
+*/
 
-    FAPI_INF("Exiting p9_registerFfdc_fail...");
+    FAPI_INF("Exiting p10_registerFfdc_fail...");
     return fapi2::current_err;
 }
 
 
 //******************************************************************************
-// p9_procedureFfdc_fail.
+// p10_procedureFfdc_fail.
 // Cause a failure which calls a procedure that fills in some ffdc into the
 // fapi2::ReturnCode
 //******************************************************************************
-fapi2::ReturnCode p9_procedureFfdc_fail()
+fapi2::ReturnCode p10_procedureFfdc_fail()
 {
-    FAPI_INF("Enter p9_procedureFfdc_fail...");
+    FAPI_INF("Enter p10_procedureFfdc_fail...");
 
 /* FIXME RTC: 210975
     uint32_t pib = 0x0001;
@@ -117,111 +125,150 @@ fapi2::ReturnCode p9_procedureFfdc_fail()
   fapi_try_exit:
 */
 
-    FAPI_INF("Exiting p9_procedureFfdc_fail...");
+    FAPI_INF("Exiting p10_procedureFfdc_fail...");
 
     return l_rc;
 }
 
 
 //******************************************************************************
-// p9_gardAndDeconfig
+// p10_gardAndDeconfig
 // Force a test return code that deconfigures the target and gards it
 //******************************************************************************
-fapi2::ReturnCode p9_gardAndDeconfig(
+fapi2::ReturnCode p10_gardAndDeconfig(
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target)
 {
-    FAPI_INF("Enter p9_gardAndDeconfig...");
+    FAPI_INF("Enter p10_gardAndDeconfig...");
+
+/* FIXME RTC: 210975
+    // TEST_ERROR_GARD_DECONFIG needs
+    src/import/chips/p9/procedures/xml/error_info/proc_example_errors.xml to be
+    run through platCreateHwpErrParser.pl in fapi2.mk but it contains usage of
+    p9_collect_some_ffdc. At the moment there's no p10 counterpart to src/
+    import/chips/p9/procedures/xml/error_info/proc_example_errors.xml
 
     FAPI_ASSERT(0, fapi2::TEST_ERROR_GARD_DECONFIG().set_TARGET(i_proc_target));
 
   fapi_try_exit:
+*/
 
-    FAPI_INF("Exiting p9_gardAndDeconfig...");
+    FAPI_INF("Exiting p10_gardAndDeconfig...");
 
     return fapi2::current_err;
 }
 
 //******************************************************************************
-// p9_deconfig
+// p10_deconfig
 // Force a test return code that deconfigures the target
 //******************************************************************************
-fapi2::ReturnCode p9_deconfigCallout(
+fapi2::ReturnCode p10_deconfigCallout(
     fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm_target)
 {
-    FAPI_INF("Enter p9_deconfigCallout...");
+    FAPI_INF("Enter p10_deconfigCallout...");
+
+/* FIXME RTC: 210975
+    // TEST_ERROR_DECONFIG needs
+    src/import/chips/p9/procedures/xml/error_info/proc_example_errors.xml to be
+    run through platCreateHwpErrParser.pl in fapi2.mk but it contains usage of
+    p9_collect_some_ffdc. At the moment there's no p10 counterpart to src/
+    import/chips/p9/procedures/xml/error_info/proc_example_errors.xml
 
     FAPI_ASSERT(0, fapi2::TEST_ERROR_DECONFIG().set_TARGET(i_dimm_target));
 
   fapi_try_exit:
+*/
 
-    FAPI_INF("Exiting p9_deconfigCallout...");
+    FAPI_INF("Exiting p10_deconfigCallout...");
 
     return fapi2::current_err;
 }
 
 //******************************************************************************
-// p9_deconfig_callout_none
+// p10_deconfig_callout_none
 // Force a test return code that deconfigures the target
 //******************************************************************************
-fapi2::ReturnCode p9_deconfigCalloutNone(
+fapi2::ReturnCode p10_deconfigCalloutNone(
     fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm_target)
 {
-    FAPI_INF("Enter p9_deconfigCalloutNone...");
+    FAPI_INF("Enter p10_deconfigCalloutNone...");
+
+/* FIXME RTC: 210975
+    // TEST_ERROR_DECONFIG_NO_CALLOUT needs
+    src/import/chips/p9/procedures/xml/error_info/proc_example_errors.xml to be
+    run through platCreateHwpErrParser.pl in fapi2.mk but it contains usage of
+    p9_collect_some_ffdc. At the moment there's no p10 counterpart to src/
+    import/chips/p9/procedures/xml/error_info/proc_example_errors.xml
 
     FAPI_ASSERT(0,
             fapi2::TEST_ERROR_DECONFIG_NO_CALLOUT().set_TARGET(i_dimm_target));
 
   fapi_try_exit:
-
-    FAPI_INF("Exiting p9_deconfigCalloutNone...");
+*/
+    FAPI_INF("Exiting p10_deconfigCalloutNone...");
 
     return fapi2::current_err;
 }
 
 //******************************************************************************
-// p9_procedureCallout
+// p10_procedureCallout
 // Force a test return code that creates a procedure callout
 //******************************************************************************
-fapi2::ReturnCode p9_procedureCallout()
+fapi2::ReturnCode p10_procedureCallout()
 {
-    FAPI_INF("Enter p9_procedureCallout...");
+    FAPI_INF("Enter p10_procedureCallout...");
+
+/* FIXME RTC: 210975
+    // TEST_ERROR_PROCEDURE_CALLOUT needs
+    src/import/chips/p9/procedures/xml/error_info/proc_example_errors.xml to be
+    run through platCreateHwpErrParser.pl in fapi2.mk but it contains usage of
+    p9_collect_some_ffdc. At the moment there's no p10 counterpart to src/
+    import/chips/p9/procedures/xml/error_info/proc_example_errors.xml
 
     FAPI_ASSERT(0, fapi2::TEST_ERROR_PROCEDURE_CALLOUT());
 
   fapi_try_exit:
+*/
 
-    FAPI_INF("Exiting p9_procedureCallout...");
+    FAPI_INF("Exiting p10_procedureCallout...");
 
     return fapi2::current_err;
 }
 
 //******************************************************************************
-// p9_hwCallout
+// p10_hwCallout
 // Force a test return code that creates a hw callout
 //******************************************************************************
-fapi2::ReturnCode p9_hwCallout(
+fapi2::ReturnCode p10_hwCallout(
     fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_core_target)
 {
-    FAPI_INF("Enter p9_hwCallout...");
+    FAPI_INF("Enter p10_hwCallout...");
+
+/* FIXME RTC: 210975
+    // TEST_ERROR_HW_CALLOUT needs
+    src/import/chips/p9/procedures/xml/error_info/proc_example_errors.xml to be
+    run through platCreateHwpErrParser.pl in fapi2.mk but it contains usage of
+    p9_collect_some_ffdc. At the moment there's no p10 counterpart to src/
+    import/chips/p9/procedures/xml/error_info/proc_example_errors.xml
 
     FAPI_ASSERT(0, fapi2::TEST_ERROR_HW_CALLOUT().set_TARGET(i_core_target));
 
   fapi_try_exit:
+*/
 
-    FAPI_INF("Exiting p9_hwCallout...");
+    FAPI_INF("Exiting p10_hwCallout...");
 
     return fapi2::current_err;
 }
 
 
 //****************************************************************************
-// p9ErrorWithBuffer
+// p10ErrorWithBuffer
 // Force an error that will use a caller populated fapi2::buffer<>
 //****************************************************************************
-fapi2::ReturnCode p9ErrorWithBuffer(
+fapi2::ReturnCode p10ErrorWithBuffer(
                     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
-    FAPI_INF("Entering p9ErrorWithBuffer");
+    FAPI_INF("Entering p10ErrorWithBuffer");
 
     fapi2::buffer<uint64_t> l_userBuffer{FAPI2_TEST_BUFFER_VALUE};
 
@@ -239,23 +286,23 @@ fapi2::ReturnCode p9ErrorWithBuffer(
                 fapi2::PROC_EXAMPLE_ERROR().set_BUFFER(l_userBuffer)
                                     .set_parm1(l_paramValue)
                                     .set_UNIT_TEST_CHIP_TARGET(i_target),
-                "p9ErrorWithBuffer Unit Test"
+                "p10ErrorWithBuffer Unit Test"
                );
 
 fapi_try_exit:
 */
-    FAPI_INF("Exiting p9ErrorWithBuffer");
+    FAPI_INF("Exiting p10ErrorWithBuffer");
     return fapi2::current_err;
 }
 
 //****************************************************************************
-// p9ErrorWithVariableBuffer
+// p10ErrorWithVariableBuffer
 // Force an error that will use a caller populated fapi2::variable_buffer
 //****************************************************************************
-fapi2::ReturnCode p9ErrorWithVariableBuffer(
+fapi2::ReturnCode p10ErrorWithVariableBuffer(
                     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
-    FAPI_INF("Entering p9ErrorWithVariableBuffer");
+    FAPI_INF("Entering p10ErrorWithVariableBuffer");
 
     fapi2::variable_buffer l_userBuffer(FAPI2_TEST_VARIABLE_BUFFER_VALUE,
                                         VARIABLE_BUFFER_ELEMENTS,
@@ -276,12 +323,12 @@ fapi2::ReturnCode p9ErrorWithVariableBuffer(
                 fapi2::PROC_EXAMPLE_ERROR().set_BUFFER(l_userBuffer)
                                     .set_parm1(l_paramValue)
                                     .set_UNIT_TEST_CHIP_TARGET(i_target),
-                "p9ErrorWithVariableBuffer Unit Test"
+                "p10ErrorWithVariableBuffer Unit Test"
                );
 
 fapi_try_exit:
 */
-    FAPI_INF("Exiting p9ErrorWithVariableBuffer");
+    FAPI_INF("Exiting p10ErrorWithVariableBuffer");
     return fapi2::current_err;
 }
 
