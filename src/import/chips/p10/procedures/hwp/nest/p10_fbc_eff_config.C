@@ -424,7 +424,6 @@ fapi2::ReturnCode p10_fbc_eff_config_link_attrs(void)
     fapi2::ATTR_CHIP_UNIT_POS_Type l_iohs_pos;
     fapi2::ATTR_FREQ_PROC_IOHS_MHZ_Type l_freq_proc_iohs_mhz;
     fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE_Type l_link_inactive = fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_FALSE;
-    fapi2::ATTR_PROC_FABRIC_ASYNC_MODE_Type l_async_perf_mode = fapi2::ENUM_ATTR_PROC_FABRIC_ASYNC_MODE_PERF_MODE;
     fapi2::ATTR_PROC_FABRIC_BROADCAST_MODE_Type l_broadcast_mode;
     fapi2::ATTR_PROC_FABRIC_PRESENT_GROUPS_Type l_present_groups;
     fapi2::ATTR_PROC_FABRIC_A_INDIRECT_Type l_a_indirect;
@@ -447,10 +446,6 @@ fapi2::ReturnCode p10_fbc_eff_config_link_attrs(void)
                      "Error form FAPI_ATTR_GET (ATTR_FREQ_PROC_IOHS_MHZ)");
         }
     }
-
-    // set async mode
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_ASYNC_MODE, FAPI_SYSTEM, l_async_perf_mode),
-             "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_ASYNC_MODE)");
 
     // set indirect data routing for alinks (chip_is_group pump and >= 4 groups)
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_BROADCAST_MODE, FAPI_SYSTEM, l_broadcast_mode),
