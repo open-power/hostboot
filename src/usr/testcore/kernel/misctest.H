@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,7 @@ class MiscTest : public CxxTest::TestSuite
         /** Tests for cpu_spr_value() */
         void testCpuSprValue()
         {
-            if (WAKEUP_MSR_VALUE != cpu_spr_value(CPU_SPR_MSR))
+            if ((WAKEUP_MSR_VALUE | MSR_SMF_MASK) != cpu_spr_value(CPU_SPR_MSR))
             {
                 TS_FAIL("MSR value is not as expected.");
             }
