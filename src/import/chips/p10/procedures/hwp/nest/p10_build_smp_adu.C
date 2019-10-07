@@ -71,7 +71,7 @@ const uint32_t P10_BUILD_SMP_FFDC_REGS[P10_BUILD_SMP_FFDC_NUM_REGS] =
     scomt::proc::PB_PTLSCOM23_PTL_FIR_REG_RW,            // 11
     scomt::proc::PB_PTLSCOM45_PTL_FIR_REG_RW,            // 12
     scomt::proc::PB_PTLSCOM67_PTL_FIR_REG_RW,            // 13
-    scomt::proc::TP_TPBR_AD_SND_MODE_REG                 // 14 (Switch AB)
+    scomt::proc::TP_TPBR_AD_SND_MODE_REG                 // 14 (Switch AB/CD)
 };
 
 //------------------------------------------------------------------------------
@@ -192,6 +192,10 @@ fapi2::ReturnCode p10_build_smp_adu_set_switch_action(
     {
         l_flags |= fapi2::SBE_MEM_ACCESS_FLAGS_PRE_SWITCH_AB_MODE;
     }
+    else if (i_action == SWITCH_CD)
+    {
+        l_flags |= fapi2::SBE_MEM_ACCESS_FLAGS_PRE_SWITCH_CD_MODE;
+    }
     else
     {
         l_flags |= fapi2::SBE_MEM_ACCESS_FLAGS_POST_SWITCH_MODE;
@@ -233,6 +237,7 @@ fapi2::ReturnCode p10_build_smp_sequence_adu(
     switch (i_action)
     {
         case SWITCH_AB:
+        case SWITCH_CD:
             l_flags |= fapi2::SBE_MEM_ACCESS_FLAGS_SWITCH_MODE;
             break;
 
@@ -275,8 +280,9 @@ fapi2::ReturnCode p10_build_smp_sequence_adu(
     {
         for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); ++p_iter)
         {
-            if (((i_action == QUIESCE) && (p_iter->second.issue_quiesce_next)) ||
-                ((i_action == SWITCH_AB) && (p_iter->second.master_chip_sys_next)))
+            if (((i_action == QUIESCE) && (p_iter->second.issue_quiesce_next))
+                || ((i_action == SWITCH_AB) && (p_iter->second.master_chip_sys_next))
+                || (i_action == SWITCH_CD))
             {
                 char l_target_str[fapi2::MAX_ECMD_STRING_LEN];
                 fapi2::toString(*(p_iter->second.target), l_target_str, sizeof(l_target_str));

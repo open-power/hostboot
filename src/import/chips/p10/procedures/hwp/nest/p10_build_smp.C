@@ -36,6 +36,7 @@
 //------------------------------------------------------------------------------
 #include <p10_build_smp.H>
 #include <p10_build_smp_fbc_ab.H>
+#include <p10_build_smp_fbc_cd.H>
 #include <p10_fbc_utils.H>
 
 #include <p10_scom_proc.H>
@@ -637,7 +638,17 @@ fapi2::ReturnCode p10_build_smp(
     FAPI_TRY(p10_build_smp_check_topology(i_op, l_smp),
              "Error from p10_build_smp_check_topology");
 
-    // set fabric hotplug registers to active new SMP configuration
+    // activate fabric async configuration (switch CD)
+    // switch_cd should only be issued once, do this in phase2
+    // since it needs to be done after dynamic inits are applied
+    if (i_op == SMP_ACTIVATE_PHASE2)
+    {
+        FAPI_TRY(p10_build_smp_set_fbc_cd(l_smp),
+                 "Error from p10_build_smp_set_fbc_cd");
+    }
+
+    // set fabric hotplug configuration registers (switch AB)
+    // activates new SMP configuration for given phase1/phase2
     FAPI_TRY(p10_build_smp_set_fbc_ab(l_smp, i_op),
              "Error from p10_build_smp_set_fbc_ab");
 
