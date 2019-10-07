@@ -3411,10 +3411,6 @@
       </uint32_t>
     </simpleType>
     <writeable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_FREQ_CORE_FLOOR_MHZ</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
   </attribute>
 
   <attribute>

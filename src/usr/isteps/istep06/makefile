@@ -42,6 +42,7 @@ PM_HWP_PATH   += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm
 #CORE_HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/core
 #CACHE_HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/cache
 LIB_HWP_PATH  += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/lib
+PMLIB_PATH += ${ROOTPATH}/src/import/chips/p10/common/pmlib/
 
 #VPATH += ${NEST_HWP_PATH}
 VPATH += ${PERV_HWP_PATH}
@@ -58,18 +59,16 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/secureboot
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include
 #EXTRAINCDIR += ${NEST_HWP_PATH}
 EXTRAINCDIR += ${PERV_HWP_PATH}
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${PM_HWP_PATH}
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/include/registers
 EXTRAINCDIR += ${LIB_HWP_PATH}
 #EXTRAINCDIR += ${CORE_HWP_PATH}
 #EXTRAINCDIR += ${CACHE_HWP_PATH}
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/pmlib/include/registers
 
 #Required include before all the procedure.mk are included
 include ${ROOTPATH}/procedure.rules.mk
@@ -80,18 +79,16 @@ include ${ROOTPATH}/procedure.rules.mk
 # Take another look at PM lib
 #include $(PM_HWP_PATH)/p9_pm_utils.mk
 
+include $(PM_HWP_PATH)/p10_setup_evid.mk
+include $(LIB_HWP_PATH)/p10_avsbus_lib.mk
+include $(LIB_HWP_PATH)/p10_pm_utils.mk
+
 #TODO RTC: 208838
 #include $(PERV_HWP_PATH)/p10_setup_sbe_config.mk
 #include $(PM_HWP_PATH)/p9_query_core_access_state.mk
 #include $(PM_HWP_PATH)/p9_query_cache_access_state.mk
 #include $(PM_HWP_PATH)/p9_quad_power_off.mk
 #include $(LIB_HWP_PATH)/p9_avsbus_lib.mk
-
-#add objects from p9_setup_evid.mk directly to avoid duplicates
-#OBJS+=p9_avsbus_lib.o
-#OBJS+=p9_pstate_parameter_block.o
-#OBJS+=p9_setup_evid.o
-
 
 #OBJS+=p9_hcd_core_stopclocks.o
 #OBJS+=p9_hcd_cache_stopclocks.o
