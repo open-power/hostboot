@@ -531,14 +531,51 @@ foreach my $argnum ( 0 .. $#ARGV )
         #----------------------------------------------------------------------
         # Print if the attribute is a platInit attribute
         #----------------------------------------------------------------------
+        my $plat_init_val = '';
         if ( exists $attr->{platInit} )
         {
-            print AIFILE "const bool $attr->{id}_PlatInit = true;\n";
+            # Get platInit value
+            my $plat_init_attr = $attr->{platInit};
+
+            # PlatInit vs MRW assigned value table
+            # HASH: Old <platInit/> tag without data source specified for compatibility.
+            # <platInit><data_source></platInit>  --> data_source)
+            my @platInitTable = ( 'HASH, ', 'fw', 'mrw', 'vpd', 'customer', 'usedefault' );
+            my @platInitVals  = ( '1',      '2',  '3',   '4',   '5',        '6' );
+            my $index         = 0;
+
+            # <platInit/> case
+            if ( ref($plat_init_attr) eq "HASH" )
+            {
+                $plat_init_val = 1;
+            }
+
+            # <platInit><data_source></platInit> case
+            else
+            {
+                foreach my $table_entry (@platInitTable)
+                {
+                    if ( $attr->{platInit} eq $table_entry )
+                    {
+                        $plat_init_val = @platInitVals[$index];
+                        last;
+                    }
+                    $index++;
+                }
+                if ( $plat_init_val eq '' )
+                {
+                    print("parseAttributeInfo.pl ERROR: platInit value not recognized: $attr->{platInit}.\n");
+                    exit(1);
+                }
+            }
         }
         else
         {
-            print AIFILE "const bool $attr->{id}_PlatInit = false;\n";
+            $plat_init_val = 0;
         }
+
+        # Write assigned plat init source data to file
+        print AIFILE "const uint8_t $attr->{id}_PlatInit = $plat_init_val;\n";
 
         #----------------------------------------------------------------------
         # Print the value enumeration (if specified) to attribute_ids.H and

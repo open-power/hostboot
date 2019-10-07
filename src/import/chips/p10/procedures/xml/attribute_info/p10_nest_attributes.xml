@@ -85,7 +85,7 @@
     2HOP_CHIP_IS_NODE  = 0x03
   </enum>
   <writeable/>
-  <platInit/>
+  <platInit>mrw</platInit>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -120,7 +120,7 @@
     MODE1 = 0x01
   </enum>
   <writeable/>
-  <platInit/>
+  <platInit>mrw</platInit>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -133,7 +133,7 @@
   </description>
   <valueType>uint8</valueType>
   <writeable/>
-  <platInit/>
+  <platInit>mrw</platInit>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -202,7 +202,7 @@
     NV    = 0x2,
     OCAPI = 0x3
   </enum>
-  <platInit/>
+  <platInit>mrw</platInit>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -218,7 +218,7 @@
     1_BYTE = 0x01,
     2_BYTE = 0x02
   </enum>
-  <platInit/>
+  <platInit>mrw</platInit>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -235,7 +235,7 @@
     FALSE = 0x0,
     TRUE = 0x1
   </enum>
-  <platInit/>
+  <platInit>mrw</platInit>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -631,7 +631,7 @@
     EPS_TYPE_MR = 0x02,
     EPS_TYPE_HE = 0x03
   </enum>
-  <platInit/>
+  <platInit>mrw</platInit>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>

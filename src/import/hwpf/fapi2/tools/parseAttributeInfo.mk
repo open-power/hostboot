@@ -50,7 +50,7 @@ CLEAN_TARGETS += $(GENPATH)/fapi2AttrOverrideData.H
 CLEAN_TARGETS += $(GENPATH)/fapi2AttrOverrideEnums.H
 
 define parseAttributeInfo_RUN
-		$(C1) $$< --output-dir=$$($(GENERATED)_PATH) $$(filter-out $$<,$$^)
+		$(C1) $$< --output-dir=$$($(GENERATED)_PATH) --parse_defaults $$(filter-out $$<,$$^)
 endef
 
 $(call BUILD_GENERATED)
