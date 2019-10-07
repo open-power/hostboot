@@ -325,6 +325,7 @@ case HWAS::_type: CONSOLE::displayf(NULL, "  Bus Type                 : %s", #_t
                     case_BUS_TYPE(I2C_BUS_TYPE)
                     case_BUS_TYPE(PSI_BUS_TYPE)
                     case_BUS_TYPE(O_BUS_TYPE)
+                    case_BUS_TYPE(OMI_BUS_TYPE)
                     default:
                         CONSOLE::displayf(NULL, "  Bus Type                 : UNKNOWN 0x%X",
                                           callout->busType);
