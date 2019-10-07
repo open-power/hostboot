@@ -3766,7 +3766,7 @@ void PlatPmPPB::compute_dds_slopes(
     {
         for(auto region(REGION_POWERSAVE_CF1); region <= REGION_UT_FMAX; ++region)
         {
-            for (auto cores = 0; cores <= MAXIMUM_CORES; cores++)
+            for (auto cores = 0; cores < MAXIMUM_CORES; cores++)
             {
                 //Insertion delay slopes
                 o_gppb->ps_dds_delay_slopes[pt_set][cores][region] =
@@ -3785,7 +3785,7 @@ void PlatPmPPB::compute_dds_slopes(
 
             for (uint8_t dds_cnt = TRIP_OFFSET; dds_cnt < NUM_POUNDW_DDS_FIELDS; ++dds_cnt)
             {
-                for (auto cores = 0; cores <= MAXIMUM_CORES; cores++)
+                for (auto cores = 0; cores < MAXIMUM_CORES; cores++)
                 {
                     switch (dds_cnt)
                     {
