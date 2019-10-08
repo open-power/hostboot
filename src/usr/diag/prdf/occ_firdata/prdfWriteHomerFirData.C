@@ -628,39 +628,6 @@ void getAddresses( TrgtMap_t & io_targMap )
         0x07013373, // DL2_ERROR_HOLD
     };
 
-    io_targMap[TRGT_OCMB][REG_GLBL] =
-    {
-        0x08040000, // MB_CHIPLET_CS_FIR
-        0x08040001, // MB_CHIPLET_RE_FIR
-        0x08040004, // MB_CHIPLET_SPA_FIR
-    };
-
-    io_targMap[TRGT_OCMB][REG_FIR] =
-    {
-        0x0804000a, // MB_LFIR
-        0x08010870, // MMIOFIR
-        0x08011400, // SRQFIR
-        0x08011800, // MCBISTFIR
-        0x08011c00, // RDFFIR
-        0x08012400, // TLXFIR
-        0x08012800, // OMIDLFIR
-    };
-
-    io_targMap[TRGT_OCMB][REG_REG] =
-    {
-        0x08040002, // MB_CHIPLET_FIR_MASK
-        0x08040007, // MB_CHIPLET_SPA_FIR_MASK
-        0x08012813, // DL0_ERROR_HOLD
-        0x0801241D, // TLX_ERR1_REPORT
-
-        // AUE/IAUE analysis
-        0x080118D7, // MCBMCAT
-
-        // AUE/IAUE analysis
-        0x0801186D, // MBUER
-        0x0801186E, // MBAUER
-    };
-
     // EC level handling will be done with a
     // structure and separate register count field.
 

@@ -164,12 +164,12 @@ actionclass analyzeUSTLFIR { analyze(gUSTLFIR); };
 
 actionclass analyze_ocmb_chnl0
 {
-    analyze(connected(TYPE_OCMB_CHIP, 0));
+    try( funccall("checkOcmb_0"), analyze(connected(TYPE_OCMB_CHIP, 0)) );
 };
 
 actionclass analyze_ocmb_chnl1
 {
-    analyze(connected(TYPE_OCMB_CHIP, 1));
+    try( funccall("checkOcmb_1"), analyze(connected(TYPE_OCMB_CHIP, 1)) );
 };
 
 actionclass analyze_ocmb_chnl0_UERE
