@@ -91,8 +91,7 @@ ReturnCode platGetScom(const Target<TARGET_TYPE_ALL>& i_target,
     bool l_traceit = platIsScanTraceEnabled();
 
     // Extract the component pointer
-    TARGETING::Target* l_target =
-              reinterpret_cast<TARGETING::Target*>(i_target.get());
+    TARGETING::Target* l_target = i_target.get();
 
     // Grab the name of the target
     TARGETING::ATTR_FAPI_NAME_type l_targName = {0};
@@ -156,8 +155,7 @@ ReturnCode platPutScom(const Target<TARGET_TYPE_ALL>& i_target,
     bool l_traceit = platIsScanTraceEnabled();
 
     // Extract the component pointer
-    TARGETING::Target* l_target =
-              reinterpret_cast<TARGETING::Target*>(i_target.get());
+    TARGETING::Target* l_target = i_target.get();
 
     // Grab the name of the target
     TARGETING::ATTR_FAPI_NAME_type l_targName = {0};
@@ -228,8 +226,7 @@ ReturnCode platPutScomUnderMask(const Target<TARGET_TYPE_ALL>& i_target,
     do
     {
         // Extract the component pointer
-        TARGETING::Target* l_target =
-                  reinterpret_cast<TARGETING::Target*>(i_target.get());
+        TARGETING::Target* l_target = i_target.get();
 
         // Get current value from HW
         uint64_t l_data = 0;
@@ -437,8 +434,7 @@ ReturnCode platGetCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
     do
     {
         // Extract the target pointer
-        TARGETING::Target* l_target =
-                reinterpret_cast<TARGETING::Target*>(i_target.get());
+        TARGETING::Target* l_target = i_target.get();
 
         // Get the chip target if l_target is not a chip
         TARGETING::Target* l_myChipTarget = NULL;
@@ -453,7 +449,7 @@ ReturnCode platGetCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
         }
 
         // Can't access cfam engine on master processor
-        l_err = verifyCfamAccessTarget(i_target,i_address);
+        l_err = verifyCfamAccessTarget(l_target,i_address);
         if (l_err)
         {
             FAPI_ERR("platGetCfamRegister: verifyCfamAccessTarget returns error!");
@@ -517,8 +513,7 @@ ReturnCode platPutCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
     do
     {
         // Extract the component pointer
-        TARGETING::Target* l_target =
-                reinterpret_cast<TARGETING::Target*>(i_target.get());
+        TARGETING::Target* l_target = i_target.get();
 
         // Get the chip target if l_target is not a chip
         TARGETING::Target* l_myChipTarget = NULL;
@@ -531,7 +526,7 @@ ReturnCode platPutCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
         }
 
         // Can't access cfam engine on master processor
-        l_err = verifyCfamAccessTarget(i_target,i_address);
+        l_err = verifyCfamAccessTarget(l_target,i_address);
         if (l_err)
         {
             FAPI_ERR("platPutCfamRegister: verifyCfamAccessTarget returns error!");
@@ -649,18 +644,17 @@ ReturnCode platModifyCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
 
     do
     {
+        // Extract the component pointer
+        TARGETING::Target* l_target = i_target.get();
+
         // Can't access cfam engine on master processor
-        l_err = verifyCfamAccessTarget(i_target,i_address);
+        l_err = verifyCfamAccessTarget(l_target,i_address);
         if (l_err)
         {
             FAPI_ERR("platModifyCfamRegister: verifyCfamAccessTarget returns error!");
             l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
             break;
         }
-
-        // Extract the component pointer
-        TARGETING::Target* l_target =
-                reinterpret_cast<TARGETING::Target*>(i_target.get());
 
         // Get the chip target if l_target is not a chip
         TARGETING::Target* l_myChipTarget = NULL;
@@ -744,8 +738,7 @@ ReturnCode platGetRing(const Target<TARGET_TYPE_ALL>& i_target,
     errlHndl_t l_err = NULL;
 
     // Extract the component pointer
-    TARGETING::Target* l_target =
-            reinterpret_cast<TARGETING::Target*>(i_target.get());
+    TARGETING::Target* l_target = i_target.get();
 
     // Grab the name of the target
     TARGETING::ATTR_FAPI_NAME_type l_targName = {0};
@@ -797,8 +790,7 @@ inline ReturnCode platPutRing(const Target<TARGET_TYPE_ALL>& i_target,
     bool l_traceit = platIsScanTraceEnabled();
 
     // Extract the component pointer
-    TARGETING::Target* l_target =
-            reinterpret_cast<TARGETING::Target*>(i_target.get());
+    TARGETING::Target* l_target = i_target.get();
 
     // Grab the name of the target
     TARGETING::ATTR_FAPI_NAME_type l_targName = {0};
@@ -863,8 +855,7 @@ ReturnCode platModifyRing(const Target<TARGET_TYPE_ALL>& i_target,
     do
     {
         // Extract the component pointer
-        TARGETING::Target* l_target =
-                reinterpret_cast<TARGETING::Target*>(i_target.get());
+        TARGETING::Target* l_target = i_target.get();
 
         // --------------------
         // Read current value

@@ -205,8 +205,7 @@ errlHndl_t todInitHwp()
                     GETHUID(l_pMDMT->getTarget()),
                     l_pMDMT->getMasterType());
 
-            l_failingTodProc = reinterpret_cast<TARGETING::Target*>(
-                    l_fapiFailingProcTarget.get());
+            l_failingTodProc = l_fapiFailingProcTarget.get();
 
             break;
         }

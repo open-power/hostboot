@@ -474,8 +474,7 @@ void processEIHwCallouts(const ErrorInfo & i_errInfo,
 
         HwCallouts::HwCallout l_hw = ((*itr)->iv_hw);
 
-        TARGETING::Target * l_pRefTarget =
-            reinterpret_cast<TARGETING::Target*>((*itr)->iv_refTarget.get());
+        TARGETING::Target * l_pRefTarget = (*itr)->iv_refTarget.get();
 
         if ( ((l_hw == HwCallouts::TOD_CLOCK) ||
               (l_hw == HwCallouts::MEM_REF_CLOCK) ||
@@ -572,11 +571,9 @@ void processEIBusCallouts(const ErrorInfo & i_errInfo,
     for (auto itr = i_errInfo.iv_busCallouts.begin();
          itr != i_errInfo.iv_busCallouts.end(); ++itr)
     {
-        TARGETING::Target * l_pTarget1 =
-            reinterpret_cast<TARGETING::Target*>((*itr)->iv_target1.get());
+        TARGETING::Target * l_pTarget1 = (*itr)->iv_target1.get();
 
-        TARGETING::Target * l_pTarget2 =
-            reinterpret_cast<TARGETING::Target*>((*itr)->iv_target2.get());
+        TARGETING::Target * l_pTarget2 = (*itr)->iv_target2.get();
 
         HWAS::callOutPriority l_priority =
             xlateCalloutPriority((*itr)->iv_calloutPriority);
@@ -647,8 +644,7 @@ void processEICDGs(const ErrorInfo & i_errInfo,
     for (auto itr = i_errInfo.iv_CDGs.begin();
          itr != i_errInfo.iv_CDGs.end(); ++itr)
     {
-        TARGETING::Target * l_pTarget =
-            reinterpret_cast<TARGETING::Target*>((*itr)->iv_target.get());
+        TARGETING::Target * l_pTarget = (*itr)->iv_target.get();
 
         HWAS::callOutPriority l_priority =
             xlateCalloutPriority((*itr)->iv_calloutPriority);
@@ -701,8 +697,7 @@ void getChildTargetsForCDG(
     do
     {
         // Get the parent TARGETING::Target
-        TARGETING::Target * l_pTargParent =
-            reinterpret_cast<TARGETING::Target *>(i_parentTarget.get());
+        TARGETING::Target * l_pTargParent = i_parentTarget.get();
 
         if (l_pTargParent == NULL)
         {
@@ -1063,8 +1058,7 @@ void set_log_id( const Target<TARGET_TYPE_ALL>& i_fapiTrgt,
     do
     {
         // Get TARGETING target.
-        TARGETING::Target* attrTrgt =
-                        reinterpret_cast<TARGETING::Target*>(i_fapiTrgt.get());
+        TARGETING::Target* attrTrgt = i_fapiTrgt.get();
         if ( nullptr == attrTrgt )
         {
             FAPI_ERR( "[set_log_id] attrTrgt is null" );
@@ -1155,8 +1149,7 @@ fapi2::ReturnCode platSpecialWakeup(const Target<TARGET_TYPE_ALL>& i_target,
 {
     fapi2::ReturnCode fapi_rc = fapi2::FAPI2_RC_SUCCESS;
 
-    TARGETING::Target* l_target =
-        reinterpret_cast<TARGETING::Target*>(i_target.get());
+    TARGETING::Target* l_target = i_target.get();
     FAPI_INF("platSpecialWakeup : HUID=%.8X, enable=%d", TARGETING::get_huid(l_target), i_enable);
 
     WAKEUP::HandleOptions_t l_option = WAKEUP::DISABLE;

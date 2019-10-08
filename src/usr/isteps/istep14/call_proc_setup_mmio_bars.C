@@ -74,8 +74,10 @@ void* call_proc_setup_mmio_bars (void *io_pArgs)
                   "call p10_setup_mmio_bars: Target HUID  %.8X",
                   TARGETING::get_huid(l_procChip));
 
+        fapi2::Target <fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProcChip(l_procChip);
+
         // Call the HWP with each fapi::Target
-        FAPI_INVOKE_HWP(l_errl, p10_setup_mmio_bars, l_procChip);
+        FAPI_INVOKE_HWP(l_errl, p10_setup_mmio_bars, l_fapiProcChip);
 
         if (l_errl)
         {

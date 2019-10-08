@@ -677,8 +677,7 @@ bool AttrOverrideSync::getAttrOverride(const AttributeId i_attrId,
     uint32_t l_targetType = getTargetType(i_pTarget);
 
     // Get the Target pointer
-    TARGETING::Target * l_pTarget =
-        reinterpret_cast<TARGETING::Target*>(i_pTarget->get());
+    TARGETING::Target * l_pTarget = i_pTarget->get();
     uint16_t l_pos = 0;
     uint8_t l_unitPos = 0;
     uint8_t l_node = 0;
@@ -741,8 +740,7 @@ void AttrOverrideSync::setAttrActions(const AttributeId i_attrId,
         uint32_t l_targetType = getTargetType(i_pTarget);
 
         // Get the Target pointer
-        TARGETING::Target * l_pTarget =
-            reinterpret_cast<TARGETING::Target*>(i_pTarget->get());
+        TARGETING::Target * l_pTarget = i_pTarget->get();
         uint16_t l_pos = 0;
         uint8_t l_unitPos = 0;
         uint8_t l_node = 0;

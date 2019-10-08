@@ -170,7 +170,7 @@ void*    call_mss_freq( void *io_pArgs )
                     "call_mss_freq: running p10_mss_freq_system HWP on target 0x%.08X",
                     get_huid(l_proc_target));
 
-            FAPI_INVOKE_HWP(l_err, p10_mss_freq_system, l_proc_target);
+            FAPI_INVOKE_HWP(l_err, p10_mss_freq_system, l_fapi_proc_target);
             if (l_err)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,

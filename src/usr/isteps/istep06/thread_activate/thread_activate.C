@@ -202,8 +202,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
                    TARGETING::get_huid(l_masterCore) );
 
         // cast OUR type of target to a FAPI type of target.
-        const fapi2::Target<fapi2::TARGET_TYPE_CORE>& l_fapiCore0 =
-              (const_cast<TARGETING::Target*>(l_masterCore));
+        const fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapiCore0(l_masterCore);
 
         // AVPs might enable a subset of the available threads
         uint64_t max_threads = cpu_thread_count();
@@ -347,8 +346,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
                        l_fusedCoreID, TARGETING::get_huid(l_fusedCore) );
 
             // cast OUR type of target to a FAPI type of target.
-            const fapi2::Target<fapi2::TARGET_TYPE_CORE>& l_fapiCore1 =
-                (const_cast<TARGETING::Target*>(l_fusedCore));
+            const fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapiCore1(l_fusedCore);
 
             // First capture if threads 1,3 are enabled.  Then eliminate
             // even threads and compress to bits 0,1

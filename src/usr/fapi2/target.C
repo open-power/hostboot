@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,7 +36,9 @@ namespace PLAT_TARGET
 
     void systemTargCtorHelperFunc(fapi2::plat_target_handle_t& io_handle)
     {
-      TARGETING::targetService().getTopLevelTarget(io_handle);
+        TARGETING::Target* l_target = nullptr;
+        TARGETING::targetService().getTopLevelTarget(l_target);
+        io_handle = l_target;
     }
 
 

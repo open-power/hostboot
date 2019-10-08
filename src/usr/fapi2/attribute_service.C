@@ -133,7 +133,7 @@ errlHndl_t getTargetingTarget(const Target<TARGET_TYPE_ALL>& i_pFapiTarget,
             break;
         }
 
-        o_pTarget = reinterpret_cast<TARGETING::Target*>(i_pFapiTarget.get());
+        o_pTarget = i_pFapiTarget.get();
         if(i_expectedType != TARGETING::TYPE_NA)
         {
             TARGETING::TYPE l_type = o_pTarget->getAttr<TARGETING::ATTR_TYPE>();

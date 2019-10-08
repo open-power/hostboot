@@ -110,8 +110,7 @@ errlHndl_t requestHwpViaSbe(const char * i_hwpName, TARGETING::Target * i_target
         to determine what hwp we need to request */ \
         const char* l_function = #FUNC; \
         /*Read the target argument, which is the first argument in the list */ \
-        TARGETING::Target* l_target = \
-        reinterpret_cast<TARGETING::Target*>(_GET_1ST_ARG(_args).get()); \
+        TARGETING::Target* l_target = _GET_1ST_ARG(_args).get(); \
         do  \
         { \
             /*TODO RTC:211082 Remove hook to bypass calling SBE */\
