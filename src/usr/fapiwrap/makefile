@@ -34,7 +34,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 # to get common_ringId.H
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 # to get ffdc_includes.H
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 
 # HWP include directories :
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
