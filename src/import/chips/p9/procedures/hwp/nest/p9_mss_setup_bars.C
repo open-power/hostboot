@@ -2045,9 +2045,18 @@ fapi2::ReturnCode writeMCBarData(
     uint8_t l_pos;
 
     fapi2::buffer<uint64_t> l_scomData(0);
+    fapi2::buffer<uint64_t> l_scomData_mirror(0);
+    fapi2::buffer<uint64_t> l_scomData_mcmode(0);
     fapi2::buffer<uint64_t> l_extAddr(0);
     fapi2::buffer<uint64_t> l_norAddr;
     uint64_t l_ext_mask;
+
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    uint8_t mirror_policy;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MIRROR_PLACEMENT_POLICY,  FAPI_SYSTEM, mirror_policy),
+             "Error reading ATTR_MEM_MIRROR_PLACEMENT_POLICY, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
 
     FAPI_TRY(p9a_get_ext_mask(l_ext_mask));
 
@@ -2154,30 +2163,67 @@ fapi2::ReturnCode writeMCBarData(
                      "Error writing to P9A_MI_MCFGPM1 reg");
         }
 
-        // 3. ---- Set MCFGPA reg -----
+        // 3. ---- Set MCFGPA/MCFGPMA regs -----
         l_scomData = 0;
-
-        // Assert if both HOLE1 and SMF are valid, settings will overlap
-        FAPI_ASSERT((l_data.MCFGPA_HOLE_valid[1] && l_data.MCFGPA_SMF_valid) == 0,
-                    fapi2::MSS_SETUP_BARS_HOLE1_SMF_CONFLICT()
-                    .set_TARGET(l_target)
-                    .set_HOLE1_VALID(l_data.MCFGPA_HOLE_valid[1])
-                    .set_SMF_VALID(l_data.MCFGPA_SMF_valid),
-                    "Error: MCFGPA HOLE1 and SMF are both valid, settings will overlap");
+        l_scomData_mirror = 0;
 
         // Hole 0
         if (l_data.MCFGPA_HOLE_valid[0] == true)
         {
-            // MCFGPA HOLE0 valid (bit 0)
-            l_scomData.setBit<P9A_MI_MCFGP0A_HOLE_VALID>();
+            if(mirror_policy ==
+               fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL) //Non-mirrored mode, but still set up mirrored equiv addressses
+            {
+                // Non-mirrored
+                // MCFGP0A HOLE valid (bit 0)
+                l_scomData.setBit<P9A_MI_MCFGP0A_HOLE_VALID>();
 
-            // Hole 0 lower addr
-            // Hole 0 always extends to end of range
-            FAPI_DBG("l_data.MCFGPA_HOLE_LOWER_addr[0]: %016llx", l_data.MCFGPA_HOLE_LOWER_addr[0]);
-            FAPI_TRY(extBar(l_ext_mask, l_data.MCFGPA_HOLE_LOWER_addr[0], l_extAddr));
-            l_scomData.insert<P9A_MI_MCFGP0A_HOLE_LOWER_ADDRESS,
-                              P9A_MI_MCFGP0A_HOLE_LOWER_ADDRESS_LEN>(
-                                  (l_extAddr << 9)); //matches 17:31 extendedBarAddress shifts left 8 (17-8) = 9
+                // Hole lower addr
+                // Hole always extends to end of range
+                FAPI_DBG("l_data.MCFGPA_HOLE_LOWER_addr[0]: %016llx", l_data.MCFGPA_HOLE_LOWER_addr[0]);
+                FAPI_TRY(extBar(l_ext_mask, l_data.MCFGPA_HOLE_LOWER_addr[0], l_extAddr));
+                l_scomData.insert<P9A_MI_MCFGP0A_HOLE_LOWER_ADDRESS,
+                                  P9A_MI_MCFGP0A_HOLE_LOWER_ADDRESS_LEN>(
+                                      (l_extAddr << 9)); //matches 17:31 extendedBarAddress shifts left 8 (17-8) = 9
+
+                // Mirrored Address = Non-mirrored >> 1 since bit 56 is not part of the dsaddr
+                // MCFGPM0A HOLE0 valid (bit 0)
+                l_scomData_mirror.setBit<P9A_MI_MCFGPM0A_HOLE_VALID>();
+
+                // Hole lower addr
+                // Hole always extends to end of range
+                FAPI_DBG("l_data.MCFGPA_HOLE_LOWER_addr[0]: %016llx", (l_data.MCFGPA_HOLE_LOWER_addr[0] >> 1));
+                FAPI_TRY(extBar(l_ext_mask, l_data.MCFGPA_HOLE_LOWER_addr[0], l_extAddr));
+                l_scomData_mirror.insert<P9A_MI_MCFGPM0A_HOLE_LOWER_ADDRESS,
+                                         P9A_MI_MCFGPM0A_HOLE_LOWER_ADDRESS_LEN>(
+                                             (l_extAddr << 8)); //matches 17:31 extendedBarAddress shifts left 8 (17- (8 + 1)) = 8
+            }
+            else
+            {
+                // Mirrored Address
+                // MCFGPM0A HOLE0 valid (bit 0)
+                l_scomData_mirror.setBit<P9A_MI_MCFGPM0A_HOLE_VALID>();
+
+                // Hole 0 lower addr
+                // Hole 0 always extends to end of range
+                FAPI_DBG("l_data.MCFGPA_HOLE_LOWER_addr[0]: %016llx", l_data.MCFGPA_HOLE_LOWER_addr[0]);
+                FAPI_TRY(extBar(l_ext_mask, l_data.MCFGPA_HOLE_LOWER_addr[0], l_extAddr));
+                l_scomData_mirror.insert<P9A_MI_MCFGPM0A_HOLE_LOWER_ADDRESS,
+                                         P9A_MI_MCFGPM0A_HOLE_LOWER_ADDRESS_LEN>(
+                                             (l_extAddr << 9)); //matches 17:31 extendedBarAddress shifts left 8 (17- 8) = 9
+
+                // Non-mirrored Address = Mirrored Address << 1 since bit 56 is part of the dsaddr
+                // MCFGPA HOLE0 valid (bit 0)
+                l_scomData.setBit<P9A_MI_MCFGP0A_HOLE_VALID>();
+
+                // Hole 0 lower addr
+                // Hole 0 always extends to end of range
+                FAPI_DBG("l_data.MCFGPA_HOLE_LOWER_addr[0]: %016llx", (l_data.MCFGPA_HOLE_LOWER_addr[0] << 1));
+                FAPI_TRY(extBar(l_ext_mask, l_data.MCFGPA_HOLE_LOWER_addr[0], l_extAddr));
+                l_scomData.insert<P9A_MI_MCFGP0A_HOLE_LOWER_ADDRESS,
+                                  P9A_MI_MCFGP0A_HOLE_LOWER_ADDRESS_LEN>(
+                                      (l_extAddr << 10)); //matches 17:31 extendedBarAddress shifts left 8 (17- (8 - 1)) = 10
+
+            }
         }
 
         // SMF
@@ -2185,34 +2231,108 @@ fapi2::ReturnCode writeMCBarData(
         {
             FAPI_DBG("Writing SMF bit into address extension now");
             // Set up Extension Address for SMF
-            FAPI_TRY(fapi2::getScom(l_target.getParent<fapi2::TARGET_TYPE_MI>(), P9A_MI_MCMODE2, l_scomData),
+            FAPI_TRY(fapi2::getScom(l_target.getParent<fapi2::TARGET_TYPE_MI>(), P9A_MI_MCMODE2, l_scomData_mcmode),
                      "Error reading to P9A_MI_MCMODE2 reg");
-            l_scomData.setBit<46>();
-            FAPI_TRY(fapi2::putScom(l_target.getParent<fapi2::TARGET_TYPE_MI>(), P9A_MI_MCMODE2, l_scomData),
+            l_scomData_mcmode.setBit<P9A_MI_MCMODE2_CHIP_ADDRESS_EXTENSION_MASK_ENABLE>();
+            FAPI_TRY(fapi2::putScom(l_target.getParent<fapi2::TARGET_TYPE_MI>(), P9A_MI_MCMODE2, l_scomData_mcmode),
                      "Error writing to P9A_MI_MCMODE2 reg");
 
-            l_scomData = 0;
-            // MCFGPA SMF valid (bit 0)
-            l_scomData.setBit<P9A_MI_MCFGP0A_SMF_VALID>();
+            if(mirror_policy ==
+               fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL) //Non-mirrored mode, but still set up mirrored equiv addressses
+            {
+                //Non-mirrored
+                // MCFGPA SMF valid (bit 0)
+                l_scomData.setBit<P9A_MI_MCFGP0A_SMF_VALID>();
 
-            // MCFGPA_SMF_UPPER_ADDRESS_AT_END_OF_RANGE
-            l_scomData.setBit<P9A_MI_MCFGP0A_SMF_EXTEND_TO_END_OF_RANGE>();
+                // MCFGPA_SMF_UPPER_ADDRESS_AT_END_OF_RANGE
+                l_scomData.setBit<P9A_MI_MCFGP0A_SMF_EXTEND_TO_END_OF_RANGE>();
 
-            // SMF lower addr
-            l_norAddr = 0;
-            l_norAddr.insertFromRight<17, 19>(l_data.MCFGPA_SMF_LOWER_addr);
-            FAPI_TRY(extendBarAddress(l_ext_mask, l_norAddr, l_extAddr));
-            l_scomData.insert<P9A_MI_MCFGP0A_SMF_LOWER_ADDRESS,
-                              P9A_MI_MCFGP0A_SMF_LOWER_ADDRESS_LEN>(
-                                  (l_extAddr << 9)); //matches 17:35 extendBarAddress shifts left 8 (17-8) = 9
-            // SMF upper addr
-            l_norAddr = 0;
-            l_norAddr.insertFromRight<17, 19>(l_data.MCFGPA_SMF_UPPER_addr);
-            FAPI_TRY(extendBarAddress(l_ext_mask, l_norAddr, l_extAddr));
-            l_scomData.insert<P9A_MI_MCFGP0A_SMF_UPPER_ADDRESS,
-                              P9A_MI_MCFGP0A_SMF_UPPER_ADDRESS_LEN>(
-                                  (l_extAddr << 9)); //matches 17:35 extendBarAddress shifts left 8 (17-8) = 9
+                // SMF lower addr
+                l_norAddr = 0;
+                l_norAddr.insertFromRight<17, 19>(l_data.MCFGPA_SMF_LOWER_addr);
+                FAPI_TRY(extendBarAddress(l_ext_mask, l_norAddr, l_extAddr));
+                l_scomData.insert<P9A_MI_MCFGP0A_SMF_LOWER_ADDRESS,
+                                  P9A_MI_MCFGP0A_SMF_LOWER_ADDRESS_LEN>(
+                                      (l_extAddr << 9)); //matches 17:35 extendBarAddress shifts left 8 (17-8) = 9
+                // SMF upper addr
+                l_norAddr = 0;
+                l_norAddr.insertFromRight<17, 19>(l_data.MCFGPA_SMF_UPPER_addr);
+                FAPI_TRY(extendBarAddress(l_ext_mask, l_norAddr, l_extAddr));
+                l_scomData.insert<P9A_MI_MCFGP0A_SMF_UPPER_ADDRESS,
+                                  P9A_MI_MCFGP0A_SMF_UPPER_ADDRESS_LEN>(
+                                      (l_extAddr << 9)); //matches 17:35 extendBarAddress shifts left 8 (17-8) = 9
 
+
+                //Mirrored BAR = Non-mirrored BAR >> 1 since bit 56 is not a dsaddr bit
+                // MCFGPA SMF valid (bit 0)
+                l_scomData_mirror.setBit<P9A_MI_MCFGPM0A_SMF_VALID>();
+
+                // MCFGPA_SMF_UPPER_ADDRESS_AT_END_OF_RANGE
+                l_scomData_mirror.setBit<P9A_MI_MCFGPM0A_SMF_EXTEND_TO_END_OF_RANGE>();
+
+                // SMF lower addr
+                l_norAddr = 0;
+                l_norAddr.insertFromRight<17, 19>(l_data.MCFGPA_SMF_LOWER_addr);
+                FAPI_TRY(extendBarAddress(l_ext_mask, l_norAddr, l_extAddr));
+                l_scomData_mirror.insert<P9A_MI_MCFGPM0A_SMF_LOWER_ADDRESS,
+                                         P9A_MI_MCFGPM0A_SMF_LOWER_ADDRESS_LEN>(
+                                             (l_extAddr << 8)); //matches 17:35 extendBarAddress shifts left 8 (17- (8 + 1)) = 8
+                // SMF upper addr
+                l_norAddr = 0;
+                l_norAddr.insertFromRight<17, 19>(l_data.MCFGPA_SMF_UPPER_addr);
+                FAPI_TRY(extendBarAddress(l_ext_mask, l_norAddr, l_extAddr));
+                l_scomData_mirror.insert<P9A_MI_MCFGPM0A_SMF_UPPER_ADDRESS,
+                                         P9A_MI_MCFGPM0A_SMF_UPPER_ADDRESS_LEN>(
+                                             (l_extAddr << 8)); //matches 17:35 extendBarAddress shifts left 8 (17- (8 + 1)) = 8
+            }
+            else
+            {
+                //Mirrored
+                // MCFGPA SMF valid (bit 0)
+                l_scomData_mirror.setBit<P9A_MI_MCFGPM0A_SMF_VALID>();
+
+                // MCFGPA_SMF_UPPER_ADDRESS_AT_END_OF_RANGE
+                l_scomData_mirror.setBit<P9A_MI_MCFGPM0A_SMF_EXTEND_TO_END_OF_RANGE>();
+
+                // SMF lower addr
+                l_norAddr = 0;
+                l_norAddr.insertFromRight<17, 19>(l_data.MCFGPA_SMF_LOWER_addr);
+                FAPI_TRY(extendBarAddress(l_ext_mask, l_norAddr, l_extAddr));
+                l_scomData_mirror.insert<P9A_MI_MCFGPM0A_SMF_LOWER_ADDRESS,
+                                         P9A_MI_MCFGPM0A_SMF_LOWER_ADDRESS_LEN>(
+                                             (l_extAddr << 9)); //matches 17:35 extendBarAddress shifts left 8 (17- 8) = 9
+                // SMF upper addr
+                l_norAddr = 0;
+                l_norAddr.insertFromRight<17, 19>(l_data.MCFGPA_SMF_UPPER_addr);
+                FAPI_TRY(extendBarAddress(l_ext_mask, l_norAddr, l_extAddr));
+                l_scomData_mirror.insert<P9A_MI_MCFGPM0A_SMF_UPPER_ADDRESS,
+                                         P9A_MI_MCFGPM0A_SMF_UPPER_ADDRESS_LEN>(
+                                             (l_extAddr << 9)); //matches 17:35 extendBarAddress shifts left 8 (17- 8) = 9
+
+                //Non-Mirrored BAR = Mirrored BAR << 1 since bit 56 is now a dsaddr bit
+                // MCFGPA SMF valid (bit 0)
+                l_scomData.setBit<P9A_MI_MCFGP0A_SMF_VALID>();
+
+                // MCFGPA_SMF_UPPER_ADDRESS_AT_END_OF_RANGE
+                l_scomData.setBit<P9A_MI_MCFGP0A_SMF_EXTEND_TO_END_OF_RANGE>();
+
+                // SMF lower addr
+                l_norAddr = 0;
+                l_norAddr.insertFromRight<17, 19>(l_data.MCFGPA_SMF_LOWER_addr);
+                FAPI_TRY(extendBarAddress(l_ext_mask, l_norAddr, l_extAddr));
+                l_scomData.insert<P9A_MI_MCFGP0A_SMF_LOWER_ADDRESS,
+                                  P9A_MI_MCFGP0A_SMF_LOWER_ADDRESS_LEN>(
+                                      (l_extAddr << 10)); //matches 17:35 extendBarAddress shifts left 8 (17- (8 - 1)) = 10
+                // SMF upper addr
+                l_norAddr = 0;
+                l_norAddr.insertFromRight<17, 19>(l_data.MCFGPA_SMF_UPPER_addr);
+                FAPI_TRY(extendBarAddress(l_ext_mask, l_norAddr, l_extAddr));
+                l_scomData.insert<P9A_MI_MCFGP0A_SMF_UPPER_ADDRESS,
+                                  P9A_MI_MCFGP0A_SMF_UPPER_ADDRESS_LEN>(
+                                      (l_extAddr << 10)); //matches 17:35 extendBarAddress shifts left 8 (17- (8 - 1)) = 10
+
+
+            }
         }
 
         // Write to reg
@@ -2222,6 +2342,11 @@ fapi2::ReturnCode writeMCBarData(
                      P9A_MI_MCFGP0A, l_scomData);
             FAPI_TRY(fapi2::putScom(l_target.getParent<fapi2::TARGET_TYPE_MI>(), P9A_MI_MCFGP0A, l_scomData),
                      "Error writing to P9A_MI_MCFGP0A reg");
+
+            FAPI_INF("Write MCFGPM0A reg 0x%.16llX, Value 0x%.16llX",
+                     P9A_MI_MCFGPM0A, l_scomData_mirror);
+            FAPI_TRY(fapi2::putScom(l_target.getParent<fapi2::TARGET_TYPE_MI>(), P9A_MI_MCFGPM0A, l_scomData_mirror),
+                     "Error writing to P9A_MI_MCFGPM0A reg");
         }
         else
         {
@@ -2229,76 +2354,12 @@ fapi2::ReturnCode writeMCBarData(
                      P9A_MI_MCFGP1A, l_scomData);
             FAPI_TRY(fapi2::putScom(l_target.getParent<fapi2::TARGET_TYPE_MI>(), P9A_MI_MCFGP1A, l_scomData),
                      "Error writing to P9A_MI_MCFGP1A reg");
+
+            FAPI_INF("Write MCFGPM1A reg 0x%.16llX, Value 0x%.16llX",
+                     P9A_MI_MCFGPM1A, l_scomData_mirror);
+            FAPI_TRY(fapi2::putScom(l_target.getParent<fapi2::TARGET_TYPE_MI>(), P9A_MI_MCFGPM1A, l_scomData_mirror),
+                     "Error writing to P9A_MI_MCFGP1A reg");
         }
-
-        // 4. ---- Set MCFGPMA reg -----
-        l_scomData = 0;
-
-        // Assert if both HOLE1 and SMF are valid, settings will overlap
-        FAPI_ASSERT((l_data.MCFGPMA_HOLE_valid[1] && l_data.MCFGPMA_SMF_valid) == 0,
-                    fapi2::MSS_SETUP_BARS_HOLE1_SMF_CONFLICT()
-                    .set_TARGET(l_target)
-                    .set_HOLE1_VALID(l_data.MCFGPMA_HOLE_valid[1])
-                    .set_SMF_VALID(l_data.MCFGPMA_SMF_valid),
-                    "Error: MCFGPMA HOLE1 and SMF are both valid, settings will overlap");
-
-        // Hole 0
-        if (l_data.MCFGPMA_HOLE_valid[0] == true)
-        {
-            // MCFGPMA HOLE0 valid (bit 0)
-            l_scomData.setBit<P9A_MI_MCFGPM0A_HOLE_VALID>();
-
-            // Hole 0 lower addr
-            // 0b0000000001 = 4GB
-            FAPI_TRY(extBar(l_ext_mask, l_data.MCFGPMA_HOLE_LOWER_addr[0], l_extAddr));
-            l_scomData.insert<P9A_MI_MCFGPM0A_HOLE_LOWER_ADDRESS,
-                              P9A_MI_MCFGPM0A_HOLE_LOWER_ADDRESS_LEN>(
-                                  (l_extAddr << 9)); //matches 17:31 extendedBarAddress shifts left 8 (17-8) = 9
-        }
-
-        // SMF
-        if (l_data.MCFGPMA_SMF_valid == true)
-        {
-            // MCFGPMA SMF valid (bit 0)
-            l_scomData.setBit<P9A_MI_MCFGPM0A_SMF_VALID>();
-
-            // MCFGPMA_SMF_UPPER_ADDRESS_AT_END_OF_RANGE
-            l_scomData.setBit<P9A_MI_MCFGPM0A_SMF_EXTEND_TO_END_OF_RANGE>();
-
-            // SMF lower addr
-            l_norAddr = 0;
-            l_norAddr.insertFromRight<17, 19>(l_data.MCFGPMA_SMF_LOWER_addr);
-            FAPI_TRY(extendBarAddress(l_ext_mask, l_norAddr, l_extAddr));
-            l_scomData.insert<P9A_MI_MCFGPM0A_SMF_LOWER_ADDRESS,
-                              P9A_MI_MCFGPM0A_SMF_LOWER_ADDRESS_LEN>(
-                                  (l_extAddr << 9 )); //matches 17:35 extendBarAddress shifts left 8 (17-8) = 9
-            // SMF upper addr
-            l_norAddr = 0;
-            l_norAddr.insertFromRight<17, 19>(l_data.MCFGPMA_SMF_UPPER_addr);
-            FAPI_TRY(extendBarAddress(l_ext_mask, l_norAddr, l_extAddr));
-            l_scomData.insert<P9A_MI_MCFGPM0A_SMF_UPPER_ADDRESS,
-                              P9A_MI_MCFGPM0A_SMF_UPPER_ADDRESS_LEN>(
-                                  (l_extAddr << 9)); //matches 17:35 extendBarAddress shifts left 8 (17-8) = 9
-        }
-
-        // Write to reg
-        if (l_pos % 2 == 0)
-        {
-            FAPI_INF("Write P9A_MI_MCFGPM0A reg 0x%.16llX, Value 0x%.16llX",
-                     P9A_MI_MCFGPM0A, l_scomData);
-
-            FAPI_TRY(fapi2::putScom(l_target.getParent<fapi2::TARGET_TYPE_MI>(), P9A_MI_MCFGPM0A, l_scomData),
-                     "Error writing to P9A_MI_MCFGPM0A reg");
-        }
-        else
-        {
-            FAPI_INF("Write P9A_MI_MCFGPM1A reg 0x%.16llX, Value 0x%.16llX",
-                     P9A_MI_MCFGPM1A, l_scomData);
-
-            FAPI_TRY(fapi2::putScom(l_target.getParent<fapi2::TARGET_TYPE_MI>(), P9A_MI_MCFGPM1A, l_scomData),
-                     "Error writing to P9A_MI_MCFGPM1A reg");
-        }
-
     } // Data pair loop
 
 fapi_try_exit:
@@ -2563,7 +2624,6 @@ fapi2::ReturnCode p9_mss_setup_bars(
                      "fixGeminiMDI() returns error, l_rc 0x%.8X",
                      uint64_t(fapi2::current_err));
         }
-
 
         // Write data to MI
         FAPI_TRY(writeMCBarData(l_mccBarDataPair),

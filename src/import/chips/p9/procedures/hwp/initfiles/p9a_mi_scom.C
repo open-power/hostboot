@@ -45,6 +45,8 @@ fapi2::ReturnCode p9a_mi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TGT0,
         uint64_t l_def_ENABLE_PREFETCH_DROP_PROMOTE_BASIC = literal_1;
         fapi2::ATTR_ENABLE_MEM_EARLY_DATA_SCOM_Type l_TGT1_ATTR_ENABLE_MEM_EARLY_DATA_SCOM;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ENABLE_MEM_EARLY_DATA_SCOM, TGT1, l_TGT1_ATTR_ENABLE_MEM_EARLY_DATA_SCOM));
+        fapi2::ATTR_MEM_MIRROR_PLACEMENT_POLICY_Type l_TGT1_ATTR_MEM_MIRROR_PLACEMENT_POLICY;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MIRROR_PLACEMENT_POLICY, TGT1, l_TGT1_ATTR_MEM_MIRROR_PLACEMENT_POLICY));
         uint64_t l_def_ENABLE_AMO_CACHING = literal_1;
         uint64_t l_def_ENABLE_MCU_TIMEOUTS = literal_1;
         fapi2::buffer<uint64_t> l_scom_buffer;
@@ -97,6 +99,18 @@ fapi2::ReturnCode p9a_mi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TGT0,
             l_scom_buffer.insert<25, 7, 57, uint64_t>(literal_0b0111111 );
             constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_FORCE_COMMANDLIST_VALID_ON = 0x1;
             l_scom_buffer.insert<5, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_FORCE_COMMANDLIST_VALID_ON );
+
+            if ((l_TGT1_ATTR_MEM_MIRROR_PLACEMENT_POLICY == fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED))
+            {
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_MEM_MAP_MODE_ON = 0x1;
+                l_scom_buffer.insert<36, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_MEM_MAP_MODE_ON );
+            }
+            else if ((l_TGT1_ATTR_MEM_MIRROR_PLACEMENT_POLICY == fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL))
+            {
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_MEM_MAP_MODE_OFF = 0x0;
+                l_scom_buffer.insert<36, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_MEM_MAP_MODE_OFF );
+            }
+
             FAPI_TRY(fapi2::putScom(TGT0, 0x5010811ull, l_scom_buffer));
         }
         {
