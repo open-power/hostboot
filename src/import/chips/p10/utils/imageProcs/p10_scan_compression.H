@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -86,7 +86,8 @@ typedef struct
     uint16_t      iv_undefined; // Must be last (temp assumption in Mvpd accessor)
 } CompressedScanData;
 
-#define RS4_V3TOV4_SIZE_INC 4 // Header increase from V3 to V4 (needed by Mvpd accessor)
+#define RS4_V3TOV4_SIZE_INC  4 // Header increase from V3 to V4 (needed by Mvpd accessor)
+#define RS4_MIN_RING_SIZE   20 // Min value of iv_size, e.g. flush size of short ring.
 
 /// Endian-translate a CompressedScanData structure
 ///

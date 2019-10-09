@@ -48,7 +48,7 @@ typedef uint8_t   ChipletType_t;    // Type for Chiplets enum
 typedef uint8_t   ChipId_t;         // Type for ChipId enum
 typedef uint8_t   RingType_t;       // Type for RingType enum
 typedef uint8_t   RingRequest_t;    // Type for RingRequest enum, e.g. GET_SINGLE_RING
-typedef uint32_t  TorCpltOffset_t;  // Type for offset value to chiplet's CMN or INST section
+typedef uint16_t  TorOffset_t;      // Type for offset value to various TOR objects (chiplet,ring)
 typedef uint8_t   MyBool_t;         // false:0, true:1, undefined:UNDEFINED_BOOLEAN
 
 #define  UNDEFINED_RING_ID         (RingId_t)0xffff
@@ -61,10 +61,14 @@ typedef uint8_t   MyBool_t;         // false:0, true:1, undefined:UNDEFINED_BOOL
 
 #define  UNDEFINED_DD_LEVEL     (uint8_t)0xff
 
-#define  MAX_TOR_RING_OFFSET    (uint16_t)(256*256-1) // Max val of uint16
-
 #define  MAX_RING_NAME_LENGTH   (uint8_t)50
 
+// Ring section defines
+#define  MAX_TOR_RING_OFFSET        (uint16_t)(256*256-1) // Max val of uint16
+#define  MAX_TOR_RING_SECTION_SIZE  (uint32_t)(256*256)
+#define  MAX_DYN_RING_SECTION_SIZE  (uint32_t)(1024*1024)
+
+// Chiplet ID defines
 #define  CHIPLET_ID_MASK       (uint32_t)0xFF000000
 #define  MIN_INSTANCE_ID       (uint8_t)0x01
 #define  MAX_INSTANCE_ID       (uint8_t)0x3F
@@ -93,11 +97,9 @@ typedef struct
 
 typedef struct
 {
-    TorCpltOffset_t cmnOffset;
-    TorCpltOffset_t instOffset;
+    TorOffset_t cmnOffset;
+    TorOffset_t instOffset;
 } TorCpltBlock_t;
-
-typedef uint16_t TorRingOffset_t;  // Offset value to actual ring
 
 //                                                                           //
 //                     TOR layout definitions - End                          //
@@ -118,7 +120,8 @@ typedef uint16_t TorRingOffset_t;  // Offset value to actual ring
 //#define TOR_VERSION  7  // Added three more runtime risk levels (RL3/4/5)
 
 // P10 TOR versions
-#define TOR_VERSION  1  // Removed all ring variant support. Only BASE rings supported now.
+//#define TOR_VERSION  1  // Removed all ring variant support. Only BASE rings supported now.
+#define TOR_VERSION  2  // TOR ringSection offsets now wrt origin of ringSection at TOR header.
 
 
 // TOR Magic values for top-level TOR ringSection and sub-ringSections
@@ -263,8 +266,8 @@ enum RingType
 
 enum RingRequest
 {
-    GET_SINGLE_RING     = 0x00,
-    PUT_SINGLE_RING     = 0x01
+    GET_SINGLE_RING        = 0,
+    PUT_SINGLE_RING        = 1,
 };
 
 //
@@ -327,7 +330,7 @@ typedef struct
 #define TOR_INVALID_CHIP_ID                   INFRASTRUCT_NOOF_RCS + 3
 #define TOR_INVALID_CHIPLET_TYPE              INFRASTRUCT_NOOF_RCS + 4
 #define TOR_INVALID_RING_ID                   INFRASTRUCT_NOOF_RCS + 5
-#define TOR_INVALID_INSTANCE_ID               INFRASTRUCT_NOOF_RCS + 6
+#define TOR_INVALID_CHIPLET_ID                INFRASTRUCT_NOOF_RCS + 6
 #define TOR_INVALID_RING_REQUEST              INFRASTRUCT_NOOF_RCS + 7
 #define TOR_UNSUPPORTED_RING_SECTION          INFRASTRUCT_NOOF_RCS + 8
 #define TOR_RING_FILE_NOT_FOUND               INFRASTRUCT_NOOF_RCS + 9

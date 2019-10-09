@@ -353,10 +353,11 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_XIPC_SECTION_SIZING</rc>
+    <rc>RC_XIPC_RING_SECTION_SIZING</rc>
     <description>Code bug: Ring section size would exceed max ring section size</description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_SECTION_SIZE</ffdc>
+    <ffdc>RING_SECTION_BUF_SIZE</ffdc>
     <ffdc>MAX_RING_SECTION_SIZE</ffdc>
     <ffdc>OCCURRENCE</ffdc>
     <callout>

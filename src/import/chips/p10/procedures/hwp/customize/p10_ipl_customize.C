@@ -882,10 +882,10 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
 
         l_rc = tor_append_ring(
                    i_ringSection,
-                   io_ringSectionSize, // In: Exact size. Out: Updated size.
+                   i_maxRingSectionSize,
                    i_ringId,
-                   l_chipletId,     // Chiplet ID
-                   i_vpdRing );     // The VPD RS4 ring container
+                   l_chipletId,
+                   i_vpdRing );
 
         FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
                      fapi2::XIPC_TOR_APPEND_RING_FAILED().
@@ -896,7 +896,10 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                      "tor_append_ring() failed in sysPhase=%d w/rc=%d for ringId=0x%x",
                      i_sysPhase, l_rc, i_ringId );
 
-        FAPI_IMP("Successfully appended VPD ring, (ringId,chipletId)=(0x%x,0x%02x), and now ringSectionSize=%u",
+        io_ringSectionSize = be32toh(((TorHeader_t*)i_ringSection)->size);
+
+        FAPI_IMP("Successfully appended VPD ring, (ringId,chipletId)=(0x%x,0x%02x), and"
+                 " now ringSectionSize=%u",
                  i_ringId, l_chipletId, io_ringSectionSize);
     }
     else if ((uint32_t)l_fapiRc == RC_MVPD_RING_NOT_FOUND)
@@ -907,7 +910,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
         // No match, do nothing. But since rare, trace out as warning since all
         // rings we're looking for in Mvpd really should be represented there.
         FAPI_DBG("WARNING!: _fetch_and_insert_vpd_rings(): The ring w/"
-                 "(ringId,chipletId)=(0x%02x,0x%02x) was not found. (This is not a bug)",
+                 "(ringId,chipletId)=(0x%x,0x%02x) was not found. (This is not a bug)",
                  i_ringId, l_chipletId);
 
         fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
@@ -977,7 +980,7 @@ fapi2::ReturnCode resolve_gptr_overlays(
     FAPI_TRY( FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC,
                                        i_procTarget,
                                        o_ddLevel),
-              "Error: Attribute ATTR_EC failed w/rc=0x%08x",
+              "ERROR: Attribute ATTR_EC failed w/rc=0x%08x",
               (uint64_t)current_err );
 
     l_rc = p9_xip_get_section(i_hwImage, P9_XIP_SECTION_HW_OVERLAYS, &l_xipSection, o_ddLevel);
@@ -1848,7 +1851,7 @@ fapi2::ReturnCode process_base_and_dynamic_rings(
                  set_RING_ID(i_ringId).
                  set_DD_LEVEL(i_ddlevel).
                  set_LOCAL_RC(l_rc),
-                 "tor_get_single_ring() for Base ring: Failed w/rc=%i for "
+                 "ERROR: tor_get_single_ring() for Base ring: Failed w/rc=%i for "
                  "ringId=0x%x, chipletId=0xff and ddLevel=0x%x",
                  l_rc, i_ringId, i_ddlevel );
 
@@ -1862,14 +1865,9 @@ fapi2::ReturnCode process_base_and_dynamic_rings(
         baseTypeField = ((CompressedScanData*)baseRs4)->iv_type;
     }
 
-//CMO-20190902: At this point we could probably sanity check that baseTypeField ==
-//              dynTypeField. However, it's a hit-and-miss check since we can only
-//              make this check if both a Base AND a Dynamic ring is found. It's
-//              better than nothing, but we postpone for now.
-
     if(bBaseRingFound && bDynRingFound)
     {
-        FAPI_DBG("Base and Dynamic rings found.");// Will delete later
+        FAPI_DBG("ringId=0x%x: Base ring found. Dynamic ring found.", i_ringId);
 
         // Use baseTypeField as ref input value for iv_type, but dynTypeField would be just as good
         finalTypeField = (baseTypeField & ~RS4_IV_TYPE_SEL_MASK) |
@@ -1891,7 +1889,7 @@ fapi2::ReturnCode process_base_and_dynamic_rings(
     }
     else if(!bBaseRingFound && bDynRingFound)
     {
-        FAPI_DBG("No Base ring found. Dynamic ring found.");//Will delete later
+        FAPI_DBG("ringId=0x%x: No Base ring found. Dynamic ring found.", i_ringId);
 
         // We'll need these temp vars below
         RingId_t ringIdTmp = be16toh(((CompressedScanData*)finalRs4)->iv_ringId);
@@ -1927,7 +1925,7 @@ fapi2::ReturnCode process_base_and_dynamic_rings(
     else if(bBaseRingFound && !bDynRingFound)
     {
         //In this case finalRs4 = baseRs4 = io_ringBuf1 already has the final ring
-        FAPI_DBG("Base ring found. No Dynamic ring found.");//Will delete this later
+        FAPI_DBG("ringId=0x%x: Base ring found. No Dynamic ring found.", i_ringId);
 
         finalTypeField = (baseTypeField & ~RS4_IV_TYPE_SEL_MASK) |
                          RS4_IV_TYPE_SEL_BASE | RS4_IV_TYPE_SEL_FINAL;
@@ -1939,11 +1937,11 @@ fapi2::ReturnCode process_base_and_dynamic_rings(
     }
     else
     {
-        FAPI_DBG("No Base or Dynamic rings found."); // Delete later
+        FAPI_DBG("ringId=0x%x: No Base ring found. No Dynamic ring found.", i_ringId);
         fapi2::current_err = RC_XIPC_NO_RING_FOUND;
     }
 
-    //io_ringBuf1 has the final ring at this point.
+    // Note that the final ring is already in io_ringBuf1 at this point.
 
 fapi_try_exit:
     FAPI_DBG("Exiting process_base_and_dynamic_rings");
@@ -2311,8 +2309,9 @@ ReturnCode p10_ipl_customize (
     uint32_t        l_inputImageSize;
     uint32_t        l_imageSizeWithoutRings;
     uint32_t        l_currentImageSize;
-    uint32_t        l_maxImageSize = 0; // Attrib adjusted local value of MAX_SEEPROM_IMAGE_SIZE
-    uint32_t        l_maxRingSectionSize;
+    uint32_t        l_maxImageSize = 0;   // Attrib adjusted local value of MAX_SEEPROM_IMAGE_SIZE
+    uint32_t        l_maxRingSectionSize; // Max size of ringSection
+    uint32_t        l_ringSectionBufSize; // Size of ringSection buffer
     uint32_t        l_sectionOffset = 1;
     uint32_t        attrMaxSbeSeepromSize = 0;
     uint32_t        l_requestedBootCoreMask = (i_sysPhase == SYSPHASE_HB_SBE) ? io_bootCoreMask : 0xFFFFFFFF;
@@ -2337,14 +2336,13 @@ ReturnCode p10_ipl_customize (
     void*           baseRingSection = NULL;
     void*           dynamicRingSection = NULL;
     TorHeader_t*    torHeaderBase;
-    uint32_t        customRingSectionSize = 0;
     uint8_t*        partialKwdData = NULL;
     uint32_t        sizeofPartialKwdData  = 0;
     uint8_t         mvpdRtvFromCode = 0xff;
     uint8_t         mvpdRtvFromMvpd = 0xff;
     MvpdKeyword     mvpdKeyword;
 
-    FAPI_IMP ("Entering p10_ipl_customize w/sysPhase=%d...", i_sysPhase);
+    FAPI_IMP("Entering p10_ipl_customize w/sysPhase=%d...", i_sysPhase);
 
 
     // Make copy of the requested bootCoreMask
@@ -2441,6 +2439,9 @@ ReturnCode p10_ipl_customize (
                  (uintptr_t)i_ringBufSize1,
                  (uintptr_t)i_ringBufSize2,
                  (uintptr_t)i_ringBufSize3 );
+
+    // Make local copy of the [max] io_ringSectionBufSize before we start changing it
+    l_ringSectionBufSize = io_ringSectionBufSize;
 
 
     //-------------------------------------------
@@ -2910,17 +2911,17 @@ ReturnCode p10_ipl_customize (
                      set_CHIP_TARGET(i_procTarget).
                      set_INPUT_IMAGE_SIZE(l_inputImageSize).
                      set_IMAGE_BUF_SIZE(io_imageSize).
-                     set_RING_SECTION_BUF_SIZE(io_ringSectionBufSize).
+                     set_RING_SECTION_BUF_SIZE(l_ringSectionBufSize).
                      set_RING_BUF_SIZE1(i_ringBufSize1).
                      set_RING_BUF_SIZE2(i_ringBufSize2).
                      set_OCCURRENCE(2),
                      "One or more invalid input buffer sizes for HB_SBE phase:\n"
                      "  l_maxImageSize=0x%016llx\n"
                      "  io_imageSize=0x%016llx\n"
-                     "  io_ringSectionBufSize=0x%016llx\n",
+                     "  l_ringSectionBufSize=0x%016llx\n",
                      (uintptr_t)l_maxImageSize,
                      (uintptr_t)io_imageSize,
-                     (uintptr_t)io_ringSectionBufSize );
+                     (uintptr_t)l_ringSectionBufSize );
 
     }
 
@@ -3011,7 +3012,8 @@ ReturnCode p10_ipl_customize (
                          set_CHIP_TARGET(i_procTarget).
                          set_SYSPHASE(i_sysPhase).
                          set_OCCURRENCE(1),
-                         "Caller bug: Caller supplied unsupported value of sysPhase=%u (Occurrence 1)",
+                         "Caller bug: Caller supplied unsupported value of sysPhase=%u"
+                         " (Occurrence 1)",
                          i_sysPhase );
 
             break;
@@ -3035,6 +3037,7 @@ ReturnCode p10_ipl_customize (
 
 
 
+
     //////////////////////////////////////////////////////////////////////////
     // CUSTOMIZE item:     Build up a new ring section in io_ringSectionBuf
     //                     based on the TOR header info in baseRingSection.
@@ -3054,7 +3057,64 @@ ReturnCode p10_ipl_customize (
                  set_CHIP_TARGET(i_procTarget),
                  "tor_skeleton_generation failed w/rc=0x%08X", (uint32_t)l_rc );
 
-    customRingSectionSize = be32toh(((TorHeader_t*)io_ringSectionBuf)->size);
+    // Now, start tracking the instantaneous actual custom ring section size.
+    // (Note that we already took a copy of the [max] value of io_ringSectionBufSize
+    // earlier on into l_ringSectionBufSize, so safe to update this now.)
+    io_ringSectionBufSize = be32toh(((TorHeader_t*)io_ringSectionBuf)->size);
+
+
+
+
+    //////////////////////////////////////////////////////////////////////////
+    // CUSTOMIZE item:     Determine the max allowed ringSection size
+    // Systemp phase:      All phases
+    //////////////////////////////////////////////////////////////////////////
+
+    switch (i_sysPhase)
+    {
+
+        case SYSPHASE_HB_SBE:
+
+            // Calc the max ring section size for SBE.
+            l_maxRingSectionSize = l_maxImageSize - l_imageSizeWithoutRings;
+
+            break;
+
+        case SYSPHASE_RT_QME:
+
+            // Max ring section size for QME.
+            l_maxRingSectionSize = l_ringSectionBufSize; // l_ringSectionBufSize is actual max buf size
+
+            break;
+
+        default:
+
+            FAPI_ASSERT( false,
+                         fapi2::XIPC_INVALID_SYSPHASE_PARM().
+                         set_CHIP_TARGET(i_procTarget).
+                         set_SYSPHASE(i_sysPhase).
+                         set_OCCURRENCE(2),
+                         "Caller bug: Caller supplied unsupported value of sysPhase=%u"
+                         " (Occurrence 2)",
+                         i_sysPhase );
+
+            break;
+    }
+
+    // maxRingSectionSize should never exceed ringSectionBufSize which should always be allocated
+    // to be so large that we should be able to fill out the image to its maximum capacity.
+    FAPI_ASSERT( l_maxRingSectionSize <= l_ringSectionBufSize,
+                 fapi2::XIPC_RING_SECTION_SIZING().
+                 set_CHIP_TARGET(i_procTarget).
+                 set_RING_SECTION_SIZE(io_ringSectionBufSize).
+                 set_RING_SECTION_BUF_SIZE(l_ringSectionBufSize).
+                 set_MAX_RING_SECTION_SIZE(l_maxRingSectionSize).
+                 set_OCCURRENCE(1),
+                 "CODE BUG : maxRingSectionSize(=%u) > ringSectionBufSize(=%u) should"
+                 " never happen. Fix your assumptions/settings about ringSection"
+                 " buffer size or max image size (=%u) (Occurrence 1)",
+                 l_maxRingSectionSize, l_ringSectionBufSize, l_maxImageSize );
+
 
 
 
@@ -3087,7 +3147,9 @@ ReturnCode p10_ipl_customize (
                  set_CHIP_TARGET(i_procTarget).
                  set_OCCURRENCE(5),
                  "FAPI_ATTR_GET(ATTR_DYNAMIC_INIT_FEATURE_VEC) failed."
-                 " Unable to determine featureVector." );
+                 " Unable to determine featureVec." );
+
+    FAPI_IMP("Dynamic inits featureVec = 0x%016llx (GET from plat attribute)", featureVec);
 
     l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_IPL_PHASE,
                               FAPI_SYSTEM,
@@ -3155,6 +3217,8 @@ ReturnCode p10_ipl_customize (
                  set_OCCURRENCE(8),
                  "Failed to set the dynamic init feature vector attribute" );
 
+    FAPI_IMP("Dynamic inits featureVec = 0x%016llx (SET to plat attribute)", featureVec);
+
     l_rc = p9_xip_get_section(i_hwImage, P9_XIP_SECTION_HW_DYNAMIC, &iplImgSection, attrDdLevel);
 
     FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
@@ -3181,7 +3245,7 @@ ReturnCode p10_ipl_customize (
 
 //CMO-20190825: For the RT_QME phase we will get TOR_INVALID_CHIPLET_TYPE a lot
 //              here because we cycle through all the chiplets, when we really only
-//              shold consider the EQ chiplet for RT_QME.  For now, we will be
+//              should consider the EQ chiplet for RT_QME. For now, we will be
 //              mindless, but this should probably be changed.
     for(ringId = 0; ringId < NUM_RING_IDS; ringId++)
     {
@@ -3213,16 +3277,16 @@ ReturnCode p10_ipl_customize (
                      "ringId=0x%0x w/rc=0x%08x",
                      ringId, (uint32_t)l_fapiRc);
 
-        if(l_fapiRc == FAPI2_RC_SUCCESS)
+        if (l_fapiRc == FAPI2_RC_SUCCESS)
         {
             l_rc = tor_append_ring(
                        io_ringSectionBuf,
-                       customRingSectionSize,
+                       l_maxRingSectionSize,
                        ringId,
                        0xff,
                        i_ringBuf1 );
 
-            FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS ||
+            FAPI_ASSERT( l_rc == TOR_SUCCESS ||
                          l_rc == TOR_INVALID_CHIPLET_TYPE ||
                          l_rc == TOR_RING_HAS_DERIVS,
                          fapi2::XIPC_TOR_APPEND_RING_FAILED().
@@ -3235,12 +3299,45 @@ ReturnCode p10_ipl_customize (
                          "for ringId=0x%x",
                          l_rc, ringId );
 
-            FAPI_DBG("A Base or Dynamic ring w/ringId=0x%x was either appended or skipped (if"
-                     " deriv ring or invalid chiplet) and now ringSectionSize=%u",
-                     ringId, be32toh(((TorHeader_t*)io_ringSectionBuf)->size));
+            io_ringSectionBufSize = be32toh(((TorHeader_t*)io_ringSectionBuf)->size);
+
+            switch (l_rc)
+            {
+                case TOR_SUCCESS:
+                    FAPI_IMP("A Base or Dynamic ring w/ringId=0x%x was appended"
+                             " and now ringSection->size=%u",
+                             ringId, io_ringSectionBufSize);
+                    break;
+
+                case TOR_INVALID_CHIPLET_TYPE:
+                    FAPI_IMP("A Base or Dynamic ring w/ringId=0x%x was skipped"
+                             " because its an invalid chiplet for this sysPhase=%u",
+                             ringId, i_sysPhase);
+                    break;
+
+                case TOR_RING_HAS_DERIVS:
+                    FAPI_IMP("A Base or Dynamic ring w/ringId=0x%x was skipped"
+                             " because its a [root] ring w/derivatives",
+                             ringId);
+                    break;
+
+                default:
+                    FAPI_ASSERT( false,
+                                 fapi2::XIPC_CODE_BUG().
+                                 set_CHIP_TARGET(i_procTarget).
+                                 set_OCCURRENCE(2),
+                                 "Code bug(2): Messed up RC handling in assoc code. Fix code!" );
+                    break;
+            }
+
         }
     }
 
+    // Now create the "anticipatory" dynamic init debug ring list.
+    // - This list lists all the ringIds that have received dynamic init overlays.
+    // - For each ringId, the complete final feature vector is included so it can be seen
+    //   which specific features were applied to a given ringId.
+    // - The list may come in handy in case of scanning issues with the final dynamic rings.
     ringIdFeatListSize = ringIdFeatureVecMap.size() * (sizeof(uint64_t) + sizeof(RingId_t));
     ringIdFeatList = new uint8_t[ringIdFeatListSize];
 
@@ -3271,11 +3368,6 @@ ReturnCode p10_ipl_customize (
                           0 );
 
 
-    // Make a copy of the supplied max ring section buffer size before over writing it
-    l_maxRingSectionSize = io_ringSectionBufSize;
-
-    // Now, start tracking the instantaneous actual custom ring section size
-    io_ringSectionBufSize = customRingSectionSize;
 
     //////////////////////////////////////////////////////////////////////////
     // CUSTOMIZE item:     Append VPD rings to io_ringSectionBuf
@@ -3352,12 +3444,8 @@ ReturnCode p10_ipl_customize (
 
         case SYSPHASE_HB_SBE:
 
-            FAPI_DBG("Size of SBE .rings section before VPD update: %d", io_ringSectionBufSize);
-
-            // Adjust the max ring section size
-            l_maxRingSectionSize = l_maxImageSize - l_imageSizeWithoutRings;
-
-            FAPI_DBG("Max allowable size of .rings section: %d", l_maxRingSectionSize);
+            FAPI_DBG("Size of SBE .rings section before VPD update: %u (max size allowed: %u)",
+                     io_ringSectionBufSize, l_maxRingSectionSize);
 
             //----------------------------------------
             // Append VPD Rings to the .rings section
@@ -3440,12 +3528,13 @@ ReturnCode p10_ipl_customize (
 
             // More size code sanity checks of section and image sizes.
             FAPI_ASSERT( io_ringSectionBufSize <= l_maxRingSectionSize,
-                         fapi2::XIPC_SECTION_SIZING().
+                         fapi2::XIPC_RING_SECTION_SIZING().
                          set_CHIP_TARGET(i_procTarget).
                          set_RING_SECTION_SIZE(io_ringSectionBufSize).
+                         set_RING_SECTION_BUF_SIZE(l_ringSectionBufSize).
                          set_MAX_RING_SECTION_SIZE(l_maxRingSectionSize).
-                         set_OCCURRENCE(1),
-                         "Code bug: ringSectionBufSize(=%d) > maxRingSectionSize(=%d) in HB_SBE(1)",
+                         set_OCCURRENCE(2),
+                         "Code bug: ringSectionBufSize(=%d) > maxRingSectionSize(=%d) in HB_SBE (Occurrence 2)",
                          io_ringSectionBufSize, l_maxRingSectionSize );
 
             FAPI_ASSERT( (l_imageSizeWithoutRings + io_ringSectionBufSize) <= l_maxImageSize,
@@ -3552,12 +3641,14 @@ ReturnCode p10_ipl_customize (
 
             // More size code sanity checks of section and image sizes.
             FAPI_ASSERT( io_ringSectionBufSize <= l_maxRingSectionSize,
-                         fapi2::XIPC_SECTION_SIZING().
+                         fapi2::XIPC_RING_SECTION_SIZING().
                          set_CHIP_TARGET(i_procTarget).
                          set_RING_SECTION_SIZE(io_ringSectionBufSize).
+                         set_RING_SECTION_BUF_SIZE(l_ringSectionBufSize).
                          set_MAX_RING_SECTION_SIZE(l_maxRingSectionSize).
                          set_OCCURRENCE(3),
-                         "Code bug: QME ring section size(=%d) > maxRingSectionSize(=%d) in RT_QME(3)",
+                         "Code bug: QME ring section size(=%d) > maxRingSectionSize(=%d)"
+                         " in RT_QME (Occurrence 3)",
                          io_ringSectionBufSize, l_maxRingSectionSize );
 
             break;
@@ -3567,8 +3658,9 @@ ReturnCode p10_ipl_customize (
                          fapi2::XIPC_INVALID_SYSPHASE_PARM().
                          set_CHIP_TARGET(i_procTarget).
                          set_SYSPHASE(i_sysPhase).
-                         set_OCCURRENCE(2),
-                         "Caller bug: Caller supplied unsupported value of sysPhase=%u (Occurrence 2)",
+                         set_OCCURRENCE(3),
+                         "Caller bug: Caller supplied unsupported value of sysPhase=%u"
+                         " (Occurrence 3)",
                          i_sysPhase );
 
             break;

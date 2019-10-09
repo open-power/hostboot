@@ -49,7 +49,6 @@ const uint32_t  MAX_RT_IMAGE_SIZE       = 1024 * 1024;   // Max Runtime size.
 const uint32_t  MAX_RING_BUF_SIZE       = 650000;        // Max ring buffer size (agreed w/HB).
 const uint32_t  MAX_RING_BUF_SIZE_TOOL  = 450000;        // Max ring buf size for tools.
 
-const uint32_t  MAX_DYN_RING_SECTION_SIZE = 1024 * 1024; // Max dynamic ring section size.
 const uint32_t  MAX_OVERRIDES_SIZE      = 2 * 1024;      // Max overrides ring section size.
 const uint32_t  MAX_HBBL_SIZE           = 20 * 1024;     // Max hbbl bin section size.
 

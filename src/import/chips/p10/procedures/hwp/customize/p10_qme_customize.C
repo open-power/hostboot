@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,11 +49,10 @@ fapi2::ReturnCode p10_qme_customize(
     uint32_t& io_bufCustRingsSize,
     uint32_t i_dbgl)
 {
-    FAPI_IMP(">> p10_qme_customize ");
-
     int rc = INFRASTRUCT_RC_SUCCESS;
 
-    TorHeader_t* torHeader = (TorHeader_t*) i_bufQmeRings;
+    TorHeader_t* torHeaderQme  = (TorHeader_t*) i_bufQmeRings;
+    TorHeader_t* torHeaderCust = (TorHeader_t*) io_bufCustRings;
 
     uint8_t ddLevel;
     uint8_t torVersion;
@@ -63,11 +62,13 @@ fapi2::ReturnCode p10_qme_customize(
     ChipId_t chipId = UNDEFINED_CHIP_ID;
     ChipletData_t* chipletData;
 
-    ddLevel = torHeader->ddLevel;
-    torVersion = torHeader->version;
-    torMagic = be32toh(torHeader->magic);
-    chipId = torHeader->chipId;
-    inputQmeRingsSize = be32toh(torHeader->size);
+    FAPI_IMP(">> p10_qme_customize ");
+
+    ddLevel = torHeaderQme->ddLevel;
+    torVersion = torHeaderQme->version;
+    torMagic = be32toh(torHeaderQme->magic);
+    chipId = torHeaderQme->chipId;
+    inputQmeRingsSize = be32toh(torHeaderQme->size);
 
     RingId_t numRings = UNDEFINED_RING_ID; // Number of chiplet common or instance rings
     MyBool_t bInstCase = UNDEFINED_BOOLEAN; // 0:COMMON, 1:INSTANCE rings
@@ -78,8 +79,11 @@ fapi2::ReturnCode p10_qme_customize(
 
     uint8_t  iRing;
     void*    nextRing = NULL;
-    uint32_t nextRingSize;
+    uint32_t remBufSize;
 
+    //
+    // Step 0: Test input parameters
+    //
     FAPI_ASSERT(i_custOp < NUM_CUSTOMIZE_QME_ENTRIES
                 && i_bufQmeRings != NULL
                 && io_bufCustRings != NULL,
@@ -127,6 +131,7 @@ fapi2::ReturnCode p10_qme_customize(
     // Step 1: Create TOR skeleton ringSection
     // Create the complete ring skeleton, but with empty TOR ring slots (ie, no ring content).
     //
+
     rc = tor_skeleton_generation(io_bufCustRings,
                                  torMagic,
                                  torVersion,
@@ -135,13 +140,9 @@ fapi2::ReturnCode p10_qme_customize(
                                  i_dbgl);
 
     FAPI_DBG("tor_skeleton_generation() completed w/rc=0x%08x,\n"
-             " torMagic=0x%08x and torVersion=0x%08x,\n"
-             " ddLevel=0x%08x and chipId=0x%08x.\n",
-             rc,
-             torMagic,
-             torVersion,
-             ddLevel,
-             chipId);
+             " torMagic=0x%08x, torVersion=%u,\n"
+             " ddLevel=0x%02x and chipId=0x%02x.\n",
+             rc, torMagic, torVersion, ddLevel, chipId);
 
     FAPI_ASSERT(rc == INFRASTRUCT_RC_SUCCESS,
                 fapi2::QMEC_TOR_SKELETON_GEN_ERROR()
@@ -151,20 +152,13 @@ fapi2::ReturnCode p10_qme_customize(
                 .set_TOR_VER(torVersion)
                 .set_DD_LEVEL(ddLevel)
                 .set_CHIP_ID(chipId),
-                "Error: tor_skeleton_generation() failed w/rc=0x%08x,\n"
-                " torMagic=0x%08x and torVersion=0x%08x,\n"
-                " ddLevel=0x%08x and chipId=0x%08x.\n",
-                rc,
-                torMagic,
-                torVersion,
-                ddLevel,
-                chipId);
+                "Error: tor_skeleton_generation() failed w/rc=0x%08x,"
+                " torMagic=0x%08x, torVersion=%u, ddLevel=0x%02x and chipId=0x%02x\n",
+                rc, torMagic, torVersion, ddLevel, chipId);
 
     //
     // Step 2: Add ring content
-    // Main TOR ringSection create loop
-    // - Generate RS4 container for each ring, attaching it to end of ringSection and update
-    //   the ring's TOR offset slot
+    // Append rings to the end of the [skeleton] TOR ring section and update TOR offset slot
     //
 
     // Get all the meta data for this chiplet and its rings
@@ -174,13 +168,6 @@ fapi2::ReturnCode p10_qme_customize(
                                  EQ_TYPE,
                                  &chipletData);
 
-    FAPI_DBG("ringid_get_chipletProps() completed w/rc=0x%08x,\n"
-             " chipId=0x%08x, torMagic=0x%08x, torVersion=0x%08x.\n",
-             rc,
-             chipId,
-             torMagic,
-             torVersion);
-
     FAPI_ASSERT(rc == INFRASTRUCT_RC_SUCCESS,
                 fapi2::QMEC_RINGID_GET_CHIPLETPROPS_ERROR()
                 .set_TARGET(i_procTarget)
@@ -188,23 +175,14 @@ fapi2::ReturnCode p10_qme_customize(
                 .set_TOR_MAGIC(torMagic)
                 .set_TOR_VER(torVersion),
                 "Error: ringid_get_chipletProps() failed w/rc=0x%08x,\n"
-                " ddLevel=0x%08x and torVersion=0x%08x.\n",
-                rc,
-                torMagic,
-                torVersion);
+                " torMagic=0x%08x and torVersion=%u.\n",
+                rc, torMagic, torVersion);
 
     chipletInstId = chipletData->chipletBaseId + i_custOp;
 
     numRings = bInstCase ?
                chipletData->numInstanceRings :
                chipletData->numCommonRings;
-
-    FAPI_DBG("p10_qme_customize(): chipletInstId = 0x%08x, numRings = 0x%08x,\n"
-             " numInstanceRings = 0x%08x, numCommonRings = 0x%08x.\n",
-             chipletInstId,
-             numRings,
-             chipletData->numInstanceRings,
-             chipletData->numCommonRings);
 
     // Loop through all rings, get ring data for each ring and
     // append it to cust ring section.
@@ -219,15 +197,6 @@ fapi2::ReturnCode p10_qme_customize(
                               ringId,
                               false);
 
-        FAPI_DBG("ringidGetRingId2() completed w/rc=0x%08x,\n"
-                 " torMagic=0x%08x,iRing=0x%08x,\n"
-                 " bInstCase=%d, ringId=0x%08x.\n",
-                 rc,
-                 torMagic,
-                 iRing,
-                 bInstCase,
-                 ringId);
-
         FAPI_ASSERT(rc == INFRASTRUCT_RC_SUCCESS,
                     fapi2::QMEC_RINGID_GET_RINGID2_ERROR()
                     .set_TARGET(i_procTarget)
@@ -237,30 +206,26 @@ fapi2::ReturnCode p10_qme_customize(
                     .set_INST_CASE(bInstCase)
                     .set_RING_ID(ringId),
                     "Error: ringidGetRingId2() failed w/rc=0x%08x,\n"
-                    " torMagic=0x%08x,iRing=0x%08x,\n"
-                    " bInstCase=%d, ringId=0x%08x.\n",
-                    rc,
-                    torMagic,
-                    iRing,
-                    bInstCase,
-                    ringId);
+                    " torMagic=0x%08x, iRing=%u,\n"
+                    " bInstCase=%u and ringId=0x%x.\n",
+                    rc, torMagic, iRing, bInstCase, ringId);
 
-        io_bufCustRingsSize = be32toh(((TorHeader_t*) io_bufCustRings)->size);
+        io_bufCustRingsSize = be32toh(torHeaderCust->size);
         nextRing = (void*) (io_bufCustRings + io_bufCustRingsSize);
-        nextRingSize = maxCustRingsSize - io_bufCustRingsSize;
 
-        // nextRing is portion of io_bufCustRings buffer, which is used as
-        // temporary memory to pass the ring in i_bufQmeRings from the
+        // nextRing is portion of io_bufCustRings buffer which is used as
+        // temporary buffer to pass the ring in i_bufQmeRings from the
         // tor_get_single_ring() function.
-        // The size of nextRing is the size of temporary memory.
+        // The size of this temporary buffer is captured by remBufSize.
         FAPI_ASSERT(maxCustRingsSize > io_bufCustRingsSize,
                     fapi2::QMEC_RINGS_OUTPUT_BUFFER_TOO_SMALL()
                     .set_MAX_CUST_RINGS_BUF_SIZE(maxCustRingsSize)
                     .set_CUST_QME_RINGS_BUF_SIZE(io_bufCustRingsSize),
                     "Error: QME rings output buffer is not large enough to use part of it for rs4Ring,\n"
                     " maxCustRingsSize=0x%08x, io_bufCustRingsSize=0x%08x.\n",
-                    maxCustRingsSize,
-                    io_bufCustRingsSize);
+                    maxCustRingsSize, io_bufCustRingsSize);
+
+        remBufSize = maxCustRingsSize - io_bufCustRingsSize;
 
         // Extract ring data using the ringId.
         rc = tor_get_single_ring(i_bufQmeRings,
@@ -268,17 +233,8 @@ fapi2::ReturnCode p10_qme_customize(
                                  ringId,
                                  chipletInstId, //This argument ignored for Common rings.
                                  nextRing,
-                                 nextRingSize,
+                                 remBufSize,
                                  i_dbgl);
-
-        FAPI_DBG("tor_get_single_ring() completed w/rc=0x%08x,\n"
-                 " ddLevel=0x%08x, ringId=0x%08x,\n"
-                 " chipletInstId=0x%08x, nextRs4RingSize=%d.\n",
-                 rc,
-                 ddLevel,
-                 ringId,
-                 chipletInstId,
-                 nextRingSize);
 
         FAPI_ASSERT(rc == INFRASTRUCT_RC_SUCCESS ||
                     rc == TOR_RING_IS_EMPTY,
@@ -288,17 +244,12 @@ fapi2::ReturnCode p10_qme_customize(
                     .set_DD_LEVEL(ddLevel)
                     .set_RING_ID(ringId)
                     .set_CHIPLET_INST_ID(chipletInstId)
-                    .set_NEXT_RS4RING_BUF_SIZE(nextRingSize),
-                    "Error: tor_get_single_ring() failed w/rc=0x%08x,\n"
-                    " ddLevel=0x%08x, ringId=0x%08x,\n"
-                    " chipletInstId=0x%08x, nextRs4RingSize=%d.\n",
-                    rc,
-                    ddLevel,
-                    ringId,
-                    chipletInstId,
-                    nextRingSize);
+                    .set_NEXT_RS4RING_BUF_SIZE(remBufSize),
+                    "Error: tor_get_single_ring() failed w/rc=0x%08x, ddLevel=0x%02x,"
+                    " ringId=0x%x, chipletInstId=0x%02x, remBufSize=%u.\n",
+                    rc, ddLevel, ringId, chipletInstId, remBufSize);
 
-        // if ring is empty, loop through and check next ring.
+        // If ring is empty, skip and check next ring.
         if(rc == TOR_RING_IS_EMPTY)
         {
             rc = INFRASTRUCT_RC_SUCCESS;
@@ -308,17 +259,13 @@ fapi2::ReturnCode p10_qme_customize(
         // Append ring to ring section.
         // Note that this API also updates the header's ring size
         rc = tor_append_ring(io_bufCustRings,
-                             io_bufCustRingsSize,
+                             maxCustRingsSize,
                              ringId,
                              chipletInstId,
-                             (void*) nextRing,
+                             (void*)nextRing,
                              i_dbgl);
 
-        FAPI_DBG("tor_append_ring() completed w/rc=0x%08x,\n"
-                 " io_bufCustRingsSize=0x%08x, ringId=0x%x.\n",
-                 rc,
-                 io_bufCustRingsSize,
-                 ringId);
+        io_bufCustRingsSize = be32toh(torHeaderCust->size);
 
         FAPI_ASSERT(rc == INFRASTRUCT_RC_SUCCESS,
                     fapi2::QMEC_TOR_APPEND_RING_ERROR()
@@ -328,16 +275,13 @@ fapi2::ReturnCode p10_qme_customize(
                     .set_RING_ID(ringId),
                     "Error: tor_append_ring() failed w/rc=0x%08x,\n"
                     " io_bufCustRingsSize=0x%08x, ringId=0x%x.\n",
-                    rc,
-                    io_bufCustRingsSize,
-                    ringId);
+                    rc, io_bufCustRingsSize, ringId);
+
     }
 
-    FAPI_DBG("p10_qme_customize(): io_bufCustRingsSize = 0x%08x\n",
-             io_bufCustRingsSize);
+fapi_try_exit:
 
     FAPI_IMP("<< p10_qme_customize ");
 
-fapi_try_exit:
     return fapi2::current_err;
 }

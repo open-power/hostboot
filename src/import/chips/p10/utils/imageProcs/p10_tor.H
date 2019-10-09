@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,66 +56,25 @@ int tor_skeleton_generation( void*         io_ringSection,
                              uint32_t      dbgl = 0 );
 
 
-/// Access and perform various functions on a TOR ring section.
-///
-/// \param[in]  i_ringSection A pointer to the TOR ring section.
-///
-/// \param[in]  i_ringId A enum to indicate unique ID for the ring
-///
-/// \param[in]  i_ddLevel A variable to indicate chip DD level. TOR API
-/// uses DD level to extract single ring or block of rings from hw_image
-///
-/// \param[in/out] io_instanceId A variable to indicate chiplet instance ID.
-/// It returns Chiplet instance ID while doing get single ring operation
-///
-/// \param[in] i_ringRequest  A enum to indicate type of operation performed
-/// by TOR API Option:
-/// GET_SINGLE_RING indicates to extract single ring container.
-/// PUT_SINGLE_RING indicates to extract ring absolute memory addres for
-/// ringTorSlot location
-///
-/// \param[in/out] io_rs4Ring A void pointer to pointer. Returns data
-/// which copied during extract ring operation and returns tor absolute address
-/// where offset slot is located while PUT_SINGLE_RING call.
-/// Note:- Caller's responsibility for free() to avoid memory leak
-///
-/// \param[in/out] io_ringBufSize A variable. Returns size of data copied
-/// into io_rs4Ring and returns absolute offset where ring RS4 starts in
-/// TOR during PUT_SINGLE_RING call
-///
-/// \param[in] i_debug Debug level [0:3].
-///
-/// \retval 0 Success
-///
-/// \retval non-0 See \ref TOR API RETURN errors
-int tor_access_ring( void*           i_ringSection,
-                     RingId_t        i_ringId,
-                     uint8_t         i_ddLevel,
-                     uint8_t&        io_instanceId,   // Chiplet instance ID
-                     RingRequest_t   i_ringRequest,   // {GET,PUT}_SINGLE_RING
-                     void*           io_rs4Ring,
-                     uint32_t&       io_ringBufSize,  // Query, rs4Size, or max buf size
-                     uint32_t        i_dbgl = 0 );
-
-
 /// Retrieve a single RS4 ring from a TOR ring section
 ///
-/// \param[in]  i_ringSection A pointer to the ring section.
+/// \param[in] i_ringSection  A pointer to the ring section.
 ///
-/// \param[in]  i_ringId A enum to indicate unique ID for the ring
+/// \param[in] i_ringId  A enum to indicate unique ID for the ring
 ///
-/// \param[in]  i_ddLevel A variable to indicate chip DD level. TOR API
-/// uses DD level to verify validity of ring section.
+/// \param[in] i_ddLevel  A variable to indicate chip DD level. TOR API uses
+///                       DD level to verify validity of ring section.
 ///
-/// \param[in] io_instanceId A variable to indicate chiplet instance ID
+/// \param[in] i_chipletId  A variable to indicate chiplet instance ID. Only
+///                         used for Instance rings. Ignored for Common rings.
 ///
-/// \param[in/out] io_rs4Ring A void pointer. Contains copied ring.
-/// Note that it's caller's responsibility to manage buffer.
+/// \param[in/out] io_rs4Ring  A void pointer. Contains copied ring. Note that
+///                            it's caller's responsibility to manage buffer.
 ///
-/// \param[in/out] io_ringBufSize A variable that returns size of ring
-/// copied into io_rs4Ring
+/// \param[in/out] io_ringBufSize  A variable that returns size of ring
+///                                copied into io_rs4Ring
 ///
-/// \param[in] i_debug Debug level [0:3].
+/// \param[in] i_debug  Debug level [0:3].
 ///
 /// \retval 0 Success
 ///
@@ -123,37 +82,36 @@ int tor_access_ring( void*           i_ringSection,
 int tor_get_single_ring ( void*          i_ringSection,
                           uint8_t        i_ddLevel,
                           RingId_t       i_ringId,
-                          uint8_t        i_instanceId,
+                          uint8_t        i_chipletId,
                           void*          io_rs4Ring,
                           uint32_t&      io_ringBufSize, // Query, rs4Size, or max buf size
                           uint32_t       i_dbgl = 0 );
 
 
-/// Append a single RS4 ring to the end of a TOR ring section.
+/// Append an RS4 ring to the end of a TOR ring section.
 ///
-/// \param[in] i_ringSection A pointer to a TOR ring section.
-///                          Note that caller manages this buffer.
+/// \param[in/out] io_ringSection  A pointer to a TOR ring section.
+///                                Note that caller manages this buffer.
 ///
-/// \param[in/out] io_ringSectionSize   In: Exact size of i_ringSection.
-///                                     Out: Updated size of i_ringSection.
+/// \param[in] i_maxRingSectionSize  Max ring section size
 ///
-/// \param[in] i_ringId The unique enum ID for the ring
+/// \param[in] i_ringId  The enum ID for the ring in rs4Ring to be appended
 ///
-/// \param[in] i_instanceId The chiplet instance ID. Only needed for
-///                         Instance rings. Ignored for Common rings.
+/// \param[in] i_chipletId  The chiplet instance ID. Only needed for Instance rings.
+///                         Ignored for Common rings.
 ///
-/// \param[in] i_rs4Ring Pointer to the RS4 compressed ring container.
+/// \param[in] i_rs4Ring  Pointer to the RS4 compressed ring container.
 ///
-/// \param[in] i_debug Debug level [0:3].
+/// \param[in] i_debug  Debug level [0:3].
 ///
 /// \retval 0 Success
 ///
-/// \retval non-0 See \ref TOR API RETURN errors
+/// \retval non-0  See \ref TOR API RETURN errors
 ///
-int tor_append_ring( void*           i_ringSection,
-                     uint32_t&       io_ringSectionSize,
+int tor_append_ring( void*           io_ringSection,
+                     uint32_t        i_maxRingSectionSize,
                      RingId_t        i_ringId,
-                     uint8_t         i_instanceId,
+                     uint8_t         i_chipletId,
                      void*           i_rs4Ring, // Ptr to the RS4 ring container
                      uint32_t        i_dbgl = 0 );
 
@@ -201,7 +159,8 @@ int dyn_get_ring( void*         i_ringSection,
 
 /// Append a single RS4 ring to the end of a Dynamic ring section (non-TOR layout).
 ///
-/// \param[in]  i_ringSection         A pointer to the Dynamic ring section.
+/// \param[in]  io_ringSection        A pointer to the Dynamic ring section.
+///                                   Note that caller manages buffer.
 ///
 /// \param[in]  i_maxRingSectionSize  Max size of i_ringSection.
 ///
