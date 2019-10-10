@@ -2010,6 +2010,8 @@ ReturnCode p10_ipl_customize (
     RingId_t        ringId = UNDEFINED_RING_ID;
     std::map< Rs4Selector_t,  Rs4Selector_t> idxFeatureMap;
     std::map<RingId_t, uint64_t> ringIdFeatureVecMap;
+    uint8_t*        ringIdFeatList = NULL;
+    uint16_t        ringIdFeatListSize = 0;
     Rs4Selector_t   numberOfFeatures = 0;
     void*           baseRingSection = NULL;
     void*           dynamicRingSection = NULL;
@@ -2906,20 +2908,41 @@ ReturnCode p10_ipl_customize (
         }
     }
 
-    for ( std::map<RingId_t, uint64_t>::iterator it = ringIdFeatureVecMap.begin();
-          it != ringIdFeatureVecMap.end();
-          it++ )
+    ringIdFeatListSize = ringIdFeatureVecMap.size() * (sizeof(uint64_t) + sizeof(RingId_t));
+    ringIdFeatList = new uint8_t[ringIdFeatListSize];
+
+    for( std::map<RingId_t, uint64_t>::iterator it = ringIdFeatureVecMap.begin();
+         it != ringIdFeatureVecMap.end();
+         it++ )
     {
         FAPI_IMP("(ringId,featureVecAcc)=(0x%x,0x%0llx)\n", it->first, it->second);
+
+        RingId_t* pKey = (RingId_t*)ringIdFeatList;
+        *pKey = htobe16(it->first);
+        ringIdFeatList += sizeof(it->first);
+
+        uint64_t* pData = (uint64_t*)ringIdFeatList;
+        *pData = htobe64(it->second);
+        ringIdFeatList += sizeof(it->second);
     }
+
+    //--------------------------------------------------------
+    // Append the updated .debug_map section to the Seeprom image
+    //--------------------------------------------------------
+    l_rc = p9_xip_append( io_image,
+                          P9_XIP_SECTION_SBE_RINGIDFEATLIST,
+                          ringIdFeatList,
+                          ringIdFeatListSize,
+                          RINGID_FEAT_LIST_MAX_SIZE,
+                          &l_sectionOffset,
+                          0 );
+
 
     // Make a copy of the supplied max ring section buffer size before over writing it
     l_maxRingSectionSize = io_ringSectionBufSize;
 
     // Now, start tracking the instantaneous actual custom ring section size
     io_ringSectionBufSize = customRingSectionSize;
-
-
 
     //////////////////////////////////////////////////////////////////////////
     // CUSTOMIZE item:     Append VPD rings to io_ringSectionBuf
@@ -3231,7 +3254,6 @@ ReturnCode p10_ipl_customize (
     }
 
     FAPI_DBG("Final customized .rings section size: %d", io_ringSectionBufSize);
-
 
 fapi_try_exit:
     FAPI_IMP("Exiting p10_ipl_customize w/rc=0x%08x", (uint32_t)fapi2::current_err);

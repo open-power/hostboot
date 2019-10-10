@@ -45,9 +45,6 @@
 #define QUAD0_CORES_MASK (uint32_t)0xF0000000
 #define CORE0_MASK       (uint32_t)0x80000000
 
-#define MVPD_DD_KWD_VER1 (uint8_t)0x01
-//#define UNDEFINED_MVPD_KEYWORD (uint8_t)0xff
-
 enum MvpdRingType
 {
     MVPD_RING_PDG = (uint8_t)0,
@@ -55,6 +52,8 @@ enum MvpdRingType
     MVPD_RING_PDR = (uint8_t)2,
     MVPD_RING_TYPES = (uint8_t)3
 };
+
+#define RINGID_FEAT_LIST_MAX_SIZE (uint16_t)1024
 
 enum SYSPHASE
 {

@@ -165,6 +165,9 @@ enum MvpdChipName
     MVPD_CHIP_NAME_P10 = 0xda,
 };
 
+// Constant to verify version of DD keyword
+static const uint8_t MVPD_DD_KWD_VER1 = 0x01;
+
 // MVPD file size
 static const uint32_t SIZE_OF_MVPD_FILE = 64 * 1024;
 
