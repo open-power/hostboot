@@ -2396,6 +2396,9 @@
       <id>NUMERIC_POD_TYPE_TEST</id>
     </attribute>
     <attribute>
+      <id>OCMB_FW_UPDATE_OVERRIDE</id>
+    </attribute>
+    <attribute>
       <id>PAYLOAD_BASE</id>
     </attribute>
     <attribute>

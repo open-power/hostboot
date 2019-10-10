@@ -132,6 +132,10 @@ void updateAll(IStepError& o_stepError)
     TARGETING::TargetHandleList l_ocmbTargetList;
     getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
 
+    Target* l_pTopLevel = nullptr;
+    targetService().getTopLevelTarget( l_pTopLevel );
+    assert(l_pTopLevel, "expupd::updateAll: no TopLevelTarget");
+
     TRACFCOMP(g_trac_expupd, ENTER_MRK
               "updateAll: %d ocmb chips found",
               l_ocmbTargetList.size());
@@ -141,6 +145,18 @@ void updateAll(IStepError& o_stepError)
         // If no OCMB chips exist, we're done.
         if(l_ocmbTargetList.size() == 0)
         {
+            break;
+        }
+
+        // Check if we have any overrides to force our behavior
+        auto l_forced_behavior =
+            l_pTopLevel->getAttr<TARGETING::ATTR_OCMB_FW_UPDATE_OVERRIDE>();
+
+        // Exit now if told to
+        if( TARGETING::OCMB_FW_UPDATE_BEHAVIOR_PREVENT_UPDATE
+            == l_forced_behavior )
+        {
+            TRACFCOMP(g_trac_expupd, INFO_MRK "Skipping update due to override (PREVENT_UPDATE)");
             break;
         }
 
@@ -269,12 +285,28 @@ void updateAll(IStepError& o_stepError)
                           "updateAll: SHA512 hash for ocmb[0x%08x]"
                           " matches SHA512 hash of PNOR image.",
                           TARGETING::get_huid(l_ocmbTarget));
+
+                // Add every OCMB to the update list if told to
+                if( TARGETING::OCMB_FW_UPDATE_BEHAVIOR_FORCE_UPDATE
+                    == l_forced_behavior )
+                {
+                    TRACFCOMP(g_trac_expupd, INFO_MRK "Forcing update due to override (FORCE_UPDATE)");
+                    l_flashUpdateList.push_back(l_ocmbTarget);
+                }
             }
         }
 
         TRACFCOMP(g_trac_expupd,
                   "updateAll: updating flash for %d OCMB chips",
                   l_flashUpdateList.size());
+
+        // Exit now if we were asked to only do the check portion
+        if( TARGETING::OCMB_FW_UPDATE_BEHAVIOR_CHECK_BUT_NO_UPDATE
+            == l_forced_behavior )
+        {
+            TRACFCOMP(g_trac_expupd, INFO_MRK "Skipping update due to override (CHECK_BUT_NO_UPDATE)");
+            break;
+        }
 
         // update each explorer in the list of chips needing updates
         for(const auto & l_ocmb : l_flashUpdateList)
@@ -344,9 +376,6 @@ void updateAll(IStepError& o_stepError)
     {
         TRACFCOMP(g_trac_expupd,
                   "updateAll: OCMB chip(s) was updated.  Requesting reboot...");
-        Target* l_pTopLevel = nullptr;
-        targetService().getTopLevelTarget( l_pTopLevel );
-        assert(l_pTopLevel, "expupd::updateAll: no TopLevelTarget");
         auto l_reconfigAttr =
             l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
         l_reconfigAttr |= RECONFIGURE_LOOP_OCMB_FW_UPDATE;

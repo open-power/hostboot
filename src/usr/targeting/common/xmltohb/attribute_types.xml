@@ -5320,6 +5320,48 @@
     <no_export/>
   </attribute>
 
+  <enumerationType>
+    <default>DEFAULT_ALL</default>
+    <description>Enumeration for the various OCMB Firmware update behaviors</description>
+    <enumerator>
+      <!-- Compare actual and desired versions, update if they do not match -->
+      <name>CHECK_VERSIONS</name>
+      <value>0</value>
+    </enumerator>
+    <enumerator>
+      <!-- Force an update regardless of the current version in the hardware -->
+      <name>FORCE_UPDATE</name>
+      <value>1</value>
+    </enumerator>
+    <enumerator>
+      <!-- Do not update the firwmare, do not even check the versions -->
+      <name>PREVENT_UPDATE</name>
+      <value>2</value>
+    </enumerator>
+    <enumerator>
+      <!-- Compare actual and desired versions, but do not do any updates -->
+      <name>CHECK_BUT_NO_UPDATE</name>
+      <value>3</value>
+    </enumerator>
+    <id>OCMB_FW_UPDATE_BEHAVIOR</id>
+  </enumerationType>
+
+  <attribute>
+    <description>
+       Force specific behavior for the OCMB Firmware update function.
+    </description>
+    <id>OCMB_FW_UPDATE_OVERRIDE</id>
+    <!-- @fixme-RTC:244420-Should be volatile-zero -->
+    <persistency>volatile</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t>
+        <!-- Cannot use enumeration directly due to override issue -->
+        <default>2</default>
+      </uint8_t>
+    </simpleType>
+  </attribute>
+
   <attribute>
     <description>
         Physical entity path an OMI's associated OMIC parent target
