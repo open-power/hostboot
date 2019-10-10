@@ -41,7 +41,6 @@
 #include <lib/utils/pmic_consts.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/c_str.H>
-#include <mss_generic_attribute_getters.H>
 
 extern "C"
 {
@@ -54,89 +53,38 @@ extern "C"
     fapi2::ReturnCode pmic_enable(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
                                   const mss::pmic::enable_mode i_mode)
     {
-        auto l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_ocmb_target);
-        auto l_pmics = mss::find_targets<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target);
+        auto l_dimms = mss::find_targets_sorted_by_index<fapi2::TARGET_TYPE_DIMM>(i_ocmb_target);
+        auto l_pmics = mss::find_targets_sorted_by_index<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target);
 
-        // Sort by index (low to high) since find_targets may not return the correct order
-        std::sort(l_dimms.begin(), l_dimms.end(),
-                  [] (const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& l_first_dimm,
-                      const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& l_second_dimm) -> bool
+        // Check that we have PMICs (we wouldn't on gemini, for example)
+        if (l_pmics.empty())
         {
-            return mss::index(l_first_dimm) < mss::index(l_second_dimm);
-        });
+            FAPI_INF("No PMICs to enable on %s, exiting.", mss::c_str(i_ocmb_target));
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
 
-        std::sort(l_pmics.begin(), l_pmics.end(),
-                  [] (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& l_first_pmic,
-                      const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& l_second_pmic) -> bool
+        // Disable PMICs and clear status bits so we are starting at a known off state
+        FAPI_TRY(mss::pmic::disable_and_reset_pmics(l_pmics));
+
+        // // If we're enabling via internal settings, we can just run VR ENABLE down the line
+        if (i_mode == mss::pmic::enable_mode::MANUAL)
         {
-            return mss::index(l_first_pmic) < mss::index(l_second_pmic);
-        });
-
-        // Start at PMIC0. If there was ever a weird case where there is a 4U dimm
-        // on the same OCMB as a 2U dimm (is this possible?),
-        // we would have 6 total PMICs. So, we need to keep
-        // track of where we left off for the last pmic we enabled
-        uint8_t l_pmic_index = 0;
-
-        // Not asserting vectors non-empty because there could be OCMBs without DIMMs on them
-        for (const auto& l_dimm : l_dimms)
+            FAPI_TRY(mss::pmic::enable_manual(l_pmics));
+        }
+        else
         {
-            // Get module height for DIMM to determine the number of PMICs we should be using
-            uint8_t l_module_height = 0;
-            FAPI_TRY(mss::attr::get_dram_module_height(l_dimm, l_module_height));
-
-            if (l_module_height == mss::pmic::module_height::HEIGHT_1U ||
-                l_module_height == mss::pmic::module_height::HEIGHT_2U)
+            if (!l_dimms.empty())
             {
-                // 1U and 2U are the same sequence, use 1U traits
-                using PMIC_TRAITS = mss::pmic::pmic_traits<mss::pmic::module_height::HEIGHT_1U>;
-
-                uint16_t l_vendor_id = 0;
-
-                // PMIC0 and PMIC1 of each DIMM
-                for (uint8_t l_current_pmic = 0; l_current_pmic < PMIC_TRAITS::PMICS_PER_DIMM; ++l_current_pmic)
-                {
-                    const auto l_current_pmic_target = l_pmics[l_pmic_index + l_current_pmic];
-                    // Get vendor ID
-                    FAPI_TRY(mss::pmic::get_mfg_id[l_current_pmic](l_dimm, l_vendor_id));
-
-                    // Poll to make sure PBULK reports good, then we can enable the chip and write/read registers
-                    FAPI_TRY(mss::pmic::poll_for_pbulk_good(l_current_pmic_target),
-                             "pmic_enable: poll for pbulk good either failed, or returned not good status on PMIC %s",
-                             mss::c_str(l_current_pmic_target));
-
-                    // Call the enable procedure
-                    FAPI_TRY((mss::pmic::enable_chip
-                              <mss::pmic::module_height::HEIGHT_1U>
-                              (l_current_pmic_target, l_dimm, l_vendor_id, i_mode)),
-                             "pmic_enable: Error enabling PMIC %s", mss::c_str(l_current_pmic_target));
-
-                }
-
-                // Increment by the number of PMICs that were enabled and move on to the next dimm
-                l_pmic_index += PMIC_TRAITS::PMICS_PER_DIMM;
-            }
-            else // 4U DIMM:
-            {
-                // Asserting out here as if we see a 4U at this point we shouldn't be able to proceed
-                // Ugly assert false, but we need the above else later so we will use this for now
-                FAPI_ASSERT(false,
-                            fapi2::PMIC_DIMM_SPD_4U()
-                            .set_TARGET(l_dimm),
-                            "DIMM %s module height attribute identified as 4U. Not supported yet.",
-                            mss::c_str(l_dimm));
-
-                // The enable algorithm will be:
-                // Load SPD for PMIC0 and PMIC1
-                // Broadcast enable both together
-
-                // Load SPD for PMIC2 and PMIC3 (which should be the same data as for PMIC0 and PMIC1)
-                // Broadcast and enable both together
-
-                // using PMIC_TRAITS = mss::pmic::pmic_traits<mss::pmic::module_height::HEIGHT_4U>;
-                // l_pmic_index += PMIC_TRAITS::PMICS_PER_DIMM;
+                FAPI_TRY(mss::pmic::pmic_enable_SPD(l_pmics, l_dimms));
             }
         }
+
+        // Check that all the PMIC statuses are good post-enable
+        FAPI_TRY(mss::pmic::status::check_all_pmics(i_ocmb_target),
+                 "Bad statuses returned, or error checking statuses of PMICs on %s", mss::c_str(i_ocmb_target));
+
+        // If we get here, statuses are good
+        FAPI_INF("All status codes were OK for PMICs on %s", mss::c_str(i_ocmb_target));
 
         return fapi2::FAPI2_RC_SUCCESS;
 
