@@ -53,6 +53,12 @@ rcw_settings  rdimm_rc_a1( 0x02,  // RC00 Enable weak drive
                            0x00); // RC01 Enables all clocks
 
 ///
+/// @brief raw card A2 settings
+///
+rcw_settings  rdimm_rc_a2( 0x02,  // RC00 Enable weak drive
+                           0x00); // RC01 Enables all clocks
+
+///
 /// @brief raw card B1 settings
 /// @note need to verify, copy from b2, need to verify with b1 annex
 ///
@@ -66,6 +72,12 @@ rcw_settings rdimm_rc_b2( 0x02,   // RC00
                           0x00 ); // RC01
 
 ///
+/// @brief raw card B3 settings
+///
+rcw_settings rdimm_rc_b3( 0x02,   // RC00
+                          0x00 ); // RC01
+
+///
 /// @brief raw card C1 settings
 ///
 rcw_settings rdimm_rc_c1( 0x02,   // RC00
@@ -76,6 +88,13 @@ rcw_settings rdimm_rc_c1( 0x02,   // RC00
 /// @note same settings as C1
 ///
 rcw_settings rdimm_rc_c2( 0x02,   // RC00
+                          0x0C ); // RC01
+
+///
+/// @brief raw card C3 settings
+/// @note same settings as C1
+///
+rcw_settings rdimm_rc_c3( 0x02,   // RC00
                           0x0C ); // RC01
 
 ///
@@ -117,8 +136,11 @@ const std::vector< std::pair< uint8_t , rcw_settings> > RAW_CARDS =
     {raw_card_rev::B1, rdimm_rc_b1},
     {raw_card_rev::C1, rdimm_rc_c1},
     {raw_card_rev::VBU, rdimm_rc_vbu},
+    {raw_card_rev::A2, rdimm_rc_a2},
     {raw_card_rev::B2, rdimm_rc_b2},
     {raw_card_rev::C2, rdimm_rc_c2},
+    {raw_card_rev::B3, rdimm_rc_b3},
+    {raw_card_rev::C3, rdimm_rc_c3},
     {raw_card_rev::CUSTOM, rdimm_rc_custom},
 };
 

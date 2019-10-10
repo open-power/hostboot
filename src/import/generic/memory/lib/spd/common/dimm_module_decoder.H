@@ -1492,6 +1492,28 @@ class dimm_module_decoder
         }
 
         ///
+        /// @brief Decodes PMIC0 Sequence Order
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode sequence_pmic0(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes PMIC1 Sequence Order
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode sequence_pmic1(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
         /// @brief Decodes DRAM Manufacturer ID code
         /// @param[out] o_value dram manufacturing id code
         /// @return FAPI2_RC_SUCCESS iff okay

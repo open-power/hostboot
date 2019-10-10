@@ -59,15 +59,18 @@ enum raw_card_rev : uint8_t
 
     A1 = 0x20,
     B1 = 0x21,
-
     // RDIMM power-on
     C1 = 0x22,
 
     // TK - Change VBU value to a no-op value or a value that will never be reached -JLH
     VBU = 0x23,
 
+    A2 = 0x40,
     B2 = 0x41,
     C2 = 0x42,
+
+    B3 = 0x61,
+    C3 = 0x62,
 
     // Default settings used for DIMMs that do not use a JEDEC raw card reference
     CUSTOM = 0xFF,
@@ -83,10 +86,13 @@ extern const std::vector< std::pair< uint8_t, rcw_settings> > RAW_CARDS;
 // Exposed so we can test them.
 // Alphabetized list below
 extern rcw_settings rdimm_rc_a1;
+extern rcw_settings rdimm_rc_a2;
 extern rcw_settings rdimm_rc_b1;
 extern rcw_settings rdimm_rc_b2;
+extern rcw_settings rdimm_rc_b3;
 extern rcw_settings rdimm_rc_c1;
 extern rcw_settings rdimm_rc_c2;
+extern rcw_settings rdimm_rc_c3;
 extern rcw_settings rdimm_rc_custom;
 extern rcw_settings rdimm_rc_nvdimm;
 extern rcw_settings rdimm_rc_vbu;

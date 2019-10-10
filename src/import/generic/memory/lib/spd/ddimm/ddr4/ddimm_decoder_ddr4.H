@@ -642,19 +642,6 @@ class decoder< DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes VDD_Core PMIC0 -> VDD_CORE_PMIC0
-        /// @param[out] o_output encoding from SPD
-        /// @return FAPI2_RC_SUCCESS if okay
-        ///
-        virtual fapi2::ReturnCode vdd_core_pmic0(uint8_t& o_output) const override
-        {
-            FAPI_TRY( (mss::spd::reader<fields_t::VDD_CORE_PMIC0, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
         /// @brief Decodes PMIC0 Manfacture ID code 2nd byte
         /// @param[out] o_output encoding from SPD - multiple fields used
         /// @return FAPI2_RC_SUCCESS if okay
@@ -690,19 +677,6 @@ class decoder< DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         virtual fapi2::ReturnCode revision_pmic0(uint8_t& o_output) const override
         {
             FAPI_TRY( (mss::spd::reader<fields_t::PMIC0_REV, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief Decodes VDD_Core PMIC1 -> VDD_CORE_PMIC1
-        /// @param[out] o_output encoding from SPD
-        /// @return FAPI2_RC_SUCCESS if okay
-        ///
-        virtual fapi2::ReturnCode vdd_core_pmic1(uint8_t& o_output) const override
-        {
-            FAPI_TRY( (mss::spd::reader<fields_t::VDD_CORE_PMIC1, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1394,6 +1368,32 @@ class decoder< DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         virtual fapi2::ReturnCode phase_combination_pmic1(uint8_t& o_output) const override
         {
             FAPI_TRY( (mss::spd::reader<fields_t::PMIC1_PHASE_COMBIN, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes PMIC1 Sequence -> PMIC0_SEQUENCE
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode sequence_pmic0(uint8_t& o_output) const override
+        {
+            FAPI_TRY((mss::spd::reader<fields_t::PMIC0_SEQUENCE, R>(iv_target, iv_data, o_output)));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes PMIC1 Sequence -> PMIC1_SEQUENCE
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode sequence_pmic1(uint8_t& o_output) const override
+        {
+            FAPI_TRY((mss::spd::reader<fields_t::PMIC1_SEQUENCE, R>(iv_target, iv_data, o_output)));
 
         fapi_try_exit:
             return fapi2::current_err;

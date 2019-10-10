@@ -4450,16 +4450,16 @@ class readerTraits < fields< DDR4, DDIMM_MODULE>::VIN_BULK_ENDURANT, R >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note VDD_CORE_PMIC0 field specialization
+/// @note PMIC0_SEQUENCE field specialization
 /// @note valid for all revs
 ///
 template< rev R >
-class readerTraits < fields< DDR4, DDIMM_MODULE>::VDD_CORE_PMIC0, R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SEQUENCE, R >
 {
     public:
 
-        static constexpr size_t COMPARISON_VAL = 0xff;
-        static constexpr const char* FIELD_STR = "VDD_Core PMIC0";
+        static constexpr size_t COMPARISON_VAL = 0x4;
+        static constexpr const char* FIELD_STR = "PMIC0 Sequence";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
@@ -4526,16 +4526,16 @@ class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_REV, R >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note VDD_CORE_PMIC1 field specialization
+/// @note PMIC1_SEQUENCE field specialization
 /// @note valid for all revs
 ///
 template< rev R >
-class readerTraits < fields< DDR4, DDIMM_MODULE>::VDD_CORE_PMIC1, R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SEQUENCE, R >
 {
     public:
 
-        static constexpr size_t COMPARISON_VAL = 0xff;
-        static constexpr const char* FIELD_STR = "VDD_Core PMIC1";
+        static constexpr size_t COMPARISON_VAL = 0x04;
+        static constexpr const char* FIELD_STR = "PMIC1 Sequence";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;

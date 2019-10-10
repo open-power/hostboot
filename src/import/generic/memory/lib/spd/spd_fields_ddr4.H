@@ -959,10 +959,10 @@ class fields<DDR4, DDIMM_MODULE>
             VIN_BULK_ENDURANT_START = 6,
             VIN_BULK_ENDURANT_LEN = 2,
 
-            // Byte 226: VDD_Core PMIC0
-            VDD_CORE_PMIC0_BYTE = 226,
-            VDD_CORE_PMIC0_START = 0,
-            VDD_CORE_PMIC0_LEN = 8,
+            // Byte 226: PMIC0 Sequence
+            PMIC0_SEQUENCE_BYTE = 226,
+            PMIC0_SEQUENCE_START = 0,
+            PMIC0_SEQUENCE_LEN = 8,
 
             // Byte 227: PMIC0 Manfacture ID code 1st byte
             PMIC0_MFG_CODE1_BYTE = 227,
@@ -979,10 +979,10 @@ class fields<DDR4, DDIMM_MODULE>
             PMIC0_REV_START = 0,
             PMIC0_REV_LEN = 8,
 
-            // Byte 230: VDD_Core PMIC1
-            VDD_CORE_PMIC1_BYTE = 230,
-            VDD_CORE_PMIC1_START = 0,
-            VDD_CORE_PMIC1_LEN = 8,
+            // Byte 230: PMIC1 Sequence
+            PMIC1_SEQUENCE_BYTE = 230,
+            PMIC1_SEQUENCE_START = 0,
+            PMIC1_SEQUENCE_LEN = 8,
 
             // Byte 231: PMIC1 Manfacture ID code 1st byte
             PMIC1_MFG_CODE1_BYTE = 231,
@@ -1288,8 +1288,8 @@ class fields<DDR4, DDIMM_MODULE>
         static constexpr field_t VIN_BULK_OPERABLE{VIN_BULK_BYTE, VIN_BULK_OPERABLE_START, VIN_BULK_OPERABLE_LEN};
         static constexpr field_t VIN_BULK_ENDURANT{VIN_BULK_BYTE, VIN_BULK_ENDURANT_START, VIN_BULK_ENDURANT_LEN};
 
-        // Byte 226: VDD_Core PMIC0
-        static constexpr field_t VDD_CORE_PMIC0{VDD_CORE_PMIC0_BYTE, VDD_CORE_PMIC0_START, VDD_CORE_PMIC0_LEN};
+        // Byte 226: PMIC0 Sequence
+        static constexpr field_t PMIC0_SEQUENCE{PMIC0_SEQUENCE_BYTE, PMIC0_SEQUENCE_START, PMIC0_SEQUENCE_LEN};
 
         // Byte 227: PMIC0 Manfacture ID code 1st byte
         static constexpr field_t PMIC0_CONT_CODE{PMIC0_MFG_CODE1_BYTE, PMIC0_CONT_CODE_START, PMIC0_CONT_CODE_LEN};
@@ -1300,8 +1300,8 @@ class fields<DDR4, DDIMM_MODULE>
         // Byte 229: PMIC0 Revision Number
         static constexpr field_t PMIC0_REV{PMIC0_REV_BYTE, PMIC0_REV_START, PMIC0_REV_LEN};
 
-        // Byte 230: VDD_Core PMIC1
-        static constexpr field_t VDD_CORE_PMIC1{VDD_CORE_PMIC1_BYTE, VDD_CORE_PMIC1_START, VDD_CORE_PMIC1_LEN};
+        // Byte 230: PMIC1 Sequence
+        static constexpr field_t PMIC1_SEQUENCE{PMIC1_SEQUENCE_BYTE, PMIC1_SEQUENCE_START, PMIC1_SEQUENCE_LEN};
 
         // Byte 231: PMIC1 Manfacture ID code 1st byte
         static constexpr field_t PMIC1_CONT_CODE{PMIC1_MFG_CODE1_BYTE, PMIC1_CONT_CODE_START, PMIC1_CONT_CODE_LEN};

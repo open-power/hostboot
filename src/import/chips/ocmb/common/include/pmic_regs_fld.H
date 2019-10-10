@@ -69,7 +69,72 @@ struct pmicFields<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint8_t SEQUENCE_SWC_ENABLE            = 0x04;
     static constexpr uint8_t SEQUENCE_SWD_ENABLE            = 0x03;
 
-    static constexpr uint8_t VIN_BULK_INPUT_PWR_GOOD_STATUS = 0x07;
+    // R04
+    static constexpr uint8_t R04_GLOBAL_ERROR_COUNT                     = 0x07;
+    static constexpr uint8_t R04_GLOBAL_ERROR_LOG_BUCK_OV_OR_UV         = 0x06;
+    static constexpr uint8_t R04_GLOBAL_ERROR_LOG_VIN_BULK_OVER_VOLTAGE = 0x05;
+    static constexpr uint8_t R04_GLOBAL_ERROR_LOG_CRITICAL_TEMPERATURE  = 0x04;
+
+    // R05
+    static constexpr uint8_t R05_SWA_POWER_GOOD      = 0x06;
+    static constexpr uint8_t R05_SWB_POWER_GOOD      = 0x05;
+    static constexpr uint8_t R05_SWC_POWER_GOOD      = 0x04;
+    static constexpr uint8_t R05_SWD_POWER_GOOD      = 0x03;
+    static constexpr uint8_t R05_PMIC_ERROR_LOG      = 0x02; // TK ARRAY
+
+    // R06
+    static constexpr uint8_t R06_SWA_UNDER_VOLTAGE_LOCKOUT  = 0x07;
+    static constexpr uint8_t R06_SWB_UNDER_VOLTAGE_LOCKOUT  = 0x06;
+    static constexpr uint8_t R06_SWC_UNDER_VOLTAGE_LOCKOUT  = 0x05;
+    static constexpr uint8_t R06_SWD_UNDER_VOLTAGE_LOCKOUT  = 0x04;
+    static constexpr uint8_t R06_SWA_OVER_VOLTAGE           = 0x03;
+    static constexpr uint8_t R06_SWB_OVER_VOLTAGE           = 0x02;
+    static constexpr uint8_t R06_SWC_OVER_VOLTAGE           = 0x01;
+    static constexpr uint8_t R06_SWD_OVER_VOLTAGE           = 0x00;
+
+    // R07 all reserved
+
+    // R08
+    static constexpr uint8_t R08_VIN_BULK_INPUT_PWR_GOOD_STATUS = 0x07;
+    static constexpr uint8_t R08_CRITICAL_TEMP_SHUTDOWN_STATUS  = 0x06;
+    static constexpr uint8_t R08_SWA_PWR_GOOD_STATUS            = 0x05;
+    static constexpr uint8_t R08_SWB_PWR_GOOD_STATUS            = 0x04;
+    static constexpr uint8_t R08_SWC_PWR_GOOD_STATUS            = 0x03;
+    static constexpr uint8_t R08_SWD_PWR_GOOD_STATUS            = 0x02;
+    static constexpr uint8_t R08_VIN_MGMT_INPUT_OVER_VOLTAGE    = 0x01;
+    static constexpr uint8_t R08_VIN_BULK_INPUT_OVER_VOLTAGE    = 0x00;
+
+    // R09
+    static constexpr uint8_t R09_PMIC_HIGH_TEMP_WARNING_STATUS                      = 0x07;
+    static constexpr uint8_t R09_VBIAS_PWR_GOOD_STATUS                              = 0x06;
+    static constexpr uint8_t R09_VOUT_1_8_V_PWR_GOOD_STATUS                         = 0x05;
+    static constexpr uint8_t R09_VIN_MGMT_TO_VIN_BULK_SWITCHOVER_STATUS             = 0x04;
+    static constexpr uint8_t R09_SWA_HIGH_OUTPUT_CURRENT_CONSUMPTION_WARNING_STATUS = 0x03;
+    static constexpr uint8_t R09_SWB_HIGH_OUTPUT_CURRENT_CONSUMPTION_WARNING_STATUS = 0x02;
+    static constexpr uint8_t R09_SWC_HIGH_OUTPUT_CURRENT_CONSUMPTION_WARNING_STATUS = 0x01;
+    static constexpr uint8_t R09_SWD_HIGH_OUTPUT_CURRENT_CONSUMPTION_WARNING_STATUS = 0x00;
+
+    // R0A
+    static constexpr uint8_t R0A_SWA_OUTPUT_OVER_VOLTAGE_STATUS = 0x07;
+    static constexpr uint8_t R0A_SWB_OUTPUT_OVER_VOLTAGE_STATUS = 0x06;
+    static constexpr uint8_t R0A_SWC_OUTPUT_OVER_VOLTAGE_STATUS = 0x05;
+    static constexpr uint8_t R0A_SWD_OUTPUT_OVER_VOLTAGE_STATUS = 0x04;
+    static constexpr uint8_t R0A_PEC_ERROR_STATUS               = 0x03;
+    static constexpr uint8_t R0A_PARITY_ERROR_STATUS            = 0x02;
+    static constexpr uint8_t R0A_IBI_STATUS                     = 0x01; // 0x00 reserved
+
+    // R0B
+    static constexpr uint8_t R0B_SWA_OUTPUT_CURRENT_LIMITER_WARNING_STATUS  = 0x07;
+    static constexpr uint8_t R0B_SWB_OUTPUT_CURRENT_LIMITER_WARNING_STATUS  = 0x06;
+    static constexpr uint8_t R0B_SWC_OUTPUT_CURRENT_LIMITER_WARNING_STATUS  = 0x05;
+    static constexpr uint8_t R0B_SWD_OUTPUT_CURRENT_LIMITER_WARNING_STATUS  = 0x04;
+    static constexpr uint8_t R0B_SWA_OUTPUT_UNDER_VOLTAGE_LOCKOUT_STATUS    = 0x03;
+    static constexpr uint8_t R0B_SWB_OUTPUT_UNDER_VOLTAGE_LOCKOUT_STATUS    = 0x02;
+    static constexpr uint8_t R0B_SWC_OUTPUT_UNDER_VOLTAGE_LOCKOUT_STATUS    = 0x01;
+    static constexpr uint8_t R0B_SWD_OUTPUT_UNDER_VOLTAGE_LOCKOUT_STATUS    = 0x00;
+
+    // 0x14
+    static constexpr uint8_t R14_GLOBAL_CLEAR_STATUS = 0x00;
 
     static constexpr uint8_t DELAY_FLD_LENGTH               = 3;
     static constexpr uint8_t VOLTAGE_SETTING_START          = 0;

@@ -74,6 +74,23 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Sort the provided target vector in order of index (low to high)
+///
+/// @tparam T TargetType
+/// @param[in,out] io_targets vector of targets to sort
+///
+template <fapi2::TargetType T>
+inline void sort_targets_by_index(std::vector<fapi2::Target<T>>& io_targets)
+{
+    std::sort(io_targets.begin(), io_targets.end(), [] (
+                  const fapi2::Target<T>& l_first_target,
+                  const fapi2::Target<T>& l_second_target) -> bool
+    {
+        return mss::index(l_first_target) < mss::index(l_first_target);
+    });
+}
+
+///
 /// @brief Return an attribute array index from a rank number
 /// @param[in] i_rank uint64_t a rank number DIMM0 {0, 1, 2, 3} DIMM1 {0, 1, 2, 3}
 /// @return size_t the attribute array index.
