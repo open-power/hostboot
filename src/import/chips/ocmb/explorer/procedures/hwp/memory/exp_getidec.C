@@ -37,6 +37,7 @@
 #include <exp_getidec.H>
 #include <lib/shared/exp_consts.H>
 #include <chips/ocmb/explorer/common/include/explorer_scom_addresses.H>
+#include <chips/ocmb/explorer/common/include/explorer_scom_addresses_fixes.H>
 #include <chips/ocmb/explorer/common/include/explorer_scom_addresses_fld.H>
 #include <chips/ocmb/explorer/common/include/explorer_scom_addresses_fld_fixes.H>
 #include <generic/memory/mss_git_data_helper.H>

@@ -36,9 +36,14 @@
 #ifndef _MSS_EXP_I2C_FIELDS_H_
 #define _MSS_EXP_I2C_FIELDS_H_
 
-#include <generic/memory/lib/utils/mss_field.H>
-#include <lib/shared/exp_consts.H>
 #include <functional>
+#ifdef __PPE__
+    #include <mss_field.H>
+    #include <exp_consts.H>
+#else
+    #include <generic/memory/lib/utils/mss_field.H>
+    #include <lib/shared/exp_consts.H>
+#endif
 
 namespace mss
 {
@@ -60,6 +65,7 @@ struct fields
     static constexpr mss::field_t<mss::endian::BIG> DFE_DISABLE{0, 0, 1};
     static constexpr mss::field_t<mss::endian::BIG> LANE_MODE{0, 1, 3};
     static constexpr mss::field_t<mss::endian::BIG> SERDES_FREQ{0, 4, 4};
+    static constexpr mss::field_t<mss::endian::BIG> ADAPTATION_MODE{1, 0, 1};
     static constexpr mss::field_t<mss::endian::BIG> FW_MODE{1, 1, 2};
     static constexpr mss::field_t<mss::endian::BIG> LOOPBACK_TEST{1, 3, 1};
     static constexpr mss::field_t<mss::endian::BIG> TRANSPORT_LAYER{1, 4, 2};
@@ -178,6 +184,20 @@ struct fieldTraits<fields::FW_MODE>
 };
 
 ///
+/// @class fieldTraits - ADAPTATION_MODE specialization
+/// @brief Traits assoiated with the Explorer I2C commands
+///
+template <>
+struct fieldTraits<fields::ADAPTATION_MODE>
+{
+    static constexpr uint8_t COMPARISON_VAL = 0x01;
+    static constexpr const char* FIELD_STR = "Adaptation Mode";
+
+    template <typename T>
+    using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
 /// @class fieldTraits - CMD_ID specialization
 /// @brief Traits assoiated with the Explorer I2C commands
 ///
@@ -241,6 +261,7 @@ inline fapi2::ReturnCode get_field(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
     return mss::get_field<endian::BIG, F, TT>(i_target, i_data, EXP_I2C_GET_FIELD, o_value);
 }
 
+#ifndef __PPE__
 ///
 /// @brief Explorer I2C field setter
 /// @tparam IT Input type
@@ -374,6 +395,33 @@ inline fapi2::ReturnCode set_dl_layer_boot_mode(const fapi2::Target<fapi2::TARGE
     return set_field<fields::DL_LAYER_BOOT_MODE>(i_target, io_data, i_setting);
 }
 
+/// @brief ADAPTATION_MODE getter
+/// @param[in] i_target the OCMB target
+/// @param[in] i_data the buffer as a reference to a vector
+/// @param[out] o_setting
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode get_adaptation_mode(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const std::vector<uint8_t>& i_data,
+        uint8_t& o_setting)
+{
+    return get_field<fields::ADAPTATION_MODE>(i_target, i_data, o_setting);
+}
+
+///
+/// @brief ADAPTATION_MODE setter
+/// @param[in] i_target the OCMB target
+/// @param[in,out] io_data the buffer as a reference to a vector
+/// @param[in] i_setting the value to set
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode set_adaptation_mode(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        std::vector<uint8_t>& io_data,
+        const uint8_t i_setting)
+{
+    return set_field<fields::ADAPTATION_MODE>(i_target, io_data, i_setting);
+}
+
 ///
 /// @brief DL_LAYER_BOOT_MODE getter
 /// @param[in] i_target the OCMB target
@@ -461,6 +509,8 @@ inline fapi2::ReturnCode set_fw_mode(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
 
 }// boot_cfg
 
+#endif
+
 namespace status
 {
 
@@ -478,6 +528,7 @@ inline fapi2::ReturnCode get_boot_stage(const fapi2::Target<fapi2::TARGET_TYPE_O
     return get_field<fields::BOOT_STAGE>(i_target, i_data, o_setting);
 }
 
+
 ///
 /// @brief STATUS_CODE getter
 /// @param[in] i_target the OCMB target
@@ -492,6 +543,7 @@ inline fapi2::ReturnCode get_status_code(const fapi2::Target<fapi2::TARGET_TYPE_
     return get_field<fields::STATUS_CODE>(i_target, i_data, o_setting);
 }
 
+#ifndef __PPE__
 ///
 /// @brief CMD_ID getter
 /// @param[in] i_target the OCMB target
@@ -505,6 +557,7 @@ inline fapi2::ReturnCode get_cmd_id(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
 {
     return get_field<fields::CMD_ID>(i_target, i_data, o_setting);
 }
+#endif
 
 }// status
 }// i2c

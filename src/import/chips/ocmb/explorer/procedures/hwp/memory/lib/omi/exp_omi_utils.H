@@ -136,6 +136,7 @@ inline fapi2::ReturnCode check_enterprise_mode( const fapi2::Target<fapi2::TARGE
         fapi2::buffer<uint64_t>& i_data )
 {
     const bool l_actual = mss::exp::omi::get_enterprise_config(i_data);
+
     FAPI_ASSERT(l_actual == i_is_enterprise,
                 fapi2::MSS_EXP_ENTERPRISE_SETUP_ERROR()
                 .set_EXPECTED(i_is_enterprise)
@@ -144,6 +145,8 @@ inline fapi2::ReturnCode check_enterprise_mode( const fapi2::Target<fapi2::TARGE
                 .set_OCMB_TARGET(i_target),
                 "%s failed to setup enterprise mode properly expected: %u actual: %u register data 0x%016lx",
                 mss::c_str(i_target), i_is_enterprise, l_actual, i_data);
+
+    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -209,7 +212,7 @@ inline fapi2::ReturnCode write_dlx_config1( const fapi2::Target<fapi2::TARGET_TY
 /// @param[in] i_train_mode mode to use
 /// @param[in] i_dl_x4_backoff_en backoff enable bit
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
-/// @note Algorithm from p10_omi_train.C
+/// @note Algorithm from p9a_omi_train.C
 ///
 fapi2::ReturnCode setup_omi_dl0_config0(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,

@@ -30,5 +30,27 @@ static const uint64_t EXPLR_MIPS_TO_OCMB_INTERRUPT_REGISTER1_DOORBELL           
 static const uint64_t EXPLR_EFUSE_IMAGE_OUT_3_ENTERPRISE_MODE_EC_MINOR          = 50;
 static const uint8_t  EXPLR_EFUSE_IMAGE_OUT_3_ENTERPRISE_MODE_EC_MINOR_LEN      = 4;
 static const uint64_t EXPLR_EFUSE_IMAGE_OUT_0_ENTERPRISE_MODE_DIS               = 53;
+static const uint64_t EXPLR_SRQ_MBA_PMU8Q_CFG_INIT_COMPLETE                     = 63;
+
+static const uint8_t EXPLR_MCBIST_MBSSYMEC9Q_MODAL_SYMBOL_COUNTER_72           = 0   ;
+static const uint8_t EXPLR_MCBIST_MBSSYMEC9Q_MODAL_SYMBOL_COUNTER_72_LEN       = 8   ;
+static const uint8_t EXPLR_MCBIST_MBSSYMEC9Q_MODAL_SYMBOL_COUNTER_73           = 8   ;
+static const uint8_t EXPLR_MCBIST_MBSSYMEC9Q_MODAL_SYMBOL_COUNTER_73_LEN       = 8   ;
+static const uint8_t EXPLR_MCBIST_MBSSYMEC9Q_MODAL_SYMBOL_COUNTER_74           = 16  ;
+static const uint8_t EXPLR_MCBIST_MBSSYMEC9Q_MODAL_SYMBOL_COUNTER_74_LEN       = 8   ;
+static const uint8_t EXPLR_MCBIST_MBSSYMEC9Q_MODAL_SYMBOL_COUNTER_75           = 24  ;
+static const uint8_t EXPLR_MCBIST_MBSSYMEC9Q_MODAL_SYMBOL_COUNTER_75_LEN       = 8   ;
+static const uint8_t EXPLR_MCBIST_MBSSYMEC9Q_MODAL_SYMBOL_COUNTER_76           = 32  ;
+static const uint8_t EXPLR_MCBIST_MBSSYMEC9Q_MODAL_SYMBOL_COUNTER_76_LEN       = 8   ;
+static const uint8_t EXPLR_MCBIST_MBSSYMEC9Q_MODAL_SYMBOL_COUNTER_77           = 40  ;
+static const uint8_t EXPLR_MCBIST_MBSSYMEC9Q_MODAL_SYMBOL_COUNTER_77_LEN       = 8   ;
+static const uint8_t EXPLR_MCBIST_MBSSYMEC9Q_MODAL_SYMBOL_COUNTER_78           = 48  ;
+static const uint8_t EXPLR_MCBIST_MBSSYMEC9Q_MODAL_SYMBOL_COUNTER_78_LEN       = 8   ;
+static const uint8_t EXPLR_MCBIST_MBSSYMEC9Q_MODAL_SYMBOL_COUNTER_79           = 56  ;
+static const uint8_t EXPLR_MCBIST_MBSSYMEC9Q_MODAL_SYMBOL_COUNTER_79_LEN       = 8   ;
+static const uint8_t EXPLR_RDF_MCBCM2_MCBIST_HALF_COMPARE_MASK                 = 0   ;
+static const uint8_t EXPLR_RDF_MCBCM2_MCBIST_HALF_COMPARE_MASK_LEN             = 40  ;
+static const uint8_t EXPLR_TP_MB_UNIT_TOP_TR1_TRACE_TRCTRL_CONFIG_TRA_MASTER_CLOCK_ENABLE = 22;
+static const uint8_t EXP_APBONLY0_MICROCONTMUXSEL_MICROCONTMUXSEL              = 63  ;
 
 #endif

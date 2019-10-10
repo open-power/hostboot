@@ -32,11 +32,13 @@
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
-#ifdef P10_READY_FOR_EXP_HWP
+
 #ifndef __MSS_EXP_DRAMINIT_UTILS__
 #define __MSS_EXP_DRAMINIT_UTILS__
 
 #include <fapi2.H>
+#include <lib/shared/exp_defaults.H>
+#include <lib/dimm/exp_rank.H>
 #include <lib/shared/exp_consts.H>
 #include <exp_data_structs.H>
 #include <mss_generic_attribute_getters.H>
@@ -56,10 +58,11 @@ namespace exp
 ///
 enum msdg_dimm_types
 {
-    MSDG_UDIMM  = 0x0000,
-    MSDG_RDIMM  = 0x0001,
-    MSDG_LRDIMM = 0x0002,
-    MSDG_DDIMM  = 0x0003,
+    MSDG_UDIMM      = 0x0000,
+    MSDG_RDIMM      = 0x0001,
+    MSDG_LRDIMM     = 0x0002,
+    MSDG_MDS_LRDIMM = 0x0003,
+    MSDG_MDS        = 0x0004
 };
 
 ///
@@ -134,11 +137,27 @@ enum msdg_enable
 };
 
 ///
+/// @brief defines fields for the ODT RD/WR params
+///
+enum odt_fields
+{
+    FLD_LENGTH = 4,
+    RANK3 = 12,
+    RANK2 = 8,
+    RANK1 = 4,
+    RANK0 = 0,
+};
+
+///
 /// @brief host_fw_command_struct structure setup
 /// @param[in] i_cmd_data_crc the command data CRC
+/// @param[in] i_cmd_length the length of the command present in the data buffer (if any)
 /// @param[out] o_cmd the command parameters to set
 ///
-void setup_cmd_params(const uint32_t i_cmd_data_crc, host_fw_command_struct& o_cmd);
+void setup_cmd_params(
+    const uint32_t i_cmd_data_crc,
+    const uint8_t i_cmd_length,
+    host_fw_command_struct& o_cmd);
 
 ///
 /// @brief user_input_msdg structure setup
@@ -161,9 +180,9 @@ struct phy_params_t
     ///
     uint32_t iv_version_number;
     uint8_t iv_dimm_type[MAX_DIMM_PER_PORT];
-    uint16_t iv_chip_select;
+    uint8_t iv_chip_select[MAX_DIMM_PER_PORT];
     uint8_t iv_dram_data_width[MAX_DIMM_PER_PORT];
-    uint16_t iv_height_3DS;
+    uint16_t iv_height_3DS[MAX_DIMM_PER_PORT];
     uint16_t iv_dbyte_macro[MAX_DIMM_PER_PORT];
     uint32_t iv_nibble[MAX_DIMM_PER_PORT];
     uint8_t iv_addr_mirror[MAX_DIMM_PER_PORT];
@@ -180,8 +199,8 @@ struct phy_params_t
     uint8_t iv_num_pstate[MAX_DIMM_PER_PORT];
     uint64_t iv_frequency;
     uint8_t iv_odt_impedance[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
-    uint8_t iv_drv_impedance_pu[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
-    uint8_t iv_drv_impedance_pd[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
+    uint16_t iv_drv_impedance_pu[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
+    uint16_t iv_drv_impedance_pd[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint8_t iv_slew_rate[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint8_t iv_atx_impedance[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint8_t iv_atx_slew_rate[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
@@ -194,8 +213,8 @@ struct phy_params_t
     uint8_t iv_dram_dic[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint8_t iv_dram_preamble[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint8_t iv_phy_equalization[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
-    uint8_t iv_init_vref_dq;
-    uint16_t iv_init_phy_vref;
+    uint8_t iv_init_vref_dq[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
+    uint8_t iv_init_phy_vref[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint8_t iv_odt_wr_map_cs[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint8_t iv_odt_rd_map_cs[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint8_t iv_geardown_mode[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
@@ -224,6 +243,7 @@ class phy_params
 
         fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> iv_target;
         phy_params_t iv_params;
+        std::vector<mss::rank::info<>> iv_rank_info;
 
     public:
 
@@ -244,9 +264,9 @@ class phy_params
             uint8_t l_master_ranks[MAX_DIMM_PER_PORT] = {};
             // Fetch attributes and populate the member variables
             FAPI_TRY(mss::attr::get_dimm_type(i_target, iv_params.iv_dimm_type));
-            FAPI_TRY(mss::attr::get_exp_cs_present(i_target, iv_params.iv_chip_select));
+            FAPI_TRY(mss::attr::get_dimm_ranks_configed(i_target, iv_params.iv_chip_select));
             FAPI_TRY(mss::attr::get_dram_width(i_target, iv_params.iv_dram_data_width));
-            FAPI_TRY(mss::attr::get_exp_3ds_height(i_target, iv_params.iv_height_3DS));
+            FAPI_TRY(mss::attr::get_3ds_height(i_target, iv_params.iv_height_3DS));
             FAPI_TRY(mss::attr::get_byte_enables(i_target, iv_params.iv_dbyte_macro));
             FAPI_TRY(mss::attr::get_nibble_enables(i_target, iv_params.iv_nibble));
             FAPI_TRY(mss::attr::get_exp_dram_address_mirroring(i_target, iv_params.iv_addr_mirror));
@@ -307,6 +327,8 @@ class phy_params
                 iv_params.iv_encoded_quadcs = (l_has_rcd && l_4r) ? MSDG_QUAD_ENCODE_MODE : MSDG_DUAL_DIRECT_MODE;
             }
 
+            FAPI_TRY(mss::rank::ranks_on_port(i_target, iv_rank_info));
+
         fapi_try_exit:
             o_rc = fapi2::current_err;
         }
@@ -317,17 +339,84 @@ class phy_params
         /// @brief Set params as per the value initialized (useful for testing)
         /// @param[in] i_target the fapi2 target
         /// @param[in] i_phy_params explorer specific data structure
+        /// @param[out] o_rc Return code from rank API initialization
         ///
         phy_params(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-                   const phy_params_t& i_phy_params):
+                   const phy_params_t& i_phy_params,
+                   const std::vector<mss::rank::info<>> i_rank_info):
             iv_target(i_target),
-            iv_params(i_phy_params)
+            iv_params(i_phy_params),
+            iv_rank_info(i_rank_info)
         {}
 
         ///
         /// @brief Destructor
         ///
         ~phy_params() = default;
+
+        ///
+        /// @brief Set the rank-based phy field from the attribute
+        ///
+        /// @param[in] i_phy_param_ranks array of pointers to the rank fields to be filled in
+        /// @param[in] i_phy_param_attr pointer to the iv array indexed by dimm & rank
+        /// @note this function assumes i_phy_param_ranks is properly populated with 4 fields (1 per phy rank)
+        ///
+        void set_phy_field_by_rank(const std::vector<uint16_t*>& i_phy_param_ranks,
+                                   const uint8_t (&i_phy_param_attr)[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM]) const
+        {
+            // First, zero everything out
+            for (uint8_t l_rank = 0; l_rank < i_phy_param_ranks.size(); ++l_rank)
+            {
+                *i_phy_param_ranks[l_rank] = 0;
+            }
+
+            // For each rank, the phy rank value (0-4) is what needs to be filled in for draminit
+            // This maps to the field corresponding to the ATTR index value
+            // indexed by the rank's dimm index and dimm rank
+            for (const auto& l_rank : iv_rank_info)
+            {
+                const uint8_t l_dimm_index = mss::index(l_rank.get_dimm_target());
+                const uint8_t l_dimm_rank = l_rank.get_dimm_rank();
+                *i_phy_param_ranks[l_rank.get_phy_rank()] = i_phy_param_attr[l_dimm_index][l_dimm_rank];
+            }
+        }
+
+        ///
+        /// @brief Maps the ODT RD/WR attributes to the form needed for exp_draminit
+        ///
+        /// @param[in] i_odt_rd_wr_attr iv array indexed by dimm & rank
+        /// @param[out] o_odt_buffer buffer to populate
+        ///
+        fapi2::ReturnCode populate_odt_buffer(const uint8_t (&i_odt_rd_wr_attr)[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM],
+                                              fapi2::buffer<uint16_t>& o_odt_buffer) const
+        {
+            // Const vector to map phy ranks to their buffer offset position
+            const std::vector<uint8_t> l_buffer_rank_offset =
+            {
+                odt_fields::RANK0,
+                odt_fields::RANK1,
+                odt_fields::RANK2,
+                odt_fields::RANK3,
+            };
+
+            for (const auto& l_rank : iv_rank_info)
+            {
+                const auto OFFSET = l_buffer_rank_offset[l_rank.get_phy_rank()];
+                const auto DIMM_RANK = l_rank.get_dimm_rank();
+                const auto DIMM_INDEX = mss::index(l_rank.get_dimm_target());
+                FAPI_TRY(o_odt_buffer.insert(i_odt_rd_wr_attr[DIMM_INDEX][DIMM_RANK], OFFSET, odt_fields::FLD_LENGTH));
+            }
+
+            // Rest of the buffer should already be zeroed from declaration
+            // Our attribute values come in left aligned (LSB left), our buffers are left aligned, but MCHP wants things right aligned:
+            // (rank0 == [1:0], rank1 == [5:4])
+            // So we can set it up from the buffer perspective, but then flip the whole buffer, getting the values back to their
+            // correct form (MSB right aligned) in addition to flipping the rank positions to their expected locations
+            o_odt_buffer.reverse();
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
 
         ///
         /// @brief user_input_msdg structure setup for parameter DimmType
@@ -351,6 +440,14 @@ class phy_params
 
                 case fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_LRDIMM:
                     io_phy_params.DimmType = MSDG_LRDIMM;
+                    break;
+
+                case fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_MDS_LRDIMM:
+                    io_phy_params.DimmType = MSDG_MDS_LRDIMM;
+                    break;
+
+                case fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_MDS:
+                    io_phy_params.DimmType = MSDG_MDS;
                     break;
 
                 default:
@@ -378,7 +475,14 @@ class phy_params
         ///
         fapi2::ReturnCode setup_CsPresent(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.CsPresent = iv_params.iv_chip_select;
+            fapi2::buffer<uint8_t> l_cs_present(iv_params.iv_chip_select[0]);
+
+            // Flip buffer (Needs to be right aligned, currently 0bXXXX0000)
+            l_cs_present.reverse();
+
+            // Now extend to 16 bits for phy_params struct
+            io_phy_params.CsPresent = static_cast<uint16_t>(l_cs_present);
+
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -428,21 +532,21 @@ class phy_params
         ///
         fapi2::ReturnCode setup_Height3DS(user_input_msdg& io_phy_params) const
         {
-            switch (iv_params.iv_height_3DS)
+            switch (iv_params.iv_height_3DS[0])
             {
-                case fapi2::ENUM_ATTR_MEM_EXP_3DS_HEIGHT_PLANAR:
+                case fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_PLANAR:
                     io_phy_params.Height3DS = MSDG_PLANAR;
                     break;
 
-                case fapi2::ENUM_ATTR_MEM_EXP_3DS_HEIGHT_H2:
+                case fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_H2:
                     io_phy_params.Height3DS = MSDG_H2;
                     break;
 
-                case fapi2::ENUM_ATTR_MEM_EXP_3DS_HEIGHT_H4:
+                case fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_H4:
                     io_phy_params.Height3DS = MSDG_H4;
                     break;
 
-                case fapi2::ENUM_ATTR_MEM_EXP_3DS_HEIGHT_H8:
+                case fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_H8:
                     io_phy_params.Height3DS = MSDG_H8;
                     break;
 
@@ -452,9 +556,9 @@ class phy_params
                                 fapi2::MSS_EXP_DRAMINIT_UNSUPPORTED_3DS_HEIGHT().
                                 set_OCMB_TARGET(l_ocmb).
                                 set_PORT(iv_target).
-                                set_HEIGHT(iv_params.iv_height_3DS),
+                                set_HEIGHT(iv_params.iv_height_3DS[0]),
                                 "%s 3DS Height is not a supported (%d)",
-                                mss::c_str(iv_target), iv_params.iv_height_3DS);
+                                mss::c_str(iv_target), iv_params.iv_height_3DS[0]);
                     break;
             }
 
@@ -604,7 +708,8 @@ class phy_params
         ///
         fapi2::ReturnCode set_Frequency(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.Frequency[0] = static_cast<uint16_t>(iv_params.iv_frequency);
+            // Divide by 2 to convert from DRAM freq to MEMCLK freq
+            io_phy_params.Frequency[0] = static_cast<uint16_t>(iv_params.iv_frequency / 2);
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -714,10 +819,15 @@ class phy_params
         ///
         fapi2::ReturnCode set_RttNom(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.DramRttNomR0[0] = iv_params.iv_dram_rtt_nom[0][0];
-            io_phy_params.DramRttNomR1[0] = iv_params.iv_dram_rtt_nom[0][1];
-            io_phy_params.DramRttNomR2[0] = iv_params.iv_dram_rtt_nom[0][2];
-            io_phy_params.DramRttNomR3[0] = iv_params.iv_dram_rtt_nom[0][3];
+            const std::vector<uint16_t*> l_rtt_noms =
+            {
+                &io_phy_params.DramRttNomR0[0],
+                &io_phy_params.DramRttNomR1[0],
+                &io_phy_params.DramRttNomR2[0],
+                &io_phy_params.DramRttNomR3[0],
+            };
+
+            set_phy_field_by_rank(l_rtt_noms, iv_params.iv_dram_rtt_nom);
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -728,10 +838,15 @@ class phy_params
         ///
         fapi2::ReturnCode set_RttWr(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.DramRttWrR0[0] = iv_params.iv_dram_rtt_wr[0][0];
-            io_phy_params.DramRttWrR1[0] = iv_params.iv_dram_rtt_wr[0][1];
-            io_phy_params.DramRttWrR2[0] = iv_params.iv_dram_rtt_wr[0][2];
-            io_phy_params.DramRttWrR3[0] = iv_params.iv_dram_rtt_wr[0][3];
+            const std::vector<uint16_t*> l_rtt_wrs =
+            {
+                &io_phy_params.DramRttWrR0[0],
+                &io_phy_params.DramRttWrR1[0],
+                &io_phy_params.DramRttWrR2[0],
+                &io_phy_params.DramRttWrR3[0],
+            };
+
+            set_phy_field_by_rank(l_rtt_wrs, iv_params.iv_dram_rtt_wr);
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -742,10 +857,15 @@ class phy_params
         ///
         fapi2::ReturnCode set_RttPark(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.DramRttParkR0[0] = iv_params.iv_dram_rtt_park[0][0];
-            io_phy_params.DramRttParkR1[0] = iv_params.iv_dram_rtt_park[0][1];
-            io_phy_params.DramRttParkR2[0] = iv_params.iv_dram_rtt_park[0][2];
-            io_phy_params.DramRttParkR3[0] = iv_params.iv_dram_rtt_park[0][3];
+            const std::vector<uint16_t*> l_rtt_parks =
+            {
+                &io_phy_params.DramRttParkR0[0],
+                &io_phy_params.DramRttParkR1[0],
+                &io_phy_params.DramRttParkR2[0],
+                &io_phy_params.DramRttParkR3[0],
+            };
+
+            set_phy_field_by_rank(l_rtt_parks, iv_params.iv_dram_rtt_park);
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -804,7 +924,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_InitVrefDQ(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.InitVrefDQ[0] = iv_params.iv_init_vref_dq;
+            io_phy_params.InitVrefDQ[0] = iv_params.iv_init_vref_dq[0][0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -815,9 +935,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_InitPhyVref(user_input_msdg& io_phy_params) const
         {
-            // Attr Vref = percentage of VDDQ, Receiver Vref = VDDQ*PhyVref[6:0]/128
-            // conversion is attr_value * 128 / 100
-            io_phy_params.InitPhyVref[0] = iv_params.iv_init_phy_vref * 128 / 100;
+            io_phy_params.InitPhyVref[0] = iv_params.iv_init_phy_vref[0][0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -828,8 +946,13 @@ class phy_params
         ///
         fapi2::ReturnCode set_OdtWrMapCs(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.OdtWrMapCs[0] = iv_params.iv_odt_wr_map_cs[0][0];
-            return fapi2::FAPI2_RC_SUCCESS;
+            fapi2::buffer<uint16_t> odt_wr_map_cs_buff;
+
+            FAPI_TRY(populate_odt_buffer(iv_params.iv_odt_wr_map_cs, odt_wr_map_cs_buff));
+            io_phy_params.OdtWrMapCs[0] = odt_wr_map_cs_buff;
+
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         ///
@@ -839,8 +962,13 @@ class phy_params
         ///
         fapi2::ReturnCode set_OdtRdMapCs(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.OdtRdMapCs[0] = iv_params.iv_odt_rd_map_cs[0][0];
-            return fapi2::FAPI2_RC_SUCCESS;
+            fapi2::buffer<uint16_t> odt_rd_map_cs_buff;
+
+            FAPI_TRY(populate_odt_buffer(iv_params.iv_odt_rd_map_cs, odt_rd_map_cs_buff));
+            io_phy_params.OdtRdMapCs[0] = odt_rd_map_cs_buff;
+
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         ///
@@ -1030,5 +1158,4 @@ fapi2::ReturnCode response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_
 }// exp
 }// mss
 
-#endif
 #endif

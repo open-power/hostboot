@@ -36,7 +36,9 @@
 #ifndef MSS_EXP_CONSTS_H
 #define MSS_EXP_CONSTS_H
 
-#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#ifndef __PPE__
+    #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#endif
 
 namespace mss
 {
@@ -46,6 +48,7 @@ namespace exp
 
 constexpr uint32_t OCMB_ADDR_SHIFT = 3;
 
+#ifndef __PPE__
 ///
 /// @brief enum list for the indexes for the address delays
 /// @note Taken from 07-MAY-19 firwmare document
@@ -125,7 +128,11 @@ enum sizes
     MAX_SYMBOLS_PER_PORT = 72,
     MAX_RANKS_DIMM1 = 2,
     MAX_MRANK_PER_PORT = MAX_DIMM_PER_PORT * MAX_RANK_PER_DIMM,
+    MAX_BYTES_PER_PORT = MAX_DQ_BITS_PER_PORT / BITS_PER_BYTE,
+    MAX_NIBBLES_PER_PORT = MAX_DQ_BITS_PER_PORT / BITS_PER_NIBBLE,
 };
+
+#endif
 
 ///
 /// @brief explorer ffdc codes
@@ -198,14 +205,33 @@ namespace i2c
 ///
 enum cmd_id : uint8_t
 {
-    FW_BOOT_CONFIG     = 0x01,
-    FW_STATUS          = 0x02,
-    FW_REG_ADDR_LATCH  = 0x03,
-    FW_REG_READ        = 0x04,
-    FW_REG_WRITE       = 0x05,
-    FW_DOWNLOAD        = 0x06,
-    FW_CONT_REG_READ   = 0x07,
-    FW_CONT_REG_WRITE  = 0x08,
+    FW_BOOT_CONFIG                           = 0x01,
+    FW_STATUS                                = 0x02,
+    FW_REG_ADDR_LATCH                        = 0x03,
+    FW_REG_READ                              = 0x04,
+    FW_REG_WRITE                             = 0x05,
+    FW_DOWNLOAD                              = 0x06,
+    FW_CONT_REG_READ                         = 0x07,
+    FW_CONT_REG_WRITE                        = 0x08,
+    FW_BYPASS_4SEC_TIMEOUT                   = 0x09,
+    FW_PQM_LANE_SET                          = 0x0A,
+    FW_PQM_LANE_GET                          = 0x0B,
+    FW_PQM_FREQ_SET                          = 0x0C,
+    FW_PQM_FREQ_GET                          = 0x0D,
+    FW_PQM_LANE_TRAINING                     = 0x0E,
+    FW_PQM_TRAINING_RESET                    = 0x0F,
+    FW_PQM_RX_ADAPTATION_OBJ_READ            = 0x10,
+    FW_PQM_RX_CALIBRATION_VALUE_READ         = 0x11,
+    FW_PQM_CSU_CALIBRATION_VALUE_STATUS_READ = 0x12,
+    FW_PQM_PRBS_PATTERN_MODE_SET             = 0x13,
+    FW_PQM_PRBS_USER_DEFINED_PATTERN_SET     = 0x14,
+    FW_PQM_PRBS_MONITOR_CONTROL              = 0x15,
+    FW_PQM_PRBS_GENERATOR_CONTROL            = 0x16,
+    FW_PQM_PRBS_ERR_COUNT_READ               = 0x17,
+    FW_PQM_HORIZONTAL_BATHTUB_GET            = 0x18,
+    FW_PQM_VERTICAL_BATHTUB_GET              = 0x19,
+    FW_PQM_2D_BATHTUB_GET                    = 0x1A,
+    EXP_FW_PQM_FORCE_DELAY_LINE_UPDATE       = 0x22,
 };
 
 ///
@@ -239,6 +265,7 @@ enum status_codes
     FW_BUSY              = 0xFE,
 };
 
+#ifndef __PPE__
 ///
 /// @brief status codes for FW_BOOT_CONFIG
 ///
@@ -256,6 +283,7 @@ enum fw_boot_cfg_status
     FW_BOOT_CFG_UNSUPPORTED_SERDES_FREQ = 0x04,
 };
 
+#endif
 ///
 /// @brief I2C boot stage options
 /// @note certain cmds work in certain boot stages
@@ -303,9 +331,9 @@ enum addrSide
     RHS = 0x01
 };
 
-
 }// i2c
 
+#ifndef __PPE__
 namespace omi
 {
 
@@ -369,6 +397,8 @@ enum response_arg
 };
 
 }// omi
+#endif
+
 }// exp
 }// mss
 

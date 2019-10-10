@@ -37,7 +37,7 @@
 #define _MSS_GENERIC_RANK_H_
 
 #include <fapi2.H>
-#include <generic/memory/lib/utils/pos.H>
+#include <generic/memory/lib/utils/index.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
@@ -89,7 +89,8 @@ class info
 
             // Ranks
             iv_dimm_rank = i_index;
-            iv_port_rank = iv_dimm_rank + ((mss::relative_pos<DEFAULT_MEM_PORT_TARGET>(i_dimm_target) * TT::RANK_INDEX_STEP));
+            iv_port_rank = iv_dimm_rank + ((mss::index(i_dimm_target) * TT::RANK_INDEX_STEP));
+            iv_phy_rank = iv_dimm_rank + ((mss::index(i_dimm_target) * TT::PHY_RANK_INDEX_STEP));
         fapi_try_exit:
             o_rc = fapi2::current_err;
         }
@@ -131,7 +132,7 @@ class info
                     // throw that error.
                     // If we do find the right dimm, we need to then make sure that the master_ranks_per_dimm attribute
                     // is greater than the expected dimm rank.
-                    if (mss::relative_pos<DEFAULT_MEM_PORT_TARGET>(l_dimm) == l_target_index)
+                    if (mss::index(l_dimm) == l_target_index)
                     {
                         uint8_t l_master_ranks_per_dimm = 0;
                         FAPI_TRY(mss::attr::get_num_master_ranks_per_dimm(l_dimm, l_master_ranks_per_dimm));
@@ -155,6 +156,7 @@ class info
 
                 // Ranks
                 iv_dimm_rank = i_index % TT::RANK_INDEX_STEP;
+                iv_phy_rank = get_phy_rank_from_port_rank(i_index);
                 iv_port_rank = i_index;
             }
 
@@ -170,6 +172,7 @@ class info
         {
             return iv_port_rank;
         }
+
         ///
         /// @brief Accessor for rank number of DIMM
         /// @return the number (0-3) of the DIMM
@@ -177,6 +180,16 @@ class info
         inline const uint8_t get_dimm_rank() const
         {
             return iv_dimm_rank;
+        }
+
+        ///
+        /// @brief Accessor for phy rank
+        /// @return the phy rank value
+        /// @note in a hypothetical 2 4-rank dimm configuration (not possible), this value is not valid
+        ///
+        inline const uint8_t get_phy_rank() const
+        {
+            return iv_phy_rank;
         }
 
         ///
@@ -197,11 +210,37 @@ class info
             return iv_port_target;
         }
 
+        ///
+        /// @brief Calculate phy rank given port rank (unit testable)
+        ///
+        /// @param[in] l_port_rank port rank
+        /// @return phy rank
+        ///
+        inline static uint8_t get_phy_rank_from_port_rank(const uint8_t i_port_rank)
+        {
+            const uint8_t l_dimm_rank = i_port_rank % TT::RANK_INDEX_STEP;
+            const uint8_t l_dimm_index = i_port_rank / TT::RANK_INDEX_STEP;
+
+            // Dimm index * 2 sets the center point at 2
+            // Add on the dimm rank
+            // Note that this logic does NOT apply in a hypothetical/impossible 2 4-rank dimm configuration
+            return ((l_dimm_index * TT::PHY_RANK_INDEX_STEP) + (l_dimm_rank));
+        }
+
     private:
         fapi2::Target<fapi2::TARGET_TYPE_DIMM> iv_dimm_target;
         fapi2::Target<DEFAULT_MEM_PORT_TARGET> iv_port_target;
         uint8_t iv_dimm_rank;
         uint8_t iv_port_rank;
+
+        // Note! a configuration of 2 4-rank dimms is not possible.
+        // In this hypothetical scenario, the value for phy-rank would not
+        // be valid / does not apply, as there will be some rollover.
+        // 1 rank-per-dimm: 0 dimm0 2 dimm1
+        // 2 rank-per-dimm: 0/1 dimm0 2/3 dimm1.
+        // 2 rank single dimm 0/1
+        // 4 rank (quad encoded) 0-3.
+        uint8_t iv_phy_rank;
 };
 
 ///
@@ -229,13 +268,13 @@ fapi2::ReturnCode ranks_on_port(const fapi2::Target<DEFAULT_MEM_PORT_TARGET>& i_
 
     for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_port_target))
     {
-        const uint8_t l_dimm_pos = mss::relative_pos<DEFAULT_MEM_PORT_TARGET>(l_dimm);
-        const uint8_t l_port_index_start = l_dimm_pos * TT::RANK_INDEX_STEP;
+        const uint8_t l_dimm_index = mss::index(l_dimm);
+        const uint8_t l_port_index_start = l_dimm_index * TT::RANK_INDEX_STEP;
 
         fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
         // For each rank index of the dimm from the port's perspective
-        for (uint8_t l_index = l_port_index_start; l_index < (l_port_index_start + l_master_ranks_per_dimm[l_dimm_pos]);
+        for (uint8_t l_index = l_port_index_start; l_index < (l_port_index_start + l_master_ranks_per_dimm[l_dimm_index]);
              ++l_index)
         {
             o_vect.push_back(mss::rank::info<>(i_port_target, l_index, l_rc));

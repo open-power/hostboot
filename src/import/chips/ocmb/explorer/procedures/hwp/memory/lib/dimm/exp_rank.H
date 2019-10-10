@@ -22,6 +22,15 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+///
+/// @file exp_rank.H
+/// @brief Explorer rank definitions
+///
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: FSP:HB
 
 #ifndef _MSS_EXP_RANK_H_
 #define _MSS_EXP_RANK_H_
@@ -44,19 +53,55 @@ class rankTraits<mss::mc_type::EXPLORER>
         static constexpr uint8_t MAX_DIMMS_PER_PORT = 2;
         static constexpr uint8_t MAX_RANKS_PER_DIMM = 4;
         static constexpr uint8_t RANK_INDEX_STEP = 4;
+
+        // Note! a configuration of 2 4-rank dimms is not possible.
+        // In this hypothetical scenario, the value for phy-rank would not
+        // be valid / does not apply, as there will be some rollover.
+        static constexpr uint8_t PHY_RANK_INDEX_STEP = 2;
 };
 
 ///
-/// @brief Return a vector of rank numbers which represent the primary rank pairs for this port or dimm
-/// @tparam T the target type
-/// @param[in] i_target TARGET_TYPE_MCA or TARGET_TYPEDIMM
-/// @param[out] o_rps a vector of rank_pairs
+/// @brief Return a vector of rank numbers which represent the primary rank pairs for this port
+/// @param[in] i_target port target on which to operate
+/// @param[out] o_ranks a vector of ranks
 /// @return FAPI@_RC_SUCCESS iff all is ok
-//TODO: Need to implement this
-template< fapi2::TargetType T >
-inline fapi2::ReturnCode primary_ranks( const fapi2::Target<T>& i_target, std::vector< uint64_t >& o_rps )
+inline fapi2::ReturnCode primary_ranks( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                        std::vector< uint64_t >& o_rps )
 {
-    return fapi2::FAPI2_RC_SUCCESS;
+    o_rps.clear();
+    std::vector<mss::rank::info<mss::mc_type::EXPLORER>> l_rank_info_vect;
+    FAPI_TRY(mss::rank::ranks_on_port<mss::mc_type::EXPLORER>(i_target, l_rank_info_vect));
+
+    // Loop through and assemble the ranks
+    for(const auto& l_rank_info : l_rank_info_vect)
+    {
+        o_rps.push_back(l_rank_info.get_port_rank());
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Return a vector of rank numbers which represent the primary rank pairs for this dimm
+/// @param[in] i_target DIMM target on which to operate
+/// @param[out] o_ranks a vector of ranks
+/// @return FAPI@_RC_SUCCESS iff all is ok
+inline fapi2::ReturnCode primary_ranks( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                        std::vector< uint64_t >& o_rps )
+{
+    o_rps.clear();
+    std::vector<mss::rank::info<mss::mc_type::EXPLORER>> l_rank_info_vect;
+    FAPI_TRY(mss::rank::ranks_on_dimm<mss::mc_type::EXPLORER>(i_target, l_rank_info_vect));
+
+    // Loop through and assemble the ranks
+    for(const auto& l_rank_info : l_rank_info_vect)
+    {
+        o_rps.push_back(l_rank_info.get_port_rank());
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///

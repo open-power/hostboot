@@ -75,7 +75,7 @@ enum exp_struct_sizes
 /// @brief The host command structure
 /// @note The HOST uses 64 Byte Command Information Unit (IU) for sending commands to Firmware
 ///
-typedef struct
+typedef struct __attribute__((packed))
 {
     // Command Header
     uint8_t  cmd_id;                          // Command type
@@ -88,14 +88,15 @@ typedef struct
     uint32_t padding[CMD_PADDING_SIZE];        // Fill up to the size of one cache line
     uint8_t  command_argument[ARGUMENT_SIZE]; // Additional parameters associated with the command
     uint32_t cmd_header_crc;                  // CRC of 64 bytes of command header
-} host_fw_command_struct;
+}
+host_fw_command_struct;
 
 ///
 /// @class host_fw_response_struct
 /// @brief The firmware response structure
 /// @note The Firmware uses 64 Byte Response Information Unit (IU) for sending responses to HOST
 ///
-typedef struct
+typedef struct __attribute__((packed))
 {
     // Response Header
     uint8_t  response_id;                      // Response ID - same as Command ID
@@ -107,7 +108,8 @@ typedef struct
     uint32_t padding[RSP_PADDING_SIZE];         // Fill up to the size of one cache line
     uint8_t  response_argument[ARGUMENT_SIZE]; // Additional parameters associated with the response
     uint32_t response_header_crc;              // CRC of 64 bytes of reponse header
-} host_fw_response_struct;
+}
+host_fw_response_struct;
 
 
 ///
@@ -115,14 +117,16 @@ typedef struct
 /// @brief PHY initialization parameters
 /// @note PHY FW module requires certain parameters from HOST software
 ///
-typedef struct user_input_msdg
+typedef struct __attribute__((packed)) user_input_msdg
 {
     uint32_t version_number;
 
     // Choose the Dimm type from one of below:
     // 0 = UDIMM
     // 1 = RDIMM
-    // 2 = LRDIMM
+    // 2 = LRDIMM (invalid for explorer)
+    // 3 = MDS-LRDIMM
+    // 4 = MDS
     uint16_t DimmType;
 
     // Indicates presence of DRAM at each chip select for PHY. Each
@@ -166,7 +170,7 @@ typedef struct user_input_msdg
     // 0 = No Address Mirror.
     uint16_t AddrMirror;
 
-    // DRAM Column Addr Width (Valid value: 5,6,7,10)
+    // DRAM Column Addr Width (Valid value: 10)
     uint16_t ColumnAddrWidth;
 
     // DRAM Row Addr Width (Valid value: 14,15,16,17,18)
@@ -463,25 +467,43 @@ typedef struct user_input_msdg
     uint16_t InitPhyVref[MSDG_MAX_PSTATE];
 
     // Enter desired ODT[3:0] value when writing to ranks
-    // OdtWrMapCs[i][3:0] ODT value when writing to rank 0
-    // OdtWrMapCs[i][7:4] ODT value when writing to rank 1
-    // OdtWrMapCs[i][11:8] ODT value when writing to rank 2
-    // OdtWrMapCs[i][15:12] ODT value when writing to rank 3
-    // [0] - ODT value for P0
-    // [1] - ODT value for P1
-    // [2] - ODT value for P2
-    // [3] - ODT value for P3
+    // in normal mode (2 rank)
+    // OdtWrMapCs BIT [1:0] ODT_A/B[1:0] value when writing to rank 0
+    // OdtWrMapCs BIT [5:4] ODT_A/B[1:0] value when writing to rank 1
+    // If EncodedQuadCs = 1
+    // OdtWrMapCs BIT [1:0] ODT_A/B[1:0] value when writing to rank 0
+    // OdtWrMapCs BIT [5:4] ODT_A/B[1:0] value when writing to rank 1
+    // OdtWrMapCs BIT [9:8] ODT_A/B[1:0] value when writing to rank 2
+    // OdtWrMapCs BIT [13:12] ODT_A/B[1:0] value when writing to rank 3
+    // If Rank4Mode = 1
+    // OdtWrMapCs BIT [1:0] ODT_A[1:0] value when writing to rank 0
+    // OdtWrMapCs BIT [3:2] ODT_B[1:0] value when writing to rank 0
+    // OdtWrMapCs BIT [5:4] ODT_A[1:0] value when writing to rank 1
+    // OdtWrMapCs BIT [7:6] ODT_B[1:0] value when writing to rank 1
+    // OdtWrMapCs BIT [9:8] ODT_A[1:0] value when writing to rank 2
+    // OdtWrMapCs BIT [11:10] ODT_B[1:0] value when writing to rank 2
+    // OdtWrMapCs BIT [13:12] ODT_A[1:0] value when writing to rank 3
+    // OdtWrMapCs BIT [15:14] ODT_B[1:0] value when writing to rank 3
     uint16_t OdtWrMapCs[MSDG_MAX_PSTATE];
 
-    // Enter desired ODT[3:0] value when writing to ranks
-    // OdtRdMapCs[i][3:0] ODT value when writing to rank 0
-    // OdtRdMapCs[i][7:4] ODT value when writing to rank 1
-    // OdtRdMapCs[i][11:8] ODT value when writing to rank 2
-    // OdtRdMapCs[i][15:12] ODT value when writing to rank 3
-    // [0] - ODT value for P0
-    // [1] - ODT value for P1
-    // [2] - ODT value for P2
-    // [3] - ODT value for P3
+    // Enter desired ODT[3:0] value when reading from ranks
+    // in normal mode (2 rank)
+    // OdtRdMapCs BIT [1:0] ODT_A/B[1:0] value when reading from rank 0
+    // OdtRdMapCs BIT [5:4] ODT_A/B[1:0] value when reading from rank 1
+    // If EncodedQuadCs = 1
+    // OdtRdMapCs BIT [1:0] ODT_A/B[1:0] value when reading from rank 0
+    // OdtRdMapCs BIT [5:4] ODT_A/B[1:0] value when reading from rank 1
+    // OdtRdMapCs BIT [9:8] ODT_A/B[1:0] value when reading from rank 2
+    // OdtRdMapCs BIT [13:12] ODT_A/B[1:0] value when reading from rank 3
+    // If Rank4Mode = 1
+    // OdtRdMapCs BIT [1:0] ODT_A[1:0] value when reading from rank 0
+    // OdtRdMapCs BIT [3:2] ODT_B[1:0] value when reading from rank 0
+    // OdtRdMapCs BIT [5:4] ODT_A[1:0] value when reading from rank 1
+    // OdtRdMapCs BIT [7:6] ODT_B[1:0] value when reading from rank 1
+    // OdtRdMapCs BIT [9:8] ODT_A[1:0] value when reading from rank 2
+    // OdtRdMapCs BIT [11:10] ODT_B[1:0] value when reading from rank 2
+    // OdtRdMapCs BIT [13:12] ODT_A[1:0] value when reading from rank 3
+    // OdtRdMapCs BIT [15:14] ODT_B[1:0] value when reading from rank 3
     uint16_t OdtRdMapCs[MSDG_MAX_PSTATE];
 
     // Enable geardown mode during training/dfi_bist.
@@ -595,7 +617,7 @@ typedef struct user_input_msdg
 /// @brief The sensor cache structure
 /// @note The data in the sensor cache is returned in 2 32-byte packets
 ///
-typedef struct
+typedef struct __attribute__((packed))
 {
     /*
      * Packet 0
@@ -636,14 +658,15 @@ typedef struct
     uint8_t initial_packet1;         // initial_packet1[0] '1' on first packet1 return, otherwise '0'
     //                               // initial_packet1[1:7] Reserved
     uint8_t reserved1[SENSOR_CACHE_PADDING_SIZE_1];
-} sensor_cache_struct;
+}
+sensor_cache_struct;
 
 
 ///
 /// @class user_response_timing_msdg_t
 /// @brief Contains the command to command timing training results
 ///
-typedef struct user_response_timing_msdg
+typedef struct __attribute__((packed)) user_response_timing_msdg
 {
     uint16_t DFIMRL_DDRCLK_trained; // Training result of DFIMRL_DDRCLK parameter (by mrlTraining step).
     // DFIMRL_DDRCLK: Max Read Latency counted by DDR Clock. dfi_rddata is returned (14 + DFIMRL_DDRCLK) cycles after dfi_rddata_en is asserted.
@@ -667,7 +690,7 @@ typedef struct user_response_timing_msdg
 /// @class user_response_error_msdg
 /// @brief Contains the lane failure results
 ///
-typedef struct user_response_error_msdg
+typedef struct __attribute__((packed)) user_response_error_msdg
 {
     uint16_t Failure_Lane[TRAINING_RESPONSE_NUM_LANES]; // error code of DQ[n] on Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
     //Failure status of training. Each uint16_t field contains the training error code of all 4 ranks on 1 DQ lane.
@@ -689,7 +712,7 @@ typedef struct user_response_error_msdg
 /// @class user_response_mrs_msdg_t
 /// @brief MRS response structure
 ///
-typedef struct user_response_mrs_msdg_t
+typedef struct __attribute__((packed)) user_response_mrs_msdg_t
 {
     uint16_t MR0;               // Value of DDR mode register MR0 for all ranks, all devices
     uint16_t MR1[TRAINING_RESPONSE_NUM_RANKS];            // Value of DDR mode register MR1 for each rank (up to 4 ranks)
@@ -705,7 +728,7 @@ typedef struct user_response_mrs_msdg_t
 /// @class user_response_rc_msdg_t
 /// @brief RCD response structure
 ///
-typedef struct user_response_rc_msdg_t
+typedef struct __attribute__((packed)) user_response_rc_msdg_t
 {
     uint8_t   F0RC_D0[TRAINING_RESPONSE_NUM_RC];      // RCD control words for DIMM0; Invalid for UDIMM
     // F0RC_D0[15:0] BIT [3:0]: 4-bit value of F0RC00~F0RC0F
@@ -725,7 +748,7 @@ typedef struct user_response_rc_msdg_t
 /// @class user_response_msdg_t
 /// @brief Microchip response structure
 ///
-typedef struct user_response_msdg
+typedef struct __attribute__((packed)) user_response_msdg
 {
     uint32_t                        version_number;
     user_response_timing_msdg_t     tm_resp;

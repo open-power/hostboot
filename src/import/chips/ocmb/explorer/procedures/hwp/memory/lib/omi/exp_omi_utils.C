@@ -55,7 +55,7 @@ namespace omi
 /// @param[in] i_train_mode mode to use
 /// @param[in] i_dl_x4_backoff_en backoff enable bit
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
-/// @note Algorithm from p10_omi_train.C
+/// @note Algorithm from p9a_omi_train.C
 ///
 fapi2::ReturnCode setup_omi_dl0_config0(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
@@ -69,7 +69,7 @@ fapi2::ReturnCode setup_omi_dl0_config0(
              "Error reading EXPLR_DLX_DL0_CONFIG0 on %s", mss::c_str(i_target));
 
     // CFG_DL0_HALF_WIDTH_BACKOFF_ENABLE: dl0 x4 backoff enabled
-    l_config0.writeBit<EXPLR_DLX_DL0_CONFIG0_CFG_X4_BACKOFF_ENABLE>(i_dl_x4_backoff_en);
+    l_config0.writeBit<EXPLR_DLX_DL0_CONFIG0_CFG_HALF_WIDTH_BACKOFF_ENABLE>(i_dl_x4_backoff_en);
 
     // CFG_DL0_TRAIN_MODE: dl0 train mode
     l_config0.insertFromRight<EXPLR_DLX_DL0_CONFIG0_CFG_TRAIN_MODE,
@@ -102,11 +102,14 @@ fapi2::ReturnCode setup_fw_boot_config( const fapi2::Target<fapi2::TARGET_TYPE_O
     uint8_t l_dl_layer_boot_mode = 0;
     uint8_t l_dfe_disable = 0;
     uint8_t l_lane_mode = 0;
+    uint8_t l_adaptation_mode = 0;
     uint32_t l_omi_freq = 0;
 
     const auto& l_proc = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
 
     // Read the EXP_FW_BOOT_CONFIG from the attributes
+    FAPI_TRY(mss::attr::get_ocmb_exp_boot_config_adaptation_mode(i_target, l_adaptation_mode));
+
     FAPI_TRY(mss::attr::get_ocmb_exp_boot_config_fw_mode(i_target, l_fw_mode));
 
     FAPI_TRY(mss::attr::get_ocmb_exp_boot_config_opencapi_loopback_test(i_target, l_loopback_test));
@@ -133,6 +136,7 @@ fapi2::ReturnCode setup_fw_boot_config( const fapi2::Target<fapi2::TARGET_TYPE_O
     FAPI_TRY(mss::exp::i2c::boot_cfg::set_transport_layer( i_target, o_data, l_transport_layer ));
     FAPI_TRY(mss::exp::i2c::boot_cfg::set_loopback_test( i_target, o_data, l_loopback_test ));
     FAPI_TRY(mss::exp::i2c::boot_cfg::set_fw_mode( i_target, o_data, l_fw_mode ));
+    FAPI_TRY(mss::exp::i2c::boot_cfg::set_adaptation_mode( i_target, o_data, l_adaptation_mode ));
 
 fapi_try_exit:
     return fapi2::current_err;
