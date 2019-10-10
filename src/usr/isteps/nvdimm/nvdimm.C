@@ -3727,13 +3727,7 @@ errlHndl_t notifyNvdimmProtectionChange(Target* i_target,
 
 #ifdef __HOSTBOOT_RUNTIME
 
-        // Don't send message to OPAL
-        if (TARGETING::is_sapphire_load())
-        {
-            break;
-        }
-
-        // Send combined status to phyp
+        // Send combined status notification
         // Get the Proc Chip Id
         RT_TARG::rtChipId_t l_chipId = 0;
 
@@ -3745,7 +3739,7 @@ errlHndl_t notifyNvdimmProtectionChange(Target* i_target,
             break;
         }
 
-        // send the notification msg
+        // Check for valid interface
         if ((nullptr == g_hostInterfaces) ||
             (nullptr == g_hostInterfaces->firmware_request))
         {
@@ -3780,7 +3774,7 @@ errlHndl_t notifyNvdimmProtectionChange(Target* i_target,
 
         TRACFCOMP( g_trac_nvdimm,
                   "notifyNvdimmProtectionChange: 0x%.8X "
-                  "NV_STATUS to PHYP: 0x%02X",
+                  "NV_STATUS to HYP: 0x%02X",
                   get_huid(l_proc),
                   l_combined_status );
 
