@@ -42,8 +42,10 @@ constexpr uint8_t EEPROM_MAX_RETRIES = 2;
 constexpr uint8_t  INVALID_EEPROM_INDEX  = 0xFF;
 constexpr uint32_t UNSET_INTERNAL_OFFSET_VALUE = 0xFFFFFFFF;
 constexpr uint32_t UNSET_END_OF_CACHE_VALUE = UNSET_INTERNAL_OFFSET_VALUE;
-constexpr uint8_t  NUM_BYTE_UNIQUE_ID = 12;
+constexpr uint8_t  NUM_BYTE_UNIQUE_ID = 13;
 constexpr uint8_t  MAX_EEPROMS_VERSION_1 = 50;
+constexpr uint8_t  MAX_EEPROMS_VERSION_2 = 50;
+constexpr uint8_t  MAX_EEPROMS_LATEST = MAX_EEPROMS_VERSION_2;
 
 /**
  * @brief Enumerations to link EEPROM types to EEPROM's chip number behind
@@ -92,8 +94,19 @@ enum EECACHE_VERSION
 {
     EECACHE_VERSION_UNSET = 0xFF,
     EECACHE_VERSION_1     = 0x01,
+    EECACHE_VERSION_2     = 0x02,
     // Useful Enum
-    EECACHE_VERSION_LATEST = EECACHE_VERSION_1,
+    EECACHE_VERSION_LATEST = EECACHE_VERSION_2,
+};
+
+/**
+* @brief Enumerations to describe how the eeprom is accessed
+*/
+enum class EepromHwAccessMethodType : uint8_t
+{
+    EEPROM_HW_ACCESS_METHOD_UNKNOWN  = 0x00,
+    EEPROM_HW_ACCESS_METHOD_I2C      = 0x01,
+    EEPROM_HW_ACCESS_METHOD_SPI      = 0x02,
 };
 
 /**
@@ -105,26 +118,41 @@ enum EECACHE_VERSION
 *        completeRecord is the standard way to access data in the union.
 *
 *        uniqueRecord is useful if you want to quickly compare the "unique"
-*        bits of a header entry which includes the target_huid, port, engine,
-*        devAddr, mux_huid, and mux_select, and size
+*        bits of a header entry which includes the accessType, target_huid,
+*        port, engine, devAddr, mux_huid, and mux_select, and size
 *
 */
 union eepromRecordHeader
 {
     struct completeRecord
     {
-        uint32_t i2c_master_huid;   // HUID of i2c Master
-        uint8_t  port;              // I2C Port
-        uint8_t  engine;            // I2C Engine
-        uint8_t  devAddr;           // I2C Device Address
-        uint8_t  mux_select;        // Some I2C devices are behind a mux, this says
-                                    // what setting on the mux is required
+        EepromHwAccessMethodType accessType;  // how to access record
+        union eepromAccess_t
+        {
+            struct i2cAccess_t
+            {
+                uint32_t i2c_master_huid;   // HUID of i2c Master
+                uint8_t  port;              // I2C Port
+                uint8_t  engine;            // I2C Engine
+                uint8_t  devAddr;           // I2C Device Address
+                uint8_t  mux_select;        // Some I2C devices are behind a mux, this says
+                                            // what setting on the mux is required
+            } PACKED i2cAccess;
+            struct spiAccess_t
+            {
+                uint32_t spi_master_huid;  // HUID of SPI master
+                uint8_t  engine;           // engine specific to eeprom
+                uint16_t offset_KB;        // offset in KB of where record begins in eeprom
+                uint8_t  pad_byte;         // just padding
+            } PACKED spiAccess;
+        } PACKED eepromAccess;
         uint32_t cache_copy_size;   // Size of data saved in cache (in KB)
         uint32_t internal_offset;   // offset from start of EECACHE section where cached
                                     // data exists
         uint8_t  cached_copy_valid : 1,   // This bit is set when we think the contents of the
                                           // cache is valid.
-                 unused            : 7;
+        master_eeprom              : 1,   // This bit marks this record as the master one (i.e. look at this one for change)
+        unused                     : 6;
 
     } PACKED completeRecord;
 
@@ -155,7 +183,7 @@ struct eecacheSectionHeader
 {
     uint8_t version;         // EECACHE_VERSION
     uint32_t end_of_cache;   // End point of the last cache entry
-    eepromRecordHeader recordHeaders[MAX_EEPROMS_VERSION_1];
+    eepromRecordHeader recordHeaders[MAX_EEPROMS_LATEST];
 } PACKED ;
 
 /**
@@ -168,40 +196,49 @@ struct eecacheSectionHeader
  */
 struct eeprom_addr_t
 {
-    uint8_t port;
-    uint8_t engine;
-    uint8_t devAddr;
+    EepromHwAccessMethodType accessMethod;
+    union accessAddr_t
+    {
+        struct i2c_addr_t
+        {
+            TARGETING::EntityPath i2cMasterPath;
+            uint8_t engine;
+            uint8_t devAddr;
+            uint8_t port;
+            eeprom_addr_size_t addrSize;
+            uint64_t writePageSize;  // in bytes
+            uint64_t chipCount;      // number of chips making up eeprom device
+            uint64_t writeCycleTime;  // in milliseconds
+            uint8_t i2cMuxBusSelector;
+            TARGETING::EntityPath i2cMuxPath;
+        } PACKED i2c_addr;
+        struct spi_addr_t
+        {
+            TARGETING::EntityPath spiMasterPath;
+            uint8_t engine;
+            uint64_t roleOffset_KB;  // offset of the eepromRole's data
+        } PACKED spi_addr;
+        accessAddr_t()
+        {
+            memset(this, 0, sizeof(accessAddr_t));
+        }
+        ~accessAddr_t() {}
+    } PACKED accessAddr;
     int64_t  eepromRole;
-    uint64_t offset;
-    eeprom_addr_size_t addrSize;
-    TARGETING::EntityPath i2cMasterPath;
-    uint64_t writePageSize;  // in bytes
-    uint64_t devSize_KB;     // in kilobytes
-    uint64_t chipCount;      // number of chips making up eeprom device
-    uint64_t writeCycleTime;  // in milliseconds
-    uint8_t i2cMuxBusSelector;
-    TARGETING::EntityPath i2cMuxPath;
+    uint64_t offset;      // offset from devAddr
+    uint64_t devSize_KB; // size of data area starting from devAddr
 
     /**
      *  @brief Construct a default eeprom_addr_t
      */
     eeprom_addr_t()
-        : port(0),
-          engine(0),
-          devAddr(0),
-          eepromRole(INVALID_CHIP_TYPE),
-          offset(0),
-          addrSize(LAST_DEVICE_TYPE),
-          i2cMasterPath(TARGETING::EntityPath::PATH_NA),
-          writePageSize(0),
-          devSize_KB(0),
-          chipCount(0),
-          writeCycleTime(0),
-          i2cMuxBusSelector(I2C_MUX::NOT_APPLICABLE),
-          i2cMuxPath(TARGETING::EntityPath::PATH_NA)
+      : accessMethod(EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_UNKNOWN),
+        eepromRole(INVALID_CHIP_TYPE),
+        offset(0),
+        devSize_KB(0)
     {
     }
-};
+} PACKED;
 
 
 /**
@@ -210,28 +247,32 @@ struct eeprom_addr_t
  */
 struct EepromInfo_t
 {
-    TARGETING::Target* i2cMaster; //< I2C Master chip
-    uint64_t engine; //< I2C engine (relative to master chip)
-    uint64_t port; //< I2C port (relative to engine)
-    uint64_t busFreq; //< Bus speed in Hz
-    uint64_t devAddr; //< I2C device address (relative to port)
-    uint64_t sizeKB; //< Total eeprom size in KB
-    uint64_t chipCount; //< Number of chips making up eeprom device
-    uint64_t addrBytes; //< Number of bytes required for addressing
-    EEPROM_ROLE device; //< Identifies role of eeprom
+    EepromHwAccessMethodType accessMethod;
+    union access_t
+    {
+        struct i2cAccess
+        {
+            TARGETING::Target* i2cMaster; //< I2C Master chip
+            uint64_t engine; //< I2C engine (relative to master chip)
+            uint64_t port; //< I2C port (relative to engine)
+            uint64_t busFreq; //< Bus speed in Hz
+            uint64_t devAddr; //< I2C device address (relative to port)
+            uint64_t chipCount; //< Number of chips making up eeprom device
+            uint64_t addrBytes; //< Number of bytes required for addressing
+        } PACKED i2cInfo;
+        struct spiAccess
+        {
+            TARGETING::Target* spiMaster; //< SPI Master chip
+            uint64_t engine; //< SPI engine (relative to master chip)
+        } PACKED spiInfo;
+    } PACKED eepromAccess;
+
+    EEPROM_ROLE deviceRole; //< Identifies role of eeprom
     TARGETING::Target* assocTarg; //< Target associated with this device
 
     EepromInfo_t()
-      : i2cMaster(nullptr),
-        engine(0),
-        port(0),
-        busFreq(0),
-        devAddr(0),
-        sizeKB(0),
-        chipCount(0),
-        addrBytes(0),
-        device(INVALID_CHIP_TYPE),
-        assocTarg(nullptr)
+      : accessMethod(EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_UNKNOWN),
+        deviceRole(INVALID_CHIP_TYPE)
     {
     }
 };

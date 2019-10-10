@@ -120,6 +120,8 @@ errlHndl_t IpVpdFacade::read ( TARGETING::Target * i_target,
                               recordName);
         if( err )
         {
+            TRACFCOMP( g_trac_vpd,
+                       ERR_MRK"IpVpdFacade::read: translateRecord failed" );
             break;
         }
 
@@ -128,10 +130,12 @@ errlHndl_t IpVpdFacade::read ( TARGETING::Target * i_target,
 
         if( err )
         {
+            TRACFCOMP( g_trac_vpd,
+                       ERR_MRK"IpVpdFacade::read: translateKeyword failed" );
             break;
         }
 
-        TRACSCOMP( g_trac_vpd,
+        TRACSSCOMP( g_trac_vpd,
                    INFO_MRK"IpVpdFacade::read: Record (%s) and Keyword (%s)",
                    recordName, keywordName );
 
@@ -147,12 +151,14 @@ errlHndl_t IpVpdFacade::read ( TARGETING::Target * i_target,
             break;
         }
 
-        TRACSCOMP( g_trac_vpd,
+        TRACSSCOMP( g_trac_vpd,
                    INFO_MRK"IpVpdFacade::read: Record offset for %s is 0x%.4x",
                    recordName, recordOffset );
 
         if(IPVPD::FULL_RECORD == i_args.keyword)
         {
+            TRACSSCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::read: read full record - target 0x%.8X length 0x%X",
+              TARGETING::get_huid(i_target), io_buflen);
             // full record
             err = retrieveRecord(  recordName,
                                    recordOffset,
@@ -163,6 +169,9 @@ errlHndl_t IpVpdFacade::read ( TARGETING::Target * i_target,
         }
         else //specific keyword
         {
+            TRACSSCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::read: retrieveKeyword  target 0x%.8X length 0x%X",
+              TARGETING::get_huid(i_target), io_buflen);
+
             // use record offset to find/read the keyword
             err = retrieveKeyword( keywordName,
                                    recordName,
@@ -176,6 +185,8 @@ errlHndl_t IpVpdFacade::read ( TARGETING::Target * i_target,
 
         if( err )
         {
+            TRACSSCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::read: target 0x%.8X length 0x%X failed",
+              TARGETING::get_huid(i_target), io_buflen);
             break;
         }
 
@@ -231,7 +242,7 @@ errlHndl_t IpVpdFacade::write ( TARGETING::Target * i_target,
             break;
         }
 
-        TRACSCOMP( g_trac_vpd,
+        TRACSSCOMP( g_trac_vpd,
                    INFO_MRK"IpVpdFacade::Write: Record (%s) and Keyword (%s)",
                    recordName, keywordName );
 
@@ -1944,13 +1955,16 @@ errlHndl_t IpVpdFacade::fetchDataFromEeprom(uint64_t i_byteAddr,
 {
     errlHndl_t err = NULL;
     TRACSSCOMP( g_trac_vpd,
-                ENTER_MRK"IpVpdFacade::fetchDataFromEeprom(%ld, %d, . . .)",
+                ENTER_MRK"IpVpdFacade::fetchDataFromEeprom(%ld, %d, 0x%.8X . . .)",
                 i_byteAddr,
-                i_numBytes );
+                i_numBytes,
+                TARGETING::get_huid(i_target) );
 
     do
     {
         // Need to read directly from target's EEPROM.
+        TRACSSCOMP( g_trac_vpd, "IpVpdFacade::fetchDataFromEeprom -> deviceOp(DEVICE_EEPROM_ADDRESS(VPD_PRIMARY, %d, %d)",
+          i_byteAddr, i_eepromSource );
         err = DeviceFW::deviceOp( DeviceFW::READ,
                                   i_target,
                                   o_data,
@@ -1961,6 +1975,12 @@ errlHndl_t IpVpdFacade::fetchDataFromEeprom(uint64_t i_byteAddr,
                                       i_eepromSource ) );
         if( err )
         {
+            TRACSSCOMP( g_trac_vpd,
+                ERR_MRK"IpVpdFacade::fetchDataFromEeprom(%ld, %d, 0x%.8X . . .) failed, err rc=0x%X, plid=0x%X",
+                i_byteAddr,
+                i_numBytes,
+                TARGETING::get_huid(i_target),
+                ERRL_GETRC_SAFE(err), ERRL_GETPLID_SAFE(err) );
             break;
         }
     } while( 0 );

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,13 +53,15 @@ enum eepromModuleId
     EEPROM_WRITE                            = 0x03,
     EEPROM_PREPAREADDRESS                   = 0x04,
     EEPROM_READATTRIBUTES                   = 0x05,
-    EEPROM_GETI2CMASTERTARGET               = 0x06,
+    EEPROM_GET_MASTERTARGET                 = 0x06,
     EEPROM_CACHE_EEPROM                     = 0x07,
     EEPROM_CLEAR_EECACHE                    = 0x08,
     EEPROM_CACHE_PERFORM_OP                 = 0x09,
     EEPROM_INVALIDATE_CACHE                 = 0x0A,
     EEPROM_RESOLVE_SOURCE                   = 0x0B,
     EEPROM_CACHE_INIT_RT                    = 0x0C,
+    EEPROM_PERFORM_OP_HW                    = 0x0D,
+    EEPROM_PERFORM_SPI_OP                   = 0x0E,
 };
 
 /**
@@ -75,7 +77,7 @@ enum eepromReasonCode
     EEPROM_INVALID_DEVICE_TYPE              = EEPROM_COMP_ID | 0x02,
     EEPROM_ATTR_INFO_NOT_FOUND              = EEPROM_COMP_ID | 0x03,
     EEPROM_INVALID_CHIP                     = EEPROM_COMP_ID | 0x04,
-    EEPROM_I2C_MASTER_PATH_ERROR            = EEPROM_COMP_ID | 0x05,
+    EEPROM_MASTER_PATH_ERROR                = EEPROM_COMP_ID | 0x05,
     EEPROM_TARGET_NULL                      = EEPROM_COMP_ID | 0x06,
     EEPROM_INVALID_ADDR_OFFSET_SIZE         = EEPROM_COMP_ID | 0x07,
     EEPROM_OVERFLOW_ERROR                   = EEPROM_COMP_ID | 0x08,
@@ -95,15 +97,17 @@ enum eepromReasonCode
     EEPROM_CACHE_NOT_FOUND_IN_PNOR          = EEPROM_COMP_ID | 0x10,   // An entry we thought would be in the the EECACHE section of PNOR seems
                                                                        // to be missing
     EEPROM_CACHE_NO_VPD_IN_RSV_MEM          = EEPROM_COMP_ID | 0x11,   // When looking up the VPD section in reserved memory no entry was found.
-    EEPROM_DUPLICATE_CACHE_ENTRY            = EEPROM_COMP_ID | 0x12    // While parsing eecache found in reserved memory we found at least two
+    EEPROM_DUPLICATE_CACHE_ENTRY            = EEPROM_COMP_ID | 0x12,   // While parsing eecache found in reserved memory we found at least two
                                                                        // cache entries that had identical "unique" identifiers
                                                                        // (see structs defined in eeprom_const.H)
+    EEPROM_INVALID_ACCESS_METHOD            = EEPROM_COMP_ID | 0x13,   // See EepromHwAccessMethodType in eeprom_const.H
 };
 
 enum UserDetailsTypes
 {
     EEPROM_UDT_NO_FORMAT       = 0x0,
-    EEPROM_UDT_PARAMETERS      = 0x1,
+    EEPROM_UDT_I2C_PARAMETERS  = 0x1,
+    EEPROM_UDT_SPI_PARAMETERS  = 0x2,
 };
 
 };  // end EEPROM

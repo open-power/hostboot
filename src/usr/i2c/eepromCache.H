@@ -171,11 +171,24 @@ uint64_t lookupEepromCacheAddr(const eepromRecordHeader& i_eepromRecordHeader);
 * @brief Print the info found in the Table of Contents of the EECACHE
 *        section of pnor to trace buffer
 *
+* @param[in] i_only_valid_entries - just print the valid entries
+*
 * @return void
 *
 */
-void printTableOfContents(void);
+void printTableOfContentsFromPnor(bool i_only_valid_entries = false);
 
+
+/**
+*
+* @brief Print the global map table of contents section to trace buffer
+*
+* @param[in] i_only_valid_entries - just print the valid entries
+*
+* @return void
+*
+*/
+void printTableOfContentsFromGlobalMemory(bool i_only_valid_entries = false);
 
 /**
 *
@@ -236,6 +249,54 @@ bool hasEeepromChanged(const eepromRecordHeader & i_eepromRecordHeader);
 * @return void
 */
 void setEeepromChanged(const eepromRecordHeader & i_eepromRecordHeader);
+
+
+/**
+ * @brief Checks if eeprom is in sync with hw based on vpd
+ *        or matching master role eeprom
+ * @param[in] - target checking
+ * @param[in] - eeprom record to check
+ * @param[in] - eeprom role
+ * @param[out] - true if record is in-sync, else false
+ * @return  error log if failure found
+ */
+errlHndl_t isEepromInSync(TARGETING::Target * i_target,
+                          const eepromRecordHeader& i_eepromRecordHeader,
+                          EEPROM::EEPROM_ROLE i_eepromType,
+                          bool & o_isInSync);
+
+/**
+ * @brief Compares the two headers to see if they are on the same eeprom
+ *        This will match master and ancillary eeproms
+ *        since they are for same physical eeprom
+ * @param[in] - i_eepromMasterRecord - this record's eeprom must be matched
+ * @param[in] - i_eepromCheckRecord - check this eeprom against master one
+ * @return true if records are for same eeprom, else false
+ */
+bool eepromsMatch(eepromRecordHeader * i_eepromMasterRecord,
+                  eepromRecordHeader * i_eepromCheckRecord);
+
+/**
+ * @brief Clears all cache records pertaining to the physical eeprom.
+ *        It will walk the PNOR records and clear out all
+ *        sections (master & ancillary) with matching eeprom.
+ *        Writes 0xFF to content data and sets each matching
+ *        record's header to invalid cache.
+ * @param[in] - i_eecacheSectionHeaderPtr - pointer to PNOR EECACHE
+ * @param[in] - i_eepromRecordHeader - record pointing to eeprom to clear
+ * @return error if failure during clear, else nullptr
+ */
+errlHndl_t clearEecache(eecacheSectionHeader * i_eecacheSectionHeaderPtr,
+                        eepromRecordHeader & i_eepromRecordHeader);
+
+/**
+ * @brief Lookup the current state of the eeprom based on master
+ * @param[in] - i_eepromRecordHeader - record identifying eeprom to lookup
+ * @param[out] - o_valid - true if eeprom is valid, else false
+ * @param[out] - o_changed - true if eeprom has changed, else false
+ */
+void getMasterEepromCacheState(const eepromRecordHeader & i_eepromRecordHeader,
+                               bool & o_valid, bool & o_changed);
 #else
 /**
 *
@@ -263,7 +324,7 @@ bool addEepromToCachedList(const eepromRecordHeader & i_eepromRecordHeader,
 *
 * @param[in] i_eepromRecordHeader Header for record we want to add to lookup address for
 *
-* @param[in] i_isntance  Node ID that this eeprom is on
+* @param[in] i_instance  Node ID that this eeprom is on
 *
 * @pre  It is expected that i_eepromRecordHeader has valid information for
 *       the uniqueID (i2cm_huid, port, engine, devAddr, mux_select)

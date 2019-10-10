@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -189,7 +189,6 @@ UdI2CParms::UdI2CParms( uint8_t i_opType,
 //------------------------------------------------------------------------------
 UdI2CParms::~UdI2CParms()
 {
-
 }
 
 } // end I2C namespace
@@ -201,22 +200,23 @@ namespace EEPROM
 //------------------------------------------------------------------------------
 //  EEPROM User Details
 //------------------------------------------------------------------------------
-UdEepromParms::UdEepromParms( uint8_t i_opType,
-                              TARGETING::Target * i_target,
-                              uint64_t i_buflen,
-                              eeprom_addr_t i_i2cInfo )
+UdEepromI2cParms::UdEepromI2cParms( uint8_t i_opType,
+                                    TARGETING::Target * i_target,
+                                    uint64_t i_buflen,
+                                    eeprom_addr_t i_i2cInfo )
 {
     // Set up Ud instance variables
     iv_CompId = EEPROM_COMP_ID;
-    iv_Version = 3;
-    iv_SubSection = EEPROM_UDT_PARAMETERS;
+    iv_Version = 4;
+    iv_SubSection = EEPROM_UDT_I2C_PARAMETERS;
 
     //***** Memory Layout *****
     // 1 byte   : Op Type Description
     // 1 byte   : Op Type (DeviceFW::OperationType)
+    // 1 byte   : Eeprom access type
     // 4 bytes  : Target HUID
     // 8 bytes  : Length of In/Out Buffer
-    // 8 bytes  : Chip
+    // 8 bytes  : eepromRole
     // 8 bytes  : Offset
     // 8 bytes  : Port
     // 8 bytes  : Engine
@@ -230,10 +230,21 @@ UdEepromParms::UdEepromParms( uint8_t i_opType,
     // N bytes  : I2C MUX path in string form
 
     // Cache the MUX path in string form for reference and easy access
-    char *l_muxPath = i_i2cInfo.i2cMuxPath.toString();
+
+    char *l_muxPath;
+    if ( i_i2cInfo.accessMethod ==
+         EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_I2C )
+    {
+        l_muxPath = i_i2cInfo.accessAddr.i2c_addr.i2cMuxPath.toString();
+    }
+    else
+    {
+        l_muxPath = new char[1];
+        l_muxPath[0] = '\0';
+    }
 
     char * l_pBuf = reinterpret_cast<char *>(
-                          reallocUsrBuf(sizeof(uint8_t)*2
+                          reallocUsrBuf(sizeof(uint8_t)*3
                                         +sizeof(uint32_t)
                                         +sizeof(uint64_t)*6
                                         +sizeof(uint8_t)
@@ -264,6 +275,13 @@ UdEepromParms::UdEepromParms( uint8_t i_opType,
     memcpy(l_pBuf, &tmp8, sizeof(tmp8));
     l_pBuf += sizeof(tmp8);
 
+    ////////////////////////
+    // version 4 data
+    tmp8 = static_cast<uint8_t>(i_i2cInfo.accessMethod);
+    memcpy(l_pBuf, &tmp8, sizeof(tmp8));
+    l_pBuf += sizeof(tmp8);
+    ////////////////////////
+
     tmp32 = TARGETING::get_huid(i_target);
     memcpy(l_pBuf, &tmp32, sizeof(tmp32));
     l_pBuf += sizeof(tmp32);
@@ -280,23 +298,23 @@ UdEepromParms::UdEepromParms( uint8_t i_opType,
     memcpy(l_pBuf, &tmp64, sizeof(tmp64));
     l_pBuf += sizeof(tmp64);
 
-    tmp64 = i_i2cInfo.port;
+    tmp64 = i_i2cInfo.accessAddr.i2c_addr.port;
     memcpy(l_pBuf, &tmp64, sizeof(tmp64));
     l_pBuf += sizeof(tmp64);
 
-    tmp64 = i_i2cInfo.engine;
+    tmp64 = i_i2cInfo.accessAddr.i2c_addr.engine;
     memcpy(l_pBuf, &tmp64, sizeof(tmp64));
     l_pBuf += sizeof(tmp64);
 
-    tmp64 = i_i2cInfo.devAddr;
+    tmp64 = i_i2cInfo.accessAddr.i2c_addr.devAddr;
     memcpy(l_pBuf, &tmp64, sizeof(tmp64));
     l_pBuf += sizeof(tmp64);
 
-    tmp8 = static_cast<uint8_t>(i_i2cInfo.addrSize);
+    tmp8 = static_cast<uint8_t>(i_i2cInfo.accessAddr.i2c_addr.addrSize);
     memcpy(l_pBuf, &tmp8, sizeof(tmp8));
     l_pBuf += sizeof(tmp8);
 
-    tmp64 = i_i2cInfo.writePageSize;
+    tmp64 = i_i2cInfo.accessAddr.i2c_addr.writePageSize;
     memcpy(l_pBuf, &tmp64, sizeof(tmp64));
     l_pBuf += sizeof(tmp64);
 
@@ -304,16 +322,16 @@ UdEepromParms::UdEepromParms( uint8_t i_opType,
     memcpy(l_pBuf, &tmp64, sizeof(tmp64));
     l_pBuf += sizeof(tmp64);
 
-    tmp64 = i_i2cInfo.chipCount;
+    tmp64 = i_i2cInfo.accessAddr.i2c_addr.chipCount;
     memcpy(l_pBuf, &tmp64, sizeof(tmp64));
     l_pBuf += sizeof(tmp64);
 
-    tmp64 = i_i2cInfo.writeCycleTime;
+    tmp64 = i_i2cInfo.accessAddr.i2c_addr.writeCycleTime;
     memcpy(l_pBuf, &tmp64, sizeof(tmp64));
     l_pBuf += sizeof(tmp64);
 
     // Begin Version 3 Data
-    tmp8 = i_i2cInfo.i2cMuxBusSelector;
+    tmp8 = i_i2cInfo.accessAddr.i2c_addr.i2cMuxBusSelector;
     memcpy(l_pBuf, &tmp8, sizeof(tmp8));
     l_pBuf += sizeof(tmp8);
 
@@ -326,10 +344,106 @@ UdEepromParms::UdEepromParms( uint8_t i_opType,
     l_muxPath = nullptr;
 }
 
-//------------------------------------------------------------------------------
-UdEepromParms::~UdEepromParms()
-{
 
+UdEepromI2cParms::~UdEepromI2cParms()
+{
+}
+
+
+//------------------------------------------------------------------------------
+UdEepromSpiParms::UdEepromSpiParms( uint8_t i_opType,
+                                    TARGETING::Target * i_target,
+                                    uint64_t i_buflen,
+                                    eeprom_addr_t i_spiInfo )
+{
+    // Set up Ud instance variables
+    iv_CompId = EEPROM_COMP_ID;
+    iv_Version = 1;
+    iv_SubSection = EEPROM_UDT_SPI_PARAMETERS;
+
+    //***** Memory Layout *****
+    // 1 byte   : Op Type (DeviceFW::OperationType)
+    // 1 byte   : Eeprom access method
+    // 4 bytes  : Target HUID
+    // 8 bytes  : Length of In/Out Buffer
+    // 8 bytes  : eepromRole
+    // 8 bytes  : Offset
+    // 8 bytes  : devSize_KB
+    // 8 bytes  : roleOffset_KB
+    // 1 byte   : SPI engine
+    // N bytes  : SPI master path
+    // Cache the SPI path in string form for reference and easy access
+
+    char *l_masterPath;
+    if ( i_spiInfo.accessMethod ==
+         EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_SPI )
+    {
+        l_masterPath = i_spiInfo.accessAddr.spi_addr.spiMasterPath.toString();
+    }
+    else
+    {
+        l_masterPath = new char[1];
+        l_masterPath[0] = '\0';
+    }
+
+    char * l_pBuf = reinterpret_cast<char *>(
+                          reallocUsrBuf(sizeof(uint8_t)*2
+                                        +sizeof(uint32_t)
+                                        +sizeof(uint64_t)*5
+                                        +sizeof(uint8_t)
+                                        +(strlen(l_masterPath)+1) ) );
+
+    uint64_t tmp64 = 0;
+    uint32_t tmp32 = 0;
+    uint8_t tmp8 = 0;
+
+    tmp8 = i_opType;
+    memcpy(l_pBuf, &tmp8, sizeof(tmp8));
+    l_pBuf += sizeof(tmp8);
+
+    tmp8 = static_cast<uint8_t>(i_spiInfo.accessMethod);
+    memcpy(l_pBuf, &tmp8, sizeof(tmp8));
+    l_pBuf += sizeof(tmp8);
+
+    tmp32 = TARGETING::get_huid(i_target);
+    memcpy(l_pBuf, &tmp32, sizeof(tmp32));
+    l_pBuf += sizeof(tmp32);
+
+    tmp64 = i_buflen;
+    memcpy(l_pBuf, &tmp64, sizeof(tmp64));
+    l_pBuf += sizeof(tmp64);
+
+    tmp64 = i_spiInfo.eepromRole;
+    memcpy(l_pBuf, &tmp64, sizeof(tmp64));
+    l_pBuf += sizeof(tmp64);
+
+    tmp64 = i_spiInfo.offset;
+    memcpy(l_pBuf, &tmp64, sizeof(tmp64));
+    l_pBuf += sizeof(tmp64);
+
+    tmp64 = i_spiInfo.devSize_KB;
+    memcpy(l_pBuf, &tmp64, sizeof(tmp64));
+    l_pBuf += sizeof(tmp64);
+
+    tmp64 = i_spiInfo.accessAddr.spi_addr.roleOffset_KB;
+    memcpy(l_pBuf, &tmp64, sizeof(tmp64));
+    l_pBuf += sizeof(tmp64);
+
+    tmp8 = i_spiInfo.accessAddr.spi_addr.engine;
+    memcpy(l_pBuf, &tmp8, sizeof(tmp8));
+    l_pBuf += sizeof(tmp8);
+
+    memcpy(l_pBuf, l_masterPath, strlen(l_masterPath));
+    l_pBuf += strlen(l_masterPath);
+    *l_pBuf = '\0';   // add a terminator for ease of parsing
+    ++l_pBuf;
+
+    free(l_masterPath);
+    l_masterPath = nullptr;
+}
+
+UdEepromSpiParms::~UdEepromSpiParms()
+{
 }
 
 } // end EEPROM namespace

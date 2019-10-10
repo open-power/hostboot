@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2014                   */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -54,8 +56,10 @@ namespace EEPROM
         public:
             UserDetailsParserFactory()
             {
-                registerParser<EEPROM::UdParserEepromParms>
-                  (EEPROM_UDT_PARAMETERS);
+                registerParser<EEPROM::UdParserEepromI2cParms>
+                  (EEPROM_UDT_I2C_PARAMETERS);
+                registerParser<EEPROM::UdParserEepromSpiParms>
+                  (EEPROM_UDT_SPI_PARAMETERS);
             }
 
         private:

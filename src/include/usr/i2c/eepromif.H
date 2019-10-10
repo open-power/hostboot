@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -68,9 +68,8 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
  *
  * @param[in] i_target - The current Target.
  *
- * @param[in] i_i2cInfo - Structure of I2C parameters needed to execute
- *      the command to the I2C device driver.
- *      NOTE: it is expected i2cMasterPath member is filled out
+ * @param[in] i_eepromInfo - structure of eeprom information with master target
+ *                           entity path filled in
  *
  * @param[out] o_target - The "new" target that will be used for all operations
  *      from this point on.
@@ -78,9 +77,9 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
  * @return errlHndl_t - NULL if successful, otherwise a pointer to the
  *      error log.
  */
-errlHndl_t eepromGetI2CMasterTarget ( TARGETING::Target * i_target,
-                                      const eeprom_addr_t & i_i2cInfo,
-                                      TARGETING::Target * &o_target );
+errlHndl_t eepromGetMasterTarget ( TARGETING::Target * i_target,
+                                   const eeprom_addr_t & i_eepromInfo,
+                                   TARGETING::Target * &o_target );
 
 /**
  * @brief Return a set of information related to every unique
@@ -112,6 +111,40 @@ void dumpEepromData(const TARGETING::EepromVpdPrimaryInfo & i_i2cInfo);
  *
  */
 void dumpEepromData(const eeprom_addr_t & i_i2cInfo);
+
+/**
+ *
+ * @brief A useful utility to cache the VPD for a given target
+ *        These are master eeprom types that are used to see if eeprom changes
+ *
+ * @param [in] i_target - target that may have mvpd to cache
+ * @param [in] i_present - eeprom presence
+ *
+ */
+void cacheEepromVpd(TARGETING::Target * i_target, bool i_present);
+
+/**
+ *
+ * @brief A useful utility to cache all ancillary role eeprom data
+ *        This is for the roles that do not know if the cache has changed
+ *
+ *        This should be called after cacheEeepromVpd() has been called for
+ *        each target.  Needs the master eeprom setup first.
+ */
+void cacheEepromAncillaryRoles();
+
+/**
+ *  @brief Get a common user data piece for eepromRecordHeader record
+ *         Format returned:
+ *           @userdata1[0:31]  HUID of Master
+ *           @userdata1[32:39] Port (or 0xFF)
+ *           @userdata1[40:47] Engine
+ *           @userdata1[48:55] devAddr    (or byte 0 offset_KB)
+ *           @userdata1[56:63] mux_select (or byte 1 offset_KB)
+ *  @param Filled in eeprom record header
+ *  @return userdata for this eeprom record
+ */
+uint64_t getEepromHeaderUserData(const eepromRecordHeader& i_eepromRecordHeader);
 
 };  // end namespace EEPROM
 

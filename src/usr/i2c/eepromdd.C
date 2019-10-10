@@ -42,6 +42,8 @@
 #include "eepromCache.H"
 #include "eepromdd_hardware.H"
 #include <i2c/eepromddreasoncodes.H>
+#include <i2c/eepromif.H>
+
 #ifdef __HOSTBOOT_RUNTIME
 // Need to be able to convert HB target id's to runtime target ids
 #include <targeting/attrrp.H>
@@ -97,7 +99,8 @@ errlHndl_t resolveSource(TARGETING::Target * i_target,
     // then we know it exists in cache somewhere
     if(lookupEepromCacheAddr(l_eepromRecordHeader))
     {
-        TRACDCOMP(g_trac_eeprom,"Eeprom found in cache, looking at eecache");
+        TRACDCOMP(g_trac_eeprom,"Eeprom of 0x%.8X tgt and %d role found in cache, looking at eecache",
+          TARGETING::get_huid(i_target), io_i2cInfo.eepromRole);
         o_source = EEPROM::CACHE;
     }
     else
@@ -120,27 +123,19 @@ errlHndl_t resolveSource(TARGETING::Target * i_target,
         * @errortype
         * @moduleid     EEPROM_RESOLVE_SOURCE
         * @reasoncode   EEPROM_CACHE_NOT_FOUND_IN_MAP
-        * @userdata1[0:7]   i2c_master_huid
-        * @userdata1[8:9]   port on i2c master eeprom slave is on
-        * @userdata1[10:11] engine on i2c master eeprom slave is on
-        * @userdata1[12:13] devAddr of eeprom slave
-        * @userdata1[14:15] muxSelect of eeprom slave (0xFF is not valid)
-        * @userdata2[0:7]   size of eeprom
+        * @userdata1[0:31]  master Huid
+        * @userdata1[32:39] port (or 0xFF)
+        * @userdata1[40:47] engine
+        * @userdata1[48:55] devAddr of eeprom slave   (or byte 0 offset_KB)
+        * @userdata1[56:63] muxSelect of eeprom slave (or byte 1 offset_KB)
+        * @userdata2[0:31]  size of eeprom
         * @devdesc      resolveSource failed to find cache in map during runtime
         */
         err = new ERRORLOG::ErrlEntry(
                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                         EEPROM_RESOLVE_SOURCE,
                         EEPROM_CACHE_NOT_FOUND_IN_MAP,
-                        TWO_UINT32_TO_UINT64(
-                            l_eepromRecordHeader.completeRecord.i2c_master_huid,
-                            TWO_UINT16_TO_UINT32(
-                                TWO_UINT8_TO_UINT16(
-                                    l_eepromRecordHeader.completeRecord.port,
-                                    l_eepromRecordHeader.completeRecord.engine),
-                                TWO_UINT8_TO_UINT16(
-                                    l_eepromRecordHeader.completeRecord.devAddr,
-                                    l_eepromRecordHeader.completeRecord.mux_select))),
+                        getEepromHeaderUserData(l_eepromRecordHeader),
                         l_eepromRecordHeader.completeRecord.cache_copy_size,
                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
     }
@@ -192,25 +187,24 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
                             va_list i_args )
 {
     errlHndl_t err = nullptr;
-    eeprom_addr_t i2cInfo;
+    eeprom_addr_t eepromAddr;
 
-    i2cInfo.eepromRole = va_arg( i_args, uint64_t );
-    i2cInfo.offset     = va_arg( i_args, uint64_t );
+    eepromAddr.eepromRole = va_arg( i_args, uint64_t );
+    eepromAddr.offset  = va_arg( i_args, uint64_t );
     #ifdef CONFIG_SUPPORT_EEPROM_CACHING
     EEPROM_SOURCE l_source  = (EEPROM_SOURCE)va_arg(i_args, uint64_t);
     #endif
-    TRACDCOMP( g_trac_eeprom,
-               ENTER_MRK"eepromPerformOp()" );
 
-    TRACUCOMP (g_trac_eeprom, ENTER_MRK"eepromPerformOp(): "
-               "i_opType=%d, chip=%d, offset=%x, len=%d",
-               (uint64_t) i_opType, i2cInfo.eepromRole, i2cInfo.offset, io_buflen);
+    TRACUCOMP (g_trac_eeprom, ENTER_MRK"eepromPerformOp(): target 0x%.8X "
+               "i_opType=%d, role=%d, offset=%x, len=%d",
+               TARGETING::get_huid(i_target), (uint64_t) i_opType,
+               eepromAddr.eepromRole, eepromAddr.offset, io_buflen);
     do{
 
         #ifdef CONFIG_SUPPORT_EEPROM_CACHING
         if(l_source == EEPROM::AUTOSELECT)
         {
-            err = resolveSource(i_target, i2cInfo, l_source);
+            err = resolveSource(i_target, eepromAddr, l_source);
         }
 
         if(err)
@@ -224,7 +218,7 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
         {
             // Read the copy of the EEPROM data we have cached in PNOR
             err = eepromPerformOpCache(i_opType, i_target,
-                                       io_buffer, io_buflen, i2cInfo);
+                                       io_buffer, io_buflen, eepromAddr);
 
             if(err)
             {
@@ -237,7 +231,7 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
                 // If the operation is a write we also need to
                 // "write through" to HW after we write cache
                 err = eepromPerformOpHW(i_opType, i_target,
-                                        io_buffer, io_buflen, i2cInfo);
+                                        io_buffer, io_buflen, eepromAddr);
             }
             #endif
         }
@@ -245,13 +239,13 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
         {
             // Read from the actual physical EEPROM device
             err = eepromPerformOpHW(i_opType, i_target, io_buffer,
-                                    io_buflen, i2cInfo);
+                                    io_buflen, eepromAddr);
         }
         #else
 
         // Read from the actual physical EEPROM device
         err = eepromPerformOpHW(i_opType, i_target, io_buffer,
-                                io_buflen, i2cInfo);
+                                io_buflen, eepromAddr);
 
         #endif // CONFIG_SUPPORT_EEPROM_CACHING
 

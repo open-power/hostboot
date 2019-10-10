@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,12 +48,11 @@ errlHndl_t buildEepromRecordHeader(TARGETING::Target * i_target,
 {
 
     TARGETING::Target * l_muxTarget = nullptr;
-    TARGETING::Target * l_i2cMasterTarget = nullptr;
+    TARGETING::Target * l_masterTarget = nullptr;
     TARGETING::TargetService& l_targetService = TARGETING::targetService();
     errlHndl_t l_errl = nullptr;
 
     do{
-
         l_errl = eepromReadAttributes(i_target, io_eepromInfo);
         if(l_errl)
         {
@@ -65,47 +64,27 @@ errlHndl_t buildEepromRecordHeader(TARGETING::Target * i_target,
             break;
         }
 
-        // Grab the I2C mux target so we can read the HUID, if the target is NULL we will not be able
-        // to lookup attribute to uniquely ID this eeprom so we will not cache it
-        l_muxTarget = l_targetService.toTarget( io_eepromInfo.i2cMuxPath);
-        if(l_muxTarget == nullptr)
-        {
-            TRACFCOMP( g_trac_eeprom,
-                      "buildEepromRecordHeader() Mux target associated with target 0x%.08X resolved to a nullptr , check attribute for eepromType %d. Skipping Cache",
-                      TARGETING::get_huid(i_target),
-                      io_eepromInfo.eepromRole);
-            /*@
-            * @errortype
-            * @moduleid     EEPROM_CACHE_EEPROM
-            * @reasoncode   EEPROM_I2C_MUX_PATH_ERROR
-            * @userdata1    HUID of target we want to cache
-            * @userdata2    Type of EEPROM we are caching
-            * @devdesc      buildEepromRecordHeader invalid mux target
-            */
-            l_errl = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                            EEPROM_CACHE_EEPROM,
-                            EEPROM_I2C_MUX_PATH_ERROR,
-                            TARGETING::get_huid(i_target),
-                            io_eepromInfo.eepromRole,
-                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-            l_errl->collectTrace(EEPROM_COMP_NAME);
-            break;
-        }
 
-        // Grab the I2C master target so we can read the HUID, if the target is NULL we will not be able
+        // Grab the master target so we can read the HUID, if the target is NULL we will not be able
         // to lookup attribute to uniquely ID this eeprom so we will not cache it
-        l_i2cMasterTarget = l_targetService.toTarget( io_eepromInfo.i2cMasterPath );
-        if(l_i2cMasterTarget == nullptr)
+        if (io_eepromInfo.accessMethod == EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_I2C)
+        {
+            l_masterTarget = l_targetService.toTarget( io_eepromInfo.accessAddr.i2c_addr.i2cMasterPath );
+        }
+        else
+        {
+            l_masterTarget = l_targetService.toTarget( io_eepromInfo.accessAddr.spi_addr.spiMasterPath );
+        }
+        if(l_masterTarget == nullptr)
         {
             TRACFCOMP( g_trac_eeprom,
-                      "buildEepromRecordHeader() I2C Master target associated with target 0x%.08X resolved to a nullptr , check attribute for eepromType %d. Skipping Cache ",
+                      "buildEepromRecordHeader() master target associated with target 0x%.08X resolved to a nullptr, check attribute for eepromType %d. Skipping Cache ",
                       TARGETING::get_huid(i_target),
                       io_eepromInfo.eepromRole);
             /*@
             * @errortype
             * @moduleid     EEPROM_CACHE_EEPROM
-            * @reasoncode   EEPROM_I2C_MASTER_PATH_ERROR
+            * @reasoncode   EEPROM_MASTER_PATH_ERROR
             * @userdata1    HUID of target we want to cache
             * @userdata2    Type of EEPROM we are caching
             * @devdesc      buildEepromRecordHeader invalid master target
@@ -113,7 +92,7 @@ errlHndl_t buildEepromRecordHeader(TARGETING::Target * i_target,
             l_errl = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                             EEPROM_CACHE_EEPROM,
-                            EEPROM_I2C_MASTER_PATH_ERROR,
+                            EEPROM_MASTER_PATH_ERROR,
                             TARGETING::get_huid(i_target),
                             io_eepromInfo.eepromRole,
                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
@@ -121,19 +100,69 @@ errlHndl_t buildEepromRecordHeader(TARGETING::Target * i_target,
             break;
         }
 
+        if (io_eepromInfo.accessMethod == EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_I2C)
+        {
+            // Grab the I2C mux target so we can read the HUID, if the target is NULL we will not be able
+            // to lookup attribute to uniquely ID this eeprom so we will not cache it
+            l_muxTarget = l_targetService.toTarget( io_eepromInfo.accessAddr.i2c_addr.i2cMuxPath);
+            if(l_muxTarget == nullptr)
+            {
+                TRACFCOMP( g_trac_eeprom,
+                          "buildEepromRecordHeader() Mux target associated with target 0x%.08X resolved to a nullptr , check attribute for eepromType %d. Skipping Cache",
+                          TARGETING::get_huid(i_target),
+                          io_eepromInfo.eepromRole);
+                /*@
+                * @errortype
+                * @moduleid     EEPROM_CACHE_EEPROM
+                * @reasoncode   EEPROM_I2C_MUX_PATH_ERROR
+                * @userdata1    HUID of target we want to cache
+                * @userdata2    Type of EEPROM we are caching
+                * @devdesc      buildEepromRecordHeader invalid mux target
+                */
+                l_errl = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                EEPROM_CACHE_EEPROM,
+                                EEPROM_I2C_MUX_PATH_ERROR,
+                                TARGETING::get_huid(i_target),
+                                io_eepromInfo.eepromRole,
+                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                l_errl->collectTrace(EEPROM_COMP_NAME);
+                break;
+            }
+        }
+
+
+
         // This is what we will compare w/ when we are going through the existing
         // caches in the eeprom to see if we have already cached something
         // Or if no matches are found we will copy this into the header
-        o_eepromRecordHeader.completeRecord.i2c_master_huid = l_i2cMasterTarget->getAttr<TARGETING::ATTR_HUID>();
-        o_eepromRecordHeader.completeRecord.port            = static_cast<uint8_t>(io_eepromInfo.port);
-        o_eepromRecordHeader.completeRecord.engine          = static_cast<uint8_t>(io_eepromInfo.engine);
-        o_eepromRecordHeader.completeRecord.devAddr         = static_cast<uint8_t>(io_eepromInfo.devAddr);
-        o_eepromRecordHeader.completeRecord.mux_select      = static_cast<uint8_t>(io_eepromInfo.i2cMuxBusSelector);
-        o_eepromRecordHeader.completeRecord.cache_copy_size     = static_cast<uint32_t>(io_eepromInfo.devSize_KB);
+        o_eepromRecordHeader.completeRecord.accessType = io_eepromInfo.accessMethod;
+        o_eepromRecordHeader.completeRecord.cache_copy_size = static_cast<uint32_t>(io_eepromInfo.devSize_KB);
 
-        // Do not set valid bit nor internal offset here as we do not have
-        // enough information availible to determine
+        if(io_eepromInfo.accessMethod == EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_I2C)
+        {
+            o_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.i2c_master_huid = l_masterTarget->getAttr<TARGETING::ATTR_HUID>();
+            o_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.port       = static_cast<uint8_t>(io_eepromInfo.accessAddr.i2c_addr.port);
+            o_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.engine     = static_cast<uint8_t>(io_eepromInfo.accessAddr.i2c_addr.engine);
+            o_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.devAddr    = static_cast<uint8_t>(io_eepromInfo.accessAddr.i2c_addr.devAddr);
+            o_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.mux_select = static_cast<uint8_t>(io_eepromInfo.accessAddr.i2c_addr.i2cMuxBusSelector);
 
+            // Do not set valid bit nor internal offset here as we do not have
+            // enough information available to determine
+        }
+        else
+        {
+            o_eepromRecordHeader.completeRecord.eepromAccess.spiAccess.spi_master_huid = l_masterTarget->getAttr<TARGETING::ATTR_HUID>();
+            o_eepromRecordHeader.completeRecord.eepromAccess.spiAccess.engine     = static_cast<uint8_t>(io_eepromInfo.accessAddr.spi_addr.engine);
+            o_eepromRecordHeader.completeRecord.eepromAccess.spiAccess.offset_KB = static_cast<uint16_t>(io_eepromInfo.accessAddr.spi_addr.roleOffset_KB);
+        }
+
+        if ((io_eepromInfo.eepromRole == VPD_PRIMARY) ||
+            (io_eepromInfo.eepromRole == VPD_BACKUP))
+        {
+            // This record is the master record for this eeprom
+            o_eepromRecordHeader.completeRecord.master_eeprom = 1;
+        }
     }while(0);
 
     return l_errl;
@@ -308,7 +337,7 @@ errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
                             EEPROM_CACHE_PERFORM_OP,
                             EEPROM_NOT_IN_CACHE,
                             TWO_UINT32_TO_UINT64(i_opType,
-                                                  i_eepromInfo.eepromRole),
+                                                 i_eepromInfo.eepromRole),
                             TO_UINT64(i_eepromInfo.offset),
                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(l_errl);

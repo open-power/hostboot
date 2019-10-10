@@ -57,6 +57,10 @@
 #include <hwas/common/deconfigGard.H>
 #include <hwas/common/hwas_reasoncodes.H>
 
+#ifdef CONFIG_SUPPORT_EEPROM_CACHING
+#include <i2c/eepromif.H>
+#endif
+
 namespace HWAS
 {
 
@@ -1128,6 +1132,12 @@ errlHndl_t HWASDiscovery::discoverTargets()
                 break;
             }
         }
+#endif
+
+#if( defined(CONFIG_SUPPORT_EEPROM_CACHING)  )
+        // call this after all targets have cached their eeprom vpd
+        // This will cover the roles that cannot determine if eeprom has updated
+        EEPROM::cacheEepromAncillaryRoles();
 #endif
     } while (0);
 

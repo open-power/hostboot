@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -170,22 +170,22 @@ namespace EEPROM
 {
 
 /**
- * @class UdParserEepromParms
+ * @class UdParserEepromI2cParms
  *
- * Parses UdEepromParms
+ * Parses UdEepromI2cParms
  */
-class UdParserEepromParms : public ERRORLOG::ErrlUserDetailsParser
+class UdParserEepromI2cParms : public ERRORLOG::ErrlUserDetailsParser
 {
 public:
     /**
      *  @brief Constructor
      */
-    UdParserEepromParms() {}
+    UdParserEepromI2cParms() {}
 
     /**
      *  @brief Destructor
      */
-    virtual ~UdParserEepromParms() {}
+    virtual ~UdParserEepromI2cParms() {}
 
     /**
      *  @brief Parses string user detail data from an error log
@@ -206,6 +206,7 @@ public:
         //***** Memory Layout *****
         // 1 byte   : Op Type Description
         // 1 byte   : Op Type (DeviceFW::OperationType)
+        // 1 byte   : Eeprom access method
         // 4 bytes  : Target HUID
         // 8 bytes  : Length of In/Out Buffer
         // 8 bytes  : Chip
@@ -239,6 +240,25 @@ public:
 
         i_parser.PrintNumber("Op Type Value","%.2lX",TO_UINT8(l_databuf));
         l_databuf += sizeof(uint8_t);
+
+        if (i_version >= 4 )
+        {
+            uint8_t opMethod = TO_UINT8(l_databuf);
+            if (opMethod == 1)
+            {
+                i_parser.PrintNumber("EEPROM ACCESS: I2C", "%.2lX", opMethod);
+            }
+            else if (opMethod == 2)
+            {
+                i_parser.PrintNumber("EEPROM ACCESS: SPI", "%.2lX", opMethod);
+            }
+            else
+            {
+                i_parser.PrintNumber("EEPROM ACCESS: Unknown", "%.2lX", opMethod);
+            }
+            l_databuf += sizeof(uint8_t);
+        }
+
         i_parser.PrintNumber("Target HUID","%.8lX",TO_UINT32(l_databuf));
         l_databuf += sizeof(uint32_t);
         i_parser.PrintNumber("Length I/O Buff","%.16lX",TO_UINT64(l_databuf));
@@ -281,8 +301,110 @@ public:
 
 private:
     // Disabled
-    UdParserEepromParms(const UdParserEepromParms&);
-    UdParserEepromParms & operator=(const UdParserEepromParms&);
+    UdParserEepromI2cParms(const UdParserEepromI2cParms&);
+    UdParserEepromI2cParms & operator=(const UdParserEepromI2cParms&);
+};
+
+/**
+ * @class UdParserEepromSpiParms
+ *
+ * Parses UdParserEepromSpiParms
+ */
+class UdParserEepromSpiParms : public ERRORLOG::ErrlUserDetailsParser
+{
+public:
+    /**
+     *  @brief Constructor
+     */
+    UdParserEepromSpiParms() {}
+
+    /**
+     *  @brief Destructor
+     */
+    virtual ~UdParserEepromSpiParms() {}
+
+    /**
+     *  @brief Parses string user detail data from an error log
+     *
+     *  @param  i_version Version of the data
+     *  @param  i_parse   ErrlUsrParser object for outputting information
+     *  @param  i_pBuffer Pointer to buffer containing detail data
+     *  @param  i_buflen  Length of the buffer
+     */
+    virtual void parse(errlver_t i_version,
+                       ErrlUsrParser & i_parser,
+                       void * i_pBuffer,
+                       const uint32_t i_buflen) const
+    {
+        char* l_databuf = static_cast<char*>(i_pBuffer);
+        i_parser.PrintHeading("EEPROM Parameters");
+
+        //***** Memory Layout *****
+        // 1 byte   : Op Type (DeviceFW::OperationType)
+        // 1 byte   : Eeprom access method
+        // 4 bytes  : Target HUID
+        // 8 bytes  : Length of In/Out Buffer
+        // 8 bytes  : eepromRole
+        // 8 bytes  : Offset
+        // 8 bytes  : devSize_KB
+        // 8 bytes  : roleOffset_KB
+        // 1 byte   : SPI engine
+        // N bytes  : SPI master path
+        // Cache the SPI path in string form for reference and easy access
+        uint8_t op = TO_UINT8(l_databuf);
+        l_databuf += sizeof(uint8_t);
+
+        if( op == 0 )
+        {
+            i_parser.PrintHeading("EEPROM Read");
+        }
+        else if( op == 1 )
+        {
+            i_parser.PrintHeading("EEPROM Write");
+        }
+        else
+        {
+            i_parser.PrintHeading("Unknown EEPROM Operation");
+        }
+        i_parser.PrintNumber("Op Type Value","%.2lX",op);
+
+        uint8_t opMethod = TO_UINT8(l_databuf);
+        if (opMethod == 1)
+        {
+            i_parser.PrintNumber("EEPROM ACCESS: I2C", "%.2lX", opMethod);
+        }
+        else if (opMethod == 2)
+        {
+            i_parser.PrintNumber("EEPROM ACCESS: SPI", "%.2lX", opMethod);
+        }
+        else
+        {
+            i_parser.PrintNumber("EEPROM ACCESS: Unknown", "%.2lX", opMethod);
+        }
+        l_databuf += sizeof(uint8_t);
+
+        i_parser.PrintNumber("Target HUID","%.8lX",TO_UINT32(l_databuf));
+        l_databuf += sizeof(uint32_t);
+        i_parser.PrintNumber("Length I/O Buff","%.16lX",TO_UINT64(l_databuf));
+        l_databuf += sizeof(uint64_t);
+        i_parser.PrintNumber("eepromRole","%.16lX",TO_UINT64(l_databuf));
+        l_databuf += sizeof(uint64_t);
+        i_parser.PrintNumber("Offset","%.16lX",TO_UINT64(l_databuf));
+        l_databuf += sizeof(uint64_t);
+        i_parser.PrintNumber("Device Size (in KB)","%.16lX", TO_UINT64(l_databuf));
+        l_databuf += sizeof(uint64_t);
+        i_parser.PrintNumber("Start of device data (in KB)","%.16lX",TO_UINT64(l_databuf));
+        l_databuf += sizeof(uint64_t);
+        i_parser.PrintNumber("SPI Engine","%.2lX",TO_UINT8(l_databuf));
+        i_parser.PrintString("SPI Master Path", l_databuf);
+        // Increment past the NULL terminated string + 1 (null terminator)
+        l_databuf += (strlen(l_databuf) + 1);
+    }
+
+private:
+    // Disabled
+    UdParserEepromSpiParms(const UdParserEepromSpiParms&);
+    UdParserEepromSpiParms & operator=(const UdParserEepromSpiParms&);
 };
 
 } // end EEPROM NAMESPACE

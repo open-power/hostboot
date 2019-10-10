@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1424,7 +1424,6 @@ void add_to_list( std::list<EEPROM::EepromInfo_t>& i_list,
         nv_info.devAddr = nvdimmData.devAddr;
         nv_info.assocTarg = i_targ;
         nv_info.chipCount = nvdimmData.chipCount;
-        nv_info.sizeKB = nvdimmData.maxMemorySizeKB;
         nv_info.addrBytes = nvdimmData.byteAddrOffset;
         //one more lookup for the speed
         TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type speeds;

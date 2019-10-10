@@ -66,9 +66,9 @@ if defined bmc_files {
         #echo "Find eecache file name from: "+$bmc_files
         @simenv.eecache_file = find_eecache_file( simenv.bmc_files )
 
-        # Create EECACHE file using version 1
+        # Create EECACHE file using version 2 (I2C version 2)
         # Note: this checks if eecache_file is None
-        @eecache_gen( simenv.eecache_file, 1)
+        @eecache_gen( simenv.eecache_file, 2 )
 
         # generate file before looking it up here
         $hb_skip_eecache = 0;

@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019
+# Contributors Listed Below - COPYRIGHT 2019,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -546,7 +546,7 @@ sub parseEecacheToc {
             ###### VERSION 2 ########
             #    struct completeRecord
             #    {
-            #        EepromAccessMethodType accessType;  // how to access record
+            #        EepromHwAccessMethodType accessType;  // how to access record
             #        union eepromAccess_t
             #        {
             #            struct i2cAccess_t

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,11 +78,11 @@ class UdI2CParms : public ERRORLOG::ErrlUserDetails
 namespace EEPROM
 {
 /**
- * @class UdEepromParms
+ * @class UdEepromI2cParms
  *
  * Adds EEPROM information to an error log as user detail data
  */
-class UdEepromParms : public ERRORLOG::ErrlUserDetails
+class UdEepromI2cParms : public ERRORLOG::ErrlUserDetails
 {
   public:
     /**
@@ -93,7 +93,7 @@ class UdEepromParms : public ERRORLOG::ErrlUserDetails
      *  @param i_buflen       Length of In/Out Buffer
      *  @param i_i2cInfo      Miscellaneous Parameters
      */
-    UdEepromParms( uint8_t i_opType,
+    UdEepromI2cParms( uint8_t i_opType,
                    TARGETING::Target * i_target,
                    uint64_t i_buflen,
                    eeprom_addr_t i_i2cInfo );
@@ -101,12 +101,44 @@ class UdEepromParms : public ERRORLOG::ErrlUserDetails
     /**
      *  @brief Destructor
      */
-    virtual ~UdEepromParms();
+    virtual ~UdEepromI2cParms();
 
   private:
     // Disabled
-    UdEepromParms(UdEepromParms &);
-    UdEepromParms & operator=(UdEepromParms &);
+    UdEepromI2cParms(UdEepromI2cParms &);
+    UdEepromI2cParms & operator=(UdEepromI2cParms &);
+};
+
+/**
+ * @class UdEepromSpiParms
+ *
+ * Adds EEPROM information to an error log as user detail data
+ */
+class UdEepromSpiParms : public ERRORLOG::ErrlUserDetails
+{
+  public:
+    /**
+     *  @brief Constructor
+     *
+     *  @param i_opType       Operation Type
+     *  @param i_target       Chip being detected/acted upon
+     *  @param i_buflen       Length of In/Out Buffer
+     *  @param i_spiInfo      Miscellaneous Parameters
+     */
+    UdEepromSpiParms( uint8_t i_opType,
+                      TARGETING::Target * i_target,
+                      uint64_t i_buflen,
+                      eeprom_addr_t i_spiInfo );
+
+    /**
+     *  @brief Destructor
+     */
+    virtual ~UdEepromSpiParms();
+
+  private:
+    // Disabled
+    UdEepromSpiParms(UdEepromSpiParms &);
+    UdEepromSpiParms & operator=(UdEepromSpiParms &);
 };
 
 } // end EEPROM namespace

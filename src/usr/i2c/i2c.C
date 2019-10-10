@@ -5271,7 +5271,7 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
         std::list<I2C::MasterInfo_t> l_i2cInfo;
         I2C::getMasterInfo( pChipTarget, l_i2cInfo );
 
-        //Find all the EEPROMs connected via i2c
+        //Find all the EEPROMs connected via i2c (and spi - todo: RTC 212110)
         std::list<EEPROM::EepromInfo_t> l_eepromInfo;
         EEPROM::getEEPROMs( l_eepromInfo );
 
@@ -5291,11 +5291,19 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
                 l_eepromInfo.begin();
             while( l_eep != l_eepromInfo.end() )
             {
-                TRACUCOMP(g_trac_i2c,"eeprom loop - eng=%.8X, port=%.8X", TARGETING::get_huid(l_eep->i2cMaster), l_eep->engine );
+                // Skip non-i2c eeproms
+                if ( l_eep->accessMethod !=
+                     EEPROM::EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_I2C )
+                {
+                    l_eep = l_eepromInfo.erase(l_eep);
+                    continue;
+                }
+
+                TRACUCOMP(g_trac_i2c,"eeprom loop - eng=%.8X, port=%.8X", TARGETING::get_huid(l_eep->eepromAccess.i2cInfo.i2cMaster), l_eep->eepromAccess.i2cInfo.engine );
                 DeviceInfo_t l_currentDI;
 
                 //ignore the devices that aren't on the current target
-                if( l_eep->i2cMaster != pChipTarget )
+                if( l_eep->eepromAccess.i2cInfo.i2cMaster != pChipTarget )
                 {
                     TRACUCOMP(g_trac_i2c,"skipping unmatched i2cmaster");
                     l_eep = l_eepromInfo.erase(l_eep);
@@ -5303,25 +5311,25 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
                 }
 
                 //skip the devices that are on a different engine
-                else if( l_eep->engine != i2cm.engine)
+                else if( l_eep->eepromAccess.i2cInfo.engine != i2cm.engine)
                 {
-                    TRACUCOMP(g_trac_i2c,"skipping umatched engine");
+                    TRACUCOMP(g_trac_i2c,"skipping unmatched engine");
                     ++l_eep;
                     continue;
                 }
 
                 l_currentDI.assocNode = assocNode;
                 l_currentDI.assocProc = assocProc;
-                l_currentDI.masterChip = l_eep->i2cMaster;
-                l_currentDI.engine = l_eep->engine;
-                l_currentDI.masterPort = l_eep->port;
-                l_currentDI.addr = l_eep->devAddr;
+                l_currentDI.masterChip = l_eep->eepromAccess.i2cInfo.i2cMaster;
+                l_currentDI.engine = l_eep->eepromAccess.i2cInfo.engine;
+                l_currentDI.masterPort = l_eep->eepromAccess.i2cInfo.port;
+                l_currentDI.addr = l_eep->eepromAccess.i2cInfo.devAddr;
                 l_currentDI.slavePort = 0xFF;
-                l_currentDI.busFreqKhz = (l_eep->busFreq)
+                l_currentDI.busFreqKhz = (l_eep->eepromAccess.i2cInfo.busFreq)
                     / FREQ_CONVERSION::HZ_PER_KHZ;
                 l_currentDI.deviceType =
                     TARGETING::HDAT_I2C_DEVICE_TYPE_SEEPROM;
-                switch(l_eep->device)
+                switch(l_eep->deviceRole)
                 {
                     case EEPROM::VPD_PRIMARY:
                     case EEPROM::VPD_BACKUP:
@@ -5337,7 +5345,7 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
                         break;
                 }
 
-                TRACUCOMP(g_trac_i2c,"Adding addr=0x%X", l_eep->devAddr);
+                TRACUCOMP(g_trac_i2c,"Adding addr=0x%X", l_eep->eepromAccess.i2cInfo.devAddr);
                 o_deviceInfo.push_back(l_currentDI);
                 l_eep = l_eepromInfo.erase(l_eep);
             } //end of eeprom iter

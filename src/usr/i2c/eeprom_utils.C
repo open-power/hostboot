@@ -29,6 +29,7 @@
 #include <i2c/eepromddreasoncodes.H>
 #include <i2c/eeprom_const.H>
 #include "i2c_common.H"
+#include <fsi/fsiif.H>
 
 
 // ----------------------------------------------
@@ -50,23 +51,23 @@ namespace EEPROM
 //-------------------------------------------------------------------
 bool eepromPresence ( TARGETING::Target * i_target )
 {
-    TRACUCOMP(g_trac_eeprom, ENTER_MRK"eepromPresence()");
+    TRACUCOMP(g_trac_eeprom, ENTER_MRK"eepromPresence() 0x%.8X",
+      TARGETING::get_huid(i_target));
 
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
+    TARGETING::Target * l_eepromMasterTarget = nullptr;
+    TARGETING::Target* l_masterProcTarget = nullptr;
     bool l_present = false;
-    TARGETING::Target * i2cMasterTarget = NULL;
 
-    eeprom_addr_t i2cInfo;
+    eeprom_addr_t eepInfo;
 
-    i2cInfo.eepromRole = EEPROM::VPD_PRIMARY;
-    i2cInfo.offset = 0;
+    eepInfo.eepromRole = EEPROM::VPD_PRIMARY;
+    eepInfo.offset = 0;
     do
     {
 
         // Read Attributes needed to complete the operation
-        err = eepromReadAttributes( i_target,
-                                    i2cInfo );
-
+        err = eepromReadAttributes( i_target, eepInfo );
         if( err )
         {
             TRACFCOMP(g_trac_eeprom,
@@ -74,43 +75,69 @@ bool eepromPresence ( TARGETING::Target * i_target )
             break;
         }
 
-        // Check to see if we need to find a new target for
-        // the I2C Master
-        err = eepromGetI2CMasterTarget( i_target,
-                                        i2cInfo,
-                                        i2cMasterTarget );
-
+        // Check to see if we need to find a new target for master
+        err = eepromGetMasterTarget( i_target,
+                                     eepInfo,
+                                     l_eepromMasterTarget );
         if( err )
         {
             TRACFCOMP(g_trac_eeprom,
-                     ERR_MRK"Error in eepromPresence::eepromGetI2Cmaster()");
+                     ERR_MRK"Error in eepromPresence::eepromGetMasterTarget()");
             break;
         }
 
-        // If the target has dynamic device address attribute, then use that instead of the
-        // read-only address found in ATTR_EEPROM_XX_INFO attrs. We use the dynamic address
-        // attribute because ATTR_EEPROM_XX_INFO attrs are not writable and its difficult
-        // to override complex attributes.
-        if(i_target->tryGetAttr<TARGETING::ATTR_DYNAMIC_I2C_DEVICE_ADDRESS>(i2cInfo.devAddr))
+        if (eepInfo.accessMethod == EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_I2C)
         {
-            TRACDCOMP(g_trac_eeprom,
-                     "Using DYNAMIC_I2C_DEVICE_ADDRESS %.2x for HUID %.8x",
-                      i2cInfo.devAddr,
-                      TARGETING::get_huid(i_target));
+            // If the target has dynamic device address attribute, then use that instead of the
+            // read-only address found in ATTR_EEPROM_XX_INFO attrs. We use the dynamic address
+            // attribute because ATTR_EEPROM_XX_INFO attrs are not writable and its difficult
+            // to override complex attributes.
+            if(i_target->tryGetAttr<TARGETING::ATTR_DYNAMIC_I2C_DEVICE_ADDRESS>(eepInfo.accessAddr.i2c_addr.devAddr))
+            {
+                TRACDCOMP(g_trac_eeprom,
+                         "Using DYNAMIC_I2C_DEVICE_ADDRESS %.2x for HUID %.8x",
+                          eepInfo.accessAddr.i2c_addr.devAddr,
+                          TARGETING::get_huid(i_target));
+            }
+
+            //Check for the target at the I2C level
+            l_present = I2C::i2cPresence(l_eepromMasterTarget,
+                              eepInfo.accessAddr.i2c_addr.port,
+                              eepInfo.accessAddr.i2c_addr.engine,
+                              eepInfo.accessAddr.i2c_addr.devAddr,
+                              eepInfo.accessAddr.i2c_addr.i2cMuxBusSelector,
+                              eepInfo.accessAddr.i2c_addr.i2cMuxPath);
         }
+        else if (eepInfo.accessMethod == EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_SPI)
+        {
+            // RTC 251866 - implement spiPresence
+            /*
+            // Check for the target at the SPI level
+            l_present = SPI::spiPresence(masterTarget,
+                                         eepInfo.accessAddr.spi_addr.engine,
+                                         eepInfo.accessAddr.spi_addr.devAddr);
+            */
+            // For now just default to true if the eeprom masterTarget is present
+            l_present = true;
 
-        //Check for the target at the I2C level
-        l_present = I2C::i2cPresence(i2cMasterTarget,
-                          i2cInfo.port,
-                          i2cInfo.engine,
-                          i2cInfo.devAddr,
-                          i2cInfo.i2cMuxBusSelector,
-                          i2cInfo.i2cMuxPath);
-
+            // Master proc is taken as always present. Validate other targets.
+            TARGETING::targetService().masterProcChipTargetHandle(l_masterProcTarget );
+            if (l_eepromMasterTarget != l_masterProcTarget)
+            {
+                // Use the FSI slave presence detection to see if master can be found
+                if( ! FSI::isSlavePresent(l_eepromMasterTarget) )
+                {
+                    TRACDCOMP( g_trac_eeprom,
+                        "eepromPresence> FSI::isSlavePresent returned false for eeprom Master Target %.08X",
+                        TARGETING::get_huid(l_eepromMasterTarget) );
+                    l_present = false;
+                }
+            }
+        }
         if( !l_present )
         {
             TRACDCOMP(g_trac_eeprom,
-                     ERR_MRK"i2cPresence returned false! chip NOT present!");
+                     ERR_MRK"Presence check returned false! chip NOT present!");
             break;
         }
 
@@ -119,7 +146,7 @@ bool eepromPresence ( TARGETING::Target * i_target )
     // If there was an error commit the error log
     if( err )
     {
-        errlCommit( err, I2C_COMP_ID );
+        errlCommit( err, EEPROM_COMP_ID );
     }
 
     TRACDCOMP(g_trac_eeprom, EXIT_MRK"eepromPresence()");
@@ -155,44 +182,137 @@ void dumpEepromData(const TARGETING::EepromVpdPrimaryInfo & i_i2cInfo)
     l_masterPath = l_muxPath = nullptr;
 }
 
+/**
+ *
+ * @brief A useful utility to dump (trace out) the SpiEepromVpdPrimaryInfo data.
+ *        Use as needed.
+ *
+ * @param [in] i_spiInfo - The SpiEepromVpdPrimaryInfo data to dump for user
+ *
+ */
+void dumpEepromData(const TARGETING::SpiEepromVpdPrimaryInfo & i_spiInfo)
+{
+    char* l_masterPath = i_spiInfo.spiMasterPath.toString();
+    TRACFCOMP (g_trac_eeprom, INFO_MRK"SpiEepromVpdPrimaryInfo data: "
+               "masterPath=%s engine=%d, dataSizeKB=0x%X, dataOffsetKB=%d",
+               l_masterPath, i_spiInfo.engine,
+               i_spiInfo.dataSizeKB, i_spiInfo.dataOffsetKB);
+
+    free(l_masterPath);
+    l_masterPath = nullptr;
+}
 
 /**
  *
  * @brief A useful utility to dump (trace out) the eeprom_addr_t data.
  *         Use as needed.
  *
- * @param [in] i_i2cInfo - The eeprom_addr_t data to dump for user
+ * @param [in] i_eepInfo - The eeprom_addr_t data to dump for user
  *
  */
-void dumpEepromData(const eeprom_addr_t & i_i2cInfo)
+void dumpEepromData(const eeprom_addr_t & i_eepInfo)
 {
-    TRACFCOMP (g_trac_eeprom, INFO_MRK"eeprom_addr_t data: \n"
-               "engine=%d, port=%d, devAddr=0X%X, writePageSize=%d, \n"
-               "devSize_KB=0x%X, chipCount=%d, writeCycleTime=%d \n",
-               i_i2cInfo.engine, i_i2cInfo.port, i_i2cInfo.devAddr,
-               i_i2cInfo.writePageSize, i_i2cInfo.devSize_KB,
-               i_i2cInfo.chipCount, i_i2cInfo.writeCycleTime);
+    switch (i_eepInfo.accessMethod)
+    {
+        case EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_UNKNOWN:
+        {
+            TRACFCOMP(g_trac_eeprom, INFO_MRK"eeprom_addr_t data: EEPROM_HW_ACCESS_METHOD_UNKNOWN");
+            break;
+        }
+        case EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_I2C:
+        {
+            TRACFCOMP (g_trac_eeprom, INFO_MRK"eeprom_addr_t data: "
+                "engine=%d, port=%d, devAddr=0X%X, writePageSize=%d, "
+                "devSize_KB=0x%X, chipCount=%d, writeCycleTime=%d",
+                i_eepInfo.accessAddr.i2c_addr.engine,
+                i_eepInfo.accessAddr.i2c_addr.port,
+                i_eepInfo.accessAddr.i2c_addr.devAddr,
+                i_eepInfo.accessAddr.i2c_addr.writePageSize,
+                i_eepInfo.devSize_KB, i_eepInfo.accessAddr.i2c_addr.chipCount,
+                i_eepInfo.accessAddr.i2c_addr.writeCycleTime);
 
-    char* l_masterPath = i_i2cInfo.i2cMasterPath.toString();
-    char* l_muxPath = i_i2cInfo.i2cMuxPath.toString();
-    TRACFCOMP (g_trac_eeprom, INFO_MRK"eeprom_addr_t data cont.: \n"
-              "masterPath=%s, muxSelector=0x%X, muxPath=%s \n",
-              l_masterPath, i_i2cInfo.i2cMuxBusSelector, l_muxPath);
+            char* l_masterPath = i_eepInfo.accessAddr.i2c_addr.i2cMasterPath.toString();
+            char* l_muxPath = i_eepInfo.accessAddr.i2c_addr.i2cMuxPath.toString();
+            TRACFCOMP (g_trac_eeprom, INFO_MRK"eeprom_addr_t data cont.: "
+                "eepromRole=0x%X, i2cMasterPath=%s, muxSelector=0x%X, muxPath=%s",
+                i_eepInfo.eepromRole, l_masterPath,
+                i_eepInfo.accessAddr.i2c_addr.i2cMuxBusSelector, l_muxPath);
 
-    free(l_masterPath);
-    free(l_muxPath);
-    l_masterPath = l_muxPath = nullptr;
+            free(l_masterPath);
+            free(l_muxPath);
+            l_masterPath = l_muxPath = nullptr;
+            break;
+        }
+        case EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_SPI:
+        {
+            char * l_masterPath = i_eepInfo.accessAddr.spi_addr.spiMasterPath.toString();
+            TRACFCOMP(g_trac_eeprom, INFO_MRK"eeprom_addr_t data: "
+                "eepromRole=0x%X, spiMasterPath=%s, engine=%d, "
+                "roleOffset_KB=0x%X, offset=0x%X, devSize_KB=0x%X",
+                i_eepInfo.eepromRole, l_masterPath,
+                i_eepInfo.accessAddr.spi_addr.engine,
+                i_eepInfo.accessAddr.spi_addr.roleOffset_KB,
+                i_eepInfo.offset, i_eepInfo.devSize_KB);
+            free(l_masterPath);
+            l_masterPath = nullptr;
+            break;
+        }
+        default:
+        {
+            TRACFCOMP(g_trac_eeprom,INFO_MRK"eeprom_addr_t data: \n"
+                      "Unknown access method for eeprom_addr_t: %d",
+                      i_eepInfo.accessMethod);
+        }
+    }
 }
 
+/**
+ *  @brief Get a common user data piece for eepromRecordHeader record
+ *         Format returned:
+ *           @userdata1[0:31]  HUID of Master
+ *           @userdata1[32:39] Port (or 0xFF)
+ *           @userdata1[40:47] Engine
+ *           @userdata1[48:55] devAddr    (or byte 0 offset_KB)
+ *           @userdata1[56:63] mux_select (or byte 1 offset_KB)
+ *  @param Filled in eeprom record header
+ *  @return userdata for this eeprom record
+ */
+uint64_t getEepromHeaderUserData(const eepromRecordHeader& i_eepromRecordHeader)
+{
+    uint64_t l_userdata1 = 0;
+    if (i_eepromRecordHeader.completeRecord.accessType ==
+        EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_I2C)
+    {
+        l_userdata1 = TWO_UINT32_TO_UINT64(
+            i_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.i2c_master_huid,
+            TWO_UINT16_TO_UINT32(
+              TWO_UINT8_TO_UINT16(i_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.port,
+                                  i_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.engine),
+              TWO_UINT8_TO_UINT16(i_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.devAddr,
+                                  i_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.mux_select)));
+    }
+    else
+    {
+        l_userdata1 = TWO_UINT32_TO_UINT64(
+            i_eepromRecordHeader.completeRecord.eepromAccess.spiAccess.spi_master_huid,
+
+            TWO_UINT16_TO_UINT32(
+              TWO_UINT8_TO_UINT16(0xFF,
+                i_eepromRecordHeader.completeRecord.eepromAccess.spiAccess.engine),
+              i_eepromRecordHeader.completeRecord.eepromAccess.spiAccess.offset_KB) );
+    }
+    return l_userdata1;
+}
 
 // ------------------------------------------------------------------
 // eepromReadAttributes
 // ------------------------------------------------------------------
 errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
-                                  eeprom_addr_t & o_i2cInfo )
+                                  eeprom_addr_t & io_eepromAddr )
 {
     errlHndl_t err = NULL;
-    bool fail_reading_attribute = false;
+    bool found_i2c_eep = false;
+    bool found_spi_eep = false;
 
     TRACDCOMP( g_trac_eeprom,
                ENTER_MRK"eepromReadAttributes()" );
@@ -201,38 +321,51 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
     // Note:  each 'EepromVpd' struct is kept the same via the attributes
     //        so will be copying each to eepromData to save code space
     TARGETING::EepromVpdPrimaryInfo eepromData;
+    TARGETING::SpiMvpdPrimaryInfo spiEepromData;
 
     do
     {
-
-        switch (o_i2cInfo.eepromRole )
+        switch (io_eepromAddr.eepromRole )
         {
             case VPD_PRIMARY:
-                if( !( i_target->
-                         tryGetAttr<TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO>
-                             ( eepromData ) ) )
-
+                if( i_target->
+                    tryGetAttr<TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO>
+                    ( eepromData ) )
                 {
-                    fail_reading_attribute = true;
+                    found_i2c_eep = true;
+                }
+                else if (i_target->
+                    tryGetAttr<TARGETING::ATTR_SPI_MVPD_PRIMARY_INFO>
+                    (spiEepromData) )
+                {
+                    found_spi_eep = true;
                 }
                 break;
 
             case VPD_BACKUP:
 
-                if( !(i_target->
-                        tryGetAttr<TARGETING::ATTR_EEPROM_VPD_BACKUP_INFO>
-                        ( reinterpret_cast<
-                            TARGETING::ATTR_EEPROM_VPD_BACKUP_INFO_type&>
-                                ( eepromData) ) ) )
+                if( i_target->
+                    tryGetAttr<TARGETING::ATTR_EEPROM_VPD_BACKUP_INFO>
+                    (reinterpret_cast<
+                     TARGETING::ATTR_EEPROM_VPD_BACKUP_INFO_type&>
+                     ( eepromData )) )
                 {
-                    fail_reading_attribute = true;
+                    found_i2c_eep = true;
+                }
+                else if ( i_target->
+                          tryGetAttr<TARGETING::ATTR_SPI_MVPD_BACKUP_INFO>
+                          (reinterpret_cast<
+                           TARGETING::ATTR_SPI_MVPD_BACKUP_INFO_type&>
+                           (spiEepromData)) )
+                {
+                    found_spi_eep = true;
                 }
                 break;
 
             default:
                 TRACFCOMP( g_trac_eeprom,ERR_MRK"eepromReadAttributes() - "
                            "Invalid chip (%d) to read attributes from!",
-                            o_i2cInfo.eepromRole );
+                            io_eepromAddr.eepromRole );
 
                 /*@
                  * @errortype
@@ -246,7 +379,7 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
                 err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            EEPROM_READATTRIBUTES,
                                            EEPROM_INVALID_CHIP,
-                                           o_i2cInfo.eepromRole,
+                                           io_eepromAddr.eepromRole,
                                            TARGETING::get_huid(i_target),
                                            true /*Add HB SW Callout*/ );
 
@@ -256,12 +389,12 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
         }
 
         // Check if Attribute Data was found
-        if( fail_reading_attribute == true )
+        if( !found_i2c_eep && !found_spi_eep )
         {
             TRACFCOMP( g_trac_eeprom,
                        ERR_MRK"eepromReadAttributes() - ERROR reading "
                        "attributes for eeprom role %d!",
-                       o_i2cInfo.eepromRole );
+                       io_eepromAddr.eepromRole );
 
                 /*@
                  * @errortype
@@ -277,7 +410,7 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
                                     EEPROM_READATTRIBUTES,
                                     EEPROM_ATTR_INFO_NOT_FOUND,
                                     TARGETING::get_huid(i_target),
-                                    o_i2cInfo.eepromRole);
+                                    io_eepromAddr.eepromRole);
 
                 // Could be FSP or HB code's fault
                 err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
@@ -291,84 +424,108 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
 
         }
 
-        // Successful reading of Attribute, so extract the data
-        o_i2cInfo.port           = eepromData.port;
-        o_i2cInfo.devAddr        = eepromData.devAddr;
-        o_i2cInfo.engine         = eepromData.engine;
-        o_i2cInfo.i2cMasterPath  = eepromData.i2cMasterPath;
-        o_i2cInfo.writePageSize  = eepromData.writePageSize;
-        o_i2cInfo.devSize_KB     = eepromData.maxMemorySizeKB;
-        o_i2cInfo.chipCount      = eepromData.chipCount;
-        o_i2cInfo.writeCycleTime = eepromData.writeCycleTime;
-        o_i2cInfo.i2cMuxBusSelector = eepromData.i2cMuxBusSelector;
-        o_i2cInfo.i2cMuxPath     = eepromData.i2cMuxPath;
-
-        // Convert attribute info to eeprom_addr_size_t enum
-        if ( eepromData.byteAddrOffset == 0x3 )
+        if (found_i2c_eep)
         {
-            o_i2cInfo.addrSize = ONE_BYTE_ADDR;
+            io_eepromAddr.accessMethod = EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_I2C;
+
+            // Successful reading of Attribute, so extract the data
+            io_eepromAddr.accessAddr.i2c_addr.port           = eepromData.port;
+            io_eepromAddr.accessAddr.i2c_addr.devAddr        = eepromData.devAddr;
+            io_eepromAddr.accessAddr.i2c_addr.engine         = eepromData.engine;
+            io_eepromAddr.accessAddr.i2c_addr.i2cMasterPath  = eepromData.i2cMasterPath;
+            io_eepromAddr.accessAddr.i2c_addr.writePageSize  = eepromData.writePageSize;
+            io_eepromAddr.devSize_KB                         = eepromData.maxMemorySizeKB;
+            io_eepromAddr.accessAddr.i2c_addr.chipCount      = eepromData.chipCount;
+            io_eepromAddr.accessAddr.i2c_addr.writeCycleTime = eepromData.writeCycleTime;
+            io_eepromAddr.accessAddr.i2c_addr.i2cMuxBusSelector = eepromData.i2cMuxBusSelector;
+            io_eepromAddr.accessAddr.i2c_addr.i2cMuxPath     = eepromData.i2cMuxPath;
+
+            // Convert attribute info to eeprom_addr_size_t enum
+            if ( eepromData.byteAddrOffset == 0x3 )
+            {
+                io_eepromAddr.accessAddr.i2c_addr.addrSize = ONE_BYTE_ADDR;
+            }
+            else if ( eepromData.byteAddrOffset == 0x2 )
+            {
+                io_eepromAddr.accessAddr.i2c_addr.addrSize = TWO_BYTE_ADDR;
+            }
+            else if ( eepromData.byteAddrOffset == 0x1 )
+            {
+                io_eepromAddr.accessAddr.i2c_addr.addrSize = ONE_BYTE_ADDR_PAGESELECT;
+            }
+            else if ( eepromData.byteAddrOffset == 0x0 )
+            {
+                io_eepromAddr.accessAddr.i2c_addr.addrSize = ZERO_BYTE_ADDR;
+            }
+            else
+            {
+                TRACFCOMP( g_trac_eeprom,
+                           ERR_MRK"eepromReadAttributes() - INVALID ADDRESS "
+                           "OFFSET SIZE %d!",
+                           io_eepromAddr.accessAddr.i2c_addr.addrSize );
+
+                    /*@
+                     * @errortype
+                     * @reasoncode       EEPROM_INVALID_ADDR_OFFSET_SIZE
+                     * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                     * @moduleid         EEPROM_READATTRIBUTES
+                     * @userdata1        HUID of target
+                     * @userdata2        Address Offset Size
+                     * @devdesc          Invalid address offset size
+                     */
+                    err = new ERRORLOG::ErrlEntry(
+                                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                        EEPROM_READATTRIBUTES,
+                                        EEPROM_INVALID_ADDR_OFFSET_SIZE,
+                                        TARGETING::get_huid(i_target),
+                                        io_eepromAddr.accessAddr.i2c_addr.addrSize,
+                                        true /*Add HB SW Callout*/ );
+
+                    err->collectTrace( EEPROM_COMP_NAME );
+
+                    break;
+            }
+
+            TRACUCOMP(g_trac_eeprom,"eepromReadAttributes() I2C tgt=0x%X, %d/%d/0x%X "
+              "devSize_KB=0x%X, aS=%d (%d)",
+              TARGETING::get_huid(i_target),
+              io_eepromAddr.accessAddr.i2c_addr.port,
+              io_eepromAddr.accessAddr.i2c_addr.engine,
+              io_eepromAddr.accessAddr.i2c_addr.devAddr,
+              io_eepromAddr.devSize_KB,
+              io_eepromAddr.accessAddr.i2c_addr.addrSize,
+              eepromData.byteAddrOffset);
+
+            // Printing mux info separately, if combined, nothing is displayed
+            char* l_muxPath = io_eepromAddr.accessAddr.i2c_addr.i2cMuxPath.toString();
+            TRACUCOMP(g_trac_eeprom, "eepromReadAttributes(): "
+                      "muxSelector=0x%X, muxPath=%s",
+                      io_eepromAddr.accessAddr.i2c_addr.i2cMuxBusSelector,
+                      l_muxPath);
+            free(l_muxPath);
+            l_muxPath = nullptr;
+
         }
-        else if ( eepromData.byteAddrOffset == 0x2 )
+        else if (found_spi_eep)
         {
-            o_i2cInfo.addrSize = TWO_BYTE_ADDR;
-        }
-        else if ( eepromData.byteAddrOffset == 0x1 )
-        {
-            o_i2cInfo.addrSize = ONE_BYTE_ADDR_PAGESELECT;
-        }
-        else if ( eepromData.byteAddrOffset == 0x0 )
-        {
-            o_i2cInfo.addrSize = ZERO_BYTE_ADDR;
-        }
-        else
-        {
-            TRACFCOMP( g_trac_eeprom,
-                       ERR_MRK"eepromReadAttributes() - INVALID ADDRESS "
-                       "OFFSET SIZE %d!",
-                       o_i2cInfo.addrSize );
+            io_eepromAddr.accessMethod = EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_SPI;
+            io_eepromAddr.accessAddr.spi_addr.spiMasterPath = spiEepromData.spiMasterPath;
+            io_eepromAddr.accessAddr.spi_addr.engine = spiEepromData.engine;
+            io_eepromAddr.accessAddr.spi_addr.roleOffset_KB = spiEepromData.dataOffsetKB;
+            io_eepromAddr.devSize_KB = spiEepromData.dataSizeKB;
 
-                /*@
-                 * @errortype
-                 * @reasoncode       EEPROM_INVALID_ADDR_OFFSET_SIZE
-                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid         EEPROM_READATTRIBUTES
-                 * @userdata1        HUID of target
-                 * @userdata2        Address Offset Size
-                 * @devdesc          Invalid address offset size
-                 */
-                err = new ERRORLOG::ErrlEntry(
-                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    EEPROM_READATTRIBUTES,
-                                    EEPROM_INVALID_ADDR_OFFSET_SIZE,
-                                    TARGETING::get_huid(i_target),
-                                    o_i2cInfo.addrSize,
-                                    true /*Add HB SW Callout*/ );
-
-                err->collectTrace( EEPROM_COMP_NAME );
-
-                break;
-
+            TRACUCOMP( g_trac_eeprom,
+                       "eepromReadAttributes() SPI tgt=0x%X engine=0x%X"
+                       " - data at 0x%.8X, size 0x%.8X",
+                       TARGETING::get_huid(i_target),
+                       io_eepromAddr.accessAddr.spi_addr.engine,
+                       io_eepromAddr.accessAddr.spi_addr.roleOffset_KB,
+                       io_eepromAddr.devSize_KB );
         }
 
     } while( 0 );
 
-    TRACUCOMP(g_trac_eeprom,"eepromReadAttributes() tgt=0x%X, %d/%d/0x%X "
-              "dsKb=0x%X, aS=%d (%d)",
-              TARGETING::get_huid(i_target),
-              o_i2cInfo.port, o_i2cInfo.engine, o_i2cInfo.devAddr,
-              o_i2cInfo.devSize_KB, o_i2cInfo.addrSize,
-              eepromData.byteAddrOffset);
 
-
-
-    // Printing mux info separately, if combined, nothing is displayed
-    char* l_muxPath = o_i2cInfo.i2cMuxPath.toString();
-    TRACUCOMP(g_trac_eeprom, "eepromReadAttributes(): "
-              "muxSelector=0x%X, muxPath=%s",
-              o_i2cInfo.i2cMuxBusSelector,
-              l_muxPath);
-    free(l_muxPath);
-    l_muxPath = nullptr;
 
     TRACDCOMP( g_trac_eeprom,
                EXIT_MRK"eepromReadAttributes()" );
@@ -378,64 +535,79 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
 
 
 // ------------------------------------------------------------------
-// eepromGetI2CMasterTarget
+// eepromGetMasterTarget
 // ------------------------------------------------------------------
-errlHndl_t eepromGetI2CMasterTarget ( TARGETING::Target * i_target,
-                                      const eeprom_addr_t & i_i2cInfo,
-                                      TARGETING::Target * &o_target )
+errlHndl_t eepromGetMasterTarget ( TARGETING::Target * i_target,
+                                   const eeprom_addr_t & i_eepromInfo,
+                                   TARGETING::Target * &o_target )
 {
     errlHndl_t err = NULL;
     o_target = NULL;
+    TARGETING::EntityPath masterPath;
+    char masterTypeStr[4];
 
     TRACDCOMP( g_trac_eeprom,
-               ENTER_MRK"eepromGetI2CMasterTarget()" );
+               ENTER_MRK"eepromGetMasterTarget()" );
 
     do
     {
-        TARGETING::TargetService& tS = TARGETING::targetService();
-
-        // The path from i_target to its I2C Master was read from the
+        // The path from i_target to its Master was read from the
         // attribute via eepromReadAttributes() and passed to this function
-        // in i_i2cInfo.i2cMasterPath
+        // in i_eepromInfo
+        if (i_eepromInfo.accessMethod ==
+            EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_I2C)
+        {
+            masterPath = i_eepromInfo.accessAddr.i2c_addr.i2cMasterPath;
+            strcpy(masterTypeStr, "i2c");
+        }
+        else
+        {
+            masterPath = i_eepromInfo.accessAddr.spi_addr.spiMasterPath;
+            strcpy(masterTypeStr, "spi");
+        }
+
+        TARGETING::TargetService& tS = TARGETING::targetService();
 
         // check that the path exists
         bool exists = false;
-        tS.exists( i_i2cInfo.i2cMasterPath,
-                   exists );
+        tS.exists( masterPath, exists );
 
         if( !exists )
         {
+            char * l_masterPathStr = masterPath.toString();
             TRACFCOMP( g_trac_eeprom,
-                       ERR_MRK"eepromGetI2CMasterTarget() - "
-                       "i2cMasterPath attribute path doesn't exist!" );
+                       ERR_MRK"eepromGetMasterTarget() - "
+                       "%sMaster path doesn't exist! %s",
+                       masterTypeStr, l_masterPathStr);
 
             // Compress the entity path
             uint64_t l_epCompressed = 0;
-            for( uint32_t i = 0; i < i_i2cInfo.i2cMasterPath.size(); i++ )
+            for( uint32_t i = 0; i < masterPath.size(); i++ )
             {
                 // Can only fit 4 path elements into 64 bits
                 if ( i <= 3 )
                 {
                     // Path element: type:8 instance:8
                     l_epCompressed |=
-                        i_i2cInfo.i2cMasterPath[i].type << (16*(3-i));
+                        masterPath[i].type << (16*(3-i));
                     l_epCompressed |=
-                        i_i2cInfo.i2cMasterPath[i].instance << ((16*(3-i))-8);
+                        masterPath[i].instance << ((16*(3-i))-8);
                 }
 
                 // Always trace all of the info even if we cannot fit it in error log
                 TRACFCOMP( g_trac_eeprom,
-                       ERR_MRK"eepromGetI2CMasterTarget() - "
-                       "i_i2cInfo.i2cMasterPath[%d].type = %.02X i_i2cInfo.i2cMasterPath[%d].instance =  %.02X",
-                        i, i_i2cInfo.i2cMasterPath[i].type, i, i_i2cInfo.i2cMasterPath[i].instance );
+                       ERR_MRK"eepromGetMasterTarget() - "
+                       "i_eepromInfo.%sMasterPath[%d].type = %.02X i_eepromInfo.%sMasterPath[%d].instance =  %.02X",
+                        masterTypeStr, i, masterPath[i].type,
+                        masterTypeStr, i, masterPath[i].instance );
 
             }
 
             /*@
              * @errortype
-             * @reasoncode       EEPROM_I2C_MASTER_PATH_ERROR
+             * @reasoncode       EEPROM_MASTER_PATH_ERROR
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         EEPROM_GETI2CMASTERTARGET
+             * @moduleid         EEPROM_GET_MASTERTARGET
              * @userdata1[00:31] Attribute Chip Type Enum
              * @userdata1[32:63] HUID of target
              * @userdata2        Compressed Entity Path
@@ -443,52 +615,51 @@ errlHndl_t eepromGetI2CMasterTarget ( TARGETING::Target * i_target,
              */
             err = new ERRORLOG::ErrlEntry(
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                EEPROM_GETI2CMASTERTARGET,
-                                EEPROM_I2C_MASTER_PATH_ERROR,
+                                EEPROM_GET_MASTERTARGET,
+                                EEPROM_MASTER_PATH_ERROR,
                                 TWO_UINT32_TO_UINT64(
-                                    i_i2cInfo.eepromRole,
+                                    i_eepromInfo.eepromRole,
                                     TARGETING::get_huid(i_target) ),
                                 l_epCompressed,
                                 true /*Add HB SW Callout*/ );
 
             err->collectTrace( EEPROM_COMP_NAME );
-
-            char* l_masterPath = i_i2cInfo.i2cMasterPath.toString();
-            ERRORLOG::ErrlUserDetailsString(l_masterPath).addToLog(err);
-            free(l_masterPath);
-            l_masterPath = nullptr;
+            ERRORLOG::ErrlUserDetailsString(l_masterPathStr).addToLog(err);
+            free(l_masterPathStr);
+            l_masterPathStr = nullptr;
 
             break;
         }
 
         // Since it exists, convert to a target
-        o_target = tS.toTarget( i_i2cInfo.i2cMasterPath );
+        o_target = tS.toTarget( masterPath );
 
         if( NULL == o_target )
         {
             TRACFCOMP( g_trac_eeprom,
-                       ERR_MRK"eepromGetI2CMasterTarget() - I2C Master "
+                       ERR_MRK"eepromGetMasterTarget() - Master "
                               "Path target was NULL!" );
 
             // Compress the entity path
             uint64_t l_epCompressed = 0;
-            for( uint32_t i = 0; i < i_i2cInfo.i2cMasterPath.size(); i++ )
+            for( uint32_t i = 0; i < masterPath.size(); i++ )
             {
                 // Can only fit 4 path elements into 64 bits
                 if ( i <= 3 )
                 {
                     // Path element: type:8 instance:8
                     l_epCompressed |=
-                        i_i2cInfo.i2cMasterPath[i].type << (16*(3-i));
+                        masterPath[i].type << (16*(3-i));
                     l_epCompressed |=
-                        i_i2cInfo.i2cMasterPath[i].instance << ((16*(3-i))-8);
+                        masterPath[i].instance << ((16*(3-i))-8);
                 }
 
                 // Always trace all of the info even if we cannot fit it in error log
                 TRACFCOMP( g_trac_eeprom,
-                       ERR_MRK"eepromGetI2CMasterTarget() - "
-                       "i_i2cInfo.i2cMasterPath[%d].type = %.02X i_i2cInfo.i2cMasterPath[%d].instance =  %.02X",
-                        i, i_i2cInfo.i2cMasterPath[i].type, i, i_i2cInfo.i2cMasterPath[i].instance );
+                       ERR_MRK"eepromGetMasterTarget() - "
+                       "masterPath[%d].type = 0x%.02X, "
+                       "masterPath[%d].instance = 0x%.02X",
+                        i, masterPath[i].type, i, masterPath[i].instance );
 
             }
 
@@ -496,27 +667,27 @@ errlHndl_t eepromGetI2CMasterTarget ( TARGETING::Target * i_target,
              * @errortype
              * @reasoncode       EEPROM_TARGET_NULL
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         EEPROM_GETI2CMASTERTARGET
-             * @userdata1[00:31] Attribute Chip Type Enum
+             * @moduleid         EEPROM_GET_MASTERTARGET
+             * @userdata1[00:31] Eeprom role
              * @userdata1[32:63] HUID of target
              * @userdata2        Compressed Entity Path
-             * @devdesc          I2C master path target is null.
+             * @devdesc          Master path target is null.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           EEPROM_GETI2CMASTERTARGET,
+                                           EEPROM_GET_MASTERTARGET,
                                            EEPROM_TARGET_NULL,
                                            TWO_UINT32_TO_UINT64(
-                                               i_i2cInfo.eepromRole,
+                                               i_eepromInfo.eepromRole,
                                                TARGETING::get_huid(i_target) ),
                                            l_epCompressed,
                                            true /*Add HB SW Callout*/ );
 
             err->collectTrace( EEPROM_COMP_NAME );
 
-            char* l_masterPath = i_i2cInfo.i2cMasterPath.toString();
-            ERRORLOG::ErrlUserDetailsString(l_masterPath).addToLog(err);
-            free(l_masterPath);
-            l_masterPath = nullptr;
+            char* l_masterPathStr = masterPath.toString();
+            ERRORLOG::ErrlUserDetailsString(l_masterPathStr).addToLog(err);
+            free(l_masterPathStr);
+            l_masterPathStr = nullptr;
 
             break;
         }
@@ -524,10 +695,10 @@ errlHndl_t eepromGetI2CMasterTarget ( TARGETING::Target * i_target,
     } while( 0 );
 
     TRACDCOMP( g_trac_eeprom,
-               EXIT_MRK"eepromGetI2CMasterTarget()" );
+               EXIT_MRK"eepromGetMasterTarget()" );
 
     return err;
-} // end eepromGetI2CMasterTarget
+} // end eepromGetMasterTarget
 
 
 /**
@@ -542,10 +713,26 @@ class isSameEeprom
 
     bool operator()( const EepromInfo_t& i_second )
     {
-        return( (iv_first.i2cMaster == i_second.i2cMaster)
-                && (iv_first.engine == i_second.engine)
-                && (iv_first.port == i_second.port)
-                && (iv_first.devAddr == i_second.devAddr) );
+        bool match = false;
+        if (iv_first.accessMethod == EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_I2C)
+        {
+            if ((iv_first.eepromAccess.i2cInfo.i2cMaster == i_second.eepromAccess.i2cInfo.i2cMaster)
+                && (iv_first.eepromAccess.i2cInfo.engine == i_second.eepromAccess.i2cInfo.engine)
+                && (iv_first.eepromAccess.i2cInfo.port == i_second.eepromAccess.i2cInfo.port)
+                && (iv_first.eepromAccess.i2cInfo.devAddr == i_second.eepromAccess.i2cInfo.devAddr))
+            {
+                match = true;
+            }
+        }
+        else
+        {
+            if ((iv_first.eepromAccess.spiInfo.spiMaster == i_second.eepromAccess.spiInfo.spiMaster)
+                && (iv_first.eepromAccess.spiInfo.engine == i_second.eepromAccess.spiInfo.engine))
+            {
+                match = true;
+            }
+        }
+        return match;
     }
   private:
     const EepromInfo_t& iv_first;
@@ -554,21 +741,25 @@ class isSameEeprom
 /**
  * @brief Add any new EEPROMs associated with this target
  *   to the list
- * @param[in] i_list : list of previously discovered EEPROMs
- * @param[out] i_targ : owner of EEPROMs to add
+ * @param[in/out] io_list : list of discovered EEPROMs (builds on this list)
+ * @param[in] i_targ : owner of EEPROMs to add
+ * @param[in] i_allowDups : allow duplicate eepromInfo entries
  */
-void add_to_list( std::list<EepromInfo_t>& i_list,
-                  TARGETING::Target* i_targ )
+void add_to_list( std::list<EepromInfo_t>& io_list,
+                  TARGETING::Target* i_targ,
+                  bool i_allowDups)
 {
-    TRACFCOMP(g_trac_eeprom,"Targ %.8X",TARGETING::get_huid(i_targ));
+    TRACFCOMP(g_trac_eeprom,"add_to_list(): Targ %.8X",TARGETING::get_huid(i_targ));
 
     // try all defined types of EEPROMs
     for( EEPROM_ROLE eep_type = FIRST_CHIP_TYPE;
          eep_type < LAST_CHIP_TYPE;
          eep_type = static_cast<EEPROM_ROLE>(eep_type+1) )
     {
-        bool found_eep = false;
+        bool found_i2c_eep = false;
+        bool found_spi_eep = false;
         TARGETING::EepromVpdPrimaryInfo eepromData;
+        TARGETING::SpiMvpdPrimaryInfo spiEepromData;
 
         switch( eep_type )
         {
@@ -576,9 +767,14 @@ void add_to_list( std::list<EepromInfo_t>& i_list,
                 if( i_targ->
                     tryGetAttr<TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO>
                     ( eepromData ) )
-
                 {
-                    found_eep = true;
+                    found_i2c_eep = true;
+                }
+                else if (i_targ->
+                    tryGetAttr<TARGETING::ATTR_SPI_MVPD_PRIMARY_INFO>
+                    (spiEepromData) )
+                {
+                    found_spi_eep = true;
                 }
                 break;
 
@@ -589,17 +785,35 @@ void add_to_list( std::list<EepromInfo_t>& i_list,
                       TARGETING::ATTR_EEPROM_VPD_BACKUP_INFO_type&>
                       ( eepromData) ) )
                 {
-                    found_eep = true;
+                    found_i2c_eep = true;
+                }
+                else if (
+                  i_targ->tryGetAttr<TARGETING::ATTR_SPI_MVPD_BACKUP_INFO>
+                  ( reinterpret_cast<
+                      TARGETING::ATTR_SPI_MVPD_BACKUP_INFO_type&>
+                      (spiEepromData) ) )
+                {
+                    found_spi_eep = true;
                 }
                 break;
 
             case LAST_CHIP_TYPE:
                 //only included to catch additional types later on
-                found_eep = false;
+                found_i2c_eep = false;
+                found_spi_eep = false;
                 break;
         }
 
-        if( !found_eep )
+        TARGETING::EntityPath masterPath;
+        if ( found_i2c_eep )
+        {
+            masterPath = eepromData.i2cMasterPath;
+        }
+        else if ( found_spi_eep )
+        {
+            masterPath = spiEepromData.spiMasterPath;
+        }
+        else
         {
             TRACDCOMP(g_trac_eeprom,"eep_type=%d not found",eep_type);
             //nothing to do
@@ -608,8 +822,7 @@ void add_to_list( std::list<EepromInfo_t>& i_list,
 
         // check that the path exists
         bool exists = false;
-        TARGETING::targetService().exists( eepromData.i2cMasterPath,
-                                           exists );
+        TARGETING::targetService().exists( masterPath, exists );
         if( !exists )
         {
             TRACDCOMP(g_trac_eeprom,"no master path");
@@ -617,9 +830,9 @@ void add_to_list( std::list<EepromInfo_t>& i_list,
         }
 
         // Since it exists, convert to a target
-        TARGETING::Target* i2cm = TARGETING::targetService()
-          .toTarget( eepromData.i2cMasterPath );
-        if( NULL == i2cm )
+        TARGETING::Target* pMaster = TARGETING::targetService()
+          .toTarget( masterPath );
+        if( nullptr == pMaster )
         {
             //not sure how this could happen, but just skip it
             TRACDCOMP(g_trac_eeprom,"no target");
@@ -629,7 +842,7 @@ void add_to_list( std::list<EepromInfo_t>& i_list,
         // ignore anything with junk data
         TARGETING::Target * sys = NULL;
         TARGETING::targetService().getTopLevelTarget( sys );
-        if( i2cm == sys )
+        if( pMaster == sys )
         {
             TRACDCOMP(g_trac_eeprom,"sys target");
             continue;
@@ -637,48 +850,71 @@ void add_to_list( std::list<EepromInfo_t>& i_list,
 
         // copy all the data out
         EepromInfo_t eep_info;
-        eep_info.i2cMaster = i2cm;
-        eep_info.engine = eepromData.engine;
-        eep_info.port = eepromData.port;
-        eep_info.devAddr = eepromData.devAddr;
-        eep_info.device = eep_type;
-        eep_info.assocTarg = i_targ;
-        eep_info.chipCount = eepromData.chipCount;
-        eep_info.sizeKB = eepromData.maxMemorySizeKB;
-        eep_info.addrBytes = eepromData.byteAddrOffset;
-        //one more lookup for the speed
-        TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type speeds;
-        if( i2cm->tryGetAttr<TARGETING::ATTR_I2C_BUS_SPEED_ARRAY>
-            (speeds) )
+        if ( found_i2c_eep )
         {
-            if( (eep_info.engine > I2C_BUS_MAX_ENGINE(speeds))
-                || (eep_info.port > I2C_BUS_MAX_PORT(speeds)) )
+            eep_info.accessMethod = EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_I2C;
+            eep_info.eepromAccess.i2cInfo.i2cMaster = pMaster;
+            eep_info.eepromAccess.i2cInfo.engine = eepromData.engine;
+            eep_info.eepromAccess.i2cInfo.port = eepromData.port;
+            eep_info.eepromAccess.i2cInfo.devAddr = eepromData.devAddr;
+            eep_info.eepromAccess.i2cInfo.chipCount = eepromData.chipCount;
+            eep_info.eepromAccess.i2cInfo.addrBytes = eepromData.byteAddrOffset;
+            //one more lookup for the speed
+            TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type speeds;
+            if( pMaster->tryGetAttr<TARGETING::ATTR_I2C_BUS_SPEED_ARRAY>
+                (speeds) )
             {
-                TRACDCOMP(g_trac_eeprom,"bad engine/port");
+                if( (eep_info.eepromAccess.i2cInfo.engine > I2C_BUS_MAX_ENGINE(speeds))
+                    || (eep_info.eepromAccess.i2cInfo.port > I2C_BUS_MAX_PORT(speeds)) )
+                {
+                    TRACDCOMP(g_trac_eeprom,"bad engine/port");
+                    continue;
+                }
+                eep_info.eepromAccess.i2cInfo.busFreq = speeds[eep_info.eepromAccess.i2cInfo.engine][eep_info.eepromAccess.i2cInfo.port];
+                eep_info.eepromAccess.i2cInfo.busFreq *= 1000; //convert KHz->Hz
+            }
+            else
+            {
+                TRACDCOMP(g_trac_eeprom,"eep_type=%d, Speed=0",eep_type);
                 continue;
             }
-            eep_info.busFreq = speeds[eep_info.engine][eep_info.port];
-            eep_info.busFreq *= 1000; //convert KHz->Hz
         }
         else
         {
-            TRACDCOMP(g_trac_eeprom,"eep_type=%d, Speed=0",eep_type);
-            continue;
+            eep_info.accessMethod = EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_SPI;
+            eep_info.eepromAccess.spiInfo.spiMaster = pMaster;
+            eep_info.eepromAccess.spiInfo.engine = spiEepromData.engine;
         }
+        eep_info.deviceRole = eep_type;
+        eep_info.assocTarg = i_targ;
 
         // check if the eeprom is already in our list
         std::list<EepromInfo_t>::iterator oldeep =
-          find_if( i_list.begin(), i_list.end(),
+          find_if( io_list.begin(), io_list.end(),
                    isSameEeprom(eep_info) );
-        if( oldeep == i_list.end() )
+        if( oldeep == io_list.end() || i_allowDups)
         {
             // didn't find it in our list so stick it into the output list
-            i_list.push_back(eep_info);
-            TRACFCOMP(g_trac_eeprom,"--Adding i2cm=%.8X, type=%d, eng=%d, port=%d, addr=%.2X for %.8X", TARGETING::get_huid(i2cm),eep_type,eepromData.engine,eepromData.port, eep_info.devAddr,  TARGETING::get_huid(eep_info.assocTarg));
+            io_list.push_back(eep_info);
+            if ( found_i2c_eep )
+            {
+                TRACFCOMP(g_trac_eeprom,"--Adding i2cMaster=%.8X, type=%d, eng=%d, port=%d, addr=%.2X for %.8X", TARGETING::get_huid(pMaster),eep_type,eepromData.engine,eepromData.port, eep_info.eepromAccess.i2cInfo.devAddr,  TARGETING::get_huid(eep_info.assocTarg));
+            }
+            else
+            {
+                TRACFCOMP(g_trac_eeprom,"--Adding spiMaster=%.8X, type=%d, eng=%d for %.8X", TARGETING::get_huid(pMaster),eep_type,spiEepromData.engine, TARGETING::get_huid(eep_info.assocTarg));
+            }
         }
         else
         {
-            TRACFCOMP(g_trac_eeprom,"--Skipping duplicate i2cm=%.8X, type=%d, eng=%d, port=%d, addr=%.2X for %.8X", TARGETING::get_huid(i2cm),eep_type,eepromData.engine,eepromData.port, eep_info.devAddr,  TARGETING::get_huid(eep_info.assocTarg));
+            if ( found_i2c_eep )
+            {
+                TRACFCOMP(g_trac_eeprom,"--Skipping duplicate i2cMaster=%.8X, type=%d, eng=%d, port=%d, addr=%.2X for %.8X", TARGETING::get_huid(pMaster),eep_type,eepromData.engine,eepromData.port, eep_info.eepromAccess.i2cInfo.devAddr,  TARGETING::get_huid(eep_info.assocTarg));
+            }
+            else
+            {
+                TRACFCOMP(g_trac_eeprom,"--Skipping duplicate spiMaster=%.8X, type=%d, eng=%d for %.8X", TARGETING::get_huid(pMaster),eep_type,spiEepromData.engine, TARGETING::get_huid(eep_info.assocTarg));
+            }
         }
     }
 }
@@ -701,6 +937,8 @@ void getEEPROMs( std::list<EepromInfo_t>& o_info )
     TARGETING::PredicateHwas isPresent;
     isPresent.reset().poweredOn(true).present(true);
 
+    bool allowDupEntries = true;
+
     // #1 - Nodes
     TARGETING::PredicateCTM nodes( TARGETING::CLASS_ENC,
                                    TARGETING::TYPE_NODE,
@@ -712,7 +950,7 @@ void getEEPROMs( std::list<EepromInfo_t>& o_info )
                                            &l_nodeFilter );
     for( ; node_itr; ++node_itr )
     {
-        add_to_list( o_info, *node_itr );
+        add_to_list( o_info, *node_itr, !allowDupEntries );
     }
 
     // #2 - Procs
@@ -726,9 +964,7 @@ void getEEPROMs( std::list<EepromInfo_t>& o_info )
                                            &l_procFilter );
     for( ; proc_itr; ++proc_itr )
     {
-        /* TODO RTC 212110: Add support for PROC EEPROMs to SPI
-        add_to_list( o_info, *proc_itr );
-        */
+        add_to_list( o_info, *proc_itr, !allowDupEntries );
     }
 
     // #3 - DIMMs
@@ -742,10 +978,123 @@ void getEEPROMs( std::list<EepromInfo_t>& o_info )
                                            &l_dimmFilter );
     for( ; dimm_itr; ++dimm_itr )
     {
-        add_to_list( o_info, *dimm_itr );
+        add_to_list( o_info, *dimm_itr, !allowDupEntries );
     }
 
     TRACFCOMP(g_trac_eeprom,"<<getEEPROMs()");
 }
 
+
+void cacheEepromVpd(TARGETING::Target * i_target, bool i_present)
+{
+    errlHndl_t errl = nullptr;
+    size_t presentSize;
+
+    TARGETING::EepromVpdPrimaryInfo eepromData;
+    TARGETING::SpiEepromVpdPrimaryInfo spiEepromData;
+    if ( i_target->tryGetAttr<TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO>(eepromData) ||
+         i_target->tryGetAttr<TARGETING::ATTR_SPI_EEPROM_VPD_PRIMARY_INFO>
+          (spiEepromData) )
+    {
+        TRACFCOMP(g_trac_eeprom, "Reading EEPROMs for target 0x%.8X, eeprom cache = %d VPD_PRIMARY, target present = %d , eeprom type = %d",
+                  TARGETING::get_huid(i_target), DEVICE_CACHE_EEPROM_ADDRESS(i_present, EEPROM::VPD_PRIMARY));
+        presentSize = sizeof(i_present);
+        errl = deviceRead(i_target, &i_present, presentSize,
+                        DEVICE_CACHE_EEPROM_ADDRESS(i_present, EEPROM::VPD_PRIMARY));
+        if (errl != nullptr)
+        {
+            TRACFCOMP(g_trac_eeprom,"pTarget %.8X - failed reading primary VPD eeprom",
+                i_target->getAttr<TARGETING::ATTR_HUID>());
+            errlCommit(errl, EEPROM_COMP_ID);
+        }
+    }
+
+    // Also try backup VPD
+    // TODO RTC: 206301 - backup VPD contains whether WOF data changed
+#if 0
+    TARGETING::EepromVpdBackupInfo eepromBackupData;
+    TARGETING::SpiEepromVpdBackupInfo spiEepromBackupData;
+    if ( i_target->tryGetAttr<TARGETING::ATTR_EEPROM_VPD_BACKUP_INFO>(eepromBackupData) ||
+         i_target->tryGetAttr<TARGETING::ATTR_SPI_EEPROM_VPD_BACKUP_INFO>
+          (spiEepromBackupData) )
+    {
+        TRACFCOMP(g_trac_eeprom,"Reading EEPROMs for target 0x%.8X, eeprom cache = %d VPD_BACKUP , target present = %d , eeprom type = %d",
+                  TARGETING::get_huid(i_target), DEVICE_CACHE_EEPROM_ADDRESS(i_present, EEPROM::VPD_BACKUP));
+        presentSize = sizeof(i_present);
+        errl = deviceRead(i_target, &i_present, presentSize,
+                        DEVICE_CACHE_EEPROM_ADDRESS(i_present, EEPROM::VPD_BACKUP));
+        if (errl != nullptr)
+        {
+            TRACFCOMP(g_trac_eeprom, "pTarget %.8X - failed reading backup VPD eeprom",
+                i_target->getAttr<TARGETING::ATTR_HUID>());
+            errlCommit(errl, EEPROM_COMP_ID);
+        }
+    }
+#endif
 }
+
+
+void cacheEepromAncillaryRoles()
+{
+    errlHndl_t errl = nullptr;
+    std::list<EepromInfo_t> l_eepromTargets;
+
+    // Grab list of all present targets that potentially have eeproms
+
+    // predicate to only look for those that are actually present
+    TARGETING::PredicateHwas isPresent;
+    isPresent.reset().poweredOn(true).present(true);
+
+    TARGETING::PredicateCTM nodes( TARGETING::CLASS_ENC,
+                                   TARGETING::TYPE_NODE,
+                                   TARGETING::MODEL_NA );
+
+    TARGETING::PredicateCTM procs( TARGETING::CLASS_CHIP,
+                                   TARGETING::TYPE_PROC,
+                                   TARGETING::MODEL_NA );
+
+    TARGETING::PredicateCTM dimms( TARGETING::CLASS_LOGICAL_CARD,
+                                   TARGETING::TYPE_DIMM,
+                                   TARGETING::MODEL_NA );
+
+    TARGETING::PredicatePostfixExpr l_eepromTargetFilter;
+    l_eepromTargetFilter.push(&nodes).push(&procs).Or().push(&dimms).Or().
+                         push(&isPresent).And();
+
+    TARGETING::TargetRangeFilter eepromTarget_itr( TARGETING::targetService().begin(),
+                                                   TARGETING::targetService().end(),
+                                                   &l_eepromTargetFilter );
+    bool allowDupEntries = true;
+    for( ; eepromTarget_itr; ++eepromTarget_itr )
+    {
+        // loop for eeproms associated with the target and add
+        // them to the list.  Allow duplicate eeproms to show up to account
+        // for different roles present
+        add_to_list( l_eepromTargets, *eepromTarget_itr, allowDupEntries );
+    }
+
+    // Go through list and call cachedEeprom on each non-VPD type
+    for (auto eepromTarget : l_eepromTargets)
+    {
+        // Only update ancillary roles (non-VPD)
+        if ( (eepromTarget.deviceRole != VPD_PRIMARY) &&
+             (eepromTarget.deviceRole != VPD_BACKUP) )
+        {
+            bool present = true;
+            size_t presentSize = sizeof(present);
+            TRACFCOMP(g_trac_eeprom,"cacheEepromAncillaryRoles(): Reading EEPROMs for target %.8X, eeprom cache = %d , target present = %d , eeprom type = %d",
+                  TARGETING::get_huid(eepromTarget.assocTarg),
+                  DEVICE_CACHE_EEPROM_ADDRESS(present, eepromTarget.deviceRole));
+            errl = deviceRead(eepromTarget.assocTarg, &present, presentSize,
+                            DEVICE_CACHE_EEPROM_ADDRESS(present, eepromTarget.deviceRole));
+            if (errl != nullptr)
+            {
+                TRACFCOMP(g_trac_eeprom, ERR_MRK "pTarget %.8X - failed reading eeprom for type %d",
+                    TARGETING::get_huid(eepromTarget.assocTarg), eepromTarget.deviceRole);
+                errlCommit(errl, EEPROM_COMP_ID);
+            }
+        }
+    }
+} // END cacheEepromAncillaryRoles()
+
+} // END namespace EEPROM

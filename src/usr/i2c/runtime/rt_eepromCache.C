@@ -36,6 +36,7 @@
 #include <errl/errlentry.H>
 #include <devicefw/driverif.H>
 #include <i2c/eepromddreasoncodes.H>
+#include <i2c/eepromif.H>
 #include <runtime/interface.h>
 #include <targeting/runtime/rt_targeting.H>
 #include <targeting/common/utilFilter.H>
@@ -124,7 +125,7 @@ struct rtEecacheInit
 
             eepromRecordHeader * l_recordHeaderToCopy = nullptr;
             uint8_t l_eepromCount = 0;
-            for(int8_t i = 0; i < MAX_EEPROMS_VERSION_1; i++)
+            for(int8_t i = 0; i < MAX_EEPROMS_LATEST; i++)
             {
                 // Keep track of current record so we can use outside for loop
                 l_recordHeaderToCopy = &l_sectionHeader->recordHeaders[i];
@@ -141,17 +142,18 @@ struct rtEecacheInit
 
                         TRACFCOMP(g_trac_eeprom,
                           "rtEecacheInit(): ERROR Duplicate cache entries found in VPD reserved memory section");
+
                         /*@
                         * @errortype        ERRL_SEV_UNRECOVERABLE
                         * @moduleid         EEPROM_CACHE_INIT_RT
                         * @reasoncode       EEPROM_DUPLICATE_CACHE_ENTRY
-                        * @userdata1[0:31]   i2c_master_huid
-                        * @userdata1[32:39] port on i2c master eeprom slave is on
-                        * @userdata1[40:47] engine on i2c master eeprom slave is on
-                        * @userdata1[48:55] devAddr of eeprom slave
-                        * @userdata1[56:63] muxSelect of eeprom slave (0xFF is not valid)
-                        * @userdata2[0:31]   size of eeprom
-                        * @userdata2[32:63]  Node Id
+                        * @userdata1[0:31]  master Huid
+                        * @userdata1[32:39] port (or 0xFF)
+                        * @userdata1[40:47] engine
+                        * @userdata1[48:55] devAddr of eeprom slave   (or byte 0 offset_KB)
+                        * @userdata1[56:63] muxSelect of eeprom slave (or byte 1 offset_KB)
+                        * @userdata2[0:31]  size of eeprom
+                        * @userdata2[32:63] Node Id
                         * @devdesc          Attempted to lookup VPD in reserved memory
                         *                   and failed
                         * @custdesc         A problem occurred during the IPL of the
@@ -160,15 +162,7 @@ struct rtEecacheInit
                         l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                               EEPROM::EEPROM_CACHE_INIT_RT,
                                               EEPROM::EEPROM_DUPLICATE_CACHE_ENTRY,
-                                              TWO_UINT32_TO_UINT64(
-                                                  l_recordHeaderToCopy->completeRecord.i2c_master_huid,
-                                                  TWO_UINT16_TO_UINT32(
-                                                      TWO_UINT8_TO_UINT16(
-                                                          l_recordHeaderToCopy->completeRecord.port,
-                                                          l_recordHeaderToCopy->completeRecord.engine),
-                                                      TWO_UINT8_TO_UINT16(
-                                                          l_recordHeaderToCopy->completeRecord.devAddr,
-                                                          l_recordHeaderToCopy->completeRecord.mux_select))),
+                                              EEPROM::getEepromHeaderUserData(*l_recordHeaderToCopy),
                                               TWO_UINT32_TO_UINT64(l_recordHeaderToCopy->completeRecord.cache_copy_size,
                                                                    TO_UINT32(l_instance)),
                                               ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
@@ -205,22 +199,37 @@ void printCurrentCachedEepromMap(void)
             iter != g_cachedEeproms[i].end();
             ++iter)
         {
-            TRACSSCOMP( g_trac_eeprom,
-                        "printTableOfContents(): I2CM Huid: 0x%.08X, Port: 0x%.02X,"
-                        " Engine: 0x%.02X, Dev Addr: 0x%.02X,"
-                        " Mux Select: 0x%.02X, Size: 0x%.08X",
-                        iter->first.completeRecord.i2c_master_huid,
-                        iter->first.completeRecord.port,
-                        iter->first.completeRecord.engine,
-                        iter->first.completeRecord.devAddr,
-                        iter->first.completeRecord.mux_select,
-                        iter->first.completeRecord.cache_copy_size);
+            if ( iter->first.completeRecord.accessType ==
+                   EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_I2C )
+            {
+                TRACSSCOMP( g_trac_eeprom,
+                            "printTableOfContents(): I2CM Huid: 0x%.08X, Port: 0x%.02X,"
+                            " Engine: 0x%.02X, Dev Addr: 0x%.02X,"
+                            " Mux Select: 0x%.02X, Size: 0x%.08X",
+                            iter->first.completeRecord.eepromAccess.i2cAccess.i2c_master_huid,
+                            iter->first.completeRecord.eepromAccess.i2cAccess.port,
+                            iter->first.completeRecord.eepromAccess.i2cAccess.engine,
+                            iter->first.completeRecord.eepromAccess.i2cAccess.devAddr,
+                            iter->first.completeRecord.eepromAccess.i2cAccess.mux_select,
+                            iter->first.completeRecord.cache_copy_size);
+            }
+            else
+            {
+                TRACSSCOMP( g_trac_eeprom,
+                            "printTableOfContents(): SPI Huid: 0x%.08X, Engine: 0x%.02X,"
+                            " offset: 0x%.04X KB, Size: 0x%.08X",
+                            iter->first.completeRecord.eepromAccess.spiAccess.spi_master_huid,
+                            iter->first.completeRecord.eepromAccess.spiAccess.engine,
+                            iter->first.completeRecord.eepromAccess.spiAccess.offset_KB,
+                            iter->first.completeRecord.cache_copy_size);
+            }
 
             TRACSSCOMP( g_trac_eeprom,
                         "                          "
-                        "Internal Offset: 0x%.08X, Cache Valid: 0x%.02X",
+                        "Internal Offset: 0x%.08X, Cache Valid: 0x%.02X, Master EEPROM: 0x%.02X",
                         iter->first.completeRecord.internal_offset,
-                        iter->first.completeRecord.cached_copy_valid);
+                        iter->first.completeRecord.cached_copy_valid,
+                        iter->first.completeRecord.master_eeprom);
         }
     }
     mutex_unlock(&g_eecacheMutex);
@@ -233,6 +242,14 @@ uint64_t lookupEepromCacheAddr(const eepromRecordHeader& i_eepromRecordHeader,
     uint64_t l_vaddr = 0;
     std::map<eepromRecordHeader, EeepromEntryMetaData_t>::iterator l_it;
 
+    if (MAX_NODES_PER_SYS < i_instance)
+    {
+        TRACFCOMP( g_trac_eeprom, "lookupEepromCacheAddr() called with instance"
+                   " %d, which is greater than max cached eeproms %d",
+                   i_instance, MAX_NODES_PER_SYS );
+        return 0;
+    }
+
     // Wrap lookup in mutex because reads are not thread safe
     mutex_lock(&g_eecacheMutex);
     l_it = g_cachedEeproms[i_instance].find(i_eepromRecordHeader);
@@ -242,6 +259,7 @@ uint64_t lookupEepromCacheAddr(const eepromRecordHeader& i_eepromRecordHeader,
         l_vaddr = l_it->second.cache_entry_address;
     }
     mutex_unlock(&g_eecacheMutex);
+
     return l_vaddr;
 }
 
@@ -263,17 +281,34 @@ bool addEepromToCachedList(const eepromRecordHeader & i_eepromRecordHeader,
         g_cachedEeproms[i_instance][i_eepromRecordHeader].header_entry_address =
               i_recordHeaderVaddr;
 
-        TRACSSCOMP( g_trac_eeprom,
-                    "addEepromToCachedList() Adding I2CM Huid: 0x%.08X, Port: 0x%.02X,"
-                    " Engine: 0x%.02X, Dev Addr: 0x%.02X, Mux Select: 0x%.02X,"
-                    " Size: 0x%.08X to g_cachedEeproms",
-                    i_eepromRecordHeader.completeRecord.i2c_master_huid,
-                    i_eepromRecordHeader.completeRecord.port,
-                    i_eepromRecordHeader.completeRecord.engine,
-                    i_eepromRecordHeader.completeRecord.devAddr,
-                    i_eepromRecordHeader.completeRecord.mux_select,
-                    i_eepromRecordHeader.completeRecord.cache_copy_size);
-
+        if (i_eepromRecordHeader.completeRecord.accessType ==
+            EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_I2C)
+        {
+            TRACSSCOMP( g_trac_eeprom,
+                "addEepromToCachedList() Adding access: 0x%02X,"
+                " I2CM Huid: 0x%.08X, Port: 0x%.02X,"
+                " Engine: 0x%.02X, Dev Addr: 0x%.02X, Mux Select: 0x%.02X,"
+                " Size: 0x%.08X to g_cachedEeproms",
+                i_eepromRecordHeader.completeRecord.accessType,
+                i_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.i2c_master_huid,
+                i_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.port,
+                i_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.engine,
+                i_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.devAddr,
+                i_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.mux_select,
+                i_eepromRecordHeader.completeRecord.cache_copy_size);
+        }
+        else
+        {
+            TRACSSCOMP( g_trac_eeprom,
+                "addEepromToCachedList() Adding access: 0x%02X,"
+                " SPI master Huid: 0x%.08X, Engine: 0x%.02X, "
+                " offset_KB: 0x%.04X, Size: 0x%.08X to g_cachedEeproms",
+                i_eepromRecordHeader.completeRecord.accessType,
+                i_eepromRecordHeader.completeRecord.eepromAccess.spiAccess.spi_master_huid,
+                i_eepromRecordHeader.completeRecord.eepromAccess.spiAccess.engine,
+                i_eepromRecordHeader.completeRecord.eepromAccess.spiAccess.offset_KB,
+                i_eepromRecordHeader.completeRecord.cache_copy_size);
+        }
         l_matchFound = false;
     }
 

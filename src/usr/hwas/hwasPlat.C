@@ -1075,17 +1075,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
             pTarget_it = io_targets.erase(pTarget_it);
         }
 #if defined(CONFIG_SUPPORT_EEPROM_CACHING) && defined(CONFIG_SUPPORT_EEPROM_HWACCESS)
-        TARGETING::EepromVpdPrimaryInfo eepromData;
-        if (pTarget->tryGetAttr<ATTR_EEPROM_VPD_PRIMARY_INFO>(eepromData))
-        {
-            HWAS_INF( "Reading EEPROMs for target, eeprom type = %d , target present = %d , eeprom type = %d",
-                      DEVICE_CACHE_EEPROM_ADDRESS(present, EEPROM::VPD_PRIMARY));
-            errl = deviceRead(pTarget, &present, presentSize,
-                            DEVICE_CACHE_EEPROM_ADDRESS(present, EEPROM::VPD_PRIMARY));
-
-            errlCommit(errl, HWAS_COMP_ID);
-            // errl is now null, move on to next target
-        }
+        EEPROM::cacheEepromVpd(pTarget, present);
 #endif
         // FSP normally sets PN/SN so if FSP isn't present, do it here
         //(after VPD has been cached if caching is enabled)

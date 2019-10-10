@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,7 @@
  * @file eepromdd_hardware.H
  *
  * @brief Provides the interfaces for accessing EEPROMs within
- *      the system via the I2C device driver
+ *      the system via the SPI and I2C device drivers
  */
 
 #include <i2c/eeprom_const.H>
@@ -58,12 +58,12 @@ namespace EEPROM
 *       OUTPUT: Length of buffer that was written, or length of buffer
 *           to be read from target device.
 *
-* @param [in/out] io_i2cInfo struct containing information needed to perform
-*        operation on the given i2c eeprom. NOTE It is expected that
+* @param [in/out] io_eepromInfo struct containing information needed to perform
+*        operation on the given eeprom. NOTE It is expected that
 *        eepromRole and offset have been filled out in this struct
 *        prior to passing it into this function
 *
-* @pre  It is expected that io_i2cInfo.eepromRole will have a valid role set
+* @pre  It is expected that io_eepromInfo.eepromRole will have a valid role set
 *
 * @return errlHndl_t - nullptr if successful, otherwise a pointer to the
 *       error log.
@@ -73,11 +73,11 @@ errlHndl_t eepromPerformOpHW(DeviceFW::OperationType i_opType,
                              TARGETING::Target * i_target,
                              void * io_buffer,
                              size_t & io_buflen,
-                             eeprom_addr_t & io_i2cInfo) ;
+                             eeprom_addr_t & io_eepromInfo) ;
 
 /**
  *
- * @brief Perform operations to lock and unlock the page mutex
+ * @brief Perform operations to lock and unlock the I2C page mutex
  *
  * @param[in] i_target - the target to lock the page for
  * @param[in] i_switchPage - bool to tell the function whether we are
@@ -97,16 +97,16 @@ errlHndl_t eepromPerformOpHW(DeviceFW::OperationType i_opType,
  * @return errlHndl_t - NULL if successful, otherwise a pointer to the
  *      error log.
  */
-errlHndl_t eepromPageOp( TARGETING::Target * i_target,
-                         bool i_switchPage,
-                         bool i_lockMutex,
-                         bool & io_pageLocked,
-                         uint8_t i_desiredPage,
-                         const eeprom_addr_t & i_i2cInfo );
+errlHndl_t eepromI2cPageOp( TARGETING::Target * i_target,
+                            bool i_switchPage,
+                            bool i_lockMutex,
+                            bool & io_pageLocked,
+                            uint8_t i_desiredPage,
+                            const eeprom_addr_t & i_i2cInfo );
 
 
 /**
- * @brief This utility function determines if a read/write straddles
+ * @brief This utility function determines if an I2C read/write straddles
  *        the boundary between EEPROM pages and if so, returns the
  *        parameters to perform 2 operations, one for each page.
  *
@@ -122,15 +122,15 @@ errlHndl_t eepromPageOp( TARGETING::Target * i_target,
  * @return bool - True if the requested data straddles the EEPROM page
  *          boundary, False otherwise. If False, io_newLen == i_originalLen.
  */
-bool crossesEepromPageBoundary( uint64_t i_originalOffset,
-                                 size_t i_originalLen,
-                                 size_t & io_newLen,
-                                 size_t & o_pageTwoBuflen,
-                                 const eeprom_addr_t & i_i2cInfo );
+bool crossesEepromI2cPageBoundary( uint64_t i_originalOffset,
+                                   size_t i_originalLen,
+                                   size_t & io_newLen,
+                                   size_t & o_pageTwoBuflen,
+                                   const eeprom_addr_t & i_i2cInfo );
 
 
 /**
- * @brief This function peforms the sequencing to do a read of the
+ * @brief This function peforms the sequencing to do an I2C read of the
  *      EEPROM that is identified.
  *
  * @param[in] i_target - Target device.
@@ -146,14 +146,14 @@ bool crossesEepromPageBoundary( uint64_t i_originalOffset,
  * @return errlHndl_t - NULL if successful, otherwise a pointer to the
  *      error log.
  */
-errlHndl_t eepromRead ( TARGETING::Target * i_target,
-                        void * o_buffer,
-                        size_t i_buflen,
-                        eeprom_addr_t i_i2cInfo );
+errlHndl_t eepromI2cRead ( TARGETING::Target * i_target,
+                           void * o_buffer,
+                           size_t i_buflen,
+                           eeprom_addr_t & i_i2cInfo );
 
 
 /**
- * @brief This function actually performs the i2c operations to read data from
+ * @brief This function actually performs the I2C operations to read data from
  *        the EEPROM
  *
  * @param[in] i_target - Target device
@@ -173,17 +173,17 @@ errlHndl_t eepromRead ( TARGETING::Target * i_target,
  * @return errlHndl_t - NULL if successful, otherwise a pointer to the
  *       error log.
  */
-errlHndl_t eepromReadData( TARGETING::Target * i_target,
-                           void * o_buffer,
-                           size_t i_buflen,
-                           void * i_byteAddress,
-                           size_t i_byteAddressSize,
-                           eeprom_addr_t i_i2cInfo );
+errlHndl_t eepromI2cReadData( TARGETING::Target * i_target,
+                              void * o_buffer,
+                              size_t i_buflen,
+                              void * i_byteAddress,
+                              size_t i_byteAddressSize,
+                              const eeprom_addr_t & i_i2cInfo );
 
 
 
 /**
- * @brief This function peforms the sequencing to do a write of the
+ * @brief This function peforms the sequencing to do an I2C write of the
  *      EEPROM that is identified.
  *
  * @param[in] i_target - Target device.
@@ -202,15 +202,15 @@ errlHndl_t eepromReadData( TARGETING::Target * i_target,
  * @return errlHndl_t - NULL if successful, otherwise a pointer to the
  *      error log.
  */
-errlHndl_t eepromWrite ( TARGETING::Target * i_target,
-                         void * io_buffer,
-                         size_t & io_buflen,
-                         eeprom_addr_t i_i2cInfo );
+errlHndl_t eepromI2cWrite ( TARGETING::Target * i_target,
+                            void * io_buffer,
+                            size_t & io_buflen,
+                            eeprom_addr_t & i_i2cInfo );
 
 
 
 /**
- * @brief This function actually writes data into the devices EEPROM
+ * @brief This function actually writes data via I2C into the devices EEPROM
  *
  * @param[in] i_target - Target device.
  * @param[in] i_dataToWrite - The data to be written into the device.
@@ -220,12 +220,12 @@ errlHndl_t eepromWrite ( TARGETING::Target * i_target,
  * @param[in] i_i2cInfo - Structure of I2C parameters needed to execute
  *      the command to the I2C device driver.
  */
-errlHndl_t eepromWriteData( TARGETING::Target * i_target,
-                            void * i_dataToWrite,
-                            size_t i_dataLen,
-                            void * i_byteAddress,
-                            size_t i_byteAddressSize,
-                            eeprom_addr_t i_i2cInfo );
+errlHndl_t eepromI2cWriteData( TARGETING::Target * i_target,
+                               void * i_dataToWrite,
+                               size_t i_dataLen,
+                               void * i_byteAddress,
+                               size_t i_byteAddressSize,
+                               eeprom_addr_t & i_i2cInfo );
 
 
 /**
@@ -248,11 +248,43 @@ errlHndl_t eepromWriteData( TARGETING::Target * i_target,
  * @return errlHndl_t - NULL if successful, otherwise a pointer to the
  *      error log.
  */
-errlHndl_t eepromPrepareAddress ( TARGETING::Target * i_target,
-                                  void * io_buffer,
-                                  size_t & o_bufSize,
-                                  uint8_t & o_desiredPage,
-                                  const eeprom_addr_t & i_i2cInfo);
+errlHndl_t eepromPrepareI2cAddress ( TARGETING::Target * i_target,
+                                     void * io_buffer,
+                                     size_t & o_bufSize,
+                                     uint8_t & o_desiredPage,
+                                     const eeprom_addr_t & i_i2cInfo);
+
+
+/**
+ * @brief Use SPI to read from eeprom
+ *
+ * @param i_spiMaster - spi master target
+ * @param o_buffer    - an allocated buffer for data
+ * @param io_buflen   - length of buffer data to transfer (returns how much read)
+ * @param i_spiInfo   - contains SPI informational data for how to access eeprom
+ * @return nullptr if no error, else a filled in error
+ */
+errlHndl_t eepromSpiRead ( TARGETING::Target * i_spiMaster,
+                           void * o_buffer,
+                           size_t i_buflen,
+                           eeprom_addr_t & i_spiInfo );
+
+/**
+ * @brief Use SPI to write out to eeprom
+ *        Note: this function will be recursively called after each page write
+ *
+ * @param i_target    - eeprom target device
+ * @param i_spiMaster - master spi target used to access eeprom target
+ * @param i_buffer    - buffer contains data to write
+ * @param io_buflen   - length of buffer data to transfer
+ * @param io_spiInfo  - contains SPI informational data for how to access eeprom
+ * @return nullptr if no error, else a filled in error
+ */
+errlHndl_t eepromSpiWrite ( TARGETING::Target * i_target,
+                            TARGETING::Target * i_spiMaster,
+                            void * i_buffer,
+                            size_t & io_buflen,
+                            eeprom_addr_t & io_spiInfo );
 
 }
 
