@@ -82,6 +82,25 @@ enum POUNDW_DDS_FIELDS
 #define RESCLK_FREQ_REGIONS 4
 #define RESCLK_STEPS        32
 
+/// These define PGPE Flags
+#define MAX_PGPE_FLAGS      32 //Note: not all are used, but kept for future use
+enum PGPE_FLAGS_IDX
+{
+    PGPE_FLAG_RESCLK_ENABLE                 = 0,
+    PGPE_FLAG_CURRENT_READ_DISABLE          = 1,
+    PGPE_FLAG_OCS_DISABLE                   = 2,
+    PGPE_FLAG_WOF_ENABLE                    = 3,
+    PGPE_FLAG_WOV_UNDERVOLT_ENABLE          = 4,
+    PGPE_FLAG_WOV_OVERVOLT_ENABLE           = 5,
+    PGPE_FLAG_DDS_CAL_PSTATE_ENABLE         = 6,
+    PGPE_FLAG_DDS_COARSE_THROTTLE_ENABLE    = 7,
+    PGPE_FLAG_FREQ_JUMP_ENABLE              = 8,
+    PGPE_FLAG_PMCR_MOST_RECENT_ENABLE       = 9,
+    PGPE_FLAG_OCC_IPC_IMMEDIATE_MODE        = 10,
+    PGPE_FLAG_WOF_IPC_IMMEDIATE_MODE        = 11,
+    PGPE_FLAG_PHANTOM_HALT_ENABLE           = 12,
+};
+
 /// Control Attributes
 typedef union
 {
@@ -280,7 +299,6 @@ typedef struct
 } VRMParms_t;
 
 
-
 /// @todo Need to define the DDS control block
 
 /// Pstate Parameter consumed by PGPE
@@ -362,6 +380,10 @@ typedef struct
     uint32_t vcs_vratio_weight;
     uint16_t array_write_vdn_mv;
     uint16_t array_write_vdd_mv;
+
+    //PGPE Flags
+    //Note: not all are used, but reserved for future use
+    uint8_t pgpe_flags[MAX_PGPE_FLAGS];
 
     // Biased Compare VID operating points
     // @todo RTC 201083 Add DDS GPPB values

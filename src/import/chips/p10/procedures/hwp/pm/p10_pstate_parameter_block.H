@@ -121,9 +121,19 @@ typedef struct
     uint8_t attr_nest_leakage_percent;
 
     // Control attributes
-    uint8_t attr_systemp_resclk_disable;
+    uint8_t attr_system_current_read_disable;
+    uint8_t attr_system_ocs_disable;
     uint8_t attr_system_wof_disable;
     uint8_t attr_system_dds_disable;
+    uint8_t attr_dds_cal_pstate_enable;
+    uint8_t attr_dds_coarse_thr_enable;
+    uint8_t attr_dds_freq_jump_enable;
+    uint8_t attr_pmcr_most_recent_enable;
+    uint8_t attr_phantom_halt_enable;
+    uint8_t attr_pgpe_hcode_function_enable;
+    uint8_t attr_system_wof_throttle_control_loop_disable;
+    uint8_t attr_system_pitch_enable;
+    uint8_t attr_system_wof_throttle_control_loop_mode;
 
     uint8_t attr_dd_wof_not_supported;
     uint8_t attr_dd_dds_not_supported;

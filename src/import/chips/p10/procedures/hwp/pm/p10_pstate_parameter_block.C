@@ -840,6 +840,21 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
                 revle32(io_globalppb->dpll_pstate0_value),
                 revle32(io_globalppb->dpll_pstate0_value));
 
+        //Set PGPE Flags
+        io_globalppb->pgpe_flags[PGPE_FLAG_RESCLK_ENABLE] = iv_resclk_enabled;
+        io_globalppb->pgpe_flags[PGPE_FLAG_CURRENT_READ_DISABLE] = iv_attrs.attr_system_current_read_disable;
+        io_globalppb->pgpe_flags[PGPE_FLAG_OCS_DISABLE] = iv_attrs.attr_system_ocs_disable;
+        io_globalppb->pgpe_flags[PGPE_FLAG_WOF_ENABLE] = iv_wof_enabled;
+        io_globalppb->pgpe_flags[PGPE_FLAG_WOV_UNDERVOLT_ENABLE] = iv_wov_underv_enabled;
+        io_globalppb->pgpe_flags[PGPE_FLAG_WOV_OVERVOLT_ENABLE] = iv_wov_overv_enabled;
+        io_globalppb->pgpe_flags[PGPE_FLAG_DDS_COARSE_THROTTLE_ENABLE] = iv_attrs.attr_dds_coarse_thr_enable;
+        io_globalppb->pgpe_flags[PGPE_FLAG_PMCR_MOST_RECENT_ENABLE] = iv_attrs.attr_pmcr_most_recent_enable;
+        io_globalppb->pgpe_flags[PGPE_FLAG_OCC_IPC_IMMEDIATE_MODE] = iv_attrs.attr_pgpe_hcode_function_enable;
+        io_globalppb->pgpe_flags[PGPE_FLAG_WOF_IPC_IMMEDIATE_MODE] = iv_attrs.attr_pgpe_hcode_function_enable;
+        io_globalppb->pgpe_flags[PGPE_FLAG_PHANTOM_HALT_ENABLE] = iv_attrs.attr_phantom_halt_enable;
+
+
+
 #if 0
         //WOV parameters
         io_globalppb->wov_sample_125us                = revle32(iv_attrs.attr_wov_sample_125us);
@@ -1263,6 +1278,16 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
     DATABLOCK_GET_ATTR(ATTR_SYSTEM_DDS_DISABLE,    FAPI_SYSTEM, attr_system_dds_disable);
     DATABLOCK_GET_ATTR(ATTR_SYSTEM_RESCLK_DISABLE, FAPI_SYSTEM, attr_resclk_disable);
     DATABLOCK_GET_ATTR(ATTR_SYSTEM_PSTATES_MODE,   FAPI_SYSTEM, attr_pstate_mode);
+
+    DATABLOCK_GET_ATTR(ATTR_SYSTEM_PGPE_CURRENT_READ_DISABLE, iv_procChip, attr_system_current_read_disable);
+    DATABLOCK_GET_ATTR(ATTR_SYSTEM_OCS_DISABLE,         iv_procChip , attr_system_ocs_disable);
+    DATABLOCK_GET_ATTR(ATTR_DDS_COARSE_THROTTLE_ENABLE, iv_procChip , attr_dds_coarse_thr_enable);
+    DATABLOCK_GET_ATTR(ATTR_PMCR_MOST_RECENT_MODE,      iv_procChip , attr_pmcr_most_recent_enable);
+    DATABLOCK_GET_ATTR(ATTR_PGPE_HCODE_FUNCTION_ENABLE, FAPI_SYSTEM , attr_pgpe_hcode_function_enable);
+    DATABLOCK_GET_ATTR(ATTR_PGPE_PHANTOM_HALT_ENABLE,   FAPI_SYSTEM , attr_phantom_halt_enable);
+    DATABLOCK_GET_ATTR(ATTR_WOF_THROTTLE_CONTROL_LOOP_DISABLE,    FAPI_SYSTEM, attr_system_wof_throttle_control_loop_disable);
+    DATABLOCK_GET_ATTR(ATTR_WOF_PITCH_ENABLE,               FAPI_SYSTEM, attr_system_pitch_enable);
+    DATABLOCK_GET_ATTR(ATTR_WOF_THROTTLE_CONTROL_LOOP_MODE, FAPI_SYSTEM, attr_system_wof_throttle_control_loop_mode);
 
     //TBD
     //DATABLOCK_GET_ATTR(ATTR_CHIP_EC_FEATURE_WOF_NOT_SUPPORTED, iv_procChip, attr_dd_wof_not_supported);
@@ -2535,6 +2560,8 @@ fapi2::ReturnCode PlatPmPPB::apply_biased_values ()
         FAPI_DBG("Pstate Base Frequency - after bias %X (%d)",
                  iv_attr_mvpd_poundV_biased[VPD_PV_UT].frequency_mhz * 1000,
                  iv_attr_mvpd_poundV_biased[VPD_PV_UT].frequency_mhz * 1000);
+
+
     }while(0);
 
 fapi_try_exit:

@@ -331,6 +331,28 @@
     <group>enablement</group>
   </attribute>
 
+ <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOF_THROTTLE_CONTROL_DISABLED</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     This attribute is set to ON (disabled) if ATTR_WOF_PITCH_ENABLE = ON.
+     and on WOF_ENABLED = ON.
+
+    Producer: proc_build_pstate_datablock
+
+    Consumers: p10_hcode_image_build ->
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+          FALSE=0,
+          TRUE=1
+    </enum>
+    <initToZero/>
+    <writeable/>
+    <group>enablement</group>
+  </attribute>
+
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_XGPE_PHANTOM_HALT_ENABLE</id>

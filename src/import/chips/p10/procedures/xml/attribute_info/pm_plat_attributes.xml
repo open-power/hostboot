@@ -703,6 +703,87 @@
 
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_WOF_THROTTLE_CONTROL_LOOP_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Disables Workload Optimized Frequency Throttle Control Loop 
+
+    OFF:Will enable WOF Throttle control loop is validity check pass. If validity
+    check fails, then WOF Throttle control loop will be disabled for the present IPL.
+
+    ON: Will disable throttle control loop 
+
+    Producer: Override
+
+    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PSPB)
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <enum>
+        OFF=0,
+        ON=1
+    </enum>
+    <overrideOnly/>
+    <initToZero/>
+    <group>enablement</group>
+  </attribute>
+
+ <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOF_PITCH_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    ON: Disables PGPE Throttle CI loop. Raw overage value written to
+    WCOR. Bit in WCOR indicates the Overage has subsided and by how much.
+
+    OFF: Allows PGPE Throttle Loop to be enabled.
+
+    Producer: Override
+
+    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PSPB)
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <enum>
+        OFF=0,
+        ON=1
+    </enum>
+    <overrideOnly/>
+    <initToZero/>
+    <group>enablement</group>
+  </attribute>
+  
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOF_THROTTLE_CONTROL_LOOP_MODE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+     If WOF Throttle Control Loop is enabled, then selects the mode to update
+     throttle control values.
+
+    BINARY: Will update the throttle control values by half the current value of
+    throttle.
+
+    DECINC: Will update throttle control value by one in each step.
+
+    Producer: Override
+
+    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PSPB)
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <enum>
+        BINARY = 0x0,
+        DECINC = 0x1
+    </enum>
+    <default>BINARY</default>
+    <initToZero/>
+    <group>wof</group>
+  </attribute>
+
+
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_SYSTEM_OCS_DISABLE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
