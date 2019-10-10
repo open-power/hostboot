@@ -43,6 +43,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/sbe
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include
 
 ATTR_RP_OBJS += attrrp.o
 ATTR_RP_OBJS += attrsync.o

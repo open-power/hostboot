@@ -33,6 +33,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps
 EXTRAINCDIR += ${ROOTPATH}/src/usr/mbox/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 
 VPATH = ${ROOTPATH}/src/usr/initservice/bootconfig/
 

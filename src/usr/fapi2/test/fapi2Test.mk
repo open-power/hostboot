@@ -33,26 +33,31 @@
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/fapi2/test/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/accessors/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/accessors/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/targeting/common/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
+EXTRAINCDIR += ${ROOTPATH}/src/usr/
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwp/fapi2/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
+EXTRAINCDIR += ${ROOTPATH}/src/usr/diag/attn/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag/
 
 # Procedures
-OBJS += p9_sample_procedure.o
-OBJS += p9_hwtests.o
-OBJS += rcSupport.o
-OBJS += fapi2TestUtils.o
-OBJS += fapi2DdimmGetEfdTest.o
-OBJS += getVpdTest.o
-OBJS += p9_pm_get_poundv_bucket.o
-OBJS += fapi2PlatGetVpdOcmbChipTest.o
+#OBJS += p9_sample_procedure.o
+#OBJS += p9_hwtests.o
+#OBJS += rcSupport.o
+#OBJS += fapi2TestUtils.o
+#OBJS += fapi2DdimmGetEfdTest.o
+#OBJS += getVpdTest.o
+#OBJS += p9_pm_get_poundv_bucket.o
+#OBJS += fapi2PlatGetVpdOcmbChipTest.o
 
 
 ifeq (${HOSTBOOT_RUNTIME},1)
@@ -74,6 +79,8 @@ else
          sort | xargs}
 #OBJS += p9_i2ctests.o
 #OBJS += p9_mmiotests.o
+# TODO RTC: 210905 Remove the next line and pull the test with other tests automatically
+TESTS += ${ROOTPATH}/src/usr/fapi2/test/fapi2MulticastTest.H
 
 ################################################################################
 endif
@@ -81,4 +88,4 @@ endif
 #TESTS += ${shell ls ${ROOTPATH}/src/usr/fapi2/test/*TestCxx.H | sort | xargs}
 
 
-VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
+#VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/

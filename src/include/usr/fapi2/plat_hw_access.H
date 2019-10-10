@@ -46,9 +46,12 @@
 #include <devicefw/userif.H>
 #include "plat_utils.H"
 
-
 namespace fapi2
 {
+
+// Forward-declare multicast enums
+enum MulticastGroup : uint32_t;
+enum MulticastType : uint8_t;
 
 //------------------------------------------------------------------------------
 // HW Communication Functions to be implemented at the platform layer.
@@ -309,6 +312,54 @@ void checkPibMask(errlHndl_t& io_errLog );
 */
 errlHndl_t isOnMasterProc(TARGETING::Target * i_target, bool & o_isMaster);
 
+/**
+ * @brief Assemble a multicast address from the given SCOM address
+ *
+ * @param[in/out] i_addr the SCOM address to populate with multicast info
+ * @param[in] i_group the multicast group to add to the address
+ * @param[in] i_op the multicast op (type) to add to the address
+ * @return The assembled multicast address
+ */
+uint64_t getMulticastAddr(uint64_t i_addr,
+                          MulticastGroup i_group,
+                          MulticastType i_op);
+
+/**
+ * @brief Returns the multicast bit of the given address
+ *
+ * @param[in] i_scomAddr the input address
+ * @return bool the multicast bit of the given address
+ */
+bool getMulticastBit(uint32_t i_scomAddr);
+
+/**
+ * @brief Returns the multicast group of the passed address
+ * @note The return value only makes sense if the multicast bit in the address
+ *       is set
+ *
+ * @param[in] i_mulitcastScomAddr the input address
+ * @return MulticastGroup the multicast group of the given address
+ */
+MulticastGroup getMulticastGroup(uint32_t i_multicastScomAddr);
+
+/**
+ * @brief Returns the muticast operation requested for the given multicast addr
+ * @note The return value only makes sense if the multicast bit in the address
+ *       is set
+ *
+ * @param[in] i_multicastScomAddr the input address
+ * @return MulticastType the multicast operation requested
+ */
+MulticastType getMulticastOp(uint32_t i_mulitcastScomAddr);
+
+/**
+ * @brief Encodes the given multicast group into hex value to insert into
+ *        the mulitcast address.
+ *
+ * @param[in] i_group the multicast group to encode
+ * @return uint32_t the encoded value in the range 0-7
+ */
+uint32_t getPlatMCGroup(MulticastGroup i_group);
 
 } // End namespace
 

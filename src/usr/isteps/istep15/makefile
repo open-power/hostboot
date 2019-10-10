@@ -37,13 +37,15 @@ EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/customize/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/pmlib/include/registers/
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 
 OBJS += host_build_stop_image.o
 OBJS += proc_set_homer_bar.o

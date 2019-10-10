@@ -70,6 +70,8 @@
 #include    <p10_infrastruct_help.H>
 #include    <p10_hcode_image_defines.H>
 #include    <p10_ipl_section_append.H>
+#include    <multicast_defs.H>
+#include    <multicast_group_defs.H>
 
 #include    <secureboot/smf_utils.H>
 #include    <secureboot/smf.H>
@@ -670,7 +672,7 @@ void* host_build_stop_image (void *io_pArgs)
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                                "applyHcodeGenCpuRegs SUCCESS " );
                 }
-
+#endif
                 // Set wakeup mode for processor based on SMF enablement
                 FAPI_INVOKE_HWP(l_errl,
                                 p10_setup_runtime_wakeup_mode,
@@ -681,12 +683,10 @@ void* host_build_stop_image (void *io_pArgs)
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                               "host_build_stop_image ERROR occured during p10_setup_runtime_wakeup_mode : errorlog PLID=0x%x",
                               l_errl->plid() );
-
-                    //  drop out of block with errorlog.
-                    break;
+                     //  drop out of block with errorlog.
+                     break;
                 }
-#endif
-            }   while (0) ;
+            } while (0) ;
 
             // broke out due to an error, store all the details away, store
             //  the errlog in IStepError, and continue to next proc
@@ -748,7 +748,6 @@ void* host_build_stop_image (void *io_pArgs)
         }
     }
 #endif
-
 
     if(l_pVirtMemBase)
     {

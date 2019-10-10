@@ -1506,9 +1506,14 @@ Target<K, M, V>::getMulticast(const MulticastGroup i_group) const
                   "Requested target type must be part of TARGET_TYPE_MULTICASTABLE");
     static_assert(bitCount<T>::count == 1,
                   "Requested target type must be a single type, TARGET_TYPE_MULTICAST will be added automatically");
-    //TODO RTC: 203303 Incorporate i_group into the target wrapper
-
-    return Target < T | TARGET_TYPE_MULTICAST, O, V > ();
+    // The "internal" multicast target is the target on which getMulticast is
+    // called (a PROC_CHIP target). The multicast operation will always execute
+    // against the proc.
+    plat_target_handle_t l_target(this->iv_handle,
+                                  true, // multicast
+                                  i_group,
+                                  O); // Multicast op
+    return l_target;
 }
 
 ///

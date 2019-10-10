@@ -30,7 +30,7 @@ ROOTPATH = ../../../..
 MODULE = testfapi2
 
 # FIXME RTC: 210975
-#include fapi2Test.mk
+include fapi2Test.mk
 
 ifdef TRACE_MB_VPD_ATTR_UNIT_TEST
 CXXFLAGS+=-DTRACE_MB_VPD_ATTR_UNIT_TEST
@@ -38,5 +38,5 @@ endif
 
 include ${ROOTPATH}/config.mk
 
-#vpath %.C ${GENDIR}
+vpath %.C ${GENDIR}
 

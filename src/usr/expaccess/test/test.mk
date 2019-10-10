@@ -32,6 +32,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include
 EXTRAINCDIR += ${ROOTPATH}/src/import
 EXTRAINCDIR += ${ROOTPATH}/src/usr/expaccess
 EXTRAINCDIR += ${ROOTPATH}/src/usr/expaccess/test
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 
 # FIXME RTC: 210975
 #VPATH += ${ROOTPATH}/src/usr/expaccess/test/

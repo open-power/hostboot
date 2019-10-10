@@ -45,6 +45,8 @@
 #include <hw_access_def.H>
 #include <arch/ppc.H>
 
+#include <multicast_group_defs.H>
+#include <multicast_defs.H>
 
 namespace fapi2
 {
@@ -72,6 +74,32 @@ thread_local uint8_t pib_err_mask = 0x00;
 uint8_t pib_err_mask = 0x00;
 #endif
 
+// Multicast address parts
+enum MulticastMasks : uint32_t
+{
+    MULTICAST_GROUP_MASK   = 0x07000000,
+    MULTICAST_OP_MASK      = 0x38000000,
+    MULTICAST_BIT          = 0x40000000,
+};
+
+enum MulticastOffsets : uint8_t
+{
+    MULTICAST_GROUP_OFFSET = 24,
+    MULTICAST_OP_OFFSET    = 27,
+    MULTICAST_BIT_OFFSET   = 30,
+};
+
+// The MulticastGroup to hwValue (bits in the multicast address) map.
+// There are only 3 multicast group bits in the multicast address,
+// so the right side of the map must be <= 7.
+std::map<MulticastGroup, uint32_t> g_multicastGroupMap = {
+        {MCGROUP_ALL,        0x7},
+        {MCGROUP_GOOD_NO_TP, 0x1},
+        {MCGROUP_GOOD_MC,    0x2},
+        {MCGROUP_GOOD_IOHS,  0x3},
+        {MCGROUP_GOOD_PAU,   0x4},
+        {MCGROUP_GOOD_PCI,   0x5},
+        {MCGROUP_GOOD_EQ,    0x6} };
 
 //------------------------------------------------------------------------------
 // HW Communication Functions to be implemented at the platform layer.
@@ -97,12 +125,21 @@ ReturnCode platGetScom(const Target<TARGET_TYPE_ALL>& i_target,
     TARGETING::ATTR_FAPI_NAME_type l_targName = {0};
     fapi2::toString(i_target, l_targName, sizeof(l_targName));
 
+     uint64_t l_scomAddr = i_address;
+     if(i_target.get().isMulticast())
+     {
+         // Compose the multicast address based on multicast params
+         l_scomAddr = fapi2::getMulticastAddr(l_scomAddr,
+                                             i_target.get().getMulticastGroup(),
+                                             i_target.get().getMulticastOp());
+     }
+
     // Perform SCOM read
     size_t l_size = sizeof(uint64_t);
     l_err = deviceRead(l_target,
                        &o_data(),
                        l_size,
-                       DEVICE_SCOM_ADDRESS(i_address, opMode));
+                       DEVICE_SCOM_ADDRESS(l_scomAddr, opMode));
 
     //If an error occured durring the device read and a pib_err_mask is set,
     // then we will check if the err matches the mask, if it does we
@@ -123,7 +160,7 @@ ReturnCode platGetScom(const Target<TARGET_TYPE_ALL>& i_target,
         {
             FAPI_ERR("platGetScom: deviceRead returns error!");
             FAPI_ERR("fapiGetScom failed - Target %s, Addr %.16llX",
-                     l_targName, i_address);
+                     l_targName, l_scomAddr);
             l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
         }
     }
@@ -133,7 +170,7 @@ ReturnCode platGetScom(const Target<TARGET_TYPE_ALL>& i_target,
         uint64_t l_data = (uint64_t)o_data;
         FAPI_SCAN("TRACE : GETSCOM     :  %s : %.16llX %.16llX",
                   l_targName,
-                  i_address,
+                  l_scomAddr,
                   l_data);
     }
 
@@ -161,13 +198,23 @@ ReturnCode platPutScom(const Target<TARGET_TYPE_ALL>& i_target,
     TARGETING::ATTR_FAPI_NAME_type l_targName = {0};
     fapi2::toString(i_target, l_targName, sizeof(l_targName));
 
+    uint64_t l_scomAddr = i_address;
+
+    if(i_target.get().isMulticast())
+    {
+        // Compose the multicast address based on multicast params
+        l_scomAddr = fapi2::getMulticastAddr(l_scomAddr,
+                                             i_target.get().getMulticastGroup(),
+                                             i_target.get().getMulticastOp());
+    }
+
     // Perform SCOM write
     size_t l_size = sizeof(uint64_t);
     uint64_t l_data  = static_cast<uint64_t>(i_data);
     l_err = deviceWrite(l_target,
                         &l_data,
                         l_size,
-                        DEVICE_SCOM_ADDRESS(i_address, opMode));
+                        DEVICE_SCOM_ADDRESS(l_scomAddr, opMode));
 
     //If an error occured durring the device write and a pib_err_mask is set,
     // then we will check if the err matches the mask, if it does we
@@ -188,7 +235,7 @@ ReturnCode platPutScom(const Target<TARGET_TYPE_ALL>& i_target,
         {
             FAPI_ERR("platPutScom: deviceWrite returns error!");
             FAPI_ERR("platPutScom failed - Target %s, Addr %.16llX",
-                     l_targName, i_address);
+                     l_targName, l_scomAddr);
                      l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
         }
     }
@@ -197,7 +244,7 @@ ReturnCode platPutScom(const Target<TARGET_TYPE_ALL>& i_target,
     {
         FAPI_SCAN("TRACE : PUTSCOM     :  %s : %.16llX %.16llX",
                   l_targName,
-                  i_address,
+                  l_scomAddr,
                   l_data);
     }
 
@@ -1024,6 +1071,51 @@ errlHndl_t isOnMasterProc(TARGETING::Target * i_target, bool & o_isMaster)
         }
     }
     return l_errl;
+}
+
+uint32_t getPlatMCGroup(const MulticastGroup i_group)
+{
+    assert(i_group < MCGROUP_COUNT, "getPlatMCGroup: invalid i_group");
+    auto l_iterator = g_multicastGroupMap.find(i_group);
+    assert(l_iterator != g_multicastGroupMap.end(),
+          "getPlatMCGroup: could not find Multicast Group mapping for group %d",
+          i_group);
+    return l_iterator->second;
+}
+
+uint64_t getMulticastAddr(uint64_t i_addr,
+                          const MulticastGroup i_group,
+                          const MulticastType i_op)
+{
+    uint64_t l_resultingAddress = i_addr;
+    // Set the mulitcast bit (bit 1)
+    l_resultingAddress |= MULTICAST_BIT;
+    // Copy in the op (bits 2, 3, 4)
+    l_resultingAddress &= ~MULTICAST_OP_MASK;
+    l_resultingAddress |= (i_op << MULTICAST_OP_OFFSET);
+    // Copy in the group (bits 5, 6, 7)
+    l_resultingAddress &= ~MULTICAST_GROUP_MASK;
+    l_resultingAddress |= (getPlatMCGroup(i_group) << MULTICAST_GROUP_OFFSET);
+    return l_resultingAddress;
+}
+
+bool getMulticastBit(const uint32_t i_scomAddr)
+{
+    return ((i_scomAddr & MULTICAST_BIT) >> MULTICAST_BIT_OFFSET);
+}
+
+MulticastGroup getMulticastGroup(const uint32_t i_multicastScomAddr)
+{
+    return static_cast<MulticastGroup>(
+                ((i_multicastScomAddr & MULTICAST_GROUP_MASK) >>
+                    MULTICAST_GROUP_OFFSET));
+}
+
+MulticastType getMulticastOp(const uint32_t i_multicastScomAddr)
+{
+    return static_cast<MulticastType>(
+                ((i_multicastScomAddr & MULTICAST_OP_MASK) >>
+                    MULTICAST_OP_OFFSET));
 }
 
 } // End namespace

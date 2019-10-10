@@ -32,6 +32,8 @@
 
 // HB platform support
 #include <targeting/common/target.H>
+#include <multicast_defs.H>
+#include <multicast_group_defs.H>
 
 namespace fapi2
 {
@@ -52,7 +54,8 @@ namespace fapi2
         const TARGETING::Target* iv_pTarget; // Hostboot target type
         bool iv_multicast;                   // Whether a multicast SCOM op
                                              // is to be executed on this target
-        uint32_t iv_group;                   // The selected group for multicast
+        MulticastGroup iv_group;             // The selected group for multicast
+        MulticastType iv_multicastOp;        // The type of multicast operation
 
         public:
 
@@ -64,13 +67,16 @@ namespace fapi2
          * @param[in] i_multicast whether the plat_target_handle_t is
          *            a multicast target wrapper
          * @param[in] i_group the multicast group
+         * @param[in] i_op the type of multicast operation
          */
         plat_target_handle_t(const TARGETING::Target* i_target = nullptr,
                              bool i_multicast = false,
-                             uint32_t i_group = 0):
+                             MulticastGroup i_group = MCGROUP_ALL,
+                             MulticastType i_op = MULTICAST_OR):
                              iv_pTarget(i_target),
                              iv_multicast(i_multicast),
-                             iv_group(i_group)
+                             iv_group(i_group),
+                             iv_multicastOp(i_op)
         {
         }
 
@@ -118,6 +124,37 @@ namespace fapi2
         bool operator<(const plat_target_handle_t& i_rhs) const
         {
             return iv_pTarget < i_rhs.iv_pTarget;
+        }
+
+        /**
+         * @brief The getter function for internal iv_multicast member
+         *
+         * @return true if target supports multicast; false otherwise
+         */
+        bool isMulticast() const
+        {
+            return iv_multicast;
+        }
+
+        /**
+         * @brief The getter function for internal iv_group member
+         *
+         * @return The multicast group requested for this target
+         * @note The returned value only makes sense if isMulticast is true
+         */
+        MulticastGroup getMulticastGroup() const
+        {
+            return iv_group;
+        }
+
+        /**
+         * @brief The getter function for internal iv_multicastOp member
+         *
+         * @return The type of multicast operation requested
+         */
+        MulticastType getMulticastOp() const
+        {
+            return iv_multicastOp;
         }
 
     }; //class plat_target_handle_t

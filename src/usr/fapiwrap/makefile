@@ -39,6 +39,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 # HWP include directories :
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 
+# to get multicast_group_defs.H
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 # HWP objects
 OBJS += exp_getidec.o
 
