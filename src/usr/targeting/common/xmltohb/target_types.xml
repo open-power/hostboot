@@ -2125,6 +2125,9 @@
       <id>NVDIMM_ENCRYPTION_KEYS_FW</id>
     </attribute>
     <attribute>
+      <id>OCMB_FW_UPDATE_OVERRIDE</id>
+    </attribute>
+    <attribute>
       <id>O_EREPAIR_THRESHOLD_FIELD</id>
     </attribute>
     <attribute>
