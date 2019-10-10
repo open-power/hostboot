@@ -167,6 +167,28 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Check if PMIC is TI vendor
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[out] o_is_ti true/false
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+/// @note Can't unit test this properly as R3D is hardcoded in simics
+///
+fapi2::ReturnCode pmic_is_ti(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target, bool& o_is_ti)
+{
+    o_is_ti = false;
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+    fapi2::buffer<uint8_t> l_reg_contents;
+
+    FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R3D_VENDOR_ID_BYTE_1, l_reg_contents));
+
+    o_is_ti = (l_reg_contents == mss::pmic::vendor::TI_SHORT);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 namespace status
 {
 

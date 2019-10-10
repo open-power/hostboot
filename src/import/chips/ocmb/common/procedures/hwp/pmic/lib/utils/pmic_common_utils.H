@@ -56,7 +56,7 @@ typedef fapi2::ReturnCode (*mfg_id_attr_ptr)(const fapi2::Target<fapi2::TARGET_T
 static constexpr mfg_id_attr_ptr get_mfg_id[] =
 {
     mss::attr::get_pmic0_mfg_id,
-    mss::attr::get_pmic1_mfg_id
+    mss::attr::get_pmic1_mfg_id,
 };
 
 using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
@@ -69,7 +69,7 @@ static constexpr uint8_t const VOLT_SETTING_ACTIVE_REGS[] =
     REGS::R21_SWA_VOLTAGE_SETTING,
     REGS::R23_SWB_VOLTAGE_SETTING,
     REGS::R25_SWC_VOLTAGE_SETTING,
-    REGS::R27_SWD_VOLTAGE_SETTING
+    REGS::R27_SWD_VOLTAGE_SETTING,
 };
 
 static constexpr uint8_t const VOLT_SETTING_VENDOR_REGS[] =
@@ -77,7 +77,7 @@ static constexpr uint8_t const VOLT_SETTING_VENDOR_REGS[] =
     REGS::R45_SWA_VOLTAGE_SETTING,
     REGS::R47_SWB_VOLTAGE_SETTING,
     REGS::R49_SWC_VOLTAGE_SETTING,
-    REGS::R4B_SWD_VOLTAGE_SETTING
+    REGS::R4B_SWD_VOLTAGE_SETTING,
 };
 
 static constexpr uint8_t const VOLT_RANGE_FLDS[] =
@@ -85,7 +85,7 @@ static constexpr uint8_t const VOLT_RANGE_FLDS[] =
     FIELDS::SWA_VOLTAGE_RANGE,
     FIELDS::SWB_VOLTAGE_RANGE,
     FIELDS::SWC_VOLTAGE_RANGE,
-    FIELDS::SWD_VOLTAGE_RANGE
+    FIELDS::SWD_VOLTAGE_RANGE,
 };
 
 static constexpr uint32_t const VOLT_RANGE_MINS[][CONSTS::NUM_RANGES] =
@@ -93,7 +93,7 @@ static constexpr uint32_t const VOLT_RANGE_MINS[][CONSTS::NUM_RANGES] =
     {CONSTS::SWABC_VOLT_RANGE0_MIN, CONSTS::SWABC_VOLT_RANGE1_MIN},
     {CONSTS::SWABC_VOLT_RANGE0_MIN, CONSTS::SWABC_VOLT_RANGE1_MIN},
     {CONSTS::SWABC_VOLT_RANGE0_MIN, CONSTS::SWABC_VOLT_RANGE1_MIN},
-    {CONSTS::SWD_VOLT_RANGE0_MIN,   CONSTS::SWD_VOLT_RANGE1_MIN}
+    {CONSTS::SWD_VOLT_RANGE0_MIN,   CONSTS::SWD_VOLT_RANGE1_MIN},
 };
 
 static constexpr uint32_t const VOLT_RANGE_MAXES[][CONSTS::NUM_RANGES] =
@@ -101,7 +101,7 @@ static constexpr uint32_t const VOLT_RANGE_MAXES[][CONSTS::NUM_RANGES] =
     {CONSTS::SWABC_VOLT_RANGE0_MAX, CONSTS::SWABC_VOLT_RANGE1_MAX},
     {CONSTS::SWABC_VOLT_RANGE0_MAX, CONSTS::SWABC_VOLT_RANGE1_MAX},
     {CONSTS::SWABC_VOLT_RANGE0_MAX, CONSTS::SWABC_VOLT_RANGE1_MAX},
-    {CONSTS::SWD_VOLT_RANGE0_MAX,   CONSTS::SWD_VOLT_RANGE1_MAX}
+    {CONSTS::SWD_VOLT_RANGE0_MAX,   CONSTS::SWD_VOLT_RANGE1_MAX},
 };
 
 ///
@@ -168,6 +168,15 @@ fapi2::ReturnCode lock_vendor_region(const fapi2::Target<fapi2::TargetType::TARG
 ///
 fapi2::ReturnCode pmic_is_idt(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target, bool& o_is_idt);
 
+///
+/// @brief Check if PMIC is TI vendor
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[out] o_is_ti true/false
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode pmic_is_ti(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target, bool& o_is_ti);
+
 namespace status
 {
 
@@ -187,7 +196,7 @@ static const std::vector<std::pair<uint8_t, std::vector<status_field>>> IDT_SPEC
         {   {FIELDS::R04_GLOBAL_ERROR_COUNT, "GLOBAL_ERROR_COUNT: >1 error count since last erase operation"},
             {FIELDS::R04_GLOBAL_ERROR_LOG_BUCK_OV_OR_UV, "GLOBAL_ERROR_LOG: BUCK OV/UV: Error occurred"},
             {FIELDS::R04_GLOBAL_ERROR_LOG_VIN_BULK_OVER_VOLTAGE, "GLOBAL_ERROR_LOG: VIN_BULK_OVER_VOLTAGE"},
-            {FIELDS::R04_GLOBAL_ERROR_LOG_CRITICAL_TEMPERATURE, "GLOBAL_ERROR_LOG: CRITICAL_TEMPERATURE"}
+            {FIELDS::R04_GLOBAL_ERROR_LOG_CRITICAL_TEMPERATURE, "GLOBAL_ERROR_LOG: CRITICAL_TEMPERATURE"},
         }
     },
 
@@ -196,7 +205,7 @@ static const std::vector<std::pair<uint8_t, std::vector<status_field>>> IDT_SPEC
         {   {FIELDS::R05_SWA_POWER_GOOD, "PMIC POWER ON: SWA_PWR_NOT_GOOD"},
             {FIELDS::R05_SWB_POWER_GOOD, "PMIC POWER ON: SWB_PWR_NOT_GOOD"},
             {FIELDS::R05_SWC_POWER_GOOD, "PMIC POWER ON: SWC_PWR_NOT_GOOD"},
-            {FIELDS::R05_SWD_POWER_GOOD, "PMIC POWER ON: SWD_PWR_NOT_GOOD"}
+            {FIELDS::R05_SWD_POWER_GOOD, "PMIC POWER ON: SWD_PWR_NOT_GOOD"},
         }
     },
 
@@ -209,7 +218,7 @@ static const std::vector<std::pair<uint8_t, std::vector<status_field>>> IDT_SPEC
             {FIELDS::R06_SWA_OVER_VOLTAGE, "SWA_OVER_VOLTAGE"},
             {FIELDS::R06_SWB_OVER_VOLTAGE, "SWB_OVER_VOLTAGE"},
             {FIELDS::R06_SWC_OVER_VOLTAGE, "SWC_OVER_VOLTAGE"},
-            {FIELDS::R06_SWD_OVER_VOLTAGE, "SWD_OVER_VOLTAGE"}
+            {FIELDS::R06_SWD_OVER_VOLTAGE, "SWD_OVER_VOLTAGE"},
         }
     }
 };
@@ -228,7 +237,7 @@ static const std::vector<std::pair<uint8_t, std::vector<status_field>>> STATUS_F
             {FIELDS::R08_SWC_PWR_GOOD_STATUS,            "SWC_PWR_NOT_GOOD"},
             {FIELDS::R08_SWD_PWR_GOOD_STATUS,            "SWD_PWR_NOT_GOOD"},
             {FIELDS::R08_VIN_MGMT_INPUT_OVER_VOLTAGE,    "VIN_MGMT_INPUT_OVER_VOLTAGE"},
-            {FIELDS::R08_VIN_BULK_INPUT_OVER_VOLTAGE,    "VIN_BULK_INPUT_OVER_VOLTAGE"}
+            {FIELDS::R08_VIN_BULK_INPUT_OVER_VOLTAGE,    "VIN_BULK_INPUT_OVER_VOLTAGE"},
         }
     },
 
@@ -241,7 +250,7 @@ static const std::vector<std::pair<uint8_t, std::vector<status_field>>> STATUS_F
             {FIELDS::R09_SWA_HIGH_OUTPUT_CURRENT_CONSUMPTION_WARNING_STATUS, "SWA_HIGH_OUTPUT_CURRENT_CONSUMPTION_WARNING"},
             {FIELDS::R09_SWB_HIGH_OUTPUT_CURRENT_CONSUMPTION_WARNING_STATUS, "SWB_HIGH_OUTPUT_CURRENT_CONSUMPTION_WARNING"},
             {FIELDS::R09_SWC_HIGH_OUTPUT_CURRENT_CONSUMPTION_WARNING_STATUS, "SWC_HIGH_OUTPUT_CURRENT_CONSUMPTION_WARNING"},
-            {FIELDS::R09_SWD_HIGH_OUTPUT_CURRENT_CONSUMPTION_WARNING_STATUS, "SWD_HIGH_OUTPUT_CURRENT_CONSUMPTION_WARNING"}
+            {FIELDS::R09_SWD_HIGH_OUTPUT_CURRENT_CONSUMPTION_WARNING_STATUS, "SWD_HIGH_OUTPUT_CURRENT_CONSUMPTION_WARNING"},
         }
     },
 
@@ -253,7 +262,7 @@ static const std::vector<std::pair<uint8_t, std::vector<status_field>>> STATUS_F
             {FIELDS::R0A_SWD_OUTPUT_OVER_VOLTAGE_STATUS, "SWD_OUTPUT_OVER_VOLTAGE"},
             {FIELDS::R0A_PEC_ERROR_STATUS,               "PEC_ERROR"},
             {FIELDS::R0A_PARITY_ERROR_STATUS,            "PARITY_ERROR"},
-            {FIELDS::R0A_IBI_STATUS,                     "PENDING_IBI"}
+            {FIELDS::R0A_IBI_STATUS,                     "PENDING_IBI"},
         }
     },
 
@@ -266,7 +275,7 @@ static const std::vector<std::pair<uint8_t, std::vector<status_field>>> STATUS_F
             {FIELDS::R0B_SWA_OUTPUT_UNDER_VOLTAGE_LOCKOUT_STATUS  , "SWA_OUTPUT_UNDER_VOLTAGE_LOCKOUT"},
             {FIELDS::R0B_SWB_OUTPUT_UNDER_VOLTAGE_LOCKOUT_STATUS  , "SWB_OUTPUT_UNDER_VOLTAGE_LOCKOUT"},
             {FIELDS::R0B_SWC_OUTPUT_UNDER_VOLTAGE_LOCKOUT_STATUS  , "SWC_OUTPUT_UNDER_VOLTAGE_LOCKOUT"},
-            {FIELDS::R0B_SWD_OUTPUT_UNDER_VOLTAGE_LOCKOUT_STATUS  , "SWD_OUTPUT_UNDER_VOLTAGE_LOCKOUT"}
+            {FIELDS::R0B_SWD_OUTPUT_UNDER_VOLTAGE_LOCKOUT_STATUS  , "SWD_OUTPUT_UNDER_VOLTAGE_LOCKOUT"},
         }
     }
 };

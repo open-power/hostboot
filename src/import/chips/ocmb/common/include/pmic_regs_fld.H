@@ -133,12 +133,47 @@ struct pmicFields<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint8_t R0B_SWC_OUTPUT_UNDER_VOLTAGE_LOCKOUT_STATUS    = 0x01;
     static constexpr uint8_t R0B_SWD_OUTPUT_UNDER_VOLTAGE_LOCKOUT_STATUS    = 0x00;
 
-    // 0x14
+    // R14
     static constexpr uint8_t R14_GLOBAL_CLEAR_STATUS = 0x00;
+
+    // R1A
+    static constexpr uint8_t R1A_OUTPUT_POWER_SELECT = 0x01;
+
+    // R1B
+    static constexpr uint8_t R1B_CURRENT_OR_POWER_METER_SELECT = 0x06;
+
+    // R2B - bit positions flipped (0 is for bit7, 1 is for bit6, etc)
+    static constexpr uint8_t R2B_LDO_1P8_VOLT_SETTING_START     = 0x00;
+    static constexpr uint8_t R2B_LDO_1P8_VOLT_SETTING_LENGTH    = 0x02;
+    static constexpr uint8_t R2B_LDO_1P0_VOLT_SETTING_START     = 0x05;
+    static constexpr uint8_t R2B_LDO_1P0_VOLT_SETTING_LENGTH    = 0x02;
+
+    // R2F
+    static constexpr uint8_t R2F_SWA_REGULATOR_CONTROL = 0x06;
+    static constexpr uint8_t R2F_SWB_REGULATOR_CONTROL = 0x05;
+    static constexpr uint8_t R2F_SWC_REGULATOR_CONTROL = 0x04;
+    static constexpr uint8_t R2F_SWD_REGULATOR_CONTROL = 0x03;
+
+    // R4F
+    static constexpr uint8_t R4F_SWA_SWB_PHASE_MODE_SELECT = 0x00;
+
+    // R30 - bit positions flipped (0 is for bit7, 1 is for bit6, etc)
+    static constexpr uint8_t R30_ADC_ENABLE        = 0x00;
+    static constexpr uint8_t R30_ADC_SELECT_START  = 0x01;
+    static constexpr uint8_t R30_ADC_SELECT_LENGTH = 0x04;
+
+    // R31 - bit positions flipped (0 is for bit7, 1 is for bit6, etc)
+    static constexpr uint8_t R31_ADC_READ_SETTING_START         = 0x00;
+    static constexpr uint8_t R31_ADC_READ_SETTING_LENGTH        = 0x08;
+
+    // R33 - bit positions flipped (0 is for bit7, 1 is for bit6, etc)
+    static constexpr uint8_t R33_TEMPERATURE_SETTING_START      = 0x00;
+    static constexpr uint8_t R33_TEMPERATURE_SETTING_LENGTH     = 0x03;
 
     static constexpr uint8_t DELAY_FLD_LENGTH               = 3;
     static constexpr uint8_t VOLTAGE_SETTING_START          = 0;
     static constexpr uint8_t VOLTAGE_SETTING_LENGTH         = 7;
+
 };
 
 #endif
