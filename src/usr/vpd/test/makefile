@@ -25,7 +25,14 @@
 ROOTPATH = ../../../..
 
 MODULE = testvpd
-# TODO RTC: 210975
-#TESTS = *.H
+# TESTS = *.H
+
+# Failing all tests:
+# mvpdtest.H
+# Failing tests, not able to find DIMMs
+# spdtest.H
+
+TESTS = dimmPrestest.H
+
 
 include ${ROOTPATH}/config.mk
