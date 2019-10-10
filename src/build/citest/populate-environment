@@ -40,5 +40,10 @@ fi
 # Create img directory.
 mkdir -p $SANDBOXBASE/img || exit -1
 
-# Copy files.
-hbDistribute --test --hb-standalone -j32 || exit -1
+# Copy files -- Only populate testcases if they are
+# intended to be ran
+if [ -z "$SKIP_CXX_TESTS" ]; then
+    hbDistribute --test --hb-standalone -j32 || exit -1
+else
+    hbDistribute --hb-standalone -j32 || exit -1
+fi

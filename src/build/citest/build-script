@@ -62,6 +62,7 @@ case $key in
     ;;
     --skipCxxTests)
     SKIP_CXX_TESTS=1
+    export SKIP_CXX_TESTS
     shift # past argument
     ;;
     -h|--help)
@@ -129,6 +130,9 @@ if [[ ! -z "${HOSTBOOT_PROFILE}" ]]; then
 elif [[ ! -z "${HOSTBOOT_CPPCHECK}" ]]; then
     build_opt="cppcheck"
     COMPILE_ONLY=1
+# vpo
+elif [[ ! -z "${VPO_COMPILE}" ]]; then
+    SKIP_CXX_TESTS=1
 fi
 # Build Hostboot
 start_time=$(date)
