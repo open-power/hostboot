@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1363,7 +1363,7 @@ namespace SENSOR
         TARGETING::targetService().getTopLevelTarget(sys);
         assert(sys != NULL);
         getChildAffinityTargets(nodes, sys, TARGETING::CLASS_ENC,
-                                TARGETING::TYPE_NODE);
+                                TARGETING::TYPE_NODE, false);
         assert(!nodes.empty());
 
         //Backplane sensor ID
@@ -1390,8 +1390,13 @@ namespace SENSOR
         static uint16_t L_NV_bits = 0;
         errlHndl_t l_err = nullptr;
 
-        if (L_NV_bits == 0)
-        {
+        do {
+            // only do the lookup once
+            if (L_NV_bits != 0)
+            {
+                break;
+            }
+
             // grab system enclosure node
             TARGETING::TargetHandle_t l_sys = NULL;
             TARGETING::TargetHandleList l_nodeTargets;
@@ -1399,61 +1404,63 @@ namespace SENSOR
             assert(l_sys != NULL);
             getChildAffinityTargets(l_nodeTargets, l_sys, TARGETING::CLASS_ENC,
                                     TARGETING::TYPE_NODE);
-            assert(!l_nodeTargets.empty());
+            if(l_nodeTargets.empty())
+            {
+                TRACFCOMP(g_trac_ipmi,"getNVCfgIDBit(): No functional nodes - forcing invalid config");
+                break;
+            }
 
             // get keyword size first
             PVPD::pvpdRecord l_Record = PVPD::VNDR;
             PVPD::pvpdKeyword l_KeyWord = PVPD::NV;
             size_t l_nvKwdSize = 0;
             l_err = deviceRead(l_nodeTargets[0],NULL,l_nvKwdSize,
-                                    DEVICE_PVPD_ADDRESS(l_Record,l_KeyWord));
-            if (!l_err)
+                               DEVICE_PVPD_ADDRESS(l_Record,l_KeyWord));
+            if (l_err)
             {
-                if (l_nvKwdSize == sizeof(HDAT::hdatNVKwdStruct_t))
-                {
-                    uint8_t l_kwd[l_nvKwdSize] = {0};
-                    // now read the keyword
-                    l_err = deviceRead(l_nodeTargets[0],l_kwd,l_nvKwdSize,
-                                    DEVICE_PVPD_ADDRESS(l_Record,l_KeyWord));
-                    if (!l_err)
-                    {
-                        HDAT::hdatNVKwdStruct_t * NVptr =
-                            reinterpret_cast<HDAT::hdatNVKwdStruct_t*>(l_kwd);
+                TRACFCOMP(g_trac_ipmi,"getNVCfgIDBit(): Error getting VNDR:NV size");
+                break;
+            }
 
-                        // Valid NV keyword config has NV00 as magic header
-                        if ( !memcmp((char*)&(NVptr->magic),"NV00", 4) )
-                        {
-                            uint8_t cfgID = NVptr->config;
-                            if (cfgID < 16) // maximum setting (bits 0-15)
-                            {
-                                L_NV_bits = 0x0001 << cfgID;
-                            }
-                            else
-                            {
-                                TRACFCOMP(g_trac_ipmi,"getNVCfgIDBit(): Invalid NV config 0x%02X", cfgID);
-                            }
-                        }
-                        else
-                        {
-                            TRACFCOMP(g_trac_ipmi, "Invalid NV magic header: 0x%.8X", NVptr->magic);
-                            TRACFBIN(g_trac_ipmi, "NV KEYWORD", l_kwd, l_nvKwdSize);
-                        }
-                    }
-                    else
-                    {
-                        TRACFCOMP(g_trac_ipmi,ERR_MRK"%.8X Error getting VNDR record data",l_err->eid());
-                    }
+            if (l_nvKwdSize != sizeof(HDAT::hdatNVKwdStruct_t))
+            {
+                TRACFCOMP(g_trac_ipmi,"Invalid NV keyword size: %d, expected %d",l_nvKwdSize,sizeof(HDAT::hdatNVKwdStruct_t));
+                break;
+            }
+
+            uint8_t l_kwd[l_nvKwdSize] = {0};
+            // now read the keyword
+            l_err = deviceRead(l_nodeTargets[0],l_kwd,l_nvKwdSize,
+                               DEVICE_PVPD_ADDRESS(l_Record,l_KeyWord));
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_ipmi,"getNVCfgIDBit(): Error reading VNDR:NV");
+                break;
+            }
+
+            HDAT::hdatNVKwdStruct_t * NVptr =
+              reinterpret_cast<HDAT::hdatNVKwdStruct_t*>(l_kwd);
+
+            // Valid NV keyword config has NV00 as magic header
+            if ( !memcmp((char*)&(NVptr->magic),"NV00", 4) )
+            {
+                uint8_t cfgID = NVptr->config;
+                if (cfgID < 16) // maximum setting (bits 0-15)
+                {
+                    L_NV_bits = 0x0001 << cfgID;
                 }
                 else
                 {
-                    TRACFCOMP(g_trac_ipmi,"Invalid NV keyword size: %d, expected %d",l_nvKwdSize,sizeof(HDAT::hdatNVKwdStruct_t));
+                    TRACFCOMP(g_trac_ipmi,"getNVCfgIDBit(): Invalid NV config 0x%02X", cfgID);
+                    break;
                 }
             }
             else
             {
-                TRACFCOMP(g_trac_ipmi,ERR_MRK"%.8X Error getting VNDR record size",l_err->eid());
+                TRACFCOMP(g_trac_ipmi, "Invalid NV magic header: 0x%.8X", NVptr->magic);
+                TRACFBIN(g_trac_ipmi, "NV KEYWORD", l_kwd, l_nvKwdSize);
             }
-        }
+        } while(0);
 
         o_cfgID_bitwise = L_NV_bits;
 
