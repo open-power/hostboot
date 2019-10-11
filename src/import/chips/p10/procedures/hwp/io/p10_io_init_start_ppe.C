@@ -189,6 +189,75 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Set bits in mem_regs to speed up simulation
+///
+/// @param[in] i_target Chip target to work with
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_io_sim_speedup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_DBG("Begin");
+    auto l_pauc_targets = i_target.getChildren<fapi2::TARGET_TYPE_PAUC>();
+
+    for (auto l_pauc_target : l_pauc_targets)
+    {
+        //Set the reg_init bit
+        for (auto i = 0; i < P10_IO_LIB_NUMBER_OF_THREADS; i++)
+        {
+            //PPE_Lib::ppe_mem_regs_put("loff_setting_ovr_enb", "1", ppe_thread);
+            FAPI_TRY(p10_io_ppe_loff_setting_ovr_enb[i].putData(l_pauc_target, 1));
+
+            //PPE_Lib::ppe_mem_regs_put("amp_setting_ovr_enb", "1", ppe_thread);
+            FAPI_TRY(p10_io_ppe_amp_setting_ovr_enb[i].putData(l_pauc_target, 1));
+
+            //PPE_Lib::ppe_mem_regs_put("rx_eo_converged_end_count", "0000", ppe_thread);
+            FAPI_TRY(p10_io_ppe_rx_eo_converged_end_count[i].putData(l_pauc_target, 0));
+
+            //PPE_Lib::ppe_mem_regs_put("rx_min_recal_cnt", "0000", ppe_thread);
+            FAPI_TRY(p10_io_ppe_rx_min_recal_cnt[i].putData(l_pauc_target, 0));
+
+            //PPE_Lib::ppe_mem_regs_put("rx_vga_jump_target", "00110000", ppe_thread); //48
+            FAPI_TRY(p10_io_ppe_rx_vga_jump_target[i].putData(l_pauc_target, 0x30));
+
+            //PPE_Lib::ppe_mem_regs_put("rx_vga_amax_target", "00110000", ppe_thread); //48
+            FAPI_TRY(p10_io_ppe_rx_vga_amax_target[i].putData(l_pauc_target, 0x30));
+
+            //PPE_Lib::ppe_mem_regs_put("rx_vga_amax_target", "00110000", ppe_thread); //48
+            FAPI_TRY(p10_io_ppe_rx_vga_amax_target[i].putData(l_pauc_target, 0x30));
+
+            //PPE_Lib::ppe_mem_regs_put("rx_vga_recal_max_target", "00111000", ppe_thread); //56
+            FAPI_TRY(p10_io_ppe_rx_vga_recal_max_target[i].putData(l_pauc_target, 0x38));
+
+            //PPE_Lib::ppe_mem_regs_put("rx_vga_recal_min_target", "00101000", ppe_thread); //40
+            FAPI_TRY(p10_io_ppe_rx_vga_recal_min_target[i].putData(l_pauc_target, 0x28));
+
+            //Disable long running tasks
+            FAPI_TRY(p10_io_ppe_rx_eo_enable_lte_cal[i].putData(l_pauc_target, 0x0));
+            FAPI_TRY(p10_io_ppe_rx_eo_enable_dfe_cal[i].putData(l_pauc_target, 0x0));
+            FAPI_TRY(p10_io_ppe_rx_eo_enable_ddc[i].putData(l_pauc_target, 0x0));
+            FAPI_TRY(p10_io_ppe_rx_eo_enable_quad_phase_cal[i].putData(l_pauc_target, 0x0));
+            FAPI_TRY(p10_io_ppe_rx_rc_enable_lte_cal[i].putData(l_pauc_target, 0x0));
+            FAPI_TRY(p10_io_ppe_rx_rc_enable_dfe_cal[i].putData(l_pauc_target, 0x0));
+            FAPI_TRY(p10_io_ppe_rx_rc_enable_ddc[i].putData(l_pauc_target, 0x0));
+            FAPI_TRY(p10_io_ppe_rx_rc_enable_quad_phase_cal[i].putData(l_pauc_target, 0x0));
+            FAPI_TRY(p10_io_ppe_tx_dc_enable_dcc[i].putData(l_pauc_target, 0x0));
+            FAPI_TRY(p10_io_ppe_tx_rc_enable_dcc[i].putData(l_pauc_target, 0x0));
+            //FAPI_TRY(p10_io_ppe_rx_dc_enable_zcal[i].putData(l_pauc_target, 0x0));
+        }
+    }
+
+    //Flush values
+    for (auto i = 0; i < P10_IO_LIB_NUMBER_OF_THREADS; i++)
+    {
+        FAPI_TRY(p10_io_ppe_mem_regs[i].flush());
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+///
 /// @brief Set the ext_cmd_req bits for reg_init, dccal, power on, and fifo init and
 ///        write them to the chip.
 ///
@@ -199,19 +268,6 @@ fapi2::ReturnCode p10_io_ext_req_all(const fapi2::Target<fapi2::TARGET_TYPE_PROC
 {
     FAPI_DBG("Begin");
     auto l_pauc_targets = i_target.getChildren<fapi2::TARGET_TYPE_PAUC>();
-
-    //TODO: REMOVE ME WHEN DCC/ZCAL WORKING
-    for (auto l_pauc_target : l_pauc_targets)
-    {
-        //Set the reg_init bit
-        for (auto i = 0; i < P10_IO_LIB_NUMBER_OF_THREADS; i++)
-        {
-            FAPI_TRY(p10_io_ppe_rx_dc_enable_dcc[i].putData(l_pauc_target, 0, true));
-            FAPI_TRY(p10_io_ppe_rx_dc_enable_zcal[i].putData(l_pauc_target, 0, true));
-        }
-    }
-
-    //TODO FIXME << REMOVE WHEN DCC/ZCAL WORKING
 
     for (auto l_pauc_target : l_pauc_targets)
     {
@@ -331,6 +387,10 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode p10_io_init_start_ppe(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> l_sys;
+    uint8_t l_sim = 0;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, l_sys, l_sim));
+
     FAPI_TRY(p10_io_init_lane_reversal(i_target));
 
     FAPI_TRY(p10_io_init_img_regs(i_target));
@@ -338,6 +398,11 @@ fapi2::ReturnCode p10_io_init_start_ppe(const fapi2::Target<fapi2::TARGET_TYPE_P
     //Wait for reset to finish
     //FIXME: is there a way to tell when it's done?
     fapi2::delay(100, 8000000);
+
+    if (l_sim)
+    {
+        FAPI_TRY(p10_io_sim_speedup(i_target));
+    }
 
     FAPI_TRY(p10_io_ext_req_lanes(i_target));
     FAPI_TRY(p10_io_ext_req_all(i_target));

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p10/procedures/hwp/io/p10_iohs_scominit.C $  */
+/* $Source: src/import/chips/p10/procedures/hwp/initfiles/p10_iohs_scom.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,47 +22,24 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-///
-/// @file p10_iohs_scominit.C
-/// @brief Placeholder for IOHS SCOM init customization (FAPI2)
-///
-/// *HWP HW Maintainer: Chris Steffen <cwsteffen@us.ibm.com>
-/// *HWP FW Maintainer: Ilya Smirnov <ismirno@us.ibm.com>
-/// *HWP Consumed by: HB
-///
+#ifndef _INIT_P10_IOHS_SCOM_PROCEDURE_H_
+#define _INIT_P10_IOHS_SCOM_PROCEDURE_H_
 
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
-#include <p10_iohs_scominit.H>
-#include <p10_iohs_scom.H>
 
-//------------------------------------------------------------------------------
-// Function definitions
-//------------------------------------------------------------------------------
+#include <stddef.h>
+#include <stdint.h>
+#include <fapi2.H>
 
-/// Main function, see description in header
-fapi2::ReturnCode p10_iohs_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+
+typedef fapi2::ReturnCode (*p10_iohs_scom_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>&,
+        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>&, const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
+
+extern "C"
 {
-    FAPI_DBG("Entering ...");
-    fapi2::ReturnCode l_rc;
-    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
-    auto l_iohs_targets = i_target.getChildren<fapi2::TARGET_TYPE_IOHS>();
+    fapi2::ReturnCode p10_iohs_scom(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& TGT0,
+                                    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT2);
 
-    for (const auto& l_iohs_target : l_iohs_targets)
-    {
-        FAPI_EXEC_HWP(l_rc, p10_iohs_scom, l_iohs_target, FAPI_SYSTEM, i_target);
-
-        if (l_rc)
-        {
-            FAPI_ERR("Error from p10.iohs.scom.initfile");
-            fapi2::current_err = l_rc;
-            goto fapi_try_exit;
-        }
-    }
-
-fapi_try_exit:
-    FAPI_DBG("Exiting ...");
-    return fapi2::current_err;
 }
+
+#endif

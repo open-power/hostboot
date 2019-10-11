@@ -35,6 +35,8 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <p10_io_omi_scominit.H>
+#include <p10_omi_scom.H>
+#include <p10_omic_scom.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -44,6 +46,37 @@
 fapi2::ReturnCode p10_io_omi_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     FAPI_DBG("Entering ...");
+    fapi2::ReturnCode l_rc;
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+    auto l_omi_targets = i_target.getChildren<fapi2::TARGET_TYPE_OMI>();
+    auto l_omic_targets = i_target.getChildren<fapi2::TARGET_TYPE_OMIC>();
+
+    for (const auto& l_omic_target : l_omic_targets)
+    {
+        FAPI_EXEC_HWP(l_rc, p10_omic_scom, l_omic_target, FAPI_SYSTEM, i_target);
+
+        if (l_rc)
+        {
+            FAPI_ERR("Error from p10.omic.scom.initfile");
+            fapi2::current_err = l_rc;
+            goto fapi_try_exit;
+        }
+    }
+
+    for (auto l_omi_target : l_omi_targets)
+    {
+        FAPI_EXEC_HWP(l_rc, p10_omi_scom, l_omi_target, FAPI_SYSTEM, i_target);
+
+        if (l_rc)
+        {
+            FAPI_ERR("Error from p10.omi.scom.initfile");
+            fapi2::current_err = l_rc;
+            goto fapi_try_exit;
+        }
+    }
+
+fapi_try_exit:
     FAPI_DBG("Exiting ...");
     return fapi2::current_err;
 }
