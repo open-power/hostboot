@@ -84,6 +84,7 @@ fapi2::ReturnCode p10_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PR
                     fapi2::current_err = l_rc;
                     goto fapi_try_exit;
                 }
+
             }
         }
     }
