@@ -1,0 +1,125 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_htm_setup_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- File: p10_htm_setup_errors.xml. -->
+<!-- Error definitions for p10_htm_setup HWP. -->
+
+<hwpErrors>
+
+<hwpError>
+    <rc>RC_HTM_SETUP_PROC_BAR_SIZE</rc>
+    <description>
+        ATTR_PROC_HTM_BAR_SIZE contains an invalid size value.
+        Firmware error.
+    </description>
+    <ffdc>PROC_BAR_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_P10_NHTM_CTRL_BAD_STATE</rc>
+    <description>
+        NHTM is not at the expected state for current operation.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>HTM_STATUS_REG_NHTM0</ffdc>
+    <ffdc>HTM_STATUS_REG_NHTM1</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <!-- No need to deconfigure/gard chip as this is a debug functionality -->
+</hwpError>
+
+<hwpError>
+    <rc>RC_P10_CHTM_CTRL_BAD_STATE</rc>
+    <description>
+        CHTM is not at the expected state for current operation.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>HTM_STATUS_REG</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <!-- No need to deconfigure/gard chip as this is a debug functionality -->
+</hwpError>
+
+<hwpError>
+    <rc>RC_P10_NHTM_CTRL_TIMEOUT</rc>
+    <description>
+        NHTM state machine change did not complete in allotted time.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>DELAY_COUNT</ffdc>
+    <ffdc>HTM_STATUS_REG_NHTM0</ffdc>
+    <ffdc>HTM_STATUS_REG_NHTM1</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <!-- No need to deconfigure/gard chip as this is a debug functionality -->
+</hwpError>
+
+<hwpError>
+    <rc>RC_NHTM_TRACE_TYPE_NOT_SUPPORTED</rc>
+    <description>
+        The selected Nest HTM trace type is not yet supported.
+    </description>
+    <ffdc>NHTM_TRACE_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_CHTM_TRACE_TYPE_NOT_SUPPORTED</rc>
+    <description>
+        The selected Core HTM trace type is not yet supported.
+    </description>
+    <ffdc>CORE_POS</ffdc>
+    <ffdc>CHTM_TRACE_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+</hwpErrors>
