@@ -1060,8 +1060,7 @@ bool InitService::unregisterShutdownEvent(msg_q_t i_msgQ)
     {
 
         for(EventRegistry_t::iterator r = iv_regMsgQ.begin();
-                r != iv_regMsgQ.end();
-                ++r)
+                r != iv_regMsgQ.end();)
         {
             // erase all instances
             if(r->msgQ == i_msgQ)
@@ -1072,7 +1071,11 @@ bool InitService::unregisterShutdownEvent(msg_q_t i_msgQ)
                     r->compID, r->msgQ, r->msgType, r->msgPriority);
 
                 result = true;
-                iv_regMsgQ.erase(r);
+                r = iv_regMsgQ.erase(r);
+            }
+            else
+            {
+                ++r;
             }
         }
     }
