@@ -51,6 +51,7 @@
 #include <lib/phy/dp16.H>
 #include <lib/mss_attribute_accessors_manual.H>
 #include <generic/memory/lib/utils/freq/gen_mss_freq.H>
+#include <lib/workarounds/eff_config_workarounds.H>
 
 namespace mss
 {
@@ -1567,6 +1568,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_dimm::dimm_rc03()
 {
+    constexpr uint8_t NVDIMM_RCW_WORKAROUND_VALUE = 0x08;
     fapi2::buffer<uint8_t> l_buffer;
 
     uint8_t l_attrs_dimm_rc03[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -1589,6 +1591,10 @@ fapi2::ReturnCode eff_dimm::dimm_rc03()
         l_buffer.insertFromRight<CA_START, LEN>(l_ca_output_drive)
         .insertFromRight<CS_START, LEN>(l_cs_output_drive);
     }
+
+    // Update the value if the NVDIMM workaround is needed
+    FAPI_TRY(mss::workarounds::eff_config::nvdimm_rc_drive_strength(iv_dimm, NVDIMM_RCW_WORKAROUND_VALUE, l_buffer));
+
     // Retrieve MCS attribute data
     FAPI_TRY( eff_dimm_ddr4_rc03(iv_mcs, &l_attrs_dimm_rc03[0][0]) );
 
@@ -1608,6 +1614,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_dimm::dimm_rc04()
 {
+    constexpr uint8_t NVDIMM_RCW_WORKAROUND_VALUE = 0x0a;
     uint8_t l_attrs_dimm_rc04[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     uint8_t l_odt_output_drive = 0;
     uint8_t l_cke_output_drive = 0;
@@ -1631,6 +1638,9 @@ fapi2::ReturnCode eff_dimm::dimm_rc04()
         .insertFromRight<ODT_START, LEN>(l_odt_output_drive);
     }
 
+    // Update the value if the NVDIMM workaround is needed
+    FAPI_TRY(mss::workarounds::eff_config::nvdimm_rc_drive_strength(iv_dimm, NVDIMM_RCW_WORKAROUND_VALUE, l_buffer));
+
     // Retrieve MCS attribute data
     FAPI_TRY( eff_dimm_ddr4_rc04(iv_mcs, &l_attrs_dimm_rc04[0][0]) );
 
@@ -1650,6 +1660,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_dimm::dimm_rc05()
 {
+    constexpr uint8_t NVDIMM_RCW_WORKAROUND_VALUE = 0x0a;
     uint8_t l_attrs_dimm_rc05[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     uint8_t l_a_side_output_drive = 0;
     uint8_t l_b_side_output_drive = 0;
@@ -1672,6 +1683,9 @@ fapi2::ReturnCode eff_dimm::dimm_rc05()
         l_buffer.insertFromRight<B_START, LEN>(l_b_side_output_drive)
         .insertFromRight<A_START, LEN>(l_a_side_output_drive);
     }
+
+    // Update the value if the NVDIMM workaround is needed
+    FAPI_TRY(mss::workarounds::eff_config::nvdimm_rc_drive_strength(iv_dimm, NVDIMM_RCW_WORKAROUND_VALUE, l_buffer));
 
     // Retrieve MCS attribute data
     FAPI_TRY( eff_dimm_ddr4_rc05(iv_mcs, &l_attrs_dimm_rc05[0][0]) );
