@@ -80,6 +80,12 @@ errlHndl_t mmioSetup()
         TARGETING::TargetHandleList l_mcTargetList;
         getAllChiplets(l_mcTargetList, TARGETING::TYPE_MC);
 
+        TARGETING::Target * l_sys = NULL;
+        TARGETING::targetService().getTopLevelTarget( l_sys );
+        assert(l_sys, "mmioSetup: no TopLevelTarget");
+        const auto l_topoMode =
+            l_sys->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_MODE>();
+
         for (auto & l_mcTarget: l_mcTargetList)
         {
             uint32_t  l_mcChipUnit =
@@ -89,17 +95,14 @@ errlHndl_t mmioSetup()
             auto l_omiBaseAddr =
                   l_mcTarget->getAttr<TARGETING::ATTR_OMI_INBAND_BAR_BASE_ADDR_OFFSET>();
 
-            // TODO RTC 214701 -- Need to use TOPOLOGY ID here
-            // Build up the full address with group/chip address considerations
+            // Build up the full address using fabric topology
             auto l_procType = TARGETING::TYPE_PROC;
             TARGETING::Target* l_parentChip = getParent(l_mcTarget, l_procType);
-            uint8_t l_groupId =
-                   l_parentChip->getAttr<ATTR_PROC_EFF_FABRIC_GROUP_ID>();
-            uint8_t l_chipId  =
-                   l_parentChip->getAttr<ATTR_PROC_EFF_FABRIC_CHIP_ID>();
-            uint64_t  l_realAddr = computeMemoryMapOffset( MMIO_BASE,
-                                                           l_groupId,
-                                                           l_chipId );
+            const auto l_topoId =
+                l_parentChip->getAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>();
+            uint64_t l_realAddr = computeMemoryMapOffset( MMIO_BASE,
+                                                          l_topoMode,
+                                                          l_topoId);
 
             //  Apply the MMIO base offset so we get the final address
             l_realAddr += l_omiBaseAddr;
