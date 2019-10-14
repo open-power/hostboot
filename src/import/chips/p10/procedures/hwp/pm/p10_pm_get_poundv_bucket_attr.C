@@ -92,21 +92,21 @@ fapi2::ReturnCode p10_pm_get_poundv_bucket_attr(
     //RTC 207137
     //Hardcode the bucketId until we decide the source of bucketid
     l_bucketId = 1;
-    l_bucketSize = VERSION_1_BUCKET_SIZE;
+    l_bucketSize = VERSION_2_BUCKET_SIZE;
 
-    //Version 1:
+    //Version 2:
     //#V record is laid out as follows:
     //Name:     0x2 byte
     //Length:   0x2 byte
     //Version:  0x1 byte **buffer starts here
     //PNP:      0x3 byte
-    //bucket 1: 0x118 byte
-    //bucket 2: 0x118 byte
-    if( *l_fullVpdData == POUNDV_VERSION_1 &&
+    //bucket 1: 0x15E byte
+    //bucket 2: 0x15E byte
+    if( *l_fullVpdData <= POUNDV_VERSION_2 &&
         !l_bucketId)
     {
         //Set the size of the bucket
-        l_bucketSize = VERSION_1_BUCKET_SIZE;
+        l_bucketSize = VERSION_2_BUCKET_SIZE;
 
         //Reset VPD size because we want to find size of another VPD record
         l_tempVpdSize = 0;

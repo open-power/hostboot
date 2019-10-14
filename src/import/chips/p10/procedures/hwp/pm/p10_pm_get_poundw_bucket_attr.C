@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2019                             */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -88,10 +89,10 @@ fapi2::ReturnCode p10_pm_get_poundw_bucket_attr(
     //#W Bucket ID #2:       0x1 byte
     //DDSC Data for bucket 2: varies by version
 
-    if( *l_fullVpdData == POUNDW_VERSION_1)
+    if( *l_fullVpdData <= POUNDW_VERSION_2)
     {
         //Set the size of the bucket
-        l_bucketSize = POUNDW_BUCKETID_SIZE + PW_VER_1_DDSCDATA_SIZE;
+        l_bucketSize = POUNDW_BUCKETID_SIZE + PW_VER_2_DDSCDATA_SIZE;
     }
     else
     {

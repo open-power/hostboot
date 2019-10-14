@@ -45,9 +45,10 @@
 enum bucketParms
 {
     POUNDV_VERSION_1      = 0x1,
+    POUNDV_VERSION_2      = 0x2,
     POUNDV_BUCKET_OFFSET  = 0x1,
     NUM_BUCKETS           = 0x2,
-    VERSION_1_BUCKET_SIZE = 350,
+    VERSION_2_BUCKET_SIZE = 350,
 };
 
 

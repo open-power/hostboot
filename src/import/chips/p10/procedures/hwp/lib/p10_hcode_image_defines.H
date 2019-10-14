@@ -418,7 +418,11 @@ typedef struct
     uint8_t iv_bootCopier[PGPE_BOOT_COPIER_SIZE];
     uint8_t iv_bootLoader[PGPE_BOOT_LOADER_SIZE];
     uint8_t iv_pgpeSramRegion[PGPE_SRAM_SIZE];
-    uint8_t iv_ppmrReserve[ONE_MB - (PPMR_BOOT_REGION + PGPE_SRAM_SIZE)];
+    uint8_t iv_reserve1[OCC_PSTATE_PARAM_BLOCK_PPMR_OFFSET - (PPMR_BOOT_REGION + PGPE_SRAM_SIZE)];
+    uint8_t iv_occPstateParamBlock[OCC_PSTATE_PARAM_BLOCK_REGION_SIZE];
+    uint8_t iv_pstateTable[PGPE_PSTATE_OUTPUT_TABLES_REGION_SIZE];
+    uint8_t iv_reserve2[PPMR_RESERVE_PSTATE_TABLE_TO_WOF];
+    uint8_t iv_wofTable[OCC_WOF_TABLES_SIZE];
 } PPMRLayout_t;
 
 /**

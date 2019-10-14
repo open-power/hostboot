@@ -406,6 +406,7 @@
     </description>
     <ffdc>BAD_IMG_SIZE</ffdc>
     <ffdc>MAX_QME_IMG_SIZE_ALLOWED</ffdc>
+    <ffdc>EC_LEVEL</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -418,6 +419,7 @@
     Note: 0xFFFFFFFF in field MAX_XGPE_IMG_SIZE_ALLOWED indicates an invalid size.
     <ffdc>BAD_IMG_SIZE</ffdc>
     <ffdc>MAX_XGPE_IMG_SIZE_ALLOWED</ffdc>
+    <ffdc>EC_LEVEL</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -430,6 +432,7 @@
     Note: 0xFFFFFFFF in field MAX_PGPE_IMG_SIZE_ALLOWED indicates an invalid size.
     <ffdc>BAD_IMG_SIZE</ffdc>
     <ffdc>MAX_PGPE_IMG_SIZE_ALLOWED</ffdc>
+    <ffdc>EC_LEVEL</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

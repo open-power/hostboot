@@ -26,6 +26,7 @@ PROCEDURE=p10_hcode_image_build
 HCODE_UTIL=$(ROOTPATH)/chips/p10/procedures/utils/stopreg/
 HCODE_UTIL+=$(ROOTPATH)/chips/p10/utils/imageProcs/
 HCODE_UTIL+=$(ROOTPATH)/chips/p10/procedures/hwp/lib/
+HCODE_UTIL+=$(ROOTPATH)/chips/p10/procedures/hwp/pm/
 HCODE_UTIL+=$(ROOTPATH)/chips/p10/common/include/
 HCODE_UTIL+=$(ROOTPATH)/chips/p10/procedures/hwp/customize/
 HCODE_UTIL+=$(ROOTPATH)/chips/p10/procedures/hwp/accessors/
@@ -39,4 +40,8 @@ lib$(PROCEDURE)_DEPLIBS += p10_scan_ring_util
 lib$(PROCEDURE)_DEPLIBS += p10_ipl_customize
 lib$(PROCEDURE)_DEPLIBS += p10_get_mvpd_ring
 lib$(PROCEDURE)_DEPLIBS += p10_mvpd_ring_funcs
+lib$(PROCEDURE)_DEPLIBS += p10_pstate_parameter_block
+lib$(PROCEDURE)_DEPLIBS += p10_pm_utils
+lib$(PROCEDURE)_DEPLIBS += p10_pm_get_poundw_bucket
+lib$(PROCEDURE)_DEPLIBS += p10_pm_get_poundv_bucket
 $(call BUILD_PROCEDURE)

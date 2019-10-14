@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2019                             */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -57,7 +58,7 @@ typedef struct __attribute__((__packed__))  ddscData
     // bucket Id
     uint8_t bucketId;
     // VDM data
-    uint8_t ddscData[PW_VER_1_DDSCDATA_SIZE];
+    uint8_t ddscData[PW_VER_2_DDSCDATA_SIZE];
 } ddscData_t;
 
 }

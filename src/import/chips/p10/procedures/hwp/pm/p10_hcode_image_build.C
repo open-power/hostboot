@@ -48,6 +48,7 @@
 #include <p10_ipl_image.H>
 #include <p10_ipl_customize.H>
 #include <p10_stop_api.H>
+#include <p10_pstate_parameter_block.H>
 
 extern "C"
 {
@@ -166,6 +167,8 @@ class ImageBuildRecord
         iv_maxSizeList["PGPE Hcode"]        =   PGPE_HCODE_SIZE;
         iv_maxSizeList["GPSPB"]             =   PGPE_GLOBAL_PSTATE_PARAM_BLOCK_SIZE;
         iv_maxSizeList["PGPE SRAM Size"]    =   PGPE_SRAM_SIZE;
+        iv_maxSizeList["OPSPB"]             =   OCC_PSTATE_PARAM_BLOCK_REGION_SIZE;
+        iv_maxSizeList["PState Table"]      =   PGPE_PSTATE_OUTPUT_TABLES_REGION_SIZE;
     }
 
     /**
@@ -566,7 +569,6 @@ fapi2::ReturnCode buildXpmrHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
     l_pXpmrHdr->iv_xgpeHcodeLength  =   l_sectn.iv_sectnLength;
 
     //XGPE SRAM
-    i_xpmrBuildRecord.getSection( "XGPE SRAM", l_sectn );
     l_pXpmrHdr->iv_xgpeSramSize     =   l_sectn.iv_sectnLength;
 
 #ifndef __HOSTBOOT_MODULE
@@ -583,6 +585,8 @@ fapi2::ReturnCode buildXpmrHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
     FAPI_DBG( "XPMR BL Length             0x%08x", htobe32(l_pXpmrHdr->iv_bootLoaderLength));
     FAPI_DBG( "XPMR Hcode Offset          0x%08x", htobe32(l_pXpmrHdr->iv_xgpeHcodeOffset));
     FAPI_DBG( "XPMR Hcode Length          0x%08x", htobe32(l_pXpmrHdr->iv_xgpeHcodeLength));
+    FAPI_DBG( "XGPE SRAM Image Length     0x%08x", htobe32(l_pXpmrHdr->iv_xgpeSramSize));
+
     FAPI_DBG( "==========================================================" );
 #endif
 
@@ -1414,6 +1418,49 @@ fapi_try_exit:
 //-------------------------------------------------------------------------------------------------------
 
 /**
+ * @brief   builds P-State parameter block region of HOMER.
+ * @param[in]   i_procTgt       fapi2 target for P10 chip
+ * @param[in]   i_pChipHomer        models P10's HOMER.
+ * @param[in]   i_ppmrBuildRecord   PPMR region image build metadata
+ * @return      fapi2 return code.
+ */
+fapi2::ReturnCode buildParameterBlock( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t* i_pChipHomer,
+                                       ImageBuildRecord & i_ppmrBuildRecord )
+{
+    FAPI_DBG( " >> buildParameterBlock " );
+    ImgSectnSumm   l_sectn;
+    i_ppmrBuildRecord.getSection( "PGPE Hcode", l_sectn );
+    PstateSuperStructure  l_pstateParamBlock;
+    memset( &l_pstateParamBlock, 0x00, sizeof(PstateSuperStructure) );
+    uint8_t * l_pWofData    =   i_pChipHomer->iv_ppmrRegion.iv_wofTable;
+    uint32_t  l_wofSize     =   OCC_WOF_TABLES_SIZE;
+    uint32_t  l_tempOffset  =   l_sectn.iv_sectnOffset + l_sectn.iv_sectnLength;
+
+    FAPI_TRY( p10_pstate_parameter_block( i_procTgt, &l_pstateParamBlock, l_pWofData, l_wofSize ) );
+
+    FAPI_DBG( "PGPE Hcode Offset 0x%08x  Length 0x%08x",
+                l_sectn.iv_sectnOffset, l_sectn.iv_sectnLength );
+
+    memcpy( &i_pChipHomer->iv_ppmrRegion.iv_pgpeSramRegion[l_sectn.iv_sectnLength],
+            &l_pstateParamBlock.iv_globalppb, sizeof(GlobalPstateParmBlock_t) );
+
+    i_ppmrBuildRecord.setSection( "GPSPB", l_tempOffset, sizeof(GlobalPstateParmBlock_t) );
+
+    memcpy( i_pChipHomer->iv_ppmrRegion.iv_occPstateParamBlock, &l_pstateParamBlock.iv_occppb,
+            sizeof( OCCPstateParmBlock_t ) );
+
+    i_ppmrBuildRecord.setSection( "OPSPB", OCC_PSTATE_PARAM_BLOCK_PPMR_OFFSET,
+                                  sizeof( OCCPstateParmBlock_t ) );
+
+    FAPI_DBG( " << buildParameterBlock " );
+
+    fapi_try_exit:
+    return fapi2::current_err;
+
+}
+//-------------------------------------------------------------------------------------------------------
+
+/**
  * @brief   builds PPMR header in the HOMER.
  * @param[in]   i_pChipHomer        models P10's HOMER.
  * @param[in]   i_ppmrBuildRecord   PPMR region image build metadata
@@ -1431,17 +1478,26 @@ fapi2::ReturnCode buildPpmrHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
 
     //PGPE Boot Loader
     i_ppmrBuildRecord.getSection( "PGPE Boot Loader", l_sectn );
-    l_pPpmrHdr->iv_bootLoaderOffset = l_sectn.iv_sectnOffset;
-    l_pPpmrHdr->iv_bootLoaderLength = PGPE_BOOT_LOADER_SIZE;
+    l_pPpmrHdr->iv_bootLoaderOffset     =   l_sectn.iv_sectnOffset;
+    l_pPpmrHdr->iv_bootLoaderLength     =   PGPE_BOOT_LOADER_SIZE;
 
     //PGPE Hcode
     i_ppmrBuildRecord.getSection( "PGPE Hcode", l_sectn );
-    l_pPpmrHdr->iv_hcodeOffset = l_sectn.iv_sectnOffset;
-    l_pPpmrHdr->iv_hcodeLength = l_sectn.iv_sectnLength;
+    l_pPpmrHdr->iv_hcodeOffset  =   l_sectn.iv_sectnOffset;
+    l_pPpmrHdr->iv_hcodeLength  =   l_sectn.iv_sectnLength;
+
+    //GPSPB
+    i_ppmrBuildRecord.getSection( "GPSPB", l_sectn );
+    l_pPpmrHdr->iv_gpspbOffset  =   l_sectn.iv_sectnOffset;
+    l_pPpmrHdr->iv_gpspbLength  =   l_sectn.iv_sectnLength;
+
+    //OPSPB
+    i_ppmrBuildRecord.getSection( "OPSPB", l_sectn );
+    l_pPpmrHdr->iv_opspbOffset  =   l_sectn.iv_sectnOffset;
+    l_pPpmrHdr->iv_opspbLength  =   l_sectn.iv_sectnLength;
 
     //PGPE SRAM
-    i_ppmrBuildRecord.getSection( "PGPE SRAM", l_sectn );
-    l_pPpmrHdr->iv_sramSize = l_sectn.iv_sectnLength;
+    l_pPpmrHdr->iv_sramSize     =   l_pPpmrHdr->iv_hcodeLength + l_pPpmrHdr->iv_gpspbLength;
 
 #ifndef __HOSTBOOT_MODULE
     l_pPpmrHdr->iv_bootCopierOffset =   htobe32(l_pPpmrHdr->iv_bootCopierOffset);
@@ -1450,6 +1506,10 @@ fapi2::ReturnCode buildPpmrHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
     l_pPpmrHdr->iv_hcodeOffset      =   htobe32(l_pPpmrHdr->iv_hcodeOffset);
     l_pPpmrHdr->iv_hcodeLength      =   htobe32(l_pPpmrHdr->iv_hcodeLength);
     l_pPpmrHdr->iv_sramSize         =   htobe32(l_pPpmrHdr->iv_sramSize);
+    l_pPpmrHdr->iv_gpspbOffset      =   htobe32(l_pPpmrHdr->iv_gpspbOffset);
+    l_pPpmrHdr->iv_gpspbLength      =   htobe32(l_pPpmrHdr->iv_gpspbLength);
+    l_pPpmrHdr->iv_opspbOffset      =   htobe32(l_pPpmrHdr->iv_opspbOffset);
+    l_pPpmrHdr->iv_opspbLength      =   htobe32(l_pPpmrHdr->iv_opspbLength);
 
     FAPI_DBG( "====================== PPMR Header =======================" );
     FAPI_DBG( "PPMR BC Offset             0x%08x", htobe32(l_pPpmrHdr->iv_bootCopierOffset));
@@ -1457,6 +1517,12 @@ fapi2::ReturnCode buildPpmrHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
     FAPI_DBG( "PPMR BL Length             0x%08x", htobe32(l_pPpmrHdr->iv_bootLoaderLength));
     FAPI_DBG( "PPMR Hcode Offset          0x%08x", htobe32(l_pPpmrHdr->iv_hcodeOffset));
     FAPI_DBG( "PPMR Hcode Length          0x%08x", htobe32(l_pPpmrHdr->iv_hcodeLength));
+    FAPI_DBG( "PPMR GPSPB Offset          0x%08x", htobe32(l_pPpmrHdr->iv_gpspbOffset));
+    FAPI_DBG( "PPMR GPSPB Length          0x%08x", htobe32(l_pPpmrHdr->iv_gpspbLength));
+    FAPI_DBG( "PPMR OPSPB Offset          0x%08x", htobe32(l_pPpmrHdr->iv_opspbOffset));
+    FAPI_DBG( "PPMR OPSPB Length          0x%08x", htobe32(l_pPpmrHdr->iv_opspbLength));
+    FAPI_DBG( "PGPE SRAM Image Length     0x%08x", htobe32(l_pPpmrHdr->iv_sramSize));
+
     FAPI_DBG( "==========================================================" );
 #endif
 
@@ -1481,16 +1547,26 @@ fapi2::ReturnCode buildPgpeHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
     pPgpeHeader->g_pgpe_hcodeLength         =   l_sectn.iv_sectnLength;
     pPgpeHeader->g_pgpe_sysResetAddress     =   PGPE_SRAM_BASE_ADDR + PPE_RESET_VECTOR;
     pPgpeHeader->g_pgpe_ivprAddress         =   PGPE_SRAM_BASE_ADDR;
+    pPgpeHeader->g_pgpe_gpspbSramAddress    =   PGPE_SRAM_BASE_ADDR + pPgpeHeader->g_pgpe_hcodeLength;
+    i_ppmrBuildRecord.getSection( "GPSPB", l_sectn );
+    pPgpeHeader->g_pgpe_gpspbMemOffset      =   l_sectn.iv_sectnOffset + PPMR_MEM_MASK;
+    pPgpeHeader->g_pgpe_gpspbMemLength      =   l_sectn.iv_sectnLength;
 
 #ifndef __HOSTBOOT_MODULE
     pPgpeHeader->g_pgpe_hcodeLength         =   htobe32( pPgpeHeader->g_pgpe_hcodeLength );
     pPgpeHeader->g_pgpe_sysResetAddress     =   htobe32( pPgpeHeader->g_pgpe_sysResetAddress );
     pPgpeHeader->g_pgpe_ivprAddress         =   htobe32( pPgpeHeader->g_pgpe_ivprAddress );
+    pPgpeHeader->g_pgpe_gpspbSramAddress    =   htobe32( pPgpeHeader->g_pgpe_gpspbSramAddress );
+    pPgpeHeader->g_pgpe_gpspbMemOffset      =   htobe32( pPgpeHeader->g_pgpe_gpspbMemOffset );
+    pPgpeHeader->g_pgpe_gpspbMemLength      =   htobe32( pPgpeHeader->g_pgpe_gpspbMemLength );
 
     FAPI_DBG( "====================== PGPE Header =======================" );
     FAPI_INF( "PGPE Hcode Length        0x%08x", htobe32( pPgpeHeader->g_pgpe_hcodeLength ) );
     FAPI_INF( "PGPE Sys Reset Address   0x%08x", htobe32( pPgpeHeader->g_pgpe_sysResetAddress ) );
     FAPI_INF( "PGPE IVPR Address        0x%08x", htobe32( pPgpeHeader->g_pgpe_ivprAddress ) );
+    FAPI_INF( "GPSPB SRAM Address       0x%08x", htobe32( pPgpeHeader->g_pgpe_gpspbSramAddress ));
+    FAPI_INF( "GPSPB Mem  Address       0x%08x", htobe32( pPgpeHeader->g_pgpe_gpspbMemOffset ));
+    FAPI_INF( "GPSPB Length             0x%08x", htobe32( pPgpeHeader->g_pgpe_gpspbMemLength ));
 
     FAPI_DBG( "==========================================================" );
 #endif
@@ -1542,7 +1618,6 @@ fapi2::ReturnCode buildPpmrImage( CONST_FAPI2_PROC& i_procTgt,
         pPgpeImg = ppeSection.iv_offset + (uint8_t*) (i_pImageIn );
         FAPI_DBG("HW image PGPE Offset = 0x%08X", ppeSection.iv_offset);
 
-        FAPI_INF("PPMR Header");
         rcTemp = copySectionToHomer( i_pChipHomer->iv_ppmrRegion.iv_ppmrHeader,
                                      pPgpeImg,
                                      l_pgpeBuildRecord,
@@ -1590,6 +1665,7 @@ fapi2::ReturnCode buildPpmrImage( CONST_FAPI2_PROC& i_procTgt,
                      "Failed To Update PGPE Boot Loader Region Of HOMER" );
 
         l_pgpeBuildRecord.setSection( "PGPE Boot Loader", PGPE_BOOT_LOADER_PPMR_OFFSET, ppeSection.iv_size );
+
         rcTemp = copySectionToHomer( i_pChipHomer->iv_ppmrRegion.iv_pgpeSramRegion,
                                      pPgpeImg,
                                      l_pgpeBuildRecord,
@@ -1608,7 +1684,8 @@ fapi2::ReturnCode buildPpmrImage( CONST_FAPI2_PROC& i_procTgt,
 
         FAPI_DBG( "PGPE Hcode       0x%08x",    ppeSection.iv_size );
 
-        l_pgpeBuildRecord.setSection( "PGPE SRAM Size", PGPE_IMAGE_PPMR_OFFSET, ppeSection.iv_size );
+        FAPI_TRY( buildParameterBlock( i_procTgt, i_pChipHomer, l_pgpeBuildRecord ),
+                  "Failed To Build P-State Parameter Block" );
 
         FAPI_TRY( buildPpmrHeader( i_pChipHomer, l_pgpeBuildRecord ),
                   "Failed To Build PPMR Header" );
@@ -1664,6 +1741,65 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+
+//-------------------------------------------------------------------------------------------------------
+
+/**
+ * @brief       verifies overall image size for XGPE, QME and PGPE
+ * @param[in]   i_pChipHomer        models P10's HOMER
+ * @param[in]   i_chipFuncModel P10 chip configuration
+ * @return      fapi2 return code
+ */
+fapi2::ReturnCode verifySramImageSize( Homerlayout_t * i_pChipHomer, P10FuncModel & i_chipFuncModel )
+{
+    uint32_t l_imageSize    =   0;
+    XpmrHeader_t * l_pXpmrHdr   =
+            (XpmrHeader_t *) i_pChipHomer->iv_xpmrRegion.iv_xpmrHeader;
+    CpmrHeader_t* pCpmrHdr      =
+        (CpmrHeader_t*) & ( i_pChipHomer->iv_cpmrRegion.iv_selfRestoreRegion.iv_CPMR_SR.elements.iv_CPMRHeader);
+    PpmrHeader_t * l_pPpmrHdr   =
+            (PpmrHeader_t *) i_pChipHomer->iv_ppmrRegion.iv_ppmrHeader;
+
+    l_imageSize     =   htobe32 (l_pXpmrHdr->iv_xgpeSramSize );
+
+    FAPI_ASSERT( ( l_imageSize <= XGPE_SRAM_SIZE ),
+                 fapi2::XGPE_IMG_EXCEED_SRAM_SIZE()
+                 .set_BAD_IMG_SIZE( l_imageSize )
+                 .set_MAX_XGPE_IMG_SIZE_ALLOWED(XGPE_SRAM_SIZE)
+                 .set_EC_LEVEL( i_chipFuncModel.getChipLevel() ),
+                 "XGPE Image Size Check Failed Actual 0x%08x Max Allowed 0x%08x",
+                 l_imageSize, XGPE_SRAM_SIZE );
+
+    FAPI_INF( "----- XGPE Image Check Success -----" );
+
+    l_imageSize =   htobe32( pCpmrHdr->iv_qmeImgLength ) + htobe32( pCpmrHdr->iv_commonRingLength ) +
+                    htobe32( pCpmrHdr->iv_localPstateLength ) + htobe32 (pCpmrHdr->iv_specRingLength );
+
+    FAPI_ASSERT( ( l_imageSize <= QME_SRAM_SIZE ),
+                 fapi2::QME_IMG_EXCEED_SRAM_SIZE()
+                 .set_BAD_IMG_SIZE( l_imageSize )
+                 .set_MAX_QME_IMG_SIZE_ALLOWED( QME_SRAM_SIZE )
+                 .set_EC_LEVEL( i_chipFuncModel.getChipLevel() ),
+                 "QME Image Size Check Failed Actual 0x%08x Max Allowed 0x%08x",
+                 l_imageSize, PGPE_SRAM_SIZE );
+
+    FAPI_INF( "----- QME Image Check Success  -----" );
+
+    l_imageSize     =   htobe32( l_pPpmrHdr->iv_sramSize );
+
+    FAPI_ASSERT( ( l_imageSize <= PGPE_SRAM_SIZE ),
+                 fapi2::PGPE_IMG_EXCEED_SRAM_SIZE()
+                 .set_BAD_IMG_SIZE( l_imageSize )
+                 .set_MAX_PGPE_IMG_SIZE_ALLOWED(PGPE_SRAM_SIZE)
+                 .set_EC_LEVEL( i_chipFuncModel.getChipLevel() ),
+                 "PGPE Image Size Check Failed Actual 0x%08x Max Allowed 0x%08x",
+                 l_imageSize, PGPE_SRAM_SIZE );
+
+    FAPI_INF( "----- PGPE Image Check Success -----" );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 //-------------------------------------------------------------------------------------------------------
 
@@ -1741,7 +1877,10 @@ fapi2::ReturnCode p10_hcode_image_build(    CONST_FAPI2_PROC& i_procTgt,
 
     //Update the attributes storing PGPE and XGPE's boot copier offset.
     FAPI_TRY( updateGpeAttributes( pChipHomer, i_procTgt ),
-              "Failed to update XGPE/PGPE IVPR attributes" );
+              "Failed To Update XGPE/PGPE IVPR Attributes" );
+
+    FAPI_TRY( verifySramImageSize( pChipHomer, l_chipFuncModel ) ,
+              "Image Size Check Failed " );
 
 fapi_try_exit:
     FAPI_IMP("<< p10_hcode_image_build" );
