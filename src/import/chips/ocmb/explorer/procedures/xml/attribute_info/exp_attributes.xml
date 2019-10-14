@@ -290,7 +290,7 @@
             SWAP = 0,
             NO_SWAP = 1
         </enum>
-        <writeable/>
+        <platInit/>
     </attribute>
 
     <attribute>
@@ -307,7 +307,7 @@
             BIG_ENDIAN = 0,
             LITTLE_ENDIAN = 1
         </enum>
-        <writeable/>
+        <platInit/>
     </attribute>
 
     <attribute>
