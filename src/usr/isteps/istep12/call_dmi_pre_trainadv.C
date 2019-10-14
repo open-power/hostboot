@@ -26,12 +26,12 @@
 
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
-#include    <errl/errlentry.H>
-
-#include    <isteps/hwpisteperror.H>
-#include    <errl/errludtarget.H>
-
 #include    <initservice/isteps_trace.H>
+#include    <errl/errlentry.H>
+#include    <errl/errludtarget.H>
+#include    <isteps/hwpisteperror.H>
+#include    <util/misc.H>
+#include    <util/utilmbox_scratch.H>
 
 //  targeting support.
 #include    <targeting/common/commontargeting.H>
@@ -41,11 +41,13 @@
 #include    <config.h>
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
-#include    <util/utilmbox_scratch.H>
+
 
 //HWP
 #include    <p9_io_dmi_pre_trainadv.H>
 #ifdef CONFIG_AXONE
+#include    <exp_omi_setup.H>
+#include    <p9a_omi_setup.H>
 #include    <p9a_omi_train.H>
 #endif
 
@@ -128,45 +130,84 @@ void* call_dmi_pre_trainadv (void *io_pArgs)
     }
 
 #ifdef CONFIG_AXONE
-    TARGETING::TargetHandleList l_omiTargetList;
-    getAllChiplets(l_omiTargetList, TYPE_OMI);
 
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_pre_trainadv: %d OMIs found",
-            l_omiTargetList.size());
-
-    for (const auto & l_omi_target : l_omiTargetList)
+    if( ! Util::isSimicsRunning() )
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "p9a_omi_train HWP target HUID %.8x",
-            TARGETING::get_huid(l_omi_target));
+        TARGETING::TargetHandleList l_ocmbTargetList;
+        getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
 
-        //  call the HWP with each OMI target
-        fapi2::Target<fapi2::TARGET_TYPE_OMI> l_fapi_omi_target(l_omi_target);
-
-        FAPI_INVOKE_HWP(l_err, p9a_omi_train , l_fapi_omi_target );
-
-        //  process return code.
-        if ( l_err )
+        for (const auto & l_ocmb_target : l_ocmbTargetList)
         {
+            //  call the HWP with each target
+            fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target
+                (l_ocmb_target);
+
+
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR 0x%.8X:  p9a_omi_train HWP on target HUID %.8x",
-                l_err->reasonCode(), TARGETING::get_huid(l_omi_target) );
+                "exp_omi_setup HWP target HUID 0x%.08x",
+                TARGETING::get_huid(l_ocmb_target));
 
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_omi_target).addToLog( l_err );
+            FAPI_INVOKE_HWP(l_err, exp_omi_setup, l_fapi_ocmb_target);
 
-            // Create IStep error log and cross reference to error that occurred
-            l_StepError.addErrorDetails( l_err );
+            //  process return code.
+            if ( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR 0x%.8X:  exp_omi_setup HWP on target HUID 0x%.08x",
+                    l_err->reasonCode(), TARGETING::get_huid(l_ocmb_target) );
 
-            // Commit Error
-            errlCommit( l_err, ISTEP_COMP_ID );
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_ocmb_target).addToLog( l_err );
+
+                // Create IStep error log and cross reference to error that occurred
+                l_StepError.addErrorDetails( l_err );
+
+                // Commit Error , continue on to next OCMB
+                errlCommit( l_err, ISTEP_COMP_ID );
+            }
         }
-        else
+
+        TARGETING::TargetHandleList l_omiTargetList;
+        getAllChiplets(l_omiTargetList, TYPE_OMI);
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_pre_trainadv: %d OMIs found",
+                l_omiTargetList.size());
+
+        for (const auto & l_omi_target : l_omiTargetList)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                      "SUCCESS :  p9a_omi_train HWP on 0x%.08X", TARGETING::get_huid(l_omi_target));
+                "p9a_omi_setup HWP target HUID %.8x",
+                TARGETING::get_huid(l_omi_target));
+
+            //  call the HWP with each OMI target
+            fapi2::Target<fapi2::TARGET_TYPE_OMI> l_fapi_omi_target(l_omi_target);
+
+            FAPI_INVOKE_HWP(l_err, p9a_omi_setup , l_fapi_omi_target );
+
+            //  process return code.
+            if ( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR 0x%.8X:  p9a_omi_setup HWP on target HUID %.8x",
+                    l_err->reasonCode(), TARGETING::get_huid(l_omi_target) );
+
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_omi_target).addToLog( l_err );
+
+                // Create IStep error log and cross reference to error that occurred
+                l_StepError.addErrorDetails( l_err );
+
+                // Commit Error
+                errlCommit( l_err, ISTEP_COMP_ID );
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                          "SUCCESS :  p9a_omi_setup HWP on 0x%.08X", TARGETING::get_huid(l_omi_target));
+            }
         }
     }
+
 #endif
 
 
