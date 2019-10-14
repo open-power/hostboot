@@ -138,6 +138,7 @@ AtLoadFunctions atLoadFunction;
 ///////////////////////////////////////////////////////////////////////////////
 ErrlManager::ErrlManager() :
     iv_pnorReadyForErrorLogs(false),
+    iv_recvdShutdownEvent(false),
     iv_hwasProcessCalloutFn(NULL),
     iv_msgQ(NULL),
     iv_pnorAddr(NULL),
@@ -290,6 +291,30 @@ void ErrlManager::errlogMsgHndlr ()
         msg_t * theMsg = msg_wait( iv_msgQ );
         TRACFCOMP( g_trac_errl, INFO_MRK"Got an error log Msg - Type: 0x%08x",
                                                                theMsg->type );
+
+        // if we've been shut down then do nothing except delete the msg or send
+        // a response depending on the message type.
+        if(iv_recvdShutdownEvent)
+        {
+            TRACFCOMP( g_trac_errl, INFO_MRK "Error log service is shutdown. "
+                                             "Message will be ignored.");
+            switch( theMsg->type )
+            {
+                // Shutdown and flush message types expect a response
+                case ERRLOG_SHUTDOWN_TYPE:
+                case ERRLOG_FLUSH_TYPE:
+                    msg_respond ( iv_msgQ, theMsg );
+                    break;
+
+                // All other messages just need to be freed
+                default:
+                    msg_free(theMsg);
+                    break;
+            }
+            // wait for next message
+            continue;
+        }
+
         //Process message just received
         switch( theMsg->type )
         {
@@ -1028,6 +1053,9 @@ void ErrlManager::errlogShutdown()
     // Ensure that all the error logs are pushed out to PNOR
     // prior to the PNOR resource provider shutting down.
     PNOR::flush(PNOR::HB_ERRLOGS);
+
+    // Remember that we have recieved the shutdown event
+    iv_recvdShutdownEvent = true;
 
     return;
 }
