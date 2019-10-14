@@ -478,6 +478,11 @@ private:
     bool        iv_pnorReadyForErrorLogs;
 
     /**
+     *  @brief  Indicates if we have processed a shutdown event message
+     */
+    bool        iv_recvdShutdownEvent;
+
+    /**
       * @brief
       * Pointer to the header that precedes the error log storage buffer
       * in L3 RAM.  This may go away when we adopt PNOR, or else become
