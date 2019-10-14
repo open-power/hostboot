@@ -37,8 +37,21 @@
 #ifndef _MSS_FIELD_H_
 #define _MSS_FIELD_H_
 
-#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
-#include <generic/memory/lib/utils/mss_generic_check.H>
+#ifdef __PPE__
+    #include <mss_generic_check.H>
+#else
+    #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+    #include <generic/memory/lib/utils/mss_generic_check.H>
+#endif
+
+//Macro
+#ifdef __PPE__
+    #define TARGIDFORMAT "0x%08X"
+    #define TARGTID i_target.get()
+#else
+    #define TARGIDFORMAT "%s"
+    #define TARGTID spd::c_str(i_target)
+#endif
 
 namespace mss
 {
@@ -190,18 +203,18 @@ inline fapi2::ReturnCode get_field(const fapi2::Target<T>& i_target,
                  .set_LIST_SIZE(i_data.size())
                  .set_FUNCTION(i_ffdc_codes)
                  .set_TARGET(i_target),
-                 "Out of bounds indexing (with %d) on a list of size %d for %s",
+                 "Out of bounds indexing (with %d) on a list of size %d for " TARGIDFORMAT,
                  BYTE,
                  i_data.size(),
-                 spd::c_str(i_target));
+                 TARGTID);
 
     {
         // Extracting desired bits
         const fapi2::buffer<OT> l_buffer(i_data[BYTE]);
         l_buffer.template extractToRight<F.get_start(), F.get_length()>(o_value);
 
-        FAPI_DBG("%s data[%d] = 0x%02x. Field with start bit %d, bit len %d, has data 0x%02x.",
-                 spd::c_str(i_target),
+        FAPI_DBG(TARGIDFORMAT " data[%d] = 0x%02x. Field with start bit %d, bit len %d, has data 0x%02x.",
+                 TARGTID,
                  BYTE,
                  i_data[BYTE],
                  F.get_start(),
@@ -214,6 +227,7 @@ inline fapi2::ReturnCode get_field(const fapi2::Target<T>& i_target,
 fapi_try_exit:
     return fapi2::current_err;
 }
+#ifndef __PPE__
 
 ///
 /// @brief Helper function to set byte field information
@@ -274,6 +288,7 @@ inline fapi2::ReturnCode set_field(const fapi2::Target<T>& i_target,
 fapi_try_exit:
     return fapi2::current_err;
 }
+#endif
 
 ///
 /// @brief byte field reader
@@ -303,7 +318,7 @@ inline fapi2::ReturnCode get_field( const fapi2::Target<T>& i_target,
 {
     IT l_temp = 0;
     FAPI_TRY( (get_field<E, F>(i_target, i_data, i_ffdc_codes, l_temp)),
-              "Failed get_field() for %s", spd::c_str(i_target) );
+              "Failed get_field() for " TARGIDFORMAT, TARGTID );
 
     // Test if retrieved data seems valid
     FAPI_TRY( check::invalid_value(i_target,
@@ -319,25 +334,26 @@ inline fapi2::ReturnCode get_field( const fapi2::Target<T>& i_target,
 
     // Output should only change if data check passes
     o_value = static_cast<OT>(l_temp);
-
     FAPI_ASSERT( o_value == l_temp,
                  fapi2::MSS_CONVERSION_ERROR()
                  .set_ORIGINAL_VAL(l_temp)
                  .set_CONVERTED_VAL(o_value)
                  .set_TARGET(i_target)
                  .set_FUNCTION(i_ffdc_codes),
-                 "Conversion error between original %d to converted %d value for %s",
-                 l_temp, o_value, spd::c_str(i_target) );
+                 "Conversion error between original %d to converted %d value for " TARGIDFORMAT,
+                 l_temp, o_value, TARGTID);
 
-    FAPI_INF("%s: 0x%02x for %s",
+    FAPI_DBG("%s: 0x%02x for %s",
              TT::FIELD_STR,
              o_value,
              spd::c_str(i_target));
+
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
+#ifndef __PPE__
 ///
 /// @brief byte field writer
 /// @tparam E endian type
@@ -380,7 +396,7 @@ inline fapi2::ReturnCode set_field( const fapi2::Target<T>& i_target,
     FAPI_TRY( (set_field<E, F>(i_target, i_setting, i_ffdc_codes, io_data)),
               "Failed set_field() for %s", spd::c_str(i_target) );
 
-    FAPI_INF("%s: Set value of 0x%02x. Data for buffer at byte %d, is now 0x%02x for %s",
+    FAPI_DBG("%s: Set value of 0x%02x. Data for buffer at byte %d, is now 0x%02x for %s",
              TT::FIELD_STR,
              i_setting,
              BYTE,
@@ -390,6 +406,7 @@ inline fapi2::ReturnCode set_field( const fapi2::Target<T>& i_target,
 fapi_try_exit:
     return fapi2::current_err;
 }
+#endif
 
 }// mss
 

@@ -37,9 +37,14 @@
 #ifndef _ENDIAN_UTILS_H_
 #define _ENDIAN_UTILS_H_
 
-#include <cstdint>
 #include <vector>
-#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+
+#ifdef __PPE__
+    #include <mss_generic_consts.H>
+#else
+    #include <cstdint>
+    #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#endif
 
 namespace mss
 {
@@ -67,6 +72,7 @@ void forceLE(const T& i_input, std::vector<uint8_t>& io_data)
     }
 }
 
+#ifndef __PPE__
 ///
 /// @brief Forces native data into LE order for an array
 /// @tparam T the data type to process
@@ -82,7 +88,7 @@ inline void forceLEArray(const T* i_input, const uint64_t i_size, std::vector<ui
         forceLE(i_input[i], io_data);
     }
 }
-
+#endif
 ///
 /// @brief Forces native data into BE order
 /// @tparam T the data type to process
@@ -98,20 +104,31 @@ void forceBE(const T& i_input, std::vector<uint8_t>& io_data)
     std::vector<uint8_t> l_tempBuffer;
 
     // This loop will put i_input into l_tempBuffer in BE order
-    for(size_t i = 0; i < sizeof(i_input); i++)
+
+    for(size_t i = sizeof(i_input); i > 0; i--)
     {
         // Grab the lowest order byte and add it to the front of the vector
         const uint8_t l_byte = l_temp & 0xFF;
-        l_tempBuffer.insert(l_tempBuffer.begin(), l_byte);
+        l_tempBuffer.push_back(l_byte);
 
         // Shift higher byte value into lowest no matter existing endianness
         l_temp >>= BITS_PER_BYTE;
     }
 
     // Put the new BE formatted data at the end of the input buffer
-    io_data.insert(io_data.end(), l_tempBuffer.begin(), l_tempBuffer.end());
+
+    std::vector<uint8_t>::iterator it = l_tempBuffer.end();
+    --it; //Move iterator to the last element.
+
+    for(uint8_t i = l_tempBuffer.size(); i > 0; --i)
+    {
+        io_data.push_back(*it);
+        --it;
+    }
+
 }
 
+#ifndef __PPE__
 ///
 /// @brief Forces native data into BE order for an array
 /// @tparam T the data type to process
@@ -127,6 +144,7 @@ inline void forceBEArray(const T* i_input, const uint64_t i_size, std::vector<ui
         forceBE(i_input[i], io_data);
     }
 }
+#endif
 
 ///
 /// @brief Converts LE data into native order
@@ -165,6 +183,7 @@ bool readLE(const std::vector<uint8_t>& i_input, uint32_t& io_idx, T& o_data)
     return true;
 }
 
+#ifndef __PPE__
 ///
 /// @brief Converts LE data into native order
 /// @tparam T the data type to output to
@@ -188,6 +207,7 @@ bool readLEArray(const std::vector<uint8_t>& i_input, const uint32_t i_size, uin
 
     return l_passing;
 }
+#endif
 
 ///
 /// @brief Converts BE data into native order
@@ -225,6 +245,7 @@ bool readBE(const std::vector<uint8_t>& i_input, uint32_t& io_idx, T& o_data)
     return true;
 }
 
+#ifndef __PPE__
 ///
 /// @brief Converts BE data into native order
 /// @tparam T the data type to output to
@@ -248,6 +269,7 @@ bool readBEArray(const std::vector<uint8_t>& i_input, const uint32_t i_size, uin
 
     return l_passing;
 }
+#endif
 
 }
 

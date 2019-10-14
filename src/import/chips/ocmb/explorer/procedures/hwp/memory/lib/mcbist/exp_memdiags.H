@@ -40,7 +40,6 @@
 #include <fapi2.H>
 
 #include <lib/shared/exp_consts.H>
-#include <lib/ecc/ecc_traits.H>
 #include <lib/mcbist/exp_mcbist.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_memdiags.H>
 

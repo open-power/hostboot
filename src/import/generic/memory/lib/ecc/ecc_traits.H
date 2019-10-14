@@ -22,3 +22,33 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file ecc_traits.H
+/// @brief Traits class for the MC ECC syndrome registers
+///
+// *HWP HWP Owner: Matthew Hickman <Matthew.Hickman@ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: FSP:HB
+
+#ifndef _MSS_ECC_TRAITS_H_
+#define _MSS_ECC_TRAITS_H_
+
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+
+namespace mss
+{
+
+///
+/// @class eccTraits
+/// @brief a collection of traits associated with the MC ECC interface
+/// @tparam T fapi2::TargetType representing the memory controller
+///
+template< mss::mc_type MC, fapi2::TargetType T >
+class eccTraits;
+
+} // close namespace mss
+
+#endif

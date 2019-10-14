@@ -50,7 +50,6 @@ namespace mss
 template< mss::mc_type P, mss::spd::device_type D >
 class voltage_traits;
 
-
 ///
 /// @class Traits and policy class for voltage code - specialization for the AXONE processor type, DDR4 device type
 ///

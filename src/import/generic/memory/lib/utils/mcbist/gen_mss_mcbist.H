@@ -2780,6 +2780,78 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Helper for assembling the ecc/spare pattern
+/// @param[in] i_data the data pattern for a single beat
+/// @param[in] i_invert true if the data should be inverted
+/// @return The data pattern for this beat (a single byte of dataa)
+///
+inline uint8_t generate_eccspare_pattern_helper(const uint64_t& i_data, const bool i_invert )
+{
+    fapi2::buffer<uint64_t> l_data(i_invert ? ~i_data : i_data);
+    uint8_t l_byte = 0;
+    l_data.extractToRight<0, BITS_PER_BYTE>(l_byte);
+    return l_byte;
+}
+
+///
+/// @brief Generates the pattern for the ECC and/or spare data
+/// @param[in] i_pattern the pattern on which to operate
+/// @param[in] i_invert true if the pattern should be inverted
+/// @return ECC/spare pattern as needing to be put into the ECC/spare registers
+///
+inline fapi2::buffer<uint64_t> generate_eccspare_pattern(const pattern& i_pattern, const bool i_invert )
+{
+    constexpr uint64_t BYTE0 = BITS_PER_BYTE * 0;
+    constexpr uint64_t BYTE1 = BITS_PER_BYTE * 1;
+    constexpr uint64_t BYTE2 = BITS_PER_BYTE * 2;
+    constexpr uint64_t BYTE3 = BITS_PER_BYTE * 3;
+    constexpr uint64_t BYTE4 = BITS_PER_BYTE * 4;
+    constexpr uint64_t BYTE5 = BITS_PER_BYTE * 5;
+    constexpr uint64_t BYTE6 = BITS_PER_BYTE * 6;
+    constexpr uint64_t BYTE7 = BITS_PER_BYTE * 7;
+
+    fapi2::buffer<uint64_t> l_pattern;
+
+    // Pattern assembly is a tad weird for ECC/spare
+    // The pattern is stored in the same register by byte
+    // So we want to keep the same data as the rest of the data
+    // As such, we want to grab each piece of data on a byte by byte basis, flip as needed, and append it to the pattern
+
+    // Beat 0/1
+    l_pattern.insertFromRight<BYTE0, BITS_PER_BYTE>(generate_eccspare_pattern_helper(i_pattern[0].first, i_invert));
+    l_pattern.insertFromRight<BYTE1, BITS_PER_BYTE>(generate_eccspare_pattern_helper(i_pattern[0].second, i_invert));
+
+    // Beat 2/3
+    l_pattern.insertFromRight<BYTE2, BITS_PER_BYTE>(generate_eccspare_pattern_helper(i_pattern[1].first, i_invert));
+    l_pattern.insertFromRight<BYTE3, BITS_PER_BYTE>(generate_eccspare_pattern_helper(i_pattern[1].second, i_invert));
+
+    // Beat 4/5
+    l_pattern.insertFromRight<BYTE4, BITS_PER_BYTE>(generate_eccspare_pattern_helper(i_pattern[2].first, i_invert));
+    l_pattern.insertFromRight<BYTE5, BITS_PER_BYTE>(generate_eccspare_pattern_helper(i_pattern[2].second, i_invert));
+
+    // Beat 6/7
+    l_pattern.insertFromRight<BYTE6, BITS_PER_BYTE>(generate_eccspare_pattern_helper(i_pattern[3].first, i_invert));
+    l_pattern.insertFromRight<BYTE7, BITS_PER_BYTE>(generate_eccspare_pattern_helper(i_pattern[3].second, i_invert));
+
+    return l_pattern;
+}
+
+///
+/// @brief Load MCBIST ECC (and?) spare data pattern given a pattern
+/// @tparam MC the mc type of the T
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_pattern an mcbist::patterns
+/// @param[in] i_invert whether to invert the pattern or not
+/// @note this overload disappears when we have real patterns.
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+inline fapi2::ReturnCode load_eccspare_pattern( const fapi2::Target<T>& i_target, const pattern& i_pattern,
+        const bool i_invert );
+
+///
 /// @brief Load MCBIST pattern given a pattern
 /// @tparam MC the mc type of the T
 /// @tparam T, the fapi2::TargetType - derived
@@ -2795,7 +2867,17 @@ inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, const p
 {
     uint64_t l_address = TT::PATTERN0_REG;
 
-    // TODO RTC:155561 Add random pattern support.
+    // Checks that the pattern is of the expected length, if not, error out
+    // Creates helpers for FAPI_ASSERT
+    const auto EXPECTED_SIZE = TT::EXPECTED_PATTERN_SIZE;
+    const auto ACTUAL_SIZE = i_pattern.size();
+    FAPI_ASSERT(EXPECTED_SIZE == ACTUAL_SIZE,
+                fapi2::MSS_MCBIST_INCORRECT_PATTERN_LENGTH()
+                .set_TARGET(i_target)
+                .set_EXPECTED(EXPECTED_SIZE)
+                .set_ACTUAL(ACTUAL_SIZE),
+                "%s pattern expected size %u != actual size %u",
+                mss::c_str(i_target), EXPECTED_SIZE, ACTUAL_SIZE);
 
     // TK: algorithm for patterns which include ECC bits in them
     // Loop over the cache lines in the pattern. We write one half of the cache line
@@ -2809,6 +2891,8 @@ inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, const p
         FAPI_TRY( fapi2::putScom(i_target, ++l_address, l_value_second) );
         ++l_address;
     }
+
+    FAPI_TRY(load_eccspare_pattern<MC>( i_target, i_pattern, i_invert ));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -2925,7 +3009,7 @@ fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, const pa
     // set ecc mode bit on
     l_aacr
     .template writeBit<PT::RMW_WRT_BUFFER_SEL>(mss::states::OFF)
-    .template insertFromRight<PT::RMW_WRT_ADDRESS, PT::RMW_WRT_ADDRESS_LEN>(mss::mcbist::rmw_address::DW0)
+    .template insertFromRight<PT::RMW_WRT_ADDRESS, PT::RMW_WRT_ADDRESS_LEN>(PT::MAINT_DATA_INDEX_START)
     .template writeBit<PT::RMW_WRT_AUTOINC>(mss::states::ON)
     .template writeBit<PT::RMW_WRT_ECCGEN>(mss::states::ON);
 
@@ -2937,7 +3021,7 @@ fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, const pa
 
     for (const auto& p : l_ports)
     {
-        l_aacr.template insertFromRight<PT::RMW_WRT_ADDRESS, PT::RMW_WRT_ADDRESS_LEN>(mss::mcbist::rmw_address::DW0);
+        l_aacr.template insertFromRight<PT::RMW_WRT_ADDRESS, PT::RMW_WRT_ADDRESS_LEN>(PT::MAINT_DATA_INDEX_START);
 
         for (auto l_num_writes = 0; l_num_writes < 2; ++l_num_writes)
         {
@@ -2965,7 +3049,7 @@ fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, const pa
                 FAPI_TRY( fapi2::putScom(p, PT::RMW_WRT_BUF_ECC_REG, 0) );
             }
 
-            l_aacr.template insertFromRight<PT::RMW_WRT_ADDRESS, PT::RMW_WRT_ADDRESS_LEN>(mss::mcbist::rmw_address::DW8);
+            l_aacr.template insertFromRight<PT::RMW_WRT_ADDRESS, PT::RMW_WRT_ADDRESS_LEN>(PT::MAINT_DATA_INDEX_END);
         }
     }
 
@@ -3222,9 +3306,6 @@ fapi_try_exit:
 template<  mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode load_data_config( const fapi2::Target<T>& i_target, const mcbist::program<MC>& i_program )
 {
-    uint64_t l_data_rotate_cnfg_addr = TT::DATA_ROTATE_CNFG_REG;
-    uint64_t l_data_rotate_seed_addr = TT::DATA_ROTATE_SEED_REG;
-
     // First load the data pattern registers
     FAPI_INF("Loading the data pattern seeds for %s!", mss::c_str(i_target));
     FAPI_TRY( mss::mcbist::load_pattern(i_target, i_program.iv_pattern) );
@@ -3242,8 +3323,8 @@ inline fapi2::ReturnCode load_data_config( const fapi2::Target<T>& i_target, con
     FAPI_TRY( mss::mcbist::load_maint_pattern(i_target, i_program.iv_pattern) );
 
     FAPI_INF("Loading the data rotate config and seeds for %s!", mss::c_str(i_target));
-    FAPI_TRY( fapi2::putScom(i_target, l_data_rotate_cnfg_addr, i_program.iv_data_rotate_cnfg) );
-    FAPI_TRY( fapi2::putScom(i_target, l_data_rotate_seed_addr, i_program.iv_data_rotate_seed) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::DATA_ROTATE_CNFG_REG, i_program.iv_data_rotate_cnfg) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::DATA_ROTATE_SEED_REG, i_program.iv_data_rotate_seed) );
 
 fapi_try_exit:
     return fapi2::current_err;

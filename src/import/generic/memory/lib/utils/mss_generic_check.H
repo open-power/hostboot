@@ -37,15 +37,18 @@
 #define _MSS_GENERIC_CHECK_H_
 
 #include <fapi2.H>
-#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
-#include <generic/memory/lib/utils/scom.H>
-#include <generic/memory/lib/utils/c_str.H>
+
+#ifndef __PPE__
+    #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+    #include <generic/memory/lib/utils/scom.H>
+    #include <generic/memory/lib/utils/c_str.H>
+#endif
 
 namespace mss
 {
 namespace check
 {
-
+#ifndef __PPE__
 ///
 /// @brief Checks whether any FIRs have lit up on a target
 /// @tparam MC MC type for which to check FIR's
@@ -175,6 +178,7 @@ fapi2::ReturnCode fir_or_pll_fail( const fapi2::Target<T>& i_target,
 #endif
 }
 
+#endif
 ///
 /// @brief Checks conditional passes and implements traces & exits if it fails
 /// @tparam T fapi2 target type
@@ -196,6 +200,18 @@ inline fapi2::ReturnCode invalid_value(const fapi2::Target<T>& i_target,
                                        const FFDC i_ffdc_codes,
                                        const char* i_err_str = "")
 {
+#ifdef __PPE__
+    FAPI_ASSERT(i_conditional,
+                fapi2::MSS_FAILED_DATA_INTEGRITY_CHECK().
+                set_VALUE(i_data).
+                set_BYTE(i_byte_index).
+                set_TARGET(i_target).
+                set_FFDC_CODE(i_ffdc_codes),
+                "%s Byte %d, Data returned: %d.",
+                i_err_str,
+                i_byte_index,
+                i_data);
+#else
     FAPI_ASSERT(i_conditional,
                 fapi2::MSS_FAILED_DATA_INTEGRITY_CHECK().
                 set_VALUE(i_data).
@@ -208,6 +224,7 @@ inline fapi2::ReturnCode invalid_value(const fapi2::Target<T>& i_target,
                 i_byte_index,
                 i_data);
 
+#endif
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:

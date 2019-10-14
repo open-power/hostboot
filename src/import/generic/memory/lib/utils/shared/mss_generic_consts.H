@@ -37,7 +37,9 @@
 #ifndef _MSS_GENERIC_CONSTS_H_
 #define _MSS_GENERIC_CONSTS_H_
 
-#include <cstdint>
+#ifndef __PPE__
+    #include <cstdint>
+#endif
 
 namespace mss
 {
@@ -92,12 +94,13 @@ enum mcbist_common_consts
 enum common_timings
 {
     DELAY_1NS               = 1,
-    DELAY_10NS              = 10 ,      ///< general purpose 10  ns delay for HW mode
-    DELAY_100NS             = 100,      ///< general purpose 100 ns delay for HW mode
-    DELAY_1US               = 1000,     ///< general purpose 1 usec delay for HW mode
-    DELAY_10US              = 10000,    ///< general purpose 1 usec delay for HW mode
-    DELAY_100US             = 100000,   ///< general purpose 100 usec delay for HW mode
-    DELAY_1MS               = 1000000,  ///< general purpose 1 ms delay for HW mode
+    DELAY_10NS              = 10 ,         ///< general purpose 10  ns delay for HW mode
+    DELAY_100NS             = 100,         ///< general purpose 100 ns delay for HW mode
+    DELAY_1US               = 1000,        ///< general purpose 1 usec delay for HW mode
+    DELAY_10US              = 10000,       ///< general purpose 1 usec delay for HW mode
+    DELAY_100US             = 100000,      ///< general purpose 100 usec delay for HW mode
+    DELAY_1MS               = 1000000,     ///< general purpose 1 ms delay for HW mode
+    DELAY_1S                = 1000000000,  ///< general purpose 1 sec delay for HW mode
 };
 
 ///
@@ -112,6 +115,14 @@ enum conversions
     NIBBLES_PER_BYTE = 2,
     BITS_PER_NIBBLE = 4,
     BITS_PER_BYTE = 8,
+    BIT_POS_FOR_BYTE0 = BITS_PER_BYTE * 0,
+    BIT_POS_FOR_BYTE1 = BITS_PER_BYTE * 1,
+    BIT_POS_FOR_BYTE2 = BITS_PER_BYTE * 2,
+    BIT_POS_FOR_BYTE3 = BITS_PER_BYTE * 3,
+    BIT_POS_FOR_BYTE4 = BITS_PER_BYTE * 4,
+    BIT_POS_FOR_BYTE5 = BITS_PER_BYTE * 5,
+    BIT_POS_FOR_BYTE6 = BITS_PER_BYTE * 6,
+    BIT_POS_FOR_BYTE7 = BITS_PER_BYTE * 7,
 
     // Used by exp_decoder.C for dA to cA
     DECI_TO_CENTI = 10,
@@ -267,7 +278,7 @@ enum generic_ffdc_codes
 ///
 enum class proc_type
 {
-    P10 = 0xA00,
+    P10 = 0x0900,
 };
 
 ///
@@ -380,27 +391,6 @@ enum broadcast_timebase
     TB_COUNT_32    = 0b0011111,
     TB_COUNT_64    = 0b0111111,
     TB_COUNT_128   = 0b1111111,
-};
-
-enum rmw_address
-{
-    // 32B block addresses into the maint portion of the rmw buffer
-    DW0            = 0b111110000,
-    DW1            = 0b111110001,
-    DW2            = 0b111110010,
-    DW3            = 0b111110011,
-    DW4            = 0b111110100,
-    DW5            = 0b111110101,
-    DW6            = 0b111110110,
-    DW7            = 0b111110111,
-    DW8            = 0b111111000,
-    DW9            = 0b111111001,
-    DWA            = 0b111111010,
-    DWB            = 0b111111011,
-    DWC            = 0b111111100,
-    DWD            = 0b111111101,
-    DWE            = 0b111111110,
-    DWF            = 0b111111111,
 };
 
 enum data_rotate_mode
@@ -964,8 +954,6 @@ enum class throttle_type
     POWER = 0,
     THERMAL = 1,
 };
-
-
 
 ///
 /// @brief Trait classes for mc_type

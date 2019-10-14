@@ -100,7 +100,7 @@ static const std::vector<std::pair<uint64_t, uint64_t>> FREQ_TO_CLOCK_PERIOD =
     {DIMM_SPEED_4400,  454}, // DDR5
     {DIMM_SPEED_4800,  416}, // DDR5
 };
-}
+} // ns dram_freq
 
 ///
 /// @brief Return the number of picoseconds

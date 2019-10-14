@@ -112,9 +112,9 @@ fapi2::ReturnCode change_iml_complete( const fapi2::Target<T>& i_target, states 
 
     FAPI_DBG("Change the IML init complete bit to high for %s %s", (i_state == HIGH ? "high" : "low"),
              mss::c_str(i_target));
-    FAPI_TRY( mss::getScom(i_target, TT::FARB6Q_REG, l_data) );
+    FAPI_TRY( mss::getScom(i_target, TT::PMU8Q_REG, l_data) );
     l_data.writeBit<TT::CFG_INIT_COMPLETE>(i_state);
-    FAPI_TRY( mss::putScom(i_target, TT::FARB6Q_REG, l_data) );
+    FAPI_TRY( mss::putScom(i_target, TT::PMU8Q_REG, l_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -291,6 +291,19 @@ fapi2::ReturnCode change_addr_mux_sel( const fapi2::Target<T>& i_target, states 
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+
+///
+/// @brief Change the state of the force_str bit
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @param[in] i_state the state
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+fapi2::ReturnCode change_force_str( const fapi2::Target<T>& i_target, const states i_state );
 
 
 ///

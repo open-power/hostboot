@@ -39,9 +39,11 @@
 #include <fapi2.H>
 #include <utility>
 #include <lib/shared/exp_consts.H>
-#include <lib/ecc/ecc_traits.H>
+#include <lib/ecc/ecc_traits_explorer.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_traits.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_address.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_ecc_trap_address.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_fwms_address.H>
 
 
 #endif

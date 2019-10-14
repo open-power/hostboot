@@ -210,7 +210,7 @@ class cas_latency
                     FAPI_TRY( l_cache.prim_sdram_signal_loading(l_stack_type) );
 
                     // Is there a more algorithmic efficient approach? - AAM
-                    iv_is_3ds = (l_stack_type == fapi2::ENUM_ATTR_MEM_EFF_PRIM_STACK_TYPE_3DS) ?
+                    iv_is_3ds = (l_stack_type == fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_3DS) ?
                                 loading::IS_3DS : loading::NOT_3DS;
                 }
 

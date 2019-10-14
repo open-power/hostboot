@@ -36,8 +36,6 @@
 #include <fapi2.H>
 
 #include <lib/shared/exp_defaults.H>
-//#include <p9_mc_scom_addresses.H>
-//#include <p9_mc_scom_addresses_fld.H>
 
 #include <lib/dimm/exp_rank.H>
 #include <lib/mcbist/exp_memdiags.H>
