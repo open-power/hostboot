@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -7268,6 +7268,92 @@
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+  </attribute>
+
+  <attribute>
+    <complexType>
+      <description>Structure to define the addressing for an attached SPI
+          eeprom device that contains backup VPD info.
+      </description>
+      <field>
+        <default>physical:sys-0</default>
+        <description>Entity path to the chip that contains the SPI master</description>
+        <name>spiMasterPath</name>
+        <type>EntityPath</type>
+      </field>
+      <field>
+        <default>0xFF</default>
+        <description>SPI master engine</description>
+        <name>engine</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <default>0</default>
+        <description>Starting offset (in KB) of VPD data in EEPROM</description>
+        <name>dataOffsetKB</name>
+        <type>uint16_t</type>
+      </field>
+      <field>
+        <default>0xFFFF</default>
+        <description>The number of kilobytes of BACKUP VPD data in EEPROM</description>
+        <name>dataSizeKB</name>
+        <type>uint16_t</type>
+      </field>
+      <field>
+        <default>0xFF</default>
+        <description>Indicates the target's eeprom content type</description>
+        <name>eepromContentType</name>
+        <type>uint8_t</type>
+      </field>
+    </complexType>
+    <description>Information needed to address the EEPROM BACKUP MVPD data via SPI</description>
+    <id>SPI_EEPROM_VPD_BACKUP_INFO</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
+    <complexType>
+      <description>Structure to define the addressing for an attached SPI
+          eeprom device that contains primary VPD info.
+      </description>
+      <field>
+        <default>physical:sys-0</default>
+        <description>Entity path to the chip that contains the SPI master</description>
+        <name>spiMasterPath</name>
+        <type>EntityPath</type>
+      </field>
+      <field>
+        <default>0xFF</default>
+        <description>SPI master engine</description>
+        <name>engine</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <default>0</default>
+        <description>Starting offset (in KB) of VPD data in EEPROM</description>
+        <name>dataOffsetKB</name>
+        <type>uint16_t</type>
+      </field>
+      <field>
+        <default>0xFFFF</default>
+        <description>The number of kilobytes of PRIMARY VPD in EEPROM</description>
+        <name>dataSizeKB</name>
+        <type>uint16_t</type>
+      </field>
+      <field>
+        <default>0xFF</default>
+        <description>Indicates the target's eeprom content type</description>
+        <name>eepromContentType</name>
+        <type>uint8_t</type>
+      </field>
+    </complexType>
+    <description>Information needed to address the EEPROM PRIMARY MVPD via SPI</description>
+    <id>SPI_EEPROM_VPD_PRIMARY_INFO</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <no_export/>
   </attribute>
 
   <attribute>

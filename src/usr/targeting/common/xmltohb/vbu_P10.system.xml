@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -196,6 +196,24 @@
             <field><id>port</id><value>0</value></field>
             <field><id>writeCycleTime</id><value>0x0A</value></field>
             <field><id>writePageSize</id><value>0x80</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>SPI_EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>spiMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>2</value></field>
+            <field><id>dataOffsetKB</id><value>0x00C0</value></field>
+            <field><id>dataSizeKB</id><value>0x40</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>SPI_EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>spiMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>dataOffsetKB</id><value>0x00C0</value></field>
+            <field><id>dataSizeKB</id><value>0x40</value></field>
         </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
