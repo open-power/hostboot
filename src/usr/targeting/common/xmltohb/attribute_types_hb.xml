@@ -1048,6 +1048,20 @@
   </attribute>
 
   <attribute>
+    <id>OCMB_COUNTER_HB</id>
+    <description>
+        Tracks the sequence id for OCMB command transactions.
+        The platform is expected to guarantee a unique value on each read.
+    </description>
+    <simpleType>
+      <uint32_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <description>
       While in Secureboot, this value is set to 1 the first time attribute
       override is attempted and error logged.

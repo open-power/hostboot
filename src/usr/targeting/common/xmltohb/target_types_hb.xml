@@ -97,6 +97,9 @@
       <id>MMIO_VM_ADDR</id>
     </attribute>
     <attribute>
+      <id>OCMB_COUNTER_HB</id>
+    </attribute>
+    <attribute>
       <id>VPD_SWITCHES</id>
     </attribute>
   </targetTypeExtension>

@@ -3065,7 +3065,43 @@ ReturnCode platGetFreqMcaMhz(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
 
 #endif
 
+//******************************************************************************
+// fapi::platAttrSvc::platIncrementCounter function
+//******************************************************************************
+ReturnCode platIncrementOcmbCounter(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                                    uint32_t & o_val)
+{
+    fapi2::ReturnCode rc;
+    errlHndl_t l_errl = nullptr;
 
+    TARGETING::Target * l_chipTarget = nullptr;
+    static mutex_t l_counter_mutex = MUTEX_INITIALIZER;
+    l_errl = getTargetingTarget(i_fapiTarget, l_chipTarget);
+    if (l_errl)
+    {
+        FAPI_ERR("platIncrementOcmbCounter: Error from getTargetingTarget");
+        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+    }
+    else
+    {
+        mutex_lock(&l_counter_mutex);
+        o_val = l_chipTarget->getAttr<TARGETING::ATTR_OCMB_COUNTER_HB>();
+        if( o_val == 0 )
+        {
+            // seed each target with a unique number to make messages more
+            //  distinct across operations
+            o_val = (l_chipTarget->getAttr<TARGETING::ATTR_HUID>()
+                     && 0x0000FFFF) << 16;
+        }
+        else
+        {
+            ++o_val;
+        }
+        l_chipTarget->setAttr<TARGETING::ATTR_OCMB_COUNTER_HB>(o_val);
+        mutex_unlock(&l_counter_mutex);
+    }
+    return rc;
+}
 } // End platAttrSvc namespace
 
 } // End fapi2 namespace

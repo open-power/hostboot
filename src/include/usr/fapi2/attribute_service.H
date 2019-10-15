@@ -514,7 +514,7 @@ ReturnCode getPllBucket(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
 //
 //  @param[in] i_fapiTarget  The target for the attribute operation.
 //  @param[in] i_attr        Which ATTR extracting from VPD
-//  @param[out] o_val        The retrieved attribute value.
+//  @param[out] o_val        The retrieved attribute value
 //  @return ReturnCode       Zero on success, else platform specified error.
 ReturnCode platGetMBvpdSlopeInterceptData(
                                    const Target<TARGET_TYPE_ALL>& i_fapiTarget,
@@ -554,6 +554,14 @@ ReturnCode platSetFreqMcaMhz(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
 //  @return ReturnCode Zero on success, else platform specified error.
 ReturnCode platGetMcPllBucket(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
                               uint8_t& o_val);
+
+/// @brief This function is called by the FAPI_ATTR_SET macro when getting
+//  ATTR_OCMB_COUNTER
+//  @param[in] i_fapiTarget    FAPI2 Target pointer
+//  @param[out] o_val          The retrieved attribute value
+//  @return ReturnCode         Zero on success, else platform specified error.
+ReturnCode platIncrementOcmbCounter(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                                    uint32_t& o_val);
 
 // -----------------------------------------------------------------------------
 // End TODO: End to be supported functions
@@ -1731,4 +1739,18 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
 
 #endif //CONFIG_AXONE
 
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_OCMB_COUNTER access to the correct HB function
+//----------------------------------------------------------------------------
+#undef ATTR_OCMB_COUNTER_GETMACRO
+#define ATTR_OCMB_COUNTER_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platIncrementOcmbCounter(TARGET, VAL)
+#undef ATTR_OCMB_COUNTER_SETMACRO
+#define ATTR_OCMB_COUNTER_SETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::platErrorOnSet(TARGET, VAL)
 #endif // ATTRIBUTESERVICE_H_
