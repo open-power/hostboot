@@ -411,8 +411,9 @@
       The time to send pre-ipl PRBS in ms.
     </description>
     <valueType>uint32</valueType>
-    <default>0x100</default>
+    <default>0x400</default>
     <platInit/>
+    <mrwHide/>
     <mssAccessorName>omi_dl_preipl_prbs_time</mssAccessorName>
   </attribute>
 
