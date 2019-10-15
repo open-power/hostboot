@@ -741,10 +741,6 @@ static void initializeAttributes(TargetService& i_targetService,
 
                 ATTR_FABRIC_PRESENT_GROUPS_type l_fabric_groups = 0;
 
-                // Get the topology mode (same for all chips).
-                const auto l_topoMode =
-                    l_pTopLevel->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_MODE>();
-
                 for(auto l_chip : l_chips)
                 {
                     // Read the fabric topology id
@@ -754,8 +750,7 @@ static void initializeAttributes(TargetService& i_targetService,
                     // Extract the group ID from the topology ID
                     groupId_t l_groupId;
                     chipId_t l_chipId;
-                    extractGroupAndChip(l_topoMode,
-                                        l_topoId,
+                    extractGroupAndChip(l_topoId,
                                         l_groupId,
                                         l_chipId);
 

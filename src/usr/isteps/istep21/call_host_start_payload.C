@@ -315,7 +315,7 @@ void* call_host_start_payload (void *io_pArgs)
         task_affinity_pin();
         task_affinity_migrate_to_master();
 
-        uint64_t this_node = PIR_t(task_getcpuid()).groupId;
+        uint64_t this_node = PIR_t::nodeOrdinalFromPir(PIR_t(task_getcpuid()).word);
 
         task_affinity_unpin();
 

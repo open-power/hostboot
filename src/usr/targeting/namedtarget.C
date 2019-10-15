@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,10 +66,8 @@ const TARGETING::Target *   getMasterCore( )
 
     TARGETING::Target * l_processor =   NULL;
     (void)TARGETING::targetService().masterProcChipTargetHandle( l_processor );
-    FABRIC_GROUP_ID_ATTR l_logicalGroupId =
-                l_processor->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
-    FABRIC_CHIP_ID_ATTR l_chipId =
-                l_processor->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+    FABRIC_CHIP_ID_ATTR l_topologyId =
+                l_processor->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
 
     TargetHandleList l_cores;
     getChildChiplets( l_cores,
@@ -92,7 +90,7 @@ const TARGETING::Target *   getMasterCore( )
         CHIP_UNIT_ATTR l_coreId =
                     l_core->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
-        PIR_t l_corePIR = PIR_t(l_logicalGroupId, l_chipId, l_coreId);
+        PIR_t l_corePIR = PIR_t(l_topologyId, l_coreId);
 
         if (l_corePIR == l_masterPIR){
             TRACFCOMP( g_trac_targeting,

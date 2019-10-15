@@ -247,16 +247,14 @@ void Service::processIntrQMsgPreAck(const msg_t & i_msg)
     // resolve the PIR to a proc target
     while(it != procs.end())
     {
-        uint64_t group = 0, chip = 0;
+        uint64_t topologyId = 0;
 
-        getTargetService().getAttribute(ATTR_FABRIC_GROUP_ID, *it, group);
-        getTargetService().getAttribute(ATTR_FABRIC_CHIP_ID, *it,  chip);
-
+        getTargetService().getAttribute(ATTR_PROC_FABRIC_TOPOLOGY_ID, *it, topologyId);
         // for debug, but you have to compile it in
-        ATTN_TRACE("IntrQMsgPreAck: Group:%X Chip:%X  PirG:%X PirC:%X PirW:%X",
-                    group, chip, l_pir.groupId, l_pir.chipId, l_pir.word  );
+        ATTN_TRACE("IntrQMsgPreAck: Topology:0x%X  PirT:0x%X PirW:0x%X",
+                    topologyId, l_pir.topologyId, l_pir.word  );
 
-        if ((group == l_pir.groupId) && (chip == l_pir.chipId))
+        if (topologyId == l_pir.topologyId)
         {
             proc = *it;
             break;

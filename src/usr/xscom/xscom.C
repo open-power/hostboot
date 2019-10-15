@@ -823,7 +823,7 @@ uint64_t readRemoteScom( uint64_t i_node,
         l_sys->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_MODE>();
     uint8_t l_chipId = 0;
     uint8_t l_groupId = 0;
-    extractGroupAndChip(l_topoMode, l_localTopoId, l_groupId, l_chipId);
+    extractGroupAndChip(l_localTopoId, l_groupId, l_chipId);
     const auto l_remoteTopoId = makeTopoId(l_topoMode, i_node, l_chipId);
 
     // compute xscom address & control

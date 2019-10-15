@@ -320,8 +320,8 @@ void TargetService::_getMasterProcChipTargetHandle(
     task_affinity_migrate_to_master();
     uint64_t cpuid = task_getcpuid();
     task_affinity_unpin();
-    uint64_t l_masterGroupID = PIR_t::groupFromPir(cpuid);
-    uint64_t l_masterChipID  = PIR_t::chipFromPir(cpuid);
+
+    uint64_t l_masterTopologyID = PIR_t::topologyIdFromPir(cpuid);
 
     // Get all Proc targets
     TARGETING::TargetHandleList l_procTargetList;
@@ -331,11 +331,10 @@ void TargetService::_getMasterProcChipTargetHandle(
     TARGETING::Target* l_masterChip = nullptr;
     for (auto & l_chip: l_procTargetList)
     {
-        TARGETING::ATTR_FABRIC_CHIP_ID_type l_chipId =
-            (l_chip)->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
-        TARGETING::ATTR_FABRIC_GROUP_ID_type l_groupId =
-            (l_chip)->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
-        if( l_chipId == l_masterChipID && l_groupId == l_masterGroupID )
+        TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID_type l_topologyId =
+            (l_chip)->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
+
+        if (l_topologyId == l_masterTopologyID)
         {
             l_masterChip = (l_chip);
             break;

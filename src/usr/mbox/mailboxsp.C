@@ -2254,7 +2254,7 @@ errlHndl_t MBOX::send(queue_id_t i_q_id, msg_t * i_msg,int i_node)
 
             // node means Hb instance number in this context
             PIR_t my_pir (KernelIpc::ipc_data_area.pir);
-            if ( (my_pir.groupId == i_node)
+            if ((static_cast<int>(PIR_t::nodeOrdinalFromPir(my_pir.word)) == i_node)
                 && (MBOX::HB_TEST_MSGQ != i_q_id)) //use IPC for tests
             {
                 // Message is to this node - don't use IPC path

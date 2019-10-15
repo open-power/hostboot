@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,7 +48,7 @@ class PirformatTest: public CxxTest::TestSuite
             "testPirformat> start" );
 
         PIR_t zeroPir      = PIR_t(0);
-        PIR_t otherZeroPir = PIR_t(0, 0, 0, 0);
+        PIR_t otherZeroPir = PIR_t(0, 0, 0);
 
         if ((PIR_t::groupFromPir(zeroPir.word)
                               != PIR_t::groupFromPir(otherZeroPir.word))
@@ -62,14 +62,16 @@ class PirformatTest: public CxxTest::TestSuite
         }
 
         //Test with some arbitrary values
+        //Note the group and chip id values determine the topology id
         TRACFCOMP(g_trac_pir, ENTER_MRK
-            "testPirformat: Test with 1,2,5,3 values");
-        testPirformat(1,2,5,3);
+            "testPirformat: Test with 5,0,10,5,3 values");
+        testPirformat(5,0,10,5,3);
 
-        //Test with 'max' values
+        //Test with max values
+        //Note the group and chip id values determine the topology id
         TRACFCOMP(g_trac_pir, ENTER_MRK
-            "testPirformat: Test with 15,7,31,3 values");
-        testPirformat(15,7,31,3);
+            "testPirformat: Test with 7,1,15,31,3 values");
+        testPirformat(7,1,15,31,3);
 
         TRACFCOMP(g_trac_pir, ENTER_MRK
                 "testPirformat> finish" );
@@ -78,28 +80,18 @@ class PirformatTest: public CxxTest::TestSuite
 
 
     void testPirformat(uint32_t i_group, uint32_t i_chip,
-                       uint32_t i_core,  uint32_t i_thread)
+                       uint32_t i_topology,
+                       uint32_t i_core, uint32_t i_thread)
     {
 
         //Test PIR with various values and the "fromPir" helpers
-        uint32_t GROUP_TEST_VAL = i_group;
+        uint32_t TOPOLOGY_TEST_VAL = i_topology;
         uint32_t CHIP_TEST_VAL = i_chip;
+        uint32_t GROUP_TEST_VAL = i_group;
         uint32_t CORE_TEST_VAL = i_core;
         uint32_t THREAD_TEST_VAL = i_thread;
-        PIR_t test1 = PIR_t(GROUP_TEST_VAL, CHIP_TEST_VAL,
+        PIR_t test1 = PIR_t(TOPOLOGY_TEST_VAL,
                             CORE_TEST_VAL,  THREAD_TEST_VAL);
-
-        if (  (test1.groupId != PIR_t::groupFromPir(test1.word))
-            || (test1.groupId != GROUP_TEST_VAL))
-        {
-            TS_FAIL("Group constructors or fromPir helper not working.");
-        }
-
-        if (  (test1.chipId != PIR_t::chipFromPir(test1.word))
-             || (test1.chipId != CHIP_TEST_VAL))
-        {
-            TS_FAIL("Chip constructors or fromPir helper not working.");
-        }
 
         if (  (test1.coreId != PIR_t::coreFromPir(test1.word))
              || (test1.coreId != CORE_TEST_VAL))
@@ -114,16 +106,14 @@ class PirformatTest: public CxxTest::TestSuite
         }
 
         //Test masks + 'AFTER' constants
-        if (((test1.word & PIR_t::GROUP_MASK) >> PIR_t::BITS_AFTER_GROUP)
-                 != GROUP_TEST_VAL)
+        if (PIR_t::groupFromPir(test1.word) != GROUP_TEST_VAL)
         {
-            TS_FAIL("GROUP_MASK or BITS_AFTER_GROUP not correct.");
+            TS_FAIL("groupFromPir() not correct.");
         }
 
-        if (((test1.word & PIR_t::CHIP_MASK) >> PIR_t::BITS_AFTER_CHIP)
-                 != CHIP_TEST_VAL)
+        if (PIR_t::chipFromPir(test1.word) != CHIP_TEST_VAL)
         {
-            TS_FAIL("CHIP_MASK or BITS_AFTER_CHIP not correct.");
+            TS_FAIL("chipFromPir() not correct.");
         }
 
         if (((test1.word & PIR_t::CORE_MASK) >> PIR_t::BITS_AFTER_CORE)
@@ -146,22 +136,6 @@ class PirformatTest: public CxxTest::TestSuite
         uint32_t coreId1 = PIR_t::createCoreId( CHIP_TEST_VAL,
                                                 CORE_TEST_VAL );
 
-        if (PIR_t::groupFromCoreId(coreId0) != GROUP_TEST_VAL)
-        {
-            TRACFCOMP(g_trac_pir, "Value from helper: 0x%x, not equal to known group value: 0x%x",
-                      PIR_t::groupFromCoreId(coreId0), GROUP_TEST_VAL);
-            TS_FAIL("Group from CoreID not correct.");
-        }
-
-        if ( (PIR_t::chipFromCoreId(coreId0) != CHIP_TEST_VAL)
-             || (PIR_t::chipFromCoreId(coreId1) != CHIP_TEST_VAL))
-        {
-            TRACFCOMP(g_trac_pir, "Value from helper: 0x%x, not equal to known chip value: 0x%x",
-                      PIR_t::chipFromCoreId(coreId0), CHIP_TEST_VAL);
-            TRACFCOMP(g_trac_pir, "OR - Value from helper: 0x%x, not equal to known chip value: 0x%x",
-                      PIR_t::chipFromCoreId(coreId1), CHIP_TEST_VAL);
-                TS_FAIL("Chip from CoreID not correct.");
-        }
 
         if ( (PIR_t::coreFromCoreId(coreId0) != CORE_TEST_VAL)
              || (PIR_t::coreFromCoreId(coreId1) != CORE_TEST_VAL))
@@ -171,24 +145,6 @@ class PirformatTest: public CxxTest::TestSuite
             TRACFCOMP(g_trac_pir, "OR - Value from helper: 0x%x, not equal to known core value: 0x%x",
                       PIR_t::coreFromCoreId(coreId1), CORE_TEST_VAL);
             TS_FAIL("Core from CoreID not correct.");
-        }
-
-        //Test Chip ID Constructors and helpers
-        uint32_t chipId = PIR_t::createChipId( GROUP_TEST_VAL,
-                                               CHIP_TEST_VAL );
-
-        if (PIR_t::groupFromChipId(chipId) != GROUP_TEST_VAL)
-        {
-            TRACFCOMP(g_trac_pir, "Value from helper: 0x%x, not equal to known group value: 0x%x",
-                      PIR_t::groupFromChipId(chipId), GROUP_TEST_VAL);
-            TS_FAIL("Group from ChipID not correct.");
-        }
-
-        if (PIR_t::chipFromChipId(chipId) != CHIP_TEST_VAL)
-        {
-            TRACFCOMP(g_trac_pir, "Value from helper: 0x%x, not equal to known group value: 0x%x",
-                      PIR_t::chipFromChipId(chipId), CHIP_TEST_VAL);
-            TS_FAIL("Chip from ChipID not correct.");
         }
     }
 

@@ -27,18 +27,16 @@
 
 #include <limits.h>
 #include <usr/initservice/mboxRegs.H>
-#if !(defined(BOOTLOADER) || defined(HOSTBOOT_KERNEL))
-#include <attributetraits.H>
-#include <attributeenums.H>
-#endif
+#include <targeting/common/attributes.H>
+#include <targeting/common/targetservice.H>
+#include <assert.h>
 
 using namespace INITSERVICE;
 using namespace SPLESS;
+using namespace TARGETING;
 
 namespace MEMMAP
 {
-
-#if !(defined(BOOTLOADER) || defined(HOSTBOOT_KERNEL))
 
 // Shortened type name for convenience
 using topoId_t = TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID_type;
@@ -90,21 +88,27 @@ typedef union
 /**
  * @brief bit definition for a complete memory address
  */
-typedef union
+struct memoryAddress_t
 {
-    struct
+    union
     {
-        uint64_t rsvd1:12;    //0:11
-        uint64_t smf:1;       //12
-        uint64_t memType:2;   //13:14
-                              // b00 = non-mirrored
-                              // b10 = mirrored
-                              // b11 = mmio
-        uint64_t topoIndex:5; //15:19
-        uint64_t chipAddr:44; //20:63
-    } bits;
-    uint64_t address;
-} memoryAddress_t;
+        struct
+        {
+            uint64_t rsvd1:12;    //0:11
+            uint64_t smf:1;       //12
+            uint64_t memType:2;   //13:14
+                                  // b00 = non-mirrored
+                                  // b10 = mirrored
+                                  // b11 = mmio
+            uint64_t topoIndex:5; //15:19
+            uint64_t chipAddr:44; //20:63
+        } bits;
+
+        uint64_t address;
+    };
+
+    memoryAddress_t() : address(0) {};
+};
 
 /**
  * Collection of constants and utility functions related to the
@@ -163,9 +167,9 @@ inline uint64_t computeMemoryMapOffset( const uint64_t i_baseAddr,
 };
 
 /**
- * @brief Compute MMIO address for a 5-bit topology index
+ * @brief Compute address for a 5-bit topology index
  *
- * @param[in] i_baseAddr The base MMIO address for topology index 0
+ * @param[in] i_baseAddr The base address for topology index 0
  * @param[in] i_topologyIndex The topology Index (or effective topology Index)
  *
  * @return The base address adjusted for the chip associated with the given
@@ -175,12 +179,12 @@ inline uint64_t computeMemoryMapOffset( const uint64_t i_baseAddr,
                                         const uint8_t i_topologyIndex)
 {
     memoryAddress_t l_addr;
-    l_addr.bits.chipAddr = i_baseAddr;
+    l_addr.address = i_baseAddr;
     l_addr.bits.topoIndex = i_topologyIndex;
     return l_addr.address;
 };
 
-
+#ifdef __HOSTBOOT_MODULE
 /**
  * @brief Extract the fabric group and chip ID's from a 4-bit topology ID
  *
@@ -190,16 +194,23 @@ inline uint64_t computeMemoryMapOffset( const uint64_t i_baseAddr,
  * @param[out] o_chip The chip number
  *
  */
-inline void extractGroupAndChip(const topoMode_t i_topologyMode,
-                                const topoId_t i_topologyId,
+inline void extractGroupAndChip(const topoId_t i_topologyId,
                                 groupId_t& o_group,
                                 chipId_t& o_chip)
 {
+    TARGETING::Target* l_sys = nullptr;
+    TARGETING::TargetService & l_tgtServ = TARGETING::targetService();
+    l_tgtServ.getTopLevelTarget(l_sys);
+
+    assert(nullptr != l_sys, "System target cannot be null");
+
+    topoMode_t l_topologyMode = l_sys->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_MODE>();
+
     // NOTE: mode 0 -> GGGC
     //       mode 1 -> GGCC
     topologyIdBits_t l_idBits;
     l_idBits.topoId = i_topologyId;
-    if(i_topologyMode == TARGETING::PROC_FABRIC_TOPOLOGY_MODE_MODE0)
+    if(l_topologyMode == TARGETING::PROC_FABRIC_TOPOLOGY_MODE_MODE0)
     {
         o_group = l_idBits.mode0.group;
         o_chip = l_idBits.mode0.chip;
@@ -210,6 +221,7 @@ inline void extractGroupAndChip(const topoMode_t i_topologyMode,
         o_chip = l_idBits.mode1.chip;
     }
 };
+#endif
 
 /**
  * @brief Make a 4-bit topology ID from a group and chip ID formatted with
@@ -244,18 +256,16 @@ inline topoId_t makeTopoId(const topoMode_t i_topologyMode,
 };
 
 /**
- * @brief Determine topology index from a MMIO address
+ * @brief Determine topology index from an address
  * @param[in] i_addr  position-specific memory address
- * @return i_chip  Fabric Topology ID that address represents
+ * @return  Fabric Topology ID that address represents
  */
-inline uint8_t getTopoIndexFromAddr( uint64_t i_addr )
+inline uint8_t getTopoIndexFromAddr( const uint64_t i_addr )
 {
     memoryAddress_t l_memAddr;
     l_memAddr.address = i_addr;
     return l_memAddr.bits.topoIndex;
 };
-
-#endif // if !(defined(BOOTLOADER) || defined(HOSTBOOT_KERNEL))
 
 /**
  *  @brief  A few default values that will need to be known

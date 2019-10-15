@@ -185,9 +185,29 @@ ErrlManager::ErrlManager() :
     //   [4..7] for hostboot on alternate proc on node [0..3]
 
     const PIR_t masterCpu = task_getcpuid();
-    const uint32_t l_eid_id = (masterCpu.chipId == 0) ?
-                                    masterCpu.groupId :
-                                    masterCpu.groupId + 4;
+    int group_id = 0;
+    int chip_id = 0;
+    if (masterCpu.word == 0)
+    {
+        // Assume chip is group mode GGGC
+        int groupMask = 0b1110; // extract GGG from GGGC
+        int chipMask = 0b0001;  // extract C from GGGC
+
+        group_id = (masterCpu.topologyId & groupMask) >> 1;
+        chip_id = (masterCpu.topologyId & chipMask);
+    }
+    else
+    {
+        // Assume chip is node mode GGCC
+        int groupMask = 0b1100; // extract GG from GGCC
+        int chipMask = 0b0011;  // extract CC from GGCC
+
+        group_id = (masterCpu.topologyId & groupMask) >> 2;
+        chip_id = (masterCpu.topologyId & chipMask);
+    }
+    const uint32_t l_eid_id = (chip_id == 0) ?
+                                    group_id :
+                                    group_id + 4;
 
     iv_baseNodeId = ERRLOG_PLID_BASE + (l_eid_id << ERRLOG_PLID_NODE_SHIFT);
     iv_currLogId = iv_baseNodeId | ERRLOG_PLID_INITIAL;
@@ -199,7 +219,7 @@ ErrlManager::ErrlManager() :
     // whatever it is.
 
     TRACFCOMP( g_trac_errl, INFO_MRK"ErrlManager on node %d (%smaster proc), LogId 0x%X",
-        masterCpu.groupId, (masterCpu.chipId == 0) ? "" : "alternate ",
+        group_id, (chip_id == 0) ? "" : "alternate ",
         iv_currLogId);
 
     // Create and register error log message queue.

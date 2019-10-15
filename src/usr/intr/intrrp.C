@@ -360,9 +360,9 @@ errlHndl_t IntrRp::_init()
     iv_masterCpu = cpuid;
     iv_masterCpu.threadId = 0;
 
-    TRACFCOMP(g_trac_intr,"IntrRp::_init() Master cpu group[%d], "
-                          "chip[%d], core[%d], thread[%d]",
-              iv_masterCpu.groupId, iv_masterCpu.chipId, iv_masterCpu.coreId,
+    TRACFCOMP(g_trac_intr,"IntrRp::_init() Master cpu topology[%d], "
+                          " core[%d], thread[%d]",
+              iv_masterCpu.topologyId, iv_masterCpu.coreId,
               iv_masterCpu.threadId);
 
     iv_IntrRpShutdownRequested = false; // Not shutting down
@@ -1347,9 +1347,9 @@ void IntrRp::msgHandler()
                     //Push back base core PIR for later use
                     iv_cpuList.push_back(pir);
 
-                    TRACFCOMP(g_trac_intr,"Add CPU group[%d], chip[%d],"
+                    TRACFCOMP(g_trac_intr,"Add CPU topology[%d],"
                               "core[%d], thread[%d]",
-                              pir.groupId, pir.chipId, pir.coreId,
+                              pir.topologyId, pir.coreId,
                               pir.threadId);
 
                     //Get threads to be enabled so they will be monitored
@@ -1583,13 +1583,11 @@ errlHndl_t IntrRp::sendEOI(uint64_t& i_intSource, PIR_t& i_pir)
     for(ChipList_t::iterator targ_itr = iv_chipList.begin();
             targ_itr != iv_chipList.end(); ++targ_itr)
     {
-        uint64_t l_groupId = (*targ_itr)->proc->getAttr
-                                        <TARGETING::ATTR_FABRIC_GROUP_ID>();
-        uint64_t l_chipId = (*targ_itr)->proc->getAttr
-                                        <TARGETING::ATTR_FABRIC_CHIP_ID>();
+        uint64_t l_topologyId = (*targ_itr)->proc->getAttr
+                                        <TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
 
         //Core + Thread IDs not important so use 0's
-        PIR_t l_pir = PIR_t(l_groupId, l_chipId, 0, 0);
+        PIR_t l_pir = PIR_t(l_topologyId, 0, 0);
 
         if (l_pir == i_pir)
         {
@@ -1672,12 +1670,10 @@ void IntrRp::handleExternalInterrupt()
 
                 //Get PIR value for the proc with the
                 // interrupt condition
-                uint64_t l_groupId =
-                  (*targ_itr)->proc->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
-                uint64_t l_chipId =
-                  (*targ_itr)->proc->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+                uint64_t l_topologyId =
+                  (*targ_itr)->proc->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
                 //Core + Thread IDs not important so use 0's
-                PIR_t l_pir = PIR_t(l_groupId, l_chipId, 0, 0);
+                PIR_t l_pir = PIR_t(l_topologyId, 0, 0);
 
                 //Make object to search pending interrupt
                 //   list for
@@ -1957,13 +1953,11 @@ void IntrRp::completeInterruptProcessing(uint64_t& i_intSource, PIR_t& i_pir)
     for (ChipList_t::iterator targ_itr = iv_chipList.begin();
             targ_itr != iv_chipList.end(); ++targ_itr)
     {
-        uint64_t l_groupId = (*targ_itr)->proc->getAttr
-                                        <TARGETING::ATTR_FABRIC_GROUP_ID>();
-        uint64_t l_chipId = (*targ_itr)->proc->getAttr
-                                        <TARGETING::ATTR_FABRIC_CHIP_ID>();
+        uint64_t l_topologyId = (*targ_itr)->proc->getAttr
+                                        <TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
 
         //Core + Thread IDs not important so use 0's
-        PIR_t l_pir = PIR_t(l_groupId, l_chipId, 0, 0);
+        PIR_t l_pir = PIR_t(l_topologyId, 0, 0);
 
         if (l_pir == i_pir)
         {
@@ -2402,13 +2396,11 @@ void IntrRp::allowAllInterrupts(TARGETING::Target* i_core)
 {
     const TARGETING::Target * proc = getParentChip(i_core);
 
-    FABRIC_CHIP_ID_ATTR chip = proc->getAttr<ATTR_FABRIC_CHIP_ID>();
-    FABRIC_GROUP_ID_ATTR node = proc->getAttr<ATTR_FABRIC_GROUP_ID>();
+    auto topology = proc->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>();
     CHIP_UNIT_ATTR coreId = i_core->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
     PIR_t pir(0);
-    pir.groupId = node;
-    pir.chipId = chip;
+    pir.topologyId = topology;
     pir.coreId = coreId;
 
     size_t threads = cpu_thread_count();
@@ -2426,13 +2418,11 @@ void IntrRp::disableAllInterrupts(TARGETING::Target* i_core)
 {
     const TARGETING::Target * proc = getParentChip(i_core);
 
-    FABRIC_CHIP_ID_ATTR  chip = proc->getAttr<ATTR_FABRIC_CHIP_ID>();
-    FABRIC_GROUP_ID_ATTR node = proc->getAttr<ATTR_FABRIC_GROUP_ID>();
+    auto topology = proc->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>();
     CHIP_UNIT_ATTR coreId = i_core->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
     PIR_t pir(0);
-    pir.groupId = node;
-    pir.chipId = chip;
+    pir.topologyId = topology;
     pir.coreId = coreId;
 
     size_t threads = cpu_thread_count();
@@ -2461,17 +2451,15 @@ void IntrRp::drainMpIplInterrupts(TARGETING::TargetHandleList & i_cores)
         {
             const TARGETING::Target * proc = getParentChip(*core);
 
-            FABRIC_CHIP_ID_ATTR chip = proc->getAttr<ATTR_FABRIC_CHIP_ID>();
-            FABRIC_GROUP_ID_ATTR node = proc->getAttr<ATTR_FABRIC_GROUP_ID>();
+            auto topology = proc->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>();
             CHIP_UNIT_ATTR coreId =
                               (*core)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
             PIR_t pir(0);
-            pir.groupId = node;
-            pir.chipId = chip;
+            pir.topologyId = topology;
             pir.coreId = coreId;
 
-            TRACFCOMP(g_trac_intr,"  n%d p%d c%d", node, chip, coreId);
+            TRACFCOMP(g_trac_intr,"  t%d c%d", topology, coreId);
             size_t threads = cpu_thread_count();
             for(size_t thread = 0; thread < threads; ++thread)
             {
@@ -2580,7 +2568,7 @@ errlHndl_t IntrRp::syncNodes(intr_mpipl_sync_t i_sync_type)
 
         for(uint64_t node = 0; node < MAX_NODES_PER_SYS; ++node)
         {
-            if (node == iv_masterCpu.groupId)
+            if (node == PIR_t::nodeOrdinalFromPir(iv_masterCpu.word))
             {
                 vaddr[node] = this_node_info;
             }
@@ -2668,7 +2656,7 @@ errlHndl_t IntrRp::syncNodes(intr_mpipl_sync_t i_sync_type)
             {
                 // We are still using this_node_info area
                 // so unmap it later.
-                if(node != iv_masterCpu.groupId)
+                if(node != PIR_t::nodeOrdinalFromPir(iv_masterCpu.word))
                 {
                     mm_block_unmap(vaddr[node]);
                 }
@@ -2706,7 +2694,7 @@ errlHndl_t  IntrRp::initializeMpiplSyncArea()
         this_node_info->mpipl_intr_sync = INTR_MPIPL_SYNC_CLEAR;
         for(uint64_t node = 0; node < MAX_NODES_PER_SYS; ++node)
         {
-            if(iv_masterCpu.groupId == node)
+            if(PIR_t::groupFromPir(iv_masterCpu.word) == node)
             {
                 this_node_info->exist[node] = true;
             }
