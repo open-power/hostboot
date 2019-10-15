@@ -46,6 +46,7 @@
 #include <generic/memory/lib/spd/spd_facade.H>
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/conversions.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss
 {
@@ -212,10 +213,9 @@ inline fapi2::ReturnCode update_data(const std::shared_ptr<efd::base_decoder>& i
 {
     const auto l_ocmb = i_efd_data->get_ocmb_target();
 
-    // TK, remove hard-code when VPDinfo struct adds an iv_dimm index
-    // For explorer we can only have 1 DDIMM (index 0), or up to 2 DIMMs
-    constexpr size_t l_dimm_index = 0;
-    const auto l_rank = i_efd_data->get_rank();
+    // mss::index of rank number will % 4 (RANKS_PER_DIMM) to get us the corresponding dimm
+    const size_t l_dimm_index = mss::index(i_efd_data->get_rank());
+    const auto l_dimm_rank = i_efd_data->get_rank() % mss::MAX_RANK_PER_DIMM; // TK HARDCODE TEST REMOVE ME!
 
     FAPI_ASSERT( l_dimm_index < X,
                  fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
@@ -228,19 +228,19 @@ inline fapi2::ReturnCode update_data(const std::shared_ptr<efd::base_decoder>& i
                  X,
                  mss::spd::c_str(l_ocmb) );
 
-    FAPI_ASSERT( l_rank < Y,
+    FAPI_ASSERT( l_dimm_rank < Y,
                  fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
-                 .set_INDEX(l_rank)
+                 .set_INDEX(l_dimm_rank)
                  .set_LIST_SIZE(X)
                  .set_FUNCTION(i_ffdc_code)
                  .set_TARGET(l_ocmb),
                  "Rank index (%d) was larger than max (%d) on %s",
-                 l_rank,
+                 l_dimm_rank,
                  Y,
                  mss::spd::c_str(l_ocmb) );
 
-    FAPI_DBG("Updating data[%d][%d] with %d for %s", l_dimm_index, l_rank, i_setting, spd::c_str(l_ocmb));
-    o_data[l_dimm_index][l_rank] = i_setting;
+    FAPI_DBG("Updating data[%d][%d] with %d for %s", l_dimm_index, l_dimm_rank, i_setting, spd::c_str(l_ocmb));
+    o_data[l_dimm_index][l_dimm_rank] = i_setting;
 
     return fapi2::FAPI2_RC_SUCCESS;
 
