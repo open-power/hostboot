@@ -146,6 +146,21 @@
   </attribute>
 
   <attribute>
+    <id>DYNAMIC_I2C_DEVICE_ADDRESS</id>
+    <description>
+      This attribute is used when a given target could have different
+      i2c device addresses depending on which manufacture's device we
+      are using.
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>EARLY_TESTCASES_ISTEP</id>
     <description>
         Indicates which istep we should execute the CXX testcases after, if

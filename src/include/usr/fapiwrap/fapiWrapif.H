@@ -55,6 +55,18 @@ namespace FAPIWRAP
     errlHndl_t explorer_getidec( TARGETING::Target * i_ocmbChip,
                                   uint16_t& o_chipId,
                                   uint8_t&  o_ec);
+
+    /**
+     * @brief This function wraps around the FAPI2 HWP "get_pmic_i2c_addr" which
+     *        takes in a DDIMM's DDR4 SPD data and a PMIC's position relative to
+     *        its parent OCMB's chip and returns the device address of that pmic
+     * @param[in] i_spd      - Binary blob containing addresses a given OCMB's PMICs
+     * @param[in] i_pmic_id  - PMIC's position relative to parent OCMB
+     * @return uint8_t 0 if invalid pmic_id is passed, PMIC's devAddress otherwise
+     */
+    uint8_t get_pmic_dev_addr( const char* i_spd,
+                               const uint8_t i_pmic_id);
+
 }
 
 #endif

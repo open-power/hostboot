@@ -206,6 +206,14 @@
   </targetTypeExtension>
 
   <targetTypeExtension>
+    <id>pmic</id>
+    <attribute>
+      <id>DYNAMIC_I2C_DEVICE_ADDRESS</id>
+      <default>0</default>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
     <id>sys-sys-power10</id>
     <attribute>
       <id>ALLOW_ATTR_OVERRIDES_IN_SECURE_MODE</id>

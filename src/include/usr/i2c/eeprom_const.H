@@ -170,9 +170,9 @@ struct eecacheSectionHeader
  */
 struct eeprom_addr_t
 {
-    uint64_t port;
-    uint64_t engine;
-    uint64_t devAddr;
+    uint8_t port;
+    uint8_t engine;
+    uint8_t devAddr;
     int64_t  eepromRole;
     uint64_t offset;
     eeprom_addr_size_t addrSize;

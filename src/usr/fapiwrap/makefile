@@ -38,6 +38,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 
 # HWP include directories :
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/spd_access/
 
 # to get multicast_group_defs.H
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
