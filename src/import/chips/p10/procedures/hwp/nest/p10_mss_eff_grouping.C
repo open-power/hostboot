@@ -4042,7 +4042,7 @@ fapi2::ReturnCode setMCMODE0regData(
     fapi2::ATTR_MEMORY_BAR_REGS_Type o_memBarRegs)
 {
     FAPI_DBG("Entering");
-    std::map<fapi2::Target<fapi2::TARGET_TYPE_MI>, bool> l_granule_supported;
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_MI>> l_granule_supported;
     fapi2::ATTR_MSS_INTERLEAVE_GRANULARITY_Type l_interleave_granule_size;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_INTERLEAVE_GRANULARITY,
                            fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
@@ -4050,7 +4050,7 @@ fapi2::ReturnCode setMCMODE0regData(
              "Error getting ATTR_MSS_INTERLEAVE_GRANULARITY, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
-    // Granularity is set only if both channels support it
+    // Build a list of MIs that need to have granularity programmed
     for (auto l_pair : i_mcBarDataPair)
     {
         fapi2::Target<fapi2::TARGET_TYPE_MCC> l_target = l_pair.first;
@@ -4059,61 +4059,40 @@ fapi2::ReturnCode setMCMODE0regData(
         // MCFGP valid (bit 0)
         if (l_data.MCFGP_valid == true)
         {
+            // If MI is not in the list yet, add it to the list to set granularity
             fapi2::Target<fapi2::TARGET_TYPE_MI> l_mi_target = l_target.getParent<fapi2::TARGET_TYPE_MI>();
+            auto it = std::find(l_granule_supported.begin(), l_granule_supported.end(), l_mi_target);
 
-            // configure interleave granularity if 1/2/4/8 MC per group only
-            if ((l_data.MCFGP_chan_per_group == 0) || // 8 MC/group
-                (l_data.MCFGP_chan_per_group == 1) || // 1 MC/group
-                (l_data.MCFGP_chan_per_group == 2) || // 2 MC/group
-                (l_data.MCFGP_chan_per_group == 4))   // 4 MC/group
+            if (it == l_granule_supported.end())
             {
-                //Only set to true if the value for the target is not set yet
-                if (l_granule_supported.find(l_mi_target) == l_granule_supported.end())
-                {
-                    l_granule_supported[l_mi_target] = true;
-                }
-            }
-            else
-            {
-                //Always set to false if we find one channel that cannot support it.
-                l_granule_supported[l_mi_target] = false;
+                l_granule_supported.push_back(l_mi_target);
             }
         }
     }
 
+    // Set granularity
     for ( auto l_it = l_granule_supported.begin(); l_it != l_granule_supported.end(); l_it++ )
     {
         fapi2::buffer<uint64_t> l_mcmode0_scom_data(0);
         fapi2::buffer<uint64_t> l_mcmode0_scom_mask_data(0);
-        // Get MC target pos
-        auto l_mi_target = l_it->first;
+
+        // Get MI target pos
+        auto l_mi_target = *l_it;
         uint8_t l_miPos = 0;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mi_target, l_miPos),
                  "Error getting MI ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
 
-        // Granularity supported
-        if (l_it->second)
-        {
-            FAPI_TRY(PREP_SCOMFIR_MCMODE0(l_mi_target));
-
-            // Set interleave granularity (bits 32:35)
-            SET_SCOMFIR_MCMODE0_GROUP_ADDRESS_INTERLEAVE_GRANULARITY(l_interleave_granule_size,
-                    l_mcmode0_scom_data);
-
-            // Set mask value for bits 32:35
-            SET_SCOMFIR_MCMODE0_GROUP_ADDRESS_INTERLEAVE_GRANULARITY((uint64_t)0xF,
-                    l_mcmode0_scom_mask_data);
-            // Save to buffer
-            o_memBarRegs[l_miPos][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCMODE0][BAR_REGS_DATA_IDX] = l_mcmode0_scom_data;
-            o_memBarRegs[l_miPos][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCMODE0][BAR_REGS_MASK_IDX] = l_mcmode0_scom_mask_data;
-        }
-        // If not supported, set mask to all 0s so MODE0 is untouched
-        else
-        {
-            o_memBarRegs[l_miPos][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCMODE0][BAR_REGS_DATA_IDX] = 0;
-            o_memBarRegs[l_miPos][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCMODE0][BAR_REGS_MASK_IDX] = 0;
-        }
+        FAPI_TRY(PREP_SCOMFIR_MCMODE0(l_mi_target));
+        // Set interleave granularity (bits 32:35)
+        SET_SCOMFIR_MCMODE0_GROUP_ADDRESS_INTERLEAVE_GRANULARITY(l_interleave_granule_size,
+                l_mcmode0_scom_data);
+        // Set mask value for bits 32:35
+        SET_SCOMFIR_MCMODE0_GROUP_ADDRESS_INTERLEAVE_GRANULARITY((uint64_t)0xF,
+                l_mcmode0_scom_mask_data);
+        // Save to buffer
+        o_memBarRegs[l_miPos][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCMODE0][BAR_REGS_DATA_IDX] = l_mcmode0_scom_data;
+        o_memBarRegs[l_miPos][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCMODE0][BAR_REGS_MASK_IDX] = l_mcmode0_scom_mask_data;
     }
 
 fapi_try_exit:
@@ -4252,6 +4231,7 @@ fapi2::ReturnCode setMCFGPregData(
         // R0 Configuration group size
         SET_SCOMFIR_MCFGP0_R0_CONFIGURATION_GROUP_SIZE(mss::exp::ib::EXPLR_IB_BAR_SIZE,
                 l_mcfgp_scom_data);
+
         // R0 MMIO group size
         SET_SCOMFIR_MCFGP0_R0_MMIO_GROUP_SIZE(mss::exp::ib::EXPLR_IB_BAR_SIZE, l_mcfgp_scom_data);
 
@@ -4336,21 +4316,24 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Set MCFGPA register data
+/// @brief Set MCFGPA/MCFGPMA register data
 ///
 /// @param[in]  i_target         Reference to MCC chiplet target
 /// @param[in]  i_mccBarData     MCC Bar data
+/// @param[in]  i_sysAttrs       System attribute settings
 /// @param[out] o_memBarRegs     BAR register attribute data array
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode setMCFGPAregData(
+fapi2::ReturnCode set_MCFGPA_MCFGPMA_regData(
     const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
     const mcBarData_t& i_mccBarData,
+    const EffGroupingSysAttrs i_sysAttrs,
     fapi2::ATTR_MEMORY_BAR_REGS_Type o_memBarRegs)
 {
     FAPI_DBG("Entering");
     fapi2::buffer<uint64_t> l_mcfgpa_scom_data(0);
+    fapi2::buffer<uint64_t> l_mcfgpma_scom_data(0);
     uint8_t l_mccPos = 0;
     uint8_t l_miPos = 0;
     uint8_t l_reg_idx = fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGP0A;
@@ -4360,35 +4343,98 @@ fapi2::ReturnCode setMCFGPAregData(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mi_target, l_miPos),
              "Error getting MI ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
-    FAPI_TRY(PREP_SCOMFIR_MCFGP0A(l_mi_target));
 
-    // Hole
+    // Prep buffer
+    FAPI_TRY(PREP_SCOMFIR_MCFGP0A(l_mi_target));
+    FAPI_TRY(PREP_SCOMFIR_MCFGPM0A(l_mi_target));
+
+    // Hole0
     if (i_mccBarData.MCFGPA_HOLE_valid[0] == true)
     {
-        // MCFGPA HOLE valid
-        SET_SCOMFIR_MCFGP0A_HOLE_VALID(l_mcfgpa_scom_data);
+        // Need to setup both normal and mirrored registers for both
+        // Normal and Flipped modes
 
-        // Hole lower addr
-        SET_SCOMFIR_MCFGP0A_HOLE_LOWER_ADDRESS(i_mccBarData.MCFGPA_HOLE_LOWER_addr[0],
-                                               l_mcfgpa_scom_data);
+        // MCFGPA HOLE0 valid
+        SET_SCOMFIR_MCFGP0A_HOLE_VALID(l_mcfgpa_scom_data);
+        // MCFGPM0A HOLE0 valid
+        SET_SCOMFIR_MCFGPM0A_HOLE_VALID(l_mcfgpma_scom_data);
+
+        // Normal mode, but still set up mirrored equiv addressses
+        if (i_sysAttrs.iv_mirrorPlacement ==
+            fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL)   // Normal
+        {
+            // Non-mirrored Hole0 lower addr
+            SET_SCOMFIR_MCFGP0A_HOLE_LOWER_ADDRESS(i_mccBarData.MCFGPA_HOLE_LOWER_addr[0],
+                                                   l_mcfgpa_scom_data);
+            // Mirrored Hole0 lower addr (= non-mirrored lower addr << 1)
+            SET_SCOMFIR_MCFGPM0A_HOLE_LOWER_ADDRESS(i_mccBarData.MCFGPA_HOLE_LOWER_addr[0] << 1,
+                                                    l_mcfgpma_scom_data);
+        }
+        // Flipped mode, but still set up non-mirrored equiv addressses
+        else
+        {
+            // Mirrored Hole0 lower addr
+            SET_SCOMFIR_MCFGPM0A_HOLE_LOWER_ADDRESS(i_mccBarData.MCFGPMA_HOLE_LOWER_addr[0],
+                                                    l_mcfgpma_scom_data);
+            // Non-mirrored Hole0 lower addr (= mirrored lower addr >> 1)
+            SET_SCOMFIR_MCFGP0A_HOLE_LOWER_ADDRESS(i_mccBarData.MCFGPMA_HOLE_LOWER_addr[0] >> 1,
+                                                   l_mcfgpa_scom_data);
+        }
     }
 
     // SMF
     if (i_mccBarData.MCFGPA_SMF_valid == true)
     {
+        // Need to setup both normal and mirrored registers for both
+        // Normal and Flipped modes
+
         // MCFGPA SMF valid
         SET_SCOMFIR_MCFGP0A_SMF_VALID(l_mcfgpa_scom_data);
-
-        // MCFGPA_SMF_UPPER_ADDRESS_AT_END_OF_RANGE
+        // MCFGPMA SMF valid
+        SET_SCOMFIR_MCFGPM0A_SMF_VALID(l_mcfgpma_scom_data);
+        // Non-mirrored Hole0 SMF extend end of range
         SET_SCOMFIR_MCFGP0A_SMF_EXTEND_TO_END_OF_RANGE(l_mcfgpa_scom_data);
+        // Mirrored Hole0 SMF extend end of range
+        SET_SCOMFIR_MCFGPM0A_SMF_EXTEND_TO_END_OF_RANGE(l_mcfgpma_scom_data);
 
-        // SMF lower addr
-        SET_SCOMFIR_MCFGP0A_SMF_LOWER_ADDRESS(i_mccBarData.MCFGPA_SMF_LOWER_addr,
-                                              l_mcfgpa_scom_data);
+        // Normal mode, but still set up mirrored equiv addressses
+        if (i_sysAttrs.iv_mirrorPlacement ==
+            fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL)   // Normal
+        {
+            // Non-mirrored Hole0 SMF lower addr
+            SET_SCOMFIR_MCFGP0A_SMF_LOWER_ADDRESS(i_mccBarData.MCFGPA_SMF_LOWER_addr,
+                                                  l_mcfgpa_scom_data);
+            // Non-mirrored Hole0 SMF upper addr
+            SET_SCOMFIR_MCFGP0A_SMF_UPPER_ADDRESS(i_mccBarData.MCFGPA_SMF_UPPER_addr,
+                                                  l_mcfgpa_scom_data);
 
-        // SMF upper addr
-        SET_SCOMFIR_MCFGP0A_SMF_UPPER_ADDRESS(i_mccBarData.MCFGPA_SMF_UPPER_addr,
-                                              l_mcfgpa_scom_data);
+            // Mirrored SMF lower addr (= non-mirrored lower addr << 1)
+            SET_SCOMFIR_MCFGPM0A_SMF_LOWER_ADDRESS(i_mccBarData.MCFGPA_SMF_LOWER_addr << 1,
+                                                   l_mcfgpma_scom_data);
+            // Mirrored SMF upper addr (= non-mirrored upper addr << 1)
+            SET_SCOMFIR_MCFGPM0A_SMF_UPPER_ADDRESS(i_mccBarData.MCFGPA_SMF_UPPER_addr << 1,
+                                                   l_mcfgpma_scom_data);
+        }
+
+        // Flipped mode, but still set up non-mirrored equiv addressses
+        else
+        {
+            // Mirrored SMF lower addr
+            SET_SCOMFIR_MCFGPM0A_SMF_LOWER_ADDRESS(i_mccBarData.MCFGPMA_SMF_LOWER_addr,
+                                                   l_mcfgpma_scom_data);
+            // Mirrored SMF upper addr
+            SET_SCOMFIR_MCFGPM0A_SMF_UPPER_ADDRESS(i_mccBarData.MCFGPMA_SMF_UPPER_addr,
+                                                   l_mcfgpma_scom_data);
+
+            // SMF lower addr ( = mirrored smf lower addr >> 1)
+            SET_SCOMFIR_MCFGP0A_SMF_LOWER_ADDRESS(i_mccBarData.MCFGPMA_SMF_LOWER_addr >> 1,
+                                                  l_mcfgpa_scom_data);
+            // SMF upper addr ( = mirrored smf upper addr >> 1)
+            SET_SCOMFIR_MCFGP0A_SMF_UPPER_ADDRESS(i_mccBarData.MCFGPMA_SMF_LOWER_addr >> 1,
+                                                  l_mcfgpa_scom_data);
+
+        }
+
     }
 
     if ((i_mccBarData.MCFGPA_HOLE_valid[0] == true) ||
@@ -4415,93 +4461,18 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Set MCFGPMA register data
-///
-/// @param[in]  i_target         Reference to MCC chiplet target
-/// @param[in]  i_mccBarData     MCC Bar data
-/// @param[out] o_memBarRegs     BAR register attribute data array
-///
-/// @return FAPI2_RC_SUCCESS if success, else error code.
-///
-fapi2::ReturnCode setMCFGPMAregData(
-    const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
-    const mcBarData_t& i_mccBarData,
-    fapi2::ATTR_MEMORY_BAR_REGS_Type o_memBarRegs)
-{
-    FAPI_DBG("Entering");
-    fapi2::buffer<uint64_t> l_mcfgpma_scom_data(0);
-    uint8_t l_mccPos = 0;
-    uint8_t l_miPos = 0;
-    uint8_t l_reg_idx = fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM0A;
-
-    fapi2::Target<fapi2::TARGET_TYPE_MI> l_mi_target = i_target.getParent<fapi2::TARGET_TYPE_MI>();
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mi_target, l_miPos),
-             "Error getting MI ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-    FAPI_TRY(PREP_SCOMFIR_MCFGPM0A(l_mi_target));
-
-    // Hole
-    if (i_mccBarData.MCFGPMA_HOLE_valid[0] == true)
-    {
-        // MCFGPM0A HOLE valid
-        SET_SCOMFIR_MCFGPM0A_HOLE_VALID(l_mcfgpma_scom_data);
-
-        // Hole lower addr
-        SET_SCOMFIR_MCFGPM0A_HOLE_LOWER_ADDRESS(i_mccBarData.MCFGPMA_HOLE_LOWER_addr[0],
-                                                l_mcfgpma_scom_data);
-    }
-
-    // SMF
-    if (i_mccBarData.MCFGPMA_SMF_valid == true)
-    {
-        // MCFGPMA SMF valid
-        SET_SCOMFIR_MCFGPM0A_SMF_VALID(l_mcfgpma_scom_data);
-
-        // MCFGPMA_SMF_UPPER_ADDRESS_AT_END_OF_RANGE
-        SET_SCOMFIR_MCFGPM0A_SMF_EXTEND_TO_END_OF_RANGE(l_mcfgpma_scom_data);
-
-        // SMF lower addr
-        SET_SCOMFIR_MCFGPM0A_SMF_LOWER_ADDRESS(i_mccBarData.MCFGPMA_SMF_LOWER_addr,
-                                               l_mcfgpma_scom_data);
-
-        // SMF upper addr
-        SET_SCOMFIR_MCFGPM0A_SMF_UPPER_ADDRESS(i_mccBarData.MCFGPMA_SMF_UPPER_addr,
-                                               l_mcfgpma_scom_data);
-    }
-
-    if ((i_mccBarData.MCFGPMA_HOLE_valid[0] == true) ||
-        (i_mccBarData.MCFGPMA_SMF_valid == true))
-    {
-        // Save to buffer
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_mccPos),
-                 "Error getting MCC ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
-                 (uint64_t)fapi2::current_err);
-
-        if (l_mccPos % 2)
-        {
-            l_reg_idx = fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM1A;
-
-        }
-
-        o_memBarRegs[l_miPos][l_reg_idx][BAR_REGS_DATA_IDX] = l_mcfgpma_scom_data;
-        o_memBarRegs[l_miPos][l_reg_idx][BAR_REGS_MASK_IDX] = 0xFFFFFFFFFFFFFFFFULL;
-    }
-
-fapi_try_exit:
-    FAPI_DBG("Exit");
-    return fapi2::current_err;
-}
-
-///
 /// @brief Set BAR registers data.
 ///
-/// @param[in] i_mccBarDataPair  Target pair <target, data>
-/// @param[out] o_memBarRegs     BAR register attribute data array
+/// @param[in]  i_mccBarDataPair  Target pair <target, data>
+/// @param[in]  i_sysAttrs        System attribute settings
+/// @param[in]  i_memInfo         Memory configuration information
+/// @param[out] o_memBarRegs      BAR register attribute data array
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode setBarRegsData(
     const std::vector<std::pair<fapi2::Target<fapi2::TARGET_TYPE_MCC>, mcBarData_t>>& i_mccBarDataPair,
+    const EffGroupingSysAttrs i_sysAttrs,
     const EffGroupingMemInfo& i_memInfo,
     fapi2::ATTR_MEMORY_BAR_REGS_Type o_memBarRegs)
 {
@@ -4549,30 +4520,9 @@ fapi2::ReturnCode setBarRegsData(
                  "setMCFGPMregData() returns an error. l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
 
-        // 4. ---- Set MCFGPA reg data -----
-        // Assert if both HOLE1 and SMF are valid, settings will overlap
-        FAPI_ASSERT((l_data.MCFGPA_HOLE_valid[1] && l_data.MCFGPA_SMF_valid) == 0,
-                    fapi2::MSS_SETUP_BARS_HOLE1_SMF_CONFLICT()
-                    .set_TARGET(l_target)
-                    .set_HOLE1_VALID(l_data.MCFGPA_HOLE_valid[1])
-                    .set_SMF_VALID(l_data.MCFGPA_SMF_valid),
-                    "Error: MCFGPA HOLE1 and SMF are both valid, settings will overlap");
-
-        FAPI_TRY(setMCFGPAregData(l_target, l_data, o_memBarRegs),
-                 "setMCFGPAregData() returns an error. l_rc 0x%.8X",
-                 (uint64_t)fapi2::current_err);
-
-        // 5. ---- Set MCFGPMA reg -----
-        // Assert if both HOLE1 and SMF are valid, settings will overlap
-        FAPI_ASSERT((l_data.MCFGPMA_HOLE_valid[1] && l_data.MCFGPMA_SMF_valid) == 0,
-                    fapi2::MSS_SETUP_BARS_HOLE1_SMF_CONFLICT()
-                    .set_TARGET(l_target)
-                    .set_HOLE1_VALID(l_data.MCFGPMA_HOLE_valid[1])
-                    .set_SMF_VALID(l_data.MCFGPMA_SMF_valid),
-                    "Error: MCFGPMA HOLE1 and SMF are both valid, settings will overlap");
-
-        FAPI_TRY(setMCFGPMAregData(l_target, l_data, o_memBarRegs),
-                 "setMCFGPMAregData() returns an error. l_rc 0x%.8X",
+        // 4. ---- Set MCFGPA and MCFGPMA regs data -----
+        FAPI_TRY(set_MCFGPA_MCFGPMA_regData(l_target, l_data, i_sysAttrs, o_memBarRegs),
+                 "set_MCFGPA_MCFGPMA_regData() returns an error. l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
 
     } // Data pair loop
@@ -4769,7 +4719,7 @@ fapi2::ReturnCode p10_mss_eff_grouping(
              (uint64_t)fapi2::current_err);
 
     // Set MC BAR registers data
-    FAPI_TRY(setBarRegsData(l_mccBarDataPair, l_memInfo, l_memoryBarRegs),
+    FAPI_TRY(setBarRegsData(l_mccBarDataPair, l_sysAttrs, l_memInfo, l_memoryBarRegs),
              "setBarRegsData() returns error, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
