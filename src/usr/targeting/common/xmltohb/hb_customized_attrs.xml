@@ -826,6 +826,28 @@
         <id>ATTR_SMF_CONFIG</id>
         <writeable/>
     </attribute>
+
+    <!-- OCMB Endianess attributes -->
+    <attribute>
+        <id>ATTR_MSS_OCMB_EXP_STRUCT_ENDIAN</id>
+        <default>0x1</default>
+        <no_export/>
+    </attribute>
+    <attribute>
+        <id>ATTR_MSS_OCMB_EXP_STRUCT_MMIO_ENDIAN_CTRL</id>
+        <default>0x1</default>
+        <no_export/>
+    </attribute>
+    <attribute>
+        <id>ATTR_MSS_OCMB_EXP_STRUCT_MMIO_WORD_SWAP</id>
+        <default>NO_SWAP</default>
+        <no_export/>
+    </attribute>
+    <attribute>
+        <id>ATTR_MSS_OCMB_EXP_OMI_CFG_ENDIAN_CTRL</id>
+        <no_export/>
+    </attribute>
+
     <!-- =====================================================================
      End of customizations definitions
      ================================================================= -->

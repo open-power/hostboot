@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -174,13 +174,11 @@ void* call_mss_eff_config (void *io_pArgs)
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_eff_config entry" );
 
-    Target* l_sys = nullptr;
-    targetService().getTopLevelTarget(l_sys);
-    assert( l_sys != nullptr );
+    TARGETING::TargetHandleList l_membufTargetList;
+    TARGETING::TargetHandleList l_mcsTargetList;
+    TARGETING::TargetHandleList l_memportTargetList;
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>> l_fapi_ocmb_targets;
 
-    //TODO RTC: 202491 Ensure endianess in simics matches hardware
-    l_sys->setAttr<ATTR_MSS_OCMB_EXP_STRUCT_MMIO_ENDIAN_CTRL>(fapi2::ENUM_ATTR_MSS_OCMB_EXP_STRUCT_MMIO_ENDIAN_CTRL_NO_SWAP);
-    l_sys->setAttr<ATTR_MSS_OCMB_EXP_STRUCT_ENDIAN>(fapi2::ENUM_ATTR_MSS_OCMB_EXP_STRUCT_ENDIAN_LITTLE_ENDIAN);
 
     do {
         // Build up this list from memport parents, used in exp_mss_eff_config_thermal
