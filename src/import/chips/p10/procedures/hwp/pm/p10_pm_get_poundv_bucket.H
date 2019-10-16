@@ -64,7 +64,7 @@ typedef struct
     uint16_t core_freq_gb_sort;
     uint16_t vdd_vmin;
     uint16_t ivdd_powr_cur_act;
-    uint8_t core_powr_temp;
+    uint8_t  core_powr_temp;
     uint8_t  spare[6];
 } poundV_entry_pts_t;
 
@@ -101,7 +101,12 @@ typedef struct
     uint8_t  TdpSrtPwrTmp;
     uint16_t VddTdpWofCoreFreq;
     uint16_t FxdFreqMdeCoreFreq;
-    uint8_t rsvd[10];
+    uint16_t VddPsavCoreFreq;
+    uint16_t VddUTCoreFreq;
+    uint16_t VddFmxCoreFreq;
+    uint8_t  MmaThrTemp;
+    uint8_t  IOThrTemp;
+    uint16_t rsvd;
 } poundV_other_info_t;
 //Represents the data contained within a single #V (version=1) bucket
 //Note: This structure should not be assumed to be binary identical

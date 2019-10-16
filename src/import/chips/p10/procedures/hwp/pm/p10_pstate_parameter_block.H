@@ -222,6 +222,26 @@ class PlatPmPPB
             const VoltageConfigActions_t i_action);
 
         /// -----------------------------------------------------------------------
+        /// @brief Initialize WOF data
+        /// @param[out]     o_buf points to WOF data
+        /// @param[inout]   io_size size of the wof  table
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        fapi2::ReturnCode wof_init(
+            uint8_t* o_buf,
+            uint32_t& io_size);
+
+        /// -----------------------------------------------------------------------
+        /// @brief VRT data initialization from WOF data
+        /// @param[in]     i_pBuffer WOF data buffer
+        /// @param[inout]  o_vrt_data  vrt data
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        fapi2::ReturnCode update_vrt(
+            uint8_t* i_pBuffer,
+            VRT_t* o_vrt_data);
+
+        /// -----------------------------------------------------------------------
         /// @brief Initialize global pstate parameter block
         /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------

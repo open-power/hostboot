@@ -45,44 +45,50 @@
 #define NUM_OP_POINTS      8
 #define NUM_PV_POINTS      8
 #define VPD_PV_PSAV        0
+#define VPD_PV_CF0         0
 #define VPD_PV_CF1         1
 #define VPD_PV_CF2         2
 #define VPD_PV_CF3         3
 #define VPD_PV_CF4         4
 #define VPD_PV_CF5         5
+#define VPD_PV_CF6         6
+#define VPD_PV_CF7         7
 #define VPD_PV_UT          6
 #define VPD_PV_FMAX        7
 
 #define VPD_PV_STR { \
-        "PowerSave", \
+        "CF0", \
         "CF1", \
         "CF2", \
         "CF3", \
         "CF4", \
         "CF5", \
-        "UltraTurbo", \
-        "Fmax"  \
+        "CF6", \
+        "CF7"  \
     }
 
 /// VPD #V Operating Points (eg Natural order)
 #define POWERSAVE   0
+#define CF0         0
 #define CF1         1
 #define CF2         2
 #define CF3         3
 #define CF4         4
 #define CF5         5
+#define CF6         6
+#define CF7         7
 #define ULTRA       6
 #define FMAX        7
-#define PV_OP {POWERSAVE, CF1, CF2, CF3, CF4, CF5, ULTRA, FMAX}
+#define PV_OP {CF0, CF1, CF2, CF3, CF4, CF5, CF6, CF7}
 #define PV_OP_STR { \
-        "PowerSave ", \
+        "CF0       ", \
         "CF1       ", \
         "CF2       ", \
         "CF3       ", \
         "CF4       ", \
         "CF5       ", \
-        "Ultra     ", \
-        "Fmax      "  \
+        "CF6       ", \
+        "CF7       "  \
     }
 
 
@@ -112,21 +118,24 @@
 
 #define VPD_NUM_SLOPES_REGION       7
 #define REGION_POWERSAVE_CF1        0
+#define REGION_CF0_CF1              0
 #define REGION_CF1_CF2              1
 #define REGION_CF2_CF3              2
 #define REGION_CF3_CF4              3
 #define REGION_CF4_CF5              4
+#define REGION_CF5_CF6              5
+#define REGION_CF6_CF7              6
 #define REGION_CF5_UT               5
 #define REGION_UT_FMAX              6
-#define VPD_OP_SLOPES_REGION_ORDER {REGION_POWERSAVE_CF1, REGION_CF1_CF2, REGION_CF2_CF3, REGION_CF3_CF4, REGION_CF4_CF5, REGION_CF5_UT, REGION_UT_FMAX,}
+#define VPD_OP_SLOPES_REGION_ORDER {REGION_CF0_CF1, REGION_CF1_CF2, REGION_CF2_CF3, REGION_CF3_CF4, REGION_CF4_CF5, REGION_CF5_CF6, REGION_CF6_CF7,}
 #define VPD_OP_SLOPES_REGION_ORDER_STR { \
-        "POWERSAVE_CF1", \
+        "CF0_CF1      ", \
         "CF1_CF2      ", \
         "CF2_CF3      ", \
         "CF3_CF4      ", \
         "CF4_CF5      ", \
-        "CF5_UT       ", \
-        "UT_FMAX      ", \
+        "CF5_CF6      ", \
+        "CF6_CF7      ", \
     }
 
 
@@ -291,8 +300,13 @@ typedef struct
         uint32_t value;
         struct
         {
+#ifdef _BIG_ENDIAN
             uint32_t text    : 24;
             uint32_t version : 8;
+#else
+            uint32_t version : 8;
+            uint32_t text    : 24;
+#endif
         } fields;
     } magic_number;
 
@@ -308,11 +322,11 @@ typedef struct
     uint16_t vrt_block_size;
 
     /// VRT block header size
-    uint16_t VRT_block_header_size;
+    uint16_t vrt_block_header_size;
 
     /// VRT Data Size
     ///    Length, in bytes, of the data field.
-    uint16_t VRT_data_size;
+    uint16_t vrt_data_size;
 
     /// Over-Current Mode.
     /// 0: Table set assumes OCS is OFF; 1: Table set assumes OCS is ON
@@ -420,16 +434,25 @@ typedef struct
 
     ///  ---- Double word 8 -----
 
-    /// Thermal Design Point (TDP) VDD Ceff Percent
-    uint8_t  vdd_tdp_ceff_pct;
+    /// Thermal Design Point (TDP) VCS Ceff Index
+    uint8_t  vcs_tdp_ceff_indx;
 
-    /// Thermal Design Point (TDP) VCS Ceff Percent
-    uint8_t  vcs_tdp_ceff_pct;
+    /// Thermal Design Point (TDP) VDD Ceff Index
+    uint8_t  vdd_tdp_ceff_indx;
+
+    /// TDP IO Power index
+    uint8_t  io_tdp_pwr_indx;
+
+    /// TDP Amb Cond index
+    uint8_t  amb_cond_tdp_indx;
 
     /// Thermal Design Point (TDP) IO Wattage (Watts)
     uint8_t  io_tdp_w;
 
-    uint8_t reserved4[5];
+    /// IO TDP Disabled wattage
+    uint8_t  io_dis_w;
+
+    uint8_t reserved4[2];
 
     ///  ---- Double word 9 and 10 -----
 
@@ -438,7 +461,7 @@ typedef struct
 
     // Padding to 128B is left to the compiler via the following attribute.
 
-} WofTablesHeader_t __attribute__((aligned(128)));
+} __attribute__((packed, aligned(128))) WofTablesHeader_t;
 
 /// Header associated with the WOF Voltage Ratio Tables (VRT)
 typedef struct
@@ -448,14 +471,26 @@ typedef struct
         uint32_t value;
         struct
         {
+#ifdef _BIG_ENDIAN
             uint32_t    marker              : 8;
             uint32_t    type                : 1;
             uint32_t    content             : 1;
             uint32_t    version             : 2;
             uint32_t    io_id               : 2;
             uint32_t    ac_id               : 2;
+            uint32_t    vcs_ceff_ratio_pct  : 8;
+            uint32_t    vdd_ceff_ratio_pct  : 8;
+#else
             uint32_t    vdd_ceff_ratio_pct  : 8;
             uint32_t    vcs_ceff_ratio_pct  : 8;
+            uint32_t    ac_id               : 2;
+            uint32_t    io_id               : 2;
+            uint32_t    version             : 2;
+            uint32_t    content             : 1;
+            uint32_t    type                : 1;
+            uint32_t    marker              : 8;
+#endif
+
         } fields;
     };
 } VRT_header_t;
@@ -469,7 +504,7 @@ typedef struct
 /// WOF Voltage Ratio Tables (VRT) -- 16B
 typedef struct
 {
-    VRT_header_t header;
+    VRT_header_t vrtHeader;
     uint8_t      data[WOF_VRT_SIZE];
 } VRT_t;
 
@@ -507,7 +542,7 @@ typedef struct
 {
     WofTablesHeader_t wof_header_data;
     WOFVCS_t          vrt_array;
-} HomerWOFLayout_t;
+} HomerVRTLayout_t;
 
 #ifdef __cplusplus
 } // end extern C

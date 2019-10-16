@@ -222,7 +222,7 @@
 
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PSTATE_PB_POUNDV_WOF_UT_ERROR</rc>
+    <rc>RC_PSTATE_PB_POUNDV_WOF_CF6_ERROR</rc>
     <description>WOF was intending to be enabled but could not due to #V validity
     checking issue of the UltraTurbo content.  The machine continues as
     functional but with WOF disabled.
@@ -252,7 +252,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PSTATE_PB_BIASED_POUNDV_WOF_UT_ERROR</rc>
+    <rc>RC_PSTATE_PB_BIASED_POUNDV_WOF_CF6_ERROR</rc>
     <description>WOF was intending to be enabled but could not due to #V validity
     checking issue of the biased UltraTurbo content.  The machine continues as
     functional but with WOF disabled.
@@ -289,11 +289,22 @@
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>MAGIC_NUMBER</ffdc>
     <ffdc>VERSION</ffdc>
-    <ffdc>VFRT_BLOCK_SIZE</ffdc>
-    <ffdc>VFRT_HEADER_SIZE</ffdc>
-    <ffdc>VFRT_DATA_SIZE</ffdc>
-    <ffdc>QUADS_ACTIVE_SIZE</ffdc>
+    <ffdc>VRT_BLOCK_SIZE</ffdc>
+    <ffdc>VRT_HEADER_SIZE</ffdc>
+    <ffdc>VRT_DATA_SIZE</ffdc>
     <ffdc>CORE_COUNT</ffdc>
+    <ffdc>VCS_START</ffdc>
+    <ffdc>VCS_STEP</ffdc>
+    <ffdc>VCS_SIZE</ffdc>
+    <ffdc>VDD_START</ffdc>
+    <ffdc>VDD_STEP</ffdc>
+    <ffdc>VDD_SIZE</ffdc>
+    <ffdc>IO_START</ffdc>
+    <ffdc>IO_STEP</ffdc>
+    <ffdc>IO_SIZE</ffdc>
+    <ffdc>AMB_COND_START</ffdc>
+    <ffdc>AMB_COND_STEP</ffdc>
+    <ffdc>AMB_COND_SIZE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -301,13 +312,13 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PSTATE_PB_VFRT_HEADER_DATA_INVALID</rc>
-    <description>VFRT Header data is invalid. The machine continues as
+    <rc>RC_PSTATE_PB_VRT_HEADER_DATA_INVALID</rc>
+    <description>VRT Header data is invalid. The machine continues as
     functional but with WOF disabled.
     </description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>MAGIC_NUMBER</ffdc>
-    <ffdc>VFRT_INDEX</ffdc>
+    <ffdc>VRT_INDEX</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -499,7 +510,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PSTATE_PB_CORE_FLOOR_FREQ_GT_UT_FREQ</rc>
+    <rc>RC_PSTATE_PB_CORE_FLOOR_FREQ_GT_CF6_FREQ</rc>
     <description>The core floor frequency is greater than ultra turbo freq.
     </description>
     <ffdc>CHIP_TARGET</ffdc>
@@ -525,7 +536,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PSTATE_PB_SAFE_FREQ_GT_UT_FREQ</rc>
+    <rc>RC_PSTATE_PB_SAFE_FREQ_GT_CF6_FREQ</rc>
     <description>The calculated Save Mode frequency, after uplifting to
     account for VDM droop events, is above the UltraTurbo frequency of
     the part.
@@ -561,21 +572,6 @@
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_PSTATE_PB_VFRT_BIAS_ERROR</rc>
-    <description>The frequency biasing attributes do not match when WOF is
-    enabled.  This is a requirement for doing VFRT biasing that is consistent
-    with #V frequency biasing.
-    </description>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>FREQ_BIAS_HP_ULTRATURBO</ffdc>
-    <ffdc>FREQ_BIAS_HP_TURBO</ffdc>
-    <ffdc>FREQ_BIAS_HP_NOMINAL</ffdc>
-    <ffdc>FREQ_BIAS_HP_POWERSAVE</ffdc>
-    <ffdc>UT_FREQ</ffdc>
-    <!-- No callout occurs as this is a user error -->
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>

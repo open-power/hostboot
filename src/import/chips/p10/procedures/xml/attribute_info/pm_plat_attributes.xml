@@ -1394,12 +1394,12 @@
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
     WOF data from SEEPROM which contains WOF header data + VRT data (vrt +
-    for 6 Vcs, 30 Vdd and 8 IO)
+    for 6 Vcs, 26 Vdd, 4 IO, 4 AC)
 
     Consumer: p10_pstate_parameter_build
     </description>
     <valueType>uint8</valueType>
-    <array>23168</array>
+    <array>40064</array>
     <platInit/>
     <initToZero/>
     <group>wof</group>
