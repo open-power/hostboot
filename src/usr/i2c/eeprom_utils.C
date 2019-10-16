@@ -87,6 +87,18 @@ bool eepromPresence ( TARGETING::Target * i_target )
             break;
         }
 
+        // If the target has dynamic device address attribute, then use that instead of the
+        // read-only address found in ATTR_EEPROM_XX_INFO attrs. We use the dynamic address
+        // attribute because ATTR_EEPROM_XX_INFO attrs are not writable and its difficult
+        // to override complex attributes.
+        if(i_target->tryGetAttr<TARGETING::ATTR_DYNAMIC_I2C_DEVICE_ADDRESS>(i2cInfo.devAddr))
+        {
+            TRACDCOMP(g_trac_eeprom,
+                     "Using DYNAMIC_I2C_DEVICE_ADDRESS %.2x for HUID %.8x",
+                      i2cInfo.devAddr,
+                      TARGETING::get_huid(i_target));
+        }
+
         //Check for the target at the I2C level
         l_present = I2C::i2cPresence(i2cMasterTarget,
                           i2cInfo.port,

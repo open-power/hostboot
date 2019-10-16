@@ -108,6 +108,18 @@ errlHndl_t fapiI2cPerformOp(DeviceFW::OperationType i_opType,
             break;
         }
 
+        // If the target has dynamic device address attribute, then use that instead of the
+        // read-only address found in ATTR_FAPI_I2C_CONTROL_INFO. We use the dynamic address
+        // attribute because ATTR_FAPI_I2C_CONTROL_INFO is not writable and its difficult
+        // to override complex attributes.
+        if(i_target->tryGetAttr<TARGETING::ATTR_DYNAMIC_I2C_DEVICE_ADDRESS>(l_i2cInfo.devAddr))
+        {
+            TRACDCOMP(g_trac_i2c,
+                     "Using DYNAMIC_I2C_DEVICE_ADDRESS %.2x for HUID %.8x",
+                      l_i2cInfo.devAddr,
+                      TARGETING::get_huid(i_target));
+        }
+
         // grab target pointer to master
         TARGETING::TargetService& ts = TARGETING::targetService();
         TARGETING::Target * i2cm = ts.toTarget(l_i2cInfo.i2cMasterPath);

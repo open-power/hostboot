@@ -569,6 +569,59 @@ errlHndl_t discoverMuxTargetsAndEnable(const Target &i_sysTarget)
     return l_err;
 }
 
+/**
+ * @brief Do presence detect on only PMIC targets and enable HWAS state
+ *
+ * @param[in] i_sysTarget the top level target (CLASS_SYS)
+ * @return    errlHndl_t  return nullptr if no error,
+ *                        else return a handle to an error entry
+ *
+ */
+errlHndl_t discoverPmicTargetsAndEnable(const Target &i_sysTarget)
+{
+    HWAS_INF(ENTER_MRK"discoverPmicTargetsAndEnable");
+
+    errlHndl_t l_err{nullptr};
+
+    do
+    {
+        // Only get PMIC targets
+        const PredicateCTM l_pmicPred(CLASS_ASIC, TYPE_PMIC);
+        TARGETING::PredicatePostfixExpr l_asicPredExpr;
+        l_asicPredExpr.push(&l_pmicPred);
+        TargetHandleList l_pPmicCheckPres;
+        targetService().getAssociated( l_pPmicCheckPres, (&i_sysTarget),
+            TargetService::CHILD, TargetService::ALL, &l_asicPredExpr);
+
+        // Do the presence detect on only PMIC targets
+        // NOTE: this function will remove any non-functional targets
+        //       from pPmicCheckPres
+        l_err = platPresenceDetect(l_pPmicCheckPres);
+
+        // If an issue with platPresenceDetect, then exit, returning
+        // error back to caller
+        if (nullptr != l_err)
+        {
+            break;
+        }
+
+        // Enable the HWAS State for the PMICs
+        const bool l_present(true);
+        const bool l_functional(true);
+        const uint32_t l_errlEid(0);
+        for (TargetHandle_t pTarget : l_pPmicCheckPres)
+        {
+            // set HWAS state to show PMIC is present and functional
+            enableHwasState(pTarget, l_present, l_functional, l_errlEid);
+        }
+    } while (0);
+
+    HWAS_INF(EXIT_MRK"discoverPmicTargetsAndEnable exit with %s",
+             (nullptr == l_err ? "no error" : "error"));
+
+    return l_err;
+}
+
 errlHndl_t discoverTargets()
 {
     HWAS_DBG("discoverTargets entry");
@@ -643,11 +696,13 @@ errlHndl_t discoverTargets()
         PredicateCTM predPmic(CLASS_ASIC, TYPE_PMIC);
         // We can ignore chips of TYPE_I2C_MUX because they
         // were already detected above in discoverMuxTargetsAndEnable
+        // Also we can ignore chips of type PMIC because they will be processed
+        // below.
         PredicateCTM predMux(CLASS_CHIP, TYPE_I2C_MUX);
         PredicatePostfixExpr checkExpr;
         checkExpr.push(&predChip).push(&predDimm).Or().push(&predEnc).Or().
-                  push(&predMcs).Or().push(&predPmic).Or().
-                  push(&predMux).Not().And();
+                  push(&predMcs).Or().push(&predMux).Not().And().
+                  push(&predPmic).Not().And();
 
         TargetHandleList pCheckPres;
         targetService().getAssociated( pCheckPres, pSys,
@@ -864,6 +919,16 @@ errlHndl_t discoverTargets()
             }
 
         } // for pTarget_it
+
+        // After processing all other targets look at the pmics,
+        // we must wait because we need the SPD cached from the OCMBs
+        // which occurs when OCMBs go through presence detection above
+        errl = discoverPmicTargetsAndEnable(*pSys);
+
+        if (errl != NULL)
+        {
+            break; // break out of the do/while so that we can return
+        }
 
         // Check for non-present Procs and if found, trigger
         // DeconfigGard::_invokeDeconfigureAssocProc() to run by setting

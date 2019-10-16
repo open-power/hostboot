@@ -27,7 +27,8 @@
 #include <fapi2/plat_hwp_invoker.H> // FAPI_INVOKE_HWP
 #include <trace/interface.H> // tracing includes
 
-#include <exp_getidec.H> // exp_getidec
+#include <exp_getidec.H>       // exp_getidec
+#include <pmic_i2c_addr_get.H> // get_pmic_i2c_addr
 
 trace_desc_t* g_trac_fapiwrap;
 TRAC_INIT(&g_trac_fapiwrap, FAPIWRAP_COMP_NAME, 6*KILOBYTE, TRACE::BUFFER_SLOW);
@@ -54,5 +55,11 @@ namespace FAPIWRAP
                         o_ec);
 
         return l_errl;
+    }
+
+    uint8_t get_pmic_dev_addr( const char* i_spd,
+                               const uint8_t i_pmic_id)
+    {
+        return get_pmic_i2c_addr(i_spd, i_pmic_id);
     }
 }
