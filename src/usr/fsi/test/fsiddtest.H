@@ -113,8 +113,6 @@ class FsiDDTest : public CxxTest::TestSuite
         } test_data[] = {
             //** Master Control Space
             // version number
-            //CMFSI MVER
-            { PROC0, 0x003074, 0x92010800, false, true },
             //MFSI MVER
             { PROC0, 0x003474, 0x92010800, false, true },
 
@@ -123,8 +121,6 @@ class FsiDDTest : public CxxTest::TestSuite
             { PROC0, 0x081000, 0x12345678, true, false },
             //CHIPID from SHIFT off cMFSI-0
             { PROC0, 0x031028, 0x160E9049, false, false },
-            //CMFSI MVER from Proc off MFSI-2
-            { PROC0, 0x103074, 0x92010800, false, false },
 
             //** Slave Regs
             //DATA_0 from FSI2PIB off MFSI-0
