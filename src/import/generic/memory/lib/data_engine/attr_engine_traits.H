@@ -1393,8 +1393,14 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
                 break;
 
             default:
-                // TODO Add FFDC
-                fapi2::Assert(false);
+                FAPI_ASSERT(false,
+                            fapi2::MSS_INVALID_SPD_RANK().
+                            set_FUNCTION(SET_SI_DRAM_RTT_NOM).
+                            set_RANK( i_efd_data->get_rank() ).
+                            set_TARGET(l_ocmb),
+                            "%s SPD decoder returned invalid rank: %d",
+                            spd::c_str(l_ocmb),
+                            i_efd_data->get_rank());
                 break;
         };
 
@@ -1484,8 +1490,14 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
                 break;
 
             default:
-                // TODO Add FFDC
-                fapi2::Assert(false);
+                FAPI_ASSERT(false,
+                            fapi2::MSS_INVALID_SPD_RANK().
+                            set_FUNCTION(SET_SI_DRAM_RTT_WR).
+                            set_RANK( i_efd_data->get_rank() ).
+                            set_TARGET(l_ocmb),
+                            "%s SPD decoder returned invalid rank: %d",
+                            spd::c_str(l_ocmb),
+                            i_efd_data->get_rank());
                 break;
         };
 
@@ -1580,8 +1592,14 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
                 break;
 
             default:
-                // TODO Add FFDC
-                fapi2::Assert(false);
+                FAPI_ASSERT(false,
+                            fapi2::MSS_INVALID_SPD_RANK().
+                            set_FUNCTION(SET_SI_DRAM_RTT_PARK).
+                            set_RANK( i_efd_data->get_rank() ).
+                            set_TARGET(l_ocmb),
+                            "%s SPD decoder returned invalid rank: %d",
+                            spd::c_str(l_ocmb),
+                            i_efd_data->get_rank());
                 break;
         };
 

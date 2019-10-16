@@ -505,6 +505,21 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_INVALID_SPD_RANK</rc>
+    <description>
+      Invalid rank passed into attribute engine.
+      May be due to problem in SPD.
+    </description>
+    <ffdc>FUNCTION</ffdc>
+    <ffdc>RANK</ffdc>
+    <ffdc>TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_INVALID_SPD_RESERVED_BITS</rc>
     <description>
         Invalid SPD reserved bits received.
