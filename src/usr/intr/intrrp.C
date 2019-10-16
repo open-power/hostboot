@@ -314,36 +314,37 @@ errlHndl_t IntrRp::clearAllIntFirs()
     return l_err;
 }
 
-errlHndl_t  IntrRp::setHbModeOnTctxtCfgReg()
+errlHndl_t  IntrRp::setHbModeOnTctxtCfgReg(intr_hdlr_t * i_procIntrHdlr)
 {
+    assert(i_procIntrHdlr != nullptr,"BUG! Input interrupt handler pointer "
+            "was nullptr");
+    auto * const l_procChip = i_procIntrHdlr->proc;
+    assert(l_procChip != nullptr,"BUG! proc target was nullptr");
+
     errlHndl_t l_err = nullptr;
     do{
-        TARGETING::TargetHandleList l_funcProcs;
-        getAllChips(l_funcProcs, TYPE_PROC);
         uint64_t scom_data = 0;
-        size_t    DATA_SIZE = sizeof(scom_data);
-        //Need to set this bit on all functional processors
-        for(const auto & l_procChip : l_funcProcs)
+        size_t   DATA_SIZE = sizeof(scom_data);
+        l_err = deviceRead( l_procChip,
+                            &scom_data,
+                            DATA_SIZE,
+                            DEVICE_SCOM_ADDRESS(INT_TCTXT_CFG_SCOM_ADDR) );
+        if( l_err)
         {
-            l_err = deviceRead(l_procChip,
-                                &scom_data,
-                                DATA_SIZE,
-                                DEVICE_SCOM_ADDRESS(INT_TCTXT_CFG_SCOM_ADDR));
-            if( l_err)
-            {
-                break;
-            }
-
-            scom_data |= INT_TCTXT_CFG_HB_MODE;
-            l_err = deviceWrite(l_procChip,
-                                &scom_data,
-                                DATA_SIZE,
-                                DEVICE_SCOM_ADDRESS(INT_TCTXT_CFG_SCOM_ADDR));
-            if( l_err)
-            {
-                break;
-            }
+            break;
         }
+
+        scom_data |= INT_TCTXT_CFG_HB_MODE;
+
+        l_err = deviceWrite(l_procChip,
+                            &scom_data,
+                            DATA_SIZE,
+                            DEVICE_SCOM_ADDRESS(INT_TCTXT_CFG_SCOM_ADDR));
+        if( l_err)
+        {
+            break;
+        }
+
     }while(0);
 
     return l_err;
@@ -408,7 +409,7 @@ errlHndl_t IntrRp::_init()
             break;
         }
 
-        l_err = setHbModeOnTctxtCfgReg();
+        l_err = setHbModeOnTctxtCfgReg(iv_masterHdlr);
 
         if (l_err)
         {
@@ -1014,6 +1015,8 @@ void IntrRp::msgHandler()
                                                                 l_pendingIntr;
                     uint32_t ackResponse =
                                         static_cast<uint32_t>(msg->data[0]>>32);
+                    TRACDCOMP(g_trac_intr, "IntrRp::msgHandler(): ackResponse = 0x%x", ackResponse);
+
                     //Check if LSI-Based Interrupt
                     if ((ackResponse & LSI_INTERRUPT) == LSI_INTERRUPT)
                     {

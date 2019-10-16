@@ -586,9 +586,11 @@ namespace INTR
             /**
              * Perform HW Functions to set Hostboot (HB) mode
              * on the INT_TCTXT Register for all functional procs
+             * @param[in] i_procIntrHdlr the interrupt handler for one chip
+             *            (must not be nullptr)
              * @return Errorlog from DeviceWrite
              */
-            errlHndl_t setHbModeOnTctxtCfgReg();
+            errlHndl_t setHbModeOnTctxtCfgReg(intr_hdlr_t * i_procIntrHdlr);
 
             /**
              * Perform HW Functions to acknowledge Interrupt which will
