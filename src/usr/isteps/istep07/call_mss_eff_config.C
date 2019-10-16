@@ -207,18 +207,11 @@ void*    call_mss_eff_config( void *io_pArgs )
 
     TARGETING::ATTR_MODEL_type l_procModel = TARGETING::targetService().getProcessorModel();
 
-    TARGETING::Target* l_sys = nullptr;
-    targetService().getTopLevelTarget(l_sys);
-    assert( l_sys != nullptr );
-
     TARGETING::TargetHandleList l_membufTargetList;
     TARGETING::TargetHandleList l_mcsTargetList;
     TARGETING::TargetHandleList l_memportTargetList;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>> l_fapi_ocmb_targets;
 
-    //TODO RTC: 202491 Ensure endianess in simics matches hardware
-    l_sys->setAttr<TARGETING::ATTR_MSS_OCMB_EXP_STRUCT_MMIO_ENDIAN_CTRL>(fapi2::ENUM_ATTR_MSS_OCMB_EXP_STRUCT_MMIO_ENDIAN_CTRL_NO_SWAP);
-    l_sys->setAttr<TARGETING::ATTR_MSS_OCMB_EXP_STRUCT_ENDIAN>(fapi2::ENUM_ATTR_MSS_OCMB_EXP_STRUCT_ENDIAN_LITTLE_ENDIAN);
 
     if(l_procModel == TARGETING::MODEL_CUMULUS)
     {
