@@ -40,20 +40,19 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
+#include <p10_mss_eff_grouping.H>
 #include <p10_htm_setup.H>
 #include <p10_htm_def.H>
 #include <p10_htm_start.H>
 #include <p10_htm_reset.H>
-//TODO: Update with Scom headers, remove unnecessary constants, remove P9 HW specific
-//      bug workarounds, make P10 specific changes.
+#include <p10_scom_proc.H>
+#include <p10_scom_c.H>
+#include <p10_scom_mcc.H>
 
 ///----------------------------------------------------------------------------
 /// Constants
 ///----------------------------------------------------------------------------
 const uint64_t IMA_EVENT_MASK_VALUE                            = 0x0004008000000000;
-const uint8_t NHTM_HTMSC_MODE_CAPTURE_ENABLE_FILTER_ALL_BIT    = 5;
-const uint8_t NHTM_HTMSC_MODE_CAPTURE_CRESP_MODE_BIT_START     = 6;
-const uint8_t NHTM_HTMSC_MODE_CAPTURE_LIMIT_MEM_ALLOCATION_BIT = 8;
 
 ///----------------------------------------------------------------------------
 /// Struct HTM_CTRL_attrs_t
@@ -186,54 +185,32 @@ fapi_try_exit:
 ///
 /// @param[in] i_target    Reference to core target
 ///
-/// @return FAPI2_RC_SUCCESS if success, else error code.
+// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode setup_CHTM_PDBAR(
     const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target)
 {
+    using namespace scomt;
+    using namespace scomt::c;
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
-    //fapi2::buffer<uint64_t> l_scomData(0);
+    fapi2::buffer<uint64_t> l_cHTM_pdbar(0);
     uint8_t l_uint8_attr = 0;
     uint64_t l_uint64_attr = 0;
-    uint8_t l_pos = 0;
 
     // Get the proc target to read attribute settings
-    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_proc =
-        i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_proc = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
 
-    // Get the EX parent of this core to program the register
-    // TODO: replace with EQ Target
-    //fapi2::Target<fapi2::TARGET_TYPE_EX> l_ex =
-    //    i_target.getParent<fapi2::TARGET_TYPE_EX>();
+    FAPI_TRY(PREP_NC_NCCHTM_NCCHTSC_HTM_IMA_PDBAR(i_target));
 
-    // Get this core's position
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_pos),
-             "Error getting ATTR_CHIP_UNIT_POS");
-
-    //// --------------------------------------
-    //// Attributes to setup CHTM_PDBAR reg
-    //// --------------------------------------
-
-    // ATTR_HTMSC_IMA_PDBAR_SPLIT_CORE_MODE
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_IMA_PDBAR_SPLIT_CORE_MODE, l_proc,
-                           l_uint8_attr),
-             "setup_CHTM_PDBAR: Error getting ATTR_HTMSC_IMA_PDBAR_SPLIT_CORE_MODE, "
-             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_HTMSC_IMA_PDBAR_SPLIT_CORE_MODE 0x%.8X", l_uint8_attr);
-    //(l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_IMA_PDBAR_SPLIT_CORE_MODE_DISABLE) ?
-    //l_scomData.clearBit<EX_HTM_IMA_PDBAR_HTMSC_ENABLE_SPLIT_CORE>() :
-    //l_scomData.setBit<EX_HTM_IMA_PDBAR_HTMSC_ENABLE_SPLIT_CORE>();
-
+    // P10 does not have Split Core functionality
     // ATTR_HTMSC_IMA_PDBAR_SCOPE
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_IMA_PDBAR_SCOPE, l_proc,
                            l_uint8_attr),
              "setup_CHTM_PDBAR: Error getting ATTR_HTMSC_IMA_PDBAR_SCOPE, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_IMA_PDBAR_SCOPE 0x%.8X", l_uint8_attr);
-    //l_scomData.insertFromRight<EX_HTM_IMA_PDBAR_HTMSC_SCOPE,
-    //                           EX_HTM_IMA_PDBAR_HTMSC_SCOPE_LEN>
-    //                           (l_uint8_attr);
+    SET_NC_NCCHTM_NCCHTSC_HTM_IMA_PDBAR_HTMSC_IMA_PDBAR_SCOPE(l_uint8_attr, l_cHTM_pdbar);
 
     // ATTR_HTMSC_IMA_PDBAR_ADDR
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_IMA_PDBAR_ADDR, l_proc,
@@ -241,19 +218,12 @@ fapi2::ReturnCode setup_CHTM_PDBAR(
              "setup_CHTM_PDBAR: Error getting ATTR_HTMSC_IMA_PDBAR_ADDR, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_IMA_PDBAR_ADDR 0x%.16llX", l_uint64_attr);
-    //// Bits 8:50
-    //l_scomData.insert<EX_HTM_IMA_PDBAR_HTMSC, EX_HTM_IMA_PDBAR_HTMSC_LEN,
-    //                  EX_HTM_IMA_PDBAR_HTMSC>(l_uint64_attr);
+    SET_NC_NCCHTM_NCCHTSC_HTM_IMA_PDBAR_HTMSC_IMA_PDBAR(l_uint64_attr, l_cHTM_pdbar);
 
-    //// Display CHTM_PDBAR reg setup value
-    //FAPI_INF("setupChtm: CHTM_PDBAR reg setup: 0x%016llX", l_scomData);
 
+    FAPI_INF("setupChtm: CHTM_PDBAR reg setup: 0x%016llX", l_cHTM_pdbar);
     //// Write HW
-    // TODO: replace with EQ Target
-    //FAPI_TRY(fapi2::putScom(l_ex,  CHTM_modeReg[l_pos % 2] + CHTM_PDBAR,
-    //                        l_scomData),
-    //         "setupChtm: putScom returns error: Addr 0x%016llX, l_rc 0x%.8X",
-    //         CHTM_modeReg[l_pos % 2] + CHTM_PDBAR,  (uint64_t)fapi2::current_err);
+    FAPI_TRY(PUT_NC_NCCHTM_NCCHTSC_HTM_IMA_PDBAR(i_target, l_cHTM_pdbar));
 
 fapi_try_exit:
     FAPI_DBG("Exiting");
@@ -271,27 +241,18 @@ fapi_try_exit:
 fapi2::ReturnCode setup_IMA_EVENT_MASK(
     const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target)
 {
+    using namespace scomt;
+    using namespace scomt::c;
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
-    fapi2::buffer<uint64_t> l_scomData(IMA_EVENT_MASK_VALUE);
-    uint8_t l_pos = 0;
-
-    // Get the EX parent of this core to program the register
-    // TODO: replace with EQ Target
-    //fapi2::Target<fapi2::TARGET_TYPE_EX> l_ex =
-    //    i_target.getParent<fapi2::TARGET_TYPE_EX>();
-
-    // Get this core's position
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_pos),
-             "Error getting ATTR_CHIP_UNIT_POS");
+    fapi2::buffer<uint64_t> l_mask_data(IMA_EVENT_MASK_VALUE);
 
     // Display IMA_EVENT_MASK reg setup value
-    FAPI_INF("setupChtm: IMA_EVENT_MASK reg setup: 0x%016llX", l_scomData);
+    FAPI_INF("setupChtm: IMA_EVENT_MASK reg setup: 0x%016llX", l_mask_data);
 
     //// Write HW
-    //FAPI_TRY(fapi2::putScom(l_ex, EX_IMA_EVENT_MASK, l_scomData),
-    //         "setup_IMA_EVENT_MASK: putScom returns error: Addr 0x%016llX, l_rc 0x%.8X",
-    //         EX_IMA_EVENT_MASK,  (uint64_t)fapi2::current_err);
+    FAPI_TRY(PREP_EC_PC_IMA_EVENT_MASK(i_target));
+    FAPI_TRY(PUT_EC_PC_IMA_EVENT_MASK(i_target, l_mask_data));
 
 fapi_try_exit:
     FAPI_DBG("Exiting");
@@ -308,15 +269,15 @@ fapi_try_exit:
 fapi2::ReturnCode setup_NHTM_FILT(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
-    // TODO: Replace uint*_attr vars with more specific variable names
-    //       Use ATTR_*_Type
+    using namespace scomt;
+    using namespace scomt::proc;
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
-    //fapi2::buffer<uint64_t> l_scomData(0);
+    fapi2::buffer<uint64_t> l_nHTM_filt_data(0);
     uint8_t l_uint8_attr = 0;
     uint32_t l_uint32_attr = 0;
 
-    // Setup data value to program NHTM_FILT reg
+    FAPI_TRY(PREP_PB_BRIDGE_NHTM_SC_HTM_FILT(i_target));
 
     // ATTR_HTMSC_FILT_PAT
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_PAT, i_target,
@@ -324,9 +285,7 @@ fapi2::ReturnCode setup_NHTM_FILT(
              "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_PAT, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_FILT_PAT        0x%.8X", l_uint32_attr);
-    //l_scomData.insertFromRight<PU_HTM0_HTM_FILT_HTMSC_PAT,
-    //                           PU_HTM0_HTM_FILT_HTMSC_PAT_LEN>
-    //                           (l_uint32_attr);
+    SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_TTAG_PAT(l_uint32_attr, l_nHTM_filt_data);
 
     // ATTR_HTMSC_FILT_CRESP_PAT
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_CRESP_PAT, i_target,
@@ -334,9 +293,7 @@ fapi2::ReturnCode setup_NHTM_FILT(
              "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_CRESP_PAT, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_FILT_CRESP_PAT  0x%.8X", l_uint8_attr);
-    //l_scomData.insertFromRight<PU_HTM0_HTM_FILT_HTMSC_CRESP_PAT,
-    //                           PU_HTM0_HTM_FILT_HTMSC_CRESP_PAT_LEN>
-    //                           (l_uint8_attr);
+    SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_CRESP_PAT(l_uint8_attr, l_nHTM_filt_data);
 
     // ATTR_HTMSC_FILT_MASK
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_MASK, i_target,
@@ -344,9 +301,7 @@ fapi2::ReturnCode setup_NHTM_FILT(
              "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_MASK, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_FILT_MASK       0x%.8X", l_uint32_attr);
-    //l_scomData.insertFromRight<PU_HTM0_HTM_FILT_HTMSC_MASK,
-    //                           PU_HTM0_HTM_FILT_HTMSC_MASK_LEN>
-    //                           (~l_uint32_attr);
+    SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_TTAG_MASK(~l_uint32_attr, l_nHTM_filt_data);
 
     // ATTR_HTMSC_FILT_CRESP_MASK
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_CRESP_MASK, i_target,
@@ -354,23 +309,13 @@ fapi2::ReturnCode setup_NHTM_FILT(
              "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_CRESP_MASK, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_FILT_CRESP_MASK 0x%.8X", l_uint8_attr);
-    //l_scomData.insertFromRight<PU_HTM0_HTM_FILT_HTMSC_CRESP_MASK,
-    //                           PU_HTM0_HTM_FILT_HTMSC_CRESP_MASK_LEN>
-    //                           (~l_uint8_attr);
+    SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_CRESP_MASK(~l_uint8_attr, l_nHTM_filt_data);
 
-    //// Display NHTM_FILT reg setup value
-    //FAPI_INF("setup_NHTM_FILT: NHTM_FILT reg setup: 0x%016llX",
-    //         l_scomData);
+    // Display NHTM_FILT reg setup value
+    FAPI_INF("setup_NHTM_FILT: NHTM_FILT reg setup: 0x%016llX", l_nHTM_filt_data);
 
-    //// Write HW, program both NHTM0 and NHTM1
-    //for (uint8_t ii = 0; ii < NUM_NHTM_ENGINES; ii++)
-    //{
-    //    FAPI_TRY(fapi2::putScom(i_target, NHTM_modeRegList[ii] + NHTM_FILT,
-    //                            l_scomData),
-    //             "setup_NHTM_FILT: putScom returns error: Addr 0x%016llX, "
-    //             "l_rc 0x%.8X", NHTM_modeRegList[ii] + NHTM_FILT,
-    //             (uint64_t)fapi2::current_err);
-    //}
+    // Write HW, program both NHTM0 and NHTM1, registers unified for P10
+    FAPI_TRY(PUT_PB_BRIDGE_NHTM_SC_HTM_FILT(i_target, l_nHTM_filt_data));
 
 fapi_try_exit:
     FAPI_DBG("Exiting");
@@ -389,12 +334,15 @@ fapi_try_exit:
 fapi2::ReturnCode setup_NHTM_TTYPE_FILT(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
+    using namespace scomt;
+    using namespace scomt::proc;
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
-    //fapi2::buffer<uint64_t> l_scomData(0);
+    fapi2::buffer<uint64_t> l_nHTM_t_filt_data(0);
     uint8_t l_uint8_attr = 0;
 
     // Setup data value to program NHTM_TTYPE_FILT reg
+    FAPI_TRY(PREP_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT(i_target));
 
     // ATTR_HTMSC_TTYPEFILT_PAT
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_TTYPEFILT_PAT, i_target,
@@ -402,9 +350,7 @@ fapi2::ReturnCode setup_NHTM_TTYPE_FILT(
              "setup_NHTM_TTYPE_FILT: Error getting ATTR_HTMSC_TTYPEFILT_PAT, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_TTYPEFILT_PAT        0x%.8X", l_uint8_attr);
-    //l_scomData.insertFromRight<PU_HTM0_HTM_TTYPEFILT_HTMSC_PAT,
-    //                           PU_HTM0_HTM_TTYPEFILT_HTMSC_PAT_LEN>
-    //                           (l_uint8_attr);
+    SET_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT_TTYPEFILT_PAT(l_uint8_attr, l_nHTM_t_filt_data);
 
     // ATTR_HTMSC_TSIZEFILT_PAT
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_TSIZEFILT_PAT, i_target,
@@ -412,9 +358,7 @@ fapi2::ReturnCode setup_NHTM_TTYPE_FILT(
              "setup_NHTM_TTYPE_FILT: Error getting ATTR_HTMSC_TSIZEFILT_PAT, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_TSIZEFILT_PAT        0x%.8X", l_uint8_attr);
-    //l_scomData.insertFromRight<PU_HTM0_HTM_TTYPEFILT_HTMSC_TSIZEFILT_PAT,
-    //                           PU_HTM0_HTM_TTYPEFILT_HTMSC_TSIZEFILT_PAT_LEN>
-    //                           (l_uint8_attr);
+    SET_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT_TSIZEFILT_PAT(l_uint8_attr, l_nHTM_t_filt_data);
 
     // Set ATTR_HTMSC_TTYPEFILT_MASK
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_TTYPEFILT_MASK, i_target,
@@ -422,9 +366,7 @@ fapi2::ReturnCode setup_NHTM_TTYPE_FILT(
              "setup_NHTM_TTYPE_FILT: Error getting ATTR_HTMSC_TTYPEFILT_MASK, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_TTYPEFILT_MASK       0x%.8X", l_uint8_attr);
-    //l_scomData.insertFromRight<PU_HTM0_HTM_TTYPEFILT_HTMSC_MASK,
-    //                           PU_HTM0_HTM_TTYPEFILT_HTMSC_MASK_LEN>
-    //                           (~l_uint8_attr);
+    SET_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT_TTYPEFILT_MASK(~l_uint8_attr, l_nHTM_t_filt_data);
 
     // ATTR_HTMSC_TSIZEFILT_MASK
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_TSIZEFILT_MASK, i_target,
@@ -432,9 +374,7 @@ fapi2::ReturnCode setup_NHTM_TTYPE_FILT(
              "setup_NHTM_TTYPE_FILT: Error getting ATTR_HTMSC_TSIZEFILT_MASK, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_TSIZEFILT_MASK       0x%.8X", l_uint8_attr);
-    //l_scomData.insertFromRight<PU_HTM0_HTM_TTYPEFILT_HTMSC_TSIZEFILT_MASK,
-    //                           PU_HTM0_HTM_TTYPEFILT_HTMSC_TSIZEFILT_MASK_LEN>
-    //                           (~l_uint8_attr);
+    SET_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT_TSIZEFILT_MASK(~l_uint8_attr, l_nHTM_t_filt_data);
 
     // ATTR_HTMSC_TTYPEFILT_INVERT
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_TTYPEFILT_INVERT, i_target,
@@ -442,9 +382,9 @@ fapi2::ReturnCode setup_NHTM_TTYPE_FILT(
              "setup_NHTM_TTYPE_FILT: Error getting ATTR_HTMSC_TTYPEFILT_INVERT, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_TTYPEFILT_INVERT     0x%.8X", l_uint8_attr);
-    //(l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_TTYPEFILT_INVERT_MATCH) ?
-    //l_scomData.clearBit<PU_HTM0_HTM_TTYPEFILT_HTMSC_INVERT>() :
-    //l_scomData.setBit<PU_HTM0_HTM_TTYPEFILT_HTMSC_INVERT>();
+    (l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_TTYPEFILT_INVERT_MATCH) ?
+    SET_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT_TTYPEFILT_INVERT(l_nHTM_t_filt_data) :
+    CLEAR_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT_TTYPEFILT_INVERT(l_nHTM_t_filt_data);
 
     // ATTR_HTMSC_CRESPFILT_INVERT
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_CRESPFILT_INVERT, i_target,
@@ -452,22 +392,14 @@ fapi2::ReturnCode setup_NHTM_TTYPE_FILT(
              "setup_NHTM_TTYPE_FILT: Error getting ATTR_HTMSC_CRESPFILT_INVERT, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_CRESPFILT_INVERT     0x%.8X", l_uint8_attr);
-    //(l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_CRESPFILT_INVERT_MATCH) ?
-    //l_scomData.clearBit<PU_HTM0_HTM_TTYPEFILT_HTMSC_CRESPFILT_INVERT>() :
-    //l_scomData.setBit<PU_HTM0_HTM_TTYPEFILT_HTMSC_CRESPFILT_INVERT>();
+    (l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_CRESPFILT_INVERT_MATCH) ?
+    SET_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT_CRESPFILT_INVERT(l_nHTM_t_filt_data) :
+    CLEAR_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT_CRESPFILT_INVERT(l_nHTM_t_filt_data);
 
-    //// Display NHTM_TTYPE_FILT reg setup value
-    //FAPI_INF("setupNhtm: NHTM_TTYPE_FILT reg setup: 0x%016llX", l_scomData);
+    // Display NHTM_TTYPE_FILT reg setup value
+    FAPI_INF("setupNhtm: NHTM_TTYPE_FILT reg setup: 0x%016llX", l_nHTM_t_filt_data);
 
-    //// Write HW, program both NHTM0 and NHTM1
-    //for (uint8_t ii = 0; ii < NUM_NHTM_ENGINES; ii++)
-    //{
-    //    FAPI_TRY(fapi2::putScom(i_target, NHTM_modeRegList[ii] + NHTM_TTYPE_FILT,
-    //                            l_scomData),
-    //             "setup_NHTM_TTYPE_FILT: putScom returns error: Addr 0x%016llX, "
-    //             "l_rc 0x%.8X", NHTM_modeRegList[ii] + NHTM_TTYPE_FILT,
-    //             (uint64_t)fapi2::current_err);
-    //}
+    FAPI_TRY(PUT_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT(i_target, l_nHTM_t_filt_data));
 
 fapi_try_exit:
     FAPI_DBG("Exiting");
@@ -492,67 +424,58 @@ template<>
 fapi2::ReturnCode setup_HTM_CTRL(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
+    using namespace scomt;
+    using namespace scomt::proc;
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
-    //fapi2::buffer<uint64_t> l_scomData(0);
+    fapi2::buffer<uint64_t> l_nHTM_ctrl_data(0);
     HTM_CTRL_attrs_t l_HTM_CTRL;
-
-    // Setup data value to program HTM_CTRL reg
-    // Note: Register bit definitions are the same for both NHTM0 and NHTM1
 
     // Get the proc attributes needed to perform HTM_CTRL setup
     FAPI_TRY(l_HTM_CTRL.getAttrs(i_target),
              "l_HTM_CTRL.getAttrs() returns an error, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
-    //// Set CTRL_TRIG
-    //l_scomData.insertFromRight <PU_HTM0_HTM_CTRL_HTMSC_TRIG,
-    //                           PU_HTM0_HTM_CTRL_HTMSC_TRIG_LEN>
-    //                           (l_HTM_CTRL.iv_nhtmCtrlTrig);
+    FAPI_TRY(PREP_PB_BRIDGE_NHTM_SC_HTM_CTRL(i_target));
 
-    //// Set CTRL_MARK
-    //l_scomData.insertFromRight <PU_HTM0_HTM_CTRL_HTMSC_MARK,
-    //                           PU_HTM0_HTM_CTRL_HTMSC_MARK_LEN>
-    //                           (l_HTM_CTRL.iv_nhtmCtrlMark);
+    // Set CTRL_TRIG
 
-    //// Set CTRL_DBG0_STOP
-    //(l_HTM_CTRL.iv_ctrlDbg0Stop == fapi2::ENUM_ATTR_HTMSC_CTRL_DBG0_STOP_DISABLE) ?
-    //l_scomData.clearBit<PU_HTM0_HTM_CTRL_HTMSC_DBG0_STOP>() :
-    //l_scomData.setBit<PU_HTM0_HTM_CTRL_HTMSC_DBG0_STOP>();
+    SET_PB_BRIDGE_NHTM_SC_HTM_CTRL_TRIG(l_HTM_CTRL.iv_nhtmCtrlTrig, l_nHTM_ctrl_data);
 
-    //// Set CTRL_DBG1_STOP
-    //(l_HTM_CTRL.iv_ctrlDbg1Stop == fapi2::ENUM_ATTR_HTMSC_CTRL_DBG1_STOP_DISABLE) ?
-    //l_scomData.clearBit<PU_HTM0_HTM_CTRL_HTMSC_DBG1_STOP>() :
-    //l_scomData.setBit<PU_HTM0_HTM_CTRL_HTMSC_DBG1_STOP>();
+    // Set CTRL_MARK
+    SET_PB_BRIDGE_NHTM_SC_HTM_CTRL_MARK(l_HTM_CTRL.iv_nhtmCtrlMark, l_nHTM_ctrl_data);
 
-    //// Set CTRL_RUN_STOP
-    //(l_HTM_CTRL.iv_ctrlRunStop == fapi2::ENUM_ATTR_HTMSC_CTRL_RUN_STOP_DISABLE) ?
-    //l_scomData.clearBit<PU_HTM0_HTM_CTRL_HTMSC_RUN_STOP>() :
-    //l_scomData.setBit<PU_HTM0_HTM_CTRL_HTMSC_RUN_STOP>();
+    // Set CTRL_DBG0_STOP
+    (l_HTM_CTRL.iv_ctrlDbg0Stop == fapi2::ENUM_ATTR_HTMSC_CTRL_DBG0_STOP_DISABLE) ?
+    SET_PB_BRIDGE_NHTM_SC_HTM_CTRL_DBG0_STOP(l_nHTM_ctrl_data) :
+    CLEAR_PB_BRIDGE_NHTM_SC_HTM_CTRL_DBG0_STOP(l_nHTM_ctrl_data);
 
-    //// Set CTRL_OTHER_DBG0_STOP
-    //(l_HTM_CTRL.iv_ctrlOtherDbg0Stop == fapi2::ENUM_ATTR_HTMSC_CTRL_OTHER_DBG0_STOP_DISABLE) ?
-    //l_scomData.clearBit<PU_HTM0_HTM_CTRL_HTMSC_OTHER_DBG0_STOP>() :
-    //l_scomData.setBit<PU_HTM0_HTM_CTRL_HTMSC_OTHER_DBG0_STOP>();
+    // Set CTRL_DBG1_STOP
+    (l_HTM_CTRL.iv_ctrlDbg1Stop == fapi2::ENUM_ATTR_HTMSC_CTRL_DBG1_STOP_DISABLE) ?
+    SET_PB_BRIDGE_NHTM_SC_HTM_CTRL_DBG1_STOP(l_nHTM_ctrl_data) :
+    CLEAR_PB_BRIDGE_NHTM_SC_HTM_CTRL_DBG1_STOP(l_nHTM_ctrl_data);
 
-    //// Set CTRL_XSTOP_STOP
-    //(l_HTM_CTRL.iv_ctrlXstopStop == fapi2::ENUM_ATTR_HTMSC_CTRL_XSTOP_STOP_DISABLE) ?
-    //l_scomData.clearBit<PU_HTM0_HTM_CTRL_HTMSC_XSTOP_STOP>() :
-    //l_scomData.setBit<PU_HTM0_HTM_CTRL_HTMSC_XSTOP_STOP>();
+    // Set CTRL_RUN_STOP
+    (l_HTM_CTRL.iv_ctrlRunStop == fapi2::ENUM_ATTR_HTMSC_CTRL_RUN_STOP_DISABLE) ?
+    SET_PB_BRIDGE_NHTM_SC_HTM_CTRL_RUN_STOP(l_nHTM_ctrl_data) :
+    CLEAR_PB_BRIDGE_NHTM_SC_HTM_CTRL_RUN_STOP(l_nHTM_ctrl_data);
 
-    //// Display HTM_CTRL reg setup value
-    //FAPI_INF("setup_HTM_CTRL: HTM_CTRL reg setup: 0x%016llX", l_scomData);
+    // Set CTRL_OTHER_DBG0_STOP
+    (l_HTM_CTRL.iv_ctrlOtherDbg0Stop == fapi2::ENUM_ATTR_HTMSC_CTRL_OTHER_DBG0_STOP_DISABLE) ?
+    SET_PB_BRIDGE_NHTM_SC_HTM_CTRL_OTHER_DBG0_STOP(l_nHTM_ctrl_data) :
+    CLEAR_PB_BRIDGE_NHTM_SC_HTM_CTRL_OTHER_DBG0_STOP(l_nHTM_ctrl_data);
 
-    //// Write data to HTM_CTRL
-    //// Program both NHTM0 and NHTM1
-    //for (uint8_t ii = 0; ii < NUM_NHTM_ENGINES; ii++)
-    //{
-    //    FAPI_TRY(fapi2::putScom(i_target, NHTM_modeRegList[ii] + HTM_CTRL,
-    //                            l_scomData),
-    //             "setup_HTM_CTRL: putScom returns error: Addr 0x%016llX, "
-    //             "l_rc 0x%.8X", NHTM_modeRegList[ii],
-    //             (uint64_t)fapi2::current_err);
-    //}
+    // Set CTRL_XSTOP_STOP
+    (l_HTM_CTRL.iv_ctrlXstopStop == fapi2::ENUM_ATTR_HTMSC_CTRL_XSTOP_STOP_DISABLE) ?
+    SET_PB_BRIDGE_NHTM_SC_HTM_CTRL_XSTOP_STOP(l_nHTM_ctrl_data) :
+    CLEAR_PB_BRIDGE_NHTM_SC_HTM_CTRL_XSTOP_STOP(l_nHTM_ctrl_data);
+
+    // Display HTM_CTRL reg setup value
+    FAPI_INF("setup_HTM_CTRL: HTM_CTRL reg setup: 0x%016llX", l_nHTM_ctrl_data);
+
+    // Write data to HTM_CTRL
+    // Program both NHTM0 and NHTM1
+    FAPI_TRY(PUT_PB_BRIDGE_NHTM_SC_HTM_CTRL(i_target, l_nHTM_ctrl_data));
 
 fapi_try_exit:
     FAPI_DBG("Exiting");
@@ -570,7 +493,7 @@ fapi2::ReturnCode setup_HTM_CTRL(
     fapi2::ReturnCode l_rc;
 
     // For IMA trace, no need to program HTM_CTRL.
-    // Place holder for other CHTM trace setup when they are suppored.
+    // Place holder for other CHTM trace setup when they are supported.
 
     FAPI_DBG("Exiting");
     return fapi2::current_err;
@@ -678,6 +601,7 @@ fapi_try_exit:
 template<fapi2::TargetType T>
 fapi2::ReturnCode setup_HTM_MEM(const fapi2::Target<T>& i_target);
 
+
 ///
 /// TARGET_TYPE_PROC_CHIP (NHTM trace)
 ///
@@ -685,17 +609,18 @@ template<>
 fapi2::ReturnCode setup_HTM_MEM(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
+    using namespace scomt;
+    using namespace scomt::proc;
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
-    //fapi2::buffer<uint64_t> l_scomData;
+    fapi2::buffer<uint64_t> l_HTM_mem_data;
     uint8_t l_uint8_attr = 0;
     htm_size_t l_barHtmSize;
     bool l_smallSize;
     uint64_t l_barAddr;
     uint64_t l_barSize;
 
-    // Setup data value to program HTM_MEM reg
-    // Note: Register bit definitions are the same for both NHTM0 and NHTM1
+    FAPI_TRY(PREP_PB_BRIDGE_NHTM_SC_HTM_MEM(i_target));
 
     // ATTR_PROC_NHTM_BAR_BASE_ADDR
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_NHTM_BAR_BASE_ADDR, i_target,
@@ -709,32 +634,28 @@ fapi2::ReturnCode setup_HTM_MEM(
              "setup_HTM_MEM: Error getting ATTR_PROC_NHTM_BAR_SIZE, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
 
-    //l_scomData = 0;
+    l_HTM_mem_data = 0;
 
     // ATTR_HTMSC_MEM_SCOPE
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MEM_SCOPE, i_target, l_uint8_attr),
              "setup_HTM_MEM: Error getting ATTR_HTMSC_MEM_SCOPE, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_MEM_SCOPE            0x%.8X", l_uint8_attr);
-    //l_scomData.insertFromRight<PU_HTM0_HTM_MEM_HTMSC_SCOPE,
-    //                           PU_HTM0_HTM_MEM_HTMSC_SCOPE_LEN>
-    //                           (l_uint8_attr);
+    SET_PB_BRIDGE_NHTM_SC_HTM_MEM_SCOPE(l_uint8_attr, l_HTM_mem_data);
 
     // ATTR_HTMSC_MEM_PRIORITY
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MEM_PRIORITY, i_target, l_uint8_attr),
              "setup_HTM_MEM: Error getting ATTR_HTMSC_MEM_PRIORITY, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_MEM_PRIORITY         0x%.8X", l_uint8_attr);
-    //(l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MEM_PRIORITY_LOW) ?
-    //l_scomData.clearBit<PU_HTM0_HTM_MEM_HTMSC_PRIORITY>() :   // LOW
-    //l_scomData.setBit<PU_HTM0_HTM_MEM_HTMSC_PRIORITY>();      // HIGH
+    (l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MEM_PRIORITY_LOW) ?
+    SET_PB_BRIDGE_NHTM_SC_HTM_MEM_PRIORITY(l_HTM_mem_data) :
+    CLEAR_PB_BRIDGE_NHTM_SC_HTM_MEM_PRIORITY(l_HTM_mem_data);
 
     // Set base addr
     // Right shift PROC HTM Bar Base addr 24 bits to align to 16MB trace memory.
     FAPI_DBG("  ATTR_PROC_NHTM_BAR_BASE_ADDR 0x%.16llX", l_barAddr);
-    //l_scomData.insertFromRight<PU_HTM0_HTM_MEM_HTMSC_BASE,
-    //                           PU_HTM0_HTM_MEM_HTMSC_BASE_LEN>
-    //                           (l_barAddr >> 24);
+    SET_PB_BRIDGE_NHTM_SC_HTM_MEM_BASE(l_barAddr >> 24, l_HTM_mem_data);
 
     // Get HTM size
     FAPI_TRY(getTraceMemSizeValues(l_barSize, l_barHtmSize, l_smallSize),
@@ -744,38 +665,23 @@ fapi2::ReturnCode setup_HTM_MEM(
     // Set bar size (ATTR_PROC_NHTM_BAR_SIZES)
     FAPI_DBG("  ATTR_PROC_NHTM_BAR_SIZE  0x%.16llX", l_barSize);
     FAPI_DBG("  HTMSC_SIZE 0x%.16llX", l_barHtmSize);
-    //l_scomData.insertFromRight<PU_HTM0_HTM_MEM_HTMSC_SIZE,
-    //                           PU_HTM0_HTM_MEM_HTMSC_SIZE_LEN>
-    //                           (l_barHtmSize);
+    SET_PB_BRIDGE_NHTM_SC_HTM_MEM_SIZE(l_barHtmSize, l_HTM_mem_data);
 
     // Set mem size
-    FAPI_DBG("  Small Mem Size[%u]          0x%.8X", (uint32_t)l_smallSize);
-    //(l_smallSize == true) ?
-    //l_scomData.setBit<PU_HTM0_HTM_MEM_HTMSC_SIZE_SMALL>() :
-    //l_scomData.clearBit<PU_HTM0_HTM_MEM_HTMSC_SIZE_SMALL>();
+    FAPI_DBG("  Small Mem Size          0x%.8X", (uint32_t)l_smallSize);
+    (l_smallSize == true) ?
+    SET_PB_BRIDGE_NHTM_SC_HTM_MEM_SIZE_SMALL(l_HTM_mem_data) :
+    CLEAR_PB_BRIDGE_NHTM_SC_HTM_MEM_SIZE_SMALL(l_HTM_mem_data);
 
     // Display HTM_MEM value to write to HW
-    //FAPI_INF("setup_HTM_MEM: HTM_MEM reg setup: 0x%016llX", l_scomData);
+    FAPI_INF("setup_HTM_MEM: HTM_MEM reg setup: 0x%016llX", l_HTM_mem_data);
 
     // Write config data into HTM_MEM
-    // Note: Yes, write same value to both engines.
-    //for (uint8_t ii = 0; ii < NUM_NHTM_ENGINES; ii++)
-    //{
-    //    // MEM_ALLOC must switch from 0->1 for this setup to complete
-    //    l_scomData.clearBit<PU_HTM0_HTM_MEM_HTMSC_ALLOC>();
-    //    FAPI_TRY(fapi2::putScom(i_target, NHTM_modeRegList[ii] + HTM_MEM,
-    //                            l_scomData),
-    //             "setup_HTM_MEM: putScom returns error (1): Addr 0x%016llX, "
-    //             "l_rc 0x%.8X",  NHTM_modeRegList[ii] + HTM_MEM,
-    //             (uint64_t)fapi2::current_err);
-
-    //    l_scomData.setBit<PU_HTM0_HTM_MEM_HTMSC_ALLOC>();
-    //    FAPI_TRY(fapi2::putScom(i_target, NHTM_modeRegList[ii] + HTM_MEM,
-    //                            l_scomData),
-    //             "setup_HTM_MEM: putScom returns error (2): Addr 0x%016llX, "
-    //             "l_rc 0x%.8X", NHTM_modeRegList[ii] + HTM_MEM,
-    //             (uint64_t)fapi2::current_err);
-    //}
+    // MEM_ALLOC must switch from 0->1 for this setup to complete
+    CLEAR_PB_BRIDGE_NHTM_SC_HTM_MEM_ALLOC(l_HTM_mem_data);
+    FAPI_TRY(PUT_PB_BRIDGE_NHTM_SC_HTM_MEM(i_target, l_HTM_mem_data));
+    SET_PB_BRIDGE_NHTM_SC_HTM_MEM_ALLOC(l_HTM_mem_data);
+    FAPI_TRY(PUT_PB_BRIDGE_NHTM_SC_HTM_MEM(i_target, l_HTM_mem_data));
 
 fapi_try_exit:
     FAPI_DBG("Exiting");
@@ -821,19 +727,22 @@ fapi2::ReturnCode setup_HTM_MODE(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint8_t i_traceType)
 {
+    using namespace scomt;
+    using namespace scomt::proc;
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
-    //fapi2::buffer<uint64_t> l_scomData(0);
+    fapi2::buffer<uint64_t> l_HTM_mode_data(0);
     uint8_t l_uint8_attr = 0;
+    uint16_t l_uint16_attr = 0;
     uint32_t l_uint32_attr = 0;
 
     // Setup data value to program HTM_MODE reg
     // Note:
-    //    - Register bit definitions are the same for both NHTM0 and NHTM1
     //    - i_traceType may be needed later when more trace type is supported.
 
     // Enable HTM
-    //l_scomData.setBit<PU_HTM0_HTM_MODE_HTMSC_ENABLE>();
+    FAPI_TRY(PREP_PB_BRIDGE_NHTM_SC_HTM_MODE(i_target));
+    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_HTM_ENABLE(l_HTM_mode_data);
 
     // ATTR_NHTM_HTMSC_MODE_CONTENT_SEL
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NHTM_HTMSC_MODE_CONTENT_SEL, i_target,
@@ -841,64 +750,16 @@ fapi2::ReturnCode setup_HTM_MODE(
              "setup_HTM_MODE: Error getting ATTR_NHTM_HTMSC_MODE_CONTENT_SEL, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_NHTM_HTMSC_MODE_CONTENT_SEL      0x%.8X", l_uint8_attr);
-    //l_scomData.insertFromRight<PU_HTM0_HTM_MODE_HTMSC_CONTENT_SEL,
-    //                           PU_HTM0_HTM_MODE_HTMSC_CONTENT_SEL_LEN>
-    //                           (l_uint8_attr);
+    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_CONTENT_SEL(l_uint8_attr, l_HTM_mode_data);
 
-    // ATTR_NHTM_HTMSC_MODE_CAPTURE_GENERATED_WRITES
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NHTM_HTMSC_MODE_CAPTURE_GENERATED_WRITES,
-                           i_target, l_uint8_attr),
-             "setup_HTM_MODE: Error getting ATTR_NHTM_HTMSC_MODE_CAPTURE_GENERATED_WRITES, "
+    // ATTR_NHTM_HTMSC_MODE_CAPTURE
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NHTM_HTMSC_MODE_CAPTURE,
+                           i_target, l_uint16_attr),
+             "setup_HTM_MODE: Error getting ATTR_NHTM_HTMSC_MODE_CAPTURE, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_NHTM_HTMSC_MODE_CAPTURE_GENERATED_WRITES 0x%.8X", l_uint8_attr);
-    //(l_uint8_attr == fapi2::ENUM_ATTR_NHTM_HTMSC_MODE_CAPTURE_GENERATED_WRITES_DISABLE) ?
-    //l_scomData.clearBit<PU_HTM0_HTM_MODE_HTMSC_CAPTURE>() :
-    //l_scomData.setBit<PU_HTM0_HTM_MODE_HTMSC_CAPTURE>();
+    FAPI_DBG("  ATTR_NHTM_HTMSC_MODE_CAPTURE_GENERATED_WRITES 0x%.8X", l_uint16_attr);
 
-    // ATTR_NHTM_HTMSC_MODE_CAPTURE_ENABLE_FILTER_ALL
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NHTM_HTMSC_MODE_CAPTURE_ENABLE_FILTER_ALL,
-                           i_target, l_uint8_attr),
-             "setup_HTM_MODE: Error getting ATTR_NHTM_HTMSC_MODE_CAPTURE_ENABLE_FILTER_ALL, "
-             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_NHTM_HTMSC_MODE_CAPTURE_ENABLE_FILTER_ALL 0x%.8X", l_uint8_attr);
-    //(l_uint8_attr == fapi2::ENUM_ATTR_NHTM_HTMSC_MODE_CAPTURE_ENABLE_FILTER_ALL_DISABLE) ?
-    //l_scomData.clearBit<NHTM_HTMSC_MODE_CAPTURE_ENABLE_FILTER_ALL_BIT>() :
-    //l_scomData.setBit<NHTM_HTMSC_MODE_CAPTURE_ENABLE_FILTER_ALL_BIT>();
-
-    // ATTR_NHTM_HTMSC_MODE_CAPTURE_PRECISE_CRESP_MODE
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NHTM_HTMSC_MODE_CAPTURE_PRECISE_CRESP_MODE,
-                           i_target, l_uint8_attr),
-             "setup_HTM_MODE: Error getting ATTR_NHTM_HTMSC_MODE_CAPTURE_PRECISE_CRESP_MODE, "
-             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_NHTM_HTMSC_MODE_CAPTURE_PRECISE_CRESP_MODE 0x%.8X", l_uint8_attr);
-    //// Clear CRESP mode bits (6:7)
-    //l_scomData.clearBit<NHTM_HTMSC_MODE_CAPTURE_CRESP_MODE_BIT_START, 2>();
-
-    //if (l_uint8_attr == fapi2::ENUM_ATTR_NHTM_HTMSC_MODE_CAPTURE_PRECISE_CRESP_MODE_ENABLE)
-    //{
-    //    // Set bits 6:7 to 0b10 for Precise cresp mode
-    //    l_scomData.setBit<NHTM_HTMSC_MODE_CAPTURE_CRESP_MODE_BIT_START>();
-    //}
-
-    // ATTR_NHTM_HTMSC_MODE_CAPTURE_LIMIT_MEM_ALLOCATION
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NHTM_HTMSC_MODE_CAPTURE_LIMIT_MEM_ALLOCATION,
-                           i_target, l_uint8_attr),
-             "setup_HTM_MODE: Error getting ATTR_NHTM_HTMSC_MODE_CAPTURE_LIMIT_MEM_ALLOCATION, "
-             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_NHTM_HTMSC_MODE_CAPTURE_LIMIT_MEM_ALLOCATION 0x%.8X", l_uint8_attr);
-    //(l_uint8_attr == fapi2::ENUM_ATTR_NHTM_HTMSC_MODE_CAPTURE_LIMIT_MEM_ALLOCATION_DISABLE) ?
-    //l_scomData.clearBit<NHTM_HTMSC_MODE_CAPTURE_LIMIT_MEM_ALLOCATION_BIT>() :
-    //l_scomData.setBit<NHTM_HTMSC_MODE_CAPTURE_LIMIT_MEM_ALLOCATION_BIT>();
-
-    // ATTR_NHTM_HTMSC_MODE_CAPTURE_PMISC_ONLY_CMD
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NHTM_HTMSC_MODE_CAPTURE_PMISC_ONLY_CMD,
-                           i_target, l_uint8_attr),
-             "setup_HTM_MODE: Error getting ATTR_NHTM_HTMSC_MODE_CAPTURE_PMISC_ONLY_CMD, "
-             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_NHTM_HTMSC_MODE_CAPTURE_PMISC_ONLY_CMD 0x%.8X", l_uint8_attr);
-    //(l_uint8_attr == fapi2::ENUM_ATTR_NHTM_HTMSC_MODE_CAPTURE_PMISC_ONLY_CMD_DISABLE) ?
-    //l_scomData.clearBit<NHTM_HTMSC_MODE_CAPTURE_LIMIT_MEM_ALLOCATION_BIT>() :
-    //l_scomData.setBit<NHTM_HTMSC_MODE_CAPTURE_LIMIT_MEM_ALLOCATION_BIT>();
+    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_CAPTURE(l_uint16_attr, l_HTM_mode_data);
 
     // ATTR_HTMSC_MODE_WRAP
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MODE_WRAP, i_target,
@@ -906,9 +767,9 @@ fapi2::ReturnCode setup_HTM_MODE(
              "setup_HTM_MODE: Error getting ATTR_HTMSC_MODE_WRAP, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_MODE_WRAP                  0x%.8X", l_uint8_attr);
-    //(l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_WRAP_DISABLE) ?
-    //l_scomData.clearBit<PU_HTM0_HTM_MODE_HTMSC_WRAP>() :
-    //l_scomData.setBit<PU_HTM0_HTM_MODE_HTMSC_WRAP>();
+    (l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_WRAP_DISABLE) ?
+    CLEAR_PB_BRIDGE_NHTM_SC_HTM_MODE_WRAP(l_HTM_mode_data) :
+    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_WRAP(l_HTM_mode_data);
 
     // ATTR_HTMSC_MODE_DIS_TSTAMP
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MODE_DIS_TSTAMP, i_target,
@@ -916,9 +777,9 @@ fapi2::ReturnCode setup_HTM_MODE(
              "setup_HTM_MODE: Error getting ATTR_HTMSC_MODE_DIS_TSTAMP, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_MODE_DIS_TSTAMP            0x%.8X", l_uint8_attr);
-    //(l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_DIS_TSTAMP_DISABLE) ?
-    //l_scomData.setBit<PU_HTM0_HTM_MODE_HTMSC_DIS_TSTAMP>() :
-    //l_scomData.clearBit<PU_HTM0_HTM_MODE_HTMSC_DIS_TSTAMP>();
+    (l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_DIS_TSTAMP_DISABLE) ?
+    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_DIS_TSTAMP(l_HTM_mode_data) :
+    CLEAR_PB_BRIDGE_NHTM_SC_HTM_MODE_DIS_TSTAMP(l_HTM_mode_data);
 
     // ATTR_HTMSC_MODE_SINGLE_TSTAMP
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MODE_SINGLE_TSTAMP, i_target,
@@ -926,9 +787,9 @@ fapi2::ReturnCode setup_HTM_MODE(
              "setup_HTM_MODE: Error getting ATTR_HTMSC_MODE_SINGLE_TSTAMP, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_MODE_SINGLE_TSTAMP         0x%.8X", l_uint8_attr);
-    //(l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_SINGLE_TSTAMP_DISABLE) ?
-    //l_scomData.clearBit<PU_HTM0_HTM_MODE_HTMSC_SINGLE_TSTAMP>() :
-    //l_scomData.setBit<PU_HTM0_HTM_MODE_HTMSC_SINGLE_TSTAMP>();
+    (l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_SINGLE_TSTAMP_DISABLE) ?
+    CLEAR_PB_BRIDGE_NHTM_SC_HTM_MODE_SINGLE_TSTAMP(l_HTM_mode_data) :
+    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_SINGLE_TSTAMP(l_HTM_mode_data);
 
     // ATTR_HTMSC_MODE_MARKERS_ONLY
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MODE_MARKERS_ONLY, i_target,
@@ -936,9 +797,9 @@ fapi2::ReturnCode setup_HTM_MODE(
              "setup_HTM_MODE: Error getting ATTR_HTMSC_MODE_MARKERS_ONLY, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_MODE_MARKERS_ONLY          0x%.8X", l_uint8_attr);
-    //(l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_MARKERS_ONLY_DISABLE) ?
-    //l_scomData.clearBit<PU_HTM0_HTM_MODE_HTMSC_MARKERS_ONLY>() :
-    //l_scomData.setBit<PU_HTM0_HTM_MODE_HTMSC_MARKERS_ONLY>();
+    (l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_MARKERS_ONLY_DISABLE) ?
+    CLEAR_PB_BRIDGE_NHTM_SC_HTM_MODE_MARKERS_ONLY(l_HTM_mode_data) :
+    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_MARKERS_ONLY(l_HTM_mode_data);
 
     // ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE,
@@ -946,9 +807,9 @@ fapi2::ReturnCode setup_HTM_MODE(
              "setup_HTM_MODE: Error getting ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE, "
              "l_rc 0x%.8X",  (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE 0x%.8X", l_uint8_attr);
-    //(l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE_DISABLE) ?
-    //l_scomData.clearBit<PU_HTM0_HTM_MODE_HTMSC_DIS_FORCE_GROUP_SCOPE>() :
-    //l_scomData.setBit<PU_HTM0_HTM_MODE_HTMSC_DIS_FORCE_GROUP_SCOPE>();
+    (l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE_DISABLE) ?
+    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_DIS_FORCE_GROUP_SCOPE(l_HTM_mode_data) :
+    CLEAR_PB_BRIDGE_NHTM_SC_HTM_MODE_DIS_FORCE_GROUP_SCOPE(l_HTM_mode_data);
 
     // ATTR_NHTM_HTMSC_MODE_SYNC_STAMP_FORCE
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NHTM_HTMSC_MODE_SYNC_STAMP_FORCE, i_target,
@@ -956,9 +817,7 @@ fapi2::ReturnCode setup_HTM_MODE(
              "setup_HTM_MODE: Error getting ATTR_NHTM_HTMSC_MODE_SYNC_STAMP_FORCE, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_NHTM_HTMSC_MODE_SYNC_STAMP_FORCE 0x%.8X", l_uint8_attr);
-    //l_scomData.insertFromRight<PU_HTM0_HTM_MODE_HTMSC_SYNC_STAMP_FORCE,
-    //                           PU_HTM0_HTM_MODE_HTMSC_SYNC_STAMP_FORCE_LEN>
-    //                           (l_uint8_attr);
+    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_SYNC_STAMP_FORCE(l_uint8_attr, l_HTM_mode_data);
 
     // ATTR_NHTM_HTMSC_MODE_WRITETOIO
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NHTM_HTMSC_MODE_WRITETOIO,
@@ -966,9 +825,9 @@ fapi2::ReturnCode setup_HTM_MODE(
              "setup_HTM_MODE: Error getting ATTR_NHTM_HTMSC_MODE_WRITETOIO, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_NHTM_HTMSC_MODE_WRITETOIO        0x%.8X", l_uint8_attr);
-    //(l_uint8_attr == fapi2::ENUM_ATTR_NHTM_HTMSC_MODE_WRITETOIO_DISABLE) ?
-    //l_scomData.clearBit<PU_HTM0_HTM_MODE_HTMSC_WRITETOIO>() :
-    //l_scomData.setBit<PU_HTM0_HTM_MODE_HTMSC_WRITETOIO>();
+    (l_uint8_attr == fapi2::ENUM_ATTR_NHTM_HTMSC_MODE_WRITETOIO_DISABLE) ?
+    CLEAR_PB_BRIDGE_NHTM_SC_HTM_MODE_WRITETOIO(l_HTM_mode_data) :
+    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_WRITETOIO(l_HTM_mode_data);
 
     // ATTR_HTMSC_MODE_VGTARGET
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MODE_VGTARGET, i_target,
@@ -976,21 +835,13 @@ fapi2::ReturnCode setup_HTM_MODE(
              "setup_HTM_MODE: Error getting ATTR_HTMSC_MODE_VGTARGET, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_MODE_VGTARGET              0x%.8X", l_uint32_attr);
-    //l_scomData.insertFromRight<PU_HTM0_HTM_MODE_HTMSC_VGTARGET,
-    //                           PU_HTM0_HTM_MODE_HTMSC_VGTARGET_LEN>
-    //                           (~l_uint32_attr);
+    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_VGTARGET(~l_uint32_attr, l_HTM_mode_data);
 
-    //// Display HTM_MODE reg setup value
-    //FAPI_INF("setup_HTM_MODE: HTM_MODE reg setup: 0x%016llX", l_scomData);
+    // Display HTM_MODE reg setup value
+    FAPI_INF("setup_HTM_MODE: HTM_MODE reg setup: 0x%016llX", l_HTM_mode_data);
 
-    //// Program both NHTM0 and NHTM1
-    //for (uint8_t ii = 0; ii < NUM_NHTM_ENGINES; ii++)
-    //{
-    //    FAPI_TRY(fapi2::putScom(i_target, NHTM_modeRegList[ii], l_scomData),
-    //             "setup_HTM_MODE: putScom returns error: "
-    //             "Addr 0x%016llX, l_rc 0x%.8X",
-    //             NHTM_modeRegList[ii],  (uint64_t)fapi2::current_err);
-    //}
+    // Put data
+    FAPI_TRY(PUT_PB_BRIDGE_NHTM_SC_HTM_MODE(i_target, l_HTM_mode_data));
 
 fapi_try_exit:
     FAPI_DBG("Exiting");
@@ -1005,27 +856,23 @@ fapi2::ReturnCode setup_HTM_MODE(
     const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
     const uint8_t i_traceType)
 {
+    using namespace scomt;
+    using namespace scomt::c;
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
-    //fapi2::buffer<uint64_t> l_scomData(0);
+    fapi2::buffer<uint64_t> l_HTM_mode_data(0);
     uint8_t l_uint8_attr = 0;
     uint32_t l_uint32_attr = 0;
-    uint8_t l_pos = 0;
 
     // Setup data value to program HTM_MODE reg
     // Note:
     //    - i_traceType may be needed later when more trace type is supported.
 
     // Get the proc target to read common CHTM attribute settings
-    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_proc =
-        i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
-    // Get the EX parent of this core to program the register
-    // TODO: replace with EQ Target
-    //fapi2::Target<fapi2::TARGET_TYPE_EX> l_ex =
-    //    i_target.getParent<fapi2::TARGET_TYPE_EX>();
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_proc = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
 
-    //// Enable HTM
-    //l_scomData.setBit<EX_HTM_MODE_HTMSC_ENABLE>();
+    // Enable HTM
+    SET_NC_NCCHTM_NCCHTSC_HTM_MODE_HTM_ENABLE(l_HTM_mode_data);
 
     // ATTR_CHTM_HTMSC_MODE_CONTENT_SEL
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHTM_HTMSC_MODE_CONTENT_SEL, l_proc,
@@ -1033,9 +880,7 @@ fapi2::ReturnCode setup_HTM_MODE(
              "setup_HTM_MODE: Error getting ATTR_CHTM_HTMSC_MODE_CONTENT_SEL, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_CHTM_HTMSC_MODE_CONTENT_SEL      0x%.8X", l_uint8_attr);
-    //l_scomData.insertFromRight<EX_HTM_MODE_HTMSC_CONTENT_SEL,
-    //                           EX_HTM_MODE_HTMSC_CONTENT_SEL_LEN>
-    //                           (l_uint8_attr);
+    SET_NC_NCCHTM_NCCHTSC_HTM_MODE_CONTENT_SEL(l_uint8_attr, l_HTM_mode_data);
 
     // ATTR_CHTM_HTMSC_MODE_CAPTURE
     // For CHTM IMA mode (Direct Memory Write), Capture mode bit 4 is used
@@ -1048,9 +893,9 @@ fapi2::ReturnCode setup_HTM_MODE(
              "setup_HTM_MODE: Error getting ATTR_HTMSC_MODE_WRAP, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_MODE_WRAP                  0x%.8X", l_uint8_attr);
-    //(l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_WRAP_DISABLE) ?
-    //l_scomData.clearBit<EX_HTM_MODE_HTMSC_WRAP>() :
-    //l_scomData.setBit<EX_HTM_MODE_HTMSC_WRAP>();
+    (l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_WRAP_DISABLE) ?
+    CLEAR_NC_NCCHTM_NCCHTSC_HTM_MODE_WRAP(l_HTM_mode_data) :
+    SET_NC_NCCHTM_NCCHTSC_HTM_MODE_WRAP(l_HTM_mode_data);
 
     // ATTR_HTMSC_MODE_DIS_TSTAMP
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MODE_DIS_TSTAMP, l_proc,
@@ -1058,9 +903,9 @@ fapi2::ReturnCode setup_HTM_MODE(
              "setup_HTM_MODE: Error getting ATTR_HTMSC_MODE_DIS_TSTAMP, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_MODE_DIS_TSTAMP            0x%.8X", l_uint8_attr);
-    //(l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_DIS_TSTAMP_DISABLE) ?
-    //l_scomData.setBit<EX_HTM_MODE_HTMSC_DIS_TSTAMP>() :
-    //l_scomData.clearBit<EX_HTM_MODE_HTMSC_DIS_TSTAMP>();
+    (l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_DIS_TSTAMP_DISABLE) ?
+    CLEAR_NC_NCCHTM_NCCHTSC_HTM_MODE_DIS_TSTAMP(l_HTM_mode_data) :
+    SET_NC_NCCHTM_NCCHTSC_HTM_MODE_DIS_TSTAMP(l_HTM_mode_data);
 
     // ATTR_HTMSC_MODE_SINGLE_TSTAMP
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MODE_SINGLE_TSTAMP, l_proc,
@@ -1068,28 +913,28 @@ fapi2::ReturnCode setup_HTM_MODE(
              "setup_HTM_MODE: Error getting ATTR_HTMSC_MODE_SINGLE_TSTAMP, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_MODE_SINGLE_TSTAMP         0x%.8X", l_uint8_attr);
-    //(l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_SINGLE_TSTAMP_DISABLE) ?
-    //l_scomData.clearBit<EX_HTM_MODE_HTMSC_SINGLE_TSTAMP>() :
-    //l_scomData.setBit<EX_HTM_MODE_HTMSC_SINGLE_TSTAMP>();
+    (l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_SINGLE_TSTAMP_DISABLE) ?
+    CLEAR_NC_NCCHTM_NCCHTSC_HTM_MODE_SINGLE_TSTAMP(l_HTM_mode_data) :
+    SET_NC_NCCHTM_NCCHTSC_HTM_MODE_SINGLE_TSTAMP(l_HTM_mode_data);
 
     // ATTR_CHTM_HTMSC_MODE_CORE_INSTR_STALL
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHTM_HTMSC_MODE_CORE_INSTR_STALL, l_proc,
                            l_uint8_attr),
-             "setup_HTM_MODE: Error getting ATTR_CHTM_HTMSC_MODE_CORE_INSTR_STALL, "
+             "setup_HTM_MODE: Error gettting ATTR_CHTM_HTMSC_MODE_CORE_INSTR_STALL, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_CHTM_HTMSC_MODE_CORE_INSTR_STALL 0x%.8X", l_uint8_attr);
-    //(l_uint8_attr == fapi2::ENUM_ATTR_CHTM_HTMSC_MODE_CORE_INSTR_STALL_DISABLE) ?
-    //l_scomData.setBit<EX_HTM_MODE_HTMSC_DIS_STALL>() :
-    //l_scomData.clearBit<EX_HTM_MODE_HTMSC_DIS_STALL>();
+    FAPI_DBG("  ATTR_CHTM_HTMSC_MODE_CORE_INSTR_STALL           0x%.8X", l_uint8_attr);
+    (l_uint8_attr == fapi2::ENUM_ATTR_CHTM_HTMSC_MODE_CORE_INSTR_STALL_DISABLE) ?
+    SET_NC_NCCHTM_NCCHTSC_HTM_MODE_DIS_STALL(l_HTM_mode_data) :
+    CLEAR_NC_NCCHTM_NCCHTSC_HTM_MODE_DIS_STALL(l_HTM_mode_data);
 
     // ATTR_HTMSC_MODE_MARKERS_ONLY
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MODE_MARKERS_ONLY, l_proc, l_uint8_attr),
              "setup_HTM_MODE: Error getting ATTR_HTMSC_MODE_MARKERS_ONLY, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_MODE_MARKERS_ONLY          0x%.8X", l_uint8_attr);
-    //(l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_MARKERS_ONLY_DISABLE) ?
-    //l_scomData.clearBit<EX_HTM_MODE_HTMSC_MARKERS_ONLY>() :
-    //l_scomData.setBit<EX_HTM_MODE_HTMSC_MARKERS_ONLY>();
+    (l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_MARKERS_ONLY_DISABLE) ?
+    SET_NC_NCCHTM_NCCHTSC_HTM_MODE_MARKERS_ONLY(l_HTM_mode_data) :
+    CLEAR_NC_NCCHTM_NCCHTSC_HTM_MODE_MARKERS_ONLY(l_HTM_mode_data);
 
     // ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE,
@@ -1097,9 +942,9 @@ fapi2::ReturnCode setup_HTM_MODE(
              "setup_HTM_MODE: Error getting ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE, "
              "l_rc 0x%.8X",  (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE 0x%.8X", l_uint8_attr);
-    //(l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE_DISABLE) ?
-    //l_scomData.clearBit<EX_HTM_MODE_HTMSC_DIS_GROUP>() :
-    //l_scomData.setBit<EX_HTM_MODE_HTMSC_DIS_GROUP>();
+    (l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE_DISABLE) ?
+    SET_NC_NCCHTM_NCCHTSC_HTM_MODE_DIS_GROUP(l_HTM_mode_data) :
+    CLEAR_NC_NCCHTM_NCCHTSC_HTM_MODE_DIS_GROUP(l_HTM_mode_data);
 
     // ATTR_HTMSC_MODE_VGTARGET
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MODE_VGTARGET, l_proc,
@@ -1107,26 +952,18 @@ fapi2::ReturnCode setup_HTM_MODE(
              "setup_HTM_MODE: Error getting ATTR_HTMSC_MODE_VGTARGET, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_MODE_VGTARGET              0x%.8X", l_uint32_attr);
-    //l_scomData.insertFromRight<EX_HTM_MODE_HTMSC_VGTARGET,
-    //                           EX_HTM_MODE_HTMSC_VGTARGET_LEN>
-    //                           (l_uint32_attr);
+    SET_NC_NCCHTM_NCCHTSC_HTM_MODE_VGTARGET(~l_uint32_attr, l_HTM_mode_data);
 
-    //// Display HTM_MODE reg setup value
-    //FAPI_INF("setup_HTM_MODE: HTM_MODE reg setup: 0x%016llX", l_scomData);
+    // Display HTM_MODE reg setup value
+    FAPI_INF("setup_HTM_MODE: HTM_MODE reg setup: 0x%016llX", l_HTM_mode_data);
 
     // Write to HW
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_pos),
-             "Error getting ATTR_CHIP_UNIT_POS");
-    //FAPI_TRY(fapi2::putScom(l_ex, CHTM_modeReg[l_pos % 2] + HTM_MODE, l_scomData),
-    //         "setup_HTM_MODE: putScom returns error: "
-    //         "Addr 0x%016llX, l_rc 0x%.8X",
-    //         CHTM_modeReg[l_pos % 2] + HTM_MODE, (uint64_t)fapi2::current_err);
+    FAPI_TRY(PUT_NC_NCCHTM_NCCHTSC_HTM_MODE(i_target, l_HTM_mode_data));
 
 fapi_try_exit:
     FAPI_DBG("Exiting");
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief Verify HTM engine is in correct state before setting up.
@@ -1146,38 +983,27 @@ template<>
 fapi2::ReturnCode checkHtmState(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
+    using namespace scomt;
+    using namespace scomt::proc;
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
-    //fapi2::buffer<uint64_t> l_scomData(0);
-    //fapi2::buffer<uint64_t> l_scomData_2(0);
+    fapi2::buffer<uint64_t> l_HTM_stat_data(0);
 
     // Read HTM_STATE
-    //FAPI_TRY(fapi2::getScom(i_target, NHTM_modeRegList[0] + HTM_STAT,
-    //                        l_scomData),
-    //         "checkHtmState: getScom returns error: Addr 0x%016llX, "
-    //         "l_rc 0x%.8X", NHTM_modeRegList[0] + HTM_STAT,
-    //         (uint64_t)fapi2::current_err);
-
-    //FAPI_TRY(fapi2::getScom(i_target, NHTM_modeRegList[1] + HTM_STAT,
-    //                        l_scomData_2),
-    //         "checkHtmState: getScom returns error: Addr 0x%016llX, "
-    //         "l_rc 0x%.8X", NHTM_modeRegList[1] + HTM_STAT,
-    //         (uint64_t)fapi2::current_err);
+    FAPI_TRY(GET_PB_BRIDGE_NHTM_SC_HTM_STAT(i_target, l_HTM_stat_data));
 
     // HTM must be in "Complete", "Repair", or "Blank" state
-    // Bit positions are same for HTM0 and HTM1
-    //FAPI_ASSERT( ( (l_scomData == 0) && (l_scomData_2 == 0) ) ||  // Blank
-    //             ( l_scomData.getBit<PU_HTM0_HTM_STAT_HTMCO_STATUS_COMPLETE>() &&
-    //               l_scomData_2.getBit<PU_HTM0_HTM_STAT_HTMCO_STATUS_COMPLETE>() ) ||
-    //             ( l_scomData.getBit<PU_HTM0_HTM_STAT_HTMCO_STATUS_REPAIR>() &&
-    //               l_scomData_2.getBit<PU_HTM0_HTM_STAT_HTMCO_STATUS_REPAIR>() ),
-    //             fapi2::P10_NHTM_CTRL_BAD_STATE()
-    //             .set_TARGET(i_target)
-    //             .set_HTM_STATUS_REG_NHTM0(l_scomData)
-    //             .set_HTM_STATUS_REG_NHTM1(l_scomData_2),
-    //             "checkHtmState: Can not setup HTM with current HTM state "
-    //             "NHTM0 status 0x%016llX, NHTM1 status 0x%016llX",
-    //             l_scomData, l_scomData_2);
+    FAPI_ASSERT( ( (l_HTM_stat_data == 0) ) ||  // Blank
+                 ( GET_PB_BRIDGE_NHTM_SC_HTM_STAT_0_HTMCO_STATUS_COMPLETE(l_HTM_stat_data) &&
+                   GET_PB_BRIDGE_NHTM_SC_HTM_STAT_1_HTMCO_STATUS_COMPLETE(l_HTM_stat_data)) ||
+                 ( GET_PB_BRIDGE_NHTM_SC_HTM_STAT_0_HTMCO_STATUS_REPAIR(l_HTM_stat_data) &&
+                   GET_PB_BRIDGE_NHTM_SC_HTM_STAT_1_HTMCO_STATUS_REPAIR(l_HTM_stat_data) ),
+                 fapi2::P10_NHTM_CTRL_BAD_STATE()
+                 .set_TARGET(i_target)
+                 .set_HTM_STATUS_REG(l_HTM_stat_data),
+                 "checkHtmState: Can not setup HTM with current HTM state "
+                 "NHTM status 0x%016llX",
+                 l_HTM_stat_data);
 
 fapi_try_exit:
     FAPI_DBG("Exiting");
@@ -1191,35 +1017,24 @@ template<>
 fapi2::ReturnCode checkHtmState(
     const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target)
 {
+    using namespace scomt;
+    using namespace scomt::c;
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
-    //fapi2::buffer<uint64_t> l_scomData(0);
-    uint8_t l_pos = 0;
+    fapi2::buffer<uint64_t> l_HTM_stat_data(0);
 
-    // Get the EX parent of this core
-    // TODO: replace with EQ Target
-    //fapi2::Target<fapi2::TARGET_TYPE_EX> l_ex =
-    //    i_target.getParent<fapi2::TARGET_TYPE_EX>();
 
-    // Get the core position
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_pos),
-             "Error getting ATTR_CHIP_UNIT_POS");
+    FAPI_TRY(GET_NC_NCCHTM_NCCHTSC_HTM_STAT(i_target, l_HTM_stat_data));
 
-    //// Read HTM_STATE
-    //FAPI_TRY(fapi2::getScom(l_ex, CHTM_modeReg[l_pos % 2] + HTM_STAT, l_scomData),
-    //         "checkHtmState: getScom returns error: Addr 0x%016llX, "
-    //         "l_rc 0x%.8X", CHTM_modeReg[l_pos % 2] + HTM_STAT,
-    //         (uint64_t)fapi2::current_err);
-
-    //// HTM must be in "Complete", "Repair", or "Blank" state
-    //FAPI_ASSERT( (l_scomData == 0) ||
-    //             (l_scomData.getBit<EX_HTM_STAT_HTMCO_STATUS_COMPLETE>()) ||
-    //             (l_scomData.getBit<EX_HTM_STAT_HTMCO_STATUS_REPAIR>()),
-    //             fapi2::P10_CHTM_CTRL_BAD_STATE()
-    //             .set_TARGET(l_ex)
-    //             .set_HTM_STATUS_REG(l_scomData),
-    //             "checkHtmState: Can not setup HTM with current HTM state "
-    //             "0x%016llX", l_scomData);
+    // HTM must be in "Complete", "Repair", or "Blank" state
+    FAPI_ASSERT( (l_HTM_stat_data == 0) ||
+                 (GET_NC_NCCHTM_NCCHTSC_HTM_STAT_HTMCO_STATUS_COMPLETE(l_HTM_stat_data)) ||
+                 (GET_NC_NCCHTM_NCCHTSC_HTM_STAT_HTMCO_STATUS_REPAIR(l_HTM_stat_data)),
+                 fapi2::P10_CHTM_CTRL_BAD_STATE()
+                 .set_TARGET(i_target)
+                 .set_HTM_STATUS_REG(l_HTM_stat_data),
+                 "checkHtmState: Can not setup HTM with current HTM state "
+                 "0x%016llX", l_HTM_stat_data);
 
 fapi_try_exit:
     FAPI_DBG("Exiting");
@@ -1256,16 +1071,16 @@ fapi2::ReturnCode getTraceTypes(
              "getTraceTypes: Error getting ATTR_NHTM_TRACE_TYPE, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
-    //// Show NHTM trace type
-    //FAPI_INF("    NHTM type: %u", o_nhtmTraceType);
+    // Show NHTM trace type
+    FAPI_INF("    NHTM type: %u", o_nhtmTraceType);
 
-    //// Currently only support NHTM FABRIC type
-    //FAPI_ASSERT( (o_nhtmTraceType == fapi2::ENUM_ATTR_NHTM_TRACE_TYPE_DISABLE) ||
-    //             (o_nhtmTraceType == fapi2::ENUM_ATTR_NHTM_TRACE_TYPE_FABRIC),
-    //             fapi2::NHTM_TRACE_TYPE_NOT_SUPPORTED()
-    //             .set_NHTM_TRACE_TYPE(o_nhtmTraceType),
-    //             "getTraceTypes: NHTM trace type is not supported: "
-    //             "0x%.8X", o_nhtmTraceType);
+    // Currently only support NHTM FABRIC type
+    FAPI_ASSERT( (o_nhtmTraceType == fapi2::ENUM_ATTR_NHTM_TRACE_TYPE_DISABLE) ||
+                 (o_nhtmTraceType == fapi2::ENUM_ATTR_NHTM_TRACE_TYPE_FABRIC),
+                 fapi2::NHTM_TRACE_TYPE_NOT_SUPPORTED()
+                 .set_NHTM_TRACE_TYPE(o_nhtmTraceType),
+                 "getTraceTypes: NHTM trace type is not supported: "
+                 "0x%.8X", o_nhtmTraceType);
 
     // Get ATTR_CHTM_TRACE_TYPE
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHTM_TRACE_TYPE, i_target,
@@ -1274,78 +1089,26 @@ fapi2::ReturnCode getTraceTypes(
              (uint64_t)fapi2::current_err);
     memcpy(o_chtmTraceType, l_chtmTraceType, sizeof(l_chtmTraceType));
 
-    //// Show CHTM trace type
-    //for (uint8_t ii = 0; ii < NUM_CHTM_ENGINES; ii++)
-    //{
-    //    FAPI_INF("    CHTM type: Core[%u] %u", ii, o_chtmTraceType[ii]);
-    //}
-
-    //// Verify each core trace type, all so set flag
-    //// to indicate if any core trace is enabled.
-    //for (uint8_t ii = 0; ii < NUM_CHTM_ENGINES; ii++)
-    //{
-    //    if (o_chtmTraceType[ii] != fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_DISABLE)
-    //    {
-    //        // Currently only support CHTM DMW (IMA) type
-    //        FAPI_ASSERT( (o_chtmTraceType[ii] == fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_DISABLE) ||
-    //                     (o_chtmTraceType[ii] == fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_DMW),
-    //                     fapi2::CHTM_TRACE_TYPE_NOT_SUPPORTED()
-    //                     .set_CORE_POS(ii)
-    //                     .set_CHTM_TRACE_TYPE(o_chtmTraceType[ii]),
-    //                     "getTraceTypes: CHTM trace type is not supported: "
-    //                     "Core #%u, TraceType 0x%.8X", ii, o_chtmTraceType[ii]);
-    //    }
-    //}
-
-fapi_try_exit:
-    FAPI_DBG("Exiting");
-    return fapi2::current_err;
-}
-
-///
-/// @brief Write HTM Queue reservation values to MCPERF0 regs
-///
-/// @param[in]  i_portTargets     Vector of reference of port targets (MCA/DMI)
-/// @param[in]  i_numOfHtmQueues  HTM queue reservation values
-///
-/// @return FAPI2_RC_SUCCESS if success, else error code.
-///
-template<fapi2::TargetType T>
-fapi2::ReturnCode write_MCPERF0(
-    const std::vector< fapi2::Target<T> >& i_portTargets,
-    const uint8_t i_numOfHtmQueues[])
-
-{
-    FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
-    //fapi2::buffer<uint64_t> l_scomData(0);
-
-    for (auto l_port : i_portTargets)
+    // Show CHTM trace type
+    for (uint8_t ii = 0; ii < NUM_CHTM_ENGINES; ii++)
     {
-        uint8_t l_unitPos = 0;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_port, l_unitPos),
-                 "Error getting ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
-                 (uint64_t)fapi2::current_err);
+        FAPI_INF("    CHTM type: Core[%u] %u", ii, o_chtmTraceType[ii]);
+    }
 
-        // Queue reservation exists
-        if (i_numOfHtmQueues[l_unitPos] > 0)
+    // Verify each core trace type, all so set flag
+    // to indicate if any core trace is enabled.
+    for (uint8_t ii = 0; ii < NUM_CHTM_ENGINES; ii++)
+    {
+        if (o_chtmTraceType[ii] != fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_DISABLE)
         {
-            //FAPI_TRY(fapi2::getScom(l_port, MCS_PORT02_MCPERF0, l_scomData),
-            //         "setup_HTM_queues: getScom returns error: Addr "
-            //         "0x%016llX, l_rc 0x%.8X", MCS_PORT02_MCPERF0,
-            //         (uint64_t)fapi2::current_err);
-
-            //// HTM RESERVE (bits 16:21)
-            //l_scomData.insertFromRight<MCS_PORT02_MCPERF0_NUM_HTM_RSVD,
-            //                           MCS_PORT02_MCPERF0_NUM_HTM_RSVD_LEN>(
-            //                               i_numOfHtmQueues[l_unitPos]);
-
-            //// Write to reg
-            //FAPI_INF("Write MCS_PORT02_MCPERF0 reg 0x%.16llX, Value 0x%.16llX",
-            //         MCS_PORT02_MCPERF0, l_scomData);
-            //FAPI_TRY(fapi2::putScom(l_port, MCS_PORT02_MCPERF0, l_scomData),
-            //         "Error writing to MCS_PORT02_MCPERF0 reg");
-
+            // Currently only support CHTM DMW (IMA) type
+            FAPI_ASSERT( (o_chtmTraceType[ii] == fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_DISABLE) ||
+                         (o_chtmTraceType[ii] == fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_DMW),
+                         fapi2::CHTM_TRACE_TYPE_NOT_SUPPORTED()
+                         .set_CORE_POS(ii)
+                         .set_CHTM_TRACE_TYPE(o_chtmTraceType[ii]),
+                         "getTraceTypes: CHTM trace type is not supported: "
+                         "Core #%u, TraceType 0x%.8X", ii, o_chtmTraceType[ii]);
         }
     }
 
@@ -1364,39 +1127,45 @@ fapi_try_exit:
 fapi2::ReturnCode setup_HTM_queues(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
+    using namespace scomt;
+    using namespace scomt::mcc;
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
-    //uint8_t l_numHtmQueues[NUM_MC_PORTS_PER_PROC];
-
-    // Get the functional MCA chiplets, should be none for Cumulus
-    auto l_mcaChiplets = i_target.getChildren<fapi2::TARGET_TYPE_MCA>();
-    // Get functional DMI chiplets, , should be none for Nimbus
-    auto l_dmiChiplets = i_target.getChildren<fapi2::TARGET_TYPE_DMI>();
+    uint8_t l_numHtmQueues[NUM_MCC_PER_PROC];
+    fapi2::buffer<uint64_t> l_mc_data(0);
+    auto l_miChiplets = i_target.getChildren<fapi2::TARGET_TYPE_MI>();
 
     // Get ATTR_HTM_QUEUES
-    //FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTM_QUEUES, i_target, l_numHtmQueues),
-    //         "Error getting ATTR_HTM_QUEUES, l_rc 0x%.8X",
-    //         (uint64_t)fapi2::current_err);
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTM_QUEUES, i_target, l_numHtmQueues),
+             "Error getting ATTR_HTM_QUEUES, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
 
-    FAPI_INF("Num of HTM queues:");
+    for (uint8_t ii = 0; ii < NUM_MCC_PER_PROC; ii++)
+    {
+        FAPI_INF("ATTR_HTM_QUEUES[%u]: %d", ii, l_numHtmQueues[ii]);
+    }
 
-    //for (uint8_t ii = 0; ii < NUM_MC_PORTS_PER_PROC; ii++)
-    //{
-    //    FAPI_INF("ATTR_HTM_QUEUES[%u]: %d", ii, l_numHtmQueues[ii]);
-    //}
+    for (auto l_port : l_miChiplets)
+    {
+        uint8_t l_unitPos = 0;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_port, l_unitPos),
+                 "Error getting ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
 
-    //if (l_mcaChiplets.size() > 0)
-    //{
-    //    FAPI_TRY(write_MCPERF0(l_mcaChiplets, l_numHtmQueues),
-    //             "write_MCPERF0 returns error - MCA, l_rc 0x%.8X",
-    //             (uint64_t)fapi2::current_err);
-    //}
-    //else
-    //{
-    //    FAPI_TRY(write_MCPERF0(l_dmiChiplets, l_numHtmQueues),
-    //             "write_MCPERF0 returns error - DMI, l_rc 0x%.8X",
-    //             (uint64_t)fapi2::current_err);
-    //}
+        // Queue reservation exists
+        if (l_numHtmQueues[l_unitPos] > 0)
+        {
+            FAPI_TRY(GET_ATCL_CL_CLSCOM_MCPERF0(l_port, l_mc_data));
+
+            //// HTM RESERVE (bits 16:19)
+            SET_ATCL_CL_CLSCOM_MCPERF0_NUM_HTM_RSVD(l_numHtmQueues[l_unitPos], l_mc_data);
+
+            //// Write to reg
+            FAPI_INF("Write MCS_PORT02_MCPERF0 reg 0x%.16llX, Value 0x%.16llX",
+                     ATCL_CL_CLSCOM_MCPERF0, l_mc_data);
+            FAPI_TRY(PUT_ATCL_CL_CLSCOM_MCPERF0(l_port, l_mc_data));
+        }
+    }
 
 fapi_try_exit:
     FAPI_DBG("Exiting");

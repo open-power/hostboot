@@ -23,5 +23,4 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p10_htm_adu_ctrl
-OBJS+=p10_fbc_utils.o
 $(call BUILD_PROCEDURE)

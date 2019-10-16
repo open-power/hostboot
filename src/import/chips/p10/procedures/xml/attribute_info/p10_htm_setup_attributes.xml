@@ -46,7 +46,7 @@
   <description> The Core HTM trace type desired to be collected.
   </description>
   <valueType>uint8</valueType>
-  <array>24</array>
+  <array>32</array>
   <enum> DISABLE = 0x0, CORE = 0x1, LLAT = 0x2, PPE = 0x3, DMW = 0x4 </enum>
   <initToZero/>
   <writeable/>
@@ -254,75 +254,34 @@
 </attribute>
 
 <attribute>
-  <id>ATTR_NHTM_HTMSC_MODE_CAPTURE_GENERATED_WRITES</id>
+  <id>ATTR_NHTM_HTMSC_MODE_CAPTURE</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> Nest HTM: defines if the generated data writes are captured.
-                HTM Collection Mode Register (4).
-                0 - Ignore HTM generated data writes
-                1 - Capture even HTM generated writes if they meet the filtering
-                    criteria.
+  <description>
+      HTMSC_MODE_CAPTURE: HTM capture mode bit definition according to Trace Mode
+      When htm_mode_q(1 TO 2) == 00, i.e. FABRIC
+      456789012
+      0htmx0000 : Ignore HTM generated data writes
+      1htmx0000 : Capture htm generated data writes
+      x0htm0000 : Filtering ignored on PMISC (always trace PMISC and Report Hang)
+      x1htm0000 : Filtering applied on ttype = PMISC and ttype = report hang
+      xx00x0000 : CRESP Mode: Flush CRESP Queue to avoid overrun (default)
+      xx01x0000 : CRESP Mode: Reserved
+      xx10x0000 : CRESP Mode: Enable Precise CRESP Mode
+      xx11x0000 : CRESP Mode: Ignore CRESP
+      htmx00000 : Pre-Allocate maximum memory buffers (8)
+      htmx10000 : Pre-Allocate fewer memory buffers (4)
+      When htm_mode_q(1 TO 2) == 01, i.e. OTHER
+      00000htmx : Pre-Allocate maximum memory buffers (8)
+      00001htmx : Pre-Allocate fewer memory buffers (4)
+      0000xmmmx : mmm for optional external mux control
+      0000htmx0 : Both -other- trace buses to NHTM0
+      0000htmx1 : Other trace bus0 to nhtm0, trace bus1 to nhtm1. High BW
+      When htm_mode_q(1 TO 2) == 10, i.e. OCC
+      00000htm0 : Pre-Allocate maximum memory buffers (8)
+      00001htm0 : Pre-Allocate fewer memory buffers (4)
+      0000xmmm0 : mmm for optional external mux control 
   </description>
-  <valueType>uint8</valueType>
-  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
-  <initToZero/>
-  <writeable/>
-  <persistRuntime/>
-</attribute>
-
-<attribute>
-  <id>ATTR_NHTM_HTMSC_MODE_CAPTURE_ENABLE_FILTER_ALL</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> Nest HTM: defines if the filtering will apply to ttype=PMISC
-                and ttype=Report Hang commands when filtering is enabled.
-                HTM Collection Mode Register (5).
-                0 - filtering ignored on PMISC
-                1 - Apply filtering to PMISC also
-  </description>
-  <valueType>uint8</valueType>
-  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
-  <initToZero/>
-  <writeable/>
-  <persistRuntime/>
-</attribute>
-
-<attribute>
-  <id>ATTR_NHTM_HTMSC_MODE_CAPTURE_PRECISE_CRESP_MODE</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> Nest HTM: defines if Precise cresp mode is enabled.
-                0 - Enable precisce cresp mode
-                1 - Disable precisce cresp mode
-  </description>
-  <valueType>uint8</valueType>
-  <enum> ENABLE = 0x0, DISABLE = 0x1 </enum>
-  <initToZero/>
-  <writeable/>
-  <persistRuntime/>
-</attribute>
-
-<attribute>
-  <id>ATTR_NHTM_HTMSC_MODE_CAPTURE_LIMIT_MEM_ALLOCATION</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> Nest HTM: defines Limit Memory Allocation mode.
-                 0 - Pre-allocate maximum memory buffers (NHTM=8)
-                 1 - Pre-allocate only one half maximum memory buffers
-  </description>
-  <valueType>uint8</valueType>
-  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
-  <initToZero/>
-  <writeable/>
-  <persistRuntime/>
-</attribute>
-
-<attribute>
-  <id>ATTR_NHTM_HTMSC_MODE_CAPTURE_PMISC_ONLY_CMD</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> Nest HTM: defines PMISC only Command trace mode.
-                 0 rCmd amd cResp port 0 only goes to NHTM0
-                 1 rCmd and Cresp port 0 is stored alternately to NHTM0 and
-                   NHTM1, switching based for each valid
-  </description>
-  <valueType>uint8</valueType>
-  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
+  <valueType>uint16</valueType>
   <initToZero/>
   <writeable/>
   <persistRuntime/>
@@ -714,22 +673,6 @@
   <description> Stop on PC_TC_DBG_Trigger1
                 1 = stop trigger Core Debug Trigger 1
                 0 = ignore Core Debug Trigger  1
-  </description>
-  <valueType>uint8</valueType>
-  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
-  <initToZero/>
-  <writeable/>
-  <persistRuntime/>
-</attribute>
-
-<attribute>
-  <id>ATTR_HTMSC_IMA_PDBAR_SPLIT_CORE_MODE</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> This bit controls the indexing of the PDBAR address for the
-                starting address of the write to the PDBAR space.
-                For CHTM only.
-                0 'Big Core' mode.
-                1 'Split Core' mode.
   </description>
   <valueType>uint8</valueType>
   <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>

@@ -37,14 +37,9 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <p10_htm_adu_ctrl.H>
-//TODO: Update with Scom headers, remove unnecessary constants, remove P9 HW specific
-//      bug workarounds, make P10 specific changes.
-
-//------------------------------------------------------------------------------
-// Constants
-//------------------------------------------------------------------------------
-// Status time-out
-const uint32_t P10_HTM_START_MAX_STATUS_POLLS = 100;
+#include <fapi2_mem_access.H>
+#include <p10_putmemproc.H>
+#include <fapi2_subroutine_executor.H>
 
 ///
 /// See doxygen in p10_htm_adu_ctrl.H
@@ -55,116 +50,22 @@ fapi2::ReturnCode aduNHTMControl(
 {
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
-    //uint8_t l_num_attempts = 2;
-    //bool l_adu_is_dirty = false;
-    //uint32_t l_num_polls = 0;
-    //bool l_busy_bit_status = false;
-    //adu_status_busy_handler l_busy_handling = EXIT_ON_BUSY;
+    uint32_t l_mem_flags = fapi2::SBE_MEM_ACCESS_FLAGS_SWITCH_MODE
+                           | fapi2::SBE_MEM_ACCESS_FLAGS_TARGET_PROC;
+    uint32_t l_bytes = 2; // Want a TSIZE of 2 for these htm ctrl commands
+    uint8_t l_data[2] = {0, 0}; // give a pointer to real data to prevent any undefined behavior
 
-    //// validate input action, set ADU operation parameters
-    //p10_ADU_oper_flag l_adu_oper_flag;
+    FAPI_DBG("Debug data: Target: mem_flags: 0x%08llx, addr: 0x%016llx", l_mem_flags, i_addr);
 
-    //// Setup ADU operation
-    //l_adu_oper_flag.setOperationType(p10_ADU_oper_flag::PMISC_OPER);
-    //l_adu_oper_flag.setTransactionSize(p10_ADU_oper_flag::TSIZE_2);
+    FAPI_DBG("Attempting to put pMisc command");
+    FAPI_CALL_SUBROUTINE(l_rc,
+                         p10_putmemproc,
+                         i_target,
+                         i_addr,
+                         l_bytes,
+                         l_data,
+                         l_mem_flags);
 
-    //// Acquire ADU lock
-    //FAPI_TRY(p10_adu_coherent_manage_lock( i_target,
-    //                                      false,
-    //                                      true,           // Acquire lock
-    //                                      l_num_attempts),
-    //         "Error from p10_adu_coherent_manage_lock (acquire all)");
-
-    //// NOTE: lock is now held, if an operation fails from this point
-    ////       to the end of the procedure, need to reset and unlock.
-    //l_adu_is_dirty = true;
-
-    //// Reset ADU
-
-    //if (l_rc)
-    //{
-    //    goto adu_reset_unlock;
-    //}
-
-    //// Issue operation
-    //l_rc = p10_adu_coherent_setup_adu(i_target,
-    //                                 i_addr,
-    //                                 false,      // write
-    //                                 l_adu_oper_flag.setFlag());
-
-    //if (l_rc)
-    //{
-    //    FAPI_ERR("Error from p10_adu_coherent_setup_adu (op)");
-    //    goto adu_reset_unlock;
-    //}
-
-    //// Check status
-    //// Wait for operation to be completed (busy bit cleared)
-    //l_busy_bit_status = false;
-
-    //while (l_num_polls < P10_HTM_START_MAX_STATUS_POLLS)
-    //{
-    //    l_rc = p10_adu_coherent_status_check(i_target,
-    //                                        l_busy_handling,
-    //                                        true,
-    //                                        l_busy_bit_status);
-
-    //    if (l_rc)
-    //    {
-    //        FAPI_ERR("p10_adu_coherent_status_check() returns error");
-    //        goto adu_reset_unlock;
-    //    }
-
-    //    if (l_busy_bit_status == true)
-    //    {
-    //        l_num_polls++;
-
-    //        // last try, set handler to expect busy bit clear, if not then
-    //        // p10_adu_coherent_status_check() will log an error so that
-    //        // we don't have to deal with the error separately here.
-    //        if (l_num_polls == (P10_HTM_START_MAX_STATUS_POLLS - 1))
-    //        {
-    //            l_busy_handling = EXPECTED_BUSY_BIT_CLEAR;
-    //        }
-    //    }
-    //    else
-    //    {
-    //        // Operation done, break out
-    //        break;
-    //    }
-    //}
-
-    //// Unlock ADUs
-    //FAPI_DBG("Operation complete, releasing lock for all ADU units in drawer");
-    //l_rc = p10_adu_coherent_manage_lock(i_target,
-    //                                   false,
-    //                                   false, // Release lock
-    //                                   l_num_attempts);
-
-    //if (l_rc)
-    //{
-    //    FAPI_ERR("Error from p10_adu_coherent_manage_lock (release all)");
-    //    goto adu_reset_unlock;
-    //}
-
-    //FAPI_DBG("All ADU locks released");
-    //// No error for entire operation
-    //l_adu_is_dirty = false;
-
-adu_reset_unlock:
-
-    // if error has occurred and any ADU is dirty,
-    // attempt to reset all ADUs and free locks (propogate rc of original fail)
-    //if (l_rc && l_adu_is_dirty)
-    //{
-    //    FAPI_INF("Attempting to reset/free lock on all ADUs");
-    //    // Unlock ADUs
-    //    // ignore return codes
-    //    (void) p10_adu_coherent_manage_lock(i_target,
-    //                                       false, // No lock pick
-    //                                       false, // Lock release
-    //                                       1);    // Attempt 1 time
-    //}
 
 fapi_try_exit:
     FAPI_DBG("Exiting");

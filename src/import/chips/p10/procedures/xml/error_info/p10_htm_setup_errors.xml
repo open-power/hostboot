@@ -46,8 +46,7 @@
         NHTM is not at the expected state for current operation.
     </description>
     <ffdc>TARGET</ffdc>
-    <ffdc>HTM_STATUS_REG_NHTM0</ffdc>
-    <ffdc>HTM_STATUS_REG_NHTM1</ffdc>
+    <ffdc>HTM_STATUS_REG</ffdc>
     <callout>
       <target>TARGET</target>
       <priority>HIGH</priority>
@@ -56,7 +55,7 @@
       <procedure>CODE</procedure>
       <priority>LOW</priority>
     </callout>
-    <!-- No need to deconfigure/gard chip as this is a debug functionality -->
+    <!-- No need to deconfigure/gard chip as this is debug functionality -->
 </hwpError>
 
 <hwpError>
@@ -84,8 +83,7 @@
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>DELAY_COUNT</ffdc>
-    <ffdc>HTM_STATUS_REG_NHTM0</ffdc>
-    <ffdc>HTM_STATUS_REG_NHTM1</ffdc>
+    <ffdc>HTM_STATUS_REG</ffdc>
     <callout>
       <target>TARGET</target>
       <priority>HIGH</priority>

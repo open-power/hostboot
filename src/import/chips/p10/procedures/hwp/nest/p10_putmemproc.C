@@ -52,6 +52,7 @@ fapi2::ReturnCode p10_putmemproc(
     uint8_t* i_data,
     const uint32_t i_mem_flags)
 {
+    FAPI_DBG("Start");
     adu_operationFlag l_flags;
     uint64_t l_target_address = i_address;
     uint64_t l_end_address = i_address + i_bytes;
@@ -59,7 +60,6 @@ fapi2::ReturnCode p10_putmemproc(
     uint32_t l_granule = 0;
     bool l_first_access = true;
 
-    FAPI_DBG("Start");
 
     // Validate flags
     FAPI_TRY(p10_validateSbeMemoryAccessFlagsADU(i_target, i_address, i_bytes, i_mem_flags),

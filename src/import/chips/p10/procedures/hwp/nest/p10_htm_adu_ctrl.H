@@ -44,6 +44,20 @@
 #include <fapi2.H>
 
 //------------------------------------------------------------------------------
+// Constants
+//------------------------------------------------------------------------------
+extern "C"
+{
+    // pMisc address constants
+    const uint64_t PMISC_GLOBAL_HTM_MARK_DROPPED = 0x000000000080000ull;
+    const uint64_t PMISC_GLOBAL_HTM_VALID        = 0x000000000040000ull;
+    const uint64_t PMISC_GLOBAL_HTM_START        = 0x000000000020000ull;
+    const uint64_t PMISC_GLOBAL_HTM_STOP         = 0x000000000010000ull;
+    const uint64_t PMISC_GLOBAL_HTM_PAUSE        = 0x000000000008000ull;
+    const uint64_t PMISC_GLOBAL_HTM_RESET        = 0x000000000004000ull;
+} // extern "C"
+
+//------------------------------------------------------------------------------
 // Function prototypes
 //------------------------------------------------------------------------------
 ///
