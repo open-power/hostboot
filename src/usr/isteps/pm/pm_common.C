@@ -48,11 +48,9 @@
 #include    <targeting/common/targetservice.H>
 #include    <targeting/common/util.H>
 
-/* FIXME RTC: 210975
 //  fapi support
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
-*/
 
 //PNOR Resource Provider
 #include    <pnor/pnorif.H>
@@ -71,11 +69,11 @@
 /* FIXME RTC: 210975
 // Procedures
 #include <p9_pm_pba_bar_config.H>
-#include <p9_pm_init.H>
-#include <p9_hcode_image_build.H>
-
-#include <p9_hcode_image_defines.H>
+#include <p10_pm_init.H>
 */
+#include <p10_hcode_image_build.H>
+#include <p10_infrastruct_help.H>
+#include <p10_hcode_image_defines.H>
 #include <util/impl/shared_ptr.H>
 
 #include <arch/ppc.H>
@@ -84,13 +82,10 @@
 #include <isteps/pm/occCheckstop.H>
 
 /* FIXME RTC: 210975
-#include    <p9_core_checkstop_handler.H>
-#include    <p9_stop_api.H>
+#include    <p10_core_checkstop_handler.H>
 */
+#include    <p10_stop_api.H>
 #include    <scom/scomif.H>
-/* FIXME RTC: 210975
-#include    <p9_quad_scom_addresses.H>
-*/
 #include <secureboot/smf_utils.H>
 
 
@@ -121,9 +116,7 @@
 
 
 using namespace TARGETING;
-/* FIXME RTC: 210975
-using namespace p9_hcodeImageBuild;
-*/
+using namespace hcodeImageBuild;
 
 namespace HBPM
 {
@@ -171,10 +164,8 @@ namespace HBPM
             // Remap unless we're zeroing things out
             if( i_phys_addr )
             {
-/* FIXME RTC: 210975
                 l_virt_addr = HBPM_MAP(HBPM_PHYS_ADDR,
                                        sizeof(Homerlayout_t));
-*/
             }
             else
             {
@@ -286,17 +277,15 @@ namespace HBPM
 
         errlHndl_t l_errl = nullptr;
 
-/* FIXME RTC: 210975
         // cast OUR type of target to a FAPI type of target.
         // figure out homer offsets
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
             l_fapiTarg(i_target);
 
         void *l_buffer1 = (void*)malloc(HW_IMG_RING_SIZE);
-        void *l_buffer2 = (void*)malloc(MAX_RING_BUF_SIZE);
-        void *l_buffer3 = (void*)malloc(MAX_RING_BUF_SIZE);
-        void *l_buffer4 = (void*)malloc(MAX_RING_BUF_SIZE);
-*/
+        void *l_buffer2 = (void*)malloc(WORK_BUF_SIZE);
+        void *l_buffer3 = (void*)malloc(WORK_BUF_SIZE);
+        void *l_buffer4 = (void*)malloc(WORK_BUF_SIZE);
 
         do
         {
@@ -326,10 +315,8 @@ namespace HBPM
                            ERR_MRK"loadHcode: "
                            "release stored LID image failed!");
                 l_errl->collectTrace("ISTEPS_TRACE",256);
-/* FIXME RTC: 210975
                 l_errl->collectTrace(FAPI_TRACE_NAME,256);
                 l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
-*/
                 break;
             }
 
@@ -340,10 +327,8 @@ namespace HBPM
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            ERR_MRK"loadHcode: get stored LID image failed!");
                 l_errl->collectTrace("ISTEPS_TRACE",256);
-/* FIXME RTC: 210975
                 l_errl->collectTrace(FAPI_TRACE_NAME,256);
                 l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
-*/
                 break;
             }
 
@@ -365,9 +350,7 @@ namespace HBPM
                                      l_imageBuild,
                                      ISTEPS_TRACE::g_trac_isteps_trace);
 
-/* FIXME RTC: 210975
             ImageType_t l_imgType;
-*/
 
             // Check if we have a valid ring override section and
             //  include it in if so
@@ -381,9 +364,8 @@ namespace HBPM
                 errlCommit(l_errl, ISTEP_COMP_ID);
             }
 
-/* FIXME RTC: 210975
             FAPI_INVOKE_HWP( l_errl,
-                             p9_hcode_image_build,
+                             p10_hcode_image_build,
                              l_fapiTarg,
                              l_pImageIn, //reference image
                              i_pImageOut, //homer image buffer
@@ -394,16 +376,16 @@ namespace HBPM
                              l_buffer1,
                              HW_IMG_RING_SIZE,
                              l_buffer2,
-                             MAX_RING_BUF_SIZE,
+                             WORK_BUF_SIZE,
                              l_buffer3,
-                             MAX_RING_BUF_SIZE,
+                             WORK_BUF_SIZE,
                              l_buffer4,
-                             MAX_RING_BUF_SIZE);
+                             WORK_BUF_SIZE);
 
             if (l_errl)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"loadHcode: p9_hcode_image_build failed!" );
+                           ERR_MRK"loadHcode: p10_hcode_image_build failed!" );
                 l_errl->addFFDC( ERRL_COMP_ID,
                                  reinterpret_cast<void *>(&l_imageBuild),
                                  sizeof(Util::imageBuild_t),
@@ -414,7 +396,6 @@ namespace HBPM
 
                 break;
             }
-*/
 
             // If SMF is enabled, need to copy the information contained within
             // l_buffer2 into the unsecure HOMER memory area
@@ -431,7 +412,7 @@ namespace HBPM
                           "loadHcode: Unsecure HOMER addr: 0x%.16llx; unsecure HOMER size: 0x%x",
                           l_unsecureHomerAddr, l_unsecureHomerSize);
 
-                assert(l_unsecureHomerSize <= 60000 /* FIXME RTC: 210975 MAX_RING_BUF_SIZE*/,
+                assert(l_unsecureHomerSize <= MAX_RING_BUF_SIZE,
                        "loadHcode: unsecure HOMER is bigger than the output buffer");
                 assert(l_unsecureHomerSize <= MAX_UNSECURE_HOMER_SIZE,
                        "loadHcode: the size of unsecure HOMER is more than 0x%x", MAX_UNSECURE_HOMER_SIZE);
@@ -443,9 +424,7 @@ namespace HBPM
                                    l_unsecureHomerSize);
                 assert(l_unsecureHomerVAddr,
                        "loadHcode: could not map unsecure HOMER phys addr");
-/* FIXME RTC: 210975
                 memcpy(l_unsecureHomerVAddr, l_buffer2, l_unsecureHomerSize);
-*/
 
                 int l_rc = HBPM_UNMAP(l_unsecureHomerVAddr);
                 if(l_rc)
@@ -555,12 +534,10 @@ namespace HBPM
 
         } while(0);
 
-/* FIXME RTC: 210975
         free(l_buffer1);
         free(l_buffer2);
         free(l_buffer3);
         free(l_buffer4);
-*/
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    EXIT_MRK"loadHcode: RC=0x%X, PLID=0x%lX",
@@ -612,12 +589,12 @@ namespace HBPM
             // Remove bit 0, may be set for physical addresses
             uint64_t l_occ_addr = i_occImgPaddr & PHYSICAL_ADDR_MASK;
             FAPI_INVOKE_HWP( l_errl,
-                             p9_pm_pba_bar_config,
+                             p10_pm_pba_bar_config,
                              l_fapiTarg,
                              0,
                              l_occ_addr,
                              VMM_HOMER_INSTANCE_SIZE_IN_MB,
-                             p9pba::LOCAL_NODAL,
+                             p10pba::LOCAL_NODAL,
                              0xFF );
 
             if (l_errl)
@@ -645,12 +622,12 @@ namespace HBPM
             // Remove bit 0, may be set for physical addresses
             uint64_t l_common_addr = i_commonPhysAddr & PHYSICAL_ADDR_MASK;
             FAPI_INVOKE_HWP( l_errl,
-                             p9_pm_pba_bar_config,
+                             p10_pm_pba_bar_config,
                              l_fapiTarg,
                              2,
                              l_common_addr,
                              VMM_OCC_COMMON_SIZE_IN_MB,
-                             p9pba::LOCAL_NODAL,
+                             p10pba::LOCAL_NODAL,
                              0xFF );
 
             if (l_errl)
@@ -709,10 +686,8 @@ namespace HBPM
                             ERR_MRK"loadOCCImageToHomer: "
                             "release stored LID image failed!");
                     l_errl->collectTrace("ISTEPS_TRACE",256);
-/* FIXME RTC: 210975
                     l_errl->collectTrace(FAPI_TRACE_NAME,256);
                     l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
-*/
                     break;
                 }
             }
@@ -725,10 +700,8 @@ namespace HBPM
                            ERR_MRK"loadOCCImageToHomer: "
                            "get stored LID image failed!");
                 l_errl->collectTrace("ISTEPS_TRACE",256);
-/* FIXME RTC: 210975
                 l_errl->collectTrace(FAPI_TRACE_NAME,256);
                 l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
-*/
                 break;
             }
 
@@ -822,11 +795,9 @@ namespace HBPM
                 l_errl = HBOCC::loadOCCImageDuringIpl(i_target, l_occVirt);
                 if(l_errl)
                 {
-/* FIXME RTC: 210975
                     TRACFCOMP(g_fapiImpTd,
                             ERR_MRK"loadPMComplex:"
                             " loadOCCImageDuringIpl failed!");
-*/
                     break;
                 }
             }
@@ -846,10 +817,8 @@ namespace HBPM
                                                       + IPL_FLAG_AND_FREQ_SIZE);
                 if(l_errl)
                 {
-/* FIXME RTC: 210975
                     TRACFCOMP(g_fapiImpTd,
                               "loadPMComplex: Error erasing IPL flag");
-*/
                     break;
                 }
 #endif
@@ -879,10 +848,8 @@ namespace HBPM
                                                         PRDF::MASTER_PROC_CORE);
                 if( l_errl != NULL )
                 {
-/* FIXME RTC: 210975
                     TRACFCOMP(g_fapiImpTd,
                                        ERR_MRK"loading Host Data Area failed!");
-*/
                     break;
                 }
             }
@@ -966,32 +933,30 @@ namespace HBPM
         l_homerPhysAddr = i_target->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>();
         void* l_homerVAddr = convertHomerPhysToVirt(i_target,l_homerPhysAddr);
 
-/* FIXME RTC: 210975
         // cast OUR type of target to a FAPI type of target.
         // figure out homer offsets
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
             l_fapiTarg(i_target);
-*/
 
         do {
             // Init path
-            // p9_pm_init.C enum: PM_INIT
+            // p10_pm_init.C enum: PM_INIT
             if (TARGETING::is_phyp_load())
             {
                 l_sys->setAttr <TARGETING::ATTR_PM_MALF_ALERT_ENABLE> (0x1);
             }
 /* FIXME RTC: 210975
             FAPI_INVOKE_HWP( l_errl,
-                             p9_pm_init,
+                             p10_pm_init,
                              l_fapiTarg,
-                             p9pm::PM_INIT,
+                             p10pm::PM_INIT,
                              l_homerVAddr);
 
             if ( l_errl != nullptr )
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            ERR_MRK"startPMComplex: "
-                           "p9_pm_init(PM_INIT) failed! "
+                           "p10_pm_init(PM_INIT) failed! "
                            "HUID=0x%08X", get_huid(i_target) );
                 l_errl->collectTrace("ISTEPS_TRACE",256);
 
@@ -1035,12 +1000,10 @@ namespace HBPM
         void* l_homerVAddr =
                            convertHomerPhysToVirt(i_target,l_homerPhysAddr);
 
-/* FIXME RTC: 210975
         // cast OUR type of target to a FAPI type of target.
         // figure out homer offsets
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
             l_fapiTarg(i_target);
-*/
 
         do
         {
@@ -1079,18 +1042,18 @@ namespace HBPM
 
 /* FIXME RTC: 210975
             // Reset path
-            // p9_pm_init.C enum: PM_RESET
+            // p10_pm_init.C enum: PM_RESET
             FAPI_INVOKE_HWP( l_errl,
-                             p9_pm_init,
+                             p10_pm_init,
                              l_fapiTarg,
-                             p9pm::PM_RESET,
+                             p10pm::PM_RESET,
                              l_homerVAddr );
 
             if (l_errl)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            ERR_MRK"resetPMComplex: "
-                           "p9_pm_init(PM_RESET) failed! "
+                           "p10_pm_init(PM_RESET) failed! "
                            "HUID=0x%08X", get_huid(i_target) );
                 l_errl->collectTrace("ISTEPS_TRACE",256);
 
@@ -1099,7 +1062,7 @@ namespace HBPM
 */
 
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "resetPMComplex: p9_pm_init(PM_RESET) succeeded "
+                       "resetPMComplex: p10_pm_init(PM_RESET) succeeded "
                        "HUID=0x%08X", get_huid(i_target) );
 
 #ifdef __HOSTBOOT_RUNTIME
@@ -1338,8 +1301,9 @@ namespace HBPM
         // Wait up to 15 seconds for all OCCs to be ready (150 * 100ms = 15s)
         const size_t NS_BETWEEN_READ = 100 * NS_PER_MSEC;
         const size_t READ_RETRY_LIMIT = 150;
+/* FIXME RTC: 214350 re-enable PM Complex Functionality
         const uint16_t l_readLength = 8;
-
+*/
         for (const auto & l_procChip: l_procChips)
         {
             uint64_t l_checkpoint = 0x0;
@@ -1348,6 +1312,7 @@ namespace HBPM
 
             while (retryCount++ < READ_RETRY_LIMIT)
             {
+/* FIXME RTC: 214350 re-enable PM Complex Functionality
                 // Read SRAM response buffer to check for OCC checkpoint
                 l_errl = HBOCC::readSRAM( l_procChip,OCC_SRAM_RSP_ADDR,
                                           &(l_checkpoint),
@@ -1360,7 +1325,7 @@ namespace HBPM
                         "HUID 0x%X", get_huid(l_procChip));
                     break;
                 }
-
+*/
                 if( OCC_CHKPT_COMPLETE == (l_checkpoint & 0xFFFF) )
                 {
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -1416,10 +1381,8 @@ namespace HBPM
                                           HWAS::GARD_NULL );
                 }
 
-/* FIXME RTC: 210975
                 l_errl->collectTrace(FAPI_TRACE_NAME,256);
                 l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
-*/
                 l_errl->collectTrace("ISTEPS_TRACE",256);
 
                 break;
@@ -1464,10 +1427,8 @@ namespace HBPM
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            ERR_MRK"getRingOvd: get stored LID image failed!");
                 l_err->collectTrace("ISTEPS_TRACE",256);
-/* FIXME RTC: 210975
                 l_err->collectTrace(FAPI_TRACE_NAME,256);
                 l_err->collectTrace(FAPI_IMP_TRACE_NAME,256);
-*/
                 break;
             }
 
@@ -1522,13 +1483,13 @@ errlHndl_t core_checkstop_helper_hwp( const TARGETING::Target* i_core_target,
         const fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_coreTarget(
                 const_cast<TARGETING::Target*> ( i_core_target ));
 
-        FAPI_INVOKE_HWP( l_errl, p9_core_checkstop_handler,
+        FAPI_INVOKE_HWP( l_errl, p10_core_checkstop_handler,
                          l_fapi2_coreTarget, i_override_restore);
 
         if( l_errl )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "p9_core_checkstop_handler ERROR: returning "
+                       "p10_core_checkstop_handler ERROR: returning "
                        "errorlog, reason=0x%x", l_errl->reasonCode() );
 
             // Capture the target data in the elog
@@ -1605,10 +1566,10 @@ errlHndl_t core_checkstop_helper_homer()
             }
 
             stopImageSection::StopReturnCode_t l_srErrl =
-                                p9_stop_save_scom( l_homerVAddr,
+                                p10_stop_save_scom( l_homerVAddr,
                                 l_scomAddr, l_action0,
-                                stopImageSection::P9_STOP_SCOM_REPLACE,
-                                stopImageSection::P9_STOP_SECTION_CORE_SCOM );
+                                stopImageSection::P10_STOP_SCOM_REPLACE,
+                                stopImageSection::P10_STOP_SECTION_CORE_SCOM );
 
             if( l_srErrl != stopImageSection::StopReturnCode_t::
                                 STOP_SAVE_SUCCESS )
@@ -1633,10 +1594,10 @@ errlHndl_t core_checkstop_helper_homer()
                 break;
             }
 
-            l_srErrl = p9_stop_save_scom( l_homerVAddr,
+            l_srErrl = p10_stop_save_scom( l_homerVAddr,
                                 l_scomAddr, l_action1,
-                                stopImageSection::P9_STOP_SCOM_REPLACE,
-                                stopImageSection::P9_STOP_SECTION_CORE_SCOM );
+                                stopImageSection::P10_STOP_SCOM_REPLACE,
+                                stopImageSection::P10_STOP_SECTION_CORE_SCOM );
 
             if( l_srErrl != stopImageSection::StopReturnCode_t::
                                 STOP_SAVE_SUCCESS )

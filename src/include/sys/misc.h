@@ -53,6 +53,15 @@ enum    p9SystemConsts
 
 };
 
+enum    p10SystemConsts
+{
+    /// max possible processors in a P10 system
+    P10_MAX_PROCS        =   8,
+    /// max EC (cores available in a processor )
+    P10_MAX_EC_PER_PROC  =   32,
+
+};
+
 /**
  * @enum ShutdownStatus
  *

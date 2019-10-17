@@ -283,6 +283,9 @@
     <attribute>
       <id>MASTER_MBOX_SCRATCH</id>
     </attribute>
+    <attribute>
+      <id>OCC_COMMON_AREA_PHYS_ADDR</id>
+    </attribute>
   </targetTypeExtension>
 
   <targetTypeExtension>

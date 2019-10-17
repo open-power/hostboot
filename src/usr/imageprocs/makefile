@@ -28,7 +28,6 @@ MODULE = imageprocs
 
 SUBDIRS += runtime.d
 
-# FIXME RTC: 210975
-#include imageprocs.mk
+include imageprocs.mk
 
 include ${ROOTPATH}/config.mk

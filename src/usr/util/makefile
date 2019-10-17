@@ -39,8 +39,7 @@ OBJS += utilmbox_scratch.o
 OBJS += utiltcemgr.o
 OBJS += utilsemipersist.o
 OBJS += utilrsvdmem.o
-# FIXME RTC: 210975
-#OBJS += utilxipimage.o
+OBJS += utilxipimage.o
 OBJS += utilmclmgr.o
 OBJS += utilcommonattr.o
 

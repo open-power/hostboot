@@ -25,16 +25,14 @@
 ROOTPATH = ../../../..
 MODULE = istep15
 
-# FIXME RTC: 210975
-
-#PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p9/procedures
+PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p10/procedures
 
 #EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest/
-#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/pm/
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/pm/
 #EXTRAINCDIR += ${PROCEDURES_PATH}/stop_reg/
-#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/lib/
-#EXTRAINCDIR += ${PROCEDURES_PATH}/utils/stopreg/
-#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/customize/
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/lib/
+EXTRAINCDIR += ${PROCEDURES_PATH}/utils/stopreg/
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/customize/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip/
@@ -57,4 +55,4 @@ include ${ROOTPATH}/procedure.rules.mk
 #include $(PROCEDURES_PATH)/hwp/pm/p9_update_ec_eq_state.mk
 include ${ROOTPATH}/config.mk
 
-#VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
+#VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm/

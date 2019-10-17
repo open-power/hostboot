@@ -22,8 +22,8 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-# xip image processing functions
-HWP_XIP_PATH := ${ROOTPATH}/src/import/chips/p9/xip
+# ipl image processing functions
+HWP_IPL_PATH := ${ROOTPATH}/src/import/chips/p10/ipl
 
 # p10 ring id
 HWP_IMAGEPROCS_PATH := ${ROOTPATH}/src/import/chips/p10/utils/imageProcs
@@ -32,35 +32,33 @@ HWP_IMAGEPROCS_PATH := ${ROOTPATH}/src/import/chips/p10/utils/imageProcs
 HWP_COMMON_IMAGEPROCS_PATH += \
 		 ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 
-# xip customize path
-XIP_CUSTOMIZE_PATH = ${ROOTPATH}/src/import/chips/p9/procedures/hwp/customize
+# ipl customize path
+IPL_CUSTOMIZE_PATH = ${ROOTPATH}/src/import/chips/p10/procedures/hwp/customize
 
 # vpd accesssors
-HWP_ACC_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/accessors
+HWP_ACC_PATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/accessors
 
-VPATH += ${HWP_XIP_PATH} ${HWP_IMAGEPROCS_PATH} ${HWP_CEN_IMAGEPROCS_PATH} \
+VPATH += ${HWP_IPL_PATH} ${HWP_IMAGEPROCS_PATH} \
 		 ${HWP_COMMON_IMAGEPROCS_PATH} ${HWP_STOPUTIL_PATH}
-VPATH += ${XIP_CUSTOMIZE_PATH} ${HWP_ACC_PATH}
+VPATH += ${IPL_CUSTOMIZE_PATH} ${HWP_ACC_PATH}
 
-EXTRAINCDIR += ${HWP_XIP_PATH} ${HWP_IMAGEPROCS_PATH}
-EXTRAINCDIR += ${HWP_CEN_IMAGEPROCS_PATH} ${HWP_COMMON_IMAGEPROCS_PATH}
+EXTRAINCDIR += ${HWP_IPL_PATH} ${HWP_IMAGEPROCS_PATH}
+EXTRAINCDIR += ${HWP_COMMON_IMAGEPROCS_PATH}
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
-EXTRAINCDIR += ${XIP_CUSTOMIZE_PATH}
+EXTRAINCDIR += ${IPL_CUSTOMIZE_PATH}
 EXTRAINCDIR += ${HWP_ACC_PATH}
 
 include ${ROOTPATH}/procedure.rules.mk
 
-# FIXME RTC: 210975
-#include ${XIP_CUSTOMIZE_PATH}/p9_xip_customize.mk
-include ${XIP_CUSTOMIZE_PATH}/p9_xip_section_append.mk
-include ${HWP_XIP_PATH}/p9_xip_image.mk
-include ${HWP_IMAGEPROCS_PATH}/p9_dd_container.mk
-include ${HWP_IMAGEPROCS_PATH}/p9_tor.mk
-include ${HWP_IMAGEPROCS_PATH}/p9_ring_identification.mk
-include ${HWP_IMAGEPROCS_PATH}/p9_ringId.mk
+include ${IPL_CUSTOMIZE_PATH}/p10_ipl_customize.mk
+include ${IPL_CUSTOMIZE_PATH}/p10_ipl_section_append.mk
+include ${HWP_IMAGEPROCS_PATH}/p10_ipl_image.mk
+include ${HWP_IMAGEPROCS_PATH}/p10_ddco.mk
+include ${HWP_IMAGEPROCS_PATH}/p10_tor.mk
+include ${HWP_IMAGEPROCS_PATH}/p10_ringId.mk
 include ${HWP_COMMON_IMAGEPROCS_PATH}/common_ringId.mk
-include ${HWP_IMAGEPROCS_PATH}/p9_scan_compression.mk
-include ${HWP_ACC_PATH}/p9_get_mvpd_ring.mk
-include ${HWP_ACC_PATH}/p9_mvpd_ring_funcs.mk
+include ${HWP_IMAGEPROCS_PATH}/p10_scan_compression.mk
+include ${HWP_ACC_PATH}/p10_get_mvpd_ring.mk
+include ${HWP_ACC_PATH}/p10_mvpd_ring_funcs.mk
 

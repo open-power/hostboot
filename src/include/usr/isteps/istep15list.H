@@ -33,7 +33,7 @@
  *
  *    15.1    host_build_stop_image
  *          : Build runtime STOP images
- *    15.1    proc_set_pba_homer_bar
+ *    15.2    proc_set_pba_homer_bar
  *          : Set HOMER location in OCC
  *    15.3    host_establish_ex_chiplet
  *          : Select Hostboot core
@@ -48,7 +48,6 @@
 #include <initservice/initsvcstructs.H>
 #include <initservice/initsvcreasoncodes.H>
 #include <config.h>
-
 namespace   ISTEP_15
 {
 
@@ -140,8 +139,8 @@ const DepModInfo g_istep15Dependancies = {
 //        DEP_LIB(libp9_stop_util.so),
 //        DEP_LIB(libnestmemutils.so),
 //        DEP_LIB(libp9_cpuWkup.so),
-//        DEP_LIB(libpm.so),
-//        DEP_LIB(libimageprocs.so),
+        DEP_LIB(libpm.so),
+        DEP_LIB(libimageprocs.so),
 //        DEP_LIB(libisteps_mss.so),
         NULL
     }

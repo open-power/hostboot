@@ -62,17 +62,14 @@
 //HWP Invoker
 #include    <fapi2/plat_hwp_invoker.H>
 
-/* FIXME: RTC 208832 - P10 istep 15
 //Import directory (from EKB repository)
-#include    <p9_hcode_image_build.H>
-#include    <p9_stop_api.H>
-#include    <p9_setup_runtime_wakeup_mode.H>
-#include    <p9_xip_image.h>
-#include    <p9_infrastruct_help.H>
-#include    <p9_hcode_image_defines.H>
-#include    <p9_xip_section_append.H>
-#include    <p9n2_quad_scom_addresses_fld.H>
-*/
+#include    <p10_hcode_image_build.H>
+#include    <p10_stop_api.H>
+#include    <p10_setup_runtime_wakeup_mode.H>
+#include    <p10_ipl_image.H>
+#include    <p10_infrastruct_help.H>
+#include    <p10_hcode_image_defines.H>
+#include    <p10_ipl_section_append.H>
 
 #include    <secureboot/smf_utils.H>
 #include    <secureboot/smf.H>
@@ -86,25 +83,24 @@ using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   TARGETING;
 using   namespace   PNOR;
-/* FIXME RTC: 208832 - P10 istep 15
 using   namespace   stopImageSection;
-*/
+using   namespace   hcodeImageBuild;
 using   namespace   fapi2;
 
 namespace ISTEP_15
 {
 
 /**
- *  @brief Load HCODE image and return a pointer to it, or NULL
+ *  @brief Load HCODE image and return a pointer to it, or nullptr
  *
  *  @param[out] -   address of the HCODE image
  *
- *  @return      NULL if success, errorlog if failure
+ *  @return      nullptr if success, errorlog if failure
  *
  */
-errlHndl_t  loadHcodeImage(  char                    *& o_rHcodeAddr)
+errlHndl_t  loadHcodeImage(char *& o_rHcodeAddr)
 {
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
     PNOR::SectionInfo_t l_info;
 
     do
@@ -146,13 +142,13 @@ errlHndl_t  loadHcodeImage(  char                    *& o_rHcodeAddr)
 
 /**
  * @brief   apply cpu reg information to the HCODE image using
- *          p9_stop_save_cpureg() .
+ *          proc_stop_save_cpureg() .
  *
  * @param i_procChipTarg   -   proc target
  * @param io_image      -   pointer to the HCODE image
  * @param i_sizeImage   -   size of the HCODE image
  *
- * @return errorlog if error, NULL otherwise.
+ * @return errorlog if error, nullptr otherwise.
  *
  */
 errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
@@ -161,8 +157,6 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
 {
     errlHndl_t  l_errl = nullptr;
 
-// FIXME RTC: 208832 - P10 istep 15
-#if 0
     do
     {
 
@@ -189,34 +183,22 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
     uint64_t    l_msrVal    =   cpu_spr_value(CPU_SPR_MSR);
     uint64_t    l_lpcrVal   =   cpu_spr_value(CPU_SPR_LPCR);
 
-    if(SECUREBOOT::SMF::isSmfEnabled())
-    {
-        l_errl = SECUREBOOT::SMF::checkRiskLevelForSmf();
-        if(l_errl)
-        {
-            break;
-        }
-
-        // Set the secure bit (41) on if SMF is enabled
-        l_msrVal |= MSR_SMF_MASK;
-    }
-
-    // See LPCR def, PECE "reg" in Power ISA AS Version: Power8 June 27, 2012
-    //  and 23.7.3.5 - 6 in Murano Book 4
+    // See LPCR def, PECE "reg" in Power ISA AS Version: Power10 September 12, 2019
+    //  section 4.10.1 in P10 Book 4
     l_lpcrVal   &=  ~(0x0000000000002000) ;
     l_lpcrVal   |=    0x0000400000000000  ;  //Allow Hyp virt to exit STOP
 
     //Get top-lvl system target with TARGETING code to find the enabled threads
-    TARGETING::Target* sys = NULL;
+    TARGETING::Target* sys = nullptr;
     TARGETING::targetService().getTopLevelTarget(sys);
-    assert( sys != NULL );
+    assert( sys != nullptr );
     uint64_t en_threads = sys->getAttr<ATTR_ENABLED_THREADS>();
 
     //look up the HRMOR value from the HRMOR CPU special purpose register(SPR)
     uint64_t    l_hrmorVal  =   cpu_spr_value(CPU_SPR_HRMOR);
 
     // create a mask to represent the ATTN enable bit in the HID register
-    uint64_t  l_enblAttnMask = 0x8000000000000000ull >> P9N2_C_HID_EN_ATTN;
+    uint64_t  l_enblAttnMask = 0x8000000000000000ull >> CPU_SPR_HID_EN_ATTN;
 
     //iterate through the cores while copying information from SPRs
     for (const auto & l_core: l_coreIds)
@@ -264,9 +246,9 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
         for(size_t l_fuseAdj = 0; l_fuseAdj < l_fuseThreadAdjust; l_fuseAdj++)
         {
 
-            //Call p9_stop_save_cpureg to store the MSR SPR value
-            l_rc = p9_stop_save_cpureg( io_image,
-                                        P9_STOP_SPR_MSR,
+            //Call proc_stop_save_cpureg to store the MSR SPR value
+            l_rc = proc_stop_save_cpureg( io_image,
+                                        PROC_STOP_SPR_MSR,
                                         l_msrVal,
                                         l_pirVal | l_fuseAdj);
             if ( l_rc )
@@ -274,13 +256,13 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            "ERROR: MSR: core=0x%x,thread=0x%x,l_rc=0x%x",
                            l_coreId, l_threadId, l_rc );
-                l_failAddr = P9_STOP_SPR_MSR;
+                l_failAddr = PROC_STOP_SPR_MSR;
                 break;
             }
 
-            //Call p9_stop_save_cpureg to store the HRMOR SPR value
-            l_rc = p9_stop_save_cpureg( io_image,
-                                        P9_STOP_SPR_HRMOR,
+            //Call proc_stop_save_cpureg to store the HRMOR SPR value
+            l_rc = proc_stop_save_cpureg( io_image,
+                                        PROC_STOP_SPR_HRMOR,
                                         l_hrmorVal,
                                         l_pirVal | l_fuseAdj);
 
@@ -288,16 +270,16 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            "ERROR: HRMOR: core=0x%x,thread=0x%x,l_rc=0x%x",
                            l_coreId, l_threadId, l_rc );
-                l_failAddr = P9_STOP_SPR_HRMOR;
+                l_failAddr = PROC_STOP_SPR_HRMOR;
                 break;
             }
 
-            //Call p9_stop_save_cpureg to store the HID SPR value
+            //Call proc_stop_save_cpureg to store the HID SPR value
             //  (minus ATTN enable bit)
             uint64_t l_curHidVal =  cpu_spr_value( CPU_SPR_HID );
             uint64_t l_hidVal = l_curHidVal & (~(l_enblAttnMask));
-            l_rc = p9_stop_save_cpureg( io_image,
-                                        P9_STOP_SPR_HID,
+            l_rc = proc_stop_save_cpureg( io_image,
+                                        PROC_STOP_SPR_HID,
                                         l_hidVal,
                                         l_pirVal | l_fuseAdj);
 
@@ -305,13 +287,13 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            "ERROR: HID: core=0x%x,thread=0x%x,l_rc=0x%x",
                            l_coreId, l_threadId, l_rc );
-                l_failAddr = P9_STOP_SPR_HID;
+                l_failAddr = PROC_STOP_SPR_HID;
                 break;
             }
 
-            // Call p9_stop_save_cpureg to store the URMOR SPR value
-            l_rc = p9_stop_save_cpureg(io_image,
-                                       P9_STOP_SPR_URMOR,
+            // Call proc_stop_save_cpureg to store the URMOR SPR value
+            l_rc = proc_stop_save_cpureg(io_image,
+                                       PROC_STOP_SPR_URMOR,
                                        l_hrmorVal,
                                        l_pirVal | l_fuseAdj);
             if(l_rc)
@@ -319,7 +301,7 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                           "ERROR: URMOR: core=0x%x,thread=0x%x,l_rc=0x%x",
                           l_coreId, l_threadId, l_rc);
-                l_failAddr = P9_STOP_SPR_HRMOR;
+                l_failAddr = PROC_STOP_SPR_HRMOR;
                 break;
             }
         }
@@ -343,10 +325,10 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
             //the thread ID is the last 3 bytes of pirVal so you can just OR
             uint64_t l_pirValThread = l_pirVal | l_threadId;
 
-            //Call p9_stop_save_cpureg from p9_stop_api
+            //Call proc_stop_save_cpureg from p10_stop_api
             //to store the LPCR SPR value
-            l_rc = p9_stop_save_cpureg( io_image,
-                                        P9_STOP_SPR_LPCR,
+            l_rc = proc_stop_save_cpureg( io_image,
+                                        PROC_STOP_SPR_LPCR,
                                         l_lpcrVal,
                                         l_pirValThread);
             if ( l_rc )
@@ -354,7 +336,7 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            "ERROR: LPCR: core=0x%x,thread=0x%x,l_rc=0x%x",
                            l_coreId, l_threadId, l_rc );
-                l_failAddr = P9_STOP_SPR_LPCR;
+                l_failAddr = PROC_STOP_SPR_LPCR;
                 break;
             }
         }   // end for l_threadId
@@ -369,19 +351,18 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
 
     if ( l_rc ){
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "ERROR: p9 stop api fail core=0x%x, thread=0x%x, l_rc=0x%x",
+                   "ERROR: p10 stop api fail core=0x%x, thread=0x%x, l_rc=0x%x",
                    l_coreId, l_threadId, l_rc );
         /*@
         * @errortype
         * @reasoncode  ISTEP::RC_BAD_RC
         * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
         * @moduleid    ISTEP::MOD_BUILD_HCODE_IMAGES
-        * @userdata1   Hi 32 bits: return code from p8_pore_gen_scom_fixed
-        *              Lo 32 bits: Address of EX_CORE_FIR_ACTION1_0x10013107
+        * @userdata1   Hi 32 bits: return code from proc_stop_save_cpureg
+        *              Lo 32 bits: SPR number being processed
         * @userdata2   Hi 32 bits: ID of core
         *              Lo 32 bits: Thread id
-        * @devdesc     Unable to force core checkstops by updating ACTION1
-        *              when it comes out of winkle
+        * @devdesc     The proc_stop_save_cpureg procedure failed.
         * @custdesc    A problem occurred during the IPL
         *              of the system.
         */
@@ -398,7 +379,6 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
 
     }while(0);
 
-#endif
     return  l_errl;
 }
 
@@ -406,34 +386,29 @@ void* host_build_stop_image (void *io_pArgs)
 {
     ISTEP_ERROR::IStepError     l_StepError;
 
-    errlHndl_t  l_errl           = NULL;
+    errlHndl_t  l_errl           = nullptr;
 
     // unload of HCODE PNOR section only necessary if SECUREBOOT compiled in
 #ifdef CONFIG_SECUREBOOT
     bool unload_hcode_pnor_section = false;
 #endif
 
-    char*       l_pHcodeImage     = NULL;
-    //void*       l_pRealMemBase   = NULL;
-    void*       l_pVirtMemBase   = NULL;
+    char*       l_pHcodeImage    = nullptr;
+    void*       l_pRealMemBase   = nullptr;
+    void*       l_pVirtMemBase   = nullptr;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_build_stop_image entry" );
 
-// FIXME RTC: 208832 - P10 istep 15
-#if 0
     // allocate four temporary work buffers
     void* l_temp_buffer1 = malloc(HW_IMG_RING_SIZE);
     void* l_temp_buffer2 = malloc(MAX_RING_BUF_SIZE);
     void* l_temp_buffer3 = malloc(MAX_RING_BUF_SIZE);
     void* l_temp_buffer4 = malloc(MAX_RING_BUF_SIZE);
-#endif
     do  {
-// FIXME RTC: 208832 - P10 istep 15
-#if 0
         //Determine top-level system target
-        TARGETING::Target* l_sys = NULL;
+        TARGETING::Target* l_sys = nullptr;
         TARGETING::targetService().getTopLevelTarget(l_sys);
-        assert( l_sys != NULL );
+        assert( l_sys != nullptr );
 
         if (l_sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
         {
@@ -454,7 +429,7 @@ void* host_build_stop_image (void *io_pArgs)
 
         //  Get a chunk of real memory big enough to store all the possible
         //  HCODE images. (4MB is size of HOMER)
-        assert(VMM_HOMER_REGION_SIZE <= (P9_MAX_PROCS * (4 * MEGABYTE)),
+        assert(VMM_HOMER_REGION_SIZE <= (P10_MAX_PROCS * (4 * MEGABYTE)),
                "host_build_stop_image: Unsupported HOMER Region size");
 
         //If running Sapphire need to place this at the top of memory instead
@@ -476,7 +451,7 @@ void* host_build_stop_image (void *io_pArgs)
 
         TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "Got virtual mem  buffer for %d cpus = 0x%p",
-                   P9_MAX_PROCS,
+                   P10_MAX_PROCS,
                    l_pVirtMemBase  );
 
         //Since we have the HOMER location defined, set the
@@ -484,7 +459,7 @@ void* host_build_stop_image (void *io_pArgs)
         l_sys->setAttr<TARGETING::ATTR_OCC_COMMON_AREA_PHYS_ADDR>
             (reinterpret_cast<uint64_t>(l_pRealMemBase)
                 + VMM_HOMER_REGION_SIZE);
-#endif
+
         //  Continue, build hcode images
         //
         //Load the reference image from PNOR
@@ -501,8 +476,6 @@ void* host_build_stop_image (void *io_pArgs)
         unload_hcode_pnor_section = true;
 #endif
 
-// FIXME RTC: 208832 - P10 istep 15
-#if 0
         // Pull build information from XIP header and trace it
         Util::imageBuild_t l_imageBuild;
         Util::pullTraceBuildInfo(l_pHcodeImage,
@@ -519,11 +492,11 @@ void* host_build_stop_image (void *io_pArgs)
                    "Found %d functional procs in system",
                    l_procChips.size()   );
 
-        auto l_unsecureHomerSize =
-                          l_sys->getAttr<TARGETING::ATTR_UNSECURE_HOMER_SIZE>();
-
         for (const auto & l_procChip: l_procChips)
         {
+            auto l_unsecureHomerSize =
+                     l_procChip->getAttr<TARGETING::ATTR_UNSECURE_HOMER_SIZE>();
+
             do  {
                 // write the HUID of the core we are writing to
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -545,13 +518,11 @@ void* host_build_stop_image (void *io_pArgs)
                   (reinterpret_cast<uint64_t>(l_pVirtMemBase)
                    + l_procOffsetAddr) ;
 
-                uint32_t    l_sizeImageOut  =
-                  ((P9_MAX_PROCS * (4 * MEGABYTE)));
 
                 //Make sure that the HOMER is zeroed out for the MPIPL path
                 memset(l_pImageOut, 0, 4 * MEGABYTE);
 
-                //Set default values, used later by p9_hcode_build
+                //Set default values, used later by p10_hcode_image_build
                 l_procChip->setAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>
                                                         (l_procRealMemAddr);
 
@@ -570,7 +541,7 @@ void* host_build_stop_image (void *io_pArgs)
 
                 // Check if we have a valid ring override section and
                 //  include it in if so
-                void* l_ringOverrides = NULL;
+                void* l_ringOverrides = nullptr;
                 l_errl = HBPM::getRingOvd(l_ringOverrides);
                 if(l_errl)
                 {
@@ -597,9 +568,10 @@ void* host_build_stop_image (void *io_pArgs)
                               l_unsecureHomerAddr);
                 }
 
-                //Call p9_hcode_image_build.C HWP
+#ifdef ISTEP15_ENABLE_HWPS
+                //Call p10_hcode_image_build.C HWP
                 FAPI_INVOKE_HWP( l_errl,
-                                 p9_hcode_image_build,
+                                 p10_hcode_image_build,
                                  l_fapiProcTarget,
                                  reinterpret_cast<void*>(l_pHcodeImage),
                                  l_pImageOut, //homer image buffer
@@ -618,15 +590,15 @@ void* host_build_stop_image (void *io_pArgs)
                 if ( l_errl )
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "host_build_stop_image ERROR occured during p9_hcode_image_build : errorlog PLID=0x%x",
+                              "host_build_stop_image ERROR occured during p10_hcode_image_build : errorlog PLID=0x%x",
                               l_errl->plid() );
 
                     //  drop out of block with errorlog.
                     break;
                 }
-
+#endif
                 // We now need to copy the data that was put in l_temp_buffer2
-                // by the p9_hcode_image_build procedure into the unsecure
+                // by the p10_hcode_image_build procedure into the unsecure
                 // HOMER memory
                 if(SECUREBOOT::SMF::isSmfEnabled())
                 {
@@ -677,6 +649,10 @@ void* host_build_stop_image (void *io_pArgs)
                     }
                 }
 
+#ifdef ISTEP15_ENABLE_HWPS
+                uint32_t    l_sizeImageOut  =
+                  ((P10_MAX_PROCS * (4 * MEGABYTE)));
+
                 l_errl = applyHcodeGenCpuRegs( l_procChip,
                                                l_pImageOut,
                                                l_sizeImageOut );
@@ -697,19 +673,19 @@ void* host_build_stop_image (void *io_pArgs)
 
                 // Set wakeup mode for processor based on SMF enablement
                 FAPI_INVOKE_HWP(l_errl,
-                                p9_setup_runtime_wakeup_mode,
+                                p10_setup_runtime_wakeup_mode,
                                 l_fapiProcTarget);
 
                 if ( l_errl )
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "host_build_stop_image ERROR occured during p9_setup_runtime_wakeup_mode : errorlog PLID=0x%x",
+                              "host_build_stop_image ERROR occured during p10_setup_runtime_wakeup_mode : errorlog PLID=0x%x",
                               l_errl->plid() );
 
                     //  drop out of block with errorlog.
                     break;
                 }
-
+#endif
             }   while (0) ;
 
             // broke out due to an error, store all the details away, store
@@ -735,7 +711,6 @@ void* host_build_stop_image (void *io_pArgs)
 
         } ;  // endfor
 
-#endif
     }  while (0);
     // @@@@@    END CUSTOM BLOCK:   @@@@@
 
@@ -748,14 +723,11 @@ void* host_build_stop_image (void *io_pArgs)
         errlCommit( l_errl, HWPF_COMP_ID );
     }
 
-// FIXME RTC: 208832 - P10 istep 15
-#if 0
     // delete working buffers
     if( l_temp_buffer1 ) { free(l_temp_buffer1); }
     if( l_temp_buffer2 ) { free(l_temp_buffer2); }
     if( l_temp_buffer3 ) { free(l_temp_buffer3); }
     if( l_temp_buffer4 ) { free(l_temp_buffer4); }
-#endif
 
 #ifdef CONFIG_SECUREBOOT
     // securely unload HCODE PNOR section, if necessary

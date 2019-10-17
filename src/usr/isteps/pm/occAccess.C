@@ -30,16 +30,14 @@
 #include    <targeting/common/utilFilter.H>
 
 #include    <isteps/hwpf_reasoncodes.H>
-/* FIXME RTC: 210975
 // Fapi
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
 
 // Procedures
-#include <p9_pm_ocb_init.H>
-#include <p9_pm_ocb_indir_setup_linear.H>
-#include <p9_pm_ocb_indir_access.H>
-*/
+#include <p10_pm_ocb_init.H>
+#include <p10_pm_ocb_indir_setup_linear.H>
+#include <p10_pm_ocb_indir_access.H>
 
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
@@ -67,9 +65,7 @@ errlHndl_t getChipTarget(const TARGETING::Target* i_target,
     {
         if(nullptr == i_target) //unexpected error
         {
-/* FIXME RTC: 210975
             TRACFCOMP( g_fapiTd, ERR_MRK"getChipTarget: null target passed");
-*/
             break; // log and return error
         }
 
@@ -82,12 +78,10 @@ errlHndl_t getChipTarget(const TARGETING::Target* i_target,
             if (nullptr == o_pChipTarget)
             {
                 l_huid  = i_target->getAttr<TARGETING::ATTR_HUID>();
-/* FIXME RTC: 210975
                 TRACFCOMP( g_fapiTd, ERR_MRK"getChipTarget:"
                 " Error OCC target has no parent"
                 " Target type: 0x%X huid:0x%X",
                 l_type, l_huid);
-*/
                 break; // log and return error
             }
             l_found = true;
@@ -100,12 +94,10 @@ errlHndl_t getChipTarget(const TARGETING::Target* i_target,
         else // unexpected target type
         {
             l_huid  = i_target->getAttr<TARGETING::ATTR_HUID>();
-/* FIXME RTC: 210975
             TRACFCOMP( g_fapiTd, ERR_MRK"getChipTarget:"
                  " Error Unexpected target type. Not PROC or"
                  " OCC. Target is of type: 0x%X huid:0x%X",
                  l_type, l_huid);
-*/
             break; // log and return error
         }
 
@@ -163,45 +155,34 @@ errlHndl_t accessOCBIndirectChannel(accessOCBIndirectCmd i_cmd,
                                     size_t i_dataLen )
 {
     errlHndl_t l_errl = nullptr;
-    // FIXME RTC: 210975
-    //uint32_t   l_len  = 0;
+    uint32_t   l_len  = 0;
     TARGETING::Target* l_pChipTarget = nullptr;
 
-    /* FIXME RTC: 210975
-    p9ocb::PM_OCB_CHAN_NUM   l_channel = p9ocb::OCB_CHAN0;  // OCB channel (0,1,2,3)
-    p9ocb::PM_OCB_ACCESS_OP   l_operation = p9ocb::OCB_GET;  // Operation(Get, Put)
+    ocb::PM_OCB_CHAN_NUM   l_channel = ocb::OCB_CHAN0;  // OCB channel (0,1,2,3)
+    ocb::PM_OCB_ACCESS_OP   l_operation = ocb::OCB_GET;  // Operation(Get, Put)
     bool       l_ociAddrValid = true;  // use oci_address
-    */
     bool       l_setup=true;           // set up linear
 
-/* FIXME RTC: 210975
     TRACUCOMP( g_fapiTd, ENTER_MRK"accessOCBIndirectChannel cmd=%d",i_cmd);
-*/
 
     switch (i_cmd)
     {
         case (ACCESS_OCB_READ_LINEAR):
             break; // use defaults
         case (ACCESS_OCB_WRITE_LINEAR):
-/* FIXME RTC: 210975
-            l_operation = p9ocb::OCB_PUT;
-*/
+            l_operation = ocb::OCB_PUT;
             break;
         case (ACCESS_OCB_WRITE_CIRCULAR):
-/* FIXME RTC: 210975
-            l_channel = p9ocb::OCB_CHAN1;
-            l_operation = p9ocb::OCB_PUT;
+            l_channel = ocb::OCB_CHAN1;
+            l_operation = ocb::OCB_PUT;
             l_ociAddrValid = false;
             l_setup = false;
-*/
             break;
     }
 
-/* FIXME RTC: 210975
     TRACUCOMP( g_fapiTd, INFO_MRK"accessOCBIndirectChannel"
            " channel=%d operation=%d addrValid=%d",
            l_channel,l_operation,l_ociAddrValid);
-*/
     do
     {
         l_errl = getChipTarget(i_pTarget,l_pChipTarget);
@@ -210,25 +191,21 @@ errlHndl_t accessOCBIndirectChannel(accessOCBIndirectCmd i_cmd,
             break; //exit with error
         }
 
-/* FIXME RTC: 210975
         TRACUCOMP( g_fapiTd, INFO_MRK"accessOCBIndirectChannel:"
                     " target=%.8x type=%d",
                     get_huid(l_pChipTarget),
                     l_pChipTarget->getAttr<TARGETING::ATTR_TYPE>());
 
         fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapiTarget( l_pChipTarget );
-*/
 
         // buffer must be multiple of 8 bytes
         if( i_dataLen%8 != 0)
         {
 
-/* FIXME RTC: 210975
             TRACFCOMP( g_fapiImpTd, ERR_MRK"accessOCBIndirectChannel:"
                     " Error Improper data size:%d(in bytes),size of data"
                     " requested to be read is not aligned in size of 8 Bytes",
                     i_dataLen );
-*/
 
             /*@
              * @errortype
@@ -260,12 +237,11 @@ errlHndl_t accessOCBIndirectChannel(accessOCBIndirectCmd i_cmd,
         if (l_setup)
         {
 
-/* FIXME RTC: 210975
             FAPI_INVOKE_HWP( l_errl,
-                             p9_pm_ocb_indir_setup_linear,
+                             p10_pm_ocb_indir_setup_linear,
                              l_fapiTarget,
-                             p9ocb::OCB_CHAN0,
-                             p9ocb::OCB_TYPE_LINSTR,
+                             ocb::OCB_CHAN0,
+                             ocb::OCB_TYPE_LINSTR,
                              i_addr );
 
 
@@ -273,17 +249,15 @@ errlHndl_t accessOCBIndirectChannel(accessOCBIndirectCmd i_cmd,
             {
                 TRACFCOMP( g_fapiImpTd, ERR_MRK"accessOCBIndirectChannel:"
                        " Error [0x%X] in call to "
-                       " FAPI_INVOKE_HWP(p9_pm_ocb_indir_setup_linear)",
+                       " FAPI_INVOKE_HWP(p10_pm_ocb_indir_setup_linear)",
                        l_errl->reasonCode());
                 break; // return with error
             }
-*/
         }
 
-/* FIXME RTC: 210975
         // perform operation
         FAPI_INVOKE_HWP( l_errl,
-                         p9_pm_ocb_indir_access,
+                         p10_pm_ocb_indir_access,
                          l_fapiTarget,
                          l_channel,
                          l_operation,
@@ -297,17 +271,14 @@ errlHndl_t accessOCBIndirectChannel(accessOCBIndirectCmd i_cmd,
         {
             TRACFCOMP( g_fapiImpTd, ERR_MRK"accessOCBIndirectChannel:"
                    " Error [0x%X] in call to"
-                   " FAPI_INVOKE_HWP(p9_pm_ocb_indir_access)",
+                   " FAPI_INVOKE_HWP(p10_pm_ocb_indir_access)",
                    l_errl->reasonCode());
             break; // return with error
         }
-*/
     }
     while (0);
 
-/* FIXME RTC: 210975
     TRACUCOMP( g_fapiTd, EXIT_MRK"accessOCBIndirectChannel");
-*/
 
     return l_errl;
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,7 +27,7 @@
 #include <util/utilxipimage.H>
 
 //Procedures
-#include <p9_xip_image.h>
+#include <p10_ipl_image.H>
 
 namespace Util
 {
@@ -36,6 +36,7 @@ namespace Util
                             trace_desc_t* i_traceDesc)
     {
         // Pull build information from XIP header
+        // NOTE: P10 is still using the P9 name here!
         P9XipHeader* l_xipHeader = reinterpret_cast<P9XipHeader *>(i_imagePtr);
 
         o_imageBuild.buildDate = l_xipHeader->iv_buildDate;
