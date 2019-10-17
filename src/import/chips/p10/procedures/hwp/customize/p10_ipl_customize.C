@@ -2755,7 +2755,7 @@ ReturnCode p10_ipl_customize (
 
     dynamicRingSection = (void*)((uint8_t*)i_hwImage + iplImgSection.iv_offset);
 
-    for(uint64_t feature = 0; feature < 64; feature++)
+    for(Rs4Selector_t feature = 0; feature < 64; feature++)
     {
         bFeature = dynamicVector & (0x8000000000000000 >> feature);
 

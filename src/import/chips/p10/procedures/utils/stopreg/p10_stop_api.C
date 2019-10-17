@@ -944,7 +944,7 @@ STATIC StopReturnCode_t lookUpScomRestoreEntry( void * i_pImage, const ScomSecti
     {
         l_temp  =   l_pScom->iv_scomAddress & SWIZZLE_4_BYTE(SCOM_ADDR_MASK);
 
-        if( SWIZZLE_4_BYTE(i_scomAddress & SCOM_ADDR_MASK) == l_temp  )
+        if( SWIZZLE_4_BYTE((i_scomAddress & SCOM_ADDR_MASK)) == l_temp  )
         {
             o_pScomDat->iv_entryMatchOffset  =   l_entry;
             o_pScomDat->iv_matchFound        =   0x01;
