@@ -228,7 +228,12 @@ void bl_console::init()
     uint64_t divisor = (g_uartClock / 16) / g_uartBaud;
     uint8_t output = 0;
 
-    if (!writeUartReg(LCR, 0x00) ||
+    const auto blConfigData = reinterpret_cast<BootloaderConfigData_t *>(
+        SBE_HB_COMM_ADDR);
+    bool consoleEnabled = (blConfigData->lpcConsoleEnable == 1);
+
+    if (!consoleEnabled ||
+        !writeUartReg(LCR, 0x00) ||
         !writeUartReg(SCR, 'w') ||
         !readUartReg(SCR, output) ||
         !writeUartReg(IER, 0) ||
