@@ -23,4 +23,33 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXP_OMI_TRAIN_ERR</rc>
+    <description>
+      exp_omi_train_check did not see expected trained status from OCMB DL0 status register
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>EXPECTED_SM_STATE</ffdc>
+    <ffdc>ACTUAL_SM_STATE</ffdc>
+    <ffdc>DL0_STATUS</ffdc>
+    <ffdc>DL0_TRAINING_STATUS</ffdc>
+    <ffdc>DL0_CONFIG1</ffdc>
+    <ffdc>OMI_FREQ</ffdc>
+    <callout>
+        <target>OCMB_TARGET</target>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+        <bus>OMI_TARGET, OCMB_TARGET</bus>
+        <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+        <target>OCMB_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>OCMB_TARGET</target>
+    </gard>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
