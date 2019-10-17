@@ -27,17 +27,25 @@ ROOTPATH = ../../../..
 EXTRAINCDIR += ${ROOTPATH}/src/usr/sbeio/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/sbe
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/sbe
+
 
 MODULE = testsbeio
 
-# FIXME RTC: 210975
 #TESTS = *.H
+TESTS  = sbe_ffdctest.H
+#TODO RTC:245441
+#TESTS += sbe_getsbeffdctest.H
+TESTS += sbe_fifo_buffer_test.H
+#TODO RTC:208826
+#TESTS += sbe_retry_handler_test.H
+TESTS += sbe_memregiontest.H
 
 include ${ROOTPATH}/config.mk

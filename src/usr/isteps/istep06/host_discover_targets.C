@@ -623,10 +623,7 @@ void* host_discover_targets( void *io_pArgs )
         // Make the PSU call to get and apply the SBE Capabilities
 
 #ifdef CONFIG_SBE_PRESENT
-        // TODO RTC: 216284: the capabilities size returned from SBE doesn't
-        // match that in hostboot; the SBE version and Commit ID are reported as
-        // zero.
-        //l_err = SBEIO::getPsuSbeCapabilities(l_pMasterProcChip);
+        l_err = SBEIO::getPsuSbeCapabilities(l_pMasterProcChip);
 #endif
         if (l_err)
         {
