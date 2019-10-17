@@ -42,11 +42,13 @@ namespace exp
 
 ///
 /// @brief host_fw_command_struct structure setup
+/// @param[in] i_target the OCMB being acted upon
 /// @param[in] i_cmd_data_crc the command data CRC
 /// @param[in] i_cmd_length the length of the command present in the data buffer (if any)
 /// @param[out] o_cmd the command parameters to set
 ///
-void setup_cmd_params(
+fapi2::ReturnCode setup_cmd_params(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     const uint32_t i_cmd_data_crc,
     const uint8_t i_cmd_length,
     host_fw_command_struct& o_cmd)
@@ -56,12 +58,20 @@ void setup_cmd_params(
     // Explicit with all of these (including 0 values) to avoid ambiguity
     o_cmd.cmd_id = mss::exp::omi::EXP_FW_DDR_PHY_INIT;
     o_cmd.cmd_flags = 0;
-    // TK - Fabricated value need to figure out if we'll be creating req_id tables
-    o_cmd.request_identifier = 0xBB;
+
+    // Retrieve a unique sequence id for this transaction
+    uint32_t l_counter = 0;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCMB_COUNTER, i_target, l_counter));
+
+    o_cmd.request_identifier = l_counter;
     o_cmd.cmd_length = i_cmd_length;
     o_cmd.cmd_crc = i_cmd_data_crc;
     o_cmd.host_work_area = 0;
     o_cmd.cmd_work_area = 0;
+    memset(o_cmd.padding, 0, sizeof(o_cmd.padding));
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -162,15 +172,20 @@ namespace check
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 fapi2::ReturnCode response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                           const host_fw_response_struct& i_rsp)
+                           const host_fw_response_struct& i_rsp,
+                           const host_fw_command_struct& i_cmd)
 {
     // Check if cmd was successful
-    FAPI_ASSERT(i_rsp.response_argument[0] == omi::response_arg::SUCCESS,
+    FAPI_ASSERT(i_rsp.response_argument[0] == omi::response_arg::SUCCESS &&
+                i_rsp.request_identifier == i_cmd.request_identifier,
                 fapi2::MSS_EXP_RSP_ARG_FAILED().
                 set_TARGET(i_target).
                 set_RSP_ID(i_rsp.response_id).
-                set_ERROR_CODE(i_rsp.response_argument[1]),
-                "Failed to initialize the PHY for %s", mss::c_str(i_target));
+                set_ERROR_CODE(i_rsp.response_argument[1]).
+                set_EXPECTED_REQID(i_cmd.request_identifier).
+                set_ACTUAL_REQID(i_rsp.request_identifier),
+                "Failed to initialize the PHY for %s, response=0x%X",
+                mss::c_str(i_target), i_rsp.response_argument[0]);
 
     return fapi2::FAPI2_RC_SUCCESS;
 

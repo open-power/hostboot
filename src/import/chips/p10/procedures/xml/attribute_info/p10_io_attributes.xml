@@ -90,4 +90,18 @@
     <default>0xFF</default><!-- Ensures platform explicitly puts a valid number in here -->
   </attribute>
   <!-- ******************************************************************************** -->
+  <attribute>
+    <id>ATTR_OCMB_COUNTER</id>
+    <targetType>
+      TARGET_TYPE_OCMB_CHIP
+    </targetType>
+    <description>
+        Tracks the sequence id for OCMB command transactions. The platform is
+        expected to guarantee a unique value on each read.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <default>0</default>
+  </attribute>
+  <!-- ******************************************************************************** -->
 </attributes>

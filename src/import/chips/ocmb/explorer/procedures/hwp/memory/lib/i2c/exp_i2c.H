@@ -295,12 +295,6 @@ inline fapi2::ReturnCode boot_config(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
     // The command takes ~300ms and we poll for around 100ms, so wait 250ms here
     FAPI_TRY( fapi2::delay( (mss::DELAY_1MS * 250), 200) );
 
-    // Poll for status response
-    // Note: the EXP_FW_BOOT_CONFIG command trains the OMI, which takes a
-    // significant amount of time. We're waiting 1ms between polls, and poll for 100 loops,
-    // which totals at least 100ms
-    FAPI_TRY(fw_status(i_target, DELAY_1MS, 100));
-
 fapi_try_exit:
     return fapi2::current_err;
 }

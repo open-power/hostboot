@@ -55,6 +55,7 @@ extern "C"
         mss::display_git_commit_info("exp_draminit");
 
         uint32_t l_crc = 0;
+        host_fw_command_struct l_cmd;
 
         user_input_msdg l_phy_params;
         FAPI_TRY(mss::exp::setup_phy_params(i_target, l_phy_params),
@@ -64,10 +65,12 @@ extern "C"
         FAPI_TRY( mss::exp::ib::putUserInputMsdg(i_target, l_phy_params, l_crc),
                   "Failed putUserInputMsdg() for %s", mss::c_str(i_target) );
 
-        // Issue full boot mode cmd though EXP-FW REQ buffer
         {
-            host_fw_command_struct l_cmd;
-            mss::exp::setup_cmd_params(l_crc, sizeof(l_phy_params), l_cmd);
+            // Issue full boot mode cmd though EXP-FW REQ buffer
+            FAPI_TRY( mss::exp::setup_cmd_params(i_target,
+                                                 l_crc,
+                                                 sizeof(l_phy_params),
+                                                 l_cmd) );
             FAPI_TRY( mss::exp::ib::putCMD(i_target, l_cmd),
                       "Failed putCMD() for  %s", mss::c_str(i_target) );
         }
@@ -96,7 +99,7 @@ extern "C"
             FAPI_TRY( mss::exp::train::display_info(i_target, l_train_response));
 
             // Check if cmd was successful
-            l_rc = mss::exp::check::response(i_target, l_response);
+            l_rc = mss::exp::check::response(i_target, l_response, l_cmd);
 
             // If not, then we need to process the bad bitmap
             if(l_rc != fapi2::FAPI2_RC_SUCCESS)

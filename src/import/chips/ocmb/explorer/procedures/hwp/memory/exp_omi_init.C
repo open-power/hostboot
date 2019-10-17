@@ -39,6 +39,7 @@
 #include <mss_explorer_attribute_getters.H>
 #include <mss_p10_attribute_getters.H>
 #include <generic/memory/mss_git_data_helper.H>
+#include <lib/workarounds/exp_omi_workarounds.H>
 
 ///
 /// @brief Verify we know how to talk to the connected device
@@ -56,6 +57,7 @@ fapi2::ReturnCode omiDeviceVerify(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
 
     FAPI_ASSERT(l_data == ((POWER_OCID::EXPLORER << 16) | (POWER_OCID::VENDOR_IBM)),
                 fapi2::OCMB_IS_NOT_EXPLORER()
+                .set_OCMB_TARGET(i_target)
                 .set_TARGET(i_target)
                 .set_ID(l_data),
                 "Explorer ID was not found");
@@ -89,10 +91,26 @@ fapi2::ReturnCode omiSetUpstreamTemplates(const fapi2::Target<fapi2::TARGET_TYPE
     fapi2::ATTR_EXPLR_TMPL_9_PACING_Type l_tmpl_9_pacing;
     fapi2::ATTR_EXPLR_TMPL_B_PACING_Type l_tmpl_b_pacing;
 
+    fapi2::ATTR_CHIP_EC_FEATURE_US_TEMPLATES_0159_Type l_us_only_0159;
+
+    auto const& l_proc = i_target.getParent<fapi2::TARGET_TYPE_OMI>()
+                         .getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_US_TEMPLATES_0159,
+                           l_proc,
+                           l_us_only_0159),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_US_TEMPLATES_0159)");
+
     FAPI_TRY(mss::attr::get_explr_enable_us_tmpl_1(i_target, l_enable_tmpl_1));
     FAPI_TRY(mss::attr::get_explr_enable_us_tmpl_5(i_target, l_enable_tmpl_5));
     FAPI_TRY(mss::attr::get_explr_enable_us_tmpl_9(i_target, l_enable_tmpl_9));
     FAPI_TRY(mss::attr::get_explr_enable_us_tmpl_b(i_target, l_enable_tmpl_b));
+
+    FAPI_ASSERT(!l_us_only_0159 || !l_enable_tmpl_b,
+                fapi2::PROC_DOES_NOT_SUPPORT_US_B()
+                .set_TARGET(l_proc)
+                .set_B(l_enable_tmpl_b),
+                "Upstream template B requested, but not supported by proc");
 
     FAPI_TRY(mss::attr::get_explr_tmpl_0_pacing(i_target, l_tmpl_0_pacing));
     FAPI_TRY(mss::attr::get_explr_tmpl_1_pacing(i_target, l_tmpl_1_pacing));
@@ -285,13 +303,23 @@ fapi2::ReturnCode omiValidateDownstream(const fapi2::Target<fapi2::TARGET_TYPE_O
     fapi2::ATTR_PROC_TMPL_A_PACING_Type l_tmpl_A_pace;
     uint8_t l_tmp = 0x0;
 
+    fapi2::ATTR_CHIP_EC_FEATURE_DS_TEMPLATES_0147_Type l_ds_only_0147;
+
+    const auto& l_proc = i_target.getParent<fapi2::TARGET_TYPE_OMI>()
+                         .getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+
     const auto& l_mcc_target = i_target.getParent<fapi2::TARGET_TYPE_OMI>()
                                .getParent<fapi2::TARGET_TYPE_MCC>();
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_DS_TEMPLATES_0147,
+                           l_proc,
+                           l_ds_only_0147),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_DS_TEMPLATES_0147)");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_ENABLE_DL_TMPL_1,
                            l_mcc_target,
                            l_enable_tmpl_1),
-             "Error from FAPI_ATTR_GET (ATTR_PROC_ENABLE_DL_TiMPL_1)");
+             "Error from FAPI_ATTR_GET (ATTR_PROC_ENABLE_DL_TMPL_1)");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_ENABLE_DL_TMPL_4,
                            l_mcc_target,
@@ -307,6 +335,12 @@ fapi2::ReturnCode omiValidateDownstream(const fapi2::Target<fapi2::TARGET_TYPE_O
                            l_mcc_target,
                            l_enable_tmpl_A),
              "Error from FAPI_ATTR_GET (ATTR_PROC_ENABLE_DL_TMPL_A)");
+
+    FAPI_ASSERT(!l_ds_only_0147 || !l_enable_tmpl_A,
+                fapi2::PROC_DOES_NOT_SUPPORT_DS_A()
+                .set_TARGET(l_proc)
+                .set_A(l_enable_tmpl_A),
+                "Downstream template A requested, but not supported by proc");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_TMPL_0_PACING,
                            l_mcc_target,
@@ -574,6 +608,7 @@ fapi2::ReturnCode exp_omi_init(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
     mss::display_git_commit_info("exp_omi_init");
 
     FAPI_DBG("Start");
+    FAPI_TRY(mss::exp::workarounds::omi::gem_setup_config(i_target));
     FAPI_TRY(omiDeviceVerify(i_target));
     FAPI_TRY(omiSetUpstreamTemplates(i_target));
     FAPI_TRY(omiValidateDownstream(i_target));

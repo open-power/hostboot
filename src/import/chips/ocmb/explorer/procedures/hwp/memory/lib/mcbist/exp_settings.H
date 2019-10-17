@@ -38,7 +38,7 @@
 #include <fapi2.H>
 
 #include <lib/shared/exp_consts.H>
-#include <lib/ecc/ecc_traits.H>
+#include <lib/ecc/ecc_traits_explorer.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_traits.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_settings.H>
 

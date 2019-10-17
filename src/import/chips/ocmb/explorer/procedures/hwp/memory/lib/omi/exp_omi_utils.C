@@ -40,6 +40,7 @@
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <mss_explorer_attribute_getters.H>
 #include <generic/memory/lib/mss_generic_system_attribute_getters.H>
+#include <lib/shared/exp_consts.H>
 
 namespace mss
 {
@@ -75,12 +76,17 @@ fapi2::ReturnCode setup_omi_dl0_config0(
     l_config0.insertFromRight<EXPLR_DLX_DL0_CONFIG0_CFG_TRAIN_MODE,
                               EXPLR_DLX_DL0_CONFIG0_CFG_TRAIN_MODE_LEN>(i_train_mode);
 
+    l_config0.writeBit<EXPLR_DLX_DL0_CONFIG0_CFG_PWRMGT_ENABLE>(0);
+
+    FAPI_DBG("Writing 0x%16llx to EXPLR_DLX_DL0_CONFIG0 (0x%16llx) of %s",
+             l_config0, EXPLR_DLX_DL0_CONFIG0, mss::c_str(i_target));
+
     // All other bits will be left at their default values
     FAPI_TRY( fapi2::putScom(i_target, EXPLR_DLX_DL0_CONFIG0, l_config0),
               "Error writing EXPLR_DLX_DL0_CONFIG0 on %s", mss::c_str(i_target));
 
 fapi_try_exit:
-    return fapi2::FAPI2_RC_SUCCESS;
+    return fapi2::current_err;
 }
 
 namespace train
@@ -137,6 +143,32 @@ fapi2::ReturnCode setup_fw_boot_config( const fapi2::Target<fapi2::TARGET_TYPE_O
     FAPI_TRY(mss::exp::i2c::boot_cfg::set_loopback_test( i_target, o_data, l_loopback_test ));
     FAPI_TRY(mss::exp::i2c::boot_cfg::set_fw_mode( i_target, o_data, l_fw_mode ));
     FAPI_TRY(mss::exp::i2c::boot_cfg::set_adaptation_mode( i_target, o_data, l_adaptation_mode ));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check the OMI train status on the OCMB chip
+///
+/// @param[in] i_target OCMB chil
+/// @param[out] o_state_machine_state training state mahcine
+/// @param[out] o_omi_training_status training status
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode omi_train_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                   uint8_t& o_state_machine_state,
+                                   fapi2::buffer<uint64_t>& o_omi_training_status)
+{
+    fapi2::buffer<uint64_t> l_omi_status;
+
+    // Check OMI training status
+    FAPI_TRY(fapi2::getScom(i_target, EXPLR_DLX_DL0_STATUS, l_omi_status));
+
+    o_omi_training_status = l_omi_status;
+    o_state_machine_state = 0;
+    l_omi_status.extractToRight<EXPLR_DLX_DL0_STATUS_STS_TRAINING_STATE_MACHINE,
+                                EXPLR_DLX_DL0_STATUS_STS_TRAINING_STATE_MACHINE_LEN>(o_state_machine_state);
 
 fapi_try_exit:
     return fapi2::current_err;

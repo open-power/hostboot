@@ -37,8 +37,12 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/omi/exp_omi_utils.H>
 #include <lib/i2c/exp_i2c.H>
+#include <lib/exp_attribute_accessors_manual.H>
+#include <lib/workarounds/exp_omi_workarounds.H>
 #include <exp_omi_train.H>
 #include <generic/memory/mss_git_data_helper.H>
+#include <generic/memory/lib/mss_generic_attribute_getters.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 extern "C"
 {
@@ -52,6 +56,7 @@ extern "C"
     {
         mss::display_git_commit_info("exp_omi_train");
 
+        // Perform boot config 1
         std::vector<uint8_t> l_data;
         uint8_t l_dl_layer_boot_mode = fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE_ONLY_DL_TRAINING;
 
@@ -62,8 +67,10 @@ extern "C"
         FAPI_TRY(mss::exp::i2c::boot_cfg::set_dl_layer_boot_mode( i_target, l_data, l_dl_layer_boot_mode ));
 
         // Issues the command and checks for completion
-        // Note: the status check also checks for the OMI training completion, so after we run this command, we're good to go
         FAPI_TRY(mss::exp::i2c::boot_config(i_target, l_data));
+
+        // Gemini should return success code
+        FAPI_TRY(mss::exp::i2c::fw_status(i_target, mss::DELAY_1MS, 100));
 
     fapi_try_exit:
         return fapi2::current_err;

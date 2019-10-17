@@ -150,11 +150,14 @@ enum odt_fields
 
 ///
 /// @brief host_fw_command_struct structure setup
+/// @param[in] i_target the OCMB being acted upon
 /// @param[in] i_cmd_data_crc the command data CRC
 /// @param[in] i_cmd_length the length of the command present in the data buffer (if any)
 /// @param[out] o_cmd the command parameters to set
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-void setup_cmd_params(
+fapi2::ReturnCode setup_cmd_params(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     const uint32_t i_cmd_data_crc,
     const uint8_t i_cmd_length,
     host_fw_command_struct& o_cmd);
@@ -1147,11 +1150,13 @@ namespace check
 ///
 /// @brief Checks explorer response argument for a successful command
 /// @param[in] i_target OCMB target
-/// @param[in] i_rsp response command
+/// @param[in] i_rsp response from command
+/// @param[in] i_cmd original command
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 fapi2::ReturnCode response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                           const host_fw_response_struct& i_rsp);
+                           const host_fw_response_struct& i_rsp,
+                           const host_fw_command_struct& i_cmd);
 
 }//check
 

@@ -230,6 +230,19 @@ namespace train
 ///
 fapi2::ReturnCode setup_fw_boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                         std::vector<uint8_t>& o_data );
+
+///
+/// @brief Check the OMI train status on the OCMB chip
+///
+/// @param[in] i_target OCMB chil
+/// @param[out] o_state_machine_state training state mahcine
+/// @param[out] o_omi_training_status training status
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode omi_train_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                   uint8_t& o_state_machine_state,
+                                   fapi2::buffer<uint64_t>& o_omi_training_status);
+
 } // ns train
 
 } // ns omi

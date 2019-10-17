@@ -373,6 +373,28 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_EXP_I2C_FW_BOOT_CONFIG_STATUS_CODE_INVALID</rc>
+    <description>
+      Unexpected Explorer status code returned during OMI link training pattern handshake.
+      Expected FW_BUSY, but received STATUS_CODE in FFDC data
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>STATUS_CODE</ffdc>
+    <ffdc>CMD_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_EXP_I2C_FW_STATUS_BUSY</rc>
     <description>
       Received FW_BUSY status after polling timeout for
@@ -460,6 +482,8 @@
     </description>
     <ffdc>RSP_ID</ffdc>
     <ffdc>ERROR_CODE</ffdc>
+    <ffdc>EXPECTED_REQID</ffdc>
+    <ffdc>ACTUAL_REQID</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
