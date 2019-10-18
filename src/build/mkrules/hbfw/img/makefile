@@ -65,6 +65,7 @@ SBEI_OBJPATH  = ${HBFW_OBJPATH:S/hbfw\/img/sbei\/sbfw\/img/g}
 ENGD_WOFPATH  = ${HBFW_OBJPATH:S/hbfw\/img/engd\/wofdata/g}
 ENGD_MEMDPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/memd/g}
 HBFW_SIMPATH  = ${HBFW_OBJPATH:S/img/simics/g}
+EDITED_LAYOUT_PATH = ${DUMMY:!pwd!}
 #################################################
 # Copy Hostboot binary images to obj dir to be grabbed
 # during build flash pass and consumption by HWSV.
@@ -227,12 +228,14 @@ GEN_STANDALONE_BIN_FILES = ${GEN_COMMON_BIN_FILES},TEST=EMPTY,TESTRO=EMPTY,TESTL
     DEFAULT_PARAMS = --build-all --emit-eccless ${TARGET_TEST:b--test} ${HB_STANDALONE:b--hb-standalone} \
                      ${CONFIG_SECUREBOOT:b--secureboot} --systemBinFiles ${GEN_DEFAULT_BIN_FILES} \
                      --pnorLayout ${PNOR_LAYOUT} ${KEY_TRANSITION_PARAMS} ${CORRUPT_PARAMS} \
-                     --hwKeyHashFile ${IMPRINT_HW_KEY_HASH}
+                     --hwKeyHashFile ${IMPRINT_HW_KEY_HASH} \
+                     --editedLayoutLocation ${EDITED_LAYOUT_PATH}
 .else
     PNOR_LAYOUT = ${pnorLayoutFake.xml:P}
     # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
     GEN_DEFAULT_BIN_FILES = HBI=${HBI_IMG},HBEL=EMPTY,MVPD=${${VPO_FAKE_MVPD}:P},DJVPD=${${VPO_FAKE_DJVPD}:P},FIRDATA=EMPTY,MEMD=EMPTY
-    DEFAULT_PARAMS = --systemBinFiles ${GEN_DEFAULT_BIN_FILES} --pnorLayout ${PNOR_LAYOUT}
+    DEFAULT_PARAMS = --systemBinFiles ${GEN_DEFAULT_BIN_FILES} --pnorLayout ${PNOR_LAYOUT} \
+                     --editedLayoutLocation ${EDITED_LAYOUT_PATH}
 .endif
 
 # rule to update hostboot image tags for custom CFM image, only enabled
@@ -465,7 +468,8 @@ ZZ2UGEN4_HBD_FINAL_IMG = ZZ-2U-GEN4.HBD.bin
                              --systemBinFiles ${GEN_ZZ2U_BIN_FILES} \
                              --systemBinFiles ${GEN_ZZGEN4_BIN_FILES} \
                              --systemBinFiles ${GEN_ZZ2UGEN4_BIN_FILES} \
-                             --hwKeyHashFile ${IMPRINT_HW_KEY_HASH}
+                             --hwKeyHashFile ${IMPRINT_HW_KEY_HASH} \
+                             --editedLayoutLocation ${EDITED_LAYOUT_PATH}
 .else
     # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
     GEN_NIMBUS_BIN_FILES = NIMBUS:HCODE=${${NIMBUS_HCODE_IMG}:P},HBD=${${NIMBUS_VPO_HBD_IMG}:P},CENHWIMG=EMPTY
@@ -476,7 +480,8 @@ ZZ2UGEN4_HBD_FINAL_IMG = ZZ-2U-GEN4.HBD.bin
                              --systemBinFiles ${GEN_NIMBUS_BIN_FILES} \
                              --systemBinFiles ${GEN_CUMULUS_BIN_FILES} \
                              --systemBinFiles ${GEN_AXONE_BIN_FILES} \
-                             --systemBinFiles ${GEN_CUMULUS_CDIMM_BIN_FILES}
+                             --systemBinFiles ${GEN_CUMULUS_CDIMM_BIN_FILES} \
+                             --editedLayoutLocation ${EDITED_LAYOUT_PATH}
 .endif
 
 gen_system_specific_images_bypass_cache : dump-secureboot-config
@@ -566,7 +571,8 @@ ${IMAGE_TARGET}: ${IMAGE_LAYOUT} ${IMAGE_BINS} ${PNOR_BUILD_SCRIPT}
 			${FAKEPNOR} == ${IMAGE_TARGET})
 		${PNOR_BUILD_SCRIPT} --pnorOutBin ${IMAGE_TARGET} \
 			${TARGET_TEST:b--test} --pnorLayout ${IMAGE_LAYOUT} \
-			${IMAGE_BIN_OPTION} --fpartCmd "fpart" --fcpCmd "fcp"
+			${IMAGE_BIN_OPTION} --fpartCmd "fpart" --fcpCmd "fcp" \
+			--editedLayoutLocation ${EDITED_LAYOUT_PATH}
 	.endif
 .endif
 

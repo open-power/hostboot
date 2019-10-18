@@ -126,6 +126,7 @@ my $sign_mode = $DEVELOPMENT;
 my $hwKeyHashFile = "";
 my $hb_standalone="";
 my $buildType="";
+my $editedLayoutLocation="";
 
 # @TODO RTC 170650: Set default to 0 after all environments provide external
 # control over this policy, plus remove '!' from 'lab-security-override'
@@ -148,6 +149,7 @@ GetOptions("binDir:s" => \$bin_dir,
            "lab-security-override!" => \$labSecurityOverride,
            "emit-eccless" => \$emitEccless,
            "build-type:s" => \$buildType,
+           "editedLayoutLocation:s" => \$editedLayoutLocation,
            "help" => \$help);
 
 if ($help)
@@ -391,7 +393,8 @@ if ($build_all && $secureboot)
 }
 
 #Load PNOR Layout XML file
-loadPnorLayout($pnorLayoutFile, \%pnorLayout, \%PhysicalOffsets, $testRun);
+loadPnorLayout($pnorLayoutFile, \%pnorLayout, \%PhysicalOffsets, $testRun,
+    $editedLayoutLocation);
 
 # Generate final images for each system's bin files.
 foreach my $binFilesCSV (@systemBinFiles)
@@ -1307,6 +1310,7 @@ print <<"ENDUSAGE";
                                       switch (separated with a space and not
                                       including the single quotes). OpenPower is
                                       the default.
+    --editedLayoutLocation <directory>      Location to place edited layout file
 
   Current Limitations:
     - Issues with dependency on ENGD build for certain files such as SBE. This is why [--build-all | --install-all ] are used.
