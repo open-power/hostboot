@@ -79,7 +79,7 @@ endif
 $(OBJDIR)/%.o : %.C
 	@mkdir -p $(OBJDIR)
 	$(C2) "    CXX        $(notdir $<)"
-	$(C1)$(CXX) -c $(call FLAGS_FILTER, $(CXXFLAGS), $<) $(SOURCE_FILE) \
+	$(C1)$(CXX) -c $(call FLAGS_FILTER, $(CXXFLAGS), $<) $(CLI_CXXFLAGS) $(SOURCE_FILE) \
 	            -o $@.trace $(INCLUDE_DIRS) -iquote .
 	$(C1)$(TRACE_HASHER) $@ $(TRACE_FLAGS)
 	@rm $@.trace
@@ -90,7 +90,7 @@ $(OBJDIR)/%.o : %.C
 $(OBJDIR)/%.o : %.cc
 	@mkdir -p $(OBJDIR)
 	$(C2) "    CXX        $(notdir $<)"
-	$(C1)$(CXX) -c $(CXXFLAGS) $(SOURCE_FILE) -o $@.trace \
+	$(C1)$(CXX) -c $(CXXFLAGS) $(CLI_CXXFLAGS) $(SOURCE_FILE) -o $@.trace \
 	               $(INCLUDE_DIRS) -iquote .
 	$(C1)$(TRACE_HASHER) $@ $(TRACE_FLAGS)
 	@rm $@.trace
@@ -103,13 +103,13 @@ $(OBJDIR)/%.o : %.c
 # CC_OVERRIDE is set in the makefile of the component
 ifndef CC_OVERRIDE
 	$(C2) "    CC         $(notdir $<)"
-	$(C1)$(CC) -c $(call FLAGS_FILTER, $(CFLAGS), $<) $(SOURCE_FILE) \
+	$(C1)$(CC) -c $(call FLAGS_FILTER, $(CFLAGS), $<) $(CLI_CFLAGS) $(SOURCE_FILE) \
 	           -o $@.trace $(INCLUDE_DIRS) -iquote .
 	$(CXX_PRINT)
 	$(C_CPPCHECK_COMMAND)
 else
 	$(C2) "    CXX        $(notdir $<)"
-	$(C1)$(CXX) -c $(call FLAGS_FILTER, $(CXXFLAGS), $<) $(SOURCE_FILE) \
+	$(C1)$(CXX) -c $(call FLAGS_FILTER, $(CXXFLAGS), $<) $(CLI_CXXFLAGS) $(SOURCE_FILE) \
 	            -o $@.trace $(INCLUDE_DIRS) -iquote .
 	$(CXX_PRINT)
 	$(CXX_CPPCHECK_COMMAND)
