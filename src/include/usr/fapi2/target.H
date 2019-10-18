@@ -1532,9 +1532,16 @@ Target<K, M, V>::getMulticast(const MulticastGroup i_group, const MulticastCoreS
 {
     static_assert((K == TARGET_TYPE_PROC_CHIP), "Parent target must be the proc chip");
 
-    //TODO RTC: 203303 Incorporate i_group and i_cores into the target wrapper
+    // The "internal" multicast target is the target on which getMulticast is
+    // called (a PROC_CHIP target). The multicast operation will always execute
+    // against the proc.
+    plat_target_handle_t l_target(this->iv_handle,
+                                  true, // multicast
+                                  i_group,
+                                  O, // Multicast op
+                                  i_cores);
 
-    return Target< K | TARGET_TYPE_MULTICAST, O, V > ();
+    return l_target;
 }
 
 } // End namespace fapi2

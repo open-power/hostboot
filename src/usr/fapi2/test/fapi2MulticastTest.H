@@ -133,6 +133,32 @@ void testMulticastSetup()
                 fapi2::getMulticastOp(l_multicastAddr));
         break;
     }
+
+    // Test multihot (core select)
+    l_eq = l_fapiProc.getMulticast<fapi2::MULTICAST_OR>(
+                                     fapi2::MCGROUP_GOOD_EQ,
+                                     fapi2::MCCORE_0);
+    if(l_eq.get().getCoreSelect() != fapi2::MCCORE_0)
+    {
+        TS_FAIL("testMulticastSetup: Unexpected core select returned. "
+                "Expected: %d (0x%x), actual: %d (0x%x)",
+                fapi2::MCCORE_0, fapi2::MCCORE_0,
+                l_eq.get().getCoreSelect(), l_eq.get().getCoreSelect());
+        break;
+    }
+
+    l_multicastAddr = fapi2::getMulticastAddr(l_multicastAddr,
+                            l_eq.get().getMulticastGroup(),
+                            l_eq.get().getMulticastOp(),
+                            l_eq.get().getCoreSelect());
+    if(fapi2::getCoreSelect(l_multicastAddr) != fapi2::MCCORE_0)
+    {
+        TS_FAIL("testMulticastSetup: Incorrect core select in the resulting"
+                " multicast address. Expected %d (0x%x), actual %d (0x%x)",
+                fapi2::MCCORE_0, fapi2::MCCORE_0,
+                fapi2::getCoreSelect(l_multicastAddr),
+                fapi2::getCoreSelect(l_multicastAddr));
+    }
     } while(0);
 }
 
@@ -418,6 +444,290 @@ void testMulticastWriteOpBadParam()
         break;
     }
     }while(0);
+}
+
+void testMulticastReadOr()
+{
+    TARGETING::TargetHandle_t l_proc = nullptr;
+    TARGETING::targetService().masterProcChipTargetHandle(l_proc);
+    assert(l_proc, "testMulticastReadOr: master proc handle is nullptr");
+
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
+    auto l_eq = l_fapiProc.getMulticast<fapi2::TARGET_TYPE_EQ,
+                                        fapi2::MULTICAST_OR>(
+                                           fapi2::MCGROUP_GOOD_EQ);
+    const uint32_t TEST_SCOM_ADDR = 0x20000008; // TPEQP.CPLT_CONF0
+    const uint64_t TEST_DATA = 0x0000000000000003; // Bit 62, 63 set
+    const uint64_t TEST_DATA_1 = 0x0000000000000004; // Bit 61
+    uint32_t l_scomAddr = TEST_SCOM_ADDR;
+
+    do {
+    TARGETING::TargetHandleList l_eqs;
+    getChildAffinityTargets(l_eqs, l_proc,
+                            TARGETING::CLASS_UNIT, TARGETING::TYPE_EQ, false);
+    TARGETING::Target* l_eqTarget = l_eqs[0];
+    TARGETING::Target* l_eqTarget1 = l_eqs[1];
+    TARGETING::Target* l_eqTarget2 = l_eqs[2];
+
+    if(l_eq.get() == nullptr)
+    {
+        TS_FAIL("testMulticastReadOr: Internal multicast target is nullptr");
+        break;
+    }
+
+    // Setup: clear bits 61, 62, 63 from TEST_SCOM_ADDR on all EQs for future
+    // testing
+    uint64_t l_dataToWrite = 0;
+    size_t l_size = sizeof(l_dataToWrite);
+    errlHndl_t l_errl = deviceRead(l_eqTarget,
+                                   &l_dataToWrite,
+                                   l_size,
+                                   DEVICE_SCOM_ADDRESS(TEST_SCOM_ADDR, 0));
+    if(l_errl)
+    {
+        TS_FAIL("testMulticastReadOr: Could not read SCOM 0x%.08x", l_scomAddr);
+        errlCommit(l_errl, CXXTEST_COMP_ID);
+        break;
+    }
+
+    l_dataToWrite &= (~(TEST_DATA | TEST_DATA_1));
+
+    // Clear bits 61, 62, and 63 in the test reg on all EQs
+    for(const auto& l_eqTgt : l_eqs)
+    {
+        l_errl = deviceWrite(l_eqTgt,
+                             &l_dataToWrite,
+                             l_size,
+                             DEVICE_SCOM_ADDRESS(TEST_SCOM_ADDR, 0));
+        if(l_errl)
+        {
+            TS_FAIL("testMulticastReadOr: Could not reset test reg on target "
+                    "0x%.08x", TARGETING::get_huid(l_eqTgt));
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+            break;
+        }
+    }
+
+    uint64_t l_testData = l_dataToWrite | TEST_DATA;
+
+    // Write the first set of test data to EQ2
+    l_errl = deviceWrite(l_eqTarget2,
+                         &l_testData,
+                         l_size,
+                         DEVICE_SCOM_ADDRESS(TEST_SCOM_ADDR, 0));
+    if(l_errl)
+    {
+        TS_FAIL("testMulticastReadOr: Could not write test data to target "
+                "0x%.08x", TARGETING::get_huid(l_eqTarget2));
+        errlCommit(l_errl, CXXTEST_COMP_ID);
+        break;
+    }
+
+    l_testData = l_dataToWrite | TEST_DATA_1;
+    // Write the second set of test data to EQ1
+    l_errl = deviceWrite(l_eqTarget1,
+                         &l_testData,
+                         l_size,
+                         DEVICE_SCOM_ADDRESS(TEST_SCOM_ADDR, 0));
+    if(l_errl)
+    {
+        TS_FAIL("testMulticastReadOr: Could not write test data to target "
+                "0x%.08x", TARGETING::get_huid(l_eqTarget1));
+        errlCommit(l_errl, CXXTEST_COMP_ID);
+        break;
+    }
+
+    uint64_t l_multicastScom = fapi2::getMulticastAddr(l_scomAddr,
+                                l_eq.get().getMulticastGroup(),
+                                l_eq.get().getMulticastOp());
+    TS_INFO("testMulticastReadOr: Multicast address = 0x%.08x",l_multicastScom);
+
+    uint64_t l_multicastReadData = 0xFF;
+    l_errl = deviceRead(l_eq.get(),
+                        &l_multicastReadData,
+                        l_size,
+                        DEVICE_SCOM_ADDRESS(l_multicastScom, 0));
+    if(l_errl)
+    {
+        TS_FAIL("testMulticastReadOr: Could not read multicast reg 0x%.08x on "
+                "target 0x%.08x", l_multicastScom,
+                TARGETING::get_huid(l_eq.get()));
+        errlCommit(l_errl, CXXTEST_COMP_ID);
+        break;
+    }
+    else
+    {
+        // The result should be the OR of all test bits
+        if(l_multicastReadData != (l_dataToWrite | TEST_DATA | TEST_DATA_1))
+        {
+            TS_FAIL("testMulticastReadOr: The multicast read data does not "
+                    "match expectation. Expected: 0x%.16lx; actual 0x%.16lx",
+                    l_dataToWrite, l_multicastReadData);
+            break;
+        }
+    }
+
+    }while(0);
+}
+
+void testMulticastReadAnd()
+{
+    TARGETING::TargetHandle_t l_proc = nullptr;
+    TARGETING::targetService().masterProcChipTargetHandle(l_proc);
+    assert(l_proc, "testMulticastReadAnd: master proc handle is nullptr");
+
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
+    auto l_eq = l_fapiProc.getMulticast<fapi2::TARGET_TYPE_EQ,
+                                        fapi2::MULTICAST_AND>(
+                                            fapi2::MCGROUP_GOOD_EQ);
+    const uint32_t TEST_SCOM_WRITE_ADDR = 0x20000008; // TPEQP.CPLT_CONF0
+    const uint64_t TEST_DATA = 0x0000000000000005; // Bit 61, 63 set
+    const uint64_t TEST_DATA_1 = 0x0000000000000002; // Bit 62 set
+    const uint64_t TEST_DATA_2 = 0x0000000000000001; // Bit 63 set
+
+    uint32_t l_scomAddr = TEST_SCOM_WRITE_ADDR;
+    uint64_t l_dataToWrite = 0xFF;
+
+    do {
+    TARGETING::TargetHandleList l_eqs;
+    getChildAffinityTargets(l_eqs, l_proc,
+                            TARGETING::CLASS_UNIT, TARGETING::TYPE_EQ, false);
+    TARGETING::Target* l_eqTarget = l_eqs[0];
+    TARGETING::Target* l_eqTarget1 = l_eqs[1];
+
+    if(l_eq.get() == nullptr)
+    {
+        TS_FAIL("testMulticastReadAnd: Internal multicast target is nullptr");
+        break;
+    }
+
+    size_t l_size = sizeof(l_dataToWrite);
+    // Set up - erase the test data from regs
+    errlHndl_t l_errl = deviceRead(l_eqTarget,
+                                   &l_dataToWrite,
+                                   l_size,
+                                   DEVICE_SCOM_ADDRESS(l_scomAddr, 0));
+    if(l_errl)
+    {
+        TS_FAIL("testMulticastReadAnd: Could not read SCOM 0x%.08x",l_scomAddr);
+        errlCommit(l_errl, CXXTEST_COMP_ID);
+        break;
+    }
+
+    // Reset the test bits
+    l_dataToWrite &= ~(TEST_DATA | TEST_DATA_1);
+    // Write first set of test data to all EQs
+    uint64_t l_testData = l_dataToWrite | TEST_DATA;
+
+    for(const auto& l_eq : l_eqs)
+    {
+        l_errl = deviceWrite(l_eq,
+                             &l_dataToWrite,
+                             l_size,
+                             DEVICE_SCOM_ADDRESS(l_scomAddr, 0));
+        if(l_errl)
+        {
+            TS_FAIL("testMulticastReadAnd: Could not reset test data for target"
+                    " 0x%.08x", TARGETING::get_huid(l_eq));
+            break;
+        }
+
+        l_errl = deviceWrite(l_eq,
+                             &l_testData,
+                             l_size,
+                             DEVICE_SCOM_ADDRESS(l_scomAddr, 0));
+        if(l_errl)
+        {
+            TS_FAIL("testMulticastReadAnd: Could not write test data to HUID "
+                    "0x%.08x", TARGETING::get_huid(l_eq));
+            break;
+        }
+    }
+    if(l_errl)
+    {
+        errlCommit(l_errl, CXXTEST_COMP_ID);
+        break;
+    }
+
+    // Write the second set of test data to EQ1
+    l_testData = l_dataToWrite | TEST_DATA_1;
+    l_errl = deviceWrite(l_eqTarget1,
+                         &l_testData,
+                         l_size,
+                         DEVICE_SCOM_ADDRESS(l_scomAddr, 0));
+    if(l_errl)
+    {
+        TS_FAIL("testMulticastReadAnd: Could not write test data to EQ0 "
+                "(HUID: 0x%.08x)", TARGETING::get_huid(l_eqTarget));
+        break;
+    }
+
+    uint64_t l_multicastScom = fapi2::getMulticastAddr(l_scomAddr,
+                                l_eq.get().getMulticastGroup(),
+                                l_eq.get().getMulticastOp());
+    TS_INFO("testMulticastReadAnd: multicast address = 0x%.08x",
+            l_multicastScom);
+
+    // Read multicast
+    l_errl = deviceRead(l_eq.get(),
+                        &l_testData,
+                        l_size,
+                        DEVICE_SCOM_ADDRESS(l_multicastScom, 0));
+    if(l_errl)
+    {
+        TS_FAIL("testMulticastReadAnd: Could not read multicast");
+        errlCommit(l_errl, CXXTEST_COMP_ID);
+        break;
+    }
+
+    // Since the operation is AND read, the result of the read should be
+    // a logical AND of all reads, in which case no test data should show
+    // up in bits 61-63 since the bits alternate.
+    if(l_testData != l_dataToWrite)
+    {
+        TS_FAIL("testMulticastReadAnd: Unexpected multicast AND read data. "
+                "Expected 0x%.16lx; actual 0x%.16lx", l_dataToWrite,l_testData);
+        break;
+    }
+
+    // Now set bit 63 in EQ1
+    l_testData = l_dataToWrite | TEST_DATA_2;
+    l_errl = deviceWrite(l_eqTarget1,
+                         &l_testData,
+                         l_size,
+                         DEVICE_SCOM_ADDRESS(l_scomAddr, 0));
+    if(l_errl)
+    {
+        TS_FAIL("testMulticastReadAnd: Cound not write second set of test data "
+                "to EQ1");
+        errlCommit(l_errl, CXXTEST_COMP_ID);
+        break;
+    }
+
+    // Read multicast
+    l_errl = deviceRead(l_eq.get(),
+                        &l_testData,
+                        l_size,
+                        DEVICE_SCOM_ADDRESS(l_multicastScom, 0));
+    if(l_errl)
+    {
+        TS_FAIL("testMulticastReadAnd: Could not read multicast for the second"
+                " test");
+        errlCommit(l_errl, CXXTEST_COMP_ID);
+        break;
+    }
+
+    // Bit 63 overlaps in all registers, so it should be set in the result of
+    // multicast AND read
+    if(l_testData != (l_dataToWrite | TEST_DATA_2))
+    {
+        TS_FAIL("testMulticastReadAnd: Test 2: Unexpected multicast AND read "
+                "data. Expected: 0x%.16lx; actual 0x%.16lx",
+                (l_dataToWrite | TEST_DATA_2), l_testData);
+        break;
+    }
+
+    } while(0);
 }
 
 }; //class FapiMulticastTest

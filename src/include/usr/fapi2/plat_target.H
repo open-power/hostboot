@@ -37,6 +37,12 @@
 
 namespace fapi2
 {
+    // Since the EKB definition of MulticastCoreSelect does not contain
+    // an "invalid"/"no core selected" enum, declare one here for initialization
+    // convenience purposes.
+    static const MulticastCoreSelect MCCORE_NONE =
+        static_cast<MulticastCoreSelect>(0);
+
     /**
      * @brief plat_target_handle_t class
      *
@@ -56,6 +62,7 @@ namespace fapi2
                                              // is to be executed on this target
         MulticastGroup iv_group;             // The selected group for multicast
         MulticastType iv_multicastOp;        // The type of multicast operation
+        MulticastCoreSelect iv_coreSelect;   // Which cores to run SCOM op on
 
         public:
 
@@ -68,15 +75,18 @@ namespace fapi2
          *            a multicast target wrapper
          * @param[in] i_group the multicast group
          * @param[in] i_op the type of multicast operation
+         * @param[in] i_coreSelect which cores to run the operation on
          */
         plat_target_handle_t(const TARGETING::Target* i_target = nullptr,
                              bool i_multicast = false,
                              MulticastGroup i_group = MCGROUP_ALL,
-                             MulticastType i_op = MULTICAST_OR):
+                             MulticastType i_op = MULTICAST_OR,
+                             MulticastCoreSelect i_coreSelect = MCCORE_NONE):
                              iv_pTarget(i_target),
                              iv_multicast(i_multicast),
                              iv_group(i_group),
-                             iv_multicastOp(i_op)
+                             iv_multicastOp(i_op),
+                             iv_coreSelect(i_coreSelect)
         {
         }
 
@@ -155,6 +165,16 @@ namespace fapi2
         MulticastType getMulticastOp() const
         {
             return iv_multicastOp;
+        }
+
+        /**
+         * @brief The getter function for internal iv_coreSelect member
+         *
+         * @return Which cores to run the SCOM op on
+         */
+        MulticastCoreSelect getCoreSelect() const
+        {
+            return iv_coreSelect;
         }
 
     }; //class plat_target_handle_t

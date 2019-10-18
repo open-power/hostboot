@@ -77,6 +77,7 @@ uint8_t pib_err_mask = 0x00;
 // Multicast address parts
 enum MulticastMasks : uint32_t
 {
+    CORE_SELECT_MASK       = 0x0000F000,
     MULTICAST_GROUP_MASK   = 0x07000000,
     MULTICAST_OP_MASK      = 0x38000000,
     MULTICAST_BIT          = 0x40000000,
@@ -84,6 +85,7 @@ enum MulticastMasks : uint32_t
 
 enum MulticastOffsets : uint8_t
 {
+    CORE_SELECT_OFFSET     = 12,
     MULTICAST_GROUP_OFFSET = 24,
     MULTICAST_OP_OFFSET    = 27,
     MULTICAST_BIT_OFFSET   = 30,
@@ -131,7 +133,8 @@ ReturnCode platGetScom(const Target<TARGET_TYPE_ALL>& i_target,
          // Compose the multicast address based on multicast params
          l_scomAddr = fapi2::getMulticastAddr(l_scomAddr,
                                              i_target.get().getMulticastGroup(),
-                                             i_target.get().getMulticastOp());
+                                             i_target.get().getMulticastOp(),
+                                             i_target.get().getCoreSelect());
      }
 
     // Perform SCOM read
@@ -205,7 +208,8 @@ ReturnCode platPutScom(const Target<TARGET_TYPE_ALL>& i_target,
         // Compose the multicast address based on multicast params
         l_scomAddr = fapi2::getMulticastAddr(l_scomAddr,
                                              i_target.get().getMulticastGroup(),
-                                             i_target.get().getMulticastOp());
+                                             i_target.get().getMulticastOp(),
+                                             i_target.get().getCoreSelect());
     }
 
     // Perform SCOM write
@@ -1085,7 +1089,8 @@ uint32_t getPlatMCGroup(const MulticastGroup i_group)
 
 uint64_t getMulticastAddr(uint64_t i_addr,
                           const MulticastGroup i_group,
-                          const MulticastType i_op)
+                          const MulticastType i_op,
+                          const MulticastCoreSelect i_coreSelect)
 {
     uint64_t l_resultingAddress = i_addr;
     // Set the mulitcast bit (bit 1)
@@ -1096,6 +1101,13 @@ uint64_t getMulticastAddr(uint64_t i_addr,
     // Copy in the group (bits 5, 6, 7)
     l_resultingAddress &= ~MULTICAST_GROUP_MASK;
     l_resultingAddress |= (getPlatMCGroup(i_group) << MULTICAST_GROUP_OFFSET);
+
+    if(i_coreSelect != MCCORE_NONE)
+    {
+        // Copy in the core select (bits 16, 17, 18, 19)
+        l_resultingAddress &= ~CORE_SELECT_MASK;
+        l_resultingAddress |= (i_coreSelect << CORE_SELECT_OFFSET);
+    }
     return l_resultingAddress;
 }
 
@@ -1116,6 +1128,13 @@ MulticastType getMulticastOp(const uint32_t i_multicastScomAddr)
     return static_cast<MulticastType>(
                 ((i_multicastScomAddr & MULTICAST_OP_MASK) >>
                     MULTICAST_OP_OFFSET));
+}
+
+MulticastCoreSelect getCoreSelect(const uint32_t i_multicastScomAddr)
+{
+    return static_cast<MulticastCoreSelect>(
+                ((i_multicastScomAddr & CORE_SELECT_MASK) >>
+                    CORE_SELECT_OFFSET));
 }
 
 } // End namespace
