@@ -2848,7 +2848,7 @@ inline fapi2::buffer<uint64_t> generate_eccspare_pattern(const pattern& i_patter
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
-inline fapi2::ReturnCode load_eccspare_pattern( const fapi2::Target<T>& i_target, const pattern& i_pattern,
+fapi2::ReturnCode load_eccspare_pattern( const fapi2::Target<T>& i_target, const pattern& i_pattern,
         const bool i_invert );
 
 ///
