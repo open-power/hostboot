@@ -56,6 +56,7 @@ my %SideOptions = (
         B => "B",
         sideless => "sideless",
     );
+my $editedLayoutLocation = "";
 
 if ($#ARGV < 0) {
     usage();
@@ -95,6 +96,10 @@ for (my $i=0; $i < $#ARGV + 1; $i++)
     elsif($ARGV[$i] =~ /--test/) {
         $testRun = 1;
     }
+    elsif($ARGV[$i] =~ /--editedLayoutLocation/) {
+        $editedLayoutLocation = $ARGV[++$i];
+        trace(2, "Location where the edited layout file will be placed: $editedLayoutLocation");
+    }
     else {
         traceErr("Unrecognized Input: $ARGV[$i]");
         exit 1;
@@ -112,7 +117,8 @@ if (-e $pnorBinName)
 }
 
 #Load PNOR Layout XML file
-loadPnorLayout($pnorLayoutFile, \%pnorLayout, \%PhysicalOffsets, $testRun);
+loadPnorLayout($pnorLayoutFile, \%pnorLayout, \%PhysicalOffsets, $testRun,
+    $editedLayoutLocation);
 
 #Verify all the section files exist
 verifyFilesExist(\%pnorLayout, \%binFiles);
@@ -621,6 +627,7 @@ print <<"ENDUSAGE";
     --fpartCmd          invoke string for executing the fpart tool
     --fcpCmd            invoke string for executing the fcp tool
     --test              Output test-only sections.
+    --editedLayoutLocation <directory>      Location to place edited layout file
 
   Current Limitations:
       --TOC Records must be 4 or 8 bytes in length

@@ -54,7 +54,8 @@ use constant PAGE_SIZE => 4096;
 ################################################################################
 sub loadPnorLayout
 {
-    my ($i_pnorFile, $i_pnorLayoutRef, $i_physicalOffsets, $i_testRun) = @_;
+    my ($i_pnorFile, $i_pnorLayoutRef, $i_physicalOffsets, $i_testRun,
+        $i_outputLayoutLocation) = @_;
     my $this_func = (caller(0))[3];
 
     unless(-e $i_pnorFile)
@@ -255,21 +256,25 @@ sub loadPnorLayout
         checkForOverlap($i_pnorLayoutRef);
     }
 
-    # write xml with offsets to new file
-    my $filename = basename($i_pnorFile, ".xml");
-    $filename = "${filename}WithOffsets.xml";
+    # Write xml with offsets to new file if $i_outputLayoutLocation
+    # argument is supplied
+    if (defined $i_outputLayoutLocation && $i_outputLayoutLocation ne "")
+    {
+        my $filename = basename($i_pnorFile, ".xml");
+        $filename = "${i_outputLayoutLocation}/${filename}WithOffsets.xml";
 
-    # writing to new file with error handling
-    eval
-    {
-        print XMLout($xml, RootName => "pnor", OutputFile => $filename);
-        1;
+        # writing to new file with error handling
+        eval
+        {
+            print XMLout($xml, RootName => "pnor", OutputFile => $filename);
+            1;
+        }
+        or do
+        {
+            my $err = $@;
+            die "ERROR: $this_func: Failed to create new XML file with corrected offsets, error = $err";
+        };
     }
-    or do
-    {
-        my $err = $@;
-        die "ERROR: $this_func: Failed to create new XML file with corrected offsets, error = $err";
-    };
 
     return 0;
 }
