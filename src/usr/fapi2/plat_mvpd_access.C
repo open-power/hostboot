@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -374,7 +374,7 @@ fapi2::ReturnCode getMvpdField
         size_t l_fieldLen = io_fieldSize;
 
         l_errl = deviceRead(
-                reinterpret_cast< TARGETING::Target*>(i_procTarget.get()),
+                i_procTarget.get(),
                 i_pBuffer,
                 l_fieldLen,
                 DEVICE_MVPD_ADDRESS(l_hbRecord, l_hbKeyword));
@@ -449,7 +449,7 @@ fapi2::ReturnCode setMvpdField
         size_t l_fieldLen = i_fieldSize;
 
         l_errl = deviceWrite(
-                reinterpret_cast< TARGETING::Target*>(i_procTarget.get()),
+                i_procTarget.get(),
                 const_cast<uint8_t *>(i_pBuffer),
                 l_fieldLen,
                 DEVICE_MVPD_ADDRESS(l_hbRecord, l_hbKeyword));
