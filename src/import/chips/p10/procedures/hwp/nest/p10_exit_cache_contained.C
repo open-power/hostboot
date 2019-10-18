@@ -552,6 +552,8 @@ p10_exit_cache_contained(
     fapi2::ReturnCode l_rc;
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_sbe_master_chip_target;
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>> l_targets_master;
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>> l_targets_slaves;
     fapi2::ATTR_IS_MPIPL_Type l_is_mpipl;
     std::vector<std::pair<uint64_t, uint64_t>> l_xscom_inits;
     bool l_sbe_master_chip_found = false;
@@ -589,8 +591,13 @@ p10_exit_cache_contained(
 
         if (l_sbe_master_chip_flag == fapi2::ENUM_ATTR_PROC_SBE_MASTER_CHIP_TRUE)
         {
+            l_targets_master.push_back(l_target);
             l_sbe_master_chip_target = l_target;
             l_sbe_master_chip_found = true;
+        }
+        else
+        {
+            l_targets_slaves.push_back(l_target);
         }
     }
 
@@ -601,14 +608,25 @@ p10_exit_cache_contained(
     if ((i_step & p10_sbe_exit_cache_contained_step_t::SETUP_MEMORY_BARS) ==
         p10_sbe_exit_cache_contained_step_t::SETUP_MEMORY_BARS)
     {
-        FAPI_TRY(p10_exit_cache_contained_append_mc_bar_inits(i_targets,
+        // ensure master chip's data is placed first in output buffer
+        FAPI_TRY(p10_exit_cache_contained_append_mc_bar_inits(l_targets_master,
                  l_xscom_inits),
-                 "Error from p10_exit_cache_contained_append_mc_bar_inits");
+                 "Error from p10_exit_cache_contained_append_mc_bar_inits (master)");
 
-        FAPI_TRY(p10_exit_cache_contained_append_mcd_bar_inits(i_targets,
+        FAPI_TRY(p10_exit_cache_contained_append_mcd_bar_inits(l_targets_master,
                  FAPI_SYSTEM,
                  l_xscom_inits),
-                 "Error from p10_exit_cache_contained_append_mcd_bar_inits");
+                 "Error from p10_exit_cache_contained_append_mcd_bar_inits (master)");
+
+        // then append slave chip data
+        FAPI_TRY(p10_exit_cache_contained_append_mc_bar_inits(l_targets_slaves,
+                 l_xscom_inits),
+                 "Error from p10_exit_cache_contained_append_mc_bar_inits (slaves)");
+
+        FAPI_TRY(p10_exit_cache_contained_append_mcd_bar_inits(l_targets_slaves,
+                 FAPI_SYSTEM,
+                 l_xscom_inits),
+                 "Error from p10_exit_cache_contained_append_mcd_bar_inits (slaves)");
     }
 
     // issue sequence of requested operations on chip hosting master SBE
