@@ -352,7 +352,7 @@ fapi2::ReturnCode qme_halt(
 
     FAPI_INF("Send HALT command via XCR...");
     l_data64.flush<0>().insertFromRight( XCR_HALT, 1, 3 );
-    FAPI_TRY( putScom( l_eq_mc_or, QME_SCOM_XIDBGPRO, l_data64 ) );
+    FAPI_TRY( putScom( l_eq_mc_or, QME_SCOM_XIXCR, l_data64 ) );
 
     FAPI_INF("Poll for HALT State via XSR...");
 
