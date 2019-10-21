@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep15/proc_set_pba_homer_bar.C $             */
+/* $Source: src/usr/isteps/istep15/proc_set_homer_bar.C $                 */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,31 +22,33 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
+/**
+ *  @file proc_set_homer_bar.C
+ *  Contains code for setting the HOMER BAR registers.
+ *  HOMER = Hardware Offload Microcode Engine Region
+ */
 
 //From Hostboot Directory
 ////System
-  #include    <limits.h>
-  #include    <sys/misc.h>
+#include    <limits.h>
+#include    <sys/misc.h>
 
 ////Error handling and traces
-  #include    <errl/errluserdetails.H>
-  #include    <errl/errlmanager.H>
-  #include    <errl/errlentry.H>
-  #include    <errl/errludtarget.H>
-  #include    <isteps/hwpisteperror.H>
-  #include    <initservice/isteps_trace.H>
+#include    <errl/errluserdetails.H>
+#include    <errl/errlmanager.H>
+#include    <errl/errlentry.H>
+#include    <errl/errludtarget.H>
+#include    <isteps/hwpisteperror.H>
+#include    <initservice/isteps_trace.H>
 
 ////Targeting support
-  #include    <targeting/common/utilFilter.H>
-/* FIXME RTC: 210975
-  #include    <fapi2/plat_hwp_invoker.H>
-  #include    <fapi2/target.H>
+#include    <targeting/common/utilFilter.H>
+#include    <fapi2/plat_hwp_invoker.H>
+#include    <fapi2/target.H>
 
 //From Import Directory (EKB Repository)
 #include    <return_code.H>
-#include    <p9_pm_set_homer_bar.H>
-*/
+#include    <p10_pm_set_homer_bar.H>
 
 //Namespaces
 using namespace ERRORLOG;
@@ -60,11 +62,10 @@ enum
     HOMER_SIZE_IN_MB    =4,
 };
 
-void* proc_set_pba_homer_bar (void *io_pArgs)
+void* proc_set_homer_bar (void *io_pArgs)
 {
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_set_pba_homer_bar entry" );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "proc_set_homer_bar entry" );
     ISTEP_ERROR::IStepError l_StepError;
-/* FIXME RTC: 210975
     errlHndl_t l_errl = NULL;
     TARGETING::TargetHandleList l_procChips;
 
@@ -83,22 +84,31 @@ void* proc_set_pba_homer_bar (void *io_pArgs)
         const uint64_t homerAddr =
             l_procChip->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>();
 
-        //call p9_pm_set_homer_bar.C HWP
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "proc_set_homer_bar: calling p10_pm_set_homer_bar(huid=0x%08x, homerAddr=0x%016llx)",
+                TARGETING::get_huid(l_procChip),
+                homerAddr);
+
+#ifdef ISTEP15_ENABLE_HWPS
+        //call p10_pm_set_homer_bar.C HWP
         FAPI_INVOKE_HWP( l_errl,
-                        p9_pm_set_homer_bar,
+                        p10_pm_set_homer_bar,
                         l_fapiCpuTarget,
                         homerAddr,
                         HOMER_SIZE_IN_MB);
-
+#endif
         if(l_errl)
         {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "proc_set_homer_bar: p10_pm_set_homer_bar(huid=0x%08x, homerAddr=0x%016llx) FAILED!",
+                    TARGETING::get_huid(l_procChip),
+                    homerAddr);
             l_StepError.addErrorDetails( l_errl );
             errlCommit( l_errl, HWPF_COMP_ID );
         }
     }
 
-*/
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_set_pba_homer_bar exit" );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "proc_set_homer_bar exit" );
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();
 }
