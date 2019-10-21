@@ -33,10 +33,26 @@ if [ -n "${OPENPOWER_BUILD}" ]; then
     export SKIP_BINARY_FILES=1
     export JAILCMD=""
 else
+    # Setup for RHEL 6 and 7 machines:
     export CROSS_PREFIX=${CROSS_PREFIX:-/opt/mcp/shared/powerpc64-gcc-20190822/bin/powerpc64le-buildroot-linux-gnu-}
-    export FAKEROOT=${FAKEROOT:-/opt/mcp/shared/powerpc64-gcc-20150516}
-    export HOST_PREFIX=${HOST_PREFIX:-${FAKEROOT}/wrappers/x86_64-pc-linux-gnu-}
-    export PATH=${FAKEROOT}/wrappers:${PATH}
+    RED_HAT_DIST=`sed "s/^.*release \([0-9]*\)\..*$/rh\1/" /etc/redhat-release`
+    if [[ $RED_HAT_DIST == "rh7" ]]; then
+        export RH7_BUILD=1
+        export JAILCMD=""
+        export HOST_BINUTILS_DIR=${HOST_BINUTILS_DIR:-/opt/mcp/shared/host-binutils-2.31.1/}
+        export FAKEROOT=${FAKEROOT:-/opt/rh/devtoolset-8/root}
+        export HOST_PREFIX=${HOST_PREFIX:-${FAKEROOT}/usr/bin/}
+        export PATH=${FAKEROOT}/usr/bin:${PATH}
+    elif [[ $RED_HAT_DIST == "rh6" ]]; then
+        export FAKEROOT=${FAKEROOT:-/opt/mcp/shared/powerpc64-gcc-20150516}
+        export HOST_PREFIX=${HOST_PREFIX:-${FAKEROOT}/wrappers/x86_64-pc-linux-gnu-}
+        export PATH=${FAKEROOT}/wrappers:${PATH}
+    else
+        echo "Could not set host compilers because env.bash script could not"
+        echo "properly parse out the machine's red hat distribution:"
+        echo "RED_HAT_DIST: $RED_HAT_DIST"
+        exit 1
+    fi
 fi
 
 # Setup some global variables

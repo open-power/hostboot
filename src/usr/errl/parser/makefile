@@ -47,7 +47,9 @@ ERRLPARSE_TARGETS = \
     ${GENDIR}/plugins/makefile
 
 ifndef OPENPOWER_BUILD
+ifndef RH7_BUILD
     ERRL_LINK_STATIC = -m32 -static
+endif
 endif
 
 CC=$(HOST_PREFIX)g++ $(ERRL_LINK_STATIC)
