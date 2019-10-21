@@ -31,7 +31,7 @@
 // *HWP HWP Backup Owner : Prasad BG Ranganath <prasadbgr@in.ibm.com>
 // *HWP FW Owner         : Prem S Jha <premjha2@in.ibm.com>
 // *HWP Team             : PM
-// *HWP Level            : 1
+// *HWP Level            : 2
 // *HWP Consumed by      : HS
 
 #ifndef _P10_PM_HALT_H
@@ -46,6 +46,15 @@
 // -----------------------------------------------------------------------------
 #include <fapi2.H>
 #include <p10_pm.H>
+#include <p10_pm_pgpe_init.H>
+#include <p10_pm_xgpe_init.H>
+#include <p10_pm_qme_init.H>
+#include <p10_pm_occ_control.H>
+#include <p10_pm_ocb_init.H>
+#include <p10_pm_pss_init.H>
+#include <p10_pm_pba_init.H>
+#include <p10_pm_firinit.H>
+#include <p10_pm_occ_firinit.H>
 
 
 typedef fapi2::ReturnCode (*p10_pm_halt_FP_t) (

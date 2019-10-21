@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p10/procedures/hwp/pm/p10_pm_start.H $       */
+/* $Source: src/import/chips/p10/procedures/hwp/pm/p10_pm_occ_firinit.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,55 +23,40 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
-/// @file p10_pm_start.H
-/// @brief Wrapper that start or halt the OCC complex.
+/// @file p10_pm_occ_firinit.C
+/// @brief Configures the OCC LFIR Mask and Action
 ///
-// *HWP HWP Owner        : Greg Still <stillgs@us.ibm.com>
-// *HWP HWP Backup Owner : Prasad BG Ranganath <prasadbgr@in.ibm.com>
-// *HWP FW Owner         : Prem S Jha <premjha2@in.ibm.com>
-// *HWP Team             : PM
-// *HWP Level            : 2
-// *HWP Consumed by      : HS
+// *HWP HW Owner        :   Greg Still <stillgs@us.ibm.com>
+// *HWP Backup Owner    :   Prasad BG Ranganath <prasadbgr@in.ibm.com>
+// *HWP FW Owner        :   Prem S Jha <premjha2@in.ibm.com>
+// *HWP Team            :   PM
+// *HWP Level           :   1
+// *HWP Consumed by     :   HS
 
-#ifndef _P10_PM_START_H
-#define _P10_PM_START_H
+#ifndef _P10_PM_OCC_FIRINIT_H_
+#define _P10_PM_OCC_FIRINIT_H_
 
-// -----------------------------------------------------------------------------
-// Includes
-// -----------------------------------------------------------------------------
 #include <fapi2.H>
 #include <p10_pm.H>
-#include <p10_pm_pgpe_init.H>
-#include <p10_pm_xgpe_init.H>
-#include <p10_pm_qme_init.H>
-#include <p10_pm_occ_control.H>
-#include <p10_pm_ocb_init.H>
-#include <p10_pm_pss_init.H>
-#include <p10_pm_pba_init.H>
-#include <p10_pm_firinit.H>
-#include <p10_pm_occ_firinit.H>
 
-
-// Function pointer defintion
-typedef fapi2::ReturnCode (*p10_pm_start_FP_t) (
+// function pointer typedef definition for HWP call support
+typedef fapi2::ReturnCode (*p10_pm_occ_firinit_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
-    void* i_pHomerImage);
+    const pm::PM_FLOW_MODE);
 
-extern "C"
-{
+extern "C" {
 //------------------------------------------------------------------------------
-///
-/// @brief Wrapper that initializes or resets the OCC complex.
-///
-/// @param[in] i_target Chip target
-/// @param[in] i_pHomerImage pointer to the beginning of the HOMER image buffer
-///
-/// @return FAPI2_RC_SUCCESS on success, else error code.
-///
-    fapi2::ReturnCode p10_pm_start(
+// Function prototype
+//------------------------------------------------------------------------------
+/// @brief  Configures the OCC LFIR Mask and Action
+/// param[in] i_target   Chip Target
+/// param[in] i_mode     Control mode for the procedure
+/// @return FAPI2_RC_SUCCESS in case of success, error code otherwise
+
+    fapi2::ReturnCode p10_pm_occ_firinit(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        void* i_pHomerImage);
+        const pm::PM_FLOW_MODE i_mode);
 
-}
+} // extern "C"
 
-#endif // _P10_PM_START_H
+#endif

@@ -31,7 +31,7 @@
 // *HWP HWP Backup Owner : Prasad BG Ranganath <prasadbgr@in.ibm.com>
 // *HWP FW Owner         : Prem S Jha <premjha2@in.ibm.com>
 // *HWP Team             : PM
-// *HWP Level            : 1
+// *HWP Level            : 2
 // *HWP Consumed by      : HS
 
 ///
@@ -54,6 +54,7 @@
 // Includes
 // -----------------------------------------------------------------------------
 #include <p10_pm_halt.H>
+#include <p10_pm_occ_gpe_init.H>
 // -----------------------------------------------------------------------------
 // Constant definitions
 // -----------------------------------------------------------------------------
@@ -77,7 +78,94 @@ fapi2::ReturnCode p10_pm_halt(
 {
     FAPI_IMP(">> p10_pm_halt");
 
+    fapi2::ReturnCode l_rc;
 
+    //  ************************************************************************
+    //  Mask the OCC FIRs as errors can occur in what follows
+    //  ************************************************************************
+    FAPI_DBG("Executing p10_pm_occ_firinit for masking errors in halt operation.");
+    FAPI_EXEC_HWP(l_rc, p10_pm_occ_firinit, i_target, pm::PM_RESET_SOFT);
+    FAPI_TRY(l_rc, "ERROR: Failed to mask OCC FIRs.");
+
+    //  ************************************************************************
+    //  Halt the OCC PPC405 and halt it safely
+    //  ************************************************************************
+    FAPI_DBG("Executing p10_pm_occ_control to put OCC PPC405 into halt safely.");
+    FAPI_EXEC_HWP(l_rc, p10_pm_occ_control,
+                  i_target,
+                  occ_ctrl::PPC405_RESET_SEQUENCE, //Operation on PPC405
+                  occ_ctrl::PPC405_BOOT_NULL, // Boot instruction location
+                  0); //Jump to 405 main instruction - not used here
+    FAPI_TRY(l_rc, "ERROR: Failed to halt OCC PPC405");
+    //  ************************************************************************
+    //  Mask the PBA & QME FIRs as errors can occur in what follows
+    //  ************************************************************************
+    FAPI_DBG("Executing p10_pm_firinit for masking errors in halt operation.");
+    FAPI_EXEC_HWP(l_rc, p10_pm_firinit, i_target, pm::PM_RESET_SOFT);
+    FAPI_TRY(l_rc, "ERROR: Failed to mask PBA & QME FIRs.");
+
+    //  ************************************************************************
+    //  Issue halt to OCC GPEs ( GPE0 and GPE1) (Bring them to HALT)
+    //  ************************************************************************
+    FAPI_DBG("Executing p10_pm_occ_gpe_init to halt OCC GPE");
+    FAPI_EXEC_HWP(l_rc, p10_pm_occ_gpe_init,
+                  i_target,
+                  pm::PM_HALT,
+                  occgpe::GPEALL // Apply to both OCC GPEs
+                 );
+    FAPI_TRY(l_rc, "ERROR: Failed to halt the OCC GPEs");
+
+    //  ************************************************************************
+    //  Reset the PSTATE GPE (Bring it to HALT)
+    //  ************************************************************************
+    FAPI_DBG("Executing p10_pm_pstate_gpe_init to halt PGPE");
+    FAPI_EXEC_HWP(l_rc, p10_pm_pgpe_init, i_target, pm::PM_HALT);
+    FAPI_TRY(l_rc, "ERROR: Failed to halt the PGPE");
+
+    //  ************************************************************************
+    //  Reset the XGPE (Bring it to HALT)
+    //  ************************************************************************
+    FAPI_DBG("Executing p10_pm_stop_gpe_init to halt XGPE");
+    FAPI_EXEC_HWP(l_rc, p10_pm_xgpe_init, i_target, pm::PM_HALT);
+    FAPI_TRY(l_rc, "ERROR: Failed to halt XGPE");
+
+    //TODO
+    //  ************************************************************************
+    // Clear the OCC Flag and Scratch2 registers
+    // which contain runtime settings and modes for PM GPEs (Pstate and Stop functions)
+    //  ************************************************************************
+
+    //  ************************************************************************
+    //  Reset the QME (Bring it to HALT)
+    //  ************************************************************************
+    FAPI_DBG("Executing p10_pm_qme_init to halt QME");
+    FAPI_EXEC_HWP(l_rc, p10_pm_qme_init, i_target, pm::PM_HALT);
+    FAPI_TRY(l_rc, "ERROR: Failed to halt QME");
+
+    //  ************************************************************************
+    //  Issue halt to OCB
+    //  ************************************************************************
+    FAPI_DBG("Executing p10_pm_ocb_init to halt OCB");
+    FAPI_EXEC_HWP(l_rc, p10_pm_ocb_init,
+                  i_target,
+                  pm::PM_HALT,
+                  ocb::OCB_CHAN0, // Channel
+                  ocb::OCB_TYPE_NULL, // Channel type
+                  0, // Base address
+                  0, // Length of circular push/pull queue
+                  ocb::OCB_Q_OUFLOW_NULL, // Channel flow control
+                  ocb::OCB_Q_ITPTYPE_NULL // Channel interrupt control
+                 );
+    FAPI_TRY(l_rc, "ERROR: Failed to halt OCB");
+
+    //  ************************************************************************
+    //  Resets P2S and HWC logic
+    //  ************************************************************************
+    FAPI_DBG("Executing p10_pm_pss_init to halt P2S and HWC logic");
+    FAPI_EXEC_HWP(l_rc, p10_pm_pss_init, i_target, pm::PM_HALT);
+    FAPI_TRY(l_rc, "ERROR: Failed to halt PSS & HWC");
+
+fapi_try_exit:
 
     FAPI_IMP("<< p10_pm_halt");
     return fapi2::current_err;

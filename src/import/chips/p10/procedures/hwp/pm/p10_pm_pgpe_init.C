@@ -352,6 +352,11 @@ fapi2::ReturnCode p10_pm_pgpe_init(
     // Boot the PSTATE GPE
     if (i_mode == pm::PM_START)
     {
+#if 0
+        FAPI_EXEC_HWP(fapi2::current_err,
+                      p10_pm_pba_init,
+                      i_target,
+                      pm::PM_HALT);
         // Setup the PBA channels for run-time operation (eg when the PPC405 and its GPEs are active).
         FAPI_EXEC_HWP(fapi2::current_err,
                       p10_pm_pba_init,
@@ -363,6 +368,7 @@ fapi2::ReturnCode p10_pm_pgpe_init(
                     .set_CHIP(i_target)
                     .set_MODE(pm::PM_START),
                     "PBA Setup Failed" );
+#endif
 
         // Start PGPE
         FAPI_TRY(pgpe_start(i_target),

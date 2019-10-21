@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p10/procedures/hwp/pm/p10_pm_start.H $       */
+/* $Source: src/import/chips/p10/procedures/hwp/pm/p10_pm_firinit.H $     */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,55 +23,55 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
-/// @file p10_pm_start.H
-/// @brief Wrapper that start or halt the OCC complex.
+/// @file p10_pm_firinit.H
+/// @brief  common .H file for all FIRINITS
 ///
-// *HWP HWP Owner        : Greg Still <stillgs@us.ibm.com>
-// *HWP HWP Backup Owner : Prasad BG Ranganath <prasadbgr@in.ibm.com>
-// *HWP FW Owner         : Prem S Jha <premjha2@in.ibm.com>
-// *HWP Team             : PM
-// *HWP Level            : 2
-// *HWP Consumed by      : HS
+// *HWP HW Owner        :   Greg Still <stillgs@us.ibm.com>
+// *HWP Backup Owner    :   Prasad BG Ranganath <prasadbgr@in.ibm.com>
+// *HWP FW Owner        :   Prem S Jha <premjha2@in.ibm.com>
+// *HWP Team            :   PM
+// *HWP Level           :   1
+// *HWP Consumed by     :   HS
 
-#ifndef _P10_PM_START_H
-#define _P10_PM_START_H
-
-// -----------------------------------------------------------------------------
+#ifndef _P10_PM_FIRINIT_H_
+#define _P10_PM_FIRINIT_H_
+//------------------------------------------------------------------------------
+//
 // Includes
-// -----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 #include <fapi2.H>
 #include <p10_pm.H>
-#include <p10_pm_pgpe_init.H>
-#include <p10_pm_xgpe_init.H>
-#include <p10_pm_qme_init.H>
-#include <p10_pm_occ_control.H>
-#include <p10_pm_ocb_init.H>
-#include <p10_pm_pss_init.H>
-#include <p10_pm_pba_init.H>
-#include <p10_pm_firinit.H>
-#include <p10_pm_occ_firinit.H>
 
-
-// Function pointer defintion
-typedef fapi2::ReturnCode (*p10_pm_start_FP_t) (
+// function pointer typedef definition for HWP call support
+typedef fapi2::ReturnCode (*p10_pm_firinit_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
-    void* i_pHomerImage);
+    const pm::PM_FLOW_MODE);
 
 extern "C"
 {
 //------------------------------------------------------------------------------
+// Function prototype
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 ///
-/// @brief Wrapper that initializes or resets the OCC complex.
+/// @brief Calls each PM unit firinit procedures based on the input mode,
+///        to configure the FIRs of the chip to  predefined types.
+///        The procedures invoked are:
+///        p10_pm_pba_firinit
+///        p10_pm_ppm_firinit
+///        p10_pm_cme_firinit
 ///
-/// @param[in] i_target Chip target
-/// @param[in] i_pHomerImage pointer to the beginning of the HOMER image buffer
+/// @param[in] i_target   Chip target which will be passed to all the procedures
+/// @param[in] i_mode     Control mode for the procedure:
+///                       PM_INIT, PM_RESET
 ///
-/// @return FAPI2_RC_SUCCESS on success, else error code.
+/// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
-    fapi2::ReturnCode p10_pm_start(
+    fapi2::ReturnCode p10_pm_firinit(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        void* i_pHomerImage);
+        const pm::PM_FLOW_MODE i_mode);
 
-}
+} // extern "C"
 
-#endif // _P10_PM_START_H
+#endif //_P10_PM_FIRINIT_H_

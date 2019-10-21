@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p10/procedures/hwp/pm/p10_pm_start.H $       */
+/* $Source: src/import/chips/p10/procedures/hwp/pm/p10_pm_occ_gpe_init.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,56 +22,65 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+/// @file p10_pm_occ_gpe_init.H
+/// @brief Initialize or reset the targeted GPE0 and/or GPE1
 ///
-/// @file p10_pm_start.H
-/// @brief Wrapper that start or halt the OCC complex.
-///
-// *HWP HWP Owner        : Greg Still <stillgs@us.ibm.com>
-// *HWP HWP Backup Owner : Prasad BG Ranganath <prasadbgr@in.ibm.com>
-// *HWP FW Owner         : Prem S Jha <premjha2@in.ibm.com>
-// *HWP Team             : PM
-// *HWP Level            : 2
-// *HWP Consumed by      : HS
+// *HWP HWP Owner       :   Greg Still <stillgs@us.ibm.com>
+// *HWP Backup Owner    :   Prasad BG Ranganath <prasadbgr@in.ibm.com>
+// *HWP FW  Owner       :   Prem S Jha <premjha2@in.ibm.com>
+// *HWP Team            :   PM
+// *HWP Level           :   3
+// *HWP Consumed by     :   HS
+//
 
-#ifndef _P10_PM_START_H
-#define _P10_PM_START_H
+#ifndef _P10_PM_OCC_GPE_INIT_H
+#define _P10_PM_OCC_GPE_INIT_H
 
-// -----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Includes
-// -----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 #include <fapi2.H>
 #include <p10_pm.H>
-#include <p10_pm_pgpe_init.H>
-#include <p10_pm_xgpe_init.H>
-#include <p10_pm_qme_init.H>
-#include <p10_pm_occ_control.H>
-#include <p10_pm_ocb_init.H>
-#include <p10_pm_pss_init.H>
-#include <p10_pm_pba_init.H>
-#include <p10_pm_firinit.H>
-#include <p10_pm_occ_firinit.H>
+
+//------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
+namespace occgpe
+{
+enum GPE_ENGINES
+{
+    GPE0        = 0x0,
+    GPE1        = 0x1,
+    GPEALL      = 0XF
+};
+}
 
 
-// Function pointer defintion
-typedef fapi2::ReturnCode (*p10_pm_start_FP_t) (
+// function pointer typedef definition for HWP call support
+typedef fapi2::ReturnCode (*p10_pm_occ_gpe_init_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
-    void* i_pHomerImage);
+    const pm::PM_FLOW_MODE,
+    const occgpe::GPE_ENGINES);
 
 extern "C"
 {
+
 //------------------------------------------------------------------------------
-///
-/// @brief Wrapper that initializes or resets the OCC complex.
-///
-/// @param[in] i_target Chip target
-/// @param[in] i_pHomerImage pointer to the beginning of the HOMER image buffer
-///
-/// @return FAPI2_RC_SUCCESS on success, else error code.
-///
-    fapi2::ReturnCode p10_pm_start(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        void* i_pHomerImage);
+// Function prototypes
+//------------------------------------------------------------------------------
 
-}
+/// @brief Configure or reset the targeted GPE0 and/or GPE1
+///
+/// param[in] i_target   Chip target
+/// param[in] i_mode     Control mode for the procedure (PM_INIT, PM_RESET)
+/// param[in] i_engine   Targeted engine:  GPE0, GPE1, GPEALL
 
-#endif // _P10_PM_START_H
+/// @return FAPI2_RC_SUCCESS in case of success
+///         error code otherwise
+
+    fapi2::ReturnCode
+    p10_pm_occ_gpe_init(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                        const pm::PM_FLOW_MODE i_mode,
+                        const occgpe::GPE_ENGINES i_engine);
+} //extern "C"
+#endif // P10_PM_OCC_GPE_INIT_H

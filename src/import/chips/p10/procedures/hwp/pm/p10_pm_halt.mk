@@ -23,5 +23,14 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p10_pm_halt
+lib$(PROCEDURE)_EXTRALIBS+=p10_pm_xgpe_init
+lib$(PROCEDURE)_EXTRALIBS+=p10_pm_pgpe_init
+lib$(PROCEDURE)_EXTRALIBS+=p10_pm_qme_init
+lib$(PROCEDURE)_EXTRALIBS+=p10_pm_pba_init
+lib$(PROCEDURE)_EXTRALIBS+=p10_pm_pss_init
+lib$(PROCEDURE)_EXTRALIBS+=p10_pm_firinit
+lib$(PROCEDURE)_EXTRALIBS+=p10_pm_ocb_init
+lib$(PROCEDURE)_EXTRALIBS+=p10_pm_occ_control
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/procedures/hwp/lib)
+$(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/common/pmlib/include/registers)
 $(call BUILD_PROCEDURE)
