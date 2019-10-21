@@ -90,6 +90,11 @@ extern "C"
             FAPI_TRY(mss::exp::ecid::read_from_fuse(i_target, l_ecid),
                      "exp_getecid: Could not read ecid from FUSE on %s", mss::c_str(i_target));
 
+            for (uint8_t l_ecid_idx = 0; l_ecid_idx < mss::exp::ecid_consts::FUSE_ARRAY_SIZE; ++l_ecid_idx)
+            {
+                FAPI_INF("%s ECID[%u]: 0x%04X", mss::c_str(i_target), l_ecid_idx, l_ecid[l_ecid_idx]);
+            }
+
             // TK - Remove once ATTR_ECID is made large enough
             FAPI_TRY(mss::attr::set_ocmb_ecid(i_target, l_ecid),
                      "exp_getecid: Could not set ATTR_MSS_OCMB_ECID on %s", mss::c_str(i_target));
