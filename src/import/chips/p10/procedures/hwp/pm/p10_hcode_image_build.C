@@ -169,6 +169,7 @@ class ImageBuildRecord
         iv_maxSizeList["PGPE SRAM Size"]    =   PGPE_SRAM_SIZE;
         iv_maxSizeList["OPSPB"]             =   OCC_PSTATE_PARAM_BLOCK_REGION_SIZE;
         iv_maxSizeList["PState Table"]      =   PGPE_PSTATE_OUTPUT_TABLES_REGION_SIZE;
+        iv_maxSizeList["WOF Tables"]        =   OCC_WOF_TABLES_SIZE;
     }
 
     /**
@@ -1438,8 +1439,8 @@ fapi2::ReturnCode buildParameterBlock( CONST_FAPI2_PROC& i_procTgt, Homerlayout_
 
     FAPI_TRY( p10_pstate_parameter_block( i_procTgt, &l_pstateParamBlock, l_pWofData, l_wofSize ) );
 
-    FAPI_DBG( "PGPE Hcode Offset 0x%08x  Length 0x%08x",
-                l_sectn.iv_sectnOffset, l_sectn.iv_sectnLength );
+    FAPI_DBG( "PGPE Hcode Offset 0x%08x  Length 0x%08x WOF Table Size 0x%08x",
+                l_sectn.iv_sectnOffset, l_sectn.iv_sectnLength, l_wofSize );
 
     memcpy( &i_pChipHomer->iv_ppmrRegion.iv_pgpeSramRegion[l_sectn.iv_sectnLength],
             &l_pstateParamBlock.iv_globalppb, sizeof(GlobalPstateParmBlock_t) );
@@ -1451,6 +1452,8 @@ fapi2::ReturnCode buildParameterBlock( CONST_FAPI2_PROC& i_procTgt, Homerlayout_
 
     i_ppmrBuildRecord.setSection( "OPSPB", OCC_PSTATE_PARAM_BLOCK_PPMR_OFFSET,
                                   sizeof( OCCPstateParmBlock_t ) );
+
+    i_ppmrBuildRecord.setSection( "WOF Tables", OCC_WOF_TABLES_PPMR_OFFSET, l_wofSize );
 
     FAPI_DBG( " << buildParameterBlock " );
 
@@ -1499,6 +1502,11 @@ fapi2::ReturnCode buildPpmrHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
     //PGPE SRAM
     l_pPpmrHdr->iv_sramSize     =   l_pPpmrHdr->iv_hcodeLength + l_pPpmrHdr->iv_gpspbLength;
 
+    //WOF Table
+    i_ppmrBuildRecord.getSection( "WOF Tables", l_sectn );
+    l_pPpmrHdr->iv_wofTableOffset   =   l_sectn.iv_sectnOffset;
+    l_pPpmrHdr->iv_wofTableLength   =   l_sectn.iv_sectnLength;
+
 #ifndef __HOSTBOOT_MODULE
     l_pPpmrHdr->iv_bootCopierOffset =   htobe32(l_pPpmrHdr->iv_bootCopierOffset);
     l_pPpmrHdr->iv_bootLoaderOffset =   htobe32(l_pPpmrHdr->iv_bootLoaderOffset);
@@ -1510,6 +1518,8 @@ fapi2::ReturnCode buildPpmrHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
     l_pPpmrHdr->iv_gpspbLength      =   htobe32(l_pPpmrHdr->iv_gpspbLength);
     l_pPpmrHdr->iv_opspbOffset      =   htobe32(l_pPpmrHdr->iv_opspbOffset);
     l_pPpmrHdr->iv_opspbLength      =   htobe32(l_pPpmrHdr->iv_opspbLength);
+    l_pPpmrHdr->iv_wofTableOffset   =   htobe32(l_pPpmrHdr->iv_wofTableOffset);
+    l_pPpmrHdr->iv_wofTableLength   =   htobe32(l_pPpmrHdr->iv_wofTableLength);
 
     FAPI_DBG( "====================== PPMR Header =======================" );
     FAPI_DBG( "PPMR BC Offset             0x%08x", htobe32(l_pPpmrHdr->iv_bootCopierOffset));
@@ -1522,6 +1532,8 @@ fapi2::ReturnCode buildPpmrHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
     FAPI_DBG( "PPMR OPSPB Offset          0x%08x", htobe32(l_pPpmrHdr->iv_opspbOffset));
     FAPI_DBG( "PPMR OPSPB Length          0x%08x", htobe32(l_pPpmrHdr->iv_opspbLength));
     FAPI_DBG( "PGPE SRAM Image Length     0x%08x", htobe32(l_pPpmrHdr->iv_sramSize));
+    FAPI_DBG( "WOF Table Offset           0x%08x", htobe32(l_pPpmrHdr->iv_wofTableOffset));
+    FAPI_DBG( "WOF Table Length           0x%08x", htobe32(l_pPpmrHdr->iv_wofTableLength));
 
     FAPI_DBG( "==========================================================" );
 #endif
