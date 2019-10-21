@@ -92,7 +92,7 @@ fapi2::ReturnCode p10_update_ec_state(
 
     FAPI_TRY(update_ec_config(i_target),
              "Error update_core_config detected");
-
+    //TODO Need to find the right way to get deconfigured target
     FAPI_TRY(verify_ec_hw_state(i_target));
 
 fapi_try_exit:
@@ -105,6 +105,7 @@ fapi2::ReturnCode verify_ec_hw_state(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     FAPI_INF (">>verify_hw_state");
+#if 0
     uint8_t l_present_core_unit_pos;
     uint8_t l_functional_core_unit_pos;
 
@@ -163,6 +164,7 @@ fapi2::ReturnCode verify_ec_hw_state(
         }
     }//end of present
 
+#endif
 
 fapi_try_exit:
     FAPI_INF("< update_core_config...");
