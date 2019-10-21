@@ -733,6 +733,19 @@ errlHndl_t nvdimm_getTPM(TARGETING::Target*& o_tpm);
  */
 errlHndl_t nvdimmValidImage(TARGETING::Target *i_nvdimm, bool &o_imgValid);
 
+
+/**
+ * @brief This function grabs the current slot NVDIMM code is running
+ *        Slot 0 is the failure slot, Slot 1 is the updateable slot
+ *
+ * @param[in] i_nvdimm - nvdimm target with NV controller
+ * @param[out] o_slot -  0 or 1
+ *
+ * @return errlHndl_t - Null if successful, otherwise a pointer to
+ *      the error log.
+ */
+errlHndl_t nvdimmGetRunningSlot(TARGETING::Target *i_nvdimm, uint8_t & o_slot);
+
 } //End NVDIMM namespace
 
 

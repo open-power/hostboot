@@ -206,6 +206,7 @@ enum nvdimmReasonCode
     NVDIMM_ARM_ENCRYPTION_UNLOCK_FAILED        = NVDIMM_COMP_ID | 0x53,
     NVDIMM_ARM_RETRY                           = NVDIMM_COMP_ID | 0x54,
     NVDIMM_CLEAR_FW_OPS_STATUS_TIMEOUT         = NVDIMM_COMP_ID | 0x55,   // Failed to clear FW_OPS_STATUS
+    NVDIMM_NOT_RUNNING_LATEST_LEVEL            = NVDIMM_COMP_ID | 0x56,   // Either running from slot 0 or level was not updated
 };
 
 enum UserDetailsTypes

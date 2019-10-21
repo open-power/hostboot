@@ -2063,8 +2063,7 @@ void nvdimm_init(Target *i_nvdimm)
         }
 
         // Check if the firmware slot is 0
-        l_err = nvdimmReadReg ( i_nvdimm, FW_SLOT_INFO, l_data);
-
+        l_err = nvdimmGetRunningSlot(i_nvdimm, l_data);
         if (l_err)
         {
             nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR);
@@ -2073,7 +2072,7 @@ void nvdimm_init(Target *i_nvdimm)
             break;
         }
 
-        if (!(l_data & RUNNING_FW_SLOT))
+        if (l_data == 0)
         {
             nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
             TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_init() nvdimm[%X], running on fw slot 0",
@@ -2083,7 +2082,7 @@ void nvdimm_init(Target *i_nvdimm)
              *@reasoncode       NVDIMM_INVALID_FW_SLOT
              *@severity         ERRORLOG_SEV_PREDICTIVE
              *@moduleid         NVDIMM_CHECK_FW_SLOT
-             *@userdata1[0:31]  Related ops (0xff = NA)
+             *@userdata1[0:31]  Slot running
              *@userdata1[32:63] Target Huid
              *@userdata2        <UNUSED>
              *@devdesc          Encountered error when checking the firmware slot running
@@ -4650,5 +4649,29 @@ void send_ATTR_NVDIMM_ARMED( Target* i_nvdimm,
 #endif //__HOSTBOOT_RUNTIME
 }
 
+/**
+ * @brief Grab the current slot that NVDIMM code is running
+ */
+errlHndl_t nvdimmGetRunningSlot(TARGETING::Target *i_nvdimm, uint8_t & o_slot)
+{
+    errlHndl_t l_err = nullptr;
+    uint8_t l_data = 0;
+    o_slot = 0;  //default to slot 0
+
+    // Check if the firmware slot is 0
+    l_err = nvdimmReadReg ( i_nvdimm, FW_SLOT_INFO, l_data);
+    if (l_err)
+    {
+        nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR);
+        TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmGetRunningSlot() nvdimm[%X], failed to read slot info",
+                  get_huid(i_nvdimm));
+    }
+    else
+    {
+        // Bits 7-4 = RUNNING_FW_SLOT - slot number of running firmware
+        o_slot = (l_data & RUNNING_FW_SLOT) >> 4;
+    }
+    return l_err;
+}
 
 } // end NVDIMM namespace

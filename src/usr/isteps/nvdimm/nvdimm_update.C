@@ -186,6 +186,7 @@ uint16_t NvdimmLidImage::getVersion()
     return o_version;
 }
 
+
 const uint8_t * NvdimmLidImage::getHeaderAndSmartSignature(uint16_t & o_size)
 {
     o_size = 0;
@@ -355,7 +356,6 @@ errlHndl_t NvdimmInstalledImage::getVersion(uint16_t & o_version,
     o_version = iv_version;
     return l_err;
 }
-
 
 errlHndl_t NvdimmInstalledImage::updateImage(NvdimmLidImage * i_lidImage)
 {
@@ -1906,6 +1906,9 @@ bool NvdimmsUpdate::runUpdateUsingLid(NvdimmLidImage * i_lidImage,
     errlHndl_t l_err = nullptr;
     for (auto pInstalledImage : i_list)
     {
+        TARGETING::Target * l_nvdimm = pInstalledImage->getNvdimmTarget();
+        uint64_t l_nvdimm_huid = TARGETING::get_huid(l_nvdimm);
+
         INITSERVICE::sendProgressCode();
         bool updateNeeded = false;
         l_err = isUpdateNeeded(updateNeeded, i_lidImage, pInstalledImage);
@@ -1923,9 +1926,6 @@ bool NvdimmsUpdate::runUpdateUsingLid(NvdimmLidImage * i_lidImage,
         else if (updateNeeded)
         {
             // shared trace variables
-            const TARGETING::Target * l_nvdimm = pInstalledImage->getNvdimmTarget();
-            uint64_t l_nvdimm_huid = TARGETING::get_huid(l_nvdimm);
-
             uint32_t l_installed_type = INVALID_TYPE;
             l_err = pInstalledImage->getType(l_installed_type);
             if (l_err)
@@ -1938,6 +1938,7 @@ bool NvdimmsUpdate::runUpdateUsingLid(NvdimmLidImage * i_lidImage,
                     ERRL_GETRC_SAFE(l_err), ERRL_GETPLID_SAFE(l_err));
                 commitPredictiveNvdimmError(l_err);
                 l_err = nullptr;
+                continue;
             }
 
             uint16_t l_oldVersion = INVALID_VERSION;
@@ -2002,6 +2003,7 @@ bool NvdimmsUpdate::runUpdateUsingLid(NvdimmLidImage * i_lidImage,
                 commitPredictiveNvdimmError(l_err);
                 l_err = nullptr;
                 o_no_error_found = false;
+                continue;
             }
             else
             {
@@ -2049,6 +2051,97 @@ bool NvdimmsUpdate::runUpdateUsingLid(NvdimmLidImage * i_lidImage,
                 ERRORLOG::errlCommit(l_err, NVDIMM_COMP_ID);
             }
         } // end of updateNeeded
+
+        /////////////////////////////////////////////////////////////////
+        // Should not exit the nvdimm update stage until each nvdimm
+        // is running at the lid's code level
+        // (or a predictive error was logged for that nvdimm)
+        /////////////////////////////////////////////////////////////////
+
+        // Check NVDIMM is at the latest level and it is running from slot 1
+        uint16_t l_curVersion = INVALID_VERSION;
+        l_err = pInstalledImage->getVersion(l_curVersion, true);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm_upd,
+                ERR_MRK"NvdimmsUpdate::runUpdateUsingLid() - "
+                "Failed to find current level of NVDIMM %.8X. "
+                "RC=0x%X, PLID=0x%.8X", l_nvdimm_huid,
+                ERRL_GETRC_SAFE(l_err), ERRL_GETPLID_SAFE(l_err));
+            commitPredictiveNvdimmError(l_err);
+            l_err = nullptr;
+            o_no_error_found = false;
+            continue;
+        }
+        uint8_t l_slot_running = 0;
+        l_err = nvdimmGetRunningSlot(l_nvdimm, l_slot_running);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm_upd,
+                ERR_MRK"NvdimmsUpdate::runUpdateUsingLid() - "
+                "Failed to find running slot of NVDIMM %.8X. "
+                "RC=0x%X, PLID=0x%.8X", l_nvdimm_huid,
+                ERRL_GETRC_SAFE(l_err), ERRL_GETPLID_SAFE(l_err));
+            commitPredictiveNvdimmError(l_err);
+            l_err = nullptr;
+            o_no_error_found = false;
+            continue;
+        }
+
+        if ((l_slot_running == 0) || (l_curVersion != i_lidImage->getVersion()))
+        {
+            // Not running latest code on this NVDIMM
+            TRACFCOMP(g_trac_nvdimm_upd,
+                ERR_MRK"NvdimmsUpdate::runUpdateUsingLid() - "
+                "NVDIMM %.8X running from slot %d with code level "
+                "0x%04X (lid level: 0x%04X)",
+                l_nvdimm_huid, l_slot_running, l_curVersion,
+                i_lidImage->getVersion());
+            /*@
+             *@errortype
+             *@reasoncode       NVDIMM_NOT_RUNNING_LATEST_LEVEL
+             *@severity         ERRORLOG_SEV_PREDICTIVE
+             *@moduleid         NVDIMM_RUN_UPDATE_USING_LID
+             *@userdata1        NVDIMM Target Huid
+             *@userdata2[0:15]  NVDIMM slot
+             *@userdata2[16:31] slot1 version
+             *@userdata2[32:47] latest version from lid
+             *@devdesc          Encountered error after update while checking
+             *                  if NVDIMM is running latest code level
+             *@custdesc         NVDIMM not running latest firmware level
+             */
+            l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                          NVDIMM_RUN_UPDATE_USING_LID,
+                                          NVDIMM_NOT_RUNNING_LATEST_LEVEL,
+                                          l_nvdimm_huid,
+                                          FOUR_UINT16_TO_UINT64(
+                                              l_slot_running,
+                                              l_curVersion,
+                                              i_lidImage->getVersion(),
+                                              0x0000),
+                                          ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+
+            l_err->collectTrace( NVDIMM_COMP_NAME );
+
+            // Add callout of nvdimm with no deconfig/gard
+            l_err->addHwCallout( l_nvdimm,
+                                 HWAS::SRCI_PRIORITY_LOW,
+                                 HWAS::NO_DECONFIG,
+                                 HWAS::GARD_NULL);
+
+            // Maybe vendor log will tell why it isn't running latest code level
+            nvdimmAddVendorLog(l_nvdimm, l_err);
+            commitPredictiveNvdimmError(l_err);
+            l_err = nullptr;
+            o_no_error_found = false;
+        }
+        else
+        {
+            TRACFCOMP(g_trac_nvdimm_upd,
+                "NvdimmsUpdate::runUpdateUsingLid() - "
+                "NVDIMM %.8X running from slot %d with latest level 0x%04X",
+                l_nvdimm_huid, l_slot_running, l_curVersion);
+        }
     }
     return o_no_error_found;
 }
@@ -2195,7 +2288,6 @@ bool NvdimmsUpdate::runUpdate(void)
 
             for(auto& lid : info.lidIds)
             {
-
                 TRACFCOMP(g_trac_nvdimm,"LID ID=0x%08X, size=%d, vAddr=%p",
                     lid.id, lid.size, lid.vAddr);
 
@@ -2306,7 +2398,7 @@ errlHndl_t NvdimmsUpdate::isUpdateNeeded(bool & o_update_needed,
     uint32_t curType = INVALID_TYPE;
 
     do {
-        const TARGETING::Target * l_dimm = i_cur_image->getNvdimmTarget();
+        TARGETING::Target * l_dimm = i_cur_image->getNvdimmTarget();
 
         // check Types match (same manufacturer and product)
         lidType = i_lid_image->getType();

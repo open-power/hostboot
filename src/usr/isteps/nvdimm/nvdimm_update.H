@@ -220,10 +220,17 @@ class NvdimmInstalledImage
                           const bool i_force_recollect = false);
 
     /**
+     * @brief Read the current slot that is running
+     * @param o_slot - 0 or 1
+     * @return error if read operation fails
+     */
+    errlHndl_t getRunningSlot(uint8_t & o_slot);
+
+    /**
      * @brief Accessor to grab the current NVDIMM target
      * @return NVDIMM target
      */
-    const TARGETING::Target * getNvdimmTarget(void)
+    TARGETING::Target * getNvdimmTarget(void)
     {
         return iv_dimm;
     }
