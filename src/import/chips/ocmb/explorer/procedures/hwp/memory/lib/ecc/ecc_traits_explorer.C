@@ -36,7 +36,7 @@
 #include <fapi2.H>
 #include <explorer_scom_addresses.H>
 #include <explorer_scom_addresses_fld.H>
-#include <chips/ocmb/explorer/procedures/hwp/memory/lib/ecc/ecc_traits_explorer.H>
+#include <lib/ecc/ecc_traits_explorer.H>
 
 
 namespace mss
