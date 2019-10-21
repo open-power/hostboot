@@ -87,6 +87,7 @@
 #include <p10_scom_proc.H>
 #include <p10_scom_eq.H>
 #include <multicast_group_defs.H>
+#include <math.h>
 
 // ------------------------------------------------------------------------------
 // Constant definitions
