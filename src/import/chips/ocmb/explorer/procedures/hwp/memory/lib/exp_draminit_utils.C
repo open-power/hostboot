@@ -44,6 +44,61 @@ namespace exp
 {
 
 ///
+/// @brief Check that the rsp_data size returned from the PHY_INIT command matches the expected size
+///
+/// @param[in] i_target OCMB target
+/// @param[in] i_actual_size size enum expected for the given phy init mode
+/// @param[in] i_mode phy init mode. Expected to be a valid enum value since we asserted as such in exp_draminit.C
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff matching, else MSS_EXP_INVALID_PHY_INIT_RSP_DATA_LENGTH
+///
+fapi2::ReturnCode check_rsp_data_size(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const uint16_t i_actual_size,
+    const phy_init_mode i_mode)
+{
+    uint16_t l_expected_size = 0;
+
+    switch (i_mode)
+    {
+        case phy_init_mode::NORMAL:
+            l_expected_size = sizeof(user_response_msdg_t);
+            break;
+
+        case phy_init_mode::EYE_CAPTURE_STEP_1:
+            l_expected_size = sizeof(user_2d_eye_response_1_msdg_t);
+            break;
+
+        case phy_init_mode::EYE_CAPTURE_STEP_2:
+            l_expected_size = sizeof(user_2d_eye_response_2_msdg_t);
+            break;
+
+        default:
+            // This really can't occur since we asserted phy_init_mode was valid in exp_draminit.C
+            // We have bigger problems if we get here, implying somehow this bad value was passed to explorer
+            FAPI_ASSERT(false,
+                        fapi2::MSS_EXP_UNKNOWN_PHY_INIT_MODE()
+                        .set_TARGET(i_target)
+                        .set_VALUE(i_mode),
+                        "%s Value for phy init mode for exp_draminit is unknown: %u expected 0 (NORMAL), 1 (EYE_CAPTURE_STEP_1), 2 (EYE_CAPTURE_STEP_2)",
+                        mss::c_str(i_target), i_mode);
+            break;
+    }
+
+    FAPI_ASSERT(l_expected_size == i_actual_size,
+                fapi2::MSS_EXP_INVALID_PHY_INIT_RSP_DATA_LENGTH()
+                .set_OCMB_TARGET(i_target)
+                .set_PHY_INIT_MODE(i_mode)
+                .set_EXPECTED_LENGTH(l_expected_size)
+                .set_ACTUAL_LENGTH(i_actual_size),
+                "%s PHY INIT response data buffer size 0x%x did not match expected size 0x%x for phy_init_mode %u",
+                mss::c_str(i_target), i_actual_size, l_expected_size, i_mode);
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Perform normal host FW phy init
 ///
 /// @param[in] i_target OCMB target
@@ -60,6 +115,8 @@ fapi2::ReturnCode host_fw_phy_normal_init(const fapi2::Target<fapi2::TARGET_TYPE
     // Issue full boot mode cmd though EXP-FW REQ buffer
     FAPI_TRY(send_host_phy_init_cmd(i_target, i_crc, phy_init_mode::NORMAL, l_cmd));
     FAPI_TRY(mss::exp::check_host_fw_response(i_target, l_cmd, l_rsp_data, l_rc));
+
+    FAPI_TRY(check_rsp_data_size(i_target, l_rsp_data.size(), phy_init_mode::NORMAL));
     FAPI_TRY(mss::exp::read_and_display_normal_training_repsonse(i_target, l_rsp_data, l_rc));
 
 fapi_try_exit:
@@ -97,7 +154,17 @@ fapi2::ReturnCode host_fw_phy_init_with_eye_capture(const fapi2::Target<fapi2::T
         // Return code output param is that of check::response
         // A fail of getRSP will go to fapi_try_exit
         FAPI_TRY(mss::exp::check_host_fw_response(i_target, l_cmd, l_rsp_data, l_check_response_1_rc));
-        l_read_display_response_1_rc = mss::exp::read_and_display_user_2d_eye_response(i_target, l_rsp_data, l_response_1);
+
+        l_read_display_response_1_rc = check_rsp_data_size(i_target,
+                                       l_rsp_data.size(),
+                                       phy_init_mode::EYE_CAPTURE_STEP_1);
+
+        // If the data is the right size, we can read and display it. Otherwise, skip the reading and try step 2
+        // Check the return codes at the end
+        if (l_read_display_response_1_rc == fapi2::FAPI2_RC_SUCCESS)
+        {
+            l_read_display_response_1_rc = mss::exp::read_and_display_user_2d_eye_response(i_target, l_rsp_data, l_response_1);
+        }
     }
     l_rsp_data.clear();
 
@@ -117,7 +184,16 @@ fapi2::ReturnCode host_fw_phy_init_with_eye_capture(const fapi2::Target<fapi2::T
         // A fail of getRSP will go to fapi_try_exit
         FAPI_TRY(mss::exp::check_host_fw_response(i_target, l_cmd, l_rsp_data, l_check_response_2_rc));
 
-        l_read_display_response_2_rc = mss::exp::read_and_display_user_2d_eye_response(i_target, l_rsp_data, l_response_2);
+        l_read_display_response_2_rc = check_rsp_data_size(i_target,
+                                       l_rsp_data.size(),
+                                       phy_init_mode::EYE_CAPTURE_STEP_2);
+
+        // If the data is the right size, we can read and display it. Otherwise, skip the reading.
+        // Next, we will check these return codes
+        if (l_read_display_response_2_rc == fapi2::FAPI2_RC_SUCCESS)
+        {
+            l_read_display_response_2_rc = mss::exp::read_and_display_user_2d_eye_response(i_target, l_rsp_data, l_response_2);
+        }
     }
 
     // Check the return codes
@@ -269,7 +345,7 @@ fapi2::ReturnCode read_and_display_normal_training_repsonse(
 
     // Proccesses the response data
     FAPI_TRY( mss::exp::read_normal_training_response(i_target, i_resp_data, l_train_response),
-              "Failed read_training_response for %s", mss::c_str(i_target));
+              "Failed read_normal_training_response for %s", mss::c_str(i_target));
 
     // Displays the training response
     FAPI_INF("%s displaying user response data version %u", mss::c_str(i_target), l_train_response.version_number)
@@ -302,7 +378,6 @@ fapi2::ReturnCode setup_cmd_params(
     const uint8_t i_phy_init_mode,
     host_fw_command_struct& o_cmd)
 {
-    static constexpr uint8_t EYE_CAPTURE_STEP_1 = 1;
     memset(&o_cmd, 0, sizeof(host_fw_command_struct));
     // Issue full boot mode cmd though EXP-FW REQ buffer
     // Explicit with all of these (including 0 values) to avoid ambiguity
@@ -313,8 +388,10 @@ fapi2::ReturnCode setup_cmd_params(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCMB_COUNTER, i_target, l_counter));
     o_cmd.request_identifier = l_counter;
 
-    // STEP_1 = 1, STEP_2 = 0 as defined in MCHP spec section 5.4.3 Eye Capture
-    o_cmd.cmd_flags = i_phy_init_mode == EYE_CAPTURE_STEP_1 ? 1 : 0;
+    // With cmd_length > 0, data exists in the extended data buffer. Must set cmd_flags to 1. However,
+    // eye capture step 2 needs cmd_flags to be set to zero as defined in MCHP spec section 5.4.3 Eye Capture
+    // despite having data in the extended data buffer
+    o_cmd.cmd_flags = ((i_cmd_length > 0) && (i_phy_init_mode != phy_init_mode::EYE_CAPTURE_STEP_2)) ? 1 : 0;
 
     o_cmd.cmd_length = i_cmd_length;
     o_cmd.cmd_crc = i_cmd_data_crc;

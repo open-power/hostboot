@@ -703,7 +703,7 @@
   <hwpError>
     <rc>RC_MSS_EXP_UNKNOWN_PHY_INIT_MODE</rc>
     <description>
-      The PHY init mode attribute value was unknown. Valid: 0 (NORMAL), 1 (WITH_EYE_CAPTURE)
+      The PHY init mode value was an unknown value.
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>VALUE</ffdc>
@@ -711,6 +711,28 @@
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
     </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_INVALID_PHY_INIT_RSP_DATA_LENGTH</rc>
+    <description>
+      The data buffer vector retrieved from the EXP_FW_DDR_PHY_INIT response did not match the expected length
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>PHY_INIT_MODE</ffdc>
+    <ffdc>EXPECTED_LENGTH</ffdc>
+    <ffdc>ACTUAL_LENGTH</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
   </hwpError>
 
 </hwpErrors>

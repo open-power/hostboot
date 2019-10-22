@@ -162,6 +162,19 @@ enum odt_fields
 };
 
 ///
+/// @brief Check that the rsp_data size returned from the PHY_INIT command matches the expected size
+///
+/// @param[in] i_target OCMB target
+/// @param[in] i_actual_size size enum expected for the given phy init mode
+/// @param[in] i_mode phy init mode. Expected to be a valid enum value since we asserted as such in exp_draminit.C
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff matching, else MSS_EXP_INVALID_PHY_INIT_RSP_DATA_LENGTH
+///
+fapi2::ReturnCode check_rsp_data_size(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const uint16_t i_actual_size,
+    const phy_init_mode i_mode);
+
+///
 /// @brief Perform normal host FW phy init
 ///
 /// @param[in] i_target OCMB target
