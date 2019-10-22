@@ -299,12 +299,6 @@ void kernel_execute_softpatch()
 
         switch (CpuID::getCpuType())
         {
-            case CORE_POWER8_MURANO:
-            case CORE_POWER8_VENICE:
-            case CORE_POWER8_NAPLES:
-            case CORE_POWER9_NIMBUS:
-            case CORE_POWER9_CUMULUS:
-            case CORE_POWER9_AXONE:
             case CORE_POWER10:
             case CORE_UNKNOWN:
                 p8_softpatch_denorm_assist(t->fp_context);
@@ -454,4 +448,3 @@ void kernel_execute_unhandled_exception()
     termWriteSRC(TI_UNHANDLED_EX, KERNEL::RC_UNHANDLED_EX, exception);
     terminateExecuteTI();
 }
-

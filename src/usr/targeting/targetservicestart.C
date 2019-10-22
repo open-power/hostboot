@@ -361,44 +361,6 @@ static void checkProcessorTargeting(TargetService& i_targetService)
     {
         switch(l_filter->getAttr<ATTR_MODEL>())
         {
-            case MODEL_VENICE:
-                if(l_coreType == CORE_POWER8_VENICE)
-                {
-                    l_haveOneCorrectProcessor = true;
-                }
-                break;
-
-            case MODEL_MURANO:
-                if(l_coreType == CORE_POWER8_MURANO)
-                {
-                    l_haveOneCorrectProcessor = true;
-                }
-                break;
-
-            case MODEL_NAPLES:
-                if(l_coreType == CORE_POWER8_NAPLES)
-                {
-                    l_haveOneCorrectProcessor = true;
-                }
-                break;
-            case MODEL_NIMBUS:
-                if(l_coreType == CORE_POWER9_NIMBUS)
-                {
-                    l_haveOneCorrectProcessor = true;
-                }
-                break;
-            case MODEL_CUMULUS:
-                if(l_coreType == CORE_POWER9_CUMULUS)
-                {
-                    l_haveOneCorrectProcessor = true;
-                }
-                break;
-            case MODEL_AXONE:
-                if(l_coreType == CORE_POWER9_AXONE)
-                {
-                    l_haveOneCorrectProcessor = true;
-                }
-                break;
             case MODEL_POWER10:
                 if(l_coreType == CORE_POWER10)
                 {

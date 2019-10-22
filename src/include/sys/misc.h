@@ -133,19 +133,6 @@ extern "C" void shutdown(uint64_t i_status,
  */
 enum ProcessorCoreType
 {
-    /** Power8 "Murano" (low-end) core */
-    CORE_POWER8_MURANO,
-    /** Power8 "Venice" (high-end) core */
-    CORE_POWER8_VENICE,
-    /** Power8 "Naples" core */
-    CORE_POWER8_NAPLES,
-    /** Power9 "NIMBUS" (scale-out) core */
-    CORE_POWER9_NIMBUS,
-    /** Power9 "CUMULUS" (scale-up) core */
-    CORE_POWER9_CUMULUS,
-    /** Power9' "AXONE" core */
-    CORE_POWER9_AXONE,
-
     CORE_POWER10,
 
     CORE_UNKNOWN,

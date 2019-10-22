@@ -570,37 +570,14 @@ static void hdatGetFeatureFlagInfo(
     // Default to Nimbus DD2.3
     uint8_t l_ddLvlIdx = HDAT_NIMBUS_DD_23_IDX;
 
-    // Set the value based on DD level and risk level
-    if (l_pvr.chipType == PVR_t::NIMBUS_CHIP)
-    {
-        if ( (l_ddLevel == HDAT_PROC_NIMBUS_DD_20) ||
-             (l_ddLevel == HDAT_PROC_NIMBUS_DD_21)
-           )
-        {
-            l_ddLvlIdx = HDAT_NIMBUS_DD_20_21_IDX;
-        }
-        else if (l_ddLevel == HDAT_PROC_NIMBUS_DD_22)
-        {
-            l_ddLvlIdx = HDAT_NIMBUS_DD_22_IDX;
-        }
-        else if (l_ddLevel == HDAT_PROC_NIMBUS_DD_23)
-        {
-            l_ddLvlIdx = HDAT_NIMBUS_DD_23_IDX;
-        }
-    }
-    else if (l_pvr.chipFamily == PVR_t::P9_AXONE)
-    {
-        // Axone follows the Nimbus DD2.3 settings
-        l_ddLvlIdx = HDAT_NIMBUS_DD_23_IDX;
-    }
-
     l_featFlagArr = hdatIplpFeatureFlagSettingsArray[l_riskLvl][l_ddLvlIdx];
     l_featFlagArrSize =
       sizeof(hdatIplpFeatureFlagSettingsArray[l_riskLvl][l_ddLvlIdx]);
 
-    HDAT_DBG("Feature flag array size:0x%x, Model:0x%x, DD Level:0x%x "
-        "Risk Level:0x%x", l_featFlagArrSize, l_pvr.chipType,
-         l_ddLevel, l_riskLvl);
+    HDAT_DBG("Feature flag array size:0x%x, DD Level:0x%x "
+             "Risk Level:0x%x",
+             l_featFlagArrSize,
+             l_ddLevel, l_riskLvl);
 
     o_featFlagArrSize = l_featFlagArrSize;
     o_featureFlagArrayHdr.hdatOffset    = sizeof(hdatHDIFVersionedDataArray_t);
@@ -609,7 +586,7 @@ static void hdatGetFeatureFlagInfo(
     o_featureFlagArrayHdr.hdatArrayCnt  =
         l_featFlagArrSize/sizeof(hdatIplpFeatureFlagSetting_t);
     o_featureFlagArrayHdr.hdatVersion   = HDAT_FEATURE_FLAG_VERSION::V1;
- 
+
     memcpy(o_featureFlagSettings , l_featFlagArr, l_featFlagArrSize);
 }
 
@@ -660,7 +637,7 @@ void HdatIplParms::hdatGetSystemParamters()
     // No Anchor Card in BMC systems
     this->iv_hdatIPLParams->iv_sysParms.hdatProcFeatCode = 0;
 
-    // Set the PVR        
+    // Set the PVR
     PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
     this->iv_hdatIPLParams->iv_sysParms.hdatEffectivePvr = l_pvr.word;
 
@@ -1194,7 +1171,7 @@ errlHndl_t HdatIplParms::hdatLoadIplParams(uint32_t &o_size, uint32_t &o_count)
     // Get the feature flag information
     memset(&this->iv_hdatIPLParams->iv_featureFlagArrayHdr, 0x00,
                                 sizeof(HDAT::hdatHDIFVersionedDataArray_t));
-    memset(&this->iv_hdatIPLParams->iv_featureFlagSettings, 0x00, 
+    memset(&this->iv_hdatIPLParams->iv_featureFlagSettings, 0x00,
                   sizeof(hdatIplpFeatureFlagSetting_t) * MAX_FEATURE_FLAGS);
     this->iv_hdatIPLParams->iv_featureFlagArrSize = 0x00;
     hdatGetFeatureFlagInfo(this->iv_hdatIPLParams->iv_featureFlagArrayHdr,

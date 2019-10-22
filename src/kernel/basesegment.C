@@ -72,12 +72,6 @@ void BaseSegment::_init()
     // Create initial block of memory according to the information from SBE.
     switch (CpuID::getCpuType())
     {
-        case CORE_POWER8_MURANO:
-        case CORE_POWER8_VENICE:
-        case CORE_POWER8_NAPLES:
-        case CORE_POWER9_NIMBUS:
-        case CORE_POWER9_CUMULUS:
-        case CORE_POWER9_AXONE:
         case CORE_POWER10:
         default:
             iv_physMemSize = l_hbCacheSizeBytes;

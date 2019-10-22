@@ -37,39 +37,6 @@ namespace CpuID
 
         switch(l_pvr.chipFamily)
         {
-            case PVR_t::P8_MURANO:
-                return CORE_POWER8_MURANO;
-
-            case PVR_t::P8_NAPLES:
-                return CORE_POWER8_NAPLES;
-
-            case PVR_t::P8_VENICE:
-                return CORE_POWER8_VENICE;
-
-            case PVR_t::P9_ALL:
-            {
-                // Nimbus DD1.0 has a different PVR format
-                if( l_pvr.isNimbusDD1() )
-                {
-                    return CORE_POWER9_NIMBUS;
-                }
-
-                switch(l_pvr.chipType)
-                {
-                    case PVR_t::NIMBUS_CHIP:
-                        return CORE_POWER9_NIMBUS;
-
-                    case PVR_t::CUMULUS_CHIP:
-                        return CORE_POWER9_CUMULUS;
-
-                    default:
-                        return CORE_UNKNOWN;
-                }
-            }
-
-            case PVR_t::P9_AXONE:
-               return CORE_POWER9_AXONE;
-
             case PVR_t::P10:
                return CORE_POWER10;
 
@@ -84,5 +51,3 @@ namespace CpuID
         return l_pvr.getDDLevel();
     }
 };
-
-

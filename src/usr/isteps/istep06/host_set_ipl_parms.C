@@ -88,7 +88,8 @@ void* host_set_ipl_parms( void *io_pArgs )
         Util::writeSemiPersistData(l_semiData);
     }
 
-
+    /* @TODO RTC 245390: Update for P10 DD 1.0 */
+#if 0
     // Add a check to indicate that Nimbus DD1.0 is NOT supported
     // and prevent a boot
     PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
@@ -127,7 +128,7 @@ void* host_set_ipl_parms( void *io_pArgs )
         l_stepError.addErrorDetails( l_err );
         errlCommit( l_err, ISTEP_COMP_ID );
     }
-
+#endif
 
 #if (defined(CONFIG_PNORDD_IS_BMCMBOX) || defined(CONFIG_PNORDD_IS_IPMI))
     // Add a check to indicate the BMC does not support HIOMAP pnor-ipmi access

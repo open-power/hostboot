@@ -25,139 +25,91 @@
 #ifndef _PVRFORMAT_H
 #define _PVRFORMAT_H
 
+#include <stdint.h>
+
 /**
- * @brief Format of Processor Version Register (PVR) for P9
+ * @brief Format of Processor Version Register (PVR) for P10
  */
 struct PVR_t
 {
+    /**
+     * @brief  Constants for the PVR_t::smt field
+     */
+    enum SMT_SCALING_t
+    {
+        SMT8_MODE = 0,
+        SMT4_MODE = 1
+    };
+
+    /**
+     * @brief Constant values representing chip families
+     */
+    enum chipFamily_t : uint16_t
+    {
+        P10 = 0x80
+    };
+
     union
     {
-        // Layout of the PVR is (32-bit):
+        // Layout of the PVR is 32-bits:
         uint32_t word;
 
-        //Nimbus DD1.0
-        //     2 nibbles reserved.
-        //     2 nibbles chip family.
-        //       = x'4E' - P9
-        //     1 nibble technology.
-        //     1 nibble major DD.
-        //     1 nibble reserved.
-        //     1 nibble minor DD.
         struct
         {
-            uint32_t dd1_reserved0:8;    // 00:07 = unused
-            uint32_t dd1_chipFamily:8;   // 08:15 = chip type
-            uint32_t dd1_tech:4;         // 16:19 = technology
-            uint32_t dd1_majorDD:4;      // 20:23 = Major DD
-            uint32_t dd1_reserved1:4;    // 24:27 = unused
-            uint32_t dd1_minorDD:4;      // 28:31 = Minor DD
-        } PACKED;
-
-
-        //Nimbus DD2+, Cumulus
-        //     2 nibbles reserved.
-        //     2 nibbles chip family.
-        //       = x'4E' - P9
-        //     2 bits Simics indicator.
-        //     1 bit chip type.
-        //       = x'0' - Nimbus
-        //       = x'1' - Cumulus
-        //     1 bit SMT mode.
-        //       = x'0' - 12 core  (SMT8)
-        //       = x'1' - 24 core  (SMT4)
-        //     1 nibble major DD.
-        //     1 nibble reserved.
-        //     1 nibble minor DD.
-        struct
-        {
-            uint32_t reserved0:8;    // 00:07 = unused
-            uint32_t chipFamily:8;   // 08:15 = chip family
-            uint32_t simics:2;       // 16:17 = Simics flag
-            uint32_t chipType:1;     // 18 = chip type
-            uint32_t smt:1;          // 19 = SMT mode
-            uint32_t majorDD:4;      // 20:23 = Major DD
-            uint32_t reserved1:4;    // 24:27 = unused
-            uint32_t minorDD:4;      // 28:31 = Minor DD
+            chipFamily_t chipFamily: 16;/* Processor version number. POWER10
+                                           version is 0x0080. */
+            uint32_t reserved1 : 3; // Zero.
+            SMT_SCALING_t smt  : 1; /* POWER10 chip scaling factor (0 ->
+                                       8-threaded cores, 1 -> 4-threaded
+                                       cores). */
+            uint32_t majorDD   : 4; /* Major revision level. The major processor
+                                       revision level starts at 1, indicating
+                                       major revision 1. Subsequent revisions
+                                       will be 2, 3, and so on. */
+            uint32_t reserved2 : 4; // Zero.
+            uint32_t minorDD   : 4; /* Minor revision level. Each major revision
+                                       will reset the minor revision field to 0
+                                       and each minor revision will increment
+                                       this field by 1. */
         } PACKED;
     };
 
-    // Populate with a 32-bit data word
-    PVR_t(uint32_t i_word = 0) : word(i_word) {}
-
-    // Populate with a 64-bit data word
-    PVR_t(uint64_t i_word = 0)
-      : word(static_cast<uint32_t>(i_word & 0xFFFFFFFF)) {}
-
-    PVR_t operator= (uint32_t i_word)
-    {
-        word = i_word;
-        return word;
-    }
-
-    PVR_t operator= (uint64_t i_word)
-    {
-        word = static_cast<uint32_t>(i_word & 0xFFFFFFFF);
-        return word;
-    }
+    /**
+     * @brief Constructor for PVR_t
+     *
+     * @param[in] i_word PVR register value.
+     */
+    PVR_t(const uint32_t i_word = 0)
+      : word(i_word) {}
 
     /**
-     * @brief Return Major.Minor DD level
-     * @return 8-bit DD level
+     * @brief Constant values representing DD levels (4 bits for major version,
+     *        4 bits for minor).
      */
-    inline uint8_t getDDLevel() {
-        return (majorDD << 4) | minorDD;
-    }
-
-    /**
-     * @brief  A bunch of constants
-     */
-    enum
+    enum DD_t : uint8_t
     {
-        NIMBUS_DD1_MASK  = 0x00FF2F0F,
-        IS_NIMBUS_DD1    = 0x004E0100,
-        IS_NIMBUS_DD20   = 0x004E0200,
-        IS_NIMBUS_DD21   = 0x004E0201,
-
-        // Field: chipType
-        NIMBUS_CHIP  = 0,
-        CUMULUS_CHIP = 1,
-
-        // Field: smt
-        SMT8_MODE = 0,
-        SMT4_MODE = 1,
-
-        // Field: chipFamily
-        P8_MURANO = 0x4B,
-        P8_NAPLES = 0x4C,
-        P8_VENICE = 0x4D,
-        P9_ALL    = 0x4E, //NIMBUS/CUMULUS
-        P9_AXONE  = 0x4F,
-
-        P10       = 0x80,
+        DD1 = 0x10
     };
 
     /**
-     * @brief Return Major.Minor DD level
-     * @return 8-bit DD level
+     * @brief Get PVR DD level
+     *
+     * @return 8-bit DD level (4 bits major version, 4 bits minor)
      */
-    inline bool isNimbusDD1() {
-        return ((word & NIMBUS_DD1_MASK) == IS_NIMBUS_DD1);
+    DD_t getDDLevel() const
+    {
+        return static_cast<DD_t>((majorDD << 4) | minorDD);
     }
 
     /**
-     * @brief Check if DD2.0
-     * @return true if DD2.0, else false
+     * @brief Check whether the current DD level is DD1.0
+     *
+     * @return True if and only if the current DD level is DD1.0
      */
-    inline bool isNimbusDD20() {
-        return ((word & NIMBUS_DD1_MASK) == IS_NIMBUS_DD20);
-    }
-
-    /**
-     * @brief Check if DD2.1
-     * @return true if DD2.1, else false
-     */
-    inline bool isNimbusDD21() {
-        return ((word & NIMBUS_DD1_MASK) == IS_NIMBUS_DD21);
+    bool isP10DD1() const
+    {
+        return (chipFamily == P10)
+            && (getDDLevel() == DD1);
     }
 };
 

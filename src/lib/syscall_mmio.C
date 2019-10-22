@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,14 +69,8 @@ static uint64_t mmio_scratch_base()
     ProcessorCoreType cpuType = CpuID::getCpuType();
     switch (cpuType)
     {
-        case CORE_POWER8_MURANO:
-        case CORE_POWER8_VENICE:
-        case CORE_POWER8_NAPLES:
-            return 0x40;
-        case CORE_POWER9_NIMBUS:
-        case CORE_POWER9_CUMULUS:
-        case CORE_POWER9_AXONE:
         case CORE_UNKNOWN:
+        case CORE_POWER10:
         default:
             // See misc.C - updateScratchReg() for more info on this
             return 0x00;

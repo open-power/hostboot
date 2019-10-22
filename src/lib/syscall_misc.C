@@ -64,14 +64,6 @@ size_t cpu_thread_count()
     ProcessorCoreType core_type = cpu_core_type();
     switch(core_type)
     {
-        case CORE_POWER8_MURANO:
-        case CORE_POWER8_VENICE:
-        case CORE_POWER8_NAPLES:
-            threads = 8;
-            break;
-        case CORE_POWER9_NIMBUS:
-        case CORE_POWER9_CUMULUS:
-        case CORE_POWER9_AXONE:
         case CORE_POWER10:
             threads = 4;
             break;

@@ -515,14 +515,6 @@ namespace KernelMisc
 
         switch(CpuID::getCpuType())
         {
-          case CORE_POWER8_MURANO:
-          case CORE_POWER8_VENICE:
-          case CORE_POWER8_NAPLES:
-              l_scratch_addr = l_scratch_addr + 0x40;
-              break;
-          case CORE_POWER9_NIMBUS:
-          case CORE_POWER9_CUMULUS:
-          case CORE_POWER9_AXONE:
           case CORE_POWER10:
           case CORE_UNKNOWN:
           default:
@@ -617,14 +609,6 @@ namespace KernelMemState
 
 const char* ProcessorCoreTypeStrings[]
 {
-    "Murano",
-    "Venice",
-    "Naples",
-    "Nimbus",
-    "Cumulus",
-    "Axone",
     "POWER10",
     "Unknown"
 };
-
-

@@ -226,28 +226,6 @@ void CpuManager::startCPU(ssize_t i)
 
         cpu->xscom_mutex = NULL;
 
-        // xscom workaround for HW822317 : Power8 Errata.
-        //     Need to make the xscom mutex a per-core mutex to prevent
-        //     multi-threaded access to the HMER.
-        if ((CpuID::getCpuType() == CORE_POWER8_MURANO) ||
-            (CpuID::getCpuType() == CORE_POWER8_VENICE) ||
-            (CpuID::getCpuType() == CORE_POWER8_NAPLES))
-        {
-            const size_t num_threads = getThreadCount();
-            size_t cpu_idx = (cpuId / num_threads) * num_threads;
-
-            for(size_t i = 0; i < getThreadCount(); ++i)
-            {
-                if ((NULL != cv_cpus[nodeId][cpu_idx + i]) &&
-                    (NULL != cv_cpus[nodeId][cpu_idx + i]->xscom_mutex))
-                {
-                    cpu->xscom_mutex =
-                        cv_cpus[nodeId][cpu_idx + i]->xscom_mutex;
-                    break;
-                }
-            }
-        }
-
         if (NULL == cpu->xscom_mutex)
         {
             cpu->xscom_mutex = new mutex_t;
@@ -501,15 +479,6 @@ size_t CpuManager::getThreadCount()
     size_t threads = 0;
     switch (CpuID::getCpuType())
     {
-        case CORE_POWER8_VENICE:
-        case CORE_POWER8_MURANO:
-        case CORE_POWER8_NAPLES:
-            threads = 8;
-            break;
-
-        case CORE_POWER9_NIMBUS:
-        case CORE_POWER9_CUMULUS:
-        case CORE_POWER9_AXONE:
         case CORE_POWER10:
             threads = 4;
             break;
