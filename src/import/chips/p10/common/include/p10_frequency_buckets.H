@@ -28,13 +28,12 @@
 
 // constant defining number of MEM PLL frequency options ('buckets')
 // to be built into unsigned HW image
-const uint8_t MEM_PLL_FREQ_BUCKETS = 5;
+const uint8_t MEM_PLL_FREQ_BUCKETS = 4;
 
 // MEM PLL frequency in MHz
 // index is bucket number
 const uint32_t MEM_PLL_FREQ_LIST[MEM_PLL_FREQ_BUCKETS] =
 {
-    1200,
     1333,
     1466,
     1600,
@@ -57,6 +56,29 @@ const uint32_t IOHS_PLL_FREQ_LIST[IOHS_PLL_FREQ_BUCKETS] =
     2067,
     2070,
     0
+};
+
+// OMI bucket descriptor
+struct OmiBucketDescriptor_t
+{
+    uint32_t omifreq; // OMI Frequency in MHz
+    uint32_t vco;     // VCO selector
+
+    uint32_t mcafreq; // MCA Frequency in MHz
+};
+
+//MC PLL frequency in MHz for Axone
+// index is bucket number
+// OMI -> ATTR_FREQ_OMI_MHZ
+// VCO -> ATTR_OMI_PLL_VCO
+// MCA -> ATTR_FREQ_MCA_MHZ
+const OmiBucketDescriptor_t OMI_PLL_FREQ_LIST[MEM_PLL_FREQ_BUCKETS] =
+{
+    //  OMI    VCO   MCA          Data rate
+    { 21330,   0,    1333 }, // ->DDR4-2667
+    { 23460,   0,    1466 }, // ->DDR4-2933
+    { 23460,   1,    1466 }, // ->DDR4-2933
+    { 25600,   1,    1600 }  // ->DDR4-3200
 };
 
 #endif // _P10_FREQUENCY_BUCKETS_H_
