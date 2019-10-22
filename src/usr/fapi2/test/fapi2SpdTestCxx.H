@@ -53,175 +53,127 @@ class SPDTest: public CxxTest::TestSuite
 {
     public:
 
-        /**
-         * @brief Test SPD get Interface DIMMs.
-         */
-        void testGetSPD ( void )
-        {
-            fapi2::ReturnCode l_rc;
-            size_t l_size = 0;
-            uint8_t * l_blobData = NULL;
+      /**
+       * @brief Test SPD get Interface DIMMs.
+       */
+      void testGetSPD ( void )
+      {
+          fapi2::ReturnCode l_rc;
+          size_t l_spdSize = 0;
+          uint8_t * l_blobData = NULL;
 
-            FAPI_INF( "testGetSPD - Enter" );
+          FAPI_INF( "testGetSPD - Enter" );
 
-            do
-            {
-                TARGETING::Target * i_pTarget = NULL;
+          // Get DIMM Targets
+          TargetHandleList dimmList;
+          getDIMMTargets( dimmList );
 
-                // Get DIMM Targets
-                TargetHandleList dimmList;
-                getDIMMTargets( dimmList );
+          // Should get atleast one
+          if( ( 0 == dimmList.size() ) ||
+              ( NULL == dimmList[0] ) )
+          {
+              TS_FAIL( "testGetSPD- No DIMMs found!");
+          }
 
-                // Should get atleast one
-                if( ( 0 == dimmList.size() ) ||
-                    ( NULL == dimmList[0] ) )
-                {
-                    FAPI_INF( "testGetSPD- No DIMMs found!");
-                    break;
-                }
+          for( auto l_tDimm : dimmList )
+          {
 
-                // Work on the first DIMM target
-                i_pTarget = dimmList[0];
+              // convert to fapi2 target
+              fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_fDimm(l_tDimm);
 
-                // convert to fapi2 target
-                fapi2::Target<fapi2::TARGET_TYPE_DIMM> fapi2_Target(i_pTarget);
+              // SPD interface call with NULL blob to get size data
+              l_rc = fapi2::getSPD(l_fDimm, NULL, l_spdSize);
 
-                // SPD interface call with NULL blob to get size data
-                l_rc = fapi2::getSPD(fapi2_Target, NULL, l_size);
+              // Expect to return the size or non failure
+              if( !l_spdSize || (l_rc != fapi2::FAPI2_RC_SUCCESS) )
+              {
+                  TS_FAIL("testGetSPD: Failed getting the size of the mem buffer - Dimm %.8X", TARGETING::get_huid(l_tDimm));
+                  continue;
+              }
 
-                // Expect to return the size or non failure
-                if( !l_size || (l_rc != fapi2::FAPI2_RC_SUCCESS) )
-                {
-                    TS_FAIL("testGetSPD: Failed getting the size of the mem buffer");
-                    break;
-                }
+              //  allocate the blob data of mem size length to hold data
+              l_blobData = reinterpret_cast<uint8_t *>(malloc(l_spdSize));
+              memset(l_blobData,0,l_spdSize);
 
-                //  allocate the blob data of mem size length to hold data
-                l_blobData = reinterpret_cast<uint8_t *>(malloc(l_size));
-                memset(l_blobData,0,l_size);
+              l_rc = fapi2::getSPD(l_fDimm,l_blobData, l_spdSize);
+              if ( l_rc != fapi2::FAPI2_RC_SUCCESS )
+              {
+                  TS_FAIL( "testGetSPD- Failed to read data from DIMM with HUID= 0x%x",
+                           TARGETING::get_huid(l_tDimm));
+                  continue;
+              }
 
-                l_rc = fapi2::getSPD(fapi2_Target,l_blobData, l_size);
-                if ( l_rc != fapi2::FAPI2_RC_SUCCESS )
-                {
-                    TS_FAIL( "testGetSPD- Failed to read data from DIMM with HUID= 0x%x",
-                              TARGETING::get_huid(i_pTarget));
-                    break;
-                }
+              uint8_t l_memModule = 0x0;
+              size_t l_memSize = sizeof(uint8_t);
 
-                uint8_t l_memModule = 0x0;
-                size_t l_memSize = sizeof(uint8_t);
+              auto l_errl = deviceRead(l_tDimm,
+                                       (void *)&l_memModule,
+                                       l_memSize,
+                                       DEVICE_SPD_ADDRESS(SPD::MODULE_TYPE));
 
-                auto l_errl = deviceRead(i_pTarget,
-                                         (void *)&l_memModule,
-                                         l_memSize,
-                                         DEVICE_SPD_ADDRESS(SPD::MODULE_TYPE));
+              if ( l_errl )
+              {
+                  TS_FAIL( "testGetSPD- Failed to deviceRead with HUID= 0x%x",
+                           TARGETING::get_huid(l_tDimm));
+                  continue;
+              }
 
-                if ( l_errl )
-                {
-                    TS_FAIL( "testGetSPD- Failed to deviceRead with HUID= 0x%x",
-                              TARGETING::get_huid(i_pTarget));
-                    break;
-                }
+              uint8_t l_memGen = 0x0;
+              l_errl = deviceRead(l_tDimm,
+                                  (void *)&l_memGen,
+                                  l_memSize,
+                                  DEVICE_SPD_ADDRESS(SPD::BASIC_MEMORY_TYPE));
 
-                uint8_t l_memGen = 0x0;
-                l_errl = deviceRead(i_pTarget,
-                                         (void *)&l_memGen,
-                                         l_memSize,
-                                         DEVICE_SPD_ADDRESS(SPD::BASIC_MEMORY_TYPE));
+              if ( l_errl )
+              {
+                  TS_FAIL( "testGetSPD- Failed to deviceRead with HUID= 0x%x",
+                           TARGETING::get_huid(l_tDimm));
+                  continue;
+              }
 
-                if ( l_errl )
-                {
-                    TS_FAIL( "testGetSPD- Failed to deviceRead with HUID= 0x%x",
-                              TARGETING::get_huid(i_pTarget));
-                    break;
-                }
+              // figure out the expected size based on the memory type
+              size_t l_compareSize = 0;
+              if( (l_memModule == SPD::MEM_DDIMM) && (l_memGen == SPD::MEM_DDR4) )
+              {
+                  l_compareSize = SPD::OCMB_SPD_EFD_COMBINED_SIZE;
+              }
+              else if( (l_memModule != SPD::MEM_DDIMM) && (l_memGen == SPD::MEM_DDR4) )
+              {
+                  l_compareSize = SPD::DDR4_SPD_SIZE;
+              }
+              else if( l_memGen == SPD::MEM_DDR3 )
+              {
+                  l_compareSize = SPD::DDR3_SPD_SIZE;
+              }
+              else
+              {
+                  TS_FAIL( "testGetSPD - Unknown memory type for %.8X : module=0x%X, gen=0x%X",
+                           TARGETING::get_huid(l_tDimm), l_memModule, l_memGen );
+                  continue;
+              }
 
-                auto l_chipModel = i_pTarget->getAttr<TARGETING::ATTR_MODEL>();
+              if( l_compareSize != l_spdSize )
+              {
+                  TS_FAIL( "testGetSPD - Wrong SPD size for %.8X : module=0x%X, gen=0x%X, exp=%d, act=%d",
+                           TARGETING::get_huid(l_tDimm), l_memModule, l_memGen,
+                           l_compareSize, l_spdSize);
+                  continue;
+              }
 
-                if( l_chipModel == TARGETING::MODEL_AXONE )
-                {
-                    // Assumes Axone is strictly DDR4, so not taking into
-                    // account DDR3 or any other DRAM generation
-                    if( l_memModule == SPD::MEM_DDIMM )
-                    {
-                        if ( l_size != SPD::DDIMM_DDR4_SPD_SIZE )
-                        {
-                            TS_FAIL( "testGetSPD- expected size %d != actual size %d with HUID= 0x%x",
-                                     SPD::DDIMM_DDR4_SPD_SIZE,
-                                     l_size,
-                                     TARGETING::get_huid(i_pTarget));
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        if ( l_size != SPD::DDR4_SPD_SIZE )
-                        {
-                            TS_FAIL( "testGetSPD- expected size %d != actual size %d with HUID= 0x%x",
-                                     SPD::DDR4_SPD_SIZE,
-                                     l_size,
-                                     TARGETING::get_huid(i_pTarget));
-                            break;
-                        }
-                    }
-                }
-                else if ( l_chipModel == TARGETING::MODEL_NIMBUS )
-                {
-                    // Nimbus only suppported DDR4 and SPD size was
-                    // DIMM BASE_MODULE_TYPE agnostic.
-                    if ( l_size != SPD::DDR4_SPD_SIZE )
-                    {
-                            TS_FAIL( "testGetSPD- expected size %d != actual size %d with HUID= 0x%x",
-                                     SPD::DDR4_SPD_SIZE,
-                                     l_size,
-                                     TARGETING::get_huid(i_pTarget));
-                            break;
-                    }
-                }
-                else if( l_chipModel == TARGETING::MODEL_CUMULUS )
-                {
-                    // BASE_MODULE_TYPE (RDIMM, LRDIMM, etc) isn't being
-                    // taken into account because the SPD size isn't dependent
-                    // on it for Cumulus.
-                    if( l_memGen == SPD::MEM_DDR4 )
-                    {
-                        if ( l_size != SPD::DDR4_SPD_SIZE )
-                        {
-                                TS_FAIL( "testGetSPD- expected size %d != actual size %d with HUID= 0x%x",
-                                         SPD::DDR4_SPD_SIZE,
-                                         l_size,
-                                         TARGETING::get_huid(i_pTarget));
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        if ( l_size != SPD::DDR3_SPD_SIZE )
-                        {
-                                TS_FAIL( "testGetSPD- expected size %d != actual size %d with HUID= 0x%x",
-                                         SPD::DDR3_SPD_SIZE,
-                                         l_size,
-                                         TARGETING::get_huid(i_pTarget));
-                                break;
-                        }
-                    }
-                }
+              FAPI_DBG("getSPD: SPD data for DIMM with HUID=0x%.8X Size %d Blob %d",
+                       TARGETING::get_huid(l_tDimm),
+                       l_spdSize,
+                       l_blobData);
+          }
 
-                FAPI_DBG("getSPD: SPD data for DIMM with HUID=0x%.8X Size %d Blob %d",
-                          TARGETING::get_huid(i_pTarget),
-                          l_size,
-                          l_blobData);
+          if( NULL != l_blobData )
+          {
+              free( l_blobData );
+              l_blobData = NULL;
+          }
 
-            } while(0);
-
-            if( NULL != l_blobData )
-            {
-                free( l_blobData );
-                l_blobData = NULL;
-            }
-
-            FAPI_INF( "testGetSPD - Exit" );
-        }
+          FAPI_INF( "testGetSPD - Exit" );
+      }
 
 };
 

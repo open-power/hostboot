@@ -111,7 +111,8 @@ fapi2DdimmGetEfdTest::fapi2DdimmGetEfdTest()
 {
     FAPI_INF(">> fapi2DdimmGetEfdTest");
 
-    if(TARGETING::MODEL_AXONE != TARGETING::targetService().getProcessorModel())
+    iv_attrModel = TARGETING::targetService().getProcessorModel();
+    if(TARGETING::MODEL_AXONE != iv_attrModel)
     {
         FAPI_INF("<< fapi2DdimmGetEfdTest: This is not AXONE. "
                  "Skipping AXONE tests.");
