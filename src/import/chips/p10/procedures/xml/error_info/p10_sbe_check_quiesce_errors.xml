@@ -32,13 +32,101 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
+    <rc>RC_P10_NX_PBI_WRITE_IDLE_TIMEOUT</rc>
+    <description>
+      Procedure: p10_sbe_check_quiesce
+      The PBI Write Idle never happened 
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>NX_PB_ERR_RPT_0</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_NX_CRB_KILL_DONE_TIMEOUT</rc>
+    <description>
+      Procedure: p10_sbe_check_quiesce
+      CRB kills were not complete 
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>NX_DMA_SU_CRB_KILL_REQ</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_NX_STOP_UMAC_FETCHING_NEW_CRBS_TIMEOUT</rc>
+    <description>
+      Procedure: p10_sbe_check_quiesce
+      UMAC was not stopped from fetching new CRBs
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>NX_PBI_UMAC_STATUS_CONTROL</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_NX_UMAC_DISPATCH_SLOTS_TO_DRAIN_CRBS_TIMEOUT</rc>
+    <description>
+      Procedure: p10_sbe_check_quiesce
+      UMAC was not done dispatching slots to drain of CRBs
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>NX_PBI_UMAC_STATUS_CONTROL</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_WAIT_FOR_DMA_CHANNELS_TO_DRAIN_TIMEOUT</rc>
+    <description>
+      Procedure: p10_sbe_check_quiesce
+      DMA channels were not drained 
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>NX_DMA_SU_STATUS</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_WAIT_FOR_ERAT_IDLE</rc>
+    <description>
+      Procedure: p10_sbe_check_quiesce
+      ERAT was not idle 
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>NX_PBI_SHIM_ERAT_STATUS_CONTROL</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_PBI_MASTER_MACHINES_IDLE_TIMEOUT</rc>
+    <description>
+      Procedure: p10_sbe_check_quiesce
+      PBI Master machines are not idle
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>NX_DMA_SU_STATUS</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_UMAC_QUIESCE_FAILED</rc>
+    <description>
+      Procedure: p10_sbe_check_quiesce
+      UMAC status control quiesce failed 
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>NX_PBI_UMAC_STATUS_CONTROL</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
     <rc>RC_P10_PSIHBCR_INBOUND_QUEUE_NOT_EMPTY</rc>
     <description>
       Procedure: p10_sbe_check_quiesce
       PSIHBCR inbound queue not empty 
     </description>
     <ffdc>TARGET</ffdc>
-    <ffdc>DATA</ffdc>
+    <ffdc>TPBR_PSIHB_STATUS_CTL_REG</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
