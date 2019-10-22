@@ -147,6 +147,11 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       TARGETING::TYPE_PAUC,
                       startScomProcess);
 
+DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
+                      DeviceFW::SCOM,
+                      TARGETING::TYPE_MEM_PORT,
+                      startScomProcess);
+
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 errlHndl_t startScomProcess(DeviceFW::OperationType i_opType,
@@ -257,11 +262,15 @@ errlHndl_t scomTranslate(TARGETING::Target * &i_target,
     // Get the type attribute.
     TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
 
-    l_err = p10_translation(i_target,
-                            l_type,
-                            io_addr,
-                            o_needsWakeup,
-                            i_opMode);
+    // No translation is required for MEM_PORT targets
+    if( TARGETING::TYPE_MEM_PORT != l_type )
+    {
+        l_err = p10_translation(i_target,
+                                l_type,
+                                io_addr,
+                                o_needsWakeup,
+                                i_opMode);
+    }
 
     return l_err;
 }
