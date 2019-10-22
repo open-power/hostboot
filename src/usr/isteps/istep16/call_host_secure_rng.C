@@ -37,96 +37,98 @@
 // Includes
 /******************************************************************************/
 
-#include    <stdint.h>
+#include <stdint.h>
 
-#include    <trace/interface.H>
-#include    <initservice/taskargs.H>
-#include    <errl/errlentry.H>
+#include <trace/interface.H>
+#include <initservice/taskargs.H>
+#include <errl/errlentry.H>
 
-#include    <isteps/hwpisteperror.H>
-#include    <errl/errludtarget.H>
-#include    <errl/errlreasoncodes.H>
+#include <isteps/hwpisteperror.H>
+#include <errl/errludtarget.H>
+#include <errl/errlreasoncodes.H>
 
-#include    <initservice/isteps_trace.H>
-#include    <initservice/initserviceif.H>
+#include <initservice/isteps_trace.H>
+#include <initservice/initserviceif.H>
 
 //  targeting support
-#include    <targeting/common/commontargeting.H>
-#include    <targeting/common/utilFilter.H>
+#include <targeting/common/commontargeting.H>
+#include <targeting/common/utilFilter.H>
 
 //  MVPD
 #include <devicefw/userif.H>
 #include <vpd/mvpdenums.H>
 
 #include <config.h>
-/* FIXME RTC: 210975
 #include <fapi2/plat_hwp_invoker.H>
-#include <p9_rng_init_phase2.H>
-*/
+#include <p10_rng_init_phase2.H>
 
-namespace   ISTEP_16
+using namespace ISTEP;
+using namespace ISTEP_ERROR;
+using namespace ERRORLOG;
+using namespace TARGETING;
+
+namespace ISTEP_16
 {
-
-using   namespace   ISTEP;
-using   namespace   ISTEP_ERROR;
-using   namespace   ERRORLOG;
-using   namespace   TARGETING;
 
 //******************************************************************************
 // wrapper function to call host_secure_rng
 //******************************************************************************
-void* call_host_secure_rng( void *io_pArgs )
+void* call_host_secure_rng(void* const io_pArgs)
 {
 
     IStepError l_StepError;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_secure_rng entry" );
-/* FIXME RTC: 210975
-    errlHndl_t l_err = NULL;
-    //
+
+    errlHndl_t l_err = nullptr;
+
     //  get a list of all the procs in the system
-    //
     TARGETING::TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC);
 
     // Loop through all processors including master
-    for (const auto & l_cpu_target: l_cpuTargetList)
+    for (const auto& l_cpu_target : l_cpuTargetList)
     {
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapi2_proc_target(
-                l_cpu_target);
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+            l_fapi2_proc_target(l_cpu_target);
 
         // Check for functional NX
         TARGETING::TargetHandleList l_nxTargetList;
         getChildChiplets(l_nxTargetList, l_cpu_target, TYPE_NX, true);
+        
         if (l_nxTargetList.empty())
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-              "Running host_secure_rng; no functional NX found for proc %.8X",
-              TARGETING::get_huid(l_cpu_target));
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "Running host_secure_rng; no functional NX "
+                      "found for proc %.8X",
+                      TARGETING::get_huid(l_cpu_target));
             continue;
         }
 
-        FAPI_INVOKE_HWP(l_err, p9_rng_init_phase2, l_fapi2_proc_target);
-        if(l_err)
+        FAPI_INVOKE_HWP(l_err, p10_rng_init_phase2, l_fapi2_proc_target);
+        
+        if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR: call p9_rng_init_phase2, PLID=0x%x, rc=0x%.4X",
-                l_err->plid(), l_err->reasonCode());
+                      "ERROR: call p10_rng_init_phase2, PLID=0x%x, rc=0x%.4X: "
+                      TRACE_ERR_FMT,
+                      l_err->plid(), l_err->reasonCode(),
+                      TRACE_ERR_ARGS(l_err));
 
-            for (const auto l_callout : l_err->getUDSections(
-                    HWPF_COMP_ID,
-                    ERRORLOG::ERRL_UDT_CALLOUT))
+            for (const auto l_callout
+                     : l_err->getUDSections(HWPF_COMP_ID,
+                                            ERRORLOG::ERRL_UDT_CALLOUT))
             {
-                if(reinterpret_cast<HWAS::callout_ud_t*>
-                    (l_callout)->type == HWAS::HW_CALLOUT)
+                if (reinterpret_cast<HWAS::callout_ud_t*>(l_callout)->type
+                    == HWAS::HW_CALLOUT)
                 {
-                    for (const auto & l_nxTarget: l_nxTargetList)
+                    for (const auto& l_nxTarget : l_nxTargetList)
                     {
-                        l_err->addHwCallout( l_nxTarget,
-                            HWAS::SRCI_PRIORITY_HIGH,
-                            HWAS::DECONFIG,
-                            HWAS::GARD_NULL );
+                        l_err->addHwCallout(l_nxTarget,
+                                            HWAS::SRCI_PRIORITY_HIGH,
+                                            HWAS::DECONFIG,
+                                            HWAS::GARD_NULL);
                     }
                  }
             }
@@ -135,12 +137,11 @@ void* call_host_secure_rng( void *io_pArgs )
             errlCommit(l_err, HWPF_COMP_ID);
         }
     } // end of going through all processors
-*/
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_secure_rng exit");
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+              "call_host_secure_rng exit");
 
     return l_StepError.getErrorHandle();
-}
+} // end call_host_secure_rng
 
-};   // end namespace
+} // end namespace ISTEP_16

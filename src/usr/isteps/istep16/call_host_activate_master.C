@@ -25,13 +25,13 @@
 
 
 // Error Handling
-#include    <errl/errlentry.H>
-#include    <errl/errlmanager.H>
-#include    <initservice/isteps_trace.H>
-#include    <isteps/hwpisteperror.H>
-#include    <errl/errludtarget.H>
-#include    <intr/interrupt.H>
-#include    <console/consoleif.H>
+#include <errl/errlentry.H>
+#include <errl/errlmanager.H>
+#include <initservice/isteps_trace.H>
+#include <isteps/hwpisteperror.H>
+#include <errl/errludtarget.H>
+#include <intr/interrupt.H>
+#include <console/consoleif.H>
 #include <arch/pirformat.H>
 #include <arch/pvrformat.H>
 #include <sys/task.h>
@@ -39,114 +39,103 @@
 #include <arch/ppc.H>
 
 
-//  targeting support
-#include    <targeting/namedtarget.H>
-#include    <targeting/attrsync.H>
-/* FIXME RTC: 210975
-#include    <fapi2/target.H>
-*/
+//targeting support
+#include <targeting/namedtarget.H>
+#include <targeting/attrsync.H>
+#include <fapi2/target.H>
 
-//SBE interfacing
-#include    <sbeio/sbeioif.H>
-#include    <sys/misc.h>
-#include    <pm/pm_common.H>
+// SBE interfacing
+#include <sbeio/sbeioif.H>
+#include <sys/misc.h>
+#include <pm/pm_common.H>
 
-/* FIXME RTC: 210975
-//Import directory (EKB)
-#include    <p9_block_wakeup_intr.H>
-*/
+#include <p10_block_wakeup_intr.H>
+#include <p10_gen_fbc_rt_settings.H>
 
 #include <scom/scomif.H>
 
-/* FIXME RTC: 210975
-//HWP invoker
-#include    <fapi2/plat_hwp_invoker.H>
-*/
+// HWP invoker
+#include <fapi2/plat_hwp_invoker.H>
 
-using   namespace   ERRORLOG;
-using   namespace   TARGETING;
-using   namespace   ISTEP;
-using   namespace   ISTEP_ERROR;
+#include <iterator>
 
+using namespace ERRORLOG;
+using namespace TARGETING;
+using namespace ISTEP;
+using namespace ISTEP_ERROR;
 
 namespace ISTEP_16
 {
-void* call_host_activate_master (void *io_pArgs)
+
+void* call_host_activate_master(void* const io_pArgs)
 {
-    IStepError  l_stepError;
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+              "call_host_activate_master entry");
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_activate_master entry" );
+    errlHndl_t l_errl = nullptr;
 
-    errlHndl_t  l_errl  =   NULL;
+    do
+    {
+        const bool l_isFusedMode = is_fused_mode();
 
-    do  {
-        bool l_isFusedMode = is_fused_mode();
         // find the master core, i.e. the one we are running on
-        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "call_host_activate_master: Find master core: " );
-                   //Determine top-level system target
-        TARGETING::Target* l_sys = NULL;
-        TARGETING::targetService().getTopLevelTarget(l_sys);
-        assert( l_sys != NULL );
+        TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "call_host_activate_master: Find master core:");
 
+        // Determine top-level system target
+        Target* l_sys = nullptr;
+        targetService().getTopLevelTarget(l_sys);
+        assert(l_sys != nullptr, "Toplevel target must not be null");
 
-        const TARGETING::Target*  l_masterCore  = getMasterCore( );
-        assert( l_masterCore != NULL );
+        const Target* const l_masterCore = getMasterCore();
+        assert(l_masterCore != nullptr, "Master core must not be null");
 
-        TARGETING::Target* l_proc_target = const_cast<TARGETING::Target *>
-                                          ( getParentChip( l_masterCore ) );
+        const Target* const l_proc_target = getParentChip(l_masterCore);
+        assert(l_proc_target, "Parent chip of master core must not be null");
 
-/* FIXME RTC: 210975
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+            l_fapi2_proc_chip(l_proc_target);
+
         // Cast OUR type of target to a FAPI2 type of target.
-        const fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_coreTarget(
-                                const_cast<TARGETING::Target*> (l_masterCore));
-*/
+        const fapi2::Target<fapi2::TARGET_TYPE_CORE>
+            l_fapi2_coreTarget(l_masterCore);
 
-        bool l_isDD1 = false;
-        PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
-        if( l_pvr.isNimbusDD1() )
+        fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_fusedTarget(nullptr);
+        const Target* l_fusedCore = nullptr;
+
+        if (l_isFusedMode)
         {
-            l_isDD1 = true;
-        }
-
-/* FIXME RTC: 210975
-        fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_fusedTarget = NULL;
-*/
-        const TARGETING::Target* l_fusedCore = NULL;
-
-        if(l_isFusedMode && !l_isDD1)
-        {
-            uint64_t cpuid = task_getcpuid();
-            uint64_t l_masterCoreID = PIR_t::coreFromPir(cpuid);
-            uint64_t l_fusedCoreID = l_masterCoreID + 1;
+            const uint64_t cpuid = task_getcpuid();
+            const uint64_t l_masterCoreID = PIR_t::coreFromPir(cpuid);
+            const uint64_t l_fusedCoreID = l_masterCoreID + 1;
 
             // get the list of core targets for this proc chip
-            TARGETING::TargetHandleList l_coreTargetList;
-            TARGETING::getChildChiplets( l_coreTargetList,
-                                         l_proc_target,
-                                         TARGETING::TYPE_CORE,
-                                         false);
+            TargetHandleList l_coreTargetList;
+            getChildChiplets(l_coreTargetList,
+                             l_proc_target,
+                             TYPE_CORE,
+                             false);
 
-            //Find the core that matched with the fusedCoreID we
-            //calculated above. This core is the core that will
-            //be fused with the master.
-            for( const auto & l_core:l_coreTargetList)
+            // Find the core that matched with the fusedCoreID we
+            // calculated above. This core is the core that will
+            // be fused with the master.
+            for (const auto& l_core : l_coreTargetList)
             {
-                TARGETING::ATTR_CHIP_UNIT_type l_coreId =
-                (l_core)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-                if( l_coreId == l_fusedCoreID )
+                const ATTR_CHIP_UNIT_type l_coreId =
+                    l_core->getAttr<ATTR_CHIP_UNIT>();
+
+                if (l_coreId == l_fusedCoreID)
                 {
-                    l_fusedCore = (l_core);
+                    l_fusedCore = l_core;
                     break;
                 }
             }
 
-            if( l_fusedCore == NULL )
+            if (l_fusedCore == nullptr)
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "Could not find a target for core %d",
-                        l_fusedCoreID );
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "Could not find a target for core %d",
+                          l_fusedCoreID);
                 /*@
                 * @errortype
                 * @moduleid     ISTEP::MOD_HOST_ACTIVATE_MASTER
@@ -158,30 +147,27 @@ void* call_host_activate_master (void *io_pArgs)
                 * @custdesc     A problem occurred during the IPL
                 *               of the system.
                 */
-                l_errl = new ERRORLOG::ErrlEntry(
-                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    ISTEP::MOD_HOST_ACTIVATE_MASTER,
-                                    ISTEP::RC_NO_FUSED_CORE_TARGET,
-                                    l_fusedCoreID,
-                                    TARGETING::get_huid(l_proc_target));
-                l_errl->collectTrace("TARG",256);
-/* FIXME RTC: 210975
-                l_errl->collectTrace(FAPI_TRACE_NAME,256);
-                l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
-*/
+                l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                 ISTEP::MOD_HOST_ACTIVATE_MASTER,
+                                                 ISTEP::RC_NO_FUSED_CORE_TARGET,
+                                                 l_fusedCoreID,
+                                                 get_huid(l_proc_target));
+
+                l_errl->collectTrace("TARG");
+                l_errl->collectTrace(FAPI_TRACE_NAME);
+                l_errl->collectTrace(FAPI_IMP_TRACE_NAME);
 
                 break;
             }
 
-/* FIXME RTC: 210975
             // Cast OUR type of target to a FAPI2 type of target.
-            l_fapi2_fusedTarget = const_cast<TARGETING::Target*> (l_fusedCore);
-*/
+            l_fapi2_fusedTarget = { l_fusedCore };
         }
 
-        //Because of a bug in how the SBE injects the IPI used to wake
-        //up the master core, need to ensure no mailbox traffic
-        //or even an interrupt in the interrupt presenter
+        // @TODO RTC 245393: Still necessary?
+        // Because of a bug in how the SBE injects the IPI used to wake
+        // up the master core, need to ensure no mailbox traffic
+        // or even an interrupt in the interrupt presenter
         // 1) Reclaim all DMA bfrs from the FSP
         // 2) suspend the mailbox with interrupt disable
         // 3) tell the SBE to start the deadman timer
@@ -189,137 +175,197 @@ void* call_host_activate_master (void *io_pArgs)
         l_errl = MBOX::reclaimDmaBfrsFromFsp();
         if (l_errl)
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "call_host_activate_master ERROR : "
-                       "MBOX::reclaimDmaBfrsFromFsp");
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "call_host_activate_master ERROR : "
+                      "MBOX::reclaimDmaBfrsFromFsp");
 
-            //  if it not complete then thats okay, but we want to store the
-            //   log away somewhere. Since we didn't get all the DMA buffers
-            //   back its not a big deal to commit a log, even if we lose a
-            //   DMA buffer because of it it doesn't matter that much.
-            //  this will generate more traffic to the FSP
+            // If it not complete then thats okay, but we want to store the
+            // log away somewhere. Since we didn't get all the DMA buffers
+            // back its not a big deal to commit a log, even if we lose a
+            // DMA buffer because of it it doesn't matter that much.
+            // this will generate more traffic to the FSP
             l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
             errlCommit( l_errl, HWPF_COMP_ID );
 
-            // (do not break.   keep going to suspend)
+            // (Do not break. Keep going to suspend)
         }
 
         l_errl = MBOX::suspend(true, true);
         if (l_errl)
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "call_host_activate_master ERROR : MBOX::suspend");
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "call_host_activate_master ERROR : MBOX::suspend");
             break;
         }
 
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "call_host_activate_master: About to start deadman loop... "
-                   "Target HUID %.8X",
-                    TARGETING::get_huid(l_proc_target));
+        std::vector<std::pair<uint64_t, uint64_t>> l_regInits;
+
+        // Send a list of pairs of fully formed XSCOM register addresses and
+        // data to write to those registers when the core enters sleep 15.
+        {
+            std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>> l_fapiProcs;
+
+            TARGETING::TargetHandleList l_procsList;
+            TARGETING::getAllChips(l_procsList, TARGETING::TYPE_PROC);
+
+            assert(l_procsList.size() > 0, "Must have at least one proc");
+
+            std::transform(l_procsList.cbegin(), l_procsList.cend(),
+                           std::back_inserter(l_fapiProcs),
+                           [](const auto target) {
+                               return fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>(target);
+                           });
+
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "call_host_activate_master: calling p10_gen_fbc_rt_settings "
+                      "for %d procs",
+                      std::size(l_fapiProcs));
+
+            FAPI_INVOKE_HWP(l_errl,
+                            p10_gen_fbc_rt_settings,
+                            l_fapiProcs,
+                            l_regInits);
+
+            if (l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"call_host_activate_master: Error in "
+                          "p10_gen_fbc_rt_settings: "
+                          TRACE_ERR_FMT,
+                          TRACE_ERR_ARGS(l_errl));
+
+                break;
+            }
+        }
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "call_host_activate_master: About to start deadman loop... "
+                  "Target HUID %.8X",
+                  get_huid(l_proc_target));
 
         //In the future possibly move default "waitTime" value to SBEIO code
-        uint64_t waitTime = 1000000; // bump the wait time to 1 sec
-        l_errl = SBEIO::startDeadmanLoop(waitTime);
 
-        if ( l_errl )
+        /* @TODO RTC 243962: Enable this code when we have SBE support */
+#ifdef ISTEP16_ENABLE_HWPS
+        const uint64_t waitTime = 1000000; // bump the wait time to 1 sec
+        l_errl = SBEIO::startDeadmanLoop(waitTime);
+#endif
+
+        if (l_errl)
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "startDeadmanLoop ERROR : Returning errorlog, reason=0x%x",
-                l_errl->reasonCode() );
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "startDeadmanLoop ERROR : Returning errorlog, reason=0x%x",
+                      l_errl->reasonCode());
 
             // capture the target data in the elog
-            ErrlUserDetailsTarget(l_proc_target).addToLog( l_errl );
+            ErrlUserDetailsTarget(l_proc_target).addToLog(l_errl);
 
             break;
         }
         else
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "startDeadManLoop SUCCESS"  );
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "startDeadManLoop SUCCESS");
         }
 
-        //Need to indicate to PHYP to save HRMOR and other SPR Data to be
+        // Need to indicate to PHYP to save HRMOR and other SPR Data to be
         // applied during wakeup
         MAGIC_INSTRUCTION(MAGIC_SIMICS_CORESTATESAVE);
 
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "draining interrupt Q");
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Draining interrupt queue");
         INTR::drainQueue();
 
-        // Call p9_block_wakeup_intr to prevent stray interrupts from
+        // Call p10_block_wakeup_intr to prevent stray interrupts from
         // popping core out of winkle before SBE sees it.
 
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "call_host_activated_master: call p9_block_wakeup_intr(SET) "
-                   "Target HUID %.8x",
-                   /* FIXME RTC: 210975 TARGETING::get_huid(l_fapi2_coreTarget)*/ 0 );
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "call_host_activate_master: call p10_block_wakeup_intr(SET) "
+                  "Target HUID %.8x",
+                  get_huid(l_fapi2_coreTarget.get()));
 
-/* FIXME RTC: 210975
-        FAPI_INVOKE_HWP( l_errl,
-                        p9_block_wakeup_intr,
+        /* @TODO RTC 243962: Enable when supported in simics */
+#ifdef ISTEP16_ENABLE_HWPS
+        FAPI_INVOKE_HWP(l_errl,
+                        p10_block_wakeup_intr,
                         l_fapi2_coreTarget,
-                        p9pmblockwkup::SET );
+                        p10pmblockwkup::ENABLE_BLOCK_EXIT);
+#endif
 
-        if ( l_errl )
+        if (l_errl)
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "p9_block_wakeup_intr ERROR : Returning errorlog, reason=0x%x",
-                l_errl->reasonCode() );
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "p10_block_wakeup_intr ERROR : Returning errorlog, "
+                      "reason=0x%x: "
+                      TRACE_ERR_FMT,
+                      l_errl->reasonCode(),
+                      TRACE_ERR_ARGS(l_errl));
 
             // capture the target data in the elog
-            ErrlUserDetailsTarget(l_masterCore).addToLog( l_errl );
+            ErrlUserDetailsTarget(l_masterCore).addToLog(l_errl);
 
             break;
         }
         else
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "p9_block_wakeup_intr SUCCESS"  );
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "p10_block_wakeup_intr SUCCESS");
         }
 
-        if(l_fusedCore != NULL)
+        if (l_fusedCore != nullptr)
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "call_host_activated_master: call p9_block_wakeup_intr(SET) "
-            "Target HUID %.8x",
-            TARGETING::get_huid(l_fapi2_fusedTarget) );
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "call_host_activated_master: call p10_block_wakeup_intr(SET) "
+                      "Target HUID %.8x",
+                      get_huid(l_fapi2_fusedTarget.get()));
 
-            FAPI_INVOKE_HWP( l_errl,
-                            p9_block_wakeup_intr,
-                             l_fapi2_fusedTarget,
-                            p9pmblockwkup::SET );
+            /* @TODO RTC 243962: Enable when supported in simics */
+#ifdef ISTEP16_ENABLE_HWPS
+            FAPI_INVOKE_HWP(l_errl,
+                            p10_block_wakeup_intr,
+                            l_fapi2_fusedTarget,
+                            p10pmblockwkup::ENABLE_BLOCK_EXIT);
+#endif
 
-            if ( l_errl )
+            if (l_errl)
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "p9_block_wakeup_intr ERROR : Returning errorlog, reason=0x%x",
-                    l_errl->reasonCode() );
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "p10_block_wakeup_intr ERROR : Returning errorlog, "
+                          "reason=0x%x: "
+                          TRACE_ERR_FMT,
+                          l_errl->reasonCode(),
+                          TRACE_ERR_ARGS(l_errl));
 
                 // capture the target data in the elog
-                ErrlUserDetailsTarget(l_fusedCore).addToLog( l_errl );
+                ErrlUserDetailsTarget(l_fusedCore).addToLog(l_errl);
 
                 break;
             }
             else
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "p9_block_wakeup_intr SUCCESS"  );
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "p10_block_wakeup_intr SUCCESS");
             }
         }
-*/
 
         //  put the master into winkle.
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "call_host_activate_master: put master into winkle..." );
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "call_host_activate_master: put master into winkle...");
 
         // Flush any lingering console traces first
         CONSOLE::flush();
 
-        int l_rc    =   cpu_master_winkle(l_isFusedMode);
-        if ( l_rc )
+        const int l_rc = 0;
+
+        /* @TODO RTC 243962: Enable this code when we have SBE support */
+#ifdef ISTEP16_ENABLE_HWPS
+        l_rc = cpu_master_winkle(l_isFusedMode);
+#endif
+
+        if (l_rc)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "ERROR : failed to winkle master, rc=0x%x",
-                      l_rc  );
+                      l_rc);
             /*@
              * @errortype
              * @reasoncode  RC_FAIL_MASTER_WINKLE
@@ -331,10 +377,10 @@ void* call_host_activate_master (void *io_pArgs)
              * @devdesc cpu_master_winkle returned an error
              */
             l_errl =
-            new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    MOD_HOST_ACTIVATE_MASTER,
-                                    RC_FAIL_MASTER_WINKLE,
-                                    l_rc, l_isFusedMode );
+                new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                        MOD_HOST_ACTIVATE_MASTER,
+                                        RC_FAIL_MASTER_WINKLE,
+                                        l_rc, l_isFusedMode);
             break;
         }
 
@@ -342,26 +388,30 @@ void* call_host_activate_master (void *io_pArgs)
         //  --------------------------------------------------------
         //  should return from Winkle at this point
         //  --------------------------------------------------------
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Returned from Winkle." );
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "Returned from Winkle.");
 
+        /* @TODO RTC 243962: Enable with SBE support */
+#ifdef ISTEP16_ENABLE_HWPS
         l_errl = SBEIO::stopDeadmanLoop();
-        if ( l_errl )
+#endif
+
+        if (l_errl)
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "stopDeadmanLoop ERROR : "
-                       "Returning errorlog, reason=0x%x",
-                       l_errl->reasonCode() );
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "stopDeadmanLoop ERROR : "
+                      "Returning errorlog, reason=0x%x",
+                      l_errl->reasonCode());
 
             // capture the target data in the elog
-            ErrlUserDetailsTarget(l_proc_target).addToLog( l_errl );
+            ErrlUserDetailsTarget(l_proc_target).addToLog(l_errl);
 
             break;
         }
         else
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "stopDeadmanLoop SUCCESS"  );
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "stopDeadmanLoop SUCCESS");
         }
 
         //Re-enable the mailbox
@@ -373,33 +423,32 @@ void* call_host_activate_master (void *io_pArgs)
             break;
         }
 
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Call proc_stop_deadman_timer. Target %.8X",
-                   TARGETING::get_huid(l_proc_target) );
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "Call proc_stop_deadman_timer. Target %.8X",
+                  get_huid(l_proc_target));
 
-/* FIXME RTC: 210975
         // Save off original checkstop values and override them
         // to disable core xstops and enable sys xstops.
         l_errl = HBPM::core_checkstop_helper_hwp(l_masterCore, true);
 
-        if( l_errl )
+        if (l_errl)
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "core_checkstop_helper_hwp on master ERROR: returning.");
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "core_checkstop_helper_hwp on master ERROR: returning.");
             break;
         }
 
         // We want to make sure the fused pair is also setting the
         // core firs to handle checkstops at system level and not
         // at the local level
-        if(l_fusedCore != NULL)
+        if (l_fusedCore != nullptr)
         {
             l_errl = HBPM::core_checkstop_helper_hwp(l_fusedCore, true);
 
-            if ( l_errl )
+            if (l_errl)
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "core_checkstop_helper_hwp on fused pair ERROR: returning.");
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "core_checkstop_helper_hwp on fused pair ERROR: returning.");
                 break;
             }
         }
@@ -407,35 +456,33 @@ void* call_host_activate_master (void *io_pArgs)
         // Take new checkstop values and insert them into the homer image
         l_errl = HBPM::core_checkstop_helper_homer();
 
-        if( l_errl )
+        if (l_errl)
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "core_checkstop_helper_homer ERROR: returning.");
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "core_checkstop_helper_homer ERROR: returning.");
             break;
         }
-*/
+    } while (0);
 
-    }   while ( 0 );
+    IStepError l_stepError;
 
-    if( l_errl )
+    if (l_errl)
     {
         // Create IStep error log and cross reference error that occurred
-        l_stepError.addErrorDetails( l_errl );
+        l_stepError.addErrorDetails(l_errl);
 
         // Commit Error
-        errlCommit( l_errl, HWPF_COMP_ID );
+        errlCommit(l_errl, HWPF_COMP_ID);
     }
 
     // Flush the console to correct the timestamp on istep 16.2
     CONSOLE::flush();
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_activate_master exit" );
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+              "call_host_activate_master exit");
+
     // end task, returning any errorlogs to IStepDisp
     return l_stepError.getErrorHandle();
+} // end call_host_activate_master
 
-}
-
-
-
-};
+} // end namespace ISTEP_16

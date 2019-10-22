@@ -2062,6 +2062,15 @@
       <id>HB_SETTINGS</id>
     </attribute>
     <attribute>
+      <id>HDAT_HBRT_NUM_SECTIONS</id>
+    </attribute>
+    <attribute>
+      <id>HDAT_HBRT_SECTION_SIZE</id>
+    </attribute>
+    <attribute>
+      <id>HDAT_RSV_MEM_NUM_SECTIONS</id>
+    </attribute>
+    <attribute>
       <default>0x00010000</default>
       <id>HUID</id>
     </attribute>
@@ -2393,6 +2402,9 @@
     </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
+    </attribute>
+    <attribute>
+      <id>PREVIOUS_WAKEUP_FAIL</id>
     </attribute>
   </targetType>
 

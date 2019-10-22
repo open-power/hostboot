@@ -23,59 +23,49 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include    <errl/errlentry.H>
-#include    <errno.h>
-#include    <initservice/isteps_trace.H>
-#include    <isteps/hwpisteperror.H>
-#include    <errl/errludtarget.H>
+#include <errl/errlentry.H>
+#include <errno.h>
+#include <initservice/isteps_trace.H>
+#include <isteps/hwpisteperror.H>
+#include <errl/errludtarget.H>
 
-#include    <arch/pirformat.H>
-#include    <console/consoleif.H>
+#include <arch/pirformat.H>
+#include <console/consoleif.H>
 
 //  targeting support
-#include    <targeting/common/commontargeting.H>
-#include    <targeting/common/utilFilter.H>
-#include    <targeting/namedtarget.H>
-/* FIXME RTC: 210975
-#include    <fapi2/target.H>
-*/
-#include    <errl/errlmanager.H>
-#include    <sys/task.h>
-#include    <sys/misc.h>
+#include <targeting/common/commontargeting.H>
+#include <targeting/common/utilFilter.H>
+#include <targeting/namedtarget.H>
+#include <fapi2/target.H>
+#include <errl/errlmanager.H>
+#include <sys/task.h>
+#include <sys/misc.h>
 
-/* FIXME RTC: 210975
-#include    <fapi2/plat_hwp_invoker.H>
-#include    <p9_check_idle_stop_done.H>
-*/
+#include <fapi2/plat_hwp_invoker.H>
+#include <p10_query_core_stop_state.H>
 
-#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
-  #include <isteps/pm/occCheckstop.H>
-#endif
+#include <scom/scomif.H>
+#include <errl/errludprintk.H>
+#include <intr/intr_reasoncodes.H>
+#include <initservice/istepdispatcherif.H>
 
-#include    <scom/scomif.H>
-#include    <errl/errludprintk.H>
-#include    <intr/intr_reasoncodes.H>
-#include    <initservice/istepdispatcherif.H>
+using namespace ERRORLOG;
+using namespace TARGETING;
+using namespace ISTEP;
+using namespace ISTEP_ERROR;
 
-using   namespace   ERRORLOG;
-using   namespace   TARGETING;
-using   namespace   ISTEP;
-using   namespace   ISTEP_ERROR;
-/* FIXME RTC: 210975
-using   namespace   p9_check_idle_stop;
-*/
+// 15 is the deepest sleep state, used because it loses state and forces the
+// core to reload all hardware settings.
+const int EXPECTED_STOP_STATE = 15;
 
 namespace ISTEP_16
 {
-void* call_host_activate_slave_cores (void *io_pArgs)
+
+void* call_host_activate_slave_cores(void* const io_pArgs)
 {
     IStepError  l_stepError;
-
-/* FIXME RTC: 210975
-    errlHndl_t  l_timeout_errl  =   NULL;
-*/
-    errlHndl_t  l_errl          =   NULL;
-
+    errlHndl_t  l_timeout_errl =   nullptr;
+    errlHndl_t  l_errl         =   nullptr;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_activate_slave_cores entry" );
@@ -83,68 +73,68 @@ void* call_host_activate_slave_cores (void *io_pArgs)
     // @@@@@    CUSTOM BLOCK:   @@@@@
 
     //track master group/chip/core (no threads)
-    uint64_t l_masterPIR_wo_thread = PIR_t(task_getcpuid()).word &
-                                     ~PIR_t::THREAD_MASK;
+    const uint64_t l_masterPIR_wo_thread
+        = PIR_t(task_getcpuid()).word & ~PIR_t::THREAD_MASK;
 
     TargetHandleList l_cores;
     getAllChiplets(l_cores, TYPE_CORE);
-    TARGETING::Target* sys = NULL;
+    TARGETING::Target* sys = nullptr;
     TARGETING::targetService().getTopLevelTarget(sys);
-    assert( sys != NULL );
+    assert(sys != nullptr, "Toplevel target must not be null");
     uint32_t l_numCores = 0;
 
     // keep track of which cores started
     TargetHandleList l_startedCores;
 
-    for(TargetHandleList::const_iterator
-        l_core = l_cores.begin();
-        l_core != l_cores.end();
-        ++l_core)
+    for (const auto& l_core : l_cores)
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Iterating all cores in system - "
-                   "This is core: %d", l_numCores);
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "Iterating all cores in system - This is core: %d",
+                  l_numCores);
+
         l_numCores += 1;
 
-        ConstTargetHandle_t l_processor = getParentChip(*l_core);
+        ConstTargetHandle_t l_processor = getParentChip(l_core);
 
-        CHIP_UNIT_ATTR l_coreId =
-                (*l_core)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-        FABRIC_GROUP_ID_ATTR l_logicalGroupId =
-          l_processor->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
-        FABRIC_CHIP_ID_ATTR l_chipId =
-          l_processor->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+        CHIP_UNIT_ATTR l_coreId
+            = l_core->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+        FABRIC_GROUP_ID_ATTR l_logicalGroupId
+            = l_processor->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
+        FABRIC_CHIP_ID_ATTR l_chipId
+            = l_processor->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
 
-
-/* FIXME RTC: 210975
-        const fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_coreTarget(
-              const_cast<TARGETING::Target*> (*l_core));
-*/
+        const fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_coreTarget(l_core);
 
         //Determine PIR and threads to enable for this core
-        uint64_t pir = PIR_t(l_logicalGroupId, l_chipId, l_coreId).word;
-        uint64_t en_threads = sys->getAttr<ATTR_ENABLED_THREADS>();
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "pir for this core is: %lx", pir);
+        const uint64_t pir = PIR_t(l_logicalGroupId, l_chipId, l_coreId).word;
+        const uint64_t en_threads = sys->getAttr<ATTR_ENABLED_THREADS>();
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "pir for this core is: %lx", pir);
 
         //If not the master core, skip
         if ((pir & ~PIR_t::THREAD_MASK) != l_masterPIR_wo_thread)
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "call_host_activate_slave_cores: Waking %x.",
-                       pir );
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "call_host_activate_slave_cores: Waking %x.",
+                      pir);
 
-            int rc = cpu_start_core(pir, en_threads);
+            int rc = 0;
 
+            // @TODO RTC 243962: enable when supported
+#ifdef ISTEP16_ENABLE_HWPS
+            rc = cpu_start_core(pir, en_threads);
+#endif
+
+            // TODO: Evaluate whether this is still necessary for P10
             // Workaround to handle some syncing issues with new cpus
-            //  waking
+            // waking
             if (-ETIME == rc)
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "call_host_activate_slave_cores: "
-                        "Time out rc from kernel %d on core 0x%x, resending doorbell",
-                        rc,
-                        pir);
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "call_host_activate_slave_cores: Time out "
+                          "rc from kernel %d on core 0x%x, resending doorbell",
+                          rc,
+                          pir);
                 rc = cpu_wakeup_core(pir,en_threads);
             }
 
@@ -152,34 +142,36 @@ void* call_host_activate_slave_cores (void *io_pArgs)
             uint32_t l_checkidle_eid = 0;
             if (-ETIME == rc)
             {
-/* FIXME RTC: 210975
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "call_host_activate_slave_cores: "
-                        "Time out rc from kernel %d on core 0x%x",
-                        rc,
-                        pir);
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "call_host_activate_slave_cores: "
+                          "Time out rc from kernel %d on core 0x%x",
+                          rc,
+                          pir);
 
                 // only called if the core doesn't report in
                 const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                    l_fapi2ProcTarget(
-                        const_cast<TARGETING::Target*>(l_processor) );
+                    l_fapi2ProcTarget(l_processor);
 
-                TARGETING::ATTR_FAPI_NAME_type l_targName = {0};
-                fapi2::toString( l_fapi2ProcTarget,
-                                 l_targName,
-                                 sizeof(l_targName) );
+                TARGETING::ATTR_FAPI_NAME_type l_targName { };
+                fapi2::toString(l_fapi2ProcTarget,
+                                l_targName,
+                                sizeof(l_targName));
 
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Call p9_check_idle_stop_done on processor %s", l_targName );
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "Call p10_check_idle_stop_done on processor %s",
+                          l_targName);
 
-                FAPI_INVOKE_HWP( l_timeout_errl,
-                                 p9_check_idle_stop_done,
-                                 l_fapi2_coreTarget );
+                FAPI_INVOKE_HWP(l_timeout_errl,
+                                p10_query_core_stop_state,
+                                l_fapi2_coreTarget,
+                                EXPECTED_STOP_STATE);
 
                 if (l_timeout_errl)
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR : p9_check_idle_stop_done" );
+                              "ERROR : p10_check_idle_stop_done: "
+                              TRACE_ERR_FMT,
+                              TRACE_ERR_ARGS(l_timeout_errl));
 
                     // Add chip target info
                     ErrlUserDetailsTarget(l_processor).addToLog(l_timeout_errl);
@@ -190,18 +182,17 @@ void* call_host_activate_slave_cores (void *io_pArgs)
                     l_checkidle_eid = l_timeout_errl->eid();
 
                     // Commit error
-                    errlCommit( l_timeout_errl, HWPF_COMP_ID );
+                    errlCommit(l_timeout_errl, HWPF_COMP_ID);
                 }
-*/
             } // End of handle time out error
 
             // Check if this core failed last time
-            ATTR_PREVIOUS_WAKEUP_FAIL_type l_prevFail =
-              (*l_core)->getAttr<TARGETING::ATTR_PREVIOUS_WAKEUP_FAIL>();
+            ATTR_PREVIOUS_WAKEUP_FAIL_type l_prevFail
+                = l_core->getAttr<TARGETING::ATTR_PREVIOUS_WAKEUP_FAIL>();
 
             // Create predictive error log if this is the first failure
             //   AND the HWP didn't see a problem
-            if( (0 != rc) && (l_prevFail == 0) && (l_checkidle_eid == 0) )
+            if ((0 != rc) && (l_prevFail == 0) && (l_checkidle_eid == 0))
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                         "call_host_activate_slave_cores: "
@@ -214,20 +205,18 @@ void* call_host_activate_slave_cores (void *io_pArgs)
                   * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
                   * @moduleid    MOD_HOST_ACTIVATE_SLAVE_CORES
                   * @userdata1   PIR of failing core.
-                  * @userdata2[00:31]   EID from p9_check_idle_stop_done().
+                  * @userdata2[00:31]   EID from p10_check_idle_stop_done().
                   * @userdata2[32:63]   rc of cpu_start_core().
                   *
                   * @devdesc Kernel returned error when trying to activate
                   *          core.
                   */
-                l_errl = new ERRORLOG::ErrlEntry(
-                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                             MOD_HOST_ACTIVATE_SLAVE_CORES,
-                             RC_BAD_RC,
-                             pir,
-                             TWO_UINT32_TO_UINT64(
-                                 l_checkidle_eid,
-                                 rc) );
+                l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                 MOD_HOST_ACTIVATE_SLAVE_CORES,
+                                                 RC_BAD_RC,
+                                                 pir,
+                                                 TWO_UINT32_TO_UINT64(l_checkidle_eid,
+                                                                      rc));
 
                 // Going to assume some kind of SW error unless it fails
                 //  again
@@ -235,10 +224,10 @@ void* call_host_activate_slave_cores (void *io_pArgs)
                                              HWAS::SRCI_PRIORITY_HIGH);
 
                 // Callout core that failed to wake up.
-                l_errl->addHwCallout(*l_core,
-                        HWAS::SRCI_PRIORITY_LOW,
-                        HWAS::NO_DECONFIG,
-                        HWAS::GARD_NULL);
+                l_errl->addHwCallout(l_core,
+                                     HWAS::SRCI_PRIORITY_LOW,
+                                     HWAS::NO_DECONFIG,
+                                     HWAS::GARD_NULL);
 
                 // Could be an interrupt issue
                 l_errl->collectTrace(INTR_TRACE_NAME,256);
@@ -256,14 +245,15 @@ void* call_host_activate_slave_cores (void *io_pArgs)
                 // Remember that we failed so we can gard the core if it
                 //  happens again on the reboot
                 l_prevFail = 1;
-                (*l_core)->
-                  setAttr<TARGETING::ATTR_PREVIOUS_WAKEUP_FAIL>(l_prevFail);
+                l_core->setAttr<TARGETING::ATTR_PREVIOUS_WAKEUP_FAIL>(l_prevFail);
 
 #ifdef CONFIG_BMC_IPMI
                 // Initiate a graceful power cycle
-                CONSOLE::displayf(ISTEP_COMP_NAME, "System Rebooting To Retry Recoverable Error");
+                CONSOLE::displayf(ISTEP_COMP_NAME,
+                                  "System Rebooting To Retry Recoverable Error");
                 CONSOLE::flush();
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"call_host_activate_slave_cores: requesting power cycle");
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "call_host_activate_slave_cores: requesting power cycle");
                 INITSERVICE::requestReboot();
 #endif
 
@@ -271,8 +261,8 @@ void* call_host_activate_slave_cores (void *io_pArgs)
             }
             // Create unrecoverable error log if this is a repeat
             //  OR if the HWP hit something
-            else if( (0 != rc) &&
-                     ((l_prevFail > 0) || (l_checkidle_eid != 0)) )
+            else if (   (0 != rc)
+                     && ((l_prevFail > 0) || (l_checkidle_eid != 0)) )
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            "call_host_activate_slave_cores: "
@@ -285,25 +275,22 @@ void* call_host_activate_slave_cores (void *io_pArgs)
                  * @moduleid    MOD_HOST_ACTIVATE_SLAVE_CORES
                  * @userdata1[00:31]   PIR of failing core.
                  * @userdata2[32:63]   Number of previous failures.
-                 * @userdata2[00:31]   EID from p9_check_idle_stop_done().
+                 * @userdata2[00:31]   EID from p10_check_idle_stop_done().
                  * @userdata2[32:63]   rc of cpu_start_core().
                  *
                  * @devdesc Kernel returned error when trying to activate
                  *          core.
                  */
-                l_errl = new ERRORLOG::ErrlEntry(
-                               ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                               MOD_HOST_ACTIVATE_SLAVE_CORES,
-                               RC_SLAVE_CORE_WAKEUP_ERROR,
-                               TWO_UINT32_TO_UINT64(
-                                   pir,
-                                   l_prevFail),
-                               TWO_UINT32_TO_UINT64(
-                                   l_checkidle_eid,
-                                   rc) );
+                l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                 MOD_HOST_ACTIVATE_SLAVE_CORES,
+                                                 RC_SLAVE_CORE_WAKEUP_ERROR,
+                                                 TWO_UINT32_TO_UINT64(pir,
+                                                                      l_prevFail),
+                                                 TWO_UINT32_TO_UINT64(l_checkidle_eid,
+                                                                      rc));
 
                 // Callout and gard core that failed to wake up.
-                l_errl->addHwCallout(*l_core,
+                l_errl->addHwCallout(l_core,
                                      HWAS::SRCI_PRIORITY_HIGH,
                                      HWAS::DECONFIG,
                                      HWAS::GARD_Predictive);
@@ -317,23 +304,22 @@ void* call_host_activate_slave_cores (void *io_pArgs)
                 // Add interesting ISTEP traces
                 l_errl->collectTrace(ISTEP_COMP_NAME,256);
 
-                l_stepError.addErrorDetails( l_errl );
-                errlCommit( l_errl, HWPF_COMP_ID );
+                l_stepError.addErrorDetails(l_errl);
+                errlCommit(l_errl, HWPF_COMP_ID);
 
                 // We garded the core so we should zero out the fail
                 //  counter so the replacement doesn't get blamed
                 l_prevFail = 0;
-                (*l_core)->
-                  setAttr<TARGETING::ATTR_PREVIOUS_WAKEUP_FAIL>(l_prevFail);
+                l_core->setAttr<TARGETING::ATTR_PREVIOUS_WAKEUP_FAIL>(l_prevFail);
 
                 break;
             }
             // Zero out the counter if we passed
-            else if( l_prevFail > 0 )
+            else if (l_prevFail > 0)
             {
                 // Add to the list of passing cores so we can
                 //  clear ATTR_PREVIOUS_WAKEUP_FAIL later
-                l_startedCores.push_back(*l_core);
+                l_startedCores.push_back(l_core);
             }
         }
     }
@@ -341,41 +327,15 @@ void* call_host_activate_slave_cores (void *io_pArgs)
     // Clear out the wakeup_fail indicators only after every core has passed.
     //  Doing this outside the loop helps mitigate the (unlikely) case where
     //  a failure bounces between different cores on several consecutive boots.
-    for(TargetHandleList::const_iterator
-        l_core = l_startedCores.begin();
-        l_core != l_startedCores.end();
-        ++l_core)
+    for (const auto& l_core : l_startedCores)
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "call_host_activate_slave_cores: "
-                   "Resetting failure count for core %.8X",
-                   TARGETING::get_huid(*l_core) );
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "call_host_activate_slave_cores: "
+                  "Resetting failure count for core %.8X",
+                  TARGETING::get_huid(l_core));
         ATTR_PREVIOUS_WAKEUP_FAIL_type l_prevFail = 0;
-        (*l_core)->
-          setAttr<TARGETING::ATTR_PREVIOUS_WAKEUP_FAIL>(l_prevFail);
+        l_core->setAttr<TARGETING::ATTR_PREVIOUS_WAKEUP_FAIL>(l_prevFail);
     }
-
-#if defined(CONFIG_IPLTIME_CHECKSTOP_ANALYSIS) && !defined(__HOSTBOOT_RUNTIME)
-    if( l_stepError.isNull() )
-    {
-        // update firdata inputs for OCC
-        TARGETING::Target* masterproc = NULL;
-        TARGETING::targetService().masterProcChipTargetHandle(masterproc);
-        l_errl = HBOCC::loadHostDataToSRAM(masterproc,
-                                            PRDF::ALL_HARDWARE);
-        if (l_errl)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Error returned from call to HBOCC::loadHostDataToSRAM");
-
-            //Create IStep error log and cross reference error that occurred
-            l_stepError.addErrorDetails(l_errl);
-
-            // Commit Error
-            errlCommit(l_errl, HWPF_COMP_ID);
-        }
-    }
-#endif
 
     //Set SKIP_WAKEUP to false after all cores are powered on (16.2)
     //If this is not set false, PM_RESET will fail to enable special wakeup.
@@ -386,11 +346,11 @@ void* call_host_activate_slave_cores (void *io_pArgs)
     //  multicast scom operations
     SCOM::enableSlaveCoreMulticast();
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_activate_slave_cores exit" );
+    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+              "call_host_activate_slave_cores exit");
 
     // end task, returning any errorlogs to IStepDisp
     return l_stepError.getErrorHandle();
-}
+} // end call_host_activate_slave_cores
 
-};
+} // end namespace ISTEP_16

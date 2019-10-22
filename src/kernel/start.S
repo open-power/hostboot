@@ -1101,8 +1101,7 @@ kernel_execute_stop:
 
     ;// Execute stop.
 1:
-    ;// When GCC supports 'stop', you can  use it
-    .long 0x4C0002E4
+    stop
 
 .section .data
     .balign 1024

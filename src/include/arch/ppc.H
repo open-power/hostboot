@@ -229,10 +229,9 @@ ALWAYS_INLINE
 inline void msgsync()
 {
     // See POWER ISA 5.9.2 for details
-    //asm volatile("msgsync" ::: "memory");
-    asm volatile(".long 0x7C0006EC"); // Our GCC doesn't support 'msgsync' yet
-    //  [011111 ///// ///// ///// 11011 10110/]
+    asm volatile("msgsync" ::: "memory");
 
+    // TODO RTC 245393: Still needed for p10?
     // There is a P9 DD2 workaround that a lwsync is also required
     //  after a msgsync
     asm volatile("lwsync" ::: "memory");
@@ -359,7 +358,7 @@ inline void icbi(void* _ptr)
 ALWAYS_INLINE
 inline void nap()
 {
-    asm volatile(".long 0x4C0002E4"); // When GCC supports 'stop', use it
+    asm volatile("stop");
 }
 
 ALWAYS_INLINE

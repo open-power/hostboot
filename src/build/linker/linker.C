@@ -1156,7 +1156,10 @@ bool Object::perform_global_relocations()
         if (!found_symbol)
         {
             ostringstream oss;
-            oss << "Could not find symbol " << i->name;
+            oss << "Could not find symbol "
+                << i->name
+                << " while linking "
+                << name;
             cout << oss.str() << endl;
             throw range_error(oss.str());
         }

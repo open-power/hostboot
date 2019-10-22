@@ -40,10 +40,11 @@
  *
  */
 
-#include    <initservice/initsvcstructs.H>
-#include    <initservice/initsvcreasoncodes.H>
+#include <initservice/initsvcstructs.H>
+#include <initservice/initsvcreasoncodes.H>
+#include <iterator>
 
-namespace   ISTEP_16
+namespace ISTEP_16
 {
 
 /**
@@ -54,9 +55,7 @@ namespace   ISTEP_16
  *  return any errlogs to istep
  *
  */
-void*  call_host_activate_master( void    *io_pArgs );
-
-
+void* call_host_activate_master(void *io_pArgs);
 
 /**
  *  @brief   host_activate_slave_cores
@@ -66,9 +65,7 @@ void*  call_host_activate_master( void    *io_pArgs );
  *  return  any errlogs to istep
  *
  */
-void*    call_host_activate_slave_cores( void    *io_pArgs );
-
-
+void* call_host_activate_slave_cores(void *io_pArgs);
 
 /**
  *  @brief   host_secure_rng
@@ -78,7 +75,7 @@ void*    call_host_activate_slave_cores( void    *io_pArgs );
  *  return  any errlogs to istep
  *
  */
-void*    call_host_secure_rng( void    *io_pArgs );
+void* call_host_secure_rng(void *io_pArgs);
 
 /**
  *  @brief   mss_scrub
@@ -88,7 +85,7 @@ void*    call_host_secure_rng( void    *io_pArgs );
  *  return  any errlogs to istep
  *
  */
-void*    call_mss_scrub( void    *io_pArgs );
+void* call_mss_scrub(void *io_pArgs);
 
 /**
  *  @brief    host_ipl_complete
@@ -98,7 +95,7 @@ void*    call_mss_scrub( void    *io_pArgs );
  *  return  any errlogs to istep
  *
  */
-void*    call_host_ipl_complete( void    *io_pArgs );
+void* call_host_ipl_complete(void *io_pArgs);
 
 /**
  *  @brief    host_load_io_ppe
@@ -108,58 +105,53 @@ void*    call_host_ipl_complete( void    *io_pArgs );
  *  return  any errlogs to istep
  *
  */
-void*    call_host_load_io_ppe( void    *io_pArgs );
+void* call_host_load_io_ppe(void *io_pArgs);
 
 };
 
-
-
-namespace   INITSERVICE
+namespace INITSERVICE
 {
-    const   TaskInfo    g_istep16[]  =   {
+    const TaskInfo g_istep16[] =
+    {
         {
-                "",         // dummy, index 0
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
+            "",         // dummy, index 0
+            nullptr,
+            { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
-                ISTEPNAME(16,01,"host_activate_master"),
-                ISTEP_16::call_host_activate_master,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
+            ISTEPNAME(16,01,"host_activate_master"),
+            ISTEP_16::call_host_activate_master,
+            { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
         {
-                ISTEPNAME(16,02,"host_activate_slave_cores"),
-                ISTEP_16::call_host_activate_slave_cores,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
+            ISTEPNAME(16,02,"host_activate_slave_cores"),
+            ISTEP_16::call_host_activate_slave_cores,
+            { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
         },
         {
-                ISTEPNAME(16,03,"host_secure_rng"),
-                ISTEP_16::call_host_secure_rng,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+            ISTEPNAME(16,03,"host_secure_rng"),
+            ISTEP_16::call_host_secure_rng,
+            { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                // Hostboot PRD should no longer be called after this step.
-                ISTEPNAME(16,04,"mss_scrub"),
-                ISTEP_16::call_mss_scrub,
+            // Hostboot PRD should no longer be called after this step.
+            ISTEPNAME(16,04,"mss_scrub"),
+            ISTEP_16::call_mss_scrub,
 #ifdef CONFIG_NVDIMM
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
+            { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
 #else
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+            { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
 #endif
         },
         {
-                ISTEPNAME(16,05,"host_load_io_ppe"),
-                ISTEP_16::call_host_load_io_ppe,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-        {
-                ISTEPNAME(16,06,"host_ipl_complete"),
-                ISTEP_16::call_host_ipl_complete,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
+            ISTEPNAME(16,05,"host_ipl_complete"),
+            ISTEP_16::call_host_ipl_complete,
+            { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
 };
 
-const DepModInfo g_istep16Dependancies = {
+const DepModInfo g_istep16Dependancies =
+{
     {
         DEP_LIB(libistep16.so),
         DEP_LIB(libnestmemutils.so),
@@ -168,13 +160,14 @@ const DepModInfo g_istep16Dependancies = {
         DEP_LIB(libpm.so),
         DEP_LIB(libimageprocs.so),
         DEP_LIB(libisteps_nest.so),
-        NULL
+        nullptr
     }
 };
 
-const   ExtTaskInfo g_istep16TaskList    =   {
+const ExtTaskInfo g_istep16TaskList =
+{
     &(g_istep16[0]),
-    ( sizeof(g_istep16)/sizeof(TaskInfo) ),
+    std::size(g_istep16),
     &g_istep16Dependancies
 };
 

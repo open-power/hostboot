@@ -23,159 +23,147 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include    <errl/errlentry.H>
-#include    <initservice/isteps_trace.H>
-#include    <isteps/hwpisteperror.H>
-#include    <errl/errludtarget.H>
-#include    <errl/errlmanager.H>
-#include    <util/misc.H>
-#include    <diag/prdf/prdfMain.H>
-
-/* FIXME RTC: 210975
+#include <errl/errlentry.H>
+#include <initservice/isteps_trace.H>
+#include <isteps/hwpisteperror.H>
+#include <errl/errludtarget.H>
+#include <errl/errlmanager.H>
+#include <util/misc.H>
+#include <diag/prdf/prdfMain.H>
 #include <plat_hwp_invoker.H>     // for FAPI_INVOKE_HWP
-#include <lib/fir/memdiags_fir.H> // for mss::unmask::after_background_scrub
-*/
+//#include <lib/fir/memdiags_fir.H> // for mss::unmask::after_background_scrub
 
-using   namespace   ERRORLOG;
-using   namespace   TARGETING;
-using   namespace   ISTEP;
-using   namespace   ISTEP_ERROR;
-using   namespace   TARGETING;
+using namespace ERRORLOG;
+using namespace TARGETING;
+using namespace ISTEP;
+using namespace ISTEP_ERROR;
+using namespace TARGETING;
 
 namespace ISTEP_16
 {
-void* call_mss_scrub (void *io_pArgs)
+
+void* call_mss_scrub(void* const io_pArgs)
 {
     #define ISTEP_FUNC "call_mss_scrub: "
 
     IStepError l_stepError;
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ISTEP_FUNC "entry" );
+    /* @TODO RTC 245529: Implement IStep 16.4 */
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ISTEP_FUNC "skipping");
+        return l_stepError.getErrorHandle();
+    }
+
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ISTEP_FUNC "entry");
 
     errlHndl_t errl = nullptr;
 
     do
     {
-        if ( Util::isSimicsRunning() )
+        if (Util::isSimicsRunning())
         {
             // There are performance issues and some functional deficiencies
             // that make background scrub problematic in SIMICs.
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ISTEP_FUNC
-                       "Background scrubbing not supported in SIMICs" );
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ISTEP_FUNC
+                      "Background scrubbing not supported in SIMICs");
             break;
         }
 
         TargetHandle_t sysTrgt = nullptr;
-        targetService().getTopLevelTarget( sysTrgt );
+        targetService().getTopLevelTarget(sysTrgt);
 
-        TargetHandle_t masterProc = nullptr;
-        targetService().masterProcChipTargetHandle( masterProc );
-
-        // Determine which target type runs the maintenance commands.
-        TARGETING::MODEL masterProcModel = masterProc->getAttr<ATTR_MODEL>();
-        TARGETING::TYPE maintTrgtType = TYPE_MBA;
-        switch ( masterProcModel )
-        {
-            case MODEL_CUMULUS: maintTrgtType = TYPE_MBA;       break;
-            case MODEL_NIMBUS:  maintTrgtType = TYPE_MCBIST;    break;
-            default:
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ISTEP_FUNC
-                           "Master PROC model %d not supported",
-                           masterProcModel );
-                /*@
-                * @errortype
-                * @moduleid     ISTEP::MOD_MSS_SCRUB
-                * @reasoncode   ISTEP::RC_INVALID_TARGET_TYPE
-                * @userdata1    Master processor model
-                * @userdata2    unused
-                * @devdesc      The master processor model is unsupported.
-                * @custdesc     A problem occurred during the IPL of the system.
-                */
-                errl = new ERRORLOG::ErrlEntry(
-                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    ISTEP::MOD_MSS_SCRUB,
-                                    ISTEP::RC_INVALID_TARGET_TYPE,
-                                    masterProcModel, 0,
-                                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
-        }
-        if ( nullptr != errl ) break;
+        // The OCMB_CHIP target type runs the maintenance commands.
+        const TARGETING::TYPE maintTrgtType = TYPE_OCMB_CHIP;
 
         // Start background scrubbing on all targets of this maintenance type.
-        TargetHandleList maintList; getAllChiplets( maintList, maintTrgtType );
-        for ( auto & maintTrgt : maintList )
+        TargetHandleList maintList; getAllChiplets(maintList, maintTrgtType);
+        for (const auto& maintTrgt : maintList)
         {
             bool start = true; // initially true except for MP-IPL conditions.
 
+// QUESTION: Leave this block here?
 #ifdef CONFIG_NVDIMM
             // During MP-IPLs, We only want to start background scrubbing on
             // maintenance targets that have connected NVDIMMs.
-            if ( sysTrgt->getAttr<ATTR_IS_MPIPL_HB>() )
+            if (sysTrgt->getAttr<ATTR_IS_MPIPL_HB>())
             {
                 start = false; // Only true if there is an NVDIMM.
 
                 // Find at least one DIMM behind this MCBIST that is an NVDIMM.
                 TargetHandleList dimmList;
-                getChildAffinityTargets( dimmList, maintTrgt, CLASS_NA,
-                                         TYPE_DIMM );
-                for ( auto & dimmTrgt : dimmList )
+                getChildAffinityTargets(dimmList, maintTrgt, CLASS_NA,TYPE_DIMM);
+                for (const auto& dimmTrgt : dimmList)
                 {
                     start = isNVDIMM(dimmTrgt);
-                    if ( start ) break;
+                    if (start)
+                    {
+                        break;
+                    }
                 }
             }
 #endif
             // Continue to the next target if we are unable to start background
             // scrubbing on this target.
-            if ( !start ) continue;
+            if (!start)
+            {
+                continue;
+            }
 
             // Start the command on this target.
-/* FIXME RTC: 210975 Linker errors
-            errl = PRDF::startScrub( maintTrgt );
-*/
-            if ( nullptr != errl )
+            /* @TODO RTC 243962: Implement startScrub for P10
+            errl = PRDF::startScrub(maintTrgt);
+            */
+
+            if (nullptr != errl)
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ISTEP_FUNC
-                           "PRDF::startScrub(0x%08x) failed",
-                           get_huid(maintTrgt) );
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ISTEP_FUNC
+                          "PRDF::startScrub(0x%08x) failed",
+                          get_huid(maintTrgt));
                 break;
             }
 
-/* FIXME RTC: 210975
+            /* @TODO RTC 243962: after_background_scrub isn't defined for p10 in ekb
+
             // Nimbus chips require us to unmask some additional FIR bits. Note
             // that this is not needed on Cumulus based systems because this is
             // already contained within the other Centaur HWPs.
-            if ( TYPE_MCBIST == maintTrgtType )
+            if (TYPE_MCBIST == maintTrgtType)
             {
-                fapi2::Target<fapi2::TARGET_TYPE_MCBIST> ft ( maintTrgt );
+                fapi2::Target<fapi2::TARGET_TYPE_MCBIST> ft (maintTrgt);
 
-                FAPI_INVOKE_HWP( errl, mss::unmask::after_background_scrub, ft);
-                if ( nullptr != errl )
+                FAPI_INVOKE_HWP(errl, mss::unmask::after_background_scrub, ft);
+
+                if (errl)
                 {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ISTEP_FUNC
-                               "mss::unmask::after_background_scrub(0x%08x) "
-                               "failed", get_huid(maintTrgt) );
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ISTEP_FUNC
+                              "mss::unmask::after_background_scrub(0x%08x) failed: "
+                              TRACE_ERR_FMT,
+                              get_huid(maintTrgt),
+                              TRACE_ERR_ARGS(errl));
                     break;
                 }
             }
-*/
+            */
         }
-        if ( nullptr != errl ) break;
-
+        if (nullptr != errl)
+        {
+            break;
+        }
     } while (0);
 
-    if ( nullptr != errl )
+    if (nullptr != errl)
     {
-        l_stepError.addErrorDetails( errl );
-        errl->collectTrace( "ISTEPS_TRACE", 256 );
-        errlCommit( errl, HWPF_COMP_ID );
+        l_stepError.addErrorDetails(errl);
+        errl->collectTrace("ISTEPS_TRACE");
+        errlCommit(errl, HWPF_COMP_ID);
     }
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ISTEP_FUNC "exit" );
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ISTEP_FUNC "exit");
 
     // end task, returning any errorlogs to IStepDisp
     return l_stepError.getErrorHandle();
 
     #undef ISTEP_FUNC
-}
+} // end call_mss_scrub
 
-};
+} // end namespace ISTEP_16

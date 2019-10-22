@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -194,7 +194,7 @@ namespace std
 
                 /**
                  * Get iterator to the first vector element
-                 * @return iterator of rist vector element
+                 * @return iterator of first vector element
                  * @pre None.
                  * @post None.
                  */
@@ -206,7 +206,7 @@ namespace std
 
                 /**
                  * Get const_iterator to the first vector element
-                 * @return const_iterator of rist vector element
+                 * @return const_iterator of first vector element
                  * @pre None.
                  * @post None.
                  */
@@ -218,7 +218,7 @@ namespace std
 
                 /**
                  * Get iterator to the last vector element + 1
-                 * @return iterator
+                 * @return iterator of last vector element + 1
                  * @pre None.
                  * @post None.
                  */
@@ -230,12 +230,36 @@ namespace std
 
                 /**
                  * Get const_iterator to the last vector element + 1
-                 * @return const_iterator
+                 * @return const_iterator of last vector element + 1
                  * @pre None.
                  * @post None.
                  */
                 __attribute__ ((always_inline))
                 const_iterator end() const
+                {
+                    return (iv_finish);
+                }
+
+                /**
+                 * Get const_iterator to the first vector element
+                 * @return const_iterator of first vector element
+                 * @pre None.
+                 * @post None.
+                 */
+                __attribute__ ((always_inline))
+                const_iterator cbegin() const
+                {
+                    return (iv_start);
+                }
+
+                /**
+                 * Get const_iterator to the last vector element + 1
+                 * @return const_iterator of last vector element + 1
+                 * @pre None.
+                 * @post None.
+                 */
+                __attribute__ ((always_inline))
+                const_iterator cend()
                 {
                     return (iv_finish);
                 }
