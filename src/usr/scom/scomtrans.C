@@ -192,6 +192,11 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       TARGETING::TYPE_NPU,
                       startScomProcess);
 
+DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
+                      DeviceFW::SCOM,
+                      TARGETING::TYPE_MEM_PORT,
+                      startScomProcess);
+
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 errlHndl_t startScomProcess(DeviceFW::OperationType i_opType,
@@ -301,9 +306,10 @@ errlHndl_t scomTranslate(TARGETING::Target * &i_target,
     // Get the type attribute.
     TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
 
-    centaurChipUnits_t l_chipUnit = CENTAUR_CHIP;
+    centaurChipUnits_t l_cenChipUnit = CENTAUR_CHIP;
+    p9ChipUnits_t l_p9ChipUnit = NONE;
 
-    if(false == getChipUnitCentaur(l_type,l_chipUnit))
+    if(false == getChipUnitCentaur(l_type,l_cenChipUnit))
     {
         l_err = centaur_translation(i_target,
                                     l_type,
@@ -311,14 +317,21 @@ errlHndl_t scomTranslate(TARGETING::Target * &i_target,
                                     i_opMode);
         o_needsWakeup = false;
     }
-    else
+    else if(false == getChipUnitP9(l_type,l_p9ChipUnit))
     {
         l_err = p9_translation(i_target,
-                            l_type,
-                            io_addr,
-                            o_needsWakeup,
-                            i_opMode);
+                               l_type,
+                               io_addr,
+                               o_needsWakeup,
+                               i_opMode);
     }
+    else
+    {
+        // The only type leftover should be mem_port, and there is
+        //  no translation required for that
+        assert( TARGETING::TYPE_MEM_PORT == l_type );
+    }
+
     return l_err;
 }
 

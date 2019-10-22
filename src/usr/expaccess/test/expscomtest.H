@@ -109,6 +109,20 @@ private:
       return fapi2::getScom(i_target,i_address,o_data);
     }
 
+    fapi2::ReturnCode put_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                               const uint64_t i_address,
+                               const fapi2::buffer<uint64_t> i_data)
+    {
+        return fapi2::putScom(i_target,i_address,i_data);
+    }
+
+    fapi2::ReturnCode get_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                               const uint64_t i_address,
+                               fapi2::buffer<uint64_t>& o_data)
+    {
+        return fapi2::getScom(i_target,i_address,o_data);
+    }
+
     // This is used for tests that need to not run operations at the same time
     HB_MUTEX_SERIALIZE_TEST_LOCK_ATTR iv_serializeTestMutex;
 
@@ -132,7 +146,6 @@ public:
         // will be used to hold error from fapi calls
         fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
         fapi2::buffer<uint64_t> l_scom_buffer;
-        TargetHandleList l_explorerList;
 
         do{
             if (!iv_serializeTestMutex)
@@ -142,6 +155,7 @@ public:
             }
 
             // Get the system's OCMB chips, we will use these as test targets
+            TargetHandleList l_explorerList;
             getAllChips( l_explorerList,
                           TYPE_OCMB_CHIP,
                           true ); // true: return functional OCMBs
@@ -152,13 +166,29 @@ public:
                 break;
             }
 
+            // Get the system's MEM_PORT units, we will use these as test targets
+            TargetHandleList l_memportList;
+            getAllChiplets( l_memportList,
+                            TYPE_MEM_PORT,
+                            true ); // true: return functional OCMBs
+
+            if(l_explorerList.size() != l_memportList.size() )
+            {
+                TS_FAIL( "Wrong number of MEM_PORTs (%d) compared to OCMB_CHIPs (%d)", l_memportList.size(), l_explorerList.size() );
+                break;
+            }
+
             // We will use the first and last targets for these scom tests
             auto l_firstExpChip = l_explorerList.front();
             auto l_lastExpChip  = l_explorerList.back();
+            auto l_firstMemPort = l_memportList.front();
+            auto l_lastMemPort  = l_memportList.back();
 
             // Cast the TARGETING::Targets into fapi2::Targets
             fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_firstExpChip_fapi(l_firstExpChip);
             fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_lastExpChip_fapi(l_lastExpChip);
+            fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> l_firstMemPort_fapi(l_firstMemPort);
+            fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> l_lastMemPort_fapi(l_lastMemPort);
 
             // Save away original scom switch info so we can restore it at the end of the test
             auto first_ocmb_info =
@@ -191,6 +221,7 @@ public:
                     // Otherwise we know this is a native OCMB address and it is only 32 bits
                     l_scom_buffer.insert<32,32,0,uint32_t>(l_testEntry.data);
                 }
+
                 FAPI_INVOKE_HWP(l_err, put_scom,
                                 l_firstExpChip_fapi,
                                 l_testEntry.addr,
@@ -228,7 +259,7 @@ public:
                 if(l_err)
                 {
                     FAIL_TEST_ERRL(l_firstExpChip,
-                                "testExpscomI2c>> Failed getScom reading 0x%.16X to 0x%.8X on target w/ huid 0x%.8X")
+                                "testExpscomI2c>> Failed getScom reading 0x%.16X to 0x%.8X on target w/ huid 0x%.8X");
                 }
 
                 l_tests++;
@@ -253,7 +284,7 @@ public:
                 if(l_err)
                 {
                     FAIL_TEST_ERRL(l_lastExpChip,
-                                "testExpscomI2c>> Failed getScom reading 0x%.16X to 0x%.8X on target w/ huid 0x%.8X")
+                                "testExpscomI2c>> Failed getScom reading 0x%.16X to 0x%.8X on target w/ huid 0x%.8X");
                 }
 
                 l_tests++;
@@ -264,6 +295,97 @@ public:
                             l_testEntry.data,
                             l_scom_buffer(),
                             get_huid(l_lastExpChip));
+                }
+
+                /// Repeat everything on the MEM_PORT targets
+
+                // Read the test entry info from the global table at the top of this file
+                l_testEntry = g_expscomAddrTable[l_num];
+
+                if(l_testEntry.addr & mss::exp::i2c::IBM_SCOM_INDICATOR)
+                {
+                    // If this is an IBM address then we expect 64 bits of data
+                    l_scom_buffer.insert<0,64,0,uint64_t>(l_testEntry.data);
+                }
+                else
+                {
+                    // Otherwise we know this is a native OCMB address and it is only 32 bits
+                    l_scom_buffer.insert<32,32,0,uint32_t>(l_testEntry.data);
+                }
+
+                FAPI_INVOKE_HWP(l_err, put_scom,
+                                l_firstMemPort_fapi,
+                                l_testEntry.addr,
+                                l_scom_buffer );
+                l_tests++;
+                if(l_err)
+                {
+                    FAIL_TEST_ERRL(l_firstMemPort,
+                                "testExpscomI2c>> Failed putScom writing 0x%.16X to 0x%.8X on target w/ huid 0x%.8X");
+
+                }
+
+                // putScom to last MEM_PORT over i2c
+                FAPI_INVOKE_HWP(l_err, put_scom,
+                                l_lastMemPort_fapi,
+                                l_testEntry.addr,
+                                l_scom_buffer );
+                l_tests++;
+                if(l_err)
+                {
+                    FAIL_TEST_ERRL(l_lastMemPort,
+                              "testExpscomI2c>> Failed putScom writing 0x%.16X to 0x%.8X on target w/ huid 0x%.8X");
+                }
+
+
+                // Flush scom buffers so it doesnt mess up next test
+                l_scom_buffer.flush<0>();
+
+                // getScom to first MEM_PORT over i2c
+                FAPI_INVOKE_HWP(l_err, get_scom,
+                                l_firstMemPort_fapi,
+                                l_testEntry.addr,
+                                l_scom_buffer );
+                l_tests++;
+                if(l_err)
+                {
+                    FAIL_TEST_ERRL(l_firstMemPort,
+                                "testExpscomI2c>> Failed getScom reading 0x%.16X to 0x%.8X on target w/ huid 0x%.8X");
+                }
+
+                l_tests++;
+                if(l_scom_buffer() != l_testEntry.data)
+                {
+                    l_fails++;
+                    TS_FAIL("testExpscomI2c>> Expected 0x%.16X but got 0x%.16X on target w/ huid 0x%.8X",
+                            l_testEntry.data,
+                            l_scom_buffer(),
+                            get_huid(l_firstMemPort));
+                }
+
+                // Flush scom buffers so it doesnt mess up next test
+                l_scom_buffer.flush<0>();
+
+                // getScom to last MEM_PORT over i2c
+                FAPI_INVOKE_HWP(l_err, get_scom,
+                                l_lastMemPort_fapi,
+                                l_testEntry.addr,
+                                l_scom_buffer );
+                l_tests++;
+                if(l_err)
+                {
+                    FAIL_TEST_ERRL(l_lastMemPort,
+                                "testExpscomI2c>> Failed getScom reading 0x%.16X to 0x%.8X on target w/ huid 0x%.8X");
+                }
+
+                l_tests++;
+                if(l_scom_buffer() != l_testEntry.data)
+                {
+                    l_fails++;
+                    TS_FAIL("testExpscomI2c>> Expected 0x%.16X but got 0x%.16X on target w/ huid 0x%.8X",
+                            l_testEntry.data,
+                            l_scom_buffer(),
+                            get_huid(l_lastMemPort));
                 }
             }
 
