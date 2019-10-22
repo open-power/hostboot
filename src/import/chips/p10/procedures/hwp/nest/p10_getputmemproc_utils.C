@@ -153,6 +153,15 @@ extern "C"
         else if ((i_mem_flags & fapi2::SBE_MEM_ACCESS_FLAGS_SWITCH_MODE) == fapi2::SBE_MEM_ACCESS_FLAGS_SWITCH_MODE)
         {
             o_aduFlags.setOperationType(adu_operationFlag::PMISC_OPER);
+
+            if (i_bytes == 1)
+            {
+                o_aduFlags.setTransactionSize(adu_operationFlag::TSIZE_1);
+            }
+            else if (i_bytes == 2)
+            {
+                o_aduFlags.setTransactionSize(adu_operationFlag::TSIZE_2);
+            }
         }
         else if ((i_mem_flags & fapi2::SBE_MEM_ACCESS_FLAGS_PB_INIT_MODE) == fapi2::SBE_MEM_ACCESS_FLAGS_PB_INIT_MODE)
         {
