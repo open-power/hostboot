@@ -41,6 +41,12 @@
   #include <isteps/pm/occCheckstop.H>
 #endif
 
+// TODO RTC:245219
+// use PRD's version of memdiags instead of this cronus verison once its working
+#ifdef CONFIG_AXONE
+#include <exp_mss_memdiag.H>
+#endif
+
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
@@ -161,6 +167,32 @@ void* call_mss_memdiag (void* io_pArgs)
             // No need to unmask or turn off FIFO. That is already contained
             // within the other Centaur HWPs.
         }
+#ifdef CONFIG_AXONE
+        else if (MODEL_AXONE == procType )
+        {
+            // no need to run in simics
+            if ( Util::isSimicsRunning() == false )
+            {
+                // TODO RTC:245219
+                // use PRD's version of memdiags instead of this cronus verison once its working
+                TargetHandleList trgtList; getAllChips( trgtList, TYPE_OCMB_CHIP );
+                for (const auto & l_ocmb_target : trgtList)
+                {
+                    fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target(l_ocmb_target);
+                    // Start Memory Diagnostics.
+                    FAPI_INVOKE_HWP( errl, exp_mss_memdiag, l_fapi_ocmb_target );
+                    if ( nullptr != errl )
+                    {
+                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                                  "exp_mss_memdiag (0x%08x) "
+                                  "failed", get_huid(l_ocmb_target) );
+                        break;
+                    }
+                }
+
+            }
+        }
+#endif
 
     } while (0);
 
