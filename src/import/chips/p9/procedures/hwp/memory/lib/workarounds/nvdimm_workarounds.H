@@ -58,18 +58,44 @@ typedef fapi2::ReturnCode (*p9_flush_nvdimm_FP_t) (const fapi2::Target<fapi2::TA
 /// @param[in] i_target - PROC_CHIP target
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
-
 fapi2::ReturnCode trigger_csave( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target );
 
 ///
-/// @brief Helper for trigger_csave. This subroutine assert RESET_n to trigger
-/// the backup on nvdimm
+/// @brief Program the necessary scom regs to prepare for CSAVE
 /// @param[in] i_target - PROC_CHIP target
-/// @param[in] i_mca_pos - The MCA position relative to the PROC
+/// @param[in] i_mcbist - mcbist position relative to the proc
+/// @param[out] o_addresses - list of addresses that require restore
+/// @param[out] o_data - data to restore to o_addresses
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
+fapi2::ReturnCode prep_for_csave( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                                  const uint8_t i_mcbist,
+                                  std::vector<uint64_t>& o_addresses,
+                                  std::vector<fapi2::buffer<uint64_t>>& o_data);
 
-fapi2::ReturnCode assert_resetn( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, uint8_t i_mca_pos);
+///
+/// @brief Select which port to run CCS on
+/// @param[in] i_target - PROC_CHIP target
+/// @param[in] i_mca - mca position relative to the proc
+/// @param[out] o_addresses - list of addresses that require restore
+/// @param[out] o_data - data to restore to o_addresses
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+fapi2::ReturnCode select_port(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                              const uint8_t i_mca,
+                              std::vector<uint64_t>& o_addresses,
+                              std::vector<fapi2::buffer<uint64_t>>& o_data);
+
+///
+/// @brief Start or stop CCS
+/// @param[in] i_target - PROC_CHIP target
+/// @param[in] i_mcbist - mcbist position relative to the proc
+/// @param[in] i_start_stop - start or stop CCS
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+fapi2::ReturnCode start_stop_ccs( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                                  const uint8_t i_mcbist,
+                                  const bool i_start_stop);
 
 ///
 /// @brief change the BAR valid state on MCS with NVDIMM installed
@@ -81,15 +107,6 @@ fapi2::ReturnCode assert_resetn( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHI
 fapi2::ReturnCode change_bar_valid_state( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         const fapi2::buffer<uint8_t> i_port_bitmap,
         const uint64_t i_state);
-
-///
-/// @brief Helper for trigger_csave. This subroutine puts the MCA into STR
-/// @param[in] i_target - PROC_CHIP target
-/// @param[in] i_mca_pos - The MCA position relative to the PROC
-/// @return FAPI2_RC_SUCCESS iff setup was successful
-///
-
-fapi2::ReturnCode self_refresh_entry( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, uint8_t i_mca_pos);
 
 }//ns nvdimm
 }//ns workarounds

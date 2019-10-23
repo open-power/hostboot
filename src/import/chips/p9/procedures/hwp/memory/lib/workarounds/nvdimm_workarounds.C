@@ -48,34 +48,8 @@ namespace workarounds
 namespace nvdimm
 {
 
-
-// MBASTR0Q for each MCA
 // Note: Since the scoms are executed at the chip, it needs the dedicated
 // address for each MCA
-constexpr const uint64_t MBASTR0Q_REG[] =
-{
-    MCA_0_MBASTR0Q,
-    MCA_1_MBASTR0Q,
-    MCA_2_MBASTR0Q,
-    MCA_3_MBASTR0Q,
-    MCA_4_MBASTR0Q,
-    MCA_5_MBASTR0Q,
-    MCA_6_MBASTR0Q,
-    MCA_7_MBASTR0Q,
-};
-
-// MBARPC0Q for each MCA
-constexpr const uint64_t MBARPC0Q_REG[] =
-{
-    MCA_0_MBARPC0Q,
-    MCA_1_MBARPC0Q,
-    MCA_2_MBARPC0Q,
-    MCA_3_MBARPC0Q,
-    MCA_4_MBARPC0Q,
-    MCA_5_MBARPC0Q,
-    MCA_6_MBARPC0Q,
-    MCA_7_MBARPC0Q,
-};
 
 // FARB5Q for each MCA
 constexpr const uint64_t FARB5Q_REG[] =
@@ -88,19 +62,6 @@ constexpr const uint64_t FARB5Q_REG[] =
     MCA_5_MBA_FARB5Q,
     MCA_6_MBA_FARB5Q,
     MCA_7_MBA_FARB5Q,
-};
-
-// FARB6Q for each MCA
-constexpr const uint64_t FARB6Q_REG[] =
-{
-    MCA_0_MBA_FARB6Q,
-    MCA_1_MBA_FARB6Q,
-    MCA_2_MBA_FARB6Q,
-    MCA_3_MBA_FARB6Q,
-    MCA_4_MBA_FARB6Q,
-    MCA_5_MBA_FARB6Q,
-    MCA_6_MBA_FARB6Q,
-    MCA_7_MBA_FARB6Q,
 };
 
 // MCFGP for each MCS
@@ -119,129 +80,131 @@ constexpr const uint64_t MCB_CNTLQ_REG[] =
     MCBIST_1_MCB_CNTLQ,
 };
 
+// MCB_MCBAGRAQ
+constexpr const uint64_t MCB_MCBAGRAQ_REG[] =
+{
+    MCBIST_0_MCBAGRAQ,
+    MCBIST_1_MCBAGRAQ,
+};
+
+// CCS_MODEQ
+constexpr const uint64_t CCS_MODEQ_REG[] =
+{
+    MCBIST_0_CCS_MODEQ,
+    MCBIST_1_CCS_MODEQ,
+};
+
+// CCS_CNTLQ
+constexpr const uint64_t CCS_CNTLQ_REG[] =
+{
+    MCBIST_0_CCS_CNTLQ,
+    MCBIST_1_CCS_CNTLQ,
+};
+
 constexpr uint8_t PORTS_PER_MODULE = 8;
+constexpr uint8_t PORTS_PER_MCBIST = 4;
+constexpr uint8_t MCBISTS_PER_PROC = 2;
 
 ///
-/// @brief Helper for trigger_csave. This subroutine puts the MCA into STR
-/// This is the same thing as mss::nvdimm::self_refresh_entry() but rewritten
-/// to support SBE
+/// @brief Program the necessary scom regs to prepare for CSAVE
 /// @param[in] i_target - PROC_CHIP target
-/// @param[in] i_mca_pos - The MCA position relative to the PROC
+/// @param[in] i_mcbist - mcbist position relative to the proc
+/// @param[out] o_addresses - list of addresses that require restore
+/// @param[out] o_data - data to restore to o_addresses
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
-fapi2::ReturnCode self_refresh_entry( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                                      const uint8_t i_mca_pos)
+fapi2::ReturnCode prep_for_csave( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                                  const uint8_t i_mcbist,
+                                  std::vector<uint64_t>& o_addresses,
+                                  std::vector<fapi2::buffer<uint64_t>>& o_data)
 {
-    FAPI_ASSERT((i_mca_pos < PORTS_PER_MODULE),
-                fapi2::MSS_SRE_MCA_OUT_OF_RANGE().
-                set_PROC_TARGET(i_target).
-                set_MCA_POS(i_mca_pos),
-                "Invalid port number %u provided", i_mca_pos);
+    fapi2::buffer<uint64_t> l_mcbcntlq_data;
+    fapi2::buffer<uint64_t> l_mcbagraq_data;
+    fapi2::buffer<uint64_t> l_ccs_modeq_data;
 
-    FAPI_DBG("Entering STR on port %u.", i_mca_pos);
+    // Stop mcbist first otherwise it can kick the DIMM out of STR
+    FAPI_TRY(fapi2::getScom(i_target, MCB_CNTLQ_REG[i_mcbist], l_mcbcntlq_data));
+    l_mcbcntlq_data.setBit<MCBIST_CCS_CNTLQ_STOP>();
+    FAPI_TRY(fapi2::putScom(i_target, MCB_CNTLQ_REG[i_mcbist], l_mcbcntlq_data));
 
-    {
-        fapi2::buffer<uint64_t> l_mbarpc0_data;
-        fapi2::buffer<uint64_t> l_mbastr0_data;
-        fapi2::buffer<uint64_t> l_mcbcntlq_data;
-        fapi2::buffer<uint64_t> l_mcafarb6q_data;
-        constexpr uint64_t ENABLE = 1;
-        constexpr uint64_t DISABLE = 0;
-        constexpr uint64_t MAXALL_MIN0 = 0b010;
-        constexpr uint64_t STOP = 1;
-        constexpr uint64_t PORTS_PER_MCBIST = 4;
-        constexpr uint64_t TIME_0 = 0;
-        const uint8_t l_mcbist = i_mca_pos < PORTS_PER_MCBIST ? 0 : 1;
+    // Backup the address and data for the following scoms to restore later
 
-        // Variables for polling. Poll up to a second to make sure the port has entered STR
-        // Why a second? No idea. STR is controlled by the sequencer via power control.
-        // The settings are set to enter STR ASAP but a poll here would let us know
-        // if somehow the port is not in STR.
-        constexpr uint64_t POLL_ITERATION = 500;
-        constexpr uint64_t DELAY_2MS_IN_NS = 2000000;
-        bool l_in_str = false;
-        uint8_t l_sim = 0;
+    // Disable maint. address mode
+    FAPI_TRY(fapi2::getScom(i_target, MCB_MCBAGRAQ_REG[i_mcbist], l_mcbagraq_data));
+    o_addresses.push_back(MCB_MCBAGRAQ_REG[i_mcbist]);
+    o_data.push_back(l_mcbagraq_data);
+    l_mcbagraq_data.clearBit<MCBIST_MCBAGRAQ_CFG_MAINT_ADDR_MODE_EN>();
+    FAPI_TRY(fapi2::putScom(i_target, MCB_MCBAGRAQ_REG[i_mcbist], l_mcbagraq_data));
 
-        // Stop mcbist first otherwise it can kick the DIMM out of STR
-        FAPI_TRY(fapi2::getScom(i_target, MCB_CNTLQ_REG[l_mcbist], l_mcbcntlq_data));
-        l_mcbcntlq_data.writeBit<MCBIST_CCS_CNTLQ_STOP>(STOP);
-        FAPI_TRY(fapi2::putScom(i_target, MCB_CNTLQ_REG[l_mcbist], l_mcbcntlq_data));
-
-        // Step 1 - In MBARPC0Q, disable power domain control, set domain to MAXALL_MIN0,
-        //          and disable minimum domain reduction (allow immediate entry of STR)
-        FAPI_TRY(fapi2::getScom(i_target, MBARPC0Q_REG[i_mca_pos], l_mbarpc0_data));
-        l_mbarpc0_data.writeBit<MCA_MBARPC0Q_CFG_MIN_MAX_DOMAINS_ENABLE>(DISABLE);
-        l_mbarpc0_data.insertFromRight<MCA_MBARPC0Q_CFG_MIN_MAX_DOMAINS, MCA_MBARPC0Q_CFG_MIN_MAX_DOMAINS_LEN>(MAXALL_MIN0);
-        l_mbarpc0_data.writeBit<MCA_MBARPC0Q_CFG_MIN_DOMAIN_REDUCTION_ENABLE>(DISABLE);
-        FAPI_TRY(fapi2::putScom(i_target, MBARPC0Q_REG[i_mca_pos], l_mbarpc0_data));
-
-        // Step 2 - In MBASTR0Q, enable STR entry
-        FAPI_TRY(fapi2::getScom(i_target, MBASTR0Q_REG[i_mca_pos], l_mbastr0_data));
-        l_mbastr0_data.writeBit<MCA_MBASTR0Q_CFG_STR_ENABLE>(ENABLE);
-        l_mbastr0_data.insertFromRight<MCA_MBASTR0Q_CFG_ENTER_STR_TIME, MCA_MBASTR0Q_CFG_ENTER_STR_TIME_LEN>(TIME_0);
-        FAPI_TRY(fapi2::putScom(i_target, MBASTR0Q_REG[i_mca_pos], l_mbastr0_data));
-
-        // Step 3 - In MBARPC0Q, enable power domain control.
-        l_mbarpc0_data.writeBit<MCA_MBARPC0Q_CFG_MIN_MAX_DOMAINS_ENABLE>(ENABLE);
-        FAPI_TRY(fapi2::putScom(i_target, MBARPC0Q_REG[i_mca_pos], l_mbarpc0_data));
-
-#ifndef __PPE__
-        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_sim) );
-#endif
-
-        if (!l_sim)
-        {
-            // Poll to make sure we are in STR before proceeding.
-            for (uint8_t i = 0; i < POLL_ITERATION; i++)
-            {
-                FAPI_TRY(fapi2::delay(DELAY_2MS_IN_NS, 0), "Error returned from fapi2::delay call");
-                FAPI_TRY(fapi2::getScom(i_target, FARB6Q_REG[i_mca_pos], l_mcafarb6q_data));
-
-                if (l_mcafarb6q_data.getBit<MCA_MBA_FARB6Q_CFG_STR_STATE>())
-                {
-                    l_in_str = true;
-                    break;
-                }
-            }
-
-            FAPI_ASSERT(l_in_str,
-                        fapi2::MSS_STR_NOT_ENTERED().
-                        set_PROC_TARGET(i_target).
-                        set_MCA_POS(i_mca_pos).
-                        set_MCA_FARB6Q(l_mcafarb6q_data).
-                        set_STR_STATE(l_in_str),
-                        "STR not entered on port %u", i_mca_pos);
-        }
-    }
+    // Required for CCS to drive RESETn
+    FAPI_TRY(fapi2::getScom(i_target, CCS_MODEQ_REG[i_mcbist], l_ccs_modeq_data));
+    o_addresses.push_back(CCS_MODEQ_REG[i_mcbist]);
+    o_data.push_back(l_ccs_modeq_data);
+    l_ccs_modeq_data.setBit<MCBIST_CCS_MODEQ_IDLE_PAT_BANK_2>();
+    FAPI_TRY(fapi2::putScom(i_target, CCS_MODEQ_REG[i_mcbist], l_ccs_modeq_data));
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
 ///
-/// @brief Helper for trigger_csave. This subroutine assert RESET_n to trigger
-/// the backup on nvdimm
-/// @param[in] i_target - PROC_CHIP targetdefine
-/// @param[in] i_mca_pos - The MCA position relative to the PROC
+/// @brief Start or stop CCS
+/// @param[in] i_target - PROC_CHIP target
+/// @param[in] i_mcbist - mcbist position relative to the proc
+/// @param[in] i_start_stop - start or stop CCS
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
-fapi2::ReturnCode assert_resetn( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const uint8_t i_mca_pos)
+fapi2::ReturnCode start_stop_ccs( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                                  const uint8_t i_mcbist,
+                                  const uint8_t i_start_stop)
 {
-    FAPI_ASSERT((i_mca_pos < PORTS_PER_MODULE),
-                fapi2::MSS_RESETN_MCA_OUT_OF_RANGE().
+    fapi2::buffer<uint64_t> l_data;
+    constexpr uint8_t START = 1;
+
+    FAPI_TRY(fapi2::getScom(i_target, CCS_CNTLQ_REG[i_mcbist], l_data));
+    FAPI_TRY(fapi2::putScom(i_target, CCS_CNTLQ_REG[i_mcbist],
+                            i_start_stop == START ? l_data.setBit<MCBIST_CCS_CNTLQ_START>() : l_data.setBit<MCBIST_CCS_CNTLQ_STOP>()));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Select which port to run CCS on
+/// @param[in] i_target - PROC_CHIP target
+/// @param[in] i_mca - mca position relative to the proc
+/// @param[out] o_addresses - list of addresses that require restore
+/// @param[out] o_data - data to restore to o_addresses
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+fapi2::ReturnCode select_port(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                              const uint8_t i_mca,
+                              std::vector<uint64_t>& o_addresses,
+                              std::vector<fapi2::buffer<uint64_t>>& o_data)
+{
+    FAPI_ASSERT((i_mca < PORTS_PER_MODULE),
+                fapi2::MSS_SELECT_PORT_MCA_OUT_OF_RANGE().
                 set_PROC_TARGET(i_target).
-                set_MCA_POS(i_mca_pos),
-                "Invalid port number %u provided", i_mca_pos);
-
-    FAPI_DBG("Asserting RESETn on port %d.", i_mca_pos);
-
+                set_MCA_POS(i_mca),
+                "Invalid port number %u provided", i_mca);
     {
-        fapi2::buffer<uint64_t> l_farb5q_data;
-        constexpr uint64_t LOW = 0;
+        // MCB_CNTLQ[2:5]. Default to port 0 then shift right as needed
+        constexpr uint8_t PORT_0 = 0b1000;
+        const uint64_t l_port_sel = PORT_0 >> (i_mca % PORTS_PER_MCBIST);
+        const uint8_t l_mcbist = i_mca < PORTS_PER_MCBIST ? 0 : 1;
+        fapi2::buffer<uint64_t> l_data;
 
-        FAPI_TRY(fapi2::getScom(i_target, FARB5Q_REG[i_mca_pos], l_farb5q_data));
-        l_farb5q_data.writeBit<MCA_MBA_FARB5Q_CFG_DDR_RESETN>(LOW);
-        FAPI_TRY(fapi2::putScom(i_target, FARB5Q_REG[i_mca_pos], l_farb5q_data));
+        FAPI_TRY(fapi2::getScom(i_target, MCB_CNTLQ_REG[l_mcbist], l_data));
+        l_data.insertFromRight<MCBIST_MCB_CNTLQ_MCBCNTL_PORT_SEL, MCBIST_MCB_CNTLQ_MCBCNTL_PORT_SEL_LEN>(l_port_sel);
+        FAPI_TRY(fapi2::putScom(i_target, MCB_CNTLQ_REG[l_mcbist], l_data));
+
+        // For each port, set the address mux to CCS and enable CCS to drive RESETn
+        FAPI_TRY(fapi2::getScom(i_target, FARB5Q_REG[i_mca], l_data));
+        o_addresses.push_back(FARB5Q_REG[i_mca]);
+        o_data.push_back(l_data);
+        l_data.setBit<MCA_MBA_FARB5Q_CFG_CCS_ADDR_MUX_SEL>();
+        l_data.setBit<MCA_MBA_FARB5Q_CFG_CCS_INST_RESET_ENABLE>();
+        FAPI_TRY(fapi2::putScom(i_target, FARB5Q_REG[i_mca], l_data));
     }
 
 fapi_try_exit:
@@ -288,6 +251,10 @@ fapi2::ReturnCode trigger_csave( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHI
     fapi2::buffer<uint8_t> l_nvdimm_port_bitmap = 0;
     constexpr uint64_t INVALID = 0;
     constexpr uint64_t VALID = 1;
+    constexpr uint8_t START = 1;
+    constexpr uint8_t STOP = 0;
+    constexpr uint64_t MS_IN_NS = 1000000;
+    const uint64_t DELAY_20MS_IN_NS = 20 * MS_IN_NS;
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_SBE_NVDIMM_IN_PORT, i_target, l_nvdimm_port_bitmap) );
 
@@ -295,17 +262,50 @@ fapi2::ReturnCode trigger_csave( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHI
     // remove the port out of STR
     FAPI_TRY( change_bar_valid_state(i_target, l_nvdimm_port_bitmap, INVALID));
 
-    for (uint8_t l_mca_pos = 0; l_mca_pos < PORTS_PER_MODULE; l_mca_pos++)
+    // Get all the mcbists/mcas with NVDIMM
+    for (uint8_t l_mcbist = 0; l_mcbist < MCBISTS_PER_PROC; l_mcbist++)
     {
-        if (l_nvdimm_port_bitmap.getBit(l_mca_pos) == fapi2::ENUM_ATTR_SBE_NVDIMM_IN_PORT_YES)
+        std::vector<uint8_t> l_mcas;
+        std::vector<uint64_t> l_addresses;
+        std::vector<fapi2::buffer<uint64_t>> l_data;
+        const uint8_t MCA_STARTING_POS = (PORTS_PER_MCBIST * l_mcbist);
+
+        // For each mcbist, gather a list of mcas with nvdimm installed
+        for (uint8_t l_mca_pos = 0 + MCA_STARTING_POS;
+             l_mca_pos < PORTS_PER_MCBIST + MCA_STARTING_POS;
+             l_mca_pos++)
         {
-            FAPI_DBG("NVDIMM found in port %d ", l_mca_pos);
+            if (l_nvdimm_port_bitmap.getBit(l_mca_pos) == fapi2::ENUM_ATTR_SBE_NVDIMM_IN_PORT_YES)
+            {
+                l_mcas.push_back(l_mca_pos);
+            }
+        }
 
-            // Enter STR
-            FAPI_TRY(self_refresh_entry(i_target, l_mca_pos));
+        // Nothing to do
+        if (l_mcas.empty())
+        {
+            FAPI_DBG("No mca with nvdimm detect. l_mcbist = 0x%x, l_mcas.size = %u",
+                     l_mcbist, l_mcas.size());
+            continue;
+        }
 
-            // Assert ddr_resetn
-            FAPI_TRY(assert_resetn(i_target, l_mca_pos));
+        // Prep mcbist/ccs for csave
+        FAPI_TRY( prep_for_csave(i_target, l_mcbist, l_addresses, l_data));
+
+        // Start and stop CCS, one port at a time.
+        for (const auto l_mca : l_mcas)
+        {
+            FAPI_TRY( select_port(i_target, l_mca, l_addresses, l_data), "Error returned from select_port(). l_mca = %u", l_mca);
+            FAPI_TRY( start_stop_ccs(i_target, l_mcbist, START), "Error to START from start_stop_ccs()");
+            FAPI_TRY( fapi2::delay(DELAY_20MS_IN_NS, 0), "Error returned from fapi2::delay call");
+            FAPI_TRY( start_stop_ccs(i_target, l_mcbist, STOP), "Error to STOP from start_stop_ccs()");
+        }
+
+        // Restore the original value. This is a don't care for poweroff/warm reboot,
+        // needed for MPIPL
+        for (size_t index = 0; index < l_addresses.size(); index++)
+        {
+            FAPI_TRY(fapi2::putScom(i_target, l_addresses[index], l_data[index]));
         }
     }
 

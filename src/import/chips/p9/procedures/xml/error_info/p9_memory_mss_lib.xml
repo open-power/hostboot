@@ -489,34 +489,10 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_SRE_MCA_OUT_OF_RANGE</rc>
-    <description>Indicates a MCA passed to the NVDIMM sre code is out of range</description>
+    <rc>RC_MSS_SELECT_PORT_MCA_OUT_OF_RANGE</rc>
+    <description>Indicates a MCA is out of range</description>
     <ffdc>PROC_TARGET</ffdc>
     <ffdc>MCA_POS</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_RESETN_MCA_OUT_OF_RANGE</rc>
-    <description>Indicates a MCA passed to the NVDIMM resetn code is out of range</description>
-    <ffdc>PROC_TARGET</ffdc>
-    <ffdc>MCA_POS</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_STR_NOT_ENTERED</rc>
-    <description>Indicates a MCA has not entered STR within the allotted time</description>
-    <ffdc>PROC_TARGET</ffdc>
-    <ffdc>MCA_POS</ffdc>
-    <ffdc>MCA_FARB6Q</ffdc>
-    <ffdc>STR_STATE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
