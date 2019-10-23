@@ -576,6 +576,18 @@ namespace KernelMisc
 
             l_frame = reinterpret_cast<uint64_t*>(*l_frame);
         }
+
+        printk("\n  GPRs for %d:\n", l_tid);
+
+        for (int i = 0; i < 16; ++i)
+        {
+            printk("    r%-2d = 0x%016lx    r%-2d = 0x%016lx\n",
+                   i,
+                   i_task->context.gprs[i],
+                   i + 16,
+                   i_task->context.gprs[i + 16]);
+        }
+
         printk("\n");
     }
 
