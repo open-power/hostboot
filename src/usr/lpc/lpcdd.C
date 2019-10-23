@@ -52,7 +52,6 @@
 #include <util/misc.H>
 #include <errl/errlreasoncodes.H>
 
-
 trace_desc_t* g_trac_lpc;
 TRAC_INIT( & g_trac_lpc, LPC_COMP_NAME, 2*KILOBYTE, TRACE::BUFFER_SLOW);
 
@@ -759,6 +758,60 @@ errlHndl_t LpcDD::checkAddr(LPC::TransType i_type,
     return NULL;
 }
 
+// @TODO RTC 248971
+// MCTP support requires some MMIO reads/writes from/to LPC FW space to be 4-byte aligned,
+// whereas the Hostboot memcpy implementation only supports 8 or 1 byte alignment.  Temporarily
+// switch to 4-byte alignment to allow this case to work.  The referenced work item should
+// implement an intelligent copy that optimizes the sequences of 1,2,4,8 byte MMIOs to achieve
+// the desired transfer, while taking into account alignment requirements.
+
+#ifdef CONFIG_MCTP
+
+/**
+ *  @brief Copy four bytes at a time to or from LPC FW space memory until
+ *      less than four bytes remain, then copy one byte at a time for the
+ *      remaining data.
+ *
+ *  @param[in] i_pDest Pointer to destination buffer (must not be nullptr
+ *      or assertion will fire).
+ *
+ *  @param[in] i_pSrc  Pointer to source buffer (must not be nullptr or
+ *      assertion will fire).
+ *
+ *  @param[in] i_len Number of bytes to copy
+ *
+ *  @return Pointer to destination buffer
+ */
+static void* lpc_fw_memcpy(
+          void* const i_pDest,
+    const void* const i_pSrc,
+          size_t      i_len)
+{
+    assert(i_pDest,"Destination pointer was nullptr");
+    assert(i_pSrc,"Source pointer was nullptr");
+
+    uint32_t* pLdest = reinterpret_cast<uint32_t*>(i_pDest);
+    const uint32_t* pLsrc = reinterpret_cast<const uint32_t*>(i_pSrc);
+
+    while (i_len >= sizeof(uint32_t))
+    {
+        *pLdest++ = *pLsrc++;
+        i_len -= sizeof(uint32_t);
+    }
+
+    uint8_t* pBdest = reinterpret_cast<uint8_t*>(pLdest);
+    const uint8_t* pBsrc = reinterpret_cast<const uint8_t*>(pLsrc);
+
+    while (i_len >= sizeof(uint8_t))
+    {
+        *pBdest++ = *pBsrc++;
+        i_len -= sizeof(uint8_t);
+    }
+
+    return i_pDest;
+}
+#endif
+
 /**
  * @brief Read an address from LPC space, assumes lock is already held
  */
@@ -804,7 +857,11 @@ errlHndl_t LpcDD::_readLPC(LPC::TransType i_type,
         else if ( i_type == LPC::TRANS_FW
                   && (i_addr + io_buflen) <= LPC::FW_WINDOW_SIZE)
         {
+#ifdef CONFIG_MCTP
+            lpc_fw_memcpy( o_buffer, reinterpret_cast<void*>(l_addr), io_buflen );
+#else
             memcpy( o_buffer, reinterpret_cast<void*>(l_addr), io_buflen );
+#endif
         }
 #endif
         else
@@ -885,7 +942,11 @@ errlHndl_t LpcDD::_writeLPC(LPC::TransType i_type,
         else if ( i_type == LPC::TRANS_FW
                                  && (i_addr + io_buflen) < LPC::FW_WINDOW_SIZE)
         {
+#ifdef CONFIG_MCTP
+            lpc_fw_memcpy( o_buffer, reinterpret_cast<void*>(l_addr), io_buflen );
+#else
             memcpy( reinterpret_cast<void*>(l_addr), i_buffer, io_buflen );
+#endif
         }
         eieio();
 #endif
