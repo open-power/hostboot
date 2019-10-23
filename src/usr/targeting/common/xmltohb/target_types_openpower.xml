@@ -131,6 +131,18 @@
   <targetTypeExtension>
     <id>sys-sys-power10</id>
     <attribute>
+      <id>ALLOW_CALLHOME_ESELS_TO_BMC</id>
+    </attribute>
+    <attribute>
+      <id>BMC_MAX_ERROR_LOG_SIZE</id>
+    </attribute>
+    <attribute>
+      <id>IPMI_MAX_BUFFER_SIZE</id>
+    </attribute>
+    <attribute>
+      <id>IPMI_SENSORS</id>
+    </attribute>
+    <attribute>
       <id>OP_TRACE_LITE</id>
     </attribute>
   </targetTypeExtension>
