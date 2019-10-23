@@ -2096,9 +2096,11 @@ errlHndl_t getOmiFreq(TARGETING::ATTR_FREQ_OMI_MHZ_type & o_omiFreqMhz)
 
         TARGETING::ATTR_FREQ_OMI_MHZ_type l_omiFreqToCmp = l_procsList[i]->getAttr<TARGETING::ATTR_FREQ_OMI_MHZ>();
 
-        // If we found that this processor's OMI freq value does not match the first processor's value then
+        // If this processors OMI freq is 0 then we have not determined this proc's OMI freq yet so we can ignore it.
+        // Otherwise, if we found that this processor's OMI freq value does not match the first processor's values then
         // return an error
-        if (l_omiFreqToCmp != o_omiFreqMhz)
+        if (l_omiFreqToCmp != 0 &&
+            l_omiFreqToCmp != o_omiFreqMhz)
         {
             FAPI_ERR("platGetMcPllBucket: Detected two processors with different OMI frequencies."
                       " Proc 0x%.08X has OMI freq = %d. "
