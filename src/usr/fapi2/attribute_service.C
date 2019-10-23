@@ -2808,10 +2808,12 @@ errlHndl_t getOmiFreqAndVco(TARGETING::ATTR_FREQ_OMI_MHZ_type & o_omiFreq,
         TARGETING::ATTR_FREQ_OMI_MHZ_type l_omiFreqToCmp = l_procsList[i]->getAttr<TARGETING::ATTR_FREQ_OMI_MHZ>();
         TARGETING::ATTR_OMI_PLL_VCO_type  l_omiVcoToCmp  = l_procsList[i]->getAttr<TARGETING::ATTR_OMI_PLL_VCO>();
 
-        // If we found that this processor's OMI freq / vco values do not match the first processor's values then
+        // If this processors OMI freq is 0 then we have not determined this proc's OMI freq yet so we can ignore it.
+        // Otherwise, if we found that this processor's OMI freq / vco values do not match the first processor's values then
         // return an error
-        if (l_omiFreqToCmp != o_omiFreq ||
-            l_omiVcoToCmp  != o_omiVco )
+        if ((l_omiFreqToCmp != 0) &&
+            (l_omiFreqToCmp != o_omiFreq ||
+            l_omiVcoToCmp  != o_omiVco ))
         {
             FAPI_ERR("platGetMcPllBucket: Detected two processors with difference OMI VCO / FREQ combinations."
                       " Proc 0x%.08X has OMI freq = %d and OMI vco = %d. "
