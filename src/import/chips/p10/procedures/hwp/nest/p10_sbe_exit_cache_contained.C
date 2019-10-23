@@ -68,6 +68,9 @@
 ///                                     associated with backing caches
 /// @param[out] o_master_core_target    Designated HB master core target,
 ///                                     should lie in set of active core targets
+/// @param[out] o_master_core_pair_target    Designated HB master core pair
+///                                     target, should lie in set of active core
+///                                     targets
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
@@ -77,7 +80,8 @@ p10_sbe_exit_cache_contained_validate_inputs(
     p10_sbe_exit_cache_contained_step_t& io_steps,
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_CORE>>& o_active_core_targets,
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_CORE>>& o_backing_cache_targets,
-    fapi2::Target<fapi2::TARGET_TYPE_CORE>& o_master_core_target)
+    fapi2::Target<fapi2::TARGET_TYPE_CORE>& o_master_core_target,
+    fapi2::Target<fapi2::TARGET_TYPE_CORE>& o_master_core_pair_target)
 {
     FAPI_DBG("Start");
 
@@ -91,6 +95,8 @@ p10_sbe_exit_cache_contained_validate_inputs(
     fapi2::buffer<uint32_t> l_active_cores;
     fapi2::buffer<uint32_t> l_backing_caches;
     bool l_master_core_found = false;
+    bool l_master_core_pair_found = false;
+    uint8_t l_fused_core = 0;
 
     // validate that HWP steps should be run -- only desire to run on the
     // master SBE in a non-MPIPL
@@ -115,6 +121,12 @@ p10_sbe_exit_cache_contained_validate_inputs(
         io_steps = p10_sbe_exit_cache_contained_step_t::SKIP_ALL;
         goto fapi_try_exit;
     }
+
+    // Find the fused core mode
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FUSED_CORE_MODE,
+                           fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_fused_core),
+             "Error from FAPI_ATTR_GET (ATTR_FUSED_CORE_MODE)");
 
     // validate and generate set of targets for HWP steps to use
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MASTER_CORE,
@@ -170,6 +182,15 @@ p10_sbe_exit_cache_contained_validate_inputs(
                 l_master_core_found = true;
             }
 
+            // Paired core is always +1 w.r.t master core
+            else if( (l_fused_core) &&
+                     (l_master_core_pair_found == false) &&
+                     (l_master_core_num + 1 == l_core_num) )
+            {
+                o_master_core_pair_target = l_core_target;
+                l_master_core_pair_found = true;
+            }
+
             o_active_core_targets.push_back(l_core_target);
 
         }
@@ -188,6 +209,17 @@ p10_sbe_exit_cache_contained_validate_inputs(
                 "Master core: %d not found in set of active cores!",
                 l_master_core_num);
 
+    if(l_fused_core)
+    {
+        FAPI_ASSERT(l_master_core_pair_found,
+                    fapi2::P10_SBE_EXIT_CACHE_CONTAINED_NO_MASTER_PAIR_ERR()
+                    .set_TARGET(i_target)
+                    .set_MASTER_CORE_NUM(l_master_core_num)
+                    .set_ACTIVE_CORES(l_active_cores),
+                    "Master core: %d pair in fused mode not found in set of active cores!",
+                    l_master_core_num);
+    }
+
 fapi_try_exit:
     FAPI_DBG("End");
     return fapi2::current_err;
@@ -197,10 +229,12 @@ fapi_try_exit:
 fapi2::ReturnCode
 p10_sbe_exit_cache_contained(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const std::vector<std::pair<uint64_t, uint64_t>>& i_reg_inits,
+    const size_t i_xscomPairSize,
+    const void* i_pxscomInit,
     const p10_sbe_exit_cache_contained_step_t i_steps)
 {
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    uint8_t l_fused_core = 0;
 
     FAPI_DBG("Start");
 
@@ -209,6 +243,7 @@ p10_sbe_exit_cache_contained(
         std::vector<fapi2::Target<fapi2::TARGET_TYPE_CORE>> l_active_core_targets;
         std::vector<fapi2::Target<fapi2::TARGET_TYPE_CORE>> l_backing_cache_targets;
         fapi2::Target<fapi2::TARGET_TYPE_CORE> l_master_core_target;
+        fapi2::Target<fapi2::TARGET_TYPE_CORE> l_master_core_pair_target;
         p10_sbe_exit_cache_contained_step_t l_steps = i_steps;
 
         // process input target & set operation
@@ -217,7 +252,8 @@ p10_sbe_exit_cache_contained(
                    l_steps,
                    l_active_core_targets,
                    l_backing_cache_targets,
-                   l_master_core_target);
+                   l_master_core_target,
+                   l_master_core_pair_target);
 
         if (l_rc)
         {
@@ -262,7 +298,8 @@ p10_sbe_exit_cache_contained(
             FAPI_EXEC_HWP(l_rc,
                           p10_sbe_apply_xscom_inits,
                           i_target,
-                          i_reg_inits);
+                          i_xscomPairSize,
+                          i_pxscomInit);
 
             if (l_rc)
             {
@@ -291,10 +328,49 @@ p10_sbe_exit_cache_contained(
             ((l_steps & p10_sbe_exit_cache_contained_step_t::RESUME_HB) ==
              p10_sbe_exit_cache_contained_step_t::RESUME_HB))
         {
-            FAPI_EXEC_HWP(l_rc,
-                          p10_sbe_instruct_start,
-                          l_master_core_target,
-                          ALL_THREADS);
+            //Need to derive the threads to start while resuming the HB based on
+            //the FUSED Core Mode.
+            // Check the fused core mode
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FUSED_CORE_MODE,
+                                   fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                   l_fused_core),
+                     "Error from FAPI_ATTR_GET (ATTR_FUSED_CORE_MODE)");
+
+            if(l_fused_core)
+            {
+                //Start Instruction in thread0, thread1 for both masterCore
+                //and associated fused Core Pair Target. T0 & T1 are fixed
+                FAPI_EXEC_HWP(l_rc,
+                              p10_sbe_instruct_start,
+                              l_master_core_target,
+                              static_cast<ThreadSpecifier>(THREAD0 | THREAD1));
+
+                if(l_rc)
+                {
+                    FAPI_ERR("Error from p10_sbe_instruct_start for MasterCore"
+                             " in Fused Core mode");
+                    break;
+                }
+
+                FAPI_EXEC_HWP(l_rc,
+                              p10_sbe_instruct_start,
+                              l_master_core_pair_target,
+                              static_cast<ThreadSpecifier>(THREAD0 | THREAD1));
+
+                if(l_rc)
+                {
+                    FAPI_ERR("Error from p10_sbe_instruct_start for "
+                             "MasterCore Pair Target in Fused Core mode");
+                    break;
+                }
+            }
+            else // Normal Core, Just start all threads in Master Core
+            {
+                FAPI_EXEC_HWP(l_rc,
+                              p10_sbe_instruct_start,
+                              l_master_core_target,
+                              ALL_THREADS);
+            }
 
             if (l_rc)
             {
@@ -306,6 +382,12 @@ p10_sbe_exit_cache_contained(
     }
     while(0);
 
+    if(l_rc)
+    {
+        fapi2::current_err = l_rc;
+    }
+
+fapi_try_exit:
     FAPI_DBG("End");
-    return l_rc;
+    return fapi2::current_err;
 }

@@ -40,37 +40,42 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <fapi2.H>
-
 //------------------------------------------------------------------------------
 // Structure definitions
 //------------------------------------------------------------------------------
+//Struct to hold the list of XSCOM address and the value to be applied
+struct xscomsInits_t
+{
+    uint64_t address;
+    uint64_t data;
+};
 
 // Function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p10_sbe_apply_xscom_inits_FP_t)(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
-    const std::vector<std::pair<uint64_t, uint64_t>>&);
-
+    const size_t,
+    const void*);
 //------------------------------------------------------------------------------
 // Function prototypes
 //------------------------------------------------------------------------------
 extern "C"
 {
 
-///
-/// @brief Configures MC/MCD BAR resources on all sockets via XSCOM, as part
-///        of HB cache contained exit sequence
-///
-/// @param[in] i_target    Reference to processor chip target
-/// @param[in] i_reg_inits Set of register inits to be performed via XSCOM
-///                        Each pair is expected to contain a fully
-///                        formed XSCOM address (first) + associated data
-///                        (second)
-/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-///
+//
+// @brief Configures MC/MCD BAR resources on all sockets via XSCOM, as part
+//        of HB cache contained exit sequence
+//
+// @param[in] i_target          Reference to processor chip target
+// @param[in] i_xscomPairSize   Number of XSCOM register address-data pair to
+//                              be initialized.
+// @param[in] i_pxscomInit      Pointer to the data set of address-data pair
+//
+// @return fapi2::ReturnCode    FAPI2_RC_SUCCESS if success, else error code.
+//
     fapi2::ReturnCode p10_sbe_apply_xscom_inits(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        const std::vector<std::pair<uint64_t, uint64_t>>& i_reg_inits);
-
+        const size_t i_xscomPairSize,
+        const void* i_pxscomInit);
 } // extern "C"
 
 #endif // _P10_SBE_APPLY_XSCOM_INITS_H_

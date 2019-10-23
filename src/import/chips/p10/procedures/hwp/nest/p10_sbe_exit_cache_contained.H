@@ -65,6 +65,7 @@ enum class p10_sbe_exit_cache_contained_step_t : uint8_t
     SKIP_ALL           = 0x00
 };
 
+
 constexpr enum p10_sbe_exit_cache_contained_step_t operator | (p10_sbe_exit_cache_contained_step_t a,
         p10_sbe_exit_cache_contained_step_t b)
 {
@@ -80,7 +81,8 @@ constexpr enum p10_sbe_exit_cache_contained_step_t operator & (p10_sbe_exit_cach
 // Function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p10_sbe_exit_cache_contained_FP_t)(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
-    const std::vector<std::pair<uint64_t, uint64_t>>&,
+    const size_t,
+    const void*,
     const p10_sbe_exit_cache_contained_step_t);
 
 //------------------------------------------------------------------------------
@@ -89,22 +91,22 @@ typedef fapi2::ReturnCode (*p10_sbe_exit_cache_contained_FP_t)(
 extern "C"
 {
 
-///
-/// @brief Executes sequence of HWP calls to exit HB cache containment
-///
-/// @param[in] i_target    Reference to processor chip target
-/// @param[in] i_reg_inits Set of register inits to be performed via XSCOM
-///                        Each pair is expected to contain a fully
-///                        formed XSCOM address (first) + associated data
-///                        (second)
-/// @param[in] i_steps     Enum defining steps of HWP sequence which should
-///                        be run
-///
-/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-///
+// @brief Executes sequence of HWP calls to exit HB cache containment
+//
+// @param[in] i_target          Reference to processor chip target
+// @param[in] i_xscomPairSize   Number of XSCOM register address-data pair to
+//                              be initialized.
+// @param[in] i_pxscomInit      Pointer to the data set of address-data pair
+//
+// @param[in] i_steps           Enum defining steps of HWP sequence which should
+//                              be run
+//
+// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+//
     fapi2::ReturnCode p10_sbe_exit_cache_contained(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        const std::vector<std::pair<uint64_t, uint64_t>>& i_reg_inits,
+        const size_t i_xscomPairSize,
+        const void* i_pxscomInit,
         const p10_sbe_exit_cache_contained_step_t i_steps);
 
 } // extern "C"

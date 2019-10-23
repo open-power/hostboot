@@ -57,6 +57,16 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <rc>RC_P10_SBE_EXIT_CACHE_CONTAINED_NO_MASTER_PAIR_ERR</rc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>MASTER_CORE_NUM</ffdc>
+    <ffdc>ACTIVE_CORES</ffdc>
+    <description>
+      Master core pair in fused mode was not found in set of active cores
+    </description>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
     <rc>RC_P10_SBE_EXIT_CACHE_CONTAINED_THREAD_STOP_ERR</rc>
     <ffdc>TARGET</ffdc>
     <ffdc>THREAD_NUM</ffdc>

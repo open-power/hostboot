@@ -558,6 +558,7 @@ p10_exit_cache_contained(
     std::vector<std::pair<uint64_t, uint64_t>> l_xscom_inits;
     bool l_sbe_master_chip_found = false;
 
+
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_MPIPL,
                            FAPI_SYSTEM,
                            l_is_mpipl),
@@ -633,7 +634,8 @@ p10_exit_cache_contained(
     FAPI_CALL_SUBROUTINE(l_rc,
                          p10_sbe_exit_cache_contained,
                          l_sbe_master_chip_target,
-                         l_xscom_inits,
+                         l_xscom_inits.size(),
+                         reinterpret_cast<void*>(l_xscom_inits.data()),
                          i_step);
 
     fapi2::current_err = l_rc;
