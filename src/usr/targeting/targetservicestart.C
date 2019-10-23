@@ -488,9 +488,15 @@ static void initializeAttributes(TargetService& i_targetService,
             }
             else
             {
+                // TODO RTC: 213021
+                // This attribute is no longer present; the only code that
+                // reads the attribute is a Nimbus only path dealing with
+                // pre-dynamic init risk levels.  Disable for P10 bringup.
+                #if 0
                 // MRW used to setup RISK_LEVEL
                 l_pTopLevel->setAttr<ATTR_RISK_LEVEL_ORIGIN>
                     (RISK_LEVEL_ORIGIN_MRW);
+                #endif
             }
             TARG_INF( "Setting RISK_LEVEL=%d", l_riskLevel );
             l_pTopLevel->setAttr<ATTR_RISK_LEVEL>(l_riskLevel);
