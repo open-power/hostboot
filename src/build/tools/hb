@@ -315,7 +315,7 @@ hb_prime()
 
     if [[ $HB_STANDALONE -eq 1 ]] && [[ $PNOR_LAYOUT_SELECTED != "FSP" ]]; then
         hbDistribute --hb-standalone $*
-        exit 0
+        exit $?
     fi
 
     # Priming using ODE SB
