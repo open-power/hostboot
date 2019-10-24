@@ -594,21 +594,24 @@ enum RingOffset
     eq_time                  = 2,
     eq_cmsk                  = 3,
     eq_inex                  = 4,
-    ec_cl2_fure              = 5,
-    ec_cl2_gptr              = 6,
-    ec_cl2_time              = 7,
-    ec_cl2_cmsk              = 8,
-    ec_cl2_inex              = 9,
-    ec_mma_fure              = 10,
-    ec_mma_gptr              = 11,
-    ec_mma_time              = 12,
-    ec_mma_cmsk              = 13,
-    ec_mma_inex              = 14,
-    ec_l3_fure               = 15,
-    ec_l3_gptr               = 16,
-    ec_l3_time               = 17,
-    ec_l3_cmsk               = 18,
-    ec_l3_inex               = 19,
+    eq_mode                  = 5,
+    ec_cl2_fure              = 6,
+    ec_cl2_gptr              = 7,
+    ec_cl2_time              = 8,
+    ec_cl2_cmsk              = 9,
+    ec_cl2_inex              = 10,
+    ec_cl2_mode              = 11,
+    ec_mma_fure              = 12,
+    ec_mma_gptr              = 13,
+    ec_mma_time              = 14,
+    ec_mma_cmsk              = 15,
+    ec_mma_inex              = 16,
+    ec_l3_fure               = 17,
+    ec_l3_gptr               = 18,
+    ec_l3_time               = 19,
+    ec_l3_cmsk               = 20,
+    ec_l3_inex               = 21,
+    ec_l3_mode               = 22,
     // Instance Rings
     eq_repr                  = (0 | INSTANCE_RING_MARK),
     ec_cl2_repr              = (1 | INSTANCE_RING_MARK),
@@ -629,7 +632,7 @@ static const ChipletData_t g_chipletData =
 {
     0x20, // Base chiplet/instance ID.
     8,  // Number of chiplet instances
-    20, // 20 common rings for EQ Chiplet
+    23, // 23 common rings for EQ Chiplet
     13, // 13 instance specific rings for EQ Chiplet
 };
 }; // end of namespace EQ
@@ -914,33 +917,36 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { "eq_time"                 , 0x20034037, EQ::eq_time                 , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDG_TIME                        }, // 273
     { "eq_cmsk"                 , 0x2003403A, EQ::eq_cmsk                 , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS                            }, // 274
     { "eq_inex"                 , 0x2003403B, EQ::eq_inex                 , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS                            }, // 275
-    { "ec_cl2_fure"             , 0x2003200F, EQ::ec_cl2_fure             , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME         }, // 276
-    { "ec_cl2_gptr"             , 0x20032002, EQ::ec_cl2_gptr             , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY | RMRK_SCAN_BY_QME }, // 277
-    { "ec_cl2_repr"             , 0x20032006, EQ::ec_cl2_repr             , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME     }, // 278
-    { "ec_cl2_time"             , 0x20032007, EQ::ec_cl2_time             , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDG_TIME | RMRK_SCAN_BY_QME     }, // 279
-    { "ec_cl2_cmsk"             , 0x2003200A, EQ::ec_cl2_cmsk             , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME         }, // 280
-    { "ec_cl2_inex"             , 0x2003200B, EQ::ec_cl2_inex             , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME         }, // 281
-    { "ec1_cl2_repr"            , 0x20031006, EQ::ec1_cl2_repr            , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME     }, // 282
-    { "ec2_cl2_repr"            , 0x20030806, EQ::ec2_cl2_repr            , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME     }, // 283
-    { "ec3_cl2_repr"            , 0x20030406, EQ::ec3_cl2_repr            , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME     }, // 284
-    { "ec_mma_fure"             , 0x2083000F, EQ::ec_mma_fure             , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME         }, // 285
-    { "ec_mma_gptr"             , 0x20830002, EQ::ec_mma_gptr             , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY | RMRK_SCAN_BY_QME }, // 286
-    { "ec_mma_repr"             , 0x20830006, EQ::ec_mma_repr             , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME     }, // 287
-    { "ec_mma_time"             , 0x20830007, EQ::ec_mma_time             , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDG_TIME | RMRK_SCAN_BY_QME     }, // 288
-    { "ec_mma_cmsk"             , 0x2083000A, EQ::ec_mma_cmsk             , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME         }, // 289
-    { "ec_mma_inex"             , 0x2083000B, EQ::ec_mma_inex             , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME         }, // 290
-    { "ec1_mma_repr"            , 0x20430006, EQ::ec1_mma_repr            , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME     }, // 291
-    { "ec2_mma_repr"            , 0x20230006, EQ::ec2_mma_repr            , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME     }, // 292
-    { "ec3_mma_repr"            , 0x20130006, EQ::ec3_mma_repr            , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME     }, // 293
-    { "ec_l3_fure"              , 0x2003020F, EQ::ec_l3_fure              , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME         }, // 294
-    { "ec_l3_gptr"              , 0x20030202, EQ::ec_l3_gptr              , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY | RMRK_SCAN_BY_QME }, // 295
-    { "ec_l3_repr"              , 0x20030206, EQ::ec_l3_repr              , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME     }, // 296
-    { "ec_l3_time"              , 0x20030207, EQ::ec_l3_time              , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDG_TIME | RMRK_SCAN_BY_QME     }, // 297
-    { "ec_l3_cmsk"              , 0x2003020A, EQ::ec_l3_cmsk              , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME         }, // 298
-    { "ec_l3_inex"              , 0x2003020B, EQ::ec_l3_inex              , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME         }, // 299
-    { "ec1_l3_repr"             , 0x20030106, EQ::ec1_l3_repr             , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME     }, // 300
-    { "ec2_l3_repr"             , 0x20030086, EQ::ec2_l3_repr             , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME     }, // 301
-    { "ec3_l3_repr"             , 0x20030046, EQ::ec3_l3_repr             , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME     }, // 302
+    { "eq_mode"                 , 0x20034031, EQ::eq_mode                 , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS                            }, // 276
+    { "ec_cl2_fure"             , 0x2003200F, EQ::ec_cl2_fure             , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME         }, // 277
+    { "ec_cl2_gptr"             , 0x20032002, EQ::ec_cl2_gptr             , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY | RMRK_SCAN_BY_QME }, // 278
+    { "ec_cl2_repr"             , 0x20032006, EQ::ec_cl2_repr             , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME     }, // 279
+    { "ec_cl2_time"             , 0x20032007, EQ::ec_cl2_time             , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDG_TIME | RMRK_SCAN_BY_QME     }, // 280
+    { "ec_cl2_cmsk"             , 0x2003200A, EQ::ec_cl2_cmsk             , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME         }, // 281
+    { "ec_cl2_inex"             , 0x2003200B, EQ::ec_cl2_inex             , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME         }, // 282
+    { "ec_cl2_mode"             , 0x20032001, EQ::ec_cl2_mode             , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME         }, // 283
+    { "ec1_cl2_repr"            , 0x20031006, EQ::ec1_cl2_repr            , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME     }, // 284
+    { "ec2_cl2_repr"            , 0x20030806, EQ::ec2_cl2_repr            , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME     }, // 285
+    { "ec3_cl2_repr"            , 0x20030406, EQ::ec3_cl2_repr            , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME     }, // 286
+    { "ec_mma_fure"             , 0x2083000F, EQ::ec_mma_fure             , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME         }, // 287
+    { "ec_mma_gptr"             , 0x20830002, EQ::ec_mma_gptr             , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY | RMRK_SCAN_BY_QME }, // 288
+    { "ec_mma_repr"             , 0x20830006, EQ::ec_mma_repr             , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME     }, // 289
+    { "ec_mma_time"             , 0x20830007, EQ::ec_mma_time             , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDG_TIME | RMRK_SCAN_BY_QME     }, // 290
+    { "ec_mma_cmsk"             , 0x2083000A, EQ::ec_mma_cmsk             , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME         }, // 291
+    { "ec_mma_inex"             , 0x2083000B, EQ::ec_mma_inex             , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME         }, // 292
+    { "ec1_mma_repr"            , 0x20430006, EQ::ec1_mma_repr            , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME     }, // 293
+    { "ec2_mma_repr"            , 0x20230006, EQ::ec2_mma_repr            , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME     }, // 294
+    { "ec3_mma_repr"            , 0x20130006, EQ::ec3_mma_repr            , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME     }, // 295
+    { "ec_l3_fure"              , 0x2003020F, EQ::ec_l3_fure              , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME         }, // 296
+    { "ec_l3_gptr"              , 0x20030202, EQ::ec_l3_gptr              , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY | RMRK_SCAN_BY_QME }, // 297
+    { "ec_l3_repr"              , 0x20030206, EQ::ec_l3_repr              , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME     }, // 298
+    { "ec_l3_time"              , 0x20030207, EQ::ec_l3_time              , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDG_TIME | RMRK_SCAN_BY_QME     }, // 299
+    { "ec_l3_cmsk"              , 0x2003020A, EQ::ec_l3_cmsk              , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME         }, // 300
+    { "ec_l3_inex"              , 0x2003020B, EQ::ec_l3_inex              , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME         }, // 301
+    { "ec_l3_mode"              , 0x20030201, EQ::ec_l3_mode              , EQ_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME         }, // 302
+    { "ec1_l3_repr"             , 0x20030106, EQ::ec1_l3_repr             , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME     }, // 303
+    { "ec2_l3_repr"             , 0x20030086, EQ::ec2_l3_repr             , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME     }, // 304
+    { "ec3_l3_repr"             , 0x20030046, EQ::ec3_l3_repr             , EQ_TYPE  , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME     }, // 305
 };
 #endif
 
@@ -1223,33 +1229,36 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { EQ::eq_time                 , EQ_TYPE   }, // 273
     { EQ::eq_cmsk                 , EQ_TYPE   }, // 274
     { EQ::eq_inex                 , EQ_TYPE   }, // 275
-    { EQ::ec_cl2_fure             , EQ_TYPE   }, // 276
-    { EQ::ec_cl2_gptr             , EQ_TYPE   }, // 277
-    { EQ::ec_cl2_repr             , EQ_TYPE   }, // 278
-    { EQ::ec_cl2_time             , EQ_TYPE   }, // 279
-    { EQ::ec_cl2_cmsk             , EQ_TYPE   }, // 280
-    { EQ::ec_cl2_inex             , EQ_TYPE   }, // 281
-    { EQ::ec1_cl2_repr            , EQ_TYPE   }, // 282
-    { EQ::ec2_cl2_repr            , EQ_TYPE   }, // 283
-    { EQ::ec3_cl2_repr            , EQ_TYPE   }, // 284
-    { EQ::ec_mma_fure             , EQ_TYPE   }, // 285
-    { EQ::ec_mma_gptr             , EQ_TYPE   }, // 286
-    { EQ::ec_mma_repr             , EQ_TYPE   }, // 287
-    { EQ::ec_mma_time             , EQ_TYPE   }, // 288
-    { EQ::ec_mma_cmsk             , EQ_TYPE   }, // 289
-    { EQ::ec_mma_inex             , EQ_TYPE   }, // 290
-    { EQ::ec1_mma_repr            , EQ_TYPE   }, // 291
-    { EQ::ec2_mma_repr            , EQ_TYPE   }, // 292
-    { EQ::ec3_mma_repr            , EQ_TYPE   }, // 293
-    { EQ::ec_l3_fure              , EQ_TYPE   }, // 294
-    { EQ::ec_l3_gptr              , EQ_TYPE   }, // 295
-    { EQ::ec_l3_repr              , EQ_TYPE   }, // 296
-    { EQ::ec_l3_time              , EQ_TYPE   }, // 297
-    { EQ::ec_l3_cmsk              , EQ_TYPE   }, // 298
-    { EQ::ec_l3_inex              , EQ_TYPE   }, // 299
-    { EQ::ec1_l3_repr             , EQ_TYPE   }, // 300
-    { EQ::ec2_l3_repr             , EQ_TYPE   }, // 301
-    { EQ::ec3_l3_repr             , EQ_TYPE   }, // 302
+    { EQ::eq_mode                 , EQ_TYPE   }, // 276
+    { EQ::ec_cl2_fure             , EQ_TYPE   }, // 277
+    { EQ::ec_cl2_gptr             , EQ_TYPE   }, // 278
+    { EQ::ec_cl2_repr             , EQ_TYPE   }, // 279
+    { EQ::ec_cl2_time             , EQ_TYPE   }, // 280
+    { EQ::ec_cl2_cmsk             , EQ_TYPE   }, // 281
+    { EQ::ec_cl2_inex             , EQ_TYPE   }, // 282
+    { EQ::ec_cl2_mode             , EQ_TYPE   }, // 283
+    { EQ::ec1_cl2_repr            , EQ_TYPE   }, // 284
+    { EQ::ec2_cl2_repr            , EQ_TYPE   }, // 285
+    { EQ::ec3_cl2_repr            , EQ_TYPE   }, // 286
+    { EQ::ec_mma_fure             , EQ_TYPE   }, // 287
+    { EQ::ec_mma_gptr             , EQ_TYPE   }, // 288
+    { EQ::ec_mma_repr             , EQ_TYPE   }, // 289
+    { EQ::ec_mma_time             , EQ_TYPE   }, // 290
+    { EQ::ec_mma_cmsk             , EQ_TYPE   }, // 291
+    { EQ::ec_mma_inex             , EQ_TYPE   }, // 292
+    { EQ::ec1_mma_repr            , EQ_TYPE   }, // 293
+    { EQ::ec2_mma_repr            , EQ_TYPE   }, // 294
+    { EQ::ec3_mma_repr            , EQ_TYPE   }, // 295
+    { EQ::ec_l3_fure              , EQ_TYPE   }, // 296
+    { EQ::ec_l3_gptr              , EQ_TYPE   }, // 297
+    { EQ::ec_l3_repr              , EQ_TYPE   }, // 298
+    { EQ::ec_l3_time              , EQ_TYPE   }, // 299
+    { EQ::ec_l3_cmsk              , EQ_TYPE   }, // 300
+    { EQ::ec_l3_inex              , EQ_TYPE   }, // 301
+    { EQ::ec_l3_mode              , EQ_TYPE   }, // 302
+    { EQ::ec1_l3_repr             , EQ_TYPE   }, // 303
+    { EQ::ec2_l3_repr             , EQ_TYPE   }, // 304
+    { EQ::ec3_l3_repr             , EQ_TYPE   }, // 305
 };
 #endif  // __PPE__
 
