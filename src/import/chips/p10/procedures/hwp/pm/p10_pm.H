@@ -97,6 +97,12 @@ enum PM_FLOW_MODE
     PM_INIT_SPECIAL = 0x8,
 };
 
+enum PM_DUMP_MODE
+{
+    PM_DUMP,
+    PM_NO_DUMP,
+};
+
 } // end of namespace pm
 
 
