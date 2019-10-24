@@ -161,7 +161,8 @@ ifeq (${FAKEPNOR},)
         --hb-standalone $(if ${CONFIG_SECUREBOOT},--secureboot) \
         --systemBinFiles ${GEN_DEFAULT_BIN_FILES} \
         --pnorLayout ${PNOR_LAYOUT} ${KEY_TRANSITION_PARAMS} ${CORRUPT_PARAMS} \
-        --hwKeyHashFile ${IMPRINT_HW_KEY_HASH}
+        --hwKeyHashFile ${IMPRINT_HW_KEY_HASH} \
+	--editedLayoutLocation ${STAGINGDIR}
 
 # Parameters passed to GEN_PNOR_IMAGE_SCRIPT.
     _GEN_BIN_FILES := SBE=${SBE_IMG},HCODE=${HCODE_IMG},OCC=${OCC_IMG},\
@@ -171,7 +172,8 @@ ifeq (${FAKEPNOR},)
         $(if ${TARGET_TEST},--test) $(if ${CONFIG_SECUREBOOT},--secureboot) \
         --pnorLayout ${PNOR_LAYOUT} ${CORRUPT_PARAMS} --hb-standalone \
         --systemBinFiles ${GEN_BIN_FILES} \
-        --hwKeyHashFile ${IMPRINT_HgitW_KEY_HASH}
+        --hwKeyHashFile ${IMPRINT_HgitW_KEY_HASH} \
+	--editedLayoutLocation ${STAGINGDIR}
 
 # For standalone PNOR layout
     HOSTBOOT_DEFAULT_SECTIONS := HBBL=${HBBL_FINAL_IMG} HBB=${HBB_FINAL_IMG} \
@@ -191,13 +193,14 @@ else
     _GEN_DEFAULT_BIN_FILES := HBI=${HBI_IMG},HBEL=EMPTY,EECACHE=${EECACHE_IMG},HBD=${HBD_FAKE}
     GEN_DEFAULT_BIN_FILES := $(shell echo ${_GEN_DEFAULT_BIN_FILES} | sed 's/ //g')
     DEFAULT_PARAMS := --systemBinFiles ${GEN_DEFAULT_BIN_FILES}\
-    	--pnorLayout ${PNOR_LAYOUT}
+    	--pnorLayout ${PNOR_LAYOUT} --editedLayoutLocation ${STAGINGDIR}
 
 # Parameters passed to GEN_PNOR_IMAGE_SCRIPT.
     _GEN_BIN_FILES := HBD=${HBD_FAKE}
     GEN_BIN_FILES := $(shell echo ${_GEN_BIN_FILES} | sed 's/ //g')
     SYSTEM_SPECIFIC_PARAMS := --install-all --emit-eccless \
-		--pnorLayout ${PNOR_LAYOUT} --systemBinFiles ${GEN_BIN_FILES}
+		--pnorLayout ${PNOR_LAYOUT} --systemBinFiles ${GEN_BIN_FILES} \
+		--editedLayoutLocation ${STAGINGDIR}
 
 # For standalone PNOR layout
     HOSTBOOT_DEFAULT_SECTIONS := HBI=${HBI_FINAL_IMG} HBEL=${HBEL_FINAL_IMG}
@@ -279,7 +282,7 @@ OUTPUTPNOR: gen_system_specific_image
 	${PNOR_BUILD_SCRIPT} --pnorLayout ${PNOR_LAYOUT} \
         ${IMAGE_BIN_OPTION} \
         --pnorOutBin ${OUTPUTPNOR} $(if ${TARGET_TEST}, "--test", ) \
-        --fpartCmd fpart --fcpCmd fcp
+        --fpartCmd fpart --fcpCmd fcp --editedLayoutLocation ${STAGINGDIR}
 
 gen_system_specific_image: ${GEN_BUILD}
     # Call script to generate final bin file for chip/system specific images
