@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -196,6 +196,14 @@ DEVICE_REGISTER_ROUTE( DeviceFW::WRITE,
 
 errlHndl_t SIO::isAvailable(bool& available)
 {
+    // @TODO RTC 245588
+    // Either remove this workaround if SIO simulation path to
+    // ast2600 is fixed, or remove it completely if it will
+    // never be used
+    errlHndl_t l_err = nullptr;
+    available = false;
+    #if 0
+
     uint8_t l_byte = SIO::SIO_PASSWORD_REG;
     size_t l_len = sizeof(uint8_t);
     errlHndl_t l_err = NULL;
@@ -231,6 +239,7 @@ errlHndl_t SIO::isAvailable(bool& available)
     {
         available = true;
     }
+    #endif // @TODO RTC 245588
 
     return l_err;
 }
