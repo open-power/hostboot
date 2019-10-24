@@ -27,7 +27,7 @@
 
 namespace fapi2
 {
-enum MulticastType
+enum MulticastType : uint8_t
 {
     // Code points picked according to PCB spec
     MULTICAST_OR      = 0,
@@ -66,7 +66,7 @@ enum MulticastGroup : uint32_t;
 /**
  * @brief Bit mask for selecting cores out of an EQ.
  */
-enum MulticastCoreSelect
+enum MulticastCoreSelect : uint8_t
 {
     MCCORE_0   = 0x8,
     MCCORE_1   = 0x4,
