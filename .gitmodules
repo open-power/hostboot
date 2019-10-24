@@ -13,8 +13,8 @@
 	url = ssh://hostboot.gerrit/hw/ppe
 	update = none
 
-        # Ignore any change done in the repo (except
-        # for changes to the head commit)
+	# Ignore any change done in the repo (except
+	# for changes to the head commit)
 	# such as files created with "make install."
 	ignore = dirty
 
@@ -23,7 +23,14 @@
 	url = ssh://hostboot.gerrit/hw/ekb
 	update = none
 
-        # Ignore any change done in the repo (except
-        # for changes to the head commit)
+	# Ignore any change done in the repo (except
+	# for changes to the head commit)
 	# such as files created with "make install."
 	ignore = dirty
+
+[submodule "libmctp"]
+	path = src/import/libmctp
+	url = https://github.com/openbmc/libmctp
+
+	# We want this submodule to be cloned automatically when
+	# the Hostboot repo is recursively cloned.
