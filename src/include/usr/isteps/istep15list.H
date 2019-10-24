@@ -29,16 +29,16 @@
  * @file    istep15list.H
  *
  *  IStep 15    Build STOP Images
- *  IPL FLow Doc        v1.07
+ *  P10 IPL FLow Doc        v0.89.12
  *
  *    15.1    host_build_stop_image
  *          : Build runtime STOP images
  *    15.2    proc_set_homer_bar
- *          : Set HOMER location in OCC
- *    15.3    host_establish_ex_chiplet
- *          : Select Hostboot core
- *    15.4    host_start_stop_engine
- *          : Initialize STOPGPE engine
+ *          : Set HOMER location in OCC and QME
+ *    15.3    host_start_stop_engine
+ *          : Initialize QME engine
+ *    15.4    host_establish_ec_chiplet
+ *          : Update multicast on ECs for runtime state
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -88,14 +88,14 @@ void*    host_start_stop_engine( void    *io_pArgs );
 
 
 /**
- *  @brief   host_establish_ex_chiplet
+ *  @brief   host_establish_ec_chiplet
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return  any errlogs to istep
  *
  */
-void*    host_establish_ex_chiplet( void    *io_pArgs );
+void*    host_establish_ec_chiplet( void    *io_pArgs );
 
 };
 
@@ -118,15 +118,15 @@ namespace   INITSERVICE
                 ISTEP_15::proc_set_homer_bar,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
         },
-/*
         {
-                ISTEPNAME(15,03,"host_establish_ex_chiplet"),
-                ISTEP_15::host_establish_ex_chiplet,
+                ISTEPNAME(15,03,"host_start_stop_engine"),
+                ISTEP_15::host_start_stop_engine,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
+/*
         {
-                ISTEPNAME(15,04,"host_start_stop_engine"),
-                ISTEP_15::host_start_stop_engine,
+                ISTEPNAME(15,04,"host_establish_ec_chiplet"),
+                ISTEP_15::host_establish_ec_chiplet,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
 */

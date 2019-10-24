@@ -27,13 +27,13 @@ MODULE = istep15
 
 PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p10/procedures
 
-#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest/
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/pm/
 #EXTRAINCDIR += ${PROCEDURES_PATH}/stop_reg/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/lib/
 EXTRAINCDIR += ${PROCEDURES_PATH}/utils/stopreg/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/customize/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
@@ -49,8 +49,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 
 OBJS += host_build_stop_image.o
 OBJS += proc_set_homer_bar.o
+OBJS += host_start_stop_engine.o
 #OBJS += host_establish_ex_chiplet.o
-#OBJS += host_start_stop_engine.o
 
 
 include ${ROOTPATH}/procedure.rules.mk

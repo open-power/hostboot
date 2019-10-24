@@ -22,6 +22,10 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+/**
+ *  @file host_start_stop_engine.C
+ *  Contains code for initializing the QME (Quad Management Engine).
+ */
 
 //From Hostboot Directory
 ////Error handling and traces
@@ -32,28 +36,22 @@
 #include    <errl/errluserdetails.H>
 #include    <errl/errludtarget.H>
 
-/* FIXME RTC: 210975
 //HWP Invoker
 #include    <fapi2/plat_hwp_invoker.H>
 
 ////Targeting support
 #include    <fapi2/target.H>
-*/
 #include    <targeting/common/utilFilter.H>
 
-/* FIXME RTC: 210975
 //From Import Directory (EKB Repository)
-#include <p9_pm.H>
-#include <p9_pm_stop_gpe_init.H>
-*/
+#include <p10_pm.H>
+#include <p10_pm_qme_init.H>
 
 //Namespaces
 using namespace ERRORLOG;
 using namespace TARGETING;
-/* FIXME RTC: 210975
-using namespace p9pm;
+using namespace pm;
 using namespace fapi2;
-*/
 
 namespace ISTEP_15
 {
@@ -61,77 +59,52 @@ void* host_start_stop_engine (void *io_pArgs)
 {
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_start_stop_engine entry" );
     ISTEP_ERROR::IStepError     l_StepError;
-/* FIXME RTC: 210975
-    errlHndl_t l_errl = NULL;
-
-    // Cast to void just to get around unused var warning if #ifdef's dont work
-    // out to actually use the l_errl variable
-    (void)l_errl;
+    errlHndl_t l_errl = nullptr;
 
     do {
-#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
-        uint64_t l_writeData;
-        size_t l_writeSize = sizeof(l_writeData);
-
-        TARGETING::Target* l_proc = NULL;
-        TARGETING::targetService().masterProcChipTargetHandle(l_proc);
-
-        l_errl = deviceRead(l_proc, &l_writeData, l_writeSize,
-                            DEVICE_SCOM_ADDRESS(0x6C004));
-        if(l_errl)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "host_start_stop_engine: failed to read OIMR0 interrupt mask");
-            break;
-        }
-#endif
 
         //Use targeting code to get a list of all processors
-        TARGETING::TargetHandleList l_procChips;
-        getAllChips( l_procChips, TARGETING::TYPE_PROC );
+        TargetHandleList l_procChips;
+        getAllChips( l_procChips, TYPE_PROC );
 
         for (const auto & l_procChip: l_procChips)
         {
-            //Convert the TARGETING::Target into a fapi2::Target by passing
+            //Convert the Target into a fapi2::Target by passing
             //l_procChip into the fapi2::Target constructor
             fapi2::Target<TARGET_TYPE_PROC_CHIP>l_fapi2CpuTarget(
                                                               (l_procChip));
 
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Calling p9_pm_stop_gpe_init for 0x%.8X target",
-                TARGETING::get_huid(l_procChip) );
+                "Calling p10_pm_qme_init for 0x%.8X target",
+                get_huid(l_procChip) );
 
-            //call p9_pm_stop_gpe_init.C HWP
+            //call p10_pm_qme_init.C HWP
             FAPI_INVOKE_HWP(l_errl,
-                            p9_pm_stop_gpe_init,
+                            p10_pm_qme_init,
                             l_fapi2CpuTarget,
-                            PM_INIT);
+                            PM_START);
             if(l_errl)
             {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "host_start_stop_engine:: p10_pm_qme_init failed on HUID 0x%08x. "
+                        TRACE_ERR_FMT,
+                        get_huid(l_procChip),
+                        TRACE_ERR_ARGS(l_errl));
                 ErrlUserDetailsTarget(l_procChip).addToLog(l_errl);
+#ifdef ISTEP15_ENABLE_HWPS
                 l_StepError.addErrorDetails( l_errl );
                 errlCommit( l_errl, HWPF_COMP_ID );
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_start_stop_engine:: failed on proc with HUID : %d",TARGETING::get_huid(l_procChip)  );
+#else
+                // If istep15 HWPS are disable then just delete the error log
+                // but still allow the HWP to run in order to support bringup.
+                delete l_errl;
+                l_errl = nullptr;
+#endif
             }
         }
 
-#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
-        // Starting SGPE in istep15.4 causes OIMR0 register to be improperly
-        // reset, which breaks the xstop analysis flow during IPL. A hack
-        // is to write the original contents of that register back if
-        // the IPL checkstop flag is enabled.
-        l_errl = deviceWrite(l_proc, &l_writeData, l_writeSize,
-                             DEVICE_SCOM_ADDRESS(0x6C004));
-        if(l_errl)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "host_start_stop_engine: failed to reset OIMR0 interrupt mask");
-            break;
-        }
-#endif
       }while (0);
 
-*/
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_start_stop_engine exit" );
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();

@@ -47,8 +47,8 @@ EXTRAINCDIR += ${HWP_PM_PATH}
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv
 HWP_STOPUTIL_PATH += ${ROOTPATH}/src/import/chips/p10/procedures/utils/stopreg/
 EXTRAINCDIR += ${HWP_STOPUTIL_PATH}
-#NEST_UTIL_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest
-#EXTRAINCDIR += ${NEST_UTIL_PATH}
+NEST_UTIL_PATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/nest/
+EXTRAINCDIR += ${NEST_UTIL_PATH}
 
 # for attnsvc in pm_common.C
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag/
@@ -72,7 +72,7 @@ OBJS += pm_common.o
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${HWP_PM_PATH}
 VPATH += ${HWP_LIB_PATH} ${HWP_STOPUTIL_PATH}
-#VPATH += ${NEST_UTIL_PATH}
+VPATH += ${NEST_UTIL_PATH}
 #VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/
 
 # TODO RTC: 164237
@@ -95,7 +95,7 @@ include ${HWP_LIB_PATH}/p10_pm_utils.mk
 #include ${HWP_PM_PATH}/p9_pm_pss_init.mk
 #include ${HWP_PM_PATH}/p9_pm_cme_firinit.mk
 include ${HWP_PM_PATH}/p10_hcode_image_build.mk
-#include ${HWP_PM_PATH}/p9_pm_stop_gpe_init.mk
+include ${HWP_PM_PATH}/p10_pm_qme_init.mk
 #include ${HWP_PM_PATH}/p9_pm_pfet_init.mk
 #include ${HWP_PM_PATH}/p9_pm_reset.mk
 #include ${HWP_PM_PATH}/p9_pm_occ_sram_init.mk
@@ -105,6 +105,7 @@ include ${HWP_PM_PATH}/p10_hcode_image_build.mk
 include ${HWP_PM_PATH}/p10_scan_ring_util.mk
 include ${HWP_STOPUTIL_PATH}/p10_stop_util.mk
 include ${HWP_STOPUTIL_PATH}/p10_stop_api.mk
+include ${NEST_UTIL_PATH}/p10_fbc_utils.mk
 include ${HWP_PM_PATH}/p10_pstate_parameter_block.mk
 include ${HWP_PM_PATH}/p10_pm_get_poundv_bucket.mk
 include ${HWP_PM_PATH}/p10_pm_get_poundw_bucket.mk

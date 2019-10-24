@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file proc_set_homer_bar.C
- *  Contains code for setting the HOMER BAR registers.
+ *  Contains code for setting the HOMER BAR registers for OCC and QME
  *  HOMER = Hardware Offload Microcode Engine Region
  */
 
@@ -57,7 +57,7 @@ using namespace fapi2;
 
 namespace ISTEP_15
 {
-enum
+enum : uint64_t
 {
     HOMER_SIZE_IN_MB    =4,
 };
@@ -66,17 +66,17 @@ void* proc_set_homer_bar (void *io_pArgs)
 {
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "proc_set_homer_bar entry" );
     ISTEP_ERROR::IStepError l_StepError;
-    errlHndl_t l_errl = NULL;
-    TARGETING::TargetHandleList l_procChips;
+    errlHndl_t l_errl = nullptr;
+    TargetHandleList l_procChips;
 
     //Use targeting code to get a list of all processors
-    getAllChips( l_procChips, TARGETING::TYPE_PROC   );
+    getAllChips( l_procChips, TYPE_PROC   );
 
     //Loop through all of the procs and call the HWP on each one
     for (const auto & l_procChip: l_procChips)
     {
 
-        //Convert the TARGETING::Target into a fapi2::Target by passing
+        //Convert the Target into a fapi2::Target by passing
         //the const_casted l_procChip into the fapi::Target constructor
         const fapi2::Target<TARGET_TYPE_PROC_CHIP>
             l_fapiCpuTarget((l_procChip));
@@ -86,7 +86,7 @@ void* proc_set_homer_bar (void *io_pArgs)
 
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 "proc_set_homer_bar: calling p10_pm_set_homer_bar(huid=0x%08x, homerAddr=0x%016llx)",
-                TARGETING::get_huid(l_procChip),
+                get_huid(l_procChip),
                 homerAddr);
 
         //call p10_pm_set_homer_bar.C HWP
@@ -98,9 +98,11 @@ void* proc_set_homer_bar (void *io_pArgs)
         if(l_errl)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "proc_set_homer_bar: p10_pm_set_homer_bar(huid=0x%08x, homerAddr=0x%016llx) FAILED!",
-                    TARGETING::get_huid(l_procChip),
-                    homerAddr);
+                    "proc_set_homer_bar: p10_pm_set_homer_bar(huid=0x%08x, homerAddr=0x%016llx) FAILED! "
+                    TRACE_ERR_FMT,
+                    get_huid(l_procChip),
+                    homerAddr,
+                    TRACE_ERR_ARGS(l_errl));
             l_StepError.addErrorDetails( l_errl );
             errlCommit( l_errl, HWPF_COMP_ID );
         }

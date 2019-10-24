@@ -95,14 +95,16 @@ inline OpModes getOpMode(void)
 
 ///
 /// @brief Platform-level implementation of getScom()
-/// @Tparam K template parameter, passed in target.
+/// @Tparam K the type (Kind) of target
+/// @Tparam M the type of multicast operation if it's a multicast target
+/// @Tparam V the type of the target's value
 /// @param[in]  i_target   HW target to operate on.
 /// @param[in]  i_address  SCOM register address to read from.
 /// @param[out] o_data     Buffer that holds data read from HW target.
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-template< TargetType K >
-inline ReturnCode getScom(const Target<K>& i_target,
+template< TargetType K, MulticastType M, typename V >
+inline ReturnCode getScom(const Target<K, M, V>& i_target,
                           const uint64_t i_address,
                           buffer<uint64_t>& o_data)
 {
@@ -110,13 +112,15 @@ inline ReturnCode getScom(const Target<K>& i_target,
 }
 
 /// @brief Platform-level implementation of putScom()
-/// @Tparam K template parameter, passed in target.
+/// @Tparam K the type (Kind) of target
+/// @Tparam M the type of multicast operation if it's a multicast target
+/// @Tparam V the type of the target's value
 /// @param[in] i_target     HW target to operate on.
 /// @param[in] i_address    SCOM register address to write to.
 /// @param[in] i_data       Buffer that holds data to write into address.
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-template< TargetType K >
-inline ReturnCode putScom(const Target<K>& i_target,
+template< TargetType K, MulticastType M, typename V >
+inline ReturnCode putScom(const Target<K, M, V>& i_target,
                           const uint64_t i_address,
                           const buffer<uint64_t> i_data)
 {
@@ -124,14 +128,16 @@ inline ReturnCode putScom(const Target<K>& i_target,
 }
 
 /// @brief Platform-level implementation of putScomUnderMask()
-/// @tparam K template parameter, passed in target.
+/// @Tparam K the type (Kind) of target
+/// @Tparam M the type of multicast operation if it's a multicast target
+/// @Tparam V the type of the target's value
 /// @param[in] i_target     HW target to operate on.
 /// @param[in] i_address    SCOM register address to write to.
 /// @param[in] i_data       Buffer that holds data to write into address.
 /// @param[in] i_mask       Buffer that holds the mask value.
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-template< TargetType K >
-inline ReturnCode putScomUnderMask(const Target<K>& i_target,
+template< TargetType K, MulticastType M, typename V >
+inline ReturnCode putScomUnderMask(const Target<K, M, V>& i_target,
                                    const uint64_t i_address,
                                    const buffer<uint64_t> i_data,
                                    const buffer<uint64_t> i_mask)
@@ -142,14 +148,16 @@ inline ReturnCode putScomUnderMask(const Target<K>& i_target,
 ///
 /// @brief Platform-level implementation called by getCfamRegister()
 /// Hardware procedures writers will not call this function.
-/// @Tparam K template parameter, passed in target.
+/// @Tparam K the type (Kind) of target
+/// @Tparam M the type of multicast operation if it's a multicast target
+/// @Tparam V the type of the target's value
 /// @param[in]  i_target   HW target to operate on.
 /// @param[in]  i_address  CFAM address to read from.
 /// @param[out] o_data     32-bit buffer that holds data read from HW target.
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-template< TargetType K >
-inline ReturnCode getCfamRegister(const Target<K>& i_target,
+template< TargetType K, MulticastType M, typename V >
+inline ReturnCode getCfamRegister(const Target<K, M, V>& i_target,
                                   const uint32_t i_address,
                                   buffer<uint32_t>& o_data)
 {
@@ -159,14 +167,16 @@ inline ReturnCode getCfamRegister(const Target<K>& i_target,
 ///
 /// @brief Platform-level implementation of putCfamRegister()
 /// Hardware procedures writers will not call this function.
-/// @Tparam K template parameter, passed in target.
+/// @Tparam K the type (Kind) of target
+/// @Tparam M the type of multicast operation if it's a multicast target
+/// @Tparam V the type of the target's value
 /// @param[in]  i_target   HW target to operate on.
 /// @param[in]  i_address  CFAM address to write to.
 /// @param[out] i_data     32-bit buffer that holds data to write into address.
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-template< TargetType K >
-inline ReturnCode putCfamRegister(const Target<K>& i_target,
+template< TargetType K, MulticastType M, typename V >
+inline ReturnCode putCfamRegister(const Target<K, M, V>& i_target,
                                   const uint32_t i_address,
                                   const buffer<uint32_t> i_data)
 {
@@ -177,15 +187,17 @@ inline ReturnCode putCfamRegister(const Target<K>& i_target,
 ///
 /// @brief Platform-level implementation of modifyCfamRegister()
 /// Hardware procedures writers will not call this function.
-/// @Tparam K template parameter, passed in target.
+/// @Tparam K the type (Kind) of target
+/// @Tparam M the type of multicast operation if it's a multicast target
+/// @Tparam V the type of the target's value
 /// @param[in]  i_target     HW target to operate on.
 /// @param[in]  i_address    CFAM register address to modify.
 /// @param[out] i_data       32-bit buffer that holds data to modify.
 /// @param[in]  i_modifyMode The modify mode (or/and/xor).
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-template< TargetType K >
-inline ReturnCode modifyCfamRegister(const Target<K>& i_target,
+template< TargetType K, MulticastType M, typename V >
+inline ReturnCode modifyCfamRegister(const Target<K, M, V>& i_target,
                                      const uint32_t i_address,
                                      const buffer<uint32_t> i_data,
                                      const fapi2::ChipOpModifyMode i_modifyMode)
@@ -198,15 +210,17 @@ inline ReturnCode modifyCfamRegister(const Target<K>& i_target,
 ///
 /// @brief Platform-level implementation of getRing()
 /// Hardware procedures writers will not call this function.
-/// @Tparam K template parameter, passed in target.
+/// @Tparam K the type (Kind) of target
+/// @Tparam M the type of multicast operation if it's a multicast target
+/// @Tparam V the type of the target's value
 /// @param[in]  i_target   HW target to operate on.
 /// @param[in]  i_address  Ring address to read from.
 /// @param[out] o_data     Buffer that holds ring data read from HW target.
 /// @param[in]  i_ringMode Ring operation mode.
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-template< TargetType K >
-inline ReturnCode getRing(const Target<K>& i_target,
+template< TargetType K, MulticastType M, typename V >
+inline ReturnCode getRing(const Target<K, M, V>& i_target,
                           const scanRingId_t i_address,
                           variable_buffer& o_data,
                           const RingMode i_ringMode)
@@ -248,7 +262,8 @@ inline ReturnCode putRing(const Target<K>& i_target,
 }
 
 /// @brief Platform-level implementation of modifyRing()
-/// @tparam K template parameter, passed in target.
+/// @Tparam M the type of multicast operation if it's a multicast target
+/// @Tparam V the type of the target's value
 /// @param[in] i_target     Target to operate on.
 /// @param[in] i_address    Ring address to modify.
 /// @param[in] i_data       Buffer that contains RS4 compressed ring data
@@ -256,8 +271,8 @@ inline ReturnCode putRing(const Target<K>& i_target,
 /// @param[in] i_modifyMode The modify mode (or/and/xor)
 /// @param[in] i_ringMode   Ring operation mode.
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-template< TargetType K >
-inline ReturnCode modifyRing(const Target<K>& i_target,
+template< TargetType K, MulticastType M, typename V >
+inline ReturnCode modifyRing(const Target<K, M, V>& i_target,
                              const scanRingId_t i_address,
                              const variable_buffer& i_data,
                              const ChipOpModifyMode i_modifyMode,
