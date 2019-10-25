@@ -82,7 +82,7 @@ include ${ROOTPATH}/procedure.rules.mk
 #include ${HWP_PM_PATH}/p9_pm_pba_bar_config.mk
 #include ${HWP_PM_PATH}/p9_pm_pba_init.mk
 #include ${HWP_PM_PATH}/p9_pm_pba_firinit.mk
-#include ${HWP_PM_PATH}/p9_pm_utils.mk
+include ${HWP_LIB_PATH}/p10_pm_utils.mk
 #include ${HWP_PM_PATH}/p10_pm_ocb_init.mk
 #include ${HWP_PM_PATH}/p10_pm_ocb_indir_setup_linear.mk
 #include ${HWP_PM_PATH}/p10_pm_ocb_indir_access.mk
@@ -105,8 +105,9 @@ include ${HWP_PM_PATH}/p10_hcode_image_build.mk
 include ${HWP_PM_PATH}/p10_scan_ring_util.mk
 include ${HWP_STOPUTIL_PATH}/p10_stop_util.mk
 include ${HWP_STOPUTIL_PATH}/p10_stop_api.mk
-#include ${HWP_PM_PATH}/p9_pstate_parameter_block.mk
-#include ${HWP_PM_PATH}/p9_pm_get_poundv_bucket.mk
+include ${HWP_PM_PATH}/p10_pstate_parameter_block.mk
+include ${HWP_PM_PATH}/p10_pm_get_poundv_bucket.mk
+include ${HWP_PM_PATH}/p10_pm_get_poundw_bucket.mk
 #include ${HWP_PM_PATH}/p9_pm_pstate_gpe_init.mk
 #include ${HWP_PM_PATH}/p9_check_proc_config.mk
 #include ${HWP_PM_PATH}/p9_pm_recovery_ffdc_base.mk
