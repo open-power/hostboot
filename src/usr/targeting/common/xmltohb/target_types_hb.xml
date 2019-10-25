@@ -29,58 +29,6 @@
      and target type extensions to add attributes to common target types
      ================================================================= -->
 <attributes>
-  <!-- Centaur chip/DMI -->
-  <targetTypeExtension>
-    <id>chip-membuf-centaur</id>
-    <attribute>
-      <id>EEPROM_PAGE_ARRAY</id>
-      <default>2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2</default>
-    </attribute>
-    <attribute>
-      <id>FSI_SCOM_MUTEX</id>
-    </attribute>
-    <attribute>
-      <id>HBRT_HYP_ID</id>
-    </attribute>
-    <attribute>
-      <id>I2C_ENGINE_MUTEX_0</id>
-      <default>0</default>
-    </attribute>
-    <attribute>
-      <id>I2C_ENGINE_MUTEX_1</id>
-      <default>0</default>
-    </attribute>
-    <attribute>
-      <id>I2C_PAGE_MUTEX_0</id>
-      <default>0</default>
-    </attribute>
-    <attribute>
-      <id>I2C_PAGE_MUTEX_1</id>
-      <default>0</default>
-    </attribute>
-    <attribute>
-      <id>IBSCOM_MUTEX</id>
-    </attribute>
-    <attribute>
-      <id>IBSCOM_VIRTUAL_ADDR</id>
-    </attribute>
-    <attribute>
-      <id>PART_NUMBER</id>
-    </attribute>
-    <attribute>
-      <id>SCAN_MUTEX</id>
-    </attribute>
-    <attribute>
-      <id>SCOM_IND_MUTEX</id>
-    </attribute>
-    <attribute>
-      <id>SERIAL_NUMBER</id>
-    </attribute>
-    <attribute>
-      <id>VPD_SWITCHES</id>
-    </attribute>
-  </targetTypeExtension>
-
   <targetTypeExtension>
     <id>chip-ocmb</id>
     <attribute>
@@ -155,7 +103,7 @@
   </targetTypeExtension>
 
   <targetTypeExtension>
-    <id>chip-processor-power9</id>
+    <id>chip-processor-power10</id>
     <attribute>
       <id>EEPROM_PAGE_ARRAY</id>
       <default>2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2</default>
@@ -226,7 +174,7 @@
   </targetTypeExtension>
 
   <targetTypeExtension>
-    <id>enc-node-power9</id>
+    <id>enc-node-power10</id>
     <attribute>
       <id>IS_SLAVE_DRAWER</id>
     </attribute>
@@ -289,7 +237,7 @@
   </targetTypeExtension>
 
   <targetTypeExtension>
-    <id>unit-core-power9</id>
+    <id>unit-core-power10</id>
     <attribute>
       <id>HBRT_HYP_ID</id>
     </attribute>
@@ -302,14 +250,14 @@
   </targetTypeExtension>
 
   <targetTypeExtension>
-    <id>unit-eq-power9</id>
+    <id>unit-eq-power10</id>
     <attribute>
       <id>SPCWKUP_COUNT</id>
     </attribute>
   </targetTypeExtension>
 
   <targetTypeExtension>
-    <id>unit-ex-power9</id>
+    <id>unit-fc-power10</id>
     <attribute>
       <id>HBRT_HYP_ID</id>
     </attribute>
@@ -322,24 +270,7 @@
   </targetTypeExtension>
 
   <targetTypeExtension>
-    <id>unit-mcs-nimbus</id>
-    <attribute>
-      <id>HB_TARGET_SCOMABLE</id>
-    </attribute>
-    <attribute>
-      <id>VPD_SWITCHES</id>
-    </attribute>
-  </targetTypeExtension>
-
-  <targetTypeExtension>
-    <id>unit-mcs-power9</id>
-    <attribute>
-      <id>MEMD_OFFSET</id>
-    </attribute>
-  </targetTypeExtension>
-
-  <targetTypeExtension>
-    <id>unit-xbus-nimbus</id>
+    <id>unit-iohs-power10</id>
     <attribute>
       <id>HB_TARGET_SCOMABLE</id>
     </attribute>
