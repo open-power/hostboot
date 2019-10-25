@@ -47,6 +47,22 @@
   </targetTypeExtension>
 
   <targetTypeExtension>
+    <id>chip-bmc-ast2600</id>
+    <attribute>
+      <id>BMC_HW_CHIP_TYPE</id>
+    </attribute>
+    <attribute>
+      <id>BMC_MANUFACTURER</id>
+    </attribute>
+    <attribute>
+      <id>BMC_SW_TYPE</id>
+    </attribute>
+    <attribute>
+      <id>FRU_ID</id>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
     <id>chip-membuf-centaur</id>
     <attribute>
       <id>EEPROM_VPD_PRIMARY_INFO</id>
