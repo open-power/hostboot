@@ -62,24 +62,22 @@ endif
 
 GCOVNAME := $(MODULE).lcov
 
-ifndef TESTS
 ifdef HOSTBOOT_PROFILE
-OBJS := gcov.o $(OBJS)
-endif
+OBJS := gcov.o $(filter-out gcov.o,$(OBJS))
 endif
 else
 GCOVNAME := $(notdir $(shell pwd)).lcov
 endif
 
-## Disable coverage on test cases or any directory that sets
+ifdef HOSTBOOT_PROFILE
+
+## Disable coverage on any directory that sets
 ## HOSTBOOT_PROFILE_NO_INSTRUMENT
 
-ifndef TESTS
-ifdef HOSTBOOT_PROFILE
 ifndef HOSTBOOT_PROFILE_NO_INSTRUMENT
 CFLAGS += --coverage
 endif
-endif
+
 endif
 
 ifdef HOSTBOOT_PROFILE
@@ -87,21 +85,4 @@ ifdef HOSTBOOT_PROFILE
                                 $(filter-out --coverage,$(1)),\
                                 $(1))
     FLAGS_FILTER = $(call PROFILE_FLAGS_FILTER, $(1), $(2))
-endif
-
-## Reduce the optimization level when profiling is enabled to ensure the
-## base image fits in 512k still.
-ifdef HOSTBOOT_PROFILE
-# We're not doing this right now because it causes linker errors in
-# various parts of hostboot with or without gcov (i.e. functions that
-# the code relies on being inlined are not; some const statics that
-# aren't defined in a compilation unit have linker references, etc.)
-# and it also causes the image to be generated incorrectly (symbol
-# names are wrong, calls to functions named things like __savegpr_rXX
-# are emitted but the functions themselves aren't and so you end up
-# jumping into an area of zeroes, ...). We should come back to this
-# later and fix, we might be able to profile more of hostboot with the
-# space savings that -Os could give.
-
-#OPT_LEVEL = -Os
 endif

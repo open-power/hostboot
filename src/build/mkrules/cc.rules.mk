@@ -42,9 +42,11 @@ $(OBJDIR)/%.list : $(OBJDIR)/%.o
 ifdef HOSTBOOT_PROFILE
 SOURCE_FILE=$(shell readlink -f $<)
 INCLUDE_DIRS=$(shell $(ROOTPATH)/src/build/tools/cflags.sh $(INCFLAGS))
+INCLUDE_PWD=$(shell readlink -f .)
 else
 SOURCE_FILE=$<
 INCLUDE_DIRS=$(INCFLAGS)
+INCLUDE_PWD=.
 endif
 
 # TODO RTC 215692
@@ -54,7 +56,7 @@ endif
 # the directory where the original file is located
 ifdef DOCPPCHECK
 	CXX_PRINT=$(C2) "    CPPCHECK        $(notdir $<)"
-	# NoteL Error code 127 means that the command timed-out. We do not fail
+	# Note: Error code 127 means that the command timed-out. We do not fail
 	# for timeouts
 	CXX_CPPCHECK_COMMAND=$(C1) set -o pipefail && cd `dirname $<` && timeout 2m $(CXX_CHECK) `basename $<` 2>&1 | tee .`basename $<`.cppcheck; exit_code=$$? ; \
 	if [ "$$exit_code" -ne 1 ]; then \
@@ -80,7 +82,7 @@ $(OBJDIR)/%.o : %.C
 	@mkdir -p $(OBJDIR)
 	$(C2) "    CXX        $(notdir $<)"
 	$(C1)$(CXX) -c $(call FLAGS_FILTER, $(CXXFLAGS), $<) $(CLI_CXXFLAGS) $(SOURCE_FILE) \
-	            -o $@.trace $(INCLUDE_DIRS) -iquote .
+	            -o $@.trace $(INCLUDE_DIRS) -iquote $(INCLUDE_PWD)
 	$(C1)$(TRACE_HASHER) $@ $(TRACE_FLAGS)
 	@rm $@.trace
 	$(CXX_PRINT)
@@ -91,7 +93,7 @@ $(OBJDIR)/%.o : %.cc
 	@mkdir -p $(OBJDIR)
 	$(C2) "    CXX        $(notdir $<)"
 	$(C1)$(CXX) -c $(CXXFLAGS) $(CLI_CXXFLAGS) $(SOURCE_FILE) -o $@.trace \
-	               $(INCLUDE_DIRS) -iquote .
+	               $(INCLUDE_DIRS) -iquote $(INCLUDE_PWD)
 	$(C1)$(TRACE_HASHER) $@ $(TRACE_FLAGS)
 	@rm $@.trace
 	$(CXX_PRINT)
@@ -104,13 +106,13 @@ $(OBJDIR)/%.o : %.c
 ifndef CC_OVERRIDE
 	$(C2) "    CC         $(notdir $<)"
 	$(C1)$(CC) -c $(call FLAGS_FILTER, $(CFLAGS), $<) $(CLI_CFLAGS) $(SOURCE_FILE) \
-	           -o $@.trace $(INCLUDE_DIRS) -iquote .
+	           -o $@.trace $(INCLUDE_DIRS) -iquote $(INCLUDE_PWD)
 	$(CXX_PRINT)
 	$(C_CPPCHECK_COMMAND)
 else
 	$(C2) "    CXX        $(notdir $<)"
 	$(C1)$(CXX) -c $(call FLAGS_FILTER, $(CXXFLAGS), $<) $(CLI_CXXFLAGS) $(SOURCE_FILE) \
-	            -o $@.trace $(INCLUDE_DIRS) -iquote .
+	            -o $@.trace $(INCLUDE_DIRS) -iquote $(INCLUDE_PWD)
 	$(CXX_PRINT)
 	$(CXX_CPPCHECK_COMMAND)
 endif
