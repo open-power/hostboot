@@ -58,6 +58,9 @@ extern "C"
         host_fw_command_struct l_cmd;
 
         user_input_msdg l_phy_params;
+        uint8_t l_sim = 0;
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_sim) );
+
         FAPI_TRY(mss::exp::setup_phy_params(i_target, l_phy_params),
                  "Failed setup_phy_params() for %s", mss::c_str(i_target));
 
@@ -91,26 +94,29 @@ extern "C"
             FAPI_TRY( mss::exp::ib::getRSP(i_target, l_response, l_rsp_data),
                       "Failed getRSP() for  %s", mss::c_str(i_target) );
 
-            // Proccesses the response data
-            FAPI_TRY( mss::exp::read_training_response(i_target, l_rsp_data, l_train_response),
-                      "Failed read_training_response for %s", mss::c_str(i_target));
-
-            // Displays the training response
-            FAPI_TRY( mss::exp::train::display_info(i_target, l_train_response));
-
-            // Check if cmd was successful
-            l_rc = mss::exp::check::response(i_target, l_response, l_cmd);
-
-            // If not, then we need to process the bad bitmap
-            if(l_rc != fapi2::FAPI2_RC_SUCCESS)
+            if (!l_sim)
             {
-                mss::exp::bad_bit_interface l_interface(l_train_response);
+                // Proccesses the response data
+                FAPI_TRY( mss::exp::read_training_response(i_target, l_rsp_data, l_train_response),
+                          "Failed read_training_response for %s", mss::c_str(i_target));
 
-                // Record bad bits should only fail if we have an attributes issue - that's a major issue
-                FAPI_TRY(mss::record_bad_bits<mss::mc_type::EXPLORER>(i_target, l_interface));
+                // Displays the training response
+                FAPI_TRY( mss::exp::train::display_info(i_target, l_train_response));
 
-                // Now, go to our true error handling procedure
-                FAPI_TRY(l_rc, "mss::exp::check::response failed for %s", mss::c_str(i_target));
+                // Check if cmd was successful
+                l_rc = mss::exp::check::response(i_target, l_response, l_cmd);
+
+                // If not, then we need to process the bad bitmap
+                if(l_rc != fapi2::FAPI2_RC_SUCCESS)
+                {
+                    mss::exp::bad_bit_interface l_interface(l_train_response);
+
+                    // Record bad bits should only fail if we have an attributes issue - that's a major issue
+                    FAPI_TRY(mss::record_bad_bits<mss::mc_type::EXPLORER>(i_target, l_interface));
+
+                    // Now, go to our true error handling procedure
+                    FAPI_TRY(l_rc, "mss::exp::check::response failed for %s", mss::c_str(i_target));
+                }
             }
         }
 
