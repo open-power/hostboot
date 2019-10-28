@@ -570,7 +570,6 @@ void* host_build_stop_image (void *io_pArgs)
                               l_unsecureHomerAddr);
                 }
 
-#ifdef ISTEP15_ENABLE_HWPS
                 //Call p10_hcode_image_build.C HWP
                 FAPI_INVOKE_HWP( l_errl,
                                  p10_hcode_image_build,
@@ -598,7 +597,6 @@ void* host_build_stop_image (void *io_pArgs)
                     //  drop out of block with errorlog.
                     break;
                 }
-#endif
                 // We now need to copy the data that was put in l_temp_buffer2
                 // by the p10_hcode_image_build procedure into the unsecure
                 // HOMER memory
@@ -651,7 +649,6 @@ void* host_build_stop_image (void *io_pArgs)
                     }
                 }
 
-#ifdef ISTEP15_ENABLE_HWPS
                 uint32_t    l_sizeImageOut  =
                   ((P10_MAX_PROCS * (4 * MEGABYTE)));
 
@@ -672,7 +669,6 @@ void* host_build_stop_image (void *io_pArgs)
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                                "applyHcodeGenCpuRegs SUCCESS " );
                 }
-#endif
                 // Set wakeup mode for processor based on SMF enablement
                 FAPI_INVOKE_HWP(l_errl,
                                 p10_setup_runtime_wakeup_mode,

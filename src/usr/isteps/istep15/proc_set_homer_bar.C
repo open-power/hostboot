@@ -89,14 +89,12 @@ void* proc_set_homer_bar (void *io_pArgs)
                 TARGETING::get_huid(l_procChip),
                 homerAddr);
 
-#ifdef ISTEP15_ENABLE_HWPS
         //call p10_pm_set_homer_bar.C HWP
         FAPI_INVOKE_HWP( l_errl,
                         p10_pm_set_homer_bar,
                         l_fapiCpuTarget,
                         homerAddr,
                         HOMER_SIZE_IN_MB);
-#endif
         if(l_errl)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
