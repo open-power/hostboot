@@ -112,6 +112,8 @@ struct Section
     size_t size;
 
     bfd_byte* data;
+
+    Section() : name(""), vma_offset(0), size(0), data(NULL) {}
 };
 
 /**
@@ -204,7 +206,7 @@ struct Object
         /**
          * CTOR default
          */
-        Object() : image(NULL), text(), rodata(), data(), offset(0),
+        Object() : image(NULL), text(), rodata(), data(), sfpr(), offset(0),
                    base_addr(0), iv_output(NULL), tls_module(-1) {}
 
 
@@ -214,7 +216,7 @@ struct Object
          * @param[in] i_out : output FILE handle
          */
         Object(unsigned long i_baseAddr, FILE* i_out)
-            : image(NULL), text(), rodata(), data(), offset(0),
+            : image(NULL), text(), rodata(), data(), sfpr(), offset(0),
               base_addr(i_baseAddr), iv_output(i_out), tls_module(-1) {}
 };
 
