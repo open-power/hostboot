@@ -164,9 +164,8 @@ fapi2::ReturnCode verify_ec_hw_state(
         }
     }//end of present
 
-#endif
-
 fapi_try_exit:
+#endif
     FAPI_INF("< update_core_config...");
     return fapi2::current_err;
 
