@@ -74,7 +74,7 @@ const uint64_t PFIR_MASK_REG    = 0xF800000000000000ULL;
 /// @brief Configures fabric mode registers
 /// @param[in] i_target       Reference to pec chip target
 /// @return fapi::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
-fapi2::ReturnCode p10_pci_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+fapi2::ReturnCode p10_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
 
     using namespace scomt;
