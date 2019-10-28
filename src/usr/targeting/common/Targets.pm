@@ -30,114 +30,209 @@ use XML::Simple;
 use XML::Parser;
 use Data::Dumper;
 use feature "state";
+use Carp qw( croak confess );
 
+# Although these are duplicated in the hash below, I left these here as
+# to not break other scripts that use this Perl module.
 use constant
 {
     PERVASIVE_PARENT_CORE_OFFSET => 32,
-    PERVASIVE_PARENT_EQ_OFFSET => 16,
+    PERVASIVE_PARENT_EQ_OFFSET => 32,
     PERVASIVE_PARENT_XBUS_OFFSET => 6,
     PERVASIVE_PARENT_OBUS_OFFSET => 9,
-    PERVASIVE_PARENT_MCBIST_OFFSET => 7,
-    PERVASIVE_PARENT_MCS_OFFSET => 7,
-    PERVASIVE_PARENT_MCA_OFFSET => 7,
     PERVASIVE_PARENT_PEC_OFFSET => 13,
     PERVASIVE_PARENT_PHB_OFFSET => 13,
-    PERVASIVE_PARENT_NPU_OFFSET => 5,
     PERVASIVE_PARENT_MC_OFFSET => 7,
     PERVASIVE_PARENT_MI_OFFSET => 7,
-    PERVASIVE_PARENT_DMI_OFFSET => 7,
     NUM_PROCS_PER_GROUP => 4,
+    MAX_PROCS_PER_SOCKET => 2,
     DIMMS_PER_PROC => 64,  # Cumulus
-    DIMMS_PER_DMI => 8,    # Cumulus
     DIMMS_PER_MBA => 4,# Cumulus
-    MAX_MCS_PER_PROC => 4, # 4 MCS per Nimbus
     MBA_PER_MEMBUF => 2,
     MAX_DIMMS_PER_MBA_PORT => 2,
-
+    CORES_PER_EQ => 4,
+    PAU_PER_PAUC => 2,
 };
 
-my %maxInstance = (
-    "PROC"          => 4,
-    "CORE"          => 24,
-    "EX"            => 12,
-    "EQ"            => 6,
+# Not only does this value control the PERVASIVE_PARENT start value,
+# it also controls the starting value of the CHIPLET_ID.
+# These values are just duplicates of above, but this hash allows for
+# dynamic coding
+our %PERVASIVE_PARENT_OFFSET =
+(
+    EQ    => 32,
+    FC    => 32,
+    CORE  => 32,
+    MC    => 12,
+    MI    => 12,
+    MCC   => 12,
+    OMI   => 12,
+    OMIC  => 12,
+    PAUC  => 16,
+    IOHS  => 24,
+    PAU   => 16,
+    OBUS  => 9,
+);
+
+# The maximum number of target instances per parent
+# This value has an effect on REL_POS, AFFINITY_PATH and PHYS_PATH
+my %MAX_INST_PER_PARENT =
+(
+    PROC => 8, # Number of PROCs per NODE
+    EQ   => 8, # Number of EQs per PROC
+    FC   => 2, # Number of FCs per EQ
+    CORE => 2, # Number of COREs per FC
+
+    MC   => 4, # Number of MCs per PROC
+    MI   => 1, # Number of MIs per MC
+    MCC  => 2, # Number of MCCs per MI
+    OMI  => 2, # Number of OMIs per MCC/OMIC (has two parents 'a nuclear family')
+    OCMB => 1, # Number of CHIP_OCMBs per OMI
+    PMIC => 2, # Number of PMICs per OCMB
+    MEM_PORT => 1, # Number of MEM_PORTs per OCM
+    DIMM => 1, # Number of DIMMs per MEM_PORT
+    PMIC => 2, # Number of PMICs per DIMM
+
+    OMIC => 2, # Number of OMICs per MC
+
+    PAUC => 4, # Number of PAUCs per PROC
+    IOHS => 2, # Number of IOHSs per PAUC
+    PAU  => 1, # Number of PAUs per IOHS
+);
+
+# The maximum number of target instances per PROC.  These can be calculated
+# from the values of MAX_INST_PER_PARENT.
+# These values control HUID, PARENT_PERVASIVE, ORDINAL_ID, FAPI_POS values
+our %MAX_INST_PER_PROC = (
+    "EQ"            => $MAX_INST_PER_PARENT{EQ},
+    "FC"            => $MAX_INST_PER_PARENT{EQ} * $MAX_INST_PER_PARENT{FC},
+    "CORE"          => $MAX_INST_PER_PARENT{EQ} * $MAX_INST_PER_PARENT{FC} *
+                       $MAX_INST_PER_PARENT{CORE},
+
+    "MC"            => $MAX_INST_PER_PARENT{MC},
+    "MI"            => $MAX_INST_PER_PARENT{MC} * $MAX_INST_PER_PARENT{MI},
+    "MCC"           => $MAX_INST_PER_PARENT{MC} * $MAX_INST_PER_PARENT{MI} *
+                       $MAX_INST_PER_PARENT{MCC},
+    "OMI"           => $MAX_INST_PER_PARENT{MC} * $MAX_INST_PER_PARENT{MI} *
+                       $MAX_INST_PER_PARENT{MCC} * $MAX_INST_PER_PARENT{OMI},
+    "OCMB_CHIP"     => $MAX_INST_PER_PARENT{MC} * $MAX_INST_PER_PARENT{MI} *
+                       $MAX_INST_PER_PARENT{MCC} * $MAX_INST_PER_PARENT{OMI} *
+                       $MAX_INST_PER_PARENT{OCMB},
+    "MEM_PORT"      => $MAX_INST_PER_PARENT{MC} * $MAX_INST_PER_PARENT{MI} *
+                       $MAX_INST_PER_PARENT{MCC} * $MAX_INST_PER_PARENT{OMI} *
+                       $MAX_INST_PER_PARENT{OCMB} * $MAX_INST_PER_PARENT{MEM_PORT},
+    "DDIMM"         => $MAX_INST_PER_PARENT{MC} * $MAX_INST_PER_PARENT{MI} *
+                       $MAX_INST_PER_PARENT{MCC} * $MAX_INST_PER_PARENT{OMI} *
+                       $MAX_INST_PER_PARENT{OCMB} * $MAX_INST_PER_PARENT{MEM_PORT} *
+                       $MAX_INST_PER_PARENT{DIMM},
+    "PMIC"          => $MAX_INST_PER_PARENT{MC} * $MAX_INST_PER_PARENT{MI} *
+                       $MAX_INST_PER_PARENT{MCC} * $MAX_INST_PER_PARENT{OMI} *
+                       $MAX_INST_PER_PARENT{OCMB} * $MAX_INST_PER_PARENT{MEM_PORT} *
+                       $MAX_INST_PER_PARENT{DIMM} * $MAX_INST_PER_PARENT{PMIC},
+
+    "OMIC"          => $MAX_INST_PER_PARENT{MC} * $MAX_INST_PER_PARENT{OMIC},
+
+    "PAUC"          => $MAX_INST_PER_PARENT{PAUC},
+    "IOHS"          => $MAX_INST_PER_PARENT{PAUC} * $MAX_INST_PER_PARENT{IOHS},
+    "PAU"           => $MAX_INST_PER_PARENT{PAUC} * $MAX_INST_PER_PARENT{IOHS} * $MAX_INST_PER_PARENT{PAU},
+                       # For PAU, only 6 used, PAU1 and PAU2 not used
+
     "ABUS"          => 3,
     "XBUS"          => 3,
     "OBUS"          => 4,
-    "MCBIST"        => 2,
-    "MCS"           => 4,
-    "MCA"           => 8,
-    "PHB"           => 6, #PHB is same as PCIE
-    "PEC"           => 3, #PEC is same as PBCQ
+    "PHB"           => 6, # PHB is same as PCIE
+    "PEC"           => 2, # PEC is same as PBCQ
     "PCIESWITCH"    => 2,
     "MBA"           => 16,
-    "PPE"           => 51, #Only 21, but they are sparsely populated
-    "PERV"          => 56, #Only 42, but they are sparsely populated
+    "PPE"           => 51, # Only 21, but they are sparsely populated
+    "PERV"          => 56, # Only 39, but they are sparsely populated
     "CAPP"          => 2,
     "SBE"           => 1,
     "OBUS_BRICK"    => 12,
-    "NPU"           => 1,
-    "MC"            => 2,
-    "MI"            => 4,
-    "MCC"           => 8,
-    "OMI"           => 16,
-    "OCMB_CHIP"     => 16,
-    "MEM_PORT"      => 16,
-    "DDIMM"         => 16,
-    "DMI"           => 8,
     "OCC"           => 1,
     "NV"            => 6,
     "NX"            => 1,
     "MEMBUF"        => 8,
     "SMPGROUP"      => 8,
-    "OMIC"          => 6,
 );
+
+#--------------------------------------------------
+# @brief The constructor for the object Targets which will contain the
+#        target instances along with their attributes.
+#--------------------------------------------------
 sub new
 {
     my $class = shift;
     my $self  = {
+        # The following data are associated with the
+        # user command line options
+        build           => "",
+        force           => 0,
+        serverwiz_file  => "",  # input xml file
+        serverwiz_dir   => "",  # directory of input xml file
+        debug           => 0,
+        system_config   => "",
+        output_file     => "",
+        report          => 0,
+        run_self_test   => 0,   # run internal test
+        stealth_mode    => 0,   # Silence warnings, only print errors
+
+        # The following data are associated with the
+        # xml itself
+        version         => 0,
         xml          => undef,
         data         => undef,
         targeting    => undef,
         enumerations => undef,
-        MAX_MCS      => 0,
         master_proc  => undef,
         UNIT_COUNTS  => undef,
         huid_idx     => undef,
         mru_idx      => undef,
-        force        => 0,
-        debug        => 0,
-        version      => "",
         xml_version  => 0,
         errorsExist  => 0,
         NUM_PROCS    => 0,
         TOP_LEVEL    => "",
+        TOP_LEVEL_HANDLE    => undef,
         TOPOLOGY     => undef,
         report_log   => "",
         vpd_num      => 0,
         dimm_tpos    => 0,
         MAX_MC       => 0,
         MAX_MI       => 0,
-        MAX_DMI      => 0,
-        DMI_FSI_MAP  => {
-            '0' => '3',
-            '1' => '2',
-            '4' => '7',
-            '5' => '6'
-        }
-        # TODO RTC:132549
-        # DMI_FSI_MAP is a lookup table for DMI channel to FSI and ref clock.
-        # It is processor specific and needs to be pulled from a
-        # processor attribute instead of being hardcoded
-
     };
     return bless $self, $class;
 }
 
+#--------------------------------------------------
+# @brief Set the version of the output file
+#
+# @details If given a version number, then that will be used for the output
+#          file.  If no version number given, then will use the version
+#          number from the input file.  If no version given and none can be
+#          found, then 0 is used.
+#
+# @param [in] $self - The global target object.
+# @param [in] $version - If given, the version number to set ouput file to.
+#--------------------------------------------------
 sub setVersion
 {
     my $self    = shift;
     my $version = shift;
+
+    # If no version number given, then try input XML file
+    if ($version eq undef)
+    {
+        # Default to 0 if no version number given
+        $version = 0;
+
+        # If the input XML file has a version number, then propagate that to the
+        # output file, which seems to be the most appropriate thing to do
+        # considering that the output file is a product of the input file.
+        if (exists $self->{xml}->{version})
+        {
+            $version = $self->{xml}->{version};
+        }
+    }
 
     $self->{version} = $version;
 }
@@ -306,7 +401,11 @@ sub printAttribute
     my $value = $target_ptr->{$attribute}->{default};
     if ($value eq "")
     {
-        print " Targets.pm> WARNING: empty default tag for attribute : $attribute\n";
+        # Only spew warning if not in stealth mode
+        if (0 == $self->{stealth_mode})
+        {
+            print " Targets.pm> WARNING: empty default tag for attribute : $attribute\n";
+        }
         return;
     }
 
@@ -357,7 +456,28 @@ sub printAttribute
     }
 }
 
-## stores TYPE enumeration values which is used to generate HUIDs
+#--------------------------------------------------
+# @brief stores TYPE enumeration values
+# @details Takes enumeration types from 'self->{xml}->{enumerationType}'
+#          or from 'self->{xml}->{enumerationTypes}->{enumerationType}'
+#          and stores them in 'self->{enumeration}'
+# example:  (bless represents the self)
+#    takes:
+#        bless ( { 'xml' =>
+#                  { 'enumerationTypes' =>
+#                    { 'enumerationType' =>
+#                      { 'WOF_POWER_LIMIT' =>
+#                        { 'enumerator' =>
+#                          { 'NOMINAL' => { 'value' => '0' },
+#                            'TURBO' => { 'value' => '1' }
+#                          } } } } }
+#    and copies to:
+#    bless ( { 'enumeration' =>
+#              { 'WOF_POWER_LIMIT' =>
+#                { 'NOMINAL' => '0',
+#                  'TURBO' => '1'
+#                } } }
+#--------------------------------------------------
 sub storeEnumerations
 {
     my $self = shift;
@@ -376,6 +496,7 @@ sub storeEnumerations
         }
     }
 }
+
 sub storeGroups
 {
     my $self = shift;
@@ -389,6 +510,172 @@ sub storeGroups
         }
     }
 }
+
+#--------------------------------------------------
+# @brief Set the target instance handle to the given target handle
+#
+# @note Private method, not for public consumption
+#
+# @param [in] $self - The global target object.
+# @param [in] $targetHndl - The value the target instance handle is set to.
+#--------------------------------------------------
+sub __setTargetInstanceHandle__
+{
+    my $self = shift;
+    my $targetHndl = shift;
+
+    # Dynamically create and cache a handle to the target instance
+    $self->{TARGET_INST_HANDLE} = $targetHndl;
+}
+
+
+#--------------------------------------------------
+# @brief Initialize a handle to the target instance.
+#
+# @details This method locates where the target instance
+#          resides and caches it for fast retrieval.
+#
+# @note Private method, not for public consumption
+#
+# @post A handle to the target instance is cached or exit
+#       stating that the target instance cannot be found.
+#
+# @param [in] $self - The global target object.
+#--------------------------------------------------
+sub __initializeTargetInstanceHandle__
+{
+    my $self = shift;
+
+    if ( (!defined $self->{TARGET_INST_HANDLE}) ||
+         ($self->{TARGET_INST_HANDLE} eq "") )
+    {
+        # Find the location of where target instances reside
+        my $targetInstances = $self->{xml}->{'targetInstance'};
+        if (!defined $targetInstances)
+        {
+            # Check one more level for the target instances
+            $targetInstances = $self->{xml}->{'targetInstances'}
+                                           ->{'targetInstance'};
+        }
+
+        # If can't find the target instances, then state so and exit
+        if (!defined $targetInstances)
+        {
+            die "No target instances defined. Check input XML for 'targetInstance' tag.\n";
+        }
+
+        $self->__setTargetInstanceHandle__($targetInstances);
+    } # end if ( (!defined $self->{TARGET_INST_HANDLE}) ||  ...
+}
+
+#--------------------------------------------------
+# @brief Return a handle to the target instances.
+#
+# @details This method will initialize the target instances
+#          if has not been already initialized.
+#
+# @param [in] $self - The global target object.
+#
+# @return - A handle to the target instance.
+#--------------------------------------------------
+sub getTargetInstanceHandle
+{
+    my $self = shift;
+
+    # Initialize the target handle.  This call will return quickly
+    # if already initialized or error out if it can't initialize,
+    # either way, no need to check handle prior to calling.
+    $self->__initializeTargetInstanceHandle__();
+
+    return ($self->{TARGET_INST_HANDLE});
+}
+
+#--------------------------------------------------
+# @brief Set the top level target to the given target.
+#
+# @note Private method, not for public consumption
+#
+# @param [in] $self - The global target object.
+# @param [in] $target - The value the top level target is set to.
+#--------------------------------------------------
+sub __setTopLevel__
+{
+    my $self = shift;
+    my $target = shift;
+
+    $self->{TOP_LEVEL} = $target;
+}
+
+#--------------------------------------------------
+# @brief Initialize the top level target.
+#
+# @details This method locates the top level target
+#          and caches it for fast retrieval.
+#
+# @note Private method, not for public consumption
+#
+# @post The top level target is cached or exit stating that
+#       top level target not found.
+#
+# @param [in] $self - The global target object.
+#--------------------------------------------------
+sub __initalizeTopLevel__
+{
+    my $self = shift;
+
+    # If the top level target instance has not been found and set,
+    # then find that target and set top level to it
+    if ((!defined $self->{TOP_LEVEL}) || ($self->{TOP_LEVEL} eq ""))
+    {
+        # Get a handle to the target instances
+        my $targetInstancesHandle = $self->getTargetInstanceHandle();
+
+        # Find the system target which is the top level target
+        foreach my $target (keys(%{$targetInstancesHandle}))
+        {
+            # If target is of type 'SYS' then we found the top level target
+            if ($targetInstancesHandle->{$target}->{attribute}
+                                      ->{TYPE}->{default} eq "SYS")
+            {
+                # Set the top level target and search no more
+                $self->__setTopLevel__($target);
+
+                last;
+                # YOU SHALL NOT PASS!!!
+            }
+        }
+
+        # If unable to find top level target, then state so and exit
+        if ((!defined $self->{TOP_LEVEL}) || ($self->{TOP_LEVEL} eq ""))
+        {
+            die "Unable to find system top level target\n";
+        }
+    } # end if ((!defined $self->{TOP_LEVEL}) || ($self->{TOP_LEVEL} eq ""))
+}
+
+#--------------------------------------------------
+# @brief Return the top level target.
+#
+# @details This method will initialize the top level
+#          target, if has not already initialized, and
+#          returns the top level target.
+#
+# @param [in] $self - The global target object.
+#
+# @return - The top level target.
+#--------------------------------------------------
+sub getTopLevel
+{
+    my $self = shift;
+
+    # Initialize the top level.  This call will return quickly
+    # if top level already initialized or error out if it can't
+    # initialize, either way, no need to check top level prior to calling.
+    $self->__initalizeTopLevel__();
+
+    return ($self->{TOP_LEVEL});
+}
+
 
 ####################################################
 ## build target hierarchy recursively
@@ -424,34 +711,23 @@ sub buildHierarchy
     my $self   = shift;
     my $target = shift;
 
+    # Get a handle to the target instances
+    my $targetInstanceHandle = $self->getTargetInstanceHandle();
+
+    # If caller did not provide a target, then use the top level target
+    if ($target eq "")
+    {
+        $target = $self->getTopLevel();
+    }
+
     my $instance_path = $self->{data}->{INSTANCE_PATH};
     if (!defined $instance_path)
     {
         $instance_path = "";
     }
-    my $baseptr = $self->{xml}->{'targetInstance'};
-    if ($self->{xml_version} == 1)
-    {
-        $baseptr = $self->{xml}->{'targetInstances'}->{'targetInstance'};
-    }
-    if ($target eq "")
-    {
-        ## find system target
-        foreach my $t (keys(%{$baseptr}))
-        {
-            if ($baseptr->{$t}->{attribute}->{TYPE}->{default} eq "SYS")
-            {
-                $self->{TOP_LEVEL} = $t;
-                $target = $t;
-            }
-        }
-    }
-    if ($target eq "")
-    {
-        die "Unable to find system top level target\n";
-    }
+
     my $old_path        = $instance_path;
-    my $target_xml      = $baseptr->{$target};
+    my $target_xml      = $targetInstanceHandle->{$target};
     my $affinity_target = $target;
     my $key             = $instance_path . "/" . $target;
 
@@ -468,7 +744,6 @@ sub buildHierarchy
     $self->{data}->{INSTANCE_PATH} = $old_path . "/" . $target;
 
     ## copy attributes
-
     foreach my $attribute (keys %{ $target_xml->{attribute} })
     {
         my $value = $target_xml->{attribute}->{$attribute}->{default};
@@ -505,7 +780,8 @@ sub buildHierarchy
         {
             $self->setAttribute($key, $attribute, $value);
         }
-    }
+    } # end foreach my $attribute (keys %{ $target_xml->{attribute} })
+
     ## global attributes overwrite local
     my $settingptr = $self->{xml}->{globalSetting};
     if ($self->{xml_version} == 1)
@@ -574,7 +850,7 @@ sub buildHierarchy
             $bus_entry{BUS_TARGET}    = $b;
             push(@{ $self->{data}->{BUSSES}->{$bus_type} }, \%bus_entry);
         }
-    }
+    } # end if (defined($target_xml->{bus}))
 
     foreach my $child (@{ $target_xml->{child_id} })
     {
@@ -583,6 +859,7 @@ sub buildHierarchy
         push(@{ $self->{data}->{TARGETS}->{$key}->{CHILDREN} }, $child_key);
         $self->buildHierarchy($child);
     }
+
     foreach my $child (@{ $target_xml->{hidden_child_id} })
     {
         my $child_key = $self->{data}->{INSTANCE_PATH} . "/" . $child;
@@ -591,7 +868,6 @@ sub buildHierarchy
         $self->buildHierarchy($child);
     }
     $self->{data}->{INSTANCE_PATH} = $old_path;
-
 }
 
 ##########################################################
@@ -611,9 +887,13 @@ sub prune
     {
         if(not defined $self->{data}->{TARGETS}->{$target}->{TARGET})
         {
-            printf("WARNING: Target instance for %s not found, deleting. ",
-                    $target);
-            printf("This probably indicates a bug in the source XML\n");
+            # Only spew warning if not in stealth mode
+            if (0 == $self->{stealth_mode})
+            {
+                printf("WARNING: Target instance for %s not found, deleting. ",
+                       $target);
+                printf("This probably indicates a bug in the source XML\n");
+            }
             delete $self->{data}->{TARGETS}->{$target};
         }
     }
@@ -645,11 +925,11 @@ sub getParentNodePos
     return $pos;
 }
 
+
+
 ##########################################################
 ## traces busses and builds affinity hierarchy
 ## HOSTBOOT expected hierarchy: sys/node/proc/<unit>
-##                              sys/node/proc/mcs/membuf/<unit>
-##                              sys/node/proc/mcs/membuf/mba/dimm
 ## This function also sets the common attributes for all the targets
 ## Common attributes include:
 ##  - FAPI_NAME
@@ -670,7 +950,6 @@ sub buildAffinity
     my $omi             = -1;
     my $ocmb            = -1;
     my $mem_port        = -1;
-    my $i2c_mux         = -1;
     my $dimm            = -1;
     my $pmic            = -1;
     my $sys_phys        = "";
@@ -678,7 +957,6 @@ sub buildAffinity
     my $node_aff        = "";
     my $proc_fapi       = "";
     my $sys_pos         = 0; # There is always a single system target
-    my $mcbist          = -1;
     my $num_mc          = 0 ;
     my @tpm_list        = (); # The list of TPMs found on the system
     my @ucd_list        = (); # The list of UCDs found on the system
@@ -756,7 +1034,7 @@ sub buildAffinity
             }
             $self->setAttribute($target, "ORDINAL_ID",    $pos);
 
-        }
+        } # end elsif ($type eq "NODE")
         elsif ($type eq "TPM")
         {
             $tpm++;
@@ -773,10 +1051,9 @@ sub buildAffinity
             #       already been dealt with.
             $self->setAttribute($target, "PHYS_PATH",     $tpm_phys);
             $self->setAttribute($target, "ORDINAL_ID",    $tpm);
-        }
+        } # end elsif ($type eq "TPM")
         elsif ($type eq "POWER_SEQUENCER")
         {
-
             my $target_type = $self->getTargetType($target);
 
             # Strip off the chip- part of the target type name
@@ -806,7 +1083,7 @@ sub buildAffinity
             $self->setAttribute($target, "CLASS", "ASIC");
             $self->deleteAttribute($target, "POSITION");
             $self->deleteAttribute($target, "FRU_ID");
-        }
+        } # end elsif ($type eq "POWER_SEQUENCER")
         elsif ($type eq "MCC")
         {
             $mcc++;
@@ -815,7 +1092,7 @@ sub buildAffinity
             # To get the corresponding proc, MC, or MI number for a given MCC
             # divide the MCC number by the number of MCCs per unit, then mod 2
             # to get the relative path in terms of 0 or 1
-            my $numOfMccsPerProc = $maxInstance{$type};
+            my $numOfMccsPerProc = $MAX_INST_PER_PROC{$type};
             my $numOfMccsPerMc = 4;
             my $numOfMccsPerMi = 2;
             my $proc_num = ($mcc / $numOfMccsPerProc) % 2;
@@ -844,7 +1121,7 @@ sub buildAffinity
                 $omi++;
 
                 # Same logic for MCC, but for OMI instead
-                my $numOfOmisPerProc = $maxInstance{$type};
+                my $numOfOmisPerProc = $MAX_INST_PER_PROC{$type};
                 my $numOfOmisPerMc = 8;
                 my $numOfOmisPerMi = 4;
                 my $numOfOmisPerMcc = 2;
@@ -880,15 +1157,6 @@ sub buildAffinity
             $self->setAttribute($target, "AFFINITY_PATH", $bmc_aff);
             $self->setAttribute($target, "ORDINAL_ID",    $bmc);
 
-        }
-        elsif ($type eq "MCS")
-        {
-            $self->setAttribute($target, "VPD_REC_NUM", 0);
-        }
-        elsif ($type eq "MCA")
-        {
-            my $ddrs = $self->findConnections($target,"DDR4","");
-            $self->processMcaDimms($ddrs, $sys_pos, $node_phys, $node, $proc);
         }
         elsif ($type eq "OCMB_CHIP")
         {
@@ -955,7 +1223,7 @@ sub buildAffinity
             # no direct way to get the relative position to the proc. The
             # relationship between ocmb and omi is 1:1, so we take the chip unit
             # of the corresponding omi as the relative position to the proc
-            my $fapi_pos = $omi_chip_unit + ($maxInstance{$type} * $proc_num);
+            my $fapi_pos = $omi_chip_unit + ($MAX_INST_PER_PROC{$type} * $proc_num);
             $self->setAttribute($target, "FAPI_POS", $fapi_pos);
 
             my $ocmb_num = $fapi_pos;
@@ -980,47 +1248,6 @@ sub buildAffinity
             my $eeprom_name = "EEPROM_VPD_PRIMARY_INFO";
             $self->setAttributeField($target, $eeprom_name, "i2cMasterPath", $master_path);
             $self->setAttributeField($target, $eeprom_name, "chipCount", "0x01");
-        }
-        elsif ($type eq "I2C_MUX")
-        {
-            $i2c_mux++;
-
-            $self->{targeting}{SYS}[0]{NODES}[$node]{I2C_MUXS}[$i2c_mux]{KEY} = $target;
-
-            # There exists 1 i2c_mux per MC, so 2 i2c_mux per proc
-            my $numOfMuxesPerProc = 2;
-            my $proc_num = ($i2c_mux / $numOfMuxesPerProc) % 2;
-            my $i2c_aff = $node_aff . "/proc-$proc_num/i2c_mux-$i2c_mux";
-            $self->setAttribute($target, "AFFINITY_PATH", $i2c_aff);
-
-            my $i2c_phys = $node_phys . "/i2c_mux-$i2c_mux";
-            $self->setAttribute($target, "PHYS_PATH", $i2c_phys);
-            $self->setHuid($target, $sys_pos, $node);
-
-            my $fapi_name = "FAPI_I2C_CONTROL_INFO";
-            my $master_path = $node_phys . "/proc-$proc_num";
-            $self->setAttributeField($target, $fapi_name, "i2cMasterPath", $master_path);
-            my $conn = $self->findConnectionsByDirection($target, "I2C",
-                                                         "", 1);
-            if ($conn ne "")
-            {
-                # Get the i2c-master-omi which has the engine and port values
-                # The endpoint mux has the devAddr
-                foreach my $conn (@{$conn->{CONN}})
-                {
-                    my $source = $conn->{SOURCE};
-                    my $dest = $conn->{DEST};
-                    if ($self->getTargetParent($conn->{DEST}) eq $target)
-                    {
-                        $self->setAttributeField($target, $fapi_name, "engine",
-                            $self->getAttribute($source, "I2C_ENGINE"));
-                        $self->setAttributeField($target, $fapi_name, "port",
-                            $self->getAttribute($source, "I2C_PORT"));
-                        $self->setAttributeField($target, $fapi_name, "devAddr",
-                            $self->getAttribute($dest, "I2C_ADDRESS"));
-                    }
-                }
-            }
         }
         elsif ($type eq "MEM_PORT")
         {
@@ -1085,8 +1312,8 @@ sub buildAffinity
                     # omi_num indicates the chip_unit of the corresponding omi
                     $omi_chip_unit = $omi_num;
                     $omi_num %= 2;
-                }
-            }
+                } # end foreach my $conn (@{$conn->{CONN}})
+            } # end if ($conn ne "")
 
             $self->{targeting}{SYS}[0]{NODES}[$node]{DIMMS}[$dimm]{KEY} = $target;
             $self->setAttribute($target, "PHYS_PATH", $node_phys . "/dimm-$dimm");
@@ -1097,7 +1324,7 @@ sub buildAffinity
             # no direct way to get the relative position to the proc. The
             # relationship between dimm and omi is 1:1, so we take the chip unit
             # of the corresponding omi as the relative position to the proc
-            my $fapi_pos = $omi_chip_unit + ($maxInstance{"DDIMM"} * $proc_num);
+            my $fapi_pos = $omi_chip_unit + ($MAX_INST_PER_PROC{"DDIMM"} * $proc_num);
             $self->setAttribute($target, "FAPI_POS", $fapi_pos);
             $self->setAttribute($target, "ORDINAL_ID", $dimm);
             $self->setAttribute($target, "REL_POS", 0);
@@ -1120,7 +1347,7 @@ sub buildAffinity
             my $eeprom_name = "EEPROM_VPD_PRIMARY_INFO";
             $self->setAttributeField($target, $eeprom_name, "chipCount", "0x01");
             $self->setAttributeField($target, $eeprom_name, "i2cMasterPath", "physical:sys-0/node-0/proc-$proc_num");
-        }
+        } # end elsif ($type eq "DIMM" && $self->getTargetType($target) ...
         elsif ($type eq "PMIC")
         {
             # Pmics are not in order, so we take the parent dimm's
@@ -1194,8 +1421,8 @@ sub buildAffinity
                     $mi_num = $targets[8] % 2;
                     $mcc_num = $targets[9] % 2;
                     $omi_num = $targets[10] % 2;
-                }
-            }
+                } # end foreach my $conn (@{$conn->{CONN}})
+            } # end if ($conn ne "")
 
             my $ocmb_num = 0;
             $pmic_num %= 2;
@@ -1205,7 +1432,7 @@ sub buildAffinity
             my $fapi_name = "FAPI_I2C_CONTROL_INFO";
             $self->setAttributeField($target, $fapi_name, "i2cMasterPath",
                 "physical:sys-0/node-0/proc-$proc_num");
-        }
+        } # end elsif ($type eq "PMIC")
         elsif ($type eq "PROC")
         {
             my $socket = $target;
@@ -1215,33 +1442,38 @@ sub buildAffinity
             }
             if($socket ne "")
             {
-              $proc = $self->getAttribute($socket,"POSITION");
+                # Set the PROC position
+                $proc = $self->getAttribute($target,"POSITION");
+
+                my $system_name = $self->getSystemName();
+                # Set position for RAINIER
+                if ($system_name =~ /RAINIER/i)
+                {
+                   # There are 2 sockets comprising of 2 processors for a total of 4.
+                   # For Rainier, the processors are unique to the system, not
+                   # to a socket, therefore each processor gets their own position.
+                   # The position of the socket is either 0 or 1 and the processors,
+                   # within a socket, has position of either 0 or 1.
+                   my $socketPosition = $self->getAttribute($socket,"POSITION");
+                   # Do the following math to get the unique position for a processor
+                   $proc = ($socketPosition * MAX_PROCS_PER_SOCKET) + $proc;
+                }
             }
             else
             {
               die "Cannot find socket connector for $target\n";
             }
-            my $num_mcs = 0;
+
             my $num_mi = 0;
-            my $num_dmi  = 0;
-            ### count number of MCSs
+            ### count number of MCs
             foreach my $unit (@{ $self->{data}->{TARGETS}{$target}{CHILDREN} })
             {
                 my $unit_type = $self->getType($unit);
-                if ($unit_type eq "MCBIST")
-                {
-                    $num_mcs+=2;  # 2 MCS's per MCBIST
-                }
                 if ($unit_type eq "MC")
                 {
                     $num_mc++;
                     $num_mi += 2; # 2 MI's per MC
-                    $num_dmi+=4;  # 2DMI's per MI & 4 DMI per MC
                 }
-            }
-            if ($num_mcs > $self->{MAX_MCS})
-            {
-                $self->{MAX_MCS} = $num_mcs;
             }
             if ($num_mc > $self->{MAX_MC})
             {
@@ -1250,10 +1482,6 @@ sub buildAffinity
             if ($num_mi > $self->{MAX_MI})
             {
                 $self->{MAX_MI} = $num_mi;
-            }
-            if ($num_dmi > $self->{MAX_DMI})
-            {
-                $self->{MAX_DMI} = $num_dmi;
             }
 
             if($self->{NUM_PROCS_PER_NODE} < ($proc + 1))
@@ -1271,7 +1499,7 @@ sub buildAffinity
             my $fapi_name = $self->getFapiName($type, $node, $proc);
             #unique offset per system
             my $nodepos = $self->getParentNodePos($target) ;
-            my $proc_ordinal_id = ($nodepos * $maxInstance{$type}) + $proc;
+            my $proc_ordinal_id = ($nodepos * $MAX_INST_PER_PROC{$type}) + $proc;
 
             # Ensure processor HUID is node-relative
             $self->{huid_idx}->{$type} = $proc;
@@ -1310,12 +1538,13 @@ sub buildAffinity
                $self->setAttribute($target, "PROC_SBE_MASTER_CHIP", "FALSE");
             }
 
+            # Iterate over the children of the PROC and set some attributes for them
             $self->iterateOverChiplets($target, $sys_pos, $node, $proc);
 
             $self->processMc($target, $sys_pos, $node, $proc, $parent_affinity,
                              $parent_physical, $node_phys);
-        }
-    } # foreach
+        } # end elsif ($type eq "PROC")
+    } # end foreach my $target (sort keys %{ $self->{data}->{TARGETS} })
 
     # Now populate the affinity path of each TPM. Do this after the main loop
     # because we need to make sure that all of the procs have been processed
@@ -1517,12 +1746,13 @@ sub iterateOverChiplets
                                  printf("Found a duplicate connection for PEC %s PHB %s.\n",$pec_num,$phb_num);
                                  die "Duplicate PHB bus connection found\n";
                              }
-                        }
-                    }
-                }
-            }
+                        } # end elsif (($self->getNumConnections ...
+                    } # end foreach my $pcibus ...
+                } # end foreach my $phb (@{ $self->getTargetChildren($child) })
+            } # end if ($tgt_type eq "PEC")
             else
             {
+                # These target types are NOT PEC
                 my $unit_ptr        = $self->getTarget($child);
                 my $unit_type       = $self->getType($child);
 
@@ -1546,14 +1776,16 @@ sub iterateOverChiplets
                             $brick_sub = $brick_pos;
                             $prev_obus = $curr_obus;
                         }
-                    }
+                    } # end if ($unit_type eq "OBUS_BRICK")
+
                     #set common attrs for child
                     $self->setCommonAttrForChiplet($child, $sys, $node, $proc,
                         $prev_obus, $brick_sub);
                     $self->iterateOverChiplets($child, $sys, $node, $proc);
-                }
-            }
-        }
+                } # end if ($unit_type ne "PCI" && ...
+            } # end if ($tgt_type eq "PEC") ... else
+        } # end foreach my $child (@{ $self->getTargetChildren($target) })
+
         my $size = @phb_array;
         # For every entry in the PHB array, if there is a PHB in its slot
         # we add that PHB target to the MRW.
@@ -1569,7 +1801,7 @@ sub iterateOverChiplets
                     (@phb_array[$i], $sys, $node, $proc);
             }
         }
-    }
+    } # end if ($target_children eq "") ... else
 }
 
 sub setCommonAttrForChiplet
@@ -1589,57 +1821,14 @@ sub setCommonAttrForChiplet
             ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{$tgt_type}},
             { 'KEY' => $target });
 
-    #This is a static variable. Persists over time
-    #everything that is a grand_children of proc
-
-    state %grand_children;
-    if (not %grand_children)
-    {
-        $grand_children{"EX"}    = 1;
-        $grand_children{"CORE"}  = 1;
-        $grand_children{"MCS"}   = 1;
-        $grand_children{"MCA"}   = 1;
-        $grand_children{"MC"}    = 1;
-        $grand_children{"MI"}    = 1;
-        $grand_children{"DMI"}   = 1;
-    }
-
     my $pos             = $self->getAttribute($target, "CHIP_UNIT");
     my $unit_pos        = $pos;
 
-    #HB expects chiplets' positions in AFFINITY_PATH to be relative to the
-    #parent, serverwiz outputs it unique/absolute.
-    #Since, in P9, each of the chiplets only have
-    #up to two children (each eq has 2 ex, each ex has 2 cores, each mcbist has
-    #two mcs, etc), we can simply calculate this by (absolute_Pos%2)
-    #CHIP_UNIT is absolute position
-    if ($grand_children{$tgt_type} eq 1)
+    # Chiplets' positions, in AFFINITY_PATH, are expected to be relative to the
+    # parent, serverwiz outputs it unique/absolute.
+    if ($MAX_INST_PER_PARENT{$tgt_type})
     {
-        $unit_pos = $pos%2;
-    }
-    elsif ($tgt_type eq "OBUS_BRICK")
-    {
-        # Relative position of OBUS_BRICK is just the difference between the
-        # current position and the position of the first obus_brick of the
-        # parent obus
-        # Ex: obus3 -> obus_brick9
-        #           -> obus_brick10
-        #           -> obus_brick11
-        # Position of first obus_brick of parent obus = 9
-        # Relative position of obus_brick11 = 11 - 9 = 2
-        $unit_pos = $pos - $brick_sub;
-    }
-    elsif ($tgt_type eq "SMPGROUP")
-    {
-        # SMPGROUP inherits the same INSTANCE_PATH as its parent OBUS which
-        # messes up the HUID -NID mapping, hence adding the below line
-        $self->setAttribute($target, "INSTANCE_PATH", $target);
-        $unit_pos = $pos%2;
-    }
-    elsif ($tgt_type eq "OMIC")
-    {
-        # There are 3 OMICs per MC parent
-        $unit_pos = $pos % 3;
+        $unit_pos = $pos % $MAX_INST_PER_PARENT{$tgt_type};
     }
 
     my $parent_affinity = $self->getAttribute(
@@ -1653,11 +1842,11 @@ sub setCommonAttrForChiplet
     my $fapi_name       = $self->getFapiName($tgt_type, $node, $proc, $pos);
 
     # Calculate a system wide offset
-    my $sys_offset = (($node * $maxInstance{"PROC"} + $proc ) *
-        $maxInstance{$tgt_type}) + $pos;
+    my $sys_offset = (($node * $MAX_INST_PER_PROC{"PROC"} + $proc ) *
+        $MAX_INST_PER_PROC{$tgt_type}) + $pos;
 
     # Calculate a node specific offset
-    my $node_offset = ($proc * $maxInstance{$tgt_type}) + $pos;
+    my $node_offset = ($proc * $MAX_INST_PER_PROC{$tgt_type}) + $pos;
 
     # HUID is node based so use that offset
     $self->{huid_idx}->{$tgt_type} = $node_offset;
@@ -1677,6 +1866,7 @@ sub setCommonAttrForChiplet
         $self->setAttribute($target, "PARENT_PERVASIVE", $perv_parent_val);
     }
 }
+
 
 sub getFapiName
 {
@@ -1699,7 +1889,6 @@ sub getFapiName
         $nonFapiTargets{"TPM"}   = "NA";
         $nonFapiTargets{"NVBUS"} = "NA";
         $nonFapiTargets{"OCC"}   = "NA";
-        $nonFapiTargets{"NPU"}   = "NA";
         $nonFapiTargets{"BMC"}   = "NA";
     }
 
@@ -1758,10 +1947,44 @@ sub getFapiName
     }
 }
 
+#--------------------------------------------------
+# @brief Get the maximum instance per processor from global hash
+#        MAX_INST_PER_PROC.
+#
+# @details This is a wrapper around the hash MAX_INST_PER_PROC that will
+#          validate the key.  If the key does not exist in the hash, then an
+#          error is displayed and the script halted.  The advantage to using
+#          this method over reading the hash directly, is that, Perl will
+#          not flag if the key does not exist, and the programmer can easily
+#          dismiss the no warning/error as everything is working fine.
+#
+# @note Will croak if key into hash is not found.
+#
+# @param [in] $targetObj - The global target object.
+# @param [in] $targetType - The key to look for in hash MAX_INST_PER_PROC
+#
+# @return Value associated with key in hash MAX_INST_PER_PROC if key exists,
+#         else croak stating key not found in hash.
+#--------------------------------------------------
+sub getMaxInstPerProc
+{
+    my $self = shift;
+    my $targetType = shift;
+
+    if (not exists $MAX_INST_PER_PROC{$targetType})
+    {
+        confess "\nTargets::getMaxInstPerProc: ERROR: Key for target " .
+           "type \"$targetType\" not found in hash " .
+           "Targets::MAX_INST_PER_PROC.\n";
+    }
+
+    return $MAX_INST_PER_PROC{$targetType};
+}
+
 sub getPervasiveForUnit
 {
     # Input should be of the form <type><chip unit>, example: "core0"
-    my ($unit) = @_;
+    my $unit = shift;
 
     # The mapping is a static variable that is preserved across new calls to
     # the function to speed up the mapping performance
@@ -1769,76 +1992,66 @@ sub getPervasiveForUnit
 
     if ( not %unitToPervasive )
     {
-        for my $core (0..$maxInstance{"CORE"}-1)
+        use integer;
+        my @targetTypes = qw (PAU CORE IOHS EQ PAUC MC OBUS);
+        foreach my $targetType (@targetTypes)
         {
-            $unitToPervasive{"CORE$core"} = PERVASIVE_PARENT_CORE_OFFSET+$core;
-        }
-        for my $eq (0..$maxInstance{"EQ"}-1)
-        {
-            $unitToPervasive{"EQ$eq"} = PERVASIVE_PARENT_EQ_OFFSET + $eq;
-        }
-        for my $xbus (0..$maxInstance{"XBUS"}-1)
+            for my $targetTypeValue (0..$MAX_INST_PER_PROC{$targetType}-1)
+            {
+                my $value = $Targets::PERVASIVE_PARENT_OFFSET{$targetType};
+
+                if ($targetType eq "PAU")
+                {
+                    $value += ($targetTypeValue/PAU_PER_PAUC);
+                }
+                elsif ($targetType eq "CORE")
+                {
+                    # The core pervasive parent value is not sequential, from min to
+                    # max, but increase per EQ. In other words, all the core's
+                    # pervasive parent value for an EQ are the same.
+                    $value += ($targetTypeValue/CORES_PER_EQ);
+                }
+                else
+                {
+                    # Most target types will use this computation
+                    $value += $targetTypeValue;
+                }
+
+                $unitToPervasive{"$targetType$targetTypeValue"} = $value;
+            }
+        } # end foreach my $targetType (@targetTypes)
+
+        for my $xbus (0..$MAX_INST_PER_PROC{"XBUS"}-1)
         {
             $unitToPervasive{"XBUS$xbus"} = PERVASIVE_PARENT_XBUS_OFFSET;
         }
-        for my $obus (0..$maxInstance{"OBUS"}-1)
-        {
-            $unitToPervasive{"OBUS$obus"} = PERVASIVE_PARENT_OBUS_OFFSET+$obus;
-        }
-        for my $capp (0..$maxInstance{"CAPP"}-1)
+
+        for my $capp (0..$MAX_INST_PER_PROC{"CAPP"}-1)
         {
             $unitToPervasive{"CAPP$capp"} = 2 * ($capp+1);
         }
-        for my $mcbist (0..$maxInstance{"MCBIST"}-1)
-        {
-            $unitToPervasive{"MCBIST$mcbist"} =
-                PERVASIVE_PARENT_MCBIST_OFFSET + $mcbist;
-        }
-        for my $mcs (0..$maxInstance{"MCS"}-1)
-        {
-            $unitToPervasive{"MCS$mcs"} =
-                PERVASIVE_PARENT_MCS_OFFSET + ($mcs > 1);
-        }
-        for my $mca (0..$maxInstance{"MCA"}-1)
-        {
-            $unitToPervasive{"MCA$mca"} =
-                PERVASIVE_PARENT_MCA_OFFSET + ($mca > 3);
-        }
-        for my $mc (0..$maxInstance{"MC"}-1)
-        {
-            $unitToPervasive{"MC$mc"} =
-                PERVASIVE_PARENT_MC_OFFSET + $mc;
-        }
-        for my $mi (0..$maxInstance{"MI"}-1)
+
+        for my $mi (0..$MAX_INST_PER_PROC{"MI"}-1)
         {
             $unitToPervasive{"MI$mi"} =
                 PERVASIVE_PARENT_MI_OFFSET + ($mi > 1);
         }
-        for my $dmi (0..$maxInstance{"DMI"}-1)
-        {
-            $unitToPervasive{"DMI$dmi"} =
-                PERVASIVE_PARENT_DMI_OFFSET + ($dmi > 3);
-        }
-        for my $pec (0..$maxInstance{"PEC"}-1)
+        for my $pec (0..$MAX_INST_PER_PROC{"PEC"}-1)
         {
             $unitToPervasive{"PEC$pec"} =
                 PERVASIVE_PARENT_PEC_OFFSET + $pec;
         }
-        for my $phb (0..$maxInstance{"PHB"}-1)
+        for my $phb (0..$MAX_INST_PER_PROC{"PHB"}-1)
         {
             $unitToPervasive{"PHB$phb"} =
                 PERVASIVE_PARENT_PHB_OFFSET + ($phb>0) + ($phb>2);
         }
         my $offset = 0;
-        for my $obrick (0..$maxInstance{"OBUS_BRICK"}-1)
+        for my $obrick (0..$MAX_INST_PER_PROC{"OBUS_BRICK"}-1)
         {
             $offset += (($obrick%3 == 0) && ($obrick != 0)) ? 1 : 0;
             $unitToPervasive{"OBUS_BRICK$obrick"}
                 = PERVASIVE_PARENT_OBUS_OFFSET + $offset;
-        }
-        for my $npu (0..$maxInstance{"NPU"}-1)
-        {
-            $unitToPervasive{"NPU$npu"} = PERVASIVE_PARENT_NPU_OFFSET;
         }
     }
 
@@ -1851,112 +2064,12 @@ sub getPervasiveForUnit
     return $pervasive
 }
 
-sub processMcaDimms
-{
-    my $self        = shift;
-    my $ddrs        = shift;
-    my $sys         = shift;
-    my $node_phys   = shift;
-    my $node        = shift;
-    my $proc        = shift;
 
-    if ($ddrs ne "")
-    {
-        #There should be 2 Connections
-        #Each MCA has 2 ddr channels
-        foreach my $dimms (@{$ddrs->{CONN}})
-        {
-            my $ddr = $dimms->{SOURCE};
-            my $dimm=$dimms->{DEST_PARENT};
-
-            #proc->mcbist->mcs->mca->ddr
-            my $mca_target          = $self->getTargetParent($ddr);
-            my $mcs_target          = $self->getTargetParent($mca_target);
-            my $mcbist_target       = $self->getTargetParent($mcs_target);
-            my $proc_target         = $self->getTargetParent($mcbist_target);
-            my $dimm_connector_tgt  = $self->getTargetParent($dimm);
-
-            #Get the loc code from connector and update to dimm targ
-            my $loc_code = $self->getAttribute($dimm_connector_tgt,"LOCATION_CODE");
-
-            my $mca     = $self->getAttribute($mca_target,       "CHIP_UNIT")%2;
-            my $mcs     = $self->getAttribute($mcs_target,       "CHIP_UNIT")%2;
-            my $mcbist  = $self->getAttribute($mcbist_target,    "CHIP_UNIT");
-            my $dimm_pos= $self->getAttribute($dimm_connector_tgt,"POSITION");
-
-            #The port/dimm attributes have been swizzled too many times and
-            # now they no longer make sense.  Until everyone is on the same
-            # page we will replicate everything as needed.
-            my $dimm_num = 0;
-            my $port_num = 0; # MCA only has 1 port
-
-            # Eventually we will converge on a generic name for all
-            #  configurations that the MRW will use.
-            if( !$self->isBadAttribute($ddr, "POS_ON_MEM_PORT") )
-            {
-                $dimm_num = $self->getAttribute($ddr,"POS_ON_MEM_PORT");
-            }
-            # Legacy OP systems are using MBA_PORT to represent the dimm
-            #  position within the port, going to remap that to keep that
-            #  support in place.
-            elsif( !$self->isBadAttribute($ddr, "MBA_PORT") )
-            {
-                $dimm_num = $self->getAttribute($ddr,"MBA_PORT");
-            }
-            else
-            {
-                print "ERROR: No port specified for dimm $ddr\n";
-                $self->myExit(4);
-            }
-
-            # Write out all the attributes that someone might still be using
-            $self->setAttribute($dimm, "CEN_MBA_PORT",$port_num); #unused
-            $self->setAttribute($dimm, "MBA_PORT",$port_num); #legacy
-            $self->setAttribute($dimm, "MEM_PORT",$port_num); #converged
-            $self->setAttribute($dimm, "CEN_MBA_DIMM",$dimm_num); #unused
-            $self->setAttribute($dimm, "MBA_DIMM",$dimm_num); #legacy
-            $self->setAttribute($dimm, "POS_ON_MEM_PORT",$dimm_num); #converged
-
-
-            $self->setAttribute($dimm, "AFFINITY_PATH",
-                $self->getAttribute($mcbist_target, "AFFINITY_PATH")
-             . "/mcs-$mcs/mca-$mca/dimm-$dimm_num"
-            );
-
-            $self->setAttribute($dimm, "PHYS_PATH",
-                $node_phys . "/dimm-" . $dimm_pos);
-            my $type       = $self->getType($dimm);
-
-            $self->setAttribute($dimm, "ORDINAL_ID",$dimm_pos);
-            $self->setAttribute($dimm, "POSITION",  $dimm_pos);
-            $self->setAttribute($dimm, "VPD_REC_NUM", $dimm_pos);
-            $self->setAttribute($dimm, "REL_POS", $dimm_num);
-            $self->setAttribute($dimm, "LOCATION_CODE",$loc_code);
-
-            ## set FAPI_POS for dimm
-            my $DIMM_PER_MCA = 2;
-            my $mca_pos = $self->getAttribute($mca_target,"FAPI_POS");
-            my $dimm_pos = ($mca_pos * $DIMM_PER_MCA) +
-              $self->getAttribute($dimm,"REL_POS");
-
-            $self->setAttribute($dimm,"FAPI_NAME",
-                    $self->getFapiName($type, $node, $dimm_pos));
-
-            $self->setAttribute($dimm, "FAPI_POS",  $dimm_pos);
-
-            $self->{huid_idx}->{$type} = $dimm_pos;
-            $self->setHuid($dimm, $sys, $node);
-
-            $self->{targeting}
-                  ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MCBISTS}[$mcbist]
-                    {MCSS}[$mcs]{MCAS}[$mca]{DIMMS}[$dimm_pos]{KEY}
-                    = $dimm;
-        }
-
-    }
-
-}
-
+# TODO, RTC 215164. This method was heavily involved with DMI which is dead for
+#                   P10, therefore I removed all code associated with this
+#                   method and it had no affect on the output file.  Leaving it
+#                   here for now, until work on the MC target gets underway.
+#
 sub processMc
 {
 
@@ -1968,268 +2081,6 @@ sub processMc
     my $parent_affinity = shift;
     my $parent_physical = shift;
     my $node_phys       = shift;
-
-    foreach my $proc_child (@{ $self->getTargetChildren($target) })
-    {
-       my $tgt_type       = $self->getType($proc_child);
-
-       if($tgt_type eq "MC")
-       {
-            my $mc =  $proc_child;
-
-            my $mc_num =  $self->getAttribute($mc, "CHIP_UNIT");
-
-            foreach my $mi (@{ $self->getTargetChildren($mc) })
-            {
-                my $mi_num = $self->getAttribute($mi, "CHIP_UNIT");
-
-                foreach my $dmi (@{ $self->getTargetChildren($mi) })
-                {
-                    my $child_type = $self->getType($dmi);
-                    if ($child_type ne "DMI")
-                    {
-                        next;
-                    }
-
-                    my $dmi_num = $self->getAttribute($dmi, "CHIP_UNIT");
-
-                    my $membufnum = $proc * $self->{MAX_DMI} + $dmi_num;
-
-                    my $aff_path = $self->getAttribute($dmi, "AFFINITY_PATH");
-
-                    ## Find connected membufs
-                    my $membuf_dmi = $self->{data}->{TARGETS}{$dmi}{CONNECTION}{DEST}[0];
-                    if (defined($membuf_dmi))
-                    {
-                        ## found membuf connected
-                        my $membuf = $self->{data}->{TARGETS}{$membuf_dmi}{PARENT};
-                        $self->setAttribute($membuf, "POSITION",$membufnum);
-                        $self->setAttribute($membuf, "AFFINITY_PATH",
-                                            $aff_path . "/membuf-$membufnum");
-
-                        my $membuf_type = $self->getType($membuf);
-
-                        my $memCardOffset = $proc * $maxInstance{"MC"} + $mc_num;
-
-                        $self->setAttribute($membuf, "PHYS_PATH",
-                            $node_phys . "/membuf-$membufnum");
-
-                        my $parent_physical = $self->getAttribute($membuf, "PHYS_PATH");
-
-                        $self->setAttribute($membuf,"FAPI_NAME",
-                                     $self->getFapiName($membuf_type, $node, $membufnum, $memCardOffset));
-
-                        my $fapi_pos = (($node * $maxInstance{"PROC"}) + $proc ) * $self->{MAX_DMI} + $dmi_num;
-
-                        $self->setAttribute($membuf, "FAPI_POS",  $fapi_pos);
-                        $self->setAttribute($membuf, "ORDINAL_ID", $fapi_pos);
-
-                        $self->setAttribute($membuf, "REL_POS", $membufnum);
-                        $self->setAttribute($membuf, "POSITION", $membufnum);
-
-                        # It's okay to hard code these here because the code fixes it as needed
-                        # This is hardcoded for proc target as well.
-                        $self->setAttributeField($membuf, "SCOM_SWITCHES", "useSbeScom","0");
-                        $self->setAttributeField($membuf, "SCOM_SWITCHES", "useI2cScom","0");
-                        $self->setAttributeField($membuf, "SCOM_SWITCHES", "useFsiScom","1");
-                        $self->setAttributeField($membuf, "SCOM_SWITCHES", "reserved",   "0");
-                        $self->setAttributeField($membuf, "SCOM_SWITCHES", "useInbandScom", "0");
-                        $self->setAttributeField($membuf, "SCOM_SWITCHES", "useXscom", "0");
-
-                        my $riser_card_conn = $self->getTargetParent($self->getTargetParent($membuf));
-                        my $riser_card_pos = $self->getAttribute($riser_card_conn,"POSITION");
-                        $self->setAttribute($membuf, "VPD_REC_NUM", $riser_card_pos);
-
-                        ## get the dmi bus
-                        my $dmi_bus = $self->{data}->{TARGETS}{$dmi}{CONNECTION}{BUS}[0];
-
-                        # copy DMI bus attributes to membuf
-                        $self->setAttribute($dmi, "EI_BUS_TX_LANE_INVERT",
-                            $dmi_bus->{bus_attribute}->{PROC_TX_LANE_INVERT}->{default});
-                        $self->setAttribute($membuf, "EI_BUS_TX_LANE_INVERT",
-                            $dmi_bus->{bus_attribute}->{MEMBUF_TX_LANE_INVERT}->{default});
-
-                        ## auto setup FSI assuming schematic symbol.  If FSI busses are
-                        ## defined in serverwiz2, this will be overridden
-                        ## in the schematic symbol, the fsi port num matches dmi ref clk num
-
-                        my $fsi_port = $self->{DMI_FSI_MAP}->{$dmi};
-                        my $proc_key =
-                            $self->{targeting}->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{KEY};
-                        my $proc_path = $self->getAttribute($proc_key,"PHYS_PATH");
-                        $self->setFsiAttributes($membuf,"FSICM",0,$proc_path,$fsi_port,0);
-
-                        # HUID needs to be node relative
-                        $self->{huid_idx}->{$membuf_type} = $membufnum;
-                        $self->setHuid($membuf, $sys, $node);
-                        $self->{targeting}
-                          ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MC}[$mc]{MI}[$mi]
-                          {DMI}[$dmi] {MEMBUFS}[$membufnum]{KEY} = $membuf;
-
-                        $self->setAttribute($membuf, "ENTITY_INSTANCE",
-                               $self->{membuf_inst_num});
-                               $self->{membuf_inst_num}++;
-                        ## get the mbas
-                        foreach my $membuf_child (@{ $self->{data}->{TARGETS}{$membuf}{CHILDREN} })
-                        {
-                            my $childType = $self->getType($membuf_child);
-                            my $membuf_physical = $self->getAttribute(
-                                                    $self->getTargetParent($membuf_child),"PHYS_PATH");
-                            my $membuf_aff = $self->getAttribute(
-                                                    $self->getTargetParent($membuf_child),"AFFINITY_PATH");
-
-                            ## need to not hardcard the subunits
-                            if ($childType eq "L4")
-                            {
-                                $self->{targeting}
-                                  ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MC}[$mc]{MI}[$mi]
-                                    {DMI}[$dmi]{MEMBUFS}[$membufnum]{L4S}[0] {KEY} = $membuf_child;
-
-                                $self->setAttribute($membuf_child, "AFFINITY_PATH",
-                                                    $membuf_aff . "/l4-0");
-                                $self->setAttribute($membuf_child, "PHYS_PATH",
-                                    $membuf_physical . "/l4-0");
-                                # FAPI_POS and ORDINAL_ID are same as membuf
-                                $self->setAttribute($membuf_child, "FAPI_POS",  $fapi_pos);
-                                $self->setAttribute($membuf_child, "ORDINAL_ID", $fapi_pos);
-                                $self->setAttribute($membuf_child, "REL_POS", 0);
-
-                                # HUID needs to be node relative
-                                # L4 is 1 to 1 mapping with membuf
-                                $self->{huid_idx}->{"L4"} = $membufnum;
-                                $self->setHuid($membuf_child, $sys, $node);
-
-                                $self->setAttribute($membuf_child,"FAPI_NAME",
-                                    $self->getFapiName($childType, $node,
-                                    $membufnum, 0));
-                            }
-
-
-                            if ($childType eq "MBA")
-                            {
-                                my $mba = $self->getAttribute($membuf_child,"MBA_NUM");
-
-                                $self->setAttribute($membuf_child, "AFFINITY_PATH",
-                                              $membuf_aff . "/mba-$mba");
-
-                                $self->setAttribute($membuf_child, "PHYS_PATH",
-                                    $membuf_physical . "/mba-$mba");
-
-                                # Node offset
-                                my $mba_offset = (MBA_PER_MEMBUF * $membufnum) +
-                                                 $mba ;
-                                # System offset
-                                my $fapi_pos =
-                                 ($node * $maxInstance{"PROC"}) * $maxInstance{"MBA"} +
-                                     $mba_offset;
-
-                                $self->setAttribute($membuf_child, "FAPI_POS",  $fapi_pos);
-                                $self->setAttribute($membuf_child, "ORDINAL_ID", $fapi_pos);
-
-                                $self->setAttribute($membuf_child, "REL_POS", $mba);
-                                $self->setAttribute($membuf_child, "POSITION", $mba_offset);
-
-                                # HUID needs to be node relative
-                                $self->{huid_idx}->{"MBA"} = $mba_offset;
-                                $self->setHuid($membuf_child, $sys, $node);
-
-                                 $self->setAttribute($membuf_child,"FAPI_NAME",
-                                     $self->getFapiName($childType, $node,
-                                     $membufnum, $mba));
-
-                                $self->{targeting}
-                                  ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MC}[$mc]{MI}[$mi]
-                                    {DMI}[$dmi]{MEMBUFS}[$membufnum]{MBAS}[$mba]{KEY} = $membuf_child;
-
-                                ## Trace the DDR busses to find connected DIMM
-                                my $ddrs = $self->findConnections($membuf_child,"DDR4","");
-
-                                if($ddrs eq "")
-                                {
-                                   # on multi node system there is a possibility that either
-                                   # DDR4 or DDR3 dimms are connected under a node
-                                   my $ddrs = $self->findConnections($membuf_child,"DDR3","");
-                                }
-                                if ($ddrs ne "")
-                                {
-                                    my $dimmPos=0;
-                                    foreach my $dimms (@{$ddrs->{CONN}})
-                                    {
-                                        my $ddr = $dimms->{SOURCE};
-                                        my $dimm=$dimms->{DEST_PARENT};
-                                        $self->setAttribute($dimm,"CLASS","LOGICAL_CARD");
-
-                                        #We will converge on POS_ON_MEM_PORT/MEM_PORT eventually, but
-                                        # we are leaving in support for everything for now
-                                        my $port_num = getDimmPort( $self, $ddr );
-                                        $self->setAttribute($dimm, "CEN_MBA_PORT",$port_num); #hwp
-                                        $self->setAttribute($dimm, "MBA_PORT",$port_num); #legacy
-                                        $self->setAttribute($dimm, "MEM_PORT",$port_num); #converged
-
-                                        my $dimm_num = getDimmPos( $self, $ddr );
-                                        $self->setAttribute($dimm, "CEN_MBA_DIMM",$dimm_num); #hwp
-                                        $self->setAttribute($dimm, "MBA_DIMM",$dimm_num); #legacy
-                                        $self->setAttribute($dimm, "POS_ON_MEM_PORT",$dimm_num); #converged
-
-
-                                        my $aff_pos = DIMMS_PER_PROC*$proc+
-                                                      DIMMS_PER_DMI*$dmi_num+
-                                                      DIMMS_PER_MBA*$mba+
-                                                      MAX_DIMMS_PER_MBA_PORT*$port_num + $dimm_num;
-                                        my $fapi_pos =
-                                         (($node * $maxInstance{"PROC"}) + $proc ) * DIMMS_PER_PROC +
-                                          DIMMS_PER_DMI*$dmi_num+
-                                          DIMMS_PER_MBA*$mba+
-                                          MAX_DIMMS_PER_MBA_PORT*$port_num  + $dimm_num;
-
-                                        $self->setAttribute($dimm, "AFFINITY_PATH",
-                                                  $membuf_aff . "/mba-$mba/dimm-$dimmPos" );
-
-                                        $self->setAttribute($dimm, "PHYS_PATH",
-                                             $node_phys  . "/dimm-" . $self->{dimm_tpos});
-
-                                        my $dimmType = $self->getType($dimm);
-
-                                        # cXX portion for dimms is relative to node
-                                        $self->setAttribute($dimm,"FAPI_NAME",
-                                            $self->getFapiName($dimmType, $node, $aff_pos));
-
-                                        $self->setAttribute($dimm,"FAPI_POS", $fapi_pos);
-
-                                        $self->setAttribute($dimm, "ORDINAL_ID", $fapi_pos);
-
-                                        $self->setAttribute($dimm, "POSITION", $aff_pos);
-
-                                        $self->setAttribute($dimm, "REL_POS",
-                                            MAX_DIMMS_PER_MBA_PORT*$port_num +
-                                            $dimm_num);
-
-                                        $self->setAttribute($dimm, "VPD_REC_NUM", $self->{dimm_tpos});
-
-                                        # HUID needs to be node relative
-                                        $self->{huid_idx}->{$dimmType} = $aff_pos;
-                                        $self->setHuid($dimm, $sys, $node);
-                                        $self->{targeting}
-                                          ->{SYS}[0]{NODES}[$node]{PROCS}[$proc] {MC}[$mc]{MI}[$mi]{DMI}[$dmi]
-                                          {MEMBUFS}[$membufnum]{MBAS}[$mba] {DIMMS}[$dimmPos]{KEY} =
-                                          $dimm;
-                                        $self->setAttribute($dimm, "ENTITY_INSTANCE",
-                                             $self->{dimm_tpos});
-                                        $self->{dimm_tpos}++;
-
-                                        $dimmPos++;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-
-                }#dmi
-            }#mi
-
-        }#mc
-    }#membuf_child
 
 }
 
@@ -2290,7 +2141,6 @@ sub setFsiAttributes
     $self->setAttributeField($target, "FSI_OPTION_FLAGS","flipPort",
           $flip_port);
     $self->setAttributeField($target, "FSI_OPTION_FLAGS","reserved", "0");
-
 }
 
 ## remove target
@@ -2324,6 +2174,50 @@ sub getTargetParent
     my $target     = shift;
     my $target_ptr = $self->getTarget($target);
     return $target_ptr->{PARENT};
+}
+
+
+#--------------------------------------------------
+# @brief Traverse parent lineage looking for parent with
+#        given type search criteria
+#
+# @details Traverse the parent lineage and return the parent that matches the
+#          type search criteria.  If the top level target is hit and it's
+#          type does not match search criteria, then the script will exit
+#          stating so.
+#
+# @note If the target has no type, then try method findParentByInstName
+#
+# @param [in] $self - The global target object.
+# @param [in] $child - the starting point to find parent
+# @param [in] $typeToMatch - search criteria
+#
+# @return parent whose type matches search criteria, else croak if not found
+#--------------------------------------------------
+sub findParentByType
+{
+    my $self        = shift;
+    my $child       = shift;
+    my $typeToMatch = shift;
+
+    # Make sure we have not reached the end
+    my $topLevel = "/" . $self->getTopLevel();
+    if ($child eq $topLevel)
+    {
+       croak "findParentByType: ERROR: Reached top level target. " .
+           "There is no parent of type \"$typeToMatch\". Error";
+    };
+
+    # Get the child's parent and check if that is the parent we want
+    my $parent = ($self->getTarget($child))->{PARENT};
+    my $parentType = $self->getType($parent);
+    if ($parentType ne $typeToMatch)
+    {
+        $parent = $self->findParentByType($parent, $typeToMatch);
+    }
+
+    # Found our parent, now return it. Recursion, a wonderful thing
+    return $parent;
 }
 
 ## returns the number of connections associated with target
@@ -2464,192 +2358,6 @@ sub findDestConnections
     return $self->findConnectionsByDirection($target, $bus_type,
                                              $source_type, 1);
 
-}
-
-sub setEepromAttributesForAxone
-{
-    my $self      = shift;
-    my $targetObj = shift;
-    # Expects ocmb target
-    my $target    = shift;
-
-    my %connections;
-    my $num=0;
-
-    my $eeprom_name = "EEPROM_VPD_PRIMARY_INFO";
-    my $fapi_name = "FAPI_I2C_CONTROL_INFO";
-    # SPD contains data for EEPROM_VPD_PRIMARY_INFO and FAPI_I2C_CONTROL_INFO
-    # SPD is the child of ocmb's parent, so get ocmb's parent
-    # then look for the SPD child
-    # With the resulting info, we populate pmic0, pmic1, ocmb, and dimm
-    my $target_parent = $self->getTargetParent($target);
-
-    # Need to store pmic targets because they get parsed before we
-    # do calculations for engine, port, and muxBusSelector
-    # pmics need these values, so we store them until we need them later
-    my $address = 0;
-    my @pmic_array;
-    foreach my $child (@{ $self->getTargetChildren($target_parent) })
-    {
-        my $type = $self->getTargetType($child);
-        if ($type eq "chip-spd-device")
-        {
-            my $offset = $self->getAttribute($child, "BYTE_ADDRESS_OFFSET");
-            my $memory_size = $self->getAttribute($child, "MEMORY_SIZE_IN_KB");
-            my $cycle_time = $self->getAttribute($child, "WRITE_CYCLE_TIME");
-            my $page_size = $self->getAttribute($child, "WRITE_PAGE_SIZE");
-
-            # Populate EEPROM for ocmb
-            $targetObj->setAttributeField($target, $eeprom_name, "byteAddrOffset",
-                $offset);
-            $targetObj->setAttributeField($target, $eeprom_name, "maxMemorySizeKB",
-                $memory_size);
-            $targetObj->setAttributeField($target, $eeprom_name, "writeCycleTime",
-                $cycle_time);
-            $targetObj->setAttributeField($target, $eeprom_name, "writePageSize",
-                $page_size);
-
-            # Populate EEPROM for dimm
-            $targetObj->setAttributeField($target_parent, $eeprom_name, "byteAddrOffset",
-                $offset);
-            $targetObj->setAttributeField($target_parent, $eeprom_name, "maxMemorySizeKB",
-                $memory_size);
-            $targetObj->setAttributeField($target_parent, $eeprom_name, "writeCycleTime",
-                $cycle_time);
-            $targetObj->setAttributeField($target_parent, $eeprom_name, "writePageSize",
-                $page_size);
-
-            # spd only child is i2c-slave, which contains devAddr info
-            foreach my $i2c_slave (@{ $self->getTargetChildren($child) })
-            {
-                $address = $self->getAttribute($i2c_slave, "I2C_ADDRESS");
-                # Populate EEPROM for dimm
-                $targetObj->setAttributeField($target_parent, $eeprom_name, "devAddr",
-                    $address);
-
-                # Populate EEPROM for ocmb
-                $targetObj->setAttributeField($target, $eeprom_name, "devAddr",
-                    $address);
-            }
-        }
-        elsif ($type eq "chip-vreg-generic")
-        {
-            push(@pmic_array, $child);
-            foreach my $i2c_slave (@{ $self->getTargetChildren($child) })
-            {
-                $type = $self->getTargetType($i2c_slave);
-                # pmic has child i2c_slave which contains the device address
-                if ($type eq "unit-i2c-slave")
-                {
-                    $address = $self->getAttribute($i2c_slave, "I2C_ADDRESS");
-
-                    # Populate FAPI for pmic
-                    $targetObj->setAttributeField($child, $fapi_name, "devAddr",
-                        $address);
-                    last;
-                }
-            }
-        }
-        elsif ($type eq "chip-ocmb")
-        {
-            foreach my $i2c_slave (@{ $self->getTargetChildren($child) })
-            {
-                # ocmb has multiple i2c-slaves, so we query with instance_name
-                my $instance_name = $self->getInstanceName($i2c_slave);
-                if ($instance_name eq "i2c-ocmb")
-                {
-                    $address = $self->getAttribute($i2c_slave, "I2C_ADDRESS");
-
-                    # Populate FAPI for ocmb
-                    $targetObj->setAttributeField($target, $fapi_name, "devAddr",
-                        $address);
-                    last;
-                }
-            }
-        }
-    }
-
-    # Get data from i2c-master-omi, which connects to the i2c_mux PCA9847
-    my $conn = $self->findConnectionsByDirection($target, "I2C", "", 1);
-    if ($conn ne "")
-    {
-        # There exists multiple i2c bus connections with chip-ocmb
-        # They are all the same connections so we just take the first one
-        # The mux channel has the i2cMuxBusSelector
-        my $conn_source = @{$conn->{CONN}}[0]->{SOURCE};
-        my $mux = $self->getAttribute($conn_source, "MUX_CHANNEL");
-
-        # Parent PCA9848 determines the mux path
-        my $parent = $self->getTargetParent($conn_source);
-        my $parent_pos = $self->getAttribute($parent, "POSITION");
-        my $i2c_mux_path = "physical:sys-0/node-0/i2c_mux-$parent_pos";
-
-        # pmics and ocmb all grab FRU_ID from parent dimm
-        my $fru = $self->getAttribute($target_parent, "FRU_ID");
-
-        my $master_i2c = $self->findConnectionsByDirection($self->getTargetParent($conn_source), "I2C", "", 1);
-        if ($master_i2c ne "")
-        {
-            # There exists multiple i2c bus connections with the PCA9847 i2c_mux
-            # They are all the same connections so we just take the first one
-            $master_i2c = @{$master_i2c->{CONN}}[0];
-            # i2c-master-omi source which has data we need
-            my $source = $master_i2c->{SOURCE};
-            my $dest = $master_i2c->{DEST};
-            my $engine = $self->getAttribute($source, "I2C_ENGINE");
-            my $port = $self->getAttribute($source, "I2C_PORT");
-
-            # Populate FAPI for ocmb
-            $self->setAttributeField($target, $fapi_name, "engine",
-                $engine);
-            $self->setAttributeField($target, $fapi_name, "port",
-                $port);
-            $self->setAttributeField($target, $fapi_name, "i2cMuxBusSelector",
-                $mux);
-            $self->setAttributeField($target, $fapi_name, "i2cMuxPath",
-                $i2c_mux_path);
-            $self->setAttribute($target, "FRU_ID",
-                $fru);
-
-            # Populate EEPROM for ocmb
-            $self->setAttributeField($target, $eeprom_name, "i2cMuxPath",
-                $i2c_mux_path);
-            $self->setAttributeField($target, $eeprom_name, "engine",
-                $engine);
-            $self->setAttributeField($target, $eeprom_name, "port",
-                $port);
-            $self->setAttributeField($target, $eeprom_name, "i2cMuxBusSelector",
-                $mux);
-
-
-            # Populate FAPI for pmics
-            foreach my $pmic (@pmic_array)
-            {
-                $self->setAttributeField($pmic, $fapi_name, "engine",
-                    $engine);
-                $self->setAttributeField($pmic, $fapi_name, "port",
-                    $port);
-                $self->setAttributeField($pmic, $fapi_name, "i2cMuxBusSelector",
-                    $mux);
-                $self->setAttributeField($pmic, $fapi_name, "i2cMuxPath",
-                    $i2c_mux_path);
-                $self->setAttribute($pmic, "FRU_ID",
-                    $fru);
-            }
-
-            # Populate EEPROM for dimm
-            $self->setAttributeField($target_parent, $eeprom_name, "engine",
-                $engine);
-            $self->setAttributeField($target_parent, $eeprom_name, "port",
-                $port);
-            $self->setAttributeField($target_parent, $eeprom_name, "i2cMuxBusSelector",
-                $mux);
-            $self->setAttributeField($target_parent, $eeprom_name, "i2cMuxPath",
-                $i2c_mux_path);
-            $self->setAttribute($target_parent, "FRU_ID",
-                $fru);
-        }
-    }
 }
 
 # Find connections from/to $target (and it's children)
@@ -2810,6 +2518,41 @@ sub getTargetType
     return $target_ptr->{TARGET}->{type};
 }
 
+
+#--------------------------------------------------
+# @brief Checks the given target for given attribute
+#
+# @details Will check the target for the given attribute.
+#          If attribute does not exist for target then
+#          return 0 (false), else if attribute does exist
+#          for target then return 1 (true).  This methods
+#          does not check the validity of the attribute
+#          or it's value.
+#
+# @param [in] $self - The global target object.
+# @param [in] $target - target to locate attribute on
+# @param [in] $attribute - attribute to locate
+#
+# @return true if attribute found, else false
+#--------------------------------------------------
+sub doesAttributeExistForTarget
+{
+    my $self       = shift;
+    my $target     = shift;
+    my $attribute  = shift;
+
+    my $target_ptr = $self->getTarget($target);
+
+    # If can't locate attribute for target then return back 0 (false)
+    if (!defined($target_ptr->{ATTRIBUTES}->{$attribute}))
+    {
+        return 0;
+    }
+
+    # Attribute for target was found, return back 1 (true)
+    return 1;
+}
+
 ## checks if attribute is value
 ## must be defined and have a non-empty value
 sub isBadAttribute
@@ -2836,6 +2579,7 @@ sub isBadAttribute
     {
         return 1;
     }
+
     return 0;
 }
 
@@ -2882,6 +2626,7 @@ sub getAttribute
     my $target     = shift;
     my $attribute  = shift;
     my $target_ptr = $self->getTarget($target);
+
     if (!defined($target_ptr->{ATTRIBUTES}->{$attribute}->{default}))
     {
         printf("ERROR: getAttribute(%s,%s) | Attribute not defined\n",
@@ -2929,6 +2674,7 @@ sub deleteAttribute
     {
         return 1;
     }
+
     delete($target_ptr->{ATTRIBUTES}->{$Name});
     $self->log($target, "Deleting attribute: $Name");
     return 0;
@@ -3077,6 +2823,7 @@ sub getTargetChildren
     my $self       = shift;
     my $target     = shift;
     my $target_ptr = $self->getTarget($target);
+
     ## this is an array
     return $target_ptr->{CHILDREN};
 }
@@ -3131,15 +2878,18 @@ sub getEnumHash
     return $self->{enumeration}->{$enumType};
 }
 
+
 sub setHuid
 {
     my $self   = shift;
     my $target = shift;
     my $sys    = shift;
     my $node   = shift;
+    my $index  = shift;
 
     my $type    = $self->getType($target);
     my $type_id = $self->{enumeration}->{TYPE}->{$type};
+
     if ($type eq "" || $type eq "NA")
     {
         if (defined ($self->getAttribute($target,"BUS_TYPE")))
@@ -3149,15 +2899,29 @@ sub setHuid
             if ($type_id eq "") {$type_id = $self->{enumeration}->{BUS_TYPE}->{$type};}
         }
     }
-    if ($type_id eq "") { $type_id = 0; }
 
-    if ($type_id == 0) { return; }
-    my $index = 0;
-    if (defined($self->{huid_idx}->{$type}))
+    if ( ($type_id eq "") || ($type_id == 0 ) )
     {
+        return;
+    }
+
+    # If caller supplied an index, then cache the index
+    if ($index ne undef)
+    {
+        $self->{huid_idx}->{$type} = $index;
+    }
+    # If caller did not supply an index, then calculate one
+    else
+    {
+        # If no index cached, then cache a 0 index to start with
+        if (not defined($self->{huid_idx}->{$type}))
+        {
+            $self->{huid_idx}->{$type} = 0;
+        }
+
         $index = $self->{huid_idx}->{$type};
     }
-    else { $self->{huid_idx}->{$type} = 0; }
+
     # Format: SSSS NNNN TTTTTTTT iiiiiiiiiiiiiiii
     my $huid = sprintf("%01x%01x%02x%04x", $sys, $node, $type_id, $index);
     $huid = "0x" . uc($huid);
@@ -3176,11 +2940,14 @@ sub setMruid
 
     my $type          = $self->getType($target);
     my $mru_prefix_id = $self->{enumeration}->{MRU_PREFIX}->{$type};
-    if (!defined $mru_prefix_id || $mru_prefix_id eq "")
+
+    if ( (!defined $mru_prefix_id) ||
+         ($mru_prefix_id eq "")    ||
+         ($mru_prefix_id eq "0xFFFF") )
     {
-         $mru_prefix_id = "0xFFFF";
+        return;
     }
-    if ($mru_prefix_id eq "0xFFFF") { return; }
+
     my $index = 0;
     if (defined($self->{mru_idx}->{$node}->{$type}))
     {
@@ -3327,7 +3094,262 @@ sub writeReportFile
     close R;
 }
 
+#--------------------------------------------------
+# @brief Populates the EEPROM attributes for DDIMMs
+#
+# @param [in] $self - The global target object.
+# @param [in] $target - An OCMB target
+#--------------------------------------------------
+sub setEepromAttributesForDdimms
+{
+    my $self      = shift;
+    my $target    = shift;  # Expects ocmb target
+
+    my %connections;
+    my $num=0;
+
+    my $eeprom_name = "EEPROM_VPD_PRIMARY_INFO";
+    my $fapi_name = "FAPI_I2C_CONTROL_INFO";
+    # SPD contains data for EEPROM_VPD_PRIMARY_INFO and FAPI_I2C_CONTROL_INFO
+    # SPD is the child of ocmb's parent, so get ocmb's parent
+    # then look for the SPD child
+    # With the resulting info, we populate pmic0, pmic1, ocmb, and dimm
+    my $target_parent = $self->getTargetParent($target);
+
+    # Need to store pmic targets because they get parsed before we
+    # do calculations for engine, port, etc
+    # pmics need these values, so we store them until we need them later
+    my $address = 0;
+    my @pmic_array;
+    foreach my $child (@{ $self->getTargetChildren($target_parent) })
+    {
+        my $type = $self->getTargetType($child);
+        if ($type eq "chip-spd-device")
+        {
+            my $offset = $self->getAttribute($child, "BYTE_ADDRESS_OFFSET");
+            my $memory_size = $self->getAttribute($child, "MEMORY_SIZE_IN_KB");
+            my $cycle_time = $self->getAttribute($child, "WRITE_CYCLE_TIME");
+            my $page_size = $self->getAttribute($child, "WRITE_PAGE_SIZE");
+
+            # Populate EEPROM for ocmb
+            $self->setAttributeField($target, $eeprom_name, "byteAddrOffset",
+                $offset);
+            $self->setAttributeField($target, $eeprom_name, "maxMemorySizeKB",
+                $memory_size);
+            $self->setAttributeField($target, $eeprom_name, "writeCycleTime",
+                $cycle_time);
+            $self->setAttributeField($target, $eeprom_name, "writePageSize",
+                $page_size);
+
+            # Populate EEPROM for dimm
+            $self->setAttributeField($target_parent, $eeprom_name, "byteAddrOffset",
+                $offset);
+            $self->setAttributeField($target_parent, $eeprom_name, "maxMemorySizeKB",
+                $memory_size);
+            $self->setAttributeField($target_parent, $eeprom_name, "writeCycleTime",
+                $cycle_time);
+            $self->setAttributeField($target_parent, $eeprom_name, "writePageSize",
+                $page_size);
+
+            # spd only child is i2c-slave, which contains devAddr info
+            foreach my $i2c_slave (@{ $self->getTargetChildren($child) })
+            {
+                $address = $self->getAttribute($i2c_slave, "I2C_ADDRESS");
+                # Populate EEPROM for dimm
+                $self->setAttributeField($target_parent, $eeprom_name, "devAddr",
+                    $address);
+
+                # Populate EEPROM for ocmb
+                $self->setAttributeField($target, $eeprom_name, "devAddr",
+                    $address);
+            }
+        } # end if ($type eq "chip-spd-device") ...
+        elsif ($type eq "chip-vreg-generic")
+        {
+            push(@pmic_array, $child);
+            foreach my $i2c_slave (@{ $self->getTargetChildren($child) })
+            {
+                $type = $self->getTargetType($i2c_slave);
+                # pmic has child i2c_slave which contains the device address
+                if ($type eq "unit-i2c-slave")
+                {
+                    $address = $self->getAttribute($i2c_slave, "I2C_ADDRESS");
+
+                    # Populate FAPI for pmic
+                    $self->setAttributeField($child, $fapi_name, "devAddr",
+                        $address);
+                    last;
+                }
+            }
+        } # end elsif ($type eq "chip-vreg-generic")
+        elsif ($type eq "chip-ocmb")
+        {
+            foreach my $i2c_slave (@{ $self->getTargetChildren($child) })
+            {
+                # ocmb has multiple i2c-slaves, so we query with instance_name
+                my $instance_name = $self->getInstanceName($i2c_slave);
+                if ($instance_name eq "i2c-ocmb")
+                {
+                    $address = $self->getAttribute($i2c_slave, "I2C_ADDRESS");
+
+                    # Populate FAPI for ocmb
+                    $self->setAttributeField($target, $fapi_name, "devAddr",
+                        $address);
+                    last;
+                }
+            }
+        } # end elsif ($type eq "chip-ocmb")
+    } # end foreach my $child ...
+} # end setEepromAttributesForDdimms
+
+###############################################################################
+# Useful Utilites
+###############################################################################
+#--------------------------------------------------
+# @brief This will print a subset of the targets. Currently tweaked for
+#        HB, but can be tweaked to print what targets you are interested in.
+#
+# @details This was written with Rainier MRW XML in mind, change accordingly.
+#          Run as a stand alone utility.
+#
+# @param[in] $self - The global target object
+# @param[in] $filename - The XML file to be processed
+# @param[in] $target - The target to explore children of, if given, else
+#                      will start with the top level target
+#--------------------------------------------------
+sub printCompactTargetHierarchy
+{
+    my $self = shift;
+    my $filename = shift;
+    my $target = shift;
+
+    if ($filename eq "")
+    {
+        die "Must provide an XML file to process.\n";
+    }
+
+    # Only want to load the XML file once.
+    state $isXmlFileLoaded = 0;
+    if (0 == $isXmlFileLoaded )
+    {
+        $XML::Simple::PREFERRED_PARSER = 'XML::Parser';
+        $self->loadXML($filename);
+        $isXmlFileLoaded = 1;
+    }
+
+    # No target given, so use the top level target
+    if ($target eq undef)
+    {
+        $target = "/" . $self->getTopLevel();
+        print "$target \n";
+    }
+
+    # Target print control
+    my $stopProcessingChildren1 = "power10-1";
+    my $stopProcessingChildren2 = "fsi-slave-0";
+    my $stopProcessingChildren3 = "motherboard_fault_sensor";
+    my $stopProcessingChildren4 = "system_event_sensor";
+    my $skipChild = "vpd_assoc_child";
+    my $skipChildrenUntilDimm = "proc_socket-1";
+    my $skipUntilDimm = 0;
+
+    # Iterate over the children
+    my $children = $self->getTargetChildren($target);
+    foreach my $child (@{ $children })
+    {
+
+        if (($child =~ m/$stopProcessingChildren1/)  ||
+            ($child =~ m/$stopProcessingChildren2/)  ||
+            ($child =~ m/$stopProcessingChildren3/)  ||
+            ($child =~ m/$stopProcessingChildren4/) )
+        {
+            return;
+        }
+
+        if ($child =~ m/$skipChild/)
+        {
+            next;
+        }
+
+        if ($child =~ m/$skipChildrenUntilDimm/)
+        {
+            $skipUntilDimm = 1;
+            next;
+        }
+
+        if ( ($skipUntilDimm == 1) &&
+             (!($child =~ m/ddimm-connector/)) )
+        {
+            next;
+        }
+
+        print "$child \n";
+        $self->printCompactTargetHierarchy($filename, $child);
+    } # end foreach my $child (@{ $children })
+} # end sub printCompactTargetHierarchy
+
+#--------------------------------------------------
+# @brief This will print ALL targets and their hiearchy from the given file.
+#        Run as a stand alone utility.
+#
+# @param[in] $self - The global target object
+# @param[in] $filename - The XML file to be processed
+# @param[in] $target - The target to explore children of, if given, else
+#                      will start with the top level target
+#--------------------------------------------------
+sub printFullTargetHierarchy
+{
+    my $self = shift;
+    my $filename = shift;
+    my $target = shift;
+
+    if ($filename eq "")
+    {
+        die "Must provide an XML file to process.\n";
+    }
+
+    # Only want to load the XML file once.
+    state $isXmlFileLoaded = 0;
+    if (0 == $isXmlFileLoaded )
+    {
+        $XML::Simple::PREFERRED_PARSER = 'XML::Parser';
+        $self->loadXML($filename);
+        $isXmlFileLoaded = 1;
+    }
+
+    # If no target given, use the top level target
+    if ($target eq undef)
+    {
+        $target = "/" . $self->getTopLevel();
+        print "$target \n";
+    }
+
+    # Iterate over the children
+    my $children = $self->getTargetChildren($target);
+    foreach my $child (@{ $children })
+    {
+        print "$child \n";
+        $self->printFullTargetHierarchy($filename, $child);
+    }
+} # end sub printFullTargetHierarchy
+
+###############################################################################
+# The end of the perl module
+#
+# @brief The end of the executable elements of this PERL module
+#
+# @details Don't forget to return the true value (1) from this file
+###############################################################################
 1;
+
+
+###############################################################################
+# Perl documentation
+#
+# @brief The beginning of the Perl documentation
+#
+# @details do `perldoc Targets.pm` to see the Perl documentation
+###############################################################################
 
 =head1 NAME
 
@@ -3402,6 +3424,14 @@ C</sys-0/node-0/motherboard-0/dimm-0>
 Reads ServerWiz2 XML C<FILENAME> and stores into a data structure for
 manipulation and printing.
 
+=item getTargetInstanceHandle ( )
+
+Returns a handle to the target instances.
+
+=item getTopLevel ( )
+
+Returns the top level target.
+
 =item removeTarget(C<TARGET_STRING>)
 
 Removes the given target from the data structure (C<TARGET>)
@@ -3455,7 +3485,7 @@ for a endpoint C<MRW_TYPE> and C<BUS_TYPE>
 
 =item getBusType(C<TARGET_STRING>)
 
-Returns the BUS_TYPE attribute of (C<TARGET_STRING>).  Examples are I2C and DMI.
+Returns the BUS_TYPE attribute of (C<TARGET_STRING>).  An example is I2C
 
 =item getType(C<TARGET_STRING>)
 

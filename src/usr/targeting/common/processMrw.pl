@@ -24,6 +24,9 @@
 #
 # IBM_PROLOG_END_TAG
 
+###############################################################################
+# Include these libraries
+###############################################################################
 use strict;
 use XML::Simple;
 use Data::Dumper;
@@ -32,112 +35,216 @@ use Math::BigInt;
 use Getopt::Long;
 use File::Basename;
 
-use constant HZ_PER_KHZ=>1000;
-use constant MAX_MCS_PER_PROC => 4; # 4 MCS per Nimbus
-
-my $VERSION = "1.0.0";
-
-my $force           = 0;
-my $serverwiz_file  = "";
-my $version         = 0;
-my $debug           = 0;
-my $report          = 0;
-my $sdr_file        = "";
-my $build           = "hb";
-my $system_config   = "";
-my $output_filename = "";
-
-# Map the OMI instance to its corresponding OMIC parent
-my %omi_map         = (4  => "omic-0",
-                       5  => "omic-0",
-                       6  => "omic-0",
-                       7  => "omic-1",
-                       2  => "omic-1",
-                       3  => "omic-1",
-                       0  => "omic-2",
-                       1  => "omic-2",
-                       12 => "omic-0",
-                       13 => "omic-0",
-                       14 => "omic-0",
-                       15 => "omic-1",
-                       10 => "omic-1",
-                       11 => "omic-1",
-                       8  => "omic-2",
-                       9  => "omic-2");
-
-# TODO RTC:170860 - Remove this after dimm connector defines VDDR_ID
-my $num_voltage_rails_per_proc = 1;
-
-GetOptions(
-    "build=s" => \$build,
-    "f"   => \$force,             # numeric
-    "x=s" => \$serverwiz_file,    # string
-    "d"   => \$debug,
-    "c=s" => \$system_config,      #string
-    "o=s" => \$output_filename,   #string
-    "v"   => \$version,
-    "r"   => \$report,
-  )                               # flag
-  or printUsage();
-
-if ($version == 1)
-{
-    die "\nprocessMrw.pl\tversion $VERSION\n";
-}
-
-if ($serverwiz_file eq "")
-{
-    printUsage();
-}
-
-$XML::Simple::PREFERRED_PARSER = 'XML::Parser';
-
+###############################################################################
+# Define some global constants
+###############################################################################
+# Create a Target object
 my $targetObj = Targets->new;
-if ($force == 1)
-{
-    $targetObj->{force} = 1;
-}
-if ($debug == 1)
-{
-    $targetObj->{debug} = 1;
-}
 
-$targetObj->setVersion($VERSION);
-my $xmldir = dirname($serverwiz_file);
-$targetObj->loadXML($serverwiz_file);
+# Define a true and false keyword
+use constant { true => 1, false => 0 };
+
+use constant HZ_PER_KHZ=>1000;
 
 our %hwsvmrw_plugins;
-# FSP-specific functions
-if ($build eq "fsp")
+
+###############################################################################
+# Main - The starting point for this script
+###############################################################################
+main($targetObj);
+exit 0;  # YOU SHALL NOT PASS!! All code should start in sub main
+
+#--------------------------------------------------
+# @brief Print usage statement and exit
+#--------------------------------------------------
+sub printUsage
 {
-    eval ("use processMrw_fsp; return 1;");
-    processMrw_fsp::return_plugins();
+    print "
+processMrwl.pl -x [XML filename] [OPTIONS]
+Options:
+        -build <hb | fsp> = hb  - process HB targets only (the default)
+                            fsp - process FSP targets in addition to HB targets
+        -c <2N | w> = special configurations we want to run
+                      2N - special 2 node config with extra ABUS links
+                      w - Special MST wrap config
+        -d = run in debug mode
+        -f = force output file creation even when errors
+        -o <filename> = output filename
+        -r = create report and save to [system_name].rpt
+        -s = run in silent mode, suppress warnings but not errors,
+             use judiciously
+        -t = run self test
+";
+    exit(1);
 }
 
-my $str=sprintf(
-    " %30s | %10s | %6s | %4s | %9s | %4s | %4s | %4s | %10s | %s\n",
-    "Sensor Name","FRU Name","Ent ID","Type","Evt Type","ID","Inst","FRU",
-    "HUID","Target");
+#--------------------------------------------------
+# @brief main
+#
+# @details The real starting point of this script.
+#--------------------------------------------------
+sub main
+{
+    my $targetObj = shift;
 
-$targetObj->writeReport($str);
-my $str=sprintf(
-    " %30s | %10s | %6s | %4s | %9s | %4s | %4s | %4s | %10s | %s\n",
-    "------------------------------","----------",
-    "------","----","---------","----","----","----","----------",
-    "----------");
+    # Extract the caller's options off the command line and validate.
+    # Will exit if options are not valid.
+    getAndValidateCallerInputOptions($targetObj);
 
-$targetObj->writeReport($str);
+    # Run tests if asked to do so
+    if ($targetObj->{run_self_test} == 1)
+    {
+        runTests($targetObj);
+        return 0;
+    }
 
-########################
-## Used to setup GPU sensors on processors
-my %G_gpu_sensors;
-# key: obusslot target,
-# value: (GPU#, Function, Temp, MemTemp IPMI name/ids,
+    # Load the XML and process the file, extracting targets and associated
+    # attributes, with their data, to the targets.
+    loadXmlFile($targetObj);
 
-my %G_slot_to_proc;
-# key: obusslot string
-# value: processor target string
-#########################
+    if ($targetObj->{build} eq "fsp")
+    {
+        eval ("use processMrw_fsp; return 1;");
+        processMrw_fsp::return_plugins();
+    }
+
+    # Write the report
+    writeReport($targetObj);
+
+    # Process the targets - set some needed attribute values
+    processTargets($targetObj);
+
+    if ($targetObj->{build} eq "fsp")
+    {
+        processMrw_fsp::loadFSP($targetObj);
+    }
+
+    # Check for errors in the targets
+    errorCheckTheTargets($targetObj);
+
+    # Write the results of processing the targets to an XML file
+    writeResultsToXml($targetObj);
+}
+
+###############################################################################
+# Supporting subroutines
+###############################################################################
+#--------------------------------------------------
+# @brief Extract caller's command line options
+#
+# @details Extract caller's command line options and
+#          validate them.  If valid then store in the
+#          global Target object for easy retrieval.
+#          If options are not valid, then print
+#          usage statement and exit script.
+#--------------------------------------------------
+sub getAndValidateCallerInputOptions
+{
+    my $targetObj = shift;
+
+    # Local variables, and their defaults, to cache the command line options to
+    my $serverwiz_file  = "";
+    my $build           = "hb";  # Used to process HB targets only or FSP and HB
+                                 # targets.  Process HB targets is the default.
+                                 # It is also used as a tag for the generated
+                                 # output file, if no output file given.
+    my $system_config   = "";
+    my $debug           = 0;
+    my $force           = 0;
+    my $output_file     = "";
+    my $report          = 0;
+    my $stealth_mode    = 0;  # Only print errors not warnings
+    my $run_self_test   = 0;
+    my $version         = 0;
+
+    # Grab the user's command line options.  If an option is not recognized,
+    # print usage statement and exit script.
+    GetOptions(
+        "x=s" => \$serverwiz_file, # string (mandatory)
+        # The following options are optional
+        "build=s" => \$build,      # string
+        "c=s" => \$system_config,  # string
+        "d"   => \$debug,          # flag
+        "f"   => \$force,          # numeric
+        "o=s" => \$output_file,    # string
+        "r"   => \$report,         # flag
+        "s"   => \$stealth_mode,   # flag
+        "t"   => \$run_self_test,  # flag
+      )
+      or printUsage();
+
+    # If caller did not specify an input file, then print usage and exit
+    if ($serverwiz_file eq "")
+    {
+        printUsage();
+    }
+
+    # If caller used an invalid option for 'system_config' then state so and exit
+    if ( ($system_config ne "")     &&
+         ($system_config ne "2N")   &&
+         ($system_config ne "w")  )
+
+    {
+        print "\nInvalid input \"$system_config\" for option -c\n";
+        printUsage();
+    }
+
+    # If caller used an invalid option for 'build' then state so and exit
+    if ( ($build ne "")     &&
+         ($build ne "hb")   &&
+         ($build ne "fsp")  )
+
+    {
+        print "\nInvalid input \"$build\" for option -build\n";
+        printUsage();
+    }
+
+    # Save the caller's input options to global storage for easy retrieval
+    $targetObj->{serverwiz_file} = $serverwiz_file;
+    $targetObj->{serverwiz_dir} = dirname($serverwiz_file);
+    $targetObj->{build} = $build;
+    $targetObj->{system_config} = $system_config;
+    $targetObj->{debug} = $debug;
+    $targetObj->{force} = $force;
+    $targetObj->{output_file} = $output_file;
+    $targetObj->{report} = $report;
+    $targetObj->{stealth_mode} = $stealth_mode;
+    $targetObj->{run_self_test} = $run_self_test;
+
+} # end getAndValidateCallerInputOptions
+
+
+# loadXmlFile
+sub loadXmlFile
+{
+    my $targetObj = shift;
+
+    $XML::Simple::PREFERRED_PARSER = 'XML::Parser';
+    $targetObj->loadXML($targetObj->{serverwiz_file});
+
+    # Set the version number to the given input XML file
+    $targetObj->setVersion();
+} # end loadXmlFile
+
+# writeReport
+sub writeReport
+{
+    my $targetObj = shift;
+
+    my $str=sprintf(
+        " %30s | %10s | %6s | %4s | %9s | %4s | %4s | %4s | %10s | %s\n",
+        "Sensor Name","FRU Name","Ent ID","Type","Evt Type","ID","Inst","FRU",
+        "HUID","Target");
+
+    $targetObj->writeReport($str);
+    my $str=sprintf(
+        " %30s | %10s | %6s | %4s | %9s | %4s | %4s | %4s | %10s | %s\n",
+        "------------------------------","----------",
+        "------","----","---------","----","----","----","----------",
+        "----------");
+
+    $targetObj->writeReport($str);
+} # end loadXmlFile
 
 # convert a number string into a bit-position number
 # example:  "0x02" -->  0b0100 = 4
@@ -151,88 +258,6 @@ sub numToBitPositionNum
     return $newNum;
 }
 
-# Used to populate G_gpu_sensors hash of array references
-#
-# Each array reference will be composed of 3 sensors +
-# board cfg ID which together makes up a GPU.
-#  - each sensor has a sensor type & entity ID + a sensor ID
-#  - board cfg is known as OBUS_CONFIG in mrw
-#       (each GPU can belong to 1 or more cfgs)
-#
-sub addSensorToGpuSensors
-{
-    my ($name, $obusslot_str, $type, $entID, $sensorID) = @_;
-
-    my $GPU_SENSORS_FUNC_OFFSET = 0;
-    my $GPU_SENSORS_TEMP_OFFSET = 2;
-    my $GPU_SENSORS_MEM_TEMP_OFFSET = 4;
-
-    my $rSensorArray = $G_gpu_sensors{$obusslot_str};
-    unless ($rSensorArray) {
-        $rSensorArray = [ "0xFFFF","0xFF","0xFFFF","0xFF",
-                          "0xFFFF","0xFF","0x00" ];
-    }
-
-    if ($name =~ m/Func/)
-    {
-        $rSensorArray->[$GPU_SENSORS_FUNC_OFFSET] =
-            sprintf("0x%02X%02X", oct($type), oct($entID));
-        $rSensorArray->[$GPU_SENSORS_FUNC_OFFSET+1] = $sensorID;
-    }
-    elsif($name =~ m/Memory_Temp/)
-    {
-        $rSensorArray->[$GPU_SENSORS_MEM_TEMP_OFFSET] =
-            sprintf("0x%02X%02X", oct($type), oct($entID));
-        $rSensorArray->[$GPU_SENSORS_MEM_TEMP_OFFSET+1] = $sensorID;
-    }
-    elsif($name =~ m/Temp/)
-    {
-        $rSensorArray->[$GPU_SENSORS_TEMP_OFFSET] =
-            sprintf("0x%02X%02X", oct($type), oct($entID));
-        $rSensorArray->[$GPU_SENSORS_TEMP_OFFSET+1] = $sensorID;
-    }
-
-    $G_gpu_sensors{$obusslot_str} = $rSensorArray;
-}
-
-
-# Populates the G_slot_to_proc hash and updates the cfgID in G_gpu_sensors
-# This is how we map the obusslot to the GPU sensors
-sub addObusCfgToGpuSensors
-{
-    my ($obusslot_str, $proc_target, $cfg) = @_;
-    my $GPU_SENSORS_OBUS_CFG_OFFSET = 6;
-
-    my $foundSlot = 0;
-
-    $G_slot_to_proc{$obusslot_str} = $proc_target;
-
-    foreach my $obusslot (keys %G_gpu_sensors)
-    {
-        if ($obusslot =~ m/$obusslot_str/)
-        {
-            # Add in the cfg number
-            my $rSensorArray = $G_gpu_sensors{$obusslot_str};
-            $rSensorArray->[$GPU_SENSORS_OBUS_CFG_OFFSET] =
-                 sprintf("0x%02X",
-                        (oct($rSensorArray->[$GPU_SENSORS_OBUS_CFG_OFFSET]) |
-                        oct(numToBitPositionNum($cfg))) );
-            $foundSlot = 1;
-            last;
-        }
-    }
-    if (!$foundSlot)
-    {
-        print STDOUT sprintf("%s:%d ", __FILE__,__LINE__);
-        print STDOUT "Found obus slot ($obusslot_str - processor $proc_target)".
-                     " not in G_gpu_sensors hash\n";
-
-        my $cfg_bit_num = numToBitPositionNum($cfg);
-        $G_gpu_sensors{$obusslot_str} =
-            ["0xFFFF","0xFF","0xFFFF","0xFF","0xFFFF",
-             "0xFF", sprintf("0x02X",oct($cfg_bit_num))];
-    }
-}
 
 #  @brief Returns whether system has multiple possible TPMs or not
 #
@@ -253,6 +278,7 @@ sub addObusCfgToGpuSensors
 
 sub isMultiTpmSystem
 {
+    my $targetObj = shift;
     my $targetsRef = shift;
 
     my $tpms=0;
@@ -273,94 +299,188 @@ sub isMultiTpmSystem
 }
 
 #--------------------------------------------------
-## loop through all targets and do stuff
-my @targets = sort keys %{ $targetObj->getAllTargets() };
-my $isMultiTpmSys = isMultiTpmSystem(\@targets);
-foreach my $target (@targets)
+# @brief Loop through all targets and set attributes as needed
+#
+# @param [in] $targetObj - The global target object.
+#--------------------------------------------------
+sub processTargets
 {
-    my $type = $targetObj->getType($target);
-    if ($type eq "SYS")
-    {
-        processSystem($targetObj, $target);
-        #TODO RTC: 178351 Remove depricated Attribute from HB XML
-        #these are obsolete
-        $targetObj->deleteAttribute($target,"FUSED_CORE_MODE");
-        $targetObj->deleteAttribute($target,"MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE");
-        $targetObj->deleteAttribute($target,"MRW_CDIMM_SPARE_I2C_TEMP_SENSOR_ENABLE");
-        $targetObj->deleteAttribute($target,"MRW_DRAMINIT_RESET_DISABLE");
-        $targetObj->deleteAttribute($target,"MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA");
-        $targetObj->deleteAttribute($target,"MRW_STRICT_MBA_PLUG_RULE_CHECKING");
-        $targetObj->deleteAttribute($target,"MSS_DRAMINIT_RESET_DISABLE");
-        $targetObj->deleteAttribute($target,"MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_SLOT");
-        $targetObj->deleteAttribute($target,"OPT_MEMMAP_GROUP_POLICY");
-        $targetObj->deleteAttribute($target,"PFET_POWERDOWN_DELAY_NS");
-        $targetObj->deleteAttribute($target,"PFET_POWERUP_DELAY_NS");
-        $targetObj->deleteAttribute($target,"PFET_VCS_VOFF_SEL");
-        $targetObj->deleteAttribute($target,"PFET_VDD_VOFF_SEL");
-        $targetObj->deleteAttribute($target,"SYSTEM_IVRMS_ENABLED");
-        $targetObj->deleteAttribute($target,"SYSTEM_RESCLK_ENABLE");
-        $targetObj->deleteAttribute($target,"SYSTEM_WOF_ENABLED");
-        $targetObj->deleteAttribute($target,"VDM_ENABLE");
-        $targetObj->deleteAttribute($target,"CHIP_HAS_SBE");
+    my $targetObj = shift;
+    my @targets = sort keys %{ $targetObj->getAllTargets() };
+    my $isMultiTpmSys = isMultiTpmSystem($targetObj, \@targets);
 
-        my $maxComputeNodes  = get_max_compute_nodes($targetObj , $target);
-        $targetObj->setAttribute($target, "MAX_COMPUTE_NODES_PER_SYSTEM", $maxComputeNodes);
+    foreach my $target (@targets)
+    {
+        my $type = $targetObj->getType($target);
+        if ($type eq "SYS")
+        {
+            processSystem($targetObj, $target);
 
-        #handle enumeration changes
-        my $enum_val = $targetObj->getAttribute($target,"PROC_FABRIC_PUMP_MODE");
-        if ( $enum_val =~ /MODE1/i)
-        {
-            $targetObj->setAttribute($target,"PROC_FABRIC_PUMP_MODE","CHIP_IS_NODE");
+            my $maxComputeNodes  = get_max_compute_nodes($targetObj , $target);
+            $targetObj->setAttribute($target, "MAX_COMPUTE_NODES_PER_SYSTEM", $maxComputeNodes);
+
+            #handle enumeration changes
+            my $enum_val = $targetObj->getAttribute($target,"PROC_FABRIC_PUMP_MODE");
+            if ( $enum_val =~ /MODE1/i)
+            {
+                $targetObj->setAttribute($target,"PROC_FABRIC_PUMP_MODE","CHIP_IS_NODE");
+            }
+            elsif ( $enum_val =~ /MODE2/i)
+            {
+                $targetObj->setAttribute($target,"PROC_FABRIC_PUMP_MODE","CHIP_IS_GROUP");
+            }
         }
-        elsif ( $enum_val =~ /MODE2/i)
+        elsif ($type eq "PROC")
         {
-            $targetObj->setAttribute($target,"PROC_FABRIC_PUMP_MODE","CHIP_IS_GROUP");
+            processProcessor($targetObj, $target);
+
+            if ($targetObj->{build} eq "fsp")
+            {
+                do_plugin("fsp_proc", $targetObj, $target);
+            }
+        }
+        elsif ($type eq "APSS")
+        {
+            processApss($targetObj, $target);
         }
 
-    }
-    elsif ($type eq "PROC")
-    {
-        processProcessor($targetObj, $target);
-        if ($build eq "fsp")
+        # @TODO RTC: 189374 Remove multiple TPMs filter when all platforms' MRW
+        # supports dynamically determining the processor driving it.
+        elsif (($type eq "TPM") && $isMultiTpmSys)
         {
-            do_plugin("fsp_proc", $targetObj, $target);
+            processTpm($targetObj, $target);
         }
-        #TODO RTC: 178351 Remove depricated Attribute from HB XML
-        #these are obsolete
-        $targetObj->deleteAttribute($target,"CHIP_HAS_SBE");
-        $targetObj->deleteAttribute($target,"FSI_GP_REG_SCOM_ACCESS");
-        $targetObj->deleteAttribute($target,"I2C_SLAVE_ADDRESS");
-        $targetObj->deleteAttribute($target,"LPC_BASE_ADDR");
-        $targetObj->deleteAttribute($target,"NPU_MMIO_BAR_BASE_ADDR");
-        $targetObj->deleteAttribute($target,"NPU_MMIO_BAR_SIZE");
-        $targetObj->deleteAttribute($target,"PM_PFET_POWERDOWN_CORE_DELAY0");
-        $targetObj->deleteAttribute($target,"PM_PFET_POWERDOWN_CORE_DELAY1");
-        $targetObj->deleteAttribute($target,"PM_PFET_POWERDOWN_ECO_DELAY0");
-        $targetObj->deleteAttribute($target,"PM_PFET_POWERDOWN_ECO_DELAY1");
-        $targetObj->deleteAttribute($target,"PM_PFET_POWERUP_CORE_DELAY0");
-        $targetObj->deleteAttribute($target,"PM_PFET_POWERUP_CORE_DELAY1");
-        $targetObj->deleteAttribute($target,"PM_PFET_POWERUP_ECO_DELAY0");
-        $targetObj->deleteAttribute($target,"PM_PFET_POWERUP_ECO_DELAY1");
-        $targetObj->deleteAttribute($target,"PNOR_I2C_ADDRESS_BYTES");
-        $targetObj->deleteAttribute($target,"PROC_PCIE_NUM_IOP");
-        $targetObj->deleteAttribute($target,"PROC_PCIE_NUM_LANES");
-        $targetObj->deleteAttribute($target,"PROC_PCIE_NUM_PEC");
-        $targetObj->deleteAttribute($target,"PROC_PCIE_NUM_PHB");
-        $targetObj->deleteAttribute($target,"PROC_SECURITY_SETUP_VECTOR");
-        $targetObj->deleteAttribute($target,"SBE_SEEPROM_I2C_ADDRESS_BYTES");
-    }
-    elsif ($type eq "APSS")
+        elsif ($type eq "POWER_SEQUENCER")
+        {
+            my $target_type = $targetObj->getTargetType($target);
+
+            # Strip off the chip- part of the target type name
+            $target_type =~ s/chip\-//g;
+
+            # Currently only UCD9090 and UCD90120A on FSP systems are supported.
+            # All other UCD types are skipped.
+            if (($target_type eq "UCD9090")
+                || ($target_type eq "UCD90120A"))
+            {
+                processUcd($targetObj, $target);
+            }
+        }
+        elsif ($type eq "OCMB_CHIP")
+        {
+            processOcmbChip($targetObj, $target);
+        }
+
+        # Once processing of the target type is complete, remove
+        # deprecated and un-needed attributes for this type
+        pruneTargetAttributes($targetObj, $target, $type);
+
+        processIpmiSensors($targetObj,$target);
+    }  # end foreach my $target (@targets)
+
+} # end processTargets
+
+#--------------------------------------------------
+# @brief Check the processed targets for errors
+#
+# @param [in] $targetObj - The global target object.
+#--------------------------------------------------
+sub errorCheckTheTargets
+{
+    my $targetObj = shift;
+
+    # Check topology
+    foreach my $n (keys %{$targetObj->{TOPOLOGY}})
     {
-        processApss($targetObj, $target);
+        if ($targetObj->{TOPOLOGY}->{$n} > 1)
+        {
+            print "ERROR: Fabric topology invalid.  2 targets have same ".
+                  "FABRIC_TOPOLOGY_ID ($n)\n";
+            $targetObj->myExit(3);
+        }
     }
-    elsif ($type eq "MEMBUF")
+
+    # Check for errors
+    foreach my $target (keys %{ $targetObj->getAllTargets() })
     {
-        processMembuf($targetObj, $target);
-        $targetObj->deleteAttribute($target,"CEN_MSS_VREF_CAL_CNTL");
+# TODO, RTC 215164. Having issues with power10-0 so wrapped errorCheck with if statement:
+# ERROR: EEPROM_VPD_PRIMARY_INFO/devAddr attribute is invalid (Target=/sys-0/node-0/nisqually-0/proc_socket-0/godel-0/power10-0)
+#	I2C connection to target is not defined
+## Once resolved, will remove if statement
+        if ($target != "/sys-0/node-0/nisqually-0/proc_socket-0/godel-0/power10-0")
+        {
+            errorCheck($targetObj, $target);
+        }
     }
-    elsif ($type eq "PHB")
+} # end sub errorCheckTheTargets
+
+#--------------------------------------------------
+# @brief Write out the results to an XML file
+#
+# @param [in] $targetObj - The global target object.
+#--------------------------------------------------
+sub writeResultsToXml
+{
+    my $targetObj = shift;
+
+    my $xml_fh;
+    my $filename;
+    my $config_str = $targetObj->{system_config};
+
+    #If user did not specify the output filename, then build one up by using
+    #config and build parameters
+    if ($targetObj->{output_file} eq "")
     {
-        #TODO RTC: 178351 Remove depricated Attribute from HB XML
+        if ($config_str ne "")
+        {
+            $config_str = "_" . $config_str;
+        }
+
+        $filename = $targetObj->{serverwiz_dir} . "/" . $targetObj->getSystemName() . $config_str . "_" . $targetObj->{build} . ".mrw.xml";
+    }
+    else
+    {
+        $filename = $targetObj->{output_file};
+    }
+
+    print "Creating XML: $filename\n";
+    open($xml_fh, ">$filename") || die "Unable to create: $filename";
+
+    $targetObj->printXML($xml_fh, "top", $targetObj->{build});
+    close $xml_fh;
+    if (!$targetObj->{errorsExist})
+    {
+        ## optionally print out report
+        if ($targetObj->{report})
+        {
+            print "Writing report to: ".$targetObj->{report_filename}."\n";
+            $targetObj->writeReportFile();
+        }
+        print "MRW created successfully!\n";
+    }
+} # end sub writeResultsToXml
+
+#--------------------------------------------------
+# @brief Remove attributes associated with target.
+#        Either because they have been deprecated
+#        or simply not used/needed.
+#
+# @param[in] $targetObj - The global target object blob
+# @param[in] $target - The target to remove attributes from
+# @param[in] $type -   The type of the target
+#
+# TODO RTC: 178351 Remove depricated Attribute from HB XML
+# these are obsolete
+#
+#--------------------------------------------------
+sub pruneTargetAttributes
+{
+    my $targetObj = shift;
+    my $target    = shift;
+    my $type      = shift;
+
+    if ($type eq "PHB")
+    {
+        $targetObj->deleteAttribute($target,"DEVICE_ID");
         $targetObj->deleteAttribute($target,"DEVICE_ID");
         $targetObj->deleteAttribute($target,"HDDW_ORDER");
         $targetObj->deleteAttribute($target,"MAX_POWER");
@@ -370,97 +490,11 @@ foreach my $target (@targets)
         $targetObj->deleteAttribute($target,"PCIE_64BIT_DMA_SIZE");
         $targetObj->deleteAttribute($target,"PCIE_64BIT_MMIO_SIZE");
         $targetObj->deleteAttribute($target,"PCIE_CAPABILITES");
-        $targetObj->deleteAttribute($target,"PROC_PCIE_BAR_BASE_ADDR");
-        $targetObj->deleteAttribute($target,"PROC_PCIE_NUM_LANES");
         $targetObj->deleteAttribute($target,"SLOT_INDEX");
         $targetObj->deleteAttribute($target,"SLOT_NAME");
         $targetObj->deleteAttribute($target,"VENDOR_ID");
     }
-    # @TODO RTC: 189374 Remove multiple TPMs filter when all platforms' MRW
-    # supports dynamically determining the processor driving it.
-    elsif (($type eq "TPM") && $isMultiTpmSys)
-    {
-        processTpm($targetObj, $target);
-    }
-    elsif ($type eq "POWER_SEQUENCER")
-    {
-        my $target_type = $targetObj->getTargetType($target);
-
-        # Strip off the chip- part of the target type name
-        $target_type =~ s/chip\-//g;
-
-        # Currently only UCD9090 and UCD90120A on FSP systems are supported.
-        # All other UCD types are skipped.
-        if (($target_type eq "UCD9090")
-            || ($target_type eq "UCD90120A"))
-        {
-            processUcd($targetObj, $target);
-        }
-    }
-    elsif ($type eq "OCMB_CHIP")
-    {
-        processOcmbChip($targetObj, $target);
-    }
-
-    processIpmiSensors($targetObj,$target);
-}
-
-if ($build eq "fsp")
-{
-    processMrw_fsp::loadFSP($targetObj);
-}
-## check topology
-foreach my $n (keys %{$targetObj->{TOPOLOGY}}) {
-    if ($targetObj->{TOPOLOGY}->{$n} > 1) {
-        print "ERROR: Fabric topology invalid.  2 targets have same ".
-              "FABRIC_TOPOLOGY_ID ($n)\n";
-        $targetObj->myExit(3);
-    }
-}
-## check for errors
-foreach my $target (keys %{ $targetObj->getAllTargets() })
-{
-    errorCheck($targetObj, $target);
-}
-
-#--------------------------------------------------
-## write out final XML
-my $xml_fh;
-my $filename;
-my $config_str = $system_config;
-
-#If user did not specify the output filename, then build one up by using
-#config and build parameters
-if ($output_filename eq "")
-{
-    if ($config_str ne "")
-    {
-        $config_str = "_" . $config_str;
-    }
-
-    $filename = $xmldir . "/" . $targetObj->getSystemName() . $config_str . "_" . $build . ".mrw.xml";
-}
-else
-{
-    $filename = $output_filename;
-}
-
-print "Creating XML: $filename\n";
-open($xml_fh, ">$filename") || die "Unable to create: $filename";
-
-$targetObj->printXML($xml_fh, "top", $build);
-close $xml_fh;
-if (!$targetObj->{errorsExist})
-{
-    ## optionally print out report
-    if ($report)
-    {
-        print "Writing report to: ".$targetObj->{report_filename}."\n";
-        $targetObj->writeReportFile();
-    }
-    print "MRW created successfully!\n";
-}
-
+}  # end pruneTargetAttributes
 
 #--------------------------------------------------
 #--------------------------------------------------
@@ -487,30 +521,6 @@ sub processSystem
     if (!$targetObj->isBadAttribute($target,"XSCOM_BASE_ADDRESS") )
     {
         $targetObj->deleteAttribute($target,"XSCOM_BASE_ADDRESS");
-    }
-
-    # TODO RTC:170860 - Remove this after dimm connector defines VDDR_ID
-    my $system_name = $targetObj->getAttribute($target,"SYSTEM_NAME");
-    if ($system_name =~ /ZAIUS/i)
-    {
-        $num_voltage_rails_per_proc = 2;
-    }
-
-    # TODO RTC:182764 -- right now there is no support for CDIMMs. So,
-    # we don't know what to base these attributes off of. But, once
-    # we get CDIMM support in processMrw, then we should base these
-    # attributes on the type of DIMMs
-    if ($system_name =~ /ZEPPELIN/i)
-    {
-        #Zeppelin has ISDIMM with 10K VPD
-        $targetObj->setAttribute($target, "CVPD_SIZE", 0x2800);
-        $targetObj->setAttribute($target, "CVPD_MAX_SECTIONS", 25);
-    }
-    elsif ($system_name =~ /FLEETWOOD/i)
-    {
-        #Fleetwood has CDIMM with 4K VPD
-        $targetObj->setAttribute($target, "CVPD_SIZE", 0x1000);
-        $targetObj->setAttribute($target, "CVPD_MAX_SECTIONS", 64);
     }
 }
 
@@ -594,12 +604,6 @@ sub processIpmiSensors {
             }
 
             $targetObj->writeReport($str);
-
-            if ($name =~ /^GPU\d$/)
-            {
-                addSensorToGpuSensors($sensor_name, $target, $sensor_type,
-                            $entity_id, $sensor_id_str);
-            }
         }
     }
     for (my $i=@sensors;$i<16;$i++)
@@ -609,8 +613,8 @@ sub processIpmiSensors {
     my @sensors_sort = sort(@sensors);
     $targetObj->setAttribute($target,
                  "IPMI_SENSORS",join(',',@sensors_sort));
-
 }
+
 sub processApss {
     my $targetObj=shift;
     my $target=shift;
@@ -703,7 +707,7 @@ sub processApss {
                     $systemTarget);
 
             $targetObj->writeReport($str);
-        }
+        } # end if ($targetObj->getMrwType($child) eq "APSS_SENSOR")
         elsif ($targetObj->getMrwType($child) eq "APSS_GPIO")
         {
             my $function_id=$targetObj->
@@ -715,8 +719,9 @@ sub processApss {
             {
                 $gpios[$port] = $function_id;
             }
-        }
-    }
+        } # end elsif ($targetObj->getMrwType($child) eq "APSS_GPIO")
+    } # end foreach my $child (@{$targetObj->getTargetChildren($target)})
+
     for (my $i=0;$i<16;$i++)
     {
         if ($sensors[$i] eq "")
@@ -760,6 +765,7 @@ sub processApss {
 
     convertNegativeNumbers($targetObj,$systemTarget,"ADC_CHANNEL_OFFSETS",32);
 }
+
 sub convertNegativeNumbers
 {
     my $targetObj=shift;
@@ -940,9 +946,9 @@ sub processUcd
 }
 
 #--------------------------------------------------
-## Processor
-##
-
+# @brief Process processors
+#
+#--------------------------------------------------
 sub processProcessor
 {
     my $targetObj = shift;
@@ -963,16 +969,11 @@ sub processProcessor
     $targetObj->copyAttribute($module_target,$target,"LOCATION_CODE");
 
     ## Copy PCIE attributes from socket
-    ## Copy Position attribute from socket
     ## Copy PBAX attributes from socket
     foreach my $attr (sort (keys
            %{ $targetObj->getTarget($socket_target)->{TARGET}->{attribute} }))
     {
         if ($attr =~ /PROC\_PCIE/)
-        {
-            $targetObj->copyAttribute($socket_target,$target,$attr);
-        }
-        elsif ($attr =~/POSITION/)
         {
             $targetObj->copyAttribute($socket_target,$target,$attr);
         }
@@ -997,7 +998,6 @@ sub processProcessor
             $targetObj->copyAttribute($socket_target,$target,$attr);
         }
     }
-
 
     # I2C arrays
     my @engine = ();
@@ -1025,6 +1025,11 @@ sub processProcessor
         {
             processXbus($targetObj, $child);
         }
+        elsif (($child_type eq "EQ") || ($child_type eq "PAUC"))
+        {
+            # Recursively iterate over the target and it's children
+            setTargetChipletId($targetObj, $child, $child_type);
+        }
         elsif ($child_type eq "OBUS")
         {
             processObus($targetObj, $child);
@@ -1043,37 +1048,15 @@ sub processProcessor
         {
             processPec($targetObj, $child, $target);
         }
-        elsif ($child_type eq "MCBIST")
-        {
-            processMcbist($targetObj, $child, $target);
-
-            # TODO RTC:170860 - Eventually the dimm connector will
-            #   contain this information and this can be removed
-            my $socket_pos =  $targetObj->getAttribute($socket_target,
-                                  "POSITION");
-            if ($num_voltage_rails_per_proc > 1)
-            {
-                my $mcbist_pos = $targetObj->getAttribute($child, "CHIP_UNIT");
-                $targetObj->setAttribute($child, "VDDR_ID",
-                         $socket_pos*$num_voltage_rails_per_proc + $mcbist_pos);
-            }
-            else
-            {
-                $targetObj->setAttribute($child, "VDDR_ID", $socket_pos);
-            }
-        }
         elsif ($child_type eq "MC")
         {
             processMc($targetObj, $child);
-        }
-        elsif ($child_type eq "EQ")
-        {
-            processEq($targetObj, $child);
         }
         elsif ($child_type eq "OCC")
         {
             processOcc($targetObj, $child, $target);
         }
+
         # Ideally this should be $child_type eq "I2C", but we need a change
         # in serverwiz and the witherspoon.xml first
         elsif (index($child,"i2c-master") != -1)
@@ -1093,27 +1076,6 @@ sub processProcessor
             push(@label, @$i2cLabel);
 
         }
-    }
-
-    # Add GPU sensors to processor
-    my @aGpuSensors = ();
-    foreach my $obusslot (sort keys %G_gpu_sensors)
-    {
-        # find matching obusslot to processor
-        my $proc_target = $G_slot_to_proc{$obusslot};
-
-        # if a processor target is found and it is the same as this target
-        if ($proc_target && ($target =~ m/$proc_target/))
-        {
-            # Add this GPU's sensors to the processor's array of GPU sensors
-            push (@aGpuSensors, @{ $G_gpu_sensors{$obusslot} });
-        }
-    }
-    if (@aGpuSensors)
-    {
-        # add GPU_SENSORS to this processor target
-        $targetObj->setAttribute( $target, "GPU_SENSORS",
-                                 join(',', @aGpuSensors) );
     }
 
     # Add final I2C arrays to processor
@@ -1216,10 +1178,11 @@ sub processProcessor
                              $targetObj->getAttribute($target,
                                                       "FABRIC_CHIP_ID"));
 
-    processMembufVpdAssociation($targetObj,$target);
+
     #TODO RTC: 191762 -- Need a generic way to source FABRIC_GROUP_ID and
     #FABRIC_CHIP_ID from the MRW and select the right value in processMRW
     #based on the system configuration we are compiling for.
+    my $system_config = $targetObj->{system_config};
     if ($system_config eq "w")
     {
         my $huid_str = $targetObj->getAttribute($target, "HUID");
@@ -1262,12 +1225,46 @@ sub processProcessor
         $targetObj->setAttribute($target,"PROC_EFF_FABRIC_CHIP_ID",$chip_id);
     }
 
-    setupBars($targetObj,$target);
+    setupMemoryMaps($targetObj,$target);
 
     $targetObj->setAttribute($target,
                      "PROC_MEM_TO_USE", ( $targetObj->getAttribute($target,
                      "FABRIC_GROUP_ID") << 3));
+
     processPowerRails ($targetObj, $target);
+
+    # TODO, RTC 215469. Remove this, once this attribute has been defined in the MRW
+    # Default the FREQ_OMI_MHZ to 25600 if no value found for this attribute
+    use constant FREQ_OMI_MHZ_ATTRIB  => "FREQ_OMI_MHZ";
+    use constant FREQ_OMI_MHZ_VALUE   => 25600;
+    if ($targetObj->doesAttributeExistForTarget($target, FREQ_OMI_MHZ_ATTRIB))
+    {
+        # Attribute exists for this processor, check
+        # if it does not have a default value
+        my $value = $targetObj->getAttribute($target, FREQ_OMI_MHZ_ATTRIB);
+        if ($value eq "")
+        {
+            # No default defined for attribute, give it a value
+            $targetObj->setAttribute($target, FREQ_OMI_MHZ_ATTRIB,
+                                              FREQ_OMI_MHZ_VALUE);
+        }
+    }
+
+    # Set the MRU_ID to correct values
+    {
+        # Split the PROC on "-" boundaries.  That will separate the PROC numeric
+        # position from the other fluff: "...power10-0" => "...power10", "0"
+        my @procParts = split(/-/, $target); # array of ("...power10", "0")
+        # Get the last value from array to retrieve the position (-1 in Perl means last)
+        my $procPosition = $procParts[-1];
+
+        # Set the MRU_ID to the MRU_PREFIX plus PROC position
+        my $mru_prefix_id = $targetObj->{enumeration}->{MRU_PREFIX}->{PROC};
+        my $mruiId = sprintf("%s%04x", $mru_prefix_id, $procPosition);
+
+        # Set the target MRU_ID attribute
+        $targetObj->setAttribute($target, "MRU_ID", $mruiId);
+    }
 }
 
 sub processPowerRails
@@ -1383,10 +1380,13 @@ sub processI2cSpeeds
             my $bus_speed=$targetObj->getBusAttribute(
                   $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_SPEED");
 
-            if ($bus_speed eq "" || $bus_speed==0) {
-                print "ERROR: I2C bus speed not defined for $i2c->{SOURCE}\n";
-                $targetObj->myExit(3);
-            }
+# TODO, RTC 215164. Having an issue with this statement:
+# ERROR: I2C bus speed not defined for /sys-0/node-0/nisqually-0/proc_socket-0/godel-0/power10-0/i2c-master-lightpath
+# Once resolved, will uncomment or maybe drop if not needed
+#            if ($bus_speed eq "" || $bus_speed==0) {
+#                print "ERROR: I2C bus speed not defined for $i2c->{SOURCE}\n";
+#                $targetObj->myExit(3);
+#            }
 
             ## choose lowest bus speed
             if ($bus_speeds[$engine][$port] eq "" ||
@@ -1412,40 +1412,26 @@ sub processI2cSpeeds
     $targetObj->setAttribute($target,"I2C_BUS_SPEED_ARRAY",$bus_speed_attr);
 }
 
-################################
-## Setup address map
-
-sub setupBars
+#--------------------------------------------------
+# @brief Set up memory maps for certain attributes of the PROCS
+#--------------------------------------------------
+sub setupMemoryMaps
 {
     my $targetObj = shift;
     my $target = shift;
-    #--------------------------------------------------
-    ## Setup BARs
 
-    #The topology ID is a 4 bit value that must be converted to
-    #a 5-bit topology index before we can use it to calculate the
-    #address offset.
-    #The conversion method depends on the topology mode.
-    my $topoId = $targetObj->getAttribute($target, "PROC_FABRIC_TOPOLOGY_ID");
-    my $topoMode = $targetObj->getAttribute($target, "PROC_FABRIC_TOPOLOGY_MODE");
-
-    #Assume topo mode 1 (GGCC -> 0GGCC)
-    my $topoIndex = $topoId;
-
-    #Check for topo mode 0
-    if ($topoMode == 0)
-    {
-        # GGGC -> GGG0C
-        $topoIndex = (($topoIndex & 0xE) << 1) | ($topoIndex & 0x1);
-    }
-
-    #keep track of which topology ID's have been used
+    # Keep track of which topology IDs have been used
+    my $topoId = getTopologyId($targetObj, $target);
     $targetObj->{TOPOLOGY}->{$topoId}++;
 
-    #P10 has a defined memory map for all configurations,
-    #these are the base addresses for topology ID 0 (group0-chip0).
+    # Get the topology index
+    my $topologyIndex = getTopologyIndex($targetObj, $target);
+
+    # P10 has a defined memory map for all configurations,
+    # these are the base addresses for topology ID 0 (group0-chip0).
     my %bars=(  "FSP_BASE_ADDR"             => 0x0006030100000000,
                 "PSI_BRIDGE_BASE_ADDR"      => 0x0006030203000000);
+
     #Note - Not including XSCOM_BASE_ADDRESS and LPC_BUS_ADDR in here
     # because Hostboot code itself writes those on every boot
     if (!$targetObj->isBadAttribute($target,"XSCOM_BASE_ADDRESS") )
@@ -1457,212 +1443,316 @@ sub setupBars
         $targetObj->deleteAttribute($target,"LPC_BUS_ADDR");
     }
 
-    #Each 5-bit topology index has its own 16TB space.
-    my $topoIndexOffset = 0x0000100000000000;
+    # The topology index resides in bits 15:19 of the P10 memory map.
+    # This offset, when multiplied to the index, will put the index in the
+    # correct bits of the memory map.
+    my $topologyIndexOffset = 0x0000100000000000;
 
+    # Add the topology index to the bar base memory
     foreach my $bar (keys %bars)
     {
-        my $i_base = Math::BigInt->new($bars{$bar});
-        my $value=sprintf("0x%016s",substr((
-                        $i_base+$topoIndexOffset*$topoIndex)->as_hex(),2));
+        my $base = Math::BigInt->new($bars{$bar});
+
+        # Add the topology index (multiplied out to the correct position)
+        # to the base.
+        my $value=sprintf("0x%016s",substr(($base +
+                          ($topologyIndexOffset*$topologyIndex))->as_hex(),2));
+        # Set the bar of the target to calculated value
         $targetObj->setAttribute($target,$bar,$value);
+    }
+}  # end setupMemoryMaps
+
+#--------------------------------------------------
+# @brief Retrieve the fabric topology mode
+#
+# @details The fabric topology mode, attribute PROC_FABRIC_TOPOLOGY_MODE,
+#          is an attribute of the top level target (sys-0), but retrieving
+#          the value from the attribute returns a string (MODE0 or MODE1).
+#          This string is used to get the actual value, tied to that mode,
+#          within the enumeration types.
+#
+# @param[in] $targetObj - The global target object, needed to get topology mode
+#
+# @return the numerical value of the topology mode in base 10
+#--------------------------------------------------
+sub getTopologyMode
+{
+    my $targetObj = shift;
+
+    use constant TOPOLOGY_MODE_ATTRIBUTE => "PROC_FABRIC_TOPOLOGY_MODE";
+
+    # Get topology mode from top level target
+    # Need to prepend "/" to the returned top level target because targets
+    # are mapped slightly different in the TARGETS hash vs the xml hash.
+    my $topologoyMode = $targetObj->getAttribute("/".$targetObj->{TOP_LEVEL},
+                                                 TOPOLOGY_MODE_ATTRIBUTE);
+
+    # Return the value of the mode as defined in
+    # enumeration type PROC_FABRIC_TOPOLOGY_MODE
+    # Convert the value from hex to base 10
+    return hex($targetObj->{xml}->{enumerationTypes}->{enumerationType}
+                      ->{PROC_FABRIC_TOPOLOGY_MODE}
+                      ->{enumerator}->{$topologoyMode}->{value});
+}
+
+#--------------------------------------------------
+# @brief Convert the topology ID to a topology index.
+#
+# @details  The topology ID is a 4 bit value that will be converted to a 5 bit
+#           topology index. The topology index is an index into the topology
+#           table.
+#           The conversion method depends on the topology mode.
+#                Mode      ID      index
+#               MODE 0 => GGGC --> GGG0C
+#               MODE 1 => GGCC --> GG0CC
+#
+# @param[in] $topologyId - The topology ID to convert to an index
+# @param[in] $topologyMode - The topology mode that determines the conversion
+#                            method. Needs to be a base 10 numeral value.
+#
+# @return a toplogy index, that is a base 10 numeral value.
+#--------------------------------------------------
+sub convertTopologyIdToIndex
+{
+    my $topologyId = shift;
+    my $topologyMode = shift;
+
+    use constant TOPOLOGY_MODE_1 => 1;
+
+    # Assume topology mode 0 (GGGC -> GGG0C)
+    my $groupMask = 0xE; # Use 0xE, 1110b, to extract 'GGG' from 'GGGC'
+    my $chipMask = 0x1;  # Use 0x1, 0001b, to extract 'C' from 'GGGC'
+
+    # If topology mode 1 (GGCC -> GG0CC)
+    if (TOPOLOGY_MODE_1 == $topologyMode)
+    {
+        $groupMask = 0xC; # Use 0xC, 1100b, to extract 'GG' from 'GGCC'
+        $chipMask = 0x3;  # Use 0x3, 0011b, to extract 'CC' from 'GGCC'
+    }
+
+    # Set topology index to topology ID before doing conversion
+    my $topologyIndex = $topologyId;
+
+    ## Turn the 4 bit topology ID into a 5 bit index
+    ## convert GGGC to GGG0C
+    ##      OR GGCC to GG0CC
+    # If group mask equal to 0xE (mode 0) then extract 'GGG' from 'GGGC':
+    #  1) GGGC & 0xE (1110b) returns GGG0 then shift left (<< 1) to get GGG00
+    #  2) extract C from GGGC: GGGC & 0x1 (0001b) returns C
+    # If group mask equal to 0xC (mode 1) then extract 'GG' from 'GGCC':
+    #  1) GGCC & 0xC (1100b) returns GG00 then shift left (<< 1) to get GG000
+    #  2) extract CC from GGCC: GGCC & 0x3 (0011b) returns CC
+    # Bitwise 'OR' 1 and 2 together to produce a 5 bit index value: GGG0C OR GG0CC
+    #    Index     =                  1                  'OR'               2
+    $topologyIndex = (($topologyIndex & $groupMask) << 1) | ($topologyIndex & $chipMask);
+
+    return ($topologyIndex);
+}
+
+#--------------------------------------------------
+# @brief Get the topology ID from processor
+#
+#
+# @param[in] $targetObj - The global target object, needed to get topology mode
+# @param[in] $processorTarget - The processor target, has the attribute topology ID
+#
+# @return topology ID, that is a base 10 numeral value.
+#--------------------------------------------------
+sub getTopologyId
+{
+    my $targetObj = shift;
+    my $processorTarget = shift;
+
+    use constant TOPOLOGY_ID_ATTRIBUTE => "PROC_FABRIC_TOPOLOGY_ID";
+
+    # Get the topology ID from the processor.
+    # Convert hex value to base 10 numerical value
+    return (hex($targetObj->getAttribute($processorTarget,
+                                         TOPOLOGY_ID_ATTRIBUTE) ));
+}
+
+#--------------------------------------------------
+# @brief Get the topology index, an index into the topology table.
+#
+# @details The topology index needs to be calculated using the topology mode
+#          and the topology ID.  @see convertTopologyIdToIndex for
+#          more details
+#
+# @param[in] $targetObj - The global target object, needed to get topology mode
+# @param[in] $processorTarget - The processor target has the attribute topology ID
+#
+# @return a topology index, that is base 10 numeral value.
+#--------------------------------------------------
+sub getTopologyIndex
+{
+    my $targetObj = shift;
+    my $processorTarget = shift;
+
+    # Get the topology mode: MODE 0 (0) or MODE 1 (1)
+    my $topologyMode = getTopologyMode($targetObj);
+
+    # Get the topology ID from the processor.
+    my $topologyId = getTopologyId($targetObj, $processorTarget);
+
+    # Convert the topology ID to a topology index. The conversion method is
+    # based on the topology mode.
+    return (convertTopologyIdToIndex($topologyId, $topologyMode));
+}
+
+#--------------------------------------------------
+# @brief Set the Target's attribute CHIPLET_ID
+#
+# @details The CHIPLET_ID value is calculated via the addition of the
+#          target's attribute CHIP_UNIT with the PERVASIVE_PARENT_OFFSET value
+#          for target type.
+#
+# @param [in] $targetObj - The global target object.
+# @param [in] $target - target to set CHIPLET_ID for
+# @param [in] $targetType - The target type of the target
+# @param [in] $chipUnit - The CHIP_UNIT value used to calculate the CHIPLET_ID
+#
+# @note The $chipUnit may be supplied for the child to use in calculating
+#       the CHIPLET_ID, if not supplied, then will use child's CHIP_UNIT value.
+#
+# @return true if attribute found, else false
+#--------------------------------------------------
+sub setTargetChipletId
+{
+    my $targetObj = shift;
+    my $target    = shift;
+    my $targetType = shift;
+    my $chipUnit = shift;
+
+    # If no chip unit given, then use the target's chip unit
+    if ($chipUnit eq undef)
+    {
+        if ($targetObj->doesAttributeExistForTarget($target, "CHIP_UNIT"))
+        {
+            $chipUnit = $targetObj->getAttribute($target, "CHIP_UNIT");
+        }
+        else
+        {
+            # Can't get the CHIP_UNIT value, then no point in continuing
+            # This is a an acceptable response, not all target instance have
+            # a CHIP_UNIT attribute.
+            return;
+        }
+    }
+
+    # If the target has pervasive parent, then process it
+    if (exists $Targets::PERVASIVE_PARENT_OFFSET{$targetType})
+    {
+        # Get this target's PERVASIVE_PARENT value
+        my $value = $Targets::PERVASIVE_PARENT_OFFSET{$targetType};
+
+        if ($targetType eq "PAU")
+        {
+            # We devide by 2 here because the PERVASIVE_PARENT repeats in pairs
+            $value += ($chipUnit / 2);
+        }
+        else
+        {
+            # Add the CHIP_UNIT value to the pervasive parent offset
+            $value += $chipUnit;
+        }
+
+        # Make it look pwetty
+        $value = sprintf("0x%0.2X", $value);
+
+        # Set the chiplet ID with calculated value
+        $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
+    }
+
+    # Set the Chiplet ID for the children, if children exists
+    if ($targetObj->getTargetChildren($target) ne "")
+    {
+        # Iterate over the children setting their Chiplet IDs
+        foreach my $child (@{ $targetObj->getTargetChildren($target) })
+        {
+            # Get the target type of the child for logging
+            my $childType = $targetObj->getType($child);
+
+            $targetObj->log($target,
+                "Processing $targetType child: $child Type: $childType");
+
+            if ($childType eq "IOHS")
+            {
+                # Don't send THIS chip unit, let IOHS use it's own chip unit
+                setTargetChipletId($targetObj, $child, $childType);
+            }
+            elsif ($childType eq "PAU")
+            {
+                # TODO  RTC 215164 This is a bad place to put, but fits.
+                # Will need to refactor
+                setPauOrdinalId($targetObj, $child);
+                setTargetChipletId($targetObj, $child, $childType, $chipUnit);
+            }
+            else
+            {
+                setTargetChipletId($targetObj, $child, $childType, $chipUnit);
+            }
+        }
     }
 }
 
 #--------------------------------------------------
-## MCS
-##
-sub processMcs
-{
-    my $targetObj    = shift;
-    my $target       = shift;
-    my $parentTarget = shift;
-    my $group        = shift;
-    my $proc         = shift;
-
-    #@FIXME RTC:168611 To decouple DVPD from PVPD
-    #parentTarget == MCBIST
-    #parent(MCBIST) = Proc
-    #parent(proc) = module
-    #parent(module) = socket
-    #parent(socket) = motherboard
-    #parent(motherboard) = node
-    my $node = $targetObj->getTargetParent( #node
-                    $targetObj->getTargetParent( #motherboard
-                        $targetObj->getTargetParent #socket
-                            ($targetObj->getTargetParent #module
-                                ($targetObj->getTargetParent($parentTarget)))));
-    my $name = "EEPROM_VPD_PRIMARY_INFO";
-    $targetObj->copyAttributeFields($node, $target, "EEPROM_VPD_PRIMARY_INFO");
-
-    # MEMVPD_POS is relative to the EEPROM containing the MEMD record
-    #  associated with this MCS, since all MCS are sharing the same
-    #  VPD record (see VPD_REC_NUM hardcode in Targets.pm) that means all
-    #  MCS need a unique position
-    my $chip_unit = $targetObj->getAttribute($target, "CHIP_UNIT");
-    my $proctarg = $targetObj->getTargetParent( $parentTarget );
-    my $proc_num = $targetObj->getAttribute($proctarg, "POSITION");
-    $targetObj->setAttribute( $target, "MEMVPD_POS",
-                             $chip_unit + ($proc_num * MAX_MCS_PER_PROC) );
-
-    foreach my $child (@{ $targetObj->getTargetChildren($target) })
-    {
-        my $child_type = $targetObj->getType($child);
-
-        $targetObj->log($target,
-            "Processing MCS child: $child Type: $child_type");
-
-        if ($child_type eq "MCA")
-        {
-            processMca($targetObj, $child);
-        }
-    }
-
-    {
-        use integer;
-        # There are a total of two MCS units on an MCBIST unit. So, to
-        # determine which MCBIST an MCS belongs to, the CHIP_UNIT of the MCS can
-        # be divided by the number of units per MCBIST to arrive at the correct
-        # offset to add to the pervasive MCS parent offset.
-        my $numberOfMcsPerMcbist = 2;
-
-        my $value = sprintf("0x%x",
-                            Targets::PERVASIVE_PARENT_MCS_OFFSET
-                            + ($chip_unit / $numberOfMcsPerMcbist));
-
-        $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
-    }
-}
-
-sub processMca
-{
-    use integer;
-    my $targetObj = shift;
-    my $target    = shift;
-
-    my $chip_unit = $targetObj->getAttribute($target, "CHIP_UNIT");
-
-    # There are a total of four MCA units on an MCBIST unit. So, to determine
-    # which MCBIST an MCA belongs to, the CHIP_UNIT of the MCA can be divided by
-    # the number of units per MCBIST to arrive at the correct offset to add to
-    # the pervasive MCA parent offset.
-    my $numberOfMcaPerMcbist = 4;
-
-    my $value = sprintf("0x%x",
-                        Targets::PERVASIVE_PARENT_MCA_OFFSET
-                        + ($chip_unit / $numberOfMcaPerMcbist));
-
-    $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
-}
-
-## EQ
-sub processEq
+# @brief This will set the PAU's ordinal ID.
+#
+# @details For a given PROC, PAU1 and PAU2 (0-based) are not used.
+#          Normal calculation is done with the position of the PAU.  With PAU1
+#          and PAU2 not being used, the position is not sequential but the
+#          ordinal ID's for the used PAUs must be sequential.  There
+#          are gaps in the position which must be realigned to get a contiguous
+#          integer sequence.
+#
+# @details Need to take a sequence such as:
+#          0, 3, 4, 5, 6, 7, 8, 11, 12, 13, 14, 15
+#          transform to:
+#          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
+#          The sequence deviates after every 1st PAU in a given PROC.
+#          To find those numbers, look for every number that is a product
+#          of the maximum number of PAUs per PROC and the PROCs position.
+#          Then realign those numbers.
+#
+# @param [in] $targetObj - The global target object.
+# @param [in] $pauTarget - a target of type PAU
+#--------------------------------------------------
+sub setPauOrdinalId
 {
     my $targetObj = shift;
-    my $target    = shift;
+    my $pauTarget = shift;
 
-    my $chip_unit = $targetObj->getAttribute($target, "CHIP_UNIT");
-
-    foreach my $child (@{ $targetObj->getTargetChildren($target) })
+    # Verify that target type is of type PAU
+    my $targetType = $targetObj->getType($pauTarget);
+    if ($targetType ne "PAU")
     {
-        my $child_type = $targetObj->getType($child);
-
-        $targetObj->log($target,
-            "Processing EQ child: $child Type: $child_type");
-
-        if ($child_type eq "EX")
-        {
-            processEx($targetObj, $child, $chip_unit);
-        }
+        die "setPauOrdinalId: ERROR: Target type must be \"PAU\" not " .
+            "\"$targetType\". Error";
     }
 
-    my $value = sprintf("0x%x",
-                        Targets::PERVASIVE_PARENT_EQ_OFFSET + $chip_unit);
+    # Need to get the PROC for this PAU target
+    my $procParent = $targetObj->findParentByType($pauTarget, "PROC");
 
-    $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
-}
+    # Get the position of the PROC which is used to calculate the ORDINAL_ID
+    my $procPosition = $targetObj->getAttribute($procParent, "POSITION");
 
-## EX
-sub processEx
-{
-    my $targetObj        = shift;
-    my $target           = shift;
-    my $parent_chip_unit = shift;
+    # Get the current ORDINAL_ID of the PAU, which will have numerical gaps.
+    my $targetOrdinalId = $targetObj->getAttribute($pauTarget, "ORDINAL_ID");
 
-    foreach my $child (@{ $targetObj->getTargetChildren($target) })
+    # Gaps begin on the 2nd ordinal id (1 for 0-based) for every proc.
+    my $maxInst = $targetObj->getMaxInstPerProc($targetType);
+    if ($targetOrdinalId >=
+        (($procPosition * $maxInst) + 1) )
     {
-        my $child_type = $targetObj->getType($child);
-
-        $targetObj->log($target,
-            "Processing EX child: $child Type: $child_type");
-
-        if ($child_type eq "CORE")
-        {
-            processCore($targetObj, $child);
-        }
+        $targetOrdinalId = $targetOrdinalId - (($procPosition + 1) * 2);
+    }
+    elsif ($targetOrdinalId > 0)  # Do not process 0
+    {
+        $targetOrdinalId = $targetOrdinalId - ($procPosition * 2);
     }
 
-    my $value = sprintf("0x%x",
-                        Targets::PERVASIVE_PARENT_EQ_OFFSET
-                        + $parent_chip_unit);
-
-    $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
+    $targetObj->setAttribute($pauTarget, "ORDINAL_ID", $targetOrdinalId);
 }
-
-## CORE
-sub processCore
-{
-    my $targetObj = shift;
-    my $target    = shift;
-
-    my $chip_unit = $targetObj->getAttribute($target, "CHIP_UNIT");
-    my $value = sprintf("0x%x",
-                        Targets::PERVASIVE_PARENT_CORE_OFFSET + $chip_unit);
-
-    $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
-
-}
-
-## MCBIST
-sub processMcbist
-{
-    my $targetObj    = shift;
-    my $target       = shift;
-    my $parentTarget = shift;
-
-    my $group = $targetObj->getAttribute($parentTarget, "FABRIC_GROUP_ID");
-    my $proc   = $targetObj->getAttribute($parentTarget, "FABRIC_CHIP_ID");
-
-    foreach my $child (@{ $targetObj->getTargetChildren($target) })
-    {
-        my $child_type = $targetObj->getType($child);
-
-        $targetObj->log($target,
-            "Processing MCBIST child: $child Type: $child_type");
-
-        if ($child_type eq "NA" || $child_type eq "FSI")
-        {
-            $child_type = $targetObj->getMrwType($child);
-        }
-        if ($child_type eq "MCS")
-        {
-            processMcs($targetObj, $child, $target, $group, $proc);
-        }
-    }
-
-    {
-        use integer;
-        my $chip_unit = $targetObj->getAttribute($target, "CHIP_UNIT");
-        my $value = sprintf("0x%x",
-                            Targets::PERVASIVE_PARENT_MCBIST_OFFSET
-                            + $chip_unit);
-
-        $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
-    }
-
-
-}
-
 
 #--------------------------------------------------
 ## MC
@@ -1670,9 +1760,9 @@ sub processMcbist
 ##
 sub processMc
 {
-    # NOTE: OMI_INBAND_BAR_BASE_ADDR_OFFSET will be set for the MC                         
-    # targets via a specific child OMI Target. View the                                    
-    # processOmi function for further details.                                             
+    # NOTE: OMI_INBAND_BAR_BASE_ADDR_OFFSET will be set for the MC
+    # targets via a specific child OMI Target. View the
+    # processOmi function for further details.
     my $targetObj    = shift;
     my $target       = shift;
 
@@ -1749,8 +1839,28 @@ sub processMcc
 ##
 sub processOmi
 {
-    my $mrwObj   = shift;
-    my $omitarg      = shift;
+    my $mrwObj  = shift;
+    my $omitarg = shift;
+
+# TODO, RTC 208783. This will need to be updated.  This will be addressed
+# in story 208783, just making a note.
+    # Map the OMI instance to its corresponding OMIC parent
+    my %omi_map = (4  => "omic-0",
+                   5  => "omic-0",
+                   6  => "omic-0",
+                   7  => "omic-1",
+                   2  => "omic-1",
+                   3  => "omic-1",
+                   0  => "omic-2",
+                   1  => "omic-2",
+                   12 => "omic-0",
+                   13 => "omic-0",
+                   14 => "omic-0",
+                   15 => "omic-1",
+                   10 => "omic-1",
+                   11 => "omic-1",
+                   8  => "omic-2",
+                   9  => "omic-2");
 
     use integer;
     # There are a total of eight OMI units on an MC unit. So, to
@@ -1832,18 +1942,18 @@ sub processOmic
 }
 
 #--------------------------------------------------
-## OCMB_CHIP
-##
-##
+# @brief OCMB_CHIP
+#
+#--------------------------------------------------
 sub processOcmbChip
 {
     my $targetObj    = shift;
     my $target       = shift;
 
-    $targetObj->setEepromAttributesForAxone($targetObj, $target);
+    $targetObj->setEepromAttributesForDdimms($target);
 }
 
-#-------------------------------------------------g
+#--------------------------------------------------
 ## MI
 ##
 ##
@@ -1949,8 +2059,6 @@ sub processObus
                      {
                        $intarget = $targetObj->getTargetParent($intarget);
                      }
-                     addObusCfgToGpuSensors($obrick_conn->{DEST_PARENT},
-                                            $intarget, $cfg);
                  }
 
                  $match = ($obrick_conn->{SOURCE} eq $obrick);
@@ -2030,6 +2138,7 @@ sub processXbus
         #For example, in wrap config, CONFIG_APPLY is expected to have "w"
         #If "w" is not there, then we skip the connection and mark peers
         #as NULL
+        my $system_config = $targetObj->{system_config};
         if (($system_config eq $wrap_config && $config =~ /$wrap_config/) ||
            ($system_config ne $wrap_config && $config =~ /$default_config/))
         {
@@ -2096,7 +2205,7 @@ sub processAbus
     # A-bus connection has to be conisdered or not
     # If user has passed 2N as argument, then we consider only those
     # A-bus connections where token "2" is present
-
+    my $system_config = $targetObj->{system_config};
     if($system_config eq "2N" && $config =~ /$twonode/)
     {
         #Looking for Abus connections pertaining to 2 node system only
@@ -2632,123 +2741,6 @@ sub processOcc
     $targetObj->setAttribute($target,"OCC_MASTER_CAPABLE",$master_capable);
 }
 
-sub processMembufVpdAssociation
-{
-    my $targetObj = shift;
-    my $target    = shift;
-
-    my $vpds=$targetObj->findConnections($target,"I2C","VPD");
-    if ($vpds ne "" ) {
-        my $vpd = $vpds->{CONN}->[0];
-        my $membuf_assocs=$targetObj->findConnections($vpd->{DEST_PARENT},
-                          "LOGICAL_ASSOCIATION","MEMBUF");
-
-        if ($membuf_assocs ne "") {
-            foreach my $membuf_assoc (@{$membuf_assocs->{CONN}}) {
-                my $membuf_target = $membuf_assoc->{DEST_PARENT};
-                setEepromAttributes($targetObj,
-                       "EEPROM_VPD_PRIMARY_INFO",$membuf_target,$vpd);
-                my $index = $targetObj->getBusAttribute($membuf_assoc->{SOURCE},
-                                $membuf_assoc->{BUS_NUM}, "ISDIMM_MBVPD_INDEX");
-                $targetObj->setAttribute(
-                            $membuf_target,"ISDIMM_MBVPD_INDEX",$index);
-                $targetObj->setAttribute($membuf_target,
-                            "VPD_REC_NUM",$targetObj->{vpd_num});
-            }
-        }
-        my $group_assocs=$targetObj->findConnections($vpd->{DEST_PARENT},
-                          "LOGICAL_ASSOCIATION","CARD");
-
-        if ($group_assocs ne "") {
-            foreach my $group_assoc (@{$group_assocs->{CONN}}) {
-                my $mb_target = $group_assoc->{DEST_PARENT};
-                my $group_target = $targetObj->getTargetParent($mb_target);
-                $targetObj->setAttribute($group_target,
-                            "VPD_REC_NUM",$targetObj->{vpd_num});
-            }
-        }
-        $targetObj->{vpd_num}++;
-    }
-}
-
-#--------------------------------------------------
-## MEMBUF
-##
-## Finds I2C connections to DIMM and creates EEPROM attributes
-## FYI:  I had to handle DMI busses in framework because they
-## define affinity path
-sub processMembuf
-{
-    my $targetObj = shift;
-    my $membufTarg    = shift;
-    if ($targetObj->isBadAttribute($membufTarg, "PHYS_PATH", ""))
-    {
-        ##dmi is probably not connected.  will get caught in error checking
-        return;
-    }
-
-    processMembufVpdAssociation($targetObj,$membufTarg);
-
-    ## find port mapping
-    my %dimm_portmap;
-    foreach my $child (@{$targetObj->getTargetChildren($membufTarg)})
-    {
-         if ($targetObj->getType($child) eq "MBA")
-         {
-             # find this MBA's position relative to the membuf
-             my $mba_num = $targetObj->getAttribute($child,"MBA_NUM");
-             # follow the DDR4 bus connection to find the 'ddr' targets
-             my $ddrs = $targetObj->findConnections($child,"DDR4","");
-
-             if($ddrs eq "")
-             {
-                # on multi node system there is a possibility that either
-                # DDR4 or DDR3 dimms are connected under a node
-                my $ddrs = $targetObj->findConnections($child,"DDR3","");
-             }
-
-             if ($ddrs ne "")
-             {
-                 foreach my $ddr (@{$ddrs->{CONN}})
-                 {
-                       my $port_num = $targetObj->getDimmPort($ddr->{SOURCE});
-                       my $dimm_num = $targetObj->getDimmPos($ddr->{SOURCE});
-                       my $map = oct("0b".$mba_num.$port_num.$dimm_num);
-                       $dimm_portmap{$ddr->{DEST_PARENT}} = $map;
-                 }
-             }
-         }
-    }
-
-
-    ## Process MEMBUF to DIMM I2C connections
-    my @addr_map=('0','0','0','0','0','0','0','0');
-    my $dimms=$targetObj->findConnections($membufTarg,"I2C","SPD");
-    if ($dimms ne "") {
-        foreach my $dimm (@{$dimms->{CONN}}) {
-            my $dimm_target = $targetObj->getTargetParent($dimm->{DEST_PARENT});
-            setEepromAttributes($targetObj,
-                       "EEPROM_VPD_PRIMARY_INFO",$dimm_target,
-                       $dimm);
-
-            my $field=getI2cMapField($targetObj,$dimm_target,$dimm);
-            my $map = $dimm_portmap{$dimm_target};
-
-            if ($map eq "") {
-                print "ERROR: $dimm_target doesn't map to a dimm/port\n";
-                $targetObj->myExit(3);
-            }
-            $addr_map[$map] = $field;
-        }
-    }
-    $targetObj->setAttribute($membufTarg,
-            "MRW_MEM_SENSOR_CACHE_ADDR_MAP","0x".join("",@addr_map));
-
-    ## Update bus speeds
-    processI2cSpeeds($targetObj,$membufTarg);
-
-    processPowerRails($targetObj, $membufTarg);
-}
 
 sub getI2cMapField
 {
@@ -2792,7 +2784,7 @@ sub getI2cMapField
     return $hexfield;
 }
 
-#------------------------------------------------------------------------------
+#--------------------------------------------------
 # I2C
 #
 sub processI2C
@@ -3251,7 +3243,9 @@ sub get_max_compute_nodes
 }
 
 #--------------------------------------------------
-## ERROR checking
+# @brief Error checking
+#
+#--------------------------------------------------
 sub errorCheck
 {
     my $targetObj = shift;
@@ -3273,9 +3267,6 @@ sub errorCheck
           'I2C connection to target is not defined',
         'FSI_MASTER_PORT' => 'This target is missing a required FSI connection',
         'FSI_MASTER_CHIP' => 'This target is missing a required FSI connection',
-        'EI_BUS_TX_MSBSWAP' =>
-          'DMI connection is missing to this membuf from processor',
-        'PHYS_PATH' =>'DMI connection is missing to this membuf from processor',
     );
 
     my @errors;
@@ -3305,7 +3296,6 @@ sub errorCheck
     }
     if ($type eq "PROC")
     {
-        ## note: DMI is checked on membuf side so don't need to check that here
         ## this checks if at least 1 abus is connected
         my $found_abus = 0;
         my $abus_error = "";
@@ -3350,23 +3340,6 @@ sub errorCheck
     }
 }
 
-sub printUsage
-{
-    print "
-processMrwl.pl -x [XML filename] [OPTIONS]
-Options:
-        -f = force output file creation even when errors
-        -d = debug mode
-        -c = special configurations we want to run for [2N, w]
-             2N = special 2 node config with extra ABUS links
-             w = Special MST wrap config
-        -o = output filename
-        -s [SDR XML file] = import SDRs
-        -r = create report and save to [system_name].rpt
-        -v = version
-";
-    exit(1);
-}
 ################################################################################
 # utility function used to call plugins. if none exists, call is skipped.
 ################################################################################
@@ -3378,8 +3351,275 @@ sub do_plugin
     {
         $hwsvmrw_plugins{$step}(@_);
     }
-    elsif ($debug && ($build eq "fsp"))
+    elsif ($targetObj->{debug} && ($targetObj->{build} eq "fsp"))
     {
-        print STDERR "build is $build but no plugin for $step\n";
+        print STDERR "build is $targetObj->{build} but no plugin for $step\n";
     }
 }
+
+###############################################################################
+# Self tests
+###############################################################################
+#--------------------------------------------------
+# @brief The main procedure to run the tests
+#
+# @param[in] $targetObj - The global target object
+#--------------------------------------------------
+sub runTests
+{
+    print "\nRunning tests: \n\n";
+    my $targetObj = shift;
+
+    # Load the XML and process the file, extracting targets and associating
+    # attributes, with their data, to the targets
+    loadXmlFile($targetObj);
+
+    # Process the targets, setting the targets attributes.
+    processTargets($targetObj);
+
+    # Each one of the test build on each other, if one fails then no point in
+    # running the other
+    testGetTopologyMode($targetObj)   &&
+    testTopologyIdToTopologyIndex()   &&
+    testGetTopologyIndex($targetObj);
+
+    testMaxInstPerProc($targetObj);
+}
+
+#--------------------------------------------------
+# @brief Test the method that gets the topology mode.
+#
+# @param[in] $targetObj - The global target object
+#
+# @return true if test passed, false other wise
+#--------------------------------------------------
+sub testGetTopologyMode
+{
+    print ">> Running testgetTopologyMode \n";
+    my $targetObj = shift;
+
+    my $testPassed = true;
+
+    use constant TOPOLOGY_MODE_ATTRIBUTE => "PROC_FABRIC_TOPOLOGY_MODE";
+    use constant TOPOLOGY_MODES => qw/ MODE0 MODE1 /;
+    my @topologyModes = (TOPOLOGY_MODES);
+
+    # Cache the current mode to restore later
+    my $persistMode = $targetObj->getAttribute("/".$targetObj->{TOP_LEVEL},
+                                               TOPOLOGY_MODE_ATTRIBUTE);
+
+    # Test getting the topology mode
+    foreach my $topologyMode (@topologyModes)
+    {
+        $targetObj->setAttribute("/".$targetObj->{TOP_LEVEL},
+                                 TOPOLOGY_MODE_ATTRIBUTE,
+                                 $topologyMode);
+        my $topologyModeNumber = chop($topologyMode);
+        if (getTopologyMode($targetObj) != $topologyModeNumber)
+        {
+
+            $testPassed = false;
+            print "ERROR: Expected topology mode '$topologyModeNumber' but got " .
+                   getTopologyMode($targetObj) . "\n";
+        }
+    }
+
+    # Restore mode
+    $targetObj->setAttribute("/".$targetObj->{TOP_LEVEL},
+                             TOPOLOGY_MODE_ATTRIBUTE,
+                             $persistMode);
+
+    print "<< Running testgetTopologyMode: test " .
+          getPassFailString($testPassed) . "\n";
+
+    return $testPassed;
+}
+
+#--------------------------------------------------
+# @brief Tests the conversion method that converts the topology ID,
+#        with given topology mode, to the topology index.
+#
+# @return true if test passed, false other wise
+#--------------------------------------------------
+sub testTopologyIdToTopologyIndex
+{
+    print ">> Running testTopologyIdToTopologyIndex \n";
+
+    my $testPassed = true;
+
+    # The different values expected when mode is 0 or 1
+    use constant TOPOLOGY_MODE_0_ARRAY => qw/ 0 1 4 5 8 9 12 13 16 17 20 21 24 25 28 29 /;
+    use constant TOPOLOGY_MODE_1_ARRAY => qw/ 0 1 2 3 8 9 10 11 16 17 18 19 24 25 26 27 /;
+
+    # The different topology modes
+    use constant TOPOLOGY_MODES => qw/ MODE0 MODE1 /;
+    my @topologyModes = (TOPOLOGY_MODES);
+
+    # Default with mode 0
+    my @toplogyModeArray = (TOPOLOGY_MODE_0_ARRAY);
+
+    # Test the conversion on the different IDs and modes
+    for my $topologyMode (@topologyModes)
+    {
+        my $topologyModeNumber = chop($topologyMode);
+        if (1 == $topologyModeNumber)
+        {
+            @toplogyModeArray = (TOPOLOGY_MODE_1_ARRAY);
+        }
+
+        # Needed variable
+        my $topologyIndex = 0;
+
+        # Iterate thru each permutation of the topology ID and
+        # test conversion to index
+        for (my $topologyId = 0; $topologyId < 16; ++$topologyId)
+        {
+            $topologyIndex = convertTopologyIdToIndex($topologyId,
+                                                      $topologyModeNumber);
+            if ($topologyIndex != $toplogyModeArray[$topologyId])
+            {
+                $testPassed = false;
+                print "ERROR: conversion on topology Id($topologyId) with ";
+                print "topology mode($topologyMode) returned ";
+                print "topology index($topologyIndex), but expected ";
+                print "topology index($toplogyModeArray[$topologyId]) \n";
+            }
+        }  # end for (my $topologyId = 0 ...
+    } # end foreach my $topologyMode (@topologyModes)
+
+    print "<< Running testTopologyIdToTopologyIndex: test " .
+          getPassFailString($testPassed) . "\n";
+
+    return $testPassed;
+}
+
+#--------------------------------------------------
+# @brief Test the method that gets the topology index based
+#        based on the current processors within the MRW XML
+#
+# @param[in] $targetObj - The global target object
+#
+# @return true if test passed, false other wise
+#--------------------------------------------------
+sub testGetTopologyIndex
+{
+    my $targetObj = shift;
+
+    my $testPassed = true;
+
+    my $system_name = $targetObj->getAttribute('/sys-0',"SYSTEM_NAME");
+    if ($system_name =~ /RAINIER/i)
+    {
+        print ">> Running testGetTopologyIndex \n";
+
+        # The different procs available
+        use constant PROC_0 => "/sys-0/node-0/nisqually-0/proc_socket-0/godel-0/power10-0";
+        use constant PROC_1 => "/sys-0/node-0/nisqually-0/proc_socket-0/godel-0/power10-1";
+
+        # Get processor 1's index
+        my $processorTarget = PROC_0;
+        my $topologyIndex = getTopologyIndex($targetObj, $processorTarget);
+
+        # For the current MRW, proc 0 has index 0 with mode 0
+        my $expectedTopologyIndex = 0;
+        if ($topologyIndex != $expectedTopologyIndex)
+        {
+            $testPassed = false;
+            my @fullProc = split(/\//, $processorTarget);
+            print "ERROR: retrieved topology index $topologyIndex for processor " .
+                   "@fullProc[-1] but expected $expectedTopologyIndex \n";
+        }
+
+        # Get processor 2's index
+        $processorTarget = PROC_1;
+        $topologyIndex = getTopologyIndex($targetObj, $processorTarget);
+
+        # For the current MRW, proc 1 has index 4 with mode 0
+        $expectedTopologyIndex = 4;
+        if ($topologyIndex != $expectedTopologyIndex)
+        {
+            $testPassed = false;
+            my @fullProc = split(/\//, $processorTarget);
+            print "ERROR: retrieved topology index $topologyIndex for processor " .
+                   "@fullProc[-1] but expected $expectedTopologyIndex \n";
+        }
+
+        print "<< Running testGetTopologyIndex: test " .
+              getPassFailString($testPassed) . "\n";
+
+    } # end if ($system_name =~ /RAINIER/i)
+
+    return $testPassed;
+}
+
+#--------------------------------------------------
+# @brief Test that maixumum instance per PROC have the right values.
+#
+# @param[in] $targetObj - The global target object
+#
+# @return true if test passed, false other wise
+#--------------------------------------------------
+sub testMaxInstPerProc
+{
+    print ">> Running testMaxInstPerProc \n";
+
+    my $targetObj = shift;
+
+    my $testPassed = true;
+
+    my %targetPerProc =
+    (
+        EQ        => 8,
+        FC        => 16,
+        CORE      => 32,
+
+        MC        => 4,
+        MI        => 4,
+        MCC       => 8,
+        OMIC      => 8,
+        OMI       => 16,
+        OCMB_CHIP => 16,
+        DDIMM     => 16,
+        PMIC      => 32,
+
+        PAUC      => 4,
+        IOHS      => 8,
+        PAU       => 8,
+    );
+
+    foreach my $target (keys %targetPerProc)
+    {
+        if ($targetObj->getMaxInstPerProc("$target") != $targetPerProc{$target})
+        {
+            print "ERROR: getMaxInstPerProc(\"$target\") returned " .
+                   $targetObj->getMaxInstPerProc("$target") .
+                   ", but expected " . $targetPerProc{$target} . "\n";
+            $testPassed = $targetPerProc{$target};
+        }
+
+    }
+
+    return $testPassed;
+}
+
+#--------------------------------------------------
+# @brief A utility to return a given pass/fail flag as string "passed"/"failed"
+#
+# @param[in] $passFailBoolean - Flag indicating a pass/fail in terms of true/false.
+#
+# @return return string "passed" or "failed" based on input
+#--------------------------------------------------
+sub getPassFailString
+{
+    my $passFailBoolean = shift;
+    my $failPassString = "passed";
+
+    if ($passFailBoolean == false)
+    {
+        $failPassString = "failed";
+    }
+
+    return $failPassString;
+}
+
+
