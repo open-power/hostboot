@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep15/host_establish_ex_chiplet.C $          */
+/* $Source: src/usr/isteps/istep15/host_establish_ec_chiplet.C $          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,6 +22,10 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+/**
+ *  @file host_establish_ec_chiplet.C
+ *  Contains code for updating multicast on ECs for runtime state
+ */
 
 //From Hostboot Directory
 ////Error handling and traces
@@ -32,64 +36,58 @@
 #include    <isteps/hwpisteperror.H>
 #include    <initservice/isteps_trace.H>
 
-/* FIXME RTC: 210975
 //HWP Invoker
 #include    <fapi2/plat_hwp_invoker.H>
-*/
 
 //Targeting Support
 #include    <targeting/common/utilFilter.H>
-/* FIXME RTC: 210975
 #include    <fapi2/target.H>
 
 //From Import Directory (EKB Repository)
-#include    <p9_update_ec_eq_state.H>
-*/
+#include    <p10_update_ec_state.H>
 
 //Namespaces
 using namespace ERRORLOG;
 using namespace TARGETING;
-/* FIXME RTC: 210975
 using namespace fapi2;
-*/
 
 namespace ISTEP_15
 {
-void* host_establish_ex_chiplet (void *io_pArgs)
+void* host_establish_ec_chiplet (void *io_pArgs)
 {
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_establish_ex_chiplet entry" );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_establish_ec_chiplet entry" );
     ISTEP_ERROR::IStepError l_StepError;
-/* FIXME RTC: 210975
-    #ifndef CONFIG_AXONE_BRING_UP
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
     do {
         //Use targeting code to get a list of all processors
-        TARGETING::TargetHandleList l_procChips;
-        getAllChips( l_procChips, TARGETING::TYPE_PROC   );
+        TargetHandleList l_procChips;
+        getAllChips( l_procChips, TYPE_PROC   );
 
         for (const auto & l_procChip: l_procChips)
         {
             const fapi2::Target<TARGET_TYPE_PROC_CHIP>
                 l_fapi_cpu_target(l_procChip);
-            // call p9_update_ec_eq_state.C HWP
-            FAPI_INVOKE_HWP( l_errl,
-                             p9_update_ec_eq_state,
-                             l_fapi_cpu_target);
 
+            // call p10_update_ec_state.C HWP
+            FAPI_INVOKE_HWP( l_errl,
+                             p10_update_ec_state,
+                             l_fapi_cpu_target);
             if(l_errl)
             {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "host_establish_ec_chiplet: p10_update_ec_state failed on HUID 0x%08x. "
+                          TRACE_ERR_FMT,
+                          get_huid(l_procChip),
+                          TRACE_ERR_ARGS(l_errl));
                 ErrlUserDetailsTarget(l_procChip).addToLog(l_errl);
                 l_StepError.addErrorDetails( l_errl );
                 errlCommit( l_errl, HWPF_COMP_ID );
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_establish_ex_chiplet:: failed on proc with HUID : %d",TARGETING::get_huid(l_procChip)  );
             }
         }
     }while(0);
-    #endif
-*/
 
     // end task, returning any errorlogs to IStepDisp
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_establish_ex_chiplet exit" );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_establish_ec_chiplet exit" );
     return l_StepError.getErrorHandle();
 }
 };

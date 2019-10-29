@@ -1544,6 +1544,22 @@ Target<K, M, V>::getMulticast(const MulticastGroup i_group, const MulticastCoreS
     return l_target;
 }
 
+///
+/// @brief Get the multicast core select value for a given target
+///
+/// @Tparam K the type (Kind) of target
+/// @Tparam M the type of multicast operation if it's a multicast target
+/// @Tparam V the type of the target's value
+///
+/// @return the multicast core select value for the target
+///
+template<TargetType K, MulticastType M, typename V>
+inline MulticastCoreSelect
+Target<K, M, V>::_getCoreSelect(void) const
+{
+    return this->iv_handle.getCoreSelect();
+}
+
 } // End namespace fapi2
 
 #endif // End __FAPI2_TARGET__

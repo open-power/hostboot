@@ -4360,6 +4360,7 @@ sub getAttributeIdEnumeration {
     my $attributeValue = 1;
     my $enumeration = { } ;
     my %attrValHash;
+    my $env_chip = $ENV{'CHIP'};
 
     # add the N/A value
     $enumeration->{description} = "Internal enum for attribute IDs\n";
@@ -4387,8 +4388,23 @@ sub getAttributeIdEnumeration {
             # attribute_types_hb.xml or attributes_types_fsp.
             else
             {
-                croak("Error: AttributeId $attribute->{id} "
-                    . "defined multiple times");
+                # Don't fail if we're in an FSPBUILD context and
+                # it is one of the *RUNN_* attributes.  This workaround
+                # is needed until we can get a P10 fips branch so that
+                # the *RUNN_* attributes can be removed from fips without
+                # breaking fips.
+                #
+                # TODO RTC 245621 - remove this check once fips is ready for p10
+                if ( ($env_chip ne 'FSPBUILD') || (index($attribute->{id}, "RUNN_") == -1) )
+                {
+                    croak("Error: AttributeId $attribute->{id} "
+                    .   "defined multiple times");
+                }
+                else
+                {
+                    print STDERR "**** CHIP = $env_chip, Ignoring duplicate attribute" .
+                          " for $attribute->{id} ****\n";
+                }
             }
         }
         else

@@ -29,33 +29,36 @@ PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p10/procedures
 
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/pm/
-#EXTRAINCDIR += ${PROCEDURES_PATH}/stop_reg/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/lib/
 EXTRAINCDIR += ${PROCEDURES_PATH}/utils/stopreg/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/customize/
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/corecache/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/pmlib/include/registers/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 
 OBJS += host_build_stop_image.o
 OBJS += proc_set_homer_bar.o
 OBJS += host_start_stop_engine.o
-#OBJS += host_establish_ex_chiplet.o
-
+OBJS += host_establish_ec_chiplet.o
 
 include ${ROOTPATH}/procedure.rules.mk
 include $(PROCEDURES_PATH)/hwp/pm/p10_pm_set_homer_bar.mk
-#include $(PROCEDURES_PATH)/hwp/pm/p9_update_ec_eq_state.mk
+include $(PROCEDURES_PATH)/hwp/corecache/p10_hcd_corecache_clock_control.mk
+include $(PROCEDURES_PATH)/hwp/corecache/p10_hcd_core_poweroff.mk
+include $(PROCEDURES_PATH)/hwp/pm/p10_update_ec_state.mk
+
+# This line is required by p10_update_ec_state.mk for pulling in
+# additional modules required by that procedure.
+OBJS += ${OBJ}
+
 include ${ROOTPATH}/config.mk
 
 VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm/
+VPATH += ${PROCEDURES_PATH}/hwp/corecache/

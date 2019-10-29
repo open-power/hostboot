@@ -74,13 +74,6 @@ FAPI2_ATTR_XML := $(filter-out $(ROOTPATH)/src/import/hwpf/fapi2/xml/attribute_i
 FAPI2_ATTR_XML := $(filter-out $(wildcard $(ROOTPATH)/src/import/hwpf/fapi2/xml/attribute_info/*~) ,$(FAPI2_ATTR_XML))
 FAPI2_ATTR_XML := $(filter-out $(wildcard $(ROOTPATH)/src/import/chips/p9/procedures/xml/attribute_info/*~),$(FAPI2_ATTR_XML))
 
-# TODO RTC: 215162 This XML introduces an attribute that has a duplicate in
-# src/hbfw/fsp/targeting/xmltohb/attribute_types_fsp.xml (RUNN_MODE). When CMVC
-# is branched to P10, that attribute will need to be removed from attr_types_fsp.xml.
-# Until then, we prevent the following xml file from being compiled in hostboot to
-#avoid compilation errors due to duplicates.
-FAPI2_ATTR_XML := $(filter-out $(ROOTPATH)/src/import/chips/p10/procedures/xml/attribute_info/p10_runn_attributes.xml,$(FAPI2_ATTR_XML))
-
 XMLTOHB_FAPIATTR_SOURCES += ${FAPI2_ATTR_XML}
 
 

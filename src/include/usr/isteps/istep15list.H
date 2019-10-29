@@ -123,26 +123,20 @@ namespace   INITSERVICE
                 ISTEP_15::host_start_stop_engine,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
-/*
         {
                 ISTEPNAME(15,04,"host_establish_ec_chiplet"),
                 ISTEP_15::host_establish_ec_chiplet,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
-*/
 };
 
 
 const DepModInfo g_istep15Dependancies = {
     {
         DEP_LIB(libistep15.so),
-//        DEP_LIB(libp9_stop_util.so),
-//        DEP_LIB(libnestmemutils.so),
-//        DEP_LIB(libp9_cpuWkup.so),
         DEP_LIB(libpm.so),
         DEP_LIB(libimageprocs.so),
-//        DEP_LIB(libisteps_mss.so),
-        NULL
+        nullptr
     }
 };
 
