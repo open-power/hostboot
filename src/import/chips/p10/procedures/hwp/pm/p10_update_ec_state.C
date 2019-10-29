@@ -84,8 +84,7 @@ fapi2::ReturnCode p10_check_core_l3_clock_power_state(
 
 // See .H for documentation
 fapi2::ReturnCode p10_update_ec_state(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    uint8_t i_qssr_skip)
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
 
     FAPI_IMP("> p10_update_ec_state");
