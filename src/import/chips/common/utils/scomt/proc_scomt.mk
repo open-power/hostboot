@@ -22,5 +22,5 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-PROCEDURE=proc_scomt
-$(call BUILD_PROCEDURE)
+MODULE=proc_scomt
+$(call BUILD_MODULE)
