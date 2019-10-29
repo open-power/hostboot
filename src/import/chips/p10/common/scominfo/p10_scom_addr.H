@@ -485,7 +485,7 @@ extern "C"
                 return;
             }
 
-            /// @brief Get  Super Wrapper Register address (bits 12:20)
+            /// @brief Get Super Wrapper Register address (bits 12:20)
             ///        of an indirect scom address
             /// @retval uint32_t Register address
             inline uint32_t getIoRegAddr() const
@@ -516,6 +516,38 @@ extern "C"
             {
                 iv_addr &= 0xFFFFFFE0FFFFFFFFULL;
                 iv_addr |= ( ((uint64_t)i_lane & 0x1F) <<  32);
+            }
+
+            /// IOP indirect SCOMs
+            /// IOP0.top0.pma0 (PMA0) -> 0x8000xxxx0801113f
+            /// IOP0.top0.pma1 (PMA1) -> 0x8001xxxx0801113f
+            /// IOP0.top1.pma0 (PMA2) -> 0x8000xxxx0801153f
+            /// IOP0.top1.pma1 (PMA3) -> 0x8001xxxx0801153f
+            /// IOP1.top0.pma0 (PMA0) -> 0x8000xxxx0901113f
+            /// IOP1.top0.pma1 (PMA1) -> 0x8001xxxx0901113f
+            /// IOP1.top1.pma0 (PMA2) -> 0x8000xxxx0901153f
+            /// IOP1.top1.pma1 (PMA3) -> 0x8001xxxx0901153f
+
+            /// @brief Get PEC IOP Control Register value (bits 12:31) from
+            ///        an indirect scom address
+            /// @retval uint32_t CR register
+            inline uint32_t getIopIndCRreg() const
+            {
+                return ((iv_addr >> 32) & 0xFFFFF);
+            }
+
+            /// @brief Get IOP TOP value (bit 53) from an indirect scom address
+            /// @retval uint8_t Top value (0 or 1)
+            inline uint8_t getIopTop() const
+            {
+                return ((iv_addr >> 10) & 0x1);
+            }
+
+            /// @brief Get PMA value (bit 15) from an indirect scom address
+            /// @retval uint8_t Top value (0 or 1)
+            inline uint8_t getPMA() const
+            {
+                return ( ((iv_addr >> 48) & 0x1) + (getIopTop() * 2) );
             }
 
             /// @brief Determine if SCOM address is valid/well-formed
