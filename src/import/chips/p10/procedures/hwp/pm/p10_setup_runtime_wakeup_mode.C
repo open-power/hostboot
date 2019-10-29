@@ -53,7 +53,7 @@ fapi2::ReturnCode p10_setup_runtime_wakeup_mode(
 {
     FAPI_INF("> p10_setup_runtime_wakeup_mode" );
     fapi2::buffer<uint64_t> l_wakeupMode;
-    uint8_t l_smfEnabled        =   0;
+    uint8_t l_smfConfig         =   0;
     uint32_t l_qmeFlagReggAddr  =   scomt::eq::QME_FLAGS_WO_OR;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
@@ -64,16 +64,16 @@ fapi2::ReturnCode p10_setup_runtime_wakeup_mode(
 
     l_wakeupMode.flush<0>();
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SMF_ENABLED,
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SMF_CONFIG,
                            FAPI_SYSTEM,
-                           l_smfEnabled),
-             "Error from FAPI_ATTR_GET for attribute ATTR_SMF_ENABLED ");
+                           l_smfConfig),
+             "Error from FAPI_ATTR_GET for attribute ATTR_SMF_CONFIG ");
 
-    FAPI_DBG("SMF Status : %s", l_smfEnabled ? "Enabled" : "Disabled" );
+    FAPI_DBG("SMF Status : %s", l_smfConfig ? "Enabled" : "Disabled" );
 
     l_wakeupMode.setBit( SELF_SAVE_RESTORE_WAKEUP_MODE_BIT_POS );
 
-    if( l_smfEnabled )
+    if( l_smfConfig )
     {
         //wakeup to HV mode
         l_qmeFlagReggAddr   =   scomt::eq::QME_FLAGS_WO_CLEAR;

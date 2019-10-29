@@ -412,22 +412,6 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_SMF_ENABLED</id>
-  <targetType>TARGET_TYPE_SYSTEM</targetType>
-  <description>
-    True if smf config is enabled and smf is supported in the
-    chip ec level. Set by p10_mss_eff_grouping.
-  </description>
-  <valueType>uint8</valueType>
-  <enum>
-    FALSE = 0x00,
-    TRUE = 0x01
-  </enum>
-  <writeable/>
-  <initToZero/>
-</attribute>
-<!-- ********************************************************************** -->
-<attribute>
   <id>ATTR_PROC_OCC_SANDBOX_BASE_ADDR</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
