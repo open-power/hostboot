@@ -198,6 +198,12 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
                 l_def_SLOT1_DENOMINATOR);
         fapi2::ATTR_MEM_SI_ODT_RD_Type l_TGT1_ATTR_MEM_SI_ODT_RD;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_ODT_RD, TGT1, l_TGT1_ATTR_MEM_SI_ODT_RD));
+        uint64_t l_def_dual_drop = ((l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_0] > literal_0)
+                                    && (l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_1] > literal_0));
+        fapi2::ATTR_MEM_EFF_FOUR_RANK_MODE_Type l_TGT1_ATTR_MEM_EFF_FOUR_RANK_MODE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FOUR_RANK_MODE, TGT1, l_TGT1_ATTR_MEM_EFF_FOUR_RANK_MODE));
+        uint64_t l_def_four_rank_mode = (l_TGT1_ATTR_MEM_EFF_FOUR_RANK_MODE[literal_0] == literal_1);
+        uint64_t l_def_cs_tied = ((l_def_four_rank_mode == literal_0) && (l_def_dual_drop == literal_0));
         fapi2::ATTR_MEM_SI_ODT_WR_Type l_TGT1_ATTR_MEM_SI_ODT_WR;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_ODT_WR, TGT1, l_TGT1_ATTR_MEM_SI_ODT_WR));
         uint64_t l_def_NUM_RANKS = (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] +
@@ -629,12 +635,20 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
 
             l_scom_buffer.insert<0, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_0] >> literal_7) );
             l_scom_buffer.insert<1, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_0] >> literal_6) );
-            l_scom_buffer.insert<2, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_0] >> literal_3) );
-            l_scom_buffer.insert<3, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_0] >> literal_2) );
+            l_scom_buffer.insert<2, 1, 63, uint64_t>(((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_0] >> literal_3) &
+                    literal_0b1) && (l_def_cs_tied == literal_0))
+                    || (((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_0] >> literal_7) & literal_0b1) && (l_def_cs_tied == literal_1))) );
+            l_scom_buffer.insert<3, 1, 63, uint64_t>(((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_0] >> literal_2) &
+                    literal_0b1) && (l_def_cs_tied == literal_0))
+                    || (((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_0] >> literal_6) & literal_0b1) && (l_def_cs_tied == literal_1))) );
             l_scom_buffer.insert<4, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_7) );
             l_scom_buffer.insert<5, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_6) );
-            l_scom_buffer.insert<6, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_3) );
-            l_scom_buffer.insert<7, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_2) );
+            l_scom_buffer.insert<6, 1, 63, uint64_t>(((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_3) &
+                    literal_0b1) && (l_def_cs_tied == literal_0))
+                    || (((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_7) & literal_0b1) && (l_def_cs_tied == literal_1))) );
+            l_scom_buffer.insert<7, 1, 63, uint64_t>(((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_2) &
+                    literal_0b1) && (l_def_cs_tied == literal_0))
+                    || (((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_6) & literal_0b1) && (l_def_cs_tied == literal_1))) );
             l_scom_buffer.insert<8, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_2] >> literal_7) );
             l_scom_buffer.insert<9, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_2] >> literal_6) );
             l_scom_buffer.insert<10, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_2] >> literal_3) );
@@ -661,12 +675,20 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
             l_scom_buffer.insert<31, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_3] >> literal_2) );
             l_scom_buffer.insert<32, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_0] >> literal_7) );
             l_scom_buffer.insert<33, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_0] >> literal_6) );
-            l_scom_buffer.insert<34, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_0] >> literal_3) );
-            l_scom_buffer.insert<35, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_0] >> literal_2) );
+            l_scom_buffer.insert<34, 1, 63, uint64_t>(((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_0] >> literal_3) &
+                    literal_0b1) && (l_def_cs_tied == literal_0))
+                    || (((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_0] >> literal_7) & literal_0b1) && (l_def_cs_tied == literal_1))) );
+            l_scom_buffer.insert<35, 1, 63, uint64_t>(((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_0] >> literal_2) &
+                    literal_0b1) && (l_def_cs_tied == literal_0))
+                    || (((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_0] >> literal_6) & literal_0b1) && (l_def_cs_tied == literal_1))) );
             l_scom_buffer.insert<36, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_7) );
             l_scom_buffer.insert<37, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_6) );
-            l_scom_buffer.insert<38, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_3) );
-            l_scom_buffer.insert<39, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_2) );
+            l_scom_buffer.insert<38, 1, 63, uint64_t>(((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_3) &
+                    literal_0b1) && (l_def_cs_tied == literal_0))
+                    || (((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_7) & literal_0b1) && (l_def_cs_tied == literal_1))) );
+            l_scom_buffer.insert<39, 1, 63, uint64_t>(((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_2) &
+                    literal_0b1) && (l_def_cs_tied == literal_0))
+                    || (((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_6) & literal_0b1) && (l_def_cs_tied == literal_1))) );
             l_scom_buffer.insert<40, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_2] >> literal_7) );
             l_scom_buffer.insert<41, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_2] >> literal_6) );
             l_scom_buffer.insert<42, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_2] >> literal_3) );

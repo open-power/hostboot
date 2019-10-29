@@ -458,6 +458,7 @@
           READ, On Die Termination triggering bitmap. Use bitmap to determine which ODT to fire for the designated rank.
           The bits in 8 bit field are
           [DIMM0 ODT0][DIMM0 ODT1][DIMM0 ODT2][DIMM0 ODT3][DIMM1 ODT0][DIMM1 ODT1][DIMM1 ODT2][DIMM1 ODT3]
+          For Explorer: Only bits 0,1,4,5 are used. They correspond to A0 A1 -- -- B0 B1 -- --
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -474,6 +475,7 @@
           WRITE, On Die Termination triggering bitmap. Use bitmap to determine which ODT to fire for the designated rank.
           The bits in 8 bit field are
           [DIMM0 ODT0][DIMM0 ODT1][DIMM0 ODT2][DIMM0 ODT3][DIMM1 ODT0][DIMM1 ODT1][DIMM1 ODT2][DIMM1 ODT3]
+          For Explorer: Only bits 0,1,4,5 are used. They correspond to A0 A1 -- -- B0 B1 -- --
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>

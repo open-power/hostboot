@@ -154,7 +154,10 @@ enum msdg_enable
 ///
 enum odt_fields
 {
-    FLD_LENGTH = 4,
+    R2_FLD_LENGTH = 2, // R2 = 2 rank (normal / 2 rank mode: makes use of 2 bits)
+    R4_FLD_LENGTH = 4, // R4 = 4 rank (4 rank mode: makes use of 4 bits)
+    ODT_MIDPOINT = 4,
+    R4_SHIFT = 2,
     RANK3 = 12,
     RANK2 = 8,
     RANK1 = 4,
@@ -527,6 +530,9 @@ class phy_params
         fapi2::ReturnCode populate_odt_buffer(const uint8_t (&i_odt_rd_wr_attr)[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM],
                                               fapi2::buffer<uint16_t>& o_odt_buffer) const
         {
+            // TK - Update code for encoded quad CS, waiting on SPD
+            // static constexpr bool ENCODED_QUAD_CS_ENABLE = true;
+
             // Const vector to map phy ranks to their buffer offset position
             const std::vector<uint8_t> l_buffer_rank_offset =
             {
@@ -538,10 +544,66 @@ class phy_params
 
             for (const auto& l_rank : iv_rank_info)
             {
-                const auto OFFSET = l_buffer_rank_offset[l_rank.get_phy_rank()];
-                const auto DIMM_RANK = l_rank.get_dimm_rank();
-                const auto DIMM_INDEX = mss::index(l_rank.get_dimm_target());
-                FAPI_TRY(o_odt_buffer.insert(i_odt_rd_wr_attr[DIMM_INDEX][DIMM_RANK], OFFSET, odt_fields::FLD_LENGTH));
+                if (iv_params.iv_rank4_mode[0] == fapi2::ENUM_ATTR_MEM_EFF_FOUR_RANK_MODE_ENABLE)
+                {
+                    // A & B separate. We need to do a bit if shifting from our attribute
+                    // our attribute is aligned XX00YY00 but we want XXYY0000
+                    // The attr must be populated this way, as we only have 4 ODTs and they are aligned as such
+                    // Otherwise, we have problems on the SPD/decoder side
+                    // where XX is A0A1 (bits 0,1) and YY is B0B1 (bits 4,5)
+
+                    // From MCHP spec:
+                    // OdtRdMapCs BIT [1:0] ODT_A[1:0] value when reading to rank 0
+                    // OdtRdMapCs BIT [3:2] ODT_B[1:0] value when reading to rank 0
+                    // ...
+
+                    const auto OFFSET = l_buffer_rank_offset[l_rank.get_phy_rank()];
+                    const auto DIMM_RANK = l_rank.get_dimm_rank();
+                    const auto DIMM_INDEX = mss::index(l_rank.get_dimm_target());
+
+                    uint8_t l_data = 0;
+
+                    // l_data populated as such:
+                    // XX000000 || 0000YY00 << 2
+                    l_data = i_odt_rd_wr_attr[DIMM_INDEX][DIMM_RANK];
+                    l_data |= (i_odt_rd_wr_attr[DIMM_INDEX][DIMM_RANK] << odt_fields::R4_SHIFT);
+
+                    // Sanity check: bitwise and the relevant bits
+                    l_data &= 0b11110000;
+
+                    // Now we have XXYY0000
+                    // Insert into the buffer
+                    FAPI_TRY(o_odt_buffer.insert(l_data, OFFSET, odt_fields::R4_FLD_LENGTH));
+                }
+                // TK: need more information for encoded_quadcs (4U only)
+                // else if (iv_params.iv_encoded_quadcs == ENCODED_QUAD_CS_ENABLE)
+                // {
+                // }
+                else
+                {
+                    // For DDIMM:
+                    // A & B together. B0 (ODT2) mirrors A0 (ODT0), B1 (ODT3) mirrors A1 (ODT1)
+                    // ODTA/B [1:0] == [ODT3/1:ODT2/0]
+
+                    // From MCHP spec:
+                    // OdtRdMapCs BIT [1:0] ODTA/B[1:0] value when reading to rank 0
+                    // So it already accounts for any mirroring, we just need to plop in the value
+
+                    const auto OFFSET = l_buffer_rank_offset[l_rank.get_phy_rank()];
+                    const auto DIMM_RANK = l_rank.get_dimm_rank();
+                    const auto DIMM_INDEX = mss::index(l_rank.get_dimm_target());
+
+                    uint8_t l_data = 0;
+                    l_data = i_odt_rd_wr_attr[DIMM_INDEX][DIMM_RANK];
+
+                    // Finally, put it back
+
+                    // Insert l_data (attribute) from the corresponding dimm's position:
+                    // DIMM0 (ODT0, ODT1) (bits 0,1) or DIMM1 ODT0, ODT1 (bits 4,5) (though DIMM1 probably wouldn't be applicable here)
+                    // at the offset to match the draminit field.
+                    //
+                    FAPI_TRY(o_odt_buffer.insert(l_data, OFFSET, odt_fields::R2_FLD_LENGTH, DIMM_INDEX * odt_fields::ODT_MIDPOINT));
+                }
             }
 
             // Rest of the buffer should already be zeroed from declaration
