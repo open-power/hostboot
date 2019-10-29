@@ -45,6 +45,7 @@
 // use PRD's version of memdiags instead of this cronus verison once its working
 #ifdef CONFIG_AXONE
 #include <exp_mss_memdiag.H>
+#include <chipids.H> // for EXPLORER ID
 #endif
 
 using   namespace   ISTEP;
@@ -178,19 +179,24 @@ void* call_mss_memdiag (void* io_pArgs)
                 TargetHandleList trgtList; getAllChips( trgtList, TYPE_OCMB_CHIP );
                 for (const auto & l_ocmb_target : trgtList)
                 {
-                    fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target(l_ocmb_target);
-                    // Start Memory Diagnostics.
-                    FAPI_INVOKE_HWP( errl, exp_mss_memdiag, l_fapi_ocmb_target );
-                    if ( nullptr != errl )
+                    uint32_t chipId = l_ocmb_target->getAttr< TARGETING::ATTR_CHIP_ID>();
+                    // Only call memdiags on Explorer cards, it breaks when you run on Gemini
+                    if (chipId == POWER_CHIPID::EXPLORER_16)
                     {
-                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                                  "exp_mss_memdiag (0x%08x) "
-                                  "failed", get_huid(l_ocmb_target) );
-                        break;
+                        fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target(l_ocmb_target);
+                        // Start Memory Diagnostics.
+                        FAPI_INVOKE_HWP( errl, exp_mss_memdiag, l_fapi_ocmb_target );
+                        if ( nullptr != errl )
+                        {
+                            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                                      "exp_mss_memdiag (0x%08x) "
+                                      "failed", get_huid(l_ocmb_target) );
+                            break;
+                        }
                     }
                 }
-
             }
+
         }
 #endif
 
