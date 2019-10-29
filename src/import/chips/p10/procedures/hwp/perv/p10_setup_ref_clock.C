@@ -224,14 +224,12 @@ fapi2::ReturnCode p10_setup_ref_clock(const
     l_read_reg.writeBit<FSXCOMP_FSXLOG_ROOT_CTRL4_CLEAR_TP_MUX3_CLKIN_SEL_DC>
     (l_attr_mux_input.getBit<7>());
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_MUX4A_INPUT, i_target_chip, l_attr_mux_input),
-             "Error from FAPI_ATTR_GET (ATTR_CLOCK_MUX4A_INPUT)");
-
-    l_read_reg.writeBit<FSXCOMP_FSXLOG_ROOT_CTRL4_CLEAR_TP_MUX4A_CLKIN_SEL_DC>
-    (l_attr_mux_input.getBit<7>());
-
-    // RC4 bits 25,29
+    // statically set bits 24:26 and 29 to match HW flush state
+    // nest mesh needs to start at 1:1 to permit scan of the PLL rings, switch to 2:1
+    // will occur in switch_gears
+    l_read_reg.setBit<FSXCOMP_FSXLOG_ROOT_CTRL4_TP_MUX4A_CLKIN_SEL_DC>();
     l_read_reg.setBit<FSXCOMP_FSXLOG_ROOT_CTRL4_TP_AN_CLKGLM_NEST_ASYNC_RESET_DC>();
+    l_read_reg.setBit<FSXCOMP_FSXLOG_ROOT_CTRL4_TP_AN_NEST_DIV2_ASYNC_RESET_DC>();
     l_read_reg.setBit<FSXCOMP_FSXLOG_ROOT_CTRL4_TP_PLL_FORCE_OUT_EN_DC>();
 
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL4_FSI, l_read_reg));
