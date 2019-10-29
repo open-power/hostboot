@@ -165,16 +165,6 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_CLOCK_MUX4A_INPUT</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>MUX 4a input</description>
-  <valueType>uint8</valueType>
-  <enum>MUX3_DIV_BY_2 = 0, MUX3_DIV_BY_1 = 1</enum>
-  <platInit/>
-  <initToZero/>
-</attribute>
-<!-- ************************************************************************-->
-<attribute>
   <id>ATTR_CLOCK_MUX10_PAU_DPLL_INPUT</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>PAU DPLL input from Filter PLLs</description>
