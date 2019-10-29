@@ -1111,7 +1111,7 @@ uint64_t getMulticastAddr(uint64_t i_addr,
     return l_resultingAddress;
 }
 
-bool getMulticastBit(const uint32_t i_scomAddr)
+bool isMulticastBitSet(const uint32_t i_scomAddr)
 {
     return ((i_scomAddr & MULTICAST_BIT) >> MULTICAST_BIT_OFFSET);
 }

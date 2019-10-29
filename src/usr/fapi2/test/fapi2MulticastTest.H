@@ -31,12 +31,15 @@
 #include <multicast_group_defs.H>
 #include <multicast_defs.H>
 #include <fapi2/plat_hw_access.H>
+#include <fapi2/hw_access.H>
+#include <fapi2/plat_utils.H>
 #include <devicefw/driverif.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <hbotcompid.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/target.H>
+
 
 class FapiMulticastTest : public CxxTest::TestSuite
 {
@@ -103,7 +106,7 @@ void testMulticastSetup()
         break;
     }
 
-    if(fapi2::getMulticastBit(l_multicastAddr) != 1)
+    if(fapi2::isMulticastBitSet(l_multicastAddr) != 1)
     {
         TS_FAIL("testMulticastSetup: The multicast bit is not set in the "
                 "resulting multicast address");
@@ -275,14 +278,17 @@ void testMulticastWriteOp()
     }
 
     // Now write multicast
-    l_errl = deviceWrite(l_eq.get(),
-                         &l_dataToWrite,
-                         l_size,
-                         DEVICE_SCOM_ADDRESS(l_multicastScom, 0));
+    fapi2::ReturnCode l_fapiRc = fapi2::putScom(l_eq,
+                                                TEST_SCOM_WRITE_ADDR,
+                                                l_dataToWrite);
+    if(l_fapiRc)
+    {
+         TS_FAIL("testMulticastWriteOp: could not write multicast SCOM via"
+                 " fapi2 layer to addr 0x%.08x", l_multicastScom);
+         l_errl = fapi2::rcToErrl(l_fapiRc);
+    }
     if(l_errl)
     {
-        TS_FAIL("testMulticastWriteOp: Could not write back data 0x%.16x "
-                "to multicast SCOM 0x%.08x", l_dataToWrite, l_multicastScom);
         errlCommit(l_errl, CXXTEST_COMP_ID);
         break;
     }
@@ -388,14 +394,17 @@ void testMulticastWriteOpBadParam()
     l_dataToWrite |= TEST_DATA;
 
     // Multicast-write the modified data
-    l_errl = deviceWrite(l_eq.get(),
-                         &l_dataToWrite,
-                         l_size,
-                         DEVICE_SCOM_ADDRESS(l_multicastScom, 0));
+    fapi2::ReturnCode l_fapiRc = fapi2::putScom(l_eq,
+                                                TEST_SCOM_WRITE_ADDR,
+                                                l_dataToWrite);
+     if(l_fapiRc)
+     {
+         TS_FAIL("testMulticastWriteOpBadParam: could not write multicast SCOM "
+                 "via fapi2 layer to addr 0x%.08x", l_multicastScom);
+         l_errl = fapi2::rcToErrl(l_fapiRc);
+     }
     if(l_errl)
     {
-        TS_FAIL("testMulticastWriteOpBadParam: Could not write data 0x%.16x "
-                " to multicast SCOM 0x%.08x", l_dataToWrite, l_multicastScom);
         errlCommit(l_errl, CXXTEST_COMP_ID);
         break;
     }
@@ -543,26 +552,29 @@ void testMulticastReadOr()
     TS_INFO("testMulticastReadOr: Multicast address = 0x%.08x",l_multicastScom);
 
     uint64_t l_multicastReadData = 0xFF;
-    l_errl = deviceRead(l_eq.get(),
-                        &l_multicastReadData,
-                        l_size,
-                        DEVICE_SCOM_ADDRESS(l_multicastScom, 0));
+    fapi2::buffer<uint64_t>l_fapiBuff(l_multicastReadData);
+    fapi2::ReturnCode l_fapiRc = fapi2::getScom(l_eq,
+                                                TEST_SCOM_ADDR,
+                                                l_fapiBuff);
+    if(l_fapiRc)
+    {
+        TS_FAIL("testMulticastReadOr: could not read multicast SCOM via"
+                " fapi2 layer from addr 0x%.08x", l_multicastScom);
+        l_errl = fapi2::rcToErrl(l_fapiRc);
+    }
     if(l_errl)
     {
-        TS_FAIL("testMulticastReadOr: Could not read multicast reg 0x%.08x on "
-                "target 0x%.08x", l_multicastScom,
-                TARGETING::get_huid(l_eq.get()));
         errlCommit(l_errl, CXXTEST_COMP_ID);
         break;
     }
     else
     {
         // The result should be the OR of all test bits
-        if(l_multicastReadData != (l_dataToWrite | TEST_DATA | TEST_DATA_1))
+        if(l_fapiBuff != (l_dataToWrite | TEST_DATA | TEST_DATA_1))
         {
             TS_FAIL("testMulticastReadOr: The multicast read data does not "
                     "match expectation. Expected: 0x%.16lx; actual 0x%.16lx",
-                    l_dataToWrite, l_multicastReadData);
+                    l_dataToWrite, l_fapiBuff);
             break;
         }
     }
@@ -669,13 +681,18 @@ void testMulticastReadAnd()
             l_multicastScom);
 
     // Read multicast
-    l_errl = deviceRead(l_eq.get(),
-                        &l_testData,
-                        l_size,
-                        DEVICE_SCOM_ADDRESS(l_multicastScom, 0));
+    fapi2::buffer<uint64_t>l_fapiBuff(l_testData);
+    fapi2::ReturnCode l_fapiRc = fapi2::getScom(l_eq,
+                                                TEST_SCOM_WRITE_ADDR,
+                                                l_fapiBuff);
+    if(l_fapiRc)
+    {
+        TS_FAIL("testMulticastReadAnd: could not read multicast SCOM via"
+                " fapi2 layer from addr 0x%.08x", l_multicastScom);
+        l_errl = fapi2::rcToErrl(l_fapiRc);
+    }
     if(l_errl)
     {
-        TS_FAIL("testMulticastReadAnd: Could not read multicast");
         errlCommit(l_errl, CXXTEST_COMP_ID);
         break;
     }
@@ -683,7 +700,7 @@ void testMulticastReadAnd()
     // Since the operation is AND read, the result of the read should be
     // a logical AND of all reads, in which case no test data should show
     // up in bits 61-63 since the bits alternate.
-    if(l_testData != l_dataToWrite)
+    if(l_fapiBuff != l_dataToWrite)
     {
         TS_FAIL("testMulticastReadAnd: Unexpected multicast AND read data. "
                 "Expected 0x%.16lx; actual 0x%.16lx", l_dataToWrite,l_testData);
@@ -705,21 +722,24 @@ void testMulticastReadAnd()
     }
 
     // Read multicast
-    l_errl = deviceRead(l_eq.get(),
-                        &l_testData,
-                        l_size,
-                        DEVICE_SCOM_ADDRESS(l_multicastScom, 0));
+    l_fapiRc = fapi2::getScom(l_eq,
+                              TEST_SCOM_WRITE_ADDR,
+                              l_fapiBuff);
+    if(l_fapiRc)
+    {
+        TS_FAIL("testMulticastReadAnd: could not read multicast SCOM via"
+                " fapi2 layer from addr 0x%.08x", l_multicastScom);
+        l_errl = fapi2::rcToErrl(l_fapiRc);
+    }
     if(l_errl)
     {
-        TS_FAIL("testMulticastReadAnd: Could not read multicast for the second"
-                " test");
         errlCommit(l_errl, CXXTEST_COMP_ID);
         break;
     }
 
     // Bit 63 overlaps in all registers, so it should be set in the result of
     // multicast AND read
-    if(l_testData != (l_dataToWrite | TEST_DATA_2))
+    if(l_fapiBuff != (l_dataToWrite | TEST_DATA_2))
     {
         TS_FAIL("testMulticastReadAnd: Test 2: Unexpected multicast AND read "
                 "data. Expected: 0x%.16lx; actual 0x%.16lx",
@@ -727,6 +747,169 @@ void testMulticastReadAnd()
         break;
     }
 
+    } while(0);
+}
+
+void testMulticastCoreSelect()
+{
+    TARGETING::TargetHandle_t l_proc = nullptr;
+    TARGETING::targetService().masterProcChipTargetHandle(l_proc);
+    assert(l_proc, "testMulticastCoreSelect: master proc handle is nullptr");
+
+    // MCCORE_0 and MCCORE_2
+    uint32_t l_coreSelect = 0x8 | 0x2;
+
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
+    auto l_eq = l_fapiProc.getMulticast<fapi2::MULTICAST_AND>(
+                                     fapi2::MCGROUP_GOOD_EQ,
+                                     static_cast<fapi2::MulticastCoreSelect>
+                                            (l_coreSelect));
+
+    const uint32_t TEST_SCOM_WRITE_ADDR = 0x200E88A0; // QME_QOSR
+    const uint64_t TEST_DATA = 0x00000000002A0000;
+    const uint64_t BIT_CLEAR_MASK = 0x00000000003F0000;
+
+    uint64_t l_dataToWrite = 0x0;
+
+    do {
+    uint32_t l_multicastScomAddr =fapi2::getMulticastAddr(TEST_SCOM_WRITE_ADDR,
+                                                 l_eq.get().getMulticastGroup(),
+                                                 l_eq.get().getMulticastOp(),
+                                                 l_eq.get().getCoreSelect());
+    TS_INFO("testMulticastCoreSelect: multicast address 0x%.08x",
+             l_multicastScomAddr);
+    size_t l_size = sizeof(l_dataToWrite);
+
+    TARGETING::TargetHandleList l_cores;
+    TARGETING::getAllChiplets(l_cores, TARGETING::TYPE_CORE, false);
+    assert(l_cores.size() != 0, "testMulticastCoreSelect: "
+           "could not find any cores!");
+    errlHndl_t l_errl = nullptr;
+    TARGETING::Target* l_coreTarget = l_cores[0];
+
+    l_errl = deviceRead(l_coreTarget,
+                        &l_dataToWrite,
+                        l_size,
+                        DEVICE_SCOM_ADDRESS(TEST_SCOM_WRITE_ADDR,0));
+    if(l_errl)
+    {
+        TS_FAIL("testMulticastCoreSelect: Could not read SCOM "
+                "0x%.08x for target 0x%.08x",
+                TEST_SCOM_WRITE_ADDR,
+                TARGETING::get_huid(l_coreTarget));
+        errlCommit(l_errl, CXXTEST_COMP_ID);
+        break;
+    }
+
+    l_dataToWrite &= ~(BIT_CLEAR_MASK); // reset test bits
+    // Write reset test bits
+    for(const auto & l_c : l_cores)
+    {
+        l_errl = deviceWrite(l_c,
+                             &l_dataToWrite,
+                             l_size,
+                             DEVICE_SCOM_ADDRESS(TEST_SCOM_WRITE_ADDR, 0));
+        if(l_errl)
+        {
+            TS_FAIL("testMulticastCoreSelect: could not reset test data on core"
+                    " 0x%x", TARGETING::get_huid(l_c));
+            break;
+        }
+    }
+    if(l_errl)
+    {
+        errlCommit(l_errl, CXXTEST_COMP_ID);
+        break;
+    }
+
+    // Set up test data
+    l_dataToWrite |= TEST_DATA;
+    // Write multicast
+    fapi2::ReturnCode l_rc =
+        fapi2::putScom(l_eq, TEST_SCOM_WRITE_ADDR, l_dataToWrite);
+    if(l_rc)
+    {
+        TS_FAIL("testMulticastCoreSelect: could not write multicast SCOM via"
+                " fapi2 layer to addr 0x%.08x", l_multicastScomAddr);
+        l_errl = fapi2::rcToErrl(l_rc);
+    }
+
+    if(l_errl)
+    {
+        errlCommit(l_errl, CXXTEST_COMP_ID);
+        break;
+    }
+
+    std::map<TARGETING::Target*, bool>l_coreTestTable = {
+        {l_cores[0], true},
+        {l_cores[1], false},
+        {l_cores[2], true},
+        {l_cores[3], false}, };
+
+    // Read core 0 - the data should match the test data
+    uint64_t l_readData = 0xFF;
+
+    for(const auto& l_coreTest : l_coreTestTable)
+    {
+        l_errl = deviceRead(l_coreTest.first,
+                            &l_readData,
+                            l_size,
+                            DEVICE_SCOM_ADDRESS(TEST_SCOM_WRITE_ADDR, 0));
+        if(l_errl)
+        {
+            TS_FAIL("testMulticastCoreSelect: could not read from SCOM "
+                    "0x%.08x for target 0x%.08x",
+                    TEST_SCOM_WRITE_ADDR,
+                    TARGETING::get_huid(l_coreTest.first));
+            break;
+        }
+
+        if((l_readData == l_dataToWrite) != l_coreTest.second)
+        {
+            TS_FAIL("testMulticastCoreSelect: unexpected core select data on "
+                    "core HUID 0x%.08x. Expected 0x%.16lx; actual 0x%.16x "
+                    "(should %s match)",
+                    TARGETING::get_huid(l_coreTest.first),
+                    l_dataToWrite,
+                    l_readData,
+                    l_coreTest.second ? "" : "not");
+            break;
+        }
+    }
+    if(l_errl)
+    {
+        errlCommit(l_errl, CXXTEST_COMP_ID);
+        break;
+    }
+
+    l_readData = 0xFF;
+
+    // Now do multicast read from the affected registers
+    fapi2::buffer<uint64_t>l_fapiBuff(l_readData);
+    l_rc = fapi2::getScom(l_eq, TEST_SCOM_WRITE_ADDR, l_fapiBuff);
+    if(l_rc)
+    {
+        TS_FAIL("testMulticastCoreSelect: could not read multicast SCOM via"
+                " fapi2 layer from addr 0x%.08x", l_multicastScomAddr);
+        l_errl = fapi2::rcToErrl(l_rc);
+    }
+    if(l_errl)
+    {
+        errlCommit(l_errl, CXXTEST_COMP_ID);
+        break;
+    }
+
+    // The multicast read operation is AND, so the data that we read back
+    // should match what we wrote if all is well. Multicast will read only
+    // the regs on the cores we selected, all of which should have been
+    // altered, so the AND of all reads should match the original data.
+    if(l_fapiBuff != l_dataToWrite)
+    {
+        TS_FAIL("testMulticastCoreSelect: unexpected multicast read data. "
+                "Expected 0x%.16lx; actual 0x%.16lx", l_dataToWrite,
+                l_fapiBuff);
+        break;
+    }
     } while(0);
 }
 

@@ -70,8 +70,6 @@
 #include    <p10_infrastruct_help.H>
 #include    <p10_hcode_image_defines.H>
 #include    <p10_ipl_section_append.H>
-#include    <multicast_defs.H>
-#include    <multicast_group_defs.H>
 
 #include    <secureboot/smf_utils.H>
 #include    <secureboot/smf.H>

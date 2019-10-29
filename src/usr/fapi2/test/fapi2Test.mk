@@ -49,6 +49,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/diag/attn/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag/
 
+# TODO RTC: 210905 Uncomment the procedures below
 # Procedures
 #OBJS += p9_sample_procedure.o
 #OBJS += p9_hwtests.o

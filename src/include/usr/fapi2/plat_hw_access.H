@@ -315,7 +315,7 @@ errlHndl_t isOnMasterProc(TARGETING::Target * i_target, bool & o_isMaster);
 /**
  * @brief Assemble a multicast address from the given SCOM address
  *
- * @param[in/out] i_addr the SCOM address to populate with multicast info
+ * @param[in] i_addr the SCOM address to populate with multicast info
  * @param[in] i_group the multicast group to add to the address
  * @param[in] i_op the multicast op (type) to add to the address
  * @param[in] i_coreSelect the core select bits
@@ -330,9 +330,9 @@ uint64_t getMulticastAddr(uint64_t i_addr,
  * @brief Returns the multicast bit of the given address
  *
  * @param[in] i_scomAddr the input address
- * @return bool the multicast bit of the given address
+ * @return bool whether the multicast bit is set in the given address
  */
-bool getMulticastBit(uint32_t i_scomAddr);
+bool isMulticastBitSet(uint32_t i_scomAddr);
 
 /**
  * @brief Returns the multicast group of the passed address
