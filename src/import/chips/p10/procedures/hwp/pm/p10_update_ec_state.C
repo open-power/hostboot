@@ -38,6 +38,7 @@
 //  Includes
 // -----------------------------------------------------------------------------
 #include "p10_update_ec_state.H"
+#include <p10_pm_util.H>
 #include "p10_hcd_common.H"
 #include "p10_hcd_cache_stopclocks.H"
 #include "p10_hcd_core_poweroff.H"
@@ -104,67 +105,26 @@ fapi2::ReturnCode verify_ec_hw_state(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     FAPI_INF (">>verify_hw_state");
-#if 0
-    uint8_t l_present_core_unit_pos;
-    uint8_t l_functional_core_unit_pos;
+    uint8_t l_core_unit_pos;
 
-    uint8_t l_core_match = 0;
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_CORE> >l_core_list;
+    FAPI_TRY(getDeconfiguredTargets(i_target, l_core_list));
 
-    //Get the perv target lists
-    auto l_core_present_target_vector = i_target.getChildren<fapi2::TARGET_TYPE_CORE>(
-                                            fapi2::TARGET_STATE_PRESENT);
-
-    //Get the functional lists
-    auto l_core_functional_vector =
-        i_target.getChildren<fapi2::TARGET_TYPE_CORE>
-        (fapi2::TARGET_STATE_FUNCTIONAL);
-
-    //Verify Core state
-    for (auto core_present_it : l_core_present_target_vector)
+    for (auto l_core : l_core_list)
     {
+
         FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS,
-                                core_present_it,
-                                l_present_core_unit_pos));
+                                l_core,
+                                l_core_unit_pos));
+        FAPI_INF("Core present but non functional %d",
+                 l_core_unit_pos);
 
-        l_core_match = 1;
+        //Check the clock state and power state
+        FAPI_TRY(p10_check_core_l3_clock_power_state(l_core, l_core_unit_pos));
 
-        FAPI_INF("Present core %d ", l_present_core_unit_pos);
-
-        for (auto core_functional_it : l_core_functional_vector)
-        {
-            FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS,
-                                    core_functional_it,
-                                    l_functional_core_unit_pos));
-            FAPI_INF("  Functional EC %d",
-                     l_functional_core_unit_pos);
-
-            if (l_functional_core_unit_pos == l_present_core_unit_pos)
-            {
-                l_core_match = 1;
-                break;
-            }
-            else
-            {
-                l_core_match = 0;
-            }
-        }//end of functional
-
-        if (!l_core_match)
-        {
-            for ( auto l_core_target : core_present_it.getChildren<fapi2::TARGET_TYPE_CORE>(fapi2::TARGET_STATE_PRESENT) )
-            {
-                FAPI_INF("Core present but non functional %d",
-                         l_present_core_unit_pos);
-
-                //Check the clock state and power state
-                FAPI_TRY(p10_check_core_l3_clock_power_state(l_core_target, l_present_core_unit_pos));
-
-            }
-        }
-    }//end of present
+    }
 
 fapi_try_exit:
-#endif
     FAPI_INF("< update_core_config...");
     return fapi2::current_err;
 
