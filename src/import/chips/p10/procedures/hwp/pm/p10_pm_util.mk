@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/import/chips/p10/procedures/hwp/pm/p10_update_ec_state.mk $
+# $Source: src/import/chips/p10/procedures/hwp/pm/p10_pm_util.mk $
 #
 # OpenPOWER HostBoot Project
 #
@@ -22,21 +22,5 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-PROCEDURE=p10_update_ec_state
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(PROJECT_ROOT)/chips/p10/procedures/hwp/corecache/)
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(PROJECT_ROOT)/chips/p10/procedures/hwp/lib/)
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(PROJECT_ROOT)/chips/p10/common/include)
-lib$(PROCEDURE)_DEPLIBS+=p10_pm_util
-OBJ+=p10_hcd_core_stopclocks.o
-OBJ+=p10_hcd_cache_poweroff.o
-OBJ+=p10_hcd_cache_stopclocks.o
-OBJ+=p10_hcd_l3_purge.o
-OBJ+=p10_hcd_ncu_purge.o
-OBJ+=p10_hcd_powerbus_purge.o
-OBJ+=p10_hcd_l2_purge.o
-OBJ+=p10_hcd_core_shadows_disable.o
-OBJ+=p10_hcd_l2_tlbie_quiesce.o
-OBJ+=p10_hcd_core_stopgrid.o
-OBJ+=p10_hcd_chtm_purge.o
-OBJ+=p10_pm_util.o
+PROCEDURE=p10_pm_util
 $(call BUILD_PROCEDURE)
