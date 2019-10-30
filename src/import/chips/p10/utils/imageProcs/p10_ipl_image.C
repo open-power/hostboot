@@ -3148,6 +3148,7 @@ p9_xip_translate_header(P9XipHeader* o_dest, const P9XipHeader* i_src)
     o_dest->iv_L1LoaderAddr = htobe64(i_src->iv_L1LoaderAddr);
     o_dest->iv_L2LoaderAddr = htobe64(i_src->iv_L2LoaderAddr);
     o_dest->iv_kernelAddr   = htobe64(i_src->iv_kernelAddr);
+    o_dest->iv_dataAddr     = htobe64(i_src->iv_dataAddr);
     o_dest->iv_linkAddress = htobe64(i_src->iv_linkAddress);
 
     memset(o_dest->iv_reserved64, 0, sizeof(i_src->iv_reserved64));

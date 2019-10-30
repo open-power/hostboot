@@ -387,12 +387,18 @@ typedef struct
     /// The entry address of Kernel in SRAM
     uint64_t iv_kernelAddr;
 
+    /// The pibmem memory address for the data section. For HRESET requirement
+    /// were on the text section needs to be reloaded, we had to split the text
+    /// and the data section in the image. This address will be used to load
+    /// the data into the pibmem.
+    uint64_t iv_dataAddr;
+
     /// The base address used to link the image, as a full relocatable image
     /// address
     uint64_t iv_linkAddress;
 
     /// Reserved for future expansion
-    uint64_t iv_reserved64[3];
+    uint64_t iv_reserved64[2];
 
     //////////////////////////////////////////////////////////////////////
     // Section Table - 4-byte aligned; 15 entries
