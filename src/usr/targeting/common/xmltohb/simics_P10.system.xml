@@ -152,6 +152,10 @@
       <default>1</default>
     </attribute>
     <attribute>
+      <id>SMF_CONFIG</id>
+      <default>0x01</default>
+    </attribute>
+    <attribute>
       <id>SYSTEM_POUNDV_VALIDITY_HALT_DISABLE</id>
       <default>0</default>
     </attribute>
