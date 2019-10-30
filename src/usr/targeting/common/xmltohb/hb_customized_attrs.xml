@@ -817,6 +817,10 @@
         <id>ATTR_FUSED_CORE_MODE</id>
         <writeable/>
     </attribute>
+    <attribute>
+        <id>ATTR_SMF_CONFIG</id>
+        <writeable/>
+    </attribute>
     <!-- =====================================================================
      End of customizations definitions
      ================================================================= -->

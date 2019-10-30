@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,7 +99,7 @@ void setSmfEnabled(bool i_enabled)
     TARGETING::Target* l_sys = nullptr;
     TARGETING::targetService().getTopLevelTarget(l_sys);
     assert(l_sys != nullptr, "The top level target is nullptr!");
-    l_sys->setAttr<TARGETING::ATTR_SMF_ENABLED>(i_enabled);
+    l_sys->setAttr<TARGETING::ATTR_SMF_CONFIG>(i_enabled);
 }
 
 errlHndl_t distributeSmfMem(const uint64_t i_requestedSmfMemAmtInBytes,

@@ -161,7 +161,7 @@ public:
 
         TARGETING::targetService().getTopLevelTarget(l_sys);
         assert(l_sys != nullptr, "The top level target is nullptr!");
-        l_sys->setAttr<TARGETING::ATTR_SMF_ENABLED>(true);
+        l_sys->setAttr<TARGETING::ATTR_SMF_CONFIG>(true);
 
         // Set SMF mem size to be something other than 0
         l_errl = setSmfMemSize(0x1);
@@ -179,7 +179,7 @@ public:
             errlCommit(l_errl, CXXTEST_COMP_ID);
         }
 
-        if(l_sys->getAttr<TARGETING::ATTR_SMF_ENABLED>())
+        if(l_sys->getAttr<TARGETING::ATTR_SMF_CONFIG>())
         {
             // SMF should have been turned OFF with 0 mem request
             TS_FAIL("testDistributeZeroMem: SMF should have been disabled on 0 SMF mem request");

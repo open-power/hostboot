@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -90,7 +90,7 @@ public:
         TARGETING::Target* l_sys = nullptr;
         TARGETING::targetService().getTopLevelTarget(l_sys);
         assert(l_sys, "The top level target is nullptr!");
-        l_sys->setAttr<TARGETING::ATTR_SMF_ENABLED>(true);
+        l_sys->setAttr<TARGETING::ATTR_SMF_CONFIG>(true);
 
         bool l_smfEnabled = SECUREBOOT::SMF::isSmfEnabled();
         if(l_smfEnabled != true)
@@ -98,7 +98,7 @@ public:
             TS_FAIL("testIsSmfEnabled: expected SMF to be enabled, but it's disabled");
         }
 
-        l_sys->setAttr<TARGETING::ATTR_SMF_ENABLED>(false);
+        l_sys->setAttr<TARGETING::ATTR_SMF_CONFIG>(false);
         l_smfEnabled = SECUREBOOT::SMF::isSmfEnabled();
         if(l_smfEnabled != false)
         {
