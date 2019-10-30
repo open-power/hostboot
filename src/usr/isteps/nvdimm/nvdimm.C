@@ -1134,25 +1134,27 @@ errlHndl_t nvdimmValidImage(Target *i_nvdimm, bool &o_imgValid)
  * @brief This function handles all the restore related operations.
  *        SRE -> restore -> SRX/RCD/MRS
  *
- * @param[in] i_nvdimmList - list of nvdimms
+ * @param[in,out] io_nvdimmList - list of nvdimms. Each nvdimm is removed
+ *                from the list after a successful restore. Leftover nvdimm
+ *                is returned to the caller for error handling.
  *
  * @param[in] i_mpipl - MPIPL mode
  *
  * @return errlHndl_t - Null if successful, otherwise a pointer to
  *      the error log.
  */
-errlHndl_t nvdimmRestore(TargetHandleList& i_nvdimmList, uint8_t &i_mpipl)
+errlHndl_t nvdimmRestore(TargetHandleList& io_nvdimmList, uint8_t &i_mpipl)
 {
     errlHndl_t l_err = nullptr;
     uint8_t l_rstrValid;
     uint32_t l_poll = 0;
-    TargetHandleList l_nvdimmList = i_nvdimmList;
+    TargetHandleList l_nvdimmList = io_nvdimmList;
 
     do
     {
         // Put NVDIMM into self-refresh
-        for (TargetHandleList::iterator it = i_nvdimmList.begin();
-             it != i_nvdimmList.end();)
+        for (TargetHandleList::iterator it = io_nvdimmList.begin();
+             it != io_nvdimmList.end();)
         {
             // Default state during boot is unarmed, therefore not preserved
             nvdimmSetStatusFlag(*it, NSTD_VAL_DISARMED);
@@ -1213,7 +1215,7 @@ errlHndl_t nvdimmRestore(TargetHandleList& i_nvdimmList, uint8_t &i_mpipl)
         }
 
         // Kick off the restore on each nvdimm in the nvdimm list
-        for (const auto & l_nvdimm : i_nvdimmList)
+        for (const auto & l_nvdimm : io_nvdimmList)
         {
             l_err = nvdimmWriteReg(l_nvdimm, NVDIMM_FUNC_CMD, RESTORE_IMAGE);
             if (l_err)
@@ -1230,7 +1232,7 @@ errlHndl_t nvdimmRestore(TargetHandleList& i_nvdimmList, uint8_t &i_mpipl)
         }
 
         // Make sure the restore completed
-        for (const auto & l_nvdimm : i_nvdimmList)
+        for (const auto & l_nvdimm : io_nvdimmList)
         {
             // Since we kicked off the restore on all the modules at once, the restore
             // should complete on all of the modules in one restore window. Use the
@@ -1250,13 +1252,14 @@ errlHndl_t nvdimmRestore(TargetHandleList& i_nvdimmList, uint8_t &i_mpipl)
         }
 
         // Check for restore errors
-        for (const auto & l_nvdimm : i_nvdimmList)
+        for (TargetHandleList::iterator it = io_nvdimmList.begin();
+             it != io_nvdimmList.end();)
         {
-            l_err = nvdimmGetRestoreValid(l_nvdimm, l_rstrValid);
+            l_err = nvdimmGetRestoreValid(*it, l_rstrValid);
             if (l_err)
             {
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmRestore Target[%X] error validating restore status!",
-                          get_huid(l_nvdimm));
+                          get_huid(*it));
                 break;
             }
 
@@ -1264,7 +1267,7 @@ errlHndl_t nvdimmRestore(TargetHandleList& i_nvdimmList, uint8_t &i_mpipl)
             {
 
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"NDVIMM HUID[%X] restore failed due to errors",
-                          get_huid(l_nvdimm));
+                          get_huid(*it));
                 /*@
                  *@errortype
                  *@reasoncode      NVDIMM_RESTORE_FAILED
@@ -1281,17 +1284,17 @@ errlHndl_t nvdimmRestore(TargetHandleList& i_nvdimmList, uint8_t &i_mpipl)
                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                             NVDIMM_RESTORE,
                             NVDIMM_RESTORE_FAILED,
-                            get_huid(l_nvdimm),
+                            get_huid(*it),
                             0x0,
                             ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
-                nvdimmAddPage4Regs(l_nvdimm,l_err);
-                nvdimmAddVendorLog(l_nvdimm, l_err);
+                nvdimmAddPage4Regs(*it,l_err);
+                nvdimmAddVendorLog(*it, l_err);
                 break;
             }
 
             // Exit self-refresh
             TargetHandleList l_mcaList;
-            getParentAffinityTargets(l_mcaList, l_nvdimm, CLASS_UNIT, TYPE_MCA);
+            getParentAffinityTargets(l_mcaList, *it, CLASS_UNIT, TYPE_MCA);
             assert(l_mcaList.size(), "nvdimmRestore() failed to find parent MCA.");
 
             fapi2::Target<fapi2::TARGET_TYPE_MCA> l_fapi_mca(l_mcaList[0]);
@@ -1303,15 +1306,15 @@ errlHndl_t nvdimmRestore(TargetHandleList& i_nvdimmList, uint8_t &i_mpipl)
             if (l_err)
             {
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmRestore() HUID[%X] post_restore_transition failed!",
-                          get_huid(l_nvdimm));
-                nvdimmAddPage4Regs(l_nvdimm,l_err);
+                          get_huid(*it));
+                nvdimmAddPage4Regs(*it,l_err);
                 break;
             }
             else
             {
                 // Restore success!
                 // Remove dimm from list for error handling
-                i_nvdimmList.erase(i_nvdimmList.begin());
+                it = io_nvdimmList.erase(it);
             }
         }
 
