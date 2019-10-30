@@ -40,6 +40,7 @@
 #include <generic/memory/lib/utils/find.H>
 #include <lib/i2c/exp_i2c.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/mss_generic_system_attribute_getters.H>
 
 ///
 /// @brief Check that the OCMB's omi state machine is in its expected state after OMI training
@@ -68,6 +69,14 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
     uint8_t l_state_machine_state = 0;
     uint8_t l_tries = 0;
     uint32_t l_omi_freq = 0;
+
+    uint8_t l_sim = 0;
+    FAPI_TRY(mss::attr::get_is_simulation(l_sim));
+
+    if (l_sim)
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
 
     do
     {
