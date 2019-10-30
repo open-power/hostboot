@@ -219,6 +219,8 @@ HCD_HDR_UINT32( g_pgpe_gpspbSramAddress,    0);
 HCD_HDR_UINT32( g_pgpe_hcodeLength,         0);
 HCD_HDR_UINT32( g_pgpe_gpspbMemOffset,      0);
 HCD_HDR_UINT32( g_pgpe_gpspbMemLength,      0);
+HCD_HDR_UINT32( g_pgpe_genPsTableMemOffset, 0);
+HCD_HDR_UINT32( g_pgpe_genPsTableMemLength, 0);
 HCD_HDR_UINT32( g_pgpe_opspbTableAddress,   0);
 HCD_HDR_UINT32( g_pgpe_opspbTableLength,    0);
 HCD_HDR_UINT32( g_pgpe_beaconAddress,       0);
