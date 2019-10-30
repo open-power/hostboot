@@ -64,6 +64,9 @@ extern "C"
         // BOOT CONFIG 0
         uint8_t l_dl_layer_boot_mode = fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE_NON_DL_TRAINING;
 
+        uint8_t l_sim = 0;
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_sim) );
+
         // Gets the data setup
         FAPI_TRY(mss::exp::omi::train::setup_fw_boot_config(i_target, l_boot_config_data));
 
@@ -75,51 +78,54 @@ extern "C"
         FAPI_TRY(mss::exp::i2c::boot_config(i_target, l_boot_config_data));
 
         // Check FW status for success
-        FAPI_TRY(mss::exp::i2c::fw_status(i_target, mss::DELAY_1MS, 100));
-
-        FAPI_TRY(mss::exp::workarounds::omi::gem_menterp(i_target, l_gem_menterp_workaround));
-
-        // If no workaround (explorer), we can perform menterp reads/writes
-        // If workaround (gemini). we need to bypass menterp. Can also bypass dlx_config1 too since it's a noop
-        if (l_gem_menterp_workaround)
+        if (!l_sim)
         {
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
+            FAPI_TRY(mss::exp::i2c::fw_status(i_target, mss::DELAY_1MS, 100));
 
-        // Set up DLX_CONFIG1
-        {
-            fapi2::buffer<uint64_t> l_data;
-            fapi2::buffer<uint64_t> l_dlx_config1_data;
+            FAPI_TRY(mss::exp::workarounds::omi::gem_menterp(i_target, l_gem_menterp_workaround));
 
-            uint8_t l_edpl_disable = 0;
-            bool l_is_enterprise = false;
-            bool l_is_half_dimm = false;
+            // If no workaround (explorer), we can perform menterp reads/writes
+            // If workaround (gemini). we need to bypass menterp. Can also bypass dlx_config1 too since it's a noop
+            if (l_gem_menterp_workaround)
+            {
+                return fapi2::FAPI2_RC_SUCCESS;
+            }
 
-            // Gets the configuration information from attributes
-            FAPI_TRY(mss::enterprise_mode(i_target, l_is_enterprise));
-            FAPI_TRY(mss::half_dimm_mode(i_target, l_is_half_dimm));
-            FAPI_TRY(mss::attr::get_mss_omi_edpl_disable(l_edpl_disable));
+            // Set up DLX_CONFIG1
+            {
+                fapi2::buffer<uint64_t> l_data;
+                fapi2::buffer<uint64_t> l_dlx_config1_data;
 
-            // Prints out the data
-            FAPI_INF("%s is %s enterprise mode, and %s-DIMM mode", mss::c_str(i_target), l_is_enterprise ? "" : "non",
-                     l_is_half_dimm ? "half" : "full");
+                uint8_t l_edpl_disable = 0;
+                bool l_is_enterprise = false;
+                bool l_is_half_dimm = false;
 
-            // Sets up the register
-            mss::exp::omi::set_enterprise_set_bit(l_data, l_is_enterprise);
-            mss::exp::omi::set_half_dimm_mode(l_data, l_is_half_dimm);
+                // Gets the configuration information from attributes
+                FAPI_TRY(mss::enterprise_mode(i_target, l_is_enterprise));
+                FAPI_TRY(mss::half_dimm_mode(i_target, l_is_half_dimm));
+                FAPI_TRY(mss::attr::get_mss_omi_edpl_disable(l_edpl_disable));
 
-            // Writes the data to the register
-            FAPI_TRY(mss::exp::omi::write_enterprise_config(i_target, l_data));
+                // Prints out the data
+                FAPI_INF("%s is %s enterprise mode, and %s-DIMM mode", mss::c_str(i_target), l_is_enterprise ? "" : "non",
+                         l_is_half_dimm ? "half" : "full");
 
-            // Checks that the chip is configured correctly
-            FAPI_TRY(mss::exp::omi::read_enterprise_config(i_target, l_data));
-            FAPI_TRY(mss::exp::omi::check_enterprise_mode(i_target, l_is_enterprise, l_data));
+                // Sets up the register
+                mss::exp::omi::set_enterprise_set_bit(l_data, l_is_enterprise);
+                mss::exp::omi::set_half_dimm_mode(l_data, l_is_half_dimm);
 
-            // Set the EDPL according the attribute
-            FAPI_TRY(mss::exp::omi::read_dlx_config1(i_target, l_dlx_config1_data));
-            mss::exp::omi::set_edpl_enable_bit(l_dlx_config1_data, !l_edpl_disable);
-            FAPI_TRY(mss::exp::omi::write_dlx_config1(i_target, l_dlx_config1_data));
-            FAPI_INF("%s EDPL enable: %s", mss::c_str(i_target), l_edpl_disable ? "false" : "true");
+                // Writes the data to the register
+                FAPI_TRY(mss::exp::omi::write_enterprise_config(i_target, l_data));
+
+                // Checks that the chip is configured correctly
+                FAPI_TRY(mss::exp::omi::read_enterprise_config(i_target, l_data));
+                FAPI_TRY(mss::exp::omi::check_enterprise_mode(i_target, l_is_enterprise, l_data));
+
+                // Set the EDPL according the attribute
+                FAPI_TRY(mss::exp::omi::read_dlx_config1(i_target, l_dlx_config1_data));
+                mss::exp::omi::set_edpl_enable_bit(l_dlx_config1_data, !l_edpl_disable);
+                FAPI_TRY(mss::exp::omi::write_dlx_config1(i_target, l_dlx_config1_data));
+                FAPI_INF("%s EDPL enable: %s", mss::c_str(i_target), l_edpl_disable ? "false" : "true");
+            }
         }
 
     fapi_try_exit:
