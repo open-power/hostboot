@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2019                             */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -56,7 +57,7 @@ fapi2::ReturnCode p10_pm_get_poundv_bucket(
                            i_target,
                            l_bucketAttr));
 
-    memcpy(&o_data, l_bucketAttr, sizeof(o_data));
+    memcpy(&o_data, l_bucketAttr, sizeof(l_bucketAttr));
 
 fapi_try_exit:
     FAPI_DBG("Exiting p10_pm_get_poundv_bucket ....");
