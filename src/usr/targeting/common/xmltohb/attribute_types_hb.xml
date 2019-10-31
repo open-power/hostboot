@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2020                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -1410,6 +1410,78 @@
     </description>
     <simpleType>
       <uint32_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>SPI_ENGINE_MUTEX_0</id>
+    <description>Mutex for SPI Master engine 0</description>
+    <simpleType>
+      <hbmutex/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>SPI_ENGINE_MUTEX_1</id>
+    <description>Mutex for SPI Master engine 1</description>
+    <simpleType>
+      <hbmutex/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>SPI_ENGINE_MUTEX_2</id>
+    <description>Mutex for SPI Master engine 2</description>
+    <simpleType>
+      <hbmutex/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>SPI_ENGINE_MUTEX_3</id>
+    <description>Mutex for SPI Master engine 3</description>
+    <simpleType>
+      <hbmutex/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>SPI_ENGINE_MUTEX_4</id>
+    <description>Mutex for SPI Master engine 4</description>
+    <simpleType>
+      <hbmutex/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>SPI_ENGINE_MUTEX_5</id>
+    <description>Mutex for SPI Master engine 5</description>
+    <simpleType>
+      <hbmutex/>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>

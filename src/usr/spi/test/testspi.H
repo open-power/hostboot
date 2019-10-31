@@ -1,0 +1,513 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/spi/test/testspi.H $                                  */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+#ifndef __TEST_SPI_H
+#define __TEST_SPI_H
+
+#include <cxxtest/TestSuite.H>
+#include <devicefw/driverif.H>
+#include <errl/errlentry.H>
+#include <errl/errlmanager.H>
+#include <trace/interface.H>
+
+#define SPI_TEST_IGNORE_DATA_COMPARE 0xFFFFFFFFFFFFFFFF
+
+class SpiTestSuite : public CxxTest::TestSuite
+{
+public:
+    void testSpiRead() const
+    {
+        TS_INFO(ENTER_MRK"testSpiRead");
+
+        // Grab master proc
+        TARGETING::Target* masterProc = nullptr;
+        TARGETING::targetService().masterProcChipTargetHandle(masterProc);
+
+        struct TestData
+        {
+            TARGETING::Target* spiMaster;
+            uint8_t engine;
+
+            // Data to compare to.
+            uint64_t data;
+            // Length of read.
+            size_t dataLength;
+            // Offset to read from.
+            uint64_t read_offset;
+
+        };
+
+        // Tests that are expected to not return errors.
+        TestData testDataGood[] =
+        {
+            // Read from offset 0
+            {masterProc, 0, 0x584950205345504d, 8, 0},
+
+            // Read from offset 16
+            {masterProc, 0, 0x44FC00000000ffff, 8, 16},
+
+            // Read from offset 4
+            {masterProc, 0, 0x5345504de7000000, 8, 4},
+
+        };
+
+        const uint32_t NUM_TESTS_GOOD = sizeof(testDataGood)
+                                      / sizeof(testDataGood[0]);
+
+
+        // Check Good tests
+        for (size_t i = 0; i < NUM_TESTS_GOOD; i++)
+        {
+            const size_t TEST_NUMBER = i + 1;
+            uint64_t buffer = 0;
+            // Make sure the read size is 8 bytes so that it fits the buffer.
+            if (testDataGood[i].dataLength != 8)
+            {
+                TS_TRACE("testSpiRead: data length (%d) is not 8 bytes. "
+                         "Skipping good test %d",
+                         testDataGood[i].dataLength,
+                         TEST_NUMBER);
+                continue;
+            }
+
+            // Perform a read and compare the data.
+            errlHndl_t errl = deviceOp(
+                                 DeviceFW::READ,
+                                 testDataGood[i].spiMaster,
+                                 &buffer,
+                                 testDataGood[i].dataLength,
+                                 DEVICE_SPI_ADDRESS(testDataGood[i].engine,
+                                                    testDataGood[i].read_offset));
+
+            if (errl)
+            {
+                TS_FAIL("testSpiRead: Failed on good test %d of %d with error.",
+                        TEST_NUMBER,
+                        NUM_TESTS_GOOD);
+                errlCommit(errl,
+                           SPI_COMP_ID);
+                continue;
+            }
+
+            if (buffer != testDataGood[i].data)
+            {
+                TS_FAIL("testSpiRead: Good test %d/%d, Data read: "
+                        "0x%016llx, expected 0x%016llx",
+                        TEST_NUMBER,
+                        NUM_TESTS_GOOD,
+                        buffer,
+                        testDataGood[i].data);
+                continue;
+            }
+        }
+
+        // =====================================================================
+        // Test alignment adjusting
+        // =====================================================================
+        uint8_t engine = 0, cmds = 0, fails = 0;
+
+        // Do a 1 byte read from offset 0. This will have the spi driver create
+        // an expanded buffer of 8 bytes, do the read, and return the single
+        // byte.
+        do {
+            // Data to compare to.
+            uint8_t data = 0x58;
+            // Length of read.
+            size_t dataLength = 1;
+            // Offset to read from.
+            uint64_t read_offset = 0;
+
+            uint8_t buffer = 0;
+
+            // Perform a read and compare the data.
+            ++cmds;
+            errlHndl_t errl = deviceOp(
+                                 DeviceFW::READ,
+                                 masterProc,
+                                 &buffer,
+                                 dataLength,
+                                 DEVICE_SPI_ADDRESS(engine,
+                                                    read_offset));
+
+            if (errl)
+            {
+                TS_FAIL("testSpiRead: unexpected deviceOp error occurred "
+                        "during Alignment Adjustment Test %d.", cmds);
+                errlCommit(errl,
+                           SPI_COMP_ID);
+                ++fails;
+                break;
+            }
+
+            if (buffer != data)
+            {
+                TS_FAIL("testSpiRead: Alignment Adjustment Test %d. Read: "
+                        "0x%016llx, Expected: 0x%016llx.",
+                        cmds,
+                        buffer,
+                        data);
+                ++fails;
+            }
+        } while(0);
+
+        // Do a 4 byte read from offset 6. This crosses the alignment boundary
+        // so the driver will have to create a 16 byte buffer, read the full 16,
+        // and pass back the requested 4.
+        do {
+
+            // Data to compare to.
+            uint8_t data[] = { 0x50, 0x4d,  0xe7, 0x00 };
+
+            // Length of read.
+            size_t dataLength = 4;
+
+            // Offset to read from.
+            uint64_t read_offset = 6;
+
+            uint8_t* buffer = new uint8_t[dataLength];
+
+            // Perform a read and compare the data.
+            ++cmds;
+            errlHndl_t errl = deviceOp(
+                                 DeviceFW::READ,
+                                 masterProc,
+                                 buffer,
+                                 dataLength,
+                                 DEVICE_SPI_ADDRESS(engine,
+                                                    read_offset));
+
+            if (errl)
+            {
+                TS_FAIL("testSpiRead: unexpected deviceOp error occurred "
+                        "during Alignment Adjustment Test %d.", cmds);
+                errlCommit(errl,
+                           SPI_COMP_ID);
+                ++fails;
+                delete[] buffer;
+                break;
+            }
+
+            if (memcmp(buffer, data, dataLength) != 0)
+            {
+                TS_FAIL("testSpiRead: Alignment Adjustment Test %d: data read "
+                        "didn't match expected data", cmds);
+                TRACFBIN(g_trac_test, "Data Read", buffer, dataLength);
+                TRACFBIN(g_trac_test, "Expected Data", data, dataLength);
+                ++fails;
+            }
+
+            delete[] buffer;
+
+        } while(0);
+
+        // Do a 5 byte read from offset 3. This request is aligned to the upper
+        // bounds of the 8 byte alignment window. The driver will expand the
+        // buffer to be 8 bytes and read without crossing the alignment boundary
+        do {
+            // Data to compare to.
+            uint8_t data[] = { 0x20, 0x53, 0x45, 0x50, 0x4d };
+            // Length of read.
+            size_t dataLength = 5;
+            // Offset to read from.
+            uint64_t read_offset = 3;
+
+            uint8_t* buffer = new uint8_t[dataLength];
+
+            // Perform a read and compare the data.
+            ++cmds;
+            errlHndl_t errl = deviceOp(
+                                 DeviceFW::READ,
+                                 masterProc,
+                                 buffer,
+                                 dataLength,
+                                 DEVICE_SPI_ADDRESS(engine,
+                                                    read_offset));
+
+            if (errl)
+            {
+                TS_FAIL("testSpiRead: unexpected deviceOp error occurred "
+                        "during Alignment Adjustment Test %d.", cmds);
+                errlCommit(errl,
+                           SPI_COMP_ID);
+                ++fails;
+                delete[] buffer;
+                break;
+            }
+
+            if (memcmp(buffer, data, dataLength) != 0)
+            {
+                TS_FAIL("testSpiRead: Alignment Adjustment Test %d: data read "
+                        "didn't match expected data", cmds);
+                TRACFBIN(g_trac_test, "Data Read", buffer, dataLength);
+                TRACFBIN(g_trac_test, "Expected Data", data, dataLength);
+            }
+
+            delete[] buffer;
+
+        } while(0);
+
+        TS_TRACE("testSpiRead: Alignment Adjustment Tests Failures %d/%d",
+                 fails,
+                 cmds);
+
+    }
+
+    void testSpiWrite() const
+    {
+        TS_INFO(ENTER_MRK"testSpiWrite");
+
+        // Grab master proc
+        TARGETING::Target* masterProc = nullptr;
+        TARGETING::targetService().masterProcChipTargetHandle(masterProc);
+
+        struct TestData
+        {
+            TARGETING::Target* spiMaster;
+            uint8_t engine;
+
+            // Data to write to the device.
+            uint64_t data;
+            // Length of data to write.
+            size_t dataLength;
+            // Offset to write to.
+            uint64_t write_offset;
+
+        };
+
+        // Tests that are expected to not return errors.
+        TestData testDataGood[] =
+        {
+            // Write to offset 0
+            {masterProc, 0, 0x1234567890ABCDEF, 8, 0},
+
+            // Write to offset 16
+            {masterProc, 0, 0x1234567890ABCDEF, 8, 16},
+
+            // Write 8 bytes starting at offset 5
+            {masterProc, 0, 0x1234567890ABCDEF, 8, 5},
+
+            // Write 7 bytes starting at offset 0
+            {masterProc, 0, 0x1234567890ABCD4D, 7, 0},
+        };
+
+        // Tests that are expected to return errors.
+        TestData testDataBad[] =
+        {
+
+            // Write 0 bytes starting at offset 0
+            // @TODO RTC 243918 Enable when error paths are in
+            //{masterProc, 0, SPI_TEST_IGNORE_DATA_COMPARE, 0, 0},
+
+        };
+
+        const uint32_t NUM_TESTS_GOOD = sizeof(testDataGood)
+                                      / sizeof(testDataGood[0]);
+
+        const uint32_t NUM_TESTS_BAD = sizeof(testDataBad)
+                                     / sizeof(testDataBad[0]);
+
+        for (size_t i = 0; i < NUM_TESTS_GOOD; i++)
+        {
+            uint64_t original_data = 0, buffer = 0;
+            const size_t TEST_NUMBER = i + 1;
+
+            // Make sure the write size is 8 bytes so that it fits the buffer.
+            if (testDataGood[i].dataLength != 8)
+            {
+                TS_TRACE("testSpiWrite: data length (%d) is not 8 bytes. "
+                         "Skipping test %d",
+                         testDataGood[i].dataLength,
+                         TEST_NUMBER);
+                continue;
+            }
+
+            // First read out the original data to restore to later on.
+            errlHndl_t errl = deviceOp(
+                                DeviceFW::READ,
+                                testDataGood[i].spiMaster,
+                                &original_data,
+                                testDataGood[i].dataLength,
+                                DEVICE_SPI_ADDRESS(testDataGood[i].engine,
+                                                   testDataGood[i].write_offset));
+
+            if (errl)
+            {
+                TS_FAIL("testSpiWrite: Unexpected error when saving original "
+                        "data from SPI device during test %d of %d. "
+                        "Moving on to the next test.",
+                        TEST_NUMBER,
+                        NUM_TESTS_GOOD);
+                errlCommit(errl, SPI_COMP_ID);
+                continue;
+            }
+
+            // Write the new data to the device.
+            errl = deviceOp(
+                     DeviceFW::WRITE,
+                     testDataGood[i].spiMaster,
+                     &testDataGood[i].data,
+                     testDataGood[i].dataLength,
+                     DEVICE_SPI_ADDRESS(testDataGood[i].engine,
+                                        testDataGood[i].write_offset));
+
+            if (errl)
+            {
+                TS_FAIL("testSpiWrite: Unexpected error when writing data to "
+                        "the SPI device during test %d of %d. "
+                        "Moving on to the next test.",
+                        TEST_NUMBER,
+                        NUM_TESTS_GOOD);
+                errlCommit(errl, SPI_COMP_ID);
+                continue;
+            }
+
+            // Read back the data that was written and compare.
+            errl = deviceOp(
+                     DeviceFW::READ,
+                     testDataGood[i].spiMaster,
+                     &buffer,
+                     testDataGood[i].dataLength,
+                     DEVICE_SPI_ADDRESS(testDataGood[i].engine,
+                                        testDataGood[i].write_offset));
+
+            if (errl)
+            {
+                TS_FAIL("testSpiWrite: Unexpected error when reading back "
+                        "data written to SPI device during test %d of %d. "
+                        "Moving on to the next test.",
+                        TEST_NUMBER,
+                        NUM_TESTS_GOOD);
+                errlCommit(errl, SPI_COMP_ID);
+                continue;
+            }
+
+            // Check that the data read was the data written.
+            if (buffer != testDataGood[i].data)
+            {
+                TS_FAIL("testSpiWrite: Test %d/%d, Written data read back: "
+                        "0x%016llx, expected data 0x%016llx",
+                        TEST_NUMBER,
+                        NUM_TESTS_GOOD,
+                        buffer,
+                        testDataGood[i].data);
+                continue;
+            }
+
+            // Write back the original data
+            errl = deviceOp(
+                     DeviceFW::WRITE,
+                     testDataGood[i].spiMaster,
+                     &original_data,
+                     testDataGood[i].dataLength,
+                     DEVICE_SPI_ADDRESS(testDataGood[i].engine,
+                                        testDataGood[i].write_offset));
+
+            if (errl)
+            {
+                TS_FAIL("testSpiWrite: Unexpected error when restoring original"
+                        " data from SPI device during test %d of %d. "
+                        "Moving on to the next test.",
+                        TEST_NUMBER,
+                        NUM_TESTS_GOOD);
+                errlCommit(errl, SPI_COMP_ID);
+                continue;
+            }
+
+            // Verify that the original data has been written.
+            errl = deviceOp(
+                     DeviceFW::READ,
+                     testDataGood[i].spiMaster,
+                     &buffer,
+                     testDataGood[i].dataLength,
+                     DEVICE_SPI_ADDRESS(testDataGood[i].engine,
+                                        testDataGood[i].write_offset));
+
+            if (errl)
+            {
+                TS_FAIL("testSpiWrite: Unexpected error when reading "
+                        "data from SPI device during test %d of %d. "
+                        "Moving on to the next test.",
+                        TEST_NUMBER,
+                        NUM_TESTS_GOOD);
+                errlCommit(errl, SPI_COMP_ID);
+                continue;
+            }
+
+            // Verify that the original data is back.
+            if (buffer != original_data)
+            {
+                TS_FAIL("testSpiWrite: Test %d/%d, Data read: "
+                        "0x%016llx, expected 0x%016llx",
+                        TEST_NUMBER,
+                        NUM_TESTS_GOOD,
+                        buffer,
+                        original_data);
+                continue;
+            }
+        }
+
+        for (size_t i = 0; i < NUM_TESTS_BAD; i++)
+        {
+            const size_t TEST_NUMBER = i + 1;
+            // Make sure the write size is 8 bytes so that it fits the buffer.
+            if (testDataBad[i].dataLength > 8)
+            {
+                TS_TRACE("testSpiWrite: data length (%d) is greater than 8 "
+                         "bytes. Skipping test %d",
+                         testDataBad[i].dataLength,
+                         TEST_NUMBER);
+                continue;
+            }
+            // For these tests reading the original data first would cause
+            // errors before we are able to test doing bad writes. So, for these
+            // tests we'll perform the writes without reading.
+            errlHndl_t errl = deviceOp(
+                                DeviceFW::WRITE,
+                                testDataBad[i].spiMaster,
+                                &testDataBad[i].data,
+                                testDataBad[i].dataLength,
+                                DEVICE_SPI_ADDRESS(testDataBad[i].engine,
+                                                   testDataBad[i].write_offset));
+
+            if (errl)
+            {
+                // Error was expected. Delete and continue
+                delete errl;
+                errl = nullptr;
+                continue;
+            }
+            else if (errl == nullptr)
+            {
+                TS_FAIL("testSpiWrite: Expected an error for test %d of %d",
+                        TEST_NUMBER,
+                        NUM_TESTS_BAD);
+                continue;
+            }
+        }
+    }
+
+
+};
+
+#endif

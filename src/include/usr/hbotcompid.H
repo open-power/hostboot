@@ -484,14 +484,6 @@ const compId_t UCD_COMP_ID = 0x4100;
 const char UCD_COMP_NAME[] = "ucd";
 //@}
 
-/** @name SPI
- *  SPI device driver component
- */
-//@{
-const compId_t SPI_COMP_ID = 0x4200;
-const char SPI_COMP_NAME[] = "spi";
-//@}
-
 /** @name EXPUPD
  *  Explorer update component
  */
@@ -507,6 +499,14 @@ const char EXPUPD_COMP_NAME[] = "expupd";
 //@{
 const compId_t FAPIWRAP_COMP_ID = 0x4400;
 const char FAPIWRAP_COMP_NAME[] = "fapiwrap";
+//@}
+
+/** @name SPI
+ *  SPI device driver component
+ */
+//@{
+const compId_t SPI_COMP_ID = 0x4500;
+const char SPI_COMP_NAME[] = "spi";
 //@}
 
 //

@@ -275,6 +275,7 @@ TESTCASE_MODULES += testsmf
 TESTCASE_MODULES += testexpaccess
 TESTCASE_MODULES += testrtloader
 TESTCASE_MODULES += testexpupd
+TESTCASE_MODULES += testspi
 
 #******************************************************************
 #KNOWN ISSUES (I might let these run but there is something wrong)

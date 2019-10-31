@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/spi/makefile $
+# $Source: src/usr/spi/test/makefile $
 #
 # OpenPOWER HostBoot Project
 #
@@ -22,27 +22,19 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../..
+ROOTPATH = ../../../..
 
-MODULE = spi
+MODULE = testspi
 
-HWP_PATH += ${ROOTPATH}/src/import/chips/p10/procedures
+TESTS = testspi.H
 
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
-EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
-EXTRAINCDIR += ${HWP_PATH}/hwp/ffdc
-EXTRAINCDIR += ${HWP_PATH}/../common/include/
-EXTRAINCDIR += ${HWP_PATH}/hwp/spi/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
+#HWP_PATH += ${ROOTPATH}/src/import/chips/p10/procedures
 
-#include unique objects
-OBJS += spidd.o
+#EXTRAINCDIR += ${ROOTPATH}/src/include/usr/
+#EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
+#EXTRAINCDIR += ${HWP_PATH}/hwp/ffdc
 
-SUBDIRS += test.d
 
-VPATH += ${HWP_PATH}/hwp/spi/
-
-include ${ROOTPATH}/procedure.rules.mk
-include ${HWP_PATH}/hwp/spi/p10_sbe_spi_cmd.mk
 include ${ROOTPATH}/config.mk
