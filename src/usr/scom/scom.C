@@ -48,10 +48,8 @@
 #include <p10_scom_addr.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/namedtarget.H>
+#include <fapi2/plat_hw_access.H>
 
-
-#ifndef __HOSTBOOT_RUNTIME
-#endif
 
 // Trace definition
 trace_desc_t* g_trac_scom = NULL;
@@ -712,7 +710,201 @@ errlHndl_t doForm1IndirectScom(DeviceFW::OperationType i_opType,
 
     return l_err;
 }
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+/**
+ * @brief Populates the input ErrlUserDetailsLogRegister with multicast-specific
+ *        debug information.
+ *
+ * @param[in] i_chipTarg the target on which the multicast scom operation was
+ *            executed
+ * @param[out] o_scom_data the captured FFDC for the specified target
+ * @return PIB_NO_ERROR on success; error code on failure (see piberror.H)
+ */
+PIB::PibError addMulticastFFDC(TARGETING::Target* i_chipTarg,
+                             ERRORLOG::ErrlUserDetailsLogRegister& o_scom_data)
+{
+    PIB::PibError l_rc = PIB::PIB_NO_ERROR;
+    constexpr uint32_t FRONT_NIBBLE = 0x70;
+    constexpr uint32_t BACK_NIBBLE = 0x07;
 
+    uint32_t l_badChiplet = 0;
+    uint64_t ffdc_regs1[] =
+    {
+        0x000F001E, // PCBMS.FIRST_ERR_REG
+        0x000F001F, // PCBMS.ERROR_REG
+    };
+    for(size_t x = 0;
+        x < (sizeof(ffdc_regs1)/sizeof(ffdc_regs1[0]));
+        ++x)
+    {
+        o_scom_data.addData(DEVICE_SCOM_ADDRESS(ffdc_regs1[x]));
+    }
+
+    uint64_t ffdc_regs2[] =
+    {
+        0x000F0011, // PCBMS.REC_ERR_REG0
+        0x000F0012, // PCBMS.REC_ERR_REG1
+        0x000F0013, // PCBMS.REC_ERR_REG2
+        0x000F0014, // PCBMS.REC_ERR_REG3
+    };
+
+    // save off the responses to figure out which chiplet failed
+    uint8_t l_responses[(sizeof(ffdc_regs2)/sizeof(ffdc_regs2[0]))
+                        *sizeof(uint64_t)];
+    uint8_t* l_respPtr = l_responses;
+
+    errlHndl_t l_ignored = nullptr;
+    for(size_t x = 0;
+        x < (sizeof(ffdc_regs2)/sizeof(ffdc_regs2[0]));
+        ++x)
+    {
+        // going to read these manually because we want to look at the data
+        uint64_t l_scomdata = 0;
+        size_t l_scomsize = sizeof(l_scomdata);
+        l_ignored = doScomOp(DeviceFW::READ,
+                             i_chipTarg,
+                             &l_scomdata,
+                             l_scomsize,
+                             DeviceFW::SCOM,
+                             ffdc_regs2[x]);
+        if(l_ignored)
+        {
+            // Save off the PIB RC
+            for(auto data : l_ignored->getUDSections(SCOM_COMP_ID,
+                                                     SCOM::SCOM_UDT_PIB))
+            {
+                // We get the raw data from the userdetails section, which in
+                // this case is the pib_err itself so just check it.
+                uint8_t l_tmpRc = *reinterpret_cast<uint8_t *>(data);
+                l_rc = static_cast<PIB::PibError>(l_tmpRc);
+                delete l_ignored;
+                l_ignored = nullptr;
+                l_scomdata = 0;
+            }
+        }
+        else
+        {
+            o_scom_data.addDataBuffer(&l_scomdata,
+                                       l_scomsize,
+                                       DEVICE_SCOM_ADDRESS(ffdc_regs2[x]));
+        }
+
+        // copy the error data into our big buffer
+        memcpy(l_respPtr, &l_scomdata, l_scomsize);
+        l_respPtr += l_scomsize; // move to the next chunk
+    }
+
+    // find the bad chiplet
+    //   4-bits per chiplet : 1-bit response, 3-bit error code
+    for(size_t x = 0; x < sizeof(l_responses); ++x)
+    {
+        // look for the first non-zero pib error code
+        if(l_responses[x] & FRONT_NIBBLE)
+        {
+            l_badChiplet = x*2;
+            break;
+        }
+        else if(l_responses[x] & BACK_NIBBLE)
+        {
+            l_badChiplet = x*2 + 1;
+            break;
+        }
+    }
+
+    uint64_t ffdc_regs3[] =
+    {
+        0x0F0001, // multicast group1
+        0x0F0002, // multicast group2
+        0x0F0003, // multicast group3
+        0x0F0004, // multicast group4
+    };
+    for(size_t x = 0;
+        x < (sizeof(ffdc_regs3)/sizeof(ffdc_regs3[0]));
+        ++x)
+    {
+        p10_scom_addr l_scom(ffdc_regs3[x]);
+        l_scom.setChipletId(l_badChiplet);
+        o_scom_data.addData(DEVICE_SCOM_ADDRESS(l_scom.getAddr()));
+    }
+
+
+    return l_rc;
+}
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+/**
+ * @brief Checks for the special Multicast Miscompare condition and updates
+ *        the given error log with appropriate return codes when necessary.
+ * @note A Multicast Miscompare occurs on a multicast read when the results
+ *       of the read are not the same among the registers read. In that case, a
+ *       PIB_CLOCK_ERROR is thrown and needs to be translated into muticast
+ *       miscompare error.
+ *
+ * @param[in] i_target the target of multicast operation
+ * @param[in] i_addr the address of the multicast operation
+ * @param[in/out] io_errl the error log associated with the multicast error
+ */
+void processMulticastErrl(TARGETING::Target* i_target,
+                          const uint64_t i_addr,
+                          errlHndl_t io_errl)
+{
+    constexpr uint8_t CLOCK_CONTROLLER = 0x3;
+    //Delete the error if the mask matches the pib err
+    for(auto data : io_errl->getUDSections(SCOM_COMP_ID, SCOM::SCOM_UDT_PIB))
+    {
+        uint8_t l_pibRc = *reinterpret_cast<uint8_t *>(data);
+        //We get the raw data from the userdetails section, which in this
+        //case is the pib_err itself so just check it.
+        if(l_pibRc == PIB::PIB_CHIPLET_OFFLINE)
+        {
+            TRACFCOMP(g_trac_scom, "Ignoring error %.8X because it is a"
+                      " multicast scom with a PIB_CHIPLET_OFFLINE error,"
+                      " and this is expected",
+                      io_errl->plid() );
+            delete io_errl;
+            io_errl = nullptr;
+            break;
+        }
+        else if(l_pibRc == PIB::PIB_CLOCK_ERROR)
+        {
+            // If PIB error is 0x5 (PIB_CLOCK_ERROR):
+            /*
+            IF it's a multicast read-compare (bits 1:4 == 0b1100) THEN
+                IF the access did not target the clock controller (bits 12:15 != 0x3) THEN
+                     This is not a PIB error but a miscompare
+                ELSE
+                    Read the multicast FFDC for your master out of the PCBM
+                    IF no chiplet responded with a response code of 0x5 THEN
+                         This is not a PIB error but a miscompare
+                    END IF
+                END IF
+            END IF
+            */
+            if(fapi2::getMulticastOp(i_addr) == fapi2::MULTICAST_COMPARE)
+            {
+                if(p10_scom_addr(i_addr).getEndpoint() != CLOCK_CONTROLLER)
+                {
+                    // This is a miscompare
+                    io_errl->setErrorType(SCOM::SCOM_MULTICAST_MISCOMPARE);
+                }
+                else
+                {
+                    PIB::PibError l_pibRc = PIB::PIB_NO_ERROR;
+                    ERRORLOG::ErrlUserDetailsLogRegister l_scom_data(
+                       i_target);
+                    l_pibRc = addMulticastFFDC(i_target, l_scom_data);
+                    if(l_pibRc != PIB::PIB_CLOCK_ERROR)
+                    {
+                        // This is a miscompare
+                        io_errl->setErrorType(
+                            SCOM::SCOM_MULTICAST_MISCOMPARE);
+                    }
+                }
+            }
+        }
+    }
+}
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
@@ -842,25 +1034,9 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
     while(l_remainingAttempts > 0);
 
 
-    // FIXME RTC: 213303 Potentially handle the Miscompare error here?
     if( l_err && p10_scom_addr(i_addr).isMulticast())
     {
-        //Delete the error if the mask matches the pib err
-        for(auto data : l_err->getUDSections(SCOM_COMP_ID, SCOM::SCOM_UDT_PIB))
-        {
-            //We get the raw data from the userdetails section, which in this
-            //case is the pib_err itself so just check it.
-            if(*reinterpret_cast<uint8_t *>(data) == PIB::PIB_CHIPLET_OFFLINE)
-            {
-                TRACFCOMP(g_trac_scom, "Ignoring error %.8X because it is a"
-                          " multicast scom with a PIB_CHIPLET_OFFLINE error,"
-                          " and this is expected",
-                          l_err->plid() );
-                delete l_err;
-                l_err = NULL;
-                break;
-            }
-        }
+        processMulticastErrl(i_target, i_addr, l_err);
     }
 
     //Add some additional FFDC based on the specific operation
@@ -871,8 +1047,6 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
 
     return l_err;
 }
-
-
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 void addScomFailFFDC( errlHndl_t i_err,
@@ -908,89 +1082,7 @@ void addScomFailFFDC( errlHndl_t i_err,
         && (TARGETING::TYPE_PROC == l_type) )
     {
         addit = true;
-        uint64_t ffdc_regs1[] = {
-            0x000F001E, // PCBMS.FIRST_ERR_REG
-            0x000F001F, // PCBMS.ERROR_REG
-        };
-        for( size_t x = 0;
-             x < (sizeof(ffdc_regs1)/sizeof(ffdc_regs1[0]));
-             x++ )
-        {
-            l_scom_data.addData(DEVICE_SCOM_ADDRESS(ffdc_regs1[x]));
-        }
-
-        uint64_t ffdc_regs2[] = {
-            0x000F0011, // PCBMS.REC_ERR_REG0
-            0x000F0012, // PCBMS.REC_ERR_REG1
-            0x000F0013, // PCBMS.REC_ERR_REG2
-            0x000F0014, // PCBMS.REC_ERR_REG3
-        };
-
-        // save off the responses to figure out which chiplet failed
-        uint8_t l_responses[(sizeof(ffdc_regs2)/sizeof(ffdc_regs2[0]))
-                            *sizeof(uint64_t)];
-        uint8_t* l_respPtr = l_responses;
-
-        for( size_t x = 0;
-             x < (sizeof(ffdc_regs2)/sizeof(ffdc_regs2[0]));
-             x++ )
-        {
-            // going to read these manually because we want to look at the data
-            uint64_t l_scomdata = 0;
-            size_t l_scomsize = sizeof(l_scomdata);
-            errlHndl_t l_ignored = doScomOp( DeviceFW::READ,
-                                             i_chipTarg,
-                                             &l_scomdata,
-                                             l_scomsize,
-                                             DeviceFW::SCOM,
-                                             ffdc_regs2[x] );
-            if( l_ignored )
-            {
-                delete l_ignored;
-                l_ignored = nullptr;
-                l_scomdata = 0;
-            }
-            else
-            {
-                l_scom_data.addDataBuffer( &l_scomdata,
-                                        l_scomsize,
-                                        DEVICE_SCOM_ADDRESS(ffdc_regs2[x]) );
-            }
-
-            // copy the error data into our big buffer
-            memcpy( l_respPtr, &l_scomdata, l_scomsize );
-            l_respPtr += l_scomsize; // move to the next chunk
-        }
-
-        // find the bad chiplet
-        //   4-bits per chiplet : 1-bit response, 3-bit error code
-        for( size_t x = 0; x < sizeof(l_responses); x++ )
-        {
-            // look for the first non-zero pib error code
-            if( l_responses[x] & 0x70 ) //front nibble
-            {
-                l_badChiplet = x*2;
-            }
-            else if( l_responses[x] & 0x07 ) //back nibble
-            {
-                l_badChiplet = x*2 + 1;
-            }
-        }
-
-        uint64_t ffdc_regs3[] = {
-            0x0F0001, // multicast group1
-            0x0F0002, // multicast group2
-            0x0F0003, // multicast group3
-            0x0F0004, // multicast group4
-        };
-        for( size_t x = 0;
-             x < (sizeof(ffdc_regs3)/sizeof(ffdc_regs3[0]));
-             x++ )
-        {
-            p10_scom_addr l_scom(ffdc_regs3[x]);
-            l_scom.setChipletId(l_badChiplet);
-            l_scom_data.addData(DEVICE_SCOM_ADDRESS(l_scom.getAddr()));
-        }
+        (void)addMulticastFFDC(i_chipTarg, l_scom_data);
     }
 
     //Any non-PCB Slave and non TP reg on the processor
@@ -1007,8 +1099,9 @@ void addScomFailFFDC( errlHndl_t i_err,
         uint64_t ffdc_regs[] = {
             0x0F001F, // PCBSL<cplt>.ERROR_REG
             0x03000F, // CC.<chiplet>.ERROR_STATUS
-            0x010001, // <chiplet>.PSC.PSCOM_STATUS_ERROR_REG
-            0x010002, // <chiplet>.PSC.PSCOM_ERROR_MASK
+            // FIXME RTC: 213303 find the P10 equivalents
+            //0x010001, // <chiplet>.PSC.PSCOM_STATUS_ERROR_REG
+            //0x010002, // <chiplet>.PSC.PSCOM_ERROR_MASK
         };
         for( size_t x = 0; x < (sizeof(ffdc_regs)/sizeof(ffdc_regs[0])); x++ )
         {

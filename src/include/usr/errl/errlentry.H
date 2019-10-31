@@ -714,6 +714,24 @@ public:
      */
     bool getDoHbDump();
 
+    /**
+     * @brief set the internal error type member. Note that the error type
+     *        describes the generic type of the error. It's not the return
+     *        code.
+     *
+     * @param[in] i_errType the error type to set the member to
+     */
+    void setErrorType(uint32_t i_errType);
+
+    /**
+     * @brief return the type of error this error log is. The error type is
+     *        not a return code - it is the generic type of the error that
+     *        occurred.
+     *
+     * @return uint32_t the tyoe of error this error log is
+     */
+    uint32_t getErrorType() const;
+
 private:
 
      /**
@@ -957,7 +975,11 @@ private:
     // doShutdown can request that a HB dump be done.
     bool iv_doHbDump;
 
-
+    // Generic error type
+    // This value should come from a given component's reasoncode
+    // range to guarantee uniqueness among errorTypes and to avoid
+    // confusion with any reasoncodes
+    uint32_t iv_errorType;
 };
 
 
@@ -1124,6 +1146,20 @@ inline bool ErrlEntry::getEselCallhomeInfoEvent()
 inline bool ErrlEntry::getDoHbDump()
 {
     return iv_doHbDump;
+}
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+inline void ErrlEntry::setErrorType(const uint32_t i_errType)
+{
+    iv_errorType = i_errType;
+}
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+inline uint32_t ErrlEntry::getErrorType() const
+{
+    return iv_errorType;
 }
 
 } // End namespace

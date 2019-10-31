@@ -39,6 +39,7 @@
 #include <hbotcompid.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/target.H>
+#include <scom/scomreasoncodes.H>
 
 
 class FapiMulticastTest : public CxxTest::TestSuite
@@ -911,6 +912,209 @@ void testMulticastCoreSelect()
         break;
     }
     } while(0);
+}
+
+void testMulticastCompare()
+{
+    TARGETING::TargetHandle_t l_proc = nullptr;
+    errlHndl_t l_errl = nullptr;
+    const uint32_t TEST_SCOM_WRITE_ADDR = 0x20000000; // CPLT_CTRL0
+    const uint64_t TEST_DATA = 0x000000000000000F; // Bits 60-63 set
+
+    do {
+    l_errl = TARGETING::targetService().queryMasterProcChipTargetHandle(l_proc);
+    if(l_errl)
+    {
+        break;
+    }
+
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
+    auto l_eq = l_fapiProc.getMulticast<fapi2::TARGET_TYPE_EQ,
+                                        fapi2::MULTICAST_COMPARE >(
+                                                fapi2::MCGROUP_GOOD_EQ);
+
+    TARGETING::TargetHandleList l_eqs;
+    getChildAffinityTargets(l_eqs, l_proc,
+                            TARGETING::CLASS_UNIT, TARGETING::TYPE_EQ, false);
+
+    uint64_t l_dataToWrite = 0xFF;
+    size_t l_size = sizeof(l_dataToWrite);
+
+    auto l_eq0 = l_eqs[0];
+    l_errl = deviceRead(l_eq0,
+                        &l_dataToWrite,
+                        l_size,
+                        DEVICE_SCOM_ADDRESS(TEST_SCOM_WRITE_ADDR,0));
+    if(l_errl)
+    {
+        TS_FAIL("testMulticastCompare: Could not read SCOM 0x%.08x",
+                TEST_SCOM_WRITE_ADDR);
+        break;
+    }
+
+    // Reset test bits
+    l_dataToWrite &= ~(TEST_DATA);
+
+    for(const auto& l_eqTarget : l_eqs)
+    {
+        l_errl = deviceWrite(l_eqTarget,
+                             &l_dataToWrite,
+                             l_size,
+                             DEVICE_SCOM_ADDRESS(TEST_SCOM_WRITE_ADDR,0));
+        if(l_errl)
+        {
+            TS_FAIL("testMulticastCompare: could not write to SCOM 0x%.08x "
+                    "for EQ HUID 0x%.08x", TEST_SCOM_WRITE_ADDR,
+                    TARGETING::get_huid(l_eqTarget));
+            break;
+        }
+    }
+    if(l_errl)
+    {
+        break;
+    }
+
+    l_dataToWrite |= TEST_DATA;
+
+    // Write the test data to only the first EQ to trigger the compare error
+    l_errl = deviceWrite(l_eq0,
+                         &l_dataToWrite,
+                         l_size,
+                         DEVICE_SCOM_ADDRESS(TEST_SCOM_WRITE_ADDR, 0));
+    if(l_errl)
+    {
+        TS_FAIL("testMulticastCompare: could not write test data to SCOM "
+                "0x%.08x", TEST_SCOM_WRITE_ADDR);
+        break;
+    }
+    uint32_t l_multicastScomAddr = fapi2::getMulticastAddr(TEST_SCOM_WRITE_ADDR,
+                                                 l_eq.get().getMulticastGroup(),
+                                                 l_eq.get().getMulticastOp());
+
+    uint64_t l_multicastReadData = 0xFF;
+    fapi2::buffer<uint64_t>l_fapiBuff(l_multicastReadData);
+    fapi2::ReturnCode l_fapiRc = fapi2::FAPI2_RC_SUCCESS;
+    // Read compare - this should trigger an error.
+    // Hostboot-style of SCOM here because we want to look at the HB error
+    // log produced.
+    l_errl = deviceRead(l_eq.get(),
+                        &l_multicastReadData,
+                        l_size,
+                        DEVICE_SCOM_ADDRESS(l_multicastScomAddr, 0));
+    if(!l_errl)
+    {
+        TS_FAIL("testMulticastCompare: expected a multicast compare error but "
+                "didn't get one");
+        break;
+    }
+    else
+    {
+        if(l_errl->getErrorType() != SCOM::SCOM_MULTICAST_MISCOMPARE)
+        {
+            TS_FAIL("testMulticastCompare: incorrect RC returned for multicast"
+                    " miscompare. Expected 0x%x; actual 0x%x",
+                    SCOM::SCOM_MULTICAST_MISCOMPARE,
+                    l_errl->reasonCode());
+            break;
+        }
+        else
+        {
+            // The error is expected, so no need to keep it
+            delete l_errl;
+            l_errl = nullptr;
+        }
+    }
+
+    // Now read FAPI-style to check HB to FAPI RC conversion
+    l_fapiRc = fapi2::getScom(l_eq,
+                              TEST_SCOM_WRITE_ADDR,
+                              l_fapiBuff);
+    if(!l_fapiRc)
+    {
+        TS_FAIL("testMulticastCompare: expected a FAPI multicast compare error"
+                " but didn't get one");
+        break;
+    }
+    else
+    {
+        if(l_fapiRc != fapi2::FAPI2_RC_PLAT_MISCOMPARE)
+        {
+            TS_FAIL("testMulticastCompare: incorrect RC returned for FAPI "
+                    "multicsat miscompare. Expected 0x%x; actual 0x%x",
+                    fapi2::FAPI2_RC_PLAT_MISCOMPARE,
+                    l_fapiRc);
+            l_errl = fapi2::rcToErrl(l_fapiRc);
+            break;
+        }
+        else
+        {
+            l_errl = fapi2::rcToErrl(l_fapiRc);
+            if(!l_errl)
+            {
+                TS_FAIL("testMulticastCompare: no HB errl is created for FAPI"
+                        " multicast miscompare RC");
+                break;
+            }
+            else
+            {
+                if(l_errl->getErrorType() != SCOM::SCOM_MULTICAST_MISCOMPARE)
+                {
+                    TS_FAIL("testMulticastCompare: incorrect HB errl rc for "
+                            "FAPI multicast miscompare. Expected 0x%x; actual "
+                            "0x%x",
+                            SCOM::SCOM_MULTICAST_MISCOMPARE,
+                            l_errl->getErrorType());
+                    break;
+                }
+            }
+        }
+    }
+
+    // Now write multicast to all EQs
+    l_fapiRc = fapi2::putScom(l_eq,
+                              TEST_SCOM_WRITE_ADDR,
+                              l_dataToWrite);
+    if(l_fapiRc)
+    {
+        TS_FAIL("testMulticastCompare: could not write multicast SCOM via"
+                " fapi2 layer to addr 0x%.08x", l_multicastScomAddr);
+        l_errl = fapi2::rcToErrl(l_fapiRc);
+    }
+    if(l_errl)
+    {
+        break;
+    }
+
+    // Now read compare - it should work fine
+    l_fapiRc = fapi2::getScom(l_eq,
+                              TEST_SCOM_WRITE_ADDR,
+                              l_fapiBuff);
+    if(l_fapiRc)
+    {
+        TS_FAIL("testMulticastCompare: could not read multicast SCOM via"
+                " fapi2 layer from addr 0x%.08x", l_multicastScomAddr);
+        l_errl = fapi2::rcToErrl(l_fapiRc);
+    }
+    if(l_errl)
+    {
+        break;
+    }
+
+    // The read data should be the same across all reads
+    if(l_fapiBuff != l_dataToWrite)
+    {
+        TS_FAIL("testMulticastCompare: unexpected data returned from multicast "
+                "read. Expected: 0x%.16lx; actual 0x%.16lx", l_dataToWrite,
+                l_multicastReadData);
+        break;
+    }
+
+    } while(0);
+
+    if(l_errl)
+    {
+        errlCommit(l_errl, CXXTEST_COMP_ID);
+    }
 }
 
 }; //class FapiMulticastTest

@@ -47,6 +47,8 @@
 
 #include <multicast_group_defs.H>
 #include <multicast_defs.H>
+#include <return_code_defs.H>
+#include <hbotcompid.H>
 
 namespace fapi2
 {
@@ -112,8 +114,8 @@ ReturnCode platGetScom(const Target<TARGET_TYPE_ALL>& i_target,
                        const uint64_t i_address,
                        buffer<uint64_t>& o_data)
 {
-    ReturnCode l_rc;
-    errlHndl_t l_err = NULL;
+    ReturnCode l_rc = FAPI2_RC_SUCCESS;
+    errlHndl_t l_err = nullptr;
 
     FAPI_DBG(ENTER_MRK "platGetScom");
     // Note: Trace is placed here in plat code because PPE doesn't support
@@ -165,6 +167,10 @@ ReturnCode platGetScom(const Target<TARGET_TYPE_ALL>& i_target,
             FAPI_ERR("fapiGetScom failed - Target %s, Addr %.16llX",
                      l_targName, l_scomAddr);
             l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+            if(l_err->getErrorType() == SCOM::SCOM_MULTICAST_MISCOMPARE)
+            {
+                l_rc.setRC(fapi2::FAPI2_RC_PLAT_MISCOMPARE);
+            }
         }
     }
 
@@ -186,8 +192,8 @@ ReturnCode platPutScom(const Target<TARGET_TYPE_ALL>& i_target,
                        const uint64_t i_address,
                        const buffer<uint64_t> i_data)
 {
-    ReturnCode l_rc;
-    errlHndl_t l_err = NULL;
+    ReturnCode l_rc = FAPI2_RC_SUCCESS;
+    errlHndl_t l_err = nullptr;
 
     FAPI_DBG(ENTER_MRK "platPutScom");
     // Note: Trace is placed here in plat code because PPE doesn't support
@@ -262,8 +268,8 @@ ReturnCode platPutScomUnderMask(const Target<TARGET_TYPE_ALL>& i_target,
                                 const buffer<uint64_t> i_data,
                                 const buffer<uint64_t> i_mask)
 {
-    ReturnCode l_rc;
-    errlHndl_t l_err = NULL;
+    ReturnCode l_rc = FAPI2_RC_SUCCESS;
+    errlHndl_t l_err = nullptr;
 
     FAPI_DBG(ENTER_MRK "platPutScomUnderMask");
     // Note: Trace is placed here in plat code because PPE doesn't support
@@ -360,10 +366,10 @@ ReturnCode platPutScomUnderMask(const Target<TARGET_TYPE_ALL>& i_target,
 errlHndl_t verifyCfamAccessTarget(const TARGETING::Target* i_target,
                                   const uint32_t i_address)
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     // Can't access cfam engine on the master processor
-    TARGETING::Target* l_pMasterProcChip = NULL;
+    TARGETING::Target* l_pMasterProcChip = nullptr;
     TARGETING::targetService().
       masterProcChipTargetHandle( l_pMasterProcChip );
 
@@ -408,7 +414,7 @@ void checkPibMask(errlHndl_t& io_errLog )
         {
             FAPI_ERR( "Ignoring error %.8X due to pib_err_mask=%.1X", io_errLog->plid(), pib_err_mask );
             delete io_errLog;
-            io_errLog = NULL;
+            io_errLog = nullptr;
             break;
         }
     }
@@ -475,7 +481,7 @@ ReturnCode platGetCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
 {
     FAPI_DBG(ENTER_MRK "platGetCfamRegister");
     ReturnCode l_rc;
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
     bool l_traceit = platIsScanTraceEnabled();
 
     // Grab the name of the target
@@ -488,7 +494,7 @@ ReturnCode platGetCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
         TARGETING::Target* l_target = i_target.get();
 
         // Get the chip target if l_target is not a chip
-        TARGETING::Target* l_myChipTarget = NULL;
+        TARGETING::Target* l_myChipTarget = nullptr;
         l_err = getCfamChipTarget(l_target, l_myChipTarget);
         if (l_err)
         {
@@ -554,7 +560,7 @@ ReturnCode platPutCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
 {
     FAPI_DBG(ENTER_MRK "platPutCfamRegister");
     ReturnCode l_rc;
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
     bool l_traceit = platIsScanTraceEnabled();
 
     // Grab the name of the target
@@ -567,7 +573,7 @@ ReturnCode platPutCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
         TARGETING::Target* l_target = i_target.get();
 
         // Get the chip target if l_target is not a chip
-        TARGETING::Target* l_myChipTarget = NULL;
+        TARGETING::Target* l_myChipTarget = nullptr;
         l_err = getCfamChipTarget(l_target, l_myChipTarget);
         if (l_err)
         {
@@ -685,7 +691,7 @@ ReturnCode platModifyCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
 {
     FAPI_DBG(ENTER_MRK "platModifyCfamRegister");
     ReturnCode l_rc;
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
     bool l_traceit = platIsScanTraceEnabled();
     const char* l_modeString = platModeString(i_modifyMode);
 
@@ -708,7 +714,7 @@ ReturnCode platModifyCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
         }
 
         // Get the chip target if l_target is not a chip
-        TARGETING::Target* l_myChipTarget = NULL;
+        TARGETING::Target* l_myChipTarget = nullptr;
         l_err = getCfamChipTarget(l_target, l_myChipTarget);
         if (l_err)
         {
@@ -786,7 +792,7 @@ ReturnCode platGetRing(const Target<TARGET_TYPE_ALL>& i_target,
     bool l_traceit = platIsScanTraceEnabled();
 
     ReturnCode l_rc;
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     // Extract the component pointer
     TARGETING::Target* l_target = i_target.get();
@@ -833,7 +839,7 @@ inline ReturnCode platPutRing(const Target<TARGET_TYPE_ALL>& i_target,
 {
     FAPI_DBG(ENTER_MRK "platPutRing");
     ReturnCode l_rc;
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     // Note: Trace is placed here in plat code because PPE doesn't support
     //       trace in common fapi2_hw_access.H
@@ -891,7 +897,7 @@ ReturnCode platModifyRing(const Target<TARGET_TYPE_ALL>& i_target,
     assert(0,"platModifyRing not supported yet.");
 
     ReturnCode l_rc;
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
     variable_buffer l_current_data(i_data);
 
     // Note: Trace is placed here in plat code because PPE doesn't support
