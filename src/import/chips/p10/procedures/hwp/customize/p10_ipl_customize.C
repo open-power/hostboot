@@ -1727,7 +1727,7 @@ fapi2::ReturnCode process_base_and_dynamic_rings(
                                                  set_DATA_DYNACC(dataDynAcc[i]).
                                                  set_DATA_DYN(dataDyn[i]).
                                                  set_OCCURRENCE(1),
-                                                 "Bit conflict at bit=0x%d found while processing "
+                                                 "Bit conflict at bit=%d found while processing "
                                                  "dynamic rings for ringId=0x%0x at feature=%d and "
                                                  "featureVecAcc=0x%0llx)",
                                                  8 * i + j, i_ringId, nextFeature, featureVecAcc);
@@ -2000,6 +2000,8 @@ ReturnCode p10_ipl_customize (
     uint8_t*        l_fullCIData = nullptr;
 
     uint64_t        featureVec = 0;
+    fapi2::ATTR_SYSTEM_IPL_PHASE_Type l_attr_system_ipl_phase;
+    fapi2::ATTR_CONTAINED_IPL_TYPE_Type l_attr_contained_ipl_type;
     RingId_t        ringId = UNDEFINED_RING_ID;
     std::map< Rs4Selector_t,  Rs4Selector_t> idxFeatureMap;
     std::map<RingId_t, uint64_t> ringIdFeatureVecMap;
@@ -2734,7 +2736,12 @@ ReturnCode p10_ipl_customize (
     //            ring becomes the de facto Base ring.
     //////////////////////////////////////////////////////////////////////////
 
-    l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_DYNAMIC_INIT_FEATURE_VEC, FAPI_SYSTEM,
+    // TODO / FIXME: The mapping from bit position in the vector to features
+    //               should be encapsulated in an enum constructed at ekb build
+    //               time.
+
+    l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_DYNAMIC_INIT_FEATURE_VEC,
+                              FAPI_SYSTEM,
                               featureVec);
 
     FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
@@ -2743,6 +2750,59 @@ ReturnCode p10_ipl_customize (
                  set_OCCURRENCE(5),
                  "FAPI_ATTR_GET(ATTR_DYNAMIC_INIT_FEATURE_VEC) failed."
                  " Unable to determine featureVector." );
+
+    l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_IPL_PHASE,
+                              FAPI_SYSTEM,
+                              l_attr_system_ipl_phase);
+
+    FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
+                 fapi2::XIPC_XIP_API_MISC_ERROR().
+                 set_CHIP_TARGET(i_procTarget).
+                 set_OCCURRENCE(5),
+                 "Failed to retrieve the system IPL phase attribute" );
+
+    l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_CONTAINED_IPL_TYPE,
+                              FAPI_SYSTEM,
+                              l_attr_contained_ipl_type);
+
+    FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
+                 fapi2::XIPC_XIP_API_MISC_ERROR().
+                 set_CHIP_TARGET(i_procTarget).
+                 set_OCCURRENCE(6),
+                 "Failed to retrieve the contained IPL type attribute" );
+
+    if ((l_attr_system_ipl_phase == fapi2::ENUM_ATTR_SYSTEM_IPL_PHASE_HB_IPL) &&
+        (i_sysPhase == SYSPHASE_HB_SBE))
+    {
+        featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_HOSTBOOT;
+    }
+    else if (l_attr_system_ipl_phase == fapi2::ENUM_ATTR_SYSTEM_IPL_PHASE_CONTAINED_IPL)
+    {
+        featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_COMMON_CONTAINED;
+
+        if (l_attr_contained_ipl_type == fapi2::ENUM_ATTR_CONTAINED_IPL_TYPE_CACHE)
+        {
+            featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_CACHE_CONTAINED;
+        }
+        else
+        {
+            featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_CHIP_CONTAINED;
+        }
+    }
+    else
+    {
+        // runtime
+    }
+
+    l_fapiRc2 = FAPI_ATTR_SET(fapi2::ATTR_DYNAMIC_INIT_FEATURE_VEC,
+                              FAPI_SYSTEM,
+                              featureVec);
+
+    FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
+                 fapi2::XIPC_XIP_API_MISC_ERROR().
+                 set_CHIP_TARGET(i_procTarget).
+                 set_OCCURRENCE(7),
+                 "Failed to set the dynamic init feature vector attribute" );
 
     l_rc = p9_xip_get_section(i_hwImage, P9_XIP_SECTION_HW_DYNAMIC, &iplImgSection, attrDdLevel);
 
@@ -2816,7 +2876,8 @@ ReturnCode p10_ipl_customize (
                        i_ringBuf1 );
 
             FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS ||
-                         l_rc == TOR_INVALID_CHIPLET_TYPE,
+                         l_rc == TOR_INVALID_CHIPLET_TYPE ||
+                         l_rc == TOR_RING_IS_POPULATED,
                          fapi2::XIPC_TOR_APPEND_RING_FAILED().
                          set_CHIP_TARGET(i_procTarget).
                          set_TOR_RC(l_rc).

@@ -515,6 +515,11 @@
     <name>ATTR_NUM_KEY_ADDR_PAIR</name>
     <value>0x0</value>
   </entry>
+  <!-- HWP writeable attributes -->
+  <entry>
+    <name>ATTR_SCAN_CHIPLET_OVERRIDE</name>
+    <value>0x00</value>
+  </entry>
   <!-- virtual attributes -->
   <entry>
     <name>ATTR_CHIP_UNIT_POS</name>

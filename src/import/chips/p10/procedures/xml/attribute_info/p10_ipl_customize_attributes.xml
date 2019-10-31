@@ -67,8 +67,16 @@
     </description>
     <valueType>uint64</valueType>
     <initToZero/>
+    <writeable/>
     <platInit/>
     <persistRuntime/>
+    <enum>
+      CACHE_CONTAINED   = 0x8000000000000000,
+      CHIP_CONTAINED    = 0x4000000000000000,
+      COMMON_CONTAINED  = 0x2000000000000000,
+      HOSTBOOT          = 0x1000000000000000,
+      L2RC_HIGH_JITTER  = 0x0800000000000000
+    </enum>
   </attribute>
   <!-- ********************************************************************** -->
 </attributes>
