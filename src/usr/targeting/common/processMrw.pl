@@ -92,12 +92,34 @@ sub main
     getAndValidateCallerInputOptions($targetObj);
 
     # Run tests if asked to do so
-    if ($targetObj->{run_self_test} == 1)
+    if ($targetObj->{run_internal_tests} == 1)
     {
         runTests($targetObj);
         return 0;
     }
 
+    # Print HB target hierarchy only, ignore all other options
+    if ($targetObj->{print_hb_hierarchy} == 1)
+    {
+        my $xmlFile = $targetObj->{serverwiz_file};
+        print "\nPrinting out the HB target hierarchy from XML file $xmlFile.\n";
+        print "All other options ignored and no processing of file done.\n";
+        print "I suggest piping this out to a file for prosperity.\n\n";
+        $targetObj->printHostbootTargetHierarchy($xmlFile);
+        return 0;
+    }
+    # Print the full target hierarchy, ignore all other options
+    elsif ($targetObj->{print_full_hierarchy} == 1)
+    {
+        my $xmlFile = $targetObj->{serverwiz_file};
+        print "\nPrinting out the Full target hierarchy from XML file $xmlFile.\n";
+        print "All other options ignored and no processing of file done.\n";
+        print "I suggest piping this out to a file for prosperity.\n\n";
+        $targetObj->printFullTargetHierarchy($xmlFile);
+        return 0;
+    }
+
+    ## If not testing and not printing out hierarchy, then let's get to work ...
     # Load the XML and process the file, extracting targets and associated
     # attributes, with their data, to the targets.
     loadXmlFile($targetObj);
@@ -150,11 +172,13 @@ sub getAndValidateCallerInputOptions
                                  # output file, if no output file given.
     my $system_config   = "";
     my $debug           = 0;
+    my $print_full_hierarchy = 0; # print the full XML hierarchy
+    my $print_hb_hierarchy   = 0; # print only the  XML hierarchy
     my $force           = 0;
     my $output_file     = "";
     my $report          = 0;
     my $stealth_mode    = 0;  # Only print errors not warnings
-    my $run_self_test   = 0;
+    my $run_internal_tests   = 0;
     my $version         = 0;
 
     # Grab the user's command line options.  If an option is not recognized,
@@ -165,11 +189,13 @@ sub getAndValidateCallerInputOptions
         "build=s" => \$build,      # string
         "c=s" => \$system_config,  # string
         "d"   => \$debug,          # flag
+        "fh"  => \$print_full_hierarchy,  # flag
+        "hh"  => \$print_hb_hierarchy,    # flag
         "f"   => \$force,          # numeric
         "o=s" => \$output_file,    # string
         "r"   => \$report,         # flag
         "s"   => \$stealth_mode,   # flag
-        "t"   => \$run_self_test,  # flag
+        "t"   => \$run_internal_tests,  # flag
       )
       or printUsage();
 
@@ -209,8 +235,9 @@ sub getAndValidateCallerInputOptions
     $targetObj->{output_file} = $output_file;
     $targetObj->{report} = $report;
     $targetObj->{stealth_mode} = $stealth_mode;
-    $targetObj->{run_self_test} = $run_self_test;
-
+    $targetObj->{run_internal_tests} = $run_internal_tests;
+    $targetObj->{print_full_hierarchy} = $print_full_hierarchy;
+    $targetObj->{print_hb_hierarchy} = $print_hb_hierarchy;
 } # end getAndValidateCallerInputOptions
 
 
@@ -365,10 +392,6 @@ sub processTargets
                 processUcd($targetObj, $target);
             }
         }
-        elsif ($type eq "OCMB_CHIP")
-        {
-            processOcmbChip($targetObj, $target);
-        }
 
         # Once processing of the target type is complete, remove
         # deprecated and un-needed attributes for this type
@@ -442,7 +465,7 @@ sub writeResultsToXml
         $filename = $targetObj->{output_file};
     }
 
-    print "Creating XML: $filename\n";
+    print "Creating XML:    $filename\n";
     open($xml_fh, ">$filename") || die "Unable to create: $filename";
 
     $targetObj->printXML($xml_fh, "top", $targetObj->{build});
@@ -522,7 +545,7 @@ sub processSystem
     {
         $targetObj->deleteAttribute($target,"XSCOM_BASE_ADDRESS");
     }
-}
+} # end sub processSystem
 
 sub processIpmiSensors {
     my $targetObj=shift;
@@ -613,7 +636,7 @@ sub processIpmiSensors {
     my @sensors_sort = sort(@sensors);
     $targetObj->setAttribute($target,
                  "IPMI_SENSORS",join(',',@sensors_sort));
-}
+} # end sub processIpmiSensors
 
 sub processApss {
     my $targetObj=shift;
@@ -764,52 +787,7 @@ sub processApss {
                  "APSS_GPIO_PORT_PINS",join(',',@gpios));
 
     convertNegativeNumbers($targetObj,$systemTarget,"ADC_CHANNEL_OFFSETS",32);
-}
-
-sub convertNegativeNumbers
-{
-    my $targetObj=shift;
-    my $target=shift;
-    my $attribute=shift;
-    my $numbits=shift;
-
-    my @offset = split(/\,/,
-                 $targetObj->getAttribute($target,$attribute));
-    for (my $i=0;$i<@offset;$i++)
-    {
-        if ($offset[$i]<0)
-        {
-            my $neg_offset = 2**$numbits+$offset[$i];
-            $offset[$i]=sprintf("0x%08X",$neg_offset);
-        }
-    }
-    my $new_offset = join(',',@offset);
-    $targetObj->setAttribute($target,$attribute,$new_offset)
-}
-
-sub parseBitwise
-{
-    my $targetObj = shift;
-    my $target = shift;
-    my $attribute = shift;
-    my $mask = 0;
-
-    #if CDM_POLICIES_BITMASK is not a bad attribute, aka if it is defined
-    if (!$targetObj->isBadAttribute($target, $attribute."_BITMASK"))
-    {
-        foreach my $e (keys %{ $targetObj->getEnumHash($attribute)})
-        {
-            my $field = $targetObj->getAttributeField(
-                        $target,$attribute."_BITMASK",$e);
-            my $val=hex($targetObj->getEnumValue($attribute,$e));
-            if ($field eq "true")
-            {
-                $mask=$mask | $val;
-            }
-        }
-        $targetObj->setAttribute($target,$attribute,$mask);
-    }
-}
+} # end sub processApss
 
 #  @brief Processes a TPM target
 #
@@ -862,7 +840,7 @@ sub processTpm
             last;
         }
     }
-}
+} # end sub processTpm
 
 sub processUcd
 {
@@ -943,7 +921,7 @@ sub processUcd
             last;
         }
     }
-}
+} # end sub processUcd
 
 #--------------------------------------------------
 # @brief Process processors
@@ -1025,7 +1003,7 @@ sub processProcessor
         {
             processXbus($targetObj, $child);
         }
-        elsif (($child_type eq "EQ") || ($child_type eq "PAUC"))
+        elsif (($child_type eq "EQ") || ($child_type eq "PAUC") || ($child_type eq "MC"))
         {
             # Recursively iterate over the target and it's children
             setTargetChipletId($targetObj, $child, $child_type);
@@ -1047,10 +1025,6 @@ sub processProcessor
         elsif ($child_type eq "PEC")
         {
             processPec($targetObj, $child, $target);
-        }
-        elsif ($child_type eq "MC")
-        {
-            processMc($targetObj, $child);
         }
         elsif ($child_type eq "OCC")
         {
@@ -1265,7 +1239,7 @@ sub processProcessor
         # Set the target MRU_ID attribute
         $targetObj->setAttribute($target, "MRU_ID", $mruiId);
     }
-}
+} # end sub processProcessor
 
 sub processPowerRails
 {
@@ -1337,7 +1311,7 @@ sub processPowerRails
             $targetObj->setAttribute($target, $rail_attr_id, $position);
         }
     }
-}
+} # end sub processPowerRails
 
 sub processI2cSpeeds
 {
@@ -1410,7 +1384,53 @@ sub processI2cSpeeds
     $bus_speed_attr =~ s/,$//;
 
     $targetObj->setAttribute($target,"I2C_BUS_SPEED_ARRAY",$bus_speed_attr);
+} # end sub processI2cSpeeds
+
+sub convertNegativeNumbers
+{
+    my $targetObj=shift;
+    my $target=shift;
+    my $attribute=shift;
+    my $numbits=shift;
+
+    my @offset = split(/\,/,
+                 $targetObj->getAttribute($target,$attribute));
+    for (my $i=0;$i<@offset;$i++)
+    {
+        if ($offset[$i]<0)
+        {
+            my $neg_offset = 2**$numbits+$offset[$i];
+            $offset[$i]=sprintf("0x%08X",$neg_offset);
+        }
+    }
+    my $new_offset = join(',',@offset);
+    $targetObj->setAttribute($target,$attribute,$new_offset)
 }
+
+sub parseBitwise
+{
+    my $targetObj = shift;
+    my $target = shift;
+    my $attribute = shift;
+    my $mask = 0;
+
+    #if CDM_POLICIES_BITMASK is not a bad attribute, aka if it is defined
+    if (!$targetObj->isBadAttribute($target, $attribute."_BITMASK"))
+    {
+        foreach my $e (keys %{ $targetObj->getEnumHash($attribute)})
+        {
+            my $field = $targetObj->getAttributeField(
+                        $target,$attribute."_BITMASK",$e);
+            my $val=hex($targetObj->getEnumValue($attribute,$e));
+            if ($field eq "true")
+            {
+                $mask=$mask | $val;
+            }
+        }
+        $targetObj->setAttribute($target,$attribute,$mask);
+    }
+}
+
 
 #--------------------------------------------------
 # @brief Set up memory maps for certain attributes of the PROCS
@@ -1603,7 +1623,7 @@ sub getTopologyIndex
 # @brief Set the Target's attribute CHIPLET_ID
 #
 # @details The CHIPLET_ID value is calculated via the addition of the
-#          target's attribute CHIP_UNIT with the PERVASIVE_PARENT_OFFSET value
+#          target's attribute CHIP_UNIT with the PARENT_PERVASIVE_OFFSET value
 #          for target type.
 #
 # @param [in] $targetObj - The global target object.
@@ -1633,17 +1653,17 @@ sub setTargetChipletId
         else
         {
             # Can't get the CHIP_UNIT value, then no point in continuing
-            # This is a an acceptable response, not all target instance have
+            # This is an acceptable response, not all target instance have
             # a CHIP_UNIT attribute.
             return;
         }
     }
 
     # If the target has pervasive parent, then process it
-    if (exists $Targets::PERVASIVE_PARENT_OFFSET{$targetType})
+    if (exists $Targets::PARENT_PERVASIVE_OFFSET{$targetType})
     {
         # Get this target's PERVASIVE_PARENT value
-        my $value = $Targets::PERVASIVE_PARENT_OFFSET{$targetType};
+        my $value = $Targets::PARENT_PERVASIVE_OFFSET{$targetType};
 
         if ($targetType eq "PAU")
         {
@@ -1755,88 +1775,9 @@ sub setPauOrdinalId
 }
 
 #--------------------------------------------------
-## MC
-##
-##
-sub processMc
-{
-    # NOTE: OMI_INBAND_BAR_BASE_ADDR_OFFSET will be set for the MC
-    # targets via a specific child OMI Target. View the
-    # processOmi function for further details.
-    my $targetObj    = shift;
-    my $target       = shift;
-
-    foreach my $child (@{ $targetObj->getTargetChildren($target) })
-    {
-        my $child_type = $targetObj->getType($child);
-
-        $targetObj->log($target,
-            "Processing MC child: $child Type: $child_type");
-
-        if ($child_type eq "MI")
-        {
-            processMi($targetObj, $child);
-        }
-        elsif ($child_type eq "OMIC")
-        {
-            processOmic($targetObj, $child);
-        }
-    }
-
-    {
-        use integer;
-        my $chip_unit = $targetObj->getAttribute($target, "CHIP_UNIT");
-        my $value = sprintf("0x%x",
-                            Targets::PERVASIVE_PARENT_MC_OFFSET
-                            + $chip_unit);
-
-        $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
-    }
-}
-
-#--------------------------------------------------
-## MCC
-##
-##
-sub processMcc
-{
-    my $targetObj   = shift;
-    my $target      = shift;
-
-    foreach my $child (@{ $targetObj->getTargetChildren($target) })
-    {
-        my $child_type = $targetObj->getType($child);
-
-        $targetObj->log($target,
-            "Processing MCC child: $child Type: $child_type");
-
-        if ($child_type eq "OMI")
-        {
-            processOmi($targetObj, $child);
-        }
-    }
-
-    {
-        use integer;
-        # There are a total of four MCC units on an MC unit. So, to
-        # determine which MC an MCC belongs to, the CHIP_UNIT of the MCC can
-        # be divided by the number of units per MC to arrive at the correct
-        # offset to add to the pervasive MCC parent offset.
-        my $numberOfMccPerMc = 4;
-        my $chip_unit = $targetObj->getAttribute($target, "CHIP_UNIT");
-
-        my $value = sprintf("0x%x",
-                            Targets::PERVASIVE_PARENT_MI_OFFSET
-                            + ($chip_unit / $numberOfMccPerMc));
-
-        $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
-    }
-}
-
-#--------------------------------------------------
 ## OMI
 ##
-##
+##  TODO, RTC 208783 The code to do the OMI_INBAND_BAR_BASE_ADDR_OFFSET NEEDS to be done.
 sub processOmi
 {
     my $mrwObj  = shift;
@@ -1845,22 +1786,14 @@ sub processOmi
 # TODO, RTC 208783. This will need to be updated.  This will be addressed
 # in story 208783, just making a note.
     # Map the OMI instance to its corresponding OMIC parent
-    my %omi_map = (4  => "omic-0",
-                   5  => "omic-0",
-                   6  => "omic-0",
-                   7  => "omic-1",
+    my %omi_map = (0  => "omic-0",
+                   1  => "omic-0",
                    2  => "omic-1",
                    3  => "omic-1",
-                   0  => "omic-2",
-                   1  => "omic-2",
-                   12 => "omic-0",
-                   13 => "omic-0",
-                   14 => "omic-0",
-                   15 => "omic-1",
-                   10 => "omic-1",
-                   11 => "omic-1",
-                   8  => "omic-2",
-                   9  => "omic-2");
+                   4  => "omic-2",
+                   5  => "omic-2",
+                   6  => "omic-3",
+                   7  => "omic-3" );
 
     use integer;
     # There are a total of eight OMI units on an MC unit. So, to
@@ -1868,10 +1801,11 @@ sub processOmi
     # be divided by the number of units per MC to arrive at the correct
     # offset to add to the pervasive OMI parent offset.
     my $numberOfOmiPerMc = 8;
+
     my $chip_unit = $mrwObj->getAttribute($omitarg, "CHIP_UNIT");
     my $fapi_pos = $mrwObj->getAttribute($omitarg, "FAPI_POS");
     my $value = sprintf("0x%x",
-                        Targets::PERVASIVE_PARENT_MI_OFFSET
+                        $Targets::PARENT_PERVASIVE_OFFSET{MI}
                         + ($chip_unit / $numberOfOmiPerMc));
 
     $mrwObj->setAttribute($omitarg, "CHIPLET_ID", $value);
@@ -1915,82 +1849,6 @@ sub processOmi
         $mrwObj->setAttribute($parent_mc, "OMI_INBAND_BAR_BASE_ADDR_OFFSET",
             $value);
     }
-}
-
-#--------------------------------------------------
-## OMIC
-##
-##
-sub processOmic
-{
-    my $targetObj   = shift;
-    my $target      = shift;
-
-    use integer;
-    # There are a total of three OMIC units on an MC unit. So, to
-    # determine which MC an OMIC belongs to, the CHIP_UNIT of the OMIC can
-    # be divided by the number of units per MC to arrive at the correct
-    # offset to add to the pervasive OMIC parent offset.
-    my $numberOfOmicPerMc = 3;
-    my $chip_unit = $targetObj->getAttribute($target, "CHIP_UNIT");
-
-    my $value = sprintf("0x%x",
-                        Targets::PERVASIVE_PARENT_MI_OFFSET
-                        + ($chip_unit / $numberOfOmicPerMc));
-
-    $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
-}
-
-#--------------------------------------------------
-# @brief OCMB_CHIP
-#
-#--------------------------------------------------
-sub processOcmbChip
-{
-    my $targetObj    = shift;
-    my $target       = shift;
-
-    $targetObj->setEepromAttributesForDdimms($target);
-}
-
-#--------------------------------------------------
-## MI
-##
-##
-sub processMi
-{
-    my $targetObj    = shift;
-    my $target       = shift;
-
-    foreach my $child (@{ $targetObj->getTargetChildren($target) })
-    {
-        my $child_type = $targetObj->getType($child);
-
-        $targetObj->log($target,
-            "Processing MI child: $child Type: $child_type");
-
-        if ($child_type eq "MCC")
-        {
-            processMcc($targetObj, $child);
-        }
-    }
-
-    {
-        use integer;
-        # There are a total of two MI units on an MC unit. So, to
-        # determine which MC an MI belongs to, the CHIP_UNIT of the MI can
-        # be divided by the number of units per MC to arrive at the correct
-        # offset to add to the pervasive MI parent offset.
-        my $numberOfMiPerMc = 2;
-        my $chip_unit = $targetObj->getAttribute($target, "CHIP_UNIT");
-
-        my $value = sprintf("0x%x",
-                            Targets::PERVASIVE_PARENT_MI_OFFSET
-                            + ($chip_unit / $numberOfMiPerMc));
-
-        $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
-    }
-
 }
 
 
@@ -2098,7 +1956,7 @@ sub processObus
             $targetObj->setAttribute($child, "CHIPLET_ID", $value);
         }
     }
-}
+} # end sub processObus
 
 #--------------------------------------------------
 ## XBUS
@@ -2168,8 +2026,7 @@ sub processXbus
             $targetObj->setAttribute($target, "PEER_PATH", "physical:na");
         }
     }
-
-}
+} # end sub processXbus
 
 #--------------------------------------------------
 ## ABUS
@@ -2281,7 +2138,7 @@ sub processAbus
         $targetObj->setAttribute($target, "MFG_WRAP_TEST_ABUS_LINKS_SET", $link_set);
         $targetObj->setAttribute($abus_dest_parent, "MFG_WRAP_TEST_ABUS_LINKS_SET", $link_set);
     }
-}
+} # end sub processAbus
 
 #--------------------------------------------------
 ## FSI
@@ -2390,7 +2247,7 @@ sub processFsi
         $targetObj->setFsiAttributes($fsi_child_target,
                     $type,$cmfsi,$proc_path,$fsi_link,$flip_port,$altfsiswitch);
     }
-}
+} # end sub processFsi
 
 #--------------------------------------------------
 ## PEC
@@ -2721,7 +2578,8 @@ sub processPec
 
         } # PHB loop
     } # PEC config loop
-}
+} # sub processPec
+
 #--------------------------------------------------
 ## OCC
 ##
@@ -2739,7 +2597,7 @@ sub processOcc
         $master_capable=1;
     }
     $targetObj->setAttribute($target,"OCC_MASTER_CAPABLE",$master_capable);
-}
+} # end sub processOcc
 
 
 sub getI2cMapField
