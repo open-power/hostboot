@@ -51,7 +51,7 @@ namespace fapi2
 
 // Forward-declare multicast enums
 enum MulticastGroup : uint32_t;
-enum MulticastType : uint8_t;
+enum MulticastType : uint32_t;
 
 //------------------------------------------------------------------------------
 // HW Communication Functions to be implemented at the platform layer.
