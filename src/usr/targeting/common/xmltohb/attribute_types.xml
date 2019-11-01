@@ -2970,6 +2970,81 @@
     <writeable/>
   </attribute>
 
+  <attribute>
+    <id>KEY_CLEAR_REQUEST</id>
+    <description>
+        Indicates types of Key Clear Requests are being made
+    </description>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <simpleType>
+      <enumeration>
+        <id>KEY_CLEAR_REQUEST</id>
+        <default>NONE</default>
+      </enumeration>
+    </simpleType>
+    <writeable/>
+  </attribute>
+
+  <enumerationType>
+    <id>KEY_CLEAR_REQUEST</id>
+    <description>
+        Enum indicating the different possible Key Clear Request values
+    </description>
+    <enumerator>
+      <description>
+          (Default) Key clear not requested
+      </description>
+      <name>NONE</name>
+      <value>0x0000</value>
+    </enumerator>
+    <enumerator>
+      <description>
+          Clear/reset all sensitive data controlled by platform firmware
+          from the system
+      </description>
+      <name>ALL</name>
+      <value>0x8000</value>
+    </enumerator>
+    <enumerator>
+      <description>
+          This indicates OPAL to clear the OS platform key
+      </description>
+      <name>OS_PK</name>
+      <value>0x4000</value>
+    </enumerator>
+    <enumerator>
+      <description>
+          This indicates to OPAL/PEF to clear the System Security Officer
+          certificate
+      </description>
+      <name>PEF_SSO</name>
+      <value>0x2000</value>
+    </enumerator>
+    <enumerator>
+      <description>
+          This indicates to PowerVM to clear the system key to the default state
+      </description>
+      <name>POWERVM_SYSKEY</name>
+      <value>0x1000</value>
+    </enumerator>
+    <enumerator>
+      <description>
+          Clear all sensitive data for MFG processing
+          Only valid on development drivers
+      </description>
+      <name>MFG</name>
+      <value>0x0100</value>
+    </enumerator>
+    <enumerator>
+      <description>
+          Reserved bits
+      </description>
+      <name>RESERVED</name>
+      <value>0x00FF</value>
+    </enumerator>
+  </enumerationType>
+
   <enumerationType>
     <id>KEY_TRANSITION_STATE</id>
     <description>
