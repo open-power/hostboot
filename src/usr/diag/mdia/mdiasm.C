@@ -49,6 +49,7 @@
 #include <p9c_mss_maint_cmds.H>
 #include <dimmBadDqBitmapFuncs.H>
 #include <sys/misc.h>
+#include <hwp_wrappers.H>
 
 using namespace TARGETING;
 using namespace ERRORLOG;
@@ -632,16 +633,17 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                 // target type is MCBIST
                 else if ( TYPE_MCBIST == trgtType )
                 {
+                    #ifndef CONFIG_AXONE
                     fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiMcbist(target);
-                    FAPI_INVOKE_HWP( err, mss::memdiags::stop, fapiMcbist );
+                    FAPI_INVOKE_HWP( err, nim_stop, fapiMcbist );
 
                     if ( nullptr != err )
                     {
-                        MDIA_ERR("sm: mss::memdiags::stop failed");
+                        MDIA_ERR("sm: nim_stop failed");
                         errlCommit(err, MDIA_COMP_ID);
                     }
 
-                    //mss::memdiags::stop will set the command complete attention so
+                    //nim_stop will set the command complete attention so
                     //we need to clear those
                     bitMask = ~bitMask;
 
@@ -654,22 +656,23 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                                    "0x%08X", firAddr, get_huid(target) );
                         errlCommit(err, MDIA_COMP_ID);
                     }
+                    #endif
                 }
                 // target type is OCMB_CHIP
                 else if ( TYPE_OCMB_CHIP == trgtType )
                 {
-                    /* TODO RTC 201293 uncomment once we have hwp support
+                    #ifdef CONFIG_AXONE
                     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                         fapiOcmb(target);
-                    FAPI_INVOKE_HWP( err, mss::memdiags::stop, fapiOcmb );
+                    FAPI_INVOKE_HWP( err, exp_stop, fapiOcmb );
 
                     if ( nullptr != err )
                     {
-                        MDIA_ERR("sm: mss::memdiags::stop failed");
+                        MDIA_ERR("sm: exp_stop failed");
                         errlCommit(err, MDIA_COMP_ID);
                     }
 
-                    // mss::memdiags::stop will set the command complete
+                    // exp_stop will set the command complete
                     // attention so we need to clear those
                     bitMask = ~bitMask;
 
@@ -682,7 +685,7 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                                    "0x%08X", firAddr, get_huid(target) );
                         errlCommit(err, MDIA_COMP_ID);
                     }
-                    */
+                    #endif
                 }
                 // Assert if unsupported type
                 else
@@ -782,7 +785,15 @@ void StateMachine::setup(const WorkFlowAssocMap & i_list)
         p->timeoutCnt = 0;
 
         p->data = NULL;
-        p->chipUnit = it->first->getAttr<ATTR_CHIP_UNIT>();
+        if ( TYPE_OCMB_CHIP == it->first->getAttr<ATTR_TYPE>() )
+        {
+            // There is no chip unit attribute for OCMBs, so just use 0
+            p->chipUnit = 0;
+        }
+        else
+        {
+            p->chipUnit = it->first->getAttr<ATTR_CHIP_UNIT>();
+        }
 
         iv_workFlowProperties.push_back(p);
     }
@@ -1242,14 +1253,15 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
         //target type is MCBIST
         else if (TYPE_MCBIST == trgtType)
         {
+            #ifndef CONFIG_AXONE
             fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiMcbist(target);
-            mss::mcbist::stop_conditions<> stopCond;
+            mss::mcbist::stop_conditions<mss::mc_type::NIMBUS> stopCond;
 
             switch(workItem)
             {
                 case START_RANDOM_PATTERN:
 
-                    FAPI_INVOKE_HWP( err, mss::memdiags::sf_init, fapiMcbist,
+                    FAPI_INVOKE_HWP( err, nim_sf_init, fapiMcbist,
                                      mss::mcbist::PATTERN_RANDOM );
                     MDIA_FAST("sm: random init %p on: %x", fapiMcbist,
                             get_huid(target));
@@ -1270,7 +1282,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                         stopCond.set_pause_on_nce_hard(mss::ON);
                     }
 
-                    FAPI_INVOKE_HWP( err, mss::memdiags::sf_read, fapiMcbist,
+                    FAPI_INVOKE_HWP( err, nim_sf_read, fapiMcbist,
                                      stopCond );
                     MDIA_FAST("sm: scrub %p on: %x", fapiMcbist,
                             get_huid(target));
@@ -1285,7 +1297,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                 case START_PATTERN_6:
                 case START_PATTERN_7:
 
-                    FAPI_INVOKE_HWP( err, mss::memdiags::sf_init, fapiMcbist,
+                    FAPI_INVOKE_HWP( err, nim_sf_init, fapiMcbist,
                                      workItem );
                     MDIA_FAST("sm: init %p on: %x", fapiMcbist,
                             get_huid(target));
@@ -1301,19 +1313,20 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                 MDIA_FAST("sm: Running Maint Cmd failed");
                 i_wfp.data = nullptr;
             }
+            #endif
         }
         // target type is OCMB_CHIP
         else if ( TYPE_OCMB_CHIP == trgtType )
         {
-            /* TODO RTC 201293 - uncomment with hwp support
+            #ifdef CONFIG_AXONE
             fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiOcmb(target);
-            mss::mcbist::stop_conditions<> stopCond;
+            mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
 
             switch(workItem)
             {
                 case START_RANDOM_PATTERN:
 
-                    FAPI_INVOKE_HWP( err, mss::memdiags::sf_init, fapiOcmb,
+                    FAPI_INVOKE_HWP( err, exp_sf_init, fapiOcmb,
                                      mss::mcbist::PATTERN_RANDOM );
                     MDIA_FAST("sm: random init %p on: %x", fapiOcmb,
                             get_huid(target));
@@ -1334,7 +1347,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                         stopCond.set_pause_on_nce_hard(mss::ON);
                     }
 
-                    FAPI_INVOKE_HWP( err, mss::memdiags::sf_read, fapiOcmb,
+                    FAPI_INVOKE_HWP( err, exp_sf_read, fapiOcmb,
                                      stopCond );
                     MDIA_FAST( "sm: scrub %p on: %x", fapiOcmb,
                                get_huid(target) );
@@ -1349,7 +1362,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                 case START_PATTERN_6:
                 case START_PATTERN_7:
 
-                    FAPI_INVOKE_HWP( err, mss::memdiags::sf_init, fapiOcmb,
+                    FAPI_INVOKE_HWP( err, exp_sf_init, fapiOcmb,
                                      workItem );
                     MDIA_FAST( "sm: init %p on: %x", fapiOcmb,
                                get_huid(target) );
@@ -1365,7 +1378,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                 MDIA_FAST("sm: Running Maint Cmd failed");
                 i_wfp.data = nullptr;
             }
-            */
+            #endif
         }
         else
         {
@@ -1571,37 +1584,39 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
         //target type is MCBIST
         else if ( TYPE_MCBIST == trgtType )
         {
+            #ifndef CONFIG_AXONE
             if(flags & STOP_CMD)
             {
                 MDIA_FAST("sm: stopping command: %p", target);
 
                 fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiMcbist(target);
-                FAPI_INVOKE_HWP( err, mss::memdiags::stop, fapiMcbist );
+                FAPI_INVOKE_HWP( err, nim_stop, fapiMcbist );
 
                 if(nullptr != err)
                 {
-                    MDIA_ERR("sm: mss::memdiags::stop failed");
+                    MDIA_ERR("sm: nim_stop failed");
                     errlCommit(err, MDIA_COMP_ID);
                 }
             }
+            #endif
         }
         // target type is OCMB_CHIP
         else if ( TYPE_OCMB_CHIP == trgtType )
         {
+            #ifdef CONFIG_AXONE
             if(flags & STOP_CMD)
             {
                 MDIA_FAST("sm: stopping command: %p", target);
-                /* TODO RTC 201293 - reenable with hwp support
                 fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiOcmb(target);
-                FAPI_INVOKE_HWP( err, mss::memdiags::stop, fapiOcmb );
+                FAPI_INVOKE_HWP( err, exp_stop, fapiOcmb );
 
                 if(nullptr != err)
                 {
-                    MDIA_ERR("sm: mss::memdiags::stop failed");
+                    MDIA_ERR("sm: exp_stop failed");
                     errlCommit(err, MDIA_COMP_ID);
                 }
-                */
             }
+            #endif
         }
         else
         {

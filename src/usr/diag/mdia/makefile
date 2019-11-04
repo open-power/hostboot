@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2017
+# Contributors Listed Below - COPYRIGHT 2012,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -49,6 +49,11 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/common/include
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/memory
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/memory/lib/shared
+
+EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/prd/
+EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/utils/mcbist/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 
 MODULE = mdia
 

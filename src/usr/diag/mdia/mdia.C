@@ -125,7 +125,6 @@ errlHndl_t runStep(const TargetHandleList & i_targetList)
     ATTR_RECONFIGURE_LOOP_type attr = top->getAttr<ATTR_RECONFIGURE_LOOP>();
     if ( 0 == (attr & RECONFIGURE_LOOP_RCD_PARITY_ERROR) )
     {
-        //TODO RTC 201293 - may need to update this for axone as well
         TargetHandleList trgtList; getAllChiplets( trgtList, TYPE_MCA );
         for ( auto & trgt : trgtList )
         {
