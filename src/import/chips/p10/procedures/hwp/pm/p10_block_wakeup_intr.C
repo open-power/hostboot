@@ -110,7 +110,7 @@ p10_block_wakeup_intr(
 
             //Ignore STOP Exits  bits :0-3
             l_scrb_data = BIT64(l_relative_core_pos);
-            //OCCFLG3 set bit 10,11,12
+            //OCCFLG3 set bit 11,12,13
             l_occflg3_data = BIT64(XGPE_IGNORE_STOP_CONTROL) | BIT64(XGPE_IGNORE_STOP_ACTION) |
                              BIT64(XGPE_IGNORE_STOP_EXITS);
             break;
@@ -119,7 +119,7 @@ p10_block_wakeup_intr(
             //Ignore STOP Exits  bits :0-3
             l_scrb_data = BIT64(l_relative_core_pos);
 
-            //OCCFLG3 set bit 10,12
+            //OCCFLG3 set bit 11,13
             //bit 11 is left cleared for the disable operation".
             l_occflg3_data = BIT64(XGPE_IGNORE_STOP_CONTROL) | BIT64(XGPE_IGNORE_STOP_EXITS);
             break;
@@ -128,7 +128,7 @@ p10_block_wakeup_intr(
             //Ignore STOP Entries  bits :4-7
             l_scrb_data = BIT64(l_relative_core_pos) >> 4;
 
-            //OCCFLG3 set bit 10,11,12
+            //OCCFLG3 set bit 11,12,13
             l_occflg3_data = BIT64(XGPE_IGNORE_STOP_CONTROL) | BIT64(XGPE_IGNORE_STOP_ACTION) |
                              BIT64(XGPE_IGNORE_STOP_ENTRIES);
             break;
@@ -137,8 +137,8 @@ p10_block_wakeup_intr(
             //Ignore STOP Entries  bits :4-7
             l_scrb_data = BIT64(l_relative_core_pos) >> 4;
 
-            //OCCFLG3 set bit 10,13
-            //bit 11 is left cleared for the disable operation".
+            //OCCFLG3 set bit 11,14
+            //bit 12 is left cleared for the disable operation".
             l_occflg3_data = BIT64(XGPE_IGNORE_STOP_CONTROL) | BIT64(XGPE_IGNORE_STOP_ENTRIES);
             break;
 
