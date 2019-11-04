@@ -112,7 +112,6 @@ fapi2::ReturnCode exp_sf_read( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                                const mss::mcbist::address& i_end_address = mss::mcbist::address(
                                        mss::mcbistTraits<mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>::LARGEST_ADDRESS) );
 
-#if 0  // These functions aren't required at the moment, but leaving here in case
 ///
 /// @brief Continuous background scrub command wrapper for Nimbus
 /// @param[in] i_target the target behind which all memory should be scrubbed
@@ -123,7 +122,7 @@ fapi2::ReturnCode exp_sf_read( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
 ///
 fapi2::ReturnCode nim_background_scrub( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
                                         const mss::mcbist::stop_conditions<mss::mc_type::NIMBUS>& i_stop,
-                                        const speed i_speed,
+                                        const mss::mcbist::speed i_speed,
                                         const mss::mcbist::address& i_address );
 
 ///
@@ -136,7 +135,7 @@ fapi2::ReturnCode nim_background_scrub( const fapi2::Target<fapi2::TARGET_TYPE_M
 ///
 fapi2::ReturnCode exp_background_scrub( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                         const mss::mcbist::stop_conditions<mss::mc_type::EXPLORER>& i_stop,
-                                        const speed i_speed,
+                                        const mss::mcbist::speed i_speed,
                                         const mss::mcbist::address& i_address );
 
 ///
@@ -183,7 +182,7 @@ fapi2::ReturnCode nim_continue_cmd( const fapi2::Target<fapi2::TARGET_TYPE_MCBIS
                                     const mss::mcbist::end_boundary i_end = mss::mcbist::end_boundary::DONT_CHANGE,
                                     const mss::mcbist::stop_conditions<mss::mc_type::NIMBUS>& i_stop = mss::mcbist::stop_conditions<mss::mc_type::NIMBUS>
                                             (mss::mcbist::stop_conditions<mss::mc_type::NIMBUS>::DONT_CHANGE),
-                                    const speed i_speed = speed::SAME_SPEED );
+                                    const mss::mcbist::speed i_speed = mss::mcbist::speed::SAME_SPEED );
 
 ///
 /// @brief Continue current command wrapper for Explorer
@@ -198,7 +197,7 @@ fapi2::ReturnCode exp_continue_cmd( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
                                     const mss::mcbist::stop_conditions<mss::mc_type::EXPLORER>& i_stop =
                                         mss::mcbist::stop_conditions<mss::mc_type::EXPLORER>
                                         (mss::mcbist::stop_conditions<mss::mc_type::EXPLORER>::DONT_CHANGE),
-                                    const speed i_speed = speed::SAME_SPEED );
+                                    const mss::mcbist::speed i_speed = mss::mcbist::speed::SAME_SPEED );
 
 ///
 /// @brief Broadcast mode check wrapper for Nimbus
@@ -220,7 +219,7 @@ const mss::states nim_is_broadcast_capable(const std::vector<fapi2::Target<fapi2
 /// @param[in] i_kinds the dimms to effect
 /// @return o_capable - yes iff these vector of targets are broadcast capable
 ///
-const mss::states nim_is_broadcast_capable(const std::vector<mss::dimm::kind>& i_kinds);
+const mss::states nim_is_broadcast_capable(const std::vector<mss::dimm::kind<>>& i_kinds);
 
 ///
 /// @brief Broadcast mode check wrapper for Explorer
@@ -242,7 +241,6 @@ const mss::states exp_is_broadcast_capable(const std::vector<fapi2::Target<fapi2
 /// @param[in] i_kinds the dimms to effect
 /// @return o_capable - yes iff these vector of targets are broadcast capable
 ///
-const mss::states exp_is_broadcast_capable(const std::vector<mss::dimm::kind>& i_kinds);
-#endif
+const mss::states exp_is_broadcast_capable(const std::vector<mss::dimm::kind<>>& i_kinds);
 
 #endif
