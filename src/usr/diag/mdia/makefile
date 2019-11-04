@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2019
+# Contributors Listed Below - COPYRIGHT 2012,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -51,6 +51,11 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/utils/mcbist
 ##########################################################
 # Following is needed to include p9c_mss_maint_cmds.H
 ##########################################################
+
+EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/prd/
+EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/utils/mcbist/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 
 MODULE = mdia
 
