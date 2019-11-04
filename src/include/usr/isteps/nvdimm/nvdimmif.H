@@ -42,6 +42,22 @@ namespace NVDIMM
  */
 void getNVDIMMs( std::list<EEPROM::EepromInfo_t>& o_info );
 
+/**
+ * @brief Check if given address is owned by nvdimms and return
+          a new address that isn't if it was
+ * @param[in] i_topAddr = High mainstore address (see get_top_homer_mem_addr)
+ * @return uint64_t - Highest address without a nvdimm
+ */
+uint64_t get_top_addr_with_no_nvdimms( uint64_t i_topAddr );
+
+// Make a very simple inline if we don't support NVDIMMs in this compile
+#ifndef CONFIG_NVDIMM
+inline uint64_t get_top_addr_with_no_nvdimms( uint64_t i_topAddr )
+{
+    return i_topAddr;
+};
+#endif
+
 };  // end namespace NVDIMM
 
 #endif  // end __NVDIMMIF_H

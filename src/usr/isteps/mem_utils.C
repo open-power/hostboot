@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,7 @@
 #include <errl/hberrltypes.H>
 #include <secureboot/smf_utils.H>
 #include <stdint.h>
+#include <isteps/nvdimm/nvdimmif.H>
 
 namespace ISTEP
 {
@@ -207,6 +208,11 @@ uint64_t get_top_homer_mem_addr()
         {
             l_top_homer_addr = get_top_mem_addr();
         }
+
+        // Need to make sure we don't choose a range that is owned by
+        //  the NVDIMMs
+        l_top_homer_addr =
+          NVDIMM::get_top_addr_with_no_nvdimms(l_top_homer_addr);
 
     }while(0);
 

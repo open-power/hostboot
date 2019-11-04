@@ -1583,4 +1583,175 @@ void getNVDIMMs( std::list<EEPROM::EepromInfo_t>& o_info )
         o_info.size());
 }
 
+/**
+ * @brief  Helper structure to keep track of memory ranges
+ */
+typedef struct memGroups_t
+{
+    Target* proc;
+    uint64_t membottom;
+    uint64_t memtop;
+    size_t group;
+} memGroups_t;
+
+/**
+ * @brief Comparator for memGroups_t to allow sorting, sorts big-to-small
+ * @param[in]  Left-side of compare
+ * @param[in]  Right-side of compare
+ * @return true:left-side is bigger, false:right-side is bigger
+ */
+bool compare_memGroups(memGroups_t& i_ls,
+                       memGroups_t& i_rs)
+{
+    return (i_ls.memtop > i_rs.memtop);
+}
+
+/**
+ * @brief Check if given address is owned by nvdimms and return
+ *         a new address that isn't if it was
+ */
+uint64_t get_top_addr_with_no_nvdimms( uint64_t i_topAddr )
+{
+    // Default to just returning the same value we got (no nvdimms)
+    uint64_t o_topAddr = i_topAddr;
+
+    // On a NVDIMM system we need to make sure that we don't
+    //  use the NV memory for the HOMER (or other reserved
+    //  memory).  Depending on the specific memory layout
+    //  the NV memory could be placed at the top of memory
+    //  where we would normally land.
+
+    // NVDIMMs are only on Nimbus systems
+    if( TARGETING::MODEL_NIMBUS
+        !=TARGETING::targetService().getProcessorModel() )
+    {
+        return o_topAddr;
+    }
+
+    // Skip all of this checking if the input value is weird
+    if( i_topAddr == 0 )
+    {
+        return o_topAddr;
+    }
+
+    // Build up a list of possible memory ranges
+    std::vector<memGroups_t> l_memGroups;
+
+    ATTR_PROC_MEM_BASES_type l_memBases = {0};
+    ATTR_PROC_MEM_SIZES_type l_memSizes = {0};
+    const size_t l_numGroups = sizeof(ATTR_PROC_MEM_SIZES_type)
+      /sizeof(l_memSizes[0]);
+
+    TARGETING::TargetHandleList l_procList;
+    TARGETING::getAllChips(l_procList, TARGETING::TYPE_PROC);
+    assert(l_procList.size() != 0, "Empty proc list returned!");
+    for (auto l_pProc : l_procList)
+    {
+        // Get the memory group ranges under this proc
+        assert(l_pProc->tryGetAttr<ATTR_PROC_MEM_BASES>(l_memBases),
+               "Unable to get ATTR_PROC_MEM_BASES attribute");
+        assert(l_pProc->tryGetAttr<ATTR_PROC_MEM_SIZES>(l_memSizes),
+               "Unable to get ATTR_PROC_MEM_SIZES attribute");
+
+        for (size_t l_grp=0; l_grp < l_numGroups; l_grp++)
+        {
+            // Non-zero size means that there is memory present
+            if (l_memSizes[l_grp])
+            {
+                memGroups_t l_mg;
+                l_mg.proc = l_pProc;
+                l_mg.membottom = l_memBases[l_grp];
+                l_mg.memtop = l_memBases[l_grp] + l_memSizes[l_grp];
+                l_mg.group = l_grp;
+                l_memGroups.push_back(l_mg);
+            }
+        }
+    }
+
+
+    // Loop through the groups from biggest to smallest
+    //  l_top_homer_addr should hit the biggest one first, then we'll
+    //  find the next biggest if the first match has a nvdimm in it.
+    std::sort( l_memGroups.begin(), l_memGroups.end(), compare_memGroups );
+    for( auto l_memGroup : l_memGroups )
+    {
+        bool l_foundNvdimm = false;
+
+        // Get the array of mcas/group from the attribute
+        // The attr contains 8 8-bit entries, one entry per group
+        // The bits specify which mcas are included in the group
+        ATTR_MSS_MEM_MC_IN_GROUP_type l_memMcGroup = {0};
+        assert(l_memGroup.proc->tryGetAttr<ATTR_MSS_MEM_MC_IN_GROUP>
+               (l_memMcGroup),
+               "Unable to get ATTR_MSS_MEM_MC_IN_GROUP attribute");
+
+        // Get list of mcas under this proc
+        TargetHandleList l_mcaList;
+        getChildAffinityTargets( l_mcaList,
+                                 l_memGroup.proc,
+                                 CLASS_UNIT,
+                                 TYPE_MCA );
+
+        // Loop through the mcas on this proc
+        for (const auto & l_mcaTarget : l_mcaList)
+        {
+            // Get the chip unit for this mca
+            ATTR_CHIP_UNIT_type l_mcaUnit = 0;
+            l_mcaUnit = l_mcaTarget->getAttr<ATTR_CHIP_UNIT>();
+
+            // Check if this mca is included in the memory group
+            const uint8_t l_mcMask = 0x80;
+            if (l_memMcGroup[l_memGroup.group] & (l_mcMask >> l_mcaUnit))
+            {
+                // Get the list of dimms under this mca
+                TargetHandleList l_dimmList;
+                getChildAffinityTargets( l_dimmList,
+                                         l_mcaTarget,
+                                         CLASS_NA,
+                                         TYPE_DIMM );
+                for (const auto & l_dimmTarget : l_dimmList)
+                {
+                    if( isNVDIMM(l_dimmTarget) )
+                    {
+                        l_foundNvdimm = true;
+                        break;
+                    }
+                }
+                if( l_foundNvdimm ) { break; }
+            }
+        } // for all MCAs
+
+        // If we didn't find a nvdimm, we have a candidate for a valid
+        //  top address
+        if( l_foundNvdimm )
+        {
+            // Check if top addr is in this group's memory range
+            if( (o_topAddr >= l_memGroup.membottom) &&
+                (o_topAddr <= l_memGroup.memtop) )
+            {
+                TRACFCOMP(g_trac_nvdimm,"get_top_addr_with_no_nvdimms> Chosen address 0x%llX has nvdimms, cannot be used",
+                          o_topAddr);
+                o_topAddr = 0;
+            }
+        }
+        else
+        {
+            // Since we are sorted by size, this must be the
+            //  largest group without a nvdimm
+            if( o_topAddr != l_memGroup.memtop )
+            {
+                o_topAddr = l_memGroup.memtop;
+                TRACFCOMP(g_trac_nvdimm,"get_top_addr_with_no_nvdimms> Choosing address 0x%llX as new top",
+                          o_topAddr);
+                break;
+            }
+        }
+    } //for all memgroups
+
+    assert( o_topAddr != 0, "get_top_addr_with_no_nvdimms> No valid memory group found without a NVDIMM" );
+
+    return o_topAddr;
+}
+
+
 } // end namespace NVDIMM
