@@ -84,7 +84,7 @@ class SbePsu
             SBE_PSU_CLASS_CORE_STATE        = 0xD1,
             SBE_PSU_PUT_RING_FROM_IMAGE_CMD = 0xD3,
             SBE_PSU_CLASS_SECURITY_CONTROL  = 0xD6,
-            SBE_PSU_GENERIC_MESSAGE         = 0xD7
+            SBE_PSU_GENERIC_MESSAGE         = 0xD7,
         };
 
         /**
@@ -95,7 +95,7 @@ class SbePsu
         enum psuCoreStateControlCommands
         {
             SBE_CMD_CONTROL_DEADMAN_LOOP   = 0x01,
-
+            SBE_CMD_EXIT_CACHE_CONTAINED   = 0x02,
         };
 
         /**
@@ -123,13 +123,14 @@ class SbePsu
         };
 
         /**
-        * @brief enums for SBE Security Control commands
-        */
+         * @brief enums for SBE Security Control commands
+         */
         //BYTE 7 options
         enum psuSecurityContolCommands
         {
             SBE_PSU_SET_UNSECURE_MEMORY_REGION_CMD  = 0x01,
         };
+
 
         /**
          * @brief enums for SBE core state control flags
@@ -187,6 +188,27 @@ class SbePsu
             SBE_DMCONTROL_START_RSP_USED_REGS     = 0x01,
             SBE_DMCONTROL_STOP_REQ_USED_REGS      = 0x01,
             SBE_DMCONTROL_STOP_RSP_USED_REGS      = 0x01,
+        };
+
+        /**
+         * @brief non reserved word enums
+         *
+         * Shows which of the request and response msg registers are
+         * not reserved. Reserved registers do not need to be written
+         * or read.
+         *
+         * This is a 4 bit field:
+         * 0x1 - Reg 0 is non-reserved (read or write this reg)
+         * 0x2 - Reg 1 is non-reserved (read or write this reg)
+         * 0x4 - Reg 2 is non-reserved (read or write this reg)
+         * 0x8 - Reg 3 is non-reserved (read or write this reg)
+         */
+        enum psuExitCacheContainedNonReservedMsgs
+        {
+            // Use Reg 0,1,2 (0x1 + 0x2 + 0x4)
+            SBE_EXIT_CACHE_CONTAINED_REQ_USED_REGS  = 0x07,
+            // Use Reg 4 (0x1)
+            SBE_EXIT_CACHE_CONTAINED_RSP_USED_REGS  = 0x01,
         };
 
         /**
@@ -342,7 +364,6 @@ class SbePsu
             SBE_SECURITY_LIST_BIN_DUMP_RSP_USED_REGS     = 0x01,
         };
 
-
         /**
          * @brief Struct for PSU command message format
          *
@@ -402,6 +423,22 @@ class SbePsu
                 uint64_t cd1_ControlDeadmanLoop_ScomRegInitsCount;
                 uint64_t cd1_ControlDeadmanLoop_ScomRegInitsAddr;
             } PACKED;
+
+            struct //exitCacheContain
+            {
+                uint16_t cd1_exitCacheContain_Reserved;
+                //0x0300 -- 0x0100 = Response required from SBE
+                //       -- 0x0200 = SBE Ack required for this message
+                uint16_t cd1_exitCacheContain_ControlFlags;
+                uint16_t cd1_exitCacheContain_SeqId;
+                uint8_t  cd1_exitCacheContain_CommandClass;  //Mbx Reg 0 -- 0xD8
+                uint8_t  cd1_exitCacheContain_Command;       //Mbx Reg 0 -- 0x01
+                uint32_t cd1_exitCacheContain_NumXscoms;       // mbxReg1
+                uint32_t cd1_exitCacheContain_StepDetails;     // mbxReg1
+                uint64_t cd1_exitCacheContain_DataAddr;        // mbxReg2
+                uint64_t cd1_exitCacheContain_MbxReg3Reserved; // mbxReg3
+            } PACKED;
+
 
             struct //setSystemConfig
             {
@@ -521,6 +558,7 @@ class SbePsu
                 uint64_t cd7_readSeeprom_DestinationAddr; // mbxReg2
                 uint64_t cd7_readSeeprom_MbxReg3Reserved; // mbxReg3
             } PACKED;
+
 
             psuCommand(uint16_t i_controlFlags, //Mbx Reg 0 input
                        uint8_t  i_commandClass, //Mbx Reg 0 input

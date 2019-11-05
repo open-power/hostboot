@@ -181,6 +181,17 @@ namespace SBEIO
      */
     errlHndl_t getFifoSbeCapabilities(TARGETING::TargetHandle_t i_target);
 
+
+
+    /**
+    * @brief Package and Send Exit Cache Contained to the SBE via PSU
+    *
+    * @param[in]  i_argPtr  Buffer of Input arguments from HWP Call
+    *             i_argSize Size of Input argument data
+    */
+    errlHndl_t sendExitCacheContainedOp(const uint8_t * i_argPtr,
+                                        size_t    i_argSize );
+
     /**
     * @brief Sends a PSU chipOp to stash away a key,addr pair on the SBE
     *
@@ -352,22 +363,21 @@ namespace SBEIO
     /**
     * @brief Request the SBE to do a specific chip op
     *
-    * @param[in] i_target       The target of which the HWP is intended to be called on,
-    *                           this must be the first param of the request HWP
+    * @param[in] i_dataPointer  Pointer to a blob of data that contains
+    *                           additional parameters for the requests
+    *                           HWP. If a Target object is needed it is
+    *                           expected to be sent as part of this
+    *                           data blob.
     *
-    * @param[in] i_dataPointer  Pointer to a blob of data that contains additional parameters
-    *                           for the requests HWP
-    *
-    * @param[in] i_dataSize     Size of blob of data that contains additional parameters
-    *                           for the requests HWP
+    * @param[in] i_dataSize     Size of blob of data that contains additional
+    *                           parameters for the requests HWP
     *
     * @param[in] i_hwpName      Pointer to string of chars representing hwp name
     *
     * @return errlHndl_t Error log handle on failure.
     *
     */
-    errlHndl_t sendSecureHwpRequest(TARGETING::Target * i_target,
-                                    uint8_t * i_dataPointer,
+    errlHndl_t sendSecureHwpRequest(uint8_t * i_dataPointer,
                                     uint64_t i_dataSize,
                                     const char * i_hwpName);
 

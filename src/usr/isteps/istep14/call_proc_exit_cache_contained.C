@@ -51,6 +51,7 @@
 #include <sys/misc.h>
 #include <vmmconst.h>
 
+#include <intr/interrupt.H>
 #include <isteps/mem_utils.H>
 #include <arch/ppc.H>
 
@@ -380,100 +381,79 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
         }
         else
         {
-            /*TODO RTC:211082 Need some semblance of the following:
-            // 1) Reclaim all DMA buffers from the FSP
-            // 2) Suspend the mailbox with interrupt disable
-            // 3) Tell the SBE to start the deadman timer
-            // 4) Ensure that interrupt presenter is drained
-            // 5) call p10_exit_cache_contained which routes a chipop to the SBE
+            do {
+                // 1) Reclaim all DMA buffers from the FSP
+                // 2) Suspend the mailbox with interrupt disable
+                // 3) Ensure that interrupt presenter is drained
+                // 4) call p10_exit_cache_contained which routes
+                //       a chipop to the SBE
 
-            l_errl = MBOX::reclaimDmaBfrsFromFsp();
-            if (l_errl)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "call_proc_exit_cache_contained ERROR : "
-                           "MBOX::reclaimDmaBfrsFromFsp");
+                l_errl = MBOX::reclaimDmaBfrsFromFsp();
+                if (l_errl)
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "call_proc_exit_cache_contained ERROR : "
+                               "MBOX::reclaimDmaBfrsFromFsp");
 
-                //  if it not complete then thats okay, but we want to store the
-                //   log away somewhere. Since we didn't get all the DMA buffers
-                //   back its not a big deal to commit a log, even if we lose a
-                //   DMA buffer because of it it doesn't matter that much.
-                //  this will generate more traffic to the FSP
-                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-                errlCommit( l_errl, HWPF_COMP_ID );
+                    // If it not complete then thats okay, but we want to store
+                    // the log away somewhere. Since we didn't get all the DMA
+                    // buffers back its not a big deal to commit a log, even if
+                    // we lose a DMA buffer because of it it doesn't matter that
+                    // much. This will generate more traffic to the FSP
+                    l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    errlCommit( l_errl, HWPF_COMP_ID );
 
-                // (do not break.   keep going to suspend)
-            }
+                    // (do not break.   keep going to suspend)
+                }
 
-            l_errl = MBOX::suspend(true, true);
-            if (l_errl)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "call_proc_exit_cache_contained ERROR : MBOX::suspend");
-                break;
-            }
+                l_errl = MBOX::suspend(true, true);
+                if (l_errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "call_proc_exit_cache_contained ERROR : MBOX::suspend");
+                    break;
+                }
 
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                  "call_proc_exit_cache_contained: About to start deadman loop... "
-                       "Target HUID %.8X",
-                       TARGETING::get_huid(l_proc_target));
-
-            //In the future possibly move default "waitTime" value to SBEIO code
-            uint64_t waitTime = 1000000; // bump the wait time to 1 sec
-            l_errl = SBEIO::startDeadmanLoop(waitTime);
-
-            if ( l_errl )
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "startDeadmanLoop ERROR : Returning errorlog, reason=0x%x",
-                   l_errl->reasonCode() );
-
-                // capture the target data in the elog
-                ErrlUserDetailsTarget(l_proc_target).addToLog( l_errl );
-
-                break;
-            }
-            else
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "startDeadManLoop SUCCESS"  );
-            }
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "draining interrupt Q");
                 INTR::drainQueue();
-*/
 
-            //The HWP takes a list of processors, first build the list
-            std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>> l_fapiProcList;
-            for (const auto & l_procChip: l_procList)
-            {
-                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                             l_fapi_cpu_target(l_procChip);
-                l_fapiProcList.push_back(l_fapi_cpu_target);
-            }
+                //The HWP takes a list of processors, first build the list
+                std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>> l_fapiProcList;
+                for (const auto & l_procChip: l_procList)
+                {
+                    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                                 l_fapi_cpu_target(l_procChip);
+                    l_fapiProcList.push_back(l_fapi_cpu_target);
+                }
 
-            // call p10_proc_exit_cache_contained.C HWP
-            FAPI_INVOKE_HWP( l_errl,
-                             p10_exit_cache_contained,
-                             l_fapiProcList,
-                             p10_sbe_exit_cache_contained_step_t::RUN_ALL );
+                if(Util::isSimicsRunning())
+                {
+                    // notify simics exiting cache contained mode
+                    MAGIC_INSTRUCTION(MAGIC_SIMICS_EXIT_CACHE_CONTAINED);
+                }
 
-            if(l_errl)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_exit_cache_contained:: failed");
-            }
+                // call p10_proc_exit_cache_contained.C HWP to
+                //         RUN_ALL functionality
+                FAPI_INVOKE_HWP(
+                        l_errl,
+                        p10_exit_cache_contained,
+                        l_fapiProcList,
+                        p10_sbe_exit_cache_contained_step_t::RUN_ALL);
+
+                if(l_errl)
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "call_proc_exit_cache_contained:: failed");
+                    break;
+                }
+            } while (0);
+
         }
-
-        // no errors so extend Virtual Memory Map
+            // no errors so extend Virtual Memory Map
         if(!l_errl)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "SUCCESS : call_proc_exit_cache_contained" );
-
-            if(Util::isSimicsRunning())
-            {
-                // notify simics exiting cache contained mode
-                MAGIC_INSTRUCTION(MAGIC_SIMICS_EXIT_CACHE_CONTAINED);
-            }
 
             // Call the function to extend VMM to mainstore
             int rc = mm_extend();

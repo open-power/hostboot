@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -159,9 +159,6 @@ namespace SBEIO
     /**
     * @brief Request the SBE to do a specific chip op
     *
-    * @param[in] i_target       The target of which the HWP is intended to be called on,
-    *                           this must be the first param of the request HWP
-    *
     * @param[in] i_argPtr       Pointer to argument data for the request HWP
     *                           arguments for the requests HWP
     *
@@ -172,46 +169,21 @@ namespace SBEIO
     * @return errlHndl_t Error log handle on failure.
     *
     */
-    errlHndl_t sendSecureHwpRequest(TARGETING::Target * i_target,
-                                    uint8_t * i_argPtr,
+    errlHndl_t sendSecureHwpRequest(uint8_t * i_argPtr,
                                     size_t i_argSize,
                                     const char * i_hwpName)
     {
         errlHndl_t errl = nullptr;
         do
         {
-            SBE_TRACF(ENTER_MRK "sendSecureHwpRequest: HWP %s, Target 0x%.8X",
-                      i_hwpName, TARGETING::get_huid(i_target));
-
-            // First we need to figure out if this is a proc, if it isn't
-            // then we need to find its parent proccessor chip
-            auto l_targType =  i_target->getAttr<TARGETING::ATTR_TYPE>();
-            TARGETING::Target * l_proc;
-            if(l_targType == TARGETING::TYPE_PROC)
-            {
-                l_proc = i_target;
-            }
-            else
-            {
-                l_proc = const_cast<TARGETING::Target *>(getParentChip(i_target));
-            }
+            SBE_TRACF(ENTER_MRK "sendSecureHwpRequest: HWP %s",
+                      i_hwpName);
 
             // -----------------------------------------------
             // Identify HWP and call appropriate chip-op setup
             // -----------------------------------------------
-            // HWP = p9_putmemproc
-            if (strcmp(i_hwpName,"p9_putmemproc") == 0)
-            {
-                // Perform PutMem chip-op
-                errl = putMemChipOpRequest(l_proc, i_argPtr, i_argSize);
-                if (errl)
-                {
-                    break;
-                }
-            }
-
             // HWP = test_hwp
-            else if (strcmp(i_hwpName, "test_hwp") == 0)
+            if (strcmp(i_hwpName, "test_hwp") == 0)
             {
             }
 
@@ -231,7 +203,19 @@ namespace SBEIO
                 errl->collectTrace(SBEIO_COMP_NAME);
                 break;
             }
-
+            // There is a special step for the p10_sbe_cache_contained hwp to
+            // send a specific exit cache contained chip op
+            else if (strcmp(i_hwpName, "p10_sbe_exit_cache_contained") == 0)
+            {
+                SBE_TRACF(INFO_MRK "sendSecureHwpRequest: HWP %s was called.", i_hwpName);
+                //Send Exit Cache Containted Chip Op to the SBE
+                errl = sendExitCacheContainedOp(i_argPtr, i_argSize);
+                if (errl)
+                {
+                    SBE_TRACF(ERR_MRK "sendSecureHwpRequest: Error running %s.", i_hwpName);
+                    break;
+                }
+            }
             // HWP = unknown
             // Assert if HWP is not recognized, either a code bug or HWP needs
             // to be supported

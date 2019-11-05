@@ -52,13 +52,12 @@
 * @brief Given a hwp name, and its parameters, serialize the parmeters and pass the serialized
 *        data to the SBE via a FIFO chipop
 * @param[in]  i_hwpName  String representing the name of the hwp to be called
-* @param[in]  i_Target   TARGETING::Target which op is being called on
 * @param[in]  types      Any variable length of arguments, which along with target should get passed
 *                        in as parameters to the given HWP
 * @return errlHndl_t Error log handle on failure.
 */
 template<class... Types>
-errlHndl_t requestHwpViaSbe(const char * i_hwpName, TARGETING::Target * i_target, Types... types)
+errlHndl_t requestHwpViaSbe(const char * i_hwpName, Types... types)
 {
     errlHndl_t l_errl = nullptr;
 
@@ -73,8 +72,8 @@ errlHndl_t requestHwpViaSbe(const char * i_hwpName, TARGETING::Target * i_target
     memset(l_bufferPtr, 0, l_sizeOfArgInBytes);
     (void) expander{ 0, ((memcpy(l_bufferPtr,&types,sizeof(types)),l_bufferPtr+=sizeof(types)), 0)... };
 
-    FAPI_INF("requestHwpViaSbe - HWP name %s, Target 0x%.8X, Size of arguments %d bytes",
-            i_hwpName, TARGETING::get_huid(i_target), l_sizeOfArgInBytes);
+    FAPI_INF("requestHwpViaSbe - HWP name %s, Size of arguments %d bytes",
+            i_hwpName, l_sizeOfArgInBytes);
 
 #if DEBUG_TRACE
     for (uint32_t ii = 0; ii < l_sizeOfArgInBytes; ii++)
@@ -84,15 +83,12 @@ errlHndl_t requestHwpViaSbe(const char * i_hwpName, TARGETING::Target * i_target
 #endif
 
     //Call the chip op send function to request the SBE to call the HWP
-    l_bufferPtr = &(l_buffer[8]); // Advance past target argument value
-    l_errl = SBEIO::sendSecureHwpRequest(i_target, l_bufferPtr,
-                l_sizeOfArgInBytes - sizeof(i_target), i_hwpName);
+    l_bufferPtr = &(l_buffer[0]);
+    l_errl = SBEIO::sendSecureHwpRequest(l_bufferPtr,
+                  l_sizeOfArgInBytes, i_hwpName);
 
     return l_errl;
 }
-
-//Macros that return the 1st argument
-#define _GET_1ST_ARG(N, ...) N
 
 /**
  * @brief Subroutine Executor macro example code - Platforms will need to
@@ -109,23 +105,12 @@ errlHndl_t requestHwpViaSbe(const char * i_hwpName, TARGETING::Target * i_target
         /* Read the FUNC as a string and pass it to the conversion method \
         to determine what hwp we need to request */ \
         const char* l_function = #FUNC; \
-        /*Read the target argument, which is the first argument in the list */ \
-        TARGETING::Target* l_target = _GET_1ST_ARG(_args).get(); \
         do  \
         { \
-            /*TODO RTC:211082 Remove hook to bypass calling SBE */\
-            if (0 == memcmp(l_function, "p10_sbe_exit_cache_contained", 29)) \
-            { \
-                FAPI_INF("Skip running p10_sbe_exit_cache_contained until SBE code ready"); \
-                break; \
-            } \
-            else \
-            { \
-                FAPI_INF("subroutine_executor: executing hwp %s via SBE chip-op", \
-                          l_function); \
-                l_errl =  requestHwpViaSbe(l_function, l_target, _args); \
-                break; \
-            } \
+            FAPI_INF("subroutine_executor: executing hwp %s via SBE chip-op", \
+                      l_function); \
+            l_errl =  requestHwpViaSbe(l_function, _args); \
+            break; \
         } while (0); \
         if(l_errl) \
         { \

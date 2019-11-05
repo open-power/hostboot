@@ -23,7 +23,7 @@
 #
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../..
-PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
+PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p10/procedures
 MODULE = sbeio
 
 # pull in .mk common between sbeio and sbeio_rt
@@ -50,6 +50,7 @@ OBJS += sbe_fifo_buffer.o
 OBJS += sbe_ffdc_package_parser.o
 OBJS += sbe_getCapabilities.o
 OBJS += sbe_securityListBinDump.o
+OBJS += sbe_exitCatcheContained.o
 
 # sbeio's sub directories
 SUBDIRS += test.d
