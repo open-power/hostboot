@@ -61,12 +61,10 @@ int32_t McbistCmdComplete( ExtensibleChip * i_chip,
 {
     #define PRDF_FUNC "[explorer_ocmb::McbistCmdComplete] "
 
-    // TODO RTC 207273 - Do nothing for now until we have full support for
-    // Axone/Explorer
     return SUCCESS;
 
     // Tell the TD controller there was a command complete attention.
-    /*OcmbDataBundle * db = getOcmbDataBundle( i_chip );
+    OcmbDataBundle * db = getOcmbDataBundle( i_chip );
     if ( SUCCESS != db->getTdCtlr()->handleCmdComplete(io_sc) )
     {
         // Something failed. It is possible the command complete attention has
@@ -79,7 +77,7 @@ int32_t McbistCmdComplete( ExtensibleChip * i_chip,
         // MDIA to do it, the command complete bit has already been cleared.
         // Don't do it again.
         return PRD_NO_CLEAR_FIR_BITS;
-    }*/
+    }
 
     #undef PRDF_FUNC
 }

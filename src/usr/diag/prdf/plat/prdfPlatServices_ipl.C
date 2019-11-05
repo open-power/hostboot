@@ -43,7 +43,7 @@
 
 #include <diag/mdia/mdia.H>
 
-#include <mcbist/gen_mss_mcbist_settings.H>
+#include <hwp_wrappers.H>
 
 using namespace TARGETING;
 
@@ -189,7 +189,7 @@ uint32_t mssRestoreDramRepairs<TYPE_OCMB_CHIP>( TargetHandle_t i_target,
 {
     uint32_t o_rc = SUCCESS;
 
-    /* TODO RTC 207273 - no HWP support yet
+    /* TODO RTC 199032 - no HWP support yet
     errlHndl_t errl = NULL;
 
 
@@ -329,17 +329,19 @@ uint32_t cleanupSfRead<TYPE_MCBIST>( ExtensibleChip * i_mcbChip )
 template<>
 bool isBroadcastModeCapable<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
 {
-    /* TODO RTC 207273 - no HWP support yet
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
 
-    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt ( i_chip->getTrgt() );
-
     mss::states l_ret = mss::states::NO;
-    FAPI_CALL_HWP( l_ret, mss::mcbist::is_broadcast_capable, fapiTrgt );
+
+    #ifdef CONFIG_AXONE
+
+    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt ( i_chip->getTrgt() );
+    FAPI_CALL_HWP( l_ret, exp_is_broadcast_capable, fapiTrgt );
+
+    #endif
+
     return ( mss::states::YES == l_ret );
-    */
-    return false;
 }
 
 //------------------------------------------------------------------------------
@@ -357,12 +359,13 @@ uint32_t startSfRead<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
 
     uint32_t o_rc = SUCCESS;
 
-    /* TODO RTC 207273 - no HWP support yet
+    #ifdef CONFIG_AXONE
+
     // Get the OCMB_CHIP fapi target
-    fapi2::Target<fapi2::TYPE_OCMB_CHIP> fapiTrgt ( i_ocmb->getTrgt() );
+    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt ( i_ocmb->getTrgt() );
 
     // Get the stop conditions.
-    mss::mcbist::stop_conditions<> stopCond;
+    mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
     stopCond.set_pause_on_mpe(mss::ON)
             .set_pause_on_ue(mss::ON)
             .set_pause_on_aue(mss::ON)
@@ -397,11 +400,11 @@ uint32_t startSfRead<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
 
         // Start the super fast read command.
         errlHndl_t errl;
-        FAPI_INVOKE_HWP( errl, mss::memdiags::sf_read, fapiTrgt, stopCond,
+        FAPI_INVOKE_HWP( errl, exp_sf_read, fapiTrgt, stopCond,
                          saddr );
         if ( nullptr != errl )
         {
-            PRDF_ERR( PRDF_FUNC "mss::memdiags::sf_read(0x%08x,%d) failed",
+            PRDF_ERR( PRDF_FUNC "exp_sf_read(0x%08x,%d) failed",
                       i_ocmb->getHuid(), i_rank.getMaster() );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
             o_rc = FAIL; break;
@@ -409,7 +412,7 @@ uint32_t startSfRead<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
 
     } while (0);
 
-    */
+    #endif
 
     return o_rc;
 
@@ -426,10 +429,12 @@ uint32_t cleanupSfRead<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmbChip )
 
 //------------------------------------------------------------------------------
 
+#ifdef CONFIG_AXONE
+
 template<>
 uint32_t startTdSteerCleanup<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-    const MemRank & i_rank, AddrRangeType i_rangeType,
-    mss::mcbist::stop_conditions<> i_stopCond )
+        const MemRank & i_rank, AddrRangeType i_rangeType,
+        mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> i_stopCond )
 {
     #define PRDF_FUNC "[PlatServices::startTdSteerCleanup<TYPE_OCMB_CHIP>] "
 
@@ -469,7 +474,7 @@ uint32_t startTdSteerCleanup<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             break;
         }
 
-        // TODO RTC 207273 - sparing support
+        // TODO RTC 199032 - sparing support
 
     } while (0);
 
@@ -478,13 +483,16 @@ uint32_t startTdSteerCleanup<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 
+#endif
+
 //------------------------------------------------------------------------------
+
+#ifdef CONFIG_AXONE
 
 template<>
 uint32_t startTdSfRead<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
-                                      const MemRank & i_rank,
-                                      AddrRangeType i_rangeType,
-                                      mss::mcbist::stop_conditions<> i_stopCond)
+        const MemRank & i_rank, AddrRangeType i_rangeType,
+        mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> i_stopCond)
 {
     #define PRDF_FUNC "[PlatServices::startTdSfRead<TYPE_OCMB_CHIP>] "
 
@@ -521,7 +529,20 @@ uint32_t startTdSfRead<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
             break;
         }
 
-        // TODO RTC 207273 - HWP support
+        // Get the OCMB fapi target.
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
+            fapiTrgt( i_chip->getTrgt() );
+
+        // Start the super fast read command.
+        errlHndl_t errl;
+        FAPI_INVOKE_HWP( errl, exp_sf_read, fapiTrgt, i_stopCond, saddr );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "exp_sf_read(0x%08x,%d) failed",
+                      i_chip->getHuid(), i_rank.getMaster() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
 
     } while (0);
 
@@ -529,6 +550,8 @@ uint32_t startTdSfRead<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
+
+#endif
 
 //------------------------------------------------------------------------------
 

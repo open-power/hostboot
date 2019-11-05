@@ -85,6 +85,14 @@ prd_incpath += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/io/
 prd_incpath += ${ROOTPATH}/src/import/generic/memory/lib/utils/mcbist/
 prd_incpath += ${ROOTPATH}/src/usr/isteps/nvdimm
 
+# For including hwp_wrappers.H
+prd_incpath += ${ROOTPATH}/src/import/generic/memory/lib/prd/
+prd_incpath += ${ROOTPATH}/src/import/generic/memory/lib/utils/mcbist/
+prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
+prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
+prd_incpath += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
+prd_incpath += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
+
 ################################################################################
 # Hostboot only object files common to both IPL and runtime
 ################################################################################
@@ -180,6 +188,19 @@ prd_obj_no_sim += p9_proc_gettracearray.o
 prd_obj_no_sim += p9_sbe_tracearray.o
 prd_obj_no_sim += p9_io_xbus_clear_firs.o
 prd_obj_no_sim += p9_io_xbus_pdwn_lanes.o
+
+prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/
+prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/eff_config/
+prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/mcbist/
+prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/utils
+prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/utils/
+prd_obj_no_sim += hwp_wrappers_nim.o
+prd_obj_no_sim += hwp_wrappers_exp.o
+prd_obj_no_sim += nimbus_pos.o
+prd_obj_no_sim += explorer_pos.o
+prd_obj_no_sim += exp_mcbist.o
+prd_obj_no_sim += exp_memdiags.o
+prd_obj_no_sim += explorer_memory_size.o
 
 ################################################################################
 # The following are hardware procedure utilities that we are pulling into the

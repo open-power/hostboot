@@ -577,7 +577,7 @@ int32_t mssGetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
 {
     int32_t o_rc = SUCCESS;
 
-    /* TODO RTC 207273 - sparing support
+    /* TODO RTC 199032 - sparing support
 
     // called by FSP code so can't just move to hostboot side
 #ifdef __HOSTBOOT_MODULE
@@ -617,7 +617,7 @@ int32_t mssSetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_memPort,
 {
     int32_t o_rc = SUCCESS;
 
-    /* TODO RTC 207273 - sparing support
+    /* TODO RTC 199032 - sparing support
 
 #ifdef __HOSTBOOT_MODULE
     errlHndl_t errl = NULL;
