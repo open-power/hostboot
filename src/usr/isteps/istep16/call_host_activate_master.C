@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -204,7 +204,8 @@ void* call_host_activate_master (void *io_pArgs)
                     TARGETING::get_huid(l_proc_target));
 
         //In the future possibly move default "waitTime" value to SBEIO code
-        uint64_t waitTime = 1000000; // bump the wait time to 1 sec
+        uint64_t waitTime = 10500; // wait time 10.5 sec, anything larger than 10737 ms can cause
+                                   // overflow on SBE side of the tiemout calculations
         l_errl = SBEIO::startDeadmanLoop(waitTime);
 
         if ( l_errl )
