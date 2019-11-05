@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2018
+# Contributors Listed Below - COPYRIGHT 2017,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -588,6 +588,11 @@ sub DecodeObmcEselData
                     $timestamp_found = 1;
                     last;
                 }
+                elsif($next_line =~ /timestamp/)
+                {
+                    $timestamp_found = 2;
+                    last;
+                }
                 elsif($next_line =~ /ESEL/ or
                       $next_line =~ /20 00 04/) # found the next ESEL
                 {
@@ -601,16 +606,35 @@ sub DecodeObmcEselData
 
             if($timestamp_found)
             {
-                # strip the "Timestamp", commas, spaces, and the newline
-                $next_line =~ s/"Timestamp"://g;
-                $next_line =~ s/,//g;
-                $next_line =~ s/ //g;
-                chomp $next_line;
+                if($timestamp_found == 1)
+                {
+                    # strip the "Timestamp", commas, spaces, and the newline
+                    $next_line =~ s/"Timestamp"://g;
+                    $next_line =~ s/,//g;
+                    $next_line =~ s/ //g;
+                    chomp $next_line;
 
-                # convert to date/time (we are given the timestamp in ms, so divide
-                # by 1000 to get s).
-                $timestamp =
+                    # convert to date/time (we are given the timestamp in ms, so divide
+                    # by 1000 to get s).
+                    $timestamp =
                       strftime("%m/%d/%Y %H:%M:%S", localtime($next_line/1000));
+                }
+                elsif($timestamp_found == 2)
+                {
+                    # Field format :: "timestamp": "2019-10-31 10:20:50"
+                    $next_line =~ s/"timestamp"://g;
+                    $next_line =~ s/"//g;  #drop the quotes
+                    my @tmp1 = split( " ", $next_line ); #break the date and time apart
+                    my @df = split( /-/, $tmp1[0] ); #break up the date fields
+                    # Convert to :: 11/05/2019 12:25:41
+                    $timestamp = "$df[1]/$df[2]/$df[0] $tmp1[1]";
+                    ($debug) && print "timestamp> $timestamp \n";
+                }
+                else
+                {
+                    die "Bad timestamp\n";
+                }
+
                 ($debug) && print "Timestamp for ESEL #$esel_record_count:$next_line\n";
                 ($debug) && print "Decoded timestamp for ESEL #$esel_record_count:$timestamp\n";
 
