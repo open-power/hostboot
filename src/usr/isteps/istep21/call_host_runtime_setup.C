@@ -68,6 +68,7 @@
 
 #ifdef CONFIG_NVDIMM
 #include "call_nvdimm_update.H"
+#include <isteps/nvdimm/nvdimm.H>
 #endif
 
 using   namespace   ERRORLOG;
@@ -736,6 +737,19 @@ void* call_host_runtime_setup (void *io_pArgs)
                 errlCommit(l_err, ISTEP_COMP_ID);
                 pmStartSuccess = false;
             }
+            else
+            {
+#ifdef CONFIG_NVDIMM
+                // Arm the nvdimms
+                // Only get here if is_sapphire_load and PM started and have NVDIMMs
+                TARGETING::TargetHandleList l_nvdimmTargetList;
+                NVDIMM::nvdimm_getNvdimmList(l_nvdimmTargetList);
+                if (l_nvdimmTargetList.size() != 0)
+                {
+                    NVDIMM::nvdimmArm(l_nvdimmTargetList);
+                }
+#endif
+            }
 
 #ifdef CONFIG_HTMGT
             // Report PM status to HTMGT
@@ -767,7 +781,7 @@ void* call_host_runtime_setup (void *io_pArgs)
             uint8_t l_skip_fir_attr_reset = 1;
             // Since we are not leaving the PM complex alive, we will
             //  explicitly put it into reset and clean up any memory
-            l_err = HBPM::resetPMAll(HBPM::RESET_AND_CLEAR_ATTRIBUTES, 
+            l_err = HBPM::resetPMAll(HBPM::RESET_AND_CLEAR_ATTRIBUTES,
                                      l_skip_fir_attr_reset);
             if (l_err)
             {
@@ -846,7 +860,7 @@ void* call_host_runtime_setup (void *io_pArgs)
                 break;
             }
         }
-        
+
         // Update the MDRT Count and PDA Table Entries from Attribute
         TargetService& l_targetService = targetService();
         Target* l_sys = nullptr;

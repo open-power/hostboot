@@ -159,17 +159,6 @@ errlHndl_t nvdimmEraseNF(TARGETING::Target *i_nvdimm);
  */
 void nvdimmSetStatusFlag(TARGETING::Target *i_nvdimm, const uint8_t i_status_flag);
 
-#ifdef __HOSTBOOT_RUNTIME
-
-/**
- * @brief Check nvdimm error state
- *
- * @param[in] i_nvdimm - nvdimm target
- *
- * @return bool - true if nvdimm is in any error state, false otherwise
- */
-bool nvdimmInErrorState(TARGETING::Target *i_nvdimm);
-
 /**
  * @brief This function arms/disarms the trigger based on i_state
  *
@@ -204,6 +193,17 @@ bool nvdimmArm(TARGETING::TargetHandleList &i_nvdimmTargetList);
  * @return true if no errors logged, else false
  */
 bool nvdimmDisarm(TARGETING::TargetHandleList &i_nvdimmTargetList);
+
+#ifdef __HOSTBOOT_RUNTIME
+
+/**
+ * @brief Check nvdimm error state
+ *
+ * @param[in] i_nvdimm - nvdimm target
+ *
+ * @return bool - true if nvdimm is in any error state, false otherwise
+ */
+bool nvdimmInErrorState(TARGETING::Target *i_nvdimm);
 
 /**
  * @brief Check the ES (enery source)/backup power module(BPM) health status of

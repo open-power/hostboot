@@ -266,17 +266,6 @@ void occActiveNotification( void * i_data )
         {
             l_err = NVDIMM::notifyNvdimmProtectionChange(l_proc,
                                                          NVDIMM::OCC_ACTIVE);
-            // Arm the nvdimms
-            Target* l_sys = nullptr;
-            targetService().getTopLevelTarget( l_sys );
-            assert(l_sys, "occActiveNotification: no TopLevelTarget");
-
-            if (l_sys->getAttr<ATTR_NVDIMM_AUTO_ARM>())
-            {
-                TARGETING::TargetHandleList l_nvdimmTargetList =
-                                    TARGETING::getProcNVDIMMs(l_proc);
-                NVDIMM::nvdimmArm(l_nvdimmTargetList);
-            }
         }
         else
         {
