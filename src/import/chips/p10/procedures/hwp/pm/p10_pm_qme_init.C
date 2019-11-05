@@ -188,12 +188,18 @@ fapi2::ReturnCode qme_init(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target )
 {
     using namespace scomt::eq;
+
+    // RTC 245822
+    // remove this to use the auto-generated value once it bit shows up in the headers.
+    const uint32_t QME_QMCR_STOP_SHIFTREG_OVERRIDE_EN = 29;
+
     fapi2::buffer<uint64_t> l_qme_flag;
     fapi2::buffer<uint64_t> l_xcr;
     fapi2::buffer<uint64_t> l_xsr;
     fapi2::buffer<uint64_t> l_iar;
     fapi2::buffer<uint64_t> l_ir;
     fapi2::buffer<uint64_t> l_dbg;
+    fapi2::buffer<uint64_t> l_qmcr;
     uint32_t                l_timeout = TIMEOUT_COUNT;
 
     FAPI_IMP(">> qme_init");
@@ -241,6 +247,11 @@ fapi2::ReturnCode qme_init(
     }
 
     FAPI_TRY( initQmeBoot( i_target ), "p10_pm_qme_init Failed To Copy QME Hcode In To QME's SRAM" );
+
+    FAPI_INF("Allow QMEs to have access to the shiftable core registers");
+    l_qmcr.flush<0>().setBit<QME_QMCR_STOP_SHIFTREG_OVERRIDE_EN>();
+    FAPI_TRY(fapi2::putScom(l_eq_mc_or, QME_QMCR_WO_CLEAR, l_qmcr),
+             "Error during putscom of QME_QMCR_WO_CLEAR for shiftable regs access");
 
     FAPI_INF("Start the QMEs");
     l_xcr.flush< 0 >().insertFromRight( XCR_HARD_RESET, 1, 3 );
