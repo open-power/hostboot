@@ -53,6 +53,8 @@
 #include <p9_stop_api.H>
 #include <rt_todintf.H>
 
+#include <hwp_wrappers.H>
+
 //------------------------------------------------------------------------------
 
 using namespace TARGETING;
@@ -435,21 +437,21 @@ uint32_t stopBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
 
     uint32_t rc = SUCCESS;
 
-    PRDF_TRAC( PRDF_FUNC "Function not supported yet" );
+    #ifdef CONFIG_AXONE
 
-    /* TODO RTC 207273 - no HWP support yet
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt ( i_chip->getTrgt() );
 
     errlHndl_t errl;
-    FAPI_INVOKE_HWP( errl, mss::memdiags::stop, fapiTrgt );
+    FAPI_INVOKE_HWP( errl, exp_stop, fapiTrgt );
 
     if ( nullptr != errl )
     {
-        PRDF_ERR( PRDF_FUNC "mss::memdiags::stop(0x%08x) failed", i_chip->getHuid());
+        PRDF_ERR( PRDF_FUNC "exp_stop(0x%08x) failed", i_chip->getHuid());
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         rc = FAIL;
     }
-    */
+
+    #endif
 
     return rc;
 
@@ -469,8 +471,8 @@ uint32_t resumeBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     uint32_t o_rc = SUCCESS;
 
-    PRDF_TRAC( PRDF_FUNC "Function not supported yet" );
-    /* TODO RTC 207273 - no HWP support yet
+    #ifdef CONFIG_AXONE
+
     // Get the OCMB fapi target
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt ( i_chip->getTrgt() );
 
@@ -486,7 +488,7 @@ uint32_t resumeBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         }
 
         // Check UE and CE stop counters to determine stop conditions
-        mss::mcbist::stop_conditions<> stopCond;
+        mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
         if ( getOcmbDataBundle(i_chip)->iv_ueStopCounter.thReached(io_sc) )
         {
             // If we've reached the limit of UEs we're allowed to stop on
@@ -513,25 +515,25 @@ uint32_t resumeBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         {
             // If we haven't reached threshold on the number of UEs or CEs we
             // have stopped on, do not change the stop conditions.
-            stopCond = mss::mcbist::stop_conditions<>(
-                mss::mcbist::stop_conditions<>::DONT_CHANGE );
+            stopCond = mss::mcbist::stop_conditions<mss::mc_type::EXPLORER>(
+            mss::mcbist::stop_conditions<mss::mc_type::EXPLORER>::DONT_CHANGE );
         }
 
         // Resume the command on the next address.
         errlHndl_t errl;
-        FAPI_INVOKE_HWP( errl, mss::memdiags::continue_cmd, fapiTrgt,
+        FAPI_INVOKE_HWP( errl, exp_continue_cmd, fapiTrgt,
             mss::mcbist::end_boundary::DONT_CHANGE, stopCond );
-
         if ( nullptr != errl )
         {
-            PRDF_ERR( PRDF_FUNC "mss::memdiags::continue_cmd(0x%08x) failed",
+            PRDF_ERR( PRDF_FUNC "exp_continue_cmd(0x%08x) failed",
                       i_chip->getHuid() );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
             o_rc = FAIL; break;
         }
 
     } while (0);
-    */
+
+    #endif
 
     return o_rc;
 

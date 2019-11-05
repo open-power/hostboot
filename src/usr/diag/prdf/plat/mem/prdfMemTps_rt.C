@@ -37,6 +37,8 @@
 #include <prdfP9McaExtraSig.H>
 #include <prdfTargetServices.H>
 
+#include <hwp_wrappers.H>
+
 using namespace TARGETING;
 
 namespace PRDF
@@ -1330,13 +1332,15 @@ uint32_t TpsEvent<TYPE_MCA>::startCmd()
 
     uint32_t o_rc = SUCCESS;
 
+    #ifndef CONFIG_AXONE
+
     // We don't need to set any stop-on-error conditions or thresholds for
     // soft/inter/hard CEs at runtime. The design is to let the command continue
     // to the end of the rank and we do diagnostics on the CE counts found in
     // the per-symbol counters. Therefore, all we need to do is tell the
     // hardware which CE types to count.
 
-    mss::mcbist::stop_conditions<> stopCond;
+    mss::mcbist::stop_conditions<mss::mc_type::NIMBUS> stopCond;
 
     switch ( iv_phase )
     {
@@ -1364,6 +1368,8 @@ uint32_t TpsEvent<TYPE_MCA>::startCmd()
                   iv_chip->getHuid(), getKey() );
     }
 
+    #endif
+
     return o_rc;
 
     #undef PRDF_FUNC
@@ -1382,13 +1388,15 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::startCmd()
 
     uint32_t o_rc = SUCCESS;
 
+    #ifdef CONFIG_AXONE
+
     // We don't need to set any stop-on-error conditions or thresholds for
     // soft/inter/hard CEs at runtime. The design is to let the command continue
     // to the end of the rank and we do diagnostics on the CE counts found in
     // the per-symbol counters. Therefore, all we need to do is tell the
     // hardware which CE types to count.
 
-    mss::mcbist::stop_conditions<> stopCond;
+    mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
 
     switch ( iv_phase )
     {
@@ -1415,6 +1423,8 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::startCmd()
         PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
                   iv_chip->getHuid(), getKey() );
     }
+
+    #endif
 
     return o_rc;
 

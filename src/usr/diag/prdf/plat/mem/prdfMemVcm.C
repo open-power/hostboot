@@ -30,6 +30,8 @@
 // Platform includes
 #include <prdfCenMbaExtraSig.H>
 
+#include <hwp_wrappers.H>
+
 using namespace TARGETING;
 
 namespace PRDF
@@ -98,8 +100,10 @@ uint32_t VcmEvent<TYPE_MCA>::startCmd()
 
     uint32_t o_rc = SUCCESS;
 
+    #ifndef CONFIG_AXONE
+
     // No stop conditions.
-    mss::mcbist::stop_conditions<> stopCond;
+    mss::mcbist::stop_conditions<mss::mc_type::NIMBUS> stopCond;
 
     // Start the time based scrub procedure on this master rank.
     o_rc = startTdScrub<TYPE_MCA>( iv_chip, iv_rank, MASTER_RANK, stopCond );
@@ -108,6 +112,8 @@ uint32_t VcmEvent<TYPE_MCA>::startCmd()
         PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
                   iv_chip->getHuid(), getKey() );
     }
+
+    #endif
 
     return o_rc;
 
@@ -475,8 +481,10 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::startCmd()
 
     uint32_t o_rc = SUCCESS;
 
+    #ifdef CONFIG_AXONE
+
     // No stop conditions.
-    mss::mcbist::stop_conditions<> stopCond;
+    mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
 
     // Start the time based scrub procedure on this master rank.
     o_rc = startTdScrub<TYPE_OCMB_CHIP>( iv_chip, iv_rank, MASTER_RANK,
@@ -486,6 +494,8 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::startCmd()
         PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
                   iv_chip->getHuid(), getKey() );
     }
+
+    #endif
 
     return o_rc;
 

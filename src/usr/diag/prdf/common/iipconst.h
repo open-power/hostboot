@@ -65,12 +65,13 @@ namespace PRDF
 /*  Constants                                                         */
 /*--------------------------------------------------------------------*/
 
+// Return code constants
 #ifndef SUCCESS
-#define SUCCESS 0
+static const int32_t SUCCESS = 0;
 #endif
 
 #ifndef FAIL
-#define FAIL -1
+static const int32_t FAIL = -1;
 #endif
 
 enum DOMAIN_ID

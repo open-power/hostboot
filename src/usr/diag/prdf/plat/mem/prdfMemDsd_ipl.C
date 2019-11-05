@@ -30,6 +30,8 @@
 #include <prdfMemDqBitmap.H>
 #include <prdfMemDsd.H>
 
+#include <hwp_wrappers.H>
+
 using namespace TARGETING;
 
 namespace PRDF
@@ -231,7 +233,9 @@ uint32_t DsdEvent<TYPE_OCMB_CHIP>::startCmd()
 
     uint32_t o_rc = SUCCESS;
 
-    mss::mcbist::stop_conditions<> stopCond;
+    #ifdef CONFIG_AXONE
+
+    mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
 
     switch ( iv_phase )
     {
@@ -259,6 +263,8 @@ uint32_t DsdEvent<TYPE_OCMB_CHIP>::startCmd()
 
         default: PRDF_ASSERT( false ); // invalid phase
     }
+
+    #endif
 
     return o_rc;
 
