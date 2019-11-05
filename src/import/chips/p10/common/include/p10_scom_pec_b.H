@@ -137,6 +137,36 @@ static const uint32_t EPS_FIR_LOCAL_MASK_62 = 62;
 static const uint32_t EPS_FIR_LOCAL_MASK_63 = 63;
 // pec/reg00011.H
 
+static const uint64_t IOPFIR_RW = 0x08011500ull;
+static const uint64_t IOPFIR_WO_AND = 0x08011501ull;
+static const uint64_t IOPFIR_WO_OR = 0x08011502ull;
+
+static const uint32_t IOPFIR_PHY0_ECC_CE_ERR = 0;
+static const uint32_t IOPFIR_PHY0_ECC_UE_ERR = 1;
+static const uint32_t IOPFIR_PHY1_ECC_CE_ERR = 2;
+static const uint32_t IOPFIR_PHY1_ECC_UE_ERR = 3;
+static const uint32_t IOPFIR_RESERVED_4_5 = 4;
+static const uint32_t IOPFIR_RESERVED_4_5_LEN = 2;
+// pec/reg00011.H
+
+static const uint64_t IOPFIRACT1 = 0x08011507ull;
+
+static const uint32_t IOPFIRACT1_FIR_ACTION1 = 0;
+static const uint32_t IOPFIRACT1_FIR_ACTION1_LEN = 6;
+// pec/reg00011.H
+
+static const uint64_t IXDATA0 = 0x0801150cull;
+
+static const uint32_t IXDATA0_DATA = 0;
+static const uint32_t IXDATA0_DATA_LEN = 64;
+// pec/reg00011.H
+
+static const uint64_t IXRADR0 = 0x0801150aull;
+
+static const uint32_t IXRADR0_ADDR = 0;
+static const uint32_t IXRADR0_ADDR_LEN = 12;
+// pec/reg00011.H
+
 static const uint64_t LOCAL_FIR_RW = 0x08040100ull;
 static const uint64_t LOCAL_FIR_WO_AND = 0x08040101ull;
 static const uint64_t LOCAL_FIR_WO_OR = 0x08040102ull;
@@ -214,6 +244,22 @@ static const uint32_t PB_PBCQ_PEPBREGS_NSTQSTKOVR_REG_STK0_LEN = 16;
 static const uint32_t PB_PBCQ_PEPBREGS_NSTQSTKOVR_REG_STK1 = 16;
 static const uint32_t PB_PBCQ_PEPBREGS_NSTQSTKOVR_REG_STK1_LEN = 8;
 static const uint32_t PB_PBCQ_PEPBREGS_NSTQSTKOVR_REG_ENABLE = 24;
+// pec/reg00011.H
+
+static const uint64_t PIPEDOUTCTL0 = 0x08011514ull;
+
+static const uint32_t PIPEDOUTCTL0_RESERVED_63_59 = 0;
+static const uint32_t PIPEDOUTCTL0_RESERVED_63_59_LEN = 5;
+static const uint32_t PIPEDOUTCTL0_PHY1_REFB_LANE_CLK_EN = 5;
+static const uint32_t PIPEDOUTCTL0_PHY1_REFB_CLKDET_EN = 6;
+static const uint32_t PIPEDOUTCTL0_PHY1_REFA_LANE_CLK_EN = 7;
+static const uint32_t PIPEDOUTCTL0_PHY1_REFA_CLKDET_EN = 8;
+static const uint32_t PIPEDOUTCTL0_PHY0_REFB_LANE_CLK_EN = 9;
+static const uint32_t PIPEDOUTCTL0_PHY0_REFB_CLKDET_EN = 10;
+static const uint32_t PIPEDOUTCTL0_PHY0_REFA_LANE_CLK_EN = 11;
+static const uint32_t PIPEDOUTCTL0_PHY0_REFA_CLKDET_EN = 12;
+static const uint32_t PIPEDOUTCTL0_RESERVED_50_0 = 13;
+static const uint32_t PIPEDOUTCTL0_RESERVED_50_0_LEN = 51;
 // pec/reg00011.H
 
 static const uint64_t RECOV = 0x08040001ull;

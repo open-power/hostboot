@@ -7074,6 +7074,1018 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_IXMODE(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = IXMODE;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_IXMODE(const fapi2::Target<K, M, V>& i_target, fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = IXMODE;
+#endif
+    return fapi2::getScom(i_target, IXMODE, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_IXMODE(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return fapi2::putScom(i_target, IXMODE, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_PHY0_SRAM_EXT_LD_DONE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.insertFromRight<IXMODE_PHY0_SRAM_EXT_LD_DONE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY0_SRAM_EXT_LD_DONE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_PHY0_SRAM_EXT_LD_DONE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.insertFromRight<IXMODE_PHY0_SRAM_EXT_LD_DONE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY0_SRAM_EXT_LD_DONE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_PHY0_SRAM_EXT_LD_DONE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.setBit<IXMODE_PHY0_SRAM_EXT_LD_DONE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY0_SRAM_EXT_LD_DONE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_IXMODE_PHY0_SRAM_EXT_LD_DONE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.clearBit<IXMODE_PHY0_SRAM_EXT_LD_DONE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY0_SRAM_EXT_LD_DONE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_IXMODE_PHY0_SRAM_EXT_LD_DONE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return i_data.extractToRight<IXMODE_PHY0_SRAM_EXT_LD_DONE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY0_SRAM_EXT_LD_DONE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_IXMODE_PHY0_SRAM_EXT_LD_DONE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return i_data.getBit<IXMODE_PHY0_SRAM_EXT_LD_DONE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY0_SRAM_EXT_LD_DONE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_PHY1_SRAM_EXT_LD_DONE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.insertFromRight<IXMODE_PHY1_SRAM_EXT_LD_DONE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY1_SRAM_EXT_LD_DONE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_PHY1_SRAM_EXT_LD_DONE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.insertFromRight<IXMODE_PHY1_SRAM_EXT_LD_DONE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY1_SRAM_EXT_LD_DONE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_PHY1_SRAM_EXT_LD_DONE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.setBit<IXMODE_PHY1_SRAM_EXT_LD_DONE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY1_SRAM_EXT_LD_DONE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_IXMODE_PHY1_SRAM_EXT_LD_DONE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.clearBit<IXMODE_PHY1_SRAM_EXT_LD_DONE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY1_SRAM_EXT_LD_DONE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_IXMODE_PHY1_SRAM_EXT_LD_DONE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return i_data.extractToRight<IXMODE_PHY1_SRAM_EXT_LD_DONE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY1_SRAM_EXT_LD_DONE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_IXMODE_PHY1_SRAM_EXT_LD_DONE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return i_data.getBit<IXMODE_PHY1_SRAM_EXT_LD_DONE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY1_SRAM_EXT_LD_DONE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_RAM_SCOM_ACCESS_MODE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.insertFromRight<IXMODE_RAM_SCOM_ACCESS_MODE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_RAM_SCOM_ACCESS_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_RAM_SCOM_ACCESS_MODE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.insertFromRight<IXMODE_RAM_SCOM_ACCESS_MODE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_RAM_SCOM_ACCESS_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_RAM_SCOM_ACCESS_MODE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.setBit<IXMODE_RAM_SCOM_ACCESS_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_RAM_SCOM_ACCESS_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_IXMODE_RAM_SCOM_ACCESS_MODE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.clearBit<IXMODE_RAM_SCOM_ACCESS_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_RAM_SCOM_ACCESS_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_IXMODE_RAM_SCOM_ACCESS_MODE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return i_data.extractToRight<IXMODE_RAM_SCOM_ACCESS_MODE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_RAM_SCOM_ACCESS_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_IXMODE_RAM_SCOM_ACCESS_MODE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return i_data.getBit<IXMODE_RAM_SCOM_ACCESS_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_RAM_SCOM_ACCESS_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_RAM_SCOM_AUTOINC_RW_MODE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.insertFromRight<IXMODE_RAM_SCOM_AUTOINC_RW_MODE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_RAM_SCOM_AUTOINC_RW_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_RAM_SCOM_AUTOINC_RW_MODE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.insertFromRight<IXMODE_RAM_SCOM_AUTOINC_RW_MODE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_RAM_SCOM_AUTOINC_RW_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_RAM_SCOM_AUTOINC_RW_MODE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.setBit<IXMODE_RAM_SCOM_AUTOINC_RW_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_RAM_SCOM_AUTOINC_RW_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_IXMODE_RAM_SCOM_AUTOINC_RW_MODE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.clearBit<IXMODE_RAM_SCOM_AUTOINC_RW_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_RAM_SCOM_AUTOINC_RW_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_IXMODE_RAM_SCOM_AUTOINC_RW_MODE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return i_data.extractToRight<IXMODE_RAM_SCOM_AUTOINC_RW_MODE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_RAM_SCOM_AUTOINC_RW_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_IXMODE_RAM_SCOM_AUTOINC_RW_MODE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return i_data.getBit<IXMODE_RAM_SCOM_AUTOINC_RW_MODE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_RAM_SCOM_AUTOINC_RW_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_SCRUB_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.insertFromRight<IXMODE_SCRUB_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_SCRUB_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_SCRUB_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.insertFromRight<IXMODE_SCRUB_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_SCRUB_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_SCRUB_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.setBit<IXMODE_SCRUB_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_SCRUB_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_IXMODE_SCRUB_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.clearBit<IXMODE_SCRUB_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_SCRUB_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_IXMODE_SCRUB_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return i_data.extractToRight<IXMODE_SCRUB_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_SCRUB_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_IXMODE_SCRUB_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return i_data.getBit<IXMODE_SCRUB_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_SCRUB_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_SCRUB_PERIOD(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.insertFromRight<IXMODE_SCRUB_PERIOD,
+           IXMODE_SCRUB_PERIOD_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_SCRUB_PERIOD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_SCRUB_PERIOD(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.insertFromRight<IXMODE_SCRUB_PERIOD,
+           IXMODE_SCRUB_PERIOD_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_SCRUB_PERIOD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_IXMODE_SCRUB_PERIOD(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return i_data.extractToRight<IXMODE_SCRUB_PERIOD,
+           IXMODE_SCRUB_PERIOD_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_SCRUB_PERIOD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_PHY0_ARRAY_ERR_INJ_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.insertFromRight<IXMODE_PHY0_ARRAY_ERR_INJ_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY0_ARRAY_ERR_INJ_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_PHY0_ARRAY_ERR_INJ_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.insertFromRight<IXMODE_PHY0_ARRAY_ERR_INJ_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY0_ARRAY_ERR_INJ_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_PHY0_ARRAY_ERR_INJ_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.setBit<IXMODE_PHY0_ARRAY_ERR_INJ_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY0_ARRAY_ERR_INJ_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_IXMODE_PHY0_ARRAY_ERR_INJ_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.clearBit<IXMODE_PHY0_ARRAY_ERR_INJ_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY0_ARRAY_ERR_INJ_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_IXMODE_PHY0_ARRAY_ERR_INJ_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return i_data.extractToRight<IXMODE_PHY0_ARRAY_ERR_INJ_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY0_ARRAY_ERR_INJ_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_IXMODE_PHY0_ARRAY_ERR_INJ_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return i_data.getBit<IXMODE_PHY0_ARRAY_ERR_INJ_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY0_ARRAY_ERR_INJ_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_PHY0_ARRAY_ERR_INJ_TYPE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.insertFromRight<IXMODE_PHY0_ARRAY_ERR_INJ_TYPE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY0_ARRAY_ERR_INJ_TYPE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_PHY0_ARRAY_ERR_INJ_TYPE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.insertFromRight<IXMODE_PHY0_ARRAY_ERR_INJ_TYPE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY0_ARRAY_ERR_INJ_TYPE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_PHY0_ARRAY_ERR_INJ_TYPE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.setBit<IXMODE_PHY0_ARRAY_ERR_INJ_TYPE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY0_ARRAY_ERR_INJ_TYPE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_IXMODE_PHY0_ARRAY_ERR_INJ_TYPE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.clearBit<IXMODE_PHY0_ARRAY_ERR_INJ_TYPE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY0_ARRAY_ERR_INJ_TYPE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_IXMODE_PHY0_ARRAY_ERR_INJ_TYPE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return i_data.extractToRight<IXMODE_PHY0_ARRAY_ERR_INJ_TYPE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY0_ARRAY_ERR_INJ_TYPE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_IXMODE_PHY0_ARRAY_ERR_INJ_TYPE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return i_data.getBit<IXMODE_PHY0_ARRAY_ERR_INJ_TYPE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY0_ARRAY_ERR_INJ_TYPE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_PHY0_ARRAY_ERR_INJ_ACTION(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.insertFromRight<IXMODE_PHY0_ARRAY_ERR_INJ_ACTION,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY0_ARRAY_ERR_INJ_ACTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_PHY0_ARRAY_ERR_INJ_ACTION(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.insertFromRight<IXMODE_PHY0_ARRAY_ERR_INJ_ACTION,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY0_ARRAY_ERR_INJ_ACTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_PHY0_ARRAY_ERR_INJ_ACTION(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.setBit<IXMODE_PHY0_ARRAY_ERR_INJ_ACTION>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY0_ARRAY_ERR_INJ_ACTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_IXMODE_PHY0_ARRAY_ERR_INJ_ACTION(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.clearBit<IXMODE_PHY0_ARRAY_ERR_INJ_ACTION>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY0_ARRAY_ERR_INJ_ACTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_IXMODE_PHY0_ARRAY_ERR_INJ_ACTION(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return i_data.extractToRight<IXMODE_PHY0_ARRAY_ERR_INJ_ACTION,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY0_ARRAY_ERR_INJ_ACTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_IXMODE_PHY0_ARRAY_ERR_INJ_ACTION(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return i_data.getBit<IXMODE_PHY0_ARRAY_ERR_INJ_ACTION>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY0_ARRAY_ERR_INJ_ACTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_PHY1_ARRAY_ERR_INJ_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.insertFromRight<IXMODE_PHY1_ARRAY_ERR_INJ_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY1_ARRAY_ERR_INJ_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_PHY1_ARRAY_ERR_INJ_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.insertFromRight<IXMODE_PHY1_ARRAY_ERR_INJ_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY1_ARRAY_ERR_INJ_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_PHY1_ARRAY_ERR_INJ_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.setBit<IXMODE_PHY1_ARRAY_ERR_INJ_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY1_ARRAY_ERR_INJ_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_IXMODE_PHY1_ARRAY_ERR_INJ_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.clearBit<IXMODE_PHY1_ARRAY_ERR_INJ_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY1_ARRAY_ERR_INJ_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_IXMODE_PHY1_ARRAY_ERR_INJ_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return i_data.extractToRight<IXMODE_PHY1_ARRAY_ERR_INJ_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY1_ARRAY_ERR_INJ_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_IXMODE_PHY1_ARRAY_ERR_INJ_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return i_data.getBit<IXMODE_PHY1_ARRAY_ERR_INJ_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY1_ARRAY_ERR_INJ_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_PHY1_ARRAY_ERR_INJ_TYPE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.insertFromRight<IXMODE_PHY1_ARRAY_ERR_INJ_TYPE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY1_ARRAY_ERR_INJ_TYPE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_PHY1_ARRAY_ERR_INJ_TYPE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.insertFromRight<IXMODE_PHY1_ARRAY_ERR_INJ_TYPE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY1_ARRAY_ERR_INJ_TYPE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_PHY1_ARRAY_ERR_INJ_TYPE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.setBit<IXMODE_PHY1_ARRAY_ERR_INJ_TYPE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY1_ARRAY_ERR_INJ_TYPE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_IXMODE_PHY1_ARRAY_ERR_INJ_TYPE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.clearBit<IXMODE_PHY1_ARRAY_ERR_INJ_TYPE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY1_ARRAY_ERR_INJ_TYPE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_IXMODE_PHY1_ARRAY_ERR_INJ_TYPE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return i_data.extractToRight<IXMODE_PHY1_ARRAY_ERR_INJ_TYPE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY1_ARRAY_ERR_INJ_TYPE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_IXMODE_PHY1_ARRAY_ERR_INJ_TYPE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return i_data.getBit<IXMODE_PHY1_ARRAY_ERR_INJ_TYPE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY1_ARRAY_ERR_INJ_TYPE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_PHY1_ARRAY_ERR_INJ_ACTION(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.insertFromRight<IXMODE_PHY1_ARRAY_ERR_INJ_ACTION,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY1_ARRAY_ERR_INJ_ACTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_PHY1_ARRAY_ERR_INJ_ACTION(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.insertFromRight<IXMODE_PHY1_ARRAY_ERR_INJ_ACTION,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY1_ARRAY_ERR_INJ_ACTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IXMODE_PHY1_ARRAY_ERR_INJ_ACTION(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.setBit<IXMODE_PHY1_ARRAY_ERR_INJ_ACTION>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY1_ARRAY_ERR_INJ_ACTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_IXMODE_PHY1_ARRAY_ERR_INJ_ACTION(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return o_data.clearBit<IXMODE_PHY1_ARRAY_ERR_INJ_ACTION>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY1_ARRAY_ERR_INJ_ACTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_IXMODE_PHY1_ARRAY_ERR_INJ_ACTION(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return i_data.extractToRight<IXMODE_PHY1_ARRAY_ERR_INJ_ACTION,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY1_ARRAY_ERR_INJ_ACTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_IXMODE_PHY1_ARRAY_ERR_INJ_ACTION(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IXMODE));
+#endif
+    return i_data.getBit<IXMODE_PHY1_ARRAY_ERR_INJ_ACTION>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IXMODE_PHY1_ARRAY_ERR_INJ_ACTION chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_OPCG_REG1(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING

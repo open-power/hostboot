@@ -130,6 +130,25 @@ static const uint32_t OPCG_CAPT3_12ODD = 59;
 static const uint32_t OPCG_CAPT3_12ODD_LEN = 5;
 // pec/reg00001.H
 
+static const uint64_t PIPEDINCTL0 = 0x08011519ull;
+
+static const uint32_t PIPEDINCTL0_RESERVED_63_17 = 0;
+static const uint32_t PIPEDINCTL0_RESERVED_63_17_LEN = 47;
+static const uint32_t PIPEDINCTL0_PHY_RTUNE_ACK = 47;
+static const uint32_t PIPEDINCTL0_RESERVED_15_12 = 48;
+static const uint32_t PIPEDINCTL0_RESERVED_15_12_LEN = 4;
+static const uint32_t PIPEDINCTL0_PHY1_REFB_CLKDET_RESULT = 52;
+static const uint32_t PIPEDINCTL0_PHY1_REFA_CLKDET_RESULT = 53;
+static const uint32_t PIPEDINCTL0_PHY1_MPLLB_FORCE_ACK = 54;
+static const uint32_t PIPEDINCTL0_PHY1_MPLLA_FORCE_ACK = 55;
+static const uint32_t PIPEDINCTL0_RESERVED_7_4 = 56;
+static const uint32_t PIPEDINCTL0_RESERVED_7_4_LEN = 4;
+static const uint32_t PIPEDINCTL0_PHY0_REFB_CLKDET_RESULT = 60;
+static const uint32_t PIPEDINCTL0_PHY0_REFA_CLKDET_RESULT = 61;
+static const uint32_t PIPEDINCTL0_PHY0_MPLLB_FORCE_ACK = 62;
+static const uint32_t PIPEDINCTL0_PHY0_MPLLA_FORCE_ACK = 63;
+// pec/reg00001.H
+
 static const uint64_t RECOV_INTERRUPT_REG = 0x080f001bull;
 
 static const uint32_t RECOV_INTERRUPT_REG_RECOV = 0;

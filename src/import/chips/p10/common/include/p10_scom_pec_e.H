@@ -141,6 +141,23 @@ static const uint32_t EPS_FIR_LOCAL_ACTION1_62 = 62;
 static const uint32_t EPS_FIR_LOCAL_ACTION1_63 = 63;
 // pec/reg00014.H
 
+static const uint64_t IXMODE = 0x0801150eull;
+
+static const uint32_t IXMODE_PHY0_SRAM_EXT_LD_DONE = 0;
+static const uint32_t IXMODE_PHY1_SRAM_EXT_LD_DONE = 1;
+static const uint32_t IXMODE_RAM_SCOM_ACCESS_MODE = 2;
+static const uint32_t IXMODE_RAM_SCOM_AUTOINC_RW_MODE = 3;
+static const uint32_t IXMODE_SCRUB_EN = 17;
+static const uint32_t IXMODE_SCRUB_PERIOD = 18;
+static const uint32_t IXMODE_SCRUB_PERIOD_LEN = 8;
+static const uint32_t IXMODE_PHY0_ARRAY_ERR_INJ_EN = 26;
+static const uint32_t IXMODE_PHY0_ARRAY_ERR_INJ_TYPE = 27;
+static const uint32_t IXMODE_PHY0_ARRAY_ERR_INJ_ACTION = 28;
+static const uint32_t IXMODE_PHY1_ARRAY_ERR_INJ_EN = 31;
+static const uint32_t IXMODE_PHY1_ARRAY_ERR_INJ_TYPE = 32;
+static const uint32_t IXMODE_PHY1_ARRAY_ERR_INJ_ACTION = 33;
+// pec/reg00014.H
+
 static const uint64_t OPCG_REG1 = 0x08030003ull;
 
 static const uint32_t OPCG_REG1_SCAN_COUNT = 0;

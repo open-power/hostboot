@@ -1378,7 +1378,7 @@ static const uint32_t PB_BRIDGE_NHTM_SC_HTM_PMU_MODE_CFG_MEM_SIZE = 8;
 static const uint32_t PB_BRIDGE_NHTM_SC_HTM_PMU_MODE_CFG_MEM_SIZE_LEN = 16;
 // proc/reg00040.H
 
-static const uint64_t PSI_MAC_SCOM_REGS_TX_MODE = 0x03012c31ull;
+static const uint64_t PSI_MAC_SCOM_REGS_TX_MODE = 0x01011031ull;
 
 static const uint32_t PSI_MAC_SCOM_REGS_TX_MODE_PC_TEST_MODE = 0;
 static const uint32_t PSI_MAC_SCOM_REGS_TX_MODE_MAIN_EN_ENC = 4;

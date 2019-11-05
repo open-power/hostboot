@@ -1589,7 +1589,7 @@ static const uint64_t PB_PTLSCOM67_MAILBOX_10_REG = 0x13011832ull;
 static const uint64_t PB_PTLSCOM67_MAILBOX_11_REG = 0x13011833ull;
 // proc/reg00053.H
 
-static const uint64_t PSI_MAC_SCOM_REGS_RX_MODE = 0x03012c21ull;
+static const uint64_t PSI_MAC_SCOM_REGS_RX_MODE = 0x01011021ull;
 
 static const uint32_t PSI_MAC_SCOM_REGS_RX_MODE_VREF = 0;
 static const uint32_t PSI_MAC_SCOM_REGS_RX_MODE_VREF_LEN = 8;
@@ -1602,7 +1602,7 @@ static const uint32_t PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE = 24;
 static const uint32_t PSI_MAC_SCOM_REGS_RX_MODE_MODE_SPARE_LEN = 8;
 // proc/reg00053.H
 
-static const uint64_t PSI_MAC_SCOM_REGS_RX_STATUS = 0x03012c22ull;
+static const uint64_t PSI_MAC_SCOM_REGS_RX_STATUS = 0x01011022ull;
 
 static const uint32_t PSI_MAC_SCOM_REGS_RX_STATUS_RX_PSI_PATTERN_CHECK_PASS_RO_SIGNAL = 0;
 static const uint32_t PSI_MAC_SCOM_REGS_RX_STATUS_RX_PSI_PATTERN_CHECK_FAIL_RO_SIGNAL = 1;

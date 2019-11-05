@@ -162,6 +162,58 @@ static const uint32_t PB_PBAIB_REGS_PRDSTKOVR_REG_STK1_LEN = 16;
 static const uint32_t PB_PBAIB_REGS_PRDSTKOVR_REG_ENABLE = 48;
 // pec/reg00007.H
 
+static const uint64_t PIPEDINCTL1 = 0x0801151aull;
+
+static const uint32_t PIPEDINCTL1_IPE_LANE7_REF_CLK_REQ_N = 0;
+static const uint32_t PIPEDINCTL1_IPE_LANE6_REF_CLK_REQ_N = 1;
+static const uint32_t PIPEDINCTL1_IPE_LANE5_REF_CLK_REQ_N = 2;
+static const uint32_t PIPEDINCTL1_IPE_LANE4_REF_CLK_REQ_N = 3;
+static const uint32_t PIPEDINCTL1_IPE_LANE3_REF_CLK_REQ_N = 4;
+static const uint32_t PIPEDINCTL1_IPE_LANE2_REF_CLK_REQ_N = 5;
+static const uint32_t PIPEDINCTL1_IPE_LANE1_REF_CLK_REQ_N = 6;
+static const uint32_t PIPEDINCTL1_IPE_LANE0_REF_CLK_REQ_N = 7;
+static const uint32_t PIPEDINCTL1_HY_PHY7_PPM_DRIFT_VLD = 8;
+static const uint32_t PIPEDINCTL1_HY_PHY7_PPM_DRIFT = 9;
+static const uint32_t PIPEDINCTL1_HY_PHY7_PPM_DRIFT_LEN = 6;
+static const uint32_t PIPEDINCTL1_HY_PHY6_PPM_DRIFT_VLD = 15;
+static const uint32_t PIPEDINCTL1_HY_PHY6_PPM_DRIFT = 16;
+static const uint32_t PIPEDINCTL1_HY_PHY6_PPM_DRIFT_LEN = 6;
+static const uint32_t PIPEDINCTL1_HY_PHY5_PPM_DRIFT_VLD = 22;
+static const uint32_t PIPEDINCTL1_HY_PHY5_PPM_DRIFT = 23;
+static const uint32_t PIPEDINCTL1_HY_PHY5_PPM_DRIFT_LEN = 6;
+static const uint32_t PIPEDINCTL1_HY_PHY4_PPM_DRIFT_VLD = 29;
+static const uint32_t PIPEDINCTL1_HY_PHY4_PPM_DRIFT = 30;
+static const uint32_t PIPEDINCTL1_HY_PHY4_PPM_DRIFT_LEN = 6;
+static const uint32_t PIPEDINCTL1_HY_PHY3_PPM_DRIFT_VLD = 36;
+static const uint32_t PIPEDINCTL1_HY_PHY3_PPM_DRIFT = 37;
+static const uint32_t PIPEDINCTL1_HY_PHY3_PPM_DRIFT_LEN = 6;
+static const uint32_t PIPEDINCTL1_HY_PHY2_PPM_DRIFT_VLD = 43;
+static const uint32_t PIPEDINCTL1_HY_PHY2_PPM_DRIFT = 44;
+static const uint32_t PIPEDINCTL1_HY_PHY2_PPM_DRIFT_LEN = 6;
+static const uint32_t PIPEDINCTL1_HY_PHY1_PPM_DRIFT_VLD = 50;
+static const uint32_t PIPEDINCTL1_HY_PHY1_PPM_DRIFT = 51;
+static const uint32_t PIPEDINCTL1_HY_PHY1_PPM_DRIFT_LEN = 6;
+static const uint32_t PIPEDINCTL1_HY_PHY0_PPM_DRIFT_VLD = 57;
+static const uint32_t PIPEDINCTL1_HY_PHY0_PPM_DRIFT = 58;
+static const uint32_t PIPEDINCTL1_HY_PHY0_PPM_DRIFT_LEN = 6;
+// pec/reg00007.H
+
+static const uint64_t PIPEDOUTCTL2 = 0x08011516ull;
+
+static const uint32_t PIPEDOUTCTL2_RESERVED_63_57 = 0;
+static const uint32_t PIPEDOUTCTL2_RESERVED_63_57_LEN = 7;
+static const uint32_t PIPEDOUTCTL2_PIPE_RX4_SRIS_MODE_EN = 7;
+static const uint32_t PIPEDOUTCTL2_PIPE_RX0_SRIS_MODE_EN = 8;
+static const uint32_t PIPEDOUTCTL2_PIPE_RX4_ES_CMN_REFCLK_MODE = 9;
+static const uint32_t PIPEDOUTCTL2_PIPE_RX0_ES_CMN_REFCLK_MODE = 10;
+static const uint32_t PIPEDOUTCTL2_PIPE_LANE4_CMN_REFCLK_MODE = 11;
+static const uint32_t PIPEDOUTCTL2_PIPE_LANE0_CMN_REFCLK_MODE = 12;
+static const uint32_t PIPEDOUTCTL2_UPCS_PIPE_CONFIG = 13;
+static const uint32_t PIPEDOUTCTL2_UPCS_PIPE_CONFIG_LEN = 3;
+static const uint32_t PIPEDOUTCTL2_RESERVED_47_0 = 16;
+static const uint32_t PIPEDOUTCTL2_RESERVED_47_0_LEN = 48;
+// pec/reg00007.H
+
 static const uint64_t RECOV_UNMASKED = 0x08040011ull;
 
 static const uint32_t RECOV_UNMASKED_IN = 1;

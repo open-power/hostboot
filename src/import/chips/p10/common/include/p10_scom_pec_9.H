@@ -105,6 +105,22 @@ static const uint64_t EPS_THERM_WSUB_SKITTER_FORCE_REG = 0x08050014ull;
 static const uint32_t EPS_THERM_WSUB_SKITTER_FORCE_REG_F_SKITTER_READ = 0;
 // pec/reg00009.H
 
+static const uint64_t IXERRPT = 0x0801150full;
+
+static const uint32_t IXERRPT_0_RAM_ECC_CE_ERRRPT_HOLD = 0;
+static const uint32_t IXERRPT_0_RAM_ECC_UE_ERRRPT_HOLD = 1;
+static const uint32_t IXERRPT_1_RAM_ECC_CE_ERRRPT_HOLD = 2;
+static const uint32_t IXERRPT_1_RAM_ECC_UE_ERRRPT_HOLD = 3;
+static const uint32_t IXERRPT_0_SCOM_ECC_CE_ERRRPT_HOLD = 4;
+static const uint32_t IXERRPT_0_SCOM_ECC_UE_ERRRPT_HOLD = 5;
+static const uint32_t IXERRPT_1_SCOM_ECC_CE_ERRRPT_HOLD = 6;
+static const uint32_t IXERRPT_1_SCOM_ECC_UE_ERRRPT_HOLD = 7;
+static const uint32_t IXERRPT_0_SCRUB_ECC_CE_ERRRPT_HOLD = 8;
+static const uint32_t IXERRPT_0_SCRUB_ECC_UE_ERRRPT_HOLD = 9;
+static const uint32_t IXERRPT_1_SCRUB_ECC_CE_ERRRPT_HOLD = 10;
+static const uint32_t IXERRPT_1_SCRUB_ECC_UE_ERRRPT_HOLD = 11;
+// pec/reg00009.H
+
 static const uint64_t MULTICAST_GROUP_2 = 0x080f0002ull;
 
 static const uint32_t MULTICAST_GROUP_2_MULTICAST2_GROUP = 3;
