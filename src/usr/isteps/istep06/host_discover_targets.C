@@ -607,11 +607,22 @@ void* host_discover_targets( void *io_pArgs )
     }
 
 #ifdef CONFIG_BMC_IPMI
+
+    // @TODO RTC 245663
+    // FRU Inventory is not well supported until PLDM FRU inventory
+    // is implemented, so disable for now and revisit when that
+    // support is available.
+
     // Gather + Send the base IPMI Fru Inventory data to the BMC
-    IPMIFRUINV::setData();
+    //IPMIFRUINV::setData();
+
+    // @TODO RTC 246392
+    // Sensors are not supported until PLDM sensors or their equivalent
+    // are implemented, so disable for now and revisit when that support
+    // is available.
 
     // send DIMM/CORE/PROC sensor status to the BMC
-    SENSOR::updateBMCSensorStatus();
+    //SENSOR::updateBMCSensorStatus();
 #endif
 
 
