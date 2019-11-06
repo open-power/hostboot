@@ -614,6 +614,17 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_MCBIST_EXCEEDED_MAX_SUBTESTS</rc>
+    <description>Attempt to run an MCBIST program exceeding the max number of subtests (32)</description>
+    <ffdc>MC_TARGET</ffdc>
+    <ffdc>NUMBER_OF_SUBTESTS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_MCBIST_INCORRECT_PATTERN_LENGTH</rc>
     <description>MCBIST pattern has an incorrect length</description>
     <ffdc>TARGET</ffdc>
