@@ -900,7 +900,7 @@ fapi2::ReturnCode buildCoreRestoreImage( void* const i_pImageIn,
         rcTemp = copySectionToHomer( i_pChipHomer->iv_cpmrRegion.iv_selfRestoreRegion.iv_CPMR_SR.iv_region,
                                      pSelfRestImg,
                                      i_qmeBuildRecord,
-                                     P9_XIP_SECTION_RESTORE_SELF,
+                                     P9_XIP_SECTION_RESTORE_SELF_SAVE_RESTORE,
                                      i_procFuncModel.getChipLevel(),
                                      ppeSection );
 

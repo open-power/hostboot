@@ -1997,14 +1997,14 @@ typedef enum
 /**************************************************************************/
 typedef enum
 {
-    P9_XIP_SECTION_RESTORE_CPMR_HDR = P9_XIP_SECTIONS_PLUS(0),
-    P9_XIP_SECTION_RESTORE_SELF     = P9_XIP_SECTIONS_PLUS(1),
-    P9_XIP_SECTIONS_RESTORE         = P9_XIP_SECTIONS_PLUS(2) // # sections
+    P9_XIP_SECTION_RESTORE_CPMR_HDR          = P9_XIP_SECTIONS_PLUS(0),
+    P9_XIP_SECTION_RESTORE_SELF_SAVE_RESTORE = P9_XIP_SECTIONS_PLUS(1),
+    P9_XIP_SECTIONS_RESTORE                  = P9_XIP_SECTIONS_PLUS(2) // # sections
 } p9_xip_section_restore_t;
 #define P9_XIP_SECTION_NAMES_RESTORE(var)    \
     P9_XIP_SECTION_NAMES(var,                \
                          ".cpmr_hdr",        \
-                         ".self_restore")
+                         ".self_save_restore")
 
 /**************************************************************************/
 /* IOPPE Image                                                            */
