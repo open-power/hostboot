@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,12 +60,19 @@ namespace FAPIWRAP
      * @brief This function wraps around the FAPI2 HWP "get_pmic_i2c_addr" which
      *        takes in a DDIMM's DDR4 SPD data and a PMIC's position relative to
      *        its parent OCMB's chip and returns the device address of that pmic
-     * @param[in] i_spd      - Binary blob containing addresses a given OCMB's PMICs
+     *        This wrapper will actually lookup the SPD of a given ocmb target so
+     *        the caller doesnt need to worry about it.
+     * @param[in] i_ocmbChip - Parent ocmb of the PMIC we wish to find the device addres of
      * @param[in] i_pmic_id  - PMIC's position relative to parent OCMB
-     * @return uint8_t 0 if invalid pmic_id is passed, PMIC's devAddress otherwise
+     * @param[out]o_pmic_devAddr - If this pmic exists on the ocmb then return the device address
+                                   found in the SPD. Otherwise return NO_PMIC_DEV_ADDR
+     * @return errlHndl_t - nullptr if no error, otherwise contains error
      */
-    uint8_t get_pmic_dev_addr( const char* i_spd,
-                               const uint8_t i_pmic_id);
+    errlHndl_t get_pmic_dev_addr( TARGETING::Target * i_ocmbChip,
+                                  const uint8_t i_pmic_id,
+                                  uint8_t& o_pmic_devAddr);
+
+    constexpr uint8_t NO_PMIC_DEV_ADDR = 0xFF;
 
 }
 

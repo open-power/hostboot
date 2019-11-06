@@ -35,6 +35,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 # to get ffdc_includes.H
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
+# to get chipids.H
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils
 
 # HWP include directories :
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,12 +23,18 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include <fapiwrap/fapiWrapif.H> // interface definitions
+// Platform includes
+#include <fapiwrap/fapiWrapif.H>    // interface definitions
 #include <fapi2/plat_hwp_invoker.H> // FAPI_INVOKE_HWP
-#include <trace/interface.H> // tracing includes
+#include <trace/interface.H>        // tracing includes
+#include <vpd/spdenums.H>           // DDIMM_DDR4_SPD_SIZE
+#include <devicefw/driverif.H>      // deviceRead
 
+// Imported Includes
 #include <exp_getidec.H>       // exp_getidec
 #include <pmic_i2c_addr_get.H> // get_pmic_i2c_addr
+#include <chipids.H>           // for GEMINI ID
+
 
 trace_desc_t* g_trac_fapiwrap;
 TRAC_INIT(&g_trac_fapiwrap, FAPIWRAP_COMP_NAME, 6*KILOBYTE, TRACE::BUFFER_SLOW);
@@ -57,9 +63,45 @@ namespace FAPIWRAP
         return l_errl;
     }
 
-    uint8_t get_pmic_dev_addr( const char* i_spd,
-                               const uint8_t i_pmic_id)
+    errlHndl_t get_pmic_dev_addr( TARGETING::Target * i_ocmbChip,
+                                  const uint8_t i_pmic_id,
+                                  uint8_t& o_pmic_devAddr)
     {
-        return get_pmic_i2c_addr(i_spd, i_pmic_id);
+        errlHndl_t l_errl = nullptr;
+
+        do{
+
+            auto l_chipId = i_ocmbChip->getAttr< TARGETING::ATTR_CHIP_ID>();
+
+            if( l_chipId == POWER_CHIPID::GEMINI_16)
+            {
+                // If this is a Gemini OCMB then there are no PMIC targets
+                // so just set the out parm to NO_PMIC_DEV_ADDR and break
+                o_pmic_devAddr = NO_PMIC_DEV_ADDR;
+                break;
+            }
+
+            uint8_t l_spdBlob[SPD::DDIMM_DDR4_SPD_SIZE];
+            size_t l_spdSize = SPD::DDIMM_DDR4_SPD_SIZE;
+
+            l_errl = deviceRead(i_ocmbChip,
+                        l_spdBlob,
+                        l_spdSize,
+                        DEVICE_SPD_ADDRESS(SPD::ENTIRE_SPD_WITHOUT_EFD));
+
+            if(l_errl)
+            {
+                TRACFCOMP( g_trac_fapiwrap, ERR_MRK"get_pmic_dev_addr() "
+                            "Error reading SPD associated with OCMB 0x%.08X",
+                            TARGETING::get_huid(i_ocmbChip));
+                break;
+            }
+
+            o_pmic_devAddr = get_pmic_i2c_addr(
+                                   reinterpret_cast<char *>(l_spdBlob),
+                                   i_pmic_id);
+
+        }while(0);
+        return l_errl;
     }
 }
