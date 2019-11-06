@@ -32,7 +32,6 @@
 #include <initservice/initserviceif.H>
 #include <errl/errlmanager.H>
 #include "i2c_common.H"
-#include <vpd/spdenums.H>
 #include <fapiwrap/fapiWrapif.H>
 
 extern trace_desc_t* g_trac_i2c;
@@ -269,23 +268,16 @@ errlHndl_t pmicI2CPresencePerformOp(DeviceFW::OperationType i_opType,
 
     errlHndl_t l_errl = nullptr;
     bool l_pmicPresent = 0;
+    uint8_t l_devAddr;
     TARGETING::Target* l_parentOcmb = TARGETING::getImmediateParentByAffinity(i_target);
-
-    uint8_t l_spdBlob[SPD::DDIMM_DDR4_SPD_SIZE];
-    size_t l_spdSize = SPD::DDIMM_DDR4_SPD_SIZE;
+    auto l_parentHwasState = l_parentOcmb->getAttr<TARGETING::ATTR_HWAS_STATE>();
 
     do{
 
-        l_errl = deviceRead(l_parentOcmb,
-                            l_spdBlob,
-                            l_spdSize,
-                            DEVICE_SPD_ADDRESS(SPD::ENTIRE_SPD_WITHOUT_EFD));
-
-        if(l_errl)
+        if(! l_parentHwasState.present)
         {
-            TRACFCOMP( g_trac_i2c, ERR_MRK"pmicI2CPresencePerformOp() "
-                        "Error reading SPD associated with PMIC 0x%.08X, failed to determine presence",
-                        TARGETING::get_huid(i_target));
+            // If the parent chip is not present, then neither is the pmic
+            // so just break out and return not present
             break;
         }
 
@@ -294,12 +286,27 @@ errlHndl_t pmicI2CPresencePerformOp(DeviceFW::OperationType i_opType,
         // PMICs will have a different device address depending on the vendor.
         // Prior to doing present detection on a pmic we must first query the
         // device address from the parent OCMB's SPD
-        uint8_t l_devAddr = FAPIWRAP::get_pmic_dev_addr(reinterpret_cast<char *>(l_spdBlob),
-                                                      l_relPos);
+        l_errl = FAPIWRAP::get_pmic_dev_addr(l_parentOcmb,
+                                             l_relPos,
+                                             l_devAddr);
+        if (l_errl)
+        {
+            TRACFCOMP( g_trac_i2c, ERR_MRK"pmicI2CPresencePerformOp() "
+                        "Error attempting to read pmic device address on OCMB 0x%.08X",
+                        TARGETING::get_huid(l_parentOcmb));
+            break;
+        }
 
         assert(l_devAddr != 0,
               "Found devAddr for PMIC 0x%.08x to be 0, this cannot be. Check SPD and REL_POS on target",
               TARGETING::get_huid(i_target));
+
+        if(l_devAddr == FAPIWRAP::NO_PMIC_DEV_ADDR)
+        {
+            // There is no pmic device address for this rel position on this ocmb so
+            // break and return not present.
+            break;
+        }
 
         i_target->setAttr<TARGETING::ATTR_DYNAMIC_I2C_DEVICE_ADDRESS>(l_devAddr);
 
