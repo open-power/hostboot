@@ -5,9 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
-/* [+] Jim Yuan                                                           */
+/* [+] Super Micro Computer, Inc.                                         */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -175,9 +175,9 @@ static errlHndl_t hdatGetPathInfo(
         o_pathArray[o_arrayHdr.hdatArrayCnt].hdatLPCHCBarFwAdrSpc =
                                                          LPC::LPCHC_FW_SPACE;
         o_pathArray[o_arrayHdr.hdatArrayCnt].hdatLPCHCBarIntRegSpc =
-                                                         LPC::LPCHC_REG_SPACE;
+                                                         LPC::LPCHC_INT_REG_SPACE;
 #ifdef CONFIG_CONSOLE
-        CONSOLE::UartInfo_t l_uartInfo = CONSOLE::getUartInfo();
+        CONSOLE::UartInfo_t l_uartInfo = CONSOLE::getUartInfo(CONSOLE::VUART1);
 
         o_pathArray[o_arrayHdr.hdatArrayCnt].hdatBarOfUARTDev =
                                                     l_uartInfo.lpcBaseAddr;

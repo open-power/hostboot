@@ -711,7 +711,7 @@ errlHndl_t LpcDD::checkAddr(LPC::TransType i_type,
                 break;
             }
             *o_addr =
-            getLPCBaseAddr()+ i_addr + LPC::LPCHC_REG_SPACE- LPC_ADDR_START;
+            getLPCBaseAddr()+ i_addr + LPC::LPCHC_INT_REG_SPACE- LPC_ADDR_START;
             break;
         case LPC::TRANS_ERR:
           if( i_addr >= 0x10000 )

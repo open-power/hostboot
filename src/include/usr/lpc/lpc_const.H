@@ -22,6 +22,14 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+/**
+ * @file lpc_const.H
+ *
+ * @brief Defines constants describing the LPC address space
+ *
+ */
+
 #ifndef LPC_CONST_H
 #define LPC_CONST_H
 
@@ -34,19 +42,49 @@ namespace LPC
      * @brief Some general constants
      *
      */
-    enum {
-        LPCHC_FW_SPACE  = 0xF0000000, /**< LPC Host Controller FW Space */
-        LPCHC_MEM_SPACE = 0xE0000000, /**< LPC Host Controller Mem Space */
-        LPCHC_IO_SPACE  = 0xD0010000, /**< LPC Host Controller I/O Space */
-        LPCHC_REG_SPACE = 0xC0012000, /**< LPC Host Ctlr Register Space */
-        LPCHC_ERR_SPACE = 0xC0010000, /**< LPC Host Ctlr Err Register Space */
+    enum : uint64_t
+    {
+        /* LPC Host Controller FW Space */
+        LPCHC_FW_SPACE =        0xF0000000,
 
-        /** Physical addr of the start of LPC address space*/
-        LPC_PHYS_BASE = 0x6030000000000,
+        /* LPC Host Controller MCTP/PLDM base address */
+        LPCHC_MCTP_PLDM_BASE =  0x0FF00000,
 
-        FW_WINDOW_SIZE =  0x10000000, //Size of FW Window
+        /* LPC Host Controller Mem Space */
+        LPCHC_MEM_SPACE =       0xE0000000,
 
-        OPB_ERROR_MASK = 0x20000FC3, /**< OPBM Error Bits MASK */
+        /* LPC Host Controller I/O Space */
+        LPCHC_IO_SPACE  =       0xD0010000,
+
+        /* LPC Host Ctlr Internal Register Space */
+        LPCHC_INT_REG_SPACE =   0xC0012000,
+
+        /* LPC Host Ctlr Err Register Space */
+        LPCHC_ERR_SPACE =       0xC0010000,
+
+        /* Physical addr of the start of LPC address space */
+        LPC_PHYS_BASE =         0x6030000000000,
+
+        /* Size of FW Window */
+        FW_WINDOW_SIZE =        0x10000000,
+
+        /* OPBM Error Bits MASK */
+        OPB_ERROR_MASK =        0x20000FC3,
+
+        /* Keyboard Controller Style (KCS) data register address
+         * NOTE: This can be found in the IPMI spec
+         */
+        KCS_DATA_REG =          0xCA2,
+
+        /* Keyboard Controller Style (KCS) status register address
+         * NOTE: This can be found in the IPMI spec
+         */
+        KCS_STATUS_REG =        0xCA3,
+
+        /* Serial IRQ number for KCS interface
+         * (provided by hypervisor team)
+         */
+        KCS_SERIAL_IRQ =        11,
     };
 }
 
@@ -55,7 +93,8 @@ namespace LPC
       * @brief More general constants not tied to LPC namespace
       *
       */
-    enum {
+    enum : uint32_t
+    {
         /** Start of LPC Addr within the memory mapped space*/
         LPC_ADDR_START = 0xC0000000,
 
@@ -148,7 +187,7 @@ namespace LPC
     /**
       * @brief Enums for different levels of resetting PNOR communication levels
       */
-    enum ResetLevels
+    enum ResetLevels : uint32_t
     {
         RESET_CLEAR          = 0x00000000, /**< Clear Reset Level */
         RESET_OPB_LPCHC_SOFT = 0x00000001, /**< OPB LPCHC Clear Errors */

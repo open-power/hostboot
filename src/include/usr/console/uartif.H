@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,6 +22,15 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+/**
+ * @file uartif.H
+ *
+ * @brief Defines an interface for retrieving information about the
+ *        LPC connected UART devices.
+ *
+ */
+
 #ifndef __CONSOLE_UARTIF_H
 #define __CONSOLE_UARTIF_H
 
@@ -31,13 +40,27 @@
 namespace CONSOLE
 {
 
-    const uint8_t SERIAL_IRQ        = 4;
+    // NOTE: These interrupt numbers come from the legacy values used for
+    //       COM1/COM2 ports on the old IBM compatible PC's.
+    const uint8_t VUART1_IRQ        = 4;
+    const uint8_t VUART2_IRQ        = 3;
 
-    // Host SerlIRQ interrupt type for SUART1
-    const uint8_t RESERVED          = 0x00;
+    // Host SerlIRQ interrupt type for UART1 and UART2
+    // These values are defined in the "Initialization of Hypervisor Memory
+    // Space for P10" document.
+    const uint8_t RESERVED_TRIG     = 0x00;
     const uint8_t LOW_LEVEL_TRIG    = 0x01;
     const uint8_t RISING_EDGE_TRIG  = 0x02;
     const uint8_t HIGH_LEVEL_TRIG   = 0x03;
+
+/**
+ * @brief UART ID's representing the supported UARTS
+ */
+enum uartId_t: uint8_t
+{
+    VUART1 = 0,
+    VUART2 = 1
+};
 
 /**
  * Structure to return UART information in
@@ -54,12 +77,14 @@ struct UartInfo_t
 };
 
 /**
- * Retrieve some information about the UART and the connection
+ * Retrieve some information about a UART and the connection
  * we have to it.
+ *
+ * param[in] i_uartId The id of the UART for which to retrieve information
  *
  * @return Structure of UART data
  */
-UartInfo_t getUartInfo(void);
+UartInfo_t getUartInfo(uartId_t i_uartId);
 
 
 };

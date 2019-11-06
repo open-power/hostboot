@@ -5,9 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
-/* [+] International Business Machines Corp.                              */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -23,6 +23,14 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+/**
+ * @file uart.H
+ *
+ * @brief Defines interface for console support
+ *
+ */
+
 #ifndef __CONSOLE_UART_H
 #define __CONSOLE_UART_H
 
@@ -142,9 +150,12 @@ namespace CONSOLE
     };
 
         // Static configuration constants.  See uartconfig.C.
-    extern const uint64_t g_uartBase;
-    extern const uint64_t g_uartBaud;
-    extern const uint64_t g_uartClock;
+    extern const uint64_t g_vuart1Base;
+    extern const uint64_t g_vuart1Baud;
+    extern const uint64_t g_vuart1Clock;
+    extern const uint64_t g_vuart2Base;
+    extern const uint64_t g_vuart2Baud;
+    extern const uint64_t g_vuart2Clock;
 }
 
 /** Helper macro to associate inherited UART device with the singleton. */

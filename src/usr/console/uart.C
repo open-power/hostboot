@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -23,6 +23,14 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+/**
+ * @file uart.C
+ *
+ * @brief Provides console support
+ *
+ */
+
 #include "uart.H"
 #include <devicefw/userif.H>
 #include <lpc/lpcif.H>
@@ -73,7 +81,7 @@ namespace CONSOLE
 
 
             // Set baud rate.
-            uint64_t divisor = (g_uartClock / 16) / g_uartBaud;
+            uint64_t divisor = (g_vuart1Clock / 16) / g_vuart1Baud;
             l_errl = writeReg(LCR, LCR_DLAB);
             if (l_errl) { break; }
             l_errl = writeReg(DLL, divisor & 0xff);
@@ -205,7 +213,7 @@ namespace CONSOLE
                            &i_byte,
                            len,
                            DEVICE_LPC_ADDRESS(LPC::TRANS_IO,
-                                              i_addr + g_uartBase));
+                                              i_addr + g_vuart1Base));
     }
 
     errlHndl_t Uart::readReg(uint64_t i_addr, uint8_t& o_byte)
@@ -215,25 +223,49 @@ namespace CONSOLE
                           static_cast<uint8_t*>(&o_byte),
                           len,
                           DEVICE_LPC_ADDRESS(LPC::TRANS_IO,
-                                             i_addr + g_uartBase));
+                                             i_addr + g_vuart1Base));
     }
 
     Uart* Uart::g_device = NULL;
 
     /**
-     * Retrieve some information about the UART and the connection
+     * Retrieve some information about a UART and the connection
      * we have to it.
+     *
+     * param[in] i_uartId The id of the UART for which to retrieve information
+     *
+     * @return Structure of UART data
      */
-    UartInfo_t getUartInfo(void)
+    UartInfo_t getUartInfo(const uartId_t i_uartId)
     {
         UartInfo_t l_info;
 
-        l_info.lpcBaseAddr = g_uartBase;
-        l_info.lpcSize = sizeof(uint8_t);
-        l_info.clockFreqHz = g_uartClock;
-        l_info.freqHz = g_uartBaud;
-        l_info.interruptNum = SERIAL_IRQ;
-        l_info.interruptTrigger = LOW_LEVEL_TRIG;
+        memset(&l_info, 0, sizeof(l_info));
+
+        if(i_uartId == VUART1)
+        {
+            l_info.lpcBaseAddr = g_vuart1Base;
+            l_info.lpcSize = sizeof(uint8_t);
+            l_info.clockFreqHz = g_vuart1Clock;
+            l_info.freqHz = g_vuart1Baud;
+            l_info.interruptNum = VUART1_IRQ;
+            l_info.interruptTrigger = LOW_LEVEL_TRIG;
+        }
+        else if(i_uartId == VUART2)
+        {
+            l_info.lpcBaseAddr = g_vuart2Base;
+            l_info.lpcSize = sizeof(uint8_t);
+            l_info.clockFreqHz = g_vuart2Clock;
+            l_info.freqHz = g_vuart2Baud;
+            l_info.interruptNum = VUART2_IRQ;
+            l_info.interruptTrigger = LOW_LEVEL_TRIG;
+        }
+        else
+        {
+            assert(false,
+                   "getUartInfo: Request for UART info on unsupported UART ID %d!",
+                   i_uartId);
+        }
 
         return l_info;
     };

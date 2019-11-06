@@ -192,7 +192,7 @@ void nanosleep(const uint64_t i_sec, const uint64_t i_nsec)
 // TODO: RTC 209583 addon commit to handle error path
 static bool readUartReg(const uint8_t i_addr, uint8_t &o_data)
 {
-    uint64_t src_addr = g_blData->blToHbData.lpcBAR + LPC::LPCHC_IO_SPACE + g_uartBase + i_addr;
+    uint64_t src_addr = g_blData->blToHbData.lpcBAR + LPC::LPCHC_IO_SPACE + g_vuart1Base + i_addr;
     Bootloader::handleMMIO(src_addr,
                            reinterpret_cast<uintptr_t>(&o_data) + getHRMOR(),
                            sizeof(o_data), Bootloader::BYTESIZE,
@@ -203,7 +203,7 @@ static bool readUartReg(const uint8_t i_addr, uint8_t &o_data)
 
 static bool writeUartReg(const uint8_t i_addr, const uint8_t i_data)
 {
-    uint64_t dest_addr = g_blData->blToHbData.lpcBAR + LPC::LPCHC_IO_SPACE + g_uartBase + i_addr;
+    uint64_t dest_addr = g_blData->blToHbData.lpcBAR + LPC::LPCHC_IO_SPACE + g_vuart1Base + i_addr;
     Bootloader::handleMMIO(reinterpret_cast<uintptr_t>(&i_data) + getHRMOR(),
                            dest_addr,
                            sizeof(i_data), Bootloader::BYTESIZE,
@@ -225,7 +225,7 @@ void bl_console::putString(const char* i_s)
 // removed when SBE works
 void bl_console::init()
 {
-    uint64_t divisor = (g_uartClock / 16) / g_uartBaud;
+    uint64_t divisor = (g_vuart1Clock / 16) / g_vuart1Baud;
     uint8_t output = 0;
 
     const auto blConfigData = reinterpret_cast<BootloaderConfigData_t *>(
