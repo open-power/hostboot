@@ -129,4 +129,20 @@
     <ffdc>TPBR_PSIHB_STATUS_CTL_REG</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
+
+  
+  <!-- ******************************************************************** -->
+   <hwpError>
+    <sbeError/>
+    <rc>RC_P10_VAS_QUIESCE_TIMEOUT</rc>
+    <description>
+      Procedure: p10_sbe_check_quiesce
+      The VAS quiesce was not achieved
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>NORTHDATA</ffdc>
+    <ffdc>SOUTHDATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+
 </hwpErrors>
