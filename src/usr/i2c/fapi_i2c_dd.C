@@ -41,6 +41,8 @@
 #include <devicefw/driverif.H>
 #include <i2c/i2creasoncodes.H>
 #include "fapi_i2c_dd.H"
+#include <time.h>
+#include <stdio.h>
 
 extern trace_desc_t* g_trac_i2c;
 
@@ -83,6 +85,7 @@ errlHndl_t fapiI2cPerformOp(DeviceFW::OperationType i_opType,
 {
     errlHndl_t l_err = nullptr;
     errlHndl_t l_err_retryable = nullptr;
+    bool l_non_retryable_err_hit = false;
     const uint8_t FAPI_I2C_MAX_RETRIES = 2;
 
     TARGETING::ATTR_FAPI_I2C_CONTROL_INFO_type l_i2cInfo;
@@ -93,6 +96,10 @@ errlHndl_t fapiI2cPerformOp(DeviceFW::OperationType i_opType,
     {
         l_cfgData = va_arg( i_args, uint8_t* );
     }
+
+    timespec_t l_startTime;
+    timespec_t l_endTime;
+    clock_gettime(CLOCK_MONOTONIC, &l_startTime);
 
     TRACUCOMP(g_trac_i2c, ENTER_MRK"fapiI2cPerformOp(): "
       "%s operation on target %.8X",
@@ -153,8 +160,6 @@ errlHndl_t fapiI2cPerformOp(DeviceFW::OperationType i_opType,
                                           TARGETING::get_huid(i_target),
                                           0,
                                           true /*Add HB SW Callout*/ );
-
-            l_err->collectTrace( I2C_COMP_NAME );
             break;
         }
 
@@ -181,8 +186,6 @@ errlHndl_t fapiI2cPerformOp(DeviceFW::OperationType i_opType,
                                           i_opType,
                                           TARGETING::get_huid(i_target),
                                           true /*Add HB SW Callout*/ );
-
-            l_err->collectTrace( I2C_COMP_NAME );
             break;
         }
 
@@ -221,8 +224,7 @@ errlHndl_t fapiI2cPerformOp(DeviceFW::OperationType i_opType,
                            "Error: rc=0x%X, tgt=0x%X, No Retry (retry=%d)",
                             l_err->reasonCode(),
                             TARGETING::get_huid(i_target), retry);
-                l_err->collectTrace(I2C_COMP_NAME);
-
+                l_non_retryable_err_hit = true;
                 // break from retry loop
                 break;
             }
@@ -284,33 +286,52 @@ errlHndl_t fapiI2cPerformOp(DeviceFW::OperationType i_opType,
 
         } // end of retryable error loop
 
+        clock_gettime(CLOCK_MONOTONIC, &l_endTime);
+        char l_time_str[128];
+        snprintf(l_time_str, sizeof(l_time_str),
+                 "Start Time: %lu sec %lu ns End Time: %lu sec %lu ns",
+                  l_startTime.tv_sec, l_startTime.tv_nsec,
+                  l_endTime.tv_sec, l_endTime.tv_nsec);
+
         // Handle saved retryable error, if any
         if (l_err_retryable)
         {
-            if (l_err)
+            // This is the case where we had 1 or more retryable errors and
+            // eventually hit a non retryable error.
+            if (l_err && l_non_retryable_err_hit)
             {
                 // commit original retryable error with new err PLID
                 l_err_retryable->plid(l_err->plid());
                 TRACFCOMP(g_trac_i2c, "fapiI2cPerformOp(): Committing saved "
                     "retryable error eid=0x%X with plid of returned err 0x%X",
                     l_err_retryable->eid(), l_err_retryable->plid());
-
+                ERRORLOG::ErrlUserDetailsString(l_time_str)
+                                              .addToLog(l_err_retryable);
                 ERRORLOG::ErrlUserDetailsTarget(i_target)
                                                .addToLog(l_err_retryable);
                 l_err_retryable->collectTrace(I2C_COMP_NAME);
+                l_err_retryable->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
                 errlCommit(l_err_retryable, I2C_COMP_ID);
             }
             else
             {
-                // Since we eventually succeeded,
-                // delete original retryable error
-                TRACUCOMP(g_trac_i2c, "fapiI2cPerformOp(): Op successful, "
-                    "deleting saved retryable err eid=0x%X, plid=0x%X",
+                // In this case we have either hit the max retryable errors and
+                // failed, or hit one or more retryable errors and eventually
+                // passed. Either way we do not need this l_err_retryable anymore.
+                TRACUCOMP(g_trac_i2c, "fapiI2cPerformOp(): Op successful, or we hit max Retries and"
+                    " the caller is polling on this i2c op. Deleting saved retryable err eid=0x%X,"
+                     " plid=0x%X.",
                     l_err_retryable->eid(), l_err_retryable->plid());
-
                 delete l_err_retryable;
                 l_err_retryable = nullptr;
             }
+        }
+
+        if(l_err)
+        {
+            ERRORLOG::ErrlUserDetailsString(l_time_str)
+                                          .addToLog(l_err);
+            l_err->collectTrace(I2C_COMP_NAME);
         }
 
     } while (0);
