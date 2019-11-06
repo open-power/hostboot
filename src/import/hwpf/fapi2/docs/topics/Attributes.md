@@ -113,13 +113,13 @@ Note : You should provide information on the meaning of the indices inside of th
 
 ### default
 Specifies a default value for this attribute.  The default serves different purposes depending on what other tags are used.
-* Without mrwHide : Provides an initial value that is shown to the MRW owner.  Once any value is saved into the MRW, the default is no longer used.
-* With mrwHide : Determines the final value of this attribute
+* Without mrwHide / platInit=mrw : Provides an initial value that is shown to the MRW owner.  Once any value is saved into the MRW, the default is no longer used.
+* With mrwHide / platInit=usedefault : Determines the final value of this attribute
 
 `<default>42</default>`
 
 ### enum
-Specifies a set of enumerations/constants that should be used to read/write the attribute.  You are not required to use the enum for access but it is strongly encouraged.
+Specifies a set of enumerations/constants that should be used to read/write the attribute.  You are not required to use the enum for access but it is strongly encouraged.  The enumeration name will appear in MRW menus.
 The constant will have a value of : fapi2::ENUM_ATTR_<name of attribute>_<enum string>.
 
 `<enum>FIRSTVALUE = 0, ANOTHERONE = 1, SKIPPEDSOME = 10</enum>`
@@ -136,19 +136,32 @@ Note : must have a default tag.
 
 `<mrwHide/>`
 
+*Note : Will be deprecated once platforms support the various platInit tags*
+
 ### overrideOnly
 Indicates that this attribute is only ever modified from its default value using lab override tools.  Using this tag will result in memory savings for the platform and also hide it from the MRW tooling.
 
 `<overrideOnly/>`
 
-### platInit
-Indicates that the platform is responsible for providing the value of this attribute.  This could be algorithmically, sourced from VPD, defined as part of the MRW, or blank space allocated for lab overrides.
+*Note : Will be deprecated once platforms support the various platInit tags*
 
-`<platInit/>`
+### platInit
+Indicates that the platform is responsible for providing the value of this attribute.  This could be algorithmically, sourced from VPD, defined as part of the MRW, or blank space allocated for lab overrides.  The value of the tag gives a hint to platform code on how to treat the attribute.
+
+Types
+* customer :: Value is input by customer
+* fw  :: Value is calculated by platform code
+* mrw :: Value is provided by the MRW
+* override :: Indicates that this attribute is only ever modified from its default value using lab override tools.  Using this tag will result in memory savings for the platform and also hide it from the MRW tooling.
+* usedefault :: Value is provided as a default inside the attribute xml definition.  This value will be used by all systems.  The only time it would vary is with an explicit override in the lab.
+* vpd :: Value comes directly from VPD (live lookup)
+
+`<platInit>Type</platInit>`
+`<platInit/>` is equivalent to `<platInit>mrw</platInit>` (*Note : Will be deprecated once platforms support the various platInit tags*)
 
 ### writeable
 Indicates that the attribute can be written to a new value by a Hardware Procedure (HWP).  By default, attributes are read-only.
-Note : It is unusual, though not unheard of, for an attribute to be both platInit and writeable.  If this is the case, the written value will persist across boots.
+Note : It is unusual, though not unheard of, for an attribute to be both platInit and writeable.  If this is the case, the written value will persist across boots and code updates.
 
 `<writeable/>`
 
