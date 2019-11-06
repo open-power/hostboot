@@ -82,4 +82,51 @@
     <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SCAN_CHIPLET_OVERRIDE</id>
+    <targetType>
+      TARGET_TYPE_PROC_CHIP
+    </targetType>
+    <description>
+      Specifies target chiplet ID for scan operations via fapi2::putRing.
+      If set, this attribute will override the chiplet ID present in the RS4
+      encoded scan ring image.
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>
+      NONE  = 0x00,
+      TP    = 0x01,
+      N0    = 0x02,
+      N1    = 0x03,
+      PCI0  = 0x08,
+      PCI1  = 0x09,
+      MC0   = 0x0C,
+      MC1   = 0x0D,
+      MC2   = 0x0E,
+      MC3   = 0x0F,
+      PAU0  = 0x10,
+      PAU1  = 0x11,
+      PAU2  = 0x12,
+      PAU3  = 0x13,
+      IOHS0 = 0x18,
+      IOHS1 = 0x19,
+      IOHS2 = 0x1A,
+      IOHS3 = 0x1B,
+      IOHS4 = 0x1C,
+      IOHS5 = 0x1D,
+      IOHS6 = 0x1E,
+      IOHS7 = 0x1F,
+      EQ0   = 0x20,
+      EQ1   = 0x21,
+      EQ2   = 0x22,
+      EQ3   = 0x23,
+      EQ4   = 0x24,
+      EQ5   = 0x25,
+      EQ6   = 0x26,
+      EQ7   = 0x27
+    </enum>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>
