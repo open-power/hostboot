@@ -25,7 +25,6 @@
 PROCEDURE=p10_exit_cache_contained
 OBJS+=p10_fbc_utils.o
 OBJS+=p10_gen_xscom_init.o
-OBJS+=p10_scominfo.o
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/common/scominfo/)
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/common/scominfo/)
 $(call BUILD_PROCEDURE)

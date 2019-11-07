@@ -100,6 +100,8 @@ OBJS += p10_setup_mmio_bars.o
 #include ${PROCEDURE_PATH}/hwp/nest/p9_throttle_sync.mk
 #include ${PROCEDURE_PATH}/hwp/memory/p9_mss_power_cleanup.mk
 
+OBJS += p10_scominfo.o
+
 VPATH    += ${PROCEDURE_PATH}/hwp/nest/
 VPATH    += ${PROCEDURE_PATH}/hwp/core/
 VPATH    += ${PROCEDURE_PATH}/hwp/memory/
