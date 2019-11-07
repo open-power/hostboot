@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -146,7 +146,22 @@ enum
     SMF_BIT_CHECK               =   0x0001000000000000ull,
     INST_VALUE_SC2              =   0x44000042,
     SRESET_WORD_POS             =   0x40,
+    UV_SMF_HV_POS               =   0x80,
     CPMR_VDM_PER_QUAD           =   0x43504d525f322e30ull, //supports VDM per quad
+    LE_MF_HRMOR_R1              =   0xa64a397c,
+    LE_MFMSR_R21                =   0xa600a07e,
+    LE_CLEAR_MSR_LE             =   0xa407b57a,
+    LE_MT_SRR1_FROM_R21         =   0xa603bb7e,
+    LE_ADDI_R1_32               =   0x20012138,
+    LE_MT_SRR0_R1               =   0xa6033a7c,
+    LE_RFID                     =   0x2400004c,
+    BE_BRANCH_SC2               =   0x4800001c,
+    BE_MTSPR_HRMOR_R10          =   0x7d594ba6,
+    BE_SLBIA                    =   0x7c0003e4,
+    BE_STOP                     =   0x4c0002e4,
+    MAX_TRANS_INST              =   0x08,
+    MAX_UV_HV_TRANSITION_INST   =   0x03,
+
 };
 
 /**
@@ -4993,7 +5008,7 @@ fapi2::ReturnCode populateUnsecureHomerAddress( CONST_FAPI2_PROC& i_procTgt, Hom
  * @note:       initializes buffer irrespective of SMF enable state for simplicity.
  * It will behave as NOP for SMF disabled systems.
  */
-fapi2::ReturnCode   initUnsecureHomer( void* const  i_pBuf2, const uint32_t  i_sizeBuf2 )
+fapi2::ReturnCode   initUnsecureHomer( void* const  i_pBuf2, const uint32_t  i_sizeBuf2, const uint8_t i_smfEnabled )
 {
     FAPI_DBG( ">> initUnsecureHomer" );
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
@@ -5001,7 +5016,30 @@ fapi2::ReturnCode   initUnsecureHomer( void* const  i_pBuf2, const uint32_t  i_s
     uint32_t l_attr_unsecureHomerSize;
     uint32_t * l_pWord              =  (uint32_t *) i_pBuf2;
     uint32_t l_initInst             =  SWIZZLE_4_BYTE(CORE_RESTORE_PAD_OPCODE);
+    uint32_t  * l_pUvToHvWord       =   (uint32_t *) i_pBuf2;
+    uint32_t l_hvToUvTransCode[MAX_TRANS_INST]  =
+                                        {   BE_BRANCH_SC2,      // 'b be_sc2_location' in BE NOP in LE
+                                            LE_MF_HRMOR_R1,     // 'mfspr  r1, HRMOR '  in LE
+                                            LE_MFMSR_R21,       // 'mfmsr  r21' in LE
+                                            LE_CLEAR_MSR_LE,    // 'clrrdi r21, r21, 1' in LE
+                                            LE_MT_SRR1_FROM_R21,// 'mtsrr1 r21' in LE
+                                            LE_ADDI_R1_32,      // 'addi r1, r1, 288' in LE
+                                            LE_MT_SRR0_R1,      // 'mtsrr0 r1' in LE
+                                            INST_VALUE_SC2,     // 'sc2' in BE at be_sc2_location
+                                             };
 
+   uint32_t l_uvToSmfEnabledHv[MAX_UV_HV_TRANSITION_INST]  =
+                                        {
+                                            BE_MTSPR_HRMOR_R10,  //'mtspr hrmor, r10'
+                                            BE_SLBIA,            //'slbia'
+                                            BE_STOP,             //'stop'
+                                        };
+
+
+    if( !i_smfEnabled )
+    {
+        goto fapi_try_exit;
+    }
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_UNSECURE_HOMER_SIZE,
                            FAPI_SYSTEM,
@@ -5025,8 +5063,23 @@ fapi2::ReturnCode   initUnsecureHomer( void* const  i_pBuf2, const uint32_t  i_s
        memcpy( l_pWord + wordCnt, &l_initInst, sizeof(uint32_t) );
     }
 
-    l_initInst              =   SWIZZLE_4_BYTE(INST_VALUE_SC2);
-    memcpy( l_pWord + SRESET_WORD_POS, &l_initInst, sizeof(uint32_t) );
+    l_pWord     +=  SRESET_WORD_POS;
+
+    for( size_t inst = 0; inst < MAX_TRANS_INST; inst++ )
+    {
+        l_initInst   =   SWIZZLE_4_BYTE(l_hvToUvTransCode[inst]);
+        memcpy( l_pWord, &l_initInst, sizeof(uint32_t) );
+        l_pWord++;
+    }
+
+    l_pUvToHvWord    +=  UV_SMF_HV_POS;
+
+    for( size_t inst = 0; inst < MAX_UV_HV_TRANSITION_INST; inst++ )
+    {
+        l_initInst  =   SWIZZLE_4_BYTE(l_uvToSmfEnabledHv[inst]);
+        memcpy( l_pUvToHvWord, &l_initInst, sizeof(uint32_t) );
+        l_pUvToHvWord++;
+    }
 
     fapi_try_exit:
     FAPI_DBG( "<< initUnsecureHomer" );
@@ -5269,7 +5322,7 @@ fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
     FAPI_TRY( verifySprSelfSave( i_pHomerImage, fuseModeState, l_chipFuncModel ),
               "Failed to create SPR self save restore entry" );
 
-    FAPI_TRY( initUnsecureHomer( i_pBuf2, i_sizeBuf2 ),
+    FAPI_TRY( initUnsecureHomer( i_pBuf2, i_sizeBuf2, l_chipFuncModel.isSmfEnabled() ),
               "Failed to initialize unsecure HOMER" );
 fapi_try_exit:
     FAPI_IMP("<< p9_hcode_image_build" );

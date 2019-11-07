@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,8 +38,8 @@
 
 enum
 {
-    RUN_TIME_WAKEUP_MODE_BIT_POS    =   3,
-    HV_COMPATIBILITY_MODE_BIT_POS   =   4,
+    RUN_TIME_HV_WAKEUP_MODE_BIT_POS     =   3,
+    SMF_ENABLE_BIT_POS                  =   4,
 };
 
 fapi2::ReturnCode p9_setup_runtime_wakeup_mode(
@@ -68,15 +68,15 @@ fapi2::ReturnCode p9_setup_runtime_wakeup_mode(
 
         if( l_smfEnabled )
         {
-            //Wakeup in Ultravisor mode
-            l_wakeupMode.clearBit( RUN_TIME_WAKEUP_MODE_BIT_POS );
-            l_wakeupMode.clearBit( HV_COMPATIBILITY_MODE_BIT_POS );
+            //Wakeup in Ultravisor mode, SMF enabled
+            l_wakeupMode.clearBit( RUN_TIME_HV_WAKEUP_MODE_BIT_POS );
+            l_wakeupMode.clearBit( SMF_ENABLE_BIT_POS );
         }
         else
         {
-            //Wakeup in Hypervisor mode
-            l_wakeupMode.setBit( RUN_TIME_WAKEUP_MODE_BIT_POS );
-            l_wakeupMode.setBit( HV_COMPATIBILITY_MODE_BIT_POS );
+            //Wakeup in Hypervisor mode, SMF Dsiabled
+            l_wakeupMode.setBit( RUN_TIME_HV_WAKEUP_MODE_BIT_POS );
+            l_wakeupMode.setBit( SMF_ENABLE_BIT_POS );
         }
 
         FAPI_TRY(fapi2::putScom(core, C_CPPM_CPMMR, l_wakeupMode),
