@@ -547,13 +547,6 @@ errlHndl_t IntrRp::_init()
                 break;
             }
 
-            //Route LSI interrupt events over PSIHB instead of local wire
-            // This is a HW Bug Workaround for slaves using the PSIHB and
-            // the master using the local wire
-            routeLSIInterrupts(l_procIntrHdlr);
-
-            enableLsiInterrupts();
-
             TRACFCOMP(g_trac_intr, "IntrRp::_init() Enabling PSIHB Interrupts");
             //Enable PSIHB Interrupts
             l_err = enableInterrupts(l_procIntrHdlr);
@@ -562,6 +555,13 @@ errlHndl_t IntrRp::_init()
                 TRACFCOMP(g_trac_intr, "IntrRp::_init() Error enabling Interrupts");
                 break;
             }
+
+            //Route LSI interrupt events over PSIHB instead of local wire
+            // This is a HW Bug Workaround for slaves using the PSIHB and
+            // the master using the local wire
+            routeLSIInterrupts(l_procIntrHdlr);
+
+            enableLsiInterrupts();
         }
 
         // Build up list of unregistered LSI sources, at this point no sourced
