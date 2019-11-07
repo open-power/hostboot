@@ -75,8 +75,7 @@ extern "C" fapi2::ReturnCode p10_proc_gettracearray(
     {
         l_target = i_target.getParent<fapi2::TARGET_TYPE_PERV>();
     }
-
-    if (IS_PEC(i_args.trace_bus))
+    else if (IS_PEC(i_args.trace_bus))
     {
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
                                i_target,

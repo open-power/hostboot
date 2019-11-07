@@ -109,46 +109,45 @@ const uint32_t TA_DEBUG_BASE_SCOM      = 0x000107C0;
 const uint32_t TA_EQ_DEBUG_BASE_SCOM   = 0x000183E0;
 const uint32_t TA_TRACE_BASE_SCOM      = 0x00010400;
 
+
 //------------------------------------------------------------------------------
 // Helper methods
 //------------------------------------------------------------------------------
-extern "C" {
-    /*
-     * @brief Determine if the secondary trace mux is used.
-     *
-     * @param pri_setting The primary mux setting if the secondary mux is used
-     *
-     * @return if pri_setting is < 5 then the secondary mux setting should be used
-     *
-     */
-    static inline bool use_sec_mux(uint8_t pri_setting)
-    {
-        return (pri_setting < 4);
-    }
+/*
+ * @brief Determine if the secondary trace mux is used.
+ *
+ * @param pri_setting The primary mux setting if the secondary mux is used
+ *
+ * @return if pri_setting is < 5 then the secondary mux setting should be used
+ *
+ */
+static inline bool use_sec_mux(uint8_t pri_setting)
+{
+    return (pri_setting < 4);
+}
 
-    /*
-     * @brief Determine the amount of offset needed for an EQ scoped L3, NCU or CLKADJ bus
-     *
-     * @param i_target: the target passed from the wrapper
-     *
-     * @return offset
-     *
-     */
-    static inline uint32_t get_eq_scom_offset(fapi2::Target<P10_SBE_TRACEARRAY_TARGET_TYPES>& i_target)
-    {
-        fapi2::ATTR_CHIP_UNIT_POS_Type l_region_select = 0;
+/*
+ * @brief Determine the amount of offset needed for an EQ scoped L3, NCU or CLKADJ bus
+ *
+ * @param i_target: the target passed from the wrapper
+ *
+ * @return offset
+ *
+ */
+static inline uint32_t get_eq_scom_offset(fapi2::Target<P10_SBE_TRACEARRAY_TARGET_TYPES>& i_target)
+{
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_region_select = 0;
 
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
-                               i_target,
-                               l_region_select),
-                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                           i_target,
+                           l_region_select),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
 
-        FAPI_DBG("reg_sel: %llx", l_region_select);
+    FAPI_DBG("reg_sel: %llx", l_region_select);
 
-    fapi_try_exit:
-        return ((l_region_select % 4) * 0x40);
-    }
-} // extern "C"
+fapi_try_exit:
+    return ((l_region_select % 4) * 0x40);
+}
 
 //------------------------------------------------------------------------------
 // Table of known trace arrays
@@ -199,9 +198,8 @@ static const ta_def ta_defs[] =
     /* PAUC */
     { { PROC_TB_PAU0_0, PROC_TB_PAU1_0, PROC_TB_PTL0},            0x00, 0x0000, 5 },
     { { PROC_TB_PAU0_1, PROC_TB_PAU1_1, PROC_TB_PTL1},            0x00, 0x0002, 5 },
-    { { PROC_TB_IOPPE },                                          0x00, 0x0004, 5 },
     /* AXON */
-    { { PROC_TB_ODL, PROC_TB_NDL, PROC_TB_PDL },                  0x00, 0x0000, 5 },
+    { { NO_TB, NO_TB, PROC_TB_IOHS },                             0x00, 0x0000, 5 },
     /* CORE */
     { { PROC_TB_L20 },                                            0x20, 0x07E2, 5 },
     { { PROC_TB_L21 },                                            0x20, 0x07E4, 5 },
@@ -210,7 +208,8 @@ static const ta_def ta_defs[] =
     /* EQ */
     { { PROC_TB_L3_0, PROC_TB_NCU_0, PROC_TB_CLKADJ },            0x20, 0x03F0, 5 },
     { { PROC_TB_L3_1, PROC_TB_NCU_1 },                            0x20, 0x03F1, 5 },
-    { { PROC_TB_QME },                                            0x20, 0x0400, 5 }
+    { { PROC_TB_QME0 },                                           0x20, 0x0400, 5 },
+    { { PROC_TB_QME1 },                                           0x20, 0x0401, 5 }
 };
 
 class TraceArrayFinder
@@ -278,7 +277,7 @@ class TraceArrayFinder
                             }
                         }
 
-                        FAPI_DBG("Assinging secondary mux");
+                        FAPI_DBG("Assigning secondary mux");
 
                         // Traces with a pri setting <4 also use a secondary select to control one of the traces
                         // connected to the primary mux.
@@ -428,7 +427,7 @@ fapi2::ReturnCode p10_sbe_tracearray(
                 ta_type, arg_type);
 
     // Check if this PAUC target has the requested bus
-    if(!IS_PEC(i_args.trace_bus))
+    if ( ! IS_PEC(i_args.trace_bus))
     {
         FAPI_ASSERT(!( (i_target.getChipletNumber() == 0x10 || i_target.getChipletNumber() == 0x11)
                        &&  ( (i_args.trace_bus == PROC_TB_PAU1_0 || i_args.trace_bus == PROC_TB_PAU1_1) ) ),

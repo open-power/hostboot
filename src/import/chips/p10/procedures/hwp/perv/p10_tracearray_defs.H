@@ -124,14 +124,11 @@ enum p10_tracearray_bus_id
     PROC_TB_PAU1_1,
     PROC_TB_PTL0,
     PROC_TB_PTL1,
-    PROC_TB_IOPPE,
 
     _PROC_TB_LAST_PAUC_TARGET = 0xA0,
 
     /* AXON chiplets - TARGET_TYPE_IOHS */
-    PROC_TB_ODL,
-    PROC_TB_NDL,
-    PROC_TB_PDL,
+    PROC_TB_IOHS,
 
     _PROC_TB_LAST_IOHS_TARGET  = 0xC0,
     /* Core regions - TARGET_TYPE_CORE */
@@ -150,7 +147,8 @@ enum p10_tracearray_bus_id
 
     _PROC_TB_LAST_CORE_EQ_TARGET = 0xF0,
     /* EQ chiplets - TARGET_TYPE_EQ */
-    PROC_TB_QME
+    PROC_TB_QME0,
+    PROC_TB_QME1
 
 };
 
