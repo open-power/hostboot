@@ -41,6 +41,7 @@
 #include <p10_pcie_scominit.H>
 #include <p10_pcie_scom.H>
 #include <p10_scom_pec_6.H>
+#include <p10_scom_phb_e.H>
 
 
 ///-----------------------------------------------------------------------------
@@ -54,10 +55,12 @@ p10_pcie_scominit(
     FAPI_DBG("Start");
     using namespace scomt;
     using namespace scomt::pec;
+    using namespace scomt::phb;
 
     fapi2::ReturnCode l_rc;
     fapi2::buffer<uint64_t> l_data;
     auto l_pec_targets = i_target.getChildren<fapi2::TARGET_TYPE_PEC>();
+    auto l_phb_targets = i_target.getChildren<fapi2::TARGET_TYPE_PHB>();
 
     //Perform the PCIe Phase 1 Inits 1-8
     //Sets the lane config based on MRW attributes
@@ -76,6 +79,15 @@ p10_pcie_scominit(
         SET_CPLT_CONF1_IOVALID_DC_9H(l_data);
         SET_CPLT_CONF1_IOVALID_DC_10H(l_data);
         FAPI_TRY(PUT_CPLT_CONF1_WO_OR(l_pec_target, l_data));
+    }
+
+    //Reset PHBs
+    for (auto l_phb_target : l_phb_targets)
+    {
+        l_data = 0;
+        FAPI_TRY(PREP_REGS_PHBRESET_REG(l_phb_target));
+        SET_REGS_PHBRESET_REG_PE_ETU_RESET(l_data);
+        FAPI_TRY(PUT_REGS_PHBRESET_REG(l_phb_target, l_data));
     }
 
     //Run initfile
