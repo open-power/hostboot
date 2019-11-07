@@ -2302,6 +2302,8 @@ errlHndl_t Bpm::disableWriteProtection()
             break;
         }
 
+        nanosleep(0, 100 * NS_PER_MSEC);
+
         // Make sure protection was removed
         uint8_t data = 0;
         errl = nvdimmReadReg(iv_nvdimm,
