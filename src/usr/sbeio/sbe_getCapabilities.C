@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 #include <targeting/common/commontargeting.H>  // get_huid
 #include <util/align.H>            // ALIGN_X
 #include <sys/mm.h>                // mm_virt_to_phys
+#include <sbeio/sbeioif.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -100,25 +101,13 @@ errlHndl_t getPsuSbeCapabilities(TargetHandle_t i_target)
     // Cache the SBE Capabilities' size for future uses
     size_t l_sbeCapabilitiesSize = sizeof(sbeCapabilities_t);
 
-    // The buffer must be a multiple of 128 bytes in size, and it must
-    // be aligned to a 128 byte boundary.
-    const size_t totalAlignedSize = ALIGN_X(l_sbeCapabilitiesSize,
-          SbePsu::SBE_CAPABILITIES_ALIGNMENT_SIZE_IN_BYTES)
-        + (SbePsu::SBE_CAPABILITIES_ALIGNMENT_SIZE_IN_BYTES - 1);
+    void* l_sbeCapabilitiesReadBufferAligned = nullptr;
 
-    // Set up the buffer which the SBE will copy the capabilities info to.
-    // Create buffer with enough size to be properly aligned
-    uint8_t * l_sbeCapabilitiesReadBuffer = static_cast<uint8_t*>(
-        malloc(totalAlignedSize));
-
-    // Align the buffer
-    uint64_t l_sbeCapabilitiesReadBufferAligned =
-        ALIGN_X(reinterpret_cast<uint64_t>(l_sbeCapabilitiesReadBuffer),
-                SbePsu::SBE_CAPABILITIES_ALIGNMENT_SIZE_IN_BYTES);
+    auto l_alignedMemHandle = sbeMalloc(l_sbeCapabilitiesSize,
+                                        l_sbeCapabilitiesReadBufferAligned);
 
     // Clear buffer up to the size of the capabilities
-    memset(reinterpret_cast<uint8_t*>(l_sbeCapabilitiesReadBufferAligned),
-           0, l_sbeCapabilitiesSize );
+    memset(l_sbeCapabilitiesReadBufferAligned, 0, l_sbeCapabilitiesSize);
 
     // Create a PSU request message and initialize it
     SbePsu::psuCommand l_psuCommand(
@@ -128,10 +117,9 @@ errlHndl_t getPsuSbeCapabilities(TargetHandle_t i_target)
                 SbePsu::SBE_PSU_MSG_GET_CAPABILITIES);   //command
     l_psuCommand.cd7_getSbeCapabilities_CapabilitiesSize =
                 ALIGN_X(l_sbeCapabilitiesSize,
-                        SbePsu::SBE_CAPABILITIES_ALIGNMENT_SIZE_IN_BYTES);
+                        SbePsu::SBE_ALIGNMENT_SIZE_IN_BYTES);
     l_psuCommand.cd7_getSbeCapabilities_CapabilitiesAddr =
-                 mm_virt_to_phys(
-                   reinterpret_cast<void*>(l_sbeCapabilitiesReadBufferAligned));
+                 mm_virt_to_phys(l_sbeCapabilitiesReadBufferAligned);
 
     // Create a PSU response message
     SbePsu::psuResponse l_psuResponse;
@@ -169,7 +157,7 @@ errlHndl_t getPsuSbeCapabilities(TargetHandle_t i_target)
 
             TRACDBIN(g_trac_sbeio,
               "getPsuSbeCapabilities: capabilities data",
-              reinterpret_cast<uint8_t*>(l_sbeCapabilitiesReadBufferAligned),
+              l_sbeCapabilitiesReadBufferAligned,
               l_sbeCapabilitiesSize);
 
             break;
@@ -243,7 +231,7 @@ errlHndl_t getPsuSbeCapabilities(TargetHandle_t i_target)
         if (l_psuResponse.sbe_capabilities_size >= l_sbeCapabilitiesSize)
         {
             memcpy (&l_sbeCapabilities,
-                   reinterpret_cast<void*>(l_sbeCapabilitiesReadBufferAligned),
+                   l_sbeCapabilitiesReadBufferAligned,
                    l_sbeCapabilitiesSize);
         }
         // If the returned size is less than the needed size and is not zero
@@ -251,7 +239,7 @@ errlHndl_t getPsuSbeCapabilities(TargetHandle_t i_target)
         else if (l_psuResponse.sbe_capabilities_size)
         {
             memcpy (&l_sbeCapabilities,
-                   reinterpret_cast<void*>(l_sbeCapabilitiesReadBufferAligned),
+                   l_sbeCapabilitiesReadBufferAligned,
                    l_psuResponse.sbe_capabilities_size);
         }
 
@@ -263,11 +251,8 @@ errlHndl_t getPsuSbeCapabilities(TargetHandle_t i_target)
     } while (0);
 
     // Free the buffer
-    if (l_sbeCapabilitiesReadBuffer)
-    {
-        free(l_sbeCapabilitiesReadBuffer);
-        l_sbeCapabilitiesReadBuffer = nullptr;
-    }
+    sbeFree(l_alignedMemHandle);
+    l_sbeCapabilitiesReadBufferAligned = nullptr;
 
     TRACFCOMP(g_trac_sbeio, EXIT_MRK "getPsuSbeCapabilities");
 
@@ -368,4 +353,3 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
 };
 
 } //end namespace SBEIO
-

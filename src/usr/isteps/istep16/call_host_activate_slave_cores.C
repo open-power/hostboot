@@ -107,7 +107,6 @@ void* call_host_activate_slave_cores(void* const io_pArgs)
 
         //Determine PIR and threads to enable for this core
         const uint64_t pir = PIR_t(l_logicalGroupId, l_chipId, l_coreId).word;
-        const uint64_t en_threads = sys->getAttr<ATTR_ENABLED_THREADS>();
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "pir for this core is: %lx", pir);
 
@@ -122,21 +121,9 @@ void* call_host_activate_slave_cores(void* const io_pArgs)
 
             // @TODO RTC 243962: enable when supported
 #ifdef ISTEP16_ENABLE_HWPS
+            const uint64_t en_threads = sys->getAttr<ATTR_ENABLED_THREADS>();
             rc = cpu_start_core(pir, en_threads);
 #endif
-
-            // TODO: Evaluate whether this is still necessary for P10
-            // Workaround to handle some syncing issues with new cpus
-            // waking
-            if (-ETIME == rc)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "call_host_activate_slave_cores: Time out "
-                          "rc from kernel %d on core 0x%x, resending doorbell",
-                          rc,
-                          pir);
-                rc = cpu_wakeup_core(pir,en_threads);
-            }
 
             // Handle time out error
             uint32_t l_checkidle_eid = 0;

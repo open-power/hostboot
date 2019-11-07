@@ -244,12 +244,9 @@ void* call_host_activate_master(void* const io_pArgs)
                   get_huid(l_proc_target));
 
         //In the future possibly move default "waitTime" value to SBEIO code
-        /* @TODO RTC 243962: Enable this code when we have SBE support */
-#ifdef ISTEP16_ENABLE_HWPS
-        uint64_t waitTime = 10500; // wait time 10.5 sec, anything larger than 10737 ms can cause
-                                   // overflow on SBE side of the tiemout calculations
-        l_errl = SBEIO::startDeadmanLoop(waitTime);
-#endif
+        uint64_t waitTimeMs = 10500; // wait time 10.5 sec, anything larger than 10737 ms can cause
+                                     // overflow on SBE side of the timeout calculations
+        l_errl = SBEIO::startDeadmanLoop(waitTimeMs);
 
         if (l_errl)
         {
@@ -391,10 +388,7 @@ void* call_host_activate_master(void* const io_pArgs)
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "Returned from Winkle.");
 
-        /* @TODO RTC 243962: Enable with SBE support */
-#ifdef ISTEP16_ENABLE_HWPS
         l_errl = SBEIO::stopDeadmanLoop();
-#endif
 
         if (l_errl)
         {

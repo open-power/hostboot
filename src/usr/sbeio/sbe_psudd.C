@@ -77,6 +77,29 @@ using namespace ERRORLOG;
 namespace SBEIO
 {
 
+sbeAllocationHandle_t sbeMalloc(const size_t i_bytes, void*& o_allocation)
+{
+    // The buffer must be a multiple of SBE_ALIGNMENT_SIZE_IN_BYTES
+    // bytes in size, and it must be aligned to a
+    // SBE_ALIGNMENT_SIZE_IN_BYTES byte boundary.
+    const size_t l_totalAlignedSize =
+        (ALIGN_X(i_bytes, SbePsu::SBE_ALIGNMENT_SIZE_IN_BYTES)
+         + (SbePsu::SBE_ALIGNMENT_SIZE_IN_BYTES - 1));
+
+    // Create buffer with enough size to be properly aligned
+    void* const l_sbeBuffer = malloc(l_totalAlignedSize);
+
+    // Align the buffer
+    const uint64_t l_sbeBufferAligned =
+        ALIGN_X(reinterpret_cast<uint64_t>(l_sbeBuffer),
+                SbePsu::SBE_ALIGNMENT_SIZE_IN_BYTES);
+
+    o_allocation = reinterpret_cast<void*>(l_sbeBufferAligned);
+
+    // Return a pointer to the original buffer, so we can free() it later
+    return { l_sbeBuffer };
+}
+
 SbePsu & SbePsu::getTheInstance()
 {
     return Singleton<SbePsu>::instance();

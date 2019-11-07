@@ -61,9 +61,9 @@ class SbePsu
     public:
 
         /**
-         * @brief The alignment boundary for sending an SBE Capabilities message
+         * @brief The alignment boundary for sending an SBE message
          */
-        static constexpr uint32_t SBE_CAPABILITIES_ALIGNMENT_SIZE_IN_BYTES = 128;
+        static constexpr uint32_t SBE_ALIGNMENT_SIZE_IN_BYTES = 128;
 
         /**
          * @brief get the instance of this class
@@ -398,9 +398,9 @@ class SbePsu
                 uint16_t cd1_ControlDeadmanLoop_SeqID;
                 uint8_t  cd1_ControlDeadmanLoop_CommandClass;
                 uint8_t  cd1_ControlDeadmanLoop_Command;
-                uint64_t cd1_ControlDeadmanLoop_WaitTime ;
-                uint64_t cd1_ControlDeadmanLoop_MbxReg2reserved;
-                uint64_t cd1_ControlDeadmanLoop_MbxReg3reserved;
+                uint64_t cd1_ControlDeadmanLoop_WaitTime;
+                uint64_t cd1_ControlDeadmanLoop_ScomRegInitsCount;
+                uint64_t cd1_ControlDeadmanLoop_ScomRegInitsAddr;
             } PACKED;
 
             struct //setSystemConfig

@@ -27,7 +27,6 @@
 
 #include <errl/errlentry.H>
 
-
 /* Associated defines for sendPsuReadSeeprom() function below */
 #define CHIPOP_READ_SEEPROM_SIZE_ALIGNMENT_BYTES 128
 #define CHIPOP_READ_SEEPROM_DEST_ADDR_ALIGNMENT_BYTES 8
@@ -53,14 +52,63 @@ namespace SBEIO
     };
 
     /**
+     * @brief The type returned by sbeMalloc and deallocated by sbeFree
+     */
+    struct sbeAllocationHandle_t
+    {
+        void* data = nullptr;
+
+        /* @brief Null test for data member.
+         */
+        operator bool() const
+        {
+            return data;
+        };
+    };
+
+    /**
+     * @brief Allocate memory suitable to pass to SBE
+     *
+     * @note The memory allocated by this function should be deallocated by
+     *       passing the returned sbeAllocationHandle_t to sbeFree. Do NOT
+     *       pass the value of o_allocation to free().
+     *
+     * @param[in] i_bytes      The number of bytes to allocate
+     * @param[in] o_allocation The resulting memory allocation
+     *
+     * @return sbeAllocationHandle_t A handle that should be passed to sbeFree
+     *                               to deallocate the memory.
+     */
+    sbeAllocationHandle_t sbeMalloc(size_t i_bytes, void*& o_allocation);
+
+    /**
+     * @brief Frees an allocation previously allocated with sbeMalloc
+     *
+     * @param[in] i_handle The handle to deallocate
+     */
+    inline void sbeFree(sbeAllocationHandle_t& i_handle)
+    {
+        free(i_handle.data);
+        i_handle.data = nullptr;
+    }
+
+    /**
      * @brief Start Deadman loop
      *
-     * @param[in] i_waitTime Time to wait in milliseconds
+     * @note  This function must not be called twice without an intervening call
+     *        to stopDeadmanLoop.
+     *
+     * @param[in] i_waitTime     Time to wait in milliseconds
+     * @param[in] i_regInits     Array of SCOM register/value pairs to write
+     * @param[in] i_regInitCount Number of elements in i_regInits
      *
      * @return errlHndl_t Error log handle on failure.
-     *
      */
-    errlHndl_t startDeadmanLoop(const uint64_t i_waitTime );
+    errlHndl_t startDeadmanLoop(
+        uint64_t i_waitTime,
+        const std::pair<uint64_t, uint64_t>* i_regInits = nullptr,
+        size_t i_regInitCount = 0
+    );
 
     /**
      * @brief Stop Deadman loop
