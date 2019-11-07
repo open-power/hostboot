@@ -47,5 +47,6 @@ TESTS += sbe_fifo_buffer_test.H
 #TODO RTC:208826
 #TESTS += sbe_retry_handler_test.H
 TESTS += sbe_memregiontest.H
+TESTS += sbe_psucommandstest.H
 
 include ${ROOTPATH}/config.mk
