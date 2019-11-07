@@ -42,6 +42,8 @@
 #include <lib/phy/exp_train_handler.H>
 #include <lib/shared/exp_consts.H>
 #include <generic/memory/mss_git_data_helper.H>
+#include <explorer_scom_addresses.H>
+#include <explorer_scom_addresses_fld.H>
 
 extern "C"
 {
@@ -94,7 +96,16 @@ extern "C"
             FAPI_TRY( mss::exp::ib::getRSP(i_target, l_response, l_rsp_data),
                       "Failed getRSP() for  %s", mss::c_str(i_target) );
 
-            if (!l_sim)
+            if (l_sim)
+            {
+                //Clear MBA_FARB0Q_CFG_WAIT_FOR_INIT_COMPLETE for simulation
+                fapi2::buffer<uint64_t> l_data = 0;
+
+                FAPI_TRY(fapi2::getScom(i_target, EXPLR_SRQ_MBA_FARB0Q, l_data));
+                l_data.clearBit<EXPLR_SRQ_MBA_FARB0Q_CFG_WAIT_FOR_INIT_COMPLETE>();
+                FAPI_TRY(fapi2::putScom(i_target, EXPLR_SRQ_MBA_FARB0Q, l_data));
+            }
+            else // Not simulation
             {
                 // Proccesses the response data
                 FAPI_TRY( mss::exp::read_training_response(i_target, l_rsp_data, l_train_response),
