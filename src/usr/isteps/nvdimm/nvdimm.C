@@ -4410,8 +4410,57 @@ void nvdimmAddVendorLog( TARGETING::Target* i_nvdimm, errlHndl_t& io_err )
             break;
         }
 
-        // Add NUL terminator to ascii data
-        l_fullData.push_back(0x00);
+        // Find first NUL char in the vendor log data
+        bool l_foundNull = false;
+        uint32_t l_idx = 0;
+        for (l_idx = 0; l_idx < l_fullData.size(); l_idx++)
+        {
+            if (l_fullData[l_idx] == 0x00)
+            {
+                l_foundNull = true;
+                break;
+            }
+        }
+
+        // If NULL char not found
+        // then this is the old log format
+        if (l_foundNull == false)
+        {
+            // Add NUL terminator to ascii data
+            l_fullData.push_back(0x00);
+        }
+        // Else new log format
+        else
+        {
+            // If the next char is not NULL
+            // then the log has wrapped
+            // Re-arrange the data in chronological order
+            if (l_fullData[l_idx + 1] != 0x00)
+            {
+                // Save the data after the NULL char
+                // This is the start of the log
+                std::vector<uint8_t> l_tmpData;
+                l_tmpData.insert(l_tmpData.begin(),
+                                 l_fullData.begin() + l_idx + 1,
+                                 l_fullData.end());
+
+                // Erase this data from the vector
+                l_fullData.erase(l_fullData.begin() + l_idx + 1,
+                                 l_fullData.end());
+
+                // Place the saved data at the front
+                l_fullData.insert(l_fullData.begin(),
+                                  l_tmpData.begin(),
+                                  l_tmpData.end());
+            }
+            // Else log has not wrapped
+            else
+            {
+                // Erase the data at the end of the vector
+                l_fullData.erase(l_fullData.begin() + l_idx + 1,
+                                 l_fullData.end());
+            }
+        }
 
         // Add vendor data to error log as string
         const char* l_fullChar = reinterpret_cast<char*>(l_fullData.data());
