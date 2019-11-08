@@ -38,10 +38,6 @@
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
 
-/* TODO RTC 245393: P10 implementation
-#include <p10_switch_rec_attn.H>
-*/
-
 #include <targeting/attrrp.H>
 #include <sys/internode.h>
 #include <runtime/runtime.H>
@@ -179,59 +175,6 @@ void* call_host_ipl_complete(void* const io_pArgs)
         }
 
         sys->setAttr<ATTR_HDAT_HBRT_SECTION_SIZE>(l_secSize);
-
-        TARGETING::TargetHandleList l_procChips;
-        //Use targeting code to get a list of all processors
-        getAllChips(l_procChips, TARGETING::TYPE_PROC);
-
-        //Loop through all of the procs and call the HWP on each one
-        for (const auto & l_procChip: l_procChips)
-        {
-            const fapi2::Target<TARGET_TYPE_PROC_CHIP> l_fapiProcTarget(l_procChip);
-
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "Running p10_switch_rec_attn HWP on target HUID %.8X",
-                      TARGETING::get_huid(l_procChip));
-
-            /* @TODO RTC 245393: Update for P10
-#ifdef ISTEP16_ENABLE_HWPS
-            //  call p10_switch_rec_attn
-            FAPI_INVOKE_HWP(l_err, p10_switch_rec_attn, l_fapiProcTarget);
-#endif
-            */
-
-            if (l_err)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR 0x%.8X: p10_switch_rec_attn HWP returned error: "
-                          TRACE_ERR_FMT,
-                          l_err->reasonCode(),
-                          TRACE_ERR_ARGS(l_err));
-
-                // capture the target data in the elog
-                ErrlUserDetailsTarget(l_procChip).addToLog(l_err);
-
-                //Create IStep error log and cross reference error that occurred
-                l_stepError.addErrorDetails(l_err);
-
-                //break to end because if p10_switch_rec_attn fails
-                //recoverable/special attentions control didnt make it back
-                // to the fsp, this is a fatal error
-                break;
-            }
-            else
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "SUCCESS: p10_switch_rec_attn HWP( ) on target HUID %.8X",
-                          TARGETING::get_huid(l_procChip));
-            }
-        }
-
-        // if an error occurred during for loop, break to error handling
-        if (l_err)
-        {
-            break;
-        }
 
         // populate PHYP ATTN Area Attributes with values
         if (INITSERVICE::spBaseServicesEnabled() && is_phyp_load())
