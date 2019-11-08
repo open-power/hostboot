@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -32,6 +32,7 @@
 #include <util/align.H>
 #include <devicefw/driverif.H>
 #include <vpd/mvpdenums.H>
+#include <config.h>
 
 using namespace VPD;
 using namespace MVPD;
@@ -893,8 +894,14 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
             assert(l_pSysTarget != NULL);
         }
 
+#ifdef CONFIG_LOAD_PHYP_FROM_BOOTKERNEL
+        //Disable all STOP states (for debug ease) when loading
+        //PHYP from BOOTKERNEL partition.
+        iv_spPcrd->hdatChipData.hdatPcrdStopLevelSupport = 0x00000000;
+#else
         iv_spPcrd->hdatChipData.hdatPcrdStopLevelSupport =
             l_pSysTarget->getAttr<TARGETING::ATTR_SUPPORTED_STOP_STATES>();
+#endif
         iv_spPcrd->hdatChipData.hdatPcrdCheckstopAddr = HDAT_SW_CHKSTP_FIR_SCOM;
         iv_spPcrd->hdatChipData.hdatPcrdSpareBitNum   = HDAT_SW_CHKSTP_FIR_SCOM_BIT_POS;
 

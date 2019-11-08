@@ -70,3 +70,10 @@ config SUPPORT_EEPROM_CACHING
     help
         If enabled will read data off eeproms and cache in PNOR's
         EECACHE section.
+
+config LOAD_PHYP_FROM_BOOTKERNEL
+    default n
+    help
+        If enabled will load PHYP from the BOOTKERNEL partition
+        of PNOR.
+

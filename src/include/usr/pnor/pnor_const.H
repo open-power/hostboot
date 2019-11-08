@@ -74,6 +74,9 @@ enum SectionId
     HDAT,           /**< HDAT data */
     EECACHE,
     OCMBFW,         /**< OCMB image */
+#ifdef CONFIG_LOAD_PHYP_FROM_BOOTKERNEL
+    BOOTKERNEL,     /**< Bootkernel -- HB uses for  PHYP */
+#endif
 #endif
     NUM_SECTIONS,   /**< Number of defined sections */
 

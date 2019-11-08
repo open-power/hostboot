@@ -404,6 +404,14 @@ static void initializeAttributes(TargetService& i_targetService,
         //to enable special wakeup on cores that are not yet powered
         l_pTopLevel->setAttr<ATTR_SKIP_WAKEUP>(1);
 
+#ifdef CONFIG_LOAD_PHYP_FROM_BOOTKERNEL
+        // Switch PAYLOAD type, base and entry for PHYP
+        TARG_INF("Forcing load of PHYP from BOOTKERNEL");
+        l_pTopLevel->setAttr<ATTR_PAYLOAD_KIND>(PAYLOAD_KIND_PHYP);
+        l_pTopLevel->setAttr<ATTR_PAYLOAD_ENTRY>(0x180);
+        l_pTopLevel->setAttr<ATTR_PAYLOAD_BASE>(0x100);
+#endif
+
         Target* l_pMasterProcChip = NULL;
         i_targetService.masterProcChipTargetHandle(l_pMasterProcChip);
 
