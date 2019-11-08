@@ -111,8 +111,6 @@ void* call_dmi_io_run_training (void *io_pArgs)
 
 #ifdef CONFIG_AXONE
 
-    if( ! Util::isSimicsRunning() )
-    {
         TARGETING::TargetHandleList l_ocmbTargetList;
         getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
 
@@ -196,7 +194,6 @@ void* call_dmi_io_run_training (void *io_pArgs)
                           "SUCCESS :  p9a_omi_train HWP on 0x%.08X", TARGETING::get_huid(l_omi_target));
             }
         }
-    }
 
 #endif
 
