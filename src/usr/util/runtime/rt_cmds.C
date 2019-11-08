@@ -48,6 +48,7 @@
                                     // switchToFspScomAccess
 #ifdef CONFIG_NVDIMM
 #include <isteps/nvdimm/nvdimm.H>  // notify NVDIMM protection change
+#include <util/runtime/rt_fwnotify.H>
 #endif
 
 extern char hbi_ImageId;
@@ -1233,6 +1234,30 @@ void cmd_nvdDmmNvmCheckHealthStatus( char* &o_output)
 }  // end cmd_nvdDmmNvmCheckHealthStatus
 
 
+/**
+ * @brief Execute nvdimm operation, see interface.h for operation format
+ * @param[out] o_output  Output display buffer, memory allocated here.
+ *                       Will inform caller if nvdimm op passes or fails.
+ * @param[in] i_op  nvdimm operation to perform, see interface.h
+ */
+void cmd_nvdimm_op( char* &o_output, uint16_t i_op )
+{
+    o_output = new char[500];
+
+    hostInterfaces::nvdimm_operation_t l_operation;
+    l_operation.procId = HBRT_NVDIMM_OPERATION_APPLY_TO_ALL_NVDIMMS;
+    l_operation.rsvd1  = 0x0;
+    l_operation.rsvd2  = 0x0;
+    l_operation.opType = (hostInterfaces::NVDIMM_Op_t)i_op;
+
+    int rc = doNvDimmOperation(l_operation);
+    if (rc == -1)
+    {
+        sprintf( o_output, "Error on call doNvDimmOperation() op 0x%X",i_op);
+    }
+}
+
+
 #endif
 
 /**
@@ -1555,7 +1580,7 @@ int hbrtCommand( int argc,
         }
     }
 #ifdef CONFIG_NVDIMM
-     else if( !strcmp( argv[0], "nvdimm_protection" ) )
+    else if( !strcmp( argv[0], "nvdimm_protection" ) )
     {
         if (argc >= 3)
         {
@@ -1591,6 +1616,19 @@ int hbrtCommand( int argc,
         {
             *l_output = new char[100];
             sprintf(*l_output, "Usage: nvdimm_nvm_check_status");
+        }
+    }
+    else if( !strcmp( argv[0], "nvdimm_op" ) )
+    {
+        if (argc == 2)
+        {
+            uint16_t op = strtou64(argv[1], NULL, 16);
+            cmd_nvdimm_op( *l_output, op );
+        }
+        else
+        {
+            *l_output = new char[100];
+            sprintf(*l_output, "ERROR: nvdimm_op <op>");
         }
     }
 
@@ -1637,6 +1675,11 @@ int hbrtCommand( int argc,
         sprintf( l_tmpstr, "nvdimm_es_check_status\n");
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "nvdimm_nvm_check_status\n");
+        strcat( *l_output, l_tmpstr );
+        sprintf( l_tmpstr, "nvdimm_op <op>\n"
+                           "    0x1=disarm 0x2=disable_encryption 0x4=remove_keys\n"
+                           "    0x8=enable_encryption 0x10=arm 0x20=es_healthcheck\n"
+                           "    0x40=nvm_healthcheck\n");
         strcat( *l_output, l_tmpstr );
 
 #endif
