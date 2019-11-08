@@ -151,7 +151,6 @@
 /// \endcode
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <endian.h>
 #include "p10_scan_compression.H"
@@ -161,7 +160,6 @@
 #ifdef DEBUG_P10_SCAN_COMPRESSION
 
 #include <stdio.h>
-
 
 #define BUG(rc)                                     \
     ({                                              \
@@ -177,7 +175,7 @@
         (rc);                                   \
     })
 
-#else // DEBUG_P9_SCAN_COMPRESSION
+#else
 
 #define BUG(rc) (rc)
 #define BUGX(rc, ...) (rc)
@@ -1126,54 +1124,4 @@ rs4_extract_cmsk( const CompressedScanData*   i_rs4,
     }
 
     return rc;
-}
-
-
-// Prints out the raw decompressed RS4 ring content
-void print_raw_ring( uint8_t*  data,
-                     uint32_t  bits )
-{
-    uint32_t i;
-    uint8_t  bytePerWordCount = 0; // Nibble count in each word
-    uint32_t bytePerLineCount = 0; // Column count
-    uint8_t  rem = bits % 8;      // Rem raw bits beyond 1-byte boundary
-    uint8_t  nibblesToPrint;      // The last 1 or 2 nibbles to dump
-
-    for (i = 0; i < bits / 8; i++)
-    {
-        MY_DBG("%02x", *(data + i));
-
-        if (++bytePerWordCount == 4)
-        {
-            MY_DBG(" ");
-            bytePerWordCount = 0;
-        }
-
-        if (++bytePerLineCount == 32)
-        {
-            MY_DBG("\n");
-            bytePerLineCount = 0;
-        }
-    }
-
-    // Dump remaining bits (in whole nibbles and with any
-    //   unused bits being zeroed)
-    if (rem)
-    {
-        // Ensure the rightmost (8-rem) unused bits are zeroed out
-        nibblesToPrint = (*(data + i) >> (8 - rem)) << (8 - rem);
-
-        if (rem <= 4)
-        {
-            // Content only in first nibble. Dump only first nibble
-            MY_DBG("%01x", nibblesToPrint >> 4);
-        }
-        else
-        {
-            // Content in both nibbles. Dump both nibbles
-            MY_DBG("%02x", nibblesToPrint);
-        }
-    }
-
-    MY_DBG("\n");
 }

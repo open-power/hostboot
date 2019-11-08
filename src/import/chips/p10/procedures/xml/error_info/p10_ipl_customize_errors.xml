@@ -407,18 +407,6 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_XIPC_TOR_GET_BLOCK_OF_RINGS_FAILED</rc>
-    <description>tor_get_block_of_rings() failed</description>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>TOR_RC</ffdc>
-    <ffdc>SYSPHASE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
     <rc>RC_XIPC_FAPI_ATTR_SVC_FAIL</rc>
     <description>FAPI attribute service failed</description>
     <ffdc>CHIP_TARGET</ffdc>
@@ -500,21 +488,6 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_XIPC_OVLY_RING_BUFFER_MISMATCH_ERROR</rc>
-    <description>Code bug: process_gptr_rings() failed with ring buffer pointer mismatch</description>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>RING_ID</ffdc>
-    <ffdc>RING_BUF2</ffdc>
-    <ffdc>RING_BUF2_LOCAL</ffdc>
-    <ffdc>RING_BUF3</ffdc>
-    <ffdc>RING_BUF3_LOCAL</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
     <rc>RC_XIPC_INPUT_SBE_IMAGE_NONZERO_RINGS_SIZE</rc>
     <description>The DD specific input SBE image .rings size is not zero</description>
     <ffdc>CHIP_TARGET</ffdc>
@@ -568,7 +541,7 @@
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_SKELETON_GEN_FAILED</rc>
-    <description>TOR sekeleton api failed</description>
+    <description>Failure in tor_skeleton_generation</description>
     <ffdc>CHIP_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
@@ -577,8 +550,13 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <rc>RC_XIPC_OVERLAYS_RING_IS_EMPTY</rc>
+    <description>Specified Overlays ring is empty</description>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
     <rc>RC_XIPC_DYNAMIC_INIT_FAILED</rc>
-    <description>Failed to fetch the rings in process_base_and_dynamic_rings</description>
+    <description>Failure in process_base_and_dynamic_rings</description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_ID</ffdc>
     <callout>
@@ -599,7 +577,7 @@
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_DYN_GET_RING_ERROR</rc>
-    <description>Failed to fetch dynamic ring</description>
+    <description>Failure in dyn_get_ring</description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_ID</ffdc>
     <ffdc>FEATURE</ffdc>
