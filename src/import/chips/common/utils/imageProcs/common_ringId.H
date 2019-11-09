@@ -351,14 +351,9 @@ int ringid_get_chipletIndex( ChipId_t        i_chipId,
 MyBool_t ringid_is_mvpd_ring( ChipId_t  i_chipId,
                               RingId_t  i_ringId );
 
-#if !defined(__PPE__) && !defined(NO_STD_LIB_IN_PPE) && !defined(__HOSTBOOT_MODULE) && !defined(FIPSODE) && !defined(WIN32)
+#if !defined(__PPE__) && !defined(NO_STD_LIB_IN_PPE) && !defined(WIN32)
 
 #include <map>
-#include <string>
-
-// The following two maps replaces all chipId/chipType maps defined various places in initCompiler codes
-extern std::map <ChipId_t, std::string> chipIdToTypeMap;
-extern std::map <std::string, ChipId_t> chipTypeToIdMap;
 
 // This function returns the root ringId of a given scanScomAddr.
 // Notes:
@@ -378,16 +373,6 @@ int ringidGetRootRingId( ChipId_t   i_chipId,
                          RingId_t&  o_ringId,
                          bool       i_bTest = false );
 
-// This function returns the ringId associated with the ringName.
-// Notes:
-// - Setting bTest=true will test if more than one ring exist for a given ringName and
-//   produce an error.
-//
-int ringidGetRingId1( ChipId_t     i_chipId,
-                      std::string  i_ringName,
-                      RingId_t&    o_ringId,
-                      bool         i_bTest = false );
-
 // This function returns the ringId associated with the effective ring index within a chiplet.
 // (Note that "effective" means the index is void of the instance marker bit.)
 int ringidGetRingId2( ChipId_t       i_chipId,
@@ -399,16 +384,36 @@ int ringidGetRingId2( ChipId_t       i_chipId,
                       RingId_t&      o_ringId,
                       bool           i_bTest = false );
 
-// This function returns the ringName associated with the ringId.
-int ringidGetRingName( ChipId_t     i_chipId,
-                       RingId_t     i_ringId,
-                       std::string& o_ringName );
-
 // This fumction returns the ringClass associated with the ringId.
 int ringidGetRingClass( ChipId_t      i_chipId,
                         RingId_t      i_ringId,
                         RingClass_t&  o_ringClass );
 
-#endif // __PPE__ && NO_STD_LIB_IN_PPE
+#if !defined(__HOSTBOOT_MODULE) && !defined(FIPSODE)
+
+#include <string>
+
+// The following two maps replaces all chipId/chipType maps defined various places in initCompiler codes
+extern std::map <ChipId_t, std::string> chipIdToTypeMap;
+extern std::map <std::string, ChipId_t> chipTypeToIdMap;
+
+// This function returns the ringId associated with the ringName.
+// Notes:
+// - Setting bTest=true will test if more than one ring exist for a given ringName and
+//   produce an error.
+//
+int ringidGetRingId1( ChipId_t     i_chipId,
+                      std::string  i_ringName,
+                      RingId_t&    o_ringId,
+                      bool         i_bTest = false );
+
+// This function returns the ringName associated with the ringId.
+int ringidGetRingName( ChipId_t     i_chipId,
+                       RingId_t     i_ringId,
+                       std::string& o_ringName );
+
+#endif // __HOSTBOOT_MODULE && FIPSODE
+
+#endif // __PPE__ && NO_STD_LIB_IN_PPE && WIN32
 
 #endif  // _COMMON_RINGID_H_

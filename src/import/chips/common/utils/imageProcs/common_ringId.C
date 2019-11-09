@@ -329,21 +329,7 @@ MyBool_t ringid_is_mvpd_ring( ChipId_t  i_chipId,
 }
 
 
-#if !defined(__PPE__) && !defined(NO_STD_LIB_IN_PPE) && !defined(__HOSTBOOT_MODULE) && !defined(FIPSODE) && !defined(WIN32)
-
-// Mapping from the shared [initCompiler] chipId to the chipType name
-std::map <ChipId_t, std::string> chipIdToTypeMap
-{
-    { (ChipId_t)CID_P10, "p10" },
-    { (ChipId_t)CID_EXPLORER, "explorer" }
-};
-
-// Mapping from chipType name to the shared [initCompiler] chipId (reverse of above map)
-std::map <std::string, ChipId_t> chipTypeToIdMap
-{
-    { "p10", (ChipId_t)CID_P10 },
-    { "explorer", (ChipId_t)CID_EXPLORER }
-};
+#if !defined(__PPE__) && !defined(NO_STD_LIB_IN_PPE) && !defined(WIN32)
 
 int ringidGetRootRingId( ChipId_t    i_chipId,
                          uint32_t    i_scanScomAddr,
@@ -424,77 +410,6 @@ int ringidGetRootRingId( ChipId_t    i_chipId,
                    i_scanScomAddr, i_chipId, l_ringId, UNDEFINED_RING_ID);
             rc = INFRASTRUCT_RC_CODE_BUG;
         }
-    }
-
-    o_ringId = l_ringId;
-
-    return rc;
-}
-
-
-int ringidGetRingId1( ChipId_t     i_chipId,
-                      std::string  i_ringName,
-                      RingId_t&    o_ringId,
-                      bool         i_bTest )
-{
-    int rc = INFRASTRUCT_RC_SUCCESS;
-    RingProperties_t* ringProps = NULL;
-    RingId_t          numRingIds = UNDEFINED_RING_ID;
-    RingId_t          iRingId = UNDEFINED_RING_ID; // ringId loop counter
-    RingId_t          l_ringId = UNDEFINED_RING_ID;
-    bool              bFound = false;
-
-    switch (i_chipId)
-    {
-        case CID_P10:
-            ringProps = (RingProperties_t*)&P10_RID::RING_PROPERTIES;
-            numRingIds = P10_RID::NUM_RING_IDS;
-            break;
-
-        default:
-            MY_ERR("ringidGetRingId1(): Unsupported chipId (=%d) supplied\n", i_chipId);
-            rc = TOR_INVALID_CHIP_ID;
-            break;
-    }
-
-    if (!rc)
-    {
-        for ( iRingId = 0; iRingId < numRingIds; iRingId++ )
-        {
-            if ( !(i_ringName.compare(ringProps[iRingId].ringName)) )
-            {
-                if (bFound)
-                {
-                    MY_ERR("ringidGetRingId1(): Two rings cannot have the same ringName=%s.  Fix"
-                           " RING_PROPERTIES list for chipId=%d at ringId=0x%x and ringId=0x%x\n",
-                           i_ringName.c_str(), i_chipId, l_ringId, iRingId);
-                    rc = INFRASTRUCT_RC_CODE_BUG;
-                    l_ringId = UNDEFINED_RING_ID;
-                    break;
-                }
-                else
-                {
-                    l_ringId = iRingId;
-                    bFound = true;
-
-                    if (!i_bTest)
-                    {
-                        // Stop testing and break our of ringId loop
-                        break;
-                    }
-
-                    // Continue testing to see if duplicate ringNames found
-                }
-            }
-        }
-    }
-
-    if (!rc && !bFound)
-    {
-        MY_DBG("ringidGetRingId1(): Did not find match to ringName=%s for chipId=%d."
-               " (Note, l_ringId=0x%x better be equal to UNDEFINED_RING_ID=0x%x)\n",
-               i_ringName.c_str(), i_chipId, l_ringId, UNDEFINED_RING_ID);
-        rc = TOR_RING_NAME_NOT_FOUND;
     }
 
     o_ringId = l_ringId;
@@ -633,6 +548,100 @@ int ringidGetRingId2( ChipId_t       i_chipId,
 }
 
 
+int ringidGetRingClass( ChipId_t      i_chipId,
+                        RingId_t      i_ringId,
+                        RingClass_t&  o_ringClass )
+{
+    return (ringid_get_ringClass(i_chipId, i_ringId, &o_ringClass));
+}
+
+#if !defined(__HOSTBOOT_MODULE) && !defined(FIPSODE)
+
+// Mapping from the shared [initCompiler] chipId to the chipType name
+std::map <ChipId_t, std::string> chipIdToTypeMap
+{
+    { (ChipId_t)CID_P10, "p10" },
+    { (ChipId_t)CID_EXPLORER, "explorer" }
+};
+
+// Mapping from chipType name to the shared [initCompiler] chipId (reverse of above map)
+std::map <std::string, ChipId_t> chipTypeToIdMap
+{
+    { "p10", (ChipId_t)CID_P10 },
+    { "explorer", (ChipId_t)CID_EXPLORER }
+};
+
+int ringidGetRingId1( ChipId_t     i_chipId,
+                      std::string  i_ringName,
+                      RingId_t&    o_ringId,
+                      bool         i_bTest )
+{
+    int rc = INFRASTRUCT_RC_SUCCESS;
+    RingProperties_t* ringProps = NULL;
+    RingId_t          numRingIds = UNDEFINED_RING_ID;
+    RingId_t          iRingId = UNDEFINED_RING_ID; // ringId loop counter
+    RingId_t          l_ringId = UNDEFINED_RING_ID;
+    bool              bFound = false;
+
+    switch (i_chipId)
+    {
+        case CID_P10:
+            ringProps = (RingProperties_t*)&P10_RID::RING_PROPERTIES;
+            numRingIds = P10_RID::NUM_RING_IDS;
+            break;
+
+        default:
+            MY_ERR("ringidGetRingId1(): Unsupported chipId (=%d) supplied\n", i_chipId);
+            rc = TOR_INVALID_CHIP_ID;
+            break;
+    }
+
+    if (!rc)
+    {
+        for ( iRingId = 0; iRingId < numRingIds; iRingId++ )
+        {
+            if ( !(i_ringName.compare(ringProps[iRingId].ringName)) )
+            {
+                if (bFound)
+                {
+                    MY_ERR("ringidGetRingId1(): Two rings cannot have the same ringName=%s.  Fix"
+                           " RING_PROPERTIES list for chipId=%d at ringId=0x%x and ringId=0x%x\n",
+                           i_ringName.c_str(), i_chipId, l_ringId, iRingId);
+                    rc = INFRASTRUCT_RC_CODE_BUG;
+                    l_ringId = UNDEFINED_RING_ID;
+                    break;
+                }
+                else
+                {
+                    l_ringId = iRingId;
+                    bFound = true;
+
+                    if (!i_bTest)
+                    {
+                        // Stop testing and break our of ringId loop
+                        break;
+                    }
+
+                    // Continue testing to see if duplicate ringNames found
+                }
+            }
+        }
+    }
+
+    if (!rc && !bFound)
+    {
+        MY_DBG("ringidGetRingId1(): Did not find match to ringName=%s for chipId=%d."
+               " (Note, l_ringId=0x%x better be equal to UNDEFINED_RING_ID=0x%x)\n",
+               i_ringName.c_str(), i_chipId, l_ringId, UNDEFINED_RING_ID);
+        rc = TOR_RING_NAME_NOT_FOUND;
+    }
+
+    o_ringId = l_ringId;
+
+    return rc;
+}
+
+
 int ringidGetRingName( ChipId_t     i_chipId,
                        RingId_t     i_ringId,
                        std::string& o_ringName )
@@ -666,11 +675,6 @@ int ringidGetRingName( ChipId_t     i_chipId,
 }
 
 
-int ringidGetRingClass( ChipId_t      i_chipId,
-                        RingId_t      i_ringId,
-                        RingClass_t&  o_ringClass )
-{
-    return (ringid_get_ringClass(i_chipId, i_ringId, &o_ringClass));
-}
+#endif // __HOSTBOOT_MODULE && FIPSODE
 
-#endif // __PPE__ && NO_STD_LIB_IN_PPE
+#endif // __PPE__ && NO_STD_LIB_IN_PPE && WIN32
