@@ -682,7 +682,7 @@ _rs4_compress(CompressedScanData* io_rs4,
         }
 
         // iv_type check: selector
-        if ( ( i_selector == UNDEFINED_RS4_SELECTOR && (i_type & RS4_IV_TYPE_SEL_MASK) ) ||
+        if ( ( i_selector == UNDEFINED_RS4_SELECTOR ) ||
              ( i_selector != UNDEFINED_RS4_SELECTOR &&
                ( (i_type & RS4_IV_TYPE_SEL_MASK) == RS4_IV_TYPE_SEL_DYN ||
                  (i_type & RS4_IV_TYPE_SEL_MASK) == RS4_IV_TYPE_SEL_PLL ) ) )
