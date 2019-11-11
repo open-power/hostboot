@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2019
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -231,6 +231,7 @@ my $resident_modules = {
     "libnvdimm.so"              => '1',
     "libmmio.so"                => '1',
     "libsmf.so"                 => '1',
+    "libmctp.so"                => '1',
 };
 
 # A list of the dependent libraries in each istep.

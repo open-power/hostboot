@@ -151,6 +151,7 @@ BASE_MODULES += pnor
 BASE_MODULES += vfs
 BASE_MODULES += $(if $(CONFIG_AST2400) || $(CONFIG_AST2500), sio)
 BASE_MODULES += $(if $(CONFIG_CONSOLE),console)
+BASE_MODULES += $(if $(CONFIG_MCTP),mctp,)
 
 # This is exported so that gcov knows the list of base modules to
 # exclude from instrumentation. We can't simply export BASE_MODULES or

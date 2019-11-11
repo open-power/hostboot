@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2019
+# Contributors Listed Below - COPYRIGHT 2010,2020
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -74,6 +74,7 @@ SUBDIRS += vfs.d
 SUBDIRS += vpd.d
 SUBDIRS += xscom.d
 SUBDIRS += xz.d
+SUBDIRS += $(if $(CONFIG_MCTP),mctp.d)
 
 #errldisplay relies on some generated files from PRD.
 #Enforce that it goes after

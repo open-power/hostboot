@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -107,7 +107,19 @@ const TaskInfo    g_taskinfolist[]   =   {
                         EXT_IMAGE,                  // EXT_IMAGE
                 }
         },
-
+#ifdef CONFIG_MCTP
+        /**
+         * @brief   libmctp, initializes extended module area
+         */
+        {
+                "libmctp.so" ,                // taskname
+                NULL,                               // no pointer to fn
+                {
+                        START_TASK,
+                        EXT_IMAGE,                  // EXT_IMAGE
+                }
+        },
+#endif
 
         //  ---------------------------------------------------------------
         //  -----   END OF LIST!!!  ---------------------------------------

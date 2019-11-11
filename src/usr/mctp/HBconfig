@@ -1,0 +1,4 @@
+config MCTP
+  default y
+    help
+      If enabled Hostboot supports MCTP over LPC.
