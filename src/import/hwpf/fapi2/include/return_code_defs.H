@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -117,6 +117,10 @@ enum ReturnCodes : uint32_t
 
     FAPI2_RC_PLAT_TOR_HEADER_DATA_INVALID = FAPI2_RC_PLAT_MASK | 0x07,
     //Accessing TOR ring section fail because TOR magic word not found
+
+    FAPI2_RC_PLAT_MISCOMPARE              = FAPI2_RC_PLAT_MASK | 0x08,
+    ///< An operation (like a getScom using multicast-compare) failed
+    ///< because the returned data was different from a reference value.
 };
 
 }
