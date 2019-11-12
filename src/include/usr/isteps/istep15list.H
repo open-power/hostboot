@@ -35,10 +35,10 @@
  *          : Build runtime STOP images
  *    15.2    proc_set_homer_bar
  *          : Set HOMER location in OCC and QME
- *    15.3    host_start_stop_engine
- *          : Initialize QME engine
- *    15.4    host_establish_ec_chiplet
+ *    15.3    host_establish_ec_chiplet
  *          : Update multicast on ECs for runtime state
+ *    15.4    host_start_stop_engine
+ *          : Initialize QME engine
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -119,13 +119,13 @@ namespace   INITSERVICE
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
         },
         {
-                ISTEPNAME(15,03,"host_start_stop_engine"),
-                ISTEP_15::host_start_stop_engine,
+                ISTEPNAME(15,03,"host_establish_ec_chiplet"),
+                ISTEP_15::host_establish_ec_chiplet,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
         {
-                ISTEPNAME(15,04,"host_establish_ec_chiplet"),
-                ISTEP_15::host_establish_ec_chiplet,
+                ISTEPNAME(15,04,"host_start_stop_engine"),
+                ISTEP_15::host_start_stop_engine,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
 };

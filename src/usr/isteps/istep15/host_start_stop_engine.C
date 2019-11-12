@@ -46,6 +46,7 @@
 //From Import Directory (EKB Repository)
 #include <p10_pm.H>
 #include <p10_pm_qme_init.H>
+#include <p10_pm_xgpe_init.H>
 
 //Namespaces
 using namespace ERRORLOG;
@@ -67,6 +68,44 @@ void* host_start_stop_engine (void *io_pArgs)
         TargetHandleList l_procChips;
         getAllChips( l_procChips, TYPE_PROC );
 
+        // Start XGPE's on all proc chips
+        for (const auto & l_procChip: l_procChips)
+        {
+            //Convert the Target into a fapi2::Target by passing
+            //l_procChip into the fapi2::Target constructor
+            fapi2::Target<TARGET_TYPE_PROC_CHIP>l_fapi2CpuTarget(
+                                                              (l_procChip));
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "Calling p10_pm_xgpe_init for 0x%.8X target",
+                get_huid(l_procChip) );
+
+            //call p10_pm_xgpe_init HWP
+            FAPI_INVOKE_HWP(l_errl,
+                            p10_pm_xgpe_init,
+                            l_fapi2CpuTarget,
+                            PM_START);
+            if(l_errl)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "host_start_stop_engine:: p10_pm_xgpe_init failed on HUID 0x%08x. "
+                        TRACE_ERR_FMT,
+                        get_huid(l_procChip),
+                        TRACE_ERR_ARGS(l_errl));
+                ErrlUserDetailsTarget(l_procChip).addToLog(l_errl);
+#ifdef ISTEP15_ENABLE_HWPS
+                l_StepError.addErrorDetails( l_errl );
+                errlCommit( l_errl, HWPF_COMP_ID );
+#else
+                // If istep15 HWPS are disabled then just delete the error log
+                // but still allow the HWP to run in order to support bringup
+                delete l_errl;
+                l_errl = nullptr;
+#endif
+            }
+        }
+
+        // Start QME's on all proc chips
         for (const auto & l_procChip: l_procChips)
         {
             //Convert the Target into a fapi2::Target by passing
@@ -91,15 +130,8 @@ void* host_start_stop_engine (void *io_pArgs)
                         get_huid(l_procChip),
                         TRACE_ERR_ARGS(l_errl));
                 ErrlUserDetailsTarget(l_procChip).addToLog(l_errl);
-#ifdef ISTEP15_ENABLE_HWPS
                 l_StepError.addErrorDetails( l_errl );
                 errlCommit( l_errl, HWPF_COMP_ID );
-#else
-                // If istep15 HWPS are disable then just delete the error log
-                // but still allow the HWP to run in order to support bringup.
-                delete l_errl;
-                l_errl = nullptr;
-#endif
             }
         }
 

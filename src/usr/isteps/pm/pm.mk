@@ -80,7 +80,7 @@ VPATH += ${NEST_UTIL_PATH}
 
 include ${ROOTPATH}/procedure.rules.mk
 #include ${HWP_PM_PATH}/p9_pm_pba_bar_config.mk
-#include ${HWP_PM_PATH}/p9_pm_pba_init.mk
+include ${HWP_PM_PATH}/p10_pm_pba_init.mk
 #include ${HWP_PM_PATH}/p9_pm_pba_firinit.mk
 include ${HWP_LIB_PATH}/p10_pm_utils.mk
 #include ${HWP_PM_PATH}/p10_pm_ocb_init.mk
@@ -96,6 +96,7 @@ include ${HWP_LIB_PATH}/p10_pm_utils.mk
 #include ${HWP_PM_PATH}/p9_pm_cme_firinit.mk
 include ${HWP_PM_PATH}/p10_hcode_image_build.mk
 include ${HWP_PM_PATH}/p10_pm_qme_init.mk
+include ${HWP_PM_PATH}/p10_pm_xgpe_init.mk
 #include ${HWP_PM_PATH}/p9_pm_pfet_init.mk
 #include ${HWP_PM_PATH}/p9_pm_reset.mk
 #include ${HWP_PM_PATH}/p9_pm_occ_sram_init.mk
@@ -105,7 +106,6 @@ include ${HWP_PM_PATH}/p10_pm_qme_init.mk
 include ${HWP_PM_PATH}/p10_scan_ring_util.mk
 include ${HWP_STOPUTIL_PATH}/p10_stop_util.mk
 include ${HWP_STOPUTIL_PATH}/p10_stop_api.mk
-include ${NEST_UTIL_PATH}/p10_fbc_utils.mk
 include ${HWP_PM_PATH}/p10_pstate_parameter_block.mk
 include ${HWP_PM_PATH}/p10_pm_get_poundv_bucket.mk
 include ${HWP_PM_PATH}/p10_pm_get_poundw_bucket.mk
