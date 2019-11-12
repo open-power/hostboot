@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p10/procedures/hwp/pm/p10_pm_firinit.C $     */
+/* $Source: src/import/chips/p10/procedures/hwp/pm/p10_pm_qme_firinit.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,9 +23,8 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
-/// @file p10_pm_firinit.C
-/// @brief  Calls firinit procedures to configure the FIRs to predefined types
-//
+/// @file p10_pm_qme_firinit.H
+/// @brief  Configures the QME FIRs, Mask & actions
 // *HWP HW Owner        :   Greg Still <stillgs@us.ibm.com>
 // *HWP Backup Owner    :   Prasad BG Ranganath <prasadbgr@in.ibm.com>
 // *HWP FW Owner        :   Prem S Jha <premjha2@in.ibm.com>
@@ -33,54 +32,42 @@
 // *HWP Level           :   3
 // *HWP Consumed by     :   HS
 
-///
-/// High-level procedure flow:
-///
-/// @verbatim
-///     - call p10_pm_pba_firinit.C
-///     - evaluate RC
-///
-///     - call p10_pm_qme_firinit.C
-///     - evaluate RC
-///
-///  @endverbatim
-///
-///  Procedure Prereq:
-///  - System clocks are running
-///
+#ifndef _P10_PM_QME_FIRINIT_H_
+#define _P10_PM_QME_FIRINIT_H_
 
-// ----------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Includes
-// ----------------------------------------------------------------------
-#include <p10_pm_firinit.H>
-#include <p10_pm_pba_firinit.H>
-#include <p10_pm_qme_firinit.H>
+//------------------------------------------------------------------------------
+#include <fapi2.H>
+#include <p10_pm.H>
+#include <p10_pm_fir_class.H>
 
-// ----------------------------------------------------------------------
-// Function definitions
-// ----------------------------------------------------------------------
-fapi2::ReturnCode p10_pm_firinit(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const pm::PM_FLOW_MODE i_mode)
+// function pointer typedef definition for HWP call support
+typedef fapi2::ReturnCode (*p10_pm_qme_firinit_FP_t) (
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
+    const pm::PM_FLOW_MODE);
+
+extern "C"
 {
-    FAPI_IMP("p10_pm_firinit start");
 
-    fapi2::ReturnCode l_rc;
-    fapi2::buffer<uint64_t> l_data64;
+//------------------------------------------------------------------------------
+// Function prototype
+//------------------------------------------------------------------------------
 
+//------------------------------------------------------------------------------
+///
+/// @brief Reset/init the QME FIRs, Actions and Masks
+///
+/// @param[in] i_target   Chip target
+/// @param[in] i_mode     Control mode for the procedure
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+///
 
-    // Handle PBA FIRs, Masks and actions
-    FAPI_DBG("Calling PBA firinit ...");
-    FAPI_EXEC_HWP(l_rc, p10_pm_pba_firinit, i_target, i_mode);
-    FAPI_TRY(l_rc);
+    fapi2::ReturnCode p10_pm_qme_firinit(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+        const pm::PM_FLOW_MODE i_mode);
 
+} // extern "C"
 
-    // Handle QME FIRs, Masks and actions
-    FAPI_DBG("Calling QME firinit ...");
-    FAPI_EXEC_HWP(l_rc, p10_pm_qme_firinit, i_target, i_mode);
-    FAPI_TRY(l_rc);
-
-fapi_try_exit:
-    FAPI_INF("p10_pm_firinit end");
-    return fapi2::current_err;
-} // END p10_pm_firinit
+#endif // _P10_PM_QME_FIRINIT_H_

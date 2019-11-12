@@ -30,7 +30,7 @@
 // *HWP Backup Owner    :   Prasad BG Ranganath <prasadbgr@in.ibm.com>
 // *HWP FW Owner        :   Prem S Jha <premjha2@in.ibm.com>
 // *HWP Team            :   PM
-// *HWP Level           :   1
+// *HWP Level           :   3
 // *HWP Consumed by     :   HS
 
 #ifndef _P10_PM_OCC_FIRINIT_H_
@@ -38,6 +38,7 @@
 
 #include <fapi2.H>
 #include <p10_pm.H>
+#include <p10_pm_fir_class.H>
 
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p10_pm_occ_firinit_FP_t) (

@@ -30,7 +30,7 @@
 // *HWP Backup Owner    :   Prasad BG Ranganath <prasadbgr@in.ibm.com>
 // *HWP FW Owner        :   Prem S Jha <premjha2@in.ibm.com>
 // *HWP Team            :   PM
-// *HWP Level           :   1
+// *HWP Level           :   3
 // *HWP Consumed by     :   HS
 
 #ifndef _P10_PM_FIRINIT_H_
