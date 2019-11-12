@@ -142,6 +142,17 @@ struct pmicFields<mss::pmic::product::JEDEC_COMPLIANT>
     // R1B
     static constexpr uint8_t R1B_CURRENT_OR_POWER_METER_SELECT = 0x06;
 
+    // R1C/R1D/R1E/R1F - bit positions flipped (0 is for bit7, 1 is for bit6, etc)
+    static constexpr uint8_t HIGH_CURRENT_WARNING_START          = 0x00;
+    static constexpr uint8_t HIGH_CURRENT_WARNING_LENGTH         = 0x06;
+
+    // R20 - bit positions flipped (0 is for bit7, 1 is for bit6, etc)
+    static constexpr uint8_t R20_SWA_OUTPUT_CURRENT_LIMITER_WARNING_THRESHOLD_SETTING_START     = 0x00;
+    static constexpr uint8_t R20_SWB_OUTPUT_CURRENT_LIMITER_WARNING_THRESHOLD_SETTING_START     = 0x02;
+    static constexpr uint8_t R20_SWC_OUTPUT_CURRENT_LIMITER_WARNING_THRESHOLD_SETTING_START     = 0x04;
+    static constexpr uint8_t R20_SWD_OUTPUT_CURRENT_LIMITER_WARNING_THRESHOLD_SETTING_START     = 0x06;
+    static constexpr uint8_t R20_OUTPUT_CURRENT_LIMITER_WARNING_THRESHOLD_SETTING_LENGTH        = 0x02;
+
     // R2B - bit positions flipped (0 is for bit7, 1 is for bit6, etc)
     static constexpr uint8_t R2B_LDO_1P8_VOLT_SETTING_START     = 0x00;
     static constexpr uint8_t R2B_LDO_1P8_VOLT_SETTING_LENGTH    = 0x02;
@@ -153,6 +164,9 @@ struct pmicFields<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint8_t R2F_SWB_REGULATOR_CONTROL = 0x05;
     static constexpr uint8_t R2F_SWC_REGULATOR_CONTROL = 0x04;
     static constexpr uint8_t R2F_SWD_REGULATOR_CONTROL = 0x03;
+
+    // R3B
+    static constexpr uint8_t R3B_PMIC_CURRENT_CAPABILITY = 0x00;
 
     // R4F
     static constexpr uint8_t R4F_SWA_SWB_PHASE_MODE_SELECT = 0x00;
