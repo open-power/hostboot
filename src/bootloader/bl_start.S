@@ -37,7 +37,7 @@
 # .set SBE_HB_LPCMMIOBAR,   sbe_hb_structures+32 ;// uint64_t
 .set HBBL_BASE_ADDRESS,   base_load_address
 .set HBBL_END_ADDRESS,    end_load_address
-.set HBBL_DATA_ADDR_OFFSET,      0x00008000 ;// offset of external data
+.set HBBL_DATA_ADDR_OFFSET,      0x00009000 ;// offset of external data
 .set HBBL_TI_OFFSET,             0x50       ;// offset within external data
 .set HBBL_SCRATCH_ADDR_OFFSET,   0x00010000 ;// offset of scratch space
 .set HBBL_system_reset,          0x100

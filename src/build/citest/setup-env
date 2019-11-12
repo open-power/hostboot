@@ -45,6 +45,13 @@ then
     export PNOR=ZZ.pnor
     export CONFIG_FILE=src/build/configs/fsprelease.config
     export MACHINE=NIMBUS
+elif [ "$CHIP" == "VPO" ];
+then
+    export CONFIG_FILE=src/build/vpo/vpo.config
+    export FAKEPNOR=p10.pnor
+    export VPO_COMPILE=1
+    export MACHINE=P10_STANDALONE
+    export HB_STANDALONE=1
 fi
 
 # If we are running under Jenkins we need to pick a random-ish sandbox name

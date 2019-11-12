@@ -125,9 +125,13 @@ if($vpo_compile == "1") {
 
     # Set up to run on core 1 (for testing purposes)
     system_cmp0.cpu0_0_01_0->hrmor = 0x8200000
+    system_cmp0.cpu0_0_01_0->urmor = 0x8200000
     system_cmp0.cpu0_0_01_0->iar = 0
     system_cmp0.cpu0_0_01_0.enable
     system_cmp0.cpu0_0_00_0.disable
     sim->frontend_current_processor = "system_cmp0.cpu0_0_01_0"
+
+    # A workaround to allow PVR to be set correctly (otherwise thread 1 hangs)
+    set-class-attr $proc_type pvr 0x809100
 }
 

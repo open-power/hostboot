@@ -101,7 +101,7 @@ fi
 
 # Create holding environment, build HB, and populate holding environment
 echo "#--------------------------------"
-if [ "$CHIP" == "P10" ];then
+if [ "$CHIP" == "P10" ] || [ "$CHIP" == "VPO" ];then
     echo "As things stand, when doing a P10 Standalone build, a Sandbox is "
     echo "still created because Simics' autosim depends on it."
     export SETUP_FOR_STANDALONE="1"
@@ -205,7 +205,6 @@ if [ -z "$SKIP_CXX_TESTS" ]; then
             echo "#--------------------------------"
             printf "\n\nrc=$?: $(date): FINISHED running (\"cxxtest-start.sh\" was started at  $start_time)\n\n"
             echo "#--------------------------------"
-
     fi
 fi
 

@@ -370,7 +370,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
             }
         },
 #endif
-
+#ifndef CONFIG_VPO_COMPILE
         /**
          * @brief   Node Communications Device Driver library
          */
@@ -382,6 +382,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 EXT_IMAGE,                      // Extended Module
             }
         },
+#endif
 
         /**
          * @brief  Explorer Scom library

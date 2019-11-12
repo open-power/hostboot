@@ -96,7 +96,7 @@ VERSION_IMG := version.txt
 
 # # Input fake images
 HBD_FAKE = ${BASEIMAGESDIR}/vbu_P10_targeting.bin
-EECACHE_IMG = ${SANDBOXBASE}/simics/eecache_prebuilt.bin.ecc
+EECACHE_IMG = ${STANDALONEDIR}/simics/eecache_prebuilt.bin.ecc
 
 # Output final images
 HBBL_FINAL_IMG := HBBL.bin
