@@ -35,16 +35,18 @@
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
-#include <lib/shared/nimbus_defaults.H>
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 #include <lib/shared/mss_const.H>
+
+#include <lib/shared/nimbus_defaults.H>
+#include <lib/dimm/mrs_traits_nimbus.H>
 #include <lib/phy/mss_lrdimm_training.H>
 #include <lib/phy/mss_training.H>
 #include <lib/dimm/rank.H>
-#include <lib/dimm/ddr4/mrs_load_ddr4.H>
-#include <lib/dimm/ddr4/control_word_ddr4.H>
-#include <lib/dimm/ddr4/data_buffer_ddr4.H>
+#include <lib/dimm/ddr4/mrs_load_ddr4_nimbus.H>
+#include <lib/dimm/ddr4/control_word_ddr4_nimbus.H>
+#include <lib/dimm/ddr4/data_buffer_ddr4_nimbus.H>
 #include <lib/workarounds/ccs_workarounds.H>
 #include <lib/ccs/ccs_traits_nimbus.H>
 #include <generic/memory/lib/ccs/ccs.H>

@@ -41,9 +41,9 @@
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <lib/ccs/ccs_traits_nimbus.H>
 #include <generic/memory/lib/ccs/ccs.H>
-#include <lib/dimm/ddr4/mrs_load_ddr4.H>
-#include <lib/dimm/ddr4/control_word_ddr4.H>
-#include <lib/dimm/ddr4/data_buffer_ddr4.H>
+#include <lib/dimm/ddr4/mrs_load_ddr4_nimbus.H>
+#include <lib/dimm/ddr4/control_word_ddr4_nimbus.H>
+#include <lib/dimm/ddr4/data_buffer_ddr4_nimbus.H>
 #include <lib/phy/seq.H>
 #include <generic/memory/lib/utils/buffer_ops.H>
 #include <lib/mcbist/mcbist.H>
