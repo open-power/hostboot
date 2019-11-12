@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,8 @@
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
+#include <lib/shared/nimbus_defaults.H>
+#include <lib/dimm/mrs_traits_nimbus.H>
 #include <mss.H>
 #include <lib/utils/fake_vpd.H>
 #include <lib/shared/mss_const.H>

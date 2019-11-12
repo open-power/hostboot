@@ -34,6 +34,8 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
+#include <lib/shared/nimbus_defaults.H>
+#include <lib/dimm/mrs_traits_nimbus.H>
 #include <mss.H>
 
 using fapi2::TARGET_TYPE_MCA;

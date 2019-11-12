@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,19 +32,19 @@
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB Memory
-
-#include <lib/shared/nimbus_defaults.H>
 #include <vector>
+
 #include <fapi2.H>
 #include <lib/shared/mss_const.H>
 #include <generic/memory/lib/utils/c_str.H>
-#include <lib/dimm/ddr4/mrs_load_ddr4.H>
-#include <lib/dimm/ddr4/latch_wr_vref.H>
+#include <lib/shared/nimbus_defaults.H>
+#include <lib/dimm/mrs_traits_nimbus.H>
 #include <lib/dimm/rank.H>
-#include <lib/workarounds/ccs_workarounds.H>
 #include <lib/ccs/ccs_traits_nimbus.H>
 #include <generic/memory/lib/ccs/ccs.H>
-
+#include <lib/workarounds/ccs_workarounds.H>
+#include <lib/dimm/ddr4/mrs_load_ddr4_nimbus.H>
+#include <lib/dimm/ddr4/latch_wr_vref.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_DIMM;

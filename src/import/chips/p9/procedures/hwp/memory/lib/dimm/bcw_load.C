@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,8 +34,9 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
-#include <mss.H>
 #include <lib/shared/nimbus_defaults.H>
+#include <lib/dimm/mrs_traits_nimbus.H>
+#include <mss.H>
 #include <lib/shared/mss_const.H>
 
 #include <lib/dimm/bcw_load.H>

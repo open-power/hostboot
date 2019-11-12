@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,13 +43,13 @@
 #include <lib/eff_config/timing.H>
 #include <lib/ccs/ccs_traits_nimbus.H>
 #include <generic/memory/lib/ccs/ccs.H>
+#include <lib/dimm/mrs_traits_nimbus.H>
 #include <lib/dimm/bcw_load_ddr4.H>
-#include <lib/dimm/ddr4/control_word_ddr4.H>
-#include <lib/dimm/ddr4/data_buffer_ddr4.H>
+#include <lib/dimm/ddr4/control_word_ddr4_nimbus.H>
+#include <lib/dimm/ddr4/data_buffer_ddr4_nimbus.H>
 #include <lib/mss_attribute_accessors.H>
 #include <lib/workarounds/ccs_workarounds.H>
 #include <generic/memory/lib/spd/spd_utils.H>
-
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;

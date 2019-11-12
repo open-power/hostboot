@@ -33,8 +33,9 @@
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
-#include <lib/shared/nimbus_defaults.H>
 #include <fapi2.H>
+#include <lib/shared/nimbus_defaults.H>
+#include <lib/dimm/mrs_traits_nimbus.H>
 #include <mss.H>
 
 #include <p9_mc_scom_addresses_fld.H>

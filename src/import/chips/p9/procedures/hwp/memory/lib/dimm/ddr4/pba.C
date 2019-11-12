@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,12 +40,14 @@
 #include <lib/utils/nimbus_find.H>
 #include <lib/ccs/ccs_traits_nimbus.H>
 #include <generic/memory/lib/ccs/ccs.H>
-#include <lib/dimm/ddr4/data_buffer_ddr4.H>
+#include <lib/dimm/mrs_traits_nimbus.H>
+#include <lib/dimm/ddr4/data_buffer_ddr4_nimbus.H>
 #include <lib/phy/phy_cntrl.H>
 #include <lib/dimm/ddr4/pba.H>
 // Including PDA as some of the helper functions are the same for PBA
-#include <lib/dimm/ddr4/pda.H>
+#include <lib/dimm/ddr4/pda_nimbus.H>
 #include <lib/workarounds/ccs_workarounds.H>
+#include <lib/phy/write_cntrl.H>
 
 #include <map>
 

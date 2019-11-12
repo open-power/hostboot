@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,6 @@
 
 #include <fapi2.H>
 #include <lib/shared/exp_consts.H>
-#include <lib/shared/exp_defaults.H>
 #include <lib/dimm/exp_rank.H>
 #include <exp_data_structs.H>
 #include <generic/memory/lib/utils/endian_utils.H>

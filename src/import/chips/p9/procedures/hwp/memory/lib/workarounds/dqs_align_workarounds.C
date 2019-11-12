@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,13 +23,15 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include <lib/shared/nimbus_defaults.H>
 #include <fapi2.H>
-#include <lib/workarounds/dqs_align_workarounds.H>
 #include <p9_mc_scom_addresses.H>
+#include <lib/shared/nimbus_defaults.H>
+#include <lib/dimm/mrs_traits_nimbus.H>
 #include <mss_attribute_accessors.H>
-#include <lib/phy/seq.H>
 #include <lib/phy/phy_cntrl.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <lib/phy/seq.H>
+#include <lib/workarounds/dqs_align_workarounds.H>
 
 namespace mss
 {

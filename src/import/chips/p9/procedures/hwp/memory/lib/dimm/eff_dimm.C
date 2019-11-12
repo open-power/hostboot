@@ -36,17 +36,20 @@
 #include <utility>
 
 // mss lib
+#include <lib/dimm/mrs_traits_nimbus.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
 #include <lib/freq/nimbus_freq_traits.H>
+
 #include <lib/utils/fake_vpd.H>
 #include <lib/mss_vpd_decoder.H>
 #include <generic/memory/lib/spd/common/rcw_settings.H>
 #include <lib/eff_config/timing.H>
-#include <lib/dimm/ddr4/mrs_load_ddr4.H>
+#include <lib/dimm/ddr4/mrs_load_ddr4_nimbus.H>
 #include <lib/dimm/rank.H>
 #include <lib/utils/mss_nimbus_conversions.H>
 #include <lib/utils/nimbus_find.H>
 #include <lib/dimm/eff_dimm.H>
-#include <lib/dimm/mrs_load.H>
+
 #include <lib/shared/mss_kind.H>
 #include <lib/phy/dp16.H>
 #include <lib/mss_attribute_accessors_manual.H>

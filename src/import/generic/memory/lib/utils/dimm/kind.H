@@ -33,8 +33,8 @@
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
-#ifndef _GEN_MSS_KIND_H_
-#define _GEN_MSS_KIND_H_
+#ifndef _GENERIC_KIND_H_
+#define _GENERIC_KIND_H_
 
 #include <fapi2.H>
 
@@ -45,6 +45,29 @@
 
 namespace mss
 {
+
+///
+/// @brief DIMM kinds of DIMM/DRAM used to descriminate in templates.
+/// @note These must be contiguous and unique
+///
+enum kind_t
+{
+    // The default, base, etc. kind. Used to define the function
+    // which would be in a base class. Also used to stop the
+    // metaprogramming recursion of the dispatcher functions.
+    DEFAULT_KIND = 0,
+
+    // DIMM type and DRAM Generation representation
+    KIND_RDIMM_EMPTY = 1,
+    KIND_RDIMM_DDR4 = 2,
+    KIND_LRDIMM_EMPTY = 3,
+    KIND_LRDIMM_DDR4 = 4,
+
+    // Used to force dispatching looking for overloads
+    // This moust always be one more than that largest
+    // kind_t.
+    FORCE_DISPATCH = 4 + 1,
+};
 
 namespace dimm
 {

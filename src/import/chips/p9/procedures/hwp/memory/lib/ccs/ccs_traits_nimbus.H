@@ -67,6 +67,7 @@ class ccsTraits<mss::mc_type::NIMBUS>
         static constexpr uint64_t NTTM_READ_DELAY = 0x40;
         static constexpr uint64_t NTTM_MODE_FORCE_READ = 33;
 
+        static constexpr uint64_t DDR_ADDRESS_12 = 12;
 
         // Command Pass Disable Delay Time for Nimbus
         static constexpr uint64_t TIMING_TCPDED = 4;
@@ -207,6 +208,34 @@ class ccsTraits<mss::mc_type::NIMBUS>
             STAT_HUNG = 0x0ull,
         };
 
+        // Map bits in the ARR0 register(s) to MRS address bits. Should be traits related to ARR0. BRS
+        enum address_bits
+        {
+            A0 = 0,
+            A1 = 1,
+            A2 = 2,
+            A3 = 3,
+            A4 = 4,
+            A5 = 5,
+            A6 = 6,
+            A7 = 7,
+            A8 = 8,
+            A9 = 9,
+            A10 = 10,
+            A11 = 11,
+            A12 = 12,
+            A13 = 13,
+            A14 = ARR0_DDR_ADDRESS_14,
+            A15 = ARR0_DDR_ADDRESS_15,
+            A16 = ARR0_DDR_ADDRESS_16,
+            A17 = ARR0_DDR_ADDRESS_17,
+
+            // Only kind of address bits ... <shrug>
+            BA0 = 17,
+            BA1 = 18,
+            BG0 = 19,
+            BG1 = 15,
+        };
 
         // CSN Regular Settings
         static constexpr std::pair<uint64_t, uint64_t> CS_N[mss::MAX_RANK_PER_DIMM] =

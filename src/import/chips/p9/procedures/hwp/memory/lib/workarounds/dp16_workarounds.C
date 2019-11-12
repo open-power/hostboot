@@ -35,23 +35,26 @@
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
-#include <lib/shared/nimbus_defaults.H>
 #include <fapi2.H>
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 
 #include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/pos.H>
-#include <lib/workarounds/dp16_workarounds.H>
-#include <lib/phy/dp16.H>
+
+#include <lib/shared/nimbus_defaults.H>
+#include <lib/dimm/mrs_traits_nimbus.H>
 #include <lib/phy/ddr_phy.H>
 #include <lib/phy/phy_cntrl.H>
 #include <lib/phy/mss_training.H>
 #include <lib/dimm/rank.H>
 #include <lib/utils/bit_count.H>
 #include <lib/fir/check.H>
-#include <lib/dimm/ddr4/mrs_load_ddr4.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <lib/dimm/ddr4/mrs_load_ddr4_nimbus.H>
 #include <lib/dimm/eff_dimm.H>
+#include <lib/phy/dp16.H>
+#include <lib/workarounds/dp16_workarounds.H>
 
 namespace mss
 {

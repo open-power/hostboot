@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,14 +35,16 @@
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
-#include <lib/shared/nimbus_defaults.H>
 #include <fapi2.H>
-#include <lib/workarounds/dp16_workarounds.H>
+#include <lib/shared/nimbus_defaults.H>
+#include <lib/dimm/mrs_traits_nimbus.H>
 #include <lib/workarounds/wr_vref_workarounds.H>
 #include <lib/phy/dp16.H>
-#include <lib/dimm/ddr4/latch_wr_vref.H>
-#include <lib/dimm/ddr4/nvdimm_utils.H>
 #include <generic/memory/lib/utils/scom.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <lib/dimm/ddr4/nvdimm_utils.H>
+#include <lib/dimm/ddr4/latch_wr_vref.H>
+#include <lib/workarounds/dp16_workarounds.H>
 
 namespace mss
 {

@@ -33,6 +33,7 @@
 // *HWP Consumed by: FSP:HB
 
 #include <generic/memory/lib/utils/c_str.H>
+#include <lib/shared/exp_defaults.H>
 #include <lib/exp_draminit_utils.H>
 #include <lib/phy/exp_train_display.H>
 #include <lib/phy/exp_train_handler.H>

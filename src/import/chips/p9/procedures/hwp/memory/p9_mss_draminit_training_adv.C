@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,8 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
+#include <lib/shared/nimbus_defaults.H>
+#include <lib/dimm/mrs_traits_nimbus.H>
 #include <mss.H>
 #include <vector>
 
@@ -44,6 +46,7 @@
 #include <lib/phy/ddr_phy.H>
 #include <lib/phy/mss_training.H>
 #include <lib/workarounds/dp16_workarounds.H>
+
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;

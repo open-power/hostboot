@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,6 @@
 #define __MSS_EXP_DRAMINIT_UTILS__
 
 #include <fapi2.H>
-#include <lib/shared/exp_defaults.H>
 #include <lib/dimm/exp_rank.H>
 #include <lib/shared/exp_consts.H>
 #include <exp_data_structs.H>

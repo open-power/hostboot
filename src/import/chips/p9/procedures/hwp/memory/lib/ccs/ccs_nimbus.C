@@ -35,10 +35,11 @@
 
 #include <fapi2.H>
 
+#include <lib/shared/nimbus_defaults.H>
+#include <lib/dimm/mrs_traits_nimbus.H>
 #include <mss.H>
 #include <lib/fir/check.H>
 #include <lib/phy/mss_lrdimm_training.H>
-#include <lib/shared/nimbus_defaults.H>
 #include <lib/ccs/ccs_traits_nimbus.H>
 #include <generic/memory/lib/ccs/ccs.H>
 #include <lib/ccs/ccs_nimbus.H>

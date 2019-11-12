@@ -44,7 +44,7 @@
 #include <p9_mc_scom_addresses_fld.H>
 #include <mss_attribute_accessors.H>
 #include <lib/phy/dp16.H>
-#include <lib/dimm/ddr4/mrs_load_ddr4.H>
+#include <lib/dimm/ddr4/mrs_load_ddr4_nimbus.H>
 
 namespace mss
 {

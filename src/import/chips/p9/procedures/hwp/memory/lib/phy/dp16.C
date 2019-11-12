@@ -52,6 +52,8 @@
 #include <generic/memory/lib/utils/pos.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/utils/find_magic.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <lib/dimm/mrs_traits_nimbus.H>
 #include <lib/workarounds/dp16_workarounds.H>
 #include <lib/fir/check.H>
 #include <generic/memory/lib/utils/mss_math.H>

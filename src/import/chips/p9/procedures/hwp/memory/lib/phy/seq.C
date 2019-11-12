@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,14 +33,16 @@
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
-#include <lib/shared/nimbus_defaults.H>
 #include <fapi2.H>
-#include <lib/phy/seq.H>
+#include <lib/shared/nimbus_defaults.H>
 #include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/utils/bit_count.H>
 #include <lib/eff_config/timing.H>
 #include <lib/shared/mss_const.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <lib/dimm/mrs_traits_nimbus.H>
+#include <lib/phy/seq.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_DIMM;

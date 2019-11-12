@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,6 @@
 #include <fapi2.H>
 #include <lib/eff_config/timing.H>
 #include <lib/dimm/ddr4/latch_wr_vref.H>
-#include <lib/mss_attribute_accessors.H>
 
 namespace mss
 {

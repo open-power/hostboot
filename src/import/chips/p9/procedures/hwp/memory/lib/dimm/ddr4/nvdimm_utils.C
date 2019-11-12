@@ -32,15 +32,12 @@
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
-
-#include <fapi2.H>
 #include <vector>
 
+#include <fapi2.H>
 #include <lib/shared/mss_const.H>
 #include <lib/shared/nimbus_defaults.H>
-#include <lib/ccs/ccs_traits_nimbus.H>
-#include <generic/memory/lib/ccs/ccs.H>
-#include <lib/dimm/ddr4/nvdimm_utils.H>
+#include <lib/dimm/mrs_traits_nimbus.H>
 #include <lib/mc/mc.H>
 #include <lib/dimm/rank.H>
 #include <lib/mss_attribute_accessors.H>
@@ -55,12 +52,15 @@
 #include <generic/memory/lib/utils/pos.H>
 #include <lib/mc/port.H>
 #include <lib/phy/dp16.H>
-#include <lib/dimm/mrs_load.H>
+
 #include <lib/dimm/ddr4/zqcal.H>
-#include <lib/dimm/ddr4/latch_wr_vref.H>
-#include <lib/dimm/ddr4/control_word_ddr4.H>
+#include <lib/dimm/ddr4/control_word_ddr4_nimbus.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
 #include <lib/workarounds/ccs_workarounds.H>
 #include <lib/eff_config/timing.H>
+#include <lib/dimm/ddr4/latch_wr_vref.H>
+#include <lib/dimm/ddr4/nvdimm_utils.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;

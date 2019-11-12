@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,33 +36,12 @@
 #ifndef _MSS_KIND_H_
 #define _MSS_KIND_H_
 
-#include <fapi2.H>
+#include <generic/memory/lib/utils/dimm/kind.H>
 
 namespace mss
 {
 
-// These must be contiguous and unique
-/// Kind's of DIMM/DRAM used to descriminate in templates.
-enum kind_t
-{
-    // The default, base, etc. kind. Used to define the function
-    // which would be in a base class. Also used to stop the
-    // metaprogramming recursion of the dispatcher functions.
-    DEFAULT_KIND = 0,
-
-    // DIMM type and DRAM Generation representation
-    KIND_RDIMM_EMPTY = 1,
-    KIND_RDIMM_DDR4 = 2,
-    KIND_LRDIMM_EMPTY = 3,
-    KIND_LRDIMM_DDR4 = 4,
-
-    // Used to force dispatching looking for overloads
-    // This moust always be one more than that largest
-    // kind_t.
-    FORCE_DISPATCH = 4 + 1,
-};
-
-inline mss::kind_t dimm_kind( const uint64_t i_type, const uint64_t i_gen )
+inline kind_t dimm_kind( const uint64_t i_type, const uint64_t i_gen )
 {
     // This is the conditional needed to differentiate dimm type/generation
     switch (i_type)

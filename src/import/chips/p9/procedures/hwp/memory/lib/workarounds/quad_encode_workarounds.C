@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,8 @@
 #include <lib/ccs/ccs_traits_nimbus.H>
 #include <generic/memory/lib/ccs/ccs.H>
 #include <lib/mss_attribute_accessors.H>
-#include <lib/dimm/ddr4/mrs_load_ddr4.H>
+#include <lib/dimm/mrs_traits_nimbus.H>
+#include <lib/dimm/ddr4/mrs_load_ddr4_nimbus.H>
 #include <lib/workarounds/quad_encode_workarounds.H>
 
 namespace mss

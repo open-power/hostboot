@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,7 +66,7 @@
 #include <lib/mcbist/mcbist.H>
 
 #include <lib/dimm/rcd_load.H>
-#include <lib/dimm/mrs_load.H>
+
 #include <lib/dimm/rank.H>
 #include <lib/dimm/nimbus_kind.H>
 

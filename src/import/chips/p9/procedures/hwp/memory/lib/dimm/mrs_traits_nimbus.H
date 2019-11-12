@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/dimm/exp_mrs_traits.H $ */
+/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/dimm/mrs_traits_nimbus.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,8 +24,8 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file exp_mrs_traits.H
-/// @brief Contains the mc specific traits and settings for the mrs engine
+/// @file mrs_traits_nimbus.H
+/// @brief Run and manage the CCS engine
 ///
 // *HWP HWP Owner: Matthew Hickman <Matthew.Hickman@ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
@@ -33,34 +33,31 @@
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
-#ifndef _EXP_MRS_TRAITS_H_
-#define _EXP_MRS_TRAITS_H_
+#ifndef _MSS_MRS_TRAITS_NIMBUS_H_
+#define _MSS_MRS_TRAITS_NIMBUS_H_
 
 #include <fapi2.H>
-#include <explorer_scom_addresses.H>
-#include <explorer_scom_addresses_fld.H>
+#include <p9_mc_scom_addresses.H>
+#include <p9_mc_scom_addresses_fld.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
-#include <lib/shared/exp_defaults.H>
-
-#include <generic/memory/lib/utils/mss_rank.H>
-#include <generic/memory/lib/utils/find.H>
-#include <lib/shared/exp_consts.H>
-#include <lib/exp_attribute_accessors_manual.H>
-#include <lib/mc/exp_port.H>
+#include <lib/shared/mss_const.H>
+#include <lib/mss_attribute_accessors.H>
+#include <lib/mc/port.H>
 #include <generic/memory/lib/dimm/mrs_traits.H>
+#include <lib/eff_config/timing.H>
 
 ///
 /// @class mrsTraits
 /// @brief Nimbus MRS Engine traits
 ///
 template<>
-class mrsTraits<mss::mc_type::EXPLORER>
+class mrsTraits<mss::mc_type::NIMBUS>
 {
     public:
 
-        static constexpr fapi2::TargetType PORT_TARGET_TYPE = fapi2::TARGET_TYPE_MEM_PORT;
+        static constexpr fapi2::TargetType PORT_TARGET_TYPE = fapi2::TARGET_TYPE_MCA;
         static constexpr uint64_t TCCD_S = 4;
-        static constexpr uint64_t TMRD = 16;
+        static constexpr uint64_t TMRD = 8;
 
         ///
         /// @brief Returns an error for bad mrs parameter
@@ -72,17 +69,16 @@ class mrsTraits<mss::mc_type::EXPLORER>
         }
 
         ///
-        /// @brief Returns if rcd mirror mode on
-        /// @return false, currently set to disabled
+        /// @brief Returns the attribute rcd mirror mode on
+        /// @return rcd mirror mode on
         ///
         static uint8_t attr_mirror_mode_on()
         {
-            constexpr uint8_t MIRRORED = 0x01;
-            return MIRRORED;
+            return fapi2::ENUM_ATTR_EFF_DIMM_RCD_MIRROR_MODE_ON;
         }
 
         ///
-        /// @brief Returns if mirror mode is enabled, currently set to disabled
+        /// @brief Returns the ATTR_EFF_DIMM_RCD_MIRROR_MODE getter
         /// @param[in] const ref to the fapi2::Target<fapi2::TARGET_TYPE_DIMM>
         /// @param[out] ref to the value uint8_t
         /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
@@ -90,73 +86,32 @@ class mrsTraits<mss::mc_type::EXPLORER>
         static fapi2::ReturnCode mirror_mode(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                              uint8_t& o_value)
         {
-            return mss::attr::get_exp_dram_address_mirroring(i_target, o_value);
+            return mss::eff_dimm_rcd_mirror_mode(i_target, o_value);
         }
 
         ///
         /// @brief Calls the get_dimm_target_from_rank port api
         /// @param[in] i_target the port target
-        /// @param[in] i_port_rank the port rank number
+        /// @param[in] i_rank the rank number
         /// @param[out] o_dimm the DIMM target
         /// @return FAPI2_RC_SUCCESS iff all is ok, FAPI2_RC_INVALID_PARAMETER otherwise
         ///
-        static fapi2::ReturnCode get_dimm_target_wrap (const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-                const uint64_t i_port_rank,
+        static fapi2::ReturnCode get_dimm_target_wrap (const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                const uint64_t i_rank,
                 fapi2::Target<fapi2::TARGET_TYPE_DIMM>& o_dimm)
         {
-            fapi2::ReturnCode l_rc;
-            auto l_rank_info = mss::rank::info<mss::mc_type::EXPLORER>(i_target, i_port_rank, l_rc);
-            FAPI_TRY (l_rc);
-            o_dimm = l_rank_info.get_dimm_target();
-
-        fapi_try_exit:
-            return l_rc;
+            return mss::rank::get_dimm_target_from_rank(i_target, i_rank, o_dimm);
         }
 
         ///
-        /// @brief Calls the ATTR_EFF_DRAM_TCCD_L getter
-        /// @param[in] const ref to the TARGET_TYPE_MEM_PORT
-        /// @param[out] uint8_t& reference to store the value
-        /// @return FAPI2_RC_SUCCESS iff all is ok, FAPI2_RC_INVALID_PARAMETER otherwise
+        /// @brief Calls the is_rank_on_dimm port api
+        /// @param[in] i_target representing the DIMM
+        /// @param[in] i_rank the rank number.
+        /// @return true iff i_rank is a rank on i_target
         ///
-        static fapi2::ReturnCode dram_tccd_l (const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, uint8_t& o_value)
+        static bool rank_on_dimm_wrap (const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, const uint64_t i_rank)
         {
-            return mss::attr::get_dram_tccd_l(i_target, o_value);
-        }
-
-        ///
-        /// @brief Calls the ATTR_EFF_DRAM_TRP getter
-        /// @param[in] const ref to the TARGET_TYPE_MEM_PORT
-        /// @param[out] uint8_t& reference to store the value
-        /// @return FAPI2_RC_SUCCESS iff all is ok, FAPI2_RC_INVALID_PARAMETER otherwise
-        ///
-        static fapi2::ReturnCode dram_trp (const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, uint8_t& o_value)
-        {
-            return mss::attr::get_dram_trp(i_target, o_value);
-        }
-
-        ///
-        /// @brief Calls the ATTR_EFF_DRAM_TCCD_L getter
-        /// @param[in] const ref to the TARGET_TYPE_MEM_PORT
-        /// @param[out] uint8_t& reference to store the value
-        /// @return FAPI2_RC_SUCCESS iff all is ok, FAPI2_RC_INVALID_PARAMETER otherwise
-        ///
-        static fapi2::ReturnCode dram_tccd_l (const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t& o_value)
-        {
-            auto l_port_target = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
-            return mss::attr::get_dram_tccd_l(l_port_target, o_value);
-        }
-
-        ///
-        /// @brief Calls the ATTR_EFF_DRAM_TRP getter
-        /// @param[in] const ref to the TARGET_TYPE_MEM_PORT
-        /// @param[out] uint8_t& reference to store the value
-        /// @return FAPI2_RC_SUCCESS iff all is ok, FAPI2_RC_INVALID_PARAMETER otherwise
-        ///
-        static fapi2::ReturnCode dram_trp (const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t& o_value)
-        {
-            auto l_port_target = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
-            return mss::attr::get_dram_trp(l_port_target, o_value);
+            return mss::rank::is_rank_on_dimm(i_target, i_rank);
         }
 
         ///
@@ -164,13 +119,33 @@ class mrsTraits<mss::mc_type::EXPLORER>
         /// @tparam T fapi2::TargetType of the target used to calculate cycles from ns
         /// @param[in] i_target the target used to get clocks
         /// @return max(24nCK,15ns) in clocks
-        /// @note Returning the worst case tMOD - 24 nCK
         ///
         template < fapi2::TargetType T >
         static uint64_t mrs_tmod( const fapi2::Target<T>& i_target )
         {
-            constexpr uint64_t WORST_CASE_TMOD = 24;
-            return WORST_CASE_TMOD;
+            return mss::tmod(i_target);
+        }
+
+        ///
+        /// @brief Calls the ATTR_EFF_DRAM_TCCD_L getter
+        /// @param[in] const ref to the fapi2::Target<fapi2::TARGET_TYPE_MCA>
+        /// @param[out] ref to the value uint8_t
+        /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+        ///
+        static fapi2::ReturnCode dram_tccd_l(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t& o_value)
+        {
+            return mss::eff_dram_tccd_l(i_target, o_value);
+        }
+
+        ///
+        /// @brief Calls the ATTR_EFF_DRAM_TRP getter
+        /// @param[in] const ref to the fapi2::Target<fapi2::TARGET_TYPE_MCA>
+        /// @param[out] ref to the value uint8_t
+        /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+        ///
+        static fapi2::ReturnCode dram_trp(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t& o_value)
+        {
+            return mss::eff_dram_trp(i_target, o_value);
         }
 
         // Enum for the nibble locations in register
@@ -181,7 +156,6 @@ class mrsTraits<mss::mc_type::EXPLORER>
         };
 
         // function space and control word definitions
-        // Need verification
         enum db02_def : size_t
         {
             // Function spaces

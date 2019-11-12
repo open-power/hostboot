@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,9 +35,11 @@
 
 #include <fapi2.H>
 
+#include <lib/shared/nimbus_defaults.H>
+#include <lib/dimm/mrs_traits_nimbus.H>
 #include <mss.H>
 #include <lib/dimm/rcd_load_ddr4.H>
-#include <lib/dimm/ddr4/control_word_ddr4.H>
+#include <lib/dimm/ddr4/control_word_ddr4_nimbus.H>
 #include <lib/workarounds/draminit_workarounds.H>
 #include <lib/workarounds/ccs_workarounds.H>
 

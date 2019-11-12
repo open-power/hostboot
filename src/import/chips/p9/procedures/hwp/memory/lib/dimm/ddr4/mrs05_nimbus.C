@@ -35,8 +35,10 @@
 
 #include <fapi2.H>
 
+#include <lib/shared/nimbus_defaults.H>
+#include <lib/dimm/mrs_traits_nimbus.H>
 #include <mss.H>
-#include <lib/dimm/ddr4/mrs_load_ddr4.H>
+#include <lib/dimm/ddr4/mrs_load_ddr4_nimbus.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_DIMM;
@@ -116,6 +118,8 @@ fapi2::ReturnCode mrs05(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         ccs::instruction_t& io_inst,
                         const uint64_t i_rank)
 {
+    using TT = ccsTraits<mc_type::NIMBUS>;
+
     constexpr uint64_t CA_PARITY_LATENCY_LENGTH = 3;
     constexpr uint64_t CA_PARITY_LATENCY_START = 7;
     constexpr uint64_t RTT_PARK_LENGTH = 3;
@@ -155,15 +159,15 @@ fapi2::ReturnCode mrs05(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
              uint8_t(l_rtt_park_buffer), i_data.iv_ca_parity,
              i_data.iv_data_mask, i_data.iv_write_dbi, i_data.iv_read_dbi);
 
-    mss::swizzle<A0, CA_PARITY_LATENCY_LENGTH, CA_PARITY_LATENCY_START>(l_ca_parity_latency_buffer, io_inst.arr0);
-    io_inst.arr0.writeBit<A3>(i_data.iv_crc_error_clear);
-    io_inst.arr0.writeBit<A4>(i_data.iv_ca_parity_error_status);
-    io_inst.arr0.writeBit<A5>(i_data.iv_odt_input_buffer);
-    mss::swizzle<A6, RTT_PARK_LENGTH, RTT_PARK_START>(l_rtt_park_buffer, io_inst.arr0);
-    io_inst.arr0.writeBit<A9>(i_data.iv_ca_parity);
-    io_inst.arr0.writeBit<A10>(i_data.iv_data_mask);
-    io_inst.arr0.writeBit<A11>(i_data.iv_write_dbi);
-    io_inst.arr0.writeBit<A12>(i_data.iv_read_dbi);
+    mss::swizzle<TT::A0, CA_PARITY_LATENCY_LENGTH, CA_PARITY_LATENCY_START>(l_ca_parity_latency_buffer, io_inst.arr0);
+    io_inst.arr0.writeBit<TT::A3>(i_data.iv_crc_error_clear);
+    io_inst.arr0.writeBit<TT::A4>(i_data.iv_ca_parity_error_status);
+    io_inst.arr0.writeBit<TT::A5>(i_data.iv_odt_input_buffer);
+    mss::swizzle<TT::A6, RTT_PARK_LENGTH, RTT_PARK_START>(l_rtt_park_buffer, io_inst.arr0);
+    io_inst.arr0.writeBit<TT::A9>(i_data.iv_ca_parity);
+    io_inst.arr0.writeBit<TT::A10>(i_data.iv_data_mask);
+    io_inst.arr0.writeBit<TT::A11>(i_data.iv_write_dbi);
+    io_inst.arr0.writeBit<TT::A12>(i_data.iv_read_dbi);
 
     FAPI_INF("%s MR5: 0x%016llx", mss::c_str(i_target), uint64_t(io_inst.arr0));
 
@@ -200,20 +204,22 @@ fapi2::ReturnCode mrs05_decode_helper(const ccs::instruction_t& i_inst,
                                       fapi2::buffer<uint8_t>& o_ca_parity_latency_buffer,
                                       fapi2::buffer<uint8_t>& o_rtt_park_buffer)
 {
+    using TT = ccsTraits<mc_type::NIMBUS>;
+
     o_ca_parity_latency_buffer = 0;
     o_rtt_park_buffer = 0;
 
-    mss::swizzle<5, 3, A2>(i_inst.arr0, o_ca_parity_latency_buffer);
-    mss::swizzle<5, 3, A8>(i_inst.arr0, o_rtt_park_buffer);
+    mss::swizzle<5, 3, TT::A2>(i_inst.arr0, o_ca_parity_latency_buffer);
+    mss::swizzle<5, 3, TT::A8>(i_inst.arr0, o_rtt_park_buffer);
 
-    o_crc_error_clear = i_inst.arr0.getBit<A3>();
-    o_ca_parity_error_status = i_inst.arr0.getBit<A4>();
-    o_odt_input_buffer = i_inst.arr0.getBit<A5>();
+    o_crc_error_clear = i_inst.arr0.getBit<TT::A3>();
+    o_ca_parity_error_status = i_inst.arr0.getBit<TT::A4>();
+    o_odt_input_buffer = i_inst.arr0.getBit<TT::A5>();
 
-    o_ca_parity = i_inst.arr0.getBit<A9>();
-    o_data_mask = i_inst.arr0.getBit<A10>();
-    o_write_dbi = i_inst.arr0.getBit<A11>();
-    o_read_dbi = i_inst.arr0.getBit<A12>();
+    o_ca_parity = i_inst.arr0.getBit<TT::A9>();
+    o_data_mask = i_inst.arr0.getBit<TT::A10>();
+    o_write_dbi = i_inst.arr0.getBit<TT::A11>();
+    o_read_dbi = i_inst.arr0.getBit<TT::A12>();
 
     FAPI_INF("MR5 rank %d decode: CAPL: 0x%x, CRC_EC: 0x%x, CA_PES: 0x%x, ODT_IB: 0x%x "
              "RTT_PARK: 0x%x, CAP: 0x%x, DM: 0x%x, WDBI: 0x%x, RDBI: 0x%x",

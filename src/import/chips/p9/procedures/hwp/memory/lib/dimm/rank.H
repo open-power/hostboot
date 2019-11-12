@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -815,6 +815,18 @@ template< fapi2::TargetType T, fapi2::TargetType D >
 fapi2::ReturnCode get_dimm_target_from_rank(const fapi2::Target<T>& i_target,
         const uint64_t i_rank,
         fapi2::Target<D>& o_dimm);
+
+///
+/// @brief Return the DIMM target which posesses this rank on a given port - specialization for Nimbus
+/// @param[in] i_target the port target
+/// @param[in] i_rank the rank number
+/// @param[out] o_dimm the DIMM target
+/// @return FAPI2_RC_SUCCESS iff all is ok, FAPI2_RC_INVALID_PARAMETER otherwise
+///
+template<>
+fapi2::ReturnCode get_dimm_target_from_rank(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rank,
+        fapi2::Target<fapi2::TARGET_TYPE_DIMM>& o_dimm);
 
 ///
 /// @brief Given a target, get the rank pair assignments, based on DIMMs

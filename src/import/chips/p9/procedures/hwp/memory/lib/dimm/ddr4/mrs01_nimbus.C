@@ -35,10 +35,11 @@
 
 #include <fapi2.H>
 
+#include <lib/shared/nimbus_defaults.H>
+#include <lib/dimm/mrs_traits_nimbus.H>
 #include <mss.H>
 #include <lib/shared/mss_const.H>
-#include <lib/dimm/ddr4/mrs_load_ddr4.H>
-#include <lib/shared/nimbus_defaults.H>
+#include <lib/dimm/ddr4/mrs_load_ddr4_nimbus.H>
 #include <lib/ccs/ccs_traits_nimbus.H>
 #include <generic/memory/lib/ccs/ccs.H>
 
@@ -116,6 +117,8 @@ fapi2::ReturnCode mrs01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         ccs::instruction_t& io_inst,
                         const uint64_t i_rank)
 {
+    using TT = ccsTraits<mc_type::NIMBUS>;
+
     // Little table to map Output Driver Imepdance Control. 34Ohm is index 0,
     // 48Ohm is index 1
     // Left bit is A2, right bit is A1
@@ -163,14 +166,14 @@ fapi2::ReturnCode mrs01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
              uint8_t(l_additive_latency), i_data.iv_wl_enable,
              uint8_t(l_rtt_nom_buffer), i_data.iv_tdqs, i_data.iv_qoff);
 
-    io_inst.arr0.writeBit<A0>(i_data.iv_dll_enable);
-    mss::swizzle<A1, ODIC_LENGTH, ODIC_START_BIT>(l_odic_buffer, io_inst.arr0);
-    mss::swizzle<A3, ADDITIVE_LATENCE_LENGTH, ADDITIVE_LATENCE_START_BIT>(fapi2::buffer<uint8_t>
+    io_inst.arr0.writeBit<TT::A0>(i_data.iv_dll_enable);
+    mss::swizzle<TT::A1, ODIC_LENGTH, ODIC_START_BIT>(l_odic_buffer, io_inst.arr0);
+    mss::swizzle<TT::A3, ADDITIVE_LATENCE_LENGTH, ADDITIVE_LATENCE_START_BIT>(fapi2::buffer<uint8_t>
             (i_data.iv_additive_latency), io_inst.arr0);
-    io_inst.arr0.writeBit<A7>(i_data.iv_wl_enable);
-    mss::swizzle<A8, RTT_NOM_LENGTH, RTT_NOM_START_BIT>(l_rtt_nom_buffer, io_inst.arr0);
-    io_inst.arr0.writeBit<A11>(i_data.iv_tdqs);
-    io_inst.arr0.writeBit<A12>(i_data.iv_qoff);
+    io_inst.arr0.writeBit<TT::A7>(i_data.iv_wl_enable);
+    mss::swizzle<TT::A8, RTT_NOM_LENGTH, RTT_NOM_START_BIT>(l_rtt_nom_buffer, io_inst.arr0);
+    io_inst.arr0.writeBit<TT::A11>(i_data.iv_tdqs);
+    io_inst.arr0.writeBit<TT::A12>(i_data.iv_qoff);
 
     FAPI_INF("%s MR1: 0x%016llx", mss::c_str(i_target), uint64_t(io_inst.arr0));
 
@@ -203,18 +206,20 @@ fapi2::ReturnCode mrs01_decode_helper(const ccs::instruction_t& i_inst,
                                       fapi2::buffer<uint8_t>& o_additive_latency,
                                       fapi2::buffer<uint8_t>& o_rtt_nom)
 {
+    using TT = ccsTraits<mc_type::NIMBUS>;
+
     o_odic = 0;
     o_additive_latency = 0;
     o_rtt_nom = 0;
 
-    o_dll_enable = i_inst.arr0.getBit<A0>();
-    o_wrl_enable = i_inst.arr0.getBit<A7>();
-    o_tdqs = i_inst.arr0.getBit<A11>();
-    o_qoff = i_inst.arr0.getBit<A12>();
+    o_dll_enable = i_inst.arr0.getBit<TT::A0>();
+    o_wrl_enable = i_inst.arr0.getBit<TT::A7>();
+    o_tdqs = i_inst.arr0.getBit<TT::A11>();
+    o_qoff = i_inst.arr0.getBit<TT::A12>();
 
-    mss::swizzle<6, 2, A2>(i_inst.arr0, o_odic);
-    mss::swizzle<6, 2, A4>(i_inst.arr0, o_additive_latency);
-    mss::swizzle<5, 3, A10>(i_inst.arr0, o_rtt_nom);
+    mss::swizzle<6, 2, TT::A2>(i_inst.arr0, o_odic);
+    mss::swizzle<6, 2, TT::A4>(i_inst.arr0, o_additive_latency);
+    mss::swizzle<5, 3, TT::A10>(i_inst.arr0, o_rtt_nom);
 
     FAPI_INF("MR1 rank %d decode: DLL_ENABLE: 0x%x, ODIC: 0x%x, AL: 0x%x, WLE: 0x%x, "
              "RTT_NOM: 0x%x, TDQS: 0x%x, QOFF: 0x%x",

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,7 +44,7 @@
 #include <lib/utils/nimbus_find.H>
 #include <generic/memory/lib/ccs/ccs.H>
 #include <lib/dimm/rank.H>
-#include <lib/dimm/ddr4/mrs_load_ddr4.H>
+#include <lib/dimm/ddr4/mrs_load_ddr4_nimbus.H>
 #include <p9_mc_scom_addresses_fld.H>
 
 namespace mss

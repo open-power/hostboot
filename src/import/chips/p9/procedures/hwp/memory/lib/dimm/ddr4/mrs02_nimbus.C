@@ -35,8 +35,10 @@
 
 #include <fapi2.H>
 
+#include <lib/shared/nimbus_defaults.H>
+#include <lib/dimm/mrs_traits_nimbus.H>
 #include <mss.H>
-#include <lib/dimm/ddr4/mrs_load_ddr4.H>
+#include <lib/dimm/ddr4/mrs_load_ddr4_nimbus.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_DIMM;
@@ -108,6 +110,8 @@ fapi2::ReturnCode mrs02(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         ccs::instruction_t& io_inst,
                         const uint64_t i_rank)
 {
+    using TT = ccsTraits<mc_type::NIMBUS>;
+
     constexpr uint64_t CWL_LENGTH = 3;
     constexpr uint64_t CWL_START = 7;
     constexpr uint64_t LPASR_LENGTH = 2;
@@ -144,13 +148,13 @@ fapi2::ReturnCode mrs02(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
              mss::c_str(i_target), i_rank, uint8_t(i_data.iv_lpasr), i_data.iv_cwl,
              uint8_t(l_cwl_buffer), uint8_t(l_rtt_wr_buffer), i_data.iv_write_crc);
 
-    mss::swizzle<A3, CWL_LENGTH, CWL_START>(l_cwl_buffer, io_inst.arr0);
+    mss::swizzle<TT::A3, CWL_LENGTH, CWL_START>(l_cwl_buffer, io_inst.arr0);
 
-    mss::swizzle<A6, LPASR_LENGTH, LPASR_START>(fapi2::buffer<uint8_t>(i_data.iv_lpasr), io_inst.arr0);
+    mss::swizzle<TT::A6, LPASR_LENGTH, LPASR_START>(fapi2::buffer<uint8_t>(i_data.iv_lpasr), io_inst.arr0);
 
-    mss::swizzle<A9, RTT_WR_LENGTH, RTT_WR_START>(l_rtt_wr_buffer, io_inst.arr0);
+    mss::swizzle<TT::A9, RTT_WR_LENGTH, RTT_WR_START>(l_rtt_wr_buffer, io_inst.arr0);
 
-    io_inst.arr0.writeBit<A12>(i_data.iv_write_crc);
+    io_inst.arr0.writeBit<TT::A12>(i_data.iv_write_crc);
 
     FAPI_INF("MR2: 0x%016llx", uint64_t(io_inst.arr0));
 
@@ -177,14 +181,16 @@ fapi2::ReturnCode mrs02_decode_helper(const ccs::instruction_t& i_inst,
                                       fapi2::buffer<uint8_t>& o_cwl,
                                       fapi2::buffer<uint8_t>& o_rtt_wr)
 {
+    using TT = ccsTraits<mc_type::NIMBUS>;
+
     o_lpasr = 0;
     o_cwl = 0;
     o_rtt_wr = 0;
 
-    o_write_crc = i_inst.arr0.getBit<A12>();
-    mss::swizzle<5, 3, A5>(i_inst.arr0, o_cwl);
-    mss::swizzle<6, 2, A7>(i_inst.arr0, o_lpasr);
-    mss::swizzle<5, 3, A11>(i_inst.arr0, o_rtt_wr);
+    o_write_crc = i_inst.arr0.getBit<TT::A12>();
+    mss::swizzle<5, 3, TT::A5>(i_inst.arr0, o_cwl);
+    mss::swizzle<6, 2, TT::A7>(i_inst.arr0, o_lpasr);
+    mss::swizzle<5, 3, TT::A11>(i_inst.arr0, o_rtt_wr);
 
     FAPI_INF("MR2 rank %d deocode: LPASR: 0x%x, CWL: 0x%x, RTT_WR: 0x%x, WRITE_CRC: 0x%x",
              i_rank, uint8_t(o_lpasr), uint8_t(o_cwl), uint8_t(o_rtt_wr), o_write_crc);

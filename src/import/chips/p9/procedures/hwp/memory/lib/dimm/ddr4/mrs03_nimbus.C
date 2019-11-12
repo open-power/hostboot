@@ -35,8 +35,10 @@
 
 #include <fapi2.H>
 
+#include <lib/shared/nimbus_defaults.H>
+#include <lib/dimm/mrs_traits_nimbus.H>
 #include <mss.H>
-#include <lib/dimm/ddr4/mrs_load_ddr4.H>
+#include <lib/dimm/ddr4/mrs_load_ddr4_nimbus.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_DIMM;
@@ -133,6 +135,8 @@ fapi2::ReturnCode mrs03(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         ccs::instruction_t& io_inst,
                         const uint64_t i_rank)
 {
+    using TT = ccsTraits<mc_type::NIMBUS>;
+
     //Some consts for the swizzle action
     constexpr uint64_t LOWEST_WL = 4;
     constexpr uint64_t WL_COUNT = 3;
@@ -154,15 +158,17 @@ fapi2::ReturnCode mrs03(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 
     l_crc_wr_latency_buffer = crc_wr_latency_map[i_data.iv_crc_wr_latency - LOWEST_WL];
 
-    mss::swizzle<A0, MPR_PAGE_LENGTH, MPR_PAGE_START>(fapi2::buffer<uint8_t>(i_data.iv_mpr_page), io_inst.arr0);
-    io_inst.arr0.writeBit<A2>(i_data.iv_mpr_mode);
-    io_inst.arr0.writeBit<A3>(i_data.iv_geardown);
-    io_inst.arr0.writeBit<A4>(i_data.iv_pda);
-    io_inst.arr0.writeBit<A5>(i_data.iv_temp_readout);
+    mss::swizzle<TT::A0, MPR_PAGE_LENGTH, MPR_PAGE_START>(fapi2::buffer<uint8_t>(i_data.iv_mpr_page), io_inst.arr0);
+    io_inst.arr0.writeBit<TT::A2>(i_data.iv_mpr_mode);
+    io_inst.arr0.writeBit<TT::A3>(i_data.iv_geardown);
+    io_inst.arr0.writeBit<TT::A4>(i_data.iv_pda);
+    io_inst.arr0.writeBit<TT::A5>(i_data.iv_temp_readout);
 
-    mss::swizzle<A6, FINE_REFRESH_LENGTH, FINE_REFRESH_START>(fapi2::buffer<uint8_t>(i_data.iv_fine_refresh), io_inst.arr0);
-    mss::swizzle<A9, CRC_WR_LATENCY_LENGTH, CRC_WR_LATENCY_START>(l_crc_wr_latency_buffer, io_inst.arr0);
-    mss::swizzle<A11, READ_FORMAT_LENGTH, READ_FORMAT_START>(fapi2::buffer<uint8_t>(i_data.iv_read_format), io_inst.arr0);
+    mss::swizzle<TT::A6, FINE_REFRESH_LENGTH, FINE_REFRESH_START>(fapi2::buffer<uint8_t>(i_data.iv_fine_refresh),
+            io_inst.arr0);
+    mss::swizzle<TT::A9, CRC_WR_LATENCY_LENGTH, CRC_WR_LATENCY_START>(l_crc_wr_latency_buffer, io_inst.arr0);
+    mss::swizzle<TT::A11, READ_FORMAT_LENGTH, READ_FORMAT_START>(fapi2::buffer<uint8_t>(i_data.iv_read_format),
+            io_inst.arr0);
 
     FAPI_INF("%s MR3: 0x%016llx", mss::c_str(i_target), uint64_t(io_inst.arr0));
 
@@ -197,21 +203,22 @@ fapi2::ReturnCode mrs03_decode_helper(const ccs::instruction_t& i_inst,
                                       fapi2::buffer<uint8_t>& o_crc_wr_latency_buffer,
                                       fapi2::buffer<uint8_t>& o_read_format)
 {
+    using TT = ccsTraits<mc_type::NIMBUS>;
 
     o_mpr_page = 0;
     o_fine_refresh = 0;
     o_crc_wr_latency_buffer = 0;
     o_read_format = 0;
 
-    o_mpr_mode = i_inst.arr0.getBit<A2>();
-    o_geardown = i_inst.arr0.getBit<A3>();
-    o_pda = i_inst.arr0.getBit<A4>();
-    o_temp_readout = i_inst.arr0.getBit<A5>();
+    o_mpr_mode = i_inst.arr0.getBit<TT::A2>();
+    o_geardown = i_inst.arr0.getBit<TT::A3>();
+    o_pda = i_inst.arr0.getBit<TT::A4>();
+    o_temp_readout = i_inst.arr0.getBit<TT::A5>();
 
-    mss::swizzle<6, 2, A1>(i_inst.arr0, o_mpr_page);
-    mss::swizzle<5, 3, A8>(i_inst.arr0, o_fine_refresh);
-    mss::swizzle<6, 2, A10>(i_inst.arr0, o_crc_wr_latency_buffer);
-    mss::swizzle<6, 2, A12>(i_inst.arr0, o_read_format);
+    mss::swizzle<6, 2, TT::A1>(i_inst.arr0, o_mpr_page);
+    mss::swizzle<5, 3, TT::A8>(i_inst.arr0, o_fine_refresh);
+    mss::swizzle<6, 2, TT::A10>(i_inst.arr0, o_crc_wr_latency_buffer);
+    mss::swizzle<6, 2, TT::A12>(i_inst.arr0, o_read_format);
 
     FAPI_INF("MR3 rank %d decode: MPR_MODE: 0x%x, MPR_PAGE: 0x%x, GD: 0x%x, PDA: 0x%x, "
              "TEMP: 0x%x FR: 0x%x, CRC_WL: 0x%x, RF: 0x%x", i_rank,

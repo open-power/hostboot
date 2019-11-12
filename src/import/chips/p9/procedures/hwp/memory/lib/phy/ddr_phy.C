@@ -37,6 +37,8 @@
 #include <initializer_list>
 
 #include <fapi2.H>
+#include <lib/shared/nimbus_defaults.H>
+#include <lib/dimm/mrs_traits_nimbus.H>
 #include <mss.H>
 #include <lib/mss_attribute_accessors.H>
 

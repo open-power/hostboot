@@ -38,6 +38,8 @@
 #include <vector>
 #include <initializer_list>
 #include <fapi2.H>
+#include <lib/shared/nimbus_defaults.H>
+#include <lib/dimm/mrs_traits_nimbus.H>
 #include <mss.H>
 #include <lib/phy/ddr_phy.H>
 #include <lib/phy/mss_training.H>
@@ -52,7 +54,7 @@
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <lib/dimm/rank.H>
 #include <lib/shared/mss_const.H>
-#include <lib/dimm/ddr4/pda.H>
+#include <lib/dimm/ddr4/pda_nimbus.H>
 #include <lib/phy/seq.H>
 #include <lib/phy/read_cntrl.H>
 #include <lib/mss_attribute_accessors.H>

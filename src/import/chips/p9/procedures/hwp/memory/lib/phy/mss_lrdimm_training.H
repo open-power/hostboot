@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,12 +40,12 @@
 
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <lib/shared/mss_const.H>
-#include <lib/phy/mss_training.H>
 #include <lib/ccs/ccs_traits_nimbus.H>
 #include <generic/memory/lib/ccs/ccs.H>
-#include <lib/dimm/ddr4/mrs_load_ddr4.H>
-#include <lib/dimm/ddr4/control_word_ddr4.H>
-#include <lib/dimm/ddr4/data_buffer_ddr4.H>
+#include <lib/phy/mss_training.H>
+#include <lib/dimm/ddr4/mrs_load_ddr4_nimbus.H>
+#include <lib/dimm/ddr4/control_word_ddr4_nimbus.H>
+#include <lib/dimm/ddr4/data_buffer_ddr4_nimbus.H>
 #include <lib/phy/seq.H>
 #include <generic/memory/lib/utils/buffer_ops.H>
 #include <lib/mcbist/mcbist.H>
@@ -100,6 +100,7 @@ inline fapi2::ReturnCode add_mpr_pattern_writes(const fapi2::Target<fapi2::TARGE
         const uint64_t i_pattern,
         std::vector<mss::ccs::instruction_t>& io_insts)
 {
+    using TT = ccsTraits<mss::mc_type::NIMBUS>;
 
     constexpr uint64_t NUM_MPR_PATTERNS = 4;
     constexpr uint64_t MPR_WR_BG = 0;
@@ -128,7 +129,7 @@ inline fapi2::ReturnCode add_mpr_pattern_writes(const fapi2::Target<fapi2::TARGE
                                               MPR_WR_BG,
                                               l_pattern);
             // Swaps the bank addresses so they're a true to the BA we tried to pass in above
-            swap<BA0, BA1>(l_wr.arr0);
+            swap<TT::BA0, TT::BA1>(l_wr.arr0);
 
             l_wr.arr1.template insertFromRight<MCBIST_CCS_INST_ARR1_00_IDLES, MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(MPR_WR_SAFE_DELAY);
             FAPI_TRY(address_mirror(i_target, i_rank, l_wr));

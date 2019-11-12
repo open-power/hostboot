@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,7 +36,7 @@
 #include <fapi2.H>
 
 #include <lib/dimm/rcd_load_ddr4.H>
-#include <lib/dimm/ddr4/control_word_ddr4.H>
+#include <lib/dimm/ddr4/control_word_ddr4_nimbus.H>
 
 namespace mss
 {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,7 @@
 #include <p9_mc_scom_addresses_fld.H>
 #include <mss_attribute_accessors_manual.H>
 #include <generic/memory/lib/utils/scom.H>
-#include <lib/dimm/ddr4/mrs_load_ddr4.H>
+#include <generic/memory/lib/dimm/ddr4/mrs_load_ddr4.H>
 
 namespace mss
 {
