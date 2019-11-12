@@ -49,6 +49,7 @@ HWP_STOPUTIL_PATH += ${ROOTPATH}/src/import/chips/p10/procedures/utils/stopreg/
 EXTRAINCDIR += ${HWP_STOPUTIL_PATH}
 NEST_UTIL_PATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/nest/
 EXTRAINCDIR += ${NEST_UTIL_PATH}
+CUSTOMIZE_HWP_PATH = ${ROOTPATH}/src/import/chips/p10/procedures/hwp/customize
 
 # for attnsvc in pm_common.C
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag/
@@ -71,7 +72,9 @@ OBJS += pm_common.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${HWP_PM_PATH}
-VPATH += ${HWP_LIB_PATH} ${HWP_STOPUTIL_PATH}
+VPATH += ${HWP_LIB_PATH}
+VPATH += ${HWP_STOPUTIL_PATH}
+VPATH += ${CUSTOMIZE_HWP_PATH}
 VPATH += ${NEST_UTIL_PATH}
 #VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/
 
@@ -122,3 +125,4 @@ include ${HWP_PM_PATH}/p10_pm_get_poundw_bucket.mk
 #include ${HWP_PM_PATH}/p9_pm_callout.mk
 #include ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/p9_core_checkstop_handler.mk
 include ${HWP_PM_PATH}/p10_setup_runtime_wakeup_mode.mk
+include ${CUSTOMIZE_HWP_PATH}/p10_qme_customize.mk
