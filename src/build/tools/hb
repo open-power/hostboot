@@ -520,8 +520,27 @@ hb_startsimics()
             STARTSIMCMD+=(sbe_boot_mem=pibmem)
         fi
 
-        echo "cd ${STANDALONE_SIMICS} $$ ${STARTSIMCMD[@]}"
-        cd ${STANDALONE_SIMICS} && "${STARTSIMCMD[@]}"
+        # If '-nre' was passed in as a flag, then do not vexec
+        # also, if $POOL is defined, this indicates are already in
+        # a vexec shell so do not vexec
+        if [ "$*" = "-nre" ] || [ ! -z ${POOL} ]; then
+            VEXEC_STR=""
+        else
+            VEXEC_STR=" vexec"
+
+            # Spawn the vexec to the same type of server we started on
+            RED_HAT_DIST=`sed "s/^.*release \([0-9]*\)\..*$/rh\1/" /etc/redhat-release`
+            if [[ $RED_HAT_DIST == "rh7" ]]; then
+                VEXEC_STR+=" -pool csexec8t-rhel7 "
+            fi
+        fi
+
+        # Create a file (simcmd) to run under vexec
+        echo "cd ${STANDALONE_SIMICS}" > ${STANDALONE_SIMICS}/simcmd
+        echo "${STARTSIMCMD[@]}" >> ${STANDALONE_SIMICS}/simcmd
+        chmod +x ${STANDALONE_SIMICS}/simcmd
+        cat ${STANDALONE_SIMICS}/simcmd
+        ${VEXEC_STR} ${STANDALONE_SIMICS}/simcmd
 
         exit 0
     fi
