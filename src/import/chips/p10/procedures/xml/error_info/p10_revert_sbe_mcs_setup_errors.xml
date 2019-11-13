@@ -30,7 +30,7 @@
         Procedure: p10_revert_sbe_mcs_setup
         No MI targets were found to revert.
       </description>
-      <ffdc>TARGET</ffdc>
+      <ffdc>CHIP</ffdc>
       <callout>
         <target>CODE</target>
         <priority>HIGH</priority>

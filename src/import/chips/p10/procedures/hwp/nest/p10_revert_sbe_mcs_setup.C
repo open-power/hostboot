@@ -119,7 +119,7 @@ p10_revert_sbe_mcs_setup(
     {
         FAPI_ASSERT(false,
                     fapi2::P10_REVERT_SBE_MCS_SETUP_NO_MI_TARGETS_FOUND()
-                    .set_CHIP(i_target)
+                    .set_CHIP(i_target),
                     "No functional MC unit target found on master chip");
     }
 
