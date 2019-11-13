@@ -100,6 +100,7 @@ PPE_PATH := $(ROOTPATH)/src/build/tools/extern/ppe
 .PHONY: ppe
 ppe: $(PPE_PATH)/Makefile
 
+.PHONY: $(PPE_PATH)/Makefile
 $(PPE_PATH)/Makefile:
 	git submodule update --init --checkout -- $(PPE_PATH)
 
@@ -108,6 +109,7 @@ EKB_PATH := $(ROOTPATH)/src/build/tools/extern/ekb
 .PHONY: ekb
 ekb: $(EKB_PATH)/ekb
 
+.PHONY: $(EKB_PATH)/ekb
 $(EKB_PATH)/ekb:
 	git submodule update --init --checkout -- $(EKB_PATH)
 
