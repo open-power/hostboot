@@ -67,16 +67,24 @@ namespace Bootloader
         RC_STD_EX_W_DSISR          = HBBL_COMP_ID | 0x04, /**< Std Except w/ DSISR */
         RC_STD_EX_W_SRR1           = HBBL_COMP_ID | 0x05, /**< Std Except w/ SRR1 */
         RC_HYPE_EXCEPTION          = HBBL_COMP_ID | 0x06, /**< Hypervisor Exception */
+        //termination_rc
         RC_REMOVE_ECC_FAIL         = HBBL_COMP_ID | 0x07, /**< Remove ECC Failed */
         RC_CHK_NULL_BUFFER         = HBBL_COMP_ID | 0x08, /**< Check for NULL Buffr */
+        //termination_rc
         RC_HDR_CHECKSUM_ERR        = HBBL_COMP_ID | 0x09, /**< Hdr Checksum Error */
+        //termination_rc
         RC_CHECK_HEADER_ERR        = HBBL_COMP_ID | 0x0A, /**< Check Header Error */
+        //termination_rc
         RC_PARSE_ENTRIES_ERR       = HBBL_COMP_ID | 0x0B, /**< Parse Entries Error */
+        //termination_rc
         RC_NO_HBB_IN_TOC           = HBBL_COMP_ID | 0x0C, /**< No HBB Sect in TOC */
         RC_PNOR_SECID_OUT_OF_RANGE = HBBL_COMP_ID | 0x0D, /**< Requested PNOR SecId DNE in string array */
         RC_PNOR_NULLPTR            = HBBL_COMP_ID | 0x0E, /**< Requested address to compare is a nullptr */
+        //termination_rc
         RC_BAD_WORK_LEN            = HBBL_COMP_ID | 0x0F, /**< Working length too large */
+        //termination_rc
         RC_LPC_ERR                 = HBBL_COMP_ID | 0x10, /**< LPC Error */
+        //termination_rc
         RC_TOC_NOT_FOUND_ERR       = HBBL_COMP_ID | 0x11, /**< TOC Not Found Error */
     };
 
