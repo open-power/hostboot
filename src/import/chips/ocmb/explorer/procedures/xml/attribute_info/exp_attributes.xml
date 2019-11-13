@@ -410,4 +410,15 @@
         <mssAccessorName>exp_atxdly_b</mssAccessorName>
     </attribute>
 
+    <attribute>
+        <id>ATTR_IS_IBM_SIMULATION</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+            Attribute for IBM cycle simulation with OCMB+
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+    </attribute>
+
 </attributes>
