@@ -138,6 +138,41 @@ enum TorMagicNum
 ///////////////////////////////////////////////////////////////////////////////
 
 
+///////////////////////////////////////////////////////////////////////////////
+//                           MVPD defs - Begin                               //
+//                                                                           //
+
+// The MVPD "Magic" word located in the first 55 byte VHDR header.
+// (We have agreed with Mvpd team to only use 7 bytes of the RT keyword field)
+static const uint64_t MVPD_MAGIC = 0x52540456484452; // "RT.VHDR"
+
+// The below structure partially defines the 55 byte VHDR header of the MVPD.
+// This header is the very first content of any MVPD and contains, among other
+// things, the "magic word" defined above which we use to uniquely identify an
+// MVPD file. Since the presence of this magic word is the only reason we need
+// this structure, all other fields before the magic word are declared as
+// undefined.  Further, since the magic word is an 8-byte entity that is not
+// on an 8-byte boundary, the structure is declared "packed".
+typedef struct
+{
+    uint8_t  undefined[14];
+    uint64_t magic;  // Represents the 7-byte RT keyword field (+ 1-byte)
+} __attribute__((packed)) MvpdHeader_t;
+
+// MVPD chip name (Corresponds to POWER platforms chip type, e.g CID_P10=0xa)
+enum MvpdChipName
+{
+    MVPD_CHIP_NAME_P10 = 0xda,
+};
+
+// MVPD file size
+static const uint32_t SIZE_OF_MVPD_FILE = 64 * 1024;
+
+//                                                                           //
+//                           MVPD defs - End                                 //
+///////////////////////////////////////////////////////////////////////////////
+
+
 //
 // Chip ID list
 //
@@ -147,7 +182,6 @@ enum ChipId
     CID_P10 = 0xA,
 };
 
-#define P10_MVPD_CHIP_NAME 0xda
 
 //
 // Ring markers and pre-defined classes (both used in RING_PROPERTIES to classify rings)

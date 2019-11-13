@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,6 +58,12 @@ namespace fapi2
 ///
 /// @return fapi2::ReturnCode. FAPI_RC_SUCCESS, or failure value.
 ///
+typedef ReturnCode (*getMvpdField_FP_t) ( const MvpdRecord,
+        const MvpdKeyword,
+        const Target<TARGET_TYPE_PROC_CHIP>&,
+        uint8_t* const,
+        uint32_t& );
+
 ReturnCode getMvpdField(const MvpdRecord i_record,
                         const MvpdKeyword i_keyword,
                         const Target<TARGET_TYPE_PROC_CHIP>& i_target,

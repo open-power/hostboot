@@ -34,6 +34,7 @@
 
 namespace fapi2
 {
+
 enum MvpdRecord
 {
     MVPD_RECORD_CRP0 = 0x00,
@@ -126,7 +127,7 @@ enum MvpdKeyword
     MVPD_KEYWORD_CI  = 0x2e,
     MVPD_KEYWORD_LAST, //useful for testcases
     MVPD_KEYWORD_FIRST = MVPD_KEYWORD_VD, //useful for testcases
-    MVPD_KEYWORD_UNDEFINED = 0xff,
+    MVPD_KEYWORD_UNDEFINED = 0xff, //useful for initializing keyword
 };
 }
 

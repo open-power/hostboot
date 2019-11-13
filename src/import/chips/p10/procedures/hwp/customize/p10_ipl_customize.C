@@ -2241,7 +2241,7 @@ ReturnCode p10_ipl_customize (
 
     FAPI_DBG("Mvpd chip name = 0x%x", *fullCIData);
 
-    FAPI_ASSERT((*(fullCIData) == P10_MVPD_CHIP_NAME) && (chipName == CID_P10),
+    FAPI_ASSERT((*(fullCIData) == MVPD_CHIP_NAME_P10) && (chipName == CID_P10),
                 fapi2::XIPC_CHIPNAME_MISMATCH_ERROR().
                 set_CHIP_TARGET(i_procTarget).
                 set_ATTR_NAME(chipName).
