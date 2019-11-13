@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,8 +88,8 @@ namespace CONSOLE
                                   DEVICE_SIO_ADDRESS(SIO::SUART1, 0x30));
                 if (l_errl) { break; }
 
-                // Set SUART1 addr to g_uartBase
-                l_data =(g_uartBase >> 8) & 0xFF;
+                // Set SUART1 addr to g_vuart1Base
+                l_data =(g_vuart1Base >> 8) & 0xFF;
                 l_errl = deviceOp( DeviceFW::WRITE,
                                   TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                                   &(l_data),
@@ -97,7 +97,7 @@ namespace CONSOLE
                                   DEVICE_SIO_ADDRESS(SIO::SUART1, 0x60));
                 if (l_errl) { break; }
 
-                l_data = g_uartBase & 0xFF;
+                l_data = g_vuart1Base & 0xFF;
                 l_errl = deviceOp( DeviceFW::WRITE,
                                   TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                                   &(l_data),
@@ -106,7 +106,7 @@ namespace CONSOLE
                 if (l_errl) { break; }
 
                 // Set the SerIRQ
-                l_data = SERIAL_IRQ;
+                l_data = VUART1_IRQ;
                 l_errl = deviceOp( DeviceFW::WRITE,
                                   TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                                   &(l_data),
@@ -183,7 +183,7 @@ namespace CONSOLE
                                   DEVICE_AHB_SIO_ADDRESS(VUART1_GCTRLB));
                 if(l_err){break;}
 
-                v = (v & ~0xf0u) | ((SERIAL_IRQ << 4));
+                v = (v & ~0xf0u) | ((VUART1_IRQ << 4));
                 l_err = deviceOp(DeviceFW::WRITE,
                                  TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                                  &(v),
@@ -192,7 +192,7 @@ namespace CONSOLE
                 if(l_err){break;}
 
                 /* configure the address */
-                v =  g_uartBase & 0xff;
+                v =  g_vuart1Base & 0xff;
                 l_err = deviceOp(DeviceFW::WRITE,
                                  TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                                  &(v),
@@ -200,7 +200,7 @@ namespace CONSOLE
                                  DEVICE_AHB_SIO_ADDRESS(VUART1_ADDRL));
                 if(l_err){break;}
 
-                v = g_uartBase >> 8;
+                v = g_vuart1Base >> 8;
                 l_err = deviceOp(DeviceFW::WRITE,
                                  TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                                  &(v),
