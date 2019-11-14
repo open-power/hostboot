@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -202,11 +202,15 @@ fapi2::ReturnCode pm_occ_fir_reset(
                            i_target, firinit_done_flag),
              "ERROR: Failed to fetch the entry status of FIRINIT");
 
+    // Here we need to read all the OCC fir registers (action0/1,mask,fir)
+    // and will be stored in the respective class variable. So that below when
+    // we call put function it will be read modify write.
+    FAPI_TRY(l_occFir.get(p9pmFIR::REG_ALL),
+             "ERROR: Failed to get the OCC FIR/MASK/ACTION0/ACTION1 value");
+
     if (firinit_done_flag
         == fapi2::ENUM_ATTR_PM_FIRINIT_DONE_ONCE_FLAG_FIRS_INITED)
     {
-        FAPI_TRY(l_occFir.get(p9pmFIR::REG_FIRMASK),
-                 "ERROR: Failed to get the OCC FIR MASK value");
 
         /* Fetch the OCC FIR MASK; Save it to HWP attribute; clear its contents */
         FAPI_TRY(l_occFir.saveMask(),
