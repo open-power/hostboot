@@ -315,6 +315,14 @@ class PlatPmPPB
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode safe_mode_computation(
             const Pstate i_ps_pstate);
+
+        /// -----------------------------------------------------------------------
+        /// @brief Compute the retention VID value
+        /// @attr[out]      ATTR_RVRM_RVID
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        fapi2::ReturnCode compute_retention_vid();
+
         /// -----------------------------------------------------------------------
         /// @brief Convert pstate to voltage
         /// @param[in]     i_pstate  pstate value that needs to be converted

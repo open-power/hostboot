@@ -113,6 +113,10 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     // Compute the boot/safe values
     FAPI_TRY(l_pmPPB.compute_boot_safe(i_action));
 
+    // Compute the RVRM retention Voltage Id
+    FAPI_DBG("Compute RVID");
+    FAPI_TRY(l_pmPPB.compute_retention_vid());
+
     //We only wish to apply settings if i_action says to
     // this will be executed in istep 10
     if(i_action == APPLY_VOLTAGE_SETTINGS)
@@ -157,6 +161,7 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         if(attrs.attr_avs_bus_num[VDD] != INVALID_BUS_NUM &&
            attrs.attr_avs_bus_num[VCS] != INVALID_BUS_NUM)
         {
+            FAPI_INF("Setting Boot voltage values for VDD and VCS");
             FAPI_TRY(update_VDD_VCS_voltage(i_target,
                                             attrs.attr_avs_bus_num,
                                             attrs.attr_avs_bus_rail_select,
@@ -187,6 +192,7 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         {
             if (attrs.attr_boot_voltage_mv[VDN])
             {
+                FAPI_INF("Setting Boot voltage value for VDN");
                 FAPI_TRY(p10_setup_evid_voltageWrite(i_target,
                                                      attrs.attr_avs_bus_num[VDN],
                                                      attrs.attr_avs_bus_rail_select[VDN],
@@ -213,6 +219,7 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         {
             if (attrs.attr_boot_voltage_mv[VIO])
             {
+                FAPI_INF("Setting Boot voltage value for VDN");
                 FAPI_TRY(p10_setup_evid_voltageWrite(i_target,
                                                      attrs.attr_avs_bus_num[VIO],
                                                      attrs.attr_avs_bus_rail_select[VIO],
@@ -223,6 +230,7 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                          "error from VIO setup function");
             }
         }
+
     }
 
 fapi_try_exit:
@@ -309,7 +317,7 @@ p10_setup_evid_voltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         // Read the present voltage
 
-        // This loop is to ensrue AVSBus Master and Slave are in sync
+        // This loop is to ensure AVSBus Master and Slave are in sync
         l_count = 0;
 
         do

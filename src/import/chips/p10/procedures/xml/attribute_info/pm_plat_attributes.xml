@@ -706,12 +706,12 @@
     <id>ATTR_WOF_THROTTLE_CONTROL_LOOP_DISABLE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-    Disables Workload Optimized Frequency Throttle Control Loop 
+    Disables Workload Optimized Frequency Throttle Control Loop
 
     OFF:Will enable WOF Throttle control loop is validity check pass. If validity
     check fails, then WOF Throttle control loop will be disabled for the present IPL.
 
-    ON: Will disable throttle control loop 
+    ON: Will disable throttle control loop
 
     Producer: Override
 
@@ -752,7 +752,7 @@
     <initToZero/>
     <group>enablement</group>
   </attribute>
-  
+
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_WOF_THROTTLE_CONTROL_LOOP_MODE</id>
@@ -2051,7 +2051,7 @@
     <id>ATTR_RVRM_VID</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    Retention Voltage ID to be applied to STOP 5 cores.
+    Retention Voltage ID to be applied to STOP 3 cores.
 
     Valid values (8mV granularity) -:
         0x00 - 000mV
@@ -2071,7 +2071,7 @@
     will be clipped to 848mV.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
     <default>0x4B</default>
     <overrideOnly/>
     <group>rvrm</group>

@@ -193,14 +193,14 @@ fapi2::ReturnCode qme_init(
     // remove this to use the auto-generated value once it bit shows up in the headers.
     const uint32_t QME_QMCR_STOP_SHIFTREG_OVERRIDE_EN = 29;
 
-    fapi2::buffer<uint64_t> l_qme_flag;
-    fapi2::buffer<uint64_t> l_xcr;
-    fapi2::buffer<uint64_t> l_xsr;
-    fapi2::buffer<uint64_t> l_iar;
-    fapi2::buffer<uint64_t> l_ir;
-    fapi2::buffer<uint64_t> l_dbg;
-    fapi2::buffer<uint64_t> l_qmcr;
-    uint32_t                l_timeout = TIMEOUT_COUNT;
+    fapi2::buffer<uint64_t>     l_qme_flag;
+    fapi2::buffer<uint64_t>     l_xcr;
+    fapi2::buffer<uint64_t>     l_xsr;
+    fapi2::buffer<uint64_t>     l_iar;
+    fapi2::buffer<uint64_t>     l_ir;
+    fapi2::buffer<uint64_t>     l_dbg;
+    fapi2::buffer<uint64_t>     l_qmcr;
+    uint32_t                    l_timeout = TIMEOUT_COUNT;
 
     FAPI_IMP(">> qme_init");
 
@@ -244,6 +244,16 @@ fapi2::ReturnCode qme_init(
                           "ERROR: Failed To Clear QME Active Bit In QME Flag Register" );
             }
         }
+    }
+
+    {
+        fapi2::buffer<uint64_t>     l_rvid;
+        fapi2::ATTR_RVRM_VID_Type   l_rvrm_rvid;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_RVRM_VID, i_target, l_rvrm_rvid));
+        l_rvid.flush<0>().insertFromRight( l_rvrm_rvid, QME_RVCR_RVID_VALUE, QME_RVCR_RVID_VALUE_LEN );
+        FAPI_TRY( putScom( l_eq_mc_or, QME_RVCR, l_rvid ) );
+        FAPI_INF("Setting Retention VID to %02X", l_rvrm_rvid);
     }
 
     FAPI_TRY( initQmeBoot( i_target ), "p10_pm_qme_init Failed To Copy QME Hcode In To QME's SRAM" );
