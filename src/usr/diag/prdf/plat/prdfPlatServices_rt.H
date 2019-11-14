@@ -90,10 +90,12 @@ uint32_t stopBgScrub( ExtensibleChip * i_chip );
  *       Diagnotics procedure.
  *
  * @param  i_chip MCBIST, MCA, MBA, or OCMB chip.
+ * @param  io_sc  The step code data struct.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
-uint32_t resumeBgScrub( ExtensibleChip * i_chip );
+uint32_t resumeBgScrub( ExtensibleChip * i_chip,
+                        STEP_CODE_DATA_STRUCT & io_sc );
 
 /**
  * @brief  Resumes TD scrubbing after it has paused on error.

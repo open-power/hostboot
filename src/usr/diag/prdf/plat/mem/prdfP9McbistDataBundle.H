@@ -36,6 +36,7 @@
 // Platform includes
 #include <prdfMemTdCtlr.H>
 #include <prdfPlatServices.H>
+#include <prdfThresholdUtils.H>
 
 namespace PRDF
 {
@@ -88,8 +89,15 @@ class McbistDataBundle : public DataBundle
     // These are used to limit the number of times a scrub command will stop
     // on a UE or CE on a rank. This is to prevent potential flooding of
     // maintenance UEs or CEs. The threshold will be 16 per rank for each.
-    ScrubResumeCounter iv_ueScrubStopCounter;
-    ScrubResumeCounter iv_ceScrubStopCounter;
+    TimeBasedThreshold iv_ueStopCounter =
+        TimeBasedThreshold( 16, ThresholdResolution::TEN_HOURS );
+    TimeBasedThreshold iv_ceStopCounter =
+        TimeBasedThreshold( 16, ThresholdResolution::TEN_HOURS );
+
+    // If we stop on a UE or a CE, we will need to store the rank that the
+    // error is on so that we can clear our respective thresholds if the
+    // next error we stop on is on a different rank.
+    MemRank iv_ceUeRank;
 
     #endif
 };

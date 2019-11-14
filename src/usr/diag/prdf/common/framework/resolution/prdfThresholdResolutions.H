@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2003,2014              */
+/* Contributors Listed Below - COPYRIGHT 2003,2019                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -100,10 +102,11 @@ class ThresholdResolution : public MaskResolution
 
     enum TimeBase
     {
-        ONE_SEC  = 1,
-        ONE_MIN  = ONE_SEC  * 60,
-        ONE_HOUR = ONE_MIN  * 60,
-        ONE_DAY  = ONE_HOUR * 24,
+        ONE_SEC   = 1,
+        ONE_MIN   = ONE_SEC  * 60,
+        ONE_HOUR  = ONE_MIN  * 60,
+        TEN_HOURS = ONE_HOUR * 10,
+        ONE_DAY   = ONE_HOUR * 24,
 
         NONE = 0xffffffff,
     };

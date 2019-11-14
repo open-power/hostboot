@@ -313,7 +313,7 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
         PRDF_TRAC( PRDF_FUNC "Calling resumeBgScrub<T>(0x%08x)",
                    iv_chip->getHuid() );
 
-        o_rc = resumeBgScrub<T>( iv_chip );
+        o_rc = resumeBgScrub<T>( iv_chip, io_sc );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "resumeBgScrub<T>(0x%08x) failed",
@@ -388,10 +388,48 @@ uint32_t __handleNceEte( ExtensibleChip * i_chip,
         uint32_t count = symData.size();
         switch ( T )
         {
-            case TYPE_MCA:       PRDF_ASSERT( 1 <= count && count <= 2 ); break;
-            case TYPE_MBA:       PRDF_ASSERT( 1 == count               ); break;
-            case TYPE_OCMB_CHIP: PRDF_ASSERT( 1 <= count && count <= 2 ); break;
-            default: PRDF_ASSERT( false );
+            case TYPE_MCA:
+            {
+                PRDF_ASSERT( 1 <= count && count <= 2 );
+                // Increment the CE counter and store the rank we're on,
+                // reset the UE and CE counts if we have stopped on a new rank.
+                ExtensibleChip * mcb = getConnectedParent(i_chip, TYPE_MCBIST);
+                McbistDataBundle * mcbdb = getMcbistDataBundle(mcb);
+                if ( mcbdb->iv_ceUeRank != i_addr.getRank() )
+                {
+                    mcbdb->iv_ceStopCounter.reset();
+                    mcbdb->iv_ueStopCounter.reset();
+                }
+                mcbdb->iv_ceStopCounter.inc( io_sc );
+                mcbdb->iv_ceUeRank = i_addr.getRank();
+
+                break;
+            }
+            case TYPE_MBA:
+            {
+                PRDF_ASSERT( 1 == count );
+                break;
+            }
+            case TYPE_OCMB_CHIP:
+            {
+                PRDF_ASSERT( 1 <= count && count <= 2 );
+                // Increment the UE counter and store the rank we're on,
+                // reset the UE and CE counts if we have stopped on a new rank.
+                OcmbDataBundle * ocmbdb = getOcmbDataBundle(i_chip);
+                if ( ocmbdb->iv_ceUeRank != i_addr.getRank() )
+                {
+                    ocmbdb->iv_ceStopCounter.reset();
+                    ocmbdb->iv_ueStopCounter.reset();
+                }
+                ocmbdb->iv_ceStopCounter.inc( io_sc );
+                ocmbdb->iv_ceUeRank = i_addr.getRank();
+
+                break;
+            }
+            default:
+            {
+                PRDF_ASSERT( false );
+            }
         }
 
         for ( auto & d : symData )
@@ -1607,7 +1645,8 @@ uint32_t MemTdCtlr<TYPE_MBA>::handleRrFo()
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t MemTdCtlr<TYPE_MCBIST>::canResumeBgScrub( bool & o_canResume )
+uint32_t MemTdCtlr<TYPE_MCBIST>::canResumeBgScrub( bool & o_canResume,
+        STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[MemTdCtlr<TYPE_MCBIST>::canResumeBgScrub] "
 
@@ -1638,8 +1677,8 @@ uint32_t MemTdCtlr<TYPE_MCBIST>::canResumeBgScrub( bool & o_canResume )
         // of UEs or CEs that we have stopped on on a rank.
 
         // If we haven't hit CE or UE threshold, check the CE stop conditions
-        if ( !getMcbistDataBundle(iv_chip)->iv_ceScrubStopCounter.atTh() &&
-             !getMcbistDataBundle(iv_chip)->iv_ueScrubStopCounter.atTh() )
+        if ( !getMcbistDataBundle(iv_chip)->iv_ceStopCounter.thReached(io_sc) &&
+             !getMcbistDataBundle(iv_chip)->iv_ueStopCounter.thReached(io_sc) )
         {
             // If the stop conditions aren't set, just break out.
             if ( !(0xf != reg->GetBitFieldJustified(0,4) && // NCE int TH
@@ -1652,7 +1691,7 @@ uint32_t MemTdCtlr<TYPE_MCBIST>::canResumeBgScrub( bool & o_canResume )
         }
 
         // If we haven't hit UE threshold yet, check the UE stop condition
-        if ( !getMcbistDataBundle(iv_chip)->iv_ueScrubStopCounter.atTh() )
+        if ( !getMcbistDataBundle(iv_chip)->iv_ueStopCounter.thReached(io_sc) )
         {
             // If the stop condition isn't set, just break out
             if ( !reg->IsBitSet(35) ) // pause on UE
@@ -1677,7 +1716,8 @@ uint32_t MemTdCtlr<TYPE_MCBIST>::canResumeBgScrub( bool & o_canResume )
 }
 
 template<>
-uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::canResumeBgScrub( bool & o_canResume )
+uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::canResumeBgScrub( bool & o_canResume,
+        STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[MemTdCtlr<TYPE_OCMB_CHIP>::canResumeBgScrub] "
 
@@ -1708,8 +1748,8 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::canResumeBgScrub( bool & o_canResume )
         // of UEs or CEs that we have stopped on on a rank.
 
         // If we haven't hit CE or UE threshold, check the CE stop conditions
-        if ( !getOcmbDataBundle(iv_chip)->iv_ceScrubStopCounter.atTh() &&
-             !getOcmbDataBundle(iv_chip)->iv_ueScrubStopCounter.atTh() )
+        if ( !getOcmbDataBundle(iv_chip)->iv_ceStopCounter.thReached(io_sc) &&
+             !getOcmbDataBundle(iv_chip)->iv_ueStopCounter.thReached(io_sc) )
         {
             // If the stop conditions aren't set, just break out.
             if ( !(0xf != reg->GetBitFieldJustified(0,4) && // NCE int TH
@@ -1722,7 +1762,7 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::canResumeBgScrub( bool & o_canResume )
         }
 
         // If we haven't hit UE threshold yet, check the UE stop condition
-        if ( !getOcmbDataBundle(iv_chip)->iv_ueScrubStopCounter.atTh() )
+        if ( !getOcmbDataBundle(iv_chip)->iv_ueStopCounter.thReached(io_sc) )
         {
             // If the stop condition isn't set, just break out
             if ( !reg->IsBitSet(35) ) // pause on UE
@@ -1747,7 +1787,8 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::canResumeBgScrub( bool & o_canResume )
 }
 
 template<>
-uint32_t MemTdCtlr<TYPE_MBA>::canResumeBgScrub( bool & o_canResume )
+uint32_t MemTdCtlr<TYPE_MBA>::canResumeBgScrub( bool & o_canResume,
+        STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[MemTdCtlr<TYPE_MBA>::canResumeBgScrub] "
 

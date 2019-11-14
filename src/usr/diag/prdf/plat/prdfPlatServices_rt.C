@@ -152,7 +152,8 @@ uint32_t stopBgScrub<TYPE_MCA>( ExtensibleChip * i_chip )
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t resumeBgScrub<TYPE_MCBIST>( ExtensibleChip * i_chip )
+uint32_t resumeBgScrub<TYPE_MCBIST>( ExtensibleChip * i_chip,
+        STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[PlatServices::resumeBgScrub<TYPE_MCBIST>] "
 
@@ -177,13 +178,13 @@ uint32_t resumeBgScrub<TYPE_MCBIST>( ExtensibleChip * i_chip )
 
         // Check UE and CE stop counters to determine stop conditions
         mss::mcbist::stop_conditions<> stopCond;
-        if ( getMcbistDataBundle(i_chip)->iv_ueScrubStopCounter.atTh() )
+        if ( getMcbistDataBundle(i_chip)->iv_ueStopCounter.thReached(io_sc) )
         {
             // If we've reached the limit of UEs we're allowed to stop on
             // per rank, only set the stop on mpe stop condition.
             stopCond.set_pause_on_mpe(mss::ON);
         }
-        else if ( getMcbistDataBundle(i_chip)->iv_ceScrubStopCounter.atTh() )
+        else if (getMcbistDataBundle(i_chip)->iv_ceStopCounter.thReached(io_sc))
         {
             // If we've reached the limit of CEs we're allowed to stop on
             // per rank, set all the normal stop conditions except stop on CE
@@ -208,12 +209,9 @@ uint32_t resumeBgScrub<TYPE_MCBIST>( ExtensibleChip * i_chip )
         }
 
         // Resume the command on the next address.
-        // Note: we have to limit the number of times a command has been stopped
-        // because of a UE/CE. Therefore, we must always resume the command to
-        // the end of the current slave rank so we can reset the UE/CE counts.
         errlHndl_t errl;
         FAPI_INVOKE_HWP( errl, mss::memdiags::continue_cmd, fapiTrgt,
-            mss::mcbist::STOP_AFTER_SLAVE_RANK, stopCond );
+            mss::mcbist::end_boundary::DONT_CHANGE, stopCond );
 
         if ( nullptr != errl )
         {
@@ -233,12 +231,14 @@ uint32_t resumeBgScrub<TYPE_MCBIST>( ExtensibleChip * i_chip )
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t resumeBgScrub<TYPE_MCA>( ExtensibleChip * i_chip )
+uint32_t resumeBgScrub<TYPE_MCA>( ExtensibleChip * i_chip,
+        STEP_CODE_DATA_STRUCT & io_sc )
 {
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
 
-    return resumeBgScrub<TYPE_MCBIST>(getConnectedParent(i_chip, TYPE_MCBIST));
+    return resumeBgScrub<TYPE_MCBIST>(getConnectedParent(i_chip, TYPE_MCBIST),
+                                      io_sc);
 }
 
 //##############################################################################
@@ -378,7 +378,8 @@ uint32_t __resumeScrub<TYPE_MBA>( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t resumeBgScrub<TYPE_MBA>( ExtensibleChip * i_chip )
+uint32_t resumeBgScrub<TYPE_MBA>( ExtensibleChip * i_chip,
+        STEP_CODE_DATA_STRUCT & io_sc )
 {
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
@@ -458,7 +459,8 @@ uint32_t stopBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t resumeBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
+uint32_t resumeBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+        STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[PlatServices::resumeBgScrub<TYPE_OCMB_CHIP>] "
 
@@ -485,13 +487,13 @@ uint32_t resumeBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
 
         // Check UE and CE stop counters to determine stop conditions
         mss::mcbist::stop_conditions<> stopCond;
-        if ( getOcmbDataBundle(i_chip)->iv_ueScrubStopCounter.atTh() )
+        if ( getOcmbDataBundle(i_chip)->iv_ueStopCounter.thReached(io_sc) )
         {
             // If we've reached the limit of UEs we're allowed to stop on
             // per rank, only set the stop on mpe stop condition.
             stopCond.set_pause_on_mpe(mss::ON);
         }
-        else if ( getOcmbDataBundle(i_chip)->iv_ceScrubStopCounter.atTh() )
+        else if ( getOcmbDataBundle(i_chip)->iv_ceStopCounter.thReached(io_sc) )
         {
             // If we've reached the limit of CEs we're allowed to stop on
             // per rank, set all the normal stop conditions except stop on CE
@@ -516,12 +518,9 @@ uint32_t resumeBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
         }
 
         // Resume the command on the next address.
-        // Note: we have to limit the number of times a command has been stopped
-        // because of a UE/CE. Therefore, we must always resume the command to
-        // the end of the current slave rank so we can reset the UE/CE counts.
         errlHndl_t errl;
         FAPI_INVOKE_HWP( errl, mss::memdiags::continue_cmd, fapiTrgt,
-            mss::mcbist::STOP_AFTER_SLAVE_RANK, stopCond );
+            mss::mcbist::end_boundary::DONT_CHANGE, stopCond );
 
         if ( nullptr != errl )
         {
