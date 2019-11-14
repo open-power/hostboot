@@ -51,7 +51,7 @@ else
         echo "Could not set host compilers because env.bash script could not"
         echo "properly parse out the machine's red hat distribution:"
         echo "RED_HAT_DIST: $RED_HAT_DIST"
-        exit 1
+        exit 0
     fi
 fi
 
