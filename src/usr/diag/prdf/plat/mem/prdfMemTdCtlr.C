@@ -369,7 +369,7 @@ uint32_t MemTdCtlr<T>::analyzeCmdComplete( bool & o_errorsFound,
             // of in defaultStep() because a TD procedure could have been run
             // before defaultStep() and it is possible that canResumeBgScrub()
             // could give as a false positive in that case.
-            o_rc = canResumeBgScrub( iv_resumeBgScrub );
+            o_rc = canResumeBgScrub( iv_resumeBgScrub, io_sc );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "canResumeBgScrub(0x%08x) failed",

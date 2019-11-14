@@ -127,6 +127,20 @@ uint32_t handleMemUe<TYPE_MCA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
                           i_chip->getHuid(), i_type );
                 break;
             }
+
+            #ifdef __HOSTBOOT_RUNTIME
+            // Increment the UE counter and store the rank we're on, resetting
+            // the UE and CE counts if we have stopped on a new rank.
+            ExtensibleChip * mcb = getConnectedParent( i_chip, TYPE_MCBIST );
+            McbistDataBundle * mcbdb = getMcbistDataBundle(mcb);
+            if ( mcbdb->iv_ceUeRank != i_addr.getRank() )
+            {
+                mcbdb->iv_ceStopCounter.reset();
+                mcbdb->iv_ueStopCounter.reset();
+            }
+            mcbdb->iv_ueStopCounter.inc( io_sc );
+            mcbdb->iv_ceUeRank = i_addr.getRank();
+            #endif
         }
 
     } while (0);
@@ -180,6 +194,20 @@ uint32_t handleMemUe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                           i_chip->getHuid(), i_type );
                 break;
             }
+
+            #ifdef __HOSTBOOT_RUNTIME
+            // Increment the UE counter and store the rank we're on, resetting
+            // the UE and CE counts if we have stopped on a new rank.
+            OcmbDataBundle * ocmbdb = getOcmbDataBundle(i_chip);
+            if ( ocmbdb->iv_ceUeRank != i_addr.getRank() )
+            {
+                ocmbdb->iv_ceStopCounter.reset();
+                ocmbdb->iv_ueStopCounter.reset();
+            }
+            ocmbdb->iv_ueStopCounter.inc( io_sc );
+            ocmbdb->iv_ceUeRank = i_addr.getRank();
+            #endif
+
         }
 
     } while (0);

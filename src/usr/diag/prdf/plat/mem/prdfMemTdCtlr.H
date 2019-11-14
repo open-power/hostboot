@@ -294,9 +294,11 @@ class MemTdCtlr
     /**
      * @param  o_canResume True, if background scrubbing can be resumed. False,
      *                     if a new background scrub command must be started.
+     * @param  io_sc       The step code data struct.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    uint32_t canResumeBgScrub( bool & o_canResume );
+    uint32_t canResumeBgScrub( bool & o_canResume,
+                               STEP_CODE_DATA_STRUCT & io_sc );
 
     #endif
 

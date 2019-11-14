@@ -721,8 +721,8 @@ uint32_t startBgScrub<TYPE_MCA>( ExtensibleChip * i_mcaChip,
 
     #ifdef __HOSTBOOT_RUNTIME
     // Starting a new command. Clear the UE and CE scrub stop counters
-    getMcbistDataBundle( mcbChip )->iv_ueScrubStopCounter.reset();
-    getMcbistDataBundle( mcbChip )->iv_ceScrubStopCounter.reset();
+    getMcbistDataBundle( mcbChip )->iv_ueStopCounter.reset();
+    getMcbistDataBundle( mcbChip )->iv_ceStopCounter.reset();
     #endif
 
     // Get the stop conditions.
@@ -903,8 +903,8 @@ uint32_t startBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
 
     #ifdef __HOSTBOOT_RUNTIME
     // Starting a new command. Clear the UE and CE scrub stop counters
-    getOcmbDataBundle( mcbChip )->iv_ueScrubStopCounter.reset();
-    getOcmbDataBundle( mcbChip )->iv_ceScrubStopCounter.reset();
+    getOcmbDataBundle( mcbChip )->iv_ueStopCounter.reset();
+    getOcmbDataBundle( mcbChip )->iv_ceStopCounter.reset();
     #endif
 
     // Get the stop conditions.
