@@ -98,8 +98,7 @@ prd_obj += prdfDumpResolution.o
 prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfWriteHomerFirData.o)
 
 # plat/
-# FIXME RTC: 210975
-#prd_obj += prdfPlatServices.o
+prd_obj += prdfPlatServices.o
 prd_obj += prdfRasServices.o
 
 ################################################################################
@@ -122,8 +121,7 @@ prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfPnorFirDataReader.o)
 prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfReadPnorFirData.o)
 
 # plat/
-# FIXME RTC: 210975
-#prd_obj += prdfPlatServices_ipl.o
+prd_obj += prdfPlatServices_ipl.o
 
 endif
 

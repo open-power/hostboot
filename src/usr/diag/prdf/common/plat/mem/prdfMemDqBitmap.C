@@ -487,11 +487,6 @@ uint32_t __getSpareInfo( TargetHandle_t i_trgt, MemRank i_rank,
         {
             o_spareSupported = false;
         }
-        // Centaur/MBA case
-        else if ( TYPE_MBA == trgtType )
-        {
-            o_noSpare     = MEM_EFF_DIMM_SPARE_NO_SPARE;
-        }
         // Generic/MEM_PORT case
         else
         {

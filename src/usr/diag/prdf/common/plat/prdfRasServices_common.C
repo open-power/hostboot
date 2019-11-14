@@ -250,7 +250,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
     #if defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
 
-    iplDiagMode = /* FIXME RTC: 210975 PlatServices::isInMdiaMode() */ 0;
+    iplDiagMode = PlatServices::isInMdiaMode();
 
     #endif
 

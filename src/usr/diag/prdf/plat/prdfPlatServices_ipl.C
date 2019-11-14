@@ -86,7 +86,7 @@ int32_t mdiaSendEventMsg( TargetHandle_t i_trgt,
                  TYPE_OCMB_CHIP == trgtType );
 
     // MDIA must be running.
-    PRDF_ASSERT( /* FIXME RTC: 210975 isInMdiaMode() */ 1 );
+    PRDF_ASSERT( isInMdiaMode() );
 
     // Send command complete to MDIA.
     MDIA::MaintCommandEvent mdiaEvent;
@@ -240,7 +240,7 @@ uint32_t startSfRead<TYPE_MCA>( ExtensibleChip * i_mcaChip,
 {
     #define PRDF_FUNC "[PlatServices::startSfRead<TYPE_MCA>] "
 
-    PRDF_ASSERT( /* FIXME RTC: 210975 isInMdiaMode()*/ 1 ); // MDIA must be running.
+    PRDF_ASSERT( isInMdiaMode() ); // MDIA must be running.
 
     PRDF_ASSERT( nullptr != i_mcaChip );
     PRDF_ASSERT( TYPE_MCA == i_mcaChip->getType() );
@@ -351,7 +351,7 @@ uint32_t startSfRead<TYPE_MEM_PORT>( ExtensibleChip * i_memPort,
 {
     #define PRDF_FUNC "[PlatServices::startSfRead<TYPE_MCA>] "
 
-    PRDF_ASSERT( /* FIXME RTC: 210975 isInMdiaMode() */ 1); // MDIA must be running.
+    PRDF_ASSERT( isInMdiaMode() ); // MDIA must be running.
 
     PRDF_ASSERT( nullptr != i_memPort );
     PRDF_ASSERT( TYPE_MEM_PORT == i_memPort->getType() );
@@ -446,7 +446,7 @@ uint32_t startTdSteerCleanup<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 {
     #define PRDF_FUNC "[PlatServices::startTdSteerCleanup<TYPE_OCMB_CHIP>] "
 
-    PRDF_ASSERT( /* FIXME RTC: 210975 isInMdiaMode()*/ 1 ); // MDIA must be running.
+    PRDF_ASSERT( isInMdiaMode() ); // MDIA must be running.
 
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
@@ -501,7 +501,7 @@ uint32_t startTdSfRead<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
 {
     #define PRDF_FUNC "[PlatServices::startTdSfRead<TYPE_OCMB_CHIP>] "
 
-    PRDF_ASSERT( /* FIXME RTC: 210975 isInMdiaMode()*/ 1 ); // MDIA must be running.
+    PRDF_ASSERT( isInMdiaMode() ); // MDIA must be running.
 
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );

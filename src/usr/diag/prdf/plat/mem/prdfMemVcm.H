@@ -58,7 +58,7 @@ class VcmEvent : public TdEntry
     VcmEvent<T>( ExtensibleChip * i_chip, const MemRank & i_rank,
                  const MemMark & i_mark ) :
         TdEntry(VCM_EVENT, i_chip, i_rank), iv_mark(i_mark),
-        iv_rowRepairEnabled(false /* FIXME RTC: 210975 PlatServices::isRowRepairEnabled<T>(i_chip,i_rank)*/)
+        iv_rowRepairEnabled(PlatServices::isRowRepairEnabled<T>(i_chip,i_rank))
     {
         PRDF_ASSERT( nullptr != i_chip );
         PRDF_ASSERT( T == i_chip->getType() );
@@ -77,10 +77,8 @@ class VcmEvent : public TdEntry
 
         do
         {
-/* FIXME RTC: 210975
             // First, do analysis.
             o_rc = analyzePhase( io_sc, o_done );
-*/
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "analyzePhase() failed on 0x%08x,0x%2x",
@@ -90,10 +88,8 @@ class VcmEvent : public TdEntry
 
             if ( o_done ) break; // Nothing more to do.
 
-/* FIXME RTC: 210975
             // Then, start the next phase of the procedure.
             o_rc = startNextPhase( io_sc );
-*/
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "startNextPhase() failed on 0x%08x,0x%2x",
@@ -158,7 +154,7 @@ class VcmEvent : public TdEntry
 
         io_sc.service_data->AddSignatureList( iv_chip->getTrgt(), signature );
 
-        return 0;/* FIXME RTC: 210974 startCmd();*/
+        return startCmd();
     }
 
     /**
@@ -199,10 +195,8 @@ class VcmEvent : public TdEntry
 
             if ( o_done ) break; // abort the procedure.
 
-/* FIXME RTC: 210975
             // Complete the phase.
             o_rc = handlePhaseComplete( eccAttns, io_sc, o_done );
-*/
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "checkEcc() failed on 0x%08x",

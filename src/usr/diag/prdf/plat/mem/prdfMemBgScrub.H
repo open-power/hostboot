@@ -71,10 +71,8 @@ uint32_t startInitialBgScrub( ExtensibleChip * i_chip )
         PRDF_ASSERT( !ranklist.empty() ); // i_chip configured with no ranks
         MemRank rank = ranklist.front();
 
-/* FIXME RTC: 210975
         // Start background scrubbing.
         o_rc = PlatServices::startBgScrub<T>( i_chip, rank );
-*/
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "startBgScrub(0x%08x,%d) failed",

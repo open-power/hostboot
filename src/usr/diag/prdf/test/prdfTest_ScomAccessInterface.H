@@ -59,7 +59,6 @@ public:
 
     void TestScomInterfaces(void)
     {
-/* FIXME RTC: 210975
         TS_TRACE(ENTER_MRK "-Scom Access Interface Test 1 - Put Scom - Start-");
 
         uint32_t rc = SUCCESS;
@@ -117,7 +116,6 @@ public:
         }while(0);
 
         TS_TRACE(EXIT_MRK "- Scom Access Interface Test 1 - Put Scom - End -");
-*/
     }
 
 };

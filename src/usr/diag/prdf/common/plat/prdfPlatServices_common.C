@@ -115,15 +115,6 @@ int32_t readErepair<TYPE_XBUS>(TargetHandle_t i_rxBusTgt,
     return o_rc;
 }
 
-template<>
-int32_t readErepair<TYPE_DMI>(TargetHandle_t i_rxBusTgt,
-                              std::vector<uint8_t> &o_rxFailLanes,
-                              uint8_t i_clkGrp)
-{
-    int32_t o_rc = SUCCESS;
-    return o_rc;
-}
-
 //------------------------------------------------------------------------------
 template<>
 int32_t clearIOFirs<TYPE_XBUS>(TargetHandle_t i_rxBusTgt)
@@ -152,13 +143,6 @@ int32_t clearIOFirs<TYPE_XBUS>(TargetHandle_t i_rxBusTgt)
 
     #endif
 
-    return o_rc;
-}
-
-template<>
-int32_t clearIOFirs<TYPE_DMI>(TargetHandle_t  i_rxBusTgt)
-{
-    int32_t o_rc = SUCCESS;
     return o_rc;
 }
 
@@ -196,16 +180,6 @@ int32_t powerDownLanes<TYPE_XBUS>( TargetHandle_t i_rxBusTgt,
     return o_rc;
 }
 
-template<>
-int32_t powerDownLanes<TYPE_DMI>(TargetHandle_t i_rxBusTgt,
-                                 const std::vector<uint8_t> &i_rxFailLanes,
-                                 const std::vector<uint8_t> &i_txFailLanes,
-                                 uint8_t i_clkGrp )
-{
-    int32_t o_rc = SUCCESS;
-    return o_rc;
-}
-
 //------------------------------------------------------------------------------
 template<>
 int32_t getVpdFailedLanes<TYPE_XBUS>(TargetHandle_t i_rxBusTgt,
@@ -240,16 +214,6 @@ int32_t getVpdFailedLanes<TYPE_XBUS>(TargetHandle_t i_rxBusTgt,
     }
 
     #endif
-    return o_rc;
-}
-
-template<>
-int32_t getVpdFailedLanes<TYPE_DMI>( TargetHandle_t i_rxBusTgt,
-                                     std::vector<uint8_t> &o_rxFailLanes,
-                                     std::vector<uint8_t> &o_txFailLanes,
-                                     uint8_t i_clkGrp )
-{
-    int32_t o_rc = SUCCESS;
     return o_rc;
 }
 
@@ -550,6 +514,23 @@ template<>
 void getDimmDqAttr<TYPE_DIMM>( TargetHandle_t i_target,
                                uint8_t (&o_dqMapPtr)[DQS_PER_DIMM] )
 {
+    #define PRDF_FUNC "[PlatServices::getDimmDqAttr<TYPE_DIMM>] "
+
+    PRDF_ASSERT( TYPE_DIMM == getTargetType(i_target) );
+
+    const uint8_t DIMM_BAD_DQ_SIZE_BYTES = 80;
+
+    uint8_t tmpData[DIMM_BAD_DQ_SIZE_BYTES];
+
+    if ( !i_target->tryGetAttr<ATTR_CEN_DQ_TO_DIMM_CONN_DQ>(tmpData) )
+    {
+        PRDF_ERR( PRDF_FUNC "Failed to get ATTR_CEN_DQ_TO_DIMM_CONN_DQ" );
+        PRDF_ASSERT( false );
+    }
+
+    memcpy( &o_dqMapPtr[0], &tmpData[0], DQS_PER_DIMM );
+
+    #undef PRDF_FUNC
 } // end function getDimmDqAttr
 
 
@@ -867,15 +848,6 @@ uint32_t isSpareAvailable<TYPE_MEM_PORT>( TARGETING::TargetHandle_t i_trgt,
     MemRank i_rank, uint8_t i_ps, bool & o_spAvail, bool & o_eccAvail );
 
 //------------------------------------------------------------------------------
-
-template<>
-uint32_t queryChnlFail<TYPE_DMI>( ExtensibleChip * i_chip, bool & o_chnlFail )
-{
-    uint32_t o_rc = SUCCESS;
-    return o_rc;
-}
-
-//------------------------------------------------------------------------------
 // Constants defined from Serial Presence Detect (SPD) specs
 //---------------------------------------------------------------------
 const uint8_t SPD_IDX_MODSPEC_COM_REF_BASIC_MEMORY_TYPE = 0x02;
@@ -910,12 +882,9 @@ int32_t  getSpdModspecComRefRawCard(
     uint8_t * l_blobData = nullptr;
 
     do{
-
-/* FIXME RTC: 210975
       // Grab the SPD data for this DIMM
       // This has an FSP and Hostboot implementation
       rc = getSpdData(i_pTarget, l_blobData, l_size);
-*/
       if (rc != SUCCESS)
       {
         break;

@@ -27,30 +27,28 @@ ROOTPATH = ../../../../..
 
 MODULE = testprdf
 
-# FIXME RTC: 210975
-
 #ROOTPATH must be defined before including prdf_hb_common_test.mk
-#include prdf_hb_common_test.mk
+include prdf_hb_common_test.mk
 
 #------------------------------------------------------------------------------
 # paths
 #------------------------------------------------------------------------------
 PRD_SRC_PATH = ${ROOTPATH}/src/usr/diag/prdf
 
-#VPATH += ${PRD_SRC_PATH}/occ_firdata
+VPATH += ${PRD_SRC_PATH}/occ_firdata
 
 #------------------------------------------------------------------------------
 # objects
 #------------------------------------------------------------------------------
-#OBJS += prdfsimMfgSync.o
-#OBJS += prdfsimFspSyncSvc.o
+OBJS += prdfsimMfgSync.o
+OBJS += prdfsimFspSyncSvc.o
 
 ifneq (${HOSTBOOT_RUNTIME},1)
-#OBJS += prdfWriteHomerFirData.o
-#TESTS += prdfTest_WriteHomerFir.H
+OBJS += prdfWriteHomerFirData.o
+TESTS += prdfTest_WriteHomerFir.H
 endif
 
-#TESTS += prdfTest_MfgSync.H
-#TESTS += prdfTest_ScomAccessInterface.H
+TESTS += prdfTest_MfgSync.H
+TESTS += prdfTest_ScomAccessInterface.H
 
 include ${ROOTPATH}/config.mk

@@ -59,10 +59,8 @@ uint32_t MemTdCtlr<T>::initialize()
     {
         if ( iv_initialized ) break; // nothing to do
 
-/* FIXME RTC: 210975
         // Check if broadcast mode is capable on this chip.
         iv_broadcastModeCapable = isBroadcastModeCapable<T>( iv_chip );
-*/
 
         // At this point, the TD controller is initialized.
         iv_initialized = true;
@@ -106,10 +104,8 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
                 break;
             }
 
-/* FIXME RTC: 210975
             // The command reached the end of memory. Send a message to MDIA.
             o_rc = mdiaSendEventMsg(iv_chip->getTrgt(), MDIA::COMMAND_COMPLETE);
-*/
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "mdiaSendEventMsg(0x%08x,COMMAND_COMPLETE) "
@@ -125,10 +121,8 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
                        nextRank.getRank().getMaster(),
                        nextRank.getRank().getSlave() );
 
-/* FIXME RTC: 210975 linker errors
             // Start a super fast command to the end of memory.
             o_rc = startSfRead<T>( nextRank.getChip(), nextRank.getRank() );
-*/
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "startSfRead<T>(0x%08x,m%ds%d) failed",

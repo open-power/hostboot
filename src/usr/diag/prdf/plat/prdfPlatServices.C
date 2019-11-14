@@ -342,7 +342,6 @@ uint32_t getMemAddrRange<TYPE_MCA>( ExtensibleChip * i_chip,
 {
     #define PRDF_FUNC "[PlatServices::getMemAddrRange<TYPE_MCA>] "
 
-/* FIXME RTC: 210975
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
 
@@ -366,7 +365,7 @@ uint32_t getMemAddrRange<TYPE_MCA>( ExtensibleChip * i_chip,
         PRDF_ERR( PRDF_FUNC "unsupported range type %d", i_rangeType );
         PRDF_ASSERT(false);
     }
-*/
+
     return SUCCESS;
 
     #undef PRDF_FUNC
@@ -648,11 +647,9 @@ uint32_t startBgScrub<TYPE_MCA>( ExtensibleChip * i_mcaChip,
 
     #endif
 
-/* FIXME RTC: 210975
     // Get the scrub speed.
     mss::mcbist::speed scrubSpeed = enableFastBgScrub() ? mss::mcbist::LUDICROUS
                                                         : mss::mcbist::BG_SCRUB;
-*/
 
     do
     {
@@ -678,10 +675,8 @@ uint32_t startBgScrub<TYPE_MCA>( ExtensibleChip * i_mcaChip,
 
         // Start the background scrub command.
         errlHndl_t errl = nullptr;
-/* FIXME RTC: 210975
         FAPI_INVOKE_HWP( errl, mss::memdiags::background_scrub, fapiTrgt,
                          stopCond, scrubSpeed, saddr );
-*/
 
         if ( nullptr != errl )
         {
@@ -959,7 +954,6 @@ uint32_t startTdScrub<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
 int32_t restartTraceArray(TargetHandle_t i_tgt)
 {
     int32_t o_rc = SUCCESS;
-/* FIXME RTC: 210975
     errlHndl_t err = nullptr;
     TYPE tgtType = getTargetType(i_tgt);
     proc_gettracearray_args taArgs;
@@ -1014,7 +1008,6 @@ int32_t restartTraceArray(TargetHandle_t i_tgt)
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
-*/
     return o_rc;
 }
 

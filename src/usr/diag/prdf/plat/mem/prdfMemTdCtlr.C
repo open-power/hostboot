@@ -101,30 +101,26 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
         //       to add the capture data to the assert error log. Until then
         //       exit with a bad RC and make the error log predictive.
         // PRDF_ASSERT( isInMdiaMode() ); // MDIA must be running.
-        if ( /* FIXME RTC: 210975 !isInMdiaMode()*/ 0 )
+        if ( !isInMdiaMode() )
         {
             PRDF_ERR( PRDF_FUNC "IPL cmd complete attn outside of MDIA" );
             o_rc = FAIL;
             break;
         }
 
-/* FIXME RTC: 210975
         // Inform MDIA the command has completed and PRD is starting analysis.
         // If MDIA started the command, the reset message will do the cleanup
         // for the super fast command.
         o_rc = mdiaSendEventMsg( iv_chip->getTrgt(), MDIA::RESET_TIMER );
-*/
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "mdiaSendEventMsg(RESET_TIMER) failed" );
             break;
         }
 
-/* FIXME RTC: 210975
         // If PRD started a super fast command, this will do the cleanup for the
         // super fast command.
         o_rc = cleanupSfRead<T>( iv_chip );
-*/
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "cleanupSfRead(0x%08x) failed",
@@ -158,9 +154,7 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         // Move onto the next step in the state machine.
-/* FIXME RTC: 210975
         o_rc = nextStep( io_sc );
-*/
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "nextStep() failed" );
@@ -197,15 +191,13 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
 
         #ifndef __HOSTBOOT_RUNTIME // IPL only
 
-        if ( /* FIXME RTC: 210975 isInMdiaMode() */ 0)
+        if ( isInMdiaMode() )
         {
-/* FIXME RTC: 210975
             // Tell MDIA to skip further analysis on this target.
             uint32_t l_rc = mdiaSendEventMsg( iv_chip->getTrgt(),
                                               MDIA::STOP_TESTING );
             if ( SUCCESS != l_rc )
                 PRDF_ERR( PRDF_FUNC "mdiaSendEventMsg(STOP_TESTING) failed" );
-*/
         }
 
         #endif

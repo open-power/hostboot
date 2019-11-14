@@ -1000,10 +1000,8 @@ int32_t rank( ExtensibleChip * i_chip, MemRank i_rank )
 
         // Get the address range of i_rank.
         MemAddr startAddr, endAddr;
-/* FIXME RTC: 210975
         o_rc = getMemAddrRange<T>( i_chip, i_rank, startAddr, endAddr,
                                    SLAVE_RANK );
-*/
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%02x) failed",
@@ -1051,9 +1049,7 @@ int32_t port( ExtensibleChip * i_chip )
 
         // Get the address range of i_chip.
         MemAddr startAddr, endAddr;
-/* FIXME RTC: 210975
         o_rc = getMemAddrRange<T>( i_chip, startAddr, endAddr );
-*/
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x) failed",
@@ -1114,9 +1110,7 @@ int32_t __getDimmRange( TargetHandle_t i_dimm,
 
         // Get the address range of i_dimm.
         MemAddr startAddr, endAddr;
-/* FIXME RTC: 210975
         o_rc = getMemAddrRange<T>( chip, startAddr, endAddr, dimmSlct );
-*/
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,%d) failed",

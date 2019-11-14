@@ -2252,7 +2252,7 @@ uint32_t TpsEvent<TYPE_MCA>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
 
     io_sc.service_data->AddSignatureList( iv_chip->getTrgt(), signature );
 
-    return 0; /* FIXME RTC: 210975 startCmd();*/
+    return startCmd();
 }
 
 //------------------------------------------------------------------------------
@@ -2272,7 +2272,7 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::startNextPhase(STEP_CODE_DATA_STRUCT & io_sc)
     io_sc.service_data->AddSignatureList( iv_chip->getTrgt(), signature );
     */
 
-    return 0; /* FIXME RTC: 210975 startCmd();*/
+    return startCmd();
 }
 
 //------------------------------------------------------------------------------

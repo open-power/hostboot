@@ -122,14 +122,12 @@ int32_t PostAnalysis( ExtensibleChip * i_chip,
     }
     else
     {
-/* FIXME RTC: 210975
         int32_t l_rc = restartTraceArray(i_chip->GetChipHandle());
         if (SUCCESS != l_rc)
         {
             PRDF_ERR( "[EC PostAnalysis HUID: 0x%08x RestartTraceArray failed",
                       i_chip->GetId());
         }
-*/
 
     }
 #endif
@@ -377,9 +375,7 @@ int32_t CheckCoreCheckstop( ExtensibleChip * i_chip,
             // Don't sleep on first time through.
             if (secondsToSleep != CORECS_SECONDS_TO_SLEEP)
             {
-/* FIXME RTC: 210975
                 PlatServices::milliSleep(1,0); // 1 second
-*/
             }
             secondsToSleep--;
 

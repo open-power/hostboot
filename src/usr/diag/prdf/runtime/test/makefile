@@ -26,11 +26,10 @@
 HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../../../..
 MODULE = testprdf_rt
-# FIXME RTC: 210975
-#VPATH += ../../test
+VPATH += ../../test
 
 #ROOTPATH must be defined before including prdf_hb_common_test.mk
-#include ../../test/prdf_hb_common_test.mk
+include ../../test/prdf_hb_common_test.mk
 
 #------------------------------------------------------------------------------
 # objects

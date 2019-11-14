@@ -437,8 +437,8 @@ uint32_t restoreDramRepairs( TargetHandle_t i_trgt )
         }
 
         uint8_t rankMask = 0, dimmMask = 0;
-        if ( /* FIXME RTC: 210975 SUCCESS != mssRestoreDramRepairs<T>( i_trgt, rankMask,
-                                                  dimmMask)*/ 0 )
+        if ( SUCCESS != mssRestoreDramRepairs<T>( i_trgt, rankMask,
+                                                  dimmMask) )
         {
             // Can't check anything if this doesn't work.
             PRDF_ERR( "[" PRDF_FUNC "] mssRestoreDramRepairs() failed" );

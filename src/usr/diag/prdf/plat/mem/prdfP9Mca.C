@@ -186,18 +186,16 @@ int32_t RcdParityError( ExtensibleChip * i_mcaChip,
     {
         // Recovery is disabled. Issue a reconfig loop. Make the error log
         // predictive if threshold is reached.
-        if ( /* FIXME RTC: 210975 rcdParityErrorReconfigLoop(i_mcaChip->getTrgt())*/ 1 )
+        if ( rcdParityErrorReconfigLoop(i_mcaChip->getTrgt()) )
             io_sc.service_data->setServiceCall();
 
-        if ( /* FIXME RTC: 210975 isInMdiaMode()*/ 1 )
+        if ( isInMdiaMode() )
         {
             SCAN_COMM_REGISTER_CLASS * mask = nullptr;
 
-/* FIXME RTC: 210975
             // Stop any further commands on this MCBIST to avoid subsequent RCD
             // errors or potential AUEs.
             l_rc = mdiaSendEventMsg( mcbChip->getTrgt(), MDIA::STOP_TESTING );
-*/
             if ( SUCCESS != l_rc )
             {
                 PRDF_ERR( PRDF_FUNC "mdiaSendEventMsg(STOP_TESTING) failed" );

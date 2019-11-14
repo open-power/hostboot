@@ -45,7 +45,7 @@ ServiceDataCollector::ServiceDataCollector() :
     ivpDumpRequestChipHandle(NULL),
     causeAttentionType(INVALID_ATTENTION_TYPE)
 {
-    /* FIXME RTC: 210975 PlatServices::getCurrentTime(ivCurrentEventTime);*/
+    PlatServices::getCurrentTime(ivCurrentEventTime);
 }
 
 // ---------------------------------------------------------------

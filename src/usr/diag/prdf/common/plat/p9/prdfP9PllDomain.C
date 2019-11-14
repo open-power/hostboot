@@ -168,10 +168,8 @@ void mfClockResolution( STEP_CODE_DATA_STRUCT &io_sc,
 
         if ( !bothClocksFailed )
         {
-            TargetHandle_t l_ptargetClock = nullptr;
-/* FIXME RTC: 210975
+            TargetHandle_t l_ptargetClock =
                 PlatServices::getActiveRefClk(chipTgt, TYPE_OSCPCICLK);
-*/
 
             // Callout this chip if nothing else.
             if(NULL == l_ptargetClock)

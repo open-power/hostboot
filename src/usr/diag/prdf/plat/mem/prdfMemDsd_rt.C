@@ -226,7 +226,7 @@ uint32_t DsdEvent<T>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
 
     io_sc.service_data->AddSignatureList( iv_chip->getTrgt(), signature );
 
-    return 0; /* FIXME RTC: 210975 startCmd();*/
+    return startCmd();
 }
 
 //------------------------------------------------------------------------------
