@@ -56,15 +56,14 @@ typedef uint8_t   MyBool_t;         // false:0, true:1, undefined:UNDEFINED_BOOL
 #define  UNDEFINED_RING_CLASS      (RingClass_t)0xffff
 #define  UNDEFINED_CHIPLET_TYPE    (ChipletType_t)0xff
 #define  UNDEFINED_CHIP_ID         (ChipId_t)0xff
-#define  INVALID_RING_TYPE         (RingType_t)0xff
+#define  UNDEFINED_RING_INDEX      (uint8_t)0xff
+#define  UNDEFINED_BOOLEAN         (MyBool_t)0xff
 
 #define  UNDEFINED_DD_LEVEL     (uint8_t)0xff
 
 #define  MAX_TOR_RING_OFFSET    (uint16_t)(256*256-1) // Max val of uint16
 
 #define  MAX_RING_NAME_LENGTH   (uint8_t)50
-
-#define  UNDEFINED_BOOLEAN      (MyBool_t)0xff
 
 #define  CHIPLET_ID_MASK       (uint32_t)0xFF000000
 #define  MIN_INSTANCE_ID       (uint8_t)0x01
@@ -88,7 +87,7 @@ typedef struct
     uint8_t   version;     // =TOR_VERSION
     ChipId_t  chipId;      // Value from ChipId enum
     uint8_t   ddLevel;     // Actual DD level of ringSection
-    uint8_t   undefined;
+    uint8_t   rtVersion;   // Ring table version (greater of EKB and Mvpd)
     uint32_t  size;        // Size of ringSection (incl this header).
 } TorHeader_t;
 
@@ -178,18 +177,19 @@ enum ChipId
 enum RingMarker
 {
     RMRK_ROOT        = (RingClass_t)0b0000000000000001, // ENGD root ring marker bit
-    RMRK_EKB_RINGS   = (RingClass_t)0b0000000000000010, // EKB .rings and .dynamic marker bit
-    RMRK_GPTR_OVLY   = (RingClass_t)0b0000000000000100, // Gptr overlay ring marker bit
-    RMRK_TIME        = (RingClass_t)0b0000000000001000, // Time ring marker bit
-    RMRK_CMSK        = (RingClass_t)0b0000000000010000, // CMSK marker bit (setup ring)
-    RMRK_STUMPED     = (RingClass_t)0b0000000000100000, // CMSK stump marker bit (short actual ring)
-    RMRK_MVPD_PDG    = (RingClass_t)0b0000000001000000, // MVPD #G gptr/time ring marker bit
-    RMRK_MVPD_PDP    = (RingClass_t)0b0000000010000000, // MVPD #P pll ring marker bit
-    RMRK_MVPD_PDR    = (RingClass_t)0b0000000100000000, // MVPD #G repr ring marker bit
-    RMRK_MVPD_NEST   = (RingClass_t)0b0000001000000000, // NEST (non-EQ) ring marker bit
-    RMRK_MVPD_EQ     = (RingClass_t)0b0000010000000000, // EQ (non-core) ring marker bit
-    RMRK_MVPD_CORE   = (RingClass_t)0b0000100000000000, // Core ring marker bit
-    RMRK_SCAN_BY_QME = (RingClass_t)0b0001000000000000, // QME scannable ring marker bit
+    RMRK_HAS_DERIVS  = (RingClass_t)0b0000000000000010, // Ring has derivatives, e.g. has buckets
+    RMRK_EKB_RINGS   = (RingClass_t)0b0000000000000100, // EKB .rings and .dynamic marker bit
+    RMRK_GPTR_OVLY   = (RingClass_t)0b0000000000001000, // Gptr overlay ring marker bit
+    RMRK_TIME        = (RingClass_t)0b0000000000010000, // Time ring marker bit
+    RMRK_CMSK        = (RingClass_t)0b0000000000100000, // CMSK marker bit (setup ring)
+    RMRK_STUMPED     = (RingClass_t)0b0000000001000000, // CMSK stump marker bit (short actual ring)
+    RMRK_MVPD_PDG    = (RingClass_t)0b0000000010000000, // MVPD #G gptr/time ring marker bit
+    RMRK_MVPD_PDP    = (RingClass_t)0b0000000100000000, // MVPD #P pll ring marker bit
+    RMRK_MVPD_PDR    = (RingClass_t)0b0000001000000000, // MVPD #G repr ring marker bit
+    RMRK_MVPD_NEST   = (RingClass_t)0b0000010000000000, // NEST (non-EQ) ring marker bit
+    RMRK_MVPD_EQ     = (RingClass_t)0b0000100000000000, // EQ (non-core) ring marker bit
+    RMRK_MVPD_CORE   = (RingClass_t)0b0001000000000000, // Core ring marker bit
+    RMRK_SCAN_BY_QME = (RingClass_t)0b0010000000000000, // QME scannable ring marker bit
 };
 
 //
@@ -267,9 +267,6 @@ typedef struct
 // This is used to Clear the left-most bit
 #define  INSTANCE_RING_MASK  (uint8_t)0x7F
 
-// This is used to mark an invalid ring in the ring properties list
-#define INVALID_RING_OFFSET  (uint8_t)0xFF
-
 
 
 //
@@ -300,15 +297,17 @@ typedef struct
 #define TOR_RING_IS_EMPTY                     INFRASTRUCT_NOOF_RCS + 10
 #define TOR_RING_IS_POPULATED                 INFRASTRUCT_NOOF_RCS + 11
 #define TOR_RING_HAS_NO_TOR_SLOT              INFRASTRUCT_NOOF_RCS + 12
-#define TOR_AMBIGUOUS_API_PARMS               INFRASTRUCT_NOOF_RCS + 13
-#define TOR_SECTION_NOT_FOUND                 INFRASTRUCT_NOOF_RCS + 14
-#define TOR_DD_LEVEL_NOT_FOUND                INFRASTRUCT_NOOF_RCS + 15
-#define TOR_BUFFER_TOO_SMALL                  INFRASTRUCT_NOOF_RCS + 16
-#define TOR_OFFSET_TOO_BIG                    INFRASTRUCT_NOOF_RCS + 17
+#define TOR_RING_HAS_DERIVS                   INFRASTRUCT_NOOF_RCS + 13
+#define TOR_AMBIGUOUS_API_PARMS               INFRASTRUCT_NOOF_RCS + 14
+#define TOR_SECTION_NOT_FOUND                 INFRASTRUCT_NOOF_RCS + 15
+#define TOR_DD_LEVEL_NOT_FOUND                INFRASTRUCT_NOOF_RCS + 16
+#define TOR_BUFFER_TOO_SMALL                  INFRASTRUCT_NOOF_RCS + 17
+#define TOR_OFFSET_TOO_BIG                    INFRASTRUCT_NOOF_RCS + 18
 #define TOR_SCOM_ADDR_NOT_FOUND               INFRASTRUCT_NOOF_RCS + 19
 #define TOR_RING_NAME_NOT_FOUND               INFRASTRUCT_NOOF_RCS + 20
 #define TOR_NO_RINGS_FOR_CHIP                 INFRASTRUCT_NOOF_RCS + 21
 #define TOR_DYN_RING_NOT_FOUND                INFRASTRUCT_NOOF_RCS + 22
+#define TOR_HOLE_RING_ID                      INFRASTRUCT_NOOF_RCS + 23
 
 // This function returns the main ring properties list associated w/the chip ID.
 int ringid_get_ringProps( ChipId_t           i_chipId,
@@ -355,6 +354,20 @@ MyBool_t ringid_is_mvpd_ring( ChipId_t  i_chipId,
 MyBool_t ringid_is_gptr_ring( ChipId_t  i_chipId,
                               RingId_t  i_ringId );
 
+// Check if ring has derivative, eg if it has bucket rings. Note that the actual
+// derivative ring itself, eg the *_bucket_n ring, will *not* be marked as derivative.
+// Only the "root ring", eg that does *not* have the *_bucket_n suffix, will be marked.
+MyBool_t ringid_has_derivs( ChipId_t  i_chipId,
+                            RingId_t  i_ringId );
+
+// Returns the version of the master ring table that EKB (ie, non-MVPD) rings are based on
+uint8_t ringid_get_ring_table_version_ekb( void);
+
+// Returns the version of the master ring table that MVPD rings are based on
+uint8_t ringid_get_ring_table_version_mvpd( void);
+
+// Returns the effective version of the master ring table that HW image rings are based on
+uint8_t ringid_get_ring_table_version_hwimg( void);
 
 #if !defined(__PPE__) && !defined(NO_STD_LIB_IN_PPE) && !defined(WIN32)
 

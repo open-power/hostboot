@@ -232,12 +232,17 @@ int ringid_check_ringId( ChipId_t  i_chipId,
     switch (i_chipId)
     {
         case CID_P10:
-            if ( i_ringId >= P10_RID::NUM_RING_IDS && i_ringId != UNDEFINED_RING_ID )
+            if ( strcmp(P10_RID::RING_PROPERTIES[i_ringId].ringName, "invalid") == 0 )
             {
+                // There are ringId holes. This is harmless. No trace out.
+                rc = TOR_HOLE_RING_ID;
+            }
+            else if ( i_ringId >= P10_RID::NUM_RING_IDS && i_ringId != UNDEFINED_RING_ID )
+            {
+                // This is unlikely to happen, and shouldn't happen, so here we trace out.
                 MY_ERR("ringid_check_ringId(): ringId(=0x%x) >= NUM_RING_IDS(=0x%x) not allowed\n",
                        i_ringId, P10_RID::NUM_RING_IDS);
                 rc = TOR_INVALID_RING_ID;
-                break;
             }
 
             break;
@@ -352,6 +357,50 @@ MyBool_t ringid_is_gptr_ring( ChipId_t  i_chipId,
 }
 
 
+MyBool_t ringid_has_derivs( ChipId_t  i_chipId,
+                            RingId_t  i_ringId )
+{
+    switch (i_chipId)
+    {
+        case CID_P10:
+            if ( P10_RID::RING_PROPERTIES[i_ringId].ringClass & RMRK_HAS_DERIVS )
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        default:
+            MY_ERR("ringid_has_derivs(): Unsupported chipId (=%d) supplied\n", i_chipId);
+            return UNDEFINED_BOOLEAN;
+    }
+
+    return UNDEFINED_BOOLEAN;
+}
+
+
+uint8_t ringid_get_ring_table_version_ekb( void)
+{
+    return P10_RID::RING_TABLE_VERSION_EKB;
+}
+
+
+uint8_t ringid_get_ring_table_version_mvpd( void)
+{
+    return P10_RID::RING_TABLE_VERSION_MVPD;
+}
+
+
+uint8_t ringid_get_ring_table_version_hwimg( void)
+{
+    return P10_RID::RING_TABLE_VERSION_EKB >= P10_RID::RING_TABLE_VERSION_MVPD ?
+           P10_RID::RING_TABLE_VERSION_EKB :
+           P10_RID::RING_TABLE_VERSION_MVPD;
+}
+
+
 #if !defined(__PPE__) && !defined(NO_STD_LIB_IN_PPE) && !defined(WIN32)
 
 int ringidGetRootRingId( ChipId_t    i_chipId,
@@ -456,7 +505,7 @@ int ringidGetRingId2( ChipId_t       i_chipId,
     RingId_t          numRingIds = UNDEFINED_RING_ID;
     RingId_t          iRingId = UNDEFINED_RING_ID; // ringId loop counter
     RingId_t          l_ringId = UNDEFINED_RING_ID;
-    uint8_t           l_idxRing = INVALID_RING_OFFSET;
+    uint8_t           l_idxRing = UNDEFINED_RING_INDEX;
     bool              bFound = false;
     bool              bOverlap = false;
 

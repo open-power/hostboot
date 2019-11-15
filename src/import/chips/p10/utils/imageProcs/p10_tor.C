@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,6 +30,7 @@
 #endif
 
 #include "p10_tor.H"
+#include "p10_ringId.H"
 #include "p10_scan_compression.H"
 #include "p10_infrastruct_help.H"
 
@@ -328,13 +329,14 @@ int tor_access_ring( void*           i_ringSection,  // Ring section ptr
         MY_DBG("TOR header fields\n"
                "  magic:         0x%08x\n"
                "  version:       %d\n"
-               "  chipId:        %d\n"
+               "  chipId:        0x%x\n"
                "  ddLevel:       0x%x\n"
+               "  rtVersion:     %u\n"
                "  size:          %d\n"
                "API parms\n"
                "  i_ddLevel:     0x%x\n",
                torMagic, torHeader->version, torHeader->chipId,
-               torHeader->ddLevel,
+               torHeader->ddLevel, torHeader->rtVersion,
                be32toh(torHeader->size),
                i_ddLevel);
 
@@ -355,31 +357,51 @@ int tor_access_ring( void*           i_ringSection,  // Ring section ptr
         }
     }
 
-    if ( torMagic >> 8 != TOR_MAGIC ||
-         // Check that we're not trying to be "forward" compatible to a newer image
-         torHeader->version > TOR_VERSION ||
-         // Make sure version is set
-         torHeader->version == 0 ||
-         // Check for valid chip ID and for valid ring ID
-         ringid_check_ringId(torHeader->chipId, i_ringId) != INFRASTRUCT_RC_SUCCESS )
+    // Check for valid ring ID and chip ID
+    rc = ringid_check_ringId(torHeader->chipId, i_ringId);
+
+    if ( rc != TOR_SUCCESS )
     {
-        MY_ERR("Invalid TOR header or ringId:\n"
-               "  magic:       0x%08x (TOR_MAGIC: 0x%08x)\n"
-               "  version:     %d (TOR_VERSION: %d)\n"
-               "  chipId:      %d\n"
-               "  ringId:      0x%x\n"
-               "  ddLevel:     0x%x  (requested ddLevel=0x%x)\n"
+        if ( rc == TOR_HOLE_RING_ID )
+        {
+            // "hole" ring. Not an error. No info to retrieve.
+            return rc;
+        }
+        else if ( rc == TOR_INVALID_RING_ID || rc == TOR_INVALID_CHIP_ID )
+        {
+            MY_ERR("ERROR: tor_access_ring(): ringid_check_ringId() failed w/rc=0x%08x\n"
+                   " So either invalid ringId(=0x%x) or invalid chipId(=0x%x)\n",
+                   rc, i_ringId, torHeader->chipId);
+
+            return rc;
+        }
+    }
+
+    // Check TOR header
+    const uint8_t RING_TABLE_VERSION_HWIMG = ringid_get_ring_table_version_hwimg();
+
+    if ( torMagic >> 8 != TOR_MAGIC ||
+         torHeader->version != TOR_VERSION ||
+         torHeader->rtVersion > RING_TABLE_VERSION_HWIMG )
+    {
+        MY_ERR("TOR header check failure:\n"
+               "  magic:       0x%08x (!= TOR_MAGIC: 0x%08x)\n"
+               "  version:     %u (!= TOR_VERSION: %u)\n"
+               "  rtVersion:   %u (> RING_TABLE_VERSION_HWIMG: %u)\n"
                "  size:        %d\n",
-               torMagic, TOR_MAGIC, torHeader->version, TOR_VERSION,
-               torHeader->chipId, i_ringId, torHeader->ddLevel,
-               i_ddLevel, be32toh(torHeader->size));
+               torMagic, TOR_MAGIC,
+               torHeader->version, TOR_VERSION,
+               torHeader->rtVersion, RING_TABLE_VERSION_HWIMG,
+               be32toh(torHeader->size));
         return TOR_HEADER_CHECK_FAILURE;
     }
 
+    // Check ddLevel
     if ( i_ddLevel != torHeader->ddLevel &&
          i_ddLevel != UNDEFINED_DD_LEVEL )
     {
-        MY_ERR("Requested DD level (=0x%x) doesn't match TOR header DD level (=0x%x) nor UNDEFINED_DD_LEVEL (=0x%x) \n",
+        MY_ERR("Requested DD level (=0x%x) doesn't match TOR header DD level (=0x%x) nor"
+               " UNDEFINED_DD_LEVEL (=0x%x)\n",
                i_ddLevel, torHeader->ddLevel, UNDEFINED_DD_LEVEL);
         return TOR_DD_LEVEL_NOT_FOUND;
     }
@@ -393,7 +415,7 @@ int tor_access_ring( void*           i_ringSection,  // Ring section ptr
                                       i_dbgl );
 
     // Explanation to the "list" of RCs that we exclude from tracing out:
-    // TOR_RING_IS_EMPTY:  Normal scenario (will occur frequently)
+    // TOR_RING_IS_EMPTY:  Normal scenario (will occur frequently).
     // TOR_RING_HAS_NO_TOR_SLOT:  Will be caused a lot by ipl_image_tool, but is an error if
     //                     called by any other user.
     // TOR_INVALID_CHIPLET_TYPE:  Also somewhat normal scenario since the caller should,
@@ -444,7 +466,9 @@ int tor_get_single_ring ( void*         i_ringSection,  // Ring section ptr
                           i_dbgl );
 
     // Explanation to the "list" of RCs that we exclude from tracing out:
-    // TOR_RING_IS_EMPTY:  Normal scenario (will occur frequently)
+    // TOR_RING_IS_EMPTY:  Normal scenario (will occur frequently).
+    // TOR_HOLE_RING_ID:   Normal scenario when rings are removed from the ring list
+    //                     and leaves behind a "hole".
     // TOR_INVALID_CHIPLET_TYPE:  Also somewhat normal scenario since the caller should,
     //                     in princple, be able to mindlessly request a ringId without
     //                     having to figure out first if that ringId belongs to a chiplet
@@ -454,6 +478,7 @@ int tor_get_single_ring ( void*         i_ringSection,  // Ring section ptr
     if (rc)
     {
         if ( rc != TOR_RING_IS_EMPTY &&
+             rc != TOR_HOLE_RING_ID &&
              rc != TOR_INVALID_CHIPLET_TYPE )
         {
             MY_ERR("ERROR : tor_get_single_ring() : tor_access_ring() failed w/rc=0x%08x\n", rc);
@@ -484,6 +509,13 @@ int tor_append_ring( void*           i_ringSection,      // Ring section ptr
     uint32_t   rs4Size = 0;
     TorRingOffset_t   ringOffset16;
     uint32_t   torOffsetSlot;
+
+    if ( ringid_has_derivs( ((TorHeader_t*)i_ringSection)->chipId, i_ringId) )
+    {
+        MY_DBG("Can't append ringId=0x%x since it has derivatives\n",
+               i_ringId);
+        return TOR_RING_HAS_DERIVS;
+    }
 
     rc = tor_access_ring( i_ringSection,
                           i_ringId,
@@ -589,8 +621,8 @@ int tor_skeleton_generation( void*         io_ringSection,
     torHeader->version = i_torVersion;
     torHeader->chipId  = i_chipId;
     torHeader->ddLevel = i_ddLevel;
+    torHeader->rtVersion = ringid_get_ring_table_version_hwimg();
     //torHeader->size = Updated after creating TOR skeleton
-    torHeader->undefined = 0;
 
     // Init local running ring section size
     ringSectionSize = sizeof(TorHeader_t);
@@ -759,24 +791,50 @@ int dyn_get_ring( void*          i_ringSection,
                   uint32_t&      io_ringBufSize, // Query, ring size, or max buffer size
                   uint32_t       i_dbgl )
 {
+    int  rc = TOR_SUCCESS;
     TorHeader_t* torHeader = (TorHeader_t*)i_ringSection;
     uint32_t ringSectionLoc = 0; // Tracks the position inside the ringSection
     CompressedScanData* nextRs4 = NULL;
     uint32_t rs4Size = 0;
     MyBool_t bFound = UNDEFINED_BOOLEAN;
 
+    // Check for valid ring ID and chip ID
+    rc = ringid_check_ringId(torHeader->chipId, i_ringId);
+
+    if ( rc != TOR_SUCCESS )
+    {
+        if ( rc == TOR_HOLE_RING_ID )
+        {
+            // "hole" ring. Not an error. No info to retrieve.
+            return rc;
+        }
+        else if ( rc == TOR_INVALID_RING_ID || rc == TOR_INVALID_CHIP_ID )
+        {
+            MY_ERR("ERROR: dyn_get_ring(): ringid_check_ringId() failed w/rc=0x%08x\n"
+                   " So either invalid ringId(=0x%x) or invalid chipId(=0x%x)\n",
+                   rc, i_ringId, torHeader->chipId);
+
+            return rc;
+        }
+    }
+
     // TOR header check
+    const uint8_t RING_TABLE_VERSION_HWIMG = ringid_get_ring_table_version_hwimg();
+
     if ( be32toh(torHeader->magic) != TOR_MAGIC_DYN ||
          torHeader->version != TOR_VERSION ||
-         torHeader->ddLevel != i_ddLevel )
+         torHeader->ddLevel != i_ddLevel ||
+         torHeader->rtVersion != RING_TABLE_VERSION_HWIMG )
     {
-        MY_ERR("ERROR in dyn_get_ring: TOR header check failed as follows:\n"
+        MY_ERR("ERROR: dyn_get_ring(): TOR header check failed as follows:\n"
                " torHeader->magic(=0x%08x) != TOR_MAGIC_DYN(=0x%08x)\n"
                " torHeader->version(=%u) != TOR_VERSION(=%u)\n"
-               " torHeader->ddLevel(=0x%02x) != i_ddLevel(=0x%02x)\n",
+               " torHeader->ddLevel(=0x%02x) != i_ddLevel(=0x%02x)\n"
+               " torHeader->rtVersion(=%u) != RING_TABLE_VERSION_HWIMG(=%u)\n",
                be32toh(torHeader->magic), TOR_MAGIC_DYN,
                torHeader->version, TOR_VERSION,
-               torHeader->ddLevel, i_ddLevel);
+               torHeader->ddLevel, i_ddLevel,
+               torHeader->rtVersion, RING_TABLE_VERSION_HWIMG);
         return TOR_HEADER_CHECK_FAILURE;
     }
 

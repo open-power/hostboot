@@ -249,8 +249,8 @@ fapi2::ReturnCode get_overlays_ring(
     // As we'll be using tor_get_single_ring() with P9_XIP_MAGIC_SEEPROM
     // to identify TOR layout for overlays/overrides sections we have to define
     // following variables (though unused in this context) to support the API.
-    uint8_t  l_instanceId = 0; // Unused param (instance id)
-    uint32_t l_ringBlockSize = 0xFFFFFFFF;  // Unused param (ringBlockSize)
+    uint8_t  l_chipletId = 0; // Unused param
+    uint32_t l_ringBlockSize = 0xFFFFFFFF;  // Unused param
 
     FAPI_DBG("Entering get_overlays_ring");
 
@@ -259,7 +259,7 @@ fapi2::ReturnCode get_overlays_ring(
                i_overlaysSection,
                i_ddLevel,
                i_ringId,
-               l_instanceId,
+               l_chipletId,
                io_ringBuf2,  //Has RS4 Gptr overlay ring on return
                l_ringBlockSize );
 
@@ -686,7 +686,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
     fapi2::current_err  = fapi2::FAPI2_RC_SUCCESS;
     int        l_rc = INFRASTRUCT_RC_SUCCESS;;
 
-    FAPI_INF("_fetch_and_insert_vpd_ring: (ringId,chipletSel) = (0x%x,0x%08x)",
+    FAPI_DBG("_fetch_and_insert_vpd_ring: (ringId,chipletSel) = (0x%x,0x%08x)",
              i_ringId, i_chipletSel);
 
     uint32_t     l_vpdRingSize = i_vpdRingSize;
@@ -896,10 +896,8 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                      "tor_append_ring() failed in sysPhase=%d w/rc=%d for ringId=0x%x",
                      i_sysPhase, l_rc, i_ringId );
 
-        FAPI_INF("Successfully added VPD ring: (ringId,chipletId)=(0x%02x,0x%02x)",
-                 i_ringId, l_chipletId);
-
-        FAPI_DBG("(After tor_append_ring) io_ringSectionSize = %d", io_ringSectionSize);
+        FAPI_IMP("Successfully appended VPD ring, (ringId,chipletId)=(0x%x,0x%02x), and now ringSectionSize=%u",
+                 i_ringId, l_chipletId, io_ringSectionSize);
     }
     else if ((uint32_t)l_fapiRc == RC_MVPD_RING_NOT_FOUND)
     {
@@ -937,8 +935,8 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
         // getMvpdRing failed for some other reason aside from above handled cases.
         if (l_fapiRc != fapi2::FAPI2_RC_SUCCESS)
         {
-            FAPI_ERR("_fetch_and_insert_vpd_ring(): getMvpdRing failed "
-                     " w/rc=0x%08X", (uint64_t)l_fapiRc);
+            FAPI_ERR("_fetch_and_insert_vpd_ring(): getMvpdRing failed w/rc=0x%08X",
+                     (uint64_t)l_fapiRc);
             fapi2::current_err = l_fapiRc;
         }
     }
@@ -1054,7 +1052,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
     uint8_t l_ringStatusInMvpd            = RING_SCAN;
     bool    l_bImgOutOfSpace              = false;
     uint8_t l_eqNumWhenOutOfSpace         = 0xF;   // Assign invalid value to check for correctness of value when used
-    RingType_t l_ringType = INVALID_RING_TYPE;
+    RingType_t l_ringType = 0xff; // 0:COMMON, 1:INSTANCE
 
     // Initialize activeCoreMask to be filled up with EC column filling as it progresses
     uint32_t l_activeCoreMask  = 0x0;
@@ -1108,10 +1106,12 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
 
     for ( l_ringId = 0; l_ringId < NUM_RING_IDS; l_ringId++ )
     {
+
         l_ringClass = l_ringProps[l_ringId].ringClass;
 
-        if ( ( l_ringClass & RCLS_MVPD_MASK ) &&
-             ( (l_ringClass & RCLS_MVPD_PDR_EQ) != RCLS_MVPD_PDR_EQ ) &&
+        if ( ( l_ringClass != UNDEFINED_RING_CLASS )  &&
+             ( l_ringClass & RCLS_MVPD_MASK )  &&
+             ( (l_ringClass & RCLS_MVPD_PDR_EQ) != RCLS_MVPD_PDR_EQ )  &&
              ( (l_ringClass & RCLS_MVPD_PDR_CORE) != RCLS_MVPD_PDR_CORE ) )
         {
             l_rc = ringid_get_chipletProps( CID_P10,
@@ -1220,7 +1220,8 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
             //
             l_ringClass = l_ringProps[l_ringId].ringClass;
 
-            if ( ( (l_ringClass & RCLS_MVPD_PDR_EQ) == RCLS_MVPD_PDR_EQ )  &&
+            if ( ( l_ringClass != UNDEFINED_RING_CLASS )  &&
+                 ( (l_ringClass & RCLS_MVPD_PDR_EQ) == RCLS_MVPD_PDR_EQ )  &&
                  ( i_sysPhase == SYSPHASE_HB_SBE  ||
                    ( i_sysPhase == SYSPHASE_RT_QME && (l_ringClass & RMRK_SCAN_BY_QME) ) ) )
             {
@@ -1251,7 +1252,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                 l_chipletId = l_chipletDataEQ->chipletBaseId + eq;
                 l_chipletSel = ((uint32_t)l_chipletId) << 24;
 
-                FAPI_DBG("EQ=%d; instanceId=0x%02x, ringName:%s",
+                FAPI_DBG("EQ=%d; chipletId=0x%02x, ringName:%s",
                          eq, l_chipletId, l_ringProps[l_ringId].ringName);
 
                 // Update for ring in scan mode
@@ -1333,7 +1334,8 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                 //
                 l_ringClass = l_ringProps[l_ringId].ringClass;
 
-                if ( ( (l_ringClass & RCLS_MVPD_PDR_CORE) == RCLS_MVPD_PDR_CORE )  &&
+                if ( ( l_ringClass != UNDEFINED_RING_CLASS )  &&
+                     ( (l_ringClass & RCLS_MVPD_PDR_CORE) == RCLS_MVPD_PDR_CORE )  &&
                      ( i_sysPhase == SYSPHASE_HB_SBE  ||
                        ( i_sysPhase == SYSPHASE_RT_QME && (l_ringClass & RMRK_SCAN_BY_QME) ) ) )
                 {
@@ -1657,8 +1659,9 @@ fapi2::ReturnCode process_base_and_dynamic_rings(
     memset(dataDyn, 0, maxRingBufSize);
     memset(dataDynAcc, 0, maxRingBufSize);
 
-    FAPI_DBG("Entering process_base_and_dynamic_rings i_numberOfFeatures is %d and i_ringId is 0x%x", i_numberOfFeatures,
-             i_ringId);
+    FAPI_DBG("Entering process_base_and_dynamic_rings i_numberOfFeatures is %d and i_ringId"
+             " is 0x%x",
+             i_numberOfFeatures, i_ringId);
 
     //
     // 1st: Get/accumulate the Dynamic ring(s)
@@ -1806,7 +1809,8 @@ fapi2::ReturnCode process_base_and_dynamic_rings(
                 }
             }
         }
-        else if(l_rc != TOR_DYN_RING_NOT_FOUND)
+        else if( l_rc != TOR_DYN_RING_NOT_FOUND &&
+                 l_rc != TOR_HOLE_RING_ID )
         {
             FAPI_ASSERT( false,
                          fapi2::XIPC_DYNAMIC_RING_ERROR().
@@ -1837,6 +1841,7 @@ fapi2::ReturnCode process_base_and_dynamic_rings(
 
     FAPI_ASSERT( l_rc == TOR_SUCCESS ||
                  l_rc == TOR_RING_IS_EMPTY ||
+                 l_rc == TOR_HOLE_RING_ID ||
                  l_rc == TOR_INVALID_CHIPLET_TYPE,  // We will hit this in RT_QME phase
                  fapi2::XIPC_BASE_GET_SINGLE_RING_ERROR().
                  set_CHIP_TARGET(i_procTarget).
@@ -1872,9 +1877,9 @@ fapi2::ReturnCode process_base_and_dynamic_rings(
 
         // Note that apply_overlay_ring() will set iv_selector = UNDEFINED_RS4_SELECTOR.
         FAPI_TRY( apply_overlay_ring( i_procTarget,
-                                      finalRs4, //finalRs4 = baseRs4 = io_ringBuf1 will have final ring
+                                      finalRs4, //finalRs4=baseRs4=io_ringBuf1 will have final ring
                                       i_ringBuf2,
-                                      dataDynAcc, //dataDynAcc = i_ringBuf3 has raw Dynamic ring
+                                      dataDynAcc, //dataDynAcc=i_ringBuf3 has raw Dynamic ring
                                       dynUncmpSize,
                                       (CompressedScanData*)finalRs4, //Base is a good ref
                                       finalTypeField ),
@@ -1999,17 +2004,16 @@ ReturnCode p10_ipl_customize (
     uint32_t        l_sizeMvpdCIField = 0;
     uint8_t*        l_fullCIData = nullptr;
 
-    uint64_t        featureVec = 0;
-    fapi2::ATTR_SYSTEM_IPL_PHASE_Type l_attr_system_ipl_phase;
-    fapi2::ATTR_CONTAINED_IPL_TYPE_Type l_attr_contained_ipl_type;
+    uint64_t        featureVec = 0; // Dynamic inits feature vector from platform attribute
+    fapi2::ATTR_SYSTEM_IPL_PHASE_Type l_attrSystemIplPhase;
+    fapi2::ATTR_CONTAINED_IPL_TYPE_Type l_attrContainedIplType;
     RingId_t        ringId = UNDEFINED_RING_ID;
     std::map< Rs4Selector_t,  Rs4Selector_t> idxFeatureMap;
     std::map<RingId_t, uint64_t> ringIdFeatureVecMap;
     Rs4Selector_t   numberOfFeatures = 0;
     void*           baseRingSection = NULL;
     void*           dynamicRingSection = NULL;
-    TorHeader_t*    torHeader;
-    bool            bFeature = false;
+    TorHeader_t*    torHeaderBase;
     uint32_t        customRingSectionSize = 0;
 
     FAPI_IMP ("Entering p10_ipl_customize w/sysPhase=%d...", i_sysPhase);
@@ -2673,7 +2677,7 @@ ReturnCode p10_ipl_customize (
                          set_CHIP_TARGET(i_procTarget).
                          set_SYSPHASE(i_sysPhase).
                          set_OCCURRENCE(1),
-                         "Caller bug: Caller supplied unsupported value of sysPhase (=%d)",
+                         "Caller bug: Caller supplied unsupported value of sysPhase=%u (Occurrence 1)",
                          i_sysPhase );
 
             break;
@@ -2691,7 +2695,7 @@ ReturnCode p10_ipl_customize (
                  " There's no TOR.",
                  i_sysPhase, attrDdLevel, mainSectionID, subSectionID );
 
-    // Point baseRingSection to either the DD specific ring section in the SBE
+    // Point baseRingSection to the DD specific ring section in either the SBE
     // or in the QME image.
     baseRingSection = (void*)((uint8_t*)i_hwImage + iplImgSection.iv_offset);
 
@@ -2703,13 +2707,13 @@ ReturnCode p10_ipl_customize (
     // System phase:       All phases
     //////////////////////////////////////////////////////////////////////////
 
-    torHeader  = (TorHeader_t*)baseRingSection;
+    torHeaderBase  = (TorHeader_t*)baseRingSection;
 
     l_rc = tor_skeleton_generation( io_ringSectionBuf,
-                                    be32toh(torHeader->magic),
-                                    torHeader->version,
+                                    be32toh(torHeaderBase->magic),
+                                    torHeaderBase->version,
                                     attrDdLevel,
-                                    torHeader->chipId );
+                                    torHeaderBase->chipId );
 
     FAPI_ASSERT( l_rc == 0,
                  fapi2::XIPC_SKELETON_GEN_FAILED().
@@ -2753,34 +2757,34 @@ ReturnCode p10_ipl_customize (
 
     l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_IPL_PHASE,
                               FAPI_SYSTEM,
-                              l_attr_system_ipl_phase);
+                              l_attrSystemIplPhase);
 
     FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
-                 fapi2::XIPC_XIP_API_MISC_ERROR().
+                 fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
                  set_CHIP_TARGET(i_procTarget).
-                 set_OCCURRENCE(5),
+                 set_OCCURRENCE(6),
                  "Failed to retrieve the system IPL phase attribute" );
 
     l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_CONTAINED_IPL_TYPE,
                               FAPI_SYSTEM,
-                              l_attr_contained_ipl_type);
+                              l_attrContainedIplType);
 
     FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
-                 fapi2::XIPC_XIP_API_MISC_ERROR().
+                 fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
                  set_CHIP_TARGET(i_procTarget).
-                 set_OCCURRENCE(6),
+                 set_OCCURRENCE(7),
                  "Failed to retrieve the contained IPL type attribute" );
 
-    if ((l_attr_system_ipl_phase == fapi2::ENUM_ATTR_SYSTEM_IPL_PHASE_HB_IPL) &&
+    if ((l_attrSystemIplPhase == fapi2::ENUM_ATTR_SYSTEM_IPL_PHASE_HB_IPL) &&
         (i_sysPhase == SYSPHASE_HB_SBE))
     {
         featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_HOSTBOOT;
     }
-    else if (l_attr_system_ipl_phase == fapi2::ENUM_ATTR_SYSTEM_IPL_PHASE_CONTAINED_IPL)
+    else if (l_attrSystemIplPhase == fapi2::ENUM_ATTR_SYSTEM_IPL_PHASE_CONTAINED_IPL)
     {
         featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_COMMON_CONTAINED;
 
-        if (l_attr_contained_ipl_type == fapi2::ENUM_ATTR_CONTAINED_IPL_TYPE_CACHE)
+        if (l_attrContainedIplType == fapi2::ENUM_ATTR_CONTAINED_IPL_TYPE_CACHE)
         {
             featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_CACHE_CONTAINED;
         }
@@ -2799,9 +2803,9 @@ ReturnCode p10_ipl_customize (
                               featureVec);
 
     FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
-                 fapi2::XIPC_XIP_API_MISC_ERROR().
+                 fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
                  set_CHIP_TARGET(i_procTarget).
-                 set_OCCURRENCE(7),
+                 set_OCCURRENCE(8),
                  "Failed to set the dynamic init feature vector attribute" );
 
     l_rc = p9_xip_get_section(i_hwImage, P9_XIP_SECTION_HW_DYNAMIC, &iplImgSection, attrDdLevel);
@@ -2821,27 +2825,22 @@ ReturnCode p10_ipl_customize (
 
     for(Rs4Selector_t feature = 0; feature < 64; feature++)
     {
-        bFeature = featureVec & (0x8000000000000000 >> feature);
-
-        if(bFeature)
+        if( featureVec & (0x8000000000000000 >> feature) )
         {
             idxFeatureMap.insert({numberOfFeatures, feature});
             numberOfFeatures++;
-            bFeature = false;
         }
     }
 
-//CMO-20190825: Is it reasonable to mindlessly run through all ringId when we know
-//              which ringId to consider for the given sysPhase?  It's ok for the
-//              HB_SBE phase, but not for the RT_QME phase because we will get
-//              TOR_INVALID_CHIPLET_TYPE a lot and thus have to mask that error
-//              but this comes at expense of the protection it gives us.  For now,
-//              we will be mindless, but this should probably be changed.
+//CMO-20190825: For the RT_QME phase we will get TOR_INVALID_CHIPLET_TYPE a lot
+//              here because we cycle through all the chiplets, when we really only
+//              shold consider the EQ chiplet for RT_QME.  For now, we will be
+//              mindless, but this should probably be changed.
     for(ringId = 0; ringId < NUM_RING_IDS; ringId++)
     {
         // Only process non-Mvpd and GPTR rings (which are all assumed to be Common rings)
-        if ( ringid_is_gptr_ring(torHeader->chipId, ringId) == false &&
-             ringid_is_mvpd_ring(torHeader->chipId, ringId) == true )
+        if ( ringid_is_gptr_ring(torHeaderBase->chipId, ringId) == false &&
+             ringid_is_mvpd_ring(torHeaderBase->chipId, ringId) == true )
         {
             continue;
         }
@@ -2878,7 +2877,7 @@ ReturnCode p10_ipl_customize (
 
             FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS ||
                          l_rc == TOR_INVALID_CHIPLET_TYPE ||
-                         l_rc == TOR_RING_IS_POPULATED,
+                         l_rc == TOR_RING_HAS_DERIVS,
                          fapi2::XIPC_TOR_APPEND_RING_FAILED().
                          set_CHIP_TARGET(i_procTarget).
                          set_TOR_RC(l_rc).
@@ -2886,20 +2885,20 @@ ReturnCode p10_ipl_customize (
                          set_OCCURRENCE(1),
                          "tor_append_ring() failed in "
                          "process_base_and_dynamic_rings w/rc=%d "
-                         "for ringId=0x%x", l_rc, ringId );
+                         "for ringId=0x%x",
+                         l_rc, ringId );
 
-        }
-        else
-        {
-            FAPI_DBG("No Rings found");//Will remove later
-            continue;
+            FAPI_DBG("A Base or Dynamic ring w/ringId=0x%x was either appended or skipped (if"
+                     " deriv ring or invalid chiplet) and now ringSectionSize=%u",
+                     ringId, be32toh(((TorHeader_t*)io_ringSectionBuf)->size));
         }
     }
 
-    for(std::map<RingId_t, uint64_t>::iterator it = ringIdFeatureVecMap.begin(); it != ringIdFeatureVecMap.end();
-        it++)
+    for ( std::map<RingId_t, uint64_t>::iterator it = ringIdFeatureVecMap.begin();
+          it != ringIdFeatureVecMap.end();
+          it++ )
     {
-        FAPI_DBG("For RingID 0x%0x featureVector applied is 0x%0llx\n", it->first, it->second);
+        FAPI_IMP("(ringId,featureVecAcc)=(0x%x,0x%0llx)\n", it->first, it->second);
     }
 
     // Make a copy of the supplied max ring section buffer size before over writing it
@@ -3088,8 +3087,8 @@ ReturnCode p10_ipl_customize (
 
             l_fapiRc = fetch_and_insert_vpd_rings( i_procTarget,
                                                    io_ringSectionBuf,
-                                                   io_ringSectionBufSize, // Running section size
-                                                   l_maxRingSectionSize,  // Max section size
+                                                   io_ringSectionBufSize, // Running ring section size
+                                                   l_maxRingSectionSize,  // Max allowed section size
                                                    i_hwImage,
                                                    i_sysPhase,
                                                    i_ringBuf1,
@@ -3140,7 +3139,7 @@ ReturnCode p10_ipl_customize (
                          set_CHIP_TARGET(i_procTarget).
                          set_SYSPHASE(i_sysPhase).
                          set_OCCURRENCE(2),
-                         "Caller bug: Caller supplied unsupported value of sysPhase (=%d)",
+                         "Caller bug: Caller supplied unsupported value of sysPhase=%u (Occurrence 2)",
                          i_sysPhase );
 
             break;
