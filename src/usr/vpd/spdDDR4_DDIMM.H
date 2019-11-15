@@ -107,6 +107,7 @@ const KeywordData ddr4DDIMMData[] =
     { MODULE_MANUFACTURER_ID,           0x200,  0x02,   0x00,   0x00, true,  false, ALL },
     { MODULE_SERIAL_NUMBER,             0x205,  0x04,   0x00,   0x00, false, false, ALL },
     { MODULE_PART_NUMBER,               0x209,  0x1E,   0x00,   0x00, false, false, ALL },
+    { DIMM_BAD_DQ_DATA,                 0x280,  0x50,   0x00,   0x00, false, true,  ALL },
     { MODULE_REVISION_CODE,             0x277,  0x01,   0x00,   0x00, false, false, ALL },
     // Normal fields supported on DDR4 only
     { BANK_GROUP_BITS,                  0x04,   0x01,   0xC0,   0x06, false, false, ALL },
