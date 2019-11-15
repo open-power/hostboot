@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2019
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -31,6 +31,7 @@ PERV_HWP_PATH = $(ROOTPATH)/src/import/chips/p9/procedures/hwp/perv
 OBJS += $(if $(CONFIG_DRTM),drtm.o)
 OBJS += $(if $(CONFIG_SECUREBOOT), service_ext.o)
 OBJS += $(if $(CONFIG_PHYS_PRES_PWR_BUTTON), phys_presence.o)
+OBJS += $(if $(CONFIG_KEY_CLEAR), key_clear.o)
 
 VPATH += $(PERV_HWP_PATH)
 

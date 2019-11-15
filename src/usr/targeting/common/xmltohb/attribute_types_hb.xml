@@ -1298,6 +1298,23 @@
   </attribute>
 
   <attribute>
+    <description>Designates if this this IPL was due to a request to open the
+                 Physical Presence Window:
+                 0 - This IPL was NOT due to a Request to Open Window
+                 1 - This IPL was due to a Request to Open Window
+    </description>
+    <id>PHYS_PRES_REIPL</id>
+    <simpleType>
+      <uint8_t>
+        <default>0x0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <description>Designates if there is a request to open the Physical Presence
                  Window:
                  0 - No Request to Open Window (ie, do NOT open window)

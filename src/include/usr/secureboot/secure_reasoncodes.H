@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,9 +71,10 @@ namespace SECUREBOOT
         MOD_NCT_SEND                        = 0x2E,
         MOD_NCT_RECEIVE                     = 0x2F,
 
-        // Use 0x40-0x4F range for Physical Presence Detection
-        MOD_PHYS_PRES_DETECT                = 0x40,
-        MOD_PHYS_PRES_OPEN_WINDOW           = 0x41,
+        // Use 0x40-0x4F range for Physical Presence Detection and Key Clear
+        // Requests
+        MOD_DETECT_PHYS_PRES                = 0x40,
+        MOD_HANDLE_PHYS_PRES_WINDOW         = 0x41,
 
     };
 
@@ -128,7 +129,8 @@ namespace SECUREBOOT
         RC_NCT_INITIATION_MISMATCH         = SECURE_COMP_ID | 0x33,
         RC_NCEX_NO_FUNCTIONAL_PRIMARY_TPM  = SECURE_COMP_ID | 0x34,
 
-        // Use 0x20-0x3F range for Node Communications
+        // Use 0x40-0x4F range for Physical Presence Detection and Key Clear
+        // Requests
 
         // RC_PHYS_PRES_WINDOW_OPENED_SHUTDOWN Must have one unique use
         //  for Shutdown path since FSP relies on it.
@@ -137,6 +139,9 @@ namespace SECUREBOOT
         RC_PHYS_PRES_ATTR_NOT_FOUND         = SECURE_COMP_ID | 0x41,
         RC_PHYS_PRES_WINDOW_NOT_CLOSED      = SECURE_COMP_ID | 0x42,
         RC_PHYS_PRES_WINDOW_NOT_OPENED      = SECURE_COMP_ID | 0x43,
+        RC_PHYS_PRES_ASSERTED               = SECURE_COMP_ID | 0x44,
+        RC_PHYS_PRES_REIPL                  = SECURE_COMP_ID | 0x45,
+
 
         // Reason codes 0xA0 - 0xEF reserved for trustedboot_reasoncodes.H
     };

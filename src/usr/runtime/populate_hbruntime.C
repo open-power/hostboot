@@ -55,6 +55,7 @@
 #include <util/align.H>
 #include <secureboot/trustedbootif.H>
 #include <secureboot/service.H>
+#include <secureboot/key_clear_if.H>
 #include <hdat/hdat.H>
 #include "../hdat/hdattpmdata.H"
 #include "../hdat/hdatpcrd.H"
@@ -1883,14 +1884,18 @@ errlHndl_t populate_hbSecurebootData ( void )
         l_sysSecSets->secureboot = secure? 1: 0;
 
         // populate security override setting
-        l_sysSecSets->sbeSecBackdoor = SECUREBOOT::getSbeSecurityBackdoor();
+        auto sbe_security_backdoor = SECUREBOOT::getSbeSecurityBackdoor();
+        l_sysSecSets->sbeSecBackdoor = sbe_security_backdoor;
 
         // populate "System Physical Presence has been asserted"
         TARGETING::Target* sys = nullptr;
         TARGETING::targetService().getTopLevelTarget( sys );
         assert(sys != nullptr, "populate_hbSecurebootData() - Could not obtain top level target");
-        l_sysSecSets->physicalPresenceAsserted =
-            sys->getAttr<TARGETING::ATTR_PHYS_PRES_ASSERTED>();
+        auto phys_pres_asserted = 0;
+#ifdef CONFIG_PHYS_PRES_PWR_BUTTON
+        phys_pres_asserted = sys->getAttr<TARGETING::ATTR_PHYS_PRES_ASSERTED>();
+#endif
+        l_sysSecSets->physicalPresenceAsserted = phys_pres_asserted;
 
         // populate TPM config bits in hdat
         bool tpmRequired = false;
@@ -1919,6 +1924,80 @@ errlHndl_t populate_hbSecurebootData ( void )
         memset(l_sysParmsPtr->hdatHwKeyHashValue,0,
                 sizeof(l_sysParmsPtr->hdatHwKeyHashValue));
 #endif
+
+#ifdef CONFIG_KEY_CLEAR
+        // Populate "Host FW key clear requests" section
+        // NOTE: ATTR_KEY_CLEAR_REQUEST enum should sync with expected bits
+        // in HDAT spec
+        auto key_clear_request =
+            sys->getAttr<TARGETING::ATTR_KEY_CLEAR_REQUEST>();
+
+        // If Physical Presence was not asserted, then mask off all bits
+        // except for Mfg bit in case of imprint drivers
+        // NOTE: Using the presence of a backdoor to assert we have an
+        // imprint/development driver
+        if ((phys_pres_asserted == 0) &&
+            (key_clear_request != KEY_CLEAR_REQUEST_NONE))
+        {
+            if ((sbe_security_backdoor != 0) &&
+                (key_clear_request & KEY_CLEAR_REQUEST_MFG))
+            {
+                TRACFCOMP(g_trac_runtime, INFO_MRK"populate_hbSecurebootData: "
+                          "Physical Presence not asserted, but "
+                          "KEY_CLEAR_REQUEST_MFG bit is set for imprint driver."
+                          " Updating key_clear_request from 0x%.4X to 0x%.4X",
+                          key_clear_request, KEY_CLEAR_REQUEST_MFG);
+
+                key_clear_request = KEY_CLEAR_REQUEST_MFG;
+            }
+            else
+            {
+                TRACFCOMP(g_trac_runtime, INFO_MRK"populate_hbSecurebootData: "
+                          "Physical Presence not asserted. Updating "
+                          "key_clear_request from 0x%.4X to 0x%.4X",
+                          key_clear_request, KEY_CLEAR_REQUEST_NONE);
+
+                key_clear_request = KEY_CLEAR_REQUEST_NONE;
+            }
+        }
+        // Must mask off KEY_CLEAR_REQUEST_MFG for non-imprint drivers
+        else if ((phys_pres_asserted != 0) &&
+                 (sbe_security_backdoor == 0) &&
+                 (key_clear_request & KEY_CLEAR_REQUEST_MFG))
+        {
+            auto temp_key_clear_request =
+                   (key_clear_request & ~KEY_CLEAR_REQUEST_MFG);
+
+            TRACFCOMP(g_trac_runtime, INFO_MRK"populate_hbSecurebootData: "
+                      "Physical Presence asserted on production driver with "
+                      "KEY_CLEAR_REQUEST_MFG bit (0x%.4X) set. "
+                      "Updating key_clear_request from 0x%.4X to 0x%.4X",
+                      KEY_CLEAR_REQUEST_MFG, key_clear_request,
+                      temp_key_clear_request);
+
+            key_clear_request = temp_key_clear_request;
+        }
+
+        TRACFCOMP(g_trac_runtime, INFO_MRK"populate_hbSecurebootData: "
+                  "Setting key_clear_request in HDAT to 0x%.4X before clearing "
+                  "ATTR_KEY_CLEAR_REQUEST",
+                  key_clear_request);
+        l_sysParmsPtr->hdatKeyClearRequest = key_clear_request;
+
+        // Clear the Key Clear Requests
+        key_clear_request = KEY_CLEAR_REQUEST_NONE;
+        sys->setAttr<TARGETING::ATTR_KEY_CLEAR_REQUEST>(key_clear_request);
+#ifdef CONFIG_BMC_IPMI
+        l_elog = SECUREBOOT::clearKeyClearSensor();
+        if(l_elog != nullptr)
+        {
+            TRACFCOMP( g_trac_runtime, ERR_MRK "populate_hbSecurebootData: "
+                    "SECUREBOOT::clearKeyClearSensor() falied");
+            break;
+
+        }
+#endif // CONFIG_BMC_IPMI
+#endif // CONFIG_KEY_CLEAR
 
     } while(0);
 

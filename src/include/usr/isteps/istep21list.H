@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -134,6 +134,9 @@ const DepModInfo  g_istep21Dependancies = {
 #endif
 #ifdef CONFIG_UCD_FLASH_UPDATES
         DEP_LIB(libucd.so),
+#endif
+#ifdef CONFIG_SECUREBOOT
+        DEP_LIB(libsecureboot_ext.so),
 #endif
         NULL
     }
