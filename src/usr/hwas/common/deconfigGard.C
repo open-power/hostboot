@@ -2867,8 +2867,8 @@ errlHndl_t DeconfigGard::_symmetryValidation(ProcInfoVector &io_procInfo)
         Target* pSys;
         targetService().getTopLevelTarget(pSys);
         HWAS_ASSERT(pSys, "HWAS _symmetryValidation: no TopLevelTarget");
-        if ( pSys->getAttr<ATTR_PROC_FABRIC_PUMP_MODE>() ==
-             TARGETING::PROC_FABRIC_PUMP_MODE_CHIP_IS_GROUP )
+        if ( pSys->getAttr<TARGETING::ATTR_PROC_FABRIC_BROADCAST_MODE>() ==
+             TARGETING::PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_GROUP )
         {
           // When CHIP_IS_GROUP is set, that means a single fabric CHIP
           // per GROUP (or NODE). If we apply symmetry deconfig, it will

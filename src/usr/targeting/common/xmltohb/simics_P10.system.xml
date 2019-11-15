@@ -125,6 +125,10 @@
         <default>NONE</default>
     </attribute>
     <attribute>
+        <id>PROC_FABRIC_BROADCAST_MODE</id>
+        <default>1HOP_CHIP_IS_NODE</default>
+    </attribute>
+    <attribute>
       <default>0</default>
       <id>TPM_REQUIRED</id>
     </attribute>
