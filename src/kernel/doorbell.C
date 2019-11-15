@@ -30,6 +30,8 @@
 #include <kernel/doorbell.H>
 #include <kernel/console.H>
 #include <kernel/cpumgr.H>
+#include <kernel/intmsghandler.H>
+#include <config.h>
 
 void doorbell_clear()
 {
@@ -68,13 +70,19 @@ void doorbell_send(uint64_t i_pir)
 
 void send_doorbell_wakeup(uint64_t i_pir)
 {
-    cpu_t *l_cpu = CpuManager::getCpu(i_pir);
+    printk("send_doorbell_wakeup to pir: %lx\n", i_pir);
 
-    printkd("send_doorbell_wakeup to pir: %lx\n", i_pir);
+#ifdef CONFIG_SIMICS_SLAVECORE_HACK
+    //We never get a real wakeup interrupt so just lie
+    InterruptMsgHdlr::sendThreadWakeupMsg(i_pir);
+#else
     //Create WorkItem and put on the stack to be executed during doorbell
     // execution
     KernelWorkItem* l_work = new CpuWakeupDoorbellWorkItem();
+    cpu_t *l_cpu = CpuManager::getCpu(i_pir);
     l_cpu->doorbell_actions.push(l_work);
+#endif
+
     //Put a barrier here to prevent a possible weak consistency
     // issue with the l_work memory getting consumed incorrectly
     // by the new thread that wakes up

@@ -77,3 +77,9 @@ config LOAD_PHYP_FROM_BOOTKERNEL
         If enabled will load PHYP from the BOOTKERNEL partition
         of PNOR.
 
+config SIMICS_SLAVECORE_HACK
+    default y
+    help
+        If enabled will use Simics magic instructions to enable
+        the slave cores
+

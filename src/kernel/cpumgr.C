@@ -174,6 +174,8 @@ void CpuManager::requestShutdown(uint64_t i_status, uint32_t i_error_data)
 
 void CpuManager::startCPU(ssize_t i)
 {
+    printk("startCPU(%ld)\n",i);
+
     // Save away the current timebase for TB synchronization.
     iv_lastStartTimebase = getTB();
 

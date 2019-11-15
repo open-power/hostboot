@@ -1371,6 +1371,7 @@ void IntrRp::msgHandler()
                     PIR_t pir = msg->data[0];
                     TRACDCOMP(g_trac_intr, "IntrRp::msgHandler() CPU Timeout Message received for: %x",
                               pir.word);
+#ifndef CONFIG_SIMICS_SLAVECORE_HACK
                     size_t count = msg->data[1];
 
                     if(iv_ipisPending.count(pir))
@@ -1404,6 +1405,7 @@ void IntrRp::msgHandler()
                         }
                     }
                     else // Ended successfully.
+#endif //CONFIG_SIMICS_SLAVECORE_HACK
                     {
                         TRACFCOMP(g_trac_intr,
                                   INFO_MRK "Cpu wakeup completed on %x",

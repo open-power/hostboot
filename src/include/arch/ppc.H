@@ -512,6 +512,9 @@ enum
     MAGIC_SET_LOG_LEVEL       =  7022, // Set log level for given component
     MAGIC_TOGGLE_OUTPUT       =  7023, // Enable simic log capture
 
+    MAGIC_ENABLE_THREAD       =  7024, // Manually enable a thread
+    MAGIC_SETUP_THREAD        =  7025, // Manually set thread regs pre-enable
+
     MAGIC_CONTINUOUS_TRACE    =  7055, // extract mixed trace buffer
     MAGIC_GCOV_MODULE_UNLOAD  =  7056, // extract gcov info
 
@@ -568,6 +571,7 @@ enum
 #define MAGIC_DONE_WAITING_FOR_FSP() \
     asm volatile("mr 4, %0" :: "r" (2) : "4"); \
     MAGIC_INSTRUCTION(MAGIC_SIMICS_FSP_WAIT); \
+
 /**
  * @brief set the log level for a given component
  * @param[in]  _componentId Enum of simics comp ids
@@ -589,5 +593,26 @@ enum
                  "r" (_enable) : \
                  "4"); \
     MAGIC_INSTRUCTION(MAGIC_TOGGLE_OUTPUT); \
+
+/**
+ * @brief Enable the thread with the given PIR
+ * @param[in]  pir value
+ */
+#define MAGIC_INST_ENABLE_THREAD(_pir) \
+    asm volatile("mr 4, %0" :: \
+                 "r" (_pir) : \
+                 "4"); \
+    MAGIC_INSTRUCTION(MAGIC_ENABLE_THREAD); \
+
+/**
+ * @brief Setup the thread with the given PIR with good default
+ *        register values to allow it to run when enabled
+ * @param[in]  pir value
+ */
+#define MAGIC_INST_SETUP_THREAD(_pir) \
+    asm volatile("mr 4, %0" :: \
+                 "r" (_pir) : \
+                 "4"); \
+    MAGIC_INSTRUCTION(MAGIC_SETUP_THREAD); \
 
 #endif

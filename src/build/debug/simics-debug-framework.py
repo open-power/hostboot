@@ -573,6 +573,34 @@ def magic_instruction_callback(user_arg, cpu, arg):
         percent_s = "%s"
         dateCommand = "shell \" date +'%s > TRACE REGS: %d %d' \""%(percent_s,first_num,second_num)
         SIM_run_alone(run_command, dateCommand )
+
+    if arg == 7024:  # MAGIC_ENABLE_THREAD
+        pir = cpu.r4
+        core = (pir//8)*2 + pir%2
+        thread = (pir%8)//2
+        cpuobj = "system_cmp0.cpu0_0_0%s_%s" % ( core, thread )
+        print "Enabling PIR ", pir, cpuobj
+        enableCommand = "%s.enable" % ( cpuobj )
+        print "enableCommand=", enableCommand
+        SIM_run_alone(run_command, enableCommand )
+
+    if arg == 7025:  # MAGIC_SETUP_THREAD
+        pir = cpu.r4
+        core = (pir//8)*2 + pir%2
+        thread = (pir%8)//2
+        cpuobj = "system_cmp0.cpu0_0_0%s_%s" % ( core, thread )
+        print "Setting up PIR ", pir, cpuobj
+        setupCommand = "%s->lpcr=0x40000000D00A" % ( cpuobj )
+        SIM_run_alone(run_command, setupCommand )
+        setupCommand = "%s->msr=0x9000000000401000" % ( cpuobj )
+        SIM_run_alone(run_command, setupCommand )
+        setupCommand = "%s->urmor=0x8000000" % ( cpuobj )
+        SIM_run_alone(run_command, setupCommand )
+        setupCommand = "%s->hrmor=0x8000000" % ( cpuobj )
+        SIM_run_alone(run_command, setupCommand )
+        setupCommand = "%s->iar=0x100" % ( cpuobj )
+        SIM_run_alone(run_command, setupCommand )
+
     if arg == 7022:  # MAGIC_SET_LOG_LEVEL
         if( not os.environ.has_key('ENABLE_HB_SIMICS_LOGS') ):
             #print("Skipping Hostboot Simics Logging because ENABLE_HB_SIMICS_LOGS is not set")
