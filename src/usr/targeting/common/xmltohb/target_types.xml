@@ -1226,9 +1226,6 @@
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
     <attribute>
-      <id>KEY_CLEAR_REQUEST</id>
-    </attribute>
-    <attribute>
       <id>KEY_TRANSITION_STATE</id>
     </attribute>
     <attribute>
@@ -1922,6 +1919,9 @@
     </attribute>
     <attribute>
       <id>ISTEP_PAUSE_ENABLE</id>
+    </attribute>
+    <attribute>
+      <id>KEY_CLEAR_REQUEST</id>
     </attribute>
     <attribute>
       <default>0x0006030000000000</default>
