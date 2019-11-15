@@ -161,6 +161,9 @@ const DepModInfo  g_istep21Dependancies = {
 #ifdef CONFIG_UCD_FLASH_UPDATES
         DEP_LIB(libucd.so),
 #endif
+#ifdef CONFIG_SECUREBOOT
+        DEP_LIB(libsecureboot_ext.so),
+#endif
         NULL
     }
 };

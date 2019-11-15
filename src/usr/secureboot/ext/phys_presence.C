@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,6 @@
  *
  */
 
-#include <config.h>
 #include <targeting/common/util.H>
 #include <targeting/common/target.H>
 #include <errl/errlentry.H>
@@ -42,11 +41,13 @@
 #include <initservice/istepdispatcherif.H>
 #include <secureboot/secure_reasoncodes.H>
 #include <secureboot/phys_presence_if.H>
+#include <secureboot/key_clear_if.H>
 #include "../common/securetrace.H"
 #include <gpio/gpioif.H>
 
 using namespace TARGETING;
 using namespace GPIO;
+using namespace ERRORLOG;
 
 namespace SECUREBOOT
 {
@@ -129,8 +130,8 @@ errlHndl_t detectPhysPresence(void)
         /*@
          * @errortype
          * @reasoncode       RC_PHYS_PRES_ATTR_NOT_FOUND
-         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid         MOD_PHYS_PRES_DETECT
+         * @severity         ERRL_SEV_UNRECOVERABLE
+         * @moduleid         MOD_DETECT_PHYS_PRES
          * @userdata1        HUID of Master Processor Target
          * @userdata2        ATTR_GPIO_INFO_PHYS_PRES hash value
          * @devdesc          Master processor target did not have
@@ -138,12 +139,12 @@ errlHndl_t detectPhysPresence(void)
          * @custdesc         A problem occurred during the IPL
          *                   of the system.
          */
-        err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                      MOD_PHYS_PRES_DETECT,
-                                      RC_PHYS_PRES_ATTR_NOT_FOUND,
-                                      get_huid(mproc),
-                                      ATTR_GPIO_INFO_PHYS_PRES,
-                                      ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                            MOD_DETECT_PHYS_PRES,
+                            RC_PHYS_PRES_ATTR_NOT_FOUND,
+                            get_huid(mproc),
+                            ATTR_GPIO_INFO_PHYS_PRES,
+                            ErrlEntry::ADD_SW_CALLOUT);
 
         err->collectTrace( SECURE_COMP_NAME );
         break;
@@ -185,7 +186,7 @@ errlHndl_t detectPhysPresence(void)
                attr_fake_assert);
 
         // Write the attribute so faking the assert only happens once
-        sys->setAttr<ATTR_PHYS_PRES_FAKE_ASSERT>(0x00);
+        sys->setAttr<ATTR_PHYS_PRES_FAKE_ASSERT>(0x0);
     }
 
     SB_INF("detectPhysPresence: LEDs=0x%.2X, led_WO=0x%X, led_PPA=0x%X, "
@@ -193,6 +194,43 @@ errlHndl_t detectPhysPresence(void)
            led_data, led_window_open, led_phys_pres_asserted,
            attr_open_window, attr_fake_assert,
            is_window_open, is_phys_pres_asserted);
+
+    // If Physical Presence was asserted, create an informational log and
+    // alert users via console trace
+    if (is_phys_pres_asserted == true)
+    {
+        /*@
+         * @errortype
+         * @moduleid          MOD_DETECT_PHYS_PRES
+         * @reasoncode        RC_PHYS_PRES_ASSERTED
+         * @userdata1[0:31]   Value of Attribute Requesting an Open Window
+         * @userdata1[32:63]  Value of Attribute to Fake Physical Presence
+         *                    Assertion
+         * @userdata2[0:31]   Logic of 'is_window_open'
+         * @userdata2[32:63]  Logic of 'is_phys_pres_asserted'
+         * @devdesc      Physical Presence was Asserted
+         * @custdesc     Physical Presence was Asserted
+         */
+        errlHndl_t err_info = new ErrlEntry(
+                                  ERRL_SEV_INFORMATIONAL,
+                                  MOD_DETECT_PHYS_PRES,
+                                  RC_PHYS_PRES_ASSERTED,
+                                  TWO_UINT32_TO_UINT64(
+                                      attr_open_window,
+                                      attr_fake_assert),
+                                  TWO_UINT32_TO_UINT64(
+                                      is_window_open,
+                                      is_phys_pres_asserted));
+
+        err_info->collectTrace( SECURE_COMP_NAME );
+
+        errlCommit( err_info, SECURE_COMP_ID );
+
+#ifdef CONFIG_CONSOLE
+        CONSOLE::displayf(SECURE_COMP_NAME, "Physical Presence Was Asserted In Detection Window\n");
+        CONSOLE::flush();
+#endif
+    }
 
     } while(0);
 
@@ -221,8 +259,8 @@ errlHndl_t detectPhysPresence(void)
                 /*@
                  * @errortype
                  * @reasoncode       RC_PHYS_PRES_WINDOW_NOT_CLOSED
-                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid         MOD_PHYS_PRES_DETECT
+                 * @severity         ERRL_SEV_UNRECOVERABLE
+                 * @moduleid         MOD_DETECT_PHYS_PRES
                  * @userdata1        HUID of Master Processor Target
                  * @userdata2[0:31]  LED Data from PCA9551
                  * @userdata[32:63]  LED Windoow Open LED (aka PIN)
@@ -231,15 +269,15 @@ errlHndl_t detectPhysPresence(void)
                  * @custdesc         A problem occurred during the IPL
                  *                   of the system.
                  */
-                err_close = new ERRORLOG::ErrlEntry(
-                                          ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          MOD_PHYS_PRES_DETECT,
-                                          RC_PHYS_PRES_WINDOW_NOT_CLOSED,
-                                          get_huid(mproc),
-                                          TWO_UINT32_TO_UINT64(
-                                            led_data,
-                                            led_window_open),
-                                          ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                err_close = new ErrlEntry(
+                                ERRL_SEV_UNRECOVERABLE,
+                                MOD_DETECT_PHYS_PRES,
+                                RC_PHYS_PRES_WINDOW_NOT_CLOSED,
+                                get_huid(mproc),
+                                TWO_UINT32_TO_UINT64(
+                                  led_data,
+                                  led_window_open),
+                                ErrlEntry::ADD_SW_CALLOUT);
             }
             else
             {
@@ -325,35 +363,98 @@ errlHndl_t handlePhysPresenceWindow(void)
     // overrides are not allowed in that scenario.
     uint8_t attr_open_window =
         sys->getAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>();
+
     uint8_t attr_phys_pres_asserted = sys->getAttr<ATTR_PHYS_PRES_ASSERTED>();
 
-    if (attr_open_window == 0)
-    {
-        SB_INF("handlePhysPresenceWindow: attr_open_window=0x%.2X: "
-               "no need to open window (attr_phys_pres_asserted=0x%.2X)",
-               attr_open_window, attr_phys_pres_asserted);
-        break;
-    }
-    // This solves the issue of using attribute overrides to open the window,
-    // as they don't always get cleared on re-IPLs and attr_open_window might
-    // still != 0
-    else if (attr_phys_pres_asserted != 0)
-    {
-        SB_INF("handlePhysPresenceWindow: attr_open_window=0x%.2X, but "
-               "attr_phys_pres_asserted=0x%.2X, so no need to open window. "
-               "Clearing open window request",
-               attr_open_window, attr_phys_pres_asserted);
+    uint8_t attr_phys_pres_reipl = sys->getAttr<ATTR_PHYS_PRES_REIPL>();
 
-        // Close request to open the window
-        sys->setAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>(0x00);
+    // Get info associated with Key Clear Requests - another possible reason
+    // to open the Physical Presence Window
+    bool doesKeyClearRequestPhysPres = false;
+    KEY_CLEAR_REQUEST keyClearRequests = KEY_CLEAR_REQUEST_NONE;
+#ifdef CONFIG_KEY_CLEAR
+    err = getKeyClearRequest(doesKeyClearRequestPhysPres, keyClearRequests);
+    if(err)
+    {
+        SB_ERR("handlePhysPresenceWindow: call to getKeyClearRequest "
+               "failed.  err_plid=0x%X, err_rc=0x%X",
+               ERRL_GETPLID_SAFE(err),
+               ERRL_GETRC_SAFE(err));
+
+        err->collectTrace(SECURE_COMP_NAME);
         break;
     }
     else
     {
+        SB_INF("handlePhysPresenceWindow: call to getKeyClearRequest "
+               "returned: doesKeyClearRequestPhysPres=%d, "
+               "keyClearRequests=0x%X",
+               doesKeyClearRequestPhysPres,keyClearRequests);
+    }
+#endif
+
+    // If physical presence is already asserted, then there's no need to open
+    // the window
+    if (attr_phys_pres_asserted != 0)
+    {
+        SB_INF("handlePhysPresenceWindow: attr_phys_pres_asserted=0x%.2X. "
+               "Since Physical Presence is already asserted, ignoring "
+               "attr_open_window=0x%.2X and doesKeyClearRequestPhysPres=%d ",
+               attr_phys_pres_asserted, attr_open_window,
+               doesKeyClearRequestPhysPres);
+
+        if (attr_open_window != 0)
+        {
+            // Close request to open the window
+            SB_INF("handlePhysPresenceWindow: Since attr_open_window=0x%.2X, "
+                   "but Physical Presence is already asserted, "
+                   "clearing open window request",
+                   attr_open_window);
+            attr_open_window = 0x00;
+            sys->setAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>(attr_open_window);
+        }
+
+        break;
+    }
+
+    // If this re-IPL was due to a window open request, but physical presence
+    // wasn't asserted, then we don't need to re-IPL again
+    // -- This avoids infinite loops
+    else if (attr_phys_pres_reipl != 0)
+    {
+        SB_INF("handlePhysPresenceWindow: attr_phys_pres_reipl=0x%.2X. "
+               "Since this IPL opened the window but Physical Presence "
+               "was NOT asserted (0x%.2X) ignoring "
+               "attr_open_window=0x%.2X and doesKeyClearRequestPhysPres=%d "
+               "and clearing attr_phys_pres_reipl",
+               attr_phys_pres_reipl, attr_phys_pres_asserted, attr_open_window,
+               doesKeyClearRequestPhysPres);
+
+        attr_phys_pres_reipl = 0x00;
+        sys->setAttr<ATTR_PHYS_PRES_REIPL>(attr_phys_pres_reipl);
+
+        break;
+    }
+
+    // If there's no reason to open a window, then don't open it
+    else if ((attr_open_window == 0) &&
+            (doesKeyClearRequestPhysPres == false))
+    {
+        SB_INF("handlePhysPresenceWindow: attr_open_window=0x%.2X: "
+               "and key_clear_req=%d so no need to open window "
+               "(attr_phys_pres_asserted=0x%.2X)",
+               attr_open_window, doesKeyClearRequestPhysPres,
+               attr_phys_pres_asserted);
+        break;
+    }
+
+    // Open window by continuing on in this function
+    else
+    {
         SB_INF("handlePhysPresenceWindow: attr_open_window=0x%.2X, "
-               "attr_phys_pres_asserted=0x%.2X: "
-               "Will Open Window To Detect Physical Presence",
-               attr_open_window, attr_phys_pres_asserted);
+               "doesKeyClearRequestPhysPres=%d, attr_phys_pres_asserted=0x%.2X:"
+               " Will Open Window To Detect Physical Presence",
+               attr_open_window, doesKeyClearRequestPhysPres, attr_phys_pres_asserted);
     }
 
     // The PCA9551 device that controls the "window open" and
@@ -401,8 +502,8 @@ errlHndl_t handlePhysPresenceWindow(void)
         /*@
          * @errortype
          * @reasoncode       RC_PHYS_PRES_WINDOW_NOT_OPENED
-         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid         MOD_PHYS_PRES_OPEN_WINDOW
+         * @severity         ERRL_SEV_UNRECOVERABLE
+         * @moduleid         MOD_HANDLE_PHYS_PRES_WINDOW
          * @userdata1        HUID of Master Processor Target
          * @userdata2[0:31]  LED Data from PCA9551
          * @userdata2[32:63] LED Windoow Open LED (aka PIN)
@@ -411,22 +512,54 @@ errlHndl_t handlePhysPresenceWindow(void)
          * @custdesc         A problem occurred during the IPL
          *                   of the system.
          */
-        err = new ERRORLOG::ErrlEntry(
-                                  ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                  MOD_PHYS_PRES_OPEN_WINDOW,
-                                  RC_PHYS_PRES_WINDOW_NOT_OPENED,
-                                  get_huid(mproc),
-                                   TWO_UINT32_TO_UINT64(
-                                     led_data,
-                                     led_window_open),
-                                   ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        err = new ErrlEntry(
+                      ERRL_SEV_UNRECOVERABLE,
+                      MOD_HANDLE_PHYS_PRES_WINDOW,
+                      RC_PHYS_PRES_WINDOW_NOT_OPENED,
+                      get_huid(mproc),
+                      TWO_UINT32_TO_UINT64(
+                          led_data,
+                          led_window_open),
+                      ErrlEntry::ADD_SW_CALLOUT);
 
         err->collectTrace( SECURE_COMP_NAME );
         break;
     }
 
+    // Create an informational log to document request for a re-IPL
+    /*@
+     * @errortype
+     * @moduleid          MOD_HANDLE_PHYS_PRES_WINDOW
+     * @reasoncode        RC_PHYS_PRES_REIPL
+     * @userdata1[0:31]   Value of Attribute Requesting an Open Window
+     * @userdata1[32:63]  Value of Key Clear Requests
+     * @userdata2[0:31]   Value of Attribute Physical Presence Asserted
+     * @userdata2[32:63]  Value of Attribute Physical Presence re-IPL
+     * @devdesc      Re-IPLing to open a Physical Presence Window
+     * @custdesc     Re-IPLing to open a Physical Presence Window
+     */
+    errlHndl_t err_info = new ErrlEntry(
+                                  ERRL_SEV_INFORMATIONAL,
+                                  MOD_HANDLE_PHYS_PRES_WINDOW,
+                                  RC_PHYS_PRES_REIPL,
+                                  TWO_UINT32_TO_UINT64(
+                                      attr_open_window,
+                                      keyClearRequests),
+                                  TWO_UINT32_TO_UINT64(
+                                      attr_phys_pres_asserted,
+                                      attr_phys_pres_reipl));
+
+    err_info->collectTrace( SECURE_COMP_NAME );
+
+    errlCommit( err_info, SECURE_COMP_ID );
+
     // Close request to open the window and sync attributes
     sys->setAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>(0x00);
+
+    // Set the attribute telling us that this re-IPL is purposely for
+    // opening a physical presence window
+    sys->setAttr<ATTR_PHYS_PRES_REIPL>(0x01);
+
 
     if(INITSERVICE::spBaseServicesEnabled())
     {

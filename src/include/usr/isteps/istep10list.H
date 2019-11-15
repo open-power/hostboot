@@ -227,6 +227,9 @@ const DepModInfo g_istep10Dependancies = {
         DEP_LIB(libsbe.so),
         DEP_LIB(libnestmemutils.so),
         DEP_LIB(libimageprocs.so),
+#ifdef CONFIG_SECUREBOOT
+        DEP_LIB(libsecureboot_ext.so),
+#endif
         NULL
     }
 };

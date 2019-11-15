@@ -12,7 +12,7 @@ config TPM_NVIDX_VALIDATE
 
 config PHYS_PRES_PWR_BUTTON
     default n
-    depends on !PHYS_PRES_JUMPER
+    depends on (!PHYS_PRES_JUMPER && SECUREBOOT)
     help
         Support asserting Physical Presence via pushing the Power Button
         on the system
@@ -23,6 +23,13 @@ config PHYS_PRES_JUMPER
     help
         Support asserting Physical Presence via a jumper on the TPM Card
         Currently not supported.
+
+config KEY_CLEAR
+    default n
+    depends on PHYS_PRES_PWR_BUTTON
+    help
+        Support various 'key clear requests' to remove specific security
+        keys, certificates, etc on the system
 
 config DISABLE_TPM_IN_HDAT
     default y
