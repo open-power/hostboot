@@ -165,10 +165,10 @@ p10_hcd_corecache_power_control(
                     .set_CORE_TARGET(i_target),
                     "PFET_SEQ_STATE not 0");
 
-        FAPI_DBG("Clear L3/CL2[%x] PFET stage select and value override bits via PFETCNTL[4,5/6,7/8]", l_isL3);
+        FAPI_DBG("Clear L3=1/CL2=0[%x] PFET stage select and value override bits via PFETCNTL[4,5/6,7/8]", l_isL3);
         FAPI_TRY( HCD_PUTMMIO_C( i_target, HCD_CPMS_PFETCNTL_CLR[l_isL3], MMIO_LOAD32H( HCD_PFET_OVERRIDES[l_isVCS] ) ) );
 
-        FAPI_DBG("Turn L3/CL2[%x] VCS/VDD[%x] ON/OFF[%x]", l_isL3, l_isVCS, l_isON);
+        FAPI_DBG("Turn L3=1/CL2=0[%x] VCS=1/VDD=0[%x] ON=1/OFF=0[%x]", l_isL3, l_isVCS, l_isON);
         FAPI_TRY( HCD_PUTMMIO_C( i_target, HCD_CPMS_PFETCNTL_OR[l_isL3],
                                  MMIO_LOAD32H( HCD_PFET_SEQ_STATES[l_isON][l_isVCS] ) ) );
 
