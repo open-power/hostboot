@@ -338,7 +338,7 @@ class SbePsu
         */
         enum psuSecurityListBinDumpNonReservedMsgs
         {
-            SBE_SECURITY_LIST_BIN_DUMP_REQ_USED_REGS     = 0x01,
+            SBE_SECURITY_LIST_BIN_DUMP_REQ_USED_REGS     = 0x03,
             SBE_SECURITY_LIST_BIN_DUMP_RSP_USED_REGS     = 0x01,
         };
 
