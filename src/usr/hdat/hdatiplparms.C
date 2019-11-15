@@ -374,7 +374,9 @@ void  HdatIplParms::hdatGetIplParmsData()
     this->iv_hdatIPLParams->iv_iplParms.hdatKeyLockPosition =
                                                      HDAT_KEYLOCK_MANUAL;
 
-    TARGETING::ATTR_LMB_SIZE_type l_lmbSize;
+    //@TODO: RTC 142465 missing attribute
+    //@TODO RTC 245661 to get from pldm bios
+    /*TARGETING::ATTR_LMB_SIZE_type l_lmbSize;
     if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_LMB_SIZE>(l_lmbSize))
     {
         this->iv_hdatIPLParams->iv_iplParms.hdatLMBSize = 4;
@@ -382,7 +384,10 @@ void  HdatIplParms::hdatGetIplParmsData()
     else
     {
         HDAT_ERR("Error in getting LMB_SIZE attribute");
-    }
+    }*/
+
+    //attribute LMB_SIZE not defined
+    this->iv_hdatIPLParams->iv_iplParms.hdatLMBSize = 4;
 
     TARGETING::ATTR_MAX_HSL_OPTICONNECT_CONNECTIONS_type l_hslConnections;
     if(l_pSysTarget->tryGetAttr
@@ -605,6 +610,7 @@ static void hdatGetFeatureFlagInfo(
  **/
 void HdatIplParms::hdatGetSystemParamters()
 {
+    HDAT_ENTER();
 
     TARGETING::Target *l_pSysTarget = NULL;
     (void) TARGETING::targetService().getTopLevelTarget(l_pSysTarget);
@@ -619,7 +625,14 @@ void HdatIplParms::hdatGetSystemParamters()
     uint32_t l_sysModel = 0;
 
     TARGETING::ATTR_RAW_MTM_type l_rawMTM = {0};
-    if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_RAW_MTM>(l_rawMTM))
+    strcpy(l_rawMTM,"8335.GTG");
+    //@TODO: RTC 142465 missing attribute
+    //RAW_MTM not defined
+    //@TODO RTC 243468 BP vpd to hold the VSYS TM and SE  
+    //@TODO RTC 216059 hostboot to read BP vpd via PLDM
+    //@TODO l_pSysTarget->getAttrAsStdArr<..>() to get array values using a get 
+   // if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_RAW_MTM>(l_rawMTM))
+    if(1)
     {
         //we only want the last three bytes of the raw MTM, preceded by a 0x20
         l_sysModel = *((reinterpret_cast<uint32_t*>(l_rawMTM))+1);
@@ -645,8 +658,11 @@ void HdatIplParms::hdatGetSystemParamters()
             this->iv_hdatIPLParams->iv_sysParms.hdatEffectivePvr);
 
     // Get system type
-    iv_hdatIPLParams->iv_sysParms.hdatSysType =
-             (l_pSysTarget->getAttr<TARGETING::ATTR_PHYP_SYSTEM_TYPE>());
+    // @TODO RTC  142465 missing attribute 
+    //iv_hdatIPLParams->iv_sysParms.hdatSysType =
+      //       (l_pSysTarget->getAttr<TARGETING::ATTR_PHYP_SYSTEM_TYPE>());
+    iv_hdatIPLParams->iv_sysParms.hdatSysType = 0;
+    HDAT_DBG("after ATTR_PHYP_SYSTEM_TYPE");
 
     //Get ABC Bus Speed
     this->iv_hdatIPLParams->iv_sysParms.hdatABCBusSpeed = 24;
@@ -663,7 +679,8 @@ void HdatIplParms::hdatGetSystemParamters()
 **/
 
     //Get XYZ Bus Speed
-    TARGETING::ATTR_FREQ_X_MHZ_type l_WXYZBusSpeed;
+    //@TODO: RTC 142465 attribute not available
+    /*TARGETING::ATTR_FREQ_X_MHZ_type l_WXYZBusSpeed;
     if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_FREQ_X_MHZ>(l_WXYZBusSpeed))
     {
         this->iv_hdatIPLParams->iv_sysParms.hdatWXYZBusSpeed = l_WXYZBusSpeed;
@@ -671,7 +688,9 @@ void HdatIplParms::hdatGetSystemParamters()
     else
     {
         HDAT_ERR(" Error in getting attribute FREQ_X_MHZ");
-    }
+    }*/
+    
+    this->iv_hdatIPLParams->iv_sysParms.hdatWXYZBusSpeed = 0x000007d0;//hard coding as witherspoon 
 
     // NO ECO Support
     this->iv_hdatIPLParams->iv_sysParms.hdatSystemECOMode = 0;
@@ -690,6 +709,7 @@ void HdatIplParms::hdatGetSystemParamters()
     {
         HDAT_ERR(" Error in getting attribute PAYLOAD_IN_MIRROR_MEM");
     }
+    HDAT_DBG("after selective memory mirroring");
 
     // Check both compat and native mode for relevant risk levels
     ATTR_RISK_LEVEL_type l_risk = l_pSysTarget->getAttr<ATTR_RISK_LEVEL>();
@@ -700,9 +720,16 @@ void HdatIplParms::hdatGetSystemParamters()
         this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes |=
           HDAT_RISK_LEVEL_ELEVATED;
     }
+    HDAT_DBG("after risk level");
 
-    this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes |=
+    //@TODO: RTC 142465 missing attribut
+    //IS_MPIPL_SUPPORTED not present
+   /* this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes |=
           l_pSysTarget->getAttr<ATTR_IS_MPIPL_SUPPORTED>() ? HDAT_MPIPL_SUPPORTED : 0 ;
+
+    HDAT_DBG("after mpipl supported");  */    
+    this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes |= 
+                                                           HDAT_MPIPL_SUPPORTED;
 
     this->iv_hdatIPLParams->iv_sysParms.hdatMemoryScrubbing = 0;
 
@@ -714,7 +741,9 @@ void HdatIplParms::hdatGetSystemParamters()
                              <TARGETING::ATTR_OPEN_POWER_TURBO_MODE_SUPPORTED>
                                                         (l_turboModeSupported))
     {
+        HDAT_DBG("fetched OPEN_POWER_TURBO_MODE_SUPPORTED");
         HDAT::hdatGetNumberOfCores(l_numCores);
+        HDAT_DBG("got number of cores %d",l_numCores);
 
         if(l_turboModeSupported == true)
         {
@@ -736,6 +765,7 @@ void HdatIplParms::hdatGetSystemParamters()
     {
         HDAT_ERR("Error in getting OPEN_POWER_TURBO_MODE_SUPPORTED attribute");
     }
+    HDAT_DBG("after OPEN_POWER_TURBO_MODE_SUPPORTED");
 
     this->iv_hdatIPLParams->iv_sysParms.usePoreSleep  = 0x01;
 
@@ -749,6 +779,7 @@ void HdatIplParms::hdatGetSystemParamters()
     {
         HDAT_ERR("Error in getting VTPM_ENABLED attribute");
     }
+    HDAT_DBG("after VTPM_ENABLED");
 
     //HW Page Table Size : 0x07 : 1/128
     this->iv_hdatIPLParams->iv_sysParms.hdatHwPageTbl = 0x07;
@@ -768,6 +799,7 @@ void HdatIplParms::hdatGetSystemParamters()
     {
         HDAT_ERR("Error in getting HYP_DISPATCH_WHEEL attribute");
     }
+    HDAT_DBG("after HYP_DISPATCH_WHEEL");
 
     TARGETING::ATTR_FREQ_PB_MHZ_type l_nestClockFreq;
     if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_FREQ_PB_MHZ>
@@ -780,6 +812,7 @@ void HdatIplParms::hdatGetSystemParamters()
     {
         HDAT_ERR("Error in getting FREQ_PB_MHZ");
     }
+    HDAT_DBG("after FREQ_PB_MHZ");
 
     this->iv_hdatIPLParams->iv_sysParms.hdatSplitCoreMode = 1;
 
@@ -795,6 +828,7 @@ void HdatIplParms::hdatGetSystemParamters()
     {
         HDAT_ERR("Error in getting SYSTEM_BRAND_NAME");
     }
+    HDAT_DBG("after SYSTEM_BRAND_NAME");
 
     // The next 5 fields are set to their final values in a common handler
     // in istep 21.1, to avoid trust issues when HDAT is initially populated
@@ -820,6 +854,7 @@ void HdatIplParms::hdatGetSystemParamters()
     {
         HDAT_ERR("Error in getting SYSTEM_FAMILY");
     }
+    HDAT_DBG("after SYSTEM_FAMILY");
 
     TARGETING::ATTR_SYSTEM_TYPE_type l_systemType = {0};
     if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_SYSTEM_TYPE> (l_systemType))
@@ -832,6 +867,8 @@ void HdatIplParms::hdatGetSystemParamters()
     {
         HDAT_ERR("Error in getting SYSTEM_TYPE");
     }
+    HDAT_DBG("after SYSTEM_TYPE");
+    HDAT_EXIT();
 }
 
 /**

@@ -292,11 +292,17 @@ errlHndl_t hdatGetHwCardId(const Target *i_pTarget, uint32_t &o_cardId)
  */
 void hdatPopulateMTMAndSerialNumber()
 {
-    errlHndl_t l_errl = NULL;
-    TARGETING::ATTR_RAW_MTM_type l_rawMTM = {0};
-    TARGETING::ATTR_SERIAL_NUMBER_type l_serialNumber = {0};
+    //errlHndl_t l_errl = NULL;
+    //@TODO RTC 246438  MTM and SN yet to be defined in workbook
+    //VSYS TM and SE will be read from the bp vpd once defined
+    TARGETING::ATTR_RAW_MTM_type l_rawMTM = {};
+    TARGETING::ATTR_SERIAL_NUMBER_type l_serialNumber = {};
     TARGETING::Target *l_pSysTarget = NULL;
-    size_t     l_vpdSize = 0;
+
+    strcpy(l_rawMTM,"8335.GTG");
+    strcpy(reinterpret_cast<char *>(l_serialNumber),"RAINIER");
+    HDAT_ERR("initializing mtm with %s",l_rawMTM);
+ //   size_t     l_vpdSize = 0;
 
     (void) TARGETING::targetService().getTopLevelTarget(l_pSysTarget);
     if(l_pSysTarget == NULL)
@@ -305,7 +311,11 @@ void hdatPopulateMTMAndSerialNumber()
         assert(l_pSysTarget != NULL);
     }
 
-    TARGETING::PredicateCTM l_nodePredicate(TARGETING::CLASS_ENC,
+    //@TODO: RTC 246357 missing attrubute
+    //ATTR_SERIAL_NUMBER and ATTR_RAW_MTM not defined
+    //use STD Array format when reenabled
+
+    /*TARGETING::PredicateCTM l_nodePredicate(TARGETING::CLASS_ENC,
                                              TARGETING::TYPE_NODE);
     TARGETING::PredicateHwas l_predHwas;
     l_predHwas.present(true);
@@ -356,9 +366,16 @@ void hdatPopulateMTMAndSerialNumber()
     if(l_errl)
     {
         ERRORLOG::errlCommit(l_errl,HDAT_COMP_ID);
-    }
+    }*/
 
-    l_errl = deviceRead(l_nodeTarget, NULL, l_vpdSize,
+    //TODO RTC attribute ATTR_RAW_MTM not defined
+    /*if(!l_pSysTarget->trySetAttr<TARGETING::ATTR_RAW_MTM>
+                         (l_rawMTM))
+    {
+        HDAT_ERR("Error in setting MTM");
+    }*/
+
+    /*l_errl = deviceRead(l_nodeTarget, NULL, l_vpdSize,
             DEVICE_PVPD_ADDRESS( PVPD::OSYS, PVPD::SS ));
 
     if(l_errl == NULL)
@@ -381,12 +398,18 @@ void hdatPopulateMTMAndSerialNumber()
                 HDAT_ERR("Error in setting Serial Number");
             }
         }
+    }*/
+    //TODO RTC attribute ATTR_SERIAL_NUMBER not defined
+    /*if(!l_pSysTarget->trySetAttr
+           <TARGETING::ATTR_SERIAL_NUMBER>(l_serialNumber))
+    {
+        HDAT_ERR("Error in setting Serial Number");
     }
 
     if(l_errl)
     {
         ERRORLOG::errlCommit(l_errl,HDAT_COMP_ID);
-    }
+    }*/
 
 }
 
@@ -414,6 +437,10 @@ void hdatGetLocationCodePrefix(char *o_locCode)
         assert(l_pSysTarget != NULL);
     }
 
+    //@TODO: RTC 246357 missing attribute
+    strcpy(l_rawMTM,"8335.GTG");
+    strcpy(reinterpret_cast<char *>(l_serialNumber),"RAINIER");
+
     strcpy(o_locCode, "U");
 
     //if(l_pSysTarget == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
@@ -421,10 +448,13 @@ void hdatGetLocationCodePrefix(char *o_locCode)
    //     assert(false);
    // }
 
-    if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_RAW_MTM>(l_rawMTM))
+    //@TODO RTC 246357 attribute MTM and SERIAL_NUMBER not defined
+   // if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_RAW_MTM>(l_rawMTM))
+      if (1)
     {
-        if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_SERIAL_NUMBER>
-                                                         (l_serialNumber))
+       // if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_SERIAL_NUMBER>
+                 //                                        (l_serialNumber))
+        if(1)
         {
             strcat(o_locCode,"OPWR");
             strcat(o_locCode,".");
