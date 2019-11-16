@@ -119,16 +119,56 @@ iv_kwdSize(0), iv_kwd(NULL)
 
     iv_fru.hdatResourceId = i_resourceId;
     size_t theSize[i_num];
+    char *o_fmtKwd = nullptr;
+    uint32_t o_fmtkwdSize = 0;
     //get the SLCA index and the keyword for the RID
+    if ( i_vpdType != BP) //fetch bp vpd from file
+    {
     o_errlHndl = hdatGetAsciiKwd(l_target,iv_kwdSize,iv_kwd,i_vpdType,
                                  i_fetchVpd,i_num,theSize);
 
     HDAT_DBG("hdatGetAsciiKwd returned kwd size =%d",iv_kwdSize);
 
-    char *o_fmtKwd;
-    uint32_t o_fmtkwdSize;
     o_errlHndl = hdatformatAsciiKwd(i_fetchVpd, i_num, theSize, iv_kwd,
                 iv_kwdSize, o_fmtKwd, o_fmtkwdSize, i_pvpdKeywords);
+    }
+    else //bp vpd
+    {
+        UtilFile l_bpFile ("pvpd_bp.dat");
+        if ( !l_bpFile.exists())
+        {
+            HDAT_ERR("the backplane vpd file was not found");
+        }
+        else
+        {
+            o_errlHndl = l_bpFile.open("r");
+            do{
+            if (o_errlHndl)
+            {
+                break;
+            }
+            o_fmtkwdSize = l_bpFile.size();
+            if ( o_fmtkwdSize == 0 )
+            {
+                HDAT_DBG("no vpd data");
+                o_errlHndl = l_bpFile.close();
+                if (o_errlHndl)
+                {
+                    delete o_errlHndl;
+                }
+                break;
+            }
+            o_fmtKwd = new char [o_fmtkwdSize];
+            l_bpFile.read((void *)&o_fmtKwd[0],o_fmtkwdSize);
+            HDAT_DBG("constructed bp vpd data");
+            o_errlHndl = l_bpFile.close();
+            if (o_errlHndl)
+            {
+                delete o_errlHndl;
+            }
+            }while(0);
+        }
+    }
     if( o_fmtKwd != NULL )
     {
         delete[] iv_kwd;
@@ -136,6 +176,7 @@ iv_kwdSize(0), iv_kwd(NULL)
         memcpy(iv_kwd,o_fmtKwd,o_fmtkwdSize);
         iv_kwdSize = o_fmtkwdSize;
         delete[] o_fmtKwd;
+        o_fmtKwd = nullptr;
     }
 
     if(strcmp(i_eyeCatcher,"IO KID")==0)
@@ -237,10 +278,52 @@ iv_kwdSize(0), iv_kwd(NULL)
     iv_fru.hdatResourceId = i_resourceId;
     size_t theSize[i_num];
     //get the SLCA index and the keyword for the RID
+    //TODO does Phyp need the full bp vpd?
+    //or only LX R0 kwd as fsp??
+    if (i_vpdType != BP)
+    {
     o_errlHndl = hdatGetFullRecords(l_target,iv_kwdSize,iv_kwd,i_vpdType,
                                  i_fetchVpd,i_num,theSize);
 
-    HDAT_DBG("hdatGetAsciiKwd returned kwd size =%d",iv_kwdSize);
+    HDAT_DBG("hdatGetFullRecords returned kwd size =%d",iv_kwdSize);
+    }
+    else
+    {
+        UtilFile l_bpFile ("pvpd_bp.dat");
+        if ( !l_bpFile.exists())
+        {
+            HDAT_ERR("the backplane vpd file was not found for full bp vpd");
+        }
+        else
+        {
+            o_errlHndl = l_bpFile.open("r");
+            do{
+                if (o_errlHndl)
+                {
+                    break;
+                }
+            iv_kwdSize = l_bpFile.size();
+            if (iv_kwdSize == 0)
+            {
+                HDAT_DBG("no vpd data");
+                o_errlHndl = l_bpFile.close();
+                if (o_errlHndl)
+                {
+                    delete o_errlHndl;
+                }
+                break;
+            }
+            iv_kwd = new char [iv_kwdSize];
+            l_bpFile.read((void *)&iv_kwd[0], iv_kwdSize);
+            o_errlHndl = l_bpFile.close();
+            if (o_errlHndl)
+            {
+                delete o_errlHndl;
+            }
+            HDAT_DBG("constructed full bp vpd data");
+            }while(0);
+        }
+    }
 
     if(strcmp(i_eyeCatcher,"IO KID")==0)
     {
@@ -265,6 +348,7 @@ iv_kwdSize(0), iv_kwd(NULL)
         memcpy((void *)(temp_buf+iv_kwdSize),temp_lx, LX_RECORD_SIZE);
 
         delete[] temp_lx;
+        temp_lx = nullptr;
         delete[] iv_kwd;
         iv_kwd = temp_buf;
         iv_kwdSize = combined_size;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,7 @@
 #include <../vpd/mvpd.H>
 #include <../vpd/ipvpd.H>
 #include <../vpd/pvpd.H>
+#include <util/utilfile.H>
 using namespace MVPD;
 using namespace PVPD;
 using namespace IPVPD;

@@ -28,6 +28,14 @@ MODULE = hdat
 
 EXTRAINCDIR += ../vpd
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include
+EXTRAINCDIR += ../util
+
+${ROOTPATH}/img/pvpd_bp.dat:
+	cp pvpd_bp.dat ${ROOTPATH}/img/pvpd_bp.dat
+
+code_pass: ${ROOTPATH}/img/pvpd_bp.dat
+
+EXTRA_PARTS = ${ROOTPATH}/img/pvpd_bp.dat
 
 OBJS += hdatutil.o
 OBJS += hdatpcia.o

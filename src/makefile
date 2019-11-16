@@ -330,7 +330,7 @@ endif
 # else we get duplicate modules in the list which causes linker errors.
 export RUNTIME_MODULES_GCOV_BLACKLIST:=$(RUNTIME_MODULES)
 
-RUNTIME_DATA_MODULES +=
+RUNTIME_DATA_MODULES += $(if $(CONFIG_ENABLE_HDAT_IN_HOSTBOOT),pvpd_bp.dat)
 
 #RUNTIME_TESTCASE_MODULES += cxxtest_rt
 #RUNTIME_TESTCASE_MODULES += testsyslib_rt
@@ -372,6 +372,7 @@ securerom_NO_RELOCATION = 1
 # for PRDR_RULE_TABLE_TARGETS
 #include ${ROOTPATH}/src/usr/diag/prdf/common/rule/prdf_rule.mk
 
+hbicore_DATA_MODULES += $(if $(CONFIG_ENABLE_HDAT_IN_HOSTBOOT),pvpd_bp.dat)
 hbicore_DATA_MODULES += ${prd_rule_prf_targets}
 
 hbicore_test_OBJECTS += ${hbicore_OBJECTS}
