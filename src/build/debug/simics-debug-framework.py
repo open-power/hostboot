@@ -675,6 +675,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
 
         hb_tracBinaryBuffer = cpu.r4
         hb_tracBinaryBufferSz = cpu.r5
+        hb_tracBinaryMaxOffset = hb_tracBinaryBuffer + hb_tracBinaryBufferSz
         per_node = 0x200000000000   #32TB
         per_chip = 0x40000000000    #4TB
         hb_hrmor = cpu.hrmor
@@ -684,6 +685,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
         #print ">> hrmor=%X" % hb_hrmor
         #print ">> hb_tracBinaryBuffer=%X" % hb_tracBinaryBuffer
         #print ">> hb_tracBinaryBufferSz=%X" % hb_tracBinaryBufferSz
+        #print ">> hb_tracBinaryMaxOffset=0x%X" % hb_tracBinaryMaxOffset
         #print ">> node_num=%d" % node_num
         #print ">> chip_num=%d" % chip_num
 
@@ -701,6 +703,8 @@ def magic_instruction_callback(user_arg, cpu, arg):
                  (entry[0] + entry[4] >= hb_hrmor + 0x4000000) or
                  (entry[0] == 134217728) or
                  (entry[0] == 136314880))): #0x8000000 or 0x8200000
+                obj = entry[1]
+                size = entry[4]
                 target = entry[5]
                 priority = entry[6]
                 # Check if there is a target that needs to be investigated that
@@ -712,17 +716,18 @@ def magic_instruction_callback(user_arg, cpu, arg):
                         if ((smm_entry[0] == (node_num*per_node)) or
                             (entry[0] == hb_hrmor)):
                             mem_object = simics.SIM_object_name(smm_entry[1])
-                            #print "Found entry %s for hrmor %x" % (mem_object, hb_hrmor)
+                            #print "SMM: Found entry %s for hrmor %x" % (mem_object, hb_hrmor)
                             low_priority = priority
                             #break
                     break
                 # If we find an object later in the list that covers the
                 # correct area then use it.
                 else:
-                    mem_object = simics.SIM_object_name(entry[1])
-                    #print "Found entry %s for hrmor %d" % (mem_object, hb_hrmor)
-                    low_priority = priority
-                    #break
+                    if hb_tracBinaryMaxOffset < size:
+                        mem_object = simics.SIM_object_name(obj)
+                        #print "Found entry %s size=0x%x" % (mem_object, size)
+                        low_priority = priority
+                        #break
 
         if mem_object == None:
             print "Could not find entry for hrmor %d" % (hb_hrmor)
