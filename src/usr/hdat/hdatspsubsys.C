@@ -176,23 +176,57 @@ static errlHndl_t hdatGetPathInfo(
                                                          LPC::LPCHC_FW_SPACE;
         o_pathArray[o_arrayHdr.hdatArrayCnt].hdatLPCHCBarIntRegSpc =
                                                          LPC::LPCHC_INT_REG_SPACE;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatLPCMCTPMemWinBar =
+                                                      LPC::LPCHC_MCTP_PLDM_BASE;
 #ifdef CONFIG_CONSOLE
-        CONSOLE::UartInfo_t l_uartInfo = CONSOLE::getUartInfo(CONSOLE::VUART1);
+        CONSOLE::UartInfo_t l_vuart1Info =
+            CONSOLE::getUartInfo(CONSOLE::VUART1);
 
-        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatBarOfUARTDev =
-                                                    l_uartInfo.lpcBaseAddr;
-        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatSizeofUARTAdrSpc =
-                                                    l_uartInfo.lpcSize;
-        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatUARTFreqHz =
-                                                    l_uartInfo.clockFreqHz;
-        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatCurUARTDevBaudRate =
-                                                    l_uartInfo.freqHz;
-        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatUARTInterruptDetails.
-                                hdatUARTIntrNum = l_uartInfo.interruptNum;
-        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatUARTInterruptDetails.
-                                hdatTriggerType = l_uartInfo.interruptTrigger;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatBarOfVUART1Dev =
+                                                    l_vuart1Info.lpcBaseAddr;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatSizeofVUART1AdrSpc =
+                                                    l_vuart1Info.lpcSize;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatVUART1FreqHz =
+                                                    l_vuart1Info.clockFreqHz;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatCurVUART1DevBaudRate =
+                                                    l_vuart1Info.freqHz;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatVUART1InterruptDetails.
+                                hdatUARTIntrNum = l_vuart1Info.interruptNum;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatVUART1InterruptDetails.
+                                hdatTriggerType = l_vuart1Info.interruptTrigger;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatVUART1InterruptDetails.
+                               hdatIsURARTValid = HDAT_UART_IS_VALID;
 #endif
 
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatKCSDataRegAddr =
+                                                         LPC::KCS_DATA_REG;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatKCSStatusRegAddr =
+                                                         LPC::KCS_STATUS_REG;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatKCSInterruptNum =
+                                                         LPC::KCS_SERIAL_IRQ;
+
+#ifdef CONFIG_CONSOLE
+        CONSOLE::UartInfo_t l_vuart2Info =
+            CONSOLE::getUartInfo(CONSOLE::VUART2);
+
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatBarOfVUART2Dev =
+                                                    l_vuart2Info.lpcBaseAddr;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatSizeofVUART2AdrSpc =
+                                                    l_vuart2Info.lpcSize;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatVUART2FreqHz =
+                                                    l_vuart2Info.clockFreqHz;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatCurVUART2DevBaudRate =
+                                                    l_vuart2Info.freqHz;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatVUART2InterruptDetails.
+                                hdatUARTIntrNum = l_vuart2Info.interruptNum;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatVUART2InterruptDetails.
+                                hdatTriggerType = l_vuart2Info.interruptTrigger;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatVUART2InterruptDetails.
+                               hdatIsURARTValid = HDAT_UART_IS_VALID;
+#endif
+
+// TODO : RTC Story 246408 - Enable IPMI BT support in SP Subsystem
+// 151618 Will relook at this once we get mail from Tom.
 #if 0 //Temp remove until ready CONFIG_BMC_IPMI
         IPMI::BmcInfo_t l_bmcInfo = IPMI::getBmcInfo();
 

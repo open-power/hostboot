@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,6 +66,11 @@ enum hdatSpStatus
  */
 const char HDAT_STRUCT_NAME[] = "SPINFO";
 
+//TODO : : RTC Story 246434 Usage of UART validity flag
+/** @brief Indicates the validity of UVART
+ */
+const uint8_t HDAT_UART_IS_VALID = 1;
+
 /** @brief Structure version number
  */
 const uint16_t HDAT_SP_SUBSYS_VERSION = 0x0021;
@@ -91,7 +96,8 @@ struct uartIntData_t
 {
      uint8_t hdatUARTIntrNum;// UART Interrupt number
      uint8_t hdatTriggerType;// UART interrupt trigger type
-     uint8_t hdatResrved2[2];// Reserved
+     uint8_t hdatIsURARTValid;// UART is valid OR not
+     uint8_t hdatResrved2;// Reserved
 };
 
 /** @brief Structure for Bulk Transfer Interrupt info
@@ -117,13 +123,31 @@ struct hdatSpIoPath_t
     uint32_t     hdatLPCHCBarMemAdrSpc; // 0x0010 LPCHC BAR for MemAdr Space
     uint32_t     hdatLPCHCBarFwAdrSpc;  // 0x0014 LPCHC BAR for FW Adr Space
     uint32_t     hdatLPCHCBarIntRegSpc; // 0x0018 LPCHC BAR for Internal Reg Space
-    uint32_t     hdatReserved1;         // 0x001C Reserved
-    uint64_t     hdatBarOfUARTDev;      // 0x0020 BAR of UART device on LPC bus
-    uint32_t     hdatSizeofUARTAdrSpc;  // 0x0028 Size of UART device adr space
-    uint32_t     hdatUARTFreqHz;        // 0x002C Clock Frequcny of UART buad clock
-    uint32_t     hdatCurUARTDevBaudRate;// 0x0030 Current Baud rate of UART device
-    uartIntData_t  hdatUARTInterruptDetails; // 0x0034 UART interrupt details
-    btIntData_t    hdatBTInterruptDetails;   // 0x0048 Bulk Tansfer Interrupt Details
+    uint32_t     hdatLPCMCTPMemWinBar;  // 0x001C LPC MCTP Memory Window Base
+                                        //        Address
+    uint64_t     hdatBarOfVUART1Dev;    // 0x0020 BAR of VUART1 device on LPC
+                                        //        bus
+    uint32_t     hdatSizeofVUART1AdrSpc;// 0x0028 Size of VUART1 device adr
+                                        //        space
+    uint32_t     hdatVUART1FreqHz;      // 0x002C Clock Frequcny of VUART1 buad
+                                        //        clock
+    uint32_t     hdatCurVUART1DevBaudRate;    // 0x0030 Current Baud rate of
+                                              //        VUART1 device
+    uartIntData_t  hdatVUART1InterruptDetails;// 0x0034 VUART1 interrupt details
+    uint16_t     hdatKCSDataRegAddr;          // 0x0038 KCS Data Register
+                                              //        Address
+    uint16_t     hdatKCSStatusRegAddr;        // 0x003A KCS Status Register
+                                              //        Address
+    uint8_t      hdatKCSInterruptNum;         // 0x003C KCS Interrupt Number
+    uint64_t     hdatBarOfVUART2Dev;          // 0x003D BAR of VUART2 device on
+                                              //        LPC bus
+    uint32_t     hdatSizeofVUART2AdrSpc;      // 0x0045 Size of VUART2 device
+                                              //        adr space
+    uint32_t     hdatVUART2FreqHz;            // 0x0049 Clock Frequcny of VUART2
+                                              //        buad clock
+    uint32_t     hdatCurVUART2DevBaudRate;    // 0x004D Current Baud rate of
+                                              //        VUART2 device
+    uartIntData_t  hdatVUART2InterruptDetails;// 0x0051 VUART2 interrupt details
 } __attribute__ ((packed));
 
 #define HDAT_NON_FUNCTIONAL 0 // PSI link is not functional
