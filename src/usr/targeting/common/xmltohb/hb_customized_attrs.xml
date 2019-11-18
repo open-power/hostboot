@@ -539,6 +539,11 @@
     </attribute>
 
     <attribute>
+          <id>ATTR_PROC_XSCOM_BAR_BASE_ADDR_OFFSET</id>
+          <default>0x3FC00000000</default>
+    </attribute>
+
+    <attribute>
           <id>ATTR_ISDIMM_MBVPD_INDEX</id>
           <no_export/>
     </attribute>
