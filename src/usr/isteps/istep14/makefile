@@ -65,15 +65,10 @@ OBJS += call_proc_exit_cache_contained.o
 
 include ${ROOTPATH}/procedure.rules.mk
 include ${PROCEDURE_PATH}/hwp/nest/p10_exit_cache_contained.mk
-include ${PROCEDURE_PATH}/hwp/nest/p10_sbe_exit_cache_contained.mk
-include ${PROCEDURE_PATH}/hwp/nest/p10_sbe_stop_hb.mk
-include ${PROCEDURE_PATH}/hwp/nest/p10_sbe_purge_hb.mk
-include ${PROCEDURE_PATH}/hwp/nest/p10_sbe_apply_xscom_inits.mk
 include ${PROCEDURE_PATH}/hwp/nest/p10_l2_flush.mk
 include ${PROCEDURE_PATH}/hwp/nest/p10_l3_flush.mk
 #include ${PROCEDURE_PATH}/hwp/nest/p10_adu_setup.mk
 include ${PROCEDURE_PATH}/hwp/nest/p10_adu_access.mk
-include ${PROCEDURE_PATH}/hwp/core/p10_sbe_instruct_start.mk
 include ${PROCEDURE_PATH}/hwp/nest/p10_revert_sbe_mcs_setup.mk
 
 # TODO: RTC 159164: Multiple definition linker errors on HWPs that include the
