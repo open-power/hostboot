@@ -908,6 +908,12 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
         iv_spPcrd->hdatChipData.hdatPcrdCheckstopAddr = HDAT_SW_CHKSTP_FIR_SCOM;
         iv_spPcrd->hdatChipData.hdatPcrdSpareBitNum   = HDAT_SW_CHKSTP_FIR_SCOM_BIT_POS;
 
+        auto l_topIdTable = l_pSysTarget->getAttrAsStdArr
+            <TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE>();
+        std::copy(&l_topIdTable[0], &l_topIdTable[0]+std::size(l_topIdTable),
+            iv_spPcrd->hdatChipData.hdatPcrdTopologyIdTab);
+        iv_spPcrd->hdatChipData.hdatPcrdTopologyIdIndex =
+            iv_spPcrd->hdatChipData.hdatPcrdTopologyIdTab[0];
     }
     while(0);
     return l_errl;

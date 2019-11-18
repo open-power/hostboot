@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -111,7 +111,12 @@ struct hdatPcrdChipInfo_t
     uint32_t  hdatPcrdStopLevelSupport; // 0x0040 Supported Stop Level
     uint32_t  hdatPcrdCheckstopAddr;    // 0x0044 SW Checkstop FIR SCom address
     uint8_t   hdatPcrdSpareBitNum;      // 0x0048 Bit position to set for FIR scom
-    uint8_t   reserved_02[3];           // 0x0049 Reserved 
+    uint8_t   hdatPcrdTopologyIdTab
+              [sizeof(TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE_type)];
+                                        // 0x0049 Topology ID table
+    uint8_t   hdatPcrdTopologyIdIndex;  // 0x0069 index in the topology id array
+                                        //        to indicate the primary
+                                        //        topology id
 } __attribute__ ((packed));
 
 /* @brief Defines 'chip time-of-day structure in the PCRD */
