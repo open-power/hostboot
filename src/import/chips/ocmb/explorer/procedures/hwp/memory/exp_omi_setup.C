@@ -92,12 +92,15 @@ extern "C"
             fapi2::buffer<uint64_t> l_dlx_config1_data;
 
             uint8_t l_edpl_disable = 0;
-            bool l_is_enterprise = false;
+            uint8_t l_enterprise_attr = 0;
             bool l_is_half_dimm = false;
+            bool l_is_enterprise = false;
 
             // Gets the configuration information from attributes
-            FAPI_TRY(mss::enterprise_mode(i_target, l_is_enterprise));
-            FAPI_TRY(mss::half_dimm_mode(i_target, l_is_half_dimm));
+            FAPI_TRY(mss::attr::get_ocmb_enterprise_mode(i_target, l_enterprise_attr));
+            l_is_enterprise = (l_enterprise_attr == fapi2::ENUM_ATTR_MSS_OCMB_ENTERPRISE_MODE_ENTERPRISE);
+
+            FAPI_TRY(mss::half_dimm_mode(i_target, l_is_enterprise, l_is_half_dimm));
             FAPI_TRY(mss::attr::get_mss_omi_edpl_disable(l_edpl_disable));
 
             // Prints out the data
