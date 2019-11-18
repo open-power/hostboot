@@ -44,6 +44,7 @@
 #include <targeting/common/commontargeting.H>
 #include <hwas/common/deconfigGard.H>
 #include <hwas/common/hwasError.H>
+#include <targeting/common/target.H>
 
 namespace HWAS
 {
@@ -199,24 +200,24 @@ typedef std::vector<TargetInfo> TargetInfoVector;
 void invokePresentByAssoc();
 
 /**
+ * @brief Deconfigures a target based on type
+ *
+ * Called by invokePresentByAssoc() after presentByAssoc() is called
+ *
+ * @param[in] i_targInfo TargetInfo for the target to be deconfigured
+ */
+void deconfigPresentByAssoc(TargetInfo i_targInfo);
+
+/**
  * @brief Algorithm to validate the memory target structure.
  *
- * For non direct memory, check if a MCS has a MEMBUF, a MEMBUF has a MBA,
- * and the MBA has a DIMM.
+ * This function ensures that targets are deconfigured appropriately based on
+ * whether their parents or children are functional.
  *
- * For direct memory, check if a MCS has a MCA, and a MCA has a DIMM.
- *
- * The vector o_funcTargets is sorted by affinity path to allow a single pass
- * with some backtracking to check every scenario more efficiently.
- * These checks are needed because of scenarios where targets are non-present
- * and their related targets are not marked as deconfigured
- *
- * @param[in/out] io_funcTargets    A vector of functional memory targets
- * @param[out]    o_targToDeconfig  A vector of targets to deconfigure, done
- *                                  this way to allow unit tests
+ * @param[in] i_funcTargets A vector of functional memory targets. The vector
+ *                          contains no meaningful data after the function returns.
  */
-void presentByAssoc(TargetInfoVector& io_funcTargets,
-                    TargetInfoVector& o_targToDeconfig);
+void presentByAssoc(TARGETING::TargetHandleList& i_funcTargets);
 
 /**
 * @brief Algorithm to set up the EQ_GARD and EC_GARD attributes on the proc

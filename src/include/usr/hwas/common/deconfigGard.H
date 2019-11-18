@@ -133,6 +133,8 @@ public:
     //  used in TARGETING::HwasSate.deconfiguredByEid
     enum DeconfiguredByReason
     {
+        INVALID_DECONFIGURED_BY_REASON,
+
         DECONFIGURED_BY_CODE_BASE               = 0x0000FF00,
 
         // set when GARD_User_Manual
@@ -213,6 +215,9 @@ public:
         DECONFIGURED_BY_NO_PARENT_OCMB_CHIP,    // BASE | 0x22
         DECONFIGURED_BY_NO_PARENT_OMIC,         // BASE | 0x23
         DECONFIGURED_BY_INACTIVE_PAU,           // BASE | 0x24
+        DECONFIGURED_BY_NO_CHILD_OMIC,          // BASE | 0x25
+        DECONFIGURED_BY_NO_CHILD_MCC,           // BASE | 0x26
+        DECONFIGURED_BY_NO_PARENT_MEM_PORT,     // BASE | 0x27
 
         // mask - these bits mean it's a PLID and not an enum
         DECONFIGURED_BY_PLID_MASK                = 0xFFFF0000,

@@ -68,6 +68,8 @@
 
 #define TEST_SAVE_RESTORE_SYSTEM_STATE    0
 
+#include <algorithm>
+
 using namespace HWAS;
 using namespace TARGETING;
 
@@ -5181,6 +5183,156 @@ public:
         }
     }
 
+    // @brief Simple type/instance pair describing a component of an entity path
+    // for used in presentByAssocTestPath. The instance number defaults to zero.
+    struct entityPathComponent
+    {
+        TYPE targetType;
+        int instance = 0;
+
+        entityPathComponent(const TYPE i_type, const int i_instance = 0)
+            : targetType(i_type), instance(i_instance)
+        { }
+    };
+
+    // @brief A structure containing the path to an entity (rooted in
+    // sys0node0proc0) and whether the entity should be functional after
+    // presentByAssoc is run.
+    struct presentByAssocTestPath
+    {
+        // If true, the target described by entityPathComponents should be
+        // functional after presentByAssoc is run, otherwise it should be
+        // nonfunctional.
+        bool shouldBeFunctional;
+
+        // The affinity path to an entity (rooted in sys0node0proc0) described by
+        // instances of entityPathComponent. For example, if entityPathComponents is
+        //   { {TYPE_MC, 1}, {TYPE_MI, 0} }
+        // then the entity represented is at the path
+        //   sys0/node0/proc0/mc1/mi0
+        std::vector<entityPathComponent> entityPathComponents;
+    };
+
+    // @brief Called at the beginning of a presentByAssoc test to deconfigure
+    // all MCs and their children. This is so that whatever targets the test
+    // specifies as being initially functional are the only functional targets
+    // in the memory targeting hierarchy.
+    static void deconfigAllMc()
+    {
+        TargetHandleList l_funcMCTargetList;
+        getAllChiplets(l_funcMCTargetList, TYPE_MC, true);
+
+        for (const auto l_mc : l_funcMCTargetList)
+        {
+            TargetInfo l_mcinfo;
+            l_mcinfo.pThisTarget = l_mc;
+            l_mcinfo.affinityPath = l_mc->getAttr<ATTR_AFFINITY_PATH>();
+            l_mcinfo.type = l_mc->getAttr<ATTR_TYPE>();
+
+            // Recursively deconfigure children
+            deconfigPresentByAssoc(l_mcinfo);
+        }
+    }
+
+    /* @brief This function runs a test on presentByAssoc.
+     *
+     * It expects a list of entity paths and functionality expectations; it then
+     * deconfigures everything in the memory hierarchy except the targets
+     * mentioned in the list of paths, runs presentByAssoc, and then checks that
+     * each target mentioned by the test has been deconfigured or not, as
+     * specified by each element of the list.
+     *
+     * @brief i_testPaths List of entity paths to test.
+     * @return bool Whether all paths were functional or not as expected.
+     */
+    static bool runDeconfigPresentByAssocTest(
+        const std::vector<presentByAssocTestPath>& i_testPaths
+    )
+    {
+        bool l_success = true;
+
+        TargetHandleList l_targets;
+
+        EntityPath l_root(EntityPath::PATH_AFFINITY);
+        l_root.addLast(TYPE_SYS, 0).addLast(TYPE_NODE, 0).addLast(TYPE_PROC, 0);
+
+        // Save the HWAS state of all targets so that we can restore the system
+        // state after running the test
+        saveSystemState();
+
+        // Start off with everything deconfigured
+        deconfigAllMc();
+
+        // Enable all targets listed in the test
+        for (const auto& l_targetInfo : i_testPaths)
+        {
+            auto l_entPath = l_root;
+
+            for (const auto l_component : l_targetInfo.entityPathComponents)
+            {
+                l_entPath.addLast(l_component.targetType, l_component.instance);
+            }
+
+            Target* const l_targ = targetService().toTarget(l_entPath);
+
+            if (!l_targ)
+            {
+                char* l_affinityPath = l_entPath.toString();
+
+                TS_FAIL("runDeconfigPresentByAssocTest: "
+                        "Invalid test case, target does not exist: bad entity path: %s",
+                        l_affinityPath);
+
+                free(l_affinityPath);
+                l_affinityPath = nullptr;
+
+                return false;
+            }
+
+            auto l_hwasState = l_targ->getAttr<ATTR_HWAS_STATE>();
+            l_hwasState.functional = true;
+            l_targ->setAttr<ATTR_HWAS_STATE>(l_hwasState);
+
+            l_targets.push_back(l_targ);
+        }
+
+        // Run presentByAssoc, which should deconfigure targets
+        {
+            auto l_scratchTargets = l_targets;
+            presentByAssoc(l_scratchTargets);
+        }
+
+        // Ensure that every target was deconfigured or not, as specified by
+        // each test path
+        for (size_t i = 0; i < l_targets.size(); ++i)
+        {
+            const auto& l_target = l_targets[i];
+            const auto l_targetInfo = i_testPaths[i];
+
+            if (l_target->getAttr<ATTR_HWAS_STATE>().functional
+                != l_targetInfo.shouldBeFunctional)
+            {
+                char* l_affinityPath
+                    = l_target->getAttr<ATTR_AFFINITY_PATH>().toString();
+
+                TS_FAIL("runDeconfigPresentByAssocTest: Testcase failed: "
+                        "%s -> functional is %d but should be %d",
+                        l_affinityPath,
+                        !l_targetInfo.shouldBeFunctional,
+                        l_targetInfo.shouldBeFunctional);
+
+                free(l_affinityPath);
+                l_affinityPath = nullptr;
+
+                l_success = false;
+            }
+        }
+
+        restoreSystemState();
+
+        return l_success;
+    }
+
     /**
      *  @brief Test Deconfig Present Association 1
      */
@@ -5189,105 +5341,54 @@ public:
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc1: Started");
         HWAS_INF("testdeconfigPresentByAssoc1: Started");
 
-        // This tests the scenario where there is 1 mc, mi, dmi, membuff, mba and dimm
+        // This tests the scenario where there is 1 mc, mi, omic, mcc, omi and
+        // ocmb, mem_port, and dimm
+
         // This is done to ensure that the algorithm works on each edge case
 
-        TargetInfoVector l_targets;
-        TargetInfoVector l_targToDeconfig;
-        TargetInfo l_TargetInfo;
-
-        l_TargetInfo.pThisTarget = nullptr;
-        EntityPath l_ep[6];
-
-        // MC only
-        l_ep[0].addLast(TYPE_MC, 0);
-        l_TargetInfo.affinityPath = l_ep[0]; // SHOULD GET DECONFIGURED
-        l_TargetInfo.type = TYPE_MC;
-
-        l_targets.push_back(l_TargetInfo);
-
-        presentByAssoc(l_targets, l_targToDeconfig);
-
-        // MI only
-        l_ep[1].addLast(TYPE_MC, 0);
-        l_ep[1].addLast(TYPE_MI, 0);
-        l_TargetInfo.affinityPath = l_ep[1]; // SHOULD GET DECONFIGURED
-        l_TargetInfo.type = TYPE_MI;
-
-        l_targets.push_back(l_TargetInfo);
-
-        presentByAssoc(l_targets, l_targToDeconfig);
-
-        // DMI only
-        l_ep[2].addLast(TYPE_MC, 0);
-        l_ep[2].addLast(TYPE_MI, 0);
-        l_ep[2].addLast(TYPE_DMI, 0);
-        l_TargetInfo.affinityPath = l_ep[2]; // SHOULD GET DECONFIGURED
-        l_TargetInfo.type = TYPE_DMI;
-
-        l_targets.push_back(l_TargetInfo);
-
-        presentByAssoc(l_targets, l_targToDeconfig);
-
-        // MEMBUF only
-        l_ep[3].addLast(TYPE_MC, 0);
-        l_ep[3].addLast(TYPE_MI, 0);
-        l_ep[3].addLast(TYPE_DMI, 0);
-        l_ep[3].addLast(TYPE_MEMBUF, 0);
-        l_TargetInfo.affinityPath = l_ep[3]; // SHOULD GET DECONFIGURED
-        l_TargetInfo.type = TYPE_MEMBUF;
-        l_targets.push_back(l_TargetInfo);
-
-        presentByAssoc(l_targets, l_targToDeconfig);
-
-        // MBA only
-        l_ep[4].addLast(TYPE_MC, 0);
-        l_ep[4].addLast(TYPE_MI, 0);
-        l_ep[4].addLast(TYPE_DMI, 0);
-        l_ep[4].addLast(TYPE_MEMBUF, 0);
-        l_ep[4].addLast(TYPE_MBA, 0);
-        l_TargetInfo.affinityPath = l_ep[4]; // SHOULD GET DECONFIGURED
-        l_TargetInfo.type = TYPE_MBA;
-        l_targets.push_back(l_TargetInfo);
-
-        presentByAssoc(l_targets, l_targToDeconfig);
-
-        // DIMM only
-        l_ep[5].addLast(TYPE_MC, 0);
-        l_ep[5].addLast(TYPE_MI, 0);
-        l_ep[5].addLast(TYPE_DMI, 0);
-        l_ep[5].addLast(TYPE_MEMBUF, 0);
-        l_ep[5].addLast(TYPE_MBA, 0);
-        l_ep[5].addLast(TYPE_DIMM, 0);
-        l_TargetInfo.affinityPath = l_ep[5]; // SHOULD GET DECONFIGURED
-        l_TargetInfo.type = TYPE_DIMM;
-        l_targets.push_back(l_TargetInfo);
-
-        presentByAssoc(l_targets, l_targToDeconfig);
-
-        // Check result
-        std::sort(l_targToDeconfig.begin(), l_targToDeconfig.end(),
-              compareAffinityCXX);
-        if ((l_targToDeconfig.size() == 6) &&
-            (l_targToDeconfig[0].affinityPath == l_ep[0]) &&
-            (l_targToDeconfig[1].affinityPath == l_ep[1]) &&
-            (l_targToDeconfig[2].affinityPath == l_ep[2]) &&
-            (l_targToDeconfig[3].affinityPath == l_ep[3]) &&
-            (l_targToDeconfig[4].affinityPath == l_ep[4]) &&
-            (l_targToDeconfig[5].affinityPath == l_ep[5]) )
+        const std::vector<presentByAssocTestPath> l_testCases[] =
         {
-            TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc1: Success");
-        }
-        else
-        {
-            TS_FAIL("testdeconfigPresentByAssoc1: incorrect configuration returned");
-            for (uint8_t i=0;i<l_targToDeconfig.size();i++)
+            // Each one of these is a separate test. Each test has only a single
+            // functional target, which is expected to be deconfigured by
+            // presentByAssoc.
             {
-                char *s = l_targToDeconfig[i].affinityPath.toString();
-                TS_WARN("deconfig %s reason %x",s, l_targToDeconfig[i].reason);
-                free(s);
+                { false,      // This target will not be functional after presentByAssoc
+                  { TYPE_MC } // Path to the target (rooted in sys0node0proc0, i.e. sys0node0proc0mc0)
+                },
+            },
+            {
+                { false, { TYPE_MC, TYPE_MI } },
+            },
+            {
+                { false, { TYPE_MC, TYPE_OMIC } },
+            },
+            {
+                { false, { TYPE_MC, TYPE_MI, TYPE_MCC } },
+            },
+            {
+                { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
+            },
+            {
+                { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
+            },
+            {
+                { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+            },
+            {
+                { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+            },
+        };
+
+        // Run each testcase
+        for (const auto& l_testCase : l_testCases)
+        {
+            if (!runDeconfigPresentByAssocTest(l_testCase))
+            {
+                TS_INFO("testdeconfigPresentByAssoc1: incorrect configuration returned");
             }
         }
+
+        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc1: Exit");
     }
 
     /**
@@ -5298,99 +5399,30 @@ public:
         TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc2: Started");
         HWAS_INF("testdeconfigPresentByAssoc2: Started");
 
-        // This test the scenario where MC Group 0 does not have a membuf
-        // MC Group 1 is fully populated
+        // This test the scenario where MC Group 1 does not have any children
+        // MC Group 0 is fully populated
 
-        // User-defined number of targets
-        size_t NUM_TARGS = 7;
+        const std::vector<presentByAssocTestPath> l_testCase = {
+            // MC 1 (has nothing)
+            { false, { {TYPE_MC, 1} } },
 
-        // Input target vector
-        TargetInfoVector l_targets;
-        TargetInfo l_TargInfo;
-        EntityPath l_ep[NUM_TARGS];
-        l_TargInfo.pThisTarget = nullptr;
-        l_TargInfo.affinityPath = l_ep[0];
-        l_targets.insert(l_targets.begin(), NUM_TARGS, l_TargInfo);
-        // Output target vector
-        TargetInfoVector l_targToDeconfig;
+            // MC 0 (fully populated)
+            { true, { TYPE_MC } },
+            { true, { TYPE_MC, TYPE_MI } },
+            { true, { TYPE_MC, TYPE_OMIC } },
+            { true, { TYPE_MC, TYPE_MI, TYPE_MCC } },
+            { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
+            { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
+            { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+            { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+        };
 
-        // Add MC Group 0
-        //l_targets[0].pThisTarget = nullptr;
-        l_targets[0].affinityPath.addLast(TYPE_MC, 0);
-        l_ep[0] = l_targets[0].affinityPath; // SHOULD GET DECONFIGURED
-        l_targets[0].type = TYPE_MC;
-
-        // Add MEMBUF Group 1
-        //l_targets[1].pThisTarget = nullptr;
-        l_targets[1].affinityPath.addLast(TYPE_MC,1);
-        l_targets[1].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[1].affinityPath.addLast(TYPE_DMI, 0);
-        l_targets[1].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_ep[1] = l_targets[1].affinityPath;
-        l_targets[1].type = TYPE_MEMBUF;
-
-        // Add MBA Group 1
-        //l_targets[2].pThisTarget = nullptr;
-        l_targets[2].affinityPath.addLast(TYPE_MC,1);
-        l_targets[2].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[2].affinityPath.addLast(TYPE_DMI, 0);
-        l_targets[2].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_targets[2].affinityPath.addLast(TYPE_MBA, 0);
-        l_ep[2] = l_targets[2].affinityPath;
-        l_targets[2].type = TYPE_MBA;
-
-        // Add DIMM Group 1
-        //l_targets[3].pThisTarget = nullptr;
-        l_targets[3].affinityPath.addLast(TYPE_MC,1);
-        l_targets[3].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[3].affinityPath.addLast(TYPE_DMI, 0);
-        l_targets[3].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_targets[3].affinityPath.addLast(TYPE_MBA, 0);
-        l_targets[3].affinityPath.addLast(TYPE_DIMM, 0);
-        l_ep[3] = l_targets[3].affinityPath;
-        l_targets[3].type = TYPE_DIMM;
-
-        // Add MI Group 1
-        //l_targets[4].pThisTarget = nullptr;
-        l_targets[4].affinityPath.addLast(TYPE_MC,1);
-        l_targets[4].affinityPath.addLast(TYPE_MI, 0);
-        l_ep[4] = l_targets[4].affinityPath;
-        l_targets[4].type = TYPE_MI;
-
-        // Add DMI Group 1
-        //l_targets[5].pThisTarget = nullptr;
-        l_targets[5].affinityPath.addLast(TYPE_MC,1);
-        l_targets[5].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[5].affinityPath.addLast(TYPE_DMI, 0);
-        l_ep[5] = l_targets[5].affinityPath;
-        l_targets[5].type = TYPE_DMI;
-
-
-        // Add MC Group 1
-        l_targets[6].affinityPath.addLast(TYPE_MC,1);
-        l_ep[6] = l_targets[6].affinityPath;
-        l_targets[6].type = TYPE_MC;
-
-        presentByAssoc(l_targets, l_targToDeconfig);
-
-        // Check result
-        std::sort(l_targToDeconfig.begin(), l_targToDeconfig.end(),
-              compareAffinityCXX);
-        if ((l_targToDeconfig.size() == 1) &&
-            (l_targToDeconfig[0].affinityPath == l_ep[0]) )
+        if (!runDeconfigPresentByAssocTest(l_testCase))
         {
-            TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc2: Success");
+            TS_INFO("testdeconfigPresentByAssoc2: incorrect configuration returned");
         }
-        else
-        {
-            TS_FAIL("testdeconfigPresentByAssoc2: incorrect configuration returned");
-            for (uint8_t i=0;i<l_targToDeconfig.size();i++)
-            {
-                char *s = l_targToDeconfig[i].affinityPath.toString();
-                TS_WARN("deconfig %s reason %x",s, l_targToDeconfig[i].reason);
-                free(s);
-            }
-        }
+
+        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc2: Exit");
     }
 
     /**
@@ -5401,125 +5433,36 @@ public:
         TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc3: Started");
         HWAS_INF("testdeconfigPresentByAssoc3: Started");
 
-        // This test the scenario where MEMBUF Group 1 has no DMI and then
-        // DIMM Group 1 has no MEMBUF because MEMBUF 1 will be marked for
-        // deconfigure
+        // This test the scenario where OMI group 1 is missing an OCMB chip so
+        // it deconfigures the whole chain up to (but not including) the parent
+        // MCC
 
-        // User-defined number of targets
-        size_t NUM_TARGS = 9;
+        const std::vector<presentByAssocTestPath> l_testCase = {
+            { true, { TYPE_MC } },
+            { true, { TYPE_MC, TYPE_MI } },
+            { true, { TYPE_MC, TYPE_OMIC } },
+            { false, { TYPE_MC, {TYPE_OMIC, 1} } }, // deconfigured because MCC 1 has no functional OMIs
+            { true, { TYPE_MC, TYPE_MI, TYPE_MCC } },
 
-        // Input target vector
-        TargetInfoVector l_targets;
-        TargetInfo l_TargInfo;
-        EntityPath l_ep[NUM_TARGS];
-        l_TargInfo.affinityPath = l_ep[0];
-        l_targets.insert(l_targets.begin(), NUM_TARGS, l_TargInfo);
-        // Output target vector
-        TargetInfoVector l_targToDeconfig;
+            // OMI group 0
+            { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
+            { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
+            { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+            { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
 
-        // Add DMI Group 0
-        l_targets[0].pThisTarget = nullptr;
-        l_targets[0].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[0].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[0].affinityPath.addLast(TYPE_DMI, 0);
-        l_ep[0] = l_targets[0].affinityPath;
-        l_targets[0].type = TYPE_DMI;
+            // OMI group 1
+            { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1} } },
+            // No OCMB chip here
+            { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+            { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+        };
 
-        // Add MEMBUF Group 0
-        l_targets[1].pThisTarget = nullptr;
-        l_targets[1].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[1].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[1].affinityPath.addLast(TYPE_DMI, 0);
-        l_targets[1].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_ep[1] = l_targets[1].affinityPath;
-        l_targets[1].type = TYPE_MEMBUF;
-
-        // Add MBA Group 0
-        l_targets[2].pThisTarget = nullptr;
-        l_targets[2].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[2].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[2].affinityPath.addLast(TYPE_DMI, 0);
-        l_targets[2].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_targets[2].affinityPath.addLast(TYPE_MBA, 0);
-        l_ep[2] = l_targets[2].affinityPath;
-        l_targets[2].type = TYPE_MBA;
-
-        // Add MBA Group 1
-        l_targets[3].pThisTarget = nullptr;
-        l_targets[3].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[3].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[3].affinityPath.addLast(TYPE_DMI, 1);
-        l_targets[3].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_targets[3].affinityPath.addLast(TYPE_MBA, 0);
-        l_ep[3] = l_targets[3].affinityPath; // SHOULD GET DECONFIGURED
-        l_targets[3].type = TYPE_MBA;
-
-        // Add MEMBUF Group 1
-        l_targets[4].pThisTarget = nullptr;
-        l_targets[4].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[4].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[4].affinityPath.addLast(TYPE_DMI, 1);
-        l_targets[4].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_ep[4] = l_targets[4].affinityPath; // SHOULD GET DECONFIGURED
-        l_targets[4].type = TYPE_MEMBUF;
-
-        // Add DIMM Group 0
-        l_targets[5].pThisTarget = nullptr;
-        l_targets[5].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[5].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[5].affinityPath.addLast(TYPE_DMI, 0);
-        l_targets[5].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_targets[5].affinityPath.addLast(TYPE_MBA, 0);
-        l_targets[5].affinityPath.addLast(TYPE_DIMM, 0);
-        l_ep[5] = l_targets[5].affinityPath;
-        l_targets[5].type = TYPE_DIMM;
-
-        // Add DIMM Group 1
-        l_targets[6].pThisTarget = nullptr;
-        l_targets[6].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[6].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[6].affinityPath.addLast(TYPE_DMI, 1);
-        l_targets[6].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_targets[6].affinityPath.addLast(TYPE_MBA, 0);
-        l_targets[6].affinityPath.addLast(TYPE_DIMM, 0);
-        l_ep[6] = l_targets[6].affinityPath; // SHOULD GET DECONFIGURED
-        l_targets[6].type = TYPE_DIMM;
-
-        // Add MC
-        l_targets[7].pThisTarget = nullptr;
-        l_targets[7].affinityPath.addLast(TYPE_MC, 0);
-        l_ep[7] = l_targets[7].affinityPath;
-        l_targets[7].type = TYPE_MC;
-
-        // Add MI
-        l_targets[8].pThisTarget = nullptr;
-        l_targets[8].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[8].affinityPath.addLast(TYPE_MI, 0);
-        l_ep[8] = l_targets[8].affinityPath;
-        l_targets[8].type = TYPE_MI;
-
-        presentByAssoc(l_targets, l_targToDeconfig);
-
-        // Check result
-        std::sort(l_targToDeconfig.begin(), l_targToDeconfig.end(),
-              compareAffinityCXX);
-        if ((l_targToDeconfig.size() == 3) &&
-            (l_targToDeconfig[0].affinityPath == l_ep[4]) && // 0010 MEMBUF
-            (l_targToDeconfig[1].affinityPath == l_ep[3]) && // 00100 MBA
-            (l_targToDeconfig[2].affinityPath == l_ep[6]) )  // 001000 DIMM
+        if (!runDeconfigPresentByAssocTest(l_testCase))
         {
-            TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc3: Success");
+            TS_INFO("testdeconfigPresentByAssoc3: incorrect configuration returned");
         }
-        else
-        {
-            TS_FAIL("testdeconfigPresentByAssoc3: incorrect configuration returned");
-            for (uint8_t i=0;i<l_targToDeconfig.size();i++)
-            {
-                char *s = l_targToDeconfig[i].affinityPath.toString();
-                TS_WARN("deconfig %s reason %x",s, l_targToDeconfig[i].reason);
-                free(s);
-            }
-        }
+
+        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc3: Exit");
     }
 
     /**
@@ -5530,74 +5473,40 @@ public:
         TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc4: Started");
         HWAS_INF("testdeconfigPresentByAssoc4: Started");
 
-        // This test the scenario where MEMBUF Group 0 has no MBAs causing
+        // This test the scenario where OCMB_CHIP Group 0 has no MEM_PORTs causing
         // MC Group 0 to also be deconfigured.
 
-        // User-defined number of targets
-        size_t NUM_TARGS = 4;
-
-        // Input target vector
-        TargetInfoVector l_targets;
-        TargetInfo l_TargInfo;
-        EntityPath l_ep[NUM_TARGS];
-        l_TargInfo.affinityPath = l_ep[0];
-        l_targets.insert(l_targets.begin(), NUM_TARGS, l_TargInfo);
-        // Output target vector
-        TargetInfoVector l_targToDeconfig;
-
-        // Add MC Group 0
-        l_targets[0].pThisTarget = nullptr;
-        l_targets[0].affinityPath.addLast(TYPE_MC, 0);
-        l_ep[0] = l_targets[0].affinityPath; // SHOULD BE DECONFIGURED
-        l_targets[0].type = TYPE_MC;
-
-        // Add MI Group 0
-        l_targets[1].pThisTarget = nullptr;
-        l_targets[1].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[1].affinityPath.addLast(TYPE_MI, 0);
-        l_ep[1] = l_targets[1].affinityPath; // SHOULD BE DECONFIGURED
-        l_targets[1].type = TYPE_MI;
-
-        // Add DMI Group 0
-        l_targets[2].pThisTarget = nullptr;
-        l_targets[2].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[2].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[2].affinityPath.addLast(TYPE_DMI, 0);
-        l_ep[2] = l_targets[2].affinityPath; // SHOULD BE DECONFIGURED
-        l_targets[2].type = TYPE_DMI;
-
-        // Add MEMBUF Group 0
-        l_targets[3].pThisTarget = nullptr;
-        l_targets[3].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[3].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[3].affinityPath.addLast(TYPE_DMI, 0);
-        l_targets[3].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_ep[3] = l_targets[3].affinityPath; // SHOULD BE DECONFIGURED
-        l_targets[3].type = TYPE_MEMBUF;
-
-        presentByAssoc(l_targets, l_targToDeconfig);
-
-        // Check result
-        std::sort(l_targToDeconfig.begin(), l_targToDeconfig.end(),
-              compareAffinityCXX);
-        if ((l_targToDeconfig.size() == 4) &&
-            (l_targToDeconfig[0].affinityPath == l_ep[0]) && // 0 MC
-            (l_targToDeconfig[1].affinityPath == l_ep[1]) && // 00 MI
-            (l_targToDeconfig[2].affinityPath == l_ep[2]) && // 000 DMI
-            (l_targToDeconfig[3].affinityPath == l_ep[3]) )  // 0000 MEMBUF
+        const std::vector<presentByAssocTestPath> l_testCases[] =
         {
-            TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc4: Success");
-        }
-        else
+            { // baseline functional
+                { true, { TYPE_MC } },
+                { true, { TYPE_MC, TYPE_MI } },
+                { true, { TYPE_MC, TYPE_OMIC } },
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC } },
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } }
+            },
+            { // missing MEM_PORT causes deconfiguration
+                { false, { TYPE_MC } },
+                { false, { TYPE_MC, TYPE_MI } },
+                { false, { TYPE_MC, TYPE_OMIC } },
+                { false, { TYPE_MC, TYPE_MI, TYPE_MCC } },
+                { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
+                { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } }
+            }
+        };
+
+        for (const auto& l_testCase : l_testCases)
         {
-            TS_FAIL("testdeconfigPresentByAssoc4: incorrect configuration returned");
-            for (uint8_t i=0;i<l_targToDeconfig.size();i++)
+            if (!runDeconfigPresentByAssocTest(l_testCase))
             {
-                char *s = l_targToDeconfig[i].affinityPath.toString();
-                TS_WARN("deconfig %s reason %x",s, l_targToDeconfig[i].reason);
-                free(s);
+                TS_INFO("testdeconfigPresentByAssoc4: incorrect configuration returned");
             }
         }
+
+        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc4: Exit");
     }
 
     /**
@@ -5608,128 +5517,53 @@ public:
         TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc5: Started");
         HWAS_INF("testdeconfigPresentByAssoc5: Started");
 
-        // This test the scenario where MEMBUF Group 0 and MBA Group 0 having
-        // no DMI. This tests the DMIINDEX edge case because one never existed
+        // This test the scenario where a PMIC has no OCMB_CHIP parent, we make
+        // sure the PMIC is deconfigured
 
-        // User-defined number of targets
-        size_t NUM_TARGS = 2;
-
-        // Input target vector
-        TargetInfoVector l_targets;
-        TargetInfo l_TargInfo;
-        EntityPath l_ep[NUM_TARGS];
-        l_TargInfo.affinityPath = l_ep[0];
-        l_targets.insert(l_targets.begin(), NUM_TARGS, l_TargInfo);
-        // Output target vector
-        TargetInfoVector l_targToDeconfig;
-
-        // Add MEMBUF Group 0
-        l_targets[0].pThisTarget = nullptr;
-        l_targets[0].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[0].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[0].affinityPath.addLast(TYPE_DMI, 0);
-        l_targets[0].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_ep[0] = l_targets[0].affinityPath; // SHOULD BE DECONFIGURED
-        l_targets[0].type = TYPE_MEMBUF;
-
-        // Add MBA Group 0
-        l_targets[1].pThisTarget = nullptr;
-        l_targets[1].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[1].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[1].affinityPath.addLast(TYPE_DMI, 0);
-        l_targets[1].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_targets[1].affinityPath.addLast(TYPE_MBA, 0);
-        l_ep[1] = l_targets[1].affinityPath; // SHOULD BE DECONFIGURED
-        l_targets[1].type = TYPE_MBA;
-
-        presentByAssoc(l_targets, l_targToDeconfig);
-
-        // Check result
-        std::sort(l_targToDeconfig.begin(), l_targToDeconfig.end(),
-              compareAffinityCXX);
-        if ((l_targToDeconfig.size() == 2) &&
-            (l_targToDeconfig[0].affinityPath == l_ep[0]) && // 0000 MEMBUF
-            (l_targToDeconfig[1].affinityPath == l_ep[1]) )  // 00000 MBA
+        const std::vector<presentByAssocTestPath> l_testCases[] =
         {
-            TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc5: Success");
-        }
-        else
+            { // baseline should be functional
+                { true, { TYPE_MC } },
+                { true, { TYPE_MC, TYPE_MI } },
+                { true, { TYPE_MC, TYPE_OMIC } },
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC } },
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+            },
+            { // removing the PMIC shouldn't affect anything
+                { true, { TYPE_MC } },
+                { true, { TYPE_MC, TYPE_MI } },
+                { true, { TYPE_MC, TYPE_OMIC } },
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC } },
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+            },
+            { // remove the OCMB_CHIP and everything should go bad, including the PMIC
+                { false, { TYPE_MC } },
+                { false, { TYPE_MC, TYPE_MI } },
+                { false, { TYPE_MC, TYPE_OMIC } },
+                { false, { TYPE_MC, TYPE_MI, TYPE_MCC } },
+                { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
+                { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+            },
+        };
+
+        for (const auto& l_testCase : l_testCases)
         {
-            TS_FAIL("testdeconfigPresentByAssoc5: incorrect configuration returned");
-            for (uint8_t i=0;i<l_targToDeconfig.size();i++)
+            if (!runDeconfigPresentByAssocTest(l_testCase))
             {
-                char *s = l_targToDeconfig[i].affinityPath.toString();
-                TS_WARN("deconfig %s reason %x",s, l_targToDeconfig[i].reason);
-                free(s);
+                TS_INFO("testdeconfigPresentByAssoc5: incorrect configuration returned");
             }
         }
-    }
 
-    /**
-     *  @brief Test Deconfig Present Association 6
-     */
-    void testdeconfigPresentByAssoc6()
-    {
-        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc6: Started");
-        HWAS_INF("testdeconfigPresentByAssoc6: Started");
-
-        // This test the scenario where MBA Group 0 and DIMM Group 0 having
-        // no MEMBUF. This tests the MEMBUFIndex edge case because one never existed
-
-        // User-defined number of targets
-        size_t NUM_TARGS = 2;
-
-        // Input target vector
-        TargetInfoVector l_targets;
-        TargetInfo l_TargInfo;
-        EntityPath l_ep[NUM_TARGS];
-        l_TargInfo.affinityPath = l_ep[0];
-        l_targets.insert(l_targets.begin(), NUM_TARGS, l_TargInfo);
-        // Output target vector
-        TargetInfoVector l_targToDeconfig;
-
-        // Add MBA Group 0
-        l_targets[0].pThisTarget = nullptr;
-        l_targets[0].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[0].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[0].affinityPath.addLast(TYPE_DMI, 0);
-        l_targets[0].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_targets[0].affinityPath.addLast(TYPE_MBA, 0);
-        l_ep[0] = l_targets[0].affinityPath; // SHOULD BE DECONFIGURED
-        l_targets[0].type = TYPE_MBA;
-
-        // Add DIMM Group 0
-        l_targets[1].pThisTarget = nullptr;
-        l_targets[1].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[1].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[1].affinityPath.addLast(TYPE_DMI, 0);
-        l_targets[1].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_targets[1].affinityPath.addLast(TYPE_MBA, 0);
-        l_targets[1].affinityPath.addLast(TYPE_DIMM, 0);
-        l_ep[1] = l_targets[1].affinityPath; // SHOULD BE DECONFIGURED
-        l_targets[1].type = TYPE_DIMM;
-
-        presentByAssoc(l_targets, l_targToDeconfig);
-
-        // Check result
-        std::sort(l_targToDeconfig.begin(), l_targToDeconfig.end(),
-              compareAffinityCXX);
-        if ((l_targToDeconfig.size() == 2) &&
-            (l_targToDeconfig[0].affinityPath == l_ep[0]) && // 00000 MBA
-            (l_targToDeconfig[1].affinityPath == l_ep[1]) )  // 000000 DIMM
-        {
-            TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc6: Success");
-        }
-        else
-        {
-            TS_FAIL("testdeconfigPresentByAssoc6: incorrect configuration returned");
-            for (uint8_t i=0;i<l_targToDeconfig.size();i++)
-            {
-                char *s = l_targToDeconfig[i].affinityPath.toString();
-                TS_WARN("deconfig %s reason %x",s, l_targToDeconfig[i].reason);
-                free(s);
-            }
-        }
+        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc5: Exit");
     }
 
     /**
@@ -5740,101 +5574,59 @@ public:
         TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc7: Started");
         HWAS_INF("testdeconfigPresentByAssoc7: Started");
 
-        // This test the scenario where MBA Group 1 has no DIMMS
+        // This test the scenario where OMI Group 0 has no DIMMS
 
-        // User-defined number of targets
-        size_t NUM_TARGS = 7;
-
-        // Input target vector
-        TargetInfoVector l_targets;
-        TargetInfo l_TargInfo;
-        EntityPath l_ep[NUM_TARGS];
-        l_TargInfo.affinityPath = l_ep[0];
-        l_targets.insert(l_targets.begin(), NUM_TARGS, l_TargInfo);
-        // Output target vector
-        TargetInfoVector l_targToDeconfig;
-
-        // Add DMI Group 0
-        l_targets[0].pThisTarget = nullptr;
-        l_targets[0].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[0].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[0].affinityPath.addLast(TYPE_DMI, 0);
-        l_ep[0] = l_targets[0].affinityPath;
-        l_targets[0].type = TYPE_DMI;
-
-        // Add MEMBUF Group 0
-        l_targets[1].pThisTarget = nullptr;
-        l_targets[1].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[1].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[1].affinityPath.addLast(TYPE_DMI, 0);
-        l_targets[1].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_ep[1] = l_targets[1].affinityPath;
-        l_targets[1].type = TYPE_MEMBUF;
-
-        // Add MBA Group 0
-        l_targets[2].pThisTarget = nullptr;
-        l_targets[2].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[2].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[2].affinityPath.addLast(TYPE_DMI, 0);
-        l_targets[2].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_targets[2].affinityPath.addLast(TYPE_MBA, 0);
-        l_ep[2] = l_targets[2].affinityPath;
-        l_targets[2].type = TYPE_MBA;
-
-        // Add DIMM Group 0
-        l_targets[3].pThisTarget = nullptr;
-        l_targets[3].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[3].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[3].affinityPath.addLast(TYPE_DMI, 0);
-        l_targets[3].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_targets[3].affinityPath.addLast(TYPE_MBA, 0);
-        l_targets[3].affinityPath.addLast(TYPE_DIMM, 0);
-        l_ep[3] = l_targets[3].affinityPath;
-        l_targets[3].type = TYPE_DIMM;
-
-        // Add MBA Group 1
-        l_targets[4].pThisTarget = nullptr;
-        l_targets[4].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[4].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[4].affinityPath.addLast(TYPE_DMI, 0);
-        l_targets[4].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_targets[4].affinityPath.addLast(TYPE_MBA, 1);
-        l_ep[4] = l_targets[4].affinityPath; // SHOULD BE DECONFIGURED
-        l_targets[4].type = TYPE_MBA;
-
-        // Add MI Group 0
-        l_targets[5].pThisTarget = nullptr;
-        l_targets[5].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[5].affinityPath.addLast(TYPE_MI, 0);
-        l_ep[5] = l_targets[5].affinityPath;
-        l_targets[5].type = TYPE_MI;
-
-        // Add MC  Group 0
-        l_targets[6].pThisTarget = nullptr;
-        l_targets[6].affinityPath.addLast(TYPE_MC, 0);
-        l_ep[6] = l_targets[6].affinityPath;
-        l_targets[6].type = TYPE_MC;
-
-        presentByAssoc(l_targets, l_targToDeconfig);
-
-        // Check result
-        std::sort(l_targToDeconfig.begin(), l_targToDeconfig.end(),
-              compareAffinityCXX);
-        if ((l_targToDeconfig.size() == 1) &&
-            (l_targToDeconfig[0].affinityPath == l_ep[4]) ) // 001 MBA
+        const std::vector<presentByAssocTestPath> l_testCases[] =
         {
-            TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc7: Success");
-        }
-        else
+            { // baseline should be all good except for childless OMIC1
+                { true, { TYPE_MC } },
+                { true, { TYPE_MC, TYPE_MI } },
+                { true, { TYPE_MC, TYPE_OMIC } },
+                { false, { TYPE_MC, {TYPE_OMIC, 1} } },
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC } },
+
+                // OMI group 0
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+
+                // OMI group 1
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1} } },
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } }
+            },
+            { // When we remove the DIMM for OMI 0 then it should be deconfigured
+                { true, { TYPE_MC } },
+                { true, { TYPE_MC, TYPE_MI } },
+                { true, { TYPE_MC, TYPE_OMIC } }, // not deconfigured because OMI 1 is not deconfigured
+                { false, { TYPE_MC, {TYPE_OMIC, 1} } }, // deconfigured because MCC1 has no functional OMI
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC } },
+
+                // OMI group 0
+                { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
+                { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
+                { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                  // no DIMM here
+
+                // OMI group 1
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1} } },
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } }
+            }
+        };
+
+        for (const auto& l_testCase : l_testCases)
         {
-            TS_FAIL("testdeconfigPresentByAssoc7: incorrect configuration returned");
-            for (uint8_t i=0;i<l_targToDeconfig.size();i++)
+            if (!runDeconfigPresentByAssocTest(l_testCase))
             {
-                char *s = l_targToDeconfig[i].affinityPath.toString();
-                TS_WARN("deconfig %s reason %x",s, l_targToDeconfig[i].reason);
-                free(s);
+                TS_INFO("testdeconfigPresentByAssoc7: incorrect configuration returned");
             }
         }
+
+        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc7: Exit");
     }
 
     /**
@@ -5848,158 +5640,86 @@ public:
         // This test the scenario where each type is missing it's child
         //  and the cascade
 
-        // User-defined number of targets
-        size_t NUM_TARGS = 13;
-
-        // Input target vector
-        TargetInfoVector l_targets;
-        TargetInfo l_TargInfo;
-        EntityPath l_ep[NUM_TARGS];
-        l_TargInfo.affinityPath = l_ep[0];
-        l_targets.insert(l_targets.begin(), NUM_TARGS, l_TargInfo);
-        // Output target vector
-        TargetInfoVector l_targToDeconfig;
-
-        // Add DMI Group 0
-        l_targets[0].pThisTarget = nullptr;
-        l_targets[0].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[0].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[0].affinityPath.addLast(TYPE_DMI, 0);
-        l_ep[0] = l_targets[0].affinityPath;
-        l_targets[0].type = TYPE_DMI; // SHOULD BE DECONFIGURED
-
-        // Add MEMBUF Group 0
-        l_targets[1].pThisTarget = nullptr;
-        l_targets[1].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[1].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[1].affinityPath.addLast(TYPE_DMI, 0);
-        l_targets[1].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_ep[1] = l_targets[1].affinityPath;
-        l_targets[1].type = TYPE_MEMBUF; // SHOULD BE DECONFIGURED
-
-        // Add MBA Group 0
-        l_targets[2].pThisTarget = nullptr;
-        l_targets[2].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[2].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[2].affinityPath.addLast(TYPE_DMI, 0);
-        l_targets[2].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_targets[2].affinityPath.addLast(TYPE_MBA, 0);
-        l_ep[2] = l_targets[2].affinityPath;
-        l_targets[2].type = TYPE_MBA; // SHOULD BE DECONFIGURED
-
-
-        // Add DMI Group 1
-        l_targets[3].pThisTarget = nullptr;
-        l_targets[3].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[3].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[3].affinityPath.addLast(TYPE_DMI, 1);
-        l_ep[3] = l_targets[3].affinityPath;
-        l_targets[3].type = TYPE_DMI; // SHOULD BE DECONFIGURED
-
-
-        // Add MCS Group 2
-        l_targets[4].pThisTarget = nullptr;
-        l_targets[4].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[4].affinityPath.addLast(TYPE_MI, 1);
-        l_targets[4].affinityPath.addLast(TYPE_DMI, 0);
-        l_ep[4] = l_targets[4].affinityPath;
-        l_targets[4].type = TYPE_DMI;
-
-        // Add MEMBUF Group 0
-        l_targets[5].pThisTarget = nullptr;
-        l_targets[5].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[5].affinityPath.addLast(TYPE_MI, 1);
-        l_targets[5].affinityPath.addLast(TYPE_DMI, 0);
-        l_targets[5].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_ep[5] = l_targets[5].affinityPath;
-        l_targets[5].type = TYPE_MEMBUF; // SHOULD BE DECONFIGURED
-
-        // Add MEMBUF Group 1
-        l_targets[6].pThisTarget = nullptr;
-        l_targets[6].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[6].affinityPath.addLast(TYPE_MI, 1);
-        l_targets[6].affinityPath.addLast(TYPE_DMI, 0);
-        l_targets[6].affinityPath.addLast(TYPE_MEMBUF, 1);
-        l_ep[6] = l_targets[6].affinityPath;
-        l_targets[6].type = TYPE_MEMBUF;
-
-        // Add MBA Group 0
-        l_targets[7].pThisTarget = nullptr;
-        l_targets[7].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[7].affinityPath.addLast(TYPE_MI, 1);
-        l_targets[7].affinityPath.addLast(TYPE_DMI, 0);
-        l_targets[7].affinityPath.addLast(TYPE_MEMBUF, 1);
-        l_targets[7].affinityPath.addLast(TYPE_MBA, 0);
-        l_ep[7] = l_targets[7].affinityPath;
-        l_targets[7].type = TYPE_MBA; // SHOULD BE DECONFIGURED
-
-        // Add MBA Group 1
-        l_targets[8].pThisTarget = nullptr;
-        l_targets[8].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[8].affinityPath.addLast(TYPE_MI, 1);
-        l_targets[8].affinityPath.addLast(TYPE_DMI, 0);
-        l_targets[8].affinityPath.addLast(TYPE_MEMBUF, 1);
-        l_targets[8].affinityPath.addLast(TYPE_MBA, 1);
-        l_ep[8] = l_targets[8].affinityPath;
-        l_targets[8].type = TYPE_MBA;
-
-        // Add DIMM Group 1
-        l_targets[9].pThisTarget = nullptr;
-        l_targets[9].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[9].affinityPath.addLast(TYPE_MI, 1);
-        l_targets[9].affinityPath.addLast(TYPE_DMI, 0);
-        l_targets[9].affinityPath.addLast(TYPE_MEMBUF, 1);
-        l_targets[9].affinityPath.addLast(TYPE_MBA, 1);
-        l_targets[9].affinityPath.addLast(TYPE_DIMM, 0);
-        l_ep[9] = l_targets[9].affinityPath;
-        l_targets[9].type = TYPE_DIMM;
-
-        // Add MC 0
-        l_targets[10].pThisTarget = nullptr;
-        l_targets[10].affinityPath.addLast(TYPE_MC, 0);
-        l_ep[10] = l_targets[10].affinityPath;
-        l_targets[10].type = TYPE_MC;
-
-        // Add MI 0
-        l_targets[11].pThisTarget = nullptr;
-        l_targets[11].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[11].affinityPath.addLast(TYPE_MI, 0);
-        l_ep[11] = l_targets[11].affinityPath;
-        l_targets[11].type = TYPE_MI;  // SHOULD BE DECONFIGURED
-
-        // Add MI 1
-        l_targets[12].pThisTarget = nullptr;
-        l_targets[12].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[12].affinityPath.addLast(TYPE_MI, 1);
-        l_ep[12] = l_targets[12].affinityPath;
-        l_targets[12].type = TYPE_MI;
-
-        presentByAssoc(l_targets, l_targToDeconfig);
-
-        // Check result
-        std::sort(l_targToDeconfig.begin(), l_targToDeconfig.end(),
-              compareAffinityCXX);
-        if ((l_targToDeconfig.size() == 7) &&
-            (l_targToDeconfig[0].affinityPath == l_ep[11]) && // 00 MI
-            (l_targToDeconfig[1].affinityPath == l_ep[0]) &&  // 000 DMI
-            (l_targToDeconfig[2].affinityPath == l_ep[1]) &&  // 0000 MEMBUF
-            (l_targToDeconfig[3].affinityPath == l_ep[2]) &&  // 00000 MBA
-            (l_targToDeconfig[4].affinityPath == l_ep[3]) &&  // 001 DMI
-            (l_targToDeconfig[5].affinityPath == l_ep[5]) &&  // 0100 MEMBUF
-            (l_targToDeconfig[6].affinityPath == l_ep[7])  )  // 01010 MBA
+        const std::vector<presentByAssocTestPath> l_testCases[] =
         {
-            TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc8: Success");
-        }
-        else
+            { // baseline should be all good
+                { true, { TYPE_MC } },
+                { true, { TYPE_MC, TYPE_OMIC } },
+                { true, { TYPE_MC, {TYPE_OMIC, 1} } },
+
+                { true, { TYPE_MC, TYPE_MI } },
+                  // MCC0
+                  { true, { TYPE_MC, TYPE_MI, TYPE_MCC } },
+                    // MCC0/OMI0
+                    { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
+                      { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
+                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+                    // MCC0/OMI1
+                    { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1} } },
+                      { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
+                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+                  // MCC1
+                  { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1} } },
+                    // MCC1/OMI0
+                    { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI } },
+                      { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+                    // MCC1/OMI1
+                    { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1} } },
+                      { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+            },
+            { // Missing children should bubble up
+                { true, { TYPE_MC } },
+                { false, { TYPE_MC, TYPE_OMIC } },
+                { true, { TYPE_MC, {TYPE_OMIC, 1} } },
+
+                { true, { TYPE_MC, TYPE_MI } },
+                  // MCC0
+                  { false, { TYPE_MC, TYPE_MI, TYPE_MCC } },
+                    // MCC0/OMI0
+                    { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
+                    // MCC0/OMI1
+                    { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1} } },
+                      { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
+                  // MCC1
+                  { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1} } },
+                    // MCC1/OMI0
+                    { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI } },
+                      { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+                    // MCC1/OMI1
+                    { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1} } },
+                      { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+            }
+        };
+
+        for (const auto& l_testCase : l_testCases)
         {
-            TS_FAIL("testdeconfigPresentByAssoc8: incorrect configuration returned");
-            for (uint8_t i=0;i<l_targToDeconfig.size();i++)
+            if (!runDeconfigPresentByAssocTest(l_testCase))
             {
-                char *s = l_targToDeconfig[i].affinityPath.toString();
-                TS_WARN("deconfig %s reason %x",s, l_targToDeconfig[i].reason);
-                free(s);
+                TS_INFO("testdeconfigPresentByAssoc8: incorrect configuration returned");
             }
         }
+
+        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc8: Exit");
     }
 
     /**
@@ -6013,105 +5733,249 @@ public:
         // This test the scenario where each type is missing it's parent
         //  and the cascade
 
-        // User-defined number of targets
-        size_t NUM_TARGS = 6;
-
-        // Input target vector
-        TargetInfoVector l_targets;
-        TargetInfo l_TargInfo;
-        EntityPath l_ep[NUM_TARGS];
-        l_TargInfo.affinityPath = l_ep[0];
-        l_targets.insert(l_targets.begin(), NUM_TARGS, l_TargInfo);
-        // Output target vector
-        TargetInfoVector l_targToDeconfig;
-
-        // Add MEMBUF Group 0
-        l_targets[0].pThisTarget = nullptr;
-        l_targets[0].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[0].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[0].affinityPath.addLast(TYPE_DMI, 0);
-        l_targets[0].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_ep[0] = l_targets[0].affinityPath;
-        l_targets[0].type = TYPE_MEMBUF; // SHOULD BE DECONFIGURED
-
-        // Add MBA Group 0
-        l_targets[1].pThisTarget = nullptr;
-        l_targets[1].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[1].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[1].affinityPath.addLast(TYPE_DMI, 0);
-        l_targets[1].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_targets[1].affinityPath.addLast(TYPE_MBA, 0);
-        l_ep[1] = l_targets[1].affinityPath;
-        l_targets[1].type = TYPE_MBA; // SHOULD BE DECONFIGURED
-
-        // Add DIMM Group 0
-        l_targets[2].pThisTarget = nullptr;
-        l_targets[2].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[2].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[2].affinityPath.addLast(TYPE_DMI, 0);
-        l_targets[2].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_targets[2].affinityPath.addLast(TYPE_MBA, 0);
-        l_targets[2].affinityPath.addLast(TYPE_DIMM, 0);
-        l_ep[2] = l_targets[2].affinityPath;
-        l_targets[2].type = TYPE_DIMM; // SHOULD BE DECONFIGURED
-
-        // Add MBA Group 1
-        l_targets[3].pThisTarget = nullptr;
-        l_targets[3].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[3].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[3].affinityPath.addLast(TYPE_DMI, 1);
-        l_targets[3].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_targets[3].affinityPath.addLast(TYPE_MBA, 0);
-        l_ep[3] = l_targets[3].affinityPath;
-        l_targets[3].type = TYPE_MBA; // SHOULD BE DECONFIGURED
-
-        // Add DIMM Group 1
-        l_targets[4].pThisTarget = nullptr;
-        l_targets[4].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[4].affinityPath.addLast(TYPE_MI, 0);
-        l_targets[4].affinityPath.addLast(TYPE_DMI, 1);
-        l_targets[4].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_targets[4].affinityPath.addLast(TYPE_MBA, 0);
-        l_targets[4].affinityPath.addLast(TYPE_DIMM, 0);
-        l_ep[4] = l_targets[4].affinityPath;
-        l_targets[4].type = TYPE_DIMM; // SHOULD BE DECONFIGURED
-
-        // Add DIMM Group 2
-        l_targets[5].pThisTarget = nullptr;
-        l_targets[5].affinityPath.addLast(TYPE_MC, 0);
-        l_targets[5].affinityPath.addLast(TYPE_MI, 1);
-        l_targets[5].affinityPath.addLast(TYPE_DMI, 0);
-        l_targets[5].affinityPath.addLast(TYPE_MEMBUF, 0);
-        l_targets[5].affinityPath.addLast(TYPE_MBA, 0);
-        l_targets[5].affinityPath.addLast(TYPE_DIMM, 0);
-        l_ep[5] = l_targets[5].affinityPath;
-        l_targets[5].type = TYPE_DIMM; // SHOULD BE DECONFIGURED
-
-        presentByAssoc(l_targets, l_targToDeconfig);
-
-        // Check result
-        std::sort(l_targToDeconfig.begin(), l_targToDeconfig.end(),
-              compareAffinityCXX);
-        if ((l_targToDeconfig.size() == 6) &&
-            (l_targToDeconfig[0].affinityPath == l_ep[0]) &&
-            (l_targToDeconfig[1].affinityPath == l_ep[1]) &&
-            (l_targToDeconfig[2].affinityPath == l_ep[2]) &&
-            (l_targToDeconfig[3].affinityPath == l_ep[3]) &&
-            (l_targToDeconfig[4].affinityPath == l_ep[4]) &&
-            (l_targToDeconfig[5].affinityPath == l_ep[5]) )
+        const std::vector<presentByAssocTestPath> l_testCases[] =
         {
-            TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc9: Success");
-        }
-        else
+            { // baseline should be all good
+                { true, { TYPE_MC } },
+                { true, { TYPE_MC, TYPE_OMIC } },
+                { true, { TYPE_MC, {TYPE_OMIC, 1} } },
+
+                { true, { TYPE_MC, TYPE_MI } },
+                  // MCC0
+                  { true, { TYPE_MC, TYPE_MI, TYPE_MCC } },
+                    // MCC0/OMI0
+                    { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
+                      { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
+                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+                    // MCC0/OMI1
+                    { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1} } },
+                      { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
+                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+                  // MCC1
+                  { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1} } },
+                    // MCC1/OMI0
+                    { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI } },
+                      { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+                    // MCC1/OMI1
+                    { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1} } },
+                      { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+            },
+            { // Bad parent MC should make all children bad
+                { false, { TYPE_MC, TYPE_OMIC } },
+                { false, { TYPE_MC, {TYPE_OMIC, 1} } },
+
+                { false, { TYPE_MC, TYPE_MI } },
+                  // MCC0
+                  { false, { TYPE_MC, TYPE_MI, TYPE_MCC } },
+                    // MCC0/OMI0
+                    { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
+                      { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+                    // MCC0/OMI1
+                    { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1} } },
+                      { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+                  // MCC1
+                  { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1} } },
+                    // MCC1/OMI0
+                    { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI } },
+                      { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+                    // MCC1/OMI1
+                    { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1} } },
+                      { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+            },
+            { // Bad MI should make all children bad
+                { false, { TYPE_MC } },
+                { false, { TYPE_MC, TYPE_OMIC } },
+                { false, { TYPE_MC, {TYPE_OMIC, 1} } },
+
+                  // MCC0
+                  { false, { TYPE_MC, TYPE_MI, TYPE_MCC } },
+                    // MCC0/OMI0
+                    { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
+                      { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+                    // MCC0/OMI1
+                    { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1} } },
+                      { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+                  // MCC1
+                  { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1} } },
+                    // MCC1/OMI0
+                    { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI } },
+                      { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+                    // MCC1/OMI1
+                    { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1} } },
+                      { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+            },
+            { // Bad MCC, OMI makes children bad
+                { true, { TYPE_MC } },
+                { false, { TYPE_MC, TYPE_OMIC } },
+                { true, { TYPE_MC, {TYPE_OMIC, 1} } },
+
+                { true, { TYPE_MC, TYPE_MI } },
+                  // MCC0
+                    // MCC0/OMI0
+                    { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
+                      { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+                    // MCC0/OMI1
+                    { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1} } },
+                      { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+                  // MCC1
+                  { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1} } },
+                    // MCC1/OMI0
+                      { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+                    // MCC1/OMI1
+                    { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1} } },
+                      { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+            },
+            { // Bad OCMB chip makes children bad
+                { true, { TYPE_MC } },
+                { true, { TYPE_MC, TYPE_OMIC } },
+                { true, { TYPE_MC, {TYPE_OMIC, 1} } },
+
+                { true, { TYPE_MC, TYPE_MI } },
+                  // MCC0
+                  { true, { TYPE_MC, TYPE_MI, TYPE_MCC } },
+                    // MCC0/OMI0
+                    { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
+                      { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
+                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+                    // MCC0/OMI1
+                    { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1} } },
+                      // missing OCMB chip here
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+                  // MCC1
+                  { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1} } },
+                    // MCC1/OMI0
+                    { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI } },
+                      // missing OCMB chip here
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+                    // MCC1/OMI1
+                    { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1} } },
+                      { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+            },
+            { // Missing OMIC should make child OMIs bad
+                { true, { TYPE_MC } },
+                { true, { TYPE_MC, {TYPE_OMIC, 1} } },
+                // No OMICs here
+
+                { true, { TYPE_MC, TYPE_MI } },
+                  // MCC0
+                  { false, { TYPE_MC, TYPE_MI, TYPE_MCC } },
+                    // MCC0/OMI0
+                    { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
+                      { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+                    // MCC0/OMI1
+                    { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1} } },
+                      { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+                  // MCC1
+                  { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1} } },
+                    // MCC1/OMI0
+                    { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI } },
+                      { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+                    // MCC1/OMI1
+                    { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1} } },
+                      { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+            }
+        };
+
+        for (const auto& l_testCase : l_testCases)
         {
-            TS_FAIL("testdeconfigPresentByAssoc9: incorrect configuration returned");
-            for (uint8_t i=0;i<l_targToDeconfig.size();i++)
+            if (!runDeconfigPresentByAssocTest(l_testCase))
             {
-                char *s = l_targToDeconfig[i].affinityPath.toString();
-                TS_TRACE("deconfig %s reason %x",s, l_targToDeconfig[i].reason);
-                free(s);
+                TS_INFO("testdeconfigPresentByAssoc9: incorrect configuration returned");
             }
         }
+
+        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc9: Exit");
     }
 
     /**

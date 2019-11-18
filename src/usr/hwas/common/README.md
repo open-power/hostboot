@@ -1,3 +1,41 @@
+# HWAS
+## discoverTargets
+- Initializes the HWAS state of all targets
+- Call platPresenceDetect for targets that need it
+- Iterate each chip and apply partial-good information to children
+  (isChipFunctional, checkPartialGoodForDescendants)
+- Call discoverPmicTargetsAndEnable
+- Call validateProcessorEcLevels to ensure that each slave PROC chip has the
+  same EC level as the master
+- Call restrictECunits to deconfigure cores appropriately in fused-core mode
+- Call invokePresentByAssoc to propagate parent/child functional status around
+  the memory hierarchy
+- Deconfigure NMMU1 based on its special rules
+
+## invokePresentByAssoc
+
+This function collects a list of targets in the memory targeting hierarchy and
+calls presentByAssoc on the list.
+
+## presentByAssoc
+
+This function examines each target in the memory hierarchy and
+- propagates functional state from parents to children;
+- deconfigures parents if they have no functional children of a given type;
+- enforces special parent/child relationships not reflected in the normal
+  hierarchy, such as that between OMIC and OMI targets.
+
+## isChipFunctional
+
+This function checks the partial-good data for always-good chiplets in each
+processor to determine whether the processor.
+
+## checkPartialGoodForDescendants
+
+This function checks the partial-good data for a target and all its children,
+propagating deconfiguration as appropriate throughout the hierarchy based on PG
+rules defined in pgLogic.C.
+
 # DeconfigGard
 
 ## Deconfigure by association path
