@@ -2100,6 +2100,9 @@
       <id>MFG_TRACE_ENABLE</id>
     </attribute>
     <attribute>
+      <id>MIRROR_BASE_ADDRESS</id>
+    </attribute>
+    <attribute>
       <default>POWER10</default>
       <id>MODEL</id>
     </attribute>
