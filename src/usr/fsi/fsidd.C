@@ -803,9 +803,6 @@ void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type,
         l_scom_data.addData(DEVICE_XSCOM_ADDRESS(opb_base|OPB_REG_CMD));
         l_scom_data.addData(DEVICE_XSCOM_ADDRESS(opb_base|OPB_REG_STAT));
         l_scom_data.addData(DEVICE_XSCOM_ADDRESS(opb_base|OPB_REG_LSTAT));
-        l_scom_data.addData(DEVICE_XSCOM_ADDRESS(opb_base|OPB_REG_CRSIC));
-        l_scom_data.addData(DEVICE_XSCOM_ADDRESS(opb_base|OPB_REG_CRSIM));
-        l_scom_data.addData(DEVICE_XSCOM_ADDRESS(opb_base|OPB_REG_CRSIS));
         if( FSI::FFDC_OPB0_FAIL == i_ffdc_type )
         {
             l_scom_data.addData(DEVICE_XSCOM_ADDRESS(opb_base|OPB_REG_RSIC));

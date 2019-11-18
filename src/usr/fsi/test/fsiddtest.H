@@ -112,15 +112,10 @@ class FsiDDTest : public CxxTest::TestSuite
             bool present;
         } test_data[] = {
 
-            // TODO RTC 245221: This address is failing with the lastest simics
-            //                  model, but we need latest simics model for istep 15.
-            //                  This can be uncommented once simics is fixed to
-            //                  properly support this address.
-            //
             //** Master Control Space
             // version number
             //MFSI MVER
-            //{ PROC0, 0x003474, 0x92010800, false, true },
+            { PROC0, 0x003474, 0x92010800, false, true },
 
             //** Slave Regs (via absolute address)
             //DATA_0 from FSI2PIB off MFSI-0

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -300,9 +300,6 @@ class FsiDD
         OPB_REG_LSTAT = 0x0002, /**< Locked Status */
         // no reg for 0x0003
         OPB_REG_RES   = 0x0004, /**< Reset */
-        OPB_REG_CRSIC = 0x0005, /**< cMFSI Remote Slave Interrupt Condition */
-        OPB_REG_CRSIM = 0x0006, /**< cMFSI Remote Slave Interrupt Mask */
-        OPB_REG_CRSIS = 0x0007, /**< cMFSI Remote Slave Interrupt Status */
         OPB_REG_RSIC  = 0x0008, /**< MFSI Remote Slave Interrupt Condition */
         OPB_REG_RSIM  = 0x0009, /**< MFSI Remote Slave Interrupt Mask */
         OPB_REG_RSIS  = 0x000A, /**< MFSI Remote Slave Interrupt Status */
