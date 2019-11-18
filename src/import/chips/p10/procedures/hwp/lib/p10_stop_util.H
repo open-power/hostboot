@@ -25,6 +25,8 @@
 #ifndef __P10_STOP_UTIL_
 #define __P10_STOP_UTIL_
 
+#include <stdint.h>
+
 #ifdef _AIX
     #define __BYTE_ORDER __BIG_ENDIAN
 #elif __SKIBOOT__
@@ -72,8 +74,10 @@ namespace stopImageSection
     ( (((WORD) >> 8) & 0x00FF) | (((WORD) << 8) & 0xFF00) )
 
 #define SWIZZLE_4_BYTE(WORD) \
-    ( (((WORD) >> 24) & 0x000000FF) | (((WORD) >>  8) & 0x0000FF00) | \
-      (((WORD) <<  8) & 0x00FF0000) | (((WORD) << 24) & 0xFF000000) )
+    ( { uint64_t l_tmp64 = WORD; \
+        (uint32_t)( (((l_tmp64) >> 24) & 0x000000FF) | (((l_tmp64) >> 8) & 0x0000FF00) | \
+                    (((l_tmp64) << 8) & 0x00FF0000) | (((l_tmp64) << 24) & 0xFF000000) ) ;\
+    })
 
 #define SWIZZLE_8_BYTE(WORD) \
     ( (((WORD) >> 56) & 0x00000000000000FF) |  \

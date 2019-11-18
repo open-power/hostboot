@@ -85,7 +85,7 @@ enum INTERNAL_ERR_CODE
  */
 struct ImgSectnSumm
 {
-    uint8_t     iv_sectnName[TEMP_ARRAY_SIZE];
+    char        iv_sectnName[TEMP_ARRAY_SIZE];
     uint32_t    iv_sectnOffset;
     uint32_t    iv_sectnLength;
     ImgSectnSumm()
@@ -234,7 +234,7 @@ class ImageBuildRecord
      * @brief sets the section under build.
      * @note it is not built as yet.
      */
-    void setCurrentSectn( const char * i_sectn ) { memcpy( iv_currentSectn, i_sectn, PLAT_NAME_SIZE ); }
+    void setCurrentSectn( const char * i_sectn ) { memcpy( iv_currentSectn, i_sectn, ( strlen(i_sectn) + 1 ) ); }
 
     private:
     std::vector< ImgSectnSumm > iv_sectnList;
