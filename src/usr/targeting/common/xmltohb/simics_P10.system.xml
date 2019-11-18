@@ -148,20 +148,9 @@
       <id>FREQ_PAU_MHZ</id>
       <default>2000</default>
     </attribute>
-    <!-- TODO RTC:244307 Revisit POUND_V_STATIC_DATA_ENABLE
-         + SYSTEM_POUNDV_VALIDITY_HALT_DISABLE settings
-         when #V data for MVPD available -->
-    <attribute>
-      <id>POUND_V_STATIC_DATA_ENABLE</id>
-      <default>1</default>
-    </attribute>
     <attribute>
       <id>SMF_CONFIG</id>
       <default>0x01</default>
-    </attribute>
-    <attribute>
-      <id>SYSTEM_POUNDV_VALIDITY_HALT_DISABLE</id>
-      <default>0</default>
     </attribute>
 </targetInstance>
 
@@ -273,12 +262,6 @@
     <attribute>
         <id>FREQ_OMI_MHZ</id>
         <default>25600</default>
-    </attribute>
-<!-- TODO RTC:244307 Revisit FREQ_CORE_FLOOR_MHZ
-     when #V data for MVPD available -->
-    <attribute>
-      <id>FREQ_CORE_FLOOR_MHZ</id>
-      <default>2200</default>
     </attribute>
 </targetInstance>
 

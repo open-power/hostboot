@@ -92,10 +92,12 @@
           <default>0</default>
      </attribute>
 
+    <!-- TODO RTC:244307 Revisit ATTR_FREQ_CORE_FLOOR_MHZ
+         when #V data for MVPD available -->
     <attribute>
-          <id>ATTR_FREQ_CORE_FLOOR_MHZ</id>
-          <default>4800</default>
-     </attribute>
+        <id>ATTR_FREQ_CORE_FLOOR_MHZ</id>
+        <default>2200</default>
+    </attribute>
 
     <attribute>
           <id>ATTR_FREQ_A_MHZ</id>
@@ -304,6 +306,13 @@
           <persistency>volatile-zeroed</persistency>
      </attribute>
 
+    <!-- TODO RTC:244307 Revisit ATTR_SYSTEM_POUNDV_VALIDITY_HALT_DISABLE
+         when #V data for MVPD available -->
+    <attribute>
+        <id>ATTR_SYSTEM_POUNDV_VALIDITY_HALT_DISABLE</id>
+        <default>0</default>
+    </attribute>
+
     <attribute>
           <id>ATTR_PROC_FABRIC_A_BUS_WIDTH</id>
           <default>4_BYTE</default>
@@ -358,6 +367,13 @@
           <id>ATTR_IO_XBUS_TX_FFE_PRECURSOR</id>
           <default>6</default>
      </attribute>
+
+    <!-- TODO RTC:244307 Revisit ATTR_POUND_V_STATIC_DATA_ENABLE
+         when #V data for MVPD available -->
+    <attribute>
+        <id>ATTR_POUND_V_STATIC_DATA_ENABLE</id>
+        <default>1</default>
+    </attribute>
 
     <attribute>
           <id>ATTR_POUNDV_BUCKET_NUM_OVERRIDE</id>
