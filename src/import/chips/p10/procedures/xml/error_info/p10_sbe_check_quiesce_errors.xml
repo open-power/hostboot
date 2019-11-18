@@ -129,9 +129,6 @@
     <ffdc>TPBR_PSIHB_STATUS_CTL_REG</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
-
-  
-  <!-- ******************************************************************** -->
    <hwpError>
     <sbeError/>
     <rc>RC_P10_VAS_QUIESCE_TIMEOUT</rc>
@@ -144,5 +141,27 @@
     <ffdc>SOUTHDATA</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
-
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_INTP_QUIESCE_TIMEOUT</rc>
+    <description>
+      Procedure: p10_sbe_check_quiesce
+      INTP master or slave is not idle
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>RST_CTL_DATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_INT_SCRUB_NOT_FINISHED_ERR</rc>
+    <description>
+      Procedure: p10_sbe_check_quiesce
+      Cache scrub operation did not finish within programmed wait period
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>FLUSH_CTRL_ADDRESS</ffdc>
+    <ffdc>FLUSH_CTRL_DATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
