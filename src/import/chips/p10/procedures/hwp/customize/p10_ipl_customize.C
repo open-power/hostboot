@@ -261,7 +261,7 @@ fapi2::ReturnCode get_overlays_ring(
                i_ringId,
                l_instanceId,
                io_ringBuf2,  //Has RS4 Gptr overlay ring on return
-               l_ringBlockSize);
+               l_ringBlockSize );
 
     if (l_rc == INFRASTRUCT_RC_SUCCESS)
     {
@@ -899,7 +899,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
         FAPI_INF("Successfully added VPD ring: (ringId,chipletId)=(0x%02x,0x%02x)",
                  i_ringId, l_chipletId);
 
-        FAPI_DBG("(After tor_append) io_ringSectionSize = %d", io_ringSectionSize);
+        FAPI_DBG("(After tor_append_ring) io_ringSectionSize = %d", io_ringSectionSize);
     }
     else if ((uint32_t)l_fapiRc == RC_MVPD_RING_NOT_FOUND)
     {
@@ -1833,7 +1833,7 @@ fapi2::ReturnCode process_base_and_dynamic_rings(
                i_ringId,
                0xff,
                baseRs4,
-               ringBlockSize, 1);//Last parameter is for debug will remove it later
+               ringBlockSize );
 
     FAPI_ASSERT( l_rc == TOR_SUCCESS ||
                  l_rc == TOR_RING_IS_EMPTY ||
@@ -2707,8 +2707,7 @@ ReturnCode p10_ipl_customize (
                                     be32toh(torHeader->magic),
                                     torHeader->version,
                                     attrDdLevel,
-                                    torHeader->chipId,
-                                    0 );
+                                    torHeader->chipId );
 
     FAPI_ASSERT( l_rc == 0,
                  fapi2::XIPC_SKELETON_GEN_FAILED().
@@ -2814,7 +2813,7 @@ ReturnCode p10_ipl_customize (
                        customRingSectionSize,
                        ringId,
                        0xff,
-                       i_ringBuf1, 1);//Last parameter is for debug, will remove it later
+                       i_ringBuf1 );
 
             FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS ||
                          l_rc == TOR_INVALID_CHIPLET_TYPE,
