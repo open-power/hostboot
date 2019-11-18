@@ -164,6 +164,19 @@ inline fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> find_target(const fapi2::Targ
 }
 
 ///
+/// @brief find the MCC given a OCMB_CHIP
+/// @param[in] i_target the fapi2 target OCMB_CHIP
+/// @return a MCC target.
+///
+template<>
+inline fapi2::Target<fapi2::TARGET_TYPE_MCC> find_target(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target)
+{
+    return i_target.getParent<fapi2::TARGET_TYPE_OMI>()
+           .getParent<fapi2::TARGET_TYPE_MCC>();
+}
+
+///
 /// @brief find all the OCMB_CHIPs connected to a PROC_CHIP
 /// @param[in] i_target a fapi2::Target PROC_CHIP
 /// @return a vector of fapi2::TARGET_TYPE_OCMB_CHIP
