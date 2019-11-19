@@ -617,7 +617,9 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
             }
             else if ((l_element.type == TYPE_PROC) ||
                      (l_element.type == TYPE_MEMBUF) ||
-                     (l_element.type == TYPE_DIMM))
+                     (l_element.type == TYPE_DIMM) ||
+                     (l_element.type == TYPE_OCMB_CHIP) ||
+                     (l_element.type == TYPE_PMIC))
             {
                 o_pos = l_element.instance;
             }
@@ -635,7 +637,11 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
                      (l_element.type == TYPE_PPE) ||
                      (l_element.type == TYPE_PERV) ||
                      (l_element.type == TYPE_PEC) ||
-                     (l_element.type == TYPE_PHB))
+                     (l_element.type == TYPE_PHB) ||
+                     (l_element.type == TYPE_OMI) ||
+                     (l_element.type == TYPE_MCC) ||
+                     (l_element.type == TYPE_OMIC) ||
+                     (l_element.type == TYPE_MEM_PORT))
             {
                 o_unitPos = l_element.instance;
             }
