@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2017
+# Contributors Listed Below - COPYRIGHT 2012,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -481,6 +481,7 @@ sub handleAttrDump
 
         ##Call the FapiAttr tool module
         $Hostboot::_DebugFramework::toolOpts{'attrbin'} = $g_attr_fname;
+        $Hostboot::_DebugFramework::toolOpts{'attr_output'} = "./hbFapiAttrDump";
         ::callToolModule("FapiAttr");
 
         unlink $g_attr_fname;
