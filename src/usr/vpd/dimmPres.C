@@ -205,9 +205,24 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
 #endif
 
         // TODO RTC 213602
-        // enable this once dimm presence detection works
-        //present = spdPresent( i_target );
-        present = true;
+        // Remove this exception logic once the I2C code has
+        // been updated for P10 and all ports (0-15) are
+        // able to be used.  Currently only port 0..3 are available.
+        const auto i2cInfo = i_target->getAttr<
+            TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO>();
+        if(i2cInfo.port < 4)
+        {
+           present=true;
+        }
+        else
+        {
+            TRACFCOMP(g_trac_spd, INFO_MRK "dimmPresenceDetect() "
+                      "Marking DIMM 0x%08X not present since it's driven by "
+                      "i2c port %d which is not supported yet.  Only 0-3 are "
+                      "supported.",
+                      TARGETING::get_huid(i_target));
+            present = false;
+        }
 
         if( present == false )
         {
