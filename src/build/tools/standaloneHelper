@@ -152,6 +152,8 @@ generate_sbe_image()
     ./sb workon<<<'make install $1 && ./sb prime && exit'
     cp ${PPE_DIR}/simics/import/boot_roms/sbe_seeprom_p10.bin.ecc \
     ${PROJECT_ROOT}/standalone/simics/sbe_seeprom_p10.bin.ecc
+    cp ${PPE_DIR}/simics/import/boot_roms/sbe_measurement_p10.bin.ecc \
+    ${PROJECT_ROOT}/standalone/simics/sbe_measurement_p10.bin.ecc
     cd ${PROJECT_ROOT}
 
 }

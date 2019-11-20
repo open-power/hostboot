@@ -47,12 +47,14 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
     export PATH=${STANDALONE_SIMICS}:${PATH}
 
     SBE_STANDALONE_IMG=${STANDALONE_SIMICS}/sbe_seeprom_p10.bin.ecc
+    SBE_STANDALONE_MEASURE_IMG=${STANDALONE_SIMICS}/sbe_measurement_p10.bin.ecc
 
     export START_SIMICS_CMD="\
         runsim -m ${MACHINE} \
         hb_script_to_run=${STARTUPSIMICS} \
         pnor_img=${STANDALONE}/pnor/P10.pnor \
         sbe_seeprom_img=${SBE_STANDALONE_IMG} \
+        sbe_meas_seeprom_img=${SBE_STANDALONE_MEASURE_IMG} \
         sbe_boot_mem=seeprom \
         enable_lpc_console=TRUE \
         fused_core=TRUE \

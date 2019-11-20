@@ -487,9 +487,16 @@ hb_startsimics()
         fi
 
         SBE_STANDALONE_IMG=${PROJECT_ROOT}/standalone/simics/sbe_seeprom_p10.bin.ecc
+        SBE_STANDALONE_MEASURE_IMG=${PROJECT_ROOT}/standalone/simics/sbe_measurement_p10.bin.ecc
 
         if [[ ! -f ${SBE_STANDALONE_IMG} ]]; then
             echo "File does not exist: " ${SBE_STANDALONE_IMG}
+            echo "Please make sure to run \"hb prime\" to create it."
+            exit 1
+        fi
+
+        if [[ ! -f ${SBE_STANDALONE_MEASURE_IMG} ]]; then
+            echo "File does not exist: " ${SBE_STANDALONE_MEASURE_IMG}
             echo "Please make sure to run \"hb prime\" to create it."
             exit 1
         fi
@@ -505,6 +512,7 @@ hb_startsimics()
         if [ -z "${VPO_COMPILE}" ]; then
             STARTSIMCMD+=(sbe_seeprom_img=${SBE_STANDALONE_IMG})
             STARTSIMCMD+=(sbe_boot_mem=seeprom)
+            STARTSIMCMD+=(sbe_meas_seeprom_img=${SBE_STANDALONE_MEASURE_IMG})
             STARTSIMCMD+=(enable_lpc_console=TRUE)
             STARTSIMCMD+=(fused_core=TRUE)
         else
