@@ -164,6 +164,7 @@ HdatPcrd::HdatPcrd(errlHndl_t &o_errlHndl, const hdatMsAddr_t &i_msAddr)
 *******************************************************************************/
 errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
 {
+    HDAT_ENTER();
     errlHndl_t l_errl = NULL, l_errl1 = NULL;
     do
     {
@@ -200,7 +201,10 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
         }
 
         // @TODO: RTC 142465. Add check to know whether in fused mode or not
-        l_coreThreadCount = l_pTopLevel->getAttr<ATTR_THREAD_COUNT>();
+        // @TODO RTC 246357 missing attribute
+        
+        //l_coreThreadCount = l_pTopLevel->getAttr<ATTR_THREAD_COUNT>();
+        l_coreThreadCount = 8; //assuming fused core
         uint32_t l_procStatus;
         if ( l_coreThreadCount == HDAT_MAX_EIGHT_THREADS_SUPPORTED )
         {
@@ -694,6 +698,7 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
         o_count = index;
     }while(0);
 
+    HDAT_EXIT();
     return l_errl;
 }
 
@@ -703,6 +708,7 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
 errlHndl_t HdatPcrd::hdatSetProcessorInfo(
                 const TARGETING::Target* i_pProcTarget, uint32_t i_procstatus)
 {
+    HDAT_ENTER();
     errlHndl_t l_errl = NULL;
 
     do
@@ -897,6 +903,9 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
             assert(l_pSysTarget != NULL);
         }
 
+//@TODO RTC 246357 missing attribute
+if (0)
+{
 #ifdef CONFIG_LOAD_PHYP_FROM_BOOTKERNEL
         //Disable all STOP states (for debug ease) when loading
         //PHYP from BOOTKERNEL partition.
@@ -905,17 +914,23 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
         iv_spPcrd->hdatChipData.hdatPcrdStopLevelSupport =
             l_pSysTarget->getAttr<TARGETING::ATTR_SUPPORTED_STOP_STATES>();
 #endif
+}
+        iv_spPcrd->hdatChipData.hdatPcrdStopLevelSupport = 0x00000000;
         iv_spPcrd->hdatChipData.hdatPcrdCheckstopAddr = HDAT_SW_CHKSTP_FIR_SCOM;
         iv_spPcrd->hdatChipData.hdatPcrdSpareBitNum   = HDAT_SW_CHKSTP_FIR_SCOM_BIT_POS;
 
-        auto l_topIdTable = l_pSysTarget->getAttrAsStdArr
+        /*auto l_topIdTable = l_pSysTarget->getAttrAsStdArr
             <TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE>();
         std::copy(&l_topIdTable[0], &l_topIdTable[0]+std::size(l_topIdTable),
             iv_spPcrd->hdatChipData.hdatPcrdTopologyIdTab);
         iv_spPcrd->hdatChipData.hdatPcrdTopologyIdIndex =
-            iv_spPcrd->hdatChipData.hdatPcrdTopologyIdTab[0];
+            iv_spPcrd->hdatChipData.hdatPcrdTopologyIdTab[0]; */
+        iv_spPcrd->hdatChipData.hdatPcrdTopologyIdTab[0] = 10;
+        iv_spPcrd->hdatChipData.hdatPcrdTopologyIdIndex = 0;
+
     }
     while(0);
+    HDAT_EXIT();
     return l_errl;
 }
 

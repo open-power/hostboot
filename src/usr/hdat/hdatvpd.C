@@ -179,7 +179,10 @@ iv_kwdSize(0), iv_kwd(NULL)
         o_fmtKwd = nullptr;
     }
 
-    if(strcmp(i_eyeCatcher,"IO KID")==0)
+    //@TODO: RTC 246357 : HDAT: Support of missing attributes in P10 Rainer
+    //this block is probably not required because LXR0 is
+    ////available in the bp vpd file as needed by Phyp
+    /*if(strcmp(i_eyeCatcher,"IO KID")==0)
     {
         using namespace TARGETING;
         // Get Target Service, and the system target.
@@ -205,7 +208,7 @@ iv_kwdSize(0), iv_kwd(NULL)
         delete[] iv_kwd;
         iv_kwd = temp_buf;
         iv_kwdSize = combined_size;
-    }
+    }*/
 
 
     if (NULL == o_errlHndl)
@@ -325,7 +328,10 @@ iv_kwdSize(0), iv_kwd(NULL)
         }
     }
 
-    if(strcmp(i_eyeCatcher,"IO KID")==0)
+    //TODO RTC 246357 missing attrubute
+    //this block may not be needed as LXR0 is
+    //already available in the bp vpd for Rainier
+    /*if(strcmp(i_eyeCatcher,"IO KID")==0)
     {
         using namespace TARGETING;
         // Get Target Service, and the system target.
@@ -352,7 +358,7 @@ iv_kwdSize(0), iv_kwd(NULL)
         delete[] iv_kwd;
         iv_kwd = temp_buf;
         iv_kwdSize = combined_size;
-    }
+    }*/
     if (NULL == o_errlHndl)
     {
         iv_fru.hdatSlcaIdx = l_slcaIdx;

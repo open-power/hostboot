@@ -454,6 +454,7 @@ errlHndl_t HdatIoHubFru::hdatGetDaughterInfoFromTarget(
     HDAT_ENTER();
     errlHndl_t l_errl = NULL;
     o_DaughterRids.clear();
+    uint32_t  dummy_slca_rid = 0;
     do
     {
         if ( NULL == i_target )
@@ -518,8 +519,13 @@ errlHndl_t HdatIoHubFru::hdatGetDaughterInfoFromTarget(
             break;
         }
         //get the parent node id, this is BP of the proc
-        TARGETING::Target* l_pNodeTarget = o_targetList[0];
-        o_DaughterRids.push_back(l_pNodeTarget->getAttr<ATTR_SLCA_RID>());
+        //not available in hostboot
+        //TARGETING::Target* l_pNodeTarget = o_targetList[0];
+        //@TODO RTC 246357 missing attribute
+        //SLCA_RID not present for BP, will it be supported at all?
+        //o_DaughterRids.push_back(l_pNodeTarget->getAttr<ATTR_SLCA_RID>());
+        o_DaughterRids.push_back(dummy_slca_rid);
+        dummy_slca_rid++;
 
 
         //@TODO: RTC 148660 add the loop to fetch the pci slot and card
@@ -537,6 +543,7 @@ errlHndl_t HdatIoHubFru::hdatGetDaughterInfoFromTarget(
 errlHndl_t HdatIoHubFru::bldDaughterStruct(const TARGETING::Target * i_target,
                                            uint32_t i_index)
 {
+    HDAT_ENTER();
     errlHndl_t l_errlHndl = NULL;
     uint32_t   l_InstalledEtRidCnt = 0;
     uint32_t   l_loopCnt = 0;
@@ -683,15 +690,28 @@ errlHndl_t HdatIoHubFru::addDaughterCard(uint32_t i_resourceId,
              */
             if(l_model == TARGETING::MODEL_POWER10)
             {
-                uint32_t i_num = sizeof(pvpdDataP10)/sizeof(pvpdDataP10[0]);
+                //@TODO RTC 216059 hostboot to read BP vpd via PLDM
+                HDAT_DBG("constructing BP vpd for daughter card");
+                //BP not available in hostboot
+               // uint32_t i_num = sizeof(pvpdDataP10)/sizeof(pvpdDataP10[0]);
                 l_vpdObj = new HdatVpd(l_errlHndl, i_resourceId,i_target,
                                        HDAT_KID_STRUCT_NAME,i_index,BP,
-                                       pvpdDataP10,i_num,l_pvpdKeywordsP10);
+                                       pvpdDataP10,0,l_pvpdKeywordsP10);
             }
             else
             {
                 HDAT_ERR("Chip is not POWER10");
             }
+        }
+        else if (l_model == TARGETING::MODEL_POWER10)//BP vpd not present in Hostboot
+        {
+            //@TODO RTC 216059 hostboot to read BP vpd via PLDM
+            //l_vpdType can not be compared since there is no valid rid
+            //for BP
+            HDAT_DBG("constructing BP vpd for daughter card");
+            l_vpdObj = new HdatVpd(l_errlHndl, i_resourceId,i_target,
+                                      HDAT_KID_STRUCT_NAME,i_index,BP,
+                                      pvpdDataP10,0,l_pvpdKeywordsP10);//values are not used
         }
         //@TODO: RTC 148660 pci slots and cards
 
@@ -788,12 +808,14 @@ errlHndl_t HdatIoHubFru::bldSlotMapInfoStruct(uint32_t i_numProc)
 
 errlHndl_t HdatIoHubFru::hdatGetSlotMapTableAreas(uint32_t i_numProc)
 {
+    HDAT_ENTER();
     errlHndl_t l_errlHndl = NULL;
     iv_hdatSlotMapAreaArrayHdr = { sizeof(hdatHDIFDataArray_t),
                                    (i_numProc == 0)? PROC0_NUM_SLOT_TABLE_AREAS:PROC1_NUM_SLOT_TABLE_AREAS,
                                    sizeof(hdatSlotMapArea_t),
                                    sizeof(hdatSlotMapArea_t) };
     memcpy(iv_hdatSlotMapAreaPtr, hdatSlotMapAreas[i_numProc] , sizeof(hdatSlotMapArea_t)*iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt);
+    HDAT_EXIT();
     return l_errlHndl;
 }
 
@@ -933,10 +955,6 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             {
                 l_hub->hdatModuleId = HDAT_MODULE_TYPE_ID_P10_HOPPER;
             }
-            else
-            {
-                HDAT_ERR("Chip is not POWER10");
-            }
 
             TARGETING::Target *l_pSysTarget = NULL;
             (void) TARGETING::targetService().getTopLevelTarget(l_pSysTarget);
@@ -976,8 +994,10 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             //memory map version
             l_hub->hdatMemMapVersion = 3;
 
-            l_hub->hdatFab0PresDetect = l_pProcTarget->
-                   getAttr<TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE>();
+            //@TODO RTC 246357 missing attribute
+            /*l_hub->hdatFab0PresDetect = l_pProcTarget->
+                   getAttr<TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE>();*/
+            l_hub->hdatFab0PresDetect = 0;       
 
             TARGETING::PredicateHwas l_predHwasFunc;
             TARGETING::PredicateCTM l_phbPredicate (TARGETING::CLASS_UNIT,
@@ -1000,19 +1020,21 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
                 TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION_GEN4_type
                            l_laneEq4 = {0};
                            
-                TARGETING::Target *l_phbTarget = l_phbList[l_idx];
+                //TARGETING::Target *l_phbTarget = l_phbList[l_idx];
                 
-                assert( l_phbTarget->
+                //@TODO RTC 246357 missing attribute
+                /*assert( l_phbTarget->
                    tryGetAttr<TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION_GEN3>(
-                       l_laneEq3));
+                       l_laneEq3));*/
 
                 memcpy((l_hub->hdatLaneEqPHBGen3 +
                           l_idx*NUM_OF_LANES_PER_PHB), l_laneEq3,
                           NUM_OF_LANES_PER_PHB*2);
 
-                assert( l_phbTarget->
+               //@TODO RTC 246357 missing attribute
+               /* assert( l_phbTarget->
                    tryGetAttr<TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION_GEN4>(
-                      l_laneEq4));
+                      l_laneEq4));*/
 
                 memcpy((l_hub->hdatLaneEqPHBGen4 +
                           l_idx*NUM_OF_LANES_PER_PHB),l_laneEq4,

@@ -79,6 +79,7 @@ void HdatMsVpd::hdatInit(hdatMsAddr_t &i_maxMsAddr,
                          uint32_t i_ueAreaCnt,
                          uint64_t i_MirrMemStartAddr)
 {
+    HDAT_ENTER();
     iv_maxUEAddrRngCnt = i_ueAreaCnt;
     iv_maxMsAreaCnt = i_msAreaCnt;
     iv_maxIMTAddrRngCnt = i_msAreaCnt;
@@ -129,6 +130,7 @@ void HdatMsVpd::hdatInit(hdatMsAddr_t &i_maxMsAddr,
 				    (iv_maxRHBAddrRngCnt * sizeof(hdatMsVpdRhbAddrRange_t))));
     this->align();
 
+    HDAT_EXIT();
     return;
 }
 
@@ -282,6 +284,7 @@ errlHndl_t HdatMsVpd::addRHBAddrRange(uint32_t i_dbob_id, hdatMsAddr_t &i_start,
                                       uint8_t* &i_labelStringPtr,
                                       hdatRhbPermType i_permission)
 {
+    HDAT_ENTER();
     errlHndl_t l_errlHndl = NULL;
     hdatMsVpdRhbAddrRange_t *l_addr;
 
@@ -346,6 +349,7 @@ errlHndl_t HdatMsVpd::addRHBAddrRange(uint32_t i_dbob_id, hdatMsAddr_t &i_start,
                   iv_maxRHBAddrRngCnt);           // SRC hex word 2
     }
 
+    HDAT_EXIT();
     return l_errlHndl;
 
 }
@@ -369,6 +373,7 @@ void HdatMsVpd::setBSR(const hdatMsAddr_t &i_bsrAddr,
  */
 void HdatMsVpd::setXSCOM(const hdatMsAddr_t &i_xscomAddr)
 {
+    HDAT_ENTER();
 
     const uint32_t HDAT_XSCOM_ENABLED = 0x10000000;
 
@@ -376,6 +381,7 @@ void HdatMsVpd::setXSCOM(const hdatMsAddr_t &i_xscomAddr)
 
     memcpy(&iv_mover.hdatXSCOMAddr, &i_xscomAddr, sizeof(hdatMsAddr_t));
 
+    HDAT_EXIT();
     return;
 }
 
@@ -390,6 +396,7 @@ errlHndl_t HdatMsVpd::addMsAreaFru(uint32_t i_resourceId,
                                    uint32_t i_chipEcCnt,
                                    uint32_t i_addrRngCnt)
 {
+    HDAT_ENTER();
     errlHndl_t l_errlHndl = NULL;
     HdatMsArea *l_msArea, *l_prevMsArea, **l_arrayEntry;
     uint32_t l_slcaIdx, l_kwdSize, l_resourceId, l_prevIdx;
@@ -470,6 +477,7 @@ errlHndl_t HdatMsVpd::addMsAreaFru(uint32_t i_resourceId,
                   i_msAreaId);            // SRC hex word 3
     }
 
+    HDAT_EXIT();
     return l_errlHndl;
 }
 
@@ -612,6 +620,7 @@ errlHndl_t HdatMsVpd::addMsAreaAddr(uint16_t i_msAreaId,
                                     uint32_t i_hdatMemCntrlID,
                                     bool i_hdatSmf)
 {
+    HDAT_ENTER();
     errlHndl_t l_errlHndl = NULL;
     HdatMsArea *l_obj;
     hdatMsAddr_t l_startMirrAddr;
@@ -635,6 +644,7 @@ errlHndl_t HdatMsVpd::addMsAreaAddr(uint16_t i_msAreaId,
         HDAT_INF( "hdatmsvpd:addMsAreaAddr - invalid i_msAreadId parameter");
     }
 
+    HDAT_EXIT();
     return l_errlHndl;
 }
 
@@ -645,6 +655,7 @@ errlHndl_t HdatMsVpd::addEcEntry(uint16_t i_msAreaId,
                                  uint32_t i_manfId,
                                  uint32_t i_ecLvl)
 {
+    HDAT_ENTER();
     errlHndl_t l_errlHndl = NULL;
     HdatMsArea *l_obj;
 
@@ -658,6 +669,7 @@ errlHndl_t HdatMsVpd::addEcEntry(uint16_t i_msAreaId,
         HDAT_ERR( "hdatmsvpd:addEcEntry - invalid i_msAreadId parameter");
     }
 
+    HDAT_EXIT();
     return l_errlHndl;
 }
 
@@ -666,6 +678,7 @@ errlHndl_t HdatMsVpd::addEcEntry(uint16_t i_msAreaId,
 void HdatMsVpd::setMsaI2cInfo(uint16_t i_msAreaId,
     std::vector<hdatI2cData_t>& i_I2cDevEntries)
 {
+    HDAT_ENTER();
     HdatMsArea *l_obj;
 
     if (i_msAreaId < iv_actMsAreaCnt)
@@ -677,6 +690,7 @@ void HdatMsVpd::setMsaI2cInfo(uint16_t i_msAreaId,
     {
         HDAT_ERR("hdatmsvpd:setMsaI2cInfo - invalid i_msAreadId parametera");
     }
+    HDAT_EXIT();
 }
 
 /** @brief See the prologue in hdatmsvpd.H
@@ -1040,13 +1054,14 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
         uint32_t l_mostSigAffinityDomain_x = 0;
         uint32_t l_ueCount = 1;
 
-        TARGETING::ATTR_MIRROR_BASE_ADDRESS_type l_mirroringBaseAddress_x =
-            l_pSysTarget->getAttr<TARGETING::ATTR_MIRROR_BASE_ADDRESS>();
+        //@TODO: RTC 246357 : HDAT: Support of missing attributes in P10 Rainer
+        /*TARGETING::ATTR_MIRROR_BASE_ADDRESS_type l_mirroringBaseAddress_x =
+            l_pSysTarget->getAttr<TARGETING::ATTR_MIRROR_BASE_ADDRESS>();*/
 
-        TARGETING::ATTR_MIRROR_BASE_ADDRESS_type l_mirrorBaseAddress_x =
-            l_mirroringBaseAddress_x;
+        TARGETING::ATTR_MIRROR_BASE_ADDRESS_type l_mirrorBaseAddress_x = 0;
+         //   l_mirroringBaseAddress_x; //not supported
 
-        l_mirroringBaseAddress_x |= HDAT_REAL_ADDRESS_MASK64;
+       // l_mirroringBaseAddress_x |= HDAT_REAL_ADDRESS_MASK64; //not supported
         //TODO : RTC Story 246361 HDAT Nimbus/Cumulus model code removal
         /*
         TARGETING::ATTR_MAX_MCS_PER_SYSTEM_type l_maxMsAreas =
@@ -1067,7 +1082,7 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
         // TODO : RTC Story 166994 to set the maximum number of Ms Area entries
         // from new attribute
         hdatInit(l_tmpMaxMsAddr,l_tmpMaxMsAddr,l_sizeConfigured,l_maxMsAreas,
-                l_mostSigAffinityDomain_x,l_ueCount,l_mirroringBaseAddress_x);
+                l_mostSigAffinityDomain_x,l_ueCount,/*l_mirroringBaseAddress_x*/0); //mirroring not supported
 
         TARGETING::ATTR_XSCOM_BASE_ADDRESS_type l_xscomAddr =
                  l_pSysTarget->getAttr<TARGETING::ATTR_XSCOM_BASE_ADDRESS>();
@@ -2397,8 +2412,9 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                                              TARGETING::targetService().end(),
                                              &l_functionalnode);
 
-        TARGETING::ATTR_HB_RSV_MEM_SIZE_MB_type l_rhbSize =
-            l_pSysTarget->getAttr<TARGETING::ATTR_HB_RSV_MEM_SIZE_MB>();
+        TARGETING::ATTR_HB_RSV_MEM_SIZE_MB_type l_rhbSize = 0;
+        //@TODO RTC 246357 missing attributes
+           // l_pSysTarget->getAttr<TARGETING::ATTR_HB_RSV_MEM_SIZE_MB>();
         if( 0 != l_rhbSize )
         {
             for(;l_nodes;++l_nodes)
@@ -3036,6 +3052,7 @@ errlHndl_t HdatMsVpd::hdatScanDimmsP10(const TARGETING::Target *i_pOcmbTarget,
                          bool& o_areaFunctional,
                          hdatMemParentType& o_parentType)
 {
+    HDAT_ENTER();
     errlHndl_t l_err = NULL;
 
     do
@@ -3161,6 +3178,7 @@ errlHndl_t HdatMsVpd::hdatScanDimmsP10(const TARGETING::Target *i_pOcmbTarget,
         }
     }
     while(0);
+    HDAT_EXIT();
     return l_err;
 }
 

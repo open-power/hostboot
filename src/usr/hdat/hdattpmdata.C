@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,6 +51,7 @@ HdatTpmData::HdatTpmData(errlHndl_t &o_errlHndl,
     iv_msAddr(i_msAddr),
     iv_hdatTpmData(nullptr)
 {
+    HDAT_ENTER();
     assert(o_errlHndl == nullptr,"The error log handle passed must be nullptr");
 
     const uint64_t l_baseAddr = static_cast<uint64_t>(i_msAddr.hi) << 32
@@ -115,6 +116,7 @@ HdatTpmData::HdatTpmData(errlHndl_t &o_errlHndl,
             HDAT_VERSION1,
             false);
     }
+    HDAT_EXIT();
 }
 
 HdatTpmData::~HdatTpmData()

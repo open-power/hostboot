@@ -210,6 +210,7 @@ errlHndl_t hdatGetIdEc(const Target *i_pTarget,
 *******************************************************************************/
 errlHndl_t hdatGetHwCardId(const Target *i_pTarget, uint32_t &o_cardId)
 {
+    HDAT_ENTER();
     errlHndl_t l_errl = NULL;
     do
     {
@@ -275,6 +276,7 @@ errlHndl_t hdatGetHwCardId(const Target *i_pTarget, uint32_t &o_cardId)
     }
     while(0);
 
+    HDAT_EXIT();
     return l_errl;
 }
 
@@ -1795,7 +1797,9 @@ void hdatGetSMPLinkInfo(TARGETING::Target* i_pTarget,
 {
     HDAT_ENTER();
 
-    errlHndl_t l_err = NULL;
+    //@TODO RTC 246357 missing attribute
+    //@TODO RTC 246438 VNDR NV is not defined: in the bp vpd yet
+ /*   errlHndl_t l_err = NULL;
     uint8_t *l_NVKwd = NULL;
     PVPD::pvpdRecord l_Record = PVPD::VNDR;
     PVPD::pvpdKeyword l_KeyWord = PVPD::NV;
@@ -1903,6 +1907,7 @@ void hdatGetSMPLinkInfo(TARGETING::Target* i_pTarget,
         l_err = NULL;
     }
 
+*/
     HDAT_EXIT();
 }
 

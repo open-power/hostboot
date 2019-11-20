@@ -128,6 +128,7 @@ HdatPcia::HdatPcia(errlHndl_t &o_errlHndl, const hdatMsAddr_t &i_msAddr)
 *******************************************************************************/
 errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
 {
+    HDAT_ENTER();
     errlHndl_t l_errl = NULL;
 
     do
@@ -163,9 +164,16 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
 
         // Get the fused core support info
         bool l_fused_core_support = is_fused_mode();
+        HDAT_DBG("is_fused_mode=%d",l_fused_core_support);
 
-        l_coreThreadCount = l_pTopLevel->getAttr<ATTR_THREAD_COUNT>();
-        uint64_t en_thread_mask =
+        l_coreThreadCount = 4;
+        HDAT_DBG("THREAD_COUNT is 0x%x",l_coreThreadCount);
+        size_t l_enabledThreads = l_coreThreadCount;
+        //@TODO RTC 246357 missing attribute
+        //l_coreThreadCount = l_pTopLevel->getAttr<ATTR_THREAD_COUNT>();
+        //
+        //@TODO RTC 246357 missing attribute
+        /*uint64_t en_thread_mask =
           l_pTopLevel->getAttr<TARGETING::ATTR_ENABLED_THREADS>();
         //Check the enabled threads to see if user overrode to SMT1 or SMT2
         //Note this only handles specific SMT1/2 -- no other permutations
@@ -177,7 +185,7 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
         else if (en_thread_mask == 0xC000000000000000)
         {
              l_enabledThreads = 2;
-        }
+        }*/
         uint32_t l_procStatus;
         HDAT_DBG("Core Thread Count[%d], Enabled[%d]",
                  l_coreThreadCount, l_enabledThreads);
@@ -592,6 +600,7 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
         o_count = index;
     }while(0);
 
+    HDAT_EXIT();
     return l_errl;
 }
 
