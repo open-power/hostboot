@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,15 @@
 #define CORE0_MASK       (uint32_t)0x80000000
 
 #define MVPD_DD_KWD_VER1 (uint8_t)0x01
+//#define UNDEFINED_MVPD_KEYWORD (uint8_t)0xff
+
+enum MvpdRingType
+{
+    MVPD_RING_PDG = (uint8_t)0,
+    MVPD_RING_PDP = (uint8_t)1,
+    MVPD_RING_PDR = (uint8_t)2,
+    MVPD_RING_TYPES = (uint8_t)3
+};
 
 enum SYSPHASE
 {

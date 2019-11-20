@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -126,6 +126,7 @@ enum MvpdKeyword
     MVPD_KEYWORD_CI  = 0x2e,
     MVPD_KEYWORD_LAST, //useful for testcases
     MVPD_KEYWORD_FIRST = MVPD_KEYWORD_VD, //useful for testcases
+    MVPD_KEYWORD_UNDEFINED = 0xff,
 };
 }
 

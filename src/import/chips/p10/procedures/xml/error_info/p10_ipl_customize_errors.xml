@@ -649,4 +649,17 @@
     </callout>
   </hwpError>
   <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_MVPD_RINGTABLE_VERSION_MISMATCH</rc>
+    <description>Mismatch between ring table version of MVPD and Code header</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RINGTABLE_VERSION_MVPD</ffdc>
+    <ffdc>RINGTABLE_VERSION_CODE</ffdc>
+    <ffdc>MVPD_RING_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
 </hwpErrors>
