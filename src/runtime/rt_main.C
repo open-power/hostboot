@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -165,6 +165,11 @@ runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
     {
         // (HTMGT not compiled in by default)
     }
+
+#ifdef CONFIG_NVDIMM
+    // Update hose with current NV_STATUS
+    rtPost->callSendNvStatus();
+#endif
 
     // do any version mismatch fixups
     rt_version_fixup();

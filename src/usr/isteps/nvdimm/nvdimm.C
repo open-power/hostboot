@@ -3660,6 +3660,10 @@ errlHndl_t notifyNvdimmProtectionChange(Target* i_target,
                     break;
                 case ENCRYPTION_DISABLED:
                     l_clr_encryption = true;
+                    break;
+                case SEND_NV_STATUS:
+                    // no action, just send status
+                    break;
             }
 
             // Set the attribute and send it to the FSP if needed

@@ -1021,4 +1021,36 @@ bool nvDimmNvmCheckHealthStatusOnSystem()
 }  // end nvDimmCheckHealthStatusOnSystem
 
 
+/**
+ * @brief Send NV_STATUS to host
+ */
+void nvdimmSendNvStatus()
+{
+    // Send NV_STATUS for all nvdimms
+    TargetHandleList l_nvdimmTargetList;
+    nvdimm_getNvdimmList(l_nvdimmTargetList);
+    for (const auto & l_nvdimm : l_nvdimmTargetList)
+    {
+        errlHndl_t l_err = nullptr;
+        l_err = notifyNvdimmProtectionChange(l_nvdimm,SEND_NV_STATUS);
+        if (l_err)
+        {
+            errlCommit(l_err, NVDIMM_COMP_ID);
+        }
+    }
+}
+
+
+struct registerNvdimmRt
+{
+    registerNvdimmRt()
+    {
+        // Register function to call at end of RT init
+        postInitCalls_t * rt_post = getPostInitCalls();
+        rt_post->callSendNvStatus = &nvdimmSendNvStatus;
+    }
+};
+
+registerNvdimmRt g_registerNvdimmRt;
+
 } // end NVDIMM namespace

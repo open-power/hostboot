@@ -271,6 +271,12 @@ bool nvDimmNvmCheckHealthStatus(const TARGETING::TargetHandleList
  */
 bool nvDimmNvmCheckHealthStatusOnSystem();
 
+
+/**
+ * @brief Send NV_STATUS to host
+ */
+void nvdimmSendNvStatus();
+
 #endif
 
 /**
@@ -299,6 +305,7 @@ enum nvdimm_protection_t
     NVDIMM_ENCRYPTION_ERROR   = 6,
     ENCRYPTION_ENABLED        = 7,
     ENCRYPTION_DISABLED       = 8,
+    SEND_NV_STATUS            = 11,
     /* deprecated, still used by PRD */
     UNPROTECTED_BECAUSE_ERROR = 4,
 };

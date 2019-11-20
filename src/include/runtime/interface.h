@@ -1124,6 +1124,11 @@ struct postInitCalls_t
      */
     void (*callCommitRsvdTraceBufErrl)();
 
+    /**
+     * @brief Sends current NV_STATUS to host
+     *
+     */
+    void (*callSendNvStatus)();
 };
 
 extern hostInterfaces_t* g_hostInterfaces;
