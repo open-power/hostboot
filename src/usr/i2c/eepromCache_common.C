@@ -27,7 +27,6 @@
 #include <i2c/eepromif.H>
 #include <i2c/eepromddreasoncodes.H>
 #include <errl/errludtarget.H>
-#include <config.h>
 
 #ifdef __HOSTBOOT_RUNTIME
 #include <targeting/attrrp.H>

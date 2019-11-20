@@ -51,7 +51,6 @@
 #include <console/consoleif.H>
 
 // Custom compile configs
-#include <config.h>
 
 #ifdef CONFIG_DRTM
 #include <secureboot/drtm.H>

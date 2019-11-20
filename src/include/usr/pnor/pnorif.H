@@ -31,7 +31,6 @@
 #include <pnor/pnor_const.H>
 #include <errl/errlentry.H>
 #include <utility>
-#include <config.h>
 
 namespace PNOR
 {

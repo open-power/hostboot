@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,7 +50,6 @@
 #include <targeting/common/utilFilter.H>
 #include <targeting/namedtarget.H>
 
-#include <config.h>
 
 #ifndef __HOSTBOOT_RUNTIME
 #ifdef CONFIG_SECUREBOOT

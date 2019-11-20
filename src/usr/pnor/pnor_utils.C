@@ -53,7 +53,6 @@ extern trace_desc_t* g_trac_pnor;
 
 #include "common/ffs_hb.H"
 #include <util/align.H>
-#include <config.h>
 #include <securerom/ROM.H>
 
 #include <pnor/pnorif.H>

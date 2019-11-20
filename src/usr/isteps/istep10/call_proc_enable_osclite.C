@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,7 +55,6 @@
 #include <devicefw/userif.H>
 #include <vpd/mvpdenums.H>
 
-#include <config.h>
 
 //  --  prototype   includes    --
 //  Add any customized routines that you don't want overwritten into

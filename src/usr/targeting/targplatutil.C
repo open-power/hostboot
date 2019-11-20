@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,6 @@
 #include <targeting/common/predicates/predicates.H>
 #include <targeting/common/utilFilter.H>
 #include <errl/errlmanager.H>
-#include <config.h>
 #include <algorithm>
 namespace TARGETING
 {

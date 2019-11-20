@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,7 +33,6 @@
 #include <trace/interface.H>
 #include <hwas/common/deconfigGard.H>
 #include <console/consoleif.H>
-#include <config.h>
 #include <sio/sio.H>
 #include <devicefw/driverif.H>
 

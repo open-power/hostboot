@@ -37,7 +37,6 @@
 #include <errl/errlentry.H>
 #include <devicefw/driverif.H>
 #include <targeting/common/predicates/predicatectm.H>
-#include <config.h>
 
 #include <vpd/dvpdenums.H>
 #include <vpd/vpdreasoncodes.H>

@@ -43,7 +43,6 @@
 #include <prdfMfgThresholdMgr.H>
 
 #include <diag/mdia/mdia.H>
-#include <config.h>
 
 using namespace TARGETING;
 

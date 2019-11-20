@@ -45,7 +45,6 @@
 #include "../trustedboot.H"
 #include "../trustedbootCmds.H"
 #include "../tpmLogMgr.H"
-#include <config.h>
 
 using namespace TRUSTEDBOOT;
 

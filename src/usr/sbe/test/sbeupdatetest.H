@@ -38,7 +38,6 @@
 #include <devicefw/driverif.H>
 #include <vfs/vfs.H>
 #include <targeting/common/utilFilter.H>
-#include <config.h>
 #include <sbe/sbeif.H>
 #include <sbe/sbe_update.H>
 #include <secureboot/service.H>

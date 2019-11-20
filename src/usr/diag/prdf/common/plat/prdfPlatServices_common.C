@@ -48,7 +48,6 @@
 #include <p9_io_xbus_pdwn_lanes.H>
 #include <p9_io_xbus_clear_firs.H>
 #include <p9_io_erepairAccessorHwpFuncs.H>
-#include <config.h>
 #include <p9_io_cen_read_erepair.H>
 #include <p9_io_cen_pdwn_lanes.H>
 #include <p9_io_dmi_read_erepair.H>

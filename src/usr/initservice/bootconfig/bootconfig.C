@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,7 +27,6 @@
 /******************************************************************************/
 #include <lpc/lpcif.H>
 #include <devicefw/userif.H>
-#include <config.h>
 #include <errl/errlentry.H>
 #include "bootconfig.H"
 

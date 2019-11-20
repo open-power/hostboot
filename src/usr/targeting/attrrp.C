@@ -51,7 +51,6 @@
 #include <sys/misc.h>
 #include <fapi2/plat_attr_override_sync.H>
 #include <targeting/attrPlatOverride.H>
-#include <config.h>
 #include <secureboot/service.H>
 #include <kernel/bltohbdatamgr.H>
 #include <bootloader/bootloaderif.H>

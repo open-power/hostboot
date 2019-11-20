@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,7 +25,6 @@
 #ifndef __CONSOLE_UARTIF_H
 #define __CONSOLE_UARTIF_H
 
-#include <config.h>
 #include <stdarg.h>
 
 namespace CONSOLE

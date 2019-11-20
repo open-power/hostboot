@@ -45,7 +45,6 @@
 #include <secureboot/service.H>
 #include <secureboot/containerheader.H>
 #include <kernel/console.H>
-#include <config.h>
 
 using namespace VFS;
 

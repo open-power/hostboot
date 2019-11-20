@@ -48,7 +48,6 @@
 #include <kernel/bltohbdatamgr.H>
 #include <errl/errludlogregister.H>
 #include <initservice/taskargs.H>
-#include <config.h>
 #include <arch/memorymap.H>
 #include <util/misc.H>
 #include <errl/errlreasoncodes.H>

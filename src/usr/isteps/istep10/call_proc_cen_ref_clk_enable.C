@@ -80,7 +80,6 @@
 #include <errl/errludtarget.H>
 #include <attributetraits.H>
 
-#include <config.h>
 #include <util/align.H>
 #include <util/algorithm.H>
 

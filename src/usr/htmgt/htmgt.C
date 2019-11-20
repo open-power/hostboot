@@ -31,7 +31,6 @@
 #include "htmgt_memthrottles.H"
 #include "htmgt_poll.H"
 #include <devicefw/userif.H>
-#include <config.h>
 #include <console/consoleif.H>
 
 //  Targeting support

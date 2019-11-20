@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,7 +44,6 @@
 #include <targeting/common/utilFilter.H>
 
 // Custom compile configs
-#include <config.h>
 
 #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
   #include "ipl/attnfilereg.H"

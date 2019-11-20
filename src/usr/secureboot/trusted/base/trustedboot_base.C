@@ -45,7 +45,6 @@
 #include <secureboot/header.H>
 #include <secureboot/containerheader.H>
 #include <pnor/pnorif.H>
-#include <config.h>
 #include "../trustedboot.H"
 #include "../trustedbootCmds.H"
 #include "../trustedbootUtils.H"

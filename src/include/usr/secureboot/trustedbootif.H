@@ -41,7 +41,6 @@
 #include <secureboot/containerheader.H>
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
-#include <config.h>
 
 namespace TRUSTEDBOOT
 {

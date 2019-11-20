@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,7 +27,6 @@
 #define __SECUREBOOT_DRTM_H
 
 #include <initservice/mboxRegs.H>
-#include <config.h>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <vector>

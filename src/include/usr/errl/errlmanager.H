@@ -35,7 +35,6 @@
 /*****************************************************************************/
 // I n c l u d e s
 /*****************************************************************************/
-#include <config.h>
 #include <util/singleton.H>
 #include <errl/errlentry.H>
 #include <errldisplay/errldisplay.H>

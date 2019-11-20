@@ -36,7 +36,6 @@
 #include <devicefw/driverif.H>
 #include <devicefw/userif.H>
 
-#include <config.h>
 #include <sys/task.h>
 #include <initservice/taskargs.H>
 #include <initservice/initserviceif.H>

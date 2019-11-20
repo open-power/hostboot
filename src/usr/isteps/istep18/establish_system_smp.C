@@ -53,7 +53,6 @@
 
 #include <istep_mbox_msgs.H>
 #include <vfs/vfs.H>
-#include <config.h>
 
 //  targeting support
 #include <targeting/common/commontargeting.H>

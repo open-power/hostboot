@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,7 +54,6 @@
 #include <initservice/initserviceif.H>
 #include <util/align.H>
 #include <lpc/lpcif.H>
-#include <config.h>
 #include "sfcdd.H"
 
 // Initialized in pnorrp.C

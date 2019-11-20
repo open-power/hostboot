@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,7 +56,6 @@
 #include    <fapi2/plat_hwp_invoker.H>
 #include    <isteps/hwpf_reasoncodes.H>
 #include    <isteps/hwpisteperror.H>
-#include <config.h>
 #include <vector>
 #include "smp_unfencing_inter_enclosure_abus_links.H"
 

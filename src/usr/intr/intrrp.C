@@ -53,7 +53,6 @@
 #include <arch/ppc.H>
 #include <arch/pirformat.H>
 #include <arch/pvrformat.H>
-#include <config.h>
 #include <p9_misc_scom_addresses.H>
 #include <p9n2_misc_scom_addresses_fld.H>
 #include <util/utilmbox_scratch.H>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -37,7 +37,6 @@
 #include <util/singleton.H>
 #include <assert.h>
 #include <time.h>
-#include <config.h>
 #include <console/consoleif.H>
 #include <stdio.h>
 #include <ctype.h>

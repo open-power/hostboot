@@ -53,7 +53,6 @@
 #ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmisensor.H>
 #endif
-#include <config.h>
 #include <devicefw/driverif.H>
 #include <i2c/tpmddif.H>
 #include "trustedboot.H"

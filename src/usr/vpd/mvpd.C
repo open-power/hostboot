@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -38,7 +38,6 @@
 #include <vpd/mvpdenums.H>
 #include <vpd/vpd_if.H>
 #include <i2c/eepromif.H>
-#include <config.h>
 
 #include "mvpd.H"
 #include "ipvpd.H"

@@ -34,7 +34,6 @@
 #include <initservice/initserviceif.H>
 #include <util/align.H>
 #include <errl/errlmanager.H>
-#include <config.h>        // @FIXME RTC 132398
 #include <secureboot/trustedbootif.H>
 #include <devicefw/driverif.H>
 

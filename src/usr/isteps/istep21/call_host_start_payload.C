@@ -54,7 +54,6 @@
 #include <p9n2_quad_scom_addresses_fld.H>
 #include <p9_quad_scom_addresses.H>
 #include <ipmi/ipmiwatchdog.H>
-#include <config.h>
 #include <errno.h>
 #include <p9_int_scom.H>
 #include <sbeio/sbeioif.H>

@@ -36,7 +36,6 @@
 #include <fapi2/plat_hwp_invoker.H>
 
 #include <p9_update_security_ctrl.H>
-#include <config.h>
 
 namespace SECUREBOOT
 {

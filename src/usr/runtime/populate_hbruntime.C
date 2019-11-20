@@ -56,7 +56,6 @@
 #include <secureboot/trustedbootif.H>
 #include <secureboot/service.H>
 #include <hdat/hdat.H>
-#include <config.h>
 #include "../hdat/hdattpmdata.H"
 #include "../hdat/hdatpcrd.H"
 #include "../secureboot/trusted/tpmLogMgr.H"

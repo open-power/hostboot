@@ -30,7 +30,6 @@
 #include <util/utilmclmgr.H>
 #include <errl/errlmanager.H>
 #include <hbotcompid.H>
-#include <config.h>
 #include <initservice/isteps_trace.H>
 #include <isteps/ucd/updateUcdFlash.H>
 #include <secureboot/trustedbootif.H>

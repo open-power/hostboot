@@ -31,7 +31,6 @@
 #include <map>
 #include <pnor/pnorif.H>
 #include <devicefw/driverif.H>
-#include <config.h>
 #include "vpd.H"
 #include <i2c/eeprom_const.H>
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,6 @@
 #include <pnor/pnor_const.H>
 #include "limits.h"
 #include "ffs.h"
-#include <config.h>
 
 #ifndef BOOTLOADER
 #include <errl/errlentry.H>

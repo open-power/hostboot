@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,7 +31,6 @@
 #include <targeting/common/target.H>
 #include <initservice/initserviceif.H>
 #include <secureboot/settings.H>
-#include <config.h>
 #include <console/consoleif.H>
 #include <kernel/console.H>
 

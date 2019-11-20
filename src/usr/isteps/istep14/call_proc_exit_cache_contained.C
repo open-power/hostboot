@@ -47,7 +47,6 @@
 #include <arch/pirformat.H>
 #include <isteps/hwpf_reasoncodes.H>
 #include <devicefw/userif.H>
-#include <config.h>
 #include <util/misc.H>
 #include <hwas/common/hwas.H>
 #include <sys/misc.h>

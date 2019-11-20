@@ -38,7 +38,6 @@
 #include <arch/ppc.H>
 #include <kernel/console.H>
 #include <xz/xz.h>
-#include <config.h>
 
 
 using namespace ERRORLOG;

@@ -41,7 +41,6 @@
 #include <vpd/cvpdenums.H>
 #include <vpd/vpd_if.H>
 #include <i2c/eepromif.H>
-#include <config.h>
 #include "cvpd.H"
 #include "pvpd.H"
 #include "vpd.H"

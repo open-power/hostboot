@@ -38,6 +38,8 @@ CFLAGS += -DNO_INITIALIZER_LIST
 CFLAGS += -D__FAPI
 endif
 
+# Force all files to pull in the CONFIG_ variables
+CFLAGS += -include config.h
 
 COMMONFLAGS += $(OPT_LEVEL) -nostdlib
 CFLAGS += $(COMMONFLAGS) -mcpu=power7 -nostdinc -g -mno-vsx -mno-altivec\

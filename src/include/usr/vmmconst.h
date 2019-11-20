@@ -31,7 +31,6 @@
  */
 
 #include <limits.h>
-#include <config.h>
 
 /**
  * Segments

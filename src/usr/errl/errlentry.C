@@ -49,7 +49,6 @@
 #include <errl/errludstate.H>
 #include <errl/errli2c.H>
 #include <trace/interface.H>
-#include <config.h>
 
 #include "../trace/entry.H"
 #include <util/align.H>
@@ -60,7 +59,6 @@
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/commontargeting.H>
-#include <config.h>
 #include <initservice/initserviceif.H>
 #include <attributeenums.H>
 #include "errlentry_consts.H"

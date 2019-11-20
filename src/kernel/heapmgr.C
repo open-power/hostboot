@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,7 +31,6 @@
 #include <util/align.H>
 #include <arch/ppc.H>
 #include <usr/debugpointers.H>
-#include <config.h>
 
 #ifdef HOSTBOOT_DEBUG
 #define SMALL_HEAP_PAGES_TRACKED 64

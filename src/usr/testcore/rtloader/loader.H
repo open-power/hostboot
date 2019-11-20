@@ -45,7 +45,6 @@
 #include <pnor/ecc.H>
 #include <ipmi/ipmiif.H>
 #include <targeting/common/attributeTank.H>
-#include <config.h>
 #include <util/utilrsvdmem.H>
 #include <sys/misc.h>
 #include <errno.h>

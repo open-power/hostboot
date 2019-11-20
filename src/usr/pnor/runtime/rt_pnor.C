@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,6 @@
 #include <util/align.H>
 #include <runtime/customize_attrs_for_payload.H>
 #include <securerom/ROM.H>
-#include <config.h>
 #include "../pnor_utils.H"
 #include <runtime/common/runtime_utils.H>
 

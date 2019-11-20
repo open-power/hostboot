@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -31,7 +31,6 @@
 #include "mailboxsp.H"
 #include "mboxdd.H"
 #include "ipcSp.H"
-#include <config.h>
 #include <sys/task.h>
 #include <initservice/taskargs.H>
 #include <initservice/initserviceif.H>

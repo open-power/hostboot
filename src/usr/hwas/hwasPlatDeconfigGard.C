@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -41,7 +41,6 @@
 #include <vpd/mvpdenums.H>
 #include <stdio.h>
 #include <sys/mm.h>
-#include <config.h>
 #include <initservice/istepdispatcherif.H>
 #include <initservice/initserviceif.H>
 

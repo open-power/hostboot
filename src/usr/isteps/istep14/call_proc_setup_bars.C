@@ -22,7 +22,6 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include <config.h>
 #include <errl/errlentry.H>
 #include <isteps/hwpisteperror.H>
 #include <initservice/isteps_trace.H>

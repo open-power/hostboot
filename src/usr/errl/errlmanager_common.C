@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,7 +23,6 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #include <errl/errlmanager.H>
-#include <config.h>
 #include <hwas/common/hwasCallout.H>
 #include <errl/errlreasoncodes.H>
 #ifdef CONFIG_BMC_IPMI

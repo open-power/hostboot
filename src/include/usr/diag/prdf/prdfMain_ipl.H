@@ -27,7 +27,6 @@
 #define __prdfMain_ipl_H
 
 // Custom compile configs
-#include <config.h>
 
 /**
  * @file  prdfMain_ipl.H

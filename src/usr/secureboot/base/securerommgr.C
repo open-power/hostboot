@@ -39,7 +39,6 @@
 
 #include "securerommgr.H"
 #include <secureboot/settings.H>
-#include <config.h>
 #include <console/consoleif.H>
 #include <secureboot/containerheader.H>
 #include "../common/errlud_secure.H"

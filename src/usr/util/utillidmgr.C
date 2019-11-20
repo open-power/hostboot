@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,6 @@
 #include <sys/mm.h>
 #include <util/align.H>
 
-#include <config.h>
 #ifdef CONFIG_SECUREBOOT
 #include <pnor/pnorif.H>
 #include <secureboot/service.H>

@@ -37,7 +37,6 @@
 // supported HWPF attributes lists attributes handled by Hostboot
 
 #include <stdint.h>
-#include <config.h>
 #include <return_code.H>
 #include <attribute_ids.H>
 #include <attributeenums.H>

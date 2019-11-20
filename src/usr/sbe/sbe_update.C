@@ -52,7 +52,6 @@
 #include <hwas/common/hwas.H>
 #include <initservice/initserviceif.H>
 #include <console/consoleif.H>
-#include <config.h>
 #include <sbe/sbeif.H>
 #include <sbeio/sbeioif.H>
 #include <sbe/sbereasoncodes.H>

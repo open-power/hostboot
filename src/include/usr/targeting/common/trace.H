@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -41,7 +41,6 @@
 // Other includes
 #include <targeting/adapters/traceadapter.H>
 #ifdef __HOSTBOOT_MODULE
-#include <config.h>
 #endif
 
 #define TARG_LOC TARG_NAMESPACE TARG_CLASS TARG_FN ": "

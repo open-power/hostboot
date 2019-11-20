@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,7 +48,6 @@
 #include <sys/time.h>
 #include <sys/vfs.h>
 #include <arch/ppc.H>
-#include <config.h>
 #include <mbox/ipc_msg_types.H>
 
 #include <fapi2.H>

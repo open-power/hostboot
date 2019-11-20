@@ -48,7 +48,6 @@
 #include <hwas/common/hwas_reasoncodes.H>
 #include <targeting/common/utilFilter.H>
 #include <fsi/fsiif.H>
-#include <config.h>
 #include <targeting/common/targetservice.H>
 #include <chipids.H>
 #include <vpd/spdenums.H>

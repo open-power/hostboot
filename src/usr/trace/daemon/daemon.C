@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -47,7 +47,6 @@
 #include <devicefw/userif.H>
 
 #include <mbox/mboxif.H>
-#include <config.h>
 #include <console/consoleif.H>
 #include <util/utilmbox_scratch.H>
 #include <debugpointers.H>

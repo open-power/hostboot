@@ -24,7 +24,6 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include <stdint.h>
-#include <config.h>
 #include <builtins.h>
 #include <limits.h>
 #include <string.h>

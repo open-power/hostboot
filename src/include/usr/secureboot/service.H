@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,7 +26,6 @@
 #define __SECUREBOOT_SERVICE_H
 
 #include <errl/errlentry.H>
-#include <config.h>
 #include <secureboot/settings.H>
 #include <utility>
 #include <cstdint>

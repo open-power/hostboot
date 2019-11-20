@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,7 +25,6 @@
 #ifndef OCCACCESS_H_
 #define OCCACCESS_H_
 
-#include <config.h>
 #include <errl/errlentry.H>
 #include <targeting/common/commontargeting.H>
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,7 +28,6 @@
 // ----------------------------------------------
 // Includes
 // ----------------------------------------------
-#include <config.h>
 #include <time.h>
 #include <devicefw/userif.H>
 #include <trace/interface.H>

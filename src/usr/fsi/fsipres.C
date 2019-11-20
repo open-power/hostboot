@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -33,7 +33,6 @@
 #include <errl/errlmanager.H>
 #include <hwas/common/hwasCallout.H>
 #include <targeting/common/predicates/predicatectm.H>
-#include <config.h>
 #include <initservice/initserviceif.H>
 
 extern trace_desc_t* g_trac_fsi;

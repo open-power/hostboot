@@ -69,7 +69,6 @@
 #include    <initservice/initsvcreasoncodes.H>
 
 //  include prototypes file
-#include <config.h>
 
 namespace   ISTEP_13
 {

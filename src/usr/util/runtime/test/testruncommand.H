@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,7 +24,6 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #include <cxxtest/TestSuite.H>
 #include <errl/errlmanager.H>
-#include <config.h>
 #include <runtime/interface.h>
 #include <string.h>
 #include <stdio.h>

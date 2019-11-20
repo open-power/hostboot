@@ -23,7 +23,6 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include <config.h>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <initservice/isteps_trace.H>
