@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,7 @@
 #include <lib/utils/bit_count.H>
 #include <lib/dimm/nimbus_kind.H>
 #include <lib/mcbist/mcbist_traits.H>
+#include <lib/workarounds/mcbist_workarounds.H>
 #include <generic/memory/lib/utils/num.H>
 #include <generic/memory/lib/utils/poll.H>
 #include <generic/memory/lib/utils/memory_size.H>
@@ -55,7 +56,6 @@
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_settings.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist.H>
 #include <generic/memory/lib/utils/dump_regs.H>
-#include <lib/workarounds/mcbist_workarounds.H>
 
 namespace mss
 {

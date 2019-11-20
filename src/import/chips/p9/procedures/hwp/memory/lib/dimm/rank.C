@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -897,6 +897,25 @@ fapi2::ReturnCode get_pair_from_rank(const fapi2::Target<TARGET_TYPE_MCA>& i_tar
 
     // Rank not found
     return FAPI2_RC_INVALID_PARAMETER;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Return a vector of rank numbers which represent the ranks for this dimm
+/// @param[in] i_dimm_target TARGET_TYPE_DIMM
+/// @param[out] o_ranks a vector of ranks for dimm (numbers)
+/// @return FAPI2_RC_SUCCESS iff all is ok
+///
+template<>
+fapi2::ReturnCode ranks_on_dimm_helper<mss::mc_type::NIMBUS>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
+        i_dimm_target,
+        std::vector<uint64_t>& o_ranks)
+{
+    std::vector<uint64_t> l_ranks;
+    FAPI_TRY( mss::rank::ranks(i_dimm_target, l_ranks) );
+    o_ranks = l_ranks;
 
 fapi_try_exit:
     return fapi2::current_err;

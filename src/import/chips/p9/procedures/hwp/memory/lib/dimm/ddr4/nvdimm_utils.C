@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,14 +44,14 @@
 #include <lib/mc/mc.H>
 #include <lib/dimm/rank.H>
 #include <lib/mss_attribute_accessors.H>
+#include <lib/mcbist/mcbist.H>
+#include <lib/utils/mss_nimbus_conversions.H>
 #include <generic/memory/lib/utils/poll.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/mc/gen_mss_port.H>
 #include <lib/mcbist/address.H>
 #include <lib/mcbist/memdiags.H>
-#include <lib/mcbist/mcbist.H>
 #include <lib/mcbist/settings.H>
-#include <lib/utils/mss_nimbus_conversions.H>
 #include <generic/memory/lib/utils/pos.H>
 #include <lib/mc/port.H>
 #include <lib/phy/dp16.H>

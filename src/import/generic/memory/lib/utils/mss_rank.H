@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,12 +49,15 @@ namespace rank
 
 ///
 /// @brief Rank traits class for variations depending on MC
+/// @tparam MC the memory controller type
 ///
 template <mss::mc_type MC = DEFAULT_MC_TYPE>
 class rankTraits;
 
 ///
 /// @brief Rank info class
+/// @tparam MC the memory controller type
+/// @tparam TT the class traits for the port
 ///
 template <mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = rankTraits<MC>>
 class info
@@ -245,6 +248,8 @@ class info
 
 ///
 /// @brief Obtains all DIMM ranks on a given port target
+/// @tparam MC the memory controller type
+/// @tparam TT the class traits for the port
 /// @param[in] i_port_target port target
 /// @param[out] o_vect vector of ranks
 /// @return FAPI2_RC_SUCCESS iff success
@@ -288,6 +293,8 @@ fapi_try_exit:
 
 ///
 /// @brief Obtains all ranks on a given DIMM target
+/// @tparam MC the memory controller type
+/// @tparam TT the class traits for the port
 /// @param[in] i_target DIMM target
 /// @param[out] o_vect vector of ranks
 /// @return FAPI2_RC_SUCCESS iff success
@@ -324,6 +331,17 @@ fapi2::ReturnCode ranks_on_dimm(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief Return a vector of rank numbers which represent the ranks for this dimm
+/// @tparam MC the memory controller type
+/// @param[in] i_dimm_target TARGET_TYPE_DIMM
+/// @param[out] o_ranks a vector of ranks for dimm (numbers)
+/// @return FAPI2_RC_SUCCESS iff all is ok
+///
+template<mss::mc_type MC>
+fapi2::ReturnCode ranks_on_dimm_helper(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm_target,
+                                       std::vector<uint64_t>& o_ranks);
 
 } // rank
 } // mss

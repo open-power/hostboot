@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,9 +43,9 @@
 
 #include <lib/shared/exp_consts.H>
 #include <lib/ecc/ecc_traits_explorer.H>
+#include <lib/mcbist/exp_mcbist_traits.H>
 #include <lib/mc/exp_port.H>
 #include <lib/utils/mss_exp_conversions.H>
-#include <lib/mcbist/exp_mcbist_traits.H>
 #include <generic/memory/lib/utils/poll.H>
 #include <generic/memory/lib/utils/memory_size.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_patterns.H>

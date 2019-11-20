@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,6 +55,7 @@
 #include <lib/dimm/ddr4/pda.H>
 #include <lib/phy/seq.H>
 #include <lib/phy/read_cntrl.H>
+#include <lib/mss_attribute_accessors.H>
 
 #ifdef LRDIMM_CAPABLE
     #include <lib/phy/mss_dwl.H>
@@ -66,6 +67,19 @@
 
 namespace mss
 {
+
+///
+/// @brief Bad bit getter - Nimbus specialization
+/// @param[in] i_target the fapi2 target oon which training was conducted
+/// @param[out] o_array the bad bits
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+template <>
+fapi2::ReturnCode get_bad_dq_bitmap<mss::mc_type::NIMBUS>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        uint8_t (&o_array)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT])
+{
+    return mss::bad_dq_bitmap(i_target, &(o_array[0][0]));
+}
 
 namespace training
 {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -553,11 +553,11 @@ inline void get_region( const fapi2::buffer<uint64_t>& i_data, mark_region& o_va
 /// @param[in, out] io_data the register value
 /// @param[in] i_address mcbist::address form of address field
 ///
-template< fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
 inline void set_address( fapi2::buffer<uint64_t>& io_data, const mcbist::address& i_address)
 {
     // construct fwms::address from mcbist::address
-    const auto l_addr = address<>(i_address);
+    const auto l_addr = address<MC, T, TT>(i_address);
     io_data.insert<TT::FIRMWARE_MS_ADDRESS, TT::FIRMWARE_MS_ADDRESS_LEN, TT::FIRMWARE_MS_ADDRESS>(l_addr);
     FAPI_INF("set_address: 0x%016lx", uint64_t(l_addr));
 }
@@ -569,11 +569,11 @@ inline void set_address( fapi2::buffer<uint64_t>& io_data, const mcbist::address
 /// @param[in] i_data the register value
 /// @param[out] o_address mcbist::address form of address field
 ///
-template< fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
 inline void get_address( const fapi2::buffer<uint64_t>& i_data, mcbist::address& o_address )
 {
     // construct fwms::address from i_data
-    const auto l_addr = mss::ecc::fwms::address<>(uint64_t(i_data));
+    const auto l_addr = mss::ecc::fwms::address<MC, T, TT>(uint64_t(i_data));
     // construct mcbist::address from fwms::address
     o_address = l_addr.operator mss::mcbist::address();
     FAPI_INF("get_address: 0x%016lx", uint64_t(l_addr));

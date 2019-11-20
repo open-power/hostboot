@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,11 +40,12 @@
 
 #include <generic/memory/lib/utils/poll.H>
 #include <generic/memory/lib/utils/memory_size.H>
+#include <generic/memory/lib/utils/mc/gen_mss_port.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_patterns.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_settings.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_traits.H>
+#include <generic/memory/lib/utils/conversions.H>
 #include <generic/memory/lib/utils/num.H>
-#include <generic/memory/lib/utils/mc/gen_mss_port.H>
 
 namespace mss
 {
@@ -2129,7 +2130,7 @@ class program
         inline fapi2::ReturnCode process_errors( const fapi2::Target<T> i_target ) const
         {
             // MCBIST error traits
-            using ET = mcbistMCTraits<DEFAULT_MC_TYPE>;
+            using ET = mcbistMCTraits<MC>;
 
             // Until reading the error array is documented, comparison errors 'just' result in
             // a flag indicating there was a problem on port.
@@ -3287,8 +3288,8 @@ inline fapi2::ReturnCode load_fifo_mode( const fapi2::Target<T>& i_target, const
     // Turns on FIFO mode
     constexpr mss::states FIFO_ON = mss::states::ON;
 
-    FAPI_TRY(mss::configure_wrq(i_target, FIFO_ON));
-    FAPI_TRY(mss::configure_rrq(i_target, FIFO_ON));
+    FAPI_TRY( configure_wrq(i_target, FIFO_ON) );
+    FAPI_TRY( configure_rrq(i_target, FIFO_ON) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -3724,6 +3725,23 @@ fapi_try_exit:
 }
 
 } // namespace mcbist
+
+namespace ecc
+{
+
+///
+/// @brief Clear all MAINT.ECC counters
+/// @tparam T the fapi2::TargetType - derived
+/// @param[in] i_target the fapi2 target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T >
+inline fapi2::ReturnCode clear_all_counters( const fapi2::Target<T>& i_target )
+{
+    return ( mss::mcbist::reset_errors(i_target) );
+}
+
+} // namespace ecc
 
 } // namespace mss
 

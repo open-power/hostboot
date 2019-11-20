@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,12 +41,13 @@
 #include <explorer_scom_addresses_fld.H>
 #include <explorer_scom_addresses_fld_fixes.H>
 #include <lib/exp_attribute_accessors_manual.H>
+#include <lib/utils/mss_exp_conversions.H>
+#include <mss_explorer_attribute_getters.H>
 #include <lib/shared/exp_consts.H>
 #include <lib/dimm/exp_rank.H>
 #include <generic/memory/lib/utils/mc/gen_mss_port.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <mss_generic_attribute_getters.H>
-#include <mss_explorer_attribute_getters.H>
 
 namespace mss
 {
