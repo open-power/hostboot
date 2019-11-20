@@ -425,41 +425,41 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                     TARGETING::Target* l_pTarget = l_eqList[l_eqIdx];
                     l_eqId = l_pTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
-                    //Get the the EX targets
-                    TARGETING::TargetHandleList l_exList;
+                    //Get the the FC targets
+                    TARGETING::TargetHandleList l_fcList;
                     TARGETING::PredicateCTM
-                        l_exFilter(TARGETING::CLASS_UNIT, TARGETING::TYPE_EX);
+                        l_fcFilter(TARGETING::CLASS_UNIT, TARGETING::TYPE_FC);
 
-                    //Check the presence of EXs
-                    TARGETING::PredicateHwas l_predExPresent;
-                    l_predExPresent.present(true);
+                    //Check the presence of FCs
+                    TARGETING::PredicateHwas l_predFcPresent;
+                    l_predFcPresent.present(true);
 
-                    TARGETING::PredicatePostfixExpr l_presentEx;
-                    l_presentEx.push(&l_exFilter).push(&l_predExPresent).And();
+                    TARGETING::PredicatePostfixExpr l_presentFc;
+                    l_presentFc.push(&l_fcFilter).push(&l_predFcPresent).And();
 
                     TARGETING::targetService().getAssociated(
-                        l_exList,
+                        l_fcList,
                         l_pTarget,
                         TARGETING::TargetService::CHILD,
                         TARGETING::TargetService::ALL,
-                        &l_presentEx);
+                        &l_presentFc);
 
                     HDAT_DBG("thread count :0x%.8X", l_coreThreadCount);
-                    TARGETING::ATTR_CHIP_UNIT_type l_exId = 0;
-                    for(uint32_t l_exIdx = 0; l_exIdx < l_exList.size();
-                        ++l_exIdx)
+                    TARGETING::ATTR_CHIP_UNIT_type l_fcId = 0;
+                    for(uint32_t l_fcIdx = 0; l_fcIdx < l_fcList.size();
+                        ++l_fcIdx)
                     {
                         HDAT_DBG("PCIA offset 0x%016llX",
                             (uint64_t) &this->iv_spPcia[index]);
 
-                        TARGETING::Target* l_pExTarget = l_exList[l_exIdx];
-                        l_exId =
-                            l_pExTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+                        TARGETING::Target* l_pFcTarget = l_fcList[l_fcIdx];
+                        l_fcId =
+                            l_pFcTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
                         //Resetting the proc status
                         l_procStatus = HDAT_PROC_USABLE;
 
-                        l_errl = hdatSetCoreInfo(index, l_pExTarget,
+                        l_errl = hdatSetCoreInfo(index, l_pFcTarget,
                                                  l_pProcTarget);
                         if(l_errl)
                         {
@@ -497,7 +497,7 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                             l_threadProcIdReg =  l_procFabricId << 11 |
                                                  l_procPosition << 8  |
                                                  l_eqId << 4          |
-                                                 l_exId << 3          |
+                                                 l_fcId << 3          |
                                                  l_threadIndex;
 
                             this->iv_spPcia[index].hdatThreadData.
@@ -505,7 +505,7 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                                 l_threadProcIdReg;
                         }
 
-                        if (l_pExTarget->getAttr<TARGETING::ATTR_HWAS_STATE>
+                        if (l_pFcTarget->getAttr<TARGETING::ATTR_HWAS_STATE>
                             ().functional == false)
                         {
                             l_procStatus = HDAT_PROC_NOT_USABLE;
@@ -625,7 +625,7 @@ errlHndl_t HdatPcia::hdatSetCoreInfo(const uint32_t i_index,
         }
 
         if((i_pCoreTarget->getAttr<ATTR_TYPE>() != TYPE_CORE) &&
-            (i_pCoreTarget->getAttr<ATTR_TYPE>() != TYPE_EX))
+            (i_pCoreTarget->getAttr<ATTR_TYPE>() != TYPE_FC))
         {
             HDAT_ERR("Input Target type is not valid");
             HDAT_ERR("Input Target type is not valid %x",
