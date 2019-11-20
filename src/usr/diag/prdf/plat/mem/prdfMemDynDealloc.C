@@ -766,14 +766,14 @@ void __getGrpPrms<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, uint8_t & o_portPos,
     // TODO RTC 210072 - support for multiple ports
     o_portPos = 0;
 
-    // Get the position of the OCMB relative to the MCC (0:1)
-    uint8_t ocmbChnl = i_chip->getPos() % MAX_OCMB_PER_MCC;
+    // Get the position of the MCC relative to the MI (0:1)
+    uint8_t chnlPos = mcc->getPos() % MAX_MCC_PER_MI;
 
     char mcfgpName[64];
-    sprintf( mcfgpName, "MCFGP%d", ocmbChnl );
+    sprintf( mcfgpName, "MCFGP%d", chnlPos );
 
     char mcfgpmName[64];
-    sprintf( mcfgpmName, "MCFGPM%d", ocmbChnl );
+    sprintf( mcfgpmName, "MCFGPM%d", chnlPos );
 
     o_mcfgp  = mi->getRegister( mcfgpName );
     o_mcfgpm = mi->getRegister( mcfgpmName );
@@ -923,10 +923,11 @@ uint32_t __getGrpInfo<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
 //------------------------------------------------------------------------------
 
-uint32_t __insertGrpId( uint64_t & io_addr, uint64_t i_grpChnls,
-                        uint64_t i_grpId )
+template <TYPE T>
+uint32_t __insertGrpId( ExtensibleChip * i_chip, uint64_t & io_addr,
+                        uint64_t i_grpChnls, uint64_t i_grpId )
 {
-    #define PRDF_FUNC "[MemDealloc::__insertGrpId] "
+    #define PRDF_FUNC "[MemDealloc::__insertGrpId<T>] "
 
     uint32_t o_rc = SUCCESS;
 
@@ -975,6 +976,108 @@ uint32_t __insertGrpId( uint64_t & io_addr, uint64_t i_grpChnls,
     return o_rc;
 
     #undef PRDF_FUNC
+}
+
+template<>
+uint32_t __insertGrpId<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                        uint64_t & io_addr, uint64_t i_grpChnls,
+                                        uint64_t i_grpId )
+{
+    #define PRDF_FUNC "[MemDealloc::__insertGrpId<TYPE_OCMB_CHIP>] "
+
+    uint32_t o_rc = SUCCESS;
+
+    uint64_t upper33 = io_addr & 0xFFFFFFFF80ull;
+    uint64_t lower7  = io_addr & 0x000000007full;
+
+    bool subChanAEnable = false;
+    bool subChanBEnable = false;
+    bool bothSubChansEnabled = false;
+
+    ExtensibleChip * mcc = getConnectedParent( i_chip, TYPE_MCC );
+
+    // Check both subchannels whether we can get the connected OCMB to
+    // determine whether they are enabled.
+    // Check for subchannel A
+    ExtensibleChip * subchanA = getConnectedChild( mcc, TYPE_OCMB_CHIP, 0 );
+    if ( nullptr != subchanA ) subChanAEnable = true;
+
+    // Check for subchannel B
+    ExtensibleChip * subchanB = getConnectedChild( mcc, TYPE_OCMB_CHIP, 1 );
+    if ( nullptr != subchanB ) subChanBEnable = true;
+
+    // Check if both subchannels were enabled
+    if ( subChanAEnable && subChanBEnable ) bothSubChansEnabled = true;
+
+    // If both subchannels are enabled, bit 56 of the address will contain the
+    // subchannel select bit.
+    if ( bothSubChansEnabled )
+    {
+        uint8_t ocmbChnl = i_chip->getPos() % MAX_OCMB_PER_MCC; // 0:1
+        uint8_t bitInsert = 0;
+
+        switch ( i_grpChnls )
+        {
+            case 1: // insert 1 bit for subchannel select
+            case 3:
+            case 6:
+                bitInsert = ( ocmbChnl & 0x1 );
+                io_addr = (upper33 << 1) | (bitInsert << 7) | lower7;
+                break;
+
+            case 2: // insert 1 bit for subchannel select and 1 bit for grpId
+                bitInsert = ( ((i_grpId & 0x1) << 1) | (ocmbChnl & 0x1) );
+                io_addr = (upper33 << 2) | (bitInsert << 7) | lower7;
+                break;
+
+            case 4: // insert 1 bit for subchannel select and 2 bits for grpId
+                bitInsert = ( ((i_grpId & 0x3) << 1) | (ocmbChnl & 0x1) );
+                io_addr = (upper33 << 3) | (bitInsert << 7) | lower7;
+                break;
+
+            case 8: // insert 1 bit for subchannel select and 3 bits for grpId
+                bitInsert = ( ((i_grpId & 0x7) << 1) | (ocmbChnl & 0x1) );
+                io_addr = (upper33 << 4) | (bitInsert << 7) | lower7;
+                break;
+
+            default:
+                PRDF_ERR( PRDF_FUNC "Invalid MC channels per group value %d",
+                          i_grpChnls );
+                o_rc = FAIL;
+        }
+    }
+    else
+    {
+        switch ( i_grpChnls )
+        {
+            case 1: // no shifting
+            case 3:
+            case 6:
+                break;
+
+            case 2: // insert 1 bit
+                io_addr = (upper33 << 1) | ((i_grpId & 0x1) << 7) | lower7;
+                break;
+
+            case 4: // insert 2 bits
+                io_addr = (upper33 << 2) | ((i_grpId & 0x3) << 7) | lower7;
+                break;
+
+            case 8: // insert 3 bits
+                io_addr = (upper33 << 3) | ((i_grpId & 0x7) << 7) | lower7;
+                break;
+
+            default:
+                PRDF_ERR( PRDF_FUNC "Invalid MC channels per group value %d",
+                          i_grpChnls );
+                o_rc = FAIL;
+        }
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+
 }
 
 //------------------------------------------------------------------------------
@@ -1084,7 +1187,7 @@ void __addBar( uint64_t & io_addr, uint64_t i_grpBar )
 
 template<TYPE T>
 uint32_t getSystemAddr( ExtensibleChip * i_chip, MemAddr i_addr,
-                                  uint64_t & o_addr )
+                        uint64_t & o_addr )
 {
     #define PRDF_FUNC "[MemDealloc::getSystemAddr] "
 
@@ -1102,7 +1205,7 @@ uint32_t getSystemAddr( ExtensibleChip * i_chip, MemAddr i_addr,
         if ( SUCCESS != o_rc ) break;
 
         // Insert the group ID.
-        o_rc = __insertGrpId( o_addr, grpChnls, grpId );
+        o_rc = __insertGrpId<T>( i_chip, o_addr, grpChnls, grpId );
         if ( SUCCESS != o_rc ) break;
 
         // Notes on 3 and 6 channel per group configs:
@@ -1150,8 +1253,8 @@ uint32_t getSystemAddrRange( ExtensibleChip * i_chip,
         if ( SUCCESS != o_rc ) break;
 
         // Insert the group ID.
-        o_rc  = __insertGrpId( o_saddr, grpChnls, grpId );
-        o_rc |= __insertGrpId( o_eaddr, grpChnls, grpId );
+        o_rc  = __insertGrpId<T>( i_chip, o_saddr, grpChnls, grpId );
+        o_rc |= __insertGrpId<T>( i_chip, o_eaddr, grpChnls, grpId );
         if ( SUCCESS != o_rc ) break;
 
         // Notes on 3 and 6 channel per group configs:
