@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -810,11 +810,8 @@ uint64_t generate_mmio_addr( TARGETING::Target* i_proc,
     // Build the XSCom address (relative to group 0, chip 0)
     XSComP9Address l_mmioAddr(i_scomAddr);
 
-    // Get the offset
-    uint64_t l_offset = l_mmioAddr.offset();
-
     // Compute value relative to target chip
-    l_returnAddr = l_XSComBaseAddr + l_offset;
+    l_returnAddr = l_XSComBaseAddr + l_mmioAddr;
 
     return l_returnAddr;
 }

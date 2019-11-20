@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -180,7 +180,14 @@ void forceCheckstop()
     {
         printk( "Forcing a xstop with %p = %.16lX\n",
                 g_xstopRegPtr, g_xstopRegValue );
-        *g_xstopRegPtr = g_xstopRegValue;
+
+        // Per PowerPC ISA :
+        // Store Doubleword Caching Inhibited Indexed
+        // stdcix      RS,RA,RB
+        // let the effective address (EA) be the sum(RA|0)+ (RB).
+        // (RS) is stored into the doubleword in storage addressed by EA
+        asm volatile("stdcix %0,0,%1"
+                     :: "r" (g_xstopRegValue) , "r" (reinterpret_cast <uint64_t>(g_xstopRegPtr)));
     }
     else
     {
