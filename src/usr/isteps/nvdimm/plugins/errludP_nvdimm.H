@@ -7,6 +7,7 @@
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
+/* [+] YADRO                                                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -195,96 +196,46 @@ public:
                        void * i_pBuffer,
                        const uint32_t i_buflen) const
     {
-        char* l_databuf = static_cast<char*>(i_pBuffer);
+        const uint8_t* l_databuf = static_cast<const uint8_t*>(i_pBuffer);
         i_parser.PrintHeading("NVDIMM I2C Register Traces");
 
-        //***** Memory Layout *****
-        // 1 byte   : MODULE_HEALTH
-        // 1 byte   : MODULE_HEALTH_STATUS0
-        // 1 byte   : MODULE_HEALTH_STATUS1
-        // 1 byte   : CSAVE_STATUS
-        // 1 byte   : CSAVE_INFO
-        // 1 byte   : CSAVE_FAIL_INFO0
-        // 1 byte   : CSAVE_FAIL_INFO1
-        // 1 byte   : CSAVE_TIMEOUT_INFO0
-        // 1 byte   : CSAVE_TIMEOUT_INFO1
-        // 1 byte   : ERROR_THRESHOLD_STATUS
-        // 1 byte   : NVDIMM_READY
-        // 1 byte   : NVDIMM_CMD_STATUS0
-        // 1 byte   : ERASE_STATUS
-        // 1 byte   : ERASE_FAIL_INFO
-        // 1 byte   : ERASE_TIMEOUT0
-        // 1 byte   : ERASE_TIMEOUT1
-        // 1 byte   : ABORT_CMD_TIMEOUT
-        // 1 byte   : SET_ES_POLICY_STATUS
-        // 1 byte   : RESTORE_STATUS
-        // 1 byte   : RESTORE_FAIL_INFO
-        // 1 byte   : RESTORE_TIMEOUT0
-        // 1 byte   : RESTORE_TIMEOUT1
-        // 1 byte   : ARM_STATUS
-        // 1 byte   : ARM_FAIL_INFO
-        // 1 byte   : ARM_TIMEOUT0
-        // 1 byte   : ARM_TIMEOUT1
-        // 1 byte   : SET_EVENT_NOTIFICATION_STATUS
-        // 1 byte   : ENCRYPTION_CONFIG_STATUS
-        //
+        // Memory Layout (1 byte each)
+        static const char* l_registers[] = {
+            "MODULE_HEALTH",
+            "MODULE_HEALTH_STATUS0",
+            "MODULE_HEALTH_STATUS1",
+            "CSAVE_STATUS",
+            "CSAVE_INFO",
+            "CSAVE_FAIL_INFO0",
+            "CSAVE_FAIL_INFO1",
+            "CSAVE_TIMEOUT_INFO0",
+            "CSAVE_TIMEOUT_INFO1",
+            "ERROR_THRESHOLD_STATUS",
+            "NVDIMM_READY",
+            "NVDIMM_CMD_STATUS0",
+            "ERASE_STATUS",
+            "ERASE_FAIL_INFO",
+            "ERASE_TIMEOUT0",
+            "ERASE_TIMEOUT1",
+            "ABORT_CMD_TIMEOUT",
+            "SET_ES_POLICY_STATUS",
+            "RESTORE_STATUS",
+            "RESTORE_FAIL_INFO",
+            "RESTORE_TIMEOUT0",
+            "RESTORE_TIMEOUT1",
+            "ARM_STATUS",
+            "ARM_FAIL_INFO",
+            "ARM_TIMEOUT0",
+            "ARM_TIMEOUT1",
+            "SET_EVENT_NOTIFICATION_STATUS",
+            "ENCRYPTION_CONFIG_STATUS"
+        };
 
-        i_parser.PrintNumber("Module Health Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("Module Health Status0 Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("Module Health Status1 Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("CSave Status Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("CSave Info Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("CSave Fail Info0 Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("CSave Fail Info1 Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("CSave Timeout Info0 Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("CSave Timeout Info1 Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("Error Threshold Status Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("NVDIMM Ready Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("NVDIMM CMD Status0 Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("Erase Status Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("Erase Fail Info Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("Erase Timeout0 Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("Erase Timeout1 Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("Abort CMD Timeout Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("Set ES Policy Status Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("Restore Status Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("Restore Fail Info0 Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("Restore Timeout0 Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("Restore Timeout1 Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("Arm Status Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("Arm Fail Info Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("Arm Timeout0 Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("Arm Timeout1 Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("Set Event Notification Status Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
-        i_parser.PrintNumber("NVDIMM Encryption Configuration and Status Register: ","%.2lX",TO_UINT8(l_databuf));
-        ++l_databuf;
+        for (uint32_t i = 0; i < i_buflen &&
+                             i < sizeof(l_registers) / sizeof(l_registers[0]); ++i)
+        {
+            i_parser.PrintNumber(l_registers[i], "%02X", l_databuf[i]);
+        }
     }
 
     // Disabled
