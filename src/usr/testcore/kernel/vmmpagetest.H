@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -50,13 +52,13 @@ class vmmpagetest: public CxxTest::TestSuite
             rc = mm_alloc_block(iv_mq,reinterpret_cast<void*>(iv_va),iv_size);
             if (rc != 0)
             {
-                TS_FAIL("Unable to allocate block.\n");
+                TS_FAIL("Unable to allocate block - rc=%d.\n",rc);
             }
             rc = mm_set_permission(reinterpret_cast<void*>(iv_va),iv_size,
                                    initPerm);
             if (rc != 0)
             {
-                TS_FAIL("Failed to set block permissions to READ_ONLY.\n");
+                TS_FAIL("Failed to set block permissions to READ_ONLY - rc=%d.\n",rc);
             }
             task_create(testDaemon, NULL);
         }
@@ -76,7 +78,7 @@ class vmmpagetest: public CxxTest::TestSuite
                     reinterpret_cast<void*>(iv_va),iv_size);
             if (rc != 0)
             {
-                TS_FAIL("Failed to release read pages\n");
+                TS_FAIL("Failed to release read pages - rc=%d.\n",rc);
             }
         }
 
@@ -86,7 +88,7 @@ class vmmpagetest: public CxxTest::TestSuite
             if (rc != 0)
             {
                 TS_FAIL(
-                "Failed to set WRITE_TRACKED permissions on first page.\n");
+                "Failed to set WRITE_TRACKED permissions on first page - rc=%d.\n",rc);
             }
 
             (*(volatile uint64_t *)iv_va) = 0x12345678; sync();
@@ -99,13 +101,13 @@ class vmmpagetest: public CxxTest::TestSuite
             if (rc != 0)
             {
                 TS_FAIL(
-                "Failed to set WRITE_TRACKED permissions on second page.\n");
+                "Failed to set WRITE_TRACKED permissions on second page - rc=%d.\n",rc);
             }
             rc = mm_remove_pages(FLUSH,
                                  reinterpret_cast<void*>(iv_va),iv_size);
             if (rc != 0)
             {
-                TS_FAIL("Failed to flush write tracked pages\n");
+                TS_FAIL("Failed to flush write tracked pages - rc=%d.\n",rc);
             }
         }
 
@@ -115,7 +117,7 @@ class vmmpagetest: public CxxTest::TestSuite
             if (rc != 0)
             {
                 TS_FAIL(
-                "Failed to set WRITE_TRACKED permissions on first page.\n");
+                "Failed to set WRITE_TRACKED permissions on first page - rc=%d.\n",rc);
             }
 
             (*(volatile uint64_t *)(iv_va+2*PAGESIZE)) = 0x33333333; sync();
@@ -126,14 +128,14 @@ class vmmpagetest: public CxxTest::TestSuite
             if (rc != 0)
             {
                 TS_FAIL(
-                "Failed to set WRITE_TRACKED permissions on first page.\n");
+                "Failed to set WRITE_TRACKED permissions on first page - rc=%d.\n",rc);
             }
 
             rc = mm_remove_pages(RELEASE,
                     reinterpret_cast<void*>(iv_va),iv_size);
             if (rc != 0)
             {
-                TS_FAIL("Failed to release write track pages\n");
+                TS_FAIL("Failed to release write track pages - rc=%d.\n",rc);
             }
         }
 
@@ -143,7 +145,7 @@ class vmmpagetest: public CxxTest::TestSuite
             rc = mm_set_permission(reinterpret_cast<void*>(iv_va+4*PAGESIZE), 3*PAGESIZE, READ_ONLY);
             if (rc != 0)
             {
-                TS_FAIL(" 1   Failed to Update permissions.\n");
+                TS_FAIL(" 1   Failed to Update permissions - rc=%d.\n",rc);
             }
 
             // try to write to a read_only page
@@ -153,13 +155,13 @@ class vmmpagetest: public CxxTest::TestSuite
             if ((child != task_wait_tid(child, &status, NULL)) ||
                 (status != TASK_STATUS_CRASHED))
             {
-                TS_FAIL("ERROR! Write to READ_ONLY address not caught.");
+                TS_FAIL("ERROR! Write to READ_ONLY address not caught - status=%d.",status);
             }
 
 	    rc = mm_set_permission(reinterpret_cast<void*>(iv_va+4*PAGESIZE), 3*PAGESIZE, EXECUTABLE);
             if (rc != 0)
             {
-                TS_FAIL("2    Failed to Update permissions.\n");
+                TS_FAIL("2    Failed to Update permissions - rc=%d.\n",rc);
             }
 
             // try to write to an executable page
@@ -168,13 +170,13 @@ class vmmpagetest: public CxxTest::TestSuite
             if ((child != task_wait_tid(child, &status, NULL)) ||
                 (status != TASK_STATUS_CRASHED))
             {
-                TS_FAIL("ERROR! Write to EXECUTABLE address not caught.");
+                TS_FAIL("ERROR! Write to EXECUTABLE address not caught - status=%d",status);
             }
 
             rc = mm_set_permission(reinterpret_cast<void*>(iv_va+4*PAGESIZE), 3*PAGESIZE, NO_ACCESS);
             if (rc != 0)
             {
-                TS_FAIL("3   Failed to Update permissions.\n");
+                TS_FAIL("3   Failed to Update permissions - rc=%d.\n",rc);
             }
 
             // try to write to a no access page
@@ -183,7 +185,7 @@ class vmmpagetest: public CxxTest::TestSuite
             if ((child != task_wait_tid(child, &status, NULL)) ||
                 (status != TASK_STATUS_CRASHED))
             {
-                TS_FAIL("ERROR!  write to a NO_ACCESS addr not caught.\n");
+                TS_FAIL("ERROR!  write to a NO_ACCESS addr not caught - status=%d",status);
             }
 
             // test that you cannot set WRITABLE and EXECUTABLE permissions
@@ -191,13 +193,13 @@ class vmmpagetest: public CxxTest::TestSuite
             if (rc == 0)
             {
                 printk("Error .. invalid combination that did not get detected\n");
-                TS_FAIL(" ERROR..Failed to detect a bad parm condition.\n");
+                TS_FAIL(" ERROR..Failed to detect a bad parm condition - rc=%d.\n",rc);
             }
 
             rc = mm_set_permission(reinterpret_cast<void*>(iv_va+4*PAGESIZE), 3*PAGESIZE, WRITABLE);
             if (rc != 0)
             {
-                TS_FAIL(" 4   Failed to detect a bad parm condition.\n");
+                TS_FAIL(" 4   Failed to detect a bad parm condition - rc=%d.\n",rc);
             }
 
 
