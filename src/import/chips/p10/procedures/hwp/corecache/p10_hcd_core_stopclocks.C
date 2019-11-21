@@ -64,12 +64,6 @@
 // Constant Definitions
 //------------------------------------------------------------------------------
 
-enum P10_HCD_CORE_STOPCLOCKS_CONSTANTS
-{
-    HCD_ECL2_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS        = 10000,   // 10^4ns = 10us timeout
-    HCD_ECL2_CLK_SYNC_DROP_POLL_DELAY_HW_NS          = 100,     // 100ns poll loop delay
-    HCD_ECL2_CLK_SYNC_DROP_POLL_DELAY_SIM_CYCLE      = 3200,    // 3.2k sim cycle delay
-};
 
 //------------------------------------------------------------------------------
 // Procedure: p10_hcd_core_stopclocks
@@ -83,13 +77,6 @@ p10_hcd_core_stopclocks(
         i_target.getParent < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST > ();
     uint32_t                l_regions  = i_target.getCoreSelect() << SHIFT32(8);
     fapi2::buffer<uint64_t> l_scomData = 0;
-    fapi2::buffer<buffer_t> l_mmioData = 0;
-#ifndef EQ_SKEW_ADJUST_DISABLE
-    uint32_t                l_timeout  = 0;
-    fapi2::Target < fapi2::TARGET_TYPE_SYSTEM > l_sys;
-    fapi2::ATTR_RUNN_MODE_Type                  l_attr_runn_mode;
-    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_RUNN_MODE, l_sys, l_attr_runn_mode ) );
-#endif
 
     FAPI_INF(">>p10_hcd_core_stopclocks");
 
@@ -100,42 +87,6 @@ p10_hcd_core_stopclocks(
     FAPI_TRY( HCD_PUTSCOM_Q( eq_target, CPLT_CTRL1_WO_OR,  SCOM_LOAD32H(l_regions) ) );
 
     FAPI_TRY( p10_hcd_corecache_clock_control(eq_target, l_regions, HCD_CLK_STOP ) );
-
-    FAPI_DBG("Disable ECL2 Skewadjust via CPMS_CGCSR_[1:CL2_CLK_SYNC_ENABLE]");
-    FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_CGCSR_WO_CLEAR, MMIO_1BIT(1) ) );
-
-#ifndef EQ_SKEW_ADJUST_DISABLE
-
-    FAPI_DBG("Check ECL2 Skewadjust Removed via CPMS_CGCSR[33:CL2_CLK_SYNC_DONE]");
-    l_timeout = HCD_ECL2_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS /
-                HCD_ECL2_CLK_SYNC_DROP_POLL_DELAY_HW_NS;
-
-    do
-    {
-        if (!l_attr_runn_mode)
-        {
-            FAPI_TRY( HCD_GETMMIO_C( i_target, MMIO_LOWADDR(CPMS_CGCSR), l_mmioData ) );
-
-            // use multicastOR to check 0
-            if( MMIO_GET(MMIO_LOWBIT(33)) == 0 )
-            {
-                break;
-            }
-        }
-
-        fapi2::delay(HCD_ECL2_CLK_SYNC_DROP_POLL_DELAY_HW_NS,
-                     HCD_ECL2_CLK_SYNC_DROP_POLL_DELAY_SIM_CYCLE);
-    }
-    while( (--l_timeout) != 0 );
-
-    FAPI_ASSERT((l_timeout != 0),
-                fapi2::ECL2_CLK_SYNC_DROP_TIMEOUT()
-                .set_ECL2_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS(HCD_ECL2_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS)
-                .set_CPMS_CGCSR(l_mmioData)
-                .set_CORE_TARGET(i_target),
-                "ECL2 Clock Sync Drop Timeout");
-
-#endif
 
 fapi_try_exit:
 
