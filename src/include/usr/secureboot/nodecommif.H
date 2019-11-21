@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,7 +26,6 @@
 #define __NODECOMMIF_H
 
 #include <initservice/mboxRegs.H>
-#include <config.h>
 #include <errl/errlentry.H>
 
 namespace SECUREBOOT

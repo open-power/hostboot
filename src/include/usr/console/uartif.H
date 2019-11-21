@@ -34,7 +34,6 @@
 #ifndef __CONSOLE_UARTIF_H
 #define __CONSOLE_UARTIF_H
 
-#include <config.h>
 #include <stdarg.h>
 
 namespace CONSOLE

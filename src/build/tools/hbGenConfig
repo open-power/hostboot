@@ -368,7 +368,6 @@ used both in makefiles and in source.  Any config option is given the prefix
 CONFIG_ (ex. CONFIG_EXAMPLE).
 
 In C[++] files you should use:
-    #include <config.h>
     #ifdef CONFIG_EXAMPLE
         ...
     #endif

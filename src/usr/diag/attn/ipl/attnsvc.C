@@ -40,7 +40,6 @@
 #include <initservice/initserviceif.H>  // for hostboot TI
 
 // Custom compile configs
-#include <config.h>
 
 using namespace std;
 using namespace PRDF;

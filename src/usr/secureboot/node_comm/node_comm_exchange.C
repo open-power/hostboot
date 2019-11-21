@@ -51,7 +51,6 @@
 #include <targeting/targplatutil.H>
 #include <sys/internode.h>
 #include <util/misc.H>
-#include <config.h>
 
 #include "node_comm.H"
 #include "node_comm_transfer.H"

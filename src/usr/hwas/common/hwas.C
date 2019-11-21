@@ -42,7 +42,6 @@
 #include <stdio.h> // sprintf
 
 #ifdef __HOSTBOOT_MODULE
-#include <config.h>
 #include <initservice/initserviceif.H>
 #endif
 

@@ -61,7 +61,6 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <devicefw/userif.H>
-#include <config.h>
 #include <initservice/initserviceif.H>
 #include <util/misc.H>
 #include <util/utilrsvdmem.H>

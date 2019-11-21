@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,7 +44,6 @@
 #include <initservice/taskargs.H>
 #include <initservice/initsvcreasoncodes.H>
 #include <initservice/initsvcstructs.H>
-#include <config.h>
 #include "../baseinitsvc/initservice.H"
 #include "splesscommon.H"
 #include "istep_mbox_msgs.H"

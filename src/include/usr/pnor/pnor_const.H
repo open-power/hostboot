@@ -27,7 +27,6 @@
 
 #include <stdint.h>
 #include <builtins.h>
-#include <config.h>
 
 namespace PNOR
 {

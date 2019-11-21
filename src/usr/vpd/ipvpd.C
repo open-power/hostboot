@@ -39,7 +39,6 @@
 #include <vfs/vfs.H>
 #include <vpd/vpdreasoncodes.H>
 #include <vpd/vpd_if.H>
-#include <config.h>
 #include <vpd/ipvpdenums.H>
 #include <util/utilrsvdmem.H>
 #include <util/runtime/util_rt.H>

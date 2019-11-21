@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,6 @@
 #include "ipmirp.H"
 #include <ipmi/ipmiif.H>
 #include <errno.h>
-#include <config.h>
 
 // Defined in ipmidd.C
 extern trace_desc_t * g_trac_ipmi;

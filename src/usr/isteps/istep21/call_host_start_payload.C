@@ -56,7 +56,6 @@
 #include <p9_quad_scom_addresses.H>
 */
 #include <ipmi/ipmiwatchdog.H>
-#include <config.h>
 #include <errno.h>
 /* FIXME RTC: 210975
 #include <p9_int_scom.H>

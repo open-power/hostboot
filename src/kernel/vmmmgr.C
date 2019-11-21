@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,7 +32,6 @@
 #include <kernel/basesegment.H>
 #include <kernel/stacksegment.H>
 #include <kernel/devicesegment.H>
-#include <config.h>
 #include <kernel/bltohbdatamgr.H>
 #include <util/align.H>
 

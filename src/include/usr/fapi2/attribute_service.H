@@ -49,7 +49,6 @@
 #include <devicefw/driverif.H>
 #include <plat_attr_override_sync.H>
 #include <vpd/spdenums.H>
-#include <config.h>
 
 //******************************************************************************
 // Interface

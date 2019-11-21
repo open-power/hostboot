@@ -44,7 +44,6 @@
 #include <kernel/console.H>
 #include <endian.h>
 #include <util/align.H>
-#include <config.h>
 #include <pnor/pnorif.H>
 #include "pnor_common.H"
 #include <hwas/common/hwasCallout.H>

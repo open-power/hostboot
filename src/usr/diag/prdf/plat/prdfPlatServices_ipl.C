@@ -42,7 +42,6 @@
 #include <prdfMfgThresholdMgr.H>
 
 #include <diag/mdia/mdia.H>
-#include <config.h>
 
 #include <mcbist/gen_mss_mcbist_settings.H>
 

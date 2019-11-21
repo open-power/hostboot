@@ -39,7 +39,6 @@
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
 #include <scom/scomif.H>
-#include <config.h>
 #include <devicefw/driverif.H>
 
 

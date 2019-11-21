@@ -46,7 +46,6 @@
 #include <fapi2/plat_hwp_invoker.H>
 */
 #include <devicefw/userif.H>
-#include <config.h>
 #include "host_proc_pcie_scominit.H"
 #include <hwas/common/hwas.H>
 #include <hwas/common/deconfigGard.H>

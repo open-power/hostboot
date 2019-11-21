@@ -36,7 +36,6 @@
 #include <util/align.H>
 #include <bootloader/bootloader.H>
 #include <lpc_const.H>
-#include <config.h>
 #ifdef PNORUTILSTEST_H
 #define BOOTLOADER_TRACE(args) TRACFCOMP(g_trac_pnor,"##args")
 #define BOOTLOADER_TRACE_W_BRK(args) TRACFCOMP(g_trac_pnor,"##args")

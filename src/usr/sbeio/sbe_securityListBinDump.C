@@ -28,7 +28,6 @@
 *        for the whitelist/blacklist algorithm.
 */
 
-#include <config.h>
 #include <trace/interface.H>
 #include <errl/errlmanager.H>
 #include <sbeio/sbeioif.H>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -27,7 +27,6 @@
 #define __PNOR_PNORDD_H
 
 #include <limits.h>
-#include <config.h>
 #include <pnor/pnor_const.H>
 
 namespace PNOR { class UdPnorDDParms; }

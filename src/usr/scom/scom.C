@@ -49,7 +49,6 @@
 #include <targeting/common/utilFilter.H>
 #include <targeting/namedtarget.H>
 
-#include <config.h>
 
 #ifndef __HOSTBOOT_RUNTIME
 #endif

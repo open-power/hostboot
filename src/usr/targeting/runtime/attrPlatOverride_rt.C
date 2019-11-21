@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,7 +31,6 @@
 #include <targeting/common/trace.H>
 #include <errl/errlmanager.H>
 #include <initservice/initserviceif.H>
-#include <config.h>
 #include <secureboot/service.H>
 #include <targeting/common/targreasoncodes.H>
 #include <devicefw/userif.H>

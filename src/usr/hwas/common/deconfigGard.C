@@ -44,7 +44,6 @@
 #include <targeting/common/targetservice.H>
 
 #ifdef __HOSTBOOT_MODULE
-#include <config.h>
 #include <errl/errlmanager.H>
 #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
 #include <console/consoleif.H>

@@ -41,7 +41,6 @@
 #include <vpd/mvpdenums.H>
 #include <stdio.h>
 #include <sys/mm.h>
-#include <config.h>
 #include <initservice/istepdispatcherif.H>
 #include <initservice/initserviceif.H>
 

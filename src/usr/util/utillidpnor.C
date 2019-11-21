@@ -25,7 +25,6 @@
 
 #include <util/utillidmgr.H>
 #include <util/utillidpnor.H>
-#include <config.h>
 #include <pnor/pnorif.H>
 #include <errl/errlmanager.H>
 

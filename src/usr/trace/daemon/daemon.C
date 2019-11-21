@@ -47,7 +47,6 @@
 #include <devicefw/userif.H>
 
 #include <mbox/mboxif.H>
-#include <config.h>
 #include <console/consoleif.H>
 #include <util/utilmbox_scratch.H>
 #include <debugpointers.H>

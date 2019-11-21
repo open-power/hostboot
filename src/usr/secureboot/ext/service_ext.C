@@ -38,7 +38,6 @@
 
 #include <p9_update_security_ctrl.H>
 */
-#include <config.h>
 
 namespace SECUREBOOT
 {

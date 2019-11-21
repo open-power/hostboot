@@ -40,7 +40,6 @@
 
 #include    <initservice/initsvcstructs.H>
 #include    <initservice/initsvcreasoncodes.H>
-#include    <config.h>
 
 
 #if CONFIG_ENABLE_HDAT_IN_HOSTBOOT

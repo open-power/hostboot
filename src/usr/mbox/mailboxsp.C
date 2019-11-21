@@ -31,7 +31,6 @@
 #include "mailboxsp.H"
 #include "mboxdd.H"
 #include "ipcSp.H"
-#include <config.h>
 #include <sys/task.h>
 #include <initservice/taskargs.H>
 #include <initservice/initserviceif.H>

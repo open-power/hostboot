@@ -33,7 +33,6 @@
 #include <map>
 #include "pnor_common.H"
 #include "ffs.h"
-#include <config.h>
 #include <securerom/ROM.H>
 
 namespace SECUREBOOT

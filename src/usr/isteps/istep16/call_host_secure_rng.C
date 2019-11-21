@@ -58,7 +58,6 @@
 #include <devicefw/userif.H>
 #include <vpd/mvpdenums.H>
 
-#include <config.h>
 #include <fapi2/plat_hwp_invoker.H>
 #include <p10_rng_init_phase2.H>
 

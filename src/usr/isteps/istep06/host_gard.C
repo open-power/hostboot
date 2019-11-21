@@ -51,7 +51,6 @@
 #include <console/consoleif.H>
 
 // Custom compile configs
-#include <config.h>
 
 #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
   #include <diag/attn/attn.H>

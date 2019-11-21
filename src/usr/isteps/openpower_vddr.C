@@ -27,7 +27,6 @@
 // VDDR is enabled/disabled via a GPIO on the hammock card.
 // A separate GPIO selects between 1.35V and 1.25V output from the VR.
 
-#include <config.h>
 
 #include "platform_vddr.H"
 

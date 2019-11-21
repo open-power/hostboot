@@ -26,7 +26,6 @@
 // ----------------------------------------------
 // Includes
 // ----------------------------------------------
-#include <config.h>
 #include <time.h>
 #include <devicefw/userif.H>
 #include <trace/interface.H>

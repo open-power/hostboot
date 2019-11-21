@@ -48,7 +48,6 @@
 #include <sys/time.h>
 #include <sys/vfs.h>
 #include <arch/ppc.H>
-#include <config.h>
 #include <mbox/ipc_msg_types.H>
 
 /* FIXME RTC: 210975

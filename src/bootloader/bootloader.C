@@ -53,7 +53,6 @@
 #include <math.h>
 
 #include <securerom/ROM.H>
-#include <config.h>
 #include <secureboot/secure_reasoncodes.H>
 #include <p10_sbe_hb_structures.H>
 

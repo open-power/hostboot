@@ -38,7 +38,6 @@
 #include <fapi2TestUtils.H>
 #include <p10_mmiotests.H>
 #include <plat_hwp_invoker.H>
-#include <config.h>
 
 using namespace fapi2;
 

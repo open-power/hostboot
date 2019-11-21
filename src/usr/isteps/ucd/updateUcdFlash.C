@@ -23,7 +23,6 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include <config.h>
 #include <isteps/ucd/updateUcdFlash.H>
 #include <ucd/ucd_reasoncodes.H>
 #include <devicefw/driverif.H>

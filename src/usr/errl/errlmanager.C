@@ -50,7 +50,6 @@
 #include <arch/pirformat.H>
 #include <errldisplay/errldisplay.H>
 #include <console/consoleif.H>
-#include <config.h>
 #include <functional>
 #include <hwas/common/deconfigGard.H>
 #include <kernel/terminate.H>

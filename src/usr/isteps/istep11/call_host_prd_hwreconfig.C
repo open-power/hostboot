@@ -26,7 +26,6 @@
 #include <errl/errlmanager.H>
 #include <isteps/hwpisteperror.H>
 #include <pnor/pnorif.H>
-#include <config.h>
 #include <initservice/isteps_trace.H>
 
 using namespace ERRORLOG;

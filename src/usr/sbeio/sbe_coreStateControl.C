@@ -29,7 +29,6 @@
 
 #include <errno.h>
 #include <sys/mm.h>
-#include <config.h>
 #include <trace/interface.H>
 #include <errl/errlmanager.H>
 #include <sbeio/sbeioif.H>

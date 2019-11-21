@@ -60,7 +60,6 @@
 #include <devicefw/userif.H>
 #include <vpd/mvpdenums.H>
 
-#include <config.h>
 #include "host_proc_pcie_scominit.H"
 // FIXME RTC: 210975
 //#include <p9_pcie_scominit.H>

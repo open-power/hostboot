@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,7 +33,6 @@
 #include <hwas/common/deconfigGard.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
-#include <config.h>
 #include <attributeenums.H>
 #include <i2c/eepromif.H>
 

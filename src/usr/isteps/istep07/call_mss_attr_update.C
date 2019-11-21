@@ -62,7 +62,6 @@
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
 
-#include <config.h>
 
 // HWP
 #include <p10_mss_attr_update.H>

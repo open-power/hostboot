@@ -69,7 +69,6 @@
 
 //  include prototypes file
 
-#include <config.h>
 
 namespace   ISTEP_12
 {

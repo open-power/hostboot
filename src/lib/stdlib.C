@@ -28,7 +28,6 @@
 #include <kernel/heapmgr.H>
 #include <kernel/pagemgr.H>
 #include <kernel/console.H>
-#include <config.h>
 #include <assert.h>
 
 #ifdef HOSTBOOT_MEMORY_LEAKS

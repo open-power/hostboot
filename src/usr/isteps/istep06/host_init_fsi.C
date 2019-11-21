@@ -37,7 +37,6 @@
 #include <isteps/hwpisteperror.H>
 #include <attributeenums.H>
 #include <secureboot/trustedbootif.H>
-#include <config.h>
 
 //Targeting
 #include    <targeting/common/commontargeting.H>

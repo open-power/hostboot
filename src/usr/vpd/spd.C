@@ -54,7 +54,6 @@
 #include "spdDDR4_DDIMM.H"
 #include "errlud_vpd.H"
 #include "ocmb_spd.H"
-#include <config.h>
 
 // ----------------------------------------------
 // Trace definitions

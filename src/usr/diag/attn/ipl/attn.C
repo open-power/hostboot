@@ -44,7 +44,6 @@
 #include <targeting/common/utilFilter.H>
 
 // Custom compile configs
-#include <config.h>
 
 #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
   #include "ipl/attnfilereg.H"

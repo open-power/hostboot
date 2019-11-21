@@ -32,7 +32,6 @@
 #include <util/align.H>
 #include <devicefw/driverif.H>
 #include <vpd/mvpdenums.H>
-#include <config.h>
 
 using namespace VPD;
 using namespace MVPD;

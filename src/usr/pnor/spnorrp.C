@@ -33,7 +33,6 @@
 #include <sys/mm.h>
 #include <errno.h>
 #include <util/align.H>
-#include <config.h>
 #include "pnor_common.H"
 #include <console/consoleif.H>
 #include <secureboot/service.H>

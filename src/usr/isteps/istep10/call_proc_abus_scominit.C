@@ -60,7 +60,6 @@
 #include <devicefw/userif.H>
 #include <vpd/mvpdenums.H>
 
-#include <config.h>
 
 
 namespace   ISTEP_10

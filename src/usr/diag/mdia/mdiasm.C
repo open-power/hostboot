@@ -43,7 +43,6 @@
 #include <errl/errludlogregister.H>
 #include <initservice/istepdispatcherif.H>
 #include <ipmi/ipmiwatchdog.H>
-#include <config.h>
 #include <initservice/initserviceif.H>
 #include <sys/time.h>
 #include <dimmBadDqBitmapFuncs.H>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -25,7 +25,6 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #ifndef __PNOR_NORFLASH_H
 #define __PNOR_NORFLASH_H
-#include <config.h>
 #include <errl/errlentry.H>
 
 class SfcDD;

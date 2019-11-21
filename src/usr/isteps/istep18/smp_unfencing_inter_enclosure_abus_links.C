@@ -60,7 +60,6 @@
 */
 #include    <isteps/hwpf_reasoncodes.H>
 #include    <isteps/hwpisteperror.H>
-#include <config.h>
 #include <vector>
 #include "smp_unfencing_inter_enclosure_abus_links.H"
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,7 +27,6 @@
 * @brief Send command to stash key-value pair in the SBE
 */
 
-#include <config.h>
 #include <trace/interface.H>
 #include <errl/errlmanager.H>
 #include <sbeio/sbeioif.H>

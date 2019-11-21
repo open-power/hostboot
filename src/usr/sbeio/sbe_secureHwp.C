@@ -27,7 +27,6 @@
 * @brief Send request to perform a HWP securely on SBE
 */
 
-#include <config.h>
 #include <trace/interface.H>
 #include <errl/errlmanager.H>
 #include <sbeio/sbeioif.H>

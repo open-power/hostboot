@@ -26,7 +26,6 @@
  *  @file  call_proc_setup_mmio_bars.C
  *  @brief Contains the wrapper for istep 14.5
  */
-#include <config.h>
 #include <errl/errlentry.H>
 #include <isteps/hwpisteperror.H>
 #include <initservice/isteps_trace.H>

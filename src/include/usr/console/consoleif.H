@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -26,8 +26,8 @@
 #ifndef __CONSOLE_CONSOLEIF_H
 #define __CONSOLE_CONSOLEIF_H
 
-#include <config.h>
 #include <stdarg.h>
+#include <stddef.h>
 
 namespace CONSOLE
 {

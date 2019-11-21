@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -35,7 +35,6 @@
 /*****************************************************************************/
 // I n c l u d e s
 /*****************************************************************************/
-#include <config.h>
 #include <errl/errlentry.H>
 
 namespace ERRORLOGDISPLAY

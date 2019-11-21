@@ -61,7 +61,6 @@
 #include <devicefw/userif.H>
 #include <vpd/mvpdenums.H>
 
-#include <config.h>
 // FIXME RTC: 210975
 //#include <p9_io_xbus_scominit.H>
 

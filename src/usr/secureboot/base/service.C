@@ -35,7 +35,6 @@
 #include <sys/mm.h>
 #include <util/singleton.H>
 #include <secureboot/secure_reasoncodes.H>
-#include <config.h>
 #include <devicefw/userif.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/targetservice.H>

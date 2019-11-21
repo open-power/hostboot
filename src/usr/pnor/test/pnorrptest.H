@@ -42,7 +42,6 @@
 #include <sys/task.h>
 #include <targeting/common/targetservice.H>
 #include <devicefw/userif.H>
-#include <config.h>
 #include <pnor/ecc.H>
 #include "../pnorrp.H"
 #include "../pnor_common.H"

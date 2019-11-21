@@ -25,7 +25,6 @@
 #ifndef __HWAS_PLAT_H
 #define __HWAS_PLAT_H
 
-#include <config.h>
 
 /**
  *  @file hwas/hwasPlat.H

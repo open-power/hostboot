@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -31,7 +31,6 @@
 #include <errl/errlentry.H>
 #include "sfcdd.H"
 #include "sfc_ast2X00.H"
-#include <config.h>
 
 /** @file sfc_ast2400.H
  *  @brief Provides the logic to access and configure the

@@ -86,7 +86,6 @@
 #include    "istep20list.H"
 #include    "istep21list.H"
 
-#include    "config.h"
 
 namespace   INITSERVICE
 {

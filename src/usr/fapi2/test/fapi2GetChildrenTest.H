@@ -32,7 +32,6 @@
 #include <functional>
 #include <plat_utils.H>
 #include <error_scope.H>
-#include <config.h>
 
 namespace fapi2
 {

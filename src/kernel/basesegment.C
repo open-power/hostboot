@@ -31,7 +31,6 @@
  */
 
 #include <limits.h>
-#include <config.h>
 #include <errno.h>
 #include <util/singleton.H>
 #include <util/align.H>

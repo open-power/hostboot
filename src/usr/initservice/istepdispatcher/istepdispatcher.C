@@ -78,7 +78,6 @@
 #include <ipmi/ipmiif.H>
 #endif
 
-#include <config.h>
 #include <initservice/bootconfigif.H>
 #include <trace/trace.H>
 #include <util/utilmbox_scratch.H>

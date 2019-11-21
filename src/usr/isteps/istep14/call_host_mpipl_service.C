@@ -46,7 +46,6 @@
 #include <vfs/vfs.H>
 #include <dump/dumpif.H>
 
-#include <config.h>
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,6 @@
 #include <targeting/common/targetservice.H>
 #include <errl/errlentry.H>
 #include "sfcdd.H"
-#include <config.h>
 
 /** @file sfc_ast2X00.H
  *  @brief Provides the base logic to access and configure the

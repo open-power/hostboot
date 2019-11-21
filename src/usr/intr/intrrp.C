@@ -53,7 +53,6 @@
 #include <arch/ppc.H>
 #include <arch/pirformat.H>
 #include <arch/pvrformat.H>
-#include <config.h>
 #include <util/utilmbox_scratch.H>
 #include <util/align.H>
 #include <errl/errludprintk.H>

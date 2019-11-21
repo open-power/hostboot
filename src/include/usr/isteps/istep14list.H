@@ -55,7 +55,6 @@
 
 #include <initservice/initsvcstructs.H>
 #include <initservice/initsvcreasoncodes.H>
-#include <config.h>
 
 namespace   ISTEP_14
 {

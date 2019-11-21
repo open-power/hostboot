@@ -46,7 +46,6 @@
 #include <p9_io_xbus_pdwn_lanes.H>
 #include <p9_io_xbus_clear_firs.H>
 #include <p9_io_erepairAccessorHwpFuncs.H>
-#include <config.h>
 #endif
 
 using namespace TARGETING;

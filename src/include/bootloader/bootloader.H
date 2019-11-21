@@ -33,6 +33,7 @@
  */
 
 #include <builtins.h>
+#include <stddef.h>
 #include <pnor_const.H>
 #include <pnor_utils.H>
 #include <common/ffs_hb.H>

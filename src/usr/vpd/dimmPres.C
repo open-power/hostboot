@@ -41,7 +41,6 @@
 #include <devicefw/driverif.H>
 #include <vpd/vpdreasoncodes.H>
 #include <vpd/spdenums.H>
-#include <config.h>
 #include <initservice/initserviceif.H>
 #include <fsi/fsiif.H>
 
