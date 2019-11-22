@@ -3237,6 +3237,7 @@ static const uint64_t EXP_DDR4_PHY_DBYTE9_VREFDAC0_R5 = 0x4065500ull;
 static const uint64_t EXP_DDR4_PHY_DBYTE9_VREFDAC0_R6 = 0x4065900ull;
 static const uint64_t EXP_DDR4_PHY_DBYTE9_VREFDAC0_R7 = 0x4065D00ull;
 static const uint64_t EXP_DDR4_PHY_DBYTE9_VREFDAC0_R8 = 0x4066100ull;
+static const uint64_t EXP_DDR4_PHY_DDR_PHY_CONTROL    = 0x6000118ull;
 
 
 
