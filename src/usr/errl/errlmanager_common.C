@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 #include <pnor/pnorif.H>
 #include <errl/errludstring.H>
 #include <map>
+#include <util/misc.H>
 
 namespace ERRORLOG
 {
@@ -607,6 +608,13 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
             "sendErrLogToBmc: setting l_callhome_type" );
         l_callhome_type = true;
         l_send_eSel_only = true;  // just send eSEL without any callout SELs
+    }
+
+    if (Util::isSimicsRunning())
+    {
+        TRACFCOMP( g_trac_errl, INFO_MRK
+                   "SIMULATION SPEEDUP -- NOT sending IPMI PEL" );
+        return;
     }
 
     do {
