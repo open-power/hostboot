@@ -997,7 +997,7 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             //@TODO RTC 246357 missing attribute
             /*l_hub->hdatFab0PresDetect = l_pProcTarget->
                    getAttr<TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE>();*/
-            l_hub->hdatFab0PresDetect = 0;       
+            l_hub->hdatFab0PresDetect = 1;       
 
             TARGETING::PredicateHwas l_predHwasFunc;
             TARGETING::PredicateCTM l_phbPredicate (TARGETING::CLASS_UNIT,

@@ -273,7 +273,8 @@ enum hdatHubStatus
 //@TODO:RTC 166789: Need to access the module type from HB targeting model
 #define HDAT_MODULE_TYPE_ID_NIMBUS_LAGRANGE 0x0022
 #define HDAT_MODULE_TYPE_ID_CUMULUS_DUOMO 0x0030
-#define HDAT_MODULE_TYPE_ID_P10_HOPPER  0x0040
+//TODO: RTC Story 246515 Miscellaneous Rainier Changes
+#define HDAT_MODULE_TYPE_ID_P10_HOPPER  0x0050
 
 
 

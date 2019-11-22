@@ -482,6 +482,10 @@ errlHndl_t HdatSpSubsys::hdatFillDataPtrs()
             iv_mem.hdatHostRamSize = l_info.size;
         }
 
+        //TODO: RTC Story 246515 Miscellaneous Rainier Changes
+        iv_mem.hdatHostRamSize = 0x0110b000;
+        HDAT_DBG(" hdatHostRamSize:0X%08X", iv_mem.hdatHostRamSize);
+
         // Fill the SP I/O path information
 
         iv_ioPathArray = reinterpret_cast<hdatSpIoPath_t *>(calloc(

@@ -661,8 +661,8 @@ void HdatIplParms::hdatGetSystemParamters()
     // @TODO RTC  142465 missing attribute 
     //iv_hdatIPLParams->iv_sysParms.hdatSysType =
       //       (l_pSysTarget->getAttr<TARGETING::ATTR_PHYP_SYSTEM_TYPE>());
-    iv_hdatIPLParams->iv_sysParms.hdatSysType = 0;
-    HDAT_DBG("after ATTR_PHYP_SYSTEM_TYPE");
+    iv_hdatIPLParams->iv_sysParms.hdatSysType = 0x50300000;
+    HDAT_DBG("System Type:0X%08X", iv_hdatIPLParams->iv_sysParms.hdatSysType);
 
     //Get ABC Bus Speed
     this->iv_hdatIPLParams->iv_sysParms.hdatABCBusSpeed = 24;
@@ -843,6 +843,8 @@ void HdatIplParms::hdatGetSystemParamters()
         sizeof(this->iv_hdatIPLParams->iv_sysParms.hdatHwKeyHashValue));
     memset(this->iv_hdatIPLParams->iv_sysParms.hdatSystemFamily, 0x00, 64);
 
+    //TODO: RTC Story 246515 Miscellaneous Rainier Changes
+    /*
     TARGETING::ATTR_SYSTEM_FAMILY_type l_systemFamily = {0};
     if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_SYSTEM_FAMILY> (l_systemFamily))
     {
@@ -854,8 +856,15 @@ void HdatIplParms::hdatGetSystemParamters()
     {
         HDAT_ERR("Error in getting SYSTEM_FAMILY");
     }
-    HDAT_DBG("after SYSTEM_FAMILY");
+     */
+    strcpy(reinterpret_cast<char*>
+           (this->iv_hdatIPLParams->iv_sysParms.hdatSystemFamily),
+           "ibm,p10-openbmc");
+    HDAT_DBG("SYSTEM_FAMILY:%s",
+        this->iv_hdatIPLParams->iv_sysParms.hdatSystemFamily);
 
+    //TODO: RTC Story 246515 Miscellaneous Rainier Changes
+    /*
     TARGETING::ATTR_SYSTEM_TYPE_type l_systemType = {0};
     if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_SYSTEM_TYPE> (l_systemType))
     {
@@ -867,7 +876,12 @@ void HdatIplParms::hdatGetSystemParamters()
     {
         HDAT_ERR("Error in getting SYSTEM_TYPE");
     }
-    HDAT_DBG("after SYSTEM_TYPE");
+     */
+    strcpy(reinterpret_cast<char*>
+           (this->iv_hdatIPLParams->iv_sysParms.hdatSystemType),
+           "ibm,rainier");
+    HDAT_DBG("SYSTEM_TYPE:%s",
+        this->iv_hdatIPLParams->iv_sysParms.hdatSystemType);
     HDAT_EXIT();
 }
 
