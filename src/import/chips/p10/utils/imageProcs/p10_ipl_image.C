@@ -1427,8 +1427,9 @@ xipHeaderFind(void* i_image, const char* i_id, P9XipItem* o_item)
         HEADER_TOC(toc_normalized, iv_normalized,    P9_XIP_UINT8),
         HEADER_TOC(toc_sorted,     iv_tocSorted,     P9_XIP_UINT8),
 
-        HEADER_TOC(build_user, iv_buildUser, P9_XIP_STRING),
-        HEADER_TOC(build_host, iv_buildHost, P9_XIP_STRING),
+        HEADER_TOC(build_user,        iv_buildUser,       P9_XIP_STRING),
+        HEADER_TOC(build_host,        iv_buildHost,       P9_XIP_STRING),
+        HEADER_TOC(build_head_commit, iv_buildHeadCommit, P9_XIP_STRING),
 
     };
 
@@ -3177,6 +3178,8 @@ p9_xip_translate_header(P9XipHeader* o_dest, const P9XipHeader* i_src)
            sizeof(i_src->iv_buildUser));
     memcpy(o_dest->iv_buildHost, i_src->iv_buildHost,
            sizeof(i_src->iv_buildHost));
+    memcpy(o_dest->iv_buildHeadCommit, i_src->iv_buildHeadCommit,
+           sizeof(i_src->iv_buildHeadCommit));
     memcpy(o_dest->iv_reservedChar, i_src->iv_reservedChar,
            sizeof(i_src->iv_reservedChar));
 #else
