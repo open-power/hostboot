@@ -22,5 +22,24 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
+PROC_SCOMT_PATH := $(ROOTPATH)/scomt
+PROC_SCOMT_SOURCE := proc_scomt.C
+PROC_SCOMT_MODULE_OBJS := $(patsubst %.C,%.o,$(PROC_SCOMT_SOURCE))
+PROC_SCOMT_SOURCE_DIRS := $(PROC_SCOMT_PATH)
+
+define PROC_SCOMT_INCLUDES
+$(foreach dir, $(PROC_SCOMT_SOURCE_DIRS), $(call ADD_MODULE_SRCDIR,$(1),$(dir)))
+$(call ADD_MODULE_INCDIR,$(1),$(FAPI2_PATH)/include)
+$(call ADD_MODULE_INCDIR,$(1),$(GENPATH))
+$(call ADD_MODULE_INCDIR,$(1),$(FAPI2_PLAT_INCLUDE))
+$(call ADD_MODULE_INCDIR,$(1),$(ROOTPATH))
+endef
+
 MODULE=proc_scomt
+OBJS += $(PROC_SCOMT_MODULE_OBJS)
+
+#COMMONFLAGS+=-DSCOM_CHECKING=1
+
+$(eval $(call PROC_SCOMT_INCLUDES,$(MODULE)))
 $(call BUILD_MODULE)
