@@ -919,13 +919,18 @@ if (0)
         iv_spPcrd->hdatChipData.hdatPcrdCheckstopAddr = HDAT_SW_CHKSTP_FIR_SCOM;
         iv_spPcrd->hdatChipData.hdatPcrdSpareBitNum   = HDAT_SW_CHKSTP_FIR_SCOM_BIT_POS;
 
+        // @TODO RTC 246357 missing attribute
         /*auto l_topIdTable = l_pSysTarget->getAttrAsStdArr
             <TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE>();
         std::copy(&l_topIdTable[0], &l_topIdTable[0]+std::size(l_topIdTable),
             iv_spPcrd->hdatChipData.hdatPcrdTopologyIdTab);
         iv_spPcrd->hdatChipData.hdatPcrdTopologyIdIndex =
             iv_spPcrd->hdatChipData.hdatPcrdTopologyIdTab[0]; */
-        iv_spPcrd->hdatChipData.hdatPcrdTopologyIdTab[0] = 10;
+        iv_spPcrd->hdatChipData.hdatPcrdTopologyIdTab[0] = 0;
+        for (uint8_t l_idx =1; l_idx <32; l_idx++)
+        {
+            iv_spPcrd->hdatChipData.hdatPcrdTopologyIdTab[l_idx] = 0xFF;
+        }
         iv_spPcrd->hdatChipData.hdatPcrdTopologyIdIndex = 0;
 
     }
