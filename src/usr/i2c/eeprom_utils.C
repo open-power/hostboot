@@ -314,8 +314,9 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
     bool found_i2c_eep = false;
     bool found_spi_eep = false;
 
-    TRACDCOMP( g_trac_eeprom,
-               ENTER_MRK"eepromReadAttributes()" );
+    TRACUCOMP( g_trac_eeprom,
+               ENTER_MRK"eepromReadAttributes(), role %d",
+               io_eepromAddr.eepromRole );
 
     // This variable will be used to hold the EEPROM attribute data
     // Note:  each 'EepromVpd' struct is kept the same via the attributes
@@ -379,6 +380,17 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
                           (reinterpret_cast<
                            TARGETING::ATTR_SPI_SBE_BOOT_CODE_BACKUP_INFO_type&>
                            (spiEepromData)) )
+                {
+                    found_spi_eep = true;
+                }
+                break;
+
+            case SPARE_TEST:
+                if (
+                  i_target->tryGetAttr<TARGETING::ATTR_SPI_EEPROM_SPARE_INFO>
+                  ( reinterpret_cast<
+                      TARGETING::ATTR_SPI_EEPROM_SPARE_INFO_type&>
+                      (spiEepromData) ) )
                 {
                     found_spi_eep = true;
                 }
@@ -538,7 +550,7 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
 
             TRACUCOMP( g_trac_eeprom,
                        "eepromReadAttributes() SPI tgt=0x%X engine=0x%X"
-                       " - data at 0x%.8X, size 0x%.8X",
+                       " - data at 0x%.8X KB, size 0x%.8X KB",
                        TARGETING::get_huid(i_target),
                        io_eepromAddr.accessAddr.spi_addr.engine,
                        io_eepromAddr.accessAddr.spi_addr.roleOffset_KB,
@@ -837,6 +849,19 @@ void add_to_list( std::list<EepromInfo_t>& io_list,
                       TARGETING::ATTR_SPI_SBE_BOOT_CODE_BACKUP_INFO_type&>
                       (spiEepromData) ) )
                 {
+
+                    found_spi_eep = true;
+                }
+                break;
+
+            case SPARE_TEST:
+                if (
+                  i_targ->tryGetAttr<TARGETING::ATTR_SPI_EEPROM_SPARE_INFO>
+                  ( reinterpret_cast<
+                      TARGETING::ATTR_SPI_EEPROM_SPARE_INFO_type&>
+                      (spiEepromData) ) )
+                {
+                    TRACUCOMP(g_trac_eeprom,"SPARE_INFO found");
                     found_spi_eep = true;
                 }
                 break;
@@ -1083,6 +1108,8 @@ void cacheEepromAncillaryRoles()
     errlHndl_t errl = nullptr;
     std::list<EepromInfo_t> l_eepromTargets;
 
+    TRACUCOMP(g_trac_eeprom,">> cacheEepromAncillaryRoles()");
+
     // Grab list of all present targets that potentially have eeproms
 
     // predicate to only look for those that are actually present
@@ -1108,14 +1135,21 @@ void cacheEepromAncillaryRoles()
     TARGETING::TargetRangeFilter eepromTarget_itr( TARGETING::targetService().begin(),
                                                    TARGETING::targetService().end(),
                                                    &l_eepromTargetFilter );
+
+    int numTarget = 0;
     bool allowDupEntries = true;
     for( ; eepromTarget_itr; ++eepromTarget_itr )
     {
+        numTarget++;
+        TRACUCOMP(g_trac_eeprom,"cacheEepromAncillaryRoles(): calling add_to_list for target 0x%.8X",
+            TARGETING::get_huid(*eepromTarget_itr));
         // loop for eeproms associated with the target and add
         // them to the list.  Allow duplicate eeproms to show up to account
         // for different roles present
         add_to_list( l_eepromTargets, *eepromTarget_itr, allowDupEntries );
     }
+    TRACUCOMP(g_trac_eeprom,"cacheEepromAncillaryRoles(): called add_to_list on %d targets, resulted in %d eeprom targets",
+        numTarget, l_eepromTargets.size());
 
     // Go through list and call cachedEeprom on each non-VPD and non-SBE type
     for (auto eepromTarget : l_eepromTargets)
@@ -1128,9 +1162,11 @@ void cacheEepromAncillaryRoles()
         {
             bool present = true;
             size_t presentSize = sizeof(present);
-            TRACFCOMP(g_trac_eeprom,"cacheEepromAncillaryRoles(): Reading EEPROMs for target %.8X, eeprom cache = %d , target present = %d , eeprom type = %d",
-                  TARGETING::get_huid(eepromTarget.assocTarg),
-                  DEVICE_CACHE_EEPROM_ADDRESS(present, eepromTarget.deviceRole));
+            TRACFCOMP(g_trac_eeprom,"cacheEepromAncillaryRoles(): "
+                "Reading EEPROMs for target %.8X, eeprom cache = %d,"
+                " target present = %d , eeprom type = %d",
+                TARGETING::get_huid(eepromTarget.assocTarg),
+                DEVICE_CACHE_EEPROM_ADDRESS(present, eepromTarget.deviceRole));
             errl = deviceRead(eepromTarget.assocTarg, &present, presentSize,
                             DEVICE_CACHE_EEPROM_ADDRESS(present, eepromTarget.deviceRole));
             if (errl != nullptr)

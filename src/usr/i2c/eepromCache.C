@@ -53,6 +53,8 @@ extern trace_desc_t* g_trac_eeprom;
 
 //#define TRACSSCOMP(args...)  TRACFCOMP(args)
 #define TRACSSCOMP(args...)
+//#define TRACSSBIN(args...) TRACFBIN(args)
+#define TRACSSBIN(args...)
 
 namespace EEPROM
 {
@@ -141,7 +143,8 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
                        bool i_present,
                        EEPROM::EEPROM_ROLE i_eepromType)
 {
-    TRACSSCOMP( g_trac_eeprom, "cacheEeprom() ENTER Target HUID 0x%.08X ", TARGETING::get_huid(i_target));
+    TRACSSCOMP( g_trac_eeprom, ENTER_MRK "cacheEeprom() target HUID 0x%.08X, present %d, role %d",
+      TARGETING::get_huid(i_target), i_present, i_eepromType);
     errlHndl_t l_errl = nullptr;
 
     EEPROM::eeprom_addr_t l_eepromInfo;
@@ -378,7 +381,7 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
                 HWAS::markTargetChanged(i_target);
             }
             TRACSSCOMP( g_trac_eeprom,
-                      "cacheEeprom() Eeprom w/ Role %d, HUID 0x.%08X already in global map of cached eeproms",
+                      "cacheEeprom() Eeprom w/ Role %d, HUID 0x%.08X already in global map of cached eeproms",
                       i_eepromType, TARGETING::get_huid(i_target));
 
             // Cache entry has already been updated via another target, just break out
@@ -597,6 +600,9 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
         // the eeprom's header entry if we were told to do so.
         if(l_updateHeader)
         {
+            TRACSSCOMP(g_trac_eeprom,"cacheEeprom:  Copy record header to PNOR.");
+            TRACSSBIN( g_trac_eeprom,"RECORD HEADER", &l_eepromRecordHeader, sizeof(eepromRecordHeader));
+
             // Copy the local eepromRecord header struct with the info about the
             // new eeprom we want to add to the cache to the open slot we found
             memcpy(l_recordHeaderToUpdate , &l_eepromRecordHeader, sizeof(eepromRecordHeader));
@@ -738,7 +744,7 @@ errlHndl_t setIsValidCacheEntry(const eepromRecordHeader& i_eepromRecordHeader, 
 
     do{
 
-        TRACDCOMP( g_trac_eeprom, ENTER_MRK"setIsValidCacheEntry() ");
+        TRACDCOMP( g_trac_eeprom, ENTER_MRK"setIsValidCacheEntry(%d)", i_isValid);
 
         // Find the address of the header entry in the table of contents of the EECACHE pnor section
         l_eepromRecordHeaderToUpdate =
@@ -809,6 +815,8 @@ errlHndl_t setIsValidCacheEntry(const eepromRecordHeader& i_eepromRecordHeader, 
         }
 
         // Update the header so that it state the entry is invalid
+        TRACSSCOMP(g_trac_eeprom,"setIsValidCacheEntry() - setting 0x%08X record to %d cached_copy_valid",
+          getEepromHeaderUserData(i_eepromRecordHeader), i_isValid);
         l_eepromRecordHeaderToUpdate->completeRecord.cached_copy_valid = i_isValid;
 
         // Flush the page to make sure it gets to the PNOR

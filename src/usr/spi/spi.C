@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -404,10 +404,15 @@ void getTargetSpiDeviceInfo(Target* const i_spiTarget,
                   {
                       if (engineToDevice.find(value.engine) == end(engineToDevice))
                       {
-                          TRACFCOMP(g_trac_spi,
-                                    ERR_MRK"getTargetSpiDeviceInfo: EEPROM partition belongs to nonexistent engine %d",
-                                    value.engine);
-                          assert(false, "EEPROM partition belongs to nonexistent engine");
+                          // more details on the EEPROM partition that doesn't have a matching engine
+                          TRACFCOMP(g_trac_spi, ERR_MRK"getTargetSpiDeviceInfo:"
+                             "master SPI 0x%.8X, engine %d, dataOffsetKB = 0x%04X, "
+                             "dataSizeKB = 0x%04X, eepromContentType = %d",
+                             get_huid(spiMaster), value.engine,
+                             value.dataOffsetKB, value.dataSizeKB,
+                             value.eepromContentType);
+
+                          assert(false, "EEPROM partition belongs to nonexistent engine %d", value.engine);
                       }
                       else
                       {

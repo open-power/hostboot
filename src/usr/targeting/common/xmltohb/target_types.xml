@@ -834,6 +834,32 @@
       <id>SBE_IS_STARTED</id>
     </attribute>
     <attribute>
+      <id>SPI_EEPROM_SPARE_INFO</id>
+      <default>
+        <field>
+          <id>dataOffsetKB</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>dataSizeKB</id>
+          <value>0</value>
+        </field>
+        <field>
+          <!-- Corresponds to the RAW value of the EEPROM_CONTENT_TYPE enumeration -->
+          <id>eepromContentType</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>engine</id>
+          <value>3</value>
+        </field>
+        <field>
+          <id>spiMasterPath</id>
+          <value>physical:.</value>
+        </field>
+      </default>
+    </attribute>
+    <attribute>
       <id>SPI_EEPROM_VPD_BACKUP_INFO</id>
       <default>
         <field>
@@ -844,8 +870,8 @@
           <id>dataSizeKB</id>
           <value>512</value>
         </field>
-        <!-- Corresponds to the RAW value of the EEPROM_CONTENT_TYPE enumeration -->
         <field>
+          <!-- Corresponds to the RAW value of the EEPROM_CONTENT_TYPE enumeration -->
           <id>eepromContentType</id>
           <value>0</value>
         </field>
@@ -870,8 +896,8 @@
           <id>dataSizeKB</id>
           <value>512</value>
         </field>
-        <!-- Corresponds to the RAW value of the EEPROM_CONTENT_TYPE enumeration -->
         <field>
+          <!-- Corresponds to the RAW value of the EEPROM_CONTENT_TYPE enumeration -->
           <id>eepromContentType</id>
           <value>0</value>
         </field>

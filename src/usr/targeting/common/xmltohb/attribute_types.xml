@@ -7511,7 +7511,50 @@
   <attribute>
     <complexType>
       <description>Structure to define the addressing for an attached SPI
-          eeprom device that contains primary VPD info, SBE measurement code, and Keystore.
+          eeprom device that contains SPARE info.
+      </description>
+      <field>
+        <default>physical:sys-0</default>
+        <description>Entity path to the chip that contains the SPI master</description>
+        <name>spiMasterPath</name>
+        <type>EntityPath</type>
+      </field>
+      <field>
+        <default>0xFF</default>
+        <description>SPI master engine</description>
+        <name>engine</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <default>0</default>
+        <description>Starting offset (in KB) of SPARE data in EEPROM</description>
+        <name>dataOffsetKB</name>
+        <type>uint16_t</type>
+      </field>
+      <field>
+        <default>0xFFFFFFFFFFFFFFFF</default>
+        <description>The number of kilobytes of SPARE data in EEPROM</description>
+        <name>dataSizeKB</name>
+        <type>uint16_t</type>
+      </field>
+      <field>
+        <default>0xFFFFFFFF</default>
+        <description>Indicates the target's eeprom content type</description>
+        <name>eepromContentType</name>
+        <type>uint8_t</type>
+      </field>
+    </complexType>
+    <description>Information needed to address the EEPROM SPARE info via SPI</description>
+    <id>SPI_EEPROM_SPARE_INFO</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
+    <complexType>
+      <description>Structure to define the addressing for an attached SPI
+          eeprom device that contains backup VPD info, SBE measurement code, and Keystore.
       </description>
       <field>
         <default>physical:sys-0</default>

@@ -395,6 +395,15 @@
     <attribute>
         <id>SPI_KEYSTORE_INFO_HOSTBOOT</id>
     </attribute>
+    <attribute>
+        <id>SPI_EEPROM_SPARE_INFO</id>
+        <default>
+            <field><id>spiMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>dataOffsetKB</id><value>0x01A0</value></field>
+            <field><id>dataSizeKB</id><value>0x12</value></field> <!-- 0x60 -->
+        </default>
+    </attribute>
     <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
     <attribute>
         <id>FREQ_OMI_MHZ</id>
