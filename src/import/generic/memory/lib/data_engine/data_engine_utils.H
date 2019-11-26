@@ -215,8 +215,8 @@ inline fapi2::ReturnCode update_data(const std::shared_ptr<efd::base_decoder>& i
     const auto l_ocmb = i_efd_data->get_ocmb_target();
 
     // mss::index of rank number will % 4 (RANKS_PER_DIMM) to get us the corresponding dimm
-    const size_t l_dimm_index = mss::index(i_efd_data->get_rank());
-    const auto l_dimm_rank = i_efd_data->get_rank() % mss::MAX_RANK_PER_DIMM; // TK HARDCODE TEST REMOVE ME!
+    const auto l_dimm_index = i_efd_data->get_rank() / mss::MAX_RANK_PER_DIMM;
+    const auto l_dimm_rank = i_efd_data->get_rank() % mss::MAX_RANK_PER_DIMM;
 
     FAPI_ASSERT( l_dimm_index < X,
                  fapi2::MSS_OUT_OF_BOUNDS_INDEXING()

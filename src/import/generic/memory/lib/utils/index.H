@@ -91,7 +91,7 @@ inline void sort_targets_by_index(std::vector<fapi2::Target<T>>& io_targets)
 }
 
 ///
-/// @brief Return an attribute array index from a rank number
+/// @brief Return a dimm rank / attribute array index from a port rank number
 /// @param[in] i_rank uint64_t a rank number DIMM0 {0, 1, 2, 3} DIMM1 {0, 1, 2, 3}
 /// @return size_t the attribute array index.
 ///
