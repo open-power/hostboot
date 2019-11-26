@@ -765,6 +765,9 @@ errlHndl_t HdatPcia::hdatSetCoreInfo(const uint32_t i_index,
         // set the memory bus frequency
         iv_spPcia[i_index].hdatTime.pciaMemBusFreq = getMemBusFreq(i_pProcTarget);
 
+        // @TODO RTC 246357 missing attribute
+        // Need to update these values in MRW
+        /*
         //Set ICache Info
         //Cache Size Structure
         this->iv_spPcia[i_index].hdatCache.pciaICacheSize =
@@ -826,6 +829,49 @@ errlHndl_t HdatPcia::hdatSetCoreInfo(const uint32_t i_index,
         //Set CPU Attributes
         iv_spPcia[i_index].hdatAttr.pciaAttributes =
                         i_pProcTarget->getAttr<TARGETING::ATTR_CPU_ATTR>();
+        */
+        //Set ICache Info
+        //Cache Size Structure
+        this->iv_spPcia[i_index].hdatCache.pciaICacheSize = 0x20;
+        this->iv_spPcia[i_index].hdatCache.pciaICacheLineSize = 0x80;
+        this->iv_spPcia[i_index].hdatCache.pciaICacheBlkSize = 0x80;
+
+        this->iv_spPcia[i_index].hdatCache.pciaICacheAssocSets = 0x8;
+
+        //Set DCache Info
+        this->iv_spPcia[i_index].hdatCache.pciaDCacheBlkSize = 0x80;
+        this->iv_spPcia[i_index].hdatCache.pciaDCacheAssocSets = 0x8;
+
+
+        //Set L1 Cache Info
+        this->iv_spPcia[i_index].hdatCache.pciaL1DCacheSize = 0x20;
+        this->iv_spPcia[i_index].hdatCache.pciaL1DCacheLineSize = 128;
+
+        //Set L2 Cache Info
+        this->iv_spPcia[i_index].hdatCache.pciaL2DCacheSize = 0x200;
+        this->iv_spPcia[i_index].hdatCache.pciaL2DCacheLineSize = 0x80;
+
+        this->iv_spPcia[i_index].hdatCache.pciaL2AssocSets = 0x8;
+
+        //Set L3 Cache Info
+        this->iv_spPcia[i_index].hdatCache.pciaL3DCacheSize = 0x2800;
+        this->iv_spPcia[i_index].hdatCache.pciaL3DCacheLineSize = 0x80;
+
+        //ECO not supported initialize to 0
+        this->iv_spPcia[i_index].hdatCache.pciaL3Pt5DCacheSize = 0;
+        this->iv_spPcia[i_index].hdatCache.pciaL3Pt5DCacheLineSize = 0;
+
+        //Set TLB info
+        this->iv_spPcia[i_index].hdatCache.pciaITlbEntries = 0;
+        this->iv_spPcia[i_index].hdatCache.pciaITlbAssocSets = 0;
+
+        this->iv_spPcia[i_index].hdatCache.pciaDTlbEntries = 0x400;
+        this->iv_spPcia[i_index].hdatCache.pciaDTlbAssocSets = 0x4;
+
+        this->iv_spPcia[i_index].hdatCache.pciaReserveSize = 0x80;
+
+        //Set CPU Attributes
+        iv_spPcia[i_index].hdatAttr.pciaAttributes = 0x0000001D;
     }
     while(0);
 
