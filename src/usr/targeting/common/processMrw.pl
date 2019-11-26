@@ -271,7 +271,7 @@ sub writeReport
         "----------");
 
     $targetObj->writeReport($str);
-} # end loadXmlFile
+} # end writeReport
 
 # convert a number string into a bit-position number
 # example:  "0x02" -->  0b0100 = 4

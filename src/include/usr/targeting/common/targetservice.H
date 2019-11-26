@@ -212,6 +212,9 @@ class TargetService
                                 ///< target
             OMI_CHILD,          ///< The result target(s) should be an OMI target
             OMIC_PARENT,        ///< The result target should be an OMIC target
+            PAUC_CHILD,         ///< The result targets should be OMIC child
+                                ///< targets associated with a PAUC parent
+            PAUC_PARENT,        ///< The result target should be a PAUC target
             MAX_ASSOCIATION_TYPES, ///< Number of types, must always be last
         };
 

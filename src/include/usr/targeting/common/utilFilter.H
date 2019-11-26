@@ -331,6 +331,50 @@ void getChildOmiTargetsByState (
           ResourceState                i_state);
 
 /**
+ * @brief Given an input target, finds all the targets linked to it via a
+ *   PAUC_PARENT relationship and writes them to the output vector.
+ *   The class, type, and resource state further filter the set of results.
+ *   Note: It is expected that only 1 PAUC target will be added to the output
+ *         vector for getParentPaucTargetsByState calls.
+ *
+ * @parm[out] o_vector, reference to vector of target pointers
+ * @parm[in]  i_target, source target to search from
+ * @parm[in]  i_class, class of the targets to be obtained
+ * @parm[in]  i_type, type of the targets to be obtained
+ * @parm[in]  i_state, specifies state the target should be in
+ *
+ * @return N/A
+ */
+void getParentPaucTargetsByState (
+          TARGETING::TargetHandleList& o_vector,
+    const Target*                      i_target,
+          CLASS                        i_class,
+          TYPE                         i_type,
+          ResourceState                i_state);
+
+/**
+ * @brief Given an input target, finds all the targets linked to it via a
+ *   PAUC_CHILD relationship and writes them to the output vector.
+ *   The class, type, and resource state further filter the set of results.
+ *   Note: It is expected that 2 OMIC targets will be added to the output
+ *         vector for getChildPaucTargetsByState calls.
+ *
+ * @parm[out] o_vector, reference to vector of target pointers
+ * @parm[in]  i_target, source target to search from
+ * @parm[in]  i_class, class of the targets to be obtained
+ * @parm[in]  i_type, type of the targets to be obtained
+ * @parm[in]  i_state, specifies state the target should be in
+ *
+ * @return N/A
+ */
+void getChildPaucTargetsByState (
+          TARGETING::TargetHandleList& o_vector,
+    const Target*                      i_target,
+          CLASS                        i_class,
+          TYPE                         i_type,
+          ResourceState                i_state);
+
+/**
  * @brief Populate the o_vector with target object pointers which are
  *        affinity parents of the input target
  *

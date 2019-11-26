@@ -5402,6 +5402,20 @@
   </attribute>
 
   <attribute>
+    <description>
+        Physical entity path of an OMIC's associated PAUC parent target
+    </description>
+    <id>PAUC_PARENT</id>
+    <nativeType>
+      <name>EntityPath</name>
+    </nativeType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <virtual/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <description>Base address (target HRMOR) of the payload.  Value is in MB.</description>
     <id>PAYLOAD_BASE</id>
     <persistency>volatile</persistency>

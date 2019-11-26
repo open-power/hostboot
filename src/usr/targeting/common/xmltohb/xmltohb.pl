@@ -157,12 +157,16 @@ use constant PERVASIVE_CHILD => "PervasiveChild";
 use constant PARENT_PERVASIVE => "ParentPervasive";
 use constant OMIC_PARENT => "OmicParent";
 use constant OMI_CHILD => "OmiChild";
+use constant PAUC_CHILD => "PaucChild";
+use constant PAUC_PARENT => "PaucParent";
 my @associationTypes = ( PARENT_BY_CONTAINMENT,
     CHILD_BY_CONTAINMENT, PARENT_BY_AFFINITY, CHILD_BY_AFFINITY,
-    PERVASIVE_CHILD, PARENT_PERVASIVE, OMIC_PARENT, OMI_CHILD );
+    PERVASIVE_CHILD, PARENT_PERVASIVE, OMIC_PARENT, OMI_CHILD, PAUC_CHILD,
+    PAUC_PARENT );
 
 # Constants for attribute names (minus ATTR_ prefix)
 use constant ATTR_OMIC_PARENT => "OMIC_PARENT";
+use constant ATTR_PAUC_PARENT => "PAUC_PARENT";
 use constant ATTR_PARENT_PERVASIVE => "PARENT_PERVASIVE";
 use constant ATTR_PHYS_PATH => "PHYS_PATH";
 use constant ATTR_AFFINITY_PATH => "AFFINITY_PATH";
@@ -288,7 +292,7 @@ if( !($cfgSrcOutputDir =~ "none") )
     close $targAttrFile;
 
     open(MUTEX_ATTR_FILE, ">$cfgSrcOutputDir"."mutexattributes.H")
-      or croak ("Muxtex Attribute file: \"$cfgSrcOutputDir"
+      or croak ("Mutex Attribute file: \"$cfgSrcOutputDir"
         . "mutexattributes.H\" could not be opened.");
     my $mutexFile = *MUTEX_ATTR_FILE;
     writeMutexFileHeader($mutexFile);
@@ -4160,7 +4164,7 @@ VERBATIM
 }
 
 ######
-# Create a .C file to put System Target Attributes along with there respective
+# Create a .C file to put System Target Attributes along with their respective
 # Size in a map file
 ######
 sub writeAttrSizeMapCFile{
@@ -6276,6 +6280,8 @@ sub generateTargetingImage {
         my $ptrToParentPervasiveAssociations = INVALID_POINTER;
         my $ptrToOmiChildAssociations = INVALID_POINTER;
         my $ptrToOmicParentAssociations = INVALID_POINTER;
+        my $ptrToPaucChildAssociations = INVALID_POINTER;
+        my $ptrToPaucParentAssociations = INVALID_POINTER;
 
         my $id = $targetInstance->{id};
         $targetAddrHash{$id}{offsetToPtrToParentByContainmentAssociations} =
@@ -6310,6 +6316,14 @@ sub generateTargetingImage {
             $offsetWithinTargets + length $data;
         $data .= pack8byte($ptrToOmicParentAssociations);
 
+        $targetAddrHash{$id}{offsetToPtrToPaucChildAssociations} =
+            $offsetWithinTargets + length $data;
+        $data .= pack8byte($ptrToPaucChildAssociations);
+
+        $targetAddrHash{$id}{offsetToPtrToPaucParentAssociations} =
+            $offsetWithinTargets + length $data;
+        $data .= pack8byte($ptrToPaucParentAssociations);
+
         $targetAddrHash{$id}{ParentByContainmentAssociations} = [@NullPtrArray];
         $targetAddrHash{$id}{ChildByContainmentAssociations} = [@NullPtrArray];
         $targetAddrHash{$id}{ParentByAffinityAssociations} = [@NullPtrArray];
@@ -6318,6 +6332,8 @@ sub generateTargetingImage {
         $targetAddrHash{$id}{ParentPervasiveAssociations} = [@NullPtrArray];
         $targetAddrHash{$id}{OmiChildAssociations} = [@NullPtrArray];
         $targetAddrHash{$id}{OmicParentAssociations} = [@NullPtrArray];
+        $targetAddrHash{$id}{PaucChildAssociations} = [@NullPtrArray];
+        $targetAddrHash{$id}{PaucParentAssociations} = [@NullPtrArray];
 
         if($id =~/^sys\d+$/)
         {
@@ -6351,6 +6367,10 @@ sub generateTargetingImage {
         . "$targetAddrHash{$id}{offsetToPtrToOmiChildAssociations}");
         ASSOC_DBG("Offset within targets to ptr to omic parent list = "
         . "$targetAddrHash{$id}{offsetToPtrToOmicParentAssociations}");
+        ASSOC_DBG("Offset within targets to ptr to Pauc child list = "
+        . "$targetAddrHash{$id}{offsetToPtrToPaucChildAssociations}");
+        ASSOC_DBG("Offset within targets to ptr to Pauc parent list = "
+        . "$targetAddrHash{$id}{offsetToPtrToPaucParentAssociations}");
 
         $attrAddr += $attributeListTypeHoH{$targetInstance->{type}}{elements}
             * (length pack8byte(0));
@@ -6490,12 +6510,13 @@ sub generateTargetingImage {
         {
             #print STDOUT "Id=$attributeId\n";
 
-            # Save each target's physical + affinity  + parent pervasive
-            # path for association processing later on
+            # Save each target's physical + affinity  + parent pervasive/OMIC/
+            # PAUC path for association processing later on
             if(   ($attributeId eq ATTR_PHYS_PATH)
                || ($attributeId eq ATTR_AFFINITY_PATH)
                || ($attributeId eq ATTR_PARENT_PERVASIVE)
-               || ($attributeId eq ATTR_OMIC_PARENT))
+               || ($attributeId eq ATTR_OMIC_PARENT)
+               || ($attributeId eq ATTR_PAUC_PARENT))
             {
                 $targetAddrHash{$targetInstance->{id}}{$attributeId} =
                     $attrhash{$attributeId}->{default};
@@ -6941,6 +6962,7 @@ sub generateTargetingImage {
         my $affn_attr = ATTR_AFFINITY_PATH;
         my $parent_pervasive = ATTR_PARENT_PERVASIVE;
         my $omic_parent = ATTR_OMIC_PARENT;
+        my $pauc_parent = ATTR_PAUC_PARENT;
 
         my $phys_path = $targetAddrHash{$id}{$phys_attr};
         my $parent_phys_path = substr $phys_path, 0, (rindex $phys_path, "/");
@@ -6970,6 +6992,33 @@ sub generateTargetingImage {
                 unshift
                     @ { $targetAddrHash{$parent}
                         {OmiChildAssociations} },
+                    $firstTgtPtr + $targetAddrHash{$id}
+                {OffsetToTargetWithinTargetList};
+            }
+        }
+
+        # If this target has an associated PAUC target, create a
+        # bidirectional relationship between this target and the specified
+        # PAUC target.  This target will point to the PAUC target via
+        # a "PAUC_PARENT" association, and the PAUC target will
+        # point to this target (OMIC) via a "PAUC_CHILD" association.
+        if(defined $targetAddrHash{$id}{$pauc_parent})
+        {
+            my $parent_pauc_path =
+                $targetAddrHash{$id}{$pauc_parent};
+
+            if(defined $targetPhysicalPath{$parent_pauc_path})
+            {
+                my $parent = $targetPhysicalPath{$parent_pauc_path};
+                unshift
+                    @ { $targetAddrHash{$id}
+                        {PaucParentAssociations} },
+                    $firstTgtPtr + $targetAddrHash{$parent}
+                {OffsetToTargetWithinTargetList};
+
+                unshift
+                    @ { $targetAddrHash{$parent}
+                        {PaucChildAssociations} },
                     $firstTgtPtr + $targetAddrHash{$id}
                 {OffsetToTargetWithinTargetList};
             }

@@ -80,6 +80,8 @@ void test_fapi2GetChildren()
         std::vector<Target<fapi2::TARGET_TYPE_OMI> > l_childOMIs;
         std::vector<Target<fapi2::TARGET_TYPE_OCMB_CHIP> > l_childOCMBs;
         std::vector<Target<fapi2::TARGET_TYPE_MEM_PORT> > l_childMEMPORTs;
+        std::vector<Target<fapi2::TARGET_TYPE_OMIC> > l_childOmics;
+        std::vector<Target<fapi2::TARGET_TYPE_IOHS> > l_childIohss;
 
         if (isHwValid(l_proc, MY_MC)
             && isHwValid(l_proc, MY_MI)
@@ -216,6 +218,44 @@ void test_fapi2GetChildren()
             if(l_actualSize != l_expectedSize)
             {
                 TS_FAIL("test_fapi2GetChildren:: MEM_PORTs per proc mismatch");
+                numFails++;
+                break;
+            }
+        }
+
+        if (isHwValid(l_proc, MY_PAUC)
+            && isHwValid(l_proc, MY_OMIC0)
+            && isHwValid(l_proc, MY_IOHS))
+        {
+            l_childOmics = fapi2_paucTarget.getChildren<fapi2::TARGET_TYPE_OMIC>
+                (TARGET_STATE_PRESENT);
+            l_targetHuid = TARGETING::get_huid(targeting_targets[MY_PAUC]);
+            l_actualSize = l_childOmics.size();
+
+            //Set expected size to be the number of OMICs per PAUC
+            l_expectedSize = OMIC_PER_PAUC;
+            numTests++;
+            if(l_actualSize != l_expectedSize)
+            {
+                TS_FAIL("test_fapi2GetChildren:: OMICs per PAUC mismatch. "
+                        "Expected %d, returned %d",
+                        l_expectedSize, l_actualSize);
+                numFails++;
+                break;
+            }
+
+            // Verify the existing PAUC/IOHS relationship is intact
+            l_childIohss = fapi2_paucTarget.getChildren<fapi2::TARGET_TYPE_IOHS>
+                (TARGET_STATE_PRESENT);
+            l_actualSize = l_childIohss.size();
+            //Set expected size to be the number of IOHSs per PAUC
+            l_expectedSize = IOHS_PER_PAUC;
+            numTests++;
+            if(l_actualSize != l_expectedSize)
+            {
+                TS_FAIL("test_fapi2GetChildren:: IOHSs per PAUC mismatch. "
+                        "Expected %d, returned %d",
+                        l_expectedSize, l_actualSize);
                 numFails++;
                 break;
             }

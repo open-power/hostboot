@@ -4920,6 +4920,10 @@
         <default>physical:sys-0/node-0/proc-0/perv-12</default>
     </attribute>
     <attribute>
+        <id>PAUC_PARENT</id>
+        <default>physical:sys-0/node-0/proc-0/pauc-0</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mc-0/omic-0</default>
     </attribute>
@@ -4963,6 +4967,10 @@
     <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-12</default>
+    </attribute>
+    <attribute>
+        <id>PAUC_PARENT</id>
+        <default>physical:sys-0/node-0/proc-0/pauc-0</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5010,6 +5018,10 @@
         <default>physical:sys-0/node-0/proc-0/perv-13</default>
     </attribute>
     <attribute>
+        <id>PAUC_PARENT</id>
+        <default>physical:sys-0/node-0/proc-0/pauc-2</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mc-1/omic-0</default>
     </attribute>
@@ -5053,6 +5065,10 @@
     <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-13</default>
+    </attribute>
+    <attribute>
+        <id>PAUC_PARENT</id>
+        <default>physical:sys-0/node-0/proc-0/pauc-2</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5100,6 +5116,10 @@
         <default>physical:sys-0/node-0/proc-0/perv-14</default>
     </attribute>
     <attribute>
+        <id>PAUC_PARENT</id>
+        <default>physical:sys-0/node-0/proc-0/pauc-1</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mc-2/omic-0</default>
     </attribute>
@@ -5143,6 +5163,10 @@
     <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-14</default>
+    </attribute>
+    <attribute>
+        <id>PAUC_PARENT</id>
+        <default>physical:sys-0/node-0/proc-0/pauc-1</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5190,6 +5214,10 @@
         <default>physical:sys-0/node-0/proc-0/perv-15</default>
     </attribute>
     <attribute>
+        <id>PAUC_PARENT</id>
+        <default>physical:sys-0/node-0/proc-0/pauc-3</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mc-3/omic-0</default>
     </attribute>
@@ -5233,6 +5261,10 @@
     <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-15</default>
+    </attribute>
+    <attribute>
+        <id>PAUC_PARENT</id>
+        <default>physical:sys-0/node-0/proc-0/pauc-3</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>

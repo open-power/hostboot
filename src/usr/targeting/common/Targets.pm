@@ -1711,6 +1711,22 @@ sub processOmicAndChildren
     $self->setAttribute($target, "PHYS_PATH",     $omicPhysical);
     $self->setAttribute($target, "AFFINITY_PATH", $omicAffinity);
 
+    ## Find the PAUC parent of the OMIC target
+    my %mc_to_pauc_map = (  0  => "pauc-0",
+                            1  => "pauc-2",
+                            2  => "pauc-1",
+                            3  => "pauc-3" );
+
+    # Remove '/omic-#' and find the mc unit number
+    my $paucParent  = $omicPhysical;
+    $paucParent     =~ s/\/omic-.//;
+    my ($mcUnit)    = ($paucParent =~ /\/mc-(\d)/);
+
+    # Set the PAUC parent path: remove 'mc-#', append 'pauc-#'
+    $paucParent     =~ s/mc-.//;
+    $paucParent     = $paucParent.$mc_to_pauc_map{$mcUnit};
+    $self->setAttribute($target, "PAUC_PARENT", $paucParent);
+
     ## Process child OMI
     # Sanity check flag, to make sure that this code is still valid.
     my $foundOmi = false;

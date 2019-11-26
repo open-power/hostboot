@@ -349,7 +349,8 @@ constexpr bool isProperParent(const TargetType i_child,
           | TARGET_TYPE_MEM_PORT  , TARGET_TYPE_OCMB_CHIP },
         {   TARGET_TYPE_DIMM      , TARGET_TYPE_MEM_PORT  },
         {   TARGET_TYPE_FC        , TARGET_TYPE_EQ        },
-        {   TARGET_TYPE_IOHS      , TARGET_TYPE_PAUC      },
+        {   TARGET_TYPE_IOHS
+          | TARGET_TYPE_OMIC      , TARGET_TYPE_PAUC      },
         {   TARGET_TYPE_PAU       , TARGET_TYPE_IOHS      },
         {   TARGET_TYPE_PHB       , TARGET_TYPE_PEC       },
         {   TARGET_TYPE_CORE      , TARGET_TYPE_FC        },
@@ -419,6 +420,16 @@ inline Target<K_PARENT, M, V> Target<T_SELF, M, V>::getParent(void) const
     else if(K_PARENT == fapi2::TARGET_TYPE_OMIC)
     {
         TARGETING::getParentOmicTargetsByState(
+            l_parentList,
+            static_cast<TARGETING::Target*>(this->get()),
+            TARGETING::CLASS_NA,
+            requiredPType,
+            TARGETING::UTIL_FILTER_ALL);
+    }
+    else if ((K_PARENT == fapi2::TARGET_TYPE_PAUC)
+             && (T_SELF == fapi2::TARGET_TYPE_OMIC))
+    {
+        TARGETING::getParentPaucTargetsByState(
             l_parentList,
             static_cast<TARGETING::Target*>(this->get()),
             TARGETING::CLASS_NA,
@@ -496,6 +507,15 @@ inline std::vector<Target<K_CHILD, M, V> >
                           l_type,
                           TARGETING::UTIL_FILTER_ALL);
         }
+        else if((T_SELF == fapi2::TARGET_TYPE_PAUC)
+                && (K_CHILD == fapi2::TARGET_TYPE_OMIC))
+        {
+            TARGETING::getChildPaucTargetsByState(l_childList,
+                          static_cast<TARGETING::Target*>(this->get()),
+                          TARGETING::CLASS_NA,
+                          l_type,
+                          TARGETING::UTIL_FILTER_ALL);
+        }
         // DIMMs need to use PRESENT so that we don't report things
         //  that aren't installed
         else if(K_CHILD == fapi2::TARGET_TYPE_DIMM)
@@ -530,6 +550,15 @@ inline std::vector<Target<K_CHILD, M, V> >
         else if(T_SELF == fapi2::TARGET_TYPE_OMIC)
         {
             TARGETING::getChildOmiTargetsByState(l_childList,
+                          static_cast<TARGETING::Target*>(this->get()),
+                          TARGETING::CLASS_NA,
+                          l_type,
+                          TARGETING::UTIL_FILTER_FUNCTIONAL);
+        }
+        else if((T_SELF == fapi2::TARGET_TYPE_PAUC)
+                && (K_CHILD == fapi2::TARGET_TYPE_OMIC))
+        {
+            TARGETING::getChildPaucTargetsByState(l_childList,
                           static_cast<TARGETING::Target*>(this->get()),
                           TARGETING::CLASS_NA,
                           l_type,

@@ -427,6 +427,18 @@ void getChildOmiTargetsByState(
                        TargetService::OMI_CHILD);
 }
 
+void getChildPaucTargetsByState(
+          TARGETING::TargetHandleList& o_vector,
+    const Target*                      i_target,
+          CLASS                        i_class,
+          TYPE                         i_type,
+          ResourceState                i_state )
+
+{
+    getAffinityTargets(o_vector, i_target, i_class, i_type, i_state,
+                       TargetService::PAUC_CHILD);
+}
+
 void getParentAffinityTargetsByState(
           TARGETING::TargetHandleList& o_vector,
     const Target*                      i_target,
@@ -448,6 +460,17 @@ void getParentPervasiveTargetsByState(
 {
     getAffinityTargets(o_vector, i_target, i_class, i_type, i_state,
                        TargetService::PARENT_PERVASIVE);
+}
+
+void getParentPaucTargetsByState(
+          TARGETING::TargetHandleList& o_vector,
+    const Target*                      i_target,
+          CLASS                        i_class,
+          TYPE                         i_type,
+          ResourceState                i_state )
+{
+    getAffinityTargets(o_vector, i_target, i_class, i_type, i_state,
+                       TargetService::PAUC_PARENT);
 }
 
 Target* getTargetWithPGAttr(Target& i_target)

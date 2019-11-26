@@ -3823,6 +3823,9 @@
     <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
+    <attribute>
+      <id>PAUC_PARENT</id>
+    </attribute>
   </targetType>
 
   <!-- OMIC

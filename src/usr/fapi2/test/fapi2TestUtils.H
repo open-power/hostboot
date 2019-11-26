@@ -44,6 +44,8 @@
 #define OMIC_PER_MC          2
 #define OCMB_PER_OMI         1
 #define MEM_PORT_PER_OCMB    1
+#define OMIC_PER_PAUC        2
+#define IOHS_PER_PAUC        2
 
 #define SIMULATED_GOOD_CORES 4
 

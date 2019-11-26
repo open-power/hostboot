@@ -133,6 +133,7 @@ void test_fapi2GetParent()
             GET_PARENT_TEST_MACRO(MY_MCC, TARGET_TYPE_MCC, MY_MC, TARGET_TYPE_MC)
         }
     }
+
     // OMIC Parent Tests
     if (isHwValid(l_proc, MY_MC)  &&
         isHwValid(l_proc, MY_OMIC0))
@@ -142,6 +143,13 @@ void test_fapi2GetParent()
         // Check parent proc
         GET_PARENT_TEST_MACRO(MY_OMIC0, TARGET_TYPE_OMIC, MY_PROC, TARGET_TYPE_PROC_CHIP)
     }
+    if (isHwValid(l_proc, MY_PAUC)  &&
+        isHwValid(l_proc, MY_OMIC1))
+    {
+        // Check parent PAUC
+        GET_PARENT_TEST_MACRO(MY_OMIC1, TARGET_TYPE_OMIC, MY_PAUC, TARGET_TYPE_PAUC)
+    }
+
     // OMI Parent Tests
     if (isHwValid(l_proc, MY_OMI))
     {
