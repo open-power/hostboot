@@ -24,6 +24,17 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 
 <hwpErrors>
+  <sbeTarget>MASTER_CHIP</sbeTarget>
+  <!-- ******************************************************************** -->
+  <hwpError>
+      <sbeError/>
+      <rc>RC_MAGIC_NUMBER_NOT_VALID</rc>
+      <description>Magic number not matching from Seeprom
+         read with Fused number in OTPROM
+      </description>
+      <ffdc>SEEPROM_START_ADDR</ffdc>
+      <ffdc>MAGIC_NUMBER_VALUE</ffdc>
+   </hwpError>
    <!-- ******************************************************************** -->
    <hwpError>
      <rc>RC_FILT_PLL_LOCK_ERR</rc>
