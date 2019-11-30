@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,6 +72,326 @@ const bool IMPLEMENT_EKB_PLL_MUX_TOD_WORKAROUND = true;
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
+
+/// @brief Lookup the IOHS target associated with the Bus number and check for link active
+/// @param[in] i_target         Reference to processor chip target
+/// @param[in] i_bus_enum       p10_tod_setup_bus enum
+/// @param[out] o_bus_num       Bus number associated with p10_tod_setup_bus enum
+/// @param[out] o_iohs_target   IOHS target associated with Bus number
+/// @return FAPI2_RC_SUCCESS    If the link associated with the bus number was found
+///                             and is active, else return error.
+fapi2::ReturnCode p10_tod_lookup_iohs_target(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const p10_tod_setup_bus i_bus_enum,
+    uint8_t& o_bus_num,
+    fapi2::Target<fapi2::TARGET_TYPE_IOHS>& o_iohs_target)
+{
+    fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE_Type l_link_active = 0;
+    bool l_bus_found = false;
+
+    // convert enum to bus number
+    switch (i_bus_enum)
+    {
+        case TOD_SETUP_BUS_IOHS0:
+            o_bus_num = 0;
+            break;
+
+        case TOD_SETUP_BUS_IOHS1:
+            o_bus_num = 1;
+            break;
+
+        case TOD_SETUP_BUS_IOHS2:
+            o_bus_num = 2;
+            break;
+
+        case TOD_SETUP_BUS_IOHS3:
+            o_bus_num = 3;
+            break;
+
+        case TOD_SETUP_BUS_IOHS4:
+            o_bus_num = 4;
+            break;
+
+        case TOD_SETUP_BUS_IOHS5:
+            o_bus_num = 5;
+            break;
+
+        case TOD_SETUP_BUS_IOHS6:
+            o_bus_num = 6;
+            break;
+
+        case TOD_SETUP_BUS_IOHS7:
+            o_bus_num = 7;
+            break;
+
+        default:
+            FAPI_ASSERT(false,
+                        fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_TX()
+                        .set_TARGET(i_target)
+                        .set_TX(i_bus_enum),
+                        "i_bus_enum does not represent a bus");
+            break;
+    }
+
+    // search for bus number in configured links
+    for (const auto& l_iohs_target : i_target.getChildren<fapi2::TARGET_TYPE_IOHS>())
+    {
+        uint8_t l_bus_num = 0;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_iohs_target, l_bus_num),
+                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+        if (l_bus_num == o_bus_num)
+        {
+            l_bus_found = true;
+            o_iohs_target = l_iohs_target;
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE, l_iohs_target, l_link_active),
+                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_LINK_ACTIVE)");
+
+            break;
+        }
+    }
+
+    // check that the i_bus_enum specifies a valid bus
+    FAPI_ASSERT(l_bus_found,
+                fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_TX()
+                .set_TARGET(i_target)
+                .set_TX(i_bus_enum),
+                "Invalid TOD Topology");
+
+    // link must be fabric-active to use it in the TOD configuration
+    FAPI_ASSERT(l_link_active == fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_TRUE,
+                fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_TX()
+                .set_TARGET(i_target)
+                .set_TX(i_bus_enum),
+                "Link associated with the bus is not active");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+/// @brief Lookup the sister target for the corner where a given IOHS lives
+/// @param[in] i_iohs_target    Reference to IOHS target
+/// @param[out] o_iohs_target   Reference to sister IOHS target
+/// @return FAPI2_RC_SUCCESS    If successful, else return error.
+fapi2::ReturnCode p10_tod_lookup_sister_iohs_target(
+    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target,
+    fapi2::Target<fapi2::TARGET_TYPE_IOHS>& o_iohs_target)
+{
+    auto l_target = i_iohs_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+    p10_tod_setup_bus l_bus_enum;
+
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_iohs_id, l_sister_iohs_id;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_iohs_target, l_iohs_id),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+    // determine the sister link for the corner
+    // if link is odd, sister link is the even link in the corner
+    // if link is even, sister link is the odd link in the corner
+    if(l_iohs_id % 2)
+    {
+        l_sister_iohs_id = l_iohs_id - 1;
+    }
+    else
+    {
+        l_sister_iohs_id = l_iohs_id + 1;
+    }
+
+    // convert bus id to enum
+    switch(l_sister_iohs_id)
+    {
+        case 0:
+            l_bus_enum = TOD_SETUP_BUS_IOHS0;
+            break;
+
+        case 1:
+            l_bus_enum = TOD_SETUP_BUS_IOHS1;
+            break;
+
+        case 2:
+            l_bus_enum = TOD_SETUP_BUS_IOHS2;
+            break;
+
+        case 3:
+            l_bus_enum = TOD_SETUP_BUS_IOHS3;
+            break;
+
+        case 4:
+            l_bus_enum = TOD_SETUP_BUS_IOHS4;
+            break;
+
+        case 5:
+            l_bus_enum = TOD_SETUP_BUS_IOHS5;
+            break;
+
+        case 6:
+            l_bus_enum = TOD_SETUP_BUS_IOHS6;
+            break;
+
+        case 7:
+            l_bus_enum = TOD_SETUP_BUS_IOHS7;
+            break;
+
+        default:
+            FAPI_ASSERT(false,
+                        fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_TX()
+                        .set_TARGET(l_target)
+                        .set_TX(l_sister_iohs_id),
+                        "l_sister_iohs_id does not correspond to a valid bus enum");
+            break;
+    }
+
+    // search whether the sister link exists and verify it is fbc-configured
+    FAPI_TRY(p10_tod_lookup_iohs_target(
+                 l_target,
+                 l_bus_enum,
+                 l_sister_iohs_id,
+                 o_iohs_target),
+             "Error from p10_tod_lookup_iohs_target");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+/// @brief Clear Fabric DL TOD configuration
+/// @param[in]  i_iohs_target   Reference to IOHS target
+/// @return FAPI2_RC_SUCCESS    If successful, otherwise error.
+fapi2::ReturnCode fbc_dl_tod_config_clear(
+    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target)
+{
+    fapi2::buffer<uint64_t> l_dlp_config_reg = 0;
+
+    FAPI_TRY(GET_DLP_CONFIG(i_iohs_target, l_dlp_config_reg),
+             "Error from GET_DLP_CONFIG");
+
+    SET_DLP_CONFIG_INBOUND_TOD_SELECT(0x0, l_dlp_config_reg);
+    SET_DLP_CONFIG_INBOUND_TOD_CROSS_SELECT(0x0, l_dlp_config_reg);
+    CLEAR_DLP_CONFIG_LINK0_OUTBOUND_TOD_SELECT(l_dlp_config_reg);
+    CLEAR_DLP_CONFIG_LINK1_OUTBOUND_TOD_SELECT(l_dlp_config_reg);
+
+    FAPI_TRY(PUT_DLP_CONFIG(i_iohs_target, l_dlp_config_reg),
+             "Error from PUT_DLP_CONFIG");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+/// @brief Configure Fabric DL TOD Inbound register
+/// @param[in]  i_iohs_target   Reference to IOHS target
+/// @return FAPI2_RC_SUCCESS    If successful, otherwise error.
+fapi2::ReturnCode fbc_dl_tod_config_inbound(
+    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target)
+{
+    uint8_t l_inbound_tod_select_sublink;
+    fapi2::buffer<uint64_t> l_dlp_config_reg = 0;
+    fapi2::ATTR_IOHS_FABRIC_TOD_CROSS_CONFIG_Type l_tod_cross_config;
+    fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train;
+    fapi2::Target<fapi2::TARGET_TYPE_IOHS> l_sister_iohs_target;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_FABRIC_TOD_CROSS_CONFIG, i_iohs_target, l_tod_cross_config),
+             "Error from FAPI_ATTR_GET (ATTR_IOHS_FABRIC_TOD_CROSS_CONFIG)");
+
+    if(l_tod_cross_config)
+    {
+        FAPI_TRY(p10_tod_lookup_sister_iohs_target(i_iohs_target, l_sister_iohs_target),
+                 "Error from p10_tod_lookup_sister_iohs_target");
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, l_sister_iohs_target, l_link_train),
+                 "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
+    }
+    else
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, i_iohs_target, l_link_train),
+                 "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
+    }
+
+    switch(l_link_train)
+    {
+        case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH:
+        case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY:
+            l_inbound_tod_select_sublink = DLP_INBOUND_TOD_SELECT_LINK1;
+            break;
+
+        case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY:
+            l_inbound_tod_select_sublink = DLP_INBOUND_TOD_SELECT_LINK0;
+            break;
+
+        default:
+            l_inbound_tod_select_sublink = DLP_INBOUND_TOD_SELECT_NONE;
+            break;
+    }
+
+    if(l_tod_cross_config)
+    {
+        FAPI_TRY(GET_DLP_CONFIG(i_iohs_target, l_dlp_config_reg),
+                 "Error from getScom (DLP_CONFIG)");
+        SET_DLP_CONFIG_INBOUND_TOD_SELECT(DLP_INBOUND_TOD_SELECT_OTHER, l_dlp_config_reg);
+        FAPI_TRY(PUT_DLP_CONFIG(i_iohs_target, l_dlp_config_reg),
+                 "Error from putScom (DLP_CONFIG)");
+
+        FAPI_TRY(GET_DLP_CONFIG(l_sister_iohs_target, l_dlp_config_reg),
+                 "Error from getScom (DLP_CONFIG)");
+        SET_DLP_CONFIG_INBOUND_TOD_CROSS_SELECT(l_inbound_tod_select_sublink, l_dlp_config_reg);
+        FAPI_TRY(PUT_DLP_CONFIG(l_sister_iohs_target, l_dlp_config_reg),
+                 "Error from putScom (DLP_CONFIG)");
+    }
+    else
+    {
+        FAPI_TRY(GET_DLP_CONFIG(i_iohs_target, l_dlp_config_reg),
+                 "Error from getScom (DLP_CONFIG)");
+        SET_DLP_CONFIG_INBOUND_TOD_SELECT(l_inbound_tod_select_sublink, l_dlp_config_reg);
+        FAPI_TRY(PUT_DLP_CONFIG(i_iohs_target, l_dlp_config_reg),
+                 "Error from putScom (DLP_CONFIG)");
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+/// @brief Configure Fabric DL TOD Outbound register
+/// @param[in]  i_iohs_target   Reference to IOHS target
+/// @param[in]  i_bus_num       Chiplet unit num asssociated with target
+/// @return FAPI2_RC_SUCCESS    If successful, otherwise error.
+fapi2::ReturnCode fbc_dl_tod_config_outbound(
+    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target,
+    const uint8_t& i_bus_num)
+{
+    fapi2::buffer<uint64_t> l_dlp_config_reg = 0;
+
+    fapi2::ATTR_IOHS_FABRIC_TOD_CROSS_CONFIG_Type l_tod_cross_config;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_FABRIC_TOD_CROSS_CONFIG, i_iohs_target, l_tod_cross_config),
+             "Error from FAPI_ATTR_GET (ATTR_IOHS_FABRIC_TOD_CROSS_CONFIG)");
+
+    FAPI_TRY(GET_DLP_CONFIG(i_iohs_target, l_dlp_config_reg),
+             "Error from getScom (DLP_CONFIG)");
+
+    // send tp_xb_x(0,2,4,6)_tod_sync signal to even IOHS in the corner
+    // send the opposite if cross config option is enabled
+    if((((i_bus_num % 2) == 0) && (l_tod_cross_config == fapi2::ENUM_ATTR_IOHS_FABRIC_TOD_CROSS_CONFIG_OFF)) ||
+       (((i_bus_num % 2) == 1) && (l_tod_cross_config == fapi2::ENUM_ATTR_IOHS_FABRIC_TOD_CROSS_CONFIG_ON)))
+    {
+        CLEAR_DLP_CONFIG_LINK0_OUTBOUND_TOD_SELECT(l_dlp_config_reg);
+        CLEAR_DLP_CONFIG_LINK1_OUTBOUND_TOD_SELECT(l_dlp_config_reg);
+    }
+    // send tp_xb_x(1,3,5,7)_tod_sync signal to odd IOHS in the corner
+    // send the opposite if cross config option is enabled
+    else
+    {
+        SET_DLP_CONFIG_LINK0_OUTBOUND_TOD_SELECT(l_dlp_config_reg);
+        SET_DLP_CONFIG_LINK1_OUTBOUND_TOD_SELECT(l_dlp_config_reg);
+    }
+
+    FAPI_TRY(PUT_DLP_CONFIG(i_iohs_target, l_dlp_config_reg),
+             "Error from putScom (DLP_CONFIG)");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 
 /// @brief MPIPL specific steps to clear the previous topology, this should be
 //  called only during MPIPL
@@ -142,6 +462,18 @@ fapi2::ReturnCode mpipl_clear_tod_node(
     FAPI_INF("MPIPL: Clearing TOD_S_PATH_CTRL_REG");
     FAPI_TRY(PUT_TOD_S_PATH_CTRL_REG(l_target, l_s_path_ctrl_reg),
              "Error in clearing TOD_S_PATH_CTRL_REG");
+
+    if (i_tod_sel == TOD_PRIMARY)
+    {
+        // Clear DLP link layer inits
+        FAPI_INF("MPIPL: Clearing Fabric DL TOD inits");
+
+        for(auto l_iohs_target : l_target.getChildren<fapi2::TARGET_TYPE_IOHS>())
+        {
+            FAPI_TRY(fbc_dl_tod_config_clear(l_iohs_target),
+                     "Error from fbc_dl_tod_config_clear");
+        }
+    }
 
     for(auto l_child = (i_tod_node->i_children).begin();
         l_child != (i_tod_node->i_children).end();
@@ -217,8 +549,19 @@ fapi2::ReturnCode clear_tod_node(
                  "Error in PUT_TOD_S_PATH_CTRL_REG");
     }
 
-    // TOD is cleared for this node; if it has children, start clearing
-    // their registers
+    if (i_tod_sel == TOD_PRIMARY)
+    {
+        // Clear DLP link layer inits
+        FAPI_DBG("Fabric DL TOD inits will be cleared.");
+
+        for(auto l_iohs_target : l_target.getChildren<fapi2::TARGET_TYPE_IOHS>())
+        {
+            FAPI_TRY(fbc_dl_tod_config_clear(l_iohs_target),
+                     "Error from fbc_dl_tod_config_clear");
+        }
+    }
+
+    // TOD is cleared for this node; if it has children, start clearing their registers
     for (auto l_child = (i_tod_node->i_children).begin();
          l_child != (i_tod_node->i_children).end();
          ++l_child)
@@ -226,6 +569,61 @@ fapi2::ReturnCode clear_tod_node(
         FAPI_TRY(clear_tod_node(*l_child,
                                 i_tod_sel),
                  "Failure clearing downstream TOD node!");
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+
+/// @brief Configures the fabric TOD registers; will be called by configure_tod_node
+/// @param[in] i_tod_node       Reference to TOD topology (including FAPI targets)
+/// @return FAPI2_RC_SUCCESS    If configuration is successful, else error.
+fapi2::ReturnCode configure_fbc_tod_regs(
+    const tod_topology_node* i_tod_node)
+{
+    FAPI_DBG("Start");
+
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target = *(i_tod_node->i_target);
+    fapi2::Target<fapi2::TARGET_TYPE_IOHS> l_iohs_target;
+    uint8_t l_bus_num = 0;
+
+    // Configure DL inbound settings
+    FAPI_DBG("Configuring Fabric DL TOD inbound inits for RX ports");
+
+    if((i_tod_node->i_bus_rx >= TOD_SETUP_BUS_IOHS0) && (i_tod_node->i_bus_rx <= TOD_SETUP_BUS_IOHS7))
+    {
+        FAPI_TRY(p10_tod_lookup_iohs_target(
+                     l_target,
+                     i_tod_node->i_bus_rx,
+                     l_bus_num,
+                     l_iohs_target),
+                 "Error from p10_tod_lookup_iohs_target");
+
+        FAPI_TRY(fbc_dl_tod_config_inbound(l_iohs_target),
+                 "Error from fbc_dl_tod_config_inbound");
+    }
+
+    // Configure DL outbound settings
+    FAPI_DBG("Configuring Fabric DL TOD outbound inits for TX ports");
+
+    for (auto l_child = (i_tod_node->i_children).begin();
+         l_child != (i_tod_node->i_children).end();
+         ++l_child)
+    {
+        if(((*l_child)->i_bus_tx >= TOD_SETUP_BUS_IOHS0) && ((*l_child)->i_bus_tx <= TOD_SETUP_BUS_IOHS7))
+        {
+            FAPI_TRY(p10_tod_lookup_iohs_target(
+                         l_target,
+                         (*l_child)->i_bus_tx,
+                         l_bus_num,
+                         l_iohs_target),
+                     "Error from p10_tod_lookup_iohs_target");
+
+            FAPI_TRY(fbc_dl_tod_config_outbound(l_iohs_target, l_bus_num),
+                     "Error from fbc_dl_tod_config_outbound");
+        }
     }
 
 fapi_try_exit:
@@ -414,7 +812,6 @@ fapi2::ReturnCode configure_port_ctrl_regs(
     uint32_t l_port_ctrl_addr = 0;
     fapi2::buffer<uint64_t> l_port_ctrl_check_reg = 0;
     uint32_t l_port_ctrl_check_addr = 0;
-    uint32_t l_port_rx_select_val = 0;
     uint32_t l_path_sel = 0;
     fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_Type l_x_attached_chip_cnfg;
     fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_Type l_a_attached_chip_cnfg;
@@ -468,99 +865,31 @@ fapi2::ReturnCode configure_port_ctrl_regs(
                             l_port_ctrl_check_reg),
              "Error from getScom (0x%08X)!", l_port_ctrl_check_addr);
 
-    //Determine RX port
-    switch (i_tod_node->i_bus_rx)
+    //Determine RX port if IOHS bus is selected for setup; MDMT has no rx
+    if((i_tod_node->i_bus_rx >= TOD_SETUP_BUS_IOHS0) && (i_tod_node->i_bus_rx <= TOD_SETUP_BUS_IOHS7))
     {
-        case (TOD_SETUP_BUS_XBUS0):
-            // If TOD_SETUP_BUS_XBUS0 is not enabled throw an error
-            FAPI_ASSERT((l_x_attached_chip_cnfg[0] != 0),
-                        fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_RX()
-                        .set_TARGET(l_target)
-                        .set_RX(TOD_SETUP_BUS_XBUS0),
-                        "i_tod_node->i_bus_rx is set to TOD_SETUP_BUS_XBUS0 and it is not enabled");
-            l_port_rx_select_val = TOD_PORT_CTRL_REG_RX_X0_SEL;
-            break;
+        uint8_t l_bus_rx = 0;
+        fapi2::Target<fapi2::TARGET_TYPE_IOHS> l_iohs_target;
 
-        case (TOD_SETUP_BUS_XBUS1):
-            // If TOD_SETUP_BUS_XBUS1 is not enabled throw an error
-            FAPI_ASSERT((l_x_attached_chip_cnfg[1] != 0),
-                        fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_RX()
-                        .set_TARGET(l_target)
-                        .set_RX(TOD_SETUP_BUS_XBUS1),
-                        "i_tod_node->i_bus_rx is set to TOD_SETUP_BUS_XBUS1 and it is not enabled");
-            l_port_rx_select_val = TOD_PORT_CTRL_REG_RX_X1_SEL;
-            break;
+        FAPI_TRY(p10_tod_lookup_iohs_target(
+                     l_target,
+                     i_tod_node->i_bus_rx,
+                     l_bus_rx,
+                     l_iohs_target),
+                 "Error from p10_tod_lookup_iohs_target");
 
-        case (TOD_SETUP_BUS_XBUS2):
-            // If TOD_SETUP_BUS_XBUS2 is not enabled throw an error
-            FAPI_ASSERT((l_x_attached_chip_cnfg[2] != 0),
-                        fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_RX()
-                        .set_TARGET(l_target)
-                        .set_RX(TOD_SETUP_BUS_XBUS2),
-                        "i_tod_node->i_bus_rx is set to TOD_SETUP_BUS_XBUS2 and it is not enabled");
-            l_port_rx_select_val = TOD_PORT_CTRL_REG_RX_X2_SEL;
-            break;
+        FAPI_ASSERT((l_x_attached_chip_cnfg[l_bus_rx] != 0) ||
+                    (l_a_attached_chip_cnfg[l_bus_rx] != 0),
+                    fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_RX()
+                    .set_TARGET(l_target)
+                    .set_RX(i_tod_node->i_bus_rx),
+                    "i_tod_node->i_bus_rx is set to TOD_SETUP_BUS_IOHS%d and it is not enabled", l_bus_rx);
 
-        case (TOD_SETUP_BUS_OBUS0):
-            // If TOD_SETUP_BUS_OBUS0 is not enabled throw an error
-            FAPI_ASSERT(((l_x_attached_chip_cnfg[3] != 0) ||
-                         (l_a_attached_chip_cnfg[0] != 0)),
-                        fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_RX()
-                        .set_TARGET(l_target)
-                        .set_RX(TOD_SETUP_BUS_OBUS0),
-                        "i_tod_node->i_bus_rx is set to TOD_SETUP_BUS_OBUS0 and it is not enabled");
-            l_port_rx_select_val = TOD_PORT_CTRL_REG_RX_X3_SEL;
-            break;
-
-        case (TOD_SETUP_BUS_OBUS1):
-            // If TOD_SETUP_BUS_OBUS1 is not enabled throw an error
-            FAPI_ASSERT(((l_x_attached_chip_cnfg[4] != 0) ||
-                         (l_a_attached_chip_cnfg[1] != 0)),
-                        fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_RX()
-                        .set_TARGET(l_target)
-                        .set_RX(TOD_SETUP_BUS_OBUS1),
-                        "i_tod_node->i_bus_rx is set to TOD_SETUP_BUS_OBUS1 and it is not enabled");
-            l_port_rx_select_val = TOD_PORT_CTRL_REG_RX_X4_SEL;
-            break;
-
-        case (TOD_SETUP_BUS_OBUS2):
-            // If TOD_SETUP_BUS_OBUS2 is not enabled throw an error
-            FAPI_ASSERT(((l_x_attached_chip_cnfg[5] != 0) ||
-                         (l_a_attached_chip_cnfg[2] != 0)),
-                        fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_RX()
-                        .set_TARGET(l_target)
-                        .set_RX(TOD_SETUP_BUS_OBUS2),
-                        "i_tod_node->i_bus_rx is set to TOD_SETUP_BUS_OBUS2 and it is not enabled");
-            l_port_rx_select_val = TOD_PORT_CTRL_REG_RX_X5_SEL;
-            break;
-
-        case (TOD_SETUP_BUS_OBUS3):
-            // If TOD_SETUP_BUS_OBUS3 is not enabled throw an error
-            FAPI_ASSERT(((l_x_attached_chip_cnfg[6] != 0) ||
-                         (l_a_attached_chip_cnfg[3] != 0)),
-                        fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_RX()
-                        .set_TARGET(l_target)
-                        .set_RX(TOD_SETUP_BUS_OBUS3),
-                        "i_tod_node->i_bus_rx is set to TOD_SETUP_BUS_OBUS3 and it is not enabled");
-            l_port_rx_select_val = TOD_PORT_CTRL_REG_RX_X6_SEL;
-            break;
-
-        case (TOD_SETUP_BUS_XBUS7):
-            FAPI_ASSERT(false,
-                        fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_RX()
-                        .set_TARGET(l_target)
-                        .set_RX(TOD_SETUP_BUS_XBUS7),
-                        "i_tod_node->i_bus_rx is set to TOD_SETUP_BUS_XBUS7");
-            break;
-
-        case (TOD_SETUP_BUS_NONE):
-            break; //MDMT has no rx
+        l_port_ctrl_reg.insertFromRight<TOD_PRI_PORT_0_CTRL_REG_PRI_PORT_0_RX_SELECT,
+                                        TOD_PRI_PORT_0_CTRL_REG_PRI_PORT_0_RX_SELECT_LEN>(l_bus_rx);
+        l_port_ctrl_check_reg.insertFromRight<TOD_PRI_PORT_0_CTRL_REG_PRI_PORT_0_RX_SELECT,
+                                              TOD_PRI_PORT_0_CTRL_REG_PRI_PORT_0_RX_SELECT_LEN>(l_bus_rx);
     }
-
-    l_port_ctrl_reg.insertFromRight<TOD_PRI_PORT_0_CTRL_REG_PRI_PORT_0_RX_SELECT,
-                                    TOD_PRI_PORT_0_CTRL_REG_PRI_PORT_0_RX_SELECT_LEN>(l_port_rx_select_val);
-    l_port_ctrl_check_reg.insertFromRight<TOD_PRI_PORT_0_CTRL_REG_PRI_PORT_0_RX_SELECT,
-                                          TOD_PRI_PORT_0_CTRL_REG_PRI_PORT_0_RX_SELECT_LEN>(l_port_rx_select_val);
 
     //Determine which tx path should be selected for all children
     if (is_mdmt)
@@ -620,138 +949,45 @@ fapi2::ReturnCode configure_port_ctrl_regs(
         }
     }
 
+    // Loop through all of the out busses, determine which tx buses to enable as senders
     for (auto l_child = (i_tod_node->i_children).begin();
          l_child != (i_tod_node->i_children).end();
          ++l_child)
     {
-        // Loop through all of the out busses, determine which tx buses to
-        // enable as senders
-        switch ((*l_child)->i_bus_tx)
+        if(((*l_child)->i_bus_tx >= TOD_SETUP_BUS_IOHS0) && ((*l_child)->i_bus_tx <= TOD_SETUP_BUS_IOHS7))
         {
-            case (TOD_SETUP_BUS_XBUS0):
-                // If TOD_SETUP_BUS_XBUS0 is not enabled throw an error
-                FAPI_ASSERT((l_x_attached_chip_cnfg[0] != 0),
-                            fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_TX()
-                            .set_TARGET(l_target)
-                            .set_TX(TOD_SETUP_BUS_XBUS0),
-                            "i_tod_node->i_bus_rx is set to TOD_SETUP_BUS_XBUS0 and it is not enabled");
-                l_port_ctrl_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X0_SEL,
-                                                TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
-                l_port_ctrl_reg.setBit<TOD_PORT_CTRL_REG_TX_X0_EN>();
-                l_port_ctrl_check_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X0_SEL,
-                                                      TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
-                l_port_ctrl_check_reg.setBit<TOD_PORT_CTRL_REG_TX_X0_EN>();
-                break;
+            uint8_t l_bus_tx = 0;
+            fapi2::Target<fapi2::TARGET_TYPE_IOHS> l_iohs_target;
 
-            case (TOD_SETUP_BUS_XBUS1):
-                // If XBUS1 is not enabled throw an error
-                FAPI_ASSERT((l_x_attached_chip_cnfg[1] != 0),
-                            fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_TX()
-                            .set_TARGET(l_target)
-                            .set_TX(TOD_SETUP_BUS_XBUS1),
-                            "i_tod_node->i_bus_rx is set to TOD_SETUP_BUS_XBUS1 and it is not enabled");
-                l_port_ctrl_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X1_SEL,
-                                                TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
-                l_port_ctrl_reg.setBit<TOD_PORT_CTRL_REG_TX_X1_EN>();
-                l_port_ctrl_check_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X1_SEL,
-                                                      TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
-                l_port_ctrl_check_reg.setBit<TOD_PORT_CTRL_REG_TX_X1_EN>();
-                break;
+            FAPI_TRY(p10_tod_lookup_iohs_target(
+                         l_target,
+                         (*l_child)->i_bus_tx,
+                         l_bus_tx,
+                         l_iohs_target),
+                     "Error from p10_tod_lookup_iohs_target");
 
-            case (TOD_SETUP_BUS_XBUS2):
-                // If TOD_SETUP_BUS_XBUS2 is not enabled throw an error
-                FAPI_ASSERT((l_x_attached_chip_cnfg[2] != 0),
-                            fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_TX()
-                            .set_TARGET(l_target)
-                            .set_TX(TOD_SETUP_BUS_XBUS2),
-                            "i_tod_node->i_bus_rx is set to TOD_SETUP_BUS_XBUS2 and it is not enabled");
-                l_port_ctrl_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X2_SEL,
-                                                TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
-                l_port_ctrl_reg.setBit<TOD_PORT_CTRL_REG_TX_X2_EN>();
-                l_port_ctrl_check_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X2_SEL,
-                                                      TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
-                l_port_ctrl_check_reg.setBit<TOD_PORT_CTRL_REG_TX_X2_EN>();
-                break;
+            FAPI_ASSERT((l_x_attached_chip_cnfg[l_bus_tx] != 0) ||
+                        (l_a_attached_chip_cnfg[l_bus_tx] != 0),
+                        fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_TX()
+                        .set_TARGET(l_target)
+                        .set_TX((*l_child)->i_bus_tx),
+                        "l_child->i_bus_tx is set to TOD_SETUP_BUS_IOHS%d and it is not enabled", l_bus_tx);
 
-            case (TOD_SETUP_BUS_OBUS0):
-                // If TOD_SETUP_BUS_OBUS0 is not enabled throw an error
-                FAPI_ASSERT(((l_x_attached_chip_cnfg[3] != 0)
-                             || (l_a_attached_chip_cnfg[0] != 0)),
-                            fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_TX()
-                            .set_TARGET(l_target)
-                            .set_TX(TOD_SETUP_BUS_OBUS0),
-                            "i_tod_node->i_bus_rx is set to TOD_SETUP_BUS_OBUS0 and it is not enabled");
-                l_port_ctrl_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X3_SEL,
-                                                TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
-                l_port_ctrl_reg.setBit<TOD_PORT_CTRL_REG_TX_X3_EN>();
-                l_port_ctrl_check_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X3_SEL,
-                                                      TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
-                l_port_ctrl_check_reg.setBit<TOD_PORT_CTRL_REG_TX_X3_EN>();
-                break;
-
-            case (TOD_SETUP_BUS_OBUS1):
-                // If TOD_SETUP_BUS_OBUS1 is not enabled throw an error
-                FAPI_ASSERT(((l_x_attached_chip_cnfg[4] != 0) ||
-                             (l_a_attached_chip_cnfg[1] != 0)),
-                            fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_TX()
-                            .set_TARGET(l_target)
-                            .set_TX(TOD_SETUP_BUS_OBUS1),
-                            "i_tod_node->i_bus_rx is set to TOD_SETUP_BUS_OBUS1 and it is not enabled");
-                l_port_ctrl_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X4_SEL,
-                                                TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
-                l_port_ctrl_reg.setBit<TOD_PORT_CTRL_REG_TX_X4_EN>();
-                l_port_ctrl_check_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X4_SEL,
-                                                      TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
-                l_port_ctrl_check_reg.setBit<TOD_PORT_CTRL_REG_TX_X4_EN>();
-                break;
-
-            case (TOD_SETUP_BUS_OBUS2):
-                // If TOD_SETUP_BUS_OBUS2 is not enabled throw an error
-                FAPI_ASSERT(((l_x_attached_chip_cnfg[5] != 0) ||
-                             (l_a_attached_chip_cnfg[2] != 0)),
-                            fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_TX()
-                            .set_TARGET(l_target)
-                            .set_TX(TOD_SETUP_BUS_OBUS2),
-                            "i_tod_node->i_bus_rx is set to TOD_SETUP_BUS_OBUS2 and it is not enabled");
-                l_port_ctrl_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X5_SEL,
-                                                TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
-                l_port_ctrl_reg.setBit<TOD_PORT_CTRL_REG_TX_X5_EN>();
-                l_port_ctrl_check_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X5_SEL,
-                                                      TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
-                l_port_ctrl_check_reg.setBit<TOD_PORT_CTRL_REG_TX_X5_EN>();
-                break;
-
-            case (TOD_SETUP_BUS_OBUS3):
-                // If TOD_SETUP_BUS_OBUS3 is not enabled throw an error
-                FAPI_ASSERT(((l_x_attached_chip_cnfg[6] != 0) ||
-                             (l_a_attached_chip_cnfg[3] != 0)),
-                            fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_TX()
-                            .set_TARGET(l_target)
-                            .set_TX(TOD_SETUP_BUS_OBUS3),
-                            "i_tod_node->i_bus_rx is set to TOD_SETUP_BUS_OBUS3 and it is not enabled");
-                l_port_ctrl_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X6_SEL,
-                                                TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
-                l_port_ctrl_reg.setBit<TOD_PORT_CTRL_REG_TX_X6_EN>();
-                l_port_ctrl_check_reg.insertFromRight<TOD_PORT_CTRL_REG_TX_X6_SEL,
-                                                      TOD_PORT_CTRL_REG_TX_LEN>(l_path_sel);
-                l_port_ctrl_check_reg.setBit<TOD_PORT_CTRL_REG_TX_X6_EN>();
-                break;
-
-            case (TOD_SETUP_BUS_XBUS7):
-                FAPI_ASSERT(false,
-                            fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_TX()
-                            .set_TARGET(l_target)
-                            .set_TX(TOD_SETUP_BUS_XBUS7),
-                            "i_tod_node->i_bus_tx is set to TOD_SETUP_BUS_XBUS7");
-                break;
-
-            case (TOD_SETUP_BUS_NONE):
-                FAPI_ASSERT(((*l_child)->i_bus_tx != TOD_SETUP_BUS_NONE),
-                            fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_TX()
-                            .set_TARGET(l_target)
-                            .set_TX(TOD_SETUP_BUS_NONE),
-                            "i_tod_node->i_bus_tx is set to TOD_SETUP_BUS_NONE");
-                break;
+            l_port_ctrl_reg.insertFromRight(l_path_sel, TOD_PORT_CTRL_REG_TX_X0_SEL + (TOD_PORT_CTRL_REG_TX_LEN * l_bus_tx),
+                                            TOD_PORT_CTRL_REG_TX_LEN);
+            l_port_ctrl_reg.setBit(TOD_PORT_CTRL_REG_TX_X0_EN + l_bus_tx);
+            l_port_ctrl_check_reg.insertFromRight(l_path_sel, TOD_PORT_CTRL_REG_TX_X0_SEL + (TOD_PORT_CTRL_REG_TX_LEN * l_bus_tx),
+                                                  TOD_PORT_CTRL_REG_TX_LEN);
+            l_port_ctrl_check_reg.setBit(TOD_PORT_CTRL_REG_TX_X0_EN + l_bus_tx);
+        }
+        else
+        {
+            // all children should have a tx bus to enable, throw an error
+            FAPI_ASSERT(false,
+                        fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_TX()
+                        .set_TARGET(l_target)
+                        .set_TX(TOD_SETUP_BUS_NONE),
+                        "l_child->i_bus_tx is set to TOD_SETUP_BUS_NONE");
         }
     }
 
@@ -866,6 +1102,7 @@ fapi2::ReturnCode configure_m_path_ctrl_reg(
     const bool i_mdmt)
 {
     fapi2::buffer<uint64_t> l_m_path_ctrl_reg = 0;
+    fapi2::buffer<uint64_t> l_reset_reg = 0;
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target = *(i_tod_node->i_target);
     fapi2::ATTR_CLOCK_PLL_MUX_TOD_Type l_attr_clock_pll_mux_tod;
     fapi2::buffer<uint64_t> l_perv_ctrl4 = 0;
@@ -944,6 +1181,23 @@ fapi2::ReturnCode configure_m_path_ctrl_reg(
 
     FAPI_TRY(PUT_TOD_M_PATH_CTRL_REG(l_target, l_m_path_ctrl_reg),
              "Error from PUT_TOD_M_PATH_CTRL_REG");
+
+    if (i_mdmt)
+    {
+        // When changing DUAL_EDGE_DISABLE, the Master sync counter can exceed the SPS limit and
+        // take a long time to roll over.  So reset the Master sync counter and everything related
+        // in the Master after changing DUAL_EDGE_DISABLE.
+        FAPI_TRY(PREP_TOD_MISC_RESET_REG(l_target));
+        SET_TOD_MISC_RESET_REG_M_PATH_0_SYNC_CREATE_COUNTER_RESET_ENABLE(l_reset_reg);
+        SET_TOD_MISC_RESET_REG_M_PATH_1_SYNC_CREATE_COUNTER_RESET_ENABLE(l_reset_reg);
+
+        SET_TOD_MISC_RESET_REG_M_PATH_0_STEP_CREATE_THRESHOLD_RESET_ENABLE(l_reset_reg);
+        SET_TOD_MISC_RESET_REG_M_PATH_0_STEP_ALIGN_THRESHOLD_RESET_ENABLE(l_reset_reg);
+        SET_TOD_MISC_RESET_REG_M_PATH_1_STEP_CREATE_THRESHOLD_RESET_ENABLE(l_reset_reg);
+        SET_TOD_MISC_RESET_REG_M_PATH_1_STEP_ALIGN_THRESHOLD_RESET_ENABLE(l_reset_reg);
+
+        FAPI_TRY(PUT_TOD_MISC_RESET_REG(l_target, l_reset_reg));
+    }
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -1093,6 +1347,9 @@ fapi2::ReturnCode configure_tod_node(
     const bool is_mdmt = (i_tod_node->i_tod_master &&
                           i_tod_node->i_drawer_master);
 
+    FAPI_TRY(configure_fbc_tod_regs(i_tod_node),
+             "Error from configure_fbc_tod_regs!");
+
     FAPI_TRY(configure_pss_mss_ctrl_reg(i_tod_node,
                                         i_tod_sel,
                                         i_osc_sel),
@@ -1173,60 +1430,6 @@ fapi_try_exit:
     return;
 }
 
-/// @brief Lookup the IOHS target associated with the Bus number and check for link active
-/// @param[in] i_target Chip target
-/// @param[in] i_bus_num Bus number
-/// @param[out] o_iohs_target IOHS target associated with Bus number
-/// @return FAPI2_RC_SUCCESS if the link associated with the bus number was found and is active,
-///     else return error
-fapi2::ReturnCode p10_tod_lookup_iohs_target(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint8_t i_bus_num,
-    fapi2::Target<fapi2::TARGET_TYPE_IOHS>& o_iohs_target)
-{
-    bool l_iohs_link_active = false;
-    fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE_Type l_link_active = 0;
-    bool l_bus_found = false;
-
-    for (const auto& l_iohs_target : i_target.getChildren<fapi2::TARGET_TYPE_IOHS>())
-    {
-        uint8_t l_bus_num = 0;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_iohs_target, l_bus_num),
-                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
-
-        if (l_bus_num == i_bus_num)
-        {
-            l_bus_found = true;
-            o_iohs_target = l_iohs_target;
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE, l_iohs_target, l_link_active),
-                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_LINK_ACTIVE)");
-
-            if (l_link_active == fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_TRUE)
-            {
-                l_iohs_link_active = true;
-            }
-
-            break;
-        }
-    }
-
-    // check that the i_bus_num specifies a valid bus
-    FAPI_ASSERT(l_bus_found,
-                fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_TX()
-                .set_TARGET(i_target)
-                .set_TX(i_bus_num),
-                "Invalid TOD Topology");
-
-    // Link must be active to use it in the TOD configuration
-    FAPI_ASSERT(l_iohs_link_active,
-                fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_TX()
-                .set_TARGET(i_target)
-                .set_TX(i_bus_num),
-                "Link associated with the bus is not active");
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
 
 /// @brief Returns the latency and round-trip values from the FBC-TOD Latency measure register
 /// @param[in] i_iohs_target  => IOHS target
@@ -1464,46 +1667,11 @@ fapi2::ReturnCode p10_tod_get_tod_latency_from_parent(
     // get parent Chip target
     l_parent_target = *(l_parent_tod_node->i_target);
 
-    // convert TOD enum value to bus number, unit position
-    switch (i_tod_node->i_bus_tx)    // Upstream node's bus from which step/sync is transmitted
-    {
-        case TOD_SETUP_BUS_XBUS0:
-            l_bus_num = TOD_SETUP_BUS_UNIT_POS_0;
-            break;
-
-        case TOD_SETUP_BUS_XBUS1:
-            l_bus_num = TOD_SETUP_BUS_UNIT_POS_1;
-            break;
-
-        case TOD_SETUP_BUS_XBUS2:
-            l_bus_num = TOD_SETUP_BUS_UNIT_POS_2;
-            break;
-
-        case TOD_SETUP_BUS_OBUS0:
-            l_bus_num = TOD_SETUP_BUS_UNIT_POS_3;
-            break;
-
-        case TOD_SETUP_BUS_OBUS1:
-            l_bus_num = TOD_SETUP_BUS_UNIT_POS_4;
-            break;
-
-        case TOD_SETUP_BUS_OBUS2:
-            l_bus_num = TOD_SETUP_BUS_UNIT_POS_5;
-            break;
-
-        case TOD_SETUP_BUS_NONE: /* Fall-through */
-        default:
-            FAPI_ASSERT(false,         /* parent node must have a connected bus to child */
-                        fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_TX()
-                        .set_TARGET(i_tod_node->i_target)
-                        .set_TX(i_tod_node->i_bus_tx),
-                        "i_tod_node->i_bus_tx is set to invalid value");
-            break;
-    }
-
+    // i_bus_tx is the upstream node's bus from which step/sync is transmitted
     // Lookup the IOHS target for the parent node.
     FAPI_TRY(p10_tod_lookup_iohs_target(
                  l_parent_target,
+                 i_tod_node->i_bus_tx,
                  l_bus_num,
                  l_parent_iohs_target),
              "Error from p10_tod_lookup_iohs_target");

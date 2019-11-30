@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -510,9 +510,9 @@ void TodTopologyManager::dumpTopology() const
 
     static const char* busnames[TOD_SETUP_BUS_BUS_MAX+1] = {0};
     busnames[TOD_SETUP_BUS_NONE] = NO_BUS;
-    busnames[TOD_SETUP_BUS_XBUS0] = X_BUS_0;
-    busnames[TOD_SETUP_BUS_XBUS1] = X_BUS_1;
-    busnames[TOD_SETUP_BUS_XBUS2] = X_BUS_2;
+    busnames[TOD_SETUP_BUS_IOHS0] = X_BUS_0;
+    busnames[TOD_SETUP_BUS_IOHS1] = X_BUS_1;
+    busnames[TOD_SETUP_BUS_IOHS2] = X_BUS_2;
 
     static const char* topologynames[2] = {0};
     topologynames[TOD_PRIMARY] = TOD_PRIMARY_TOPOLOGY;

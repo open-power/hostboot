@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -181,36 +181,12 @@ const uint64_t TOD_TX_TTYPE_REG_TX_TTYPE_TRIGGER = 0x8000000000000000ULL;
 const uint64_t TOD_LOAD_TOD_REG_GOTO_STOPPED_STATE = 0x0000000000000001ULL;
 
 // TOD_[PRI, SEC]_PORT_[0,1]_CTRL_REG register field definitions
-const uint32_t TOD_PORT_CTRL_REG_TX_X0_SEL = 4;
-const uint32_t TOD_PORT_CTRL_REG_TX_X1_SEL = 6;
-const uint32_t TOD_PORT_CTRL_REG_TX_X2_SEL = 8;
-const uint32_t TOD_PORT_CTRL_REG_TX_X3_SEL = 10;
-const uint32_t TOD_PORT_CTRL_REG_TX_X4_SEL = 12;
-const uint32_t TOD_PORT_CTRL_REG_TX_X5_SEL = 14;
-const uint32_t TOD_PORT_CTRL_REG_TX_X6_SEL = 16;
-const uint32_t TOD_PORT_CTRL_REG_TX_X7_SEL = 18;
-const uint32_t TOD_PORT_CTRL_REG_TX_X0_EN = 20;
-const uint32_t TOD_PORT_CTRL_REG_TX_X1_EN = 21;
-const uint32_t TOD_PORT_CTRL_REG_TX_X2_EN = 22;
-const uint32_t TOD_PORT_CTRL_REG_TX_X3_EN = 23;
-const uint32_t TOD_PORT_CTRL_REG_TX_X4_EN = 24;
-const uint32_t TOD_PORT_CTRL_REG_TX_X5_EN = 25;
-const uint32_t TOD_PORT_CTRL_REG_TX_X6_EN = 26;
-const uint32_t TOD_PORT_CTRL_REG_TX_X7_EN = 27;
+const uint32_t TOD_PORT_CTRL_REG_TX_X0_SEL    = 4;
+const uint32_t TOD_PORT_CTRL_REG_TX_X0_EN     = 20;
 const uint32_t TOD_PORT_CTRL_REG_I_PATH_DELAY = 32;
 
-const uint32_t TOD_PORT_CTRL_REG_RX_LEN = 3;
 const uint32_t TOD_PORT_CTRL_REG_TX_LEN = 2;
 const uint32_t TOD_PORT_CTRL_REG_I_PATH_DELAY_LEN = 8;
-
-const uint32_t TOD_PORT_CTRL_REG_RX_X0_SEL = 0x0;
-const uint32_t TOD_PORT_CTRL_REG_RX_X1_SEL = 0x1;
-const uint32_t TOD_PORT_CTRL_REG_RX_X2_SEL = 0x2;
-const uint32_t TOD_PORT_CTRL_REG_RX_X3_SEL = 0x3;
-const uint32_t TOD_PORT_CTRL_REG_RX_X4_SEL = 0x4;
-const uint32_t TOD_PORT_CTRL_REG_RX_X5_SEL = 0x5;
-const uint32_t TOD_PORT_CTRL_REG_RX_X6_SEL = 0x6;
-const uint32_t TOD_PORT_CTRL_REG_RX_X7_SEL = 0x7;
 
 const uint32_t TOD_PORT_CTRL_REG_S_PATH_0 = 0x0;
 const uint32_t TOD_PORT_CTRL_REG_S_PATH_1 = 0x1;
@@ -219,15 +195,11 @@ const uint32_t TOD_PORT_CTRL_REG_M_PATH_1 = 0x3;
 
 const uint32_t NUM_THREADS_PER_CORE = 4;
 
-// bus number, unit positions, corresponding to ATTR_CHIP_UNIT_POS of IOHS target
-const uint32_t TOD_SETUP_BUS_UNIT_POS_0 = 0;
-const uint32_t TOD_SETUP_BUS_UNIT_POS_1 = 1;
-const uint32_t TOD_SETUP_BUS_UNIT_POS_2 = 2;
-const uint32_t TOD_SETUP_BUS_UNIT_POS_3 = 3;
-const uint32_t TOD_SETUP_BUS_UNIT_POS_4 = 4;
-const uint32_t TOD_SETUP_BUS_UNIT_POS_5 = 5;
-const uint32_t TOD_SETUP_BUS_UNIT_POS_6 = 6;
-const uint32_t TOD_SETUP_BUS_UNIT_POS_7 = 7;
+// Fabric DL TOD Config Register Enums
+const uint8_t DLP_INBOUND_TOD_SELECT_NONE  = 0x00;
+const uint8_t DLP_INBOUND_TOD_SELECT_LINK0 = 0x01;
+const uint8_t DLP_INBOUND_TOD_SELECT_LINK1 = 0x02;
+const uint8_t DLP_INBOUND_TOD_SELECT_OTHER = 0x03;
 
 //------------------------------------------------------------------------------
 // Type definitions
@@ -246,29 +218,18 @@ extern "C" {
         TOD_SECONDARY // configure secondary TOD
     };
 
-    // FIXME @RTC 213485 -- should these enum names, values, and comments be updated for P10?
     enum p10_tod_setup_bus
     {
-        // for MDMT
-        TOD_SETUP_BUS_NONE,
-        // FBC x0
-        TOD_SETUP_BUS_XBUS0,
-        // FBC x1
-        TOD_SETUP_BUS_XBUS1,
-        // FBC x2
-        TOD_SETUP_BUS_XBUS2,
-        // FBC x3/a0
-        TOD_SETUP_BUS_OBUS0,
-        // FBC x4/a1
-        TOD_SETUP_BUS_OBUS1,
-        // FBC x5/a2
-        TOD_SETUP_BUS_OBUS2,
-        // FBC x6/a3
-        TOD_SETUP_BUS_OBUS3,
-        // should not be used
-        TOD_SETUP_BUS_XBUS7,
-        // added to satisfy HWSV code dependencies
-        TOD_SETUP_BUS_BUS_MAX = TOD_SETUP_BUS_OBUS3
+        TOD_SETUP_BUS_NONE, // for MDMT
+        TOD_SETUP_BUS_IOHS0,
+        TOD_SETUP_BUS_IOHS1,
+        TOD_SETUP_BUS_IOHS2,
+        TOD_SETUP_BUS_IOHS3,
+        TOD_SETUP_BUS_IOHS4,
+        TOD_SETUP_BUS_IOHS5,
+        TOD_SETUP_BUS_IOHS6,
+        TOD_SETUP_BUS_IOHS7,
+        TOD_SETUP_BUS_BUS_MAX = TOD_SETUP_BUS_IOHS7 // for HWSV code dependencies
     };
 
     enum tod_action
@@ -287,10 +248,8 @@ extern "C" {
         TOD_OSC_0,             // oscillator connected to OSC0 and not OSC1
         TOD_OSC_1,             // oscillator connected to OSC1 and not OSC0
         TOD_OSC_0_AND_1,       // oscillators connected to both OSC0 and OSC1
-        TOD_OSC_0_AND_1_SEL_0, // oscillators connected to both OSC0 and OSC1,
-        //   but OSC0 will always be selected
-        TOD_OSC_0_AND_1_SEL_1, // oscillators connected to both OSC0 and OSC1,
-        //   but OSC1 will always be selected
+        TOD_OSC_0_AND_1_SEL_0, // oscillators connected to both OSC0 and OSC1, but OSC0 will always be selected
+        TOD_OSC_0_AND_1_SEL_1, // oscillators connected to both OSC0 and OSC1, but OSC1 will always be selected
         TOD_OSC_NONE           // no oscillators connected
     };
 

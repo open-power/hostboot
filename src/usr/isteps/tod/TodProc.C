@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -425,16 +425,16 @@ errlHndl_t TodProc::getBusPort(
         switch(i_busPort)
         {
             case 0:
-                o_busPort = TOD_SETUP_BUS_XBUS0;
+                o_busPort = TOD_SETUP_BUS_IOHS0;
                 break;
             case 1:
-                o_busPort = TOD_SETUP_BUS_XBUS1;
+                o_busPort = TOD_SETUP_BUS_IOHS1;
                 break;
             case 2:
-                o_busPort = TOD_SETUP_BUS_XBUS2;
+                o_busPort = TOD_SETUP_BUS_IOHS2;
                 break;
             case 7:
-                o_busPort = TOD_SETUP_BUS_XBUS7;
+                o_busPort = TOD_SETUP_BUS_IOHS7;
                 break;
             default:
                 TOD_ERR("Port 0x%.8X not supported for X bus",

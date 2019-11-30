@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -236,6 +236,25 @@
     TRUE = 0x1
   </enum>
   <platInit>mrw</platInit>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IOHS_FABRIC_TOD_CROSS_CONFIG</id>
+  <targetType>TARGET_TYPE_IOHS</targetType>
+  <description>
+    Enable DL TOD cross-configuration to drive the TOD signal from
+    the other link pair in the corner.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    OFF = 0x0,
+    ON = 0x1
+  </enum>
+  <default>
+    OFF
+  </default>
+  <writeable/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
