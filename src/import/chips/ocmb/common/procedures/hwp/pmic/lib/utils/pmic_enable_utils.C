@@ -533,9 +533,6 @@ fapi2::ReturnCode disable_and_reset_pmics(const std::vector<fapi2::Target<fapi2:
 
     for (const auto& l_pmic : i_pmics)
     {
-        // Make sure PMIC is alive
-        FAPI_TRY(mss::pmic::poll_for_pbulk_good(l_pmic));
-
         // First, disable
         {
             fapi2::buffer<uint8_t> l_reg_contents;
