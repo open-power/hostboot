@@ -293,7 +293,7 @@ void* call_host_activate_slave_cores (void *io_pArgs)
                 // Callout and gard core that failed to wake up.
                 l_errl->addHwCallout(*l_core,
                                      HWAS::SRCI_PRIORITY_HIGH,
-                                     HWAS::DECONFIG,
+                                     HWAS::DELAYED_DECONFIG,
                                      HWAS::GARD_Predictive);
 
                 // Could be an interrupt issue

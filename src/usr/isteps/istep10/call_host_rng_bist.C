@@ -120,7 +120,7 @@ void* call_host_rng_bist( void *io_pArgs )
                     {
                         l_err->addHwCallout( l_nxTarget,
                             HWAS::SRCI_PRIORITY_HIGH,
-                            HWAS::DECONFIG,
+                            HWAS::DELAYED_DECONFIG,
                             HWAS::GARD_NULL );
                     }
                  }

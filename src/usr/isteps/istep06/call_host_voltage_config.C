@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -489,7 +489,7 @@ void* call_host_voltage_config( void *io_pArgs )
 
                         l_err->addHwCallout(l_proc,
                                             HWAS::SRCI_PRIORITY_HIGH,
-                                            HWAS::DECONFIG,
+                                            HWAS::DELAYED_DECONFIG,
                                             HWAS::GARD_NULL );
 
                         // Create IStep error log and
@@ -538,7 +538,7 @@ void* call_host_voltage_config( void *io_pArgs )
 
                         l_err->addHwCallout(l_proc,
                                             HWAS::SRCI_PRIORITY_HIGH,
-                                            HWAS::DECONFIG,
+                                            HWAS::DELAYED_DECONFIG,
                                             HWAS::GARD_NULL );
 
                         // Create IStep error log and
