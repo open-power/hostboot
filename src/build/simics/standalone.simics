@@ -1,7 +1,24 @@
 # Note : Assumes these vars were setup in startup.simics
 # $hb_masterproc : name of master proc chip object
-# $hb_pnor : name of pnor object associated with master proc
 ##
+
+$hb_pnor = ""
+$hb_pnor = (get-master-pnors)[0]
+
+#New Simics flow can simply get the string from get-master-pnor command
+if ($hb_pnor == NIL) {
+    try {
+        @simenv.hb_pnor = quiet_run_command("get-master-pnor")[0]
+        @SIM_get_object(simenv.hb_pnor[0])
+    } except {
+        # Default to Nimbus name
+        foreach $pnor in (get-object-list -all BmcCmp) {
+            $hb_pnor = ($pnor)
+        }
+        $hb_pnor = $hb_pnor+".sfc_master_mem"
+    }
+}
+echo "Master PNOR is: "+$hb_pnor
 
 $vpo_compile = "0"
 @if 'VPO_COMPILE' in os.environ: simenv.vpo_compile = "1"

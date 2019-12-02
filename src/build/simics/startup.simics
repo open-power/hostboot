@@ -1,4 +1,4 @@
-# We need to add the script directory in the P10 standalone model
+# We need to add the script directory in the P10 simics model
 if defined hb_script_to_run {
     $hb_script_location = (python "''.join(map('/'.__add__,\""+$hb_script_to_run+"\"[1:].split('/')[0:-1]))")
     $script_dir = (python "''.join(map('/'.__add__,\""+$hb_script_location+"\"[1:].split('/')[0:-1]))")
@@ -6,8 +6,10 @@ if defined hb_script_to_run {
 }
 
 $hb_startup_path = (lookup-file hbfw/startup.simics)
-
+$cur_path = (env PATH)
+$cur_path = $cur_path+":"+$hb_script_location
 python "os.environ['HB_TOOLPATH'] = \""+$hb_script_location+"\""
+python "os.environ['PATH'] = \""+$cur_path+"\""
 
 $hb_machine = "P10"
 # Simics relies on hb_mode; hb_mode is 0 for Axone and beyond
@@ -20,30 +22,11 @@ $vpo_compile = "0"
 python "os.environ['HB_MACHINE'] = \""+$hb_machine+"\""
 echo "HB_MACHINE is: "+$hb_machine
 
-$hb_pnor = ""
-
 $hb_masterproc = (get-master-procs)[0]
 $hb_masterproc_cecchip = (get-master-cec-chips)[0]
-$hb_pnor = (get-master-pnors)[0]
 
 echo "Master Proc is: "+$hb_masterproc
 echo "Master Proc Cec-Chip is: "+$hb_masterproc_cecchip
-
-#New Simics flow can simply get the string from get-master-pnor command
-
-if ($hb_pnor == NIL) {
-    try {
-        @simenv.hb_pnor = quiet_run_command("get-master-pnor")[0]
-        @SIM_get_object(simenv.hb_pnor[0])
-    } except {
-        # Default to Nimbus name
-        foreach $pnor in (get-object-list -all BmcCmp) {
-            $hb_pnor = ($pnor)
-        }
-        $hb_pnor = $hb_pnor+".sfc_master_mem"
-    }
-}
-echo "Master PNOR is: "+$hb_pnor
 
 # Choose a default core to start with
 $hb_cpu = "system_cmp0.cpu0_0_00_0"
@@ -109,7 +92,11 @@ if($vpo_compile == "0") { # no secureboot in VPO
 
 }
 
-run-command-file (lookup-file hbfw/standalone.simics)
+if($machine_name == "p10_standalone") {
+    run-command-file (lookup-file hbfw/standalone.simics)
+} else {
+    run-command-file (lookup-file hbfw/combined.simics)
+}
 
 if($vpo_compile == "1") {
     echo "Setting up for VPO mode"

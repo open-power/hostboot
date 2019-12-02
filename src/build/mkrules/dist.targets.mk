@@ -51,6 +51,11 @@ COPY_FILES = \
     src/build/debug/hb-dump-debug:tools,vpo,openpower \
     src/build/debug/vpo-debug-framework.pl:vpo \
     src/build/debug/ecmd-debug-framework.pl:openpower \
+    src/build/debug/simics-debug-framework.py:openpower \
+    src/build/debug/simics-debug-framework.pl:openpower \
+    src/build/simics/combined.simics:openpower \
+    src/build/simics/startup.simics:openpower \
+    src/build/simics/hb-simdebug.py:openpower \
     src/build/debug/eSEL.pl:openpower \
     src/build/debug/fsp-memdump.sh:tools,vpo \
     src/build/tools/genIstepWaitOverride.pl:tools,openpower \
