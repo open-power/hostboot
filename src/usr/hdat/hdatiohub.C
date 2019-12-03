@@ -109,7 +109,8 @@ static_assert( NUM_OF_LANES_PER_PHB ==
 // HARD codes of slot map area and entry structs
 // TODO:SW398487 : Need to replace this with PNOR : HDAT partition consumption.
 // The below hardcoding is for temporary purpose but still valid values from mrw.
-
+// hdatSlotMapAreas got changed to reflect P10 Rainier model values
+/*
 hdatSlotMapArea_t   hdatSlotMapAreas[MAX_NUM_OF_PROCS][MAX_NUM_OF_SLOT_TABLE_AREAS] = {
 {
 
@@ -144,6 +145,35 @@ hdatSlotMapArea_t   hdatSlotMapAreas[MAX_NUM_OF_PROCS][MAX_NUM_OF_SLOT_TABLE_ARE
 { 26,25,5,3,0,0,0,0,0,0,0,0,0,0x10DE,0x1DB1,0x10DE,0x1DB1,"GPU4" },
 { 27,22,5,2,0,0,0,0,0,0,0,1,13,0x10B5,0x8725,0x10B5,0x8725,0 },
 { 28,27,5,3,0,0,0,0,0,0,0,0,0,0x10DE,0x1DB1,0x10DE,0x1DB1,"GPU5" }
+}
+
+};
+*/
+hdatSlotMapArea_t
+    hdatSlotMapAreas[MAX_NUM_OF_PROCS][MAX_NUM_OF_SLOT_TABLE_AREAS] =
+{
+
+{
+
+{ 1,0,0,0,0,0,0xFF00,0,0,0,1,0,0,0,0,0,0,0,"C11" },
+{ 2,0,1,0,0,0,0x00FF,0,0,0,1,0,0,0,0,0,0,0,"002" },
+{ 3,0,2,0,0,0,0x000F,0,0,0,1,0,0,0,0,0,0,0,"001" },
+{ 4,0,3,0,0,0,0xFFFF,0,0,0,1,0,0,0,0,0,0,0,"C10" },
+{ 5,0,0,0,0,0,0xFF00,0,0,0,1,0,0,0,0,0,0,0,"C9" },
+{ 6,0,1,0,0,0,0x00FF,0,0,0,1,0,0,0,0,0,0,0,"C8" },
+{ 7,0,3,0,0,0,0xFF00,0,0,0,1,0,0,0,0,0,0,0,"C7" },
+{ 8,0,4,0,0,0,0x00F0,0,0,0,1,0,0,0,0,0,0,0,"004" },
+{ 9,0,5,0,0,0,0x000F,0,0,0,1,0,0,0,0,0,0,0,"003" },
+{ 10,0,0,0,0,0,0xFFFF,0,0,0,1,0,0,0,0,0,0,0,"C11" },
+{ 11,0,3,0,0,0,0xFFFF,0,0,0,1,0,0,0,0,0,0,0,"C10" },
+{ 12,0,0,0,0,0,0xFF00,0,0,0,1,0,0,0,0,0,0,0,"C9" },
+{ 13,0,1,0,0,0,0x00FF,0,0,0,1,0,0,0,0,0,0,0,"C8" },
+{ 14,0,3,0,0,0,0xFFFF,0,0,0,1,0,0,0,0,0,0,0,"C7" },
+
+},
+
+{
+{ 0,0,0,0,0,0,0x0,0,0,0,0,0,0,0,0,0,0,0,"" },
 }
 
 };

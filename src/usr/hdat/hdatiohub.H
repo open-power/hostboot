@@ -144,6 +144,7 @@ struct hdatSlotMapArea_t
     uint32_t   hdatEntryFeatures;
     uint8_t    hdatStationId;
     uint8_t    hdatPortNum;
+    uint16_t   hdatReserved2;
     uint32_t   hdatSwitchVendorId;
     uint32_t   hdatSwitchDeviceId;
     uint32_t   hdatSubSysVendorId;
