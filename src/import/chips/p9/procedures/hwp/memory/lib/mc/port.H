@@ -82,6 +82,7 @@ class portTraits<mss::mc_type::NIMBUS>
         static constexpr uint64_t FARB0Q_REG = MCA_MBA_FARB0Q;
         static constexpr uint64_t FARB1Q_REG = MCA_MBA_FARB1Q;
         static constexpr uint64_t FARB5Q_REG = MCA_MBA_FARB5Q;
+        static constexpr uint64_t FARB6Q_REG = MCA_MBA_FARB6Q;
         static constexpr uint64_t REFRESH_REG = MCA_MBAREF0Q;
         static constexpr uint64_t ECC_REG = MCA_RECR;
         static constexpr uint64_t CAL0Q_REG = MCA_MBA_CAL0Q;
@@ -138,6 +139,10 @@ class portTraits<mss::mc_type::NIMBUS>
             PORT_FAIL_DISABLE = MCA_MBA_FARB0Q_CFG_PORT_FAIL_DISABLE,
             OE_ALWAYS_ON = MCA_MBA_FARB0Q_CFG_OE_ALWAYS_ON,
             RCD_RECOVERY_DISABLE = MCA_MBA_FARB0Q_CFG_DISABLE_RCD_RECOVERY,
+            BW_WINDOW_SIZE = MCA_MBA_FARB0Q_CFG_BW_WINDOW_SIZE,
+            BW_WINDOW_SIZE_LEN = MCA_MBA_FARB0Q_CFG_BW_WINDOW_SIZE_LEN,
+            BW_SNAPSHOT = MCA_MBA_FARB6Q_CFG_BW_SNAPSHOT,
+            BW_SNAPSHOT_LEN = MCA_MBA_FARB6Q_CFG_BW_SNAPSHOT_LEN,
 
             CAL0Q_CAL_INTERVAL_TMR0_ENABLE = MCA_MBA_CAL0Q_CFG_CAL_INTERVAL_TMR0_ENABLE,
             CAL0Q_TIME_BASE_TMR0 = MCA_MBA_CAL0Q_CFG_TIME_BASE_TMR0,

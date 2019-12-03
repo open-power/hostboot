@@ -48,6 +48,115 @@ namespace mss
 {
 
 ///
+/// @brief Reads the farb0q register
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @param[out] o_data data read from the register
+/// @return FAPI2_RC_SUCCESS if and only if ok
+/// @note Disable Port Fail after recurring RCD errors.
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+fapi2::ReturnCode read_farb0q( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    FAPI_TRY( mss::getScom(i_target, TT::FARB0Q_REG, o_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Writes the farb0q register
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @param[in] i_data data read from the register
+/// @return FAPI2_RC_SUCCESS if and only if ok
+/// @note Disable Port Fail after recurring RCD errors.
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+fapi2::ReturnCode write_farb0q( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    FAPI_TRY( mss::putScom(i_target, TT::FARB0Q_REG, i_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reads the farb6q register
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @param[out] o_data data read from the register
+/// @return FAPI2_RC_SUCCESS if and only if ok
+/// @note Disable Port Fail after recurring RCD errors.
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+fapi2::ReturnCode read_farb6q( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    FAPI_TRY( mss::getScom(i_target, TT::FARB6Q_REG, o_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Writes the farb6q register
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @param[in] i_data data read from the register
+/// @return FAPI2_RC_SUCCESS if and only if ok
+/// @note Disable Port Fail after recurring RCD errors.
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+fapi2::ReturnCode write_farb6q( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    FAPI_TRY( mss::putScom(i_target, TT::FARB6Q_REG, i_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Gets the bandwidth window data
+/// @tparam MC the memory controller type
+/// @tparam TT the class traits for the port
+/// @param[in] i_data data read from the register
+/// @param[out] o_bw_window
+/// @return FAPI2_RC_SUCCESS if and only if ok
+/// @note Disable Port Fail after recurring RCD errors.
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = portTraits<MC> >
+void get_bw_window( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_bw_window )
+{
+    o_bw_window = 0;
+    i_data.extractToRight<TT::BW_WINDOW_SIZE, TT::BW_WINDOW_SIZE_LEN>(o_bw_window);
+}
+
+///
+/// @brief Gets the bandwidth snapshot
+/// @tparam MC the memory controller type
+/// @tparam TT the class traits for the port
+/// @param[in] i_data data read from the register
+/// @param[out] o_bw_snapshot
+/// @return FAPI2_RC_SUCCESS if and only if ok
+/// @note Disable Port Fail after recurring RCD errors.
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = portTraits<MC> >
+void get_bw_snapshot( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_bw_snapshot )
+{
+    o_bw_snapshot = 0;
+    i_data.extractToRight<TT::BW_SNAPSHOT, TT::BW_SNAPSHOT_LEN>(o_bw_snapshot);
+}
+
+
+///
 /// @brief ATTR_MSS_MVPD_FWMS getter declare
 /// @tparam MC the memory controller type
 /// @tparam T the fapi2 target type of the target
