@@ -832,6 +832,14 @@
         <writeable/>
         <persistency>volatile-zeroed</persistency>
     </attribute>
+
+    <!-- pSeries always runs in FULL_DIMM mode -->
+    <attribute>
+        <id>ATTR_MSS_OCMB_HALF_DIMM_MODE</id>
+        <no_export/>
+        <default>FULL_DIMM</default>
+    </attribute>
+
     <!-- OCMB Endianess attributes -->
     <attribute>
         <id>ATTR_MSS_OCMB_EXP_STRUCT_ENDIAN</id>
