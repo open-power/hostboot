@@ -52,11 +52,10 @@ struct testXscomAddrData
 const testXscomAddrData g_xscomAddrTable[] =
 {
         // Write data to be ORed with read value
-        // Use EXP0.EC.PCC1.COMMON.SPR_COMMON.SCR0 and
-        //EXP0.EC.PCC1.COMMON.SPR_COMMON.SCR1
+        // Use ECP.EC.PC.SCR0 and ECP.EC.PC.SCR1
         // Scom registers for testing
-        {0x21010A86, 0x0000040000000000},
-        {0x21010A87, 0xC000000000000000},
+        {0x20028486, 0x0000040000000000},
+        {0x20028487, 0xC000000000000000},
 };
 const uint32_t g_xscomAddrTableSz =
                     sizeof(g_xscomAddrTable)/sizeof(testXscomAddrData);
