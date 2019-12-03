@@ -93,15 +93,8 @@ void* host_start_stop_engine (void *io_pArgs)
                         get_huid(l_procChip),
                         TRACE_ERR_ARGS(l_errl));
                 ErrlUserDetailsTarget(l_procChip).addToLog(l_errl);
-#ifdef ISTEP15_ENABLE_HWPS
                 l_StepError.addErrorDetails( l_errl );
                 errlCommit( l_errl, HWPF_COMP_ID );
-#else
-                // If istep15 HWPS are disabled then just delete the error log
-                // but still allow the HWP to run in order to support bringup
-                delete l_errl;
-                l_errl = nullptr;
-#endif
             }
         }
 
