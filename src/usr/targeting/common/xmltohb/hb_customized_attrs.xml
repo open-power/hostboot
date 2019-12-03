@@ -794,6 +794,14 @@
         <writeable/>
         <persistency>volatile-zeroed</persistency>
     </attribute>
+
+    <!-- pSeries always runs in FULL_DIMM mode -->
+    <attribute>
+        <id>ATTR_MSS_OCMB_HALF_DIMM_MODE</id>
+        <no_export/>
+        <default>FULL_DIMM</default>
+    </attribute>
+
     <attribute>
         <id>ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE</id>
         <persistency>volatile-zeroed</persistency>
