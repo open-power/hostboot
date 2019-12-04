@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,6 +67,29 @@ enum throttle_const : size_t
     PERCENT_CONVERSION = 100,
 
 };
+
+///
+/// @brief Calculate the N throttle for a given dram data bus utilization value
+///
+/// @tparam T1  template parameter, type of input to be processed
+/// @tparam T2  template parameter, type of input to be processed
+/// @param[in]  i_dram_util     dram data bus utilization value
+/// @param[in]  i_throttle_m   M throttle value in N/M throttling
+///
+/// @return int32_t calculated N throttle value
+///
+template<typename T1, typename T2>
+inline uint32_t calc_n_from_dram_util(const T1 i_dram_util, const T2 i_throttle_m)
+{
+    constexpr uint64_t CONVERT_ADDR_UTIL_TO_DATA_UTIL = 4;
+
+    return (static_cast<int>(static_cast<double>(i_dram_util)
+                             * (i_throttle_m)
+                             / (CONVERT_ADDR_UTIL_TO_DATA_UTIL)
+                             / (PERCENT_CONVERSION)
+                            )
+           );
+}
 
 ///
 /// @brief Calculate N (address operations) allowed within a window of M DRAM clocks
@@ -1096,6 +1119,66 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+
+///
+/// @brief set the safemode throttle register
+/// @tparam MC mss::mc_type
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT portTraits port traits for the given MC target type
+/// @param[in] i_target the port target
+/// @return fapi2::FAPI2_RC_SUCCESS if ok
+/// @note sets FARB4Q
+/// @note used to set throttle window (N throttles  / M clocks)
+///
+template<mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = throttle_traits<MC>>
+fapi2::ReturnCode calc_utilization(const fapi2::Target<T>& i_target,
+                                   const uint32_t i_input_databus_util,
+                                   const uint32_t i_dram_clocks,
+                                   const uint16_t i_safemode_throttle_per_port,
+                                   const uint32_t i_max_databus_util,
+                                   uint32_t& o_util,
+                                   bool& o_util_error,
+                                   bool& o_safemode)
+{
+    constexpr uint64_t l_min_util = TT::MIN_UTIL;
+
+    o_util = i_input_databus_util;
+    o_safemode = false;
+
+    // Use MRW safemode throttle values if input utilization is zero
+    if (i_input_databus_util == 0)
+    {
+        FAPI_TRY(calc_util_from_throttles<MC>(i_safemode_throttle_per_port,
+                                              i_dram_clocks,
+                                              o_util),
+                 "%s Error calculating utilization from safemode throttle %d and mem clocks %d",
+                 mss::c_str(i_target),
+                 i_safemode_throttle_per_port,
+                 i_dram_clocks);
+        FAPI_INF("%s Safemode throttles being used since input util is zero:  Using N=%d, Utilization %f",
+                 mss::c_str(i_target),
+                 i_safemode_throttle_per_port,
+                 o_util);
+        o_safemode = true;
+    }
+    else if (i_input_databus_util < l_min_util)
+    {
+        o_util_error = true;
+    }
+
+    // Make sure MIN_UTIL <= input_utilization <= max_utilization
+    o_util = (o_util >= l_min_util) ? std::min(o_util, i_max_databus_util) : l_min_util;
+
+    FAPI_INF("%s MRW dram clock window: %d, databus utilization: %d",
+             mss::c_str(i_target),
+             i_dram_clocks,
+             o_util);
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Equalize the throttles and estimated power at those throttle levels
