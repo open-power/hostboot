@@ -490,6 +490,23 @@ try:
 except:
     1
 
+# Get CPU per group/chip/core/thread specified
+def get_host_cpu(system_cmp, group_id, chip_id, core, thread):
+    # Get all the proc components for the system
+    chips = system_cmp.chips
+    active_chip = None
+    host_cpu = None
+    # Find the proc that matches group_id/chip_id
+    for cur_chip in chips:
+        if(cur_chip.group_id == group_id and
+           cur_chip.chip_id == chip_id):
+            active_chip = cur_chip
+            break
+    # Get the core/thread associated with that proc
+    host_cpu=SIM_get_interface(active_chip, "proc_notify").get_host_cpu(None, core, thread)
+    return host_cpu
+
+
 # MAGIC_INSTRUCTION hap handler
 # arg contains the integer parameter n passed to MAGIC_INSTRUCTION(n)
 # See src/include/arch/ppc.H for the definitions of the magic args.
@@ -576,30 +593,29 @@ def magic_instruction_callback(user_arg, cpu, arg):
 
     if arg == 7024:  # MAGIC_ENABLE_THREAD
         pir = cpu.r4
+        group_id = cpu.node_num
+        chip_id = cpu.chip_num
+        component = cpu.component
         core = (pir//8)*2 + pir%2
         thread = (pir%8)//2
-        cpuobj = "system_cmp0.cpu0_0_0%s_%s" % ( core, thread )
-        print "Enabling PIR ", pir, cpuobj
-        enableCommand = "%s.enable" % ( cpuobj )
-        print "enableCommand=", enableCommand
-        SIM_run_alone(run_command, enableCommand )
+        cpuobj=get_host_cpu(component, group_id, chip_id, core, thread)
+        print "Enabling PIR ", pir, cpuobj.name
+        SIM_get_interface(cpuobj, "processor_info_v2").enable_processor()
 
     if arg == 7025:  # MAGIC_SETUP_THREAD
         pir = cpu.r4
+        group_id = cpu.node_num
+        chip_id = cpu.chip_num
+        component = cpu.component
         core = (pir//8)*2 + pir%2
         thread = (pir%8)//2
-        cpuobj = "system_cmp0.cpu0_0_0%s_%s" % ( core, thread )
-        print "Setting up PIR ", pir, cpuobj
-        setupCommand = "%s->lpcr=0x40000000D00A" % ( cpuobj )
-        SIM_run_alone(run_command, setupCommand )
-        setupCommand = "%s->msr=0x9000000000401000" % ( cpuobj )
-        SIM_run_alone(run_command, setupCommand )
-        setupCommand = "%s->urmor=0x8000000" % ( cpuobj )
-        SIM_run_alone(run_command, setupCommand )
-        setupCommand = "%s->hrmor=0x8000000" % ( cpuobj )
-        SIM_run_alone(run_command, setupCommand )
-        setupCommand = "%s->iar=0x100" % ( cpuobj )
-        SIM_run_alone(run_command, setupCommand )
+        cpuobj=get_host_cpu(component, group_id, chip_id, core, thread)
+        print "Setting up PIR ", pir, cpuobj.name
+        # Are these needed?
+        cpuobj.lpcr = 0x40000000D00A
+        cpuobj.msr = 0x9000000000401000
+        cpuobj.urmor = cpu.urmor
+        cpuobj.hrmor = cpu.hrmor
 
     if arg == 7022:  # MAGIC_SET_LOG_LEVEL
         if( not os.environ.has_key('ENABLE_HB_SIMICS_LOGS') ):
