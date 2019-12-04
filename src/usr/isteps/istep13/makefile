@@ -97,7 +97,6 @@ include ${P9_PROCEDURES_PATH}/hwp/perv/p9_mem_startclocks.mk
 
 #Scom init
 include ${P9_PROCEDURES_PATH}/hwp/memory/p9_mss_scominit.mk
-include ${P9_PROCEDURES_PATH}/hwp/nest/p9_throttle_sync.mk
 OBJS += $(if $(CONFIG_AXONE),,p9c_mss_scominit.o)
 
 include ${P9_PROCEDURES_PATH}/hwp/initfiles/p9n_ddrphy_scom.mk

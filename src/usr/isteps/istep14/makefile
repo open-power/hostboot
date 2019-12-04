@@ -113,7 +113,6 @@ VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/ddr4/
 
 # Axone vs non-Axone specific HWP
 VPATH += $(if $(CONFIG_AXONE),${EXPLORER_HWP_PATH},)
-OBJS += $(if $(CONFIG_AXONE),p9a_throttle_sync.o,p9_throttle_sync.o)
 OBJS += $(if $(CONFIG_AXONE),exp_mss_thermal_init.o,)
 # TODO RTC:245219
 # use PRD's version of memdiags instead of this cronus verison once its working

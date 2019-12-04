@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2018
+# Contributors Listed Below - COPYRIGHT 2017,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -26,15 +26,26 @@
 ROOTPATH=../../../..
 
 
+P9_PROCEDURE_PATH = ${ROOTPATH}/src/import/chips/p9/procedures/
 HWP_NEST_MEM_UTILS_PATH := ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest/
+EXP_COMMON_PATH = ${ROOTPATH}/src/import/chips/ocmb/explorer/common
+AXONE_PROCEDURE_PATH = ${ROOTPATH}/src/import/chips/p9a/procedures
 
 EXTRAINCDIR += ${HWP_NEST_MEM_UTILS_PATH}
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
+EXTRAINCDIR += ${EXP_COMMON_PATH}/include/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
+EXTRAINCDIR += ${ROOTPATH}/src/import/
+EXTRAINCDIR += ${AXONE_PROCEDURE_PATH}/hwp/memory/
+EXTRAINCDIR += ${P9_PROCEDURE_PATH}/hwp/memory
 
 VPATH += ${HWP_NEST_MEM_UTILS_PATH}
 
 include ${ROOTPATH}/procedure.rules.mk
 
 include ${HWP_NEST_MEM_UTILS_PATH}/p9_putmemproc.mk
+OBJS += $(if $(CONFIG_AXONE),p9a_throttle_sync.o,p9_throttle_sync.o)
+
+include ${ROOTPATH}/config.mk

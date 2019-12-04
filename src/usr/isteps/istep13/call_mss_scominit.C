@@ -42,12 +42,12 @@
 #include    <config.h>
 #include    <fapi2.H>
 #include    <p9_mss_scominit.H>
-#include    <p9_throttle_sync.H>
 #ifdef CONFIG_AXONE
-#include    <exp_scominit.H>
-#include    <chipids.H> // for EXPLORER ID
+  #include    <exp_scominit.H>
+  #include    <chipids.H> // for EXPLORER ID
+  #include    <p9a_throttle_sync.H>
 #else
-#include    <p9c_mss_scominit.H>
+  #include    <p9c_mss_scominit.H>
 #endif
 
 using   namespace   ERRORLOG;
@@ -264,6 +264,53 @@ void axone_call_mss_scominit(IStepError & io_istepError)
                   "target HUID %.8X", TARGETING::get_huid(l_ocmb_target));
         }
     }
+
+    // Need to setup the memory throttles for worstcase mode until
+    //  we get the thermals really setup later
+
+    // Get all functional proc chip targets
+    // Use targeting code to get a list of all processors
+    TARGETING::TargetHandleList l_procChips;
+    getAllChips( l_procChips, TARGETING::TYPE_PROC );
+
+    for (const auto & l_procChip: l_procChips)
+    {
+        //Convert the TARGETING::Target into a fapi2::Target by passing
+        //l_procChip into the fapi2::Target constructor
+        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+          l_fapi2CpuTarget((l_procChip));
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Running p9a_throttle_sync HWP on target HUID %.8X",
+                   TARGETING::get_huid(l_procChip) );
+        FAPI_INVOKE_HWP( l_err, p9a_throttle_sync, l_fapi2CpuTarget );
+
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X: p9_throttle_sync HWP returns error",
+                      l_err->reasonCode());
+
+            // Capture the target data in the elog
+            ErrlUserDetailsTarget(l_procChip).addToLog(l_err);
+
+            // Create IStep error log and cross reference
+            //  to error that occurred
+            io_istepError.addErrorDetails( l_err );
+
+            // Commit Error
+            errlCommit( l_err, HWPF_COMP_ID );
+
+            break;
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "SUCCESS : p9_throttle_sync HWP on 0x%.8X processor",
+                       TARGETING::get_huid(l_procChip) );
+        }
+    }
+
 }
 #else
 void axone_call_mss_scominit(IStepError & io_istepError)
