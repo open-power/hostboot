@@ -1141,6 +1141,22 @@
   </attribute>
 
   <attribute>
+    <id>SBE_ARCH_DUMP_ADDR</id>
+    <description>
+        Physical address where SBE Architectued Dump Area is located (per
+        Hostboot Instance).  Set in istep 21 it is only used during
+        MPIPLs to retrieve the the architected processor state (SPR/GPR)
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
     <id>SBE_COMM_ADDR</id>
     <description>
         Virtual address where SBE Communications are placed in mainstore.

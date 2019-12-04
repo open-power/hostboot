@@ -296,6 +296,9 @@
     <attribute>
       <id>PHYS_PRES_REQUEST_OPEN_WINDOW</id>
     </attribute>
+    <attribute>
+      <id>SBE_ARCH_DUMP_ADDR</id>
+    </attribute>
   </targetTypeExtension>
 
   <targetTypeExtension>

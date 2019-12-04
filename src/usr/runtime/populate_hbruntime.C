@@ -1186,51 +1186,10 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                 break;
             }
 
-            ////////////////////////////////////////////////////////////////////
-            // Set the Architected Reserve area in OPAL and pass it down to SBE
-            uint64_t l_memBase = l_topMemAddr
-                                 - VMM_ALL_HOMER_OCC_MEMORY_SIZE
-                                 - VMM_ARCH_REG_DATA_SIZE_ALL_PROC;
-
-            l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HBRT,
-                                          i_nodeId,
-                                          l_memBase,
-                                          VMM_ARCH_REG_DATA_SIZE_ALL_PROC,
-                                          HBRT_RSVD_MEM__ARCH_REG);
-            if(l_elog)
-            {
-                break;
-            }
-            // Loop through all functional Procs
-            for (const auto & l_procChip: l_procChips)
-            {
-                uint32_t l_procNum =
-                    l_procChip->getAttr<TARGETING::ATTR_POSITION>();
-                l_homerAddr = l_memBase +
-                         (l_procNum * VMM_ARCH_REG_DATA_PER_PROC_SIZE);
-
-                //Pass start address down to SBE via chipop
-                l_elog = SBEIO::sendPsuStashKeyAddrRequest(
-                                        SBEIO::ARCH_REG_DATA_ADDR,
-                                        l_homerAddr,
-                                        l_procChip);
-                if (l_elog)
-                {
-                    TRACFCOMP( g_trac_runtime, "sendPsuStashKeyAddrRequest "
-                       "failed for target: %x",TARGETING::get_huid(l_procChip));
-                    break;
-                }
-            }
-
-            if(l_elog)
-            {
-                break;
-            }
-            ////////////////////////////////////////////////////////////////////
-
 #ifdef CONFIG_START_OCC_DURING_BOOT
             ///////////////////////////////////////////////////
             // OCC Common entry
+            ///////////////////////////////////////////////////
             if( !(TARGETING::is_phyp_load()) )
             {
                 TARGETING::Target * l_sys = nullptr;
@@ -1253,6 +1212,71 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
 #endif
         }
 
+        ///////////////////////////////////////////////////
+        // Set the SBE Architected Dump area
+        // Note that this is right after HOMER areas
+        // PHYP goes up, OPAL goes down.  Save this away
+        // Into targeting so dumpCollect can find later
+        // on the MPIPL
+        //
+        // Note that this works for PHYP multinode (as it
+        // grabs location from HRMOR), but OPAL only
+        // supports a single node style system (absolute
+        // address)
+        //////////////////////////////////////////////////
+        uint64_t l_archAddr = 0;
+        if(TARGETING::is_phyp_load())
+        {
+            l_archAddr = cpu_spr_value(CPU_SPR_HRMOR)
+                          + l_mirrorBase
+                          + VMM_ARCH_REG_DATA_START_OFFSET;
+        }
+        else if(TARGETING::is_sapphire_load())
+        {
+            l_archAddr = l_topMemAddr
+                        - VMM_ALL_HOMER_OCC_MEMORY_SIZE
+                        - VMM_ARCH_REG_DATA_SIZE_ALL_PROC;
+        }
+        l_sys->setAttr<TARGETING::ATTR_SBE_ARCH_DUMP_ADDR>(l_archAddr);
+
+        // SBE Architected Dump area is a single chunk of data
+        // to OPAL/PHYP -- so reserve once, but need to inform
+        // individual SBEs of their location
+        l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HBRT,
+                                      i_nodeId,
+                                      l_archAddr,
+                                      VMM_ARCH_REG_DATA_SIZE_ALL_PROC,
+                                      HBRT_RSVD_MEM__ARCH_REG,
+                                      HDAT::RHB_READ_WRITE,
+                                      false);
+        if(l_elog)
+        {
+            break;
+        }
+
+        // Loop through all functional Procs
+        uint32_t l_procNum = 0;
+        for (const auto & l_procChip: l_procChips)
+        {
+            uint64_t l_addr = l_archAddr +
+              (l_procNum++ * VMM_ARCH_REG_DATA_PER_PROC_SIZE);
+
+            //Pass start address down to SBE via chipop
+            l_elog = SBEIO::sendPsuStashKeyAddrRequest(
+                                                      SBEIO::ARCH_REG_DATA_ADDR,
+                                                      l_addr,
+                                                      l_procChip);
+            if (l_elog)
+            {
+                TRACFCOMP( g_trac_runtime, "Arch dump sendPsuStashKeyAddrRequest "
+                       "failed for target: %x",TARGETING::get_huid(l_procChip));
+                break;
+            }
+        }
+        if(l_elog)
+        {
+            break;
+        }
 
         ////////////////////////////////////////////////////
         // HB Data area
