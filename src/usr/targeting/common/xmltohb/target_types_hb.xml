@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2020                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -368,6 +368,9 @@
     </attribute>
     <attribute>
       <id>PHYS_PRES_REQUEST_OPEN_WINDOW</id>
+    </attribute>
+    <attribute>
+      <id>SBE_ARCH_DUMP_ADDR</id>
     </attribute>
   </targetTypeExtension>
 

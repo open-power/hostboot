@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,6 +69,9 @@
 #include "call_nvdimm_update.H"
 #include <isteps/nvdimm/nvdimm.H>
 #endif
+
+#include <dump/dumpif.H>
+
 
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
@@ -864,6 +867,15 @@ void* call_host_runtime_setup (void *io_pArgs)
         TargetService& l_targetService = targetService();
         Target* l_sys = nullptr;
         l_targetService.getTopLevelTarget(l_sys);
+
+        // Default captured data to 0s -- MPIPL if check fills in if
+        // valid
+        uint32_t threadRegSize = sizeof(DUMP::hostArchRegDataHdr)+
+                                (95 * sizeof(DUMP::hostArchRegDataEntry));
+        uint8_t threadRegFormat = REG_DUMP_SBE_HB_STRUCT_VER;
+        uint64_t capThreadArrayAddr = 0;
+        uint64_t capThreadArraySize = 0;
+
         if(l_sys->getAttr<ATTR_IS_MPIPL_HB>())
         {
             uint32_t l_mdrtCount =
@@ -875,24 +887,22 @@ void* call_host_runtime_setup (void *io_pArgs)
                                           l_mdrtCount);
             }
 
-            // Update PDA Table entries
-            if ( !INITSERVICE::spBaseServicesEnabled() )
-            {
-                uint32_t threadRegSize =
-                    l_sys->getAttr<TARGETING::ATTR_PDA_THREAD_REG_ENTRY_SIZE>();
-                uint8_t threadRegFormat =
-                    l_sys->getAttr<TARGETING::ATTR_PDA_THREAD_REG_STATE_ENTRY_FORMAT>();
-                uint64_t capThreadArrayAddr =
-                    l_sys->getAttr<TARGETING::ATTR_PDA_CAPTURED_THREAD_REG_ARRAY_ADDR>();
-                uint64_t capThreadArraySize =
-                    l_sys->getAttr<TARGETING::ATTR_PDA_CAPTURED_THREAD_REG_ARRAY_SIZE>();
 
-                // Ignore return value
-                RUNTIME::updateHostProcDumpActual( RUNTIME::PROC_DUMP_AREA_TBL,
-                                                   threadRegSize, threadRegFormat,
-                                                   capThreadArrayAddr, capThreadArraySize);
-           }
+            threadRegSize =
+              l_sys->getAttr<TARGETING::ATTR_PDA_THREAD_REG_ENTRY_SIZE>();
+            threadRegFormat =
+              l_sys->getAttr<TARGETING::ATTR_PDA_THREAD_REG_STATE_ENTRY_FORMAT>();
+            capThreadArrayAddr =
+              l_sys->getAttr<TARGETING::ATTR_PDA_CAPTURED_THREAD_REG_ARRAY_ADDR>();
+            capThreadArraySize =
+              l_sys->getAttr<TARGETING::ATTR_PDA_CAPTURED_THREAD_REG_ARRAY_SIZE>();
         }
+
+        // Ignore return value
+        RUNTIME::updateHostProcDumpActual( RUNTIME::PROC_DUMP_AREA_TBL,
+                                           threadRegSize, threadRegFormat,
+                                           capThreadArrayAddr, capThreadArraySize);
+
 
         //Update the MDRT value (for MS Dump)
         l_err = RUNTIME::writeActualCount(RUNTIME::MS_DUMP_RESULTS_TBL);

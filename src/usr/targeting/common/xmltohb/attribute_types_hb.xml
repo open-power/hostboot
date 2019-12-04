@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2020                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -1297,6 +1297,22 @@
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>SBE_ARCH_DUMP_ADDR</id>
+    <description>
+        Physical address where SBE Architectued Dump Area is located (per
+        Hostboot Instance).  Set in istep 21 it is only used during
+        MPIPLs to retrieve the the architected processor state (SPR/GPR)
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
   </attribute>
 
   <attribute>

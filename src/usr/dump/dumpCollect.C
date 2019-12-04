@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -196,15 +196,29 @@ errlHndl_t copyArchitectedRegs(void)
         procTableEntry = reinterpret_cast<procDumpAreaEntry *>(procTableAddr);
         pDstAddrBase = getPhysAddr(procTableEntry->dstArrayAddr);
         vMapDstAddrBase = mm_block_map(pDstAddrBase,
-                                       procTableEntry->dstArraySize);
+                       (ALIGN_PAGE(procTableEntry->dstArraySize) + PAGESIZE));
+
+        //Need to adjust actual virtual address due to mm_block_map only
+        //mapping on page boundary to account for non page aligned addresses
+        //from PHYP/OPAL
+        uint64_t tmpAddr = reinterpret_cast<uint64_t>(vMapDstAddrBase);
+        vMapDstAddrBase = reinterpret_cast<void*>(tmpAddr +
+                               (procTableEntry->dstArrayAddr & (PAGESIZE-1)));
 
         // Map architected register reserved memory to VA addresses
-        uint64_t srcAddr = ISTEP::get_top_homer_mem_addr() -
-                           VMM_ARCH_REG_DATA_SIZE_ALL_PROC -
-                     			   VMM_ALL_HOMER_OCC_MEMORY_SIZE;
+        TARGETING::Target * l_sys = NULL;
+        TARGETING::targetService().getTopLevelTarget( l_sys );
+        assert(l_sys != NULL);
+        auto srcAddr =
+                  l_sys->getAttr<TARGETING::ATTR_SBE_ARCH_DUMP_ADDR>();
+
         pSrcAddrBase = reinterpret_cast<void * const>(srcAddr);
         vMapSrcAddrBase = mm_block_map(pSrcAddrBase,
                                        VMM_ARCH_REG_DATA_SIZE_ALL_PROC);
+
+        TRACDCOMP(g_trac_dump, "src address [0x%X] [%p], destArrayaddr"
+                 " [%X] dest[%p] [%p]", srcAddr, vMapSrcAddrBase,
+                  procTableEntry->dstArrayAddr, pDstAddrBase, vMapDstAddrBase);
 
         // Get list of functional processor chips, in MPIPL path we
         // don't expect any deconfiguration
@@ -214,13 +228,14 @@ errlHndl_t copyArchitectedRegs(void)
 
         uint64_t dstTempAddr = reinterpret_cast<uint64_t>(vMapDstAddrBase);
         procTableEntry->capArraySize = 0;
-        for (const auto & procChip: procChips)
+        for (uint32_t procNum = 0; procNum < procChips.size(); procNum++)
         {
-            uint8_t procNum = procChip->getAttr<TARGETING::ATTR_POSITION>();
             // Base addresses w.r.t PROC positions. This is static here
             // and used for reference below to calculate all other addresses
             uint64_t procSrcAddr = (reinterpret_cast<uint64_t>(vMapSrcAddrBase)+
                                     procNum * VMM_ARCH_REG_DATA_PER_PROC_SIZE);
+            TRACDCOMP(g_trac_dump, "SBE Proc[%d] [%p]", procNum, procSrcAddr);
+            procNum++;
 
             sbeArchRegDumpProcHdr_t *sbeProcHdr =
                        reinterpret_cast<sbeArchRegDumpProcHdr_t *>(procSrcAddr);
@@ -294,11 +309,15 @@ errlHndl_t copyArchitectedRegs(void)
                 hostArchRegDataHdr *hostHdr =
                      reinterpret_cast<hostArchRegDataHdr *>(dstTempAddr);
 
+                TRACDCOMP(g_trac_dump, "  Thread[%d] src[%p] dest[%p]",
+                          idx, procSrcAddr, dstTempAddr);
+
                 // Fill thread header info
+                memset(hostHdr, 0x0, sizeof(hostHdr));
                 hostHdr->pir = sbeTdHdr->pir;
                 hostHdr->coreState = sbeTdHdr->coreState;
                 hostHdr->iv_regArrayHdr.hdatOffset =
-                                              sizeof(HDAT::hdatHDIFDataArray_t);
+                                              sizeof(hostArchRegDataHdr);
                 hostHdr->iv_regArrayHdr.hdatArrayCnt = regCount;
                 hostHdr->iv_regArrayHdr.hdatAllocSize =
                                               sizeof(hostArchRegDataEntry);
@@ -367,9 +386,6 @@ errlHndl_t copyArchitectedRegs(void)
         procTableEntry->capArrayAddr = procTableEntry->dstArrayAddr;
 
         // Update the PDA Table Entries to Attribute to be fetched in istep 21
-        TARGETING::TargetService& targetService = TARGETING::targetService();
-        TARGETING::Target* l_sys = NULL;
-        targetService.getTopLevelTarget(l_sys);
         l_sys->setAttr<TARGETING::ATTR_PDA_THREAD_REG_STATE_ENTRY_FORMAT>(
                                               procTableEntry->threadRegVersion);
         l_sys->setAttr<TARGETING::ATTR_PDA_THREAD_REG_ENTRY_SIZE>(
