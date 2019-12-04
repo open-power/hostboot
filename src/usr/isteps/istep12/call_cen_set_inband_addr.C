@@ -48,6 +48,7 @@
 // Axone HWPs
 #include    <exp_omi_init.H>
 #include    <p9a_omi_init.H>
+#include    <p9a_disable_ocmb_i2c.H>
 #include    <expupd/expupd.H>
 #else
 // Cumulus HWP
@@ -67,6 +68,7 @@ namespace ISTEP_12
 void cumulus_call_cen_set_inband_addr(IStepError & io_istepError);
 void axone_call_cen_set_inband_addr(IStepError & io_istepError);
 void enableInbandScomsOCMB( TARGETING::TargetHandleList i_ocmbTargetList );
+void disableI2cAccessToOcmbs(IStepError & io_istepError);
 
 void* call_cen_set_inband_addr (void *io_pArgs)
 {
@@ -88,6 +90,12 @@ void* call_cen_set_inband_addr (void *io_pArgs)
             break;
         case TARGETING::MODEL_AXONE:
             axone_call_cen_set_inband_addr(l_StepError);
+
+            // No need to disable i2c access if and error was encountered setting up the inband addr
+            if(l_StepError.isNull())
+            {
+                disableI2cAccessToOcmbs(l_StepError);
+            }
             break;
         case TARGETING::MODEL_NIMBUS:
             break;  // do nothing step
@@ -163,6 +171,14 @@ void enableInbandScomsOCMB( TARGETING::TargetHandleList l_ocmbTargetList )
               "Error: Trying to call 'enableInbandScomsOCMB' but Axone code is not compiled in");
     assert(0, "Calling wrong Model's HWPs");
 }
+  
+void disableI2cAccessToOcmbs(IStepError & io_istepError)
+{
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+              "Error: Trying to call 'disableI2cAccessToOcmbs' but Axone code is not compiled in");
+    assert(0, "Calling wrong Model's HWPs");
+}
+
 
 #else
 
@@ -280,6 +296,53 @@ void axone_call_cen_set_inband_addr(IStepError & io_istepError)
     else
     {
         expupd::updateAll(io_istepError);
+    }
+}
+
+/**
+ * @brief Loop over all processors and disable i2c path to ocmb
+ *        After this point no i2c commands will be possible until we
+ *        power the chip off and on.
+ * @param io_istepError - Istep error that tracks error logs for this step
+ */
+void disableI2cAccessToOcmbs(IStepError & io_istepError)
+{
+    errlHndl_t l_err = nullptr;
+    TARGETING::TargetHandleList l_procTargetList;
+    getAllChips(l_procTargetList, TARGETING::TYPE_PROC);
+    // We only want to disable i2c if we are in secure mode
+    const bool FORCE_DISABLE = false;
+
+    for ( const auto & l_proc : l_procTargetList )
+    {
+        //  call the HWP with each proc
+        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_proc_target
+                (l_proc);
+
+        FAPI_INVOKE_HWP(l_err, p9a_disable_ocmb_i2c, l_fapi_proc_target, FORCE_DISABLE);
+
+        //  process return code.
+        if ( l_err )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                "ERROR 0x%.8X:  p9a_disable_ocmb_i2c HWP on target HUID %.8x",
+                l_err->reasonCode(), TARGETING::get_huid(l_proc) );
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_proc).addToLog( l_err );
+
+            // Create IStep error log and cross reference to error that occurred
+            io_istepError.addErrorDetails( l_err );
+
+            // Commit Error
+            errlCommit( l_err, ISTEP_COMP_ID );
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "SUCCESS :  p9a_disable_ocmb_i2c HWP on target HUID 0x%.8x",
+                TARGETING::get_huid(l_proc));
+        }
     }
 }
 

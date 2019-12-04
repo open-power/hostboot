@@ -152,5 +152,6 @@ OBJS += $(if $(CONFIG_AXONE),p9a_io_omi_scominit.o,)
 OBJS += $(if $(CONFIG_AXONE),p9a_io_omi_dccal.o,)
 OBJS += $(if $(CONFIG_AXONE),gem_getecid.o,)
 OBJS += $(if $(CONFIG_AXONE),exp_getecid.o,)
+OBJS += $(if $(CONFIG_AXONE),p9a_disable_ocmb_i2c.o,)
 
 include ${ROOTPATH}/config.mk
