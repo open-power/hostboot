@@ -1725,21 +1725,12 @@ void hdatGetI2cDeviceInfo(
                 "detected");
             ++linkId.instance;
 
-            //@TODO:RTC 213230(HDAT Axone additional support)
-            //Hacking this now as OCMB is not an i2c master
-            //TODO : RTC Story 246361 HDAT Nimbus/Cumulus model code removal
-            /*
-            if (i_model == TARGETING::MODEL_NIMBUS)
+            if( (i_pTarget == nullptr) ||
+                (i_pTarget == i2cDevice.masterChip)
+              )
             {
-                if( (i_pTarget == nullptr) ||
-                    (i_pTarget == i2cDevice.masterChip)
-                  )
-                {
-                    o_i2cDevEntries.push_back(l_hostI2cObj);
-                }
+                o_i2cDevEntries.push_back(l_hostI2cObj);
             }
-             */
-            o_i2cDevEntries.push_back(l_hostI2cObj);
         }
     }
 
