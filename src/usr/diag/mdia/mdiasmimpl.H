@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,11 +78,6 @@ struct WorkFlowProperties
      * @brief pointer to single work item scoped data
      */
     void * data;
-
-    /**
-     * @brief mba/mcbist position on membuf/proc (0/1)
-     */
-    uint8_t chipUnit;
 
     /**
      * @brief timeout count associated with the workFlow

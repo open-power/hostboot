@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,8 +32,6 @@
 
 #include <vector>
 #include <util/threadpool.H>
-#include <lib/shared/nimbus_defaults.H>
-#include <lib/mcbist/memdiags.H>
 #include "sys/sync.h"
 #include "mdiafwd.H"
 #include "mdiaglobals.H"
@@ -47,6 +45,7 @@ namespace MDIA
  */
 enum WorkFlowPhase
 {
+    /* TODO RTC 247259 - hard coding the patterns for now, use vars later
     START_PATTERN_0 = mss::mcbist::PATTERN_0,
     START_PATTERN_1 = mss::mcbist::PATTERN_1,
     START_PATTERN_2 = mss::mcbist::PATTERN_2,
@@ -56,6 +55,17 @@ enum WorkFlowPhase
     START_PATTERN_6 = mss::mcbist::PATTERN_6,
     START_PATTERN_7 = mss::mcbist::PATTERN_7,
     START_RANDOM_PATTERN = mss::mcbist::PATTERN_RANDOM,
+    */
+    START_PATTERN_0 = 0,
+    START_PATTERN_1 = 1,
+    START_PATTERN_2 = 2,
+    START_PATTERN_3 = 3,
+    START_PATTERN_4 = 4,
+    START_PATTERN_5 = 5,
+    START_PATTERN_6 = 6,
+    START_PATTERN_7 = 7,
+    START_RANDOM_PATTERN = 8,
+
     DUMMY_SYNC_PHASE,
     DUMMY_ASYNC_PHASE,
     RESTORE_DRAM_REPAIRS,
@@ -63,13 +73,6 @@ enum WorkFlowPhase
     CLEAR_HW_CHANGED_STATE,
     ANALYZE_IPL_MNFG_CE_STATS,
 };
-
-/**
- * @brief determine whether the TargetType should be MBA or MCBIST
- *
- * @retval either TARGET_TYPE_MBA_CHIPLET or TARGET_TYPE_MCBIST
- */
-fapi2::TargetType getMdiaTargetType();
 
 /**
  * @brief memory diagnostics step state machine

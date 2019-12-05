@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,30 +54,15 @@ int64_t WorkItem::compare(const WorkItem & i_r) const
         return 1;
     }
 
-    // if the state machine computed priority is the same,
-    // give higher priority to mbas/mcbists on different dmi busses
-
-    if(iv_chipUnit < i_r.iv_chipUnit)
-    {
-        return -1;
-    }
-
-    if(i_r.iv_chipUnit < iv_chipUnit)
-    {
-        return 1;
-    }
-
     return 0;
 }
 
 WorkItem::WorkItem(StateMachine & i_sm,
         WorkFlowProperties * i_wfp,
-        uint64_t i_priority,
-        uint8_t i_chipUnit) :
+        uint64_t i_priority) :
     iv_sm(i_sm),
     iv_wfp(i_wfp),
-    iv_priority(i_priority),
-    iv_chipUnit(i_chipUnit)
+    iv_priority(i_priority)
 {
 
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,59 +37,6 @@ using namespace TARGETING;
 
 namespace MDIA
 {
-
-bool __nimbusDD1Workaround( TargetHandle_t i_trgt )
-{
-    // In Nimbus DD1.x, 1-rank DIMMs must use a slow read as opposed to a super
-    // fast read, as such, this causes mdia to run too slowly to complete nine
-    // patterns before the istep times out. In this case, we will just do four
-    // patterns instead. This function will return true if we need to apply the
-    // Nimbus DD1 1-rank DIMM workaround or false if we don't.
-
-    bool slowRead = false;
-
-    ConstTargetHandle_t parent = getParentChip( i_trgt );
-
-    // The workaround only applies to Nimbus
-    if ( MODEL_NIMBUS == parent->getAttr<ATTR_MODEL>() )
-    {
-        // check if DD1.x
-        if ( 0x20 > parent->getAttr<ATTR_EC>() )
-        {
-            // check if there is a 1-rank DIMM
-            TargetHandleList mcsList;
-            getChildAffinityTargets( mcsList, i_trgt, CLASS_UNIT, TYPE_MCS );
-
-            for ( auto &mcs : mcsList )
-            {
-                ATTR_EFF_NUM_RANKS_PER_DIMM_type attr;
-                if ( !mcs->tryGetAttr<ATTR_EFF_NUM_RANKS_PER_DIMM>(attr) )
-                {
-                    MDIA_FAST( "tryGetAttr<ATTR_EFF_NUM_RANKS_PER_DIMM> failed:"
-                               " i_trgt=0x%08x", get_huid(i_trgt) );
-                    break;
-                }
-                for ( uint8_t pos = 0; pos < mss::PORTS_PER_MCS; pos++ )
-                {
-                    for ( uint8_t ds = 0; ds < mss::MAX_DIMM_PER_PORT; ds++ )
-                    {
-                        // If there is a DIMM with only 1 rank we must apply the
-                        // workaround.
-                        if ( 1 == attr[pos][ds] )
-                        {
-                            slowRead = true;
-                            break;
-                        }
-                    }
-                    if ( slowRead ) break;
-                }
-                if ( slowRead ) break;
-            }
-        }
-    }
-
-    return slowRead;
-}
 
 errlHndl_t getDiagnosticMode(
         const Globals & i_globals,
@@ -136,12 +83,6 @@ errlHndl_t getDiagnosticMode(
                 // 4 patterns instead of 9.
                 o_mode = FOUR_PATTERNS;
             }
-        }
-
-        // Check to see if we must apply the Nimbus DD1 1-rank DIMM workaround
-        if ( (NINE_PATTERNS == o_mode) && __nimbusDD1Workaround(i_trgt) )
-        {
-            o_mode = FOUR_PATTERNS;
         }
 
     } while(0);
@@ -216,8 +157,8 @@ errlHndl_t getWorkFlow(
 }
 
 /*
- *  Local helper function to return a list of DIMMs, MCS, and
- *  MCA associated with the input MCBIST target
+ *  Local helper function to return a list of targets associated with the input
+ *  OCMB target
  *
  */
 TargetHandleList getMemTargetsForQueryOrClear(TargetHandle_t i_trgt)
@@ -239,105 +180,73 @@ TargetHandleList getMemTargetsForQueryOrClear(TargetHandle_t i_trgt)
             o_list.insert(o_list.begin(), dimmList.begin(), dimmList.end());
         }
 
-        TYPE trgtType = i_trgt->getAttr<ATTR_TYPE>();
+        // add associated OCMB
+        o_list.push_back( i_trgt );
 
-        // mcbist target
-        if ( TYPE_MCBIST == trgtType )
+        // add associated OMI
+        TargetHandleList omiList;
+        getParentAffinityTargets( omiList, i_trgt, CLASS_UNIT, TYPE_OMI );
+        if ( omiList.size() == 1 )
         {
-            // add associated MCBIST
-            o_list.push_back( i_trgt );
-
-            // add associated MCSs
-            TargetHandleList mcsList;
-            getChildAffinityTargets( mcsList, i_trgt, CLASS_UNIT, TYPE_MCS );
-            if ( !mcsList.empty() )
-                o_list.insert( o_list.end(), mcsList.begin(), mcsList.end() );
-
-            // add associated MCAs
-            TargetHandleList mcaList;
-            getChildAffinityTargets( mcaList, i_trgt, CLASS_UNIT, TYPE_MCA );
-            if ( !mcaList.empty() )
-                o_list.insert( o_list.end(), mcaList.begin(), mcaList.end() );
-
-        }
-        // OCMB target
-        else if ( TYPE_OCMB_CHIP == trgtType )
-        {
-            // add associated OCMB
-            o_list.push_back( i_trgt );
-
-            // add associated OMI
-            TargetHandleList omiList;
-            getParentAffinityTargets( omiList, i_trgt, CLASS_UNIT, TYPE_OMI );
-            if ( omiList.size() == 1 )
-            {
-                o_list.push_back( omiList[0] );
-            }
-            else
-            {
-                MDIA_FAST( FUNC "Could not find parent OMI." );
-                break;
-            }
-
-            // add associated OMIC
-            TargetHandleList omicList;
-            getParentAffinityTargets( omicList, omiList[0], CLASS_UNIT,
-                                      TYPE_OMIC );
-            if ( omicList.size() == 1 )
-            {
-                o_list.push_back( omicList[0] );
-            }
-            else
-            {
-                MDIA_FAST( FUNC "Could not find parent OMIC." );
-                break;
-            }
-
-            // add associated MCC
-            TargetHandleList mccList;
-            getParentAffinityTargets( mccList, omiList[0], CLASS_UNIT,
-                                      TYPE_MCC );
-            if ( mccList.size() == 1 )
-            {
-                o_list.push_back( mccList[0] );
-            }
-            else
-            {
-                MDIA_FAST( FUNC "Could not find parent MCC." );
-                break;
-            }
-
-            // add associated MI
-            TargetHandleList miList;
-            getParentAffinityTargets( miList, mccList[0], CLASS_UNIT, TYPE_MI );
-            if ( miList.size() == 1 )
-            {
-                o_list.push_back( miList[0] );
-            }
-            else
-            {
-                MDIA_FAST( FUNC "Could not find parent MI." );
-                break;
-            }
-
-            // add associated MC
-            TargetHandleList mcList;
-            getParentAffinityTargets( mcList, miList[0], CLASS_UNIT, TYPE_MC );
-            if ( mcList.size() == 1 )
-            {
-                o_list.push_back( mcList[0] );
-            }
-            else
-            {
-                MDIA_FAST( FUNC "Could not find parent MC." );
-                break;
-            }
-
+            o_list.push_back( omiList[0] );
         }
         else
         {
-            assert( false, "getMemTargetsForQueryOrClear: Invalid target "
-                    "type from i_trgt: %x", get_huid(i_trgt) );
+            MDIA_FAST( FUNC "Could not find parent OMI." );
+            break;
+        }
+
+        // add associated OMIC
+        TargetHandleList omicList;
+        getParentAffinityTargets( omicList, omiList[0], CLASS_UNIT,
+                                  TYPE_OMIC );
+        if ( omicList.size() == 1 )
+        {
+            o_list.push_back( omicList[0] );
+        }
+        else
+        {
+            MDIA_FAST( FUNC "Could not find parent OMIC." );
+            break;
+        }
+
+        // add associated MCC
+        TargetHandleList mccList;
+        getParentAffinityTargets( mccList, omiList[0], CLASS_UNIT,
+                TYPE_MCC );
+        if ( mccList.size() == 1 )
+        {
+            o_list.push_back( mccList[0] );
+        }
+        else
+        {
+            MDIA_FAST( FUNC "Could not find parent MCC." );
+            break;
+        }
+
+        // add associated MI
+        TargetHandleList miList;
+        getParentAffinityTargets( miList, mccList[0], CLASS_UNIT, TYPE_MI );
+        if ( miList.size() == 1 )
+        {
+            o_list.push_back( miList[0] );
+        }
+        else
+        {
+            MDIA_FAST( FUNC "Could not find parent MI." );
+            break;
+        }
+
+        // add associated MC
+        TargetHandleList mcList;
+        getParentAffinityTargets( mcList, miList[0], CLASS_UNIT, TYPE_MC );
+        if ( mcList.size() == 1 )
+        {
+            o_list.push_back( mcList[0] );
+        }
+        else
+        {
+            MDIA_FAST( FUNC "Could not find parent MC." );
             break;
         }
 

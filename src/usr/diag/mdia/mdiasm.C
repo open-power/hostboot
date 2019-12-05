@@ -45,9 +45,9 @@
 #include <ipmi/ipmiwatchdog.H>
 #include <initservice/initserviceif.H>
 #include <sys/time.h>
-#include <dimmBadDqBitmapFuncs.H>
 #include <sys/misc.h>
-#include <hwp_wrappers.H>
+// TODO RTC 247259
+//#include <hwp_wrappers.H>
 
 using namespace TARGETING;
 using namespace ERRORLOG;
@@ -101,35 +101,6 @@ void StateMachine::running(bool & o_running)
 
 void addTimeoutFFDC(TargetHandle_t i_target, errlHndl_t & io_log)
 {
-    const uint64_t mbaRegs[] = {
-        MBA01_SPA,
-        MBA01_SPA_MASK,
-        MBA01_CMD_TYPE,
-        MBA01_CMD_CONTROL,
-        MBA01_CMD_STATUS,
-        MBA01_MBMACAQ,
-        MBA01_MBMEA,
-    };
-
-    const uint64_t membufRegs[] = {
-        MEM_SPA_FIR,
-        MEM_SPA_FIR_MASK,
-    };
-
-    const uint64_t dmiRegs[] = {
-        CHI_FIR,
-        CHI_FIR_MASK,
-        CHI_FIR_ACT0,
-        CHI_FIR_ACT1,
-    };
-
-    const uint64_t mcbRegs[] = {
-        MCBIST_FIR,
-        MCBIST_FIR_MASK,
-        MCBIST_FIR_ACT0,
-        MCBIST_FIR_ACT1,
-    };
-
     const uint64_t ocmbRegs[] = {
         OCMB_MCBIST_FIR,
         OCMB_MCBIST_FIR_AND,
@@ -156,142 +127,37 @@ void addTimeoutFFDC(TargetHandle_t i_target, errlHndl_t & io_log)
         MC1_CHIPLET_HA_FIR_MASK ,
     };
 
-    // target type
-    if ( TYPE_MBA == i_target->getAttr<ATTR_TYPE>() )
+    // get the parent proc
+    ConstTargetHandle_t proc = getParentChip(i_target);
+
+    const struct Entry
     {
-        // get the parent membuf
-        ConstTargetHandle_t membuf = getParentChip(i_target);
+        TARGETING::ConstTargetHandle_t target;
+        const uint64_t * begin;
+        const uint64_t * end;
+    } tables[] = {
+        {i_target, ocmbRegs, ocmbRegs + sizeof(ocmbRegs)/sizeof(*ocmbRegs)},
+        {proc, procRegs, procRegs + sizeof(procRegs)/sizeof(*procRegs)},
+    };
 
-        // get the parent dmi
-        TargetHandleList targetList;
-        TargetHandle_t dmi = NULL;
-        if(membuf)
-        {
-            getParentAffinityTargets(
-                    targetList,
-                    membuf,
-                    CLASS_UNIT,
-                    TYPE_DMI);
-        }
-        if(targetList.size() == 1)
-        {
-            dmi = targetList[0];
-        }
-
-        // get the parent proc
-        ConstTargetHandle_t proc = NULL;
-        if(dmi)
-        {
-            proc = getParentChip(dmi);
-        }
-
-        const struct Entry
-        {
-            TARGETING::ConstTargetHandle_t target;
-            const uint64_t * begin;
-            const uint64_t * end;
-        } tables[] = {
-            {i_target, mbaRegs, mbaRegs + sizeof(mbaRegs)/sizeof(*mbaRegs)},
-            {membuf, membufRegs,
-             membufRegs + sizeof(membufRegs)/sizeof(*membufRegs)},
-            {dmi, dmiRegs, dmiRegs + sizeof(dmiRegs)/sizeof(*dmiRegs)},
-            {proc, procRegs, procRegs + sizeof(procRegs)/sizeof(*procRegs)},
-        };
-
-        for(const Entry * tableIt = tables;
-                tableIt != tables + sizeof(tables)/sizeof(*tables);
-                ++tableIt)
-        {
-            if(!tableIt->target)
-            {
-                continue;
-            }
-
-            for(const uint64_t * regIt = tableIt->begin;
-                    regIt != tableIt->end;
-                    ++regIt)
-            {
-                ErrlUserDetailsLogRegister udLogRegister(
-                        tableIt->target,
-                        DEVICE_SCOM_ADDRESS(*regIt));
-                udLogRegister.addToLog(io_log);
-            }
-        }
-    }
-    else if ( TYPE_MCBIST == i_target->getAttr<ATTR_TYPE>() )
+    for(const Entry * tableIt = tables;
+            tableIt != tables + sizeof(tables)/sizeof(*tables);
+            ++tableIt)
     {
-        // get the parent proc
-        ConstTargetHandle_t proc = getParentChip(i_target);
-
-        const struct Entry
+        if(!tableIt->target)
         {
-            TARGETING::ConstTargetHandle_t target;
-            const uint64_t * begin;
-            const uint64_t * end;
-        } tables[] = {
-            {i_target, mcbRegs, mcbRegs + sizeof(mcbRegs)/sizeof(*mcbRegs)},
-            {proc, procRegs, procRegs + sizeof(procRegs)/sizeof(*procRegs)},
-        };
-
-        for(const Entry * tableIt = tables;
-                tableIt != tables + sizeof(tables)/sizeof(*tables);
-                ++tableIt)
-        {
-            if(!tableIt->target)
-            {
-                continue;
-            }
-
-            for(const uint64_t * regIt = tableIt->begin;
-                    regIt != tableIt->end;
-                    ++regIt)
-            {
-                ErrlUserDetailsLogRegister udLogRegister(
-                        tableIt->target,
-                        DEVICE_SCOM_ADDRESS(*regIt));
-                udLogRegister.addToLog(io_log);
-            }
+            continue;
         }
-    }
-    else if ( TYPE_OCMB_CHIP == i_target->getAttr<ATTR_TYPE>() )
-    {
-        // get the parent proc
-        ConstTargetHandle_t proc = getParentChip(i_target);
 
-        const struct Entry
+        for(const uint64_t * regIt = tableIt->begin;
+                regIt != tableIt->end;
+                ++regIt)
         {
-            TARGETING::ConstTargetHandle_t target;
-            const uint64_t * begin;
-            const uint64_t * end;
-        } tables[] = {
-            {i_target, ocmbRegs, ocmbRegs + sizeof(ocmbRegs)/sizeof(*ocmbRegs)},
-            {proc, procRegs, procRegs + sizeof(procRegs)/sizeof(*procRegs)},
-        };
-
-        for(const Entry * tableIt = tables;
-                tableIt != tables + sizeof(tables)/sizeof(*tables);
-                ++tableIt)
-        {
-            if(!tableIt->target)
-            {
-                continue;
-            }
-
-            for(const uint64_t * regIt = tableIt->begin;
-                    regIt != tableIt->end;
-                    ++regIt)
-            {
-                ErrlUserDetailsLogRegister udLogRegister(
-                        tableIt->target,
-                        DEVICE_SCOM_ADDRESS(*regIt));
-                udLogRegister.addToLog(io_log);
-            }
+            ErrlUserDetailsLogRegister udLogRegister(
+                    tableIt->target,
+                    DEVICE_SCOM_ADDRESS(*regIt));
+            udLogRegister.addToLog(io_log);
         }
-    }
-    else
-    {
-        assert( false, "addTimeoutFFDC: Invalid target type from i_target: %x",
-                get_huid(i_target) );
     }
 
     // collect these traces for timeout debugging
@@ -300,40 +166,6 @@ void addTimeoutFFDC(TargetHandle_t i_target, errlHndl_t & io_log)
     io_log->collectTrace(FAPI_TRACE_NAME,512);
     io_log->collectTrace(FAPI_IMP_TRACE_NAME,512);
 
-}
-
-fapi2::TargetType getMdiaTargetType()
-{
-    fapi2::TargetType targetType;
-
-    // we need to check the model of the master proc
-    // if it is Cumulus then we will use TARGET_TYPE_MBA_CHIPLET for targetType
-    // else it is Nimbus so then we will use TARGET_TYPE_MCBIST for targetType
-    TARGETING::Target* masterProc = nullptr;
-    TARGETING::targetService().masterProcChipTargetHandle(masterProc);
-
-    if ( TARGETING::MODEL_CUMULUS ==
-         masterProc->getAttr<TARGETING::ATTR_MODEL>() )
-    {
-        targetType = fapi2::TARGET_TYPE_MBA_CHIPLET;
-    }
-    else if ( TARGETING::MODEL_NIMBUS ==
-              masterProc->getAttr<TARGETING::ATTR_MODEL>() )
-    {
-        targetType = fapi2::TARGET_TYPE_MCBIST;
-    }
-    else if ( TARGETING::MODEL_AXONE ==
-              masterProc->getAttr<TARGETING::ATTR_MODEL>() )
-    {
-        targetType = fapi2::TARGET_TYPE_OCMB_CHIP;
-    }
-    else
-    {
-        assert( false, "getMdiaTargetType: Invalid model type from "
-                "masterProc: %x", get_huid(masterProc) );
-    }
-
-    return targetType;
 }
 
 // Returns the calculated timeout value in nanoseconds.
@@ -359,19 +191,6 @@ uint64_t getTimeoutValue()
         }
     }
 
-    // Nimbus DD1.0 workaround.
-    if ( timeout < MAINT_CMD_HW_TIMEOUT_DD10 )
-    {
-        TARGETING::Target* masterProc = nullptr;
-        TARGETING::targetService().masterProcChipTargetHandle(masterProc);
-
-        if ( MODEL_NIMBUS == masterProc->getAttr<ATTR_MODEL>() &&
-             0x10         == masterProc->getAttr<ATTR_EC>() )
-        {
-            timeout = MAINT_CMD_HW_TIMEOUT_DD10;
-        }
-    }
-
     // Ensure that the timeout is less than the watchdog timer.
     // NOTE: This should only be done on BMC based machines. The watch dog timer
     // is not checked on FSP based machines.
@@ -387,57 +206,6 @@ uint64_t getTimeoutValue()
     }
 
     return timeout * NS_PER_SEC;
-}
-
-// Do the setup for CE thresholds
-template<TARGETING::TYPE T>
-errlHndl_t ceErrorSetup( TargetHandle_t i_mba );
-
-template<>
-errlHndl_t ceErrorSetup<TYPE_MBA>( TargetHandle_t i_mba )
-{
-    errlHndl_t err = NULL;
-
-    do
-    {
-        // get the parent membuf
-        TargetHandle_t membuf = const_cast<TargetHandle_t >(getParentChip(
-                                            i_mba));
-        uint64_t addr = ( ( 0 == i_mba->getAttr<TARGETING::ATTR_CHIP_UNIT>()) ?
-                       MEM_MBA0_MBSTR : MEM_MBA1_MBSTR );
-
-        uint64_t data = 0;
-        size_t sz_data = sizeof(uint64_t);
-
-        err = deviceRead( membuf, &data, sz_data, DEVICE_SCOM_ADDRESS(addr) );
-        if( NULL != err )
-        {
-            MDIA_FAST("ceErrorSetup: deviceRead on 0x%08X failed HUID:0x%08X",
-                      addr, get_huid(membuf));
-            errlCommit( err, MDIA_COMP_ID );
-            break;
-        }
-
-        // set 0-3 bits to  Enable soft, intermittent, hard and Retry CE
-        // threshold attention
-        // set error threshold to 1 ( set 15,27,39,51 bits ).
-        // Enable per-symbol error counters to count soft, intermittent
-        // and hard CEs ( set 55, 56, 57 bits ).
-        // First clear starting 52 bits and than set relevant bits.
-
-        data = ( data & 0x0000000000000fff ) | 0xf0010010010011c0;
-
-        err = deviceWrite( membuf, &data, sz_data, DEVICE_SCOM_ADDRESS(addr) );
-        if( NULL != err )
-        {
-            MDIA_FAST("ceErrorSetup: deviceWrite on 0x%08X failed HUID:0x%08X",
-                      addr, get_huid(i_mba));
-            errlCommit( err, MDIA_COMP_ID );
-            break;
-        }
-    } while(0);
-
-    return err;
 }
 
 void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
@@ -460,46 +228,16 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
             if((*wit)->timer == *monitorIt)
             {
                 TargetHandle_t target   = getTarget(**wit);
-                TYPE           trgtType = target->getAttr<ATTR_TYPE>();
 
                 uint64_t firData = 0;
                 uint64_t mskData = 0;
                 size_t sz_uint64 = sizeof(uint64_t);
 
-                uint64_t firAddr    = 0;
-                uint64_t firAndAddr = 0;
-                uint64_t mskAddr    = 0;
-                uint64_t bitMask    = 0;
+                uint64_t firAddr    = OCMB_MCBIST_FIR;
+                uint64_t firAndAddr = OCMB_MCBIST_FIR_AND;
+                uint64_t mskAddr    = OCMB_MCBIST_FIR_MASK;
+                uint64_t bitMask    = 0x0020000000000000; // bit 10
 
-                // Init data for MCBIST.
-                if ( TYPE_MCBIST == trgtType )
-                {
-                    firAddr    = MCBIST_FIR;
-                    firAndAddr = MCBIST_FIR_AND;
-                    mskAddr    = MCBIST_FIR_MASK;
-                    bitMask    = 0x0028000000000000;
-                }
-                // Change if target type is MBA.
-                else if ( TYPE_MBA == trgtType )
-                {
-                    firAddr = MBA01_SPA;
-                    mskAddr = MBA01_SPA_MASK;
-                    bitMask = 0x8080000000000000; // bits 0 or 8
-                }
-                // Change if target type is OCMB_CHIP
-                else if ( TYPE_OCMB_CHIP == trgtType )
-                {
-                    firAddr    = OCMB_MCBIST_FIR;
-                    firAndAddr = OCMB_MCBIST_FIR_AND;
-                    mskAddr    = OCMB_MCBIST_FIR_MASK;
-                    bitMask    = 0x0020000000000000; // bit 10
-                }
-                // Assert if unsupported type
-                else
-                {
-                    assert( false, "processCommandTimeout: Invalid target type "
-                            "from target: %x", get_huid(target) );
-                }
 
                 // Check for command complete. If set, don't time out.
                 err = deviceRead( target, &firData, sz_uint64,
@@ -610,69 +348,29 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                 // If maint cmd complete bit is not on, time out
                 MDIA_FAST("sm: stopping command HUID:0x%08X", get_huid(target));
 
-                // target type is MCBIST
-                if ( TYPE_MCBIST == trgtType )
+                fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiOcmb(target);
+                // TODO RTC 247259
+                //FAPI_INVOKE_HWP( err, exp_stop, fapiOcmb );
+                if ( nullptr != err )
                 {
-                    #ifndef CONFIG_AXONE
-                    fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiMcbist(target);
-                    FAPI_INVOKE_HWP( err, nim_stop, fapiMcbist );
-
-                    if ( nullptr != err )
-                    {
-                        MDIA_ERR("sm: nim_stop failed");
-                        errlCommit(err, MDIA_COMP_ID);
-                    }
-
-                    //nim_stop will set the command complete attention so
-                    //we need to clear those
-                    bitMask = ~bitMask;
-
-                    err = deviceWrite( target, &bitMask, sz_uint64,
-                                       DEVICE_SCOM_ADDRESS(firAndAddr) );
-
-                    if ( nullptr != err )
-                    {
-                        MDIA_FAST( "sm: deviceWrite on 0x%08X failed, HUID: "
-                                   "0x%08X", firAddr, get_huid(target) );
-                        errlCommit(err, MDIA_COMP_ID);
-                    }
-                    #endif
+                    MDIA_ERR("sm: exp_stop failed");
+                    errlCommit(err, MDIA_COMP_ID);
                 }
-                // target type is OCMB_CHIP
-                else if ( TYPE_OCMB_CHIP == trgtType )
+
+                // exp_stop will set the command complete
+                // attention so we need to clear those
+                bitMask = ~bitMask;
+
+                err = deviceWrite( target, &bitMask, sz_uint64,
+                                   DEVICE_SCOM_ADDRESS(firAndAddr) );
+
+                if ( nullptr != err )
                 {
-                    #ifdef CONFIG_AXONE
-                    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
-                        fapiOcmb(target);
-                    FAPI_INVOKE_HWP( err, exp_stop, fapiOcmb );
-
-                    if ( nullptr != err )
-                    {
-                        MDIA_ERR("sm: exp_stop failed");
-                        errlCommit(err, MDIA_COMP_ID);
-                    }
-
-                    // exp_stop will set the command complete
-                    // attention so we need to clear those
-                    bitMask = ~bitMask;
-
-                    err = deviceWrite( target, &bitMask, sz_uint64,
-                                       DEVICE_SCOM_ADDRESS(firAndAddr) );
-
-                    if ( nullptr != err )
-                    {
-                        MDIA_FAST( "sm: deviceWrite on 0x%08X failed, HUID: "
-                                   "0x%08X", firAddr, get_huid(target) );
-                        errlCommit(err, MDIA_COMP_ID);
-                    }
-                    #endif
+                    MDIA_FAST( "sm: deviceWrite on 0x%08X failed, HUID: "
+                               "0x%08X", firAddr, get_huid(target) );
+                    errlCommit( err, MDIA_COMP_ID );
                 }
-                // Assert if unsupported type
-                else
-                {
-                    assert( false, "processCommandTimeout: Invalid target type "
-                            "from timed out target: %x", get_huid(target) );
-                }
+
 
                 (*wit)->data = NULL;
 
@@ -680,8 +378,8 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                 wkflprop = *wit;
 
                 // log a timeout event
-                MDIA_ERR("sm: workItem %d HW timeout on HUID:0x%08X",
-                         *((*wit)->workItem), get_huid(target));
+                MDIA_ERR( "sm: workItem %d HW timeout on HUID:0x%08X",
+                          *((*wit)->workItem), get_huid(target) );
 
                 errlCommit(timeoutErrl, MDIA_COMP_ID);
 
@@ -765,15 +463,6 @@ void StateMachine::setup(const WorkFlowAssocMap & i_list)
         p->timeoutCnt = 0;
 
         p->data = NULL;
-        if ( TYPE_OCMB_CHIP == it->first->getAttr<ATTR_TYPE>() )
-        {
-            // There is no chip unit attribute for OCMBs, so just use 0
-            p->chipUnit = 0;
-        }
-        else
-        {
-            p->chipUnit = it->first->getAttr<ATTR_CHIP_UNIT>();
-        }
 
         iv_workFlowProperties.push_back(p);
     }
@@ -891,13 +580,12 @@ bool StateMachine::scheduleWorkItem(WorkFlowProperties & i_wfp)
 
         TargetHandle_t target = getTarget(i_wfp);
 
-        MDIA_FAST("sm: dispatching work item %d for: 0x%08x, priority: %d, "
-                "unit: %d", *i_wfp.workItem,
-                get_huid(target),
-                priority,
-                i_wfp.chipUnit);
+        MDIA_FAST( "sm: dispatching work item %d for: 0x%08x, priority: %d, ",
+                   *i_wfp.workItem,
+                   get_huid(target),
+                   priority );
 
-        iv_tp->insert(new WorkItem(*this, &i_wfp, priority, i_wfp.chipUnit));
+        iv_tp->insert(new WorkItem(*this, &i_wfp, priority));
 
         return true;
     }
@@ -961,35 +649,11 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
 
             case RESTORE_DRAM_REPAIRS:
             {
+                /* TODO RTC 199034 - uncomment for restoreDramRepairs
                 TargetHandle_t target = getTarget( *i_wfp );
-                TYPE trgtType = target->getAttr<ATTR_TYPE>();
+                rc = PRDF::restoreDramRepairs<TYPE_OCMB_CHIP>( target );
+                */
 
-                // MCBIST target
-                if ( TYPE_MCBIST == trgtType )
-                {
-                    // Get the connected MCAs.
-                    TargetHandleList mcaList;
-                    getChildAffinityTargets( mcaList, target, CLASS_UNIT,
-                                             TYPE_MCA );
-                    for ( auto & mca : mcaList )
-                    {
-                        MDIA_SLOW( "sm: restoreDramRepairs(0x%08x)",
-                                   get_huid(mca) );
-                        rc |= PRDF::restoreDramRepairs<TYPE_MCA>( mca );
-                    }
-                }
-                // OCMB target
-                else if ( TYPE_OCMB_CHIP == trgtType )
-                {
-                    /* TODO RTC 199034 - uncomment for restoreDramRepairs
-                    rc = PRDF::restoreDramRepairs<TYPE_OCMB_CHIP>( target );
-                    */
-                }
-                else
-                {
-                    assert( false, "executeWorkItem: Invalid target type from "
-                            "target: %x", get_huid(target) );
-                }
                 break;
             }
             case START_PATTERN_0:
@@ -1020,6 +684,7 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
             case ANALYZE_IPL_MNFG_CE_STATS:
             {
                 MDIA_FAST("Executing analyzeIplCEStats");
+                /* TODO RTC 247259 - PRD not compiled yet
                 bool calloutMade = false;
                 TargetHandle_t target = getTarget( *i_wfp );
                 rc = PRDF::analyzeIplCEStats( target,
@@ -1038,6 +703,7 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
                     MDIA_FAST("PRD performed HW callouts during"
                               "analyzeIplCEStats");
                 }
+                */
 
             }
                 break;
@@ -1079,7 +745,7 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
 errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 {
     errlHndl_t err = nullptr;
-    //uint64_t workItem;
+    uint64_t workItem;
 
     TargetHandle_t target;
 
@@ -1090,153 +756,78 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 
     uint64_t monitorId = CommandMonitor::INVALID_MONITOR_ID;
     i_wfp.timeoutCnt = 0; // reset for new work item
-    //workItem = *i_wfp.workItem;
+    workItem = *i_wfp.workItem;
 
     target = getTarget(i_wfp);
 
     mutex_unlock(&iv_mutex);
 
-    TYPE trgtType = target->getAttr<ATTR_TYPE>();
-
     do
     {
         // new command...use the full range
-         //target type is MCBIST
-        if (TYPE_MCBIST == trgtType)
+
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiOcmb(target);
+        //TODO RTC 247259
+        //mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
+
+        switch(workItem)
         {
+            case START_RANDOM_PATTERN:
 
-            #ifndef CONFIG_AXONE
-            fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiMcbist(target);
-            mss::mcbist::stop_conditions<mss::mc_type::NIMBUS> stopCond;
+                // TODO RTC 247259
+                //FAPI_INVOKE_HWP( err, exp_sf_init, fapiOcmb,
+                //                 mss::mcbist::PATTERN_RANDOM );
+                MDIA_FAST( "sm: random init %p on: %x", fapiOcmb,
+                           get_huid(target) );
+                break;
 
-            switch(workItem)
-            {
-                case START_RANDOM_PATTERN:
+            case START_SCRUB:
 
-                    FAPI_INVOKE_HWP( err, nim_sf_init, fapiMcbist,
-                                     mss::mcbist::PATTERN_RANDOM );
-                    MDIA_FAST("sm: random init %p on: %x", fapiMcbist,
-                            get_huid(target));
-                    break;
+                //TODO RTC 247259
+                //set stop conditions
+                //stopCond.set_pause_on_mpe(mss::ON);
+                //stopCond.set_pause_on_ue( mss::ON);
+                //stopCond.set_pause_on_aue(mss::ON);
+                //stopCond.set_nce_inter_symbol_count_enable(mss::ON);
+                //stopCond.set_nce_soft_symbol_count_enable( mss::ON);
+                //stopCond.set_nce_hard_symbol_count_enable( mss::ON);
+                //if ( TARGETING::MNFG_FLAG_IPL_MEMORY_CE_CHECKING
+                //        & iv_globals.mfgPolicy )
+                //{
+                //    stopCond.set_pause_on_nce_hard(mss::ON);
+                //}
 
-                case START_SCRUB:
+                //FAPI_INVOKE_HWP( err, exp_sf_read, fapiOcmb,
+                //                 stopCond );
+                MDIA_FAST( "sm: scrub %p on: %x", fapiOcmb,
+                           get_huid(target) );
+                break;
 
-                    //set stop conditions
-                    stopCond.set_pause_on_mpe(mss::ON);
-                    stopCond.set_pause_on_ue( mss::ON);
-                    stopCond.set_pause_on_aue(mss::ON);
-                    stopCond.set_nce_inter_symbol_count_enable(mss::ON);
-                    stopCond.set_nce_soft_symbol_count_enable( mss::ON);
-                    stopCond.set_nce_hard_symbol_count_enable( mss::ON);
-                    if (TARGETING::MNFG_FLAG_IPL_MEMORY_CE_CHECKING
-                            & iv_globals.mfgPolicy)
-                    {
-                        stopCond.set_pause_on_nce_hard(mss::ON);
-                    }
+            case START_PATTERN_0:
+            case START_PATTERN_1:
+            case START_PATTERN_2:
+            case START_PATTERN_3:
+            case START_PATTERN_4:
+            case START_PATTERN_5:
+            case START_PATTERN_6:
+            case START_PATTERN_7:
 
-                    FAPI_INVOKE_HWP( err, nim_sf_read, fapiMcbist,
-                                     stopCond );
-                    MDIA_FAST("sm: scrub %p on: %x", fapiMcbist,
-                            get_huid(target));
-                    break;
+                //TODO RTC 247259
+                //FAPI_INVOKE_HWP( err, exp_sf_init, fapiOcmb,
+                //                 workItem );
+                MDIA_FAST( "sm: init %p on: %x", fapiOcmb,
+                           get_huid(target) );
+                break;
 
-                case START_PATTERN_0:
-                case START_PATTERN_1:
-                case START_PATTERN_2:
-                case START_PATTERN_3:
-                case START_PATTERN_4:
-                case START_PATTERN_5:
-                case START_PATTERN_6:
-                case START_PATTERN_7:
-
-                    FAPI_INVOKE_HWP( err, nim_sf_init, fapiMcbist,
-                                     workItem );
-                    MDIA_FAST("sm: init %p on: %x", fapiMcbist,
-                            get_huid(target));
-                    break;
-
-                default:
-                    MDIA_ERR("unrecognized work item type %d on: %x",
-                             workItem, get_huid(target));
-                    break;
-            }
-            if( nullptr != err )
-            {
-                MDIA_FAST("sm: Running Maint Cmd failed");
-                i_wfp.data = nullptr;
-            }
-
-            #endif
+            default:
+                MDIA_ERR( "unrecognized work item type %d on: %x",
+                          workItem, get_huid(target) );
+                break;
         }
-        // target type is OCMB_CHIP
-        else if ( TYPE_OCMB_CHIP == trgtType )
+        if( nullptr != err )
         {
-            #ifdef CONFIG_AXONE
-            fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiOcmb(target);
-            mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
-
-            switch(workItem)
-            {
-                case START_RANDOM_PATTERN:
-
-                    FAPI_INVOKE_HWP( err, exp_sf_init, fapiOcmb,
-                                     mss::mcbist::PATTERN_RANDOM );
-                    MDIA_FAST("sm: random init %p on: %x", fapiOcmb,
-                            get_huid(target));
-                    break;
-
-                case START_SCRUB:
-
-                    //set stop conditions
-                    stopCond.set_pause_on_mpe(mss::ON);
-                    stopCond.set_pause_on_ue( mss::ON);
-                    stopCond.set_pause_on_aue(mss::ON);
-                    stopCond.set_nce_inter_symbol_count_enable(mss::ON);
-                    stopCond.set_nce_soft_symbol_count_enable( mss::ON);
-                    stopCond.set_nce_hard_symbol_count_enable( mss::ON);
-                    if ( TARGETING::MNFG_FLAG_IPL_MEMORY_CE_CHECKING
-                            & iv_globals.mfgPolicy )
-                    {
-                        stopCond.set_pause_on_nce_hard(mss::ON);
-                    }
-
-                    FAPI_INVOKE_HWP( err, exp_sf_read, fapiOcmb,
-                                     stopCond );
-                    MDIA_FAST( "sm: scrub %p on: %x", fapiOcmb,
-                               get_huid(target) );
-                    break;
-
-                case START_PATTERN_0:
-                case START_PATTERN_1:
-                case START_PATTERN_2:
-                case START_PATTERN_3:
-                case START_PATTERN_4:
-                case START_PATTERN_5:
-                case START_PATTERN_6:
-                case START_PATTERN_7:
-
-                    FAPI_INVOKE_HWP( err, exp_sf_init, fapiOcmb,
-                                     workItem );
-                    MDIA_FAST( "sm: init %p on: %x", fapiOcmb,
-                               get_huid(target) );
-                    break;
-
-                default:
-                    MDIA_ERR("unrecognized work item type %d on: %x",
-                             workItem, get_huid(target));
-                    break;
-            }
-            if( nullptr != err )
-            {
-                MDIA_FAST("sm: Running Maint Cmd failed");
-                i_wfp.data = nullptr;
-            }
-            #endif
-        }
-        else
-        {
-            assert( false, "doMaintCommand: Invalid target type from "
-                    "target: %x", get_huid(target) );
+            MDIA_FAST( "sm: Running Maint Cmd failed" );
+            i_wfp.data = nullptr;
         }
 
         if ( nullptr == err )
@@ -1322,7 +913,6 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
         getMonitor().removeMonitor(wfp.timer);
 
         target = getTarget(**wit);
-        TYPE trgtType = target->getAttr<ATTR_TYPE>();
 
         MDIA_FAST("sm: processing event for: %x, target: %x, type: %x",
                 get_huid(getTarget(wfp)), get_huid(target), i_event.type);
@@ -1387,47 +977,18 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
                 break;
         }
 
-        //target type is MCBIST
-        if ( TYPE_MCBIST == trgtType )
+        if(flags & STOP_CMD)
         {
-            #ifndef CONFIG_AXONE
-            if(flags & STOP_CMD)
+            MDIA_FAST("sm: stopping command: %p", target);
+            fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiOcmb(target);
+            //TODO RTC 247259
+            //FAPI_INVOKE_HWP( err, exp_stop, fapiOcmb );
+
+            if(nullptr != err)
             {
-                MDIA_FAST("sm: stopping command: %p", target);
-
-                fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiMcbist(target);
-                FAPI_INVOKE_HWP( err, nim_stop, fapiMcbist );
-
-                if(nullptr != err)
-                {
-                    MDIA_ERR("sm: nim_stop failed");
-                    errlCommit(err, MDIA_COMP_ID);
-                }
+                MDIA_ERR("sm: exp_stop failed");
+                errlCommit(err, MDIA_COMP_ID);
             }
-            #endif
-        }
-        // target type is OCMB_CHIP
-        else if ( TYPE_OCMB_CHIP == trgtType )
-        {
-            #ifdef CONFIG_AXONE
-            if(flags & STOP_CMD)
-            {
-                MDIA_FAST("sm: stopping command: %p", target);
-                fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiOcmb(target);
-                FAPI_INVOKE_HWP( err, exp_stop, fapiOcmb );
-
-                if(nullptr != err)
-                {
-                    MDIA_ERR("sm: exp_stop failed");
-                    errlCommit(err, MDIA_COMP_ID);
-                }
-            }
-            #endif
-        }
-        else
-        {
-            assert( false, "processMaintCommandEvent: Invalid target type "
-                    "from target: %x", get_huid(target) );
         }
 
         // schedule the next work item

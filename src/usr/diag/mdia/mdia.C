@@ -120,19 +120,6 @@ errlHndl_t runStep(const TargetHandleList & i_targetList)
         err = doStepCleanup(globals);
     }
 
-    // If this step completes without the need for a reconfig due to an RCD
-    // parity error, clear all RCD parity error counters.
-    ATTR_RECONFIGURE_LOOP_type attr = top->getAttr<ATTR_RECONFIGURE_LOOP>();
-    if ( 0 == (attr & RECONFIGURE_LOOP_RCD_PARITY_ERROR) )
-    {
-        TargetHandleList trgtList; getAllChiplets( trgtList, TYPE_MCA );
-        for ( auto & trgt : trgtList )
-        {
-            if ( 0 != trgt->getAttr<ATTR_RCD_PARITY_RECONFIG_LOOP_COUNT>() )
-                trgt->setAttr<ATTR_RCD_PARITY_RECONFIG_LOOP_COUNT>(0);
-        }
-    }
-
     if (nullptr != err)
     {
         MDIA_FAST("runStep: error in runStep");

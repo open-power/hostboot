@@ -46,7 +46,15 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/utils/mcbist
+EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/
 
+# TODO RTC 247260 - remove these p9 paths once theyre updated to p10
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/mcbist
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 
 ##########################################################
 # Following is needed to include p9c_mss_maint_cmds.H
@@ -59,14 +67,12 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 
 MODULE = mdia
 
-# FIXME RTC: 210975
-
-#OBJS += mdiamonitor.o
-#OBJS += mdiatrace.o
-#OBJS += mdiaworkitem.o
-#OBJS += mdiamba.o
-#OBJS += mdia.o
-#OBJS += mdiasm.o
+OBJS += mdiamonitor.o
+OBJS += mdiatrace.o
+OBJS += mdiaworkitem.o
+OBJS += mdiamba.o
+OBJS += mdia.o
+OBJS += mdiasm.o
 
 SUBDIRS += test.d
 

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -62,8 +64,6 @@ class MdiaWorkItemTest : public CxxTest::TestSuite
 
             wi1.iv_priority = 1111;
             wi2.iv_priority = 1111;
-            wi1.iv_chipUnit = 0;
-            wi2.iv_chipUnit = 0;
 
             if(wi2 < wi1)
             {
@@ -74,45 +74,6 @@ class MdiaWorkItemTest : public CxxTest::TestSuite
             {
                 TS_FAIL("wi1 < wi2");
             }
-
-            wi1.iv_chipUnit = 1;
-            wi2.iv_chipUnit = 1;
-
-            if(wi2 < wi1)
-            {
-                TS_FAIL("wi2 < wi1");
-            }
-
-            if(wi1 < wi2)
-            {
-                TS_FAIL("wi1 < wi2");
-            }
-
-            wi1.iv_chipUnit = 0;
-
-            if(wi2 < wi1)
-            {
-                TS_FAIL("wi2 < wi1");
-            }
-
-            if(!(wi1 < wi2))
-            {
-                TS_FAIL("wi1 !< wi2");
-            }
-
-            wi1.iv_chipUnit = 1;
-            wi2.iv_chipUnit = 0;
-
-            if(!(wi2 < wi1))
-            {
-                TS_FAIL("wi2 !< wi1");
-            }
-
-            if(wi1 < wi2)
-            {
-                TS_FAIL("wi1 < wi2");
-            }
-
 
             TS_TRACE(EXIT_MRK "testWorkItem");
         }

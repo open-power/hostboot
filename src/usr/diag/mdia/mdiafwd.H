@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,28 +74,6 @@ enum DiagMode
  */
 enum
 {
-    // mem chiplet regs
-    MEM_SPA_FIR             = 0x03040004,
-    MEM_SPA_FIR_MASK        = 0x03040007,
-    MEM_MBA0_MBSTR          = 0x02011655,
-    MEM_MBA1_MBSTR          = 0x02011755,
-
-    // mba unit regs
-    MBA01_SPA               = 0X03010611,
-    MBA01_SPA_MASK          = 0X03010614,
-    MBA01_CMD_TYPE          = 0X0301060A,
-    MBA01_CMD_CONTROL       = 0X0301060B,
-    MBA01_CMD_STATUS        = 0X0301060C,
-    MBA01_MBMACAQ           = 0X0301060D,
-    MBA01_MBMEA             = 0X0301060E,
-
-    // mcbist unit regs
-    MCBIST_FIR              = 0x07012300,
-    MCBIST_FIR_AND          = 0x07012301,
-    MCBIST_FIR_MASK         = 0x07012303,
-    MCBIST_FIR_ACT0         = 0x07012306,
-    MCBIST_FIR_ACT1         = 0x07012307,
-
     // ocmb mcbist unit regs
     OCMB_MCBIST_FIR         = 0x08011800,
     OCMB_MCBIST_FIR_AND     = 0x08011801,
@@ -109,12 +87,6 @@ enum
     OMIDLFIR_MASK           = 0x07013343,
     OMIDLFIR_ACT0           = 0x07013346,
     OMIDLFIR_ACT1           = 0x07013347,
-
-    // mcs unit regs
-    CHI_FIR                 = 0x07010900,
-    CHI_FIR_MASK            = 0x07010903,
-    CHI_FIR_ACT0            = 0x07010906,
-    CHI_FIR_ACT1            = 0x07010907,
 
     // proc regs
     IPOLL_MASK              = 0x000F0033,
