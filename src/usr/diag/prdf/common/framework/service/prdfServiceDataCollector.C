@@ -199,14 +199,17 @@ void ServiceDataCollector::clearNvdimmMruListGard()
             if ( TYPE_DIMM == PlatServices::getTargetType(trgt) &&
                  isNVDIMM(trgt) )
             {
-                // Send the message to PHYP/Hostboot
-                uint32_t l_rc = PlatServices::nvdimmNotifyProtChange( trgt,
-                    NVDIMM::NVDIMM_RISKY_HW_ERROR );
-                if ( SUCCESS != l_rc )
+                // Send the message to PHYP/Hostboot if a predictive log
+                if ( queryServiceCall() )
                 {
-                    PRDF_TRAC( PRDF_FUNC "nvdimmNotifyProtChange(0x%08x) "
-                               "failed.", PlatServices::getHuid(trgt) );
-                    continue;
+                    uint32_t l_rc = PlatServices::nvdimmNotifyProtChange( trgt,
+                            NVDIMM::NVDIMM_RISKY_HW_ERROR );
+                    if ( SUCCESS != l_rc )
+                    {
+                        PRDF_TRAC( PRDF_FUNC "nvdimmNotifyProtChange(0x%08x) "
+                                   "failed.", PlatServices::getHuid(trgt) );
+                        continue;
+                    }
                 }
                 #ifndef __HOSTBOOT_RUNTIME
                 // IPL, clear Gard
@@ -227,14 +230,18 @@ void ServiceDataCollector::clearNvdimmMruListGard()
                 if ( TYPE_DIMM == PlatServices::getTargetType(dimm) &&
                      isNVDIMM(dimm) )
                 {
-                    // Send the message to PHYP/Hostboot
-                    uint32_t l_rc = PlatServices::nvdimmNotifyProtChange( dimm,
-                        NVDIMM::NVDIMM_RISKY_HW_ERROR );
-                    if ( SUCCESS != l_rc )
+                    // Send the message to PHYP/Hostboot if a predictive log
+                    if ( queryServiceCall() )
                     {
-                        PRDF_TRAC( PRDF_FUNC "nvdimmNotifyProtChange(0x%08x) "
-                                   "failed.", PlatServices::getHuid(dimm) );
-                        continue;
+                        uint32_t l_rc = PlatServices::nvdimmNotifyProtChange(
+                                dimm, NVDIMM::NVDIMM_RISKY_HW_ERROR );
+                        if ( SUCCESS != l_rc )
+                        {
+                            PRDF_TRAC( PRDF_FUNC "nvdimmNotifyProtChange"
+                                       "(0x%08x) failed.",
+                                       PlatServices::getHuid(dimm) );
+                            continue;
+                        }
                     }
                     #ifndef __HOSTBOOT_RUNTIME
                     // IPL, clear Gard
