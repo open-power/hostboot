@@ -225,7 +225,7 @@
   <!-- sampled: mailbox 3 -->
   <entry>
     <name>ATTR_BOOT_FLAGS</name>
-    <value>0x00000000</value>
+    <value>0x9A100000</value>
   </entry>
   <entry>
     <name>ATTR_IS_MPIPL</name>
@@ -238,7 +238,7 @@
   <!-- sampled: mailbox 4 -->
   <entry>
     <name>ATTR_I2C_BUS_DIV_REF</name>
-    <value>0x00A4</value>
+    <value>0x0041</value>
   </entry>
   <entry>
     <name>ATTR_FREQ_CORE_BOOT_MHZ</name>
