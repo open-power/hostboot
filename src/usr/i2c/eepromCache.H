@@ -97,6 +97,25 @@ errlHndl_t buildEepromRecordHeader(TARGETING::Target * i_target,
                                     eeprom_addr_t & io_eepromInfo,
                                     eepromRecordHeader & o_eepromRecordHeader);
 
+/**
+ *
+ * @brief Check whether the given record header is present in the global
+ *        EEPROM cache map.
+ * @param[in] i_eepromRecordHeader - the record to be found in the map
+ *
+ * @return bool whether the record exists in the global EEPROM cache map
+ */
+bool isEepromRecordPresent(const eepromRecordHeader& i_eepromRecordHeader);
+
+#ifndef CONFIG_SUPPORT_EEPROM_HWACCESS
+/**
+ * @brief Pre-populates the global eecache map with the contents of the
+ *        EECACHE PNOR partition
+ *
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t cacheEECACHEPartition();
+#endif
 
 #ifndef __HOSTBOOT_RUNTIME
 
@@ -168,7 +187,7 @@ void printTableOfContents(void);
 *
 * @param[in] i_eepromRole Role of EEPROM associated with target (VPD_PRIMARY etc)
 *
-* @param[in] i_isValid    Mark eeprom cache valid or invalid ? 
+* @param[in] i_isValid    Mark eeprom cache valid or invalid ?
 *
 * @return errlHndl_t - nullptr if successful, otherwise a pointer to the
 *       error log.
@@ -186,7 +205,7 @@ errlHndl_t setIsValidCacheEntry(const TARGETING::Target * i_target,
 *
 * @param[in] i_eepromRecordHeader eepromRecord oject already filled in (including eepromRole)
 *
-* @param[in] i_isValid    Mark eeprom cache valid or invalid ? 
+* @param[in] i_isValid    Mark eeprom cache valid or invalid ?
 *
 * @return errlHndl_t - nullptr if successful, otherwise a pointer to the
 *       error log.
@@ -264,7 +283,8 @@ uint64_t lookupEepromCacheAddr(const eepromRecordHeader& i_eepromRecordHeader,
 *
 */
 void printCurrentCachedEepromMap(void);
+
 #endif  // __HOSTBOOT_RUNTIME
 }
 
-#endif
+#endif // namespace  EEPROM

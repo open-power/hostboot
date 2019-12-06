@@ -34,6 +34,7 @@
 #include "i2c_common.H"
 #include <vpd/spdenums.H>
 #include <fapiwrap/fapiWrapif.H>
+#include "eepromCache.H"
 
 extern trace_desc_t* g_trac_i2c;
 
@@ -42,6 +43,43 @@ extern trace_desc_t* g_trac_i2c;
 
 namespace I2C
 {
+
+#ifndef CONFIG_SUPPORT_EEPROM_HWACCESS
+/**
+ * @brief Performs presence detection against the EECACHE PNOR partition.
+ *        In this case, the target is considered present if it has a
+ *        corresponding record in the EECACHE header.
+ *
+ * @param[in] i_target the target to check for presence
+ * @param[out] o_present the presence state of the target
+ * @return errlHndl_t: nullptr on success; non-nullptr on error
+ */
+errlHndl_t eecachePresenceDetect(TARGETING::Target* i_target,
+                                 bool& o_present)
+{
+    errlHndl_t l_errl = nullptr;
+    o_present = false;
+
+    do {
+    // Build an eecache header record out of the provided target
+    EEPROM::eeprom_addr_t l_eepromInfo;
+    EEPROM::eepromRecordHeader l_eepromRecordHeader {};
+    l_eepromInfo.eepromRole = EEPROM::VPD_PRIMARY;
+    l_errl = EEPROM::buildEepromRecordHeader(i_target,
+                                             l_eepromInfo,
+                                             l_eepromRecordHeader);
+    if(l_errl)
+    {
+        break;
+    }
+
+    o_present = EEPROM::isEepromRecordPresent(l_eepromRecordHeader);
+
+    }while(0);
+
+    return l_errl;
+}
+#endif
 
 /**
  * @brief Performs a presence detect operation on a Target that has the
@@ -234,17 +272,29 @@ errlHndl_t ocmbI2CPresencePerformOp(DeviceFW::OperationType i_opType,
                                     int64_t i_accessType,
                                     va_list i_args)
 {
-    errlHndl_t l_invalidateErrl = nullptr;
+    errlHndl_t l_errl = nullptr;
+    bool l_ocmbPresent = true;
 
+#ifndef CONFIG_SUPPORT_EEPROM_HWACCESS
+    l_errl = eecachePresenceDetect(i_target, l_ocmbPresent);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_i2c, "ocmbI2CPresencePerformOp: could not presence-"
+                  "detect target HUID 0x%.08x against the existing EECACHE",
+                  TARGETING::get_huid(i_target));
+        l_ocmbPresent = false;
+        errlCommit(l_errl, I2C_COMP_ID);
+    }
+#else
     // TODO RTC 213602
     // Enable once presence detection is supported
     //bool l_ocmbPresent = EEPROM::eepromPresence(i_target);
-    bool l_ocmbPresent = true;
+#endif
 
     memcpy(io_buffer, &l_ocmbPresent, sizeof(l_ocmbPresent));
     io_buflen = sizeof(l_ocmbPresent);
 
-    return l_invalidateErrl;
+    return l_errl;
 }
 
 /**
@@ -271,13 +321,31 @@ errlHndl_t pmicI2CPresencePerformOp(DeviceFW::OperationType i_opType,
 {
 
     errlHndl_t l_errl = nullptr;
-    bool l_pmicPresent = 0;
+    bool l_pmicPresent = false;
     TARGETING::Target* l_parentOcmb = TARGETING::getImmediateParentByAffinity(i_target);
 
     uint8_t l_spdBlob[SPD::DDIMM_DDR4_SPD_SIZE];
     size_t l_spdSize = SPD::DDIMM_DDR4_SPD_SIZE;
 
     do{
+
+#ifndef CONFIG_SUPPORT_EEPROM_HWACCESS
+        // In the EECACHE presence detection mode, look at the presence state of
+        // the parent OCMB instead of reading it.
+        l_errl = eecachePresenceDetect(l_parentOcmb, l_pmicPresent);
+        if(l_errl)
+        {
+            TRACFCOMP(g_trac_i2c, "pmicI2CPresencePerformOp: couldn't presence-"
+                      "detect target HUID 0x%.08x against the existing EECACHE",
+                      TARGETING::get_huid(i_target));
+            break;
+        }
+
+        if(!l_pmicPresent)
+        {
+            break;
+        }
+#endif
 
         l_errl = deviceRead(l_parentOcmb,
                             l_spdBlob,
@@ -313,16 +381,21 @@ errlHndl_t pmicI2CPresencePerformOp(DeviceFW::OperationType i_opType,
         if (l_errl)
         {
             TRACFCOMP( g_trac_i2c, ERR_MRK"pmicI2CPresencePerformOp() "
-                        "Error detecting target 0x%.08X, io_buffer will not be set",
+                        "Error detecting target 0x%.08X",
                         TARGETING::get_huid(i_target));
             break;
         }
 
-        // Copy variable describing if target is present or not to i/o buffer param
-        memcpy(io_buffer, &l_pmicPresent, sizeof(l_pmicPresent));
-        io_buflen = sizeof(l_pmicPresent);
-
     }while(0);
+
+    if(l_errl)
+    {
+        l_pmicPresent = false;
+    }
+
+    // Copy variable describing if target is present or not to i/o buffer param
+    memcpy(io_buffer, &l_pmicPresent, sizeof(l_pmicPresent));
+    io_buflen = sizeof(l_pmicPresent);
 
     return l_errl;
 }

@@ -69,7 +69,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/pmlib/include/registers
-
+EXTRAINCDIR += ${ROOTPATH}/src/usr/
 #Required include before all the procedure.mk are included
 include ${ROOTPATH}/procedure.rules.mk
 

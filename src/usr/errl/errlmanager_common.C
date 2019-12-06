@@ -623,13 +623,6 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
         l_send_eSel_only = true;  // just send eSEL without any callout SELs
     }
 
-    if (Util::isSimicsRunning())
-    {
-        TRACFCOMP( g_trac_errl, INFO_MRK
-                   "SIMULATION SPEEDUP -- NOT sending IPMI PEL" );
-        return;
-    }
-
     do {
 
         // keep track of procedure callouts that modify hardware callouts

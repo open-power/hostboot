@@ -1126,7 +1126,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
             // erase this target, and 'increment' to next
             pTarget_it = io_targets.erase(pTarget_it);
         }
-#ifdef CONFIG_SUPPORT_EEPROM_CACHING
+#if defined(CONFIG_SUPPORT_EEPROM_CACHING) && defined(CONFIG_SUPPORT_EEPROM_HWACCESS)
         TARGETING::EepromVpdPrimaryInfo eepromData;
         if (pTarget->tryGetAttr<ATTR_EEPROM_VPD_PRIMARY_INFO>(eepromData))
         {

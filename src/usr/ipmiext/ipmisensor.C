@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -210,6 +210,7 @@ namespace SENSOR
 
         errlHndl_t l_err = NULL;
 
+#if 0 // TODO RTC: 246392 Remove this code when PLDM is up
         iv_msg->iv_sensor_number = static_cast<uint8_t>(getSensorNumber());
 
         if( iv_msg->iv_sensor_number != TARGETING::UTIL::INVALID_IPMI_SENSOR )
@@ -253,6 +254,7 @@ namespace SENSOR
 
             delete iv_msg;
         }
+#endif
 
         return l_err;
     };

@@ -132,6 +132,7 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
         // is functional because DIMM presence detect is called before
         // the parent MCS/MCA or MBA/MEMBUF is set as present/functional.
         bool l_i2cMasterPresent = false;
+        bool l_masterProc = true;
 
         do
         {
@@ -177,6 +178,7 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
             // Master proc is taken as always present. Validate other targets.
             if (l_i2cMasterTarget != masterProcTarget)
             {
+                l_masterProc = false;
                 l_i2cMasterPresent = FSI::isSlavePresent(l_i2cMasterTarget);
                 if( !l_i2cMasterPresent )
                 {
@@ -209,7 +211,7 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
         // able to be used.  Currently only port 0..3 are available.
         const auto i2cInfo = i_target->getAttr<
             TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO>();
-        if(i2cInfo.port < 4)
+        if(i2cInfo.port < 4  && l_masterProc)
         {
            present=true;
         }

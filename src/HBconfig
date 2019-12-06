@@ -83,3 +83,12 @@ config SIMICS_SLAVECORE_HACK
         If enabled will use Simics magic instructions to enable
         the slave cores
 
+config SUPPORT_EEPROM_HWACCESS
+    default n
+    help
+        Hostboot will directly access EEPROM hardware for presence detection,
+        vpd collection, and any modifications to the contents.  If not set,
+        Hostboot will use pre-built EECACHE to perform presence detection. Only
+        the devices with associated records pre-populated into the EECACHE PNOR
+        partition will be marked as present; all devices without existing EECACHE
+        records will be marked as not present.

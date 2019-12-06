@@ -73,6 +73,55 @@ uint64_t g_eecachePnorSize  = 0;
 //         if this eeprom's hardware has changed this IPL
 std::map<eepromRecordHeader, EeepromEntryMetaData_t> g_cachedEeproms;
 
+bool isEepromRecordPresent(const eepromRecordHeader& i_eepromRecordHeader)
+{
+    bool l_isRecordCached = false;
+
+    mutex_lock(&g_eecacheMutex);
+    l_isRecordCached = (g_cachedEeproms.find(i_eepromRecordHeader) !=
+                        g_cachedEeproms.end());
+    mutex_unlock(&g_eecacheMutex);
+
+    return l_isRecordCached;
+}
+
+/**
+ * @brief A helper function to populate the global variables used by
+ *        eecache
+ *
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t populateEecacheGlobals()
+{
+    errlHndl_t l_errl = nullptr;
+
+    do {
+    // if g_eecachePnorVaddr == 0 this indicates we have not yet looked up
+    // the virtual address for the start of the EECACHE pnor section so we must
+    // look it up. We can then store it in this global var for later use
+    if(g_eecachePnorVaddr == 0 || g_eecachePnorSize == 0)
+    {
+        PNOR::SectionInfo_t l_sectionInfo;
+        l_errl = PNOR::getSectionInfo(PNOR::EECACHE, l_sectionInfo);
+
+        if(l_errl)
+        {
+            TRACFCOMP(g_trac_eeprom, "populateEecacheGlobals() Failed while looking up "
+                      "the EECACHE section in PNOR!!");
+            break;
+        }
+
+        mutex_lock(&g_eecacheMutex);
+        g_eecachePnorVaddr = l_sectionInfo.vaddr;
+        g_eecachePnorSize = l_sectionInfo.size;
+        TRACFCOMP( g_trac_eeprom, "populateEecacheGlobals() vaddr for EECACHE start = 0x%lx , size = 0x%lx!!",
+                   g_eecachePnorVaddr, g_eecachePnorSize);
+        mutex_unlock(&g_eecacheMutex);
+    }
+    } while(0);
+    return l_errl;
+}
+
 /**
  * @brief Lookup I2C information for given eeprom, check if eeprom exists in cache.
  *        If it exists already determine if any updates are required. If it is not
@@ -130,26 +179,10 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
             break;
         }
 
-        // if g_eecachePnorVaddr == 0 this indicates we have not yet looked up
-        // the virtual address for the start of the EECACHE pnor section so we must look
-        // it up. We can then store it in this global var for later use
-        if(g_eecachePnorVaddr == 0 || g_eecachePnorSize == 0)
+        l_errl = populateEecacheGlobals();
+        if(l_errl)
         {
-            PNOR::SectionInfo_t l_sectionInfo;
-            l_errl = PNOR::getSectionInfo(PNOR::EECACHE, l_sectionInfo);
-
-            if(l_errl)
-            {
-                TRACFCOMP( g_trac_eeprom, "cacheEeprom() Failed while looking up the EECACHE section in PNOR!!");
-                break;
-            }
-
-            mutex_lock(&g_eecacheMutex);
-            g_eecachePnorVaddr = l_sectionInfo.vaddr;
-            g_eecachePnorSize = l_sectionInfo.size;
-            TRACFCOMP( g_trac_eeprom, "cacheEeprom() vaddr for EECACHE start = 0x%lx , size = 0x%lx!!",
-                       g_eecachePnorVaddr, g_eecachePnorSize);
-            mutex_unlock(&g_eecacheMutex);
+            break;
         }
 
         // The start of the EECACHE pnor section follows the order of the eecacheSectionHeader struct
@@ -802,11 +835,11 @@ bool addEepromToCachedList(const eepromRecordHeader & i_eepromRecordHeader,
 {
     bool l_matchFound = true;
 
-    // Map accesses are not thread safe, make sure this is always wrapped in mutex
-    mutex_lock(&g_eecacheMutex);
-
-    if(g_cachedEeproms.find(i_eepromRecordHeader) == g_cachedEeproms.end())
+    if(!isEepromRecordPresent(i_eepromRecordHeader))
     {
+        // Map accesses aren't thread safe, make sure this is always wrapped in
+        // mutex
+        mutex_lock(&g_eecacheMutex);
         g_cachedEeproms[i_eepromRecordHeader].cache_entry_address =
               g_eecachePnorVaddr + i_eepromRecordHeader.completeRecord.internal_offset;
 
@@ -825,9 +858,8 @@ bool addEepromToCachedList(const eepromRecordHeader & i_eepromRecordHeader,
                     i_eepromRecordHeader.completeRecord.cache_copy_size);
 
         l_matchFound = false;
+        mutex_unlock(&g_eecacheMutex);
     }
-
-    mutex_unlock(&g_eecacheMutex);
 
     return l_matchFound;
 }
@@ -956,4 +988,60 @@ uint64_t lookupEepromHeaderAddr(const eepromRecordHeader& i_eepromRecordHeader)
     return l_vaddr;
 }
 
+#ifndef CONFIG_SUPPORT_EEPROM_HWACCESS
+errlHndl_t cacheEECACHEPartition()
+{
+    errlHndl_t l_errl = nullptr;
+    do {
+    l_errl = populateEecacheGlobals();
+    if(l_errl)
+    {
+        break;
+    }
+
+    // A pointer to the top of EECACHE partition.
+    eecacheSectionHeader* l_eecacheSectionHeader =
+            reinterpret_cast<eecacheSectionHeader*>(g_eecachePnorVaddr);
+    // The record header we want to push into the global eecache map
+    eepromRecordHeader* l_pRecordHeader = nullptr;
+    eepromRecordHeader l_recordToAdd {};
+
+    for(uint8_t i = 0; i < MAX_EEPROMS_VERSION_1; ++i)
+    {
+        l_pRecordHeader = &l_eecacheSectionHeader->recordHeaders[i];
+        if(l_pRecordHeader->completeRecord.internal_offset ==
+           UNSET_INTERNAL_OFFSET_VALUE)
+        {
+            // This is a non-existing record, no need to populate the cache
+            // with it
+            continue;
+        }
+
+        memcpy(&l_recordToAdd, l_pRecordHeader, sizeof(l_recordToAdd));
+        // Add the record to the global eecache
+        if(!addEepromToCachedList(l_recordToAdd,
+                                  reinterpret_cast<uint64_t>(l_pRecordHeader)))
+        {
+            TRACFBIN(g_trac_eeprom,
+                     "cacheEECACHEPartition: added record to the cache",
+                     l_pRecordHeader,
+                     sizeof(*l_pRecordHeader));
+        }
+        else
+        {
+            TRACFBIN(g_trac_eeprom,
+                     ERR_MRK"cacheEECACHEPartition: record already exists",
+                     l_pRecordHeader,
+                     sizeof(*l_pRecordHeader));
+            assert(false,"cacheEECACHEPartition: Attempted to cache a duplicate"
+                  " record. Ensure that cacheEECACHEPartition is called once "
+                  "and no duplicate entries exist in EECACHE.");
+        }
+    }
+
+    }while(0);
+    return l_errl;
 }
+#endif
+
+} // namespace EEPROM
