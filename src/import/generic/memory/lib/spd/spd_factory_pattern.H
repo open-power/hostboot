@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -219,7 +219,8 @@ class module_factory
             RDIMM_DDR4_REV_1_1 { DDR4, RDIMM_MODULE,  rev::V1_1},
             NVDIMM_DDR4_REV_1_0{ DDR4, NVDIMM_MODULE, rev::V1_0},
             NVDIMM_DDR4_REV_1_1{ DDR4, NVDIMM_MODULE, rev::V1_1},
-            DDIMM_DDR4_REV_0_0 { DDR4, DDIMM_MODULE,  rev::V0_0}
+            DDIMM_DDR4_REV_0_0 { DDR4, DDIMM_MODULE,  rev::V0_0},
+            DDIMM_DDR4_REV_0_3 { DDR4, DDIMM_MODULE,  rev::V0_3}
         {
             // Setup pre-defined maps available to search through
             init_map_vars(i_spd_data, iv_decoder_map);
@@ -270,6 +271,7 @@ class module_factory
         const module_key NVDIMM_DDR4_REV_1_0;
         const module_key NVDIMM_DDR4_REV_1_1;
         const module_key DDIMM_DDR4_REV_0_0;
+        const module_key DDIMM_DDR4_REV_0_3;
 
         std::map< module_key, std::shared_ptr<T> > iv_decoder_map;
 
@@ -329,6 +331,10 @@ class module_factory
             // Rev 0.0
             // DDIMMs start out life w/the updated general section
             o_map[DDIMM_DDR4_REV_0_0] = std::make_shared< decoder<DDR4, BASE_CNFG, rev::V0_0> >(iv_target, i_spd_data);
+
+            // Remains mostly the same. New thermal sensor fields and pmic redundancy fields
+            o_map[DDIMM_DDR4_REV_0_3] = std::make_shared< decoder<DDR4, BASE_CNFG, rev::V0_3> >(iv_target, i_spd_data);
+
         }
 
         ///
@@ -375,6 +381,9 @@ class module_factory
             // Rev 0.0
             // Life starts out at base revision level
             o_map[DDIMM_DDR4_REV_0_0] = std::make_shared< decoder<DDR4, DDIMM_MODULE, rev::V0_0> >(iv_target, i_spd_data);
+
+            // Remains mostly the same. New thermal sensor fields and pmic redundancy fields
+            o_map[DDIMM_DDR4_REV_0_3] = std::make_shared< decoder<DDR4, DDIMM_MODULE, rev::V0_3> >(iv_target, i_spd_data);
         }
 
         ///
