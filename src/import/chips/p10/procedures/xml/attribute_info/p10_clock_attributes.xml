@@ -89,7 +89,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>RCS PLL input for TOD Filter PLL</description>
   <valueType>uint8</valueType>
-  <enum>SYS_REFCLOCK0 = 0x0, RCS_ASYNC_OUT = 0x1, RCS_SYNC_OUT = 0x2</enum>
+  <enum>SYS_REFCLOCK0 = 0x0, RCS_ASYNC_OUT = 0x2, RCS_SYNC_OUT = 0x1</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -99,7 +99,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>RCS PLL input for Nest Filter PLL</description>
   <valueType>uint8</valueType>
-  <enum>SYS_REFCLOCK0 = 0x0, RCS_ASYNC_OUT = 0x1, RCS_SYNC_OUT = 0x2</enum>
+  <enum>SYS_REFCLOCK0 = 0x0, RCS_ASYNC_OUT = 0x2, RCS_SYNC_OUT = 0x1</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -109,7 +109,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>RCS PLL input for IO Filter PLL</description>
   <valueType>uint8</valueType>
-  <enum>SYS_REFCLOCK0 = 0x0, RCS_ASYNC_OUT = 0x1, RCS_SYNC_OUT = 0x2</enum>
+  <enum>SYS_REFCLOCK0 = 0x0, RCS_ASYNC_OUT = 0x2, RCS_SYNC_OUT = 0x1</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -119,7 +119,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>RCS PLL input for IO Spread Spectrum Filter PLL</description>
   <valueType>uint8</valueType>
-  <enum>SYS_REFCLOCK0 = 0x0, RCS_ASYNC_OUT = 0x1, RCS_SYNC_OUT = 0x2</enum>
+  <enum>SYS_REFCLOCK0 = 0x0, RCS_ASYNC_OUT = 0x2, RCS_SYNC_OUT = 0x1</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -189,7 +189,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>OMI LCPLL input</description>
   <valueType>uint8</valueType>
-  <enum>PLLTODFLT = 0, PLLNESTFLT = 1, PLLIOFLT = 2</enum>
+  <enum>PLLTODFLT = 0, PLLNESTFLT = 2, PLLIOFLT = 1</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -199,7 +199,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Mux 13 input</description>
   <valueType>uint8</valueType>
-  <enum>PLLTODFLT = 0, PLLNESTFLT = 1, PLLIOFLT = 2</enum>
+  <enum>PLLTODFLT = 0, PLLNESTFLT = 2, PLLIOFLT = 1</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -228,7 +228,7 @@
     IOHS7: Mux22
   </description>
   <valueType>uint8</valueType>
-  <enum>PLLTODFLT = 0, MUX14 = 1, MUX13 = 2</enum>
+  <enum>PLLTODFLT = 0, MUX14 = 2, MUX13 = 1</enum>
   <platInit/>
   <initToZero/>
   <array>8</array>
@@ -240,7 +240,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Mux 23 input from FPLL</description>
   <valueType>uint8</valueType>
-  <enum>PLLTODFLT = 0, PLLIOSSFLT = 1, MUX0D = 2</enum>
+  <enum>PLLTODFLT = 0, PLLIOSSFLT = 2, MUX0D = 1</enum>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -253,7 +253,7 @@
     PCI1: Mux25
  </description>
   <valueType>uint8</valueType>
-  <enum>MUX23 = 0, PCI_REFCLOCK0 = 1, PCI_REFCLOCK1 = 2</enum>
+  <enum>MUX23 = 0, PCI_REFCLOCK0 = 2, PCI_REFCLOCK1 = 1</enum>
   <platInit/>
   <initToZero/>
   <array>2</array>
