@@ -111,7 +111,8 @@ fapi2::ReturnCode p10_setup_ref_clock(const
     }
 
     mux0_val = (l_attr_mux0a_rcs_pll | l_attr_mux0b_rcs_pll | l_attr_mux0c_rcs_pll | l_attr_mux0d_rcs_pll);
-    l_read_reg.insertFromRight<30, 2>(mux0_val);
+    l_read_reg.writeBit<30>(mux0_val & fapi2::ENUM_ATTR_CLOCK_MUX0A_RCS_PLL_INPUT_RCS_SYNC_OUT);
+    l_read_reg.writeBit<31>(mux0_val & fapi2::ENUM_ATTR_CLOCK_MUX0A_RCS_PLL_INPUT_RCS_ASYNC_OUT);
 
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL5_FSI, l_read_reg));
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL5_COPY_FSI, l_read_reg));
