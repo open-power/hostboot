@@ -188,13 +188,11 @@ namespace   INITSERVICE
                 ISTEP_14::call_proc_exit_cache_contained,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-        /*
         {
                 ISTEPNAME(14,07,"proc_htm_setup"),
                 ISTEP_14::call_proc_htm_setup,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-        */
         {
                 ISTEPNAME(14,08,"host_mpipl_service"),
                 nullptr, //ISTEP_14::call_host_mpipl_service,

@@ -53,13 +53,18 @@ EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/nest
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/nest/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory
+EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/utils/
+EXTRAINCDIR += ${ROOTPATH}/src/import/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/shared/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/inband/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
 
 #OBJS += call_mss_memdiag.o
 #OBJS += call_mss_thermal_init.o
 #OBJS += call_proc_pcie_config.o
 #OBJS += call_mss_power_cleanup.o
 OBJS += call_proc_setup_mmio_bars.o
-#OBJS += call_proc_htm_setup.o
+OBJS += call_proc_htm_setup.o
 OBJS += call_proc_exit_cache_contained.o
 #OBJS += call_host_mpipl_service.o
 
@@ -76,7 +81,8 @@ include ${PROCEDURE_PATH}/hwp/nest/p10_revert_sbe_mcs_setup.mk
 # ---- Workaround: Compile the HWP directly below
 OBJS += p10_adu_setup.o
 OBJS += p10_setup_mmio_bars.o
-#OBJS += p9_htm_setup.o
+OBJS += p10_putmemproc.o
+OBJS += p10_getputmemproc_utils.o
 #OBJS += p9_htm_start.o
 #OBJS += p9_htm_reset.o
 #OBJS += p9_htm_adu_ctrl.o
@@ -85,7 +91,7 @@ OBJS += p10_setup_mmio_bars.o
 #OBJS += p9_mpipl_chip_cleanup.o
 #OBJS += p9_mss_thermal_init.o
 
-#include ${PROCEDURE_PATH}/hwp/nest/p9_htm_setup.mk
+include ${PROCEDURE_PATH}/hwp/nest/p10_htm_setup.mk
 #include ${PROCEDURE_PATH}/hwp/nest/p9_pcie_config.mk
 #include ${PROCEDURE_PATH}/hwp/nest/p9_setup_bars.mk
 # ---- End workaround

@@ -31,19 +31,15 @@
 #include    <isteps/hwpisteperror.H>
 #include    <initservice/isteps_trace.H>
 
-/* FIXME RTC: 210975
 //HWP Invoker
 #include    <fapi2/plat_hwp_invoker.H>
-*/
 
 //Targeting Support
 #include    <targeting/common/utilFilter.H>
-/* FIXME RTC: 210975
 #include    <fapi2/target.H>
 
 //From Import Directory (EKB Repository)
-#include    <p9_htm_setup.H>
-*/
+#include    <p10_htm_setup.H>
 
 //Namespaces
 using namespace ERRORLOG;
@@ -56,8 +52,7 @@ void* call_proc_htm_setup (void *io_pArgs)
 {
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_htm_setup entry" );
     ISTEP_ERROR::IStepError l_StepError;
-/* FIXME RTC: 210975
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
     do {
         //Use targeting code to get a list of all processors
         TARGETING::TargetHandleList l_procChips;
@@ -68,20 +63,23 @@ void* call_proc_htm_setup (void *io_pArgs)
             const fapi2::Target<TARGET_TYPE_PROC_CHIP>
                 l_fapi_cpu_target(l_procChip);
             // call p9_htm_setup.C HWP
-             FAPI_INVOKE_HWP( l_errl,
-                              p9_htm_setup,
-                              l_fapi_cpu_target);
+            FAPI_INVOKE_HWP( l_errl,
+                             p10_htm_setup,
+                             l_fapi_cpu_target);
 
             if(l_errl)
             {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "call_proc_htm_setup: p10_htm_setup failed on HUID 0x%08x. "
+                        TRACE_ERR_FMT,
+                        get_huid(l_procChip),
+                        TRACE_ERR_ARGS(l_errl));
                 ErrlUserDetailsTarget(l_procChip).addToLog(l_errl);
                 l_StepError.addErrorDetails( l_errl );
                 errlCommit( l_errl, HWPF_COMP_ID );
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_htm_setup:: failed on proc with HUID : %d",TARGETING::get_huid(l_procChip)  );
             }
         }
     }while(0);
-*/
     // end task, returning any errorlogs to IStepDisp
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_htm_setup exit" );
     return l_StepError.getErrorHandle();
