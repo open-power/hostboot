@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -157,13 +157,17 @@ typedef std::map<const TARGETING::TargetHandle_t, bool> pgState_map;
  * @param[io]  io_targetStates    Reference to the target state map to prevent
  *                                re-checking targets.
  *
+ * @param[io]  io_deconfigTargets Optional argument, store reference to targets
+ *                                found to be not functional by VPD data
+ *
  * @return bool                   Returns true if the descendant is functional;
  *                                False if not.
  *
  */
 bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
                       const partialGoodVector &i_pgData,
-                      pgState_map &io_targetStates);
+                      pgState_map &io_targetStates,
+                      TARGETING::TargetHandleList *io_deconfigTargets = nullptr);
 
 
 /**
@@ -196,6 +200,11 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
  * @param[out] o_testResult       A pointer to the functional state of i_pTarget
  *                                if we are running a test. Default nullptr.
  *
+ * @param[io]  io_deconfigTargets Optional argument, will store reference to
+ *                                targets marked as notfunctional by VPD data.
+ *                                This data is gathered when
+ *                                isDescFunctional(...) is called.
+ *
  * @return                        Returns an error if encountered, otherwise
  *                                nullptr.
  *
@@ -206,9 +215,10 @@ errlHndl_t checkPartialGoodForDescendants(
                 const bool i_chipFunctional,
                 const uint32_t i_errlEid,
                 errlHndl_t io_infoErrl,
-                bool &io_createInfoLog,
+                bool* io_createInfoLog,
                 bool i_isTestcase = false,
-                bool* o_testResult = nullptr);
+                bool* o_testResult = nullptr,
+                TARGETING::TargetHandleList* io_deconfigTargets = nullptr);
 
 /**
 * @brief                         This function will propagate a parent's

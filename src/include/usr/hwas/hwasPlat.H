@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,36 @@
 
 namespace HWAS
 {
+
+/**
+@brief Help in verifying that HB and SBE deconfig match
+*/
+class HWASPlatVerification
+{
+
+public: // User interface
+
+    /**
+     * @brief Helper function to verify that HB and SBE
+     *        deconfiguration data matches
+     */
+    void verifyDeconfiguration();
+
+private:
+
+    /**
+     * @brief Check whether if for a given target its caculated deconfig from HB
+     * and SBE match. If it doesn't match this function will log an error.
+     * This function is made virtual so that tests can override it.
+     *
+     * @param[in]  i_target Target being verified
+     * @param[in]  i_hbFunctional De-configuration according to HB
+     * @param[in]  i_sbeFunctional De-configuration according to SBE
+     */
+    virtual void verificationMatchHandler(TARGETING::Target * i_target,
+        bool i_hbFunctional, bool i_sbeFunctional);
+
+};
 
 /**
  * @brief   hwasPLDDetection   hostboot function

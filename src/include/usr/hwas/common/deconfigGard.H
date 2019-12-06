@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,16 +74,29 @@ errlHndl_t collectGard(const TARGETING::PredicateBase *i_pPredicate = NULL);
 errlHndl_t clearGardByType(const GARD_ErrorType i_type);
 
 /**
- * @brief  updateDeconfigureMask
+ * @brief  updateAttrPG
  *
- *                          Common HWAS function to set the PG attribute of a
- *                          target according to a given HWAS state.
+ *                                  Common HWAS function to set the PG attribute
+ *                                  of a target by updating ATTR_PG.
  *
- * @param  i_target         The target to update.
- * @param  i_hwasState      The HWAS state to translate.
+ * @param  i_target                 The target to update.
+ * @param  i_shouldSetFunctional    If true will update ATTR_PG to functional,
+ *                                  else it will be set to not-functional.
  */
-void updateDeconfigureMask(TARGETING::Target& i_target,
-                           const TARGETING::ATTR_HWAS_STATE_type i_hwasState);
+void updateAttrPG(TARGETING::Target& i_target,
+                           const bool i_shouldSetFunctional);
+
+/**
+ * @brief getDeconfigMaskedPGValue
+ *
+ *                          Common HWAS function to get the deconfigured masked
+ *                          PG entry value of a target.
+ *
+ * @param[in] i_target      Target whose masked PG value is calculated.
+ *
+ * @return pg_entry_t       Masked PG value.
+ */
+pg_entry_t getDeconfigMaskedPGValue(const TARGETING::Target& i_target);
 
 /**
  * @brief Returns a reference to the DeconfigGard singleton.
@@ -661,13 +674,16 @@ private:
      * @param[out] o_targetDeconfigured - if pointer is valid, bool is set
      *                  to true if target was deconfigured; NOT SET OTHERWISE
      * @param[in] i_deconfigRule Deconfigure Runtime options -
-     *              default not at runtime
+     *                  default not at runtime
+     * @param[in] i_shouldUpdateAttrPG Flag stating whether to update ATTR_PG
+     *                  for i_target
      */
     void _deconfigureTarget(TARGETING::Target & i_target,
                             const uint32_t i_errlEid,
                             bool *o_targetDeconfigured = NULL,
                             const DeconfigureFlags i_deconfigRule =
-                                    NOT_AT_RUNTIME);
+                                    NOT_AT_RUNTIME,
+                            bool i_shouldUpdateAttrPG = false);
 
     /**
      * @brief Works deconfig up the parent branch

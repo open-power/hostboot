@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,6 +27,7 @@
  *
  *  @brief Implements the DeconfigGard class
  */
+
 #include <stdint.h>
 #include <algorithm>
 #include <vector>
@@ -144,12 +145,39 @@ DeconfigGard::~DeconfigGard()
     free(iv_platDeconfigGard);
 }
 
-void updateDeconfigureMask(Target& i_target,
-                           const ATTR_HWAS_STATE_type i_hwasState)
+void updateAttrPG(Target& i_target, const bool i_shouldSetFunctional)
+{
+
+    Target* const l_perv = getTargetWithPGAttr(i_target);
+
+    if (l_perv)
+    {
+        const pg_entry_t l_old_ATTR_PG_mask = l_perv->getAttr<ATTR_PG>();
+
+        // Get masked PG value
+        const pg_entry_t l_new_ATTR_PG_mask =
+            getDeconfigMaskedPGValue(i_target);
+
+        // Apply the mask, either straight-way or else inverted depending on
+        // whether this target is being enabled or disabled.
+
+        if (!i_shouldSetFunctional)
+        {
+            l_perv->setAttr<ATTR_PG>(l_old_ATTR_PG_mask | l_new_ATTR_PG_mask);
+        }
+        else
+        {
+            l_perv->setAttr<ATTR_PG>(l_old_ATTR_PG_mask & ~l_new_ATTR_PG_mask);
+        }
+    }
+
+}
+
+pg_entry_t getDeconfigMaskedPGValue(const Target& i_target)
 {
     using namespace PARTIAL_GOOD;
 
-    // This structure holds a deconfiguration rule that applies a mask to a the
+    // This structure holds a deconfiguration rule that applies a mask to the
     // ATTR_PG bits of the given target type when the target is not functional
     // or present.
     struct target_deconfig_rule
@@ -182,67 +210,49 @@ void updateDeconfigureMask(Target& i_target,
                            return l_targetType == rule.targetType;
                        });
 
-    Target* const l_perv = getTargetWithPGAttr(i_target);
+    const auto l_chipUnit = i_target.getAttr<ATTR_CHIP_UNIT>();
 
-    if (l_perv)
+    // We will build this mask up from the rules in the array
+    // above (target_deconfig_rule), along with the rules specified in the
+    // partial-good logic (pgLogic.C)
+    pg_entry_t l_attrPGMask = 0;
+
+    // Loop through l_deconfigRules and apply all the relevant ones
+    while ((l_deconfigRule != std::end(l_deconfigRules))
+           && (l_deconfigRule->targetType == l_targetType))
     {
-        const pg_entry_t l_old_ATTR_PG_mask = l_perv->getAttr<ATTR_PG>();
+        l_attrPGMask |= l_deconfigRule->deconfigureMask;
+        ++l_deconfigRule;
+    }
 
-        // We will build this mask up from the rules in the array above, along
-        // with the rules specified in the partial-good logic (pgLogic.C)
-        pg_entry_t l_new_ATTR_PG_mask = 0;
+    // Now iterate the relevant partial-good rules and accumulate our mask
+    size_t l_numPgRules = 0;
+    const PartialGoodRule* l_pgRule_it = nullptr;
 
-        const auto l_chipUnit = i_target.getAttr<ATTR_CHIP_UNIT>();
+    auto l_errl = findRulesForTarget(&i_target, l_pgRule_it, l_numPgRules);
 
-        // Loop through l_deconfigRules and apply all the relevant ones
-        while ((l_deconfigRule != std::end(l_deconfigRules))
-               && (l_deconfigRule->targetType == l_targetType))
+    if (l_errl)
+    {
+        l_errl->collectTrace(HWAS_COMP_NAME);
+        errlCommit(l_errl, HWAS_COMP_ID);
+    }
+    else
+    {
+        while (l_numPgRules-- != 0)
         {
-            l_new_ATTR_PG_mask |= l_deconfigRule->deconfigureMask;
-
-            ++l_deconfigRule;
-        }
-
-        // Now iterate the relevant partial-good rules and accumulate our mask
-
-        size_t l_numPgRules = 0;
-        const PartialGoodRule* l_pgRule_it = nullptr;
-
-        auto l_errl = findRulesForTarget(&i_target, l_pgRule_it, l_numPgRules);
-
-        if (l_errl)
-        {
-            l_errl->collectTrace(HWAS_COMP_NAME);
-            errlCommit(l_errl, HWAS_COMP_ID);
-        }
-        else
-        {
-            while (l_numPgRules-- != 0)
+            if (l_pgRule_it->isApplicableToCurrentModel()
+                && l_pgRule_it->isApplicableToChipUnit(l_chipUnit))
             {
-                if (l_pgRule_it->isApplicableToCurrentModel()
-                    && l_pgRule_it->isApplicableToChipUnit(l_chipUnit))
-                {
-                    l_new_ATTR_PG_mask |= l_pgRule_it->partialGoodMask();
-                }
-
-                ++l_pgRule_it;
+                l_attrPGMask |= l_pgRule_it->partialGoodMask();
             }
-        }
 
-        // Apply the mask, either straight-way or else inverted depending on
-        // whether this target is being enabled or disabled.
-
-        if (!i_hwasState.functional || !i_hwasState.present)
-        {
-            l_perv->setAttr<ATTR_PG>(l_old_ATTR_PG_mask | l_new_ATTR_PG_mask);
-        }
-        else
-        {
-            l_perv->setAttr<ATTR_PG>(l_old_ATTR_PG_mask & ~l_new_ATTR_PG_mask);
+            ++l_pgRule_it;
         }
     }
-}
 
+    return l_attrPGMask;
+
+}
 
 #ifndef __HOSTBOOT_RUNTIME
 //******************************************************************************
@@ -250,6 +260,7 @@ errlHndl_t DeconfigGard::applyGardRecord(Target *i_pTarget,
         GardRecord &i_gardRecord,
         const DeconfigureFlags i_deconfigRule)
 {
+
     HWAS_INF("Apply gard record for target %.8X", get_huid(i_pTarget));
     errlHndl_t l_pErr = NULL;
     do
@@ -289,7 +300,7 @@ errlHndl_t DeconfigGard::applyGardRecord(Target *i_pTarget,
         // Deconfigure the Target
         // don't need to check ATTR_DECONFIG_GARDABLE -- if we get
         //  here, it's because of a gard record on this target
-        _deconfigureTarget(*i_pTarget, l_errlogEid,NULL,i_deconfigRule);
+        _deconfigureTarget(*i_pTarget, l_errlogEid, NULL, i_deconfigRule, true);
 
         // Deconfigure other Targets by association
         _deconfigureByAssoc(*i_pTarget, l_errlogEid,i_deconfigRule);
@@ -1245,6 +1256,7 @@ errlHndl_t DeconfigGard::deconfigureTarget(
 
     do
     {
+
         // Do not deconfig Target if we're NOT being asked to force AND
         // the System is at runtime
         if ((i_deconfigRule == NOT_AT_RUNTIME) &&
@@ -1280,6 +1292,7 @@ errlHndl_t DeconfigGard::deconfigureTarget(
                 i_target.getAttr<ATTR_HWAS_STATE>().present;
         if (!lDeconfigGardable || !lPresent)
         {
+
             // Target is not Deconfigurable. Create an error
             HWAS_ERR("Target %.8X not Deconfigurable (ATTR_DECONFIG_GARDABLE=%d, present=%d)",
                 get_huid(&i_target), lDeconfigGardable, lPresent);
@@ -1310,7 +1323,6 @@ errlHndl_t DeconfigGard::deconfigureTarget(
 
         // all ok - do the work
         HWAS_MUTEX_LOCK(iv_mutex);
-
         // Deconfigure the Target
         _deconfigureTarget(i_target, i_errlEid, o_targetDeconfigured,
                 i_deconfigRule);
@@ -1810,8 +1822,7 @@ void DeconfigGard::_deconfigureByAssoc(
 
         HWAS_INF("_deconfigureByAssoc %.8X _deconfigureTarget on CHILD: %.8X",
                  l_targetHuid, get_huid(pChild));
-        _deconfigureTarget(*pChild, i_errlEid, NULL,
-                i_deconfigRule);
+        _deconfigureTarget(*pChild, i_errlEid, NULL, i_deconfigRule);
         // Deconfigure other Targets by association
         _deconfigureByAssoc(*pChild, i_errlEid, i_deconfigRule);
     } // for CHILD
@@ -1865,7 +1876,7 @@ void DeconfigGard::_deconfigureByAssoc(
 
     HWAS_DBG("_deconfigureByAssoc exiting: %.8X", l_targetHuid);
 
-} // _deconfigByAssoc
+} // _deconfigureByAssoc
 
 //******************************************************************************
 void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
@@ -2052,8 +2063,9 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
 void DeconfigGard::_deconfigureTarget(
         Target & i_target,
         const uint32_t i_errlEid,
-        bool *o_targetDeconfigured,
-        const DeconfigureFlags i_deconfigRule)
+        bool *o_targetDeconfigured /* = NULL */,
+        const DeconfigureFlags i_deconfigRule /* = NOT_AT_RUNTIME */,
+        bool i_shouldUpdateAttrPG /* = false */)
 {
     HWAS_INF("Deconfiguring Target %.8X, errlEid 0x%X",
             get_huid(&i_target), i_errlEid);
@@ -2071,6 +2083,12 @@ void DeconfigGard::_deconfigureTarget(
     else
     {
         l_state.dumpfunctional = 0;
+    }
+
+    // Update ATTR_PG via gard only if i_shouldUpdateAttrPG is true
+    if (i_shouldUpdateAttrPG == true)
+    {
+        updateAttrPG(i_target, false);
     }
 
     if (!l_state.functional)
@@ -2101,6 +2119,7 @@ void DeconfigGard::_deconfigureTarget(
         if(i_deconfigRule == SPEC_DECONFIG)
         {
             HWAS_INF("Setting speculative deconfig");
+
             l_state.specdeconfig = 1;
             l_state.deconfiguredByEid = i_errlEid;
             i_target.setAttr<ATTR_HWAS_STATE>(l_state);
@@ -2116,8 +2135,6 @@ void DeconfigGard::_deconfigureTarget(
             l_state.deconfiguredByEid = i_errlEid;
 
             i_target.setAttr<ATTR_HWAS_STATE>(l_state);
-
-            updateDeconfigureMask(i_target, l_state);
 
             if (o_targetDeconfigured)
             {

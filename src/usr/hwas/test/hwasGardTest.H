@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,8 @@
 #include <hwas/common/hwas.H>
 #include <hwas/common/deconfigGard.H>
 #include <hwas/common/hwas_reasoncodes.H>
+#include <hwas/hwasPlat.H>
+#include <initservice/mboxRegs.H>
 
 //  $$  make sure these are disabled before checking in!!
 #define DISABLE_UNIT_TESTS        1
@@ -247,9 +249,244 @@ void restoreSystemState()
     }
 }
 
+/**
+@brief Class to help test that deconfig done by HB and SBE match each other.
+*/
+class TestHbSbePGDeconfig :
+    public HWAS::HWASDiscovery, public HWAS::HWASPlatVerification
+{
+
+private:
+
+    // Will be used to store original copy (in func saveOrigSbeRegs) and then
+    // set back (in func restoreSbeRegs) the value of ATTR_MASTER_MBOX_SCRATCH
+    ATTR_MASTER_MBOX_SCRATCH_typeStdArr g_originalSbeReg;
+
+    Target* g_topSysTarget;
+
+    /**
+    @brief From HWAS::HWASDiscovery, this function is being overridden to return
+    a manipulated PG vector. The PGV being returned will pretend that all the
+    PECs are not functional.
+    */
+    partialGoodVector parsePgData(const std::array<uint8_t,
+        VPD_CP00_PG_DATA_LENGTH>& pgData) override
+    {
+
+        // Copy of the P10 all good PG vector.
+        // partialGoodVector l_pgDataAllGood = pgDataAllGood;
+        partialGoodVector l_pgDataAllGood;
+        memcpy(&l_pgDataAllGood, &pgDataAllGood, sizeof(pgDataAllGood));
+
+        // Set all the PECs bad
+        for (const int l_pecIdx : VPD_CP00_PG_PCI_INDEX)
+        {
+            l_pgDataAllGood[l_pecIdx] |= (~VPD_CP00_PG_PCI_ALL_GOOD);
+        }
+
+        return l_pgDataAllGood;
+
+    }
+
+    /*
+    @brief From HWAS::HWASPlatVerification, this function overrides the logging
+    of errors to instead check that what has been deconfig with test data was
+    caught by verifyDeconfiguration()
+    */
+    void verificationMatchHandler(Target * i_target,
+        const bool i_hbFunctional, const bool i_sbeFunctional) override
+    {
+
+        // PEC should be deconfig in both HB and SBE context (this was done in
+        // parsePgData() and setFakeScratchRegAttr() respectively)
+        if (i_target->getAttr<ATTR_TYPE>() == TYPE_PEC)
+        {
+            if (i_hbFunctional || i_sbeFunctional)
+            {
+                TS_FAIL("testHostbootSbeDeconfig: verifyDeconfiguration() For "
+                    "PEC with HUID %.8X, expected to be marked not functional "
+                    "by SBE and HB. Instead got SBE marked functional: %s  HB "
+                    "marked functional: %s)",
+                    i_target->getAttr<ATTR_HUID>(),
+                    ((i_sbeFunctional) ? "True" : "False"),
+                    ((i_hbFunctional) ? "True" : "False") );
+            }
+        }
+
+        // All MCs should be deconfig by HB and marked as functional by SBE
+        if (i_target->getAttr<ATTR_TYPE>() == TYPE_MC)
+        {
+            if (i_hbFunctional || !i_sbeFunctional)
+            {
+                TS_FAIL("testHostbootSbeDeconfig: verifyDeconfiguration() For "
+                    "MC with HUID %.8X, expected to be marked functional by "
+                    "SBE and not functional by HB. Instead got SBE marked "
+                    "functional: %s  HB marked functional: %s)",
+                    i_target->getAttr<ATTR_HUID>(),
+                    ((i_sbeFunctional) ? "True" : "False"),
+                    ((i_hbFunctional) ? "True" : "False") );
+            }
+        }
+
+    }
+
+public:
+
+    // Constructor
+    TestHbSbePGDeconfig()
+    {
+        g_topSysTarget = nullptr;
+        targetService().getTopLevelTarget(g_topSysTarget);
+        HWAS_ASSERT(g_topSysTarget, "testHostbootSbeDeconfig: Could not get top"
+            " system target");
+    }
+
+    /**
+    @brief Save original SBE scratch reg attr values
+    */
+    void saveOrigSbeRegs()
+    {
+        g_originalSbeReg = g_topSysTarget->getAttrAsStdArr
+            <ATTR_MASTER_MBOX_SCRATCH>();
+    }
+
+    /**
+    @brief Restore SBE scratch reg to original state (kept in g_originalSbeReg)
+    */
+    void restoreSbeRegs()
+    {
+        g_topSysTarget->setAttrFromStdArr<ATTR_MASTER_MBOX_SCRATCH>
+            (g_originalSbeReg);
+    }
+
+   /**
+    @brief Faking scratch register MboxScratch2_t (as if read from SBE) to:
+    - deconfig all PECs
+    - mark all MCs as functional
+    */
+    void setFakeScratchRegAttr()
+    {
+
+        // Setting PECs to non-functional in MboxScratch2_t
+        // Note that 1 in a bit position means the part is NOT functional,
+        // a 0 means the part is functional.
+        auto l_sbeFakeRegs = g_originalSbeReg;
+        TargetHandleList l_pecList;
+        getChildAffinityTargetsByState(l_pecList, g_topSysTarget, CLASS_NA,
+            TYPE_PEC, UTIL_FILTER_ALL);
+        const uint64_t l_pecRegStartPosition = 0;
+        for (const auto l_pec: l_pecList)
+        {
+            const uint64_t l_shiftToPec = l_pec->getAttr<ATTR_CHIP_UNIT>() +
+                l_pecRegStartPosition;
+            l_sbeFakeRegs[INITSERVICE::SPLESS::MboxScratch2_t::REG_IDX] |=
+                (0x80000000ull >> l_shiftToPec);
+        }
+
+        // Setting MCs to functional in MboxScratch2_t
+        TargetHandleList l_mcList;
+        getChildAffinityTargetsByState(l_mcList, g_topSysTarget, CLASS_NA,
+            TYPE_MC, UTIL_FILTER_ALL);
+        const uint64_t l_mcRegStartPosition = 4;
+        for (const auto l_mc: l_mcList)
+        {
+            const uint64_t l_shiftToMc = l_mc->getAttr<ATTR_CHIP_UNIT>() +
+                l_mcRegStartPosition;
+            l_sbeFakeRegs[INITSERVICE::SPLESS::MboxScratch2_t::REG_IDX] &=
+                ~(0x80000000ull >> l_shiftToMc);
+        }
+
+        // Storing fake data in SBE scratch reg attr
+        g_topSysTarget->setAttrFromStdArr<ATTR_MASTER_MBOX_SCRATCH>
+            (l_sbeFakeRegs);
+    }
+
+    /**
+    @brief Garding all MCs for test
+    */
+    void createFakeGardRecords()
+    {
+        // Get all MCs
+        TargetHandleList l_mcList;
+        getChildAffinityTargetsByState (l_mcList, g_topSysTarget, CLASS_UNIT,
+            TYPE_MC, UTIL_FILTER_ALL);
+
+        // Fake manual gard
+        DeconfigGard::GardRecord l_fakeGardRecord =
+            {0, EntityPath(EntityPath::PATH_NA), 0, GARD_User_Manual, 0, 0};
+
+        // Apply fake gard to all MCs
+        for (auto const& l_mc: l_mcList)
+        {
+            errlHndl_t l_errHandler = nullptr;
+            l_errHandler = HWAS::theDeconfigGard().applyGardRecord(l_mc,
+                l_fakeGardRecord);
+
+            if (l_errHandler)
+            {
+                TS_FAIL("testHostbootSbeDeconfig: createFakeGardRecords() was "
+                "not able to apply test gard records");
+            }
+        }
+
+    }
+
+};
+
 class HwasGardTest: public CxxTest::TestSuite
 {
 public:
+
+    /**
+    @brief This test will fake de-configuration of targets from the HB and SBE
+    side independently.
+    SBE deconfig will be faked by editing ATTR_MASTER_MBOX_SCRATCH:
+        - All PECs marked as non-functional
+        - All MCs marked as functional
+    HB deconfig will be faked by:
+        - Changing VPD PG read by HB to read all PECs as non-functional
+        - Garding all MCs
+    Following the succesful creation of faked data, verifyDeconfiguration()
+    will be called to verify that in fact the de-configurations were caught and
+    that verifyDeconfiguration() takes appropriate action based on that.
+    The TestHbSbePGDeconfig class was created to assist in this testcase.
+    */
+    void testHostbootSbeDeconfig()
+    {
+
+        // Target attributes will be edited, save state to restore at the end
+        // of testcase
+        saveSystemState();
+
+        TestHbSbePGDeconfig testHbSbeDeconfig;
+
+        testHbSbeDeconfig.saveOrigSbeRegs();
+
+        // Set fake SBE reg data
+        testHbSbeDeconfig.setFakeScratchRegAttr();
+
+        // Create fake gard records
+        testHbSbeDeconfig.createFakeGardRecords();
+
+        errlHndl_t l_pErrHandler = testHbSbeDeconfig.discoverTargets();
+
+        if (nullptr != l_pErrHandler) //discoverTargets worked
+        {
+            TS_FAIL("testHostbootSbeDeconfig: Error while calling"
+                " discoverTargets()");
+        }
+
+        // Verify
+        testHbSbeDeconfig.verifyDeconfiguration();
+
+        // Restore SBE reg data
+        testHbSbeDeconfig.restoreSbeRegs();
+
+        // Restore saved Target state
+        restoreSystemState();
+
+    }
+
     /**
      *  @brief Test which verifies all targets have a valid deconfig rule
      */
@@ -6846,7 +7083,8 @@ public:
     }
 
     /**
-     *  @brief Test that deconfiguration updates ATTR_PG appropriately
+     *  @brief Test that deconfiguration updates HWAS functional state and
+     *  ATTR_PG separately
      */
     void testDeconfigureMask()
     {
@@ -6862,7 +7100,7 @@ public:
             bool gardable = true;      // Whether this target can be deconfigured
                                        // by a GARD; if not then we just set
                                        // functional = false and call
-                                       // updateDeconfigureMask ourselves
+                                       // updateAttrPG ourselves
         }
         static const testcases[] =
         {
@@ -6916,34 +7154,42 @@ public:
                     if (l_testcase.gardable)
                     {
                         theDeconfigGard().deconfigureTarget(*l_target, 0);
+
                     }
                     else
                     {
+                        // Setting HWAS state to non-functional
                         ATTR_HWAS_STATE_type l_hwasState
                             = l_target->getAttr<ATTR_HWAS_STATE>();
                         l_hwasState.functional = false;
                         l_target->setAttr<ATTR_HWAS_STATE>(l_hwasState);
-                        updateDeconfigureMask(*l_target, l_hwasState);
+                        // Setting ATTR_PG to not-functional
+                        updateAttrPG(*l_target, false);
+
+                        // Check that ATTR_PG was deconfig
+                        // by making sure that the deconfigured target has the
+                        // right ATTR_PG bits set
+                        if ((l_perv->getAttr<ATTR_PG>() & l_testcase.attrPgBits)
+                            != l_testcase.attrPgBits)
+                        {
+                            TS_FAIL("testDeconfigureMask: incorrect ATTR_PG (was 0x%08x, "
+                                    "expected bits 0x%08x to be set)",
+                                    l_perv->getAttr<ATTR_PG>(),
+                                    l_testcase.attrPgBits);
+                            restoreSystemState();
+                            continue;
+                        }
+
                     }
                 }
 
-                if (l_target->getAttr<ATTR_HWAS_STATE>().functional)
+                // Check that HWAS functional state was deconfig
+                // (Only check if the part is functional if it is present)
+                if (l_target->getAttr<ATTR_HWAS_STATE>().present &&
+                    l_target->getAttr<ATTR_HWAS_STATE>().functional)
                 {
-                    TS_FAIL("testDeconfigureMask: Failed to deconfigure target 0x %08x",
-                            l_huid);
-                    restoreSystemState();
-                    continue;
-                }
-
-                // Make sure that the deconfigured target has the right ATTR_PG bits
-                // set
-                if ((l_perv->getAttr<ATTR_PG>() & l_testcase.attrPgBits)
-                    != l_testcase.attrPgBits)
-                {
-                    TS_FAIL("testDeconfigureMask: incorrect ATTR_PG (was 0x%08x, "
-                            "expected bits 0x%08x to be set)",
-                            l_perv->getAttr<ATTR_PG>(),
-                            l_testcase.attrPgBits);
+                    TS_FAIL("testDeconfigureMask: Failed to deconfigure %s target 0x %08x",
+                            l_target->getAttrAsString<ATTR_TYPE>(), l_huid);
                     restoreSystemState();
                     continue;
                 }

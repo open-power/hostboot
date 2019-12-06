@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,23 +29,24 @@ namespace HWAS
 {
     enum HwasModuleID
     {
-        MOD_DECONFIG_GARD                 = 0x01,
-        MOD_PROCESS_CALLOUT               = 0x02,
-        MOD_CHECK_MIN_HW                  = 0x03,
-        MOD_DECONFIG_TARGETS_FROM_GARD    = 0x04,
-        MOD_VALIDATE_EC_LEVELS            = 0x05,
-        MOD_RUNTIME_DECONFIG              = 0x06,
-        MOD_DISABLE_OBUS                  = 0x07,
-        MOD_UPDATE_PROC_MEM_TO_USE        = 0x08,
-        MOD_IS_DESCENDANT_FUNCTIONAL      = 0x09,
-        MOD_FIND_RULES_FOR_TARGET         = 0x0A,
-        MOD_DISCOVER_TARGETS              = 0x0B,
-        MOD_UPDATE_PROC_COMPAT_RISK_LEVEL = 0x0C,
-        MOD_CHECK_PG_FOR_DESC             = 0x0D,
-        MOD_OCMB_IDEC                     = 0x0E,
-        MOD_OCMB_IDEC_PHASE_1             = 0x0F,
-        MOD_OCMB_IDEC_PHASE_2             = 0x10,
-        MOD_OCMB_TRANSLATE_SPD_IDEC       = 0x11,
+        MOD_DECONFIG_GARD                       = 0x01,
+        MOD_PROCESS_CALLOUT                     = 0x02,
+        MOD_CHECK_MIN_HW                        = 0x03,
+        MOD_DECONFIG_TARGETS_FROM_GARD          = 0x04,
+        MOD_VALIDATE_EC_LEVELS                  = 0x05,
+        MOD_RUNTIME_DECONFIG                    = 0x06,
+        MOD_DISABLE_OBUS                        = 0x07,
+        MOD_UPDATE_PROC_MEM_TO_USE              = 0x08,
+        MOD_IS_DESCENDANT_FUNCTIONAL            = 0x09,
+        MOD_FIND_RULES_FOR_TARGET               = 0x0A,
+        MOD_DISCOVER_TARGETS                    = 0x0B,
+        MOD_UPDATE_PROC_COMPAT_RISK_LEVEL       = 0x0C,
+        MOD_CHECK_PG_FOR_DESC                   = 0x0D,
+        MOD_OCMB_IDEC                           = 0x0E,
+        MOD_OCMB_IDEC_PHASE_1                   = 0x0F,
+        MOD_OCMB_IDEC_PHASE_2                   = 0x10,
+        MOD_OCMB_TRANSLATE_SPD_IDEC             = 0x11,
+        MOD_DECONFIG_TARGETS_FROM_GARD_AND_VPD  = 0x12,
     };
 
     enum HwasReasonCode
@@ -89,6 +90,7 @@ namespace HWAS
         RC_OCMB_UNKNOWN_CHIP_TYPE               = HWAS_COMP_ID | 0x21,
         RC_OCMB_INTERFACE_TYPE_MISMATCH         = HWAS_COMP_ID | 0x22,
         RC_OCMB_CHIP_ID_MISMATCH                = HWAS_COMP_ID | 0x23,
+        RC_HB_SBE_DECONFIG_MISMATCH             = HWAS_COMP_ID | 0x24,
     };
 
     enum HwasPlatUserDetailsTypes

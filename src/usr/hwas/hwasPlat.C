@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -37,6 +37,7 @@
 
 #include <devicefw/driverif.H>
 #include <initservice/taskargs.H>
+#include <initservice/mboxRegs.H>
 #include <vpd/mvpdenums.H>
 #include <stdio.h>
 #include <sys/mm.h>
@@ -812,59 +813,6 @@ errlHndl_t platReadPartialGood(const TargetHandle_t &i_target,
     }
     else
     {
-#if 0
-// Unit test. set P8_MURANO.config to have 4 procs, and this code will
-//  alter the VPD so that some of the procs and chiplets should get marked
-//  as NOT functional.
-        {
-            // skip past the header
-            uint16_t *pgData = reinterpret_cast <uint16_t *>(&pgRaw[VPD_CP00_PG_HDR_LENGTH]);
-            if (i_target->getAttr<ATTR_HUID>() == 0x50000)
-            {   // 1st proc
-                pgData[VPD_CP00_PG_EX0_INDEX+4] = 0xF300;
-                pgData[VPD_CP00_PG_EX0_INDEX+5] = 0xF300;
-                pgData[VPD_CP00_PG_EX0_INDEX+6] = 0x9300; // off
-                pgData[VPD_CP00_PG_EX0_INDEX+12] = 0x9300; // off
-                pgData[VPD_CP00_PG_EX0_INDEX+13] = 0x9300; // off
-                pgData[VPD_CP00_PG_EX0_INDEX+14] = 0x9300; // off
-            }
-            else
-            if (i_target->getAttr<ATTR_HUID>() == 0x50001)
-            {   // 2nd proc
-                pgData[VPD_CP00_PG_EX0_INDEX+4] = 0xF300;
-                pgData[VPD_CP00_PG_EX0_INDEX+5] = 0xF300;
-                pgData[VPD_CP00_PG_EX0_INDEX+6] = 0xF300;
-                pgData[VPD_CP00_PG_EX0_INDEX+12] = 0xF300;
-                pgData[VPD_CP00_PG_EX0_INDEX+13] = 0xF300;
-                pgData[VPD_CP00_PG_EX0_INDEX+14] = 0xF300;
-            }
-            else
-            if (i_target->getAttr<ATTR_HUID>() == 0x50002)
-            {   // 3rd proc
-                //// mark Pervasive bad - entire chip
-                ////  should be marked present and NOT functional
-                ////pgData[VPD_CP00_PG_PERVASIVE_INDEX] = 0;
-
-                pgData[VPD_CP00_PG_EX0_INDEX+4] = 0xF300;
-                pgData[VPD_CP00_PG_EX0_INDEX+5] = 0xF300;
-                pgData[VPD_CP00_PG_EX0_INDEX+6] = 0x9300; // off
-                pgData[VPD_CP00_PG_EX0_INDEX+12] = 0x9300; // off
-                pgData[VPD_CP00_PG_EX0_INDEX+13] = 0xF300;
-                pgData[VPD_CP00_PG_EX0_INDEX+14] = 0xF300;
-            }
-            else
-            if (i_target->getAttr<ATTR_HUID>() == 0x50003)
-            {   // 4th proc -  EX13 and EX14 are good
-                pgData[VPD_CP00_PG_EX0_INDEX+4] = 0xF300;
-                pgData[VPD_CP00_PG_EX0_INDEX+5] = 0xF300;
-                pgData[VPD_CP00_PG_EX0_INDEX+6] = 0x9300; // off
-                pgData[VPD_CP00_PG_EX0_INDEX+12] = 0x9300; // off
-                pgData[VPD_CP00_PG_EX0_INDEX+13] = 0x9300; // off
-                pgData[VPD_CP00_PG_EX0_INDEX+14] = 0x9300; // off
-            }
-        }
-#endif
-
         // skip past the header
         void *pgData = static_cast<void *>(&pgRaw[VPD_CP00_PG_HDR_LENGTH]);
         HWAS_DBG_BIN("PG record", pgData, VPD_CP00_PG_DATA_LENGTH);
@@ -1413,5 +1361,205 @@ errlHndl_t checkForHbOnNvdimm(void)
 
     return l_errl;
 }
+
+//******************************************************************************
+//  verificationMatchHandler()
+//******************************************************************************
+void HWASPlatVerification::verificationMatchHandler(Target * i_target,
+      const bool i_hbFunctional, const bool i_sbeFunctional)
+{
+
+    // Check if i_hbFunctional and i_sbeFunctional value match
+    if (i_hbFunctional == i_sbeFunctional)
+    {
+        HWAS_INF("verifyDeconfiguration: ATTR_PG matches mbox "
+            "scratch registers for chip unit type %s with HUID %.8X "
+            "(SBE marked functional: %s  HB marked functional: %s)",
+            i_target->getAttrAsString<ATTR_TYPE>(),
+            i_target->getAttr<ATTR_HUID>(),
+            ((i_sbeFunctional) ? "True" : "False"),
+            ((i_hbFunctional) ? "True" : "False") );
+    }
+    else
+    {
+        HWAS_ERR("verifyDeconfiguration: ATTR_PG does not match mbox "
+            "scratch registers for chip unit type %s with HUID %.8X "
+            "(SBE marked functional: %s  HB marked functional: %s)",
+            i_target->getAttrAsString<ATTR_TYPE>(),
+            i_target->getAttr<ATTR_HUID>(),
+            ((i_sbeFunctional) ? "True" : "False"),
+            ((i_hbFunctional) ? "True" : "False") );
+
+        // Commit error due to mismatching HB and SBE deconfigs
+        /*@
+        * @errortype
+        * @severity         ERRL_SEV_PREDICTIVE
+        * @moduleid         MOD_DECONFIG_TARGETS_FROM_GARD_AND_VPD
+        * @reasoncode       RC_HB_SBE_DECONFIG_MISMATCH
+        * @userdata1        Target HUID
+        * @userdata2[0:31]  SBE did configure target (0: no, 1: yes)
+        * @userdata2[32:63] HB did configure target (0: no, 1: yes)
+        * @devdesc          SBE and HB targets configuration do not
+        *                   match.
+        * @custdesc         Firmware error during IPL
+        */
+        errlHndl_t l_errLog = new ERRORLOG::ErrlEntry (
+            ERRORLOG::ERRL_SEV_PREDICTIVE,
+            MOD_DECONFIG_TARGETS_FROM_GARD_AND_VPD,
+            RC_HB_SBE_DECONFIG_MISMATCH,
+            i_target->getAttr<ATTR_HUID>(),
+            TWO_UINT32_TO_UINT64 (
+                i_sbeFunctional, i_hbFunctional
+            )
+        );
+
+        l_errLog->collectTrace(HWAS_COMP_NAME);
+
+        /* TODO RTC 248496   Uncomment the following when fixed
+        ERRORLOG::errlCommit(l_errLog, HWAS_COMP_ID);
+        */
+
+    }
+} // verificationMatchHandler
+
+//******************************************************************************
+//  verifyDeconfiguration()
+//******************************************************************************
+void HWASPlatVerification::verifyDeconfiguration()
+{
+
+    using namespace INITSERVICE::SPLESS;
+
+    // Structure to pair unit type with corresponding scratch register and
+    // location range in that scratch register
+    struct UnitMboxOffsetData
+    {
+        ATTR_TYPE_type type;
+        uint32_t mboxReg;
+        uint32_t startBitPosition;
+        uint32_t endBitPosition;
+    };
+
+    // UnitMboxOffsetData
+    // Struct containing every unit type in MboxScratch1_t and MboxScratch2_t
+    // see: src/include/usr/initservice/mboxRegs.H
+    // For each unit type, this struct contains the scratch register it is in
+    // and its offset (inclusive) range within each scratch register
+    static const UnitMboxOffsetData l_unitMboxOffsetData[] =
+    {
+        {TYPE_CORE, MboxScratch1_t::REG_IDX, 0, 31},
+        {TYPE_PEC, MboxScratch2_t::REG_IDX, 0, 1},
+        {TYPE_NMMU, MboxScratch2_t::REG_IDX, 2, 2},
+        {TYPE_MC, MboxScratch2_t::REG_IDX, 4, 7},
+        {TYPE_PAUC, MboxScratch2_t::REG_IDX, 8, 11},
+        {TYPE_PAU, MboxScratch2_t::REG_IDX, 12, 19},
+        {TYPE_IOHS, MboxScratch2_t::REG_IDX, 20, 27}
+    };
+
+    do
+    {
+        // getting top system target "SYS"
+        Target* l_topSysTarget = nullptr;
+        targetService().getTopLevelTarget(l_topSysTarget);
+        HWAS_ASSERT(l_topSysTarget,
+            "verifyDeconfiguration: Could not get top system target");
+        const auto l_scratchRegs = l_topSysTarget->getAttrAsStdArr
+            <TARGETING::ATTR_MASTER_MBOX_SCRATCH>();
+
+        // In the following loops, for every l_unitTypeOffset the
+        // l_hostbootFunctional and l_sbeFunctional values are calculated for
+        // every individual part.
+        // l_hostbootFunctional is a bool stating whether or not HB has marked a
+        // part functional. This is done by reading the ATTR_PG value of that
+        // part.
+        // l_sbeFunctional is a bool stating whether or not SBE has marked a
+        // part functional. This is done by shifting out the correspoonding gard
+        // bit for the part.
+
+        for (const auto l_unitTypeOffset: l_unitMboxOffsetData)
+        {
+            TargetHandleList l_childChiplets;
+
+            getChildAffinityTargetsByState (l_childChiplets, l_topSysTarget,
+                CLASS_NA, l_unitTypeOffset.type, UTIL_FILTER_ALL);
+
+            for (const auto l_chip: l_childChiplets)
+            {
+
+                // Getting functional state as saved from SBE
+
+                AttributeTraits<ATTR_CHIP_UNIT>::Type l_chipUnit;
+                if(!l_chip->tryGetAttr<ATTR_CHIP_UNIT>(l_chipUnit))
+                {
+                    HWAS_ERR("verifyDeconfiguration: Failed to get chip unit "
+                        "for %s with HUID %.8X",
+                        l_chip->getAttrAsString<ATTR_TYPE>(),
+                        l_chip->getAttr<ATTR_HUID>()
+                    );
+                    continue;
+                }
+
+                // see src/include/usr/initservice/mboxRegs.H, MboxScratch2_t
+                // There's a gard bit only for NMMU with CHIP_UNIT value
+                // of 1, therefore CHIP_UNIT value of 0 is ignored
+                if (l_unitTypeOffset.type == TYPE_NMMU && l_chipUnit == 0)
+                {
+                    continue;
+                }
+
+                // Calculating the offset at which this l_chip's gard data is
+                // written in the scratch register
+                uint32_t l_chipUnitOffset = l_chipUnit +
+                    l_unitTypeOffset.startBitPosition;
+
+                if (l_unitTypeOffset.type == TYPE_NMMU && l_chipUnit == 1)
+                {
+                    // Value for TYPE_NMMU with l_chipUnit equal to 1 does not
+                    // use l_chipUnit to calculate offset
+                    l_chipUnitOffset = l_unitTypeOffset.startBitPosition;
+                }
+
+                if (l_chipUnitOffset > l_unitTypeOffset.endBitPosition)
+                {
+                    HWAS_ERR("verifyDeconfiguration: l_chipUnitOffset %u is "
+                        "going beyond l_unitTypeOffset.endBitPosition %u",
+                        l_chipUnitOffset, l_unitTypeOffset.endBitPosition);
+                    continue;
+                }
+
+                const uint32_t l_scratchReg =
+                    l_scratchRegs[l_unitTypeOffset.mboxReg];
+
+                bool l_sbeFunctional =
+                    ((0x80000000ull >> l_chipUnitOffset) & l_scratchReg) == 0;
+
+                // Getting functional state as known to HB from ATTR_PG
+
+                Target* const l_perv = getTargetWithPGAttr(*l_chip);
+                bool l_hostbootFunctional = false;
+
+                if (l_perv)
+                {
+                    pg_entry_t l_attrPGMask = getDeconfigMaskedPGValue(*l_chip);
+                    l_hostbootFunctional =
+                        (l_attrPGMask & l_perv->getAttr<ATTR_PG>()) == 0;
+                }
+                else
+                {
+                    HWAS_ERR("verifyDeconfiguration: Failed to get pervasive "
+                        "target for chip unit type %s with HUID  %.8X",
+                        l_chip->getAttrAsString<ATTR_TYPE>(),
+                        l_chip->getAttr<ATTR_HUID>());
+                    continue;
+                }
+
+                verificationMatchHandler(l_chip, l_hostbootFunctional,
+                    l_sbeFunctional);
+
+            }
+        }
+    } while (0);
+
+} // verifyDeconfiguration
 
 } // namespace HWAS

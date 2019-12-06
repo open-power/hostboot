@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -212,7 +212,7 @@ private:
                                              CHIP_IS_FUNCTIONAL,
                                              NO_ERROR_ID,
                                              NO_INFO_ERRL,
-                                             DO_NOT_CREATE_INFO_LOG,
+                                             &DO_NOT_CREATE_INFO_LOG,
                                              RUN_IN_TESTCASE_MODE,
                                              &result);
 

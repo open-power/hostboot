@@ -1,9 +1,12 @@
 # HWAS
-## discoverTargets
+## HWASDiscovery::discoverTargets
 - Initializes the HWAS state of all targets
 - Call platPresenceDetect for targets that need it
 - Iterate each chip and apply partial-good information to children
   (isChipFunctional, checkPartialGoodForDescendants)
+- De-configure parts that are marked as not-functional (a.k.a. "not-good") based
+  on MVPD only
+  - This will update that part's ATTR_PG attribute
 - Call discoverPmicTargetsAndEnable
 - Call validateProcessorEcLevels to ensure that each slave PROC chip has the
   same EC level as the master
@@ -19,8 +22,9 @@ calls presentByAssoc on the list.
 
 ## presentByAssoc
 
-This function examines each target in the memory hierarchy and
-- propagates functional state from parents to children;
+This function examines each target in the memory hierarchy (in order to update
+HWAS functional state) and:
+- propagates HWAS functional state from parents to children;
 - deconfigures parents if they have no functional children of a given type;
 - enforces special parent/child relationships not reflected in the normal
   hierarchy, such as that between OMIC and OMI targets.
@@ -28,7 +32,7 @@ This function examines each target in the memory hierarchy and
 ## isChipFunctional
 
 This function checks the partial-good data for always-good chiplets in each
-processor to determine whether the processor.
+processor to determine whether the processor is functional.
 
 ## checkPartialGoodForDescendants
 
@@ -39,7 +43,7 @@ rules defined in pgLogic.C.
 # DeconfigGard
 
 ## Deconfigure by association path
-### _deconfigByAssoc
+### _deconfigureByAssoc
 ###### Propagates the deconfigured target to its associated targets
 - first deconfigures all functional children-by-containment
 - checks if affinity deconfigure is allowed

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -105,6 +105,9 @@ namespace SPLESS
                 // A 1 in a bit position means the part is NOT functional,
                 // a 0 means the part is functional.
                 // Tracks ATTR_CORE_GARD
+                // This 0:31 range is used in src/usr/hwas/hwasPlat.C
+                // verifyDeconfiguration() function, if that's edited here it
+                // must also be edited there.
                 uint32_t ecGardMask      :32;  //0:31
             } gardedCores;
 
@@ -141,6 +144,9 @@ namespace SPLESS
 
             // This is the structure of this register according to the
             // P10 IPL flow doc
+            // The ranges used here are also used in src/usr/hwas/hwasPlat.C
+            // verifyDeconfiguration() function, if they're edited here they
+            // must also be edited there.
             struct
             {
                 // For each of these masks, a 1 in a bit position

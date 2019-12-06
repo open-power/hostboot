@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,51 @@
 namespace HWAS
 {
 
+class HWASDiscovery
+{
+
+public:
+
+    /**
+     * @brief   discoverTagets   Common HWAS function to build targeting
+     *
+     *  This routine will walk through all the targets and initialize HWAS STATE
+     *  to a known default value (powered off, etc.)
+     *
+     *  Then call into the hwas platform-specific platPresenceDetect() function
+     *  to read the hardware information, and apply it to the target states,
+     *  and call into the hwas platform-specific functions:
+     *      platReadIDEC() to get and set the ChipID and EC values.
+     *      platReadPartialGood() to get and set the partial good vector.
+     *  Afterwards, for each target that has been processed, the PG is checked for
+     *  its descendants. During that process, a dictionary (l_deconfigPGData) is
+     *  filled with the targets that are not functional, as figured out by using VPD.
+     *
+     * @param  none
+     *
+     * @return errlHndl_t       valid errlHndl_t handle if there was an error
+     *                          nullptr if no errors;
+     */
+    errlHndl_t discoverTargets();
+
+private:
+
+    /**
+     * @brief   parsePgData     HWASDiscovery function to parse out a PGV
+     *
+     *  This function will parse out a partial good vector (PGV) from an array
+     *  representing VPD data. This function is virtual so that it
+     *  can be overridden during test cases.
+     *
+     * @param[in]   pgData Array representing 24-bit partial good data
+     *
+     * @return partialGoodVector    PGV representing 32-bit pg entries
+     */
+    virtual partialGoodVector parsePgData(const std::array<uint8_t,
+        VPD_CP00_PG_DATA_LENGTH>& pgData);
+
+};
+
 /**
  * @brief   initHardware   Common HWAS function to setup the hardware
  *
@@ -61,25 +106,6 @@ namespace HWAS
  *                          nullptr if no errors;
  */
 errlHndl_t initHardware();
-
-/**
- * @brief   discoverTagets   Common HWAS function to build targeting
- *
- *  This routine will walk through all the targets and initialize HWAS STATE
- *  to a known default value (powered off, etc.)
- *
- *  Then call into the hwas platform-specific platPresenceDetect() function
- *  to read the hardware information, and apply it to the target states,
- *  and call into the hwas platform-specific functions:
- *      platReadIDEC() to get and set the ChipID and EC values.
- *      platReadPartialGood() to get and set the partial good vector.
- *
- * @param  none
- *
- * @return errlHndl_t       valid errlHndl_t handle if there was an error
- *                          nullptr if no errors;
- */
-errlHndl_t discoverTargets();
 
 /**
  * @brief   restrictECunits   Internal HWAS function to restrict the ECs

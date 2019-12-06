@@ -546,7 +546,8 @@ void* host_discover_targets( void *io_pArgs )
 #endif
         if(nullptr == l_err)
         {
-            l_err = HWAS::discoverTargets();
+            HWAS::HWASDiscovery l_HWASDiscovery;
+            l_err = l_HWASDiscovery.discoverTargets();
         }
     }
 

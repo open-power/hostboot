@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -160,8 +160,6 @@ void enableHwasState(Target *i_target,
     hwasState.functional    = i_functional;
 
     i_target->setAttr<ATTR_HWAS_STATE>( hwasState );
-
-    updateDeconfigureMask(*i_target, hwasState);
 }
 
 /**
@@ -587,7 +585,8 @@ errlHndl_t discoverMuxTargetsAndEnable(const Target &i_sysTarget)
 // right-justify the actual data from the VPD.
 // This function presumes that the PG entries are stored in big-endian byte
 // order.
-static partialGoodVector parsePgData(const std::array<uint8_t, VPD_CP00_PG_DATA_LENGTH>& pgData)
+partialGoodVector HWASDiscovery::parsePgData(const std::array<uint8_t,
+    VPD_CP00_PG_DATA_LENGTH>& pgData)
 {
     partialGoodVector expanded_entries = { };
 
@@ -601,7 +600,8 @@ static partialGoodVector parsePgData(const std::array<uint8_t, VPD_CP00_PG_DATA_
         for (size_t j = 0; j < VPD_CP00_PG_ENTRY_SIZE; ++j)
         {
             expanded_entries[i]
-                = (expanded_entries[i] << 8) | pgData[i * VPD_CP00_PG_ENTRY_SIZE + j];
+                = (expanded_entries[i] << 8) |
+                pgData[i * VPD_CP00_PG_ENTRY_SIZE + j];
         }
     }
 
@@ -661,7 +661,7 @@ errlHndl_t discoverPmicTargetsAndEnable(const Target &i_sysTarget)
     return l_err;
 }
 
-errlHndl_t discoverTargets()
+errlHndl_t HWASDiscovery::discoverTargets()
 {
     HWAS_DBG("discoverTargets entry");
     errlHndl_t errl = nullptr;
@@ -766,6 +766,11 @@ errlHndl_t discoverTargets()
         //  reducing the list of valid ECs later
         procRestrict_t l_procEntry;
         std::vector <procRestrict_t> l_procRestrictList;
+
+        // List to track targets marked as non-functional by their VPD data.
+        // After all non-functional targets are collected, their corresponding
+        // ATTR_PG attributes will be marked as non-functional.
+        TargetHandleList l_deconfigTargets;
 
         // sort the list by ATTR_HUID to ensure that we
         //  start at the same place each time
@@ -911,7 +916,10 @@ errlHndl_t discoverTargets()
                                            chipFunctional,
                                            errlEid,
                                            infoErrl,
-                                           createInfoLog);
+                                           &createInfoLog,
+                                           false, // is code running in testcase
+                                           nullptr, // testcases result
+                                           &l_deconfigTargets);
 
             // set HWAS state to show CHIP is present, functional per above
             enableHwasState(pTarget, chipPresent, chipFunctional, errlEid);
@@ -952,8 +960,20 @@ errlHndl_t discoverTargets()
                 delete infoErrl;
                 infoErrl = nullptr;
             }
-
         } // for pTarget_it
+
+        // Deconfigure targets marked as not functional by their MVPD data (will
+        // update ATTR_PG)
+        for (auto& l_target : l_deconfigTargets)
+        {
+
+            HWAS_INF("discoverTargets: Updating PG mask (ATTR_PG) for %s with "
+                "HUID %.8X because read as non-functional from VPD \n",
+                l_target->getAttrAsString<ATTR_TYPE>(),
+                l_target->getAttr<ATTR_HUID>());
+
+            updateAttrPG(*l_target, false);
+        }
 
         // After processing all other targets look at the pmics,
         // we must wait because we need the SPD cached from the OCMBs
@@ -1148,7 +1168,8 @@ bool isChipFunctional(const TARGETING::TargetHandle_t &i_target,
 
 bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
                       const partialGoodVector& i_pgData,
-                      pgState_map &io_targetStates)
+                      pgState_map &io_targetStates,
+                      TARGETING::TargetHandleList *io_deconfigTargets /* = nullptr */)
 {
     bool l_functional = true, l_previouslySeen = false;
 
@@ -1211,6 +1232,13 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
 
                 if (!l_functional)
                 {
+                    // Record target who are not functional as marked by their
+                    // VPD data
+                    if (io_deconfigTargets != nullptr)
+                    {
+                        io_deconfigTargets->push_back(i_desc);
+                    }
+
                     char msg[128] = { };
                     pgRule_it->formatDebugMessage(i_desc, i_pgData, msg, sizeof(msg));
 
@@ -1313,9 +1341,10 @@ errlHndl_t checkPartialGoodForDescendants(
         const bool i_chipFunctional,
         const uint32_t i_errlEid,
         errlHndl_t io_infoErrl,
-        bool &io_createInfoLog,
+        bool* io_createInfoLog,
         bool i_isTestcase /* = false */,
-        bool* o_testResult /* = nullptr */
+        bool* o_testResult /* = nullptr */,
+        TARGETING::TargetHandleList* io_deconfigTargets /* = nullptr */
         )
 {
 
@@ -1439,7 +1468,8 @@ errlHndl_t checkPartialGoodForDescendants(
 
             descState = isDescFunctional(pDesc,
                                          i_pgData,
-                                         targetStates);
+                                         targetStates,
+                                         io_deconfigTargets);
 
             // If one descendant of the current parent is functional,
             // then the parent is functional and should be checked by
@@ -1514,7 +1544,7 @@ errlHndl_t checkPartialGoodForDescendants(
             {
                 // Add this descendant to the error log.
                 hwasErrorAddTargetInfo(io_infoErrl, pDesc);
-                io_createInfoLog = true;
+                *io_createInfoLog = true;
             }
         }
 

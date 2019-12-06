@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -256,7 +256,13 @@ void* host_gard( void *io_pArgs )
         errlCommit (l_err, ISTEP_COMP_ID);
     }
 
+    // Verify that de-configuration logic done by SBE matches what HB has
+    // de-configured
+    HWAS::HWASPlatVerification verification;
+    verification.verifyDeconfiguration();
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_gard exit" );
+
     return l_stepError.getErrorHandle();
 }
 
