@@ -130,7 +130,7 @@ void* call_host_activate_slave_cores(void* const io_pArgs)
         }
 
         TRACFCOMP( g_fapiImpTd,
-                   "Before cpu_start_core - Setting up PIRs %d..%d",
+                   "Before cpu_start_core - Setting up urmor for PIRs %d..%d",
                    pir, pir+3 );
         for( auto t = pir; t < (pir+4); t++ )
         {
@@ -144,17 +144,6 @@ void* call_host_activate_slave_cores(void* const io_pArgs)
         if( rc )
         {
             TRACFCOMP( g_fapiImpTd, "rc=%d from cpu_start_core" );
-        }
-        else
-        {
-            TRACFCOMP( g_fapiImpTd,
-                       "After cpu_start_core - Enabling PIRs %d..%d",
-                       pir, pir+3 );
-            sync();
-            for( auto t = pir; t < (pir+4); t++ )
-            {
-                MAGIC_INST_ENABLE_THREAD(t);
-            }
         }
 
 #else //CONFIG_SIMICS_SLAVECORE_HACK

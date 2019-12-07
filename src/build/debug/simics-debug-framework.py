@@ -591,17 +591,6 @@ def magic_instruction_callback(user_arg, cpu, arg):
         dateCommand = "shell \" date +'%s > TRACE REGS: %d %d' \""%(percent_s,first_num,second_num)
         SIM_run_alone(run_command, dateCommand )
 
-    if arg == 7024:  # MAGIC_ENABLE_THREAD
-        pir = cpu.r4
-        group_id = cpu.node_num
-        chip_id = cpu.chip_num
-        component = cpu.component
-        core = (pir//8)*2 + pir%2
-        thread = (pir%8)//2
-        cpuobj=get_host_cpu(component, group_id, chip_id, core, thread)
-        print "Enabling PIR ", pir, cpuobj.name
-        SIM_get_interface(cpuobj, "processor_info_v2").enable_processor()
-
     if arg == 7025:  # MAGIC_SETUP_THREAD
         pir = cpu.r4
         group_id = cpu.node_num
@@ -610,12 +599,8 @@ def magic_instruction_callback(user_arg, cpu, arg):
         core = (pir//8)*2 + pir%2
         thread = (pir%8)//2
         cpuobj=get_host_cpu(component, group_id, chip_id, core, thread)
-        print "Setting up PIR ", pir, cpuobj.name
-        # Are these needed?
-        cpuobj.lpcr = 0x40000000D00A
-        cpuobj.msr = 0x9000000000401000
+        print "Setting up urmor for PIR ", pir, cpuobj.name
         cpuobj.urmor = cpu.urmor
-        cpuobj.hrmor = cpu.hrmor
 
     if arg == 7022:  # MAGIC_SET_LOG_LEVEL
         if( not os.environ.has_key('ENABLE_HB_SIMICS_LOGS') ):

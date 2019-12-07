@@ -512,7 +512,6 @@ enum
     MAGIC_SET_LOG_LEVEL       =  7022, // Set log level for given component
     MAGIC_TOGGLE_OUTPUT       =  7023, // Enable simic log capture
 
-    MAGIC_ENABLE_THREAD       =  7024, // Manually enable a thread
     MAGIC_SETUP_THREAD        =  7025, // Manually set thread regs pre-enable
 
     MAGIC_CONTINUOUS_TRACE    =  7055, // extract mixed trace buffer
@@ -594,15 +593,6 @@ enum
                  "4"); \
     MAGIC_INSTRUCTION(MAGIC_TOGGLE_OUTPUT); \
 
-/**
- * @brief Enable the thread with the given PIR
- * @param[in]  pir value
- */
-#define MAGIC_INST_ENABLE_THREAD(_pir) \
-    asm volatile("mr 4, %0" :: \
-                 "r" (_pir) : \
-                 "4"); \
-    MAGIC_INSTRUCTION(MAGIC_ENABLE_THREAD); \
 
 /**
  * @brief Setup the thread with the given PIR with good default
