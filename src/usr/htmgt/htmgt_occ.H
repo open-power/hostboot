@@ -92,10 +92,10 @@ namespace HTMGT
     // OCC Callout Structure
     struct occErrlCallout
     {
-        uint8_t     type;
         uint64_t    calloutValue;
+        uint8_t     type;
         uint8_t     priority;
-        uint16_t    reserved1;
+        uint8_t     reserved[6];
     } __attribute__ ((__packed__));
     typedef struct occErrlCallout occErrlCallout_t;
 

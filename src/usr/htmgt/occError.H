@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@ namespace HTMGT
     // Error Actions
     enum tmgtErrlActionsType
     {
+        TMGT_ERRL_ACTIONS_MANUFACTURING_ERROR      = 0x08,
         TMGT_ERRL_ACTIONS_FORCE_ERROR_POSTED       = 0x10,
         TMGT_ERRL_ACTIONS_WOF_RESET_REQUIRED       = 0x20,
         TMGT_ERRL_ACTIONS_SAFE_MODE_REQUIRED       = 0x40,
@@ -103,7 +104,7 @@ namespace HTMGT
         uint8_t     version;             // User Details Version
         uint8_t     reserved;            // Reserved
         uint16_t    modId;               // Module Id
-        uint32_t    fwLevel;             // Firmware Level
+        uint32_t    fClipHistory;        // Frquency Clip History
         uint64_t    timeStamp;           // Time Stamp
         uint8_t     occId;               // OCC ID
         uint8_t     occRole;             // OCC Role
@@ -144,12 +145,14 @@ namespace HTMGT
         uint8_t             severity;
         // Actions to process the errors
         uint8_t             actions;
-        // Reserved
-        uint16_t            reserved;
+        // Max callouts that could be returned
+        uint8_t             maxCallouts;
         // Extended Reason Code
         uint16_t            extendedRC;
-        // Log Callout Number
-        uint8_t             maxCallouts;
+        // Max size for entire error log (including user details)
+        uint16_t            maxElogSize;
+        // Reserved
+        uint32_t            reserved;
         // Callouts
         occErrlCallout      callout[ERRL_MAX_CALLOUTS];
     } __attribute__ ((__packed__));
