@@ -80,28 +80,32 @@ const uint32_t HCD_PFET_SENSE_BITS[2][2] =
     { BIT32(0),    BIT32(2)    }   //VDD_ON,  VCS_ON
 };
 
-const uint32_t HCD_CPMS_PFETCNTL[2] =
+const uint32_t HCD_CPMS_PFETCNTL[3] =
 {
     CPMS_CL2_PFETCNTL,
-    CPMS_L3_PFETCNTL
+    CPMS_L3_PFETCNTL,
+    CPMS_MMA_PFETCNTL
 };
 
-const uint32_t HCD_CPMS_PFETCNTL_CLR[2] =
+const uint32_t HCD_CPMS_PFETCNTL_CLR[3] =
 {
     CPMS_CL2_PFETCNTL_WO_CLEAR,
-    CPMS_L3_PFETCNTL_WO_CLEAR
+    CPMS_L3_PFETCNTL_WO_CLEAR,
+    CPMS_MMA_PFETCNTL_WO_CLEAR
 };
 
-const uint32_t HCD_CPMS_PFETCNTL_OR[2] =
+const uint32_t HCD_CPMS_PFETCNTL_OR[3] =
 {
     CPMS_CL2_PFETCNTL_WO_OR,
-    CPMS_L3_PFETCNTL_WO_OR
+    CPMS_L3_PFETCNTL_WO_OR,
+    CPMS_MMA_PFETCNTL_WO_OR
 };
 
-const uint32_t HCD_CPMS_PFETSTAT[2] =
+const uint32_t HCD_CPMS_PFETSTAT[3] =
 {
     CPMS_CL2_PFETSTAT,
-    CPMS_L3_PFETSTAT
+    CPMS_L3_PFETSTAT,
+    CPMS_MMA_PFETSTAT
 };
 
 //------------------------------------------------------------------------------
@@ -116,7 +120,13 @@ p10_hcd_corecache_power_control(
     fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST > l_mc_or = i_target;//default OR
     fapi2::buffer<buffer_t> l_mmioData        = 0;
     uint32_t                l_pfet_seq_states = 0;
-    uint32_t                l_isL3            = (i_command & HCD_PFET_L3_MASK)  >> 1;
+    uint32_t                l_isL3            = (i_command & HCD_PFET_MMA_MASK) >> 1;
+
+    if (l_isL3 != 2)
+    {
+        l_isL3            = (i_command & HCD_PFET_L3_MASK)  >> 1;
+    }
+
     uint32_t                l_isON            = (i_command & HCD_PFET_ON_MASK);
     uint32_t                l_isVCS           = l_isON;
 #ifndef PFET_SENSE_POLL_DISABLE

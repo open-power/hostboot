@@ -64,6 +64,8 @@ enum P10_HCD_POWERBUS_PURGE_CONSTANTS
     HCD_POWERBUS_PURGE_DONE_POLL_TIMEOUT_HW_NS    = 100000, // 10^5ns = 100us timeout
     HCD_POWERBUS_PURGE_DONE_POLL_DELAY_HW_NS      = 1000,   // 1us poll loop delay
     HCD_POWERBUS_PURGE_DONE_POLL_DELAY_SIM_CYCLE  = 32000,  // 32k sim cycle delay
+    HCD_POWERBUS_INTERFACE_QUIESCE_DELAY_HW_NS      = 10,   // 10ns quiesce delay
+    HCD_POWERBUS_INTERFACE_QUIESCE_DELAY_SIM_CYCLE  = 64,   // 64 sim cycle delay
 };
 
 //------------------------------------------------------------------------------
@@ -74,6 +76,7 @@ fapi2::ReturnCode
 p10_hcd_powerbus_purge(
     const fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > & i_target)
 {
+    fapi2::buffer<uint64_t> l_scomData = 0;
     fapi2::buffer<buffer_t> l_mmioData = 0;
     uint32_t                l_timeout  = 0;
     uint32_t                l_powerbus_purge_done = 0;
@@ -113,6 +116,20 @@ p10_hcd_powerbus_purge(
                 "PowerBus Purge Done Timeout");
 
     // Note: Do not drop Powerbus Purge until L3 becomes available again.
+
+    FAPI_DBG("Assert NCU_PM_RCMD_DIS_CFG via NCU_RCMD_QUIESCE_REG[0]");
+    FAPI_TRY( HCD_PUTSCOM_C( i_target, 0x20010658, SCOM_1BIT(0) ) );
+
+    FAPI_DBG("Assert L3_PM_RCMD_DIS_CFG via PM_LCO_DIS_REG[1]");
+    // This register doesnt have OR/CLR interface and having two functional bits
+    // [0] L3_PM_LCO_DIS_CFG
+    // [1] L3_PM_RCMD_DIS_CFG
+    // Here set both bit0 and bit1 as bit0 would be previously set before l3 purge
+    FAPI_TRY( HCD_PUTSCOM_C( i_target, 0x20010616, SCOM_LOAD32H( BITS32(0, 2) ) ) );
+
+    FAPI_DBG("Wait ~20 Cache clocks");
+    fapi2::delay(HCD_POWERBUS_INTERFACE_QUIESCE_DELAY_HW_NS,
+                 HCD_POWERBUS_INTERFACE_QUIESCE_DELAY_SIM_CYCLE);
 
 fapi_try_exit:
 

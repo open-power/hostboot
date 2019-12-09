@@ -263,10 +263,13 @@ enum P10_HCD_DELAY_CONSTANTS
 // PFET Control Constants
 enum P10_HCD_PFET_CTRL_CONSTANTS
 {
-    HCD_POWER_CL2_OFF                        = 0x0, //00
-    HCD_POWER_CL2_ON                         = 0x1, //01
-    HCD_POWER_L3_OFF                         = 0x2, //10
-    HCD_POWER_L3_ON                          = 0x3, //11
+    HCD_POWER_CL2_OFF                        = 0x0, //000
+    HCD_POWER_CL2_ON                         = 0x1, //001
+    HCD_POWER_L3_OFF                         = 0x2, //010
+    HCD_POWER_L3_ON                          = 0x3, //011
+    HCD_POWER_MMA_OFF                        = 0x4, //100
+    HCD_POWER_MMA_ON                         = 0x5, //101
+    HCD_PFET_MMA_MASK                        = 0x4, //otherwise cl2 or l3
     HCD_PFET_L3_MASK                         = 0x2, //otherwise cl2
     HCD_PFET_ON_MASK                         = 0x1,  //otherwise off
 

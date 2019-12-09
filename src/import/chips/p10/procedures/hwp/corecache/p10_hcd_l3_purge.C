@@ -74,6 +74,13 @@ p10_hcd_l3_purge(
 
     FAPI_INF(">>p10_hcd_l3_purge");
 
+    FAPI_DBG("Assert L3_PM_LCO_DIS_CFG via PM_LCO_DIS_REG[0]");
+    // This register doesnt have OR/CLR interface and having two functional bits
+    // [0] L3_PM_LCO_DIS_CFG
+    // [1] L3_PM_RCMD_DIS_CFG
+    // Here set bit0 while keep bit1 unset until after powerbus purge
+    FAPI_TRY( HCD_PUTSCOM_C( i_target, L3_MISC_L3CERRS_PM_LCO_DIS_REG, SCOM_1BIT(0) ) );
+
     FAPI_DBG("Assert L3_PURGE_REQ via PM_PURGE_REG[0]");
     FAPI_TRY( HCD_PUTSCOM_C( i_target, L3_MISC_L3CERRS_PM_PURGE_REG, SCOM_1BIT(0) ) );
 
