@@ -58,5 +58,15 @@ fapi2::ReturnCode
 p10_hcd_mma_poweroff(
     const fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > & i_target)
 {
+    FAPI_INF(">>p10_hcd_mma_poweroff");
+
+    // VCS off first, VDD off after
+    FAPI_TRY( p10_hcd_corecache_power_control( i_target, HCD_POWER_MMA_OFF ) );
+
+fapi_try_exit:
+
+    FAPI_INF("<<p10_hcd_mma_poweroff");
+
     return fapi2::current_err;
+
 }
