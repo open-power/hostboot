@@ -120,6 +120,8 @@ static const uint32_t CLK_ADJ_03_DCADJ_WRAP_MEASURE_HISTORY_2_LEN = 8;
 // eq/reg00002.H
 
 static const uint64_t CLK_ADJ_03_DCADJ_WRAP_SET_ADJUST_MODE = 0x20011302ull;
+
+static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_ADJUST_MODE_SET_ADJUST_MD = 1;
 // eq/reg00002.H
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SOFT_RESET = 0x20011325ull;
@@ -274,7 +276,7 @@ static const uint32_t QME_EISR_BCE_BUSY = 8;
 static const uint32_t QME_EISR_RS4_BUSY = 9;
 static const uint32_t QME_EISR_RESCLK_TARGET_ASSIST = 10;
 static const uint32_t QME_EISR_RESCLK_DONE_ASSIST = 11;
-static const uint32_t QME_EISR_SPARE_12 = 12;
+static const uint32_t QME_EISR_PITCH_UPDATE = 12;
 static const uint32_t QME_EISR_WOCR_UPDATE = 13;
 static const uint32_t QME_EISR_TBR_CYCLES_ROLLED = 14;
 static const uint32_t QME_EISR_TBR_TIMEBASE_ROLLED = 15;

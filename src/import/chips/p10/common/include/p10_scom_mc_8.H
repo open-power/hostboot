@@ -350,7 +350,7 @@ static const uint32_t TRA0_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT = 22;
 static const uint32_t TRA0_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
 // mc/reg00008.H
 
-static const uint64_t TRA1_TR0_CONFIG_0 = 0x0c010443ull;
+static const uint64_t TRA1_TR0_CONFIG_0 = 0x0c010483ull;
 
 static const uint32_t TRA1_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
 static const uint32_t TRA1_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;

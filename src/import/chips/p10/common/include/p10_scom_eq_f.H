@@ -76,8 +76,9 @@ static const uint32_t CLK_ADJ_00_DCADJ_WRAP_SET_DEC_DCC_VALUE_LEN = 8;
 
 static const uint64_t CLK_ADJ_00_DCADJ_WRAP_SET_SINGLE_STEP_MODE = 0x20018304ull;
 
-static const uint32_t CLK_ADJ_00_DCADJ_WRAP_SET_SINGLE_STEP_MODE_STEP_COUNT = 0;
-static const uint32_t CLK_ADJ_00_DCADJ_WRAP_SET_SINGLE_STEP_MODE_STEP_COUNT_LEN = 16;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_SET_SINGLE_STEP_MODE_ET_SINGLE_STEP_MD_SET = 0;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_SET_SINGLE_STEP_MODE_TEP_COUNT = 1;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_SET_SINGLE_STEP_MODE_TEP_COUNT_LEN = 16;
 // eq/reg00015.H
 
 static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES = 0x20018337ull;
@@ -129,6 +130,8 @@ static const uint32_t CLK_ADJ_02_DCADJ_WRAP_DCC_OVERRIDE_VALUE_LEN = 8;
 // eq/reg00015.H
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_INIT_MODE = 0x20011320ull;
+
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_INIT_MODE_SET_INIT_MD = 4;
 // eq/reg00015.H
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_SWAP_CACHE_INC_DEC = 0x2001132full;
@@ -284,9 +287,9 @@ static const uint32_t QMETRA0_TR1_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t QMETRA0_TR1_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
 // eq/reg00015.H
 
-static const uint64_t QME_PBCR_RW = 0x200e0044ull;
-static const uint64_t QME_PBCR_WO_CLEAR = 0x200e0047ull;
-static const uint64_t QME_PBCR_WO_OR = 0x200e0046ull;
+static const uint64_t QME_PBCR = 0x200e0044ull;
+static const uint64_t QME_PBCR_SCOM1 = 0x200e0047ull;
+static const uint64_t QME_PBCR_SCOM2 = 0x200e0046ull;
 
 static const uint32_t QME_PBCR_DISABLE_LN_RD = 0;
 static const uint32_t QME_PBCR_DISABLE_NN_RN_RD = 1;
@@ -308,6 +311,7 @@ static const uint32_t QME_PBCR_HANG_POLL_MAX_CNT_LEN = 4;
 static const uint32_t QME_PBCR_HANG_DATA_MAX_CNT = 20;
 static const uint32_t QME_PBCR_HANG_DATA_MAX_CNT_LEN = 4;
 static const uint32_t QME_PBCR_DISABLE_PB_CACHE = 24;
+static const uint32_t QME_PBCR_INVALIDATE_PB_CACHE = 25;
 // eq/reg00015.H
 
 static const uint64_t QME_QSAR = 0x200e0074ull;

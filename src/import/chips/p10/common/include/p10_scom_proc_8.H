@@ -1944,14 +1944,6 @@ static const uint32_t TP_TCN1_N1_TRA7_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t TP_TCN1_N1_TRA7_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
 // proc/reg00040.H
 
-static const uint64_t TP_TPBR_PBA_PBAF_PBAPBOCR5 = 0x03011dd5ull;
-
-static const uint32_t TP_TPBR_PBA_PBAF_PBAPBOCR5_EVENT = 16;
-static const uint32_t TP_TPBR_PBA_PBAF_PBAPBOCR5_EVENT_LEN = 16;
-static const uint32_t TP_TPBR_PBA_PBAF_PBAPBOCR5_ACCUM = 44;
-static const uint32_t TP_TPBR_PBA_PBAF_PBAPBOCR5_ACCUM_LEN = 20;
-// proc/reg00040.H
-
 static const uint64_t TP_TPBR_PSI_WRAP_RX_ERROR_REG_RW_WCLEAR = 0x03011c0aull;
 static const uint64_t TP_TPBR_PSI_WRAP_RX_ERROR_REG_WO_OR = 0x03011c0cull;
 
@@ -2115,7 +2107,7 @@ static const uint32_t TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEXIRAMGA_OCB_OCI_GPEXIRAMEDR_
 static const uint32_t TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEXIRAMGA_OCB_OCI_GPEXIRAMEDR_IR_LEN = 32;
 static const uint32_t TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEXIRAMGA_SPRG0 = 32;
 static const uint32_t TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEXIRAMGA_SPRG0_LEN = 32;
-// proc/reg00041.H
+// proc/reg00040.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEXIVDRX = 0x00060085ull;
 
@@ -2653,7 +2645,7 @@ static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN60 = 60;
 static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN61 = 61;
 static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN62 = 62;
 static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_EXT_LOCAL_XSTOP = 63;
-// proc/reg00042.H
+// proc/reg00041.H
 
 static const uint64_t TP_TPCHIP_TPC_RECOV = 0x01040001ull;
 

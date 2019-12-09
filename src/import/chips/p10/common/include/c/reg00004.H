@@ -15573,6 +15573,94 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_NC_NCMISC_NCSCOMS_ERR_RPT_REG_0_UNEXP_IMA_DATA(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCMISC_NCSCOMS_ERR_RPT_REG));
+#endif
+    return o_data.insertFromRight<NC_NCMISC_NCSCOMS_ERR_RPT_REG_0_UNEXP_IMA_DATA,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NC_NCMISC_NCSCOMS_ERR_RPT_REG_0_UNEXP_IMA_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_NC_NCMISC_NCSCOMS_ERR_RPT_REG_0_UNEXP_IMA_DATA(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCMISC_NCSCOMS_ERR_RPT_REG));
+#endif
+    return o_data.insertFromRight<NC_NCMISC_NCSCOMS_ERR_RPT_REG_0_UNEXP_IMA_DATA,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NC_NCMISC_NCSCOMS_ERR_RPT_REG_0_UNEXP_IMA_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_NC_NCMISC_NCSCOMS_ERR_RPT_REG_0_UNEXP_IMA_DATA(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCMISC_NCSCOMS_ERR_RPT_REG));
+#endif
+    return o_data.setBit<NC_NCMISC_NCSCOMS_ERR_RPT_REG_0_UNEXP_IMA_DATA>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NC_NCMISC_NCSCOMS_ERR_RPT_REG_0_UNEXP_IMA_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_NC_NCMISC_NCSCOMS_ERR_RPT_REG_0_UNEXP_IMA_DATA(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCMISC_NCSCOMS_ERR_RPT_REG));
+#endif
+    return o_data.clearBit<NC_NCMISC_NCSCOMS_ERR_RPT_REG_0_UNEXP_IMA_DATA>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NC_NCMISC_NCSCOMS_ERR_RPT_REG_0_UNEXP_IMA_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_NC_NCMISC_NCSCOMS_ERR_RPT_REG_0_UNEXP_IMA_DATA(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCMISC_NCSCOMS_ERR_RPT_REG));
+#endif
+    return i_data.extractToRight<NC_NCMISC_NCSCOMS_ERR_RPT_REG_0_UNEXP_IMA_DATA,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NC_NCMISC_NCSCOMS_ERR_RPT_REG_0_UNEXP_IMA_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_NC_NCMISC_NCSCOMS_ERR_RPT_REG_0_UNEXP_IMA_DATA(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCMISC_NCSCOMS_ERR_RPT_REG));
+#endif
+    return i_data.getBit<NC_NCMISC_NCSCOMS_ERR_RPT_REG_0_UNEXP_IMA_DATA>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NC_NCMISC_NCSCOMS_ERR_RPT_REG_0_UNEXP_IMA_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_NC_NCMISC_NCSCOMS_FIR_ACTION0_REG(const fapi2::Target<K, M, V>& i_target)
 {

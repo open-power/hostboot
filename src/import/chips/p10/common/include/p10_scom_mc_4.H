@@ -196,7 +196,7 @@ static const uint32_t TRA0_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t TRA0_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
 // mc/reg00004.H
 
-static const uint64_t TRA1_TR0_CONFIG_2 = 0x0c010445ull;
+static const uint64_t TRA1_TR0_CONFIG_2 = 0x0c010485ull;
 
 static const uint32_t TRA1_TR0_CONFIG_2_A = 0;
 static const uint32_t TRA1_TR0_CONFIG_2_A_LEN = 24;

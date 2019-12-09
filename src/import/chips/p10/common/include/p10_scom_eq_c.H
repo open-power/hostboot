@@ -61,12 +61,15 @@ static const uint64_t CLK_ADJ_02_DCADJ_WRAP_SOFT_RESET = 0x20012305ull;
 // eq/reg00012.H
 
 static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_INIT_MODE = 0x20012320ull;
+
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_INIT_MODE_SET_INIT_MD = 4;
 // eq/reg00012.H
 
 static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE = 0x20012324ull;
 
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_STEP_COUNT = 0;
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_STEP_COUNT_LEN = 32;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_ET_SINGLE_STEP_MD_SET = 0;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_TEP_COUNT = 1;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_TEP_COUNT_LEN = 32;
 // eq/reg00012.H
 
 static const uint64_t CLK_ADJ_03_DCADJ_WRAP_PHASE_MEASUREMENT = 0x20011318ull;
@@ -294,13 +297,18 @@ static const uint32_t QME_PPEDBG_TRACE_MODE_SEL = 10;
 static const uint32_t QME_PPEDBG_TRACE_MODE_SEL_LEN = 2;
 static const uint32_t QME_PPEDBG_EN_MARK_TRACE = 12;
 static const uint32_t QME_PPEDBG_EN_EE_TRACE = 13;
-static const uint32_t QME_PPEDBG_RESERVED14_15 = 14;
-static const uint32_t QME_PPEDBG_RESERVED14_15_LEN = 2;
+static const uint32_t QME_PPEDBG_TRACE_LOWER_SEL1 = 14;
+static const uint32_t QME_PPEDBG_TRACE_LOWER_SEL1_LEN = 2;
 static const uint32_t QME_PPEDBG_FIR_TRIGGER = 16;
 static const uint32_t QME_PPEDBG_MIB_GPIO = 17;
 static const uint32_t QME_PPEDBG_MIB_GPIO_LEN = 3;
 static const uint32_t QME_PPEDBG_TRACE_DATA_SEL = 20;
 static const uint32_t QME_PPEDBG_TRACE_DATA_SEL_LEN = 4;
+static const uint32_t QME_PPEDBG_QHTM_TRACE_SEL = 25;
+static const uint32_t QME_PPEDBG_TRACE_EXT_SEL0 = 26;
+static const uint32_t QME_PPEDBG_TRACE_MODE_SEL1 = 27;
+static const uint32_t QME_PPEDBG_TRACE_DATA_SEL1 = 28;
+static const uint32_t QME_PPEDBG_TRACE_DATA_SEL1_LEN = 4;
 // eq/reg00012.H
 
 static const uint64_t QME_PTSR = 0x200e013cull;

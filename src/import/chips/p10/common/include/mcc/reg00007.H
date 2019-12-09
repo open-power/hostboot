@@ -2251,86 +2251,86 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF3_AMO_LIMIT_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF3_128B_CI_PR_W(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF3));
 #endif
-    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF3_AMO_LIMIT_SEL,
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF3_128B_CI_PR_W,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF3_AMO_LIMIT_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF3_128B_CI_PR_W chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF3_AMO_LIMIT_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF3_128B_CI_PR_W(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF3));
 #endif
-    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF3_AMO_LIMIT_SEL,
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF3_128B_CI_PR_W,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF3_AMO_LIMIT_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF3_128B_CI_PR_W chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF3_AMO_LIMIT_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF3_128B_CI_PR_W(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF3));
 #endif
-    return o_data.setBit<ATCL_CL_CLSCOM_MCPERF3_AMO_LIMIT_SEL>();
+    return o_data.setBit<ATCL_CL_CLSCOM_MCPERF3_128B_CI_PR_W>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF3_AMO_LIMIT_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF3_128B_CI_PR_W chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_ATCL_CL_CLSCOM_MCPERF3_AMO_LIMIT_SEL(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_ATCL_CL_CLSCOM_MCPERF3_128B_CI_PR_W(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF3));
 #endif
-    return o_data.clearBit<ATCL_CL_CLSCOM_MCPERF3_AMO_LIMIT_SEL>();
+    return o_data.clearBit<ATCL_CL_CLSCOM_MCPERF3_128B_CI_PR_W>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF3_AMO_LIMIT_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF3_128B_CI_PR_W chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCPERF3_AMO_LIMIT_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCPERF3_128B_CI_PR_W(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF3));
 #endif
-    return i_data.extractToRight<ATCL_CL_CLSCOM_MCPERF3_AMO_LIMIT_SEL,
+    return i_data.extractToRight<ATCL_CL_CLSCOM_MCPERF3_128B_CI_PR_W,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF3_AMO_LIMIT_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF3_128B_CI_PR_W chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_ATCL_CL_CLSCOM_MCPERF3_AMO_LIMIT_SEL(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_ATCL_CL_CLSCOM_MCPERF3_128B_CI_PR_W(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF3));
 #endif
-    return i_data.getBit<ATCL_CL_CLSCOM_MCPERF3_AMO_LIMIT_SEL>();
+    return i_data.getBit<ATCL_CL_CLSCOM_MCPERF3_128B_CI_PR_W>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF3_AMO_LIMIT_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF3_128B_CI_PR_W chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

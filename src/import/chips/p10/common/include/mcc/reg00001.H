@@ -344,47 +344,47 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_ALT_WRBUF_M(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_EPF_CL_LIMIT_THRESH(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
-    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_ALT_WRBUF_M,
-           ATCL_CL_CLSCOM_MCPERF2_ALT_WRBUF_M_LEN>(i_data);
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_EPF_CL_LIMIT_THRESH,
+           ATCL_CL_CLSCOM_MCPERF2_EPF_CL_LIMIT_THRESH_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF2_ALT_WRBUF_M chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF2_EPF_CL_LIMIT_THRESH chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_ALT_WRBUF_M(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_EPF_CL_LIMIT_THRESH(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
-    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_ALT_WRBUF_M,
-           ATCL_CL_CLSCOM_MCPERF2_ALT_WRBUF_M_LEN>(i_data);
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_EPF_CL_LIMIT_THRESH,
+           ATCL_CL_CLSCOM_MCPERF2_EPF_CL_LIMIT_THRESH_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF2_ALT_WRBUF_M chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF2_EPF_CL_LIMIT_THRESH chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCPERF2_ALT_WRBUF_M(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCPERF2_EPF_CL_LIMIT_THRESH(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
-    return i_data.extractToRight<ATCL_CL_CLSCOM_MCPERF2_ALT_WRBUF_M,
-           ATCL_CL_CLSCOM_MCPERF2_ALT_WRBUF_M_LEN>(o_data);
+    return i_data.extractToRight<ATCL_CL_CLSCOM_MCPERF2_EPF_CL_LIMIT_THRESH,
+           ATCL_CL_CLSCOM_MCPERF2_EPF_CL_LIMIT_THRESH_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF2_ALT_WRBUF_M chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF2_EPF_CL_LIMIT_THRESH chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -1035,47 +1035,92 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_ALT_M(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_EPF_EPS_DEC_CNTL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
-    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_ALT_M,
-           ATCL_CL_CLSCOM_MCPERF2_ALT_M_LEN>(i_data);
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_EPF_EPS_DEC_CNTL,
+           ATCL_CL_CLSCOM_MCPERF2_EPF_EPS_DEC_CNTL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF2_ALT_M chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF2_EPF_EPS_DEC_CNTL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_ALT_M(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_EPF_EPS_DEC_CNTL(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
-    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_ALT_M,
-           ATCL_CL_CLSCOM_MCPERF2_ALT_M_LEN>(i_data);
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_EPF_EPS_DEC_CNTL,
+           ATCL_CL_CLSCOM_MCPERF2_EPF_EPS_DEC_CNTL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF2_ALT_M chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF2_EPF_EPS_DEC_CNTL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCPERF2_ALT_M(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCPERF2_EPF_EPS_DEC_CNTL(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
 #endif
-    return i_data.extractToRight<ATCL_CL_CLSCOM_MCPERF2_ALT_M,
-           ATCL_CL_CLSCOM_MCPERF2_ALT_M_LEN>(o_data);
+    return i_data.extractToRight<ATCL_CL_CLSCOM_MCPERF2_EPF_EPS_DEC_CNTL,
+           ATCL_CL_CLSCOM_MCPERF2_EPF_EPS_DEC_CNTL_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF2_ALT_M chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF2_EPF_EPS_DEC_CNTL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_EPF_CL_LIMIT_MOD_CNTL(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_EPF_CL_LIMIT_MOD_CNTL,
+           ATCL_CL_CLSCOM_MCPERF2_EPF_CL_LIMIT_MOD_CNTL_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF2_EPF_CL_LIMIT_MOD_CNTL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCPERF2_EPF_CL_LIMIT_MOD_CNTL(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCPERF2_EPF_CL_LIMIT_MOD_CNTL,
+           ATCL_CL_CLSCOM_MCPERF2_EPF_CL_LIMIT_MOD_CNTL_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF2_EPF_CL_LIMIT_MOD_CNTL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCPERF2_EPF_CL_LIMIT_MOD_CNTL(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCPERF2));
+#endif
+    return i_data.extractToRight<ATCL_CL_CLSCOM_MCPERF2_EPF_CL_LIMIT_MOD_CNTL,
+           ATCL_CL_CLSCOM_MCPERF2_EPF_CL_LIMIT_MOD_CNTL_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access ATCL_CL_CLSCOM_MCPERF2_EPF_CL_LIMIT_MOD_CNTL chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

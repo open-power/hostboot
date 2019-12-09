@@ -17937,6 +17937,354 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_PHY_PPE_WRAP_SCOM_CNTL_PPE_SOURCED_HANG_PULSE_EN(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_CNTL));
+#endif
+    return o_data.insertFromRight<PHY_PPE_WRAP_SCOM_CNTL_PPE_SOURCED_HANG_PULSE_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PHY_PPE_WRAP_SCOM_CNTL_PPE_SOURCED_HANG_PULSE_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PHY_PPE_WRAP_SCOM_CNTL_PPE_SOURCED_HANG_PULSE_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_CNTL));
+#endif
+    return o_data.insertFromRight<PHY_PPE_WRAP_SCOM_CNTL_PPE_SOURCED_HANG_PULSE_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PHY_PPE_WRAP_SCOM_CNTL_PPE_SOURCED_HANG_PULSE_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PHY_PPE_WRAP_SCOM_CNTL_PPE_SOURCED_HANG_PULSE_EN(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_CNTL));
+#endif
+    return o_data.setBit<PHY_PPE_WRAP_SCOM_CNTL_PPE_SOURCED_HANG_PULSE_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PHY_PPE_WRAP_SCOM_CNTL_PPE_SOURCED_HANG_PULSE_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PHY_PPE_WRAP_SCOM_CNTL_PPE_SOURCED_HANG_PULSE_EN(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_CNTL));
+#endif
+    return o_data.clearBit<PHY_PPE_WRAP_SCOM_CNTL_PPE_SOURCED_HANG_PULSE_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PHY_PPE_WRAP_SCOM_CNTL_PPE_SOURCED_HANG_PULSE_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PHY_PPE_WRAP_SCOM_CNTL_PPE_SOURCED_HANG_PULSE_EN(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_CNTL));
+#endif
+    return i_data.extractToRight<PHY_PPE_WRAP_SCOM_CNTL_PPE_SOURCED_HANG_PULSE_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PHY_PPE_WRAP_SCOM_CNTL_PPE_SOURCED_HANG_PULSE_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PHY_PPE_WRAP_SCOM_CNTL_PPE_SOURCED_HANG_PULSE_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_CNTL));
+#endif
+    return i_data.getBit<PHY_PPE_WRAP_SCOM_CNTL_PPE_SOURCED_HANG_PULSE_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PHY_PPE_WRAP_SCOM_CNTL_PPE_SOURCED_HANG_PULSE_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PHY_PPE_WRAP_SCOM_CNTL_PPE_IO_VALID_DLY_CHKN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_CNTL));
+#endif
+    return o_data.insertFromRight<PHY_PPE_WRAP_SCOM_CNTL_PPE_IO_VALID_DLY_CHKN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PHY_PPE_WRAP_SCOM_CNTL_PPE_IO_VALID_DLY_CHKN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PHY_PPE_WRAP_SCOM_CNTL_PPE_IO_VALID_DLY_CHKN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_CNTL));
+#endif
+    return o_data.insertFromRight<PHY_PPE_WRAP_SCOM_CNTL_PPE_IO_VALID_DLY_CHKN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PHY_PPE_WRAP_SCOM_CNTL_PPE_IO_VALID_DLY_CHKN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PHY_PPE_WRAP_SCOM_CNTL_PPE_IO_VALID_DLY_CHKN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_CNTL));
+#endif
+    return o_data.setBit<PHY_PPE_WRAP_SCOM_CNTL_PPE_IO_VALID_DLY_CHKN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PHY_PPE_WRAP_SCOM_CNTL_PPE_IO_VALID_DLY_CHKN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PHY_PPE_WRAP_SCOM_CNTL_PPE_IO_VALID_DLY_CHKN(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_CNTL));
+#endif
+    return o_data.clearBit<PHY_PPE_WRAP_SCOM_CNTL_PPE_IO_VALID_DLY_CHKN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PHY_PPE_WRAP_SCOM_CNTL_PPE_IO_VALID_DLY_CHKN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PHY_PPE_WRAP_SCOM_CNTL_PPE_IO_VALID_DLY_CHKN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_CNTL));
+#endif
+    return i_data.extractToRight<PHY_PPE_WRAP_SCOM_CNTL_PPE_IO_VALID_DLY_CHKN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PHY_PPE_WRAP_SCOM_CNTL_PPE_IO_VALID_DLY_CHKN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PHY_PPE_WRAP_SCOM_CNTL_PPE_IO_VALID_DLY_CHKN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_CNTL));
+#endif
+    return i_data.getBit<PHY_PPE_WRAP_SCOM_CNTL_PPE_IO_VALID_DLY_CHKN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PHY_PPE_WRAP_SCOM_CNTL_PPE_IO_VALID_DLY_CHKN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PHY_PPE_WRAP_SCOM_CNTL_IO_PPE_DONE_DLY_CHKN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_CNTL));
+#endif
+    return o_data.insertFromRight<PHY_PPE_WRAP_SCOM_CNTL_IO_PPE_DONE_DLY_CHKN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PHY_PPE_WRAP_SCOM_CNTL_IO_PPE_DONE_DLY_CHKN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PHY_PPE_WRAP_SCOM_CNTL_IO_PPE_DONE_DLY_CHKN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_CNTL));
+#endif
+    return o_data.insertFromRight<PHY_PPE_WRAP_SCOM_CNTL_IO_PPE_DONE_DLY_CHKN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PHY_PPE_WRAP_SCOM_CNTL_IO_PPE_DONE_DLY_CHKN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PHY_PPE_WRAP_SCOM_CNTL_IO_PPE_DONE_DLY_CHKN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_CNTL));
+#endif
+    return o_data.setBit<PHY_PPE_WRAP_SCOM_CNTL_IO_PPE_DONE_DLY_CHKN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PHY_PPE_WRAP_SCOM_CNTL_IO_PPE_DONE_DLY_CHKN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PHY_PPE_WRAP_SCOM_CNTL_IO_PPE_DONE_DLY_CHKN(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_CNTL));
+#endif
+    return o_data.clearBit<PHY_PPE_WRAP_SCOM_CNTL_IO_PPE_DONE_DLY_CHKN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PHY_PPE_WRAP_SCOM_CNTL_IO_PPE_DONE_DLY_CHKN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PHY_PPE_WRAP_SCOM_CNTL_IO_PPE_DONE_DLY_CHKN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_CNTL));
+#endif
+    return i_data.extractToRight<PHY_PPE_WRAP_SCOM_CNTL_IO_PPE_DONE_DLY_CHKN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PHY_PPE_WRAP_SCOM_CNTL_IO_PPE_DONE_DLY_CHKN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PHY_PPE_WRAP_SCOM_CNTL_IO_PPE_DONE_DLY_CHKN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_CNTL));
+#endif
+    return i_data.getBit<PHY_PPE_WRAP_SCOM_CNTL_IO_PPE_DONE_DLY_CHKN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PHY_PPE_WRAP_SCOM_CNTL_IO_PPE_DONE_DLY_CHKN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PHY_PPE_WRAP_SCOM_CNTL_MMIO_ECHO_CHKN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_CNTL));
+#endif
+    return o_data.insertFromRight<PHY_PPE_WRAP_SCOM_CNTL_MMIO_ECHO_CHKN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PHY_PPE_WRAP_SCOM_CNTL_MMIO_ECHO_CHKN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PHY_PPE_WRAP_SCOM_CNTL_MMIO_ECHO_CHKN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_CNTL));
+#endif
+    return o_data.insertFromRight<PHY_PPE_WRAP_SCOM_CNTL_MMIO_ECHO_CHKN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PHY_PPE_WRAP_SCOM_CNTL_MMIO_ECHO_CHKN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_PHY_PPE_WRAP_SCOM_CNTL_MMIO_ECHO_CHKN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_CNTL));
+#endif
+    return o_data.setBit<PHY_PPE_WRAP_SCOM_CNTL_MMIO_ECHO_CHKN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PHY_PPE_WRAP_SCOM_CNTL_MMIO_ECHO_CHKN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_PHY_PPE_WRAP_SCOM_CNTL_MMIO_ECHO_CHKN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_CNTL));
+#endif
+    return o_data.clearBit<PHY_PPE_WRAP_SCOM_CNTL_MMIO_ECHO_CHKN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PHY_PPE_WRAP_SCOM_CNTL_MMIO_ECHO_CHKN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_PHY_PPE_WRAP_SCOM_CNTL_MMIO_ECHO_CHKN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_CNTL));
+#endif
+    return i_data.extractToRight<PHY_PPE_WRAP_SCOM_CNTL_MMIO_ECHO_CHKN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PHY_PPE_WRAP_SCOM_CNTL_MMIO_ECHO_CHKN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_PHY_PPE_WRAP_SCOM_CNTL_MMIO_ECHO_CHKN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_SCOM_CNTL));
+#endif
+    return i_data.getBit<PHY_PPE_WRAP_SCOM_CNTL_MMIO_ECHO_CHKN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access PHY_PPE_WRAP_SCOM_CNTL_MMIO_ECHO_CHKN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 static inline fapi2::buffer<uint64_t>& SET_PHY_PPE_WRAP_SCOM_CNTL_SCOM_PPE_SPARES(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {

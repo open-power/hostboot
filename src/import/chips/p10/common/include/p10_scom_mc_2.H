@@ -125,7 +125,7 @@ static const uint32_t SPATTN_IN34 = 34;
 static const uint32_t SPATTN_IN35 = 35;
 // mc/reg00002.H
 
-static const uint64_t TRA1_TR0_CONFIG_3 = 0x0c010446ull;
+static const uint64_t TRA1_TR0_CONFIG_3 = 0x0c010486ull;
 
 static const uint32_t TRA1_TR0_CONFIG_3_C = 0;
 static const uint32_t TRA1_TR0_CONFIG_3_C_LEN = 24;

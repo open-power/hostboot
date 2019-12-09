@@ -89,6 +89,12 @@ static const uint32_t PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG0_PE_TOPOLOGY_ID_REG0 = 0;
 static const uint32_t PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG0_PE_TOPOLOGY_ID_REG0_LEN = 40;
 // pec/reg00002.H
 
+static const uint64_t PIPEDOUTCTL4 = 0x08011518ull;
+
+static const uint32_t PIPEDOUTCTL4_RESERVED_63_0 = 0;
+static const uint32_t PIPEDOUTCTL4_RESERVED_63_0_LEN = 64;
+// pec/reg00002.H
+
 static const uint64_t SPATTN = 0x08040002ull;
 
 static const uint32_t SPATTN_ANY_SPATTN = 0;

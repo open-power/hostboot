@@ -40,6 +40,8 @@ namespace eq
 
 
 static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_ONE_SHOT_MODE = 0x20018323ull;
+
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_ONE_SHOT_MODE_SET_ONE_SHOT_MD_SET1 = 1;
 // eq/reg00007.H
 
 static const uint64_t CLK_ADJ_01_DCADJ_WRAP_PHASE_MEASUREMENT = 0x20014318ull;
@@ -76,6 +78,8 @@ static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_DEC_DCC_VALUE_LEN = 8;
 // eq/reg00007.H
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_ONE_SHOT_MODE = 0x20011323ull;
+
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_ONE_SHOT_MODE_SET_ONE_SHOT_MD_SET1 = 1;
 // eq/reg00007.H
 
 static const uint64_t EPS_THERM_WSUB_CONTROL_REG = 0x20050012ull;
@@ -289,6 +293,9 @@ static const uint32_t QME_ERR_PIG_PENDING_SOURCE_LOST = 34;
 static const uint32_t QME_ERR_PIG_PENDING_SOURCE_LOST_LEN = 6;
 static const uint32_t QME_ERR_SPARE = 40;
 static const uint32_t QME_ERR_SPARE_LEN = 4;
+static const uint32_t QME_ERR_LOCAL_ACCESS_PROTECT_ERR = 44;
+static const uint32_t QME_ERR_LOCAL_ACCESS_REGION_ERR = 45;
+static const uint32_t QME_ERR_LOCAL_ACCESS_PARTIAL_ERR = 46;
 // eq/reg00007.H
 
 static const uint64_t QME_QHTTRIG = 0x200e01b0ull;
@@ -325,7 +332,7 @@ static const uint32_t QME_QMCR_TTSR_READ_ENABLE = 25;
 static const uint32_t QME_QMCR_PTSR_READ_ENABLE = 26;
 static const uint32_t QME_QMCR_RESET_QME_PCB_MASTER_INTERFACE = 27;
 static const uint32_t QME_QMCR_SPARE = 28;
-static const uint32_t QME_QMCR_SPARE_LEN = 2;
+static const uint32_t QME_QMCR_STOP_SHIFTREG_OVERRIDE_EN = 29;
 static const uint32_t QME_QMCR_CPMS_PG_CLKOFF_DISABLE = 30;
 static const uint32_t QME_QMCR_CTFS_PG_CLKOFF_DISABLE = 31;
 static const uint32_t QME_QMCR_DTC_SEQUENCER_ENABLE = 32;

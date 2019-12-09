@@ -67,7 +67,7 @@ static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_RESET = 2;
 static const uint64_t IOPFIRACT0 = 0x08011506ull;
 
 static const uint32_t IOPFIRACT0_FIR_ACTION0 = 0;
-static const uint32_t IOPFIRACT0_FIR_ACTION0_LEN = 6;
+static const uint32_t IOPFIRACT0_FIR_ACTION0_LEN = 12;
 // pec/reg00013.H
 
 static const uint64_t IXDATA1 = 0x0801150dull;

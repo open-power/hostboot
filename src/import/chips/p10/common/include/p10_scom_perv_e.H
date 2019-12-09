@@ -58,9 +58,13 @@ static const uint32_t CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_2_LEN = 8;
 // perv/reg00028.H
 
 static const uint64_t CLK_ADJ_01_DCADJ_WRAP_SET_ADJUST_MODE = 0x00014302ull;
+
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SET_ADJUST_MODE_SET_ADJUST_MD = 1;
 // perv/reg00028.H
 
 static const uint64_t CLK_ADJ_01_DCADJ_WRAP_SET_HOLD_MODE = 0x00014301ull;
+
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SET_HOLD_MODE_SET_HOLD_MD = 0;
 // perv/reg00028.H
 
 static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE = 0x0001432aull;
@@ -82,9 +86,13 @@ static const uint32_t CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_VALUE_LEN = 8;
 // perv/reg00028.H
 
 static const uint64_t CLK_ADJ_03_DCADJ_WRAP_SET_MEASURE_ONLY_MODE = 0x00011311ull;
+
+static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_MEASURE_ONLY_MODE_SET_MEASURE_ONLY_MD_SET1 = 4;
 // perv/reg00028.H
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE = 0x00011321ull;
+
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_SET_HOLD_MD = 3;
 // perv/reg00028.H
 
 static const uint64_t EPS_DBG_TRACE_REG_1 = 0x000107ceull;

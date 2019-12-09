@@ -261,7 +261,7 @@ static const uint32_t SLAVE_CONFIG_REG_QME_PAR_DIS = 20;
 static const uint32_t SLAVE_CONFIG_REG_FORCE_0_QME = 21;
 // mc/reg00014.H
 
-static const uint64_t TRA1_TR0_CONFIG_1 = 0x0c010444ull;
+static const uint64_t TRA1_TR0_CONFIG_1 = 0x0c010484ull;
 
 static const uint32_t TRA1_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t TRA1_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;

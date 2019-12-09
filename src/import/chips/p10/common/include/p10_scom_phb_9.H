@@ -58,6 +58,8 @@ static const uint32_t REGS_PBCQMODE_REG_PE_PEER2PEER_MODDE = 0;
 static const uint32_t REGS_PBCQMODE_REG_PBCQMODE_UNUSED = 1;
 static const uint32_t REGS_PBCQMODE_REG_PE_PB_CQ_REGS_CS_ENABLE_SMF = 2;
 static const uint32_t REGS_PBCQMODE_REG_PE_ATOMIC_LITTLE_ENDIAN = 3;
+static const uint32_t REGS_PBCQMODE_REG_PE_RDP2P_DMA_MODE = 4;
+static const uint32_t REGS_PBCQMODE_REG_PE_LDP2P_DMA_MODE = 5;
 // phb/reg00009.H
 
 static const uint64_t REGS_PFIRACTION0_REG = 0x08010846ull;

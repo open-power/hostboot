@@ -221,7 +221,7 @@ static const uint32_t TRA0_TR0_CONFIG_5_D = 24;
 static const uint32_t TRA0_TR0_CONFIG_5_D_LEN = 24;
 // mc/reg00006.H
 
-static const uint64_t TRA1_TR0_CONFIG = 0x0c010442ull;
+static const uint64_t TRA1_TR0_CONFIG = 0x0c010482ull;
 
 static const uint32_t TRA1_TR0_CONFIG_STORE_ON_TRIG_MODE = 0;
 static const uint32_t TRA1_TR0_CONFIG_WRITE_ON_RUN_MODE = 1;

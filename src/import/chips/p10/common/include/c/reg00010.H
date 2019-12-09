@@ -6364,86 +6364,86 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_FIR_CORE_WOF_UNUSED_46(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_FIR_CORE_WOF_PC_TFX_XSTOP_ERROR(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_FIR_CORE_WOF));
 #endif
-    return o_data.insertFromRight<EC_PC_FIR_CORE_WOF_UNUSED_46,
+    return o_data.insertFromRight<EC_PC_FIR_CORE_WOF_PC_TFX_XSTOP_ERROR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_FIR_CORE_WOF_UNUSED_46 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_FIR_CORE_WOF_PC_TFX_XSTOP_ERROR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_FIR_CORE_WOF_UNUSED_46(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_FIR_CORE_WOF_PC_TFX_XSTOP_ERROR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_FIR_CORE_WOF));
 #endif
-    return o_data.insertFromRight<EC_PC_FIR_CORE_WOF_UNUSED_46,
+    return o_data.insertFromRight<EC_PC_FIR_CORE_WOF_PC_TFX_XSTOP_ERROR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_FIR_CORE_WOF_UNUSED_46 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_FIR_CORE_WOF_PC_TFX_XSTOP_ERROR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_FIR_CORE_WOF_UNUSED_46(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_FIR_CORE_WOF_PC_TFX_XSTOP_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_FIR_CORE_WOF));
 #endif
-    return o_data.setBit<EC_PC_FIR_CORE_WOF_UNUSED_46>();
+    return o_data.setBit<EC_PC_FIR_CORE_WOF_PC_TFX_XSTOP_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_FIR_CORE_WOF_UNUSED_46 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_FIR_CORE_WOF_PC_TFX_XSTOP_ERROR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_FIR_CORE_WOF_UNUSED_46(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_FIR_CORE_WOF_PC_TFX_XSTOP_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_FIR_CORE_WOF));
 #endif
-    return o_data.clearBit<EC_PC_FIR_CORE_WOF_UNUSED_46>();
+    return o_data.clearBit<EC_PC_FIR_CORE_WOF_PC_TFX_XSTOP_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_FIR_CORE_WOF_UNUSED_46 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_FIR_CORE_WOF_PC_TFX_XSTOP_ERROR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_FIR_CORE_WOF_UNUSED_46(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_FIR_CORE_WOF_PC_TFX_XSTOP_ERROR(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_FIR_CORE_WOF));
 #endif
-    return i_data.extractToRight<EC_PC_FIR_CORE_WOF_UNUSED_46,
+    return i_data.extractToRight<EC_PC_FIR_CORE_WOF_PC_TFX_XSTOP_ERROR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_FIR_CORE_WOF_UNUSED_46 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_FIR_CORE_WOF_PC_TFX_XSTOP_ERROR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_EC_PC_FIR_CORE_WOF_UNUSED_46(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_EC_PC_FIR_CORE_WOF_PC_TFX_XSTOP_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_FIR_CORE_WOF));
 #endif
-    return i_data.getBit<EC_PC_FIR_CORE_WOF_UNUSED_46>();
+    return i_data.getBit<EC_PC_FIR_CORE_WOF_PC_TFX_XSTOP_ERROR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_FIR_CORE_WOF_UNUSED_46 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_FIR_CORE_WOF_PC_TFX_XSTOP_ERROR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

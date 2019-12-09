@@ -210,7 +210,7 @@ static const uint32_t TRA0_TR0_CONFIG_2_B = 24;
 static const uint32_t TRA0_TR0_CONFIG_2_B_LEN = 24;
 // mc/reg00005.H
 
-static const uint64_t TRA1_TR0_TRACE_HI_DATA_REG = 0x0c010440ull;
+static const uint64_t TRA1_TR0_TRACE_HI_DATA_REG = 0x0c010480ull;
 
 static const uint32_t TRA1_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t TRA1_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;

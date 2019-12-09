@@ -225,12 +225,18 @@ static const uint64_t IOPFIRMASK_RW = 0x08011503ull;
 static const uint64_t IOPFIRMASK_WO_AND = 0x08011504ull;
 static const uint64_t IOPFIRMASK_WO_OR = 0x08011505ull;
 
-static const uint32_t IOPFIRMASK_PHY0_ECC_CE_ERR_MASK = 0;
-static const uint32_t IOPFIRMASK_PHY0_ECC_UE_ERR_MASK = 1;
-static const uint32_t IOPFIRMASK_PHY1_ECC_CE_ERR_MASK = 2;
-static const uint32_t IOPFIRMASK_PHY1_ECC_UE_ERR_MASK = 3;
-static const uint32_t IOPFIRMASK_RESERVED_MASK = 4;
-static const uint32_t IOPFIRMASK_RESERVED_MASK_LEN = 2;
+static const uint32_t IOPFIRMASK_PHY0_ECC_CE_MASK = 0;
+static const uint32_t IOPFIRMASK_PHY0_ECC_UE_MASK = 1;
+static const uint32_t IOPFIRMASK_PHY1_ECC_CE_MASK = 2;
+static const uint32_t IOPFIRMASK_PHY1_ECC_UE_MASK = 3;
+static const uint32_t IOPFIRMASK_SCOM0_ECC_CE_MASK = 4;
+static const uint32_t IOPFIRMASK_SCOM0_ECC_UE_MASK = 5;
+static const uint32_t IOPFIRMASK_SCOM1_ECC_CE_MASK = 6;
+static const uint32_t IOPFIRMASK_SCOM1_ECC_UE_MASK = 7;
+static const uint32_t IOPFIRMASK_SCRUB0_ECC_CE_MASK = 8;
+static const uint32_t IOPFIRMASK_SCRUB0_ECC_UE_MASK = 9;
+static const uint32_t IOPFIRMASK_SCRUB1_ECC_CE_MASK = 10;
+static const uint32_t IOPFIRMASK_SCRUB1_ECC_UE_MASK = 11;
 // pec/reg00008.H
 
 static const uint64_t OPCG_REG0 = 0x08030002ull;
@@ -257,6 +263,12 @@ static const uint64_t PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG3 = 0x0301180full;
 
 static const uint32_t PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG3_PE_TOPOLOGY_ID_REG3 = 0;
 static const uint32_t PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG3_PE_TOPOLOGY_ID_REG3_LEN = 40;
+// pec/reg00008.H
+
+static const uint64_t PIPEDINCTL4 = 0x0801151dull;
+
+static const uint32_t PIPEDINCTL4_RESERVED_63_0 = 0;
+static const uint32_t PIPEDINCTL4_RESERVED_63_0_LEN = 64;
 // pec/reg00008.H
 
 static const uint64_t SCAN_CAPTUREDR_LONG = 0x0803d000ull;

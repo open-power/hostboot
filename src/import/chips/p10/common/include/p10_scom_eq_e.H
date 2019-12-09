@@ -58,9 +58,13 @@ static const uint32_t CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY_2_LEN = 8;
 // eq/reg00014.H
 
 static const uint64_t CLK_ADJ_01_DCADJ_WRAP_SET_ADJUST_MODE = 0x20014302ull;
+
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SET_ADJUST_MODE_SET_ADJUST_MD = 1;
 // eq/reg00014.H
 
 static const uint64_t CLK_ADJ_01_DCADJ_WRAP_SET_HOLD_MODE = 0x20014301ull;
+
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SET_HOLD_MODE_SET_HOLD_MD = 0;
 // eq/reg00014.H
 
 static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE = 0x2001432aull;
@@ -82,9 +86,13 @@ static const uint32_t CLK_ADJ_03_DCADJ_WRAP_DCC_OVERRIDE_VALUE_LEN = 8;
 // eq/reg00014.H
 
 static const uint64_t CLK_ADJ_03_DCADJ_WRAP_SET_MEASURE_ONLY_MODE = 0x20011311ull;
+
+static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_MEASURE_ONLY_MODE_SET_MEASURE_ONLY_MD_SET1 = 4;
 // eq/reg00014.H
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE = 0x20011321ull;
+
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_SET_HOLD_MD = 3;
 // eq/reg00014.H
 
 static const uint64_t EPS_DBG_TRACE_REG_1 = 0x200183eeull;
@@ -407,9 +415,9 @@ static const uint32_t QME_LFIR_PB_SUE = 27;
 static const uint32_t QME_LFIR_PB_INVALID_TOPOTABLE_ENTRY = 28;
 static const uint32_t QME_LFIR_PB_TAG_PERR = 29;
 static const uint32_t QME_LFIR_PIG_PROTOCOL_ERR = 30;
-static const uint32_t QME_LFIR_SPARE1 = 31;
-static const uint32_t QME_LFIR_SPARE2 = 32;
-static const uint32_t QME_LFIR_SPARE3 = 33;
+static const uint32_t QME_LFIR_LOCAL_ACCESS_ERR = 31;
+static const uint32_t QME_LFIR_SPARE1 = 32;
+static const uint32_t QME_LFIR_SPARE1_LEN = 2;
 // eq/reg00014.H
 
 static const uint64_t QME_PCBSII = 0x200e0038ull;

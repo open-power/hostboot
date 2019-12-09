@@ -275,7 +275,7 @@ static const uint32_t SCOMFIR_MCWATACT_RESERVED_36_47 = 24;
 static const uint32_t SCOMFIR_MCWATACT_RESERVED_36_47_LEN = 16;
 // mc/reg00012.H
 
-static const uint64_t TRA1_TR0_CONFIG_9 = 0x0c010449ull;
+static const uint64_t TRA1_TR0_CONFIG_9 = 0x0c010489ull;
 
 static const uint32_t TRA1_TR0_CONFIG_9_DISABLE_COMPRESSION = 0;
 static const uint32_t TRA1_TR0_CONFIG_9_ERROR_BIT_COMPRESSION_CARE_MASK = 1;

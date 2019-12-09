@@ -220,7 +220,7 @@ static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE = 16;
 static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE_LEN = 8;
 // mc/reg00007.H
 
-static const uint64_t TRA1_TR0_CONFIG_5 = 0x0c010448ull;
+static const uint64_t TRA1_TR0_CONFIG_5 = 0x0c010488ull;
 
 static const uint32_t TRA1_TR0_CONFIG_5_C = 0;
 static const uint32_t TRA1_TR0_CONFIG_5_C_LEN = 24;

@@ -149,6 +149,12 @@ static const uint32_t PIPEDINCTL0_PHY0_MPLLB_FORCE_ACK = 62;
 static const uint32_t PIPEDINCTL0_PHY0_MPLLA_FORCE_ACK = 63;
 // pec/reg00001.H
 
+static const uint64_t PIPEDOUTCTL3 = 0x08011517ull;
+
+static const uint32_t PIPEDOUTCTL3_RESERVED_63_0 = 0;
+static const uint32_t PIPEDOUTCTL3_RESERVED_63_0_LEN = 64;
+// pec/reg00001.H
+
 static const uint64_t RECOV_INTERRUPT_REG = 0x080f001bull;
 
 static const uint32_t RECOV_INTERRUPT_REG_RECOV = 0;
