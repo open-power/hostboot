@@ -295,9 +295,8 @@ fapi2::ReturnCode pgpe_halt(
     FAPI_INF("Disabling OCC Heartbeat in all QMEs");
 
     l_data64.flush<0>()
-    .insertFromRight<QME_QHB_COUNT, QME_QHB_COUNT_LEN>(0xFFFF);
-    l_data64.clearBit<QME_QHB_ENABLE>()
-    .clearBit<QME_QHB_LOSS_THROTTLE_ENABLE>();
+    .insertFromRight<QME_QHB_HEARTBEAT_COUNT, QME_QHB_HEARTBEAT_COUNT_LEN>(0xFFFF);
+    l_data64.clearBit<QME_QHB_HEARTBEAT_ENABLE>();
     FAPI_TRY(fapi2::putScom(l_eq_mc_or, QME_QHB, l_data64),
              "ERROR: Failed to setup QME_QHB register")
 
