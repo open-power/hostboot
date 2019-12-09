@@ -32,6 +32,19 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
+    <rc>RC_P10_OTL_NOT_IN_RESET</rc>
+    <description>
+      Procedure: p10_sbe_check_quiesce
+      The OTLs are not all in the reset state for the NPU
+    </description>
+    <ffdc>PROC_TARGET</ffdc>
+    <ffdc>PAU_TARGET</ffdc>
+    <ffdc>STATUS_ADDR</ffdc>
+    <ffdc>STATUS_DATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
     <rc>RC_P10_NX_PBI_WRITE_IDLE_TIMEOUT</rc>
     <description>
       Procedure: p10_sbe_check_quiesce
