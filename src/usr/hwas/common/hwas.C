@@ -2673,6 +2673,16 @@ void presentByAssoc(TargetHandleList& i_targets)
           CHECK_PARENT, // symmetrical rule
           getParentOmicTargetsByState, getChildOmiTargetsByState },
 
+        // Asymmetrical rule with special accessors for parent and children.
+        // Every OMIC has to have a PAUC parent, but a PAUC parent does not
+        // have to have any OMIC children
+        { TYPE_PAUC, TYPE_OMIC,
+          DeconfigGard::INVALID_DECONFIGURED_BY_REASON, // Asymmetrical rule
+                                                        // Can't deconfig parent
+          DeconfigGard::DECONFIGURED_BY_NO_PARENT_PAUC,
+          NO_CHECK_PARENT, // Asymmetrical rule
+          getParentPaucTargetsByState, getChildPaucTargetsByState },
+
         { TYPE_MCC, TYPE_OMI,
           DeconfigGard::DECONFIGURED_BY_NO_CHILD_OMI,
           DeconfigGard::DECONFIGURED_BY_NO_PARENT_MCC },
@@ -2734,19 +2744,6 @@ void presentByAssoc(TargetHandleList& i_targets)
         {
             TargetHandleList l_childList;
             TargetHandleList l_parentList;
-
-            l_rule.getChildren(l_childList, l_funcTarget, CLASS_NA,
-                               l_rule.childType, UTIL_FILTER_FUNCTIONAL);
-
-            l_rule.getParent(l_parentList, l_funcTarget, CLASS_NA,
-                             l_rule.parentType, UTIL_FILTER_FUNCTIONAL);
-
-            l_allChildrenList.insert(l_allChildrenList.end(),
-                                     l_childList.cbegin(), l_childList.cend());
-
-            l_allParentsList.insert(l_allParentsList.end(),
-                                    l_parentList.cbegin(), l_parentList.cend());
-
             TargetHandleList* l_relativeList = nullptr;
             DeconfigGard::DeconfiguredByReason l_deconfigReason;
 
@@ -2761,6 +2758,22 @@ void presentByAssoc(TargetHandleList& i_targets)
                 l_relativeList = &l_parentList;
                 l_deconfigReason = l_rule.childDeconfigReason;
             }
+            else // skip to the next rule
+            {
+                continue;
+            }
+
+            l_rule.getChildren(l_childList, l_funcTarget, CLASS_NA,
+                               l_rule.childType, UTIL_FILTER_FUNCTIONAL);
+
+            l_rule.getParent(l_parentList, l_funcTarget, CLASS_NA,
+                             l_rule.parentType, UTIL_FILTER_FUNCTIONAL);
+
+            l_allChildrenList.insert(l_allChildrenList.end(),
+                                     l_childList.cbegin(), l_childList.cend());
+
+            l_allParentsList.insert(l_allParentsList.end(),
+                                    l_parentList.cbegin(), l_parentList.cend());
 
             if (l_relativeList)
             {
@@ -2768,6 +2781,10 @@ void presentByAssoc(TargetHandleList& i_targets)
                 // of relatives is empty, then deconfigure this target
                 if (l_relativeList->empty())
                 {
+                    HWAS_DBG("PresentByAssoc, deconfig %.8X by rule 0x%x-%x",
+                             l_funcTarget->getAttr<ATTR_HUID>(),
+                             l_rule.parentType, l_rule.childType);
+
                     deconfigPresentByAssoc(makeTargetInfo(l_funcTarget,
                                                           l_deconfigReason));
                     deconfigured[l_funcTarget] = true;

@@ -1733,6 +1733,10 @@ void DeconfigGard::_deconfigureByAssoc(
         isFunctional.specdeconfig(false);
     }
 
+    // Retrieve the target type from the given target
+    const TYPE l_targetType = i_target.getAttr<ATTR_TYPE>();
+    const uint32_t l_targetHuid = get_huid(&i_target);
+
     // If there are child targets deconfig by FCO, override the reason
     // with that of the parent's deconfg EID
     PredicateHwas isFCO;
@@ -1749,14 +1753,34 @@ void DeconfigGard::_deconfigureByAssoc(
     targetService().getAssociated(pChildList, &i_target,
         TargetService::CHILD, TargetService::ALL, &funcOrFco);
 
+    // Temporary list for OMI_CHILD and PAUC_CHILD since the
+    // getChildxxxTargetsByState functions replace instead of append to the
+    // list passed in
+    TargetHandleList pTempList;
+
     // Since OMICs and OMIs share special relations OMI_CHILD and OMIC_PARENT,
     // they will only show up if those relations are used and not the regular
     // CHILD and PARENT relations.
-    if (i_target.getAttr<ATTR_TYPE>() == TYPE_OMIC)
+    if (l_targetType == TYPE_OMIC)
     {
-        // Append OMI targets to the child list.
-        getChildOmiTargetsByState(pChildList, &i_target, CLASS_NA,
+        // Append OMI targets to the temp list.
+        getChildOmiTargetsByState(pTempList, &i_target, CLASS_NA,
                                   TYPE_OMI, UTIL_FILTER_FUNCTIONAL);
+    }
+    // Since PAUCs and OMICs share special relations PAUC_CHILD and PAUC_PARENT,
+    // they will only show up if those relations are used and not the regular
+    // CHILD and PARENT relations.
+    else if (l_targetType == TYPE_PAUC)
+    {
+        // Add OMIC targets to the temp list.
+        getChildPaucTargetsByState(pTempList, &i_target, CLASS_NA,
+                                  TYPE_OMIC, UTIL_FILTER_FUNCTIONAL);
+    }
+
+    // Append the temporary list to the child list
+    if (!pTempList.empty())
+    {
+        pChildList.insert(pChildList.end(), pTempList.begin(), pTempList.end());
     }
 
     for (TargetHandleList::iterator pChild_it = pChildList.begin();
@@ -1765,15 +1789,13 @@ void DeconfigGard::_deconfigureByAssoc(
     {
         TargetHandle_t pChild = *pChild_it;
 
-        HWAS_INF("_deconfigureByAssoc CHILD: %.8X", get_huid(pChild));
+        HWAS_INF("_deconfigureByAssoc %.8X _deconfigureTarget on CHILD: %.8X",
+                 l_targetHuid, get_huid(pChild));
         _deconfigureTarget(*pChild, i_errlEid, NULL,
                 i_deconfigRule);
         // Deconfigure other Targets by association
         _deconfigureByAssoc(*pChild, i_errlEid, i_deconfigRule);
     } // for CHILD
-
-    // Retrieve the target type from the given target
-    TYPE l_targetType = i_target.getAttr<ATTR_TYPE>();
 
     if ((i_deconfigRule == NOT_AT_RUNTIME) ||
         (i_deconfigRule == SPEC_DECONFIG)  ||
@@ -1800,15 +1822,18 @@ void DeconfigGard::_deconfigureByAssoc(
         {
             TargetHandle_t pChild = *pChild_it;
 
-            HWAS_INF("_deconfigureByAssoc CHILD_BY_AFFINITY: %.8X",
-                    get_huid(pChild));
+            HWAS_INF("_deconfigureByAssoc %.8X _deconfigureTarget "
+                     "CHILD_BY_AFFINITY: %.8X",
+                    l_targetHuid, get_huid(pChild));
             _deconfigureTarget(*pChild, i_errlEid, NULL,
                     i_deconfigRule);
+
             // Deconfigure other Targets by association
             _deconfigureByAssoc(*pChild, i_errlEid, i_deconfigRule);
         } // for CHILD_BY_AFFINITY
 
         // Work the deconfig up the parent side (if necessary)
+        HWAS_DBG("_deconfigureByAssoc %.8X _deconfigParentAssoc", l_targetHuid);
         _deconfigParentAssoc(i_target, i_errlEid, i_deconfigRule);
 
     } // !i_Runtime-ish
@@ -1819,7 +1844,8 @@ void DeconfigGard::_deconfigureByAssoc(
                 " the CHILD");
     }
 
-    HWAS_DBG("_deconfigureByAssoc exiting: %.8X", get_huid(&i_target));
+    HWAS_DBG("_deconfigureByAssoc exiting: %.8X", l_targetHuid);
+
 } // _deconfigByAssoc
 
 //******************************************************************************

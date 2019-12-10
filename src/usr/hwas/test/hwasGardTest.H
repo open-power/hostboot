@@ -59,11 +59,13 @@
 #define ENABLE_OMI_UNIT_TEST_2    0
 #define ENABLE_OMI_UNIT_TEST_3    0
 #define ENABLE_OMI_UNIT_TEST_4    0
+#define ENABLE_OMI_UNIT_TEST_5    0
 #else
 #define ENABLE_OMI_UNIT_TEST_1    1
 #define ENABLE_OMI_UNIT_TEST_2    1
 #define ENABLE_OMI_UNIT_TEST_3    1
 #define ENABLE_OMI_UNIT_TEST_4    1
+#define ENABLE_OMI_UNIT_TEST_5    1
 #endif
 
 #define TEST_SAVE_RESTORE_SYSTEM_STATE    0
@@ -5234,6 +5236,62 @@ public:
         }
     }
 
+    // @brief This function is called at the beginning of the
+    // runDeconfigPresentByAssocTest() test to deconfigure the PAUC chip and
+    // its children if the test requires it.
+    static void deconfigPauc()
+    {
+        TargetHandleList l_funcPAUCTargetList;
+        getAllChiplets(l_funcPAUCTargetList, TYPE_PAUC, true);
+
+        if (!l_funcPAUCTargetList.empty())
+        {
+            // Deconfigure the PAUC target
+            TargetHandle_t l_pPauc = l_funcPAUCTargetList[0];
+            TargetInfo l_paucinfo;
+            l_paucinfo.pThisTarget = l_pPauc;
+            l_paucinfo.affinityPath = l_pPauc->getAttr<ATTR_AFFINITY_PATH>();
+            l_paucinfo.type = l_pPauc->getAttr<ATTR_TYPE>();
+            l_paucinfo.reason = DeconfigGard::DECONFIGURED_BY_NO_PARENT_PAUC;
+            deconfigPresentByAssoc(l_paucinfo);
+        }
+        else
+        {
+            TS_FAIL("deconfigPauc: empty PAUC list");
+        }
+    }
+
+    // @brief This function is called at the end of the test
+    // runDeconfigPresentByAssocTest() to check the PAUC chips are functional.
+    static bool isPaucFunctional()
+    {
+        bool rc = true;
+        TargetHandleList l_funcPAUCTargetList;
+        getAllChiplets(l_funcPAUCTargetList, TYPE_PAUC, false);
+
+        if (!l_funcPAUCTargetList.empty())
+        {
+            // Check whether the PAUC target is functional
+            for (uint32_t l_index = 0; l_index < l_funcPAUCTargetList.size();
+                l_index++)
+            {
+                TargetHandle_t l_pPauc = l_funcPAUCTargetList[l_index];
+                if (!l_pPauc->getAttr<ATTR_HWAS_STATE>().functional)
+                {
+                    TS_FAIL("isPaucFunctional: PAUC%d not functional", l_index);
+                    rc = false;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            TS_FAIL("isPaucFunctional: empty PAUC list");
+            rc = false;
+        }
+        return rc;
+    }
+
     /* @brief This function runs a test on presentByAssoc.
      *
      * It expects a list of entity paths and functionality expectations; it then
@@ -5242,11 +5300,13 @@ public:
      * each target mentioned by the test has been deconfigured or not, as
      * specified by each element of the list.
      *
-     * @brief i_testPaths List of entity paths to test.
+     * @param[in] i_testPaths List of entity paths to test.
+     * @param[in] i_deconfigPauc Whether PAUC should be deconfigured, default is no.
      * @return bool Whether all paths were functional or not as expected.
      */
     static bool runDeconfigPresentByAssocTest(
-        const std::vector<presentByAssocTestPath>& i_testPaths
+        const std::vector<presentByAssocTestPath>& i_testPaths,
+        const bool i_deconfigPauc = false
     )
     {
         bool l_success = true;
@@ -5259,6 +5319,12 @@ public:
         // Save the HWAS state of all targets so that we can restore the system
         // state after running the test
         saveSystemState();
+
+        // Deconfigure the PAUC if required
+        if (i_deconfigPauc)
+        {
+            deconfigPauc();
+        }
 
         // Start off with everything deconfigured
         deconfigAllMc();
@@ -5326,6 +5392,13 @@ public:
 
                 l_success = false;
             }
+        }
+
+        // Unless deconfigure PAUC has been specifically requested, PAUC should
+        // be functional. This is true for all memory hierarchy deconfigs.
+        if ((!i_deconfigPauc) && (!isPaucFunctional()))
+        {
+            l_success = false;
         }
 
         restoreSystemState();
@@ -5979,6 +6052,67 @@ public:
     }
 
     /**
+     *  @brief Test Deconfig Present Association 10: PAUC/OMIC rule
+     */
+    void testdeconfigPresentByAssoc10()
+    {
+        TS_INFO(INFO_MRK "testdeconfigPresentByAssoc10: Started");
+
+        // This test creates the scenario where an OMIC has no PAUC parent.
+        // It makes sure the OMIC is deconfigured.
+        const std::vector<presentByAssocTestPath> l_testCase =
+        {
+            // A functional MC0 tree. Verify the whole tree will be
+            // deconfigured because of the missing PAUC
+            { false, { TYPE_MC } },
+                { false, { TYPE_MC, TYPE_OMIC } },
+                { false, { TYPE_MC, {TYPE_OMIC, 1} } },
+
+                { false, { TYPE_MC, TYPE_MI } },
+                  // MCC0
+                  { false, { TYPE_MC, TYPE_MI, TYPE_MCC } },
+                    // MCC0/OMI0
+                    { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
+                      { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+                    // MCC0/OMI1
+                    { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1} } },
+                      { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+                  // MCC1
+                  { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1} } },
+                    // MCC1/OMI0
+                    { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI } },
+                      { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+                    // MCC1/OMI1
+                    { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1} } },
+                      { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+        };
+
+        // Run presentByAssoc test. deconfigPauc=true.
+        if (!runDeconfigPresentByAssocTest(l_testCase, true))
+        {
+            TS_INFO("testdeconfigPresentByAssoc10: incorrect configuration returned");
+        }
+
+        TS_INFO(INFO_MRK "testdeconfigPresentByAssoc10: Exit");
+    }
+
+    /**
      *  @brief Find an MC target and deconfigure OMIC targets. This should
      *         deconfig the MC parent.
      */
@@ -6096,7 +6230,7 @@ public:
 
     /**
      *  @brief Find an MC target and deconfigure it. This should deconfig the
-     *         child OMIC targets.
+     *         child OMIC targets but not affect the PAUC targets.
      */
     void testDeconfigureAssocOMI2()
     {
@@ -6110,14 +6244,6 @@ public:
 
         do
         {
-            // This test is only relevant to Axone.
-            if (!applicableModel())
-            {
-                TS_INFO(INFO_MRK"testDeconfigureAssocOMI2: Skipped due to N/A"
-                        " model");
-                break;
-            }
-
             // find an MC
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
@@ -6143,6 +6269,20 @@ public:
                 break;
             }
 
+            // find the PAUC_PARENT for one of the OMICs
+            TargetHandleList l_pPaucList;
+            getParentPaucTargetsByState(
+                l_pPaucList,
+                l_pOmicList[0],
+                TARGETING::CLASS_NA,
+                TYPE_PAUC,
+                TARGETING::UTIL_FILTER_ALL);
+            if (l_pPaucList.empty())
+            {
+                TS_FAIL("testDeconfigureAssocOMI2: empty PAUC list");
+                break;
+            }
+
             // Deconfigure the MC target
             l_pErr = theDeconfigGard().deconfigureTarget(*l_pMc, 0xA5);
 
@@ -6154,7 +6294,7 @@ public:
 
                 if (l_state.functional)
                 {
-                    TS_FAIL("testDeconfigureAssocOMI1: OMIC functional after "
+                    TS_FAIL("testDeconfigureAssocOMI2: OMIC functional after "
                             "deconfiguring parent MC");
                     functionalOmic = true;
                     break;
@@ -6164,6 +6304,27 @@ public:
             {
                 break;
             }
+
+            // Verify the PAUC parent is not affected by OMICs becoming
+            // non-functional
+            uint32_t l_index = 0;
+            uint32_t l_numPauc = l_pPaucList.size();
+            for (; l_index < l_numPauc; l_index++)
+            {
+                HwasState l_state =
+                    l_pPaucList[l_index]->getAttr<ATTR_HWAS_STATE>();
+                if (!l_state.functional)
+                {
+                    TS_FAIL("testDeconfigureAssocOMI2: PAUC%d not functional "
+                        "after deconfiguring all OMICS", l_index);
+                    break;
+                }
+            }
+            if (l_index < l_numPauc)
+            {
+                break;
+            }
+
             TS_INFO(INFO_MRK "testDeconfigureAssocOMI2: Success");
         }
         while (0);
@@ -6371,6 +6532,82 @@ public:
         // Restore the state of the system prior to the test
         restoreSystemState();
 
+#endif
+    }
+
+    /**
+     *  @brief Find a PAUC target and deconfigure it. This should deconfigure
+     *         the child OMIC targets.
+     */
+    void testDeconfigureAssocOMI5()
+    {
+#if ENABLE_OMI_UNIT_TEST_5
+        // Save the state of the system before we make any changes.
+        saveSystemState();
+
+        TS_INFO(INFO_MRK "testDeconfigureAssocOMI5: Started");
+
+        errlHndl_t l_pErr = nullptr;
+
+        do
+        {
+            // find a PAUC
+            Target * pSys;
+            targetService().getTopLevelTarget(pSys);
+
+            TargetHandleList pPaucList;
+
+            getChildAffinityTargets(pPaucList, pSys, CLASS_NA ,TYPE_PAUC, true);
+
+            if (pPaucList.empty())
+            {
+                TS_FAIL("testDeconfigureAssocOMI5: empty PAUC list");
+                break;
+            }
+            TargetHandle_t l_pPauc = pPaucList[0];
+
+            // find all functional PAUC_CHILD targets (OMICs)
+            TargetHandleList l_pOmicList;
+            getChildPaucTargetsByState(l_pOmicList, l_pPauc, CLASS_NA,
+                                    TYPE_OMIC, UTIL_FILTER_FUNCTIONAL);
+            if (l_pOmicList.empty())
+            {
+                TS_FAIL("testDeconfigureAssocOMI5: empty OMIC list");
+                break;
+            }
+
+            // Deconfigure the PAUC target
+            l_pErr = theDeconfigGard().deconfigureTarget(*l_pPauc, 0xA5);
+
+            bool functionalOmic = false;
+            // Check to see if the OMIC targets were deconfigured.
+            for (auto l_pOmic : l_pOmicList)
+            {
+                HwasState l_state = l_pOmic->getAttr<ATTR_HWAS_STATE>();
+
+                if (l_state.functional)
+                {
+                    TS_FAIL("testDeconfigureAssocOMI5: OMIC functional after "
+                            "deconfiguring parent PAUC");
+                    functionalOmic = true;
+                    break;
+                }
+            }
+            if (functionalOmic)
+            {
+                break;
+            }
+            TS_INFO(INFO_MRK "testDeconfigureAssocOMI5: Success");
+        }
+        while (0);
+
+        if (l_pErr)
+        {
+            errlCommit(l_pErr, CXXTEST_COMP_ID);
+        }
+
+        // Restore the state of the system prior to the test
+        restoreSystemState();
 #endif
     }
 
