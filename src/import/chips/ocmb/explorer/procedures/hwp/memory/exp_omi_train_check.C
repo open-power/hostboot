@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -97,10 +97,12 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
                 .set_DL0_TRAINING_STATUS(l_omi_training_status)
                 .set_DL0_CONFIG1(l_dl0_config1)
                 .set_OMI_FREQ(l_omi_freq),
-                "%s EXP OMI Training Failure, expected state:%d/actual state:%d",
+                "%s EXP OMI Training Failure, expected state:%d/actual state:%d, DL0_STATUS:0x%016llx, DL0_TRAINING_STATUS:0x%016llx",
                 mss::c_str(i_target),
                 STATE_MACHINE_SUCCESS,
-                l_state_machine_state
+                l_state_machine_state,
+                l_omi_status,
+                l_omi_training_status
                );
 
     // Finally, make sure fw_status is good
@@ -124,7 +126,7 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
                  l_expected_dl0_error_hold);
     }
 
-    FAPI_INF("%s End exp_omi_train_check, expected state:%d/actual state:%d, DL0_STATUS:0x%016llx, DL0_TRAINING_STATUS:0x%016llx",
+    FAPI_DBG("%s End exp_omi_train_check, expected state:%d/actual state:%d, DL0_STATUS:0x%016llx, DL0_TRAINING_STATUS:0x%016llx",
              mss::c_str(i_target),
              STATE_MACHINE_SUCCESS,
              l_state_machine_state,
