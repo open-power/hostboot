@@ -103,6 +103,12 @@ Layout Description
         <ecc/>
     </section>
     <section>
+        <description>Attributes</description>
+        <eyeCatch>ATTR_TMP</eyeCatch>
+        <physicalRegionSize>0x4000</physicalRegionSize>
+        <side>sideless</side>
+    </section>
+    <section>
         <description>Hostboot Base (1MB)</description>
         <eyeCatch>HBB</eyeCatch>
         <physicalRegionSize>0x100000</physicalRegionSize>

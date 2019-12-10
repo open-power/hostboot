@@ -274,6 +274,22 @@ sub loadPnorLayout
             my $err = $@;
             die "ERROR: $this_func: Failed to create new XML file with corrected offsets, error = $err";
         };
+
+        # Write out a helper file for our simics scripts
+        print "\nlocation = " . ${i_outputLayoutLocation} . "\n";
+        my $simfilename = "${i_outputLayoutLocation}/simpnor.py";
+        open(SIM_FILE,'>',$simfilename) or die("($simfilename) could not be opened.");
+        print SIM_FILE "def hb_get_pnor_offset(partname):\n";
+        print SIM_FILE "    toc_dict={}\n";
+        #Iterate over the <section> elements.
+        foreach my $sectionEl (@{$xml->{section}})
+        {
+            my $eyeCatch = $sectionEl->{eyeCatch}[0];
+            my $physicalOffset = $sectionEl->{physicalOffset}[0];
+            print SIM_FILE "    toc_dict[\"$eyeCatch\"]=$physicalOffset\n";
+        }
+        print SIM_FILE "    return toc_dict[partname]\n";
+        close SIM_FILE;
     }
 
     return 0;

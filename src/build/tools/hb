@@ -435,7 +435,7 @@ hb_startsimics()
         else
             VEXEC_STR=""
         fi
-        export RUNSIMCMD="cd ${SANDBOXBASE}/simics/ &&${VEXEC_STR} ./runsim -m ${MACHINE} hb_script_to_run=${MY_DIR}/startup.simics pnor_img=${MY_DIR}/../../../hbfw/img/axone.pnor sbe_seeprom_img=${SANDBOXBASE}/images/ppc/lab/flash/sbe_seeprom_p9a_10.bin.ecc num_procs=2 enable_lpc_console=TRUE"
+        export RUNSIMCMD="cd ${SANDBOXBASE}/simics/ &&${VEXEC_STR} ./runsim -m ${MACHINE} hb_script_to_run=${MY_DIR}/startup.simics pnor_img=${MY_DIR}/../../../hbfw/img/axone.pnor sbe_seeprom_img=${SANDBOXBASE}/images/ppc/lab/flash/sbe_seeprom_p9a_10.bin.ecc num_procs=2 enable_lpc_console=TRUE hb_pnor_dir=${MY_DIR}/../../../hbfw/img/"
         echo "**********"
         echo $RUNSIMCMD
         echo "**********"
