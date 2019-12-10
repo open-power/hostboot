@@ -592,11 +592,6 @@
     </attribute>
 
     <attribute>
-          <id>ATTR_FAPI_POS</id>
-          <no_export/>
-    </attribute>
-
-    <attribute>
           <id>ATTR_DEVICE_ID</id>
           <no_export/>
     </attribute>
