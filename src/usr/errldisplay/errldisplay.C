@@ -67,6 +67,7 @@
 #include <targeting/common/targetservice.H>
 #include <targeting/common/iterators/targetiterator.H>
 #include <targeting/common/target.H>
+#include <arch/ppc.H>
 
 #ifdef CONFIG_CONSOLE_OUTPUT_FFDCDISPLAY
 //Generated hearder files for HWP parsing
@@ -338,7 +339,6 @@ case HWAS::_type: CONSOLE::displayf(NULL, "  Bus Type                 : %s", #_t
 
             case HWAS::HW_CALLOUT:
                 CONSOLE::displayf(NULL, "  Callout type             : Hardware Callout");
-                CONSOLE::displayf(NULL, "  CPU id                   : %d", callout->cpuid);
 
                 displayGard = true;
                 l_gard = callout->gardErrorType;
@@ -675,9 +675,9 @@ void ErrLogDisplay::msgDisplay (const errlHndl_t &i_err,
 
         CONSOLE::displayf(NULL,
                           "================================================");
-        CONSOLE::displayf(NULL, "Error reported by %s (0x%04X) PLID 0x%08X",
+        CONSOLE::displayf(NULL, "Error reported by %s (0x%04X) EID 0x%08X",
                          findComponentName( i_committerComp ),
-                         i_committerComp, i_err->plid() );
+                         i_committerComp, i_err->eid() );
 
         //PRD doesn't follow the rest of the HB conventions
         // Handle them special

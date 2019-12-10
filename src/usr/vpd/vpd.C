@@ -786,6 +786,14 @@ errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target           * i_target,
             TRACFCOMP(g_trac_vpd,
                       "VPD::ensureEepromCacheIsInSync: CACHE_PN/SN != HARDWARE_PN/SN,CACHE must be loaded from HARDWARE for target %.8X",
                       TARGETING::get_huid(i_target));
+            const char* l_pathstring
+              = i_target->getAttr<TARGETING::ATTR_PHYS_PATH>().toString();
+            CONSOLE::displayf(NULL,"Detected new part : %.8X (%s)",
+                              TARGETING::get_huid(i_target),
+                              l_pathstring);
+            free((void*)(l_pathstring));
+            l_pathstring = nullptr;
+            CONSOLE::flush();
 #ifndef CONFIG_SUPPORT_EEPROM_CACHING
             //Set the targets as changed since the p/n's don't match
             HWAS::markTargetChanged(i_target);
@@ -971,6 +979,14 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
         else
         {
             TRACFCOMP(g_trac_vpd,"VPD::ensureCacheIsInSync: PNOR_PN/SN != SEEPROM_PN/SN, Loading PNOR from SEEPROM for target %.8X",TARGETING::get_huid(i_target));
+            const char* l_pathstring =
+              i_target->getAttr<TARGETING::ATTR_PHYS_PATH>().toString();
+            CONSOLE::displayf(NULL,"Detected new part : %.8X (%s)",
+                              TARGETING::get_huid(i_target),
+                              l_pathstring);
+            free((void*)(l_pathstring));
+            l_pathstring = nullptr;
+            CONSOLE::flush();
 
             //Set the targets as changed since the p/n's don't match
             HWAS::markTargetChanged(i_target);

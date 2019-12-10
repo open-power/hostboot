@@ -713,6 +713,21 @@ namespace AttributeTank
      */
     size_t size() const;
 
+    /**
+     * @brief Return a copy of all attributes in the tank
+     *
+     * @param[out] List of all attributes in this tank
+     * @return n/a
+     */
+    void getAllAttributes( std::list<Attribute *>& o_attributes ) const;
+
+    /**
+     * @brief Return a string description of the given tank layer
+     *
+     * @return String representation of layer
+     */
+    static const char* layerToString( TankLayer i_layer );
+
 private:
     // Copy constructor and assignment operator disabled
     AttributeTank(const AttributeTank & i_right);

@@ -28,6 +28,7 @@
 #include <targeting/common/targreasoncodes.H>
 #include <errl/errlmanager.H>
 #include <secureboot/service.H>
+#include <console/consoleif.H>
 
 namespace TARGETING
 {
@@ -296,6 +297,103 @@ errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
             break;
         }
 
+        // Print out the contents of all attribute tanks
+        for( size_t i=0; i<AttributeTank::TANK_LAYER_LAST; i++ )
+        {
+            if( l_pOverTanks[i]->attributesExist() )
+            {
+                /* Display output like this
+
+                 **Found 3 attribute overrides in Tank TARG(2)
+                 - type:n1:p2:c3
+                   ATTR 12345678 = 0011223344
+                   ATTR 10102020 = 223344
+                 - type:nall:pall:call
+                   ATTR 02395414 = 07
+                 */
+
+                CONSOLE::displayf("TARG","**Found %d attribute overrides in Tank %s(%d)",
+                                  l_pOverTanks[i]->size(),
+                                  AttributeTank::layerToString(
+                                     static_cast<AttributeTank::TankLayer>(i)),
+                                  i);
+
+                AttributeTank::AttributeHeader last_hdr;
+                std::list<AttributeTank::Attribute*> l_attrList;
+                l_pOverTanks[i]->getAllAttributes(l_attrList);
+                for( auto l_attr : l_attrList )
+                {
+                    constexpr size_t MAX_DISPLAY = 100;
+                    char outstr[MAX_DISPLAY];
+                    outstr[0] = '\0';
+
+                    // Only print out the target string once if possible
+                    AttributeTank::AttributeHeader hdr = l_attr->getHeader();
+                    if( (hdr.iv_targetType != last_hdr.iv_targetType)
+                        || (hdr.iv_node != last_hdr.iv_node)
+                        || (hdr.iv_pos != last_hdr.iv_pos)
+                        || (hdr.iv_unitPos != last_hdr.iv_unitPos) )
+                    {
+                        EntityPath epath; //func should be static but isn't
+                        sprintf( outstr, "- %s",
+                               epath.pathElementTypeAsString(
+                               static_cast<TARGETING::TYPE>(hdr.iv_targetType)) );
+                        if( AttributeTank::ATTR_NODE_NA == hdr.iv_node )
+                        {
+                            strcat( outstr, ":nall" );
+                        }
+                        else
+                        {
+                            char tmpstr[10]={};
+                            sprintf( tmpstr, ":n%d", hdr.iv_node );
+                            strcat( outstr, tmpstr );
+                        }
+                        if( AttributeTank::ATTR_POS_NA == hdr.iv_pos )
+                        {
+                            strcat( outstr, ":pall" );
+                        }
+                        else
+                        {
+                            char tmpstr[10]={};
+                            sprintf( tmpstr, ":p%d", hdr.iv_pos );
+                            strcat( outstr, tmpstr );
+                        }
+                        if( AttributeTank::ATTR_UNIT_POS_NA == hdr.iv_unitPos )
+                        {
+                            strcat( outstr, ":call" );
+                        }
+                        else
+                        {
+                            char tmpstr[10]={};
+                            sprintf( tmpstr, ":c%d", hdr.iv_unitPos );
+                            strcat( outstr, tmpstr );
+                        }
+                        CONSOLE::displayf("TARG",outstr);
+                        last_hdr = hdr;
+                    }
+
+                    // Now print out the attribute values
+                    sprintf( outstr, "  ATTR %.8X [%d] = ",
+                             hdr.iv_attrId,
+                             hdr.iv_valSize );
+                    size_t max_data = (MAX_DISPLAY - strlen(outstr))/2 - 4;
+                    const char* dataval =
+                      reinterpret_cast<const char*>(l_attr->getValue());
+                    for( size_t s=0; s<hdr.iv_valSize && s<max_data; s++ )
+                    {
+                        char datastr[4]={};
+                        sprintf( datastr, "%.2X", dataval[s] );
+                        strcat( outstr, datastr );
+                    }
+                    if( hdr.iv_valSize > max_data )
+                    {
+                        strcat( outstr, "..." );
+                    }
+                    CONSOLE::displayf("TARG",outstr);
+                }
+                CONSOLE::flush();
+            }
+        }
     } while(0);
 
     TRACFCOMP(g_trac_targeting,"attrPlatOverride::getAttrOverrides EXIT");

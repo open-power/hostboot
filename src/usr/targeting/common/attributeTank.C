@@ -637,4 +637,23 @@ size_t AttributeTank::size() const
     return iv_attributes.size();
 }
 
+//******************************************************************************
+void AttributeTank::getAllAttributes( std::list<Attribute *>& o_attributes ) const
+{
+    o_attributes = iv_attributes;
 }
+
+//******************************************************************************
+const char* AttributeTank::layerToString( TankLayer i_layer )
+{
+    switch(i_layer)
+    {
+        case(AttributeTank::TANK_LAYER_FAPI): return "FAPI";
+        case(AttributeTank::TANK_LAYER_TARG): return "TARG";
+        case(AttributeTank::TANK_LAYER_PERM): return "PERM";
+        default: return "UNKNOWN";
+    }
+}
+
+}
+
