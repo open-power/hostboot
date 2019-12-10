@@ -173,6 +173,17 @@ errlHndl_t DeconfigGard::applyGardRecord(Target *i_pTarget,
         // all ok - do the work
         HWAS_MUTEX_LOCK(iv_mutex);
 
+#if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
+        const char* l_tmpstring =
+          i_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>().toString();
+        CONSOLE::displayf("HWAS", "Applying GARD record for HUID=0x%08X (%s) due to 0x%.8X",
+                    get_huid(i_pTarget),
+                    l_tmpstring,
+                    l_errlogEid);
+        free((void*)(l_tmpstring));
+        l_tmpstring = nullptr;
+#endif
+
         // Deconfigure the Target
         // don't need to check ATTR_DECONFIG_GARDABLE -- if we get
         //  here, it's because of a gard record on this target
@@ -642,9 +653,13 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             }
 
 #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
+            const char* l_tmpstring =
+              l_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>().toString();
             CONSOLE::displayf("HWAS", "Deconfig HUID 0x%08X, %s",
                     get_huid(l_pTarget),
-                    l_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>().toString());
+                    l_tmpstring);
+            free((void*)(l_tmpstring));
+            l_tmpstring = nullptr;
 #endif
         } // for
 
@@ -911,9 +926,13 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                 }
 
 #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
+                const char* l_tmpstring =
+                  l_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>().toString();
                 CONSOLE::displayf("HWAS", "Deconfig HUID 0x%08X, %s",
                     get_huid(l_pTarget),
-                    l_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>().toString());
+                    l_tmpstring);
+                free((void*)(l_tmpstring));
+                l_tmpstring = nullptr;
 #endif
 
                 l_specDeconfigVector.erase(l_specDeconfigVector.begin());
