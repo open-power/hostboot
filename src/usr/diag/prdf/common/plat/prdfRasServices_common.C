@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -906,7 +906,6 @@ void ErrDataService::deallocateDimms( const SDC_MRU_LIST & i_mruList )
                 }
                 #endif
 
->>>>>>> ad5d7d612... PRD: Skip callouts without trgts when clearing NVDIMM gard
                 switch ( tgtType )
                 {
                     case TYPE_MCBIST: case TYPE_MCS: case TYPE_MCA: // Nimbus

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,10 +26,6 @@
 /** @file  prdfMemScrubUtils.C
  *  @brief Define the functionality necessary to start initial background scrub
  */
-
-// HWP includes
-#include <lib/shared/nimbus_defaults.H>
-#include <lib/mcbist/memdiags.H>
 
 // Framework includes
 #include <prdfMemScrubUtils.H>

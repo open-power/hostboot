@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,9 @@
 #include <prdfMemSymbol.H>
 #include <prdfParserUtils.H>
 #include <prdfPlatServices.H>
+
+// External includes
+#include <algorithm>
 
 #if __HOSTBOOT_RUNTIME
   #include <prdfMemDynDealloc.H>

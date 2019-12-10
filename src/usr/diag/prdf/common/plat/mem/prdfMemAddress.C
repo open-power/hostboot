@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,8 @@
 // Framework includes
 #include <prdfExtensibleChip.H>
 #include <prdfTrace.H>
+
+#include <stdio.h>
 
 using namespace TARGETING;
 

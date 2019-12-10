@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,7 @@ int32_t pmRecovery( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[pmRecovery] "
     int32_t o_rc = SUCCESS;
+    /* TODO RTC 247259
     TargetHandle_t  target = i_chip->getTrgt();
 
     // p9_pm_callout HWP parameters
@@ -113,7 +114,7 @@ int32_t pmRecovery( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
             io_sc.service_data->SetCallout(target);
             break;
     }
-
+    */
     // Create errorlog to contain HWP FFDC
     /*@
      * @errortype
@@ -124,6 +125,7 @@ int32_t pmRecovery( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
      * @userdata2  deadCores bit vector
      * @devdesc    An errorlog containing extra FFDC collected by the HWP
      */
+    /* TODO RTC 247259
     errlHndl_t ffdcErrl = new ERRORLOG::ErrlEntry(
                                         ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                         PRDF_PM_RECOVERY_FFDC,
@@ -144,7 +146,7 @@ int32_t pmRecovery( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     ERRORLOG::errlCommit(ffdcErrl, PRDF_COMP_ID);
 
     } while (0);
-
+    */
     return o_rc;
 
     #undef PRDF_FUNC

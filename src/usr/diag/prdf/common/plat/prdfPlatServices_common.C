@@ -38,14 +38,17 @@
 #include <prdfAssert.h>
 #include <prdfTrace.H>
 #include <prdfErrlUtil.H>
+#include <fapi2.H>
 
 #ifdef __HOSTBOOT_MODULE
 #include <prdfParserUtils.H>
 #include <dimmBadDqBitmapFuncs.H>
+/* TODO RTC 247259
 #include <p9_io_xbus_read_erepair.H>
 #include <p9_io_xbus_pdwn_lanes.H>
 #include <p9_io_xbus_clear_firs.H>
 #include <p9_io_erepairAccessorHwpFuncs.H>
+*/
 #endif
 
 using namespace TARGETING;
@@ -93,6 +96,7 @@ int32_t readErepair<TYPE_XBUS>(TargetHandle_t i_rxBusTgt,
     #ifdef __HOSTBOOT_MODULE
     PRDF_ASSERT( nullptr != i_rxBusTgt);
     PRDF_ASSERT( TYPE_XBUS == getTargetType(i_rxBusTgt) );
+    /* TODO RTC 247259
     errlHndl_t err = nullptr;
 
     fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiTrgt (i_rxBusTgt);
@@ -110,6 +114,7 @@ int32_t readErepair<TYPE_XBUS>(TargetHandle_t i_rxBusTgt,
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
+    */
 
     #endif
     return o_rc;
@@ -125,6 +130,7 @@ int32_t clearIOFirs<TYPE_XBUS>(TargetHandle_t i_rxBusTgt)
     PRDF_ASSERT( nullptr != i_rxBusTgt);
     PRDF_ASSERT( TYPE_XBUS == getTargetType(i_rxBusTgt) );
 
+    /* TODO RTC 247259
     errlHndl_t err = nullptr;
 
     fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiTrgt (i_rxBusTgt);
@@ -141,6 +147,7 @@ int32_t clearIOFirs<TYPE_XBUS>(TargetHandle_t i_rxBusTgt)
             o_rc = FAIL;
         }
     }
+    */
 
     #endif
 
@@ -159,6 +166,8 @@ int32_t powerDownLanes<TYPE_XBUS>( TargetHandle_t i_rxBusTgt,
     #ifdef __HOSTBOOT_MODULE
     PRDF_ASSERT( nullptr != i_rxBusTgt);
     PRDF_ASSERT( TYPE_XBUS == getTargetType(i_rxBusTgt) );
+
+    /* TODO RTC 247259
     errlHndl_t err = nullptr;
 
     fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiTrgt (i_rxBusTgt);
@@ -177,6 +186,7 @@ int32_t powerDownLanes<TYPE_XBUS>( TargetHandle_t i_rxBusTgt,
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
+    */
 
     #endif
     return o_rc;
@@ -195,6 +205,7 @@ int32_t getVpdFailedLanes<TYPE_XBUS>(TargetHandle_t i_rxBusTgt,
     PRDF_ASSERT( nullptr != i_rxBusTgt);
     PRDF_ASSERT( TYPE_XBUS == getTargetType(i_rxBusTgt) );
 
+    /* TODO RTC 247259
     errlHndl_t err = nullptr;
 
     fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiTrgt (i_rxBusTgt);
@@ -215,6 +226,7 @@ int32_t getVpdFailedLanes<TYPE_XBUS>(TargetHandle_t i_rxBusTgt,
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
+    */
 
     #endif
     return o_rc;
@@ -238,7 +250,7 @@ int32_t setVpdFailedLanes<TYPE_XBUS,TYPE_XBUS>(
     PRDF_ASSERT( TYPE_XBUS == getTargetType(i_rxBusTgt) );
     PRDF_ASSERT( TYPE_XBUS == getTargetType(i_txBusTgt) );
 
-
+    /* TODO RTC 247259
     errlHndl_t err = nullptr;
 
     fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiRxTrgt (i_rxBusTgt);
@@ -261,6 +273,7 @@ int32_t setVpdFailedLanes<TYPE_XBUS,TYPE_XBUS>(
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
+    */
 
     #endif
     return o_rc;
@@ -293,6 +306,7 @@ uint32_t __getBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
     {
         // Skip if the DIMM doesn't exist
         if ( nullptr == getConnectedDimm(i_trgt, i_rank, ps) ) continue;
+        /* TODO RTC 247259
 
         errlHndl_t errl = nullptr;
 
@@ -310,7 +324,8 @@ uint32_t __getBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
                     i_rank.getDimmSlct(), i_rank.getRankSlct() );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
             o_rc = FAIL; break;
-        }
+       }
+       */
     }
 
     if ( SUCCESS == o_rc )
@@ -380,7 +395,7 @@ uint32_t __setBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
         {
             // Don't proceed unless the DIMM exists
             PRDF_ASSERT( nullptr != getConnectedDimm(i_trgt, i_rank, ps) );
-
+            /* TODO RTC 247259
             errlHndl_t errl = nullptr;
 
             fapi2::Target<T> l_fapiTrgt( i_trgt );
@@ -398,6 +413,7 @@ uint32_t __setBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
                 PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
                 o_rc = FAIL;
             }
+            */
         }
     }
 
@@ -543,6 +559,7 @@ void getDimmDqAttr<TYPE_DIMM>( TargetHandle_t i_target,
 
     PRDF_ASSERT( TYPE_DIMM == getTargetType(i_target) );
 
+    /* TODO RTC 247260
     const uint8_t DIMM_BAD_DQ_SIZE_BYTES = 80;
 
     uint8_t tmpData[DIMM_BAD_DQ_SIZE_BYTES];
@@ -554,6 +571,7 @@ void getDimmDqAttr<TYPE_DIMM>( TargetHandle_t i_target,
     }
 
     memcpy( &o_dqMapPtr[0], &tmpData[0], DQS_PER_DIMM );
+    */
 
     #undef PRDF_FUNC
 } // end function getDimmDqAttr
@@ -896,7 +914,7 @@ enum SPD_MODSPEC_COM_REF_RAW_CARD
   SPD_MODSPEC_COM_REF_RAW_CARD_D = 0x03,
 };
 //---------------------------------------------------------------------
-
+/* TODO RTC 247260
 int32_t  getSpdModspecComRefRawCard(
                       const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_pTarget,
                       uint8_t & o_rawCard )
@@ -980,7 +998,7 @@ int32_t  getSpdModspecComRefRawCard(
     return rc;
 #undef PRDF_FUNC
 }
-
+*/
 //------------------------------------------------------------------------------
 
 } // end namespace PlatServices

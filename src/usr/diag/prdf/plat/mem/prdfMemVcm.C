@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,9 @@
 
 // Platform includes
 
+/* TODO RTC 247259
 #include <hwp_wrappers.H>
+*/
 
 using namespace TARGETING;
 
@@ -98,6 +100,7 @@ uint32_t VcmEvent<TYPE_MCA>::startCmd()
     #define PRDF_FUNC "[VcmEvent::startCmd] "
 
     uint32_t o_rc = SUCCESS;
+    /* TODO RTC 247260
 
     #ifndef CONFIG_AXONE
 
@@ -114,6 +117,7 @@ uint32_t VcmEvent<TYPE_MCA>::startCmd()
 
     #endif
 
+    */
     return o_rc;
 
     #undef PRDF_FUNC
@@ -131,6 +135,7 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::startCmd()
     #define PRDF_FUNC "[VcmEvent::startCmd] "
 
     uint32_t o_rc = SUCCESS;
+    /* TODO RTC 247259
 
     #ifdef CONFIG_AXONE
 
@@ -148,6 +153,7 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::startCmd()
 
     #endif
 
+    */
     return o_rc;
 
     #undef PRDF_FUNC

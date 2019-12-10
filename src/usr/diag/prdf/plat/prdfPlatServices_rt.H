@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,9 +26,11 @@
 #ifndef __prdfPlatServices_rt_H
 #define __prdfPlatServices_rt_H
 
+/* TODO RTC 247259
 #include <p9_l3err_extract.H>
 #include <p9_l2err_extract.H>
 #include <p9_pm_callout.H>
+*/
 #include <prdfMemAddress.H>
 
 namespace PRDF
@@ -120,8 +122,10 @@ uint32_t resumeTdScrub( ExtensibleChip * i_chip, AddrRangeType i_rangeType,
  * @param o_errorAddr struct containing address of the CE
  * @return non-SUCCESS for failure, SUCCESS otherwise
  */
+/* TODO RTC 247259
 int32_t extractL3Err( TARGETING::TargetHandle_t i_exTgt,
                       p9_l3err_extract_err_data &o_errorAddr);
+*/
 
 /**
  * @brief Calls HWP to execute a line delete. Saves Line delete command in
@@ -130,8 +134,10 @@ int32_t extractL3Err( TARGETING::TargetHandle_t i_exTgt,
  * @param i_errorAddr struct containing address of the CE
  * @return non-SUCCESS for failure, SUCCESS otherwise
  */
+/* TODO RTC 247259
 int32_t l3LineDelete(TARGETING::TargetHandle_t i_exTgt,
                      const p9_l3err_extract_err_data& i_l3_err_data);
+*/
 
 /**
  * @brief Extracts address of an error from L2 Trace arrays
@@ -140,8 +146,10 @@ int32_t l3LineDelete(TARGETING::TargetHandle_t i_exTgt,
  * @param o_errorAddr struct containing address of the CE
  * @return non-SUCCESS for failure, SUCCESS otherwise
  */
+/* TODO RTC 247259
 int32_t extractL2Err( TARGETING::TargetHandle_t i_exTgt, bool i_ce,
                       p9_l2err_extract_err_data &o_errorAddr);
+*/
 
 /**
  * @brief Calls HWP to execute a line delete. Saves Line delete command in
@@ -150,8 +158,10 @@ int32_t extractL2Err( TARGETING::TargetHandle_t i_exTgt, bool i_ce,
  * @param i_errorAddr struct containing address of the CE
  * @return non-SUCCESS for failure, SUCCESS otherwise
  */
+/* TODO RTC 247259
 int32_t l2LineDelete(TARGETING::TargetHandle_t i_exTgt,
                      const p9_l2err_extract_err_data& i_l2_err_data);
+*/
 
 
 /**
@@ -163,10 +173,12 @@ int32_t l2LineDelete(TARGETING::TargetHandle_t i_exTgt,
  * @param o_ffdcList points to a list of STOP FFDC summary sub-sections
  * @return non-SUCCESS for failure, SUCCESS otherwise
  */
+/* TODO RTC 247259
 int32_t pmCallout( TARGETING::TargetHandle_t i_tgt,
                    RasAction& o_ra,
                    uint32_t &o_deadCores,
                    std::vector < StopErrLogSectn >& o_ffdcList );
+*/
 
 
 /**

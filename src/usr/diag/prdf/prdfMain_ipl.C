@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -182,8 +182,10 @@ errlHndl_t startScrub( const TargetHandle_t i_trgt )
 
         // Add traces
         o_errl->collectTrace( PRDF_COMP_NAME,      512 );
+        /* TODO RTC 247259
         o_errl->collectTrace( FAPI_TRACE_NAME,     256 );
         o_errl->collectTrace( FAPI_IMP_TRACE_NAME, 256 );
+        */
     }
 
     PRDF_EXIT( PRDF_FUNC );

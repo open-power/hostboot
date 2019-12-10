@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1502,42 +1502,23 @@ bool isDramWidthX4( TargetHandle_t i_trgt )
 
 template<TARGETING::TYPE T>
 void __getMasterRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
-                       uint8_t i_pos, uint8_t i_ds )
+                       uint8_t i_ds )
 {
     #define PRDF_FUNC "[__getMasterRanks] "
 
     PRDF_ASSERT( nullptr != i_trgt );
     PRDF_ASSERT( T == getTargetType(i_trgt) );
-    PRDF_ASSERT( i_pos < 2 );
     PRDF_ASSERT( i_ds <= MAX_DIMM_PER_PORT ); // can equal MAX_DIMM_PER_PORT
 
     o_ranks.clear();
 
-    uint8_t info[2][2];
+    uint8_t info[2];
 
-    ATTR_MODEL_type l_procModel = getChipModel( getMasterProc() );
-    if ( MODEL_NIMBUS == l_procModel )
+    if ( !i_trgt->tryGetAttr<ATTR_MEM_EFF_DIMM_RANKS_CONFIGED>(info) )
     {
-        if ( !i_trgt->tryGetAttr<ATTR_EFF_DIMM_RANKS_CONFIGED>(info) )
-        {
-            PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_EFF_DIMM_RANKS_CONFIGED> "
-                      "failed: i_trgt=0x%08x", getHuid(i_trgt) );
-            PRDF_ASSERT( false ); // attribute does not exist for target
-        }
-    }
-    else if ( MODEL_AXONE == l_procModel )
-    {
-        if ( !i_trgt->tryGetAttr<ATTR_MEM_EFF_DIMM_RANKS_CONFIGED>(info[0]) )
-        {
-            PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_MEM_EFF_DIMM_RANKS_CONFIGED> "
-                      "failed: i_trgt=0x%08x", getHuid(i_trgt) );
-            PRDF_ASSERT( false ); // attribute does not exist for target
-        }
-    }
-    else
-    {
-        PRDF_ERR( PRDF_FUNC "Invalid proc type" );
-        PRDF_ASSERT(false);
+        PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_MEM_EFF_DIMM_RANKS_CONFIGED> "
+                "failed: i_trgt=0x%08x", getHuid(i_trgt) );
+        PRDF_ASSERT( false ); // attribute does not exist for target
     }
 
     for ( uint32_t ds = 0; ds < MAX_DIMM_PER_PORT; ds++ )
@@ -1546,7 +1527,7 @@ void __getMasterRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
         if ( (MAX_DIMM_PER_PORT != i_ds) && (ds != i_ds) )
             continue;
 
-        uint8_t rankMask = info[i_pos][ds];
+        uint8_t rankMask = info[ds];
 
         // The configured rank selects are in the first nibble.
         for ( uint32_t rs = 0; rs < 4; rs++ )
@@ -1570,13 +1551,14 @@ void getMasterRanks<TYPE_MCA>( TargetHandle_t i_trgt,
 {
     PRDF_ASSERT( nullptr != i_trgt );
     PRDF_ASSERT( TYPE_MCA == getTargetType(i_trgt) );
-
+    /* TODO RTC 247260
     // NOTE: The attribute lives on the MCS. So need to get the MCS target and
     //       the position of the MCA relative to the MCS.
     TargetHandle_t mcsTrgt = getConnectedParent( i_trgt, TYPE_MCS );
     uint8_t relPos = getTargetPosition(i_trgt) % MAX_MCA_PER_MCS;
 
     __getMasterRanks<TYPE_MCS>( mcsTrgt, o_ranks, relPos, i_ds );
+    */
 }
 
 template<>
@@ -1588,7 +1570,7 @@ void getMasterRanks<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
     // will be supported in the future. Updates will need to be made here so we
     // can get the relevant port.
     TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT, 0 );
-    __getMasterRanks<TYPE_MEM_PORT>( memPort, o_ranks, 0, i_ds );
+    __getMasterRanks<TYPE_MEM_PORT>( memPort, o_ranks, i_ds );
 }
 
 //------------------------------------------------------------------------------
@@ -1647,50 +1629,24 @@ void getSlaveRanks<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
-uint8_t __getNumMasterRanksPerDimm( TargetHandle_t i_trgt,
-                                    uint8_t i_pos, uint8_t i_ds )
+uint8_t __getNumMasterRanksPerDimm( TargetHandle_t i_trgt, uint8_t i_ds )
 {
     #define PRDF_FUNC "[__getNumMasterRanksPerDimm] "
 
     PRDF_ASSERT( nullptr != i_trgt );
     PRDF_ASSERT( T == getTargetType(i_trgt) );
-    PRDF_ASSERT( i_pos < 2 );
     PRDF_ASSERT( i_ds < MAX_DIMM_PER_PORT );
     uint8_t num = 0;
 
-
-    ATTR_MODEL_type l_procModel = getChipModel( getMasterProc() );
-    if ( MODEL_NIMBUS == l_procModel )
+    ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM_type attr;
+    if ( !i_trgt->tryGetAttr<ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM>(attr) )
     {
-        ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_type attr;
-        if ( !i_trgt->tryGetAttr<ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM>(attr) )
-        {
-            PRDF_ERR( PRDF_FUNC
-                      "tryGetAttr<ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM> "
-                      "failed: i_trgt=0x%08x", getHuid(i_trgt) );
-            PRDF_ASSERT( false ); // attribute does not exist for target
-        }
+        PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM>"
+                  " failed: i_trgt=0x%08x", getHuid(i_trgt) );
+        PRDF_ASSERT( false ); // attribute does not exist for target
+    }
 
-        num = attr[i_pos][i_ds];
-    }
-    else if ( MODEL_AXONE == l_procModel )
-    {
-        ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM_type attr;
-        if ( !i_trgt->tryGetAttr<ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM>(attr) )
-        {
-            PRDF_ERR( PRDF_FUNC
-                      "tryGetAttr<ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM> "
-                      "failed: i_trgt=0x%08x", getHuid(i_trgt) );
-            PRDF_ASSERT( false ); // attribute does not exist for target
-        }
-
-        num = attr[i_ds];
-    }
-    else
-    {
-        PRDF_ERR( PRDF_FUNC "Invalid proc type" );
-        PRDF_ASSERT(false);
-    }
+    num = attr[i_ds];
 
     PRDF_ASSERT( num <= MASTER_RANKS_PER_DIMM_SLCT );
 
@@ -1706,12 +1662,15 @@ uint8_t getNumMasterRanksPerDimm<TYPE_MCA>( TargetHandle_t i_trgt,
     PRDF_ASSERT( nullptr != i_trgt );
     PRDF_ASSERT( TYPE_MCA == getTargetType(i_trgt) );
 
+    /* TODO RTC 247260
     // NOTE: The attribute lives on the MCS. So need to get the MCS target and
     //       the position of the MCA relative to the MCS.
     TargetHandle_t mcsTrgt = getConnectedParent( i_trgt, TYPE_MCS );
     uint8_t relPos = getTargetPosition(i_trgt) % MAX_MCA_PER_MCS;
 
     return __getNumMasterRanksPerDimm<TYPE_MCS>( mcsTrgt, relPos, i_ds );
+    */
+    return 4;
 }
 
 template<>
@@ -1722,52 +1681,29 @@ uint8_t getNumMasterRanksPerDimm<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
     // will be supported in the future. Updates will need to be made here so we
     // can get the relevant port.
     TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT, 0 );
-    return __getNumMasterRanksPerDimm<TYPE_MEM_PORT>( memPort, 0, i_ds );
+    return __getNumMasterRanksPerDimm<TYPE_MEM_PORT>( memPort, i_ds );
 }
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
-uint8_t __getNumRanksPerDimm( TargetHandle_t i_trgt,
-                              uint8_t i_pos, uint8_t i_ds )
+uint8_t __getNumRanksPerDimm( TargetHandle_t i_trgt, uint8_t i_ds )
 {
     #define PRDF_FUNC "[__getNumRanksPerDimm] "
 
     PRDF_ASSERT( nullptr != i_trgt );
     PRDF_ASSERT( T == getTargetType(i_trgt) );
-    PRDF_ASSERT( i_pos < 2 );
     PRDF_ASSERT( i_ds < MAX_DIMM_PER_PORT );
     uint8_t num = 0;
 
-    ATTR_MODEL_type l_procModel = getChipModel( getMasterProc() );
-    if ( MODEL_NIMBUS == l_procModel )
+    ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM_type attr;
+    if ( !i_trgt->tryGetAttr<ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM>(attr) )
     {
-        ATTR_EFF_NUM_RANKS_PER_DIMM_type attr;
-        if ( !i_trgt->tryGetAttr<ATTR_EFF_NUM_RANKS_PER_DIMM>(attr) )
-        {
-            PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_EFF_NUM_RANKS_PER_DIMM> "
-                      "failed: i_trgt=0x%08x", getHuid(i_trgt) );
-            PRDF_ASSERT( false ); // attribute does not exist for target
-        }
+        PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM> "
+                "failed: i_trgt=0x%08x", getHuid(i_trgt) );
+        PRDF_ASSERT( false ); // attribute does not exist for target
+    }
 
-        num = attr[i_pos][i_ds];
-    }
-    else if ( MODEL_AXONE == l_procModel )
-    {
-        ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM_type attr;
-        if ( !i_trgt->tryGetAttr<ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM>(attr) )
-        {
-            PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM> "
-                      "failed: i_trgt=0x%08x", getHuid(i_trgt) );
-            PRDF_ASSERT( false ); // attribute does not exist for target
-        }
-
-        num = attr[i_ds];
-    }
-    else
-    {
-        PRDF_ERR( PRDF_FUNC "Invalid proc type" );
-        PRDF_ASSERT(false);
-    }
+    num = attr[i_ds];
 
     PRDF_ASSERT( num < MASTER_RANKS_PER_DIMM_SLCT*SLAVE_RANKS_PER_MASTER_RANK );
 
@@ -1782,12 +1718,15 @@ uint8_t getNumRanksPerDimm<TYPE_MCA>( TargetHandle_t i_trgt, uint8_t i_ds )
     PRDF_ASSERT( nullptr != i_trgt );
     PRDF_ASSERT( TYPE_MCA == getTargetType(i_trgt) );
 
+    /* TODO RTC 247260
     // NOTE: The attribute lives on the MCS. So need to get the MCS target and
     //       the position of the MCA relative to the MCS.
     TargetHandle_t mcsTrgt = getConnectedParent( i_trgt, TYPE_MCS );
     uint8_t relPos = getTargetPosition(i_trgt) % MAX_MCA_PER_MCS;
 
     return __getNumRanksPerDimm<TYPE_MCS>( mcsTrgt, relPos, i_ds );
+    */
+    return 32;
 }
 
 template<>
@@ -1797,7 +1736,7 @@ uint8_t getNumRanksPerDimm<TYPE_OCMB_CHIP>(TargetHandle_t i_trgt, uint8_t i_ds)
     // will be supported in the future. Updates will need to be made here so we
     // can get the relevant port.
     TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT, 0 );
-    return __getNumRanksPerDimm<TYPE_MEM_PORT>( memPort, 0, i_ds );
+    return __getNumRanksPerDimm<TYPE_MEM_PORT>( memPort, i_ds );
 }
 
 //##############################################################################

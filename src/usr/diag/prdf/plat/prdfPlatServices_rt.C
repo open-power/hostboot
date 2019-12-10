@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,7 @@
 
 // Other includes
 #include <runtime/interface.h>
+/* TODO RTC 247259
 #include <p9_l3err_extract.H>
 #include <p9_l2err_extract.H>
 #include <p9_l3err_linedelete.H>
@@ -50,9 +51,12 @@
 #include <p9_proc_gettracearray.H>
 #include <pm_common_ext.H>
 #include <p9_stop_api.H>
+*/
 #include <rt_todintf.H>
 
+/* TODO RTC 247259
 #include <hwp_wrappers.H>
+*/
 
 //------------------------------------------------------------------------------
 
@@ -122,6 +126,7 @@ uint32_t stopBgScrub<TYPE_MCBIST>( ExtensibleChip * i_chip )
 
     uint32_t rc = SUCCESS;
 
+    /* TODO RTC 247260
     fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( i_chip->getTrgt() );
 
     errlHndl_t errl;
@@ -133,6 +138,7 @@ uint32_t stopBgScrub<TYPE_MCBIST>( ExtensibleChip * i_chip )
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         rc = FAIL;
     }
+    */
 
     return rc;
 
@@ -163,6 +169,7 @@ uint32_t resumeBgScrub<TYPE_MCBIST>( ExtensibleChip * i_chip,
 
     uint32_t o_rc = SUCCESS;
 
+    /* TODO RTC 247260
     // Get the MCBIST fapi target
     fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( i_chip->getTrgt() );
 
@@ -223,7 +230,7 @@ uint32_t resumeBgScrub<TYPE_MCBIST>( ExtensibleChip * i_chip,
         }
 
     } while (0);
-
+    */
     return o_rc;
 
     #undef PRDF_FUNC
@@ -256,8 +263,7 @@ uint32_t stopBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
 
     uint32_t rc = SUCCESS;
 
-    #ifdef CONFIG_AXONE
-
+    /* TODO RTC 247259
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt ( i_chip->getTrgt() );
 
     errlHndl_t errl;
@@ -269,8 +275,7 @@ uint32_t stopBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         rc = FAIL;
     }
-
-    #endif
+    */
 
     return rc;
 
@@ -290,8 +295,7 @@ uint32_t resumeBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     uint32_t o_rc = SUCCESS;
 
-    #ifdef CONFIG_AXONE
-
+    /* TODO RTC 247259
     // Get the OCMB fapi target
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt ( i_chip->getTrgt() );
 
@@ -351,8 +355,7 @@ uint32_t resumeBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         }
 
     } while (0);
-
-    #endif
+    */
 
     return o_rc;
 
@@ -362,6 +365,7 @@ uint32_t resumeBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 //##############################################################################
 //##                       Line Delete Functions
 //##############################################################################
+/* TODO RTC 247259
 int32_t extractL3Err( TargetHandle_t i_exTgt,
                       p9_l3err_extract_err_data &o_errorAddr)
 {
@@ -393,7 +397,9 @@ int32_t extractL3Err( TargetHandle_t i_exTgt,
 
     return o_rc;
 }
+*/
 
+/* TODO RTC 247259
 int32_t l3LineDelete(TargetHandle_t i_exTgt,
                      const p9_l3err_extract_err_data& i_l3_err_data)
 {
@@ -438,7 +444,9 @@ int32_t l3LineDelete(TargetHandle_t i_exTgt,
 
     return SUCCESS;
 }
+*/
 
+/* TODO RTC 247259
 int32_t extractL2Err( TargetHandle_t i_exTgt, bool i_ce,
                       p9_l2err_extract_err_data &o_errorAddr)
 {
@@ -495,7 +503,9 @@ int32_t extractL2Err( TargetHandle_t i_exTgt, bool i_ce,
 
     return SUCCESS;
 }
+*/
 
+/* TODO RTC 247259
 int32_t l2LineDelete(TargetHandle_t i_exTgt,
                      const p9_l2err_extract_err_data& i_l2_err_data)
 {
@@ -542,8 +552,9 @@ int32_t l2LineDelete(TargetHandle_t i_exTgt,
 
     return SUCCESS;
 }
+*/
 
-
+/* TODO RTC 247259
 int32_t pmCallout( TargetHandle_t i_tgt,
                    RasAction& o_ra,
                    uint32_t &o_deadCores,
@@ -578,6 +589,7 @@ int32_t pmCallout( TargetHandle_t i_tgt,
     o_deadCores = (uint32_t) deadCores;
     return SUCCESS;
 }
+*/
 
 void requestNewTODTopology( uint32_t i_oscPos,
                             const TargetHandle_t& i_procOscTgt,

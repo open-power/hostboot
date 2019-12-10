@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,8 @@
 #include <prdfTrace.H>
 #include <prdfErrlUtil.H>
 #include <prdfMemDbUtils.H>
+
+#include <stdio.h>
 
 #ifdef __HOSTBOOT_MODULE
 #include <prdfMemDsd.H>

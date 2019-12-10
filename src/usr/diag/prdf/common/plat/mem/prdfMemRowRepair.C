@@ -32,6 +32,7 @@
 #include <prdfParserUtils.H>
 #include <prdfErrlUtil.H>
 #include <prdfMemUtils.H>
+#include <fapi2.H>
 
 #ifdef __HOSTBOOT_MODULE
 #include <rowRepairsFuncs.H>
@@ -75,6 +76,8 @@ uint32_t __getRowRepairData( TargetHandle_t i_dimm, const MemRank & i_rank,
 
     uint32_t o_rc = SUCCESS;
 
+    /* TODO RTC 247259
+
     #ifdef __HOSTBOOT_MODULE
 
     uint8_t l_data[ROW_REPAIR::ROW_REPAIR_SIZE] = {0};
@@ -105,6 +108,7 @@ uint32_t __getRowRepairData( TargetHandle_t i_dimm, const MemRank & i_rank,
     }
 
     #endif // __HOSTBOOT_MODULE
+    */
 
     return o_rc;
 
@@ -144,6 +148,7 @@ uint32_t __setRowRepairData( TargetHandle_t i_dimm, const MemRank & i_rank,
     #define PRDF_FUNC "[PlatServices::__setRowRepairData] "
 
     uint32_t o_rc = SUCCESS;
+    /* TODO RTC 247259
 
     #ifdef __HOSTBOOT_MODULE
 
@@ -176,7 +181,7 @@ uint32_t __setRowRepairData( TargetHandle_t i_dimm, const MemRank & i_rank,
     }
 
     #endif // __HOSTBOOT_MODULE
-
+    */
     return o_rc;
 
     #undef PRDF_FUNC

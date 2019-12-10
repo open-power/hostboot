@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,9 @@
 #include <prdfMemDqBitmap.H>
 #include <prdfMemDsd.H>
 
+/* TODO RTC 247259
 #include <hwp_wrappers.H>
+*/
 
 using namespace TARGETING;
 
@@ -189,6 +191,8 @@ uint32_t DsdEvent<TYPE_OCMB_CHIP>::startCmd()
 
     uint32_t o_rc = SUCCESS;
 
+    /* TODO RTC 247259
+
     #ifdef CONFIG_AXONE
 
     mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
@@ -222,6 +226,7 @@ uint32_t DsdEvent<TYPE_OCMB_CHIP>::startCmd()
 
     #endif
 
+    */
     return o_rc;
 
     #undef PRDF_FUNC

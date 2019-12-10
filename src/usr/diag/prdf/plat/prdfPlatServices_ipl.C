@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,7 +43,9 @@
 
 #include <diag/mdia/mdia.H>
 
+/* TODO RTC 247259
 #include <hwp_wrappers.H>
+*/
 
 using namespace TARGETING;
 
@@ -157,8 +159,9 @@ uint32_t mssRestoreDramRepairs<TYPE_MCA>( TargetHandle_t i_target,
 {
     uint32_t o_rc = SUCCESS;
 
-    errlHndl_t errl = NULL;
+    /* TODO RTC 247260
 
+    errlHndl_t errl = NULL;
 
     fapi2::buffer<uint8_t> tmpRepairedRankMask, tmpBadDimmMask;
     FAPI_INVOKE_HWP( errl, mss::restore_repairs,
@@ -177,6 +180,7 @@ uint32_t mssRestoreDramRepairs<TYPE_MCA>( TargetHandle_t i_target,
     o_repairedRankMask = (uint8_t)tmpRepairedRankMask;
     o_badDimmMask = (uint8_t)tmpBadDimmMask;
 
+    */
     return o_rc;
 }
 
@@ -223,12 +227,14 @@ bool isBroadcastModeCapable<TYPE_MCBIST>( ExtensibleChip * i_chip )
 {
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_MCBIST == i_chip->getType() );
-
+    /* TODO RTC 247260
     fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( i_chip->getTrgt() );
 
     mss::states l_ret = mss::states::NO;
     FAPI_CALL_HWP( l_ret, mss::mcbist::is_broadcast_capable, fapiTrgt );
     return ( mss::states::YES == l_ret );
+    */
+    return false;
 }
 
 //------------------------------------------------------------------------------
@@ -246,6 +252,7 @@ uint32_t startSfRead<TYPE_MCA>( ExtensibleChip * i_mcaChip,
 
     uint32_t o_rc = SUCCESS;
 
+    /* TODO RTC 247260
     // Get the MCBIST fapi target
     ExtensibleChip * mcbChip = getConnectedParent( i_mcaChip, TYPE_MCBIST );
     fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( mcbChip->getTrgt() );
@@ -297,6 +304,7 @@ uint32_t startSfRead<TYPE_MCA>( ExtensibleChip * i_mcaChip,
         }
 
     } while (0);
+    */
 
     return o_rc;
 
@@ -331,9 +339,9 @@ bool isBroadcastModeCapable<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
 {
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
+    /* TODO RTC 247259
 
     mss::states l_ret = mss::states::NO;
-
     #ifdef CONFIG_AXONE
 
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt ( i_chip->getTrgt() );
@@ -342,6 +350,8 @@ bool isBroadcastModeCapable<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
     #endif
 
     return ( mss::states::YES == l_ret );
+    */
+    return false;
 }
 
 //------------------------------------------------------------------------------
@@ -359,6 +369,7 @@ uint32_t startSfRead<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
 
     uint32_t o_rc = SUCCESS;
 
+    /* TODO RTC 247259
     #ifdef CONFIG_AXONE
 
     // Get the OCMB_CHIP fapi target
@@ -413,6 +424,7 @@ uint32_t startSfRead<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
     } while (0);
 
     #endif
+    */
 
     return o_rc;
 
@@ -429,8 +441,7 @@ uint32_t cleanupSfRead<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmbChip )
 
 //------------------------------------------------------------------------------
 
-#ifdef CONFIG_AXONE
-
+/* TODO RTC 247259
 template<>
 uint32_t startTdSteerCleanup<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         const MemRank & i_rank, AddrRangeType i_rangeType,
@@ -482,13 +493,11 @@ uint32_t startTdSteerCleanup<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-
-#endif
+*/
 
 //------------------------------------------------------------------------------
 
-#ifdef CONFIG_AXONE
-
+/* TODO RTC 247259
 template<>
 uint32_t startTdSfRead<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
         const MemRank & i_rank, AddrRangeType i_rangeType,
@@ -550,8 +559,7 @@ uint32_t startTdSfRead<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-
-#endif
+*/
 
 //------------------------------------------------------------------------------
 

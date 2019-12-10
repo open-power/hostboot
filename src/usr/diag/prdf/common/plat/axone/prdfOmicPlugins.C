@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,8 @@
 // Platform includes
 #include <prdfMemUtils.H>
 #include <prdfPlatServices.H>
+
+#include <stdio.h>
 
 using namespace TARGETING;
 

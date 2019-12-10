@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2019
+# Contributors Listed Below - COPYRIGHT 2012,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -26,37 +26,35 @@
 ROOTPATH = ../../../..
 MODULE = prdf
 
-# FIXME RTC: 210975
-
-#SUBDIRS += rule.d
-#SUBDIRS += runtime.d
-#SUBDIRS += test.d
+SUBDIRS += rule.d
+SUBDIRS += runtime.d
+SUBDIRS += test.d
 
 ################################################################################
 
 # ROOTPATH must be defined before including this file.
-#include prdf_hb_only.mk # Will define PRD_SRC_PATH and PRD_INC_PATH
+include prdf_hb_only.mk # Will define PRD_SRC_PATH and PRD_INC_PATH
 
 # PRD_SRC_PATH and PRD_INC_PATH must be defined before including these files.
-#include common/prdf_common_fsp_and_hb.mk
-#include common/framework/prdf_framework.mk
-#include common/plat/p9/prdf_plat_p9.mk
-#include common/plat/axone/prdf_plat_axone.mk
-#include common/plat/mem/prdf_plat_mem.mk
-#include common/plat/cumulus/prdf_plat_cumulus.mk
-#include common/plat/nimbus/prdf_plat_nimbus.mk
-#include common/plat/explorer/prdf_plat_explorer.mk
-#include plat/mem/prdf_plat_mem_hb_only.mk
-#include plat/explorer/prdf_plat_explorer_hb_only.mk
-#include plat/p9/prdf_plat_p9_hb_only.mk
+include common/prdf_common_fsp_and_hb.mk
+include common/framework/prdf_framework.mk
+# TODO RTC 247259
+include common/plat/p9/prdf_plat_p9.mk
+include common/plat/axone/prdf_plat_axone.mk
+include common/plat/mem/prdf_plat_mem.mk
+include common/plat/explorer/prdf_plat_explorer.mk
+include plat/mem/prdf_plat_mem_hb_only.mk
+include plat/explorer/prdf_plat_explorer_hb_only.mk
+# TODO RTC 247259
+include plat/p9/prdf_plat_p9_hb_only.mk
 
-#VPATH += ${prd_vpath}
+VPATH += ${prd_vpath}
 
-#EXTRAINCDIR += ${prd_incpath}
+EXTRAINCDIR += ${prd_incpath}
 
-#OBJS += ${prd_obj}
-#OBJS += ${prd_obj_no_sim}
-#OBJS += ${prd_rule_plugin}
+OBJS += ${prd_obj}
+OBJS += ${prd_obj_no_sim}
+OBJS += ${prd_rule_plugin}
 
 ################################################################################
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,14 +54,18 @@
 #include <prdfHomRegisterAccess.H>
 #include <ibscomreasoncodes.H>
 #include <scom/scomreasoncodes.H>
-#include <p9_proc_gettracearray.H>
+// TODO RTC 247259 - need P10 version
+//#include <p9_proc_gettracearray.H>
 #include <fapi2_spd_access.H>
 #include <prdfParserUtils.H>
-#include <mcbist/gen_mss_mcbist_settings.H>
-#include <p9c_mss_rowRepairFuncs.H>
+// TODO RTC 247259
+//#include <mcbist/gen_mss_mcbist_settings.H>
+#include <fapi2_hwp_executor.H>
 #include <errl/errludlogregister.H>
 
+/* TODO RTC 247259
 #include <hwp_wrappers.H>
+*/
 
 #ifdef CONFIG_NVDIMM
 #include <nvdimm.H>
@@ -217,6 +221,8 @@ uint32_t getSpdData(TARGETING::TargetHandle_t i_target,
 {
 #define PRDF_FUNC "[PlatServices::getSPDdata] "
     uint32_t o_rc = SUCCESS;
+    /* TODO RTC 247259
+
     errlHndl_t l_errl = nullptr;
 
     o_len = 0;
@@ -259,6 +265,7 @@ uint32_t getSpdData(TARGETING::TargetHandle_t i_target,
           break;
       }
     } while (0);
+    */
 
     return o_rc;
 #undef PRDF_FUNC
@@ -343,6 +350,7 @@ TARGETING::TargetHandle_t getActiveRefClk(TARGETING::TargetHandle_t
 //##                        Memory specific functions
 //##############################################################################
 
+/* TODO RTC 247260
 template<>
 uint32_t getMemAddrRange<TYPE_MCA>( ExtensibleChip * i_chip,
                                     const MemRank & i_rank,
@@ -380,9 +388,11 @@ uint32_t getMemAddrRange<TYPE_MCA>( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
+*/
 
 //------------------------------------------------------------------------------
 
+/* TODO RTC 247259
 template<>
 uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                           const MemRank & i_rank,
@@ -423,9 +433,12 @@ uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
+*/
+
 
 //------------------------------------------------------------------------------
 
+/* TODO RTC 247259
 MemAddr __convertMssMcbistAddr( const mss::mcbist::address & i_addr )
 {
     uint64_t dslct = i_addr.get_dimm();
@@ -439,6 +452,7 @@ MemAddr __convertMssMcbistAddr( const mss::mcbist::address & i_addr )
 
     return MemAddr ( MemRank ( mrnk, srnk ), bnk, row, col );
 }
+*/
 
 template<>
 uint32_t getMemAddrRange<TYPE_MCA>( ExtensibleChip * i_chip,
@@ -447,6 +461,7 @@ uint32_t getMemAddrRange<TYPE_MCA>( ExtensibleChip * i_chip,
                                     MemAddr & o_endAddr,
                                     AddrRangeType i_rangeType )
 {
+    /* TODO RTC 247260
     mss::mcbist::address saddr, eaddr;
     uint32_t o_rc = getMemAddrRange<TYPE_MCA>( i_chip, i_rank, saddr, eaddr,
                                                i_rangeType );
@@ -457,6 +472,8 @@ uint32_t getMemAddrRange<TYPE_MCA>( ExtensibleChip * i_chip,
     }
 
     return o_rc;
+    */
+    return SUCCESS;
 }
 
 //------------------------------------------------------------------------------
@@ -468,6 +485,7 @@ uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                           MemAddr & o_endAddr,
                                           AddrRangeType i_rangeType )
 {
+    /* TODO RTC 247259
     mss::mcbist::address saddr, eaddr;
     uint32_t o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_chip, i_rank, saddr,
                                                      eaddr, i_rangeType );
@@ -478,6 +496,8 @@ uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     }
 
     return o_rc;
+    */
+    return SUCCESS;
 }
 
 //------------------------------------------------------------------------------
@@ -527,23 +547,24 @@ uint32_t getMemAddrRange( ExtensibleChip * i_chip, VT & o_startAddr,
 
     #undef PRDF_FUNC
 }
-
+/* TODO RTC 247260
 template
 uint32_t getMemAddrRange<TYPE_MCA>( ExtensibleChip * i_chip,
                                     mss::mcbist::address & o_startAddr,
                                     mss::mcbist::address & o_endAddr,
                                     uint8_t i_dimmSlct );
-
+*/
 template
 uint32_t getMemAddrRange<TYPE_MCA>( ExtensibleChip * i_chip,
                                     MemAddr & o_startAddr, MemAddr & o_endAddr,
                                     uint8_t i_dimmSlct );
-
+/* TODO RTC 247259
 template
 uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                           mss::mcbist::address & o_startAddr,
                                           mss::mcbist::address & o_endAddr,
                                           uint8_t i_dimmSlct );
+*/
 
 template
 uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
@@ -572,6 +593,7 @@ bool isRowRepairEnabled<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     bool o_isEnabled = false;
 
+    /* TODO RTC 247259
     do
     {
         // Don't do row repair if DRAM repairs is disabled.
@@ -597,6 +619,7 @@ bool isRowRepairEnabled<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         }
 
     }while(0);
+    */
 
     return o_isEnabled;
 
@@ -716,6 +739,7 @@ uint32_t startBgScrub<TYPE_MCA>( ExtensibleChip * i_mcaChip,
 
     uint32_t o_rc = SUCCESS;
 
+    /* TODO RTC 247260
     // Get the MCBIST fapi target
     ExtensibleChip * mcbChip = getConnectedParent( i_mcaChip, TYPE_MCBIST );
     fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( mcbChip->getTrgt() );
@@ -800,6 +824,7 @@ uint32_t startBgScrub<TYPE_MCA>( ExtensibleChip * i_mcaChip,
         }
 
     } while (0);
+    */
 
     return o_rc;
 
@@ -818,6 +843,7 @@ uint32_t startBgScrub<TYPE_MCBIST>( ExtensibleChip * i_mcaChip,
 }
 
 //------------------------------------------------------------------------------
+/* TODO RTC 247260
 
 #ifndef CONFIG_AXONE
 template<>
@@ -881,7 +907,7 @@ uint32_t startTdScrub<TYPE_MCA>( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 #endif
-
+*/
 //##############################################################################
 //##                Explorer/Axone Maintenance Command wrappers
 //##############################################################################
@@ -897,6 +923,7 @@ uint32_t startBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
 
     uint32_t o_rc = SUCCESS;
 
+    /* TODO RTC 247259
     #ifdef CONFIG_AXONE
 
     // Get the OCMB fapi target
@@ -984,6 +1011,7 @@ uint32_t startBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
     } while (0);
     #endif
 
+    */
     return o_rc;
 
     #undef PRDF_FUNC
@@ -991,6 +1019,7 @@ uint32_t startBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
 
 //------------------------------------------------------------------------------
 
+/* TODO RTC 247259
 #ifdef CONFIG_AXONE
 template<>
 uint32_t startTdScrub<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
@@ -1052,7 +1081,7 @@ uint32_t startTdScrub<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 #endif
-
+*/
 //##############################################################################
 //##                  Core/cache trace array functions
 //##############################################################################
@@ -1060,6 +1089,7 @@ uint32_t startTdScrub<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
 int32_t restartTraceArray(TargetHandle_t i_tgt)
 {
     int32_t o_rc = SUCCESS;
+    /* TODO RTC 247259 - need P10 version
     errlHndl_t err = nullptr;
     TYPE tgtType = getTargetType(i_tgt);
     proc_gettracearray_args taArgs;
@@ -1114,6 +1144,7 @@ int32_t restartTraceArray(TargetHandle_t i_tgt)
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
+    */
     return o_rc;
 }
 

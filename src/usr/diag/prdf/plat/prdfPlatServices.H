@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,9 +34,6 @@
  * is common between FSP and Hostboot should be in the respective common file.
  */
 
-#include <lib/shared/nimbus_defaults.H> // Memory HWP constant defs
-#include <lib/mcbist/memdiags.H> // MCBIST command interfaces
-
 // This must be included after all Hostboot specific includes. This will take
 // care of cases where a file must be included in the common code, but the
 // include paths are different between FSP and Hostboot.
@@ -51,6 +48,9 @@
 
 #include <prdfBitString.H>
 #include <mem/prdfMemRank.H>
+
+// External includes
+#include <targeting/common/targetservice.H>
 
 #ifdef CONFIG_NVDIMM
 #include <isteps/nvdimm/nvdimm.H>

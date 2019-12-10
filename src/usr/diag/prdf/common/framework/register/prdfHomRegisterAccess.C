@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,7 @@
 
 #ifdef __HOSTBOOT_RUNTIME
 #include <pm_common_ext.H>
-#include <p9_stop_api.H>
+#include <p10_stop_api.H>
 #endif
 
 using namespace TARGETING;
@@ -167,16 +167,18 @@ uint32_t ScomAccessor::Access(TargetHandle_t i_target,
                         if( l_MaskReg[l_count]  == registerId )
                         {
                             errlHndl_t err = nullptr;
+                            // TODO RTC 247260 - double check the
+                            // ScomSection_t values here from p10_stop_api.H
                             uint32_t sec = (TYPE_CORE == type) ?
-                                P9_STOP_SECTION_CORE_SCOM :
-                                P9_STOP_SECTION_EQ_SCOM;
+                                PROC_STOP_SECTION_CORE :
+                                PROC_STOP_SECTION_CACHE;
 
                             uint64_t scomVal =
                                 (((uint64_t)bs.getFieldJustify(0, 32)) << 32) |
                                  ((uint64_t)bs.getFieldJustify(32, 32));
 
                             err = RTPM::hcode_update(sec,
-                                                     P9_STOP_SCOM_OR_APPEND,
+                                                     PROC_STOP_SCOM_OR_APPEND,
                                                      i_target,
                                                      registerId,
                                                      scomVal);

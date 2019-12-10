@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,7 +36,9 @@
 #include <prdfP9McaExtraSig.H>
 #include <prdfPlatServices.H>
 
+/* TODO RTC 247259
 #include <hwp_wrappers.H>
+*/
 
 using namespace TARGETING;
 
@@ -260,6 +262,7 @@ uint32_t TpsEvent<TYPE_MCA>::startCmd()
     // command continue to the end of the rank and we do diagnostics on the
     // CE counts found in the per-symbol counters. Therefore, all we need to do
     // is tell the hardware which CE types to count.
+    /* TODO RTC 247259
 
     mss::mcbist::stop_conditions<mss::mc_type::NIMBUS> stopCond;
 
@@ -287,6 +290,7 @@ uint32_t TpsEvent<TYPE_MCA>::startCmd()
                   iv_chip->getHuid(), getKey() );
     }
 
+    */
     #endif
 
     return o_rc;
@@ -314,6 +318,7 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::startCmd()
     // command continue to the end of the rank and we do diagnostics on the
     // CE counts found in the per-symbol counters. Therefore, all we need to do
     // is tell the hardware which CE types to count.
+    /* TODO RTC 247259
 
     mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
 
@@ -340,6 +345,8 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::startCmd()
         PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
                   iv_chip->getHuid(), getKey() );
     }
+
+    */
 
     #endif
 

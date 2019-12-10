@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,9 @@
 #include <prdfMemDqBitmap.H>
 #include <prdfPlatServices.H>
 #include <prdfTargetServices.H>
+
+// External includes
+#include <targeting/common/targetservice.H>
 
 class WriteBadDqBitmap: public CxxTest::TestSuite
 {

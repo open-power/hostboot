@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,7 +45,9 @@
 #include <prdfMemSymbol.H>
 #include <prdfMemDqBitmap.H>
 
+/* TODO RTC 247259
 #include <plat_hwp_invoker.H>
+*/
 
 #include <errlentry.H>
 
