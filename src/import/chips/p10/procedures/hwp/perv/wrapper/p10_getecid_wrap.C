@@ -374,8 +374,6 @@ int main(int argc,
     target.cageState     = ECMD_TARGET_FIELD_WILDCARD;
     target.nodeState     = ECMD_TARGET_FIELD_WILDCARD;
     target.slotState     = ECMD_TARGET_FIELD_WILDCARD;
-    target.chipUnitNumState     = ECMD_TARGET_FIELD_WILDCARD;
-    target.coreState     = ECMD_TARGET_FIELD_UNUSED;
     target.threadState     = ECMD_TARGET_FIELD_UNUSED;
     rc = ecmdConfigLooperInit(target, ECMD_SELECTED_TARGETS_LOOP_DEFALL, looper);
 

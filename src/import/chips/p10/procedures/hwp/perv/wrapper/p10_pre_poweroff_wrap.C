@@ -166,8 +166,6 @@ int main(int argc,
     pu_target.cageState     = ECMD_TARGET_FIELD_WILDCARD;
     pu_target.nodeState     = ECMD_TARGET_FIELD_WILDCARD;
     pu_target.slotState     = ECMD_TARGET_FIELD_WILDCARD;
-    pu_target.chipUnitNumState     = ECMD_TARGET_FIELD_WILDCARD;
-    pu_target.coreState     = ECMD_TARGET_FIELD_UNUSED;
     pu_target.threadState     = ECMD_TARGET_FIELD_UNUSED;
     rc = ecmdConfigLooperInit(pu_target, ECMD_SELECTED_TARGETS_LOOP_DEFALL, looper);
 
