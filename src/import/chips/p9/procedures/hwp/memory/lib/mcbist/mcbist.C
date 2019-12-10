@@ -82,6 +82,49 @@ const std::vector< mss::mcbist::op_type > mcbistTraits<>::FIFO_MODE_REQUIRED_OP_
     mss::mcbist::op_type::READ_READ_WRITE  ,
 };
 
+// These valus are pulled out of the MCBIST specification
+// The index is the fixed width - the value is the LFSR_MASK value to be used
+const std::vector< uint64_t > mcbistTraits<mss::mc_type::NIMBUS, fapi2::TARGET_TYPE_MCBIST>::LFSR_MASK_VALUES =
+{
+    0x000000031,
+    0x00000001F,
+    0x001000000,
+    0x100000000,
+    0x004000003,
+    0x000080000,
+    0x040000018,
+    0x008000000,
+    0x010006000,
+    0x004000000,
+    0x001000000,
+    0x003200000,
+    0x001880000,
+    0x000200000,
+    0x000610000,
+    0x000100000,
+    0x000040000,
+    0x000010000,
+    0x000023000,
+    0x000002000,
+    0x000000400,
+    0x000002000,
+    0x000005008,
+    0x000002000,
+    0x000001088,
+    0x000000B00,
+    0x0000004A0,
+    0x000000100,
+    0x000000040,
+    0x000000010,
+    0x000000038,
+    0x000000008,
+    0x000000010,
+    0x000000004,
+    0x000000004,
+    0x000000002,
+    0x000000001,
+};
+
 namespace mcbist
 {
 

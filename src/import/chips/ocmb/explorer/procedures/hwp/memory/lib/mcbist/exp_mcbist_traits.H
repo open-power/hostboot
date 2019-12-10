@@ -244,6 +244,8 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
         static constexpr uint64_t MCBAMR1A0Q_REG = EXPLR_MCBIST_MCBAMR1A0Q;
         static constexpr uint64_t MCBAMR2A0Q_REG = EXPLR_MCBIST_MCBAMR2A0Q;
         static constexpr uint64_t MCBAMR3A0Q_REG = EXPLR_MCBIST_MCBAMR3A0Q;
+        static constexpr uint64_t LFSR_REG = EXPLR_MCBIST_MCBLFSRA0Q;
+        static const std::vector<uint64_t> LFSR_MASK_VALUES;
 
         // All of the pattern registers are calculated off of this base
         static constexpr uint64_t PATTERN0_REG = EXPLR_MCBIST_MCBFD0Q;
@@ -468,6 +470,9 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
             CFG_AMAP_COL3_LEN = EXPLR_MCBIST_MCBAMR3A0Q_CFG_AMAP_COL3_LEN,
             CFG_AMAP_COL2 = EXPLR_MCBIST_MCBAMR3A0Q_CFG_AMAP_COL2,
             CFG_AMAP_COL2_LEN = EXPLR_MCBIST_MCBAMR3A0Q_CFG_AMAP_COL2_LEN,
+
+            LFSR_MASK = EXPLR_MCBIST_MCBLFSRA0Q_CFG_LFSR_MASK_A0,
+            LFSR_MASK_LEN = EXPLR_MCBIST_MCBLFSRA0Q_CFG_LFSR_MASK_A0_LEN,
 
             CFG_DATA_ROT_SEED1 = EXPLR_MCBIST_MCBDRSRQ_CFG_DATA_ROT_SEED,
             CFG_DATA_ROT_SEED1_LEN = EXPLR_MCBIST_MCBDRSRQ_CFG_DATA_ROT_SEED_LEN,

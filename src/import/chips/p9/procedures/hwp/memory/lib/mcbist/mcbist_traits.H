@@ -243,6 +243,8 @@ class mcbistTraits<mss::mc_type::NIMBUS, fapi2::TARGET_TYPE_MCBIST>
         static constexpr uint64_t MCBAMR1A0Q_REG = MCBIST_MCBAMR1A0Q;
         static constexpr uint64_t MCBAMR2A0Q_REG = MCBIST_MCBAMR2A0Q;
         static constexpr uint64_t MCBAMR3A0Q_REG = MCBIST_MCBAMR3A0Q;
+        static constexpr uint64_t LFSR_REG = MCBIST_MCBLFSRA0Q;
+        static const std::vector<uint64_t> LFSR_MASK_VALUES;
 
         // MCBIST FIR registers
         static constexpr uint64_t MCBFIRMASK_REG = MCBIST_MCBISTFIRMASK;
@@ -467,6 +469,9 @@ class mcbistTraits<mss::mc_type::NIMBUS, fapi2::TARGET_TYPE_MCBIST>
             CFG_AMAP_COL3_LEN = MCBIST_MCBAMR3A0Q_CFG_AMAP_COL3_LEN,
             CFG_AMAP_COL2 = MCBIST_MCBAMR3A0Q_CFG_AMAP_COL2,
             CFG_AMAP_COL2_LEN = MCBIST_MCBAMR3A0Q_CFG_AMAP_COL2_LEN,
+
+            LFSR_MASK = MCBIST_MCBLFSRA0Q_CFG_LFSR_MASK_A0,
+            LFSR_MASK_LEN = MCBIST_MCBLFSRA0Q_CFG_LFSR_MASK_A0_LEN,
 
             CFG_DATA_ROT_SEED1 = MCBIST_MCBDRSRQ_CFG_DATA_ROT_SEED,
             CFG_DATA_ROT_SEED1_LEN = MCBIST_MCBDRSRQ_CFG_DATA_ROT_SEED_LEN,

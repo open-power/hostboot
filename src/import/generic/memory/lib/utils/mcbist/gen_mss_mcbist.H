@@ -1975,7 +1975,7 @@ class program
         /// @note Assumes data is right aligned
         /// @return the fixed width address config
         ///
-        inline uint64_t get_fixed_width()
+        inline uint64_t get_fixed_width() const
         {
             uint64_t l_fixed_width = 0;
             iv_addr_gen.extractToRight<TT::FIXED_WIDTH, TT::FIXED_WIDTH_LEN>(l_fixed_width);
