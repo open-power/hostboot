@@ -1,0 +1,18 @@
+#!/usr/bin/expect -f
+# arg0:  BMC host login password
+# arg1:  BMC host name
+# arg2:  BMC host port number
+# arg3:  BMC host login user id
+# ./login_bmc bmcpassword bmchost bmcport bmcuser
+
+set pass [lrange $argv 0 0]
+set server [lrange $argv 1 1]
+set port [lrange $argv 2 2]
+set name [lrange $argv 3 3]
+
+eval spawn ssh -p $port $name@$server
+match_max 100000
+expect "*?assword:*"
+send -- "$pass\r"
+send -- "\r"
+interact

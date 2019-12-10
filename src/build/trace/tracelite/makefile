@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/build/trace/makefile $
+# $Source: src/build/trace/tracelite/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2020
+# Contributors Listed Below - COPYRIGHT 2019,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -22,28 +22,16 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../..
+ROOTPATH = ../../../..
 
-SUBDIRS += tracelite.d
+OUT_FILE += $(GENDIR)/weave
+CLEAN_TARGETS += $(OUT_FILE) $(OUT_FILE).o
 
-GEN_PASS_BODY += tracehash extracthash
-CLEAN_TARGETS += tracehash tracehash.o extracthash extracthash.o
-
-ifdef HOST_BINUTILS_DIR
-BFD_CFLAGS = -I$(HOST_BINUTILS_DIR)/bfd/ -I$(HOST_BINUTILS_DIR)/include/
-BFD_LDFLAGS = $(HOST_BINUTILS_DIR)/bfd/libbfd.a -ldl \
-	      $(HOST_BINUTILS_DIR)/libiberty/libiberty.a -lz
-else
-BFD_LDFLAGS = -lbfd
-endif
+GEN_PASS_BODY += $(OUT_FILE)
 
 include $(ROOTPATH)/config.mk
 
-all: tracehash extracthash
-
-%hash: %hash.c
-	$(C2) "    CC         $(notdir $<)"
-	$(C1)$(CCACHE) $(HOST_PREFIX)gcc -std=c99 -O3 -g -c $< -o $@.o \
-					 $(BFD_CFLAGS)
-	$(C1)$(CCACHE) $(HOST_PREFIX)gcc -O3 -g $@.o -o $@ $(BFD_LDFLAGS)
+$(OUT_FILE): weave.C
+	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -std=gnu++11 -O3 -g -c $< -o $@.o
+	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -g $@.o -o $@
 	$(C1)rm $@.o
