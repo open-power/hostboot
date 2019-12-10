@@ -145,9 +145,9 @@ fapi2::ReturnCode p10_scomtest_putscom_pass(
 
     FAPI_INF("Entering p10_scomtest_putscom_pass...");
 
-    FAPI_INF("Do getscom on proc target");
+    FAPI_INF("Do putscom on proc target");
     FAPI_TRY(fapi2::putScom(i_target,
-                            0x02011803, //PBI CQ FIR Mask Register
+                            0x02010C03, //PBI CQ FIR Mask Register
                             l_scomdata));
 
  fapi_try_exit:
