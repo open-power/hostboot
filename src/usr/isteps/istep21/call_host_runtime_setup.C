@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -714,17 +714,16 @@ void* call_host_runtime_setup (void *io_pArgs)
         NVDIMM_UPDATE::call_nvdimm_update();
 #endif
 
-/* TODO RTC:214350 re-enable PM Complex Functionality
 
 #ifdef CONFIG_START_OCC_DURING_BOOT
-        bool l_activatePM = TARGETING::is_sapphire_load();
+        bool l_activatePM = !TARGETING::is_phyp_load();
 #else
         bool l_activatePM = false;
 #endif
 
         if(l_activatePM)
         {
-            TARGETING::Target* l_failTarget = NULL;
+            TARGETING::Target* l_failTarget = nullptr;
             bool pmStartSuccess = true;
 
             l_err = loadAndStartPMAll(HBPM::PM_LOAD, l_failTarget);
@@ -737,7 +736,6 @@ void* call_host_runtime_setup (void *io_pArgs)
                 errlCommit(l_err, ISTEP_COMP_ID);
                 pmStartSuccess = false;
             }
-
 #ifdef CONFIG_HTMGT
             // Report PM status to HTMGT
             HTMGT::processOccStartStatus(pmStartSuccess,l_failTarget);
@@ -758,9 +756,8 @@ void* call_host_runtime_setup (void *io_pArgs)
 #endif
 
         }
-
         // No support for OCC
-        else if( !Util::isSimicsRunning() )
+        else
         {
             //Shouldnt clear this ATTR_PM_FIRINIT_DONE_ONCE_FLAG
             //when we reset pm complex  from here.
@@ -793,38 +790,6 @@ void* call_host_runtime_setup (void *io_pArgs)
                 }
             }
         }
-
-#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
-        if(TARGETING::is_phyp_load() )
-        {
-            //Explicity clearing the SRAM flag before starting Payload.
-            //This tells the OCC bootloader where to pull the OCC image from
-            //0: mainstore, 1: SRAM. We want to use mainstore after this point
-
-            //Get master proc
-            TARGETING::TargetService & tS = TARGETING::targetService();
-            TARGETING::Target* masterproc = NULL;
-            tS.masterProcChipTargetHandle( masterproc );
-
-            //Clear (up to and including the IPL flag)
-            size_t sz_data = HBOCC::OCC_OFFSET_IPL_FLAG + 6;
-            size_t sz_dw   = sizeof(uint64_t);
-            uint64_t l_occAppData[(sz_data+(sz_dw-1))/sz_dw];
-            memset( l_occAppData, 0x00, sizeof(l_occAppData) );
-
-            const uint32_t l_SramAddrApp = HBOCC::OCC_405_SRAM_ADDRESS;
-            l_err = HBOCC::writeSRAM( masterproc, l_SramAddrApp, l_occAppData,
-                                      sz_data );
-            if(l_err)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                                "Error in writeSRAM of 0");
-                break;
-            }
-        }
-#endif
-
-**/
 
 #if 0 //@TODO-RTC:164022-Support max pstate without OCC
 #ifdef CONFIG_SET_NOMINAL_PSTATE

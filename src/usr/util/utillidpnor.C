@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,7 +51,7 @@ static const PnorLidsMap PnorToLidsMap =
     { PNOR::VERSION, LidAndContainerLid(VERSION_LIDID, INVALID_LIDID)},
     { PNOR::OCC,     LidAndContainerLid(OCC_LIDID, OCC_CONTAINER_LIDID)},
     { PNOR::WOFDATA, LidAndContainerLid(WOF_LIDID, WOF_CONTAINER_LIDID)},
-    { PNOR::HCODE,   LidAndContainerLid(NIMBUS_HCODE_LIDID, HCODE_CONTAINER_LIDID)},
+    { PNOR::HCODE,   LidAndContainerLid(P10_HCODE_LIDID, HCODE_CONTAINER_LIDID)},
     /* @TODO RTC:177927 - Figure out how to handle different Lids for the
                               same PNOR section based on chip.
     { PNOR::HCODE,   LidAndContainerLid(CUMULUS_HCODE_LIDID, HCODE_CONTAINER_LIDID)},

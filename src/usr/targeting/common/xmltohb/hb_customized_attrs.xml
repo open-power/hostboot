@@ -826,7 +826,6 @@
         <id>ATTR_SMF_CONFIG</id>
         <writeable/>
     </attribute>
-
     <!-- OCMB Endianess attributes -->
     <attribute>
         <id>ATTR_MSS_OCMB_EXP_STRUCT_ENDIAN</id>
@@ -847,7 +846,10 @@
         <id>ATTR_MSS_OCMB_EXP_OMI_CFG_ENDIAN_CTRL</id>
         <no_export/>
     </attribute>
-
+    <attribute>
+        <id>ATTR_UNSECURE_HOMER_SIZE</id>
+        <default>0x1000</default>
+    </attribute>
     <!-- =====================================================================
      End of customizations definitions
      ================================================================= -->

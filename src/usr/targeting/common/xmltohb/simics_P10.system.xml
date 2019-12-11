@@ -152,7 +152,6 @@
       <id>SMF_CONFIG</id>
       <default>0x01</default>
     </attribute>
-
     <attribute>
         <id>ADC_CHANNEL_FUNC_IDS</id>
         <default>22,20,5,6,9,10,1,2,24,29,30,31,32,33,18,13</default>
@@ -243,7 +242,10 @@
       <id>OPEN_POWER_MIN_POWER_CAP_WATTS</id>
       <default>1700</default>
     </attribute>
-
+    <attribute>
+      <id>FREQ_PB_MHZ</id>
+      <default>2000</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>

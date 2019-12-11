@@ -66,11 +66,10 @@
 #include <secureboot/smf_utils.H>
 #include <secureboot/smf.H>
 
-/* FIXME RTC: 210975
-// Procedures
-#include <p9_pm_pba_bar_config.H>
-#include <p10_pm_init.H>
-*/
+#include <p10_pm_set_homer_bar.H>
+#include <p10_pm_pba_bar_config.H>
+#include <p10_pm_start.H>
+#include <p10_pm_halt.H>
 #include <p10_hcode_image_build.H>
 #include <p10_infrastruct_help.H>
 #include <p10_hcode_image_defines.H>
@@ -266,9 +265,7 @@ namespace HBPM
 
         do
         {
-            bool l_isNimbus = (i_target->getAttr<ATTR_MODEL>() == MODEL_NIMBUS);
-            uint32_t l_lidId = (l_isNimbus) ? Util::NIMBUS_HCODE_LIDID
-                                            : Util::CUMULUS_HCODE_LIDID;
+            uint32_t l_lidId = Util::P10_HCODE_LIDID;
             if(g_pHcodeLidMgr.get() == nullptr)
             {
                 g_pHcodeLidMgr = std::shared_ptr<UtilLidMgr>
@@ -378,11 +375,8 @@ namespace HBPM
             // l_buffer2 into the unsecure HOMER memory area
             if(SECUREBOOT::SMF::isSmfEnabled())
             {
-                TARGETING::Target* l_sys = nullptr;
-                TARGETING::targetService().getTopLevelTarget(l_sys);
-                assert(l_sys, "Top level target is nullptr!");
-                auto l_unsecureHomerSize =
-                          l_sys->getAttr<TARGETING::ATTR_UNSECURE_HOMER_SIZE>();
+                auto l_unsecureHomerSize = i_target->
+                          getAttr<TARGETING::ATTR_UNSECURE_HOMER_SIZE>();
                 auto l_unsecureHomerAddr = i_target->
                           getAttr<TARGETING::ATTR_UNSECURE_HOMER_ADDRESS>();
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -439,75 +433,40 @@ namespace HBPM
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "lidSize=%d",l_lidImageSize);
 
-/* FIXME RTC: 210975
             // Log some info from the headers in the Homer layout
             Homerlayout_t* pChipHomer = (Homerlayout_t*)i_pImageOut;
-
-            // QPMR Region with SGPE Region
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "QPMR region -- Location: %p",
-                      &(pChipHomer->qpmrRegion));
-
-            QpmrHeaderLayout_t* pQpmrHeader = (QpmrHeaderLayout_t*)
-                (&(pChipHomer->qpmrRegion.sgpeRegion.qpmrHeader));
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "QPMR header -- Date:0x%08X, Version:0x%08X, "
-                      "Image offset:0x%08X, Image length:0x%08X, "
-                      "Bootloader offset:0x%08X, Bootloader length:0x%08X",
-                      pQpmrHeader->buildDate,
-                      pQpmrHeader->buildVersion,
-                      pQpmrHeader->sgpeImgOffset,
-                      pQpmrHeader->sgpeImgLength,
-                      pQpmrHeader->bootLoaderOffset,
-                      pQpmrHeader->bootLoaderLength);
-
-            sgpeHeader_t* pSgpeImageHeader = (sgpeHeader_t*)
-                    & pChipHomer->qpmrRegion.sgpeRegion.sgpeSramImage[SGPE_INT_VECTOR_SIZE];
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "SGPE header -- Date:0x%08X, Version:0x%08X, "
-                      "Image offset:0x%08X, Image length:0x%08X",
-                      pSgpeImageHeader->g_sgpe_build_date,
-                      pSgpeImageHeader->g_sgpe_build_ver);
 
             // CPMR Region with Self Restore Region and CME Binary
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "CPMR region -- Location: %p",
-                      &(pChipHomer->cpmrRegion));
+                      &(pChipHomer->iv_cpmrRegion));
 
-            cpmrHeader_t* pCpmrHeader =
-                (cpmrHeader_t*)(&(pChipHomer->
-                    cpmrRegion.selfRestoreRegion.CPMR_SR.elements.CPMRHeader));
+            CpmrHeader_t* pCpmrHeader =
+                (CpmrHeader_t*)(&(pChipHomer->
+                iv_cpmrRegion.iv_selfRestoreRegion.iv_CPMR_SR.elements.iv_CPMRHeader));
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "CMPR header -- Date:0x%08X, Version:0x%08X, "
                       "Image offset:0x%08X, Image length:0x%08X",
-                      pCpmrHeader->cpmrbuildDate,
-                      pCpmrHeader->cpmrVersion,
-                      pCpmrHeader->cmeImgOffset,
-                      pCpmrHeader->cmeImgLength);
-
-            cmeHeader_t* pCmeHeader = (cmeHeader_t*)
-                    & pChipHomer->cpmrRegion.cmeSramRegion[CME_INT_VECTOR_SIZE];
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "CME header  -- Hcode offset:0x%08X, Hcode length:0x%08X",
-                      pCmeHeader->g_cme_hcode_offset,
-                      pCmeHeader->g_cme_hcode_length);
+                      pCpmrHeader->iv_buildDate,
+                      pCpmrHeader->iv_version,
+                      pCpmrHeader->iv_qmeImgOffset,
+                      pCpmrHeader->iv_qmeImgLength);
 
             // PPMR Region
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "PPMR region -- Location: %p",
-                      &(pChipHomer->ppmrRegion));
+                      &(pChipHomer->iv_ppmrRegion));
 
-            PpmrHeader_t* pPpmrHeader = (PpmrHeader_t *)pChipHomer->ppmrRegion.ppmrHeader;
+            PpmrHeader_t* pPpmrHeader = (PpmrHeader_t *)pChipHomer->iv_ppmrRegion.iv_ppmrHeader;
             PgpeHeader_t* pPgpeHeader = (PgpeHeader_t*)
-                (&(pChipHomer->ppmrRegion.pgpeSramImage[PGPE_INT_VECTOR_SIZE]));
+               (&(pChipHomer->iv_ppmrRegion.iv_pgpeSramRegion[PGPE_SRAM_SIZE]));
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "PGPE header -- Date:0x%08X, Version:0x%08X, "
                       "Hcode offset:0x%08X, Hcode length:0x%08X",
-                      pPgpeHeader->g_pgpe_build_date,
-                      pPgpeHeader->g_pgpe_build_ver,
-                      pPpmrHeader->g_ppmr_hcode_offset,
-                      pPpmrHeader->g_ppmr_hcode_length);
-*/
+                      pPgpeHeader->g_pgpe_buildDate,
+                      pPgpeHeader->g_pgpe_buildVer,
+                      pPpmrHeader->iv_hcodeOffset,
+                      pPpmrHeader->iv_hcodeLength);
 
         } while(0);
 
@@ -532,15 +491,14 @@ namespace HBPM
                             uint64_t i_occImgVaddr, // dest
                             uint64_t i_commonPhysAddr)
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   ENTER_MRK"loadOCCSetup"
-                   "(OccP:0x%0lX, OccV:0x%0lX, CommonP:0x%0lX)",
-                   i_occImgPaddr, i_occImgVaddr, i_commonPhysAddr );
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  ENTER_MRK"loadOCCSetup"
+                  "(OccP:0x%0lX, OccV:0x%0lX, CommonP:0x%0lX)",
+                  i_occImgPaddr, i_occImgVaddr, i_commonPhysAddr );
 
         errlHndl_t l_errl = nullptr;
 
         do{
-/* FIXME RTC: 210975
             // cast OUR type of target to a FAPI type of target.
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                 l_fapiTarg(i_target);
@@ -549,7 +507,6 @@ namespace HBPM
 
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "loadOCCSetup: FapiTarget: %s",l_fapiTargString);
-*/
 
             //==============================
             //Setup for OCC Load
@@ -562,26 +519,21 @@ namespace HBPM
                        i_occImgPaddr,
                        VMM_HOMER_INSTANCE_SIZE_IN_MB);
 
-/* FIXME RTC: 210975
             // Remove bit 0, may be set for physical addresses
             uint64_t l_occ_addr = i_occImgPaddr & PHYSICAL_ADDR_MASK;
-            FAPI_INVOKE_HWP( l_errl,
-                             p10_pm_pba_bar_config,
-                             l_fapiTarg,
-                             0,
-                             l_occ_addr,
-                             VMM_HOMER_INSTANCE_SIZE_IN_MB,
-                             p10pba::LOCAL_NODAL,
-                             0xFF );
+            FAPI_INVOKE_HWP(l_errl,
+                            p10_pm_set_homer_bar,
+                            l_fapiTarg,
+                            l_occ_addr,
+                            VMM_HOMER_INSTANCE_SIZE_IN_MB);
 
             if (l_errl)
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"loadOCCSetup: Bar0 config failed!" );
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"loadOCCSetup: Bar0 config failed!" );
                 l_errl->collectTrace("ISTEPS_TRACE",256);
                 break;
             }
-*/
 
             // BAR2 is the OCC Common Area
             // Bar size is in MB
@@ -595,26 +547,24 @@ namespace HBPM
                        i_commonPhysAddr,
                        VMM_OCC_COMMON_SIZE_IN_MB);
 
-/* FIXME RTC: 210975
             // Remove bit 0, may be set for physical addresses
             uint64_t l_common_addr = i_commonPhysAddr & PHYSICAL_ADDR_MASK;
-            FAPI_INVOKE_HWP( l_errl,
-                             p10_pm_pba_bar_config,
-                             l_fapiTarg,
-                             2,
-                             l_common_addr,
-                             VMM_OCC_COMMON_SIZE_IN_MB,
-                             p10pba::LOCAL_NODAL,
-                             0xFF );
+            FAPI_INVOKE_HWP(l_errl,
+                            p10_pm_pba_bar_config,
+                            l_fapiTarg,
+                            2, // Index
+                            l_common_addr,
+                            VMM_OCC_COMMON_SIZE_IN_MB,
+                            p10pba::LOCAL_NODAL,
+                            0);
 
             if (l_errl)
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"loadOCCSetup: Bar2 config failed!" );
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"loadOCCSetup: Bar2 config failed!" );
                 l_errl->collectTrace("ISTEPS_TRACE",256);
                 break;
             }
-*/
 
         }while(0);
 
@@ -765,110 +715,50 @@ namespace HBPM
                            l_occImgVaddr, i_commonPhysAddr );
                 break;
             }
-#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
-            if(i_useSRAM)
-            {
-                void* l_occVirt = reinterpret_cast<void *>(l_occImgVaddr);
-                l_errl = HBOCC::loadOCCImageDuringIpl(i_target, l_occVirt);
-                if(l_errl)
-                {
-                    TRACFCOMP(g_fapiImpTd,
-                            ERR_MRK"loadPMComplex:"
-                            " loadOCCImageDuringIpl failed!");
-                    break;
-                }
-            }
-            else
-#endif
-            {
-#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
-                //If we're in Checkstop analysis and get here, we need
-                //to clear the IPL flag that got set during istep 6
-                const uint32_t l_sramAddrApp = HBOCC::OCC_405_SRAM_ADDRESS;
-                uint8_t l_occAppData[HBOCC::OCC_OFFSET_IPL_FLAG
-                                                      + IPL_FLAG_AND_FREQ_SIZE];
-                memset(l_occAppData, 0, HBOCC::OCC_OFFSET_IPL_FLAG
-                                                      + IPL_FLAG_AND_FREQ_SIZE);
-                l_errl = HBOCC::writeSRAM(i_target, l_sramAddrApp,
-                      (uint64_t*) l_occAppData, HBOCC::OCC_OFFSET_IPL_FLAG
-                                                      + IPL_FLAG_AND_FREQ_SIZE);
-                if(l_errl)
-                {
-                    TRACFCOMP(g_fapiImpTd,
-                              "loadPMComplex: Error erasing IPL flag");
-                    break;
-                }
-#endif
-                l_errl = loadOCCImageToHomer(i_target,
-                                            l_occImgPaddr,
-                                            l_occImgVaddr,
-                                            i_mode);
-                if(l_errl)
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              ERR_MRK"loadPMComplex: "
-                              "loading OCC failed! "
-                              "HUID=0x%08X OCC_Phys=0x%0lX "
-                              "OCC_Virt=0x%0lX Mode=%s",
-                              get_huid(i_target), l_occImgPaddr, l_occImgVaddr,
-                              (PM_LOAD == i_mode) ? "LOAD" : "RELOAD" );
-                    break;
-                }
-            }
-#if defined(CONFIG_IPLTIME_CHECKSTOP_ANALYSIS) && !defined(__HOSTBOOT_RUNTIME)
-            if(i_useSRAM)
-            {
-                //==============================
-                //Setup host data area in SRAM
-                //==============================
-                l_errl = HBOCC::loadHostDataToSRAM(i_target,
-                                                        PRDF::MASTER_PROC_CORE);
-                if( l_errl != NULL )
-                {
-                    TRACFCOMP(g_fapiImpTd,
-                                       ERR_MRK"loading Host Data Area failed!");
-                    break;
-                }
-            }
-            else
-#endif
-            {
-                void* l_occDataVaddr = reinterpret_cast <void *>(l_occImgVaddr +
-                                                 HOMER_OFFSET_TO_OCC_HOST_DATA);
 
-                l_errl = loadHostDataToHomer(i_target,
-                                             l_occDataVaddr);
-                if(l_errl)
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              ERR_MRK"loadPMComplex: "
-                              "loading Host Data Area failed! "
-                              "HUID=0x%08X OCC_Host_Data_Virt=0x%0lX",
-                              get_huid(i_target), l_occDataVaddr );
-                    break;
-                }
-
-                l_errl = loadHcode(i_target,
-                                   l_homerVAddr,
-                                   i_mode);
-                if(l_errl)
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               ERR_MRK"loadPMComplex: "
-                               "loadHcode failed! "
-                               "HUID=0x%08X HOMER_Virt=0x%0lX Mode=%s",
-                               get_huid(i_target), l_occImgVaddr,
-                               (PM_LOAD == i_mode) ? "LOAD" : "RELOAD" );
-                    break;
-                }
+            l_errl = loadOCCImageToHomer(i_target,
+                                         l_occImgPaddr,
+                                         l_occImgVaddr,
+                                         i_mode);
+            if(l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"loadPMComplex: "
+                          "loading OCC failed! "
+                          "HUID=0x%08X OCC_Phys=0x%0lX "
+                          "OCC_Virt=0x%0lX Mode=%s",
+                          get_huid(i_target), l_occImgPaddr, l_occImgVaddr,
+                          (PM_LOAD == i_mode) ? "LOAD" : "RELOAD" );
+                break;
             }
 
-            //If i_useSRAM is true, then we're in istep 6.11. This address needs
-            //to be reset here, so that it's recalculated again in istep 21.1
-            //where this function is called.
-            if(i_useSRAM)
+            void* l_occDataVaddr = reinterpret_cast <void *>(l_occImgVaddr +
+                                             HOMER_OFFSET_TO_OCC_HOST_DATA);
+
+            l_errl = loadHostDataToHomer(i_target,
+                                         l_occDataVaddr);
+            if(l_errl)
             {
-                i_target->setAttr<ATTR_HOMER_VIRT_ADDR>(0);
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"loadPMComplex: "
+                          "loading Host Data Area failed! "
+                          "HUID=0x%08X OCC_Host_Data_Virt=0x%0lX",
+                          get_huid(i_target), l_occDataVaddr );
+                break;
+            }
+
+            l_errl = loadHcode(i_target,
+                               l_homerVAddr,
+                               i_mode);
+            if(l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"loadPMComplex: "
+                          "loadHcode failed! "
+                          "HUID=0x%08X HOMER_Virt=0x%0lX Mode=%s",
+                          get_huid(i_target), l_occImgVaddr,
+                          (PM_LOAD == i_mode) ? "LOAD" : "RELOAD" );
+                break;
             }
 
         } while(0);
@@ -878,9 +768,9 @@ namespace HBPM
             int lRc = HBPM_UNMAP(l_homerVAddr);
             uint64_t lZeroAddr = 0;
             i_target->setAttr<ATTR_HOMER_VIRT_ADDR>(reinterpret_cast<uint64_t>(lZeroAddr));
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "loadPMComplex:" "unmap, RC=0x%X." ,
-                       lRc);
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "loadPMComplex:" "unmap, RC=0x%X." ,
+                      lRc);
         }
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -922,24 +812,21 @@ namespace HBPM
             {
                 l_sys->setAttr <TARGETING::ATTR_PM_MALF_ALERT_ENABLE> (0x1);
             }
-/* FIXME RTC: 210975
-            FAPI_INVOKE_HWP( l_errl,
-                             p10_pm_init,
-                             l_fapiTarg,
-                             p10pm::PM_INIT,
-                             l_homerVAddr);
+            FAPI_INVOKE_HWP(l_errl,
+                            p10_pm_start,
+                            l_fapiTarg,
+                            l_homerVAddr);
 
             if ( l_errl != nullptr )
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            ERR_MRK"startPMComplex: "
-                           "p10_pm_init(PM_INIT) failed! "
+                           "p10_pm_start failed! "
                            "HUID=0x%08X", get_huid(i_target) );
                 l_errl->collectTrace("ISTEPS_TRACE",256);
 
                 break;
             }
-*/
 
         } while (0);
 
@@ -988,7 +875,7 @@ namespace HBPM
             //  deconfig logic, then skip it.
             // ATTR_HB_INITIATED_PM_RESET set to COMPLETE signifies that this
             //  chip has already been reset
-            ATTR_HB_INITIATED_PM_RESET_type l_chipResetState =
+            auto l_chipResetState =
                      i_target->getAttr<TARGETING::ATTR_HB_INITIATED_PM_RESET>();
             if (HB_INITIATED_PM_RESET_COMPLETE == l_chipResetState)
             {
@@ -1017,29 +904,26 @@ namespace HBPM
             }
 #endif
 
-/* FIXME RTC: 210975
             // Reset path
-            // p10_pm_init.C enum: PM_RESET
-            FAPI_INVOKE_HWP( l_errl,
-                             p10_pm_init,
-                             l_fapiTarg,
-                             p10pm::PM_RESET,
-                             l_homerVAddr );
+            FAPI_INVOKE_HWP(l_errl,
+                            p10_pm_halt,
+                            l_fapiTarg,
+                            pm::PM_NO_DUMP,
+                            l_homerVAddr);
 
             if (l_errl)
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"resetPMComplex: "
-                           "p10_pm_init(PM_RESET) failed! "
-                           "HUID=0x%08X", get_huid(i_target) );
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"resetPMComplex: "
+                          "p10_pm_halt failed! "
+                          "HUID=0x%08X", get_huid(i_target) );
                 l_errl->collectTrace("ISTEPS_TRACE",256);
 
                 break;
             }
-*/
 
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "resetPMComplex: p10_pm_init(PM_RESET) succeeded "
+                       "resetPMComplex: p10_pm_halt succeeded "
                        "HUID=0x%08X", get_huid(i_target) );
 
 #ifdef __HOSTBOOT_RUNTIME
@@ -1278,9 +1162,7 @@ namespace HBPM
         // Wait up to 15 seconds for all OCCs to be ready (150 * 100ms = 15s)
         const size_t NS_BETWEEN_READ = 100 * NS_PER_MSEC;
         const size_t READ_RETRY_LIMIT = 150;
-/* FIXME RTC: 214350 re-enable PM Complex Functionality
         const uint16_t l_readLength = 8;
-*/
         for (const auto & l_procChip: l_procChips)
         {
             uint64_t l_checkpoint = 0x0;
@@ -1289,7 +1171,6 @@ namespace HBPM
 
             while (retryCount++ < READ_RETRY_LIMIT)
             {
-/* FIXME RTC: 214350 re-enable PM Complex Functionality
                 // Read SRAM response buffer to check for OCC checkpoint
                 l_errl = HBOCC::readSRAM( l_procChip,HTMGT::OCC_RSP_SRAM_ADDR,
                                           &(l_checkpoint),
@@ -1302,7 +1183,6 @@ namespace HBPM
                         "HUID 0x%X", get_huid(l_procChip));
                     break;
                 }
-*/
                 if( OCC_CHKPT_COMPLETE == (l_checkpoint & 0xFFFF) )
                 {
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
