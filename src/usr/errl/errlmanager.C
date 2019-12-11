@@ -138,9 +138,9 @@ AtLoadFunctions atLoadFunction;
 ErrlManager::ErrlManager() :
     iv_pnorReadyForErrorLogs(false),
     iv_recvdShutdownEvent(false),
-    iv_hwasProcessCalloutFn(NULL),
-    iv_msgQ(NULL),
-    iv_pnorAddr(NULL),
+    iv_hwasProcessCalloutFn(nullptr),
+    iv_msgQ(nullptr),
+    iv_pnorAddr(nullptr),
     iv_maxErrlInPnor(0),
     iv_pnorOpenSlot(0),
     iv_isSpBaseServices(true),  // queue msgs for fsp until we find we shouldn't
@@ -258,7 +258,7 @@ void * ErrlManager::startup ( void* i_self )
     reinterpret_cast<ErrlManager *>(i_self)->errlogMsgHndlr();
 
     TRACFCOMP( g_trac_errl, EXIT_MRK "ErrlManager::startup" );
-    return NULL;
+    return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -351,7 +351,7 @@ void ErrlManager::errlogMsgHndlr ()
                     // TARGETING is up and running now.
 
                     //  do we NOT need to send the error?
-                    TARGETING::Target * sys = NULL;
+                    TARGETING::Target * sys = nullptr;
                     TARGETING::targetService().getTopLevelTarget( sys );
 
                     // set whether we want to skip certain error logs or not.
@@ -389,7 +389,7 @@ void ErrlManager::errlogMsgHndlr ()
                     // MBOX is up and running now.
 
                     // do we need to send the errorlog
-                    TARGETING::Target * sys = NULL;
+                    TARGETING::Target * sys = nullptr;
                     TARGETING::targetService().getTopLevelTarget( sys );
                     TARGETING::SpFunctions spfn;
 
@@ -412,7 +412,7 @@ void ErrlManager::errlogMsgHndlr ()
                             TRACFCOMP(g_trac_errl, ERR_MRK "Msg queue already registered");
 
                             delete( l_err );
-                            l_err = NULL;
+                            l_err = nullptr;
 
                             //If we got an error then it means the message queue
                             //is registered with mailbox.
@@ -610,7 +610,7 @@ void ErrlManager::errlogMsgHndlr ()
                     if (l_pair.second == 0)
                     {
                         delete l_err;
-                        l_err = NULL;
+                        l_err = nullptr;
                     }
                     else
                     {
@@ -716,7 +716,7 @@ void ErrlManager::errlogMsgHndlr ()
 ///////////////////////////////////////////////////////////////////////////////
 void ErrlManager::sendErrLogToFSP ( errlHndl_t& io_err )
 {
-    msg_t *msg = NULL;
+    msg_t *msg = nullptr;
 
     TRACFCOMP( g_trac_errl, ENTER_MRK"ErrlManager::sendErrLogToFSP" );
     do
@@ -745,7 +745,7 @@ void ErrlManager::sendErrLogToFSP ( errlHndl_t& io_err )
         {
             // clear this - we're done with the message;
             // the receiver will free the storage when it's done
-            msg = NULL;
+            msg = nullptr;
         }
         else
         {
@@ -754,10 +754,10 @@ void ErrlManager::sendErrLogToFSP ( errlHndl_t& io_err )
            //Free the extra data due to the error
            MBOX::deallocate( msg->extra_data );
            msg_free( msg );
-           msg = NULL;
+           msg = nullptr;
 
            delete l_err;
-           l_err = NULL;
+           l_err = nullptr;
         }
     } while (0);
 
@@ -773,10 +773,10 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err, compId_t i_committerComp )
     TRACDCOMP( g_trac_errl, ENTER_MRK"ErrlManager::commitErrLog" );
     do
     {
-        if (io_err == NULL)
+        if (io_err == nullptr)
         {
             // put out warning trace
-            TRACFCOMP(g_trac_errl, ERR_MRK "commitErrLog() - NULL pointer");
+            TRACFCOMP(g_trac_errl, ERR_MRK "commitErrLog() - nullptr pointer");
             break;
         }
 
@@ -802,7 +802,7 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err, compId_t i_committerComp )
 
         //Offload the error log to the errlog message queue
         sendErrlogToMessageQueue ( io_err, i_committerComp );
-        io_err = NULL;
+        io_err = nullptr;
 
    } while( 0 );
 
@@ -974,7 +974,7 @@ bool ErrlManager::errlCommittedThisBoot()
 void ErrlManager::sendErrlogToMessageQueue ( errlHndl_t& io_err,
                                              compId_t i_committerComp )
 {
-    msg_t  *  msg     = NULL;
+    msg_t  *  msg     = nullptr;
 
     TRACFCOMP( g_trac_errl, ENTER_MRK"ErrlManager::sendErrlogToMessageQueue" );
 
@@ -1030,7 +1030,7 @@ void ErrlManager::errlogShutdown()
                     l_pair.first->eid(), l_pair.second);
 
         delete l_pair.first;
-        l_pair.first = NULL;
+        l_pair.first = nullptr;
         // delete from the list
         iv_errlList.pop_front();
     } // while items on iv_errlList list
@@ -1070,7 +1070,7 @@ bool ErrlManager::_updateErrlListIter(ErrlListItr_t & io_it)
     {
         // Delete errl
         delete io_it->first;
-        io_it->first = NULL;
+        io_it->first = nullptr;
         io_it = iv_errlList.erase(io_it);
         l_removed = true;
     }
