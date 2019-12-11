@@ -22,6 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 /// @file p10_pm_pss_init.H
 /// @brief Initializes P2S and HWC logic
 ///
@@ -29,13 +30,13 @@
 // *HWP Backup Owner    :   Prasad BG Ranganath <prasadbgr@in.ibm.com>
 // *HWP FW Owner        :   Prem S Jha <premjha2@in.ibm.com>
 // *HWP Team            :   PM
-// *HWP Level           :   1
+// *HWP Level           :   3
 // *HWP Consumed by     :   HS
 
 ///
 /// Procedure Summary:
 /// --------------------
-///    One procedure to startialize both P2S and HWC SPIPSS registers to
+///    One procedure to initialize both P2S and HWC SPIPSS registers to
 ///    second Procedure is to access APSS or DPSS through P2S Bridge
 ///    Third procedure is to access APSS or DPSS through HWC (hardware control)
 ///
@@ -70,8 +71,8 @@
 ///   o System clocks are running
 ///
 
-#ifndef _P10_PM_PSS_START_H_
-#define _P10_PM_PSS_START_H_
+#ifndef _P10_PM_PSS_INIT_H_
+#define _P10_PM_PSS_INIT_H_
 
 //------------------------------------------------------------------------------
 // Includes
@@ -89,7 +90,7 @@ extern "C"
 // Function prototype
 //------------------------------------------------------------------------------
 ///
-/// @brief Calls the underlying routine based on mode parameter to startialize
+/// @brief Calls the underlying routine based on mode parameter to start
 ///        the PSS macro or halt it or configure the required attributes
 ///
 /// @param[in] i_target Chip target
@@ -102,4 +103,4 @@ extern "C"
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         const pm::PM_FLOW_MODE i_mode);
 }
-#endif // _P10_PM_PSS_START_H_
+#endif // _P10_PM_PSS_INIT_H_

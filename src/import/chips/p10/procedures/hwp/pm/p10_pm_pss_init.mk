@@ -22,5 +22,6 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
 PROCEDURE=p10_pm_pss_init
 $(call BUILD_PROCEDURE)
