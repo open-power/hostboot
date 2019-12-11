@@ -482,7 +482,14 @@ const char SMF_COMP_NAME[] = "smf";
 //@{
 const compId_t UCD_COMP_ID = 0x4100;
 const char UCD_COMP_NAME[] = "ucd";
+//@}
 
+/** @name SPI
+ *  SPI device driver component
+ */
+//@{
+const compId_t SPI_COMP_ID = 0x4200;
+const char SPI_COMP_NAME[] = "spi";
 //@}
 
 //

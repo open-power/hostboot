@@ -59,6 +59,7 @@ SUBDIRS += mmio.d
 SUBDIRS += $(if $(CONFIG_FSP_BUILD),,nvram.d)
 SUBDIRS += pnor.d
 SUBDIRS += runtime.d
+SUBDIRS += spi.d
 SUBDIRS += sbe.d
 SUBDIRS += sbeio.d
 SUBDIRS += scan.d

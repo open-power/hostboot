@@ -66,6 +66,7 @@ namespace DeviceFW
         SBEFIFOSCOM,
         I2CSCOM,
         I2C_MUX,
+        SPI,
         LAST_DRIVER_ACCESS_TYPE
     };
 
@@ -338,6 +339,15 @@ namespace DeviceFW
      */
     #define DEVICE_SBEFIFOSCOM_ADDRESS(i_address) \
         DeviceFW::SBEFIFOSCOM, static_cast<uint64_t>((i_address))
+
+    /**
+     * Construct the device addressing parameters for the SPI device ops.
+     * This macro defaults to skipping the ECC bytes.
+     * @param[in] i_engine - Which SPI master engine to use.
+     * @param[in] i_offset - Offset to start read/writing from.
+     */
+    #define DEVICE_SPI_ADDRESS(i_engine, i_offset)\
+        DeviceFW::SPI, i_engine, i_offset
 
     /** @class InvalidParameterType
      *  @brief Unused type to cause compiler fails for invalid template types.

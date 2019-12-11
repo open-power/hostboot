@@ -248,18 +248,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
         },
 
         /**
-         * @brief spd task
-         */
-        {
-            "libvpd.so",                                    // taskname
-            NULL,                                           // no pointer to fn
-            {
-                INIT_TASK,                                  // task type
-                EXT_IMAGE,                                  // Extended module
-            }
-        },
-
-        /**
          * @brief   fapi2 task, handles attribute override and fapi2 plat intf.
          */
         {
@@ -268,6 +256,30 @@ const TaskInfo g_exttaskinfolist[]   =   {
             {
                     START_TASK,                             // task type
                     EXT_IMAGE,                              // Extended Module
+            }
+        },
+
+        /**
+         * @brief   Serial Peripheral Interface (SPI) Device Driver library
+         */
+        {
+            "libspi.so" ,                       // taskname
+            NULL,                               // no pointer to fn
+            {
+                START_TASK,                     // task type
+                EXT_IMAGE,                      // Extended Module
+            }
+        },
+
+        /**
+         * @brief spd task
+         */
+        {
+            "libvpd.so",                                    // taskname
+            NULL,                                           // no pointer to fn
+            {
+                INIT_TASK,                                  // task type
+                EXT_IMAGE,                                  // Extended module
             }
         },
         /**

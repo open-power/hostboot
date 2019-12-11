@@ -208,6 +208,7 @@ my $resident_modules = {
     "libmdia.so"                => '1',
     "libattn.so"                => '1',
     "libi2c.so"                 => '1',
+    "libspi.so"                 => '1',
     "libutil.so"                => '1',
     "libibscom.so"              => '1',
     "libfsiscom.so"             => '1',
