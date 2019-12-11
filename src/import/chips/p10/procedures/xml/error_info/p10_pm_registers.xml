@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -204,32 +204,32 @@
     <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBABARMSK2</scomRegister>
     <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBABARMSK3</scomRegister>
   </registerFfdc>
-  <!-- ******************************************************************** RTC 210895
+  <!-- ******************************************************************** -->
   <registerFfdc>
     <id>PSS_FFDC_REGISTERS</id>
-    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADCCR0</scomRegister>
-    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADCCR1</scomRegister>
-    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADCCR2</scomRegister>
-    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_SPIPSS_ADC_STATUS_REG</scomRegister>
-    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADC_CMD_REG</scomRegister>
-    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADC_RESET</scomRegister>
-    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADC_WDATA</scomRegister>
-    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADC_RDATA0</scomRegister>
-    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADC_RDATA1</scomRegister>
-    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADC_RDATA2</scomRegister>
-    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADC_RDATA3</scomRegister>
-    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADC_RDATA4</scomRegister>
-    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADC_RDATA5</scomRegister>
-    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADC_RDATA6</scomRegister>
-    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_ADC_RDATA7</scomRegister>
-    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_P2S_100NS</scomRegister>
-    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_P2SCR0</scomRegister>
-    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_P2SCR1</scomRegister>
-    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_P2SCR2</scomRegister>
-    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_PMC_SPIPSS_P2S_STATUS_REG</scomRegister>
-    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_P2S_CMD</scomRegister>
-    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_P2S_WDATA</scomRegister>
-    <scomRegister>scomt::proc::TPCHIP_OCC_OCI_OCB_P2S_RDATA</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_ADC_CR0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_ADC_CR1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_ADC_CR2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_ADC_STAT</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_ADC_CMD</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_ADC_RESET</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_ADC_WDATA</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_ADC_RDATA0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_ADC_RDATA1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_ADC_RDATA2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_ADC_RDATA3</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_ADC_RDATA4</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_ADC_RDATA5</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_ADC_RDATA6</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_ADC_RDATA7</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_P2S_100NS</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_P2S_CR0</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_P2S_CR1</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_P2S_CR2</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_P2S_STAT</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_P2S_CMD</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_P2S_WDATA</scomRegister>
+    <scomRegister>scomt::proc::TP_TPCHIP_OCC_OCI_OCB_P2S_RDATA</scomRegister>
     <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL0</scomRegister>
     <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL1</scomRegister>
     <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVCTL2</scomRegister>
@@ -237,7 +237,6 @@
     <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBASLVRST</scomRegister>
     <scomRegister>scomt::proc::TP_TPBR_PBA_PBAO_PBAMODE</scomRegister>
   </registerFfdc>
-  -->
   <!-- ******************************************************************** -->
   <registerFfdc>
     <id>OCB_CHANNEL0_FFDC_REGISTERS</id>
