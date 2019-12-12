@@ -229,6 +229,9 @@ const uint8_t PB_PSAVE_MISC_CFG_QTR_LUT     = 0x00;
 const uint8_t PB_PSAVE_MISC_CFG_QTR_HUT     = 0x00;
 const uint8_t PB_PSAVE_MISC_CFG_WSIZE       = 0x00;
 
+// DL Config Register Enums
+const uint8_t DLP_PHY_CONFIG_DL_SELECT_DLP  = 0x01;
+
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
@@ -541,12 +544,11 @@ fapi2::ReturnCode p10_smp_link_firs(
     action_t i_action)
 {
     using namespace scomt;
-    using namespace scomt::proc;
+    using namespace scomt::iohs;
 
     FAPI_DBG("Entering...");
 
     struct fir_registers l_reg_values = firs_inactive;
-    fapi2::buffer<uint64_t> l_pb_hp_mode2(0x0);
     fapi2::ATTR_CHIP_UNIT_POS_Type l_iohs_pos;
 
     auto l_proc_target = i_iohs_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
@@ -589,10 +591,15 @@ fapi2::ReturnCode p10_smp_link_firs(
     // Verify that the IOHS target is configured as an SMP
     if(i_iohs_target.isFunctional() && (i_action != action_t::INACTIVE))
     {
-        FAPI_TRY(GET_PB_COM_SCOM_ES3_STATION_HP_MODE2_CURR(l_proc_target, l_pb_hp_mode2),
-                 "Error from getScom (PB_COM_SCOM_ES3_STATION_HP_MODE2_CURR)");
+        fapi2::buffer<uint64_t> l_dlp_config(0x0);
+        fapi2::buffer<uint64_t> l_dl_select(0x0);
 
-        FAPI_ASSERT(l_pb_hp_mode2.getBit(l_iohs_pos),
+        FAPI_TRY(GET_DLP_PHY_CONFIG(i_iohs_target, l_dlp_config),
+                 "Error from getScom (DLP_PHY_CONFIG_DL_SELECT)");
+
+        GET_DLP_PHY_CONFIG_DL_SELECT(l_dlp_config, l_dl_select);
+
+        FAPI_ASSERT(l_dl_select == DLP_PHY_CONFIG_DL_SELECT_DLP,
                     fapi2::P10_SMP_LINK_FIRS_IOHS_NOT_SMP()
                     .set_PROC_TARGET(l_proc_target)
                     .set_IOHS_TARGET(i_iohs_target),
