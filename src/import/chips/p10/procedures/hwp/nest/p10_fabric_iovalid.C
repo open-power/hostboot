@@ -312,7 +312,7 @@ void p10_fabric_iovalid_append_tl_ffdc(
 ///
 fapi2::ReturnCode p10_fabric_iovalid_get_rem_endp(
     const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_loc_endp_target,
-    fapi2::Target<fapi2::TARGET_TYPE_IOHS> o_rem_endp_target)
+    fapi2::Target<fapi2::TARGET_TYPE_IOHS>& o_rem_endp_target)
 {
     FAPI_DBG("Start");
 
@@ -869,6 +869,7 @@ fapi_try_exit:
 /// @brief Update iovalid settings for a single fabric link (X/A)
 ///
 /// @param[in] i_target         Reference to IOHS target to configure
+/// @param[in] i_link_id        Chiplet number for given IOHS target
 /// @param[in] i_set_not_clear  Define iovalid operation (true=set, false=clear)
 /// @param[in] i_en             Defines sublinks to enable
 ///
@@ -876,36 +877,53 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode p10_fabric_iovalid_update_link(
     const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
+    const fapi2::ATTR_CHIP_UNIT_POS_Type i_link_id,
     const bool i_set_not_clear,
     const uint8_t i_en)
 {
-    using namespace scomt::iohs;
+    using namespace scomt::pauc;
 
     FAPI_DBG("Start");
 
     fapi2::buffer<uint64_t> l_iovalid_mask;
 
+    auto l_pauc_target = i_target.getParent<fapi2::TARGET_TYPE_PAUC>();
+
     if ((i_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE) ||
         (i_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_EVEN_ONLY))
     {
-        SET_AXON_CPLT_CONF1_EV_IOVALID_DC(l_iovalid_mask);
+        if(i_link_id % 2)
+        {
+            SET_CPLT_CONF1_3_IOVALID_DC(l_iovalid_mask);
+        }
+        else
+        {
+            SET_CPLT_CONF1_1_IOVALID_DC(l_iovalid_mask);
+        }
     }
 
     if ((i_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE) ||
         (i_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_ODD_ONLY))
     {
-        SET_AXON_CPLT_CONF1_OD_IOVALID_DC(l_iovalid_mask);
+        if(i_link_id % 2)
+        {
+            SET_CPLT_CONF1_2_IOVALID_DC(l_iovalid_mask);
+        }
+        else
+        {
+            SET_CPLT_CONF1_0_IOVALID_DC(l_iovalid_mask);
+        }
     }
 
     if(i_set_not_clear)
     {
-        FAPI_TRY(PUT_AXON_CPLT_CONF1_WO_OR(i_target, l_iovalid_mask),
-                 "Error clearing iovalid bits (AXON_CPLT_CONF1_WO_CLEAR)");
+        FAPI_TRY(PUT_CPLT_CONF1_WO_OR(l_pauc_target, l_iovalid_mask),
+                 "Error setting iovalid bits (CPLT_CONF1_WO_OR)");
     }
     else
     {
-        FAPI_TRY(PUT_AXON_CPLT_CONF1_WO_CLEAR(i_target, l_iovalid_mask),
-                 "Error clearing iovalid bits (AXON_CPLT_CONF1_WO_CLEAR)");
+        FAPI_TRY(PUT_CPLT_CONF1_WO_CLEAR(l_pauc_target, l_iovalid_mask),
+                 "Error clearing iovalid bits (CPLT_CONF1_WO_CLEAR)");
     }
 
 fapi_try_exit:
@@ -981,6 +999,7 @@ fapi2::ReturnCode p10_fabric_iovalid(
             FAPI_DBG("Configuring iovalid state (%s)", i_set_not_clear ? ("set") : ("clear"));
             FAPI_TRY(p10_fabric_iovalid_update_link(
                          l_iohs,
+                         l_link,
                          i_set_not_clear,
                          l_x_en[l_link] ? (l_x_en[l_link]) : (l_a_en[l_link])),
                      "Error from p10_fabric_iovalid_update_link");
