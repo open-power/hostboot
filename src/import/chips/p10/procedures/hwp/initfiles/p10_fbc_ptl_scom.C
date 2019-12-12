@@ -97,12 +97,12 @@ fapi2::ReturnCode p10_fbc_ptl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>&
         uint64_t l_def_AX0_ENABLED = (l_def_AX0_EVN_CNFG || l_def_AX0_ODD_CNFG);
         fapi2::ATTR_FREQ_PROC_IOHS_MHZ_Type l_TGT1_ATTR_FREQ_PROC_IOHS_MHZ;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PROC_IOHS_MHZ, TGT1, l_TGT1_ATTR_FREQ_PROC_IOHS_MHZ));
+        uint64_t l_def_AX0_FW_LIMIT_D = (l_TGT1_ATTR_FREQ_PROC_IOHS_MHZ[l_def_OPTX] * literal_10);
         fapi2::ATTR_FREQ_PAU_MHZ_Type l_TGT2_ATTR_FREQ_PAU_MHZ;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PAU_MHZ, TGT2, l_TGT2_ATTR_FREQ_PAU_MHZ));
-        uint64_t l_def_AX0_FW_LIMIT = (literal_0x16 - ((l_TGT2_ATTR_FREQ_PAU_MHZ * literal_85) /
-                                       (l_TGT1_ATTR_FREQ_PROC_IOHS_MHZ[l_def_OPTX] * literal_10)));
-        uint64_t l_def_AX0_HW_LIMIT = (literal_0x0C - ((l_TGT2_ATTR_FREQ_PAU_MHZ * literal_51) /
-                                       (l_TGT1_ATTR_FREQ_PROC_IOHS_MHZ[l_def_OPTX] * literal_10)));
+        uint64_t l_def_AX_FW_LIMIT_N = (l_TGT2_ATTR_FREQ_PAU_MHZ * literal_85);
+        uint64_t l_def_AX0_HW_LIMIT_D = (l_TGT1_ATTR_FREQ_PROC_IOHS_MHZ[l_def_OPTX] * literal_10);
+        uint64_t l_def_AX_HW_LIMIT_N = (l_TGT2_ATTR_FREQ_PAU_MHZ * literal_51);
         uint64_t l_def_OPTY = ((l_TGT0_ATTR_CHIP_UNIT_POS * literal_2) + literal_1);
         uint64_t l_def_AX1_ODD_CNFG = ((((l_TGT1_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[l_def_OPTY] ==
                                           fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE)
@@ -119,10 +119,8 @@ fapi2::ReturnCode p10_fbc_ptl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>&
                                        || (l_TGT1_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[l_def_OPTY] ==
                                            fapi2::ENUM_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_EVEN_ONLY));
         uint64_t l_def_AX1_ENABLED = (l_def_AX1_EVN_CNFG || l_def_AX1_ODD_CNFG);
-        uint64_t l_def_AX1_FW_LIMIT = (literal_0x16 - ((l_TGT2_ATTR_FREQ_PAU_MHZ * literal_85) /
-                                       (l_TGT1_ATTR_FREQ_PROC_IOHS_MHZ[l_def_OPTY] * literal_10)));
-        uint64_t l_def_AX1_HW_LIMIT = (literal_0x0C - ((l_TGT2_ATTR_FREQ_PAU_MHZ * literal_51) /
-                                       (l_TGT1_ATTR_FREQ_PROC_IOHS_MHZ[l_def_OPTY] * literal_10)));
+        uint64_t l_def_AX1_FW_LIMIT_D = (l_TGT1_ATTR_FREQ_PROC_IOHS_MHZ[l_def_OPTY] * literal_10);
+        uint64_t l_def_AX1_HW_LIMIT_D = (l_TGT1_ATTR_FREQ_PROC_IOHS_MHZ[l_def_OPTY] * literal_10);
         uint64_t l_def_AX0_CMD_RATE_2B_R = (((literal_7 * l_TGT2_ATTR_FREQ_PAU_MHZ) * literal_1611) %
                                             (l_TGT1_ATTR_FREQ_PROC_IOHS_MHZ[l_def_OPTX] * literal_2063));
         fapi2::ATTR_PROC_FABRIC_IOHS_BUS_WIDTH_Type l_TGT1_ATTR_PROC_FABRIC_IOHS_BUS_WIDTH;
@@ -179,15 +177,18 @@ fapi2::ReturnCode p10_fbc_ptl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>&
 
             if ((l_def_AX0_EVN_CNFG == literal_1))
             {
-                l_scom_buffer.insert<4, 6, 58, uint64_t>(l_def_AX0_FW_LIMIT );
+                l_scom_buffer.insert<4, 6, 58, uint64_t>((literal_0x16 - (l_def_AX_FW_LIMIT_N / l_def_AX0_FW_LIMIT_D)) );
             }
 
             if ((l_def_AX0_EVN_CNFG == literal_1))
             {
-                l_scom_buffer.insert<10, 6, 58, uint64_t>(l_def_AX0_HW_LIMIT );
+                l_scom_buffer.insert<10, 6, 58, uint64_t>((literal_0x0C - (l_def_AX_HW_LIMIT_N / l_def_AX0_HW_LIMIT_D)) );
             }
 
-            l_scom_buffer.insert<16, 4, 60, uint64_t>(literal_0x4 );
+            if ((l_def_AX0_EVN_CNFG == literal_1))
+            {
+                l_scom_buffer.insert<16, 4, 60, uint64_t>(literal_0x4 );
+            }
 
             if ((l_def_AX0_ODD_CNFG == literal_1))
             {
@@ -197,15 +198,19 @@ fapi2::ReturnCode p10_fbc_ptl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>&
 
             if ((l_def_AX0_ODD_CNFG == literal_1))
             {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(l_def_AX0_FW_LIMIT );
+                l_scom_buffer.insert<36, 6, 58, uint64_t>((literal_0x16 - (l_def_AX_FW_LIMIT_N / l_def_AX0_FW_LIMIT_D)) );
             }
 
             if ((l_def_AX0_ODD_CNFG == literal_1))
             {
-                l_scom_buffer.insert<42, 6, 58, uint64_t>(l_def_AX0_HW_LIMIT );
+                l_scom_buffer.insert<42, 6, 58, uint64_t>((literal_0x0C - (l_def_AX_HW_LIMIT_N / l_def_AX0_HW_LIMIT_D)) );
             }
 
-            l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0x4 );
+            if ((l_def_AX0_ODD_CNFG == literal_1))
+            {
+                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0x4 );
+            }
+
             FAPI_TRY(fapi2::putScom(TGT0, 0x1001180aull, l_scom_buffer));
         }
         {
@@ -228,15 +233,18 @@ fapi2::ReturnCode p10_fbc_ptl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>&
 
             if ((l_def_AX1_EVN_CNFG == literal_1))
             {
-                l_scom_buffer.insert<4, 6, 58, uint64_t>(l_def_AX1_FW_LIMIT );
+                l_scom_buffer.insert<4, 6, 58, uint64_t>((literal_0x16 - (l_def_AX_FW_LIMIT_N / l_def_AX1_FW_LIMIT_D)) );
             }
 
             if ((l_def_AX1_EVN_CNFG == literal_1))
             {
-                l_scom_buffer.insert<10, 6, 58, uint64_t>(l_def_AX1_HW_LIMIT );
+                l_scom_buffer.insert<10, 6, 58, uint64_t>((literal_0x0C - (l_def_AX_HW_LIMIT_N / l_def_AX1_HW_LIMIT_D)) );
             }
 
-            l_scom_buffer.insert<16, 4, 60, uint64_t>(literal_0x04 );
+            if ((l_def_AX1_EVN_CNFG == literal_1))
+            {
+                l_scom_buffer.insert<16, 4, 60, uint64_t>(literal_0x04 );
+            }
 
             if ((l_def_AX1_ODD_CNFG == literal_1))
             {
@@ -246,49 +254,61 @@ fapi2::ReturnCode p10_fbc_ptl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>&
 
             if ((l_def_AX1_ODD_CNFG == literal_1))
             {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(l_def_AX1_FW_LIMIT );
+                l_scom_buffer.insert<36, 6, 58, uint64_t>((literal_0x16 - (l_def_AX_FW_LIMIT_N / l_def_AX1_FW_LIMIT_D)) );
             }
 
             if ((l_def_AX1_ODD_CNFG == literal_1))
             {
-                l_scom_buffer.insert<42, 6, 58, uint64_t>(l_def_AX1_HW_LIMIT );
+                l_scom_buffer.insert<42, 6, 58, uint64_t>((literal_0x0C - (l_def_AX_HW_LIMIT_N / l_def_AX1_HW_LIMIT_D)) );
             }
 
-            l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0x04 );
+            if ((l_def_AX1_ODD_CNFG == literal_1))
+            {
+                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0x04 );
+            }
+
             FAPI_TRY(fapi2::putScom(TGT0, 0x1001180bull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x1001180cull, l_scom_buffer ));
 
-            if (((l_def_AX0_BUS_WIDTH_2B == literal_1) && (l_def_AX0_CMD_RATE_2B_R != literal_0)))
+            if ((((l_def_AX0_ENABLED == literal_1) && (l_def_AX0_BUS_WIDTH_2B == literal_1))
+                 && (l_def_AX0_CMD_RATE_2B_R != literal_0)))
             {
                 l_scom_buffer.insert<0, 8, 56, uint64_t>((l_def_AX_CMD_RATE_2B_N / l_def_AX0_CMD_RATE_D) );
             }
-            else if (((l_def_AX0_BUS_WIDTH_2B == literal_1) && (l_def_AX0_CMD_RATE_2B_R == literal_0)))
+            else if ((((l_def_AX0_ENABLED == literal_1) && (l_def_AX0_BUS_WIDTH_2B == literal_1))
+                      && (l_def_AX0_CMD_RATE_2B_R == literal_0)))
             {
                 l_scom_buffer.insert<0, 8, 56, uint64_t>(((l_def_AX_CMD_RATE_2B_N / l_def_AX0_CMD_RATE_D) - literal_1) );
             }
-            else if (((l_def_AX0_BUS_WIDTH_2B == literal_1) && (l_def_AX0_CMD_RATE_2B_RA != literal_0)))
+            else if ((((l_def_AX0_ENABLED == literal_1) && (l_def_AX0_BUS_WIDTH_2B == literal_1))
+                      && (l_def_AX0_CMD_RATE_2B_RA != literal_0)))
             {
                 l_scom_buffer.insert<0, 8, 56, uint64_t>((l_def_AX_CMD_RATE_2B_NA / l_def_AX0_CMD_RATE_D) );
             }
-            else if (((l_def_AX0_BUS_WIDTH_2B == literal_1) && (l_def_AX0_CMD_RATE_2B_RA == literal_0)))
+            else if ((((l_def_AX0_ENABLED == literal_1) && (l_def_AX0_BUS_WIDTH_2B == literal_1))
+                      && (l_def_AX0_CMD_RATE_2B_RA == literal_0)))
             {
                 l_scom_buffer.insert<0, 8, 56, uint64_t>(((l_def_AX_CMD_RATE_2B_NA / l_def_AX0_CMD_RATE_D) - literal_1) );
             }
-            else if (((l_def_AX0_BUS_WIDTH_2B != literal_1) && (l_def_AX0_CMD_RATE_1B_R != literal_0)))
+            else if ((((l_def_AX0_ENABLED == literal_1) && (l_def_AX0_BUS_WIDTH_2B != literal_1))
+                      && (l_def_AX0_CMD_RATE_1B_R != literal_0)))
             {
                 l_scom_buffer.insert<0, 8, 56, uint64_t>((l_def_AX_CMD_RATE_1B_N / l_def_AX0_CMD_RATE_D) );
             }
-            else if (((l_def_AX0_BUS_WIDTH_2B != literal_1) && (l_def_AX0_CMD_RATE_1B_R == literal_0)))
+            else if ((((l_def_AX0_ENABLED == literal_1) && (l_def_AX0_BUS_WIDTH_2B != literal_1))
+                      && (l_def_AX0_CMD_RATE_1B_R == literal_0)))
             {
                 l_scom_buffer.insert<0, 8, 56, uint64_t>(((l_def_AX_CMD_RATE_1B_N / l_def_AX0_CMD_RATE_D) - literal_1) );
             }
-            else if (((l_def_AX0_BUS_WIDTH_2B != literal_1) && (l_def_AX0_CMD_RATE_1B_RA != literal_0)))
+            else if ((((l_def_AX0_ENABLED == literal_1) && (l_def_AX0_BUS_WIDTH_2B != literal_1))
+                      && (l_def_AX0_CMD_RATE_1B_RA != literal_0)))
             {
                 l_scom_buffer.insert<0, 8, 56, uint64_t>((l_def_AX_CMD_RATE_1B_NA / l_def_AX0_CMD_RATE_D) );
             }
-            else if (((l_def_AX0_BUS_WIDTH_2B != literal_1) && (l_def_AX0_CMD_RATE_1B_RA == literal_0)))
+            else if ((((l_def_AX0_ENABLED == literal_1) && (l_def_AX0_BUS_WIDTH_2B != literal_1))
+                      && (l_def_AX0_CMD_RATE_1B_RA == literal_0)))
             {
                 l_scom_buffer.insert<0, 8, 56, uint64_t>(((l_def_AX_CMD_RATE_1B_NA / l_def_AX0_CMD_RATE_D) - literal_1) );
             }
@@ -298,35 +318,43 @@ fapi2::ReturnCode p10_fbc_ptl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>&
                 l_scom_buffer.insert<29, 3, 61, uint64_t>(literal_0b10 );
             }
 
-            if (((l_def_AX1_BUS_WIDTH_2B == literal_1) && (l_def_AX1_CMD_RATE_2B_R != literal_0)))
+            if ((((l_def_AX1_ENABLED == literal_1) && (l_def_AX1_BUS_WIDTH_2B == literal_1))
+                 && (l_def_AX1_CMD_RATE_2B_R != literal_0)))
             {
                 l_scom_buffer.insert<8, 8, 56, uint64_t>((l_def_AX_CMD_RATE_2B_N / l_def_AX1_CMD_RATE_D) );
             }
-            else if (((l_def_AX1_BUS_WIDTH_2B == literal_1) && (l_def_AX1_CMD_RATE_2B_R == literal_0)))
+            else if ((((l_def_AX1_ENABLED == literal_1) && (l_def_AX1_BUS_WIDTH_2B == literal_1))
+                      && (l_def_AX1_CMD_RATE_2B_R == literal_0)))
             {
                 l_scom_buffer.insert<8, 8, 56, uint64_t>(((l_def_AX_CMD_RATE_2B_N / l_def_AX1_CMD_RATE_D) - literal_1) );
             }
-            else if (((l_def_AX1_BUS_WIDTH_2B == literal_1) && (l_def_AX1_CMD_RATE_2B_RA != literal_0)))
+            else if ((((l_def_AX1_ENABLED == literal_1) && (l_def_AX1_BUS_WIDTH_2B == literal_1))
+                      && (l_def_AX1_CMD_RATE_2B_RA != literal_0)))
             {
                 l_scom_buffer.insert<8, 8, 56, uint64_t>((l_def_AX_CMD_RATE_2B_NA / l_def_AX1_CMD_RATE_D) );
             }
-            else if (((l_def_AX1_BUS_WIDTH_2B == literal_1) && (l_def_AX1_CMD_RATE_2B_RA == literal_0)))
+            else if ((((l_def_AX1_ENABLED == literal_1) && (l_def_AX1_BUS_WIDTH_2B == literal_1))
+                      && (l_def_AX1_CMD_RATE_2B_RA == literal_0)))
             {
                 l_scom_buffer.insert<8, 8, 56, uint64_t>(((l_def_AX_CMD_RATE_2B_NA / l_def_AX1_CMD_RATE_D) - literal_1) );
             }
-            else if (((l_def_AX1_BUS_WIDTH_2B != literal_1) && (l_def_AX1_CMD_RATE_1B_R != literal_0)))
+            else if ((((l_def_AX1_ENABLED == literal_1) && (l_def_AX1_BUS_WIDTH_2B != literal_1))
+                      && (l_def_AX1_CMD_RATE_1B_R != literal_0)))
             {
                 l_scom_buffer.insert<8, 8, 56, uint64_t>((l_def_AX_CMD_RATE_1B_N / l_def_AX1_CMD_RATE_D) );
             }
-            else if (((l_def_AX1_BUS_WIDTH_2B != literal_1) && (l_def_AX1_CMD_RATE_1B_R == literal_0)))
+            else if ((((l_def_AX1_ENABLED == literal_1) && (l_def_AX1_BUS_WIDTH_2B != literal_1))
+                      && (l_def_AX1_CMD_RATE_1B_R == literal_0)))
             {
                 l_scom_buffer.insert<8, 8, 56, uint64_t>(((l_def_AX_CMD_RATE_1B_N / l_def_AX1_CMD_RATE_D) - literal_1) );
             }
-            else if (((l_def_AX1_BUS_WIDTH_2B != literal_1) && (l_def_AX1_CMD_RATE_1B_RA != literal_0)))
+            else if ((((l_def_AX1_ENABLED == literal_1) && (l_def_AX1_BUS_WIDTH_2B != literal_1))
+                      && (l_def_AX1_CMD_RATE_1B_RA != literal_0)))
             {
                 l_scom_buffer.insert<8, 8, 56, uint64_t>((l_def_AX_CMD_RATE_1B_NA / l_def_AX1_CMD_RATE_D) );
             }
-            else if (((l_def_AX1_BUS_WIDTH_2B != literal_1) && (l_def_AX1_CMD_RATE_1B_RA == literal_0)))
+            else if ((((l_def_AX1_ENABLED == literal_1) && (l_def_AX1_BUS_WIDTH_2B != literal_1))
+                      && (l_def_AX1_CMD_RATE_1B_RA == literal_0)))
             {
                 l_scom_buffer.insert<8, 8, 56, uint64_t>(((l_def_AX_CMD_RATE_1B_NA / l_def_AX1_CMD_RATE_D) - literal_1) );
             }
