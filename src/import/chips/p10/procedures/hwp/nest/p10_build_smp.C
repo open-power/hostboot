@@ -40,9 +40,9 @@
 #include <p10_fbc_utils.H>
 
 #include <p10_scom_proc.H>
+#include <p10_scom_pauc_6.H>
 #include <p10_scom_pauc_d.H>
 #include <p10_scom_iohs_6.H>
-#include <p10_scom_iohs_8.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -424,9 +424,10 @@ fapi2::ReturnCode p10_build_smp_validate_link(
     // read TL training state
     FAPI_TRY(GET_PB_PTL_FIR_REG_RW(l_pauc_target, l_tl_fir_reg),
              "Error from getScom (PB_PTL_FIR_REG_RW)");
+
     // read iovalid state
-    FAPI_TRY(GET_AXON_CPLT_CONF1_RW(i_iohs_target, l_cplt_conf1_reg),
-             "Error from getScom (AXON_CPLT_CONF1_RW)");
+    FAPI_TRY(GET_CPLT_CONF1_RW(l_pauc_target, l_cplt_conf1_reg),
+             "Error from getScom (CPLT_CONF1_RW)");
 
     if (i_link_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE)
     {
@@ -435,8 +436,9 @@ fapi2::ReturnCode p10_build_smp_validate_link(
         l_tl_trained  = (i_link_id % 2) ?
                         (GET_PB_PTL_FIR_REG_FMR02_TRAINED(l_tl_fir_reg) && GET_PB_PTL_FIR_REG_FMR03_TRAINED(l_tl_fir_reg)) :
                         (GET_PB_PTL_FIR_REG_FMR00_TRAINED(l_tl_fir_reg) && GET_PB_PTL_FIR_REG_FMR01_TRAINED(l_tl_fir_reg));
-        l_iovalid_set = GET_AXON_CPLT_CONF1_EV_IOVALID_DC(l_cplt_conf1_reg) &&
-                        GET_AXON_CPLT_CONF1_OD_IOVALID_DC(l_cplt_conf1_reg);
+        l_iovalid_set = (i_link_id % 2) ?
+                        (GET_CPLT_CONF1_3_IOVALID_DC(l_cplt_conf1_reg) && GET_CPLT_CONF1_2_IOVALID_DC(l_cplt_conf1_reg)) :
+                        (GET_CPLT_CONF1_1_IOVALID_DC(l_cplt_conf1_reg) && GET_CPLT_CONF1_0_IOVALID_DC(l_cplt_conf1_reg));
     }
     else if (i_link_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_EVEN_ONLY)
     {
@@ -444,7 +446,9 @@ fapi2::ReturnCode p10_build_smp_validate_link(
         l_tl_trained  = (i_link_id % 2) ?
                         (GET_PB_PTL_FIR_REG_FMR02_TRAINED(l_tl_fir_reg)) :
                         (GET_PB_PTL_FIR_REG_FMR00_TRAINED(l_tl_fir_reg));
-        l_iovalid_set = GET_AXON_CPLT_CONF1_EV_IOVALID_DC(l_cplt_conf1_reg);
+        l_iovalid_set = (i_link_id % 2) ?
+                        (GET_CPLT_CONF1_3_IOVALID_DC(l_cplt_conf1_reg)) :
+                        (GET_CPLT_CONF1_1_IOVALID_DC(l_cplt_conf1_reg));
     }
     else if (i_link_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_ODD_ONLY)
     {
@@ -452,7 +456,9 @@ fapi2::ReturnCode p10_build_smp_validate_link(
         l_tl_trained  = (i_link_id % 2) ?
                         (GET_PB_PTL_FIR_REG_FMR03_TRAINED(l_tl_fir_reg)) :
                         (GET_PB_PTL_FIR_REG_FMR01_TRAINED(l_tl_fir_reg));
-        l_iovalid_set = GET_AXON_CPLT_CONF1_OD_IOVALID_DC(l_cplt_conf1_reg);
+        l_iovalid_set = (i_link_id % 2) ?
+                        (GET_CPLT_CONF1_2_IOVALID_DC(l_cplt_conf1_reg)) :
+                        (GET_CPLT_CONF1_0_IOVALID_DC(l_cplt_conf1_reg));
     }
 
     // assert if not in expected state
@@ -554,7 +560,7 @@ fapi2::ReturnCode p10_build_smp_check_topology(
                     FAPI_INF("Processing X link g%d:p%d:c%d", g_iter->first, p_iter->first, l_link_id);
 
                     FAPI_TRY(p10_build_smp_validate_link(l_iohs, l_link_id, l_x_en[l_link_id]),
-                             "Error from p10_build_smp_validate_link (g%d:p%dc:%d)", g_iter->first, p_iter->first, l_link_id);
+                             "Error from p10_build_smp_validate_link (g%d:p%d:c%d)", g_iter->first, p_iter->first, l_link_id);
 
                     if (l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_GROUP)
                     {
