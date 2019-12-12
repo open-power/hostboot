@@ -432,10 +432,13 @@ sub parseEecacheToc {
     }
 
     # verify uniqueId was built against same version as PNOR's EECACHE
-    unless (isUniqueIdValid($uniqueId) && ($headerVersion == $eecacheVersion))
+    if (isUniqueIdValid($uniqueId))
     {
-        die "PNOR EECACHE version $headerVersion is not same as expected EECACHE version $eecacheVersion!" .
-            "Maybe changed expected with --version option";
+        unless (($headerVersion == $eecacheVersion))
+        {
+            die "PNOR EECACHE version $headerVersion is not same as expected EECACHE version $eecacheVersion!" .
+                "Maybe changed expected with --version option";
+        }
     }
 
     # header entries start after on 6th byte
@@ -754,7 +757,11 @@ sub parseEecacheToc {
     }
     else
     {
-        print "No Match Found! \n\n";
+        # Skip failure message if not looking for a unique id match
+        if (isUniqueIdValid($uniqueId))
+        {
+            print "No Match Found! \n\n";
+        }
     }
 
     return \%entryInfo;
