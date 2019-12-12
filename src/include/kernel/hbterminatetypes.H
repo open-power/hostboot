@@ -97,7 +97,7 @@ struct HB_T_SRC_DataArea
     /* Word 5-8 - user data */
     union{
         struct {
-            uint32_t iType:16;     /**< SRC of EID failure*/
+            uint32_t iType:16;     /**< SRC or EID failure*/
             uint32_t iSource:16;   /**< Source of the src */
         };
         uint32_t SRCword5;         /**< Full Dword5 */

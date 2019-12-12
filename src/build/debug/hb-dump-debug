@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2018
+# Contributors Listed Below - COPYRIGHT 2011,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -217,6 +217,20 @@ sub extImageFile
     }
 
     return $extImage;
+}
+
+# @sub decodeRc decodes an error log return code
+# @param[in] rawRc the value of the return code
+# @param[in] modId the module ID of the error log
+# @return Decoded RC
+# @note Need to be in hb workon for this function to work
+sub decodeRc
+{
+    my $rawRc = shift;
+    my $modId = shift;
+
+    ::userDisplay("\nDecoded Reason Code and Module Id: \n");
+    system("hb", "decoderc", $rawRc, $modId);
 }
 
 __END__

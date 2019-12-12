@@ -257,6 +257,15 @@ class DebugFrameworkProcess:
         hrmor = getHRMOR()
         self.sendMsg("data-response", "%d"%(hrmor) )
 
+    def decode_rc(self,data):
+        pattern = re.compile("([0-9]+)")
+        match = pattern.search(data)
+        rc = int(match.group(1))
+        syscmd = "shell hb_decoderc %x"%(rc)
+        (r, out) = quiet_run_command(syscmd, output_modes.regular)
+        if(r):
+            print "simics ERROR running %s"%(syscmd)
+
 
 # @fn run_hb_debug_framework
 # @brief Wrapper function to execute a tool module.
@@ -288,6 +297,7 @@ def run_hb_debug_framework(tool = "Printk", toolOpts = "",
             "read-scom" :           DebugFrameworkProcess.read_xscom,
             "get-hrmor" :           DebugFrameworkProcess.get_hrmor,
             "exit" :                DebugFrameworkProcess.endProcess,
+            "decode-rc" :           DebugFrameworkProcess.decode_rc,
         }
         operations[msg[0]](fp,msg[1])
         msg = fp.recvMsg()
