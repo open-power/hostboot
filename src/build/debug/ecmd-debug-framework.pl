@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2018
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -418,6 +418,17 @@ sub determineMemMode
     }
 }
 
+# @sub decodeRc decodes an error log return code
+# @param[in] rawRc the value of the return code
+# @return Decoded RC
+# @note This function is a no-op in this framework
+sub decodeRc
+{
+    # This requires HB repo, which the user of ecmd-debug-framework may not
+    # have handy, so this is a no-op here.
+    my $rawRc = shift;
+    return $rawRc;
+}
 
 
 __END__

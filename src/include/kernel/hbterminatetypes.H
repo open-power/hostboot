@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,7 +59,7 @@ struct HB_T_SRC_DataArea
     /* Word 5-8 - user data */
     union{
         struct {
-            uint32_t iType:16;     /**< SRC of PLID failure*/
+            uint32_t iType:16;     /**< SRC or PLID failure*/
             uint32_t iSource:16;   /**< Source of the src */
         };
         uint32_t SRCword5;         /**< Full Dword5 */

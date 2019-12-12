@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2018
+# Contributors Listed Below - COPYRIGHT 2011,2020
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -348,7 +348,18 @@ sub readExtImage
 
 }
 
+# @sub decodeRc decodes an error log return code
+# @param[in] rawRc the value of the return code
+# @return Decoded RC
+# @note This function is a no-op in this framework
+sub decodeRc
+{
+    my $rawRc = shift;
 
+    # This doesn't work currently
+    # sendIPCMsg("decode-rc", "$rawRc");
+    return $rawRc;
+}
 
 
 
