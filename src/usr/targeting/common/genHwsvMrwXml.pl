@@ -4435,10 +4435,6 @@ sub generate_mcs
         <id>CHIPLET_ID</id>
         <default>$chipletId</default>
     </attribute>
-    <attribute>
-        <id>EI_BUS_TX_MSBSWAP</id>
-        <default>$msb_swap</default>
-    </attribute>
     <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
     <attribute>
         <id>REL_POS</id>
@@ -5164,10 +5160,6 @@ sub generate_xbus
         <id>IO_XBUS_TX_FFE_PRECURSOR</id>
         <default>$ffePrecursor</default>
     </attribute>
-    <attribute>
-        <id>EI_BUS_TX_MSBSWAP</id>
-        <default>$tx_swap</default>
-    </attribute>
     ";
 
     if ($peer)
@@ -5737,10 +5729,6 @@ sub generate_centaur
         <id>INSTANCE_PATH</id>
         <default>instance:$ipath</default>
     </compileAttribute>
-    <attribute>
-        <id>EI_BUS_TX_MSBSWAP</id>
-        <default>$msb_swap</default>
-    </attribute>";
 
     calcAndAddFapiPos("membuf",$affinityPath,0,$fapiPosHr);
 

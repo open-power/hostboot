@@ -1026,12 +1026,6 @@
       <id>ICACHE_SIZE</id>
     </attribute>
     <attribute>
-      <id>IMT_BAR_SIZE</id>
-    </attribute>
-    <attribute>
-      <id>IMT_BASE_ADDR</id>
-    </attribute>
-    <attribute>
       <id>ISTEP_MODE</id>
     </attribute>
     <attribute>
@@ -3151,9 +3145,6 @@
       <id>EEPROM_VPD_PRIMARY_INFO</id>
     </attribute>
     <!--fsp requirement-->
-    <attribute>
-      <id>EI_BUS_TX_MSBSWAP</id>
-    </attribute>
     <attribute>
       <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
       <default>0x00000033</default>

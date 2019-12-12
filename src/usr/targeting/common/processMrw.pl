@@ -2121,14 +2121,6 @@ sub processAbus
         $targetObj->setAttribute($abusdest, "PEER_HUID",
            $targetObj->getAttribute($abussource, "HUID"));
 
-         # copy Abus attributes from the connection to the chiplet
-        my $abus = $targetObj->getFirstConnectionBus($target);
-
-        $targetObj->setAttribute($target, "EI_BUS_TX_MSBSWAP",
-              $abus->{bus_attribute}->{SOURCE_TX_MSBSWAP}->{default});
-        $targetObj->setAttribute($abus_dest_parent, "EI_BUS_TX_MSBSWAP",
-              $abus->{bus_attribute}->{DEST_TX_MSBSWAP}->{default});
-
         # copy attributes for wrap config
         my $link_set = "SET_NONE";
         if ($targetObj->isBusAttributeDefined($aBus->{SOURCE},$aBus->{BUS_NUM},"MFG_WRAP_TEST_ABUS_LINKS_SET"))
