@@ -243,12 +243,10 @@ void* call_host_activate_master(void* const io_pArgs)
                   "Target HUID %.8X",
                   get_huid(l_proc_target));
 
-#ifdef ISTEP16_ENABLE_HWPS
         //In the future possibly move default "waitTime" value to SBEIO code
         uint64_t waitTimeMs = 10500; // wait time 10.5 sec, anything larger than 10737 ms can cause
                                      // overflow on SBE side of the timeout calculations
         l_errl = SBEIO::startDeadmanLoop(waitTimeMs);
-#endif
 
         if (l_errl)
         {
@@ -282,13 +280,10 @@ void* call_host_activate_master(void* const io_pArgs)
                   "Target HUID %.8x",
                   get_huid(l_fapi2_coreTarget.get()));
 
-        /* @TODO RTC 243962: Enable when supported in simics */
-#ifdef ISTEP16_ENABLE_HWPS
         FAPI_INVOKE_HWP(l_errl,
                         p10_block_wakeup_intr,
                         l_fapi2_coreTarget,
                         p10pmblockwkup::ENABLE_BLOCK_EXIT);
-#endif
 
         if (l_errl)
         {
@@ -317,13 +312,10 @@ void* call_host_activate_master(void* const io_pArgs)
                       "Target HUID %.8x",
                       get_huid(l_fapi2_fusedTarget.get()));
 
-            /* @TODO RTC 243962: Enable when supported in simics */
-#ifdef ISTEP16_ENABLE_HWPS
             FAPI_INVOKE_HWP(l_errl,
                             p10_block_wakeup_intr,
                             l_fapi2_fusedTarget,
                             p10pmblockwkup::ENABLE_BLOCK_EXIT);
-#endif
 
             if (l_errl)
             {
@@ -353,13 +345,7 @@ void* call_host_activate_master(void* const io_pArgs)
         // Flush any lingering console traces first
         CONSOLE::flush();
 
-        const int l_rc = 0;
-
-        /* @TODO RTC 243962: Enable this code when we have SBE support */
-#ifdef ISTEP16_ENABLE_HWPS
-        l_rc = cpu_master_winkle(l_isFusedMode);
-#endif
-
+        const int l_rc = cpu_master_winkle(l_isFusedMode);
         if (l_rc)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -390,10 +376,7 @@ void* call_host_activate_master(void* const io_pArgs)
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "Returned from Winkle.");
 
-        // @TODO RTC 243962: Enable this code when we have SBE support for
-        // stopping the deadman timer
-        // l_errl = SBEIO::stopDeadmanLoop();
-
+        l_errl = SBEIO::stopDeadmanLoop();
         if (l_errl)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
