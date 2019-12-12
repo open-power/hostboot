@@ -100,6 +100,11 @@ do
             shift
         ;;
 
+        "--openpower-sim")
+            TARGET="openpower-sim_TARGET"
+            shift
+        ;;
+
         "--errltool")
             TARGET="errltool_TARGET"
             shift

@@ -40,7 +40,7 @@ ROOTPATH = ../../..
 #
 
 # Content targets.
-VALID_TARGETS = fsp tools openpower vpo errltool
+VALID_TARGETS = fsp tools openpower vpo errltool openpower-sim
 
 #
 # Files which are to be directly copied into content targets.
@@ -48,78 +48,78 @@ VALID_TARGETS = fsp tools openpower vpo errltool
 # Format is <source file>:<comma separated targets>
 #
 COPY_FILES = \
-    src/build/debug/hb-dump-debug:tools,vpo,openpower \
+    src/build/debug/hb-dump-debug:tools,vpo,openpower,openpower-sim \
     src/build/debug/vpo-debug-framework.pl:vpo \
-    src/build/debug/ecmd-debug-framework.pl:openpower \
-    src/build/debug/simics-debug-framework.py:openpower \
-    src/build/debug/simics-debug-framework.pl:openpower \
-    src/build/simics/combined.simics:openpower \
-    src/build/simics/startup.simics:openpower \
-    src/build/simics/hb-simdebug.py:openpower \
-    src/build/debug/eSEL.pl:openpower \
+    src/build/debug/ecmd-debug-framework.pl:openpower,openpower-sim \
+    src/build/debug/simics-debug-framework.py:openpower-sim \
+    src/build/debug/simics-debug-framework.pl:openpower-sim \
+    src/build/simics/combined.simics:openpower-sim \
+    src/build/simics/startup.simics:openpower-sim \
+    src/build/simics/hb-simdebug.py:openpower-sim \
+    src/build/debug/eSEL.pl:openpower,openpower-sim \
     src/build/debug/fsp-memdump.sh:tools,vpo \
-    src/build/tools/genIstepWaitOverride.pl:tools,openpower \
+    src/build/tools/genIstepWaitOverride.pl:tools,openpower,openpower-sim \
     src/build/vpo/hb-dump:vpo \
     src/build/vpo/hb-istep:vpo \
     src/build/vpo/hb-virtdebug.pl:vpo \
     src/build/vpo/VBU_Cacheline.pm:vpo \
     src/build/simics/hb-pnor-vpd-preload.pl:vpo \
     src/build/buildpnor/pnorLayoutFake.xml:vpo \
-    img/errlparser:tools,vpo,openpower \
-    img/hbotStringFile:tools,vpo,openpower \
-    img/isteplist.csv:tools,vpo,openpower \
+    img/errlparser:tools,vpo,openpower,openpower-sim \
+    img/hbotStringFile:tools,vpo,openpower,openpower-sim \
+    img/isteplist.csv:tools,vpo,openpower,openpower-sim \
     img/dimmspd.dat:vpo \
     img/procmvpd.dat:vpo \
     img/dvpd.dat:vpo \
-    obj/genfiles/attrInfo.csv:vpo,openpower \
+    obj/genfiles/attrInfo.csv:vpo,openpower,openpower-sim \
     obj/genfiles/attrEnumInfo.csv:vpo \
     obj/genfiles/targAttrInfo.csv:vpo \
-    obj/genfiles/fapiattrs.xml:openpower \
-    obj/genfiles/config.h:openpower \
-    obj/genfiles/attribute_types_full.xml:openpower \
-    obj/genfiles/target_types_full.xml:openpower \
-    src/usr/targeting/attroverride/README.attr_override:tools,openpower \
+    obj/genfiles/fapiattrs.xml:openpower,openpower-sim \
+    obj/genfiles/config.h:openpower,openpower-sim \
+    obj/genfiles/attribute_types_full.xml:openpower,openpower-sim \
+    obj/genfiles/target_types_full.xml:openpower,openpower-sim \
+    src/usr/targeting/attroverride/README.attr_override:tools,openpower,openpower-sim \
     src/build/hwpf/prcd_compile.tcl:tools \
-    src/build/buildpnor/buildSbePart.pl:openpower \
-    src/build/buildpnor/buildpnor.pl:openpower \
-    src/build/buildpnor/genfakeheader.pl:openpower \
-    src/build/buildpnor/genPnorImages.pl:openpower \
-    src/build/buildpnor/buildUcdFlashImages.pl:openpower \
-    src/build/buildpnor/PnorUtils.pm:openpower \
-    src/build/buildpnor/imprintHwKeyHash:openpower \
-    src/build/buildpnor/wof-tables-img:openpower \
-    src/build/buildpnor/memd_creation.pl:openpower \
-    src/build/buildpnor/pkgOcmbFw.pl:openpower \
-    src/usr/targeting/common/processMrw.pl:openpower \
-    src/usr/targeting/common/Targets.pm:openpower \
-    src/usr/targeting/common/genHDATstructures.pl:openpower \
-    src/usr/hdat/genHdatBin.pl:openpower \
-    src/usr/targeting/common/filter_out_unwanted_attributes.pl:openpower \
-    src/usr/targeting/common/xmltohb/mergexml.sh:openpower \
-    src/usr/targeting/common/xmltohb/attribute_types.xml:openpower \
-    src/usr/targeting/common/xmltohb/attribute_types_hb.xml:openpower \
-    src/usr/targeting/common/xmltohb/target_types_hb.xml:openpower \
-    src/usr/targeting/common/xmltohb/simics_P10.system.xml:openpower \
+    src/build/buildpnor/buildSbePart.pl:openpower,openpower-sim \
+    src/build/buildpnor/buildpnor.pl:openpower,openpower-sim \
+    src/build/buildpnor/genfakeheader.pl:openpower,openpower-sim \
+    src/build/buildpnor/genPnorImages.pl:openpower,openpower-sim \
+    src/build/buildpnor/buildUcdFlashImages.pl:openpower,openpower-sim \
+    src/build/buildpnor/PnorUtils.pm:openpower,openpower-sim \
+    src/build/buildpnor/imprintHwKeyHash:openpower,openpower-sim \
+    src/build/buildpnor/wof-tables-img:openpower,openpower-sim \
+    src/build/buildpnor/memd_creation.pl:openpower,openpower-sim \
+    src/build/buildpnor/pkgOcmbFw.pl:openpower,openpower-sim \
+    src/usr/targeting/common/processMrw.pl:openpower,openpower-sim \
+    src/usr/targeting/common/Targets.pm:openpower,openpower-sim \
+    src/usr/targeting/common/genHDATstructures.pl:openpower,openpower-sim \
+    src/usr/hdat/genHdatBin.pl:openpower,openpower-sim \
+    src/usr/targeting/common/filter_out_unwanted_attributes.pl:openpower,openpower-sim \
+    src/usr/targeting/common/xmltohb/mergexml.sh:openpower,openpower-sim \
+    src/usr/targeting/common/xmltohb/attribute_types.xml:openpower,openpower-sim \
+    src/usr/targeting/common/xmltohb/attribute_types_hb.xml:openpower,openpower-sim \
+    src/usr/targeting/common/xmltohb/target_types_hb.xml:openpower,openpower-sim \
+    src/usr/targeting/common/xmltohb/simics_P10.system.xml:openpower,openpower-sim \
     src/usr/targeting/common/xmltohb/vbu_P10.system.xml:vpo \
-    src/usr/targeting/common/xmltohb/xmltohb.pl:openpower \
-    src/usr/hdat/hdatBinLayout.xml:openpower \
-    src/usr/targeting/xmltohb/updatetempsxml.pl:openpower \
-    src/include/usr/vmmconst.h:openpower \
-    src/usr/targeting/common/xmltohb/bios.xsd:openpower \
-    src/usr/targeting/common/xmltohb/bios_metadata_petitboot.xslt:openpower \
+    src/usr/targeting/common/xmltohb/xmltohb.pl:openpower,openpower-sim \
+    src/usr/hdat/hdatBinLayout.xml:openpower,openpower-sim \
+    src/usr/targeting/xmltohb/updatetempsxml.pl:openpower,openpower-sim \
+    src/include/usr/vmmconst.h:openpower,openpower-sim \
+    src/usr/targeting/common/xmltohb/bios.xsd:openpower,openpower-sim \
+    src/usr/targeting/common/xmltohb/bios_metadata_petitboot.xslt:openpower,openpower-sim \
     $(foreach file, $(call ROOTPATH_WILDCARD,releaseNotes.html), $(file):fsp)\
 
 ifeq ($(call try-cflag,$(CCACHE) $(HOST_PREFIX)g++,-std=gnu++11),-std=gnu++11)
-COPY_FILES += obj/genfiles/attributeOverride:tools,openpower
+COPY_FILES += obj/genfiles/attributeOverride:tools,openpower,openpower-sim
 else
 COPY_FILES += obj/genfiles/attributeOverride:tools
 endif
 
 include ${ROOTPATH}/config.mk
-COPY_FILES += $(if $(CONFIG_INCLUDE_XML_OPPOWERVM),src/usr/targeting/common/xmltohb/target_types_oppowervm.xml:openpower) \
-    $(if $(CONFIG_INCLUDE_XML_OPPOWERVM),src/usr/targeting/common/xmltohb/attribute_types_oppowervm.xml:openpower) \
-    $(if $(CONFIG_INCLUDE_XML_OPENPOWER),src/usr/targeting/common/xmltohb/target_types_openpower.xml:openpower) \
-    $(if $(CONFIG_INCLUDE_XML_OPENPOWER),src/usr/targeting/common/xmltohb/attribute_types_openpower.xml:openpower) \
+COPY_FILES += $(if $(CONFIG_INCLUDE_XML_OPPOWERVM),src/usr/targeting/common/xmltohb/target_types_oppowervm.xml:openpower,openpower-sim) \
+    $(if $(CONFIG_INCLUDE_XML_OPPOWERVM),src/usr/targeting/common/xmltohb/attribute_types_oppowervm.xml:openpower,openpower-sim) \
+    $(if $(CONFIG_INCLUDE_XML_OPENPOWER),src/usr/targeting/common/xmltohb/target_types_openpower.xml:openpower,openpower-sim) \
+    $(if $(CONFIG_INCLUDE_XML_OPENPOWER),src/usr/targeting/common/xmltohb/attribute_types_openpower.xml:openpower,openpower-sim) \
 
 #
 # Files which are copied and renamed for targets.
@@ -127,36 +127,36 @@ COPY_FILES += $(if $(CONFIG_INCLUDE_XML_OPPOWERVM),src/usr/targeting/common/xmlt
 # Format is <dest file>:<source file>:<comma separated targets>
 #
 COPY_RENAME_FILES = \
-    attribute_types.xml:obj/genfiles/attribute_types_full.xml:openpower \
-    target_types_merged.xml:obj/genfiles/target_types_full.xml:openpower \
-    attribute_types_hb.xml:src/usr/targeting/common/xmltohb/target_types_empty.xml:openpower \
-    target_types_hb.xml:src/usr/targeting/common/xmltohb/target_types_empty.xml:openpower \
-    attribute_types_oppowervm.xml:src/usr/targeting/common/xmltohb/target_types_empty.xml:openpower \
-    target_types_oppowervm.xml:src/usr/targeting/common/xmltohb/target_types_empty.xml:openpower \
-    attribute_types_openpower.xml:src/usr/targeting/common/xmltohb/target_types_empty.xml:openpower \
-    target_types_openpower.xml:src/usr/targeting/common/xmltohb/target_types_empty.xml:openpower \
+    attribute_types.xml:obj/genfiles/attribute_types_full.xml:openpower,openpower-sim \
+    target_types_merged.xml:obj/genfiles/target_types_full.xml:openpower,openpower-sim \
+    attribute_types_hb.xml:src/usr/targeting/common/xmltohb/target_types_empty.xml:openpower,openpower-sim \
+    target_types_hb.xml:src/usr/targeting/common/xmltohb/target_types_empty.xml:openpower,openpower-sim \
+    attribute_types_oppowervm.xml:src/usr/targeting/common/xmltohb/target_types_empty.xml:openpower,openpower-sim \
+    target_types_oppowervm.xml:src/usr/targeting/common/xmltohb/target_types_empty.xml:openpower,openpower-sim \
+    attribute_types_openpower.xml:src/usr/targeting/common/xmltohb/target_types_empty.xml:openpower,openpower-sim \
+    target_types_openpower.xml:src/usr/targeting/common/xmltohb/target_types_empty.xml:openpower,openpower-sim \
     makefile:src/build/mkrules/hbfw/makefile:fsp \
     img/makefile:src/build/mkrules/hbfw/img/makefile:fsp \
     hbicore.bin:img/hbicore$(UNDERSCORE_TEST).bin:vpo \
-    img/hostboot_bootloader.bin:img/hbibl.bin:fsp,openpower,vpo \
-    img/hostboot_securerom.bin:img/securerom.bin:fsp,openpower,vpo \
-    img/hostboot.bin:img/hbicore$(UNDERSCORE_TEST).bin:fsp,openpower \
-    img/hostboot_extended.bin:img/hbicore$(UNDERSCORE_TEST)_extended.bin:fsp,openpower \
-    img/hostboot_runtime.bin:img/hbirt$(UNDERSCORE_TEST).bin:fsp,openpower \
-    hbicore.syms:img/hbicore$(UNDERSCORE_TEST).syms:tools,vpo,openpower \
-    hbicore.list.bz2:img/hbicore$(UNDERSCORE_TEST).list.bz2:tools,vpo,openpower \
-    hbicore.bin.modinfo:img/hbicore$(UNDERSCORE_TEST).bin.modinfo:tools,vpo,openpower \
-    hbirt.syms:img/hbicore$(UNDERSCORE_TEST).syms:tools,vpo,openpower \
-    hbirt.list.bz2:img/hbirt$(UNDERSCORE_TEST).list.bz2:tools,vpo,openpower \
-    hbirt.bin.modinfo:img/hbirt$(UNDERSCORE_TEST).bin.modinfo:tools,vpo,openpower \
-    hbibl.syms:img/hbibl.syms:tools,vpo,openpower \
-    hbibl.list.bz2:img/hbibl.list.bz2:tools,vpo,openpower \
-    hbibl.bin.modinfo:img/hbibl.bin.modinfo:tools,vpo,openpower \
-    securerom.syms:img/securerom.syms:tools,vpo,openpower \
-    securerom.list.bz2:img/securerom.list.bz2:tools,vpo,openpower \
-    securerom.bin.modinfo:img/securerom.bin.modinfo:tools,vpo,openpower \
+    img/hostboot_bootloader.bin:img/hbibl.bin:fsp,openpower,openpower-sim,vpo \
+    img/hostboot_securerom.bin:img/securerom.bin:fsp,openpower,openpower-sim,vpo \
+    img/hostboot.bin:img/hbicore$(UNDERSCORE_TEST).bin:fsp,openpower,openpower-sim \
+    img/hostboot_extended.bin:img/hbicore$(UNDERSCORE_TEST)_extended.bin:fsp,openpower,openpower-sim \
+    img/hostboot_runtime.bin:img/hbirt$(UNDERSCORE_TEST).bin:fsp,openpower,openpower-sim \
+    hbicore.syms:img/hbicore$(UNDERSCORE_TEST).syms:tools,vpo,openpower,openpower-sim \
+    hbicore.list.bz2:img/hbicore$(UNDERSCORE_TEST).list.bz2:tools,vpo,openpower,openpower-sim \
+    hbicore.bin.modinfo:img/hbicore$(UNDERSCORE_TEST).bin.modinfo:tools,vpo,openpower,openpower-sim \
+    hbirt.syms:img/hbicore$(UNDERSCORE_TEST).syms:tools,vpo,openpower,openpower-sim \
+    hbirt.list.bz2:img/hbirt$(UNDERSCORE_TEST).list.bz2:tools,vpo,openpower,openpower-sim \
+    hbirt.bin.modinfo:img/hbirt$(UNDERSCORE_TEST).bin.modinfo:tools,vpo,openpower,openpower-sim \
+    hbibl.syms:img/hbibl.syms:tools,vpo,openpower,openpower-sim \
+    hbibl.list.bz2:img/hbibl.list.bz2:tools,vpo,openpower,openpower-sim \
+    hbibl.bin.modinfo:img/hbibl.bin.modinfo:tools,vpo,openpower,openpower-sim \
+    securerom.syms:img/securerom.syms:tools,vpo,openpower,openpower-sim \
+    securerom.list.bz2:img/securerom.list.bz2:tools,vpo,openpower,openpower-sim \
+    securerom.bin.modinfo:img/securerom.bin.modinfo:tools,vpo,openpower,openpower-sim \
     $(foreach file, $(call ROOTPATH_WILDCARD,src/build/debug/Hostboot/*.pm), \
-    Hostboot/$(notdir $(file)):$(file):tools,vpo,openpower) \
+    Hostboot/$(notdir $(file)):$(file):tools,vpo,openpower,openpower-sim) \
     $(foreach file, $(call ROOTPATH_WILDCARD,obj/genfiles/plugins/*.*), \
     hbplugins/$(notdir $(file)):$(file):errltool) \
     hbplugins/Makefile:obj/genfiles/plugins/Makefile:errltool \
