@@ -54,6 +54,12 @@
     T3 ----------'
   </description>
   <valueType>uint8</valueType>
+  <enum>
+    T0 = 0x80,
+    T1 = 0x40,
+    T2 = 0x20,
+    T3 = 0x10
+  </enum>
   <initToZero/>
   <writeable/>
 </attribute>
