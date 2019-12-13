@@ -39,7 +39,6 @@
 #include <p10_htm_adu_ctrl.H>
 #include <fapi2_mem_access.H>
 #include <p10_putmemproc.H>
-#include <fapi2_subroutine_executor.H>
 
 ///
 /// See doxygen in p10_htm_adu_ctrl.H
@@ -58,16 +57,15 @@ fapi2::ReturnCode aduNHTMControl(
     FAPI_DBG("Debug data: Target: mem_flags: 0x%08llx, addr: 0x%016llx", l_mem_flags, i_addr);
 
     FAPI_DBG("Attempting to put pMisc command");
-    FAPI_CALL_SUBROUTINE(l_rc,
-                         p10_putmemproc,
-                         i_target,
-                         i_addr,
-                         l_bytes,
-                         l_data,
-                         l_mem_flags);
+    FAPI_EXEC_HWP(l_rc,
+                  p10_putmemproc,
+                  i_target,
+                  i_addr,
+                  l_bytes,
+                  l_data,
+                  l_mem_flags);
 
 
-fapi_try_exit:
     FAPI_DBG("Exiting");
     return l_rc;
 }
