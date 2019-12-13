@@ -4217,7 +4217,10 @@ fapi2::ReturnCode setMCFGPregData(
         SET_SCOMFIR_MCFGP0_0_GROUP_SIZE(i_mccBarData.MCFGP_group_size, l_mcfgp_scom_data);
 
         // Group base address
-        SET_SCOMFIR_MCFGP0_0_GROUP_BASE_ADDRESS(i_mccBarData.MCFGP_groupBaseAddr,
+        // MCFGP0 bits 1:24 are to be programmed with group base address bits 8:31.
+        // The value of i_mccBarData.groupBaseAddr is already >> 30 bits
+        // (in GB), so >> 2 more bits here for a total of 32 bits.
+        SET_SCOMFIR_MCFGP0_0_GROUP_BASE_ADDRESS(i_mccBarData.MCFGP_groupBaseAddr >> 2,
                                                 l_mcfgp_scom_data);
 
         // Channel per group
@@ -4289,7 +4292,10 @@ fapi2::ReturnCode setMCFGPMregData(
         SET_SCOMFIR_MCFGPM0_VALID(l_mcfgpm_scom_data);
 
         // Group base address
-        SET_SCOMFIR_MCFGPM0_GROUP_BASE_ADDRESS(i_mccBarData.MCFGPM_groupBaseAddr,
+        // MCFGPM0 bits 1:24 are to be programmed with group base address bits 8:31.
+        // The value of i_mccBarData.groupBaseAddr is already >> 30 bits
+        // (in GB), so >> 2 more bits here for a total of 32 bits.
+        SET_SCOMFIR_MCFGPM0_GROUP_BASE_ADDRESS(i_mccBarData.MCFGPM_groupBaseAddr >> 2,
                                                l_mcfgpm_scom_data);
 
         // Group size
