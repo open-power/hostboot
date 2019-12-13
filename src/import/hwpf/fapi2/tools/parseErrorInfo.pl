@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
