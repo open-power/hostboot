@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,8 @@ uint8_t ErrlManager::iv_hiddenErrLogsEnable =
 
 extern trace_desc_t* g_trac_errl;
 
+// Maximum size of error log that can be sent to the host
+const uint32_t MAX_FSP_ERROR_LOG_LENGTH = 4096;
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -188,10 +190,14 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
         if(g_hostInterfaces)
         {
             uint32_t l_msgSize = io_err->flattenedSize();
+            if (l_msgSize > MAX_FSP_ERROR_LOG_LENGTH)
+            {
+                l_msgSize = MAX_FSP_ERROR_LOG_LENGTH;
+            }
             if (g_hostInterfaces->sendErrorLog)
             {
                 uint8_t * temp_buff = new uint8_t [l_msgSize ];
-                io_err->flatten ( temp_buff, l_msgSize );
+                io_err->flatten ( temp_buff, l_msgSize, true  /* truncate */ );
 
                 size_t rc = g_hostInterfaces->sendErrorLog(io_err->plid(),
                                                            l_msgSize,
