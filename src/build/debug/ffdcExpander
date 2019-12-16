@@ -1,0 +1,727 @@
+#!/bin/sh
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/build/debug/ffdcExpander $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2013,2020
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+
+###############################################################################
+# @file ffdcExpander
+#       This shell script takes a SYSDUMP file and extracts various debug elements.
+#       The caller has the option to post artifacts to a defect.
+#
+#       The starting point for this script is at the end of the file.
+###############################################################################
+
+###############################################################################
+# Some helpful constants
+###############################################################################
+FFDC_GUNZIP_TOOL="/bin/gunzip"
+FFDC_DUMP_PARSER="/esw/bin/dumpparser"
+
+
+###############################################################################
+# Some global variables
+###############################################################################
+FFDC_3RD_PARTY_SCRIPT_DIR="/gsa/ausgsa/projects/h/hostboot/optools/" # Location of files updatecq.pl, cqcmd.pl and Slurp.pm
+FFDC_SCRIPT_NAME=$(basename "${0}") # Cache the name of this script
+FFDC_SCRIPT_DIR=$(dirname "${0}")   # Location of this script and supporting scripts
+FFDC_SCRIPT_DIR="${FFDC_SCRIPT_DIR}/"
+FFDC_SYSDUMP_FILE_GZ="" # format SYSDUMP.13020B8.20000001.20190725181300.gz
+FFDC_SYSDUMP_FILE=""    # format SYSDUMP.13020B8.20000001.20190725181300
+FFDC_HB_DUMP_FILE="";   # format hb.dump.SYSDUMP.13020B8.20000001.20190725181300
+FFDC_FSP_DRIVER_DIR=""  # format '/esw/fips922/Builds/b0724a_1931.922'
+FFDC_FSP_DRIVER=""      # format 'fips922', 'fips950' , etc
+FFDC_FSP_BUILD_TAG=""   # format b0724a_1931.922
+FFDC_DEFECT_NUM=""      # format 'SW123456', 'sw123456', 'Sw123456' or 'sW123456'
+FFDC_DEFECT_NUM_CHARS="8"   # The number of characters expected in defect including 'SW'
+FFDC_CWD="`pwd -P`/"    # The current working directory
+FFDC_DEST_DIR="${FFDC_CWD}" # The destination directory of artifacts, default to CWD
+FFDC_CQ_USER=""         # The CQ user ID
+FFDC_CQ_PASS=""         # The CQ password
+FFDC_RETURN_VALUE="0"   # The return value. Default to success '0'
+FFDC_TIME_STAMP=""      # A time stamp is generated to make the files unique
+
+###############################################################################
+# Print the usage line
+#
+# @return 0 if successful, not 0 if a failure occurred
+###############################################################################
+function _ffdcUsage_()
+{
+    echo ""
+    echo "    Usage: ${FFDC_SCRIPT_NAME} -g <FFDC_SYSDUMP_FILE.gz> | -s <FFDC_SYSDUMP_FILE> |"
+    echo "                        -h <HB_FFDC_SYSDUMP_FILE> -b <FSP_BUILD_TAG>"
+    echo "                        [ OPTIONS ]"
+    echo ""
+    echo "                        OPTIONS: [ -d <DEST_DIR> ] [ -a <DEFECT_NUM> ] [ -t ]"
+    echo "                                -t  attach a time stamp to the artifacts"
+    echo ""
+    echo "    Examples: ${FFDC_SCRIPT_NAME} -g SYSDUMP.13020B8.20000001.20190725181300.raw67117184.gz"
+    echo "              ${FFDC_SCRIPT_NAME} -s SYSDUMP.13020B8.20000001.20190725181300.raw67117184"
+    echo "              ${FFDC_SCRIPT_NAME} -h hb.dump.SYSDUMP.13020B8.20000001.20190725181300 -b b0724a_1931.922"
+    echo "              ${FFDC_SCRIPT_NAME} -s SYSDUMP.13020B8.20000001.20190725181300.raw67117184 -a SW123456 -t"
+    echo "              ${FFDC_SCRIPT_NAME} -s SYSDUMP.13020B8.20000001.20190725181300.raw67117184 -d dir"
+    echo ""
+    return 0; # Return success
+}
+
+###############################################################################
+# @brief Get the caller's options and validate them
+#
+# @param [in] $* - All of the caller's inputs after name of script
+#
+# @return 0 if successful, not 0 if a failure occurred
+###############################################################################
+function _getUserInputOptionsAndValidate_()
+{
+    # Default caller options
+    CALLER_SYSDUMP_FILE_GZ=""
+    CALLER_SYSDUMP_FILE=""
+    CALLER_HB_DUMP_FILE=""
+    CALLER_FSP_BUILD_TAG=""
+    CALLER_DEST_DIR=""
+    CALLER_REQUESTS_TIME_STAMP=""
+
+    # Get caller's options
+    FFDC_RETURN_VALUE="22" # Default to 'Invalid argument'
+    MANDATORY_OPTION_CHOSEN="0"
+    echo ""
+    while getopts ts:g:h:b:d:a: option
+    do
+        if [ -n "${option}" ]; then
+            FFDC_RETURN_VALUE="0";  # Found an argument
+        fi
+        case "${option}"
+            in
+            t) CALLER_REQUESTS_TIME_STAMP=1;;
+            s) CALLER_SYSDUMP_FILE=${OPTARG}; MANDATORY_OPTION_CHOSEN="1";;
+            g) CALLER_SYSDUMP_FILE_GZ=${OPTARG}; MANDATORY_OPTION_CHOSEN="1";;
+            h) CALLER_HB_DUMP_FILE=${OPTARG}; MANDATORY_OPTION_CHOSEN="1";;
+            b) CALLER_FSP_BUILD_TAG=${OPTARG};;
+            d) CALLER_DEST_DIR=${OPTARG};;
+            a) CALLER_DEFECT_NUM=${OPTARG};;
+           \?) FFDC_RETURN_VALUE=22;;
+            :) FFDC_RETURN_VALUE=22;;
+        esac
+    done
+
+    # If call to getopts not successful, then propagate error back
+    if [ "$FFDC_RETURN_VALUE" != "0" ]; then
+        _ffdcUsage_
+        return $FFDC_RETURN_VALUE;
+    fi
+
+    # Check for a valid option chosen
+    if [ "$MANDATORY_OPTION_CHOSEN" == "0" ]; then
+        _ffdcUsage_
+        return $FFDC_RETURN_VALUE;
+    fi
+
+    # Check for nonsensical options
+    if [ -n "${CALLER_SYSDUMP_FILE}" ] && [ -n "${CALLER_SYSDUMP_FILE_GZ}" ]; then
+            echo "    ERROR: Incompatible options: options -g and -s can't be used together";
+            _ffdcUsage_
+            return 22; # return 'Invalid argument'
+    fi
+
+    if [ -n "${CALLER_SYSDUMP_FILE_GZ}" ] && [ -n "${CALLER_HB_DUMP_FILE}" ]; then
+            echo "    ERROR: Incompatible options: options -g and -h can't be used together";
+            _ffdcUsage_
+            return 22; # return 'Invalid argument'
+    fi
+
+    if [ -n "${CALLER_SYSDUMP_FILE_GZ}" ] && [ -n "${CALLER_FSP_BUILD_TAG}" ]; then
+            echo "    ERROR: Incompatible options: options -g and -b can't be used together";
+            _ffdcUsage_
+            return 22; # return 'Invalid argument'
+    fi
+
+    if [ -n "${CALLER_SYSDUMP_FILE}" ] && [ -n "${CALLER_FSP_BUILD_TAG}" ]; then
+            echo "    ERROR: Incompatible options: options -s and -b can't be used together";
+            _ffdcUsage_
+            return 22; # return 'Invalid argument'
+    fi
+
+    if [ -n "${CALLER_SYSDUMP_FILE}" ] && [ -n "${CALLER_HB_DUMP_FILE}" ]; then
+            echo "    ERROR: Incompatible options: options -s and -h can't be used together";
+            _ffdcUsage_
+            return 22; # return 'Invalid argument'
+    fi
+
+    # Verify that if caller is passing in a HB dump file, they must supply the build tag
+    if [ -n "${CALLER_HB_DUMP_FILE}" ] && [ -z "${CALLER_FSP_BUILD_TAG}" ]; then
+            echo "    ERROR: Must supply a -b option with the -h option";
+            _ffdcUsage_
+            return 22; # return 'Invalid argument'
+    fi
+
+    if [ -z "${CALLER_HB_DUMP_FILE}" ] && [ -n "${CALLER_FSP_BUILD_TAG}" ]; then
+            echo "    ERROR: Must supply a -h option with the -b option";
+            _ffdcUsage_
+            return 22; # return 'Invalid argument'
+    fi
+
+    # If caller requests a time stamp, option -t, then oblige
+    if [ "$CALLER_REQUESTS_TIME_STAMP" == "1" ]; then
+        FFDC_TIME_STAMP=$(date +%s)
+        FFDC_TIME_STAMP="_${FFDC_TIME_STAMP}"
+    fi
+
+    # If caller supplied a gzippped SYSDUMP file, option -g, then confirm it exists
+    if [ -n "${CALLER_SYSDUMP_FILE_GZ}" ]; then
+         if [ ! -e "${CALLER_SYSDUMP_FILE_GZ}" ]; then
+            echo "    gzipped SYSDUMP file (${CALLER_SYSDUMP_FILE_GZ}) not found";
+            return 22; # return 'Invalid argument'
+         fi
+
+        # Check if file given is a gzipped file, verify that it ends in .gz
+        if [[ "${CALLER_SYSDUMP_FILE_GZ}" != *\.gz ]]; then
+            echo " ";
+            echo "    WARNING: It appears that file (${CALLER_SYSDUMP_FILE_GZ}) is not a gzipped file"
+            while true; do
+                echo ""
+                read -p "    Do you wish to continue with file [Y/N] ? " yn
+                case $yn in
+                    [Yy] ) break;;
+                    [Nn] ) echo "    ¯\_(?)_/¯  exiting ..."; echo ""; return 22;; # return 'Invalid argument'
+                    * ) echo "    Please answer [Y]es or [N]o.";;
+                esac
+            done
+        fi
+
+        # Save caller's gzippped SYSDUMP file, option -g
+        FFDC_SYSDUMP_FILE_GZ="$CALLER_SYSDUMP_FILE_GZ"
+
+        ## Add an absolute path to the gzipped file, if not already an absolute path
+        # Check the first character to see if starting with absolute path
+        FIRST_CHAR="${FFDC_SYSDUMP_FILE_GZ:0:1}"
+        # If first char not a '/' then append an absolute path
+        if [ "${FIRST_CHAR}" != "/" ]; then
+            FFDC_SYSDUMP_FILE_GZ="${FFDC_CWD}${FFDC_SYSDUMP_FILE_GZ}"
+        fi
+    fi # end if [ -n "${CALLER_SYSDUMP_FILE_GZ}" ]; then
+
+
+    # If caller supplied a SYSDUMP file, option -f, then confirm it exists
+    if [ -n "${CALLER_SYSDUMP_FILE}" ]; then
+         if [ ! -e "${CALLER_SYSDUMP_FILE}" ]; then
+            echo "    SYSDUMP file (${CALLER_SYSDUMP_FILE}) not found";
+            return 22; # return 'Invalid argument'
+         fi
+
+        # Save caller's SYSDUMP file, option -f
+        FFDC_SYSDUMP_FILE="${CALLER_SYSDUMP_FILE}"
+
+        ## Add an absolute path to the gzipped file, if not already an absolute path
+        # Check the first character to see if starting with absolute path
+        FIRST_CHAR="${FFDC_SYSDUMP_FILE:0:1}"
+        # If first char not a '/' then append an absolute path
+        if [ "${FIRST_CHAR}" != "/" ]; then
+            FFDC_SYSDUMP_FILE="${FFDC_CWD}${FFDC_SYSDUMP_FILE}"
+        fi
+    fi # end if [ -n "${CALLER_SYSDUMP_FILE}" ]; then
+
+
+    # If caller supplied a HB dump file, option -h, then confirm it exists
+    if [ -n "${CALLER_HB_DUMP_FILE}" ]; then
+         if [ ! -e "${CALLER_HB_DUMP_FILE}" ]; then
+            echo "    HB dump file (${CALLER_HB_DUMP_FILE}) not found";
+            return 22; # return 'Invalid argument'
+         fi
+
+        # Save caller's HB dump file, option -h
+        FFDC_HB_DUMP_FILE="${CALLER_HB_DUMP_FILE}"
+
+        ## Add an absolute path to the HB dump file, if not already an absolute path
+        # Check the first character to see if starting with absolute path
+        FIRST_CHAR="${FFDC_HB_DUMP_FILE:0:1}"
+        # If first char not a '/' then append an absolute path
+        if [ "${FIRST_CHAR}" != "/" ]; then
+            FFDC_HB_DUMP_FILE="${FFDC_CWD}${FFDC_HB_DUMP_FILE}"
+        fi
+    fi # end if [ -n "${CALLER_HB_DUMP_FILE}" ]; then
+
+
+    # If caller supplied an FSP build tag, option -b, then validate it
+    if [ -n "${CALLER_FSP_BUILD_TAG}" ]; then
+        # Extrapolate the FSP Build Release from the FSP build tag
+        if [[ "${CALLER_FSP_BUILD_TAG}" = *"."* ]]; then
+                FIPS_VERS=$(echo ${CALLER_FSP_BUILD_TAG} | \cut -d"." -f 2)
+                if [ -n "${FIPS_VERS}" ]; then
+                    FFDC_FSP_DRIVER="fips${FIPS_VERS}"
+                else
+                    echo " ";
+                    echo "    Build tag (${CALLER_FSP_BUILD_TAG}) appears to be in wrong format";
+                    echo "    Cannot extrapolate the FIPS version from build tag";
+                    return 22; # return 'Invalid argument'
+                fi
+        else
+            echo " ";
+            echo "    Build tag (${CALLER_FSP_BUILD_TAG}) appears to be in wrong format";
+            echo "    Cannot extrapolate the FIPS version from build tag";
+            _ffdcUsage_
+            return 22; # return 'Invalid argument'
+        fi  # end if [[ "${CALLER_FSP_BUILD_TAG}" = *"."* ]]; then
+
+        # Save the caller's FSP build tag
+        FFDC_FSP_BUILD_TAG="${CALLER_FSP_BUILD_TAG}"
+
+        # Save the caller's FSP build tag with the directory to it
+        FFDC_FSP_DRIVER_DIR="/esw/${FFDC_FSP_DRIVER}/Builds/${CALLER_FSP_BUILD_TAG}"
+    fi  # end if [ -n "${CALLER_FSP_BUILD_TAG}" ]; then
+
+    # If caller supplied a defect, option -a, just confirm it is in the correct
+    # nomenclature and format
+    if [ -n "${CALLER_DEFECT_NUM}" ]; then
+
+        FFDC_DEFECT_NUM=$(echo ${CALLER_DEFECT_NUM^^})
+        if [[ $FFDC_DEFECT_NUM != SW* ]]; then
+            echo "    ERROR: software defect must be preceded with 'SW'";
+            echo " ";
+            return 22; # return 'Invalid argument'
+        fi
+
+        NUM_CHARS=${#FFDC_DEFECT_NUM}
+        if [[ "${NUM_CHARS}" -ne "${FFDC_DEFECT_NUM_CHARS}" ]]; then
+            echo "    ERROR: software defect must have a total of ${FFDC_DEFECT_NUM_CHARS} characters, including 'SW'";
+            echo " ";
+            return 22; # return 'Invalid argument'
+        fi
+
+        INTEGER_PART=$(echo ${CALLER_DEFECT_NUM} | sed "s/^SW//g")
+        REG_EXP='^[0-9]+$'
+        if ! [[ $INTEGER_PART =~ $REG_EXP ]]; then
+            echo "    ERROR: the characters (${INTEGER_PART}) that follow 'SW' must be an integer";
+            echo " ";
+            return 22; # return 'Invalid argument'
+        fi
+
+        # Prompt username and password for CQ
+        _queryUserPassword_;
+        FFDC_RETURN_VALUE=$?
+        if [ "${FFDC_RETURN_VALUE}" != "0" ]; then
+            echo ""
+            return ${FFDC_RETURN_VALUE};  # Return failure
+        fi
+    fi # end # If caller supplied a defect, option -a, ...
+
+
+    # If caller supplied a destination directory, option -d, then confirm it
+    #  exists and determine if it is a relative path or absolute path
+    if [ -n "${CALLER_DEST_DIR}" ]; then
+         if [ ! -e "${CALLER_DEST_DIR}" ]; then
+            echo "    Destination directory (${CALLER_DEST_DIR}) not found";
+            while true; do
+                echo ""
+                read -p "    Do you wish to ceate it [Y/N] ? " yn
+                case $yn in
+                    [Yy] ) break;;
+                    [Nn] ) echo "    ¯\_(?)_/¯  exiting ..."; echo ""; return 22;; # return 'Invalid argument'
+                    * ) echo "    Please answer [Y]es or [N]o.";;
+                esac
+            done
+
+            mkdir -p ${CALLER_DEST_DIR}
+            FFDC_RETURN_VALUE=$?
+            if [ "$FFDC_RETURN_VALUE" != "0" ]; then
+                echo ""
+                return $FFDC_RETURN_VALUE;  # Propagate failure
+            fi
+            echo "    Destination directory (${CALLER_DEST_DIR}) created";
+            echo ""
+        fi
+
+        # Save caller's destination directory option
+        FFDC_DEST_DIR="$CALLER_DEST_DIR"
+        NUM_CHARS=$((${#FFDC_DEST_DIR}-1))
+        LAST_CHAR="${FFDC_DEST_DIR:$NUM_CHARS:1}"
+        # If last char not a '/' then append a '/'
+        if [ "${LAST_CHAR}" != "/" ]; then
+            FFDC_DEST_DIR="${FFDC_DEST_DIR}/"
+        fi
+
+        ## Add an absolute path to the destination directory, if it is not
+        ## already an absolute path.
+        # Inspect the first character to determine path is absolute or not
+        FIRST_CHAR="${FFDC_DEST_DIR:0:1}"
+        # If first char not a '/' then append an absolute path
+        if [ "${FIRST_CHAR}" != "/" ]; then
+            FFDC_DEST_DIR="${FFDC_CWD}${FFDC_DEST_DIR}"
+        fi
+    fi # end if [ -n "${CALLER_DEST_DIR}" ]; then
+
+    return 0;  # Return success
+}
+
+###############################################################################
+# @brief Query caller for user name and password
+###############################################################################
+function _queryUserPassword_()
+{
+    if [ -n "${FFDC_DEFECT_NUM}" ]; then
+        read -p 'CQ Username: ' FFDC_CQ_USER
+        read -sp 'CQ Password: ' FFDC_CQ_PASS
+    fi
+
+    return 0;
+}
+
+###############################################################################
+# @brief Unzip the system dump file
+#
+# Example: unzip SYSDUMP.13020B8.20000001.20190725181300.raw67117184.gz  =>
+#                SYSDUMP.13020B8.20000001.20190725181300.raw67117184
+#
+# @return 0 if successful, not 0 if a failure occurred
+###############################################################################
+function _unzipSysDumpFile_()
+{
+    # Verify that we can get to the dumpparser script
+    if [[ ! -e "${FFDC_GUNZIP_TOOL}" ]]; then
+        echo ""
+        echo "    ERROR:  Could not find gunzip tool ${FFDC_GUNZIP_TOOL}"
+        echo ""
+        return 2;  # Return 'No such file or directory'
+    fi
+
+    ## Extrapolate the SYSDUMP file from the gzipped file
+    # Remove any directories and only get the file name
+    FFDC_SYSDUMP_FILE=$(echo ${FFDC_SYSDUMP_FILE_GZ} | awk -F / '{ print $NF }')
+    # Remove the '.gz' from the gzipped file
+    FFDC_SYSDUMP_FILE=$(echo ${FFDC_SYSDUMP_FILE} | sed "s/\.gz$//")
+    # Prepend the caller's directory
+    FFDC_SYSDUMP_FILE="${FFDC_DEST_DIR}${FFDC_SYSDUMP_FILE}"
+
+    # Check if the SYSDUMP file already exists, if so, ask caller if they wish
+    # to overwrite it
+    if [[ -e "${FFDC_SYSDUMP_FILE}" ]]; then
+        echo ""
+        echo "    SYSDUMP file (${FFDC_SYSDUMP_FILE}) already exists ..."
+        while true; do
+            echo ""
+            read -p "    Do you wish to override the file and continue [Y/N] ? " yn
+            case $yn in
+                [Yy] ) break;;
+                [Nn] ) echo "    Skipping call to ${FFDC_GUNZIP_TOOL} ..."; echo ""; return 0;;
+                * ) echo "    Please answer [Y]es or [N]o.";;
+            esac
+        done
+    fi
+
+    # Unzip the gzipped SYSDUMP file
+    echo ""
+    echo "    ${FFDC_GUNZIP_TOOL} -c ${FFDC_SYSDUMP_FILE_GZ} > ${FFDC_SYSDUMP_FILE}"
+    `${FFDC_GUNZIP_TOOL} -c ${FFDC_SYSDUMP_FILE_GZ} > ${FFDC_SYSDUMP_FILE}`
+    FFDC_RETURN_VALUE=$?
+    if [ "${FFDC_RETURN_VALUE}" != "0" ]; then
+        echo ""
+        return ${FFDC_RETURN_VALUE};  # Return failure
+    fi
+
+    return 0;  # Return success
+}
+
+
+###############################################################################
+# @brief Extract the HB system dump file from the SYSDUMP file
+#
+# Example: /esw/bin/dumpparser -extMem SYSDUMP.13020B8.20000001.20190725181300.raw67117184  =>
+#                hb.dump.SYSDUMP.13020B8.20000001.20190725181300
+#
+# @return 0 if successful, not 0 if a failure occurred
+###############################################################################
+function _extractHbSysDumpFile_()
+{
+    # Verify that we can get to the dump parser script
+    if [[ ! -e "${FFDC_DUMP_PARSER}" ]]; then
+        echo ""
+        echo "    ERROR:  Could not find parser ${FFDC_DUMP_PARSER}"
+        echo ""
+        return 2;  # Return 'No such file or directory'
+    fi
+
+    ## Extrapolate the HB dump file name from the SYSDUMP file
+    # Remove any directories and only get the file name
+    FFDC_HB_DUMP_FILE=$(echo ${FFDC_SYSDUMP_FILE} | awk -F / '{ print $NF }')
+    # Remove the .gz from the SYSDUMP, if it exists
+    FFDC_HB_DUMP_FILE=$(echo ${FFDC_HB_DUMP_FILE} | sed "s/\.gz$//")
+    # Remove the postpended '.rawxxx' from the SYSDUMP file, if it exists
+    FFDC_HB_DUMP_FILE=$(echo ${FFDC_HB_DUMP_FILE} | sed "s/\.raw.*$//")
+    # Prepend 'hb.dump.' to file
+    FFDC_HB_DUMP_FILE=$(echo ${FFDC_HB_DUMP_FILE} | sed "s/^/hb.dump./")
+    # Prepend the caller's directory
+    FFDC_HB_DUMP_FILE="${FFDC_DEST_DIR}${FFDC_HB_DUMP_FILE}"
+
+    # Extract the the FSP build info from the SYSDUMP file
+    FSP_BUILD_INFO=$(${FFDC_DUMP_PARSER} -a ${FFDC_SYSDUMP_FILE} | grep "Driver is" | awk '{ print $4 }')
+
+    # Extract the the FSP driver info from the FSP build info
+    FFDC_FSP_DRIVER=$(echo ${FSP_BUILD_INFO} | awk -F / '{ print $1 }')
+
+    # Extract the FSP build tag info from the FSP build info
+    FFDC_FSP_BUILD_TAG=$(echo ${FSP_BUILD_INFO} | awk -F / '{ print $2 }')
+
+    # Create a path to FSP build driver info
+    FFDC_FSP_DRIVER_DIR="/esw/${FFDC_FSP_DRIVER}/Builds/${FFDC_FSP_BUILD_TAG}"
+
+    # Check if the HB dump file already exists, if so, ask caller if they wish
+    # to overwrite it
+    if [[ -e "${FFDC_HB_DUMP_FILE}" ]]; then
+        echo ""
+        echo "    HB system dump file (${FFDC_HB_DUMP_FILE}) already exists ..."
+        while true; do
+            echo ""
+            read -p "    Do you wish to override the file and continue [Y/N] ? " yn
+            case $yn in
+                [Yy] ) break;;
+                [Nn] ) echo "    Skipping call to ${FFDC_DUMP_PARSER} ..."; return 0;;
+                * ) echo "    Please answer [Y]es or [N]o.";;
+            esac
+        done
+    fi
+
+    # Change directory to user supplied directory
+    \cd -P ${FFDC_DEST_DIR} ;
+
+    # Parse out the HB dump file using the dump parser
+    echo ""
+    echo "    ${FFDC_DUMP_PARSER} -extMem ${FFDC_SYSDUMP_FILE}"
+    ${FFDC_DUMP_PARSER} -extMem ${FFDC_SYSDUMP_FILE}
+
+    FFDC_RETURN_VALUE=$?
+    if [ "${FFDC_RETURN_VALUE}" != "0" ]; then
+        # Return back to current working directory
+        \cd -P ${FFDC_CWD}
+        echo ""
+        return ${FFDC_RETURN_VALUE};  # Return failure
+    fi
+
+    echo "    Created file ${FFDC_HB_DUMP_FILE}"
+
+    # Return back to current working directory
+    \cd -P ${FFDC_CWD}
+
+    return 0;  # Return success
+}
+
+
+###############################################################################
+# @brief Set the path to the fsp-trace tool
+#
+# @return 0
+###############################################################################
+function _setFSPTracePath_()
+{
+    FFDC_FSP_PATH="/esw/$FFDC_FSP_DRIVER/Builds/built/images/nfs/x86.nfp/bin/"
+    echo ""
+    echo "    Using fsp-trace tool: ${FFDC_FSP_PATH}fsp-trace"
+    PATH=${FFDC_FSP_PATH}:$PATH
+
+    # Verify that we can get to the dump parser script
+    if [[ ! -e "${FFDC_FSP_PATH}fsp-trace" ]]; then
+        echo ""
+        echo "    ERROR:  Could not find fsp trace ${FFDC_DUMP_PARSER}"
+        echo ""
+        return 2;  # Return 'No such file or directory'
+    fi
+
+    echo "PATH=${FFDC_FSP_PATH}:\$PATH" >> ${FFDC_DEST_DIR}${FFDC_FSP_BUILD_TAG}
+
+    return 0;  # Return success
+}
+
+###############################################################################
+# @brief Extract various HB dump info
+#
+# @param [in] $1 The HB tools directory
+# @param [in] $2 Path to the hb-dump-debug tools directory
+###############################################################################
+function _getInfoFromHBDump_()
+{
+    echo ""
+    echo "    Extracting the Trace information from HB dump ..."
+    echo "    running: $1 --img-path=$2/ --tool=Trace --file=${FFDC_HB_DUMP_FILE} > ${FFDC_DEST_DIR}TRACE${FFDC_TIME_STAMP}" | tee -a ${FFDC_DEST_DIR}${FFDC_FSP_BUILD_TAG}
+    $1 --img-path=$2/ --tool=Trace --file=${FFDC_HB_DUMP_FILE} > ${FFDC_DEST_DIR}TRACE${FFDC_TIME_STAMP}
+
+    echo ""
+    echo "    Extracting the Printk information from HB dump ..."
+    echo "    running: $1 --img-path=$2/ --tool=Printk --file=${FFDC_HB_DUMP_FILE} > ${FFDC_DEST_DIR}PRINTK${FFDC_TIME_STAMP}" | tee -a ${FFDC_DEST_DIR}${FFDC_FSP_BUILD_TAG}
+    $1 --img-path=$2/ --tool=Printk --file=${FFDC_HB_DUMP_FILE} > ${FFDC_DEST_DIR}PRINTK${FFDC_TIME_STAMP}
+
+    echo ""
+    echo "    Extracting the Errl information (Component/PLID list) from HB dump ..."
+    echo "    running: $1 --img-path=$2/ --tool=Errl --file=${FFDC_HB_DUMP_FILE} > ${FFDC_DEST_DIR}ERRL${FFDC_TIME_STAMP}" | tee -a ${FFDC_DEST_DIR}${FFDC_FSP_BUILD_TAG}
+    $1 --img-path=$2/ --tool=Errl --file=${FFDC_HB_DUMP_FILE} > ${FFDC_DEST_DIR}ERRL${FFDC_TIME_STAMP}
+
+    echo ""
+    echo "    Extracting the Errl information (Detailed listing of all Error Logs) from HB dump ..."
+    echo "    running: $1 --img-path=$2/ --tool=Errl --tool-options='display=all' --file=${FFDC_HB_DUMP_FILE} >> ${FFDC_DEST_DIR}ERRL${FFDC_TIME_STAMP}" | tee -a ${FFDC_DEST_DIR}${FFDC_FSP_BUILD_TAG}
+    $1 --img-path=$2/ --tool=Errl --tool-options='display=all' --file=${FFDC_HB_DUMP_FILE} >> ${FFDC_DEST_DIR}ERRL${FFDC_TIME_STAMP}
+
+    echo ""
+    echo "    Extracting the Ps information from HB dump ..."
+    echo "    running: $1 --img-path=$2/ --tool=Ps --file=${FFDC_HB_DUMP_FILE} > ${FFDC_DEST_DIR}PS${FFDC_TIME_STAMP}" | tee -a ${FFDC_DEST_DIR}${FFDC_FSP_BUILD_TAG}
+    $1 --img-path=$2/ --tool=Ps --file=${FFDC_HB_DUMP_FILE} > ${FFDC_DEST_DIR}PS${FFDC_TIME_STAMP}
+
+    echo ""
+    echo "    Extracting the Ps information from HB dump with backtrace ..."
+    echo "    running: $1 --img-path=$2/ --tool=Ps --tool-options="with-backtrace" --file=${FFDC_HB_DUMP_FILE} > ${FFDC_DEST_DIR}PS_BACKTRACE${FFDC_TIME_STAMP}" | tee -a ${FFDC_DEST_DIR}${FFDC_FSP_BUILD_TAG}
+    $1 --img-path=$2/ --tool=Ps --tool-options="with-backtrace" --file=${FFDC_HB_DUMP_FILE} > ${FFDC_DEST_DIR}PS_BACKTRACE${FFDC_TIME_STAMP}
+
+    echo ""
+    echo "    Extracting the MemStats information from HB dump ..."
+    echo "    running: $1 --img-path=$2/ --tool=Ps --file=${FFDC_HB_DUMP_FILE} > ${FFDC_DEST_DIR}MEMSTATS${FFDC_TIME_STAMP}" | tee -a ${FFDC_DEST_DIR}${FFDC_FSP_BUILD_TAG}
+    $1 --img-path=$2/ --tool=MemStats --file=${FFDC_HB_DUMP_FILE} > ${FFDC_DEST_DIR}MEMSTATS${FFDC_TIME_STAMP}
+
+    echo ""
+    echo "    Extracting the PageMgr information from HB dump ..."
+    echo "    running: $1 --img-path=$2/ --tool=PageMgr --file=${FFDC_HB_DUMP_FILE} > ${FFDC_DEST_DIR}PAGEMGR${FFDC_TIME_STAMP}" | tee -a ${FFDC_DEST_DIR}${FFDC_FSP_BUILD_TAG}
+    $1 --img-path=$2/ --tool=PageMgr --file=${FFDC_HB_DUMP_FILE} > ${FFDC_DEST_DIR}PAGEMGR${FFDC_TIME_STAMP}
+
+    echo ""
+    echo "    Extracting the BlTrace information from HB dump ..."
+    echo "    running: $1 --img-path=$2/ --tool=BlTrace --file=${FFDC_HB_DUMP_FILE} > ${FFDC_DEST_DIR}BLTRACE${FFDC_TIME_STAMP}" | tee -a ${FFDC_DEST_DIR}${FFDC_FSP_BUILD_TAG}
+    $1 --img-path=$2/ --tool=BlTrace --file=${FFDC_HB_DUMP_FILE} > ${FFDC_DEST_DIR}BLTRACE${FFDC_TIME_STAMP}
+}
+
+###############################################################################
+# @brief Extract various HB dump info and post to defect, if caller wishes to
+###############################################################################
+function _getInfoFromHBDumpAndPost_()
+{
+    _setFSPTracePath_
+    FFDC_RETURN_VALUE=$?
+    # If call to _setFSPTracePath_ not successful, then propagate error back
+    if [ "$FFDC_RETURN_VALUE" != "0" ]; then
+        return $FFDC_RETURN_VALUE;
+    fi
+
+    HB_TOOLS_DIR=$FFDC_FSP_DRIVER_DIR/obj/x86.nfp/hbfw/simics
+    HB_DUMP_DEBUG=$HB_TOOLS_DIR/hb-dump-debug
+    _getInfoFromHBDump_ $HB_DUMP_DEBUG $HB_TOOLS_DIR
+
+    # If supplied a defect number, then post a comment to the defect and add
+    # the generated dump files as attachments
+    if [ -n "${FFDC_DEFECT_NUM}" ]; then
+        PATH=${FFDC_3RD_PARTY_SCRIPT_DIR}:$PATH
+        CQFILE=${FFDC_3RD_PARTY_SCRIPT_DIR}updatecq.pl
+
+        echo ""
+        echo -e "\n    Adding attachment TRACE${FFDC_TIME_STAMP} to defect ${FFDC_DEFECT_NUM} ..."
+        perl $CQFILE -id $FFDC_DEFECT_NUM -a ${FFDC_DEST_DIR}TRACE${FFDC_TIME_STAMP} -u $FFDC_CQ_USER -p $FFDC_CQ_PASS -s "Hostboot dump files stored at $FFDC_DEST_DIR"
+
+        echo -e "\n    Adding attachment PRINTK${FFDC_TIME_STAMP} to defect ${FFDC_DEFECT_NUM} ..."
+        perl $CQFILE -id $FFDC_DEFECT_NUM -a ${FFDC_DEST_DIR}PRINTK${FFDC_TIME_STAMP} -u $FFDC_CQ_USER -p $FFDC_CQ_PASS
+
+        echo -e "\n    Adding attachment ERRL${FFDC_TIME_STAMP} to defect ${FFDC_DEFECT_NUM} ..."
+        perl $CQFILE -id $FFDC_DEFECT_NUM -a ${FFDC_DEST_DIR}ERRL${FFDC_TIME_STAMP} -u $FFDC_CQ_USER -p $FFDC_CQ_PASS
+
+        echo -e "\n    Adding attachment PS${FFDC_TIME_STAMP} to defect ${FFDC_DEFECT_NUM} ..."
+        perl $CQFILE -id $FFDC_DEFECT_NUM -a ${FFDC_DEST_DIR}PS${FFDC_TIME_STAMP} -u $FFDC_CQ_USER -p $FFDC_CQ_PASS
+
+        echo -e "\n    Adding attachment PS_BACKTRACE${FFDC_TIME_STAMP} to defect ${FFDC_DEFECT_NUM} ..."
+        perl $CQFILE -id $FFDC_DEFECT_NUM -a ${FFDC_DEST_DIR}PS_BACKTRACE${FFDC_TIME_STAMP} -u $FFDC_CQ_USER -p $FFDC_CQ_PASS
+
+        echo -e "\n    Adding attachment MEMSTATS${FFDC_TIME_STAMP} to defect ${FFDC_DEFECT_NUM} ..."
+        perl $CQFILE -id $FFDC_DEFECT_NUM -a ${FFDC_DEST_DIR}MEMSTATS${FFDC_TIME_STAMP} -u $FFDC_CQ_USER -p $FFDC_CQ_PASS
+
+        echo -e "\n    Adding attachment PAGEMGR${FFDC_TIME_STAMP} to defect ${FFDC_DEFECT_NUM} ..."
+        perl $CQFILE -id $FFDC_DEFECT_NUM -a ${FFDC_DEST_DIR}PAGEMGR${FFDC_TIME_STAMP} -u $FFDC_CQ_USER -p $FFDC_CQ_PASS
+
+        echo -e "\n    Adding attachment BLTRACE${FFDC_TIME_STAMP} to defect ${FFDC_DEFECT_NUM} ..."
+        perl $CQFILE -id $FFDC_DEFECT_NUM -a ${FFDC_DEST_DIR}BLTRACE${FFDC_TIME_STAMP} -u $FFDC_CQ_USER -p $FFDC_CQ_PASS
+    fi
+}
+
+
+###############################################################################
+# @brief The main. The real starting place of this script
+#
+# @return 0 if successful, not 0 if a failure occurred
+###############################################################################
+function ffdcExpanderMain()
+{
+    # Get user input options and validate
+    _getUserInputOptionsAndValidate_ $*
+    FFDC_RETURN_VALUE=$?
+    # If call to _getUserInputOptionsAndValidate_ not successful, then propagate error back
+    if [ "$FFDC_RETURN_VALUE" != "0" ]; then
+        return $FFDC_RETURN_VALUE;
+    fi
+
+
+    # If caller supplied a gzipped file then unzip it
+    if [ -n "${FFDC_SYSDUMP_FILE_GZ}" ]; then
+        _unzipSysDumpFile_
+        FFDC_RETURN_VALUE=$?
+    fi
+    # If call to _unzipSysDumpFile_ not successful, then propagate error back
+    if [ "$FFDC_RETURN_VALUE" != "0" ]; then
+        return $FFDC_RETURN_VALUE;
+    fi
+
+
+    # If caller supplied a SYSDUMP file then extract HB dump file
+    if [ -n "${FFDC_SYSDUMP_FILE}" ]; then
+        _extractHbSysDumpFile_ ${FFDC_SYSDUMP_FILE}
+        FFDC_RETURN_VALUE=$?
+    fi
+    # If call to _extractHbSysDumpFile_ not successful, then propagate error back
+    if [ "$FFDC_RETURN_VALUE" != "0" ]; then
+        return $FFDC_RETURN_VALUE;
+    fi
+
+
+    # If caller supplied a HB dump file and a FSP build tag, then retrieve HB info
+    if [ -n "${FFDC_HB_DUMP_FILE}" ] && [ -n "${FFDC_FSP_DRIVER_DIR}" ]; then
+        # Save the FSP build tag as a file for the caller's benefit
+        touch ${FFDC_DEST_DIR}${FFDC_FSP_BUILD_TAG}
+        # Add some info data to the file
+        echo ${FFDC_FSP_BUILD_TAG} > ${FFDC_DEST_DIR}${FFDC_FSP_BUILD_TAG}
+        echo ${FFDC_FSP_DRIVER} >> ${FFDC_DEST_DIR}${FFDC_FSP_BUILD_TAG}
+        echo ${FFDC_FSP_DRIVER_DIR} >> ${FFDC_DEST_DIR}${FFDC_FSP_BUILD_TAG}
+
+        _getInfoFromHBDumpAndPost_ ${FFDC_HB_DUMP_FILE} ${FFDC_FSP_DRIVER_DIR};
+        FFDC_RETURN_VALUE=$?
+    fi
+    # If call to _getInfoFromHBDumpAndPost_ not successful, then propagate error back
+    if [ "$FFDC_RETURN_VALUE" != "0" ]; then
+        return $FFDC_RETURN_VALUE;
+    fi
+
+    echo ""
+    return 0;
+}
+
+
+###############################################################################
+# @brief Call the main starting function, ffdcExpanderMain, the beginning point
+#        of this script
+#
+# @return 0 if successful, not 0 if a failure occurred
+###############################################################################
+
+ffdcExpanderMain $*
+exit $?;
+
