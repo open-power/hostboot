@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -559,7 +559,7 @@ class mcbistTraits<mss::mc_type::NIMBUS, fapi2::TARGET_TYPE_MCBIST>
             MCB_WAT_DEBUG_ATTN_MASK = MCB_WAT_DEBUG_ATTN,
 
             //XLT address valid offset
-            XLT0_SLOT1_D_VALUE     = MCS_PORT13_MCP0XLT0_SLOT1_D_VALUE,
+            XLT0_SLOT1_D_VALID     = MCS_PORT13_MCP0XLT0_SLOT1_VALID,
             XLT0_SLOT0_M1_VALID    = MCS_PORT13_MCP0XLT0_SLOT0_M1_VALID,
             XLT0_SLOT0_M0_VALID    = MCS_PORT13_MCP0XLT0_SLOT0_M0_VALID,
             XLT0_SLOT0_S2_VALID    = MCS_PORT13_MCP0XLT0_SLOT0_S2_VALID,
