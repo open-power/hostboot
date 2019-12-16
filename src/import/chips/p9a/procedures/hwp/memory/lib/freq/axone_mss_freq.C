@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -104,10 +104,13 @@ fapi_try_exit:
 ///
 template<>
 fapi2::ReturnCode set_freq<mss::proc_type::AXONE>(
-    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint64_t i_freq)
 {
-    FAPI_TRY( mss::attr::set_freq(i_target, i_freq) );
+    for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+    {
+        FAPI_TRY( mss::attr::set_freq(l_port, i_freq) );
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -191,7 +194,7 @@ fapi_try_exit:
 ///
 template<>
 fapi2::ReturnCode callout_bad_freq_calculated<mss::proc_type::AXONE>(
-    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint64_t i_final_freq)
 {
     using TT = mss::frequency_traits<mss::proc_type::AXONE>;
@@ -265,8 +268,6 @@ fapi2::ReturnCode check_freq_support_vpd<mss::proc_type::AXONE>( const fapi2::Ta
 
     FAPI_TRY(convert_ddr_freq_to_omi_freq(i_target, i_proposed_freq, l_omi_freq));
     l_vpd_info.iv_omi_freq_mhz = l_omi_freq;
-    FAPI_INF("Setting VPD info OMI frequency: %d Gbps, for DDR frequency %d MT/s",
-             l_vpd_info.iv_omi_freq_mhz, i_proposed_freq);
 
     // DDIMM SPD can contain different SI settings for each master rank.
     // To determine which frequencies are supported, we have to check for each valid
@@ -287,12 +288,10 @@ fapi2::ReturnCode check_freq_support_vpd<mss::proc_type::AXONE>( const fapi2::Ta
         }
 
         l_vpd_info.iv_rank = l_rank.get_dimm_rank();
-        FAPI_INF("%s. VPD info - checking rank: %d",
-                 mss::c_str(i_target), l_rank.get_dimm_rank());
 
         // Check if this VPD configuration is supported
         FAPI_TRY(is_vpd_config_supported<mss::proc_type::AXONE>(l_vpd_target, i_proposed_freq, l_vpd_info, o_supported),
-                 "%s failed to determine if %u freq is supported", mss::c_str(i_target), i_proposed_freq);
+                 "%s failed to determine if %u freq is supported on rank %d", mss::c_str(i_target), i_proposed_freq, l_vpd_info.iv_rank);
 
         // If we fail any of the ranks, then this VPD configuration is not supported
         if(o_supported == false)
@@ -307,29 +306,34 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Update supported frequency scoreboard according to processor limits - specialization for Axone and MEM_PORT
+/// @brief Update supported frequency scoreboard according to processor limits - specialization for Axone and PROC_CHIP
 /// @param[in] i_target processor frequency domain
 /// @param[in,out] io_scoreboard scoreboard of port targets supporting each frequency
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
 fapi2::ReturnCode limit_freq_by_processor<mss::proc_type::AXONE>(
-    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     freq_scoreboard& io_scoreboard)
 {
-    std::vector<uint64_t> l_converted_omi_freqs;
-
     // OCMB always needs to be in sync between OMI and DDR, by the given ratio
     // so we convert the supported OMI freqs and remove every other DDR freq
     // from the scoreboard
-    for (const auto l_omi_freq : AXONE_OMI_FREQS)
+    for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
-        uint64_t l_ddr_freq = 0;
-        FAPI_TRY(convert_omi_freq_to_ddr_freq(i_target, l_omi_freq, l_ddr_freq));
-        l_converted_omi_freqs.push_back(l_ddr_freq);
-    }
+        const auto l_port_pos = mss::relative_pos<fapi2::TARGET_TYPE_PROC_CHIP>(l_port);
 
-    FAPI_TRY(io_scoreboard.remove_freqs_not_on_list(0, l_converted_omi_freqs));
+        std::vector<uint64_t> l_converted_omi_freqs;
+
+        for (const auto l_omi_freq : AXONE_OMI_FREQS)
+        {
+            uint64_t l_ddr_freq = 0;
+            FAPI_TRY(convert_omi_freq_to_ddr_freq(l_port, l_omi_freq, l_ddr_freq));
+            l_converted_omi_freqs.push_back(l_ddr_freq);
+        }
+
+        FAPI_TRY(io_scoreboard.remove_freqs_not_on_list(l_port_pos, l_converted_omi_freqs));
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -353,12 +357,12 @@ fapi2::ReturnCode num_master_ranks_per_dimm<mss::proc_type::AXONE>(
 /// @brief Calls out the target if no DIMM frequencies are supported - specialization for Axone and MEM_PORT
 /// @param[in] i_target target on which to operate
 /// @param[in] i_supported_freq true if any FREQ's are supported
-/// @param[in,out] i_num_ports number of configured ports (always 1 for Axone)
+/// @param[in,out] i_num_ports number of configured ports
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
 fapi2::ReturnCode callout_no_common_freq<mss::proc_type::AXONE>(
-    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const bool i_supported_freq,
     const uint64_t i_num_ports)
 {
@@ -387,7 +391,7 @@ fapi_try_exit:
 ///
 template<>
 fapi2::ReturnCode callout_max_freq_empty_set<mss::proc_type::AXONE>(
-    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const std::vector<std::vector<uint32_t>>& i_vpd_supported_freqs)
 {
 
@@ -402,21 +406,26 @@ fapi2::ReturnCode callout_max_freq_empty_set<mss::proc_type::AXONE>(
     uint32_t l_max_mrw_freqs[NUM_MAX_FREQS] = {0};
     FAPI_TRY( mss::attr::get_max_allowed_dimm_freq(l_max_mrw_freqs) );
 
-    FAPI_ASSERT(false,
-                fapi2::P9A_MSS_MRW_FREQ_MAX_FREQ_EMPTY_SET()
-                .set_MSS_VPD_FREQ_0(l_port_vpd_max_freq[0])
-                .set_MSS_VPD_FREQ_1(l_port_vpd_max_freq[1])
-                .set_MSS_VPD_FREQ_2(l_port_vpd_max_freq[2])
-                .set_MSS_MAX_FREQ_0(l_max_mrw_freqs[0])
-                .set_MSS_MAX_FREQ_1(l_max_mrw_freqs[1])
-                .set_MSS_MAX_FREQ_2(l_max_mrw_freqs[2])
-                .set_MSS_MAX_FREQ_3(l_max_mrw_freqs[3])
-                .set_MSS_MAX_FREQ_4(l_max_mrw_freqs[4])
-                .set_OMI_FREQ_0(fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY_SERDES_21_33GBPS)
-                .set_OMI_FREQ_1(fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY_SERDES_23_46GBPS)
-                .set_OMI_FREQ_2(fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY_SERDES_25_60GBPS)
-                .set_PORT_TARGET(i_target),
-                "%s didn't find a supported frequency for the port", mss::c_str(i_target));
+    for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+    {
+        FAPI_ASSERT_NOEXIT(false,
+                           fapi2::P9A_MSS_MRW_FREQ_MAX_FREQ_EMPTY_SET()
+                           .set_MSS_VPD_FREQ_0(l_port_vpd_max_freq[0])
+                           .set_MSS_VPD_FREQ_1(l_port_vpd_max_freq[1])
+                           .set_MSS_VPD_FREQ_2(l_port_vpd_max_freq[2])
+                           .set_MSS_MAX_FREQ_0(l_max_mrw_freqs[0])
+                           .set_MSS_MAX_FREQ_1(l_max_mrw_freqs[1])
+                           .set_MSS_MAX_FREQ_2(l_max_mrw_freqs[2])
+                           .set_MSS_MAX_FREQ_3(l_max_mrw_freqs[3])
+                           .set_MSS_MAX_FREQ_4(l_max_mrw_freqs[4])
+                           .set_OMI_FREQ_0(fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY_SERDES_21_33GBPS)
+                           .set_OMI_FREQ_1(fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY_SERDES_23_46GBPS)
+                           .set_OMI_FREQ_2(fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY_SERDES_25_60GBPS)
+                           .set_TARGET(l_port),
+                           "%s didn't find a supported frequency for any ports in this domain", mss::c_str(l_port));
+    }
+
+    return fapi2::RC_P9A_MSS_MRW_FREQ_MAX_FREQ_EMPTY_SET;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -425,14 +434,14 @@ namespace check
 {
 
 ///
-/// @brief Checks the final frequency for the system type - Axone and MEM_PORT specialization
+/// @brief Checks the final frequency for the system type - Axone and PROC_CHIP specialization
 /// @param[in] i_target the target on which to operate
 /// @return FAPI2_RC_SUCCESS iff okay
 /// @note This function was needed in Nimbus to enforce a frequency limit due to a hardware limitation
 ///       and is not needed here.
 ///
 template<>
-fapi2::ReturnCode final_freq<mss::proc_type::AXONE>(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+fapi2::ReturnCode final_freq<mss::proc_type::AXONE>(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     return fapi2::FAPI2_RC_SUCCESS;
 }

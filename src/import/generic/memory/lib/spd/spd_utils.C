@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -113,7 +113,7 @@ fapi2::ReturnCode get_timebases( const mss::spd::facade& i_spd_decoder,
                  "Could not find a mapped value that matched the key (%d) for %s",
                  l_spd_ftb, spd::c_str(l_target) );
 
-    FAPI_INF("MTB: %d, FTB: %d for %s", o_mtb, o_ftb, spd::c_str(l_target));
+    FAPI_DBG("MTB: %d, FTB: %d for %s", o_mtb, o_ftb, spd::c_str(l_target));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -162,7 +162,7 @@ fapi2::ReturnCode get_tckmin( const mss::spd::facade& i_spd_decoder,
 
     o_value = l_temp;
 
-    FAPI_INF("%s. tCKmin (ps): %d",
+    FAPI_DBG("%s. tCKmin (ps): %d",
              spd::c_str(l_target),
              o_value );
 
@@ -213,7 +213,7 @@ fapi2::ReturnCode get_tckmax( const mss::spd::facade& i_spd_decoder,
 
     o_value = l_temp;
 
-    FAPI_INF( "%s. tCKmax (ps): %d",
+    FAPI_DBG( "%s. tCKmax (ps): %d",
               spd::c_str(l_target),
               o_value);
 

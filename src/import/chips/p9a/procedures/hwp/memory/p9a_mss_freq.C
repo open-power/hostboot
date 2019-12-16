@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,37 +54,42 @@
 /// @param[in] i_target port target
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode p9a_mss_freq( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target )
+fapi2::ReturnCode p9a_mss_freq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target )
 {
     mss::display_git_commit_info("p9a_mss_freq");
 
     // If there are no DIMM, we can just get out.
-    if (mss::count_dimm(i_target) == 0)
+    if (mss::count_dimm(mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target)) == 0)
     {
         FAPI_INF("Seeing no DIMM on %s, no freq to set", mss::c_str(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
     // We will first set pre-eff_config attribes
-    for(const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+    // Note that we have to go through the MEM_PORT to get to the DIMM targets because of the
+    // target hierarchy in Axone
+    for(const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
-        std::vector<uint8_t> l_raw_spd;
-        FAPI_TRY(mss::spd::get_raw_data(d, l_raw_spd));
+        for(const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(p))
         {
-            // Gets the SPD facade
-            fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
-            mss::spd::facade l_spd_decoder(d, l_raw_spd, l_rc);
+            std::vector<uint8_t> l_raw_spd;
+            FAPI_TRY(mss::spd::get_raw_data(d, l_raw_spd));
+            {
+                // Gets the SPD facade
+                fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
+                mss::spd::facade l_spd_decoder(d, l_raw_spd, l_rc);
 
-            // Checks that the facade was setup correctly
-            FAPI_TRY( l_rc, "Failed to initialize SPD facade for %s", mss::spd::c_str(d) );
+                // Checks that the facade was setup correctly
+                FAPI_TRY( l_rc, "Failed to initialize SPD facade for %s", mss::spd::c_str(d) );
 
-            // Set pre-eff_config SPD driven attributes
-            FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::AXONE, mss::pre_data_init_fields>::set(l_spd_decoder)),
-                      "Failed gen::attr_engine<mss::proc_type::AXONE, mss::pre_data_init_fields>::set on %s", mss::spd::c_str(d) );
+                // Set pre-eff_config SPD driven attributes
+                FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::AXONE, mss::pre_data_init_fields>::set(l_spd_decoder)),
+                          "Failed gen::attr_engine<mss::proc_type::AXONE, mss::pre_data_init_fields>::set on %s", mss::spd::c_str(d) );
 
-            // Set pre_eff_config attributes derived from other attributes
-            FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::AXONE, mss::generic_metadata_fields>::set(d)),
-                      "Failed gen::attr_engine<mss::proc_type::AXONE, mss::generic_metadata_fields>::set on %s", mss::spd::c_str(d) );
+                // Set pre_eff_config attributes derived from other attributes
+                FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::AXONE, mss::generic_metadata_fields>::set(d)),
+                          "Failed gen::attr_engine<mss::proc_type::AXONE, mss::generic_metadata_fields>::set on %s", mss::spd::c_str(d) );
+            }
         }
 
     }

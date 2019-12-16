@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,8 +66,6 @@ extern "C"
 
         // Get OMI freq
         FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, i_target, l_omi_freq) );
-
-        FAPI_INF("Retrieved omi freq %d", l_omi_freq);
 
         // Populate dimm speed map
         FAPI_TRY( mss::dimm_speed_map(l_ports, l_freq_map, l_equal_dimm_speed),

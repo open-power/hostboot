@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -571,7 +571,7 @@ class cas_latency
                         l_temp);
 
             o_value = l_temp;
-            FAPI_INF( "%s. tAAmin (ps): %d",
+            FAPI_DBG( "%s. tAAmin (ps): %d",
                       mss::spd::c_str(l_target),
                       o_value);
 
@@ -628,7 +628,7 @@ class cas_latency
         {
             FAPI_TRY( spd::calc_nck(i_taa, i_tck, spd::INVERSE_DDR4_CORRECTION_FACTOR, o_cas_latency) );
 
-            FAPI_INF("%s. tAA (ps): %d, tCK (ps): %d, CL (nck): %d",
+            FAPI_DBG("%s. tAA (ps): %d, tCK (ps): %d, CL (nck): %d",
                      mss::spd::c_str(iv_target),
                      i_taa,
                      i_tck,
@@ -651,8 +651,8 @@ class cas_latency
             const uint64_t l_min_cl = get_min_cl(l_cl_mask);
             const uint64_t l_max_cl = get_max_cl(l_cl_mask);
 
-            FAPI_INF("%s. min CL %lu", mss::spd::c_str(iv_target), l_min_cl);
-            FAPI_INF("%s. max CL %lu", mss::spd::c_str(iv_target), l_max_cl);
+            FAPI_DBG("%s. min CL %lu", mss::spd::c_str(iv_target), l_min_cl);
+            FAPI_DBG("%s. max CL %lu", mss::spd::c_str(iv_target), l_max_cl);
 
             for(uint64_t l_cas_latency = l_min_cl; l_cas_latency <= l_max_cl; ++l_cas_latency)
             {
@@ -688,7 +688,7 @@ class cas_latency
         {
             const bool l_found = std::binary_search(i_common_cls.begin(), i_common_cls.end(), i_cas_latency);
 
-            FAPI_INF("Found CL: %d in common CL mask: 0x%llX ? %s for %s",
+            FAPI_DBG("Found CL: %d in common CL mask: 0x%llX ? %s for %s",
                      i_cas_latency, iv_common_cl_bitmap, l_found ? "yes" : "no", mss::spd::c_str(iv_target));
 
             return l_found;
@@ -709,7 +709,7 @@ class cas_latency
             const size_t l_taa_max = (iv_is_3ds == loading::NOT_3DS) ? TAA_MAX_DDR4 : TAA_MAX_DDR4_3DS;
             const bool l_is_cl_exceeding_taa = l_cas_latency_time > l_taa_max;
 
-            FAPI_INF("%s. CL (%d) * tCK (%d) = %d > %d ? %s",
+            FAPI_DBG("%s. CL (%d) * tCK (%d) = %d > %d ? %s",
                      mss::spd::c_str(iv_target),
                      i_cas_latency,
                      i_tck,
@@ -758,7 +758,7 @@ class cas_latency
             FAPI_TRY( freq_to_ps(l_proposed_freq, io_tck),
                       "%s. Failed freq_to_ps()", mss::spd::c_str(iv_target) );
 
-            FAPI_INF("%s Supported dimm speed override %d MT/s (Clock period %d in ps)",
+            FAPI_DBG("%s Supported dimm speed override %d MT/s (Clock period %d in ps)",
                      mss::spd::c_str(iv_target), l_proposed_freq, io_tck);
 
             // Sanity check

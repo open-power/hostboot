@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,7 +55,6 @@ inline size_t count_dimm(const fapi2::Target<T>& i_target)
     // in the case of an over-ride and there are no DIMM in the config, we want to let
     // people know. Which is how we found we needed to add this code ...
     size_t l_dimm_count = find_targets<fapi2::TARGET_TYPE_DIMM>(i_target).size();
-    FAPI_INF("%d DIMM on %s", l_dimm_count, mss::c_str(i_target));
     return l_dimm_count;
 }
 

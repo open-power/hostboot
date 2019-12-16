@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -114,8 +114,6 @@ inline fapi2::ReturnCode setup_voltage_rail_values(const fapi2::Target<TT::SPD_T
 
     FAPI_TRY( (mss::set_voltage_attributes<M, D>(l_voltage_target, l_dram_voltages)),
               "Failed to set volt attributes for %s", mss::c_str(l_voltage_target) );
-
-    FAPI_INF("%s End setup_voltage_rail_values", mss::c_str(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;

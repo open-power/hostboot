@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -175,10 +175,8 @@ extern "C"
             {
                 //Set runtime throttles to worst case between ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT
                 //and ATTR_EXP_MEM_RUNTIME_THROTTLED_N_COMMANDS_PER_SLOT and the _PORT equivalents also
-                FAPI_INF("Starting update");
                 FAPI_TRY( mss::power_thermal::update_runtime_throttle(l_ocmb), "Error in exp_mss_eff_config_thermal for %d",
                           mss::c_str(l_ocmb));
-                FAPI_INF("finished update");
             }
         }
 

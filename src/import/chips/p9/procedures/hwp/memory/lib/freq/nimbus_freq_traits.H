@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,6 +57,7 @@ class frequency_traits<mss::proc_type::NIMBUS>
         //////////////////////////////////////////////////////////////
         static constexpr fapi2::TargetType PORT_TARGET_TYPE = fapi2::TARGET_TYPE_MCA;
         static constexpr fapi2::TargetType FREQ_TARGET_TYPE = fapi2::TARGET_TYPE_MCBIST;
+        static constexpr fapi2::TargetType FREQ_DOMAIN_TARGET_TYPE = fapi2::TARGET_TYPE_MCBIST;
         static constexpr fapi2::TargetType VPD_TARGET_TYPE = fapi2::TARGET_TYPE_MCS;
 
         //////////////////////////////////////////////////////////////

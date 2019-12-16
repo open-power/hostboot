@@ -591,8 +591,6 @@ fapi2::ReturnCode throttle<MC, TT>::power_regulator_throttles ()
     double  l_databus_dimm_max[TT::DIMMS_PER_PORT] = {};
     double  l_calc_databus_port_idle[TT::DIMMS_PER_PORT] = {TT::IDLE_UTIL, TT::IDLE_UTIL};
 
-    FAPI_INF("Starting power regulator throttles for %s", mss::c_str(iv_target));
-
     //Decide utilization for each dimm based off of dimm count and power slopes
     FAPI_TRY( calc_databus(iv_databus_port_max, l_databus_dimm_max),
               "Failed to calculate each DIMMs' percentage of dram databus utilization for target %s, max port databus is %d",
@@ -1072,7 +1070,7 @@ fapi2::ReturnCode throttle<MC, TT>::calc_split_util(
     //assumptions slot <= port, l_count_dimms <=2
     if (i_util_slot * l_count_dimms > i_util_port)
     {
-        FAPI_INF("In mss::power_thermal::calc_split i_util_slot is %f, i_util_port is %f, l_count_dimms is %d for %s",
+        FAPI_INF("i_util_slot is %f, i_util_port is %f, l_count_dimms is %d for %s",
                  i_util_slot,
                  i_util_port,
                  l_count_dimms,

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -80,7 +80,7 @@
     </callout>
      <callout>
       <childTargets>
-          <parent>PORT_TARGET</parent>
+          <parent>TARGET</parent>
           <childType>TARGET_TYPE_DIMM</childType>
       </childTargets>
       <priority>MEDIUM</priority>

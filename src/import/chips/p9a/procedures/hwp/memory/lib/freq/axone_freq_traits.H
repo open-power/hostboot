@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,14 +56,15 @@ class frequency_traits<mss::proc_type::AXONE>
         //////////////////////////////////////////////////////////////
         static constexpr fapi2::TargetType PORT_TARGET_TYPE = fapi2::TARGET_TYPE_MEM_PORT;
         static constexpr fapi2::TargetType FREQ_TARGET_TYPE = fapi2::TARGET_TYPE_MEM_PORT;
+        static constexpr fapi2::TargetType FREQ_DOMAIN_TARGET_TYPE = fapi2::TARGET_TYPE_PROC_CHIP;
         static constexpr fapi2::TargetType VPD_TARGET_TYPE = fapi2::TARGET_TYPE_OCMB_CHIP;
 
         //////////////////////////////////////////////////////////////
         // Traits values
         //////////////////////////////////////////////////////////////
         static const std::vector<uint64_t> SUPPORTED_FREQS;
-        // MEM_PORT is our frequency domain. So 1 port per domain
-        static constexpr uint64_t PORTS_PER_FREQ_DOMAIN = 1;
+        // PROC_CHIP is our frequency domain
+        static constexpr uint64_t PORTS_PER_FREQ_DOMAIN = 16;
         // Max DIMM's per port
         static constexpr uint64_t MAX_DIMM_PER_PORT = 2;
         // Maxium number of primary ranks on a DIMM
