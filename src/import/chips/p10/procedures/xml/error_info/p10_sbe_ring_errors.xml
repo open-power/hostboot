@@ -143,4 +143,10 @@
    <ffdc>EXPECTED_RING_ID</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
+
+  <hwpError>
+  <rc>RC_ROTATE_OP_FAILED</rc>
+  <description>Rotate operation timed out during scanning</description>
+  </hwpError>
+
 </hwpErrors>
