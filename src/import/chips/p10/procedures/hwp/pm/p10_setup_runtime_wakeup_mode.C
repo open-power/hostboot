@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,11 +36,7 @@
 #include <p10_setup_runtime_wakeup_mode.H>
 #include <p10_scom_eq_c.H>
 #include <multicast_group_defs.H>
-
-enum
-{
-    SELF_SAVE_RESTORE_WAKEUP_MODE_BIT_POS   =   10,
-};
+#include <p10_pm_hcd_flags.h>
 
 void testWakeUpMode( uint32_t i_qmeFlag, fapi2::buffer<uint64_t> i_wakeupMode )
 {
@@ -57,6 +53,7 @@ fapi2::ReturnCode p10_setup_runtime_wakeup_mode(
     uint32_t l_qmeFlagReggAddr  =   scomt::eq::QME_FLAGS_WO_OR;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
+// TODO:  why only SIM?
 #ifndef __SIM_ENV
     auto l_eq_mc_or             =   i_procTarget.getMulticast<fapi2::TARGET_TYPE_EQ,
          fapi2::MULTICAST_OR >(fapi2::MCGROUP_GOOD_EQ);
@@ -69,15 +66,23 @@ fapi2::ReturnCode p10_setup_runtime_wakeup_mode(
                            l_smfConfig),
              "Error from FAPI_ATTR_GET for attribute ATTR_SMF_CONFIG ");
 
-    FAPI_DBG("SMF Status : %s", l_smfConfig ? "Enabled" : "Disabled" );
+    FAPI_INF("SMF Status : %s", l_smfConfig ? "Enabled" : "Disabled" );
 
-    l_wakeupMode.setBit( SELF_SAVE_RESTORE_WAKEUP_MODE_BIT_POS );
+    l_wakeupMode.setBit( p10hcd::QME_FLAGS_RUNTIME_WAKEUP_MODE );
+    l_wakeupMode.setBit( p10hcd::QME_FLAGS_HV_COMPATIBILTY_MODE );
 
     if( l_smfConfig )
     {
-        //wakeup to HV mode
+        //Wakeup in Ultravisor mode
         l_qmeFlagReggAddr   =   scomt::eq::QME_FLAGS_WO_CLEAR;
     }
+    else
+    {
+        //Wakeup in Hypervisor mode
+        l_qmeFlagReggAddr   =   scomt::eq::QME_FLAGS_WO_OR;
+    }
+
+
 
 #ifdef __SIM_ENV
 

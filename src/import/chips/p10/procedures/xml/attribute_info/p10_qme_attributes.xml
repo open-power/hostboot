@@ -58,7 +58,7 @@
   </entry>
   <entry>
            <name>ATTR_PROC_FABRIC_SL_DOMAIN</name>
-           <value>0x0</value>
+           <value>0x0</value>q
   </entry>
   <!-- needed from pm_hwp_attributes_xml for core/cache_scominit -->
   <entry>
@@ -80,6 +80,10 @@
   </entry>
   <entry>
           <name>ATTR_RUNN_MODE</name>
+          <value>0x0</value>
+  </entry>
+  <entry>
+          <name>ATTR_SMF_CONFIG</name>
           <value>0x0</value>
   </entry>
   <!-- needed for qme sim -->

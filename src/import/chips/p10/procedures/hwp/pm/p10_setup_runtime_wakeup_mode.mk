@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019
+# Contributors Listed Below - COPYRIGHT 2019,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -23,6 +23,6 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE = p10_setup_runtime_wakeup_mode
-HWP_INC=$(ROOTPATH)/chips/p10/common/include/
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(HWP_INC))
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(PROJECT_ROOT)/chips/p10/procedures/hwp/lib)
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOT_PATH)/chips/p10/common/include/)
 $(call BUILD_PROCEDURE)

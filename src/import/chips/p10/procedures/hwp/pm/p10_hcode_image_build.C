@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1202,7 +1202,7 @@ fapi2::ReturnCode buildQmeHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   *
     QmeHeader_t* pImgHdr        =
             (QmeHeader_t*) & i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion[QME_INT_VECTOR_SIZE];
     ImgSectnSumm    l_imgSectn;
-    uint64_t l_cpmrPhyAdd       =   0;
+    uint64_t l_cpmrPhyAddr      =   0;
     uint32_t l_tempWord         =   0;
 
     if( !i_qmeBuildRecord.getSection( "QME Hcode", l_imgSectn ) )
@@ -1212,12 +1212,19 @@ fapi2::ReturnCode buildQmeHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   *
         l_tempWord                      =    l_imgSectn.iv_sectnOffset;
     }
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HOMER_PHYS_ADDR, i_procTgt, l_cpmrPhyAdd ),
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HOMER_PHYS_ADDR, i_procTgt, l_cpmrPhyAddr ),
              "Error From FAPI_ATTR_GET For ATTR_HOMER_PHYS_ADDR");
 
-    FAPI_DBG("HOMER base address 0x%016lX", l_cpmrPhyAdd );
+    FAPI_DBG("HOMER base address 0x%016lX", l_cpmrPhyAddr );
 
-    pImgHdr->g_qme_cpmr_PhyAddr        =   htobe64(l_cpmrPhyAdd);
+    pImgHdr->g_qme_cpmr_PhyAddr        =   htobe64(l_cpmrPhyAddr);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_UNSECURE_HOMER_ADDRESS, i_procTgt, l_cpmrPhyAddr ),
+             "Error From FAPI_ATTR_GET For ATTR_UNSECURE_HOMER_ADDRESS");
+
+    FAPI_DBG("Unsecure CPMR address 0x%016lX", l_cpmrPhyAddr );
+
+    pImgHdr->g_qme_unsec_cpmr_PhyAddr  =   htobe64(l_cpmrPhyAddr);
 
     if( !i_qmeBuildRecord.getSection( "QME Common Ring", l_imgSectn ) )
     {
