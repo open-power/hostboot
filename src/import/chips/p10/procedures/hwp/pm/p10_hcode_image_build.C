@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1228,7 +1228,8 @@ fapi2::ReturnCode buildQmeHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   *
     if( !i_qmeBuildRecord.getSection( "QME Inst Sectn", l_imgSectn ) )
     {
         pImgHdr->g_qme_inst_spec_ring_offset    =
-                    pImgHdr->g_qme_common_ring_offset + pImgHdr->g_qme_common_ring_length;
+                    ( pImgHdr->g_qme_common_ring_offset + pImgHdr->g_qme_common_ring_length );
+        pImgHdr->g_qme_inst_spec_ring_offset    =    ((( pImgHdr->g_qme_inst_spec_ring_offset  + 31 )/32) * 32);
         pImgHdr->g_qme_max_spec_ring_length     =   l_imgSectn.iv_sectnLength;
     }
 
@@ -1237,6 +1238,14 @@ fapi2::ReturnCode buildQmeHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   *
    pImgHdr->g_qme_common_ring_length    =   htobe32(pImgHdr->g_qme_common_ring_length);
    pImgHdr->g_qme_inst_spec_ring_offset =   htobe32(pImgHdr->g_qme_inst_spec_ring_offset);
    pImgHdr->g_qme_max_spec_ring_length  =   htobe32(pImgHdr->g_qme_max_spec_ring_length);
+
+   FAPI_DBG( "===================== QME Ring Header ============================== " );
+   FAPI_DBG( "Common Ring Offset        0x%08x" , htobe32(pImgHdr->g_qme_common_ring_offset));
+   FAPI_DBG( "Common Ring Length        0x%08x" , htobe32(pImgHdr->g_qme_common_ring_length));
+   FAPI_DBG( "Instance Ring Offset      0x%08x" , htobe32(pImgHdr->g_qme_inst_spec_ring_offset));
+   FAPI_DBG( "Instance Ring Length      0x%08x" , htobe32(pImgHdr->g_qme_max_spec_ring_length));
+
+   FAPI_DBG( "===================== QME Ring Header Ends ========================= " );
 #endif
 
    fapi_try_exit:
@@ -1403,6 +1412,7 @@ fapi2::ReturnCode initCpmrAttribute( Homerlayout_t   *i_pChipHomer,
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::ATTR_QME_HCODE_OFFSET_Type l_qmeHcodeOffset;
     fapi2::ATTR_QME_HCODE_BLOCK_COUNT_Type l_blockCount;
+    uint32_t l_tempCount    =   0;
 
     CpmrHeader_t* pCpmrHdr =
         (CpmrHeader_t*) & ( i_pChipHomer->iv_cpmrRegion.iv_selfRestoreRegion.iv_CPMR_SR.elements.iv_CPMRHeader);
@@ -1415,12 +1425,20 @@ fapi2::ReturnCode initCpmrAttribute( Homerlayout_t   *i_pChipHomer,
 
 
     i_qmeBuildRecord.getSection( "QME Hcode", l_imgSectn );
+    l_tempCount     =   l_imgSectn.iv_sectnLength;
+    i_qmeBuildRecord.getSection( "QME Common Ring", l_imgSectn );
+    l_tempCount    +=   l_imgSectn.iv_sectnLength;
+    i_qmeBuildRecord.getSection( "QME Inst Sectn", l_imgSectn );
+    l_tempCount    +=   l_imgSectn.iv_sectnLength;
 
-    l_blockCount = l_imgSectn.iv_sectnLength >> QME_BLK_SIZE_SHIFT;
+    l_blockCount    = l_tempCount >> QME_BLK_SIZE_SHIFT;
+
     FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_QME_HCODE_BLOCK_COUNT,
                             FAPI_SYSTEM,
                             l_blockCount),
               "Failed To Set ATTR_QME_HCODE_BLOCK_COUNT");
+
+    FAPI_DBG( "QME Image Block Count 0x%08x", l_blockCount );
 
 fapi_try_exit:
     return fapi2::current_err;

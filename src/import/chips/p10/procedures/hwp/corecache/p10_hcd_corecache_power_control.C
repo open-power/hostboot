@@ -62,6 +62,12 @@ enum P10_HCD_CORECACHE_POWER_CONTROL_CONSTANTS
     HCD_CORECACHE_POW_CTRL_POLL_DELAY_SIM_CYCLE = 32000,   // 32k sim cycle delay
 };
 
+const uint32_t HCD_PFET_FORCES[2] =
+{
+    (BIT32(4) | BITS32(12, 8)),   // VDD force on
+    (BIT32(6) | BITS32(24, 8))    // VCS force on
+};
+
 const uint32_t HCD_PFET_OVERRIDES[2] =
 {
     BITS32(4, 2),                 //VDD.val/sel
@@ -225,6 +231,15 @@ p10_hcd_corecache_power_control(
 
         MMIO_EXTRACT(0, 4, l_pfet_seq_states);
         FAPI_DBG("Current PFET Sequencer State is %x, clear value is %x", l_pfet_seq_states, HCD_PFET_SEQ_STATES[1][l_isVCS]);
+
+        if (l_isON)
+        {
+            FAPI_DBG("Force PFETs");
+            FAPI_TRY( HCD_PUTMMIO_C( i_target, HCD_CPMS_PFETCNTL_OR[l_isL3],
+                                     MMIO_LOAD32H( HCD_PFET_FORCES[l_isVCS] ) ) );
+
+            FAPI_TRY( HCD_GETMMIO_C( i_target, HCD_CPMS_PFETSTAT[l_isL3], l_mmioData ) );
+        }
 
         if (l_isL3 == 2) // if MMA only perform VDD
         {
