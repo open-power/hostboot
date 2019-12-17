@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -86,5 +86,16 @@ void termModifySRC(uint8_t i_moduleID,
  *  @return Nothing
  */
 void termSetHbDump(void);
+
+/** @fn termSetIstep
+ *
+ *  @brief Set istep into progress code word of the SRC.
+ *
+ *  @param[in] i_istep: Encoded istep value
+ *  @param[out] NONE:
+ *
+ *  @return Nothing
+ */
+void termSetIstep(uint32_t i_istep);
 
 #endif

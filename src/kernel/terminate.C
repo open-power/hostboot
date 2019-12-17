@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -128,4 +128,13 @@ void termSetHbDump(void)
 
     return;
 }
+
+void termSetIstep(uint32_t i_istep)
+{
+    // Set istep into progress code word of the SRC
+    kernel_TIDataArea.src.SRCword4 = i_istep;
+    return;
+}
+
+
 #endif // BOOTLOADER
