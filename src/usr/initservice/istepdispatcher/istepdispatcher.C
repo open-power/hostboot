@@ -93,6 +93,7 @@
 #include <p9_perv_scom_addresses.H>
 // ---------------------------
 #include <initservice/extinitserviceif.H>
+#include <kernel/terminate.H>
 
 
 namespace ISTEPS_TRACE
@@ -2506,6 +2507,9 @@ errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
     l_scratch5.minorStep = iv_curSubStep;
     Util::writeScratchReg( SPLESS::MBOX_SCRATCH_REG5,
                            l_scratch5.data32 );
+
+    //--- Push the scratch reg into kernel to be added into TI area
+    termSetIstep(l_scratch5.data32);
 
 #ifdef CONFIG_ISTEP_LPC_PORT80_DEBUG
     // Starting port 80h value for hostboot isteps.  Each step started will
