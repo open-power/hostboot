@@ -133,12 +133,16 @@ simics_setup()
 
 }
 
+hash_file ()
+{
+    # sha1sum prints out the filename in the second column, which we don't want
+    sha1sum "$1" 2>/dev/null | awk '{print $1}'
+}
+
 # Function that will take HB's bootloader image (hbbl.bin), copy it to the PPE
 # repo, and build repo to generate ECC enabled SBE image
 generate_sbe_image()
 {
-
-    echo -e "\n\nGenerating SBE image..."
     PPE_DIR=${PROJECT_ROOT}/src/build/tools/extern/ppe
 
     if [[ ! -f ${PPE_DIR}/Makefile ]];then
@@ -147,38 +151,59 @@ generate_sbe_image()
         exit 1
     fi
 
-    cp ${PROJECT_ROOT}/standalone/pnor/hbbl.bin ${PPE_DIR}/src/tools/debug/hbbl.bin
-    cd ${PPE_DIR}
-    ./sb workon<<<'make install $1 && ./sb prime && exit'
-    cp ${PPE_DIR}/simics/import/boot_roms/sbe_seeprom_p10.bin.ecc \
-    ${PROJECT_ROOT}/standalone/simics/sbe_seeprom_p10.bin.ecc
-    cp ${PPE_DIR}/simics/import/boot_roms/sbe_measurement_p10.bin.ecc \
-    ${PROJECT_ROOT}/standalone/simics/sbe_measurement_p10.bin.ecc
-    cd ${PROJECT_ROOT}
+    mkdir -p "$PROJECT_ROOT/standalone/imghash"
+    HBIBL_HASH_FILE="$PROJECT_ROOT/standalone/imghash/hbibl.bin.hash"
+    SBE_SEEPROM_IMG=${PPE_DIR}/simics/import/boot_roms/sbe_seeprom_p10.bin.ecc
+    SBE_MEASUREMENT_IMG=${PPE_DIR}/simics/import/boot_roms/sbe_measurement_p10.bin.ecc
 
+    if ! diff "$HBIBL_HASH_FILE" <(hash_file "$PROJECT_ROOT/img/hbibl.bin") &>/dev/null \
+    || [ ! -f "$SBE_SEEPROM_IMG" ] \
+    || [ ! -f "$SBE_MEASUREMENT_IMG" ]
+    then
+        echo -e "\n\nGenerating SBE image..."
+
+        cp ${PROJECT_ROOT}/standalone/pnor/hbbl.bin ${PPE_DIR}/src/tools/debug/hbbl.bin
+        cd ${PPE_DIR}
+        ./sb workon<<<'make install $1 && ./sb prime && exit'
+        hash_file "$PROJECT_ROOT/img/hbibl.bin" >"$HBIBL_HASH_FILE"
+        cd ${PROJECT_ROOT}
+    else
+        echo 'SBE image is already up to date.'
+    fi
+
+    cp "$SBE_SEEPROM_IMG" ${PROJECT_ROOT}/standalone/simics/sbe_seeprom_p10.bin.ecc
+    cp "$SBE_MEASUREMENT_IMG" ${PROJECT_ROOT}/standalone/simics/sbe_measurement_p10.bin.ecc
 }
 
 # Build the HCODE image inside the EKB repo
 generate_hcode_image()
 {
-    echo -e "\n\nGenerating HCODE image..."
     EKB_DIR=${PROJECT_ROOT}/src/build/tools/extern/ekb
+    HCODE_IMAGE=${EKB_DIR}/output/images/hw_image/p10.hw_image.bin
 
-    if [[ ! -f ${EKB_DIR}/ekb ]];then
-        echo "Could not find ekb script in EKB repo."
-        echo "Please run \"hb prime\" to clone EKB repo."
-        exit 1
-    fi
+    # Only [re]generate the HCODE image if the user hasn't asked us not to or
+    # the HCODE image hasn't been built already.
+    if [[ ! "$HB_SKIP_GEN_HCODE" || ! -f $HCODE_IMAGE ]] ; then
+        echo -e "\n\nGenerating HCODE image..."
 
-    cd ${EKB_DIR}
-    CTEPATH=/afs/awd.austin.ibm.com/projects/cte PROJECT_ROOT=${EKB_DIR} \
-        ./ekb workon<<<'unset HOST_PREFIX && \
+        if [[ ! -f ${EKB_DIR}/ekb ]];then
+            echo "Could not find ekb script in EKB repo."
+            echo "Please run \"hb prime\" to clone EKB repo."
+            exit 1
+        fi
+
+        cd ${EKB_DIR}
+        CTEPATH=/afs/awd.austin.ibm.com/projects/cte PROJECT_ROOT=${EKB_DIR} \
+               ./ekb workon<<<'unset HOST_PREFIX && \
         git submodule update --init chips/p10/engd/p10 && \
         ./ekb build p10.hw_image && \
         exit'
-    cp ${EKB_DIR}/output/images/hw_image/p10.hw_image.bin \
-        ${PROJECT_ROOT}/standalone/staging/p10.hw_image.bin
-    cd ${PROJECT_ROOT}
+        cd ${PROJECT_ROOT}
+    else
+        echo 'Skipping HCODE generating because HB_SKIP_GEN_HCODE is set.'
+    fi
+
+    cp "$HCODE_IMAGE" ${PROJECT_ROOT}/standalone/staging/p10.hw_image.bin
 }
 
 FIRST_PARAM=$1
