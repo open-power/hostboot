@@ -27,7 +27,7 @@ HOSTBOOT_RUNTIME = 1
 # Profiling the runtime makes it too big, but we should revisit this
 # later after we reduce our memory footprint because it would be good
 # to instrument this too.
-HOSTBOOT_PROFILE=
+HOSTBOOT_PROFILE_ARTIFACT=
 
 # FIXME RTC: 210975
 

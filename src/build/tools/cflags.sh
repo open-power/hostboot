@@ -34,7 +34,7 @@
 # find the files. We correct this by converting all paths to source
 # and header files to absolute paths.
 
-if [ ! "$HOSTBOOT_PROFILE" ] ; then
+if [ ! "$HOSTBOOT_PROFILE_ARTIFACT" ] ; then
     echo "$@"
     exit
 fi

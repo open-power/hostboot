@@ -25,7 +25,7 @@
 ROOTPATH = ../..
 
 # Bootloader omitted from profiling to keep size down
-HOSTBOOT_PROFILE=
+HOSTBOOT_PROFILE_ARTIFACT=
 
 EXTRAINCDIR += ${ROOTPATH}/src/usr/pnor/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/lpc/

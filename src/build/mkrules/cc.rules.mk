@@ -39,7 +39,7 @@ $(OBJDIR)/%.list : $(OBJDIR)/%.o
 # don't want to always have absolute paths because of build
 # performance and because it causes the build output with
 # BUILD_VERBOSE to be larger and less readable.
-ifdef HOSTBOOT_PROFILE
+ifdef HOSTBOOT_PROFILE_ARTIFACT
 SOURCE_FILE=$(shell readlink -f $<)
 INCLUDE_DIRS=$(shell $(ROOTPATH)/src/build/tools/cflags.sh $(INCFLAGS))
 INCLUDE_PWD=$(shell readlink -f .)

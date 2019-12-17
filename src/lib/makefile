@@ -55,7 +55,7 @@ OBJS += errno.o
 OBJS += tlsrt.o
 
 # Don't care about instrumenting basic library functions
-HOSTBOOT_PROFILE=
+HOSTBOOT_PROFILE_ARTIFACT=
 
 ifdef HOSTBOOT_MEMORY_LEAKS
 COMMONFLAGS += -DHOSTBOOT_MEMORY_LEAKS=1

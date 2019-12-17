@@ -46,6 +46,9 @@ ifdef HOSTBOOT_RUNTIME
 HOSTBOOT_PROFILE=
 endif
 
+
+ifdef HOSTBOOT_PROFILE
+
 ## We don't want certain modules to be profiled (HBB, HBRT).
 
 # This is replacing spaces with colons so that we can get an exact
@@ -58,19 +61,23 @@ null :=
 MODULE_PROFILE_BLACKLIST:=:$(subst ${null} ${null},:,$(BASE_MODULES_GCOV_BLACKLIST) $(RUNTIME_MODULES_GCOV_BLACKLIST)):
 
 ifneq (,$(findstring :$(MODULE):,$(MODULE_PROFILE_BLACKLIST)))
-HOSTBOOT_PROFILE=
+HOSTBOOT_PROFILE_ARTIFACT=
+else
+HOSTBOOT_PROFILE_ARTIFACT=1
+endif
+
 endif
 
 GCOVNAME := $(MODULE).lcov
 
-ifdef HOSTBOOT_PROFILE
+ifdef HOSTBOOT_PROFILE_ARTIFACT
 OBJS := gcov.o $(filter-out gcov.o,$(OBJS))
 endif
 else
 GCOVNAME := $(notdir $(shell pwd)).lcov
 endif
 
-ifdef HOSTBOOT_PROFILE
+ifdef HOSTBOOT_PROFILE_ARTIFACT
 
 ## Disable coverage on any directory that sets
 ## HOSTBOOT_PROFILE_NO_INSTRUMENT
@@ -81,7 +88,7 @@ endif
 
 endif
 
-ifdef HOSTBOOT_PROFILE
+ifdef HOSTBOOT_PROFILE_ARTIFACT
     PROFILE_FLAGS_FILTER = $(if $(findstring gcov,$(2)),\
                                 $(filter-out --coverage,$(1)),\
                                 $(1))

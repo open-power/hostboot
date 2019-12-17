@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2010,2014
+# Contributors Listed Below - COPYRIGHT 2010,2019
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,9 +31,9 @@ ROOTPATH = ../../..
 # instrumented itself.  This is the directory where code which is unsafe to
 # instrument should go.
 
-ifdef HOSTBOOT_PROFILE
+ifdef HOSTBOOT_PROFILE_ARTIFACT
 OBJS += gcov.o
-HOSTBOOT_PROFILE =
+HOSTBOOT_PROFILE_ARTIFACT =
 endif
 
 OBJS += idletask.o
