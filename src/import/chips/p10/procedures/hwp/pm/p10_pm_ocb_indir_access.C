@@ -95,19 +95,14 @@ fapi2::ReturnCode p10_pm_ocb_indir_access(
     uint64_t l_OCBDR_address   = 0;
     uint64_t l_OCBCSR_address  = 0;
 
-    uint64_t l_OCBSLBR_address = 0;
-    uint64_t l_OCBSLCS_address = 0;
-    uint64_t l_OCBSHBR_address = 0;
     uint64_t l_OCBSHCS_address = 0;
-    uint64_t l_OCBSES_address  = 0;
-    uint64_t l_OCBLWCR_address = 0;
-    uint64_t l_OCBLWSR_address = 0;
-    uint64_t l_OCBESR_address  = 0;
     o_ocb_act_length = 0;
 
     fapi2::buffer<uint64_t> l_data64;
 
     FAPI_DBG("Checking channel validity");
+
+    bool l_push_ok_flag = false;
 
     switch ( i_ocb_chan )
     {
@@ -115,56 +110,28 @@ fapi2::ReturnCode p10_pm_ocb_indir_access(
             l_OCBAR_address   = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBAR0;
             l_OCBDR_address   = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBDR0;
             l_OCBCSR_address  = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBCSR3_RO;
-            l_OCBSLBR_address = TP_TPCHIP_OCC_OCI_OCB_OCBSLBR0;
-            l_OCBSLCS_address = TP_TPCHIP_OCC_OCI_OCB_OCBSLCS0;
-            l_OCBSHBR_address = TP_TPCHIP_OCC_OCI_OCB_OCBSHBR0;
             l_OCBSHCS_address = TP_TPCHIP_OCC_OCI_OCB_OCBSHCS0;
-            l_OCBSES_address  = TP_TPCHIP_OCC_OCI_OCB_OCBSES0;
-            l_OCBLWCR_address = TP_TPCHIP_OCC_OCI_OCB_OCBLWCR0;
-            l_OCBLWSR_address = TP_TPCHIP_OCC_OCI_OCB_OCBLWSR0;
-            l_OCBESR_address  = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBESR0;
             break;
 
         case ocb::OCB_CHAN1:
             l_OCBAR_address   = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBAR1;
             l_OCBDR_address   = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBDR1;
             l_OCBCSR_address  = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBCSR3_RO;
-            l_OCBSLBR_address = TP_TPCHIP_OCC_OCI_OCB_OCBSLBR1;
-            l_OCBSLCS_address = TP_TPCHIP_OCC_OCI_OCB_OCBSLCS1;
-            l_OCBSHBR_address = TP_TPCHIP_OCC_OCI_OCB_OCBSHBR1;
             l_OCBSHCS_address = TP_TPCHIP_OCC_OCI_OCB_OCBSHCS1;
-            l_OCBSES_address  = TP_TPCHIP_OCC_OCI_OCB_OCBSES1;
-            l_OCBLWCR_address = TP_TPCHIP_OCC_OCI_OCB_OCBLWCR1;
-            l_OCBLWSR_address = TP_TPCHIP_OCC_OCI_OCB_OCBLWSR1;
-            l_OCBESR_address  = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBESR1;
             break;
 
         case ocb::OCB_CHAN2:
             l_OCBAR_address   = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBAR2;
             l_OCBDR_address   = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBDR2;
             l_OCBCSR_address  = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBCSR3_RO;
-            l_OCBSLBR_address = TP_TPCHIP_OCC_OCI_OCB_OCBSLBR2;
-            l_OCBSLCS_address = TP_TPCHIP_OCC_OCI_OCB_OCBSLCS2;
-            l_OCBSHBR_address = TP_TPCHIP_OCC_OCI_OCB_OCBSHBR2;
             l_OCBSHCS_address = TP_TPCHIP_OCC_OCI_OCB_OCBSHCS2;
-            l_OCBSES_address  = TP_TPCHIP_OCC_OCI_OCB_OCBSES2;
-            l_OCBLWCR_address = TP_TPCHIP_OCC_OCI_OCB_OCBLWCR2;
-            l_OCBLWSR_address = TP_TPCHIP_OCC_OCI_OCB_OCBLWSR2;
-            l_OCBESR_address  = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBESR2;
             break;
 
         case ocb::OCB_CHAN3:
             l_OCBAR_address   = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBAR3;
             l_OCBDR_address   = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBDR3;
             l_OCBCSR_address  = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBCSR3_RO;
-            l_OCBSLBR_address = TP_TPCHIP_OCC_OCI_OCB_OCBSLBR3;
-            l_OCBSLCS_address = TP_TPCHIP_OCC_OCI_OCB_OCBSLCS3;
-            l_OCBSHBR_address = TP_TPCHIP_OCC_OCI_OCB_OCBSHBR3;
             l_OCBSHCS_address = TP_TPCHIP_OCC_OCI_OCB_OCBSHCS3;
-            l_OCBSES_address  = TP_TPCHIP_OCC_OCI_OCB_OCBSES3;
-            l_OCBLWCR_address = TP_TPCHIP_OCC_OCI_OCB_OCBLWCR3;
-            l_OCBLWSR_address = TP_TPCHIP_OCC_OCI_OCB_OCBLWSR3;
-            l_OCBESR_address  = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBESR3;
             break;
     }
 
@@ -215,7 +182,6 @@ fapi2::ReturnCode p10_pm_ocb_indir_access(
             {
                 FAPI_DBG("Poll for a non-full condition to a push queue to "
                          "avoid data corruption problem");
-                bool l_push_ok_flag = false;
                 uint8_t l_counter = 0;
 
                 do
@@ -338,6 +304,57 @@ fapi2::ReturnCode p10_pm_ocb_indir_access(
     FAPI_TRY(fapi2::getScom(i_target, _m_addr, l_data64)); \
     FAPI_ERR("%-10s %d: 0x%016lX", #_m_string, l_data64);
 
+                uint64_t l_OCBSLBR_address = 0;
+                uint64_t l_OCBSLCS_address = 0;
+                uint64_t l_OCBSHBR_address = 0;
+                uint64_t l_OCBSES_address  = 0;
+                uint64_t l_OCBLWCR_address = 0;
+                uint64_t l_OCBLWSR_address = 0;
+                uint64_t l_OCBESR_address  = 0;
+
+                switch ( i_ocb_chan )
+                {
+                    case ocb::OCB_CHAN0:
+                        l_OCBSLBR_address = TP_TPCHIP_OCC_OCI_OCB_OCBSLBR0;
+                        l_OCBSLCS_address = TP_TPCHIP_OCC_OCI_OCB_OCBSLCS0;
+                        l_OCBSHBR_address = TP_TPCHIP_OCC_OCI_OCB_OCBSHBR0;
+                        l_OCBSES_address  = TP_TPCHIP_OCC_OCI_OCB_OCBSES0;
+                        l_OCBLWCR_address = TP_TPCHIP_OCC_OCI_OCB_OCBLWCR0;
+                        l_OCBLWSR_address = TP_TPCHIP_OCC_OCI_OCB_OCBLWSR0;
+                        l_OCBESR_address  = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBESR0;
+                        break;
+
+                    case ocb::OCB_CHAN1:
+                        l_OCBSLBR_address = TP_TPCHIP_OCC_OCI_OCB_OCBSLBR1;
+                        l_OCBSLCS_address = TP_TPCHIP_OCC_OCI_OCB_OCBSLCS1;
+                        l_OCBSHBR_address = TP_TPCHIP_OCC_OCI_OCB_OCBSHBR1;
+                        l_OCBSES_address  = TP_TPCHIP_OCC_OCI_OCB_OCBSES1;
+                        l_OCBLWCR_address = TP_TPCHIP_OCC_OCI_OCB_OCBLWCR1;
+                        l_OCBLWSR_address = TP_TPCHIP_OCC_OCI_OCB_OCBLWSR1;
+                        l_OCBESR_address  = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBESR1;
+                        break;
+
+                    case ocb::OCB_CHAN2:
+                        l_OCBSLBR_address = TP_TPCHIP_OCC_OCI_OCB_OCBSLBR2;
+                        l_OCBSLCS_address = TP_TPCHIP_OCC_OCI_OCB_OCBSLCS2;
+                        l_OCBSHBR_address = TP_TPCHIP_OCC_OCI_OCB_OCBSHBR2;
+                        l_OCBSES_address  = TP_TPCHIP_OCC_OCI_OCB_OCBSES2;
+                        l_OCBLWCR_address = TP_TPCHIP_OCC_OCI_OCB_OCBLWCR2;
+                        l_OCBLWSR_address = TP_TPCHIP_OCC_OCI_OCB_OCBLWSR2;
+                        l_OCBESR_address  = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBESR2;
+                        break;
+
+                    case ocb::OCB_CHAN3:
+                        l_OCBSLBR_address = TP_TPCHIP_OCC_OCI_OCB_OCBSLBR3;
+                        l_OCBSLCS_address = TP_TPCHIP_OCC_OCI_OCB_OCBSLCS3;
+                        l_OCBSHBR_address = TP_TPCHIP_OCC_OCI_OCB_OCBSHBR3;
+                        l_OCBSES_address  = TP_TPCHIP_OCC_OCI_OCB_OCBSES3;
+                        l_OCBLWCR_address = TP_TPCHIP_OCC_OCI_OCB_OCBLWCR3;
+                        l_OCBLWSR_address = TP_TPCHIP_OCC_OCI_OCB_OCBLWSR3;
+                        l_OCBESR_address  = TP_TPCHIP_OCC_OCI_OCB_PIB_OCBESR3;
+                        break;
+                }
+
                 FFDCREG(l_OCBAR_address  , OCBAR);
                 FFDCREG(l_OCBCSR_address , OCBCSR);
                 FFDCREG(l_OCBSLBR_address, OCBSLBR);
@@ -357,7 +374,7 @@ fapi2::ReturnCode p10_pm_ocb_indir_access(
                 {
                     case ocb::OCB_CHAN0:
                         FAPI_ASSERT((true == l_push_ok_flag),
-                                    fapi2::RC_PM_OCB0_GET_DATA_ERROR().
+                                    fapi2::PM_OCB0_GET_DATA_ERROR().
                                     set_CHANNEL(i_ocb_chan).
                                     set_DATA_SIZE(i_ocb_req_length).
                                     set_TARGET(i_target),
@@ -366,7 +383,7 @@ fapi2::ReturnCode p10_pm_ocb_indir_access(
 
                     case ocb::OCB_CHAN1:
                         FAPI_ASSERT((true == l_push_ok_flag),
-                                    fapi2::RC_PM_OCB1_GET_DATA_ERROR().
+                                    fapi2::PM_OCB1_GET_DATA_ERROR().
                                     set_CHANNEL(i_ocb_chan).
                                     set_DATA_SIZE(i_ocb_req_length).
                                     set_TARGET(i_target),
@@ -375,7 +392,7 @@ fapi2::ReturnCode p10_pm_ocb_indir_access(
 
                     case ocb::OCB_CHAN2:
                         FAPI_ASSERT((true == l_push_ok_flag),
-                                    fapi2::RC_PM_OCB2_GET_DATA_ERROR().
+                                    fapi2::PM_OCB2_GET_DATA_ERROR().
                                     set_CHANNEL(i_ocb_chan).
                                     set_DATA_SIZE(i_ocb_req_length).
                                     set_TARGET(i_target),
@@ -384,7 +401,7 @@ fapi2::ReturnCode p10_pm_ocb_indir_access(
 
                     case ocb::OCB_CHAN3:
                         FAPI_ASSERT((true == l_push_ok_flag),
-                                    fapi2::RC_PM_OCB3_GET_DATA_ERROR().
+                                    fapi2::PM_OCB3_GET_DATA_ERROR().
                                     set_CHANNEL(i_ocb_chan).
                                     set_DATA_SIZE(i_ocb_req_length).
                                     set_TARGET(i_target),
