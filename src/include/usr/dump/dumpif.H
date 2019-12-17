@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -146,10 +146,19 @@ namespace DUMP
     #define DUMP_ARCH_REG_TYPE_SPR	0x02
 
     // Architected register data content entries
+    union reg_t
+    {
+        char name[sizeof(uint32_t)*2];
+        struct
+        {
+            uint32_t type;
+            uint32_t num;
+        }PACKED;
+    }PACKED;
+
     struct hostArchRegDataEntry
     {
-        uint32_t regType;
-        uint32_t regNum;
+        reg_t reg;
         uint64_t regVal;
     } PACKED;
 

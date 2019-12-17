@@ -41,6 +41,8 @@
 #include <dump/dumpif.H>
 #include <util/utiltce.H>
 #include <isteps/mem_utils.H>
+#include <string.h>
+#include <stdio.h>
 
 #include <sys/msg.h>                     //  message Q's
 #include <mbox/mbox_queues.H>            //
@@ -54,7 +56,163 @@ TRAC_INIT(&g_trac_dump, "DUMP", 4*KILOBYTE);
 
 namespace DUMP
 {
+////////////
+// Define an SPR number to name str map.  Note that this inverse of how
+// the HWP uses it... so use the same mechanism/data - just inverse
+std::map<uint32_t, const char*> SPRNUM_MAP;
+typedef std::map<uint32_t, const char*>::iterator SPRNUM_MAP_IT;
 
+#define LIST_SPR_NAME_REG(_op_)\
+    _op_(XER      ,1   )\
+    _op_(DSCR_RU  ,3   )\
+    _op_(LR       ,8   )\
+    _op_(CTR      ,9   )\
+    _op_(UAMR     ,13  )\
+    _op_(DSCR     ,17  )\
+    _op_(DSISR    ,18  )\
+    _op_(DAR      ,19  )\
+    _op_(DEC      ,22  )\
+    _op_(SDR1     ,25  )\
+    _op_(SRR0     ,26  )\
+    _op_(SRR1     ,27  )\
+    _op_(CFAR     ,28  )\
+    _op_(AMR      ,29  )\
+    _op_(PIDR     ,48  )\
+    _op_(IAMR     ,61  )\
+    _op_(TFHAR    ,128 )\
+    _op_(TFIAR    ,129 )\
+    _op_(TEXASR   ,130 )\
+    _op_(TEXASRU  ,131 )\
+    _op_(CTRL_RU  ,136 )\
+    _op_(TIDR     ,144 )\
+    _op_(CTRL     ,152 )\
+    _op_(FSCR     ,153 )\
+    _op_(UAMOR    ,157 )\
+    _op_(GSR      ,158 )\
+    _op_(PSPB     ,159 )\
+    _op_(DPDES    ,176 )\
+    _op_(DAWR0    ,180 )\
+    _op_(RPR      ,186 )\
+    _op_(CIABR    ,187 )\
+    _op_(DAWRX0   ,188 )\
+    _op_(HFSCR    ,190 )\
+    _op_(VRSAVE   ,256 )\
+    _op_(SPRG3_RU ,259 )\
+    _op_(TB       ,268 )\
+    _op_(TBU_RU   ,269 )\
+    _op_(SPRG0    ,272 )\
+    _op_(SPRG1    ,273 )\
+    _op_(SPRG2    ,274 )\
+    _op_(SPRG3    ,275 )\
+    _op_(SPRC     ,276 )\
+    _op_(SPRD     ,277 )\
+    _op_(CIR      ,283 )\
+    _op_(TBL      ,284 )\
+    _op_(TBU      ,285 )\
+    _op_(TBU40    ,286 )\
+    _op_(PVR      ,287 )\
+    _op_(HSPRG0   ,304 )\
+    _op_(HSPRG1   ,305 )\
+    _op_(HDSISR   ,306 )\
+    _op_(HDAR     ,307 )\
+    _op_(SPURR    ,308 )\
+    _op_(PURR     ,309 )\
+    _op_(HDEC     ,310 )\
+    _op_(HRMOR    ,313 )\
+    _op_(HSRR0    ,314 )\
+    _op_(HSRR1    ,315 )\
+    _op_(TFMR     ,317 )\
+    _op_(LPCR     ,318 )\
+    _op_(LPIDR    ,319 )\
+    _op_(HMER     ,336 )\
+    _op_(HMEER    ,337 )\
+    _op_(PCR      ,338 )\
+    _op_(HEIR     ,339 )\
+    _op_(AMOR     ,349 )\
+    _op_(TIR      ,446 )\
+    _op_(PTCR     ,464 )\
+    _op_(USPRG0   ,496 )\
+    _op_(USPRG1   ,497 )\
+    _op_(UDAR     ,499 )\
+    _op_(SEIDR    ,504 )\
+    _op_(URMOR    ,505 )\
+    _op_(USRR0    ,506 )\
+    _op_(USRR1    ,507 )\
+    _op_(UEIR     ,509 )\
+    _op_(ACMCR    ,510 )\
+    _op_(SMFCTRL  ,511 )\
+    _op_(SIER_RU  ,768 )\
+    _op_(MMCR2_RU ,769 )\
+    _op_(MMCRA_RU ,770 )\
+    _op_(PMC1_RU  ,771 )\
+    _op_(PMC2_RU  ,772 )\
+    _op_(PMC3_RU  ,773 )\
+    _op_(PMC4_RU  ,774 )\
+    _op_(PMC5_RU  ,775 )\
+    _op_(PMC6_RU  ,776 )\
+    _op_(MMCR0_RU ,779 )\
+    _op_(SIAR_RU  ,780 )\
+    _op_(SDAR_RU  ,781 )\
+    _op_(MMCR1_RU ,782 )\
+    _op_(SIER     ,784 )\
+    _op_(MMCR2    ,785 )\
+    _op_(MMCRA    ,786 )\
+    _op_(PMC1     ,787 )\
+    _op_(PMC2     ,788 )\
+    _op_(PMC3     ,789 )\
+    _op_(PMC4     ,790 )\
+    _op_(PMC5     ,791 )\
+    _op_(PMC6     ,792 )\
+    _op_(MMCR0    ,795 )\
+    _op_(SIAR     ,796 )\
+    _op_(SDAR     ,797 )\
+    _op_(MMCR1    ,798 )\
+    _op_(IMC      ,799 )\
+    _op_(BESCRS   ,800 )\
+    _op_(BESCRSU  ,801 )\
+    _op_(BESCRR   ,802 )\
+    _op_(BESCRRU  ,803 )\
+    _op_(EBBHR    ,804 )\
+    _op_(EBBRR    ,805 )\
+    _op_(BESCR    ,806 )\
+    _op_(LMRR     ,813 )\
+    _op_(LMSER    ,814 )\
+    _op_(TAR      ,815 )\
+    _op_(ASDR     ,816 )\
+    _op_(PSSCR_SU ,823 )\
+    _op_(IC       ,848 )\
+    _op_(VTB      ,849 )\
+    _op_(LDBAR    ,850 )\
+    _op_(MMCRC    ,851 )\
+    _op_(PMSR     ,853 )\
+    _op_(PMMAR    ,854 )\
+    _op_(PSSCR    ,855 )\
+    _op_(L2QOSR   ,861 )\
+    _op_(WORC     ,863 )\
+    _op_(TRIG0    ,880 )\
+    _op_(TRIG1    ,881 )\
+    _op_(TRIG2    ,882 )\
+    _op_(PMCR     ,884 )\
+    _op_(RWMR     ,885 )\
+    _op_(WORT     ,895 )\
+    _op_(PPR      ,896 )\
+    _op_(PPR32    ,898 )\
+    _op_(TSCR     ,921 )\
+    _op_(TTR      ,922 )\
+    _op_(TRACE    ,1006)\
+    _op_(HID      ,1008)\
+    _op_(PIR      ,1023)\
+    _op_(NIA      ,2000)\
+    _op_(MSR      ,2001)\
+    _op_(CR       ,2002)\
+    _op_(FPSCR    ,2003)\
+    _op_(VSCR     ,2004)\
+    _op_(SLBE     ,2005)\
+    _op_(SLBV     ,2006)
+
+
+#define DO_SPRNUM_MAP(in_name, in_number)\
+    SPRNUM_MAP[in_number] = #in_name;
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -107,6 +265,31 @@ errlHndl_t doDumpCollect(void)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
+// Replace reg num with name
+void replaceRegNumWithName( hostArchRegDataEntry *hostRegData )
+{
+    char str[sizeof(reg_t)];
+
+    if(hostRegData->reg.type == DUMP_ARCH_REG_TYPE_GPR)
+    {
+        snprintf(str,sizeof(reg_t), "GPR%d\0", hostRegData->reg.num);
+        strncpy(hostRegData->reg.name, str, sizeof(reg_t));
+    }
+    else if (hostRegData->reg.type == DUMP_ARCH_REG_TYPE_SPR)
+    {
+        if(SPRNUM_MAP.find(hostRegData->reg.num) != SPRNUM_MAP.end())
+        {
+            strncpy(hostRegData->reg.name, SPRNUM_MAP[hostRegData->reg.num], sizeof(reg_t));
+        }
+        //else unknown... leave as number for debug
+    }
+    //else unknown type... leave as number for debug
+
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // Returns the physical address corresponding to a PHYP MDST/MDRT entry
 void* getPhysAddr( uint64_t i_phypAddr )
 {
@@ -152,6 +335,9 @@ errlHndl_t copyArchitectedRegs(void)
     void *vMapDstAddrBase = nullptr;
     // Architected Reg Dump table struct pointers
     procDumpAreaEntry *procTableEntry = nullptr;
+
+    //Setup SPR num to string mapping
+    LIST_SPR_NAME_REG(DO_SPRNUM_MAP)
 
     do
     {
@@ -330,9 +516,15 @@ errlHndl_t copyArchitectedRegs(void)
                     hostArchRegDataEntry *hostRegData =
                          reinterpret_cast<hostArchRegDataEntry *>(dstTempAddr);
 
-                    hostRegData->regType = sbeRegData->regType;
-                    hostRegData->regNum  = sbeRegData->regNum;
+                    hostRegData->reg.type = sbeRegData->regType;
+                    hostRegData->reg.num  = sbeRegData->regNum;
                     hostRegData->regVal  = sbeRegData->regVal;
+
+                    // If thread version is 2+, replace reg numbers with names
+                    if (procTableEntry->threadRegVersion >= 2)
+                    {
+                        replaceRegNumWithName(hostRegData);
+                    }
 
                     dstTempAddr = reinterpret_cast<uint64_t>(dstTempAddr +
                                                   sizeof(hostArchRegDataEntry));
@@ -363,7 +555,6 @@ errlHndl_t copyArchitectedRegs(void)
             }
         }
         // Update Process Dump Area tuple
-        procTableEntry->threadRegVersion = REG_DUMP_HDAT_STRUCT_VER;
         procTableEntry->capArrayAddr = procTableEntry->dstArrayAddr;
 
         // Update the PDA Table Entries to Attribute to be fetched in istep 21
