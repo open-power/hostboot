@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -71,6 +72,9 @@ const uint8_t ARRAY_MODE_REG_SCOM_AUTOINC_RW              = 3;
 const uint8_t ARRAY_MODE_REG_PHY0_SRAM_INIT_DONE_BIT      = 4;
 const uint8_t ARRAY_MODE_REG_PHY1_SRAM_INIT_DONE_BIT      = 5;
 const uint8_t ARRAY_MODE_REG_ENABLE_SCRUBBER_BIT          = 17;
+
+// Bit definitions for Array Address Register
+const uint8_t ARRAY_ADDR_REG_RW_SELECT_BIT  = 16;
 
 // XRAM iop_top enum
 enum xramIopTopNum_t
