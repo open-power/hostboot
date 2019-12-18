@@ -554,6 +554,17 @@ def magic_instruction_callback(user_arg, cpu, arg):
         #SIM_run_alone( run_command, cmd )
       print "MAGIC_LOAD_PAYLOAD not implemented\n";
 
+    if arg == 7014:   # MAGIC_HB_DUMP
+        # Collect a hostboot dump
+        # (no args)
+
+        # Make sure we only do 1 dump even though every thread will TI
+        if( not os.environ.has_key('HB_DUMP_COMPLETE') ):
+            print "Generating Hostboot Dump for TI"
+            os.environ['HB_DUMP_COMPLETE']="1"
+            cmd1 = "hb-Dump quiet"
+            SIM_run_alone(run_command, cmd1 )
+
     if arg == 7018:   # MAGIC_BREAK_ON_ERROR
         # Stop the simulation if an env var is set
         if( os.environ.has_key('HB_BREAK_ON_ERROR') ):

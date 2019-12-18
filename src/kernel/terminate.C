@@ -27,6 +27,7 @@
 #include <kernel/hbterminatetypes.H>
 #include <kernel/terminate.H>
 #include <sys/sync.h>
+#include <arch/ppc.H>
 #ifndef BOOTLOADER
 #include <stdint.h>
 #include <kernel/console.H>
@@ -56,6 +57,9 @@ HB_Descriptor kernel_hbDescriptor =
 
 void terminateExecuteTI()
 {
+    // Trigger a hostboot dump in Simics
+    MAGIC_INSTRUCTION(MAGIC_HB_DUMP);
+
     // Call the function that actually executes the TI code.
     p9_force_attn();
 }
