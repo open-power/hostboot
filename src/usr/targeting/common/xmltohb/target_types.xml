@@ -2062,6 +2062,9 @@
       <id>HDAT_RSV_MEM_NUM_SECTIONS</id>
     </attribute>
     <attribute>
+      <id>HOSTSVC_PLID</id>
+    </attribute>
+    <attribute>
       <default>0x00010000</default>
       <id>HUID</id>
     </attribute>
