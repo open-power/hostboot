@@ -96,7 +96,8 @@ fapi2::ReturnCode p10_perv_sbe_cmn_array_init_module(const
         fapi2::Target < fapi2::TARGET_TYPE_PERV | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > & i_mcast_target,
         const fapi2::buffer<uint16_t> i_regions,
         const fapi2::buffer<uint64_t> i_loop_counter,
-        const fapi2::buffer<uint64_t> i_start_abist_match_value)
+        const fapi2::buffer<uint64_t> i_start_abist_match_value,
+        bool i_drop_fences)
 {
 
     using namespace scomt;
@@ -139,11 +140,14 @@ fapi2::ReturnCode p10_perv_sbe_cmn_array_init_module(const
     .setBit<48, 3>();
     FAPI_TRY(fapi2::putScom(i_mcast_target, CLK_REGION, l_data64));
 
-    FAPI_DBG("Drop Region fences");
-    //Setting CPLT_CTRL1 register value
-    l_data64.flush<0>()
-    .insertFromRight<4, 15>(l_regions);
-    FAPI_TRY(fapi2::putScom(i_mcast_target, CPLT_CTRL1_WO_CLEAR, l_data64));
+    if (i_drop_fences)
+    {
+        FAPI_DBG("Drop Region fences");
+        //Setting CPLT_CTRL1 register value
+        l_data64.flush<0>()
+        .insertFromRight<4, 15>(l_regions);
+        FAPI_TRY(fapi2::putScom(i_mcast_target, CPLT_CTRL1_WO_CLEAR, l_data64));
+    }
 
     i_start_abist_match_value.extractToRight<0, 12>(l_scan_count);
     i_start_abist_match_value.extractToRight<12, 12>(l_misr_a_value);

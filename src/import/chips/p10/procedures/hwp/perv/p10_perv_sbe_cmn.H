@@ -109,7 +109,8 @@ fapi2::ReturnCode p10_perv_sbe_cmn_array_init_module(const
         fapi2::Target < fapi2::TARGET_TYPE_PERV | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > & i_mcast_target,
         const fapi2::buffer<uint16_t> i_regions,
         const fapi2::buffer<uint64_t> i_loop_counter,
-        const fapi2::buffer<uint64_t> i_start_abist_match_value);
+        const fapi2::buffer<uint64_t> i_start_abist_match_value,
+        bool i_drop_fences = true);
 
 fapi2::ReturnCode p10_perv_sbe_cmn_scan0_module(const
         fapi2::Target < fapi2::TARGET_TYPE_PERV | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > & i_mcast_target,
