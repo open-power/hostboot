@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2019
+# Contributors Listed Below - COPYRIGHT 2011,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -25,10 +25,10 @@
 ROOTPATH = ../../../..
 
 MODULE = testi2c
-# FIXME RTC: 210975
-#TESTS = eepromddtest.H
-#TESTS = $(if $(CONFIG_SUPPORT_EEPROM_CACHING), eecachetest.H, )
-#TESTS += i2ctest.H
+
+TESTS = eepromddtest.H
+TESTS = $(if $(CONFIG_SUPPORT_EEPROM_CACHING), eecachetest.H, )
+TESTS += i2ctest.H
 #TESTS += $(if $(CONFIG_TPMDD),tpmddtest.H,)
 
 include ${ROOTPATH}/config.mk

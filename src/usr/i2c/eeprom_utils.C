@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -223,28 +223,6 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
                         tryGetAttr<TARGETING::ATTR_EEPROM_VPD_BACKUP_INFO>
                         ( reinterpret_cast<
                             TARGETING::ATTR_EEPROM_VPD_BACKUP_INFO_type&>
-                                ( eepromData) ) ) )
-                {
-                    fail_reading_attribute = true;
-                }
-                break;
-
-            case SBE_PRIMARY:
-                if( !(i_target->
-                        tryGetAttr<TARGETING::ATTR_EEPROM_SBE_PRIMARY_INFO>
-                        ( reinterpret_cast<
-                            TARGETING::ATTR_EEPROM_SBE_PRIMARY_INFO_type&>
-                                ( eepromData) ) ) )
-                {
-                    fail_reading_attribute = true;
-                }
-                break;
-
-            case SBE_BACKUP:
-                if( (!i_target->
-                        tryGetAttr<TARGETING::ATTR_EEPROM_SBE_BACKUP_INFO>
-                        ( reinterpret_cast<
-                            TARGETING::ATTR_EEPROM_SBE_BACKUP_INFO_type&>
                                 ( eepromData) ) ) )
                 {
                     fail_reading_attribute = true;
@@ -615,28 +593,6 @@ void add_to_list( std::list<EepromInfo_t>& i_list,
                 }
                 break;
 
-            case SBE_PRIMARY:
-                if( i_targ->
-                    tryGetAttr<TARGETING::ATTR_EEPROM_SBE_PRIMARY_INFO>
-                    ( reinterpret_cast<
-                      TARGETING::ATTR_EEPROM_SBE_PRIMARY_INFO_type&>
-                      ( eepromData) ) )
-                {
-                    found_eep = true;
-                }
-                break;
-
-            case SBE_BACKUP:
-                if( i_targ->
-                    tryGetAttr<TARGETING::ATTR_EEPROM_SBE_BACKUP_INFO>
-                    ( reinterpret_cast<
-                      TARGETING::ATTR_EEPROM_SBE_BACKUP_INFO_type&>
-                      ( eepromData) ) )
-                {
-                    found_eep = true;
-                }
-                break;
-
             case LAST_CHIP_TYPE:
                 //only included to catch additional types later on
                 found_eep = false;
@@ -770,24 +726,12 @@ void getEEPROMs( std::list<EepromInfo_t>& o_info )
                                            &l_procFilter );
     for( ; proc_itr; ++proc_itr )
     {
+        /* TODO RTC 212110: Add support for PROC EEPROMs to SPI
         add_to_list( o_info, *proc_itr );
+        */
     }
 
-    // #3 - Membufs
-    TARGETING::PredicateCTM membs( TARGETING::CLASS_CHIP,
-                                   TARGETING::TYPE_MEMBUF,
-                                   TARGETING::MODEL_NA );
-    TARGETING::PredicatePostfixExpr l_membFilter;
-    l_membFilter.push(&isPresent).push(&membs).And();
-    TARGETING::TargetRangeFilter memb_itr( TARGETING::targetService().begin(),
-                                           TARGETING::targetService().end(),
-                                           &l_membFilter );
-    for( ; memb_itr; ++memb_itr )
-    {
-        add_to_list( o_info, *memb_itr );
-    }
-
-    // #4 - DIMMs
+    // #3 - DIMMs
     TARGETING::PredicateCTM dimms( TARGETING::CLASS_LOGICAL_CARD,
                                    TARGETING::TYPE_DIMM,
                                    TARGETING::MODEL_NA );
@@ -798,11 +742,6 @@ void getEEPROMs( std::list<EepromInfo_t>& o_info )
                                            &l_dimmFilter );
     for( ; dimm_itr; ++dimm_itr )
     {
-    #ifdef CONFIG_NVDIMM
-        // Skip if this is an NVDIMM as this will get added later
-        if (TARGETING::isNVDIMM( *dimm_itr ))
-            continue;
-    #endif
         add_to_list( o_info, *dimm_itr );
     }
 

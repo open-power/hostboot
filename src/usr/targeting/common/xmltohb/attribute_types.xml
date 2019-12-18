@@ -2537,7 +2537,7 @@
         Creator: MRW
         Purpose: Used by FW to know the fastest possible bus speed that all of
             the devices on a given bus are able to use.
-        Data Format: 4x13 array of uint16_t values.  The first index indicates
+        Data Format: 4x16 array of uint16_t values.  The first index indicates
             the engine number of the bus.  The second index indicates the port
             number of the bus.  The value in the array is the I2C bus speed
             used for that engine/port combination in KHz.
@@ -2546,13 +2546,14 @@
     <persistency>non-volatile</persistency>
     <readable/>
     <simpleType>
-      <array>4,13</array>
+      <array>4,16</array>
       <uint16_t>
         <default>
-            0,0,0,0,0,0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,0,0,0,0,0</default>
+            0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+        </default>
       </uint16_t>
     </simpleType>
   </attribute>

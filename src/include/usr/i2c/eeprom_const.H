@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,8 +53,6 @@ enum EEPROM_ROLE
 {
   VPD_PRIMARY   = 0,
   VPD_BACKUP    = 1,
-  SBE_PRIMARY   = 2,
-  SBE_BACKUP    = 3,
   LAST_CHIP_TYPE,
   // Useful Enums
   INVALID_CHIP_TYPE = LAST_CHIP_TYPE,

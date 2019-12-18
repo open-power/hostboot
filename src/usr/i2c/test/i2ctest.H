@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,6 +55,8 @@ using namespace TARGETING;
 // Used to ignore comparing data on reads
 #define I2C_TEST_IGNORE_DATA_COMPARE 0xFFFFFFFFFFFFFFFF
 
+using I2C::HOST_ENGINE_D;
+using I2C::HOST_ENGINE_E;
 
 class I2CTest: public CxxTest::TestSuite
 {
@@ -70,7 +72,7 @@ class I2CTest: public CxxTest::TestSuite
          *      Add other targets to this testcase when their support is
          *      added.
          */
-        void _testI2CDirect ( void ) //@fixme-RTC:123019
+        void testI2CDirect ( void )
         {
             errlHndl_t err = NULL;
             int cmds = 0;
@@ -96,81 +98,84 @@ class I2CTest: public CxxTest::TestSuite
             {
 
                 // PROCESSOR TESTS
-                //  -- For Processor SEEPROM's, ONLY USE ENGINE 0
+                //  -- For DIMM SPD's, ONLY USE ENGINE 3
 
                 // READ All 3 at address 0 for 8 bytes first
                 // Ignore data compare as we're not sure what's
                 //  been writted there
 
-                // Read SBE Primary:  Murano-0, port-0
-                { 0x00, 0x00, 0xAC, I2C_TEST_IGNORE_DATA_COMPARE,
+                { 0x01, HOST_ENGINE_E, 0xA0, I2C_TEST_IGNORE_DATA_COMPARE,
                      8, true, TARGETING::TYPE_PROC }, // Read
 
-                // Read SBE Backup:  Murano-0, port-0
-                { 0x00, 0x00, 0xAE, I2C_TEST_IGNORE_DATA_COMPARE,
+                { 0x0a, HOST_ENGINE_E, 0xA0, I2C_TEST_IGNORE_DATA_COMPARE,
                      8, true, TARGETING::TYPE_PROC }, // Read
 
-                // Read From MVPD: Murano-0, port 1
-                { 0x01, 0x00, 0xA4, I2C_TEST_IGNORE_DATA_COMPARE,
+                { 0x0b, HOST_ENGINE_E, 0xA0, I2C_TEST_IGNORE_DATA_COMPARE,
                      8, true, TARGETING::TYPE_PROC }, // Read data back
 
+                { 0x01, HOST_ENGINE_E, 0xA0, I2C_TEST_IGNORE_DATA_COMPARE,
+                     8, true, TARGETING::TYPE_PROC }, // Read
 
-                // Read/Write SBE Primary:  Murano-0, port-0
-                // Safe to write to first 0x300: 0x0-0x2FF
+                { 0x01, HOST_ENGINE_E, 0xA0, I2C_TEST_IGNORE_DATA_COMPARE,
+                     8, true, TARGETING::TYPE_PROC }, // Read
 
-                { 0x00, 0x00, 0xAC, 0x0020ababcdcdefef,
-                     8, false, TARGETING::TYPE_PROC }, // Write data to 0x0020
+                { 0x01, HOST_ENGINE_E, 0xA0, I2C_TEST_IGNORE_DATA_COMPARE,
+                     8, true, TARGETING::TYPE_PROC }, // Read data back
 
-                { 0x00, 0x00, 0xAC, 0x0020000000000000,
+                // Read/Write SPD
+                // Safe to write addresses past 2048
+
+                { 0x01, HOST_ENGINE_E, 0xA0, 0x0810ababcdcdefef,
+                     8, false, TARGETING::TYPE_PROC }, // Write data to 0x0810
+
+                { 0x01, HOST_ENGINE_E, 0xA0, 0x0810000000000000,
                      2, false, TARGETING::TYPE_PROC }, // Write addr for read
 
-                { 0x00, 0x00, 0xAc, 0xababcdcdefef0000,
+                { 0x01, HOST_ENGINE_E, 0xA0, 0xababcdcdefef0000,
                      6, true, TARGETING::TYPE_PROC  }, // Read data back
 
-                { 0x00, 0x00, 0xAC, 0x0023000000000000,
+                { 0x01, HOST_ENGINE_E, 0xA0, 0x0813000000000000,
                      2, false, TARGETING::TYPE_PROC }, // Write addr for read
 
-                { 0x00, 0x00, 0xAC, 0xcdefef0000000000,
+                { 0x01, HOST_ENGINE_E, 0xA0, 0xcdefef0000000000,
                      3, true, TARGETING::TYPE_PROC  }, // Read data back
 
-                { 0x00, 0x00, 0xAC, 0x0025831200000000,
-                     4, false, TARGETING::TYPE_PROC }, // Write data to 0x0025
+                { 0x01, HOST_ENGINE_E, 0xA0, 0x0825831200000000,
+                     4, false, TARGETING::TYPE_PROC }, // Write data to 0x0825
 
-                { 0x00, 0x00, 0xAC, 0x0024000000000000,
+                { 0x01, HOST_ENGINE_E, 0xA0, 0x0824000000000000,
                      2, false, TARGETING::TYPE_PROC }, // Write addr for read
 
-                { 0x00, 0x00, 0xAC, 0xef83120000000000,
+                { 0x01, HOST_ENGINE_E, 0xA0, 0x0083120000000000,
                      3, true, TARGETING::TYPE_PROC  }, // Read data back
 
+                /* TODO RTC 248506: Test other I2C engines than engine E
 
+                { 0x00, HOST_ENGINE_D, 0xA0, 0x0810ababcdcdefef,
+                     8, false, TARGETING::TYPE_PROC }, // Write data to 0x0810
 
-                // Read/Write SBE Backup:  Murano-0, port-0
-                // Safe to write to first 0x300: 0x0-0x2FF
-
-                { 0x00, 0x00, 0xAE, 0x0030ababcdcdefef,
-                     8, false, TARGETING::TYPE_PROC }, // Write data to 0x0030
-
-                { 0x00, 0x00, 0xAE, 0x0030000000000000,
+                { 0x00, HOST_ENGINE_D, 0xA0, 0x0810000000000000,
                      2, false, TARGETING::TYPE_PROC }, // Write addr for read
 
-                { 0x00, 0x00, 0xAE, 0xababcdcdefef0000,
+                { 0x00, HOST_ENGINE_D, 0xA0, 0xababcdcdefef0000,
                      6, true, TARGETING::TYPE_PROC  }, // Read data back
 
-                { 0x00, 0x00, 0xAE, 0x0033000000000000,
+                { 0x00, HOST_ENGINE_D, 0xA0, 0x0813000000000000,
                      2, false, TARGETING::TYPE_PROC }, // Write addr for read
 
-                { 0x00, 0x00, 0xAE, 0xcdefef0000000000,
+                { 0x00, HOST_ENGINE_D, 0xA0, 0xcdefef0000000000,
                      3, true, TARGETING::TYPE_PROC  }, // Read data back
 
-                { 0x00, 0x00, 0xAE, 0x0035971200000000,
-                     4, false, TARGETING::TYPE_PROC }, // Write data to 0x0035
+                { 0x00, HOST_ENGINE_D, 0xA0, 0x0825831200000000,
+                     4, false, TARGETING::TYPE_PROC }, // Write data to 0x0825
 
-                { 0x00, 0x00, 0xAE, 0x0034000000000000,
+                { 0x00, HOST_ENGINE_D, 0xA0, 0x0824000000000000,
                      2, false, TARGETING::TYPE_PROC }, // Write addr for read
 
-                { 0x00, 0x00, 0xAE, 0xef97120000000000,
+                { 0x00, HOST_ENGINE_D, 0xA0, 0x0083120000000000,
                      3, true, TARGETING::TYPE_PROC  }, // Read data back
 
+                */
             };
 
             const uint32_t NUM_CMDS = sizeof(testData)/sizeof(testData[0]);
@@ -270,10 +275,9 @@ class I2CTest: public CxxTest::TestSuite
                     if( err )
                     {
                         TS_FAIL( "testI2CDirect - fail on cmd %d out of %d",
-                                  i, NUM_CMDS );
+                                  i + 1, NUM_CMDS );
                         errlCommit( err,
                                     I2C_COMP_ID );
-                        delete err;
                         fails++;
                         continue;
                     }
@@ -295,7 +299,7 @@ class I2CTest: public CxxTest::TestSuite
                             TRACFCOMP( g_trac_i2c,
                                        "testI2CDirect - cmd: %d/%d, Data read:"
                                        " %016llx, expected: %016llx",
-                                       i, NUM_CMDS, data, testData[i].data );
+                                       i + 1, NUM_CMDS, data, testData[i].data );
                             TS_FAIL( "testI2CDirect - Failure comparing read data!" );
                             fails++;
                             continue;
@@ -319,7 +323,7 @@ class I2CTest: public CxxTest::TestSuite
          *      Add other targets to this testcase when their support is
          *      added.
          */
-        void _testI2COffset ( void ) //@fixme-RTC:123019
+        void testI2COffset ( void )
         {
             errlHndl_t err = NULL;
             int cmds = 0;
@@ -344,14 +348,12 @@ class I2CTest: public CxxTest::TestSuite
 
                 // PROCESSOR TESTS
 
-                // Read/Write SBE Backup:  Murano-0, port-0
-                // Safe to write to first 0x300: 0x0-0x2FF
-                { 0x00, 0x00, 0xAE, 0x0123,
+                // Read/Write DIMM SPD
+                { 0x01, HOST_ENGINE_E, 0xA0, 0x0820,
                   0xFEFEDADA57579191, 8, TARGETING::TYPE_PROC },
 
-                // Read/Write SBE Primary:  Murano-0, port-0
-                // Safe to write to first 0x300: 0x0-0x2FF
-                { 0x00, 0x00, 0xAC, 0x02FC,
+                // Read/Write DIMM SPD
+                { 0x0a, HOST_ENGINE_E, 0xA0, 0x0820,
                   0x5ABC310000000000, 3, TARGETING::TYPE_PROC },
             };
 
@@ -390,7 +392,7 @@ class I2CTest: public CxxTest::TestSuite
                         TRACFCOMP( g_trac_i2c,
                                    "testI2COffset: Size (%d) is greater than"
                                    " 8 bytes. Skipping test %d",
-                                   testData[i].size, i );
+                                   testData[i].size, i + 1 );
                         continue;
                     }
 
@@ -477,10 +479,9 @@ class I2CTest: public CxxTest::TestSuite
                         {
                             TS_FAIL( "testI2COffset - OP %d FAILED "
                                      "- cmd %d out of %d",
-                                     j, i, NUM_CMDS );
+                                     j, i + 1, NUM_CMDS );
                             errlCommit( err,
                                         I2C_COMP_ID );
-                            delete err;
                             fails++;
                             continue;
                         }
@@ -520,7 +521,7 @@ class I2CTest: public CxxTest::TestSuite
                                 TRACFCOMP(g_trac_i2c,"testI2COffset: New "
                                     "Data Compare Fail: wrote=%016llx, "
                                     "read back=%016llx. cmd: %d/%d (%d)",
-                                    testData[i].data, data, i, NUM_CMDS, j);
+                                    testData[i].data, data, i + 1, NUM_CMDS, j);
                                 TS_FAIL( "testI2COffset - Failure comparing "
                                          "new data!" );
                                 fails++;
@@ -544,7 +545,7 @@ class I2CTest: public CxxTest::TestSuite
                                 TRACFCOMP(g_trac_i2c,"testI2COffset: New "
                                     "Data Compare Fail: original=%016llx, "
                                     "read back=%016llx. cmd: %d/%d (%d)",
-                                    original_data, data, i, NUM_CMDS, j);
+                                    original_data, data, i + 1, NUM_CMDS, j);
                                 TS_FAIL( "testI2COffset - Failure comparing "
                                          "original data!" );
                                 fails++;
@@ -573,7 +574,7 @@ class I2CTest: public CxxTest::TestSuite
          *      needed by PHYP to ensure that the I2C masters are
          *      setup correctly on the system.
          */
-        void _testI2CSetupActiveMasters ( void ) //@fixme-RTC:123019
+        void testI2CSetupActiveMasters ( void )
         {
             errlHndl_t err = NULL;
             int fails = 0;
@@ -604,7 +605,7 @@ class I2CTest: public CxxTest::TestSuite
          *      Test that i2cSetBusVariables() and the functions it uses
          *      are returning expected values.
          */
-        void _testI2cSetBusVariables ( void ) //@fixme-RTC:123019
+        void testI2cSetBusVariables ( void )
         {
             errlHndl_t err = NULL;
             int fails = 0;
@@ -639,9 +640,9 @@ class I2CTest: public CxxTest::TestSuite
                 // 400KHz
                 { I2C_BUS_SPEED_400KHZ, 400 },
 
-                // I2C_BUS_SPEED_FROM_MRW (==0) should default to 1MHz
+                // I2C_BUS_SPEED_FROM_MRW (==0) should default to 400kHz
                 // with a processor target using Host I2C
-                { I2C_BUS_SPEED_FROM_MRW, 1000 },
+                { I2C_BUS_SPEED_FROM_MRW, 400 },
             };
 
             uint32_t NUM_CMDS = sizeof(testData)/sizeof(testData[0]);
@@ -649,8 +650,8 @@ class I2CTest: public CxxTest::TestSuite
             // set Processor Target to Host I2C mode and default engine/port
             io_args.switches.useHostI2C = 1;
             io_args.switches.useFsiI2C = 0;
-            io_args.engine = 0;
-            io_args.port = 0;
+            io_args.engine = HOST_ENGINE_E;
+            io_args.port = 1;
 
             for ( uint32_t i = 0; i < NUM_CMDS; i++ )
             {
@@ -695,19 +696,19 @@ class I2CTest: public CxxTest::TestSuite
 
                 // NEST_FREQ_MHz=2000, bus_speed=1MHz
                 { 2000, 1000,
-                  31, 800, 6250 },
+                  499, 800, 25000 },
 
                 // NEST_FREQ_MHz=2000, bus_speed=400KHz
                 { 2000, 400,
-                  77, 2000, 2500 },
+                  1249, 2000, 10000 },
 
                 // NEST_FREQ_MHz=2400, bus_speed=1MHz
                 { 2400, 1000,
-                  37, 800, 6250 },
+                  599, 800, 25000 },
 
                 // NEST_FREQ_MHz=2400, bus_speed=400KHz
                 { 2400, 400,
-                  93, 2000, 2500 },
+                  1499, 2000, 10000 },
             };
 
             NUM_CMDS = sizeof(testData_2)/sizeof(testData_2[0]);
@@ -762,7 +763,7 @@ class I2CTest: public CxxTest::TestSuite
          *      to be sure that an error is returned, and that the error returned
          *      is the correct error.
          */
-        void _testI2CInvalidTarget ( void ) //@fixme-RTC:123019
+        void testI2CInvalidTarget ( void )
         {
             errlHndl_t err = NULL;
             int fails = 0;
@@ -808,7 +809,7 @@ class I2CTest: public CxxTest::TestSuite
          *      This test will pass in an invalid Operation type.  It
          *      is expected that an error log is to be returned.
          */
-        void _testI2CInvalidOperation ( void ) //@fixme-RTC:123019
+        void testI2CInvalidOperation ( void )
         {
             errlHndl_t err = NULL;
             int64_t fails = 0, num_ops = 0;
@@ -844,9 +845,9 @@ class I2CTest: public CxxTest::TestSuite
                                 testTarget,
                                 &data,
                                 dataSize,
-                                DEVICE_I2C_ADDRESS( 0x0,
-                                                    0x0,
-                                                    0x50,
+                                DEVICE_I2C_ADDRESS( 0x1,
+                                                    0x3,
+                                                    0xA0,
                                                     0xFF,
                                                     nullptr) );
 
@@ -867,7 +868,7 @@ class I2CTest: public CxxTest::TestSuite
                        fails, num_ops );
         }
 
-        void _testI2cForceReset(void) //@fixme-RTC:123019
+        void testI2cForceReset(void)
         {
 
 
@@ -890,55 +891,76 @@ class I2CTest: public CxxTest::TestSuite
                 {
                     TRACFCOMP( g_trac_i2c,
                                " testI2cForceReset- functional good path" );
-                    io_args.engine = 0x0;
-                    io_args.port = 0x0;
+                    io_args.engine = HOST_ENGINE_E;
+                    io_args.port = 0x1;
+                    io_args.switches.useHostI2C = 1;
                     //get engine lock attr for engine 0
                     //prevents sbe update test fails
+
+
+                    size_t data_size = 8;
+
+                    uint8_t offset = 0;
+                    err = deviceOp( DeviceFW::READ,
+                                    procTarget,
+                                    &data,
+                                    data_size,
+                                    DEVICE_I2C_ADDRESS_OFFSET( 0x01, HOST_ENGINE_E, 0xA0,
+                                                               sizeof(offset),
+                                                               &offset,
+                                                               I2C_MUX::NOT_APPLICABLE,
+                                                               nullptr) );
+
+                    if(err)
+                    {
+                        TS_FAIL("testI2cForceReset: I2C read failed");
+                        errlCommit( err,I2C_COMP_ID );
+                        break;
+                    }
 
                     mutex_t * engineLock = NULL;
                     engineLock =
                     procTarget->getHbMutexAttr<TARGETING::ATTR_I2C_ENGINE_MUTEX_0>();
 
-                    (void)mutex_lock( engineLock );
+                    recursive_mutex_lock( engineLock );
 
                     //force reset
                     err = I2C::i2cReset(procTarget,
                                         io_args,
                                         I2C::FORCE_UNLOCK_RESET);
 
-                    (void) mutex_unlock( engineLock );
+                    recursive_mutex_unlock( engineLock );
 
                     //if there was an error for a reason commit it
                     if(err)
                     {
+                        TS_FAIL("I2C reset failed");
                         errlCommit( err,I2C_COMP_ID );
-                        delete err; err = NULL;
+                        break;
+                    }
+                    else
+                    {
+                        TS_INFO("i2cReset succeeded");
                     }
 
                     nanosleep( 0, 100);
 
-                    //read
-                    size_t data_size = 8;
+                    data = 0;
                     err = deviceOp( DeviceFW::READ,
                                     procTarget,
                                     &data,
                                     data_size,
-                                    DEVICE_I2C_ADDRESS( 0,
-                                                        0,
-                                                        0xAC,
-                                                        0xFF,
+                                    DEVICE_I2C_ADDRESS( 0x01,
+                                                        HOST_ENGINE_E,
+                                                        0xA0,
+                                                        I2C_MUX::NOT_APPLICABLE,
                                                         nullptr) );
-
                 }
-
-
-
 
                 if(err)
                 {
                     TS_FAIL("testI2cForceReset failed err detected");
                     errlCommit( err,I2C_COMP_ID );
-                    delete err; err = NULL;
                     break;
                 }
 

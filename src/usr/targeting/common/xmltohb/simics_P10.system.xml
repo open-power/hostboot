@@ -146,7 +146,7 @@
     </attribute>
     <attribute>
       <id>FREQ_PAU_MHZ</id>
-      <default>2000</default>
+      <default>0x960</default>
     </attribute>
     <attribute>
       <id>SMF_CONFIG</id>
@@ -316,7 +316,16 @@
     <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
         <default>0x0006030203000000</default>
     </attribute>
-    <!-- TODO RTC 213604: Remove i2c based module vpd once SPI support is enabled -->
+    <attribute>
+      <id>I2C_BUS_SPEED_ARRAY</id>
+      <default>
+        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+        400,400,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+        400,400,0,0,0,0,0,0,400,400,400,400,0,0,0,0
+      </default>
+    </attribute>
+    <!-- TODO RTC 213604: Remove i2c based module vpd once SPI support is added -->
     <attribute>
         <id>EEPROM_VPD_BACKUP_INFO</id>
         <default>
@@ -8582,7 +8591,6 @@
     </attribute>
 </targetInstance>
 
-<!-- TODO RTC 213602: Uncomment once presence detection works
 <targetInstance>
     <id>sys0node0dimm4</id>
     <type>lcard-dimm-ddimm</type>
@@ -9242,7 +9250,6 @@
         </default>
     </attribute>
 </targetInstance>
--->
 
 
 <!-- ===================================================================== -->

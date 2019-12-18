@@ -3390,11 +3390,13 @@ sub processI2cSpeeds
     my $bus_speed_attr=$targetObj->getAttribute($target,"I2C_BUS_SPEED_ARRAY");
     my @bus_speeds2 = split(/,/,$bus_speed_attr);
 
-    #need to create a 4X13 array
+    #need to create a 4X16 array
+    # This must be updated whenever I2C_BUS_SPEED_ARRAY dimensions are changed
+    # We should figure out how to read the dimensions from the attribute XML
     my $i = 0;
     for my $engineIdx (0 .. 3)
     {
-        for my $portIdx (0 .. 12)
+        for my $portIdx (0 .. 15)
         {
             $bus_speeds[$engineIdx][$portIdx] = $bus_speeds2[$i];
             $i++;
@@ -3435,11 +3437,11 @@ sub processI2cSpeeds
         }
     }
 
-    #need to flatten 4x13 array
+    #need to flatten 4x16 array
     $bus_speed_attr = "";
     for my $engineIdx (0 .. 3)
     {
-        for my $portIdx (0 .. 12)
+        for my $portIdx (0 .. 15)
         {
             $bus_speed_attr .= $bus_speeds[$engineIdx][$portIdx] . ",";
         }
@@ -5634,4 +5636,3 @@ sub processXbus
         }
     }
 } # end sub processXbus
-

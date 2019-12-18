@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -112,10 +112,10 @@ static uint64_t g_I2C_NEST_FREQ_MHZ = i2cGetNestFreq();
 ALWAYS_INLINE inline uint16_t i2cGetBitRateDivisor(uint64_t i_bus_speed_khz,
                                                    uint64_t i_local_bus_MHZ)
 {
-  // BRD = ( ( ( LocalBus_MHZ / 16 ) / i_bus_speed_khz ) - 1 ) / 4
+  // BRD = ( ( LocalBus_MHZ) / i_bus_speed_khz ) - 1 ) / 4
 
   // Use tmp variable to convert everything to KHZ safely
-  uint64_t tmp = ( i_local_bus_MHZ / 16 ) * 1000;
+  uint64_t tmp = i_local_bus_MHZ * 1000;
 
   return ( ( ( tmp / i_bus_speed_khz ) - 1 ) / 4 );
 }
@@ -172,6 +172,15 @@ enum FREQ_CONVERSION : size_t
  */
 #define I2C_HOST_MASTER_BASE_ADDR   0xA0004
 #define I2C_FSI_MASTER_BASE_ADDR    0x01800
+
+/**
+ * @brief  I2C engine numbers
+ */
+const int FSI_ENGINE_A = 0;
+const int HOST_ENGINE_B = 0;
+const int HOST_ENGINE_C = 1;
+const int HOST_ENGINE_D = 2;
+const int HOST_ENGINE_E = 3;
 
 /**
  * @brief I2C Register Offsets

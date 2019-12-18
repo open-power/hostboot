@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,32 +71,12 @@ I2cDevInfos::I2cDevInfos()
             }
         }
         {
-            TARGETING::ATTR_EEPROM_SBE_PRIMARY_INFO_type d; // local scope
-            if (l_tgt->tryGetAttr<TARGETING::ATTR_EEPROM_SBE_PRIMARY_INFO>(d))
-            {
-                // String literal is used for comparison below, must stay sync'd
-                iv_i2cdvs.push_back({d.i2cMasterPath, d.engine, d.port,
-                                    d.devAddr, d.chipCount, EEPROM::SBE_PRIMARY,
-                                    l_tgt, getDepth(l_tgt)});
-            }
-        }
-        {
             TARGETING::ATTR_EEPROM_VPD_BACKUP_INFO_type d; // local scope
             if (l_tgt->tryGetAttr<TARGETING::ATTR_EEPROM_VPD_BACKUP_INFO>(d))
             {
                 // String literal is used for comparison below, must stay sync'd
                 iv_i2cdvs.push_back({d.i2cMasterPath, d.engine, d.port,
                                      d.devAddr, d.chipCount, EEPROM::VPD_BACKUP,
-                                     l_tgt, getDepth(l_tgt)});
-            }
-        }
-        {
-            TARGETING::ATTR_EEPROM_SBE_BACKUP_INFO_type d; // local scope
-            if (l_tgt->tryGetAttr<TARGETING::ATTR_EEPROM_SBE_BACKUP_INFO>(d))
-            {
-                // String literal is used for comparison below, must stay sync'd
-                iv_i2cdvs.push_back({d.i2cMasterPath, d.engine, d.port,
-                                     d.devAddr, d.chipCount, EEPROM::SBE_BACKUP,
                                      l_tgt, getDepth(l_tgt)});
             }
         }
@@ -325,4 +305,3 @@ I2cDevInfos& I2cDevInfos::getInstance()
 }
 
 } // End namespace
-
