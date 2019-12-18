@@ -75,13 +75,27 @@ fapi2::ReturnCode p10_read_xram(
     FAPI_TRY(autoIncrementControl(i_target, i_top, true, false),
              "autoIncrementControl returns an error.");
 
+    // Auto-increment read:
+    //   - Do NOT setup Array Address Register.  The read will start
+    //     at address 0 as was set via scaninit.
+    //
+    // Individual read:
+    //   - Need to setup Array Address Register with write address and
+    //     bit 16 clear.
+    //   - Currently, we don't support individual read operation.
+    //
+
+// For furture invidual read support
+#if 0
     // Setup Array Address Register for read
     l_offsetBuf = getXramAddress(i_offset);
+    l_offsetBuf.clearBit<ARRAY_ADDR_REG_RW_SELECT_BIT>();
     FAPI_TRY(fapi2::putScom(i_target,
                             l_xramBaseReg + XRAM_ARRAY_ADDR_REG_PHY0_OFFSET + i_phy,
                             l_offsetBuf),
              "Error from putScom 0x%.16llX",
              l_xramBaseReg + XRAM_ARRAY_ADDR_REG_PHY0_OFFSET + i_phy);
+#endif
 
     // Read i_bytes data
     FAPI_DBG("p10_read_xram: Start reading data...");
