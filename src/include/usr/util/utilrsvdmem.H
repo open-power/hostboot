@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,8 +58,6 @@ namespace Util
     constexpr hbrt_mem_label_t HBRT_MEM_LABEL_VPD_XXXX  = 0x5650445F00000000;
     // Mask off specific VPD label
     constexpr hbrt_mem_label_t HBRT_MEM_LABEL_VPD_MASK  = 0x00000000FFFFFFFF;
-    // Ascii label "VPD_MEMD in hex
-    constexpr hbrt_mem_label_t HBRT_MEM_LABEL_VPD_MEMD  = 0x5650445F4D454D44;
 
 
     /** @brief A 32 byte table of contents entry */

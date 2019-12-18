@@ -832,68 +832,6 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
                     memset(reinterpret_cast<uint8_t*>(l_prevDataAddr),0,aligned_size);
                     break;
 
-                case Util::HBRT_MEM_LABEL_VPD_MEMD:
-                    {
-                    TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> VPD_MEMD v address 0x%.16llX, size: %lld", l_prevDataAddr, aligned_size);
-
-                    VPD::OverrideSpecifier_t l_over =
-                      l_vpdOverrides[l_hbTOC.entry[i].label
-                                     & Util::HBRT_MEM_LABEL_VPD_MASK];
-
-#ifdef CONFIG_SECUREBOOT
-                    // load the section in, copy the data, then unload it
-                    l_elog = PNOR::loadSecureSection(l_over.pnorId);
-                    if(l_elog)
-                    {
-                        TRACFCOMP( g_trac_runtime,
-                                   "fill_RsvMem_hbData> failed secure load call" );
-                        break;
-                    }
-#endif
-
-                    PNOR::SectionInfo_t l_memd_info;
-                    l_elog = PNOR::getSectionInfo(l_over.pnorId,l_memd_info);
-                    if( l_elog )
-                    {
-                        TRACFCOMP( g_trac_runtime,
-                                   "fill_RsvMem_hbData> failed getSectionInfo call" );
-                        break;
-                    }
-
-#ifdef CONFIG_SECUREBOOT
-                    if (l_memd_info.hasHashTable)
-                    {
-                        memcpy(reinterpret_cast<uint8_t*>(l_prevDataAddr),
-                               reinterpret_cast<uint8_t *>(l_memd_info.vaddr),
-                               l_memd_info.size);
-                    }
-                    else
-                    {
-                        memcpy(reinterpret_cast<uint8_t*>(l_prevDataAddr),
-                               reinterpret_cast<uint8_t *>(l_memd_info.vaddr),
-                               l_memd_info.secureProtectedPayloadSize);
-                    }
-#else
-                    memcpy(reinterpret_cast<uint8_t*>(l_prevDataAddr),
-                           reinterpret_cast<uint8_t *>(l_memd_info.vaddr),
-                           l_memd_info.size);
-#endif
-
-
-#ifdef CONFIG_SECUREBOOT
-                    l_elog = PNOR::unloadSecureSection(l_over.pnorId);
-                    if(l_elog)
-                    {
-                        TRACFCOMP( g_trac_runtime,
-                                   "fill_RsvMem_hbData> failed secure unload call" );
-                        break;
-                    }
-#endif
-
-                    TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> VPD v address 0x%.16llX, size: %lld done", l_prevDataAddr, aligned_size);
-                    break;
-                    }
-
                 case(Util::HBRT_MEM_LABEL_PADDING):
                     // NOOP
                     break;
