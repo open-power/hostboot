@@ -184,7 +184,7 @@ class SbePsu
          */
         enum psuCoreStateControlNonReservedMsgs
         {
-            SBE_DMCONTROL_START_REQ_USED_REGS     = 0x03,
+            SBE_DMCONTROL_START_REQ_USED_REGS     = 0x0F,
             SBE_DMCONTROL_START_RSP_USED_REGS     = 0x01,
             SBE_DMCONTROL_STOP_REQ_USED_REGS      = 0x01,
             SBE_DMCONTROL_STOP_RSP_USED_REGS      = 0x01,
