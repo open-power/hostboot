@@ -516,7 +516,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
         # Stop the simulation, much like a hard-coded breakpoint
         SIM_break_simulation( "Simulation stopped. (hap 7007)"  )
 
-    if arg == 7008:
+    if arg == 7008:   # MAGIC_RANDOM
         cpu.r3 = random.randint(1, 0xffffffffffffffffL)
 
     if arg == 7009:   # MAGIC_MEMORYLEAK_FUNCTION
@@ -525,6 +525,10 @@ def magic_instruction_callback(user_arg, cpu, arg):
     if arg == 7011: #MAGIC_SIMICS_CHECK
         cpu.r3 = 1
         print "TimeManager::cv_isSimicsRunning = true"
+        # Clear the dump flag in case it was still set from a previous boot
+        #  (this call happens only 1 time and it is very early in the boot)
+        if( os.environ.has_key('HB_DUMP_COMPLETE') ):
+            del os.environ['HB_DUMP_COMPLETE']
 
     if arg == 7012:  # MAGIC_LOAD_PAYLOAD
         #For P9 the Payload load is much faster due to PNOR
@@ -536,6 +540,17 @@ def magic_instruction_callback(user_arg, cpu, arg):
         #cmd = 'shell "fcp --force -o0 -R %s:PAYLOAD simicsPayload.ecc; ecc --remove --p8 simicsPayload.ecc simicsPayload"; load-file simicsPayload 0x%x' % (flash_file, load_addr)
         #SIM_run_alone( run_command, cmd )
       print "MAGIC_LOAD_PAYLOAD not implemented\n";
+
+    if arg == 7014:   # MAGIC_HB_DUMP
+        # Collect a hostboot dump
+        # (no args)
+
+        # Make sure we only do 1 dump even though every thread will TI
+        if( not os.environ.has_key('HB_DUMP_COMPLETE') ):
+            print "Generating Hostboot Dump for TI"
+            os.environ['HB_DUMP_COMPLETE']="1"
+            cmd1 = "hb-Dump quiet"
+            SIM_run_alone(run_command, cmd1 )
 
     if arg == 7018:   # MAGIC_BREAK_ON_ERROR
         # Stop the simulation if an env var is set
@@ -573,6 +588,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
         percent_s = "%s"
         dateCommand = "shell \" date +'%s > TRACE REGS: %d %d' \""%(percent_s,first_num,second_num)
         SIM_run_alone(run_command, dateCommand )
+
     if arg == 7022:  # MAGIC_SET_LOG_LEVEL
         if( not os.environ.has_key('ENABLE_HB_SIMICS_LOGS') ):
             #print("Skipping Hostboot Simics Logging because ENABLE_HB_SIMICS_LOGS is not set")

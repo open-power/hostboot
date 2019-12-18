@@ -523,6 +523,7 @@ enum
     MAGIC_FAKEPAYLOAD_ENTER   =  7010, // Entered the fake payload.
     MAGIC_SIMICS_CHECK        =  7011, // Check if system is running on simics
     MAGIC_LOAD_PAYLOAD        =  7012, // load payload from flash
+    MAGIC_HB_DUMP             =  7014, // Create a hostboot dump
     MAGIC_BREAK_ON_ERROR      =  7018, // Breakpoint in error cases if
                                        //  env var HB_BREAK_ON_ERROR
     MAGIC_GET_SBE_TRACES      =  7019, // Collect SBE traces

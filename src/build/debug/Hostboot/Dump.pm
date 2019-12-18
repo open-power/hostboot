@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2018
+# Contributors Listed Below - COPYRIGHT 2012,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -106,6 +106,13 @@ sub main
         $debug = 1;
     }
 
+    # Parse 'quiet' option.
+    my $quiet = 0;
+    if (defined $args->{"quiet"})
+    {
+        $quiet = 1;
+    }
+
     # Check for a different output directory
     my $outdir = "./";
     if (defined $args->{"outdir"})
@@ -128,7 +135,7 @@ sub main
     open( OUTFH, ">$hbDumpFile" )   or die "can't open $hbDumpFile: $!\n";
     binmode(OUTFH);
 
-    ::userDisplay "Using HRMOR=". ::getHRMOR() . "\n";
+    ::userDisplay "Using HRMOR=". sprintf("0x%X",::getHRMOR()) . "\n";
 
     # Read memory regions and output to file.
     foreach my $state (@{$memory_states{int $memstate}})
@@ -152,7 +159,7 @@ sub main
                     $curlength = $length_remaining;
                 }
 
-                ::userDisplay (sprintf "...%x@%x\n", $curlength, $curstart);
+                ::userDisplay (sprintf "...%x@%x\n", $curlength, $curstart) if !$quiet;
 
                 my $data = ::readData($curstart, $curlength);
                 seek OUTFH, $curstart, SEEK_SET;
@@ -187,6 +194,7 @@ sub helpInfo
         options => {
                     "outdir=<path>" =>  ["Output directory for dump file"],
                     "debug" => ["More debug output."],
+                    "quiet" => ["Less output."],
                    },
     );
 }
