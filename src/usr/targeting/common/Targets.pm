@@ -1434,7 +1434,7 @@ sub processDdimmAndChildren
         {
             # Update TYPE to PMIC, because it is set to N/A and that won't fly
             $childType = $self->setAttribute($child, "TYPE", "PMIC");
-            $self->processPmic($child);
+            $self->processPmic($child, $proc_num);
             $foundPmic = true;
         }
         elsif ($childType eq "OCMB_CHIP")
@@ -1471,6 +1471,7 @@ sub processPmic
 {
     my $self = shift;
     my $target = shift;
+    my $procPos = shift;
 
     my $targetType = $self->targetTypeSanityCheck($target, "PMIC");
 
@@ -1534,7 +1535,7 @@ sub processPmic
     #  port and devAddr are set in 'sub setEepromAttributesForDdimms'
     my $fapi_name = "FAPI_I2C_CONTROL_INFO";
     $self->setAttributeField($target, $fapi_name, "i2cMasterPath",
-                             "physical:sys-0/node-0/proc-$pmicPos");
+                             "physical:sys-0/node-0/proc-$procPos");
 
     # Save this target, for retrieval later, when printed for consumption
     $self->{targeting}{SYS}[0]{NODES}[$nodeParentPos]{PMICS}[$pmicPos]{KEY} = $target;
