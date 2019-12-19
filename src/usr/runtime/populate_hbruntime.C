@@ -195,7 +195,6 @@ uint16_t getHdatNodeInstance(void)
 errlHndl_t getNextRhbAddrRange(hdatMsVpdRhbAddrRange_t* & o_rngPtr)
 {
     errlHndl_t l_elog = nullptr;
-/* FIXME RTC: 210975 not needed for now
 
     mutex_lock( &g_rhbMutex );
 
@@ -249,7 +248,6 @@ errlHndl_t getNextRhbAddrRange(hdatMsVpdRhbAddrRange_t* & o_rngPtr)
     } while(0);
 
     mutex_unlock( &g_rhbMutex );
-*/
 
     return(l_elog);
 }
@@ -431,7 +429,6 @@ errlHndl_t setNextHbRsvMemEntry(const HDAT::hdatMsVpdRhbAddrRangeType i_type,
 {
     errlHndl_t l_elog = nullptr;
 
-/* FIXME RTC: 210975 not needed right now
     do {
 
     // Check whether hostboot is trying to access memory outside of its allowed
@@ -467,7 +464,6 @@ errlHndl_t setNextHbRsvMemEntry(const HDAT::hdatMsVpdRhbAddrRangeType i_type,
 
     } while(0);
 
-*/
     return l_elog;
 }
 
@@ -511,8 +507,7 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
                 io_start_address, io_end_address, i_startAddressValid?1:0 );
 
     errlHndl_t l_elog = nullptr;
-// FIXME RTC: 210975 not needed for now
-#if 0
+
     uint64_t l_vAddr = 0x0;
     uint64_t l_prevDataAddr = 0;
     uint64_t l_prevDataSize = 0;
@@ -907,7 +902,6 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
     TRACFCOMP( g_trac_runtime,EXIT_MRK"fill_RsvMem_hbData> io_start_address=0x%.16llX,io_end_address=0x%.16llX,size=%lld",
                 io_start_address, io_end_address, io_size );
 
-#endif
     return l_elog;
 }
 
@@ -1041,8 +1035,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
 {
     TRACFCOMP( g_trac_runtime, ENTER_MRK"populate_HbRsvMem> i_nodeId=%d", i_nodeId );
     errlHndl_t l_elog = nullptr;
-//FIXME RTC: 210975 don't need to populate reserved mem yet
-#if 0
+
     bool l_preVerLidMgrLock = false;
 
 #ifdef CONFIG_SECUREBOOT
@@ -1643,10 +1636,9 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                 {
                     continue;
                 }
-/* FIXME RTC: 2109875
+
                 l_elog = hbResvLoadSecureSection(secIdPair.first,
                                                  secIdPair.second);
-*/
                 if (l_elog)
                 {
                     break;
@@ -1670,9 +1662,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                 }
             }
 
-// FIXME RTC: 210975 don't need SMF right now
-//            if(SECUREBOOT::SMF::isSmfEnabled())
-            if(0)
+            if(SECUREBOOT::SMF::isSmfEnabled())
             {
                 auto l_unsecureHomerSize = l_sys->
                                  getAttr<TARGETING::ATTR_UNSECURE_HOMER_SIZE>();
@@ -1765,7 +1755,6 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
         PreVerifiedLidMgr::unlock();
     }
 
-#endif
     TRACFCOMP( g_trac_runtime, EXIT_MRK"populate_HbRsvMem> l_elog=%.8X", ERRL_GETRC_SAFE(l_elog) );
     return(l_elog);
 } // end populate_HbRsvMem
@@ -3369,7 +3358,6 @@ errlHndl_t populate_hbRuntimeData( void )
 {
     errlHndl_t  l_elog = nullptr;
 
-/* FIXME RTC: 210975 not needed right now
     do {
         TRACFCOMP(g_trac_runtime, "Running populate_hbRuntimeData");
 
@@ -3448,6 +3436,10 @@ errlHndl_t populate_hbRuntimeData( void )
                 getAllChips( l_procChips,
                             TARGETING::TYPE_PROC,
                             true);
+
+                // @TODO RTC: 244854
+                // Re-enable this branch as part of runtime enablement work
+                /*
                 //Pass start address down to SBE via chipop
                 // Loop through all functional Procs
                 for (const auto & l_procChip: l_procChips)
@@ -3463,6 +3455,7 @@ errlHndl_t populate_hbRuntimeData( void )
                         break;
                     }
                 }
+                */
             }
         }
         else
@@ -3554,7 +3547,6 @@ errlHndl_t populate_hbRuntimeData( void )
 
     } while(0);
 
-*/
     return(l_elog);
 
 } // end populate_hbRuntimeData

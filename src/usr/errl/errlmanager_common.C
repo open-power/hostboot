@@ -26,9 +26,14 @@
 #include <hwas/common/hwasCallout.H>
 #include <errl/errlreasoncodes.H>
 #ifdef CONFIG_BMC_IPMI
+
+// @TODO RTC: 244854
+// Re-enable as part of full runtime enablement
+#ifndef __HOSTBOOT_RUNTIME
 #include <ipmi/ipmisel.H>
 #include <ipmi/ipmisensor.H>
 #include <ipmi/ipmiconfiglookup.H>
+#endif // __HOSTBOOT_RUNTIME
 #endif
 #include <errl/errlentry.H>
 #include <sys/mm.h>
@@ -182,6 +187,10 @@ void ErrlManager::setupPnorInfo()
                         i, l_id);
 
 #ifdef CONFIG_BMC_IPMI
+
+// @TODO RTC: 244854
+// Re-enable as part of full runtime enablement
+#ifndef __HOSTBOOT_RUNTIME
                     // for IPMI systems, unflatten to send down to the BMC
                     err = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_UNRECOVERABLE, 0,0);
@@ -226,6 +235,7 @@ void ErrlManager::setupPnorInfo()
                             iv_errlList.push_back(l_pair);
                         }
                     }
+#endif // __HOSTBOOT_RUNTIME
 #else
                     // for FSP system, this shouldn't ever happen.
                     setACKInFlattened(i);
@@ -488,6 +498,10 @@ void ErrlManager::setACKInFlattened(uint32_t i_position)
 
 
 #ifdef CONFIG_BMC_IPMI
+
+// @TODO RTC: 244854
+// Re-enable as part of full runtime enablement
+#ifndef __HOSTBOOT_RUNTIME
 void getSensorOffsetBasedOnSeverity(errlHndl_t & io_err,
                                     uint8_t &o_eventDirType,
                                     uint8_t & o_offset );
@@ -1034,6 +1048,7 @@ void getSensorOffsetBasedOnSeverity(errlHndl_t & io_err,
             break;
     }
 }
+#endif // __HOSTBOOT_RUNTIME
 #endif // CONFIG_BMC_IPMI
 
 void ErrlManager::setErrlSkipFlag(errlHndl_t io_err)

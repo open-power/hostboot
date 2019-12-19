@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -175,11 +175,16 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
 
 
 #ifdef CONFIG_BMC_IPMI
+
+// @TODO RTC: 244854
+// Re-enable as part of full runtime enablement
+#ifndef __HOSTBOOT_RUNTIME
         TRACFCOMP(g_trac_errl,INFO_MRK"Send msg to BMC for errlogId [0x%08x]",
                   io_err->plid() );
 
         // convert to SEL/eSEL and send to BMC over IPMI
         sendErrLogToBmc(io_err);
+#endif // __HOSTBOOT_RUNTIME
 #else
         TRACDCOMP(g_trac_errl,
                   INFO_MRK"Send msg to FSP for errlogId [0x%08x]",
@@ -376,6 +381,9 @@ bool rt_processCallout(errlHndl_t &io_errl,
         if ((pCalloutUD->type == HWAS::HW_CALLOUT) &&
             (pCalloutUD->gardErrorType != HWAS::GARD_NULL))
         {
+                // @TODO RTC: 244854
+                // Re-enable as part of primary runtime enablement
+                /*
                 TARGETING::Target *pTarget = NULL;
                 uint8_t * l_uData = (uint8_t *)(pCalloutUD + 1);
                 bool l_err = HWAS::retrieveTarget(l_uData, pTarget, io_errl);
@@ -393,6 +401,7 @@ bool rt_processCallout(errlHndl_t &io_errl,
                         errlCommit(errl, HWAS_COMP_ID);
                     }
                 }
+                */
 
         }
     }

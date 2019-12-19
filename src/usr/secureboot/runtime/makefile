@@ -28,15 +28,14 @@ ROOTPATH = ../../../..
 
 MODULE = secureboot_rt
 
-# FIXME RTC: 210975
-#include ../common/common.mk
+include ../common/common.mk
 CFLAGS += -iquote${ROOTPATH}/src/usr/secureboot
 
 SUBDIRS += test.d
 
-#OBJS += ${SECUREBOOT_COMMON_OBJS}
-#OBJS += rt_secureboot.o
+OBJS += ${SECUREBOOT_COMMON_OBJS}
+OBJS += rt_secureboot.o
 
-#VPATH += ../common
+VPATH += ../common
 
 include $(ROOTPATH)/config.mk

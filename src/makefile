@@ -270,6 +270,7 @@ TESTCASE_MODULES += testfapi2
 TESTCASE_MODULES += $(if $(CONFIG_EARLY_TESTCASES) && $(FSP_BUILD) ,,testnvram)
 TESTCASE_MODULES += testsmf
 TESTCASE_MODULES += testexpaccess
+TESTCASE_MODULES += testrtloader
 
 #******************************************************************
 #KNOWN ISSUES (I might let these run but there is something wrong)
@@ -291,18 +292,18 @@ RUNTIME_OBJECTS += rt_assert.o
 RUNTIME_OBJECTS += rt_vfs.o
 RUNTIME_OBJECTS += rt_task.o
 RUNTIME_OBJECTS += rt_time.o
-#RUNTIME_OBJECTS += runtime_utils.o
+RUNTIME_OBJECTS += runtime_utils.o
 ifdef HOSTBOOT_PROFILE
 # we don't instrument runtime because we don't have space, but we
 # still link this in because it uses some object files that need it
 RUNTIME_OBJECTS += gcov.o
 endif
 
-#RUNTIME_MODULES += trace_rt
-#RUNTIME_MODULES += errl_rt
-#RUNTIME_MODULES += targeting_rt
-#RUNTIME_MODULES += util_rt
-#RUNTIME_MODULES += devicefw_rt
+RUNTIME_MODULES += trace_rt
+RUNTIME_MODULES += errl_rt
+RUNTIME_MODULES += targeting_rt
+RUNTIME_MODULES += util_rt
+RUNTIME_MODULES += devicefw_rt
 #RUNTIME_MODULES += xscom_rt
 #RUNTIME_MODULES += fsiscom_rt
 #RUNTIME_MODULES += scom_rt
@@ -313,9 +314,9 @@ endif
 #RUNTIME_MODULES += $(if $(CONFIG_HBRT_PRD),prdf_rt)
 #RUNTIME_MODULES += $(if $(CONFIG_BMC_IPMI),ipmi_rt)
 #RUNTIME_MODULES += pm_rt
-#RUNTIME_MODULES += pnor_rt
+RUNTIME_MODULES += pnor_rt
 #RUNTIME_MODULES += fapi2_rt
-#RUNTIME_MODULES += secureboot_rt
+RUNTIME_MODULES += secureboot_rt
 #RUNTIME_MODULES += p9_cpuWkup
 #RUNTIME_MODULES += fsi_rt
 #RUNTIME_MODULES += sbeio_rt
@@ -334,13 +335,13 @@ export RUNTIME_MODULES_GCOV_BLACKLIST:=$(RUNTIME_MODULES)
 
 RUNTIME_DATA_MODULES += $(if $(CONFIG_ENABLE_HDAT_IN_HOSTBOOT),pvpd_bp.dat)
 
-#RUNTIME_TESTCASE_MODULES += cxxtest_rt
+RUNTIME_TESTCASE_MODULES += cxxtest_rt
 #RUNTIME_TESTCASE_MODULES += testsyslib_rt
 #RUNTIME_TESTCASE_MODULES += testxscom_rt
 #RUNTIME_TESTCASE_MODULES += testerrl_rt
 #RUNTIME_TESTCASE_MODULES += testdevicefw_rt
 #RUNTIME_TESTCASE_MODULES += testscom_rt
-#RUNTIME_TESTCASE_MODULES += testutil_rt
+RUNTIME_TESTCASE_MODULES += testutil_rt
 #RUNTIME_TESTCASE_MODULES += testvpd_rt
 #RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_HBRT_PRD),testprdf_rt)
 #RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_HBRT_PRD),testattn_rt)

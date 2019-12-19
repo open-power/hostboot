@@ -27,7 +27,8 @@ ROOTPATH = ../../../../..
 
 MODULE = testutil_rt
 EXTRAINCDIR += ${ROOTPATH}/src/usr/util/
-# FIXME RTC: 210975
+# TODO RTC: 244854
+# Restore all testcases when runtime fully enabled
 #TESTS = *.H
 
 include $(ROOTPATH)/config.mk

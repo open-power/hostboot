@@ -26,16 +26,18 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = errl_rt
 
-# FIXME RTC: 210975
-
 #include common ojects between hostboot and runtime hostboot
-#include ../errl.mk
+include ../errl.mk
 
 #needed to compile hwasPlatDeconfigGard in runtime context
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
+
+# TODO RTC: 244854
+# Update all p9 HWPs to p10 when runtime fully enabled and re-enable
+# commented sections
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
 
@@ -45,12 +47,12 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps
 # need find the source for this hwp in runtime env
 #VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm
 
-#VPATH += ${ROOTPATH}/src/usr/hwas/common
-#VPATH += ${ROOTPATH}/src/usr/hwas
+VPATH += ${ROOTPATH}/src/usr/hwas/common
+VPATH += ${ROOTPATH}/src/usr/hwas
 
-#OBJS += rt_errlmanager.o
-#OBJS += rt_vfs.o
-#OBJS += hwasCallout.o
+OBJS += rt_errlmanager.o
+OBJS += rt_vfs.o
+OBJS += hwasCallout.o
 #OBJS += deconfigGard.o
 #OBJS += hwasPlatDeconfigGard.o
 #OBJS += p9_update_ec_eq_state.o
@@ -58,9 +60,9 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps
 
 SUBDIRS += test.d
 
-#VPATH += ..
+VPATH += ..
 include $(ROOTPATH)/config.mk
 
 # to find errludattribute.[CH] and errludtarget.[CH] - they are generated
 #  by src/usr/targeting/common/xmltohb/xmltohb.pl
-#vpath %.C ${GENDIR}
+vpath %.C ${GENDIR}

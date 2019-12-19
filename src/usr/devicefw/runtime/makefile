@@ -26,15 +26,13 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = devicefw_rt
 
-# FIXME RTC: 210975
-
 # Include common objects
-#include ../devicefw.mk
+include ../devicefw.mk
 
 # add unique objects - currently none
 # OBJS +=
 
 SUBDIRS += test.d
 
-#VPATH += ..
+VPATH += ..
 include $(ROOTPATH)/config.mk

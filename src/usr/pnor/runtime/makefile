@@ -26,14 +26,12 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = pnor_rt
 
-# FIXME RTC: 210975
-
-#OBJS += rt_pnor.o
-#OBJS += pnor_utils.o
-#OBJS += pnor_common.o
-#OBJS += ecc.o
+OBJS += rt_pnor.o
+OBJS += pnor_utils.o
+OBJS += pnor_common.o
+OBJS += ecc.o
 
 SUBDIRS += test.d
 
-#VPATH += ../
+VPATH += ../
 include $(ROOTPATH)/config.mk

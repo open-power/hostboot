@@ -42,22 +42,24 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 
-# FIXME RTC: 210975
-#OBJS += utilbase.o
+# TODO RTC: 244854
+# Re-enable other objects below and replace P9 HWPs with
+# p10 HWPs above when runtime is fully enabled
+OBJS += utilbase.o
 #OBJS += utilstream.o
 #OBJS += utilmem.o
-#OBJS += utillidmgr_rt.o
+OBJS += utillidmgr_rt.o
 #OBJS += utilfile.o
-#OBJS += utillidpnor.o
+OBJS += utillidpnor.o
 #OBJS += rt_cmds.o
-#OBJS += util_rt.o
-#OBJS += utilrsvdmem.o
+OBJS += util_rt.o
+OBJS += utilrsvdmem.o
 #OBJS += utilxipimage.o
 #OBJS += utilcommonattr.o
 #OBJS += rt_fwnotify.o
-#OBJS += rt_fwreq_helper.o
+OBJS += rt_fwreq_helper.o
 
 SUBDIRS += test.d
 
-#VPATH += ..
+VPATH += ..
 include $(ROOTPATH)/config.mk

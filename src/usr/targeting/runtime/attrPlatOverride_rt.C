@@ -48,6 +48,10 @@ int apply_attr_override(uint8_t* i_data,
                         size_t i_size )
 {
     int rc = 0;
+
+// @TODO RTC: 244854
+// Re-enable as part of runtime enablement work
+#if 0
     errlHndl_t l_errl = NULL;
 
     TRACFCOMP(g_trac_hbrt, ENTER_MRK" apply_attr_override");
@@ -124,6 +128,7 @@ int apply_attr_override(uint8_t* i_data,
     }
 
     TRACFCOMP(g_trac_hbrt, EXIT_MRK" apply_attr_override: rc=%d");
+#endif
     return rc;
 }
 

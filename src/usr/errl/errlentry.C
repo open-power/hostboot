@@ -959,6 +959,10 @@ void ErrlEntry::addPartIdInfoToErrLog
 }
 
 #ifdef CONFIG_BMC_IPMI
+
+// @TODO RTC: 244854
+// Re-enable as part of full runtime enablement
+#ifndef __HOSTBOOT_RUNTIME
 // Find the FRU ID associated with target.
 // Returns first FRU ID found as it navigates the target's parent hierarchy
 TARGETING::ATTR_FRU_ID_type getFRU_ID(TARGETING::Target * i_target)
@@ -1033,6 +1037,7 @@ void ErrlEntry::addSensorDataToErrLog(TARGETING::Target * i_target,
     TRACDCOMP(g_trac_errl, EXIT_MRK"ErrlEntry::addSensorDataToErrLog()");
 }
 
+#endif // __HOSTBOOT_RUNTIME
 
 #endif
 
@@ -1099,7 +1104,13 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
                     {
                         addPartIdInfoToErrLog( l_target );
 #ifdef CONFIG_BMC_IPMI
+
+// @TODO RTC: 244854
+// Re-enable as part of full runtime enablement
+#ifndef __HOSTBOOT_RUNTIME
                         addSensorDataToErrLog( l_target, l_ud->priority);
+#endif // __HOSTBOOT_RUNTIME
+
 #endif
                     }
                     else

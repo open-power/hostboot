@@ -28,22 +28,20 @@ MODULE = trace_rt
 
 EXTRAINCDIR +=${ROOTPATH}/src/usr
 
-# FIXME RTC: 210975
-
-#OBJS += interface.o
-#OBJS += assert.o
-#OBJS += compdesc.o
-#OBJS += complist.o
-#OBJS += rt_service.o
-#OBJS += bufferpage.o
-#OBJS += rt_daemon.o
-#OBJS += rt_buffer.o
-#OBJS += rt_rsvdtracebuffer.o
-#OBJS += rt_rsvdtracebufservice.o
+OBJS += interface.o
+OBJS += assert.o
+OBJS += compdesc.o
+OBJS += complist.o
+OBJS += rt_service.o
+OBJS += bufferpage.o
+OBJS += rt_daemon.o
+OBJS += rt_buffer.o
+OBJS += rt_rsvdtracebuffer.o
+OBJS += rt_rsvdtracebufservice.o
 
 
-#VPATH += ..
-#VPATH += ../daemon
+VPATH += ..
+VPATH += ../daemon
 
 SUBDIRS += test.d
 

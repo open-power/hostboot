@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,8 +45,13 @@ errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
 {
     TRACFCOMP(g_trac_targeting,"attrPlatOverride::getAttrOverrides ENTER");
 
-    // Create local permanent override tank and array of tanks
     errlHndl_t l_err = NULL;
+
+// @TODO RTC: 244854
+// Remove hostboot runtime exclusion when runtime is fully enabled
+#ifndef __HOSTBOOT_RUNTIME
+
+    // Create local permanent override tank and array of tanks
     AttributeTank l_PermTank;
     AttributeTank* l_overTanks[AttributeTank::TANK_LAYER_LAST];
 
@@ -294,6 +299,9 @@ errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
     } while(0);
 
     TRACFCOMP(g_trac_targeting,"attrPlatOverride::getAttrOverrides EXIT");
+
+#endif
+
     return l_err;
 }
 

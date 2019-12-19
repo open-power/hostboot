@@ -26,11 +26,9 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = cxxtest_rt
 
-# FIXME RTC: 210975
+OBJS += TestSuite.o
+OBJS += rt_cxxtestexec.o
 
-#OBJS += TestSuite.o
-#OBJS += rt_cxxtestexec.o
-
-#VPATH += ..
+VPATH += ..
 
 include ${ROOTPATH}/config.mk

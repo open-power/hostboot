@@ -40,7 +40,10 @@ namespace RT_TARG
 void clearPendingSbeMsgs()
 {
     TRACFCOMP(g_trac_targeting, ENTER_MRK"clearPendingSbeMsgs");
-    errlHndl_t l_errl = nullptr;
+
+    // @TODO RTC: 244854
+    // Uncomment this as part of runtime enablement work
+    //errlHndl_t l_errl = nullptr;
     do
     {
         //get runtime interfaces
@@ -70,6 +73,9 @@ void clearPendingSbeMsgs()
             break;
         }
 
+        // @TODO RTC: 244854
+        // Uncomment this as part of runtime enablement work
+        /* temp disable
         for( const auto & l_procTarget : l_procList )
         {
             // clear out the two bits (in-progress, complete) for this
@@ -89,6 +95,7 @@ void clearPendingSbeMsgs()
                 errlCommit (l_errl, SBE_COMP_ID);
             }
         }
+        */
     }
     while(0);
 

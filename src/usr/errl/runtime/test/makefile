@@ -27,8 +27,10 @@ ROOTPATH = ../../../../..
 
 MODULE = testerrl_rt
 
-# FIXME RTC: 210975
+# TODO RTC: 244854
+# Restore all testcases, instead of just the one below
 
 #TESTS = *.H
+TESTS = rt_errltest.H
 
 include ${ROOTPATH}/config.mk
