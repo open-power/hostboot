@@ -1071,6 +1071,15 @@ typedef struct runtimeInterfaces
     // functions from either direction in between any two levels of support.
     void (*reserved[21])(void);
 
+    #ifdef PROFILE_CODE
+    /**
+     *  @brief Gracefully unload the runtime environment in order to easily
+     *      capture code coverage information.  Only offered as part of a
+     *      profiled environment, not a production build
+     */
+    void (*unload)(void);
+    #endif
+
 } runtimeInterfaces_t;
 
 

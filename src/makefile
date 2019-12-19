@@ -336,7 +336,11 @@ RUNTIME_MODULES += xscom_rt    # ~/src/usr/xscom/runtime/
 # This is exported so that gcov knows the list of runtime modules to
 # exclude from instrumentation. We can't simply export RUNTIME_MODULES or
 # else we get duplicate modules in the list which causes linker errors.
-export RUNTIME_MODULES_GCOV_BLACKLIST:=$(RUNTIME_MODULES)
+#
+# @TODO RTC 248021: Remove modules from blacklist when compile is fixed
+# Reasons for coverage exclusion:
+#     vpd_rt: Duplicate weak symbol errors for AttrRp singleton
+export RUNTIME_MODULES_GCOV_BLACKLIST:= vpd_rt
 
 RUNTIME_DATA_MODULES += $(if $(CONFIG_ENABLE_HDAT_IN_HOSTBOOT),pvpd_bp.dat)
 

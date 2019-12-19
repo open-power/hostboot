@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,7 +62,12 @@ namespace TRACE
     Service::~Service()
     {
         // No need to destruct the service.
+
+        #ifndef PROFILE_CODE
+        // When code coverage is active, unload all the runtime
+        // modules to recover the code coverage data
         assert(0, "No need to destruct the Service");
+        #endif
     }
 
     void Service::writeEntry(ComponentDesc* i_td,

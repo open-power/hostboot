@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2019
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -40,12 +40,6 @@ $(LCOV_TOOL) $(GENHTML_TOOL):
 	git submodule update --init --checkout -- $(LCOV_DIR)
 
 ifdef MODULE
-
-# Don't profile HBRT modules to keep size down
-ifdef HOSTBOOT_RUNTIME
-HOSTBOOT_PROFILE=
-endif
-
 
 ifdef HOSTBOOT_PROFILE
 
@@ -83,7 +77,7 @@ ifdef HOSTBOOT_PROFILE_ARTIFACT
 ## HOSTBOOT_PROFILE_NO_INSTRUMENT
 
 ifndef HOSTBOOT_PROFILE_NO_INSTRUMENT
-CFLAGS += --coverage
+CFLAGS += --coverage -DPROFILE_CODE
 endif
 
 endif

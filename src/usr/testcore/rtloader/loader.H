@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -169,6 +169,12 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
                     // Call CxxTest entry.
                     (*rtInterface->cxxtestExecute)(&cxxTestStats);
+
+                    #ifdef PROFILE_CODE
+                    // When code coverage is active, unload all the runtime
+                    // modules to recover the code coverage data
+                    (*rtInterface->unload)();
+                    #endif
                 }
 
             } while(0);

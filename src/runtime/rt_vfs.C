@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -70,6 +72,35 @@ void vfs_module_init()
 
     printk("Modules initialized.\n");
 
+}
+
+/**
+ *  @brief Unload all loaded runtime modules
+ *
+ *  @note While this is compiled in always, it is only ever called
+ *      when profiling is enabled.  Selective compile of this section isn't
+ *      easily feasible yet because communicating whether a given non-module
+ *      runtime object has coverage is not supported.
+ */
+void vfs_module_fini(void)
+{
+    printk("Unloading runtime modules.\n");
+
+    VfsSystemModule* module = &VFS_MODULES[0];
+    while ('\0' != module->module[0])
+    {
+        printk("\tUnloading module %s...", module->module);
+        if (nullptr != module->fini)
+        {
+            (module->fini)(nullptr);
+        }
+        printk("done.\n");
+        ++module;
+    }
+    printk("Unloaded runtime modules.\n");
+
+    // Currently limited to unloading modules, not the base
+    // objects
 }
 
 VfsSystemModule * vfs_find_module(VfsSystemModule * i_table,

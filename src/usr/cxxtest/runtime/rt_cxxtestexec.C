@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -27,6 +29,15 @@
 
 #include <kernel/console.H>
 #include <vfs/vfs.H>
+
+#ifdef PROFILE_CODE
+// There is not technically supposed to be a rt_vfs.H because
+// rt_vfs.C is supposed to implement the exact API of the common
+// vfs.H.  In the one off coverage case though, the test executor
+// needs access to the special vfs_module_fini API.  Just forward
+// declare the API defintion to make that access possible.
+void vfs_module_fini();
+#endif
 
 trace_desc_t *g_trac_cxxtest = NULL;
 TRAC_INIT(&g_trac_cxxtest, CXXTEST_COMP_NAME, KILOBYTE );
@@ -70,6 +81,10 @@ namespace CxxTest
         registerCxxTest()
         {
             getRuntimeInterfaces()->cxxtestExecute = &execute;
+
+            #ifdef PROFILE_CODE
+            getRuntimeInterfaces()->unload = &vfs_module_fini;
+            #endif
         }
     };
     registerCxxTest g_register;

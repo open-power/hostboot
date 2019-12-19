@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,7 +81,11 @@ namespace TARGETING
         // Only assert if this in not a temporary AttrRP instance
         if (!iv_isTempInstance)
         {
+            #ifndef PROFILE_CODE
+            // When profiling, we want to be able to unload modules and
+            // easily recover the coverage information
             TARG_ASSERT(false, "Assert to exit ~AttrRP");
+            #endif
         }
 #endif
 

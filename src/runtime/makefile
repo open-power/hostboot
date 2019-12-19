@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2019
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -24,10 +24,12 @@
 # IBM_PROLOG_END_TAG
 HOSTBOOT_RUNTIME = 1
 
-# Profiling the runtime makes it too big, but we should revisit this
-# later after we reduce our memory footprint because it would be good
-# to instrument this too.
-HOSTBOOT_PROFILE_ARTIFACT=
+# Currently Hostboot doesn't have a great way of passing this
+# coverage flag to the runtime objects, so setting it here
+# as a one off
+ifdef HOSTBOOT_PROFILE
+CFLAGS += -DPROFILE_CODE
+endif
 
 ROOTPATH = ../..
 include ../usr/runtime/common/common.mk
