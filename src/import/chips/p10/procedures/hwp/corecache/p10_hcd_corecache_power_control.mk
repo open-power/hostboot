@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019
+# Contributors Listed Below - COPYRIGHT 2019,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -26,5 +26,5 @@ PROCEDURE=p10_hcd_corecache_power_control
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/common/include)
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/procedures/hwp/lib)
 # TODO:  remove when PFET senses work.
-#lib$(PROCEDURE)_COMMONFLAGS += -DPFET_SENSE_POLL_DISABLE
+lib$(PROCEDURE)_COMMONFLAGS += -DPFET_SENSE_POLL_DISABLE
 $(call BUILD_PROCEDURE)
