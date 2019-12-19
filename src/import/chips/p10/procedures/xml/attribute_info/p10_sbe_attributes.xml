@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -48,11 +48,12 @@
   </entry>
   <entry>
     <!-- ATTR_PG_MVPD will be customized from the PG keyword data in module VPD -->
+
     <name>ATTR_PG_MVPD</name>
     <value>0xFFE03FFF</value> <!--  0 Unused -->
-    <value>0xFFE071FF</value> <!--  1 PERV   -->
+    <value>0xFFE051FF</value> <!--  1 PERV   -->
     <value>0xFFE37FFF</value> <!--  2 N0     -->
-    <value>0xFFE51FFF</value> <!--  3 N1     -->
+    <value>0xFFE53FFF</value> <!--  3 N1     -->
     <value>0xFFFFFFFF</value> <!--  4 Unused -->
     <value>0xFFFFFFFF</value> <!--  5 Unused -->
     <value>0xFFFFFFFF</value> <!--  6 Unused -->
@@ -74,8 +75,8 @@
     <value>0xFFFFFFFF</value> <!-- 22 Unused -->
     <value>0xFFFFFFFF</value> <!-- 23 Unused -->
     <value>0xFFE33DFF</value> <!-- 24 IOHS0  -->
-    <value>0xFFE33DFF</value> <!-- 25 IOHS1  -->
-    <value>0xFFE33DFF</value> <!-- 26 IOHS2  -->
+    <value>0xFFE3BDFF</value> <!-- 25 IOHS1  -->
+    <value>0xFFE3BDFF</value> <!-- 26 IOHS2  -->
     <value>0xFFE33DFF</value> <!-- 27 IOHS3  -->
     <value>0xFFE33DFF</value> <!-- 28 IOHS4  -->
     <value>0xFFE33DFF</value> <!-- 29 IOHS5  -->
