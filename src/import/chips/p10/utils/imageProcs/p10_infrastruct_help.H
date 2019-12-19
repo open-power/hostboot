@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,7 @@ const uint32_t  MAX_RT_IMAGE_SIZE       = 1024 * 1024;   // Max Runtime size.
 // The below buffer sizes are governed by the longest p10 engd ring, n1_fure, which is
 // some 1,775,113 bits long.  And we need to hold both data *and* care parts in the buffer.
 // So... 1,775,113 x 2 / 8 = 443,778 + size to grow
-const uint32_t  MAX_RING_BUF_SIZE       = 450000;        // Max ring buffer size (agreed w/HB).
+const uint32_t  MAX_RING_BUF_SIZE       = 650000;        // Max ring buffer size (agreed w/HB).
 const uint32_t  MAX_RING_BUF_SIZE_TOOL  = 450000;        // Max ring buf size for tools.
 
 const uint32_t  MAX_DYN_RING_SECTION_SIZE = 1024 * 1024; // Max dynamic ring section size.
