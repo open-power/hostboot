@@ -808,14 +808,6 @@
   <targetType>
     <id>chip-processor-power10</id>
     <parent>chip-processor</parent>
-    <!-- TODO RTC 213604: Remove i2c based module vpd once SPI support is added -->
-    <attribute>
-      <id>EEPROM_VPD_BACKUP_INFO</id>
-    </attribute>
-    <!-- TODO RTC 213604: Remove i2c based module vpd once SPI support is added -->
-    <attribute>
-      <id>EEPROM_VPD_PRIMARY_INFO</id>
-    </attribute>
     <attribute>
       <id>FSP_BASE_ADDR</id>
     </attribute>
@@ -2356,6 +2348,9 @@
       <id>MFG_TRACE_ENABLE</id>
     </attribute>
     <attribute>
+      <id>MIN_FREQ_MHZ</id>
+    </attribute>
+    <attribute>
       <id>MIRROR_BASE_ADDRESS</id>
     </attribute>
     <attribute>
@@ -2467,9 +2462,6 @@
     <attribute>
       <default>0x000603FC00000000</default>
       <id>XSCOM_BASE_ADDRESS</id>
-    </attribute>
-    <attribute>
-      <id>MIN_FREQ_MHZ</id>
     </attribute>
   </targetType>
 
