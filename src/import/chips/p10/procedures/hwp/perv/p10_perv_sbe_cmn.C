@@ -40,6 +40,7 @@
 #include <p10_scom_perv_6.H>
 #include <p10_scom_perv_7.H>
 #include <p10_scom_perv_8.H>
+#include <p10_scom_perv_9.H>
 #include <p10_scom_perv_a.H>
 #include <p10_scom_perv_c.H>
 #include <p10_scom_perv_e.H>
@@ -541,10 +542,8 @@ fapi2::ReturnCode p10_perv_sbe_cmn_clock_start_stop(const
     FAPI_TRY(fapi2::putScom(i_mcast_target, CLK_REGION, 0));
 
     FAPI_DBG("Enter flush (clear flushmode inhibit)");
-    //Setting CPLT_CTRL0 register value
-    l_data64.flush<0>();
-    l_data64.setBit<CPLT_CTRL0_CTRL_CC_FLUSHMODE_INH>();
-    FAPI_TRY(fapi2::putScom(i_mcast_target, CPLT_CTRL0_WO_CLEAR, l_data64));
+    l_data64.flush<0>().insertFromRight<4, 15>(l_regions);
+    FAPI_TRY(fapi2::putScom(i_mcast_target, CPLT_CTRL4_WO_CLEAR, l_data64));
 
     FAPI_INF("p10_perv_sbe_cmn_clock_start_stop: Exiting ...");
 
