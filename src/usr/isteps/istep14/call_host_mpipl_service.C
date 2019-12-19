@@ -157,10 +157,10 @@ void* call_host_mpipl_service (void *io_pArgs)
 
             do
             {
-                // In non-FSP based system SBE collects architected register
+                // In OPAL based system SBE collects architected register
                 // data. Copy architected register data from Reserved Memory
                 // to hypervisor memory.
-                if ( !INITSERVICE::spBaseServicesEnabled() )
+                if( TARGETING::is_sapphire_load() )
                 {
                     l_err = DUMP::copyArchitectedRegs();
                     if (l_err)
