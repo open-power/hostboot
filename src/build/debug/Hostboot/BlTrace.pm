@@ -136,7 +136,7 @@ sub main
 
     my ($packName,$args) = @_;
 
-    my $traceAddr = 0x208000; #offset from Hostboot's HRMOR (2MB+32KB)
+    my $traceAddr = 0x209000; #offset from Hostboot's HRMOR (2MB+36KB)
     my $traceSize = 64;
 
     # Parse trace address from options.
