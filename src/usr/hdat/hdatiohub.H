@@ -59,7 +59,7 @@ namespace HDAT
 #define HDAT_PCIE_MAX_SPEED_GEN3 3
 #define HDAT_PCIE_MAX_SPEED_GEN4 4
 const uint16_t HDAT_VPD_VERSION = 0x0020;
-const uint16_t HDAT_IO_VERSION = 0x7B;
+const uint16_t HDAT_IO_VERSION = 0x8A;
 
 const uint32_t HDAT_MAX_IO_CHIPS = 10;
 const uint32_t HDAT_MAX_SLOT_PER_HUB = 32;
@@ -275,7 +275,7 @@ enum hdatHubStatus
 #define HDAT_MODULE_TYPE_ID_NIMBUS_LAGRANGE 0x0022
 #define HDAT_MODULE_TYPE_ID_CUMULUS_DUOMO 0x0030
 //TODO: RTC Story 246515 Miscellaneous Rainier Changes
-#define HDAT_MODULE_TYPE_ID_P10_HOPPER  0x0050
+#define HDAT_MODULE_TYPE_ID_P10_GODEL  0x0050
 
 
 

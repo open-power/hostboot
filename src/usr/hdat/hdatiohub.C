@@ -90,8 +90,8 @@ const HdatKeywordInfo l_pvpdKeywordsP10[] =
 extern trace_desc_t *g_trac_hdat;
 
 const uint32_t HDAT_MULTIPLE = 16;
-const uint32_t PROC0_NUM_SLOT_TABLE_AREAS = 16;
-const uint32_t PROC1_NUM_SLOT_TABLE_AREAS = 11;
+const uint32_t PROC0_NUM_SLOT_TABLE_AREAS = 4;
+const uint32_t PROC1_NUM_SLOT_TABLE_AREAS = 5;
 const uint32_t PROC0_NUM_SLOT_ENTRY_INFO  = 2;
 const uint32_t PROC1_NUM_SLOT_ENTRY_INFO  = 3;
 const uint32_t MAX_NUM_OF_PROCS           = 2;
@@ -145,7 +145,23 @@ hdatSlotMapArea_t   hdatSlotMapAreas[MAX_NUM_OF_PROCS][MAX_NUM_OF_SLOT_TABLE_ARE
 { 26,25,5,3,0,0,0,0,0,0,0,0,0,0x10DE,0x1DB1,0x10DE,0x1DB1,"GPU4" },
 { 27,22,5,2,0,0,0,0,0,0,0,1,13,0x10B5,0x8725,0x10B5,0x8725,0 },
 { 28,27,5,3,0,0,0,0,0,0,0,0,0,0x10DE,0x1DB1,0x10DE,0x1DB1,"GPU5" }
-}
+},
+
+//Rainier Hub2 and Hub3 values:
+{
+
+{ 10,0,0,0,0,0,0xFFFF,0,0,0,1,0,0,0,0,0,0,0,"C11" },
+{ 11,0,3,0,0,0,0xFFFF,0,0,0,1,0,0,0,0,0,0,0,"C10" },
+
+},
+
+{
+
+{ 12,0,0,0,0,0,0xFF00,0,0,0,1,0,0,0,0,0,0,0,"C9" },
+{ 13,0,1,0,0,0,0x00FF,0,0,0,1,0,0,0,0,0,0,0,"C8" },
+{ 14,0,3,0,0,0,0xFFFF,0,0,0,1,0,0,0,0,0,0,0,"C7" },
+
+},
 
 };
 */
@@ -159,22 +175,18 @@ hdatSlotMapArea_t
 { 2,0,1,0,0,0,0x00FF,0,0,0,1,0,0,0,0,0,0,0,"002" },
 { 3,0,2,0,0,0,0x000F,0,0,0,1,0,0,0,0,0,0,0,"001" },
 { 4,0,3,0,0,0,0xFFFF,0,0,0,1,0,0,0,0,0,0,0,"C10" },
+
+},
+
+{
+
 { 5,0,0,0,0,0,0xFF00,0,0,0,1,0,0,0,0,0,0,0,"C9" },
 { 6,0,1,0,0,0,0x00FF,0,0,0,1,0,0,0,0,0,0,0,"C8" },
 { 7,0,3,0,0,0,0xFF00,0,0,0,1,0,0,0,0,0,0,0,"C7" },
 { 8,0,4,0,0,0,0x00F0,0,0,0,1,0,0,0,0,0,0,0,"004" },
 { 9,0,5,0,0,0,0x000F,0,0,0,1,0,0,0,0,0,0,0,"003" },
-{ 10,0,0,0,0,0,0xFFFF,0,0,0,1,0,0,0,0,0,0,0,"C11" },
-{ 11,0,3,0,0,0,0xFFFF,0,0,0,1,0,0,0,0,0,0,0,"C10" },
-{ 12,0,0,0,0,0,0xFF00,0,0,0,1,0,0,0,0,0,0,0,"C9" },
-{ 13,0,1,0,0,0,0x00FF,0,0,0,1,0,0,0,0,0,0,0,"C8" },
-{ 14,0,3,0,0,0,0xFFFF,0,0,0,1,0,0,0,0,0,0,0,"C7" },
 
 },
-
-{
-{ 0,0,0,0,0,0,0x0,0,0,0,0,0,0,0,0,0,0,0,"" },
-}
 
 };
 
@@ -983,7 +995,7 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             //@TODO:RTC Story 246361 HDAT Nimbus/Cumulus model code removal
             if(l_model == TARGETING::MODEL_POWER10)
             {
-                l_hub->hdatModuleId = HDAT_MODULE_TYPE_ID_P10_HOPPER;
+                l_hub->hdatModuleId = HDAT_MODULE_TYPE_ID_P10_GODEL;
             }
 
             TARGETING::Target *l_pSysTarget = NULL;
@@ -1027,7 +1039,17 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             //@TODO RTC 246357 missing attribute
             /*l_hub->hdatFab0PresDetect = l_pProcTarget->
                    getAttr<TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE>();*/
-            l_hub->hdatFab0PresDetect = 1;       
+            //Need to remove the below check once the attribute is ready
+            //Hub0: PHB 0,1,2 & 3
+            //Hub1: PHB 0,1,3,4 & 5
+            if (l_numProcs == 0)
+            {
+                l_hub->hdatFab0PresDetect = 0xF0;
+            }
+            else if (l_numProcs == 1)
+            {
+                l_hub->hdatFab0PresDetect = 0xDC;
+            }
 
             TARGETING::PredicateHwas l_predHwasFunc;
             TARGETING::PredicateCTM l_phbPredicate (TARGETING::CLASS_UNIT,
