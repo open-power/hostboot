@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2018
+# Contributors Listed Below - COPYRIGHT 2013,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -398,7 +398,7 @@ sub verifyTodoFixme
     my $commentText;
     my $lineNumber;
     # Get the list of TODO/FIXME lines in src/
-    open TODO_LIST, "egrep -rn '(TODO.*(CQ|RTC).*)|(FIXME.*(CQ|RTC).*)' src/* |"
+    open TODO_LIST, "egrep -rn '(TODO.*(CQ|RTC).*)|(FIXME.*(CQ|RTC).*)' --exclude-dir={extern,import} src/* |"
         or die "Cannot get the list of TODO/FIXME lines.\n";
 
     while(my $line = <TODO_LIST>)
@@ -577,4 +577,3 @@ sub git_commit_msg
 
     return $message;
 }
-
