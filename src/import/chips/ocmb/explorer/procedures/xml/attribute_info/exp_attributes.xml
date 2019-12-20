@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -471,6 +471,20 @@
         <default>0x3</default>
         <platInit/>
         <mrwHide/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_CHECK_FOR_READY_TIMEOUT</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Timeout (in msec) for polling for FW_STATUS reply during
+            exp_check_for_ready. Default is 400msec, from lab experimentation
+        </description>
+        <valueType>uint16</valueType>
+        <default>400</default>
+        <platInit/>
+        <mrwHide/>
+        <mssAccessorName>check_for_ready_timeout</mssAccessorName>
     </attribute>
 
 </attributes>
