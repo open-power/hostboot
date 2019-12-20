@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,5 +42,29 @@
 const uint8_t MAX_MC_SIDES_PER_PROC = 2; // MC01, MC23
 const uint8_t MAX_MC_PER_PROC = 4; // MC0, MC1, MC2, MC3
 const uint8_t MAX_MC_PER_SIDE = 2; // MC0, MC1 or MC2, MC3
+
+namespace mss
+{
+namespace axone
+{
+
+///
+/// @brief common axone sizes
+///
+enum sizes
+{
+    MAX_DIMM_PER_PROC = 16,
+};
+
+///
+/// @brief explorer ffdc codes
+///
+enum ffdc_codes
+{
+    CHANNEL_A_BEFORE_CHANNEL_B = 0x9000,
+};
+
+} // axone
+} // mss
 
 #endif

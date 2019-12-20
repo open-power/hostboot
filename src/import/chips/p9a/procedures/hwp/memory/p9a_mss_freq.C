@@ -48,6 +48,7 @@
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/freq/gen_mss_freq.H>
 #include <generic/memory/mss_git_data_helper.H>
+#include <lib/plug_rules/p9a_plug_rules.H>
 
 ///
 /// @brief Calculate and save off DIMM frequencies
@@ -94,6 +95,11 @@ fapi2::ReturnCode p9a_mss_freq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
 
     }
 
+    // Check plug rules.
+    FAPI_TRY( mss::plug_rule::enforce_pre_freq(i_target),
+              "Failed enforce_plug_rules for %s", mss::c_str(i_target) );
+
+    // Set frequency attributes
     FAPI_TRY(mss::generate_freq<mss::proc_type::AXONE>(i_target));
 
 fapi_try_exit:
