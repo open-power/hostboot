@@ -41,6 +41,7 @@
 #include <p10_pcie_scominit.H>
 #include <p10_pcie_scom.H>
 #include <p10_scom_pec_6.H>
+#include <p10_scom_pec_f.H>
 #include <p10_scom_phb_e.H>
 
 
@@ -88,6 +89,16 @@ p10_pcie_scominit(
         FAPI_TRY(PREP_REGS_PHBRESET_REG(l_phb_target));
         SET_REGS_PHBRESET_REG_PE_ETU_RESET(l_data);
         FAPI_TRY(PUT_REGS_PHBRESET_REG(l_phb_target, l_data));
+
+    }
+
+    for (auto l_pec_target : l_pec_targets)
+    {
+        l_data = 0;
+        FAPI_TRY(PREP_CPLT_CTRL5_WO_OR(l_pec_target));
+        SET_CPLT_CTRL5_TC_CCFG_PIPE_LANEX_EXT_PLL_MODE_DC(l_data);
+        SET_CPLT_CTRL5_TC_CCFG_PHYX_CR_PARA_SEL_DC(l_data);
+        FAPI_TRY(PUT_CPLT_CTRL5_WO_OR(l_pec_target, l_data));
     }
 
     //Run initfile
