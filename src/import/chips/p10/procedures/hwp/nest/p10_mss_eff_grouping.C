@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -357,15 +357,21 @@ fapi2::ReturnCode EffGroupingProcAttrs::getAttrs(
 
     // Display attribute values
     FAPI_INF("EffGroupingProcAttrs::getAttrs: ");
-    FAPI_INF("  ATTR_PROC_NHTM_BAR_SIZE 0x%.16llX", iv_nhtmBarSize);
+    getSizeString(iv_nhtmBarSize, display);
+    FAPI_INF("  ATTR_PROC_NHTM_BAR_SIZE 0x%.16llX %s", iv_nhtmBarSize, display);
 
     for (uint8_t ii = 0; ii < NUM_OF_CHTM_REGIONS; ii++)
     {
-        FAPI_INF("  ATTR_PROC_CHTM_BAR_SIZES[%u] 0x%.16llX", ii, iv_chtmBarSizes[ii]);
+        getSizeString(iv_chtmBarSizes[ii], display);
+        FAPI_INF("  ATTR_PROC_CHTM_BAR_SIZES[%u] 0x%.16llX %s", ii,
+                 iv_chtmBarSizes[ii], display);
     }
 
-    FAPI_INF("  ATTR_PROC_OCC_SANDBOX_SIZE 0x%.16llX", iv_occSandboxSize);
-    FAPI_INF("  ATTR_PROC_SMF_BAR_SIZE 0x%.16llX", iv_smfBarSize);
+    getSizeString(iv_occSandboxSize, display);
+    FAPI_INF("  ATTR_PROC_OCC_SANDBOX_SIZE 0x%.16llX %s", iv_occSandboxSize, display);
+
+    getSizeString(iv_smfBarSize, display);
+    FAPI_INF("  ATTR_PROC_SMF_BAR_SIZE 0x%.16llX %s", iv_smfBarSize, display);
 
     for (uint8_t ii = 0; ii < iv_memBaseAddr.size(); ii++)
     {
@@ -900,10 +906,8 @@ void EffGroupingBaseSizeData::setBaseSizeData(
             if (iv_mirror_sizes[ii] > 0)
             {
                 FAPI_DBG("Mirror, Group %d:", ii + MIRR_OFFSET);
-
-                getSizeString(i_groupData.iv_data[l_index][BASE_ADDR], displayBuf);
-                FAPI_DBG("    i_groupData.iv_data[%d][BASE_ADDR] = %s",
-                         l_index, displayBuf);
+                FAPI_DBG("    i_groupData.iv_data[%d][BASE_ADDR] = %d",
+                         l_index, i_groupData.iv_data[l_index][BASE_ADDR]);
                 FAPI_DBG("    i_groupData.iv_data[%d][MCC_IN_GROUP] = %d",
                          l_index, i_groupData.iv_data[l_index][MCC_IN_GROUP]);
                 FAPI_DBG("    i_groupData.iv_data[%d][MCC_SIZE] = %d",
@@ -911,13 +915,10 @@ void EffGroupingBaseSizeData::setBaseSizeData(
 
                 getSizeString(iv_mirror_bases[ii], displayBuf);
                 FAPI_DBG("    iv_mirror_bases[%d] = %s", ii, displayBuf);
-
                 getSizeString(iv_mirror_bases_ack[ii], displayBuf);
                 FAPI_DBG("    iv_mirror_bases_ack[%d] = %s", ii, displayBuf);
-
                 getSizeString(iv_mirror_sizes[ii], displayBuf);
                 FAPI_DBG("    iv_mirror_sizes[%d] = %s", ii, displayBuf);
-
                 getSizeString(iv_mirror_sizes_ack[ii], displayBuf);
                 FAPI_DBG("    iv_mirror_sizes_ack[%d] = %s", ii, displayBuf);
             }
@@ -3437,17 +3438,13 @@ void grouping_traceData(const EffGroupingSysAttrs& i_sysAttrs,
         FAPI_INF("    MCC size %d GB", i_groupData.iv_data[ii][MCC_SIZE]);
         FAPI_INF("    Num of MCC %d", i_groupData.iv_data[ii][MCC_IN_GROUP]);
         FAPI_INF("    Group size  %d GB", i_groupData.iv_data[ii][GROUP_SIZE]);
-        FAPI_INF("    Base addr 0x%.16llX (%u GB)",
-                 i_groupData.iv_data[ii][BASE_ADDR],
-                 i_groupData.iv_data[ii][BASE_ADDR]);
+        FAPI_INF("    Base addr %u GB", i_groupData.iv_data[ii][BASE_ADDR]);
 
         for (uint8_t jj = 0; jj < NUM_OF_ALT_MEM_REGIONS; jj++)
         {
-            FAPI_INF("    ALT-BAR(%d) valid %d ", jj, i_groupData.iv_data[ii][ALT_VALID(jj)]);
-            FAPI_INF("    ALT-BAR(%d) size %d ", jj, i_groupData.iv_data[ii][ALT_SIZE(jj)]);
-            FAPI_INF("    ALT-BAR(%d) base addr 0x%.16llX (%u GB)",
-                     jj, i_groupData.iv_data[ii][ALT_BASE_ADDR(jj)],
-                     i_groupData.iv_data[ii][ALT_BASE_ADDR(jj)]);
+            FAPI_INF("    ALT-BAR(%d) valid %d", jj, i_groupData.iv_data[ii][ALT_VALID(jj)]);
+            FAPI_INF("    ALT-BAR(%d) size %d", jj, i_groupData.iv_data[ii][ALT_SIZE(jj)]);
+            FAPI_INF("    ALT-BAR(%d) base addr %u GB", jj, i_groupData.iv_data[ii][ALT_BASE_ADDR(jj)]);
         }
 
         // Display MC in groups
@@ -3472,17 +3469,13 @@ void grouping_traceData(const EffGroupingSysAttrs& i_sysAttrs,
                 FAPI_INF("    MCC size %d GB", i_groupData.iv_data[l_mirrorOffset][MCC_SIZE]);
                 FAPI_INF("    Num of MCC %d", i_groupData.iv_data[l_mirrorOffset][MCC_IN_GROUP]);
                 FAPI_INF("    Group size  %d GB", i_groupData.iv_data[l_mirrorOffset][GROUP_SIZE]);
-                FAPI_INF("    Base addr 0x%.16llX (%u GB)",
-                         i_groupData.iv_data[l_mirrorOffset][BASE_ADDR],
-                         i_groupData.iv_data[l_mirrorOffset][BASE_ADDR]);
+                FAPI_INF("    Base addr %u GB", i_groupData.iv_data[l_mirrorOffset][BASE_ADDR]);
 
                 for (uint8_t jj = 0; jj < NUM_OF_ALT_MEM_REGIONS; jj++)
                 {
-                    FAPI_INF("    ALT-BAR(%d) valid %d ", jj, i_groupData.iv_data[l_mirrorOffset][ALT_VALID(jj)]);
-                    FAPI_INF("    ALT-BAR(%d) size %d ", jj, i_groupData.iv_data[l_mirrorOffset][ALT_SIZE(jj)]);
-                    FAPI_INF("    ALT-BAR(%d) base addr 0x%.16llX (%u GB)",
-                             jj, i_groupData.iv_data[l_mirrorOffset][ALT_BASE_ADDR(jj)],
-                             i_groupData.iv_data[l_mirrorOffset][ALT_BASE_ADDR(jj)]);
+                    FAPI_INF("    ALT-BAR(%d) valid %d", jj, i_groupData.iv_data[l_mirrorOffset][ALT_VALID(jj)]);
+                    FAPI_INF("    ALT-BAR(%d) size %d", jj, i_groupData.iv_data[l_mirrorOffset][ALT_SIZE(jj)]);
+                    FAPI_INF("    ALT-BAR(%d) base addr %u GB", jj, i_groupData.iv_data[l_mirrorOffset][ALT_BASE_ADDR(jj)]);
                 }
 
                 // Display MCC in groups
