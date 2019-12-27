@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -105,6 +105,23 @@
         <ec>
           <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+ <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW514623</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Fix scan flush value of inflight tlbie queue
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
