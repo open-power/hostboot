@@ -66,6 +66,12 @@ struct ring_setup_t
     uint8_t last;         ///< Set to 1 for the last entry in an array of this struct
 };
 
+struct mc_ring_setup_t
+{
+    RingID ring_id;       ///< Abstract ring ID that will be represented by this
+    uint8_t last;         ///< Set to 1 for the last entry in an array of this struct
+};
+
 /// @brief Describes a hang pulse configuration
 struct hang_pulse_t
 {
@@ -159,6 +165,11 @@ fapi2::ReturnCode p10_perv_sbe_cmn_setup_putring(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
     const ring_setup_t* i_ring_table,
     bool i_tp_chiplet = false);
+
+fapi2::ReturnCode p10_perv_sbe_cmn_setup_putring_multicast(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+    const fapi2::MulticastGroup i_group,
+    const mc_ring_setup_t* i_ring_table);
 
 /// @brief Enable Drivers/Recievers for a pervasive target
 ///

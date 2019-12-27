@@ -1001,6 +1001,45 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+/// @brief putring call from initf procedures
+///
+/// @param[in]     i_target     Reference to TARGET_TYPE_PROC_CHIP target
+/// @param[in]     i_group      Multicast group to target
+/// @param[in]     i_ring_table Input ring table with list of rings on which putring call
+/// @return  FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_perv_sbe_cmn_setup_putring_multicast(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+    const fapi2::MulticastGroup i_group,
+    const mc_ring_setup_t* i_ring_table)
+{
+    using namespace scomt;
+    using namespace scomt::perv;
+
+    const mc_ring_setup_t* ring = i_ring_table;
+
+    auto l_mc_target = i_target_chip.getMulticast<fapi2::TARGET_TYPE_PERV>(i_group);
+
+    FAPI_DBG("p10_perv_sbe_cmn_setup_putring_multicast : Entering");
+
+    while(true)
+    {
+        FAPI_TRY(fapi2::putRing(l_mc_target, ring->ring_id),
+                 "Error from Putring on %s",
+                 ringid_get_ring_name(ring->ring_id));
+
+        if (ring->last)
+        {
+            break;
+        }
+
+        ring++;
+    }
+
+    FAPI_DBG("p10_perv_sbe_cmn_setup_putring_multicast : Exiting");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 /// @brief Check if the run is on sim or actual HW
 ///
