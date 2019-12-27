@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,7 +52,7 @@
 // -----------------------------------------------------------------------------
 
 // Following constants hold an approximate value.
-static const uint32_t XGPE_TIMEOUT_MS       = 500;
+static const uint32_t XGPE_TIMEOUT_MS       = 50000;
 static const uint32_t XGPE_TIMEOUT_MCYCLES  = 20;
 static const uint32_t XGPE_POLLTIME_MS      = 20;
 static const uint32_t XGPE_POLLTIME_MCYCLES = 2;
