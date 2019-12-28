@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -590,7 +590,7 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { "occ_fure"                , 0x0103080F, PERV::occ_fure              , PERV_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                            }, // 8
     { "perv_dpll_func"          , 0x01030060, PERV::perv_dpll_func        , PERV_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                            }, // 9
     { "perv_dpll_bndy"          , 0x01030068, PERV::perv_dpll_bndy        , PERV_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                            }, // 10
-    { "perv_dpll_time"          , 0x01030067, PERV::perv_dpll_time        , PERV_TYPE, RMRK_ROOT | RCLS_MVPD_PDG_TIME                        }, // 11
+    { "perv_dpll_time"          , 0x01030067, PERV::perv_dpll_time        , PERV_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                            }, // 11
     { "perv_dpll_gptr"          , 0x01030062, PERV::perv_dpll_gptr        , PERV_TYPE, RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                    }, // 12
     { "perv_pll_func"           , 0x01030010, PERV::perv_pll_func         , PERV_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                            }, // 13
     { "perv_pll_bndy"           , 0x01030018, PERV::perv_pll_bndy         , PERV_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                            }, // 14
