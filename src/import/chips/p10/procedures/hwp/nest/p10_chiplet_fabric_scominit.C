@@ -47,12 +47,14 @@
 // Function definitions
 //------------------------------------------------------------------------------
 
-fapi2::ReturnCode p10_chiplet_fabric_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+fapi2::ReturnCode p10_chiplet_fabric_scominit(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const bool i_config_internode,
+    const bool i_config_intranode)
 {
     FAPI_DBG("Start");
 
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-    auto l_pauc_targets = i_target.getChildren<fapi2::TARGET_TYPE_PAUC>();
     auto l_iohs_targets = i_target.getChildren<fapi2::TARGET_TYPE_IOHS>();
     char l_tgt_str[fapi2::MAX_ECMD_STRING_LEN];
     fapi2::ReturnCode l_rc;
@@ -61,13 +63,7 @@ fapi2::ReturnCode p10_chiplet_fabric_scominit(const fapi2::Target<fapi2::TARGET_
     fapi2::toString(i_target, l_tgt_str, sizeof(l_tgt_str));
     FAPI_DBG("Invoking p10.fbc.no_hp.scom.initfile on target %s...", l_tgt_str);
     FAPI_EXEC_HWP(l_rc, p10_fbc_no_hp_scom, i_target, FAPI_SYSTEM);
-
-    if (l_rc)
-    {
-        FAPI_ERR("Error from p10_fbc_no_hp_scom");
-        fapi2::current_err = l_rc;
-        goto fapi_try_exit;
-    }
+    FAPI_TRY(l_rc, "Error from p10_fbc_no_hp_scom");
 
     // mask FIRs on proc/pauc scope if there are no valid links
     if(!l_iohs_targets.size())
@@ -83,73 +79,68 @@ fapi2::ReturnCode p10_chiplet_fabric_scominit(const fapi2::Target<fapi2::TARGET_
         goto fapi_try_exit;
     }
 
-    for (auto l_pauc : l_pauc_targets)
-    {
-        // apply FBC TL scom initfile
-        fapi2::toString(l_pauc, l_tgt_str, sizeof(l_tgt_str));
-        FAPI_DBG("Invoking p10.fbc.ptl.scom.initfile on target %s...", l_tgt_str);
-        FAPI_EXEC_HWP(l_rc, p10_fbc_ptl_scom, l_pauc, i_target, FAPI_SYSTEM);
-
-        if (l_rc)
-        {
-            FAPI_ERR("Error from p10_fbc_ptl_scom");
-            fapi2::current_err = l_rc;
-            goto fapi_try_exit;
-        }
-    }
-
     for (auto l_iohs : l_iohs_targets)
     {
         fapi2::ATTR_IOHS_CONFIG_MODE_Type l_iohs_config_mode;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_CONFIG_MODE, l_iohs, l_iohs_config_mode),
                  "Error from FAPI_ATTR_GET (ATTR_IOHS_CONFIG_MODE)");
 
-        if(l_iohs_config_mode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX)
+        if((l_iohs_config_mode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX) ||
+           (l_iohs_config_mode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPA))
         {
-            fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train;
-            sublink_t sublink_opt;
+            fapi2::ATTR_IOHS_DRAWER_INTERCONNECT_Type l_drawer_interconnect;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_DRAWER_INTERCONNECT, l_iohs, l_drawer_interconnect),
+                     "Error from FAPI_ATTR_GET (ATTR_IOHS_DRAWER_INTERCONNECT)");
 
-            // apply FBC DL scom initfile
-            fapi2::toString(l_iohs, l_tgt_str, sizeof(l_tgt_str));
-            FAPI_DBG("Invoking p10.fbc.dlp.scom.initfile on target %s...", l_tgt_str);
-            FAPI_EXEC_HWP(l_rc, p10_fbc_dlp_scom, l_iohs, i_target, FAPI_SYSTEM);
-
-            if (l_rc)
+            if((i_config_internode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_FALSE)) ||
+               (i_config_intranode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_TRUE)))
             {
-                FAPI_ERR("Error from p10_fbc_dlp_scom");
-                fapi2::current_err = l_rc;
-                goto fapi_try_exit;
+                auto l_pauc = l_iohs.getParent<fapi2::TARGET_TYPE_PAUC>();
+                fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train;
+                sublink_t sublink_opt;
+
+                // apply FBC TL scom initfile
+                fapi2::toString(l_pauc, l_tgt_str, sizeof(l_tgt_str));
+                FAPI_DBG("Invoking p10.fbc.ptl.scom.initfile on target %s...", l_tgt_str);
+                FAPI_EXEC_HWP(l_rc, p10_fbc_ptl_scom, l_pauc, i_target, FAPI_SYSTEM);
+                FAPI_TRY(l_rc, "Error from p10_fbc_ptl_scom");
+
+                // apply FBC DL scom initfile
+                fapi2::toString(l_iohs, l_tgt_str, sizeof(l_tgt_str));
+                FAPI_DBG("Invoking p10.fbc.dlp.scom.initfile on target %s...", l_tgt_str);
+                FAPI_EXEC_HWP(l_rc, p10_fbc_dlp_scom, l_iohs, i_target, FAPI_SYSTEM);
+                FAPI_TRY(l_rc, "Error from p10_fbc_dlp_scom");
+
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, l_iohs, l_link_train),
+                         "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
+
+                switch(l_link_train)
+                {
+                    case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH:
+                        sublink_opt = sublink_t::BOTH;
+                        break;
+
+                    case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY:
+                        sublink_opt = sublink_t::EVEN;
+                        break;
+
+                    case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY:
+                        sublink_opt = sublink_t::ODD;
+                        break;
+
+                    default:
+                        sublink_opt = sublink_t::NONE;
+                        break;
+                }
+
+                // setup and unmask TL/DL FIRs
+                FAPI_TRY(p10_smp_link_firs(l_iohs, sublink_opt, action_t::RUNTIME),
+                         "Error from p10_smp_link_firs when configuring both sublinks for runtime operations");
             }
-
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, l_iohs, l_link_train),
-                     "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
-
-            switch(l_link_train)
-            {
-                case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH:
-                    sublink_opt = sublink_t::BOTH;
-                    break;
-
-                case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY:
-                    sublink_opt = sublink_t::EVEN;
-                    break;
-
-                case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY:
-                    sublink_opt = sublink_t::ODD;
-                    break;
-
-                default:
-                    sublink_opt = sublink_t::NONE;
-                    break;
-            }
-
-            // setup and unmask TL/DL FIRs
-            FAPI_TRY(p10_smp_link_firs(l_iohs, sublink_opt, action_t::RUNTIME),
-                     "Error from p10_smp_link_firs when configuring both sublinks for runtime operations");
         }
         else
         {
-            // mask TL/DL FIRs for links that are not configured for xbus operations
+            // mask TL/DL FIRs for links that are not configured for smp operations
             FAPI_TRY(p10_smp_link_firs(l_iohs, sublink_t::BOTH, action_t::INACTIVE),
                      "Error from p10_smp_link_firs when configuring both sublinks for inactive operations");
         }
