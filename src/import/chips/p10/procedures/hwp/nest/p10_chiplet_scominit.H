@@ -26,11 +26,12 @@
 /// @file p10_chiplet_scominit.C
 ///
 /// @brief SCOM inits to all chiplets (sans Quad/fabric)
+///        Issues switch CD to activate fabric async settings
 ///
-
-// *HWP HW Maintainer: Joe McGill <jmcgill@us.ibm.com>
-// *HWP FW Maintainer: Ilya Smirnov <ismirno@us.ibm.com>
-// *HWP Consumed by: HB
+/// *HWP HW Maintainer: Joe McGill <jmcgill@us.ibm.com>
+/// *HWP FW Maintainer: Ilya Smirnov <ismirno@us.ibm.com>
+/// *HWP Consumed by: HB
+///
 
 #ifndef _P10_CHIPLET_SCOMINIT_H_
 #define _P10_CHIPLET_SCOMINIT_H_
@@ -55,8 +56,8 @@ extern "C"
 
 /// @brief SCOM inits to all chiplets (sans Quad/fabric)
 ///
-/// @param[in] i_target Reference to processor chip target
-/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+/// @param[in] i_target         Reference to processor chip target
+/// @return fapi2::ReturnCode   FAPI2_RC_SUCCESS if success, else error code.
     fapi2::ReturnCode p10_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 } // extern "C"
