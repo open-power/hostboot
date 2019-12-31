@@ -50,13 +50,19 @@ using namespace scomt::perv;
 // Constant definitions
 //------------------------------------------------------------------------------
 
-// in TOD counts; needs to account for SCOM latency and number of chips to be
+// in TOD counts of 32Mhz clock; needs to account for SCOM latency and number of chips to be
 // started in sync
 const uint64_t  C_SSCG_START_DELAY      = 0x100000;
 // 31.25 rounded up
 const uint64_t  C_SSCG_NS_PER_TOD_COUNT = 32;
-const uint32_t  C_SSCG_START_POLL_DELAY = C_SSCG_START_DELAY * C_SSCG_NS_PER_TOD_COUNT;
-const uint32_t  C_SSCG_START_POLL_COUNT = 10;
+const uint64_t  C_SSCG_START_POLL_COUNT = 10;
+// Make the total polling delay equal to twice the expected delay
+// and divide the total polling delay up between each of the polling cycles.
+const uint64_t  C_SSCG_START_POLL_DELAY_NS = (2 * C_SSCG_START_DELAY* C_SSCG_NS_PER_TOD_COUNT) /
+        C_SSCG_START_POLL_COUNT;
+const uint64_t  C_SSCG_SIM_CYCLES_PER_TOD_CLOCK = 2000;
+const uint64_t  C_SSCG_START_POLL_DELAY_SIM_CYCLES = (2 * C_SSCG_START_DELAY* C_SSCG_SIM_CYCLES_PER_TOD_CLOCK) /
+        C_SSCG_START_POLL_COUNT;
 
 // FIXME @RTC 213485 -- temporary, if defined, then implement workaround for defect HW500611.
 // Left available for older builds.
@@ -145,7 +151,8 @@ fapi2::ReturnCode sync_spread(
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>> l_targets;
     get_targets(i_tod_node, 0, l_targets);
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_master_chip;
-    fapi2::buffer<uint64_t> l_tod_value_data;
+    fapi2::buffer<uint64_t> l_tod_value_reg_tod_value;
+    fapi2::buffer<uint64_t> l_tod_value_reg;
     fapi2::buffer<uint64_t> l_tod_timer_data;
 
     FAPI_ASSERT(l_targets.size(),
@@ -154,14 +161,17 @@ fapi2::ReturnCode sync_spread(
     l_master_chip = l_targets.front();
 
     // Read tod_value from TOD Value Register
-    FAPI_TRY(GET_TOD_VALUE_REG(l_master_chip, l_tod_value_data),
+    FAPI_TRY(GET_TOD_VALUE_REG(l_master_chip, l_tod_value_reg),
              "Error from GET_TOD_VALUE_REG");
+
+    // Get Internal path Time-of-day register value
+    GET_TOD_VALUE_REG_TOD_VALUE(l_tod_value_reg, l_tod_value_reg_tod_value);
 
     // Write value > tod_value to TOD Timer Register and enable timers
     for (auto l_chip : l_targets)
     {
         FAPI_TRY(PREP_TOD_TIMER_REG(l_chip));
-        SET_TOD_TIMER_REG_VALUE(l_tod_value_data + C_SSCG_START_DELAY, l_tod_timer_data);
+        SET_TOD_TIMER_REG_VALUE(l_tod_value_reg_tod_value + C_SSCG_START_DELAY, l_tod_timer_data);
         SET_TOD_TIMER_REG_ENABLE0(l_tod_timer_data);
         SET_TOD_TIMER_REG_ENABLE1(l_tod_timer_data);
         FAPI_TRY(PUT_TOD_TIMER_REG(l_chip, l_tod_timer_data),
@@ -173,7 +183,7 @@ fapi2::ReturnCode sync_spread(
          (i < C_SSCG_START_POLL_COUNT) && !l_targets.empty();
          i++)
     {
-        fapi2::delay(C_SSCG_START_POLL_DELAY, C_SSCG_START_POLL_DELAY);
+        fapi2::delay(C_SSCG_START_POLL_DELAY_NS, C_SSCG_START_POLL_DELAY_SIM_CYCLES);
 
         for (auto l_chip_it = l_targets.begin();
              l_chip_it != l_targets.end();
@@ -182,6 +192,10 @@ fapi2::ReturnCode sync_spread(
             FAPI_TRY(GET_TOD_TIMER_REG(*l_chip_it,
                                        l_tod_timer_data),
                      "Error polling TOD_TIMER_REG");
+
+            FAPI_TRY(GET_TOD_VALUE_REG(*l_chip_it,
+                                       l_tod_value_reg),
+                     "Error from GET_TOD_VALUE_REG");
 
             if (GET_TOD_TIMER_REG_STATUS1(l_tod_timer_data))
             {
@@ -314,7 +328,6 @@ fapi2::ReturnCode init_tod_node(
         SET_TOD_START_REG_FSM_START_TOD_DATA02(l_data);
         FAPI_TRY(PUT_TOD_START_REG(l_target, l_data),
                  "Master: Error from PUT_TOD_START_REG");
-
     }
 
     FAPI_DBG("Check TOD is Running");
