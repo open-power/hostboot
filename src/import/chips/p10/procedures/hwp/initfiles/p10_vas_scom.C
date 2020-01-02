@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p10/procedures/hwp/nest/p10_chiplet_scominit.H $ */
+/* $Source: src/import/chips/p10/procedures/hwp/initfiles/p10_vas_scom.C $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,47 +22,24 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-///
-/// @file p10_chiplet_scominit.C
-///
-/// @brief SCOM inits to all chiplets (sans quad/fabric)
-///
-///        Additionally, does the following:
-///        > Issues switch CD to activate fabric async settings
-///        > Applies nmmu epsilon values separately from initfiles
-///
-/// *HWP HW Maintainer: Joe McGill <jmcgill@us.ibm.com>
-/// *HWP FW Maintainer: Ilya Smirnov <ismirno@us.ibm.com>
-/// *HWP Consumed by: HB
-///
-
-#ifndef _P10_CHIPLET_SCOMINIT_H_
-#define _P10_CHIPLET_SCOMINIT_H_
-
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
+#include "p10_vas_scom.H"
+#include <stdint.h>
+#include <stddef.h>
 #include <fapi2.H>
 
-//------------------------------------------------------------------------------
-// Structure definitions
-//------------------------------------------------------------------------------
+using namespace fapi2;
 
-typedef fapi2::ReturnCode (*p10_chiplet_scominit_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
-//------------------------------------------------------------------------------
-// Function prototypes
-//------------------------------------------------------------------------------
-
-extern "C"
+fapi2::ReturnCode p10_vas_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT0,
+                               const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1)
 {
+    {
+        fapi2::ATTR_EC_Type   l_chip_ec;
+        fapi2::ATTR_NAME_Type l_chip_id;
+        FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT0, l_chip_id));
+        FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT0, l_chip_ec));
 
-/// @brief SCOM inits to all chiplets (sans quad/fabric)
-///
-/// @param[in] i_target         Reference to processor chip target
-/// @return fapi2::ReturnCode   FAPI2_RC_SUCCESS if success, else error code.
-    fapi2::ReturnCode p10_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
-
-} // extern "C"
-
-#endif // _P10_CHIPLET_SCOMINIT_H_
+    };
+fapi_try_exit:
+    return fapi2::current_err;
+}
