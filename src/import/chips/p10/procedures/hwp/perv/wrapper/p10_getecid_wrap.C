@@ -86,8 +86,10 @@ p10_ecid_decodeEcidFuseString( ecmdDataBuffer fuseString, char* ecidString, char
     ecmdDataBuffer subMinorEC(4);
     char           waferIdText[11];
 
+
     // CFAM IDs
     // P10
+
     const uint32_t P10_EC_DD10 = 0x120DA049;
 
     std::string DD;
@@ -97,7 +99,7 @@ p10_ecid_decodeEcidFuseString( ecmdDataBuffer fuseString, char* ecidString, char
 
     // --- the fuseString ---
     // bits   0:3  are the version, which should be all zeros to start with
-    // bits   4:63 are the wafer id ( ten 6 bit fields each containing a code)
+    // bits   4:63 are the wafer id ( Eight 6 bit fields each containing a code )
     // bits  64:71 are the chip x location (7:0)
     // bits  72:79 are the chip y location (7:0)
     // bits  80:103 are used in a different chip location algorithm
@@ -107,21 +109,23 @@ p10_ecid_decodeEcidFuseString( ecmdDataBuffer fuseString, char* ecidString, char
     // bits 173:176 are DD level
     // bits 177:191 are unused
 
-    fuseString.extract( waferID, 4, 60 );
+    //***** Using the first 8 positions of the 10 character field, the last two will be programmed to "blanks" (all 1s) *****//
+    fuseString.extract( waferID, 4, 48 );
 
-    for( uint32_t offset = 0; offset < 60; offset += 6 )
+    for( uint32_t offset = 0; offset < 48; offset += 6 )
     {
         // printf( "at offset %d value is %s which converts to %c\n", offset, waferID.genBinStr( offset, 6 ).c_str(), DT[waferID.genBinStr( offset, 6 ).c_str()] );
         waferIdText[(offset / 6)] = DT[waferID.genBinStr( offset, 6 ).c_str()];
     }
 
-    waferIdText[10] = 0;
+    waferIdText[8] = 0;
 
     fuseString.extract( &Xloc, 64, 8 );
     fuseString.extract( &Yloc, 72, 8 );
 
     std::string wafer = waferIdText;
-    wafer = getCheckSum(wafer);
+    //***** 2 byte checksum: will not exist *****//
+    //wafer = getCheckSum(wafer);
 
     // Get cfam 100A for chip ID
     // 0-3   Major EC
@@ -136,7 +140,7 @@ p10_ecid_decodeEcidFuseString( ecmdDataBuffer fuseString, char* ecidString, char
     DD = std::to_string(majorEC) + "." + std::to_string(minorEC);
     fuseString.extract( subMinorEC, 173, 4 );
 
-    printf("sub minor EC: %02X", subMinorEC.getByte(0));
+    printf("sub minor EC: %02X \n", subMinorEC.getByte(0));
 
     if ( subMinorEC.isBitClear(0, 4) )
     {
