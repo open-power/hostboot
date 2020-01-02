@@ -5,8 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
+/* [+] Stewart Smith                                                      */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -521,6 +522,10 @@ namespace Bootloader{
                    reinterpret_cast<uint64_t*>(HBB_RUNNING_ADDR |
                                                IGNORE_HRMOR_MASK);
 
+                ROM_container_raw *l_hbb_container =
+                   reinterpret_cast<ROM_container_raw*>(
+                                   HBB_WORKING_ADDR | IGNORE_HRMOR_MASK);
+
                 // Get Secure Data from SBE HBBL communication area
                 setSecureData(l_src_addr);
 
@@ -532,8 +537,10 @@ namespace Bootloader{
                 // ROM verification of HBB image
                 verifyContainer(l_src_addr);
 
-                // Increment past secure header
-                if (isEnforcedSecureSection(PNOR::HB_BASE_CODE))
+                // Increment past secure header,
+                // even if built without secure boot
+                if (isEnforcedSecureSection(PNOR::HB_BASE_CODE) ||
+                    l_hbb_container->magic_number == ROM_MAGIC_NUMBER)
                 {
                     l_src_addr += PAGE_SIZE/sizeof(uint64_t);
                     l_hbbLength -= PAGE_SIZE;
