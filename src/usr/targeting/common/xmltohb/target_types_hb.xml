@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2020                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -229,6 +229,9 @@
     </attribute>
     <attribute>
       <id>HB_EXISTING_IMAGE</id>
+    </attribute>
+    <attribute>
+      <id>HB_RSV_MEM_NEXT_SECTION</id>
     </attribute>
     <attribute>
       <id>HIDDEN_ERRLOGS_ENABLE</id>
