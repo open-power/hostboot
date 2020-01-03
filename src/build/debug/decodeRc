@@ -1,0 +1,236 @@
+#!/bin/bash
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/build/debug/decodeRc $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2019,2020
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+function die()
+{
+    if [ $# -gt 0 ]; then
+        printf '%s\n' "$1" >&2
+    fi
+
+    exit 1
+}
+
+function decodeRc_helptext()
+{
+
+    SCRIPT_NAME=$(basename "$0")
+
+    echo "  Topic '$SCRIPT_NAME'"
+    echo
+    echo "  Usage:"
+    echo "     $SCRIPT_NAME [--verbose] [--path <path to hostboot repo>] <reason code> [module id]"
+    echo
+    echo "  Decodes the reason code given in the first SRC word. Optionally"
+    echo "  will decode a Module Id that corresponds to the Component Id of"
+    echo "  the given reason code. The format of the first SRC is as"
+    echo "  follows:"
+    echo
+    echo "  Bsxxyyyy : This is often referred to as the SRC and the full 9 words are called the 'full SRC'"
+    echo
+    echo "            s = Code Subsystem (1=FSP, C=HB, 7=PHYP)"
+    echo "            xx = Subsystem ID of Callout"
+    echo "              In general we don't care about this value as it is generated dynamically based on the callouts we add"
+    echo "            yyyy = Reason Code"
+    echo "              Hostboot divides reason codes into 2 halves : CCRR"
+    echo "                CC = Component id - see src/include/usr/hbotcompid.H"
+    echo "                RR = Reasoncode - see src/include/usr/<component>/*reasoncodes.H"
+    echo
+    echo "  Options:"
+    echo "     --verbose, -v: Adds additional info to the output."
+    echo "     --path, -p: The path to a hostboot repo which is backed to the same level where the SRC originated from. Defaults to PROJECT_ROOT."
+    echo "                 This path will be where the search for the decoded return code and optional module id occurs."
+    echo
+    echo "  Usage examples:"
+    echo "    ./$SCRIPT_NAME 0c0a 01"
+    echo "    ./$SCRIPT_NAME -v 0c0a 01"
+    echo "    ./$SCRIPT_NAME 0x0c0a"
+    echo "    ./$SCRIPT_NAME -p /esw/san5/mraybuck/repos/p10/hostboot/ BC8A0C0A"
+    echo
+}
+
+function decodeRc()
+{
+
+    SKIP_MOD_ID=0
+    if [ $# -eq 1 ]; then
+        SKIP_MOD_ID=1
+    fi
+
+    HB_COMPONENT_ID_FILE="${SEARCH_PATH}/src/include/usr/hbotcompid.H"
+
+    if [ $VERBOSE -eq 1 ]
+    then
+        echo "HB Component ID File: $HB_COMPONENT_ID_FILE"
+    fi
+
+    if [ ${#1} -eq 4 ];
+    then
+        REASON_CODE=${1:2}
+        HB_COMPONENT=${1:0:2}
+    elif [ ${#1} -eq 8 ];
+    then
+        REASON_CODE=${1:(-2)}
+        HB_COMPONENT=${1:4:2}
+    elif [ ${#1} -eq 6 ];
+    then
+        REASON_CODE=${1:(-2)}
+        HB_COMPONENT=${1:2:2}
+    else
+        if [ $VERBOSE -eq 1 ]; then
+            echo "Could not parse reason code argument: $1"
+        fi
+        die
+    fi
+
+    # Force upper case and add hex identifier to value
+    REASON_CODE="0x${REASON_CODE^^}"
+    HB_COMPONENT="0x${HB_COMPONENT^^}00"
+
+
+    if [ "$HB_COMPONENT" == "0x0000" ];
+    then
+        if [ $VERBOSE -eq 1 ]; then
+            echo "Invalid HB component: $HB_COMPONENT"
+        fi
+        die
+    fi
+
+    if [ $SKIP_MOD_ID -ne 1 ]; then
+        if [ ${#2} -eq 4 ] || [ ${#2} -eq 2 ]
+        then
+            MODULE_ID=${2:(-2)}
+            MODULE_ID="0x${MODULE_ID^^}"
+        else
+            SKIP_MOD_ID=1
+        fi
+    fi
+
+    # Get the component name for the component hex value. Use this to collect all reasoncode files.
+    COMPONENT_NAME=$(grep -E "const.*$HB_COMPONENT" -A 1 $HB_COMPONENT_ID_FILE | grep -o '".*"' | sed 's/"//g')
+    if [ -z "${COMPONENT_NAME}" ];
+    then
+        if [ $VERBOSE -eq 1 ]; then
+            echo "Couldn't find valid component name for component id: $HB_COMPONENT"
+        fi
+        die
+    fi
+
+    # Search for the reason code files only once.
+    REASONCODE_FILES=$(find ${SEARCH_PATH}/src/include -type f -iname "$COMPONENT_NAME*reason*")
+    if [ -z "${REASONCODE_FILES}" ];
+    then
+        if [ $VERBOSE -eq 1 ]; then
+            echo "No reason code files found for $COMPONENT_NAME"
+        fi
+        die
+    fi
+
+    if [ $VERBOSE -eq 1 ]; then
+        echo "Reason Code Files: $REASONCODE_FILES"
+        echo ""
+    fi
+
+    echo "COMPONENT NAME: $COMPONENT_NAME ($HB_COMPONENT)"
+
+
+    # Find the reason code name
+    REASON_CODE_NAME=$(cat $REASONCODE_FILES | sed 's/\/.*//g' | grep -i $REASON_CODE | grep -i "${COMPONENT_NAME}_COMP_ID" | awk '{print $1}')
+    echo "REASON_CODE_NAME: $REASON_CODE_NAME ($REASON_CODE)"
+
+    if [ $SKIP_MOD_ID -ne 1 ]; then
+        # Find the Module Id for the reason code.
+        MODULE_ID_NAME=$(cat $REASONCODE_FILES | sed -n '/mod[a-zA-Z]*id/I, /\};/Ip' | sed 's/\/.*//g' | grep -i $MODULE_ID | awk '{print $1}')
+        echo "MODULE_ID_NAME: $MODULE_ID_NAME ($MODULE_ID)"
+    fi
+}
+
+SEARCH_PATH=
+VERBOSE=0
+
+# Parse the input options
+while :; do
+    case $1 in
+        -h|-\?|--help)
+            decodeRc_helptext
+            exit
+            ;;
+        -p|--path) # Takes an option argument; ensure it has been specified.
+            if [ "$2" ]; then
+                SEARCH_PATH=$2
+                shift
+            else
+                die 'ERROR: "--path" requires a non-empty option argument.'
+            fi
+            ;;
+        --path=?*)
+            SEARCH_PATH=${1#*=} # Delete everything up to "=" and assign the remainder.
+            ;;
+        --path=)         # Handle the case of an empty --file=
+            die 'ERROR: "--path" requires a non-empty option argument.'
+            ;;
+        -v|--verbose)
+            VERBOSE=1
+            ;;
+        --)              # End of all options.
+            shift
+            break
+            ;;
+        -?*)
+            printf 'WARNING: Unknown option (ignored): %s\n' "$1" >&2
+            ;;
+        *)               # Default case: No more options, so break out of the loop.
+            break
+    esac
+
+    shift
+done
+
+# If $PROJECT_ROOT is not defined and we haven't been given a path to search
+# from then exit with an error code.
+if [ -z "${PROJECT_ROOT}" ] && [ -z "$SEARCH_PATH" ]
+then
+    echo "ERROR: Missing PROJECT_ROOT and no --path given."
+    decodeRc_helptext
+    die
+fi
+
+# If $SEARCH_PATH wasn't set yet or a bad directory was given, then default to
+# $PROJECT_ROOT.
+if [ -z "$SEARCH_PATH" ] || [ ! -d "$SEARCH_PATH" ]
+then
+    if [ -n "${PROJECT_ROOT}" ]
+    then
+        if [ $VERBOSE -eq 1 ]
+        then
+            echo "Option --path=$SEARCH_PATH was invalid or missing. Defaulting to $PROJECT_ROOT"
+        fi
+        SEARCH_PATH=${PROJECT_ROOT}
+    else
+        die "ERROR: Directory $SEARCH_PATH doesn't exist."
+    fi
+fi
+
+decodeRc $*
