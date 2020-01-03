@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -308,7 +308,7 @@ Parser::Parser(int narg, char ** argv)
         }
         else
         {
-            cout << stats;
+            cout << stats.rdbuf();
         }
     }
 
