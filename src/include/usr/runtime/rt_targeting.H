@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,10 +38,16 @@ namespace RT_TARG
 
     enum
     {
-        MEMBUF_ID_SHIFT = 4,    //!< CHIPID for MEMBUF is '<procid>MMMM'b
+        // @TODO RTC 244718
+        // Until all MEMBUF references are removed, map OCMB and MEMBUF to the
+        // same values. All new/updated code should use OCMB* instead of
+        // MEMBUF*
+        OCMB_ID_SHIFT = 4,            //!< CHIPID for OCMB is '<procid>XXXX'b
+        OCMB_ID_MASK  = 0x0000000F,   //!< valid position bits for OCMB
+
+        MEMBUF_ID_SHIFT = 4,          //!< CHIPID for MEMBUF is '<procid>XXXX'b
         MEMBUF_ID_MASK  = 0x0000000F, //!< valid position bits for MEMBUF
     };
-
 
     /**
      * @brief Convert a TARGETING::Target to an unit ID that can be used

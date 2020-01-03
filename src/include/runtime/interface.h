@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -143,7 +143,14 @@ enum MemoryError_t
  *      passed to the host in several interfaces
  */
 #define HBRT_PROC_TYPE          0x00000000 //!< PROC chip id type
+
+// @TODO RTC 244718
+// Until all MEMBUF references are removed, map OCMB and MEMBUF to the
+// same value. All new/updated code should use HBRT_OCMB_TYPE instead of
+// HBRT_MEMBUF_TYPE
+#define HBRT_OCMB_TYPE          0x80000000 //!< OCMB chip id type
 #define HBRT_MEMBUF_TYPE        0x80000000 //!< MEMBUF chip id type
+
 #define HBRT_CORE_TYPE          0x40000000 //!< CORE chip id type
 #define HBRT_CHIPID_TYPE_MASK   0xFF000000 //!< TYPE field
 
