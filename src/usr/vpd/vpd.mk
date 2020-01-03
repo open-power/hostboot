@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2019
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -30,9 +30,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
 OBJS += vpd_common.o
 OBJS += ipvpd.o
 OBJS += mvpd.o
-OBJS += cvpd.o
 OBJS += pvpd.o
-OBJS += dvpd.o
 OBJS += spd.o
 OBJS += ocmb_spd.o
 OBJS += errlud_vpd.o

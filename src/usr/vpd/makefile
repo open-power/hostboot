@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2019
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -35,28 +35,5 @@ OBJS += rtvpd_load.o
 
 SUBDIRS += test.d
 SUBDIRS += runtime.d
-
-#Updated mvpd to contain VRML so that part/serial numbers can be
-#found for procs CCIN 54E3
-BINARY_FILES += $(IMGDIR)/procmvpd.dat:65759fa4aebd2e3b42b25309504a3007b3b51036
-BINARY_FILES += $(IMGDIR)/procmvpd_ven.dat:dd8507bec946283260f82af212ed32feaeb3363a
-BINARY_FILES += $(IMGDIR)/vpo_sysmvpd.dat:f83bbcdd56defb5d155399774c4d721de25a8e96
-BINARY_FILES += $(IMGDIR)/vpo_djvpd.dat:eb4dce98f19ebfe77243be1c56d3d0eaa1889d90
-
-# P9 (and P9 Prime) Module VPD
-BINARY_FILES += $(IMGDIR)/procmvpd_p9n.dat:a351f3cd5ba8a81a50c3e5a0dea5fea03e55769d
-BINARY_FILES += $(IMGDIR)/procmvpd_p9c.dat:04dccd5f633f07fc36dd35515d49277c0cd26a91
-BINARY_FILES += $(IMGDIR)/procmvpd_p9a.dat:04dccd5f633f07fc36dd35515d49277c0cd26a91
-
-# CDIMM Format - download 4k cvpd file
-BINARY_FILES += $(IMGDIR)/cvpd_cdimm.dat:b12431fbc14304edd31e74405cdcb27560a8e00b
-BINARY_FILES += $(IMGDIR)/dimmspd_cdimm.dat:21b0da9354a588bb1247f1408bfce3111fbc4c82
-
-# ISDIMM Format - download 8k cvpd file
-BINARY_FILES += $(IMGDIR)/cvpd.dat:af41c35b5a10f309f2519a871204936a2129e5ea
-BINARY_FILES += $(IMGDIR)/dimmspd.dat:3851074565e615dc2715ca15fc8f90bf246aa0c7
-
-#Direct memory vpd
-BINARY_FILES += $(IMGDIR)/dvpd.dat:9292032f653710f92bbeb56b39582b2d0e5296b7
 
 include ${ROOTPATH}/config.mk

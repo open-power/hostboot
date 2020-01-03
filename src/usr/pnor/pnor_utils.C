@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -352,7 +352,6 @@ bool PNOR::isEnforcedSecureSection(const uint32_t i_section)
                i_section == HCODE ||
                i_section == HB_RUNTIME ||
                i_section == WOFDATA ||
-               i_section == MEMD ||
                i_section == CAPP ||
                i_section == TESTLOAD ||
                i_section == VERSION;
@@ -415,12 +414,10 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
         "TEST",        /**< PNOR::TEST           : Test space for PNOR*/
         "TESTRO",      /**< PNOR::TESTRO         : ReadOnly Test space for PNOR */
         "BACKUP_PART", /**PNOR::BACKUP_PART      : Backup of PART*/
-        "POWERVM",     /**< PNOR::POWERVM        : Power VM data */
         "RINGOVD",     /**< PNOR::RINGOVD        : Ring overrides */
         "WOFDATA",     /**< PNOR::WOFDATA        : VFRT data tables for WOF */
         "SBKT",        /**< PNOR::SBKT           : SecureBoot Key Transition */
         "HB_VOLATILE", /**< PNOR::HB_VOLATILE    : Semi volatile partition */
-        "MEMD",        /**< PNOR::MEMD           : Memory configuration data */
         "TESTLOAD",    /**< PNOR::TESTLOAD       : Secureboot Test Load */
         "HDAT",        /**< PNOR::HDAT           : Hdat Data */
         "EECACHE",     /**< PNOR::EECACHE        : Cached data from various EEPROMs */

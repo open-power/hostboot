@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -812,18 +812,6 @@ class IpVpdFacade
         this->iv_cachePnorAddr = i_pnorAddr;
     };
 
-
-    /**
-     * @brief Retrieves the MEMD record from PNOR, finds a matching
-     *        set of data, and sets up sets up the override pointer.
-     * @param[in] i_recKw  Record/Keyword values
-     * @param[in] i_target  Relevant Target
-     * @param[in] i_vmMask  Specific bits to compare with EEPROM
-     * @return Error log
-     */
-    errlHndl_t getMEMDFromPNOR( input_args_t i_recKw,
-                                TARGETING::Target* i_target,
-                                uint32_t i_vmMask );
 
     /**
      * @brief Callback function to check for a record override and

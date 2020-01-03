@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2019
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -68,9 +68,6 @@ COPY_FILES = \
     img/errlparser:tools,vpo,openpower,openpower-sim \
     img/hbotStringFile:tools,vpo,openpower,openpower-sim \
     img/isteplist.csv:tools,vpo,openpower,openpower-sim \
-    img/dimmspd.dat:vpo \
-    img/procmvpd.dat:vpo \
-    img/dvpd.dat:vpo \
     obj/genfiles/attrInfo.csv:vpo,openpower,openpower-sim \
     obj/genfiles/attrEnumInfo.csv:vpo \
     obj/genfiles/targAttrInfo.csv:vpo \
@@ -277,14 +274,6 @@ simics.tar_CONTENTS = \
     img/hbotStringFile \
     src/build/simics/hb-pnor-vpd-preload.py \
     src/build/simics/hb-pnor-vpd-preload.pl \
-    img/dimmspd.dat \
-    img/procmvpd.dat \
-    img/procmvpd_ven.dat \
-    img/procmvpd_p9n.dat \
-    img/procmvpd_p9c.dat \
-    img/procmvpd_p9a.dat \
-    img/dvpd.dat \
-    img/dimmspd_cdimm.dat \
     obj/genfiles/attrInfo.csv \
     obj/genfiles/attrEnumInfo.csv \
     obj/genfiles/targAttrInfo.csv
@@ -312,9 +301,6 @@ fsp.tar_CONTENTS = \
     src/build/buildpnor/pnorLayoutFSP.xml \
     src/build/buildpnor/pnorLayoutP10.xml \
     $(if $(FAKEPNOR), src/build/buildpnor/pnorLayoutFake.xml, ) \
-    $(if $(FAKEPNOR), img/vpo_sysmvpd.dat, ) \
-    $(if $(FAKEPNOR), img/vpo_djvpd.dat, ) \
-    $(if $(FAKEPNOR), img/dvpd.dat, ) \
     img/simics_P10_targeting.bin \
     img/simics_P10_targeting.bin.protected \
     img/simics_P10_targeting.bin.unprotected \

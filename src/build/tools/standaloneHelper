@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2019
+# Contributors Listed Below - COPYRIGHT 2012,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -106,27 +106,18 @@ simics_setup()
     cp ${PROJECT_ROOT}/obj/genfiles/attrEnumInfo.csv ${hbfw_dir}
 
     # Copy img files
-    cp ${PROJECT_ROOT}/img/dimmspd_cdimm.dat ${hbfw_dir}
-    cp ${PROJECT_ROOT}/img/procmvpd.dat ${hbfw_dir}
     cp ${PROJECT_ROOT}/img/securerom.bin.modinfo ${hbfw_dir}
-    cp ${PROJECT_ROOT}/img/dimmspd.dat ${hbfw_dir}
     cp ${PROJECT_ROOT}/img/hbibl.bin.modinfo ${hbfw_dir}
     cp ${PROJECT_ROOT}/img/hbirt${UNDERSCORE_TEST}.bin.modinfo ${hbfw_dir}/hbirt.bin.modinfo
-    cp ${PROJECT_ROOT}/img/procmvpd_p9a.dat ${hbfw_dir}
     cp ${PROJECT_ROOT}/img/securerom.list.bz2 ${hbfw_dir}
-    cp ${PROJECT_ROOT}/img/dvpd.dat ${hbfw_dir}
     cp ${PROJECT_ROOT}/img/hbibl.list.bz2 ${hbfw_dir}
     cp ${PROJECT_ROOT}/img/hbirt${UNDERSCORE_TEST}.list.bz2 ${hbfw_dir}/hbirt.list.bz2
-    cp ${PROJECT_ROOT}/img/procmvpd_p9c.dat ${hbfw_dir}
     cp ${PROJECT_ROOT}/img/securerom.syms ${hbfw_dir}
     cp ${PROJECT_ROOT}/img/hbibl.syms ${hbfw_dir}
     cp ${PROJECT_ROOT}/img/hbirt${UNDERSCORE_TEST}.syms ${hbfw_dir}/hbirt.syms
-    cp ${PROJECT_ROOT}/img/procmvpd_p9n.dat ${hbfw_dir}
     cp ${PROJECT_ROOT}/img/errlparser ${hbfw_dir}
     cp ${PROJECT_ROOT}/img/hbicore${UNDERSCORE_TEST}.bin.modinfo ${hbfw_dir}/hbicore.bin.modinfo
     cp ${PROJECT_ROOT}/img/isteplist.csv ${hbfw_dir}
-    cp ${PROJECT_ROOT}/img/procmvpd_ven.dat ${hbfw_dir}
-    cp ${PROJECT_ROOT}/img/cvpd.dat ${hbfw_dir}
     cp ${PROJECT_ROOT}/img/hbicore${UNDERSCORE_TEST}.list.bz2 ${hbfw_dir}/hbicore.list.bz2
     cp ${PROJECT_ROOT}/img/hbicore${UNDERSCORE_TEST}.syms ${hbfw_dir}/hbicore.syms
     cp ${PROJECT_ROOT}/img/hbotStringFile ${hbfw_dir}

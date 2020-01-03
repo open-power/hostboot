@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,6 @@
 #include "hdathdif.H"            // HdatHdif base class definition
 #include "hdatmsarea.H"          // HdatMsArea class definition
 #include <errl/errlentry.H>      // ErrlEntry class
-#include <vpd/cvpdenums.H>
 #include "hdatutil.H"
 
 namespace HDAT

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,8 +40,6 @@
 #include <vpd/vpd_if.H>
 #include <i2c/eepromif.H>
 #include "pvpd.H"
-#include "cvpd.H"
-#include "dvpd.H"
 #include "vpd.H"
 #include <initservice/initserviceif.H>
 
@@ -315,17 +313,14 @@ bool VPD::pvpdPresent( TARGETING::Target * i_target )
 
 //PVPD Class Functions
 /**
- * @brief  Constructor
- * Planar VPD is included in the Centaur PNOR section.
- * Including with Centaur vpd minimizes the number of PNOR sections.
+ * @brief  Constructor for Planar VPD
  */
-//@TODO RTC: 210975: CENATUR_VPD fix
 PvpdFacade::PvpdFacade() :
 IpVpdFacade(PVPD::pvpdRecords,
             (sizeof(PVPD::pvpdRecords)/sizeof(PVPD::pvpdRecords[0])),
             PVPD::pvpdKeywords,
             (sizeof(PVPD::pvpdKeywords)/sizeof(PVPD::pvpdKeywords[0])),
-            PNOR::EECACHE,  // TODO RTC: 210975 note use of CVPD
+            PNOR::EECACHE,
             PVPD::g_mutex,
             VPD::VPD_WRITE_NODE)
 {
@@ -359,10 +354,6 @@ IpVpdFacade(PVPD::pvpdRecords,
     assert(sysTgt != NULL,"PvpdFacade: "
            "System target was NULL.");
 
-    iv_vpdSectionSize = sysTgt->getAttr<TARGETING::ATTR_CVPD_SIZE>();
-
-    iv_vpdMaxSections = sysTgt->getAttr<TARGETING::ATTR_CVPD_MAX_SECTIONS>();
-
     TRACDCOMP( g_trac_vpd, "PvpdFacade VpdSectionSize: %d"
            "MaxSections: %d ", iv_vpdSectionSize,iv_vpdMaxSections);
 }
@@ -377,21 +368,5 @@ void PvpdFacade::getRecordLists(
     // Always return this object's list
     o_primaryVpdRecords = iv_vpdRecords;
     o_primaryRecSize = iv_recSize;
-
-    // If the planar eeprom is being shared with a mem buf,
-    // then return the cvpd list as the alternative record list.
-    // At thip point, if the node is be processed, then the mem buffs
-    // might have not been discovered yet. If cvpd is being cached, then
-    // include the cvpd list as the altnative.
-#ifdef CONFIG_MEMVPD_READ_FROM_PNOR
-    o_altVpdRecords = Singleton<CvpdFacade>::instance().iv_vpdRecords;
-    o_altRecSize = Singleton<CvpdFacade>::instance().iv_recSize;
-#elif CONFIG_MEMVPD_READ_FROM_HW
-    o_altVpdRecords = Singleton<DvpdFacade>::instance().iv_vpdRecords;
-    o_altRecSize = Singleton<DvpdFacade>::instance().iv_recSize;
-#else
-    o_altVpdRecords = NULL;
-    o_altRecSize = 0;
-#endif
 }
 

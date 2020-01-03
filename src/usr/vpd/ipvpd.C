@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -44,7 +44,6 @@
 #include <util/runtime/util_rt.H>
 
 #include "vpd.H"
-#include "cvpd.H"
 #include "ipvpd.H"
 #include "errlud_vpd.H"
 
@@ -2589,24 +2588,6 @@ errlHndl_t IpVpdFacade::checkForRecordOverride( const char* i_record,
     iv_overridePtr[l_recTarg] = nullptr;
     mutex_unlock(&iv_mutex);
     return nullptr;
-}
-
-/**
- * @brief Retrieves the MEMD record from PNOR, finds a matching
- *        set of data, and sets up sets up the override pointer.
- */
-errlHndl_t IpVpdFacade::getMEMDFromPNOR( input_args_t i_recKw,
-                                         TARGETING::Target* i_target,
-                                         uint32_t i_vmMask )
-{
-    TRACFCOMP(g_trac_vpd,ENTER_MRK"IpVpdFacade::getMEMDFromPNOR( %d, %.8X )",
-              i_recKw.record, get_huid(i_target));
-
-    errlHndl_t l_errl = nullptr;
-
-    assert(0,"getMEMDFromPNOR not supported");
-
-    return l_errl;
 }
 
 #ifdef CONFIG_SECUREBOOT

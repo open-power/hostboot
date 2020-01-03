@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,41 +46,19 @@ public:
 
 void testGetVPD(void)
 {
-#if (defined CONFIG_SECUREBOOT && ! defined CONFIG_AXONE)
-    errlHndl_t pError=NULL;
-    do
-    {
-        pError = PNOR::loadSecureSection(PNOR::MEMD);
-        if(pError)
-        {
-            TS_FAIL("testGetVPD:: failed to load MEMD secure section");
-            ERRORLOG::errlCommit(pError,PNOR_COMP_ID);
-            break;
-        }
-#endif
-        testGetVPD_MR();
+      testGetVPD_MR();
 
-        testGetVPD_MT();
+      testGetVPD_MT();
 
-        testDecode_MR();
+      testDecode_MR();
 
-        testDecode_MT();
+      testDecode_MT();
 
-        testGetVPD_Override();
+      testGetVPD_Override();
 
-        testGetVPD_DQ();
+      testGetVPD_DQ();
 
-        testGetVPD_CK();
-#if (defined CONFIG_SECUREBOOT && ! defined CONFIG_AXONE)
-        pError = PNOR::unloadSecureSection(PNOR::MEMD);
-        if(pError)
-        {
-            TS_FAIL("testGetVPD:: failed to unload MEMD secure section");
-            ERRORLOG::errlCommit(pError,PNOR_COMP_ID);
-            break;
-        }
-    } while(0);
-#endif
+      testGetVPD_CK();
 
 }
 

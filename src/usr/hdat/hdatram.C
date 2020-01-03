@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,23 +47,6 @@ namespace HDAT
 /*----------------------------------------------------------------------------*/
 uint32_t HdatRam::cv_actualCnt;
 
-vpdData cvpdData[] =
-{
-    { CVPD::VINI, CVPD::DR },
-    { CVPD::VINI, CVPD::FN },
-    { CVPD::VINI, CVPD::PN },
-    { CVPD::VINI, CVPD::SN },
-    { CVPD::VINI, CVPD::CC },
-//    { CVPD::VINI, CVPD::PR },
-    //{ CVPD::VINI, CVPD::SZ },
-    { CVPD::VINI, CVPD::HE },
-    { CVPD::VINI, CVPD::CT },
-    { CVPD::VINI, CVPD::HW },
- //   { CVPD::VINI, CVPD::B3 },
- //   { CVPD::VINI, CVPD::B4 },
- //   { CVPD::VINI, CVPD::B7 },
-    { CVPD::VINI, CVPD::PF },
-};
 /*----------------------------------------------------------------------------*/
 /* Constants                                                                  */
 /*----------------------------------------------------------------------------*/

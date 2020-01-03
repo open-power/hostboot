@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,7 @@ enum SectionId
     SBE_IPL,        /**< Self-Boot Engine IPL image */
     HCODE,          /**< HCODE Reference image */
     PAYLOAD,        /**< HAL/OPAL */
-    HB_RUNTIME,     /**< Hostboot Runtime (for Sapphire) */
+    HB_RUNTIME,     /**< Hostboot Runtime Image */
     HB_DATA,        /**< Hostboot Data */
     GUARD_DATA,     /**< Guard Data */
     HB_ERRLOGS,     /**< Hostboot Error log Repository */
@@ -63,15 +63,13 @@ enum SectionId
     TEST,           /**< Scratch space for PNOR test cases */
     TESTRO,         /**< Scratch space for PNOR ReadOnly test cases */
     BACKUP_PART,    /**< Backup of TOC*/
-    POWERVM,        /**< Power VM data */
     RINGOVD,        /**< Ring override data */
     WOFDATA,        /**< VFRT data tables for WOF */
     SBKT,           /**< SecureBoot Key Transition */
     HB_VOLATILE,    /**< Semi volatile partition for reconfig */
-    MEMD,           /**< Memory configuration data */
     TESTLOAD,       /**< Secureboot test load */
     HDAT,           /**< HDAT data */
-    EECACHE,
+    EECACHE,        /**< EEPROM Cache */
     OCMBFW,         /**< OCMB image */
 #ifdef CONFIG_LOAD_PHYP_FROM_BOOTKERNEL
     BOOTKERNEL,     /**< Bootkernel -- HB uses for  PHYP */

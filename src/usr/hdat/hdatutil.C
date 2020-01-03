@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1177,18 +1177,6 @@ errlHndl_t hdatGetMvpdFullRecord(TARGETING::Target * i_target,
     HDAT_EXIT();
     return err;
 }//end hdatGetMvpdFullRecord
-
-/******************************************************************************/
-// hdatGetAsciiKwdForCvpd
-/******************************************************************************/
-errlHndl_t hdatGetAsciiKwdForCvpd(TARGETING::Target * i_target,
-           uint32_t &o_kwdSize,char* &o_kwd,
-           struct vpdData i_fetchVpd[], size_t i_num,size_t theSize[])
-{
-    //TODO RTC: 210975 remove the references to this function elsewhere
-    errlHndl_t l_err = nullptr;
-    return l_err;
-}
 
 /*******************************************************************************
 * hdatGetMaxCecNodes

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,9 +34,9 @@
 #include <vpd_access.H>
 #include <ddimm_get_efd.H>
 #include <attribute_service.H>
-#include <vpd/dvpdenums.H>
 #include <errl/errlmanager.H>
 #include <fapi2_spd_access.H>
+
 //The following can be uncommented for unit testing
 //#undef FAPI_DBG
 //#define FAPI_DBG(args...) FAPI_INF(args)

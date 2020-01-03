@@ -40,7 +40,6 @@
 
 #include "vpd.H"
 #include "mvpd.H"
-#include "cvpd.H"
 #include "spd.H"
 
 using namespace ERRORLOG;

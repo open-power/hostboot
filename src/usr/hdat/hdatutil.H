@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,7 +48,6 @@
 #include "hdatbldda.H"
 #include<vpd/mvpdenums.H>
 #include<vpd/pvpdenums.H>
-#include<vpd/cvpdenums.H>
 #include<vpd/spdenums.H>
 #include <devicefw/driverif.H>
 #include <targeting/common/predicates/predicatectm.H>
@@ -437,23 +436,6 @@ errlHndl_t hdatGetPvpdFullRecord(
                        const IpVpdFacade::recordInfo i_fetchVpd[],
                        size_t i_num,size_t theSize[]);
 
-/**
- * @brief  Get the ascii keyword for membuf
- *
- * @param[in] i_pTarget input target pointer
- *
- * @param[out]o_kwdSize: keyword size
- * @param[out]o_kwd: key word array
- * @param[in] i_fetchVpd: Vpd record-keyword table
- * @return errlHndl_t NULL on success
- *
- */
-errlHndl_t hdatGetAsciiKwdForCvpd(
-                           TARGETING::Target * i_target,
-                           uint32_t &o_kwdSize,
-                           char* &o_kwd,
-                           struct vpdData i_fetchVpd[],
-                           size_t i_num,size_t theSize[]);
 /**
  * @brief  Get the ascii keyword for  dimm
  *

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,11 +34,9 @@
 #include <sys/mm.h>
 #include "vpd.H"
 #include "mvpd.H"
-#include "cvpd.H"
 #include "pvpd.H"
 #include "spd.H"
 #include "ipvpd.H"
-#include "dvpd.H"
 #include <map>
 #include <console/consoleif.H>
 #include <initservice/istepdispatcherif.H>
@@ -352,11 +350,7 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
     do
     {
             IpVpdFacade * l_ipvpd = &(Singleton<MvpdFacade>::instance());
-            if(l_type == TARGETING::TYPE_MEMBUF)
-            {
-                l_ipvpd = &(Singleton<CvpdFacade>::instance());
-            }
-            else if(l_type == TARGETING::TYPE_NODE)
+            if(l_type == TARGETING::TYPE_NODE)
             {
                 l_ipvpd = &(Singleton<PvpdFacade>::instance());
             }
@@ -546,50 +540,6 @@ errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
             io_keywordPN = MVPD::PN;
             io_keywordSN = MVPD::SN;
         }
-        else if( i_type == TARGETING::TYPE_MEMBUF )
-        {
-#if defined(CONFIG_MEMVPD_READ_FROM_HW) && defined(CONFIG_MEMVPD_READ_FROM_PNOR)
-            IpVpdFacade* l_ipvpd     = &(Singleton<CvpdFacade>::instance());
-            io_record    = CVPD::OPFR;
-            io_keywordPN = CVPD::VP;
-            io_keywordSN = CVPD::VS;
-
-            bool l_zeroPN;
-            l_err = l_ipvpd->cmpSeepromToZero( i_target,
-                                               io_record,
-                                               io_keywordPN,
-                                               l_zeroPN );
-            if (l_err)
-            {
-                TRACFCOMP(g_trac_vpd,ERR_MRK"VPD::getPnAndSnRecordAndKeywords: Error checking if OPFR:VP == 0");
-                break;
-            }
-
-            bool l_zeroSN;
-            l_err = l_ipvpd->cmpSeepromToZero( i_target,
-                                               io_record,
-                                               io_keywordSN,
-                                               l_zeroSN );
-            if (l_err)
-            {
-                TRACFCOMP(g_trac_vpd,ERR_MRK"VPD::getPnAndSnRecordAndKeywords: Error checking if OPFR:VS == 0");
-                break;
-            }
-
-            // If VP and VS are zero, use VINI instead
-            if( l_zeroPN && l_zeroSN )
-            {
-                TRACFCOMP(g_trac_vpd, "setting cvpd to VINI PN SN");
-                io_record    = CVPD::VINI;
-                io_keywordPN = CVPD::PN;
-                io_keywordSN = CVPD::SN;
-            }
-#else
-            io_record    = CVPD::VINI;
-            io_keywordPN = CVPD::PN;
-            io_keywordSN = CVPD::SN;
-#endif
-        }
         else if((  i_type == TARGETING::TYPE_DIMM )
                || (i_type == TARGETING::TYPE_OCMB_CHIP))
         {
@@ -603,12 +553,6 @@ errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
             io_record    = PVPD::OPFR;
             io_keywordPN = PVPD::VP;
             io_keywordSN = PVPD::VS;
-        }
-        else if( i_type == TARGETING::TYPE_MCS )
-        {
-            io_record    = DVPD::VINI;
-            io_keywordPN = DVPD::PN;
-            io_keywordSN = DVPD::SN;
         }
         else
         {
@@ -825,12 +769,7 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
     TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
 
     IpVpdFacade* l_ipvpd = &(Singleton<MvpdFacade>::instance());
-    // If we have a membuf, use CVPD api
-    if(l_type == TARGETING::TYPE_MEMBUF)
-    {
-        l_ipvpd = &(Singleton<CvpdFacade>::instance());
-    }
-    else if(l_type == TARGETING::TYPE_NODE)
+    if(l_type == TARGETING::TYPE_NODE)
     {
         l_ipvpd = &(Singleton<PvpdFacade>::instance());
     }
@@ -1039,10 +978,6 @@ errlHndl_t invalidatePnorCache ( TARGETING::Target * i_target )
     {
         l_err = Singleton<MvpdFacade>::instance().invalidatePnor( i_target );
     }
-    else if( l_type == TARGETING::TYPE_MEMBUF )
-    {
-        l_err = Singleton<CvpdFacade>::instance().invalidatePnor( i_target );
-    }
     else if( l_type == TARGETING::TYPE_NODE )
     {
         l_err = Singleton<PvpdFacade>::instance().invalidatePnor( i_target );
@@ -1070,7 +1005,6 @@ errlHndl_t invalidatePnorCache ( TARGETING::Target * i_target )
 void setVpdConfigFlagsHW ( )
 {
     Singleton<MvpdFacade>::instance().setConfigFlagsHW();
-    Singleton<CvpdFacade>::instance().setConfigFlagsHW();
     Singleton<PvpdFacade>::instance().setConfigFlagsHW();
     SPD::setConfigFlagsHW();
 }
@@ -1111,7 +1045,7 @@ errlHndl_t invalidateAllPnorCaches ( bool i_setHwOnly )
             break;
         }
 
-        // Reset the PNOR config flags to HW - MVPD/CVPD/SPD
+        // Reset the PNOR config flags to HW - MVPD/SPD
         // Checks for PNOR caching mode before reset
         if( i_setHwOnly )
         {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,7 +48,7 @@ namespace HDAT
 /*----------------------------------------------------------------------------*/
 uint32_t HdatMsArea::cv_actualCnt;
 
-static vpdData cvpdData[] =
+static vpdData mvpdData[] =
 {
     { MVPD::VINI, MVPD::DR },
     { MVPD::VINI, MVPD::FN },
@@ -65,19 +65,17 @@ static vpdData cvpdData[] =
  //   { MVPD::VINI, MVPD::B7 },
 };
 
-const HdatKeywordInfo l_cvpdKeywords[] =
+const HdatKeywordInfo l_mvpdKeywords[] = 
 {
-    { CVPD::DR,  "DR" },
-    { CVPD::FN,  "FN" },
-    { CVPD::PN,  "PN" },
-    { CVPD::SN,  "SN" },
-    { CVPD::CC,  "CC" },
-    { CVPD::HE,  "HE" },
-    { CVPD::CT,  "CT" },
-    { CVPD::HW,  "HW" },
-    { CVPD::PF,  "PF" },
+    { MVPD::DR,  "DR" },  
+    { MVPD::FN,  "FN" },  
+    { MVPD::PN,  "PN" },  
+    { MVPD::SN,  "SN" },  
+    { MVPD::CC,  "CC" },  
+    { MVPD::HE,  "HE" },  
+    { MVPD::CT,  "CT" },  
+    { MVPD::HW,  "HW" },  
 };
-
 
 
 /** @brief See the prologue in hdatmsarea.H
@@ -147,17 +145,22 @@ HdatMsArea::HdatMsArea(errlHndl_t &o_errlHndl,
     }
     else
     {
-        // Get the SLCA index and ASCII keyword for this resource id
-        uint32_t l_num = sizeof(cvpdData)/sizeof(cvpdData[0]);
-        size_t theSize[l_num];
-        hdatGetAsciiKwdForMvpd(i_target,iv_kwdSize,iv_kwd,cvpdData,
-                                    l_num,theSize);
         do
         {
+            // Get the SLCA index and ASCII keyword for this resource id
+            uint32_t l_num = sizeof(mvpdData)/sizeof(mvpdData[0]);
+            size_t theSize[l_num];
+            o_errlHndl = hdatGetAsciiKwdForMvpd(i_target,iv_kwdSize,
+                                                iv_kwd,mvpdData,
+                                                l_num,theSize);
+            if( o_errlHndl ) { break; }
+
             char *o_fmtKwd;
             uint32_t o_fmtkwdSize;
-            o_errlHndl = hdatformatAsciiKwd(cvpdData , l_num , theSize, iv_kwd,
-                iv_kwdSize, o_fmtKwd, o_fmtkwdSize, l_cvpdKeywords);
+            o_errlHndl = hdatformatAsciiKwd(mvpdData , l_num , theSize, iv_kwd,
+                iv_kwdSize, o_fmtKwd, o_fmtkwdSize, l_mvpdKeywords);
+            if( o_errlHndl ) { break; }
+
             if( o_fmtKwd != NULL )
             {
                 delete[] iv_kwd;

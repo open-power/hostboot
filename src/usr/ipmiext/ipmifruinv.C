@@ -5,10 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
-/* [+] Jim Yuan                                                           */
-/* [+] Maxim Polyakov                                                     */
+/* [+] Super Micro Computer, Inc.                                         */
+/* [+] YADRO                                                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -30,7 +30,6 @@
 #include <vpd/mvpdenums.H>
 #include <devicefw/userif.H>
 #include <vpd/spdenums.H>
-#include <vpd/cvpdenums.H>
 #include <vpd/pvpdenums.H>
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
