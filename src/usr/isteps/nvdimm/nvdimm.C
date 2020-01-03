@@ -1187,6 +1187,7 @@ errlHndl_t nvdimmRestore(TargetHandleList& io_nvdimmList, uint8_t &i_mpipl)
         for (TargetHandleList::iterator it = io_nvdimmList.begin();
              it != io_nvdimmList.end();)
         {
+
             // Default state during boot is unarmed, therefore not preserved
             nvdimmSetStatusFlag(*it, NSTD_VAL_DISARMED);
 
@@ -1205,6 +1206,9 @@ errlHndl_t nvdimmRestore(TargetHandleList& io_nvdimmList, uint8_t &i_mpipl)
                 // To avoid PRD error during mpipl need to Mask MBACALFIR EventN
                 // Note: a regular IPL will already have this masked
                 maskMbacalfir_eventn(*it);
+
+                // Call init for error checking skipped in the SAVE step
+                nvdimm_init(*it);
 
                 FAPI_INVOKE_HWP(l_err, mss::ddr_resetn, l_fapi_mca, HIGH);
 
