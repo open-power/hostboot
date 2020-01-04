@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -199,7 +199,9 @@ enum BlockPriority
 #define VMM_RT_VPD_SIZE ( VMM_MODULE_VPD_SIZE + \
                           VMM_DIMM_JEDEC_VPD_SIZE )
 #else
-#define VMM_RT_VPD_SIZE (512*KILOBYTE) /* 64KB aligned (size EECACHE section size - ecc) */
+// @TODO RTC 246430
+// Re-compensate for when EECACHE ECC is removed (reduce to non-ECC size)
+#define VMM_RT_VPD_SIZE (2816*KILOBYTE) /* 2816KB aligned (size EECACHE section size) */
 #endif
 
 
