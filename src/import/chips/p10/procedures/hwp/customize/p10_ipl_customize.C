@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2839,8 +2839,9 @@ ReturnCode p10_ipl_customize (
 //              we will be mindless, but this should probably be changed.
     for(ringId = 0; ringId < NUM_RING_IDS; ringId++)
     {
-        // Only process non-Mvpd rings (which are all assumed to be Common rings)
-        if ( ringid_is_mvpd_ring(torHeader->chipId, ringId) == true )
+        // Only process non-Mvpd and GPTR rings (which are all assumed to be Common rings)
+        if ( ringid_is_gptr_ring(torHeader->chipId, ringId) == false &&
+             ringid_is_mvpd_ring(torHeader->chipId, ringId) == true )
         {
             continue;
         }

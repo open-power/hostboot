@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -322,6 +322,29 @@ MyBool_t ringid_is_mvpd_ring( ChipId_t  i_chipId,
 
         default:
             MY_ERR("ringid_is_mvpd_ring(): Unsupported chipId (=%d) supplied\n", i_chipId);
+            return UNDEFINED_BOOLEAN;
+    }
+
+    return UNDEFINED_BOOLEAN;
+}
+
+MyBool_t ringid_is_gptr_ring( ChipId_t  i_chipId,
+                              RingId_t  i_ringId )
+{
+    switch (i_chipId)
+    {
+        case CID_P10:
+            if ( P10_RID::RING_PROPERTIES[i_ringId].ringClass & RMRK_GPTR_OVLY )
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        default:
+            MY_ERR("ringid_is_gptr_ring(): Unsupported chipId (=%d) supplied\n", i_chipId);
             return UNDEFINED_BOOLEAN;
     }
 

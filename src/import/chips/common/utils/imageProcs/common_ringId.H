@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -350,6 +350,11 @@ int ringid_get_chipletIndex( ChipId_t        i_chipId,
 // Check if ring is an Mvpd ring
 MyBool_t ringid_is_mvpd_ring( ChipId_t  i_chipId,
                               RingId_t  i_ringId );
+
+// Check if ring is a GPTR ring
+MyBool_t ringid_is_gptr_ring( ChipId_t  i_chipId,
+                              RingId_t  i_ringId );
+
 
 #if !defined(__PPE__) && !defined(NO_STD_LIB_IN_PPE) && !defined(WIN32)
 
