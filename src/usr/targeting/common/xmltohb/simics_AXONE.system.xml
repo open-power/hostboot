@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -38,7 +38,7 @@
      * Each Axone has has 2 MC units
      *     Each MC unit has 2 MI units (a total of 4 per chip)
      *         Each MI unit has 2 MCC units (a total of 8 per chip)
-     *         Each MCC unit has 4 OMI Units (A total of 16 per chip)
+     *         Each MCC unit has 2 OMI Units (A total of 16 per chip)
      *           OMI Units are special as they have two parents (MI + OMIC (more description below))
      *           Each OMI unit connects to 1 OCMB chip
      *             Each OCMB unit contains 1 MEM_PORT unit
