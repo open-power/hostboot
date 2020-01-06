@@ -226,7 +226,7 @@
   <!-- sampled: mailbox 3 -->
   <entry>
     <name>ATTR_BOOT_FLAGS</name>
-    <value>0x9A100000</value>
+    <value>0x1A100000</value>
   </entry>
   <entry>
     <name>ATTR_IS_MPIPL</name>
