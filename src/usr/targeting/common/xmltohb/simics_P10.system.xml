@@ -4319,6 +4319,11 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 16GB -->
+        <default>0x30400000000</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4366,6 +4371,11 @@
     <attribute>
         <id>REL_POS</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 32GB -->
+        <default>0x30800000000</default>
     </attribute>
 </targetInstance>
 
@@ -4415,6 +4425,11 @@
         <id>REL_POS</id>
         <default>2</default>
     </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 48GB -->
+        <default>0x30C00000000</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -4462,6 +4477,11 @@
     <attribute>
         <id>REL_POS</id>
         <default>3</default>
+    </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 64GB -->
+        <default>0x31000000000</default>
     </attribute>
 </targetInstance>
 
@@ -5460,6 +5480,11 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 16GB -->
+        <default>0x30400000000</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5508,6 +5533,11 @@
     <attribute>
         <id>REL_POS</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 18GB -->
+        <default>0x30480000000</default>
     </attribute>
 </targetInstance>
 
@@ -5558,6 +5588,11 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 24GB -->
+        <default>0x30600000000</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5606,6 +5641,11 @@
     <attribute>
         <id>REL_POS</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 26GB -->
+        <default>0x30680000000</default>
     </attribute>
 </targetInstance>
 
@@ -5656,6 +5696,11 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 32GB -->
+        <default>0x30800000000</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5704,6 +5749,11 @@
     <attribute>
         <id>REL_POS</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 34GB -->
+        <default>0x30880000000</default>
     </attribute>
 </targetInstance>
 
@@ -5754,6 +5804,11 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 40GB -->
+        <default>0x30a00000000</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5802,6 +5857,11 @@
     <attribute>
         <id>REL_POS</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 42GB -->
+        <default>0x30a80000000</default>
     </attribute>
 </targetInstance>
 
@@ -5852,6 +5912,11 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 48GB -->
+        <default>0x30c00000000</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5900,6 +5965,11 @@
     <attribute>
         <id>REL_POS</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 50GB -->
+        <default>0x30c80000000</default>
     </attribute>
 </targetInstance>
 
@@ -5950,6 +6020,11 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 56GB -->
+        <default>0x30e00000000</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5998,6 +6073,11 @@
     <attribute>
         <id>REL_POS</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 58GB -->
+        <default>0x30e80000000</default>
     </attribute>
 </targetInstance>
 
@@ -6048,6 +6128,11 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 64GB -->
+        <default>0x31000000000</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6096,6 +6181,11 @@
     <attribute>
         <id>REL_POS</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 66GB -->
+        <default>0x31080000000</default>
     </attribute>
 </targetInstance>
 
@@ -6146,6 +6236,11 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 72GB -->
+        <default>0x31200000000</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6194,6 +6289,11 @@
     <attribute>
         <id>REL_POS</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 74GB -->
+        <default>0x31280000000</default>
     </attribute>
 </targetInstance>
 

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep12/call_cen_dmi_scominit.C $              */
+/* $Source: src/usr/isteps/istep12/call_omi_pre_trainadv.C $              */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,6 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+/**
+ * @file    call_omi_pre_trainadv.C
+ *
+ *  Support file for Istep 12.5 Debug routine for IO Characterization
+ *
+ */
 #include    <stdint.h>
 
 #include    <trace/interface.H>
@@ -39,17 +45,7 @@
 
 //Fapi Support
 #include    <config.h>
-/* FIXME RTC: 210975
-#include    <fapi2.H>
-#include    <fapi2/plat_hwp_invoker.H>
-*/
-#include    <util/utilmbox_scratch.H>
 
-/* FIXME RTC: 210975
-#ifdef CONFIG_AXONE
-#include    <p9a_omi_setup_bars.H>
-#endif
-*/
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -59,60 +55,18 @@ using   namespace   TARGETING;
 
 namespace ISTEP_12
 {
-void* call_cen_dmi_scominit (void *io_pArgs)
+void* call_omi_pre_trainadv (void *io_pArgs)
 {
     IStepError l_StepError;
 
-/* FIXME RTC: 210975
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_dmi_scominit entry" );
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_omi_pre_trainadv entry");
 
-    #ifdef CONFIG_AXONE
-    errlHndl_t l_err = NULL;
-    TARGETING::TargetHandleList l_procTargetList;
-    getAllChips(l_procTargetList, TYPE_PROC);
+    // 12.5.a p10_io_dmi_pre_trainadv.C (OMI/OCMB pair)
+    //        - Currently empty
+    //        - Debug routine for IO Characterization
+    //        - TODO: RTC 248244
 
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_dmi_scominit: %d procs found",
-            l_procTargetList.size());
-
-    for (const auto & l_proc_target : l_procTargetList)
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "p9a_omi_setup_bars HWP target HUID %.8x",
-            TARGETING::get_huid(l_proc_target));
-
-        //  call the HWP with each target
-        fapi2::Target <fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_proc_target
-                (l_proc_target);
-
-        FAPI_INVOKE_HWP(l_err, p9a_omi_setup_bars, l_fapi_proc_target);
-
-        //  process return code.
-        if ( l_err )
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR 0x%.8X:  p9a_omi_setup_bars HWP on target HUID %.8x",
-                l_err->reasonCode(), TARGETING::get_huid(l_proc_target) );
-
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_proc_target).addToLog( l_err );
-
-            // Create IStep error log and cross reference to error that occurred
-            l_StepError.addErrorDetails( l_err );
-
-            // Commit Error
-            errlCommit( l_err, ISTEP_COMP_ID );
-        }
-        else
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                     "SUCCESS :  p9a_omi_setup_bars HWP");
-        }
-
-    }
-    #endif // CONFIG_AXONE
-
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_dmi_scominit exit" );
-*/
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_omi_pre_trainadv exit");
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();
 }

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep12/call_proc_dmi_scominit.C $             */
+/* $Source: src/usr/isteps/istep12/call_omi_attr_update.C $               */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,6 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+/**
+ * @file    call_omi_attr_update.C
+ *
+ *  Support file for Istep 12.2 OMI attribute updates
+ *
+ */
 #include    <stdint.h>
 
 #include    <trace/interface.H>
@@ -39,18 +45,7 @@
 
 //Fapi Support
 #include    <config.h>
-/* FIXME RTC: 210975
-#include    <fapi2.H>
-#include    <fapi2/plat_hwp_invoker.H>
-*/
-#include    <util/utilmbox_scratch.H>
 
-/* FIXME RTC: 210975
-// HWP
-#include    <p9_io_dmi_scominit.H>
-*/
-
-#include    <mmio/mmio.H>
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -60,30 +55,19 @@ using   namespace   TARGETING;
 
 namespace ISTEP_12
 {
-void* call_proc_dmi_scominit (void *io_pArgs)
+void* call_omi_attr_update (void *io_pArgs)
 {
     IStepError l_StepError;
-    errlHndl_t l_err = NULL;
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_dmi_scominit entry" );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_omi_attr_update entry" );
 
-    // map OCMBs into Hostboot memory
-    l_err = MMIO::mmioSetup();
-    if ( l_err )
-    {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR 0x%.8X:  call_proc_dmi_scominit, unable to"
-                " initialize MMIO!",
-                l_err->reasonCode() );
+    // 12.2.a p10_omi_attr_update.C (void)
+    //        - Currently empty
+    //        - Attribute targets: MCS/MemBuf
+    //        - Stub HWP for FW to override attributes programmatically
+    //        - TODO: RTC 248244
 
-            // Create IStep error log and cross reference to error that occurred
-            l_StepError.addErrorDetails( l_err );
-
-            // Commit Error
-            errlCommit( l_err, ISTEP_COMP_ID );
-    }
-
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_dmi_scominit exit" );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_omi_attr_update exit" );
 
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();

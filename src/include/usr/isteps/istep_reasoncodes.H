@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,6 +24,13 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #ifndef _ISTEP_REASONCODES_H_
 #define _ISTEP_REASONCODES_H_
+
+/**
+ * @file    istep_reasoncodes.H
+ *
+ *  Define the module IDs and reason codes for ISTEP error logs.
+ *
+ */
 
 #include <hbotcompid.H>
 namespace ISTEP
@@ -70,6 +77,7 @@ namespace ISTEP
         MOD_LOAD_HCODE                                    = 0x27,
         MOD_GET_OMI_FREQ                                  = 0x28,
         MOD_DISCOVER_TARGETS                              = 0x29,
+        MOD_MSS_GETECID                                   = 0x30,
     };
 
     /**
@@ -146,6 +154,7 @@ namespace ISTEP
         RC_MM_UNMAP_FAILED                       = ISTEP_COMP_ID | 0x50,
         RC_OMI_FREQ_MISMATCH                     = ISTEP_COMP_ID | 0x51,
         RC_CANNOT_BOOT_WITH_MISMATCHED_BARS      = ISTEP_COMP_ID | 0x52,
+        RC_INVALID_OCMB_CHIP_ID                  = ISTEP_COMP_ID | 0x53,
     };
 
 };

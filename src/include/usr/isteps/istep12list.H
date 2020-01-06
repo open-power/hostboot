@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -29,35 +29,33 @@
 /**
  * @file    istep12list.H
  *
- *  IStep 12    Step 12 DMI Training
- *  IPL FLow Doc        v1.07
+ *  IStep 12    Step 12 OMI Training
+ *  P10 IPL FLow Doc        v0.89.16
  *
  * 12.1  mss_getecid
- *       :  Read out ECID off all Centaurs
- * 12.2  dmi_attr_update
- *       :DMI ATTR update
- * 12.3  proc_dmi_scominit
- *       :  DMI Scom setup on P8 MCS
- * 12.4  cen_dmi_scominit
- *       :  Scom setup on centaur
- * 12.5  dmi_erepair
- *          : Restore EDI Bus eRepair data
- * 12.6  dmi_io_dccal
- *       : Calibrate DMI interfaces
- * 12.7  dmi_pre_trainadv
- *       : Advanced pre DMI training
- * 12.8  dmi_io_run_training
- *       : Run training on MC buses
- * 12.9  dmi_post_trainadv
- *       : Advanced post DMI training
- * 12.10 proc_cen_framelock
- *       : Initialize EDI Frame
- * 12.11 host_startprd_dmi
- *       : Load prd for DMI domain
- * 12.12 host_attnlisten_memb
- *       : Start attention poll for membuf
- * 12.13 cen_set_inband_addr
- *       : Set the Inband base addresses
+ *       :  Read out ECID off all Explorers
+ * 12.2  omi_attr_update
+ *       :  OMI ATTR update
+ * 12.3  proc_omi_scominit
+ *       :  OMI Scom setup on the processor
+ * 12.4  ocmb_omi_scominit
+ *       :  OMI Scom setup for Explorer specific inits
+ * 12.5  omi_pre_trainadv
+ *       :  Advanced pre-OMI training
+ * 12.6  omi_setup
+ *       :  OMI setup for training
+ * 12.7  omi_io_run_training
+ *       :  Run training on MC buses
+ * 12.8  omi_train_check
+ *       :  Check for training errors
+ * 12.9  omi_post_trainadv
+ *       :  Debug routine for IO Characterization
+ * 12.10 host_attnlisten_memb
+ *       :  Start attention poll for membuf
+ * 12.11 host_omi_init
+ *       :  Init the OMI protocol, set the Inband base addresses
+ * 12.12 update_omi_firmware
+ *       :  Firmware update of Explorer
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -84,64 +82,44 @@ namespace   ISTEP_12
 void*  call_mss_getecid( void    *io_pArgs );
 
 /**
- *  @brief   dmi_attr_update
+ *  @brief   omi_attr_update
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return any errlogs to istep
  *
  */
-void*  call_dmi_attr_update( void    *io_pArgs );
+void*  call_omi_attr_update( void    *io_pArgs );
 
 /**
- *  @brief   proc_dmi_scominit
+ *  @brief   proc_omi_scominit
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return any errlogs to istep
  *
  */
-void*  call_proc_dmi_scominit( void    *io_pArgs );
+void*  call_proc_omi_scominit( void    *io_pArgs );
 
 /**
- *  @brief   cen_dmi_scominit
+ *  @brief   ocmb_omi_scominit
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return any errlogs to istep
  *
  */
-void*  call_cen_dmi_scominit( void    *io_pArgs );
+void*  call_ocmb_omi_scominit( void    *io_pArgs );
 
 /**
- *  @brief   dmi_erepair
+ *  @brief   omi_pre_trainadv
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return any errlogs to istep
  *
  */
-void*  call_dmi_erepair( void    *io_pArgs );
-
-/**
- *  @brief   dmi_io_dccal
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return any errlogs to istep
- *
- */
-void*  call_dmi_io_dccal( void    *io_pArgs );
-
-/**
- *  @brief   dmi_pre_trainadv
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return any errlogs to istep
- *
- */
-void*  call_dmi_pre_trainadv( void    *io_pArgs );
+void*  call_omi_pre_trainadv( void    *io_pArgs );
 
 /**
  *  @brief   dmi_io_run_training
@@ -221,73 +199,69 @@ const   TaskInfo    g_istep12[]  =   {
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(12,02,"dmi_attr_update"),
-                ISTEP_12::call_dmi_attr_update,
+                ISTEPNAME(12,02,"omi_attr_update"),
+                ISTEP_12::call_omi_attr_update,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(12,03,"proc_dmi_scominit"),
-                ISTEP_12::call_proc_dmi_scominit,
+                ISTEPNAME(12,03,"proc_omi_scominit"),
+                ISTEP_12::call_proc_omi_scominit,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(12,04,"cen_dmi_scominit"),
-                ISTEP_12::call_cen_dmi_scominit,
+                ISTEPNAME(12,04,"ocmb_omi_scominit"),
+                ISTEP_12::call_ocmb_omi_scominit,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(12,05,"dmi_erepair"),
-                ISTEP_12::call_dmi_erepair,
+                ISTEPNAME(12,05,"omi_pre_trainadv"),
+                ISTEP_12::call_omi_pre_trainadv,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
+/*        {
+                ISTEPNAME(12,06,"omi_setup"),
+                ISTEP_12::call_omi_setup,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(12,06,"dmi_io_dccal"),
-                ISTEP_12::call_dmi_io_dccal,
+                ISTEPNAME(12,07,"omi_io_run_training"),
+                ISTEP_12::call_omi_io_run_training,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(12,07,"dmi_pre_trainadv"),
-                ISTEP_12::call_dmi_pre_trainadv,
+                ISTEPNAME(12,08,"omi_train_check"),
+                ISTEP_12::call_omi_train_check,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(12,08,"dmi_io_run_training"),
-                ISTEP_12::call_dmi_io_run_training,
+                ISTEPNAME(12,09,"omi_post_trainadv"),
+                ISTEP_12::call_omi_post_trainadv,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(12,09,"dmi_post_trainadv"),
-                ISTEP_12::call_dmi_post_trainadv,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(12,10,"proc_cen_framelock"),
-                ISTEP_12::call_proc_cen_framelock,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(12,11,"host_startprd_dmi"),
-                ISTEP_12::call_host_startprd_dmi,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(12,12,"host_attnlisten_memb"),
+                ISTEPNAME(12,10,"host_attnlisten_memb"),
                 ISTEP_12::call_host_attnlisten_memb,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(12,13,"cen_set_inband_addr"),
-                ISTEP_12::call_cen_set_inband_addr,
+                ISTEPNAME(12,11,"host_omi_init"),
+                ISTEP_12::call_host_omi_init,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-
+        {
+                ISTEPNAME(12,12,"update_omi_firmware"),
+                ISTEP_12::call_update_omi_firmware,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
+*/
 };
 
 const DepModInfo g_istep12Dependancies = {
     {
         DEP_LIB(libistep12.so),
+        DEP_LIB(libistep07.so),
         DEP_LIB(libnestmemutils.so),
-        DEP_LIB(libisteps_io.so),
+//        DEP_LIB(libisteps_io.so),
         DEP_LIB(libisteps_mss.so),
         NULL
     }

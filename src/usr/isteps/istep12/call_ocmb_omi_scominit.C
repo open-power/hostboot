@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep12/call_dmi_attr_update.C $               */
+/* $Source: src/usr/isteps/istep12/call_ocmb_omi_scominit.C $             */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,6 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+/**
+ * @file    call_ocmb_omi_scominit.C
+ *
+ *  Support file for Istep 12.4 Explorer specific inits
+ *
+ */
 #include    <stdint.h>
 
 #include    <trace/interface.H>
@@ -39,14 +45,7 @@
 
 //Fapi Support
 #include    <config.h>
-/* FIXME RTC: 210975
-#include    <fapi2.H>
-#include    <fapi2/plat_hwp_invoker.H>
-#include    <util/utilmbox_scratch.H>
 
-//HWP
-#include    <p9_io_dmi_attr_update.H>
-*/
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -56,14 +55,19 @@ using   namespace   TARGETING;
 
 namespace ISTEP_12
 {
-void* call_dmi_attr_update (void *io_pArgs)
+void* call_ocmb_omi_scominit (void *io_pArgs)
 {
     IStepError l_StepError;
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_attr_update entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_ocmb_omi_scominit entry" );
 
+    // 12.4.a No-op at the moment. This would be a hook point for
+    //        Explorer specific inits
+    //        TODO: RTC 248244
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_attr_update exit" );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_ocmb_omi_scominit exit" );
 
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();

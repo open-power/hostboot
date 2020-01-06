@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -27,9 +27,12 @@ MODULE = istep12
 
 # FIXME RTC: 210975
 
+P10_PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p10/procedures
 #P9_PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
+P10_IO_HWP_PATH     = $(P10_PROCEDURES_PATH)/hwp/io
 #P9_IO_HWP_PATH     = $(P9_PROCEDURES_PATH)/hwp/io
 #P9_PERV_HWP_PATH   = $(P9_PROCEDURES_PATH)/hwp/perv
+P10_NEST_HWP_PATH   = $(P10_PROCEDURES_PATH)/hwp/nest
 #P9_NEST_HWP_PATH   = $(P9_PROCEDURES_PATH)/hwp/nest
 #P9_INITFILE_PATH   = $(P9_PROCEDURES_PATH)/hwp/initfiles
 #P9_MEMORY_HWP_PATH = $(P9_PROCEDURES_PATH)/hwp/memory
@@ -38,51 +41,50 @@ MODULE = istep12
 #P9A_MSS_ACCESSOR_PATH = ${ROOTPATH}/obj/genfiles/chips/p9a/procedures/hwp/memory/lib/
 
 #P9A_MSS_HWP_PATH   = ${ROOTPATH}/src/import/chips/p9a/procedures/hwp/memory/
-#EXPLORER_HWP_PATH  = ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
-#EXPLORER_INC_PATH  = ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
+EXPLORER_HWP_PATH  = ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
+EXPLORER_INC_PATH  = ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
 #EXPLORER_OMI_HWP_PATH  = ${EXPLORER_HWP_PATH}/lib/omi
 
 #GEM_PROCEDURES_PATH  = ${ROOTPATH}/src/import/chips/ocmb/gemini/procedures
 
 
 #Add all the extra include paths
-#EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
 #EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 #EXTRAINCDIR += $(P9_PROCEDURES_PATH)/hwp/ffdc/
-#EXTRAINCDIR += $(P9_IO_HWP_PATH)
-#EXTRAINCDIR += $(P9_NEST_HWP_PATH)
+EXTRAINCDIR += $(P10_IO_HWP_PATH)
+EXTRAINCDIR += $(P10_NEST_HWP_PATH)
 #EXTRAINCDIR += $(P9_PERV_HWP_PATH)
 #EXTRAINCDIR += $(P9_INITFILE_PATH)
 #EXTRAINCDIR += ${P9_MEMORY_HWP_PATH}
 #EXTRAINCDIR += ${P9A_MSS_HWP_PATH}
-#EXTRAINCDIR += ${EXPLORER_HWP_PATH}
-#EXTRAINCDIR += ${EXPLORER_INC_PATH}
+EXTRAINCDIR += ${EXPLORER_HWP_PATH}
+EXTRAINCDIR += ${EXPLORER_HWP_PATH}/lib
+EXTRAINCDIR += ${EXPLORER_INC_PATH}
 #EXTRAINCDIR += ${P9A_MSS_ACCESSOR_PATH}
 #EXTRAINCDIR += ${GEM_PROCEDURES_PATH}/hwp/memory
 #EXTRAINCDIR += ${GEM_PROCEDURES_PATH}/hwp/memory/lib/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 
-#VPATH += $(P9_NEST_HWP_PATH)
+VPATH += $(P10_NEST_HWP_PATH)
 #VPATH += $(P9_PERV_HWP_PATH)
-#VPATH += $(P9_IO_HWP_PATH)
+VPATH += $(P10_IO_HWP_PATH)
 #VPATH += $(P9_INITFILE_PATH)
 #VAPTH += ${ROOTPATH}/src/usr/fapi2
 
-#OBJS += call_mss_getecid.o
-#OBJS += call_dmi_attr_update.o
-#OBJS += call_proc_dmi_scominit.o
-#OBJS += call_cen_dmi_scominit.o
-#OBJS += call_dmi_erepair.o
-#OBJS += call_dmi_io_dccal.o
-#OBJS += call_dmi_pre_trainadv.o
+OBJS += call_mss_getecid.o
+OBJS += call_omi_attr_update.o
+OBJS += call_proc_omi_scominit.o
+OBJS += call_ocmb_omi_scominit.o
+OBJS += call_omi_pre_trainadv.o
 #OBJS += call_dmi_io_run_training.o
 #OBJS += call_dmi_post_trainadv.o
 #OBJS += call_proc_cen_framelock.o
@@ -94,7 +96,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 #OBJS+=p9c_set_inband_addr.o
 
 #Required before all the <procedure>.mk are included
-#include ${ROOTPATH}/procedure.rules.mk
+include ${ROOTPATH}/procedure.rules.mk
 
 #include $(P9_IO_HWP_PATH)/p9_io_dmi_attr_update.mk
 #include $(P9_IO_HWP_PATH)/p9_io_dmi_scominit.mk
@@ -110,7 +112,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 #include $(P9_IO_HWP_PATH)/p9_io_erepairAccessorHwpFuncs.mk
 
 #VPATH += $(if $(CONFIG_AXONE),${P9A_MSS_HWP_PATH},)
-#VPATH += $(if $(CONFIG_AXONE),${EXPLORER_HWP_PATH},)
+VPATH += ${EXPLORER_HWP_PATH}
 #VPATH += $(if $(CONFIG_AXONE),${EXPLORER_OMI_HWP_PATH},)
 #VPATH += $(if $(CONFIG_AXONE),${P9_MEMORY_HWP_PATH},)
 #VPATH += $(if $(CONFIG_AXONE),${GEM_PROCEDURES_PATH}/hwp/memory,)
@@ -120,7 +122,9 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 #OBJS  += $(if $(CONFIG_AXONE),exp_omi_train.o,)
 #OBJS  += $(if $(CONFIG_AXONE),p9a_omi_train.o,)
 #OBJS  += $(if $(CONFIG_AXONE),p9a_omi_train_check.o,)
-#OBJS  += $(if $(CONFIG_AXONE),p9a_omi_setup_bars.o,)
+OBJS += p10_omi_scominit.o
+OBJS += p10_fbc_utils.o
+OBJS += p10_omi_setup_bars.o
 #OBJS  += $(if $(CONFIG_AXONE),p9a_addr_ext.o,)
 #OBJS  += $(if $(CONFIG_AXONE),exp_omi_init.o,)
 #OBJS  += $(if $(CONFIG_AXONE),p9a_omi_init.o,)
@@ -130,5 +134,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 #OBJS += $(if $(CONFIG_AXONE),p9a_io_omi_scominit.o,)
 #OBJS += $(if $(CONFIG_AXONE),p9a_io_omi_dccal.o,)
 #OBJS += $(if $(CONFIG_AXONE),gem_getecid.o,)
+OBJS += exp_getecid.o
+
 
 include ${ROOTPATH}/config.mk
