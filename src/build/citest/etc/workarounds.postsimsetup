@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2019
+# Contributors Listed Below - COPYRIGHT 2011,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -44,9 +44,3 @@ echo "SETENV PROC_EC                22" >> $sb/simu/configs/P9_NIMBUS.config
 mkdir -p $sb/../simics/import/vpd/
 cp /gsa/ausgsa/projects/h/hostboot/.binary_cache/data/f6f5b778c406883e1b392b311350a1e83583e15a $sb/../simics/import/vpd/dimmspd.dat
 
-# TODO RTC:244050
-# update the por value of the EFUSE_OUT_IMAGE_3 register 
-if [[ -f "$sb/../simics/import/cec-chip/uchip_default.por" ]]; then
-   sed -i 's/UCHIP(0x0020b08c)=0x0/UCHIP(0x0020b08c)=0x00000400/' $sb/../simics/import/cec-chip/uchip_default.por
-fi
-##########################################################################
