@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -233,16 +233,16 @@ void bl_console::init()
     bool consoleEnabled = (blConfigData->lpcConsoleEnable == 1);
 
     if (!consoleEnabled ||
-        !writeUartReg(LCR, 0x00) ||
-        !writeUartReg(SCR, 'w') ||
-        !readUartReg(SCR, output) ||
-        !writeUartReg(IER, 0) ||
-        !writeUartReg(LCR, LCR_DLAB) ||
-        !writeUartReg(DLL, divisor & 0xff) ||
-        !writeUartReg(DLM, divisor >> 8) ||
-        !writeUartReg(LCR, LCR_DWL8 | LCR_NOP | LCR_STP1) ||
-        !writeUartReg(MCR, MCR_RTS | MCR_DTR) ||
-        !writeUartReg(FCR, FCR_ENF | FCR_CLFR | FCR_CLFT))
+        writeUartReg(LCR, 0x00) ||
+        writeUartReg(SCR, 'w') ||
+        readUartReg(SCR, output) ||
+        writeUartReg(IER, 0) ||
+        writeUartReg(LCR, LCR_DLAB) ||
+        writeUartReg(DLL, divisor & 0xff) ||
+        writeUartReg(DLM, divisor >> 8) ||
+        writeUartReg(LCR, LCR_DWL8 | LCR_NOP | LCR_STP1) ||
+        writeUartReg(MCR, MCR_RTS | MCR_DTR) ||
+        writeUartReg(FCR, FCR_ENF | FCR_CLFR | FCR_CLFT))
     {
         // Error already handled
     }
