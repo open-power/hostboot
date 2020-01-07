@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -330,11 +330,11 @@ enum P10_HCD_PFET_CTRL_CONSTANTS
 //   --> log2(125) = 7 (rounded up to next integer)
 //  -- > pfet_delay_value = 15 - 7 = 8
 //
-    HCD_PFET_DELAY_POWERDOWN                = 0x1,
+    HCD_PFET_DELAY_POWERDOWN                = 0xB,
 #ifndef PRODUCT_DEFAULT_PFET_DELAYS
-    HCD_PFET_DELAY_POWERUP_L3               = 0x1,
-    HCD_PFET_DELAY_POWERUP_CL2              = 0x1,
-    HCD_PFET_DELAY_POWERUP_MMA              = 0x1,
+    HCD_PFET_DELAY_POWERUP_L3               = 0xB,
+    HCD_PFET_DELAY_POWERUP_CL2              = 0xB,
+    HCD_PFET_DELAY_POWERUP_MMA              = 0xB,
 #else
     HCD_PFET_DELAY_POWERUP_L3               = 0x8,
     HCD_PFET_DELAY_POWERUP_CL2              = 0x8,
