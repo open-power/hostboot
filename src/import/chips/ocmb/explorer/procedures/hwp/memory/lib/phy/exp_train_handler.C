@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -95,12 +95,11 @@ namespace check
 // TK update this when FIR's are fully reviewed
 template<>
 fapi2::ReturnCode bad_fir_bits<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-
         fapi2::ReturnCode& io_rc,
         bool& o_fir_error )
 
 {
-    io_rc = fapi2::FAPI2_RC_SUCCESS;
+    FAPI_ERR("%s Checking for FIR's is currently unimplemented. Passing back the discovered RC", mss::c_str(i_target));
     o_fir_error = false;
     return fapi2::FAPI2_RC_SUCCESS;
 }
