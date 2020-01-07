@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -96,11 +96,12 @@ int32_t readErepair<TYPE_XBUS>(TargetHandle_t i_rxBusTgt,
     errlHndl_t err = nullptr;
 
     fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiTrgt (i_rxBusTgt);
-    FAPI_INVOKE_HWP(err,
-                    p9_io_xbus_read_erepair,
-                    fapiTrgt,
-                    i_clkGrp,
-                    o_rxFailLanes);
+//p10cleanup
+//    FAPI_INVOKE_HWP(err,
+//                    p9_io_xbus_read_erepair,
+//                    fapiTrgt,
+//                    i_clkGrp,
+//                    o_rxFailLanes);
 
     if(nullptr != err)
     {
@@ -130,7 +131,8 @@ int32_t clearIOFirs<TYPE_XBUS>(TargetHandle_t i_rxBusTgt)
 
     for (uint8_t i=0; i<2; ++i) // clear both clock groups
     {
-        FAPI_INVOKE_HWP(err, p9_io_xbus_clear_firs, fapiTrgt, i);
+//p10cleanup
+//        FAPI_INVOKE_HWP(err, p9_io_xbus_clear_firs, fapiTrgt, i);
         if(nullptr != err)
         {
             PRDF_ERR( "[PlatServices::clearIOFirs<TYPE_XBUS>] HUID: 0x%08x "
@@ -160,12 +162,13 @@ int32_t powerDownLanes<TYPE_XBUS>( TargetHandle_t i_rxBusTgt,
     errlHndl_t err = nullptr;
 
     fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiTrgt (i_rxBusTgt);
-    FAPI_INVOKE_HWP(err,
-                    p9_io_xbus_pdwn_lanes,
-                    fapiTrgt,
-                    i_clkGrp,
-                    i_rxFailLanes,
-                    i_txFailLanes);
+//p10cleanup
+//    FAPI_INVOKE_HWP(err,
+//                    p9_io_xbus_pdwn_lanes,
+//                    fapiTrgt,
+//                    i_clkGrp,
+//                    i_rxFailLanes,
+//                    i_txFailLanes);
 
     if(nullptr != err)
     {
@@ -196,12 +199,13 @@ int32_t getVpdFailedLanes<TYPE_XBUS>(TargetHandle_t i_rxBusTgt,
 
     fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiTrgt (i_rxBusTgt);
 
-    FAPI_INVOKE_HWP(err,
-                    erepairGetFailedLanes,
-                    fapiTrgt,
-                    i_clkGrp,
-                    o_txFailLanes,
-                    o_rxFailLanes);
+//p10cleanup
+//    FAPI_INVOKE_HWP(err,
+//                    erepairGetFailedLanes,
+//                    fapiTrgt,
+//                    i_clkGrp,
+//                    o_txFailLanes,
+//                    o_rxFailLanes);
 
     if(nullptr != err)
     {
@@ -240,13 +244,14 @@ int32_t setVpdFailedLanes<TYPE_XBUS,TYPE_XBUS>(
     fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiRxTrgt (i_rxBusTgt);
     fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiTxTrgt (i_txBusTgt);
 
-    FAPI_INVOKE_HWP(err,
-                    erepairSetFailedLanes,
-                    fapiTxTrgt,
-                    fapiRxTrgt,
-                    i_clkGrp,
-                    i_rxFailLanes,
-                    o_thrExceeded);
+//p10cleanup
+//    FAPI_INVOKE_HWP(err,
+//                    erepairSetFailedLanes,
+//                    fapiTxTrgt,
+//                    fapiRxTrgt,
+//                    i_clkGrp,
+//                    i_rxFailLanes,
+//                    o_thrExceeded);
 
     if(nullptr != err)
     {
@@ -293,9 +298,10 @@ uint32_t __getBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
 
         fapi2::Target<T> l_fapiTrgt( i_trgt );
 
-        FAPI_INVOKE_HWP( errl, p9DimmGetBadDqBitmap, l_fapiTrgt,
-                         i_rank.getDimmSlct(), i_rank.getRankSlct(),
-                         data[ps].bitmap, ps );
+//p10cleanup
+//        FAPI_INVOKE_HWP( errl, p9DimmGetBadDqBitmap, l_fapiTrgt,
+//                         i_rank.getDimmSlct(), i_rank.getRankSlct(),
+//                         data[ps].bitmap, ps );
 
         if ( nullptr != errl )
         {
@@ -379,9 +385,10 @@ uint32_t __setBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
 
             fapi2::Target<T> l_fapiTrgt( i_trgt );
 
-            FAPI_INVOKE_HWP( errl, p9DimmSetBadDqBitmap, l_fapiTrgt,
-                             i_rank.getDimmSlct(), i_rank.getRankSlct(),
-                             data.at(ps).bitmap, ps );
+//p10cleanup
+//            FAPI_INVOKE_HWP( errl, p9DimmSetBadDqBitmap, l_fapiTrgt,
+//                             i_rank.getDimmSlct(), i_rank.getRankSlct(),
+//                             data.at(ps).bitmap, ps );
 
             if ( nullptr != errl )
             {
@@ -586,8 +593,9 @@ int32_t mssGetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
     uint8_t port0Spare, port1Spare, eccSpare;
 
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiPort(i_ocmb);
-    FAPI_INVOKE_HWP( errl, mss_check_steering, fapiPort,
-            i_rank.getMaster(), port0Spare, port1Spare, eccSpare );
+//p10cleanup
+//    FAPI_INVOKE_HWP( errl, mss_check_steering, fapiPort,
+//            i_rank.getMaster(), port0Spare, port1Spare, eccSpare );
 
     if ( NULL != errl )
     {
@@ -629,9 +637,10 @@ int32_t mssSetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_memPort,
                                                      i_symbol.getDram(),
                                                      isDramWidthX4(dimm) );
 
-    FAPI_INVOKE_HWP( errl, mss_do_steering, fapiPort,
-                     i_rank.getMaster(), l_dramSymbol,
-                     i_x4EccSpare );
+//p10cleanup
+//    FAPI_INVOKE_HWP( errl, mss_do_steering, fapiPort,
+//                     i_rank.getMaster(), l_dramSymbol,
+//                     i_x4EccSpare );
 
     if ( NULL != errl )
     {

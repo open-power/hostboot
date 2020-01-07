@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,8 +88,9 @@ uint32_t __getRowRepairData( TargetHandle_t i_dimm, const MemRank & i_rank,
     TargetHandle_t l_mba = getConnectedParent( i_dimm, T );
     fapi2::Target<F> l_fapiMba( l_mba );
 
-    FAPI_INVOKE_HWP( l_errl, getRowRepair, l_fapiMba, i_rank.getDimmSlct(),
-                     i_rank.getRankSlct(), l_data, l_ps );
+//p10cleanup
+//    FAPI_INVOKE_HWP( l_errl, getRowRepair, l_fapiMba, i_rank.getDimmSlct(),
+//                     i_rank.getRankSlct(), l_data, l_ps );
     if ( nullptr != l_errl )
     {
         PRDF_ERR( PRDF_FUNC "getRowRepair() failed: i_dimm=0x%08x "
@@ -160,8 +161,9 @@ uint32_t __setRowRepairData( TargetHandle_t i_dimm, const MemRank & i_rank,
         TargetHandle_t l_mba = getConnectedParent(i_dimm, T);
         fapi2::Target<F> l_fapiMba( l_mba );
 
-        FAPI_INVOKE_HWP( l_errl, setRowRepair, l_fapiMba, i_rank.getDimmSlct(),
-                         i_rank.getRankSlct(), l_data, l_ps );
+//p10cleanup
+//        FAPI_INVOKE_HWP( l_errl, setRowRepair, l_fapiMba, i_rank.getDimmSlct(),
+//                         i_rank.getRankSlct(), l_data, l_ps );
         if ( nullptr != l_errl )
         {
             PRDF_ERR( PRDF_FUNC "setRowRepair() failed: i_dimm=0x%08x "
