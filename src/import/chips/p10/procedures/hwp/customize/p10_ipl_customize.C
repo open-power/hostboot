@@ -1951,6 +1951,327 @@ fapi_try_exit:
 }
 //End of process_base_and_dynamic_rings
 
+
+//  Function: apply_fbc_dyninits()
+//  Determines the fabric settings to apply based on system
+//  configuration and and sets the dynamic init vector.
+//
+//  Parameter list:
+//  const fapi::Target &i_procTarget:   Processor chip target.
+//  const fapi::Target &FAPI_SYSTEM:    System target.
+//  uint64_t& io_featureVec:            Bit vector of dynamic init features.
+//
+#ifdef WIN32
+int apply_fbc_dyninits(
+    int i_procTarget,
+    int FAPI_SYSTEM,
+#else
+fapi2::ReturnCode apply_fbc_dyninits(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procTarget,
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& FAPI_SYSTEM,
+#endif
+    uint64_t& io_featureVec)
+{
+    FAPI_DBG("Entering apply_fbc_dyninits");
+
+    fapi2::ATTR_FREQ_CORE_FLOOR_MHZ_Type l_core_fmin;
+    fapi2::ATTR_FREQ_CORE_CEILING_MHZ_Type l_core_fmax;
+    fapi2::ATTR_FREQ_PAU_MHZ_Type l_fpau;
+    fapi2::ATTR_FREQ_MC_MHZ_Type l_fmc;
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_mc_pos;
+    bool l_rt2pa_nominal;
+    bool l_rt2pa_safe;
+    bool l_pa2rt_turbo;
+    bool l_pa2rt_nominal;
+    bool l_pa2rt_safe;
+    bool l_rt2mc_ultraturbo[4]  = { false };
+    bool l_rt2mc_turbo[4]       = { false };
+    bool l_rt2mc_nominal[4]     = { false };
+    bool l_rt2mc_safe[4]        = { false };
+    bool l_mc2rt_ultraturbo[4]  = { false };
+    bool l_mc2rt_turbo[4]       = { false };
+    bool l_mc2rt_nominal[4]     = { false };
+    bool l_mc2rt_safe[4]        = { false };
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PAU_MHZ, FAPI_SYSTEM, l_fpau),
+             "Error from FAPI_ATTR_GET (ATTR_FREQ_PAU_MHZ)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ, i_procTarget, l_core_fmin),
+             "Error from FAPI_ATTR_GET (ATTR_FREQ_CORE_FLOOR_MHZ)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_CEILING_MHZ, i_procTarget, l_core_fmax),
+             "Error from FAPI_ATTR_GET (ATTR_FREQ_CORE_CEILING_MHZ)");
+
+    // MC Fast Settings
+    for (auto& l_mc_target : i_procTarget.getChildren<fapi2::TARGET_TYPE_MC>())
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mc_target, l_mc_pos),
+                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS_Type)");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_MC_MHZ, l_mc_target, l_fmc),
+                 "Error from FAPI_ATTR_GET (ATTR_FREQ_MC_MHZ)");
+
+        if(l_fmc > 1610)
+        {
+            if(l_mc_pos == 0)
+            {
+                io_featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_MC0_FAST;
+            }
+            else if(l_mc_pos == 1)
+            {
+                io_featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_MC1_FAST;
+            }
+            else if(l_mc_pos == 2)
+            {
+                io_featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_MC2_FAST;
+            }
+            else
+            {
+                io_featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_MC3_FAST;
+            }
+        }
+    }
+
+    // PBI Async Settings
+    // Frequency Ratio Definitions
+    //
+    // RT2PA
+    // RT->PAU NOMINAL when Nest Fmin >= 1/2 * Fpau
+    // RT->PAU SAFE    when Nest Fmin <  1/2 * Fpau
+    //
+    // PA2RT
+    // PAU->RF TURBO   when Fpau >= 4/2 * Nest Fmax
+    // PAU->RF NOMINAL when Fpau >= 3/2 * Nest Fmax and Fpau < 4/2 * Nest Fmax
+    // PAU->RF SAFE    when                             Fpau < 3/2 * Nest Fmax
+    //
+    // RT2MC
+    // RT->MC ULTRA_TURBO when Nest Fmin >= 3/2 * Fmc
+    // RT->MC TURBO       when Nest Fmin >= 2/2 * Fmc and Nest Fmin < 3/2 * Fmc
+    // RT->MC NOMINAL     when Nest Fmin >= 1/2 * Fmc and Nest Fmin < 2/2 * Fmc
+    // RT->MC SAFE        when                            Nest Fmin < 1/2 * Fmc
+    //
+    // MC2RT
+    // MC->RT ULTRA_TURBO when Fmc >= 4/2 * Nest Fmax
+    // MC->RT TURBO when       Fmc >= 3/2 * Nest Fmax and Fmc < 4/2 * Nest Fmax
+    // MC->RT NOMINAL when     Fmc >= 2/2 * Nest Fmax and Fmc < 3/2 * Nest Fmax
+    // MC->RT SAFE when                                   Fmc < 2/2 * Nest Fmax
+
+    l_rt2pa_nominal    = ((l_core_fmin) >= (l_fpau)) ? (true) : (false);
+    l_rt2pa_safe       = ((l_core_fmin)  < (l_fpau)) ? (true) : (false);
+
+    l_pa2rt_turbo      = ((     l_fpau) >= (    l_core_fmax))                                ? (true) : (false);
+    l_pa2rt_nominal    = (((4 * l_fpau) >= (3 * l_core_fmax)) && ((l_fpau) < (l_core_fmax))) ? (true) : (false);
+    l_pa2rt_safe       = (( 4 * l_fpau)  < (3 * l_core_fmax))                                ? (true) : (false);
+
+    for (auto& l_mc_target : i_procTarget.getChildren<fapi2::TARGET_TYPE_MC>())
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mc_target, l_mc_pos),
+                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS_Type)");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_MC_MHZ, l_mc_target, l_fmc),
+                 "Error from FAPI_ATTR_GET (ATTR_FREQ_MC_MHZ)");
+
+        l_rt2mc_ultraturbo[l_mc_pos] = ( (l_core_fmin) >= (3 * l_fmc))                                   ? (true) : (false);
+        l_rt2mc_turbo[l_mc_pos]      = (((l_core_fmin) >= (2 * l_fmc)) && ((l_core_fmin) < (3 * l_fmc))) ? (true) : (false);
+        l_rt2mc_nominal[l_mc_pos]    = (((l_core_fmin) >= (    l_fmc)) && ((l_core_fmin) < (2 * l_fmc))) ? (true) : (false);
+        l_rt2mc_safe[l_mc_pos]       = ( (l_core_fmin)  < (    l_fmc))                                   ? (true) : (false);
+
+        l_mc2rt_ultraturbo[l_mc_pos] = ((     l_fmc) >= (    l_core_fmax))                               ? (true) : (false);
+        l_mc2rt_turbo[l_mc_pos]      = (((4 * l_fmc) >= (3 * l_core_fmax))
+                                        && ((    l_fmc) < (    l_core_fmax))) ? (true) : (false);
+        l_mc2rt_nominal[l_mc_pos]    = (((2 * l_fmc) >= (    l_core_fmax))
+                                        && ((4 * l_fmc) < (3 * l_core_fmax))) ? (true) : (false);
+        l_mc2rt_safe[l_mc_pos]       = (( 2 * l_fmc)  < (    l_core_fmax))                               ? (true) : (false);
+    }
+
+    if(l_rt2pa_nominal)
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2PA_NOMINAL;
+    }
+
+    if(l_rt2pa_safe)
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2PA_SAFE;
+    }
+
+    if(l_pa2rt_turbo)
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_PA2RT_TURBO;
+    }
+
+    if(l_pa2rt_nominal)
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_PA2RT_NOMINAL;
+    }
+
+    if(l_pa2rt_safe)
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_PA2RT_SAFE;
+    }
+
+    if(l_rt2mc_ultraturbo[0])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC0_ULTRATURBO;
+    }
+
+    if(l_rt2mc_turbo[0])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC0_TURBO;
+    }
+
+    if(l_rt2mc_nominal[0])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC0_NOMINAL;
+    }
+
+    if(l_rt2mc_safe[0])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC0_SAFE;
+    }
+
+    if(l_rt2mc_ultraturbo[1])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC1_ULTRATURBO;
+    }
+
+    if(l_rt2mc_turbo[1])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC1_TURBO;
+    }
+
+    if(l_rt2mc_nominal[1])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC1_NOMINAL;
+    }
+
+    if(l_rt2mc_safe[1])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC1_SAFE;
+    }
+
+    if(l_rt2mc_ultraturbo[2])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC2_ULTRATURBO;
+    }
+
+    if(l_rt2mc_turbo[2])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC2_TURBO;
+    }
+
+    if(l_rt2mc_nominal[2])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC2_NOMINAL;
+    }
+
+    if(l_rt2mc_safe[2])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC2_SAFE;
+    }
+
+    if(l_rt2mc_ultraturbo[3])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC3_ULTRATURBO;
+    }
+
+    if(l_rt2mc_turbo[3])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC3_TURBO;
+    }
+
+    if(l_rt2mc_nominal[3])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC3_NOMINAL;
+    }
+
+    if(l_rt2mc_safe[3])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC3_SAFE;
+    }
+
+    if(l_mc2rt_ultraturbo[0])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT0_ULTRATURBO;
+    }
+
+    if(l_mc2rt_turbo[0])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT0_TURBO;
+    }
+
+    if(l_mc2rt_nominal[0])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT0_NOMINAL;
+    }
+
+    if(l_mc2rt_safe[0])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT0_SAFE;
+    }
+
+    if(l_mc2rt_ultraturbo[1])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT1_ULTRATURBO;
+    }
+
+    if(l_mc2rt_turbo[1])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT1_TURBO;
+    }
+
+    if(l_mc2rt_nominal[1])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT1_NOMINAL;
+    }
+
+    if(l_mc2rt_safe[1])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT1_SAFE;
+    }
+
+    if(l_mc2rt_ultraturbo[2])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT2_ULTRATURBO;
+    }
+
+    if(l_mc2rt_turbo[2])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT2_TURBO;
+    }
+
+    if(l_mc2rt_nominal[2])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT2_NOMINAL;
+    }
+
+    if(l_mc2rt_safe[2])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT2_SAFE;
+    }
+
+    if(l_mc2rt_ultraturbo[3])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT3_ULTRATURBO;
+    }
+
+    if(l_mc2rt_turbo[3])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT3_TURBO;
+    }
+
+    if(l_mc2rt_nominal[3])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT3_NOMINAL;
+    }
+
+    if(l_mc2rt_safe[3])
+    {
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT3_SAFE;
+    }
+
+fapi_try_exit:
+    FAPI_DBG("Exiting apply_fbc_dyninits");
+    return fapi2::current_err;
+}
+//End of apply_fbc_dyninits
+
+
 #ifndef WIN32
 fapi2::ReturnCode p10_ipl_customize (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procTarget,
@@ -2028,7 +2349,6 @@ ReturnCode p10_ipl_customize (
 
     // Make copy of the requested bootCoreMask
     io_bootCoreMask = l_requestedBootCoreMask;
-
 
     //-------------------------------------------
     // Check some input buffer parameters:
@@ -2789,10 +3109,15 @@ ReturnCode p10_ipl_customize (
                  set_OCCURRENCE(7),
                  "Failed to retrieve the contained IPL type attribute" );
 
+    // apply ipl dynamic inits
     if ((l_attrSystemIplPhase == fapi2::ENUM_ATTR_SYSTEM_IPL_PHASE_HB_IPL) &&
         (i_sysPhase == SYSPHASE_HB_SBE))
     {
         featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_HOSTBOOT;
+
+        // apply fabric dynamic inits
+        FAPI_TRY(apply_fbc_dyninits(i_procTarget, FAPI_SYSTEM, featureVec),
+                 "Error applying fabric dynamic inits");
     }
     else if (l_attrSystemIplPhase == fapi2::ENUM_ATTR_SYSTEM_IPL_PHASE_CONTAINED_IPL)
     {
