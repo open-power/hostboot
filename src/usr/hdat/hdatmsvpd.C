@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1719,11 +1719,6 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                 TARGETING::ATTR_MSS_MEM_MC_IN_GROUP_type l_mccSharingCount
                     = {0};
 
-                //Group ID for each group, group id will be assigned only
-                //if the group is shared
-                TARGETING::ATTR_MSS_MEM_MC_IN_GROUP_type l_mccSharingGrpIds
-                    = {0};
-
                 //Size configured under each group
                 TARGETING::ATTR_PROC_MEM_SIZES_type l_procMemSizesBytes = {0};
 
@@ -1764,16 +1759,6 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                     if(l_procMemSizesBytes[l_mccInGrp] > 0)
                     {
                         l_mccSharingCount[l_mccInGrp]++;
-
-                        //Assign sharing group id only if shared
-                        //And only when first instance of sharing is found
-                        if(l_mccSharingCount[l_mccInGrp] ==
-                                         HDAT_MIN_NUM_FOR_SHARING)
-                        {
-                            l_mccSharingGrpIds[l_mccInGrp] =
-                                    l_nxtSharingGroupId;
-                            l_nxtSharingGroupId++;
-                        }
                     }
                 }
 
@@ -1984,7 +1969,22 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                                     {
                                         l_memStatus = HDAT_MEM_SHARED;
                                         setMsAreaInterleavedId(l_index,
-                                            l_mccSharingGrpIds[l_mccInGrp]);
+                                                               l_mccInGrp);
+                                    }
+                                    //The memory channel is defined as a single
+                                    // MCC, and all of the memory on that
+                                    // channel is part of a single address
+                                    // space.  That means that both OCMBs on
+                                    // the same MCC share an address space.
+                                    // While this isn't the same mechanism as
+                                    // true interleaving, it looks the same to
+                                    // the code consuming HDAT, so we need to
+                                    // set the sharing flags appropriately.
+                                    else if( l_omiList.size() > 1 )
+                                    {
+                                        l_memStatus = HDAT_MEM_SHARED;
+                                        setMsAreaInterleavedId(l_index,
+                                                               l_mccInGrp);
                                     }
 
                                     setMsAreaType(l_index,l_parentType);
