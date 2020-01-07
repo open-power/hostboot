@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,7 +44,7 @@ extern trace_desc_t* g_trac_i2c;
 namespace I2C
 {
 
-#ifndef CONFIG_SUPPORT_EEPROM_HWACCESS
+#if( defined(CONFIG_SUPPORT_EEPROM_CACHING) && !defined(CONFIG_SUPPORT_EEPROM_HWACCESS) )
 /**
  * @brief Performs presence detection against the EECACHE PNOR partition.
  *        In this case, the target is considered present if it has a
@@ -275,7 +275,7 @@ errlHndl_t ocmbI2CPresencePerformOp(DeviceFW::OperationType i_opType,
     errlHndl_t l_errl = nullptr;
     bool l_ocmbPresent = true;
 
-#ifndef CONFIG_SUPPORT_EEPROM_HWACCESS
+#if( defined(CONFIG_SUPPORT_EEPROM_CACHING) && !defined(CONFIG_SUPPORT_EEPROM_HWACCESS) )
     l_errl = eecachePresenceDetect(i_target, l_ocmbPresent);
     if(l_errl)
     {
@@ -329,7 +329,7 @@ errlHndl_t pmicI2CPresencePerformOp(DeviceFW::OperationType i_opType,
 
     do{
 
-#ifndef CONFIG_SUPPORT_EEPROM_HWACCESS
+#if( defined(CONFIG_SUPPORT_EEPROM_CACHING) && !defined(CONFIG_SUPPORT_EEPROM_HWACCESS) )
         // In the EECACHE presence detection mode, look at the presence state of
         // the parent OCMB instead of reading it.
         l_errl = eecachePresenceDetect(l_parentOcmb, l_pmicPresent);

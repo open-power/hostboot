@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -540,7 +540,7 @@ void* host_discover_targets( void *io_pArgs )
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "host_discover_targets: Normal IPL mode");
 
-#ifndef CONFIG_SUPPORT_EEPROM_HWACCESS
+#if( defined(CONFIG_SUPPORT_EEPROM_CACHING) && !defined(CONFIG_SUPPORT_EEPROM_HWACCESS) )
         l_err = EEPROM::cacheEECACHEPartition();
 #endif
         if(nullptr == l_err)

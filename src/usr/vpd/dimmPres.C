@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -203,7 +203,6 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
             }
             break;
         }
-#endif
 
         // TODO RTC 213602
         // Remove this exception logic once the I2C code has
@@ -224,6 +223,7 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
                       TARGETING::get_huid(i_target));
             present = false;
         }
+#endif
 
         if( present == false )
         {
