@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/spi/spireasoncodes.H $                        */
+/* $Source: src/usr/spi/errlud_spi.H $                                    */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,42 +22,52 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __SPI_REASONCODES_H
-#define __SPI_REASONCODES_H
+#ifndef ERRL_UD_SPI_H
+#define ERRL_UD_SPI_H
 
-#include <hbotcompid.H>
+/**
+ *  @file errlud_spi.H
+ *
+ *  Defines the classes that logs and parses various SPI data
+ */
+
+#include <errl/errluserdetails.H>
+#include <devicefw/driverif.H>
+#include "spidd.H"
 
 namespace SPI
 {
 
-    enum spiModuleId
-    {
-        SPI_OP_READ             = 0x01,
-        SPI_OP_WRITE            = 0x02,
-        SPI_COPY_TO_BUFFER      = 0x03,
-        SPI_ENGINE_LOCK_OP      = 0x04,
-        SPI_PERFORM_OP          = 0x05,
-    };
+/**
+ * @class UdSpiParameters
+ *
+ * Adds SPI information to an error log as user detail data
+ */
+class UdSpiParameters : public ERRORLOG::ErrlUserDetails
+{
+  public:
+    /**
+     *  @brief Constructor
+     *
+     *  @param i_opType       Operation Type
+     *  @param i_accessType   Access Type
+     *  @param i_spiOp        Class containing the SPI parameters
+     */
+    UdSpiParameters(uint8_t i_opType,
+                    int64_t i_accessType,
+                    SpiOp   i_spiOp);
 
-    enum spiReasonCode
-    {
-        SPI_BUFFER_SIZE_MISMATCH            = SPI_COMP_ID | 0x01,
-        SPI_INVALID_PARAMETERS              = SPI_COMP_ID | 0x02,
-        SPI_FAILED_TO_RETRIEVE_ENGINE_MUTEX = SPI_COMP_ID | 0x03,
-        SPI_UNKNOWN_OP_TYPE                 = SPI_COMP_ID | 0x04,
-        SPI_INVALID_BUFFER_SIZE             = SPI_COMP_ID | 0x05,
-    };
+    /**
+     *  @brief Destructor
+     */
+    virtual ~UdSpiParameters();
 
-    enum SpiUserDetailsTypes
-    {
-        SPI_UDT_PARAMETERS = 0x01,
-    };
-
-    enum SpiUserDetailsVersions
-    {
-        SPI_UDT_VERSION_1 = 0x01,
-    };
-
+  private:
+    // Disabled
+    UdSpiParameters(UdSpiParameters &);
+    UdSpiParameters & operator=(UdSpiParameters &);
 };
+
+} // end SPI namespace
 
 #endif

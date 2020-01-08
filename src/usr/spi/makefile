@@ -38,6 +38,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 
 #include unique objects
 OBJS += spidd.o
+OBJS += errlud_spi.o
 
 SUBDIRS += test.d
 

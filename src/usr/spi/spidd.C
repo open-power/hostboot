@@ -33,6 +33,7 @@
 //      Includes
 // -----------------------------------------------------------------------------
 #include "spidd.H"
+#include "errlud_spi.H"
 #include <trace/interface.H>
 
 #include <spi/spireasoncodes.H>
@@ -138,6 +139,11 @@ errlHndl_t spiPerformOp(DeviceFW::OperationType i_opType,
     // The offset to start the read or write from
     uint64_t offset = va_arg(i_args, uint64_t);
 
+    SpiOp spiOp = SpiOp(i_target,
+                        engine,
+                        offset,
+                        io_buflen,
+                        io_buffer);
     do {
 
         if (io_buflen == 0)
@@ -163,12 +169,6 @@ errlHndl_t spiPerformOp(DeviceFW::OperationType i_opType,
                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             break;
         }
-
-        SpiOp spiOp = SpiOp(i_target,
-                            engine,
-                            offset,
-                            io_buflen,
-                            io_buffer);
 
         errl = spiEngineLockOp(i_target,
                                engine,
@@ -257,6 +257,10 @@ errlHndl_t spiPerformOp(DeviceFW::OperationType i_opType,
 
     if (errl != nullptr)
     {
+        UdSpiParameters(i_opType,
+                        i_accessType,
+                        spiOp).addToLog(errl);
+
         errl->collectTrace(SPI_COMP_NAME, KILOBYTE);
     }
 
@@ -268,6 +272,11 @@ errlHndl_t SpiOp::read(void*   o_buffer,
 {
     errlHndl_t errl = nullptr;
     SpiControlHandle handle = getSpiHandle();
+
+    if(iv_usingAdjustedBuffer)
+    {
+        iv_buffer = new uint8_t[iv_adjusted_length];
+    }
 
     do {
         if (io_buflen != iv_length)
@@ -347,6 +356,13 @@ errlHndl_t SpiOp::read(void*   o_buffer,
         }
     } while(0);
 
+    // If the op had to be aligned then make sure to delete the
+    // adjusted buffer that was created for the aligned operation.
+    if (iv_usingAdjustedBuffer && (iv_buffer != nullptr))
+    {
+        delete[] iv_buffer;
+        iv_buffer = nullptr;
+    }
     return errl;
 }
 
@@ -356,6 +372,11 @@ errlHndl_t SpiOp::write(void*   i_buffer,
     errlHndl_t errl = nullptr;
 
     SpiControlHandle handle = getSpiHandle();
+
+    if(iv_usingAdjustedBuffer)
+    {
+        iv_buffer = new uint8_t[iv_adjusted_length];
+    }
 
     do {
 
@@ -458,6 +479,13 @@ errlHndl_t SpiOp::write(void*   i_buffer,
 
     } while(0);
 
+    // If the op had to be aligned then make sure to delete the
+    // adjusted buffer that was created for the aligned operation.
+    if (iv_usingAdjustedBuffer && (iv_buffer != nullptr))
+    {
+        delete[] iv_buffer;
+        iv_buffer = nullptr;
+    }
     return errl;
 }
 
@@ -630,16 +658,6 @@ SpiOp::SpiOp(TARGETING::Target* i_target,
 
 }
 
-SpiOp::~SpiOp()
-{
-    // If the op had to be aligned then make sure to delete the
-    // adjusted buffer that was created for the aligned operation.
-    if (iv_usingAdjustedBuffer)
-    {
-        delete[] iv_buffer;
-    }
-}
-
 void SpiOp::setAdjustedOpArgs(void * i_buffer)
 {
     // Determine the adjusted start offset by checking how far off
@@ -684,9 +702,9 @@ void SpiOp::setAdjustedOpArgs(void * i_buffer)
     else
     {
         // Transaction is not aligned. Create a buffer large enough to fit
-        // aligned data.
+        // aligned data when an operation is performed.
         iv_usingAdjustedBuffer = true;
-        iv_buffer = new uint8_t[iv_adjusted_length];
+        iv_buffer = nullptr;
     }
 
     TRACUCOMP(g_trac_spi, "SpiOp::setAdjustedOpArgs(): "
@@ -809,5 +827,46 @@ SpiControlHandle SpiOp::getSpiHandle()
 
     return SpiControlHandle(chip_target, iv_engine);
 }
+
+TARGETING::Target* SpiOp::getTarget()
+{
+    return iv_target;
+}
+
+uint64_t SpiOp::getOffset()
+{
+    return iv_offset;
+}
+
+uint64_t SpiOp::getLength()
+{
+    return iv_length;
+}
+
+uint8_t  SpiOp::getEngine()
+{
+    return iv_engine;
+}
+
+uint64_t SpiOp::getAdjustedOffset()
+{
+    return iv_adjusted_offset;
+}
+
+uint64_t SpiOp::getAdjustedLength()
+{
+    return iv_adjusted_length;
+}
+
+uint8_t SpiOp::getStartIndex()
+{
+    return iv_start_index;
+}
+
+bool SpiOp::getUsingAdjustedBuffer()
+{
+    return iv_usingAdjustedBuffer;
+}
+
 
 }; // end namespace SPI

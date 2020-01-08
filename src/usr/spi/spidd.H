@@ -72,7 +72,7 @@ class SpiOp
     uint64_t iv_adjusted_length;
 
     // The index into the adjusted buffer where the requested data starts.
-    uint64_t iv_start_index;
+    uint8_t iv_start_index;
 
     // Determines if an adjusted buffer is in use. If the operation wasn't
     // aligned then an adjusted buffer would be necessary.
@@ -137,12 +137,6 @@ public:
           uint64_t           i_offset,
           size_t             i_buflen,
           void *             i_buffer);
-
-    /**
-     *  @brief Destructor used to delete iv_buffer if iv_usingAdjustedBuffer was
-     *         set to true.
-     */
-    ~SpiOp();
 
     /**
      * @brief      Constructs a SpiControlHandle object that calculates engine
@@ -213,6 +207,46 @@ public:
                             uint8_t const * i_source,
                             const size_t    i_sourceLength,
                             const size_t    i_sourceOffset = 0);
+
+    /**
+     * @brief Returns the value of iv_offset member.
+     */
+    uint64_t getOffset();
+
+    /**
+     * @brief Returns the value of iv_length member.
+     */
+    uint64_t getLength();
+
+    /**
+     * @brief Returns the value of iv_engine member.
+     */
+    uint8_t  getEngine();
+
+    /**
+     * @brief Returns the value of iv_adjusted_offset member.
+     */
+    uint64_t getAdjustedOffset();
+
+    /**
+     * @brief Returns the value of iv_adjusted_length member.
+     */
+    uint64_t getAdjustedLength();
+
+    /**
+     * @brief Returns the value of iv_start_index member.
+     */
+    uint8_t getStartIndex();
+
+    /**
+     * @brief Returns the value of iv_usingAdjustedBuffer member.
+     */
+    bool getUsingAdjustedBuffer();
+
+    /**
+     * @brief Returns the value of iv_target member.
+     */
+    TARGETING::Target* getTarget();
 
 }; // End of SpiOp class definition.
 

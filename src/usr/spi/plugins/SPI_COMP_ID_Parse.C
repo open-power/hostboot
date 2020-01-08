@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/spi/spireasoncodes.H $                        */
+/* $Source: src/usr/spi/plugins/SPI_COMP_ID_Parse.C $                     */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,42 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __SPI_REASONCODES_H
-#define __SPI_REASONCODES_H
+#include "errludparser.H"
+#include "spiUdParserFactory.H"
 
-#include <hbotcompid.H>
+ERRL_MAKE_UD_PARSER(SPI::UserDetailsParserFactory, hbfw::SPI_COMP_ID)
 
-namespace SPI
-{
-
-    enum spiModuleId
-    {
-        SPI_OP_READ             = 0x01,
-        SPI_OP_WRITE            = 0x02,
-        SPI_COPY_TO_BUFFER      = 0x03,
-        SPI_ENGINE_LOCK_OP      = 0x04,
-        SPI_PERFORM_OP          = 0x05,
-    };
-
-    enum spiReasonCode
-    {
-        SPI_BUFFER_SIZE_MISMATCH            = SPI_COMP_ID | 0x01,
-        SPI_INVALID_PARAMETERS              = SPI_COMP_ID | 0x02,
-        SPI_FAILED_TO_RETRIEVE_ENGINE_MUTEX = SPI_COMP_ID | 0x03,
-        SPI_UNKNOWN_OP_TYPE                 = SPI_COMP_ID | 0x04,
-        SPI_INVALID_BUFFER_SIZE             = SPI_COMP_ID | 0x05,
-    };
-
-    enum SpiUserDetailsTypes
-    {
-        SPI_UDT_PARAMETERS = 0x01,
-    };
-
-    enum SpiUserDetailsVersions
-    {
-        SPI_UDT_VERSION_1 = 0x01,
-    };
-
-};
-
-#endif
