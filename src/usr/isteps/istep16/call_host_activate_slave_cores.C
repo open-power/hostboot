@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,17 +98,14 @@ void* call_host_activate_slave_cores(void* const io_pArgs)
 
         ConstTargetHandle_t l_processor = getParentChip(l_core);
 
-        CHIP_UNIT_ATTR l_coreId
-            = l_core->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-        FABRIC_GROUP_ID_ATTR l_logicalGroupId
-            = l_processor->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
-        FABRIC_CHIP_ID_ATTR l_chipId
-            = l_processor->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+        const auto coreId = l_core->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+        const auto topologyId =
+            l_processor->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
 
         const fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_coreTarget(l_core);
 
-        //Determine PIR and threads to enable for this core
-        const uint64_t pir = PIR_t(l_logicalGroupId, l_chipId, l_coreId).word;
+        // Determine PIR and threads to enable for this core
+        const uint64_t pir = PIR_t(topologyId, coreId).word;
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "pir for this core is: %lx", pir);
 
