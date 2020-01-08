@@ -68,7 +68,7 @@ fapi2::ReturnCode p10_read_xram(
              i_offset, i_bytes, i_top, i_phy);
 
     // Validate input parameters
-    FAPI_TRY(validateXramAccessParms(i_offset, i_top, i_phy),
+    FAPI_TRY(validateXramAccessParms(i_target, i_offset, i_top, i_phy, i_bytes),
              "validateXramAccessParms returns an error.");
 
     // Enable auto-inc mode for read

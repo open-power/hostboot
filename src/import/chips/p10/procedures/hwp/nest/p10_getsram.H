@@ -65,10 +65,18 @@ extern "C" {
 ///
 /// @param[in]  i_target        Reference to proc chip target
 /// @param[in]  i_pervChipletId Target perv chiplet ID
-/// @param[in]  i_mode          For OCC use only:
-///                               0x1   Normal
-///                               0x2   Debug
-///                               0x3   Circular
+/// @param[in]  i_mode          For OCC and PCIe use only:
+///                               OCC: bits 0:1  1 = Normal; 2 = Debug; 3 = Circular
+///                                    bits 2:4  OCB channel number
+///                                              0b001: OCB_CHAN0
+///                                              0b010: OCB_CHAN1
+///                                              0b011: OCB_CHAN2
+///                                              0b100: OCB_CHAN3
+///                                              Default to OCB_CHAN3 otherwise.
+///                                    bits 5:7  Reserved
+///                               PCIe: bit 0:   0 = io_top_0; 1 = io_top_1
+///                                     bit 1:   0 = PHY0; 1 = PHY1
+///                                     bits 2:7 Reserved
 /// @param[in]  i_offset        SRAM offset to read from
 /// @param[in]  i_bytes         Size of data to read (in bytes)
 /// @param[out] o_data          Pointer to data storage
