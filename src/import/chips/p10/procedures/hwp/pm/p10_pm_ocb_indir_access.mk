@@ -23,5 +23,6 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p10_pm_ocb_indir_access
+lib$(PROCEDURE)_DEPLIBS+=p10_pm_sram_access_utils
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/common/include)
 $(call BUILD_PROCEDURE)

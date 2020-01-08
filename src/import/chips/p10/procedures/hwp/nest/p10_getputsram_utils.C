@@ -36,48 +36,36 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <p10_getputsram_utils.H>
-#include <p10_scom_pauc.H>
 
-//------------------------------------------------------------------------------
-// scomt name spaces
-//------------------------------------------------------------------------------
-using namespace scomt;
-using namespace scomt::pauc;
-
-//------------------------------------------------------------------------------
-// Function definitions
-//------------------------------------------------------------------------------
-/// NOTE: doxygen in header
-fapi2::ReturnCode enableDisableIoPpeAutoInc(
-    const fapi2::Target < fapi2::TARGET_TYPE_PAUC | fapi2::TARGET_TYPE_MULTICAST > & i_target,
-    bool i_enable)
+ocb::PM_OCB_CHAN_NUM getOcbChanNum(const uint8_t i_mode)
 {
-    FAPI_DBG("Start");
-    fapi2::buffer<uint64_t> l_SRAM_ctrl_reg(0);
+    FAPI_DBG("Entering getOcbChanNum: i_mode 0x%.2X", i_mode);
+    ocb::PM_OCB_CHAN_NUM l_ocbChan = ocb::PM_OCB_CHAN_NUM::OCB_CHAN3;
+    uint8_t l_inputChannel = (i_mode >> MODE_OCB_CHAN_BIT_SHIFT) & 0x7;
 
-    // There are write-only OR/CLEAR addresses for SRAM control reg 0x10012C0A
-    // PHY_PPE_WRAP_ARB_CSCR_WO_OR    (0x10012C0C, write 1 to set)
-    // PHY_PPE_WRAP_ARB_CSCR_WO_CLEAR (0x10012C0B, write 1 to clear)
-    if (i_enable == true)
+    switch (l_inputChannel)
     {
-        FAPI_DBG("Enable SRAM Auto Increment.");
-        FAPI_TRY(PREP_PHY_PPE_WRAP_ARB_CSCR_WO_OR(i_target),
-                 "enableDisableIoPpeAutoInc: PREP_PHY_PPE_WRAP_ARB_CSCR_WO_OR returns an error.");
-        SET_PHY_PPE_WRAP_ARB_CSCR_SRAM_ACCESS_MODE(l_SRAM_ctrl_reg); // Write 1 to set
-        FAPI_TRY(PUT_PHY_PPE_WRAP_ARB_CSCR_WO_OR(i_target, l_SRAM_ctrl_reg),
-                 "enableDisableIoPpeAutoInc: PUT_PHY_PPE_WRAP_ARB_CSCR_WO_OR returns an error (Enable auto-inc).");
-    }
-    else
-    {
-        FAPI_DBG("Disable SRAM Auto Increment.");
-        FAPI_TRY(PREP_PHY_PPE_WRAP_ARB_CSCR_WO_CLEAR(i_target),
-                 "enableDisableIoPpeAutoInc: PREP_PHY_PPE_WRAP_ARB_CSCR_WO_CLEAR returns an error.");
-        SET_PHY_PPE_WRAP_ARB_CSCR_SRAM_ACCESS_MODE(l_SRAM_ctrl_reg); // Write 1 to clear
-        FAPI_TRY(PUT_PHY_PPE_WRAP_ARB_CSCR_WO_CLEAR(i_target, l_SRAM_ctrl_reg),
-                 "enableDisableIoPpeAutoInc: PUT_PHY_PPE_WRAP_ARB_CSCR_WO_CLEAR returns an error (Disable auto-inc).");
+        case 0b001:
+            l_ocbChan = ocb::PM_OCB_CHAN_NUM::OCB_CHAN0;
+            break;
+
+        case 0b010:
+            l_ocbChan = ocb::PM_OCB_CHAN_NUM::OCB_CHAN1;
+            break;
+
+        case 0b011:
+            l_ocbChan = ocb::PM_OCB_CHAN_NUM::OCB_CHAN2;
+            break;
+
+        case 0b100:
+            l_ocbChan = ocb::PM_OCB_CHAN_NUM::OCB_CHAN3;
+            break;
+
+        default:
+            l_ocbChan = ocb::PM_OCB_CHAN_NUM::OCB_CHAN3;
+            break;
     }
 
-fapi_try_exit:
-    FAPI_DBG("End");
-    return fapi2::current_err;
+    FAPI_DBG("Exiting getOcbChanNum: OCB channel %d", l_ocbChan);
+    return l_ocbChan;
 }

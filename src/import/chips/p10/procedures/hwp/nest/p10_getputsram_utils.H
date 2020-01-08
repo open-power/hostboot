@@ -38,6 +38,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <fapi2.H>
+#include <p10_pm_ocb_init.H>
 
 //------------------------------------------------------------------------------
 // Constants definitions
@@ -49,6 +50,17 @@ const uint32_t EQ7_PERV_CHIPLET_ID   = 0x27;
 const uint32_t PCI0_PERV_CHIPLET_ID  = 0x08;
 const uint32_t PCI1_PERV_CHIPLET_ID  = 0x09;
 
+// PCIe constants
+const uint8_t MODE_PCIE_TOP_BIT_MASK        = 0b10000000; // Bit 0
+const uint8_t MODE_PCIE_PHY_BIT_MASK        = 0b01000000; // Bit 1
+
+// OCC constants
+const uint8_t MODE_OCC_ACCESS_MODE_BIT_SHIFT = 6;   // Bits 0:1
+const uint8_t MODE_OCB_CHAN_BIT_SHIFT        = 3;   // Bits 2:4
+const uint8_t OCB_MODE_LOWER_LIMIT           = 1;
+const uint8_t OCB_MODE_UPPER_LIMIT           = 3;
+const uint8_t OCB_MODE_CIRCULAR              = 3;
+
 //------------------------------------------------------------------------------
 // Function prototype
 //------------------------------------------------------------------------------
@@ -57,16 +69,21 @@ const uint32_t PCI1_PERV_CHIPLET_ID  = 0x09;
 extern "C" {
 
 ///
-/// @brief Enable/Disable Auto Increment for IO PPE SRAM access
+/// @brief Decode the OCB channel number from an input Mode value
 ///
-/// @param[in]  i_target    Reference PAUC or MULTICAST target
-/// @param[in]  i_enable    true=Enable; false=Disable
+/// @param[in]  i_mode          For OCC:
+///                               bits 0:1  1 = Normal; 2 = Debug; 3 = Circular
+///                               bits 2:4  OCB channel number
+///                                         0b001: OCB_CHAN0
+///                                         0b010: OCB_CHAN1
+///                                         0b011: OCB_CHAN2
+///                                         0b100: OCB_CHAN3
+///                                         Default to OCB_CHAN3 otherwise.
+///                               bits 5:7  Reserved
 ///
-/// @return FAPI_RC_SUCCESS if success, else error code
+/// @return ocb::PM_OCB_CHAN_NUM
 ///
-    fapi2::ReturnCode enableDisableIoPpeAutoInc(
-        const fapi2::Target < fapi2::TARGET_TYPE_PAUC | fapi2::TARGET_TYPE_MULTICAST > & i_target,
-        bool i_enable);
+    ocb::PM_OCB_CHAN_NUM getOcbChanNum(const uint8_t i_mode);
 
 } //extern "C"
 

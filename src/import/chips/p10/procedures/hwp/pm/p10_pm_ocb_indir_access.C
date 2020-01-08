@@ -46,6 +46,7 @@
 // Includes
 // ----------------------------------------------------------------------
 #include <p10_pm_ocb_indir_access.H>
+#include <p10_pm_sram_access_utils.H>
 #include "p10_scom_proc.H"
 
 using namespace scomt::proc;
@@ -77,7 +78,26 @@ const static uint32_t OCBSHCS_PUSH_ENABLE_BIT = TP_TPCHIP_OCC_OCI_OCB_OCBSHCS0_P
 // Function definitions
 // ----------------------------------------------------------------------
 
-fapi2::ReturnCode p10_pm_ocb_indir_access(
+/// @brief Internal function that provides for the abstract access to an OCB
+/// indirect channel that has been configured previously via
+/// p9_pm_ocb_indir_setup_[linear/circular] procedures
+///
+/// @param[in]     &i_target           Chip target
+/// @param[in]     i_ocb_chan          OCB channel number (0, 1, 2, 3)
+/// @param[in]     i_ocb_op            Operation (Get, Put)
+/// @param[in]     i_ocb_req_length    i_useByteBuf = true : Length in bytes
+///                                                   false: Length in double words
+/// @param[in]     i_oci_address_valid Indicator that oci_address is to be used
+/// @param[in]     i_oci_address       OCI Address to be used for the operation
+/// @param [out]   o_ocb_act_length    i_useByteBuf = true : Number of byte accessed
+///                                                   false: Number of double words accessed
+/// @param[in/out] io_ocb_buffer       Pointer to a container of type uint64_t
+///                                    to store the data to be written into or
+///                                    obtained from OCC SRAM
+/// @param [in]  i_useByteBuf      true: data buffer is byte wide
+///                                   false: data buffer is double word wide.
+/// @return FAPI2_RC_SUCCESS on success, else error.
+fapi2::ReturnCode p10_pm_ocb_indir_access_internal(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const ocb::PM_OCB_CHAN_NUM    i_ocb_chan,
     const ocb::PM_OCB_ACCESS_OP   i_ocb_op,
@@ -85,9 +105,10 @@ fapi2::ReturnCode p10_pm_ocb_indir_access(
     const bool                    i_oci_address_valid,
     const uint32_t                i_oci_address,
     uint32_t&                     o_ocb_act_length,
-    uint64_t*                     io_ocb_buffer)
+    uint64_t*                     io_ocb_buffer,
+    const bool                    i_useByteBuf = false)
 {
-    FAPI_DBG("> p10_pm_ocb_indir_access...");
+    FAPI_DBG("> p10_pm_ocb_indir_access - i_useByteBuf %d", i_useByteBuf);
     FAPI_DBG("Channel : %d, Operation : %d, No.of 8B Blocks of Data: %d",
              i_ocb_chan, i_ocb_op, i_ocb_req_length);
 
@@ -103,6 +124,14 @@ fapi2::ReturnCode p10_pm_ocb_indir_access(
     FAPI_DBG("Checking channel validity");
 
     bool l_push_ok_flag = false;
+
+    uint32_t l_words_to_access = i_ocb_req_length;
+
+    if (i_useByteBuf)
+    {
+        l_words_to_access = i_ocb_req_length % 8 ?
+                            (i_ocb_req_length >> 3) + 1 : i_ocb_req_length >> 3; // 64-bit len
+    }
 
     switch ( i_ocb_chan )
     {
@@ -250,9 +279,10 @@ fapi2::ReturnCode p10_pm_ocb_indir_access(
 
         // Walk the input buffer (io_ocb_buffer) 8B (64bits) at a time to write
         // the channel data register
-        for(uint32_t l_index = 0; l_index < i_ocb_req_length; l_index++)
+        for(uint32_t l_index = 0; l_index < l_words_to_access; l_index++)
         {
-            l_data64.insertFromRight(io_ocb_buffer[l_index], 0, 64);
+            getDataFromBuffer(i_useByteBuf, &io_ocb_buffer[l_index], l_data64());
+
             /* The data read is done via this getscom operation.
              * A data write failure will be logged off as a simple scom failure.
              * Need to find a way to distiniguish this error and collect
@@ -275,11 +305,10 @@ fapi2::ReturnCode p10_pm_ocb_indir_access(
         FAPI_INF("OCB access for data read operation");
 
         fapi2::buffer<uint64_t> l_data64;
-        uint64_t l_data = 0;
         fapi2::ReturnCode l_rc;
 
         // Read data from the Channel Data Register in blocks of 64 bits.
-        for (uint32_t l_loopCount = 0; l_loopCount < i_ocb_req_length;
+        for (uint32_t l_loopCount = 0; l_loopCount < l_words_to_access;
              l_loopCount++)
         {
 #ifndef __PPE__
@@ -413,8 +442,7 @@ fapi2::ReturnCode p10_pm_ocb_indir_access(
                 goto fapi_try_exit;
             }
 
-            l_data64.extract(l_data, 0, 64);
-            io_ocb_buffer[l_loopCount] = l_data;
+            loadDataToBuffer(i_useByteBuf, l_data64(), &io_ocb_buffer[l_loopCount]);
             o_ocb_act_length++;
             FAPI_DBG("data(64 bits): 0x%016lX read from channel data register",
                      io_ocb_buffer[l_loopCount]);
@@ -424,9 +452,63 @@ fapi2::ReturnCode p10_pm_ocb_indir_access(
                  o_ocb_act_length);
     }
 
+    // Number of bytes accessed
+    if (i_useByteBuf)
+    {
+        o_ocb_act_length = o_ocb_act_length * 8;
+    }
 
 fapi_try_exit:
     FAPI_DBG("< p10_pm_ocb_indir_access...");
     return fapi2::current_err;
 
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// See doxygen in header file
+fapi2::ReturnCode p10_pm_ocb_indir_access(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const ocb::PM_OCB_CHAN_NUM    i_ocb_chan,
+    const ocb::PM_OCB_ACCESS_OP   i_ocb_op,
+    const uint32_t                i_ocb_req_length,
+    const bool                    i_oci_address_valid,
+    const uint32_t                i_oci_address,
+    uint32_t&                     o_ocb_act_length,
+    uint64_t*                     io_ocb_buffer)
+{
+    FAPI_DBG("> p10_pm_ocb_indir_access");
+    return (p10_pm_ocb_indir_access_internal(
+                i_target,
+                i_ocb_chan,
+                i_ocb_op,
+                i_ocb_req_length,
+                i_oci_address_valid,
+                i_oci_address,
+                o_ocb_act_length,
+                io_ocb_buffer));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// See doxygen in header file
+fapi2::ReturnCode p10_pm_ocb_indir_access_bytes(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const ocb::PM_OCB_CHAN_NUM    i_ocb_chan,
+    const ocb::PM_OCB_ACCESS_OP   i_ocb_op,
+    const uint32_t                i_ocb_req_length,
+    const bool                    i_oci_address_valid,
+    const uint32_t                i_oci_address,
+    uint32_t&                     o_ocb_act_length,
+    uint8_t*                      io_ocb_buffer)
+{
+    FAPI_DBG("> p10_pm_ocb_indir_access_bytes");
+    return (p10_pm_ocb_indir_access_internal(
+                i_target,
+                i_ocb_chan,
+                i_ocb_op,
+                i_ocb_req_length,
+                i_oci_address_valid,
+                i_oci_address,
+                o_ocb_act_length,
+                reinterpret_cast<uint64_t*>(io_ocb_buffer),
+                true));
 }

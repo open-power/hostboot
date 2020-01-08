@@ -140,10 +140,11 @@ fapi2::ReturnCode p10_io_load_ppe(
                          PAU0_PERV_CHIPLET_ID,  // Set to PAU0 as default for multicast.
                          // p10_putsram will find valid multicast target.
                          true,                  // Do multicast load
-                         0,                     // OCC mode, not used here
+                         0,                     // Access mode, not used here
                          SRAM_IO_PPE_IMAGE_OFFSET,
                          l_ioImgSize,
                          l_ioImgDataPtr);
+
     FAPI_TRY(fapi2::current_err,
              "p10_io_load_ppe: error loading IO PPE image to SRAM_IO_PPE_IMAGE_OFFSET.");
 
@@ -156,12 +157,13 @@ fapi2::ReturnCode p10_io_load_ppe(
                              PAU0_PERV_CHIPLET_ID, // Set to PAU0 as default for multicast.
                              // p10_putsram will find valid multicast target.
                              true,                 // Do multicast load
-                             0,                    // OCC mode, not used here
+                             0,                    // Access mode, not used here
                              MEM_REG_OFFSETS[ii],
                              l_memRegsImgSize,
                              l_memRegsImgDataPtr);
+
         FAPI_TRY(fapi2::current_err,
-                 "p10_io_load_ppe: error loading IO PPE image to SRAM_IO_PPE_IMAGE_OFFSET.");
+                 "p10_io_load_ppe: error loading IO PPE image to MEM_REG_OFFSETS.");
     }
 
 fapi_try_exit:

@@ -36,7 +36,7 @@
 //------------------------------------------------------------------------------
 #include <p10_putsram_io_ppe.H>
 #include <p10_scom_pauc.H>
-#include <p10_getputsram_utils.H>
+#include <p10_io_ppe_utils.H>
 
 //------------------------------------------------------------------------------
 // scomt name spaces
