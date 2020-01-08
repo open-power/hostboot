@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,7 +28,7 @@
 #include <target.H>
 #include <errl/errlmanager.H>
 #include <mss_generic_consts.H>
-#include <p10_freq_traits.H>
+#include <lib/shared/exp_consts.H>
 
 using namespace TARGETING;
 
@@ -37,22 +37,22 @@ extern "C"
 
 using namespace mss;
 
-fapi2::ReturnCode __getDimmRepairData(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> & i_fapiTrgt,
+fapi2::ReturnCode __getDimmRepairData( const fapi2::Target
+    <fapi2::TARGET_TYPE_MEM_PORT|fapi2::TARGET_TYPE_OCMB_CHIP> & i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
     TARGETING::TargetHandle_t & o_dimmTrgt,
-    uint8_t (&o_data)[frequency_traits<proc_type::P10>::MAX_PRIMARY_RANK_PER_DIMM]
+    uint8_t (&o_data)[MAX_RANK_PER_DIMM]
                      [ROW_REPAIR_BYTE_COUNT],
-    const uint8_t i_port)
+    const uint8_t i_port )
 {
     fapi2::ReturnCode l_rc;
 
     do
     {
         // Check parameters.
-        if ( (i_dimm >= frequency_traits<proc_type::P10>::MAX_DIMM_PER_PORT) ||
-             (i_rank >= frequency_traits<proc_type::P10>::MAX_PRIMARY_RANK_PER_DIMM) )
+        if ( (i_dimm >= exp::sizes::MAX_DIMM_PER_PORT) ||
+             (i_rank >= exp::sizes::MAX_RANK_PER_DIMM) )
         {
             FAPI_ERR( "__getDimmRepairData: Bad parameter. "
                       "i_dimm:%d i_rank:%d", i_dimm, i_rank );
@@ -84,15 +84,16 @@ fapi2::ReturnCode __getDimmRepairData(
             if ( l_port == i_port )
             {
                 // Get and compare the dimm
-                const uint8_t l_dimm = dimmTrgt->getAttr<ATTR_POS_ON_MEM_PORT>();
+                const uint8_t l_dimm =
+                    dimmTrgt->getAttr<ATTR_POS_ON_MEM_PORT>();
 
                 if ( l_dimm == i_dimm )
                 {
                     o_dimmTrgt = dimmTrgt;
                     // Port and dimm are correct, get the row repair data
-                    fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_fapi2DimmTrgt(dimmTrgt);
+                    fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_fapiDimm(dimmTrgt);
                     l_rc = FAPI_ATTR_GET( fapi2::ATTR_ROW_REPAIR_DATA,
-                                          l_fapi2DimmTrgt,
+                                          l_fapiDimm,
                                           o_data );
                     if ( l_rc ) break;
                 }
@@ -110,11 +111,12 @@ fapi2::ReturnCode __getDimmRepairData(
 }
 
 //------------------------------------------------------------------------------
-fapi2::ReturnCode getRowRepair(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> & i_fapiTrgt,
+fapi2::ReturnCode getRowRepair( const fapi2::Target
+    <fapi2::TARGET_TYPE_MEM_PORT|fapi2::TARGET_TYPE_OCMB_CHIP> & i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
-    uint8_t (&o_data)[ROW_REPAIR_BYTE_COUNT])
+    uint8_t (&o_data)[ROW_REPAIR_BYTE_COUNT],
+    const uint8_t i_port )
 {
     FAPI_INF( ">>getRowRepair. %d:%d", i_dimm, i_rank );
 
@@ -123,13 +125,12 @@ fapi2::ReturnCode getRowRepair(
     do
     {
 
-        uint8_t l_data[frequency_traits<proc_type::P10>::MAX_PRIMARY_RANK_PER_DIMM]
-                      [ROW_REPAIR_BYTE_COUNT];
+        uint8_t l_data[MAX_RANK_PER_DIMM][ROW_REPAIR_BYTE_COUNT];
         TARGETING::TargetHandle_t l_dimmTrgt = nullptr;
 
         // Check parameters and get Row Repair Data
         l_rc = __getDimmRepairData( i_fapiTrgt, i_dimm, i_rank,
-                                    l_dimmTrgt, l_data, 0 );
+                                    l_dimmTrgt, l_data, i_port );
         if ( l_rc )
         {
             FAPI_ERR( "getRowRepair: Error from __getDimmRepairData." );
@@ -147,11 +148,12 @@ fapi2::ReturnCode getRowRepair(
 }
 
 //------------------------------------------------------------------------------
-fapi2::ReturnCode setRowRepair(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> & i_fapiTrgt,
+fapi2::ReturnCode setRowRepair( const fapi2::Target
+    <fapi2::TARGET_TYPE_MEM_PORT|fapi2::TARGET_TYPE_OCMB_CHIP> & i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
-    uint8_t (&i_data)[ROW_REPAIR_BYTE_COUNT])
+    uint8_t (&i_data)[ROW_REPAIR_BYTE_COUNT],
+    const uint8_t i_port )
 {
     FAPI_INF( ">>setRowRepair. %d:%d", i_dimm, i_rank );
 
@@ -159,13 +161,12 @@ fapi2::ReturnCode setRowRepair(
 
     do
     {
-        uint8_t l_data[frequency_traits<proc_type::P10>::MAX_PRIMARY_RANK_PER_DIMM]
-                      [ROW_REPAIR_BYTE_COUNT];
+        uint8_t l_data[MAX_RANK_PER_DIMM][ROW_REPAIR_BYTE_COUNT];
         TARGETING::TargetHandle_t l_dimmTrgt = nullptr;
 
         // Check parameters and get row repair data.
         l_rc = __getDimmRepairData( i_fapiTrgt, i_dimm, i_rank,
-                                    l_dimmTrgt, l_data, 0 );
+                                    l_dimmTrgt, l_data, i_port );
         if ( l_rc )
         {
             FAPI_ERR( "setRowRepair: Error from __getDimmRepairData." );
@@ -175,9 +176,9 @@ fapi2::ReturnCode setRowRepair(
         // Update the row repair data.
         memcpy( l_data[i_rank], i_data, ROW_REPAIR_BYTE_COUNT );
 
-        fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_fapi2DimmTrgt(l_dimmTrgt);
+        fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_fapiDimm(l_dimmTrgt);
         l_rc = FAPI_ATTR_SET( fapi2::ATTR_ROW_REPAIR_DATA,
-                              l_fapi2DimmTrgt,
+                              l_fapiDimm,
                               l_data );
         if ( l_rc )
         {
