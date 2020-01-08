@@ -36,8 +36,10 @@
 #include <p10_load_iop_xram.H>
 #include <multicast_group_defs.H>
 #include <p10_ipl_image.H>
-#include <p10_write_xram.H>
 #include <p10_iop_xram_utils.H>
+#include <p10_putsram.H>
+#include <p10_getputsram_utils.H>
+#include <fapi2_subroutine_executor.H>
 
 //@TODO: RTC 214852 - Use SCOM accessors, remove workaround code
 
@@ -122,27 +124,37 @@ fapi2::ReturnCode p10_load_iop_xram(
         {
             FAPI_INF("p10_load_iop_xram: Attemp to write PCIE img to XRAM: iop_top %d, phy %d.",
                      l_top, l_phy);
-            FAPI_EXEC_HWP(l_rc,
-                          p10_write_xram,
-                          l_target_mcast,
-                          0,                  // Write from offset 0
-                          l_xramFwSize,
-                          static_cast<xramIopTopNum_t>(l_top),
-                          static_cast<xramPhyNum_t>(l_phy),
-                          l_xramFwDataPtr);
 
-            if (l_rc)
+            // Encode Top and Phy into mode
+            uint8_t l_mode = 0;
+
+            if (l_top)
             {
-                FAPI_ERR("p10_load_iop_xram: p10_write_xram returns an error: iop_top %d, phy %d.",
-                         l_top, l_phy);
-                fapi2::current_err = l_rc;
-                goto fapi_try_exit;
+                l_mode = MODE_PCIE_TOP_BIT_MASK;
             }
-            else
+
+            if (l_phy)
             {
-                FAPI_INF("p10_load_iop_xram: Successfully wrote PCIE img to XRAM: iop_top %d, phy %d.",
-                         l_top, l_phy);
+                l_mode |= MODE_PCIE_PHY_BIT_MASK;
             }
+
+            // Load IOP XRAM using putsram chip-op
+            FAPI_CALL_SUBROUTINE(fapi2::current_err,
+                                 p10_putsram,
+                                 i_target,
+                                 PCI0_PERV_CHIPLET_ID,  // Set to PCI0 as default for multicast.
+                                 // p10_putsram will find valid multicast target.
+                                 true,                  // Do multicast load
+                                 l_mode,                // Access mode, not used here
+                                 0,                     // Load at offset 0
+                                 l_xramFwSize,
+                                 l_xramFwDataPtr);
+
+            FAPI_TRY(fapi2::current_err,
+                     "p10_load_iop_xram: p10_write_xram returns an error: iop_top %d, phy %d.");
+
+            FAPI_INF("p10_load_iop_xram: Successfully wrote PCIE img to XRAM: iop_top %d, phy %d.",
+                     l_top, l_phy);
         }
 
         // Done loading this iop_top, enable XRAM scrubber

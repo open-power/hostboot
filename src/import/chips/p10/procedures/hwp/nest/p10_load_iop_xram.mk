@@ -27,4 +27,5 @@ OBJS+=p10_iop_xram_utils.o
 lib$(PROCEDURE)_DEPLIBS+=p10_ipl_image
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/utils/imageProcs)
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/common/utils/imageProcs)
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/procedures/hwp/pm)
 $(call BUILD_PROCEDURE)
