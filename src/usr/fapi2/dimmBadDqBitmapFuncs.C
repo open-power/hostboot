@@ -27,7 +27,7 @@
 #include <attribute_service.H>
 #include <target.H>
 #include <errl/errlmanager.H>
-#include <p10_freq_traits.H>
+#include <lib/shared/exp_consts.H>
 
 using namespace TARGETING;
 
@@ -52,8 +52,8 @@ fapi2::ReturnCode dimmBadDqCheckParamGetBitmap( const fapi2::Target
     do
     {
         // Check parameters.
-        if ( (i_dimm >= frequency_traits<proc_type::P10>::MAX_DIMM_PER_PORT) ||
-             (i_rank >= frequency_traits<proc_type::P10>::MAX_PRIMARY_RANK_PER_DIMM) )
+        if ( (i_dimm >= exp::sizes::MAX_DIMM_PER_PORT) ||
+             (i_rank >= exp::sizes::MAX_RANK_PER_DIMM) )
         {
             FAPI_ERR( "dimmBadDqCheckParamGetBitmap: Bad parameter. "
                       "i_dimm:%d i_rank:%d", i_dimm, i_rank );
@@ -121,7 +121,8 @@ fapi2::ReturnCode p10DimmGetBadDqBitmap( const fapi2::Target
     <fapi2::TARGET_TYPE_MEM_PORT|fapi2::TARGET_TYPE_OCMB_CHIP>& i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
-    uint8_t (&o_data)[BAD_DQ_BYTE_COUNT])
+    uint8_t (&o_data)[BAD_DQ_BYTE_COUNT],
+    const uint8_t i_port)
 {
     FAPI_INF( ">>p10DimmGetBadDqBitmap. %d:%d", i_dimm, i_rank );
 
@@ -133,7 +134,7 @@ fapi2::ReturnCode p10DimmGetBadDqBitmap( const fapi2::Target
         TARGETING::TargetHandle_t l_dimmTrgt = nullptr;
 
         // Check parameters and get Bad Dq Bitmap
-        l_rc = dimmBadDqCheckParamGetBitmap( i_fapiTrgt, 0, i_dimm, i_rank,
+        l_rc = dimmBadDqCheckParamGetBitmap( i_fapiTrgt, i_port, i_dimm, i_rank,
                                              l_dimmTrgt, l_dqBitmap );
         if ( l_rc )
         {
@@ -155,7 +156,8 @@ fapi2::ReturnCode p10DimmSetBadDqBitmap( const fapi2::Target
     <fapi2::TARGET_TYPE_MEM_PORT|fapi2::TARGET_TYPE_OCMB_CHIP>& i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
-    const uint8_t (&i_data)[BAD_DQ_BYTE_COUNT])
+    const uint8_t (&i_data)[BAD_DQ_BYTE_COUNT],
+    const uint8_t i_port)
 {
     FAPI_INF( ">>p10DimmSetBadDqBitmap. %d:%d", i_dimm, i_rank );
 
@@ -168,7 +170,7 @@ fapi2::ReturnCode p10DimmSetBadDqBitmap( const fapi2::Target
         TARGETING::TargetHandle_t l_dimmTrgt = nullptr;
 
         // Check parameters and get Bad Dq Bitmap
-        l_rc = dimmBadDqCheckParamGetBitmap( i_fapiTrgt, 0, i_dimm, i_rank,
+        l_rc = dimmBadDqCheckParamGetBitmap( i_fapiTrgt, i_port, i_dimm, i_rank,
                                              l_dimmTrgt, l_dqBitmap );
         if ( l_rc )
         {

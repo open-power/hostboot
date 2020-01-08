@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -646,35 +646,8 @@ size_t DIMM_BAD_DQ_SIZE_BYTES = 0x50;
 
 union wiringData
 {
-    uint8_t nimbus[mss::PORTS_PER_MCS][mss::MAX_DQ_BITS];
     uint8_t memport[mss::MAX_DQ_BITS];
 };
-
-//******************************************************************************
-// fapi2::platAttrSvc::__getChipModel function
-//******************************************************************************
-TARGETING::ATTR_MODEL_type __getChipModel()
-{
-    // determine the chip's model
-    TARGETING::Target * masterProc = nullptr;
-    TARGETING::targetService().masterProcChipTargetHandle(masterProc);
-
-    return masterProc->getAttr<TARGETING::ATTR_MODEL>();
-}
-
-//******************************************************************************
-// fapi2::platAttrSvc::__getTranslationPortSlct function
-//******************************************************************************
-ReturnCode __getTranslationPortSlct( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
-                                     uint8_t &o_ps )
-{
-    // In the P10 case, the translation attribute exists on the MEM_PORT
-    // target so there's no need to know the port select, so just set it to 0.
-    (void)i_fapiDimm;
-    o_ps = 0;
-    return FAPI2_RC_SUCCESS;
-}
-
 
 //******************************************************************************
 // fapi2::platAttrSvc::__badDqBitmapGetHelperAttrs function
@@ -683,20 +656,19 @@ ReturnCode __badDqBitmapGetHelperAttrs(
     const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
     wiringData &o_wiringData, uint64_t &o_allMnfgFlags, uint8_t &o_ps )
 {
-    FAPI_TRY( __getTranslationPortSlct(i_fapiDimm, o_ps) );
+    // Get the MEM_PORT target
+    Target<TARGET_TYPE_MEM_PORT> l_fapiMemPort =
+        i_fapiDimm.getParent<TARGET_TYPE_MEM_PORT>();
+
+    // In the P10 case, the translation attribute exists on the MEM_PORT
+    // target so there's no need to know the port select, so just set it to 0.
+    o_ps = 0;
 
     // Get the DQ to DIMM Connector DQ Wiring attribute.
-    // Note that for C-DIMMs, this will return a simple 1:1 mapping.
-    // This code cannot tell the difference between C-DIMMs and IS-DIMMs.
 
     // memset to avoid known syntax issue with previous compiler
     // versions and ensure zero initialized array.
     memset( o_wiringData.memport, 0, sizeof(o_wiringData.memport) );
-
-    {
-    // Get the MEM_PORT target
-    Target<TARGET_TYPE_MEM_PORT> l_fapiMemPort =
-        i_fapiDimm.getParent<TARGET_TYPE_MEM_PORT>();
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_VPD_DQ_MAP, l_fapiMemPort,
                             o_wiringData.memport) );
@@ -708,7 +680,6 @@ ReturnCode __badDqBitmapGetHelperAttrs(
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MNFG_FLAGS,
                             fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
                             o_allMnfgFlags) );
-    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -991,52 +962,20 @@ ReturnCode __mcLogicalToDimmDqHelper(
     wiringData  i_wiringData, uint8_t i_ps, uint8_t i_mcPin,
     uint8_t &o_dimm_dq )
 {
-/* FIXME RTC: 210975 rosetta_map hasn't been ported to P10 yet
-    uint64_t l_c4 = 0;
-
-    TARGETING::ATTR_MODEL_type procType = __getChipModel();
-
-    if ( TARGETING::MODEL_NIMBUS == procType )
+    // use wiring data to translate mc pin to dimm dq format
+    // Note: the wiring data maps from dimm dq format to mc format
+    for ( uint8_t bit = 0; bit < mss::MAX_DQ_BITS; bit++ )
     {
-        Target<TARGET_TYPE_MCA> l_fapiMca =
-            i_fapiDimm.getParent<TARGET_TYPE_MCA>();
-
-        // For Nimbus, translate from MC Logical to C4 format
-        FAPI_TRY( mss::rosetta_map::mc_to_c4<mss::rosetta_type::DQ>(
-                  l_fapiMca, i_mcPin, l_c4 ) );
-
-        // use wiring data to translate c4 pin to dimm dq format
-        // Note: the wiring data maps from dimm dq format to c4 format
-        for ( uint8_t bit = 0; bit < mss::MAX_DQ_BITS; bit++ )
+        // Check to see which bit in the wiring data corresponds to our
+        // DIMM DQ format pin.
+        if ( i_wiringData.memport[bit] == i_mcPin )
         {
-            // Check to see which bit in the wiring data corresponds to our
-            // DIMM DQ format pin.
-            if ( i_wiringData.nimbus[i_ps][bit] == l_c4 )
-            {
-                o_dimm_dq = bit;
-                break;
-            }
-        }
-    }
-    else
-    {
-        // use wiring data to translate mc pin to dimm dq format
-        // Note: the wiring data maps from dimm dq format to mc format
-        for ( uint8_t bit = 0; bit < mss::MAX_DQ_BITS; bit++ )
-        {
-            // Check to see which bit in the wiring data corresponds to our
-            // DIMM DQ format pin.
-            if ( i_wiringData.memport[bit] == i_mcPin )
-            {
-                o_dimm_dq = bit;
-                break;
-            }
+            o_dimm_dq = bit;
+            break;
         }
     }
 
-fapi_try_exit:
-*/
-    return fapi2::current_err;
+    return FAPI2_RC_SUCCESS;
 }
 
 //******************************************************************************
@@ -1047,38 +986,11 @@ ReturnCode __dimmDqToMcLogicalHelper(
     wiringData  i_wiringData, uint8_t i_ps, uint8_t i_dimm_dq,
     uint8_t &o_mcPin )
 {
-/* FIXME RTC: 210975
-    uint64_t l_c4 = 0;
+    // Translate from DIMM DQ format to MC using wiring data
+    // Note: the wiring data maps from dimm dq format to mc logical format
+    o_mcPin = i_wiringData.memport[i_dimm_dq];
 
-    TARGETING::ATTR_MODEL_type procType = __getChipModel();
-
-    if ( TARGETING::MODEL_NIMBUS == procType )
-    {
-
-        // Translate from DIMM DQ format to C4 using wiring data
-        // Note: the wiring data maps from dimm dq format to c4 format
-        l_c4 = i_wiringData.nimbus[i_ps][i_dimm_dq];
-
-        Target<TARGET_TYPE_MCA> l_fapiMca =
-            i_fapiDimm.getParent<TARGET_TYPE_MCA>();
-
-        // For Nimbus, translate from C4 to MC Logical format
-        uint64_t l_tmp = 0;
-        FAPI_TRY( mss::rosetta_map::c4_to_mc<mss::rosetta_type::DQ>(l_fapiMca,
-                  l_c4, l_tmp) );
-        o_mcPin = static_cast<uint8_t>(l_tmp);
-    }
-    else
-    {
-        // Translate from DIMM DQ format to MC using wiring data
-        // Note: the wiring data maps from dimm dq format to mc logical format
-        o_mcPin = i_wiringData.memport[i_dimm_dq];
-    }
-
-fapi_try_exit:
-*/
-    return fapi2::current_err;
-
+    return FAPI2_RC_SUCCESS;
 }
 
 //******************************************************************************
@@ -1512,12 +1424,7 @@ ReturnCode __isX4Dram( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
     Target<TARGET_TYPE_MEM_PORT> l_fapiMemPort =
         i_fapiDimm.getParent<TARGET_TYPE_MEM_PORT>();
 
-    // Get the dram width attr and the dimm slct
-    uint8_t l_dramWidth[2];
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_WIDTH, l_fapiMemPort,
-                            l_dramWidth) );
-
-    {
+    // Get the dimm slct and the dram width attr
     TARGETING::TargetHandle_t l_dimmTrgt;
     errlHndl_t l_errl = getTargetingTarget( i_fapiDimm, l_dimmTrgt );
     if ( l_errl )
@@ -1531,9 +1438,12 @@ ReturnCode __isX4Dram( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
     uint8_t l_dimmSlct =
         l_dimmTrgt->getAttr<TARGETING::ATTR_POS_ON_MEM_PORT>();
 
+    uint8_t l_dramWidth[2];
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_WIDTH, l_fapiMemPort,
+                            l_dramWidth) );
+
     o_isX4Dram = ( fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4 ==
                    l_dramWidth[l_dimmSlct] );
-    }
 
 fapi_try_exit:
     return fapi2::current_err;

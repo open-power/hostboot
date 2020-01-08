@@ -35,7 +35,7 @@ extern "C"
  * @brief FW Team Utility function that gets the Bad DQ Bitmap.
  *
  * This utility functon should be called by a HWP needing to get the Bad DQ
- * bitmap for a particular mem port, dimm and rank.
+ * bitmap for a particular MEM_PORT/OCMB_CHIP, dimm and rank.
  *
  * This function finds the corresponding DIMM Target, calls
  * dimmBadDqBitmapAccessHwp to get the DQ bitmap and returns the data
@@ -45,6 +45,7 @@ extern "C"
  * @param[in]  i_dimm     DIMM number
  * @param[in]  i_rank     DIMM rank number
  * @param[out] o_data     Reference to data where Bad DQ bitmap is copied to
+ * @param[in]  i_port     Optional port number. Default is port 0.
  *
  * @return ReturnCode
  */
@@ -52,13 +53,14 @@ fapi2::ReturnCode p10DimmGetBadDqBitmap( const fapi2::Target
     <fapi2::TARGET_TYPE_MEM_PORT|fapi2::TARGET_TYPE_OCMB_CHIP>& i_fapiTrgt,
     uint8_t i_dimm,
     uint8_t i_rank,
-    uint8_t (&o_data)[mss::BAD_DQ_BYTE_COUNT]);
+    uint8_t (&o_data)[mss::BAD_DQ_BYTE_COUNT],
+    const uint8_t i_port = 0 );
 
 /**
  * @brief FW Team Utility function that sets the Bad DQ Bitmap.
  *
  * This utility functon should be called by a HWP needing to set the Bad DQ
- * bitmap for a particular mem port, dimm and rank.
+ * bitmap for a particular MEM_PORT/OCMB_CHIP, dimm and rank.
  *
  * This utility function finds the corresponding DIMM Target, calls
  * dimmBadDqBitmapAccessHwp to get the DQ bitmap, fills in the data for the
@@ -68,6 +70,7 @@ fapi2::ReturnCode p10DimmGetBadDqBitmap( const fapi2::Target
  * @param[in] i_dimm     DIMM number
  * @param[in] i_rank     DIMM rank number
  * @param[in] i_data     Reference to data where Bad DQ bitmap is copied from
+ * @param[in]  i_port     Optional port number. Default is port 0.
  *
  * @return ReturnCode
  */
@@ -75,7 +78,8 @@ fapi2::ReturnCode p10DimmSetBadDqBitmap( const fapi2::Target
     <fapi2::TARGET_TYPE_MEM_PORT|fapi2::TARGET_TYPE_OCMB_CHIP>& i_fapiTrgt,
     uint8_t i_dimm,
     uint8_t i_rank,
-    const uint8_t (&i_data)[mss::BAD_DQ_BYTE_COUNT]);
+    const uint8_t (&i_data)[mss::BAD_DQ_BYTE_COUNT],
+    const uint8_t i_port = 0 );
 }
 
 #endif
