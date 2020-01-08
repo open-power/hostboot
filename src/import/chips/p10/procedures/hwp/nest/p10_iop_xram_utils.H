@@ -107,15 +107,22 @@ extern "C" {
 
 ///
 /// @brief Check if input offset is 8-byte aligned.
+/// @param[in]  i_target    Reference PEC or PEC multicast target
+/// @param[in]  i_offset    Byte offset from XRAM 0 location
 /// @param[in]  i_offset    Byte offset from XRAM 0 location
 /// @param[in]  i_top       iop_top to read/write XRAM
 /// @param[in]  i_phy       Phy to read/write XRAM
+/// @param[in]  i_bytes     Read/write size (bytes)
 ///
 /// @return FAPI_RC_SUCCESS if 8-byte aligned, else error code
 ///
-    fapi2::ReturnCode validateXramAccessParms(const uint32_t i_offset,
-            const xramIopTopNum_t i_top,
-            const xramPhyNum_t i_phy);
+    fapi2::ReturnCode validateXramAccessParms(
+        const fapi2::Target < fapi2::TARGET_TYPE_PEC |
+        fapi2::TARGET_TYPE_MULTICAST > & i_target,
+        const uint32_t i_offset,
+        const xramIopTopNum_t i_top,
+        const xramPhyNum_t i_phy,
+        const uint32_t i_bytes);
 
 ///
 /// @brief Perform PHYs reset

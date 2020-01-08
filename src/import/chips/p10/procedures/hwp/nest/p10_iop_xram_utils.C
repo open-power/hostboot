@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -65,16 +66,25 @@ fapi2::buffer<uint64_t> getXramAddress(const uint32_t i_offset)
 
 /// ############################################################
 /// See doxygen in header file
-fapi2::ReturnCode validateXramAccessParms(const uint32_t i_offset,
-        const xramIopTopNum_t i_top,
-        const xramPhyNum_t i_phy)
+fapi2::ReturnCode validateXramAccessParms(
+    const fapi2::Target < fapi2::TARGET_TYPE_PEC |
+    fapi2::TARGET_TYPE_MULTICAST > & i_target,
+    const uint32_t i_offset,
+    const xramIopTopNum_t i_top,
+    const xramPhyNum_t i_phy,
+    const uint32_t i_bytes)
 {
+    fapi2::ATTR_CHIP_EC_FEATURE_PARTIAL_IOP_XRAM_ACCESS_ALLOWED_Type l_partialAllowed;
+    // Get the proc target
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_proc = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+
     // Validate offset is within range and 8-byte aligned
     FAPI_ASSERT( (i_offset < MAX_XRAM_IMAGE_SIZE) &&
                  (!(i_offset & 0x7)),
                  fapi2::P10_IOP_XRAM_OFFSET_ERROR().set_OFFSET(i_offset),
                  "validateXramAccessParms: XRAM offset must be < 32K and 8-byte aligned: Offset 0x%.16llX.",
                  i_offset);
+
     // Validate Top and Phy numbers
     FAPI_ASSERT( (i_top <= 1) && (i_phy <= 1),
                  fapi2::P10_IOP_TOP_PHY_ERROR()
@@ -82,6 +92,17 @@ fapi2::ReturnCode validateXramAccessParms(const uint32_t i_offset,
                  .set_XRAM_PHY(i_phy),
                  "validateXramAccessParms: XRAM Iop_top and/or Phy values are invalid. i_top %d, i_phy %d.",
                  i_top, i_phy);
+
+    // Validate read/write size: Must write full XRAM (32K) if DD1.0
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_PARTIAL_IOP_XRAM_ACCESS_ALLOWED,
+                           l_proc, l_partialAllowed),
+             "Error getting the ATTR_CHIP_EC_FEATURE_PARTIAL_IOP_XRAM_ACCESS_ALLOWED");
+    FAPI_ASSERT( (l_partialAllowed && i_bytes <= MAX_XRAM_IMAGE_SIZE) ||
+                 (i_bytes == MAX_XRAM_IMAGE_SIZE),
+                 fapi2::P10_IOP_XRAM_ACCESS_SIZE_ERROR()
+                 .set_ACCESS_SIZE(i_bytes),
+                 "validateXramAccessParms: Access size (%u) is invalid.", i_bytes);
+
 fapi_try_exit:
     return fapi2::current_err;
 }

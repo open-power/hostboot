@@ -37,6 +37,7 @@
 //  Includes
 // -----------------------------------------------------------------------------
 #include <p10_qme_sram_access.H>
+#include <p10_pm_sram_access_utils.H>
 #include <multicast_group_defs.H>
 #include "p10_scom_eq.H"
 
@@ -51,7 +52,6 @@ const uint32_t QSCR_SRAM_ACCESS_MODE_BIT = 0;
 // These really should come from hcd_common RTC 210851
 const uint32_t QME_SRAM_SIZE = 64 * 1024;
 const uint32_t QME_SRAM_BASE_ADDR = 0xFFFF0000;
-
 
 // -----------------------------------------------------------------------------
 //  Loal Functions
@@ -74,31 +74,50 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-
-
 // -----------------------------------------------------------------------------
 //  Function definitions
 // -----------------------------------------------------------------------------
 
-/// See doxygen in header file
-fapi2::ReturnCode p10_qme_sram_access(
+/// @brief Internal function that that read/write data from/to the targetted
+///        QME's SRAM array.
+///
+/// @param [in]  i_qme_target         EQ target
+/// @param [in]  i_start_address      Start Address is between 0xFFFF80000 and 0xFFFFFFFF and must be 8B aligned
+/// @param [in]  i_length             i_useByteBuffer = true : Length in bytes
+///                                                     false: Length in double words
+/// @param [in]  i_operation          Access operation to perform (GET/PUT/)
+/// @param [out] io_data              In/Output Data pointer
+/// @param [out] o_num_accessed       i_useByteBuffer = true : Number of byte accessed
+///                                                     false: Number of double words accessed
+/// @param [in]  i_useByteBuffer      true: data buffer is byte wide
+///                                   false: data buffer is word wide.
+///
+/// @return fapi2::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode p10_qme_sram_access_internal(
     const fapi2::Target < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > & i_qme_target,
     const uint32_t i_start_address,
-    const uint32_t i_length_dword,
+    const uint32_t i_length,
     const qmesram::Op i_operation,
-    uint64_t*      io_data,
-    uint32_t&      o_dwords_accessed)
+    uint64_t*  io_data,
+    uint32_t&  o_num_accessed,
+    const bool i_useByteBuf = false)
 {
+    FAPI_DBG("> p10_qme_sram_access_internal - i_useByteBuf %d", i_useByteBuf);
+
     fapi2::buffer<uint64_t> l_data64;
     fapi2::buffer<uint64_t> l_qsar;
     qmesram::Op     l_op;
 
     // These are initialized before being used.
     // Not doing an initial assignment to 0 to save space on the SBE.
-    uint32_t        l_norm_address;
-    uint32_t        l_words_to_access;
+    uint32_t l_norm_address;
+    uint32_t l_words_to_access = i_length;
 
-    FAPI_DBG("> p10_qme_sram_access");
+    if (i_useByteBuf)
+    {
+        l_words_to_access = i_length % 8 ? (i_length >> 3) + 1 : i_length >> 3; // 64-bit len
+    }
 
     // Ensure the address is between 0xFFFF0000 and 0xFFFFFFFF.
     // No need to check the upper limit, since that will overflow the uint32_t data type.
@@ -127,18 +146,14 @@ fapi2::ReturnCode p10_qme_sram_access(
     FAPI_TRY(fapi2::putScom(i_qme_target, QME_QSAR, l_qsar));
 
     // Compute the number of words
-    if ((l_norm_address + i_length_dword * 8) > QME_SRAM_SIZE)
+    if ((l_norm_address + l_words_to_access * 8) > QME_SRAM_SIZE)
     {
         l_words_to_access = (QME_SRAM_SIZE - l_norm_address) / 8;
-    }
-    else
-    {
-        l_words_to_access = i_length_dword;
     }
 
     // o_dwords_accessed will indicate the number of words successfully accessed.
     // Increment after each access.
-    o_dwords_accessed = 0;
+    o_num_accessed = 0;
 
     // This switch is here to allow for each switching between auto-increment
     // and non-autoincrement (NOAUTOINC) modes.
@@ -173,8 +188,8 @@ fapi2::ReturnCode p10_qme_sram_access(
                 FAPI_DBG("   Get auto Address = 0x%016llX", l_data64);
 
                 FAPI_TRY(fapi2::getScom(i_qme_target, QME_QSDR, l_data64));
-                io_data[x] = l_data64();
-                o_dwords_accessed++;
+                loadDataToBuffer(i_useByteBuf, l_data64(), &io_data[x]);
+                o_num_accessed++;
             }
 
             break;
@@ -193,8 +208,8 @@ fapi2::ReturnCode p10_qme_sram_access(
                 FAPI_DBG("   Get no auto Address = 0x%016llX", l_data64);
 
                 FAPI_TRY(fapi2::getScom(i_qme_target, QME_QSDR, l_data64));
-                io_data[x] = l_data64();
-                o_dwords_accessed++;
+                loadDataToBuffer(i_useByteBuf, l_data64(), &io_data[x]);
+                o_num_accessed++;
                 l_qsar += 0x0000000800000000;
                 FAPI_TRY(fapi2::putScom(i_qme_target, QME_QSAR, l_qsar));
             }
@@ -212,10 +227,9 @@ fapi2::ReturnCode p10_qme_sram_access(
             for (uint32_t x = 0; x < l_words_to_access; x++)
             {
                 FAPI_TRY(qme_sram_read_qsar(i_qme_target));
-
-                l_data64() = io_data[x];
-                FAPI_TRY(fapi2::putScom(i_qme_target, QME_QSDR, l_data64));
-                o_dwords_accessed++;
+                getDataFromBuffer(i_useByteBuf, &io_data[x], l_data64());
+                FAPI_TRY(fapi2::putScom(i_qme_target, QME_QSDR, l_data64()));
+                o_num_accessed++;
             }
 
             break;
@@ -232,9 +246,9 @@ fapi2::ReturnCode p10_qme_sram_access(
             {
                 FAPI_TRY(qme_sram_read_qsar(i_qme_target));
 
-                l_data64() = io_data[x];
+                getDataFromBuffer(i_useByteBuf, &io_data[x], l_data64());
                 FAPI_TRY(fapi2::putScom(i_qme_target, QME_QSDR, l_data64));
-                o_dwords_accessed++;
+                o_num_accessed++;
                 l_qsar += 0x0000000800000000;
                 FAPI_TRY(fapi2::putScom(i_qme_target, QME_QSAR, l_qsar));
             }
@@ -242,7 +256,54 @@ fapi2::ReturnCode p10_qme_sram_access(
             break;
     }
 
+    // Number of bytes accessed
+    if (i_useByteBuf)
+    {
+        o_num_accessed = o_num_accessed * 8;
+    }
+
 fapi_try_exit:
-    FAPI_DBG("< p10_qme_sram_access");
+    FAPI_DBG("< p10_qme_sram_access_internal");
     return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// See doxygen in header file
+fapi2::ReturnCode p10_qme_sram_access(
+    const fapi2::Target < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > & i_qme_target,
+    const uint32_t i_start_address,
+    const uint32_t i_length_dword,
+    const qmesram::Op i_operation,
+    uint64_t*      io_data,
+    uint32_t&      o_dwords_accessed)
+{
+    FAPI_DBG("> p10_qme_sram_access");
+    return (p10_qme_sram_access_internal(
+                i_qme_target,
+                i_start_address,
+                i_length_dword,
+                i_operation,
+                io_data,
+                o_dwords_accessed));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// See doxygen in header file
+fapi2::ReturnCode p10_qme_sram_access_bytes(
+    const fapi2::Target < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > & i_qme_target,
+    const uint32_t i_start_address,
+    const uint32_t i_length_bytes,
+    const qmesram::Op i_operation,
+    uint8_t*      io_data,
+    uint32_t&     o_bytes_accessed)
+{
+    FAPI_DBG("> p10_qme_sram_access_bytes");
+    return  (p10_qme_sram_access_internal(
+                 i_qme_target,
+                 i_start_address,
+                 i_length_bytes,
+                 i_operation,
+                 reinterpret_cast<uint64_t*>(io_data),
+                 o_bytes_accessed,
+                 true));  // Byte buffer
 }

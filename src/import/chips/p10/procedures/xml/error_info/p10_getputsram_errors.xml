@@ -1,12 +1,11 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_read_write_iop_xram_errors.xml $ -->
+<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_getputsram_errors.xml $ -->
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
 <!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
-<!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
@@ -26,11 +25,15 @@
 <!-- ******************************************************************** -->
 <hwpError>
   <sbeError/>
-  <rc>RC_P10_IOP_XRAM_OFFSET_ERROR</rc>
+  <rc>RC_P10_GETSRAM_TARGET_NOT_FUNCTIONAL_ERROR</rc>
   <description>
-    XRAM offset must be less than 32K and 8-byte aligned.
+    Requested pervasive chiplet ID not functional on target chip
   </description>
+  <ffdc>PROC_TARGET</ffdc>
+  <ffdc>PERV_CHIPLET_ID</ffdc>
+  <ffdc>MODE</ffdc>
   <ffdc>OFFSET</ffdc>
+  <ffdc>BYTES</ffdc>
   <callout>
     <target>CODE</target>
     <priority>HIGH</priority>
@@ -39,12 +42,16 @@
 <!-- ******************************************************************** -->
 <hwpError>
   <sbeError/>
-  <rc>RC_P10_IOP_TOP_PHY_ERROR</rc>
+  <rc>RC_P10_PUTSRAM_TARGET_NOT_FUNCTIONAL_ERROR</rc>
   <description>
-   Invalid iop_top and/or Phy num to access XRAM.
+    Requested pervasive chiplet ID not functional on target chip
   </description>
-  <ffdc>IOP_TOP</ffdc>
-  <ffdc>XRAM_PHY</ffdc>
+  <ffdc>PROC_TARGET</ffdc>
+  <ffdc>PERV_CHIPLET_ID</ffdc>
+  <ffdc>MULTICAST</ffdc>
+  <ffdc>MODE</ffdc>
+  <ffdc>OFFSET</ffdc>
+  <ffdc>BYTES</ffdc>
   <callout>
     <target>CODE</target>
     <priority>HIGH</priority>
@@ -53,11 +60,14 @@
 <!-- ******************************************************************** -->
 <hwpError>
   <sbeError/>
-  <rc>RC_P10_IOP_XRAM_ACCESS_SIZE_ERROR</rc>
+  <rc>RC_P10_INVALID_OCC_ACCESS_MODE_ERROR</rc>
   <description>
-   Invalid IOP XRAM access size. Must access full 32K bytes.
+    Invalid OCC SRAM access mode.
+    Mode expected: 1 = Normal; 2 = Debug; 3 = Circular.
   </description>
-  <ffdc>ACCESS_SIZE</ffdc>
+  <ffdc>PROC_TARGET</ffdc>
+  <ffdc>PERV_CHIPLET_ID</ffdc>
+  <ffdc>OCC_MODE</ffdc>
   <callout>
     <target>CODE</target>
     <priority>HIGH</priority>

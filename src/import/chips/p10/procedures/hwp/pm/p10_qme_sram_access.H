@@ -71,6 +71,14 @@ typedef fapi2::ReturnCode (*p10_qme_sram_access_FP_t) (
     uint64_t*,
     uint32_t&);
 
+typedef fapi2::ReturnCode (*p10_qme_sram_access_bytes_FP_t) (
+    const fapi2::Target < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > &,
+    const uint32_t,
+    const uint32_t,
+    const qmesram::Op,
+    uint8_t*,
+    uint32_t&);
+
 extern "C" {
 
 // -----------------------------------------------------------------------------
@@ -82,8 +90,6 @@ extern "C" {
 
 /// @brief Display data from the targetted QME's SRAM array.
 ///
-/// High-level procedure flow:
-///
 ///  Procedure Prereq:
 ///     - System clocks are running
 ///     - QME to display is enabled and unfenced
@@ -92,9 +98,9 @@ extern "C" {
 /// @param [in]  i_qme_target         EQ target
 /// @param [in]  i_start_address      Start Address is between 0xFFFF80000 and 0xFFFFFFFF and must be 8B aligned
 /// @param [in]  i_length_dword       Length in dwords (# of accesses)
-/// @param [in]  i_operation          Access operatio to perform (GET/PUT/)
-/// @param [out] o_data               Output Data
-/// @param [out] o_dwords_read        Number of actual words in the output buffer.
+/// @param [in]  i_operation          Access operation to perform (GET/PUT/)
+/// @param [out] io_data              In/Output Data
+/// @param [out] o_dwords_accessed    Number of actual double words read/write
 ///
 /// @retval FAPI2_RC_SUCCESS
 /// @retval RC_PROCPM_GPE_CODE_BAD_MODE
@@ -104,7 +110,31 @@ extern "C" {
         const uint32_t i_length_dword,
         const qmesram::Op i_operation,
         uint64_t* o_data,
-        uint32_t& o_dwords_read);
+        uint32_t& o_dwords_accessed);
+
+/// @brief Display data from the targetted QME's SRAM array using byte buffer.
+///
+///  Procedure Prereq:
+///     - System clocks are running
+///     - QME to display is enabled and unfenced
+///  Note that the address does not wrap if the length + starting address exceeds the maximum address
+///
+/// @param [in]  i_qme_target         EQ target
+/// @param [in]  i_start_address      Start Address is between 0xFFFF80000 and 0xFFFFFFFF and must be 8B aligned
+/// @param [in]  i_length_byte        Length in bytes
+/// @param [in]  i_operation          Access operation to perform (GET/PUT/)
+/// @param [out] io_data              In/Output Data
+/// @param [out] o_bytes_accessed     Number of actual bytes read/write
+///
+/// @retval FAPI2_RC_SUCCESS
+/// @retval RC_PROCPM_GPE_CODE_BAD_MODE
+    fapi2::ReturnCode p10_qme_sram_access_bytes(
+        const fapi2::Target < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > & i_qme_target,
+        const uint32_t i_start_address,
+        const uint32_t i_length_bytes,
+        const qmesram::Op i_operation,
+        uint8_t* io_data,
+        uint32_t& o_bytes_accessed);
 
 /// @}  end addtogroup
 
