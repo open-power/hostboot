@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,9 +41,9 @@ void clearPendingSbeMsgs()
 {
     TRACFCOMP(g_trac_targeting, ENTER_MRK"clearPendingSbeMsgs");
 
-    // @TODO RTC: 244854
+    // @TODO RTC: 244854  Come back to this once sbeio_rt is enabled
     // Uncomment this as part of runtime enablement work
-    //errlHndl_t l_errl = nullptr;
+    // errlHndl_t l_errl = nullptr;
     do
     {
         //get runtime interfaces

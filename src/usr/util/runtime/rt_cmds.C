@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -777,9 +777,12 @@ int cmd_reload_pm_complex( char*& o_output, uint64_t stopAt )
 {
     // NOTE: this is running in a 32K hbrt -exec stack instead of
     //       the normal 64K hbrt stack
+    int rc = 0;
+
+// @TODO: RTC 244854 Re-enable, when can
+#if 0
     o_output = new char[100*8];
     char l_tmpstr[100];
-    int rc = 0;
 
     sprintf(o_output, "cmd_reload_pm_complex >>\n");
     UTIL_FT("cmd_reload_pm_complex >>");
@@ -946,7 +949,7 @@ int cmd_reload_pm_complex( char*& o_output, uint64_t stopAt )
     sprintf(l_tmpstr, "<< cmd_reload_pm_complex\n");
     strcat(o_output, l_tmpstr);
     UTIL_FT("<< cmd_reload_pm_complex");
-
+#endif
     return rc;
 }
 

@@ -46,15 +46,15 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 # Re-enable other objects below and replace P9 HWPs with
 # p10 HWPs above when runtime is fully enabled
 OBJS += utilbase.o
-#OBJS += utilstream.o
-#OBJS += utilmem.o
+OBJS += utilstream.o
+OBJS += utilmem.o
 OBJS += utillidmgr_rt.o
-#OBJS += utilfile.o
+OBJS += utilfile.o
 OBJS += utillidpnor.o
-#OBJS += rt_cmds.o
+OBJS += rt_cmds.o
 OBJS += util_rt.o
 OBJS += utilrsvdmem.o
-#OBJS += utilxipimage.o
+OBJS += utilxipimage.o
 #OBJS += utilcommonattr.o
 OBJS += rt_fwnotify.o
 OBJS += rt_fwreq_helper.o

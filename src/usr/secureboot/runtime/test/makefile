@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2019
+# Contributors Listed Below - COPYRIGHT 2016,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -24,14 +24,11 @@
 # IBM_PROLOG_END_TAG
 
 HOSTBOOT_RUNTIME = 1
-
 ROOTPATH = ../../../../..
+MODULE = testsecureboot_rt
 
 CFLAGS += -iquote${ROOTPATH}/src/usr/secureboot
 
-MODULE = testsecureboot_rt
-
-# FIXME RTC: 210975
-#TESTS = *.H
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk

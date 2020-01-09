@@ -92,7 +92,7 @@ uint16_t SeqId_t::getCurrentSeqId()
  **/
 void sbeAttemptRecovery(uint64_t i_data)
 {
-// TODO: RTC 244854 Re-enable call below, when can
+// @TODO: RTC 244854 Re-enable call below, when can
 #if 0
 
    // Create a useful struct to get to the data
@@ -345,7 +345,7 @@ void logGardEvent(const hostInterfaces::gard_event_t& i_gardEvent)
                        i_gardEvent.i_sub_unit_mask,
                        i_gardEvent.i_recovery_level);
 
-// TODO: RTC 244854 Re-enable call below, when can
+// @TODO: RTC 244854 Re-enable call below, when can
 #if 0
     errlHndl_t l_err{nullptr};
 

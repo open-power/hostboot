@@ -35,8 +35,7 @@ MODULE = fapi2_rt
 # include common objects between hostboot and runtime hostboot
 include ../fapi2.mk
 
-# FIXME RTC: 210975
-#SUBDIRS += test.d
+SUBDIRS += test.d
 
 VPATH += ..
 

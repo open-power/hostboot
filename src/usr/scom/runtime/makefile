@@ -33,8 +33,7 @@ OBJS += rt_scom.o
 # include common ojects between hostboot and runtime hostboot
 include ../scom.mk
 
-# FIXME RTC: 210975
-#SUBDIRS += test.d
+SUBDIRS += test.d
 
 VPATH += ..
 

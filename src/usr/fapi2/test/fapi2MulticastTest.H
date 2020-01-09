@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -168,6 +168,8 @@ void testMulticastSetup()
 
 void testMulticastWriteOp()
 {
+// @TODO: RTC 244854: This is broke for run time testing, enable when can.
+#ifndef __HOSTBOOT_RUNTIME
     TARGETING::TargetHandle_t l_proc = nullptr;
     TARGETING::targetService().masterProcChipTargetHandle(l_proc);
     assert(l_proc, "testMulticastWriteOp: master proc handle is nullptr");
@@ -340,6 +342,7 @@ void testMulticastWriteOp()
     }
 
     } while(0);
+#endif
 }
 
 void testMulticastWriteOpBadParam()
@@ -458,6 +461,8 @@ void testMulticastWriteOpBadParam()
 
 void testMulticastReadOr()
 {
+// @TODO: RTC 244854: This is broke for run time testing, enable when can.
+#ifndef __HOSTBOOT_RUNTIME
     TARGETING::TargetHandle_t l_proc = nullptr;
     TARGETING::targetService().masterProcChipTargetHandle(l_proc);
     assert(l_proc, "testMulticastReadOr: master proc handle is nullptr");
@@ -581,10 +586,13 @@ void testMulticastReadOr()
     }
 
     }while(0);
+#endif
 }
 
 void testMulticastReadAnd()
 {
+// @TODO: RTC 244854: This is broke for run time testing, enable when can.
+#ifndef __HOSTBOOT_RUNTIME
     TARGETING::TargetHandle_t l_proc = nullptr;
     TARGETING::targetService().masterProcChipTargetHandle(l_proc);
     assert(l_proc, "testMulticastReadAnd: master proc handle is nullptr");
@@ -749,10 +757,13 @@ void testMulticastReadAnd()
     }
 
     } while(0);
+#endif
 }
 
 void testMulticastCoreSelect()
 {
+// @TODO: RTC 244854: This is broke for run time testing, enable when can.
+#ifndef __HOSTBOOT_RUNTIME
     TARGETING::TargetHandle_t l_proc = nullptr;
     TARGETING::targetService().masterProcChipTargetHandle(l_proc);
     assert(l_proc, "testMulticastCoreSelect: master proc handle is nullptr");
@@ -912,10 +923,13 @@ void testMulticastCoreSelect()
         break;
     }
     } while(0);
+#endif
 }
 
 void testMulticastCompare()
 {
+// @TODO: RTC 244854: This is broke for run time testing, enable when can.
+#ifndef __HOSTBOOT_RUNTIME
     TARGETING::TargetHandle_t l_proc = nullptr;
     errlHndl_t l_errl = nullptr;
     const uint32_t TEST_SCOM_WRITE_ADDR = 0x20000000; // CPLT_CTRL0
@@ -1115,6 +1129,7 @@ void testMulticastCompare()
     {
         errlCommit(l_errl, CXXTEST_COMP_ID);
     }
+#endif
 }
 
 }; //class FapiMulticastTest

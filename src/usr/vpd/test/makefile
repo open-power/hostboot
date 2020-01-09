@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2019
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -22,17 +22,10 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
 ROOTPATH = ../../../..
-
 MODULE = testvpd
-# TESTS = *.H
 
-# Failing all tests:
-# mvpdtest.H
-# Failing tests, not able to find DIMMs
-# spdtest.H
-
-TESTS = dimmPrestest.H
-
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk

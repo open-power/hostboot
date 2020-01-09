@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,70 +74,70 @@ mvpdTestData mvpdData[] =
     //    { MVPD::CP00, MVPD::PK }, // no PK in test data
     { MVPD::CP00, MVPD::pdR },
     { MVPD::CP00, MVPD::pdG },
-    { MVPD::CP00, MVPD::pdV },
+//    { MVPD::CP00, MVPD::pdV },  (REC 0x01, KEY 0x08) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
     { MVPD::CP00, MVPD::SB },
-    { MVPD::CP00, MVPD::PB },
+//    { MVPD::CP00, MVPD::PB },   (REC 0x01, KEY 0x1A) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
     { MVPD::CP00, MVPD::AW },
     { MVPD::LRP0, MVPD::VD },
-    { MVPD::LRP0, MVPD::pdV },
-    { MVPD::LRP0, MVPD::pdM },
-    { MVPD::LRP0, MVPD::CH },
+//    { MVPD::LRP0, MVPD::pdV },  (REC 0x03, KEY 0x08) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
+//    { MVPD::LRP0, MVPD::pdM },  (REC 0x03, KEY 0x16) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
+//    { MVPD::LRP0, MVPD::CH },   (REC 0x03, KEY 0x1B) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
     { MVPD::LRP1, MVPD::VD },
-    { MVPD::LRP1, MVPD::pdV },
-    { MVPD::LRP1, MVPD::pdM },
-    { MVPD::LRP1, MVPD::CH },
+//    { MVPD::LRP1, MVPD::pdV },  (REC 0x04, KEY 0x08) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
+//    { MVPD::LRP1, MVPD::pdM },  (REC 0x04, KEY 0x16) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
+//    { MVPD::LRP1, MVPD::CH },   (REC 0x04, KEY 0x1B) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
     { MVPD::LRP2, MVPD::VD },
-    { MVPD::LRP2, MVPD::pdV },
-    { MVPD::LRP2, MVPD::pdM },
-    { MVPD::LRP2, MVPD::CH },
+//    { MVPD::LRP2, MVPD::pdV },  (REC 0x05, KEY 0x08) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
+//    { MVPD::LRP2, MVPD::pdM },  (REC 0x05, KEY 0x16) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
+//    { MVPD::LRP2, MVPD::CH },   (REC 0x05, KEY 0x1B) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
     { MVPD::LRP3, MVPD::VD },
-    { MVPD::LRP3, MVPD::pdV },
-    { MVPD::LRP3, MVPD::pdM },
-    { MVPD::LRP3, MVPD::CH },
+//    { MVPD::LRP3, MVPD::pdV },  (REC 0x06, KEY 0x08) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
+//    { MVPD::LRP3, MVPD::pdM },  (REC 0x06, KEY 0x16) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
+//    { MVPD::LRP3, MVPD::CH },   (REC 0x06, KEY 0x1B) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
     { MVPD::LRP4, MVPD::VD },
-    { MVPD::LRP4, MVPD::pdV },
-    { MVPD::LRP4, MVPD::pdM },
-    { MVPD::LRP4, MVPD::CH },
+//    { MVPD::LRP4, MVPD::pdV },  (REC 0x07, KEY 0x08) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
+//    { MVPD::LRP4, MVPD::pdM },  (REC 0x07, KEY 0x16) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
+//    { MVPD::LRP4, MVPD::CH },   (REC 0x07, KEY 0x1B) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
     { MVPD::LRP5, MVPD::VD },
-    { MVPD::LRP5, MVPD::pdV },
-    { MVPD::LRP5, MVPD::pdM },
-    { MVPD::LRP5, MVPD::CH },
+//    { MVPD::LRP5, MVPD::pdV },  (REC 0x08, KEY 0x08) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
+//    { MVPD::LRP5, MVPD::pdM },  (REC 0x08, KEY 0x16) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
+//    { MVPD::LRP5, MVPD::CH },   (REC 0x08, KEY 0x1B) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
     { MVPD::LWP0, MVPD::VD },
     { MVPD::LWP0, MVPD::n20 },
     { MVPD::LWP0, MVPD::n21 },
     { MVPD::LWP0, MVPD::n30 },
     { MVPD::LWP0, MVPD::n31 },
-    { MVPD::LWP0, MVPD::IN },
+//    { MVPD::LWP0, MVPD::IN },   (REC 0x09, KEY 0x17) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
     { MVPD::LWP1, MVPD::VD },
     { MVPD::LWP1, MVPD::n20 },
     { MVPD::LWP1, MVPD::n21 },
     { MVPD::LWP1, MVPD::n30 },
     { MVPD::LWP1, MVPD::n31 },
-    { MVPD::LWP1, MVPD::IN },
+//    { MVPD::LWP1, MVPD::IN },   (REC 0x0A, KEY 0x17) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
     { MVPD::LWP2, MVPD::VD },
     { MVPD::LWP2, MVPD::n20 },
     { MVPD::LWP2, MVPD::n21 },
     { MVPD::LWP2, MVPD::n30 },
     { MVPD::LWP2, MVPD::n31 },
-    { MVPD::LWP2, MVPD::IN },
+//    { MVPD::LWP2, MVPD::IN },   (REC 0x0B, KEY 0x17) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
     { MVPD::LWP3, MVPD::VD },
     { MVPD::LWP3, MVPD::n20 },
     { MVPD::LWP3, MVPD::n21 },
     { MVPD::LWP3, MVPD::n30 },
     { MVPD::LWP3, MVPD::n31 },
-    { MVPD::LWP3, MVPD::IN },
+//    { MVPD::LWP3, MVPD::IN },   (REC 0x0C, KEY 0x17) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
     { MVPD::LWP4, MVPD::VD },
     { MVPD::LWP4, MVPD::n20 },
     { MVPD::LWP4, MVPD::n21 },
     { MVPD::LWP4, MVPD::n30 },
     { MVPD::LWP4, MVPD::n31 },
-    { MVPD::LWP4, MVPD::IN },
+//    { MVPD::LWP4, MVPD::IN },   (REC 0x0D, KEY 0x17) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
     { MVPD::LWP5, MVPD::VD },
     { MVPD::LWP5, MVPD::n20 },
     { MVPD::LWP5, MVPD::n21 },
     { MVPD::LWP5, MVPD::n30 },
     { MVPD::LWP5, MVPD::n31 },
-    { MVPD::LWP5, MVPD::IN },
+//    { MVPD::LWP5, MVPD::IN },   (REC 0x0E, KEY 0x17) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
     { MVPD::VINI, MVPD::DR },
     { MVPD::VINI, MVPD::VZ },
     { MVPD::VINI, MVPD::CC },
@@ -471,12 +471,16 @@ class MVPDTest: public CxxTest::TestSuite
                        fails, cmds );
         }
 
-
+// @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
+#if 0
         /**
          * @brief This function will test MVPD writes.
          */
-        void testMvpdWrite ( void )
+        void disabled_testMvpdWrite ( void )
         {
+            auto l_record  = MVPD::VWML;
+            auto l_keyword = MVPD::pdI;
+
             errlHndl_t err = NULL;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
@@ -502,7 +506,7 @@ class MVPDTest: public CxxTest::TestSuite
                 err = deviceRead( theTarget,
                                   testData,
                                   theSize,
-                                  DEVICE_MVPD_ADDRESS(MVPD::VWML,MVPD::pdI) );
+                                  DEVICE_MVPD_ADDRESS(l_record, l_keyword) );
                 if( err )
                 {
                     fails++;
@@ -521,7 +525,7 @@ class MVPDTest: public CxxTest::TestSuite
                 err = deviceRead( theTarget,
                                   origData,
                                   theSize,
-                                  DEVICE_MVPD_ADDRESS(MVPD::VWML,MVPD::pdI) );
+                                  DEVICE_MVPD_ADDRESS(l_record, l_keyword) );
                 if( err )
                 {
                     fails++;
@@ -548,7 +552,7 @@ class MVPDTest: public CxxTest::TestSuite
                 err = deviceWrite( theTarget,
                                    testData,
                                    theSize,
-                                   DEVICE_MVPD_ADDRESS(MVPD::VWML,MVPD::pdI) );
+                                   DEVICE_MVPD_ADDRESS(l_record, l_keyword) );
 
                 if( err )
                 {
@@ -568,7 +572,7 @@ class MVPDTest: public CxxTest::TestSuite
                 err = deviceRead( theTarget,
                                   verifyData,
                                   theSize,
-                                  DEVICE_MVPD_ADDRESS(MVPD::VWML,MVPD::pdI) );
+                                  DEVICE_MVPD_ADDRESS(l_record, l_keyword) );
                 if( err )
                 {
                     fails++;
@@ -599,7 +603,7 @@ class MVPDTest: public CxxTest::TestSuite
                 err = deviceWrite( theTarget,
                                    origData,
                                    theSize,
-                                   DEVICE_MVPD_ADDRESS(MVPD::VWML,MVPD::pdI) );
+                                   DEVICE_MVPD_ADDRESS(l_record, l_keyword) );
                 if( err )
                 {
                     fails++;
@@ -640,6 +644,7 @@ class MVPDTest: public CxxTest::TestSuite
                        "testMvpdWrite - %d/%d fails",
                        fails, cmds );
         }
+#endif
 
         /**
          * @brief This function will test that an error is generated when a
