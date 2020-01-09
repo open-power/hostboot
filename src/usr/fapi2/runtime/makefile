@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -30,15 +30,14 @@
 
 HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
-
 MODULE = fapi2_rt
 
-SUBDIRS += test.d
+# include common objects between hostboot and runtime hostboot
+include ../fapi2.mk
 
 # FIXME RTC: 210975
+#SUBDIRS += test.d
 
-#include ../fapi2.mk
+VPATH += ..
 
 include ${ROOTPATH}/config.mk
-
-#VPATH += ..

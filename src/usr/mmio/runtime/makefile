@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019
+# Contributors Listed Below - COPYRIGHT 2019,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -22,12 +22,14 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
 HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = mmio_rt
 
-#include unique object modules
+# add unique object modules
 OBJS += rt_mmio.o
 
 VPATH += ..
+
 include $(ROOTPATH)/config.mk

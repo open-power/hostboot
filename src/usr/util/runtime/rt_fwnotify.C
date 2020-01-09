@@ -33,11 +33,6 @@
 #include <targeting/common/target.H>       // TargetHandle_t, getTargetFromHuid
 #include <attributeenums.H>                // ATTRIBUTE_ID
 
-#ifdef CONFIG_NVDIMM
-#include <isteps/nvdimm/nvdimm.H>  // notify NVDIMM protection change
-#include <targeting/common/utilFilter.H>
-#endif
-
 using namespace TARGETING;
 using namespace RUNTIME;
 using namespace ERRORLOG;
@@ -52,7 +47,7 @@ extern trace_desc_t* g_trac_hbrt;
  * @brief The lower and upper bounds for the sequence ID.
  **/
 const uint16_t SEQ_ID_MIN = 0x0000;
-const uint16_t SEQ_ID_MAX =  0x7FFF;
+const uint16_t SEQ_ID_MAX = 0x7FFF;
 
 /**
  * @brief Set the sequence ID to the minimum value
@@ -253,39 +248,7 @@ void occActiveNotification( void * i_data )
 
     TRACFCOMP(g_trac_runtime, ENTER_MRK"occActiveNotification: 0x%02X", *l_active);
 
-#ifdef CONFIG_NVDIMM
-    errlHndl_t l_err = nullptr;
-
-    TargetHandleList l_procList;
-    getAllChips(l_procList, TYPE_PROC);
-
-    // Now send msg to PHYP notifying them if OCC is protecting the NVDIMMs
-    for (auto & l_proc : l_procList)
-    {
-        if (*l_active)
-        {
-            l_err = NVDIMM::notifyNvdimmProtectionChange(l_proc,
-                                                         NVDIMM::PROTECTED);
-        }
-        else
-        {
-            l_err = NVDIMM::notifyNvdimmProtectionChange(l_proc,
-                                                         NVDIMM::NOT_PROTECTED);
-        }
-
-        // commit error if it exists
-        // continue notification to all functional processors
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_runtime,
-                      ERR_MRK"occActiveNotification: 0x%02X - 0x%.8X processor",
-                      *l_active, TARGETING::get_huid(l_proc));
-
-            errlCommit(l_err, RUNTIME_COMP_ID);
-            l_err = nullptr;
-        }
-    }
-#endif
+    TRACFCOMP(g_trac_runtime, EXIT_MRK"occActiveNotification");
 }
 
 /**
@@ -381,6 +344,7 @@ void logGardEvent(const hostInterfaces::gard_event_t& i_gardEvent)
                        i_gardEvent.i_plid,
                        i_gardEvent.i_sub_unit_mask,
                        i_gardEvent.i_recovery_level);
+
 // TODO: RTC 244854 Re-enable call below, when can
 #if 0
     errlHndl_t l_err{nullptr};

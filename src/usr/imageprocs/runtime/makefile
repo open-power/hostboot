@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2019
+# Contributors Listed Below - COPYRIGHT 2018,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -22,15 +22,14 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
 HOSTBOOT_RUNTIME = 1
-
 ROOTPATH = ../../../..
-
 MODULE = imageprocs_rt
 
-# FIXME RTC: 210975
-#VPATH += ../
+# include common objects between hostboot and runtime hostboot
+include ../imageprocs.mk
 
-#include ../imageprocs.mk
+VPATH += ../
 
 include ${ROOTPATH}/config.mk

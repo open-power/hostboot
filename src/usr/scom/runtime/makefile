@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2019
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -22,18 +22,20 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
 HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = scom_rt
 
+# add unique object modules
+OBJS += rt_scom.o
+
+# include common ojects between hostboot and runtime hostboot
+include ../scom.mk
+
 # FIXME RTC: 210975
-#include common ojects between hostboot and runtime hostboot
-#include ../scom.mk
+#SUBDIRS += test.d
 
-#include unique object modules
-#OBJS += rt_scom.o
+VPATH += ..
 
-SUBDIRS += test.d
-
-#VPATH += ..
 include $(ROOTPATH)/config.mk

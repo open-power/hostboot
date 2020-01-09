@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,7 +31,7 @@
 #include <initservice/initserviceif.H>
 #include <devicefw/driverif.H>
 #include <runtime/interface.h>            // g_hostInterfaces
-#include <util/runtime/rt_fwreq_helper.H>      // firmware_request_helper
+#include <util/runtime/rt_fwreq_helper.H> // firmware_request_helper
 #include <targeting/common/util.H>
 #include <util/runtime/util_rt.H>
 #include <runtime/rt_targeting.H>

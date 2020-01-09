@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2019
+# Contributors Listed Below - COPYRIGHT 2018,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -22,14 +22,16 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
 HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = fsiscom_rt
 
-# FIXME RTC: 210975
+# add unique object modules
+OBJS += rt_fsiscom.o
 
-#OBJS += rt_fsiscom.o
+EXTRAINCDIR += ${ROOTPATH}/src/usr/diag/prdf
 
-EXTRAINCDIR += ${ROOTPATH}/src/usr/diag/prdf/
-#VPATH += ..
+VPATH += ..
+
 include $(ROOTPATH)/config.mk

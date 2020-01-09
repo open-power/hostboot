@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2019
+# Contributors Listed Below - COPYRIGHT 2016,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -22,16 +22,17 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
 HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = fsi_rt
 
-# FIXME RTC: 210975
-
-#OBJS += rt_fsi.o
-#OBJS += fsi_common.o
+# add unique object modules
+OBJS += rt_fsi.o
+OBJS += fsi_common.o
 
 EXTRAINCDIR += ${ROOTPATH}/src/usr/fsi
 
-#VPATH += ../
+VPATH += ..
+
 include $(ROOTPATH)/config.mk

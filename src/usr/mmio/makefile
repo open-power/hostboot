@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2019
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -28,11 +28,11 @@ MODULE = mmio
 SUBDIRS += test.d
 SUBDIRS += runtime.d
 
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 
-# FIXME RTC: 210975
+# FIXME RTC: 210975 mmio.C has references to p9a_mc_scom_addresses.H
 
 #include unique object modules
 #OBJS += mmio.o

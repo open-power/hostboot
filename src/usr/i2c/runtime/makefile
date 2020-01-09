@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2019
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -23,19 +23,18 @@
 #
 # IBM_PROLOG_END_TAG
 # common objects with runtime
+
 HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = i2c_rt
 
-# FIXME RTC: 210975
+# include common objects between hostboot and runtime hostboot
+include ../i2c.mk
 
-#include common objects between hostboot and runtime hostboot
-#include ../i2c.mk
+# add unique object modules
+OBJS += rt_i2c.o
+OBJS += $(if $(CONFIG_SUPPORT_EEPROM_CACHING),rt_eepromCache.o)
 
-#add unique object modules
-#OBJS += rt_i2c.o
-#OBJS += $(if $(CONFIG_SUPPORT_EEPROM_CACHING),rt_eepromCache.o)
-#VPATH += ..
+VPATH += ..
 
 include $(ROOTPATH)/config.mk
-

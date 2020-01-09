@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2019
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -23,20 +23,20 @@
 #
 # IBM_PROLOG_END_TAG
 # common objects with runtime
+
 HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = vpd_rt
 
-# TODO RTC: 210975
-#include common objects between hostboot and runtime hostboot
-#include ../vpd.mk
+# include common objects between hostboot and runtime hostboot
+include ../vpd.mk
 
-#add unique object modules
-#OBJS += rt_vpd.o
+# add unique object modules
+OBJS += rt_vpd.o
 
 SUBDIRS += test.d
 
-#VPATH += ..
+VPATH += ..
 CFLAGS += -iquote ../
 
 include $(ROOTPATH)/config.mk

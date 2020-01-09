@@ -308,29 +308,30 @@ RUNTIME_MODULES += errl_rt
 RUNTIME_MODULES += targeting_rt
 RUNTIME_MODULES += util_rt
 RUNTIME_MODULES += devicefw_rt
-#RUNTIME_MODULES += xscom_rt
-#RUNTIME_MODULES += fsiscom_rt
-#RUNTIME_MODULES += scom_rt
-#RUNTIME_MODULES += vpd_rt
-#RUNTIME_MODULES += i2c_rt
+RUNTIME_MODULES += pnor_rt
+RUNTIME_MODULES += secureboot_rt
+RUNTIME_MODULES += fapi2_rt    # ~/src/usr/fapi2/runtime/
+RUNTIME_MODULES += fsi_rt      # ~/src/usr/fsi/runtime
+RUNTIME_MODULES += fsiscom_rt  # ~/src/usr/fsiscom/runtime
+RUNTIME_MODULES += imageprocs_rt # ~/src/usr/imageprocs/runtime
+RUNTIME_MODULES += i2c_rt      # ~/src/usr/i2c/runtime/
+RUNTIME_MODULES += mmio_rt     # ~/src/usr/mmio/runtime;
+RUNTIME_MODULES += scom_rt     # ~/src/usr/scom/runtime/
+RUNTIME_MODULES += vpd_rt      # ~/src/usr/vpd/runtime/
+RUNTIME_MODULES += xscom_rt    # ~/src/usr/xscom/runtime/
+#RUNTIME_MODULES += pm_rt
 #RUNTIME_MODULES += $(if $(CONFIG_HTMGT),htmgt_rt)
 #RUNTIME_MODULES += $(if $(CONFIG_HBRT_PRD),attn_rt)
 #RUNTIME_MODULES += $(if $(CONFIG_HBRT_PRD),prdf_rt)
 #RUNTIME_MODULES += $(if $(CONFIG_BMC_IPMI),ipmi_rt)
-#RUNTIME_MODULES += pm_rt
-RUNTIME_MODULES += pnor_rt
-#RUNTIME_MODULES += fapi2_rt
-RUNTIME_MODULES += secureboot_rt
 #RUNTIME_MODULES += p9_cpuWkup
-#RUNTIME_MODULES += fsi_rt
 #RUNTIME_MODULES += sbeio_rt
 #RUNTIME_MODULES += tod_rt
 #RUNTIME_MODULES += nestmemutils
-#RUNTIME_MODULES += imageprocs_rt
 #RUNTIME_MODULES += $(if $(CONFIG_NVDIMM),nvdimm_rt)
-#RUNTIME_MODULES += mss_rt
 #RUNTIME_MODULES += expaccess_rt
-#RUNTIME_MODULES += mmio_rt
+#RUNTIME_MODULES += mss_rt
+
 
 # This is exported so that gcov knows the list of runtime modules to
 # exclude from instrumentation. We can't simply export RUNTIME_MODULES or
