@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -54,6 +54,35 @@
 </attribute>
 
 <!-- **************************************************
+        Attributes for HTM STOP Filter
+     ************************************************** -->
+<attribute>
+  <id>ATTR_HTMSC_FILT_STOP_ON_MATCH</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: enable stop on match and program stop PAT and MASK.
+  </description>
+  <valueType>uint8</valueType>
+  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_FILT_STOP_CYCLES</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: Stop on match: number of cycles before HTM stops.
+                The Stop Cycles field specifies, in 64 cycle increments, how
+                many cycles past the filter match to wait before generating the
+                local stop trigger. The maximum delay is 8128 cycles
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<!-- **************************************************
      Attributes for HTM TTYPE Filter Control Register
      ************************************************** -->
 <attribute>
@@ -88,7 +117,7 @@
   <id>ATTR_HTMSC_TTYPEFILT_MASK</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description> Nest HTM: TTYPE pattern mask.
-                If mask bit is clear to 0, then do not need to match w/ the pattern.
+                Pattern matching will apply only to bits set in this attribute.
                 If all mask bits are clear, no TTYPE pattern/masking is done.
                 The inversion of this attribute value will be programmed into
                 bits 17:23 of HTM Ttype Filter Control Register.
@@ -103,7 +132,7 @@
   <id>ATTR_HTMSC_TSIZEFILT_MASK</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description> Nest HTM: TSIZE pattern mask.
-                If mask bit is clear to 0, then do not need to match w/ the pattern.
+                Pattern matching will apply only to bits set in this attribute.
                 If all mask bits are clear, no TSIZE pattern/masking is done.
                 The inversion of this attribute value will be programmed into
                 bits 24:31 of HTM Ttype Filter Control Register.
@@ -147,30 +176,118 @@
 </attribute>
 
 <!-- **************************************************
+        Attributes for HTM Address Filter Register
+     ************************************************** -->
+<attribute>
+  <id>ATTR_HTMSC_FILT_ADDR_PAT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: Address filter pattern.
+                HTM Addr Filter Control Register (0:55)
+                In Fabric trace mode, defines the Address patter to match.
+  </description>
+  <valueType>uint64</valueType>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_FILT_ADDR_MASK</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: Address filter mask
+                HTM Addr Filter Control Register (0:55)
+                Pattern matching will apply only to bits set in this attribute.
+                If all mask bits are clear, no ADDR pattern masking is done.
+                the inversion of this attribute value will be programmed into
+                bits (0:63) of HTM Filter Address Mask Register.
+  </description>
+  <valueType>uint64</valueType>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<!-- **************************************************
         Attributes for HTM Filter Control Register
      ************************************************** -->
 <attribute>
-  <id>ATTR_HTMSC_FILT_PAT</id>
+  <id>ATTR_HTMSC_FILT_TTAG_PAT</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description> Nest HTM: Filter Pattern.
-                HTM Filter Control Register (0:22).
+                HTM Filter Control Register (0:14).
                 In Fabric trace mode, defines the TTAG/Scope/Source pattern to
                 match in the RCMD and CRESP:
-                    0:3   rcmd_ttag(0:2) Group ID Pattern for rcmd and cresp
-                          filtering.
-                    4:6   rcmd_ttag(3:5) Chip ID Pattern for rcmd and cresp
-                          filtering.
-                    7:16  rcmd_ttag(6:13) Unit ID Pattern for rcmd and cresp
-                          (if from this chip) filtering.
-                    17:19 rcmd_scope(0:2) Scope Pattern for rcmd and cresp
-                          filtering.
-                    20:21 rcmd_source(0:1) Source Pattern for rcmd filtering.
-                    22    Powerbus PORT pattern for rcmd and cresp filtering.
-                 In OCC trace mode, defines the occ_trace_data(0:22) pattern
-                 to match:
-                    0:22  occ_trace_data(0:22) pattern.
   </description>
   <valueType>uint32</valueType>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_FILT_OCC_PAT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: Filter Pattern.
+                HTM Filter Control Register (0:31).
+                In OCC trace mode, defines the OCC pattern to match.
+  </description>
+  <valueType>uint32</valueType>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_FILT_SCOPE_PAT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: Filter Pattern.
+                HTM Filter Control Register (17:19).
+                In Fabric trace mode, defines the TTAG/Scope/Source pattern to
+                match in the RCMD and CRESP:
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_FILT_SOURCE_PAT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: Filter Pattern.
+                HTM Filter Control Register (20:21).
+                In Fabric trace mode, defines the TTAG/Scope/Source pattern to
+                match in the RCMD and CRESP:
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_FILT_PORT_PAT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: Filter Pattern.
+                HTM Filter Control Register (25:25).
+                In Fabric trace mode, defines the TTAG/Scope/Source pattern to
+                match in the RCMD and CRESP:
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_TTAGFILT_INVERT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: Filter Pattern invert.
+                HTM Filter Control Register (26:26).
+                In Fabric trace mode, invert ttag filter meaning (invert match signal)
+  </description>
+  <valueType>uint8</valueType>
+  <enum> MATCH = 0x0, NOT_MATCH = 0x1 </enum>
   <initToZero/>
   <writeable/>
   <persistRuntime/>
@@ -189,28 +306,90 @@
 </attribute>
 
 <attribute>
-  <id>ATTR_HTMSC_FILT_MASK</id>
+  <id>ATTR_HTMSC_FILT_TTAG_MASK</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description> Nest HTM FABRIC: Pattern mask.
-                HTM Filter Control Register (32:54).
-                Bits clear to 0 in this mask do not need to match with the
-                Filter Pattern.
+                HTM Filter Control Register (32:46).
+                Pattern matching will apply only to bits set in this attribute.
                 If all bits are clear, no pattern/masking is done and all
                 Cresp/rcmd are captured in Fabric trace mode and all
                 OCC commands are captured in OCC mode.
                 The inversion of this attribute value will be programmed into
-                bits 32:54 of HTM Ttype Filter Control Register.
-                In Fabric Trace Mode:
-                 32:35: rcmd_ttag(0:3) Group ID Mask
-                 36:38: rcmd_ttag(4:6) Chip ID Mask
-                 39:48: rcmd_ttag(7:16) Unit ID Pattern
-                 49:51: rcmd_scope(0:2) Mask
-                 52:53: rcmd_source(0:1) Mask
-                 54in the : PowerBus PORT MASK (for rcmd and cresp filtering0
-                 In OCC Trace Mode
-                 32:54 occ_trace_data(0:22) Mask
+                bits 32:46 of HTM Ttype Filter Control Register.
   </description>
   <valueType>uint32</valueType>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_FILT_OCC_MASK</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM FABRIC: Pattern mask.
+                HTM Filter Control Register (32:63).
+                Pattern matching will apply only to bits set in this attribute.
+                If all bits are clear, no pattern/masking is done and all
+                Cresp/rcmd are captured in Fabric trace mode and all
+                OCC commands are captured in OCC mode.
+                The inversion of this attribute value will be programmed into
+                bits 47:48 and 55:58 of HTM Ttype Filter Control Register.
+  </description>
+  <valueType>uint32</valueType>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_FILT_SCOPE_MASK</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM FABRIC: Pattern mask.
+                HTM Filter Control Register (49:51).
+                Pattern matching will apply only to bits set in this attribute.
+                If all bits are clear, no pattern/masking is done and all
+                Cresp/rcmd are captured in Fabric trace mode and all
+                OCC commands are captured in OCC mode.
+                The inversion of this attribute value will be programmed into
+                bits 49:51 of HTM Ttype Filter Control Register.
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_FILT_SOURCE_MASK</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM FABRIC: Pattern mask.
+                HTM Filter Control Register (52:53).
+                Pattern matching will apply only to bits set in this attribute.
+                If all bits are clear, no pattern/masking is done and all
+                Cresp/rcmd are captured in Fabric trace mode and all
+                OCC commands are captured in OCC mode.
+                The inversion of this attribute value will be programmed into
+                bits 52:53 of HTM Ttype Filter Control Register.
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_FILT_PORT_MASK</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM FABRIC: Pattern mask.
+                HTM Filter Control Register (54:54).
+                Pattern matching will apply only to bits set in this attribute.
+                If all bits are clear, no pattern/masking is done and all
+                Cresp/rcmd are captured in Fabric trace mode and all
+                OCC commands are captured in OCC mode.
+                The inversion of this attribute value will be programmed into
+                bits 54:54 of HTM Ttype Filter Control Register.
+  </description>
+  <valueType>uint8</valueType>
   <initToZero/>
   <writeable/>
   <persistRuntime/>
@@ -221,8 +400,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description> Nest HTM FABRIC: CRESP Filter Mask.
                 HTM Filter Control Register (59:63).
-                If mask bit is clear to 0, then do not need to match w/ the CRESP
-                Filter pattern.
+                Pattern matching will apply only to bits set in this attribute.
                 If all mask bits are clear, no pattern matching is done.
                 The inversion of this attribute value will be programmed into
                 bits 59:63 of HTM Ttype Filter Control Register.

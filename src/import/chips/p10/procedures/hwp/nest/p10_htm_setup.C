@@ -52,7 +52,7 @@
 ///----------------------------------------------------------------------------
 /// Constants
 ///----------------------------------------------------------------------------
-const uint64_t IMA_EVENT_MASK_VALUE                            = 0x0004008000000000;
+const uint64_t IMA_EVENT_MASK_VALUE   = 0x0004008000000000;
 
 ///----------------------------------------------------------------------------
 /// Struct HTM_CTRL_attrs_t
@@ -73,8 +73,7 @@ struct HTM_CTRL_attrs_t
     ///
     /// @return FAPI2_RC_SUCCESS if success, else error code.
     ///
-    fapi2::ReturnCode getAttrs(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+    fapi2::ReturnCode getAttrs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
     // --------------------------------------
     // Attributes to setup HTM_CTRL reg
@@ -179,6 +178,169 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///----------------------------------------------------------------------------
+/// Struct HTM_FILT_attrs_t
+///----------------------------------------------------------------------------
+///
+/// @struct HTM_FILT_attrs_t
+/// Contains all filter related attributes required to setup the HTM filters
+/// The CHTMs do not have filtering capabilities.
+///
+struct HTM_FILT_attrs_t
+{
+    ///
+    /// @brief getAttrs
+    /// Function that reads all attributes needed to program HTM_FILT regs.
+    ///
+    /// @param[in] i_target    Reference to processor chip target
+    ///
+    /// @return FAPI2_RC_SUCCESS if success, else error code.
+    ///
+    fapi2::ReturnCode getAttrs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+
+    // --------------------------------------
+    // Attributes to setup HTM_FILT registers
+    // --------------------------------------
+    uint8_t iv_filtStopOnMatch;          // ATTR_HTMSC_FILT_STOP_ON_MATCH
+    uint8_t iv_filtCrespPat;             // ATTR_HTMSC_FILT_CRESP_PAT
+    uint8_t iv_filtScopePat;             // ATTR_HTMSC_FILT_SCOPE_PAT
+    uint8_t iv_filtSourcePat;            // ATTR_HTMSC_FILT_SOURCE_PAT
+    uint8_t iv_filtPortPat;              // ATTR_HTMSC_FILT_PORT_PAT
+    uint8_t iv_filtCrespMask;            // ATTR_HTMSC_FILT_CRESP_MASK
+    uint8_t iv_filtScopeMask;            // ATTR_HTMSC_FILT_SCOPE_MASK
+    uint8_t iv_filtSourceMask;           // ATTR_HTMSC_FILT_SOURCE_MASK
+    uint8_t iv_filtPortMask;             // ATTR_HTMSC_FILT_PORT_MASK
+    uint8_t iv_filtFiltInvert;           // ATTR_HTMSC_FILT_TTAGFILT_INVERT
+    uint8_t iv_filtTtypePat;             // ATTR_HTMSC_TTYPEFILT_TTYPE_PAT
+    uint8_t iv_filtTtypeMask;            // ATTR_HTMSC_TTYPEFILT_TTYPE_MASK
+    uint8_t iv_filtTsizePat;             // ATTR_HTMSC_TTYPEFILT_TSIZE_PAT
+    uint8_t iv_filtTsizeMask;            // ATTR_HTMSC_TTYPEFILT_TSIZE_MASK
+    uint8_t iv_filtTtypeFiltInvert;      // ATTR_HTMSC_TTYPEFILT_INVERT
+    uint8_t iv_filtCrespFiltInvert;      // ATTR_HTMSC_CRESPFILT_INVERT
+    uint8_t iv_filtStopCycles;          // ATTR_HTMSC_FILT_STOP_CYCLES
+    uint32_t iv_filtTtagPat;             // ATTR_HTMSC_FILT_TTAG_PAT
+    uint32_t iv_filtTtagMask;            // ATTR_HTMSC_FILT_TTAG_MASK
+    uint64_t iv_filtAddrPat;             // ATTR_HTMSC_FILT_ADDR_PAT
+    uint64_t iv_filtAddrMask;            // ATTR_HTMSC_FILT_ADDR_MASK
+};
+
+// See doxygen in struct definition.
+fapi2::ReturnCode HTM_FILT_attrs_t::getAttrs(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_DBG("Entering");
+    fapi2::ReturnCode l_rc;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_STOP_ON_MATCH, i_target, iv_filtStopOnMatch),
+             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_STOP_ON_MATCH, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_STOP_CYCLES, i_target, iv_filtStopCycles),
+             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_STOP_CYCLES, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_TTAG_PAT, i_target, iv_filtTtagPat),
+             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_TTAG_PAT, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_TTAG_MASK, i_target, iv_filtTtagMask),
+             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_TTAG_MASK, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+
+    // NOTE: TTYPE is in the same reg as the CRESP,TTAG,etc for STOP filters
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_CRESP_PAT, i_target, iv_filtCrespPat),
+             "setup_NHTM_CRESP_FILT: Error getting ATTR_HTMSC_FILT_CRESP_PAT, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_SCOPE_PAT, i_target, iv_filtScopePat),
+             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_SCOPE_PAT, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_SOURCE_PAT, i_target, iv_filtSourcePat),
+             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_SOURCE_PAT, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_PORT_PAT, i_target, iv_filtPortPat),
+             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_PORT_PAT, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_SCOPE_MASK, i_target, iv_filtScopeMask),
+             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_SCOPE_MASK, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_SOURCE_MASK, i_target, iv_filtSourceMask),
+             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_SOURCE_MASK, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_PORT_MASK, i_target, iv_filtPortMask),
+             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_PORT_MASK, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_CRESP_MASK, i_target, iv_filtCrespMask),
+             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_CRESP_MASK, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_TTAGFILT_INVERT, i_target, iv_filtFiltInvert),
+             "setup_NHTM_FILT: Error getting ATTR_HTMSC_TTAGFILT_INVERT, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_ADDR_PAT, i_target, iv_filtAddrPat),
+             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_ADDR_PAT, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_ADDR_MASK, i_target, iv_filtAddrMask),
+             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_ADDR_MASK, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_TTYPEFILT_PAT, i_target, iv_filtTtypePat),
+             "setup_NHTM_TTYPE_FILT: Error getting ATTR_HTMSC_TTYPEFILT_PAT, "
+             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_TSIZEFILT_PAT, i_target, iv_filtTsizePat),
+             "setup_NHTM_TTYPE_FILT: Error getting ATTR_HTMSC_TSIZEFILT_PAT, "
+             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_TTYPEFILT_MASK, i_target, iv_filtTtypeMask),
+             "setup_NHTM_TTYPE_FILT: Error getting ATTR_HTMSC_TTYPEFILT_MASK, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_TSIZEFILT_MASK, i_target, iv_filtTsizeMask),
+             "setup_NHTM_TTYPE_FILT: Error getting ATTR_HTMSC_TSIZEFILT_MASK, "
+             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_TTYPEFILT_INVERT, i_target, iv_filtTtypeFiltInvert),
+             "setup_NHTM_TTYPE_FILT: Error getting ATTR_HTMSC_TTYPEFILT_INVERT, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_CRESPFILT_INVERT, i_target, iv_filtCrespFiltInvert),
+             "setup_NHTM_TTYPE_FILT: Error getting ATTR_HTMSC_CRESPFILT_INVERT, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+
+    FAPI_DBG("  ATTR_HTMSC_FILT_TTAG_PAT          0x%.8X", iv_filtTtagPat);
+    FAPI_DBG("  ATTR_HTMSC_FILT_TTAG_MASK         0x%.8X", iv_filtTtagMask);
+    FAPI_DBG("  ATTR_HTMSC_FILT_CRESP_PAT         0x%.8X", iv_filtCrespPat);
+    FAPI_DBG("  ATTR_HTMSC_FILT_CRESP_MASK        0x%.8X", iv_filtCrespMask);
+    FAPI_DBG("  ATTR_HTMSC_FILT_SCOPE_PAT         0x%.8X", iv_filtScopePat);
+    FAPI_DBG("  ATTR_HTMSC_FILT_SCOPE_MASK        0x%.8X", iv_filtScopeMask);
+    FAPI_DBG("  ATTR_HTMSC_FILT_PORT_PAT          0x%.8X", iv_filtPortPat);
+    FAPI_DBG("  ATTR_HTMSC_FILT_PORT_MASK         0x%.8X", iv_filtPortMask);
+    FAPI_DBG("  ATTR_HTMSC_FILT_SOURCE_PAT        0x%.8X", iv_filtSourcePat);
+    FAPI_DBG("  ATTR_HTMSC_FILT_SOURCE_MASK       0x%.8X", iv_filtSourceMask);
+    FAPI_DBG("  ATTR_HTMSC_TTYPEFILT_PAT          0x%.8X", iv_filtTtypePat);
+    FAPI_DBG("  ATTR_HTMSC_TTYPEFILT_MASK         0x%.8X", iv_filtTtypeMask);
+    FAPI_DBG("  ATTR_HTMSC_TSIZEFILT_PAT          0x%.8X", iv_filtTsizePat);
+    FAPI_DBG("  ATTR_HTMSC_TSIZEFILT_MASK         0x%.8X", iv_filtTsizeMask);
+    FAPI_DBG("  ATTR_HTMSC_FILT_ADDR_PAT          0x%.16X", iv_filtAddrPat);
+    FAPI_DBG("  ATTR_HTMSC_FILT_ADDR_MASK         0x%.16X", iv_filtAddrMask);
+    FAPI_DBG("  ATTR_HTMSC_FILT_STOP_ON_MATCH     0x%.8X", iv_filtStopOnMatch);
+    FAPI_DBG("  ATTR_HTMSC_FILT_STOP_CYCLES       0x%.8X", iv_filtStopCycles);
+    FAPI_DBG("  ATTR_HTMSC_TTAGFILT_INVERT        0x%.8X", iv_filtFiltInvert);
+    FAPI_DBG("  ATTR_HTMSC_TTYPEFILT_INVERT       0x%.8X", iv_filtTtypeFiltInvert);
+    FAPI_DBG("  ATTR_HTMSC_CRESPFILT_INVERT       0x%.8X", iv_filtCrespFiltInvert);
+
+fapi_try_exit:
+    FAPI_DBG("Exiting");
+    return fapi2::current_err;
+}
 
 ///
 /// @brief This function sets up CHTM_PDBAR reg for CHTM.
@@ -274,132 +436,172 @@ fapi2::ReturnCode setup_NHTM_FILT(
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
     fapi2::buffer<uint64_t> l_nHTM_filt_data(0);
-    uint8_t l_uint8_attr = 0;
-    uint32_t l_uint32_attr = 0;
-
-    FAPI_TRY(PREP_PB_BRIDGE_NHTM_SC_HTM_FILT(i_target));
-
-    // ATTR_HTMSC_FILT_PAT
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_PAT, i_target,
-                           l_uint32_attr),
-             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_PAT, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_HTMSC_FILT_PAT        0x%.8X", l_uint32_attr);
-    SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_TTAG_PAT(l_uint32_attr, l_nHTM_filt_data);
-
-    // ATTR_HTMSC_FILT_CRESP_PAT
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_CRESP_PAT, i_target,
-                           l_uint8_attr),
-             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_CRESP_PAT, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_HTMSC_FILT_CRESP_PAT  0x%.8X", l_uint8_attr);
-    SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_CRESP_PAT(l_uint8_attr, l_nHTM_filt_data);
-
-    // ATTR_HTMSC_FILT_MASK
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_MASK, i_target,
-                           l_uint32_attr),
-             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_MASK, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_HTMSC_FILT_MASK       0x%.8X", l_uint32_attr);
-    SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_TTAG_MASK(~l_uint32_attr, l_nHTM_filt_data);
-
-    // ATTR_HTMSC_FILT_CRESP_MASK
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_CRESP_MASK, i_target,
-                           l_uint8_attr),
-             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_CRESP_MASK, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_HTMSC_FILT_CRESP_MASK 0x%.8X", l_uint8_attr);
-    SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_CRESP_MASK(~l_uint8_attr, l_nHTM_filt_data);
-
-    // Display NHTM_FILT reg setup value
-    FAPI_INF("setup_NHTM_FILT: NHTM_FILT reg setup: 0x%016llX", l_nHTM_filt_data);
-
-    // Write HW, program both NHTM0 and NHTM1, registers unified for P10
-    FAPI_TRY(PUT_PB_BRIDGE_NHTM_SC_HTM_FILT(i_target, l_nHTM_filt_data));
-
-fapi_try_exit:
-    FAPI_DBG("Exiting");
-    return fapi2::current_err;
-}
-
-
-///
-/// @brief This function sets up the NHTM_TTYPE_FILT based on attribute settings.
-///        It's used on FABRIC trace type only.
-///
-/// @param[in] i_target    Reference to processor chip target
-///
-/// @return FAPI2_RC_SUCCESS if success, else error code.
-///
-fapi2::ReturnCode setup_NHTM_TTYPE_FILT(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
-{
-    using namespace scomt;
-    using namespace scomt::proc;
-    FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
     fapi2::buffer<uint64_t> l_nHTM_t_filt_data(0);
-    uint8_t l_uint8_attr = 0;
+    fapi2::buffer<uint64_t> l_nHTM_filt_addr_data(0);
+    bool l_stop_on_match = 0;
+    uint8_t l_HTM_mode = 0;
+    uint32_t l_uint32_attr = 0;
+    uint64_t mask_dummy = 0xFFFFFFFFFFFFFFFF;
 
-    // Setup data value to program NHTM_TTYPE_FILT reg
-    FAPI_TRY(PREP_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT(i_target));
-
-    // ATTR_HTMSC_TTYPEFILT_PAT
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_TTYPEFILT_PAT, i_target,
-                           l_uint8_attr),
-             "setup_NHTM_TTYPE_FILT: Error getting ATTR_HTMSC_TTYPEFILT_PAT, "
+    // Only program OCC bits if OCC trace mode
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NHTM_HTMSC_MODE_CONTENT_SEL, i_target, l_HTM_mode),
+             "setup_NHTM_FILT: Error getting ATTR_NHTM_HTMSC_MODE_CAPTURE, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_HTMSC_TTYPEFILT_PAT        0x%.8X", l_uint8_attr);
-    SET_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT_TTYPEFILT_PAT(l_uint8_attr, l_nHTM_t_filt_data);
 
-    // ATTR_HTMSC_TSIZEFILT_PAT
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_TSIZEFILT_PAT, i_target,
-                           l_uint8_attr),
-             "setup_NHTM_TTYPE_FILT: Error getting ATTR_HTMSC_TSIZEFILT_PAT, "
-             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_HTMSC_TSIZEFILT_PAT        0x%.8X", l_uint8_attr);
-    SET_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT_TSIZEFILT_PAT(l_uint8_attr, l_nHTM_t_filt_data);
+    if (l_HTM_mode == fapi2::ENUM_ATTR_NHTM_HTMSC_MODE_CONTENT_SEL_OCC)
+    {
+        l_stop_on_match = false;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_OCC_PAT, i_target, l_uint32_attr),
+                 "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_OCC_PAT, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
+        l_nHTM_filt_data |= static_cast<uint64_t>(l_uint32_attr) << 32;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_OCC_MASK, i_target, l_uint32_attr),
+                 "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_OCC_MASK, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
+        l_nHTM_filt_data |= l_uint32_attr;
+        FAPI_TRY(PUT_PB_BRIDGE_NHTM_SC_HTM_FILT(i_target, l_nHTM_filt_data));
+    }
+    else if (l_HTM_mode == fapi2::ENUM_ATTR_NHTM_HTMSC_MODE_CONTENT_SEL_FABRIC)
+    {
+        HTM_FILT_attrs_t l_HTM_FILT;
+        FAPI_TRY(l_HTM_FILT.getAttrs(i_target),
+                 "l_HTM_FILT.getAttrs() returns an error, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
 
-    // Set ATTR_HTMSC_TTYPEFILT_MASK
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_TTYPEFILT_MASK, i_target,
-                           l_uint8_attr),
-             "setup_NHTM_TTYPE_FILT: Error getting ATTR_HTMSC_TTYPEFILT_MASK, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_HTMSC_TTYPEFILT_MASK       0x%.8X", l_uint8_attr);
-    SET_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT_TTYPEFILT_MASK(~l_uint8_attr, l_nHTM_t_filt_data);
+        l_stop_on_match = l_HTM_FILT.iv_filtStopOnMatch;
 
-    // ATTR_HTMSC_TSIZEFILT_MASK
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_TSIZEFILT_MASK, i_target,
-                           l_uint8_attr),
-             "setup_NHTM_TTYPE_FILT: Error getting ATTR_HTMSC_TSIZEFILT_MASK, "
-             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_HTMSC_TSIZEFILT_MASK       0x%.8X", l_uint8_attr);
-    SET_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT_TSIZEFILT_MASK(~l_uint8_attr, l_nHTM_t_filt_data);
+        if (l_stop_on_match)
+        {
+            FAPI_TRY(GET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER(i_target, l_nHTM_filt_data));
+            FAPI_TRY(GET_PB_BRIDGE_NHTM_SC_HTM_STOP_ADDR_PAT(i_target, l_nHTM_filt_addr_data));
 
-    // ATTR_HTMSC_TTYPEFILT_INVERT
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_TTYPEFILT_INVERT, i_target,
-                           l_uint8_attr),
-             "setup_NHTM_TTYPE_FILT: Error getting ATTR_HTMSC_TTYPEFILT_INVERT, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_HTMSC_TTYPEFILT_INVERT     0x%.8X", l_uint8_attr);
-    (l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_TTYPEFILT_INVERT_MATCH) ?
-    SET_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT_TTYPEFILT_INVERT(l_nHTM_t_filt_data) :
-    CLEAR_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT_TTYPEFILT_INVERT(l_nHTM_t_filt_data);
+            // Stop filter reg
+            SET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CYCLES(l_HTM_FILT.iv_filtStopCycles, l_nHTM_filt_data);
+            SET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_PAT(l_HTM_FILT.iv_filtTtagPat, l_nHTM_filt_data);
+            SET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_MASK(~l_HTM_FILT.iv_filtTtagMask, l_nHTM_filt_data);
+            SET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_PAT(l_HTM_FILT.iv_filtTtypePat, l_nHTM_filt_data);
+            SET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_MASK(~l_HTM_FILT.iv_filtTtypeMask, l_nHTM_filt_data);
+            SET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_PAT(l_HTM_FILT.iv_filtCrespPat, l_nHTM_filt_data);
+            SET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_MASK(~l_HTM_FILT.iv_filtCrespMask, l_nHTM_filt_data);
+            // Display NHTM_FILT reg setup value
+            FAPI_INF("setup_NHTM_FILT: NHTM_STOP_FILT reg setup: 0x%016llX", l_nHTM_filt_data);
+            FAPI_TRY(PUT_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER(i_target, l_nHTM_filt_data));
 
-    // ATTR_HTMSC_CRESPFILT_INVERT
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_CRESPFILT_INVERT, i_target,
-                           l_uint8_attr),
-             "setup_NHTM_TTYPE_FILT: Error getting ATTR_HTMSC_CRESPFILT_INVERT, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_HTMSC_CRESPFILT_INVERT     0x%.8X", l_uint8_attr);
-    (l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_CRESPFILT_INVERT_MATCH) ?
-    SET_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT_CRESPFILT_INVERT(l_nHTM_t_filt_data) :
-    CLEAR_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT_CRESPFILT_INVERT(l_nHTM_t_filt_data);
+            //Addr Pat
+            SET_PB_BRIDGE_NHTM_SC_HTM_STOP_ADDR_PAT_HTMSC_STOP_ADDR_PAT(l_HTM_FILT.iv_filtAddrPat, l_nHTM_filt_addr_data);
+            FAPI_INF("setup_NHTM_FILT: NHTM_STOP_ADDR_PAT reg setup: 0x%016llX", l_nHTM_filt_addr_data);
+            FAPI_TRY(PUT_PB_BRIDGE_NHTM_SC_HTM_STOP_ADDR_PAT(i_target, l_nHTM_filt_addr_data)) ;
+
+            // Addr Mask
+            FAPI_TRY(GET_PB_BRIDGE_NHTM_SC_HTM_STOP_ADDR_MASK(i_target, l_nHTM_filt_addr_data));
+            SET_PB_BRIDGE_NHTM_SC_HTM_STOP_ADDR_MASK_HTMSC_STOP_ADDR_MASK(~l_HTM_FILT.iv_filtAddrMask, l_nHTM_filt_addr_data);
+            FAPI_INF("setup_NHTM_FILT: NHTM_STOP_ADDR_MASK reg setup: 0x%016llX", l_nHTM_filt_addr_data);
+            FAPI_TRY(PUT_PB_BRIDGE_NHTM_SC_HTM_STOP_ADDR_MASK(i_target, l_nHTM_filt_addr_data));
+
+        }
+        else
+        {
+            // Filt Reg
+            FAPI_TRY(GET_PB_BRIDGE_NHTM_SC_HTM_FILT(i_target, l_nHTM_filt_data));
+            SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_TTAG_PAT(l_HTM_FILT.iv_filtTtagPat, l_nHTM_filt_data);
+            SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_TTAG_MASK(~l_HTM_FILT.iv_filtTtagMask, l_nHTM_filt_data);
+            SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_CRESP_PAT(l_HTM_FILT.iv_filtCrespPat, l_nHTM_filt_data);
+            SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_SCOPE_PAT(l_HTM_FILT.iv_filtScopePat, l_nHTM_filt_data);
+            SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_SOURCE_PAT(l_HTM_FILT.iv_filtSourcePat, l_nHTM_filt_data);
+            SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_PORT_PAT(l_HTM_FILT.iv_filtPortPat, l_nHTM_filt_data);
+            SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_SCOPE_MASK(~l_HTM_FILT.iv_filtScopeMask, l_nHTM_filt_data);
+            SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_SOURCE_MASK(~l_HTM_FILT.iv_filtSourceMask, l_nHTM_filt_data);
+            SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_PORT_MASK(~l_HTM_FILT.iv_filtPortMask, l_nHTM_filt_data);
+            SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_CRESP_MASK(~l_HTM_FILT.iv_filtCrespMask, l_nHTM_filt_data);
+            SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_OCC15TO16_MASK((mask_dummy & 0x3), l_nHTM_filt_data);
+            SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_OCC23TO26_MASK((mask_dummy & 0xF), l_nHTM_filt_data);
+
+            (l_HTM_FILT.iv_filtFiltInvert == fapi2::ENUM_ATTR_HTMSC_TTAGFILT_INVERT_MATCH) ?
+            CLEAR_PB_BRIDGE_NHTM_SC_HTM_FILT_TTAGFILT_INVERT(l_nHTM_filt_data) :
+            SET_PB_BRIDGE_NHTM_SC_HTM_FILT_TTAGFILT_INVERT(l_nHTM_filt_data);
+
+            // Display NHTM_FILT reg setup value
+            FAPI_INF("setup_NHTM_FILT: NHTM_FILT reg setup: 0x%016llX", l_nHTM_filt_data);
+            FAPI_TRY(PUT_PB_BRIDGE_NHTM_SC_HTM_FILT(i_target, l_nHTM_filt_data));
+
+            //Addr Pat
+            FAPI_TRY(GET_PB_BRIDGE_NHTM_SC_HTM_ADDR_PAT(i_target, l_nHTM_filt_addr_data));
+            SET_PB_BRIDGE_NHTM_SC_HTM_ADDR_PAT_HTMSC_FILT_ADDR_PAT(l_HTM_FILT.iv_filtAddrPat, l_nHTM_filt_addr_data);
+            FAPI_INF("setup_NHTM_FILT: NHTM_STOP_ADDR_PAT reg setup: 0x%016llX", l_nHTM_filt_addr_data);
+            FAPI_TRY(PUT_PB_BRIDGE_NHTM_SC_HTM_ADDR_PAT(i_target, l_nHTM_filt_addr_data));
+
+            //Addr Mask
+            FAPI_TRY(GET_PB_BRIDGE_NHTM_SC_HTM_ADDR_MASK(i_target, l_nHTM_filt_addr_data));
+            SET_PB_BRIDGE_NHTM_SC_HTM_ADDR_MASK_HTMSC_FILT_ADDR_MASK(~l_HTM_FILT.iv_filtAddrMask, l_nHTM_filt_addr_data);
+            FAPI_INF("setup_NHTM_FILT: NHTM_STOP_ADDR_MASK reg setup: 0x%016llX", l_nHTM_filt_addr_data);
+            FAPI_TRY(PUT_PB_BRIDGE_NHTM_SC_HTM_ADDR_MASK(i_target, l_nHTM_filt_addr_data));
+
+            //Ttype Filt reg
+            FAPI_TRY(PREP_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT(i_target));
+            SET_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT_TTYPEFILT_PAT(l_HTM_FILT.iv_filtTtypePat, l_nHTM_t_filt_data);
+            SET_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT_TSIZEFILT_PAT(l_HTM_FILT.iv_filtTsizePat, l_nHTM_t_filt_data);
+            SET_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT_TTYPEFILT_MASK(~l_HTM_FILT.iv_filtTtypeMask, l_nHTM_t_filt_data);
+            SET_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT_TSIZEFILT_MASK(~l_HTM_FILT.iv_filtTsizeMask, l_nHTM_t_filt_data);
+
+            (l_HTM_FILT.iv_filtTtypeFiltInvert == fapi2::ENUM_ATTR_HTMSC_TTYPEFILT_INVERT_MATCH) ?
+            CLEAR_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT_TTYPEFILT_INVERT(l_nHTM_t_filt_data) :
+            SET_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT_TTYPEFILT_INVERT(l_nHTM_t_filt_data);
+
+            (l_HTM_FILT.iv_filtCrespFiltInvert == fapi2::ENUM_ATTR_HTMSC_CRESPFILT_INVERT_MATCH) ?
+            CLEAR_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT_CRESPFILT_INVERT(l_nHTM_t_filt_data) :
+            SET_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT_CRESPFILT_INVERT(l_nHTM_t_filt_data);
+
+            // Display NHTM_TTYPE_FILT reg setup value
+            FAPI_INF("setupNhtm: NHTM_TTYPE_FILT reg setup: 0x%016llX", l_nHTM_t_filt_data);
+            FAPI_TRY(PUT_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT(i_target, l_nHTM_t_filt_data));
+
+
+        }
+
+    }
+
+    // Mask filters of registers not programmed
+    l_nHTM_filt_data = 0;
+    l_nHTM_filt_addr_data = 0;
 
     // Display NHTM_TTYPE_FILT reg setup value
-    FAPI_INF("setupNhtm: NHTM_TTYPE_FILT reg setup: 0x%016llX", l_nHTM_t_filt_data);
+    FAPI_INF("Masking unneeded filt regs:");
 
-    FAPI_TRY(PUT_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT(i_target, l_nHTM_t_filt_data));
+    // Mask appropriate registers
+    if (l_stop_on_match)
+    {
+        FAPI_TRY(PREP_PB_BRIDGE_NHTM_SC_HTM_FILT(i_target));
+        SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_TTAG_MASK  (mask_dummy, l_nHTM_filt_data);
+        SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_SCOPE_MASK (mask_dummy, l_nHTM_filt_data);
+        SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_SOURCE_MASK(mask_dummy, l_nHTM_filt_data);
+        SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_PORT_MASK  (mask_dummy, l_nHTM_filt_data);
+        SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_CRESP_MASK (mask_dummy, l_nHTM_filt_data);
+        SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_OCC15TO16_MASK(mask_dummy, l_nHTM_filt_data);
+        SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_OCC23TO26_MASK(mask_dummy, l_nHTM_filt_data);
+
+        FAPI_TRY(PUT_PB_BRIDGE_NHTM_SC_HTM_FILT(i_target, l_nHTM_filt_data));
+
+        FAPI_TRY(PREP_PB_BRIDGE_NHTM_SC_HTM_ADDR_MASK(i_target));
+        SET_PB_BRIDGE_NHTM_SC_HTM_ADDR_MASK_HTMSC_FILT_ADDR_MASK(mask_dummy, l_nHTM_filt_addr_data);
+        FAPI_TRY(PUT_PB_BRIDGE_NHTM_SC_HTM_ADDR_MASK(i_target, l_nHTM_filt_addr_data));
+
+        FAPI_TRY(PREP_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT(i_target));
+        SET_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT_TTYPEFILT_MASK(mask_dummy, l_nHTM_t_filt_data);
+        SET_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT_TSIZEFILT_MASK(mask_dummy, l_nHTM_t_filt_data);
+        FAPI_TRY(PUT_PB_BRIDGE_NHTM_SC_HTM_TTYPEFILT(i_target, l_nHTM_t_filt_data));
+    }
+    else
+    {
+        FAPI_TRY(PREP_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER (i_target));
+        SET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTAG_MASK (mask_dummy, l_nHTM_filt_data);
+        SET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_TTYPE_MASK(mask_dummy, l_nHTM_filt_data);
+        SET_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER_CRESP_MASK(mask_dummy, l_nHTM_filt_data);
+        FAPI_TRY(PUT_PB_BRIDGE_NHTM_SC_HTM_STOP_FILTER(i_target, l_nHTM_filt_data));
+
+        FAPI_TRY(PREP_PB_BRIDGE_NHTM_SC_HTM_STOP_ADDR_MASK(i_target));
+        SET_PB_BRIDGE_NHTM_SC_HTM_STOP_ADDR_MASK_HTMSC_STOP_ADDR_MASK(mask_dummy, l_nHTM_filt_addr_data);
+        FAPI_TRY(PUT_PB_BRIDGE_NHTM_SC_HTM_STOP_ADDR_MASK(i_target, l_nHTM_filt_addr_data));
+    }
 
 fapi_try_exit:
     FAPI_DBG("Exiting");
@@ -1132,7 +1334,7 @@ fapi2::ReturnCode setup_HTM_queues(
     fapi2::ReturnCode l_rc;
     uint8_t l_numHtmQueues[NUM_MCC_PER_PROC];
     fapi2::buffer<uint64_t> l_mc_data(0);
-    auto l_miChiplets = i_target.getChildren<fapi2::TARGET_TYPE_MI>();
+    auto l_miChiplets = i_target.getChildren<fapi2::TARGET_TYPE_MCC>();
 
     // Get ATTR_HTM_QUEUES
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTM_QUEUES, i_target, l_numHtmQueues),
@@ -1227,14 +1429,6 @@ extern "C" {
             FAPI_TRY(setup_NHTM_FILT(i_target),
                      "setup_NHTM_FILT() returns an error, l_rc 0x%.8X",
                      (uint64_t)fapi2::current_err);
-
-            // 6. Setup NHTM_TTYPE_FILT reg (FABRIC trace type only)
-            if (l_nhtmType == fapi2::ENUM_ATTR_NHTM_TRACE_TYPE_FABRIC)
-            {
-                FAPI_TRY(setup_NHTM_TTYPE_FILT(i_target),
-                         "setup_NHTM_TTYPE_FILT() returns an error, l_rc 0x%.8X",
-                         (uint64_t)fapi2::current_err);
-            }
         }
 
         // ----------------------------------------------
