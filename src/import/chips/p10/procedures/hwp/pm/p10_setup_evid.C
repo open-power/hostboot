@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -161,7 +161,8 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         if(attrs.attr_avs_bus_num[VDD] != INVALID_BUS_NUM &&
            attrs.attr_avs_bus_num[VCS] != INVALID_BUS_NUM)
         {
-            FAPI_INF("Setting Boot voltage values for VDD and VCS");
+            FAPI_INF("Setting Boot voltage values for VDD (%d mv) and VCS (%d mv)",
+                     attrs.attr_boot_voltage_mv[VDD], attrs.attr_boot_voltage_mv[VCS]);
             FAPI_TRY(update_VDD_VCS_voltage(i_target,
                                             attrs.attr_avs_bus_num,
                                             attrs.attr_avs_bus_rail_select,
@@ -192,7 +193,7 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         {
             if (attrs.attr_boot_voltage_mv[VDN])
             {
-                FAPI_INF("Setting Boot voltage value for VDN");
+                FAPI_INF("Setting Boot voltage value for VDN (%d mv)", attrs.attr_boot_voltage_mv[VDN]);
                 FAPI_TRY(p10_setup_evid_voltageWrite(i_target,
                                                      attrs.attr_avs_bus_num[VDN],
                                                      attrs.attr_avs_bus_rail_select[VDN],
@@ -219,7 +220,7 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         {
             if (attrs.attr_boot_voltage_mv[VIO])
             {
-                FAPI_INF("Setting Boot voltage value for VDN");
+                FAPI_INF("Setting Boot voltage value for VIO (%d mv)", attrs.attr_boot_voltage_mv[VIO]);
                 FAPI_TRY(p10_setup_evid_voltageWrite(i_target,
                                                      attrs.attr_avs_bus_num[VIO],
                                                      attrs.attr_avs_bus_rail_select[VIO],
@@ -247,7 +248,6 @@ p10_setup_evid_voltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
                            const uint8_t* i_bus_num,
                            const uint8_t* i_rail_select,
                            uint32_t* o_voltage_mv)
-
 {
     uint8_t     l_goodResponse = 0;
     uint8_t     l_throwAssert = true;
@@ -342,6 +342,7 @@ p10_setup_evid_voltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         }
         while (!l_goodResponse);
 
+        FAPI_DBG("%s voltage read: %d mv", &rail_str, l_present_voltage_mv);
         o_voltage_mv[i_evid_value] = l_present_voltage_mv;
     } //end of for
 
@@ -457,6 +458,7 @@ p10_setup_evid_voltageWrite(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
                  "Initializing avsBus VDD/VDN, bridge %d", BRIDGE_NUMBER);
     }
 
+    FAPI_INF("Present voltage for %s is %d mV", rail_str, i_present_voltage_mv);
     FAPI_INF("Setting voltage for %s to %d mV", rail_str, i_voltage_mv);
 
     // Drive AVS Bus with a frame value 0xFFFFFFFF (idle frame) to
@@ -472,12 +474,14 @@ p10_setup_evid_voltageWrite(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
     }
     else if (l_delta_mv < 0)
     {
-        FAPI_INF("Increasing voltage - delta = %d", l_delta_mv );
+        FAPI_INF("Increasing voltage - delta = %d", -l_delta_mv );
     }
     else
     {
         FAPI_INF("Voltage to be set equals the initial voltage");
     }
+
+    FAPI_DBG("ext_vrm_step_size_mv %d mV", i_ext_vrm_step_size_mv);
 
     // Break into steps limited by attr.attr_ext_vrm_step_size_mv
     while (l_delta_mv)
