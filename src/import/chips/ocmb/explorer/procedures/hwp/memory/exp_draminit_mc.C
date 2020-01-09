@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@
 
 #include <lib/mc/exp_port.H>
 #include <generic/memory/mss_git_data_helper.H>
+#include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 
 extern "C"
 {
@@ -97,9 +98,8 @@ extern "C"
         // Apply marks from OCMB VPD
         FAPI_TRY( mss::apply_mark_store(i_target), "%s Failed enable_read_ecc", mss::c_str(i_target) );
 
-        // TODO: Move mss::unmask::after_draminit_mc to generic and call it
-        // At this point the DDR interface must be monitored for memory errors. Memory related FIRs should be unmasked.
-        //FAPI_TRY( mss::unmask::after_draminit_mc(i_target), "%s Failed after_draminit_mc", mss::c_str(i_target) );
+        // Unmask registers after draminit_mc
+        FAPI_TRY(mss::unmask::after_draminit_mc(i_target), "%s Failed after_draminit_mc", mss::c_str(i_target));
 
     fapi_try_exit:
         FAPI_INF("%s End exp_draminit MC", mss::c_str(i_target));

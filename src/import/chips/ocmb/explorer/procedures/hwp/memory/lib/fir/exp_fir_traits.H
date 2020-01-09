@@ -22,3 +22,78 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+///
+/// @file exp_fir_traits.H
+/// @brief Memory subsystem FIR support
+///
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: FSP:HB
+
+#ifndef _MSS_EXP_FIR_TRAITS_H_
+#define _MSS_EXP_FIR_TRAITS_H_
+
+#include <fapi2.H>
+#include <generic/memory/lib/utils/fir/gen_mss_fir.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <explorer_scom_addresses.H>
+#include <explorer_scom_addresses_fld.H>
+
+namespace mss
+{
+
+///
+/// @brief FIR Register Traits for Explorer MCBIST FIR
+///
+template <>
+struct firTraits<EXPLR_MCBIST_MCBISTFIRQ>
+{
+    static constexpr uint64_t REG = EXPLR_MCBIST_MCBISTFIRQ;
+    static constexpr uint64_t ACT0 = EXPLR_MCBIST_MCBISTFIRACT0;
+    static constexpr uint64_t ACT1 = EXPLR_MCBIST_MCBISTFIRACT1;
+    static constexpr uint64_t MASK = EXPLR_MCBIST_MCBISTFIRMASK;
+    static constexpr uint64_t MASK_AND = EXPLR_MCBIST_MCBISTFIRMASK_AND;
+    static constexpr uint64_t MASK_OR = EXPLR_MCBIST_MCBISTFIRMASK_OR;
+
+    // Target type of this register
+    static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_OCMB_CHIP;
+};
+
+///
+/// @brief FIR Register Traits for Explorer SRQ FIR
+///
+template <>
+struct firTraits<EXPLR_SRQ_SRQFIRQ>
+{
+    static constexpr uint64_t REG = EXPLR_SRQ_SRQFIRQ;
+    static constexpr uint64_t ACT0 = EXPLR_SRQ_SRQFIR_ACTION0;
+    static constexpr uint64_t ACT1 = EXPLR_SRQ_SRQFIR_ACTION1;
+    static constexpr uint64_t MASK = EXPLR_SRQ_SRQFIR_MASK;
+    static constexpr uint64_t MASK_AND = EXPLR_SRQ_SRQFIR_MASK_AND;
+    static constexpr uint64_t MASK_OR = EXPLR_SRQ_SRQFIR_MASK_OR;
+
+    // Target type of this register
+    static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_OCMB_CHIP;
+};
+
+///
+/// @brief FIR Register Traits for Explorer RDF FIR
+///
+template <>
+struct firTraits<EXPLR_RDF_FIR>
+{
+    static constexpr uint64_t REG = EXPLR_RDF_FIR;
+    static constexpr uint64_t ACT0 = EXPLR_RDF_ACTION0;
+    static constexpr uint64_t ACT1 = EXPLR_RDF_ACTION1;
+    static constexpr uint64_t MASK = EXPLR_RDF_MASK;
+    static constexpr uint64_t MASK_AND = EXPLR_RDF_MASK_AND;
+    static constexpr uint64_t MASK_OR = EXPLR_RDF_MASK_OR;
+
+    // Target type of this register
+    static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_OCMB_CHIP;
+};
+
+} // end mss ns
+#endif

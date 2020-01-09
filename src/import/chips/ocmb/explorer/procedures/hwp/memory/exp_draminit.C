@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,7 @@
 #include <lib/phy/exp_train_handler.H>
 #include <lib/shared/exp_consts.H>
 #include <generic/memory/mss_git_data_helper.H>
+#include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 
 extern "C"
 {
@@ -85,6 +86,9 @@ extern "C"
         {
             FAPI_TRY(mss::exp::host_fw_phy_init_with_eye_capture(i_target, l_crc, l_phy_params));
         }
+
+        // Unmask registers after draminit training
+        FAPI_TRY(mss::unmask::after_draminit_training(i_target), "%s Failed after_draminit_training", mss::c_str(i_target));
 
         return fapi2::FAPI2_RC_SUCCESS;
 
