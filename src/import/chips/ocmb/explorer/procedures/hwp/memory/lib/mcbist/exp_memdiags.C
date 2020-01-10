@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,5 +65,75 @@ fapi2::ReturnCode operation<mss::mc_type::EXPLORER>::multi_port_init_internal()
 }
 
 } // namespace memdiags
+
+namespace exp
+{
+
+namespace memdiags
+{
+
+///
+/// @brief Process the result from the mcbist sf_read subtest after memdiags
+///
+/// @param[in] i_target OCMB target for traces
+/// @param[in] l_fail_behavior_attr
+/// @param[in,out] io_rc ReturnCode from sf_read
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode process_subtest_result(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const uint8_t l_fail_behavior_attr,
+        fapi2::ReturnCode& io_rc)
+{
+    // Check RC
+    if ((l_fail_behavior_attr == fapi2::ENUM_ATTR_MSS_POST_MEMDIAGS_READ_SUBTEST_FAIL_BEHAVIOR_TRACE)
+        && (io_rc != fapi2::FAPI2_RC_SUCCESS))
+    {
+        // Trace + Bad RC: Log as recovered, return success, set io_rc back to success
+        FAPI_ERR("%s Error code 0x%08lx from post-memdiags mcbist read subtest", mss::c_str(i_target), uint32_t(io_rc));
+        fapi2::logError(io_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+
+        io_rc = fapi2::FAPI2_RC_SUCCESS;
+
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Else, we will just try the RC as-is
+    FAPI_TRY(io_rc, "%s Error from post-memdiags mcbist read subtest", mss::c_str(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform a read only mcbist subtest at the end of memdiags
+///
+/// @param[in] i_target OCMB Chip
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error
+///
+fapi2::ReturnCode perform_read_only_subtest(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    uint8_t l_fail_behavior = 0;
+
+    auto l_stop_conditions = mss::mcbist::stop_conditions<mss::mc_type::EXPLORER>();
+
+    // Pause on unrecoverable error
+    l_stop_conditions.set_pause_on_ue(mss::ON);
+
+    // sf_read will run, poll for completion and return result ReturnCode
+    l_rc = mss::memdiags::sf_read<mss::mc_type::EXPLORER>(i_target, l_stop_conditions);
+
+    // Get fail behavior attr and process the result
+    FAPI_TRY(mss::attr::get_post_memdiags_read_subtest(i_target, l_fail_behavior));
+    FAPI_TRY(process_subtest_result(i_target, l_fail_behavior, l_rc));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+} // memdiags
+} // exp
 
 } // namespace mss

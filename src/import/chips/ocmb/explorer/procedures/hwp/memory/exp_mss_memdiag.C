@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,8 +51,18 @@ extern "C"
     ///
     fapi2::ReturnCode exp_mss_memdiag( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
     {
+        uint8_t l_post_memdiags_subtest = 0;
+
         FAPI_INF("Start exp_mss_memdiag on: %s", mss::c_str( i_target ));
         FAPI_TRY(mss::memdiags::mss_initialize_memory(i_target));
+
+        FAPI_TRY(mss::attr::get_post_memdiags_read_subtest(i_target, l_post_memdiags_subtest));
+
+        // Perform subtest if attribute is set to
+        if (l_post_memdiags_subtest == fapi2::ENUM_ATTR_MSS_POST_MEMDIAGS_READ_SUBTEST_ENABLE)
+        {
+            FAPI_TRY(mss::exp::memdiags::perform_read_only_subtest(i_target));
+        }
 
     fapi_try_exit:
         FAPI_INF("End exp_mss_memdiag on %s", mss::c_str( i_target ));
