@@ -38,6 +38,9 @@
 //------------------------------------------------------------------------------
 #include <p10_tod_init.H>
 #include <p10_scom_perv.H>
+#include <p10_scom_eq.H>
+#include <p10_pm_hcd_flags.h>
+#include <multicast_group_defs.H>
 
 //------------------------------------------------------------------------------
 // Namespace declarations
@@ -45,6 +48,7 @@
 
 using namespace scomt;
 using namespace scomt::perv;
+using namespace scomt::eq;
 
 //------------------------------------------------------------------------------
 // Constant definitions
@@ -438,6 +442,48 @@ fapi_try_exit:
 }
 
 
+/// @brief Helper function for p10_tod_init to notify QMEs of TOD setup
+/// @param[in] i_tod_node Pointer to TOD topology (including FAPI targets)
+/// @return FAPI2_RC_SUCCESS if QMEs are successfully notified
+///         else error
+fapi2::ReturnCode qme_tod_notify(
+    const tod_topology_node* i_tod_node)
+{
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target;
+    FAPI_DBG("Start");
+
+    FAPI_ASSERT((i_tod_node != NULL) &&
+                (i_tod_node->i_target != NULL),
+                fapi2::P10_TOD_SETUP_NULL_NODE(),
+                "Null node or target passed into function!");
+
+    l_target = *(i_tod_node->i_target);
+
+    // Avoid cross-initialization errors
+    {
+        fapi2::buffer<uint64_t> l_data64;
+        auto l_eq_mc  =
+            l_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_OR >(fapi2::MCGROUP_GOOD_EQ);
+
+        l_data64.flush<0>().setBit<p10hcd::QME_FLAGS_TOD_SETUP_COMPLETE>();
+        FAPI_TRY( putScom( l_eq_mc, QME_FLAGS_WO_OR, l_data64 ) );
+    }
+
+    // recursively configure downstream nodes
+    for (auto l_child = (i_tod_node->i_children).begin();
+         l_child != (i_tod_node->i_children).end();
+         ++l_child)
+    {
+        FAPI_TRY(qme_tod_notify(*l_child),
+                 "Failure notifying QME TOD in downstream node!");
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+
 // NOTE: description in header
 fapi2::ReturnCode p10_tod_init(
     const tod_topology_node* i_tod_node,
@@ -474,6 +520,12 @@ fapi2::ReturnCode p10_tod_init(
     FAPI_TRY(sync_spread(i_tod_node),
              "Error from sync_spread!");
 #endif
+
+    // Notify the QMEs in each node that TOD setup is complete;
+    //     (qme_tod_notify will recurse on each child)
+    // This is necessary to enable timefac shadowing for STOP operations.
+    FAPI_TRY(qme_tod_notify(i_tod_node),
+             "Error from qme_tod_notify!");
 
 fapi_try_exit:
     FAPI_DBG("End");
