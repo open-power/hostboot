@@ -933,13 +933,24 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
         }
         #endif // CONFIG_SECUREBOOT
 
-        // Record current IStep, SubStep
         mutex_lock(&iv_mutex);
+
+        // Record current IStep, SubStep
         iv_curIStep = i_istep;
         iv_curSubStep = i_substep;
+
+        // Send Progress Code
+        err = this->sendProgressCode(false);
+
         mutex_unlock(&iv_mutex);
 
-        // Send progress codes if in run-all mode
+        if(err)
+        {
+            // Commit the error and continue
+            errlCommit(err, INITSVC_COMP_ID);
+        }
+
+        // Handle shutdown and start progress thread
         if (!iv_istepMode)
         {
             // If a shutdown request has been received
@@ -950,17 +961,6 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
             }
             else
             {
-                mutex_lock(&iv_mutex);
-                // Send Progress Code
-                err = this->sendProgressCode(false);
-                mutex_unlock(&iv_mutex);
-
-                if(err)
-                {
-                    // Commit the error and continue
-                    errlCommit(err, INITSVC_COMP_ID);
-                }
-
                 // Start progress thread, if not yet started
                 if (!iv_progressThreadStarted)
                 {

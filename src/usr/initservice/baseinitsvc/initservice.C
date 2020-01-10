@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -983,7 +983,10 @@ void InitService::_doShutdown(uint64_t i_status,
     nanosleep(0,TEN_CTX_SWITCHES_NS);
 
     TRACFCOMP(g_trac_initsvc, "_doShutdown> Final status=%.16X",iv_worst_status);
-    MAGIC_INST_PRINT_ISTEP(21,4);
+    if( iv_worst_status == SHUTDOWN_STATUS_GOOD )
+    {
+        MAGIC_INST_PRINT_ISTEP(21,4);
+    }
 
     // Update the HB TI area with the worst status.
     termWriteSRC(TI_SHUTDOWN,

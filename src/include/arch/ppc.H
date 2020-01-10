@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -522,7 +522,7 @@ enum
     // 8000-8999 are defined by the Simics CEC team
     MAGIC_SIMICS_FSP_WAIT      =  8001, // Notify we are/aren't waiting for FSP
                                         //   1=waiting, 2=done waiting
-    MAGIC_SIMICS_SHUTDOWN      =  8006, // Notify we are shutting down
+    MAGIC_SIMICS_SHUTDOWN      =  8006, // Notify we shut down with an error
     MAGIC_SIMICS_ISTEP         =  8020, // Log istep, same parms as 7020
     MAGIC_SIMICS_EXIT_CACHE_CONTAINED = 8021, // Exiting cache contained mode
 };
