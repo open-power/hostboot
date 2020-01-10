@@ -65,9 +65,11 @@
 #include <p10_scom_proc_3.H>
 #include <p10_scom_proc_5.H>
 #include <p10_scom_eq.H>
+#include <p10_scom_perv.H>
 #include <multicast_group_defs.H>
 #include <p10_hcd_memmap_base.H>
 #include <p10_fbc_utils.H>
+#include <p10_tod_utils.H>
 
 // ----------------------------------------------------------------------
 // Constants
@@ -188,6 +190,7 @@ fapi2::ReturnCode qme_init(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target )
 {
     using namespace scomt::eq;
+    using namespace scomt::perv;
 
     // RTC 245822
     // remove this to use the auto-generated value once it bit shows up in the headers.
@@ -254,6 +257,27 @@ fapi2::ReturnCode qme_init(
         l_rvid.flush<0>().insertFromRight( l_rvrm_rvid, QME_RVCR_RVID_VALUE, QME_RVCR_RVID_VALUE_LEN );
         FAPI_TRY( putScom( l_eq_mc_or, QME_RVCR, l_rvid ) );
         FAPI_INF("Setting Retention VID to %02X", l_rvrm_rvid);
+    }
+
+    {
+        fapi2::buffer<uint64_t> l_tod_fsm_reg;
+        fapi2::buffer<uint64_t> l_qme_flag_mask;
+
+        l_qme_flag_mask.flush<0>().setBit<p10hcd::QME_FLAGS_TOD_SETUP_COMPLETE>();
+
+        FAPI_INF("Syncing TOD Running State");
+        FAPI_TRY(GET_TOD_FSM_REG(i_target, l_tod_fsm_reg));
+
+        if (GET_TOD_FSM_REG_TOD_IS_RUNNING(l_tod_fsm_reg))
+        {
+            FAPI_INF("TOD is running! Setting QME TOD Setup Complete Flag");
+            FAPI_TRY( putScom( l_eq_mc_or, QME_FLAGS_WO_OR, l_qme_flag_mask ) );
+        }
+        else
+        {
+            FAPI_INF("TOD is NOT running!  Clearing QME TOD Setup Complete Flag");
+            FAPI_TRY( putScom( l_eq_mc_or, QME_FLAGS_WO_CLEAR, l_qme_flag_mask ) );
+        }
     }
 
     FAPI_TRY( initQmeBoot( i_target ), "p10_pm_qme_init Failed To Copy QME Hcode In To QME's SRAM" );

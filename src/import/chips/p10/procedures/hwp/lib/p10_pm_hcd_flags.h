@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -137,7 +137,7 @@ enum PM_QME_FLAG_DEFS
     QME_FLAGS_DEBUG_HALT_ENABLE             = 5,
     QME_FLAGS_HCODE_ERROR_INJECT            = 6,
     QME_FLAGS_HCODE_FIT_ERROR_INJECT        = 7,
-    QME_FLAGS_L3_CONTAINED_MODE             = 8,
+    QME_FLAGS_TOD_SETUP_COMPLETE            = 8,
     QME_FLAGS_CHIP_CONTAINED_MODE           = 9,
     QME_FLAGS_RUNTIME_WAKEUP_MODE           = 10,
     QME_FLAGS_SPWU_CHECK_ENABLE             = 11,
