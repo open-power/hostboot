@@ -103,6 +103,7 @@ enum PGPE_FLAGS_IDX
     PGPE_FLAG_OCC_IPC_IMMEDIATE_MODE        = 10,
     PGPE_FLAG_WOF_IPC_IMMEDIATE_MODE        = 11,
     PGPE_FLAG_PHANTOM_HALT_ENABLE           = 12,
+    PGPE_FLAG_MAX_DEFINED                   = 13
 };
 
 /// Control Attributes

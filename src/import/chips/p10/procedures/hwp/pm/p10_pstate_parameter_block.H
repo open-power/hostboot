@@ -37,6 +37,7 @@
 #include <fapi2.H>
 #include <pstates_occ.H>
 #include <pstates_pgpe.H>
+#include <pstates_table.H>
 #include "p10_pm_get_poundv_bucket.H"
 #include "p10_pm_get_poundw_bucket.H"
 
