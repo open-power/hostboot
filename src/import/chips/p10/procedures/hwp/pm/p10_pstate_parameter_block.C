@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -348,6 +348,13 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
         //Initialize OPPB structure
         // ----------------
         FAPI_TRY(l_pmPPB.oppb_init(&l_occppb));
+
+
+        // ----------------
+        //Initialize pstate feature attribute state
+        // ----------------
+        FAPI_TRY(l_pmPPB.set_global_feature_attributes());
+
 
         // Put out the Parmater Blocks to the trace
         gppb_print(&(l_globalppb));
@@ -4382,6 +4389,98 @@ fapi_try_exit:
     }
 
     FAPI_DBG("<< WOF initialization");
+    return fapi2::current_err;
+}
+///////////////////////////////////////////////////////////
+////////    set_global_feature_attributes
+///////////////////////////////////////////////////////////
+fapi2::ReturnCode PlatPmPPB::set_global_feature_attributes()
+{
+
+    fapi2::ATTR_PSTATES_ENABLED_Type l_ps_enabled =
+        (fapi2::ATTR_PSTATES_ENABLED_Type)fapi2::ENUM_ATTR_PSTATES_ENABLED_FALSE;
+
+    fapi2::ATTR_RESCLK_ENABLED_Type l_resclk_enabled =
+        (fapi2::ATTR_RESCLK_ENABLED_Type)fapi2::ENUM_ATTR_RESCLK_ENABLED_FALSE;
+
+    fapi2::ATTR_DDS_ENABLED_Type l_dds_enabled =
+        (fapi2::ATTR_DDS_ENABLED_Type)fapi2::ENUM_ATTR_DDS_ENABLED_FALSE;
+
+    fapi2::ATTR_WOF_ENABLED_Type l_wof_enabled =
+        (fapi2::ATTR_WOF_ENABLED_Type)fapi2::ENUM_ATTR_WOF_ENABLED_FALSE;
+
+// RTC 247962:need to revisit
+#if 0
+    fapi2::ATTR_WOV_UNDERV_ENABLED_Type l_wov_underv_enabled =
+        (fapi2::ATTR_WOV_UNDERV_ENABLED_Type)fapi2::ENUM_ATTR_WOV_UNDERV_ENABLED_FALSE;
+
+    fapi2::ATTR_WOV_OVERV_ENABLED_Type l_wov_overv_enabled =
+        (fapi2::ATTR_WOV_OVERV_ENABLED_Type)fapi2::ENUM_ATTR_WOV_OVERV_ENABLED_FALSE;
+
+
+      //Check whether to enable WOV Undervolting. WOV can
+      //only be enabled if VDMs are enabled
+      if (!is_wov_underv_enabled() ||
+          !is_dds_enabled())
+      {
+          FAPI_DBG("UNDERV_DISABLED")
+          iv_wov_underv_enabled = false;
+      }
+
+      //Check whether to enable WOV Overvolting. WOV can
+      //only be enabled if VDMs are enabled
+      if (!is_wov_overv_enabled() || 
+          !is_dds_enabled())
+      {
+          FAPI_DBG("OVERV_DISABLED")
+          iv_wov_overv_enabled = false;
+      }
+#endif
+
+    if (iv_pstates_enabled)
+    {
+        l_ps_enabled = (fapi2::ATTR_PSTATES_ENABLED_Type)fapi2::ENUM_ATTR_PSTATES_ENABLED_TRUE;
+    }
+
+    if (iv_resclk_enabled)
+    {
+        l_resclk_enabled = (fapi2::ATTR_RESCLK_ENABLED_Type)fapi2::ENUM_ATTR_RESCLK_ENABLED_TRUE;
+    }
+
+    if (iv_dds_enabled)
+    {
+        l_dds_enabled = (fapi2::ATTR_DDS_ENABLED_Type)fapi2::ENUM_ATTR_DDS_ENABLED_TRUE;
+    }
+
+
+    if (iv_wof_enabled)
+    {
+        l_wof_enabled = (fapi2::ATTR_WOF_ENABLED_Type)fapi2::ENUM_ATTR_WOF_ENABLED_TRUE;
+    }
+
+#if 0
+    if (iv_wov_underv_enabled)
+    {
+        l_wov_underv_enabled = (fapi2::ATTR_WOV_UNDERV_ENABLED_Type)fapi2::ENUM_ATTR_WOV_UNDERV_ENABLED_TRUE;
+    }
+
+    if (iv_wov_overv_enabled)
+    {
+        l_wov_overv_enabled = (fapi2::ATTR_WOV_OVERV_ENABLED_Type)fapi2::ENUM_ATTR_WOV_OVERV_ENABLED_TRUE;
+    }
+#endif
+
+
+
+    SET_ATTR(fapi2::ATTR_PSTATES_ENABLED, iv_procChip, l_ps_enabled);
+    SET_ATTR(fapi2::ATTR_RESCLK_ENABLED, iv_procChip, l_resclk_enabled);
+    SET_ATTR(fapi2::ATTR_DDS_ENABLED, iv_procChip, l_dds_enabled);
+    SET_ATTR(fapi2::ATTR_WOF_ENABLED, iv_procChip, l_wof_enabled);
+//    SET_ATTR(fapi2::ATTR_WOV_UNDERV_ENABLED, iv_procChip, l_wov_underv_enabled);
+  //  SET_ATTR(fapi2::ATTR_WOV_OVERV_ENABLED, iv_procChip, l_wov_overv_enabled);
+
+
+fapi_try_exit:
     return fapi2::current_err;
 }
 

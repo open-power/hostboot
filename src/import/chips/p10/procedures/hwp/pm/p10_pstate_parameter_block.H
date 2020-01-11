@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -252,6 +252,13 @@ class PlatPmPPB
         /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
 //        fapi2::ReturnCode lppb_init(LocalPstateParmBlock* i_localppb);
+
+        /// -----------------------------------------------------------------------
+        /// @brief This will set the pstate feature attrbutes(VDM,RESCLK,VRM,WOF)
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        fapi2::ReturnCode set_global_feature_attributes();
+
 
         /// -----------------------------------------------------------------------
         /// @brief Initialize occ pstate parameter block
