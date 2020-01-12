@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -106,6 +106,7 @@ p10_sbe_purge_hb(
 
     for (const auto& l_core_target : i_backing_cache_targets)
     {
+        fapi2::buffer<uint64_t> l_lco_target_id_ctl_reg = 0;
         fapi2::buffer<uint64_t> l_l3_fir_mask_or_reg = 0;
         fapi2::ATTR_CHIP_UNIT_POS_Type l_core_num;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
@@ -118,6 +119,11 @@ p10_sbe_purge_hb(
         SET_L3_MISC_L3CERRS_FIR_REG_CHIP_CONTAINED_ERR(l_l3_fir_mask_or_reg);
         FAPI_TRY(PREP_L3_MISC_L3CERRS_FIR_MASK_REG_WO_OR(l_core_target));
         FAPI_TRY(PUT_L3_MISC_L3CERRS_FIR_MASK_REG_WO_OR(l_core_target, l_l3_fir_mask_or_reg));
+
+        // clear to ensure castout to memory is attempted
+        FAPI_TRY(GET_L3_MISC_L3CERRS_BACKING_CTL_REG(l_core_target, l_lco_target_id_ctl_reg));
+        CLEAR_L3_MISC_L3CERRS_BACKING_CTL_REG_CASTOUT_TO_BACKING_L3_EN_CFG(l_lco_target_id_ctl_reg);
+        FAPI_TRY(PUT_L3_MISC_L3CERRS_BACKING_CTL_REG(l_core_target, l_lco_target_id_ctl_reg));
 
         FAPI_EXEC_HWP(l_rc,
                       p10_l3_flush,
