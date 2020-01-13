@@ -58,7 +58,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
- <!-- ******************************************************************** -->
+  <!-- ******************************************************************** -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_GEMINI_OMI_SETUP_CONFIG_WORKAROUND</id>
     <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
@@ -76,11 +76,11 @@
     </chipEcFeature>
   </attribute>
   <!-- ******************************************************************** -->
-    <attribute>
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_DS_TEMPLATES_0147</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-     The processor only supports downstream OMI tempaltes 0, 1, 4, and 7.
+      The processor only supports downstream OMI tempaltes 0, 1, 4, and 7.
     </description>
     <chipEcFeature>
       <chip>
@@ -93,11 +93,11 @@
     </chipEcFeature>
   </attribute>
   <!-- ******************************************************************** -->
- <attribute>
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_US_TEMPLATES_0159</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-     The processor only supports upstream OMI tempaltes 0, 1, 5, and 9.
+      The processor only supports upstream OMI tempaltes 0, 1, 5, and 9.
     </description>
     <chipEcFeature>
       <chip>
@@ -110,7 +110,7 @@
     </chipEcFeature>
   </attribute>
   <!-- ******************************************************************** -->
- <attribute>
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW514623</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -131,7 +131,24 @@
     <id>ATTR_CHIP_EC_FEATURE_MMA_CORE_ABIST_LINKED</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-     MMA ABIST engine tied to CL2 ABIST enable
+      MMA ABIST engine tied to CL2 ABIST enable
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_ISS1234</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Checkstop on NMMU array parity errors
     </description>
     <chipEcFeature>
       <chip>

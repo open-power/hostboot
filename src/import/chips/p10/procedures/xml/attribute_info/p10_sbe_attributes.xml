@@ -534,4 +534,8 @@
     <name>ATTR_CHIP_UNIT_POS</name>
     <virtual/>
   </entry>
+  <entry>
+    <name>ATTR_CHIP_EC_FEATURE_ISS1234</name>
+    <virtual/>
+  </entry>
 </entries>
