@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -114,9 +114,6 @@ VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/ddr4/
 # Axone vs non-Axone specific HWP
 VPATH += $(if $(CONFIG_AXONE),${EXPLORER_HWP_PATH},)
 OBJS += $(if $(CONFIG_AXONE),exp_mss_thermal_init.o,)
-# TODO RTC:245219
-# use PRD's version of memdiags instead of this cronus verison once its working
-OBJS += $(if $(CONFIG_AXONE),exp_mss_memdiag.o,)
 
 include ${ROOTPATH}/config.mk
 

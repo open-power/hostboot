@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,18 +33,21 @@
 #include <util/misc.H>
 
 #include <plat_hwp_invoker.H>     // for FAPI_INVOKE_HWP
+#ifdef CONFIG_AXONE
+#include <lib/shared/exp_defaults.H>
+#include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
+#include <lib/mc/exp_port.H>
+#else
 #include <lib/shared/nimbus_defaults.H> // Needed before unmask.H
 #include <lib/fir/unmask.H> // for mss::unmask::after_memdiags
 #include <lib/mc/port.H>          // for mss::reset_reorder_queue_settings
+#endif
 
 #if defined(CONFIG_IPLTIME_CHECKSTOP_ANALYSIS) && !defined(__HOSTBOOT_RUNTIME)
   #include <isteps/pm/occCheckstop.H>
 #endif
 
-// TODO RTC:245219
-// use PRD's version of memdiags instead of this cronus verison once its working
 #ifdef CONFIG_AXONE
-#include <exp_mss_memdiag.H>
 #include <chipids.H> // for EXPLORER ID
 #endif
 
@@ -116,6 +119,7 @@ void* call_mss_memdiag (void* io_pArgs)
         // Actions vary by processor type.
         ATTR_MODEL_type procType = masterproc->getAttr<ATTR_MODEL>();
 
+        #ifndef CONFIG_AXONE
         if ( MODEL_NIMBUS == procType )
         {
             TargetHandleList trgtList; getAllChiplets( trgtList, TYPE_MCBIST );
@@ -168,37 +172,58 @@ void* call_mss_memdiag (void* io_pArgs)
             // No need to unmask or turn off FIFO. That is already contained
             // within the other Centaur HWPs.
         }
-#ifdef CONFIG_AXONE
-        else if (MODEL_AXONE == procType )
+        #else
+        if (MODEL_AXONE == procType )
         {
-            // no need to run in simics
-            if ( Util::isSimicsRunning() == false )
+            TargetHandleList trgtList; getAllChips(trgtList, TYPE_OCMB_CHIP);
+
+            // Only call memdiags on Explorer OCMBs, it breaks when you
+            // run on Gemini
+            TargetHandleList expList;
+            for ( const auto & ocmb : trgtList )
             {
-                // TODO RTC:245219
-                // use PRD's version of memdiags instead of this cronus verison once its working
-                TargetHandleList trgtList; getAllChips( trgtList, TYPE_OCMB_CHIP );
-                for (const auto & l_ocmb_target : trgtList)
+                uint32_t chipId = ocmb->getAttr<TARGETING::ATTR_CHIP_ID>();
+                if ( chipId == POWER_CHIPID::EXPLORER_16 )
                 {
-                    uint32_t chipId = l_ocmb_target->getAttr< TARGETING::ATTR_CHIP_ID>();
-                    // Only call memdiags on Explorer cards, it breaks when you run on Gemini
-                    if (chipId == POWER_CHIPID::EXPLORER_16)
-                    {
-                        fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target(l_ocmb_target);
-                        // Start Memory Diagnostics.
-                        FAPI_INVOKE_HWP( errl, exp_mss_memdiag, l_fapi_ocmb_target );
-                        if ( nullptr != errl )
-                        {
-                            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                                      "exp_mss_memdiag (0x%08x) "
-                                      "failed", get_huid(l_ocmb_target) );
-                            break;
-                        }
-                    }
+                    expList.push_back(ocmb);
                 }
             }
 
+            if ( Util::isSimicsRunning() == false )
+            {
+                // Start Memory Diagnostics.
+                errl = __runMemDiags( expList );
+                if ( nullptr != errl ) break;
+            }
+
+            for ( auto & tt : trgtList )
+            {
+                fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> ft ( tt );
+
+                // Unmask mainline FIRs.
+                FAPI_INVOKE_HWP( errl, mss::unmask::after_memdiags, ft );
+                if ( nullptr != errl )
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "mss::unmask::after_memdiags(0x%08x) failed",
+                               get_huid(tt) );
+                    break;
+                }
+
+                // Turn off FIFO mode to improve performance.
+                FAPI_INVOKE_HWP( errl, mss::reset_reorder_queue_settings, ft );
+                if ( nullptr != errl )
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "mss::reset_reorder_queue_settings(0x%08x) "
+                               "failed", get_huid(tt) );
+                    break;
+                }
+            }
+            if ( nullptr != errl ) break;
+
         }
-#endif
+        #endif
 
     } while (0);
 
