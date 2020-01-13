@@ -96,6 +96,22 @@ class SpiOp
      */
     void setAdjustedOpArgs(void * i_buffer);
 
+    /**
+     *  @brief Adds the various registers of the target spi device to an error
+     *         log.
+     *
+     *  @param[in/out]  io_errl     The error log to add the register contents
+     *                              to.
+     */
+    void addStatusRegs(errlHndl_t& io_errl);
+
+    /**
+     *  @brief Adds callouts for the SPI device to the error log.
+     *
+     *  @param[in/out]  io_errl     The error log to add the callouts to.
+     */
+    void addCallouts(errlHndl_t& io_errl);
+
 public:
 
     /**
@@ -167,10 +183,43 @@ public:
     errlHndl_t write(void*   i_buffer,
                      size_t& io_buflen);
 
+    /**
+     * @brief Copies the requested data from the adjusted buffer contents into
+     *        the output buffer. This is done because the SPI devices have an
+     *        alignment limitation that is hidden from layers above the SPI
+     *        Device Driver. So, instead of directly reading data into the
+     *        output buffer we create an aligned buffer to use for the read and
+     *        then copy the data out.
+     *        This function can also be used to generically copy one buffer's
+     *        contents to another.
+     *
+     * @param[in/out]  io_destination  The buffer to copy the requested data to.
+     *
+     * @param[in/out]  io_amountToCopy INPUT: The length of the requested data.
+     *                                 OUTPUT: zero if an error occurs.
+     *
+     * @param[in]      i_source        The buffer to copy data from.
+     *
+     * @param[in]      i_sourceLength  Used to verify that we don't overrun the
+     *                                 source buffer.
+     *
+     * @param[in]      i_sourceOffset  Offset to start at in the source buffer.
+     *                                 Defaults to 0.
+     *
+     * @return         errlHndl_t     nullptr on success. Otherwise, error log.
+     */
+    errlHndl_t copyToBuffer(void*           io_destination,
+                            size_t&         io_amountToCopy,
+                            uint8_t const * i_source,
+                            const size_t    i_sourceLength,
+                            const size_t    i_sourceOffset = 0);
+
 }; // End of SpiOp class definition.
 
 /**
  * @brief Initialize SPI Device Driver by forcing SPI Master to use PIB.
+ *
+ * @param[in/out]   io_rtaskRetErrl     nullptr on success. Otherwise, error.
  */
 void spiInit(errlHndl_t &io_rtaskRetErrl);
 
@@ -238,42 +287,21 @@ bool spiGetEngineMutex(TARGETING::Target* i_target,
  *
  * @param[in]     i_engine       The engine mutex to lock or unlock.
  *
- * @param[in]     i_unlock       TRUE: unlock the mutex
- *                               FALSE: lock the mutex
+ * @param[in]     io_unlock      INPUT: TRUE: unlock the mutex
+ *                                      FALSE: lock the mutex
+ *                               OUTPUT: TRUE: The mutex was locked and should
+ *                                             be unlocked.
+ *                                      FALSE: The mutex was unlocked and
+ *                                             shouldn't be unlocked or an error
+ *                                             occurred and mutex shouldn't be
+ *                                             unlocked.
  *
  * @return        errlHndl_t     nullptr on success, otherwise errl.
  */
 errlHndl_t spiEngineLockOp(TARGETING::Target* i_target,
                            uint8_t            i_engine,
-                           bool               i_unlock);
+                           bool&              io_unlock);
 
-/**
- * @brief Copies the requested data from the adjusted buffer contents into the
- *        output buffer. This is done because the SPI devices have an alignment
- *        limitation that is hidden from layers above the SPI Device Driver. So,
- *        instead of directly reading data into the output buffer we create an
- *        aligned buffer to use for the read and then copy the data out.
- *
- * @param[in/out]  io_destination  The buffer to copy the requested data to.
- *
- * @param[in/out]  io_amountToCopy INPUT: The length of the requested data.
- *                                 OUTPUT: zero if an error occurs.
- *
- * @param[in]      i_source        The buffer to copy data from.
- *
- * @param[in]      i_sourceLength  Used to verify that we don't overrun the
- *                                 source buffer.
- *
- * @param[in]      i_sourceOffset  Offset to start at in the source buffer.
- *                                 Defaults to 0.
- *
- * @return         errlHndl_t     nullptr on success. Otherwise, error log.
- */
-errlHndl_t copyToBuffer(void*           io_destination,
-                        size_t&         io_amountToCopy,
-                        uint8_t const * i_source,
-                        const size_t    i_sourceLength,
-                        const size_t    i_sourceOffset = 0);
 
 
 }; // end namespace SPI

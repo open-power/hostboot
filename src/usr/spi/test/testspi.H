@@ -315,9 +315,11 @@ public:
         TestData testDataBad[] =
         {
 
-            // Write 0 bytes starting at offset 0
-            // @TODO RTC 243918 Enable when error paths are in
-            //{masterProc, 0, SPI_TEST_IGNORE_DATA_COMPARE, 0, 0},
+            // Write 0 bytes starting at offset 0. Bad Request Size.
+            {masterProc, 0, SPI_TEST_IGNORE_DATA_COMPARE, 0, 0},
+
+            // Write 7 bytes starting at offset 0. Bad Engine.
+            {masterProc, 9, SPI_TEST_IGNORE_DATA_COMPARE, 7, 0},
 
         };
 
@@ -469,6 +471,7 @@ public:
 
         for (size_t i = 0; i < NUM_TESTS_BAD; i++)
         {
+            // Test bad paths. Errors are expected for success.
             const size_t TEST_NUMBER = i + 1;
             // Make sure the write size is 8 bytes so that it fits the buffer.
             if (testDataBad[i].dataLength > 8)
@@ -479,6 +482,7 @@ public:
                          TEST_NUMBER);
                 continue;
             }
+
             // For these tests reading the original data first would cause
             // errors before we are able to test doing bad writes. So, for these
             // tests we'll perform the writes without reading.
@@ -499,7 +503,7 @@ public:
             }
             else if (errl == nullptr)
             {
-                TS_FAIL("testSpiWrite: Expected an error for test %d of %d",
+                TS_FAIL("testSpiWrite: Expected an error for bad test %d of %d",
                         TEST_NUMBER,
                         NUM_TESTS_BAD);
                 continue;

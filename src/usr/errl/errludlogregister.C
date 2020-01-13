@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -137,7 +137,7 @@ void ErrlUserDetailsLogRegister::readRegister(
         case DeviceFW::SPD:         // userif.H
         case DeviceFW::XSCOM:       // driverif.H
         case DeviceFW::FSISCOM:     // driverif.H
-        case DeviceFW::IBSCOM:     // driverif.H
+        case DeviceFW::IBSCOM:      // driverif.H
         {
             numAddressArgs = 1;
             break;
@@ -215,7 +215,7 @@ void ErrlUserDetailsLogRegister::copyRegisterData(
     //  (DeviceFW::PRESENT is an example, but we chose not to log that type)
     int32_t numAddressArgs = -1;
 
-    // do we do the deviceOpValist or not, and how many
+    // do we do the writeRegisterData or not, and how many
     //  parameters are there to be logged
     switch (i_accessType)
     {
@@ -225,7 +225,7 @@ void ErrlUserDetailsLogRegister::copyRegisterData(
         case DeviceFW::SPD:         // userif.H
         case DeviceFW::XSCOM:       // driverif.H
         case DeviceFW::FSISCOM:     // driverif.H
-        case DeviceFW::IBSCOM:     // driverif.H
+        case DeviceFW::IBSCOM:      // driverif.H
         {
             numAddressArgs = 1;
             break;
@@ -247,6 +247,7 @@ void ErrlUserDetailsLogRegister::copyRegisterData(
         case DeviceFW::PRESENT:     // userif.H
         case DeviceFW::PNOR:        // userif.H
         case DeviceFW::MAILBOX:     // userif.H
+        case DeviceFW::SPI:         // driverif.H
         default:
         {   // no action - not logged
             TRACFCOMP(g_trac_errl, "LogRegister: AccessType %x not logged",

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] YADRO                                                              */
@@ -181,6 +181,10 @@ public:
                         break;
                     case DeviceFW::IBSCOM:     // userif.H
                         i_parser.PrintString("AccessType", "DeviceFW::IBSCOM "
+                                                    "- not logged");
+                        break;
+                    case DeviceFW::SPI:         // driverif.H
+                        i_parser.PrintString("AccessType", "DeviceFW::SPI "
                                                     "- not logged");
                         break;
                     default:

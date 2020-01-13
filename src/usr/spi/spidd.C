@@ -35,6 +35,14 @@
 #include "spidd.H"
 #include <trace/interface.H>
 
+#include <spi/spireasoncodes.H>
+
+#include <errl/errlentry.H>
+#include <errl/hberrltypes.H>
+#include <errl/errludlogregister.H>
+#include <errl/errludtarget.H>
+
+#include <hwas/common/hwasCallout.H>
 #include <targeting/common/utilFilter.H>
 #include <fapi2/plat_hwp_invoker.H>
 
@@ -57,6 +65,10 @@ namespace SPI
 // Always include the ECC byte so that layers above SPI driver can handle ECC
 const bool ALWAYS_INCLUDE_ECC = true;
 
+// Give this constant a more managable name.
+const uint64_t ROOT_CTRL_8 =
+    static_cast<uint64_t>(scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL8_RW);
+
 /**
  * _start() task entry procedure using the macro found in taskargs.H
  */
@@ -67,8 +79,6 @@ TASK_ENTRY_MACRO( spiInit );
 void spiInit(errlHndl_t & io_rtaskRetErrl)
 {
     // @TODO RTC 208787 Pull this code out and put in a HWP. Then call it here.
-    const uint64_t ROOT_CTRL_8 =
-        static_cast<uint64_t>(scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL8_RW);
     const uint64_t SPIM_PORT_MUX_SELECT =
         scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL8_TPFSI_SPIMST0_PORT_MUX_SEL_DC;
 
@@ -79,21 +89,47 @@ void spiInit(errlHndl_t & io_rtaskRetErrl)
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> masterProc(masterTarget);
     fapi2::buffer<uint64_t> root_ctrl_buffer;
 
-    // Get the contents of root control register 8 which controls whether we're
-    // accessing over PIB or FSI.
-    FAPI_TRY(fapi2::getScom(masterProc,
-                            ROOT_CTRL_8,
-                            root_ctrl_buffer));
+    do {
 
-    // Force root control reg 8 to use PIB for SPI Master
-    // clearing the bit to 0 forces the SPI Master to use the PIB path.
-    root_ctrl_buffer.clearBit<SPIM_PORT_MUX_SELECT>();
+        // Get the contents of root control register 8 which controls whether
+        // we're accessing over PIB or FSI.
+        FAPI_INVOKE_HWP(io_rtaskRetErrl,
+                        fapi2::getScom,
+                        masterProc,
+                        ROOT_CTRL_8,
+                        root_ctrl_buffer);
 
-    // Write the buffer back to the register.
-    FAPI_TRY(fapi2::putScom(masterProc,
-                            ROOT_CTRL_8,
-                            root_ctrl_buffer));
-fapi_try_exit:
+        if (io_rtaskRetErrl != nullptr)
+        {
+            break;
+        }
+
+        // Force root control reg 8 to use PIB for SPI Master
+        // clearing the bit to 0 forces the SPI Master to use the PIB path.
+        root_ctrl_buffer.clearBit<SPIM_PORT_MUX_SELECT>();
+
+        // Write the buffer back to the register.
+        FAPI_INVOKE_HWP(io_rtaskRetErrl,
+                        fapi2::putScom,
+                        masterProc,
+                        ROOT_CTRL_8,
+                        root_ctrl_buffer);
+
+        if (io_rtaskRetErrl != nullptr)
+        {
+            break;
+        }
+
+    } while(0);
+
+    if (io_rtaskRetErrl != nullptr)
+    {
+        TRACFCOMP(g_trac_spi, ERR_MRK"spiInit(): "
+                 "An error occurred during initialization of libspi.so! "
+                 "SPI Device Driver will not function.");
+        io_rtaskRetErrl->collectTrace(SPI_COMP_NAME, KILOBYTE);
+    }
+
     return;
 }
 
@@ -131,10 +167,25 @@ errlHndl_t spiPerformOp(DeviceFW::OperationType i_opType,
 
         if (io_buflen == 0)
         {
-            // @TODO RTC 243918 Error
             TRACFCOMP(g_trac_spi,
-                      ERR_MRK"spiPerformOp(): io_buflen %d. Size invalid",
-                      io_buflen);
+                      ERR_MRK"spiPerformOp(): io_buflen %d. "
+                      "Size must be greater than zero", io_buflen);
+            /*@
+            * @errortype
+            * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+            * @moduleid         SPI::SPI_PERFORM_OP
+            * @reasoncode       SPI::SPI_INVALID_BUFFER_SIZE
+            * @userdata1        Target HUID of the SPI Master
+            * @devdesc          The length of the buffer to write/read must be
+            *                   greater than zero.
+            * @custdesc         A problem occurred during IPL of the system.
+            */
+            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           SPI_PERFORM_OP,
+                                           SPI_INVALID_BUFFER_SIZE,
+                                           TARGETING::get_huid(i_target),
+                                           0,
+                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             break;
         }
 
@@ -149,10 +200,8 @@ errlHndl_t spiPerformOp(DeviceFW::OperationType i_opType,
                                mutex_should_unlock);
         if (errl != nullptr)
         {
-            // @TODO RTC 243918 Handle it.
             break;
         }
-        mutex_should_unlock = true;
 
         // =====================================================================
         // SPI Read Operation
@@ -164,6 +213,8 @@ errlHndl_t spiPerformOp(DeviceFW::OperationType i_opType,
 
             if (errl != nullptr)
             {
+                TRACUCOMP(g_trac_spi,
+                          ERR_MRK"spiPerformOp(): Spi read operation failed!");
                 break;
             }
         }
@@ -177,26 +228,61 @@ errlHndl_t spiPerformOp(DeviceFW::OperationType i_opType,
 
             if (errl != nullptr)
             {
+                TRACUCOMP(g_trac_spi,
+                          ERR_MRK"spiPerformOp(): Spi write operation failed!");
                 break;
             }
         }
         else
         {
             // Unknown/Unsupported Operation Type
-            // @TODO RTC 243918 Create an error for this case.
+            /*@
+            * @errortype
+            * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+            * @moduleid         SPI::SPI_PERFORM_OP
+            * @reasoncode       SPI::SPI_UNKNOWN_OP_TYPE
+            * @userdata1        Target HUID of the SPI Master
+            * @userdata2        op type
+            * @devdesc          The requested op type is not supported.
+            * @custdesc         A problem occurred during IPL of the system.
+            */
+            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           SPI_PERFORM_OP,
+                                           SPI_UNKNOWN_OP_TYPE,
+                                           TARGETING::get_huid(i_target),
+                                           i_opType,
+                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            break;
         }
 
     } while(0);
 
     if (mutex_should_unlock)
     {
-        errl = spiEngineLockOp(i_target,
-                               engine,
-                               mutex_should_unlock);
-        if (errl != nullptr)
+        errlHndl_t unlockErrl = spiEngineLockOp(i_target,
+                                                engine,
+                                                mutex_should_unlock);
+        if (unlockErrl != nullptr)
         {
-            // @TODO RTC 243918 Handle it.
+            if (errl == nullptr)
+            {
+                errl = unlockErrl;
+            }
+            else
+            {
+                TRACFCOMP(g_trac_spi, "spiPerformOp(): Committing second error "
+                          "eid=0x%X with plid of returned error: 0x%X",
+                          unlockErrl->eid(),
+                          errl->plid());
+                unlockErrl->plid(errl->plid());
+                errlCommit(unlockErrl, SPI_COMP_ID);
+            }
         }
+    }
+
+    if (errl != nullptr)
+    {
+        errl->collectTrace(SPI_COMP_NAME, KILOBYTE);
     }
 
     return errl;
@@ -209,11 +295,36 @@ errlHndl_t SpiOp::read(void*   o_buffer,
     SpiControlHandle handle = getSpiHandle();
 
     do {
-
         if (io_buflen != iv_length)
         {
-            // Something changed the buffer length after object construction
-            //@TODO RTC 243918 Error.
+            // Something changed the buffer length after object construction.
+            TRACFCOMP(g_trac_spi, ERR_MRK"SpiOp::read(): "
+                      "Buffer length didn't match previously given buffer "
+                      "length. buffer length %d, expected length %d.",
+                      io_buflen,
+                      iv_length);
+
+            /*@
+            * @errortype
+            * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+            * @moduleid         SPI::SPI_OP_READ
+            * @reasoncode       SPI::SPI_BUFFER_SIZE_MISMATCH
+            * @userdata1        Target HUID of the SPI Master
+            * @userdata2[00:31] Length of the request
+            * @userdata2[32:63] Expected length
+            * @devdesc          The length of the buffer to write/read changed
+            *                   from the expected length.
+            * @custdesc         A problem occurred during IPL of the system.
+            */
+            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           SPI_OP_READ,
+                                           SPI_BUFFER_SIZE_MISMATCH,
+                                           TARGETING::get_huid(iv_target),
+                                           TWO_UINT32_TO_UINT64(io_buflen,
+                                                                iv_length));
+            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                      HWAS::SRCI_PRIORITY_MED);
+            io_buflen = 0;
             break;
         }
 
@@ -231,6 +342,16 @@ errlHndl_t SpiOp::read(void*   o_buffer,
 
         if (errl != nullptr)
         {
+            TRACFCOMP(g_trac_spi, "SpiOp::read(): "
+                      "spi_read HWP error with params: offset = %d, "
+                      "length = %d, useAdjustedBuffer = %s",
+                      iv_adjusted_offset,
+                      iv_adjusted_length,
+                      iv_usingAdjustedBuffer ? "TRUE" : "FALSE");
+            addStatusRegs(errl);
+            addCallouts(errl);
+            ERRORLOG::ErrlUserDetailsTarget(iv_target, "Proc Target")
+                .addToLog(errl);
             io_buflen = 0;
             break;
         }
@@ -251,8 +372,6 @@ errlHndl_t SpiOp::read(void*   o_buffer,
         }
     } while(0);
 
-
-
     return errl;
 }
 
@@ -268,7 +387,32 @@ errlHndl_t SpiOp::write(void*   i_buffer,
         if (io_buflen != iv_length)
         {
             // Something changed the buffer length after object construction
-            //@TODO RTC 243918 Error.
+            TRACFCOMP(g_trac_spi, ERR_MRK"SpiOp::read(): "
+                      "Buffer length didn't match previously given buffer "
+                      "length. buffer length %d, expected length %d.",
+                      io_buflen,
+                      iv_length);
+            /*@
+            * @errortype
+            * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+            * @moduleid         SPI::SPI_OP_WRITE
+            * @reasoncode       SPI::SPI_BUFFER_SIZE_MISMATCH
+            * @userdata1        Target HUID of the SPI Master
+            * @userdata2[00:31] Length of the request
+            * @userdata2[32:63] Expected length
+            * @devdesc          The length of the buffer to write/read changed
+            *                   from the expected length.
+            * @custdesc         A problem occurred during IPL of the system.
+            */
+            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           SPI_OP_WRITE,
+                                           SPI_BUFFER_SIZE_MISMATCH,
+                                           TARGETING::get_huid(iv_target),
+                                           TWO_UINT32_TO_UINT64(io_buflen,
+                                                                iv_length));
+            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                      HWAS::SRCI_PRIORITY_MED);
+            io_buflen = 0;
             break;
         }
 
@@ -287,6 +431,15 @@ errlHndl_t SpiOp::write(void*   i_buffer,
                             iv_buffer);
             if (errl != nullptr)
             {
+                TRACFCOMP(g_trac_spi, "SpiOp::write(): "
+                          "spi_read HWP error with params: "
+                          "adjusted offset = %d, adjusted length = %d",
+                          iv_adjusted_offset,
+                          iv_adjusted_length);
+                addStatusRegs(errl);
+                addCallouts(errl);
+                ERRORLOG::ErrlUserDetailsTarget(iv_target, "Proc Target")
+                    .addToLog(errl);
                 io_buflen = 0;
                 break;
             }
@@ -317,6 +470,13 @@ errlHndl_t SpiOp::write(void*   i_buffer,
 
         if (errl != nullptr)
         {
+            TRACFCOMP(g_trac_spi, "SpiOp::write(): "
+                      "spi_write HWP error with params: offset = %d, "
+                      "length = %d", iv_adjusted_offset, iv_adjusted_length);
+            addStatusRegs(errl);
+            addCallouts(errl);
+            ERRORLOG::ErrlUserDetailsTarget targetFFDC(iv_target);
+            targetFFDC.addToLog(errl);
             io_buflen = 0;
             break;
         }
@@ -326,11 +486,11 @@ errlHndl_t SpiOp::write(void*   i_buffer,
     return errl;
 }
 
-errlHndl_t copyToBuffer(void*           io_destination,
-                        size_t&         io_amountToCopy,
-                        uint8_t const * i_source,
-                        const size_t    i_sourceLength,
-                        const size_t    i_sourceOffset)
+errlHndl_t SpiOp::copyToBuffer(void*           io_destination,
+                               size_t&         io_amountToCopy,
+                               uint8_t const * i_source,
+                               const size_t    i_sourceLength,
+                               const size_t    i_sourceOffset)
 {
     errlHndl_t errl = nullptr;
 
@@ -338,9 +498,34 @@ errlHndl_t copyToBuffer(void*           io_destination,
 
         if (i_sourceOffset + io_amountToCopy > i_sourceLength)
         {
-            //@TODO RTC 243918 Error
             TRACFCOMP(g_trac_spi, ERR_MRK"SPI::copyToBuffer() "
-                     "size to copy greater than adjusted buffer size!");
+                     "Size to copy %d from offset %d exceeds buffer size %d!",
+                     io_amountToCopy, i_sourceOffset, i_sourceLength);
+            /*@
+            * @errortype
+            * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+            * @moduleid         SPI::SPI_COPY_TO_BUFFER
+            * @reasoncode       SPI::SPI_INVALID_PARAMETERS
+            * @userdata1[00:15] The offset from which to begin copying data
+            * @userdata1[16:31] The amount of data to copy to the destination
+            * @userdata1[32:47] Unused
+            * @userdata1[48:63] The length of the source buffer.
+            * @devdesc          The combination of the offset and amount to copy
+            *                   given would have caused a buffer overrun.
+            * @custdesc         A problem occurred during IPL of the system.
+            */
+            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           SPI_COPY_TO_BUFFER,
+                                           SPI_INVALID_PARAMETERS,
+                                           FOUR_UINT16_TO_UINT64(
+                                               i_sourceOffset,
+                                               io_amountToCopy,
+                                               0, // Unused Parameter
+                                               i_sourceLength));
+
+            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                      HWAS::SRCI_PRIORITY_MED);
+            addStatusRegs(errl);
             io_amountToCopy = 0;
             break;
         }
@@ -388,10 +573,9 @@ bool spiGetEngineMutex(TARGETING::Target* i_target,
                 break;
             default:
                 TRACFCOMP(g_trac_spi, ERR_MRK"spiGetEngineMutex: "
-                          "Invalid engine for getting mutex");
+                          "Invalid engine for getting mutex. i_engine=%d",
+                          i_engine);
                 success = false;
-                assert(success, "spidd.C: Invalid engine for getting mutex "
-                       "i_engine=%d", i_engine);
                 break;
         };
     } while(0);
@@ -401,7 +585,7 @@ bool spiGetEngineMutex(TARGETING::Target* i_target,
 
 errlHndl_t spiEngineLockOp(TARGETING::Target* i_target,
                            const uint8_t      i_engine,
-                           const bool         i_unlock)
+                                 bool&        io_unlock)
 {
     errlHndl_t errl = nullptr;
 
@@ -413,17 +597,40 @@ errlHndl_t spiEngineLockOp(TARGETING::Target* i_target,
 
         if (!mutexSuccess)
         {
-            //@TODO RTC 243918 Error
+            TRACFCOMP(g_trac_spi, ERR_MRK"spiEngineLockOp(): "
+                      "Failed to retrieve requested engine mutex! Engine %d",
+                      i_engine);
+            /*@
+            * @errortype
+            * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+            * @moduleid         SPI::SPI_ENGINE_LOCK_OP
+            * @reasoncode       SPI::SPI_FAILED_TO_RETRIEVE_ENGINE_MUTEX
+            * @userdata1        Target HUID of the SPI Master
+            * @userdata2        Requested SPI Engine
+            * @devdesc          The SPI engine mutex requested couldn't be
+            *                   retrieved.
+            * @custdesc         A problem occurred during IPL of the system.
+            */
+            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           SPI_ENGINE_LOCK_OP,
+                                           SPI_FAILED_TO_RETRIEVE_ENGINE_MUTEX,
+                                           TARGETING::get_huid(i_target),
+                                           i_engine);
+            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                      HWAS::SRCI_PRIORITY_MED);
+            io_unlock = false;
             break;
         }
 
-        if (i_unlock)
+        if (io_unlock)
         {
             mutex_unlock(engine_lock);
+            io_unlock = false;
         }
         else
         {
             mutex_lock(engine_lock);
+            io_unlock = true;
         }
 
     } while(0);
@@ -511,6 +718,114 @@ void SpiOp::setAdjustedOpArgs(void * i_buffer)
               "iv_length = %d, iv_adjusted_length = %d, "
               "iv_offset = %d, iv_adjusted_offset = %d",
               iv_length, iv_adjusted_length, iv_offset, iv_adjusted_offset);
+}
+
+void SpiOp::addStatusRegs(errlHndl_t& io_errl)
+{
+    do {
+        if (io_errl == nullptr)
+        {
+            // io_errl cannot be nullptr.
+            TRACFCOMP(g_trac_spi, ERR_MRK"SpiOp::addStatusRegs(): "
+                      "io_errl was nullptr. Skip adding additional FFDC");
+            break;
+        }
+
+        ERRORLOG::ErrlUserDetailsLogRegister registerUDSection(iv_target);
+
+        // Calculates the base address for the SPI device we want to pull
+        // register contents from.
+        SpiControlHandle handle = getSpiHandle();
+
+        // List of registers to collect data from.
+        uint32_t registerList[] = {
+            (SPIM_COUNTERREG     | handle.base_addr),
+            (SPIM_CONFIGREG1     | handle.base_addr),
+            (SPIM_CLOCKCONFIGREG | handle.base_addr),
+            (SPIM_MMSPISMREG     | handle.base_addr),
+            (SPIM_TDR            | handle.base_addr),
+            (SPIM_RDR            | handle.base_addr),
+            (SPIM_SEQREG         | handle.base_addr),
+            (SPIM_STATUSREG      | handle.base_addr),
+        };
+
+        fapi2::buffer<uint64_t> buffer = 0;
+
+        for (auto reg : registerList)
+        {
+            registerUDSection.addData(DEVICE_SCOM_ADDRESS(reg));
+        }
+
+        // Add Root Control Register as well in case the PIB bit was set
+        // improperly
+        registerUDSection.addData(DEVICE_SCOM_ADDRESS(ROOT_CTRL_8));
+
+        registerUDSection.addToLog(io_errl);
+
+    } while(0);
+}
+
+void SpiOp::addCallouts(errlHndl_t& io_errl)
+{
+
+    do {
+        if (io_errl == nullptr)
+        {
+            // io_errl cannot be nullptr.
+            TRACFCOMP(g_trac_spi, ERR_MRK"SpiOp::addCallouts(): "
+                      "io_errl was nullptr. Skip adding additional FFDC");
+            break;
+        }
+
+        // Do a high callout on the SPI Device
+        // Handle the different engines of the SPI Master
+        switch(iv_engine)
+        {
+            case 0:
+            case 1:
+                // BOOT SEEPROM Primary and Backup
+                io_errl->addPartCallout(iv_target,
+                                        HWAS::SBE_SEEPROM_PART_TYPE,
+                                        HWAS::SRCI_PRIORITY_HIGH,
+                                        HWAS::NO_DECONFIG,
+                                        HWAS::GARD_NULL);
+                break;
+            case 2:
+            case 3:
+                // MVPD Primary and Backup
+                io_errl->addPartCallout(iv_target,
+                                        HWAS::VPD_PART_TYPE,
+                                        HWAS::SRCI_PRIORITY_HIGH,
+                                        HWAS::NO_DECONFIG,
+                                        HWAS::GARD_NULL);
+                break;
+            case 4:
+                // TPM
+                // @TODO RTC 246066 Handle TPM callout via HW callout using
+                //                  updated TPM_INFO attr
+                break;
+            case 5:
+                // DUMP
+                io_errl->addPartCallout(iv_target,
+                                        HWAS::SPI_DUMP_PART_TYPE,
+                                        HWAS::SRCI_PRIORITY_HIGH,
+                                        HWAS::NO_DECONFIG,
+                                        HWAS::GARD_NULL);
+                break;
+            default:
+                break;
+        };
+
+        // Do a medium callout on the SPI master proc
+        io_errl->addHwCallout(iv_target,
+                              HWAS::SRCI_PRIORITY_MED,
+                              HWAS::NO_DECONFIG,
+                              HWAS::GARD_NULL);
+
+        // Do a low callout on HB code.
+        io_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                     HWAS::SRCI_PRIORITY_LOW);
+    } while(0);
 }
 
 SpiControlHandle SpiOp::getSpiHandle()
