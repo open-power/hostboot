@@ -1,0 +1,126 @@
+#!/usr/bin/python
+
+# Reads target_types.xml, attribute_types.xml, and the system layout XML file to
+# print various information about the target hierarchy and attributes.
+
+import sys
+from collections import defaultdict
+import xml.etree.ElementTree as ET
+import json
+
+def open_files():
+  target_types_filename, attr_types_filename, system_filename = sys.argv[2:5]
+
+  return (ET.parse(target_types_filename),
+          ET.parse(attr_types_filename),
+          ET.parse(system_filename))
+
+def type_spec_to_type(spec):
+  if spec[0].tag == 'array':
+    return 'bytearray'
+  elif spec[0].tag == 'string':
+    return 'cstring'
+  elif spec[0].tag.find('int') != -1:
+    return 'int'
+  elif spec[0].tag == 'enumeration':
+    return [ 'enumeration', spec[0].find('./id').text ]
+  elif spec[0].tag == 'default':
+    return type_spec_to_type(spec[1:])
+  elif spec[0].tag == 'Target_t':
+    return 'pointer'
+  elif spec[0].tag == 'name':
+    if spec[0].text == 'EntityPath':
+      return 'entpath'
+    else:
+      raise Exception("Unknown nativetype")
+  elif spec[0].tag == 'hbmutex' or spec[0].tag == 'hbrecursivemutex':
+    return 'bytearray'
+  else:
+    raise Exception("unknown type " + spec[0].tag)
+
+def get_attribute_types(attr_types_xml):
+  types = { }
+
+  def do_children_of_types(path, typenode):
+    for attr in attr_types_xml.getroot().findall(path):
+      attr_name = attr.find('./id').text
+      children = attr.find(typenode).getchildren()
+
+      for child in children:
+        types[attr_name] = type_spec_to_type(children)
+
+  do_children_of_types("./attributes/attribute/simpleType/..", './simpleType')
+  do_children_of_types("./attributes/attribute/nativeType/..", './nativeType')
+
+  # complexType isn't supported yet, it requires more complex parsing rules
+  #do_children_of_types("./attributes/attribute/complexType/..", './nativeType')
+
+  print(json.dumps(types, indent=2))
+
+def defdict():
+  return defaultdict(defdict)
+
+def split_affinity_path(affpath):
+  return affpath[affpath.find(':')+1:].split('/')
+
+def traverse_hierarchy(hierarchy, d=None):
+  if d is None:
+    d = defaultdict(list)
+
+  for elt, children in hierarchy.items():
+    if elt != 'huid':
+      huid = hierarchy['huid']
+
+      for child, childdict in children.items():
+        if child != 'huid':
+          d[huid].append(childdict['huid'])
+          traverse_hierarchy(childdict, d)
+
+  return d
+
+def get_children_huids(system_xml):
+  hierarchy = defdict()
+  huid_map = {}
+
+  for target in system_xml.findall('./targetInstance'):
+    huid = target.find('./attribute[id="HUID"]/default').text
+    affpath = target.find('./attribute[id="AFFINITY_PATH"]/default').text
+
+    node = hierarchy
+    for elt in split_affinity_path(affpath):
+      node = node[elt]
+
+    huid_int = str(int(huid, 16))
+    huid_map[huid_int] = []
+    node['huid'] = huid_int
+
+  if sys.argv[1] == 'child_huids':
+    print(json.dumps(traverse_hierarchy(hierarchy['sys-0'], huid_map), indent=2, sort_keys=True))
+  else:
+    print(json.dumps(hierarchy, indent=2, sort_keys=True))
+
+def get_enums(attrs_xml):
+  enums = defaultdict(lambda: {})
+
+  for target in attrs_xml.findall('./attributes/enumerationType'):
+    nextvalue = 0
+
+    for enum in target.findall('./enumerator'):
+      name = enum.find('./name').text
+      valnode = enum.find('./value')
+      value = int(valnode.text, 0) if valnode is not None else nextvalue
+      nextvalue = value + 1
+
+      enums[target.find('./id').text][value] = name
+
+  print json.dumps(enums, indent=2)
+
+if __name__ == '__main__':
+  targets_xml, attrs_xml, system_xml = open_files()
+
+  if sys.argv[1] == 'attribute_types':
+    get_attribute_types(attrs_xml)
+  elif sys.argv[1] == 'child_huids' or sys.argv[1] == 'hierarchy':
+    get_children_huids(system_xml)
+  elif sys.argv[1] == 'enums':
+    get_enums(attrs_xml)

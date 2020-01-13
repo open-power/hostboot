@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2020
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,6 +35,9 @@ use constant CALLFUNC_DEBUG_ENTRY_OFFSET => CALLFUNC_DEBUG_READY_OFFSET + 8;
 use constant CALLFUNC_DEBUG_RETVAL_OFFSET => CALLFUNC_DEBUG_ENTRY_OFFSET + 8;
 use constant CALLFUNC_DEBUG_PARMS_OFFSET => CALLFUNC_DEBUG_RETVAL_OFFSET + 8;
 use constant CALLFUNC_DEBUG_PARMS => 8;
+
+use constant CYCLES_PER_EXEC_POLL => 100000;
+
 sub main
 {
     my ($packName,$args) = @_;
@@ -102,6 +107,7 @@ sub execFunc
     my $force = shift;
     my $parms_arg = shift;
     my @parms = @{$parms_arg};
+    my $maxCycles = shift // (100 * CYCLES_PER_EXEC_POLL);
 
     if( $debug )
     {
@@ -168,10 +174,10 @@ sub execFunc
     my $i = 0;
     while((0 != ::read16($address + CALLFUNC_DEBUG_READY_OFFSET)) &&
           (0 == ::read8($address + CALLFUNC_DEBUG_COMPLETE_OFFSET)) &&
-          ($i < 100))
+          ($i < $maxCycles))
     {
-        ::executeInstrCycles(100000);
-        $i = $i + 1;
+        ::executeInstrCycles(CYCLES_PER_EXEC_POLL);
+        $i = $i + CYCLES_PER_EXEC_POLL;
         if ($debug)
         {
             ::userDisplay("Loop $i.\n");
@@ -184,7 +190,7 @@ sub execFunc
         ::userDisplay "Command failed to complete.\n";
         return 1;
     }
-    
+
     if( $debug )
     {
         # Display return value.
@@ -206,4 +212,3 @@ sub helpInfo
                   "args, parameters, or parms can be used as a short-name for arguments."]
     );
 }
-

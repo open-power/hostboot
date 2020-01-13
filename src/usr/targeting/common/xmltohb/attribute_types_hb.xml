@@ -87,6 +87,7 @@
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+    <hbOnly/>
   </attribute>
 
   <attribute>
@@ -102,6 +103,7 @@
       <uint8_t/>
     </simpleType>
     <writeable/>
+    <hbOnly/>
   </attribute>
 
   <enumerationType>
@@ -129,6 +131,7 @@
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+    <hbOnly/>
   </attribute>
 
   <attribute>
@@ -143,6 +146,7 @@
     <simpleType>
       <uint32_t/>
     </simpleType>
+    <hbOnly/>
   </attribute>
 
   <attribute>
@@ -158,6 +162,7 @@
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+    <hbOnly/>
   </attribute>
 
   <attribute>
@@ -395,6 +400,7 @@
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+    <hbOnly/>
   </attribute>
 
   <enumerationType>
@@ -490,6 +496,7 @@
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+    <hbOnly/>
   </attribute>
 
   <attribute>
@@ -505,6 +512,7 @@
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+    <hbOnly/>
   </attribute>
 
   <attribute>
@@ -793,6 +801,7 @@
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+    <hbOnly/>
   </attribute>
 
   <enumerationType>
@@ -836,6 +845,7 @@
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+    <hbOnly/>
   </attribute>
 
   <attribute>
@@ -868,6 +878,7 @@
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+    <hbOnly/>
   </attribute>
 
   <attribute>
@@ -883,6 +894,7 @@
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+    <hbOnly/>
   </attribute>
 
   <attribute>
@@ -1150,6 +1162,7 @@
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+    <hbOnly/>
   </attribute>
 
   <attribute>
@@ -1167,6 +1180,7 @@
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+    <hbOnly/>
   </attribute>
 
   <attribute>
@@ -1184,6 +1198,7 @@
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+    <hbOnly/>
   </attribute>
 
   <attribute>
@@ -1201,6 +1216,7 @@
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+    <hbOnly/>
   </attribute>
 
   <attribute>
@@ -1610,6 +1626,7 @@
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+    <hbOnly/>
   </attribute>
 
   <attribute>

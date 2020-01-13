@@ -25,3 +25,4 @@ standalone/
 objdump/
 *.cppcheck
 cpptools/
+*.pyc

@@ -3396,9 +3396,9 @@ namespace TARGETING
 #define TARG_CLASS "MapAttrMetadata::"
 
 // Persistency defines
-static const char * P0_PERSISTENCY = "p0";
-static const char * P1_PERSISTENCY = "p1";
-static const char * P3_PERSISTENCY = "p3";
+static __attribute__((unused)) const char * P0_PERSISTENCY = "p0";
+static __attribute__((unused)) const char * P1_PERSISTENCY = "p1";
+static __attribute__((unused)) const char * P3_PERSISTENCY = "p3";
 
 //******************************************************************************
 // TARGETING::mapAttrMetadata
@@ -3465,74 +3465,90 @@ sub writeAttrMetadataMapCFile{
         $finalAttrhash{$attribute->{id}} = $attribute;
     }
 
-    print $outFile "\n";
-    print $outFile "    static const Pair_t l_pair[] = {\n";
+    my $mapAttrMetadataPairs = "\n    static const Pair_t l_pair[] = {\n";
+    my $hbOnlyMapAttrMetadataPairs = '';
 
     foreach my $key ( keys %finalAttrhash)
     {
-        if(!(exists $finalAttrhash{$key}->{hbOnly}))
+        # Fetch the Size of the attribute
+        my $keySize = "ATTR_"."$key"."_type";
+
+        if (!(exists $finalAttrhash{$key}->{hbOnly})
+            && ((exists $finalAttrhash{$key}->{simpleType})
+                || (exists $finalAttrhash{$key}->{complexType})
+                || (exists $finalAttrhash{$key}->{nativeType})))
         {
-            # Fetch the Size of the attribute
-            my $keySize = "ATTR_"."$key"."_type";
-            if(exists $finalAttrhash{$key}->{simpleType})
-            {
-                # Nothing to do
-            }
-            elsif(!(exists $finalAttrhash{$key}->{complexType}) &&
-                  !(exists $finalAttrhash{$key}->{nativeType}))
-            {
-                print STDOUT "\t// ### Attribute $key is Not Supported\n";
-                next;
-            }
-            print $outFile "        std::make_pair( ATTR_".$key.",";
-            print $outFile " AttrMetadataStr(sizeof($keySize),";
+            # We're good to go
+        }
+        else
+        {
+            $hbOnlyMapAttrMetadataPairs .=
+                "        std::make_pair( ATTR_$key, AttrMetadataStr(sizeof($keySize), false, NULL, false )),\n";
+            next;
+        }
 
-            # Fetch Read/Writeable Property
-            if(exists $finalAttrhash{$key}->{writeable})
-            {
-                print $outFile " true,";
-            }
-            else
-            {
-                print $outFile " false,";
-            }
+        $mapAttrMetadataPairs .= "        std::make_pair( ATTR_".$key.",";
+        $mapAttrMetadataPairs .= " AttrMetadataStr(sizeof($keySize),";
 
-            if(!(exists $finalAttrhash{$key}->{persistency}))
-            {
-                croak("Attribute[$key] should have persistency by default");
-            }
-            if($finalAttrhash{$key}->{persistency} eq "non-volatile")
-            {
-                print $outFile " P3_PERSISTENCY,";
-            }
-            elsif(($finalAttrhash{$key}->{persistency} eq
-                    "semi-non-volatile-zeroed") ||
-                  ($finalAttrhash{$key}->{persistency} eq "semi-non-volatile"))
-            {
-                print $outFile " P1_PERSISTENCY,";
-            }
-            elsif(($finalAttrhash{$key}->{persistency} eq "volatile") ||
-                  ($finalAttrhash{$key}->{persistency} eq "volatile-zeroed"))
-            {
-                print $outFile " P0_PERSISTENCY,";
-            }
-            else
-            {
-                croak("Not a defined" .
-                    "Persistency[$finalAttrhash{$key}->{persistency}] for" .
-                    "attribute [$key]");
-            }
+        # Fetch Read/Writeable Property
+        if(exists $finalAttrhash{$key}->{writeable})
+        {
+            $mapAttrMetadataPairs .= " true,";
+        }
+        else
+        {
+            $mapAttrMetadataPairs .= " false,";
+        }
 
-            if ($finalAttrhash{$key}->{id} ~~ @nonSyncAttributes)
-            {
-                print $outFile " true) ),\n";
-            }
-            else
-            {
-                print $outFile " false) ),\n";
-            }
+        if(!(exists $finalAttrhash{$key}->{persistency}))
+        {
+            croak("Attribute[$key] should have persistency by default");
+        }
+        if($finalAttrhash{$key}->{persistency} eq "non-volatile")
+        {
+            $mapAttrMetadataPairs .= " P3_PERSISTENCY,";
+        }
+        elsif(($finalAttrhash{$key}->{persistency} eq
+               "semi-non-volatile-zeroed") ||
+              ($finalAttrhash{$key}->{persistency} eq "semi-non-volatile"))
+        {
+            $mapAttrMetadataPairs .= " P1_PERSISTENCY,";
+        }
+        elsif(($finalAttrhash{$key}->{persistency} eq "volatile") ||
+              ($finalAttrhash{$key}->{persistency} eq "volatile-zeroed"))
+        {
+            $mapAttrMetadataPairs .= " P0_PERSISTENCY,";
+        }
+        else
+        {
+            croak("Not a defined" .
+                  "Persistency[$finalAttrhash{$key}->{persistency}] for" .
+                  "attribute [$key]");
+        }
+
+        if ($finalAttrhash{$key}->{id} ~~ @nonSyncAttributes)
+        {
+            $mapAttrMetadataPairs .= " true) ),\n";
+        }
+        else
+        {
+            $mapAttrMetadataPairs .= " false) ),\n";
         }
     }
+
+    print $outFile $mapAttrMetadataPairs;
+
+    # The HB-only attributes are only compiled in for hostboot to save space.
+    print $outFile "#ifdef __HOSTBOOT_MODULE\n";
+    print $outFile "// ******** WARNING ********\n";
+    print $outFile "// The synchronized, read-write, and persistency fields\n";
+    print $outFile "// for the following entries are potentially INCORRECT\n";
+    print $outFile "// because Hostboot has not yet needed to consume them.\n";
+    print $outFile "// Edit xmltohb.pl to calculate these values if necessary.\n";
+
+    print $outFile $hbOnlyMapAttrMetadataPairs;
+    print $outFile "#endif\n";
+
     print $outFile "    };\n";
     print $outFile "    iv_mapAttrMetadata\.insert( l_pair,\n";
     print $outFile "        l_pair + (sizeof(l_pair)/sizeof(l_pair[0])) );\n\n";
@@ -3692,6 +3708,13 @@ class MapAttrMetadata
          *  \@return, returns the unordered/ordered map which has the all
          *  attributes as key and struct attrMetadataStr as value pair,
          *  variable <ATTRIBUTE_ID::struct attrMetadataStr>
+         *
+         * ******** WARNING ********
+         * The attribute information in the map about persistency, synchronization,
+         * and read-write for HB-only attributes may be INCORRECT because Hostboot
+         * hasn't needed that info yet. If you need it to be correct, edit
+         * xmltohb.pl to calculate it correctly.
+
          */
          const AttrMetadataMapper& getMapMetadataForAllAttributes() const;
 

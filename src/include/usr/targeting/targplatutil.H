@@ -54,10 +54,20 @@ namespace TARGETING
 
 namespace UTIL
 {
+/**
+ * @brief Dumps to simics the values of each attribute on the target
+ *        with the given HUID, or else iterates all targets in the
+ *        system and dumps the value of each of their attributes when a
+ *        HUID is not supplied.
+ *
+ * @param[in] i_huid    The HUID of the target to dump attributes for
+ *                      (default all targets)
+ */
+void dumpHBAttrs(uint32_t i_huid = 0);
 
-    // IPMI sensors have the range 0x0-0xFE - 0xFF
-    // is reserved for invalid sensor
-    static const uint16_t INVALID_IPMI_SENSOR = 0xFF;
+// IPMI sensors have the range 0x0-0xFE - 0xFF
+// is reserved for invalid sensor
+static const uint16_t INVALID_IPMI_SENSOR = 0xFF;
 
 /**
  *  @brief Returns the top level physical target

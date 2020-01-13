@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,18 +36,102 @@
 
 // STD
 #include <stdlib.h>
+#include <algorithm>
 
 // TARG
 #include <targeting/targplatutil.H>
 #include <targeting/common/predicates/predicates.H>
 #include <targeting/common/utilFilter.H>
+
+// ERRL
 #include <errl/errlmanager.H>
-#include <algorithm>
+
+// Magic instruction
+#include <arch/ppc.H>
+
+// Attribute length info
+#include <mapattrmetadata.H>
+
 namespace TARGETING
 {
 
 namespace UTIL
 {
+
+void dumpHBAttrs(const uint32_t i_huid)
+{
+    // getting top system target "SYS"
+    Target* l_topSysTarget = nullptr;
+    targetService().getTopLevelTarget(l_topSysTarget);
+    assert(l_topSysTarget, "dumpHBAttrs: Could not get top system target");
+
+    TargetHandleList l_targetList;
+
+    targetService().getAssociated( l_targetList, l_topSysTarget,
+                                   TargetService::CHILD, TargetService::ALL, nullptr);
+
+    l_targetList.push_back(l_topSysTarget);
+
+    const auto& l_attrMetaData
+        = theMapAttrMetadata::instance().getMapMetadataForAllAttributes();
+
+    // Dump every attribute of every target.
+    for (const auto l_target: l_targetList)
+    {
+        const uint32_t l_targetHuid = get_huid(l_target);
+
+        if (i_huid != 0 && i_huid != l_targetHuid)
+        {
+            continue;
+        }
+
+        // array of attr ids
+        const ATTRIBUTE_ID* const l_pAttrId = TARG_TO_PLAT_PTR(l_target->iv_pAttrNames);
+
+        const ATTRIBUTE_ID* const end = &l_pAttrId[l_target->iv_attrs];
+
+        std::vector<uint8_t> l_attrData;
+
+        // Iterate each attribute ID and dump it, along with its value, out to the simulator
+        for (const ATTRIBUTE_ID* l_attributeId = l_pAttrId;
+             l_attributeId != end;
+             ++l_attributeId)
+        {
+            auto l_attrSizeIt = l_attrMetaData.find(*l_attributeId);
+
+            if (l_attrSizeIt == l_attrMetaData.end())
+            {
+                TRACFCOMP(g_trac_targeting,
+                          "dumpHBAttrs: Can't find size of attribute, ID 0x%08x", *l_attributeId);
+                continue;
+            }
+
+            const uint32_t l_attrSize = l_attrSizeIt->second.size;
+            l_attrData.resize(l_attrSize);
+
+            if (!l_target->_tryGetAttrUnsafe(*l_attributeId, l_attrSize, &l_attrData[0]))
+            {
+                TRACFCOMP(g_trac_targeting,
+                          "dumpHBAttrs: Can't get attribute ID 0x%08x (this is probably a bug)",
+                          *l_attributeId);
+                continue;
+            }
+
+            const uint32_t l_fixedSizes = 8;
+            const uint32_t l_count = ((l_attrSize + l_fixedSizes - 1) / l_fixedSizes);
+
+            // Iterate over 8-byte chunks of the attribute value and send them out to the simulator.
+            for (uint32_t i = 0; i < l_count; ++i)
+            {
+                MAGIC_INST_SAVE_ATTR_VALUE(l_targetHuid,
+                                           *l_attributeId,
+                                           l_attrSize,
+                                           i * l_fixedSizes,
+                                           *(uint64_t*)(&l_attrData[i * l_fixedSizes]));
+            }
+        }
+    }
+}
 
 #ifdef CONFIG_BMC_IPMI
     uint32_t getIPMISensorNumber( const TARGETING::Target*& i_targ,
@@ -324,4 +408,3 @@ Target * getTargetFromIPMISensor( uint32_t i_sensorNumber )
 } // End namespace TARGETING::UTIL
 
 } // End namespace TARGETING
-

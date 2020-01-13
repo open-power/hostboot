@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2019
+# Contributors Listed Below - COPYRIGHT 2011,2020
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -47,6 +47,7 @@ import os
 import subprocess
 import re
 import random
+import struct
 
 # @class DebugFrameworkIPCMessage
 # @brief Wrapper class for constructing a properly formed IPC message for the
@@ -490,6 +491,8 @@ try:
 except:
     1
 
+hb_attr_dump_file = open('hb_attr_dump.bin', 'wb')
+
 # Get CPU per group/chip/core/thread specified
 def get_host_cpu(system_cmp, group_id, chip_id, core, thread):
     # Get all the proc components for the system
@@ -793,6 +796,19 @@ def magic_instruction_callback(user_arg, cpu, arg):
     if arg == 7056:   # MAGIC_GCOV_DUMP_NOW
         print('Gcov dumping chain from 0x%x' % (cpu.r3,))
         SIM_run_alone(run_command, 'hb-GcovModuleUnload "address=%d"' % (cpu.r3,))
+
+    if arg == 7057:   # MAGIC_SAVE_ATTR_VALUE
+        args = (cpu.r4, cpu.r5, cpu.r6, cpu.r7, cpu.r8)
+        print('Saving attribute data from %s' % (args,))
+
+        huid, attr_id, attr_size, byte_offset, byte_data = args
+
+        hb_attr_dump_file.write(struct.pack('>IIIIQ',
+                                            huid,
+                                            attr_id,
+                                            attr_size,
+                                            byte_offset,
+                                            byte_data))
 
 # Continuous trace: Clear these files.
 rc = os.system( "rm -f hbTracMERG" )

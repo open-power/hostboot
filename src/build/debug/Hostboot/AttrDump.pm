@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2020
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -46,18 +48,6 @@ sub main
         $force = 1;
     }
 
-    # Parse 'trace' argument.
-    my $trace = (::findSymbolAddress("TARGETING::g_trac_targeting"))[0];
-    if (defined $args->{"trace"})
-    {
-        $trace = (::findSymbolAddress($args->{"trace"}))[0];
-    }
-    if( $debug )
-    {
-        my $tmp2 = $args->{"trace"};
-        ::userDisplay("\ntrace: $trace ($tmp2)\n");
-    }
-
     # Parse 'target' argument.
     my $huid = 0; # dump all targets
     if (defined $args->{"huid"})
@@ -70,9 +60,17 @@ sub main
     }
 
     my @dumpparms;
-    push( @dumpparms, $trace );
     push( @dumpparms, $huid );
-    Hostboot::CallFunc::execFunc( "TARGETING::dumpAllAttributes2(trace_buf_head**, unsigned int)", $debug, $force, \@dumpparms );
+
+    # dumpHBAttrs can take a really long time, so we give the simulation plenty
+    # of cycles to run it before we bail out.
+    use constant MAX_CYCLES_TO_EXECUTE => 100000000000;
+
+    Hostboot::CallFunc::execFunc( "TARGETING::UTIL::dumpHBAttrs(unsigned int)",
+                                  $debug,
+                                  $force,
+                                  \@dumpparms,
+                                  MAX_CYCLES_TO_EXECUTE );
 
     return 0;
 }
@@ -84,7 +82,6 @@ sub helpInfo
         intro => ["Dumps all Attributes to trace."],
         options => {
                     "huid" =>  ["HUID of target to dump (default is to dump all targets)."],
-                    "trace" => ["Trace buffer to use (default=g_trac_targ)."],
                     "force" => ["Run command even if state does not appear correct."],
                     "debug" => ["More debug output."],
                    },

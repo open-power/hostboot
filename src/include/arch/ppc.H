@@ -517,6 +517,7 @@ enum
 
     MAGIC_CONTINUOUS_TRACE    =  7055, // extract mixed trace buffer
     MAGIC_GCOV_MODULE_UNLOAD  =  7056, // extract gcov info
+    MAGIC_SAVE_ATTR_VALUE     =  7057, // record attribute value
 
 
     // 8000-8999 are defined by the Simics CEC team
@@ -526,6 +527,20 @@ enum
     MAGIC_SIMICS_ISTEP         =  8020, // Log istep, same parms as 7020
     MAGIC_SIMICS_EXIT_CACHE_CONTAINED = 8021, // Exiting cache contained mode
 };
+
+/**
+ * @brief     Ask the simulation to record (part of) the value of an attribute.
+ * @param[in] HUID         HUID of target
+ * @param[in] ATTR_ID      Attribute ID
+ * @param[in] ATTR_SIZE    Total size of attribute in bytes
+ * @param[in] BYTE_OFFSET  Offset, in bytes, of the given 8-byte chunk of the attribute value
+ * @param[in] BYTES        8-byte chunk of the attribute value
+ */
+#define MAGIC_INST_SAVE_ATTR_VALUE(HUID, ATTR_ID, ATTR_SIZE, BYTE_OFFSET, BYTES) \
+    asm volatile("mr 4, %0; mr 5, %1; mr 6, %2; mr 7, %3; mr 8, %4;"    \
+                 :: "r" (HUID), "r" (ATTR_ID), "r" (ATTR_SIZE), "r" (BYTE_OFFSET), "r" (BYTES) \
+                 : "4", "5", "6", "7", "8");                            \
+    MAGIC_INSTRUCTION(MAGIC_SAVE_ATTR_VALUE);                           \
 
 /**
  * @brief Collect SBE traces via external debug commands

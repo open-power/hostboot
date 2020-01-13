@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,6 +99,16 @@ namespace util
 {
     class Mutex;
 }
+
+#ifdef __HOSTBOOT_MODULE
+namespace TARGETING
+{
+    namespace UTIL
+    {
+        void dumpHBAttrs(uint32_t);
+    }
+}
+#endif
 
 namespace TARGETING
 {
@@ -936,6 +946,9 @@ class Target
                                      uint32_t i_attrId,
                                      uint32_t i_size );
 
+#ifdef __HOSTBOOT_MODULE
+        friend void UTIL::dumpHBAttrs(uint32_t i_huid);
+#endif
 } PACKED;
 
 template<const ATTRIBUTE_ID A>
