@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -101,13 +101,13 @@ fapi_try_exit:
 /// @brief bias PMIC with spd settings for phase combination (SWA, SWB or SWA+SWB)
 ///
 /// @param[in] i_pmic_target PMIC target
-/// @param[in] i_dimm_target - DIMM target of PMIC
+/// @param[in] i_ocmb_target - OCMB parent target of pmic
 /// @param[in] i_id - PMIC0 or PMIC1
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
 ///
 fapi2::ReturnCode bias_with_spd_phase_comb(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_DIMM>& i_dimm_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     const mss::pmic::id i_id)
 {
     static constexpr auto J = mss::pmic::product::JEDEC_COMPLIANT;
@@ -116,7 +116,7 @@ fapi2::ReturnCode bias_with_spd_phase_comb(
 
     uint8_t l_phase_comb = 0;
     fapi2::buffer<uint8_t> l_phase;
-    FAPI_TRY(mss::pmic::get_phase_comb[i_id](i_dimm_target, l_phase_comb));
+    FAPI_TRY(mss::pmic::get_phase_comb[i_id](i_ocmb_target, l_phase_comb));
 
     // Read, replace bit, and then re-write
     FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R4F, l_phase));
@@ -131,13 +131,13 @@ fapi_try_exit:
 /// @brief bias PMIC with SPD settings for voltage ranges
 ///
 /// @param[in] i_pmic_target PMIC target
-/// @param[in] i_dimm_target dimm target of PMIC
+/// @param[in] i_ocmb_target OCMB parent target of pmic
 /// @param[in] i_id PMIC0 or PMIC1
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
 ///
 fapi2::ReturnCode bias_with_spd_volt_ranges(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_DIMM>& i_dimm_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     const mss::pmic::id i_id)
 {
     static constexpr auto J = mss::pmic::product::JEDEC_COMPLIANT;
@@ -151,10 +151,10 @@ fapi2::ReturnCode bias_with_spd_volt_ranges(
 
     fapi2::buffer<uint8_t> l_volt_range_buffer;
 
-    FAPI_TRY(mss::pmic::get_swa_voltage_range_select[i_id](i_dimm_target, l_swa_range));
-    FAPI_TRY(mss::pmic::get_swb_voltage_range_select[i_id](i_dimm_target, l_swb_range));
-    FAPI_TRY(mss::pmic::get_swc_voltage_range_select[i_id](i_dimm_target, l_swc_range));
-    FAPI_TRY(mss::pmic::get_swd_voltage_range_select[i_id](i_dimm_target, l_swd_range));
+    FAPI_TRY(mss::pmic::get_swa_voltage_range_select[i_id](i_ocmb_target, l_swa_range));
+    FAPI_TRY(mss::pmic::get_swb_voltage_range_select[i_id](i_ocmb_target, l_swb_range));
+    FAPI_TRY(mss::pmic::get_swc_voltage_range_select[i_id](i_ocmb_target, l_swc_range));
+    FAPI_TRY(mss::pmic::get_swd_voltage_range_select[i_id](i_ocmb_target, l_swd_range));
 
     // Read in what the register has, as to not overwrite any default values
     FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R2B, l_volt_range_buffer));
@@ -177,13 +177,13 @@ fapi_try_exit:
 /// @brief bias PMIC with SPD settings for startup sequence
 ///
 /// @param[in] i_pmic_target PMIC target
-/// @param[in] i_dimm_target dimm target of PMIC
+/// @param[in] i_ocmb_target OCMB parent target of pmic
 /// @param[in] i_id PMIC0 or PMIC1
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
 ///
 fapi2::ReturnCode bias_with_spd_startup_seq(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_DIMM>& i_dimm_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     const mss::pmic::id i_id)
 {
     static constexpr auto J = mss::pmic::product::JEDEC_COMPLIANT;
@@ -220,8 +220,8 @@ fapi2::ReturnCode bias_with_spd_startup_seq(
     for (uint8_t l_rail_index = mss::pmic::rail::SWA; l_rail_index <= mss::pmic::rail::SWD; ++l_rail_index)
     {
         // We know after these FAPI_TRY's that all 4 entries must be populated, else the TRYs fail
-        FAPI_TRY(((l_get_sequence_order[l_rail_index][i_id]))(i_dimm_target, l_sequence_orders[l_rail_index]));
-        FAPI_TRY(((l_get_sequence_delay[l_rail_index][i_id]))(i_dimm_target, l_sequence_delays[l_rail_index]));
+        FAPI_TRY(((l_get_sequence_order[l_rail_index][i_id]))(i_ocmb_target, l_sequence_orders[l_rail_index]));
+        FAPI_TRY(((l_get_sequence_delay[l_rail_index][i_id]))(i_ocmb_target, l_sequence_delays[l_rail_index]));
 
         // The SPD allows for up to 8 sequences, but there are only 4 on the PMIC. The SPD defaults never go higher than 2.
         // We put this check in here as with anything over 4, we don't really know what we can do.
@@ -384,26 +384,18 @@ fapi_try_exit:
 ///
 /// @brief Order PMICs by sequence defined in the SPD
 ///
-/// @param[in] i_dimm DIMM target to pull SPD fields from
-/// @param[in] i_dimm_index index of the DIMM target
-/// @param[in] i_pmics_per_dimm number of PMICs per dimm
+/// @param[in] i_ocmb_target OCMB target to pull SPD fields from
 /// @param[in,out] io_pmics vector of PMICs that will be re-ordered in place
 /// @return fapi2::ReturnCode
 ///
 fapi2::ReturnCode order_pmics_by_sequence(
-    const fapi2::Target<fapi2::TARGET_TYPE_DIMM> i_dimm,
-    const uint8_t i_dimm_index,
-    const uint8_t i_pmics_per_dimm,
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> i_ocmb_target,
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& io_pmics)
 {
-    const auto l_begin_offset = i_dimm_index * i_pmics_per_dimm;
-    const auto l_iterator_begin = io_pmics.begin() + l_begin_offset;
-    const auto l_iterator_end = l_iterator_begin + i_pmics_per_dimm;
-
     fapi2::ReturnCode l_rc_0_out = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ReturnCode l_rc_1_out = fapi2::FAPI2_RC_SUCCESS;
 
-    std::sort(l_iterator_begin, l_iterator_end, [&l_rc_0_out, &l_rc_1_out, i_dimm] (
+    std::sort(io_pmics.begin(), io_pmics.end(), [&l_rc_0_out, &l_rc_1_out, i_ocmb_target] (
                   const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& l_first_pmic,
                   const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& l_second_pmic) -> bool
     {
@@ -412,8 +404,8 @@ fapi2::ReturnCode order_pmics_by_sequence(
         uint8_t l_sequence_pmic_1 = 0;
 
         // Need to pull out the RC's manually. Goto's in lambdas apparently don't play nicely
-        fapi2::ReturnCode l_rc_0 = mss::pmic::get_sequence[mss::index(l_first_pmic)](i_dimm, l_sequence_pmic_0);
-        fapi2::ReturnCode l_rc_1 = mss::pmic::get_sequence[mss::index(l_second_pmic)](i_dimm, l_sequence_pmic_1);
+        fapi2::ReturnCode l_rc_0 = mss::pmic::get_sequence[mss::index(l_first_pmic)](i_ocmb_target, l_sequence_pmic_0);
+        fapi2::ReturnCode l_rc_1 = mss::pmic::get_sequence[mss::index(l_second_pmic)](i_ocmb_target, l_sequence_pmic_1);
 
         // Hold on to an error if we see one
         if (l_rc_0 != fapi2::FAPI2_RC_SUCCESS)
@@ -428,10 +420,10 @@ fapi2::ReturnCode order_pmics_by_sequence(
         return l_sequence_pmic_0 < l_sequence_pmic_1;
     });
 
-    FAPI_TRY(l_rc_0_out, "Error getting sequencing attributes for PMICs associated with DIMM 0 target %s",
-             mss::c_str(i_dimm));
-    FAPI_TRY(l_rc_1_out, "Error getting sequencing attributes for PMICs associated with DIMM 1 target %s",
-             mss::c_str(i_dimm));
+    FAPI_TRY(l_rc_0_out, "Error getting sequencing attributes for PMICs associated with OCMB %s",
+             mss::c_str(i_ocmb_target));
+    FAPI_TRY(l_rc_1_out, "Error getting sequencing attributes for PMICs associated with OCMB%s",
+             mss::c_str(i_ocmb_target));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -477,12 +469,12 @@ fapi_try_exit:
 /// @brief Function to enable 1U and 2U pmics
 ///
 /// @param[in] i_pmic_target - the pmic target
-/// @param[in] i_dimm_target - the dimm target that the PMIC resides on
+/// @param[in] i_ocmb_target - the OCMB parent target of the pmic
 /// @param[in] i_vendor_id - the vendor ID of the PMIC to bias
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS if successful
 ///
 fapi2::ReturnCode enable_chip_1U_2U(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
-                                    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm_target,
+                                    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
                                     const uint16_t i_vendor_id)
 {
     FAPI_INF("Setting PMIC %s settings from SPD", mss::c_str(i_pmic_target));
@@ -499,13 +491,13 @@ fapi2::ReturnCode enable_chip_1U_2U(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>
 
     if (i_vendor_id == mss::pmic::vendor::IDT)
     {
-        FAPI_TRY(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::IDT>(i_pmic_target, i_dimm_target),
+        FAPI_TRY(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::IDT>(i_pmic_target, i_ocmb_target),
                  "enable_chip<IDT, 1U/2U>: Error biasing PMIC %s with SPD settings",
                  mss::c_str(i_pmic_target));
     }
     else // assert done in pmic_enable.C that vendor is IDT or TI
     {
-        FAPI_TRY(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::TI>(i_pmic_target, i_dimm_target),
+        FAPI_TRY(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::TI>(i_pmic_target, i_ocmb_target),
                  "enable_chip<TI, 1U/2U>: Error biasing PMIC %s with SPD settings",
                  mss::c_str(i_pmic_target));
     }
@@ -552,58 +544,66 @@ fapi2::ReturnCode disable_and_reset_pmics(const std::vector<fapi2::Target<fapi2:
 fapi_try_exit:
     return fapi2::current_err;
 }
+
 ///
-/// @brief Enable PMIC for SPD mode
+/// @brief Check for supported module height for the DIMMs on the provided OCMB
 ///
-/// @param[in] i_pmics vector of PMICs sorted by mss::index
-/// @param[in] i_dimms const vector of DIMMs sorted by mss::index
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+/// @param[in] i_ocmb_target OCMB target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok, else error code
 ///
-fapi2::ReturnCode pmic_enable_SPD(
-    std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmics,
-    const std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>>& i_dimms)
+fapi2::ReturnCode check_for_valid_module_height(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
 {
     uint8_t l_module_height = 0;
-    FAPI_TRY(mss::attr::get_dram_module_height(i_dimms[0], l_module_height));
+
+    // Check that we are on a supported module height
+    FAPI_TRY(mss::attr::get_dram_module_height(i_ocmb_target, l_module_height));
 
     FAPI_ASSERT(l_module_height == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_1U ||
                 l_module_height == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_2U,
                 fapi2::PMIC_DIMM_SPD_UNSUPPORTED_MODULE_HEIGHT()
-                .set_TARGET(i_dimms[0])
+                .set_TARGET(i_ocmb_target)
                 .set_VALUE(l_module_height),
-                "DIMM %s module height attribute not identified as 1U or 2U. "
+                "%s module height attribute not identified as 1U or 2U. "
                 "ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT of %u . Not supported yet.",
-                mss::c_str(i_dimms[0]), l_module_height);
+                mss::c_str(i_ocmb_target), l_module_height);
 
-    // Now we know there are 2 pmics per dimm (for DDIMM only... TK will change with future refactor)
-    static constexpr uint8_t PMICS_PER_DIMM = 2;
+    return fapi2::FAPI2_RC_SUCCESS;
 
-    for (uint8_t l_dimm_index = 0; l_dimm_index < i_dimms.size(); ++l_dimm_index)
+fapi_try_exit:
+    return fapi2::current_err;
+}
+///
+/// @brief Enable PMIC for SPD mode
+///
+/// @param[in] i_ocmb_target OCMB target parent of PMICs
+/// @param[in,out] io_pmics vector of PMICs sorted by mss::index. Expected to be non-empty, sorted again by sequence ATTR
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode pmic_enable_SPD(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+                                  std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& io_pmics)
+{
+    FAPI_TRY(mss::pmic::check_for_valid_module_height(i_ocmb_target));
+
+    // Ensure the PMICs are in sorted order
+    FAPI_TRY(mss::pmic::order_pmics_by_sequence(i_ocmb_target, io_pmics));
+
+    // Now the PMICs are in the right order of DIMM and the right order by their defined SPD sequence within each dimm
+    // Let's kick off the enables
+    for (const auto& l_pmic : io_pmics)
     {
-        // The PMICs are in sorted order
-        const auto& l_dimm = i_dimms[l_dimm_index];
-        FAPI_TRY(mss::pmic::order_pmics_by_sequence(l_dimm, l_dimm_index, PMICS_PER_DIMM, i_pmics));
+        uint16_t l_vendor_id = 0;
 
-        // Now the PMICs are in the right order of DIMM and the right order by their defined SPD sequence within each dimm
-        // Let's kick off the enables
-        for (const auto& l_pmic : i_pmics)
-        {
-            // Get the corresponding DIMM target to feed to the helpers
-            const auto& l_dimm = i_dimms[mss::index(l_pmic) / PMICS_PER_DIMM];
-            uint16_t l_vendor_id = 0;
+        // Get vendor ID
+        FAPI_TRY(mss::pmic::get_mfg_id[mss::index(l_pmic)](i_ocmb_target, l_vendor_id));
 
-            // Get vendor ID
-            FAPI_TRY(mss::pmic::get_mfg_id[mss::index(l_pmic)](l_dimm, l_vendor_id));
+        // Poll to make sure PBULK reports good, then we can enable the chip and write/read registers
+        FAPI_TRY(mss::pmic::poll_for_pbulk_good(l_pmic),
+                 "pmic_enable: poll for pbulk good either failed, or returned not good status on PMIC %s",
+                 mss::c_str(l_pmic));
 
-            // Poll to make sure PBULK reports good, then we can enable the chip and write/read registers
-            FAPI_TRY(mss::pmic::poll_for_pbulk_good(l_pmic),
-                     "pmic_enable: poll for pbulk good either failed, or returned not good status on PMIC %s",
-                     mss::c_str(l_pmic));
-
-            // Call the enable procedure
-            FAPI_TRY((mss::pmic::enable_chip_1U_2U(l_pmic, l_dimm, l_vendor_id)),
-                     "pmic_enable: Error enabling PMIC %s", mss::c_str(l_pmic));
-        }
+        // Call the enable procedure
+        FAPI_TRY((mss::pmic::enable_chip_1U_2U(l_pmic, i_ocmb_target, l_vendor_id)),
+                 "pmic_enable: Error enabling PMIC %s", mss::c_str(l_pmic));
     }
 
     return fapi2::FAPI2_RC_SUCCESS;

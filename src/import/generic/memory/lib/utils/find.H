@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -147,6 +147,18 @@ template< fapi2::TargetType M, fapi2::TargetType T >
 inline fapi2::Target<M> find_target( const fapi2::Target<T>& i_target)
 {
     return find_target_impl<M>(i_target, std::integral_constant<bool, M == T> {});
+}
+
+///
+/// @brief find the OCMB_CHIP given a DIMM
+/// @param[in] i_target the fapi2 target DIMM
+/// @return a OCMB_CHIP target.
+///
+template<>
+inline fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> find_target(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+{
+    return i_target.getParent<fapi2::TARGET_TYPE_MEM_PORT>()
+           .getParent<fapi2::TARGET_TYPE_OCMB_CHIP>();
 }
 
 ///

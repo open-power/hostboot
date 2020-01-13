@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -146,50 +146,75 @@ namespace gen
 {
 
 ///
-/// @brief Helper to get the target associated with the SPD facade
-/// @param[in] i_data the SPD data
-/// return a fapi2 DIMM target
+/// @class get
+/// @brief get struct base class
+/// @tparam T TargetType with which to use
+/// @tparam DT the data type
 ///
-static inline fapi2::Target<fapi2::TARGET_TYPE_DIMM> get_target(const spd::facade& i_data)
-{
-    return i_data.get_dimm_target();
-}
+template <fapi2::TargetType T, typename DT>
+struct get;
 
 ///
-/// @brief Helper to get the target associated with the EFD decoder
-/// @param[in] i_data the EFD data
-/// return a fapi2 DIMM target
+/// @class get<fapi2::TARGET_TYPE_OCMB_CHIP, mss::spd::facade>
+/// @brief Get target struct for TARGET_TYPE_OCMB_CHIP and spd::facade specialization
+/// @note For any attributes we denote as TARGET_TYPE_OCMB_CHIP, the SPD field will populate it,
+///       but loses any concept of dual drop.
 ///
-static inline fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> get_target(const std::shared_ptr<efd::base_decoder>& i_data)
+template <>
+struct get<fapi2::TARGET_TYPE_OCMB_CHIP, mss::spd::facade>
 {
-    return i_data->get_ocmb_target();
-}
+    ///
+    /// @brief Get target for TARGET_TYPE_OCMB_CHIP and mss::spd::facade
+    ///
+    /// @param[in] i_data mss::spd::facade data
+    /// @return fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> Attribute target type
+    ///
+    static fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> target(const mss::spd::facade& i_data)
+    {
+        return mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(
+                   mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_data.get_dimm_target()));
+    }
+};
 
 ///
-/// @brief Helper function to get the target associated with generic attribute setting
-/// @param[in] i_target
-/// return a fapi2 MEM_PORT target
+/// @class get<T, spd::facade>
+/// @brief get struct for spd::facade specialization with default target type
+/// @tparam T TargetType with which to use
 ///
-static inline fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> get_attr_target(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
-        i_target)
+template <fapi2::TargetType T>
+struct get<T, spd::facade>
 {
-    return mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
-}
+    ///
+    /// @brief Get target for spd::facade and default target type for SPD attrs (MEM_PORT)
+    ///
+    /// @param[in] i_data spd::facade data
+    /// @return fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> Attribute target type
+    ///
+    static fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> target(const spd::facade& i_data)
+    {
+        return mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_data.get_dimm_target());
+    }
+};
 
 ///
-/// @brief Helper function to get the target associated with generic attribute setting
-/// @param[in] i_target
-/// return a fapi2 MEM_PORT target
+/// @class Get get<T, std::shared_ptr<efd::base_decoder>>
+/// @brief get struct for efd::base_decoder specialization with default target type
+/// @tparam T TargetType with which to use
 ///
-inline fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> get_attr_target(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
-        i_target)
+template <fapi2::TargetType T>
+struct get<T, std::shared_ptr<efd::base_decoder>>
 {
-    // Explorer has only one MEM_PORT per OCMB, so we are looking for the 0th pos relative to the OCMB
-    // Will need to update to take into account a mem_channel index in VPDinfo if we ever support this.
-    // Per FW, for the DDIMM case we can't support unique settings per channel because the SPD
-    // doesn't know about anything outside of the DDIMM itself.
-    return mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target)[0];
-}
+    ///
+    /// @brief Get target for std::shared_ptr<efd::base_decoder> and default target type for EFD attrs (MEM_PORT)
+    ///
+    /// @param[in] i_data std::shared_ptr<efd::base_decoder> data
+    /// @return fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> Attribute target type
+    ///
+    static fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> target(const std::shared_ptr<efd::base_decoder>& i_data)
+    {
+        return mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_data->get_ocmb_target())[0];
+    }
+};
 
 ///
 /// @brief Helper function to update the structure that holds attr data
@@ -381,7 +406,6 @@ inline fapi2::ReturnCode update_data( const DT& i_data,
                                       const FFDC i_ffdc_code,
                                       OT& o_data )
 {
-    FAPI_DBG("Updating data with %d for %s", i_setting, spd::c_str(get_target(i_data)));
     o_data = i_setting;
     return fapi2::FAPI2_RC_SUCCESS;
 }
@@ -433,10 +457,7 @@ inline fapi2::ReturnCode set_field(const DT& i_data,
                                    const IT i_setting)
 {
     // Grab the target associated w/the data (e.g. SPD or EFD)
-    const auto l_data_target = get_target(i_data);
-
-    // Grab the target associated w/the attribute to set
-    const auto l_attr_target = get_attr_target(l_data_target);
+    const auto l_attr_target = get<TT::TARGET_TYPE, DT>::target(i_data);
 
     // Get the attribute data in its entirety
     typename TT::attr_type l_attr_list = {};
@@ -446,6 +467,8 @@ inline fapi2::ReturnCode set_field(const DT& i_data,
     // Update the portion of interest (can vary per dimm and/or rank)
     FAPI_TRY( update_data(i_data, i_setting, TT::FFDC_CODE, l_attr_list),
               "Failed update_data()");
+
+    FAPI_DBG("Updating data with %d for %s", i_setting, spd::c_str(l_attr_target));
 
     // Set the contents back to the attribute
     FAPI_TRY( TT::set_attr(l_attr_target, l_attr_list),

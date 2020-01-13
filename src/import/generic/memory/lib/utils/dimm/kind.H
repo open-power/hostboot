@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/utils/find.H>
 
 namespace mss
 {
@@ -155,7 +156,8 @@ class kind
             FAPI_TRY( mss::attr::get_hybrid( i_target, iv_hybrid ));
             FAPI_TRY( mss::attr::get_hybrid_memory_type( i_target, iv_hybrid_memory_type ));
             FAPI_TRY( mss::attr::get_rcd_mfg_id(i_target, iv_rcd_mfgid) );
-            FAPI_TRY( mss::attr::get_dram_module_height(i_target, iv_module_height) );
+            FAPI_TRY( mss::attr::get_dram_module_height(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target),
+                      iv_module_height) );
             return;
 
         fapi_try_exit:

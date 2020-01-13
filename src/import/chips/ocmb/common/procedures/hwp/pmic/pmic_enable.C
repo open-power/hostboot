@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,7 +45,7 @@
 extern "C"
 {
     ///
-    /// @brief Enable function for pmic module. Calls appropriate enable func with matching DIMM target
+    /// @brief Enable function for pmic modules
     /// @param[in] i_target ocmb target
     /// @param[in] i_mode enable mode operation
     /// @return FAPI2_RC_SUCCESS iff ok
@@ -53,7 +53,6 @@ extern "C"
     fapi2::ReturnCode pmic_enable(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
                                   const mss::pmic::enable_mode i_mode)
     {
-        auto l_dimms = mss::find_targets_sorted_by_index<fapi2::TARGET_TYPE_DIMM>(i_ocmb_target);
         auto l_pmics = mss::find_targets_sorted_by_index<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target);
 
         // Check that we have PMICs (we wouldn't on gemini, for example)
@@ -73,10 +72,8 @@ extern "C"
         }
         else
         {
-            if (!l_dimms.empty())
-            {
-                FAPI_TRY(mss::pmic::pmic_enable_SPD(l_pmics, l_dimms));
-            }
+            // At this point, we are certain there are pmics, so we can proceed
+            FAPI_TRY(mss::pmic::pmic_enable_SPD(i_ocmb_target, l_pmics));
         }
 
         // Check that all the PMIC statuses are good post-enable

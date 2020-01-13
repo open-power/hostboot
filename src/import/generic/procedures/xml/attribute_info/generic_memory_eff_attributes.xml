@@ -638,7 +638,7 @@
 
   <attribute>
     <id>ATTR_MEM_EFF_DRAM_MODULE_HEIGHT</id>
-    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
     <description>
       ARRAY[DIMM]
       DRAM Modlue Height
@@ -648,7 +648,6 @@
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
-    <array>2</array>
     <mssAccessorName>dram_module_height</mssAccessorName>
   </attribute>
 

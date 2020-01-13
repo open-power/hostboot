@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,9 +51,10 @@ namespace mss
 {
 namespace pmic
 {
-/// @brief pointer to PMIC attribute getters for DIMM target
-typedef fapi2::ReturnCode (*pmic_attr_ptr)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t& o_value);
-typedef fapi2::ReturnCode (*pmic_attr_ptr_signed)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+/// @brief pointer to PMIC attribute getters for OCMB parent target of pmic
+typedef fapi2::ReturnCode (*pmic_attr_ptr)(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        uint8_t& o_value);
+typedef fapi2::ReturnCode (*pmic_attr_ptr_signed)(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         int8_t& o_value);
 // Pointers below allow for run-time attribute getter selection by PMIC ID (0,1)
 
@@ -246,9 +247,9 @@ static const pmic_attr_ptr_signed* get_efd_volt_offset[] =
 static const std::vector<const char*> PMIC_RAIL_NAMES = {"SWA", "SWB", "SWC", "SWD"};
 
 // Attribute setter FP type
-typedef fapi2::ReturnCode (*pmic_attr_setter_ptr)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+typedef fapi2::ReturnCode (*pmic_attr_setter_ptr)(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         uint8_t i_value);
-typedef fapi2::ReturnCode (*pmic_attr_setter_ptr_signed)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+typedef fapi2::ReturnCode (*pmic_attr_setter_ptr_signed)(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         int8_t i_value);
 
 // Voltage Setting
@@ -407,42 +408,42 @@ fapi2::ReturnCode start_vr_enable(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target);
 
 ///
-/// @brief bias PMIC0 with spd settings for phase combination (SWA, SWB or SWA+SWB)
+/// @brief bias PMIC with spd settings for phase combination (SWA, SWB or SWA+SWB)
 ///
 /// @param[in] i_pmic_target PMIC target
-/// @param[in] i_port - port target of PMIC
-/// @param[in] i_dimm_index - DIMM index for PMIC (0,1)
+/// @param[in] i_ocmb_target - OCMB parent target of pmic
+/// @param[in] i_id - PMIC0 or PMIC1
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
 ///
 fapi2::ReturnCode bias_with_spd_phase_comb(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_DIMM>& i_dimm,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     const mss::pmic::id i_id);
 
 ///
-/// @brief bias with SPD settings for voltage ranges
+/// @brief bias PMIC with SPD settings for voltage ranges
 ///
 /// @param[in] i_pmic_target PMIC target
-/// @param[in] i_port port target of PMIC
-/// @param[in] i_dimm_index DIMM index for PMIC (0,1)
+/// @param[in] i_ocmb_target OCMB parent target of pmic
+/// @param[in] i_id PMIC0 or PMIC1
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
 ///
 fapi2::ReturnCode bias_with_spd_volt_ranges(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_DIMM>& i_dimm,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     const mss::pmic::id i_id);
 
 ///
-/// @brief bias with SPD settings for startup sequence
+/// @brief bias PMIC with SPD settings for startup sequence
 ///
 /// @param[in] i_pmic_target PMIC target
-/// @param[in] i_port port target of PMIC
-/// @param[in] i_dimm_index DIMM index for PMIC (0,1)
+/// @param[in] i_ocmb_target OCMB parent target of pmic
+/// @param[in] i_id PMIC0 or PMIC1
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
 ///
 fapi2::ReturnCode bias_with_spd_startup_seq(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_DIMM>& i_dimm,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     const mss::pmic::id i_id);
 
 ///
@@ -465,31 +466,30 @@ fapi2::ReturnCode set_startup_seq_register(
 //-----------------------------------
 
 ///
-/// @brief bias with spd settings for voltages
+/// @brief Bias with spd voltages for IDT pmic
 ///
-/// @tparam V mss::pmic::vendor (TI/IDT)
 /// @param[in] i_pmic_target PMIC target
-/// @param[in] i_dimm_target DIMM target of PMIC
-/// @param[in] i_dimm_index - DIMM index for PMIC (0,1)
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
+/// @param[in] i_ocmb_target OCMB parent target of pmic
+/// @param[in] i_id relative ID of PMIC (0/1)
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
 template <mss::pmic::vendor V>
 fapi2::ReturnCode bias_with_spd_voltages(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_DIMM>& i_dimm_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     const mss::pmic::id i_id);
 
 ///
 /// @brief Calcuate target voltage for PMIC
 ///
-/// @param[in] i_dimm_target DIMM target of PMIC (holds the attributes)
+/// @param[in] i_ocmb_target OCMB parent target of pmic of PMIC (holds the attributes)
 /// @param[in] i_id ID of pmic (0,1)
 /// @param[in] i_rail RAIL to calculate voltage for
 /// @param[out] o_volt_buffer output buffer
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
 inline fapi2::ReturnCode calculate_voltage_write_buffer(
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_DIMM>& i_dimm_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     const mss::pmic::id i_id,
     const uint8_t i_rail,
     fapi2::buffer<uint8_t>& o_volt_buffer)
@@ -499,9 +499,9 @@ inline fapi2::ReturnCode calculate_voltage_write_buffer(
     int8_t l_efd_volt_offset = 0;
 
     // Get the attributes corresponding to the rail and PMIC indices
-    FAPI_TRY(get_volt_setting[i_rail][i_id](i_dimm_target, l_volt));
-    FAPI_TRY(get_volt_offset[i_rail][i_id](i_dimm_target, l_volt_offset));
-    FAPI_TRY(get_efd_volt_offset[i_rail][i_id](i_dimm_target, l_efd_volt_offset));
+    FAPI_TRY(get_volt_setting[i_rail][i_id](i_ocmb_target, l_volt));
+    FAPI_TRY(get_volt_offset[i_rail][i_id](i_ocmb_target, l_volt_offset));
+    FAPI_TRY(get_efd_volt_offset[i_rail][i_id](i_ocmb_target, l_efd_volt_offset));
 
     // Set output buffer
     o_volt_buffer = l_volt + l_volt_offset + l_efd_volt_offset;
@@ -513,30 +513,26 @@ fapi_try_exit:
 ///
 /// @brief Order PMICs by sequence defined in the SPD
 ///
-/// @param[in] i_dimm DIMM target to pull SPD fields from
-/// @param[in] i_dimm_index index of the DIMM target
-/// @param[in] i_pmics_per_dimm number of PMICs per dimm
+/// @param[in] i_ocmb_target OCMB target to pull SPD fields from
 /// @param[in,out] io_pmics vector of PMICs that will be re-ordered in place
 /// @return fapi2::ReturnCode
 ///
 fapi2::ReturnCode order_pmics_by_sequence(
-    const fapi2::Target<fapi2::TARGET_TYPE_DIMM> i_dimm,
-    const uint8_t i_dimm_index,
-    const uint8_t i_pmics_per_dimm,
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> i_ocmb_target,
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& io_pmics);
 
 ///
 /// @brief Bias with spd voltages for IDT pmic
 ///
 /// @param[in] i_pmic_target PMIC target
-/// @param[in] i_dimm_target DIMM target
+/// @param[in] i_ocmb_target OCMB parent target of pmic
 /// @param[in] i_id relative ID of PMIC (0/1)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
 template <>
 inline fapi2::ReturnCode bias_with_spd_voltages<mss::pmic::vendor::IDT>(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_DIMM>& i_dimm_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     const mss::pmic::id i_id)
 {
     using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
@@ -544,7 +540,7 @@ inline fapi2::ReturnCode bias_with_spd_voltages<mss::pmic::vendor::IDT>(
     for (uint8_t l_rail_index = mss::pmic::rail::SWA; l_rail_index <= mss::pmic::rail::SWD; ++l_rail_index)
     {
         fapi2::buffer<uint8_t> l_volt_buffer;
-        FAPI_TRY(calculate_voltage_write_buffer(i_dimm_target, i_id, l_rail_index, l_volt_buffer));
+        FAPI_TRY(calculate_voltage_write_buffer(i_ocmb_target, i_id, l_rail_index, l_volt_buffer));
 
         // Since we have unsigned integers, this should check both underflow and overflow
         FAPI_ASSERT(l_volt_buffer <= CONSTS::MAX_VOLT_BITMAP,
@@ -572,14 +568,14 @@ fapi_try_exit:
 /// @brief Bias with spd voltages for TI pmic
 ///
 /// @param[in] i_pmic_target PMIC target
-/// @param[in] i_dimm_target DIMM target
+/// @param[in] i_ocmb_target OCMB parent target of pmic
 /// @param[in] i_id relative ID of PMIC (0/1)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
 template <>
 inline fapi2::ReturnCode bias_with_spd_voltages<mss::pmic::vendor::TI>(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_DIMM>& i_dimm_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     const mss::pmic::id i_id)
 {
     using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
@@ -588,12 +584,12 @@ inline fapi2::ReturnCode bias_with_spd_voltages<mss::pmic::vendor::TI>(
     for (uint8_t l_rail_index = mss::pmic::rail::SWA; l_rail_index <= mss::pmic::rail::SWD; ++l_rail_index)
     {
         fapi2::buffer<uint8_t> l_volt_buffer;
-        FAPI_TRY(calculate_voltage_write_buffer(i_dimm_target, i_id, l_rail_index, l_volt_buffer));
+        FAPI_TRY(calculate_voltage_write_buffer(i_ocmb_target, i_id, l_rail_index, l_volt_buffer));
 
         bool l_overflow = false;
 
         uint8_t l_volt_range_select = 0;
-        FAPI_TRY(get_volt_range_select[l_rail_index][i_id](i_dimm_target, l_volt_range_select));
+        FAPI_TRY(get_volt_range_select[l_rail_index][i_id](i_ocmb_target, l_volt_range_select));
 
         // SWD supports a RANGE 1, but NOT SWA-C
         if (l_rail_index == mss::pmic::rail::SWD)
@@ -659,25 +655,25 @@ fapi_try_exit:
 ///
 /// @tparam V mss::pmic::vendor (IDT/TI)
 /// @param[in] i_pmic_target PMIC target
-/// @param[in] i_dimm_target DIMM target associated with PMIC
+/// @param[in] i_ocmb_target OCMB parent target of pmic
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
 template <mss::pmic::vendor V>
 fapi2::ReturnCode bias_with_spd_settings(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_DIMM>& i_dimm_target);
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target);
 
 ///
 /// @brief Bias IDT PMIC from SPD settings
 ///
 /// @param[in] i_pmic_target PMIC target
-/// @param[in] i_dimm_target DIMM target
+/// @param[in] i_ocmb_target OCMB parent target of pmic
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
 template<>
 inline fapi2::ReturnCode bias_with_spd_settings<mss::pmic::vendor::IDT>(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_DIMM>& i_dimm_target)
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
 {
     using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
     // Unlock Vendor Region
@@ -690,16 +686,16 @@ inline fapi2::ReturnCode bias_with_spd_settings<mss::pmic::vendor::IDT>(
                     mss::index(i_pmic_target) % CONSTS::NUM_UNIQUE_PMICS);
 
         // Phase combination
-        FAPI_TRY(mss::pmic::bias_with_spd_phase_comb(i_pmic_target, i_dimm_target, l_relative_pmic_id));
+        FAPI_TRY(mss::pmic::bias_with_spd_phase_comb(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
 
         // Voltage ranges
-        FAPI_TRY(mss::pmic::bias_with_spd_volt_ranges(i_pmic_target, i_dimm_target, l_relative_pmic_id));
+        FAPI_TRY(mss::pmic::bias_with_spd_volt_ranges(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
 
         // Voltages
-        FAPI_TRY(mss::pmic::bias_with_spd_voltages<mss::pmic::IDT>(i_pmic_target, i_dimm_target, l_relative_pmic_id));
+        FAPI_TRY(mss::pmic::bias_with_spd_voltages<mss::pmic::IDT>(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
 
         // Startup sequence
-        FAPI_TRY(mss::pmic::bias_with_spd_startup_seq(i_pmic_target, i_dimm_target, l_relative_pmic_id));
+        FAPI_TRY(mss::pmic::bias_with_spd_startup_seq(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
     }
 
 fapi_try_exit:
@@ -711,13 +707,13 @@ fapi_try_exit:
 /// @brief Bias TI PMIC from SPD settings
 ///
 /// @param[in] i_pmic_target PMIC target
-/// @param[in] i_dimm_target DIMM target
+/// @param[in] i_ocmb_target OCMB parent target of pmic
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
 template<>
 inline fapi2::ReturnCode bias_with_spd_settings<mss::pmic::vendor::TI>(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_DIMM>& i_dimm_target)
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
 {
     using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
     // Unlock Vendor Region
@@ -729,14 +725,14 @@ inline fapi2::ReturnCode bias_with_spd_settings<mss::pmic::vendor::TI>(
         const mss::pmic::id l_relative_pmic_id = static_cast<mss::pmic::id>(
                     mss::index(i_pmic_target) % CONSTS::NUM_UNIQUE_PMICS);
         // Phase combination
-        FAPI_TRY(mss::pmic::bias_with_spd_phase_comb(i_pmic_target, i_dimm_target, l_relative_pmic_id));
+        FAPI_TRY(mss::pmic::bias_with_spd_phase_comb(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
 
         // Voltages
         // TI pmic only has range 0 for SWA-C. We need to convert anything SPD that says range 1 --> range 0
-        FAPI_TRY(mss::pmic::bias_with_spd_voltages<mss::pmic::TI>(i_pmic_target, i_dimm_target, l_relative_pmic_id));
+        FAPI_TRY(mss::pmic::bias_with_spd_voltages<mss::pmic::TI>(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
 
         // Startup sequence
-        FAPI_TRY(mss::pmic::bias_with_spd_startup_seq(i_pmic_target, i_dimm_target, l_relative_pmic_id));
+        FAPI_TRY(mss::pmic::bias_with_spd_startup_seq(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
     }
 
 fapi_try_exit:
@@ -756,12 +752,12 @@ fapi2::ReturnCode enable_manual(const std::vector<fapi2::Target<fapi2::TARGET_TY
 /// @brief Function to enable 1U and 2U pmics
 ///
 /// @param[in] i_pmic_target - the pmic target
-/// @param[in] i_dimm_target - the dimm target that the PMIC resides on
+/// @param[in] i_ocmb_target - the OCMB parent target of the pmic
 /// @param[in] i_vendor_id - the vendor ID of the PMIC to bias
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS if successful
 ///
 fapi2::ReturnCode enable_chip_1U_2U(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
-                                    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm_target,
+                                    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
                                     const uint16_t i_vendor_id);
 
 ///
@@ -773,15 +769,22 @@ fapi2::ReturnCode enable_chip_1U_2U(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>
 fapi2::ReturnCode disable_and_reset_pmics(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmics);
 
 ///
+/// @brief Check for supported module height for the DIMMs on the provided OCMB
+///
+/// @param[in] i_ocmb_target OCMB target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok, else error code
+///
+fapi2::ReturnCode check_for_valid_module_height(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target);
+
+///
 /// @brief Enable PMIC for SPD mode
 ///
-/// @param[in] i_pmics vector of PMICs sorted by mss::index
-/// @param[in] i_dimms const vector of DIMMs sorted by mss::index
+/// @param[in] i_ocmb_target OCMB target parent of PMICs
+/// @param[in,out] io_pmics vector of PMICs sorted by mss::index. Expected to be non-empty, sorted again by sequence ATTR
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-fapi2::ReturnCode pmic_enable_SPD(
-    std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmics,
-    const std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>>& i_dimms);
+fapi2::ReturnCode pmic_enable_SPD(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+                                  std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& io_pmics);
 }
 } // mss
 

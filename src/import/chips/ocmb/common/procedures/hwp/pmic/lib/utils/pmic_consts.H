@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,6 +98,9 @@ enum rail
     SWD = 3,
 };
 
+///
+/// @brief pmic attr_eff_engine_fields
+///
 enum class attr_eff_engine_fields
 {
     // Template recursive base case
@@ -156,6 +159,7 @@ enum class attr_eff_engine_fields
 
     PMIC0_MFG_ID                        = 43,
     PMIC1_MFG_ID                        = 44,
+
     PMIC0_SEQUENCE                      = 45,
     PMIC1_SEQUENCE                      = 46,
 

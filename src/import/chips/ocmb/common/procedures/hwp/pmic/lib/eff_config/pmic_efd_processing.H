@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,7 +63,7 @@ namespace efd
 /// @param[in] i_efd_data the EFD data to process
 /// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
 ///
-fapi2::ReturnCode pmic0_swa_voltage_offset(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+fapi2::ReturnCode pmic0_swa_voltage_offset(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const std::shared_ptr<mss::efd::base_decoder>& i_efd_data);
 
 ///
@@ -72,7 +72,7 @@ fapi2::ReturnCode pmic0_swa_voltage_offset(const fapi2::Target<fapi2::TARGET_TYP
 /// @param[in] i_efd_data the EFD data to process
 /// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
 ///
-fapi2::ReturnCode pmic0_swb_voltage_offset(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+fapi2::ReturnCode pmic0_swb_voltage_offset(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const std::shared_ptr<mss::efd::base_decoder>& i_efd_data);
 
 ///
@@ -81,7 +81,7 @@ fapi2::ReturnCode pmic0_swb_voltage_offset(const fapi2::Target<fapi2::TARGET_TYP
 /// @param[in] i_efd_data the EFD data to process
 /// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
 ///
-fapi2::ReturnCode pmic0_swc_voltage_offset(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+fapi2::ReturnCode pmic0_swc_voltage_offset(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const std::shared_ptr<mss::efd::base_decoder>& i_efd_data);
 
 ///
@@ -90,7 +90,7 @@ fapi2::ReturnCode pmic0_swc_voltage_offset(const fapi2::Target<fapi2::TARGET_TYP
 /// @param[in] i_efd_data the EFD data to process
 /// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
 ///
-fapi2::ReturnCode pmic0_swd_voltage_offset(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+fapi2::ReturnCode pmic0_swd_voltage_offset(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const std::shared_ptr<mss::efd::base_decoder>& i_efd_data);
 
 ///
@@ -99,7 +99,7 @@ fapi2::ReturnCode pmic0_swd_voltage_offset(const fapi2::Target<fapi2::TARGET_TYP
 /// @param[in] i_efd_data the EFD data to process
 /// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
 ///
-fapi2::ReturnCode pmic1_swa_voltage_offset(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+fapi2::ReturnCode pmic1_swa_voltage_offset(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const std::shared_ptr<mss::efd::base_decoder>& i_efd_data);
 
 ///
@@ -108,7 +108,7 @@ fapi2::ReturnCode pmic1_swa_voltage_offset(const fapi2::Target<fapi2::TARGET_TYP
 /// @param[in] i_efd_data the EFD data to process
 /// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
 ///
-fapi2::ReturnCode pmic1_swb_voltage_offset(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+fapi2::ReturnCode pmic1_swb_voltage_offset(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const std::shared_ptr<mss::efd::base_decoder>& i_efd_data);
 
 ///
@@ -117,7 +117,7 @@ fapi2::ReturnCode pmic1_swb_voltage_offset(const fapi2::Target<fapi2::TARGET_TYP
 /// @param[in] i_efd_data the EFD data to process
 /// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
 ///
-fapi2::ReturnCode pmic1_swc_voltage_offset(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+fapi2::ReturnCode pmic1_swc_voltage_offset(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const std::shared_ptr<mss::efd::base_decoder>& i_efd_data);
 
 ///
@@ -126,16 +126,16 @@ fapi2::ReturnCode pmic1_swc_voltage_offset(const fapi2::Target<fapi2::TARGET_TYP
 /// @param[in] i_efd_data the EFD data to process
 /// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
 ///
-fapi2::ReturnCode pmic1_swd_voltage_offset(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+fapi2::ReturnCode pmic1_swd_voltage_offset(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const std::shared_ptr<mss::efd::base_decoder>& i_efd_data);
 
 ///
 /// @brief Process the EFD data and set attributes
-/// @param[in] i_target DIMM target on which to operate
+/// @param[in] i_target OCMB target on which to operate
 /// @param[in] i_efd_data the EFD data to process
 /// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
 ///
-fapi2::ReturnCode process(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+fapi2::ReturnCode process(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                           const std::shared_ptr<mss::efd::base_decoder>& i_efd_data);
 
 } // ns efd

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,8 +99,13 @@ fapi2::ReturnCode p9a_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
             // Explorer EFD
             FAPI_TRY( mss::exp::efd::process(dimm, l_efd_data));
 
-            // PMIC EFD
-            FAPI_TRY(mss::pmic::efd::process(dimm, l_efd_data));
+            // PMIC EFD fields do not change per dimm. These attributes and processes will ocurr at the OCMB level,
+            // and we will just choose the fields from DIMM 0 to use as the efd_data
+            if (l_rank.get_dimm_rank() == 0)
+            {
+                // PMIC EFD
+                FAPI_TRY(mss::pmic::efd::process(l_ocmb, l_efd_data));
+            }
         }
 
         {
