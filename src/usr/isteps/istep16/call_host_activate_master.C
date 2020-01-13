@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -388,7 +388,9 @@ void* call_host_activate_master(void* const io_pArgs)
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "Returned from Winkle.");
 
-        l_errl = SBEIO::stopDeadmanLoop();
+        // @TODO RTC 243962: Enable this code when we have SBE support for
+        // stopping the deadman timer
+        // l_errl = SBEIO::stopDeadmanLoop();
 
         if (l_errl)
         {
