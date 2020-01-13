@@ -32,13 +32,13 @@
 
 
 typedef fapi2::ReturnCode (*p10_nmmu_scom_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_NMMU>&,
-        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>&);
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&, const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>&);
 
 extern "C"
 {
 
     fapi2::ReturnCode p10_nmmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_NMMU>& TGT0,
-                                    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1);
+                                    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT2);
 
 }
 
