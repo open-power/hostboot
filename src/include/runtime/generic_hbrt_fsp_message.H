@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,10 +30,14 @@
 
 
 /** @file generic_hbrt_fsp_message.H
+ *
  *  @brief A generic structure for passing data
  *
  *  This file has a generic struct to be used by the
  *  FSP/HWSV team to send and receive data.
+ *
+ *  @note  See README.md file on how to create an HBRT to FW
+ *         request/notify message interface
  */
 
 // Sentinel value for bad SCOM reads
@@ -54,12 +58,42 @@ private:
 };
 
 
+// Latest attribute setter (struct AttributeSetter_t) version
+enum ATTRIBUTE_SETTER_VERSION: uint8_t
+{
+    ATTRIBUTE_STRUCT_VERSION_FIRST = 0x01,
+    ATTRIBUTE_STRUCT_VERSION_LATEST = ATTRIBUTE_STRUCT_VERSION_FIRST,
+};
+
+/**
+  * A useful struct to serialize/deserialize the Attributes data
+  * from GenericFspMboxMessage_t::data.
+  */
+struct AttributeSetter_t // a firmware_request call
+{
+    ATTRIBUTE_SETTER_VERSION iv_structVersion;// latest attribute setter version
+    uint8_t  iv_reserved;
+    uint16_t iv_numAttributes; // number of attributes being sent
+    uint8_t  iv_attrData[];    // points to a stream of
+                               // AttributeTank::Attribute structures
+    // A method to set the local vars to a default state
+    void initialize()
+    {
+        iv_structVersion = ATTRIBUTE_STRUCT_VERSION_LATEST;
+        iv_reserved = 0;
+        iv_numAttributes = 0;
+    };
+} PACKED ;
+
 /**
   * A useful struct to pack/access the HUID and HWAS state
   * from the GenericFspMboxMessage_t.data.
   * The HUID will be in the first 4 bytes followed by the HWAS state.
+  *
+  * @note message queue = MBOX::FSP_TARG_DECONFIG_MSGQ;
+  *       message type  = MSG_DECONFIG_TARGET
   */
-struct TargetDeconfigHbrtFspData_t
+struct TargetDeconfigHbrtFspData_t  // a firmware_request call
 {
    uint32_t huid;
    TARGETING::HwasState hwasState;
@@ -70,8 +104,11 @@ struct TargetDeconfigHbrtFspData_t
   * This struct contains the message-specific data for
   * MSG_SINGLE_SCOM_OP calls to the FSP.
   * It shows the format of GenericFspMboxMessage_t.data.
+  *
+  * @note message queue = MBOX::FSP_SCOM_OPS_MSGQ
+  *       message type  = MSG_SINGLE_SCOM_OP
   */
-struct SingleScomOpHbrtFspData_t
+struct SingleScomOpHbrtFspData_t // a firmware_request call
 {
     uint8_t     scom_op;    // DeviceFW::READ, DeviceFW::WRITE
     uint32_t    huid;       // hardware target
@@ -85,8 +122,11 @@ struct SingleScomOpHbrtFspData_t
   * This struct contains the message-specific data for
   * MSG_MULTI_SCOM_OP calls to the FSP.
   * It shows the format of GenericFspMboxMessage_t.data.
+  *
+  * @note message queue = MBOX::FSP_SCOM_OPS_MSGQ
+  *       message type  = MSG_MULTI_SCOM_OP
   */
-struct MultiScomReadHbrtFspData_t
+struct MultiScomReadHbrtFspData_t  // a firmware_request call
 {
     uint32_t    huid;       // hardware target
     uint8_t     scom_num;   // number of SCOMs to read
@@ -107,8 +147,11 @@ struct MultiScomReadHbrtFspData_t
 /**
   * A useful struct to access the PLID from GenericFspMboxMessage_t.data
   * in the case where the FSP is requesting Hostboot to restart a SBE
+  *
+  * @note message queue = MBOX::FSP_SCOM_OPS_MSGQ
+  *       message type  = MSG_SBE_ERROR
   */
-struct SbeRetryReqData_t
+struct SbeRetryReqData_t  // a firmware_notify call
 {
    uint32_t huid;
    uint32_t plid;
@@ -122,8 +165,10 @@ struct SbeRetryReqData_t
   * The HUID will be the first 4 bytes followed by a 4-byte attribute ID,
   * then a 4-byte size of attribute data, and finally the attribute's data
   *
+  * @note message queue = MBOX::HB_ATTR_SYNC_MSGQ
+  *       message type  = MSG_ATTR_SYNC_REQUEST
   */
-struct HbrtAttrSyncData_t
+struct HbrtAttrSyncData_t  // a firmware_notify call
 {
     // HUID of target on which we want to update the attribute
     uint32_t huid;
@@ -187,14 +232,15 @@ struct GenericFspMboxMessage_t
         MSG_TOD_BACKUP_RESET             = 0x0001,
         MSG_TOD_BACKUP_RESET_INFORM_PHYP = 0x0002,
         MSG_TOD_TOPOLOGY_DATA            = 0x0003,
-        MSG_DECONFIG_TARGET              = 0x0004,
-        MSG_SINGLE_SCOM_OP               = 0x0005,
-        MSG_MULTI_SCOM_OP                = 0x0006,
-        MSG_ATTR_SYNC_REQUEST            = 0x000000A5,
+        MSG_DECONFIG_TARGET              = 0x0004,  // for TargetDeconfigHbrtFspData_t
+        MSG_SINGLE_SCOM_OP               = 0x0005,  // for SingleScomOpHbrtFspData_t
+        MSG_MULTI_SCOM_OP                = 0x0006,  // for MultiScomReadHbrtFspData_t
+        MSG_ATTR_WRITE_OP                = 0x0007,  // for AttributeSetter_t
+        MSG_ATTR_SYNC_REQUEST            = 0x000000A5, // for HbrtAttrSyncData_t
         MSG_OCC_ACTIVE                   = 0x000000A6,
-        MSG_SBE_ERROR                    = 0x000000D4,
-        MSG_SBE_RECOVERY_SUCCESS         = 0x000000D5,
-        MSG_SBE_RECOVERY_FAILED          = 0x000000D6,
+        MSG_SBE_ERROR                    = 0x000000D4, // for SbeRetryReqData_t
+        MSG_SBE_RECOVERY_SUCCESS         = 0x000000D5, // associated with SbeRetryReqData_t
+        MSG_SBE_RECOVERY_FAILED          = 0x000000D6, // associated with SbeRetryReqData_t
     };
 
     /**

@@ -548,8 +548,12 @@ typedef struct hostInterfaces
     /**
      *  @brief Structure to be sent and received in the
      *         firmware_request call
+     *
+     *  @note  see README.md file on how to create an HBRT to FW
+     *         request message interface
      */
-    enum
+
+    enum  // hbrt_fw_msg::io_type             the struct associated with io_type
     {
        HBRT_FW_MSG_TYPE_REQ_NOP           =  0,
        HBRT_FW_MSG_TYPE_RESP_NOP          =  1, // struct resp_generic
@@ -674,7 +678,7 @@ typedef struct hostInterfaces
           } req_hcode_update;
 
           // This struct is sent from HBRT with
-          // io_type set to HBRT_FW_MSG_TYPE_ERR_LOG
+          // io_type set to HBRT_FW_MSG_TYPE_ERROR_LOG
           // Send an error log to FSP
           struct
           {

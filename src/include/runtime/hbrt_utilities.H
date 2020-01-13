@@ -29,7 +29,16 @@
 
 #define HBRT_TRACE_NAME "HBRT"
 
-#include "interface.h"
+extern trace_desc_t *g_trac_runtime;
+
+#include <vector>
+
+#include "interface.h"                      // hostInterfaces
+#include "generic_hbrt_fsp_message.H"       // GenericFspMboxMessage_t, AttributeSetter_t
+#include "targeting/common/attributeTank.H" // TARGETING::AttributeTank::Attribute
+#include <initservice/initserviceif.H>      // INITSERVICE
+#include "util/runtime/rt_fwreq_helper.H"   // firmware_request_helper
+#include "runtime/runtime_reasoncodes.H"    // MOD_XXX and RC_XXX
 
 /** @file hbrt_utilities.H
  *  @brief A file to put HBRT Interface utilities
@@ -54,9 +63,9 @@
  *          to newly created data.)
  *
  *  @post   The request/response messages point to a valid struct,
- *          the request/response message size are equal to each other
- *          and contain the size of the request/response messages
- *          respectively upon a successful call else all the output
+ *          the request/response messages' size are equal to each other, request
+ *          message is initalized (data size is set) and response message is
+ *          zeroed out, upon a successful call else all the output
  *          parameters will either be NULL or 0 based on type.
  *
  *  @note   Use this function iff hbrt_fw_msg::io_type is of type
@@ -65,7 +74,7 @@
  *  @note   Caller is responsible for deleting (use delete []) the
  *          allocated memory
  *
- *  @param[in] i_fspReqPayloadSize  The size of the payload that will
+ *  @param[in] i_fspReqPayloadSize The size of the payload that will
  *                                 populate GenericFspMboxMessage_t::data
  *  @param[out] o_fspMsgSize       Return the size of the
  *                                 GenericFspMboxMessage_t, adjusted to
@@ -76,14 +85,19 @@
  *                                 will be equal to the request msg size
  *  @param[out] o_responseMsg      The allocated response message (not
  *                                 NULL), zeroed out
+ *  @return true if NO issue allocating memory for request/response messages,
+ *          else false
  */
-void createGenericFspMsg(uint32_t i_fspReqPayloadSize,
-                       uint32_t &o_fspMsgSize,
-                       uint64_t &o_requestMsgSize,
-                       hostInterfaces::hbrt_fw_msg* &o_requestMsg,
-                       uint64_t &o_responseMsgSize,
-                       hostInterfaces::hbrt_fw_msg* &o_responseMsg)
+bool createGenericFspMsg(uint32_t i_fspReqPayloadSize,
+                         uint32_t &o_fspMsgSize,
+                         uint64_t &o_requestMsgSize,
+                         hostInterfaces::hbrt_fw_msg* &o_requestMsg,
+                         uint64_t &o_responseMsgSize,
+                         hostInterfaces::hbrt_fw_msg* &o_responseMsg)
 {
+   // Default the return value to true, assume things will go right
+   bool l_retVal(true);
+
    // Do some quick initialization of the output data
    o_fspMsgSize = o_requestMsgSize = o_responseMsgSize = 0;
    o_requestMsg = o_responseMsg = nullptr;
@@ -111,7 +125,7 @@ void createGenericFspMsg(uint32_t i_fspReqPayloadSize,
    o_requestMsg = reinterpret_cast<hostInterfaces::hbrt_fw_msg *>
                      (new uint8_t[o_requestMsgSize]);
 
-   // If anyone of these two message's memory can't be allocated, then
+   // If any one of these two message's memory can't be allocated, then
    // delete both messages (in case one did allocate memory), set both
    // messages to NULL pointers and set their respective sizes to zero.
    if (!o_responseMsg || !o_requestMsg)
@@ -123,6 +137,10 @@ void createGenericFspMsg(uint32_t i_fspReqPayloadSize,
       // Return output data zeroed out
       o_responseMsg = o_requestMsg = nullptr;
       o_fspMsgSize = o_requestMsgSize = o_responseMsgSize = 0;
+
+      // Return false, indicating that this function had an issue creating
+      // the request and/or response message
+      l_retVal = false;
    }
    else
    {
@@ -135,6 +153,8 @@ void createGenericFspMsg(uint32_t i_fspReqPayloadSize,
       o_requestMsg->generic_msg.dataSize = o_fspMsgSize;
       o_requestMsg->generic_msg.__req = GenericFspMboxMessage_t::REQUEST;
    }
+
+   return l_retVal;
 }  // end createGenericFspMsg
 
 
