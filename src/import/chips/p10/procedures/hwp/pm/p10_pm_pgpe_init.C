@@ -40,7 +40,6 @@
 #include <p10_pm_pba_init.H>
 #include <p10_pm_hcd_flags.h>
 #include <p10_ppe_defs.H>
-#include <p10_ppe_utils.H>
 #include <p10_hcd_common.H>
 #include <p10_scom_proc.H>
 #include <p10_scom_eq.H>
@@ -57,6 +56,8 @@ static const uint32_t PGPE_TIMEOUT_MCYCLES  = 20;
 static const uint32_t PGPE_POLLTIME_MS      = 20;
 static const uint32_t PGPE_POLLTIME_MCYCLES = 2;
 static const uint32_t TIMEOUT_COUNT = PGPE_TIMEOUT_MS / PGPE_POLLTIME_MS;
+
+#define HALT 0x2
 
 // -----------------------------------------------------------------------------
 //  Function definitions

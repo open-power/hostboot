@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,29 +27,51 @@
 /// @file  p10_ppe_utils.H
 /// @brief PPE commonly used functions
 ///
-/// *HWP HW Owner        : Brian Vanderpool <vanderp@us.ibm.com>
-/// *HWP HW Backup Owner : Greg Still <stillgs@us.ibm.com>
-/// *HWP FW Owner        : Prasad Bg Ranganath <prasadbgr@in.ibm.com>
+/// *HWP HW Owner        : Greg Still <stillgs.@us.ibm.com>
+/// *HWP HW Backup Owner : Brian Vanderpool <vanderp@us.ibm.com>
+/// *HWP FW Owner        : Prasad BG Ranganath <prasadbgr@in.ibm.com>
 /// *HWP Team            : PM
 /// *HWP Level           : 3
 /// *HWP Consumed by     : Cronus, HB, FSP
 #ifndef __P10_PPE_UTILS_H__
 #define __P10_PPE_UTILS_H__
+
 #include <map>
 #include <fapi2.H>
+#include <p10_ppe_instance_defs.H>
+
 typedef struct
 {
     uint16_t    number;
     uint32_t    value;
-} PPERegValue_t;
+    const char*  name;
+} Reg32Value_t;
+
+typedef struct
+{
+    uint16_t    number;
+    uint32_t    value;
+} Reg32N_t;
+
 
 typedef struct
 {
     uint16_t    number;
     uint64_t    value;
-} SCOMRegValue_t;
+    const char*  name;
+} Reg64Value_t;
 
-/**
+//Register Tables
+typedef struct
+{
+    bool check_one;
+    uint16_t startBit;
+    uint16_t endBit;
+    const char* description;
+    std::vector<const char*> enumDescription;
+} RegField_t;
+
+/*
  * @brief enumerates opcodes for few instructions.
  */
 enum
@@ -61,179 +83,270 @@ enum
     MFSPR_BASE_OPCODE = (OPCODE_31 << (31 - 5)) | (MFSPR_CONST1 << (31 - 30)),
     MFMSRD_CONST1     = 83,
     MFCR_CONST1       = 19,
-    ANDIS_CONST       = 29,
+    ADDIS_CONST       = 15,
     ORIS_CONST        = 25,
-};
-
-
-/**
- * @brief Offsets from base address for XIRs.
- */
-const static uint64_t PPE_XIXCR    = 0x0; //XCR_NONE
-const static uint64_t PPE_XIRAMRA  = 0x1; //XCR_SPRG0
-const static uint64_t PPE_XIRAMGA  = 0x2; //IR_SPRG0
-const static uint64_t PPE_XIRAMDBG = 0x3; //XSR_SPRG0
-const static uint64_t PPE_XIRAMEDR = 0x4; //IR_EDR
-const static uint64_t PPE_XIDBGPRO = 0x5; //XSR_IAR
-
-enum PPE_DUMP_MODE
-{
-    NONE           = 0x0,
-    XIRS           = 0x4,
-    SNAPSHOT       = 0x1,
-    HALT           = 0x2,
-    FORCE_HALT     = 0x3
-};
-enum VERBOSE_MODE
-{
-    NOVERBOSE        = 0x0,
-    VERBOSE          = 0x1,
-    VERBOSEP         = 0x2,
-    VERBOSE1         = 0x3,
-
+    ANDIS_CONST       = 29,
+    LWZ_CONST         = 32,
+    STW_CONST         = 36,
+    LVD_CONST         = 5,
 };
 
 enum INT_VEC_OFFSET
 {
-    MCHK_VEC = 0x000  ,  // 0,
-    SRST_VEC = 0x040  ,  // 64,
-    DSI_VEC  =  0x060 ,  // 96,
-    ISI_VEC  =  0x080 ,  // 128,
-    EXT_VEC  =  0x0A0 ,  // 160,
-    ALIG_VEC = 0x0C0  ,  // 192,
-    PRG_VEC  =  0x0E0 ,  // 224,
-    DEC_VEC  =  0x100 ,  // 256,
-    FIT_VEC  =  0x120 ,  // 288,
-    WDT_VEC  =  0x140 ,  // 320,
-} ;
-enum PPE_XIRS
-{
-    XIR_XSR,
-    XIR_IAR,
-    XIR_IR,
-    XIR_EDR,
-    XIR_SPRG0,
+    MCHK_VEC    = 0x000  ,  // 0,
+    SRST_VEC    = 0x040  ,  // 64,
+    DSI_VEC     = 0x060 ,  // 96,
+    ISI_VEC     = 0x080 ,  // 128,
+    EXT_VEC     = 0x0A0 ,  // 160,
+    ALIG_VEC    = 0x0C0  ,  // 192,
+    PRG_VEC     = 0x0E0 ,  // 224,
+    DEC_VEC     = 0x100 ,  // 256,
+    FIT_VEC     = 0x120 ,  // 288,
+    WDT_VEC     = 0x140 ,  // 320,
 };
 
-//enum PPE_SPECIAL_ACCESS
-//{
-//    MSR,
-//    CR,
-//};
-enum PPE_SPRS
+enum PPE_REGS
 {
-    CTR     = 9,
-    DACR    = 316,
-    DBCR    = 308,
-    DEC     = 22,
-    EDR     = 61,
-    IVPR    = 63,
-    ISR     = 62,
-    LR      = 8,
-    PIR     = 286,
-    PVR     = 287,
-    SPRG0   = 272,
-    SRR0    = 26,
-    SRR1    = 27,
-    TCR     = 340,
-    TSR     = 336,
-    XER     = 1,
-    //Some unique identification no. FOR OTHER REGS(non sprn)
-    XSR     = 4200,
-    IAR     = 2,
-    IR      = 3,
-    MSR     = 42,
-    CR      = 420,
+    //SPRS
+    PPE_CTR,
+    PPE_DACR,
+    PPE_DBCR,
+    PPE_DEC,
+    PPE_EDR,
+    PPE_ISR,
+    PPE_IVPR,
+    PPE_LR,
+    PPE_PIR,
+    PPE_PVR,
+    PPE_SPRG0,
+    PPE_SRR0,
+    PPE_SRR1,
+    PPE_TCR,
+    PPE_TSR,
+    PPE_XER,
+    PPE_MSR,
+    PPE_CR,
 
+    //GPRs
+    PPE_R0,
+    PPE_R1,
+    PPE_R2,
+    PPE_R3,
+    PPE_R4,
+    PPE_R5,
+    PPE_R6,
+    PPE_R7,
+    PPE_R8,
+    PPE_R9,
+    PPE_R10,
+    PPE_R13,
+    PPE_R28,
+    PPE_R29,
+    PPE_R30,
+    PPE_R31,
+
+    //VDRs
+    PPE_D0,
+    PPE_D2,
+    PPE_D1,
+    PPE_D3,
+    PPE_D4,
+    PPE_D5,
+    PPE_D6,
+    PPE_D7,
+    PPE_D8,
+    PPE_D9,
+    PPE_D28,
+    PPE_D29,
+    PPE_D30,
+    PPE_D31,
+
+    //XIRs
+    PPE_IAR,
+    PPE_IR,
+    PPE_XCR,
+    PPE_XSR,
 };
 
-
-// Note: EDR is available via XIR
-enum PPE_GPRS
+static std::map<enum PPE_REGS, uint32_t> v_ppe_reg_number =
 {
-    R0  = 0,
-    R1  = 1,
-    R2  = 2,
-    R3  = 3,
-    R4  = 4,
-    R5  = 5,
-    R6  = 6,
-    R7  = 7,
-    R8  = 8,
-    R9  = 9,
-    R10 = 10,
-    R13 = 13,
-    R28 = 28,
-    R29 = 29,
-    R30 = 30,
-    R31 = 31,
+    //SPRs
+    { PPE_CTR,   9      },
+    { PPE_DACR,  316    },
+    { PPE_DBCR,  308    },
+    { PPE_DEC,   22     },
+    { PPE_EDR,   61     },
+    { PPE_IR,    3      },
+    { PPE_ISR,   62     },
+    { PPE_IVPR,  63     },
+    { PPE_LR,    8      },
+    { PPE_PIR,   286    },
+    { PPE_PVR,   287    },
+    { PPE_SPRG0, 272    },
+    { PPE_SRR0,  26     },
+    { PPE_SRR1,  27     },
+    { PPE_TCR,   340    },
+    { PPE_TSR,   336    },
+    { PPE_XER,   1      },
+    { PPE_MSR,   42     },
+    { PPE_CR,    420    },
+
+    //GPRs
+    { PPE_R0,    0     },
+    { PPE_R1,    1     },
+    { PPE_R2,    2     },
+    { PPE_R3,    3     },
+    { PPE_R4,    4     },
+    { PPE_R5,    5     },
+    { PPE_R6,    6     },
+    { PPE_R7,    7     },
+    { PPE_R8,    8     },
+    { PPE_R9,    9     },
+    { PPE_R10,   10    },
+    { PPE_R13,   13    },
+    { PPE_R28,   28    },
+    { PPE_R29,   29    },
+    { PPE_R30,   30    },
+    { PPE_R31,   31    },
+
+    //VDRs
+    {PPE_D0,     0     },
+    {PPE_D1,     1     },
+    {PPE_D2,     2     },
+    {PPE_D3,     3     },
+    {PPE_D4,     4     },
+    {PPE_D5,     5     },
+    {PPE_D6,     6     },
+    {PPE_D7,     7     },
+    {PPE_D8,     8     },
+    {PPE_D9,     9     },
+    {PPE_D28,    28    },
+    {PPE_D29,    29    },
+    {PPE_D30,    30    },
+    {PPE_D31,    31    },
+
+    //XIRs
+    {PPE_IAR,   1000},
+    {PPE_IR,    1001},
+    {PPE_XCR,   1002},
+    {PPE_XSR,   1003},
 };
 
-#ifndef  __HOSTBOOT_MODULE
-typedef struct
+static std::map<enum PPE_REGS, const char*> v_ppe_reg_names =
 {
-    SCOMRegValue_t    reg;
-    std::string  name;
-} SCOMReg_t;
+    //SPRs
+    { PPE_CTR,   "CTR"    },
+    { PPE_DACR,  "DACR"   },
+    { PPE_DBCR,  "DBCR"   },
+    { PPE_DEC,   "DEC"    },
+    { PPE_EDR,   "EDR"    },
+    { PPE_ISR,   "ISR"    },
+    { PPE_IVPR,  "IVPR"   },
+    { PPE_LR,    "LR"     },
+    { PPE_PIR,   "PIR"    },
+    { PPE_PVR,   "PVR"    },
+    { PPE_SPRG0, "SPRG0"  },
+    { PPE_SRR0,  "SRR0"   },
+    { PPE_SRR1,  "SRR1"   },
+    { PPE_TCR,   "TCR"    },
+    { PPE_TSR,   "TSR"    },
+    { PPE_XER,   "XER"    },
+    { PPE_MSR,   "MSR"    },
+    { PPE_CR,    "CR"     },
 
-typedef struct
-{
-    PPERegValue_t     reg;
-    std::string  name;
-} PPEReg_t;
+    //GPRs
+    { PPE_R0,    "R0"     },
+    { PPE_R1,    "R1"     },
+    { PPE_R2,    "R2"     },
+    { PPE_R3,    "R3"     },
+    { PPE_R4,    "R4"     },
+    { PPE_R5,    "R5"     },
+    { PPE_R6,    "R6"     },
+    { PPE_R7,    "R7"     },
+    { PPE_R8,    "R8"     },
+    { PPE_R9,    "R9"     },
+    { PPE_R10,   "R10"    },
+    { PPE_R13,   "R13"    },
+    { PPE_R28,   "R28"    },
+    { PPE_R29,   "R29"    },
+    { PPE_R30,   "R30"    },
+    { PPE_R31,   "R31"    },
 
-// Vector defining all spr acceess egisters
-const std::map<uint16_t, std::string> v_ppe_sprs_num_name =
-{
-    { MSR,   "MSR"    },
-    { CR,    "CR"     },
-    { CTR,   "CTR"    },
-    { LR,    "LR"     },
-    { ISR,   "ISR"    },
-    { SRR0,  "SRR0"   },
-    { SRR1,  "SRR1"   },
-    { TCR,   "TCR"    },
-    { TSR,   "TSR"    },
-    { DACR,  "DACR"   },
-    { DBCR,  "DBCR"   },
-    { DEC,   "DEC"    },
-    { IVPR,  "IVPR"   },
-    { PIR,   "PIR"    },
-    { PVR,   "PVR"    },
-    { XER,   "XER"    }
+    //VDRs
+    {PPE_D0,     "D0"     },
+    {PPE_D2,     "D1"     },
+    {PPE_D1,     "D2"     },
+    {PPE_D3,     "D3"     },
+    {PPE_D4,     "D4"     },
+    {PPE_D5,     "D5"     },
+    {PPE_D6,     "D6"     },
+    {PPE_D7,     "D7"     },
+    {PPE_D8,     "D8"     },
+    {PPE_D9,     "D9"     },
+    {PPE_D28,    "D28"    },
+    {PPE_D29,    "D29"    },
+    {PPE_D30,    "D30"    },
+    {PPE_D31,    "D31"    },
+
+    //XIRs
+    { PPE_IAR,   "IAR"    },
+    { PPE_IR,    "IR"     },
+    { PPE_XCR,   "XSR"    },
+    { PPE_XSR,   "XSR"    },
 };
 
-// Vector defining the GPRs
-const std::map<uint16_t, std::string> v_ppe_gprs_num_name =
+// XSR defines
+enum PPE_XSR_DEFS
 {
-    { R0,    "R0"     },
-    { R1,    "R1"     },
-    { R2,    "R2"     },
-    { R3,    "R3"     },
-    { R4,    "R4"     },
-    { R5,    "R5"     },
-    { R6,    "R6"     },
-    { R7,    "R7"     },
-    { R8,    "R8"     },
-    { R9,    "R9"     },
-    { R10,   "R10"    },
-    { R13,   "R13"    },
-    { R28,   "R28"    },
-    { R29,   "R29"    },
-    { R30,   "R30"    },
-    { R31,   "R31"    }
-};
-// Vector defining the other xsr regs
-const std::map<uint16_t, std::string> v_ppe_xsr_num_name =
-{
-    { XSR,   "XSR"    },
-    { IAR,   "IAR"    },
-    { IR,    "IR"     },
-    { EDR,   "EDR"    },
-    { SPRG0, "SPRG0"  }
+    PPE_XSR_HALTED_STATE         = 0,
+    PPE_XSR_HALT_CONDITION_START = 1,
+    PPE_XSR_HALT_CONDITION_LEN   = 3,
+    PPE_XSR_XCR_CMD_HALT         = 1,
+    PPE_XSR_WDT_HALT             = 2,
+    PPE_XSR_UMI_HALT             = 3,
+    PPE_XSR_DEBUG_HALT           = 4,
+    PPE_XSR_DBCR_HALT            = 5,
+    PPE_XSR_INPUT_HALT           = 6,
+    PPE_XSR_HW_FAILURE           = 7
 };
 
-#endif //__HOSTBOOT_MODULE
+// XCR defines
+enum PPE_XCR_DEFS
+{
+    PPE_XCR_CMD_START           = 1,
+    PPE_XCR_CMD_LEN             = 3,
+
+    PPE_XCR_CLEAR_DEBUG_STATUS  = 0,
+    PPE_XCR_HALT                = 1,
+    PPE_XCR_RESUME              = 2,
+    PPE_XCR_SINGLE_STEP         = 3,
+    PPE_XCR_TOGGLE_XSR_TRH      = 4,
+    PPE_XCR_SOFT_RESET          = 5,
+    PPE_XCR_HARD_RESET          = 6,
+    PPE_XCR_FORCE_HALT          = 7
+};
+
+const char* ppe_get_name(enum PPE_TYPES ppe_type, uint32_t ppe_instance_num);
+
+uint64_t ppe_get_base_address(enum PPE_TYPES ppe_type, uint32_t ppe_instance_num);
+
+const char* ppe_get_reg_name(enum PPE_REGS reg);
+
+uint32_t ppe_get_reg_number(enum PPE_REGS reg);
+
+const char* ppe_get_other_reg_name(enum PPE_TYPES ppe_type, uint16_t idx);
+
+uint32_t ppe_get_xir_vdr_flag(enum PPE_TYPES ppe_type);
+
+uint64_t ppe_get_xir_address(enum PPE_TYPES ppe_type, enum PPE_XIRS_IDX xir_idx, uint32_t ppe_instance_num);
+uint64_t ppe_get_vdr_address(enum PPE_TYPES ppe_type, enum PPE_VDRS_IDX vdr_idx, uint32_t ppe_instance_num);
+uint64_t ppe_get_mib_address(enum PPE_TYPES ppe_type, enum PPE_MIB_IDX mib_idx, uint32_t ppe_instance_num);
+uint64_t ppe_get_other_address(enum PPE_TYPES ppe_type, uint16_t idx, uint32_t ppe_instance_num);
+
+std::map<uint16_t, uint64_t> ppe_get_mib_offsets(enum PPE_TYPES ppe_type);
+
+std::map<uint16_t, uint64_t> ppe_get_other_offsets(enum PPE_TYPES ppe_type);
+
 
 ///--------------------------------------------------------------------------------------
 /// @brief generates a PPE instruction for some formats
@@ -243,7 +356,7 @@ const std::map<uint16_t, std::string> v_ppe_xsr_num_name =
 /// @param[in] i_d       Instruction Data Field
 /// @return returns 32 bit instruction representing the PPE instruction.
 ///--------------------------------------------------------------------------------------
-uint32_t ppe_getInstruction( const uint16_t i_Op, const uint16_t i_Rts, const uint16_t i_Ra, const uint16_t i_d );
+uint32_t ppe_get_inst( const uint16_t i_Op, const uint16_t i_Rts, const uint16_t i_Ra, const uint16_t i_d );
 
 ///--------------------------------------------------------------------------------------
 /// @brief generates instruction for mtspr
@@ -251,7 +364,7 @@ uint32_t ppe_getInstruction( const uint16_t i_Op, const uint16_t i_Rts, const ui
 /// @param[in] i_Spr represents spr where data is to be moved.
 /// @return returns 32 bit instruction representing mtspr instruction.
 ///--------------------------------------------------------------------------------------
-uint32_t ppe_getMtsprInstruction( const uint16_t i_Rs, const uint16_t i_Spr );
+uint32_t ppe_get_inst_mtspr( const uint16_t i_Rs, const uint16_t i_Spr );
 
 
 ///--------------------------------------------------------------------------------------
@@ -261,7 +374,7 @@ uint32_t ppe_getMtsprInstruction( const uint16_t i_Rs, const uint16_t i_Spr );
 /// @return returns 32 bit instruction representing mfspr instruction.
 ///--------------------------------------------------------------------------------------
 
-uint32_t ppe_getMfsprInstruction( const uint16_t i_Rt, const uint16_t i_Spr );
+uint32_t ppe_get_inst_mfspr( const uint16_t i_Rt, const uint16_t i_Spr );
 
 ///--------------------------------------------------------------------------------------
 /// @brief generates instruction for mfmsr instruction.
@@ -269,7 +382,7 @@ uint32_t ppe_getMfsprInstruction( const uint16_t i_Rt, const uint16_t i_Spr );
 /// @return  returns 32 bit instruction representing mfmsr instruction.
 /// @note    moves contents of register MSR to i_Rt register.
 ///--------------------------------------------------------------------------------------
-uint32_t ppe_getMfmsrInstruction( const uint16_t i_Rt );
+uint32_t ppe_get_inst_mfmsr( const uint16_t i_Rt );
 
 ///--------------------------------------------------------------------------------------
 /// @brief generates instruction for mfcr instruction.
@@ -277,61 +390,77 @@ uint32_t ppe_getMfmsrInstruction( const uint16_t i_Rt );
 /// @return  returns 32 bit instruction representing mfcr instruction.
 /// @note    moves contents of register CR to i_Rt register.
 ///--------------------------------------------------------------------------------------
-uint32_t ppe_getMfcrInstruction( const uint16_t i_Rt );
+uint32_t ppe_get_inst_mfcr( const uint16_t i_Rt );
 
 ///--------------------------------------------------------------------------------------
-/// @brief returns the XIR offset multiplier
-/// @param[in]   i_base_address    target PPE base address
-/// @return      multiplier to be applied to PPE XIR offsets
-///--------------------------------------------------------------------------------------
-uint32_t ppe_offsetAdjust(const uint64_t i_base_address);
-
-///--------------------------------------------------------------------------------------
-/// @brief poll for Halt state
-/// @param[in]  i_target fapi2 target for proc chip
-/// @param[in]  i_base_address  base SCOM address of the PPE
-/// @return  fapi2::ReturnCode
-/// @note    moves contents of register MSR to i_Rt register.
-///--------------------------------------------------------------------------------------
-
-fapi2::ReturnCode ppe_pollHaltState(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint64_t i_base_address) ;
-
-///--------------------------------------------------------------------------------------
-/// @brief halt the engine
+/// @brief Halts the engine(if not already in halted state)
 /// @param[in]  i_target fapi2 target for proc chip
 /// @param[in]  i_base_address  base SCOM address of the PPE
 /// @return  fapi2::ReturnCode
 /// @note    programs XCR with halt bit to halt the engine.
 ///--------------------------------------------------------------------------------------
-
 fapi2::ReturnCode ppe_halt(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint64_t i_base_address );
+    enum PPE_TYPES i_ppe_type, uint32_t i_ppe_instance_num);
 
 ///--------------------------------------------------------------------------------------
-/// @brief force halt the engine
+/// @brief Force Halts the engine(if not already in halted state).
 /// @param[in]  i_target fapi2 target for proc chip
 /// @param[in]  i_base_address  base SCOM address of the PPE
 /// @return  fapi2::ReturnCode
-/// @note    programs XCR with force halt  to force halt the engine.
+/// @note    programs XCR with force halt to force halt the engine.
 ///--------------------------------------------------------------------------------------
-
 fapi2::ReturnCode ppe_force_halt(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint64_t i_base_address );
+    enum PPE_TYPES i_ppe_type, uint32_t i_ppe_instance_num );
+
+
+///--------------------------------------------------------------------------------------
+/// @brief polls for Halt state. If halt state not detected then will eventually times out
+/// @param[in]  i_target fapi2 target for proc chip
+/// @param[in]  i_base_address  base SCOM address of the PPE
+/// @return  fapi2::ReturnCode
+/// @note    moves contents of register MSR to i_Rt register.
+///--------------------------------------------------------------------------------------
+fapi2::ReturnCode ppe_poll_halt_state(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    enum PPE_TYPES i_ppe_type, uint32_t i_ppe_instance_num) ;
+
+///--------------------------------------------------------------------------------------
+/// @brief Determine if the PPE is halted
+/// @param[in]   i_target        target
+/// @param[in]   i_base_address  base SCOM address of the PPE
+/// @param[out]  o_halted        boolean true if halted; false otherwise
+/// @return  fapi2::ReturnCode
+///--------------------------------------------------------------------------------------
+fapi2::ReturnCode ppe_is_halted(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    enum PPE_TYPES i_ppe_type,
+    uint32_t i_ppe_instance_num,
+    bool& o_halted);
+
+///--------------------------------------------------------------------------------------
+/// @brief xcr resume
+/// @param[in]  i_target fapi2 target for proc chip
+/// @param[in]  i_base_address  base SCOM address of the PPE
+/// @return  fapi2::ReturnCode
+/// @note    programs XCR to only resume and return(Does not wait for halt state to enter)
+///--------------------------------------------------------------------------------------
+fapi2::ReturnCode ppe_resume(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    enum PPE_TYPES i_ppe_type, uint32_t i_ppe_instance_num );
+
 
 ///--------------------------------------------------------------------------------------
 /// @brief resume the halted engine
 /// @param[in]  i_target fapi2 target for proc chip
 /// @param[in]  i_base_address  base SCOM address of the PPE
 /// @return  fapi2::ReturnCode
-/// @note    programs XCR with resume bit to resume the engine.
+/// @note    programs XCR with resume bit and then waits for engine to be in halted state(or timeouts).
 ///--------------------------------------------------------------------------------------
-fapi2::ReturnCode ppe_resume(
+fapi2::ReturnCode ppe_resume_w_poll(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint64_t i_base_address );
+    enum PPE_TYPES i_ppe_type, uint32_t i_ppe_instance_num );
 
 ///--------------------------------------------------------------------------------------
 /// @brief update dbcr
@@ -346,7 +475,8 @@ fapi2::ReturnCode ppe_resume(
 
 fapi2::ReturnCode ppe_update_dbcr(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint64_t i_base_address,
+    enum PPE_TYPES i_ppe_type,
+    uint32_t i_ppe_instance_num,
     const uint64_t i_inst_op,
     const uint16_t i_immed_16,
     const uint16_t i_Rs );
@@ -361,7 +491,8 @@ fapi2::ReturnCode ppe_update_dbcr(
 ///--------------------------------------------------------------------------------------
 fapi2::ReturnCode ppe_update_dacr(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint64_t i_base_address,
+    enum PPE_TYPES i_ppe_type,
+    uint32_t i_ppe_instance_num,
     const uint64_t i_address,
     const uint16_t i_Rs );
 
@@ -374,9 +505,10 @@ fapi2::ReturnCode ppe_update_dacr(
 /// @return  fapi2::ReturnCode
 ///--------------------------------------------------------------------------------------
 
-fapi2::ReturnCode ppe_RAMRead(
+fapi2::ReturnCode ppe_ram_read(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint64_t i_base_address,
+    enum PPE_TYPES i_ppe_type,
+    uint32_t i_ppe_instance_num,
     const fapi2::buffer<uint64_t> i_instruction,
     fapi2::buffer<uint32_t>& o_data );
 
@@ -388,9 +520,10 @@ fapi2::ReturnCode ppe_RAMRead(
 /// @return  fapi2::ReturnCode
 ///--------------------------------------------------------------------------------------
 
-fapi2::ReturnCode ppe_RAM(
+fapi2::ReturnCode ppe_ram(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint64_t i_base_address,
+    enum PPE_TYPES i_ppe_type,
+    uint32_t i_ppe_instance_num,
     const uint64_t i_instruction
 );
 
@@ -401,15 +534,28 @@ fapi2::ReturnCode ppe_RAM(
 /// @param[in]   i_Rs
 /// @param[in]   i_step_count
 /// @return  fapi2::ReturnCode
-/// @note    programs XCR with single step  tosingle step the engine.
+/// @note    programs XCR with single step to single step the engine.
 ///--------------------------------------------------------------------------------------
-
-fapi2::ReturnCode ppe_single_step(
+fapi2::ReturnCode ppe_single_step_w_dbcr_clr(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint64_t i_base_address,
+    enum PPE_TYPES i_ppe_type,
+    uint32_t i_ppe_instance_num,
     const uint16_t i_Rs,
     uint64_t i_step_count );
 
+///--------------------------------------------------------------------------------------
+/// @brief single step the engine
+/// @param[in]   i_target  target register number
+/// @param[in]   i_base_address  base SCOM address of the PPE
+/// @param[in]   i_step_count
+/// @return  fapi2::ReturnCode
+/// @note    programs XCR with single step no clearing DBCR
+///--------------------------------------------------------------------------------------
+fapi2::ReturnCode ppe_single_step(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    enum PPE_TYPES i_ppe_type,
+    uint32_t i_ppe_instance_num,
+    uint64_t i_step_count );
 
 ///--------------------------------------------------------------------------------------
 /// @brief clear the dbg status engine
@@ -418,10 +564,9 @@ fapi2::ReturnCode ppe_single_step(
 /// @return  fapi2::ReturnCode
 /// @note    programs XCR to clear dbg status.
 ///--------------------------------------------------------------------------------------
-
 fapi2::ReturnCode ppe_clear_dbg(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint64_t i_base_address );
+    enum PPE_TYPES i_ppe_type, uint32_t i_ppe_instance_num);
 
 ///--------------------------------------------------------------------------------------
 /// @brief toggle TRH
@@ -432,7 +577,7 @@ fapi2::ReturnCode ppe_clear_dbg(
 ///--------------------------------------------------------------------------------------
 fapi2::ReturnCode ppe_toggle_trh(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint64_t i_base_address );
+    enum PPE_TYPES i_ppe_type, uint32_t i_ppe_instance_num );
 
 ///--------------------------------------------------------------------------------------
 /// @brief xcr soft reset
@@ -444,7 +589,7 @@ fapi2::ReturnCode ppe_toggle_trh(
 
 fapi2::ReturnCode ppe_soft_reset(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint64_t i_base_address );
+    enum PPE_TYPES i_ppe_type, uint32_t i_ppe_instance_num );
 
 ///--------------------------------------------------------------------------------------
 /// @brief xcr hard reset
@@ -456,33 +601,7 @@ fapi2::ReturnCode ppe_soft_reset(
 
 fapi2::ReturnCode ppe_hard_reset(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint64_t i_base_address );
-
-///--------------------------------------------------------------------------------------
-/// @brief xcr resume only
-/// @param[in]   i_target  target register number
-/// @param[in]   i_base_address  base SCOM address of the PPE
-/// @return  fapi2::ReturnCode
-/// @note    programs XCR to only resume
-///--------------------------------------------------------------------------------------
-
-fapi2::ReturnCode ppe_resume_only(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint64_t i_base_address );
-
-///--------------------------------------------------------------------------------------
-/// @brief only single step the engine
-/// @param[in]   i_target  target register number
-/// @param[in]   i_base_address  base SCOM address of the PPE
-/// @param[in]   i_step_count
-/// @return  fapi2::ReturnCode
-/// @note    programs XCR with single step no clearing DBCR
-///--------------------------------------------------------------------------------------
-
-fapi2::ReturnCode ppe_ss_only(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint64_t i_base_address,
-    uint64_t i_step_count );
+    enum PPE_TYPES i_ppe_type, uint32_t i_ppe_instance_num );
 
 ///--------------------------------------------------------------------------------------
 /// @brief populate IAR register with a given address
@@ -495,49 +614,37 @@ fapi2::ReturnCode ppe_ss_only(
 
 fapi2::ReturnCode ppe_write_iar(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint64_t i_base_address,
-    const uint64_t i_address );
+    enum PPE_TYPES i_ppe_type,
+    const uint64_t i_address, uint32_t i_ppe_instance_num );
 
-
-///--------------------------------------------------------------------------------------
-/// @brief Determine if the PPE is halted
-/// @param[in]   i_target        target
-/// @param[in]   i_base_address  base SCOM address of the PPE
-/// @param[out]  o_halted        boolean true if halted; false otherwise
-/// @return  fapi2::ReturnCode
-///--------------------------------------------------------------------------------------
-fapi2::ReturnCode ppe_isHalted(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint64_t i_base_address,
-    bool* o_halted);
 
 #ifndef  __HOSTBOOT_MODULE
+fapi2::ReturnCode ppe_save_gprs_sprs(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    enum PPE_TYPES i_ppe_type,
+    uint32_t i_ppe_instance_num,
+    fapi2::buffer<uint32_t>& l_gpr0_save,
+    fapi2::buffer<uint32_t>& l_gpr1_save,
+    fapi2::buffer<uint32_t>& l_gpr9_save,
+    fapi2::buffer<uint64_t>& l_sprg0_save);
 
-///--------------------------------------------------------------------------------------
-/// @brief   finds name of SCOM registers and populates a vector
-/// @param[in]   i_ppe_regs_value    a vector of SCOMRegValue_t
-/// @param[in]   i_ppe_regs_num_name a map of reg num and respective name
-/// @param[in]   i_scom_regs         a vector of SCOMReg_t
-/// @return  fapi2::ReturnCode
-///--------------------------------------------------------------------------------------
+fapi2::ReturnCode ppe_restore_gprs_sprs(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    enum PPE_TYPES i_ppe_type,
+    uint32_t i_ppe_instance_num,
+    fapi2::buffer<uint32_t> l_gpr0_save,
+    fapi2::buffer<uint32_t> l_gpr1_save,
+    fapi2::buffer<uint32_t> l_gpr9_save,
+    fapi2::buffer<uint64_t> l_sprg0_save);
 
-fapi2::ReturnCode scom_regs_populate_name(
-    std::vector<SCOMRegValue_t> i_ppe_regs_value,
-    const std::map<uint16_t, std::string> i_ppe_regs_num_name,
-    std::vector<SCOMReg_t>& i_scom_regs );
 
-///--------------------------------------------------------------------------------------
-/// @brief       populates register names
-/// @param[in]   i_ppe_regs_value
-/// @param[in]   i_ppe_regs_num_name
-/// @param[in]   i_ppe_regs
-/// @return      fapi2::ReturnCode
-///--------------------------------------------------------------------------------------
+fapi2::ReturnCode ppe_local_reg_read(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    enum PPE_TYPES i_ppe_type,
+    uint32_t i_ppe_instance_num,
+    const uint16_t i_local_address,
+    fapi2::buffer<uint64_t>& o_data);
 
-fapi2::ReturnCode ppe_regs_populate_name(
-    std::vector<PPERegValue_t> i_ppe_regs_value,
-    const std::map<uint16_t, std::string> i_ppe_regs_num_name,
-    std::vector<PPEReg_t>& i_ppe_regs );
 
 #endif  //__HOSTBOOT_MODULE
 #endif  // __P10_PPE_UTILS_H__
