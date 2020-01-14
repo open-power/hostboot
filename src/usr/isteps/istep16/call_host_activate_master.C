@@ -243,10 +243,12 @@ void* call_host_activate_master(void* const io_pArgs)
                   "Target HUID %.8X",
                   get_huid(l_proc_target));
 
+#ifdef ISTEP16_ENABLE_HWPS
         //In the future possibly move default "waitTime" value to SBEIO code
         uint64_t waitTimeMs = 10500; // wait time 10.5 sec, anything larger than 10737 ms can cause
                                      // overflow on SBE side of the timeout calculations
         l_errl = SBEIO::startDeadmanLoop(waitTimeMs);
+#endif
 
         if (l_errl)
         {
