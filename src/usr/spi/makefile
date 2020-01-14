@@ -45,4 +45,5 @@ VPATH += ${HWP_PATH}/hwp/spi/
 
 include ${ROOTPATH}/procedure.rules.mk
 include ${HWP_PATH}/hwp/spi/p10_sbe_spi_cmd.mk
+include ${HWP_PATH}/hwp/spi/p10_spi_init_pib.mk
 include ${ROOTPATH}/config.mk

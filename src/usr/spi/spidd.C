@@ -49,6 +49,7 @@
 #include <hbotcompid.H>
 #include <initservice/taskargs.H>
 #include <p10_scom_perv.H>
+#include <p10_spi_init_pib.H>
 
 // -----------------------------------------------------------------------------
 //      Trace definitions
@@ -78,10 +79,6 @@ TASK_ENTRY_MACRO( spiInit );
 // use PIB.
 void spiInit(errlHndl_t & io_rtaskRetErrl)
 {
-    // @TODO RTC 208787 Pull this code out and put in a HWP. Then call it here.
-    const uint64_t SPIM_PORT_MUX_SELECT =
-        scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL8_TPFSI_SPIMST0_PORT_MUX_SEL_DC;
-
     TARGETING::Target * masterTarget = nullptr;
     TARGETING::targetService()
         .masterProcChipTargetHandle(masterTarget);
@@ -94,41 +91,19 @@ void spiInit(errlHndl_t & io_rtaskRetErrl)
         // Get the contents of root control register 8 which controls whether
         // we're accessing over PIB or FSI.
         FAPI_INVOKE_HWP(io_rtaskRetErrl,
-                        fapi2::getScom,
-                        masterProc,
-                        ROOT_CTRL_8,
-                        root_ctrl_buffer);
+                        p10_spi_init_pib,
+                        masterProc);
 
         if (io_rtaskRetErrl != nullptr)
         {
-            break;
-        }
-
-        // Force root control reg 8 to use PIB for SPI Master
-        // clearing the bit to 0 forces the SPI Master to use the PIB path.
-        root_ctrl_buffer.clearBit<SPIM_PORT_MUX_SELECT>();
-
-        // Write the buffer back to the register.
-        FAPI_INVOKE_HWP(io_rtaskRetErrl,
-                        fapi2::putScom,
-                        masterProc,
-                        ROOT_CTRL_8,
-                        root_ctrl_buffer);
-
-        if (io_rtaskRetErrl != nullptr)
-        {
+            TRACFCOMP(g_trac_spi, ERR_MRK"spiInit(): "
+                     "An error occurred during initialization of libspi.so! "
+                     "SPI Device Driver will not function.");
+            io_rtaskRetErrl->collectTrace(SPI_COMP_NAME, KILOBYTE);
             break;
         }
 
     } while(0);
-
-    if (io_rtaskRetErrl != nullptr)
-    {
-        TRACFCOMP(g_trac_spi, ERR_MRK"spiInit(): "
-                 "An error occurred during initialization of libspi.so! "
-                 "SPI Device Driver will not function.");
-        io_rtaskRetErrl->collectTrace(SPI_COMP_NAME, KILOBYTE);
-    }
 
     return;
 }
