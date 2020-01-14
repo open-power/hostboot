@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -249,8 +249,8 @@ void ErrorInfoEntryHwCallout::addErrorInfo(std::shared_ptr<ErrorInfo> i_info,
         static_cast<CalloutPriorities::CalloutPriority>(iv_calloutPriority),
         target);
 
-    FAPI_DBG("addErrorInfo: Adding hw callout target: 0x%lx hw: %d, pri: %d",
-             ei->iv_refTarget.get(), ei->iv_hw, ei->iv_calloutPriority);
+    FAPI_DBG("addErrorInfo: Adding hw callout hw: %d, pri: %d",
+             ei->iv_hw, ei->iv_calloutPriority);
 
     i_info->iv_hwCallouts.push_back(std::shared_ptr<ErrorInfoHwCallout>(ei));
 }
@@ -308,9 +308,7 @@ void ErrorInfoEntryBusCallout::addErrorInfo(
         (iv_calloutPriority == CalloutPriorities::HIGH) ?
         CalloutPriorities::MEDIUM : CalloutPriorities::LOW);
 
-    FAPI_DBG("addErrorInfo: Adding bus callout t1: 0x%lx t2: 0x%lx, pri: %d",
-             ei->iv_target1.get(), ei->iv_target2.get(),
-             ei->iv_calloutPriority);
+    FAPI_DBG("addErrorInfo: Adding bus callout pri: %d", ei->iv_calloutPriority);
 
     i_info->iv_busCallouts.push_back(
         std::shared_ptr<ErrorInfoBusCallout>(ei));
@@ -339,8 +337,7 @@ void ErrorInfoEntryTargetCDG::addErrorInfo(
         static_cast<GardTypes::GardType>(iv_gardType)
     );
 
-    FAPI_INF("addErrorInfo: Adding target 0x%lx cdg (%d:%d:%d), pri: %d, gtyp: %d",
-             ei->iv_target.get(),
+    FAPI_INF("addErrorInfo: Adding cdg (%d:%d:%d), pri: %d, gtyp: %d",
              ei->iv_callout, ei->iv_deconfigure,
              ei->iv_gard, ei->iv_calloutPriority,
              ei->iv_gardType);

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -82,7 +82,7 @@ p10_sbe_scratch_calc_gard_vector(
     }
 
 fapi_try_exit:
-    FAPI_DBG("Functional  : 0x%08X", l_functional);
+    FAPI_DBG("Functional  : 0x%08X", static_cast<unsigned int>(l_functional));
     o_gard_vector = ~l_functional;
     FAPI_DBG("Gard vector : 0x%08X", o_gard_vector);
 
