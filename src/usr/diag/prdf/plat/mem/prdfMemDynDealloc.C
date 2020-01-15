@@ -1274,6 +1274,14 @@ int32_t dimmList( TargetHandleList  & i_dimmList )
         TargetHandleList list;
 
 
+        // Third, check for OCMBs.
+        list = getConnected( dimmTrgt, TYPE_OCMB_CHIP );
+        if ( !list.empty() )
+        {
+            o_rc = dimmList<TYPE_OCMB_CHIP>( i_dimmList );
+            break;
+        }
+
         // If we get here we did not find a supported target.
         PRDF_ERR( PRDF_FUNC "Unsupported connected parent to dimm 0x%08x",
                   getHuid(dimmTrgt) );
