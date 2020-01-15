@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1737,6 +1737,14 @@ int32_t dimmList( TargetHandleList  & i_dimmList )
         if ( !list.empty() )
         {
             o_rc = dimmList<TYPE_MBA>( i_dimmList );
+            break;
+        }
+
+        // Third, check for OCMBs.
+        list = getConnected( dimmTrgt, TYPE_OCMB_CHIP );
+        if ( !list.empty() )
+        {
+            o_rc = dimmList<TYPE_OCMB_CHIP>( i_dimmList );
             break;
         }
 
