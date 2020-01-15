@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1019,6 +1019,8 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
         //  flush contTrace immediately after each i_istep/substep  returns
         TRAC_FLUSH_BUFFERS();
 
+#ifndef CONFIG_BMC_IPMI
+
         // sync the attributes to fsp in single step mode but only after step 6
         // is complete to allow discoverTargets() to run before the sync is done
         if(iv_istepMode && (i_istep > HB_START_ISTEP))
@@ -1038,6 +1040,7 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
                 }
             }
         }
+#endif
 
         if(err)
         {
