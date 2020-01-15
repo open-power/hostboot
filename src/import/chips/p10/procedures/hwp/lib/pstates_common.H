@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -293,27 +293,19 @@ typedef struct
 
     ///  ---- Double word 0 -----
 
-    /// Magic Number
-    ///   Set to ASCII  "WFTH___x" where x is the version of the VRT structure
+    /// Magic Value
+    ///   Set to ASCII  "WFTH"
+
     union magic_number_t
     {
         uint32_t value;
-        struct
-        {
-#ifdef _BIG_ENDIAN
-            uint32_t text    : 24;
-            uint32_t version : 8;
-#else
-            uint32_t version : 8;
-            uint32_t text    : 24;
-#endif
-        } fields;
+        char     text[4];
     } magic_number;
 
     uint8_t  reserved0[3];
 
     /// Layouut version of this structure
-    uint8_t  layout_version;
+    uint8_t  header_version;
 
     ///  ---- Double word 1 -----
 
@@ -410,7 +402,7 @@ typedef struct
     /// Socket Power (in Watts) for the WOF Tables
     uint16_t socket_power_w;
 
-    /// Core Sort Power Target Frequency (in MHz) – The #V frequency associated
+    /// Core Sort Power Target Frequency (in MHz), The #V frequency associated
     /// with the sort power target for this table set. This is the WOF Base
     /// frequency.
     uint16_t sort_power_freq_mhz;
@@ -421,18 +413,7 @@ typedef struct
     /// Boost Current Capacity (in Amps)
     uint16_t boost_current_a;
 
-
     ///  ---- Double word 7 -----
-
-    /// Date Timestamp of the table set as established by the generation process.
-    uint32_t table_date_timestamp;
-
-    /// Table Version as established by the generation process.
-    uint16_t table_version;
-
-    uint16_t reserved2;
-
-    ///  ---- Double word 8 -----
 
     /// Thermal Design Point (TDP) VCS Ceff Index
     uint8_t  vcs_tdp_ceff_indx;
@@ -452,9 +433,23 @@ typedef struct
     /// IO TDP Disabled wattage
     uint8_t  io_dis_w;
 
-    uint8_t reserved4[2];
+    /// Core Sort UltraTurbo Frequency (in MHz)
+    uint16_t sort_ultraturbo_freq_mhz;
 
-    ///  ---- Double word 9 and 10 -----
+    ///  ---- Double word 8 -----
+
+    /// Date Timestamp of the table set as established by the generation process.
+    uint32_t table_date_timestamp;
+
+    uint32_t reserved2;
+
+    ///  ---- Double word 9 and 10 ----
+
+    /// Up to 16 ASCII characters as a Table Version as established by the
+    /// generation process.
+    char table_version[16];
+
+    ///  ---- Double word 11 and 12 -----
 
     /// Up to 16 ASCII characters as a Package designator
     char package_name[16];
