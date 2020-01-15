@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -223,29 +223,6 @@ namespace HBPM
         {
             l_config_data->interruptType = USE_PSIHB_COMPLEX;
         }
-
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
-        // Figure out the FIR master
-        TARGETING::Target* masterproc = nullptr;
-        tS.masterProcChipTargetHandle( masterproc );
-        if( masterproc == i_proc )
-        {
-            l_config_data->firMaster = IS_FIR_MASTER;
-
-            #if !defined(__HOSTBOOT_RUNTIME) || defined(CONFIG_HBRT_PRD)
-            l_errl = PRDF::writeHomerFirData( l_config_data->firdataConfig,
-                                         sizeof(l_config_data->firdataConfig) );
-            #endif
-
-        }
-        else
-        {
-            l_config_data->firMaster = NOT_FIR_MASTER;
-        }
-
-#else
-        l_config_data->firMaster = 0;
-#endif
 
         if (SECUREBOOT::SMF::isSmfEnabled())
         {

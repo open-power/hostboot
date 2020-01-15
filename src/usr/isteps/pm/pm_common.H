@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,7 +36,7 @@ namespace HBPM
 {
     enum
     {
-        OccHostDataVersion = 0x00000090,
+        OccHostDataVersion = 0x000000A0,
 
         OCC_IBSCOM_RANGE_IN_MB = MEGABYTE,
 

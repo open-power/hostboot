@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -97,7 +97,7 @@ enum WinkleScope
 /** Offset from HOMER to OCC Image */
 #define HOMER_OFFSET_TO_OCC_IMG (0*KILOBYTE)
 /** Offset from HOMER to OCC Host Data Area */
-#define HOMER_OFFSET_TO_OCC_HOST_DATA (768*KILOBYTE)
+#define HOMER_OFFSET_TO_OCC_HOST_DATA (976*KILOBYTE)
 /** Offset from HOMER to HCODE Image */
 #define HOMER_HCODE_IMG_OFFSET (1*MEGABYTE)
 /** STOP Image Max ouput size */

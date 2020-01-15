@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,15 +43,6 @@ namespace HBPM
         //  0x00000000 = Use FSI2HOST Mailbox
         //  0x00000001 = Use OCC interrupt line through PSIHB complex
         uint32_t interruptType;
-
-        // For informing OCC if it is the FIR master:
-        //  0x00000000 = Default
-        //  0x00000001 = FIR Master
-        uint32_t firMaster;
-
-        // FIR collection configuration data needed by FIR Master
-        //  OCC in the event of a checkstop
-        uint8_t firdataConfig[3072];
 
         // For informing OCC if SMF mode is enabled:
         //  0x00000000 = Default (SMF disabled)
