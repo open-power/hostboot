@@ -2123,7 +2123,18 @@ VERBATIM
     {
         $hexVal = $enumerator->{value};
         $attrId = $enumerator->{name};
-        write;
+
+        # enforce the implicit length requirement since the format command
+        #  does not throw an error if we overrun
+        my $enumsize = length($attrId);
+        if( $enumsize > 55 )
+        {
+            print "    $attrId = $hexVal,\n";
+        }
+        else
+        {
+            write;
+        }
     }
 
     print $outFile "};\n\n";
@@ -2185,7 +2196,18 @@ sub writeEnumFileAttrEnums {
                 $enumHex = sprintf "0x%08X", $enumHexValue;
             }
             $enumName = $enumerationType->{id} . "_" . $enumerator->{name};
-            write;
+
+            # enforce the implicit length requirement since the format command
+            #  does not throw an error if we overrun
+            my $enumsize = length($enumName);
+            if( $enumsize > 58 )
+            {
+               print "    $enumName = $enumHex,\n";
+            }
+            else
+            {
+               write;
+            }
         }
         print $outFile "};\n\n";
     }
