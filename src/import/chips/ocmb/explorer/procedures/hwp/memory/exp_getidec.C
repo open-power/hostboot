@@ -41,6 +41,7 @@
 #include <explorer_scom_addresses_fld.H>
 #include <explorer_scom_addresses_fld_fixes.H>
 #include <generic/memory/mss_git_data_helper.H>
+#include <generic/memory/lib/utils/c_str.H>
 
 extern "C"
 {
@@ -57,40 +58,68 @@ extern "C"
                                   uint8_t& o_chipEc)
     {
         mss::display_git_commit_info("exp_getidec");
-        uint8_t l_majorEc  = 0;
-        uint8_t l_minorEc  = 0;
+        uint8_t l_revision = 0;
         uint8_t l_location = 0;
         uint8_t l_chipBaseId = 0;
-        fapi2::buffer<uint64_t> l_reg_buffer;
+        fapi2::buffer<uint64_t> l_chip_info_buffer;
+        fapi2::buffer<uint64_t> l_efuse3_buffer;
 
+        // The chipid and location come from the CHIP_INFO register
         FAPI_TRY(fapi2::getScom( i_target,
                                  static_cast<uint64_t>(mss::exp::idec_consts::EXPLR_CHIP_INFO_REG),
-                                 l_reg_buffer ),
+                                 l_chip_info_buffer ),
                  "exp_getidec: could not read explorer chip_info register register 0x%08x",
                  mss::exp::idec_consts::EXPLR_CHIP_INFO_REG);
 
-        l_reg_buffer.extractToRight<mss::exp::idec_consts::MAJOR_EC_BIT_START,
-                                    mss::exp::idec_consts::MAJOR_EC_BIT_LENGTH>(l_majorEc);
-        l_reg_buffer.extractToRight<mss::exp::idec_consts::LOCATION_BIT_START,
-                                    mss::exp::idec_consts::LOCATION_BIT_LENGTH>(l_location);
-        l_reg_buffer.extractToRight<mss::exp::idec_consts::CHIPID_BIT_START,
-                                    mss::exp::idec_consts::CHIPID_BIT_LENGTH>(l_chipBaseId);
-
-        // Due to design errors we must read the minor ec (2nd nibble) from a different register
-        FAPI_TRY(fapi2::getScom( i_target, static_cast<uint64_t>(EXPLR_EFUSE_IMAGE_OUT_3), l_reg_buffer ),
-                 "exp_getidec: could not read explorer efuse_out3 register 0x%08x", EXPLR_EFUSE_IMAGE_OUT_3);
-
-        l_reg_buffer.extractToRight<EXPLR_EFUSE_IMAGE_OUT_3_ENTERPRISE_MODE_EC_MINOR,
-                                    EXPLR_EFUSE_IMAGE_OUT_3_ENTERPRISE_MODE_EC_MINOR_LEN>(l_minorEc);
-
-        // Major EC 0:3
-        // Minor EC 4:7
-        o_chipEc = (l_majorEc << 4) | l_minorEc;
+        l_chip_info_buffer.extractToRight<mss::exp::idec_consts::LOCATION_BIT_START,
+                                          mss::exp::idec_consts::LOCATION_BIT_LENGTH>(l_location);
+        l_chip_info_buffer.extractToRight<mss::exp::idec_consts::CHIPID_BIT_START,
+                                          mss::exp::idec_consts::CHIPID_BIT_LENGTH>(l_chipBaseId);
 
         // Location  0:3
         // Empty     4:7
         // ChipId    8:15
         o_chipId = (l_location << 12) | l_chipBaseId;
+
+
+        // The revision/DD/EC level comes from EFUSE_IMAGE_OUT_3
+        FAPI_TRY(fapi2::getScom( i_target, static_cast<uint64_t>(EXPLR_EFUSE_IMAGE_OUT_3), l_efuse3_buffer ),
+                 "exp_getidec: could not read explorer efuse_out3 register 0x%08x", EXPLR_EFUSE_IMAGE_OUT_3);
+
+        l_efuse3_buffer.extractToRight<mss::exp::idec_consts::REVISION_BIT_START,
+                                       mss::exp::idec_consts::REVISION_BIT_LENGTH>(l_revision);
+
+        // Due to limitations in what logic could be updated between revisions
+        //  there is no explicit Major+Minor value available in the hardware.
+        //  Instead we have to explicitly convert a rolling number into the
+        //  standard major.minor DD value we expect.
+        o_chipEc = 0;
+
+        switch( l_revision )
+        {
+            case(0):
+                o_chipEc = 0x10;
+                break; //A.0
+
+            case(1):
+                o_chipEc = 0x11;
+                break; //A.1
+
+            case(2):
+                o_chipEc = 0x20;
+                break; //B.0
+        }
+
+        // Ensure we found a known level
+        FAPI_ASSERT(o_chipEc != 0,
+                    fapi2::EXP_UNKNOWN_REVISION().
+                    set_TARGET(i_target).
+                    set_REVISION(l_revision).
+                    set_CHIP_INFO_REG(l_chip_info_buffer).
+                    set_EFUSE_IMAGE_OUT_3(l_efuse3_buffer),
+                    "The %s revision (%d) does not match a known DD level.",
+                    mss::c_str(i_target), l_revision);
+
 
         FAPI_DBG("EC found 0x%.02x   chipId found 0x%.04x", o_chipEc, o_chipId);
 

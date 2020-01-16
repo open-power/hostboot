@@ -27,8 +27,6 @@
 #define __EXPLR_SCOM_ADDRESSES_FLD_FIXES_H
 
 static const uint64_t EXPLR_MIPS_TO_OCMB_INTERRUPT_REGISTER1_DOORBELL           = 63;
-static const uint64_t EXPLR_EFUSE_IMAGE_OUT_3_ENTERPRISE_MODE_EC_MINOR          = 50;
-static const uint8_t  EXPLR_EFUSE_IMAGE_OUT_3_ENTERPRISE_MODE_EC_MINOR_LEN      = 4;
 static const uint64_t EXPLR_EFUSE_IMAGE_OUT_0_ENTERPRISE_MODE_DIS               = 53;
 static const uint64_t EXPLR_SRQ_MBA_PMU8Q_CFG_INIT_COMPLETE                     = 63;
 

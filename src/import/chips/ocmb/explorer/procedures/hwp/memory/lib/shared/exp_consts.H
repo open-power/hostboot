@@ -279,12 +279,13 @@ enum ecid_consts
 enum idec_consts
 {
     EXPLR_CHIP_INFO_REG = 0x2134,
-    MAJOR_EC_BIT_START = 32,
-    MAJOR_EC_BIT_LENGTH = 4,
     LOCATION_BIT_START = 44,
     LOCATION_BIT_LENGTH = 4,
     CHIPID_BIT_START = 56,
     CHIPID_BIT_LENGTH = 8,
+
+    REVISION_BIT_START  = 50,
+    REVISION_BIT_LENGTH = 4,
 };
 
 
