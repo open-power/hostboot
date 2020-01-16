@@ -76,6 +76,7 @@ MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/lib/utils/
 MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/lib/freq/
 MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/lib/workarounds/
 MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/lib/fir/
+MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/lib/plug_rules/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/eff_config/
