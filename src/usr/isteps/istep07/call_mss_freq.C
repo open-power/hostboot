@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -197,30 +197,30 @@ void*    call_mss_freq( void *io_pArgs )
 #ifdef CONFIG_AXONE
         else if(l_procModel == TARGETING::MODEL_AXONE)
         {
-            TARGETING::TargetHandleList l_memportTargetList;
-            getAllChiplets(l_memportTargetList, TYPE_MEM_PORT);
+            TARGETING::TargetHandleList l_procTargList;
+            getAllChips(l_procTargList, TYPE_PROC);
 
-            for (const auto & l_memport_target : l_memportTargetList)
+            for (const auto & l_proc_target : l_procTargList)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                     "p9a_mss_freq HWP target HUID %.8x",
-                    TARGETING::get_huid(l_memport_target));
+                    TARGETING::get_huid(l_proc_target));
 
                 //  call the HWP with each target   ( if parallel, spin off a task )
-                fapi2::Target <fapi2::TARGET_TYPE_MEM_PORT> l_fapi_memport_target
-                    (l_memport_target);
+                fapi2::Target <fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_proc_target
+                    (l_proc_target);
 
-                FAPI_INVOKE_HWP(l_err, p9a_mss_freq, l_fapi_memport_target);
+                FAPI_INVOKE_HWP(l_err, p9a_mss_freq, l_fapi_proc_target);
 
                 //  process return code.
                 if ( l_err )
                 {
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                     "ERROR 0x%.8X:  p9a_mss_freq HWP on target HUID %.8x",
-                    l_err->reasonCode(), TARGETING::get_huid(l_memport_target) );
+                    l_err->reasonCode(), TARGETING::get_huid(l_proc_target) );
 
                     // capture the target data in the elog
-                    ErrlUserDetailsTarget(l_memport_target).addToLog( l_err );
+                    ErrlUserDetailsTarget(l_proc_target).addToLog( l_err );
 
                     // Create IStep error log and cross reference to error that occurred
                     l_StepError.addErrorDetails( l_err );
