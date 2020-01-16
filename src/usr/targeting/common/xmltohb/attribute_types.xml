@@ -31,7 +31,6 @@
     </nativeType>
     <persistency>non-volatile</persistency>
     <readable/>
-    <no_export/>
     <mrwRequired/>
   </attribute>
 
