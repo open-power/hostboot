@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2019
+# Contributors Listed Below - COPYRIGHT 2014,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -40,8 +40,6 @@ include ../common/framework/prdf_framework.mk
 include ../common/plat/p9/prdf_plat_p9.mk
 include ../common/plat/axone/prdf_plat_axone.mk
 include ../common/plat/mem/prdf_plat_mem.mk
-include ../common/plat/cumulus/prdf_plat_cumulus.mk
-include ../common/plat/nimbus/prdf_plat_nimbus.mk
 include ../common/plat/explorer/prdf_plat_explorer.mk
 include ../plat/mem/prdf_plat_mem_hb_only.mk
 include ../plat/explorer/prdf_plat_explorer_hb_only.mk
