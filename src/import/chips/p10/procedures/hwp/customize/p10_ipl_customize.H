@@ -27,7 +27,7 @@
 
 #ifndef WIN32
 #include <fapi2.H>
-
+#include <common_ringId.H>
 #define NUM_OF_CORES     (uint8_t)32
 #define NUM_OF_QMES      (uint8_t)8
 #define CORES_PER_QME    (NUM_OF_CORES/NUM_OF_QMES)

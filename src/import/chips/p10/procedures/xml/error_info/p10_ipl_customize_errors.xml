@@ -191,8 +191,8 @@
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_ID</ffdc>
     <ffdc>CHIPLET_ID</ffdc>
+    <ffdc>REDUNDANT</ffdc>
     <ffdc>LOCAL_RC</ffdc>
-    <ffdc>OCCURRENCE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -430,11 +430,10 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_XIPC_GPTR_GET_SINGLE_RING_ERROR</rc>
-    <description>tor_get_single_ring() for gptr failed</description>
+    <rc>RC_XIPC_TOR_GET_SINGLE_RING_ERROR</rc>
+    <description>tor_get_single_ring() failed to fetch a ring</description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_ID</ffdc>
-    <ffdc>CHIPLET_ID</ffdc>
     <ffdc>DD_LEVEL</ffdc>
     <ffdc>LOCAL_RC</ffdc>
     <ffdc>OCCURRENCE</ffdc>
@@ -449,7 +448,7 @@
     <description>_rs4_decompress() failed</description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_ID</ffdc>
-    <ffdc>MAX_RING_BYTE_SIZE</ffdc>
+    <ffdc>MAX_RING_BUF_SIZE</ffdc>
     <ffdc>LOCAL_RC</ffdc>
     <ffdc>OCCURRENCE</ffdc>
     <callout>
@@ -459,11 +458,11 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_XIPC_BASE_OVLY_RAW_RING_SIZE_MISMATCH_ERROR</rc>
-    <description>Mvpd and Ovly raw ring size mismatch</description>
+    <rc>RC_XIPC_TARGET_OVLY_RAW_RING_LENGTH_MISMATCH</rc>
+    <description>Target ring and overlay raw ring lengths do not match</description>
     <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>BASE_SIZE</ffdc>
-    <ffdc>OVLY_SIZE</ffdc>
+    <ffdc>TARGET_RAW_RING_LENGTH</ffdc>
+    <ffdc>OVLY_RAW_RING_LENGTH</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -471,13 +470,15 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_XIPC_MVPD_OVLY_RING_HEADER_MISMATCH_ERROR</rc>
+    <rc>RC_XIPC_MVPD_OVLY_RING_HEADER_MISMATCH</rc>
     <description>Mvpd and Ovly ring header mismatch</description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>MVPD_RING_ID</ffdc>
     <ffdc>OVLY_RING_ID</ffdc>
     <ffdc>MVPD_SCAN_ADDR</ffdc>
     <ffdc>OVLY_SCAN_ADDR</ffdc>
+    <ffdc>MVPD_TYPE</ffdc>
+    <ffdc>OVLY_TYPE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -491,20 +492,6 @@
     <ffdc>RING_ID</ffdc>
     <ffdc>SCAN_ADDR</ffdc>
     <ffdc>LOCAL_RC</ffdc>
-    <ffdc>OCCURRENCE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <rc>RC_XIPC_RS4_TYPE_FIELD_ERROR</rc>
-    <description>RS4 header iv_type field error</description>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>RING_ID</ffdc>
-    <ffdc>SCAN_ADDR</ffdc>
-    <ffdc>TYPE_FIELD</ffdc>
     <ffdc>OCCURRENCE</ffdc>
     <callout>
       <procedure>CODE</procedure>
@@ -601,8 +588,8 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_XIPC_NO_RING_FOUND</rc>
-    <description>No dynamic and no base rings found</description>
+    <rc>RC_XIPC_DYNAMIC_NO_RINGS_FOUND</rc>
+    <description>No Dynamic and no Base rings found</description>
     <ffdc>CHIP_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
@@ -611,24 +598,12 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_XIPC_BASE_GET_SINGLE_RING_ERROR</rc>
-    <description>Failed to fetch base ring</description>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>RING_ID</ffdc>
-    <ffdc>DD_LEVEL</ffdc>
-    <ffdc>LOCAL_RC</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <rc>RC_XIPC_DYNAMIC_RING_ERROR</rc>
+    <rc>RC_XIPC_DYN_GET_RING_ERROR</rc>
     <description>Failed to fetch dynamic ring</description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_ID</ffdc>
-    <ffdc>MAX_RING_BYTE_SIZE</ffdc>
+    <ffdc>FEATURE</ffdc>
+    <ffdc>MAX_RING_BUF_SIZE</ffdc>
     <ffdc>LOCAL_RC</ffdc>
     <callout>
       <procedure>CODE</procedure>
@@ -637,16 +612,29 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_XIPC_BITS_MISMATCH_DYNAMIC_RING</rc>
+    <rc>RC_XIPC_DYNAMIC_BITS_CONFLICT</rc>
     <description>Bit conflict found while processing dynamic rings</description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_ID</ffdc>
     <ffdc>DYNBIT</ffdc>
     <ffdc>FEATURE_VEC_ACC</ffdc>
-    <ffdc>NEXT_FEATURE</ffdc>
+    <ffdc>FEATURE</ffdc>
     <ffdc>DATA_DYNACC</ffdc>
     <ffdc>DATA_DYN</ffdc>
     <ffdc>OCCURRENCE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_TYPE_FIELD_MISMATCH</rc>
+    <description>Two RS4 rings' iv_type field do not match in the non-SEL bits</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>TARGET_TYPE_FIELD</ffdc>
+    <ffdc>DYNAMIC_TYPE_FIELD</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

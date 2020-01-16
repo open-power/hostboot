@@ -269,12 +269,12 @@ rs4_decompress( uint8_t** o_data_str,
 ///
 /// \param[in] i_data A pointer to the CompressedScanData header + data to be
 ///
-/// \param[out] o_redundant Set to 1 if the RS4 string is the compressed form
-/// of a scan string that is all 0; Otherwise set to 0.
+/// \param[out] o_redundant Set to =true if the RS4 string is the compressed form
+/// of a scan string that is all 0; Otherwise set to =false.
 ///
-/// \returns See \ref scan _compression_code
+/// \returns See \ref scan_compression_codes
 int
-rs4_redundant( const CompressedScanData* i_data, int* o_redundant );
+rs4_redundant( const CompressedScanData* i_data, MyBool_t& o_redundant );
 
 
 /// Check for CMSK ring in RS4
@@ -396,7 +396,7 @@ void print_raw_ring( uint8_t*  data, uint32_t  bits);
 #define RS4_IV_TYPE_OVRD_CTX        (uint8_t)0b00001100
 /// Base, dynamic or PLL type of ring
 #define RS4_IV_TYPE_SEL_MASK        (uint8_t)0b11110000
-#define RS4_IV_TYPE_SEL_BASE        (uint8_t)0b00010000 // Ordinary ring
+#define RS4_IV_TYPE_SEL_BASE        (uint8_t)0b00010000 // Base or Gptr
 #define RS4_IV_TYPE_SEL_DYN         (uint8_t)0b00100000 // Dynamic init
 #define RS4_IV_TYPE_SEL_PLL         (uint8_t)0b01000000 // PLL
 #define RS4_IV_TYPE_SEL_FINAL       (uint8_t)0b10000000 // Final overlaid ring

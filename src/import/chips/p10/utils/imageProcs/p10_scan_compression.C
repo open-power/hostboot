@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -912,12 +912,12 @@ rs4_decompress(uint8_t** o_data_str,
 
 
 int
-rs4_redundant(const CompressedScanData* i_data, int* o_redundant)
+rs4_redundant(const CompressedScanData* i_data, MyBool_t& o_redundant)
 {
     uint8_t* data;
     uint32_t length, pos;
 
-    *o_redundant = 0;
+    o_redundant = false;
 
     if (htobe16(i_data->iv_magic) != RS4_MAGIC)
     {
@@ -937,7 +937,7 @@ rs4_redundant(const CompressedScanData* i_data, int* o_redundant)
     {
         if (rs4_get_nibble(data, pos + 1) == 0)
         {
-            *o_redundant = 1;
+            o_redundant = true;
         }
         else
         {
@@ -945,7 +945,7 @@ rs4_redundant(const CompressedScanData* i_data, int* o_redundant)
 
             if (rs4_get_nibble(data, pos + 2) == 0)
             {
-                *o_redundant = 1;
+                o_redundant = true;
             }
         }
     }

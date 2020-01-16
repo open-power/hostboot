@@ -55,6 +55,7 @@ typedef uint8_t   MyBool_t;         // false:0, true:1, undefined:UNDEFINED_BOOL
 #define  UNDEFINED_SCOM_ADDR       (uint32_t)0xffffffff
 #define  UNDEFINED_RING_CLASS      (RingClass_t)0xffff
 #define  UNDEFINED_CHIPLET_TYPE    (ChipletType_t)0xff
+#define  UNDEFINED_CHIPLET_ID      (uint8_t)0xff
 #define  UNDEFINED_CHIP_ID         (ChipId_t)0xff
 #define  UNDEFINED_RING_INDEX      (uint8_t)0xff
 #define  UNDEFINED_BOOLEAN         (MyBool_t)0xff
