@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1063,9 +1063,25 @@ void* call_proc_cen_ref_clk_enable(void *io_pArgs )
                         "for 0x%.08X", TARGETING::get_huid(l_ocmb));
 
             fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target(l_ocmb);
-            FAPI_INVOKE_HWP(l_errl,
-                            exp_check_for_ready,
-                            l_fapi_ocmb_target);
+
+            // TODO CQ:SW482291 Remove this retry workaround when ocmb check_for_ready timeout issue is resolved
+            for(uint8_t i = 0; i < 10; i++)
+            {
+                FAPI_INVOKE_HWP(l_errl,
+                                exp_check_for_ready,
+                                l_fapi_ocmb_target);
+
+                // Preserve the error log if this is the last loop.
+                if(l_errl == NULL || i == 9)
+                {
+                    break;
+                }
+                else
+                {
+                    delete l_errl;
+                    l_errl = NULL;
+                }
+            }
 
             if (l_errl)
             {
