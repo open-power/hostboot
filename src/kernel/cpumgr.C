@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -321,7 +321,7 @@ void CpuManager::activateCPU(cpu_t * i_cpu)
     kassert(WAKEUP_MSR_VALUE == msr);
     setLPCR(WAKEUP_LPCR_VALUE);
     setRPR(WAKEUP_RPR_VALUE);
-    setPSSCR(PSSCR_NAP_VALUE); // init NAP value (stop level 1)
+    setPSSCR(PSSCR_STOP2_VALUE);
 }
 
 void CpuManager::deactivateCPU(cpu_t * i_cpu)

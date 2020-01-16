@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,8 +33,8 @@
 
 // Stop/Nap instruction
 #define STOP_INSTRUCTION   0x4C0002E4
-// Default PSSCR value for NAP'ing
-#define PSSCR_NAP_VALUE    0x0000000000310001ull
+// Default PSSCR value for "STOP 2"
+#define PSSCR_STOP2_VALUE  0x0000000000310002ull
 
 
 /** @struct context_t
