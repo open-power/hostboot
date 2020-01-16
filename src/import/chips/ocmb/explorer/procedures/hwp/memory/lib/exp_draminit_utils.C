@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -324,6 +324,8 @@ fapi2::ReturnCode check_host_fw_response(const fapi2::Target<fapi2::TARGET_TYPE_
 
     o_rc = mss::exp::check::response(i_target, l_response, i_cmd);
 
+    return fapi2::FAPI2_RC_SUCCESS;
+
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -506,18 +508,26 @@ fapi2::ReturnCode response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_
                            const host_fw_response_struct& i_rsp,
                            const host_fw_command_struct& i_cmd)
 {
+    fapi2::buffer<uint32_t> l_error_code;
+
+    l_error_code.insertFromRight<0, BITS_PER_BYTE>(i_rsp.response_argument[4]).
+    insertFromRight<BITS_PER_BYTE, BITS_PER_BYTE>(i_rsp.response_argument[3]).
+    insertFromRight<2 * BITS_PER_BYTE, BITS_PER_BYTE>(i_rsp.response_argument[2]).
+    insertFromRight<3 * BITS_PER_BYTE, BITS_PER_BYTE>(i_rsp.response_argument[1]);
+
     // Check if cmd was successful
     FAPI_ASSERT(i_rsp.response_argument[0] == omi::response_arg::SUCCESS &&
                 i_rsp.request_identifier == i_cmd.request_identifier,
                 fapi2::MSS_EXP_RSP_ARG_FAILED().
                 set_TARGET(i_target).
                 set_RSP_ID(i_rsp.response_id).
-                set_ERROR_CODE(i_rsp.response_argument[1]).
+                set_ERROR_CODE(l_error_code).
                 set_EXPECTED_REQID(i_cmd.request_identifier).
                 set_ACTUAL_REQID(i_rsp.request_identifier),
-                "Failed to initialize the PHY for %s, response=0x%X "
+                "Failed to initialize the PHY for %s, response=0x%X, error_code=0x%08X "
                 "RSP RQ ID: %u CMD RQ ID: %u",
-                mss::c_str(i_target), i_rsp.response_argument[0], i_rsp.request_identifier, i_cmd.request_identifier);
+                mss::c_str(i_target), i_rsp.response_argument[0], l_error_code,
+                i_rsp.request_identifier, i_cmd.request_identifier);
 
     return fapi2::FAPI2_RC_SUCCESS;
 
