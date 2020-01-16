@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2017,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2017,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -748,10 +748,8 @@
         <writeable/>
     </attribute>
 
-    <!-- Make this writeable so we can choose the value based on our CONFIG -->
     <attribute>
        <id>ATTR_LPC_CONSOLE_CNFG</id>
-       <persistency>volatile-zeroed</persistency>
        <writeable/>
     </attribute>
 
@@ -769,7 +767,6 @@
     <attribute>
         <id>ATTR_MRW_HW_MIRRORING_ENABLE</id>
         <writeable/>
-        <no_export/>
     </attribute>
     <attribute>
         <id>ATTR_PROC_MEM_TO_USE</id>
@@ -806,23 +803,7 @@
         <persistency>volatile-zeroed</persistency>
     </attribute>
     <attribute>
-        <id>ATTR_AVSBUS_BUSNUM</id>
-        <persistency>volatile-zeroed</persistency>
-    </attribute>
-    <attribute>
-        <id>ATTR_AVSBUS_RAIL</id>
-        <persistency>volatile-zeroed</persistency>
-    </attribute>
-    <attribute>
-        <id>ATTR_EXTERNAL_VRM_STEPSIZE</id>
-        <persistency>volatile-zeroed</persistency>
-    </attribute>
-    <attribute>
         <id>ATTR_FREQ_PB_MHZ_POUNDV_FALLBACK</id>
-        <persistency>volatile-zeroed</persistency>
-    </attribute>
-    <attribute>
-        <id>ATTR_SYSTEM_MMA_POWEROFF_DELAY_POWEROF2_MS</id>
         <persistency>volatile-zeroed</persistency>
     </attribute>
     <attribute>
