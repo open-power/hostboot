@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -720,6 +720,8 @@ extern "C"
         {
 
             // If no value for freq, then mapping of frequency was unsuccessful
+            // Note we don't want to produce FFDC if the ffdc_enabled flag is not set
+            // i.e. if we're just probing the EFD for its supported frequencies
             FAPI_ASSERT( ( !io_vpdInfo.iv_is_config_ffdc_enabled ),
                          fapi2::DDIMM_GET_EFD_UNSUPPORTED_FREQUENCY().
                          set_UNSUPPORTED_FREQ(static_cast<uint32_t>
@@ -760,6 +762,8 @@ extern "C"
         if ( !l_rankMask)
         {
             // If no value for MR, then mapping of MR was unsuccessful
+            // Note we don't want to produce FFDC if the ffdc_enabled flag is not set
+            // i.e. if we're just probing the EFD for its supported frequencies
             FAPI_ASSERT( ( !io_vpdInfo.iv_is_config_ffdc_enabled ),
                          fapi2::DDIMM_GET_EFD_UNSUPPORTED_RANK().
                          set_UNSUPPORTED_RANK(static_cast<uint32_t>
@@ -801,18 +805,30 @@ extern "C"
         l_supportedSpeeds = *reinterpret_cast<const uint16_t*>
                             (i_spdBuffer + SPD_SUPPORTED_HOST_SPEEDS_ADDR);
         l_supportedSpeeds = le16toh(l_supportedSpeeds);
-        FAPI_ASSERT( l_freqMask & l_supportedSpeeds,
-                     fapi2::DDIMM_UNSUPPORTED_FREQUENCY().
-                     set_UNSUPPORTED_FREQ(static_cast<uint32_t>
-                                          (io_vpdInfo.iv_omi_freq_mhz)).
-                     set_SUPPORTED_FREQS(l_supportedSpeeds).
-                     set_OCMB_CHIP_TARGET(i_ocmbFapi2Target).
-                     set_VPD_TYPE(io_vpdInfo.iv_vpd_type).
-                     set_DDR_TYPE(static_cast<uint32_t>
-                                  (i_spdBuffer[SPD_MEM_TYPE_ADDR])),
-                     "Invalid frequency for this DIMM - request=%d, supported mask=%.4X",
-                     io_vpdInfo.iv_omi_freq_mhz, l_supportedSpeeds );
 
+        if (!(l_freqMask & l_supportedSpeeds))
+        {
+            // Note we don't want to produce FFDC if the ffdc_enabled flag is not set
+            // i.e. if we're just probing the EFD for its supported frequencies
+            FAPI_ASSERT( !io_vpdInfo.iv_is_config_ffdc_enabled,
+                         fapi2::DDIMM_UNSUPPORTED_FREQUENCY().
+                         set_UNSUPPORTED_FREQ(static_cast<uint32_t>
+                                              (io_vpdInfo.iv_omi_freq_mhz)).
+                         set_SUPPORTED_FREQS(l_supportedSpeeds).
+                         set_OCMB_CHIP_TARGET(i_ocmbFapi2Target).
+                         set_VPD_TYPE(io_vpdInfo.iv_vpd_type).
+                         set_DDR_TYPE(static_cast<uint32_t>
+                                      (i_spdBuffer[SPD_MEM_TYPE_ADDR])),
+                         "Invalid frequency for this DIMM - request=%d, supported mask=%.4X",
+                         io_vpdInfo.iv_omi_freq_mhz, l_supportedSpeeds );
+
+            // If unable to collect FFDC and assert, at least trace out and exit with false
+            FAPI_INF ("ddr4_get_efd: Unsupported frequency %d (frequency bit mask = 0x%.4X, "
+                      "supported mask = 0x%.4X)",
+                      io_vpdInfo.iv_omi_freq_mhz, l_freqMask, l_supportedSpeeds);
+
+            FAPI_TRY(fapi2::FAPI2_RC_FALSE);
+        }
 
         // Point to the beginning of the EFD meta data, AKA EFD[0] meta data.
         l_efdMetaDataPtr = i_spdBuffer + SPD_EFD_META_DATA_ADDR;
@@ -934,6 +950,8 @@ extern "C"
         {
             // Did not find an EFD to match frequency and master rank criteria
             // Collect FFDC and assert if iv_is_config_ffdc_enabled is true
+            // Note we don't want to produce FFDC if the ffdc_enabled flag is not set
+            // i.e. if we're just probing the EFD for its supported frequencies
             FAPI_ASSERT( ( !io_vpdInfo.iv_is_config_ffdc_enabled ),
                          fapi2::DDIMM_GET_EFD_EFD_NOT_FOUND().
                          set_FREQUENCY(io_vpdInfo.iv_omi_freq_mhz).
