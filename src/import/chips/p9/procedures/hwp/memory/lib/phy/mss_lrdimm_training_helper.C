@@ -181,8 +181,8 @@ fapi2::ReturnCode set_dram_rd_preamble_mode_helper(const fapi2::Target<fapi2::TA
 {
     // Enter rank into read preamble training mode
     fapi2::ReturnCode l_rc;
-    mss::ddr4::mrs04_data l_data(i_target, l_rc);
-    FAPI_TRY(l_rc, "%s. Failed to initialize mrs04_data for mpr_load", mss::c_str(i_target) );
+    mss::ddr4::mrs04_data<mss::mc_type::NIMBUS> l_data(i_target, l_rc);
+    FAPI_TRY(l_rc, "%s. Failed to initialize mrs04_data<mss::mc_type::NIMBUS> for mpr_load", mss::c_str(i_target) );
 
     l_data.iv_rd_pre_train_mode = i_mode;
 
