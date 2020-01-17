@@ -273,6 +273,10 @@ enum generic_ffdc_codes
     SET_RCD_MFG_ID = 0x109B,
     SET_DRAM_MODULE_HEIGHT = 0x109C,
     SET_SPD_REVISION = 0x109D,
+
+    MRS_MIRROR_MODE = 0x109E,
+    MRS01_GEN = 0x109F,
+    MRS02_GEN = 0x10A0,
 };
 
 ///

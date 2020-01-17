@@ -24,10 +24,10 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file mrs03.C
+/// @file mrs03_nimbus.C
 /// @brief Run and manage mrs03
 ///
-// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
+// *HWP HWP Owner: Mattew Hickman <Matthew.Hickman@ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
@@ -38,11 +38,12 @@
 #include <lib/shared/nimbus_defaults.H>
 #include <lib/dimm/mrs_traits_nimbus.H>
 #include <mss.H>
+#include <lib/shared/mss_const.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
 #include <lib/dimm/ddr4/mrs_load_ddr4_nimbus.H>
+#include <generic/memory/lib/dimm/ddr4/mrs03.H>
 
-using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_DIMM;
-
 using fapi2::FAPI2_RC_SUCCESS;
 
 namespace mss
@@ -50,24 +51,53 @@ namespace mss
 
 namespace ddr4
 {
-enum swizzle : uint64_t
+
+///
+/// @brief Helper function to decode CRC WR latency to the MRS value - nimbus specialization
+/// @param[in] i_target a fapi2::Target<fapi2::TARGET_TYPE_DIMM>
+/// @param[in] i_value the value to be decoded
+/// @param[out] o_decode the MRS decoded value
+/// @return FAPI2_RC_SUCCESS iff OK
+///
+template<>
+fapi2::ReturnCode crc_wr_latency_helper<mss::mc_type::NIMBUS>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_value,
+        fapi2::buffer<uint8_t>& o_decode)
 {
-    MPR_PAGE_LENGTH = 2,
-    MPR_PAGE_START = 7,
-    FINE_REFRESH_LENGTH = 3,
-    FINE_REFRESH_START = 7,
-    CRC_WR_LATENCY_LENGTH = 2,
-    CRC_WR_LATENCY_START = 7,
-    READ_FORMAT_LENGTH = 2,
-    READ_FORMAT_START = 7,
-};
+    constexpr uint64_t WL_COUNT = 3;
+    constexpr uint64_t LOWEST_WL = 4;
+    //                                                 4  5  6
+    constexpr uint8_t crc_wr_latency_map[WL_COUNT] = { 0, 1, 2 };
+
+    fapi2::buffer<uint8_t> l_crc_wr_latency_buffer;
+
+    FAPI_ASSERT((i_value >= LOWEST_WL) &&
+                (i_value < (LOWEST_WL + WL_COUNT)),
+                fapi2::MSS_BAD_MR_PARAMETER()
+                .set_MR_NUMBER(3)
+                .set_PARAMETER(WRITE_CMD_LATENCY)
+                .set_PARAMETER_VALUE(i_value)
+                .set_DIMM_IN_ERROR(i_target),
+                "Bad value for Write CMD Latency: %d (%s)",
+                i_value,
+                mss::c_str(i_target));
+
+    o_decode = crc_wr_latency_map[i_value - LOWEST_WL];
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief mrs03_data ctor
 /// @param[in] a fapi2::TARGET_TYPE_DIMM target
 /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
-mrs03_data::mrs03_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc ):
+template<>
+mrs03_data<mss::mc_type::NIMBUS>::mrs03_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        fapi2::ReturnCode& o_rc ):
     iv_mpr_mode(fapi2::ENUM_ATTR_EFF_MPR_MODE_DISABLE),
     iv_mpr_page(fapi2::ENUM_ATTR_EFF_MPR_PAGE_PG0),
     iv_geardown(0),
@@ -100,164 +130,16 @@ fapi_try_exit:
     return;
 }
 
-///
-/// @brief Configure the ARR0 of the CCS instruction for mrs03
-/// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
-/// @param[in,out] io_inst the instruction to fixup
-/// @param[in] i_rank the rank in question
-/// @return FAPI2_RC_SUCCESS iff OK
-///
-fapi2::ReturnCode mrs03(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                        ccs::instruction_t& io_inst,
-                        const uint64_t i_rank)
-{
-    // Check to make sure our ctor worked ok
-    mrs03_data l_data( i_target, fapi2::current_err );
-    FAPI_TRY( fapi2::current_err,
-              "%s Unable to construct MRS03 data from attributes",
-              mss::c_str(i_target) );
-    FAPI_TRY( mrs03(i_target, l_data, io_inst, i_rank) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Configure the ARR0 of the CCS instruction for mrs03, data object as input
-/// @param[in] i_target a fapi2::Target<fapi2::TARGET_TYPE_DIMM>
-/// @param[in] i_data an mrs00_data object, filled in
-/// @param[in,out] io_inst the instruction to fixup
-/// @param[in] i_rank the rank in question
-/// @return FAPI2_RC_SUCCESS iff OK
-///
-fapi2::ReturnCode mrs03(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                        const mrs03_data& i_data,
-                        ccs::instruction_t& io_inst,
-                        const uint64_t i_rank)
-{
-    using TT = ccsTraits<mc_type::NIMBUS>;
-
-    //Some consts for the swizzle action
-    constexpr uint64_t LOWEST_WL = 4;
-    constexpr uint64_t WL_COUNT = 3;
-    //                                                 4  5  6
-    constexpr uint8_t crc_wr_latency_map[WL_COUNT] = { 0, 1, 2 };
-
-    fapi2::buffer<uint8_t> l_crc_wr_latency_buffer;
-
-    FAPI_ASSERT((i_data.iv_crc_wr_latency >= LOWEST_WL) &&
-                (i_data.iv_crc_wr_latency < (LOWEST_WL + WL_COUNT)),
-                fapi2::MSS_BAD_MR_PARAMETER()
-                .set_MR_NUMBER(3)
-                .set_PARAMETER(WRITE_CMD_LATENCY)
-                .set_PARAMETER_VALUE(i_data.iv_crc_wr_latency)
-                .set_DIMM_IN_ERROR(i_target),
-                "Bad value for Write CMD Latency: %d (%s)",
-                i_data.iv_crc_wr_latency,
-                mss::c_str(i_target));
-
-    l_crc_wr_latency_buffer = crc_wr_latency_map[i_data.iv_crc_wr_latency - LOWEST_WL];
-
-    mss::swizzle<TT::A0, MPR_PAGE_LENGTH, MPR_PAGE_START>(fapi2::buffer<uint8_t>(i_data.iv_mpr_page), io_inst.arr0);
-    io_inst.arr0.writeBit<TT::A2>(i_data.iv_mpr_mode);
-    io_inst.arr0.writeBit<TT::A3>(i_data.iv_geardown);
-    io_inst.arr0.writeBit<TT::A4>(i_data.iv_pda);
-    io_inst.arr0.writeBit<TT::A5>(i_data.iv_temp_readout);
-
-    mss::swizzle<TT::A6, FINE_REFRESH_LENGTH, FINE_REFRESH_START>(fapi2::buffer<uint8_t>(i_data.iv_fine_refresh),
-            io_inst.arr0);
-    mss::swizzle<TT::A9, CRC_WR_LATENCY_LENGTH, CRC_WR_LATENCY_START>(l_crc_wr_latency_buffer, io_inst.arr0);
-    mss::swizzle<TT::A11, READ_FORMAT_LENGTH, READ_FORMAT_START>(fapi2::buffer<uint8_t>(i_data.iv_read_format),
-            io_inst.arr0);
-
-    FAPI_INF("%s MR3: 0x%016llx", mss::c_str(i_target), uint64_t(io_inst.arr0));
-
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Helper function for mrs03_decode
-/// @param[in] i_inst the CCS instruction
-/// @param[in] i_rank the rank in question
-/// @param[out] o_mpr_mode the mpr operation setting
-/// @param[out] o_geardown the geardown mode setting
-/// @param[out] o_pda the per dram addressability setting
-/// @param[out] o_temp_readout the temperature sensor readout setting
-/// @param[out] o_mpr_page the mpr page selection
-/// @param[out] o_fine_refresh the fine granularity refresh mode setting
-/// @param[out] o_crc_wr_latency_buffer the write cmd latency when crc and dm are enabled
-/// @param[out] o_read_fromat the mpr read format setting
-/// @return FAPI2_RC_SUCCESS iff ok
-///
-fapi2::ReturnCode mrs03_decode_helper(const ccs::instruction_t& i_inst,
-                                      const uint64_t i_rank,
-                                      uint8_t& o_mpr_mode,
-                                      uint8_t& o_geardown,
-                                      uint8_t& o_pda,
-                                      uint8_t& o_temp_readout,
-                                      fapi2::buffer<uint8_t>& o_mpr_page,
-                                      fapi2::buffer<uint8_t>& o_fine_refresh,
-                                      fapi2::buffer<uint8_t>& o_crc_wr_latency_buffer,
-                                      fapi2::buffer<uint8_t>& o_read_format)
-{
-    using TT = ccsTraits<mc_type::NIMBUS>;
-
-    o_mpr_page = 0;
-    o_fine_refresh = 0;
-    o_crc_wr_latency_buffer = 0;
-    o_read_format = 0;
-
-    o_mpr_mode = i_inst.arr0.getBit<TT::A2>();
-    o_geardown = i_inst.arr0.getBit<TT::A3>();
-    o_pda = i_inst.arr0.getBit<TT::A4>();
-    o_temp_readout = i_inst.arr0.getBit<TT::A5>();
-
-    mss::swizzle<6, 2, TT::A1>(i_inst.arr0, o_mpr_page);
-    mss::swizzle<5, 3, TT::A8>(i_inst.arr0, o_fine_refresh);
-    mss::swizzle<6, 2, TT::A10>(i_inst.arr0, o_crc_wr_latency_buffer);
-    mss::swizzle<6, 2, TT::A12>(i_inst.arr0, o_read_format);
-
-    FAPI_INF("MR3 rank %d decode: MPR_MODE: 0x%x, MPR_PAGE: 0x%x, GD: 0x%x, PDA: 0x%x, "
-             "TEMP: 0x%x FR: 0x%x, CRC_WL: 0x%x, RF: 0x%x", i_rank,
-             uint8_t(o_mpr_mode), o_mpr_page, o_geardown, o_pda, uint8_t(o_temp_readout),
-             uint8_t(o_fine_refresh), uint8_t(o_crc_wr_latency_buffer), uint8_t(o_read_format));
-
-    return FAPI2_RC_SUCCESS;
-}
-
-///
-/// @brief Given a CCS instruction which contains address bits with an encoded MRS3,
-/// decode and trace the contents
-/// @param[in] i_inst the CCS instruction
-/// @param[in] i_rank the rank in question
-/// @return FAPI2_RC_SUCCESS iff ok
-///
-fapi2::ReturnCode mrs03_decode(const ccs::instruction_t& i_inst,
-                               const uint64_t i_rank)
-{
-    uint8_t l_mpr_mode = 0;
-    uint8_t l_geardown = 0;
-    uint8_t l_pda = 0;
-    uint8_t l_temp_readout = 0;
-    fapi2::buffer<uint8_t> l_mpr_page;
-    fapi2::buffer<uint8_t> l_fine_refresh;
-    fapi2::buffer<uint8_t> l_crc_wr_latency_buffer;
-    fapi2::buffer<uint8_t> l_read_format;
-
-    return mrs03_decode_helper(i_inst, i_rank, l_mpr_mode, l_geardown, l_pda, l_temp_readout,
-                               l_mpr_page, l_fine_refresh, l_crc_wr_latency_buffer, l_read_format);
-}
-
-fapi2::ReturnCode (*mrs03_data::make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const mrs03_data& i_data,
+template<>
+fapi2::ReturnCode (*mrs03_data<mss::mc_type::NIMBUS>::make_ccs_instruction)(const
+        fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const mrs03_data<mss::mc_type::NIMBUS>& i_data,
         ccs::instruction_t& io_inst,
         const uint64_t i_rank) = &mrs03;
 
-fapi2::ReturnCode (*mrs03_data::decode)(const ccs::instruction_t& i_inst,
-                                        const uint64_t i_rank) = &mrs03_decode;
+template<>
+fapi2::ReturnCode (*mrs03_data<mss::mc_type::NIMBUS>::decode)(const ccs::instruction_t& i_inst,
+        const uint64_t i_rank) = &mrs03_decode;
 
 } // ns ddr4
 } // ns mss

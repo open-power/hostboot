@@ -47,6 +47,14 @@
 #include <lib/dimm/ddr4/mrs_load_ddr4_nimbus.H>
 #include <p9_mc_scom_addresses_fld.H>
 
+#include <generic/memory/lib/dimm/ddr4/mrs00.H>
+#include <generic/memory/lib/dimm/ddr4/mrs01.H>
+#include <generic/memory/lib/dimm/ddr4/mrs02.H>
+#include <generic/memory/lib/dimm/ddr4/mrs03.H>
+#include <generic/memory/lib/dimm/ddr4/mrs04.H>
+#include <generic/memory/lib/dimm/ddr4/mrs05.H>
+#include <generic/memory/lib/dimm/ddr4/mrs06.H>
+
 namespace mss
 {
 
@@ -154,7 +162,7 @@ class shadow_regs_traits<0>
             uint64_t l_freq = 0;
 
             // Check to make sure our ctor worked ok
-            mss::ddr4::mrs00_data l_data( i_target, fapi2::current_err );
+            mss::ddr4::mrs00_data<mss::mc_type::NIMBUS> l_data( i_target, fapi2::current_err );
             FAPI_TRY( fapi2::current_err, "%s Unable to construct MRS00 data from attributes", mss::c_str(i_target) );
             FAPI_TRY( mss::eff_dimm_type(i_target, l_dimm_type));
             FAPI_TRY( mss::freq(mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq));

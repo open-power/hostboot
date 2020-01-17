@@ -60,15 +60,6 @@ class mrsTraits<mss::mc_type::NIMBUS>
         static constexpr uint64_t TMRD = 8;
 
         ///
-        /// @brief Returns an error for bad mrs parameter
-        /// @return mrs error
-        ///
-        static fapi2::MSS_BAD_MR_PARAMETER bad_mr_parameter()
-        {
-            return fapi2::MSS_BAD_MR_PARAMETER();
-        }
-
-        ///
         /// @brief Returns the attribute rcd mirror mode on
         /// @return rcd mirror mode on
         ///
@@ -80,10 +71,12 @@ class mrsTraits<mss::mc_type::NIMBUS>
         ///
         /// @brief Returns the ATTR_EFF_DIMM_RCD_MIRROR_MODE getter
         /// @param[in] const ref to the fapi2::Target<fapi2::TARGET_TYPE_DIMM>
+        /// @param[in] i_rank the rank on which to operate
         /// @param[out] ref to the value uint8_t
         /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
         ///
         static fapi2::ReturnCode mirror_mode(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                             const uint64_t i_rank,
                                              uint8_t& o_value)
         {
             return mss::eff_dimm_rcd_mirror_mode(i_target, o_value);

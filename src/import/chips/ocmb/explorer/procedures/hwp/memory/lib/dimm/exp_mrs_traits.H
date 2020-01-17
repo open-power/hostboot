@@ -63,15 +63,6 @@ class mrsTraits<mss::mc_type::EXPLORER>
         static constexpr uint64_t TMRD = 16;
 
         ///
-        /// @brief Returns an error for bad mrs parameter
-        /// @return mrs error
-        ///
-        static fapi2::MSS_BAD_MR_PARAMETER bad_mr_parameter()
-        {
-            return fapi2::MSS_BAD_MR_PARAMETER();
-        }
-
-        ///
         /// @brief Returns if rcd mirror mode on
         /// @return false, currently set to disabled
         ///
@@ -84,13 +75,36 @@ class mrsTraits<mss::mc_type::EXPLORER>
         ///
         /// @brief Returns if mirror mode is enabled, currently set to disabled
         /// @param[in] const ref to the fapi2::Target<fapi2::TARGET_TYPE_DIMM>
+        /// @param[in] i_rank the rank on which to operate from the port perspective
         /// @param[out] ref to the value uint8_t
         /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
         ///
         static fapi2::ReturnCode mirror_mode(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                             const uint64_t i_rank,
                                              uint8_t& o_value)
         {
-            return mss::attr::get_exp_dram_address_mirroring(i_target, o_value);
+            constexpr uint64_t SINGLE_RANK_MASK = 0x1;
+
+            // Makes sure that we have a good rank passed in
+            FAPI_ASSERT(i_rank < mss::exp::MAX_MRANK_PER_PORT,
+                        fapi2::MSS_INVALID_RANK().
+                        set_FUNCTION(mss::generic_ffdc_codes::MRS_MIRROR_MODE).
+                        set_RANK(i_rank).
+                        set_PORT_TARGET(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target)),
+                        "%s mirror mode received invalid rank: %d",
+                        mss::c_str(i_target), i_rank);
+
+            FAPI_TRY(mss::attr::get_exp_dram_address_mirroring(i_target, o_value));
+
+            {
+                const auto l_dimm_rank = i_rank % mss::exp::MAX_RANK_PER_DIMM;
+                o_value = o_value >> l_dimm_rank;
+                o_value &= SINGLE_RANK_MASK;
+            }
+
+            return fapi2::FAPI2_RC_SUCCESS;
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         ///

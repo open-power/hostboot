@@ -216,7 +216,7 @@ namespace wr_lvl
 /// @param[in,out] io_mrs - the MRS to update
 /// @param[in] i_state - the state for the qoff in the MRS
 ///
-void update_mrs(mss::ddr4::mrs01_data& io_mrs, const mss::states i_state);
+void update_mrs(mss::ddr4::mrs01_data<mss::mc_type::NIMBUS>& io_mrs, const mss::states i_state);
 
 ///
 /// @brief Adds in an MRS on a per-rank basis based upon qoff

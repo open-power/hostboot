@@ -796,7 +796,7 @@ fapi2::ReturnCode configure_skip_bits( const fapi2::Target<fapi2::TARGET_TYPE_MC
 /// @note The differing values can cause WR VREF fail, so the bit(s) that differ are disabled temporarily
 ///
 fapi2::ReturnCode modify_mrs_vref_to_vpd( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        mss::ddr4::mrs06_data& io_mrs06 );
+        mss::ddr4::mrs06_data<mss::mc_type::NIMBUS>& io_mrs06 );
 
 ///
 /// @brief Resets the WR DQ delays for a given DRAM to be a quarter clock before the DQS

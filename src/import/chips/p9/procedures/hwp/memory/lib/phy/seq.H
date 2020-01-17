@@ -546,7 +546,7 @@ fapi2::ReturnCode reset_config0( const fapi2::Target<T>& i_target )
 
     // Let's figure out if the A17 bit is on/ needed for parity calculations
     bool l_a17 = false;
-    FAPI_TRY( is_a17_needed( i_target, l_a17) );
+    FAPI_TRY( is_a17_needed<mss::mc_type::NIMBUS>( i_target, l_a17) );
 
     {
         const auto l_encoding = l_a17 ? TT::A17_IS_USED : TT::A17_IS_NOT_USED;

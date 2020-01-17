@@ -695,7 +695,7 @@ fapi2::ReturnCode write_ctr::post_workaround( const fapi2::Target<fapi2::TARGET_
 
         // Assembles the PDA container and fixes the disables
         {
-            mss::ddr4::pda::commands<mss::ddr4::mrs06_data> l_container;
+            mss::ddr4::pda::commands<mss::ddr4::mrs06_data<mss::mc_type::NIMBUS>> l_container;
 
             // Loops through and sets up all the data needed the workaround
             for(const auto& l_pair : l_bad_drams )
@@ -705,7 +705,7 @@ fapi2::ReturnCode write_ctr::post_workaround( const fapi2::Target<fapi2::TARGET_
 
                 // Adds in the PDA necessary for the latching commands
                 fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
-                mss::ddr4::mrs06_data l_mrs(l_dimm, l_rc);
+                mss::ddr4::mrs06_data<mss::mc_type::NIMBUS> l_mrs(l_dimm, l_rc);
                 FAPI_TRY(l_rc, "%s failed to create MRS06 data class", mss::c_str(l_dimm));
 
                 // Updates the MRS06 settings to have the proper VREF settings

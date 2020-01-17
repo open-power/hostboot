@@ -236,7 +236,7 @@ fapi2::ReturnCode add_enable( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_ta
                               const uint64_t i_rank,
                               std::vector< ccs::instruction_t >& io_inst )
 {
-    mss::ddr4::mrs03_data l_mrs03( i_target, fapi2::current_err );
+    mss::ddr4::mrs03_data<mss::mc_type::NIMBUS> l_mrs03( i_target, fapi2::current_err );
     FAPI_TRY( fapi2::current_err, "%s Unable to construct MRS03 data from attributes", mss::c_str(i_target));
 
     // Overrides the PDA value to be enabled
@@ -288,7 +288,7 @@ fapi2::ReturnCode add_disable( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_t
                                const uint64_t i_rank,
                                std::vector< ccs::instruction_t >& io_inst )
 {
-    mss::ddr4::mrs03_data l_mrs03( i_target, fapi2::current_err );
+    mss::ddr4::mrs03_data<mss::mc_type::NIMBUS> l_mrs03( i_target, fapi2::current_err );
     FAPI_TRY( fapi2::current_err, "%s Unable to construct MRS03 data from attributes", mss::c_str(i_target));
 
     // Overrides the PDA value to be disabled
@@ -348,9 +348,10 @@ fapi_try_exit:
 /// @note A PDA latch of WR VREF settings is the most common PDA operations
 /// This function adds a bit of fanciness (compression) to speed up the overall runtime
 ///
-fapi2::ReturnCode execute_wr_vref_latch( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+template<>
+fapi2::ReturnCode execute_wr_vref_latch<mss::mc_type::NIMBUS>( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint64_t i_rank,
-        const mss::ddr4::mrs06_data& i_mrs,
+        const mss::ddr4::mrs06_data<mss::mc_type::NIMBUS>& i_mrs,
         const std::vector<uint64_t>& i_drams )
 {
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
@@ -400,7 +401,9 @@ fapi_try_exit:
 /// @note A PDA latch of WR VREF settings is the most common PDA operations
 /// This function adds a bit of fanciness (compression) to speed up the overall runtime
 ///
-fapi2::ReturnCode execute_wr_vref_latch( const commands<mss::ddr4::mrs06_data>& i_commands )
+template<>
+fapi2::ReturnCode execute_wr_vref_latch<mss::mc_type::NIMBUS>( const
+        commands<mss::ddr4::mrs06_data<mss::mc_type::NIMBUS>>& i_commands )
 {
     // If the commands passed in are empty, simply exit
     FAPI_ASSERT((!i_commands.empty()),

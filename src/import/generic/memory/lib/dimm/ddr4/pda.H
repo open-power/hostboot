@@ -312,6 +312,7 @@ class commands
 
 ///
 /// @brief Performs a PDA WR VREF latch
+/// @tparam MC mss::mc_type memory controller type
 /// @param[in] i_target a fapi2::Target DIMM
 /// @param[in] i_rank the rank to send to
 /// @param[in] i_mrs the MRS data to update
@@ -320,19 +321,22 @@ class commands
 /// @note A PDA latch of WR VREF settings is the most common PDA operations
 /// This function adds a bit of fanciness (compression) to speed up the overall runtime
 ///
+template< mss::mc_type MC = DEFAULT_MC_TYPE >
 fapi2::ReturnCode execute_wr_vref_latch( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint64_t i_rank,
-        const mss::ddr4::mrs06_data& i_mrs,
+        const mss::ddr4::mrs06_data<MC>& i_mrs,
         const std::vector<uint64_t>& i_drams );
 
 ///
 /// @brief Performs a PDA WR VREF latch
+/// @tparam MC mss::mc_type memory controller type
 /// @param[in] i_commands the PDA commands to issue and DRAM
 /// @return FAPI2_RC_SUCCESS if and only if ok
 /// @note A PDA latch of WR VREF settings is the most common PDA operations
 /// This function adds a bit of fanciness (compression) to speed up the overall runtime
 ///
-fapi2::ReturnCode execute_wr_vref_latch( const commands<mss::ddr4::mrs06_data>& i_commands );
+template< mss::mc_type MC = DEFAULT_MC_TYPE >
+fapi2::ReturnCode execute_wr_vref_latch( const commands<mss::ddr4::mrs06_data<MC>>& i_commands );
 
 } // ns pda
 

@@ -43,6 +43,14 @@
 #include <lib/eff_config/timing.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
+#include <generic/memory/lib/dimm/ddr4/mrs00.H>
+#include <generic/memory/lib/dimm/ddr4/mrs01.H>
+#include <generic/memory/lib/dimm/ddr4/mrs02.H>
+#include <generic/memory/lib/dimm/ddr4/mrs03.H>
+#include <generic/memory/lib/dimm/ddr4/mrs04.H>
+#include <generic/memory/lib/dimm/ddr4/mrs05.H>
+#include <generic/memory/lib/dimm/ddr4/mrs06.H>
+
 using fapi2::TARGET_TYPE_DIMM;
 using fapi2::FAPI2_RC_SUCCESS;
 
@@ -77,8 +85,8 @@ fapi_try_exit:
 /// @note Based off of Table 2.8 Proposed DDR4 Full spec update(79-4B) page 28
 ///
 template<>
-fapi2::ReturnCode is_a17_needed(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                bool& o_is_needed)
+fapi2::ReturnCode is_a17_needed<mss::mc_type::NIMBUS>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        bool& o_is_needed)
 {
     uint8_t l_dram_density = 0;
     uint8_t l_dram_width = 0;
@@ -103,8 +111,8 @@ fapi_try_exit:
 /// @note Based off of Table 2.8 Proposed DDR4 Full spec update(79-4B) page 28
 ///
 template<>
-fapi2::ReturnCode is_a17_needed(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                bool& o_is_needed)
+fapi2::ReturnCode is_a17_needed<mss::mc_type::NIMBUS>(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        bool& o_is_needed)
 {
     // Set this to good in case no dimms and we're running unit tests
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
@@ -118,7 +126,7 @@ fapi2::ReturnCode is_a17_needed(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_t
         // Default to not used
         // Using temp because we want to OR the two results together. Don't want the false to overwrite
         bool l_temp = false;
-        FAPI_TRY( is_a17_needed( l_dimm, l_temp), "%s Failed to get a17 boolean", mss::c_str(l_dimm) );
+        FAPI_TRY( is_a17_needed<mss::mc_type::NIMBUS>( l_dimm, l_temp), "%s Failed to get a17 boolean", mss::c_str(l_dimm) );
 
         o_is_needed = o_is_needed | l_temp;
     }

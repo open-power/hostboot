@@ -64,7 +64,7 @@ namespace ddr4
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 fapi2::ReturnCode add_latch_wr_vref_commands( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const mrs06_data& i_mrs06,
+        const mrs06_data<mss::mc_type::NIMBUS>& i_mrs06,
         const uint64_t i_rank,
         std::vector< ccs::instruction_t >& io_inst)
 {
@@ -180,7 +180,7 @@ fapi2::ReturnCode setup_latch_wr_vref_commands_by_rank( const fapi2::Target<fapi
         std::vector< ccs::instruction_t >& io_inst)
 {
     // Check to make sure our ctor worked ok
-    mrs06_data l_mrs06( i_target, fapi2::current_err );
+    mrs06_data<mss::mc_type::NIMBUS> l_mrs06( i_target, fapi2::current_err );
     FAPI_TRY( fapi2::current_err, "%s Unable to construct MRS06 data from attributes", mss::c_str(i_target));
 
     // Setup training range if the value is not the default

@@ -1551,7 +1551,7 @@ fapi2::ReturnCode eff_dimm::dimm_rc02()
     fapi2::buffer<uint8_t> l_temp;
 
     bool is_a17 = false;
-    FAPI_TRY( is_a17_needed( iv_dimm, is_a17), "%s Failed to get a17 boolean", mss::c_str(iv_dimm) );
+    FAPI_TRY( is_a17_needed<mss::mc_type::NIMBUS>( iv_dimm, is_a17), "%s Failed to get a17 boolean", mss::c_str(iv_dimm) );
 
     l_temp.writeBit<rc02_encode::A17_POS>(is_a17 ? rc02_encode::A17_ENABLE : rc02_encode::A17_DISABLE);
     FAPI_TRY( eff_dimm_ddr4_rc02(iv_mcs, &l_attrs_dimm_rc02[0][0]) );
@@ -1914,7 +1914,8 @@ fapi2::ReturnCode eff_dimm::dimm_rc08()
     {
         bool l_is_a17 = false;
 
-        FAPI_TRY( is_a17_needed( iv_dimm, l_is_a17), "%s Failed to get a17 boolean", mss::c_str(iv_dimm) );
+        FAPI_TRY( is_a17_needed<mss::mc_type::NIMBUS>( iv_dimm, l_is_a17), "%s Failed to get a17 boolean",
+                  mss::c_str(iv_dimm) );
         l_buffer.writeBit<DA17_QA17_LOCATION>(l_is_a17 ? DA17_QA17_ENABLE : DA17_QA17_DISABLE);
 
         FAPI_INF("%s Turning %s DA17", mss::c_str(iv_dimm), (l_is_a17 ? "on" : "off"));

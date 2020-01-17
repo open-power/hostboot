@@ -67,7 +67,7 @@ enum wr_vref_override : uint8_t
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 fapi2::ReturnCode add_latch_wr_vref_commands( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const mrs06_data& i_mrs06,
+        const mrs06_data<mss::mc_type::NIMBUS>& i_mrs06,
         const uint64_t i_rank,
         std::vector< ccs::instruction_t >& io_inst);
 
@@ -90,7 +90,7 @@ fapi2::ReturnCode latch_wr_vref_commands_by_rank_pair( const fapi2::Target<fapi2
 /// @brief enables VREF train enable in an MRS06 class
 /// @param[in,out] io_mrs06
 ///
-inline void enable_vref_train_enable(mrs06_data& io_mrs06)
+inline void enable_vref_train_enable(mrs06_data<mss::mc_type::NIMBUS>& io_mrs06)
 {
     // Sets up the MR information
     for(uint64_t i = 0; i < MAX_RANK_PER_DIMM; ++i)
@@ -103,7 +103,7 @@ inline void enable_vref_train_enable(mrs06_data& io_mrs06)
 /// @brief disables VREF train enable in an MRS06 class
 /// @param[in,out] io_mrs06
 ///
-inline void disable_vref_train_enable(mrs06_data& io_mrs06)
+inline void disable_vref_train_enable(mrs06_data<mss::mc_type::NIMBUS>& io_mrs06)
 {
     // Sets up the MR information
     for(uint64_t i = 0; i < MAX_RANK_PER_DIMM; ++i)

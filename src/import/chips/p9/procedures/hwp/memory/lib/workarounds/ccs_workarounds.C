@@ -485,7 +485,7 @@ namespace wr_lvl
 /// @param[in,out] io_mrs - the MRS to update
 /// @param[in] i_state - the state for the qoff in the MRS
 ///
-void update_mrs(mss::ddr4::mrs01_data& io_mrs, const mss::states i_state)
+void update_mrs(mss::ddr4::mrs01_data<mss::mc_type::NIMBUS>& io_mrs, const mss::states i_state)
 {
     io_mrs.iv_qoff = i_state;
     io_mrs.iv_wl_enable = i_state;
@@ -513,7 +513,7 @@ fapi2::ReturnCode add_mrs(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
     {
         // Get the MRS data
         fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
-        mss::ddr4::mrs01_data l_mrs(l_dimm, l_rc);
+        mss::ddr4::mrs01_data<mss::mc_type::NIMBUS> l_mrs(l_dimm, l_rc);
         FAPI_TRY( l_rc, "%s failed to create MRS for rank %lu", mss::c_str(l_dimm), i_rank);
 
         // Update the MRS data for qoff
