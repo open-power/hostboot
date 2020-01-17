@@ -383,7 +383,7 @@ errlHndl_t SpiOp::write(void*   i_buffer,
         if (io_buflen != iv_length)
         {
             // Something changed the buffer length after object construction
-            TRACFCOMP(g_trac_spi, ERR_MRK"SpiOp::read(): "
+            TRACFCOMP(g_trac_spi, ERR_MRK"SpiOp::write(): "
                       "Buffer length didn't match previously given buffer "
                       "length. buffer length %d, expected length %d.",
                       io_buflen,
@@ -471,8 +471,8 @@ errlHndl_t SpiOp::write(void*   i_buffer,
                       "length = %d", iv_adjusted_offset, iv_adjusted_length);
             addStatusRegs(errl);
             addCallouts(errl);
-            ERRORLOG::ErrlUserDetailsTarget targetFFDC(iv_target);
-            targetFFDC.addToLog(errl);
+            ERRORLOG::ErrlUserDetailsTarget(iv_target, "Proc Target")
+                .addToLog(errl);
             io_buflen = 0;
             break;
         }
@@ -524,10 +524,9 @@ errlHndl_t SpiOp::copyToBuffer(void*           io_destination,
                                                i_sourceOffset,
                                                io_amountToCopy,
                                                0, // Unused Parameter
-                                               i_sourceLength));
-
-            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                      HWAS::SRCI_PRIORITY_MED);
+                                               i_sourceLength),
+                                           0,
+                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             addStatusRegs(errl);
             io_amountToCopy = 0;
             break;
@@ -618,9 +617,8 @@ errlHndl_t spiEngineLockOp(TARGETING::Target* i_target,
                                            SPI_ENGINE_LOCK_OP,
                                            SPI_FAILED_TO_RETRIEVE_ENGINE_MUTEX,
                                            TARGETING::get_huid(i_target),
-                                           i_engine);
-            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                      HWAS::SRCI_PRIORITY_MED);
+                                           i_engine,
+                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             io_unlock = false;
             break;
         }
