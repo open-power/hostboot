@@ -25,18 +25,28 @@
 <attributes>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_QME_RUNTIME_MODE</id>
+    <id>ATTR_MMA_OPERATING_MODE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-        Set when qme reached runtime, unset/default for ipl
+        
     </description>
-    <enum>FALSE = 0x0, TRUE = 0x1</enum>
+    <enum>STATIC = 0x0, DYNAMIC = 0x1</enum>
     <valueType>uint32</valueType>
     <writeable/>
     <initToZero/>
     <group>state</group>
   </attribute>
-
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_QME_STATE_LOSS_CORES</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+        Record stop11/stop5 cores for staging control
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <initToZero/>
+  </attribute>
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_DPLL_DIVIDER</id>

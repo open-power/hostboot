@@ -49,18 +49,13 @@
 #ifdef __PPE_QME
     #include "p10_ppe_c.H"
     using namespace scomt::ppe_c;
+    extern void qme_l2_purge_catchup_detect(uint32_t&);
+    extern void qme_l2_purge_abort_detect();
 #else
+    #include <multicast_group_defs.H>
     #include "p10_scom_c.H"
     using namespace scomt::c;
 #endif
-
-#ifdef __PPE_QME
-
-    extern void qme_l2_purge_catchup_detect(uint32_t&);
-    extern void qme_l2_purge_abort_detect();
-
-#endif
-
 
 //------------------------------------------------------------------------------
 // Constant Definitions
@@ -109,14 +104,10 @@ p10_hcd_l2_purge(
 
         qme_l2_purge_catchup_detect(l_core_select);
 
-        FAPI_INF("catchup0 l_core_select %x", l_core_select);
-
         if (!l_core_select)
         {
             l_core_select = l_target.getCoreSelect();
         }
-
-        FAPI_INF("catchup1 l_core_select %x", l_core_select);
 
         l_target = l_chip.getMulticast<fapi2::MULTICAST_AND>(fapi2::MCGROUP_GOOD_EQ,
                    static_cast<fapi2::MulticastCoreSelect>(l_core_select));
@@ -124,8 +115,6 @@ p10_hcd_l2_purge(
         qme_l2_purge_abort_detect();
 
         FAPI_TRY( HCD_GETMMIO_C( l_target, MMIO_LOWADDR(QME_SCSR), l_mmioData ) );
-
-        FAPI_INF("catchup2 l_mmioData %x", l_mmioData);
 #else
 
         FAPI_TRY( HCD_GETMMIO_C( l_target, MMIO_LOWADDR(QME_SCSR), l_mmioData ) );
@@ -134,8 +123,6 @@ p10_hcd_l2_purge(
 
         // use multicastAND to check 1
         MMIO_GET32L(l_l2_purge_done);
-
-        FAPI_INF("catchup3 l_l2_purge_done %x", l_l2_purge_done);
 
         if( ( l_l2_purge_done & BITS64SH(36, 2) ) == BITS64SH(36, 2) )
         {

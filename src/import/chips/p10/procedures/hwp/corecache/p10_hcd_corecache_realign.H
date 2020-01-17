@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p10/procedures/hwp/corecache/p10_hcd_corecache_clock_control.H $ */
+/* $Source: src/import/chips/p10/procedures/hwp/corecache/p10_hcd_corecache_realign.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -24,8 +24,8 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 
-#ifndef _P10_HCD_CORECACHE_CLOCK_CONTROL_H_
-#define _P10_HCD_CORECACHE_CLOCK_CONTROL_H_
+#ifndef _P10_HCD_CORECACHE_REALIGN_H_
+#define _P10_HCD_CORECACHE_REALIGN_H_
 
 //------------------------------------------------------------------------------
 // Includes
@@ -37,11 +37,11 @@
 //------------------------------------------------------------------------------
 
 /// function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*p10_hcd_corecache_clock_control_FP_t) (
+typedef fapi2::ReturnCode (*p10_hcd_corecache_realign_FP_t) (
     const fapi2::Target < fapi2::TARGET_TYPE_EQ |
     fapi2::TARGET_TYPE_MULTICAST,
     fapi2::MULTICAST_AND > &,
-    uint32_t, uint32_t);
+    uint32_t);
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -51,20 +51,18 @@ extern "C"
 {
 
 ///
-/// @brief start/stop quad clock regions
+/// @brief realign quad clock regions
 ///
 /// @param[in] i_target       Reference to processor chip target
-/// @param[in] i_command      bit0:stop, bit1:start, bit2:slave, bit3:master
 /// @param[in] i_regions      clock regions
 /// @return fapi::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
 ///
-    fapi2::ReturnCode p10_hcd_corecache_clock_control(
+    fapi2::ReturnCode p10_hcd_corecache_realign(
         const fapi2::Target < fapi2::TARGET_TYPE_EQ |
         fapi2::TARGET_TYPE_MULTICAST,
         fapi2::MULTICAST_AND > & i_target,
-        uint32_t i_regions,
-        uint32_t i_command);
+        uint32_t i_regions);
 
 } // extern "C"
 
-#endif // _P10_HCD_CORECACHE_CLOCK_CONTROL_H_
+#endif // _P10_HCD_CORECACHE_REALIGN_H_

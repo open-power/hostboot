@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -24,6 +24,37 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- Error definitions for p9_hcd_cache_startclocks procedures -->
 <hwpErrors>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SHADOW_DIS_FDCR_UPDATE_IN_PROG_TIMEOUT</rc>
+    <description>FDCR Update Timeout.</description>
+    <ffdc>SHADOW_DIS_FDCR_UPDATE_IN_PROG_POLL_TIMEOUT_HW_NS</ffdc>
+    <ffdc>CPMS_CUCR</ffdc>
+    <ffdc>CORE_TARGET</ffdc>
+    <callout>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </deconfigure>
+    <gard>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </gard>
+  </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <sbeError/>
@@ -63,6 +94,38 @@
         Shadow Disable Xfer Receive Done Timeout.
     </description>
     <ffdc>SHADOW_DIS_XFER_RECEIVE_DONE_POLL_TIMEOUT_HW_NS</ffdc>
+    <ffdc>QME_TFCSR</ffdc>
+    <ffdc>CORE_TARGET</ffdc>
+    <callout>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </deconfigure>
+    <gard>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </gard>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SHADOW_DIS_TFCSR_ERROR_CHECK_FAILED</rc>
+    <description>
+        Shadow Disable TFCSR Error Check Failed.
+    </description>
     <ffdc>QME_TFCSR</ffdc>
     <ffdc>CORE_TARGET</ffdc>
     <callout>

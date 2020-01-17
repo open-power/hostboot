@@ -42,7 +42,6 @@
 
 #include "p10_hcd_core_poweroff.H"
 #include "p10_hcd_mma_poweroff.H"
-#include "p10_hcd_mma_stopclocks.H"
 #include "p10_hcd_corecache_power_control.H"
 #include "p10_hcd_common.H"
 
@@ -75,15 +74,6 @@ p10_hcd_core_poweroff(
     fapi2::buffer<buffer_t> l_mmioData = 0;
 
     FAPI_INF(">>p10_hcd_core_poweroff");
-
-    // not stop mma clock as part of stop2 but only for stop11
-    // thus not called in core_stopclocks
-    FAPI_TRY( p10_hcd_mma_stopclocks( i_target ) );
-
-    //The MMA shares the Core-L2 grid which is sync'd with the L3
-    // Therefore not stop grid as part of stop2
-    FAPI_DBG("Switch glsmux to refclk to save clock grid power via CPMS_CGCSR[11]");
-    FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_CGCSR_WO_CLEAR, MMIO_1BIT(11) ) );
 
     // MMA PFET Power On/Off sequence requires CL2 PFET[ON] + CL2 RegulationFinger[ON]
     // Stop11: Set RF -> MMA PFET[OFF] -> Drop RF -> CL2 PFET[OFF]

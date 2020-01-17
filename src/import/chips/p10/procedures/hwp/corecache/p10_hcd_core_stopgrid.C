@@ -44,6 +44,7 @@
 //------------------------------------------------------------------------------
 
 #include "p10_hcd_core_stopgrid.H"
+#include "p10_hcd_mma_stopclocks.H"
 #include "p10_hcd_common.H"
 
 #ifdef __PPE_QME
@@ -83,6 +84,11 @@ p10_hcd_core_stopgrid(
 
     FAPI_INF(">>p10_hcd_core_stopgrid");
 
+    // also stop mma clocks after/with core clocks
+    // not part of core_stopclocks for its pure usage at p10_stopclocks
+    // shared with both stop11 and stop3 path
+    FAPI_TRY( p10_hcd_mma_stopclocks( i_target ) );
+
     FAPI_DBG("Disable ECL2 Skewadjust via CPMS_CGCSR_[1:CL2_CLK_SYNC_ENABLE]");
     FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_CGCSR_WO_CLEAR, MMIO_1BIT(1) ) );
 
@@ -117,8 +123,8 @@ p10_hcd_core_stopgrid(
 
 #endif
 
-    //The MMA shares the Core-L2 grid which is sync'd with the L3
-    // Therefore not stop grid as part of stop2
+    FAPI_DBG("Switch glsmux to refclk to save clock grid power via CPMS_CGCSR[11]");
+    FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_CGCSR_WO_CLEAR, MMIO_1BIT(11) ) );
 
 fapi_try_exit:
 

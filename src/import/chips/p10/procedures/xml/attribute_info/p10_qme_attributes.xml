@@ -96,7 +96,11 @@
   </entry>
   <!-- needed for qme sim -->
   <entry>
-          <name>ATTR_QME_RUNTIME_MODE</name>
+          <name>ATTR_QME_STATE_LOSS_CORES</name>
+          <value>0x0</value>
+  </entry>
+  <entry>
+          <name>ATTR_MMA_OPERATING_MODE</name>
           <value>0x0</value>
   </entry>
   <!-- ********************************************************************* -->
