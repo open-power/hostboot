@@ -108,7 +108,7 @@ fapi2::ReturnCode address_mirror(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i
 {
     // We only mirror if the mirroring attribute is set.
     uint8_t l_mirror = 0;
-    FAPI_TRY( TT::mirror_mode(i_target, l_mirror),
+    FAPI_TRY( TT::mirror_mode(i_target, i_rank, l_mirror),
               "Failed to invoke rcd_mirror_mode accesor on %s", mss::c_str(i_target) );
 
     // We only mirror odd ranks.
@@ -210,13 +210,14 @@ fapi_try_exit:
 
 ///
 /// @brief Helper function to determine whether the A17 is needed
-/// @tparam T fapi2::TargetType DIMM or MCA
+/// @tparam mc_type MC
+/// @tparam T fapi2::TargetType DIMM or port type
 /// @param[in] i_target the target to check
 /// @param[out] o_is_needed boolean whether A17 should be turned on or off
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 /// @note Based off of Table 2.8 Proposed DDR4 Full spec update(79-4B) page 28
 ///
-template< fapi2::TargetType T>
+template< mss::mc_type MC, fapi2::TargetType T>
 fapi2::ReturnCode is_a17_needed(const fapi2::Target<T>& i_target,
                                 bool& o_is_needed);
 
@@ -256,7 +257,7 @@ fapi2::ReturnCode mrs_engine( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_ta
               i_data.iv_mrs, i_rank, mss::c_str(i_target) );
 
     // So we need to see if the A17 bit is enabled. If it is we need to invert it for the CCS parity
-    FAPI_TRY( is_a17_needed( i_target, l_is_a17) );
+    FAPI_TRY( is_a17_needed<MC>( i_target, l_is_a17) );
     l_inst_b_side = mss::address_invert(i_target, l_inst_a_side, l_is_a17);
 
     // Not sure if we can get tricky here and only delay after the b-side MR. The question is whether the delay
@@ -304,13 +305,26 @@ namespace ddr4
 {
 
 // Forward declarations
-class mrs00_data;
-class mrs01_data;
-class mrs02_data;
-class mrs03_data;
-class mrs04_data;
-class mrs05_data;
-class mrs06_data;
+template< mss::mc_type MC >
+struct mrs00_data;
+
+template< mss::mc_type MC >
+struct mrs01_data;
+
+template< mss::mc_type MC >
+struct mrs02_data;
+
+template< mss::mc_type MC >
+struct mrs03_data;
+
+template< mss::mc_type MC >
+struct mrs04_data;
+
+template< mss::mc_type MC >
+struct mrs05_data;
+
+template< mss::mc_type MC >
+struct mrs06_data;
 
 ///
 /// @defgroup mrs-structs
@@ -321,7 +335,9 @@ class mrs06_data;
 
 ///
 /// @brief Data structure for MRS0 data
+/// @tparam MC mss::mc_type memory controller type
 ///
+template< mss::mc_type MC >
 struct mrs00_data
 {
     // Needed as we need to know what MR for the CCS instruction created by the lab tooling
@@ -357,7 +373,7 @@ struct mrs00_data
     /// @param[in] i_rhs right hand comparison operator
     /// @bool true if this object is less than i_rhs
     ///
-    bool operator<(const mss::ddr4::mrs00_data& i_rhs) const
+    bool operator<(const mss::ddr4::mrs00_data<MC>& i_rhs) const
     {
         // MSB to LSB - 2015 JEDEC spec
         // write recover/RTP
@@ -400,7 +416,7 @@ struct mrs00_data
     /// @param[in] i_rhs right hand comparison operator
     /// @bool true if this object is equal to i_rhs
     ///
-    bool operator==(const mss::ddr4::mrs00_data& i_rhs) const
+    bool operator==(const mss::ddr4::mrs00_data<MC>& i_rhs) const
     {
         return !((*this < i_rhs) || (i_rhs < *this));
     }
@@ -415,7 +431,9 @@ struct mrs00_data
 
 ///
 /// @brief Data structure for MRS1 data
+/// @tparam MC mss::mc_type memory controller type
 ///
+template< mss::mc_type MC >
 struct mrs01_data
 {
     // Needed as we need to know what MR for the CCS instruction created by the lab tooling
@@ -448,7 +466,7 @@ struct mrs01_data
     /// @param[in] i_rhs right hand comparison operator
     /// @bool true if this object is less than i_rhs
     ///
-    bool operator<(const mss::ddr4::mrs01_data& i_rhs) const
+    bool operator<(const mss::ddr4::mrs01_data<MC>& i_rhs) const
     {
         // MSB to LSB - 2015 JEDEC spec
         // Qoff
@@ -501,7 +519,7 @@ struct mrs01_data
     /// @param[in] i_rhs right hand comparison operator
     /// @bool true if this object is equal to i_rhs
     ///
-    bool operator==(const mss::ddr4::mrs01_data& i_rhs) const
+    bool operator==(const mss::ddr4::mrs01_data<MC>& i_rhs) const
     {
         return !((*this < i_rhs) || (i_rhs < *this));
     }
@@ -517,7 +535,9 @@ struct mrs01_data
 
 ///
 /// @brief Data structure for MRS2 data
+/// @tparam MC mss::mc_type memory controller type
 ///
+template< mss::mc_type MC >
 struct mrs02_data
 {
     // Needed as we need to know what MR for the CCS instruction created by the lab tooling
@@ -550,7 +570,7 @@ struct mrs02_data
     /// @param[in] i_rhs right hand comparison operator
     /// @bool true if this object is less than i_rhs
     ///
-    bool operator<(const mss::ddr4::mrs02_data& i_rhs) const
+    bool operator<(const mss::ddr4::mrs02_data<MC>& i_rhs) const
     {
         // MSB to LSB - 2015 JEDEC spec
         // write crc
@@ -583,7 +603,7 @@ struct mrs02_data
     /// @param[in] i_rhs right hand comparison operator
     /// @bool true if this object is equal to i_rhs
     ///
-    bool operator==(const mss::ddr4::mrs02_data& i_rhs) const
+    bool operator==(const mss::ddr4::mrs02_data<MC>& i_rhs) const
     {
         return !((*this < i_rhs) || (i_rhs < *this));
     }
@@ -597,7 +617,9 @@ struct mrs02_data
 
 ///
 /// @brief Data structure for MRS3 data
+/// @tparam MC mss::mc_type memory controller type
 ///
+template< mss::mc_type MC >
 struct mrs03_data
 {
     // Needed as we need to know what MR for the CCS instruction created by the lab tooling
@@ -630,7 +652,7 @@ struct mrs03_data
     /// @param[in] i_rhs right hand comparison operator
     /// @bool true if this object is less than i_rhs
     ///
-    bool operator<(const mss::ddr4::mrs03_data& i_rhs) const
+    bool operator<(const mss::ddr4::mrs03_data<MC>& i_rhs) const
     {
         // MSB to LSB - 2015 JEDEC spec
         // MPR read format
@@ -685,7 +707,7 @@ struct mrs03_data
     /// @param[in] i_rhs right hand comparison operator
     /// @bool true if this object is equal to i_rhs
     ///
-    bool operator==(const mss::ddr4::mrs03_data& i_rhs) const
+    bool operator==(const mss::ddr4::mrs03_data<MC>& i_rhs) const
     {
         return !((*this < i_rhs) || (i_rhs < *this));
     }
@@ -702,7 +724,9 @@ struct mrs03_data
 
 ///
 /// @brief Data structure for MRS4 data
+/// @tparam MC mss::mc_type memory controller type
 ///
+template< mss::mc_type MC >
 struct mrs04_data
 {
     // Needed as we need to know what MR for the CCS instruction created by the lab tooling
@@ -735,7 +759,7 @@ struct mrs04_data
     /// @param[in] i_rhs right hand comparison operator
     /// @bool true if this object is less than i_rhs
     ///
-    bool operator<(const mss::ddr4::mrs04_data& i_rhs) const
+    bool operator<(const mss::ddr4::mrs04_data<MC>& i_rhs) const
     {
         // MSB to LSB - 2015 JEDEC spec
         // PPR
@@ -808,7 +832,7 @@ struct mrs04_data
     /// @param[in] i_rhs right hand comparison operator
     /// @bool true if this object is equal to i_rhs
     ///
-    bool operator==(const mss::ddr4::mrs04_data& i_rhs) const
+    bool operator==(const mss::ddr4::mrs04_data<MC>& i_rhs) const
     {
         return !((*this < i_rhs) || (i_rhs < *this));
     }
@@ -828,7 +852,9 @@ struct mrs04_data
 
 ///
 /// @brief Data structure for MRS5 data
+/// @tparam MC mss::mc_type memory controller type
 ///
+template< mss::mc_type MC >
 struct mrs05_data
 {
     // Needed as we need to know what MR for the CCS instruction created by the lab tooling
@@ -861,7 +887,7 @@ struct mrs05_data
     /// @param[in] i_rhs right hand comparison operator
     /// @bool true if this object is less than i_rhs
     ///
-    bool operator<(const mss::ddr4::mrs05_data& i_rhs) const
+    bool operator<(const mss::ddr4::mrs05_data<MC>& i_rhs) const
     {
         // MSB to LSB - 2015 JEDEC spec
         // Read DBI
@@ -924,7 +950,7 @@ struct mrs05_data
     /// @param[in] i_rhs right hand comparison operator
     /// @bool true if this object is equal to i_rhs
     ///
-    bool operator==(const mss::ddr4::mrs05_data& i_rhs) const
+    bool operator==(const mss::ddr4::mrs05_data<MC>& i_rhs) const
     {
         return !((*this < i_rhs) || (i_rhs < *this));
     }
@@ -942,7 +968,9 @@ struct mrs05_data
 
 ///
 /// @brief Data structure for MRS6 data
+/// @tparam MC mss::mc_type memory controller type
 ///
+template< mss::mc_type MC >
 struct mrs06_data
 {
     // Needed as we need to know what MR for the CCS instruction created by the lab tooling
@@ -975,7 +1003,7 @@ struct mrs06_data
     /// @param[in] i_rhs right hand comparison operator
     /// @bool true if this object is less than i_rhs
     ///
-    bool operator<(const mss::ddr4::mrs06_data& i_rhs) const
+    bool operator<(const mss::ddr4::mrs06_data<MC>& i_rhs) const
     {
         // MSB to LSB - 2015 JEDEC spec
         // TCCD_L
@@ -1011,7 +1039,7 @@ struct mrs06_data
     /// @param[in] i_rhs right hand comparison operator
     /// @bool true if this object is equal to i_rhs
     ///
-    bool operator==(const mss::ddr4::mrs06_data& i_rhs) const
+    bool operator==(const mss::ddr4::mrs06_data<MC>& i_rhs) const
     {
         return !((*this < i_rhs) || (i_rhs < *this));
     }
@@ -1036,12 +1064,12 @@ struct mrs06_data
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = mrsTraits<MC> >
 fapi2::ReturnCode set_wr_lvl_mode(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                   const mss::states i_mode,
-                                  mrs01_data& io_data)
+                                  mrs01_data<MC>& io_data)
 {
     constexpr uint64_t MAX_WR_LVL_MODE = 0b1;
 
     FAPI_ASSERT( i_mode <= MAX_WR_LVL_MODE,
-                 TT::bad_mr_parameter()
+                 fapi2::MSS_BAD_MR_PARAMETER()
                  .set_MR_NUMBER(MRS_LOAD)
                  .set_PARAMETER(WR_LVL)
                  .set_PARAMETER_VALUE(i_mode)
@@ -1073,12 +1101,12 @@ fapi_try_exit:
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = mrsTraits<MC> >
 fapi2::ReturnCode set_dram_mpr_mode(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                     const uint8_t i_mode,
-                                    mrs03_data& io_data)
+                                    mrs03_data<MC>& io_data)
 {
     constexpr uint64_t MAX_MPR_MODE = 0b1;
 
     FAPI_ASSERT( i_mode <= MAX_MPR_MODE,
-                 TT::bad_mr_parameter()
+                 fapi2::MSS_BAD_MR_PARAMETER()
                  .set_MR_NUMBER(MRS_LOAD)
                  .set_PARAMETER(MPR_MODE)
                  .set_PARAMETER_VALUE(i_mode)
@@ -1106,14 +1134,14 @@ fapi_try_exit:
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = mrsTraits<MC> >
 fapi2::ReturnCode set_dram_rtt_nom(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                    const uint8_t i_value[MAX_RANK_PER_DIMM],
-                                   mrs01_data& io_data)
+                                   mrs01_data<MC>& io_data)
 {
     constexpr uint64_t MAX_RTT_NOM = RTT_NOM_RZQ_OVER_7;
 
     for (size_t l_rank = 0; l_rank < MAX_RANK_PER_DIMM; ++l_rank)
     {
         FAPI_ASSERT( i_value[l_rank] <= MAX_RTT_NOM,
-                     TT::bad_mr_parameter()
+                     fapi2::MSS_BAD_MR_PARAMETER()
                      .set_MR_NUMBER(MRS_LOAD)
                      .set_PARAMETER(RTT_NOM)
                      .set_PARAMETER_VALUE(i_value[l_rank])
@@ -1144,14 +1172,14 @@ fapi_try_exit:
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = mrsTraits<MC> >
 fapi2::ReturnCode set_dram_rtt_wr(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                   const uint8_t i_value[MAX_RANK_PER_DIMM],
-                                  mrs02_data& io_data)
+                                  mrs02_data<MC>& io_data)
 {
     constexpr uint64_t MAX_RTT_WR = RTT_WR_RZQ_OVER_3;
 
     for (size_t l_rank = 0; l_rank < MAX_RANK_PER_DIMM; ++l_rank)
     {
         FAPI_ASSERT( i_value[l_rank] <= MAX_RTT_WR,
-                     TT::bad_mr_parameter()
+                     fapi2::MSS_BAD_MR_PARAMETER()
                      .set_MR_NUMBER(MRS_LOAD)
                      .set_PARAMETER(RTT_WR)
                      .set_PARAMETER_VALUE(i_value[l_rank])
@@ -1182,12 +1210,12 @@ fapi_try_exit:
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = mrsTraits<MC> >
 fapi2::ReturnCode set_dram_mpr_rd_format(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint8_t i_format,
-        mrs03_data& io_data)
+        mrs03_data<MC>& io_data)
 {
     constexpr uint64_t MAX_READ_FORMAT = 0b10;
 
     FAPI_ASSERT( i_format <= MAX_READ_FORMAT,
-                 TT::bad_mr_parameter()
+                 fapi2::MSS_BAD_MR_PARAMETER()
                  .set_MR_NUMBER(MRS_LOAD)
                  .set_PARAMETER(MPR_READ_FORMAT)
                  .set_PARAMETER_VALUE(i_format)
@@ -1217,12 +1245,12 @@ fapi_try_exit:
 template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = mrsTraits<MC> >
 fapi2::ReturnCode set_dram_mpr_page(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                     const uint8_t i_page,
-                                    mrs03_data& io_data)
+                                    mrs03_data<MC>& io_data)
 {
     constexpr uint64_t MAX_PAGE = 0b11;
 
     FAPI_ASSERT( i_page <= MAX_PAGE,
-                 TT::bad_mr_parameter()
+                 fapi2::MSS_BAD_MR_PARAMETER()
                  .set_MR_NUMBER(MRS_LOAD)
                  .set_PARAMETER(MPR_PAGE)
                  .set_PARAMETER_VALUE(i_page)
@@ -1248,17 +1276,16 @@ fapi_try_exit:
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-inline fapi2::ReturnCode wr_lvl(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                const mss::states i_mode,
-                                const uint64_t i_rank,
-                                std::vector< ccs::instruction_t >& io_inst )
+template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = mrsTraits<MC> >
+fapi2::ReturnCode wr_lvl(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                         const mss::states i_mode,
+                         const uint64_t i_rank,
+                         std::vector< ccs::instruction_t >& io_inst )
 {
-    using TT = mrsTraits<DEFAULT_MC_TYPE>;
-
     // Spec states we need to use tmod for our delay, so we do
     const uint64_t l_delay = TT::mrs_tmod(i_target);
 
-    mrs01_data l_data(i_target, fapi2::current_err);
+    mrs01_data<MC> l_data(i_target, fapi2::current_err);
     FAPI_TRY(fapi2::current_err, "%s. Failed to initialize mrs01_data for set_wr_lvl_mode", mss::c_str(i_target) );
 
     FAPI_TRY( set_wr_lvl_mode(i_target, i_mode, l_data),
@@ -1282,18 +1309,17 @@ fapi_try_exit:
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-inline fapi2::ReturnCode mpr_load(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                  const uint8_t i_mode,
-                                  const uint64_t i_rank,
-                                  std::vector< ccs::instruction_t >& io_inst )
+template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = mrsTraits<MC> >
+fapi2::ReturnCode mpr_load(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                           const uint8_t i_mode,
+                           const uint64_t i_rank,
+                           std::vector< ccs::instruction_t >& io_inst )
 {
-    using TT = mrsTraits<DEFAULT_MC_TYPE>;
-
     // From DDR4 spec section 4.10.3 MPR Reads:
     // tMRD and tMOD must be satisfied after enabling/disabling MPR mode
     const uint64_t l_delay = std::max( TT::mrs_tmod(i_target), TT::TMRD );
 
-    mrs03_data l_data(i_target, fapi2::current_err);
+    mrs03_data<MC> l_data(i_target, fapi2::current_err);
     FAPI_TRY(fapi2::current_err, "%s. Failed to initialize mrs03_data for mpr_load", mss::c_str(i_target) );
 
     FAPI_TRY( set_dram_mpr_mode(i_target, i_mode, l_data),
@@ -1318,19 +1344,18 @@ fapi_try_exit:
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-inline fapi2::ReturnCode mpr_load(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                  const uint8_t i_mode,
-                                  const uint8_t i_rd_format,
-                                  const uint64_t i_rank,
-                                  std::vector< ccs::instruction_t >& io_inst )
+template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = mrsTraits<MC> >
+fapi2::ReturnCode mpr_load(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                           const uint8_t i_mode,
+                           const uint8_t i_rd_format,
+                           const uint64_t i_rank,
+                           std::vector< ccs::instruction_t >& io_inst )
 {
-    using TT = mrsTraits<DEFAULT_MC_TYPE>;
-
     // From DDR4 spec section 4.10.3 MPR Reads:
     // tMRD and tMOD must be satisfied after enabling/disabling MPR mode
     const uint64_t l_delay = std::max( TT::mrs_tmod(i_target), TT::TMRD );
 
-    mrs03_data l_data(i_target, fapi2::current_err);
+    mrs03_data<MC> l_data(i_target, fapi2::current_err);
     FAPI_TRY(fapi2::current_err, "%s. Failed to initialize mrs03_data for mpr_load", mss::c_str(i_target) );
 
     FAPI_TRY( set_dram_mpr_mode(i_target, i_mode, l_data),
@@ -1358,17 +1383,16 @@ fapi_try_exit:
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-inline fapi2::ReturnCode rtt_nom_load(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                      const uint8_t i_value[MAX_RANK_PER_DIMM],
-                                      const uint64_t i_rank,
-                                      std::vector< ccs::instruction_t >& io_inst )
+template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = mrsTraits<MC> >
+fapi2::ReturnCode rtt_nom_load(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                               const uint8_t i_value[MAX_RANK_PER_DIMM],
+                               const uint64_t i_rank,
+                               std::vector< ccs::instruction_t >& io_inst )
 {
-    using TT = mrsTraits<DEFAULT_MC_TYPE>;
-
     // tMRD (clock cycles) must be satisfied after an MRS command
     constexpr uint64_t l_delay = TT::TMRD;
 
-    mrs01_data l_data(i_target, fapi2::current_err);
+    mrs01_data<MC> l_data(i_target, fapi2::current_err);
     FAPI_TRY(fapi2::current_err, "%s. Failed to initialize mrs01_data for rtt_nom_load", mss::c_str(i_target) );
 
     FAPI_TRY( set_dram_rtt_nom(i_target, i_value, l_data),
@@ -1392,17 +1416,16 @@ fapi_try_exit:
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-inline fapi2::ReturnCode rtt_wr_load(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                     const uint8_t i_value[MAX_RANK_PER_DIMM],
-                                     const uint64_t i_rank,
-                                     std::vector< ccs::instruction_t >& io_inst )
+template< mss::mc_type MC = DEFAULT_MC_TYPE, typename TT = mrsTraits<MC> >
+fapi2::ReturnCode rtt_wr_load(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                              const uint8_t i_value[MAX_RANK_PER_DIMM],
+                              const uint64_t i_rank,
+                              std::vector< ccs::instruction_t >& io_inst )
 {
-    using TT = mrsTraits<DEFAULT_MC_TYPE>;
-
     // tMRD (clock cycles) must be satisfied after an MRS command
     constexpr uint64_t l_delay = TT::TMRD;
 
-    mrs02_data l_data(i_target, fapi2::current_err);
+    mrs02_data<MC> l_data(i_target, fapi2::current_err);
     FAPI_TRY(fapi2::current_err, "%s. Failed to initialize mrs02_data for rtt_wr_load", mss::c_str(i_target) );
 
     FAPI_TRY( set_dram_rtt_wr(i_target, i_value, l_data),
