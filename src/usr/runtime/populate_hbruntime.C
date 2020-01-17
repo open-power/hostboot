@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1168,9 +1168,9 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                     break;
                 }
             }
-// FIXME RTC: 210975 don't need get_top_homer_mem_addr for now
+
             // Opal data goes at top_of_mem
-            l_topMemAddr = 0; //ISTEP::get_top_homer_mem_addr();
+            l_topMemAddr = ISTEP::get_top_homer_mem_addr();
             assert (l_topMemAddr != 0,
                     "populate_HbRsvMem: Top of memory was 0!");
 

@@ -5438,6 +5438,7 @@
     <simpleType>
       <enumeration>
         <id>PAYLOAD_KIND</id>
+        <default>PHYP</default>
       </enumeration>
     </simpleType>
     <writeable/>

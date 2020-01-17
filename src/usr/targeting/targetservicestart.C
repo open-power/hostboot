@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -402,14 +402,6 @@ static void initializeAttributes(TargetService& i_targetService,
         //now and istep 16.2 in various configurations and IPL flows will attempt
         //to enable special wakeup on cores that are not yet powered
         l_pTopLevel->setAttr<ATTR_SKIP_WAKEUP>(1);
-
-#ifdef CONFIG_LOAD_PHYP_FROM_BOOTKERNEL
-        // Switch PAYLOAD type, base and entry for PHYP
-        TARG_INF("Forcing load of PHYP from BOOTKERNEL");
-        l_pTopLevel->setAttr<ATTR_PAYLOAD_KIND>(PAYLOAD_KIND_PHYP);
-        l_pTopLevel->setAttr<ATTR_PAYLOAD_ENTRY>(0x180);
-        l_pTopLevel->setAttr<ATTR_PAYLOAD_BASE>(0x100);
-#endif
 
         Target* l_pMasterProcChip = NULL;
         i_targetService.masterProcChipTargetHandle(l_pMasterProcChip);
