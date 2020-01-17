@@ -1313,7 +1313,7 @@
     <valueType>uint32</valueType>
     <array>4</array>
     <platInit/>
-    <initToZero/>
+    <default>0</default>
     <group>vrm</group>
   </attribute>
 
@@ -1336,7 +1336,7 @@
     <valueType>uint32</valueType>
     <array>4</array>
     <platInit/>
-    <initToZero/>
+    <default>0</default>
     <group>vrm</group>
   </attribute>
 
@@ -1360,7 +1360,7 @@
     <valueType>uint32</valueType>
     <array>4</array>
     <platInit/>
-    <initToZero/>
+    <default>0</default>
     <group>vrm</group>
   </attribute>
 
@@ -1384,7 +1384,7 @@
     <valueType>uint32</valueType>
     <array>4</array>
     <platInit/>
-    <initToZero/>
+    <default>0</default>
     <group>vrm</group>
   </attribute>
 
@@ -1847,6 +1847,7 @@
     </enum>
     <default>NO_FALLBACK</default>
     <writeable/>
+    <overrideOnly/>
     <group>vpd</group>
   </attribute>
 
@@ -2042,7 +2043,6 @@
     <valueType>uint8</valueType>
     <platInit/>
     <default>0xA</default>
-    <overrideOnly/>
     <group>mma</group>
   </attribute>
 
