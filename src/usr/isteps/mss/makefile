@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2019
+# Contributors Listed Below - COPYRIGHT 2016,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -75,6 +75,7 @@ MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/lib/eff_config/
 MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/lib/utils/
 MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/lib/freq/
 MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/lib/workarounds/
+MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/lib/fir/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/eff_config/
