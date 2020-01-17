@@ -46,8 +46,7 @@
 #include <fapi2_subroutine_executor.H>
 #include <fapi2_mem_access.H>
 
-#include <p10_scom_proc_8.H>
-#include <p10_scom_proc_e.H>
+#include <p10_scom_proc_7.H>
 #include <p10_scom_nmmu_e.H>
 
 //------------------------------------------------------------------------------
@@ -59,10 +58,12 @@
 ///        Note that the performance optimized settings are preconfigured
 ///        into the fabric Mode D registers via dynamic inits
 ///
+///        The switch_cd should only be issued from the master chip
+///
 /// @param[in] i_target         Reference to processor chip target
 /// @return fapi::ReturnCode    FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode p10_chiplet_scominit_fbc_cd(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+fapi2::ReturnCode p10_chiplet_scominit_switch_cd(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     using namespace scomt;
     using namespace scomt::proc;
@@ -75,51 +76,40 @@ fapi2::ReturnCode p10_chiplet_scominit_fbc_cd(const fapi2::Target<fapi2::TARGET_
     uint8_t l_data_unused[1];
     fapi2::ReturnCode l_rc;
 
-    fapi2::buffer<uint64_t> l_station_mode(0x0);
-    fapi2::buffer<uint64_t> l_station_cfg3(0x0);
+    fapi2::buffer<uint64_t> l_hp_mode1(0x0);
 
-    // configure fbc to abide by switch_cd signal
-    GET_PB_COM_SCOM_EQ0_STATION_MODE(i_target, l_station_mode);
-    SET_PB_COM_SCOM_EQ0_STATION_MODE_PB_CFG_SWITCH_CD_GATE_ENABLE_EQ0(l_station_mode);
-    FAPI_TRY(p10_fbc_utils_set_racetrack_regs(i_target, PB_COM_SCOM_EQ0_STATION_MODE, l_station_mode),
-             "Error from p10_fbc_utils_set_racetrack_regs (PB_COM_SCOM_EQ0_STATION_MODE)");
+    FAPI_TRY(GET_PB_COM_SCOM_ES3_STATION_HP_MODE1_CURR(i_target, l_hp_mode1),
+             "Error from getScom (PB_COM_SCOM_ES3_STATION_HP_MODE1_CURR)");
 
-    // select to apply mode D on switch_cd signal
-    GET_PB_COM_SCOM_EQ0_STATION_CFG3(i_target, l_station_cfg3);
-    SET_PB_COM_SCOM_EQ0_STATION_CFG3_PB_CFG_PBIASY_UNIT0_SELCD(l_station_cfg3);
-    SET_PB_COM_SCOM_EQ0_STATION_CFG3_PB_CFG_PBIASY_UNIT1_SELCD(l_station_cfg3);
-    SET_PB_COM_SCOM_EQ0_STATION_CFG3_PB_CFG_PBIASY_LINK0_SELCD(l_station_cfg3);
-    SET_PB_COM_SCOM_EQ0_STATION_CFG3_PB_CFG_PBIASY_LINK1_SELCD(l_station_cfg3);
-    FAPI_TRY(p10_fbc_utils_set_racetrack_regs(i_target, PB_COM_SCOM_EQ0_STATION_CFG3, l_station_cfg3),
-             "Error from p10_fbc_utils_set_racetrack_regs (PB_COM_SCOM_EQ0_STATION_CFG3)");
+    if(GET_PB_COM_SCOM_ES3_STATION_HP_MODE1_CURR_PB_CFG_MASTER_CHIP_CURR_ES3(l_hp_mode1))
+    {
+        FAPI_CALL_SUBROUTINE(l_rc,
+                             p10_putmemproc,
+                             i_target,
+                             l_addr_unused,
+                             l_bytes_unused,
+                             l_data_unused,
+                             l_flags | fapi2::SBE_MEM_ACCESS_FLAGS_PRE_SWITCH_CD_MODE);
+        FAPI_TRY(l_rc, "Error from p10_putmemproc when setting switch_cd config bit pre-switch");
 
-    // issue switch_cd to apply new configuration
-    FAPI_CALL_SUBROUTINE(l_rc,
-                         p10_putmemproc,
-                         i_target,
-                         l_addr_unused,
-                         l_bytes_unused,
-                         l_data_unused,
-                         l_flags | fapi2::SBE_MEM_ACCESS_FLAGS_PRE_SWITCH_CD_MODE);
-    FAPI_TRY(l_rc, "Error from p10_putmemproc when setting switch_cd config bit pre-switch");
+        FAPI_CALL_SUBROUTINE(l_rc,
+                             p10_putmemproc,
+                             i_target,
+                             l_addr_unused,
+                             l_bytes_unused,
+                             l_data_unused,
+                             l_flags | fapi2::SBE_MEM_ACCESS_FLAGS_SWITCH_MODE);
+        FAPI_TRY(l_rc, "Error from p10_putmemproc when issuing switch_cd command");
 
-    FAPI_CALL_SUBROUTINE(l_rc,
-                         p10_putmemproc,
-                         i_target,
-                         l_addr_unused,
-                         l_bytes_unused,
-                         l_data_unused,
-                         l_flags | fapi2::SBE_MEM_ACCESS_FLAGS_SWITCH_MODE);
-    FAPI_TRY(l_rc, "Error from p10_putmemproc when issuing switch_cd command");
-
-    FAPI_CALL_SUBROUTINE(l_rc,
-                         p10_putmemproc,
-                         i_target,
-                         l_addr_unused,
-                         l_bytes_unused,
-                         l_data_unused,
-                         l_flags | fapi2::SBE_MEM_ACCESS_FLAGS_POST_SWITCH_MODE);
-    FAPI_TRY(l_rc, "Error from p10_putmemproc when clearing switch_cd config bit post-switch");
+        FAPI_CALL_SUBROUTINE(l_rc,
+                             p10_putmemproc,
+                             i_target,
+                             l_addr_unused,
+                             l_bytes_unused,
+                             l_data_unused,
+                             l_flags | fapi2::SBE_MEM_ACCESS_FLAGS_POST_SWITCH_MODE);
+        FAPI_TRY(l_rc, "Error from p10_putmemproc when clearing switch_cd config bit post-switch");
+    }
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -184,8 +174,8 @@ fapi2::ReturnCode p10_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PR
 
     // activate fabric async configuration (switch_cd)
     FAPI_DBG("Issuing switch_cd to activate fabric async config on %s...", l_tgt_str);
-    FAPI_TRY(p10_chiplet_scominit_fbc_cd(i_target),
-             "Error from p10_build_smp_set_fbc_cd");
+    FAPI_TRY(p10_chiplet_scominit_switch_cd(i_target),
+             "Error from p10_chiplet_scominit_switch_cd");
 
     // setup nmmu epsilon values
     FAPI_DBG("Applying nmmu epsilon values on target %s...", l_tgt_str);
