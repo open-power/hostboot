@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,7 +72,9 @@
 /*
 #include    "istep08list.H"
 #include    "istep09list.H"
+*/
 #include    "istep10list.H"
+/*
 #include    "istep11list.H"
 #include    "istep12list.H"
 #include    "istep13list.H"
@@ -103,7 +105,7 @@ const  ExtTaskInfo  g_isteps[]    =   {
         INITSERVICE::g_istep07TaskList,                 //        IStep 7
         { NULL, 0, NULL },                              //  dummy IStep 8
         { NULL, 0, NULL },                              //  dummy IStep 9
-        { NULL, 0, NULL },                              //  dummy IStep 10
+        INITSERVICE::g_istep10TaskList,                 //        IStep 10
         { NULL, 0, NULL },                              //  dummy IStep 11
         { NULL, 0, NULL },                              //  dummy IStep 12
         { NULL, 0, NULL },                              //  dummy IStep 13
@@ -112,7 +114,6 @@ const  ExtTaskInfo  g_isteps[]    =   {
 /*
         INITSERVICE::g_istep08TaskList,                 //        IStep 8
         INITSERVICE::g_istep09TaskList,                 //        IStep 9
-        INITSERVICE::g_istep10TaskList,                 //        IStep 10
         INITSERVICE::g_istep11TaskList,                 //        IStep 11
         INITSERVICE::g_istep12TaskList,                 //        IStep 12
         INITSERVICE::g_istep13TaskList,                 //        IStep 13

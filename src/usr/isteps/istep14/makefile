@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -66,6 +66,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
 OBJS += call_proc_setup_mmio_bars.o
 OBJS += call_proc_htm_setup.o
 OBJS += call_proc_exit_cache_contained.o
+OBJS += p10_sbe_exit_cache_contained.o #Need to build dummy copy for linker
 #OBJS += call_host_mpipl_service.o
 
 include ${ROOTPATH}/procedure.rules.mk

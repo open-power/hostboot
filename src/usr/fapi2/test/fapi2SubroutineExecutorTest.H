@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,7 @@ namespace fapi2
 
         // a pretend HWP that we will use for simple testing
         //note that function name does not match anything defined as acceptable hwp names in sbe_secureHwp.C
-        fapi2::ReturnCode procedure_to_call(TARGETING::Target * i_target, uint32_t i_data, uint32_t& o_data )
+        fapi2::ReturnCode procedure_to_call(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, uint32_t i_data, uint32_t& o_data )
         {
             fapi2::ReturnCode l_rc = FAPI2_RC_SUCCESS;
 
@@ -58,7 +58,7 @@ namespace fapi2
 
         // a pretend HWP that we will use for simple testing
         //note that function name matches what is defined as acceptable hwp name in sbe_secureHwp.C
-        fapi2::ReturnCode test_hwp(TARGETING::Target * i_target, uint32_t i_data, uint32_t& o_data )
+        fapi2::ReturnCode test_hwp(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, uint32_t i_data, uint32_t& o_data )
         {
             fapi2::ReturnCode l_rc = FAPI2_RC_SUCCESS;
 

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -25,37 +25,38 @@
 ROOTPATH = ../../../..
 MODULE = istep10
 
+NEST_HWP_PATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/nest
+INITFILES_HWP_PATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/initfiles
+PERV_HWP_PATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv
+PROCEDURES_PATH += ${ROOTPATH}/src/import/chips/p10/procedures
+XIP_CUSTOMIZE_PATH = ${PROCEDURES_PATH}/hwp/customize
+HWP_ACC_PATH += ${PROCEDURES_PATH}/hwp/accessors
 # FIXME RTC: 210975 Uncomment the EKB paths when the time comes
-#NEST_HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest
-#INITFILES_HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/initfiles
-#PERV_HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv
-#PROCEDURES_PATH += ${ROOTPATH}/src/import/chips/p9/procedures
-#XIP_CUSTOMIZE_PATH = ${PROCEDURES_PATH}/hwp/customize
-#HWP_ACC_PATH += ${PROCEDURES_PATH}/hwp/accessors
 #OCMB_HWP_PATH += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 
-#EXTRAINCDIR += ${HWP_ACC_PATH}
-#EXTRAINCDIR += ${XIP_CUSTOMIZE_PATH}
+EXTRAINCDIR += ${HWP_ACC_PATH}
+EXTRAINCDIR += ${XIP_CUSTOMIZE_PATH}
 #EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/pm/
 #EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/io/
 #EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/lib/
 #EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/pm/include/registers
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
-#EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/ffdc/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip
-#EXTRAINCDIR += ${NEST_HWP_PATH}
-#EXTRAINCDIR += ${INITFILES_HWP_PATH}
-#EXTRAINCDIR += ${PERV_HWP_PATH}
+EXTRAINCDIR += ${NEST_HWP_PATH}
+EXTRAINCDIR += ${INITFILES_HWP_PATH}
+EXTRAINCDIR += ${PERV_HWP_PATH}
 #EXTRAINCDIR += ${OCMB_HWP_PATH}
 #EXTRAINCDIR += ${ROOTPATH}/src/import/
 
 
-#OBJS += call_proc_build_smp.o
+OBJS += call_proc_build_smp.o
 #OBJS += call_host_slave_sbe_update.o
 #OBJS += call_proc_cen_ref_clk_enable.o
 #OBJS += call_proc_enable_osclite.o
@@ -75,22 +76,29 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 #OBJS += host_proc_pcie_scominit.o
 
 # HWP objects needed to build smp in istep 10
-# instead of using HWP p9_build_smp.mk.
+# instead of using HWP p10_build_smp.mk.
 # This is done to avoid inter-isteps dependencies
-# p9_build_smp.mk
-#OBJS+=p9_build_smp.o
+# p10_build_smp.mk
+OBJS+=p10_build_smp.o
+OBJS+=p10_build_smp_adu.o
+OBJS+=p10_build_smp_fbc_ab.o
+OBJS+=p10_adu_utils.o
+OBJS+=p10_fbc_utils.o
+OBJS+=p10_fbc_ab_hp_scom.o
+OBJS+=p10_putmemproc.o
+OBJS+=p10_getputmemproc_utils.o
+OBJS+=p10_adu_access.o
+OBJS+=p10_adu_setup.o
 #OBJS+=p9_fbc_smp_utils.o
-#OBJS+=p9_build_smp_fbc_ab.o
 #OBJS+=p9_build_smp_fbc_cd.o
-#OBJS+=p9_build_smp_adu.o
 
-#VPATH += ${NEST_HWP_PATH}
-#VPATH += ${INITFILES_HWP_PATH}
-#VPATH += ${PERV_HWP_PATH}
-#VPATH += ${PROCEDURES_PATH}/hwp/io
-#VPATH += ${PROCEDURES_PATH}/hwp/pm
-#VPATH += ${PROCEDURES_PATH}/hwp/lib
-#VPATH +=  ${HWP_ACC_PATH}
+VPATH += ${NEST_HWP_PATH}
+VPATH += ${INITFILES_HWP_PATH}
+VPATH += ${PERV_HWP_PATH}
+VPATH += ${PROCEDURES_PATH}/hwp/io
+VPATH += ${PROCEDURES_PATH}/hwp/pm
+VPATH += ${PROCEDURES_PATH}/hwp/lib
+VPATH += ${HWP_ACC_PATH}
 
 
 #Required include before all the procedure.mk are included

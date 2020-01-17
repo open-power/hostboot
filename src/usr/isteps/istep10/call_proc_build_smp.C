@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,28 +36,21 @@
 #include <targeting/common/target.H>
 #include <pbusLinkSvc.H>
 
-/* FIXME RTC: 210975
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
-*/
 #include <intr/interrupt.H>
-// FIXME RTC: 210975
-//#include <p9_io_xbus_clear_firs.H>
 
 //@TODO RTC:150562 - Remove when BAR setting handled by INTRRP
 #include <devicefw/userif.H>
 #include <sys/misc.h>
 #include <sbeio/sbeioif.H>
 #include <usr/vmmconst.h>
-// FIXME RTC: 210975
-//#include <p9_build_smp.H>
+#include <p10_build_smp.H>
 
 using   namespace   ISTEP_ERROR;
 using   namespace   ISTEP;
 using   namespace   TARGETING;
 using   namespace   ERRORLOG;
-
-
 
 namespace ISTEP_10
 {
@@ -68,6 +61,9 @@ void* call_proc_build_smp (void *io_pArgs)
 
     do
     {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "call_proc_build_smp entry" );
+
         errlHndl_t  l_errl  =   nullptr;
         TARGETING::TargetHandleList l_cpuTargetList;
         getAllChips(l_cpuTargetList, TYPE_PROC);
@@ -96,7 +92,6 @@ void* call_proc_build_smp (void *io_pArgs)
             break;
         }
 
-/* FIXME RTC: 210975
         std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>> l_procList;
 
         // Loop through all proc chips and convert them to FAPI targets
@@ -107,13 +102,10 @@ void* call_proc_build_smp (void *io_pArgs)
             l_procList.push_back(l_fapi2_proc_target);
         }
 
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "call_proc_build_smp entry" );
-
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                             l_fapi2_master_proc (l_masterProc);
 
-        FAPI_INVOKE_HWP( l_errl, p9_build_smp,
+        FAPI_INVOKE_HWP( l_errl, p10_build_smp,
                          l_procList,
                          l_fapi2_master_proc,
                          SMP_ACTIVATE_PHASE1 );
@@ -121,7 +113,7 @@ void* call_proc_build_smp (void *io_pArgs)
         if(l_errl)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "ERROR : call p9_build_smp, PLID=0x%x", l_errl->plid() );
+                       "ERROR : call p10_build_smp, PLID=0x%x", l_errl->plid());
             // Create IStep error log and cross reference error that occurred
             l_StepError.addErrorDetails(l_errl);
             // Commit error
@@ -129,7 +121,6 @@ void* call_proc_build_smp (void *io_pArgs)
 
             break;
         }
-*/
 
         // At the point where we can now change the proc chips to use
         // XSCOM rather than SBESCOM which is the default.
@@ -217,50 +208,15 @@ void* call_proc_build_smp (void *io_pArgs)
                 }
             }
 
-/* FIXME RTC: 210975
-            // Clear XBUS FIR bits for bad lanes that existed prior to
-            // link training
-            TARGETING::TargetHandleList xbusTargets;
-            getChildChiplets(xbusTargets, *curproc, TYPE_XBUS);
-            for(auto pXbusTarget : xbusTargets)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "Calling p9_io_xbus_erepair_cleanup HWP for XBUS with "
-                          "HUID of 0x%08X",
-                          TARGETING::get_huid(pXbusTarget));
-
-                const fapi2::Target<fapi2::TARGET_TYPE_XBUS>
-                    fapi2_xbus(pXbusTarget);
-
-                FAPI_INVOKE_HWP(l_errl,
-                                p9_io_xbus_erepair_cleanup,
-                                fapi2_xbus);
-                if(l_errl)
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
-                              "ERROR : Call to p9_io_xbus_erepair_cleanup HWP "
-                              "for XBUS with HUID of 0x%08X failed. "
-                              "PLID=0x%08X, EID=0x%08X, Reason=0x%04X",
-                              TARGETING::get_huid(pXbusTarget),
-                              l_errl->plid(),
-                              l_errl->eid(),
-                              l_errl->reasonCode());
-                    ErrlUserDetailsTarget(pXbusTarget).addToLog(l_errl);
-                    l_StepError.addErrorDetails(l_errl);
-                    errlCommit(l_errl,HWPF_COMP_ID);
-                }
-            }
-*/
-
             ++curproc;
         }
 
         // Set a flag so that the ATTN code will check ALL processors
         // the next time it gets called versus just the master proc.
         uint8_t    l_useAllProcs = 1;
-        TARGETING::Target  *l_sys = NULL;
+        TARGETING::Target  *l_sys = nullptr;
         TARGETING::targetService().getTopLevelTarget( l_sys );
-        assert(l_sys != NULL);
+        assert(l_sys != nullptr);
         l_sys->setAttr<ATTR_ATTN_CHK_ALL_PROCS>(l_useAllProcs);
 
     } while (0);

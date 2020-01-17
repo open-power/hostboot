@@ -266,6 +266,9 @@
       <id>ALLOW_ATTR_OVERRIDES_IN_SECURE_MODE</id>
     </attribute>
     <attribute>
+      <id>ATTN_CHK_ALL_PROCS</id>
+    </attribute>
+    <attribute>
       <id>EARLY_TESTCASES_ISTEP</id>
     </attribute>
     <attribute>

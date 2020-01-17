@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -228,6 +228,7 @@ const   TaskInfo    g_istep10[]  =   {
                 ISTEP_10::call_proc_build_smp,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
+/*
         {
                 ISTEPNAME(10,02,"host_slave_sbe_update"),
                 ISTEP_10::call_host_slave_sbe_update,
@@ -293,6 +294,7 @@ const   TaskInfo    g_istep10[]  =   {
                 ISTEP_10::call_host_update_redundant_tpm,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
         },
+**/
 };
 
 const DepModInfo g_istep10Dependancies = {

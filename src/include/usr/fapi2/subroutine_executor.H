@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,7 +49,7 @@
 #define  DEBUG_TRACE  0   // 0 = disable
 
 /**
-* @brief Given a hwp name, and its parameters, serialize the parmeters and pass the serialized
+* @brief Given a hwp name, and its parameters, serialize the parameters and pass the serialized
 *        data to the SBE via a FIFO chipop
 * @param[in]  i_hwpName  String representing the name of the hwp to be called
 * @param[in]  types      Any variable length of arguments, which along with target should get passed
@@ -107,9 +107,18 @@ errlHndl_t requestHwpViaSbe(const char * i_hwpName, Types... types)
         const char* l_function = #FUNC; \
         do  \
         { \
-            FAPI_INF("subroutine_executor: executing hwp %s via SBE chip-op", \
-                      l_function); \
-            l_errl =  requestHwpViaSbe(l_function, _args); \
+            if (0 == memcmp(l_function, "p10_putmemproc", 15)) \
+            { \
+                FAPI_INF("subroutine_executor: executing hwp %s natively", \
+                         l_function); \
+                FAPI_PLAT_EXEC_HWP(RC, FUNC, _args); \
+            } \
+            else \
+            { \
+                FAPI_INF("subroutine_executor: executing hwp %s via SBE chip-op", \
+                          l_function); \
+                l_errl =  requestHwpViaSbe(l_function, _args); \
+            } \
             break; \
         } while (0); \
         if(l_errl) \
