@@ -22,3 +22,82 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file exp_mrs06.C
+/// @brief Run and manage the DDR4 MRS06 loading
+///
+// *HWP HWP Owner: Matthew Hickman <Matthew.Hickman@ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: FSP:HB
+
+#include <fapi2.H>
+#include <lib/shared/exp_consts.H>
+#include <lib/shared/exp_defaults.H>
+#include <lib/dimm/exp_mrs_traits.H>
+#include <lib/ccs/ccs_traits_explorer.H>
+#include <generic/memory/lib/dimm/ddr4/mrs_load_ddr4.H>
+#include <generic/memory/lib/dimm/ddr4/mrs06.H>
+
+namespace mss
+{
+
+namespace ddr4
+{
+
+///
+/// @brief mrs0_data ctor
+/// @param[in] a fapi2::TARGET_TYPE_DIMM target
+/// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// @note Burst Length will always be set to fixed x8 (0)
+/// @note Burst Chop (x4) is not supported
+///
+template<>
+mrs06_data<mss::mc_type::EXPLORER>::mrs06_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        fapi2::ReturnCode& o_rc ):
+    iv_tccd_l(0)
+{
+    const auto l_port_target = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
+    uint8_t l_vrefdq_train_value[mss::exp::MAX_RANK_PER_DIMM][mss::exp::MAX_NIBBLES_PER_PORT] = {0};
+    uint8_t l_vrefdq_train_range[mss::exp::MAX_RANK_PER_DIMM][mss::exp::MAX_NIBBLES_PER_PORT] = {0};
+    uint8_t l_vrefdq_train_enable[mss::exp::MAX_RANK_PER_DIMM][mss::exp::MAX_NIBBLES_PER_PORT] = {0};
+
+    FAPI_TRY( mss::attr::get_exp_resp_vref_dq_train_value(i_target, l_vrefdq_train_value), "Error in mrs06_data()" );
+    FAPI_TRY( mss::attr::get_exp_resp_vref_dq_train_range(i_target, l_vrefdq_train_range), "Error in mrs06_data()" );
+    FAPI_TRY( mss::attr::get_exp_resp_vref_dq_train_enable(i_target, l_vrefdq_train_enable), "Error in mrs06_data()" );
+    FAPI_TRY( mss::attr::get_dram_tccd_l(l_port_target, iv_tccd_l), "Error in mrs06_data()" );
+
+    for (int i = 0; i < mss::exp::MAX_RANK_PER_DIMM; i++)
+    {
+        // Using DRAM 0 values due to missing values
+        // From skipped DRAMs or spares that DNE
+        iv_vrefdq_train_value[i] = l_vrefdq_train_value[i][0];
+        iv_vrefdq_train_range[i] = l_vrefdq_train_range[i][0];
+        iv_vrefdq_train_enable[i] = l_vrefdq_train_enable[i][0];
+    }
+
+    o_rc = fapi2::FAPI2_RC_SUCCESS;
+    return;
+
+fapi_try_exit:
+    o_rc = fapi2::current_err;
+    FAPI_ERR("%s unable to get attributes for mrs06", mss::c_str(i_target));
+    return;
+}
+
+template<>
+fapi2::ReturnCode (*mrs06_data<mss::mc_type::EXPLORER>::make_ccs_instruction)(const
+        fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const mrs06_data<mss::mc_type::EXPLORER>& i_data,
+        ccs::instruction_t& io_inst,
+        const uint64_t i_rank) = &mrs06;
+
+template<>
+fapi2::ReturnCode (*mrs06_data<mss::mc_type::EXPLORER>::decode)(const ccs::instruction_t& i_inst,
+        const uint64_t i_rank) = &mrs06_decode;
+
+} // ns ddr4
+
+} // ns mss
