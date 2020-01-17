@@ -81,11 +81,15 @@ spi_wait_for_tdr_empty(SpiControlHandle& i_handle)
 
         //checking for multiplexing error
         FAPI_ASSERT( (data64.getBit<50>() == 0),
+#ifndef BOOTLOADER
                      fapi2::SBE_SPI_INVALID_PORT_MULTIPLEX_SET()
                      .set_CHIP_TARGET(i_handle.target_chip)
                      .set_BASE_ADDRESS(base_addr + SPIM_STATUSREG)
                      .set_STATUS_REGISTER(data64),
                      "Port multiplexer setting error set in spi_wait_for_tdr_empty");
+#else
+                     RC_SBE_SPI_INVALID_PORT_MULTIPLEX_SET);
+#endif
 
         if(!(data64.getBit<4>()))
         {
@@ -111,11 +115,15 @@ spi_wait_for_rdr_full(SpiControlHandle& i_handle)
 
         //checking for multiplexing error
         FAPI_ASSERT( (status_reg.getBit<50>() == 0),
+#ifndef BOOTLOADER
                      fapi2::SBE_SPI_INVALID_PORT_MULTIPLEX_SET()
                      .set_CHIP_TARGET(i_handle.target_chip)
                      .set_BASE_ADDRESS(base_addr + SPIM_STATUSREG)
                      .set_STATUS_REGISTER(status_reg),
                      "Port multiplexer setting error set in spi_wait_for_rdr_full");
+#else
+                     RC_SBE_SPI_INVALID_PORT_MULTIPLEX_SET);
+#endif
 
         if(status_reg.getBit<0>()) //Wait until RX Buffer is full
         {
@@ -141,11 +149,15 @@ spi_wait_for_idle(SpiControlHandle& i_handle)
 
         //checking for multiplexing error
         FAPI_ASSERT( (data64.getBit<50>() == 0),
+#ifndef BOOTLOADER
                      fapi2::SBE_SPI_INVALID_PORT_MULTIPLEX_SET()
                      .set_CHIP_TARGET(i_handle.target_chip)
                      .set_BASE_ADDRESS(base_addr + SPIM_STATUSREG)
                      .set_STATUS_REGISTER(data64),
                      "Port multiplexer setting error set in spi_wait_for_idle");
+#else
+                     RC_SBE_SPI_INVALID_PORT_MULTIPLEX_SET);
+#endif
 
         if(data64.getBit<15>())  //seq fsm Idle
         {
@@ -292,12 +304,16 @@ spi_precheck(SpiControlHandle& i_handle)
 
     // Check the h/w is in the expected state
     FAPI_ASSERT( !(temp & flags),
+#ifndef BOOTLOADER
                  fapi2::SBE_SPI_CMD_STATUS_REG_UNSUPPORTED_STATE()
                  .set_CHIP_TARGET(i_handle.target_chip)
                  .set_BASE_ADDRESS(base_addr + SPIM_STATUSREG)
                  .set_STATUS_REGISTER(temp)
                  .set_CHECK_FLAGS(flags),
                  "SPI status register state bits check validation failed.");
+#else
+                 RC_SBE_SPI_CMD_STATUS_REG_UNSUPPORTED_STATE);
+#endif
 fapi_try_exit:
     return fapi2::current_err;
 }
