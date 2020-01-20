@@ -22,6 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+#include <limits.h>
 #include <targeting/common/hbrt_target.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/targreasoncodes.H>
@@ -60,11 +62,10 @@ errlHndl_t getRtTarget(
             auto huid = get_huid(i_pTarget);
             auto targetingTargetType =
                 i_pTarget->getAttr<TARGETING::ATTR_TYPE>();
-            TRACFCOMP(g_trac_targeting, ERR_MRK
-                "Targeting target type of 0x%08X not supported. "
-                "HUID: 0x%08X",
-                targetingTargetType,
-                huid);
+            TARG_ERR("getRtTarget: Targeting target type of 0x%08X not supported. "
+                     "HUID: 0x%08X",
+                     targetingTargetType,
+                     huid);
             /*@
              * @errortype
              * @moduleid    TARG_RT_GET_RT_TARGET
@@ -96,6 +97,59 @@ errlHndl_t getRtTarget(
     } while(0);
 
     return pError;
+}
+
+errlHndl_t getMemTargetMmioInfo ( TARGETING::Target * i_memTarget,
+                                  std::vector<TARGETING::ocmbMmioAddressRange_t>& o_ocmbMmioSpaces)
+{
+    errlHndl_t l_err;
+
+    do{
+        TARGETING::ocmbMmioAddressRange_t l_tmpRange;
+        TARGETING::ATTR_TYPE_type l_targetType = i_memTarget->getAttr<TARGETING::ATTR_TYPE>();
+
+        assert(l_targetType == TARGETING::TYPE_OCMB_CHIP,
+              "Target type % passed to getMemTargetMmioInfo."
+              " Currently this function only supports TYPE_OCMB_CHIP",
+               l_targetType);
+
+        // We need to store in a local variable initially because we cannot
+        // pass a ptr to the getRtTarget member of the packed ocmbMmioAddressRange_t struct
+        rtChipId_t l_hbrtId;
+        l_err = TARGETING::getRtTarget(i_memTarget, l_hbrtId);
+        if(l_err)
+        {
+            break;
+        }
+        l_tmpRange.hbrtId = l_hbrtId;
+
+        TARGETING::ATTR_MMIO_PHYS_ADDR_type l_ocmbBaseMmioPhysAddr =
+                    i_memTarget->getAttr<TARGETING::ATTR_MMIO_PHYS_ADDR>();
+
+        assert(l_ocmbBaseMmioPhysAddr != 0,
+               "0 returned for physical address of OCMB's MMIO space. MMIO map probably isn't set up yet.");
+
+        // CONFIG space ( 2 GB )
+        l_tmpRange.mmioBaseAddr = l_ocmbBaseMmioPhysAddr;
+        l_tmpRange.mmioEndAddr = l_tmpRange.mmioBaseAddr + (2 * GIGABYTE) - 1;
+        l_tmpRange.accessSize = 4;
+        o_ocmbMmioSpaces.push_back(l_tmpRange);
+
+        // Microchip Scom Access Space ( 128 MB )
+        l_tmpRange.mmioBaseAddr = l_ocmbBaseMmioPhysAddr + (4 * GIGABYTE);
+        l_tmpRange.mmioEndAddr = l_tmpRange.mmioBaseAddr + (128 * MEGABYTE) - 1;
+        l_tmpRange.accessSize = 4;
+        o_ocmbMmioSpaces.push_back(l_tmpRange);
+
+        // IBM Scom Access Space ( 16 MB )
+        l_tmpRange.mmioBaseAddr = l_ocmbBaseMmioPhysAddr + (4 * GIGABYTE) + (128 * MEGABYTE);
+        l_tmpRange.mmioEndAddr = l_tmpRange.mmioBaseAddr + (16 * MEGABYTE) - 1;
+        l_tmpRange.accessSize = 8;
+        o_ocmbMmioSpaces.push_back(l_tmpRange);
+
+    }while(0);
+
+    return l_err;
 }
 
 }

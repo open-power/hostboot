@@ -1049,21 +1049,6 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
         assert(l_sys != nullptr,
                "populate_HbRsvMem: top level target nullptr" );
 
-        // Configure the ATTR_HBRT_HYP_ID attributes so that runtime code and
-        // whichever hypervisor is loaded can reference equivalent targets
-        // When populating hbRuntimeData, we make IPC calls if we are running
-        // on a multi-node configuration. The message handler for that IPC call,
-        // calls populateHbRsvMem. We want to setup hbrt target types for all
-        // the nodes. That's why, we moved this call here instead of directly
-        // calling it from istep21.
-        l_elog = RUNTIME::configureHbrtHypIds(TARGETING::is_phyp_load());
-        if (l_elog)
-        {
-            TRACFCOMP(g_trac_runtime, ERR_MRK"populate_HbRsvMem> i_nodeId=%d"
-                    " configureHbrtHypIds failed");
-            break;
-        }
-
         // Wipe out our cache of the NACA/SPIRA pointers
         RUNTIME::rediscover_hdat();
 
@@ -3402,19 +3387,6 @@ errlHndl_t populate_hbRuntimeData( void )
             }
             else
             {
-                //When PAYLOAD_KIND = NONE (aka simics)
-                //Configure the ATTR_HBRT_HYP_ID attributes
-                //When PAYLOAD_KIND is set, we call this function from
-                //populate_HbRsvMem as that function is also executed on slave
-                //nodes in a multi-node config. But, moving it there removes
-                //this call in simics case. Therefore, adding it here.
-                l_elog = RUNTIME::configureHbrtHypIds(TARGETING::is_phyp_load());
-                if (l_elog)
-                {
-                    TRACFCOMP(g_trac_runtime, ERR_MRK"populate_HbRsvMem> i_nodeId=%d"
-                            " configureHbrtHypIds failed");
-                    break;
-                }
                 // still fill in HB DATA for testing
                 uint64_t l_startAddr = cpu_spr_value(CPU_SPR_HRMOR) +
                             VMM_HB_DATA_TOC_START_OFFSET;

@@ -122,7 +122,7 @@ errlHndl_t mmioSetup()
 
             // Get the base BAR address for OpenCapi Memory Interfaces (OMIs)
             // of this Memory Controller (MC)
-            auto l_omiBaseAddr =
+            auto l_mcBaseOffset =
                   l_mcTarget->getAttr<ATTR_OMI_INBAND_BAR_BASE_ADDR_OFFSET>();
 
             // Build up the full address using fabric topology
@@ -130,22 +130,23 @@ errlHndl_t mmioSetup()
             Target* l_parentChip = getParent(l_mcTarget, l_procType);
             const auto l_topoId =
                 l_parentChip->getAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>();
-            uint64_t l_realAddr = computeMemoryMapOffset( MMIO_BASE,
+            uint64_t l_physMcAddr = computeMemoryMapOffset( MMIO_BASE,
                                                           l_topoMode,
                                                           l_topoId);
 
             //  Apply the MMIO base offset so we get the final address
-            l_realAddr += l_omiBaseAddr;
+            l_physMcAddr += l_mcBaseOffset;
 
             // Map the device with a kernel call, each device, the MC, is 16 GB
-            uint64_t l_virtAddr = reinterpret_cast<uint64_t>
-                         (mmio_dev_map(reinterpret_cast<void *>(l_realAddr),
+            uint64_t l_virtMcAddr = reinterpret_cast<uint64_t>
+                         (mmio_dev_map(reinterpret_cast<void *>(l_mcBaseOffset),
                                        16*GIGABYTE));
 
             TRACFCOMP ( g_trac_mmio, "MC%.02X (0x%.08X) MMIO BAR PHYSICAL ADDR "
                         "= 0x%lX     VIRTUAL ADDR = 0x%lX" ,
                         l_mcChipUnit, get_huid(l_mcTarget),
-                        l_realAddr, l_virtAddr);
+                        l_mcBaseOffset, l_virtMcAddr);
+
 
             // set VM_ADDR on each OCMB
             TargetHandleList l_omiTargetList;
@@ -176,18 +177,19 @@ errlHndl_t mmioSetup()
                 //       +-----+--------------------+------+-----------------------------------------+------+-------
 
                 // Calculate CNFG space BAR to write to OCMB attribute
-                uint64_t l_currentOmiOffset = (( l_omiPosRelativeToMc / 2) * 8 * GIGABYTE) +
+                uint64_t l_omiOffsetRelativeToMc = (( l_omiPosRelativeToMc / 2) * 8 * GIGABYTE) +
                                               (( l_omiPosRelativeToMc % 2) * 2 * GIGABYTE);
 
-                // Calculated real address for this OMI is (BAR from MC attribute) + (currentOmiOffset)
-                uint64_t l_calulatedRealAddr = l_omiBaseAddr + l_currentOmiOffset;
+                // Calculate the MC mmio offset + the current OMI offset and this should match
+                // the ATTR_OMI_INBAND_BAR_BASE_ADDR_OFFSET value set on the OMI target
+                uint64_t l_totalMmioOffset = l_mcBaseOffset + l_omiOffsetRelativeToMc;
 
                 // Grab bar value from attribute to verify it matches
                 // our calculations
-                auto l_omiBarAttrVal = l_omiTarget->
+                auto l_omiOffsetAttrVal = l_omiTarget->
                                getAttr<ATTR_OMI_INBAND_BAR_BASE_ADDR_OFFSET>();
 
-                if(l_omiBarAttrVal != l_calulatedRealAddr)
+                if(l_omiOffsetAttrVal != l_totalMmioOffset)
                 {
                     TRACFCOMP(g_trac_mmio,
                               "Discrepancy found between calculated OMI MMIO "
@@ -195,7 +197,7 @@ errlHndl_t mmioSetup()
                               "ATTR_OMI_INBAND_BAR_BASE_ADDR_OFFSET");
                     TRACFCOMP(g_trac_mmio, "Calculated Offset: 0x%lX, "
                               "Attribute Value : 0x%lX",
-                              l_calulatedRealAddr, l_omiBarAttrVal);
+                              l_totalMmioOffset, l_omiOffsetAttrVal);
 
                     /*@
                     * @errortype   ERRORLOG::ERRL_SEV_UNRECOVERABLE
@@ -211,8 +213,8 @@ errlHndl_t mmioSetup()
                                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             MMIO::MOD_MMIO_SETUP,
                                             MMIO::RC_BAR_OFFSET_MISMATCH,
-                                            l_calulatedRealAddr,
-                                            l_omiBarAttrVal,
+                                            l_totalMmioOffset,
+                                            l_omiOffsetAttrVal,
                                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                     l_err->collectTrace( MMIO_COMP_NAME);
                     ERRORLOG::ErrlUserDetailsTarget(l_omiTarget).addToLog(l_err);
@@ -221,9 +223,9 @@ errlHndl_t mmioSetup()
                 }
 
 
-                uint64_t l_currentOmiVirtAddr = l_virtAddr + l_currentOmiOffset;
+                uint64_t l_currentOmiVirtAddr = l_virtMcAddr + l_omiOffsetRelativeToMc;
 
-                // set VM_ADDR the associated OCMB
+                // set ATTR_MMIO_VM_ADDR and ATTR_MMIO_PHYS_ADDR the associated OCMB
                 TargetHandleList l_ocmbTargetList;
                 getChildAffinityTargets(l_ocmbTargetList, l_omiTarget,
                                   CLASS_CHIP, TYPE_OCMB_CHIP);
@@ -235,10 +237,12 @@ errlHndl_t mmioSetup()
                           " address is 0x%lX",
                           get_huid(l_ocmbTargetList[0]),
                           l_currentOmiVirtAddr,
-                          l_calulatedRealAddr | MEMMAP::MMIO_BASE );
+                          l_physMcAddr + l_omiOffsetRelativeToMc );
 
                 l_ocmbTargetList[0]->
                             setAttr<ATTR_MMIO_VM_ADDR>(l_currentOmiVirtAddr);
+                l_ocmbTargetList[0]->
+                            setAttr<ATTR_MMIO_PHYS_ADDR>(l_physMcAddr + l_omiOffsetRelativeToMc);
             }
         }
     } while(0);

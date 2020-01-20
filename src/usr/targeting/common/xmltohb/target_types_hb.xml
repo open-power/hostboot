@@ -39,6 +39,10 @@
     </attribute>
     <attribute>
       <default>0</default>
+      <id>MMIO_PHYS_ADDR</id>
+    </attribute>
+    <attribute>
+      <default>0</default>
       <id>MMIO_VM_ADDR</id>
     </attribute>
     <attribute>

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2019
+# Contributors Listed Below - COPYRIGHT 2011,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -55,7 +55,10 @@ HWPF_REL_PATH = ${ROOTPATH}/src/include/usr/hwpf
 EXTRAINCDIR +=                                       \
     $(addprefix ${HWPF_REL_PATH}/, ${HWPF_INC_DIRS}) \
     ${ROOTPATH}/src/include/usr/ecmddatabuffer       \
-    ../
+    ../                                              \
+    ${ROOTPATH}/obj/genfiles/                        \
+    ${ROOTPATH}/src/import/hwpf/fapi2/include/       \
+    ${ROOTPATH}/src/include/usr/fapi2/
 
 # Generate the test suite
 
