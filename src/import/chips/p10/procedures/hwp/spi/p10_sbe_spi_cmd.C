@@ -32,6 +32,11 @@
 #include "p10_sbe_spi_cmd.H"
 #include "endian.h"
 
+// This is required for PPE-simics compile environment
+#ifdef __PPE__
+    #include "sbeutil.H"
+#endif
+
 using namespace fapi2;
 
 fapi2::ReturnCode
