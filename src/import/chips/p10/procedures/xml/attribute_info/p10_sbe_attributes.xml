@@ -433,6 +433,14 @@
   <entry>
     <name>ATTR_PROC_SBE_MCS_SETUP_REG_STATES</name>
     <value>0x0</value>
+    <value>0x0</value>
+    <value>0x0</value>
+    <value>0x0</value>
+    <value>0x0</value>
+    <value>0x0</value>
+    <value>0x0</value>
+    <value>0x0</value>
+    <value>0x0</value>
   </entry>
   <entry>
     <name>ATTR_PROC_SBE_MCS_SETUP_SELECTED_MC</name>
