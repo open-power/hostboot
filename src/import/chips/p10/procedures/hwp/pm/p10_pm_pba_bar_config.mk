@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/import/chips/p10/procedures/hwp/pm/p10_pm_set_homer_bar.mk $
+# $Source: src/import/chips/p10/procedures/hwp/pm/p10_pm_pba_bar_config.mk $
 #
 # OpenPOWER HostBoot Project
 #
@@ -22,7 +22,5 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-PROCEDURE=p10_pm_set_homer_bar
-lib${PROCEDURE}_DEPLIBS += p10_pm_utils
-OBJS+=p10_pm_pba_bar_config.o
+PROCEDURE=p10_pm_pba_bar_config
 $(call BUILD_PROCEDURE)
