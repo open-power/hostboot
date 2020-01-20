@@ -635,15 +635,19 @@ p10_update_net_ctrl(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
         //Static domain VDN
         l_data64.setBit<mc::NET_CTRL0_ARRAY_WRITE_ASSIST_EN>();
         auto l_mc_mctrl = i_target.getMulticast<fapi2::TARGET_TYPE_PERV>(fapi2::MCGROUP_GOOD_MC);
+        FAPI_TRY(mc::PREP_NET_CTRL0_RW_WOR(l_mc_mctrl));
         FAPI_TRY(mc::PUT_NET_CTRL0_RW_WOR(l_mc_mctrl, l_data64));
 
         auto l_mc_pau   = i_target.getMulticast<fapi2::TARGET_TYPE_PERV>(fapi2::MCGROUP_GOOD_PAU);
+        FAPI_TRY(pauc::PREP_NET_CTRL0_RW_WOR(l_mc_pau));
         FAPI_TRY(pauc::PUT_NET_CTRL0_RW_WOR(l_mc_pau, l_data64));
 
         auto l_mc_iohs  = i_target.getMulticast<fapi2::TARGET_TYPE_PERV>(fapi2::MCGROUP_GOOD_IOHS);
+        FAPI_TRY(iohs::PREP_NET_CTRL0_RW_WOR(l_mc_iohs));
         FAPI_TRY(iohs::PUT_NET_CTRL0_RW_WOR(l_mc_iohs, l_data64));
 
         auto l_mc_pci = i_target.getMulticast<fapi2::TARGET_TYPE_PERV>(fapi2::MCGROUP_GOOD_PCI);
+        FAPI_TRY(pec::PREP_NET_CTRL0_RW_WOR(l_mc_pci));
         FAPI_TRY(pec::PUT_NET_CTRL0_RW_WOR(l_mc_pci, l_data64));
 
 
