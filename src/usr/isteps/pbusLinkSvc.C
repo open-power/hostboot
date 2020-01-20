@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,78 +47,27 @@ PbusLinkSvc::~PbusLinkSvc()
 }
 
 errlHndl_t PbusLinkSvc::getPbusConnections( TargetPairs_t & o_PbusConnections,
-                                         TYPE i_busType, bool i_noDuplicate )
+                                            const IOHS_CONFIG_MODE i_busType,
+                                            const bool i_noDuplicate )
 {
-    errlHndl_t l_errl = NULL;
-    TargetPairs_t * l_PbusConnections = NULL;
+    errlHndl_t l_errl = nullptr;
     o_PbusConnections.clear();
 
     mutex_lock(&iv_mutex);
 
-    switch (i_busType)
+    if (iv_busConnections[i_busType].empty())
     {
-      case TYPE_ABUS:
-    {
-        if (iv_abusConnections.size() == 0)
-        {
-            l_errl = collectPbusConnections( TYPE_ABUS );
-        }
-        if (l_errl == NULL)
-        {
-            l_PbusConnections = i_noDuplicate ? &iv_abusUniqueConnections :
-                                            &iv_abusConnections;
-        }
-    }
-      break;
-      case TYPE_OBUS:
-      {
-          if (iv_obusConnections.size() == 0)
-          {
-              l_errl = collectPbusConnections( TYPE_OBUS );
-          }
-          if (l_errl == NULL)
-          {
-              l_PbusConnections = i_noDuplicate ? &iv_obusUniqueConnections :
-                                                  &iv_obusConnections;
-          }
-      }
-      break;
-      case TYPE_XBUS:
-    {
-        if (iv_xbusConnections.size() == 0)
-        {
-              l_errl = collectPbusConnections( TYPE_XBUS );
-        }
-        if (l_errl == NULL)
-        {
-            l_PbusConnections = i_noDuplicate ? &iv_xbusUniqueConnections :
-                                            &iv_xbusConnections;
-        }
-    }
-      break;
-      default:
-      {
-          /*@
-            * @errortype    ERRL_SEV_UNRECOVERABLE
-            * @moduleid     MOD_EDI_EI_IO_RUN_TRAINING
-            * @reasoncode   RC_INVALID_TARGET_TYPE
-            * @userdata1    bus type
-            * @custdesc     Platform generated error. See User Data.
-            * @devdesc      Unexpected bus target type
-            */
-            l_errl = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                            MOD_EDI_EI_IO_RUN_TRAINING,
-                            RC_INVALID_TARGET_TYPE,
-                            i_busType );
-      }
-      break;
+        l_errl = collectPbusConnections(i_busType);
     }
 
-    if (l_errl == NULL)
+    if (l_errl == nullptr)
     {
-        o_PbusConnections.insert( (*l_PbusConnections).begin(),
-                                              (*l_PbusConnections).end() );
+        TargetPairs_t * const l_PbusConnections = (i_noDuplicate
+                                                   ? &iv_busConnections[i_busType]
+                                                   : &iv_uniqueBusConnections[i_busType]);
+
+        o_PbusConnections.insert( l_PbusConnections->begin(),
+                                  l_PbusConnections->end() );
     }
 
     mutex_unlock(&iv_mutex);
@@ -127,75 +76,58 @@ errlHndl_t PbusLinkSvc::getPbusConnections( TargetPairs_t & o_PbusConnections,
 }
 
 
-errlHndl_t PbusLinkSvc::collectPbusConnections( TYPE i_busType )
+errlHndl_t PbusLinkSvc::collectPbusConnections( const IOHS_CONFIG_MODE i_busType )
 {
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
 
-    // Get all functional i_busType chiplets
+    // Get all functional IOHS chiplets
     TARGETING::TargetHandleList l_busTargetList;
-    getAllChiplets(l_busTargetList, i_busType);
+    getAllChiplets(l_busTargetList, TYPE_IOHS);
     TRACFCOMP( TARGETING::g_trac_targeting,
-             "PbusLinkSvc::collectPbusConnections - getAllChiplets(%d type) "
-             "returned %d entries", i_busType, l_busTargetList.size());
+             "PbusLinkSvc::collectPbusConnections - getAllChiplets(TYPE_IOHS) "
+             "returned %d entries", l_busTargetList.size());
 
     // select the appropriate maps to work with
-    TargetPairs_t * l_pPbusConnections;
-    TargetPairs_t * l_pPbusUniqueConnections;
-    switch (i_busType)
-    {
-      case TYPE_ABUS:
-      {
-          l_pPbusConnections = &iv_abusConnections;
-          l_pPbusUniqueConnections = &iv_abusUniqueConnections;
-          break;
-      }
-      case TYPE_OBUS:
-      {
-          l_pPbusConnections = &iv_obusConnections;
-          l_pPbusUniqueConnections = &iv_obusUniqueConnections;
-          break;
-      }
-      case TYPE_XBUS:
-      default:
-      {
-          l_pPbusConnections = &iv_xbusConnections;
-          l_pPbusUniqueConnections = &iv_xbusUniqueConnections;
-          break;
-      }
-    }
+    TargetPairs_t* const l_pPbusConnections = &iv_busConnections[i_busType];
+    TargetPairs_t* const l_pPbusUniqueConnections = &iv_uniqueBusConnections[i_busType];
 
-    // Collect all functional i_busType pbus connections
+    // Collect all functional IOHS connections
     for (const auto & l_pTarget: l_busTargetList)
     {
+        if (l_pTarget->getAttr<ATTR_IOHS_CONFIG_MODE>() != i_busType)
+        {
+            continue; // Skip buses of types we're not requesting
+        }
+
         // exit for loop if error already encountered
-        if (NULL != l_errl)
-    {
+        if (nullptr != l_errl)
+        {
             break;
         }
 
         // get other endpoint target
         TRACFCOMP( TARGETING::g_trac_targeting,
-                 "Get other endpoint target for target HUID %.8X",
-                 TARGETING::get_huid(l_pTarget) );
+                   "Get other endpoint target for target HUID %.8X",
+                   TARGETING::get_huid(l_pTarget) );
 
         const TARGETING::Target * l_dstTgt =
-                    l_pTarget->getAttr<ATTR_PEER_TARGET>();
+            l_pTarget->getAttr<ATTR_PEER_TARGET>();
 
         TRACFCOMP( TARGETING::g_trac_targeting,
-                 "Other endpoint target HUID %.8X",
-                 TARGETING::get_huid(l_dstTgt) );
+                   "Other endpoint target HUID %.8X",
+                   TARGETING::get_huid(l_dstTgt) );
 
         // connection is existing, not to itself and is a real target
-        if ((l_dstTgt != NULL) && (l_dstTgt != l_pTarget))
+        if ((l_dstTgt != nullptr) && (l_dstTgt != l_pTarget))
         {
-            TYPE l_dstType = l_dstTgt->getAttr<ATTR_TYPE>();
+            const auto l_dstType = l_dstTgt->getAttr<ATTR_IOHS_CONFIG_MODE>();
             if (l_dstType != i_busType)
             {
                 TRACFCOMP(TARGETING::g_trac_targeting,
-                    "Both endpoints' bus type mismatch; "
-                         "target HUID %.8X: dest HUID %.8X",
-                    TARGETING::get_huid(l_pTarget),
-                    TARGETING::get_huid(l_dstTgt));
+                          "Both endpoints' bus type mismatch; "
+                          "target HUID %.8X: dest HUID %.8X",
+                          TARGETING::get_huid(l_pTarget),
+                          TARGETING::get_huid(l_dstTgt));
 
                 // Mixed bus type connection
                 /*@
@@ -208,11 +140,11 @@ errlHndl_t PbusLinkSvc::collectPbusConnections( TYPE i_busType )
                  * @devdesc      Mixed bus connection of two types
                  */
                 l_errl = new ERRORLOG::ErrlEntry(
-                                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                         MOD_EDI_EI_IO_RUN_TRAINING,
-                                         RC_MIXED_PBUS_CONNECTION,
-                                         i_busType,
-                                         l_dstType );
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    MOD_EDI_EI_IO_RUN_TRAINING,
+                    RC_MIXED_PBUS_CONNECTION,
+                    i_busType,
+                    l_dstType );
                 break;
             }
 
@@ -223,10 +155,10 @@ errlHndl_t PbusLinkSvc::collectPbusConnections( TYPE i_busType )
             if (l_endp1Parent == l_endp2Parent)
             {
                 TRACFCOMP(TARGETING::g_trac_targeting,
-                    "Both endpoints from same chip; "
-                    "target HUID %.8X dest HUID %.8X",
-                    TARGETING::get_huid(l_pTarget),
-                    TARGETING::get_huid(l_dstTgt));
+                          "Both endpoints from same chip; "
+                          "target HUID %.8X dest HUID %.8X",
+                          TARGETING::get_huid(l_pTarget),
+                          TARGETING::get_huid(l_dstTgt));
 
                 // connection of same chip
                 /*@
@@ -237,12 +169,11 @@ errlHndl_t PbusLinkSvc::collectPbusConnections( TYPE i_busType )
                  * @devdesc      Both endpoint connections of same chip
                  */
                 l_errl = new ERRORLOG::ErrlEntry(
-                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                     MOD_EDI_EI_IO_RUN_TRAINING,
-                                     RC_SAME_CHIP_PBUS_CONNECTION );
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    MOD_EDI_EI_IO_RUN_TRAINING,
+                    RC_SAME_CHIP_PBUS_CONNECTION );
                 break;
             }
-
 
             for (const auto l_dstTarget: l_busTargetList)
             {
@@ -258,14 +189,14 @@ errlHndl_t PbusLinkSvc::collectPbusConnections( TYPE i_busType )
         }
     } // for l_bus_iter
 
-    // Validate pbus connections are valid and strike out
-    // duplicates for the Unique connection map
+    // Validate pbus connections and strike out duplicates for the Unique
+    // connection map
     TargetPairs_t::iterator l_jtr;
 
     for (const auto l_PbusConnection : (*l_pPbusUniqueConnections))
     {
         // exit for loop if error already encountered
-        if (NULL != l_errl)
+        if (nullptr != l_errl)
         {
             break;
         }

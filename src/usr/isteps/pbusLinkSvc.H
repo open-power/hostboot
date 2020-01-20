@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,7 +74,7 @@ public:
      *
      * @parm[out] o_PbusConnections, reference of a map for getting a copy
      *            of the map of specified bus connections
-     * @parm[in]  i_busType, type of bus connection, TYPE_XBUS or TYPE_ABUS
+     * @parm[in]  i_busType, type of bus connection, e.g. IOHS_CONFIG_MODE_SMPX
      * @parm[in]  i_noDuplicate, set to true to eliminate duplicates, i.e.
      *            only (endpoint1,endpoint2) or (endpoint2,endpoint1) will
      *            be in the present in the map
@@ -83,7 +83,7 @@ public:
      */
 
     errlHndl_t getPbusConnections( TargetPairs_t & o_PbusConnections,
-                             TYPE i_busType,  bool i_noDuplicate = true );
+                                   IOHS_CONFIG_MODE i_busType,  bool i_noDuplicate = true );
 
 protected:
     /**
@@ -103,14 +103,10 @@ private:
     PbusLinkSvc(const PbusLinkSvc& i_right);
     PbusLinkSvc& operator=(const PbusLinkSvc& i_right);
 
-    TargetPairs_t iv_abusUniqueConnections;
-    TargetPairs_t iv_abusConnections;
-    TargetPairs_t iv_xbusUniqueConnections;
-    TargetPairs_t iv_xbusConnections;
-    TargetPairs_t iv_obusUniqueConnections;
-    TargetPairs_t iv_obusConnections;
+    std::map<IOHS_CONFIG_MODE, TargetPairs_t> iv_busConnections;
+    std::map<IOHS_CONFIG_MODE, TargetPairs_t> iv_uniqueBusConnections;
 
-    // Mutex serializing changes to the above four maps
+    // Mutex serializing changes to the above maps
     mutex_t iv_mutex;
 
     /**
@@ -119,12 +115,11 @@ private:
      *        conflicting connection, and invalid-same-chip connection.
      *        The connections are saved within the singleton.
      *
-     * @parm[in]  i_busType, type of bus connection,
-     *                      TYPE_XBUS, TYPE_OBUS or TYPE_ABUS
+     * @parm[in]  i_busType, type of bus connection, e.g. IOHS_CONFIG_MODE_SMPX
      * @return    errlHndl_t if encountering an error, or NULL (no error)
      *
      */
-    errlHndl_t collectPbusConnections( TYPE i_busType );
+    errlHndl_t collectPbusConnections( IOHS_CONFIG_MODE i_busType );
 
 };
 

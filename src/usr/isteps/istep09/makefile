@@ -27,7 +27,7 @@ ROOTPATH = ../../../..
 PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p10/procedures
 MODULE = istep09
 
-#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest/
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/io/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
@@ -40,7 +40,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc
 
 OBJS += call_proc_io_dccal_done.o
-#OBJS += call_fabric_erepair.o
+OBJS += call_fabric_dl_pre_trainadv.o
 #OBJS += call_fabric_io_dccal.o
 #OBJS += call_fabric_pre_trainadv.o
 #OBJS += call_fabric_io_run_training.o
@@ -55,6 +55,7 @@ VPATH += ${PROCEDURES_PATH}/hwp/nest/ ${PROCEDURES_PATH}/hwp/io/
 OBJS += p10_io_init_done.o
 OBJS += p10_io_ppe_lib.o
 OBJS += p10_io_ppe_regs.o
+OBJS += p10_fabric_dl_pre_trainadv.o
 
 #include ${ROOTPATH}/procedure.rules.mk
 

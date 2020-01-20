@@ -68,11 +68,9 @@ OBJS += mem_utils.o
 OBJS += hwpisteperror.o
 OBJS += hwpistepud.o
 OBJS += istepHelperFuncs.o
-# FIXME RTC: 216029 Istep 18 support for multinode stitching
-#OBJS += pbusLinkSvc.o
+OBJS += pbusLinkSvc.o
 
 #OBJS += $(if $(CONFIG_OPENPOWER_VOLTMSG),openpower_vddr.o,hbToHwsvVoltageMsg.o)
 
 #include ${ROOTPATH}/procedure.rules.mk
 include ${ROOTPATH}/config.mk
-

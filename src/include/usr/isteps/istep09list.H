@@ -74,21 +74,21 @@ void*    call_proc_io_dccal_done( void    *io_pArgs );
 
 
 
-#if 0 // TODO RTC 208827: Implement rest of Istep 9 substeps
-
 /**
- *  @brief   fabric_io_dccal
+ *  @brief   fabric_dl_pre_trainadv
  *
- *           Calibrate Fabric/EDI interfaces
+ *           Advanced pre training
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return  any errlogs to istep
  *
  */
-void*    call_fabric_io_dccal( void    *io_pArgs );
+void*    call_fabric_dl_pre_trainadv( void    *io_pArgs );
 
 
+
+#if 0 // TODO RTC 208827: Implement rest of Istep 9 substeps
 
 /**
  *  @brief   fabric_pre_trainadv
@@ -189,12 +189,12 @@ namespace   INITSERVICE
                 ISTEP_09::call_proc_io_dccal_done,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
-        /*
         {
-                ISTEPNAME(09,02,"fabric_io_dccal"),
-                ISTEP_09::call_fabric_io_dccal,
+                ISTEPNAME(09,02,"fabric_dl_pre_trainadv"),
+                ISTEP_09::call_fabric_dl_pre_trainadv,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
+        /*
         {
                 ISTEPNAME(09,03,"fabric_pre_trainadv"),
                 ISTEP_09::call_fabric_pre_trainadv,
