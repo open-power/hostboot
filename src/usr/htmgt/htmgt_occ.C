@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,7 +40,6 @@
 #include <arch/ppc.H>
 #include <isteps/pm/occAccess.H>
 #include <errl/errludlogregister.H>
-#include <fapi2.H>
 
 #include <isteps/pm/pm_common_ext.H>
 
@@ -103,11 +102,14 @@ namespace HTMGT
 
         if (OCC_ROLE_MASTER == iv_role)
         {
-            const uint8_t l_cmdData[3] =
+            const uint8_t l_cmdData[] =
             {
-                0x00, // version
+                0x30, // version
                 i_state,
-                0x00 // reserved
+                0x00, // mode
+                0x00, // FFO freq
+                0x00,
+                0x00  // reserved
             };
 
             OccCmd cmd(this, OCC_CMD_SET_STATE,
@@ -383,6 +385,8 @@ namespace HTMGT
     // Notify HostBoot which GPUs are present (after OCC goes active)
     void Occ::updateGpuPresence()
     {
+        // No GPUs are currently supported
+#if 0
         TARGETING::ConstTargetHandle_t const_proc_target =
             TARGETING::getParentChip(iv_target);
         SENSOR::StatusSensor::statusEnum gpu_status[MAX_GPUS] =
@@ -403,6 +407,7 @@ namespace HTMGT
         SENSOR::updateGpuSensorStatus(const_cast<TARGETING::TargetHandle_t>
                                       (const_proc_target),
                                       gpu_status);
+#endif
     }
 
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,7 +32,7 @@
 
 namespace HTMGT
 {
-    const uint8_t  OCC_PROC_QUAD_DEFAULT_WEIGHT = 10;  //Default 1.0 weight.
+    const uint8_t  OCC_PROC_DEFAULT_WEIGHT = 10;     //default weight (1.0)
     const uint8_t  OCC_PROC_DEFAULT_DVFS_TEMP = 0x55;//default from DEF file PM
     const uint8_t  OCC_PROC_DEFAULT_ERR_TEMP  = 0x5F;
     const uint8_t  OCC_PROC_DEFAULT_TIMEOUT   = 0x05;
@@ -45,7 +45,6 @@ namespace HTMGT
     enum occCfgDataFormat
     {
         OCC_CFGDATA_NO_REQUEST     = 0x00,  // no request for config data
-        OCC_CFGDATA_FREQ_POINT     = 0x02,  // Frequency Operating Points
         OCC_CFGDATA_OCC_ROLE       = 0x03,  // OCC Role
         OCC_CFGDATA_APSS_CONFIG    = 0x04,  // APSS Config
         OCC_CFGDATA_MEM_CONFIG     = 0x05,  // Memory Configuration
@@ -73,12 +72,12 @@ namespace HTMGT
         OCC_REPORT_THROTTLE_BELOW_NOMINAL = 0x08,   //Bit 3
         //else, OCC report throttling when max frequency lowered below turbo
 
-        CFGDATA_CORES = 24,
+        CFGDATA_CORES = 32,
 
         CFGDATA_FRU_TYPE_PROC       = 0x00,
         CFGDATA_FRU_TYPE_MEMBUF     = 0x01,
         CFGDATA_FRU_TYPE_DIMM       = 0x02,
-        CFGDATA_FRU_TYPE_VRM        = 0x03,
+        CFGDATA_FRU_TYPE_MCDIMM     = 0x03,
         CFGDATA_FRU_TYPE_GPU_CORE   = 0x04,
         CFGDATA_FRU_TYPE_GPU_MEMORY = 0x05,
         CFGDATA_FRU_TYPE_VRM_VDD    = 0x06,
@@ -126,7 +125,6 @@ namespace HTMGT
         { OCC_CFGDATA_SYS_CONFIG,     TARGET_ALL,    TO_20SEC, CFGSTATE_ALL },
         { OCC_CFGDATA_APSS_CONFIG,    TARGET_ALL,    TO_20SEC, CFGSTATE_ALL },
         { OCC_CFGDATA_OCC_ROLE,       TARGET_ALL,  TO_20SEC,CFGSTATE_STANDBY },
-        { OCC_CFGDATA_FREQ_POINT,     TARGET_MASTER,TO_20SEC, CFGSTATE_SBYOBS },
         { OCC_CFGDATA_MEM_CONFIG,     TARGET_ALL,    TO_20SEC, CFGSTATE_ALL },
         { OCC_CFGDATA_PCAP_CONFIG,    TARGET_MASTER, TO_20SEC, CFGSTATE_ALL },
         { OCC_CFGDATA_MEM_THROTTLE,   TARGET_ALL,    TO_20SEC, CFGSTATE_ALL },

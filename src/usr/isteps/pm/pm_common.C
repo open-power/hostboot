@@ -88,6 +88,7 @@
 #include    <scom/scomif.H>
 #include <secureboot/smf_utils.H>
 
+#include <htmgt/htmgt.H>
 
 #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
   #include <diag/prdf/prdfWriteHomerFirData.H>
@@ -120,7 +121,6 @@ using namespace hcodeImageBuild;
 
 namespace HBPM
 {
-    constexpr uint32_t OCC_SRAM_RSP_ADDR   = 0xFFFBF000;
     constexpr uint16_t OCC_CHKPT_COMPLETE  = 0x0EFF;
     const uint32_t IPL_FLAG_AND_FREQ_SIZE = sizeof(uint32_t) + sizeof(uint16_t);
 
@@ -1291,7 +1291,7 @@ namespace HBPM
             {
 /* FIXME RTC: 214350 re-enable PM Complex Functionality
                 // Read SRAM response buffer to check for OCC checkpoint
-                l_errl = HBOCC::readSRAM( l_procChip,OCC_SRAM_RSP_ADDR,
+                l_errl = HBOCC::readSRAM( l_procChip,HTMGT::OCC_RSP_SRAM_ADDR,
                                           &(l_checkpoint),
                                           l_readLength );
 

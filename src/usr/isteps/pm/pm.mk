@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2019
+# Contributors Listed Below - COPYRIGHT 2016,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -65,7 +65,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/util/
 
 #common PM Complex functions between ipl and runtime
 OBJS += pm_common.o
-#OBJS += occAccess.o
+OBJS += occAccess.o
 #OBJS += occCheckstop.o
 #OBJS += p9_setup_evid.o
 #OBJS += p9_avsbus_lib.o
@@ -86,16 +86,15 @@ include ${ROOTPATH}/procedure.rules.mk
 include ${HWP_PM_PATH}/p10_pm_pba_init.mk
 #include ${HWP_PM_PATH}/p9_pm_pba_firinit.mk
 include ${HWP_LIB_PATH}/p10_pm_utils.mk
-#include ${HWP_PM_PATH}/p10_pm_ocb_init.mk
-#include ${HWP_PM_PATH}/p10_pm_ocb_indir_setup_linear.mk
-#include ${HWP_PM_PATH}/p10_pm_ocb_indir_access.mk
-#include ${HWP_PM_PATH}/p9_pm_init.mk
-#include ${HWP_PM_PATH}/p9_pm_occ_control.mk
-#include ${HWP_PM_PATH}/p9_pm_occ_firinit.mk
+include ${HWP_PM_PATH}/p10_pm_ocb_init.mk
+include ${HWP_PM_PATH}/p10_pm_ocb_indir_setup_linear.mk
+include ${HWP_PM_PATH}/p10_pm_ocb_indir_access.mk
+include ${HWP_PM_PATH}/p10_pm_occ_control.mk
+include ${HWP_PM_PATH}/p10_pm_occ_firinit.mk
 #include ${HWP_PM_PATH}/p9_pm_corequad_init.mk
-#include ${HWP_PM_PATH}/p9_pm_firinit.mk
+include ${HWP_PM_PATH}/p10_pm_firinit.mk
 #include ${HWP_PM_PATH}/p9_query_cache_access_state.mk
-#include ${HWP_PM_PATH}/p9_pm_pss_init.mk
+include ${HWP_PM_PATH}/p10_pm_pss_init.mk
 #include ${HWP_PM_PATH}/p9_pm_cme_firinit.mk
 include ${HWP_PM_PATH}/p10_hcode_image_build.mk
 include ${HWP_PM_PATH}/p10_pm_qme_init.mk
@@ -103,15 +102,19 @@ include ${HWP_PM_PATH}/p10_pm_xgpe_init.mk
 #include ${HWP_PM_PATH}/p9_pm_pfet_init.mk
 #include ${HWP_PM_PATH}/p9_pm_reset.mk
 #include ${HWP_PM_PATH}/p9_pm_occ_sram_init.mk
-#include ${HWP_PM_PATH}/p9_pm_occ_gpe_init.mk
+include ${HWP_PM_PATH}/p10_pm_occ_gpe_init.mk
 #include ${HWP_PM_PATH}/p9_pm_ppm_firinit.mk
-#include ${HWP_PM_PATH}/p9_pm_ocb_indir_setup_circular.mk
+include ${HWP_PM_PATH}/p10_pm_ocb_indir_setup_circular.mk
 include ${HWP_PM_PATH}/p10_scan_ring_util.mk
 include ${HWP_STOPUTIL_PATH}/p10_stop_util.mk
 include ${HWP_STOPUTIL_PATH}/p10_stop_api.mk
 include ${HWP_PM_PATH}/p10_pstate_parameter_block.mk
 include ${HWP_PM_PATH}/p10_pm_get_poundv_bucket.mk
 include ${HWP_PM_PATH}/p10_pm_get_poundw_bucket.mk
+include ${HWP_PM_PATH}/p10_pm_set_homer_bar.mk
+include ${HWP_PM_PATH}/p10_pm_start.mk
+include ${HWP_PM_PATH}/p10_pm_pgpe_init.mk
+include ${HWP_PM_PATH}/p10_pm_halt.mk
 #include ${HWP_PM_PATH}/p9_pm_pstate_gpe_init.mk
 #include ${HWP_PM_PATH}/p9_check_proc_config.mk
 #include ${HWP_PM_PATH}/p9_pm_recovery_ffdc_base.mk

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -474,7 +474,8 @@ void calculate_system_power()
     const uint16_t freq_min = sys->getAttr<ATTR_MIN_FREQ_MHZ>();
     // Minimum Frequency biasing (ATTR_FREQ_BIAS_POWERSAVE) will be ignored here
     uint16_t freq_nominal, freq_turbo, freq_ultra;
-    check_wof_support(freq_nominal, freq_turbo, freq_ultra);
+    // TODO: RTC 247144
+    //check_wof_support(freq_nominal, freq_turbo, freq_ultra);
     if (freq_turbo == 0)
     {
         freq_turbo = sys->getAttr<ATTR_FREQ_CORE_MAX>();

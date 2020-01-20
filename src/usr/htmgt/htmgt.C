@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,6 +87,8 @@ namespace HTMGT
                     {
                         do
                         {
+                            // TODO: RTC 247144
+#if 0
 #ifndef __HOSTBOOT_RUNTIME
                             // Calc memory throttles (once per IPL)
                             l_err = calcMemThrottles();
@@ -94,6 +96,7 @@ namespace HTMGT
                             {
                                 break;
                             }
+#endif
 #endif
 
                             // Make sure OCCs are ready for communication

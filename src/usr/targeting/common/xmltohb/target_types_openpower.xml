@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -147,16 +147,124 @@
   <targetTypeExtension>
     <id>sys-sys-power10</id>
     <attribute>
+      <id>ADC_CHANNEL_FUNC_IDS</id>
+    </attribute>
+    <attribute>
+      <id>ADC_CHANNEL_GAINS</id>
+    </attribute>
+    <attribute>
+      <id>ADC_CHANNEL_GNDS</id>
+    </attribute>
+    <attribute>
+      <id>ADC_CHANNEL_OFFSETS</id>
+    </attribute>
+    <attribute>
+      <id>ADC_CHANNEL_SENSOR_NUMBERS</id>
+    </attribute>
+    <attribute>
       <id>ALLOW_CALLHOME_ESELS_TO_BMC</id>
     </attribute>
     <attribute>
+      <id>APSS_GPIO_PORT_MODES</id>
+    </attribute>
+    <attribute>
+      <id>APSS_GPIO_PORT_PINS</id>
+    </attribute>
+    <attribute>
       <id>BMC_MAX_ERROR_LOG_SIZE</id>
+    </attribute>
+    <attribute>
+      <id>CALCULATED_MAX_SYS_POWER_EXCLUDING_GPUS</id>
+    </attribute>
+    <attribute>
+      <id>CALCULATED_PROC_MEMORY_POWER_DROP</id>
+    </attribute>
+    <attribute>
+      <id>CUMULATIVE_PMCOMPLEX_RESET_COUNT</id>
+    </attribute>
+    <attribute>
+      <id>HTMGT_INTERNAL_FLAGS</id>
+    </attribute>
+    <attribute>
+      <id>HTMGT_PMCOMPLEX_RESET_COUNT_TIMER</id>
+    </attribute>
+    <attribute>
+      <id>HTMGT_SAFEMODE</id>
+    </attribute>
+    <attribute>
+      <id>HTMGT_SAVED_POWER_LIMIT</id>
     </attribute>
     <attribute>
       <id>IPMI_MAX_BUFFER_SIZE</id>
     </attribute>
     <attribute>
       <id>IPMI_SENSORS</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_DIMM_ERROR_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_DIMM_READ_TIMEOUT_SEC</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_GPU_ERROR_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_GPU_MEM_ERROR_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_GPU_MEM_READ_TIMEOUT_SEC</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_GPU_READ_TIMEOUT_SEC</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_L3_WEIGHT</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_MEMCTRL_ERROR_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_MEMCTRL_READ_TIMEOUT_SEC</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_MEMCTRL_THROTTLE_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_MIN_POWER_CAP_WATTS</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_N_PLUS_ONE_HPC_BULK_POWER_LIMIT_WATTS</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_N_PLUS_ONE_MAX_MEM_POWER_WATTS</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_PROC_DVFS_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_PROC_ERROR_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_PROC_READ_TIMEOUT_SEC</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_PROC_WEIGHT</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_QUAD_WEIGHT</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_REGULATOR_EFFICIENCY_FACTOR</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_SOFT_MIN_PCAP_WATTS</id>
     </attribute>
     <attribute>
       <id>OP_TRACE_LITE</id>
@@ -199,9 +307,12 @@
   </targetTypeExtension>
 
   <targetTypeExtension>
-    <id>unit-occ-power9</id>
+    <id>unit-occ-power10</id>
     <attribute>
       <id>IPMI_SENSORS</id>
+    </attribute>
+    <attribute>
+      <id>OCC_MASTER_CAPABLE</id>
     </attribute>
   </targetTypeExtension>
 

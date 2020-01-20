@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,7 @@
 
 namespace HTMGT
 {
+    const uint32_t OCC_RSP_SRAM_ADDR   = 0xFFFFE000;
 
     /**
      * @brief Move the OCCs into active state or on a failure leave the system

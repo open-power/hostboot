@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -906,6 +906,19 @@ ID for the sensor number returned with the elog. -->
   </attribute>
 
   <attribute>
+    <id>OPEN_POWER_L3_WEIGHT</id>
+    <description>
+        Weight factor (in 1/10ths) for each L3 DTS to calculate a core
+        temperature.
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
     <id>OPEN_POWER_MEMCTRL_ERROR_TEMP_DEG_C</id>
     <description>
         Memory controller temperature where an error will occur
@@ -1097,8 +1110,8 @@ ID for the sensor number returned with the elog. -->
   <attribute>
     <id>OPEN_POWER_QUAD_WEIGHT</id>
     <description>
-        Weight factor (in 1/10ths) for each quad (cache) DTS to calculate a core
-        temperature.
+        Weight factor (in 1/10ths) for each quad (racetrack) DTS to calculate
+        a core temperature.
     </description>
     <simpleType>
       <uint64_t/>
