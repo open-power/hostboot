@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -24,20 +24,22 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 # FIXME RTC: 210975 Uncomment the EKB paths when the time comes
-#PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p9/procedures
+PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p10/procedures
 MODULE = istep09
 
 #EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest/
-#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/io/
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/io/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
-#EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc
 
+OBJS += call_proc_io_dccal_done.o
 #OBJS += call_fabric_erepair.o
 #OBJS += call_fabric_io_dccal.o
 #OBJS += call_fabric_pre_trainadv.o
@@ -48,7 +50,11 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 #OBJS += call_host_fbc_eff_config_aggregate.o
 #OBJS += istep09HelperFuncs.o
 
-#VPATH += ${PROCEDURES_PATH}/hwp/nest/ ${PROCEDURES_PATH}/hwp/io/
+VPATH += ${PROCEDURES_PATH}/hwp/nest/ ${PROCEDURES_PATH}/hwp/io/
+
+OBJS += p10_io_init_done.o
+OBJS += p10_io_ppe_lib.o
+OBJS += p10_io_ppe_regs.o
 
 #include ${ROOTPATH}/procedure.rules.mk
 

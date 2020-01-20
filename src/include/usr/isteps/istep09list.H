@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,24 +29,22 @@
 /**
  * @file    istep09list.H
  *
- *  IStep 09    Activate PowerBus
- *  IPL FLow Doc        v0.95
+ *  IStep 09    EDI+ and Electrical O-Bus Initialization
+ *  IPL FLow Doc        v0.89.17_urmor
  *
- *    09.1    fabric_erepair
- *          : Restore Fabric Bus eRepair data
- *    09.2    fabric_io_dccal
- *          : Calibrate Fabric interfaces
- *    09.3    fabric_pre_trainadv
+ *    09.1    proc_io_dccal_done
+ *          : Ensure the IO PPE has finished iodccal
+ *    09.2    fabric_dl_pre_trainadv
  *          : Advanced pre training
- *    09.4    fabric_io_run_training
- *          : Run training on internal buses
- *    09.5    fabric_post_trainadv
- *          : Advanced post EI/EDI training
- *    09.6    proc_smp_link_layer
+ *    09.3    fabric_dl_setup_training
+ *          : Setup training on internal node buses
+ *    09.4    proc_fabric_link_layer
  *          : Start SMP link layer
- *    09.7    proc_fab_iovalid
+ *    09.5    fabric_dl_post_trainadv
+ *          : Advanced post training
+ *    09.6    proc_fabric_iovalid
  *          : Lower functional fences on local SMP
- *    09.8    host_fbc_eff_config_aggregate
+ *    09.7    proc_fbc_eff_config_aggregate
  *          : Pick link(s) for coherency
  *
  *  Please see the note in initsvcstructs.H for description of
@@ -63,18 +61,20 @@ namespace   ISTEP_09
 {
 
 /**
- *  @brief   fabric_erepair
+ *  @brief   proc_io_dccal_done
  *
- *           Restore Fabric/EDI Bus eRepair data
+ *           Ensure the IO PPE has finished iodccal
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return any errlogs to istep
  *
  */
-void*    call_fabric_erepair( void    *io_pArgs );
+void*    call_proc_io_dccal_done( void    *io_pArgs );
 
 
+
+#if 0 // TODO RTC 208827: Implement rest of Istep 9 substeps
 
 /**
  *  @brief   fabric_io_dccal
@@ -170,6 +170,8 @@ void*    call_proc_fab_iovalid( void    *io_pArgs );
  */
 void*    call_host_fbc_eff_config_aggregate( void    *io_pArgs );
 
+#endif // #if 0
+
 };   // end namespace
 
 
@@ -179,14 +181,15 @@ namespace   INITSERVICE
     const   TaskInfo    g_istep09[]  =   {
         {
                 "",         // dummy, index 0
-                NULL,
+                nullptr,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
-                ISTEPNAME(09,01,"fabric_erepair"),
-                ISTEP_09::call_fabric_erepair,
+                ISTEPNAME(09,01,"proc_io_dccal_done"),
+                ISTEP_09::call_proc_io_dccal_done,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
+        /*
         {
                 ISTEPNAME(09,02,"fabric_io_dccal"),
                 ISTEP_09::call_fabric_io_dccal,
@@ -222,6 +225,7 @@ namespace   INITSERVICE
                 ISTEP_09::call_host_fbc_eff_config_aggregate,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
+        */
     };
 
 const DepModInfo  g_istep09Dependancies = {
@@ -229,9 +233,8 @@ const DepModInfo  g_istep09Dependancies = {
         DEP_LIB(libistep09.so),
         DEP_LIB(libpm.so),
         DEP_LIB(libnestmemutils.so),
-        DEP_LIB(libfab_iovalid.so),
         DEP_LIB(libimageprocs.so),
-        NULL
+        nullptr
     }
 };
 
