@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -132,8 +132,7 @@ fapi2::ReturnCode init_topology_id_table(
     const std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>>& i_targets);
 
 ///
-/// @brief                                  Return the topology id table formatted
-///                                         as SCOM register values.
+/// @brief Return the topology id table formatted as SCOM register values.
 /// @param[in] i_target                     Reference to processor chip target
 /// @param[out] o_topology_id_table_scoms   Vector of register values to setup the topology id
 ///                                         entries in fabric unit SCOM registers:
@@ -146,6 +145,14 @@ fapi2::ReturnCode init_topology_id_table(
 fapi2::ReturnCode get_topology_table_scoms(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     std::vector<uint64_t>& o_topology_id_table_scoms);
+
+///
+/// @brief Applies topology ID table attribute values to all unit scom registers
+/// @param[in]  i_target        Reference to processor chip target
+/// @return fapi2::ReturnCode   FAPI2_RC_SUCCESS if success, else error.
+///
+fapi2::ReturnCode set_topology_id_tables(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 }; // namespace topo
 
@@ -210,10 +217,10 @@ fapi2::ReturnCode p10_fbc_utils_set_racetrack_regs(
 ///
 /// @brief Extract group/chip bits from fabric topology ID based on topology mode
 ///
-/// @param[in]  i_target                Reference to processor chip target
-/// @param[out] o_topology_group_id     Topology ID group bits, right-aligned
-/// @param[out] o_topology_chip_id      Topology ID chip bits, right-aligned
-/// @return fapi2::ReturnCode           FAPI2_RC_SUCCESS if success, else error
+/// @param[in]  i_target            Reference to processor chip target
+/// @param[out] o_topology_group_id Topology ID group bits, right-aligned
+/// @param[out] o_topology_chip_id  Topology ID chip bits, right-aligned
+/// @return fapi2::ReturnCode       FAPI2_RC_SUCCESS if success, else error.
 ///
 fapi2::ReturnCode p10_fbc_utils_get_topology_id(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,

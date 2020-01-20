@@ -40,10 +40,14 @@
 //------------------------------------------------------------------------------
 #include <p10_pcie_scominit.H>
 #include <p10_pcie_scom.H>
+#include <p10_scom_pec_2.H>
+#include <p10_scom_pec_4.H>
 #include <p10_scom_pec_6.H>
+#include <p10_scom_pec_8.H>
+#include <p10_scom_pec_e.H>
 #include <p10_scom_pec_f.H>
 #include <p10_scom_phb_e.H>
-
+#include <p10_fbc_utils.H>
 
 ///-----------------------------------------------------------------------------
 /// Function definitions
@@ -60,6 +64,8 @@ p10_pcie_scominit(
 
     fapi2::ReturnCode l_rc;
     fapi2::buffer<uint64_t> l_data;
+    std::vector<uint64_t> l_topo_table_scom_values;
+
     auto l_pec_targets = i_target.getChildren<fapi2::TARGET_TYPE_PEC>();
     auto l_phb_targets = i_target.getChildren<fapi2::TARGET_TYPE_PHB>();
 
@@ -106,9 +112,28 @@ p10_pcie_scominit(
 
     if (l_rc)
     {
-        FAPI_ERR("Error from p10.mi.omi.scom.initfile");
+        FAPI_ERR("Error from p10.pcie.scom.initfile");
         fapi2::current_err = l_rc;
         goto fapi_try_exit;
+    }
+
+    //Set topology id table
+    FAPI_TRY(topo::get_topology_table_scoms(i_target, l_topo_table_scom_values),
+             "Error forming topology ID table scom data");
+
+    for (auto l_pec_target : l_pec_targets)
+    {
+        FAPI_TRY(PREP_PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG0(l_pec_target));
+        FAPI_TRY(PUT_PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG0(l_pec_target, l_topo_table_scom_values[0]));
+
+        FAPI_TRY(PREP_PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG1(l_pec_target));
+        FAPI_TRY(PUT_PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG1(l_pec_target, l_topo_table_scom_values[1]));
+
+        FAPI_TRY(PREP_PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG2(l_pec_target));
+        FAPI_TRY(PUT_PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG2(l_pec_target, l_topo_table_scom_values[2]));
+
+        FAPI_TRY(PREP_PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG3(l_pec_target));
+        FAPI_TRY(PUT_PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG3(l_pec_target, l_topo_table_scom_values[3]));
     }
 
 fapi_try_exit:

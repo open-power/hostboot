@@ -625,6 +625,43 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Update topology ID tables to represent all chips
+///
+/// @param[in] i_smp            Fully specified structure encapsulating SMP
+///
+/// @return fapi2::ReturnCode   FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode p10_build_smp_topo_tables(
+    p10_build_smp_system& i_smp)
+{
+    FAPI_DBG("Start");
+
+    // update topology ID table entry in attribute for each chip
+    for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end(); g_iter++)
+    {
+        for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); p_iter++)
+        {
+            FAPI_TRY(topo::init_topology_id_table(*(p_iter->second.target)),
+                     "Error from topo::init_topology_id_table");
+        }
+    }
+
+    // apply resulting attribute value to all unit registers on all chips
+    for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end(); g_iter++)
+    {
+        for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); p_iter++)
+        {
+            FAPI_TRY(topo::set_topology_id_tables(*(p_iter->second.target)),
+                     "Error from topo::set_topology_id_tables");
+        }
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
 /// See doxygen comments in header file
 fapi2::ReturnCode p10_build_smp(
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>>& i_chips,
@@ -642,6 +679,10 @@ fapi2::ReturnCode p10_build_smp(
     // check topology before continuing
     FAPI_TRY(p10_build_smp_check_topology(i_op, l_smp),
              "Error from p10_build_smp_check_topology");
+
+    // update topology id tables prior to activating new config
+    FAPI_TRY(p10_build_smp_topo_tables(l_smp),
+             "Error from p10_build_smp_topo_tables");
 
     // set fabric hotplug configuration registers (switch AB)
     // activates new SMP configuration for given phase1/phase2

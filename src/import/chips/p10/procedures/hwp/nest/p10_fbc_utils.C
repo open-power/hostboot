@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,10 +34,15 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
+#include <p10_fbc_utils.H>
 #include <proc_scomt.H>
 #include <p10_scom_c.H>
 #include <p10_scom_proc.H>
-#include <p10_fbc_utils.H>
+#include <p10_scom_nmmu_5.H>
+#include <p10_scom_pau_2.H>
+#include <p10_scom_pau_5.H>
+#include <p10_scom_pau_d.H>
+#include <p10_scom_pau_a.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -52,6 +57,17 @@ namespace
 // entries along with 8x1b valid bits (1 per entry).
 const size_t NUM_TOPO_SCOMS = 4;
 const size_t NUM_TOPO_ENTRIES_PER_SCOM = 8;
+
+// Scom addresses to the first of four topology id table registers per unit
+const uint64_t ADU_TOPO_TABLE_ADDR        = scomt::proc::TP_TPBR_AD_TOPOID_XLAT_TBL0;
+const uint64_t NX_TOPO_TABLE_ADDR         = scomt::proc::NX_PBI_CQ_WRAP_NXCQ_SCOM_TOPOID_XLAT_TBL0_REG;
+const uint64_t VAS_TOPO_TABLE_ADDR        = scomt::proc::VAS_VA_EG_SCF_TOPOID_XLAT_TBL0_REG;
+const uint64_t INT_TOPO_TABLE_ADDR        = scomt::proc::INT_CQ_TTT_0;
+const uint64_t NMMU_TOPO_TABLE_ADDR       = scomt::nmmu::FBC_CQ_WRAP_NXCQ_SCOM_TOP_ID_XLAT_TBL0_REG;
+const uint64_t PAU_SM0_TOPO_TABLE_ADDR    = scomt::pau::CS_SM0_SNP_MISC_TOPOLOGY_TABLE0;
+const uint64_t PAU_SM1_TOPO_TABLE_ADDR    = scomt::pau::CS_SM1_SNP_MISC_TOPOLOGY_TABLE0;
+const uint64_t PAU_SM2_TOPO_TABLE_ADDR    = scomt::pau::CS_SM2_SNP_MISC_TOPOLOGY_TABLE0;
+const uint64_t PAU_SM3_TOPO_TABLE_ADDR    = scomt::pau::CS_SM3_SNP_MISC_TOPOLOGY_TABLE0;
 
 // The register layout is common but the SCOM headers to access them are not.
 // To simplify programming, shove function pointers to each SET_* field function
@@ -152,17 +168,16 @@ fapi2::ReturnCode get_topology_idx(
     if(i_addr_mode == HB_BOOT_ID)
     {
         uint8_t l_fabric_topology_id_mask =
-            (l_fabric_topology_mode == fapi2::ENUM_ATTR_PROC_FABRIC_TOPOLOGY_MODE_MODE0)
-            ? 0x0E : 0x0C;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID, i_target,
-                               l_fabric_topology_id),
+            (l_fabric_topology_mode == fapi2::ENUM_ATTR_PROC_FABRIC_TOPOLOGY_MODE_MODE0) ? 0x0E : 0x0C;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID, i_target, l_fabric_topology_id),
                  "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_TOPOLOGY_ID)");
-        l_fabric_topology_id &= l_fabric_topology_id_mask;//assume Chip field 0;
+
+        l_fabric_topology_id &= l_fabric_topology_id_mask; //assume Chip field 0;
     }
     else//EFF_TOPOLOGY_ID
     {
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID, i_target,
-                               l_fabric_topology_id),
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID, i_target, l_fabric_topology_id),
                  "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID)");
     }
 
@@ -188,17 +203,18 @@ fapi2::ReturnCode init_topology_id_table(
     uint8_t l_topo_idx;
     fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE_Type l_topo_tbl;
     fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_Type l_topo_id;
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
     FAPI_TRY(get_topology_idx(i_target, EFF_TOPOLOGY_ID, l_topo_idx));
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID, i_target, l_topo_id));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE, i_target, l_topo_tbl));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE, FAPI_SYSTEM, l_topo_tbl));
 
     l_topo_tbl[l_topo_idx] = l_topo_id;
 
     FAPI_DBG("Set topology id table[%zu]=%02x", l_topo_idx, l_topo_id);
 
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE, i_target, l_topo_tbl));
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE, FAPI_SYSTEM, l_topo_tbl));
 
 fapi_try_exit:
     FAPI_DBG("exit");
@@ -229,8 +245,9 @@ fapi2::ReturnCode get_topology_table_scoms(
     size_t l_topo_tbl_len = 0;
     fapi2::buffer<uint64_t> regval;
     fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE_Type l_topo_tbl;
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE, i_target, l_topo_tbl));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE, FAPI_SYSTEM, l_topo_tbl));
 
     l_topo_tbl_len = sizeof(l_topo_tbl) / sizeof(l_topo_tbl[0]);
 
@@ -268,6 +285,80 @@ fapi_try_exit:
     FAPI_DBG("exit");
     return fapi2::current_err;
 }
+
+#ifndef __PPE_QME
+fapi2::ReturnCode set_topology_id_tables(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_DBG("start");
+
+    std::vector<uint64_t> l_topo_table_scom_values;
+    FAPI_TRY(get_topology_table_scoms(i_target, l_topo_table_scom_values),
+             "Error forming topology ID table scom data");
+
+    // Topology ID tables excluded from this function:
+    //   L2/L3/NCU/QME Topology ID tables are configured by hcode
+    //   PCIe Topology ID tables configured in p10_pcie_scominit (register access requires iovalid)
+
+    FAPI_DBG("Configuring adu topology id table");
+
+    for (uint8_t i = 0; i < topo::NUM_TOPO_SCOMS; i++)
+    {
+        FAPI_TRY(putScom(i_target, ADU_TOPO_TABLE_ADDR + i, l_topo_table_scom_values[i]));
+    }
+
+    FAPI_DBG("Configuring nx topology id table");
+
+    for (uint8_t i = 0; i < topo::NUM_TOPO_SCOMS; i++)
+    {
+        FAPI_TRY(putScom(i_target, NX_TOPO_TABLE_ADDR + i, l_topo_table_scom_values[i]));
+    }
+
+    FAPI_DBG("Configuring vas topology id table");
+
+    for (uint8_t i = 0; i < topo::NUM_TOPO_SCOMS; i++)
+    {
+        FAPI_TRY(putScom(i_target, VAS_TOPO_TABLE_ADDR + i, l_topo_table_scom_values[i]));
+    }
+
+    FAPI_DBG("Configuring int topology id table");
+
+    for (uint8_t i = 0; i < topo::NUM_TOPO_SCOMS; i++)
+    {
+        FAPI_TRY(putScom(i_target, INT_TOPO_TABLE_ADDR + i, l_topo_table_scom_values[i]));
+    }
+
+    FAPI_DBG("Configuring nmmu topology id tables");
+
+    for (auto& l_nmmu : i_target.getChildren<fapi2::TARGET_TYPE_NMMU>())
+    {
+        for (uint8_t i = 0; i < topo::NUM_TOPO_SCOMS; i++)
+        {
+            FAPI_TRY(putScom(l_nmmu, NMMU_TOPO_TABLE_ADDR + i, l_topo_table_scom_values[i]));
+        }
+    }
+
+#ifndef __PPE__
+    FAPI_DBG("Configuring pau topology id tables");
+
+    for (auto& l_pau : i_target.getChildren<fapi2::TARGET_TYPE_PAU>())
+    {
+        for (uint8_t i = 0; i < topo::NUM_TOPO_SCOMS; i++)
+        {
+            FAPI_TRY(putScom(l_pau, PAU_SM0_TOPO_TABLE_ADDR + i, l_topo_table_scom_values[i]));
+            FAPI_TRY(putScom(l_pau, PAU_SM1_TOPO_TABLE_ADDR + i, l_topo_table_scom_values[i]));
+            FAPI_TRY(putScom(l_pau, PAU_SM2_TOPO_TABLE_ADDR + i, l_topo_table_scom_values[i]));
+            FAPI_TRY(putScom(l_pau, PAU_SM3_TOPO_TABLE_ADDR + i, l_topo_table_scom_values[i]));
+        }
+    }
+
+#endif // !__PPE__
+
+fapi_try_exit:
+    FAPI_DBG("exit");
+    return fapi2::current_err;
+}
+#endif // !__PPE_QME
 }; // namespace topo
 
 #ifndef __PPE_QME
