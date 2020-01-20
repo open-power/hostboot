@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,8 +36,7 @@
 #include <prdfMemScrubUtils.H>
 #include <prdfMemUtils.H>
 #include <prdfMemVcm.H>
-#include <prdfP9McaDataBundle.H>
-#include <prdfP9McaExtraSig.H>
+#include <prdfMemExtraSig.H>
 
 using namespace TARGETING;
 
@@ -146,19 +145,6 @@ template <TARGETING::TYPE T>
 bool __mnfgCeCheck( uint32_t i_eccAttns );
 
 template<> inline
-bool __mnfgCeCheck<TYPE_MCA>( uint32_t i_eccAttns )
-{
-    // The MAINT_HARD_NCE_ETE attention is reported on the MCBIST. If the
-    // command was run in broadcast mode, we may end up doing TPS on all four
-    // ports when only one port has the CE. Therefore, we must check for
-    // MAINT_NCE or MAINT_TCE, which are found on the MCA, to determine if this
-    // MCA needs a TPS procedure.
-    return ( (  0 != (i_eccAttns & MAINT_HARD_NCE_ETE) ) &&
-             ( (0 != (i_eccAttns & MAINT_NCE)) ||
-               (0 != (i_eccAttns & MAINT_TCE))         ) );
-}
-
-template<> inline
 bool __mnfgCeCheck<TYPE_OCMB_CHIP>( uint32_t i_eccAttns )
 {
     return ( (  0 != (i_eccAttns & MAINT_HARD_NCE_ETE) ) &&
@@ -245,10 +231,6 @@ uint32_t __checkEcc( ExtensibleChip * i_chip,
 }
 
 template
-uint32_t __checkEcc<TYPE_MCA>( ExtensibleChip * i_chip,
-                               const MemAddr & i_addr, bool & o_errorsFound,
-                               STEP_CODE_DATA_STRUCT & io_sc );
-template
 uint32_t __checkEcc<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                      const MemAddr & i_addr,
                                      bool & o_errorsFound,
@@ -257,7 +239,6 @@ uint32_t __checkEcc<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 // Avoid linker errors with the template.
-template class MemTdCtlr<TYPE_MCBIST>;
 template class MemTdCtlr<TYPE_OCMB_CHIP>;
 
 //------------------------------------------------------------------------------

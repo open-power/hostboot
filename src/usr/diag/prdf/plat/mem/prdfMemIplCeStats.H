@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,7 +43,7 @@ class MemoryMru;
 /**
  * This class is used for storing the CE statistics that are gathered during a
  * manufacturing mode IPL for MDIA analysis. Only one instance of this object is
- * meant to be used for each MBA/MCA and is stored in its data bundle.
+ * meant to be used for each OCMB and is stored in its data bundle.
  * It is expected that when the IPL memory diagnostics is complete, MDIA will
  * call the appropriate function to tell this object to analyze all statistics
  * that were collected during the IPL.
@@ -55,7 +55,7 @@ class MemIplCeStats
 
     /**
      * @brief Constructor
-     * @param i_chip The MBA or MCA chip.
+     * @param i_chip The OCMB chip.
      */
     explicit MemIplCeStats( ExtensibleChip * i_chip ): iv_chip(i_chip) {}
 
@@ -216,7 +216,7 @@ class MemIplCeStats
 
   private: // instance variables
 
-    /** The MBA or MCA chip. */
+    /** The OCMB chip. */
     ExtensibleChip * iv_chip;
 
     /** A map to keep track of which half ranks have all ready been called out.

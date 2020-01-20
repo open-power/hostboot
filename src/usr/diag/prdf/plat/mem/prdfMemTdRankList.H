@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -80,12 +80,12 @@ class TdRankListEntry
 
   private:
 
-    ExtensibleChip * iv_chip = nullptr;    ///< MCA, MBA, or OCMB chip.
-    MemRank          iv_rank = MemRank(0); ///< Any rank on the MCA/MBA/OCMB
+    ExtensibleChip * iv_chip = nullptr;    ///< OCMB chip.
+    MemRank          iv_rank = MemRank(0); ///< Any rank on the OCMB
 };
 
 /**
- * @brief A sorted list of all master/slave ranks behind an MBA or MCBIST. The
+ * @brief A sorted list of all master/slave ranks behind an OCMB. The
  *        list will be sorted by the order in which hardware will scrub memory.
  */
 template <TARGETING::TYPE T>
@@ -95,7 +95,7 @@ class TdRankList
 
     /**
      * @brief Constructor.
-     * @param MCBIST, OCMB, or MBA chip.
+     * @param OCMB chip.
      */
     explicit TdRankList( ExtensibleChip * i_chip );
 
@@ -155,30 +155,6 @@ class TdRankList
 
     std::vector<TdRankListEntry> iv_list; ///< The list of ranks.
 };
-
-//------------------------------------------------------------------------------
-
-template<>
-inline TdRankList<TARGETING::TYPE_MCBIST>::TdRankList( ExtensibleChip * i_chip )
-{
-    using namespace TARGETING;
-    using namespace PlatServices;
-
-    PRDF_ASSERT( TYPE_MCBIST == i_chip->getType() );
-
-    ExtensibleChipList mcaChipList = getConnected( i_chip, TYPE_MCA );
-    for ( auto & mcaChip : mcaChipList )
-    {
-        std::vector<MemRank> rankList;
-        getSlaveRanks<TYPE_MCA>( mcaChip->getTrgt(), rankList );
-        PRDF_ASSERT( !rankList.empty() ); // target configured with no ranks
-
-        for ( auto & rank : rankList )
-        {
-            iv_list.push_back( TdRankListEntry(mcaChip, rank) );
-        }
-    }
-}
 
 //------------------------------------------------------------------------------
 

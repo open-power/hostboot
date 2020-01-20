@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -133,7 +133,7 @@ class TdEntry
     /**
      * @brief Constructor
      * @param i_tdType  See TdType enum
-     * @param i_chip    MCA or MBA chip
+     * @param i_chip    OCMB chip
      * @param i_rank    Target rank
      */
     TdEntry( TdType i_tdType, ExtensibleChip * i_chip, MemRank i_rank ) :

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,35 +33,6 @@
 
 namespace PRDF
 {
-
-    // P9 Nimbus Chip
-    extern const char * nimbus_proc;
-    extern const char * nimbus_eq;
-    extern const char * nimbus_ex;
-    extern const char * nimbus_ec;
-    extern const char * nimbus_capp;
-    extern const char * nimbus_pec;
-    extern const char * nimbus_phb;
-    extern const char * nimbus_xbus;
-    extern const char * nimbus_obus;
-    extern const char * nimbus_mcbist;
-    extern const char * nimbus_mcs;
-    extern const char * nimbus_mca;
-
-    // P9 Cumulus Chip
-    extern const char * cumulus_proc;
-    extern const char * cumulus_eq;
-    extern const char * cumulus_ex;
-    extern const char * cumulus_ec;
-    extern const char * cumulus_capp;
-    extern const char * cumulus_pec;
-    extern const char * cumulus_phb;
-    extern const char * cumulus_xbus;
-    extern const char * cumulus_obus;
-    extern const char * cumulus_mc;
-    extern const char * cumulus_mi;
-    extern const char * cumulus_dmi;
-
     // P9 Axone Chip
     extern const char * axone_proc;
     extern const char * axone_eq;

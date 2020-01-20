@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2019
+# Contributors Listed Below - COPYRIGHT 2016,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -208,18 +208,12 @@ vpath %.rule \
 	  ../common/plat/p9 \
 	  ../common/plat/axone \
 	  ../common/plat/explorer \
-	  ../common/plat/centaur \
-	  ../common/plat/cumulus \
-	  ../common/plat/mem \
-	  ../common/plat/nimbus
+	  ../common/plat/mem
 
 PRDRPP_SEARCHDIRS = -I../common/plat/p9 \
 				    -I../common/plat/axone \
 				    -I../common/plat/explorer \
-				    -I../common/plat/centaur \
-				    -I../common/plat/cumulus \
-					-I../common/plat/mem \
-					-I../common/plat/nimbus
+					-I../common/plat/mem
 
 ${OBJ_RULE_DIR}/%.prf \
 ${OBJ_RULE_DIR}/%.prf.err.C \

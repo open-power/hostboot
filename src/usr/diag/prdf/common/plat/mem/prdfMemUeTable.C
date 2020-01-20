@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,9 +88,9 @@ void MemUeTable::addCapData( CaptureData & io_cd )
     {
         uint32_t mrnk = it->addr.getRank().getMaster(); //  3-bit
         uint32_t srnk = it->addr.getRank().getSlave();  //  3-bit
-        uint32_t bnk  = it->addr.getBank();             //  5-bit (MCA)
+        uint32_t bnk  = it->addr.getBank();             //  5-bit
         uint32_t row  = it->addr.getRow();              // 18-bit
-        uint32_t col  = it->addr.getCol();              //  9-bit (MBA)
+        uint32_t col  = it->addr.getCol();              //  9-bit
 
         uint8_t row0_1   = (row & 0x30000) >> 16;
         uint8_t row2_9   = (row & 0x0ff00) >>  8;

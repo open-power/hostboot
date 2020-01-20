@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,21 +69,8 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
         PRDF_ASSERT( false );
     }
 
-    // If our target is MCA
-    if ( 1 == iv_memMruMeld.s.isMca )
-    {
-        iv_target = getConnectedChild( proc, TYPE_MCA,
-                iv_memMruMeld.s.chnlPos );
-        if ( NULL == iv_target )
-        {
-            PRDF_ERR( PRDF_FUNC "Could not find functional mca "
-                    "attached to proc 0x%08X at pos: %u", getHuid( proc ),
-                    iv_memMruMeld.s.chnlPos );
-            PRDF_ASSERT( false );
-        }
-    }
     // If our target is OCMB
-    else if ( 1 == iv_memMruMeld.s.isOcmb )
+    if ( 1 == iv_memMruMeld.s.isOcmb )
     {
         // chnlPos specifies the position of the MCC relative to the proc
         TargetHandle_t mcc = getConnectedChild( proc, TYPE_MCC,
@@ -96,14 +83,14 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
             PRDF_ASSERT( false );
         }
 
-        // mbaPos specifies the position of the OMI relative to the MCC
+        // omiPos specifies the position of the OMI relative to the MCC
         TargetHandle_t omi = getConnectedChild( mcc, TYPE_OMI,
-                                                iv_memMruMeld.s.mbaPos );
+                                                iv_memMruMeld.s.omiPos );
         if ( nullptr == omi )
         {
             PRDF_ERR( PRDF_FUNC "Could not find functional omi attached to "
                       "mcc 0x%08x at pos: %u", getHuid(mcc),
-                      iv_memMruMeld.s.mbaPos );
+                      iv_memMruMeld.s.omiPos );
             PRDF_ASSERT( false );
         }
 
@@ -218,8 +205,7 @@ TargetHandleList MemoryMru::getCalloutList() const
     }
     else
     {
-        if ( TARGETING::TYPE_MCA == getTargetType(iv_target) ||
-             TARGETING::TYPE_OCMB_CHIP == getTargetType(iv_target) )
+        if ( TARGETING::TYPE_OCMB_CHIP == getTargetType(iv_target) )
         {
             if ( CALLOUT_ALL_MEM == iv_special )
             {
@@ -267,11 +253,7 @@ void MemoryMru::getCommonVars()
     TARGETING::TYPE trgtType = getTargetType( iv_target );
 
     TargetHandle_t proc = nullptr;
-    if ( TYPE_MCA == trgtType )
-    {
-        proc = getConnectedParent( iv_target, TYPE_PROC );
-    }
-    else if ( TYPE_OCMB_CHIP == trgtType )
+    if ( TYPE_OCMB_CHIP == trgtType )
     {
         TargetHandle_t mcc = getConnectedParent( iv_target, TYPE_MCC );
         proc = getConnectedParent( mcc, TYPE_PROC );
@@ -283,23 +265,16 @@ void MemoryMru::getCommonVars()
     }
     TargetHandle_t node = getConnectedParent( proc, TYPE_NODE );
 
-    // If our target is an MCA, then chnlPos will specify the MCA position
-    // and mbaPos will be an unused field
-    if ( TYPE_MCA == getTargetType(iv_target) )
-    {
-        iv_memMruMeld.s.isMca   = 1;
-        iv_memMruMeld.s.chnlPos = getTargetPosition( iv_target );
-    }
     // If our target is an OCMB, then chnlPos will specify the MCC position and
-    // mbaPos will specify the OMI position.
-    else if ( TYPE_OCMB_CHIP == getTargetType(iv_target) )
+    // omiPos will specify the OMI position.
+    if ( TYPE_OCMB_CHIP == getTargetType(iv_target) )
     {
         TargetHandle_t omi = getConnectedParent( iv_target, TYPE_OMI );
         TargetHandle_t mcc = getConnectedParent( omi, TYPE_MCC );
 
         iv_memMruMeld.s.isOcmb  = 1;
         iv_memMruMeld.s.chnlPos = getTargetPosition(mcc) % MAX_MCC_PER_PROC;
-        iv_memMruMeld.s.mbaPos  = getTargetPosition(omi) % MAX_OMI_PER_MCC;
+        iv_memMruMeld.s.omiPos  = getTargetPosition(omi) % MAX_OMI_PER_MCC;
     }
     else
     {

@@ -54,152 +54,7 @@ int32_t Initialize( ExtensibleChip * i_exChip )
     i_exChip->getDataBundle() = new P9ExDataBundle( i_exChip );
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_ex,  Ex, Initialize );
-PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, Initialize );
 PRDF_PLUGIN_DEFINE_NS( axone_ex,   Ex, Initialize );
-
-/**
- * @brief  Plugin function called after analysis is complete but before PRD
- *         exits.
- * @param  i_exChip An EX chip.
- * @param  io_sc     The step code data struct.
- * @note   This is especially useful for any analysis that still needs to be
- *         done after the framework clears the FIR bits that were at attention.
- * @return SUCCESS.
- */
-int32_t PostAnalysis( ExtensibleChip * i_exChip,
-                      STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[Ex::PostAnalysis] "
-
-    int32_t l_rc = SUCCESS;
-
-    //##########################################################################
-    // Start Nimbus DD1.0 core recovery workaround
-    //##########################################################################
-
-    do
-    {
-        if ( CHECK_STOP   == io_sc.service_data->getPrimaryAttnType() ||
-             MODEL_NIMBUS != getChipModel(i_exChip->getTrgt()) ||
-             0x10         != getChipLevel(i_exChip->getTrgt()) )
-        {
-            break; // nothing to do
-        }
-
-        // If there was an attention from L2FIR[39], the rule code would have
-        // then analyzed one of the two attached cores. There is no mechanism in
-        // the rule code to come back to this bit and clear it. So we must do
-        // that here.
-
-        // Only need to clear the FIR if it is currently set.
-        SCAN_COMM_REGISTER_CLASS * l2fir = i_exChip->getRegister("L2FIR");
-        l_rc = l2fir->Read();
-        if ( SUCCESS != l_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "Read() failed on L2FIR" );
-            break;
-        }
-
-        if ( !l2fir->IsBitSet(39) ) break; // nothing to do
-
-        // Clear the FIR bit.
-        SCAN_COMM_REGISTER_CLASS * l2fir_and =
-            i_exChip->getRegister("L2FIR_AND");
-        l2fir_and->setAllBits();
-        l2fir_and->ClearBit(39);
-        l_rc = l2fir_and->Write();
-        if ( SUCCESS != l_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "Write() failed on L2FIR_AND" );
-            break;
-        }
-
-        // The workaround is not level driven. So we need to check the
-        // current value of the COREFIR WOFs to determine if there is a new
-        // attention.
-
-        ExtensibleChipList ecChipList = getConnected( i_exChip, TYPE_CORE );
-        for ( auto & ecChip : ecChipList )
-        {
-            SCAN_COMM_REGISTER_CLASS * corefir_wof =
-                ecChip->getRegister("COREFIR_WOF");
-            SCAN_COMM_REGISTER_CLASS * corefir_mask =
-                ecChip->getRegister("COREFIR_MASK");
-
-            // A ForceRead() is required because a new attention may have
-            // occured after the initial analysis.
-            l_rc  = corefir_wof->ForceRead();
-            l_rc |= corefir_mask->ForceRead();
-            if ( SUCCESS != l_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "ForceRead() failed on "
-                          "COREFIR_WOF/COREFIR_MASK" );
-                continue; // Try the other core.
-            }
-
-            // If there are attentions in the COREFIR_WOF, set L2FIR[39].
-            if (  corefir_wof->GetBitFieldJustified(0,64) &
-                 ~corefir_mask->GetBitFieldJustified(0,64) )
-            {
-                SCAN_COMM_REGISTER_CLASS * l2fir_or =
-                    i_exChip->getRegister("L2FIR_OR");
-                l2fir_or->clearAllBits();
-                l2fir_or->SetBit(39);
-                l_rc = l2fir_or->Write();
-                if ( SUCCESS != l_rc )
-                {
-                    PRDF_ERR( PRDF_FUNC "Write() failed on L2FIR_OR" );
-                    continue; // Try the other core.
-                }
-
-                // At this point there is no need to check the other core
-                // since we only need to know if there is at least one
-                // attention on any core.
-                break;
-            }
-        }
-
-    } while(0);
-
-    //##########################################################################
-    // End Nimbus DD1.0 core recovery workaround
-    //##########################################################################
-
-    return SUCCESS; // Always return SUCCESS for this plugin.
-
-    #undef PRDF_FUNC
-}
-PRDF_PLUGIN_DEFINE_NS( nimbus_ex,  Ex, PostAnalysis );
-PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, PostAnalysis );
-PRDF_PLUGIN_DEFINE_NS( axone_ex,   Ex, PostAnalysis );
-
-/**
- * @brief  For L2/L3 Cache CEs, L3 Directory CEs, and L3 LRU Parity Errors.
- * @param  i_chip EX chip.
- * @param  io_sc  Step code data struct.
- * @return SUCCESS always
- */
-int32_t cacheCeWorkaround( ExtensibleChip * i_chip,
-                           STEP_CODE_DATA_STRUCT & io_sc )
-{
-    // WORKAROUND: Nimbus DD1.x only.
-    if ( TARGETING::MODEL_NIMBUS == getChipModel(i_chip->getTrgt()) &&
-         0x20                    >  getChipLevel(i_chip->getTrgt()) )
-    {
-        // If we are unable to issue any more line deletes, mask the attention
-        // and do not make the error log predictive.
-        if ( io_sc.service_data->IsAtThreshold() )
-            io_sc.service_data->clearServiceCall();
-    }
-    // END WORKAROUND
-
-    return SUCCESS;
-
-}
-PRDF_PLUGIN_DEFINE_NS( nimbus_ex,  Ex, cacheCeWorkaround );
-PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, cacheCeWorkaround );
-PRDF_PLUGIN_DEFINE_NS( axone_ex,   Ex, cacheCeWorkaround );
 
 /**
  * @brief Adds L2 Line Delete/Column Repair FFDC to an SDC.
@@ -324,8 +179,6 @@ int32_t L2UE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     */
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_ex,  Ex, L2UE );
-PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, L2UE );
 PRDF_PLUGIN_DEFINE_NS( axone_ex,   Ex, L2UE );
 
 /**
@@ -375,8 +228,6 @@ int32_t L3UE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     */
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_ex,  Ex, L3UE );
-PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, L3UE );
 PRDF_PLUGIN_DEFINE_NS( axone_ex,   Ex, L3UE );
 
 /**
@@ -495,8 +346,6 @@ int32_t L2CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     return SUCCESS;
 
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_ex,  Ex, L2CE );
-PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, L2CE );
 PRDF_PLUGIN_DEFINE_NS( axone_ex,   Ex, L2CE );
 
 /**
@@ -606,31 +455,15 @@ int32_t L3CE( ExtensibleChip * i_chip,
         l_bundle->iv_prevMember = curMem;
         l_bundle->iv_blfTimeout = curTime + Timer::SEC_IN_DAY;
 
-        // Execute the line delete
-        if ( MODEL_NIMBUS != getChipModel(i_chip->getTrgt()) ||
-             0x10         != getChipLevel(i_chip->getTrgt()) )
-        {
-            PRDF_TRAC( "[L3CE] HUID: 0x%08x apply directed line delete",
-                        i_chip->GetId());
-#ifdef __HOSTBOOT_RUNTIME
-            /* TODO RTC 247259
-            l_rc = l3LineDelete(i_chip->getTrgt(), errorAddr);
-            */
-#endif
-        }
-        else
-        {
-            // HW bug affecting directed line delete on NIMBUS 1.0
-            // So set delete-on-next-ce instead
 
-            SCAN_COMM_REGISTER_CLASS * prgReg =
-                               i_chip->getRegister("L3_PURGE_REG");
+        PRDF_TRAC( "[L3CE] HUID: 0x%08x apply directed line delete",
+                i_chip->GetId());
+        #ifdef __HOSTBOOT_RUNTIME
+        /* TODO RTC 247259
+        l_rc = l3LineDelete(i_chip->getTrgt(), errorAddr);
+        */
+        #endif
 
-            prgReg->clearAllBits();
-            prgReg->SetBit(5);
-
-            l_rc = prgReg->Write();
-        }
 
         if (SUCCESS != l_rc)
         {
@@ -656,8 +489,6 @@ int32_t L3CE( ExtensibleChip * i_chip,
     return SUCCESS;
 
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_ex,  Ex, L3CE );
-PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, L3CE );
 PRDF_PLUGIN_DEFINE_NS( axone_ex,   Ex, L3CE );
 
 }

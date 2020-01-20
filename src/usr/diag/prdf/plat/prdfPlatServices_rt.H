@@ -67,12 +67,12 @@ void sendDynMemDeallocRequest( uint64_t i_saddr, uint64_t i_eaddr );
 void sendPredDeallocRequest( uint64_t i_saddr, uint64_t i_eaddr );
 
 //##############################################################################
-//##                  Nimbus/Centaur Maintenance Command wrappers
+//##                   Maintenance Command wrappers
 //##############################################################################
 
 /**
  * @brief  Stops Background Scrubbing.
- * @param  i_chip MCBIST, MCA, MBA, or OCMB chip.
+ * @param  i_chip OCMB chip.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
@@ -91,26 +91,13 @@ uint32_t stopBgScrub( ExtensibleChip * i_chip );
  *       due to an error. It should not be called after executing a Targeted
  *       Diagnotics procedure.
  *
- * @param  i_chip MCBIST, MCA, MBA, or OCMB chip.
+ * @param  i_chip OCMB chip.
  * @param  io_sc  The step code data struct.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
 uint32_t resumeBgScrub( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & io_sc );
-
-/**
- * @brief  Resumes TD scrubbing after it has paused on error.
- * @param  i_chip      MBA chip.
- * @param  i_rangeType See enum AddrRangeType.
- * @param  i_stopCond  The stop conditions for the targeted scrub.
- * @param  i_incRow    True if we need to increment to the next row instead of
- *                     the next address.
- * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
- */
-template<TARGETING::TYPE T, typename SCT>
-uint32_t resumeTdScrub( ExtensibleChip * i_chip, AddrRangeType i_rangeType,
-                        SCT i_stopCond, bool i_incRow = false );
 
 //##############################################################################
 //##                       Line delete functions

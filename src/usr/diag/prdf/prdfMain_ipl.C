@@ -40,7 +40,6 @@
 
 // Platform includes
 #include <prdfPlatServices.H>
-#include <prdfP9McaDataBundle.H>
 #include <prdfOcmbDataBundle.H>
 #include <prdfMemBgScrub.H>
 
@@ -81,17 +80,7 @@ int32_t analyzeIplCEStats( TargetHandle_t i_trgt, bool &o_calloutMade )
     ExtensibleChip * chip = (ExtensibleChip *)systemPtr->GetChip( i_trgt );
     TYPE             type = getTargetType( i_trgt );
 
-    if ( TYPE_MCBIST == type )
-    {
-        // Analyze the CE stats for each MCA.
-        ExtensibleChipList list = getConnected( chip, TYPE_MCA );
-        for ( auto & mcaChip : list )
-        {
-            McaDataBundle * db = getMcaDataBundle( mcaChip );
-            if ( db->getIplCeStats()->analyzeStats() ) o_calloutMade = true;
-        }
-    }
-    else if ( TYPE_OCMB_CHIP == type )
+    if ( TYPE_OCMB_CHIP == type )
     {
         OcmbDataBundle * db = getOcmbDataBundle( chip );
         o_calloutMade = db->getIplCeStats()->analyzeStats();
@@ -151,7 +140,6 @@ errlHndl_t startScrub( const TargetHandle_t i_trgt )
         // Start background scrubbing on this target.
         switch ( chip->getType() )
         {
-            case TYPE_MCBIST: startInitialBgScrub<TYPE_MCBIST>(chip); break;
             case TYPE_OCMB_CHIP:
                 startInitialBgScrub<TYPE_OCMB_CHIP>(chip); break;
             default:

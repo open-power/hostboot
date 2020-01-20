@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -170,17 +170,11 @@ void initMemMruStrings( MemoryMruData::MemMruMeld i_mm, bool & o_addDramSite,
     uint8_t      chipPos = 0;
     uint8_t      compPos = 0;
 
-    if ( i_mm.s.isMca ) // MCA
-    {
-        compStr = "mca";
-        chipPos = i_mm.s.procPos;
-        compPos = i_mm.s.chnlPos;
-    }
-    else if ( i_mm.s.isOcmb ) // OCMB
+    if ( i_mm.s.isOcmb ) // OCMB
     {
         compStr = "ocmb";
         chipPos = (i_mm.s.procPos << 3) | i_mm.s.chnlPos;
-        compPos = i_mm.s.mbaPos;
+        compPos = i_mm.s.omiPos;
     }
 
     // Build the header string.
@@ -226,7 +220,7 @@ void addDramSiteString( const MemoryMruData::ExtendedData & i_extMemMru,
 
     // Get the DQ indexes for site location tables, adjusting for spare DRAM, if
     // needed.
-    uint8_t dqIdx = symbol2Dq<TYPE_MCA>(mm.s.symbol);
+    uint8_t dqIdx = symbol2Dq<TYPE_OCMB_CHIP>(mm.s.symbol);
     dqIdx = transDramSpare( dqIdx, mm.s.dramSpared );
 
     // Add DQ info.
@@ -450,41 +444,6 @@ bool parseIueCounts( uint8_t  * i_buffer, uint32_t i_buflen,
         snprintf( header, DATA_SIZE, "%d", count );
 
         i_parser.PrintString( header, data );
-    }
-
-    return rc;
-}
-
-//------------------------------------------------------------------------------
-
-bool parseMemRceTable( uint8_t  * i_buffer, uint32_t i_buflen,
-                       ErrlUsrParser & i_parser )
-{
-    using namespace RCE_TABLE;
-
-    bool rc = true;
-
-    // Check if something failed in parser.
-    if ( ( NULL == i_buffer ) || ( 0 == i_buflen) ) return false;
-
-    const uint32_t entries = i_buffer[0];
-    i_parser.PrintNumber( " MEM_RCE_TABLE", "%d", entries );
-
-    for ( uint32_t i = 0; i < entries; i++ )
-    {
-        uint32_t idx = 1 + i * ENTRY_SIZE;
-
-        uint32_t mrnk  = (i_buffer[idx  ] >> 5) & 0x7;  //  3-bit
-        uint32_t srnk  = (i_buffer[idx  ] >> 2) & 0x7;  //  3-bit
-        uint32_t count =  i_buffer[idx+1];              //  8-bit
-
-        // Build the data string.
-        char data[DATA_SIZE] = "";
-        snprintf( data, DATA_SIZE, "rank = m%ds%d  count = %d",
-                  mrnk, srnk, count );
-
-        // Print the line.
-        i_parser.PrintString( "", data );
     }
 
     return rc;

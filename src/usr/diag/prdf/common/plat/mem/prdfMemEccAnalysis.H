@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,6 @@
 #ifdef __HOSTBOOT_MODULE
   #include <prdfMemTps.H>
   #include <prdfMemVcm.H>
-  #include <prdfP9McbistDataBundle.H>
 #endif
 
 namespace PRDF
@@ -51,7 +50,7 @@ namespace MemEcc
  * @brief  Adds the memory CE to the callout list and CE table. Will also issue
  *         dynamic memory deallocation when appropriate. Returns true if TPS is
  *         required.
- * @param  i_chip   MCA, MBA, or OCMB.
+ * @param  i_chip   OCMB.
  * @param  i_addr   Failed address.
  * @param  i_symbol Failed symbol.
  * @param  o_doTps  True if TPS is required. False otherwise.
@@ -69,12 +68,7 @@ uint32_t handleMemCe( ExtensibleChip * i_chip, const MemAddr & i_addr,
  *         log predictive. Will also issue dynamic memory deallocation when
  *         appropriate.
  *
- * For UEs on Nimbus chips, it is possible that this UE is a side-effect of
- * DDRPHY attentions. If so, the MCA will be added to the callout list instead
- * of the DIMMs, the UE table will not be updated and no dynamic memory
- * deallocation.
- *
- * @param  i_chip   MCA, OCMB, or MBA.
+ * @param  i_chip   OCMB.
  * @param  i_addr   Failed address.
  * @param  i_type   The type of UE.
  * @param  io_sc    The step code data struct.
@@ -96,7 +90,7 @@ uint32_t handleMemUe( ExtensibleChip * i_chip, const MemAddr & i_addr,
  * the port failure is issued in the PostAnalysis plugin after the error log has
  * been committed.
  *
- * @param  i_chip MCA or OCMB chip.
+ * @param  i_chip OCMB chip.
  * @param  i_rank Rank containing the IUE.
  * @param  io_sc  The step code data struct.
  * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
@@ -107,7 +101,7 @@ uint32_t handleMemIue( ExtensibleChip * i_chip, const MemRank & i_rank,
 
 /**
  * @brief  Handles a MPE attention.
- * @param  i_chip MCA, OCMB, or MBA.
+ * @param  i_chip OCMB.
  * @param  i_addr Failed address.
  * @param  i_type The type of UE.
  * @param  io_sc  The step code data struct.
@@ -119,7 +113,7 @@ uint32_t handleMpe( ExtensibleChip * i_chip, const MemAddr & i_addr,
 
 /**
  * @brief  Handles a MPE attention.
- * @param  i_chip    MCA, OCMB, or MBA.
+ * @param  i_chip    OCMB.
  * @param  i_rank    Target rank.
  * @param  i_type    The type of UE.
  * @param  io_sc     The step code data struct.
@@ -135,7 +129,7 @@ uint32_t handleMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
 
 /**
  * @brief  Analyzes a fetch MPE attention.
- * @param  i_chip   MCA, OCMB, or MBA.
+ * @param  i_chip   OCMB.
  * @param  i_rank   Target rank.
  * @param  io_sc    The step code data struct.
  * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
@@ -146,7 +140,7 @@ uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
 
 /**
  * @brief  Analyzes a fetch NCE/TCE attention.
- * @param  i_chip   MCA, OCMB, or MBA.
+ * @param  i_chip   OCMB.
  * @param  io_sc    The step code data struct.
  * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
  */
@@ -156,7 +150,7 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip,
 
 /**
  * @brief  Analyzes a fetch UE attention.
- * @param  i_chip   MCA, OCMB, or MBA.
+ * @param  i_chip   OCMB.
  * @param  io_sc    The step code data struct.
  * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
  */
@@ -166,7 +160,7 @@ uint32_t analyzeFetchUe( ExtensibleChip * i_chip,
 
 /**
  * @brief  Analyzes a fetch mainline IUE attention.
- * @param  i_chip   MCA, OCMB, or MBA.
+ * @param  i_chip   OCMB.
  * @param  io_sc    The step code data struct.
  * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
  */
@@ -177,7 +171,7 @@ uint32_t analyzeMainlineIue( ExtensibleChip * i_chip,
 
 /**
  * @brief  Analyzes a fetch maint IUE attention.
- * @param  i_chip   MCA, OCMB, or MBA.
+ * @param  i_chip   OCMB.
  * @param  io_sc    The step code data struct.
  * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
  */
@@ -187,28 +181,18 @@ uint32_t analyzeMaintIue( ExtensibleChip * i_chip,
 
 /**
  * @brief  Analyzes a maint or mainline IMPE attention.
- * @param  i_chip   MCA, OCMB, or MBA.
+ * @param  i_chip   OCMB.
  * @param  io_sc    The step code data struct.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
 uint32_t analyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
 
-/**
- * @brief  Analyzes fetch retry CE or prefetch UE errors.
- * @param  i_chip   MBA.
- * @param  io_sc    The step code data struct.
- * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
- */
-template<TARGETING::TYPE T>
-uint32_t analyzeFetchRcePue( ExtensibleChip * i_chip,
-                             STEP_CODE_DATA_STRUCT & io_sc );
-
 #ifdef __HOSTBOOT_RUNTIME
 
 /**
  * @brief  Will trigger a port fail.
- * @param  i_chip MCA/OCMB chip
+ * @param  i_chip OCMB chip
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise
  */
 template<TARGETING::TYPE T>
@@ -221,7 +205,7 @@ uint32_t triggerPortFail( ExtensibleChip * i_chip );
 /**
  * @brief  Will query the data bundle and return if the IUE threshold has been
  *         reached.
- * @param  i_chip MCA/OCMB chip
+ * @param  i_chip OCMB chip
  * @param  io_sc  The step code data struct.
  * @return True if IUE threshold is reached, false if not.
  */
@@ -231,7 +215,7 @@ bool queryIueTh( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
 /**
  * @brief  Will mask off an entire memory port. At runtime will issue dynamic
  *         memory deallocation of the port.
- * @param  i_chip MCA/OCMB chip
+ * @param  i_chip OCMB chip
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise
  */
 template<TARGETING::TYPE T>

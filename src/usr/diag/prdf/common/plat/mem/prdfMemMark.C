@@ -64,10 +64,8 @@ namespace MarkStore
 //    upon later if we have the time, but doubtful.
 //  - Summary:
 //      - Chip marks will use HWMS0-7 registers:
-//          Nimbus: (0x07010AD0-0x07010AD7)
 //          Axone:  (0x08011C10-0x08011C17)
 //      - Symbol marks will use FWMS0-7 registers:
-//          Nimbus: (0x07010AD8-0x07010ADF)
 //          Axone:  (0x08011C18-0x08011C1F)
 //      - Each register maps to master ranks 0-7.
 
@@ -116,9 +114,6 @@ uint32_t readChipMark( ExtensibleChip * i_chip, const MemRank & i_rank,
 }
 
 template
-uint32_t readChipMark<TYPE_MCA>( ExtensibleChip * i_chip,
-                                 const MemRank & i_rank, MemMark & o_mark );
-template
 uint32_t readChipMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                        const MemRank & i_rank,
                                        MemMark & o_mark );
@@ -166,10 +161,6 @@ uint32_t writeChipMark( ExtensibleChip * i_chip, const MemRank & i_rank,
 }
 
 template
-uint32_t writeChipMark<TYPE_MCA>( ExtensibleChip * i_chip,
-                                  const MemRank & i_rank,
-                                  const MemMark & i_mark );
-template
 uint32_t writeChipMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                         const MemRank & i_rank,
                                         const MemMark & i_mark );
@@ -205,9 +196,6 @@ uint32_t clearChipMark( ExtensibleChip * i_chip, const MemRank & i_rank )
     #undef PRDF_FUNC
 }
 
-template
-uint32_t clearChipMark<TYPE_MCA>( ExtensibleChip * i_chip,
-                                  const MemRank & i_rank );
 template
 uint32_t clearChipMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                         const MemRank & i_rank );
@@ -275,9 +263,6 @@ uint32_t readSymbolMark( ExtensibleChip * i_chip,
 }
 
 template
-uint32_t readSymbolMark<TYPE_MCA>( ExtensibleChip * i_chip,
-                                   const MemRank & i_rank, MemMark & o_mark );
-template
 uint32_t readSymbolMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                          const MemRank & i_rank,
                                          MemMark & o_mark );
@@ -328,36 +313,11 @@ uint32_t writeSymbolMark( ExtensibleChip * i_chip, const MemRank & i_rank,
                   msName, i_chip->getHuid() );
     }
 
-    // Nimbus only symbol mark performance workaround
-    if ( T == TYPE_MCA )
-    {
-        // When a symbol mark is placed at runtime
-        #ifdef __HOSTBOOT_RUNTIME
-
-        // Trigger WAT logic to 'disable bypass'
-        // Get the ECC Debug/WAT Control register
-        SCAN_COMM_REGISTER_CLASS * dbgr = i_chip->getRegister( "DBGR" );
-
-        // Set DBGR[8] = 0b1
-        dbgr->SetBit( 8 );
-        o_rc = dbgr->Write();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "Write() failed on DBGR: mca=0x%08x",
-                      i_chip->getHuid() );
-        }
-        #endif
-    }
-
     return o_rc;
 
     #undef PRDF_FUNC
 }
 
-template
-uint32_t writeSymbolMark<TYPE_MCA>( ExtensibleChip * i_chip,
-                                    const MemRank & i_rank,
-                                    const MemMark & i_mark );
 template
 uint32_t writeSymbolMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                           const MemRank & i_rank,
@@ -394,9 +354,6 @@ uint32_t clearSymbolMark( ExtensibleChip * i_chip, const MemRank & i_rank )
     #undef PRDF_FUNC
 }
 
-template
-uint32_t clearSymbolMark<TYPE_MCA>( ExtensibleChip * i_chip,
-                                    const MemRank & i_rank );
 template
 uint32_t clearSymbolMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                           const MemRank & i_rank );
@@ -466,27 +423,6 @@ uint32_t __applyRasPolicies( ExtensibleChip * i_chip, const MemRank & i_rank,
                              const MemMark & i_chipMark,
                              const MemMark & i_symMark,
                              TdEntry * & o_dsdEvent, bool & o_allRepairsUsed );
-
-template<>
-uint32_t __applyRasPolicies<TYPE_MCA>( ExtensibleChip * i_chip,
-                                       const MemRank & i_rank,
-                                       STEP_CODE_DATA_STRUCT & io_sc,
-                                       const MemMark & i_chipMark,
-                                       const MemMark & i_symMark,
-                                       TdEntry * & o_dsdEvent,
-                                       bool & o_allRepairsUsed )
-{
-    // There is no DRAM sparing on Nimbus so simply check if both the chip and
-    // symbol mark have been used.
-    if ( i_chipMark.isValid() && i_symMark.isValid() )
-    {
-        o_allRepairsUsed = true;
-        io_sc.service_data->setSignature( i_chip->getHuid(),
-                                          PRDFSIG_AllDramRepairs );
-    }
-
-    return SUCCESS;
-}
 
 template<>
 uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
@@ -706,11 +642,6 @@ uint32_t applyRasPolicies( ExtensibleChip * i_chip, const MemRank & i_rank,
 }
 
 template
-uint32_t applyRasPolicies<TYPE_MCA>( ExtensibleChip * i_chip,
-                                     const MemRank & i_rank,
-                                     STEP_CODE_DATA_STRUCT & io_sc,
-                                     TdEntry * & o_dsdEvent );
-template
 uint32_t applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                            const MemRank & i_rank,
                                            STEP_CODE_DATA_STRUCT & io_sc,
@@ -781,10 +712,6 @@ uint32_t chipMarkCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
     #undef PRDF_FUNC
 }
 
-template
-uint32_t chipMarkCleanup<TYPE_MCA>( ExtensibleChip * i_chip,
-                                    const MemRank & i_rank,
-                                    STEP_CODE_DATA_STRUCT & io_sc );
 template
 uint32_t chipMarkCleanup<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                           const MemRank & i_rank,

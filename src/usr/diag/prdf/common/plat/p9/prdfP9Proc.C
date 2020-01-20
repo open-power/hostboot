@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -93,8 +93,6 @@ int32_t CheckForRecovered( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, CheckForRecovered );
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, CheckForRecovered );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, CheckForRecovered );
 
 //------------------------------------------------------------------------------
@@ -175,8 +173,6 @@ int32_t CheckForRecoveredSev(ExtensibleChip * i_chip, uint32_t & o_sev)
     return SUCCESS;
 
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, CheckForRecoveredSev );
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, CheckForRecoveredSev );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, CheckForRecoveredSev );
 
 /** @func GetCheckstopInfo
@@ -273,37 +269,7 @@ int32_t GetCheckstopInfo( ExtensibleChip * i_chip,
     return SUCCESS;
 
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, GetCheckstopInfo );
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, GetCheckstopInfo );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, GetCheckstopInfo );
-
-//------------------------------------------------------------------------------
-
-int32_t checkNimbusDD10( ExtensibleChip * i_chip,
-                         STEP_CODE_DATA_STRUCT & io_sc )
-{
-    TargetHandle_t trgt = i_chip->getTrgt();
-
-    // It does look a little weird to return FAIL when the chip is Nimbus DD1.0,
-    // but the purpose of this plugin is to give a non-SUCCESS return code to
-    // the 'try' statement in rule code so that it will execute actions
-    // specifically for Nimbus DD1.0 in the default branch of the 'try'.
-    // statement.
-
-    if ( MODEL_NIMBUS == getChipModel(trgt) && 0x10 == getChipLevel(trgt) )
-        return FAIL;
-    else
-        return SUCCESS;
-}
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc, Proc, checkNimbusDD10 );
-
-int32_t checkNotNimbusDD10( ExtensibleChip * i_chip,
-                            STEP_CODE_DATA_STRUCT & io_sc )
-{
-    // Return the opposite of checkNimbusDD10().
-    return (FAIL == checkNimbusDD10(i_chip, io_sc)) ? SUCCESS : FAIL;
-}
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc, Proc, checkNotNimbusDD10 );
 
 //------------------------------------------------------------------------------
 
@@ -320,8 +286,6 @@ int32_t isHostAttnFirAccessible(ExtensibleChip * i_chip, bool & o_isOkToAccess)
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, isHostAttnFirAccessible );
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, isHostAttnFirAccessible );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, isHostAttnFirAccessible );
 
 //------------------------------------------------------------------------------
@@ -366,8 +330,6 @@ int32_t isUcsFirAccessible(ExtensibleChip * i_chip, bool & o_isOkToAccess)
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, isUcsFirAccessible );
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, isUcsFirAccessible );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, isUcsFirAccessible );
 
 //------------------------------------------------------------------------------
@@ -385,8 +347,6 @@ int32_t handleDeadmanTimer( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, handleDeadmanTimer );
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, handleDeadmanTimer );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, handleDeadmanTimer );
 
 //------------------------------------------------------------------------------
@@ -427,8 +387,6 @@ int32_t handleSbeVital( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, handleSbeVital );
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, handleSbeVital );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, handleSbeVital );
 
 //------------------------------------------------------------------------------
@@ -462,8 +420,6 @@ int32_t CheckForUnitCs( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, CheckForUnitCs );
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, CheckForUnitCs );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, CheckForUnitCs );
 
 //------------------------------------------------------------------------------
@@ -497,8 +453,6 @@ int32_t PmRecovery( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, PmRecovery );
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, PmRecovery );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, PmRecovery );
 
 //------------------------------------------------------------------------------
@@ -573,8 +527,6 @@ int32_t handleIntCqFirPcRecovError( ExtensibleChip * i_chip,
 
     return l_rc;
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, handleIntCqFirPcRecovError );
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, handleIntCqFirPcRecovError );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, handleIntCqFirPcRecovError );
 
 //------------------------------------------------------------------------------

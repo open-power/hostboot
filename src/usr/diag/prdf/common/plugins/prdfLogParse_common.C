@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -230,13 +230,6 @@ void getTargetInfo( HUID i_chipId, TARGETING::TYPE & o_targetType,
                       l_node, l_chip, l_chiplet );
             break;
 
-        case TYPE_MCBIST:
-            l_chip    = l_chip / MAX_MCBIST_PER_PROC;
-            l_chiplet = l_chiplet % MAX_MCBIST_PER_PROC;
-            snprintf( o_chipName, i_sz_chipName, "mcb(n%dp%dc%d)",
-                      l_node, l_chip, l_chiplet );
-            break;
-
         case TYPE_OCMB_CHIP:
             snprintf( o_chipName, i_sz_chipName, "ocmb(n%dp%d)",
                       l_node, l_chip );
@@ -246,20 +239,6 @@ void getTargetInfo( HUID i_chipId, TARGETING::TYPE & o_targetType,
             l_chip    = l_chip / MAX_PORT_PER_OCMB;
             l_chiplet = l_chiplet % MAX_PORT_PER_OCMB;
             snprintf( o_chipName, i_sz_chipName, "memport(n%dp%dc%d)",
-                      l_node, l_chip, l_chiplet );
-            break;
-
-        case TYPE_MCS:
-            l_chip    = l_chip / MAX_MCS_PER_PROC;
-            l_chiplet = l_chiplet % MAX_MCS_PER_PROC;
-            snprintf( o_chipName, i_sz_chipName, "mcs(n%dp%dc%d)",
-                      l_node, l_chip, l_chiplet );
-            break;
-
-        case TYPE_MCA:
-            l_chip    = l_chip / MAX_MCA_PER_PROC;
-            l_chiplet = l_chiplet % MAX_MCA_PER_PROC;
-            snprintf( o_chipName, i_sz_chipName, "mca(n%dp%dc%d)",
                       l_node, l_chip, l_chiplet );
             break;
 
@@ -274,13 +253,6 @@ void getTargetInfo( HUID i_chipId, TARGETING::TYPE & o_targetType,
             l_chip    = l_chip / MAX_MI_PER_PROC;
             l_chiplet = l_chiplet % MAX_MI_PER_PROC;
             snprintf( o_chipName, i_sz_chipName, "mi(n%dp%dc%d)",
-                      l_node, l_chip, l_chiplet );
-            break;
-
-        case TYPE_DMI:
-            l_chip    = l_chip / MAX_DMI_PER_PROC;
-            l_chiplet = l_chiplet % MAX_DMI_PER_PROC;
-            snprintf( o_chipName, i_sz_chipName, "dmi(n%dp%dc%d)",
                       l_node, l_chip, l_chiplet );
             break;
 
@@ -485,10 +457,6 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
             else if ( Util::hashString("IUE_COUNTS") == sigId )
             {
                 parseIueCounts( sigData, sigDataSize, i_parser );
-            }
-            else if ( Util::hashString("MEM_RCE_TABLE") == sigId )
-            {
-                parseMemRceTable( sigData, sigDataSize, i_parser );
             }
             else if ( Util::hashString("DRAM_REPAIRS_DATA") == sigId )
             {

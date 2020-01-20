@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,7 @@ class ExtensibleChip;
  * @brief  Returns number of allowed CEs for MNFG IPLs.
  * @pre    Must check if in manufacturing mode before calling this function.
  * @post   Must callout if the count is greater than the returned values.
- * @param  i_chip      MCA or MBA chip.
+ * @param  i_chip      OCMB chip.
  * @param  i_rank      The rank for which the threshold is needed.
  * @param  o_cePerDram CEs allowed per DRAM.
  * @param  o_cePerRank CEs allowed per rank per logical DIMM.
@@ -71,20 +71,6 @@ ThresholdResolution::ThresholdPolicy getIueTh();
 ThresholdResolution::ThresholdPolicy getImpeTh();
 
 #endif
-
-/**
- * @brief  Returns RCE threshold policy.
- */
-ThresholdResolution::ThresholdPolicy getRceThreshold();
-
-/**
- * @brief  Returns scrub soft/intermittent CEs threshold during runtime.
- * @param  i_chip MCA or MBA chip.
- * @param  i_rank The rank for which the threshold is needed.
- * @return The Scrub soft/intermittent CE threshold.
- */
-template <TARGETING::TYPE T>
-uint32_t getScrubCeThreshold( ExtensibleChip * i_chip, const MemRank & i_rank );
 
 } // end namespace PRDF
 

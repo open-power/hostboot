@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,7 +57,7 @@ class MemoryMru
 
     /**
      * @brief Constructor for single DIMM callouts.
-     * @param i_target    The MBA or MCA in which the error occurred.
+     * @param i_target    The OCMB in which the error occurred.
      * @param i_rank      The rank in which the error occurred.
      * @param i_symbol    The symbol in which the error occurred.
      */
@@ -66,7 +66,7 @@ class MemoryMru
 
     /**
      * @brief Constructor for special callouts.
-     * @param i_target         The MBA or MCA in which error has occurred
+     * @param i_target         The OCMB in which error has occurred
      * @param i_rank           The rank in which the error occurred.
      * @param i_specialCallout See enum MemoryMruData::Callout.
      */

@@ -389,32 +389,6 @@ uint8_t getChipLevel( TARGETING::TargetHandle_t i_trgt )
     return parent->getAttr<ATTR_EC>();
 }
 
-//------------------------------------------------------------------------------
-
-void setHWStateChanged(TARGETING::TargetHandle_t i_target)
-{
-    #define PRDF_FUNC "[PlatServices::setHWStateChanged] "
-    if(NULL != i_target)
-    {
-        TYPE type = getTargetType(i_target);
-        if( (TYPE_DIMM   == type) ||
-            (TYPE_MCS    == type) )
-        {
-            update_hwas_changed_mask(i_target, HWAS_CHANGED_BIT_MEMDIAG);
-        }
-        else
-        {
-            PRDF_ERR(PRDF_FUNC "invalid target type: 0x%08x", type);
-        }
-    }
-    else
-    {
-        PRDF_ERR(PRDF_FUNC "i_target is null");
-    }
-
-    #undef PRDF_FUNC
-}
-
 //##############################################################################
 //##
 //##                       getConnected() support functions
@@ -457,18 +431,14 @@ struct conn_t
             case TYPE_OCC:          order = 12; break;
             case TYPE_PSI:          order = 13; break;
             case TYPE_NPU:          order = 14; break;
-            case TYPE_MCBIST:       order = 15; break;
-            case TYPE_MCS:          order = 16; break;
-            case TYPE_MCA:          order = 17; break;
-            case TYPE_MC:           order = 18; break;
-            case TYPE_MI:           order = 19; break;
-            case TYPE_OMIC:         order = 20; break;
-            case TYPE_MCC:          order = 21; break;
-            case TYPE_OMI:          order = 22; break;
-            case TYPE_OCMB_CHIP:    order = 23; break;
-            case TYPE_MEM_PORT:     order = 24; break;
-            case TYPE_DMI:          order = 25; break;
-            case TYPE_DIMM:         order = 29; break;
+            case TYPE_MC:           order = 15; break;
+            case TYPE_MI:           order = 16; break;
+            case TYPE_OMIC:         order = 17; break;
+            case TYPE_MCC:          order = 18; break;
+            case TYPE_OMI:          order = 19; break;
+            case TYPE_OCMB_CHIP:    order = 20; break;
+            case TYPE_MEM_PORT:     order = 21; break;
+            case TYPE_DIMM:         order = 22; break;
             default: ;
         }
 
@@ -516,14 +486,10 @@ TargetService::ASSOCIATION_TYPE getAssociationType( TargetHandle_t i_target,
         { TYPE_PROC,   TYPE_OCC,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_PSI,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_NPU,        TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_MCBIST,     TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_MCS,        TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_MCA,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_MC,         TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_MI,         TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_OMIC,       TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_MCC,        TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_DMI,        TargetService::CHILD_BY_AFFINITY  },
 
         { TYPE_EQ,     TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_EQ,     TYPE_EX,         TargetService::CHILD_BY_AFFINITY  },
@@ -556,32 +522,15 @@ TargetService::ASSOCIATION_TYPE getAssociationType( TargetHandle_t i_target,
 
         { TYPE_NPU,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
 
-        { TYPE_MCBIST, TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MCBIST, TYPE_MCS,        TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_MCBIST, TYPE_MCA,        TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_MCBIST, TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
-
-        { TYPE_MCS,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MCS,    TYPE_MCBIST,     TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MCS,    TYPE_MCA,        TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_MCS,    TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
-
-        { TYPE_MCA,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MCA,    TYPE_MCBIST,     TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MCA,    TYPE_MCS,        TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MCA,    TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
-
         { TYPE_MC,     TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_MC,     TYPE_MI,         TargetService::CHILD_BY_AFFINITY  },
         { TYPE_MC,     TYPE_OMIC,       TargetService::CHILD_BY_AFFINITY  },
         { TYPE_MC,     TYPE_MCC,        TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_MC,     TYPE_DMI,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_MC,     TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
 
         { TYPE_MI,     TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_MI,     TYPE_MC,         TargetService::PARENT_BY_AFFINITY },
         { TYPE_MI,     TYPE_MCC,        TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_MI,     TYPE_DMI,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_MI,     TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
 
         { TYPE_OMIC,   TYPE_MC,         TargetService::PARENT_BY_AFFINITY },
@@ -605,12 +554,6 @@ TargetService::ASSOCIATION_TYPE getAssociationType( TargetHandle_t i_target,
         { TYPE_MEM_PORT, TYPE_OCMB_CHIP,TargetService::PARENT_BY_AFFINITY },
         { TYPE_MEM_PORT, TYPE_DIMM,     TargetService::CHILD_BY_AFFINITY  },
 
-        { TYPE_DMI,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_DMI,    TYPE_MC,         TargetService::PARENT_BY_AFFINITY },
-        { TYPE_DMI,    TYPE_MI,         TargetService::PARENT_BY_AFFINITY },
-        { TYPE_DMI,    TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
-
-        { TYPE_DIMM,   TYPE_MCA,        TargetService::PARENT_BY_AFFINITY },
         { TYPE_DIMM,   TYPE_OCMB_CHIP,  TargetService::PARENT_BY_AFFINITY },
         { TYPE_DIMM,   TYPE_MEM_PORT,   TargetService::PARENT_BY_AFFINITY },
 
@@ -816,43 +759,7 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
                         return (trgtPos == relPec) && (i_connPos == relPhb);
                     } );
         }
-        else if ( TYPE_MCBIST == trgtType && TYPE_MCS == i_connType )
-        {
-            // i_connPos is position relative to MCBIST (0-1)
-            itr = std::find_if( list.begin(), list.end(),
-                    [&](const TargetHandle_t & t)
-                    {
-                        uint32_t mcsPos = getTargetPosition(t);
-                        return (trgtPos   == (mcsPos / MAX_MCS_PER_MCBIST)) &&
-                               (i_connPos == (mcsPos % MAX_MCS_PER_MCBIST));
-                    } );
-
-        }
-        else if ( TYPE_MCBIST == trgtType && TYPE_MCA == i_connType )
-        {
-            // i_connPos is position relative to MCBIST (0-3)
-            itr = std::find_if( list.begin(), list.end(),
-                    [&](const TargetHandle_t & t)
-                    {
-                        uint32_t mcaPos = getTargetPosition(t);
-                        return (trgtPos   == (mcaPos / MAX_MCA_PER_MCBIST)) &&
-                               (i_connPos == (mcaPos % MAX_MCA_PER_MCBIST));
-                    } );
-
-        }
-        else if ( TYPE_MCS == trgtType && TYPE_MCA == i_connType )
-        {
-            // i_connPos is position relative to MCS (0-1)
-            itr = std::find_if( list.begin(), list.end(),
-                    [&](const TargetHandle_t & t)
-                    {
-                        uint32_t mcaPos = getTargetPosition(t);
-                        return (trgtPos   == (mcaPos / MAX_MCA_PER_MCS)) &&
-                               (i_connPos == (mcaPos % MAX_MCA_PER_MCS));
-                    } );
-        }
-        else if ( (TYPE_MCA == trgtType && TYPE_DIMM == i_connType) ||
-                  (TYPE_MEM_PORT == trgtType && TYPE_DIMM == i_connType) )
+        else if ( TYPE_MEM_PORT == trgtType && TYPE_DIMM == i_connType )
         {
             // i_connPos is the DIMM select (0-1). Note that we don't use
             // getTargetPosition() on the DIMM because that does not return a
@@ -860,9 +767,9 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
             // There really isn't a good position attribute that matches the
             // position in the affinity path. We can use ATTR_REL_POS, which
             // will always match the DIMM select. This does not let us match the
-            // parent unit like all of the other checks in this functions.
+            // parent unit like all of the other checks in this function.
             // Fortunately, it will be very difficult to have a bug where the
-            // getConnected code returns DIMMs on a different MCA/MEM_PORT
+            // getConnected code returns DIMMs on a different MEM_PORT
             // target. So this is an acceptable risk.
             itr = std::find_if( list.begin(), list.end(),
                     [&](const TargetHandle_t & t)
@@ -888,28 +795,6 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
                         uint32_t mccPos = getTargetPosition(t);
                         return (trgtPos   == (mccPos / MAX_MCC_PER_MC)) &&
                                (i_connPos == (mccPos % MAX_MCC_PER_MC));
-                    } );
-        }
-        else if ( TYPE_MC == trgtType && TYPE_DMI == i_connType )
-        {
-            // i_connPos is position relative to MC (0-3)
-            itr = std::find_if( list.begin(), list.end(),
-                    [&](const TargetHandle_t & t)
-                    {
-                        uint32_t dmiPos = getTargetPosition(t);
-                        return (trgtPos   == (dmiPos / MAX_DMI_PER_MC)) &&
-                               (i_connPos == (dmiPos % MAX_DMI_PER_MC));
-                    } );
-        }
-        else if ( TYPE_MI == trgtType && TYPE_DMI == i_connType )
-        {
-            // i_connPos is position relative to MI (0-1)
-            itr = std::find_if( list.begin(), list.end(),
-                    [&](const TargetHandle_t & t)
-                    {
-                        uint32_t dmiPos = getTargetPosition(t);
-                        return (trgtPos   == (dmiPos / MAX_DMI_PER_MI)) &&
-                               (i_connPos == (dmiPos % MAX_DMI_PER_MI));
                     } );
         }
         else if ( (TYPE_OMI == trgtType && TYPE_OCMB_CHIP == i_connType) ||
@@ -1451,17 +1336,6 @@ uint32_t getPhbConfig( TARGETING::TargetHandle_t i_proc )
 //##
 //##############################################################################
 
-uint32_t getMemChnl( TargetHandle_t i_trgt )
-{
-    PRDF_ASSERT( nullptr != i_trgt );
-
-    TargetHandle_t dmiTrgt = getConnectedParent( i_trgt, TYPE_DMI );
-
-    return getTargetPosition( dmiTrgt );
-}
-
-//------------------------------------------------------------------------------
-
 bool isDramWidthX4( TargetHandle_t i_trgt )
 {
    bool o_dramWidthX4 = false;
@@ -1473,10 +1347,6 @@ bool isDramWidthX4( TargetHandle_t i_trgt )
 
    switch ( getTargetType(i_trgt) )
    {
-        case TYPE_MCA:
-            o_dramWidthX4 = true; // Nimbus only supports x4 DRAMs
-            break;
-
         case TYPE_DIMM:
             memPort = getConnectedParent(i_trgt, TYPE_MEM_PORT);
             if ( !memPort->tryGetAttr<ATTR_MEM_EFF_DRAM_WIDTH>(dramWidths) )
@@ -1545,23 +1415,6 @@ void __getMasterRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
 }
 
 template<>
-void getMasterRanks<TYPE_MCA>( TargetHandle_t i_trgt,
-                               std::vector<MemRank> & o_ranks,
-                               uint8_t i_ds )
-{
-    PRDF_ASSERT( nullptr != i_trgt );
-    PRDF_ASSERT( TYPE_MCA == getTargetType(i_trgt) );
-    /* TODO RTC 247260
-    // NOTE: The attribute lives on the MCS. So need to get the MCS target and
-    //       the position of the MCA relative to the MCS.
-    TargetHandle_t mcsTrgt = getConnectedParent( i_trgt, TYPE_MCS );
-    uint8_t relPos = getTargetPosition(i_trgt) % MAX_MCA_PER_MCS;
-
-    __getMasterRanks<TYPE_MCS>( mcsTrgt, o_ranks, relPos, i_ds );
-    */
-}
-
-template<>
 void getMasterRanks<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
                                      std::vector<MemRank> & o_ranks,
                                      uint8_t i_ds )
@@ -1618,10 +1471,6 @@ void getSlaveRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
 }
 
 template
-void getSlaveRanks<TYPE_MCA>( TargetHandle_t i_trgt,
-                              std::vector<MemRank> & o_ranks,
-                              uint8_t i_ds );
-template
 void getSlaveRanks<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
                                     std::vector<MemRank> & o_ranks,
                                     uint8_t i_ds );
@@ -1653,24 +1502,6 @@ uint8_t __getNumMasterRanksPerDimm( TargetHandle_t i_trgt, uint8_t i_ds )
     return num;
 
     #undef PRDF_FUNC
-}
-
-template<>
-uint8_t getNumMasterRanksPerDimm<TYPE_MCA>( TargetHandle_t i_trgt,
-                                            uint8_t i_ds )
-{
-    PRDF_ASSERT( nullptr != i_trgt );
-    PRDF_ASSERT( TYPE_MCA == getTargetType(i_trgt) );
-
-    /* TODO RTC 247260
-    // NOTE: The attribute lives on the MCS. So need to get the MCS target and
-    //       the position of the MCA relative to the MCS.
-    TargetHandle_t mcsTrgt = getConnectedParent( i_trgt, TYPE_MCS );
-    uint8_t relPos = getTargetPosition(i_trgt) % MAX_MCA_PER_MCS;
-
-    return __getNumMasterRanksPerDimm<TYPE_MCS>( mcsTrgt, relPos, i_ds );
-    */
-    return 4;
 }
 
 template<>
@@ -1710,23 +1541,6 @@ uint8_t __getNumRanksPerDimm( TargetHandle_t i_trgt, uint8_t i_ds )
     return num;
 
     #undef PRDF_FUNC
-}
-
-template<>
-uint8_t getNumRanksPerDimm<TYPE_MCA>( TargetHandle_t i_trgt, uint8_t i_ds )
-{
-    PRDF_ASSERT( nullptr != i_trgt );
-    PRDF_ASSERT( TYPE_MCA == getTargetType(i_trgt) );
-
-    /* TODO RTC 247260
-    // NOTE: The attribute lives on the MCS. So need to get the MCS target and
-    //       the position of the MCA relative to the MCS.
-    TargetHandle_t mcsTrgt = getConnectedParent( i_trgt, TYPE_MCS );
-    uint8_t relPos = getTargetPosition(i_trgt) % MAX_MCA_PER_MCS;
-
-    return __getNumRanksPerDimm<TYPE_MCS>( mcsTrgt, relPos, i_ds );
-    */
-    return 32;
 }
 
 template<>

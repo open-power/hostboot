@@ -81,10 +81,9 @@ int32_t mdiaSendEventMsg( TargetHandle_t i_trgt,
 
     PRDF_ASSERT( nullptr != i_trgt );
 
-    // Only MCBIST and OCMB_CHIP supported.
+    // Only OCMB_CHIP supported.
     TYPE trgtType = getTargetType( i_trgt );
-    PRDF_ASSERT( TYPE_MCBIST == trgtType ||
-                 TYPE_OCMB_CHIP == trgtType );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == trgtType );
 
     // MDIA must be running.
     PRDF_ASSERT( isInMdiaMode() );
@@ -108,80 +107,6 @@ int32_t mdiaSendEventMsg( TargetHandle_t i_trgt,
     return o_rc;
 
     #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-bool rcdParityErrorReconfigLoop( TargetHandle_t i_trgt )
-{
-    TargetHandle_t top = getSystemTarget();
-
-    // Get the current reconfig count and increment.
-    uint8_t count = i_trgt->getAttr<ATTR_RCD_PARITY_RECONFIG_LOOP_COUNT>() + 1;
-
-    // Get the reconfig threshold and check MNFG threshold, if needed.
-    uint8_t th = top->getAttr<ATTR_RCD_PARITY_RECONFIG_LOOPS_ALLOWED>() + 1;
-    if ( mfgMode() )
-    {
-        uint8_t mnfgTh = MfgThresholdMgr::getInstance()->
-                                   getThreshold(ATTR_MNFG_TH_RCD_PARITY_ERRORS);
-        if ( mnfgTh < th )
-            th = mnfgTh;
-    }
-
-    // If the count is under threshold, trigger a reconfig loop.
-    if ( count < th )
-    {
-        // Set the RCD parity error flag in the reconfig loop attribute. This
-        // will trigger a reconfig loop at the end of the current istep.
-        ATTR_RECONFIGURE_LOOP_type attr = top->getAttr<ATTR_RECONFIGURE_LOOP>();
-        if ( 0 == (attr & RECONFIGURE_LOOP_RCD_PARITY_ERROR) )
-        {
-            attr |= RECONFIGURE_LOOP_RCD_PARITY_ERROR;
-            top->setAttr<ATTR_RECONFIGURE_LOOP>(attr);
-        }
-
-        // Write the new count to the attribute.
-        i_trgt->setAttr<ATTR_RCD_PARITY_RECONFIG_LOOP_COUNT>(count);
-
-        return false;
-    }
-
-    return true;
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t mssRestoreDramRepairs<TYPE_MCA>( TargetHandle_t i_target,
-                                          uint8_t & o_repairedRankMask,
-                                          uint8_t & o_badDimmMask )
-{
-    uint32_t o_rc = SUCCESS;
-
-    /* TODO RTC 247260
-
-    errlHndl_t errl = NULL;
-
-    fapi2::buffer<uint8_t> tmpRepairedRankMask, tmpBadDimmMask;
-    FAPI_INVOKE_HWP( errl, mss::restore_repairs,
-                     fapi2::Target<fapi2::TARGET_TYPE_MCA>( i_target ),
-                     tmpRepairedRankMask, tmpBadDimmMask );
-
-    if ( NULL != errl )
-    {
-        PRDF_ERR( "[PlatServices::mssRestoreDramRepairs] "
-                  "restore_repairs() failed. HUID: 0x%08x",
-                  getHuid(i_target) );
-        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-        o_rc = FAIL;
-    }
-
-    o_repairedRankMask = (uint8_t)tmpRepairedRankMask;
-    o_badDimmMask = (uint8_t)tmpBadDimmMask;
-
-    */
-    return o_rc;
 }
 
 //------------------------------------------------------------------------------
@@ -216,118 +141,6 @@ uint32_t mssRestoreDramRepairs<TYPE_OCMB_CHIP>( TargetHandle_t i_target,
     */
 
     return o_rc;
-}
-
-//##############################################################################
-//##                    Nimbus Maintenance Command wrappers
-//##############################################################################
-
-template<>
-bool isBroadcastModeCapable<TYPE_MCBIST>( ExtensibleChip * i_chip )
-{
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MCBIST == i_chip->getType() );
-    /* TODO RTC 247260
-    fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( i_chip->getTrgt() );
-
-    mss::states l_ret = mss::states::NO;
-    FAPI_CALL_HWP( l_ret, mss::mcbist::is_broadcast_capable, fapiTrgt );
-    return ( mss::states::YES == l_ret );
-    */
-    return false;
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t startSfRead<TYPE_MCA>( ExtensibleChip * i_mcaChip,
-                                const MemRank & i_rank )
-{
-    #define PRDF_FUNC "[PlatServices::startSfRead<TYPE_MCA>] "
-
-    PRDF_ASSERT( isInMdiaMode() ); // MDIA must be running.
-
-    PRDF_ASSERT( nullptr != i_mcaChip );
-    PRDF_ASSERT( TYPE_MCA == i_mcaChip->getType() );
-
-    uint32_t o_rc = SUCCESS;
-
-    /* TODO RTC 247260
-    // Get the MCBIST fapi target
-    ExtensibleChip * mcbChip = getConnectedParent( i_mcaChip, TYPE_MCBIST );
-    fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( mcbChip->getTrgt() );
-
-    // Get the stop conditions.
-    mss::mcbist::stop_conditions<> stopCond;
-    stopCond.set_pause_on_mpe(mss::ON)
-            .set_pause_on_ue(mss::ON)
-            .set_pause_on_aue(mss::ON)
-            .set_nce_inter_symbol_count_enable(mss::ON)
-            .set_nce_soft_symbol_count_enable( mss::ON)
-            .set_nce_hard_symbol_count_enable( mss::ON);
-
-    // Stop on hard CEs if MNFG CE checking is enabled.
-    if ( isMfgCeCheckingEnabled() ) stopCond.set_pause_on_nce_hard(mss::ON);
-
-    do
-    {
-        // Get the first address of the given rank.
-        mss::mcbist::address saddr, eaddr;
-        o_rc = getMemAddrRange<TYPE_MCA>( i_mcaChip, i_rank, saddr, eaddr,
-                                          SLAVE_RANK );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
-                      i_mcaChip->getHuid(), i_rank.getKey() );
-            break;
-        }
-
-        // Clear all of the counters and maintenance ECC attentions.
-        o_rc = prepareNextCmd<TYPE_MCBIST>( mcbChip );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
-                      mcbChip->getHuid() );
-            break;
-        }
-
-        // Start the super fast read command.
-        errlHndl_t errl;
-        FAPI_INVOKE_HWP( errl, mss::memdiags::sf_read, fapiTrgt, stopCond,
-                         saddr );
-        if ( nullptr != errl )
-        {
-            PRDF_ERR( PRDF_FUNC "mss::memdiags::sf_read(0x%08x,%d) failed",
-                      mcbChip->getHuid(), i_rank.getMaster() );
-            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL; break;
-        }
-
-    } while (0);
-    */
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-// This specialization only exists to avoid a lot of extra code in some classes.
-// The input chip must still be an MCA chip.
-template<>
-uint32_t startSfRead<TYPE_MCBIST>( ExtensibleChip * i_mcaChip,
-                                   const MemRank & i_rank )
-{
-    return startSfRead<TYPE_MCA>( i_mcaChip, i_rank );
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t cleanupSfRead<TYPE_MCBIST>( ExtensibleChip * i_mcbChip )
-{
-    return SUCCESS; // Not needed for MCBIST commands.
 }
 
 //##############################################################################

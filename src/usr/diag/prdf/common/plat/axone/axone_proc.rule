@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2019
+# Contributors Listed Below - COPYRIGHT 2018,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -3330,7 +3330,7 @@ group gMCDFIR_0
     /** MCDFIR_0[0]
      *  MCD array had a unrecoverable ECC error
      */
-    (rMCDFIR_0, bit(0)) ? self_th_1; # NIMBUS_21,NIMBUS_23,CUMULUS_13
+    (rMCDFIR_0, bit(0)) ? self_th_1;
 
     /** MCDFIR_0[1]
      *  MCD array had a correctable ECC error
@@ -3413,7 +3413,7 @@ group gMCDFIR_1
     /** MCDFIR_1[0]
      *  MCD array had a unrecoverable ECC error
      */
-    (rMCDFIR_1, bit(0)) ? self_th_1; # NIMBUS_21,NIMBUS_23,CUMULUS_13
+    (rMCDFIR_1, bit(0)) ? self_th_1;
 
     /** MCDFIR_1[1]
      *  MCD array had a correctable ECC error

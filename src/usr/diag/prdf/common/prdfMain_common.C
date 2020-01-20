@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,6 @@
 #include <prdfMfgThresholdMgr.H>
 
 #ifdef __HOSTBOOT_RUNTIME
-#include <prdfP9McbistDomain.H>
 #include <prdfP9OcmbChipDomain.H>
 #endif
 
@@ -164,11 +163,7 @@ errlHndl_t noLock_initialize()
 
     // Handle R/R scenario.
     TARGETING::MODEL procModel = getChipModel( getMasterProc() );
-    if ( MODEL_NIMBUS == procModel )
-    {
-        ((McbistDomain *)systemPtr->GetDomain(MCBIST_DOMAIN))->handleRrFo();
-    }
-    else if ( MODEL_AXONE == procModel )
+    if ( MODEL_AXONE == procModel )
     {
         ((OcmbChipDomain *)systemPtr->GetDomain(OCMB_DOMAIN))->handleRrFo();
     }

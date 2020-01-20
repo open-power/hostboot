@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,21 +87,17 @@ enum DOMAIN_ID
     PHB_DOMAIN    = 0x77,
     XBUS_DOMAIN   = 0x78,
     OBUS_DOMAIN   = 0x79,
-    MCBIST_DOMAIN = 0x7A,
-    MCS_DOMAIN    = 0x7B,
-    MCA_DOMAIN    = 0x7C,
-    MC_DOMAIN     = 0x7D,
-    MI_DOMAIN     = 0x7E,
-    DMI_DOMAIN    = 0x7F,
+    MC_DOMAIN     = 0x7A,
+    MI_DOMAIN     = 0x7B,
 
-    MEMBUF_DOMAIN = 0x80,
-    MBA_DOMAIN    = 0x81,
+    MEMBUF_DOMAIN = 0x7C,
+    MBA_DOMAIN    = 0x7D,
 
-    NPU_DOMAIN    = 0x82,
-    MCC_DOMAIN    = 0x83,
-    OMIC_DOMAIN   = 0x84,
-    OMI_DOMAIN    = 0x85,
-    OCMB_DOMAIN   = 0x86,
+    NPU_DOMAIN    = 0x7E,
+    MCC_DOMAIN    = 0x7F,
+    OMIC_DOMAIN   = 0x80,
+    OMI_DOMAIN    = 0x81,
+    OCMB_DOMAIN   = 0x82,
 
     CLOCK_DOMAIN_FAB          = 0x90,
     CLOCK_DOMAIN_MEMBUF       = 0x91,

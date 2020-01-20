@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,7 @@
 #include <prdfMemScrubUtils.H>
 #include <prdfMemTdFalseAlarm.H>
 #include <prdfMemTdQueue.H>
-#include <prdfP9McaExtraSig.H>
+#include <prdfMemExtraSig.H>
 #include <prdfPlatServices.H>
 
 namespace PRDF
@@ -51,7 +51,7 @@ class VcmEvent : public TdEntry
 
     /**
      * @brief Constructor
-     * @param i_chip MCA or MBA.
+     * @param i_chip OCMB.
      * @param i_rank Rank reporting chip mark.
      * @param i_mark Chip mark placed by hardware.
      */
@@ -340,8 +340,6 @@ class VcmEvent : public TdEntry
 // that are also defined in the primary template.
 
 #ifdef __HOSTBOOT_RUNTIME
-template<>
-uint32_t VcmEvent<TARGETING::TYPE_MCA>::cleanup(STEP_CODE_DATA_STRUCT & io_sc);
 template<>
 uint32_t VcmEvent<TARGETING::TYPE_OCMB_CHIP>::cleanup(
     STEP_CODE_DATA_STRUCT & io_sc);

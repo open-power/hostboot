@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,9 +41,9 @@ namespace PRDF
 //------------------------------------------------------------------------------
 
 /** @brief Simple container for a memory rank.
- *  @note  These ranks are relative to the MBA and MCA targets. Therefore, they
- *         do not contain information like the port, which is needed for MCBIST
- *         targets. So that information will need to be derived elsewhere.
+ *  @note  These ranks are relative to the OCMB target. Therefore, they
+ *         do not contain information like the port. So that information will
+ *         need to be derived elsewhere.
  */
 class MemRank
 {

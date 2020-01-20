@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -169,14 +169,6 @@ uint32_t getChipId( TARGETING::TargetHandle_t i_trgt );
  */
 uint8_t getChipLevel( TARGETING::TargetHandle_t i_trgt );
 
-/**
- * @brief set hw changed state for a target
- *
- * @param i_target target handle
- *
- */
-void setHWStateChanged(TARGETING::TargetHandle_t i_target);
-
 //##############################################################################
 //##
 //##                         General Utility Functions
@@ -311,7 +303,7 @@ TARGETING::TargetHandle_t getConnectedPeerTarget(
                                   TARGETING::TargetHandle_t i_tgt);
 
 /**
- * @param  i_trgt The target MBA, MCA, OCMB_CHIP, or MEM_PORT.
+ * @param  i_trgt The target OCMB_CHIP or MEM_PORT.
  * @param  i_rank The target rank.
  * @return A list of DIMMs connected to the target and rank.
  */
@@ -319,10 +311,9 @@ TARGETING::TargetHandleList getConnectedDimms( TARGETING::TargetHandle_t i_trgt,
                                                const MemRank & i_rank );
 
 /**
- * @param  i_trgt The target MBA, MCA, OCMB_CHIP, or MEM_PORT.
+ * @param  i_trgt The target OCMB_CHIP or MEM_PORT.
  * @param  i_rank The target rank.
- * @param  i_port Port select, only needed for MBA and OCMB_CHIP. MCA and
- *                MEM_PORT are targets equivalent to the port already.
+ * @param  i_port Port select
  * @return The DIMM connected to the target and rank on a port.
  */
 TARGETING::TargetHandle_t getConnectedDimm( TARGETING::TargetHandle_t i_trgt,
@@ -390,14 +381,6 @@ uint32_t getPhbConfig( TARGETING::TargetHandle_t i_proc );
 //##############################################################################
 
 /**
- * @brief   Returns the DMI bus channel for the given memory target.
- * @param   i_memTarget MCS target or child of MCS.
- * @return  The DMI bus channel.
- * @note    Can check against MAX_MCS_PER_PROC for validity.
- */
-uint32_t getMemChnl( TARGETING::TargetHandle_t i_memTarget );
-
-/**
  * @brief   Determines if a given target is associated with a memory buffer that
  *          is located on the DIMM card (as opposed to IS DIMMs connected to the
  *          memory buffer).
@@ -424,35 +407,14 @@ uint8_t getDimmSlct( TARGETING::TargetHandle_t i_trgt );
 
 /**
  * @brief   checks dram width ( x4 )
- * @param   i_trgt MCA, MBA, or DIMM target
+ * @param   i_trgt DIMM target
  * @return  true if DRAM width is X4, false otherwise
  */
 bool isDramWidthX4(TARGETING::TargetHandle_t i_trgt);
 
 /**
- * @param   i_trgt MBA
- * @return  The DRAM generation ( 1 - DDR3,  2 - DDR4 )
- */
-template<TARGETING::TYPE T>
-uint8_t getDramGen( TARGETING::TargetHandle_t i_trgt );
-
-/**
- * @param  i_trgt MBA target
- * @return The number of row bits configured on this memory target.
- */
-template<TARGETING::TYPE T>
-uint8_t getRowNumConfig( TARGETING::TargetHandle_t i_trgt );
-
-/**
- * @param  i_trgt MBA target
- * @return The number of column bits configured on this memory target.
- */
-template<TARGETING::TYPE T>
-uint8_t getColNumConfig( TARGETING::TargetHandle_t i_trgt );
-
-/**
- * @brief  Returns a sorted list of configured master ranks for an MCA or MBA.
- * @param  i_trgt  MCA, MBA, or OCMB_CHIP target.
+ * @brief  Returns a sorted list of configured master ranks for an OCMB.
+ * @param  i_trgt  OCMB_CHIP target.
  * @param  o_ranks The returned list.
  * @param  i_ds    When used, this function will only return the list of ranks
  *                 for the target DIMM select. Otherwise, the default is to
@@ -467,8 +429,8 @@ void getMasterRanks( TARGETING::TargetHandle_t i_trgt,
                      uint8_t i_ds = MAX_DIMM_PER_PORT );
 
 /**
- * @brief  Returns a sorted list of configured slave ranks for an MCA or MBA.
- * @param  i_trgt  MCA, MBA, or OCMB_CHIP target.
+ * @brief  Returns a sorted list of configured slave ranks for an OCMB.
+ * @param  i_trgt  OCMB_CHIP target.
  * @param  o_ranks The returned list.
  * @param  i_ds    When used, this function will only return the list of ranks
  *                 for the target DIMM select. Otherwise, the default is to
@@ -484,7 +446,7 @@ void getSlaveRanks( TARGETING::TargetHandle_t i_trgt,
 
 /**
  * @brief  Obtains the number of master ranks per DIMM select.
- * @param  i_trgt MCA, MBA, or OCMB_CHIP target.
+ * @param  i_trgt OCMB_CHIP target.
  * @param  i_ds   DIMM select.
  * @return Total number of master ranks configured per DIMM select.
  */
@@ -495,7 +457,7 @@ uint8_t getNumMasterRanksPerDimm( TARGETING::TargetHandle_t i_trgt,
 /**
  * @brief  Obtains the total number of ranks (including slave ranks) per DIMM
  *         select.
- * @param  i_trgt MCA, MBA, or OCMB_CHIP target.
+ * @param  i_trgt OCMB_CHIP target.
  * @param  i_ds   DIMM select.
  * @return Total number of ranks configured per DIMM select.
  */

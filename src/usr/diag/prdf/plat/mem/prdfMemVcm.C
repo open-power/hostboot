@@ -79,49 +79,10 @@ uint32_t VcmEvent<T>::handlePhaseComplete( const uint32_t & i_eccAttns,
 }
 
 template
-uint32_t VcmEvent<TYPE_MCA>::handlePhaseComplete( const uint32_t & i_eccAttns,
-                                                  STEP_CODE_DATA_STRUCT & io_sc,
-                                                  bool & o_done );
-template
 uint32_t VcmEvent<TYPE_OCMB_CHIP>::handlePhaseComplete(
                                                   const uint32_t & i_eccAttns,
                                                   STEP_CODE_DATA_STRUCT & io_sc,
                                                   bool & o_done );
-
-//##############################################################################
-//
-//                           Specializations for MCA
-//
-//##############################################################################
-
-template<>
-uint32_t VcmEvent<TYPE_MCA>::startCmd()
-{
-    #define PRDF_FUNC "[VcmEvent::startCmd] "
-
-    uint32_t o_rc = SUCCESS;
-    /* TODO RTC 247260
-
-    #ifndef CONFIG_AXONE
-
-    // No stop conditions.
-    mss::mcbist::stop_conditions<mss::mc_type::NIMBUS> stopCond;
-
-    // Start the time based scrub procedure on this master rank.
-    o_rc = startTdScrub<TYPE_MCA>( iv_chip, iv_rank, MASTER_RANK, stopCond );
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
-                  iv_chip->getHuid(), getKey() );
-    }
-
-    #endif
-
-    */
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
 
 //##############################################################################
 //

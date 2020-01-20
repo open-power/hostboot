@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,7 +44,7 @@ namespace PRDF
 
 /**
  * @brief A table of memory UEs.
- * @note  Only one of these tables will exists per MBA/MCA.
+ * @note  Only one of these tables will exists per OCMB.
  * @note  So far, this table is used only for FFDC.
  */
 class MemUeTable
@@ -62,7 +62,7 @@ class MemUeTable
 
     /**
      * @brief Constructor.
-     * @param i_chip MCA or MBA associated with this data.
+     * @param i_chip OCMB associated with this data.
      */
     explicit MemUeTable( ExtensibleChip * i_chip ) :
         iv_chip( i_chip )
@@ -115,7 +115,7 @@ class MemUeTable
 
   private: // instance variables
 
-    ExtensibleChip * iv_chip; ///< MCA or MBA associated with this data.
+    ExtensibleChip * iv_chip; ///< OCMB associated with this data.
 
     /** A FIFO that stores the latest memory UE addresses and their types. This
      *  is not a pure FIFO, because if a new entry matches an existing entry,

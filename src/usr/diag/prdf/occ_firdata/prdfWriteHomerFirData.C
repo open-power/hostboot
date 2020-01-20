@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -158,67 +158,6 @@ void getAddresses( TrgtMap_t & io_targMap )
         // PLL registers
         0x0D0F001E, // PCI_CONFIG_REG
         0x0D0F001F, // PCI_ERROR_REG
-    };
-
-    io_targMap[TRGT_MCS][REG_FIR] =
-    {
-        0x05010800, // MCIFIR
-    };
-
-    io_targMap[TRGT_MCS][REG_REG] =
-    {
-        // c_err_rpt registers
-        0x0501081a, // MC Error Report 2
-        0x0501081e, // MC Error Report 0
-        0x0501081f, // MC Error Report 1
-
-        // Memory config registers
-        0x0501080a, // Primary MemCfg Reg
-        0x0501080b, // MCFGPA
-        0x0501080c, // MCFGPM
-        0x0501080d, // MCFGPMA
-    };
-
-    io_targMap[TRGT_MCBIST][REG_GLBL] =
-    {
-        0x07040000, // MC_CHIPLET_CS_FIR
-        0x07040001, // MC_CHIPLET_RE_FIR
-        0x07040018, // MC_CHIPLET_UCS_FIR
-    };
-
-    io_targMap[TRGT_MCBIST][REG_FIR] =
-    {
-        0x0704000A, // MC_LFIR
-        0x07012300, // MCBISTFIR
-    };
-
-    io_targMap[TRGT_MCA][REG_FIR] =
-    {
-        0x07010900, // MCACALFIR
-        0x07010A00, // MCAECCFIR
-        0x07011000, // DDRPHYFIR
-    };
-
-    io_targMap[TRGT_MCBIST][REG_REG] =
-    {
-        // Chiplet FIRs
-        0x07040002, // MC_CHIPLET_FIR_MASK
-        0x07040019, // MC_CHIPLET_UCS_FIR_MASK
-
-        // PLL registers
-        0x070F001E, // MC_CONFIG_REG
-        0x070F001F, // MC_ERROR_REG
-
-        // AUE/IAUE analysis
-        0x0701236D, // MCB0_MBUER
-        0x0701236E, // MCB0_MBAUER
-        0x07012372, // MCB1_MBUER
-        0x07012373, // MCB1_MBAUER
-        0x07012377, // MCB2_MBUER
-        0x07012378, // MCB2_MBAUER
-        0x0701237C, // MCB3_MBUER
-        0x0701237D, // MCB3_MBAUER
-        0x070123D7, // MCBMCAT
     };
 
     io_targMap[TRGT_EQ][REG_GLBL] =
@@ -685,11 +624,10 @@ errlHndl_t getPnorInfo( HOMER_Data_t & o_data )
  */
 typedef struct __attribute__((packed))
 {
-    HOMER_Chip_t  hChipType;  /* Nimbus, Axone, EC Level, etc...*/
+    HOMER_Chip_t  hChipType;  /* Axone, EC Level, etc...*/
 
     union
     {
-        HOMER_ChipNimbus_t   hChipN;
         HOMER_ChipAxone_t    hChipA;
     };
 
@@ -744,9 +682,6 @@ uint32_t __getUnitMask( TargetHandle_t i_chip, TARGETING::TYPE i_unitType,
             case TYPE_EQ:     maxPos = TrgtPos_t::MAX_EQ_PER_PROC;     break;
             case TYPE_EX:     maxPos = TrgtPos_t::MAX_EX_PER_PROC;     break;
             case TYPE_CORE:   maxPos = TrgtPos_t::MAX_EC_PER_PROC;     break;
-            case TYPE_MCBIST: maxPos = TrgtPos_t::MAX_MCBIST_PER_PROC; break;
-            case TYPE_MCS:    maxPos = TrgtPos_t::MAX_MCS_PER_PROC;    break;
-            case TYPE_MCA:    maxPos = TrgtPos_t::MAX_MCA_PER_PROC;    break;
             case TYPE_MC:     maxPos = TrgtPos_t::MAX_MC_PER_PROC;     break;
             case TYPE_MI:     maxPos = TrgtPos_t::MAX_MI_PER_PROC;     break;
             case TYPE_MCC:    maxPos = TrgtPos_t::MAX_MCC_PER_PROC;    break;
@@ -786,9 +721,6 @@ uint32_t __getUnitMask( TargetHandle_t i_chip, TARGETING::TYPE i_unitType,
             }
             break;
 
-        case TYPE_MCBIST:
-        case TYPE_MCS:
-        case TYPE_MCA:
         case TYPE_MC:
         case TYPE_MI:
         case TYPE_MCC:
@@ -863,7 +795,6 @@ errlHndl_t getHwConfig( std::vector<HOMER_ChipInfo_t> & o_chipInfVector,
             HOMER_ChipType_t procModelType = HOMER_CHIP_INVALID;
             switch ( getChipModel(proc) )
             {
-                case MODEL_NIMBUS: procModelType = HOMER_CHIP_NIMBUS; break;
                 case MODEL_AXONE:  procModelType = HOMER_CHIP_AXONE;  break;
                 default:
                     PRDF_ERR( FUNC "Unsupported chip model %d on 0x%08x",
@@ -876,28 +807,7 @@ errlHndl_t getHwConfig( std::vector<HOMER_ChipInfo_t> & o_chipInfVector,
             __initChipInfo( proc, procModelType, MAX_PROC_PER_NODE, ci );
 
             // Set the chip specific data.
-            if ( HOMER_CHIP_NIMBUS == procModelType )
-            {
-                // Init the chiplet masks
-                ci.hChipN = HOMER_initChipNimbus();
-
-                // Check for master processor
-                ci.hChipN.isMaster = (proc == masterProc) ? 1 : 0;
-
-                // Set all of the unit masks.
-                ci.hChipN.cappMask   = __getUnitMask(proc, TYPE_CAPP,  i_curHw);
-                ci.hChipN.xbusMask   = __getUnitMask(proc, TYPE_XBUS,  i_curHw);
-                ci.hChipN.obusMask   = __getUnitMask(proc, TYPE_OBUS,  i_curHw);
-                ci.hChipN.pecMask    = __getUnitMask(proc, TYPE_PEC,   i_curHw);
-                ci.hChipN.phbMask    = __getUnitMask(proc, TYPE_PHB,   i_curHw);
-                ci.hChipN.eqMask     = __getUnitMask(proc, TYPE_EQ,    i_curHw);
-                ci.hChipN.exMask     = __getUnitMask(proc, TYPE_EX,    i_curHw);
-                ci.hChipN.ecMask     = __getUnitMask(proc, TYPE_CORE,  i_curHw);
-                ci.hChipN.mcbistMask = __getUnitMask(proc, TYPE_MCBIST,i_curHw);
-                ci.hChipN.mcsMask    = __getUnitMask(proc, TYPE_MCS,   i_curHw);
-                ci.hChipN.mcaMask    = __getUnitMask(proc, TYPE_MCA,   i_curHw);
-            }
-            else if ( HOMER_CHIP_AXONE == procModelType )
+            if ( HOMER_CHIP_AXONE == procModelType )
             {
                 // Init the chiplet masks
                 ci.hChipA = HOMER_initChipAxone();
@@ -1055,10 +965,7 @@ errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
                 // memory when asked for
                 if ( (ALL_PROC_MEM_MASTER_CORE == i_curHw) ||
                      (ALL_HARDWARE == i_curHw)             ||
-                     ( (TRGT_MCBIST != t.first) &&
-                       (TRGT_MCS    != t.first) &&
-                       (TRGT_MCA    != t.first) &&
-                       (TRGT_MC     != t.first) &&
+                     ( (TRGT_MC     != t.first) &&
                        (TRGT_MI     != t.first) &&
                        (TRGT_MCC    != t.first) &&
                        (TRGT_OMIC   != t.first)
@@ -1112,19 +1019,7 @@ errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
                         l_chipTypeSize ); idx += l_chipTypeSize;
 
                 // Place the configured chiplet information.
-                if ( HOMER_CHIP_NIMBUS == l_chipItr->hChipType.chipType )
-                {
-                    // Ensure we won't copy beyond space allowed
-                    sz_hBuf += sizeof(HOMER_ChipNimbus_t);
-                    errl = homerVerifySizeFits(i_hBufSize, sz_hBuf);
-                    if (NULL != errl) { break; }
-
-                    memcpy( &i_hBuf[idx], &(l_chipItr->hChipN),
-                            sizeof(HOMER_ChipNimbus_t) );
-
-                    idx += sizeof(HOMER_ChipNimbus_t);
-                }
-                else if ( HOMER_CHIP_AXONE == l_chipItr->hChipType.chipType )
+                if ( HOMER_CHIP_AXONE == l_chipItr->hChipType.chipType )
                 {
                     // Ensure we won't copy beyond space allowed
                     sz_hBuf += sizeof(HOMER_ChipAxone_t);
@@ -1188,10 +1083,7 @@ errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
             {
                 if ( (ALL_PROC_MEM_MASTER_CORE == i_curHw) ||
                      (ALL_HARDWARE == i_curHw)             ||
-                     ( (TRGT_MCBIST != t.first) &&
-                       (TRGT_MCS    != t.first) &&
-                       (TRGT_MCA    != t.first) &&
-                       (TRGT_MC     != t.first) &&
+                     ( (TRGT_MC     != t.first) &&
                        (TRGT_MI     != t.first) &&
                        (TRGT_MCC    != t.first) &&
                        (TRGT_OMIC   != t.first)
@@ -1258,9 +1150,6 @@ errlHndl_t writeHomerFirData( uint8_t * i_hBuf, size_t i_hBufSize,
 
     do
     {
-        // FIRDATA not supported on Cumulus based systems. So do nothing.
-        if ( MODEL_CUMULUS == getChipModel(getMasterProc()) ) break;
-
         HOMER_Data_t  l_homerData = HOMER_getData(); // Initializes data
 
         // Set flag indicating if IPL or runtime situation.

@@ -200,7 +200,6 @@ CLEAN_TARGETS += ${MFG_THRES_PATH}
 #prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/utils/
 #prd_obj_no_sim += hwp_wrappers_nim.o
 #prd_obj_no_sim += hwp_wrappers_exp.o
-#prd_obj_no_sim += nimbus_pos.o
 #prd_obj_no_sim += explorer_pos.o
 #prd_obj_no_sim += exp_mcbist.o
 #prd_obj_no_sim += exp_memdiags.o

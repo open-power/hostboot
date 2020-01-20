@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,8 +76,7 @@ class MemDqBitmap
                  iv_x4Dram(true), iv_data(i_d)
     {
         if ( TARGETING::TYPE_MEM_PORT == PlatServices::getTargetType(iv_trgt) ||
-             TARGETING::TYPE_OCMB_CHIP ==
-                  PlatServices::getTargetType(iv_trgt) )
+             TARGETING::TYPE_OCMB_CHIP == PlatServices::getTargetType(iv_trgt) )
         {
             // TODO RTC 210072 - Support multiple ports
             TARGETING::TargetHandle_t dimm =
@@ -239,7 +238,7 @@ class MemDqBitmap
 
   private: // instance variables
 
-    TARGETING::TargetHandle_t iv_trgt; ///< Target MBA/MCA/MEM_PORT/OCMB_CHIP
+    TARGETING::TargetHandle_t iv_trgt; ///< Target MEM_PORT/OCMB_CHIP
     MemRank iv_rank;                   ///< Target rank
     bool iv_x4Dram;                    ///< TRUE if iv_trgt uses x4 DRAMs
 
@@ -253,7 +252,7 @@ class MemDqBitmap
 
 /**
  * @brief  Sets the inputted dram in DRAM repairs VPD.
- * @param  i_trgt MBA, MCA, MEM_PORT, or OCMB chip.
+ * @param  i_trgt MEM_PORT or OCMB chip.
  * @param  i_rank Target rank.
  * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
  */
@@ -262,7 +261,7 @@ uint32_t setDramInVpd( TARGETING::TargetHandle_t i_trgt, const MemRank & i_rank,
 
 /**
  * @brief  Clears the inputted dram in DRAM repairs VPD.
- * @param  i_trgt MBA, MCA, MEM_PORT, or OCMB chip.
+ * @param  i_trgt MEM_PORT or OCMB chip.
  * @param  i_rank Target rank.
  * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
  */

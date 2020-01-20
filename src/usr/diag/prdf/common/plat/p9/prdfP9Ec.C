@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -133,8 +133,6 @@ int32_t PostAnalysis( ExtensibleChip * i_chip,
 #endif
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_ec,  Ec, PostAnalysis );
-PRDF_PLUGIN_DEFINE_NS( cumulus_ec, Ec, PostAnalysis );
 PRDF_PLUGIN_DEFINE_NS( axone_ec,   Ec, PostAnalysis );
 
 /**
@@ -251,8 +249,6 @@ int32_t PreAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_ec,  Ec, PreAnalysis );
-PRDF_PLUGIN_DEFINE_NS( cumulus_ec, Ec, PreAnalysis );
 PRDF_PLUGIN_DEFINE_NS( axone_ec,   Ec, PreAnalysis );
 
 void checkCoreRePresent( ExtensibleChip * i_chip,
@@ -401,8 +397,6 @@ int32_t CheckCoreCheckstop( ExtensibleChip * i_chip,
     return SUCCESS;
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_ec,  Ec, CheckCoreCheckstop );
-PRDF_PLUGIN_DEFINE_NS( cumulus_ec, Ec, CheckCoreCheckstop );
 PRDF_PLUGIN_DEFINE_NS( axone_ec,   Ec, CheckCoreCheckstop );
 
 } // end namespace Ec

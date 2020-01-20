@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,30 +72,11 @@ enum PositionBounds
 
     MAX_XBUS_PER_PROC   = 3, // Nimbus 1 and 2, Cumulus 0, 1, and 2
 
-    MAX_MCBIST_PER_PROC = 2,
-
-    MAX_MCS_PER_MCBIST  = 2,
-    MAX_MCS_PER_PROC    = MAX_MCS_PER_MCBIST * MAX_MCBIST_PER_PROC,
-
-    MAX_MCA_PER_MCS     = 2,
-    MAX_MCA_PER_MCBIST  = MAX_MCA_PER_MCS * MAX_MCS_PER_MCBIST,
-    MAX_MCA_PER_PROC    = MAX_MCA_PER_MCS * MAX_MCS_PER_PROC,
-
-    MAX_PORT_PER_MCBIST = MAX_MCA_PER_MCBIST, // MCA == PORT
-
     MAX_MC_PER_PROC     = 2,
 
     MAX_MI_PER_MC       = 2,
     MAX_MI_PER_PROC     = MAX_MI_PER_MC * MAX_MC_PER_PROC,
 
-    MAX_DMI_PER_MI      = 2,
-    MAX_DMI_PER_MC      = MAX_DMI_PER_MI * MAX_MI_PER_MC,
-    MAX_DMI_PER_PROC    = MAX_DMI_PER_MI * MAX_MI_PER_PROC,
-
-    MAX_MEMBUF_PER_PROC = MAX_DMI_PER_PROC,
-
-    MAX_MBA_PER_MEMBUF  = 2,
-    MAX_PORT_PER_MBA    = 2,
     MAX_DIMM_PER_PORT   = 2,
     MAX_DIMM_PER_RANK   = 2,
     MAX_L4_PER_MEMBUF   = 1,
@@ -175,15 +156,6 @@ namespace CE_TABLE
     };
 
 } // namespace CE_TABLE
-
-namespace RCE_TABLE
-{
-    enum
-    {
-        ENTRY_SIZE  =  2, ///< Number of bytes per entry.
-    };
-
-} // namespace RCE_TABLE
 
 namespace DQ_BITMAP
 {
@@ -358,7 +330,7 @@ namespace TD_CTLR_DATA
         //      4-bit entry type (see TdEntry::TdType)
         VERSION_1 = 1,
 
-        // Version 2 (includes MCA port number):
+        // Version 2 (includes port number):
         //  Header:
         //      1-bit state (IPL or RT)
         //      3-bit version (VERSION_2)
@@ -367,12 +339,12 @@ namespace TD_CTLR_DATA
         //      4-bit current procedure phase (see TdEntry::Phase)
         //      4-bit current procedure type (see TdEntry::TdType)
         //      4-bit number of entries in the queue (0-15)
-        //      2-bit current procedure MCA port relative to MCBIST (0-3)
+        //      2-bit current procedure port relative to ocmb
         //  For each entry in the queue
         //      3-bit entry master rank (0-7)
         //      3-bit entry slave rank (0-7)
         //      4-bit entry type (see TdEntry::TdType)
-        //      2-bit entry MCA port relative to MCBIST (0-3)
+        //      2-bit entry port relative to ocmb
         VERSION_2  = 2,
     };
 

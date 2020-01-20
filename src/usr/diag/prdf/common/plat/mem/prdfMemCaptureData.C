@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,6 @@
 
 // Platform includes
 #include <prdfPlatServices.H>
-#include <prdfP9McaDataBundle.H>
 #include <prdfOcmbDataBundle.H>
 #include <prdfMemRowRepair.H>
 
@@ -90,11 +89,8 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
                               "single DIMM." );
                     break;
                 }
-                if ( TYPE_MCA == getTargetType(trgt) )
-                {
-                    getDimmDqAttr<TYPE_MCA>( trgt, extMemMru.dqMapping );
-                }
-                else if ( TYPE_OCMB_CHIP == getTargetType(trgt) )
+
+                if ( TYPE_OCMB_CHIP == getTargetType(trgt) )
                 {
                     getDimmDqAttr<TYPE_OCMB_CHIP>( trgt, extMemMru.dqMapping );
                 }
@@ -301,7 +297,7 @@ void captureDramRepairsVpd(TargetHandle_t i_trgt, CaptureData & io_cd)
 
             if ( SUCCESS != getBadDqBitmap(i_trgt, rank, bitmap) )
             {
-                PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed: MCA=0x%08x"
+                PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed: Trgt=0x%08x"
                           " rank=0x%02x", getHuid(i_trgt), rank.getKey() );
                 continue; // skip this rank
             }
@@ -426,33 +422,6 @@ void captureRowRepairVpd(TargetHandle_t i_trgt, CaptureData & io_cd)
 //------------------------------------------------------------------------------
 
 template<>
-void captureIueCounts<McaDataBundle*>( TARGETING::TargetHandle_t i_trgt,
-                                       McaDataBundle * i_db,
-                                       CaptureData & io_cd )
-{
-    #ifdef __HOSTBOOT_MODULE
-
-    uint8_t sz_capData = i_db->iv_iueTh.size()*2;
-    uint8_t capData[sz_capData] = {};
-    uint8_t idx = 0;
-
-    for ( auto & th_pair : i_db->iv_iueTh )
-    {
-        capData[idx]   = th_pair.first;
-        capData[idx+1] = th_pair.second.getCount();
-        idx += 2;
-    }
-
-    // Add data to capture data.
-    BitString bs ( sz_capData*8, (CPU_WORD *) &capData );
-    io_cd.Add( i_trgt, Util::hashString("IUE_COUNTS"), bs );
-
-    #endif
-}
-
-//------------------------------------------------------------------------------
-
-template<>
 void captureIueCounts<OcmbDataBundle*>( TARGETING::TargetHandle_t i_trgt,
                                         OcmbDataBundle * i_db,
                                         CaptureData & io_cd )
@@ -478,44 +447,6 @@ void captureIueCounts<OcmbDataBundle*>( TARGETING::TargetHandle_t i_trgt,
 }
 
 //------------------------------------------------------------------------------
-
-template<>
-void addEccData<TYPE_MCA>( ExtensibleChip * i_chip,
-                           STEP_CODE_DATA_STRUCT & io_sc )
-{
-    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
-
-    CaptureData & cd = io_sc.service_data->GetCaptureData();
-    McaDataBundle * db = getMcaDataBundle( i_chip );
-
-    TargetHandle_t trgt = i_chip->GetChipHandle();
-
-    // Add DRAM repairs data from hardware.
-    captureDramRepairsData<TYPE_MCA>( trgt, cd );
-
-    // Add DRAM repairs data from VPD.
-    captureDramRepairsVpd<TYPE_MCA>( trgt, cd );
-
-    // Add IUE counts to capture data.
-    captureIueCounts<McaDataBundle*>( trgt, db, cd );
-
-    // Add CE table to capture data.
-    db->iv_ceTable.addCapData( cd );
-
-    // Add UE table to capture data.
-    db->iv_ueTable.addCapData( cd );
-}
-
-template<>
-void addEccData<TYPE_MCBIST>( ExtensibleChip * i_chip,
-                              STEP_CODE_DATA_STRUCT & io_sc )
-{
-    PRDF_ASSERT( TYPE_MCBIST == i_chip->getType() );
-
-    // Add data for each connected MCA.
-    ExtensibleChipList list = getConnected( i_chip, TYPE_MCA );
-    for ( auto & mcaChip : list ) { addEccData<TYPE_MCA>(mcaChip, io_sc); }
-}
 
 template<>
 void addEccData<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
@@ -545,20 +476,6 @@ void addEccData<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 }
 
 //------------------------------------------------------------------------------
-
-template<>
-void addEccData<TYPE_MCA>( TargetHandle_t i_trgt, errlHndl_t io_errl )
-{
-    CaptureData cd;
-
-    // Add DRAM repairs data from hardware.
-    captureDramRepairsData<TYPE_MCA>( i_trgt, cd );
-
-    // Add DRAM repairs data from VPD.
-    captureDramRepairsVpd<TYPE_MCA>( i_trgt, cd );
-
-    ErrDataService::AddCapData( cd, io_errl );
-}
 
 template<>
 void addEccData<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,

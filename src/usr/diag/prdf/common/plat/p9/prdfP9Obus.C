@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -68,8 +68,6 @@ int32_t smp_masked( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
         return PRD_SCAN_COMM_REGISTER_ZERO;
     }
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_obus,  obus, smp_masked );
-PRDF_PLUGIN_DEFINE_NS( cumulus_obus, obus, smp_masked );
 PRDF_PLUGIN_DEFINE_NS( axone_obus,   obus, smp_masked );
 
 //------------------------------------------------------------------------------
@@ -94,8 +92,6 @@ int32_t non_smp_masked( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
         return SUCCESS;
     }
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_obus,  obus, non_smp_masked );
-PRDF_PLUGIN_DEFINE_NS( cumulus_obus, obus, non_smp_masked );
 PRDF_PLUGIN_DEFINE_NS( axone_obus,   obus, non_smp_masked );
 
 //------------------------------------------------------------------------------
@@ -130,8 +126,6 @@ int32_t non_smp_callout_bus_th_1( ExtensibleChip * i_chip,
         return SUCCESS;
     }
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_obus,  obus, non_smp_callout_bus_th_1 );
-PRDF_PLUGIN_DEFINE_NS( cumulus_obus, obus, non_smp_callout_bus_th_1 );
 PRDF_PLUGIN_DEFINE_NS( axone_obus,   obus, non_smp_callout_bus_th_1 );
 
 //------------------------------------------------------------------------------
@@ -158,8 +152,6 @@ int32_t non_smp_callout_lvl2_th_1( ExtensibleChip * i_chip,
         return SUCCESS;
     }
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_obus,  obus, non_smp_callout_lvl2_th_1 );
-PRDF_PLUGIN_DEFINE_NS( cumulus_obus, obus, non_smp_callout_lvl2_th_1 );
 PRDF_PLUGIN_DEFINE_NS( axone_obus,   obus, non_smp_callout_lvl2_th_1 );
 
 //------------------------------------------------------------------------------
@@ -183,8 +175,6 @@ int32_t non_smp_callout_self( ExtensibleChip * i_chip,
         return SUCCESS;
     }
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_obus,  obus, non_smp_callout_self );
-PRDF_PLUGIN_DEFINE_NS( cumulus_obus, obus, non_smp_callout_self );
 PRDF_PLUGIN_DEFINE_NS( axone_obus,   obus, non_smp_callout_self );
 
 } // end namespace obus

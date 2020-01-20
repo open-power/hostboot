@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,7 +25,7 @@
 
 /** @file  prdfMemAddress.H
  *  @brief General utilities to read, modify, and write the memory address
- *         registers for Centaur MBA and P9 MCBIST/MCA.
+ *         registers for OCMB targets.
  */
 
 #ifndef __prdfMemAddress_H
@@ -55,10 +55,9 @@ enum AddrRangeType
 //------------------------------------------------------------------------------
 
 /** @brief Simple container for a memory address.
- *  @note  These addresses are relative to the MBA and MCA targets. Therefore,
- *         they do not contain information like the port, which is needed for
- *         MCBIST targets. So that information will need to be derived
- *         elsewhere.
+ *  @note  These addresses are relative to OCMB target. Therefore,
+ *         they do not contain information like the port.
+ *         So that information will need to be derived elsewhere.
  */
 class MemAddr
 {
@@ -129,13 +128,9 @@ class MemAddr
     /**
      * @brief Constructor from components.
      * @param i_rnk Rank   See MemRank class
-     * @param i_bnk Bank   MBA (DDR4): bg1-bg0,b1-b0  (4-bit)
-     *                     MBA (DDR3): b2-b0          (3-bit)
-     *                     MCBIST:     b0-b2,bg0-bg1  (5-bit)
-     * @param i_row Row    MBA:        r17-r0         (18-bit)
-     *                     MCBIST:     r0-r17         (18-bit)
-     * @param i_col Column MBA:        c13,c11,c9-c3  (9-bit)
-     *                     MCBIST:     c3-c9          (7-bit)
+     * @param i_bnk Bank   OCMB: b0-b2,bg0-bg1 (5-bit)
+     * @param i_row Row    OCMB: r0-r17        (18-bit)
+     * @param i_col Column OCMB: c3-c9         (7-bit)
      */
     MemAddr( MemRank i_rnk, uint8_t i_bnk, uint32_t i_row, uint16_t i_col ) :
         iv_rnk(i_rnk), iv_bnk(i_bnk), iv_row(i_row), iv_col(i_col)
@@ -143,10 +138,10 @@ class MemAddr
 
   private: // instance variables
 
-    MemRank  iv_rnk = MemRank(0);   ///< Rank
-    uint8_t  iv_bnk = 0;            ///< Bank
-    uint32_t iv_row = 0;            ///< Row
-    uint16_t iv_col = 0;            ///< Column
+    MemRank  iv_rnk = MemRank(0); ///< Rank
+    uint8_t  iv_bnk = 0;          ///< Bank
+    uint32_t iv_row = 0;          ///< Row
+    uint16_t iv_col = 0;          ///< Column
 };
 
 //------------------------------------------------------------------------------
@@ -155,19 +150,7 @@ class MemAddr
 
 /**
  * @brief  Reads the specified mainline memory read address from hardware.
- * @param  i_chip An MEMBUF or MCBIST chip.
- * @param  i_pos  Position of MBA/MCA relative to MEMBUF/MCBIST.
- * @param  i_reg  The target address register.
- * @param  o_addr The returned address from hardware.
- * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
- */
-template<TARGETING::TYPE T>
-uint32_t getMemReadAddr( ExtensibleChip * i_chip, uint32_t i_pos,
-                         MemAddr::ReadReg i_reg, MemAddr & o_addr );
-
-/**
- * @brief  Reads the specified mainline memory read address from hardware.
- * @param  i_chip MCA, MBA, or OCMB.
+ * @param  i_chip OCMB chip.
  * @param  i_reg  The target address register.
  * @param  o_addr The returned address from hardware.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
@@ -179,63 +162,12 @@ uint32_t getMemReadAddr( ExtensibleChip * i_chip, MemAddr::ReadReg i_reg,
 /**
  * @brief  Reads the maintenance address from hardware.
  *
- * While the address returned will be relative to an MBA or MCA, this function
- * requires the MBA or MCBIST targets, which is where the maintenance logic
- * is on the Nimbus or Centaur. We didn't want to add a lot of hopping around
- * between targets just to make the interface look pretty.
- *
- * The address register in the MCBIST may contain the MCA port information, but
- * that is dependent on the on whether or not the command was run in broadcast
- * mode or not. Therefore, users must call getMcbistMaintPort() to get the port
- * information.
- *
- * @param  i_chip An MBA, MCBIST, or OCMB chip.
+ * @param  i_chip An OCMB chip.
  * @param  o_addr The returned address from hardware.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
 uint32_t getMemMaintAddr( ExtensibleChip * i_chip, MemAddr & o_addr );
-
-/**
- * @brief  Writes the maintenance address from hardware.
- * @param  i_chip An MBA chip.
- * @param  i_addr The address to write to hardware.
- * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
- */
-template<TARGETING::TYPE T>
-uint32_t setMemMaintAddr( ExtensibleChip * i_chip, const MemAddr & i_addr );
-
-/**
- * @brief  Reads the maintenance command end address from hardware.
- *
- * @param  i_chip An MBA chip.
- * @param  o_addr The returned end address from hardware.
- * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
- */
-template<TARGETING::TYPE T>
-uint32_t getMemMaintEndAddr( ExtensibleChip * i_chip, MemAddr & o_addr );
-
-#ifdef __HOSTBOOT_MODULE
-
-/**
- * @brief  Queries broadcast mode information and determines which of the MCBIST
- *         ports were targeted for the command.
- *
- * Notes about broadcast mode. It will only be run...
- *  - on all configured ports, no partials configurations supported.
- *  - if there are more than one configured ports behind the MCBIST.
- *  - if all configured ports have the same geometry.
- *
- * @note   Only supported for MCBIST.
- * @param  i_mcbChip An MCBIST chip.
- * @param  o_portList A list of all MCAs targeted by the command.
- * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
- */
-template<TARGETING::TYPE T>
-uint32_t getMcbistMaintPort( ExtensibleChip * i_mcbChip,
-                             ExtensibleChipList & o_portList );
-
-#endif
 
 } // end namespace PRDF
 

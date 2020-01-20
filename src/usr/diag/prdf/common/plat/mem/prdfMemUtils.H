@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,7 +73,7 @@ inline bool sortSymDataCount( const SymbolData & i, const SymbolData & j )
  * @brief  Queries the per symbol counters and returns a sorted list of symbols
  *         with a count greater than or equal to the given threshold.
  * @note   The returned list will be sorted from lowest count to highest count.
- * @param  i_chip        Target mba, mca, or mem_port chip.
+ * @param  i_chip        Target OCMB chip.
  * @param  i_rank        Target rank.
  * @param  o_maintStats  Returns the list of symbols and counts.
  * @param  o_chipMark    This represents the DRAM in which a chip mark should be
@@ -101,9 +101,9 @@ int32_t collectCeStats( ExtensibleChip * i_chip, const MemRank & i_rank,
                         uint8_t i_thr = 1 );
 
 /**
- * @brief  Gets DRAM size for an MBA, MCA, or MEM_PORT.
- * @param  i_trgt     MBA, MCA, or MEM_PORT target.
- * @param  i_dimmSlct DIMM select. Optional for MBA chip.
+ * @brief  Gets DRAM size for an OCMB or MEM_PORT.
+ * @param  i_trgt     OCMB or MEM_PORT target.
+ * @param  i_dimmSlct DIMM select.
  * @return size for a DRAM
  */
 template<TARGETING::TYPE T>

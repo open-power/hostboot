@@ -49,92 +49,10 @@
 #include <prdfPlatServices.H>
 #include <prdfTargetServices.H>
 
-// External includes
-#include <targeting/common/targetservice.H>
-
 class WriteBadDqBitmap: public CxxTest::TestSuite
 {
 
 public:
-
-    void TestNimbusReadWriteBadDqBitmap(void)
-    {
-        using namespace PRDF;
-        using namespace TARGETING;
-        using namespace PlatServices;
-
-        TargetHandle_t masterProc = nullptr;
-        targetService().masterProcChipTargetHandle(masterProc);
-
-        // Nimbus only test
-        if ( MODEL_NIMBUS == masterProc->getAttr<ATTR_MODEL>() )
-        {
-            TS_INFO("- TestNimbusReadWriteBadDqBitmap - Start -");
-
-            uint32_t rc = SUCCESS;
-
-            // Get an MCBIST
-            TargetHandle_t mcb = getConnectedChild(masterProc, TYPE_MCBIST, 0);
-            if ( nullptr == mcb )
-            {
-                TS_FAIL( "ERROR: Failed to get MCBIST" );
-            }
-            // Get an MCA
-            TargetHandle_t mca = getConnectedChild( mcb, TYPE_MCA, 0 );
-            if ( nullptr == mca )
-            {
-                TS_FAIL( "ERROR: Failed to get MCA" );
-            }
-
-            // Make arbitrary initial data
-            MemRank rank( 0, 0 );
-            const uint8_t initialBitmap[DQ_BITMAP::BITMAP_SIZE] =
-                { 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0x00 };
-            BitmapData initialData;
-            memcpy( initialData[0].bitmap, initialBitmap,
-                    sizeof(initialData[0].bitmap) );
-
-            // Set with the initial data
-            MemDqBitmap setBitmap( mca, rank, initialData );
-            rc = setBadDqBitmap( mca, rank, setBitmap );
-            if ( SUCCESS != rc )
-            {
-                TS_FAIL( "ERROR: setBadDqBitmap failed " );
-            }
-
-            // Read the data back
-            MemDqBitmap getBitmap;
-            rc = getBadDqBitmap( mca, rank, getBitmap );
-            if ( SUCCESS != rc )
-            {
-                TS_FAIL( "ERROR: getBadDqBitmap failed" );
-            }
-
-            BitmapData newData = getBitmap.getData();
-
-            // Compare the read data to the initial data. The last byte (byte 9)
-            // is for spares so we won't worry about comparing that.
-            for ( uint8_t n = 0; n < (DQ_BITMAP::BITMAP_SIZE-1); n++ )
-            {
-                if ( newData.at(0).bitmap[n] != initialBitmap[n] )
-                {
-                    TS_FAIL( "TestNimbusReadWriteBadDqBitmap: Incorrect data "
-                             "found. newData[%d]=0x%x initialBitmap[%d]=0x%x",
-                             n, newData.at(0).bitmap[n], n, initialBitmap[n] );
-                }
-            }
-
-            // Clear the vpd just in case
-            rc = clearBadDqBitmap( mca, rank );
-            if ( SUCCESS != rc )
-            {
-                TS_FAIL( "ERROR: clearBadDqBitmap failed" );
-            }
-
-            TS_INFO("- TestNimbusReadWriteBadDqBitmap - End -");
-        }
-
-    }
 
     void TestAxoneReadWriteBadDqBitmap(void)
     {

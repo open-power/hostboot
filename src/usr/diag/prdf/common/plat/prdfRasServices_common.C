@@ -908,8 +908,8 @@ void ErrDataService::deallocateDimms( const SDC_MRU_LIST & i_mruList )
 
                 switch ( tgtType )
                 {
-                    case TYPE_MCBIST: case TYPE_MCS: case TYPE_MCA: // Nimbus
-                    case TYPE_MC:     case TYPE_MI:  case TYPE_DMI: // Cumulus
+                    case TYPE_MC:
+                    case TYPE_MI:
                     {
                         TargetHandleList dimms = getConnected( calloutTgt,
                                                                TYPE_DIMM );

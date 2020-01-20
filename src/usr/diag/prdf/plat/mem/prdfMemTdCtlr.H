@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -122,7 +122,7 @@ class MemTdCtlr
     /**
      * @brief  Bans TPS on the given rank. Any attempts to add a TPS procedure
      *         to the queue for this rank will be ignored.
-     * @param  i_chip MCA, MBA, or OCMB chip.
+     * @param  i_chip OCMB chip.
      * @param  i_rank The target slave rank.
      */
     void banTps( ExtensibleChip * i_chip, const MemRank & i_rank )

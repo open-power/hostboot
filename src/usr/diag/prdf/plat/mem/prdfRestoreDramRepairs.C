@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,7 +36,6 @@
 #include "common/plat/mem/prdfMemCaptureData.H"
 #include "common/plat/mem/prdfMemDqBitmap.H"
 #include "common/plat/mem/prdfMemMark.H"
-#include "common/plat/mem/prdfP9McaExtraSig.H"
 #include "common/plat/mem/prdfMemSymbol.H"
 #include "common/plat/mem/prdfMemoryMru.H"
 #include <prdfPlatServices.H>
@@ -287,10 +286,6 @@ bool processRepairedRanks( TargetHandle_t i_trgt, uint8_t i_repairedRankMask )
     #undef PRDF_FUNC
 }
 
-
-template
-bool processRepairedRanks<TYPE_MCA>( TargetHandle_t i_trgt,
-                                     uint8_t i_repairedRankMask );
 template
 bool processRepairedRanks<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
                                            uint8_t i_repairedRankMask );
@@ -348,8 +343,6 @@ bool processBadDimms( TargetHandle_t i_trgt, uint8_t i_badDimmMask )
 }
 
 template
-bool processBadDimms<TYPE_MCA>( TargetHandle_t i_trgt, uint8_t i_badDimmMask );
-template
 bool processBadDimms<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
                                       uint8_t i_badDimmMask );
 
@@ -396,10 +389,6 @@ bool screenBadDqs( TargetHandle_t i_trgt, const std::vector<MemRank> & i_ranks )
 template<TARGETING::TYPE>
 void deployDramSpares( TargetHandle_t i_trgt,
                        const std::vector<MemRank> & i_ranks );
-
-template<>
-void deployDramSpares<TYPE_MCA>( TargetHandle_t i_trgt,
-                                 const std::vector<MemRank> & i_ranks ){}
 
 template<>
 void deployDramSpares<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
@@ -516,8 +505,6 @@ uint32_t restoreDramRepairs( TargetHandle_t i_trgt )
     #undef PRDF_FUNC
 }
 
-template
-uint32_t restoreDramRepairs<TYPE_MCA>( TargetHandle_t i_trgt );
 template
 uint32_t restoreDramRepairs<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt );
 

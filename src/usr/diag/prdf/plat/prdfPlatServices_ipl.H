@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,14 +65,6 @@ int32_t mdiaSendEventMsg( TARGETING::TargetHandle_t i_trgt,
                           MDIA::MaintCommandEventType i_eventType );
 
 /**
- * @brief  Initiates a reconfig loop due to an RCD parity error.
- * @param  i_trgt An MCA target.
- * @return True if the number of allowed reconfig loops has been exceeded.
- *         False otherwise.
- */
-bool rcdParityErrorReconfigLoop( TARGETING::TargetHandle_t i_trgt );
-
-/**
  * @brief  Invokes the restore DRAM repairs hardware procedure.
  * @param  i_target
  * @param  o_repairedRankMask An encoded bitmask of repaired ranks.
@@ -85,7 +77,7 @@ uint32_t mssRestoreDramRepairs( TARGETING::TargetHandle_t i_target,
                                 uint8_t & o_badDimmMask );
 
 //##############################################################################
-//##                  Nimbus/Centaur Maintenance Command wrappers
+//##                  Maintenance Command wrappers
 //##############################################################################
 
 /**

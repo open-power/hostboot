@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -219,9 +219,9 @@ void MemCeTable<T>::addCapData( CaptureData & io_cd )
     {
         uint32_t mrnk = entry.addr.getRank().getMaster(); //  3-bit
         uint32_t srnk = entry.addr.getRank().getSlave();  //  3-bit
-        uint32_t bnk  = entry.addr.getBank();             //  5-bit (MCA)
+        uint32_t bnk  = entry.addr.getBank();             //  5-bit
         uint32_t row  = entry.addr.getRow();              // 18-bit
-        uint32_t col  = entry.addr.getCol();              //  9-bit (MBA)
+        uint32_t col  = entry.addr.getCol();              //  9-bit
 
         uint8_t row0_1   = (row & 0x30000) >> 16;
         uint8_t row2_9   = (row & 0x0ff00) >>  8;
@@ -266,7 +266,6 @@ void MemCeTable<T>::addCapData( CaptureData & io_cd )
 //------------------------------------------------------------------------------
 
 // Avoid linker errors with the template.
-template class MemCeTable<TYPE_MCA>;
 template class MemCeTable<TYPE_OCMB_CHIP>;
 
 //------------------------------------------------------------------------------

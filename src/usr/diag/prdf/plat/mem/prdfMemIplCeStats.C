@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,7 @@
 #include <prdf_service_codes.H>
 
 // Mem includes
-#include <prdfP9McaExtraSig.H>
+#include <prdfMemExtraSig.H>
 #include <prdfMemIplCeStats.H>
 #include <prdfParserUtils.H>
 #include <prdfMemThresholds.H>
@@ -57,19 +57,6 @@ using namespace PARSERUTILS;
 //------------------------------------------------------------------------------
 
 template<>
-void MemIplCeStats<TYPE_MCA>::banAnalysis( uint8_t i_dimmSlct,
-                                           uint8_t i_portSlct )
-{
-    PRDF_ASSERT( i_dimmSlct < MAX_DIMM_PER_PORT );
-    PRDF_ASSERT( 0 == i_portSlct );
-
-    DimmKey banKey = { i_dimmSlct, i_portSlct };
-    iv_bannedAnalysis[banKey] = true;
-}
-
-//------------------------------------------------------------------------------
-
-template<>
 void MemIplCeStats<TYPE_OCMB_CHIP>::banAnalysis( uint8_t i_dimmSlct,
                                                  uint8_t i_portSlct )
 {
@@ -78,15 +65,6 @@ void MemIplCeStats<TYPE_OCMB_CHIP>::banAnalysis( uint8_t i_dimmSlct,
 
     DimmKey banKey = { i_dimmSlct, i_portSlct };
     iv_bannedAnalysis[banKey] = true;
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-void MemIplCeStats<TYPE_MCA>::banAnalysis( uint8_t i_dimmSlct )
-{
-    // Only one DIMM per DIMM select on MCA.
-    banAnalysis( i_dimmSlct, 0 );
 }
 
 //------------------------------------------------------------------------------
@@ -454,7 +432,6 @@ void MemIplCeStats<T>::addMruAndCommitErrl( const MemoryMru & i_memmru,
 //------------------------------------------------------------------------------
 
 // need these templates to avoid linker errors
-template class MemIplCeStats<TYPE_MCA>;
 template class MemIplCeStats<TYPE_OCMB_CHIP>;
 
 } // end namespace PRDF

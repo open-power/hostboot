@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,17 +88,13 @@ union MemMruMeld
         //       version field so that the error log parser know which format to
         //       used.
 
-        // NOTE: For OCMBs, specified by the isOcmb field, chnlPos will specify
-        //       the MCC position within the proc and mbaPos will specify the
-        //       OMI position within the channel.
-
 #if !( __BYTE_ORDER == __LITTLE_ENDIAN )
 
         uint32_t valid      : 1; ///< Used to indicate nothing failed while
                                  ///< building the object (1=valid, 0=not valid)
         uint32_t procPos    : 3; ///< Proc position within node (0-7)
-        uint32_t chnlPos    : 3; ///< Centaur or MCA position within proc (0-7)
-        uint32_t mbaPos     : 1; ///< MBA position within centaur (0-1)
+        uint32_t chnlPos    : 3; ///< MCC position within proc (0-7)
+        uint32_t omiPos     : 1; ///< OMI position within the MCC (0-1)
 
         uint32_t pins       : 2; ///< Even and/or Odd symbol pins
         uint32_t nodePos    : 3; ///< Node position (0-7)
@@ -109,9 +105,6 @@ union MemMruMeld
 
         uint32_t eccSpared  : 1; ///< True if symbol is on ECC DRAM
         uint32_t srank      : 3; ///< Slave rank (0-7)
-        // If isMca is specified, then chnlPos above will specify the MCA pos
-        // and the mbaPos field will be unused. See above note for OCMB usage.
-        uint32_t isMca      : 1; ///< True if MCA is used as opposed to MBA
         uint32_t isOcmb     : 1; ///< True if OCMB is used
         uint32_t unused     : 2; ///< 2 Bits currently unused
 #else
@@ -119,7 +112,6 @@ union MemMruMeld
         // simulator.
         uint32_t unused     : 2;
         uint32_t isOcmb     : 1;
-        uint32_t isMca      : 1;
         uint32_t srank      : 3;
         uint32_t eccSpared  : 1;
         uint32_t symbol     : 7;
@@ -127,7 +119,7 @@ union MemMruMeld
         uint32_t mrank      : 3;
         uint32_t nodePos    : 3;
         uint32_t pins       : 2;
-        uint32_t mbaPos     : 1;
+        uint32_t omiPos     : 1;
         uint32_t chnlPos    : 3;
         uint32_t procPos    : 3;
         uint32_t valid      : 1;

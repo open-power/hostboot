@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,11 +45,10 @@ using namespace PlatServices;
 
 enum DefaultThresholds
 {
-    MCA_RCD_PARITY_NON_MNFG_TH = 32, ///< Non-MNFG RCD parity error TH
-    MCA_IMPE_NON_MNFG_TH       = 32, ///< Non-MNFG IMPE TH
-    MCA_IUE_NON_MNFG_TH        = 8,  ///< Non-MNFG IUE TH
+    RCD_PARITY_NON_MNFG_TH     = 32, ///< Non-MNFG RCD parity error TH
+    IMPE_NON_MNFG_TH           = 32, ///< Non-MNFG IMPE TH
+    IUE_NON_MNFG_TH            = 8,  ///< Non-MNFG IUE TH
     MBA_RCE_NON_MNFG_TH        = 8,  ///< Non-MNFG RCE TH
-    MBA_SCRUB_CE_NON_MNFG_TH   = 80, ///< Non-MNFG Scrub soft/inter CE TH
 };
 
 //------------------------------------------------------------------------------
@@ -79,7 +78,7 @@ uint8_t getMnfgCeTh()
 
 ThresholdResolution::ThresholdPolicy getRcdParityTh()
 {
-    uint32_t th = MCA_RCD_PARITY_NON_MNFG_TH;
+    uint32_t th = RCD_PARITY_NON_MNFG_TH;
 
     if ( mfgMode() )
     {
@@ -99,7 +98,7 @@ ThresholdResolution::ThresholdPolicy getRcdParityTh()
 
 ThresholdResolution::ThresholdPolicy getIueTh()
 {
-    uint32_t th = MCA_IUE_NON_MNFG_TH;
+    uint32_t th = IUE_NON_MNFG_TH;
 
     if ( mfgMode() )
     {
@@ -119,11 +118,9 @@ ThresholdResolution::ThresholdPolicy getIueTh()
 
 ThresholdResolution::ThresholdPolicy getImpeTh()
 {
-    uint32_t th = MCA_IMPE_NON_MNFG_TH;
+    uint32_t th = IMPE_NON_MNFG_TH;
 
     // NOTE: We will only use the MNFG threshold if DRAM repairs is disabled.
-    //       This is for a Nimbus DD2.0.1 workaround, but the change will be
-    //       permanent for all P9 DD levels.
     if ( areDramRepairsDisabled() )
     {
         th = MfgThresholdMgr::getInstance()->
@@ -201,36 +198,9 @@ void getMnfgMemCeTh( ExtensibleChip * i_chip, const MemRank & i_rank,
 
 // need these templates to avoid linker errors
 template
-void getMnfgMemCeTh<TYPE_MCA>( ExtensibleChip * i_chip, const MemRank & i_rank,
-                               uint32_t & o_cePerDram, uint32_t & o_cePerRank,
-                               uint32_t & o_cePerDimm );
-template
 void getMnfgMemCeTh<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     const MemRank & i_rank, uint32_t & o_cePerDram, uint32_t & o_cePerRank,
     uint32_t & o_cePerDimm );
-
-//------------------------------------------------------------------------------
-
-template <TYPE T>
-uint32_t getScrubCeThreshold( ExtensibleChip * i_chip, const MemRank & i_rank )
-{
-    uint32_t o_thr = MBA_SCRUB_CE_NON_MNFG_TH;
-
-    if ( mfgMode() )
-    {
-        uint32_t junk1 = 0, junk2 = 0;
-
-        getMnfgMemCeTh<T>( i_chip, i_rank, o_thr, junk1, junk2 );
-
-        // getMnfgMemCeTh() returns the number of CEs allowed. Will need to add
-        // one to get the real threshold.
-        o_thr++;
-    }
-
-    return o_thr;
-}
-
-// need these templates to avoid linker errors
 
 } // end namespace PRDF
 

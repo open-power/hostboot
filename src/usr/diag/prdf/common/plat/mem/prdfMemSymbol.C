@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,8 +50,7 @@ MemSymbol::MemSymbol( TARGETING::TargetHandle_t i_trgt, const MemRank & i_rank,
     iv_pins(0), iv_isDramSpared(false), iv_isEccSpared(false)
 {
     PRDF_ASSERT( nullptr != i_trgt );
-    PRDF_ASSERT( TYPE_MCA == getTargetType(i_trgt) ||
-                 TYPE_OCMB_CHIP == getTargetType(i_trgt) );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_trgt) );
 }
 
 //------------------------------------------------------------------------------
@@ -80,11 +79,7 @@ uint8_t MemSymbol::getDq() const
     uint8_t dq = DQS_PER_DIMM;
     TYPE trgtType = getTargetType( iv_trgt );
 
-    if ( TYPE_MCA == trgtType )
-    {
-        dq = symbol2Dq<TYPE_MCA>( iv_symbol );
-    }
-    else if ( TYPE_OCMB_CHIP == trgtType )
+    if ( TYPE_OCMB_CHIP == trgtType )
     {
         dq = symbol2Dq<TYPE_OCMB_CHIP>( iv_symbol );
     }
@@ -104,11 +99,7 @@ uint8_t MemSymbol::getPortSlct() const
     uint8_t portSlct = 0;
     TYPE trgtType = getTargetType( iv_trgt );
 
-    if ( TYPE_MCA == trgtType )
-    {
-        portSlct = symbol2PortSlct<TYPE_MCA>( iv_symbol );
-    }
-    else if ( TYPE_OCMB_CHIP == trgtType )
+    if ( TYPE_OCMB_CHIP == trgtType )
     {
         portSlct = symbol2PortSlct<TYPE_OCMB_CHIP>( iv_symbol );
     }
@@ -129,13 +120,7 @@ uint8_t MemSymbol::getDram() const
     TYPE trgtType = getTargetType( iv_trgt );
     bool isX4 = true;
 
-    if ( TYPE_MCA == trgtType )
-    {
-        isX4 = isDramWidthX4( iv_trgt );
-        dram = isX4 ? symbol2Nibble<TYPE_MCA>( iv_symbol )
-                    : symbol2Byte  <TYPE_MCA>( iv_symbol );
-    }
-    else if ( TYPE_OCMB_CHIP == trgtType )
+    if ( TYPE_OCMB_CHIP == trgtType )
     {
         TargetHandle_t dimm = getConnectedDimm(iv_trgt, iv_rank, getPortSlct());
         isX4 = isDramWidthX4( dimm );
@@ -221,7 +206,7 @@ uint8_t MemSymbol::getDramPins() const
     uint32_t dps = 0;
     uint32_t spd = 0;
 
-    if ( TYPE_MCA == trgtType || TYPE_OCMB_CHIP == trgtType )
+    if ( TYPE_OCMB_CHIP == trgtType )
     {
         dps = MEM_DQS_PER_SYMBOL;
         spd = isX4 ? MEM_SYMBOLS_PER_NIBBLE : MEM_SYMBOLS_PER_BYTE;
@@ -253,12 +238,7 @@ uint8_t MemSymbol::getDramSymbol() const
     }
     uint8_t dram  = getDram();
 
-    if ( TYPE_MCA == trgtType )
-    {
-        dramSymbol = isX4 ? nibble2Symbol<TYPE_MCA>( dram )
-                          : byte2Symbol  <TYPE_MCA>( dram );
-    }
-    else if ( TYPE_OCMB_CHIP == trgtType )
+    if ( TYPE_OCMB_CHIP == trgtType )
     {
         dramSymbol = isX4 ? nibble2Symbol<TYPE_OCMB_CHIP>( dram )
                           : byte2Symbol  <TYPE_OCMB_CHIP>( dram );
@@ -303,60 +283,6 @@ void MemSymbol::updateSpared(const MemSymbol & i_sp0,
 
 //------------------------------------------------------------------------------
 //                       Symbol Accessor Functions
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t getMemReadSymbol<TYPE_MCA>( ExtensibleChip * i_chip,
-                                     const MemRank & i_rank,
-                                     MemSymbol & o_sym1, MemSymbol & o_sym2 )
-{
-    #define PRDF_FUNC "[getMemReadSymbol<TYPE_MCA>] "
-
-    // Check parameters
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
-
-    uint32_t o_rc = SUCCESS;
-
-    o_sym1 = o_sym2 = MemSymbol(); // both initially invalid
-
-    do
-    {
-        // Get the NCE/TCE galois and mask from hardware.
-        ExtensibleChip * mcbChip = getConnectedParent( i_chip, TYPE_MCBIST );
-
-        uint8_t port      = i_chip->getPos() % MAX_MCA_PER_MCBIST; // 0,1,2,3
-        uint8_t mcsRelMcb = port / MAX_MCA_PER_MCS;                // 0,1
-        uint8_t mcaRelMcs = port % MAX_MCA_PER_MCS;                // 0,1
-
-        const char * reg_str = (0 == mcsRelMcb) ? "MBSEVR0" : "MBSEVR1";
-
-        SCAN_COMM_REGISTER_CLASS * reg = mcbChip->getRegister(reg_str);
-        o_rc = reg->Read();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "Read() failed on %s: mcbChip=0x%08x", reg_str,
-                      mcbChip->getHuid() );
-            break;
-        }
-
-        uint32_t bitPos = mcaRelMcs * 32;
-        uint8_t g1 = reg->GetBitFieldJustified( bitPos,      8 );
-        uint8_t m1 = reg->GetBitFieldJustified( bitPos +  8, 8 );
-        uint8_t g2 = reg->GetBitFieldJustified( bitPos + 16, 8 );
-        uint8_t m2 = reg->GetBitFieldJustified( bitPos + 24, 8 );
-
-        // Get the NCE/TCE symbol.
-        o_sym1 = MemSymbol::fromGalois( i_chip->getTrgt(), i_rank, g1, m1 );
-        o_sym2 = MemSymbol::fromGalois( i_chip->getTrgt(), i_rank, g2, m2 );
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
 //------------------------------------------------------------------------------
 
 template<>

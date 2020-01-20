@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,7 @@ namespace MemCaptureData
 
 /**
  * @brief Adds memory ECC FFDC to an SDC.
- * @param i_chip MCBIST, MCA, or MBA.
+ * @param i_chip OCMB.
  * @param io_sc  Step code data struct.
  */
 template<TARGETING::TYPE T>
@@ -50,7 +50,7 @@ void addEccData( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
  * @note  The data will be limited and include things like the DRAM Repairs data
  *        but will not include stuff like the CE/UE tables, because that
  *        information is not relevant during its intended uses.
- * @param i_trgt An MBA or MCA target
+ * @param i_trgt An OCMB target
  * @param o_errl Error log.
  */
 template<TARGETING::TYPE T>
@@ -66,8 +66,8 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl );
 
 /**
  * @brief Queries hardware for all DRAM repairs data (chip/symbol marks, DRAM
- *        spare, etc.) for the given MBA or MCA and adds it to the capture data.
- * @param i_trgt An MBA, MCA, or MEM_PORT target.
+ *        spare, etc.) for the given OCMB and adds it to the capture data.
+ * @param i_trgt An OCMB target.
  * @param io_cd  Capture data struct.
  * @note  This function will be used to capture DRAM repair data into the
  *        capture data struct. Other functions can call this function and
@@ -80,7 +80,7 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
 /**
  * @brief Queries the Bad DQ attributes for the content of the DRAM repairs VPD
  *        and adds it to the capture data.
- * @param i_trgt An MBA, MCA, or MEM_PORT target.
+ * @param i_trgt An OCMB target.
  * @param io_cd  Capture data struct.
  * @note  This function will be used to capture DRAM repair data into the
  *        capture data struct. Other functions can call this function and
@@ -93,7 +93,7 @@ void captureDramRepairsVpd( TARGETING::TargetHandle_t i_trgt,
 /**
  * @brief Queries the Row Repair attributes for the content of the DRAM repairs
  *        VPD and adds it to the capture data.
- * @param i_trgt An MBA or MCA target.
+ * @param i_trgt An OCMB target.
  * @param io_cd  Capture data struct.
  * @note  This function will be used to capture row repair data into the
  *        capture data struct. Other functions can call this function and
@@ -106,8 +106,8 @@ void captureRowRepairVpd( TARGETING::TargetHandle_t i_trgt,
 /**
  * @brief Queries the IUE threshold variable for the IUE counts and adds them
  *        to the capture data.
- * @param i_trgt An MBA or MCA target.
- * @param i_db The MCA or MBA data bundle.
+ * @param i_trgt An OCMB target.
+ * @param i_db The OCMB data bundle.
  * @param io_cd  Capture data struct.
  */
 template<typename D>

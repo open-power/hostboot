@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,7 +79,7 @@ class MemSymbol
 
     /**
      * @brief  Creates a MemSymbol from a symbol.
-     * @param  i_trgt   MBA, MCA, or OCMB_CHIP target.
+     * @param  i_trgt   OCMB_CHIP target.
      * @param  i_rank   The rank this symbol is on.
      * @param  i_symbol The input symbol.
      * @return A MemSymbol. Must call isValid() to determine if the function was
@@ -93,7 +93,7 @@ class MemSymbol
 
     /**
      * @brief  Creates a MemSymbol from a Galois field.
-     * @param  i_trgt   MBA, MCA, or OCMB_CHIP target.
+     * @param  i_trgt   OCMB_CHIP target.
      * @param  i_rank   The rank this symbol is on.
      * @param  i_galois The Galois field.
      * @param  i_mask   The bit mask.
@@ -119,8 +119,7 @@ class MemSymbol
     /** @return rank associated with this symbol. */
     MemRank getRank() const { return iv_rank; };
 
-    /** @return The port select for this symbol. Only relevant on MBA. Will
-     *          always return 0 for MCA and OCMB. */
+    /** @return The port select for this symbol. */
     uint8_t getPortSlct() const;
 
     /** @return The DRAM index for this symbol. */
@@ -216,14 +215,14 @@ class MemSymbol
 
 /**
  * @brief  Reads the memory NCE/TCE vector trap register from hardware.
- * @param  i_chip   MCA, MBA, or OCMB_CHIP.
+ * @param  i_chip   OCMB_CHIP.
  * @param  i_rank   The rank this symbol is on.
  * @param  o_sym1   The first symbol. Should always be valid for both NCE/TCE.
  * @param  o_sym2   The second symbol. Only valid for TCEs.
- * @note   For MCAs, both NCEs and TCEs report to the same error vector and only
- *         the latest NCE/TCE is recorded. Therefore, it is possible that PRD
- *         handles a TCE attention, but only one symbol is found because a NCE
- *         was reported afterwards, wiping out the error vector for the TCE.
+ * @note   For OCMBs, both NCEs and TCEs report to the same error vector and
+ *         only the latest NCE/TCE is recorded. Therefore, it is possible that
+ *         PRD handles a TCE attention, but only one symbol is found because a
+ *         NCE was reported afterwards, wiping out the error vector for the TCE.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>

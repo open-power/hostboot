@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2019
+# Contributors Listed Below - COPYRIGHT 2012,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -91,17 +91,7 @@ TESTS += ${PRD_USR_TEST_PATH}/prdfTest_ProcCentFir.H
 TESTS += ${PRD_USR_TEST_PATH}/prdfTest_BadDqBitmap.H
 TESTS += ${PRD_USR_TEST_PATH}/prdfTest_Ex.H
 TESTS += ${PRD_USR_TEST_PATH}/prdfTest_NimbusTpLFir.H
-#@TODO RTC:178802
-#TESTS += ${PRD_USR_TEST_PATH}/prdfTest_Mcs.H
-
 
 # Wait for PLL code and Ben
 #TESTS += ${PRD_USR_TEST_PATH}/prdfTest_ProcTpLFir.H
-
-#TODO RTC 167288 - Once Cumulus/Centaur are ready we update these
-# Need Centaurs for this (CUMULUS processor chip)
-#TESTS += ${PRD_USR_TEST_PATH}/prdfTest_CentCs.H
-#TESTS += ${PRD_USR_TEST_PATH}/prdfTest_ProcMbsFir.H
-#TESTS += ${PRD_USR_TEST_PATH}/prdfTest_McsMciFir.H
-
 

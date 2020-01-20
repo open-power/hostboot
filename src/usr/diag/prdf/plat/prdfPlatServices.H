@@ -130,7 +130,7 @@ uint32_t getSpdData(TARGETING::TargetHandle_t i_target,
  *         address range. The MCBIST HW logic tolerates this unlike the MBA HW
  *         logic. Functions like Dynamic Memory Deallocation may need to adjust
  *         the actual address based on the actual HW config.
- * @param  i_chip      An MCA or MBA.
+ * @param  i_chip      An OCMB.
  * @param  i_rank      The target rank.
  * @param  o_startAddr The returned start address.
  * @param  o_endAddr   The returned end address.
@@ -149,7 +149,7 @@ uint32_t getMemAddrRange( ExtensibleChip * i_chip, const MemRank & i_rank,
  *         address range. The MCBIST HW logic tolerates this unlike the MBA HW
  *         logic. Functions like Dynamic Memory Deallocation may need to adjust
  *         the actual address based on the actual HW config.
- * @param  i_chip      An MCA or MBA.
+ * @param  i_chip      An OCMB.
  * @param  o_startAddr The returned start address.
  * @param  o_endAddr   The returned end address.
  * @param  i_dimmSlct  When used, this function will only return the address
@@ -164,7 +164,7 @@ uint32_t getMemAddrRange( ExtensibleChip * i_chip,
 
 /**
  * @brief  Queries if Row Repair is enabled.
- * @param  i_chip An MCA or MBA.
+ * @param  i_chip An OCMB.
  * @param  i_rank Any rank on the target DIMMs.
  * @return True if Row Repair is enabled on the DIMMs containing this rank.
  *         False otherwise.
@@ -193,12 +193,12 @@ void nvdimmAddFfdc( TARGETING::TargetHandle_t i_nvdimm, errlHndl_t & io_errl  );
 #endif
 
 //##############################################################################
-//##                  Nimbus/Centaur Maintenance Command wrappers
+//##                    Maintenance Command wrappers
 //##############################################################################
 
 /**
  * @brief  Starts Background Scrubbing.
- * @param  i_chip MCA or MBA chip.
+ * @param  i_chip OCMB chip.
  * @param  i_rank Will start background scrubbing on the first address of this
  *                slave rank. To ensure the command is started on a master rank
  *                boundary, make sure the slave rank value is 0.
@@ -209,7 +209,7 @@ uint32_t startBgScrub( ExtensibleChip * i_chip, const MemRank & i_rank );
 
 /**
  * @brief  Starts a scrub command on the target rank.
- * @param  i_chip      MCA or MBA chip.
+ * @param  i_chip      OCMB chip.
  * @param  i_rank      Target rank.
  * @param  i_rangeType See enum AddrRangeType.
  * @param  i_stopCond  The stop conditions for the targeted scrub.
@@ -218,18 +218,6 @@ uint32_t startBgScrub( ExtensibleChip * i_chip, const MemRank & i_rank );
 template<TARGETING::TYPE TT, typename SCT>
 uint32_t startTdScrub( ExtensibleChip * i_chip, const MemRank & i_rank,
                        AddrRangeType i_rangeType, SCT i_stopCond );
-
-/**
- * @brief  Increment the current maintenance address.
- * @param  i_chip      MBA chip.
- * @param  o_newAddr   The new address from the maintenance address register.
- * @param  i_incRow    True if we need to increment to the next row instead of
- *                     the next address.
- * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
- */
-template<TARGETING::TYPE T>
-uint32_t incMaintAddr( ExtensibleChip * i_chip, MemAddr & o_newAddr,
-                       bool i_incRow = false );
 
 //##############################################################################
 //##                  Core/cache trace array functions

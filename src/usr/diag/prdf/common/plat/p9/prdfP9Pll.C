@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -85,7 +85,6 @@ void getChpltList ( ExtensibleChip * i_chip,
             o_errRegStr = "PCI_ERROR_REG";
             o_cfgRegStr = "PCI_CONFIG_REG";
             break;
-        case TYPE_MCBIST:
         case TYPE_MC:
             o_errRegStr = "MC_ERROR_REG";
             o_cfgRegStr = "MC_CONFIG_REG";
@@ -346,7 +345,6 @@ int32_t CheckErrorType( ExtensibleChip * i_chip, uint32_t & o_errType )
             if (CheckChipletPll(i_chip, TYPE_PROC) ||
                 CheckChipletPll(i_chip, TYPE_XBUS) ||
                 CheckChipletPll(i_chip, TYPE_OBUS) ||
-                CheckChipletPll(i_chip, TYPE_MCBIST) ||
                 CheckChipletPll(i_chip, TYPE_MC))
             {
                 o_errType |= SYS_PLL_UNLOCK;
@@ -364,8 +362,6 @@ int32_t CheckErrorType( ExtensibleChip * i_chip, uint32_t & o_errType )
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, CheckErrorType );
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, CheckErrorType );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, CheckErrorType );
 
 /**
@@ -384,7 +380,6 @@ int32_t clearParityError( ExtensibleChip * i_chip,
         ClearChipletParityError(i_chip, TYPE_PROC);
         ClearChipletParityError(i_chip, TYPE_XBUS);
         ClearChipletParityError(i_chip, TYPE_OBUS);
-        ClearChipletParityError(i_chip, TYPE_MCBIST);
         ClearChipletParityError(i_chip, TYPE_MC);
         ClearChipletParityError(i_chip, TYPE_PEC);
         ClearChipletParityError(i_chip, TYPE_EQ);
@@ -394,8 +389,6 @@ int32_t clearParityError( ExtensibleChip * i_chip,
     return SUCCESS;
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, clearParityError );
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, clearParityError );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, clearParityError );
 
 /**
@@ -431,8 +424,6 @@ int32_t QueryPll( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, QueryPll );
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, QueryPll );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, QueryPll );
 
 /**
@@ -454,7 +445,6 @@ int32_t ClearPll( ExtensibleChip * i_chip,
         ClearChipletPll(i_chip, TYPE_PROC);
         ClearChipletPll(i_chip, TYPE_XBUS);
         ClearChipletPll(i_chip, TYPE_OBUS);
-        ClearChipletPll(i_chip, TYPE_MCBIST);
         ClearChipletPll(i_chip, TYPE_MC);
 
         // Clear TP_LFIR
@@ -476,8 +466,6 @@ int32_t ClearPll( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, ClearPll );
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, ClearPll );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, ClearPll );
 
 int32_t ClearMfPll( ExtensibleChip * i_chip,
@@ -510,8 +498,6 @@ int32_t ClearMfPll( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, ClearMfPll );
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, ClearMfPll );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, ClearMfPll );
 
 /**
@@ -532,7 +518,6 @@ int32_t MaskPll( ExtensibleChip * i_chip,
         MaskChipletPll(i_chip, TYPE_PROC);
         MaskChipletPll(i_chip, TYPE_XBUS);
         MaskChipletPll(i_chip, TYPE_OBUS);
-        MaskChipletPll(i_chip, TYPE_MCBIST);
         MaskChipletPll(i_chip, TYPE_MC);
     }
 
@@ -572,8 +557,6 @@ int32_t MaskPll( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, MaskPll );
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, MaskPll );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, MaskPll );
 
 /**
@@ -608,8 +591,6 @@ int32_t capturePllFfdc( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, capturePllFfdc );
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, capturePllFfdc );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, capturePllFfdc );
 
 } // end namespace Proc

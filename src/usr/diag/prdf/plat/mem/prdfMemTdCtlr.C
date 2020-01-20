@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,6 @@
 #include <prdfMemAddress.H>
 #include <prdfMemCaptureData.H>
 #include <prdfMemScrubUtils.H>
-#include <prdfP9McaDataBundle.H>
 #include <prdfMemExtraSig.H>
 #include <prdfParserEnums.H>
 #include <UtilHash.H> // for Util::hashString
@@ -211,12 +210,7 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
 //------------------------------------------------------------------------------
 
 // This is a forward reference to a function that is locally defined in
-// prdfMemTdCtlr_ipl.C and prdfMemTdCtlr_rt.C. The reason for this is that the
-// MemTdCtlr template is only created for the MCBIST and MBA targets, not the
-// MCA, but the ECC analysis is done on each MCA and MBA. Therefore, we needed
-// some way to change the template to use the MCA. It is also a local function
-// because this is only for MemTdCtlr internal use and it didn't make much sense
-// to create a public function.
+// prdfMemTdCtlr_ipl.C and prdfMemTdCtlr_rt.C.
 template<TARGETING::TYPE T>
 uint32_t __checkEcc( ExtensibleChip * i_chip,
                      const MemAddr & i_addr, bool & o_errorsFound,
@@ -230,64 +224,6 @@ uint32_t __analyzeCmdComplete( ExtensibleChip * i_chip,
                                const MemAddr & i_addr,
                                bool & o_errorsFound,
                                STEP_CODE_DATA_STRUCT & io_sc );
-
-template<>
-uint32_t __analyzeCmdComplete<TYPE_MCBIST>( ExtensibleChip * i_chip,
-                                            TdRankListEntry & o_stoppedRank,
-                                            const MemAddr & i_addr,
-                                            bool & o_errorsFound,
-                                            STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[__analyzeCmdComplete] "
-
-    uint32_t o_rc = SUCCESS;
-
-    o_errorsFound = false;
-
-    do
-    {
-        // Get all ports in which the command was run.
-        ExtensibleChipList portList;
-        o_rc = getMcbistMaintPort<TYPE_MCBIST>( i_chip, portList );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMcbistMaintPort(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-
-        // In broadcast mode, the rank configuration for all ports will be the
-        // same. In non-broadcast mode, there will only be one MCA in the list.
-        // Therefore, we can simply use the first MCA in the list for all
-        // configs.
-        ExtensibleChip * stopChip = portList.front();
-
-        // Update iv_stoppedRank.
-        o_stoppedRank = __getStopRank<TYPE_MCA>( stopChip, i_addr );
-
-        // Check each MCA for ECC errors.
-        for ( auto & mcaChip : portList )
-        {
-            bool errorsFound;
-            uint32_t l_rc = __checkEcc<TYPE_MCA>( mcaChip, i_addr,
-                                                  errorsFound, io_sc );
-            if ( SUCCESS != l_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "__checkEcc<TYPE_MCA>(0x%08x) failed",
-                          mcaChip->getHuid() );
-                o_rc |= l_rc; continue; // Try the other MCAs.
-            }
-
-            if ( errorsFound ) o_errorsFound = true;
-        }
-        if ( SUCCESS != o_rc ) break;
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
 
 template<>
 uint32_t __analyzeCmdComplete<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
@@ -419,17 +355,7 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
     if ( nullptr == iv_curProcedure && 0 == queueCount ) return;
 
     // Get the version to use.
-    uint8_t version = TD_CTLR_DATA::VERSION_1;
-    bool isNimbus = false;
-    if ( MODEL_NIMBUS == getChipModel(getMasterProc()) )
-    {
-        version = TD_CTLR_DATA::VERSION_2;
-        isNimbus = true;
-    }
-    else if ( MODEL_AXONE == getChipModel(getMasterProc()) )
-    {
-        version = TD_CTLR_DATA::VERSION_2;
-    }
+    uint8_t version = TD_CTLR_DATA::VERSION_2;
 
     // Get the IPL state.
     #ifdef __HOSTBOOT_RUNTIME
@@ -439,13 +365,8 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
     #endif
 
     // Get the buffer length (header + TD queue)
-    uint32_t hdrLen = TD_CTLR_DATA::v1_HEADER;
-    uint32_t entLen = TD_CTLR_DATA::v1_ENTRY;
-    if ( TD_CTLR_DATA::VERSION_2 == version )
-    {
-        hdrLen = TD_CTLR_DATA::v2_HEADER;
-        entLen = TD_CTLR_DATA::v2_ENTRY;
-    }
+    uint32_t hdrLen = TD_CTLR_DATA::v2_HEADER;
+    uint32_t entLen = TD_CTLR_DATA::v2_ENTRY;
 
     uint32_t bitLen = hdrLen + queueCount * entLen;
 
@@ -469,15 +390,8 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
         curPhase = iv_curProcedure->getPhase();
         curType  = iv_curProcedure->getType();
 
-        if ( TD_CTLR_DATA::VERSION_2 == version )
-        {
-            curPort = iv_curProcedure->getChip()->getPos() % MAX_MCA_PER_MCBIST;
-            if ( !isNimbus )
-            {
-                TargetHandle_t portTrgt = iv_curProcedure->getChip()->getTrgt();
-                curPort = portTrgt->getAttr<ATTR_REL_POS>();
-            }
-        }
+        TargetHandle_t portTrgt = iv_curProcedure->getChip()->getTrgt();
+        curPort = portTrgt->getAttr<ATTR_REL_POS>();
     }
 
     uint32_t pos = 0;
@@ -490,10 +404,7 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
     bsb.setFieldJustify( pos, 4, curType    ); pos+=4;
     bsb.setFieldJustify( pos, 4, queueCount ); pos+=4;
 
-    if ( TD_CTLR_DATA::VERSION_2 == version )
-    {
-        bsb.setFieldJustify( pos, 2, curPort ); pos+=2;
-    }
+    bsb.setFieldJustify( pos, 2, curPort ); pos+=2;
 
     //##########################################################################
     // TD Queue
@@ -506,24 +417,14 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
         uint8_t itType = queue[n]->getType();
         uint8_t itPort = 0;
 
-        if ( TD_CTLR_DATA::VERSION_2 == version )
-        {
-            itPort = queue[n]->getChip()->getPos() % MAX_MCA_PER_MCBIST;
-            if ( !isNimbus )
-            {
-                TargetHandle_t portTrgt = queue[n]->getChip()->getTrgt();
-                itPort = portTrgt->getAttr<ATTR_REL_POS>();
-            }
-        }
+        TargetHandle_t portTrgt = queue[n]->getChip()->getTrgt();
+        itPort = portTrgt->getAttr<ATTR_REL_POS>();
 
         bsb.setFieldJustify( pos, 3, itMrnk ); pos+=3;
         bsb.setFieldJustify( pos, 3, itSrnk ); pos+=3;
         bsb.setFieldJustify( pos, 4, itType ); pos+=4;
 
-        if ( TD_CTLR_DATA::VERSION_2 == version )
-        {
-            bsb.setFieldJustify( pos, 2, itPort ); pos+=2;
-        }
+        bsb.setFieldJustify( pos, 2, itPort ); pos+=2;
     }
 
     //##########################################################################
@@ -539,7 +440,6 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
 //------------------------------------------------------------------------------
 
 // Avoid linker errors with the template.
-template class MemTdCtlr<TYPE_MCBIST>;
 template class MemTdCtlr<TYPE_OCMB_CHIP>;
 
 //------------------------------------------------------------------------------

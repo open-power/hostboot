@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,7 +62,6 @@ typedef struct __attribute__((packed))
 
     union
     {
-        HOMER_ChipNimbus_t   hChipN;
         HOMER_ChipAxone_t    hChipA;
     };
 
@@ -175,39 +174,7 @@ private:
                     l_bytePtr += sizeof(HOMER_Chip_t);
 
                     /* 'Existing chiplet area' can vary in size  */
-                    if (HOMER_CHIP_NIMBUS == l_chipPtr->chipType)
-                    {
-                        HOMER_ChipNimbus_t *l_nimPtr =
-                              reinterpret_cast<HOMER_ChipNimbus_t *>(l_bytePtr);
-
-                        // MCBIST
-                        if (l_nimPtr->mcbistMask != 0)
-                        {
-                            TS_FAIL("ERROR: MCBIST should not be available. "
-                                    "(MCBIST: 0x%x)", l_nimPtr->mcbistMask);
-                            break;
-                        }
-
-                        // MCS
-                        if (l_nimPtr->mcsMask != 0)
-                        {
-                            TS_FAIL("ERROR: MCS should not be available. "
-                                    "(MCS: 0x%x)", l_nimPtr->mcsMask);
-                            break;
-                        }
-
-                        // MCA
-                        if (l_nimPtr->mcaMask != 0)
-                        {
-                            TS_FAIL("ERROR: MCA should not be available. "
-                                    "(MCA: 0x%x)", l_nimPtr->mcaMask);
-                            break;
-                        }
-
-                        // prepare for next chip (if any)
-                        l_bytePtr += sizeof(HOMER_ChipNimbus_t);
-                    }
-                    else if (HOMER_CHIP_AXONE == l_chipPtr->chipType)
+                    if (HOMER_CHIP_AXONE == l_chipPtr->chipType)
                     {
                         HOMER_ChipAxone_t *l_axPtr =
                              reinterpret_cast<HOMER_ChipAxone_t *>(l_bytePtr);
@@ -280,13 +247,6 @@ public:
     {
         using namespace PRDF;
 
-        // FIRDATA not supported on Cumulus based systems. So do nothing.
-        if ( TARGETING::MODEL_CUMULUS ==
-             PlatServices::getChipModel(PlatServices::getMasterProc()) )
-        {
-            return;
-        }
-
         TS_TRACE("- Write Homer Test 1 - Master Proc Core - Start -");
 
         errlHndl_t errl = fakeWriteHomerFirData(hBuf, sizeof(hBuf),
@@ -308,13 +268,6 @@ public:
     void TestWriteHomerAllProcMasterCore(void)
     {
         using namespace PRDF;
-
-        // FIRDATA not supported on Cumulus based systems. So do nothing.
-        if ( TARGETING::MODEL_CUMULUS ==
-             PlatServices::getChipModel(PlatServices::getMasterProc()) )
-        {
-            return;
-        }
 
         TS_TRACE("- Write Homer Test 2 - All Proc Master Core - Start -");
 
@@ -339,13 +292,6 @@ public:
     {
         using namespace PRDF;
 
-        // FIRDATA not supported on Cumulus based systems. So do nothing.
-        if ( TARGETING::MODEL_CUMULUS ==
-             PlatServices::getChipModel(PlatServices::getMasterProc()) )
-        {
-            return;
-        }
-
         TS_TRACE("- Write Homer Test 3 - All Proc Mem Master Core - Start -");
 
         errlHndl_t errl = fakeWriteHomerFirData(hBuf, sizeof(hBuf),
@@ -368,13 +314,6 @@ public:
     void TestWriteHomerAllHardware(void)
     {
         using namespace PRDF;
-
-        // FIRDATA not supported on Cumulus based systems. So do nothing.
-        if ( TARGETING::MODEL_CUMULUS ==
-             PlatServices::getChipModel(PlatServices::getMasterProc()) )
-        {
-            return;
-        }
 
         TS_TRACE("- Write Homer Test 4 - All Hardware - Start -");
 

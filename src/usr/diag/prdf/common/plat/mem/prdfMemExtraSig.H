@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,6 +75,10 @@ PRDR_ERROR_SIGNATURE(TpsFalseAlarm,   0xffff0061, "", "TPS: false alarm");
 PRDR_ERROR_SIGNATURE(TpsFalseAlarmTH, 0xffff0062, "", "TPS: false alarm threshold");
 PRDR_ERROR_SIGNATURE(TpsSymbolMark,   0xffff0063, "", "TPS: symbol mark placed");
 PRDR_ERROR_SIGNATURE(TpsChipMark,     0xffff0064, "", "TPS: chip mark placed");
+PRDR_ERROR_SIGNATURE(TpsSymUeRisk,    0xaaaa0065, "", "TPS: placing symbol mark risks UE");
+PRDR_ERROR_SIGNATURE(TpsChipUeRisk,   0xaaaa0066, "", "TPS: placing chip mark risks UE");
+PRDR_ERROR_SIGNATURE(TpsPotentialUe,  0xaaaa0067, "", "TPS: potential UE");
+PRDR_ERROR_SIGNATURE(TpsDramDisabled, 0xaaaa0068, "", "TPS: DRAM repairs disabled");
 
 PRDR_ERROR_SIGNATURE(MnfgDramCte,   0xffff0070, "", "MNFG per DRAM CTE");
 PRDR_ERROR_SIGNATURE(MnfgRankCte,   0xffff0071, "", "MNFG per rank CTE");

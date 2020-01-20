@@ -93,11 +93,6 @@ bool isLaneRepairDisabled<TYPE_XBUS>()
 {
     return isFabeRepairDisabled();
 }
-template<>
-bool isLaneRepairDisabled<TYPE_DMI>()
-{
-    return isMemeRepairDisabled();
-}
 
 template< TYPE T_RX, TYPE T_TX >
 int32_t __handleLaneRepairEvent( ExtensibleChip * i_chip,
@@ -529,8 +524,6 @@ int32_t obus_callout_L0( ExtensibleChip * i_chip,
     return rc;
 
 } // end  obus_callout_L0
-PRDF_PLUGIN_DEFINE_NS( nimbus_obus,  LaneRepair, obus_callout_L0 );
-PRDF_PLUGIN_DEFINE_NS( cumulus_obus, LaneRepair, obus_callout_L0 );
 PRDF_PLUGIN_DEFINE_NS( axone_obus,   LaneRepair, obus_callout_L0 );
 
 int32_t obus_callout_L1( ExtensibleChip * i_chip,
@@ -546,8 +539,6 @@ int32_t obus_callout_L1( ExtensibleChip * i_chip,
     return rc;
 
 } // end  obus_callout_L1
-PRDF_PLUGIN_DEFINE_NS( nimbus_obus,  LaneRepair, obus_callout_L1 );
-PRDF_PLUGIN_DEFINE_NS( cumulus_obus, LaneRepair, obus_callout_L1 );
 PRDF_PLUGIN_DEFINE_NS( axone_obus,   LaneRepair, obus_callout_L1 );
 
 int32_t obus0_callout_L0( ExtensibleChip * i_chip,
@@ -561,8 +552,6 @@ int32_t obus0_callout_L0( ExtensibleChip * i_chip,
     return rc;
 
 } // end obus0_callout_L0
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, LaneRepair, obus0_callout_L0 );
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  LaneRepair, obus0_callout_L0 );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   LaneRepair, obus0_callout_L0 );
 
 int32_t obus0_callout_L1( ExtensibleChip * i_chip,
@@ -576,8 +565,6 @@ int32_t obus0_callout_L1( ExtensibleChip * i_chip,
     return rc;
 
 } // end obus0_callout_L1
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, LaneRepair, obus0_callout_L1 );
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  LaneRepair, obus0_callout_L1 );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   LaneRepair, obus0_callout_L1 );
 
 int32_t obus1_callout_L0( ExtensibleChip * i_chip,
@@ -591,8 +578,6 @@ int32_t obus1_callout_L0( ExtensibleChip * i_chip,
     return rc;
 
 } // end obus1_callout_L0
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, LaneRepair, obus1_callout_L0 );
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  LaneRepair, obus1_callout_L0 );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   LaneRepair, obus1_callout_L0 );
 
 int32_t obus1_callout_L1( ExtensibleChip * i_chip,
@@ -606,8 +591,6 @@ int32_t obus1_callout_L1( ExtensibleChip * i_chip,
     return rc;
 
 } // end obus1_callout_L1
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, LaneRepair, obus1_callout_L1 );
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  LaneRepair, obus1_callout_L1 );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   LaneRepair, obus1_callout_L1 );
 
 int32_t obus2_callout_L0( ExtensibleChip * i_chip,
@@ -621,8 +604,6 @@ int32_t obus2_callout_L0( ExtensibleChip * i_chip,
     return rc;
 
 } // end obus2_callout_L0
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, LaneRepair, obus2_callout_L0 );
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  LaneRepair, obus2_callout_L0 );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   LaneRepair, obus2_callout_L0 );
 
 int32_t obus2_callout_L1( ExtensibleChip * i_chip,
@@ -636,8 +617,6 @@ int32_t obus2_callout_L1( ExtensibleChip * i_chip,
     return rc;
 
 } // end obus2_callout_L1
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, LaneRepair, obus2_callout_L1 );
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  LaneRepair, obus2_callout_L1 );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   LaneRepair, obus2_callout_L1 );
 
 int32_t obus3_callout_L0( ExtensibleChip * i_chip,
@@ -651,8 +630,6 @@ int32_t obus3_callout_L0( ExtensibleChip * i_chip,
     return rc;
 
 } // end obus3_callout_L0
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, LaneRepair, obus3_callout_L0 );
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  LaneRepair, obus3_callout_L0 );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   LaneRepair, obus3_callout_L0 );
 
 int32_t obus3_callout_L1( ExtensibleChip * i_chip,
@@ -666,8 +643,6 @@ int32_t obus3_callout_L1( ExtensibleChip * i_chip,
     return rc;
 
 } // end obus3_callout_L1
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, LaneRepair, obus3_callout_L1 );
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  LaneRepair, obus3_callout_L1 );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   LaneRepair, obus3_callout_L1 );
 
 void  obus_clearMaskFail( errlHndl_t &io_errl, TargetHandle_t &i_rxTrgt,
@@ -689,13 +664,6 @@ void  obus_clearMaskFail( errlHndl_t &io_errl, TargetHandle_t &i_rxTrgt,
 
     do
     {
-        if (MODEL_NIMBUS == getChipModel(i_rxTrgt))
-        {
-            PRDF_ERR("[obus_clearMaskFail] called on NIMBUS");
-            break;
-        } // nimbus not supported
-
-
         // These defines are for LINK0
         // (LINK1 will be the next bit for each of these)
         #define OBUS_CRC_ERRORS     6
@@ -776,8 +744,6 @@ int32_t obus_fail_L0( ExtensibleChip * i_chip,
     return rc;
 
 } // end obus_fail_L0
-PRDF_PLUGIN_DEFINE_NS( nimbus_obus,  LaneRepair, obus_fail_L0 );
-PRDF_PLUGIN_DEFINE_NS( cumulus_obus, LaneRepair, obus_fail_L0 );
 PRDF_PLUGIN_DEFINE_NS( axone_obus,   LaneRepair, obus_fail_L0 );
 
 int32_t obus_fail_L1( ExtensibleChip * i_chip,
@@ -808,8 +774,6 @@ int32_t obus_fail_L1( ExtensibleChip * i_chip,
     return rc;
 
 } // end obus_fail_L1
-PRDF_PLUGIN_DEFINE_NS( nimbus_obus,  LaneRepair, obus_fail_L1 );
-PRDF_PLUGIN_DEFINE_NS( cumulus_obus, LaneRepair, obus_fail_L1 );
 PRDF_PLUGIN_DEFINE_NS( axone_obus,   LaneRepair, obus_fail_L1 );
 
 /** Need routine to capture FFDC for PBIOOFIR **/
@@ -840,8 +804,6 @@ int32_t captureSmpObus0( ExtensibleChip * i_chip,
     return SUCCESS;
 
 } // end captureSmpObus0
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, LaneRepair, captureSmpObus0 );
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  LaneRepair, captureSmpObus0 );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   LaneRepair, captureSmpObus0 );
 
 int32_t captureSmpObus1( ExtensibleChip * i_chip,
@@ -851,8 +813,6 @@ int32_t captureSmpObus1( ExtensibleChip * i_chip,
     return SUCCESS;
 
 } // end captureSmpObus1
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, LaneRepair, captureSmpObus1 );
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  LaneRepair, captureSmpObus1 );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   LaneRepair, captureSmpObus1 );
 
 int32_t captureSmpObus2( ExtensibleChip * i_chip,
@@ -862,8 +822,6 @@ int32_t captureSmpObus2( ExtensibleChip * i_chip,
     return SUCCESS;
 
 } // end captureSmpObus2
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, LaneRepair, captureSmpObus2 );
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  LaneRepair, captureSmpObus2 );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   LaneRepair, captureSmpObus2 );
 
 int32_t captureSmpObus3( ExtensibleChip * i_chip,
@@ -873,8 +831,6 @@ int32_t captureSmpObus3( ExtensibleChip * i_chip,
     return SUCCESS;
 
 } // end captureSmpObus3
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc, LaneRepair, captureSmpObus3 );
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  LaneRepair, captureSmpObus3 );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   LaneRepair, captureSmpObus3 );
 
 int32_t calloutBusInterface( TargetHandle_t i_rxTrgt,
@@ -969,8 +925,6 @@ int32_t spareDeployed( ExtensibleChip * i_chip,
     else
         return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_xbus,    LaneRepair, spareDeployed );
-PRDF_PLUGIN_DEFINE_NS( cumulus_xbus,   LaneRepair, spareDeployed );
 PRDF_PLUGIN_DEFINE_NS( axone_xbus,     LaneRepair, spareDeployed );
 
 /**
@@ -987,8 +941,6 @@ int32_t maxSparesExceeded( ExtensibleChip * i_chip,
     else
         return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_xbus,    LaneRepair, maxSparesExceeded );
-PRDF_PLUGIN_DEFINE_NS( cumulus_xbus,   LaneRepair, maxSparesExceeded );
 PRDF_PLUGIN_DEFINE_NS( axone_xbus,     LaneRepair, maxSparesExceeded );
 
 /**
@@ -1005,8 +957,6 @@ int32_t tooManyBusErrors( ExtensibleChip * i_chip,
     else
         return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_xbus,    LaneRepair, tooManyBusErrors );
-PRDF_PLUGIN_DEFINE_NS( cumulus_xbus,   LaneRepair, tooManyBusErrors );
 PRDF_PLUGIN_DEFINE_NS( axone_xbus,     LaneRepair, tooManyBusErrors );
 
 /**
@@ -1021,11 +971,8 @@ int32_t calloutBusInterfacePlugin( ExtensibleChip * i_chip,
     calloutBusInterface(i_chip->getTrgt(), io_sc, MRU_LOW);
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_xbus,    LaneRepair, calloutBusInterfacePlugin );
-PRDF_PLUGIN_DEFINE_NS( cumulus_xbus,   LaneRepair, calloutBusInterfacePlugin );
 PRDF_PLUGIN_DEFINE_NS( axone_xbus,     LaneRepair, calloutBusInterfacePlugin );
 PRDF_PLUGIN_DEFINE_NS( explorer_ocmb,  LaneRepair, calloutBusInterfacePlugin );
-PRDF_PLUGIN_DEFINE_NS( cumulus_dmi,    LaneRepair, calloutBusInterfacePlugin );
 
 /**
  * @brief Add callouts for a BUS interface inputting an OMIC or MCC target
@@ -1109,8 +1056,6 @@ int32_t calloutBusInterface_##TYPE##POS( ExtensibleChip * i_chip, \
 { \
     return callChildLR_calloutBusInterfacePlugin( i_chip, TYPE_##TYPE, POS, io_sc ); \
 } \
-PRDF_PLUGIN_DEFINE_NS(nimbus_proc,  LaneRepair, calloutBusInterface_##TYPE##POS);\
-PRDF_PLUGIN_DEFINE_NS(cumulus_proc, LaneRepair, calloutBusInterface_##TYPE##POS); \
 PRDF_PLUGIN_DEFINE_NS(axone_proc,   LaneRepair, calloutBusInterface_##TYPE##POS);
 
 PLUGIN_CALLOUT_INTERFACE( XBUS, 0 )
@@ -1121,48 +1066,7 @@ PLUGIN_CALLOUT_INTERFACE( OBUS, 1 )
 PLUGIN_CALLOUT_INTERFACE( OBUS, 2 )
 PLUGIN_CALLOUT_INTERFACE( OBUS, 3 )
 
-
-
 #undef PLUGIN_CALLOUT_INTERFACE
-
-//------------------------------------------------------------------------------
-
-#define PLUGIN_LANE_REPAIR_DMI( TYPE, POS ) \
-int32_t calloutBusInterface_##TYPE##POS( ExtensibleChip * i_chip, \
-                                         STEP_CODE_DATA_STRUCT & io_sc ) \
-{ \
-    return callChildLR_calloutBusInterfacePlugin( i_chip, TYPE_##TYPE, POS, io_sc ); \
-} \
-PRDF_PLUGIN_DEFINE_NS( cumulus_mc, LaneRepair, calloutBusInterface_##TYPE##POS ); \
-\
-int32_t maxSparesExceeded_##TYPE##POS( ExtensibleChip * i_chip, \
-                                       STEP_CODE_DATA_STRUCT & io_sc ) \
-{ \
-    return callChildLR_maxSparesExceeded( i_chip, TYPE_##TYPE, POS, io_sc ); \
-} \
-PRDF_PLUGIN_DEFINE_NS( cumulus_mc, LaneRepair, maxSparesExceeded_##TYPE##POS ); \
-\
-int32_t spareDeployed_##TYPE##POS( ExtensibleChip * i_chip, \
-                                   STEP_CODE_DATA_STRUCT & io_sc ) \
-{ \
-    return callChildLR_spareDeployed( i_chip, TYPE_##TYPE, POS, io_sc ); \
-} \
-PRDF_PLUGIN_DEFINE_NS( cumulus_mc, LaneRepair, spareDeployed_##TYPE##POS ); \
-\
-int32_t tooManyBusErrors_##TYPE##POS( ExtensibleChip * i_chip, \
-                                      STEP_CODE_DATA_STRUCT & io_sc ) \
-{ \
-    return callChildLR_tooManyBusErrors( i_chip, TYPE_##TYPE, POS, io_sc ); \
-} \
-PRDF_PLUGIN_DEFINE_NS( cumulus_mc, LaneRepair, tooManyBusErrors_##TYPE##POS );
-
-// Handle the MC chip target to DMI conversion
-PLUGIN_LANE_REPAIR_DMI( DMI, 0 )
-PLUGIN_LANE_REPAIR_DMI( DMI, 1 )
-PLUGIN_LANE_REPAIR_DMI( DMI, 2 )
-PLUGIN_LANE_REPAIR_DMI( DMI, 3 )
-
-#undef PLUGIN_LANE_REPAIR_DMI
 
 //------------------------------------------------------------------------------
 

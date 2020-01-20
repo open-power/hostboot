@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,15 +40,11 @@
 #include <prdrLoadChipCache.H>  // To flush chip-file cache.
 
 #include <prdfP9CappDomain.H>
-#include <prdfP9DmiDomain.H>
 #include <prdfP9EcDomain.H>
 #include <prdfP9EqDomain.H>
 #include <prdfP9ExDomain.H>
 #include <prdfP9McDomain.H>
-#include <prdfP9McaDomain.H>
-#include <prdfP9McbistDomain.H>
 #include <prdfP9MccDomain.H>
-#include <prdfP9McsDomain.H>
 #include <prdfP9MiDomain.H>
 #include <prdfP9NpuDomain.H>
 #include <prdfP9ObusDomain.H>
@@ -98,20 +94,6 @@ errlHndl_t PlatConfigurator::build()
 
     switch ( getChipModel(getMasterProc()) )
     {
-        case MODEL_NIMBUS:
-            unitMap[TYPE_MCBIST] = new McbistDomain( MCBIST_DOMAIN );
-            unitMap[TYPE_MCS   ] = new McsDomain(    MCS_DOMAIN    );
-            unitMap[TYPE_MCA   ] = new McaDomain(    MCA_DOMAIN    );
-
-            break;
-
-        case MODEL_CUMULUS:
-            unitMap[TYPE_MC ] = new McDomain(     MC_DOMAIN     );
-            unitMap[TYPE_MI ] = new MiDomain(     MI_DOMAIN     );
-            unitMap[TYPE_DMI] = new DmiDomain(    DMI_DOMAIN    );
-
-            break;
-
         case MODEL_AXONE:
             unitMap[TYPE_NPU ] = new NpuDomain(      NPU_DOMAIN  );
             unitMap[TYPE_MC ]  = new McDomain(       MC_DOMAIN   );
@@ -231,30 +213,6 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
 
     std::map<uint32_t, std::map<TARGETING::TYPE, const char *>> fnMap =
     {
-        { MODEL_NIMBUS,   { { TYPE_PROC,   nimbus_proc    },
-                            { TYPE_EQ,     nimbus_eq      },
-                            { TYPE_EX,     nimbus_ex      },
-                            { TYPE_CORE,   nimbus_ec      },
-                            { TYPE_CAPP,   nimbus_capp    },
-                            { TYPE_PEC,    nimbus_pec     },
-                            { TYPE_PHB,    nimbus_phb     },
-                            { TYPE_XBUS,   nimbus_xbus    },
-                            { TYPE_OBUS,   nimbus_obus    },
-                            { TYPE_MCBIST, nimbus_mcbist  },
-                            { TYPE_MCS,    nimbus_mcs     },
-                            { TYPE_MCA,    nimbus_mca     }, } },
-        { MODEL_CUMULUS,  { { TYPE_PROC,   cumulus_proc   },
-                            { TYPE_EQ,     cumulus_eq     },
-                            { TYPE_EX,     cumulus_ex     },
-                            { TYPE_CORE,   cumulus_ec     },
-                            { TYPE_CAPP,   cumulus_capp   },
-                            { TYPE_PEC,    cumulus_pec    },
-                            { TYPE_PHB,    cumulus_phb    },
-                            { TYPE_XBUS,   cumulus_xbus   },
-                            { TYPE_OBUS,   cumulus_obus   },
-                            { TYPE_MC,     cumulus_mc     },
-                            { TYPE_MI,     cumulus_mi     },
-                            { TYPE_DMI,    cumulus_dmi    }, } },
         { MODEL_AXONE,    { { TYPE_PROC,   axone_proc     },
                             { TYPE_EQ,     axone_eq       },
                             { TYPE_EX,     axone_ex       },

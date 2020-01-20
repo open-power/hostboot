@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,7 +45,7 @@ namespace PRDF
 
 /**
  * @brief A table of memory CEs.
- * @note  Only one of these tables will exist per MBA/MCA.
+ * @note  Only one of these tables will exist per OCMB.
  * @note  Will be used to determine when to do a TPS procedure for Targeted
  *        Diagnostics at runtime. Will be used for FFDC only during Hostboot.
  */
@@ -85,7 +85,7 @@ class MemCeTable
 
     /**
      * @brief Constructor.
-     * @param i_chip MCA or MBA associated with this data.
+     * @param i_chip OCMB associated with this data.
      */
     explicit MemCeTable( ExtensibleChip * i_chip ) :
         iv_chip( i_chip )
@@ -171,7 +171,7 @@ class MemCeTable
 
   private: // instance variables
 
-    ExtensibleChip * iv_chip; ///< MCA or MBA associated with this data.
+    ExtensibleChip * iv_chip; ///< OCMB associated with this data.
 
     /** A storage container for memory fetch CE errors. */
     CeTable iv_table;

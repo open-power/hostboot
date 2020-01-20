@@ -33,7 +33,6 @@
 #include <prdfMemScrubUtils.H>
 #include <prdfMemTdFalseAlarm.H>
 #include <prdfMemTps.H>
-#include <prdfP9McaExtraSig.H>
 #include <prdfTargetServices.H>
 
 /* TODO RTC 247259
@@ -50,13 +49,6 @@ using namespace PlatServices;
 const uint8_t CE_REGS_PER_PORT = 9;
 const uint8_t SYMBOLS_PER_CE_REG = 8;
 
-static const char *mcbCeStatReg[CE_REGS_PER_PORT] =
-                       {
-                           "MCB_MBSSYMEC0", "MCB_MBSSYMEC1", "MCB_MBSSYMEC2",
-                           "MCB_MBSSYMEC3", "MCB_MBSSYMEC4", "MCB_MBSSYMEC5",
-                           "MCB_MBSSYMEC6", "MCB_MBSSYMEC7", "MCB_MBSSYMEC8"
-                       };
-
 static const char *ocmbCeStatReg[CE_REGS_PER_PORT] =
                        {
                            "OCMB_MBSSYMEC0", "OCMB_MBSSYMEC1", "OCMB_MBSSYMEC2",
@@ -70,12 +62,6 @@ template <TARGETING::TYPE T>
 TpsFalseAlarm * __getTpsFalseAlarmCounter( ExtensibleChip * i_chip );
 
 template<>
-TpsFalseAlarm * __getTpsFalseAlarmCounter<TYPE_MCA>( ExtensibleChip * i_chip )
-{
-    return getMcaDataBundle(i_chip)->getTpsFalseAlarmCounter();
-}
-
-template<>
 TpsFalseAlarm * __getTpsFalseAlarmCounter<TYPE_OCMB_CHIP>(
     ExtensibleChip * i_chip )
 {
@@ -86,12 +72,6 @@ TpsFalseAlarm * __getTpsFalseAlarmCounter<TYPE_OCMB_CHIP>(
 
 template <TARGETING::TYPE T>
 void __maskMainlineNceTces( ExtensibleChip * i_chip );
-
-template<>
-void __maskMainlineNceTces<TYPE_MCA>( ExtensibleChip * i_chip )
-{
-    getMcaDataBundle(i_chip)->iv_maskMainlineNceTce = true;
-}
 
 template<>
 void __maskMainlineNceTces<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
@@ -431,10 +411,6 @@ uint32_t TpsEvent<T>::analyzeEccErrors( const uint32_t & i_eccAttns,
 }
 
 template
-uint32_t TpsEvent<TYPE_MCA>::analyzeEccErrors( const uint32_t & i_eccAttns,
-                                               STEP_CODE_DATA_STRUCT & io_sc,
-                                               bool & o_done );
-template
 uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeEccErrors(const uint32_t & i_eccAttns,
                                                   STEP_CODE_DATA_STRUCT & io_sc,
                                                   bool & o_done);
@@ -460,8 +436,6 @@ uint32_t TpsEvent<T>::handleFalseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
     return SUCCESS;
 }
 
-template
-uint32_t TpsEvent<TYPE_MCA>::handleFalseAlarm( STEP_CODE_DATA_STRUCT & io_sc );
 template
 uint32_t TpsEvent<TYPE_OCMB_CHIP>::handleFalseAlarm(
                                             STEP_CODE_DATA_STRUCT & io_sc );
@@ -956,113 +930,9 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
 }
 
 template
-uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
-    CeCount i_badChipCount, CeCount i_sumAboveOneCount,
-    CeCount i_singleSymCount, STEP_CODE_DATA_STRUCT & io_sc );
-template
 uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
     CeCount i_badChipCount, CeCount i_sumAboveOneCount,
     CeCount i_singleSymCount, STEP_CODE_DATA_STRUCT & io_sc );
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t TpsEvent<TYPE_MCA>::getSymbolCeCounts( CeCount & io_badDqCount,
-    CeCount & io_badChipCount, CeCount & io_sumAboveOneCount,
-    CeCount & io_singleSymCount, STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[TpsEvent<TYPE_MCA>::getSymbolCeCounts] "
-
-    uint32_t o_rc = SUCCESS;
-
-    do
-    {
-        // Get the Bad DQ Bitmap.
-        TargetHandle_t mcaTrgt = iv_chip->getTrgt();
-        MemDqBitmap dqBitmap;
-
-        o_rc = getBadDqBitmap( mcaTrgt, iv_rank, dqBitmap );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x,%d) failed",
-                      getHuid(mcaTrgt), iv_rank.getMaster() );
-            break;
-        }
-        std::vector<MemSymbol> bmSymList = dqBitmap.getSymbolList();
-
-        ExtensibleChip * mcbChip = getConnectedParent( iv_chip, TYPE_MCBIST );
-        const char * reg_str = nullptr;
-        SCAN_COMM_REGISTER_CLASS * reg = nullptr;
-
-        for ( uint8_t regIdx = 0; regIdx < CE_REGS_PER_PORT; regIdx++ )
-        {
-            reg_str = mcbCeStatReg[regIdx];
-            reg     = mcbChip->getRegister( reg_str );
-
-            o_rc = reg->Read();
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "Read() failed on %s.", reg_str );
-                break;
-            }
-            uint8_t baseSymbol = SYMBOLS_PER_CE_REG * regIdx;
-
-            for ( uint8_t i = 0; i < SYMBOLS_PER_CE_REG;
-                  i += MEM_SYMBOLS_PER_NIBBLE )
-            {
-                MemUtils::MaintSymbols nibbleStats;
-
-                // Get a nibble's worth of symbols.
-                for ( uint8_t n = 0; n < MEM_SYMBOLS_PER_NIBBLE; n++ )
-                {
-                    uint8_t sym = baseSymbol + (i+n);
-                    PRDF_ASSERT( sym < SYMBOLS_PER_RANK );
-
-                    MemUtils::SymbolData symData;
-                    symData.symbol = MemSymbol::fromSymbol( mcaTrgt, iv_rank,
-                        sym );
-                    if ( !symData.symbol.isValid() )
-                    {
-                        PRDF_ERR( PRDF_FUNC "MemSymbol() failed: symbol=%d",
-                                  sym );
-                        o_rc = FAIL;
-                        break;
-                    }
-
-                    // Any symbol set in the DRAM repairs VPD will have an
-                    // automatic CE count of 0xFF
-                    if ( std::find( bmSymList.begin(), bmSymList.end(),
-                         symData.symbol ) != bmSymList.end() )
-                        symData.count = 0xFF;
-                    else
-                        symData.count = reg->GetBitFieldJustified(((i+n)*8), 8);
-
-                    nibbleStats.push_back( symData );
-
-                    // Add all symbols with non-zero counts to the callout list.
-                    if ( symData.count != 0 )
-                    {
-                        MemoryMru mm { mcaTrgt, iv_rank, symData.symbol };
-                        io_sc.service_data->SetCallout( mm );
-                    }
-                }
-                if ( SUCCESS != o_rc ) break;
-
-                // Analyze the nibble of symbols.
-                __analyzeNibbleSyms<TYPE_MCA>( nibbleStats, io_badDqCount,
-                    io_badChipCount, io_sumAboveOneCount, io_singleSymCount );
-
-            }
-            if ( SUCCESS != o_rc ) break;
-        }
-
-    }while(0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-
-}
 
 //------------------------------------------------------------------------------
 
@@ -1221,9 +1091,6 @@ uint32_t TpsEvent<T>::analyzeCeStats( STEP_CODE_DATA_STRUCT & io_sc,
 }
 
 template
-uint32_t TpsEvent<TYPE_MCA>::analyzeCeStats( STEP_CODE_DATA_STRUCT & io_sc,
-                                             bool & o_done );
-template
 uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeStats(STEP_CODE_DATA_STRUCT & io_sc,
                                                   bool & o_done);
 
@@ -1285,9 +1152,6 @@ uint32_t TpsEvent<T>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
 }
 
 template
-uint32_t TpsEvent<TYPE_MCA>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
-                                           bool & o_done );
-template
 uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
                                                  bool & o_done );
 
@@ -1309,69 +1173,8 @@ uint32_t TpsEvent<T>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
 }
 
 template
-uint32_t TpsEvent<TYPE_MCA>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc );
-template
 uint32_t TpsEvent<TYPE_OCMB_CHIP>::startNextPhase(
     STEP_CODE_DATA_STRUCT & io_sc );
-
-//##############################################################################
-//
-//                          Specializations for MCA
-//
-//##############################################################################
-
-template<>
-uint32_t TpsEvent<TYPE_MCA>::startCmd()
-{
-    #define PRDF_FUNC "[TpsEvent::startCmd] "
-
-    uint32_t o_rc = SUCCESS;
-
-    #ifndef CONFIG_AXONE
-
-    // We don't need to set any stop-on-error conditions or thresholds for
-    // soft/inter/hard CEs at runtime. The design is to let the command continue
-    // to the end of the rank and we do diagnostics on the CE counts found in
-    // the per-symbol counters. Therefore, all we need to do is tell the
-    // hardware which CE types to count.
-
-    /* TODO RTC 247260
-
-    mss::mcbist::stop_conditions<mss::mc_type::NIMBUS> stopCond;
-
-    switch ( iv_phase )
-    {
-        case TD_PHASE_1:
-            // Set the per symbol counters to count only hard CEs.
-            stopCond.set_nce_hard_symbol_count_enable(mss::ON);
-            break;
-
-        case TD_PHASE_2:
-            // Since there are not enough hard CEs to trigger a symbol mark, set
-            // the per symbol counters to count all CE types.
-            stopCond.set_nce_soft_symbol_count_enable( mss::ON);
-            stopCond.set_nce_inter_symbol_count_enable(mss::ON);
-            stopCond.set_nce_hard_symbol_count_enable( mss::ON);
-            break;
-
-        default: PRDF_ASSERT( false ); // invalid phase
-    }
-
-    // Start the time based scrub procedure on this slave rank.
-    o_rc = startTdScrub<TYPE_MCA>( iv_chip, iv_rank, SLAVE_RANK, stopCond );
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
-                  iv_chip->getHuid(), getKey() );
-    }
-    */
-
-    #endif
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
 
 //##############################################################################
 //

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,7 +45,7 @@ bool isEnabled();
 
 /**
  * @brief  Sends message to hypervisor for page dealloc
- * @param  i_chip MBA/MCA chip
+ * @param  i_chip OCMB chip
  * @param  i_addr   The address to page dealloc.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
@@ -54,7 +54,7 @@ int32_t page( ExtensibleChip * i_chip, MemAddr i_addr );
 
 /**
  * @brief  Sends message to hypervisor to dealloc all memory on a rank
- * @param  i_chip MBA/MCA chip
+ * @param  i_chip OCMB chip
  * @param  i_addr   The address to page dealloc.
  * @param  i_isFetch TRUE if we are calling this because of FETCH UE,
  *                   FALSE otherwise.
@@ -65,7 +65,7 @@ int32_t rank( ExtensibleChip * i_chip, MemRank i_rank );
 
 /**
  * @brief  Sends a message to hypervisor to dealloc all memory behind a port
- * @param  i_chip MBA/MCA chip
+ * @param  i_chip OCMB chip
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>

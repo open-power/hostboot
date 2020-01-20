@@ -350,10 +350,6 @@ uint32_t getBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
 
     switch( trgtType )
     {
-        case TYPE_MCA:
-            o_rc = __getBadDqBitmap<fapi2::TARGET_TYPE_MCA>( i_trgt, i_rank,
-                                                             o_bitmap );
-            break;
         case TYPE_MEM_PORT:
             o_rc = __getBadDqBitmap<fapi2::TARGET_TYPE_MEM_PORT>( i_trgt,
                 i_rank, o_bitmap );
@@ -434,10 +430,6 @@ uint32_t setBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
 
     switch( trgtType )
     {
-        case TYPE_MCA:
-            o_rc = __setBadDqBitmap<fapi2::TARGET_TYPE_MCA>( i_trgt, i_rank,
-                                                             i_bitmap );
-            break;
         case TYPE_MEM_PORT:
             o_rc = __setBadDqBitmap<fapi2::TARGET_TYPE_MEM_PORT>( i_trgt,
                 i_rank, i_bitmap );
@@ -496,30 +488,6 @@ uint32_t clearBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank )
 //------------------------------------------------------------------------------
 
 template<>
-void getDimmDqAttr<TYPE_MCA>( TargetHandle_t i_target,
-                              uint8_t (&o_dqMapPtr)[DQS_PER_DIMM] )
-{
-    #define PRDF_FUNC "[PlatServices::getDimmDqAttr<TYPE_MCA>] "
-
-    PRDF_ASSERT( TYPE_MCA == getTargetType(i_target) );
-
-    TargetHandle_t mcs = getConnectedParent( i_target, TYPE_MCS );
-
-    uint32_t mcaRelMcs = getTargetPosition( i_target ) % MAX_MCA_PER_MCS;
-    uint8_t  tmpData[MAX_MCA_PER_MCS][DQS_PER_DIMM];
-
-    if ( !mcs->tryGetAttr<ATTR_MSS_VPD_DQ_MAP>(tmpData) )
-    {
-        PRDF_ERR( PRDF_FUNC "Failed to get ATTR_MSS_VPD_DQ_MAP" );
-        PRDF_ASSERT( false );
-    }
-
-    memcpy( &o_dqMapPtr[0], &tmpData[mcaRelMcs][0], DQS_PER_DIMM );
-
-    #undef PRDF_FUNC
-} // end function getDimmDqAttr
-
-template<>
 void getDimmDqAttr<TYPE_MEM_PORT>( TargetHandle_t i_target,
                                    uint8_t (&o_dqMapPtr)[DQS_PER_DIMM] )
 {
@@ -551,47 +519,7 @@ void getDimmDqAttr<TYPE_OCMB_CHIP>( TargetHandle_t i_target,
     getDimmDqAttr<TYPE_MEM_PORT>( memPort, o_dqMapPtr );
 }
 
-template<>
-void getDimmDqAttr<TYPE_DIMM>( TargetHandle_t i_target,
-                               uint8_t (&o_dqMapPtr)[DQS_PER_DIMM] )
-{
-    #define PRDF_FUNC "[PlatServices::getDimmDqAttr<TYPE_DIMM>] "
-
-    PRDF_ASSERT( TYPE_DIMM == getTargetType(i_target) );
-
-    /* TODO RTC 247260
-    const uint8_t DIMM_BAD_DQ_SIZE_BYTES = 80;
-
-    uint8_t tmpData[DIMM_BAD_DQ_SIZE_BYTES];
-
-    if ( !i_target->tryGetAttr<ATTR_CEN_DQ_TO_DIMM_CONN_DQ>(tmpData) )
-    {
-        PRDF_ERR( PRDF_FUNC "Failed to get ATTR_CEN_DQ_TO_DIMM_CONN_DQ" );
-        PRDF_ASSERT( false );
-    }
-
-    memcpy( &o_dqMapPtr[0], &tmpData[0], DQS_PER_DIMM );
-    */
-
-    #undef PRDF_FUNC
-} // end function getDimmDqAttr
-
-
 //------------------------------------------------------------------------------
-
-template<>
-int32_t mssGetSteerMux<TYPE_MCA>( TargetHandle_t i_mca,
-                                  const MemRank & i_rank,
-                                  MemSymbol & o_port0Spare,
-                                  MemSymbol & o_port1Spare,
-                                  MemSymbol & o_eccSpare )
-{
-    // NO-OP for MCA
-    o_port0Spare = MemSymbol(); // default invalid
-    o_port1Spare = MemSymbol(); // default invalid
-    o_eccSpare   = MemSymbol(); // default invalid
-    return SUCCESS;
-}
 
 template<>
 int32_t mssGetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
@@ -677,15 +605,6 @@ int32_t mssSetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_memPort,
 //------------------------------------------------------------------------------
 
 template<>
-int32_t getDimmSpareConfig<TYPE_MCA>( TargetHandle_t i_mca, MemRank i_rank,
-                                      uint8_t i_ps, uint8_t & o_spareConfig )
-{
-    // No spares for MCAs
-    o_spareConfig = MEM_EFF_DIMM_SPARE_NO_SPARE;
-    return SUCCESS;
-}
-
-template<>
 int32_t getDimmSpareConfig<TYPE_MEM_PORT>( TargetHandle_t i_memPort,
                         MemRank i_rank, uint8_t i_ps, uint8_t & o_spareConfig )
 {
@@ -754,16 +673,6 @@ int32_t getDimmSpareConfig<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
 }
 
 //------------------------------------------------------------------------------
-
-template<>
-uint32_t isDramSparingEnabled<TYPE_MCA>( TARGETING::TargetHandle_t i_trgt,
-                                         MemRank i_rank, uint8_t i_ps,
-                                         bool & o_spareEnable )
-{
-    // DRAM sparing not supported for MCA
-    o_spareEnable = false;
-    return SUCCESS;
-}
 
 template<>
 uint32_t isDramSparingEnabled<TYPE_MEM_PORT>( TARGETING::TargetHandle_t i_trgt,
@@ -891,115 +800,6 @@ uint32_t isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
 template
 uint32_t isSpareAvailable<TYPE_MEM_PORT>( TARGETING::TargetHandle_t i_trgt,
     MemRank i_rank, uint8_t i_ps, bool & o_spAvail, bool & o_eccAvail );
-
-//------------------------------------------------------------------------------
-// Constants defined from Serial Presence Detect (SPD) specs
-//---------------------------------------------------------------------
-const uint8_t SPD_IDX_MODSPEC_COM_REF_BASIC_MEMORY_TYPE = 0x02;
-const uint8_t SPD_IDX_DDR3_MODSPEC_COM_REF_RAW_CARD_EXT = 0x3e;
-const uint8_t SPD_IDX_DDR3_MODSPEC_COM_REF_RAW_CARD     = 0x3e;
-const uint8_t SPD_IDX_DDR4_MODSPEC_COM_REF_RAW_CARD_EXT = 0x82;
-const uint8_t SPD_IDX_DDR4_MODSPEC_COM_REF_RAW_CARD     = 0x82;
-
-const uint8_t RAW_CARD_EXT_MASK         = 0x80;
-const uint8_t RAW_CARD_EXT_SHIFT        = 0x07;
-const uint8_t RAW_CARD_MASK             = 0x1f;
-const uint8_t BASIC_MEMORY_TYPE_DDR4    = 0x0c;
-
-enum SPD_MODSPEC_COM_REF_RAW_CARD
-{
-  SPD_MODSPEC_COM_REF_RAW_CARD_A = 0x00,
-  SPD_MODSPEC_COM_REF_RAW_CARD_B = 0x01,
-  SPD_MODSPEC_COM_REF_RAW_CARD_C = 0x02,
-  SPD_MODSPEC_COM_REF_RAW_CARD_D = 0x03,
-};
-//---------------------------------------------------------------------
-/* TODO RTC 247260
-int32_t  getSpdModspecComRefRawCard(
-                      const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_pTarget,
-                      uint8_t & o_rawCard )
-{
-#define PRDF_FUNC "[PlatServices::getSpdModspecComRefRawCard] "
-
-    int32_t rc = SUCCESS;
-    o_rawCard = 0xff; // something invalid
-    size_t l_size = 0;
-    uint8_t * l_blobData = nullptr;
-
-    do{
-      // Grab the SPD data for this DIMM
-      // This has an FSP and Hostboot implementation
-      rc = getSpdData(i_pTarget, l_blobData, l_size);
-      if (rc != SUCCESS)
-      {
-        break;
-      }
-
-      // Now parse the SPD data for the RawCard
-      uint8_t l_card = 0;
-      uint8_t l_cardExt = 0;  // 0 or 1
-
-      uint8_t RawCardIdx = SPD_IDX_DDR3_MODSPEC_COM_REF_RAW_CARD;
-      uint8_t RawCardExtIdx = SPD_IDX_DDR3_MODSPEC_COM_REF_RAW_CARD_EXT;
-
-      if ( (l_size > SPD_IDX_MODSPEC_COM_REF_BASIC_MEMORY_TYPE) &&
-           l_blobData[SPD_IDX_MODSPEC_COM_REF_BASIC_MEMORY_TYPE] ==
-           BASIC_MEMORY_TYPE_DDR4 )
-      {
-         RawCardIdx = SPD_IDX_DDR4_MODSPEC_COM_REF_RAW_CARD;
-         RawCardExtIdx = SPD_IDX_DDR4_MODSPEC_COM_REF_RAW_CARD_EXT;
-      }
-
-      // Get the Reference Raw Card Extension (0 or 1)
-      if (l_size > RawCardExtIdx)
-      {
-         l_cardExt = ( (l_blobData[RawCardExtIdx] & RAW_CARD_EXT_MASK) >>
-                       RAW_CARD_EXT_SHIFT );
-      }
-      else
-      {
-         PRDF_ERR( PRDF_FUNC "SPD data size too small (%ld, RAW_CARD_EXT %d)",
-                    l_size, RawCardExtIdx );
-         rc = FAIL;
-         break;
-      }
-
-      // Get the References Raw Card (bits 4-0)
-      // When Reference Raw Card Extension = 0
-      //    Reference raw cards A through AL
-      // When Reference Raw Card Extension = 1
-      //    Reference raw cards AM through CB
-      if (l_size > RawCardIdx)
-      {
-         l_card = (l_blobData[RawCardIdx] & RAW_CARD_MASK);
-      }
-      else
-      {
-         PRDF_ERR( PRDF_FUNC "SPD data size too small (%d, RAW_CARD %d)",
-                    l_size, RawCardIdx );
-         rc = FAIL;
-         break;
-      }
-
-      // Raw Card = 0x1f(ZZ) means no JEDEC reference raw card design used.
-      // Have one ZZ in the return merged enumeration.
-      if (0x1f == l_card)
-      {
-          l_cardExt = 1;  //Just one ZZ in the enumeration (0x3f)
-      }
-
-      // Merge into a single enumeration
-      o_rawCard = (l_cardExt << 5) | l_card;
-
-    } while (0);
-
-    free(l_blobData);
-
-    return rc;
-#undef PRDF_FUNC
-}
-*/
-//------------------------------------------------------------------------------
 
 } // end namespace PlatServices
 

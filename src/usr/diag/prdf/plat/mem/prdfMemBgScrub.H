@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,7 @@ namespace PRDF
 /**
  * @brief  Performs all actions necessary to start the background scrubbing on
  *         the first configured address of the given target.
- * @param  i_chip MCBIST, MCA, or MBA.
+ * @param  i_chip OCMB.
  * @return SUCCESS when background scrub is started correctly, else Non-SUCCESS.
  */
 template<TARGETING::TYPE T>
@@ -85,27 +85,6 @@ uint32_t startInitialBgScrub( ExtensibleChip * i_chip )
     return o_rc;
 
     #undef PRDF_FUNC
-}
-
-/** @brief Specialization for MCBIST. */
-template<> inline
-uint32_t startInitialBgScrub<TARGETING::TYPE_MCBIST>( ExtensibleChip * i_chip )
-{
-    using namespace TARGETING;
-
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MCBIST == i_chip->getType() );
-
-    // Find the first configured MCA.
-    ExtensibleChip * mcaChip = nullptr;
-    for ( uint32_t p = 0; p < MAX_PORT_PER_MCBIST; p++ )
-    {
-        mcaChip = PlatServices::getConnectedChild( i_chip, TYPE_MCA, p );
-        if ( nullptr != mcaChip ) break;
-    }
-    PRDF_ASSERT( nullptr != mcaChip ); // MCBIST configured with no MCAs
-
-    return startInitialBgScrub<TYPE_MCA>( mcaChip );
 }
 
 } // end namespace PRDF

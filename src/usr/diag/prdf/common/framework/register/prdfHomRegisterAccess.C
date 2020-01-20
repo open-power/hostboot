@@ -167,8 +167,6 @@ uint32_t ScomAccessor::Access(TargetHandle_t i_target,
                         if( l_MaskReg[l_count]  == registerId )
                         {
                             errlHndl_t err = nullptr;
-                            // TODO RTC 247260 - double check the
-                            // ScomSection_t values here from p10_stop_api.H
                             uint32_t sec = (TYPE_CORE == type) ?
                                 PROC_STOP_SECTION_CORE :
                                 PROC_STOP_SECTION_CACHE;

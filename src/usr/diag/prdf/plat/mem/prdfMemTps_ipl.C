@@ -32,8 +32,7 @@
 #include <prdfMemMark.H>
 #include <prdfMemScrubUtils.H>
 #include <prdfMemTps.H>
-#include <prdfP9McaDataBundle.H>
-#include <prdfP9McaExtraSig.H>
+#include <prdfMemExtraSig.H>
 #include <prdfPlatServices.H>
 
 /* TODO RTC 247259
@@ -121,12 +120,6 @@ uint32_t TpsEvent<T>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
 
 template<TARGETING::TYPE T>
 bool __iueCheck( uint32_t i_eccAttns );
-
-template<> inline
-bool __iueCheck<TYPE_MCA>( uint32_t i_eccAttns )
-{
-    return ( 0 != (i_eccAttns & MAINT_IUE) );
-}
 
 template<> inline
 bool __iueCheck<TYPE_OCMB_CHIP>( uint32_t i_eccAttns )
@@ -244,62 +237,6 @@ uint32_t TpsEvent<T>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
 
 //##############################################################################
 //
-//                          Specializations for MCA
-//
-//##############################################################################
-
-template<>
-uint32_t TpsEvent<TYPE_MCA>::startCmd()
-{
-    #define PRDF_FUNC "[TpsEvent::startCmd] "
-
-    uint32_t o_rc = SUCCESS;
-
-    #ifndef CONFIG_AXONE
-
-    // We don't need to set any stop-on-error conditions or thresholds for
-    // soft/inter/hard CEs during Memory Diagnostics. The design is to let the
-    // command continue to the end of the rank and we do diagnostics on the
-    // CE counts found in the per-symbol counters. Therefore, all we need to do
-    // is tell the hardware which CE types to count.
-    /* TODO RTC 247259
-
-    mss::mcbist::stop_conditions<mss::mc_type::NIMBUS> stopCond;
-
-    switch ( iv_phase )
-    {
-        case TD_PHASE_1:
-            // Set the per symbol counters to count only soft/inter CEs.
-            stopCond.set_nce_soft_symbol_count_enable( mss::ON);
-            stopCond.set_nce_inter_symbol_count_enable(mss::ON);
-            break;
-
-        case TD_PHASE_2:
-            // Set the per symbol counters to count only hard CEs.
-            stopCond.set_nce_hard_symbol_count_enable(mss::ON);
-            break;
-
-        default: PRDF_ASSERT( false ); // invalid phase
-    }
-
-    // Start the time based scrub procedure on this slave rank.
-    o_rc = startTdScrub<TYPE_MCA>( iv_chip, iv_rank, SLAVE_RANK, stopCond );
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
-                  iv_chip->getHuid(), getKey() );
-    }
-
-    */
-    #endif
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//##############################################################################
-//
 //                          Specializations for OCMB
 //
 //##############################################################################
@@ -358,7 +295,6 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::startCmd()
 //------------------------------------------------------------------------------
 
 // Avoid linker errors with the template.
-template class TpsEvent<TYPE_MCA>;
 template class TpsEvent<TYPE_OCMB_CHIP>;
 
 //------------------------------------------------------------------------------

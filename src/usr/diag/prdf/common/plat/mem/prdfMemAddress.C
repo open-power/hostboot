@@ -25,7 +25,7 @@
 
 /** @file  prdfMemAddress.C
  *  @brief General utilities to read, modify, and write the memory address
- *         registers for Centaur MBA and P9 MCBIST/MCA.
+ *         registers for OCMB targets.
  */
 
 #include <prdfPlatServices.H>
@@ -61,8 +61,6 @@ MemAddr MemAddr::fromReadAddr( uint64_t i_addr )
 }
 
 template
-MemAddr MemAddr::fromReadAddr<TYPE_MCBIST>( uint64_t i_addr );
-template
 MemAddr MemAddr::fromReadAddr<TYPE_OCMB_CHIP>( uint64_t i_addr );
 
 template<TARGETING::TYPE T>
@@ -81,61 +79,11 @@ MemAddr MemAddr::fromMaintAddr( uint64_t i_addr )
 }
 
 template
-MemAddr MemAddr::fromMaintAddr<TYPE_MCBIST>( uint64_t i_addr );
-template
 MemAddr MemAddr::fromMaintAddr<TYPE_OCMB_CHIP>( uint64_t i_addr );
 
 
 //------------------------------------------------------------------------------
 //                       Address Accessor Functions
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t getMemReadAddr<TYPE_MCBIST>( ExtensibleChip * i_chip, uint32_t i_pos,
-                                      MemAddr::ReadReg i_reg, MemAddr & o_addr )
-{
-    #define PRDF_FUNC "[getMemReadAddr<TYPE_MCBIST>] "
-
-    // Check parameters
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MCBIST == i_chip->getType() );
-    PRDF_ASSERT( i_pos < MAX_MCA_PER_MCBIST );
-
-    // Get the register string.
-    const char * tmp = "";
-    switch ( i_reg )
-    {
-        case MemAddr::READ_NCE_ADDR: tmp = "MBNCER"; break;
-        case MemAddr::READ_RCE_ADDR: tmp = "MBRCER"; break;
-        case MemAddr::READ_MPE_ADDR: tmp = "MBMPER"; break;
-        case MemAddr::READ_UE_ADDR : tmp = "MBUER" ; break;
-        case MemAddr::READ_AUE_ADDR: tmp = "MBAUER"; break;
-        default: PRDF_ASSERT( false );
-    }
-
-    char reg_str[64];
-    sprintf( reg_str, "MCB%d_%s", i_pos, tmp );
-
-    // Read the address register
-    SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister( reg_str );
-    uint32_t o_rc = reg->Read();
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Read() failed on %s: i_chip=0x%08x",
-                  reg_str, i_chip->getHuid() );
-    }
-    else
-    {
-        // Get the address object.
-        uint64_t addr = reg->GetBitFieldJustified( 0, 64 );
-        o_addr = MemAddr::fromReadAddr<TYPE_MCBIST>( addr );
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
 //------------------------------------------------------------------------------
 
 template<>
@@ -185,22 +133,6 @@ uint32_t getMemReadAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
 //------------------------------------------------------------------------------
 
-template<>
-uint32_t getMemReadAddr<TYPE_MCA>( ExtensibleChip * i_chip,
-                                   MemAddr::ReadReg i_reg, MemAddr & o_addr )
-{
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
-
-    ExtensibleChip * mcbChip = getConnectedParent( i_chip, TYPE_MCBIST );
-
-    uint8_t port = i_chip->getPos() % MAX_MCA_PER_MCBIST;
-
-    return getMemReadAddr<TYPE_MCBIST>( mcbChip, port, i_reg, o_addr );
-}
-
-//------------------------------------------------------------------------------
-
 template<TARGETING::TYPE T>
 uint32_t getMemMaintAddr( ExtensibleChip * i_chip, MemAddr & o_addr )
 {
@@ -231,124 +163,8 @@ uint32_t getMemMaintAddr( ExtensibleChip * i_chip, MemAddr & o_addr )
 }
 
 template
-uint32_t getMemMaintAddr<TYPE_MCBIST>( ExtensibleChip * i_chip,
-                                       MemAddr & o_addr );
-template
 uint32_t getMemMaintAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                           MemAddr & o_addr );
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t getMemMaintAddr<TYPE_MCA>( ExtensibleChip * i_chip, MemAddr & o_addr )
-{
-    #define PRDF_FUNC "[getMemMaintAddr<TYPE_MCA>] "
-
-    // Check parameters
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
-
-    ExtensibleChip * mcbChip = getConnectedParent( i_chip, TYPE_MCBIST );
-
-    return getMemMaintAddr<TYPE_MCBIST>( mcbChip, o_addr );
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-#ifdef __HOSTBOOT_MODULE
-
-template<>
-uint32_t getMcbistMaintPort<TYPE_MCBIST>( ExtensibleChip * i_mcbChip,
-                                          ExtensibleChipList & o_mcaList )
-{
-    #define PRDF_FUNC "[getMcbistMaintPort] "
-
-    // Check parameters
-    PRDF_ASSERT( nullptr != i_mcbChip );
-    PRDF_ASSERT( TYPE_MCBIST == i_mcbChip->getType() );
-
-    uint32_t o_rc = SUCCESS;
-
-    o_mcaList.clear();
-
-    SCAN_COMM_REGISTER_CLASS * mcbagra  = i_mcbChip->getRegister( "MCBAGRA" );
-    SCAN_COMM_REGISTER_CLASS * mcbmcat  = i_mcbChip->getRegister( "MCBMCAT" );
-    SCAN_COMM_REGISTER_CLASS * mcb_cntl = i_mcbChip->getRegister( "MCB_CNTL" );
-
-    do
-    {
-        o_rc = mcbagra->Read();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "Read() failed on MCBAGRA: i_mcbChip=0x%08x",
-                      i_mcbChip->getHuid() );
-            break;
-        }
-
-        // Get a mask of all ports in which the command was executed. Use
-        // MCB_CNTL[2:5] only if MCBAGRA[10] is b0 OR MCBAGRA[10:11] is b11.
-        // Otherwise, use MCBMCAT[38:39].
-        uint8_t portMask = 0;
-        if ( !mcbagra->IsBitSet(10) || mcbagra->IsBitSet(11) ) // broadcast mode
-        {
-            o_rc = mcb_cntl->Read();
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "Read() failed on MCB_CNTL: "
-                          "i_mcbChip=0x%08x", i_mcbChip->getHuid() );
-                break;
-            }
-
-            portMask = mcb_cntl->GetBitFieldJustified( 2, 4 );
-        }
-        else // non-broadcast mode
-        {
-            o_rc = mcbmcat->Read();
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "Read() failed on MCBMCAT: "
-                          "i_mcbChip=0x%08x", i_mcbChip->getHuid() );
-                break;
-            }
-
-            portMask = 0x8 >> mcbmcat->GetBitFieldJustified( 38, 2 );
-        }
-
-        // Get MCAs from all targeted ports.
-        for ( uint8_t p = 0; p < MAX_MCA_PER_MCBIST; p++ )
-        {
-            if ( 0 == (portMask & (0x8 >> p)) ) continue;
-
-            ExtensibleChip * mcaChip = getConnectedChild(i_mcbChip,TYPE_MCA,p);
-            if ( nullptr == mcaChip )
-            {
-                PRDF_ERR( PRDF_FUNC "getConnectedChild(0x%08x,TYPE_MCA,%d) "
-                          "returned nullptr", i_mcbChip->getHuid(), p );
-                PRDF_ASSERT( false ); // port configured but not functional
-            }
-
-            o_mcaList.push_back( mcaChip );
-        }
-
-        // The list should never be empty.
-        size_t sz_list = o_mcaList.size();
-        if ( 0 == sz_list )
-        {
-            PRDF_ERR( PRDF_FUNC "o_mcaList is empty: i_mcbChip=0x%08x "
-                      "portMask=0x%0x", i_mcbChip->getHuid(), portMask );
-            PRDF_ASSERT( false ); // mcbist functional but no configured ports
-        }
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-#endif
 
 //------------------------------------------------------------------------------
 

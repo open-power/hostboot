@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,7 +50,7 @@ class TpsEvent : public TdEntry
 
     /**
      * @brief Constructor
-     * @param i_chip MCA or MBA.
+     * @param i_chip OCMB.
      * @param i_rank Target rank.
      * @param i_ban  True to ban all subsequent requests for TPS on this rank.
      */

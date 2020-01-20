@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -314,7 +314,7 @@ group gCXAFIR
     /** CXAFIR[35]
      *  CXA: UE on data received from PowerBus
      */
-    (rCXAFIR, bit(35)) ? self_th_1; # NIMBUS_20,CUMULUS_10
+    (rCXAFIR, bit(35)) ? self_th_1;
 
     /** CXAFIR[36]
      *  CXA: SUE on data received from PowerBus

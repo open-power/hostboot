@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,7 +33,7 @@
 #include <prdfMemMark.H>
 #include <prdfMemScrubUtils.H>
 #include <prdfMemTdQueue.H>
-#include <prdfP9McaExtraSig.H>
+#include <prdfMemExtraSig.H>
 #include <prdfPlatServices.H>
 
 namespace PRDF
@@ -47,7 +47,7 @@ class DsdEvent : public TdEntry
 
     /**
      * @brief Constructor
-     * @param i_chip MCA, MBA, or OCMB.
+     * @param i_chip OCMB.
      * @param i_rank Rank reporting chip mark.
      */
     DsdEvent<T>( ExtensibleChip * i_chip, const MemRank & i_rank,

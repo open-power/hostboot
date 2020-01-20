@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,7 @@ typedef enum
     /* NOTE: These will be used as array indexes. */
     TRGT_FIRST = 0,
 
-    /** Common Nimbus/Axone types */
+    /** Common types */
     TRGT_PROC = TRGT_FIRST,
     TRGT_CAPP,
     TRGT_XBUS,
@@ -48,11 +48,6 @@ typedef enum
     TRGT_EQ,
     TRGT_EX,
     TRGT_EC,
-
-    /* Nimbus only */
-    TRGT_MCBIST,
-    TRGT_MCS,
-    TRGT_MCA,
 
     /* Axone only */
     TRGT_MC,
@@ -71,7 +66,7 @@ typedef enum
 /** Boundary/position ranges for each target type. */
 typedef enum
 {
-    /* Common Nimbus/Axone */
+    /* Common */
     MAX_PROC_PER_NODE   =  8,
     MAX_CAPP_PER_PROC   =  2,
     MAX_XBUS_PER_PROC   =  3, /* Nimbus 1 and 2, Axone 0, 1, and 2 */
@@ -81,11 +76,6 @@ typedef enum
     MAX_EQ_PER_PROC     =  6,
     MAX_EX_PER_PROC     = 12,
     MAX_EC_PER_PROC     = 24,
-
-    /** Nimbus only */
-    MAX_MCBIST_PER_PROC =  2,
-    MAX_MCS_PER_PROC    =  4,
-    MAX_MCA_PER_PROC    =  8,
 
     /** Axone only */
     MAX_MC_PER_PROC     =  2,

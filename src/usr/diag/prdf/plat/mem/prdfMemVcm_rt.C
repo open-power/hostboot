@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,7 +28,6 @@
 // Platform includes
 #include <prdfMemDqBitmap.H>
 #include <prdfMemVcm.H>
-#include <prdfP9McaDataBundle.H>
 
 using namespace TARGETING;
 
@@ -45,12 +44,6 @@ using namespace PlatServices;
 
 template<TARGETING::TYPE T>
 VcmFalseAlarm * __getFalseAlarmCounter( ExtensibleChip * i_chip );
-
-template<>
-VcmFalseAlarm * __getFalseAlarmCounter<TYPE_MCA>( ExtensibleChip * i_chip )
-{
-    return getMcaDataBundle(i_chip)->getVcmFalseAlarmCounter();
-}
 
 template<>
 VcmFalseAlarm * __getFalseAlarmCounter<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip)
@@ -142,49 +135,11 @@ uint32_t VcmEvent<T>::checkEcc( const uint32_t & i_eccAttns,
     #undef PRDF_FUNC
 }
 template
-uint32_t VcmEvent<TYPE_MCA>::checkEcc( const uint32_t & i_eccAttns,
-                                       STEP_CODE_DATA_STRUCT & io_sc,
-                                       bool & o_done );
-template
 uint32_t VcmEvent<TYPE_OCMB_CHIP>::checkEcc( const uint32_t & i_eccAttns,
                                               STEP_CODE_DATA_STRUCT & io_sc,
                                               bool & o_done );
 
 //------------------------------------------------------------------------------
-
-template<>
-uint32_t VcmEvent<TYPE_MCA>::cleanup( STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[VcmEvent::cleanup] "
-
-    uint32_t o_rc = SUCCESS;
-
-    do
-    {
-        o_rc = MarkStore::chipMarkCleanup<TYPE_MCA>( iv_chip, iv_rank, io_sc );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "chipMarkCleanup(0x%08x,0x%02x) failed",
-                      iv_chip->getHuid(), iv_rank.getKey() );
-            break;
-        }
-
-        // The cleanup() function is called by both verified() and falseAlarm().
-        // In either case, the error log should be predictive if there has been
-        // a least one false alarm on any DRAM on this rank other than this
-        // DRAM. This is required on Nimbus because of two symbol correction,
-        // which does not exist on Centaur.
-        VcmFalseAlarm * faCntr = __getFalseAlarmCounter<TYPE_MCA>(iv_chip);
-        uint8_t dram = iv_mark.getSymbol().getDram();
-        if ( faCntr->queryDrams(iv_rank, dram, io_sc) )
-            io_sc.service_data->setServiceCall();
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
 
 template<>
 uint32_t VcmEvent<TYPE_OCMB_CHIP>::cleanup( STEP_CODE_DATA_STRUCT & io_sc )
@@ -207,8 +162,7 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::cleanup( STEP_CODE_DATA_STRUCT & io_sc )
         // The cleanup() function is called by both verified() and falseAlarm().
         // In either case, the error log should be predictive if there has been
         // a least one false alarm on any DRAM on this rank other than this
-        // DRAM. This is required on Nimbus because of two symbol correction,
-        // which does not exist on Centaur.
+        // DRAM. This is required because of two symbol correction,
         VcmFalseAlarm * faCntr =__getFalseAlarmCounter<TYPE_OCMB_CHIP>(iv_chip);
         uint8_t dram = iv_mark.getSymbol().getDram();
         if ( faCntr->queryDrams(iv_rank, dram, io_sc) )
@@ -291,7 +245,6 @@ uint32_t VcmEvent<T>::falseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
 //------------------------------------------------------------------------------
 
 // Avoid linker errors with the template.
-template class VcmEvent<TYPE_MCA>;
 template class VcmEvent<TYPE_OCMB_CHIP>;
 
 //------------------------------------------------------------------------------

@@ -195,7 +195,7 @@ bool obusInSmpMode(TARGETING::TargetHandle_t obusTgt);
 
 /**
  * @brief  Reads the bad DQ bitmap attribute for both ports of the target rank.
- * @param  i_trgt        A MCA/MBA/MEM_PORT/OCMB_CHIP target.
+ * @param  i_trgt        An OCMB_CHIP target.
  * @param  i_rank        Target rank.
  * @param  o_bitmap      DQ bitmap container.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
@@ -205,7 +205,7 @@ uint32_t getBadDqBitmap( TARGETING::TargetHandle_t i_trgt,
 
 /**
  * @brief  Writes the bad DQ bitmap attribute for both ports of the target rank.
- * @param  i_trgt   A MCA/MBA/MEM_PORT/OCMB_CHIP target.
+ * @param  i_trgt   An OCMB_CHIP target.
  * @param  i_rank   Target rank.
  * @param  i_bitmap DQ bitmap container.
  * @note   This is a no-op if DRAM Repairs are disabled in manufacturing.
@@ -217,7 +217,7 @@ uint32_t setBadDqBitmap( TARGETING::TargetHandle_t i_trgt,
 
 /**
  * @brief  Clears the bad DQ bitmap attribute for all ports of the target rank.
- * @param  i_trgt   A MCA/MBA/MEM_PORT/OCMB_CHIP target.
+ * @param  i_trgt   An OCMB_CHIP target.
  * @param  i_rank   Target rank.
  * @note   This is a no-op if DRAM Repairs are disabled in manufacturing.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
@@ -227,7 +227,7 @@ uint32_t clearBadDqBitmap( TARGETING::TargetHandle_t i_trgt,
 
 /**
  * @brief  Invokes the get steer mux hardware procedure.
- * @param  i_trgt       Target MBA/MCA/MEM_PORT
+ * @param  i_trgt       Target OCMB
  * @param  i_rank       Target rank.
  * @param  o_port0Spare A symbol associated with the spare on port 0.
  * @param  o_port1Spare A symbol associated with the spare on port 1.
@@ -241,7 +241,7 @@ int32_t mssGetSteerMux( TARGETING::TargetHandle_t i_trgt,
 
 /**
  * @brief  Invokes the set steer mux hardware procedure.
- * @param  i_trgt       Target MBA/MEM_PORT.
+ * @param  i_trgt       Target OCMB
  * @param  i_rank       Target rank.
  * @param  i_symbol     A symbol associated with the DRAM to be spared.
  * @param  i_x4EccSpare If true, will set ECC spare instead (x4 mode only).
@@ -255,9 +255,9 @@ int32_t mssSetSteerMux( TARGETING::TargetHandle_t i_trgt,
 
 /**
  * @brief   Get spare DRAM information on a DIMM.
- * @param   i_trgt MBA/MCA/MEM_PORT target.
+ * @param   i_trgt MEM_PORT/OCMB target.
  * @param   i_rank Rank.
- * @param   i_ps MBA port select.
+ * @param   i_ps port select.
  * @param   o_spareConfig Spare DRAM config information.
  * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  * @note    On a DIMM its possible that spare is not present. Also on X4 DRAM
@@ -270,9 +270,9 @@ int32_t getDimmSpareConfig( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
 
 /**
  * @brief Checks if DRAM sparing is enabled.
- * @param i_trgt        Target MBA/MEM_PORT
+ * @param i_trgt        MEM_PORT
  * @param i_rank        Target rank
- * @param i_ps          MBA Port select
+ * @param i_ps          Port select
  * @param o_spareEnable Whether DRAM sparing is enabled or not.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
@@ -282,7 +282,7 @@ uint32_t isDramSparingEnabled( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
 
 /**
  * @brief Checks to see if the spares are available on given target and port.
- * @param i_trgt     Target MBA/MEM_PORT
+ * @param i_trgt     Target MEM_PORT
  * @param i_rank     Target rank
  * @param i_ps       Port select
  * @param o_spAvail  If the spare on inputted port select is available
@@ -302,16 +302,6 @@ uint32_t isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
 template <TARGETING::TYPE>
 void getDimmDqAttr( TARGETING::TargetHandle_t i_target,
                     uint8_t (&io_dqMapPtr)[DQS_PER_DIMM] );
-
-/**
- * @brief  Queries for a channel fail on the given target.
- * @param  i_chip     DMI chip.
- * @param  o_chnlFail True if a channel failure has been detected on this
- *                    target. False, otherwise.
- * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
- */
-template<TARGETING::TYPE>
-uint32_t queryChnlFail( ExtensibleChip * i_chip, bool & o_chnlFail );
 
 //##############################################################################
 //##                        util functions

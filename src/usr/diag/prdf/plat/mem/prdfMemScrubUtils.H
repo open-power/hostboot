@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,7 +51,7 @@ class ScrubResumeCounter
 
 /**
  * @brief  Clears the command complete and WAT workaround attentions.
- * @param  i_chip MBA, MCA, or MCBIST.
+ * @param  i_chip OCMB.
  * @return Non-SUCCESS on SCOM failures, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
@@ -59,24 +59,15 @@ uint32_t clearCmdCompleteAttn( ExtensibleChip * i_chip );
 
 /**
  * @brief  Clears the maintenance ECC counters.
- * @param  i_chip MBA, MCA, or MCBIST.
+ * @param  i_chip OCMB.
  * @return Non-SUCCESS on SCOM failures, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
 uint32_t clearEccCounters( ExtensibleChip * i_chip );
 
 /**
- * @brief  Calls checkEccFirs() and clears the maintenance ECC counters based on
- *         the active error types.
- * @param  i_chip MBA.
- * @return Non-SUCCESS on SCOM failures, SUCCESS otherwise.
- */
-template<TARGETING::TYPE T>
-uint32_t conditionallyClearEccCounters( ExtensibleChip * i_chip );
-
-/**
  * @brief  Clears the maintenance ECC FIRs.
- * @param  i_chip MBA, MCA, or MCBIST.
+ * @param  i_chip OCMB.
  * @return Non-SUCCESS on SCOM failures, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
@@ -85,7 +76,7 @@ uint32_t clearEccFirs( ExtensibleChip * i_chip );
 /**
  * @brief  Wrapper function that calls clearEccCounters(), clearEccFirs() and
  *         clearCmdCompleteAttn().
- * @param  i_chip MBA, MCA, or MCBIST.
+ * @param  i_chip OCMB.
  * @return Non-SUCCESS on SCOM failures, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
@@ -134,7 +125,6 @@ enum MaintEccAttns
 {
     MAINT_NO_ERROR      = 0,    ///< No ECC errors found
 
-    // Common Nimbus and Centaur
     MAINT_MPE           = 0x8000, ///< Chip mark placed
     MAINT_SCE           = 0x4000, ///< CE on symbol mark
     MAINT_MCE           = 0x2000, ///< CE on chip mark
@@ -144,18 +134,17 @@ enum MaintEccAttns
     MAINT_INT_NCE_ETE   = 0x0200, ///< Intermittent NCE threshold exceeed
     MAINT_RCE_ETE       = 0x0100, ///< Retry CE threshold exceeed
 
-    // Nimbus only
     MAINT_IUE           = 0x0080, ///< Intermittent UE
     MAINT_IMPE          = 0x0040, ///< Intermittent chip mark
 
     // Maintenance CEs
     MAINT_NCE           = 0x0020, ///< CE
-    MAINT_TCE           = 0x0010, ///< CE on two symbols (Nimbus only)
+    MAINT_TCE           = 0x0010, ///< CE on two symbols
 };
 
 /**
  * @brief  Checks for all currently active maintenance attentions.
- * @param  i_chip     MBA or MCA.
+ * @param  i_chip     OCMB.
  * @param  o_eccAttns Mask of all currently active maintenance attentions. See
  *                    enum MaintEccAttns for values.
  * @return Non-SUCCESS on SCOM failures, SUCCESS otherwise.
@@ -164,17 +153,7 @@ template<TARGETING::TYPE T>
 uint32_t checkEccFirs( ExtensibleChip * i_chip, uint32_t & o_eccAttns );
 
 /**
- * @brief  Sets the ETE thresholds needed for background scrubbing.
- * @param  i_chip An MBA.
- * @param  i_rank A rank on the target DIMM.
- * @return Non-SUCCESS on SCOM failures, SUCCESS otherwise.
- */
-template<TARGETING::TYPE T>
-uint32_t setBgScrubThresholds( ExtensibleChip * i_chip,
-                               const MemRank & i_rank );
-
-/**
- * @param  i_chip              MBA.
+ * @param  i_chip              OCMB.
  * @param  i_rangeType         See enum AddrRangeType.
  * @param  o_stoppedOnLastAddr True, if the current maintenance command stopped
  *                             on the last address of the given rank range.

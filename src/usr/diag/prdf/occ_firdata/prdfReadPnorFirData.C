@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -94,9 +94,6 @@ TargetHandle_t getTargetHandle( PNOR_Trgt_t * i_pTrgt )
             case TRGT_EC:     type = TYPE_CORE;      break;
             case TRGT_EQ:     type = TYPE_EQ;        break;
             case TRGT_EX:     type = TYPE_EX;        break;
-            case TRGT_MCBIST: type = TYPE_MCBIST;    break;
-            case TRGT_MCS:    type = TYPE_MCS;       break;
-            case TRGT_MCA:    type = TYPE_MCA;       break;
             case TRGT_CAPP:   type = TYPE_CAPP;      break;
             case TRGT_PEC:    type = TYPE_PEC;       break;
             case TRGT_PHB:    type = TYPE_PHB;       break;
