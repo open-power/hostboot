@@ -2329,7 +2329,7 @@
     </description>
     <valueType>uint16</valueType>
     <array>5</array>
-    <writable/>
+    <writeable/>
     <initToZero/>
     <group>dlr</group>
   </attribute>
