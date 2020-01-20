@@ -25,20 +25,49 @@
 #ifndef __HBRT_TARGET_H
 #define __HBRT_TARGET_H
 
-#include <errl/errlentry.H>
+#include <targeting/common/error.H>
 
 namespace TARGETING
 {
     typedef uint64_t rtChipId_t;
+
+    struct ocmbMmioAddressRange_t {
+        rtChipId_t hbrtId;  // Keep hbrtId as the first member of this struct
+                            // there is some tricky casting that depends on this
+        uint64_t mmioBaseAddr;
+        uint64_t mmioEndAddr;
+        uint8_t  accessSize;
+
+        ocmbMmioAddressRange_t() :
+        hbrtId(0), mmioBaseAddr(0), mmioEndAddr(0), accessSize(4)
+        {}
+
+        ocmbMmioAddressRange_t(uint64_t id, uint64_t start_addr, uint64_t end_addr, uint8_t io_size) :
+        hbrtId(id), mmioBaseAddr(start_addr), mmioEndAddr(end_addr), accessSize(io_size)
+        {}
+    } __attribute__((packed));
+
      /**
      * @brief Convert a TARGETING::Target to an unit ID that can be used
      * in calls to the runtime host
      * @param[in] The HB TARGETING::Target
-     * @param[out] Sapphire target id
+     * @param[out] Hypervisor target id
      * @return an error handle on error
      */
     errlHndl_t getRtTarget(const TARGETING::Target* i_target,
-                           rtChipId_t &o_targetId);
+                                     rtChipId_t &o_targetId);
+
+     /**
+     * @brief Takes a TARGETING::Target and passes back a vector of ocmbMmioAddressRange_t
+     *        structs, one for each memory mapped i/o space associated with a given memory
+     *        target.
+     * @param[in] The HB Memory TARGETING::Target
+     * @param[out] Vector of structs representing the mmio spaces associated with
+     *             the given memory target
+     * @return an error handle on error
+     */
+    errlHndl_t getMemTargetMmioInfo ( TARGETING::Target * i_memTarget,
+                                      std::vector<TARGETING::ocmbMmioAddressRange_t>& o_ocmbMmioSpaces);
 
 }
 

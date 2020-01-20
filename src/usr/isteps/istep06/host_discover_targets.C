@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -55,6 +55,7 @@
 #endif
 #include <fapi2/plat_hwp_invoker.H>
 #include <fapi2/target.H>
+#include <runtime/customize_attrs_for_payload.H>
 
 //SBE interfacing
 #include <sbeio/sbeioif.H>
@@ -679,6 +680,19 @@ void* host_discover_targets( void *io_pArgs )
         // Create IStep error log and cross ref error that occurred
         l_stepError.addErrorDetails( l_err );
         errlCommit( l_err, ISTEP_COMP_ID );
+    }
+
+    // Now that we have all of the targets set up we can assign HBRT ids
+    // to all of the targets. These are the IDs the Hypervisors use to ID
+    // a given target. We set them up now because we want to make sure the
+    // attribute is set long before HDAT code consumes them.
+    l_err = RUNTIME::configureHbrtHypIds(TARGETING::is_phyp_load());
+    if(l_err)
+    {
+        // Create IStep error log and cross reference occurred error
+        l_stepError.addErrorDetails( l_err );
+        // Commit Error
+        errlCommit (l_err, ISTEP_COMP_ID);
     }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
