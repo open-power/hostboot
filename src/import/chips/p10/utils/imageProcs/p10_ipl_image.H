@@ -1915,16 +1915,18 @@ typedef enum
 /**************************************************************************/
 typedef enum
 {
-    P9_XIP_SECTION_SBE_LOADERTEXT  = P9_XIP_SECTIONS_PLUS(0),
-    P9_XIP_SECTION_SBE_PIBREPRDATA = P9_XIP_SECTIONS_PLUS(1),
-    P9_XIP_SECTION_SBE_TEXT        = P9_XIP_SECTIONS_PLUS(2),
-    P9_XIP_SECTION_SBE_DATA        = P9_XIP_SECTIONS_PLUS(3),
-    P9_XIP_SECTION_SBE_BASE        = P9_XIP_SECTIONS_PLUS(4),
-    P9_XIP_SECTION_SBE_BASELOADER  = P9_XIP_SECTIONS_PLUS(5),
-    P9_XIP_SECTION_SBE_RINGS       = P9_XIP_SECTIONS_PLUS(6),
-    P9_XIP_SECTION_SBE_OVERRIDES   = P9_XIP_SECTIONS_PLUS(7),
-    P9_XIP_SECTION_SBE_HBBL        = P9_XIP_SECTIONS_PLUS(8),
-    P9_XIP_SECTIONS_SBE            = P9_XIP_SECTIONS_PLUS(9) // # sections
+    P9_XIP_SECTION_SBE_LOADERTEXT    = P9_XIP_SECTIONS_PLUS(0),
+    P9_XIP_SECTION_SBE_PIBREPRDATA   = P9_XIP_SECTIONS_PLUS(1),
+    P9_XIP_SECTION_SBE_TEXT          = P9_XIP_SECTIONS_PLUS(2),
+    P9_XIP_SECTION_SBE_DATA          = P9_XIP_SECTIONS_PLUS(3),
+    P9_XIP_SECTION_SBE_BASE          = P9_XIP_SECTIONS_PLUS(4),
+    P9_XIP_SECTION_SBE_BASELOADER    = P9_XIP_SECTIONS_PLUS(5),
+    P9_XIP_SECTION_SBE_RINGS         = P9_XIP_SECTIONS_PLUS(6),
+    P9_XIP_SECTION_SBE_OVERRIDES     = P9_XIP_SECTIONS_PLUS(7),
+    P9_XIP_SECTION_SBE_HBBL          = P9_XIP_SECTIONS_PLUS(8),
+    P9_XIP_SECTION_SBE_FA_EC_CL2_FAR = P9_XIP_SECTIONS_PLUS(9),
+    P9_XIP_SECTION_SBE_FA_EC_MMA_FAR = P9_XIP_SECTIONS_PLUS(10),
+    P9_XIP_SECTIONS_SBE              = P9_XIP_SECTIONS_PLUS(11) // # sections
 } p9_xip_section_sbe_t;
 
 #define P9_XIP_SECTION_NAMES_SBE(var)     \
@@ -1937,7 +1939,9 @@ typedef enum
                          ".baseloader",   \
                          ".rings",        \
                          ".overrides",    \
-                         ".hbbl")
+                         ".hbbl",         \
+                         ".fa_ec_cl2_far", \
+                         ".fa_ec_mma_far")
 
 /**************************************************************************/
 /* QME Image                                                             */
