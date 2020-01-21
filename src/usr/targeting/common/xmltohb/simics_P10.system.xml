@@ -86,6 +86,12 @@
     <id>sys-0</id>
     <type>sys-sys-power10</type>
     <attribute>
+        <id>SMF_MEM_AMT_REQUESTED</id>
+        <!-- The minimum (nonzero) amount allowed - 256MB;
+             used to exercise the memory distribution logic -->
+        <default>0x10000000</default>
+    </attribute>
+    <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0</default>
     </attribute>

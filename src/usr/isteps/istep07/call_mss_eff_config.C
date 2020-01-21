@@ -55,6 +55,7 @@
 // Targeting Support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
+#include    <targeting/common/util.H>
 
 // Fapi Support
 #include    <fapi2.H>
@@ -70,6 +71,8 @@
 
 #include    <nvram/nvram_interface.H>
 
+// isSimicsRunning
+#include    <util/misc.H>
 
 namespace   ISTEP_07
 {
@@ -136,6 +139,8 @@ void distributeSmfMemory()
 #ifndef CONFIG_FSP_BUILD
     errlHndl_t l_err = nullptr;
     const char* l_smfMemAmtStr = nullptr;
+    uint64_t l_smfMemAmt = 0;
+
     l_err = NVRAM::nvramRead(NVRAM::SMF_MEM_AMT_KEY, l_smfMemAmtStr);
     if(l_err)
     {
@@ -149,20 +154,25 @@ void distributeSmfMemory()
         // l_smfMemAmtStr will be nullptr if the SMF_MEM_AMT_KEY doesn't exist
         if(l_smfMemAmtStr)
         {
-            uint64_t l_smfMemAmt = strtoul(l_smfMemAmtStr, nullptr, 16);
+            l_smfMemAmt = strtoul(l_smfMemAmtStr, nullptr, 16);
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK"Distributing 0x%.16llx SMF memory among the procs on the system", l_smfMemAmt);
-            l_err = SECUREBOOT::SMF::distributeSmfMem(l_smfMemAmt);
-            if(l_err)
-            {
-                // Do not propagate or break on error - distributeSmfMem will
-                // not return unrecoverable errors.
-                errlCommit(l_err, ISTEP_COMP_ID);
-            }
         }
         else
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK"SMF_MEM_AMT_KEY was not found in NVRAM; no SMF memory was distributed.");
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK"SMF_MEM_AMT_KEY was not found in NVRAM; 0 SMF memory will be distributed.");
         }
+    }
+
+    Target* l_sys = nullptr;
+    targetService().getTopLevelTarget(l_sys);
+    assert(l_sys, "distributeSmfMemory: top level target is nullptr!");
+    l_sys->setAttr<ATTR_SMF_MEM_AMT_REQUESTED>(l_smfMemAmt);
+    l_err = SECUREBOOT::SMF::distributeSmfMem();
+    if(l_err)
+    {
+        // Do not propagate or break on error - distributeSmfMem will
+        // not return unrecoverable errors.
+        errlCommit(l_err, ISTEP_COMP_ID);
     }
 #endif
 }
@@ -273,6 +283,13 @@ void* call_mss_eff_config (void *io_pArgs)
 
         // Distribute the SMF Memory (if system appropriate)
         distributeSmfMemory();
+        // Run mss_eff_grouping again to update the state of
+        // SMF_CONFIG and SMF BAR sizes
+        call_mss_eff_grouping(l_StepError);
+        if(!l_StepError.isNull())
+        {
+            break;
+        }
 
     } while(0);
 

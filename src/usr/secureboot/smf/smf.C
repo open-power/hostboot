@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -349,6 +349,19 @@ errlHndl_t distributeSmfMem(const uint64_t i_requestedSmfMemAmtInBytes)
 
     } while(0);
 
+    return l_errl;
+}
+
+errlHndl_t distributeSmfMem()
+{
+    errlHndl_t l_errl = nullptr;
+    TARGETING::Target* l_sys = nullptr;
+    TARGETING::targetService().getTopLevelTarget(l_sys);
+    assert(l_sys, "distributeSmfMem: top level target is nullptr!");
+
+    auto l_smfMemAmt = l_sys->getAttr<TARGETING::ATTR_SMF_MEM_AMT_REQUESTED>();
+
+    l_errl = distributeSmfMem(l_smfMemAmt);
     return l_errl;
 }
 

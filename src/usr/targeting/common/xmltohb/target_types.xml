@@ -2112,6 +2112,9 @@
       <id>RECONFIG_LOOP_TESTS_ENABLE</id>
     </attribute>
     <attribute>
+      <id>SMF_MEM_AMT_REQUESTED</id>
+    </attribute>
+    <attribute>
       <id>SOCKET_POWER_NOMINAL</id>
     </attribute>
     <attribute>
