@@ -1,0 +1,79 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/diag/prdf/data/chip_data/explorer/node_chiplet_ocmb_fir.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2020                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<?xml version="1.0" encoding="UTF-8"?>
+
+<attn_node name="CHIPLET_OCMB_FIR" model_ec="EXPLORER_10" reg_type="SCOM">
+
+    <register name="CHIPLET_OCMB_CS_FIR">
+        <instance reg_inst="0" addr="0x08040000" />
+    </register>
+
+    <register name="CHIPLET_OCMB_RE_FIR">
+        <instance reg_inst="0" addr="0x08040001" />
+    </register>
+
+    <register name="CHIPLET_OCMB_FIR_MASK">
+        <instance reg_inst="0" addr="0x08040002" />
+    </register>
+
+    <capture_group node_inst="0">
+        <capture_register reg_name="CHIPLET_OCMB_CS_FIR"   reg_inst="0" />
+        <capture_register reg_name="CHIPLET_OCMB_RE_FIR"   reg_inst="0" />
+        <capture_register reg_name="CHIPLET_OCMB_FIR_MASK" reg_inst="0" />
+    </capture_group>
+
+    <rule attn_type="UCS" node_inst="0">
+        <!-- FIR & ~MASK & 0x1fffffffffffffff -->
+        <expr type="and">
+            <expr type="reg" value1="CHIPLET_OCMB_CS_FIR" />
+            <expr type="not">
+                <expr type="reg" value1="CHIPLET_OCMB_FIR_MASK" />
+            </expr>
+            <expr type="int" value1="0x1fffffffffffffff" />
+        </expr>
+    </rule>
+
+    <rule attn_type="RE" node_inst="0">
+        <!-- (FIR >> 2) & ~MASK & 0x1fffffffffffffff -->
+        <expr type="and">
+            <expr type="rshift" value1="2">
+                <expr type="reg" value1="CHIPLET_OCMB_RE_FIR" />
+            </expr>
+            <expr type="not">
+                <expr type="reg" value1="CHIPLET_OCMB_FIR_MASK" />
+            </expr>
+            <expr type="int" value1="0x1fffffffffffffff" />
+        </expr>
+    </rule>
+
+    <bit pos= "3" child_node="OCMB_LFIR" desc="Attention from OCMB_LFIR" />
+    <bit pos= "4" child_node="MMIOFIR"   desc="Attention from MMIOFIR"   />
+    <bit pos= "7" child_node="SRQFIR"    desc="Attention from SRQFIR"    />
+    <bit pos= "8" child_node="MCBISTFIR" desc="Attention from MCBISTFIR" />
+    <bit pos= "9" child_node="RDFFIR"    desc="Attention from RDFFIR"    />
+    <bit pos="11" child_node="TLXFIR"    desc="Attention from TLXFIR"    />
+    <bit pos="12" child_node="OMIDLFIR"  desc="Attention from OMIDLFIR"  />
+
+</attn_node>

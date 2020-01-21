@@ -48,7 +48,7 @@ These are machine readable files created by the hardware and firmware teams.
 They are consumed by Hostboot and used to build the Chip Data Binary files
 during Hostboot builds.
 
-Details: <https://github.com/open-power/hostboot/tree/master/src/usr/diag/prdf/TBD>.
+Details: <https://github.com/open-power/hostboot/tree/master/src/usr/diag/prdf/data/chip_data/chip_data_xml.md>.
 
 ### 2.2) Chip Data Binary
 
@@ -57,12 +57,12 @@ and stored in the PNOR. The analyzer will pull these files from the PNOR and
 feed them into the isolator. Note that each file is scoped to a specific chip
 model and EC. All signatures within a file will be unique.
 
-Details: <https://github.com/openbmc/openpower-libhei/blob/master/src/chip_data/TBD>.
+Details: <https://github.com/openbmc/openpower-libhei/blob/master/src/chip_data/CHIP_DATA.md>.
 
 ## 3) RAS Data Files
 
 These define the RAS actions (i.e. callouts, garding, thresholding, etc.)
-required for each signature. The defined actions are dependent on the analyzer
+required for each signature. The actions are dependent on the analyzer
 application. For example, the eBMC analyzer does not need any thresholding
 information since each attention handled by eBMC is a terminating event.
 

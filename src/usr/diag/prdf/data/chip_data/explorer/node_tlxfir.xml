@@ -1,0 +1,65 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/diag/prdf/data/chip_data/explorer/node_tlxfir.xml $   -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2020                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<?xml version="1.0" encoding="UTF-8"?>
+
+<attn_node name="TLXFIR" model_ec="EXPLORER_10" reg_type="SCOM">
+
+    <local_fir name="TLXFIR" config="W">
+        <instance reg_inst="0" addr="0x08012400" />
+        <action attn_type="UCS" config="00" />
+        <action attn_type="RE"  config="01" />
+        <action attn_type="HA"  config="10" />
+    </local_fir>
+
+    <bit pos= "0"    desc="Info reg parity error" />
+    <bit pos= "1"    desc="Ctrl reg parity error" />
+    <bit pos= "2"    desc="TLX VC0 return credit counter overflow" />
+    <bit pos= "3"    desc="TLX VC1 return credit counter overflow" />
+    <bit pos= "4"    desc="TLX dcp0 return credit counter overflow" />
+    <bit pos= "5"    desc="TLX dcp1 return credit counter overflow" />
+    <bit pos= "6"    desc="TLX credit management block error" />
+    <bit pos= "7"    desc="TLX credit management block parity error" />
+    <bit pos= "8"    desc="TLXT fatal parity error" />
+    <bit pos= "9"    desc="TLXT recoverable error" />
+    <bit pos="10"    desc="TLXT configuration error" />
+    <bit pos="11"    desc="TLXT informational parity error" />
+    <bit pos="12"    desc="TLXT hard error" />
+    <bit pos="13:15" desc="Reserved" />
+    <bit pos="16"    desc="Corrupted pad mem pattern" />
+    <bit pos="17"    desc="Downstream OC parity error" />
+    <bit pos="18"    desc="OC malformed" />
+    <bit pos="19"    desc="OC protocol error" />
+    <bit pos="20"    desc="Address translate error" />
+    <bit pos="21"    desc="Metadata unc or data parity error" />
+    <bit pos="22"    desc="OC unsupported group 2" />
+    <bit pos="23"    desc="OC unsupported group 1" />
+    <bit pos="24"    desc="Bit flip control error" />
+    <bit pos="25"    desc="Control HW error" />
+    <bit pos="26"    desc="ECC corrected and others" />
+    <bit pos="27"    desc="Trace stop" />
+    <bit pos="28"    desc="Internal SCOM error" />
+    <bit pos="29"    desc="Internal SCOM error clone" />
+
+</attn_node>

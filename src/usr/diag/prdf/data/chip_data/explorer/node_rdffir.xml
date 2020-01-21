@@ -1,0 +1,91 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/diag/prdf/data/chip_data/explorer/node_rdffir.xml $   -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2020                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<?xml version="1.0" encoding="UTF-8"?>
+
+<attn_node name="RDFFIR" model_ec="EXPLORER_10" reg_type="SCOM">
+
+    <local_fir name="RDFFIR" config="W">
+        <instance reg_inst="0" addr="0x08011c00" />
+        <action attn_type="UCS" config="00" />
+        <action attn_type="RE"  config="01" />
+        <action attn_type="HA"  config="10" />
+    </local_fir>
+
+    <bit pos= "0"    desc="Mainline read MPE on rank 0" />
+    <bit pos= "1"    desc="Mainline read MPE on rank 1" />
+    <bit pos= "2"    desc="Mainline read MPE on rank 2" />
+    <bit pos= "3"    desc="Mainline read MPE on rank 3" />
+    <bit pos= "4"    desc="Mainline read MPE on rank 4" />
+    <bit pos= "5"    desc="Mainline read MPE on rank 5" />
+    <bit pos= "6"    desc="Mainline read MPE on rank 6" />
+    <bit pos= "7"    desc="Mainline read MPE on rank 7" />
+    <bit pos= "8"    desc="Mainline read NCE" />
+    <bit pos= "9"    desc="Mainline read TCE" />
+    <bit pos="10"    desc="Mainline read SCE" />
+    <bit pos="11"    desc="Mainline read MCE" />
+    <bit pos="12"    desc="Mainline read SUE" />
+    <bit pos="13"    desc="Mainline read AUE" />
+    <bit pos="14"    desc="Mainline read UE" />
+    <bit pos="15"    desc="Mainline read RCD" />
+    <bit pos="16"    desc="Mainline read IAUE" />
+    <bit pos="17"    desc="Mainline read IUE" />
+    <bit pos="18"    desc="Mainline read IRCD" />
+    <bit pos="19"    desc="Mainline read IMPE" />
+    <bit pos="20"    desc="Maintenance MPE on rank 0" />
+    <bit pos="21"    desc="Maintenance MPE on rank 1" />
+    <bit pos="22"    desc="Maintenance MPE on rank 2" />
+    <bit pos="23"    desc="Maintenance MPE on rank 3" />
+    <bit pos="24"    desc="Maintenance MPE on rank 4" />
+    <bit pos="25"    desc="Maintenance MPE on rank 5" />
+    <bit pos="26"    desc="Maintenance MPE on rank 6" />
+    <bit pos="27"    desc="Maintenance MPE on rank 7" />
+    <bit pos="28"    desc="Maintenance NCE" />
+    <bit pos="29"    desc="Maintenance TCE" />
+    <bit pos="30"    desc="Maintenance SCE" />
+    <bit pos="31"    desc="Maintenance MCE" />
+    <bit pos="32"    desc="Maintenance SUE" />
+    <bit pos="33"    desc="Maintenance AUE" />
+    <bit pos="34"    desc="Maintenance UE" />
+    <bit pos="35"    desc="Maintenance RCD" />
+    <bit pos="36"    desc="Maintenance IAUE" />
+    <bit pos="37"    desc="Maintenance IUE" />
+    <bit pos="38"    desc="Maintenance  IRCD" />
+    <bit pos="39"    desc="Maintenance IMPE" />
+    <bit pos="40"    desc="RDDATA valid error" />
+    <bit pos="41"    desc="SCOM status register parity error" />
+    <bit pos="42"    desc="SCOM recoverable register parity error" />
+    <bit pos="43"    desc="SCOM unrecoverable register parity error" />
+    <bit pos="44"    desc="ECC corrector internal parity error" />
+    <bit pos="45"    desc="Rd Buff ECC CHK Cor CE DW0 Detected" />
+    <bit pos="46"    desc="Rd Buff ECC CHK Cor CE DW1 Detected" />
+    <bit pos="47"    desc="Rd Buff ECC CHK Cor UE DW0 Detected" />
+    <bit pos="48"    desc="Rd Buff ECC CHK Cor UE DW1 Detected" />
+    <bit pos="49:59" desc="Reserved" />
+    <bit pos="60"    desc="SCOM register parity error for debug/wat control" />
+    <bit pos="61"    desc="Reserved" />
+    <bit pos="62"    desc="Internal SCOM error" />
+    <bit pos="63"    desc="Internal SCOM error copy" />
+
+</attn_node>
