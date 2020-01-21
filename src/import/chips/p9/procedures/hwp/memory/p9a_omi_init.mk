@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -23,5 +23,8 @@
 #
 # IBM_PROLOG_END_TAG
 # Makefile for p9a_omi_init HWP
+
 PROCEDURE=p9a_omi_init
+$(eval $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9a/procedures/hwp/memory/))
+$(eval $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)))
 $(call BUILD_PROCEDURE)

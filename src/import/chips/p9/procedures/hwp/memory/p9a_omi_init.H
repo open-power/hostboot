@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,8 +33,8 @@
 // *HWP Consumed by: HB
 
 
-#ifndef __P9A_OMI_INIT_H_
-#define __P9A_OMI_INIT_H_
+#ifndef _P9A_OMI_INIT_H_
+#define _P9A_OMI_INIT_H_
 
 #include <fapi2.H>
 

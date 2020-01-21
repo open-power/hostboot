@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,16 +32,15 @@
 // *HWP Level: 2
 // *HWP Consumed by: HB
 
+#include <fapi2.H>
+#include <lib/fir/p9a_fir_traits.H>
+#include <lib/fir/p9a_fir.H>
 #include <p9a_omi_init.H>
 #include <p9a_omi_init_scom.H>
-#include <p9a_mc_scom_addresses.H>
-#include <p9a_mc_scom_addresses_fld.H>
 
 ///
 /// @brief Run initfile to enable templates and set pacing.
-///
 /// @param[in] i_target                 p9a channel to work on
-///
 /// @return fapi2:ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode p9a_omi_init_scominit(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target)
@@ -63,9 +62,7 @@ fapi2::ReturnCode p9a_omi_init_scominit(const fapi2::Target<fapi2::TARGET_TYPE_M
 
 ///
 /// @brief Check and enable supported templates
-///
 /// @param[in] i_target                 p9a channel to work on
-///
 /// @return fapi2:ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode p9a_omi_init_enable_templates(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target)
@@ -106,9 +103,7 @@ fapi_try_exit:
 
 ///
 /// @brief Enable ibm buffer chip low latency mode
-///
 /// @param[in] i_target                 p9a channel to work on
-///
 /// @return fapi2:ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode p9a_omi_init_enable_lol(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target)
@@ -146,11 +141,43 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+// Putting unmask function in mss::unmask for consistency with p9/EXPL/etc.
+namespace mss
+{
+
+namespace unmask
+{
+
+///
+/// @brief Initialize Axone DSTLFIR mask bits after p9a omi init
+/// @param[in] i_target MCC target to find targets to initialize
+/// @return fapi2:ReturnCode FAPI2_RC_SUCCESS if success, else error code
+///
+fapi2::ReturnCode after_p9a_omi_init(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target)
+{
+    // Get parent MC from MCC to do necessary OMI FIR unmasks
+    const auto& l_mc = mss::find_target<fapi2::TARGET_TYPE_MC>(i_target);
+    FAPI_TRY(after_p9a_omi_init_omi_fir_helper(l_mc));
+
+    // Set all bits on MCC DSTLFIR per FIR XML spec
+    FAPI_TRY(after_p9a_omi_init_dstlfir_helper(i_target));
+
+    // Set all bits on MCC USTLFIR per FIR XML spec
+    FAPI_TRY(after_p9a_omi_init_ustlfir_helper(i_target));
+
+fapi_try_exit:
+
+    FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);
+    return fapi2::current_err;
+}
+
+} // end unmask ns
+
+} // end mss ns
+
 ///
 /// @brief Finalize the OMI
-///
 /// @param[in] i_target                 p9a channel to work on
-///
 /// @return fapi2:ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode p9a_omi_init(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target)
@@ -158,6 +185,7 @@ fapi2::ReturnCode p9a_omi_init(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_ta
     FAPI_TRY(p9a_omi_init_scominit(i_target));
     FAPI_TRY(p9a_omi_init_enable_templates(i_target));
     FAPI_TRY(p9a_omi_init_enable_lol(i_target));
+    FAPI_TRY(mss::unmask::after_p9a_omi_init(i_target));
 
 fapi_try_exit:
 

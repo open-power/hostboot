@@ -45,6 +45,184 @@ namespace unmask
 {
 
 ///
+/// @brief Helper function to perform p9a MCC DSTLFIR unmasks
+/// @param[in] i_target MCC target to find targets to initialize
+/// @return fapi2:ReturnCode FAPI2_RC_SUCCESS if success, else error code
+///
+inline fapi2::ReturnCode after_p9a_omi_init_dstlfir_helper(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target)
+{
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::buffer<uint64_t> l_reg_data;
+
+    mss::fir::reg<P9A_MCC_DSTLFIR> l_p9a_mcc_dstlfir_reg(i_target, l_rc);
+    FAPI_TRY(l_rc, "for target %s unable to create fir::reg for 0x%016x", mss::c_str(i_target), P9A_MCC_DSTLFIR);
+
+    FAPI_TRY(l_p9a_mcc_dstlfir_reg.template local_checkstop<P9A_MCC_DSTLFIR_SUBCHANNEL_A_TLX_CHECKSTOP>()
+             .template recoverable_error<P9A_MCC_DSTLFIR_SUBCHANNEL_A_TLX_RECOVERABLE_ATTENTION>()
+             .template attention<P9A_MCC_DSTLFIR_SUBCHANNEL_A_TLX_SPECIAL_ATTENTION>()
+             .template local_checkstop<P9A_MCC_DSTLFIR_SUBCHANNEL_B_TLX_CHECKSTOP>()
+             .template recoverable_error<P9A_MCC_DSTLFIR_SUBCHANNEL_B_TLX_RECOVERABLE_ATTENTION>()
+             .template attention<P9A_MCC_DSTLFIR_SUBCHANNEL_B_TLX_SPECIAL_ATTENTION>()
+             .template recoverable_error<P9A_MCC_DSTLFIR_SUBCHANNEL_A_TIMEOUT_ERROR>()
+             .template recoverable_error<P9A_MCC_DSTLFIR_SUBCHANNEL_B_TIMEOUT_ERROR>()
+             .write()); // close FAPI_TRY
+
+    using MCCT = mss::mccTraits<mss::proc_type::AXONE>;
+
+    // Set bits of DSTLCFG for specific channel fail enables/disables
+    // NOTE: These are outside of standard FIR procedure and handle enabling a full OMI channel checkstop
+    FAPI_TRY(fapi2::getScom(i_target, MCCT::DSTL_CFG, l_reg_data));
+
+    l_reg_data.setBit<P9A_MCC_DSTLCFG_ENABLE_HOST_ATTN>();
+
+    FAPI_TRY(fapi2::putScom(i_target, MCCT::DSTL_CFG, l_reg_data));
+
+    // Set bits of DSTLCFG2 for specific channel fail enables/disables
+    // NOTE: These are outside of standard FIR procedure and handle enabling a full OMI channel checkstop
+    FAPI_TRY(fapi2::getScom(i_target, MCCT::DSTL_CFG2, l_reg_data));
+
+    l_reg_data.clearBit<P9A_MCC_DSTLCFG2_CFG_SUBCH_A_FAIL_DIS_LINK_DOWN>()
+    .clearBit<P9A_MCC_DSTLCFG2_CFG_SUBCH_B_FAIL_DIS_LINK_DOWN>()
+    .clearBit<P9A_MCC_DSTLCFG2_CFG_SUBCH_A_FAIL_DIS_CH_TIMEOUT>()
+    .clearBit<P9A_MCC_DSTLCFG2_CFG_SUBCH_B_FAIL_DIS_CH_TIMEOUT>()
+    .clearBit<P9A_MCC_DSTLCFG2_CFG_SUBCH_A_FAIL_DIS_TLX_XSTOP>()
+    .clearBit<P9A_MCC_DSTLCFG2_CFG_SUBCH_B_FAIL_DIS_TLX_XSTOP>()
+    .clearBit<P9A_MCC_DSTLCFG2_SUBCH_A_FAIL_DIS_COUNTER_ERR>()
+    .clearBit<P9A_MCC_DSTLCFG2_SUBCH_B_FAIL_DIS_COUNTER_ERR>()
+    .clearBit<P9A_MCC_DSTLCFG2_SUBCH_A_FAIL_DIS_TLXVC3_OVERUSE>()
+    .clearBit<P9A_MCC_DSTLCFG2_SUBCH_B_FAIL_DIS_TLXVC3_OVERUSE>()
+    .setBit<P9A_MCC_DSTLCFG2_CFG_SUBCH_A_FAIL_DIS_DSTL_TIMEOUT>()
+    .setBit<P9A_MCC_DSTLCFG2_CFG_SUBCH_B_FAIL_DIS_DSTL_TIMEOUT>();
+
+    FAPI_TRY(fapi2::putScom(i_target, MCCT::DSTL_CFG2, l_reg_data));
+
+fapi_try_exit:
+
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function to perform p9a MCC USTLFIR unmasks
+/// @param[in] i_target MCC target to find targets to initialize
+/// @return fapi2:ReturnCode FAPI2_RC_SUCCESS if success, else error code
+///
+inline fapi2::ReturnCode after_p9a_omi_init_ustlfir_helper(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target)
+{
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::buffer<uint64_t> l_reg_data;
+
+    mss::fir::reg<P9A_MCC_USTLFIR> l_p9a_mcc_ustlfir_reg(i_target, l_rc);
+    FAPI_TRY(l_rc, "for target %s unable to create fir::reg for 0x%016x", mss::c_str(i_target), P9A_MCC_USTLFIR);
+
+    // Perform all USTLFIR unmasks per RAS unmask spec
+    FAPI_TRY(l_p9a_mcc_ustlfir_reg.template local_checkstop<P9A_MCC_USTLFIR_CHANA_UNEXP_DATA_ERR>()
+             .template local_checkstop<P9A_MCC_USTLFIR_CHANB_UNEXP_DATA_ERR>()
+             .template local_checkstop<P9A_MCC_USTLFIR_CHANA_INVALID_TEMPLATE_ERROR>()
+             .template local_checkstop<P9A_MCC_USTLFIR_CHANB_INVALID_TEMPLATE_ERROR>()
+             .template recoverable_error<P9A_MCC_USTLFIR_WDF_BUFFER_CE>()
+             .template recoverable_error<P9A_MCC_USTLFIR_WDF_BUFFER_UE>()
+             .template checkstop<P9A_MCC_USTLFIR_WDF_BUFFER_OVERRUN>()
+             .template checkstop<P9A_MCC_USTLFIR_WDF_TAG_PARITY_ERROR>()
+             .template checkstop<P9A_MCC_USTLFIR_WDF_SCOM_SEQ_ERROR>()
+             .template checkstop<P9A_MCC_USTLFIR_WDF_PWCTL_SEQ_ERROR>()
+             .template checkstop<P9A_MCC_USTLFIR_WDF_MISC_REG_PARITY_ERROR>()
+             .template checkstop<P9A_MCC_USTLFIR_WDF_MCA_ASYNC_ERROR>()
+             .template checkstop<P9A_MCC_USTLFIR_WDF_CMD_PARITY_ERROR>()
+             .template checkstop<P9A_MCC_USTLFIR_READ_MBS_RDBUF_OVF_ERROR>()
+             .template recoverable_error<P9A_MCC_USTLFIR_WRT_BUFFER_CE>()
+             .template recoverable_error<P9A_MCC_USTLFIR_WRT_BUFFER_UE>()
+             .template checkstop<P9A_MCC_USTLFIR_WRT_SCOM_SEQ_ERROR>()
+             .template checkstop<P9A_MCC_USTLFIR_WRT_MISC_REG_PARITY_ERROR>()
+             .template local_checkstop<P9A_MCC_USTLFIR_CHANA_FAIL_RESP_CHECKSTOP>()
+             .template local_checkstop<P9A_MCC_USTLFIR_CHANB_FAIL_RESP_CHECKSTOP>()
+             .template recoverable_error<P9A_MCC_USTLFIR_CHANA_FAIL_RESP_RECOVER>()
+             .template recoverable_error<P9A_MCC_USTLFIR_CHANB_FAIL_RESP_RECOVER>()
+             .template recoverable_error<P9A_MCC_USTLFIR_CHANA_LOL_DROP_RECOVER>()
+             .template recoverable_error<P9A_MCC_USTLFIR_CHANB_LOL_DROP_RECOVER>()
+             .template local_checkstop<P9A_MCC_USTLFIR_CHANA_FLIT_PARITY_ERROR_FIX>()
+             .template local_checkstop<P9A_MCC_USTLFIR_CHANB_FLIT_PARITY_ERROR_FIX>()
+             .template local_checkstop<P9A_MCC_USTLFIR_CHANA_FATAL_PARITY_ERROR>()
+             .template local_checkstop<P9A_MCC_USTLFIR_CHANB_FATAL_PARITY_ERROR>()
+             .template local_checkstop<P9A_MCC_USTLFIR_CHANA_BAD_RESP_LOG_VAL>()
+             .template local_checkstop<P9A_MCC_USTLFIR_CHANB_BAD_RESP_LOG_VAL>()
+             .template local_checkstop<P9A_MCC_USTLFIR_CHANA_EXCESS_BAD_DATA_BITS>()
+             .template local_checkstop<P9A_MCC_USTLFIR_CHANB_EXCESS_BAD_DATA_BITS>()
+             .template local_checkstop<P9A_MCC_USTLFIR_CHANA_COMP_TMPL0_DATA_NOT_MMIO>()
+             .template local_checkstop<P9A_MCC_USTLFIR_CHANB_COMP_TMPL0_DATA_NOT_MMIO>()
+             .template recoverable_error<P9A_MCC_USTLFIR_CHANA_MMIO_IN_LOL_MODE>()
+             .template recoverable_error<P9A_MCC_USTLFIR_CHANB_MMIO_IN_LOL_MODE>()
+             .template local_checkstop<P9A_MCC_USTLFIR_CHANA_EXCESS_DATA_ERROR>()
+             .template local_checkstop<P9A_MCC_USTLFIR_CHANB_EXCESS_DATA_ERROR>()
+             .template local_checkstop<P9A_MCC_USTLFIR_CHANA_BADCRC_DATA_NOT_VALID_ERROR>()
+             .template local_checkstop<P9A_MCC_USTLFIR_CHANB_BADCRC_DATA_NOT_VALID_ERROR>()
+             .template local_checkstop<P9A_MCC_USTLFIR_CHANA_FIFO_OVERFLOW_ERROR>()
+             .template local_checkstop<P9A_MCC_USTLFIR_CHANB_FIFO_OVERFLOW_ERROR>()
+             .template local_checkstop<P9A_MCC_USTLFIR_CHANA_INVALID_CMD_ERROR>()
+             .template local_checkstop<P9A_MCC_USTLFIR_CHANB_INVALID_CMD_ERROR>()
+             .template checkstop<P9A_MCC_USTLFIR_FATAL_REG_PARITY_ERROR>()
+             .template recoverable_error<P9A_MCC_USTLFIR_RECOV_REG_PARITY_ERROR>()
+             .template local_checkstop<P9A_MCC_USTLFIR_CHANA_INVALID_DL_DP_COMBO>()
+             .template local_checkstop<P9A_MCC_USTLFIR_CHANB_INVALID_DL_DP_COMBO>()
+             .write()); // close FAPI_TRY
+
+    using MCCT = mss::mccTraits<mss::proc_type::AXONE>;
+
+    // Set bits of USTLFIRMASK for specific channel fail enables/disables
+    // NOTE: These are outside of standard FIR procedure and handle enabling a full OMI channel checkstop
+    FAPI_TRY(fapi2::getScom(i_target, MCCT::USTL_FAILMASK, l_reg_data));
+
+    l_reg_data.clearBit<P9A_MCC_USTLFAILMASK_RECOVER_ENABLE_MASK_0>()
+    .setBit<P9A_MCC_USTLFAILMASK_RECOVER_ENABLE_MASK_1>()
+    .setBit<P9A_MCC_USTLFAILMASK_RECOVER_ENABLE_MASK_2>()
+    .setBit<P9A_MCC_USTLFAILMASK_RECOVER_ENABLE_MASK_3>()
+    .setBit<P9A_MCC_USTLFAILMASK_RECOVER_ENABLE_MASK_4>()
+    .setBit<P9A_MCC_USTLFAILMASK_RECOVER_ENABLE_MASK_5>()
+    .setBit<P9A_MCC_USTLFAILMASK_RECOVER_ENABLE_MASK_6>()
+    .setBit<P9A_MCC_USTLFAILMASK_RECOVER_ENABLE_MASK_7>()
+    .setBit<P9A_MCC_USTLFAILMASK_RECOVER_ENABLE_MASK_8>()
+    .clearBit<P9A_MCC_USTLFAILMASK_RECOVER_ENABLE_MASK_9>()
+    .clearBit<P9A_MCC_USTLFAILMASK_RECOVER_ENABLE_MASK_10>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHECKSTOP_ENABLE_MASK_16>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHECKSTOP_ENABLE_MASK_17>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHECKSTOP_ENABLE_MASK_18>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHECKSTOP_ENABLE_MASK_19>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHECKSTOP_ENABLE_MASK_20>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHECKSTOP_ENABLE_MASK_21>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHECKSTOP_ENABLE_MASK_22>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHECKSTOP_ENABLE_MASK_23>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHECKSTOP_ENABLE_MASK_24>()
+    .setBit<P9A_MCC_USTLFAILMASK_CHECKSTOP_ENABLE_MASK_25>()
+    .setBit<P9A_MCC_USTLFAILMASK_CHECKSTOP_ENABLE_MASK_26>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK_32>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK_33>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK_34>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK_35>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK_36>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK_37>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK_38>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK_39>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK_40>()
+    .setBit<P9A_MCC_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK_41>()
+    .setBit<P9A_MCC_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK_42>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHANNEL_FAIL_TYPE_DISABLE_48>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHANNEL_FAIL_TYPE_DISABLE_49>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHANNEL_FAIL_TYPE_DISABLE_50>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHANNEL_FAIL_TYPE_DISABLE_51>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHANNEL_FAIL_TYPE_DISABLE_52>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHANNEL_FAIL_TYPE_DISABLE_53>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHANNEL_FAIL_TYPE_DISABLE_54>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHANNEL_FAIL_TYPE_DISABLE_55>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHANNEL_FAIL_TYPE_DISABLE_56>()
+    .clearBit<P9A_MCC_USTLFAILMASK_CHANNEL_FAIL_TYPE_DISABLE_57>();
+
+    FAPI_TRY(fapi2::putScom(i_target, MCCT::USTL_FAILMASK, l_reg_data));
+
+fapi_try_exit:
+
+    return fapi2::current_err;
+}
+
+///
 /// @brief Clear error bits P9A_MC_REGm_DLn_ERROR_MASK registers m[0:2], n[0:2] since they are now "active"
 /// @tparam R the REG_DL register we want to write to
 /// @param[in] i_target MC target to find targets to initialize
@@ -53,15 +231,15 @@ namespace unmask
 ///
 template<uint64_t R>
 inline fapi2::ReturnCode setup_reg_dl_helper(const fapi2::Target<fapi2::TARGET_TYPE_MC>& i_target,
-        mss::states i_state)
+        const mss::states i_state)
 {
     fapi2::buffer<uint64_t> l_reg_data;
 
-    FAPI_TRY(mss::getScom(i_target, R, l_reg_data));
-    l_reg_data.writeBit<P9A_MC_REG2_DL2_ERROR_MASK_34>(i_state);
-    l_reg_data.writeBit<P9A_MC_REG2_DL2_ERROR_MASK_33>(i_state);
-    l_reg_data.writeBit<P9A_MC_REG2_DL2_ERROR_MASK_32>(i_state);
-    FAPI_TRY(mss::putScom(i_target, R, l_reg_data));
+    FAPI_TRY(fapi2::getScom(i_target, R, l_reg_data));
+    l_reg_data.writeBit<P9A_MC_REG2_DL2_ERROR_MASK_34>(i_state)
+    .writeBit<P9A_MC_REG2_DL2_ERROR_MASK_33>(i_state)
+    .writeBit<P9A_MC_REG2_DL2_ERROR_MASK_32>(i_state);
+    FAPI_TRY(fapi2::putScom(i_target, R, l_reg_data));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -211,6 +389,37 @@ inline fapi2::ReturnCode after_p9a_chiplet_scominit(const fapi2::Target<fapi2::T
     FAPI_TRY(setup_reg_dl_helper<MCT::REG2_DL2_ERROR_MASK>(i_target, mss::HIGH));
 
     return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+
+    return fapi2::current_err;
+}
+/// @brief Helper function to perform p9a OMI FIR unmasks
+/// @param[in] i_target MC target to find targets to initialize
+/// @return fapi2:ReturnCode FAPI2_RC_SUCCESS if success, else error code
+///
+inline fapi2::ReturnCode after_p9a_omi_init_omi_fir_helper(const fapi2::Target<fapi2::TARGET_TYPE_MC>& i_target)
+{
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::buffer<uint64_t> l_reg_data;
+
+    mss::fir::reg<P9A_MC_REG0_OMI_FIR> l_p9a_mc_omi_fir_reg(i_target, l_rc);
+    FAPI_TRY(l_rc, "for target %s unable to create fir::reg for 0x%016x", mss::c_str(i_target), P9A_MC_REG0_OMI_FIR);
+
+    FAPI_TRY(l_p9a_mc_omi_fir_reg.template recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL0_FLIT_CE>().write());
+
+    using MCT = mss::mcTraits<mss::proc_type::AXONE>;
+
+    // Clear ERROR_MASK on REGm_DLn 0:2 registers because they are now considered valid
+    FAPI_TRY(setup_reg_dl_helper<MCT::REG0_DL0_ERROR_MASK>(i_target, mss::LOW));
+    FAPI_TRY(setup_reg_dl_helper<MCT::REG0_DL1_ERROR_MASK>(i_target, mss::LOW));
+    FAPI_TRY(setup_reg_dl_helper<MCT::REG0_DL2_ERROR_MASK>(i_target, mss::LOW));
+    FAPI_TRY(setup_reg_dl_helper<MCT::REG1_DL0_ERROR_MASK>(i_target, mss::LOW));
+    FAPI_TRY(setup_reg_dl_helper<MCT::REG1_DL1_ERROR_MASK>(i_target, mss::LOW));
+    FAPI_TRY(setup_reg_dl_helper<MCT::REG1_DL2_ERROR_MASK>(i_target, mss::LOW));
+    FAPI_TRY(setup_reg_dl_helper<MCT::REG2_DL0_ERROR_MASK>(i_target, mss::LOW));
+    FAPI_TRY(setup_reg_dl_helper<MCT::REG2_DL1_ERROR_MASK>(i_target, mss::LOW));
+    FAPI_TRY(setup_reg_dl_helper<MCT::REG2_DL2_ERROR_MASK>(i_target, mss::LOW));
 
 fapi_try_exit:
 
