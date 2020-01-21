@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,7 +59,13 @@ class SbePsuCommandTest : public CxxTest::TestSuite
           {
 
           TS_TRACE(ENTER_MRK"SBEPsuDeadmanTimer1: Send Start + Stop Deadman Timer commands to the SBE");
+
+          TS_TRACE(ENTER_MRK"ATTENTION: Skipping Deadman timer test");
+/*
           uint64_t waitTime = 10000; // wait time is 10 sec
+
+          TS_TRACE(ENTER_MRK"ATTENTION: Skipping Deadman timer test");
+
           l_errl = SBEIO::startDeadmanLoop(waitTime);
           if (l_errl)
           {
@@ -78,6 +84,7 @@ class SbePsuCommandTest : public CxxTest::TestSuite
                       ERRL_GETRC_SAFE(l_errl), ERRL_GETPLID_SAFE(l_errl));
               break;
           }
+**/
 
           } while(0);
 
@@ -87,9 +94,9 @@ class SbePsuCommandTest : public CxxTest::TestSuite
               errlCommit(l_errl, SBEIO_COMP_ID);
           }
 
+
           TS_TRACE(EXIT_MRK"SBEPsuDeadmanTimer1");
       }
-
 };
 
 #endif
