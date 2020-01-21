@@ -102,21 +102,21 @@ void*    call_fabric_dl_setup_training( void    *io_pArgs );
 
 
 
-#if 0 // TODO RTC 208827: Implement rest of Istep 9 substeps
-
 /**
- *  @brief   fabric_io_run_training
+ *  @brief   proc_fabric_link_layer
  *
- *           Run training on internal buses
+ *           Start SMP link layer
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return  any errlogs to istep
  *
  */
-void*    call_fabric_io_run_training( void    *io_pArgs );
+void*    call_proc_fabric_link_layer( void    *io_pArgs );
 
 
+
+#if 0 // TODO RTC 208827: Implement rest of Istep 9 substeps
 
 /**
  *  @brief   fabric_post_trainadv
@@ -199,12 +199,12 @@ namespace   INITSERVICE
                 ISTEP_09::call_fabric_dl_setup_training,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
-        /*
         {
-                ISTEPNAME(09,04,"fabric_io_run_training"),
-                ISTEP_09::call_fabric_io_run_training,
+                ISTEPNAME(09,04,"proc_fabric_link_layer"),
+                ISTEP_09::call_proc_fabric_link_layer,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
+        /*
         {
                 ISTEPNAME(09,05,"fabric_post_trainadv"),
                 ISTEP_09::call_fabric_post_trainadv,
