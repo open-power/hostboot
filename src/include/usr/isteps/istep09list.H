@@ -88,21 +88,21 @@ void*    call_fabric_dl_pre_trainadv( void    *io_pArgs );
 
 
 
-#if 0 // TODO RTC 208827: Implement rest of Istep 9 substeps
-
 /**
- *  @brief   fabric_pre_trainadv
+ *  @brief   fabric_dl_setup_training
  *
- *  08.3 : : Advanced pre EI/EDI training
+ *           Setup training on internal node buses
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return  any errlogs to istep
  *
  */
-void*    call_fabric_pre_trainadv( void    *io_pArgs );
+void*    call_fabric_dl_setup_training( void    *io_pArgs );
 
 
+
+#if 0 // TODO RTC 208827: Implement rest of Istep 9 substeps
 
 /**
  *  @brief   fabric_io_run_training
@@ -194,12 +194,12 @@ namespace   INITSERVICE
                 ISTEP_09::call_fabric_dl_pre_trainadv,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
-        /*
         {
-                ISTEPNAME(09,03,"fabric_pre_trainadv"),
-                ISTEP_09::call_fabric_pre_trainadv,
+                ISTEPNAME(09,03,"fabric_dl_setup_training"),
+                ISTEP_09::call_fabric_dl_setup_training,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
+        /*
         {
                 ISTEPNAME(09,04,"fabric_io_run_training"),
                 ISTEP_09::call_fabric_io_run_training,
