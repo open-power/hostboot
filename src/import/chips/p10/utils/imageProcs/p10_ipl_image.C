@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -100,7 +100,7 @@ dumpSectionTable(const void* i_image)
            "-------------------------------\n",
            i_image);
 
-    for (i = 0; i < P9_XIP_SECTIONS; i++)
+    for (i = 0; i < IPL_IMAGE_SECTIONS; i++)
     {
         rc = p9_xip_get_section(i_image, i, &section, UNDEFINED_DD_LEVEL);
 
@@ -314,8 +314,8 @@ xipTranslateSection(P9XipSection* o_dest, const P9XipSection* i_src)
 {
 #ifndef _BIG_ENDIAN
 
-#if IPL_IMAGE_HEADER_VERSION != 1
-#error This code assumes the IPL image header version 1 layout
+#if IPL_IMAGE_HEADER_VERSION != 2
+#error This code assumes the IPL image header version 2 layout
 #endif
 
     o_dest->iv_offset = htobe32(i_src->iv_offset);
@@ -342,8 +342,8 @@ xipTranslateToc(P9XipToc* o_dest, P9XipToc* i_src)
 {
 #ifndef _BIG_ENDIAN
 
-#if IPL_IMAGE_HEADER_VERSION != 1
-#error This code assumes the IPL image header version 1 layout
+#if IPL_IMAGE_HEADER_VERSION != 2
+#error This code assumes the IPL image header version 2 layout
 #endif
 
     o_dest->iv_id = htobe32(i_src->iv_id);
@@ -378,7 +378,7 @@ xipFinalSection(const void* i_image, int* o_sectionId)
     offset = 0;
     *o_sectionId = 0;           /* Make GCC -O3 happy */
 
-    for (i = 0; i < P9_XIP_SECTIONS; i++)
+    for (i = 0; i < IPL_IMAGE_SECTIONS; i++)
     {
         if ((hostHeader.iv_section[i].iv_size != 0) &&
             (hostHeader.iv_section[i].iv_offset >= offset))
@@ -411,7 +411,7 @@ xipGetSectionPointer(const void* i_image,
 {
     int rc;
 
-    if ((i_sectionId < 0) || (i_sectionId >= P9_XIP_SECTIONS))
+    if ((i_sectionId < 0) || (i_sectionId >= IPL_IMAGE_SECTIONS))
     {
         rc = TRACE_ERROR(P9_XIP_INVALID_ARGUMENT);
     }
@@ -541,7 +541,7 @@ xipImage2Section(const void* i_image,
 
         addressOffset = (i_imageAddress - xipLinkAddress(i_image)) & 0xffffffff;
 
-        for (sectionId = 0; sectionId < P9_XIP_SECTIONS; sectionId++)
+        for (sectionId = 0; sectionId < IPL_IMAGE_SECTIONS; sectionId++)
         {
             rc = p9_xip_get_section(i_image, sectionId, &section, UNDEFINED_DD_LEVEL);
 
@@ -564,7 +564,7 @@ xipImage2Section(const void* i_image,
             break;
         }
 
-        if (sectionId == P9_XIP_SECTIONS)
+        if (sectionId == IPL_IMAGE_SECTIONS)
         {
             rc = TRACE_ERRORX(P9_XIP_IMAGE_ERROR,
                               "Error processing IMAGE address " F0x016llx ". "
@@ -1600,7 +1600,7 @@ p9_xip_validate(void* i_image, const uint32_t i_size)
         // Validate that all sections appear to be within the image
         // bounds, and are aligned correctly.
 
-        for (i = 0; i < P9_XIP_SECTIONS; i++)
+        for (i = 0; i < IPL_IMAGE_SECTIONS; i++)
         {
 
             offset = hostHeader.iv_section[i].iv_offset;
@@ -1759,7 +1759,7 @@ p9_xip_validate2(void* i_image, const uint32_t i_size, const uint32_t i_maskIgno
         // Validate that all sections appear to be within the image
         // bounds, and are aligned correctly.
 
-        for (i = 0; i < P9_XIP_SECTIONS; i++)
+        for (i = 0; i < IPL_IMAGE_SECTIONS; i++)
         {
 
             offset = hostHeader.iv_section[i].iv_offset;
@@ -1909,7 +1909,7 @@ p9_xip_normalize(void* io_image)
             break;
         }
 
-        for (i = 0; i < P9_XIP_SECTIONS; i++)
+        for (i = 0; i < IPL_IMAGE_SECTIONS; i++)
         {
             rc = p9_xip_get_section(io_image, i, &section, UNDEFINED_DD_LEVEL);
 
@@ -2656,7 +2656,7 @@ p9_xip_delete_section(void* io_image,
             //   than i_sectionId and make a note of the order which is to
             //   be used when re-appending.  Then delete i_sectionId.
 
-            uint8_t sectionOrder[P9_XIP_SECTIONS];
+            uint8_t sectionOrder[IPL_IMAGE_SECTIONS];
             uint8_t orderIdx = 0;
 
             do
@@ -3141,8 +3141,8 @@ p9_xip_translate_header(P9XipHeader* o_dest, const P9XipHeader* i_src)
     P9XipSection* destSection;
     const P9XipSection* srcSection;
 
-#if IPL_IMAGE_HEADER_VERSION != 1
-#error This code assumes the IPL image header version 1 layout
+#if IPL_IMAGE_HEADER_VERSION != 2
+#error This code assumes the IPL image header version 2 layout
 #endif
 
     o_dest->iv_magic = htobe64(i_src->iv_magic);
@@ -3156,7 +3156,7 @@ p9_xip_translate_header(P9XipHeader* o_dest, const P9XipHeader* i_src)
 
     for (i = 0, destSection = o_dest->iv_section,
          srcSection = i_src->iv_section;
-         i < P9_XIP_SECTIONS;
+         i < IPL_IMAGE_SECTIONS;
          i++, destSection++, srcSection++)
     {
         xipTranslateSection(destSection, srcSection);

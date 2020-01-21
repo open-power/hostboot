@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,7 +43,7 @@ fapi2::ReturnCode p10_ipl_section_append(
 
     FAPI_ASSERT((i_section != NULL) &&
                 (i_section_size > 0) &&
-                (i_section_id < P9_XIP_SECTIONS) &&
+                (i_section_id < IPL_IMAGE_SECTIONS) &&
                 (i_image != NULL) &&
                 (io_image_size > 0),
                 fapi2::XIP_SECTION_APPEND_INVALID_PARAMETERS().

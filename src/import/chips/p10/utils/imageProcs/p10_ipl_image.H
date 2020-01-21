@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,7 +44,9 @@
 ///
 /// V1:  Introduces .sbe nested image and moves .rings into the PPE's
 ///      nested images (as compared to P9's last XIP V9 header)
-#define IPL_IMAGE_HEADER_VERSION 1
+/// V2:  Expands the max number of IPL image sections from 15 to 24 and which
+///      cause a .header size increase of 9 x 12 B = 108 B
+#define IPL_IMAGE_HEADER_VERSION 2
 
 /// \defgroup p9_xip_magic_numbers P9-XIP magic numbers
 ///
@@ -86,7 +88,7 @@
 
 // Fixed number of entries in section table including common and
 // image-specific sections
-#define P9_XIP_SECTIONS 15
+#define IPL_IMAGE_SECTIONS 24
 #define UNDEFINED_IPL_IMAGE_SID (int)0xff  // SID: Section ID
 
 // This ensures that common sections go first followed by image-specific
@@ -401,10 +403,10 @@ typedef struct
     uint64_t iv_reserved64[2];
 
     //////////////////////////////////////////////////////////////////////
-    // Section Table - 4-byte aligned; 15 entries
+    // Section Table - 4-byte aligned; 24 entries
     //////////////////////////////////////////////////////////////////////
 
-    P9XipSection iv_section[P9_XIP_SECTIONS];
+    P9XipSection iv_section[IPL_IMAGE_SECTIONS];
 
     //////////////////////////////////////////////////////////////////////
     // Other information - 4-byte aligned; 8 entries
