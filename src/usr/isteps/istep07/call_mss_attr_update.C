@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -320,19 +320,19 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
     INITSERVICE::SPLESS::MboxScratch6_t l_scratch6 {
         l_scratchRegs[INITSERVICE::SPLESS::SCRATCH_6]};
 
-    // If the smfConfig bit in scratch reg6 does not match the SMF_ENABLED
+    // If the smfConfig bit in scratch reg6 does not match the SMF_CONFIG
     // setting on the system, then the SBE is in disagreement with the system on
     // whether SMF mode should be enabled. We need to force SBE update here so
     // that the XSCOM BAR on the slave proc is set correctly before
     // we try to perform XSCOM operations in istep10.
-    if(l_scratch6.smfConfig != SECUREBOOT::SMF::isSmfEnabled())
+    if(l_scratch6.smfConfig != l_sys->getAttr<ATTR_SMF_CONFIG>())
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "SBE and SYS disagree on the SMF setting; SBE thinks it "
                   "should be %s, but it should actually be %s;"
                   "requesting SBE update.",
                   l_scratch6.smfConfig ? "enabled" : "disabled",
-                  SECUREBOOT::SMF::isSmfEnabled() ? "enabled" : "disabled");
+                  l_sys->getAttr<ATTR_SMF_CONFIG>() ? "enabled" : "disabled");
         l_updateNeeded = true;
     }
 

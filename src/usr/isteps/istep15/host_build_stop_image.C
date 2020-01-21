@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -452,7 +452,7 @@ void* host_build_stop_image (void *io_pArgs)
             //memory @HRMOR (instead of secure SMF memory).  When HB goes
             //through istep 16 it will enter UV mode if SMF is enabled, and then
             //when PM complex is restarted in istep 21, HOMER is moved to right
-            //spot. No movement of HOME oocurs in non-SMF mode; HOMER lands in
+            //spot. No movement of HOMER occurs in non-SMF mode; HOMER lands in
             //non-secure memory.
 
             l_memBase = get_top_mem_addr();

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -85,6 +85,17 @@ errlHndl_t distributeSmfMem(const uint64_t i_requestedSmfMemAmtInBytes);
  */
 errlHndl_t distributeSmfMem(const uint64_t i_requestedSmfMemAmtInBytes,
                             std::vector<struct ProcToMemAssoc>& i_procToMemVec);
+
+/**
+ * @brief Function to distribute the amount of SMF memory as driven by the
+ *        ATTR_SMF_MEM_AMT_REQUESTED attribute. This function makes a call
+ *        to distributeSmfMem(uint64_t) with the value of the read attribute.
+ *
+ * @return nullptr: distribution was successful
+ *         non-nullptr: an error occurred during distribution (the error type
+ *         will never be unrecoverable)
+ */
+errlHndl_t distributeSmfMem();
 
 /**
  * @brief Helper function to return the total amount of memory available behind

@@ -7502,6 +7502,19 @@
   </attribute>
 
   <attribute>
+    <description>The amount of SMF memory requested
+                 by the user, in bytes (read from NVRAM).
+    </description>
+    <id>SMF_MEM_AMT_REQUESTED</id>
+    <persistency>volatile-zeroed</persistency>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>SOCKET_POWER_NOMINAL</id>
     <description>
       The socket power in nominal mode.

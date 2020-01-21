@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,6 +55,7 @@
 // Targeting Support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
+#include    <targeting/common/util.H>
 
 // Fapi Support
 #include    <fapi2.H>
@@ -78,6 +79,7 @@
 
 // SMF Support
 #include    <secureboot/smf.H>
+#include    <secureboot/smf_utils.H>
 
 // NVDIMM Support
 #include    <nvram/nvram_interface.H>
@@ -535,40 +537,55 @@ void*    call_mss_eff_config( void *io_pArgs )
     }
 
 #ifndef CONFIG_FSP_BUILD
-    if(!l_StepError.isNull())
-    {
-        break;
-    }
-
     const char* l_smfMemAmtStr = nullptr;
+    uint64_t l_smfMemAmt = 0;
+
     l_err = NVRAM::nvramRead(NVRAM::SMF_MEM_AMT_KEY, l_smfMemAmtStr);
     if(l_err)
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK"NVRAM read failed. Will not attempt to distribute any SMF memory.");
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK"NVRAM read failed. Will distribute 0 SMF memory.");
         // Do not propagate the error - we don't care if NVRAM read fails
         delete l_err;
         l_err = nullptr;
-        break;
     }
 
     // l_smfMemAmtStr will be nullptr if the SMF_MEM_AMT_KEY doesn't exist
     if(l_smfMemAmtStr)
     {
-        uint64_t l_smfMemAmt = strtoul(l_smfMemAmtStr, nullptr, 16);
+        l_smfMemAmt = strtoul(l_smfMemAmtStr, nullptr, 16);
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK"Distributing 0x%.16llx SMF memory among the procs on the system", l_smfMemAmt);
-        l_err = SECUREBOOT::SMF::distributeSmfMem(l_smfMemAmt);
-        if(l_err)
-        {
-            // Do not propagate or break on error - distributeSmfMem will
-            // not return unrecoverable errors.
-            errlCommit(l_err, ISTEP_COMP_ID);
-        }
+
+        TARGETING::Target* l_sys = nullptr;
+        TARGETING::targetService().getTopLevelTarget(l_sys);
+        assert(l_sys, "call_mss_eff_config: top level target is nullptr!");
+        l_sys->setAttr<TARGETING::ATTR_SMF_MEM_AMT_REQUESTED>(l_smfMemAmt);
     }
     else
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK"SMF_MEM_AMT_KEY was not found in NVRAM; no SMF memory was distributed.");
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK"SMF_MEM_AMT_KEY was not found in NVRAM; 0 SMF memory will be distributed.");
     }
 
+    l_err = SECUREBOOT::SMF::distributeSmfMem();
+    if(l_err)
+    {
+        // Do not propagate or break on error - distributeSmfMem will
+        // not return unrecoverable errors.
+        errlCommit(l_err, ISTEP_COMP_ID);
+    }
+
+
+    if(SECUREBOOT::SMF::isSmfEnabled())
+    {
+        // SMF is still enabled, which means that the requested amount of
+        // SMF memory may have changed. Rerun the mss_eff_grouping HWP
+        // to update the SMF BAR/SMF memory amounts.
+        l_err = call_mss_eff_grouping(l_StepError);
+        if(l_err)
+        {
+            l_StepError.addErrorDetails( l_err );
+            errlCommit( l_err, ISTEP_COMP_ID);
+        }
+    }
 #endif
 
     } while (0);

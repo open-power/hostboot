@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -56,6 +56,11 @@
 <targetInstance>
     <id>sys0</id>
     <type>sys-sys-power9</type>
+    <attribute>
+        <id>SMF_MEM_AMT_REQUESTED</id>
+        <!-- SMF is not enabled in P9 standalone; don't request any SMF mem-->
+        <default>0x0</default>
+    </attribute>
     <attribute>
         <id>MODEL</id>
         <default>POWER9</default>
