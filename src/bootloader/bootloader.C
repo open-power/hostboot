@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -428,7 +428,7 @@ namespace Bootloader{
         bl_console::init();
 
         // start of istep 6.1
-        bl_console::putString("istep6.1\r\n");
+        bl_console::putString("\ristep6.1\r\n");
 
 #ifndef CONFIG_VPO_COMPILE // We don't want to make any LPC PNOR accesses in VPO
                            // HBB will be manually pre-loaded into the memory

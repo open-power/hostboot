@@ -153,11 +153,12 @@ void print_system_info(void)
 
     //Add all the target types that you want to see in the output to this vector
     types_to_print.push_back(TARGETING::TYPE_PROC);
-    types_to_print.push_back(TARGETING::TYPE_MEMBUF);
-    types_to_print.push_back(TARGETING::TYPE_MCS);
-    types_to_print.push_back(TARGETING::TYPE_MCA);
-    types_to_print.push_back(TARGETING::TYPE_MCBIST);
     types_to_print.push_back(TARGETING::TYPE_DIMM);
+    types_to_print.push_back(TARGETING::TYPE_CORE);
+    types_to_print.push_back(TARGETING::TYPE_MC);
+    types_to_print.push_back(TARGETING::TYPE_MI);
+    types_to_print.push_back(TARGETING::TYPE_MCC);
+    types_to_print.push_back(TARGETING::TYPE_OCMB_CHIP);
 
     //Loop through each type to get a list of targets then print it out
     for(auto l_type : types_to_print)

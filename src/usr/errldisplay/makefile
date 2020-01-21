@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2019
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -46,4 +46,12 @@ vpath %.C ${GENDIR} ${GENDIR}/plugins/prdf/rule
 EXTRAINCDIR += ${GENDIR}/plugins
 EXTRAINCDIR += ${GENDIR}/plugins/prdf/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/diag/prdf/plugins/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/scominfo/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
+
