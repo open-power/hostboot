@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2018
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -46,17 +46,17 @@ my $port = "";
 while (my $line = <CONFIG>)
 {
     # Whitespace after each constant is important
-    if ($line =~ m/^Host [^\s]/)
+    if ($line =~ m/^Host\s+(\S+)/)
     {
-        ($host) = $line =~ m/^Host (.*?)\s/
+        $host = $1;
     }
-    elsif ($line =~ m/Hostname [^\s]/)
+    elsif ($line =~ m/Hostname\s+(\S+)/)
     {
-        ($hostname) = $line =~ m/^*Hostname (.*)/;
+        $hostname = $1;
     }
-    elsif ($line =~ m/Port [^\s]/)
+    elsif ($line =~ m/Port\s+(\S+)/)
     {
-        ($port) = $line =~ m/^*Port (.*)/;
+        $port = $1;
     }
 
     # Check if we found the gerrit host name
@@ -69,12 +69,12 @@ while (my $line = <CONFIG>)
 }
 close(CONFIG);
 
-if ($host eq "")
-{
-    die "Error> Could not find gerrit host in $sshConfigFile";
-}
-else
+if ( $host and ($hostname eq $gerritHostname) and ($port eq $gerritPort) )
 {
     # Set gerrit server env variable by returning command to env.bash
     print "export GERRIT_SRV=$host\n";
+}
+else
+{
+    die "Error> Could not find gerrit host in $sshConfigFile";
 }
