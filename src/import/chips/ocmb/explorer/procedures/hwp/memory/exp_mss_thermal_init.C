@@ -71,10 +71,13 @@ extern "C"
         FAPI_TRY( mss::exp::check::sensor_response(i_target, l_response),
                   "Failed sensor_response() for  %s", mss::c_str(i_target) );
 #endif
+
+#ifdef __HOSTBOOT_MODULE
         // Prior to starting OCC, we go into "safemode" throttling
         // After OCC is started, they can change throttles however they want
+        // We don't want to do this in Cronus mode
         FAPI_TRY (mss::exp::mc::setup_emergency_throttles(i_target));
-
+#endif
         // Clear the emergency mode throttle bit
         FAPI_TRY (mss::exp::mc::disable_safe_mode_throttles(i_target));
 
