@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,7 @@
 #include <mss_explorer_attribute_setters.H>
 #include <mss_explorer_attribute_getters.H>
 #include <lib/power_thermal/exp_throttle_traits.H>
+#include <generic/memory/lib/utils/dimm/kind.H>
 #include <generic/memory/lib/utils/power_thermal/gen_throttle.H>
 
 namespace mss

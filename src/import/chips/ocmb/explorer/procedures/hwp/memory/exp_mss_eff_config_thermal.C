@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,8 +62,14 @@ extern "C"
         fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
         FAPI_INF("Start exp_mss_eff_config_thermal");
 
+        // For regulaor power/current throttling or thermal throtling
+        // Do thermal throttling last so the attributes end up representing a total power value for later usage
+        //   Need to have ATTR_EXP_TOTAL_PWR_SLOPE and ATTR_EXP_TOTAL_PWR_INTERCEPT with total DIMM power
+        //   (not regulator current values) after exp_mss_eff_config_thermal is run, so when OCC calls
+        //   exp_bulk_pwr_throttles at runtime the total DIMM power will be used for any memory bulk supply throttling
+        const std::vector<mss::throttle_type> throttle_types{ mss::throttle_type::POWER, mss::throttle_type::THERMAL};
+
         // Return error if safemode throttle utilization is less than MIN_UTIL
-        // This section needs to be in braces otherwise the compile will fail
         const uint64_t l_min_util = TT::MIN_UTIL;
         uint32_t l_safemode_util = 0;
         FAPI_TRY( mss::attr::get_mrw_safemode_dram_databus_util(l_safemode_util), "Error in exp_mss_eff_config_thermal" );
@@ -76,49 +82,53 @@ extern "C"
 
         for ( const auto& l_ocmb : i_targets)
         {
-            //Restore runtime_throttles from safemode setting
+            //Restore runtime_throttles
             //Sets throttles to max_databus_util value
             FAPI_INF("Restoring throttles for %s", mss::c_str(l_ocmb));
             FAPI_TRY( mss::power_thermal::restore_runtime_throttles<>(l_ocmb), "Error in exp_mss_eff_config_thermal");
+        }
 
-            //Not doing any work if there are no dimms installed
-            if (mss::count_dimm(l_ocmb) == 0)
+        for (const auto& l_throttle_type : throttle_types )
+        {
+            for ( const auto& l_ocmb : i_targets)
             {
-                FAPI_INF("Skipping eff_config thermal because no dimms for %s", mss::c_str(l_ocmb));
-                continue;
-            }
+                //Not doing any work if there are no dimms installed
+                if (mss::count_dimm(l_ocmb) == 0)
+                {
+                    FAPI_INF("Skipping eff_config thermal because no dimms for %s", mss::c_str(l_ocmb));
+                    continue;
+                }
 
-            // Thermal power (OCMB+DRAM)
-            uint64_t l_thermal_power_limit[TT::SIZE_OF_THERMAL_LIMIT_ATTR] = {0};
-            uint64_t l_thermal_power_slope[TT::SIZE_OF_THERMAL_SLOPE_ATTR] = {0};
-            uint64_t l_thermal_power_intecept[TT::SIZE_OF_THERMAL_INTERCEPT_ATTR] = {0};
-            // Power (PMIC)
-            uint64_t l_current_curve_with_limit[TT::SIZE_OF_CURRENT_CURVE_WITH_LIMIT_ATTR] = {0};
+                // Thermal power (OCMB+DRAM)
+                uint64_t l_thermal_power_limit[TT::SIZE_OF_THERMAL_LIMIT_ATTR] = {0};
+                uint64_t l_thermal_power_slope[TT::SIZE_OF_THERMAL_SLOPE_ATTR] = {0};
+                uint64_t l_thermal_power_intecept[TT::SIZE_OF_THERMAL_INTERCEPT_ATTR] = {0};
+                // Power (PMIC)
+                uint64_t l_current_curve_with_limit[TT::SIZE_OF_CURRENT_CURVE_WITH_LIMIT_ATTR] = {0};
 
-            // Get the data from MRW
-            FAPI_TRY( mss::attr::get_mrw_ocmb_thermal_memory_power_limit (l_thermal_power_limit),
-                      "Error in exp_mss_eff_config_thermal");
-            FAPI_TRY( mss::attr::get_mrw_ocmb_pwr_slope (l_thermal_power_slope), "Error in exp_mss_eff_config_thermal");
-            FAPI_TRY( mss::attr::get_mrw_ocmb_pwr_intercept (l_thermal_power_intecept), "Error in exp_mss_eff_config_thermal");
-            FAPI_TRY( mss::attr::get_mrw_ocmb_current_curve_with_limit (l_current_curve_with_limit),
-                      "Error in exp_mss_eff_config_thermal");
+                // Get the data from MRW
+                FAPI_TRY( mss::attr::get_mrw_ocmb_thermal_memory_power_limit (l_thermal_power_limit),
+                          "Error in exp_mss_eff_config_thermal");
+                FAPI_TRY( mss::attr::get_mrw_ocmb_pwr_slope (l_thermal_power_slope), "Error in exp_mss_eff_config_thermal");
+                FAPI_TRY( mss::attr::get_mrw_ocmb_pwr_intercept (l_thermal_power_intecept), "Error in exp_mss_eff_config_thermal");
+                FAPI_TRY( mss::attr::get_mrw_ocmb_current_curve_with_limit (l_current_curve_with_limit),
+                          "Error in exp_mss_eff_config_thermal");
 
-            // Convert array to vector
-            using namespace std;
-            vector<uint64_t> l_thermal_power_limit_v     ( begin(l_thermal_power_limit),      end(l_thermal_power_limit) );
-            vector<uint64_t> l_thermal_power_slope_v     ( begin(l_thermal_power_slope),      end(l_thermal_power_slope) );
-            vector<uint64_t> l_thermal_power_intecept_v  ( begin(l_thermal_power_intecept),   end(l_thermal_power_intecept) );
-            vector<uint64_t> l_current_curve_with_limit_v( begin(l_current_curve_with_limit), end(l_current_curve_with_limit) );
+                // Convert array to vector
+                std::vector<uint64_t> l_thermal_power_limit_v     ( std::begin(l_thermal_power_limit),
+                        std::end(l_thermal_power_limit) );
+                std::vector<uint64_t> l_thermal_power_slope_v     ( std::begin(l_thermal_power_slope),
+                        std::end(l_thermal_power_slope) );
+                std::vector<uint64_t> l_thermal_power_intecept_v  ( std::begin(l_thermal_power_intecept),
+                        std::end(l_thermal_power_intecept) );
+                std::vector<uint64_t> l_current_curve_with_limit_v( std::begin(l_current_curve_with_limit),
+                        std::end(l_current_curve_with_limit) );
 
 
-            uint16_t l_slope    [TT::DIMMS_PER_PORT] = {0};
-            uint16_t l_intercept[TT::DIMMS_PER_PORT] = {0};
-            uint32_t l_limit    [TT::DIMMS_PER_PORT] = {0};
+                uint16_t l_slope    [TT::DIMMS_PER_PORT] = {0};
+                uint16_t l_intercept[TT::DIMMS_PER_PORT] = {0};
+                uint32_t l_limit    [TT::DIMMS_PER_PORT] = {0};
 
-            const std::vector<mss::throttle_type> throttle_types{ mss::throttle_type::POWER, mss::throttle_type::THERMAL};
-
-            for (const auto& l_throttle_type : throttle_types )
-            {
                 for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(l_ocmb))
                 {
                     //Don't run if there are no dimms on the port
@@ -144,28 +154,33 @@ extern "C"
                     FAPI_TRY(mss::attr::set_dimm_thermal_limit(l_port, l_limit));
                     FAPI_TRY(mss::attr::set_mem_watt_target(l_port, l_limit));
 
-                    FAPI_INF( "PMIC current curve slope is %d, intercept is %d, limit is %d for %s", l_slope[0], l_intercept[0],
-                              l_limit[0], mss::c_str(l_port));
-
-                    FAPI_INF("Starting pwr_throttles(%s)", mss::throttle_type::POWER == l_throttle_type ? "POWER" : "THERMAL");
-                    //get the power limits, done per dimm and set to worst case for the slot and port throttles
-                    FAPI_TRY(mss::power_thermal::pwr_throttles(l_ocmb, mss::throttle_type::POWER));
-                    FAPI_TRY(l_rc, "Failed running exp_mss_eff_config_thermal with %s throttling",
-                             mss::throttle_type::POWER == l_throttle_type ? "POWER" : "THERMAL");
-
-                    //Set runtime throttles to worst case between ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT
-                    //and ATTR_EXP_MEM_RUNTIME_THROTTLED_N_COMMANDS_PER_SLOT and the _PORT equivalents also
-                    FAPI_INF("Starting update");
-                    FAPI_TRY( mss::power_thermal::update_runtime_throttle(l_ocmb), "Error in exp_mss_eff_config_thermal for %d",
-                              mss::c_str(l_port));
-                    FAPI_INF("finished update");
+                    for ( const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_port) )
+                    {
+                        const uint8_t l_dimm_pos = mss::index(l_dimm);
+                        FAPI_INF( "DIMM (%d) slope is %d, intercept is %d, limit is %d for %s",
+                                  l_dimm_pos, l_slope[l_dimm_pos], l_intercept[l_dimm_pos],
+                                  l_limit[l_dimm_pos], mss::c_str(l_port));
+                    }
                 }
+
+                FAPI_INF("Starting pwr_throttles(%s)", mss::throttle_type::POWER == l_throttle_type ? "POWER" : "THERMAL");
+                //get the power limits, done per dimm and set to worst case for the slot and port throttles
+                FAPI_TRY(mss::power_thermal::pwr_throttles(l_ocmb, l_throttle_type));
+            }
+
+            // Equalizes the throttles to the lowest of runtime and the lowest slot-throttle value
+            FAPI_TRY(mss::power_thermal::equalize_throttles(i_targets, l_throttle_type));
+
+            for ( const auto& l_ocmb : i_targets)
+            {
+                //Set runtime throttles to worst case between ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT
+                //and ATTR_EXP_MEM_RUNTIME_THROTTLED_N_COMMANDS_PER_SLOT and the _PORT equivalents also
+                FAPI_INF("Starting update");
+                FAPI_TRY( mss::power_thermal::update_runtime_throttle(l_ocmb), "Error in exp_mss_eff_config_thermal for %d",
+                          mss::c_str(l_ocmb));
+                FAPI_INF("finished update");
             }
         }
-
-        // Equalizes the throttles to the lowest of runtime and the lowest slot-throttle value
-        FAPI_TRY(mss::power_thermal::equalize_throttles(i_targets, mss::throttle_type::POWER));
-        FAPI_TRY(mss::power_thermal::equalize_throttles(i_targets, mss::throttle_type::THERMAL));
 
         //Done
         FAPI_INF( "End exp_mss_eff_config_thermal");

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -505,6 +505,21 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_INVALID_SPD_RANK</rc>
+    <description>
+      Invalid rank passed into attribute engine.
+      May be due to problem in SPD.
+    </description>
+    <ffdc>FUNCTION</ffdc>
+    <ffdc>RANK</ffdc>
+    <ffdc>TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_INVALID_SPD_RESERVED_BITS</rc>
     <description>
         Invalid SPD reserved bits received.
@@ -599,6 +614,17 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_MCBIST_EXCEEDED_MAX_SUBTESTS</rc>
+    <description>Attempt to run an MCBIST program exceeding the max number of subtests (32)</description>
+    <ffdc>MC_TARGET</ffdc>
+    <ffdc>NUMBER_OF_SUBTESTS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_MCBIST_INCORRECT_PATTERN_LENGTH</rc>
     <description>MCBIST pattern has an incorrect length</description>
     <ffdc>TARGET</ffdc>
@@ -647,18 +673,31 @@
     <description>
       When considering the frequencies in the MRW and the max supported
       frequencies based on DIMM config, the indicated port's DIMM do not support
-      the frequency of the majority of other ports' DIMM, so it will be deconfigured
+      the frequency of the majority of other ports' DIMM in the frequency domain.
+      DIMM on the offending port will be deconfigured so the IPL can continue.
+      All DIMM in the offending port's frequency domain will be marked as
+      Hardware Callout.
     </description>
     <ffdc>FREQ_TARGET</ffdc>
     <ffdc>PORT_TARGET</ffdc>
     <ffdc>FREQUENCY</ffdc>
-     <callout>
+    <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
       <childTargets>
-          <parent>PORT_TARGET</parent>
+          <parent>FREQ_TARGET</parent>
           <childType>TARGET_TYPE_DIMM</childType>
       </childTargets>
       <priority>MEDIUM</priority>
     </callout>
+    <deconfigure>
+      <childTargets>
+          <parent>PORT_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+    </deconfigure>
   </hwpError>
 
   <hwpError>

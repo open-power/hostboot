@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -133,7 +133,7 @@ fapi2::ReturnCode calc_util_from_throttles(const uint16_t i_n_throttles,
         o_calc_util = TT::MIN_UTIL;
     }
 
-    FAPI_INF("In calc_util_from_throttles, calculated %f for output utilization from throttles:%d, dram_clocks%d",
+    FAPI_INF("In calc_util_from_throttles, calculated %f for output utilization from throttles:%d, dram_clocks %d",
              o_calc_util, i_n_throttles, i_num_dram_clocks);
 
 fapi_try_exit:
@@ -655,6 +655,7 @@ fapi2::ReturnCode throttle<MC, TT>::thermal_throttles ()
     uint32_t l_dimm_power_int [TT::DIMMS_PER_PORT] = {};
     double l_calc_util [TT::DIMMS_PER_PORT] = {};
     const auto l_count = count_dimm (iv_target);
+    uint8_t l_found_ddimm = 0;
 
     //Calculate the dimm power range for each dimm at max utilization for each
     FAPI_TRY( calc_dimm_power(TT::IDLE_UTIL,
@@ -667,6 +668,8 @@ fapi2::ReturnCode throttle<MC, TT>::thermal_throttles ()
     {
         uint16_t l_temp_n_slot = 0;
         const uint8_t l_pos = mss::index(l_dimm);
+        mss::dimm::kind<MC> l_kind (l_dimm);
+        l_found_ddimm = (l_kind.iv_dimm_type == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM) ? 1 : l_found_ddimm;
         //Calculate the power curve taking the thermal limit into account
         FAPI_TRY( calc_power_curve(l_dimm_power_idle[l_pos],
                                    l_dimm_power_max[l_pos],
@@ -699,9 +702,12 @@ fapi2::ReturnCode throttle<MC, TT>::thermal_throttles ()
     //Set to lowest value between calculated and runtime
     FAPI_INF("THERMAL throttles: runtime slot is %d, calc n slot is %d for %s", iv_runtime_n_slot, iv_n_slot,
              mss::c_str(iv_target));
-    //Taking the min of the SLOT * (# of dimms on the port) and the iv_runtime_port throttle value
+    //DDDIMMs: Taking the min of the SLOT and the iv_runtime_port throttle value
+    //ISDIMMs: Taking the min of the SLOT * (# of dimms on the port) and the iv_runtime_port throttle value
     //Thermal throttling happens after the POWER calculations. the iv_runtime_n_port value shouldn't be set to 0
-    iv_n_port = std::min(iv_runtime_n_port, static_cast<uint16_t>(iv_n_slot * l_count));
+    iv_n_port = (l_found_ddimm) ?
+                std::min(iv_runtime_n_port, static_cast<uint16_t>(iv_n_slot)) :
+                std::min(iv_runtime_n_port, static_cast<uint16_t>(iv_n_slot * l_count));
     iv_n_port = (iv_n_port == 0) ? TT::MIN_THROTTLE : iv_n_port;
 
     iv_n_slot = std::min(iv_n_slot, iv_runtime_n_slot);
@@ -808,9 +814,8 @@ fapi2::ReturnCode throttle<MC, TT>::calc_dimm_power(const double i_databus_idle,
         calc_power_uplift(iv_power_uplift_idle, o_dimm_power_idle[l_pos]);
         calc_power_uplift(iv_power_uplift, o_dimm_power_max[l_pos]);
 
-        FAPI_INF("Calc_dimm_power: dimm (%d) power max is %f, %f for  dimm slope of  %d, intercept of %d for %s",
+        FAPI_INF("Calc_dimm_power: dimm (%d) power max is %f, dimm slope %d, intercept %d for %s",
                  l_pos,
-                 o_dimm_power_max[l_pos],
                  o_dimm_power_max[l_pos],
                  iv_pwr_slope[l_pos],
                  iv_pwr_int[l_pos],
@@ -972,7 +977,13 @@ fapi2::ReturnCode throttle<MC, TT>::calc_databus (const double i_databus_port_ma
     for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(iv_target))
     {
         //Left early if count_dimms == 0
-        o_databus_dimm_max[mss::index(l_dimm)] = i_databus_port_max / l_count_dimms;
+        // For DDIMM, set each virtual DIMM to the same utilization value since mrw slope/intercept/limit attributes
+        //   are equally divided by number of virtual dimms  (ie.  mrw values are for whole DDIMM, not individual virtual DIMMs)
+        // For ISDIMM, divide utilization by number of DIMMs on the port
+        mss::dimm::kind<MC> l_kind (l_dimm);
+        o_databus_dimm_max[mss::index(l_dimm)] = (l_kind.iv_dimm_type == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM) ?
+                i_databus_port_max :
+                i_databus_port_max / l_count_dimms;
     }
 
     //If the power slopes aren't equal, set the dimm with the highest power slope
@@ -1012,6 +1023,7 @@ fapi2::ReturnCode throttle<MC, TT>::calc_split_util(
     double o_util_dimm_max [TT::DIMMS_PER_PORT]) const
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    uint8_t l_found_ddimm = 0;
     const uint8_t l_count_dimms = count_dimm (iv_target);
     //The total utilization to be used is limited by either what the port can allow or what the dimms can use
     FAPI_ASSERT( (i_util_slot <= i_util_port),
@@ -1028,6 +1040,12 @@ fapi2::ReturnCode throttle<MC, TT>::calc_split_util(
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
+    for ( const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(iv_target) )
+    {
+        mss::dimm::kind<MC> l_kind (l_dimm);
+        l_found_ddimm = (l_kind.iv_dimm_type == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM) ? 1 : l_found_ddimm;
+    }
+
     //assumptions slot <= port, l_count_dimms <=2
     if (i_util_slot * l_count_dimms > i_util_port)
     {
@@ -1040,9 +1058,13 @@ fapi2::ReturnCode throttle<MC, TT>::calc_split_util(
 
         //Highest power_slope gets the higher utilization
         o_util_dimm_max[l_high_pos] = std::min(i_util_slot, i_util_port);
-        //Set the other dimm to the left over utilization (i_util_port - i_util_slot)
-        o_util_dimm_max[(!l_high_pos)] = (l_count_dimms == TT::DIMMS_PER_PORT) ? (i_util_port - o_util_dimm_max[l_high_pos]) :
-                                         0;
+        //Set the other dimm to the left over utilization (i_util_port - i_util_slot) if not a DDIMM, otherwise set to same value as above
+        o_util_dimm_max[(!l_high_pos)] = (l_found_ddimm) ?
+                                         o_util_dimm_max[l_high_pos] :
+                                         ((l_count_dimms == TT::DIMMS_PER_PORT) ?
+                                          (i_util_port - o_util_dimm_max[l_high_pos]) :
+                                          0
+                                         );
 
         FAPI_INF("Split utilization for target %s, DIMM in %d gets %f, DIMM in %d gets %f",
                  mss::c_str(iv_target),
@@ -1184,7 +1206,7 @@ fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<T> >& i_t
                     uint64_t l_fail = mss::fapi_pos(l_port);
 
                     //Set the failing port. OCC just needs one failing port, doesn't need all of them
-                    FAPI_TRY( attr::set_port_pos_of_fail_throttle(l_fail) );
+                    FAPI_TRY( mss::attr::set_port_pos_of_fail_throttle(l_fail) );
 
                     FAPI_ASSERT_NOEXIT( false,
                                         fapi2::MSS_CALC_PORT_POWER_EXCEEDS_MAX()
@@ -1202,8 +1224,8 @@ fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<T> >& i_t
 
                 FAPI_INF("%s Final throttles values for slot %d, for port %d, power value %d",
                          mss::c_str(l_port),
-                         l_fin_port,
                          l_fin_slot,
+                         l_fin_port,
                          l_fin_power);
 
                 //Even if there's an error, still calculate and set the throttles.

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -611,8 +611,8 @@
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
         Machine Readable Workbook Thermal Memory Power Limit
-        Used to calculate throttles to be at or under the power limit
-        Per DIMM basis
+        Used to calculate throttles to meet the thermal power per DIMM limit
+        Per DIMM basis, uses first matching KEY entry
         KEY (0-21): In order
         DIMM_SIZE = bits 0-3,
         DIMM_GEN = 4-5,
@@ -623,8 +623,9 @@
         DRAM_MFGID = 17-19,
         DIMM_HEIGHT = 20-21,
         Bits 22-32: Not used
-        VALUE (bits 32-47) in cW:
-        OCMB+DRAM thermal power limit per DIMM = 32-47
+        VALUE (bits 32-47) in cW: thermal power limit
+          DDIMM: Total OCMB+DRAM power limit per DDIMM
+          non-DDIMM: VMEM+VPP power limit per DIMM
     </description>
     <valueType>uint64</valueType>
     <mssUnits>cW</mssUnits>
@@ -639,8 +640,8 @@
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
         Machine Readable Workbook Power Curve Slope for DIMM
-        Used to get the OCMB+DRAM power curve for each DIMM
-        Per DIMM basis
+        Used to calculate thermal throttles and port power
+        Per DIMM basis, uses first matching KEY entry
         KEY (0-21): In order
         DIMM_SIZE = bits 0-3,
         DIMM_GEN = 4-5,
@@ -651,8 +652,9 @@
         DRAM_MFGID = 17-19,
         DIMM_HEIGHT = 20-21,
         Bits 22-32: Not used
-        VALUE (bits 32-47) in cW/utilization:
-        OCMB+DRAM thermal power limit per DIMM = 32-47
+        VALUE (bits 32-47) in cW/utilization: DIMM power slope
+          DDIMM: Total OCMB+DRAM power slope per DDIMM
+          non-DDIMM: VMEM+VPP power slope per DIMM
     </description>
     <valueType>uint64</valueType>
     <mssUnits>cW</mssUnits>
@@ -667,8 +669,8 @@
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
         Machine Readable Workbook Power Curve Intercept for DIMM
-        Used to get the OCMB+DRAM power curve for each DIMM
-        Per DIMM basis
+        Used to calculate thermal throttles and port power
+        Per DIMM basis, uses first matching KEY entry
         KEY (0-21): In order
         DIMM_SIZE = bits 0-3,
         DIMM_GEN = 4-5,
@@ -679,8 +681,9 @@
         DRAM_MFGID = 17-19,
         DIMM_HEIGHT = 20-21,
         Bits 22-32: Not used
-        VALUE (bits 32-47) in cW/utilization:
-        OCMB+DRAM thermal power limit per DIMM = 32-47
+        VALUE (bits 32-47) in cW/utilization: DIMM power intercept
+          DDIMM: Total OCMB+DRAM power intercept per DDIMM
+          non-DDIMM: VMEM+VPP power intercept per DIMM
     </description>
     <valueType>uint64</valueType>
     <mssUnits>cW/utilization</mssUnits>
@@ -694,9 +697,10 @@
     <id>ATTR_MSS_MRW_OCMB_CURRENT_CURVE_WITH_LIMIT</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-        Machine Readable Workbook Power Curve Intercept and limit for DIMM
-        Used to get the PMIC power curve and limit for each DIMM
-        Per DIMM basis
+        Machine Readable Workbook Current Curve Intercept and limit for DIMM
+        Used to calculate throttles to meet regulator current per DIMM limit
+        Per DIMM basis, uses first matching KEY entry
+        For DDIMM, use PMIC SW output that provides worst case throttling
         KEY (0-21): In order
         DIMM_SIZE = bits 0-3,
         DIMM_GEN = 4-5,
@@ -708,8 +712,14 @@
         DIMM_HEIGHT = 20-21,
         Bits 22-32: Not used
         VALUE (bits 32-39): Current limit (dA)
+          DDIMM: PMIC output current limit per DDIMM
+          non-DDIMM: VMEM regulator current limit per DIMM
         VALUE (bits 40-51): Current slope (cA/utilization)
+          DDIMM: PMIC output current slope per DDIMM
+          non-DDIMM: VMEM regulator current slope per DIMM
         VALUE (bits 52-63): Current intercept (cA)
+          DDIMM: PMIC output current intercept per DDIMM
+          non-DDIMM: VMEM regulator current intercept per DIMM
     </description>
     <valueType>uint64</valueType>
     <mssUnits>dA, cA/utilization, cA</mssUnits>

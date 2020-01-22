@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,39 +48,71 @@ namespace mss
 {
 
 ///
-/// @brief Gets whether the OCMB will be configred to enterprise mode
-/// @param[in] i_target OCMB target on which to operate
-/// @param[out] o_is_enterprise_mode true if the part is in enterprise mode
-/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+/// @brief Unit-testable half dimm mode helper function. Calculates half dimm mode based on input params
+/// @param[in] i_target OCMB chip
+/// @param[in] i_is_enterprise enterprise mode is enabled
+/// @param[in] i_half_dimm_attr half dimm mode as obtained from attribute
+/// @param[in] i_half_dimm_override_attr half dimm mode override from attribute
+/// @param[out] o_is_half_dimm_mode resulting value for half dimm mode after calculations
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-inline fapi2::ReturnCode enterprise_mode( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
-        i_target,
-        bool& o_is_enterprise_mode )
+inline fapi2::ReturnCode half_dimm_mode_helper(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const bool i_is_enterprise,
+    const uint8_t i_half_dimm_attr,
+    const uint8_t i_half_dimm_override_attr,
+    bool& o_is_half_dimm_mode )
 {
-    // Constexprs for beautification
-    constexpr uint8_t ENTERPRISE = fapi2::ENUM_ATTR_MSS_OCMB_ENTERPRISE_MODE_ENTERPRISE;
-    constexpr uint8_t NO_OVERRIDE = fapi2::ENUM_ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE_NO_OVERRIDE;
+    o_is_half_dimm_mode = false;
 
-    // Variables
-    o_is_enterprise_mode = false;
-    uint8_t l_enterprise = 0;
-    uint8_t l_override = 0;
+    bool l_is_half_dimm = 0;
 
-    FAPI_TRY( mss::attr::get_ocmb_enterprise_mode(i_target, l_enterprise) );
-    FAPI_TRY( mss::attr::get_ocmb_nonenterprise_mode_override(i_target, l_override) );
+    // First let's assert that ocmb_half_dimm_mode isn't HALF_DIMM when ENTERPRISE is 0
+    // Even though this could theoretically be overridden back to FULL_DIMM, we should
+    // check that the initial value is also valid.
+    FAPI_ASSERT(!i_half_dimm_attr || i_is_enterprise,
+                fapi2::MSS_EXP_HALF_DIMM_MODE_NOT_SUPPORTED()
+                .set_ENTERPRISE_SETTING(i_is_enterprise)
+                .set_HALF_DIMM_SETTING(i_half_dimm_attr)
+                .set_OCMB_TARGET(i_target),
+                "%s Invalid configuration: ATTR_MSS_OCMB_HALF_DIMM_MODE set to HALF_DIMM while enterprise is disabled",
+                mss::c_str(i_target));
 
+    // This might be overwritten below by overrides
+    l_is_half_dimm = (i_half_dimm_attr == fapi2::ENUM_ATTR_MSS_OCMB_HALF_DIMM_MODE_HALF_DIMM);
+
+    // Now let's apply the override
+    if (i_half_dimm_override_attr == fapi2::ENUM_ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE_OVERRIDE_HALF_DIMM)
     {
-        const bool l_enterprise_mode = l_enterprise == ENTERPRISE;
-        const bool l_no_override = l_override == NO_OVERRIDE;
-        // We will be in enterprise mode (true) IF
-        // 1) the chip is in enterprise mode (we can't run in enterprise mode if the part is non-enterprise capable) AND
-        // 2) we do not have the override to non-enterprise mode
-        o_is_enterprise_mode = l_enterprise_mode && l_no_override;
+        l_is_half_dimm = true;
 
-        FAPI_INF("%s is in %s mode. (OCMB chip is %s, with %s)", mss::c_str(i_target),
-                 o_is_enterprise_mode ? "enterprise" : "non-enterprise", l_enterprise_mode ? "enterprise" : "non-enterprise",
-                 l_no_override ? "no override" : "override to non-enterprise");
+        // Assert once more that this is valid
+        FAPI_ASSERT(!l_is_half_dimm || i_is_enterprise,
+                    fapi2::MSS_EXP_HALF_DIMM_MODE_NOT_SUPPORTED()
+                    .set_ENTERPRISE_SETTING(i_is_enterprise)
+                    .set_HALF_DIMM_SETTING(l_is_half_dimm)
+                    .set_OCMB_TARGET(i_target),
+                    "%s Invalid configuration: HALF_DIMM_MODE overridden to HALF_DIMM while enterprise is disabled",
+                    mss::c_str(i_target));
+
+        FAPI_DBG("%s overridden to HALF_DIMM_MODE", mss::c_str(i_target));
     }
+
+    else if (i_half_dimm_override_attr == fapi2::ENUM_ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE_OVERRIDE_FULL_DIMM)
+    {
+        l_is_half_dimm = false;
+        FAPI_DBG("%s overridden to FULL_DIMM_MODE", mss::c_str(i_target));
+    }
+
+    o_is_half_dimm_mode = l_is_half_dimm;
+
+    FAPI_INF("%s %s in enterprise mode, and %s override is present. The chip is in %s (attribute %u)",
+             mss::c_str(i_target),
+             i_is_enterprise ? "is" : "is not",
+             i_half_dimm_override_attr > 0 ? "an" : "no",
+             o_is_half_dimm_mode ? "half-DIMM mode" : "full-DIMM mode", l_is_half_dimm);
+
+    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -92,45 +124,22 @@ fapi_try_exit:
 /// @param[out] o_is_half_dimm_mode true if the part is in half-DIMM mode
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
 ///
-inline fapi2::ReturnCode half_dimm_mode( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
-        i_target,
-        bool& o_is_half_dimm_mode )
+inline fapi2::ReturnCode half_dimm_mode(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const bool i_is_enterprise_mode,
+    bool& o_is_half_dimm_mode )
 {
     // Variables
     o_is_half_dimm_mode = false;
-    bool l_is_enterprise = false;
-    uint8_t l_half_dimm = 0;
-    uint8_t l_override = 0;
+    uint8_t l_half_dimm_attr = 0;
+    uint8_t l_override_attr = 0;
 
-    FAPI_TRY( enterprise_mode(i_target, l_is_enterprise) );
+    FAPI_TRY( mss::attr::get_ocmb_half_dimm_mode(i_target, l_half_dimm_attr) );
+    FAPI_TRY( mss::attr::get_ocmb_half_dimm_mode_override(i_target, l_override_attr) );
 
-    // We're in full DIMM mode if we're in non-enterprise mode
-    if(!l_is_enterprise)
-    {
-        o_is_half_dimm_mode = false;
-        FAPI_INF("%s is in full-DIMM since the chip is in non-enterprise mode", mss::c_str(i_target));
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
-
-    // Now that we're not in enterprise mode, check for overrides
-    FAPI_TRY( mss::attr::get_ocmb_half_dimm_mode_override(i_target, l_override) );
-
-    // If we have an override, set based upon the override
-    if(l_override != fapi2::ENUM_ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE_NO_OVERRIDE)
-    {
-        o_is_half_dimm_mode = l_override == fapi2::ENUM_ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE_OVERRIDE_HALF_DIMM;
-        FAPI_INF("%s is in enterprise mode, and %s override is present. The chip is in %s (attribute %u)", mss::c_str(i_target),
-                 "an", o_is_half_dimm_mode ? "half-DIMM mode" : "full-DIMM mode", l_override);
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
-
-    // No override, so go with the attribute derived from the ECID
-    FAPI_TRY( mss::attr::get_ocmb_half_dimm_mode(i_target, l_half_dimm) );
-
-    // Set half DIMM mode based upon the the normal attribute
-    o_is_half_dimm_mode = l_half_dimm == fapi2::ENUM_ATTR_MSS_OCMB_HALF_DIMM_MODE_HALF_DIMM;
-    FAPI_INF("%s is in enterprise mode, and %s override is present. The chip is in %s (attribute %u)", mss::c_str(i_target),
-             "no", o_is_half_dimm_mode ? "half-DIMM mode" : "full-DIMM mode", l_half_dimm);
+    // o_is_half_dimm_mode will be set by the helper function
+    FAPI_TRY( mss::half_dimm_mode_helper(i_target, i_is_enterprise_mode, l_half_dimm_attr, l_override_attr,
+                                         o_is_half_dimm_mode));
 
 fapi_try_exit:
     return fapi2::current_err;

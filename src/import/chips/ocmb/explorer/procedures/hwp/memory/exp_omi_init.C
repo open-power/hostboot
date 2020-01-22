@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,7 @@
 #include <mss_p10_attribute_getters.H>
 #include <generic/memory/mss_git_data_helper.H>
 #include <lib/workarounds/exp_omi_workarounds.H>
+#include <generic/memory/lib/utils/find.H>
 
 ///
 /// @brief Verify we know how to talk to the connected device
@@ -509,6 +510,42 @@ fapi2::ReturnCode omiSetACTagPASIDMetaData(const fapi2::Target<fapi2::TARGET_TYP
                                   EXPLR_OC_OCTRLPID_MSB_METADATA_SUPPORTED,
                                   l_meta_data_ena,
                                   "Metadata requested but not supported", l_meta_data_ena));
+
+    // If we plan on enabling metadata, make sure either upstream templates 5 or 9 are enabled
+    if (l_meta_data_ena)
+    {
+        uint8_t l_enable_template_5 = 0;
+        uint8_t l_enable_template_9 = 0;
+        uint8_t l_enable_template_4 = 0;
+
+        const auto& l_mcc = mss::find_target<fapi2::TARGET_TYPE_MCC>(i_target);
+
+        FAPI_TRY(mss::attr::get_explr_enable_us_tmpl_5(i_target, l_enable_template_5));
+        FAPI_TRY(mss::attr::get_explr_enable_us_tmpl_9(i_target, l_enable_template_9));
+
+        FAPI_ASSERT((l_enable_template_5 == fapi2::ENUM_ATTR_EXPLR_ENABLE_US_TMPL_5_ENABLED) ||
+                    (l_enable_template_9 == fapi2::ENUM_ATTR_EXPLR_ENABLE_US_TMPL_9_ENABLED),
+                    fapi2::METADATA_ENABLE_REQUIRES_TEMPLATE_5_OR_9()
+                    .set_TARGET(i_target)
+                    .set_TMPL_5(l_enable_template_5)
+                    .set_TMPL_9(l_enable_template_9),
+                    "%s METADATA_ENABLE requires upstream template either 5 or 9 to be set. "
+                    "TMPL_5: %u TMPL_9: %u",
+                    mss::c_str(i_target),
+                    l_enable_template_5,
+                    l_enable_template_9)
+
+        // Check for downstream template 4 as well. We won't bomb out here, just have an error printout if not enabled
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_ENABLE_DL_TMPL_4, l_mcc, l_enable_template_4),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_ENABLE_DL_TMPL_4)");
+
+        if (l_enable_template_4 != fapi2::ENUM_ATTR_PROC_ENABLE_DL_TMPL_4_ENABLED)
+        {
+            FAPI_ERR("%s Expected MCC %s TMPL_4 to be enabled for metadata enabling. Was not enabled: may be incorrectly configured",
+                     mss::c_str(i_target),
+                     mss::c_str(l_mcc));
+        }
+    }
 
     l_value.insertFromRight<EXPLR_OC_OCTRLPID_MSB_METADATA_ENABLED,
                             EXPLR_OC_OCTRLPID_MSB_METADATA_ENABLED_LEN>

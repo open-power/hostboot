@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -3147,6 +3147,98 @@ static const uint64_t EXP_DDR4_PHY_DBYTE9_RXPBDLYTG3_R7 = 0x04065dacull;
 static const uint64_t EXP_DDR4_PHY_DBYTE9_RXPBDLYTG3_R8 = 0x040661acull;
 static const uint64_t EXPLR_TP_MB_UNIT_TOP_TR1_TRACE_TRCTRL_CONFIG = 0x08010442ull;
 static const uint64_t EXP_APBONLY0_MICROCONTMUXSEL      = 0x04340000ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE0_VREFDAC0_R0 = 0x4040100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE0_VREFDAC0_R1 = 0x4040500ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE0_VREFDAC0_R2 = 0x4040900ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE0_VREFDAC0_R3 = 0x4040D00ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE0_VREFDAC0_R4 = 0x4041100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE0_VREFDAC0_R5 = 0x4041500ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE0_VREFDAC0_R6 = 0x4041900ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE0_VREFDAC0_R7 = 0x4041D00ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE0_VREFDAC0_R8 = 0x4042100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE1_VREFDAC0_R0 = 0x4044100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE1_VREFDAC0_R1 = 0x4044500ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE1_VREFDAC0_R2 = 0x4044900ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE1_VREFDAC0_R3 = 0x4044D00ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE1_VREFDAC0_R4 = 0x4045100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE1_VREFDAC0_R5 = 0x4045500ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE1_VREFDAC0_R6 = 0x4045900ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE1_VREFDAC0_R7 = 0x4045D00ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE1_VREFDAC0_R8 = 0x4046100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE2_VREFDAC0_R0 = 0x4048100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE2_VREFDAC0_R1 = 0x4048500ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE2_VREFDAC0_R2 = 0x4048900ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE2_VREFDAC0_R3 = 0x4048D00ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE2_VREFDAC0_R4 = 0x4049100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE2_VREFDAC0_R5 = 0x4049500ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE2_VREFDAC0_R6 = 0x4049900ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE2_VREFDAC0_R7 = 0x4049D00ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE2_VREFDAC0_R8 = 0x404A100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE3_VREFDAC0_R0 = 0x404C100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE3_VREFDAC0_R1 = 0x404C500ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE3_VREFDAC0_R2 = 0x404C900ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE3_VREFDAC0_R3 = 0x404CD00ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE3_VREFDAC0_R4 = 0x404D100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE3_VREFDAC0_R5 = 0x404D500ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE3_VREFDAC0_R6 = 0x404D900ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE3_VREFDAC0_R7 = 0x404DD00ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE3_VREFDAC0_R8 = 0x404E100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE4_VREFDAC0_R0 = 0x4050100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE4_VREFDAC0_R1 = 0x4050500ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE4_VREFDAC0_R2 = 0x4050900ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE4_VREFDAC0_R3 = 0x4050D00ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE4_VREFDAC0_R4 = 0x4051100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE4_VREFDAC0_R5 = 0x4051500ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE4_VREFDAC0_R6 = 0x4051900ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE4_VREFDAC0_R7 = 0x4051D00ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE4_VREFDAC0_R8 = 0x4052100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE5_VREFDAC0_R0 = 0x4054100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE5_VREFDAC0_R1 = 0x4054500ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE5_VREFDAC0_R2 = 0x4054900ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE5_VREFDAC0_R3 = 0x4054D00ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE5_VREFDAC0_R4 = 0x4055100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE5_VREFDAC0_R5 = 0x4055500ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE5_VREFDAC0_R6 = 0x4055900ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE5_VREFDAC0_R7 = 0x4055D00ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE5_VREFDAC0_R8 = 0x4056100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE6_VREFDAC0_R0 = 0x4058100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE6_VREFDAC0_R1 = 0x4058500ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE6_VREFDAC0_R2 = 0x4058900ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE6_VREFDAC0_R3 = 0x4058D00ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE6_VREFDAC0_R4 = 0x4059100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE6_VREFDAC0_R5 = 0x4059500ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE6_VREFDAC0_R6 = 0x4059900ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE6_VREFDAC0_R7 = 0x4059D00ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE6_VREFDAC0_R8 = 0x405A100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE7_VREFDAC0_R0 = 0x405C100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE7_VREFDAC0_R1 = 0x405C500ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE7_VREFDAC0_R2 = 0x405C900ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE7_VREFDAC0_R3 = 0x405CD00ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE7_VREFDAC0_R4 = 0x405D100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE7_VREFDAC0_R5 = 0x405D500ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE7_VREFDAC0_R6 = 0x405D900ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE7_VREFDAC0_R7 = 0x405DD00ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE7_VREFDAC0_R8 = 0x405E100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE8_VREFDAC0_R0 = 0x4060100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE8_VREFDAC0_R1 = 0x4060500ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE8_VREFDAC0_R2 = 0x4060900ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE8_VREFDAC0_R3 = 0x4060D00ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE8_VREFDAC0_R4 = 0x4061100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE8_VREFDAC0_R5 = 0x4061500ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE8_VREFDAC0_R6 = 0x4061900ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE8_VREFDAC0_R7 = 0x4061D00ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE8_VREFDAC0_R8 = 0x4062100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE9_VREFDAC0_R0 = 0x4064100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE9_VREFDAC0_R1 = 0x4064500ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE9_VREFDAC0_R2 = 0x4064900ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE9_VREFDAC0_R3 = 0x4064D00ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE9_VREFDAC0_R4 = 0x4065100ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE9_VREFDAC0_R5 = 0x4065500ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE9_VREFDAC0_R6 = 0x4065900ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE9_VREFDAC0_R7 = 0x4065D00ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE9_VREFDAC0_R8 = 0x4066100ull;
+static const uint64_t EXP_DDR4_PHY_DDR_PHY_CONTROL    = 0x6000118ull;
+
 
 
 static const uint32_t EXPLR_EFUSE_IMAGE_OUT_0                                   = 0x20B080ull;

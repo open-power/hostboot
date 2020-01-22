@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,13 +49,8 @@ extern "C"
     fapi2::ReturnCode exp_check_for_ready(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
         mss::display_git_commit_info("exp_check_for_ready");
-        uint8_t l_sim = 0;
-        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_sim) );
 
-        if (!l_sim)
-        {
-            FAPI_TRY(mss::exp::i2c::exp_check_for_ready_helper(i_target));
-        }
+        FAPI_TRY(mss::exp::i2c::exp_check_for_ready_helper(i_target));
 
     fapi_try_exit:
         return fapi2::current_err;

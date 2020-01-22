@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -4190,7 +4190,8 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
 /// @note  Array[DIMM][RANK] READ, On Die Termination triggering bitmap. Use bitmap to determine
 /// which ODT to fire for the designated rank. The bits in 8 bit field are [DIMM0 ODT0][DIMM0
-/// ODT1][DIMM0 ODT2][DIMM0 ODT3][DIMM1 ODT0][DIMM1 ODT1][DIMM1 ODT2][DIMM1 ODT3]
+/// ODT1][DIMM0 ODT2][DIMM0 ODT3][DIMM1 ODT0][DIMM1 ODT1][DIMM1 ODT2][DIMM1 ODT3] For
+/// Explorer: Only bits 0,1,4,5 are used. They correspond to A0 A1 -- -- B0 B1 -- --
 ///
 inline fapi2::ReturnCode get_si_odt_rd(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t (&o_array)[4])
 {
@@ -4215,7 +4216,8 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
 /// @note  Array[DIMM][RANK] READ, On Die Termination triggering bitmap. Use bitmap to determine
 /// which ODT to fire for the designated rank. The bits in 8 bit field are [DIMM0 ODT0][DIMM0
-/// ODT1][DIMM0 ODT2][DIMM0 ODT3][DIMM1 ODT0][DIMM1 ODT1][DIMM1 ODT2][DIMM1 ODT3]
+/// ODT1][DIMM0 ODT2][DIMM0 ODT3][DIMM1 ODT0][DIMM1 ODT1][DIMM1 ODT2][DIMM1 ODT3] For
+/// Explorer: Only bits 0,1,4,5 are used. They correspond to A0 A1 -- -- B0 B1 -- --
 ///
 inline fapi2::ReturnCode get_si_odt_rd(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                                        uint8_t (&o_array)[2][4])
@@ -4240,7 +4242,8 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
 /// @note  Array[DIMM][RANK] WRITE, On Die Termination triggering bitmap. Use bitmap to determine
 /// which ODT to fire for the designated rank. The bits in 8 bit field are [DIMM0 ODT0][DIMM0
-/// ODT1][DIMM0 ODT2][DIMM0 ODT3][DIMM1 ODT0][DIMM1 ODT1][DIMM1 ODT2][DIMM1 ODT3]
+/// ODT1][DIMM0 ODT2][DIMM0 ODT3][DIMM1 ODT0][DIMM1 ODT1][DIMM1 ODT2][DIMM1 ODT3] For
+/// Explorer: Only bits 0,1,4,5 are used. They correspond to A0 A1 -- -- B0 B1 -- --
 ///
 inline fapi2::ReturnCode get_si_odt_wr(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t (&o_array)[4])
 {
@@ -4265,7 +4268,8 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
 /// @note  Array[DIMM][RANK] WRITE, On Die Termination triggering bitmap. Use bitmap to determine
 /// which ODT to fire for the designated rank. The bits in 8 bit field are [DIMM0 ODT0][DIMM0
-/// ODT1][DIMM0 ODT2][DIMM0 ODT3][DIMM1 ODT0][DIMM1 ODT1][DIMM1 ODT2][DIMM1 ODT3]
+/// ODT1][DIMM0 ODT2][DIMM0 ODT3][DIMM1 ODT0][DIMM1 ODT1][DIMM1 ODT2][DIMM1 ODT3] For
+/// Explorer: Only bits 0,1,4,5 are used. They correspond to A0 A1 -- -- B0 B1 -- --
 ///
 inline fapi2::ReturnCode get_si_odt_wr(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                                        uint8_t (&o_array)[2][4])

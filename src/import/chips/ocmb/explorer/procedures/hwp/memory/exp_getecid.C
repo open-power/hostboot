@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,7 @@
 #include <explorer_scom_addresses_fld.H>
 #include <mss_explorer_attribute_setters.H>
 #include <generic/memory/mss_git_data_helper.H>
+#include <lib/plug_rules/exp_plug_rules.H>
 
 extern "C"
 {
@@ -53,24 +54,20 @@ extern "C"
     {
         mss::display_git_commit_info("exp_getecid");
 
-        // Using FUSE enterprise_dis bit, determine whether enterprise is disabled, otherwise
-        // we will enable it. Override to disable it is done in omi_setup. Half_dimm_mode we
-        // will also disable by default, as it is not a feature of P systems
         {
-            uint8_t l_enterprise_mode = fapi2::ENUM_ATTR_MSS_OCMB_ENTERPRISE_MODE_NON_ENTERPRISE; // 0
-            uint8_t l_half_dimm_mode = fapi2::ENUM_ATTR_MSS_OCMB_HALF_DIMM_MODE_FULL_DIMM;        // 0
+            bool l_enterprise_fuse = false;
+            bool l_enterprise_final = false;
 
-            FAPI_TRY(mss::exp::ecid::get_enterprise_and_half_dimm_from_fuse(
-                         i_target, l_enterprise_mode, l_half_dimm_mode),
-                     "exp_getecid: getting enterprise and half_dimm from fuse failed on %s",
+            FAPI_TRY(mss::exp::ecid::get_enterprise_from_fuse(i_target, l_enterprise_fuse),
+                     "exp_getecid: getting enterprise from fuse failed on %s",
                      mss::c_str(i_target));
 
-            // Set attributes
-            FAPI_TRY(mss::attr::set_ocmb_enterprise_mode(i_target, l_enterprise_mode),
-                     "exp_getecid: Could not set ATTR_MSS_OCMB_ENTERPRISE_MODE");
+            // Calculate the global enterprise mode state while verifying plug rules with policy and override attributes
+            FAPI_TRY(mss::exp::plug_rule::enterprise_mode(i_target, l_enterprise_fuse, l_enterprise_final));
 
-            FAPI_TRY(mss::attr::set_ocmb_half_dimm_mode(i_target, l_half_dimm_mode),
-                     "exp_getecid: Could not set ATTR_MSS_OCMB_HALF_DIMM_MODE");
+            // Set global enterprise mode attribute
+            FAPI_TRY(mss::attr::set_ocmb_enterprise_mode(i_target, l_enterprise_final),
+                     "exp_getecid: Could not set ATTR_MSS_OCMB_ENTERPRISE_MODE");
         }
 
         //
@@ -89,6 +86,11 @@ extern "C"
 
             FAPI_TRY(mss::exp::ecid::read_from_fuse(i_target, l_ecid),
                      "exp_getecid: Could not read ecid from FUSE on %s", mss::c_str(i_target));
+
+            for (uint8_t l_ecid_idx = 0; l_ecid_idx < mss::exp::ecid_consts::FUSE_ARRAY_SIZE; ++l_ecid_idx)
+            {
+                FAPI_INF("%s ECID[%u]: 0x%04X", mss::c_str(i_target), l_ecid_idx, l_ecid[l_ecid_idx]);
+            }
 
             // TK - Remove once ATTR_ECID is made large enough
             FAPI_TRY(mss::attr::set_ocmb_ecid(i_target, l_ecid),

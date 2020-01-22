@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -100,6 +100,32 @@ static inline void reverse( T& io_buffer )
     l_result <<= l_s;
 
     io_buffer = l_result;
+}
+
+///
+/// @brief Reverse a given bit range of a buffer
+/// @tparam S start bit
+/// @tparam L length of bits to reverse
+/// @tparam T buffer type
+/// @param[in] io_buffer
+///
+template<uint64_t S, uint64_t L, typename T>
+static inline void reverse_range(fapi2::buffer<T>& io_buffer)
+{
+    const auto target_length = fapi2::parameterTraits<T>::bit_length();
+
+    static_assert(S < target_length,
+                  "reverse_range(): Start is out of bounds");
+
+    static_assert((S + L) <= target_length,
+                  "reverse_range(): (Start + Len) is out of bounds");
+
+    fapi2::buffer<T> l_tmp;
+
+    io_buffer.template extractToRight<S, L>(l_tmp);
+
+    l_tmp.reverse();
+    io_buffer.template insert<S, L>(l_tmp);
 }
 
 ///

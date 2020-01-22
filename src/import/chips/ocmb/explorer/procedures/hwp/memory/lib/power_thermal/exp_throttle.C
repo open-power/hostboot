@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,7 +61,7 @@ namespace power_thermal
 fapi2::ReturnCode pwr_throttles( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                  const mss::throttle_type i_throttle_type)
 {
-    FAPI_INF("Start exp_bulk_pwr_throttle for %s type throttling for %s",
+    FAPI_INF("Start pwr_throttles for %s type throttling for %s",
              (( i_throttle_type == mss::throttle_type::THERMAL) ? "THERMAL" : "POWER"), mss::c_str(i_target));
 
     if (mss::count_dimm (i_target) == 0)
@@ -109,11 +109,11 @@ fapi2::ReturnCode pwr_throttles( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
         FAPI_TRY(mss::attr::set_mem_throttled_n_commands_per_port( l_port_target, l_port));
     }
 
-    FAPI_INF("End bulk_pwr_throttles for %s", mss::c_str(i_target));
+    FAPI_INF("End pwr_throttles for %s", mss::c_str(i_target));
     return fapi2::current_err;
 
 fapi_try_exit:
-    FAPI_ERR("Error calculating bulk_pwr_throttles using %s throttling",
+    FAPI_ERR("Error calculating pwr_throttles using %s throttling",
              ((i_throttle_type == mss::throttle_type::POWER) ? "power" : "thermal"));
     return fapi2::current_err;
 }

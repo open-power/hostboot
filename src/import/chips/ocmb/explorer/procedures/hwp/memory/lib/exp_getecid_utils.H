@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,16 +47,14 @@ namespace ecid
 {
 
 ///
-/// @brief Determines enterprise and half dimm states from explorer FUSE
+/// @brief Determines enterprise state from explorer FUSE
 /// @param[in] i_target the controller
 /// @param[out] o_enterprise_mode state
-/// @param[out] o_half_dimm_mode state
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode get_enterprise_and_half_dimm_from_fuse(
+fapi2::ReturnCode get_enterprise_from_fuse(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-    uint8_t& o_enterprise_mode,
-    uint8_t& o_half_dimm_mode);
+    bool& o_enterprise_mode);
 
 ///
 /// @brief Reads ECID into output array from fuse

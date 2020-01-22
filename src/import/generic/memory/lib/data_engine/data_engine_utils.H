@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,7 @@
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/conversions.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/utils/buffer_ops.H>
 
 namespace mss
 {
@@ -214,8 +215,8 @@ inline fapi2::ReturnCode update_data(const std::shared_ptr<efd::base_decoder>& i
     const auto l_ocmb = i_efd_data->get_ocmb_target();
 
     // mss::index of rank number will % 4 (RANKS_PER_DIMM) to get us the corresponding dimm
-    const size_t l_dimm_index = mss::index(i_efd_data->get_rank());
-    const auto l_dimm_rank = i_efd_data->get_rank() % mss::MAX_RANK_PER_DIMM; // TK HARDCODE TEST REMOVE ME!
+    const auto l_dimm_index = i_efd_data->get_rank() / mss::MAX_RANK_PER_DIMM;
+    const auto l_dimm_rank = i_efd_data->get_rank() % mss::MAX_RANK_PER_DIMM;
 
     FAPI_ASSERT( l_dimm_index < X,
                  fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
@@ -476,6 +477,39 @@ fapi2::ReturnCode dimm_pos(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_targe
 
 fapi_try_exit:
     return fapi2::current_err;
+}
+
+///
+/// @brief Shift the bits of the SPD field to match the attribute format
+/// @param[in] i_value ODT field value from SPD
+/// @return ATTR formatted uint8_t
+///
+static inline uint8_t align_odt_field_to_attr(const uint8_t i_value)
+{
+    static constexpr uint8_t ODT2_OLD = 2;
+    static constexpr uint8_t ODT3_OLD = 3;
+    static constexpr uint8_t ODT2 = 4;
+    static constexpr uint8_t ODT3 = 5;
+
+    fapi2::buffer<uint8_t> l_value(i_value);
+    // Map to attribute bitmap
+    reverse(l_value);
+
+    // l_value currently looks like:
+    // XXYY0000
+    // ODT
+    // 0123----
+    //
+    // We need it to look like:
+    // XX00YY00
+    // 01--23--
+    l_value.writeBit<ODT2>(l_value.getBit<ODT2_OLD>());
+    l_value.writeBit<ODT3>(l_value.getBit<ODT3_OLD>());
+
+    l_value.clearBit<ODT2_OLD>();
+    l_value.clearBit<ODT3_OLD>();
+
+    return l_value();
 }
 
 }// gen

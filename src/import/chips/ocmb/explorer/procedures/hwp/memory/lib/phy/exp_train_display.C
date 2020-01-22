@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,15 +35,11 @@
 
 #include <fapi2.H>
 #include <lib/shared/exp_consts.H>
-#include <lib/shared/exp_defaults.H>
-#include <lib/dimm/exp_rank.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/index.H>
 #include <generic/memory/lib/utils/c_str.H>
-#include <generic/memory/lib/utils/find.H>
 #include <exp_data_structs.H>
 #include <lib/phy/exp_train_display.H>
-#include <generic/memory/lib/mss_generic_attribute_getters.H>
 
 namespace mss
 {
@@ -75,10 +71,10 @@ void display_lane_results(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_t
 
     constexpr uint16_t CLEAN = 0;
 
-    // If we passed, display the information as only as debug - we don't want to clutter the screen with too much information
+    // If we passed, display the information as only as MFG - we don't want to clutter the screen with too much information
     if(CLEAN == i_data)
     {
-        FAPI_DBG("%s lane: %u PASSING R0:%u R1:%u R2:%u R3:%u",
+        FAPI_MFG("%s lane: %u PASSING R0:%u R1:%u R2:%u R3:%u",
                  mss::c_str(i_target), i_lane,
                  l_rank0, l_rank1, l_rank2, l_rank3);
     }
@@ -93,211 +89,128 @@ void display_lane_results(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_t
 }
 
 ///
-/// @brief Displays lane failure information after training
-/// @param[in] i_target the OCMB target
-/// @param[in] i_training_info the training information to display
+/// @brief Display train_2d_read_eye_msdg_t response struct
 ///
-void display_lane_info(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                       const user_response_msdg_t& i_training_info)
+/// @param[in] i_target OCMB target
+/// @param[in] i_training_info training info struct
+///
+void display_train_2d_read_eye(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                               const user_2d_eye_response_1_msdg_t& i_training_info)
 {
-    for(uint8_t l_lane = 0; l_lane < exp_struct_sizes::TRAINING_RESPONSE_NUM_LANES; ++l_lane)
-    {
-        display_lane_results( i_target, l_lane, i_training_info.err_resp.Failure_Lane[l_lane]);
-    }
-}
+    FAPI_MFG("%s %s (EYE MIN/MAX):", mss::c_str(i_target), "VrefDAC0");
 
-///
-/// @brief Displays MR information
-/// @param[in] i_target the OCMB target
-/// @param[in] i_training_info the training information to display
-///
-fapi2::ReturnCode display_mrs_info(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                   const user_response_msdg_t& i_training_info)
-{
-    // Loop through all DIMM's
-    for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+    for (uint8_t l_rank = 0; l_rank < TRAINING_RESPONSE_NUM_RANKS; ++l_rank)
     {
-        // Rank info object for
-        std::vector<mss::rank::info<>> l_rank_info_vect;
-        uint8_t l_dram_width = 0;
-        FAPI_TRY(mss::rank::ranks_on_dimm<>(l_dimm, l_rank_info_vect));
-        FAPI_TRY(mss::attr::get_dram_width(l_dimm, l_dram_width));
-
-        // Loops through all of the ranks
-        for (const auto& l_rank_info : l_rank_info_vect)
+        for (uint8_t l_dbyte = 0; l_dbyte < DBYTE_N_SIZE; ++l_dbyte)
         {
-            const uint8_t l_phy_rank = l_rank_info.get_phy_rank();
-            // MR0->5 are easy, just display the value
-            FAPI_DBG("%s rank%u MR%u 0x%04x", mss::c_str(i_target), l_phy_rank, 0, i_training_info.mrs_resp.MR0);
-            FAPI_DBG("%s rank%u MR%u 0x%04x", mss::c_str(i_target), l_phy_rank, 1, i_training_info.mrs_resp.MR1[l_phy_rank]);
-            FAPI_DBG("%s rank%u MR%u 0x%04x", mss::c_str(i_target), l_phy_rank, 2, i_training_info.mrs_resp.MR2[l_phy_rank]);
-            FAPI_DBG("%s rank%u MR%u 0x%04x", mss::c_str(i_target), l_phy_rank, 3, i_training_info.mrs_resp.MR3);
-            FAPI_DBG("%s rank%u MR%u 0x%04x", mss::c_str(i_target), l_phy_rank, 4, i_training_info.mrs_resp.MR4);
-            FAPI_DBG("%s rank%u MR%u 0x%04x", mss::c_str(i_target), l_phy_rank, 5, i_training_info.mrs_resp.MR5[l_phy_rank]);
-
-            // The number of the DRAM's and the position to access each DRAM changes based upon x4 vs x8
-            const auto l_num_dram = l_dram_width == fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4 ?
-                                    mss::exp::generic_consts::EXP_NUM_DRAM_X4 :
-                                    mss::exp::generic_consts::EXP_NUM_DRAM_X8;
-            // The correction factor is used to determine the correct DRAM position, as x8 DRAM's take up two entries
-            const auto l_correction_factor = l_dram_width == fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4 ?
-                                             1 : 2;
-
-            for(uint64_t l_dram = 0; l_dram < l_num_dram; ++l_dram)
+            for (uint8_t l_bit = 0; l_bit < BIT_N_SIZE; ++l_bit)
             {
-                const auto l_dram_pos = l_correction_factor * l_dram;
-                FAPI_DBG("%s rank%u MR6 dram%u 0x%04x", mss::c_str(i_target), l_phy_rank, l_dram,
-                         i_training_info.mrs_resp.MR6[l_phy_rank][l_dram_pos]);
+                for (uint8_t l_eye_index = 0; l_eye_index < EYE_MIN_MAX_SIZE; ++l_eye_index)
+                {
+                    const auto l_eye_min = i_training_info.read_2d_eye_resp.VrefDAC0[l_rank][l_dbyte][l_bit].eye_min[l_eye_index];
+                    const auto l_eye_max = i_training_info.read_2d_eye_resp.VrefDAC0[l_rank][l_dbyte][l_bit].eye_max[l_eye_index];
+
+                    FAPI_MFG("%s %s RANK %u, DBYTE %u BIT %u EYE INDEX %u -- MIN: %u MAX: %u",
+                             mss::c_str(i_target), "VrefDAC0", l_rank, l_dbyte, l_bit, l_eye_index, l_eye_min, l_eye_max);
+                }
             }
         }
     }
 
-    return fapi2::FAPI2_RC_SUCCESS;
-fapi_try_exit:
-    return fapi2::current_err;
-}
+    FAPI_MFG("%s %s_Center:", mss::c_str(i_target), "VrefDAC0");
 
-///
-/// @brief Displays all RCW information
-/// @param[in] i_target the OCMB target
-/// @param[in] i_training_info the training information to display
-///
-void display_rcw_info(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                      const user_response_msdg_t& i_training_info)
-{
-    constexpr uint64_t FUNC_SPACE0 = 0;
-    constexpr uint64_t FUNC_SPACE1 = 1;
-
-    // Only display the DIMM's that exist
-    const auto& l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target);
-
-    // Display DIMM0
-    if(l_dimms.size() >= 1)
+    for (uint8_t l_dbyte = 0; l_dbyte < DBYTE_N_SIZE; ++l_dbyte)
     {
-        // Display all of function space 0
-        // Display all 4-bit numbers
-        for(uint8_t l_rcw = 0; l_rcw < exp_struct_sizes::RCW_8BIT_CUTOFF; ++l_rcw)
+        for (uint8_t l_bit = 0; l_bit < BIT_N_SIZE; ++l_bit)
         {
-            display_rcw_4bit( i_target, 0, FUNC_SPACE0, l_rcw, i_training_info.rc_resp.F0RC_D0[l_rcw]);
-        }
-
-        // Display all 8-bit numbers
-        for(uint8_t l_rcw = exp_struct_sizes::RCW_8BIT_CUTOFF; l_rcw < exp_struct_sizes::TRAINING_RESPONSE_NUM_RC; ++l_rcw)
-        {
-            display_rcw_8bit( i_target, 0, FUNC_SPACE0, l_rcw, i_training_info.rc_resp.F0RC_D0[l_rcw]);
-        }
-
-        // Display all of function space 1
-        // Display all 4-bit numbers
-        for(uint8_t l_rcw = 0; l_rcw < exp_struct_sizes::RCW_8BIT_CUTOFF; ++l_rcw)
-        {
-            display_rcw_4bit( i_target, 0, FUNC_SPACE1, l_rcw, i_training_info.rc_resp.F1RC_D0[l_rcw]);
-        }
-
-        // Display all 8-bit numbers
-        for(uint8_t l_rcw = exp_struct_sizes::RCW_8BIT_CUTOFF; l_rcw < exp_struct_sizes::TRAINING_RESPONSE_NUM_RC; ++l_rcw)
-        {
-            display_rcw_8bit( i_target, 0, FUNC_SPACE1, l_rcw, i_training_info.rc_resp.F1RC_D0[l_rcw]);
+            const auto l_vref_dac0_center = i_training_info.read_2d_eye_resp.VrefDAC0_Center[l_dbyte][l_bit];
+            FAPI_MFG("%s %s DBYTE %u, BIT %u: %u", mss::c_str(i_target), "VrefDAC0_Center", l_dbyte, l_bit, l_vref_dac0_center);
         }
     }
 
-    // Display DIMM1
-    if(l_dimms.size() == 2)
+    FAPI_MFG("%s %s_Center:", mss::c_str(i_target), "RxClkDly");
+
+    for (uint8_t l_rank = 0; l_rank < TRAINING_RESPONSE_NUM_RANKS; ++l_rank)
     {
-        // Display all of function space 0
-        // Display all 4-bit numbers
-        for(uint8_t l_rcw = 0; l_rcw < exp_struct_sizes::RCW_8BIT_CUTOFF; ++l_rcw)
+        for (uint8_t l_nibble = 0; l_nibble < NIBBLE_N_SIZE; ++l_nibble)
         {
-            display_rcw_4bit( i_target, 1, FUNC_SPACE0, l_rcw, i_training_info.rc_resp.F0RC_D1[l_rcw]);
-        }
-
-        // Display all 8-bit numbers
-        for(uint8_t l_rcw = exp_struct_sizes::RCW_8BIT_CUTOFF; l_rcw < exp_struct_sizes::TRAINING_RESPONSE_NUM_RC; ++l_rcw)
-        {
-            display_rcw_8bit( i_target, 1, FUNC_SPACE0, l_rcw, i_training_info.rc_resp.F0RC_D1[l_rcw]);
-        }
-
-        // Display all of function space 1
-        // Display all 4-bit numbers
-        for(uint8_t l_rcw = 0; l_rcw < exp_struct_sizes::RCW_8BIT_CUTOFF; ++l_rcw)
-        {
-            display_rcw_4bit( i_target, 1, FUNC_SPACE1, l_rcw, i_training_info.rc_resp.F1RC_D1[l_rcw]);
-        }
-
-        // Display all 8-bit numbers
-        for(uint8_t l_rcw = exp_struct_sizes::RCW_8BIT_CUTOFF; l_rcw < exp_struct_sizes::TRAINING_RESPONSE_NUM_RC; ++l_rcw)
-        {
-            display_rcw_8bit( i_target, 1, FUNC_SPACE1, l_rcw, i_training_info.rc_resp.F1RC_D1[l_rcw]);
+            const auto l_rxclkdly_center = i_training_info.read_2d_eye_resp.RxClkDly_Center[l_rank][l_nibble];
+            FAPI_MFG("%s %s RANK %u, NIBBLE %u: %u", mss::c_str(i_target), "RxClkDly_Center", l_rank, l_nibble, l_rxclkdly_center);
         }
     }
 }
 
 ///
-/// @brief Displays command to command response timing
+/// @brief Display train_2d_write_eye_msdg_t response struct
+///
+/// @param[in] i_target OCMB target
+/// @param[in] i_training_info training info struct
+///
+void display_train_2d_write_eye(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                const user_2d_eye_response_2_msdg_t& i_training_info)
+{
+    FAPI_MFG("%s %s (EYE MIN/MAX):", mss::c_str(i_target), "VrefDQ");
+
+    for (uint8_t l_rank = 0; l_rank < TRAINING_RESPONSE_NUM_RANKS; ++l_rank)
+    {
+        for (uint8_t l_dbyte = 0; l_dbyte < DBYTE_N_SIZE; ++l_dbyte)
+        {
+            for (uint8_t l_bit = 0; l_bit < BIT_N_SIZE; ++l_bit)
+            {
+                for (uint8_t l_eye_index = 0; l_eye_index < EYE_MIN_MAX_SIZE; ++l_eye_index)
+                {
+                    const auto l_eye_min = i_training_info.write_2d_eye_resp.VrefDQ[l_rank][l_dbyte][l_bit].eye_min[l_eye_index];
+                    const auto l_eye_max = i_training_info.write_2d_eye_resp.VrefDQ[l_rank][l_dbyte][l_bit].eye_max[l_eye_index];
+
+                    FAPI_MFG("%s %s RANK %u, DBYTE %u BIT %u EYE INDEX %u -- MIN: %u MAX: %u",
+                             mss::c_str(i_target), "VrefDQ", l_rank, l_dbyte, l_bit, l_eye_index, l_eye_min, l_eye_max);
+                }
+            }
+        }
+    }
+
+    FAPI_MFG("%s %s_Center:", mss::c_str(i_target), "VrefDQ");
+
+    for (uint8_t l_rank = 0; l_rank < TRAINING_RESPONSE_NUM_RANKS; ++l_rank)
+    {
+        for (uint8_t l_nibble = 0; l_nibble < NIBBLE_N_SIZE; ++l_nibble)
+        {
+            const auto l_vrefdq_center = i_training_info.write_2d_eye_resp.VrefDQ_Center[l_rank][l_nibble];
+            FAPI_MFG("%s %s RANK %u, NIBBLE %u: %u", mss::c_str(i_target), "VrefDQ_Center", l_rank, l_nibble, l_vrefdq_center);
+        }
+    }
+
+    FAPI_MFG("%s %s_Center:", mss::c_str(i_target), "TxDqDly");
+
+    for (uint8_t l_rank = 0; l_rank < TRAINING_RESPONSE_NUM_RANKS; ++l_rank)
+    {
+        for (uint8_t l_dbyte = 0; l_dbyte < DBYTE_N_SIZE; ++l_dbyte)
+        {
+            for (uint8_t l_bit = 0; l_bit < BIT_N_SIZE; ++l_bit)
+            {
+                const auto l_txdqdly_center = i_training_info.write_2d_eye_resp.TxDqDly_Center[l_rank][l_dbyte][l_bit];
+                FAPI_MFG("%s %s RANK %u, DBYTE %u BIT %u: %u", mss::c_str(i_target), "TxDqDly_Center", l_rank, l_dbyte, l_bit,
+                         l_txdqdly_center);
+            }
+        }
+    }
+}
+
+///
+/// @brief Displays all training information
 /// @param[in] i_target the OCMB target
 /// @param[in] i_training_info the training information to display
-/// @return returns FAPI2_RC_SUCCESS iff the procedure executes successfully
+/// @return fapi2::FAPI2_RC_SUCCESS iff success
 ///
-fapi2::ReturnCode display_response_timing(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        const user_response_msdg_t& i_training_info)
+template <>
+fapi2::ReturnCode display_user_2d_eye_info<user_2d_eye_response_1_msdg_t>(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const user_2d_eye_response_1_msdg_t& i_training_info)
 {
-    uint8_t l_num_rank_per_ocmb = 0;
+    FAPI_INF("%s displaying user 2d eye response 1 data version %u", mss::c_str(i_target), i_training_info.version_number)
+    display_train_2d_read_eye(i_target, i_training_info);
+    FAPI_TRY(display_normal_info(i_target, i_training_info));
 
-    // Loop through all DIMM's
-    for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
-    {
-        // Gets the number of DIMM's and x4 vs x8 DRAM
-        // TK update ranks to use rank API
-        uint8_t l_num_master_ranks = 0;
-
-        FAPI_TRY(mss::attr::get_num_master_ranks_per_dimm(l_dimm, l_num_master_ranks));
-        l_num_rank_per_ocmb += l_num_master_ranks;
-    }
-
-    // DFIMRL_DDRCLK_trained training result
-    FAPI_INF("%s DFIMRL_DDRCLK_trained: %u", mss::c_str(i_target), i_training_info.tm_resp.DFIMRL_DDRCLK_trained);
-
-    // RD to RD
-    FAPI_DBG("%s RD-to-RD      :  0  1  2  3", mss::c_str(i_target));
-
-    for(uint8_t l_rank_n = 0; l_rank_n < l_num_rank_per_ocmb; ++l_rank_n)
-    {
-        FAPI_DBG("%s RD-to-RD rank%u: %2i %2i %2i %2i", mss::c_str(i_target), l_rank_n,
-                 i_training_info.tm_resp.CDD_RR[l_rank_n][0], i_training_info.tm_resp.CDD_RR[l_rank_n][1],
-                 i_training_info.tm_resp.CDD_RR[l_rank_n][2], i_training_info.tm_resp.CDD_RR[l_rank_n][3]);
-    }
-
-    // WR to WR
-    FAPI_DBG("%s WR-to-WR      :  0  1  2  3", mss::c_str(i_target));
-
-    for(uint8_t l_rank_n = 0; l_rank_n < l_num_rank_per_ocmb; ++l_rank_n)
-    {
-        FAPI_DBG("%s WR-to-WR rank%u: %2i %2i %2i %2i", mss::c_str(i_target), l_rank_n,
-                 i_training_info.tm_resp.CDD_WW[l_rank_n][0], i_training_info.tm_resp.CDD_WW[l_rank_n][1],
-                 i_training_info.tm_resp.CDD_WW[l_rank_n][2], i_training_info.tm_resp.CDD_WW[l_rank_n][3]);
-    }
-
-    // WR to RD
-    FAPI_DBG("%s WR-to-RD      :  0  1  2  3", mss::c_str(i_target));
-
-    for(uint8_t l_rank_n = 0; l_rank_n < l_num_rank_per_ocmb; ++l_rank_n)
-    {
-        FAPI_DBG("%s WR-to-RD rank%u: %2i %2i %2i %2i", mss::c_str(i_target), l_rank_n,
-                 i_training_info.tm_resp.CDD_WR[l_rank_n][0], i_training_info.tm_resp.CDD_WR[l_rank_n][1],
-                 i_training_info.tm_resp.CDD_WR[l_rank_n][2], i_training_info.tm_resp.CDD_WR[l_rank_n][3]);
-    }
-
-    // RD to WR
-    FAPI_DBG("%s RD-to-WR      :  0  1  2  3", mss::c_str(i_target));
-
-    for(uint8_t l_rank_n = 0; l_rank_n < l_num_rank_per_ocmb; ++l_rank_n)
-    {
-        FAPI_DBG("%s RD-to-WR rank%u: %2i %2i %2i %2i", mss::c_str(i_target), l_rank_n,
-                 i_training_info.tm_resp.CDD_RW[l_rank_n][0], i_training_info.tm_resp.CDD_RW[l_rank_n][1],
-                 i_training_info.tm_resp.CDD_RW[l_rank_n][2], i_training_info.tm_resp.CDD_RW[l_rank_n][3]);
-    }
-
-    return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -306,15 +219,16 @@ fapi_try_exit:
 /// @brief Displays all training information
 /// @param[in] i_target the OCMB target
 /// @param[in] i_training_info the training information to display
+/// @return fapi2::FAPI2_RC_SUCCESS iff success
 ///
-fapi2::ReturnCode display_info(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                               const user_response_msdg_t& i_training_info)
+template <>
+fapi2::ReturnCode display_user_2d_eye_info<user_2d_eye_response_2_msdg_t>(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const user_2d_eye_response_2_msdg_t& i_training_info)
 {
-    FAPI_INF("%s displaying user response data version %u", mss::c_str(i_target), i_training_info.version_number)
-    display_rcw_info(i_target, i_training_info);
-    FAPI_TRY(display_mrs_info(i_target, i_training_info));
-    display_lane_info(i_target, i_training_info);
-    FAPI_TRY(display_response_timing(i_target, i_training_info));
+    FAPI_INF("%s displaying user 2d eye response 2 data version %u", mss::c_str(i_target), i_training_info.version_number)
+    display_train_2d_write_eye(i_target, i_training_info);
+    FAPI_TRY(display_normal_info(i_target, i_training_info));
 
 fapi_try_exit:
     return fapi2::current_err;

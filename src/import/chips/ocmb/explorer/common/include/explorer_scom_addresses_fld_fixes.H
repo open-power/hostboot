@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,5 +52,8 @@ static const uint8_t EXPLR_RDF_MCBCM2_MCBIST_HALF_COMPARE_MASK                 =
 static const uint8_t EXPLR_RDF_MCBCM2_MCBIST_HALF_COMPARE_MASK_LEN             = 40  ;
 static const uint8_t EXPLR_TP_MB_UNIT_TOP_TR1_TRACE_TRCTRL_CONFIG_TRA_MASTER_CLOCK_ENABLE = 22;
 static const uint8_t EXP_APBONLY0_MICROCONTMUXSEL_MICROCONTMUXSEL              = 63  ;
+static const uint8_t EXP_DDR4_PHY_DDR_PHY_CONTROL_DFI_AC_SELECT                = 63 - 8;
+static const uint8_t EXP_DDR4_PHY_DDR_PHY_CONTROL_DFI_CFGCMD_AC_MASK           = 63 - 5;
+static const uint8_t EXP_DDR4_PHY_DDR_PHY_CONTROL_DFI_CFGCMD_AC_MASK_LEN       = 2;
 
 #endif

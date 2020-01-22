@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,32 +50,21 @@ namespace ecid
 {
 
 ///
-/// @brief Determines enterprise and half dimm states from explorer FUSE
+/// @brief Determines enterprise state from explorer FUSE
 /// @param[in] i_target the controller
 /// @param[out] o_enterprise_mode state
-/// @param[out] o_half_dimm_mode state
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode get_enterprise_and_half_dimm_from_fuse(
+fapi2::ReturnCode get_enterprise_from_fuse(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-    uint8_t& o_enterprise_mode,
-    uint8_t& o_half_dimm_mode)
+    bool& o_enterprise_mode)
 {
     fapi2::buffer<uint64_t> l_reg_resp_buffer;
     FAPI_TRY(fapi2::getScom( i_target, static_cast<uint64_t>(EXPLR_EFUSE_IMAGE_OUT_0), l_reg_resp_buffer ),
              "exp_getecid: could not read explorer fuse register 0x%08x", EXPLR_EFUSE_IMAGE_OUT_0);
 
-    // Default to disabled
-    o_enterprise_mode = fapi2::ENUM_ATTR_MSS_OCMB_ENTERPRISE_MODE_NON_ENTERPRISE; // 0
-
-    // If we support enterprise mode, enable it until otherwise overridden in OMI_SETUP
-    if(!l_reg_resp_buffer.getBit <EXPLR_EFUSE_IMAGE_OUT_0_ENTERPRISE_MODE_DIS> ())
-    {
-        o_enterprise_mode = fapi2::ENUM_ATTR_MSS_OCMB_ENTERPRISE_MODE_ENTERPRISE; // 1, enabled
-    }
-
-    // half_dimm_mode will remain disabled for P systems
-    o_half_dimm_mode = fapi2::ENUM_ATTR_MSS_OCMB_HALF_DIMM_MODE_FULL_DIMM; // 0, disabled
+    // Since the bit is a disable bit, take the opposite to get enable=true, disable=false
+    o_enterprise_mode = !(l_reg_resp_buffer.getBit<EXPLR_EFUSE_IMAGE_OUT_0_ENTERPRISE_MODE_DIS>());
 
 fapi_try_exit:
     return fapi2::current_err;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -95,6 +95,15 @@ class address
         ///
         address( const uint64_t i_value ):
             iv_address(i_value << MAGIC_PAD)
+        {
+        }
+
+        ///
+        /// @brief Construct an address from the provided buffer
+        /// @param[in] i_address fapi2::buffer address
+        ///
+        address(const fapi2::buffer<uint64_t>& i_address):
+            iv_address(i_address)
         {
         }
 
@@ -410,6 +419,15 @@ class address
         inline uint64_t get_bank_group() const
         {
             return get_field<BANK_GROUP>();
+        }
+
+        ///
+        /// @brief Get the buffer object for bit operations
+        /// @return fapi2::buffer<uint64_t>&
+        ///
+        inline fapi2::buffer<uint64_t> get_address_buffer() const
+        {
+            return iv_address;
         }
 
     private:

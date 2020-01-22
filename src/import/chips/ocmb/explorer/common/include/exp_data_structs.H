@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -68,6 +68,10 @@ enum exp_struct_sizes
     TRAINING_RESPONSE_NUM_RC = 27,
     TRAINING_RESPONSE_MR6_SIZE = TRAINING_RESPONSE_NUM_RANKS * TRAINING_RESPONSE_NUM_DRAM,
     RCW_8BIT_CUTOFF = 16,
+    EYE_MIN_MAX_SIZE = 31,
+    DBYTE_N_SIZE = 10,
+    NIBBLE_N_SIZE = 20,
+    BIT_N_SIZE = 8,
 };
 
 ///
@@ -78,18 +82,19 @@ enum exp_struct_sizes
 typedef struct __attribute__((packed))
 {
     // Command Header
-    uint8_t  cmd_id;                          // Command type
-    uint8_t  cmd_flags;                       // Various flags associated with the command
-    uint16_t request_identifier;              // The request identifier of this transport request
-    uint32_t cmd_length;                      // Number of bytes following the UI header
-    uint32_t cmd_crc;                         // CRC of command data buffer, if used
-    uint32_t host_work_area;                  // Scratchpad area for Host, FW returns this value as a reponse
-    uint32_t cmd_work_area;                   // Scratchpad area for Firmware, can be used for tracking command progress etc.
-    uint32_t padding[CMD_PADDING_SIZE];        // Fill up to the size of one cache line
-    uint8_t  command_argument[ARGUMENT_SIZE]; // Additional parameters associated with the command
-    uint32_t cmd_header_crc;                  // CRC of 64 bytes of command header
+    uint8_t cmd_id;                             // Command type
+    uint8_t cmd_flags;                          // Various flags associated with the command
+    uint16_t request_identifier;                // The request identifier of this transport request
+    uint32_t cmd_length;                        // Number of bytes following the UI header
+    uint32_t cmd_crc;                           // CRC of command data buffer, if used
+    uint32_t host_work_area;                    // Scratchpad area for Host, FW returns this value as a reponse
+    uint32_t cmd_work_area;                     // Scratchpad area for Firmware, can be used for tracking command progress etc.
+    uint32_t padding[CMD_PADDING_SIZE];         // Fill up to the size of one cache line
+    uint8_t command_argument[ARGUMENT_SIZE];    // Additional parameters associated with the command
+    uint32_t cmd_header_crc;                    // CRC of 64 bytes of command header
 }
 host_fw_command_struct;
+
 
 ///
 /// @class host_fw_response_struct
@@ -745,6 +750,88 @@ typedef struct __attribute__((packed)) user_response_rc_msdg_t
 } user_response_rc_msdg_t;
 
 ///
+/// @class train_2d_eye_min_max_msdg_t
+/// @brief Microchip response structure
+///
+typedef struct __attribute__((packed)) train_2d_eye_min_max_msdg
+{
+    //2D training has to run with 1D training results in the delay registers. Horizontally it takes 1D
+    //centered value as starting position and only sweep half of a UI to left and right (1 UI in total).
+    //Vertically it takes preset vref value as starting position and sweep until bit error is detected.
+    //The assumption is that data eye will be enclosed in that range.
+    //eye_max/min contain the max/min VrefDAC0/VrefDQ value which passes test with the Nth step shift
+    //within the 1UI range. The 1D centered RxClkDly/TxDqDly is always normalized to index 15 of the
+    //array.
+    //In train_2d_read_eye_msdg, eye_max/min value represents VrefDAC0 (PHY DQ receiver Vref setting)
+    //Vref = (0.510 + VrefDAC0[6:0] * 0.00385) * VDDQ
+    //In train_2d_write_eye_msdg, eye_max/min value represents VrefDQ (Dram DQ receiver Vref setting)
+    //Vref = (0.450 + VrefDQ[6:0] * 0.0065) * VDDQ
+    uint16_t eye_min[EYE_MIN_MAX_SIZE];
+    uint16_t eye_max[EYE_MIN_MAX_SIZE];
+} train_2d_eye_min_max_msdg_t;
+
+///
+/// @class train_2d_read_eye_msdg_t
+/// @brief Microchip response structure
+///
+typedef struct __attribute__((packed)) train_2d_read_eye_msdg
+{
+    //train_2d_read_eye_msdg_t returns the read eye diagram from point of view of 2D training firmware.
+    //1D training center RxClkDly (per nibble) horizontally (left and right search), 2D training does
+    //sweep on horizontal (RxClkDly) and vertical (VrefDAC0) directions, then decide the center.
+    //2D training has to run with 1D training results in the delay registers. Horizontally it takes 1D
+    //centered value as starting position and only sweep half of a UI to left and right (1 UI in total).
+    //Vertically it takes preset vref value as starting position and sweep until bit error is detected.
+    //The assumption is that data eye will be enclosed in that range.
+    //VrefDAC0[*][*][*] contains the max/min VrefDAC0 value which passes test with the Nth step shift
+    //within the 1UI range. The 1D centered RxClkDly is always normalized to index 15 of the
+    //array.
+    //With both arrays, 2D read eye diagram can be plotted on debug host.
+
+    // VrefDAC0[RANKi][DBYTEn][BITn] Maximum
+    // and minimum passing VrefDAC0 in 2D read training
+    train_2d_eye_min_max_msdg_t VrefDAC0[TRAINING_RESPONSE_NUM_RANKS][DBYTE_N_SIZE][BIT_N_SIZE];
+
+    // VrefDAC0_Center[DBYTEn][BITn] Centered
+    // VrefDAC0 value after 2D read training
+    uint16_t VrefDAC0_Center[DBYTE_N_SIZE][BIT_N_SIZE];
+
+    // RxClkDly_Center[RANKi][NIBBLEn] Centered
+    // RxClkDly location (w.r.t. eye diagram) after 2D
+    // read training
+    uint16_t RxClkDly_Center[TRAINING_RESPONSE_NUM_RANKS][NIBBLE_N_SIZE];
+} train_2d_read_eye_msdg_t;
+
+typedef struct __attribute__((packed)) train_2d_write_eye_msdg
+{
+    //train_2d_write_eye_msdg_t returns the write eye diagram from point of view of 2D training
+    //firmware.
+    //1D training center TxDqDly (per DQ) horizontally (left and right search), 2D training does sweep
+    //on horizontal (TxDqDly) and vertical (VrefDQ) directions, then decide the center.
+    //2D training has to run with 1D training results in the delay registers. Horizontally it takes 1D
+    //centered value as starting position and only sweep half of a UI to left and right (1 UI in total).
+    //Vertically it takes preset vref value as starting position and sweep until bit error is detected.
+    //The assumption is that data eye will be enclosed in that range.
+    //VrefDQ[*][*][*] contains the max/min VrefDQ value which passes test with the Nth step shift within
+    //the 1UI range. The 1D centered TxDqDly is always normalized to index 15 of the array.
+    //With both arrays, 2D read eye diagram can be plotted on debug host.
+
+    // VrefDQ[RANKi][DBYTEn][BITn] Maximum and
+    // minimum passing VrefDQ in 2D write training
+    train_2d_eye_min_max_msdg_t VrefDQ[TRAINING_RESPONSE_NUM_RANKS][DBYTE_N_SIZE][BIT_N_SIZE];
+
+    // VrefDQ_Center[RANKi][NIBBLEn] Centered VrefDQ
+    // value after 2D write training
+    uint16_t VrefDQ_Center[TRAINING_RESPONSE_NUM_RANKS][NIBBLE_N_SIZE];
+
+    // TxDqDly_Center[RANKi][DBYTEn][BITn] Centered
+    // TxDqDly location (w.r.t. eye diagram) after 2D
+    // write training
+    uint16_t TxDqDly_Center[TRAINING_RESPONSE_NUM_RANKS][DBYTE_N_SIZE][BIT_N_SIZE];
+
+} train_2d_write_eye_msdg_t;
+
+///
 /// @class user_response_msdg_t
 /// @brief Microchip response structure
 ///
@@ -757,5 +844,35 @@ typedef struct __attribute__((packed)) user_response_msdg
     user_response_rc_msdg_t         rc_resp;
 
 } user_response_msdg_t;
+
+///
+/// @class user_2d_eye_response_1_msdg_t
+/// @brief Microchip response structure
+///
+typedef struct __attribute__((packed)) user_2d_eye_response_1_msdg
+{
+    uint32_t                        version_number;
+    train_2d_read_eye_msdg_t        read_2d_eye_resp;
+    user_response_timing_msdg_t     tm_resp;
+    user_response_error_msdg_t      err_resp;
+    user_response_mrs_msdg_t        mrs_resp;
+    user_response_rc_msdg_t         rc_resp;
+
+} user_2d_eye_response_1_msdg_t;
+
+///
+/// @class user_2d_eye_response_2_msdg_t
+/// @brief Microchip response structure
+///
+typedef struct __attribute__((packed)) user_2d_eye_response_2_msdg
+{
+    uint32_t version_number;
+    train_2d_write_eye_msdg_t write_2d_eye_resp;
+    user_response_timing_msdg_t tm_resp;
+    user_response_error_msdg_t err_resp;
+    user_response_mrs_msdg_t mrs_resp;
+    user_response_rc_msdg_t rc_resp;
+
+} user_2d_eye_response_2_msdg_t;
 
 #endif

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -96,6 +96,7 @@ constexpr uint64_t literal_0b01010 = 0b01010;
 constexpr uint64_t literal_0b00000 = 0b00000;
 constexpr uint64_t literal_0b00010 = 0b00010;
 constexpr uint64_t literal_0b00011 = 0b00011;
+constexpr uint64_t literal_0b0001 = 0b0001;
 
 fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& TGT0,
                                 const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT2,
@@ -200,6 +201,12 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
                 l_def_SLOT1_DENOMINATOR);
         fapi2::ATTR_MEM_SI_ODT_RD_Type l_TGT1_ATTR_MEM_SI_ODT_RD;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_ODT_RD, TGT1, l_TGT1_ATTR_MEM_SI_ODT_RD));
+        uint64_t l_def_dual_drop = ((l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_0] > literal_0)
+                                    && (l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_1] > literal_0));
+        fapi2::ATTR_MEM_EFF_FOUR_RANK_MODE_Type l_TGT1_ATTR_MEM_EFF_FOUR_RANK_MODE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FOUR_RANK_MODE, TGT1, l_TGT1_ATTR_MEM_EFF_FOUR_RANK_MODE));
+        uint64_t l_def_four_rank_mode = (l_TGT1_ATTR_MEM_EFF_FOUR_RANK_MODE[literal_0] == literal_1);
+        uint64_t l_def_cs_tied = ((l_def_four_rank_mode == literal_0) && (l_def_dual_drop == literal_0));
         fapi2::ATTR_MEM_SI_ODT_WR_Type l_TGT1_ATTR_MEM_SI_ODT_WR;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_ODT_WR, TGT1, l_TGT1_ATTR_MEM_SI_ODT_WR));
         uint64_t l_def_NUM_RANKS = (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] +
@@ -237,6 +244,14 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
                                                l_def_m0_val_0) + l_def_m1_val_0) + l_def_s0_val_0) + l_def_s1_val_0) + l_def_s2_val_0);
         uint64_t l_def_num_of_bitvals_1 = (((((((l_def_row_bit17_val_1 + l_def_row_bit16_val_1) + l_def_row_bit15_val_1) +
                                                l_def_m0_val_1) + l_def_m1_val_1) + l_def_s0_val_1) + l_def_s1_val_1) + l_def_s2_val_1);
+        fapi2::ATTR_MSS_OCMB_CHECKSTOP_OBJ_HANDLE_Type l_TGT2_ATTR_MSS_OCMB_CHECKSTOP_OBJ_HANDLE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_CHECKSTOP_OBJ_HANDLE, TGT2, l_TGT2_ATTR_MSS_OCMB_CHECKSTOP_OBJ_HANDLE));
+        fapi2::ATTR_MSS_OCMB_RECOV_OBJ_HANDLE_Type l_TGT2_ATTR_MSS_OCMB_RECOV_OBJ_HANDLE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_RECOV_OBJ_HANDLE, TGT2, l_TGT2_ATTR_MSS_OCMB_RECOV_OBJ_HANDLE));
+        fapi2::ATTR_MSS_OCMB_SPECATTN_OBJ_HANDLE_Type l_TGT2_ATTR_MSS_OCMB_SPECATTN_OBJ_HANDLE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_SPECATTN_OBJ_HANDLE, TGT2, l_TGT2_ATTR_MSS_OCMB_SPECATTN_OBJ_HANDLE));
+        fapi2::ATTR_MSS_OCMB_APPINTR_OBJ_HANDLE_Type l_TGT2_ATTR_MSS_OCMB_APPINTR_OBJ_HANDLE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_APPINTR_OBJ_HANDLE, TGT2, l_TGT2_ATTR_MSS_OCMB_APPINTR_OBJ_HANDLE));
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x801140cull, l_scom_buffer ));
@@ -624,12 +639,20 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
 
             l_scom_buffer.insert<0, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_0] >> literal_7) );
             l_scom_buffer.insert<1, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_0] >> literal_6) );
-            l_scom_buffer.insert<2, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_0] >> literal_3) );
-            l_scom_buffer.insert<3, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_0] >> literal_2) );
+            l_scom_buffer.insert<2, 1, 63, uint64_t>(((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_0] >> literal_3) &
+                    literal_0b1) && (l_def_cs_tied == literal_0))
+                    || (((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_0] >> literal_7) & literal_0b1) && (l_def_cs_tied == literal_1))) );
+            l_scom_buffer.insert<3, 1, 63, uint64_t>(((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_0] >> literal_2) &
+                    literal_0b1) && (l_def_cs_tied == literal_0))
+                    || (((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_0] >> literal_6) & literal_0b1) && (l_def_cs_tied == literal_1))) );
             l_scom_buffer.insert<4, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_7) );
             l_scom_buffer.insert<5, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_6) );
-            l_scom_buffer.insert<6, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_3) );
-            l_scom_buffer.insert<7, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_2) );
+            l_scom_buffer.insert<6, 1, 63, uint64_t>(((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_3) &
+                    literal_0b1) && (l_def_cs_tied == literal_0))
+                    || (((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_7) & literal_0b1) && (l_def_cs_tied == literal_1))) );
+            l_scom_buffer.insert<7, 1, 63, uint64_t>(((((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_2) &
+                    literal_0b1) && (l_def_cs_tied == literal_0))
+                    || (((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_1] >> literal_6) & literal_0b1) && (l_def_cs_tied == literal_1))) );
             l_scom_buffer.insert<8, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_2] >> literal_7) );
             l_scom_buffer.insert<9, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_2] >> literal_6) );
             l_scom_buffer.insert<10, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_0][literal_2] >> literal_3) );
@@ -656,12 +679,20 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
             l_scom_buffer.insert<31, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_RD[literal_1][literal_3] >> literal_2) );
             l_scom_buffer.insert<32, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_0] >> literal_7) );
             l_scom_buffer.insert<33, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_0] >> literal_6) );
-            l_scom_buffer.insert<34, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_0] >> literal_3) );
-            l_scom_buffer.insert<35, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_0] >> literal_2) );
+            l_scom_buffer.insert<34, 1, 63, uint64_t>(((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_0] >> literal_3) &
+                    literal_0b1) && (l_def_cs_tied == literal_0))
+                    || (((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_0] >> literal_7) & literal_0b1) && (l_def_cs_tied == literal_1))) );
+            l_scom_buffer.insert<35, 1, 63, uint64_t>(((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_0] >> literal_2) &
+                    literal_0b1) && (l_def_cs_tied == literal_0))
+                    || (((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_0] >> literal_6) & literal_0b1) && (l_def_cs_tied == literal_1))) );
             l_scom_buffer.insert<36, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_7) );
             l_scom_buffer.insert<37, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_6) );
-            l_scom_buffer.insert<38, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_3) );
-            l_scom_buffer.insert<39, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_2) );
+            l_scom_buffer.insert<38, 1, 63, uint64_t>(((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_3) &
+                    literal_0b1) && (l_def_cs_tied == literal_0))
+                    || (((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_7) & literal_0b1) && (l_def_cs_tied == literal_1))) );
+            l_scom_buffer.insert<39, 1, 63, uint64_t>(((((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_2) &
+                    literal_0b1) && (l_def_cs_tied == literal_0))
+                    || (((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_1] >> literal_6) & literal_0b1) && (l_def_cs_tied == literal_1))) );
             l_scom_buffer.insert<40, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_2] >> literal_7) );
             l_scom_buffer.insert<41, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_2] >> literal_6) );
             l_scom_buffer.insert<42, 1, 63, uint64_t>((l_TGT1_ATTR_MEM_SI_ODT_WR[literal_0][literal_2] >> literal_3) );
@@ -1725,6 +1756,39 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x8011871ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x801240dull, l_scom_buffer ));
+
+            l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0001 );
+            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b0001 );
+            l_scom_buffer.insert<56, 4, 60, uint64_t>(literal_0b0001 );
+            l_scom_buffer.insert<60, 4, 60, uint64_t>(literal_0b0001 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x801240dull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x8012410ull, l_scom_buffer ));
+
+            l_scom_buffer.insert<0, 64, 0, uint64_t>(l_TGT2_ATTR_MSS_OCMB_CHECKSTOP_OBJ_HANDLE );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x8012410ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x8012411ull, l_scom_buffer ));
+
+            l_scom_buffer.insert<0, 64, 0, uint64_t>(l_TGT2_ATTR_MSS_OCMB_RECOV_OBJ_HANDLE );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x8012411ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x8012412ull, l_scom_buffer ));
+
+            l_scom_buffer.insert<0, 64, 0, uint64_t>(l_TGT2_ATTR_MSS_OCMB_SPECATTN_OBJ_HANDLE );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x8012412ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x8012413ull, l_scom_buffer ));
+
+            l_scom_buffer.insert<0, 64, 0, uint64_t>(l_TGT2_ATTR_MSS_OCMB_APPINTR_OBJ_HANDLE );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x8012413ull, l_scom_buffer));
         }
 
     };

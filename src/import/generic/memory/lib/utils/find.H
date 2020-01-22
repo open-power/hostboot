@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -161,6 +161,19 @@ inline fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> find_target(const fapi2::Targ
     return i_target.getParent<fapi2::TARGET_TYPE_OMI>()
            .getParent<fapi2::TARGET_TYPE_MC>()
            .getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+}
+
+///
+/// @brief find the MCC given a OCMB_CHIP
+/// @param[in] i_target the fapi2 target OCMB_CHIP
+/// @return a MCC target.
+///
+template<>
+inline fapi2::Target<fapi2::TARGET_TYPE_MCC> find_target(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target)
+{
+    return i_target.getParent<fapi2::TARGET_TYPE_OMI>()
+           .getParent<fapi2::TARGET_TYPE_MCC>();
 }
 
 ///

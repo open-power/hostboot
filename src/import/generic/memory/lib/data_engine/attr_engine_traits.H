@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,11 +40,11 @@
 #include <generic/memory/lib/spd/spd_facade.H>
 #include <generic/memory/lib/data_engine/data_engine_traits_def.H>
 #include <generic/memory/lib/data_engine/data_engine.H>
+#include <generic/memory/lib/data_engine/data_engine_utils.H>
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/mss_generic_attribute_setters.H>
 #include <generic/memory/lib/mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/spd/ddimm/efd_decoder.H>
-#include <generic/memory/lib/utils/buffer_ops.H>
 #include <generic/memory/lib/utils/dimm/mss_timing.H>
 #include <generic/memory/lib/spd/spd_utils.H>
 
@@ -1393,8 +1393,14 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
                 break;
 
             default:
-                // TODO Add FFDC
-                fapi2::Assert(false);
+                FAPI_ASSERT(false,
+                            fapi2::MSS_INVALID_SPD_RANK().
+                            set_FUNCTION(SET_SI_DRAM_RTT_NOM).
+                            set_RANK( i_efd_data->get_rank() ).
+                            set_TARGET(l_ocmb),
+                            "%s SPD decoder returned invalid rank: %d",
+                            spd::c_str(l_ocmb),
+                            i_efd_data->get_rank());
                 break;
         };
 
@@ -1484,8 +1490,14 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
                 break;
 
             default:
-                // TODO Add FFDC
-                fapi2::Assert(false);
+                FAPI_ASSERT(false,
+                            fapi2::MSS_INVALID_SPD_RANK().
+                            set_FUNCTION(SET_SI_DRAM_RTT_WR).
+                            set_RANK( i_efd_data->get_rank() ).
+                            set_TARGET(l_ocmb),
+                            "%s SPD decoder returned invalid rank: %d",
+                            spd::c_str(l_ocmb),
+                            i_efd_data->get_rank());
                 break;
         };
 
@@ -1580,8 +1592,14 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
                 break;
 
             default:
-                // TODO Add FFDC
-                fapi2::Assert(false);
+                FAPI_ASSERT(false,
+                            fapi2::MSS_INVALID_SPD_RANK().
+                            set_FUNCTION(SET_SI_DRAM_RTT_PARK).
+                            set_RANK( i_efd_data->get_rank() ).
+                            set_TARGET(l_ocmb),
+                            "%s SPD decoder returned invalid rank: %d",
+                            spd::c_str(l_ocmb),
+                            i_efd_data->get_rank());
                 break;
         };
 
@@ -1813,6 +1831,8 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_ODT_
     {
         uint8_t l_value = 0;
 
+        const auto l_ocmb = i_efd_data->get_ocmb_target();
+
         switch(i_efd_data->get_rank())
         {
             case 0:
@@ -1832,17 +1852,21 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_ODT_
                 break;
 
             default:
-                // TODO Add FFDC
-                fapi2::Assert(false);
+                FAPI_ASSERT(false,
+                            fapi2::MSS_INVALID_SPD_RANK().
+                            set_FUNCTION(SET_SI_ODT_WR).
+                            set_RANK( i_efd_data->get_rank() ).
+                            set_TARGET(l_ocmb),
+                            "%s SPD decoder returned invalid rank: %d",
+                            spd::c_str(l_ocmb),
+                            i_efd_data->get_rank());
                 break;
         };
 
-        // TK update to handle differentiating 2 DIMMs, defaulted to DIMM0 case for explorer
-        {
-            // Map to attribute bitmap
-            reverse(l_value);
-            o_setting = l_value;
-        }
+        // Map to attribute bitmap
+        l_value = mss::gen::align_odt_field_to_attr(l_value);
+
+        o_setting = l_value;
 
     fapi_try_exit:
         return fapi2::current_err;
@@ -1898,6 +1922,8 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_ODT_
     {
         uint8_t l_value = 0;
 
+        const auto l_ocmb = i_efd_data->get_ocmb_target();
+
         switch(i_efd_data->get_rank())
         {
             case 0:
@@ -1917,17 +1943,21 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_ODT_
                 break;
 
             default:
-                // TODO Add FFDC
-                fapi2::Assert(false);
+                FAPI_ASSERT(false,
+                            fapi2::MSS_INVALID_SPD_RANK().
+                            set_FUNCTION(SET_SI_ODT_RD).
+                            set_RANK( i_efd_data->get_rank() ).
+                            set_TARGET(l_ocmb),
+                            "%s SPD decoder returned invalid rank: %d",
+                            spd::c_str(l_ocmb),
+                            i_efd_data->get_rank());
                 break;
         };
 
-        // TK update to handle differentiating 2 DIMMs, defaulted to DIMM0 case for explorer
-        {
-            // Map to attribute bitmap
-            reverse(l_value);
-            o_setting = l_value;
-        }
+        // Map to attribute bitmap
+        l_value = mss::gen::align_odt_field_to_attr(l_value);
+
+        o_setting = l_value;
 
     fapi_try_exit:
         return fapi2::current_err;

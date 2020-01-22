@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,17 +46,40 @@ namespace mss
 {
 
 ///
-/// @brief A generic bad bits setter
-/// @tparam MC type memory controller type
+/// @brief Bad bit getter - Explorer specialization
 /// @param[in] i_target the fapi2 target oon which training was conducted
-/// @param[in] i_array the bad bits to set
+/// @param[out] o_array the bad bits
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+template <>
+fapi2::ReturnCode get_bad_dq_bitmap<mss::mc_type::EXPLORER>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        uint8_t (&o_array)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT])
+{
+    return mss::attr::get_bad_dq_bitmap(i_target, o_array);
+}
+
+///
+/// @brief Bad bit setter - Explorer specialization
+/// @param[in] i_target the fapi2 target oon which training was conducted
+/// @param[in] i_array the bad bits to append
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
 ///
 template <>
 fapi2::ReturnCode set_bad_dq_bitmap<mss::mc_type::EXPLORER>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t (&i_array)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT])
 {
-    return mss::attr::set_bad_dq_bitmap(i_target, i_array);
+    uint8_t l_current_data[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] = {};
+
+    // Get existing bad bits data
+    FAPI_TRY(mss::attr::get_bad_dq_bitmap(i_target, l_current_data));
+
+    // Now, or the new bits and any existing bits together
+    mss::combine_bad_bits(l_current_data, i_array);
+
+    FAPI_TRY(mss::attr::set_bad_dq_bitmap(i_target, i_array));
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 namespace check
@@ -94,68 +117,17 @@ namespace exp
 /// @param[out] o_resp the processed training response class
 /// @return FAPI2_RC_SUCCESS if ok
 ///
-fapi2::ReturnCode read_training_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+fapi2::ReturnCode read_normal_training_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const std::vector<uint8_t>& i_data,
         user_response_msdg& o_resp)
 {
-
-    // True if we pass
     // We assert at the end to avoid LOTS of fapi asserts
     uint32_t l_idx = 0;
-
     uint32_t l_version_number = 0;
     bool l_pass = readLE(i_data, l_idx, l_version_number);
     o_resp.version_number = l_version_number;
 
-    uint16_t l_DFIMRL_DDRCLK_trained = 0;
-
-    // Reads in the timing portion of the training response
-    l_pass &= readLE(i_data, l_idx, l_DFIMRL_DDRCLK_trained);
-    l_pass &= readLEArray(i_data, TIMING_RESPONSE_2D_ARRAY_SIZE, l_idx, &o_resp.tm_resp.CDD_RR[0][0]);
-    l_pass &= readLEArray(i_data, TIMING_RESPONSE_2D_ARRAY_SIZE, l_idx, &o_resp.tm_resp.CDD_WW[0][0]);
-    l_pass &= readLEArray(i_data, TIMING_RESPONSE_2D_ARRAY_SIZE, l_idx, &o_resp.tm_resp.CDD_RW[0][0]);
-    l_pass &= readLEArray(i_data, TIMING_RESPONSE_2D_ARRAY_SIZE, l_idx, &o_resp.tm_resp.CDD_WR[0][0]);
-
-    // Write to user_response_msdg
-    o_resp.tm_resp.DFIMRL_DDRCLK_trained = l_DFIMRL_DDRCLK_trained;
-
-    // Error response
-    l_pass &= readLEArray(i_data, 80, l_idx, o_resp.err_resp.Failure_Lane);
-
-    uint16_t l_MR0 = 0;
-    uint16_t l_MR3 = 0;
-    uint16_t l_MR4 = 0;
-
-    // MRS response
-    l_pass &= readLE(i_data, l_idx, l_MR0);
-    l_pass &= readLEArray(i_data, TRAINING_RESPONSE_NUM_RANKS, l_idx, o_resp.mrs_resp.MR1);
-    l_pass &= readLEArray(i_data, TRAINING_RESPONSE_NUM_RANKS, l_idx, o_resp.mrs_resp.MR2);
-    l_pass &= readLE(i_data, l_idx, l_MR3);
-    l_pass &= readLE(i_data, l_idx, l_MR4);
-    l_pass &= readLEArray(i_data, TRAINING_RESPONSE_NUM_RANKS, l_idx, o_resp.mrs_resp.MR5);
-    l_pass &= readLEArray(i_data, TRAINING_RESPONSE_MR6_SIZE, l_idx, &o_resp.mrs_resp.MR6[0][0]);
-
-    o_resp.mrs_resp.MR0 = l_MR0;
-    o_resp.mrs_resp.MR3 = l_MR3;
-    o_resp.mrs_resp.MR4 = l_MR4;
-
-    // Register Control Word (RCW) response
-    l_pass &= readLEArray(i_data, TRAINING_RESPONSE_NUM_RC, l_idx, o_resp.rc_resp.F0RC_D0);
-    l_pass &= readLEArray(i_data, TRAINING_RESPONSE_NUM_RC, l_idx, o_resp.rc_resp.F1RC_D0);
-    l_pass &= readLEArray(i_data, TRAINING_RESPONSE_NUM_RC, l_idx, o_resp.rc_resp.F0RC_D1);
-    l_pass &= readLEArray(i_data, TRAINING_RESPONSE_NUM_RC, l_idx, o_resp.rc_resp.F1RC_D1);
-
-    // Check if we have errors
-    FAPI_ASSERT( l_pass,
-                 fapi2::EXP_INBAND_LE_DATA_RANGE()
-                 .set_TARGET(i_target)
-                 .set_FUNCTION(mss::exp::READ_TRAINING_RESPONSE_STRUCT)
-                 .set_DATA_SIZE(i_data.size())
-                 .set_MAX_INDEX(sizeof(user_response_msdg)),
-                 "%s Failed to convert from data to host_fw_response_struct data size %u expected size %u",
-                 mss::c_str(i_target), i_data.size(), sizeof(user_response_msdg));
-
-    return fapi2::FAPI2_RC_SUCCESS;
+    FAPI_TRY(read_tm_err_mrs_rc_response<user_response_msdg>(i_target, i_data, l_idx, l_pass, o_resp));
 
 fapi_try_exit:
     return fapi2::current_err;

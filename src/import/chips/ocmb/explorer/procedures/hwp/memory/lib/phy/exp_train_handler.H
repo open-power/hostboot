@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@
 #include <lib/shared/exp_defaults.H>
 #include <lib/dimm/exp_rank.H>
 #include <exp_data_structs.H>
+#include <generic/memory/lib/utils/endian_utils.H>
 #include <generic/memory/lib/utils/mss_bad_bits.H>
 #include <generic/memory/lib/mss_generic_attribute_setters.H>
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
@@ -51,20 +52,204 @@ namespace exp
 {
 
 ///
-/// @brief Reads the training response structure
-/// @param[in] i_target the target associated with the response data
-/// @param[in] i_data the response data to read
-/// @param[out] o_resp the processed training response class
-/// @return FAPI2_RC_SUCCESS if ok
+/// @brief Read eye capture response data from explorer data buffer
 ///
-fapi2::ReturnCode read_training_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+/// @tparam T Response struct type
+/// @param[in] i_target OCMB target
+/// @param[in] i_data Raw data bytes
+/// @param[in,out] io_current_idx Current parsing index
+/// @param[in,out] io_pass any errors occurred during reading/endian-swapping
+/// @param[in,out] io_resp response struct
+/// @note this function expects io_current_index to be set correctly to the start of eye capture data
+///
+template <typename T>
+void read_eye_capture_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                               const std::vector<uint8_t>& i_data,
+                               uint32_t& io_current_idx,
+                               bool& io_pass,
+                               T& io_resp);
+
+///
+/// @brief Read eye capture response data from explorer data buffer (eye capture step 1)
+///
+/// @param[in] i_target OCMB target
+/// @param[in] i_data Raw data bytes
+/// @param[in,out] io_current_idx Current parsing index
+/// @param[in,out] io_pass any errors occurred during reading/endian-swapping
+/// @param[in,out] io_resp train_2d_read_eye_msdg
+/// @note this function expects io_current_index to be set correctly to the start of eye capture data
+///
+template<>
+inline void read_eye_capture_response<user_2d_eye_response_1_msdg>(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target,
         const std::vector<uint8_t>& i_data,
-        user_response_msdg& o_resp);
+        uint32_t& io_current_idx,
+        bool& io_pass,
+        user_2d_eye_response_1_msdg& io_resp)
+{
+    // Eye capture step 1 struct
+    uint32_t l_idx = io_current_idx;
+    bool l_pass = io_pass;
+
+    // VrefDAC0: 3D array of 2 1D arrays
+    for (uint8_t l_num_ranks = 0; l_num_ranks < TRAINING_RESPONSE_NUM_RANKS; ++l_num_ranks)
+    {
+        for (uint8_t l_dbyte_n_size = 0; l_dbyte_n_size < DBYTE_N_SIZE; ++ l_dbyte_n_size)
+        {
+            for (uint8_t l_bit_n_sze = 0; l_bit_n_sze < BIT_N_SIZE; ++ l_bit_n_sze)
+            {
+                l_pass &= readLEArray(i_data, EYE_MIN_MAX_SIZE, l_idx,
+                                      &io_resp.read_2d_eye_resp.VrefDAC0[l_num_ranks][l_dbyte_n_size][l_bit_n_sze].eye_min[0]);
+                l_pass &= readLEArray(i_data, EYE_MIN_MAX_SIZE, l_idx,
+                                      &io_resp.read_2d_eye_resp.VrefDAC0[l_num_ranks][l_dbyte_n_size][l_bit_n_sze].eye_max[0]);
+            }
+        }
+    }
+
+    // 2D array VrefDAC0_Center [DBYTE_N_SIZE][BIT_N_SIZE]
+    l_pass &= readLEArray(i_data, (DBYTE_N_SIZE * BIT_N_SIZE), l_idx,
+                          &io_resp.read_2d_eye_resp.VrefDAC0_Center[0][0]);
+
+    // 2D array RxClkDly_Center [TRAINING_RESPONSE_NUM_RANKS][NIBBLE_N_SIZE]
+    l_pass &= readLEArray(i_data, (TRAINING_RESPONSE_NUM_RANKS * NIBBLE_N_SIZE), l_idx,
+                          &io_resp.read_2d_eye_resp.RxClkDly_Center[0][0]);
+
+    io_pass = l_pass;
+    io_current_idx = l_idx;
+}
+
+///
+/// @brief Read eye capture response data from explorer data buffer (eye capture step 2)
+///
+/// @param[in] i_target OCMB target
+/// @param[in] i_data Raw data bytes
+/// @param[in,out] io_current_idx Current parsing index
+/// @param[in,out] io_pass any errors occurred during reading/endian-swapping
+/// @param[in,out] io_resp user_2d_eye_response_2_msdg
+/// @note this function expects io_current_index to be set correctly to the start of eye capture data
+///
+template<>
+inline void read_eye_capture_response<user_2d_eye_response_2_msdg>(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target,
+        const std::vector<uint8_t>& i_data,
+        uint32_t& io_current_idx,
+        bool& io_pass,
+        user_2d_eye_response_2_msdg& io_resp)
+{
+
+    // Eye capture step 1 struct
+    uint32_t l_idx = io_current_idx;
+    bool l_pass = io_pass;
+
+    // VrefDQ: 3D array of 2 1D arrays
+    for (uint8_t l_num_ranks = 0; l_num_ranks < TRAINING_RESPONSE_NUM_RANKS; ++l_num_ranks)
+    {
+        for (uint8_t l_dbyte_n_size = 0; l_dbyte_n_size < DBYTE_N_SIZE; ++ l_dbyte_n_size)
+        {
+            for (uint8_t l_bit_n_sze = 0; l_bit_n_sze < BIT_N_SIZE; ++ l_bit_n_sze)
+            {
+                l_pass &= readLEArray(i_data, EYE_MIN_MAX_SIZE, l_idx,
+                                      &io_resp.write_2d_eye_resp.VrefDQ[l_num_ranks][l_dbyte_n_size][l_bit_n_sze].eye_min[0]);
+                l_pass &= readLEArray(i_data, EYE_MIN_MAX_SIZE, l_idx,
+                                      &io_resp.write_2d_eye_resp.VrefDQ[l_num_ranks][l_dbyte_n_size][l_bit_n_sze].eye_max[0]);
+            }
+        }
+    }
+
+    // 2D array VrefDQ_Center [TRAINING_RESPONSE_NUM_RANKS][NIBBLE_N_SIZE]
+    l_pass &= readLEArray(i_data, (TRAINING_RESPONSE_NUM_RANKS * NIBBLE_N_SIZE), l_idx,
+                          &io_resp.write_2d_eye_resp.VrefDQ_Center[0][0]);
+
+    // 3D array TxDqDly_Center [TRAINING_RESPONSE_NUM_RANKS][DBYTE_N_SIZE][DBYTE_N_SIZE]
+    l_pass &= readLEArray(i_data, (TRAINING_RESPONSE_NUM_RANKS * DBYTE_N_SIZE * BIT_N_SIZE), l_idx,
+                          &io_resp.write_2d_eye_resp.TxDqDly_Center[0][0][0]);
+
+    io_pass = l_pass;
+    io_current_idx = l_idx;
+
+    return;
+}
+
+///
+/// @brief Read the common block of fields from the training response structs
+///
+/// @tparam T training repsonse struct type
+/// @param[in] i_target OCMB chip
+/// @param[in] i_data response data
+/// @param[in] i_current_idx last index left off
+/// @param[in] i_pass response parsing success thus far
+/// @param[in,out] io_resp response struct
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+template <typename T>
+fapi2::ReturnCode read_tm_err_mrs_rc_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const std::vector<uint8_t>& i_data,
+        const uint32_t i_current_idx,
+        const bool i_pass,
+        T& io_resp)
+{
+    uint32_t l_idx = i_current_idx;
+    bool l_pass = i_pass;
+
+    uint16_t l_DFIMRL_DDRCLK_trained = 0;
+
+    // Reads in the timing portion of the training response
+    l_pass &= readLE(i_data, l_idx, l_DFIMRL_DDRCLK_trained);
+    l_pass &= readLEArray(i_data, TIMING_RESPONSE_2D_ARRAY_SIZE, l_idx, &io_resp.tm_resp.CDD_RR[0][0]);
+    l_pass &= readLEArray(i_data, TIMING_RESPONSE_2D_ARRAY_SIZE, l_idx, &io_resp.tm_resp.CDD_WW[0][0]);
+    l_pass &= readLEArray(i_data, TIMING_RESPONSE_2D_ARRAY_SIZE, l_idx, &io_resp.tm_resp.CDD_RW[0][0]);
+    l_pass &= readLEArray(i_data, TIMING_RESPONSE_2D_ARRAY_SIZE, l_idx, &io_resp.tm_resp.CDD_WR[0][0]);
+
+    // Write to user_response_msdg
+    io_resp.tm_resp.DFIMRL_DDRCLK_trained = l_DFIMRL_DDRCLK_trained;
+
+    // Error response
+    l_pass &= readLEArray(i_data, 80, l_idx, io_resp.err_resp.Failure_Lane);
+
+    uint16_t l_MR0 = 0;
+    uint16_t l_MR3 = 0;
+    uint16_t l_MR4 = 0;
+
+    // MRS response
+    l_pass &= readLE(i_data, l_idx, l_MR0);
+    l_pass &= readLEArray(i_data, TRAINING_RESPONSE_NUM_RANKS, l_idx, io_resp.mrs_resp.MR1);
+    l_pass &= readLEArray(i_data, TRAINING_RESPONSE_NUM_RANKS, l_idx, io_resp.mrs_resp.MR2);
+    l_pass &= readLE(i_data, l_idx, l_MR3);
+    l_pass &= readLE(i_data, l_idx, l_MR4);
+    l_pass &= readLEArray(i_data, TRAINING_RESPONSE_NUM_RANKS, l_idx, io_resp.mrs_resp.MR5);
+    l_pass &= readLEArray(i_data, TRAINING_RESPONSE_MR6_SIZE, l_idx, &io_resp.mrs_resp.MR6[0][0]);
+
+    io_resp.mrs_resp.MR0 = l_MR0;
+    io_resp.mrs_resp.MR3 = l_MR3;
+    io_resp.mrs_resp.MR4 = l_MR4;
+
+    // Register Control Word (RCW) response
+    l_pass &= readLEArray(i_data, TRAINING_RESPONSE_NUM_RC, l_idx, io_resp.rc_resp.F0RC_D0);
+    l_pass &= readLEArray(i_data, TRAINING_RESPONSE_NUM_RC, l_idx, io_resp.rc_resp.F1RC_D0);
+    l_pass &= readLEArray(i_data, TRAINING_RESPONSE_NUM_RC, l_idx, io_resp.rc_resp.F0RC_D1);
+    l_pass &= readLEArray(i_data, TRAINING_RESPONSE_NUM_RC, l_idx, io_resp.rc_resp.F1RC_D1);
+
+    // Check if we have errors
+    FAPI_ASSERT( l_pass,
+                 fapi2::EXP_INBAND_LE_DATA_RANGE()
+                 .set_TARGET(i_target)
+                 .set_FUNCTION(mss::exp::READ_TRAINING_RESPONSE_STRUCT)
+                 .set_DATA_SIZE(i_data.size())
+                 .set_MAX_INDEX(sizeof(T)),
+                 "%s Failed to convert from data to host_fw_response_struct data size %u expected size %u",
+                 mss::c_str(i_target), i_data.size(), sizeof(T));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Explorer's bad bit interface class
-/// @brief Explorer's bad bit interface class
+/// @tparam T user response struct type
 ///
+template <typename T>
 class bad_bit_interface
 {
     public:
@@ -85,7 +270,7 @@ class bad_bit_interface
         /// @brief Constructor
         /// @param[in] i_response response data from training
         ///
-        bad_bit_interface(const user_response_msdg_t& i_response )
+        bad_bit_interface(const T& i_response )
         {
             // First, clear everything
             std::fill(&iv_bad_bits[0][0], &iv_bad_bits[0][0] + sizeof(iv_bad_bits), 0);
@@ -170,6 +355,48 @@ class bad_bit_interface
             return fapi2::current_err;
         }
 };
+
+
+///
+/// @brief Reads the training response structure
+/// @param[in] i_target the target associated with the response data
+/// @param[in] i_data the response data to read
+/// @param[out] o_resp the processed training response class
+/// @return FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode read_normal_training_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const std::vector<uint8_t>& i_data,
+        user_response_msdg& o_resp);
+
+///
+/// @brief Reads user 2d eye response 1
+/// @tparam T response struct
+/// @param[in] i_target the target associated with the response data
+/// @param[in] i_data the response data to read
+/// @param[out] o_resp the processed training response class
+/// @return FAPI2_RC_SUCCESS if ok
+///
+template <typename T>
+inline fapi2::ReturnCode read_user_2d_eye_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const std::vector<uint8_t>& i_data,
+        T& o_resp)
+{
+    // First let's erase the struct
+    memset(&o_resp, 0, sizeof(T));
+    // We assert at the end to avoid LOTS of fapi asserts
+    uint32_t l_idx = 0;
+    uint32_t l_version_number = 0;
+    bool l_pass = readLE(i_data, l_idx, l_version_number);
+    o_resp.version_number = l_version_number;
+
+    read_eye_capture_response<T>(i_target, i_data, l_idx, l_pass, o_resp);
+
+    FAPI_TRY(read_tm_err_mrs_rc_response<T>(i_target, i_data, l_idx, l_pass, o_resp));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 
 } // ns exp
 } // ns mss

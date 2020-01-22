@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,7 @@
 #include <generic/memory/mss_git_data_helper.H>
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <mss_generic_system_attribute_getters.H>
 
 extern "C"
 {
@@ -56,21 +57,49 @@ extern "C"
     {
         mss::display_git_commit_info("exp_omi_train");
 
-        // Perform boot config 1
-        std::vector<uint8_t> l_data;
-        uint8_t l_dl_layer_boot_mode = fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE_ONLY_DL_TRAINING;
+        uint8_t l_sim = 0;
+        FAPI_TRY(mss::attr::get_is_simulation(l_sim));
 
-        // Gets the data setup
-        FAPI_TRY(mss::exp::omi::train::setup_fw_boot_config(i_target, l_data));
+        // Perform p10 workaround
+        // Train mode 1 (PATTERN_A)
+        if (!l_sim)
+        {
+            FAPI_TRY(mss::exp::workarounds::omi::training_prbs(i_target));
+        }
 
-        // Sets DL_TRAIN field
-        FAPI_TRY(mss::exp::i2c::boot_cfg::set_dl_layer_boot_mode( i_target, l_data, l_dl_layer_boot_mode ));
+        // BOOT CONFIG 1
+        {
+            bool l_ocmb_is_explorer = false;
 
-        // Issues the command and checks for completion
-        FAPI_TRY(mss::exp::i2c::boot_config(i_target, l_data));
+            std::vector<uint8_t> l_data;
+            uint8_t l_dl_layer_boot_mode = fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE_ONLY_DL_TRAINING;
 
-        // Gemini should return success code
-        FAPI_TRY(mss::exp::i2c::fw_status(i_target, mss::DELAY_1MS, 100));
+            // Gets the data setup
+            FAPI_TRY(mss::exp::omi::train::setup_fw_boot_config(i_target, l_data));
+
+            // Sets DL_TRAIN field
+            FAPI_TRY(mss::exp::i2c::boot_cfg::set_dl_layer_boot_mode(i_target, l_data, l_dl_layer_boot_mode));
+
+            // Issues the command and checks for completion
+            FAPI_TRY(mss::exp::i2c::boot_config(i_target, l_data));
+
+            // Check for expected busy status (this won't work for gemini)
+            if (!l_sim)
+            {
+                FAPI_TRY(mss::exp::workarounds::omi::ocmb_is_explorer(i_target, l_ocmb_is_explorer));
+            }
+
+            if (l_ocmb_is_explorer)
+            {
+                // Explorer & P10 environment should see a busy status until auto train is kicked off from both sides
+                FAPI_TRY(mss::exp::i2c::check_fw_status_busy(i_target));
+            }
+            else
+            {
+                // Gemini should return success code
+                FAPI_TRY(mss::exp::i2c::fw_status(i_target, mss::DELAY_1MS, 100));
+            }
+        }
 
     fapi_try_exit:
         return fapi2::current_err;

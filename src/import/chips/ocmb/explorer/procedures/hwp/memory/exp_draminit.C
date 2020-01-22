@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,7 @@
 #include <lib/phy/exp_train_handler.H>
 #include <lib/shared/exp_consts.H>
 #include <generic/memory/mss_git_data_helper.H>
+#include <mss_generic_system_attribute_getters.H>
 #include <explorer_scom_addresses.H>
 #include <explorer_scom_addresses_fld.H>
 
@@ -57,11 +58,11 @@ extern "C"
         mss::display_git_commit_info("exp_draminit");
 
         uint32_t l_crc = 0;
-        host_fw_command_struct l_cmd;
-
+        uint8_t l_phy_init_mode = 0;
         user_input_msdg l_phy_params;
+
         uint8_t l_sim = 0;
-        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_sim) );
+        FAPI_TRY(mss::attr::get_is_simulation(l_sim));
 
         FAPI_TRY(mss::exp::setup_phy_params(i_target, l_phy_params),
                  "Failed setup_phy_params() for %s", mss::c_str(i_target));
@@ -70,66 +71,39 @@ extern "C"
         FAPI_TRY( mss::exp::ib::putUserInputMsdg(i_target, l_phy_params, l_crc),
                   "Failed putUserInputMsdg() for %s", mss::c_str(i_target) );
 
+        // Get phy init mode attribute
+        FAPI_TRY(mss::attr::get_exp_phy_init_mode(i_target, l_phy_init_mode));
+
+        // Make sure we're in range
+        FAPI_ASSERT((l_phy_init_mode <= fapi2::ENUM_ATTR_MSS_OCMB_PHY_INIT_MODE_WITH_EYE_CAPTURE),
+                    fapi2::MSS_EXP_UNKNOWN_PHY_INIT_MODE()
+                    .set_TARGET(i_target)
+                    .set_VALUE(l_phy_init_mode),
+                    "%s Value for phy init mode for exp_draminit is unknown: %u expected 0 (NORMAL), 1 (WITH_EYE_CAPTURE)",
+                    mss::c_str(i_target), l_phy_init_mode);
+
+        if (l_sim)
         {
-            // Issue full boot mode cmd though EXP-FW REQ buffer
-            FAPI_TRY( mss::exp::setup_cmd_params(i_target,
-                                                 l_crc,
-                                                 sizeof(l_phy_params),
-                                                 l_cmd) );
-            FAPI_TRY( mss::exp::ib::putCMD(i_target, l_cmd),
-                      "Failed putCMD() for  %s", mss::c_str(i_target) );
+            //Clear MBA_FARB0Q_CFG_WAIT_FOR_INIT_COMPLETE for simulation
+            fapi2::buffer<uint64_t> l_data;
+
+            FAPI_TRY(fapi2::getScom(i_target, EXPLR_SRQ_MBA_FARB0Q, l_data));
+            l_data.clearBit<EXPLR_SRQ_MBA_FARB0Q_CFG_WAIT_FOR_INIT_COMPLETE>();
+            FAPI_TRY(fapi2::putScom(i_target, EXPLR_SRQ_MBA_FARB0Q, l_data));
+            return fapi2::FAPI2_RC_SUCCESS;
         }
 
-        // Wait a bit for the command (and training) to complete
-        // Value based on initial Explorer hardware in Cronus in i2c mode.
-        // Training takes ~10ms with no trace, ~450ms with Explorer UART debug
-        FAPI_TRY( fapi2::delay( (mss::DELAY_1MS * 8), 200) );
-
-        // Read the response message from EXP-FW RESP buffer
+        // Call appropriate init function
+        if (l_phy_init_mode == fapi2::ENUM_ATTR_MSS_OCMB_PHY_INIT_MODE_NORMAL)
         {
-            host_fw_response_struct l_response;
-            user_response_msdg l_train_response;
-
-            std::vector<uint8_t> l_rsp_data;
-            fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
-
-            FAPI_TRY( mss::exp::ib::getRSP(i_target, l_response, l_rsp_data),
-                      "Failed getRSP() for  %s", mss::c_str(i_target) );
-
-            if (l_sim)
-            {
-                //Clear MBA_FARB0Q_CFG_WAIT_FOR_INIT_COMPLETE for simulation
-                fapi2::buffer<uint64_t> l_data = 0;
-
-                FAPI_TRY(fapi2::getScom(i_target, EXPLR_SRQ_MBA_FARB0Q, l_data));
-                l_data.clearBit<EXPLR_SRQ_MBA_FARB0Q_CFG_WAIT_FOR_INIT_COMPLETE>();
-                FAPI_TRY(fapi2::putScom(i_target, EXPLR_SRQ_MBA_FARB0Q, l_data));
-            }
-            else // Not simulation
-            {
-                // Proccesses the response data
-                FAPI_TRY( mss::exp::read_training_response(i_target, l_rsp_data, l_train_response),
-                          "Failed read_training_response for %s", mss::c_str(i_target));
-
-                // Displays the training response
-                FAPI_TRY( mss::exp::train::display_info(i_target, l_train_response));
-
-                // Check if cmd was successful
-                l_rc = mss::exp::check::response(i_target, l_response, l_cmd);
-
-                // If not, then we need to process the bad bitmap
-                if(l_rc != fapi2::FAPI2_RC_SUCCESS)
-                {
-                    mss::exp::bad_bit_interface l_interface(l_train_response);
-
-                    // Record bad bits should only fail if we have an attributes issue - that's a major issue
-                    FAPI_TRY(mss::record_bad_bits<mss::mc_type::EXPLORER>(i_target, l_interface));
-
-                    // Now, go to our true error handling procedure
-                    FAPI_TRY(l_rc, "mss::exp::check::response failed for %s", mss::c_str(i_target));
-                }
-            }
+            FAPI_TRY(mss::exp::host_fw_phy_normal_init(i_target, l_crc));
         }
+        else
+        {
+            FAPI_TRY(mss::exp::host_fw_phy_init_with_eye_capture(i_target, l_crc, l_phy_params));
+        }
+
+        return fapi2::FAPI2_RC_SUCCESS;
 
     fapi_try_exit:
         FAPI_INF("Draminit training - %s %s",

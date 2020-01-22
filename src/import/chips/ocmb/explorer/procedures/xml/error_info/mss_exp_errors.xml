@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -326,6 +326,39 @@
     <ffdc>OCMB_TARGET</ffdc>
     <ffdc>PORT</ffdc>
     <ffdc>HEIGHT</ffdc>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_HALF_DIMM_MODE_NOT_SUPPORTED</rc>
+    <description>
+      The enterprise settings do not support half dimm mode.
+    </description>
+    <ffdc>ENTERPRISE_SETTING</ffdc>
+    <ffdc>HALF_DIMM_SETTING</ffdc>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_ENTERPRISE_INVALID_CONFIGURATION</rc>
+    <description>
+      The enterprise supported bit from explorer fuse
+      conflicts with the enterprise policy setting.
+    </description>
+    <ffdc>ENTERPRISE_SUPPORTED</ffdc>
+    <ffdc>POLICY</ffdc>
     <callout>
       <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
@@ -698,6 +731,41 @@
     <gard>
         <target>MC_TARGET</target>
     </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_UNKNOWN_PHY_INIT_MODE</rc>
+    <description>
+      The PHY init mode value was an unknown value.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_INVALID_PHY_INIT_RSP_DATA_LENGTH</rc>
+    <description>
+      The data buffer vector retrieved from the EXP_FW_DDR_PHY_INIT response did not match the expected length
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>PHY_INIT_MODE</ffdc>
+    <ffdc>EXPECTED_LENGTH</ffdc>
+    <ffdc>ACTUAL_LENGTH</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
   </hwpError>
 
 </hwpErrors>
