@@ -4,6 +4,8 @@ if defined hb_script_to_run {
     $script_dir = (python "''.join(map('/'.__add__,\""+$hb_script_location+"\"[1:].split('/')[0:-1]))")
     add-directory $script_dir
 }
+#Display Simics Search Path
+list-directories
 
 $hb_startup_path = (lookup-file hbfw/startup.simics)
 $cur_path = (env PATH)
