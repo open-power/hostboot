@@ -40,7 +40,7 @@
 #include <generic/memory/lib/utils/find.H>
 #include <lib/i2c/exp_i2c.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
-#include <generic/memory/lib/mss_generic_system_attribute_getters.H>
+#include <mss_generic_system_attribute_getters.H>
 
 ///
 /// @brief Check that the OCMB's omi state machine is in its expected state after OMI training
@@ -55,8 +55,8 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
     FAPI_INF("%s Start exp_omi_train_check", mss::c_str(i_target));
 
     // Const
-    constexpr uint8_t STATE_MACHINE_SUCCESS = 0b111;  // This value is from Lonny Lambrecht
-    constexpr uint8_t MAX_LOOP_COUNT = 10;  // Retry times
+    constexpr uint8_t STATE_MACHINE_SUCCESS = 0b111; // This value is from Lonny Lambrecht
+    constexpr uint8_t MAX_LOOP_COUNT = 10;           // Retry times
     const auto& l_omi = mss::find_target<fapi2::TARGET_TYPE_OMI>(i_target);
     const auto& l_proc = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
 
@@ -73,6 +73,7 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
     uint8_t l_sim = 0;
     FAPI_TRY(mss::attr::get_is_simulation(l_sim));
 
+    // Skip this in sim
     if (l_sim)
     {
         return fapi2::FAPI2_RC_SUCCESS;
@@ -95,7 +96,6 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
     FAPI_TRY(fapi2::getScom(i_target, EXPLR_DLX_DL0_CONFIG1, l_dl0_config1));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, l_proc, l_omi_freq));
 
-
     FAPI_ASSERT(l_state_machine_state == STATE_MACHINE_SUCCESS,
                 fapi2::EXP_OMI_TRAIN_ERR()
                 .set_OCMB_TARGET(i_target)
@@ -109,8 +109,7 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
                 "%s EXP OMI Training Failure, expected state:%d/actual state:%d",
                 mss::c_str(i_target),
                 STATE_MACHINE_SUCCESS,
-                l_state_machine_state
-               );
+                l_state_machine_state);
 
     // Finally, make sure fw_status is good
     FAPI_TRY(mss::exp::i2c::fw_status(i_target, mss::common_timings::DELAY_1MS, 100));
@@ -145,4 +144,4 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
 fapi_try_exit:
     return fapi2::current_err;
 
-}// exp_omi_train_check
+} // exp_omi_train_check
