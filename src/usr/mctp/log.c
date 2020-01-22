@@ -43,10 +43,10 @@
 #endif
 
 enum {
-	MCTP_LOG_NONE,
-	MCTP_LOG_STDIO,
-	MCTP_LOG_SYSLOG,
-	MCTP_LOG_CUSTOM,
+  MCTP_LOG_NONE,
+  MCTP_LOG_STDIO,
+  MCTP_LOG_SYSLOG,
+  MCTP_LOG_CUSTOM,
 } log_type = MCTP_LOG_NONE;
 
 static int log_stdio_level;
@@ -54,47 +54,47 @@ static void (*log_custom_fn)(int, const char *, va_list);
 
 void mctp_prlog(int level, const char *fmt, ...)
 {
-	va_list ap;
+  va_list ap;
 
-	va_start(ap, fmt);
+  va_start(ap, fmt);
 
-	switch (log_type) {
-	case MCTP_LOG_NONE:
-		break;
-	case MCTP_LOG_STDIO:
+  switch (log_type) {
+  case MCTP_LOG_NONE:
+    break;
+  case MCTP_LOG_STDIO:
 #ifdef MCTP_HAVE_STDIO
-		if (level <= log_stdio_level) {
-			vfprintf(stderr, fmt, ap);
-			fputs("\n", stderr);
-		}
+    if (level <= log_stdio_level) {
+      vfprintf(stderr, fmt, ap);
+      fputs("\n", stderr);
+    }
 #endif
-		break;
-	case MCTP_LOG_SYSLOG:
+    break;
+  case MCTP_LOG_SYSLOG:
 #ifdef MCTP_HAVE_SYSLOG
-		vsyslog(level, fmt, ap);
+    vsyslog(level, fmt, ap);
 #endif
-		break;
-	case MCTP_LOG_CUSTOM:
-		log_custom_fn(level, fmt, ap);
-		break;
-	}
+    break;
+  case MCTP_LOG_CUSTOM:
+    log_custom_fn(level, fmt, ap);
+    break;
+  }
 
-	va_end(ap);
+  va_end(ap);
 }
 
 void mctp_set_log_stdio(int level)
 {
-	log_type = MCTP_LOG_STDIO;
-	log_stdio_level = level;
+  log_type = MCTP_LOG_STDIO;
+  log_stdio_level = level;
 }
 
 void mctp_set_log_syslog(void)
 {
-	log_type = MCTP_LOG_SYSLOG;
+  log_type = MCTP_LOG_SYSLOG;
 }
 
 void mctp_set_log_custom(void (*fn)(int, const char *, va_list))
 {
-	log_type = MCTP_LOG_CUSTOM;
-	log_custom_fn = fn;
+  log_type = MCTP_LOG_CUSTOM;
+  log_custom_fn = fn;
 }

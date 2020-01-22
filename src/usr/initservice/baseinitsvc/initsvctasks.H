@@ -93,9 +93,21 @@ const TaskInfo    g_taskinfolist[]   =   {
                         BASE_IMAGE,                 // Base Module
                 }
         },
+#ifdef CONFIG_MCTP
+        /**
+         * @brief   libmctp
+         */
+        {
+                "libmctp.so" ,                      // taskname
+                NULL,                               // no pointer to fn
+                {
+                        START_TASK,
+                        BASE_IMAGE,                  // Base Module
+                }
+        },
+#endif
 
         //  -----   Extended Image  -----------------------------------------------------
-
         /**
          * @brief   extinitsvc, initializes extended module area
          */
@@ -107,19 +119,6 @@ const TaskInfo    g_taskinfolist[]   =   {
                         EXT_IMAGE,                  // EXT_IMAGE
                 }
         },
-#ifdef CONFIG_MCTP
-        /**
-         * @brief   libmctp, initializes extended module area
-         */
-        {
-                "libmctp.so" ,                // taskname
-                NULL,                               // no pointer to fn
-                {
-                        START_TASK,
-                        EXT_IMAGE,                  // EXT_IMAGE
-                }
-        },
-#endif
 
         //  ---------------------------------------------------------------
         //  -----   END OF LIST!!!  ---------------------------------------

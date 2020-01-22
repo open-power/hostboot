@@ -509,6 +509,14 @@ const compId_t SPI_COMP_ID = 0x4500;
 const char SPI_COMP_NAME[] = "spi";
 //@}
 
+/** @name MCTP
+ *  MCTP communication library module
+ */
+//@{
+const compId_t MCTP_COMP_ID = 0x4600;
+const char MCTP_COMP_NAME[] = "mctp";
+//@}
+
 //
 //
 /** @name HDAT

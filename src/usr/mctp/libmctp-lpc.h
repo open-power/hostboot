@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/mctp/mctp.C $                                         */
+/* $Source: src/usr/mctp/libmctp-lpc.h $                                  */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,19 +22,64 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include "mctp.H"
+#ifndef _LIBMCTP_LPCL_H
+#define _LIBMCTP_LPCL_H
+
 #include "libmctp.h"
-#include <stdlib.h>
-#include <string.h>
 
-void mctp_prolog(int level, const char *fmt, ...);
+struct mctp_lpcmap_hdr {
+  uint32_t  magic;
 
-void mctp_test(void)
-{
+  uint16_t  bmc_ver_min;
+  uint16_t  bmc_ver_cur;
+  uint16_t  host_ver_min;
+  uint16_t  host_ver_cur;
+  uint16_t  negotiated_ver;
+  uint16_t  pad0;
 
-}
+  uint32_t  rx_offset;
+  uint32_t  rx_size;
+  uint32_t  tx_offset;
+  uint32_t  tx_size;
+} __attribute__((packed));
 
-void hostboot_mctp_init(void)
-{
-    mctp = mctp_init();
-}
+#ifndef container_of
+#define container_of(ptr, type, member) \
+    (type *)((char *)(ptr) - (char *)&((type *)0)->member)
+#endif
+
+// first 4 bytes of config area of MCTP space
+const uint32_t MCTP_MAGIC = 0x4d435450;
+// Bits we care about in STATUS register
+const uint8_t KCS_STATUS_BMC_READY      = 0x80;
+const uint8_t KCS_STATUS_CHANNEL_ACTIVE = 0x40;
+const uint8_t KCS_STATUS_COMMAND_DATA   = 0x08;
+const uint8_t KCS_STATUS_IBF            = 0x02;
+const uint8_t KCS_STATUS_OBF            = 0x01;
+// KCS data register possible values
+const uint8_t KCS_INIT        = 0x00;
+const uint8_t KCS_TX_BEGIN    = 0x01;
+const uint8_t KCS_RX_COMPLETE = 0x02;
+const uint8_t KCS_DUMMY       = 0xFF;
+// layout of TX/RX areas
+const uint32_t  rx_offset = 0x100;
+const uint32_t  rx_size   = 0x100;
+const uint32_t  tx_offset = 0x200;
+const uint32_t  tx_size   = 0x100;
+
+enum mctp_binding_lpc_kcs_reg {
+  MCTP_LPC_KCS_REG_DATA = 0,
+  MCTP_LPC_KCS_REG_STATUS = 1,
+};
+
+struct mctp_binding_lpc_ops {
+  int (*kcs_read)(void *data, enum mctp_binding_lpc_kcs_reg reg,
+      uint8_t *val);
+  int (*kcs_write)(void *data, enum mctp_binding_lpc_kcs_reg reg,
+      uint8_t val);
+  int (*lpc_read)(void *data, void *buf, uint64_t offset, size_t len);
+  int (*lpc_write)(void *data, void *buf, uint64_t offset, size_t len);
+  void (*nanosleep)(uint64_t i_sec, uint64_t nsec);
+};
+
+#endif

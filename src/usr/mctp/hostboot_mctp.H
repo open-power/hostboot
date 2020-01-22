@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/mctp/mctp.H $                                         */
+/* $Source: src/usr/mctp/hostboot_mctp.H $                                */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,14 +22,29 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef MCTP_H
-#define MCTP_H
+#ifndef _HOSTBOOT_MCTP_H
+#define _HOSTBOOT_MCTP_H
 
-struct mctp *mctp;
+#include "libmctp-lpc.h"
 
-void mctp_astlpc_init(void);
+extern "C"
+int __mctp_hostlpc_hostboot_kcs_read(void *arg,
+    enum mctp_binding_lpc_kcs_reg reg, uint8_t *val);
 
-void hostboot_mctp_init(void);
-void mctp_test(void);
+extern "C"
+int __mctp_hostlpc_hostboot_kcs_write(void *arg,
+    enum mctp_binding_lpc_kcs_reg reg, uint8_t val);
 
-#endif //MCTP_H
+extern "C"
+int __mctp_hostlpc_hostboot_lpc_read(void *arg,
+    void * buf, uint64_t offset, size_t len);
+
+extern "C"
+int __mctp_hostlpc_hostboot_lpc_write(void *arg,
+    void * buf, uint64_t offset, size_t len);
+
+extern "C"
+void __mctp_hostlpc_hostboot_nanosleep(uint64_t i_sec,
+                                       uint64_t i_nsec);
+
+#endif

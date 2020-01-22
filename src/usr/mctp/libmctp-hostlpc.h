@@ -1,12 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/mctp/alloc.c $                                        */
+/* $Source: src/usr/mctp/libmctp-hostlpc.h $                              */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2019,2020                        */
-/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -22,60 +21,40 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
+#ifndef _LIBMCTP_HOSTLPCL_H
+#define _LIBMCTP_HOSTLPCL_H
 
-#include <assert.h>
-
-#include "libmctp.h"
-#include "libmctp-alloc.h"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
+#ifdef __cplusplus
+extern "C" {
 #endif
 
+#include "libmctp.h"
+#include "libmctp-lpc.h"
 
-struct {
-    void *(*m_alloc)(size_t);
-    void (*m_free)(void *);
-    void *(*m_realloc)(void *, size_t);
-} alloc_ops = {
-    malloc,
-    free,
-    realloc,
+#define binding_to_hostlpc(b) \
+  container_of(b, struct mctp_binding_hostlpc, binding)
+
+#define HOST_VER_MIN 1
+#define HOST_VER_CUR 1
+#define HOST_EID 9
+
+struct mctp_binding_hostlpc {
+  struct mctp_binding  binding;
+
+  union {
+    void      *lpc_map;
+    struct mctp_lpcmap_hdr  *lpc_hdr;
+  };
+
+  /* direct ops data */
+  struct mctp_binding_lpc_ops  ops;
+  void                         *ops_data;
 };
 
-/* internal-only allocation functions */
-void *__mctp_alloc(size_t size)
-{
-	if (alloc_ops.m_alloc)
-		return alloc_ops.m_alloc(size);
-	if (alloc_ops.m_realloc)
-		return alloc_ops.m_realloc(NULL, size);
-	assert(0);
-}
+struct mctp_binding_hostlpc *mctp_hostlpc_init_hostboot(uint64_t i_mctpVaddr);
 
-void __mctp_free(void *ptr)
-{
-	if (alloc_ops.m_free)
-		alloc_ops.m_free(ptr);
-	else if (alloc_ops.m_realloc)
-		alloc_ops.m_realloc(ptr, 0);
-	else
-		assert(0);
+#ifdef __cplusplus
 }
+#endif
 
-void *__mctp_realloc(void *ptr, size_t size)
-{
-	if (alloc_ops.m_realloc)
-		return alloc_ops.m_realloc(ptr, size);
-	assert(0);
-}
-
-void mctp_set_alloc_ops(void *(*m_alloc)(size_t),
-		void (*m_free)(void *),
-		void *(m_realloc)(void *, size_t))
-{
-	alloc_ops.m_alloc = m_alloc;
-	alloc_ops.m_free = m_free;
-	alloc_ops.m_realloc = m_realloc;
-}
+#endif /* _LIBMCTP_HOSTLPCL_H */

@@ -55,6 +55,7 @@ SUBDIRS += intr.d
 SUBDIRS += isteps.d
 SUBDIRS += lpc.d
 SUBDIRS += mbox.d
+SUBDIRS += $(if $(CONFIG_MCTP),mctp.d)
 SUBDIRS += mmio.d
 SUBDIRS += $(if $(CONFIG_FSP_BUILD),,nvram.d)
 SUBDIRS += pnor.d
@@ -74,7 +75,6 @@ SUBDIRS += vfs.d
 SUBDIRS += vpd.d
 SUBDIRS += xscom.d
 SUBDIRS += xz.d
-SUBDIRS += $(if $(CONFIG_MCTP),mctp.d)
 
 #errldisplay relies on some generated files from PRD.
 #Enforce that it goes after

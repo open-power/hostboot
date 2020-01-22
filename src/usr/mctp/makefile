@@ -29,7 +29,9 @@ MODULE = mctp
 
 OBJS += core.o
 OBJS += alloc.o
+OBJS += hostboot_mctp.o
+OBJS += hostlpc.o
 OBJS += log.o
-OBJS += mctp.o
+OBJS += mctprp.o
 
 include ${ROOTPATH}/config.mk
