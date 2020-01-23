@@ -116,10 +116,8 @@ void*    call_proc_fabric_link_layer( void    *io_pArgs );
 
 
 
-#if 0 // TODO RTC 208827: Implement rest of Istep 9 substeps
-
 /**
- *  @brief   fabric_post_trainadv
+ *  @brief   fabric_dl_post_trainadv
  *
  *           Advanced post EI/EDI training
  *
@@ -128,9 +126,11 @@ void*    call_proc_fabric_link_layer( void    *io_pArgs );
  *  return  any errlogs to istep
  *
  */
-void*    call_fabric_post_trainadv( void    *io_pArgs );
+void*    call_fabric_dl_post_trainadv( void    *io_pArgs );
 
 
+
+#if 0 // TODO RTC 208827: Implement rest of Istep 9 substeps
 
 /**
  *  @brief   proc_smp_link_layer
@@ -204,12 +204,12 @@ namespace   INITSERVICE
                 ISTEP_09::call_proc_fabric_link_layer,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
-        /*
         {
-                ISTEPNAME(09,05,"fabric_post_trainadv"),
-                ISTEP_09::call_fabric_post_trainadv,
+                ISTEPNAME(09,05,"fabric_dl_post_trainadv"),
+                ISTEP_09::call_fabric_dl_post_trainadv,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
+        /*
         {
                 ISTEPNAME(09,06,"proc_smp_link_layer"),
                 ISTEP_09::call_proc_smp_link_layer,
