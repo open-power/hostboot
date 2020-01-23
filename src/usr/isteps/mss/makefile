@@ -92,6 +92,7 @@ MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/ecc/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/ccs/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/workarounds/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/plug_rules/
+MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/mc/
 MSS_LIB += ${GEMINI_PROCEDURES_PATH}/hwp/memory/
 MSS_LIB += ${GEMINI_PROCEDURES_PATH}/hwp/memory/lib/
 
