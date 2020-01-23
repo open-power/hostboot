@@ -1,2 +1,2 @@
 # OCC artifact ID used to assemble PNOR image
-export OCC_ARTIFACT_ID=e33913e64ac6d32fe3f0dc01e4aedbc966feaf55
+export OCC_ARTIFACT_ID=732e4552156e38655c8f2946f58bfa5f36ac5859
