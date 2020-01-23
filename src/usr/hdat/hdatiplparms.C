@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -336,28 +336,21 @@ void  HdatIplParms::hdatGetIplParmsData()
         else
         {
             this->iv_hdatIPLParams->iv_iplParms.hdatCECIPLAttributes = 0x1000;
-
             this->iv_hdatIPLParams->iv_iplParms.hdatIPLMajorType = 0x00;
+            this->iv_hdatIPLParams->iv_iplParms.hdatIPLMinorType = 0x0C;
 
-            TARGETING::ATTR_CEC_IPL_TYPE_type l_cecIPLType;
-            if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_CEC_IPL_TYPE>
-                                                                (l_cecIPLType))
-            {
-                this->iv_hdatIPLParams->iv_iplParms.hdatIPLMinorType =
-                                                      l_cecIPLType.MinorIPLType;
-                this->iv_hdatIPLParams->iv_iplParms.hdatIPLMinorType = 0xC;
-                HDAT_DBG("hdatGetIplParmsData: setting hdatIPLMinorType to 0xC0");
-            }
-            else
-            {
-                HDAT_ERR("Error in getting CEC_IPL_TYPE attribute");
-            }
+            //@TODO: RTC 142465 missing attribute
+            //ATTR_CEC_IPL_TYPE was supposed to provide IPL minor type data
+            //Need to update it and use once we have more requirements
+            HDAT_DBG("hdatGetIplParmsData: setting hdatIPLMinorType to 0x0C");
         }
     }
     else
     {
+        this->iv_hdatIPLParams->iv_iplParms.hdatCECIPLAttributes = 0x1000;
+        this->iv_hdatIPLParams->iv_iplParms.hdatIPLMajorType = 0x00;
         this->iv_hdatIPLParams->iv_iplParms.hdatIPLMinorType = 0x0C;
-        HDAT_DBG("hdatGetIplParmsData: setting hdatIPLMinorType to 0xC0");
+        HDAT_DBG("hdatGetIplParmsData: setting hdatIPLMinorType to 0x0C");
         HDAT_ERR("Error in getting IS_MPIPL_HB attribute");
     }
 

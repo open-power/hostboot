@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Super Micro Computer, Inc.                                         */
 /*                                                                        */
@@ -462,7 +462,7 @@ errlHndl_t HdatSpSubsys::hdatFillDataPtrs()
         }
         else
         {
-           strcpy( iv_impl.hdatBmcFamily , "ibm,ast2500,openbmc");
+           strcpy( iv_impl.hdatBmcFamily , "ibm,ast2600,openbmc");
         }
 
         // Fill the FRU data
