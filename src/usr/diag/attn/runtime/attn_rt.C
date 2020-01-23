@@ -37,7 +37,8 @@
 #include <errno.h>
 #include <prdf/common/prdfMain_common.H>
 
-#include <p9_io_obus_firmask_save_restore.H>
+// TODO RTC: 210975
+//#include <p9_io_obus_firmask_save_restore.H>
 #include <fapi2/target.H>              // fapi2::Target
 #include <fapi2/plat_hwp_invoker.H>    // FAPI_INVOKE_HWP
 
@@ -69,6 +70,8 @@ namespace ATTN_RT
             // Loop through all processors chip targets
             for (const auto & l_target: l_targetList)
             {
+                (void)l_target;
+/* TODO RTC: 210975
                 const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapi2Target(l_target);
                 // Restore firmask values that were stored in attributes after chiplet_scominit.
                 // Now that we are in HBRT , OBUS peer targets are known so it is okay to
@@ -76,6 +79,7 @@ namespace ATTN_RT
                 FAPI_INVOKE_HWP(err,
                                 p9_io_obus_firmask_save_restore,
                                 l_fapi2Target, p9iofirmasksaverestore::RESTORE);
+*/
                 if(err)
                 {
                     // Commit error but don't fail, we lose debug capabilties but this
@@ -84,7 +88,8 @@ namespace ATTN_RT
                 }
             }
 
-            err = initialize();
+            // TODO RTC: 210975 re-enable PRD
+            //err = initialize();
             if (err)
             {
                 ATTN_ERR( "ATTN_RT::enableAttns: Failed to initialize PRD" );
@@ -98,7 +103,7 @@ namespace ATTN_RT
                 break;
             }
 
-            err = Singleton<Service>::instance().enableAttns();
+            err = Service::getGlobalInstance()->enableAttns();
             if(err)
             {
                 rc = ERRL_GETRC_SAFE(err);
@@ -123,7 +128,7 @@ namespace ATTN_RT
 
         int rc = 0;
         errlHndl_t err = NULL;
-        err = Singleton<Service>::instance().disableAttns();
+        err = Service::getGlobalInstance()->disableAttns();
         if(err)
         {
             rc = ERRL_GETRC_SAFE(err);
@@ -169,7 +174,7 @@ namespace ATTN_RT
                 break;
             }
 
-            err = Singleton<Service>::instance().handleAttentions(proc);
+            err = Service::getGlobalInstance()->handleAttentions(proc);
             if(err)
             {
                 ATTN_ERR("ATTN_RT::handleAttns service::handleAttentions "

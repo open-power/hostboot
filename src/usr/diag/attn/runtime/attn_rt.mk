@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2018
+# Contributors Listed Below - COPYRIGHT 2012,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -35,4 +35,5 @@ VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/io/
 
 ATTN_RT_OBJS += attn_rt.o
 ATTN_RT_OBJS += attnsvc.o
-ATTN_RT_OBJS += p9_io_obus_firmask_save_restore.o
+# FIXME RTC: 210975
+#ATTN_RT_OBJS += p9_io_obus_firmask_save_restore.o

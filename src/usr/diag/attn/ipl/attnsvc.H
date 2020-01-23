@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -104,6 +104,13 @@ class Service : public ServiceCommon
         errlHndl_t processCheckstop();
 
         #endif // CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+
+        /**
+         * @brief Returns the singleton instance of the Service class
+         *
+         * @return The Service class singleton
+         */
+        static Service* getGlobalInstance();
 
     private:
 

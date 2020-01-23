@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 #include "common/attnproc.H"
 #include "common/attnmem.H"
 #include "common/attntarget.H"
+#include <util/singleton.H>
 
 using namespace std;
 using namespace PRDF;
@@ -74,6 +75,11 @@ Service::~Service()
         errlCommit(err, ATTN_COMP_ID);
     }
     ATTN_SLOW("Service::~Service() exit");
+}
+
+Service* Service::getGlobalInstance()
+{
+    return &(Singleton<Service>::instance());
 }
 
 }

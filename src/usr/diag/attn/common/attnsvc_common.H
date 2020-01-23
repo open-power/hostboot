@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,6 +88,13 @@ class ServiceCommon
          * @retval[!0] Unexpected error
          */
         errlHndl_t handleAttentions(const TARGETING::TargetHandle_t i_proc);
+
+        /**
+         * @brief Returns the singleton instance of the ServiceCommon class
+         *
+         * @return The ServiceCommon class singleton
+         */
+        static ServiceCommon* getGlobalInstance();
 
     protected:
 

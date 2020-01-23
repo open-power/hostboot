@@ -27,7 +27,6 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = xscom_rt
 
-# TODO RTC: 210975
 OBJS += rt_xscom.o
 OBJS += piberror.o
 

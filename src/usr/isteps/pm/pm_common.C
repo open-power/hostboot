@@ -937,8 +937,8 @@ namespace HBPM
                 i_target->setAttr<ATTR_HB_INITIATED_PM_RESET>
                                 (HB_INITIATED_PM_RESET_IN_PROGRESS);
 
-                l_errl = Singleton<ATTN::Service>::instance().
-                  handleAttentions( i_target );
+                l_errl = ATTN::Service::getGlobalInstance()->
+                            handleAttentions( i_target );
 
                 // set ATTR_HB_INITIATED_PM_RESET back to the original value
                 i_target->setAttr<ATTR_HB_INITIATED_PM_RESET>

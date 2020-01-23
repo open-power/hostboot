@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,19 +61,19 @@ namespace ATTN
 
 errlHndl_t startService()
 {
-    return Singleton<Service>::instance().start();
+    return Service::getGlobalInstance()->start();
 }
 
 errlHndl_t stopService()
 {
-    return Singleton<Service>::instance().stop();
+    return Service::getGlobalInstance()->stop();
 }
 
 errlHndl_t checkForIplAttentions()
 {
     errlHndl_t err = NULL;
 
-    assert(!Singleton<Service>::instance().running());
+    assert(!Service::getGlobalInstance()->running());
 
     TargetHandleList     list;
     uint8_t              l_useAllProcs = 0;
@@ -113,7 +113,7 @@ errlHndl_t checkForIplAttentions()
     ATTN_TRACE("checkForIplAttentions: %d chips", list.size() );
     while(tit != list.end())
     {
-        err = Singleton<Service>::instance().handleAttentions(*tit);
+        err = Service::getGlobalInstance()->handleAttentions(*tit);
 
         if(err)
         {
@@ -181,7 +181,7 @@ errlHndl_t checkForCSAttentions()
 
     errlHndl_t errl = NULL;
 
-    assert(!Singleton<Service>::instance().running());
+    assert(!Service::getGlobalInstance()->running());
 
     do
     {
@@ -219,7 +219,7 @@ errlHndl_t checkForCSAttentions()
         ATTN_SLOW("Checkstop attribute set for PRD:%d", l_set);
 
         // Process the checkstop attention
-        errl = Singleton<Service>::instance().processCheckstop();
+        errl = Service::getGlobalInstance()->ProcessCheckstop();
         if ( NULL != errl )
         {
             firData.addFfdc( errl );

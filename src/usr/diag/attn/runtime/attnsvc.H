@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,6 +76,13 @@ class Service : public ServiceCommon
          * @brief dtor
          */
         ~Service();
+
+        /**
+         * @brief Returns the singleton instance of the Service class
+         *
+         * @return The Service class singleton
+         */
+        static Service* getGlobalInstance();
 
     private:
 

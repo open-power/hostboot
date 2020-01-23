@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2019
+# Contributors Listed Below - COPYRIGHT 2014,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -28,22 +28,21 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../../..
 
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include
 CFLAGS += -iquote${ROOTPATH}/src/usr/diag/attn
 
 MODULE = attn_rt
 
-# FIXME RTC: 210975
+include attn_rt.mk
+include ../common/attn_common.mk
 
-#include attn_rt.mk
-#include ../common/attn_common.mk
-
-#OBJS += ${ATTN_RT_OBJS}
-#OBJS += ${ATTN_COMMON_OBJS}
+OBJS += ${ATTN_RT_OBJS}
+OBJS += ${ATTN_COMMON_OBJS}
 
 SUBDIRS += test.d
 
-#VPATH += ..
-#VPATH += ../..
-#VPATH += ../common
+VPATH += ..
+VPATH += ../..
+VPATH += ../common
 
 include ${ROOTPATH}/config.mk

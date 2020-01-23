@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2019
+# Contributors Listed Below - COPYRIGHT 2016,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -27,19 +27,17 @@ HOSTBOOT_RUNTIME = 1
 
 ROOTPATH = ../../../../..
 
-# FIXME RTC: 210975
-
-#VPATH += ../
-#VPATH += ${ROOTPATH}/src/usr/secureboot/smf
+VPATH += ../
+VPATH += ${ROOTPATH}/src/usr/secureboot/smf
 
 MODULE = pm_rt
 
 ## Objects unique to HBRT
-#OBJS += rt_pm.o
-#OBJS += smf_utils.o
+OBJS += rt_pm.o
+OBJS += smf_utils.o
 
 SUBDIRS += test.d
 
 ## Objects common to HBRT and HB IPL
-#include ../pm.mk
+include ../pm.mk
 include ${ROOTPATH}/config.mk
