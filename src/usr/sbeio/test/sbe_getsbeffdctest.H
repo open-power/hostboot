@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,8 +40,10 @@
 #include <targeting/common/targetservice.H>
 #include <sbeio/sbeioif.H>
 #include <sbeio/sbe_sp_intf.H>
-#include <../../usr/sbeio/sbe_fifodd.H>
-#include "sbe_fifo_buffer.H"
+#include <sbe_fifodd.H>
+#include <sbe_fifo_buffer.H>
+
+using namespace SBEIO;
 
 #define SBEFFDC_TRACF(printf_string,args...) \
     TRACFCOMP(g_trac_sbeio,"getSBEFFDCTest: " printf_string,##args)
@@ -103,9 +105,9 @@ class GetSBEFFDCTest : public CxxTest::TestSuite
                     continue;
                 }
 
-                l_errl = SBEIO::getFifoSBEFFDC(l_cpu_target,
-                                               l_pFifoResponse,
-                                               l_responseSize);
+                l_errl = getFifoSBEFFDC(l_cpu_target,
+                                        l_pFifoResponse,
+                                        l_responseSize);
 
                 // Check that no error log was returned
                 if(l_errl != nullptr)
@@ -125,7 +127,7 @@ class GetSBEFFDCTest : public CxxTest::TestSuite
                     reinterpret_cast<SbeFifo::ffdcHeader *>(l_pFifoResponse);
                 uint64_t l_firstFfdcHeaderAddr =
                         reinterpret_cast<uint64_t>(l_pFfdcHeader);
-                while(l_pFfdcHeader->magic == SBEIO::SbeFifo::FIFO_FFDC_MAGIC)
+                while(l_pFfdcHeader->magic == SbeFifo::FIFO_FFDC_MAGIC)
                 {
                     l_size += l_pFfdcHeader->lengthWords / sizeof(uint32_t);
                     l_pFfdcHeader = reinterpret_cast<SbeFifo::ffdcHeader *>
@@ -135,30 +137,30 @@ class GetSBEFFDCTest : public CxxTest::TestSuite
                     SbeFifo::statusHeader *>(l_firstFfdcHeaderAddr + l_size);
 
                 // Check that status header has expected magic value
-                if(l_pStatusHeader->magic != SBEIO::SbeFifo::FIFO_STATUS_MAGIC)
+                if(l_pStatusHeader->magic != SbeFifo::FIFO_STATUS_MAGIC)
                 {
                     TS_FAIL("getSBEFFDCTest FAILED: proc 0x%.8X with status "
                             "magic 0x%.4x, but expected 0x%.4x",
                             TARGETING::get_huid(l_cpu_target),
                             l_pStatusHeader->magic,
-                            SBEIO::SbeFifo::FIFO_STATUS_MAGIC);
+                            SbeFifo::FIFO_STATUS_MAGIC);
 
                     break;
                 }
 
                 // Check status header has expected command class and command
                 if((l_pStatusHeader->commandClass !=
-                    SBEIO::SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE) ||
+                    SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE) ||
                    (l_pStatusHeader->command !=
-                    SBEIO::SbeFifo::SBE_FIFO_CMD_GET_SBE_FFDC))
+                    SbeFifo::SBE_FIFO_CMD_GET_SBE_FFDC))
                 {
                     TS_FAIL("getSBEFFDCTest FAILED: proc 0x%.8X with status "
                             "command 0x%.2x%.2x, but expected 0x%.2x%.2x",
                             TARGETING::get_huid(l_cpu_target),
                             l_pStatusHeader->commandClass,
                             l_pStatusHeader->command,
-                            SBEIO::SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE,
-                            SBEIO::SbeFifo::SBE_FIFO_CMD_GET_SBE_FFDC);
+                            SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE,
+                            SbeFifo::SBE_FIFO_CMD_GET_SBE_FFDC);
 
                     break;
                 }

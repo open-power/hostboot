@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2019
+# Contributors Listed Below - COPYRIGHT 2011,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -41,10 +41,9 @@ MODULE = testsbeio
 
 #TESTS = *.H
 TESTS  = sbe_ffdctest.H
-#TODO RTC:245441
-#TESTS += sbe_getsbeffdctest.H
+TESTS += sbe_getsbeffdctest.H
 TESTS += sbe_fifo_buffer_test.H
-#TODO RTC:208826
+#TODO RTC:248572
 #TESTS += sbe_retry_handler_test.H
 TESTS += sbe_memregiontest.H
 TESTS += sbe_psucommandstest.H
