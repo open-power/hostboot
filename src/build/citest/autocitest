@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2019
+# Contributors Listed Below - COPYRIGHT 2011,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -397,6 +397,9 @@ while [ $(($modsstarted)) -lt 1 -o $(($modsstarted)) -ne $(($modscompleted)) ]; 
     echo "==================================="
     echo
 done
+
+echo "Dumping elapsed time for each istep"
+autosim $NOWIN --simcmd "alloc0.info"
 
 echo "====> waiting for shutdown..."
 loopcount=0
