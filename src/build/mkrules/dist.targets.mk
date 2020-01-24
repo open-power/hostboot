@@ -56,6 +56,8 @@ COPY_FILES = \
     src/build/simics/combined.simics:openpower-sim \
     src/build/simics/startup.simics:openpower-sim \
     src/build/simics/hb-simdebug.py:openpower-sim \
+    src/build/simics/eecache-gen.py:openpower-sim \
+    src/build/simics/ecc.py:openpower-sim \
     src/build/debug/eSEL.pl:openpower,openpower-sim \
     src/build/debug/fsp-memdump.sh:tools,vpo \
     src/build/tools/genIstepWaitOverride.pl:tools,openpower,openpower-sim \
@@ -255,6 +257,8 @@ simics.tar_CONTENTS = \
     src/build/debug/ecmd-debug-framework.pl \
     src/build/debug/simics-debug-framework.py \
     src/build/debug/simics-debug-framework.pl \
+    src/build/simics/eecache-gen.py \
+    src/build/simics/ecc.py \
     $(addsuffix :Hostboot/, \
 	$(call ROOTPATH_WILDCARD,src/build/debug/Hostboot/*.pm)) \
     img/hbicore$(UNDERSCORE_TEST).syms \
