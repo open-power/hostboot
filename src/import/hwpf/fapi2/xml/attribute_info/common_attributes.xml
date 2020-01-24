@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -41,7 +41,8 @@
       TARGET_TYPE_DIMM,
       TARGET_TYPE_L4,TARGET_TYPE_MC,
       TARGET_TYPE_MEM_PORT,
-      TARGET_TYPE_PMIC
+      TARGET_TYPE_PMIC,
+      TARGET_TYPE_GENERICI2CSLAVE
     </targetType>
     <description>
       1 if the target is functional, else 0.  Set by the platform.
@@ -58,7 +59,8 @@
     <id>ATTR_POS</id>
     <targetType>
       TARGET_TYPE_PROC_CHIP, TARGET_TYPE_MEMBUF_CHIP,
-      TARGET_TYPE_DIMM, TARGET_TYPE_OCMB_CHIP, TARGET_TYPE_PMIC
+      TARGET_TYPE_DIMM, TARGET_TYPE_OCMB_CHIP, TARGET_TYPE_PMIC,
+      TARGET_TYPE_GENERICI2CSLAVE
     </targetType>
     <description>
       Physical position of chip/dimm within drawer
@@ -81,7 +83,8 @@
       TARGET_TYPE_SBE, TARGET_TYPE_PPE, TARGET_TYPE_PERV,
       TARGET_TYPE_PEC, TARGET_TYPE_PHB, TARGET_TYPE_CAPP,
       TARGET_TYPE_MBA, TARGET_TYPE_ABUS, TARGET_TYPE_L4, TARGET_TYPE_MC,
-      TARGET_TYPE_MEM_PORT, TARGET_TYPE_PMIC
+      TARGET_TYPE_MEM_PORT, TARGET_TYPE_PMIC,
+      TARGET_TYPE_GENERICI2CSLAVE
     </targetType>
     <description>
       Logical position of target within a system. This is derived from the SMP location
@@ -112,7 +115,8 @@
       TARGET_TYPE_MBA, TARGET_TYPE_ABUS, TARGET_TYPE_L4,
       TARGET_TYPE_MEM_PORT,
       TARGET_TYPE_DIMM,
-      TARGET_TYPE_PMIC
+      TARGET_TYPE_PMIC,
+      TARGET_TYPE_GENERICI2CSLAVE
     </targetType>
     <description>
       A target's position relative to its immediate parent target.
@@ -130,6 +134,7 @@
       PROC - MC - MI - MCC - OMI
         (OMIC - OMI is not supported)
       OCMB - PMIC
+      OCMB - GENERICI2CSLAVE
       MEMBUF - MBA - DIMM
       MEMBUF - L4
       OCMB - MEM_PORT - DIMM

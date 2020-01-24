@@ -23,4 +23,32 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
+  <!-- ******************************************************************************** -->
+  <attribute>
+    <id>ATTR_I2C_DEV_TYPE</id>
+    <targetType>TARGET_TYPE_GENERICI2CSLAVE</targetType>
+    <description>
+      Device type of I2C slave device
+    </description>
+    <enum>
+      ADS7138_ADC,
+      PCA9554A_GPIO_EXPANDER
+    </enum>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <default>0xFF</default><!-- Ensures platform explicitly puts a valid number in here -->
+  </attribute>
+  <!-- ******************************************************************************** -->
+  <attribute>
+    <id>ATTR_I2C_SUB_POS</id>
+    <targetType>TARGET_TYPE_GENERICI2CSLAVE</targetType>
+    <description>
+      Represents the ordinal position of this target compared to other peer
+      GENERICI2CSLAVE targets with the same ATTR_I2C_DEV_TYPE
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <default>0xFF</default><!-- Ensures platform explicitly puts a valid number in here -->
+  </attribute>
+  <!-- ******************************************************************************** -->
 </attributes>
