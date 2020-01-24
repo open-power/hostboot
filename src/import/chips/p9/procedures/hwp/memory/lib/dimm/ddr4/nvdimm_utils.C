@@ -218,7 +218,7 @@ fapi2::ReturnCode self_refresh_exit_helper( const fapi2::Target<fapi2::TARGET_TY
         mss::mcbist::stop_conditions<> l_stop_conditions;
 
         // Read with targeted scrub
-        FAPI_TRY ( mss::memdiags::targeted_scrub(l_mcbist,
+        FAPI_TRY ( mss::memdiags::targeted_scrub<mss::mc_type::NIMBUS>(l_mcbist,
                    l_stop_conditions,
                    l_start,
                    l_end,

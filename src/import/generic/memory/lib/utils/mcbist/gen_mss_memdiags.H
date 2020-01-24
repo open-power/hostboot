@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -235,6 +235,28 @@ using mss::mcbist::PATTERN_8;
 using mss::mcbist::PATTERN_RANDOM;
 using mss::mcbist::LAST_PATTERN;
 using mss::mcbist::NO_PATTERN;
+
+///
+/// @brief Set up memory controller specific settings for pre-maint mode read
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the portTraits associated with the port
+/// @param[in] i_target the memory controller target
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
+fapi2::ReturnCode pre_maint_read_settings( const fapi2::Target<T>& i_target );
+
+///
+/// @brief Set up memory controller specific settings for pre-scrub
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the portTraits associated with the port
+/// @param[in] i_target the memory controller target
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
+fapi2::ReturnCode pre_scrub_settings( const fapi2::Target<T>& i_target );
 
 ///
 /// @brief Stop the current command
@@ -919,7 +941,7 @@ fapi_try_exit:
 /// @note The function is asynchronous, and the caller should be looking for a done attention
 /// @note The address is often the port, dimm, rank but this is not enforced in the API.
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode sf_read( const fapi2::Target<T>& i_target,
                            const stop_conditions<MC>& i_stop,
                            const mss::mcbist::address& i_address = mss::mcbist::address(),
@@ -929,15 +951,19 @@ fapi2::ReturnCode sf_read( const fapi2::Target<T>& i_target,
     using ET = mss::mcbistMCTraits<MC>;
     FAPI_INF("superfast read - start for %s", mss::c_str(i_target));
 
-    fapi2::ReturnCode l_rc;
-    constraints<MC> l_const(i_stop, speed::LUDICROUS, i_end, i_address, i_end_address);
-    sf_read_operation<MC> l_read_op(i_target, l_const, l_rc);
+    FAPI_TRY( pre_maint_read_settings<MC>(i_target) );
 
-    FAPI_ASSERT( l_rc == fapi2::FAPI2_RC_SUCCESS,
-                 ET::memdiags_sf_init_failed_init().set_MC_TARGET(i_target),
-                 "Unable to initialize the MCBIST engine for a sf read %s", mss::c_str(i_target) );
+    {
+        fapi2::ReturnCode l_rc;
+        constraints<MC> l_const(i_stop, speed::LUDICROUS, i_end, i_address, i_end_address);
+        sf_read_operation<MC> l_read_op(i_target, l_const, l_rc);
 
-    return l_read_op.execute();
+        FAPI_ASSERT( l_rc == fapi2::FAPI2_RC_SUCCESS,
+                     ET::memdiags_sf_init_failed_init().set_MC_TARGET(i_target),
+                     "Unable to initialize the MCBIST engine for a sf read %s", mss::c_str(i_target) );
+
+        return l_read_op.execute();
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -956,7 +982,7 @@ fapi_try_exit:
 /// @note The function is asynchronous, and the caller should be looking for a done attention
 /// @note The address is often the port, dimm, rank but this is not enforced in the API.
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
+template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode background_scrub( const fapi2::Target<T>& i_target,
                                     const stop_conditions<MC>& i_stop,
                                     const speed i_speed,
@@ -965,15 +991,19 @@ fapi2::ReturnCode background_scrub( const fapi2::Target<T>& i_target,
     using ET = mss::mcbistMCTraits<MC>;
     FAPI_INF("continuous (background) scrub for %s", mss::c_str(i_target));
 
-    fapi2::ReturnCode l_rc;
-    constraints<MC> l_const(i_stop, i_speed, end_boundary::STOP_AFTER_ADDRESS, i_address);
-    continuous_scrub_operation<MC> l_op(i_target, l_const, l_rc);
+    FAPI_TRY( pre_scrub_settings<MC>(i_target) );
 
-    FAPI_ASSERT( l_rc == fapi2::FAPI2_RC_SUCCESS,
-                 ET::memdiags_continuous_scrub_failed_init().set_MC_TARGET(i_target),
-                 "Unable to initialize the MCBIST engine for a continuous scrub %s", mss::c_str(i_target) );
+    {
+        fapi2::ReturnCode l_rc;
+        constraints<MC> l_const(i_stop, i_speed, end_boundary::STOP_AFTER_ADDRESS, i_address);
+        continuous_scrub_operation<MC> l_op(i_target, l_const, l_rc);
 
-    return l_op.execute();
+        FAPI_ASSERT( l_rc == fapi2::FAPI2_RC_SUCCESS,
+                     ET::memdiags_continuous_scrub_failed_init().set_MC_TARGET(i_target),
+                     "Unable to initialize the MCBIST engine for a continuous scrub %s", mss::c_str(i_target) );
+
+        return l_op.execute();
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -994,7 +1024,7 @@ fapi_try_exit:
 /// @note The function is asynchronous, and the caller should be looking for a done attention
 /// @note The address is often the port, dimm, rank but this is not enforced in the API.
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
+template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode targeted_scrub( const fapi2::Target<T>& i_target,
                                   const stop_conditions<MC>& i_stop,
                                   const mss::mcbist::address& i_start_address,
@@ -1004,15 +1034,19 @@ fapi2::ReturnCode targeted_scrub( const fapi2::Target<T>& i_target,
     using ET = mss::mcbistMCTraits<MC>;
     FAPI_INF("targeted scrub for %s", mss::c_str(i_target));
 
-    fapi2::ReturnCode l_rc;
-    constraints<MC> l_const(i_stop, speed::LUDICROUS, i_end, i_start_address, i_end_address);
-    targeted_scrub_operation<MC> l_op(i_target, l_const, l_rc);
+    FAPI_TRY( pre_scrub_settings<MC>(i_target) );
 
-    FAPI_ASSERT( l_rc == fapi2::FAPI2_RC_SUCCESS,
-                 ET::memdiags_targeted_scrub_failed_init().set_MC_TARGET(i_target),
-                 "Unable to initialize the MCBIST engine for a targeted scrub %s", mss::c_str(i_target) );
+    {
+        fapi2::ReturnCode l_rc;
+        constraints<MC> l_const(i_stop, speed::LUDICROUS, i_end, i_start_address, i_end_address);
+        targeted_scrub_operation<MC> l_op(i_target, l_const, l_rc);
 
-    return l_op.execute();
+        FAPI_ASSERT( l_rc == fapi2::FAPI2_RC_SUCCESS,
+                     ET::memdiags_targeted_scrub_failed_init().set_MC_TARGET(i_target),
+                     "Unable to initialize the MCBIST engine for a targeted scrub %s", mss::c_str(i_target) );
+
+        return l_op.execute();
+    }
 
 fapi_try_exit:
     return fapi2::current_err;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -140,10 +140,10 @@ extern "C"
             FAPI_TRY( mss::enable_periodic_cal(p), "%s Failed enable_periodic_cal", mss::c_str(i_target) );
 
             // Step Six: Setup Control Bit ECC
-            FAPI_TRY( mss::enable_read_ecc(p), "%s Failed enable_read_ecc", mss::c_str(i_target) );
+            FAPI_TRY( mss::enable_read_ecc<mss::mc_type::NIMBUS>(p), "%s Failed enable_read_ecc", mss::c_str(i_target) );
 
             // apply marks from MVPD
-            FAPI_TRY( mss::apply_mark_store(p), "%s Failed enable_read_ecc", mss::c_str(i_target) );
+            FAPI_TRY( mss::apply_mark_store(p), "%s Failed apply_mark_store", mss::c_str(i_target) );
         }
 
         // At this point the DDR interface must be monitored for memory errors. Memory related FIRs should be unmasked.

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,31 @@ namespace mss
 
 namespace memdiags
 {
+
+///
+/// @brief Set up memory controller specific settings for pre-maint mode read
+/// @param[in] i_target the memory controller target
+/// @return FAPI2_RC_SUCCESS iff ok
+/// @note mc_type::NIMBUS specialization
+///
+template<>
+fapi2::ReturnCode pre_maint_read_settings<mss::mc_type::NIMBUS>( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>&
+        i_target )
+{
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Set up memory controller specific settings for pre-scrub
+/// @param[in] i_target the memory controller target
+/// @return FAPI2_RC_SUCCESS iff ok
+/// @note mc_type::NIMBUS specialization
+///
+template<>
+fapi2::ReturnCode pre_scrub_settings<mss::mc_type::NIMBUS>( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
+{
+    return fapi2::FAPI2_RC_SUCCESS;
+}
 
 ///
 /// @brief Helper to encapsualte the setting of multi-port address configurations

@@ -464,6 +464,19 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Set up memory controller specific settings for ECC registers (at the end of draminit_mc)
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @param[in,out] io_data contents of RECR register
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
+fapi2::ReturnCode ecc_reg_settings_draminit_mc( const fapi2::Target<T>& i_target,
+        fapi2::buffer<uint64_t>& io_data );
+
+///
 /// @brief Enable Read ECC checking
 /// @tparam MC the memory controller type
 /// @tparam T the fapi2 target type of the target
@@ -471,9 +484,11 @@ fapi_try_exit:
 /// @param[in] i_target the target
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode enable_read_ecc( const fapi2::Target<T>& i_target )
 {
+    constexpr uint8_t RECR_MBSECCQ_DATA_INVERSION_NO_INVERSION = 0b00;
+    constexpr uint8_t RECR_MBSECCQ_DATA_INVERSION_INVERT_DATA_TOGGLE_CHECKS = 0b11;
     fapi2::buffer<uint64_t> l_data;
 
     uint8_t l_sim = 0;
@@ -487,13 +502,17 @@ fapi2::ReturnCode enable_read_ecc( const fapi2::Target<T>& i_target )
 
     // VBU tests assume good ECC and we don't have good ECC (since we're not writing everything)
     // so we can't run with address checking. Disable address checking in sim.
-    l_data.writeBit<TT::ECC_USE_ADDR_HASH>(l_sim ? 0 : 1);
+    l_data.writeBit<TT::ECC_USE_ADDR_HASH>(l_sim ? mss::states::LOW : mss::states::HIGH);
 
-    // The preferred operating mode is 11 (INVERT_DATA_TOGGLE_CHECKS)   which stores data complemented
-    // (because most bits are '0', and the dram bus pulls up, so transmitting 1s is least power)  but
+    // The preferred operating mode is 11 (INVERT_DATA_TOGGLE_CHECKS) which stores data complemented
+    // (because most bits are '0', and the dram bus pulls up, so transmitting 1s is least power) but
     // still flips the inversion of check bits to aid RAS. Per Brad Michael 12/15
     // Leave un-inverted for sim. This allows the DIMM loader to write 0's and effect good ECC
-    l_data.insertFromRight<TT::RECR_MBSECCQ_DATA_INVERSION, TT::RECR_MBSECCQ_DATA_INVERSION_LEN>(l_sim ? 0b00 : 0b11);
+    l_data.insertFromRight<TT::RECR_MBSECCQ_DATA_INVERSION, TT::RECR_MBSECCQ_DATA_INVERSION_LEN>(l_sim ?
+            RECR_MBSECCQ_DATA_INVERSION_NO_INVERSION :
+            RECR_MBSECCQ_DATA_INVERSION_INVERT_DATA_TOGGLE_CHECKS);
+
+    FAPI_TRY( ecc_reg_settings_draminit_mc<MC>(i_target, l_data) );
 
     // bits: 60 MBSTRQ_CFG_MAINT_RCE_WITH_CE
     // cfg_maint_rce_with_ce - not implemented. Need to investigate if needed for nimbus.

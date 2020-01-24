@@ -93,7 +93,7 @@ extern "C"
         FAPI_TRY( mss::enable_zq_cal(i_target), "%s Failed enable_zq_cal", mss::c_str(i_target) );
 
         // Enable ecc checking
-        FAPI_TRY( mss::enable_read_ecc(i_target), "%s Failed enable_read_ecc", mss::c_str(i_target) );
+        FAPI_TRY( mss::enable_read_ecc<mss::mc_type::EXPLORER>(i_target), "%s Failed enable_read_ecc", mss::c_str(i_target) );
 
         // Apply marks from OCMB VPD
         FAPI_TRY( mss::apply_mark_store(i_target), "%s Failed enable_read_ecc", mss::c_str(i_target) );

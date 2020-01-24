@@ -64,6 +64,56 @@ fapi2::ReturnCode operation<mss::mc_type::EXPLORER>::multi_port_init_internal()
     return single_port_init();
 }
 
+///
+/// @brief Set up memory controller specific settings for pre-maint mode read
+/// @param[in] i_target the memory controller target
+/// @return FAPI2_RC_SUCCESS iff ok
+/// @note mc_type::EXPLORER specialization
+///
+template<>
+fapi2::ReturnCode pre_maint_read_settings<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target )
+{
+    using TT = mss::portTraits<mss::mc_type::EXPLORER>;
+    fapi2::buffer<uint64_t> l_data;
+
+    // Set up Explorer specific settings
+    FAPI_TRY( mss::getScom(i_target, TT::ECC_REG, l_data) );
+
+    l_data.setBit<TT::RECR_MBSECCQ_MAINT_NO_RETRY_UE>();
+    l_data.setBit<TT::RECR_MBSECCQ_MAINT_NO_RETRY_MPE>();
+
+    FAPI_TRY( mss::putScom(i_target, TT::ECC_REG, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Set up memory controller specific settings for pre-scrub
+/// @param[in] i_target the memory controller target
+/// @return FAPI2_RC_SUCCESS iff ok
+/// @note mc_type::EXPLORER specialization
+///
+template<>
+fapi2::ReturnCode pre_scrub_settings<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target )
+{
+    using TT = mss::portTraits<mss::mc_type::EXPLORER>;
+    fapi2::buffer<uint64_t> l_data;
+
+    // Set up Explorer specific settings
+    FAPI_TRY( mss::getScom(i_target, TT::ECC_REG, l_data) );
+
+    l_data.clearBit<TT::RECR_MBSECCQ_MAINT_NO_RETRY_UE>();
+    l_data.clearBit<TT::RECR_MBSECCQ_MAINT_NO_RETRY_MPE>();
+
+    FAPI_TRY( mss::putScom(i_target, TT::ECC_REG, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 } // namespace memdiags
 
 namespace exp

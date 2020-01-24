@@ -307,6 +307,21 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Set up memory controller specific settings for ECC registers (at the end of draminit_mc)
+/// @param[in] i_target the target
+/// @param[in,out] io_data contents of RECR register
+/// @return FAPI2_RC_SUCCESS if and only if ok
+/// @note mc_type::NIMBUS specialization
+///
+template<>
+fapi2::ReturnCode ecc_reg_settings_draminit_mc<mss::mc_type::NIMBUS>(
+    const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+    fapi2::buffer<uint64_t>& io_data )
+{
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
 /// @brief Perform a repair for a single bad DQ bit in a nibble
 /// Specialization for TARGET_TYPE_DIMM
 /// @param[in,out] io_machine the repair state machine
