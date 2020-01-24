@@ -130,22 +130,8 @@ void*    call_fabric_dl_post_trainadv( void    *io_pArgs );
 
 
 
-#if 0 // TODO RTC 208827: Implement rest of Istep 9 substeps
-
 /**
- *  @brief   proc_smp_link_layer
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any errlogs to istep
- *
- */
-void*   call_proc_smp_link_layer( void    *io_pArgs );
-
-
-
-/**
- *  @brief   proc_fab_iovalid
+ *  @brief   proc_fabric_iovalid
  *
  *           Lower functional fences on local SMP
  *
@@ -154,9 +140,11 @@ void*   call_proc_smp_link_layer( void    *io_pArgs );
  *  return  any errlogs to istep
  *
  */
-void*    call_proc_fab_iovalid( void    *io_pArgs );
+void*    call_proc_fabric_iovalid( void    *io_pArgs );
 
 
+
+#if 0 // TODO RTC 208827: Implement rest of Istep 9 substeps
 
 /**
  *  @brief   host_fbc_eff_config_aggregate
@@ -209,17 +197,12 @@ namespace   INITSERVICE
                 ISTEP_09::call_fabric_dl_post_trainadv,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
-        /*
         {
-                ISTEPNAME(09,06,"proc_smp_link_layer"),
-                ISTEP_09::call_proc_smp_link_layer,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-        {
-                ISTEPNAME(09,07,"proc_fab_iovalid"),
-                ISTEP_09::call_proc_fab_iovalid,
+                ISTEPNAME(09,06,"proc_fabric_iovalid"),
+                ISTEP_09::call_proc_fabric_iovalid,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
+        /*
         {
                 ISTEPNAME(09,08,"host_fbc_eff_config_aggregate"),
                 ISTEP_09::call_host_fbc_eff_config_aggregate,
@@ -244,6 +227,6 @@ const ExtTaskInfo g_istep09TaskList = {
     &g_istep09Dependancies
 };
 
-};  // end namespace
+}  // end namespace
 
 #endif

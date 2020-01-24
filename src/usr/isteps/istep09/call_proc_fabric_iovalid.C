@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep09/call_proc_fab_iovalid.C $              */
+/* $Source: src/usr/isteps/istep09/call_proc_fabric_iovalid.C $           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,10 +23,10 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
- *  @file call_proc_fab_iovalid.C
+ *  @file call_proc_fabric_iovalid.C
  *
- *  Support file for IStep: edi_ei_initialization
- *   EDI, EI Initialization
+ *  Support file for IStep: proc_fabric_iovalid
+ *   Lower functional fences on local SMP
  *
  *  HWP_IGNORE_VERSION_CHECK
  *
@@ -35,54 +35,61 @@
 /******************************************************************************/
 // Includes
 /******************************************************************************/
-#include    <stdint.h>
-#include    <map>
 
-#include    <trace/interface.H>
-#include    <initservice/taskargs.H>
-#include    <errl/errlentry.H>
+// Standard library
+#include <stdint.h>
+#include <map>
 
-#include    <isteps/hwpisteperror.H>
-#include    <errl/errludtarget.H>
+// Trace
+#include <trace/interface.H>
 
-#include    <initservice/isteps_trace.H>
-#include    <initservice/initserviceif.H>
+// Initservice
+#include <initservice/taskargs.H>
+#include <initservice/isteps_trace.H>
+#include <initservice/initserviceif.H>
 
-#include    <hwas/common/deconfigGard.H>
-#include    <hwas/common/hwasCommon.H>
-
-#include    <sbe/sbeif.H>
-
-//  targeting support
-#include    <targeting/common/commontargeting.H>
-#include    <targeting/common/utilFilter.H>
-#include    <targeting/common/trace.H>
-
-/* FIXME RTC: 210975
-#include <fapi2/target.H>
-#include <fapi2/plat_hwp_invoker.H>
-*/
+// Error log
+#include <errl/errlentry.H>
+#include <errl/errludtarget.H>
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
 
-// FIXME RTC: 210975
-// HWP
-//#include <p9_fab_iovalid.H>
+// IStep-related
+#include <isteps/hwpisteperror.H>
+#include <istepHelperFuncs.H>
 
-namespace   ISTEP_09
+// HWAS
+#include <hwas/common/deconfigGard.H>
+#include <hwas/common/hwasCommon.H>
+
+//  targeting support
+#include <targeting/common/commontargeting.H>
+#include <targeting/common/utilFilter.H>
+#include <targeting/common/trace.H>
+
+// FAPI
+#include <fapi2/target.H>
+#include <fapi2/plat_hwp_invoker.H>
+
+// HWP
+#include <p10_fabric_iovalid.H>
+
+namespace ISTEP_09
 {
 
-using   namespace   ISTEP;
-using   namespace   ISTEP_ERROR;
-using   namespace   ERRORLOG;
-using   namespace   TARGETING;
-using   namespace   HWAS;
+using namespace ISTEP;
+using namespace ISTEP_ERROR;
+using namespace ERRORLOG;
+using namespace TARGETING;
+using namespace HWAS;
+
+#if 0 // TODO RTC 246933: Reincorporate SMP wrap functionality
 
 typedef std::map<ATTR_HUID_type, ATTR_LINK_TRAIN_type > OBUSHuidAttrMap_t;
 
 void fillAttrMap (OBUSHuidAttrMap_t& o_map)
 {
-    TARGETING::TargetHandleList l_obuses;
+    TargetHandleList l_obuses;
     getAllChiplets(l_obuses, TYPE_OBUS);
     for (const auto& l_obus : l_obuses)
     {
@@ -99,7 +106,7 @@ void calloutOBUS(TargetHandle_t i_proc,
     for (const auto& l_obus : l_obuses)
     {
         auto l_trainVal = l_obus->getAttr<ATTR_LINK_TRAIN>();
-        auto l_trainValBefore = -1;
+        int l_trainValBefore = -1;
 
         auto l_itr = i_attrMapBeforeHWP.find(get_huid(l_obus));
         if (l_itr != i_attrMapBeforeHWP.end())
@@ -108,8 +115,10 @@ void calloutOBUS(TargetHandle_t i_proc,
         }
 
         TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "calloutOBUS: HUID=0x%x BeforeTrainVal=0x%x CurrTrainVal=0x%x",
-                get_huid(l_obus), l_trainValBefore, l_trainVal);
+                  "calloutOBUS: HUID=0x%x BeforeTrainVal=0x%x CurrTrainVal=0x%x",
+                  get_huid(l_obus),
+                  l_trainValBefore,
+                  l_trainVal);
 
         if (l_trainVal == l_trainValBefore)
         {
@@ -123,7 +132,7 @@ void calloutOBUS(TargetHandle_t i_proc,
                                 CLASS_UNIT,
                                 TYPE_SMPGROUP,
                                 false);
-        for (const auto& l_smpGrp : l_smpGroupTargets)
+        for (const auto l_smpGrp : l_smpGroupTargets)
         {
             auto l_smpGrpPos = l_smpGrp->getAttr<ATTR_REL_POS>();
             //if smpGrpPos%2==0, then ODD links are functional, callout even
@@ -136,55 +145,66 @@ void calloutOBUS(TargetHandle_t i_proc,
             if (((l_smpGrpPos % 2 == 0) && (l_trainVal == LINK_TRAIN_ODD_ONLY))
             || ((l_smpGrpPos % 2 == 1) && (l_trainVal == LINK_TRAIN_EVEN_ONLY)))
             {
-                auto l_smp     = l_smpGrp->getAttr<ATTR_PHYS_PATH>();
-                auto l_peerSMP = l_smpGrp->getAttr<ATTR_PEER_PATH>();
-                io_errl->addBusCallout (l_smp, l_peerSMP, HWAS::O_BUS_TYPE,
+                const auto l_smp     = l_smpGrp->getAttr<ATTR_PHYS_PATH>();
+                const auto l_peerSMP = l_smpGrp->getAttr<ATTR_PEER_PATH>();
+                io_errl->addBusCallout (l_smp, l_peerSMP, O_BUS_TYPE,
                         SRCI_PRIORITY_MED);
             }
         }
     }
 
 }
-//
-//  Wrapper function to call proc_fab_iovalid
-//
-void*    call_proc_fab_iovalid( void    *io_pArgs )
+
+#endif
+
+void* call_proc_fabric_iovalid(void* const io_pArgs)
 {
+    errlHndl_t l_errl = nullptr;
     IStepError l_StepError;
-    // FIXME RTC: 210975
-    //std::vector<fapi2::ReturnCode> l_fapiRcs;
+    std::vector<fapi2::ReturnCode> l_fapiRcs;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_proc_fab_iovalid entry" );
+               "call_proc_fabric_iovalid entry" );
 
-    //
-    //  get a list of all the procs in the system
-    //
-    TARGETING::TargetHandleList l_cpuTargetList;
+    // get a list of all the procs in the system
+    TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC);
 
+#if 0 // TODO RTC 246933: Reincorporate SMP wrap functionality
     //Save off the state of ATTR_LINK_TRAIN
     OBUSHuidAttrMap_t l_attrMapBeforeHWP;
     fillAttrMap(l_attrMapBeforeHWP);
+#endif
 
-// FIXME RTC: 210975
-#if 0
     // Loop through all processors including master
     for (const auto & l_cpu_target: l_cpuTargetList)
     {
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapi2_proc_target(
-                  l_cpu_target);
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+            l_fapi2_proc_target(l_cpu_target);
 
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                 "Running p9_fab_iovalid HWP on processor target %.8X",
-                 TARGETING::get_huid(l_cpu_target) );
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "Running p10_fabric_iovalid HWP on processor target 0x%.8X",
+                  get_huid(l_cpu_target));
 
+#if 0 // TODO RTC 246933: Reincorporate SMP wrap functionality
         if (INITSERVICE::isSMPWrapConfig())
         {
-            FAPI_INVOKE_HWP(l_errl, p9_fab_iovalid, l_fapi2_proc_target,
-                        true, true, true, l_fapiRcs);
+            const bool l_set_not_clear = true,
+                       l_update_internode = true,
+                       l_update_intranode = true;
 
-            if ((l_errl == nullptr) && (l_fapiRcs.size()))
+            // @TODO RTC 250721: The order of the inter- and intra-node
+            // parameters is incorrect in p10_fabric_iovalid and is due to
+            // change. Fix this call site after the HWP is updated.
+
+            FAPI_INVOKE_HWP(l_errl, p10_fabric_iovalid,
+                            l_fapi2_proc_target,
+                            l_set_not_clear,
+                            l_update_internode,
+                            l_update_intranode,
+                            l_fapiRcs);
+
+            if ((l_errl == nullptr) && !l_fapiRcs.empty())
             {
                 //if HWP did not return an error, then create a new
                 //error to link all the RCs with
@@ -194,21 +214,20 @@ void*    call_proc_fab_iovalid( void    *io_pArgs )
                  * @reasoncode RC_LINK_TRAIN_ERRORS_FROM_HWP
                  * @userdata0  PROC HUID
                  * @userdata1  Number of RCs from HWP
-                 * @devdesc    p9_fab_iovalid HWP returned errors on odd and
+                 * @devdesc    p10_fabric_iovalid HWP returned errors on odd and
                  *             even links. Creating an error to link all the
                  *             individual link RCs together
                  * @custdesc   There was an error training the SMP cables.
                  */
-                l_errl = new ERRORLOG::ErrlEntry(
-                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                        MOD_SMP_WRAP_PROC_IOVALID,
-                        RC_LINK_TRAIN_ERRORS_FROM_HWP,
-                        get_huid(l_cpu_target),
-                        l_fapiRcs.size());
+                l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                       MOD_SMP_WRAP_PROC_IOVALID,
+                                       RC_LINK_TRAIN_ERRORS_FROM_HWP,
+                                       get_huid(l_cpu_target),
+                                       l_fapiRcs.size());
             }
 
             //Something bad happened during the hwp run
-            for (auto& l_rc : l_fapiRcs)
+            for (const auto l_rc : l_fapiRcs)
             {
                 errlHndl_t l_tempErr = rcToErrl(l_rc);
                 if (l_tempErr)
@@ -216,51 +235,56 @@ void*    call_proc_fab_iovalid( void    *io_pArgs )
                     l_tempErr->plid(l_errl->plid());
 
                     // capture the target data in the elog
-                    ErrlUserDetailsTarget(l_cpu_target).addToLog
-                        (l_tempErr);
-
-                    l_StepError.addErrorDetails(l_tempErr);
+                    ErrlUserDetailsTarget(l_cpu_target).addToLog(l_tempErr);
 
                     //callout any buses we need to.
                     calloutOBUS(l_cpu_target, l_attrMapBeforeHWP, l_tempErr);
 
-                    errlCommit(l_tempErr, HWPF_COMP_ID);
-                    l_tempErr = nullptr;
+                    captureError(l_tempErr, l_StepError, HWPF_COMP_ID, l_cpu_target);
                 }
             }
         }
         else
-        {
-            // Note:
-            // When this HWP gets run under HB, it should only train X PHYS, not Os.
-            // The HWP shouldn't fill anydata into vector l_fapiRcs for X's,
-            // only for O's that could be used to trigger a reconfig loop in FSP.
-            // Therefore, we ignore the check for l_fapiRcs here.
-            FAPI_INVOKE_HWP(l_errl, p9_fab_iovalid, l_fapi2_proc_target,
-                        true, true, false, l_fapiRcs);
-        }
-        if(l_errl)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                     "ERROR 0x%.8X : p9_fab_iovalid "
-                     "HWP returns error for HUID %.8X",
-                     l_errl->reasonCode(),
-                     TARGETING::get_huid(l_cpu_target) );
-
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_cpu_target).addToLog( l_errl );
-
-            l_StepError.addErrorDetails(l_errl);
-            errlCommit(l_errl, HWPF_COMP_ID);
-            l_errl = NULL;
-        }
-    } // end of going through all processors//
 #endif
+        {
+            const bool l_set_not_clear = true,
+                       l_update_internode = true,
+                       l_update_intranode = false;
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_proc_fab_iovalid exit" );
+            // @TODO RTC 250721: The order of the inter- and intra-node
+            // parameters is incorrect in p10_fabric_iovalid and is due to
+            // change. Fix this call site after the HWP is updated.
+
+            // Note:
+            // When this HWP gets run under HB, it should only train X PHYS, not As.
+            // The HWP shouldn't fill any data into vector l_fapiRcs for X's,
+            // only for A's that could be used to trigger a reconfig loop in FSP.
+            // Therefore, we ignore the check for l_fapiRcs here.
+            FAPI_INVOKE_HWP(l_errl, p10_fabric_iovalid,
+                            l_fapi2_proc_target,
+                            l_set_not_clear,
+                            l_update_internode,
+                            l_update_intranode,
+                            l_fapiRcs);
+        }
+
+        if (l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"p10_fabric_iovalid HWP returns error for HUID 0x%.8X"
+                      TRACE_ERR_FMT,
+                      get_huid(l_cpu_target),
+                      TRACE_ERR_ARGS(l_errl));
+
+            captureError(l_errl, l_StepError, HWPF_COMP_ID, l_cpu_target);
+        }
+    } // end of going through all processors
+
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+              "call_proc_fabric_iovalid exit");
 
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();
 }
-};   // end namespace
+
+} // end namespace

@@ -43,10 +43,8 @@ OBJS += call_proc_io_dccal_done.o
 OBJS += call_fabric_dl_pre_trainadv.o
 OBJS += call_fabric_dl_setup_training.o
 OBJS += call_proc_fabric_link_layer.o
-#OBJS += call_fabric_io_run_training.o
 OBJS += call_fabric_dl_post_trainadv.o
-#OBJS += call_proc_smp_link_layer.o
-#OBJS += call_proc_fab_iovalid.o
+OBJS += call_proc_fabric_iovalid.o
 #OBJS += call_host_fbc_eff_config_aggregate.o
 #OBJS += istep09HelperFuncs.o
 
@@ -60,6 +58,7 @@ OBJS += p10_fabric_dl_setup_linktrain.o
 OBJS += p10_fabric_dl_pre_trainadv.o
 OBJS += p10_fabric_link_layer.o
 OBJS += p10_fabric_dl_post_trainadv.o
+OBJS += p10_fabric_iovalid.o
 
 #include ${ROOTPATH}/procedure.rules.mk
 
