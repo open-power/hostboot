@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -128,6 +128,7 @@ enum mvpdKeyword
     RT          = 0x2C,
     AW          = 0x2D,
     CI          = 0x2E,
+    pdP         = 0x2F,
 
     // Last Keyword
     MVPD_LAST_KEYWORD,

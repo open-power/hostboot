@@ -75,6 +75,7 @@ mvpdTestData mvpdData[] =
     { MVPD::CP00, MVPD::pdR },
     { MVPD::CP00, MVPD::pdG },
 //    { MVPD::CP00, MVPD::pdV },  (REC 0x01, KEY 0x08) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
+    { MVPD::CP00, MVPD::pdP },
     { MVPD::CP00, MVPD::SB },
 //    { MVPD::CP00, MVPD::PB },   (REC 0x01, KEY 0x1A) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
     { MVPD::CP00, MVPD::AW },

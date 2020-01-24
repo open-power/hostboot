@@ -25,7 +25,6 @@
 
 ROOTPATH = ../../../..
 MODULE = testvpd
-
 TESTS = *.H
 
 include ${ROOTPATH}/config.mk

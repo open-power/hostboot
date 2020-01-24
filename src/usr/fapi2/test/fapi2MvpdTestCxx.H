@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -116,11 +116,11 @@ public:
       fapi2::ReturnCode l_rc;
 
       FAPI_INF("testMvpdKeywordCheck: ENTER ");
-      for ( size_t l_fapi2Index = MvpdRecord::MVPD_RECORD_FIRST;
-            l_fapi2Index < MvpdRecord::MVPD_RECORD_LAST; ++l_fapi2Index)
+      for ( size_t l_fapi2Index = MvpdKeyword::MVPD_KEYWORD_FIRST;
+            l_fapi2Index < MvpdKeyword::MVPD_KEYWORD_LAST; ++l_fapi2Index)
       {
-          // Translate the FAPI record to a Hostboot record.
-          // This returns the MVPD record and the corresponding
+          // Translate the FAPI keyword to a Hostboot keyword.
+          // This returns the MVPD keyword and the corresponding
           // fapi2 keyword index of it.
           l_rc = fapi2::MvpdKeywordXlate((fapi2::MvpdKeyword)l_fapi2Index,
                   l_hbKeyword,
@@ -170,27 +170,25 @@ public:
       struct testMVPDRecords {
           MvpdRecord record;
           MvpdKeyword keyword;
+          MVPD::mvpdRecord hb_record;
+          MVPD::mvpdKeyword hb_keyword;
       };
 
       // Build the record, let it test both successful and failure
       // use cases.
       struct testMVPDRecords l_mvpdRecords[] = {
           // Records to use
-          { MVPD_RECORD_CRP0, MVPD_KEYWORD_VD},
-          { MVPD_RECORD_CP00, MVPD_KEYWORD_ED},
-          { MVPD_RECORD_VINI, MVPD_KEYWORD_TE},
-          { MVPD_RECORD_LRP0, MVPD_KEYWORD_DD},
-          { MVPD_RECORD_LRP1, MVPD_KEYWORD_DN},
-          { MVPD_RECORD_LRP2, MVPD_KEYWORD_PG},
-          { MVPD_RECORD_LRP3, MVPD_KEYWORD_PK},
-          { MVPD_RECORD_LRP4, MVPD_KEYWORD_PDR},
-          { MVPD_RECORD_LRP5, MVPD_KEYWORD_PDV},
-          { MVPD_RECORD_LWP0, MVPD_KEYWORD_PN},
-          { MVPD_RECORD_LWP1, MVPD_KEYWORD_SN},
-          { MVPD_RECORD_LWP2, MVPD_KEYWORD_PR},
-          { MVPD_RECORD_LWP3, MVPD_KEYWORD_HE},
-          { MVPD_RECORD_LWP4, MVPD_KEYWORD_CT},
-          { MVPD_RECORD_LWP5, MVPD_KEYWORD_HW},
+          { MVPD_RECORD_CRP0, MVPD_KEYWORD_CI, MVPD::CRP0, MVPD::CI },
+          { MVPD_RECORD_CRP0, MVPD_KEYWORD_DD, MVPD::CRP0, MVPD::DD },
+          { MVPD_RECORD_CRP0, MVPD_KEYWORD_IQ, MVPD::CRP0, MVPD::IQ },
+          { MVPD_RECORD_CRP0, MVPD_KEYWORD_PDV, MVPD::CRP0, MVPD::pdV },
+          { MVPD_RECORD_CRP0, MVPD_KEYWORD_PDW, MVPD::CRP0, MVPD::pdW },
+          { MVPD_RECORD_CRP0, MVPD_KEYWORD_VD, MVPD::CRP0, MVPD::VD },
+          { MVPD_RECORD_CP00, MVPD_KEYWORD_AW, MVPD::CP00, MVPD::AW },
+          { MVPD_RECORD_CP00, MVPD_KEYWORD_PDG, MVPD::CP00, MVPD::pdG },
+          { MVPD_RECORD_CP00, MVPD_KEYWORD_PDP, MVPD::CP00, MVPD::pdP },
+          { MVPD_RECORD_CP00, MVPD_KEYWORD_PDR, MVPD::CP00, MVPD::pdR },
+          { MVPD_RECORD_CP00, MVPD_KEYWORD_PG, MVPD::CP00, MVPD::PG },
       };
 
       TARGETING::TargetHandleList l_chipList;
@@ -232,6 +230,7 @@ public:
               if ( l_rc != fapi2::FAPI2_RC_SUCCESS )
               {
                   FAPI_ERR("getMvpdField:  Failed getting Record buffer size");
+                  TS_FAIL("testMvpdValidate : Failed getting Record buffer size for rec=0x%X/kw=0x%X", l_mvpdRecords[i].record, l_mvpdRecords[i].keyword);
                   continue;
               }
 
@@ -239,7 +238,7 @@ public:
                       l_fieldBuffer );
 
               // Validate the Records
-                l_fieldData = reinterpret_cast<uint8_t *>
+              l_fieldData = reinterpret_cast<uint8_t *>
                               (malloc(l_fieldBuffer) );
 
               //  call getMvpdField once with a valid buffer
@@ -250,7 +249,8 @@ public:
                       l_fieldBuffer );
               if ( l_rc != fapi2::FAPI2_RC_SUCCESS )
               {
-                  FAPI_ERR( "getMvpdField:  Error Getting the Record" );
+                  FAPI_ERR( "getMvpdField:  Error Getting the keyword" );
+                  TS_FAIL("testMvpdValidate : Failed reading vpd via FAPI rec=0x%X/kw=0x%X", l_mvpdRecords[i].record, l_mvpdRecords[i].keyword);
                   free(  l_fieldData );
                   continue;
               }
@@ -268,15 +268,15 @@ public:
                               l_cpu_target,
                               l_devData,
                               l_fieldLen,
-                              DEVICE_MVPD_ADDRESS(l_mvpdRecords[i].record,
-                                                  l_mvpdRecords[i].keyword
+                              DEVICE_MVPD_ADDRESS(l_mvpdRecords[i].hb_record,
+                                                  l_mvpdRecords[i].hb_keyword
                                                   )
                               );
               if (l_errl)
               {
                   FAPI_ERR("deviceRead: ERROR: errorlog PLID=0x%x",
                           l_errl->plid());
-                  FAPI_INF( "deviceRead:  Error Getting the Record" );
+                  TS_FAIL("testMvpdValidate : Failed reading vpd via HB rec=0x%X/kw=0x%X", l_mvpdRecords[i].record, l_mvpdRecords[i].keyword);
                   free( l_devData );
                   continue;
               }
@@ -293,6 +293,7 @@ public:
                   FAPI_ERR( "Error: Fetch record = 0x%x :"
                               "device read record = 0x%x",
                               l_fieldData,l_devData );
+                  TS_FAIL("testMvpdValidate : VPD mismatch for HB vs FAPI for rec=0x%X/kw=0x%X", l_mvpdRecords[i].record, l_mvpdRecords[i].keyword);
               }
 
               // clean up memory if we are here
