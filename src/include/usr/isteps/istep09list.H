@@ -144,23 +144,19 @@ void*    call_proc_fabric_iovalid( void    *io_pArgs );
 
 
 
-#if 0 // TODO RTC 208827: Implement rest of Istep 9 substeps
-
 /**
- *  @brief   host_fbc_eff_config_aggregate
+ *  @brief   proc_fbc_eff_config_aggregate
  *
- *           Aggregate the FBC configuration
+ *           Pick link(s) for coherency
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return  any errlogs to istep
  *
  */
-void*    call_host_fbc_eff_config_aggregate( void    *io_pArgs );
+void*    call_proc_fbc_eff_config_aggregate( void    *io_pArgs );
 
-#endif // #if 0
-
-};   // end namespace
+} // end namespace
 
 
 
@@ -202,17 +198,16 @@ namespace   INITSERVICE
                 ISTEP_09::call_proc_fabric_iovalid,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-        /*
         {
-                ISTEPNAME(09,08,"host_fbc_eff_config_aggregate"),
-                ISTEP_09::call_host_fbc_eff_config_aggregate,
+                ISTEPNAME(09,07,"proc_fbc_eff_config_aggregate"),
+                ISTEP_09::call_proc_fbc_eff_config_aggregate,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-        */
     };
 
 const DepModInfo  g_istep09Dependancies = {
     {
+        DEP_LIB(libistep07.so),
         DEP_LIB(libistep09.so),
         DEP_LIB(libpm.so),
         DEP_LIB(libnestmemutils.so),
@@ -227,6 +222,6 @@ const ExtTaskInfo g_istep09TaskList = {
     &g_istep09Dependancies
 };
 
-}  // end namespace
+} // end namespace
 
 #endif
