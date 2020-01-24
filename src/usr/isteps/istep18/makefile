@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2019
+# Contributors Listed Below - COPYRIGHT 2016,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -36,6 +36,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/include/isteps
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/nest
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/lib
 
 ## pointer to common HWP files
 OBJS += call_tod_init.o
