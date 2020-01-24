@@ -300,6 +300,10 @@ class mcbistTraits<mss::mc_type::NIMBUS, fapi2::TARGET_TYPE_MCBIST>
 
         enum
         {
+            // The start/end address config registers have common lengths and bits, just including 1 below
+            MCB_ADDR_CONFIG = MCBIST_MCBEA0Q_CFG_END_ADDR_0,
+            MCB_ADDR_CONFIG_LEN = MCBIST_MCBEA0Q_CFG_END_ADDR_0_LEN,
+
             // Subtest control bits. These are the same in all '16 bit subtest' field
             COMPL_1ST_CMD = MCBIST_MCBMR0Q_MCBIST_CFG_TEST00_COMPL_1ST_CMD,
             COMPL_2ND_CMD = MCBIST_MCBMR0Q_MCBIST_CFG_TEST00_COMPL_2ND_CMD,
@@ -557,6 +561,7 @@ class mcbistTraits<mss::mc_type::NIMBUS, fapi2::TARGET_TYPE_MCBIST>
             MCB_WAT_DEBUG_ATTN = MCBIST_MCBISTFIRQ_WAT_DEBUG_ATTN,
             MCB_PROGRAM_COMPLETE_MASK = MCB_PROGRAM_COMPLETE,
             MCB_WAT_DEBUG_ATTN_MASK = MCB_WAT_DEBUG_ATTN,
+            MCB_DATA_ERROR = MCBIST_MCBISTFIRQ_MCBIST_DATA_ERROR,
 
             //XLT address valid offset
             XLT0_SLOT1_D_VALID     = MCS_PORT13_MCP0XLT0_SLOT1_VALID,

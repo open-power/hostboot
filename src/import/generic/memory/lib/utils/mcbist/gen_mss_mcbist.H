@@ -724,6 +724,41 @@ inline subtest_t<MC, T, TT> read_write_subtest()
     return l_subtest;
 }
 
+
+///
+/// @brief Return a write read subtest - configured simply
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @return mss::mcbist::subtest_t
+/// @note Turns on ECC mode for the returned subtest - caller can turn it off
+/// @note Configures for start/end address select bit as address config register 0
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
+inline subtest_t<MC, T, TT> write_read_subtest()
+{
+    // Starts life full of 0's
+    subtest_t<MC, T, TT> l_subtest;
+
+    // 0:3   = 0011 - we want subtest type to be a Write Read (WR)
+    l_subtest.iv_mcbmr.template insertFromRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(op_type::WRITE_READ);
+
+    // - Not a special subtest, so no other configs associated
+    // 4     = 0    - we don't want to complement data for our Writes
+    // 5:6   = 00   - don't know whether we complement 2nd and 3rd subcommand, caller to fix
+    // 7     = 0    - forward address generation
+    // 8     = 0    - non random address generation
+    // - Don't need to set up anything for LFSRs
+    // 9:11  = 000  - Fixed data mode
+
+    // 14:15 = 0 address select config registers 0
+
+    // By default we want to turn on ECC. Caller can turn it off.
+    l_subtest.change_ecc_mode(mss::ON);
+
+    return l_subtest;
+}
+
 ///
 /// @brief Return a read write read subtest - configured simply
 /// @tparam MC the mc type of the T
@@ -739,8 +774,76 @@ inline subtest_t<MC, T, TT> read_write_read_subtest()
     // Starts life full of 0's
     subtest_t<MC, T, TT> l_subtest;
 
-    // 0:3   = 0100 - we want subtest type to be a Read Write Read (RWR)          7
+    // 0:3   = 0100 - we want subtest type to be a Read Write Read (RWR)
     l_subtest.iv_mcbmr.template insertFromRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(op_type::READ_WRITE_READ);
+
+    // - Not a special subtest, so no other configs associated
+    // 4     = 0    - we don't want to complement data for our Writes
+    // 5:6   = 00   - don't know whether we complement 2nd and 3rd subcommand, caller to fix
+    // 7     = 0    - forward address generation
+    // 8     = 0    - non random address generation
+    // - Don't need to set up anything for LFSRs
+    // 9:11  = 000  - Fixed data mode
+
+    // 14:15 = 0 address select config registers 0
+
+    // By default we want to turn on ECC. Caller can turn it off.
+    l_subtest.change_ecc_mode(mss::ON);
+
+    return l_subtest;
+}
+
+///
+/// @brief Return a read read write subtest - configured simply
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @return mss::mcbist::subtest_t
+/// @note Turns on ECC mode for the returned subtest - caller can turn it off
+/// @note Configures for start/end address select bit as address config register 0
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
+inline subtest_t<MC, T, TT> read_read_write_subtest()
+{
+    // Starts life full of 0's
+    subtest_t<MC, T, TT> l_subtest;
+
+    // 0:3   = 1000 - we want subtest type to be a Read Read Write (RRW)
+    l_subtest.iv_mcbmr.template insertFromRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(op_type::READ_READ_WRITE);
+
+    // - Not a special subtest, so no other configs associated
+    // 4     = 0    - we don't want to complement data for our Writes
+    // 5:6   = 00   - don't know whether we complement 2nd and 3rd subcommand, caller to fix
+    // 7     = 0    - forward address generation
+    // 8     = 0    - non random address generation
+    // - Don't need to set up anything for LFSRs
+    // 9:11  = 000  - Fixed data mode
+
+    // 14:15 = 0 address select config registers 0
+
+    // By default we want to turn on ECC. Caller can turn it off.
+    l_subtest.change_ecc_mode(mss::ON);
+
+    return l_subtest;
+}
+
+///
+/// @brief Return a read write write subtest - configured simply
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @return mss::mcbist::subtest_t
+/// @note Turns on ECC mode for the returned subtest - caller can turn it off
+/// @note Configures for start/end address select bit as address config register 0
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
+inline subtest_t<MC, T, TT> read_write_write_subtest()
+{
+    // Starts life full of 0's
+    subtest_t<MC, T, TT> l_subtest;
+
+    // 0:3   = 0101 - we want subtest type to be a Read Write Write (RWW)
+    l_subtest.iv_mcbmr.template insertFromRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(op_type::READ_WRITE_WRITE);
 
     // - Not a special subtest, so no other configs associated
     // 4     = 0    - we don't want to complement data for our Writes
