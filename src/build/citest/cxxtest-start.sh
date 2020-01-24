@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2019
+# Contributors Listed Below - COPYRIGHT 2011,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -58,7 +58,9 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
         sbe_boot_mem=seeprom \
         enable_lpc_console=TRUE \
         fused_core=TRUE \
-        xive_gen=2"
+        xive_gen=2 \
+        bmc_files=/host/genEecache:/usr/local/share/pnor/EECACHE \
+        eecacheEcc=1"
 
 else
     # do not set this for FSP build

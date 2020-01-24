@@ -490,6 +490,8 @@ hb_startsimics()
         STARTSIMCMD+=(hb_script_to_run=${STANDALONE_SIMICS}/hbfw/startup.simics)
         STARTSIMCMD+=(pnor_img=${PROJECT_ROOT}/standalone/pnor/${PNOR_LAYOUT_SELECTED}.pnor)
         STARTSIMCMD+=(xive_gen=2)
+        STARTSIMCMD+=(bmc_files=/host/genEecache:/usr/local/share/pnor/EECACHE)
+        STARTSIMCMD+=(eecacheEcc=1)
 
         # We don't want to run SBE in VPO mode; pass the SBE image to
         # simics in non-VPO mode
