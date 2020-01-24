@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2019
+# Contributors Listed Below - COPYRIGHT 2017,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -24,21 +24,19 @@
 # IBM_PROLOG_END_TAG
 
 HOSTBOOT_RUNTIME = 1
-
 ROOTPATH = ../../../..
-# FIXME RTC: 210975
-#VPATH += ../
-PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
-
 MODULE = sbeio_rt
 
+VPATH += ../
+PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p10/procedures
+
 # pull in .mk common between sbeio and sbeio_rt
-#include ../common/common.mk
+include ../common/common.mk
 
 ## Objects unique to HBRT
-#OBJS += rt_sbeio.o
-#OBJS += sbeio_attr_override.o
-#OBJS += sbeio_vital_attn.o
+OBJS += rt_sbeio.o
+OBJS += sbeio_attr_override.o
+OBJS += sbeio_vital_attn.o
 
 ## sbeio_rt's sub directories
 SUBDIRS += test.d

@@ -69,58 +69,9 @@ namespace HWAS
 using namespace HWAS::COMMON;
 using namespace TARGETING;
 
-#ifndef __HOSTBOOT_RUNTIME
 //******************************************************************************
-errlHndl_t collectGard(const PredicateBase *i_pPredicate)
-{
-    HWAS_DBG("collectGard entry" );
-    errlHndl_t errl = NULL;
-
-    do
-    {
-        errl = theDeconfigGard().clearGardRecordsForReplacedTargets();
-        if (errl)
-        {
-            HWAS_ERR("ERROR: collectGard failed to clear GARD Records for replaced Targets");
-            break;
-        }
-
-        (void)theDeconfigGard().clearFcoDeconfigures();
-
-        errl = theDeconfigGard().
-                    deconfigureTargetsFromGardRecordsForIpl(i_pPredicate);
-        if (errl)
-        {
-            HWAS_ERR("ERROR: collectGard failed to deconfigure Targets from GARD Records for IPL");
-            break;
-        }
-
-        errl = theDeconfigGard().processFieldCoreOverride();
-        if (errl)
-        {
-            HWAS_ERR("ERROR: collectGard failed to process Field Core Override");
-            break;
-        }
-    }
-    while(0);
-
-    if (errl)
-    {
-        HWAS_ERR("collectGard failed (plid 0x%X)", errl->plid());
-    }
-    else
-    {
-        HWAS_INF("collectGard completed successfully");
-    }
-    return errl;
-} // collectGard
-
-errlHndl_t clearGardByType(const GARD_ErrorType i_type)
-{
-    return theDeconfigGard().clearGardRecordsByType(i_type);
-}
-
-#endif //__HOSTBOOT_RUNTIME
+// RUNTIME/NON-RUNTIME/HOSTBOOT/NON-HOSTBOOT methods
+//******************************************************************************
 
 //******************************************************************************
 DeconfigGard & theDeconfigGard()
@@ -145,6 +96,1673 @@ DeconfigGard::~DeconfigGard()
     free(iv_platDeconfigGard);
 }
 
+//******************************************************************************
+errlHndl_t DeconfigGard::deconfigureTarget(
+        Target & i_target,
+        const uint32_t i_errlEid,
+        bool *o_targetDeconfigured,
+        const DeconfigureFlags i_deconfigRule)
+{
+    HWAS_DBG("Deconfigure Target");
+    errlHndl_t l_pErr = NULL;
+
+    do
+    {
+        // Do not deconfig Target if we're NOT being asked to force AND
+        // the System is at runtime
+        if ((i_deconfigRule == NOT_AT_RUNTIME) &&
+                platSystemIsAtRuntime())
+        {
+            HWAS_INF("Skipping deconfigureTarget: at Runtime; target %.8X",
+                get_huid(&i_target));
+            break;
+        }
+
+        // just to make sure that we haven't missed anything in development
+        //  AT RUNTIME: we should only be called to deconfigure these types.
+        if (i_deconfigRule != NOT_AT_RUNTIME)
+        {
+            TYPE target_type = i_target.getAttr<ATTR_TYPE>();
+            // TODO RTC 88471: use attribute vs hardcoded list.
+            if (!((target_type == TYPE_MEMBUF) ||
+                  (target_type == TYPE_NX) ||
+                  (target_type == TYPE_EQ) ||
+                  (target_type == TYPE_FC) ||
+                  (target_type == TYPE_CORE) ||
+                  (target_type == TYPE_PORE)))
+            {
+                HWAS_INF("Skipping deconfigureTarget: atRuntime with unexpected target %.8X type %d -- SKIPPING",
+                    get_huid(&i_target), target_type);
+                break;
+            }
+        }
+
+        const ATTR_DECONFIG_GARDABLE_type lDeconfigGardable =
+                i_target.getAttr<ATTR_DECONFIG_GARDABLE>();
+        const uint8_t lPresent =
+                i_target.getAttr<ATTR_HWAS_STATE>().present;
+
+        if (!lDeconfigGardable || !lPresent)
+        {
+            // Target is not Deconfigurable. Create an error
+            HWAS_ERR("Target %.8X not Deconfigurable (ATTR_DECONFIG_GARDABLE=%d, present=%d)",
+                get_huid(&i_target), lDeconfigGardable, lPresent);
+
+            /*@
+             * @errortype
+             * @moduleid          HWAS::MOD_DECONFIG_GARD
+             * @reasoncode        HWAS::RC_TARGET_NOT_DECONFIGURABLE
+             * @devdesc           Attempt to deconfigure a target that is not
+             *                    deconfigurable or not present.
+             * @userdata1[00:31]  HUID of input target
+             * @userdata1[32:63]  GARD errlog EID
+             * @userdata2[00:31]  ATTR_DECONFIG_GARDABLE
+             * @userdata2[32:63]  ATTR_HWAS_STATE.present
+
+             */
+            const uint64_t userdata1 =
+                (static_cast<uint64_t>(get_huid(&i_target)) << 32) | i_errlEid;
+            const uint64_t userdata2 =
+                (static_cast<uint64_t>(lDeconfigGardable) << 32) | lPresent;
+            l_pErr = hwasError(
+                ERRL_SEV_INFORMATIONAL,
+                HWAS::MOD_DECONFIG_GARD,
+                HWAS::RC_TARGET_NOT_DECONFIGURABLE,
+                userdata1, userdata2);
+            break;
+        }
+
+        // all ok - do the work
+        HWAS_MUTEX_LOCK(iv_mutex);
+
+        // Deconfigure the Target
+        _deconfigureTarget(i_target, i_errlEid, o_targetDeconfigured,
+                i_deconfigRule);
+
+        // Deconfigure other Targets by association
+        _deconfigureByAssoc(i_target, i_errlEid, i_deconfigRule);
+
+        HWAS_MUTEX_UNLOCK(iv_mutex);
+    }
+    while (0);
+
+    return l_pErr;
+} // deconfigureTarget
+
+//******************************************************************************
+void DeconfigGard::_deconfigureTarget(
+        Target & i_target,
+        const uint32_t i_errlEid,
+        bool *o_targetDeconfigured /* default is NULL */,
+        const DeconfigureFlags i_deconfigRule /* default is NOT_AT_RUNTIME */,
+        bool i_shouldUpdateAttrPG /* default is false */)
+{
+    HWAS_INF("Deconfiguring Target %.8X, errlEid 0x%X",
+            get_huid(&i_target), i_errlEid);
+
+    // Set the Target state to non-functional. The assumption is that it is
+    // not possible for another thread (other than deconfigGard) to be
+    // updating HWAS_STATE concurrently.
+    HwasState l_state = i_target.getAttr<ATTR_HWAS_STATE>();
+
+    // if the rule is DUMP_AT_RUNTIME and we got here, then we are at runtime.
+    if (i_deconfigRule == DUMP_AT_RUNTIME)
+    {
+        l_state.dumpfunctional = 1;
+    }
+    else
+    {
+        l_state.dumpfunctional = 0;
+    }
+
+    // Update ATTR_PG via gard only if i_shouldUpdateAttrPG is true
+    if (i_shouldUpdateAttrPG == true)
+    {
+        updateAttrPG(i_target, false);
+    }
+
+    if (!l_state.functional)
+    {
+        HWAS_DBG(
+        "Target HWAS_STATE already has functional=0; deconfiguredByEid=0x%X",
+                l_state.deconfiguredByEid);
+
+        if (i_deconfigRule != NOT_AT_RUNTIME)
+        {
+            // if FULLY_AT_RUNTIME or DUMP_AT_RUNTIME, then the dumpfunctional
+            // state changed, so do the setAttr
+            i_target.setAttr<ATTR_HWAS_STATE>(l_state);
+        }
+
+        if (l_state.deconfiguredByEid == DECONFIGURED_BY_FIELD_CORE_OVERRIDE)
+        {
+            // A child target was deconfig by FCO, and parent is being deconfig
+            // with a non-FCO reason .. override with parent's EID
+            HWAS_INF("HUID %.8X, Overriding deconfigByEid from FCO->%.8X",
+                     get_huid(&i_target), i_errlEid);
+            l_state.deconfiguredByEid = i_errlEid;
+            i_target.setAttr<ATTR_HWAS_STATE>(l_state);
+        }
+    }
+    else
+    {
+        if(i_deconfigRule == SPEC_DECONFIG)
+        {
+            HWAS_INF("Setting speculative deconfig");
+            l_state.specdeconfig = 1;
+            l_state.deconfiguredByEid = i_errlEid;
+            i_target.setAttr<ATTR_HWAS_STATE>(l_state);
+        }
+        else
+        {
+            HWAS_INF(
+                    "Setting Target HWAS_STATE: functional=0, deconfiguredByEid=0x%X",
+                    i_errlEid);
+
+            l_state.functional = 0;
+            l_state.specdeconfig = 0;
+            l_state.deconfiguredByEid = i_errlEid;
+
+            i_target.setAttr<ATTR_HWAS_STATE>(l_state);
+
+            if (o_targetDeconfigured)
+            {
+                *o_targetDeconfigured = true;
+            }
+
+            // if this is a real error, trigger a reconfigure loop
+            if (i_errlEid & DECONFIGURED_BY_PLID_MASK)
+            {
+                // Set RECONFIGURE_LOOP attribute to indicate it was caused by
+                // a hw deconfigure
+                TARGETING::Target* l_pTopLevel = NULL;
+                TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
+                TARGETING::ATTR_RECONFIGURE_LOOP_type l_reconfigAttr =
+                        l_pTopLevel->getAttr<ATTR_RECONFIGURE_LOOP>();
+                // 'OR' values in case of multiple reasons for reconfigure
+                l_reconfigAttr |= TARGETING::RECONFIGURE_LOOP_DECONFIGURE;
+                l_pTopLevel->setAttr<ATTR_RECONFIGURE_LOOP>(l_reconfigAttr);
+            }
+
+            // Do any necessary Deconfigure Actions
+            _doDeconfigureActions(i_target); /*no effect*/ // to quiet BEAM
+            // If target being deconfigured is an x/a/o bus endpoint
+            if ((TYPE_XBUS == i_target.getAttr<ATTR_TYPE>()) ||
+                (TYPE_ABUS == i_target.getAttr<ATTR_TYPE>()) ||
+                (TYPE_OBUS == i_target.getAttr<ATTR_TYPE>()))
+            {
+                // Set flag indicating x/a/o bus endpoint deconfiguration
+                iv_XAOBusEndpointDeconfigured = true;
+            }
+
+            // The target has been successfully de-configured,
+            // perform any other post-deconfig operations,
+            // e.g. syncing state with other subsystems
+            // TODO RTC:184521: Allow function platPostDeconfigureTarget
+            // to run once FSP supports it
+            // Remove the #ifdef ... #endif, once FSP is ready for code
+            #ifdef __HOSTBOOT_MODULE
+                platPostDeconfigureTarget(&i_target);
+            #endif
+        }
+    }
+} // _deconfigureTarget
+
+//******************************************************************************
+void DeconfigGard::_doDeconfigureActions(Target & i_target)
+{
+ // Placeholder for any necessary deconfigure actions
+// @TODO: RTC 244854: Enable once runtime IPMI is enabled
+#ifndef __HOSTBOOT_RUNTIME
+#ifdef CONFIG_BMC_IPMI
+    // set the BMC status for this target
+    SENSOR::StatusSensor l_sensor( &i_target );
+
+    // can assume the presence sensor is in the correct state, just
+    // assert that it is now non functional.
+    errlHndl_t err = l_sensor.setStatus( SENSOR::StatusSensor::NON_FUNCTIONAL );
+
+    if(err)
+    {
+        HWAS_ERR("Error returned from call to set sensor status for HUID 0x%x",
+                 TARGETING::get_huid( &i_target) );
+        err->collectTrace(HWAS_COMP_NAME, 512);
+        errlCommit(err, HWAS_COMP_ID);
+    }
+#endif  // end #ifndef CONFIG_BMC_IPMI
+#endif  // end #ifndef __HOSTBOOT_RUNTIME
+} // _doDeconfigureActions
+
+//******************************************************************************
+void DeconfigGard::_deconfigureByAssoc(
+        Target & i_target,
+        const uint32_t i_errlEid,
+        const DeconfigureFlags i_deconfigRule)
+{
+    HWAS_INF("_deconfigureByAssoc for %.8X (i_deconfigRule %d)",
+            get_huid(&i_target), i_deconfigRule);
+
+    // some common variables used below
+    TargetHandleList pChildList;
+    PredicateHwas isFunctional;
+    isFunctional.functional(true);
+    if(i_deconfigRule == SPEC_DECONFIG)
+    {
+        isFunctional.specdeconfig(false);
+    }
+
+    // Retrieve the target type from the given target
+    const TYPE l_targetType = i_target.getAttr<ATTR_TYPE>();
+    const uint32_t l_targetHuid = get_huid(&i_target);
+
+    // If there are child targets deconfig by FCO, override the reason
+    // with that of the parent's deconfg EID
+    PredicateHwas isFCO;
+    isFCO.present(true).functional(false)
+         .deconfiguredByEid(DECONFIGURED_BY_FIELD_CORE_OVERRIDE);
+
+    PredicatePostfixExpr funcOrFco;
+    funcOrFco.push(&isFunctional).push(&isFCO).Or();
+
+    // note - ATTR_DECONFIG_GARDABLE is NOT checked for all 'by association'
+    // deconfigures, as that attribute is only for direct deconfigure requests.
+
+    // find all CHILD targets and deconfigure them
+    targetService().getAssociated(pChildList, &i_target,
+        TargetService::CHILD, TargetService::ALL, &funcOrFco);
+
+    // Temporary list for OMI_CHILD and PAUC_CHILD since the
+    // getChildxxxTargetsByState functions replace instead of append to the
+    // list passed in
+    TargetHandleList pTempList;
+
+    // Since OMICs and OMIs share special relations OMI_CHILD and OMIC_PARENT,
+    // they will only show up if those relations are used and not the regular
+    // CHILD and PARENT relations.
+    if (l_targetType == TYPE_OMIC)
+    {
+        // Append OMI targets to the temp list.
+        getChildOmiTargetsByState(pTempList, &i_target, CLASS_NA,
+                                  TYPE_OMI, UTIL_FILTER_FUNCTIONAL);
+    }
+
+    // Since PAUCs and OMICs share special relations PAUC_CHILD and PAUC_PARENT,
+    // they will only show up if those relations are used and not the regular
+    // CHILD and PARENT relations.
+    else if (l_targetType == TYPE_PAUC)
+    {
+        // Add OMIC targets to the temp list.
+        getChildPaucTargetsByState(pTempList, &i_target, CLASS_NA,
+                                  TYPE_OMIC, UTIL_FILTER_FUNCTIONAL);
+    }
+
+    // Append the temporary list to the child list
+    if (!pTempList.empty())
+    {
+        pChildList.insert(pChildList.end(), pTempList.begin(), pTempList.end());
+    }
+
+    for (TargetHandleList::iterator pChild_it = pChildList.begin();
+            pChild_it != pChildList.end();
+            ++pChild_it)
+    {
+        TargetHandle_t pChild = *pChild_it;
+
+        HWAS_INF("_deconfigureByAssoc %.8X _deconfigureTarget on CHILD: %.8X",
+                 l_targetHuid, get_huid(pChild));
+        _deconfigureTarget(*pChild, i_errlEid, NULL,
+                i_deconfigRule);
+
+        // Deconfigure other Targets by association
+        _deconfigureByAssoc(*pChild, i_errlEid, i_deconfigRule);
+    } // for CHILD
+
+    if ((i_deconfigRule == NOT_AT_RUNTIME) ||
+        (i_deconfigRule == SPEC_DECONFIG)  ||
+        (l_targetType == TYPE_FC)          ||
+        (l_targetType == TYPE_CORE))
+    {
+        // Allow any affinity deconfigure if NOT at runtime
+        //  --> if the rule is NOT_AT_RUNTIME and we got here, then we are
+        //      not at runtime.
+        //
+        // Allow all speculative deconfigures, irregardless of runtime status
+        //
+        // Allow affinity deconfig of FC and CORE targets,
+        // regardless of the runtime status
+
+        // Work deconfigure down to its children
+        // find all CHILD_BY_AFFINITY targets and deconfigure them
+        targetService().getAssociated(pChildList, &i_target,
+            TargetService::CHILD_BY_AFFINITY, TargetService::ALL,
+            &funcOrFco);
+        for (TargetHandleList::iterator pChild_it = pChildList.begin();
+                pChild_it != pChildList.end();
+                ++pChild_it)
+        {
+            TargetHandle_t pChild = *pChild_it;
+
+            HWAS_INF("_deconfigureByAssoc %.8X _deconfigureTarget "
+                     "CHILD_BY_AFFINITY: %.8X",
+                    l_targetHuid, get_huid(pChild));
+            _deconfigureTarget(*pChild, i_errlEid, NULL,
+                    i_deconfigRule);
+
+            // Deconfigure other Targets by association
+            _deconfigureByAssoc(*pChild, i_errlEid, i_deconfigRule);
+        } // for CHILD_BY_AFFINITY
+
+        // Work the deconfig up the parent side (if necessary)
+        HWAS_DBG("_deconfigureByAssoc %.8X _deconfigParentAssoc", l_targetHuid);
+       _deconfigParentAssoc(i_target, i_errlEid, i_deconfigRule);
+
+    } // !i_Runtime-ish
+    else
+    {
+        HWAS_INF("_deconfigureByAssoc() - system is at runtime"
+                " skipping all association checks beyond"
+                " the CHILD");
+    }
+
+    HWAS_DBG("_deconfigureByAssoc exiting: %.8X", l_targetHuid);
+
+} // _deconfigureByAssoc
+
+//******************************************************************************
+void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
+                                        const uint32_t i_errlEid,
+                                        const DeconfigureFlags i_deconfigRule)
+{
+    HWAS_INF("_deconfigParentAssoc for %.8X (i_deconfigRule %d)",
+            get_huid(&i_target), i_deconfigRule);
+
+    // Retrieve the target type from the given target
+    TYPE l_targetType = i_target.getAttr<ATTR_TYPE>();
+
+    if ((i_deconfigRule == NOT_AT_RUNTIME) ||
+        (i_deconfigRule == SPEC_DECONFIG)  ||
+        (l_targetType == TYPE_FC)          ||
+        (l_targetType == TYPE_CORE))
+    {
+        // Allow any affinity deconfigure if NOT at runtime
+        //  --> if the rule is NOT_AT_RUNTIME and we got here, then we are
+        //      not at runtime.
+        //
+        // Allow all speculative deconfigures, irregardless of runtime status
+        //
+        // Allow affinity deconfig of FC and CORE targets,
+        // regardless of the runtime status
+
+        // Handles bus endpoint (TYPE_XBUS, TYPE_ABUS, TYPE_PSI) and
+        // memory (TYPE_MEMBUF, TYPE_MBA, TYPE_DIMM)
+        // chip  (TYPE_FC, TYPE_CORE)
+        // obus specific (TYPE_OBUS, TYPE_NPU, TYPE_SMPGROUP, TYPE_OBUS_BRICK)
+        // deconfigureByAssociation rules
+        switch (l_targetType)
+        {
+            case TYPE_CORE:
+            {
+                //
+                // In Fused Core Mode, Cores must be de-configureed
+                // in pairs
+                //
+                // In Normal Core Mode if both cores are non-functional
+                // FC should be deconfigured
+                //
+                // First get parent i.e FC
+                // Other errors may have affected parent state so use
+                // UTIL_FILTER_ALL
+                TargetHandleList pParentFcList;
+                getParentAffinityTargetsByState(pParentFcList, &i_target,
+                        CLASS_UNIT, TYPE_FC, UTIL_FILTER_ALL);
+                HWAS_ASSERT((pParentFcList.size() == 1),
+                    "HWAS _deconfigParentAssoc: pParentFcList != 1");
+                Target *l_parentFC = pParentFcList[0];
+
+                // General predicate to determine if target is functional
+                PredicateIsFunctional isFunctional;
+
+                if (isFunctional(l_parentFC))
+                {
+                    // Fused Core Mode
+                    if (is_fused_mode())
+                    {
+                        // If parent is functional, deconfigure it
+                        _deconfigureTarget(*l_parentFC,
+                           i_errlEid, NULL,i_deconfigRule);
+                        _deconfigureByAssoc(*l_parentFC,
+                          i_errlEid,i_deconfigRule);
+                        // After deconfiguring FC the other FC of EQ
+                        // is non-functional, case TYPE_FC takes care
+                    }
+                    // Normal Core Mode
+                    // if both cores of FC non-functional, de-config FC
+                    else if (!anyChildFunctional(*l_parentFC))
+                    {
+                       uint32_t l_errlEidOverride = i_errlEid;
+
+
+                       // If any sibling is not functional due to FCO, override
+                       // the deconfig by Eid reason of its parent to FCO
+                       if (anyChildFCO(*l_parentFC))
+                       {
+                           HWAS_INF("Override FC %.8X deconfigByEid %.8X->FCO",
+                                    get_huid(l_parentFC), i_errlEid);
+                           l_errlEidOverride =
+                                    DECONFIGURED_BY_FIELD_CORE_OVERRIDE;
+                       }
+
+                       // If parent is functional, deconfigure it
+                       _deconfigureTarget(*l_parentFC,
+                          l_errlEidOverride, NULL, i_deconfigRule);
+                       _deconfigureByAssoc(*l_parentFC,
+                          l_errlEidOverride, i_deconfigRule);
+                    } // is_fused
+                } // isFunctional
+                break;
+            } // TYPE_CORE
+
+            case TYPE_DIMM:
+            {
+                // Whenever a DIMM is deconfigured, we will also deconfigure
+                // the immediate parent target (e.g. MCA, MBA, etc) to ensure
+                // there is not an unbalanced load on the ports.
+
+                // General predicate to determine if target is functional
+                PredicateIsFunctional isFunctional;
+
+                //  get immediate parent (MCA/MBA/etc)
+                TargetHandleList pParentList;
+                PredicatePostfixExpr funcParent;
+                funcParent.push(&isFunctional);
+                targetService().getAssociated(pParentList,
+                        &i_target,
+                        TargetService::PARENT_BY_AFFINITY,
+                        TargetService::IMMEDIATE,
+                        &funcParent);
+
+                HWAS_ASSERT((pParentList.size() <= 1),
+                    "HWAS _deconfigParentAssoc: pParentList > 1");
+
+                // if parent hasn't already been deconfigured
+                //  then deconfigure it
+                if (!pParentList.empty())
+                {
+                    const Target *l_parentMba = pParentList[0];
+                    HWAS_INF("_deconfigParentAssoc DIMM parent: %.8X",
+                             get_huid(l_parentMba));
+                    _deconfigureTarget(const_cast<Target &> (*l_parentMba),
+                                       i_errlEid, NULL, i_deconfigRule);
+                    _deconfigureByAssoc(const_cast<Target &> (*l_parentMba),
+                                        i_errlEid, i_deconfigRule);
+                }
+
+                break;
+            } // TYPE_DIMM
+
+            case TYPE_OMI:
+            {
+                TargetHandleList pOmicParentList;
+                getParentOmicTargetsByState(pOmicParentList,
+                        &i_target, CLASS_NA, TYPE_OMIC,
+                        UTIL_FILTER_ALL);
+
+                TargetHandle_t parentOmic = pOmicParentList[0];
+
+                HWAS_ASSERT((pOmicParentList.size() == 1),
+                    "HWAS _deconfigParentAssoc: pOmicParentList != 1");
+
+                if (!anyChildFunctional(*parentOmic, TargetService::OMI_CHILD))
+                {
+                    _deconfigureTarget(*parentOmic, i_errlEid, NULL,
+                                       i_deconfigRule);
+                }
+
+
+                break;
+            } // TYPE_OMI
+
+            case TYPE_PAU:
+            {
+                // If PAU 0, 4, and 5 are all deconfigured then nest 1's NMMU is
+                // power-gated and we deconfigure it here.
+
+                const Target* const l_chip = getParentChip(&i_target);
+
+                Target* const l_nmmu1 = shouldPowerGateNMMU1(*l_chip);
+                if (l_nmmu1)
+                {
+                    _deconfigureTarget(*l_nmmu1,
+                                       i_errlEid,
+                                       nullptr,
+                                       i_deconfigRule);
+                }
+            } // TYPE_PAU
+
+            default:
+            {
+              // TYPE_MEMBUF, TYPE_MCA, TYPE_MCS, TYPE_MC, TYPE_MI, TYPE_DMI,
+              // TYPE_MBA, TYPE_PHB, TYPE_OBUS_BRICK, TYPE_EQ
+              _deconfigAffinityParent(i_target, i_errlEid, i_deconfigRule);
+            }
+            break;
+        } // switch
+    }
+    HWAS_DBG("_deconfigureParentAssoc exiting: %.8X", get_huid(&i_target));
+} // _deconfigParentAssoc
+
+//******************************************************************************
+bool DeconfigGard::anyChildFunctional(Target & i_parent,
+                            TargetService::ASSOCIATION_TYPE i_type)
+{
+    bool retVal = false;
+    TargetHandleList pChildList;
+    PredicateHwas isFunctional;
+    isFunctional.functional(true);
+
+    if (isFunctional(&i_parent))
+    {
+        // find all CHILD targets, that match the predicate
+        // if any of them are functional return true
+        // if all of them are non-functional return false
+        targetService().getAssociated(pChildList, &i_parent, i_type,
+                                      TargetService::ALL, &isFunctional);
+        if (pChildList.size() >= 1)
+        {
+            retVal = true;
+            if (i_type == TargetService::CHILD_BY_AFFINITY)
+            {
+                HWAS_INF("anyChildFunctional: found %d functional children of 0x%.8X (child 0: 0x%.8X)",
+                    pChildList.size(), get_huid(&i_parent), get_huid(pChildList[0]));
+            }
+        }
+    }
+    return retVal;
+} // anyChildFunctional
+
+//******************************************************************************
+bool DeconfigGard::anyChildFCO (Target & i_parent)
+{
+    bool retVal = false;
+
+    TargetHandleList pChildList;
+    PredicateHwas predFCO;
+    predFCO.present(true)
+           .functional(false)
+           .deconfiguredByEid(DECONFIGURED_BY_FIELD_CORE_OVERRIDE);
+
+    // find all CHILD targets, that match the predicate
+    // if any of them are FCO return true
+    // if none of them are FCO return false
+    targetService().getAssociated(pChildList, &i_parent,
+        TargetService::CHILD, TargetService::ALL, &predFCO);
+
+    if (pChildList.size() >= 1)
+    {
+        retVal = true;
+    }
+
+    return retVal;
+} // anyChildFCO
+
+//******************************************************************************
+void DeconfigGard::_deconfigAffinityParent( TARGETING::Target & i_child,
+                                        const uint32_t i_errlEid,
+                                        const DeconfigureFlags i_deconfigRule )
+{
+    Target * l_parent = NULL;
+    TARGETING::ATTR_PARENT_DECONFIG_RULES_type l_child_rules =
+        i_child.getAttr<ATTR_PARENT_DECONFIG_RULES>();
+
+    // Does this deconfigured child allow the deconfig to rollup to its parent
+    if (l_child_rules.deconfigureParent)
+    {
+        // General predicate to determine if target is functional
+        PredicateIsFunctional isFunctional;
+
+        l_parent = getImmediateParentByAffinity(&i_child);
+
+        if ((l_parent != NULL) && isFunctional(l_parent))
+        {
+            TARGETING::ATTR_PARENT_DECONFIG_RULES_type l_parent_rules =
+                  l_parent->getAttr<ATTR_PARENT_DECONFIG_RULES>();
+            // Does the parent allow its deconfigured children to rollup their
+            // deconfigure to itself?  This is a safety check to prevent
+            // essential resources from being deconfigured via rollup.
+            if (l_parent_rules.childRollupAllowed)
+            {
+                // Now check if parent has any functional affinity children
+                // that match the same type/class as the child
+                if ( !anyFunctionalChildLikeMe(l_parent, &i_child) )
+                {
+                    bool isDeconfigured = false;
+                    HWAS_INF("_deconfigAffinityParent: deconfig functional parent 0x%.8X, EID 0x%.8X",
+                        get_huid(l_parent), i_errlEid);
+                    _deconfigureTarget(*l_parent, i_errlEid,
+                                       &isDeconfigured, i_deconfigRule);
+                    if (isDeconfigured)
+                    {
+                        HWAS_INF("_deconfigAffinityParent: roll-up/down parent 0x%.8X deconfig, EID 0x%.8X",
+                            get_huid(l_parent), i_errlEid);
+                        // need to account for possible non-like functional children
+                        _deconfigureByAssoc(*l_parent, i_errlEid, i_deconfigRule);
+                    }
+                }
+                else
+                {
+                    HWAS_INF("_deconfigAffinityParent: functional child found for parent 0x%.8X, EID 0x%.8X",
+                        get_huid(l_parent), i_errlEid);
+                }
+            }
+            else
+            {
+                HWAS_INF("_deconfigAffinityParent: parent 0x%.8X does NOT allow deconfig via child rollup",
+                  get_huid(l_parent));
+            }
+        }
+        else
+        {
+            if (l_parent != NULL)
+            {
+                HWAS_INF("_deconfigAffinityParent: non-functional parent 0x%.8X of 0x%.8X, EID 0x%.8X",
+                    get_huid(l_parent), get_huid(&i_child), i_errlEid);
+            }
+        }
+    }
+    else
+    {
+       HWAS_INF("_deconfigAffinityParent: do not rollup deconfigured child 0x%.8X, EID 0x%.8X",
+            get_huid(&i_child), i_errlEid);
+    }
+} // _deconfigAffinityParent
+
+//******************************************************************************
+bool DeconfigGard::anyFunctionalChildLikeMe(const Target * i_my_parent,
+                                            const Target * i_child)
+{
+    bool retVal = false;
+    TargetHandleList pChildList;
+    PredicateHwas isFunctional;
+    isFunctional.functional(true);
+
+    if (isFunctional(i_my_parent))
+    {
+        // target type and class as predicate
+        auto l_childType = i_child->getAttr<ATTR_TYPE>();
+        auto l_childClass = i_child->getAttr<ATTR_CLASS>();
+
+        PredicateCTM predChildMatch(l_childClass, l_childType);
+        PredicatePostfixExpr checkExpr;
+        checkExpr.push(&predChildMatch).push(&isFunctional).And();
+
+        // find all CHILD_BY_AFFINITY targets, that match the predicate
+        // if any of them are functional return true
+        // if all of them are non-functional return false
+        targetService().getAssociated(pChildList, i_my_parent,
+                                      TargetService::CHILD_BY_AFFINITY,
+                                      TargetService::ALL,
+                                      &checkExpr);
+        if (pChildList.size() >= 1)
+        {
+            retVal = true;
+            HWAS_INF("anyFunctionalChildLikeMe: found %d functional children of 0x%.8X (child 0: 0x%.8X)",
+                    pChildList.size(), get_huid(i_my_parent), get_huid(pChildList[0]));
+        }
+    }
+    return retVal;
+} // anyFunctionalChildLikeMe
+
+//******************************************************************************
+errlHndl_t DeconfigGard::deconfigureAssocProc()
+{
+    HWAS_INF("Deconfiguring chip resources "
+             "based on fabric bus deconfigurations");
+
+    HWAS_MUTEX_LOCK(iv_mutex);
+    // call _invokeDeconfigureAssocProc() to obtain state of system,
+    // call algorithm function, and then deconfigure targets
+    // based on output
+    errlHndl_t l_pErr = _invokeDeconfigureAssocProc();
+    HWAS_MUTEX_UNLOCK(iv_mutex);
+    return l_pErr;
+} // deconfigureAssocProc
+
+//******************************************************************************
+errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(
+            TARGETING::ConstTargetHandle_t i_node,
+            bool i_doAbusDeconfig)
+{
+    HWAS_INF("Preparing data for _deconfigureAssocProc");
+    // Return error
+    errlHndl_t l_pErr = NULL;
+
+    // Define vector of ProcInfo structs to be used by
+    // _deconfigAssocProc algorithm. Declared here so
+    // "delete" can be used outside of do {...} while(0)
+    ProcInfoVector l_procInfo;
+
+    do
+    {
+        // If flag indicating deconfigured bus endpoints is not set,
+        // then there's no work for _invokeDeconfigureAssocProc to do
+        // as this implies there are no deconfigured endpoints or
+        // processors.
+        if (!(iv_XAOBusEndpointDeconfigured))
+        {
+            HWAS_INF("_invokeDeconfigureAssocProc: No deconfigured x/a/o"
+                     " bus endpoints. Deconfiguration of "
+                     "associated procs unnecessary.");
+            break;
+        }
+
+        // Clear flag as this function is called multiple times
+        iv_XAOBusEndpointDeconfigured = false;
+
+        // Get top 'starting' level target - use top level target if no
+        // i_node given (hostboot)
+        Target *pTop;
+        if (i_node == NULL)
+        {
+            HWAS_INF("_invokeDeconfigureAssocProc: i_node not specified");
+            targetService().getTopLevelTarget(pTop);
+            HWAS_ASSERT(pTop, "_invokeDeconfigureAssocProc: no TopLevelTarget");
+        }
+        else
+        {
+            HWAS_INF("_invokeDeconfigureAssocProc: i_node 0x%X specified",
+                     i_node->getAttr<ATTR_HUID>());
+            pTop = const_cast<Target *>(i_node);
+        }
+
+        // Define and populate vector of procs
+        // Define predicate
+        PredicateCTM predProc(CLASS_CHIP, TYPE_PROC);
+        PredicateHwas predPres;
+        predPres.present(true);
+
+        // Populate vector
+        TargetHandleList l_procs;
+        targetService().getAssociated(l_procs,
+                                      pTop,
+                                      TargetService::CHILD,
+                                      TargetService::ALL,
+                                      &predProc);
+
+        // Sort by HUID
+        std::sort(l_procs.begin(),
+                  l_procs.end(), compareTargetHuid);
+
+        // General predicate to determine if target is functional
+        PredicateIsFunctional isFunctional;
+
+        // Define and populate vector of present A bus endpoint chiplets and
+        // all X bus endpoint chiplets
+        PredicateCTM predXbus(CLASS_UNIT, TYPE_XBUS);
+        PredicateCTM predAbus(CLASS_UNIT, TYPE_ABUS);
+        PredicatePostfixExpr busses;
+        busses.push(&predAbus).push(&predPres).And().push(&predXbus).Or();
+
+        // Iterate through procs and populate l_procInfo vector with system
+        // information regarding procs to be used by _deconfigAssocProc
+        // algorithm.
+        ProcInfoVector l_procInfo;
+        for (TargetHandleList::const_iterator
+             l_procsIter = l_procs.begin();
+             l_procsIter != l_procs.end();
+             ++l_procsIter)
+        {
+            ProcInfo l_ProcInfo = ProcInfo();
+            // Iterate through present procs and populate structs in l_procInfo
+            // Target pointer
+            l_ProcInfo.iv_pThisProc =
+                *l_procsIter;
+            // HUID
+            l_ProcInfo.procHUID =
+                (*l_procsIter)->getAttr<ATTR_HUID>();
+            // FABRIC_GROUP_ID
+            l_ProcInfo.procFabricGroup =
+                (*l_procsIter)->getAttr<ATTR_FABRIC_GROUP_ID>();
+            // FABRIC_CHIP_ID
+            l_ProcInfo.procFabricChip =
+                (*l_procsIter)->getAttr<ATTR_FABRIC_CHIP_ID>();
+            // HWAS state
+            l_ProcInfo.iv_deconfigured =
+                !(isFunctional(*l_procsIter));
+            // iv_masterCapable - this includes both master and alternate master
+            // This is done to ensure that both the master and alt master don't
+            // get deconfigured in _deconfigAssocProc()
+            if ( (*l_procsIter)->getAttr<ATTR_PROC_MASTER_TYPE>() ==
+                 PROC_MASTER_TYPE_NOT_MASTER)
+            {
+                l_ProcInfo.iv_masterCapable = false;
+            }
+            else
+            {
+                l_ProcInfo.iv_masterCapable = true;
+            }
+            HWAS_INF( "_invokeDeconfigureAssocProc> %.8X : G=%d, C=%d, D=%d, M=%d", l_ProcInfo.procHUID, l_ProcInfo.procFabricGroup, l_ProcInfo.procFabricChip, l_ProcInfo.iv_deconfigured, l_ProcInfo.iv_masterCapable );
+            l_procInfo.push_back(l_ProcInfo);
+        }
+        HWAS_INF("----------------------------------------------------------");
+        // Iterate through l_procInfo and populate child bus endpoint
+        // chiplet information
+        for (ProcInfoVector::iterator
+             l_procInfoIter = l_procInfo.begin();
+             l_procInfoIter != l_procInfo.end();
+             ++l_procInfoIter)
+        {
+            // Populate vector of bus endpoints associated with this proc
+            TargetHandleList l_busChiplets;
+            targetService().getAssociated(l_busChiplets,
+                                         (*l_procInfoIter).iv_pThisProc,
+                                         TargetService::CHILD,
+                                         TargetService::IMMEDIATE,
+                                         &busses);
+            // Sort by HUID
+            std::sort(l_busChiplets.begin(),
+                l_busChiplets.end(), compareTargetHuid);
+            // iv_pA/XProcs[] and iv_A/XDeconfigured[] indexes
+            uint8_t xBusIndex = 0;
+            uint8_t aBusIndex = 0;
+
+            // Iterate through bus endpoint chiplets
+            for (TargetHandleList::const_iterator
+                 l_busIter = l_busChiplets.begin();
+                 l_busIter != l_busChiplets.end();
+                 ++l_busIter)
+            {
+                // Declare peer endpoint target
+                const Target * l_pTarget = *l_busIter;
+                // Get peer endpoint target
+                const Target * l_pDstTarget = l_pTarget->
+                              getAttr<ATTR_PEER_TARGET>();
+                // Only interested in endpoint chiplets which lead to a
+                // present proc:
+                // If no peer for this endpoint or peer endpoint
+                // is not present, continue
+                if ((!l_pDstTarget) ||
+                    (!(l_pDstTarget->getAttr<ATTR_HWAS_STATE>().present)))
+                {
+                    if (l_pDstTarget == nullptr)
+                    {
+                      HWAS_INF("Proc %.8X Skipping non-peer endpt of BUS %.8X",
+                        get_huid((*l_procInfoIter).iv_pThisProc),
+                        l_pTarget->getAttr<ATTR_HUID>());
+                    }
+                    else
+                    {
+                      HWAS_INF("Proc %.8X Skipping non-present endpt target %.8X of %.8X BUS",
+                          get_huid((*l_procInfoIter).iv_pThisProc),
+                          l_pDstTarget->getAttr<ATTR_HUID>(),
+                          l_pTarget->getAttr<ATTR_HUID>());
+                    }
+
+                    continue;
+                }
+
+                // Chiplet has a valid (present) peer
+                // Handle iv_pA/XProcs[]:
+                // Define target for peer proc
+                const Target* l_pPeerProcTarget;
+                // Get parent chip from xbus chiplet
+                l_pPeerProcTarget = getParentChip(l_pDstTarget);
+
+                // Find matching ProcInfo struct
+                for (ProcInfoVector::iterator
+                     l_matchProcInfoIter = l_procInfo.begin();
+                     l_matchProcInfoIter != l_procInfo.end();
+                     ++l_matchProcInfoIter)
+                {
+                    // If Peer proc target matches this ProcInfo struct's
+                    // Identifier target
+                    if (l_pPeerProcTarget ==
+                        (*l_matchProcInfoIter).iv_pThisProc)
+                    {
+                        // Update struct of current proc to point to this
+                        // struct, and also handle iv_A/XDeconfigured[]
+                        // and increment appropriate index:
+                        if (TYPE_XBUS == (*l_busIter)->getAttr<ATTR_TYPE>())
+                        {
+                            (*l_procInfoIter).iv_pXProcs[xBusIndex] =
+                                &(*l_matchProcInfoIter);
+                            // HWAS state
+                            (*l_procInfoIter).iv_XDeconfigured[xBusIndex] =
+                                !(isFunctional(*l_busIter));
+                            HWAS_INF( "%.8X add X[%d]> %.8X : G=%d, C=%d, D=%d, M=%d", (*l_procInfoIter).procHUID, xBusIndex, (*l_matchProcInfoIter).procHUID, (*l_matchProcInfoIter).procFabricGroup, (*l_matchProcInfoIter).procFabricChip, (*l_matchProcInfoIter).iv_deconfigured, (*l_matchProcInfoIter).iv_masterCapable );
+                            xBusIndex++;
+                        }
+                        // If subsystem owns abus deconfigs consider them
+                        else if (i_doAbusDeconfig &&
+                                TYPE_ABUS == (*l_busIter)->getAttr<ATTR_TYPE>())
+                        {
+                            (*l_procInfoIter).iv_pAProcs[aBusIndex] =
+                                &(*l_matchProcInfoIter);
+                            // HWAS state
+                            (*l_procInfoIter).iv_ADeconfigured[aBusIndex] =
+                               !(isFunctional(*l_busIter));
+                            HWAS_INF( "%.8X add A[%d]> %.8X : G=%d, C=%d, D=%d, M=%d", (*l_procInfoIter).procHUID, aBusIndex, (*l_matchProcInfoIter).procHUID, (*l_matchProcInfoIter).procFabricGroup, (*l_matchProcInfoIter).procFabricChip, (*l_matchProcInfoIter).iv_deconfigured, (*l_matchProcInfoIter).iv_masterCapable );
+                            aBusIndex++;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        // call _deconfigureAssocProc() to run deconfig algorithm
+        // based on current state of system obtained above
+        l_pErr = _deconfigureAssocProc(l_procInfo);
+        if (l_pErr)
+        {
+            HWAS_ERR("Error from _deconfigureAssocProc ");
+            break;
+        }
+
+        // Iterate through l_procInfo and deconfigure any procs
+        // which _deconfigureAssocProc marked for deconfiguration
+        for (ProcInfoVector::const_iterator
+             l_procInfoIter = l_procInfo.begin();
+             l_procInfoIter != l_procInfo.end();
+             ++l_procInfoIter)
+        {
+            if ((*l_procInfoIter).iv_deconfigured &&
+                (isFunctional((*l_procInfoIter).iv_pThisProc)))
+            {
+                // Deconfigure marked procs
+                HWAS_INF("_invokeDeconfigureAssocProc is "
+                                "deconfiguring proc: %.8X",
+                    get_huid((*l_procInfoIter).iv_pThisProc));
+                _deconfigureTarget(*(*l_procInfoIter).
+                                iv_pThisProc, DECONFIGURED_BY_BUS_DECONFIG);
+                _deconfigureByAssoc(*(*l_procInfoIter).
+                                iv_pThisProc, DECONFIGURED_BY_BUS_DECONFIG);
+            }
+        }
+    }while(0);
+
+    return l_pErr;
+} // _invokeDeconfigureAssocProc
+
+//******************************************************************************
+errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
+{
+    // Defined for possible use in future applications
+    errlHndl_t l_errlHdl = NULL;
+
+    do
+    {
+        // STEP 1:
+        // Find master proc and iterate through its bus endpoint chiplets.
+        // For any chiplets which are deconfigured, mark peer proc as
+        // deconfigured
+
+        // Find master proc
+        ProcInfo * l_pMasterProcInfo = NULL;
+        for (ProcInfoVector::iterator
+                 l_procInfoIter = io_procInfo.begin();
+                 l_procInfoIter != io_procInfo.end();
+                 ++l_procInfoIter)
+        {
+            if ( ((*l_procInfoIter).iv_masterCapable) &&
+                 (!(*l_procInfoIter).iv_deconfigured) )
+            {
+                // Save for subsequent use
+                l_pMasterProcInfo = &(*l_procInfoIter);
+                // Iterate through bus endpoints, and if deconfigured,
+                // mark peer proc to be deconfigured
+                for (uint8_t i = 0; i < NUM_A_BUSES; i++)
+                {
+                    if ((*l_procInfoIter).iv_ADeconfigured[i])
+                    {
+                        HWAS_INF("deconfigureAssocProc marked proc: "
+                                 "%.8X for deconfiguration "
+                                 "due to deconfigured abus endpoint "
+                                 "on master proc.",
+                                 (*l_procInfoIter).iv_pAProcs[i]->procHUID);
+                        (*l_procInfoIter).iv_pAProcs[i]->
+                                        iv_deconfigured = true;
+                    }
+                }
+                for (uint8_t i = 0; i < NUM_X_BUSES; i++)
+                {
+                    if ((*l_procInfoIter).iv_XDeconfigured[i])
+                    {
+                        HWAS_INF("deconfigureAssocProc marked proc: "
+                                 "%.8X for deconfiguration "
+                                 "due to deconfigured xbus endpoint "
+                                 "on master proc.",
+                                 (*l_procInfoIter).iv_pXProcs[i]->procHUID);
+                        (*l_procInfoIter).iv_pXProcs[i]->
+                                        iv_deconfigured = true;
+                    }
+                }
+                break;
+            }
+        } // STEP 1
+
+        // If no master proc found, mark all proc as deconfigured
+        if (l_pMasterProcInfo == NULL)
+        {
+            HWAS_INF("deconfigureAssocProc: Master proc not found");
+            // Iterate through procs, and mark deconfigured all proc
+            for (ProcInfoVector::iterator
+                     l_procInfoIter = io_procInfo.begin();
+                     l_procInfoIter != io_procInfo.end();
+                     ++l_procInfoIter)
+            {
+                (*l_procInfoIter).iv_deconfigured = true;
+            }
+            // break now since all of the rest of the processing is moot.
+            break;
+        }
+
+        // STEP 2:
+        // Iterate through procs, and mark deconfigured any
+        // non-master proc which has more than one bus endpoint
+        // chiplet deconfigured
+        for (ProcInfoVector::iterator
+                 l_procInfoIter = io_procInfo.begin();
+                 l_procInfoIter != io_procInfo.end();
+                 ++l_procInfoIter)
+        {
+            // Don't deconfigure master proc
+            if ((*l_procInfoIter).iv_masterCapable)
+            {
+                continue;
+            }
+            // Don't examine previously marked proc
+            if ((*l_procInfoIter).iv_deconfigured)
+            {
+                continue;
+            }
+            // Deconfigured bus chiplet counter
+            uint8_t deconfigBusCounter = 0;
+            // Check and increment counter if A/X bus endpoints found
+            // which are deconfigured
+            for (uint8_t i = 0; i < NUM_A_BUSES; i++)
+            {
+                if ((*l_procInfoIter).iv_ADeconfigured[i])
+                {
+                    // Only increment deconfigBusCounter if peer proc exists
+                    //  and is functional
+                    if((*l_procInfoIter).iv_pAProcs[i] &&
+                      (!(*l_procInfoIter).iv_pAProcs[i]->iv_deconfigured))
+                    {
+                        deconfigBusCounter++;
+                    }
+                }
+            }
+            for (uint8_t i = 0; i < NUM_X_BUSES; i++)
+            {
+                if ((*l_procInfoIter).iv_XDeconfigured[i])
+                {
+                    // Only increment deconfigBusCounter if peer proc exists
+                    // and is functional
+                    if((*l_procInfoIter).iv_pXProcs[i] &&
+                      (!(*l_procInfoIter).iv_pXProcs[i]->iv_deconfigured))
+                    {
+                        deconfigBusCounter++;
+                    }
+                }
+            }
+            // If number of endpoints deconfigured is > 1
+            if (deconfigBusCounter > 1)
+            {
+                // Mark current proc to be deconfigured
+                HWAS_INF("deconfigureAssocProc marked proc: "
+                                 "%.8X for deconfiguration "
+                                 "due to %d deconfigured bus endpoints "
+                                 "on this proc.",
+                                 (*l_procInfoIter).procHUID,
+                                  deconfigBusCounter);
+                (*l_procInfoIter).iv_deconfigured = true;
+            }
+        }// STEP 2
+
+
+        // STEP 3:
+        // If a deconfigured bus connects two non-master procs,
+        // both of which are in the master-containing logical group,
+        // mark proc with higher HUID to be deconfigured.
+
+        // Iterate through procs and check xbus chiplets
+        for (ProcInfoVector::iterator
+                 l_procInfoIter = io_procInfo.begin();
+                 l_procInfoIter != io_procInfo.end();
+                 ++l_procInfoIter)
+        {
+            // Master proc handled in STEP 1
+            if ((*l_procInfoIter).iv_masterCapable)
+            {
+                continue;
+            }
+            // Don't examine previously marked proc
+            if ((*l_procInfoIter).iv_deconfigured)
+            {
+                continue;
+            }
+            // If current proc is on master logical group
+            if (l_pMasterProcInfo->procFabricGroup ==
+                (*l_procInfoIter).procFabricGroup)
+            {
+                // Check xbus endpoints
+                for (uint8_t i = 0; i < NUM_X_BUSES; i++)
+                {
+                    // If endpoint deconfigured and endpoint peer proc is
+                    // not already marked deconfigured
+                    if (((*l_procInfoIter).iv_XDeconfigured[i]) &&
+                        (!((*l_procInfoIter).iv_pXProcs[i]->iv_deconfigured)))
+                    {
+                        // Mark proc with higher HUID to be deconfigured
+                        if ((*l_procInfoIter).iv_pXProcs[i]->procHUID >
+                            (*l_procInfoIter).procHUID)
+                        {
+                            HWAS_INF("deconfigureAssocProc marked remote proc:"
+                                 " %.8X for deconfiguration "
+                                 "due to higher HUID than peer "
+                                 "proc on same master-containing logical "
+                                 "group.",
+                                 (*l_procInfoIter).iv_pXProcs[i]->procHUID);
+                            (*l_procInfoIter).iv_pXProcs[i]->
+                                               iv_deconfigured = true;
+                        }
+                        else
+                        {
+                            HWAS_INF("deconfigureAssocProc marked proc: "
+                                 "%.8X for deconfiguration "
+                                 "due to higher HUID than peer "
+                                 "proc on same master-containing logical "
+                                 "group.",
+                                 (*l_procInfoIter).procHUID);
+                            (*l_procInfoIter).iv_deconfigured = true;
+                        }
+                    }
+                }
+            }
+        }// STEP 3
+
+
+        // STEP 4:
+        // If a deconfigured bus connects two procs, both in the same
+        // non-master-containing logical group, mark current proc
+        // deconfigured if there is a same position proc marked deconfigured
+        // in the master logical group, else mark remote proc if there is
+        // a same position proc marked deconfigured in the master logical
+        // group otherwise, mark the proc with the higher HUID.
+
+        // Iterate through procs and, if in non-master
+        // logical group, check xbus chiplets
+        for (ProcInfoVector::iterator
+                 l_procInfoIter = io_procInfo.begin();
+                 l_procInfoIter != io_procInfo.end();
+                 ++l_procInfoIter)
+        {
+            // Don't examine previously marked proc
+            if ((*l_procInfoIter).iv_deconfigured)
+            {
+                continue;
+            }
+            // Don't examine procs on master logical group
+            if (l_pMasterProcInfo->procFabricGroup ==
+                (*l_procInfoIter).procFabricGroup)
+            {
+                continue;
+            }
+            // Check xbuses because they connect procs which
+            // are in the same logical group
+            for (uint8_t i = 0; i < NUM_X_BUSES; i++)
+            {
+                // If endpoint deconfigured and endpoint peer proc
+                // is not already marked deconfigured
+                if (((*l_procInfoIter).iv_XDeconfigured[i]) &&
+                    (!((*l_procInfoIter).iv_pXProcs[i]->iv_deconfigured)))
+                {
+                    // Variable to indicate If this step results in
+                    // finding a proc to mark deconfigured
+                    bool l_chipIDmatch = false;
+                    // Iterate through procs and examine ones found to
+                    // be on the master-containing logical group
+                    for (ProcInfoVector::const_iterator
+                         l_mGroupProcInfoIter = io_procInfo.begin();
+                         l_mGroupProcInfoIter != io_procInfo.end();
+                         ++l_mGroupProcInfoIter)
+                    {
+                        if (l_pMasterProcInfo->procFabricGroup ==
+                            (*l_mGroupProcInfoIter).procFabricGroup)
+                        {
+                            // If master logical group proc deconfigured with
+                            // same FABRIC_CHIP_ID as current proc
+                            if (((*l_mGroupProcInfoIter).iv_deconfigured) &&
+                                ((*l_mGroupProcInfoIter).procFabricChip ==
+                                 (*l_procInfoIter).procFabricChip))
+                            {
+                                // Mark current proc to be deconfigured
+                                // and set chipIDmatch
+                                HWAS_INF("deconfigureAssocProc marked proc: "
+                                 "%.8X for deconfiguration "
+                                 "due to same position deconfigured "
+                                 "proc on master-containing logical "
+                                 "group.",
+                                 (*l_procInfoIter).procHUID);
+                                (*l_procInfoIter).iv_deconfigured =\
+                                                                  true;
+                                l_chipIDmatch = true;
+                                break;
+                            }
+                            // If master logical group proc deconfigured with
+                            // same FABRIC_CHIP_ID as current proc's xbus peer
+                            // proc
+                            else if (((*l_mGroupProcInfoIter).
+                                        iv_deconfigured) &&
+                                    ((*l_mGroupProcInfoIter).
+                                        procFabricChip ==
+                                    (*l_procInfoIter).iv_pXProcs[i]->
+                                        procFabricChip))
+                            {
+                                // Mark peer proc to be deconfigured
+                                // and set chipIDmatch
+                                HWAS_INF("deconfigureAssocProc marked remote "
+                                 "proc: %.8X for deconfiguration "
+                                 "due to same position deconfigured "
+                                 "proc on master-containing logical "
+                                 "group.",
+                                 (*l_procInfoIter).iv_pXProcs[i]->procHUID);
+                                (*l_procInfoIter).iv_pXProcs[i]->
+                                 iv_deconfigured = true;
+                                l_chipIDmatch = true;
+                                break;
+                            }
+                        }
+                    }
+                    // If previous step did not find a proc to mark
+                    if (!(l_chipIDmatch))
+                    {
+                        // Deconfigure proc with higher HUID
+                        if ((*l_procInfoIter).procHUID >
+                            (*l_procInfoIter).iv_pXProcs[i]->procHUID)
+                        {
+                             HWAS_INF("deconfigureAssocProc marked proc:"
+                             " %.8X for deconfiguration "
+                             "due to higher HUID than peer "
+                             "proc on same non master-containing logical "
+                             "group.",
+                             (*l_procInfoIter).procHUID);
+                            (*l_procInfoIter).iv_deconfigured =
+                                                          true;
+                        }
+                        else
+                        {
+                            HWAS_INF("deconfigureAssocProc marked remote proc:"
+                             " %.8X for deconfiguration "
+                             "due to higher HUID than peer "
+                             "proc on same non master-containing logical "
+                             "group.",
+                             (*l_procInfoIter).iv_pXProcs[i]->procHUID);
+                            (*l_procInfoIter).iv_pXProcs[i]->
+                            iv_deconfigured = true;
+                        }
+                    }
+                }
+            }
+        }// STEP 4
+
+        // STEP 5:
+        // If a deconfigured bus connects two procs on different logical groups,
+        // and neither proc is the master proc: If current proc's xbus peer
+        // proc is marked as deconfigured, mark current proc. Else, mark
+        // abus peer proc.
+
+        // Iterate through procs and check for deconfigured abus endpoints
+        for (ProcInfoVector::iterator
+                 l_procInfoIter = io_procInfo.begin();
+                 l_procInfoIter != io_procInfo.end();
+                 ++l_procInfoIter)
+        {
+            // Master proc handled in STEP 1
+            if ((*l_procInfoIter).iv_masterCapable)
+            {
+                continue;
+            }
+            // Don't examine procs which are already marked
+            if ((*l_procInfoIter).iv_deconfigured)
+            {
+                continue;
+            }
+            // Check abuses because they connect procs which are in
+            // different logical groups
+            for (uint8_t i = 0; i < NUM_A_BUSES; i++)
+            {
+                // If endpoint deconfigured and endpoint peer proc
+                // is not already marked deconfigured
+                if (((*l_procInfoIter).iv_ADeconfigured[i]) &&
+                    (!((*l_procInfoIter).iv_pAProcs[i]->iv_deconfigured)))
+                {
+                    // Check XBUS peer
+                    bool l_xbusPeerProcDeconfigured = false;
+                    for (uint8_t j = 0; j < NUM_X_BUSES; j++)
+                    {
+                        // If peer proc exists
+                        if ((*l_procInfoIter).iv_pXProcs[j])
+                        {
+                            // If xbus peer proc deconfigured
+                            if ((*l_procInfoIter).iv_pXProcs[j]->
+                                                    iv_deconfigured)
+                            {
+                                // Set xbusPeerProcDeconfigured and deconfigure
+                                // current proc
+                                 HWAS_INF("deconfigureAssocProc marked proc:"
+                                 " %.8X for deconfiguration "
+                                 "due to deconfigured xbus peer proc.",
+                                 (*l_procInfoIter).procHUID);
+                                l_xbusPeerProcDeconfigured = true;
+                                (*l_procInfoIter).iv_deconfigured = true;
+                                break;
+                            }
+                        }
+                    }
+                    // If previous step did not result in marking a proc
+                    // mark abus peer proc
+                    if (!(l_xbusPeerProcDeconfigured))
+                    {
+                        HWAS_INF("deconfigureAssocProc marked "
+                             "remote proc: %.8X for deconfiguration "
+                             "due to functional xbus peer proc.",
+                             (*l_procInfoIter).iv_pAProcs[i]->procHUID);
+                        (*l_procInfoIter).iv_pAProcs[i]->
+                                          iv_deconfigured = true;
+                    }
+                }
+            }
+        }// STEP 5
+    }while(0);
+    if (!l_errlHdl)
+    {
+        // Perform SMP group balancing
+        l_errlHdl = _symmetryValidation(io_procInfo);
+    }
+    return l_errlHdl;
+} // _deconfigureAssocProc
+
+//******************************************************************************
+errlHndl_t DeconfigGard::_symmetryValidation(ProcInfoVector &io_procInfo)
+{
+    // Defined for possible use in future applications
+    errlHndl_t l_errlHdl = NULL;
+
+    // Perform SMP group balancing
+    do
+    {
+        Target* pSys;
+        targetService().getTopLevelTarget(pSys);
+        HWAS_ASSERT(pSys, "HWAS _symmetryValidation: no TopLevelTarget");
+        if ( pSys->getAttr<TARGETING::ATTR_PROC_FABRIC_BROADCAST_MODE>() ==
+             TARGETING::PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_GROUP )
+        {
+          // When CHIP_IS_GROUP is set, that means a single fabric CHIP
+          // per GROUP (or NODE). If we apply symmetry deconfig, it will
+          // deconfig all the other chips because they all have the same
+          // relative position to group.
+
+          break;
+        }
+
+        // STEP 1:
+        // If a proc is deconfigured in a logical group
+        // containing the master proc, iterate through all procs
+        // and mark as deconfigured those in other logical groups
+        // with the same FABRIC_CHIP_ID (procFabricChip)
+
+        // Find master proc
+        ProcInfo * l_pMasterProcInfo = NULL;
+        for (ProcInfoVector::iterator
+                 l_procInfoIter = io_procInfo.begin();
+                 l_procInfoIter != io_procInfo.end();
+                 ++l_procInfoIter)
+        {
+            // If master proc
+            if ((*l_procInfoIter).iv_masterCapable)
+            {
+                // Save for subsequent use
+                l_pMasterProcInfo = &(*l_procInfoIter);
+                break;
+            }
+        }
+        // If no master proc found, abort
+        HWAS_ASSERT(l_pMasterProcInfo, "HWAS _symmetryValidation:"
+                                       "Master proc not found");
+        // Iterate through procs and check if in master logical group
+        for (ProcInfoVector::const_iterator
+                 l_procInfoIter = io_procInfo.begin();
+                 l_procInfoIter != io_procInfo.end();
+                 ++l_procInfoIter)
+        {
+            // Skip master proc
+            if ((*l_procInfoIter).iv_masterCapable)
+            {
+                continue;
+            }
+            // If current proc is on master logical group
+            // and marked as deconfigured
+            if ((l_pMasterProcInfo->procFabricGroup ==
+                (*l_procInfoIter).procFabricGroup) &&
+                ((*l_procInfoIter).iv_deconfigured))
+            {
+                // Iterate through procs and mark any same-
+                // position procs as deconfigured
+                for (ProcInfoVector::iterator
+                     l_posProcInfoIter = io_procInfo.begin();
+                     l_posProcInfoIter != io_procInfo.end();
+                     ++l_posProcInfoIter)
+                {
+                    if ((*l_procInfoIter).procFabricChip ==
+                        (*l_posProcInfoIter).procFabricChip)
+                    {
+                        HWAS_INF("symmetryValidation step 1 marked proc: "
+                             "%.8X for deconfiguration. Previously marked %d",
+                           (*l_posProcInfoIter).procHUID,
+                           (*l_posProcInfoIter).iv_deconfigured?1:0);
+                        (*l_posProcInfoIter).iv_deconfigured = true;
+                    }
+                }
+            }
+        }// STEP 1
+
+        // STEP 2:
+        // If a deconfigured proc is found on a non-master-containing group
+        // and has the same position (FABRIC_CHIP_ID) as a functional
+        // non-master chip on the master logical group,
+        // mark its xbus peer proc(s) for deconfiguration
+
+        // Iterate through procs, if marked deconfigured, compare chip
+        // position to functional chip on master group.
+        for (ProcInfoVector::const_iterator
+                 l_procInfoIter = io_procInfo.begin();
+                 l_procInfoIter != io_procInfo.end();
+                 ++l_procInfoIter)
+        {
+            // If proc is marked deconfigured
+            if ((*l_procInfoIter).iv_deconfigured)
+            {
+                // Iterate through procs, examining those on
+                // the master logical group
+                for (ProcInfoVector::const_iterator
+                     l_mGroupProcInfoIter = io_procInfo.begin();
+                     l_mGroupProcInfoIter != io_procInfo.end();
+                     ++l_mGroupProcInfoIter)
+                {
+                    // If proc found is on the master-containing logical group
+                    // functional, and matches the position of the deconfigured
+                    // proc from the outer loop
+                    if ((l_pMasterProcInfo->procFabricGroup ==
+                        (*l_mGroupProcInfoIter).procFabricGroup) &&
+                        (!((*l_mGroupProcInfoIter).iv_deconfigured)) &&
+                        ((*l_mGroupProcInfoIter).procFabricChip ==
+                                (*l_procInfoIter).procFabricChip))
+                    {
+                        // Find xbus peer proc to mark deconfigured
+                        for (uint8_t i = 0; i < NUM_X_BUSES; i++)
+                        {
+                            // If xbus peer proc exists, mark it
+                            if ((*l_procInfoIter).iv_pXProcs[i])
+                            {
+                                HWAS_INF( "procs> %.8X : G=%d, C=%d, D=%d, M=%d", (*l_procInfoIter).procHUID, (*l_procInfoIter).procFabricGroup, (*l_procInfoIter).procFabricChip, (*l_procInfoIter).iv_deconfigured, (*l_procInfoIter).iv_masterCapable );
+                                HWAS_INF( "mGroup> %.8X : G=%d, C=%d, D=%d, M=%d", (*l_mGroupProcInfoIter).procHUID, (*l_mGroupProcInfoIter).procFabricGroup, (*l_mGroupProcInfoIter).procFabricChip, (*l_mGroupProcInfoIter).iv_deconfigured, (*l_mGroupProcInfoIter).iv_masterCapable );
+                                HWAS_INF( "xbus%d> %.8X : G=%d, C=%d, D=%d, M=%d", i,  (*l_procInfoIter).iv_pXProcs[i]->procHUID, (*l_procInfoIter).iv_pXProcs[i]->procFabricGroup, (*l_procInfoIter).iv_pXProcs[i]->procFabricChip, (*l_procInfoIter).iv_pXProcs[i]->iv_deconfigured, (*l_procInfoIter).iv_pXProcs[i]->iv_masterCapable );
+
+                                // If the chip we found is the master then do NOT
+                                //  deconfigure it
+                                if( (*l_procInfoIter).iv_pXProcs[i]->iv_masterCapable )
+                                {
+                                    HWAS_INF( "Skipping deconfig of master proc %.8X", l_pMasterProcInfo->procHUID );
+                                }
+                                else
+                                {
+                                    HWAS_INF("symmetryValidation step 2 "
+                                             "marked proc: %.8X for "
+                                             "deconfiguration.",
+                                             (*l_procInfoIter).
+                                             iv_pXProcs[i]->procHUID);
+                                    (*l_procInfoIter).iv_pXProcs[i]->
+                                        iv_deconfigured = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }// STEP 2
+    }while(0);
+    return l_errlHdl;
+} // _symmetryValidation
+
+//******************************************************************************
+uint8_t DeconfigGard::clearBlockSpecDeconfigForReplacedTargets()
+{
+    HWAS_INF("Clear Block Spec Deconfig for replaced Targets");
+
+    // Get Block Spec Deconfig value
+    Target *pSys;
+    targetService().getTopLevelTarget(pSys);
+    ATTR_BLOCK_SPEC_DECONFIG_type l_block_spec_deconfig =
+        pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+
+    do
+    {
+        // Check Block Spec Deconfig value
+        if(l_block_spec_deconfig == 0)
+        {
+            // Block Spec Deconfig is already cleared
+            HWAS_INF("Block Spec Deconfig already cleared");
+        }
+
+        // Create the predicate with HWAS changed state and our RESRC_RECOV bit
+        PredicateHwasChanged l_predicateHwasChanged;
+        l_predicateHwasChanged.changedBit(HWAS_CHANGED_BIT_RESRC_RECOV, true);
+
+        // Go through all targets
+        for (TargetIterator t_iter = targetService().begin();
+             t_iter != targetService().end();
+             ++t_iter)
+        {
+            Target* l_pTarget = *t_iter;
+
+            // Check if target has changed
+            if (l_predicateHwasChanged(l_pTarget))
+            {
+                // Check if Block Spec Deconfig is set
+                if(l_block_spec_deconfig == 1)
+                {
+                    l_block_spec_deconfig = 0;
+                    pSys->setAttr
+                        <ATTR_BLOCK_SPEC_DECONFIG>(l_block_spec_deconfig);
+                    HWAS_INF("Block Spec Deconfig cleared due to HWAS state "
+                             "change for 0x%.8x",
+                             get_huid(l_pTarget));
+                }
+
+                // Clear RESRC_RECOV bit in changed flags for the target
+                HWAS_DBG("RESRC_RECOV bit cleared for 0x%.8x",
+                         get_huid(l_pTarget));
+                clear_hwas_changed_bit(l_pTarget, HWAS_CHANGED_BIT_RESRC_RECOV);
+            }
+        } // for
+    } while (0);
+
+    return l_block_spec_deconfig;
+} // clearBlockSpecDeconfigForReplacedTargets
+
+//******************************************************************************
+errlHndl_t
+   DeconfigGard::clearBlockSpecDeconfigForUngardedTargets(uint8_t &io_blockAttr)
+{
+    HWAS_INF("Clear Block Spec Deconfig for ungarded Targets");
+
+    errlHndl_t l_pErr = NULL;
+    GardRecords_t l_records;
+
+    // Get system target
+    Target *pSys;
+    targetService().getTopLevelTarget(pSys);
+
+    do
+    {
+        // Check Block Spec Deconfig value
+        if(io_blockAttr == 0)
+        {
+            // Block Spec Deconfig is already cleared
+            HWAS_INF("Block Spec Deconfig already cleared");
+        }
+
+        // Create the predicate with HWAS changed state and our GARD_APPLIED bit
+        PredicateHwasChanged l_predicateHwasChanged;
+        l_predicateHwasChanged.changedBit(HWAS_CHANGED_BIT_GARD_APPLIED, true);
+
+        // Go through all targets
+        for (TargetIterator t_iter = targetService().begin();
+             t_iter != targetService().end();
+             ++t_iter)
+        {
+            Target* l_pTarget = *t_iter;
+
+            // Check if target has gard applied
+            if (l_predicateHwasChanged(l_pTarget))
+            {
+                // Get gard records for the target
+                l_pErr = platGetGardRecords(l_pTarget, l_records);
+                if (l_pErr)
+                {
+                    break;
+                }
+
+                // If there are gard records, continue to next target
+                if (l_records.size() > 0)
+                {
+                    continue;
+                }
+
+                // Check if Block Spec Deconfig is set
+                if(io_blockAttr == 1)
+                {
+                    io_blockAttr = 0;
+                    pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(io_blockAttr);
+                    HWAS_INF("Block Spec Deconfig cleared due to no gard "
+                             "records for 0x%.8x",
+                             get_huid(l_pTarget));
+                }
+
+                // Clear GARD_APPLIED bit in HWAS changed flags for the target
+                HWAS_INF("HWAS_CHANGED_BIT_GARD_APPLIED cleared for 0x%.8x",
+                         get_huid(l_pTarget));
+                clear_hwas_changed_bit(l_pTarget,
+                                       HWAS_CHANGED_BIT_GARD_APPLIED);
+            }
+        } // for
+    } while (0);
+
+    return l_pErr;
+} // clearBlockSpecDeconfigForUngardedTargets
+
+//******************************************************************************
 void updateAttrPG(Target& i_target, const bool i_shouldSetFunctional)
 {
 
@@ -171,8 +1789,9 @@ void updateAttrPG(Target& i_target, const bool i_shouldSetFunctional)
         }
     }
 
-}
+} // updateAttrPG
 
+//******************************************************************************
 pg_entry_t getDeconfigMaskedPGValue(const Target& i_target)
 {
     using namespace PARTIAL_GOOD;
@@ -251,16 +1870,69 @@ pg_entry_t getDeconfigMaskedPGValue(const Target& i_target)
     }
 
     return l_attrPGMask;
+} // getDeconfigMaskedPGValue
 
-}
+//******************************************************************************
+// NON-RUNTIME methods
+//******************************************************************************
 
 #ifndef __HOSTBOOT_RUNTIME
+//******************************************************************************
+errlHndl_t collectGard(const PredicateBase *i_pPredicate)
+{
+    HWAS_DBG("collectGard entry" );
+    errlHndl_t errl = NULL;
+
+    do
+    {
+        errl = theDeconfigGard().clearGardRecordsForReplacedTargets();
+        if (errl)
+        {
+            HWAS_ERR("ERROR: collectGard failed to clear GARD Records for replaced Targets");
+            break;
+        }
+
+        (void)theDeconfigGard().clearFcoDeconfigures();
+
+        errl = theDeconfigGard().
+                    deconfigureTargetsFromGardRecordsForIpl(i_pPredicate);
+        if (errl)
+        {
+            HWAS_ERR("ERROR: collectGard failed to deconfigure Targets from GARD Records for IPL");
+            break;
+        }
+
+        errl = theDeconfigGard().processFieldCoreOverride();
+        if (errl)
+        {
+            HWAS_ERR("ERROR: collectGard failed to process Field Core Override");
+            break;
+        }
+    }
+    while(0);
+
+    if (errl)
+    {
+        HWAS_ERR("collectGard failed (plid 0x%X)", errl->plid());
+    }
+    else
+    {
+        HWAS_INF("collectGard completed successfully");
+    }
+    return errl;
+} // collectGard
+
+//******************************************************************************
+errlHndl_t clearGardByType(const GARD_ErrorType i_type)
+{
+    return theDeconfigGard().clearGardRecordsByType(i_type);
+}
+
 //******************************************************************************
 errlHndl_t DeconfigGard::applyGardRecord(Target *i_pTarget,
         GardRecord &i_gardRecord,
         const DeconfigureFlags i_deconfigRule)
 {
-
     HWAS_INF("Apply gard record for target %.8X", get_huid(i_pTarget));
     errlHndl_t l_pErr = NULL;
     do
@@ -1085,6 +2757,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
     return l_pErr;
 } // deconfigureTargetsFromGardRecordsForIpl
 
+//******************************************************************************
 void DeconfigGard::clearFcoDeconfigures()
 {
     // Get top level target
@@ -1109,7 +2782,7 @@ void DeconfigGard::clearFcoDeconfigures()
     {
         _clearFCODeconfigure(pNode);
     }
-}
+} // clearFcoDeconfigures
 
 //******************************************************************************
 errlHndl_t DeconfigGard::processFieldCoreOverride()
@@ -1224,7 +2897,7 @@ errlHndl_t DeconfigGard::processFieldCoreOverride()
     while (0);
 
     return l_pErr;
-}
+} //  processFieldCoreOverride
 
 //******************************************************************************
 errlHndl_t DeconfigGard::clearGardRecords(
@@ -1242,102 +2915,7 @@ errlHndl_t DeconfigGard::getGardRecords(
     errlHndl_t l_pErr = platGetGardRecords(i_pTarget, o_records);
     return l_pErr;
 }
-#endif //__HOSTBOOT_RUNTIME
 
-//******************************************************************************
-errlHndl_t DeconfigGard::deconfigureTarget(
-        Target & i_target,
-        const uint32_t i_errlEid,
-        bool *o_targetDeconfigured,
-        const DeconfigureFlags i_deconfigRule)
-{
-    HWAS_DBG("Deconfigure Target");
-    errlHndl_t l_pErr = NULL;
-
-    do
-    {
-
-        // Do not deconfig Target if we're NOT being asked to force AND
-        // the System is at runtime
-        if ((i_deconfigRule == NOT_AT_RUNTIME) &&
-                platSystemIsAtRuntime())
-        {
-            HWAS_INF("Skipping deconfigureTarget: at Runtime; target %.8X",
-                get_huid(&i_target));
-            break;
-        }
-
-        // just to make sure that we haven't missed anything in development
-        //  AT RUNTIME: we should only be called to deconfigure these types.
-        if (i_deconfigRule != NOT_AT_RUNTIME)
-        {
-            TYPE target_type = i_target.getAttr<ATTR_TYPE>();
-            // TODO RTC 88471: use attribute vs hardcoded list.
-            if (!((target_type == TYPE_MEMBUF) ||
-                  (target_type == TYPE_NX) ||
-                  (target_type == TYPE_EQ) ||
-                  (target_type == TYPE_EX) ||
-                  (target_type == TYPE_CORE) ||
-                  (target_type == TYPE_PORE)))
-            {
-                HWAS_INF("Skipping deconfigureTarget: atRuntime with unexpected target %.8X type %d -- SKIPPING",
-                    get_huid(&i_target), target_type);
-                break;
-            }
-        }
-
-        const ATTR_DECONFIG_GARDABLE_type lDeconfigGardable =
-                i_target.getAttr<ATTR_DECONFIG_GARDABLE>();
-        const uint8_t lPresent =
-                i_target.getAttr<ATTR_HWAS_STATE>().present;
-        if (!lDeconfigGardable || !lPresent)
-        {
-
-            // Target is not Deconfigurable. Create an error
-            HWAS_ERR("Target %.8X not Deconfigurable (ATTR_DECONFIG_GARDABLE=%d, present=%d)",
-                get_huid(&i_target), lDeconfigGardable, lPresent);
-
-            /*@
-             * @errortype
-             * @moduleid          HWAS::MOD_DECONFIG_GARD
-             * @reasoncode        HWAS::RC_TARGET_NOT_DECONFIGURABLE
-             * @devdesc           Attempt to deconfigure a target that is not
-             *                    deconfigurable or not present.
-             * @userdata1[00:31]  HUID of input target
-             * @userdata1[32:63]  GARD errlog EID
-             * @userdata2[00:31]  ATTR_DECONFIG_GARDABLE
-             * @userdata2[32:63]  ATTR_HWAS_STATE.present
-
-             */
-            const uint64_t userdata1 =
-                (static_cast<uint64_t>(get_huid(&i_target)) << 32) | i_errlEid;
-            const uint64_t userdata2 =
-                (static_cast<uint64_t>(lDeconfigGardable) << 32) | lPresent;
-            l_pErr = hwasError(
-                ERRL_SEV_INFORMATIONAL,
-                HWAS::MOD_DECONFIG_GARD,
-                HWAS::RC_TARGET_NOT_DECONFIGURABLE,
-                userdata1, userdata2);
-            break;
-        }
-
-        // all ok - do the work
-        HWAS_MUTEX_LOCK(iv_mutex);
-        // Deconfigure the Target
-        _deconfigureTarget(i_target, i_errlEid, o_targetDeconfigured,
-                i_deconfigRule);
-
-        // Deconfigure other Targets by association
-        _deconfigureByAssoc(i_target, i_errlEid, i_deconfigRule);
-
-        HWAS_MUTEX_UNLOCK(iv_mutex);
-    }
-    while (0);
-
-    return l_pErr;
-} // deconfigureTarget
-
-#ifndef __HOSTBOOT_RUNTIME
 //******************************************************************************
 void DeconfigGard::registerDeferredDeconfigure(
         const Target & i_target,
@@ -1399,811 +2977,8 @@ errlHndl_t DeconfigGard::_getDeconfigureRecords(
 
     HWAS_MUTEX_UNLOCK(iv_mutex);
     return NULL;
-}
-#endif //__HOSTBOOT_RUNTIME
+} // _getDeconfigureRecords
 
-//******************************************************************************
-
-errlHndl_t DeconfigGard::deconfigureAssocProc()
-{
-    HWAS_INF("Deconfiguring chip resources "
-             "based on fabric bus deconfigurations");
-
-    HWAS_MUTEX_LOCK(iv_mutex);
-    // call _invokeDeconfigureAssocProc() to obtain state of system,
-    // call algorithm function, and then deconfigure targets
-    // based on output
-    errlHndl_t l_pErr = _invokeDeconfigureAssocProc();
-    HWAS_MUTEX_UNLOCK(iv_mutex);
-    return l_pErr;
-}
-
-//******************************************************************************
-errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(
-            TARGETING::ConstTargetHandle_t i_node,
-            bool i_doAbusDeconfig)
-{
-    HWAS_INF("Preparing data for _deconfigureAssocProc");
-    // Return error
-    errlHndl_t l_pErr = NULL;
-
-    // Define vector of ProcInfo structs to be used by
-    // _deconfigAssocProc algorithm. Declared here so
-    // "delete" can be used outside of do {...} while(0)
-    ProcInfoVector l_procInfo;
-
-    do
-    {
-        // If flag indicating deconfigured bus endpoints is not set,
-        // then there's no work for _invokeDeconfigureAssocProc to do
-        // as this implies there are no deconfigured endpoints or
-        // processors.
-        if (!(iv_XAOBusEndpointDeconfigured))
-        {
-            HWAS_INF("_invokeDeconfigureAssocProc: No deconfigured x/a/o"
-                     " bus endpoints. Deconfiguration of "
-                     "associated procs unnecessary.");
-            break;
-        }
-
-        // Clear flag as this function is called multiple times
-        iv_XAOBusEndpointDeconfigured = false;
-
-        // Get top 'starting' level target - use top level target if no
-        // i_node given (hostboot)
-        Target *pTop;
-        if (i_node == NULL)
-        {
-            HWAS_INF("_invokeDeconfigureAssocProc: i_node not specified");
-            targetService().getTopLevelTarget(pTop);
-            HWAS_ASSERT(pTop, "_invokeDeconfigureAssocProc: no TopLevelTarget");
-        }
-        else
-        {
-            HWAS_INF("_invokeDeconfigureAssocProc: i_node 0x%X specified",
-                     i_node->getAttr<ATTR_HUID>());
-            pTop = const_cast<Target *>(i_node);
-        }
-
-        // Define and populate vector of procs
-        // Define predicate
-        PredicateCTM predProc(CLASS_CHIP, TYPE_PROC);
-        PredicateHwas predPres;
-        predPres.present(true);
-
-        // Populate vector
-        TargetHandleList l_procs;
-        targetService().getAssociated(l_procs,
-                                      pTop,
-                                      TargetService::CHILD,
-                                      TargetService::ALL,
-                                      &predProc);
-
-        // Sort by HUID
-        std::sort(l_procs.begin(),
-                  l_procs.end(), compareTargetHuid);
-
-        // General predicate to determine if target is functional
-        PredicateIsFunctional isFunctional;
-
-        // Define and populate vector of present A bus endpoint chiplets and
-        // all X bus endpoint chiplets
-        PredicateCTM predXbus(CLASS_UNIT, TYPE_XBUS);
-        PredicateCTM predAbus(CLASS_UNIT, TYPE_ABUS);
-        PredicatePostfixExpr busses;
-        busses.push(&predAbus).push(&predPres).And().push(&predXbus).Or();
-
-        // Iterate through procs and populate l_procInfo vector with system
-        // information regarding procs to be used by _deconfigAssocProc
-        // algorithm.
-        ProcInfoVector l_procInfo;
-        for (TargetHandleList::const_iterator
-             l_procsIter = l_procs.begin();
-             l_procsIter != l_procs.end();
-             ++l_procsIter)
-        {
-            ProcInfo l_ProcInfo = ProcInfo();
-            // Iterate through present procs and populate structs in l_procInfo
-            // Target pointer
-            l_ProcInfo.iv_pThisProc =
-                *l_procsIter;
-            // HUID
-            l_ProcInfo.procHUID =
-                (*l_procsIter)->getAttr<ATTR_HUID>();
-            // FABRIC_GROUP_ID
-            l_ProcInfo.procFabricGroup =
-                (*l_procsIter)->getAttr<ATTR_FABRIC_GROUP_ID>();
-            // FABRIC_CHIP_ID
-            l_ProcInfo.procFabricChip =
-                (*l_procsIter)->getAttr<ATTR_FABRIC_CHIP_ID>();
-            // HWAS state
-            l_ProcInfo.iv_deconfigured =
-                !(isFunctional(*l_procsIter));
-            // iv_masterCapable - this includes both master and alternate master
-            // This is done to ensure that both the master and alt master don't
-            // get deconfigured in _deconfigAssocProc()
-            if ( (*l_procsIter)->getAttr<ATTR_PROC_MASTER_TYPE>() ==
-                 PROC_MASTER_TYPE_NOT_MASTER)
-            {
-                l_ProcInfo.iv_masterCapable = false;
-            }
-            else
-            {
-                l_ProcInfo.iv_masterCapable = true;
-            }
-            HWAS_INF( "_invokeDeconfigureAssocProc> %.8X : G=%d, C=%d, D=%d, M=%d", l_ProcInfo.procHUID, l_ProcInfo.procFabricGroup, l_ProcInfo.procFabricChip, l_ProcInfo.iv_deconfigured, l_ProcInfo.iv_masterCapable );
-            l_procInfo.push_back(l_ProcInfo);
-        }
-        HWAS_INF("----------------------------------------------------------");
-        // Iterate through l_procInfo and populate child bus endpoint
-        // chiplet information
-        for (ProcInfoVector::iterator
-             l_procInfoIter = l_procInfo.begin();
-             l_procInfoIter != l_procInfo.end();
-             ++l_procInfoIter)
-        {
-            // Populate vector of bus endpoints associated with this proc
-            TargetHandleList l_busChiplets;
-            targetService().getAssociated(l_busChiplets,
-                                         (*l_procInfoIter).iv_pThisProc,
-                                         TargetService::CHILD,
-                                         TargetService::IMMEDIATE,
-                                         &busses);
-            // Sort by HUID
-            std::sort(l_busChiplets.begin(),
-                l_busChiplets.end(), compareTargetHuid);
-            // iv_pA/XProcs[] and iv_A/XDeconfigured[] indexes
-            uint8_t xBusIndex = 0;
-            uint8_t aBusIndex = 0;
-
-            // Iterate through bus endpoint chiplets
-            for (TargetHandleList::const_iterator
-                 l_busIter = l_busChiplets.begin();
-                 l_busIter != l_busChiplets.end();
-                 ++l_busIter)
-            {
-                // Declare peer endpoint target
-                const Target * l_pTarget = *l_busIter;
-                // Get peer endpoint target
-                const Target * l_pDstTarget = l_pTarget->
-                              getAttr<ATTR_PEER_TARGET>();
-                // Only interested in endpoint chiplets which lead to a
-                // present proc:
-                // If no peer for this endpoint or peer endpoint
-                // is not present, continue
-                if ((!l_pDstTarget) ||
-                    (!(l_pDstTarget->getAttr<ATTR_HWAS_STATE>().present)))
-                {
-                    if (l_pDstTarget == nullptr)
-                    {
-                      HWAS_INF("Proc %.8X Skipping non-peer endpt of BUS %.8X",
-                        get_huid((*l_procInfoIter).iv_pThisProc),
-                        l_pTarget->getAttr<ATTR_HUID>());
-                    }
-                    else
-                    {
-                      HWAS_INF("Proc %.8X Skipping non-present endpt target %.8X of %.8X BUS",
-                          get_huid((*l_procInfoIter).iv_pThisProc),
-                          l_pDstTarget->getAttr<ATTR_HUID>(),
-                          l_pTarget->getAttr<ATTR_HUID>());
-                    }
-
-                    continue;
-                }
-
-                // Chiplet has a valid (present) peer
-                // Handle iv_pA/XProcs[]:
-                // Define target for peer proc
-                const Target* l_pPeerProcTarget;
-                // Get parent chip from xbus chiplet
-                l_pPeerProcTarget = getParentChip(l_pDstTarget);
-
-                // Find matching ProcInfo struct
-                for (ProcInfoVector::iterator
-                     l_matchProcInfoIter = l_procInfo.begin();
-                     l_matchProcInfoIter != l_procInfo.end();
-                     ++l_matchProcInfoIter)
-                {
-                    // If Peer proc target matches this ProcInfo struct's
-                    // Identifier target
-                    if (l_pPeerProcTarget ==
-                        (*l_matchProcInfoIter).iv_pThisProc)
-                    {
-                        // Update struct of current proc to point to this
-                        // struct, and also handle iv_A/XDeconfigured[]
-                        // and increment appropriate index:
-                        if (TYPE_XBUS == (*l_busIter)->getAttr<ATTR_TYPE>())
-                        {
-                            (*l_procInfoIter).iv_pXProcs[xBusIndex] =
-                                &(*l_matchProcInfoIter);
-                            // HWAS state
-                            (*l_procInfoIter).iv_XDeconfigured[xBusIndex] =
-                                !(isFunctional(*l_busIter));
-                            HWAS_INF( "%.8X add X[%d]> %.8X : G=%d, C=%d, D=%d, M=%d", (*l_procInfoIter).procHUID, xBusIndex, (*l_matchProcInfoIter).procHUID, (*l_matchProcInfoIter).procFabricGroup, (*l_matchProcInfoIter).procFabricChip, (*l_matchProcInfoIter).iv_deconfigured, (*l_matchProcInfoIter).iv_masterCapable );
-                            xBusIndex++;
-                        }
-                        // If subsystem owns abus deconfigs consider them
-                        else if (i_doAbusDeconfig &&
-                                TYPE_ABUS == (*l_busIter)->getAttr<ATTR_TYPE>())
-                        {
-                            (*l_procInfoIter).iv_pAProcs[aBusIndex] =
-                                &(*l_matchProcInfoIter);
-                            // HWAS state
-                            (*l_procInfoIter).iv_ADeconfigured[aBusIndex] =
-                               !(isFunctional(*l_busIter));
-                            HWAS_INF( "%.8X add A[%d]> %.8X : G=%d, C=%d, D=%d, M=%d", (*l_procInfoIter).procHUID, aBusIndex, (*l_matchProcInfoIter).procHUID, (*l_matchProcInfoIter).procFabricGroup, (*l_matchProcInfoIter).procFabricChip, (*l_matchProcInfoIter).iv_deconfigured, (*l_matchProcInfoIter).iv_masterCapable );
-                            aBusIndex++;
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-
-        // call _deconfigureAssocProc() to run deconfig algorithm
-        // based on current state of system obtained above
-        l_pErr = _deconfigureAssocProc(l_procInfo);
-        if (l_pErr)
-        {
-            HWAS_ERR("Error from _deconfigureAssocProc ");
-            break;
-        }
-
-        // Iterate through l_procInfo and deconfigure any procs
-        // which _deconfigureAssocProc marked for deconfiguration
-        for (ProcInfoVector::const_iterator
-             l_procInfoIter = l_procInfo.begin();
-             l_procInfoIter != l_procInfo.end();
-             ++l_procInfoIter)
-        {
-            if ((*l_procInfoIter).iv_deconfigured &&
-                (isFunctional((*l_procInfoIter).iv_pThisProc)))
-            {
-                // Deconfigure marked procs
-                HWAS_INF("_invokeDeconfigureAssocProc is "
-                                "deconfiguring proc: %.8X",
-                    get_huid((*l_procInfoIter).iv_pThisProc));
-                _deconfigureTarget(*(*l_procInfoIter).
-                                iv_pThisProc, DECONFIGURED_BY_BUS_DECONFIG);
-                _deconfigureByAssoc(*(*l_procInfoIter).
-                                iv_pThisProc, DECONFIGURED_BY_BUS_DECONFIG);
-            }
-        }
-    }while(0);
-
-    return l_pErr;
-}
-
-
-//******************************************************************************
-void DeconfigGard::_deconfigAffinityParent( TARGETING::Target & i_child,
-                                        const uint32_t i_errlEid,
-                                        const DeconfigureFlags i_deconfigRule )
-{
-    Target * l_parent = NULL;
-    TARGETING::ATTR_PARENT_DECONFIG_RULES_type l_child_rules =
-        i_child.getAttr<ATTR_PARENT_DECONFIG_RULES>();
-
-    // Does this deconfigured child allow the deconfig to rollup to its parent
-    if (l_child_rules.deconfigureParent)
-    {
-        // General predicate to determine if target is functional
-        PredicateIsFunctional isFunctional;
-
-        l_parent = getImmediateParentByAffinity(&i_child);
-
-        if ((l_parent != NULL) && isFunctional(l_parent))
-        {
-            TARGETING::ATTR_PARENT_DECONFIG_RULES_type l_parent_rules =
-                  l_parent->getAttr<ATTR_PARENT_DECONFIG_RULES>();
-            // Does the parent allow its deconfigured children to rollup their
-            // deconfigure to itself?  This is a safety check to prevent
-            // essential resources from being deconfigured via rollup.
-            if (l_parent_rules.childRollupAllowed)
-            {
-                // Now check if parent has any functional affinity children
-                // that match the same type/class as the child
-                if ( !anyFunctionalChildLikeMe(l_parent, &i_child) )
-                {
-                    bool isDeconfigured = false;
-                    HWAS_INF("_deconfigAffinityParent: deconfig functional parent 0x%.8X, EID 0x%.8X",
-                        get_huid(l_parent), i_errlEid);
-                    _deconfigureTarget(*l_parent, i_errlEid,
-                                       &isDeconfigured, i_deconfigRule);
-                    if (isDeconfigured)
-                    {
-                        HWAS_INF("_deconfigAffinityParent: roll-up/down parent 0x%.8X deconfig, EID 0x%.8X",
-                            get_huid(l_parent), i_errlEid);
-                        // need to account for possible non-like functional children
-                        _deconfigureByAssoc(*l_parent, i_errlEid, i_deconfigRule);
-                    }
-                }
-                else
-                {
-                    HWAS_INF("_deconfigAffinityParent: functional child found for parent 0x%.8X, EID 0x%.8X",
-                        get_huid(l_parent), i_errlEid);
-                }
-            }
-            else
-            {
-                HWAS_INF("_deconfigAffinityParent: parent 0x%.8X does NOT allow deconfig via child rollup",
-                  get_huid(l_parent));
-            }
-        }
-        else
-        {
-            if (l_parent != NULL)
-            {
-                HWAS_INF("_deconfigAffinityParent: non-functional parent 0x%.8X of 0x%.8X, EID 0x%.8X",
-                    get_huid(l_parent), get_huid(&i_child), i_errlEid);
-            }
-        }
-    }
-    else
-    {
-       HWAS_INF("_deconfigAffinityParent: do not rollup deconfigured child 0x%.8X, EID 0x%.8X",
-            get_huid(&i_child), i_errlEid);
-    }
-}
-
-//******************************************************************************
-void DeconfigGard::_deconfigureByAssoc(
-        Target & i_target,
-        const uint32_t i_errlEid,
-        const DeconfigureFlags i_deconfigRule)
-{
-    HWAS_INF("_deconfigureByAssoc for %.8X (i_deconfigRule %d)",
-            get_huid(&i_target), i_deconfigRule);
-
-    // some common variables used below
-    TargetHandleList pChildList;
-    PredicateHwas isFunctional;
-    isFunctional.functional(true);
-    if(i_deconfigRule == SPEC_DECONFIG)
-    {
-        isFunctional.specdeconfig(false);
-    }
-
-    // Retrieve the target type from the given target
-    const TYPE l_targetType = i_target.getAttr<ATTR_TYPE>();
-    const uint32_t l_targetHuid = get_huid(&i_target);
-
-    // If there are child targets deconfig by FCO, override the reason
-    // with that of the parent's deconfg EID
-    PredicateHwas isFCO;
-    isFCO.present(true).functional(false)
-         .deconfiguredByEid(DECONFIGURED_BY_FIELD_CORE_OVERRIDE);
-
-    PredicatePostfixExpr funcOrFco;
-    funcOrFco.push(&isFunctional).push(&isFCO).Or();
-
-    // note - ATTR_DECONFIG_GARDABLE is NOT checked for all 'by association'
-    // deconfigures, as that attribute is only for direct deconfigure requests.
-
-    // find all CHILD targets and deconfigure them
-    targetService().getAssociated(pChildList, &i_target,
-        TargetService::CHILD, TargetService::ALL, &funcOrFco);
-
-    // Temporary list for OMI_CHILD and PAUC_CHILD since the
-    // getChildxxxTargetsByState functions replace instead of append to the
-    // list passed in
-    TargetHandleList pTempList;
-
-    // Since OMICs and OMIs share special relations OMI_CHILD and OMIC_PARENT,
-    // they will only show up if those relations are used and not the regular
-    // CHILD and PARENT relations.
-    if (l_targetType == TYPE_OMIC)
-    {
-        // Append OMI targets to the temp list.
-        getChildOmiTargetsByState(pTempList, &i_target, CLASS_NA,
-                                  TYPE_OMI, UTIL_FILTER_FUNCTIONAL);
-    }
-    // Since PAUCs and OMICs share special relations PAUC_CHILD and PAUC_PARENT,
-    // they will only show up if those relations are used and not the regular
-    // CHILD and PARENT relations.
-    else if (l_targetType == TYPE_PAUC)
-    {
-        // Add OMIC targets to the temp list.
-        getChildPaucTargetsByState(pTempList, &i_target, CLASS_NA,
-                                  TYPE_OMIC, UTIL_FILTER_FUNCTIONAL);
-    }
-
-    // Append the temporary list to the child list
-    if (!pTempList.empty())
-    {
-        pChildList.insert(pChildList.end(), pTempList.begin(), pTempList.end());
-    }
-
-    for (TargetHandleList::iterator pChild_it = pChildList.begin();
-            pChild_it != pChildList.end();
-            ++pChild_it)
-    {
-        TargetHandle_t pChild = *pChild_it;
-
-        HWAS_INF("_deconfigureByAssoc %.8X _deconfigureTarget on CHILD: %.8X",
-                 l_targetHuid, get_huid(pChild));
-        _deconfigureTarget(*pChild, i_errlEid, NULL, i_deconfigRule);
-        // Deconfigure other Targets by association
-        _deconfigureByAssoc(*pChild, i_errlEid, i_deconfigRule);
-    } // for CHILD
-
-    if ((i_deconfigRule == NOT_AT_RUNTIME) ||
-        (i_deconfigRule == SPEC_DECONFIG)  ||
-        (l_targetType == TYPE_FC)          ||
-        (l_targetType == TYPE_CORE))
-    {
-        // Allow any affinity deconfigure if NOT at runtime
-        //  --> if the rule is NOT_AT_RUNTIME and we got here, then we are
-        //      not at runtime.
-        //
-        // Allow all speculative deconfigures, irregardless of runtime status
-        //
-        // Allow affinity deconfig of FC and CORE targets,
-        // regardless of the runtime status
-
-        // Work deconfigure down to its children
-        // find all CHILD_BY_AFFINITY targets and deconfigure them
-        targetService().getAssociated(pChildList, &i_target,
-            TargetService::CHILD_BY_AFFINITY, TargetService::ALL,
-            &funcOrFco);
-        for (TargetHandleList::iterator pChild_it = pChildList.begin();
-                pChild_it != pChildList.end();
-                ++pChild_it)
-        {
-            TargetHandle_t pChild = *pChild_it;
-
-            HWAS_INF("_deconfigureByAssoc %.8X _deconfigureTarget "
-                     "CHILD_BY_AFFINITY: %.8X",
-                    l_targetHuid, get_huid(pChild));
-            _deconfigureTarget(*pChild, i_errlEid, NULL,
-                    i_deconfigRule);
-
-            // Deconfigure other Targets by association
-            _deconfigureByAssoc(*pChild, i_errlEid, i_deconfigRule);
-        } // for CHILD_BY_AFFINITY
-
-        // Work the deconfig up the parent side (if necessary)
-        HWAS_DBG("_deconfigureByAssoc %.8X _deconfigParentAssoc", l_targetHuid);
-        _deconfigParentAssoc(i_target, i_errlEid, i_deconfigRule);
-
-    } // !i_Runtime-ish
-    else
-    {
-        HWAS_INF("_deconfigureByAssoc() - system is at runtime"
-                " skipping all association checks beyond"
-                " the CHILD");
-    }
-
-    HWAS_DBG("_deconfigureByAssoc exiting: %.8X", l_targetHuid);
-
-} // _deconfigureByAssoc
-
-//******************************************************************************
-void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
-                                        const uint32_t i_errlEid,
-                                        const DeconfigureFlags i_deconfigRule)
-{
-    HWAS_INF("_deconfigParentAssoc for %.8X (i_deconfigRule %d)",
-            get_huid(&i_target), i_deconfigRule);
-
-    // Retrieve the target type from the given target
-    TYPE l_targetType = i_target.getAttr<ATTR_TYPE>();
-
-    if ((i_deconfigRule == NOT_AT_RUNTIME) ||
-        (i_deconfigRule == SPEC_DECONFIG)  ||
-        (l_targetType == TYPE_FC)          ||
-        (l_targetType == TYPE_CORE))
-    {
-        // Allow any affinity deconfigure if NOT at runtime
-        //  --> if the rule is NOT_AT_RUNTIME and we got here, then we are
-        //      not at runtime.
-        //
-        // Allow all speculative deconfigures, irregardless of runtime status
-        //
-        // Allow affinity deconfig of FC and CORE targets,
-        // regardless of the runtime status
-
-        // Handles bus endpoint (TYPE_XBUS, TYPE_ABUS, TYPE_PSI) and
-        // memory (TYPE_MEMBUF, TYPE_MBA, TYPE_DIMM)
-        // chip  (TYPE_FC, TYPE_CORE)
-        // obus specific (TYPE_OBUS, TYPE_NPU, TYPE_SMPGROUP, TYPE_OBUS_BRICK)
-        // deconfigureByAssociation rules
-        switch (l_targetType)
-        {
-            case TYPE_CORE:
-            {
-                //
-                // In Fused Core Mode, Cores must be de-configureed
-                // in pairs
-                //
-                // In Normal Core Mode if both cores are non-functional
-                // FC should be deconfigured
-                //
-                // First get parent i.e FC
-                // Other errors may have affected parent state so use
-                // UTIL_FILTER_ALL
-                TargetHandleList pParentFcList;
-                getParentAffinityTargetsByState(pParentFcList, &i_target,
-                        CLASS_UNIT, TYPE_FC, UTIL_FILTER_ALL);
-                HWAS_ASSERT((pParentFcList.size() == 1),
-                    "HWAS _deconfigParentAssoc: pParentFcList != 1");
-                Target *l_parentFC = pParentFcList[0];
-
-                // General predicate to determine if target is functional
-                PredicateIsFunctional isFunctional;
-
-                if (isFunctional(l_parentFC))
-                {
-                    // Fused Core Mode
-                    if (is_fused_mode())
-                    {
-                        // If parent is functional, deconfigure it
-                        _deconfigureTarget(*l_parentFC,
-                           i_errlEid, NULL,i_deconfigRule);
-                        _deconfigureByAssoc(*l_parentFC,
-                          i_errlEid,i_deconfigRule);
-                        // After deconfiguring FC the other FC of EQ
-                        // is non-functional, case TYPE_FC takes care
-                    }
-                    // Normal Core Mode
-                    // if both cores of FC non-functional, de-config FC
-                    else if (!anyChildFunctional(*l_parentFC))
-                    {
-                       uint32_t l_errlEidOverride = i_errlEid;
-
-                       // If any sibling is not functional due to FCO, override
-                       // the deconfig by Eid reason of its parent to FCO
-                       if (anyChildFCO(*l_parentFC))
-                       {
-                           HWAS_INF("Override FC %.8X deconfigByEid %.8X->FCO",
-                                    get_huid(l_parentFC), i_errlEid);
-                           l_errlEidOverride =
-                                    DECONFIGURED_BY_FIELD_CORE_OVERRIDE;
-                       }
-
-                       // If parent is functional, deconfigure it
-                       _deconfigureTarget(*l_parentFC,
-                          l_errlEidOverride, NULL, i_deconfigRule);
-                       _deconfigureByAssoc(*l_parentFC,
-                          l_errlEidOverride, i_deconfigRule);
-                    } // is_fused
-                } // isFunctional
-                break;
-            } // TYPE_CORE
-
-            case TYPE_DIMM:
-            {
-                // Whenever a DIMM is deconfigured, we will also deconfigure
-                // the immediate parent target (e.g. MCA, MBA, etc) to ensure
-                // there is not an unbalanced load on the ports.
-
-                // General predicate to determine if target is functional
-                PredicateIsFunctional isFunctional;
-
-                //  get immediate parent (MCA/MBA/etc)
-                TargetHandleList pParentList;
-                PredicatePostfixExpr funcParent;
-                funcParent.push(&isFunctional);
-                targetService().getAssociated(pParentList,
-                        &i_target,
-                        TargetService::PARENT_BY_AFFINITY,
-                        TargetService::IMMEDIATE,
-                        &funcParent);
-
-                HWAS_ASSERT((pParentList.size() <= 1),
-                    "HWAS _deconfigParentAssoc: pParentList > 1");
-
-                // if parent hasn't already been deconfigured
-                //  then deconfigure it
-                if (!pParentList.empty())
-                {
-                    const Target *l_parentMba = pParentList[0];
-                    HWAS_INF("_deconfigParentAssoc DIMM parent: %.8X",
-                             get_huid(l_parentMba));
-                    _deconfigureTarget(const_cast<Target &> (*l_parentMba),
-                                       i_errlEid, NULL, i_deconfigRule);
-                    _deconfigureByAssoc(const_cast<Target &> (*l_parentMba),
-                                        i_errlEid, i_deconfigRule);
-                }
-
-                break;
-            } // TYPE_DIMM
-
-            case TYPE_OMI:
-            {
-                TargetHandleList pOmicParentList;
-                getParentOmicTargetsByState(pOmicParentList,
-                        &i_target, CLASS_NA, TYPE_OMIC,
-                        UTIL_FILTER_ALL);
-
-                TargetHandle_t parentOmic = pOmicParentList[0];
-
-                HWAS_ASSERT((pOmicParentList.size() == 1),
-                    "HWAS _deconfigParentAssoc: pOmicParentList != 1");
-
-                if (!anyChildFunctional(*parentOmic, TargetService::OMI_CHILD))
-                {
-                    _deconfigureTarget(*parentOmic, i_errlEid, NULL,
-                                       i_deconfigRule);
-                }
-
-                break;
-            } // TYPE_OMI
-
-            case TYPE_PAU:
-            {
-                // If PAU 0, 4, and 5 are all deconfigured then nest 1's NMMU is
-                // power-gated and we deconfigure it here.
-
-                const Target* const l_chip = getParentChip(&i_target);
-
-                Target* const l_nmmu1 = shouldPowerGateNMMU1(*l_chip);
-                if (l_nmmu1)
-                {
-                    _deconfigureTarget(*l_nmmu1,
-                                       i_errlEid,
-                                       nullptr,
-                                       i_deconfigRule);
-                }
-            } // TYPE_PAU
-
-            default:
-            {
-              // TYPE_MEMBUF, TYPE_MCA, TYPE_MCS, TYPE_MC, TYPE_MI, TYPE_DMI,
-              // TYPE_MBA, TYPE_PHB, TYPE_OBUS_BRICK, TYPE_EQ
-              _deconfigAffinityParent(i_target, i_errlEid, i_deconfigRule);
-            }
-            break;
-        } // switch
-    }
-    HWAS_DBG("_deconfigureParentAssoc exiting: %.8X", get_huid(&i_target));
-}
-
-//******************************************************************************
-void DeconfigGard::_deconfigureTarget(
-        Target & i_target,
-        const uint32_t i_errlEid,
-        bool *o_targetDeconfigured /* = NULL */,
-        const DeconfigureFlags i_deconfigRule /* = NOT_AT_RUNTIME */,
-        bool i_shouldUpdateAttrPG /* = false */)
-{
-    HWAS_INF("Deconfiguring Target %.8X, errlEid 0x%X",
-            get_huid(&i_target), i_errlEid);
-
-    // Set the Target state to non-functional. The assumption is that it is
-    // not possible for another thread (other than deconfigGard) to be
-    // updating HWAS_STATE concurrently.
-    HwasState l_state = i_target.getAttr<ATTR_HWAS_STATE>();
-
-    // if the rule is DUMP_AT_RUNTIME and we got here, then we are at runtime.
-    if (i_deconfigRule == DUMP_AT_RUNTIME)
-    {
-        l_state.dumpfunctional = 1;
-    }
-    else
-    {
-        l_state.dumpfunctional = 0;
-    }
-
-    // Update ATTR_PG via gard only if i_shouldUpdateAttrPG is true
-    if (i_shouldUpdateAttrPG == true)
-    {
-        updateAttrPG(i_target, false);
-    }
-
-    if (!l_state.functional)
-    {
-        HWAS_DBG(
-        "Target HWAS_STATE already has functional=0; deconfiguredByEid=0x%X",
-                l_state.deconfiguredByEid);
-
-        if (i_deconfigRule != NOT_AT_RUNTIME)
-        {
-            // if FULLY_AT_RUNTIME or DUMP_AT_RUNTIME, then the dumpfunctional
-            // state changed, so do the setAttr
-            i_target.setAttr<ATTR_HWAS_STATE>(l_state);
-        }
-
-        if (l_state.deconfiguredByEid == DECONFIGURED_BY_FIELD_CORE_OVERRIDE)
-        {
-            // A child target was deconfig by FCO, and parent is being deconfig
-            // with a non-FCO reason .. override with parent's EID
-            HWAS_INF("HUID %.8X, Overriding deconfigByEid from FCO->%.8X",
-                     get_huid(&i_target), i_errlEid);
-            l_state.deconfiguredByEid = i_errlEid;
-            i_target.setAttr<ATTR_HWAS_STATE>(l_state);
-        }
-    }
-    else
-    {
-        if(i_deconfigRule == SPEC_DECONFIG)
-        {
-            HWAS_INF("Setting speculative deconfig");
-
-            l_state.specdeconfig = 1;
-            l_state.deconfiguredByEid = i_errlEid;
-            i_target.setAttr<ATTR_HWAS_STATE>(l_state);
-        }
-        else
-        {
-            HWAS_INF(
-                    "Setting Target HWAS_STATE: functional=0, deconfiguredByEid=0x%X",
-                    i_errlEid);
-
-            l_state.functional = 0;
-            l_state.specdeconfig = 0;
-            l_state.deconfiguredByEid = i_errlEid;
-
-            i_target.setAttr<ATTR_HWAS_STATE>(l_state);
-
-            if (o_targetDeconfigured)
-            {
-                *o_targetDeconfigured = true;
-            }
-
-            // if this is a real error, trigger a reconfigure loop
-            if (i_errlEid & DECONFIGURED_BY_PLID_MASK)
-            {
-                // Set RECONFIGURE_LOOP attribute to indicate it was caused by
-                // a hw deconfigure
-                TARGETING::Target* l_pTopLevel = NULL;
-                TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
-                TARGETING::ATTR_RECONFIGURE_LOOP_type l_reconfigAttr =
-                        l_pTopLevel->getAttr<ATTR_RECONFIGURE_LOOP>();
-                // 'OR' values in case of multiple reasons for reconfigure
-                l_reconfigAttr |= TARGETING::RECONFIGURE_LOOP_DECONFIGURE;
-                l_pTopLevel->setAttr<ATTR_RECONFIGURE_LOOP>(l_reconfigAttr);
-            }
-
-            // Do any necessary Deconfigure Actions
-            _doDeconfigureActions(i_target); /*no effect*/ // to quiet BEAM
-            // If target being deconfigured is an x/a/o bus endpoint
-            if ((TYPE_XBUS == i_target.getAttr<ATTR_TYPE>()) ||
-                (TYPE_ABUS == i_target.getAttr<ATTR_TYPE>()) ||
-                (TYPE_OBUS == i_target.getAttr<ATTR_TYPE>()))
-            {
-                // Set flag indicating x/a/o bus endpoint deconfiguration
-                iv_XAOBusEndpointDeconfigured = true;
-            }
-
-            // The target has been successfully de-configured,
-            // perform any other post-deconfig operations,
-            // e.g. syncing state with other subsystems
-            // TODO RTC:184521: Allow function platPostDeconfigureTarget
-            // to run once FSP supports it
-            // Remove the #ifdef ... #endif, once FSP is ready for code
-            #ifdef __HOSTBOOT_MODULE
-                platPostDeconfigureTarget(&i_target);
-            #endif
-        }
-    }
-} // _deconfigureTarget
-
-//******************************************************************************
-void DeconfigGard::_doDeconfigureActions(Target & i_target)
-{
- // Placeholder for any necessary deconfigure actions
-
-#ifdef CONFIG_BMC_IPMI
-    // set the BMC status for this target
-    SENSOR::StatusSensor l_sensor( &i_target );
-
-    // can assume the presence sensor is in the correct state, just
-    // assert that it is now non functional.
-    errlHndl_t err = l_sensor.setStatus( SENSOR::StatusSensor::NON_FUNCTIONAL );
-
-    if(err)
-    {
-        HWAS_ERR("Error returned from call to set sensor status for HUID 0x%x",
-                 TARGETING::get_huid( &i_target) );
-        err->collectTrace(HWAS_COMP_NAME, 512);
-        errlCommit(err, HWAS_COMP_ID);
-    }
-#endif
-
-}
-
-#ifndef __HOSTBOOT_RUNTIME
 //******************************************************************************
 void DeconfigGard::_createDeconfigureRecord(
     const Target & i_target,
@@ -2234,7 +3009,7 @@ void DeconfigGard::_createDeconfigureRecord(
 
         iv_deconfigureRecords.push_back(l_record);
     }
-}
+} // _createDeconfigureRecord
 
 //******************************************************************************
 void DeconfigGard::clearDeconfigureRecords(
@@ -2271,8 +3046,7 @@ void DeconfigGard::clearDeconfigureRecords(
                            get_huid(i_pTarget));
         }
     }
-}
-
+} // clearDeconfigureRecords
 
 //******************************************************************************
 void DeconfigGard::processDeferredDeconfig()
@@ -2301,566 +3075,8 @@ void DeconfigGard::processDeferredDeconfig()
 
     HWAS_DBG("<processDeferredDeconfig");
 } // processDeferredDeconfig
-#endif // __HOSTBOOT_RUNTIME
-
 
 //******************************************************************************
-errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
-{
-    // Defined for possible use in future applications
-    errlHndl_t l_errlHdl = NULL;
-
-    do
-    {
-        // STEP 1:
-        // Find master proc and iterate through its bus endpoint chiplets.
-        // For any chiplets which are deconfigured, mark peer proc as
-        // deconfigured
-
-        // Find master proc
-        ProcInfo * l_pMasterProcInfo = NULL;
-        for (ProcInfoVector::iterator
-                 l_procInfoIter = io_procInfo.begin();
-                 l_procInfoIter != io_procInfo.end();
-                 ++l_procInfoIter)
-        {
-            if ( ((*l_procInfoIter).iv_masterCapable) &&
-                 (!(*l_procInfoIter).iv_deconfigured) )
-            {
-                // Save for subsequent use
-                l_pMasterProcInfo = &(*l_procInfoIter);
-                // Iterate through bus endpoints, and if deconfigured,
-                // mark peer proc to be deconfigured
-                for (uint8_t i = 0; i < NUM_A_BUSES; i++)
-                {
-                    if ((*l_procInfoIter).iv_ADeconfigured[i])
-                    {
-                        HWAS_INF("deconfigureAssocProc marked proc: "
-                                 "%.8X for deconfiguration "
-                                 "due to deconfigured abus endpoint "
-                                 "on master proc.",
-                                 (*l_procInfoIter).iv_pAProcs[i]->procHUID);
-                        (*l_procInfoIter).iv_pAProcs[i]->
-                                        iv_deconfigured = true;
-                    }
-                }
-                for (uint8_t i = 0; i < NUM_X_BUSES; i++)
-                {
-                    if ((*l_procInfoIter).iv_XDeconfigured[i])
-                    {
-                        HWAS_INF("deconfigureAssocProc marked proc: "
-                                 "%.8X for deconfiguration "
-                                 "due to deconfigured xbus endpoint "
-                                 "on master proc.",
-                                 (*l_procInfoIter).iv_pXProcs[i]->procHUID);
-                        (*l_procInfoIter).iv_pXProcs[i]->
-                                        iv_deconfigured = true;
-                    }
-                }
-                break;
-            }
-        } // STEP 1
-
-        // If no master proc found, mark all proc as deconfigured
-        if (l_pMasterProcInfo == NULL)
-        {
-            HWAS_INF("deconfigureAssocProc: Master proc not found");
-            // Iterate through procs, and mark deconfigured all proc
-            for (ProcInfoVector::iterator
-                     l_procInfoIter = io_procInfo.begin();
-                     l_procInfoIter != io_procInfo.end();
-                     ++l_procInfoIter)
-            {
-                (*l_procInfoIter).iv_deconfigured = true;
-            }
-            // break now since all of the rest of the processing is moot.
-            break;
-        }
-
-        // STEP 2:
-        // Iterate through procs, and mark deconfigured any
-        // non-master proc which has more than one bus endpoint
-        // chiplet deconfigured
-        for (ProcInfoVector::iterator
-                 l_procInfoIter = io_procInfo.begin();
-                 l_procInfoIter != io_procInfo.end();
-                 ++l_procInfoIter)
-        {
-            // Don't deconfigure master proc
-            if ((*l_procInfoIter).iv_masterCapable)
-            {
-                continue;
-            }
-            // Don't examine previously marked proc
-            if ((*l_procInfoIter).iv_deconfigured)
-            {
-                continue;
-            }
-            // Deconfigured bus chiplet counter
-            uint8_t deconfigBusCounter = 0;
-            // Check and increment counter if A/X bus endpoints found
-            // which are deconfigured
-            for (uint8_t i = 0; i < NUM_A_BUSES; i++)
-            {
-                if ((*l_procInfoIter).iv_ADeconfigured[i])
-                {
-                    // Only increment deconfigBusCounter if peer proc exists
-                    //  and is functional
-                    if((*l_procInfoIter).iv_pAProcs[i] &&
-                      (!(*l_procInfoIter).iv_pAProcs[i]->iv_deconfigured))
-                    {
-                        deconfigBusCounter++;
-                    }
-                }
-            }
-            for (uint8_t i = 0; i < NUM_X_BUSES; i++)
-            {
-                if ((*l_procInfoIter).iv_XDeconfigured[i])
-                {
-                    // Only increment deconfigBusCounter if peer proc exists
-                    // and is functional
-                    if((*l_procInfoIter).iv_pXProcs[i] &&
-                      (!(*l_procInfoIter).iv_pXProcs[i]->iv_deconfigured))
-                    {
-                        deconfigBusCounter++;
-                    }
-                }
-            }
-            // If number of endpoints deconfigured is > 1
-            if (deconfigBusCounter > 1)
-            {
-                // Mark current proc to be deconfigured
-                HWAS_INF("deconfigureAssocProc marked proc: "
-                                 "%.8X for deconfiguration "
-                                 "due to %d deconfigured bus endpoints "
-                                 "on this proc.",
-                                 (*l_procInfoIter).procHUID,
-                                  deconfigBusCounter);
-                (*l_procInfoIter).iv_deconfigured = true;
-            }
-        }// STEP 2
-
-
-        // STEP 3:
-        // If a deconfigured bus connects two non-master procs,
-        // both of which are in the master-containing logical group,
-        // mark proc with higher HUID to be deconfigured.
-
-        // Iterate through procs and check xbus chiplets
-        for (ProcInfoVector::iterator
-                 l_procInfoIter = io_procInfo.begin();
-                 l_procInfoIter != io_procInfo.end();
-                 ++l_procInfoIter)
-        {
-            // Master proc handled in STEP 1
-            if ((*l_procInfoIter).iv_masterCapable)
-            {
-                continue;
-            }
-            // Don't examine previously marked proc
-            if ((*l_procInfoIter).iv_deconfigured)
-            {
-                continue;
-            }
-            // If current proc is on master logical group
-            if (l_pMasterProcInfo->procFabricGroup ==
-                (*l_procInfoIter).procFabricGroup)
-            {
-                // Check xbus endpoints
-                for (uint8_t i = 0; i < NUM_X_BUSES; i++)
-                {
-                    // If endpoint deconfigured and endpoint peer proc is
-                    // not already marked deconfigured
-                    if (((*l_procInfoIter).iv_XDeconfigured[i]) &&
-                        (!((*l_procInfoIter).iv_pXProcs[i]->iv_deconfigured)))
-                    {
-                        // Mark proc with higher HUID to be deconfigured
-                        if ((*l_procInfoIter).iv_pXProcs[i]->procHUID >
-                            (*l_procInfoIter).procHUID)
-                        {
-                            HWAS_INF("deconfigureAssocProc marked remote proc:"
-                                 " %.8X for deconfiguration "
-                                 "due to higher HUID than peer "
-                                 "proc on same master-containing logical "
-                                 "group.",
-                                 (*l_procInfoIter).iv_pXProcs[i]->procHUID);
-                            (*l_procInfoIter).iv_pXProcs[i]->
-                                               iv_deconfigured = true;
-                        }
-                        else
-                        {
-                            HWAS_INF("deconfigureAssocProc marked proc: "
-                                 "%.8X for deconfiguration "
-                                 "due to higher HUID than peer "
-                                 "proc on same master-containing logical "
-                                 "group.",
-                                 (*l_procInfoIter).procHUID);
-                            (*l_procInfoIter).iv_deconfigured = true;
-                        }
-                    }
-                }
-            }
-        }// STEP 3
-
-
-        // STEP 4:
-        // If a deconfigured bus connects two procs, both in the same
-        // non-master-containing logical group, mark current proc
-        // deconfigured if there is a same position proc marked deconfigured
-        // in the master logical group, else mark remote proc if there is
-        // a same position proc marked deconfigured in the master logical
-        // group otherwise, mark the proc with the higher HUID.
-
-        // Iterate through procs and, if in non-master
-        // logical group, check xbus chiplets
-        for (ProcInfoVector::iterator
-                 l_procInfoIter = io_procInfo.begin();
-                 l_procInfoIter != io_procInfo.end();
-                 ++l_procInfoIter)
-        {
-            // Don't examine previously marked proc
-            if ((*l_procInfoIter).iv_deconfigured)
-            {
-                continue;
-            }
-            // Don't examine procs on master logical group
-            if (l_pMasterProcInfo->procFabricGroup ==
-                (*l_procInfoIter).procFabricGroup)
-            {
-                continue;
-            }
-            // Check xbuses because they connect procs which
-            // are in the same logical group
-            for (uint8_t i = 0; i < NUM_X_BUSES; i++)
-            {
-                // If endpoint deconfigured and endpoint peer proc
-                // is not already marked deconfigured
-                if (((*l_procInfoIter).iv_XDeconfigured[i]) &&
-                    (!((*l_procInfoIter).iv_pXProcs[i]->iv_deconfigured)))
-                {
-                    // Variable to indicate If this step results in
-                    // finding a proc to mark deconfigured
-                    bool l_chipIDmatch = false;
-                    // Iterate through procs and examine ones found to
-                    // be on the master-containing logical group
-                    for (ProcInfoVector::const_iterator
-                         l_mGroupProcInfoIter = io_procInfo.begin();
-                         l_mGroupProcInfoIter != io_procInfo.end();
-                         ++l_mGroupProcInfoIter)
-                    {
-                        if (l_pMasterProcInfo->procFabricGroup ==
-                            (*l_mGroupProcInfoIter).procFabricGroup)
-                        {
-                            // If master logical group proc deconfigured with
-                            // same FABRIC_CHIP_ID as current proc
-                            if (((*l_mGroupProcInfoIter).iv_deconfigured) &&
-                                ((*l_mGroupProcInfoIter).procFabricChip ==
-                                 (*l_procInfoIter).procFabricChip))
-                            {
-                                // Mark current proc to be deconfigured
-                                // and set chipIDmatch
-                                HWAS_INF("deconfigureAssocProc marked proc: "
-                                 "%.8X for deconfiguration "
-                                 "due to same position deconfigured "
-                                 "proc on master-containing logical "
-                                 "group.",
-                                 (*l_procInfoIter).procHUID);
-                                (*l_procInfoIter).iv_deconfigured =\
-                                                                  true;
-                                l_chipIDmatch = true;
-                                break;
-                            }
-                            // If master logical group proc deconfigured with
-                            // same FABRIC_CHIP_ID as current proc's xbus peer
-                            // proc
-                            else if (((*l_mGroupProcInfoIter).
-                                        iv_deconfigured) &&
-                                    ((*l_mGroupProcInfoIter).
-                                        procFabricChip ==
-                                    (*l_procInfoIter).iv_pXProcs[i]->
-                                        procFabricChip))
-                            {
-                                // Mark peer proc to be deconfigured
-                                // and set chipIDmatch
-                                HWAS_INF("deconfigureAssocProc marked remote "
-                                 "proc: %.8X for deconfiguration "
-                                 "due to same position deconfigured "
-                                 "proc on master-containing logical "
-                                 "group.",
-                                 (*l_procInfoIter).iv_pXProcs[i]->procHUID);
-                                (*l_procInfoIter).iv_pXProcs[i]->
-                                 iv_deconfigured = true;
-                                l_chipIDmatch = true;
-                                break;
-                            }
-                        }
-                    }
-                    // If previous step did not find a proc to mark
-                    if (!(l_chipIDmatch))
-                    {
-                        // Deconfigure proc with higher HUID
-                        if ((*l_procInfoIter).procHUID >
-                            (*l_procInfoIter).iv_pXProcs[i]->procHUID)
-                        {
-                             HWAS_INF("deconfigureAssocProc marked proc:"
-                             " %.8X for deconfiguration "
-                             "due to higher HUID than peer "
-                             "proc on same non master-containing logical "
-                             "group.",
-                             (*l_procInfoIter).procHUID);
-                            (*l_procInfoIter).iv_deconfigured =
-                                                          true;
-                        }
-                        else
-                        {
-                            HWAS_INF("deconfigureAssocProc marked remote proc:"
-                             " %.8X for deconfiguration "
-                             "due to higher HUID than peer "
-                             "proc on same non master-containing logical "
-                             "group.",
-                             (*l_procInfoIter).iv_pXProcs[i]->procHUID);
-                            (*l_procInfoIter).iv_pXProcs[i]->
-                            iv_deconfigured = true;
-                        }
-                    }
-                }
-            }
-        }// STEP 4
-
-        // STEP 5:
-        // If a deconfigured bus connects two procs on different logical groups,
-        // and neither proc is the master proc: If current proc's xbus peer
-        // proc is marked as deconfigured, mark current proc. Else, mark
-        // abus peer proc.
-
-        // Iterate through procs and check for deconfigured abus endpoints
-        for (ProcInfoVector::iterator
-                 l_procInfoIter = io_procInfo.begin();
-                 l_procInfoIter != io_procInfo.end();
-                 ++l_procInfoIter)
-        {
-            // Master proc handled in STEP 1
-            if ((*l_procInfoIter).iv_masterCapable)
-            {
-                continue;
-            }
-            // Don't examine procs which are already marked
-            if ((*l_procInfoIter).iv_deconfigured)
-            {
-                continue;
-            }
-            // Check abuses because they connect procs which are in
-            // different logical groups
-            for (uint8_t i = 0; i < NUM_A_BUSES; i++)
-            {
-                // If endpoint deconfigured and endpoint peer proc
-                // is not already marked deconfigured
-                if (((*l_procInfoIter).iv_ADeconfigured[i]) &&
-                    (!((*l_procInfoIter).iv_pAProcs[i]->iv_deconfigured)))
-                {
-                    // Check XBUS peer
-                    bool l_xbusPeerProcDeconfigured = false;
-                    for (uint8_t j = 0; j < NUM_X_BUSES; j++)
-                    {
-                        // If peer proc exists
-                        if ((*l_procInfoIter).iv_pXProcs[j])
-                        {
-                            // If xbus peer proc deconfigured
-                            if ((*l_procInfoIter).iv_pXProcs[j]->
-                                                    iv_deconfigured)
-                            {
-                                // Set xbusPeerProcDeconfigured and deconfigure
-                                // current proc
-                                 HWAS_INF("deconfigureAssocProc marked proc:"
-                                 " %.8X for deconfiguration "
-                                 "due to deconfigured xbus peer proc.",
-                                 (*l_procInfoIter).procHUID);
-                                l_xbusPeerProcDeconfigured = true;
-                                (*l_procInfoIter).iv_deconfigured = true;
-                                break;
-                            }
-                        }
-                    }
-                    // If previous step did not result in marking a proc
-                    // mark abus peer proc
-                    if (!(l_xbusPeerProcDeconfigured))
-                    {
-                        HWAS_INF("deconfigureAssocProc marked "
-                             "remote proc: %.8X for deconfiguration "
-                             "due to functional xbus peer proc.",
-                             (*l_procInfoIter).iv_pAProcs[i]->procHUID);
-                        (*l_procInfoIter).iv_pAProcs[i]->
-                                          iv_deconfigured = true;
-                    }
-                }
-            }
-        }// STEP 5
-    }while(0);
-    if (!l_errlHdl)
-    {
-        // Perform SMP group balancing
-        l_errlHdl = _symmetryValidation(io_procInfo);
-    }
-    return l_errlHdl;
-
-}
-
-//******************************************************************************
-
-errlHndl_t DeconfigGard::_symmetryValidation(ProcInfoVector &io_procInfo)
-{
-    // Defined for possible use in future applications
-    errlHndl_t l_errlHdl = NULL;
-
-    // Perform SMP group balancing
-    do
-    {
-        Target* pSys;
-        targetService().getTopLevelTarget(pSys);
-        HWAS_ASSERT(pSys, "HWAS _symmetryValidation: no TopLevelTarget");
-        if ( pSys->getAttr<TARGETING::ATTR_PROC_FABRIC_BROADCAST_MODE>() ==
-             TARGETING::PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_GROUP )
-        {
-          // When CHIP_IS_GROUP is set, that means a single fabric CHIP
-          // per GROUP (or NODE). If we apply symmetry deconfig, it will
-          // deconfig all the other chips because they all have the same
-          // relative position to group.
-
-          break;
-        }
-
-        // STEP 1:
-        // If a proc is deconfigured in a logical group
-        // containing the master proc, iterate through all procs
-        // and mark as deconfigured those in other logical groups
-        // with the same FABRIC_CHIP_ID (procFabricChip)
-
-        // Find master proc
-        ProcInfo * l_pMasterProcInfo = NULL;
-        for (ProcInfoVector::iterator
-                 l_procInfoIter = io_procInfo.begin();
-                 l_procInfoIter != io_procInfo.end();
-                 ++l_procInfoIter)
-        {
-            // If master proc
-            if ((*l_procInfoIter).iv_masterCapable)
-            {
-                // Save for subsequent use
-                l_pMasterProcInfo = &(*l_procInfoIter);
-                break;
-            }
-        }
-        // If no master proc found, abort
-        HWAS_ASSERT(l_pMasterProcInfo, "HWAS _symmetryValidation:"
-                                       "Master proc not found");
-        // Iterate through procs and check if in master logical group
-        for (ProcInfoVector::const_iterator
-                 l_procInfoIter = io_procInfo.begin();
-                 l_procInfoIter != io_procInfo.end();
-                 ++l_procInfoIter)
-        {
-            // Skip master proc
-            if ((*l_procInfoIter).iv_masterCapable)
-            {
-                continue;
-            }
-            // If current proc is on master logical group
-            // and marked as deconfigured
-            if ((l_pMasterProcInfo->procFabricGroup ==
-                (*l_procInfoIter).procFabricGroup) &&
-                ((*l_procInfoIter).iv_deconfigured))
-            {
-                // Iterate through procs and mark any same-
-                // position procs as deconfigured
-                for (ProcInfoVector::iterator
-                     l_posProcInfoIter = io_procInfo.begin();
-                     l_posProcInfoIter != io_procInfo.end();
-                     ++l_posProcInfoIter)
-                {
-                    if ((*l_procInfoIter).procFabricChip ==
-                        (*l_posProcInfoIter).procFabricChip)
-                    {
-                        HWAS_INF("symmetryValidation step 1 marked proc: "
-                             "%.8X for deconfiguration. Previously marked %d",
-                           (*l_posProcInfoIter).procHUID,
-                           (*l_posProcInfoIter).iv_deconfigured?1:0);
-                        (*l_posProcInfoIter).iv_deconfigured = true;
-                    }
-                }
-            }
-        }// STEP 1
-
-        // STEP 2:
-        // If a deconfigured proc is found on a non-master-containing group
-        // and has the same position (FABRIC_CHIP_ID) as a functional
-        // non-master chip on the master logical group,
-        // mark its xbus peer proc(s) for deconfiguration
-
-        // Iterate through procs, if marked deconfigured, compare chip
-        // position to functional chip on master group.
-        for (ProcInfoVector::const_iterator
-                 l_procInfoIter = io_procInfo.begin();
-                 l_procInfoIter != io_procInfo.end();
-                 ++l_procInfoIter)
-        {
-            // If proc is marked deconfigured
-            if ((*l_procInfoIter).iv_deconfigured)
-            {
-                // Iterate through procs, examining those on
-                // the master logical group
-                for (ProcInfoVector::const_iterator
-                     l_mGroupProcInfoIter = io_procInfo.begin();
-                     l_mGroupProcInfoIter != io_procInfo.end();
-                     ++l_mGroupProcInfoIter)
-                {
-                    // If proc found is on the master-containing logical group
-                    // functional, and matches the position of the deconfigured
-                    // proc from the outer loop
-                    if ((l_pMasterProcInfo->procFabricGroup ==
-                        (*l_mGroupProcInfoIter).procFabricGroup) &&
-                        (!((*l_mGroupProcInfoIter).iv_deconfigured)) &&
-                        ((*l_mGroupProcInfoIter).procFabricChip ==
-                                (*l_procInfoIter).procFabricChip))
-                    {
-                        // Find xbus peer proc to mark deconfigured
-                        for (uint8_t i = 0; i < NUM_X_BUSES; i++)
-                        {
-                            // If xbus peer proc exists, mark it
-                            if ((*l_procInfoIter).iv_pXProcs[i])
-                            {
-                                HWAS_INF( "procs> %.8X : G=%d, C=%d, D=%d, M=%d", (*l_procInfoIter).procHUID, (*l_procInfoIter).procFabricGroup, (*l_procInfoIter).procFabricChip, (*l_procInfoIter).iv_deconfigured, (*l_procInfoIter).iv_masterCapable );
-                                HWAS_INF( "mGroup> %.8X : G=%d, C=%d, D=%d, M=%d", (*l_mGroupProcInfoIter).procHUID, (*l_mGroupProcInfoIter).procFabricGroup, (*l_mGroupProcInfoIter).procFabricChip, (*l_mGroupProcInfoIter).iv_deconfigured, (*l_mGroupProcInfoIter).iv_masterCapable );
-                                HWAS_INF( "xbus%d> %.8X : G=%d, C=%d, D=%d, M=%d", i,  (*l_procInfoIter).iv_pXProcs[i]->procHUID, (*l_procInfoIter).iv_pXProcs[i]->procFabricGroup, (*l_procInfoIter).iv_pXProcs[i]->procFabricChip, (*l_procInfoIter).iv_pXProcs[i]->iv_deconfigured, (*l_procInfoIter).iv_pXProcs[i]->iv_masterCapable );
-
-                                // If the chip we found is the master then do NOT
-                                //  deconfigure it
-                                if( (*l_procInfoIter).iv_pXProcs[i]->iv_masterCapable )
-                                {
-                                    HWAS_INF( "Skipping deconfig of master proc %.8X", l_pMasterProcInfo->procHUID );
-                                }
-                                else
-                                {
-                                    HWAS_INF("symmetryValidation step 2 "
-                                             "marked proc: %.8X for "
-                                             "deconfiguration.",
-                                             (*l_procInfoIter).
-                                             iv_pXProcs[i]->procHUID);
-                                    (*l_procInfoIter).iv_pXProcs[i]->
-                                        iv_deconfigured = true;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }// STEP 2
-    }while(0);
-    return l_errlHdl;
-}
-
-#ifndef __HOSTBOOT_RUNTIME
-//******************************************************************************
-
 void DeconfigGard::setXAOBusEndpointDeconfigured(bool deconfig)
 {
     HWAS_INF("Set iv_XAOBusEndpointDeconfigured = %d", deconfig?1:0);
@@ -2868,7 +3084,6 @@ void DeconfigGard::setXAOBusEndpointDeconfigured(bool deconfig)
 }
 
 //*****************************************************************************
-
 void DeconfigGard::_clearFCODeconfigure(ConstTargetHandle_t i_nodeTarget)
 {
     HWAS_DBG("Clear all FCO deconfigure");
@@ -2894,98 +3109,14 @@ void DeconfigGard::_clearFCODeconfigure(ConstTargetHandle_t i_nodeTarget)
             l_pTarget->setAttr<ATTR_HWAS_STATE>(l_state);
         }
     }
-}
+} // _clearFCODeconfigure
+
 //******************************************************************************
-#endif // __HOSTBOOT_RUNTIME
+#endif // end #ifndef __HOSTBOOT_RUNTIME
 
-bool DeconfigGard::anyFunctionalChildLikeMe(const Target * i_my_parent,
-                                            const Target * i_child)
-{
-    bool retVal = false;
-    TargetHandleList pChildList;
-    PredicateHwas isFunctional;
-    isFunctional.functional(true);
-
-    if (isFunctional(i_my_parent))
-    {
-        // target type and class as predicate
-        auto l_childType = i_child->getAttr<ATTR_TYPE>();
-        auto l_childClass = i_child->getAttr<ATTR_CLASS>();
-
-        PredicateCTM predChildMatch(l_childClass, l_childType);
-        PredicatePostfixExpr checkExpr;
-        checkExpr.push(&predChildMatch).push(&isFunctional).And();
-
-        // find all CHILD_BY_AFFINITY targets, that match the predicate
-        // if any of them are functional return true
-        // if all of them are non-functional return false
-        targetService().getAssociated(pChildList, i_my_parent,
-                                      TargetService::CHILD_BY_AFFINITY,
-                                      TargetService::ALL,
-                                      &checkExpr);
-        if (pChildList.size() >= 1)
-        {
-            retVal = true;
-            HWAS_INF("anyFunctionalChildLikeMe: found %d functional children of 0x%.8X (child 0: 0x%.8X)",
-                    pChildList.size(), get_huid(i_my_parent), get_huid(pChildList[0]));
-        }
-    }
-    return retVal;
-}
-
-
-bool DeconfigGard::anyChildFunctional(Target & i_parent,
-                            TargetService::ASSOCIATION_TYPE i_type)
-{
-    bool retVal = false;
-    TargetHandleList pChildList;
-    PredicateHwas isFunctional;
-    isFunctional.functional(true);
-
-    if (isFunctional(&i_parent))
-    {
-        // find all CHILD targets, that match the predicate
-        // if any of them are functional return true
-        // if all of them are non-functional return false
-        targetService().getAssociated(pChildList, &i_parent, i_type,
-                                      TargetService::ALL, &isFunctional);
-        if (pChildList.size() >= 1)
-        {
-            retVal = true;
-            if (i_type == TargetService::CHILD_BY_AFFINITY)
-            {
-                HWAS_INF("anyChildFunctional: found %d functional children of 0x%.8X (child 0: 0x%.8X)",
-                    pChildList.size(), get_huid(&i_parent), get_huid(pChildList[0]));
-            }
-        }
-    }
-    return retVal;
-} //anyChildFunctional
-
-
-bool DeconfigGard::anyChildFCO (Target & i_parent)
-{
-    bool retVal = false;
-
-    TargetHandleList pChildList;
-    PredicateHwas predFCO;
-    predFCO.present(true)
-           .functional(false)
-           .deconfiguredByEid(DECONFIGURED_BY_FIELD_CORE_OVERRIDE);
-
-    // find all CHILD targets, that match the predicate
-    // if any of them are FCO return true
-    // if none of them are FCO return false
-    targetService().getAssociated(pChildList, &i_parent,
-        TargetService::CHILD, TargetService::ALL, &predFCO);
-
-    if (pChildList.size() >= 1)
-    {
-        retVal = true;
-    }
-
-    return retVal;
-} //anyChildFCO
+//******************************************************************************
+// HOSTBOOT only methods - RUNTIME and NON-RUNTIME
+//******************************************************************************
 
 #ifdef __HOSTBOOT_MODULE
 /******************************************************************************/
@@ -2997,7 +3128,6 @@ errlHndl_t DeconfigGard::deconfigureTargetAtRuntime(
         const errlHndl_t i_deconfigErrl)
 
 {
-
     errlHndl_t l_errl = nullptr;
 
     uint32_t deconfigReason =
@@ -3044,134 +3174,9 @@ errlHndl_t DeconfigGard::deconfigureTargetAtRuntime(
 #endif
     HWAS_INF(">>>deconfigureTargetAtRuntime()" );
     return l_errl ;
-}
-#endif
+} // deconfigureTargetAtRuntime
 
 //******************************************************************************
-uint8_t DeconfigGard::clearBlockSpecDeconfigForReplacedTargets()
-{
-    HWAS_INF("Clear Block Spec Deconfig for replaced Targets");
-
-    // Get Block Spec Deconfig value
-    Target *pSys;
-    targetService().getTopLevelTarget(pSys);
-    ATTR_BLOCK_SPEC_DECONFIG_type l_block_spec_deconfig =
-        pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
-
-    do
-    {
-        // Check Block Spec Deconfig value
-        if(l_block_spec_deconfig == 0)
-        {
-            // Block Spec Deconfig is already cleared
-            HWAS_INF("Block Spec Deconfig already cleared");
-        }
-
-        // Create the predicate with HWAS changed state and our RESRC_RECOV bit
-        PredicateHwasChanged l_predicateHwasChanged;
-        l_predicateHwasChanged.changedBit(HWAS_CHANGED_BIT_RESRC_RECOV, true);
-
-        // Go through all targets
-        for (TargetIterator t_iter = targetService().begin();
-             t_iter != targetService().end();
-             ++t_iter)
-        {
-            Target* l_pTarget = *t_iter;
-
-            // Check if target has changed
-            if (l_predicateHwasChanged(l_pTarget))
-            {
-                // Check if Block Spec Deconfig is set
-                if(l_block_spec_deconfig == 1)
-                {
-                    l_block_spec_deconfig = 0;
-                    pSys->setAttr
-                        <ATTR_BLOCK_SPEC_DECONFIG>(l_block_spec_deconfig);
-                    HWAS_INF("Block Spec Deconfig cleared due to HWAS state "
-                             "change for 0x%.8x",
-                             get_huid(l_pTarget));
-                }
-
-                // Clear RESRC_RECOV bit in changed flags for the target
-                HWAS_DBG("RESRC_RECOV bit cleared for 0x%.8x",
-                         get_huid(l_pTarget));
-                clear_hwas_changed_bit(l_pTarget, HWAS_CHANGED_BIT_RESRC_RECOV);
-            }
-        } // for
-    } while (0);
-
-    return l_block_spec_deconfig;
-} // clearBlockSpecDeconfigForReplacedTargets
-
-//******************************************************************************
-errlHndl_t
-   DeconfigGard::clearBlockSpecDeconfigForUngardedTargets(uint8_t &io_blockAttr)
-{
-    HWAS_INF("Clear Block Spec Deconfig for ungarded Targets");
-
-    errlHndl_t l_pErr = NULL;
-    GardRecords_t l_records;
-
-    // Get system target
-    Target *pSys;
-    targetService().getTopLevelTarget(pSys);
-
-    do
-    {
-        // Check Block Spec Deconfig value
-        if(io_blockAttr == 0)
-        {
-            // Block Spec Deconfig is already cleared
-            HWAS_INF("Block Spec Deconfig already cleared");
-        }
-
-        // Create the predicate with HWAS changed state and our GARD_APPLIED bit
-        PredicateHwasChanged l_predicateHwasChanged;
-        l_predicateHwasChanged.changedBit(HWAS_CHANGED_BIT_GARD_APPLIED, true);
-
-        // Go through all targets
-        for (TargetIterator t_iter = targetService().begin();
-             t_iter != targetService().end();
-             ++t_iter)
-        {
-            Target* l_pTarget = *t_iter;
-
-            // Check if target has gard applied
-            if (l_predicateHwasChanged(l_pTarget))
-            {
-                // Get gard records for the target
-                l_pErr = platGetGardRecords(l_pTarget, l_records);
-                if (l_pErr)
-                {
-                    break;
-                }
-
-                // If there are gard records, continue to next target
-                if (l_records.size() > 0)
-                {
-                    continue;
-                }
-
-                // Check if Block Spec Deconfig is set
-                if(io_blockAttr == 1)
-                {
-                    io_blockAttr = 0;
-                    pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(io_blockAttr);
-                    HWAS_INF("Block Spec Deconfig cleared due to no gard "
-                             "records for 0x%.8x",
-                             get_huid(l_pTarget));
-                }
-
-                // Clear GARD_APPLIED bit in HWAS changed flags for the target
-                HWAS_INF("HWAS_CHANGED_BIT_GARD_APPLIED cleared for 0x%.8x",
-                         get_huid(l_pTarget));
-                clear_hwas_changed_bit(l_pTarget,
-                                       HWAS_CHANGED_BIT_GARD_APPLIED);
-            }
-        } // for
-    } while (0);
-
-    return l_pErr;
-} // clearBlockSpecDeconfigForUngardedTargets
+#endif  // end #ifdef __HOSTBOOT_MODULE
 
 } // namespace HWAS

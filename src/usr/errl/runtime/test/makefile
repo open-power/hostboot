@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2019
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -22,15 +22,11 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
 HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../../..
-
 MODULE = testerrl_rt
 
-# TODO RTC: 244854
-# Restore all testcases, instead of just the one below
-
-#TESTS = *.H
-TESTS = rt_errltest.H
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk

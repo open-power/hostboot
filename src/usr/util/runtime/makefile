@@ -22,29 +22,26 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
 HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = util_rt
 
 ## pointer to common HWP files
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/utils/stopreg/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/xip/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/utils/stopreg/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/lib/
 
 
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/sbe
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/sbe
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 
-# TODO RTC: 244854
-# Re-enable other objects below and replace P9 HWPs with
-# p10 HWPs above when runtime is fully enabled
 OBJS += utilbase.o
 OBJS += utilstream.o
 OBJS += utilmem.o
@@ -55,7 +52,7 @@ OBJS += rt_cmds.o
 OBJS += util_rt.o
 OBJS += utilrsvdmem.o
 OBJS += utilxipimage.o
-#OBJS += utilcommonattr.o
+OBJS += utilcommonattr.o
 OBJS += rt_fwnotify.o
 OBJS += rt_fwreq_helper.o
 

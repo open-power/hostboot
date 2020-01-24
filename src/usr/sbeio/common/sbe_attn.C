@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,9 +36,9 @@
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
 #include <p9_extract_sbe_rc.H>
+#include <sbeio/sbe_retry_handler.H>
 */
 #include <sbeio/sbeioreasoncodes.H>
-#include <sbeio/sbe_retry_handler.H>
 #include <sbeio/runtime/sbeio_attr_override.H>
 #include <sbeio/runtime/sbeio_vital_attn.H>
 #include <initservice/initserviceif.H>
@@ -72,6 +72,8 @@ namespace SBEIO
             }
         }
 
+// @TODO: RTC 210975: Can't take advantage of SbeRetryHandler because it relies heavily on P9 code
+#if 0
         SbeRetryHandler l_sbeObj = SbeRetryHandler(
                       SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT);
 
@@ -143,6 +145,7 @@ namespace SBEIO
                 }
             }
         }
+#endif  // End: Can't take advantage of SbeRetryHandler because it relies heavily on P9 code
 #else
 // FIXME RTC: 210975
 #if 0

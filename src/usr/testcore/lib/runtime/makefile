@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2019
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -22,13 +22,13 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
 HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../../..
-
 MODULE = testsyslib_rt
-# FIXME RTC: 210975
-#TESTCASES += stltest.H
-#TESTCASES += string.H
-#TESTS = $(addprefix ../,$(TESTCASES))
+
+TESTCASES += stltest.H
+TESTCASES += string.H
+TESTS = $(addprefix ../,$(TESTCASES))
 
 include $(ROOTPATH)/config.mk

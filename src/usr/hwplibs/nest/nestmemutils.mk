@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2019
+# Contributors Listed Below - COPYRIGHT 2017,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -22,21 +22,20 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
 # NEST Memory utils functions
 ROOTPATH=../../../..
 
-
-HWP_NEST_MEM_UTILS_PATH := ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest/
+HWP_NEST_MEM_UTILS_PATH := ${ROOTPATH}/src/build/tools/extern/ekb/chips/p10/procedures/hwp/nest
 
 EXTRAINCDIR += ${HWP_NEST_MEM_UTILS_PATH}
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 
+VPATH += ${HWP_NEST_MEM_UTILS_PATH}
+
+include ${ROOTPATH}/procedure.rules.mk
+
 # FIXME RTC: 210975
-
-#VPATH += ${HWP_NEST_MEM_UTILS_PATH}
-
-#include ${ROOTPATH}/procedure.rules.mk
-
-#include ${HWP_NEST_MEM_UTILS_PATH}/p9_putmemproc.mk
+#include ${HWP_NEST_MEM_UTILS_PATH}/p10_putmemproc.mk

@@ -78,6 +78,59 @@ TRAC_INIT(&g_trac_dbg_hwas, "HWAS",     1024 );
 TRAC_INIT(&g_trac_imp_hwas, "HWAS_I",   1024 );
 #endif
 
+
+Target* shouldPowerGateNMMU1(const Target& i_proc)
+{
+    HWAS_ASSERT(i_proc.getAttr<ATTR_TYPE>() == TYPE_PROC,
+                "shouldPowerGateNMMU1: Expecting PROC");
+
+    const CHIPLET_ID_ATTR NEST1_CHIPLET_ID = 3;
+
+    TargetHandleList l_pauHandleList { };
+    getChildChiplets(l_pauHandleList, &i_proc, TYPE_PAU);
+
+    bool l_haveFunctionalPAU = false;
+
+    // Check all the functional PAUs to see whether any of them in the set
+    // { 0, 4, 5 } are functional
+    for (Target* const l_pauTarget : l_pauHandleList)
+    {
+        const auto l_chipUnit = l_pauTarget->getAttr<ATTR_CHIP_UNIT>();
+
+        if (   l_chipUnit == 0
+            || l_chipUnit == 4
+            || l_chipUnit == 5)
+        {
+            l_haveFunctionalPAU = true;
+            break;
+        }
+    }
+
+    Target* l_nmmu1 = nullptr;
+
+    // If we have no functional PAUs in the set { 0, 4, 5 } then return a
+    // reference to NMMU1 so the caller can deconfigure it.
+    if (!l_haveFunctionalPAU)
+    {
+        TargetHandleList l_nmmuHandleList { };
+        getChildChiplets(l_nmmuHandleList, &i_proc, TYPE_NMMU);
+
+        for (Target* const l_nmmuTarget : l_nmmuHandleList)
+        {
+            if (l_nmmuTarget->getAttr<ATTR_CHIPLET_ID>()
+                == NEST1_CHIPLET_ID)
+            {
+                l_nmmu1 = l_nmmuTarget;
+                break;
+            }
+        }
+    }
+
+    return l_nmmu1;
+} // shouldPowerGateNMMU1
+
+#ifndef __HOSTBOOT_RUNTIME
+
 // SORT functions that we'll use for PR keyword processing
 bool compareProcGroup(procRestrict_t t1, procRestrict_t t2)
 {
@@ -1077,8 +1130,6 @@ errlHndl_t HWASDiscovery::discoverTargets()
 #endif
     } while (0);
 
-
-
     if (errl)
     {
         HWAS_INF("discoverTargets failed (plid 0x%X)", errl->plid());
@@ -1090,55 +1141,6 @@ errlHndl_t HWASDiscovery::discoverTargets()
     return errl;
 } // discoverTargets
 
-Target* shouldPowerGateNMMU1(const Target& i_proc)
-{
-    HWAS_ASSERT(i_proc.getAttr<ATTR_TYPE>() == TYPE_PROC,
-                "shouldPowerGateNMMU1: Expecting PROC");
-
-    const CHIPLET_ID_ATTR NEST1_CHIPLET_ID = 3;
-
-    TargetHandleList l_pauHandleList { };
-    getChildChiplets(l_pauHandleList, &i_proc, TYPE_PAU);
-
-    bool l_haveFunctionalPAU = false;
-
-    // Check all the functional PAUs to see whether any of them in the set
-    // { 0, 4, 5 } are functional
-    for (Target* const l_pauTarget : l_pauHandleList)
-    {
-        const auto l_chipUnit = l_pauTarget->getAttr<ATTR_CHIP_UNIT>();
-
-        if (   l_chipUnit == 0
-            || l_chipUnit == 4
-            || l_chipUnit == 5)
-        {
-            l_haveFunctionalPAU = true;
-            break;
-        }
-    }
-
-    Target* l_nmmu1 = nullptr;
-
-    // If we have no functional PAUs in the set { 0, 4, 5 } then return a
-    // reference to NMMU1 so the caller can deconfigure it.
-    if (!l_haveFunctionalPAU)
-    {
-        TargetHandleList l_nmmuHandleList { };
-        getChildChiplets(l_nmmuHandleList, &i_proc, TYPE_NMMU);
-
-        for (Target* const l_nmmuTarget : l_nmmuHandleList)
-        {
-            if (l_nmmuTarget->getAttr<ATTR_CHIPLET_ID>()
-                == NEST1_CHIPLET_ID)
-            {
-                l_nmmu1 = l_nmmuTarget;
-                break;
-            }
-        }
-    }
-
-    return l_nmmu1;
-} // shouldPowerGateNMMU1
 
 bool isChipFunctional(const TARGETING::TargetHandle_t &i_target,
                       const partialGoodVector& i_pgData)
@@ -3429,5 +3431,6 @@ errlHndl_t validateProcessorEcLevels()
     return l_err;
 
 } //validateProccesorEcLevels
+#endif // end #ifndef __HOSTBOOT_RUNTIME
 
 };   // end namespace

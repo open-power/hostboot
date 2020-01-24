@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019
+# Contributors Listed Below - COPYRIGHT 2019,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -22,28 +22,25 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-HOSTBOOT_RUNTIME = 1
 
+HOSTBOOT_RUNTIME = 1
+ROOTPATH = ../../../../..
 MODULE = mss_rt
 
-ROOTPATH = ../../../../..
-
 IMPORT_PATH        = ${ROOTPATH}/src/import
-PROCEDURES_PATH    = ${IMPORT_PATH}/chips/p9/procedures
+PROCEDURES_PATH    = ${IMPORT_PATH}/chips/p10/procedures
 
-# FIXME RTC: 210975
-
-#include ${ROOTPATH}/src/build/mkrules/script.rules.mk
-#include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk
+include ${ROOTPATH}/src/build/mkrules/script.rules.mk
+include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${IMPORT_PATH}/
 
 # Generic support
@@ -74,15 +71,13 @@ MSS_LIB += ${IMPORT_PATH}/generic/memory/lib/utils/freq/
 MSS_LIB += ${IMPORT_PATH}/generic/memory/lib/utils/mcbist
 MSS_LIB += ${IMPORT_PATH}/generic/memory/
 
-# Axone
-MSS_LIB += ${IMPORT_PATH}/chips/p9a/procedures/hwp/memory/lib/utils/
-
-# Nimbus
-MSS_LIB += ${IMPORT_PATH}/chips/p9/procedures/hwp/memory/lib/utils/
+MSS_LIB += ${IMPORT_PATH}/chips/p10/procedures/hwp/memory/lib/utils/
 
 EXTRAINCDIR += ${MSS_LIB}
 
-#VPATH += ${MSS_LIB}
+VPATH += ${MSS_LIB}
+
+# FIXME RTC: 210975
 
 #######
 # Add the specific files we need for HBRT
@@ -97,7 +92,6 @@ EXTRAINCDIR += ${MSS_LIB}
 #OBJS += nimbus_pos.o
 
 
-
 #HWP build tool
-#include ${ROOTPATH}/procedure.rules.mk
+include ${ROOTPATH}/procedure.rules.mk
 include ${ROOTPATH}/config.mk

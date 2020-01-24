@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2019
+# Contributors Listed Below - COPYRIGHT 2011,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -22,12 +22,14 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-HOSTBOOT_RUNTIME = 1
 
+HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = expaccess_rt
 
 SUBDIRS += test.d
+
+include ../expaccess.mk
 
 EXTRAINCDIR += ../
 

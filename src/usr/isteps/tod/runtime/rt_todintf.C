@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,12 @@
 #include <tod_init_reasoncodes.H>     // TOD_RT_TOPOLOGY_RESET_BACKUP, etc
 #include <errl/errlentry.H>
 
+namespace ISTEPS_TRACE
+{
+    // declare storage for isteps_trace!
+    trace_desc_t * g_trac_isteps_trace = nullptr;
+    TRAC_INIT(&ISTEPS_TRACE::g_trac_isteps_trace, "ISTEPS_TRACE", 2*KILOBYTE);
+}
 
 using namespace ERRORLOG;
 

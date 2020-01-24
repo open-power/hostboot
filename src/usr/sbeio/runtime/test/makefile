@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2019
+# Contributors Listed Below - COPYRIGHT 2017,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -24,14 +24,11 @@
 # IBM_PROLOG_END_TAG
 
 HOSTBOOT_RUNTIME = 1
-
 ROOTPATH = ../../../../..
-
 MODULE = testsbeio_rt
 
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 
-# FIXME RTC: 210975
-#TESTS = *.H
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk

@@ -41,8 +41,6 @@
 #include <errl/errlreasoncodes.H>
 #include <vector>
 #include <isteps/pm/pm_common_ext.H>
-#include <p9_hcd_memmap_base.H>  // for reload_pm_complex
-#include <p9_stop_data_struct.H> // for reload_pm_complex
 #include <scom/runtime/rt_scomif.H> // sendScomOpToFsp,
                                     // sendMultiScomReadToFsp,
                                     // switchToFspScomAccess

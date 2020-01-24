@@ -32,7 +32,6 @@ MODULE = testfapi2_rt
 
 include ../../test/fapi2Test.mk
 
-# FIXME RTC: 210975
 # Use temp variables to remove the tests we do not want to run in runtime
 TMPVAR1 := ${TESTS}
 # RTC: 181003 need to determine why fapi2HwpErrorBufferTest.H is getting data storage exception in RT

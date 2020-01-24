@@ -37,10 +37,10 @@
 #include <devicefw/userif.H>
 
 //  targeting support
+#include    <targeting/translateTarget.H>
 #include    <targeting/common/target.H>
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
-#include    <targeting/runtime/rt_targeting.H>
 
 //  mailbox register definitions
 #include <initservice/mboxRegs.H>

@@ -68,77 +68,20 @@ mvpdTestData mvpdData[] =
     { MVPD::CRP0, MVPD::ED },
     { MVPD::CRP0, MVPD::TE },
     { MVPD::CRP0, MVPD::DD },
+    { MVPD::CRP0, MVPD::DN },
+    { MVPD::CRP0, MVPD::pdV },
+    { MVPD::CRP0, MVPD::IQ },
     { MVPD::CRP0, MVPD::pdW },
+    { MVPD::CRP0, MVPD::RT },
+    { MVPD::CRP0, MVPD::CI },
     { MVPD::CP00, MVPD::VD },
     { MVPD::CP00, MVPD::PG },
-    //    { MVPD::CP00, MVPD::PK }, // no PK in test data
     { MVPD::CP00, MVPD::pdR },
-    { MVPD::CP00, MVPD::pdG },
-//    { MVPD::CP00, MVPD::pdV },  (REC 0x01, KEY 0x08) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
-    { MVPD::CP00, MVPD::pdP },
     { MVPD::CP00, MVPD::SB },
-//    { MVPD::CP00, MVPD::PB },   (REC 0x01, KEY 0x1A) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
+    { MVPD::CP00, MVPD::pdG },
+    { MVPD::CP00, MVPD::PZ },
+    { MVPD::CP00, MVPD::RT },
     { MVPD::CP00, MVPD::AW },
-    { MVPD::LRP0, MVPD::VD },
-//    { MVPD::LRP0, MVPD::pdV },  (REC 0x03, KEY 0x08) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
-//    { MVPD::LRP0, MVPD::pdM },  (REC 0x03, KEY 0x16) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
-//    { MVPD::LRP0, MVPD::CH },   (REC 0x03, KEY 0x1B) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
-    { MVPD::LRP1, MVPD::VD },
-//    { MVPD::LRP1, MVPD::pdV },  (REC 0x04, KEY 0x08) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
-//    { MVPD::LRP1, MVPD::pdM },  (REC 0x04, KEY 0x16) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
-//    { MVPD::LRP1, MVPD::CH },   (REC 0x04, KEY 0x1B) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
-    { MVPD::LRP2, MVPD::VD },
-//    { MVPD::LRP2, MVPD::pdV },  (REC 0x05, KEY 0x08) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
-//    { MVPD::LRP2, MVPD::pdM },  (REC 0x05, KEY 0x16) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
-//    { MVPD::LRP2, MVPD::CH },   (REC 0x05, KEY 0x1B) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
-    { MVPD::LRP3, MVPD::VD },
-//    { MVPD::LRP3, MVPD::pdV },  (REC 0x06, KEY 0x08) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
-//    { MVPD::LRP3, MVPD::pdM },  (REC 0x06, KEY 0x16) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
-//    { MVPD::LRP3, MVPD::CH },   (REC 0x06, KEY 0x1B) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
-    { MVPD::LRP4, MVPD::VD },
-//    { MVPD::LRP4, MVPD::pdV },  (REC 0x07, KEY 0x08) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
-//    { MVPD::LRP4, MVPD::pdM },  (REC 0x07, KEY 0x16) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
-//    { MVPD::LRP4, MVPD::CH },   (REC 0x07, KEY 0x1B) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
-    { MVPD::LRP5, MVPD::VD },
-//    { MVPD::LRP5, MVPD::pdV },  (REC 0x08, KEY 0x08) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
-//    { MVPD::LRP5, MVPD::pdM },  (REC 0x08, KEY 0x16) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
-//    { MVPD::LRP5, MVPD::CH },   (REC 0x08, KEY 0x1B) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
-    { MVPD::LWP0, MVPD::VD },
-    { MVPD::LWP0, MVPD::n20 },
-    { MVPD::LWP0, MVPD::n21 },
-    { MVPD::LWP0, MVPD::n30 },
-    { MVPD::LWP0, MVPD::n31 },
-//    { MVPD::LWP0, MVPD::IN },   (REC 0x09, KEY 0x17) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
-    { MVPD::LWP1, MVPD::VD },
-    { MVPD::LWP1, MVPD::n20 },
-    { MVPD::LWP1, MVPD::n21 },
-    { MVPD::LWP1, MVPD::n30 },
-    { MVPD::LWP1, MVPD::n31 },
-//    { MVPD::LWP1, MVPD::IN },   (REC 0x0A, KEY 0x17) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
-    { MVPD::LWP2, MVPD::VD },
-    { MVPD::LWP2, MVPD::n20 },
-    { MVPD::LWP2, MVPD::n21 },
-    { MVPD::LWP2, MVPD::n30 },
-    { MVPD::LWP2, MVPD::n31 },
-//    { MVPD::LWP2, MVPD::IN },   (REC 0x0B, KEY 0x17) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
-    { MVPD::LWP3, MVPD::VD },
-    { MVPD::LWP3, MVPD::n20 },
-    { MVPD::LWP3, MVPD::n21 },
-    { MVPD::LWP3, MVPD::n30 },
-    { MVPD::LWP3, MVPD::n31 },
-//    { MVPD::LWP3, MVPD::IN },   (REC 0x0C, KEY 0x17) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
-    { MVPD::LWP4, MVPD::VD },
-    { MVPD::LWP4, MVPD::n20 },
-    { MVPD::LWP4, MVPD::n21 },
-    { MVPD::LWP4, MVPD::n30 },
-    { MVPD::LWP4, MVPD::n31 },
-//    { MVPD::LWP4, MVPD::IN },   (REC 0x0D, KEY 0x17) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
-    { MVPD::LWP5, MVPD::VD },
-    { MVPD::LWP5, MVPD::n20 },
-    { MVPD::LWP5, MVPD::n21 },
-    { MVPD::LWP5, MVPD::n30 },
-    { MVPD::LWP5, MVPD::n31 },
-//    { MVPD::LWP5, MVPD::IN },   (REC 0x0E, KEY 0x17) @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
     { MVPD::VINI, MVPD::DR },
     { MVPD::VINI, MVPD::VZ },
     { MVPD::VINI, MVPD::CC },
@@ -150,27 +93,74 @@ mvpdTestData mvpdData[] =
     { MVPD::VINI, MVPD::HE },
     { MVPD::VINI, MVPD::CT },
     { MVPD::VINI, MVPD::HW },
-
+    { MVPD::VINI, MVPD::RT },
+    { MVPD::LRP0, MVPD::VD },
+    { MVPD::LRP0, MVPD::RT },
+    { MVPD::LRP1, MVPD::VD },
+    { MVPD::LRP1, MVPD::RT },
+    { MVPD::LRP2, MVPD::VD },
+    { MVPD::LRP2, MVPD::RT },
+    { MVPD::LRP3, MVPD::VD },
+    { MVPD::LRP3, MVPD::RT },
+    { MVPD::LRP4, MVPD::VD },
+    { MVPD::LRP4, MVPD::RT },
+    { MVPD::LRP5, MVPD::VD },
+    { MVPD::LRP5, MVPD::RT },
+    { MVPD::LWP0, MVPD::VD },
+    { MVPD::LWP0, MVPD::n20 },
+    { MVPD::LWP0, MVPD::n21 },
+    { MVPD::LWP0, MVPD::n30 },
+    { MVPD::LWP0, MVPD::n31 },
+    { MVPD::LWP0, MVPD::RT },
+    { MVPD::LWP1, MVPD::VD },
+    { MVPD::LWP1, MVPD::n20 },
+    { MVPD::LWP1, MVPD::n21 },
+    { MVPD::LWP1, MVPD::n30 },
+    { MVPD::LWP1, MVPD::n31 },
+    { MVPD::LWP1, MVPD::RT },
+    { MVPD::LWP2, MVPD::VD },
+    { MVPD::LWP2, MVPD::n20 },
+    { MVPD::LWP2, MVPD::n21 },
+    { MVPD::LWP2, MVPD::n30 },
+    { MVPD::LWP2, MVPD::n31 },
+    { MVPD::LWP2, MVPD::RT },
+    { MVPD::LWP3, MVPD::VD },
+    { MVPD::LWP3, MVPD::n20 },
+    { MVPD::LWP3, MVPD::n21 },
+    { MVPD::LWP3, MVPD::n30 },
+    { MVPD::LWP3, MVPD::n31 },
+    { MVPD::LWP3, MVPD::RT },
+    { MVPD::LWP4, MVPD::VD },
+    { MVPD::LWP4, MVPD::n20 },
+    { MVPD::LWP4, MVPD::n21 },
+    { MVPD::LWP4, MVPD::n30 },
+    { MVPD::LWP4, MVPD::n31 },
+    { MVPD::LWP4, MVPD::RT },
+    { MVPD::LWP5, MVPD::VD },
+    { MVPD::LWP5, MVPD::n20 },
+    { MVPD::LWP5, MVPD::n21 },
+    { MVPD::LWP5, MVPD::n30 },
+    { MVPD::LWP5, MVPD::n31 },
+    { MVPD::LWP5, MVPD::RT },
     { MVPD::VRML, MVPD::VD },
     { MVPD::VRML, MVPD::PN },
     { MVPD::VRML, MVPD::SN },
-/*    { MVPD::VRML, MVPD::TV }, ignored keyword */
-
+    { MVPD::VRML, MVPD::RT },
+    { MVPD::VWML, MVPD::VD },
     { MVPD::VWML, MVPD::pdI },
-
+    { MVPD::VWML, MVPD::RT },
     { MVPD::VER0, MVPD::VD },
     { MVPD::VER0, MVPD::pdI },
-
+    { MVPD::VER0, MVPD::RT },
+    { MVPD::MER0, MVPD::VD },
     { MVPD::MER0, MVPD::pdI },
-
-    /* add in VMSC @fixme-RTC:127341
-    { MVPD::VMSC, MVPD::IN },
-    */
+    { MVPD::MER0, MVPD::RT },
 };
 
 VPD::vpdRecord mvpdRecordData[] =
 {
     MVPD::CP00,
+    MVPD::CRP0,
     MVPD::LRP0,
     MVPD::LRP1,
     MVPD::LRP2,
@@ -183,11 +173,11 @@ VPD::vpdRecord mvpdRecordData[] =
     MVPD::LWP3,
     MVPD::LWP4,
     MVPD::LWP5,
+    MVPD::MER0,
+    MVPD::VER0,
     MVPD::VINI,
     MVPD::VRML,
     MVPD::VWML,
-    MVPD::VER0,
-    MVPD::MER0,
 };
 
 
@@ -304,7 +294,6 @@ class MVPDTest: public CxxTest::TestSuite
                     }
 
                     theData = static_cast<uint8_t*>(malloc( theSize ));
-
                     // Read record/keyword pair
                     err = deviceRead( theTarget,
                                       theData,
@@ -472,13 +461,14 @@ class MVPDTest: public CxxTest::TestSuite
                        fails, cmds );
         }
 
-// @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
-#if 0
+
         /**
          * @brief This function will test MVPD writes.
          */
-        void disabled_testMvpdWrite ( void )
+        void testMvpdWrite ( void )
         {
+// @TODO: RTC 244854: This test is currently only working in HB runtime
+#ifdef __HOSTBOOT_RUNTIME
             auto l_record  = MVPD::VWML;
             auto l_keyword = MVPD::pdI;
 
@@ -644,8 +634,8 @@ class MVPDTest: public CxxTest::TestSuite
             TRACFCOMP( g_trac_vpd,
                        "testMvpdWrite - %d/%d fails",
                        fails, cmds );
+#endif  // end #ifdef __HOSTBOOT_RUNTIME
         }
-#endif
 
         /**
          * @brief This function will test that an error is generated when a

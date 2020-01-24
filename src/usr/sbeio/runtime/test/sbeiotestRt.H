@@ -35,9 +35,10 @@
 #include <runtime/interface.h>
 #include <sbeio/runtime/sbe_msg_passing.H>
 #include <sbeio/sbeioreasoncodes.H>
-#include <targeting/runtime/rt_targeting.H>
+#include <targeting/translateTarget.H>
 #include <targeting/common/attributes.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/common/hbrt_target.H>
 #include <errl/errlmanager.H>
 #include <devicefw/userif.H>
 #include <initservice/mboxRegs.H>
@@ -308,7 +309,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
          *
          * @return Return Code    0 if Successful, otherwise not 0.
          */
-        int checkResetSbeMessagePassingCFAM(RT_TARG::rtChipId_t i_procChipId,
+        int checkResetSbeMessagePassingCFAM(TARGETING::rtChipId_t i_procChipId,
                                             const sbe_msg_processing_state_t i_state)
         {
             using namespace INITSERVICE::SPLESS;
@@ -735,7 +736,9 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
          */
         void testSbeMessagePassingDefaultPath(void)
         {
-#ifdef CONFIG_HTMGT
+// @TODO RTC 244854 Re-enable the '#ifdef CONFIG_HTMGT', when runtime HTMGT is enabled
+//#ifdef CONFIG_HTMGT
+#if 0
             // Test entry
             TRACFCOMP(g_trac_sbeio, ENTER_MRK "SbeMessagePassingRtTest::"
                                     "testSbeMessagePassingDefaultPath");

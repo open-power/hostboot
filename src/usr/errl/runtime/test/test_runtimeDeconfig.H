@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,11 +26,9 @@
 #define _TEST_DECONFIGRUNTIME_H
 
 #include <cxxtest/TestSuite.H>
-#include <attributestructs.H>
 #include <errl/errlmanager.H>
-#include <runtime/interface.h>
+#include <hbotcompid.H>
 #include <hwas/common/hwas_reasoncodes.H>
-#include <hwas/common/hwas.H>
 #include <hwas/common/deconfigGard.H>
 #include <targeting/common/utilFilter.H>
 

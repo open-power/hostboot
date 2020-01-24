@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2019
+# Contributors Listed Below - COPYRIGHT 2016,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -24,16 +24,13 @@
 # IBM_PROLOG_END_TAG
 
 HOSTBOOT_RUNTIME = 1
-
 ROOTPATH = ../../../../..
-
 MODULE = tod_rt
 
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/tod
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/isteps
 EXTRAINCDIR += ${ROOTPATH}/src/usr/errl
 
-# FIXME RTC: 215628 Runtime TOD support
-# OBJS += rt_todintf.o
+OBJS += rt_todintf.o
 
 include ../tod.mk

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -273,27 +273,27 @@ public:
         TS_TRACE( "test testErrl3");
         do
         {
-            // find some ex units that we can play with
+            // find some fc units that we can play with
             TARGETING::Target * pSys;
             TARGETING::targetService().getTopLevelTarget(pSys);
 
-            TARGETING::PredicateCTM predEx(TARGETING::CLASS_UNIT,
-                                                TARGETING::TYPE_EX);
+            TARGETING::PredicateCTM predFc(TARGETING::CLASS_UNIT,
+                                                TARGETING::TYPE_FC);
             TARGETING::PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             TARGETING::PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predEx).push(&predFunctional).And();
-            TARGETING::TargetHandleList pExList;
-            TARGETING::targetService().getAssociated( pExList, pSys,
+            checkExpr.push(&predFc).push(&predFunctional).And();
+            TARGETING::TargetHandleList pFcList;
+            TARGETING::targetService().getAssociated( pFcList, pSys,
                 TARGETING::TargetService::CHILD, TARGETING::TargetService::ALL,
                 &checkExpr );
 
-            if (pExList.empty())
+            if (pFcList.empty())
             {
-                TS_FAIL("testErrl3: empty pExList");
+                TS_FAIL("testErrl3: empty pFcList");
                 break;
             }
-            TARGETING::TargetHandle_t pTarget = *pExList.begin();
+            TARGETING::TargetHandle_t pTarget = *pFcList.begin();
 
             // Create an error log
             errlHndl_t errl = new ERRORLOG::ErrlEntry(
@@ -335,23 +335,23 @@ public:
                     HWAS::SRCI_PRIORITY_HIGH);
 
             errl->addClockCallout(
-                pExList[0],
+                pFcList[0],
                 HWAS::TODCLK_TYPE,
                 HWAS::SRCI_PRIORITY_MED);
 
             // Clock callout using deconfig/GARD parameters
             errl->addClockCallout(
-                pExList[0],
+                pFcList[0],
                 HWAS::TODCLK_TYPE,
                 HWAS::SRCI_PRIORITY_HIGH,
                 HWAS::DECONFIG,
                 HWAS::GARD_Fatal);
 
-            if (pExList.size() > 1)
+            if (pFcList.size() > 1)
             {
                 errl->addBusCallout(
-                    pExList[0],
-                    pExList[1],
+                    pFcList[0],
+                    pFcList[1],
                     HWAS::A_BUS_TYPE,
                     HWAS::SRCI_PRIORITY_LOW);
             }

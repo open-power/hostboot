@@ -30,8 +30,8 @@
 #include <errl/errlentry.H>                // ErrlEntry
 #include <errl/errlmanager.H>              // errlCommit
 #include <errl/hberrltypes.H>              // TWO_UINT32_TO_UINT64
+#include <targeting/translateTarget.H>     // RT_TARG::getHbTarget
 #include <targeting/common/target.H>       // TargetHandle_t, getTargetFromHuid
-#include <targeting/runtime/rt_targeting.H>          // RT_TARG::getHbTarget
 #include <attributeenums.H>                // ATTRIBUTE_ID
 
 using namespace TARGETING;
@@ -93,7 +93,8 @@ uint16_t SeqId_t::getCurrentSeqId()
  **/
 void sbeAttemptRecovery(uint64_t i_data)
 {
-// @TODO: RTC 244854 Re-enable call below, when can
+// @TODO: RTC 244854 Re-enable once the SBEIO::SbeRetryHandler is operational and no longer
+// tied to P9.
 #if 0
 
    // Create a useful struct to get to the data
@@ -346,8 +347,6 @@ void logGardEvent(const hostInterfaces::gard_event_t& i_gardEvent)
                        i_gardEvent.i_sub_unit_mask,
                        i_gardEvent.i_recovery_level);
 
-// @TODO: RTC 244854 Re-enable call below, when can
-#if 0
     errlHndl_t l_err{nullptr};
 
     do
@@ -434,7 +433,7 @@ void logGardEvent(const hostInterfaces::gard_event_t& i_gardEvent)
 
     // Commit any error log that occurred.
     errlCommit(l_err, RUNTIME_COMP_ID);
-#endif
+
     TRACFCOMP(g_trac_runtime, EXIT_MRK"logGardEvent")
 }
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -82,6 +82,10 @@ static PNOR::SectionInfo_t g_GardSectionInfo;
  * @brief Flag indicating if getGardSectionInfo() was called previously
  */
 static bool getGardSectionInfoCalled;
+
+//******************************************************************************
+// RUNTIME/NON-RUNTIME/HOSTBOOT/NON-HOSTBOOT methods
+//******************************************************************************
 
 void _flush(void *i_addr);
 errlHndl_t _GardRecordIdSetup(void *&io_platDeconfigGard);
@@ -730,6 +734,10 @@ errlHndl_t hwasError(const uint8_t i_sev,
     return l_pErr;
 }
 
+//******************************************************************************
+// HOSTBOOT RUNTIME methods
+//******************************************************************************
+
 #ifdef __HOSTBOOT_RUNTIME
 /******************************************************************************/
 // platDeconfigureTargetAtRuntime
@@ -769,7 +777,7 @@ errlHndl_t DeconfigGard::platDeconfigureTargetAtRuntime(
 
         // Make sure we are only working with the following types
         if( (l_targetType != TYPE_EQ) &&
-            (l_targetType != TYPE_EX) &&
+            (l_targetType != TYPE_FC) &&
             (l_targetType != TYPE_CORE) )
         {
             HWAS_ERR("Caller passed invalid type: 0x%08X", l_targetType);
@@ -779,7 +787,7 @@ errlHndl_t DeconfigGard::platDeconfigureTargetAtRuntime(
              * @errortype
              * @moduleid     MOD_RUNTIME_DECONFIG
              * @reasoncode   RC_INVALID_TARGET
-             * @devdesc      Target is neiter TYPE_EQ, TYPE_EX nor TYPE_CORE
+             * @devdesc      Target is neiter TYPE_EQ, TYPE_FC nor TYPE_CORE
              * @userdata1    target huid
              * @custdesc     Host Firmware encountered an internal
              *               error
@@ -790,14 +798,12 @@ errlHndl_t DeconfigGard::platDeconfigureTargetAtRuntime(
             break;
         }
 
-
         switch(i_deconfigureAction)
         {
             case DeconfigGard::FULLY_AT_RUNTIME:
 
                 HWAS_INF("Deconfig action FULLY_AT_RUNTIME :0x%08X",
                         DeconfigGard::FULLY_AT_RUNTIME);
-
                 break;
 
             default:
@@ -818,7 +824,6 @@ errlHndl_t DeconfigGard::platDeconfigureTargetAtRuntime(
                 l_errl = hwasError(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                         HWAS::MOD_RUNTIME_DECONFIG,
                         HWAS::RC_INVALID_PARAM,0,0);
-
                 break;
         }
 
@@ -838,13 +843,14 @@ errlHndl_t DeconfigGard::platDeconfigureTargetAtRuntime(
                 l_deconfigReason);
 
         bool l_isTargetDeconfigured = false;
+
         // deconfigureTarget() checks for targets that can be deconfigured at
         // runtime
         l_errl = theDeconfigGard().deconfigureTarget(
                                    const_cast<TARGETING::Target&>(*i_pTarget),
                                    l_deconfigReason,
-                                    &l_isTargetDeconfigured,
-                                    i_deconfigureAction);
+                                   &l_isTargetDeconfigured,
+                                   i_deconfigureAction);
 
         // If there was an error OR the target was not deconfigured, then
         // do not continue and exit
@@ -918,7 +924,7 @@ errlHndl_t DeconfigGard::platDeconfigureTargetAtRuntime(
                 "calling p9_update_ec_eq_state");
         FAPI_INVOKE_HWP( l_errl,p9_update_ec_eq_state,
                          l_proc,true/*skip qssr*/);
-#endif
+
 
         if(l_errl)
         {
@@ -930,6 +936,7 @@ errlHndl_t DeconfigGard::platDeconfigureTargetAtRuntime(
             // If an error then exit while loop
             break;
         }
+#endif
     }while(0);
 
     HWAS_INF("<<<platDeconfigureTargetAtRuntime()" );
@@ -937,7 +944,7 @@ errlHndl_t DeconfigGard::platDeconfigureTargetAtRuntime(
     return l_errl ;
 }
 
-#endif // __HOSTBOOT_RUNTIME
+#endif // end #ifdef __HOSTBOOT_RUNTIME
 
 
 } // namespace HWAS
