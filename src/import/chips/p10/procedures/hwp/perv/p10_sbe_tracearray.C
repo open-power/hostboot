@@ -209,7 +209,7 @@ static const ta_def ta_defs[] =
     { { PROC_TB_L3_0, PROC_TB_NCU_0, PROC_TB_CLKADJ },            0x20, 0x03F0, 5 },
     { { PROC_TB_L3_1, PROC_TB_NCU_1 },                            0x20, 0x03F1, 5 },
     { { PROC_TB_QME0 },                                           0x20, 0x0400, 5 },
-    { { PROC_TB_QME1 },                                           0x20, 0x0401, 5 }
+    { { PROC_TB_QME1 },                                           0x20, 0x0402, 5 }
 };
 
 class TraceArrayFinder
