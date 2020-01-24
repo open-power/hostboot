@@ -43,6 +43,7 @@
 #include <vpd/spdenums.H>
 #include <initservice/initserviceif.H>
 #include <fsi/fsiif.H>
+#include "../i2c/eepromCache.H"
 
 #include "spd.H"
 
@@ -203,7 +204,25 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
             }
             break;
         }
+#endif
 
+#if( defined(CONFIG_SUPPORT_EEPROM_CACHING) && !defined(CONFIG_SUPPORT_EEPROM_HWACCESS) )
+        err = EEPROM::eecachePresenceDetect(i_target, present);
+        if(err)
+        {
+            TRACFCOMP(g_trac_spd, ERR_MRK "dimmPresenceDetect() "
+                "detect target HUID 0x%.08x against the existing EECACHE "
+                "failed. rc=0x%X, plid=0x%X",
+                TARGETING::get_huid(i_target), ERRL_GETRC_SAFE(err),
+                ERRL_GETPLID_SAFE(err));
+            if (l_masterProc)
+            {
+                TRACFCOMP(g_trac_spd, "on master proc");
+            }
+            present = false;
+            errlCommit(err, VPD_COMP_ID);
+        }
+#else
         // TODO RTC 213602
         // Remove this exception logic once the I2C code has
         // been updated for P10 and all ports (0-15) are
@@ -240,6 +259,9 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
         if( present )
         {
             // Check if the VPD data in the PNOR matches the SEEPROM
+            TRACUCOMP( g_trac_spd, INFO_MRK"dimmPresenceDetect() "
+                       "Check if the VPD data in the PNOR matches the SEEPROM for 0x%08X.",
+                       TARGETING::get_huid(i_target) );
             err = VPD::ensureCacheIsInSync( i_target );
             if( err )
             {

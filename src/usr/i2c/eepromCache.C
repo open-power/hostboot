@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1040,6 +1040,34 @@ errlHndl_t cacheEECACHEPartition()
     }
 
     }while(0);
+    return l_errl;
+}
+#endif
+
+#if( defined(CONFIG_SUPPORT_EEPROM_CACHING) && !defined(CONFIG_SUPPORT_EEPROM_HWACCESS) )
+errlHndl_t eecachePresenceDetect(TARGETING::Target* i_target,
+                                 bool& o_present)
+{
+    errlHndl_t l_errl = nullptr;
+    o_present = false;
+
+    do {
+    // Build an eecache header record out of the provided target
+    eeprom_addr_t l_eepromInfo;
+    eepromRecordHeader l_eepromRecordHeader {};
+    l_eepromInfo.eepromRole = EEPROM::VPD_PRIMARY;
+    l_errl = buildEepromRecordHeader(i_target,
+                                     l_eepromInfo,
+                                     l_eepromRecordHeader);
+    if(l_errl)
+    {
+        break;
+    }
+
+    o_present = isEepromRecordPresent(l_eepromRecordHeader);
+
+    }while(0);
+
     return l_errl;
 }
 #endif

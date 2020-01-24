@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -285,6 +285,21 @@ uint64_t lookupEepromCacheAddr(const eepromRecordHeader& i_eepromRecordHeader,
 void printCurrentCachedEepromMap(void);
 
 #endif  // __HOSTBOOT_RUNTIME
+
+#if( defined(CONFIG_SUPPORT_EEPROM_CACHING) && !defined(CONFIG_SUPPORT_EEPROM_HWACCESS) )
+/**
+ * @brief Performs presence detection against the EECACHE PNOR partition.
+ *        In this case, the target is considered present if it has a
+ *        corresponding record in the EECACHE header.
+ *
+ * @param[in] i_target the target to check for presence
+ * @param[out] o_present the presence state of the target
+ * @return errlHndl_t: nullptr on success; non-nullptr on error
+ */
+errlHndl_t eecachePresenceDetect(TARGETING::Target* i_target,
+                                 bool& o_present);
+#endif
+
 }
 
 #endif // namespace  EEPROM

@@ -44,43 +44,6 @@ extern trace_desc_t* g_trac_i2c;
 namespace I2C
 {
 
-#if( defined(CONFIG_SUPPORT_EEPROM_CACHING) && !defined(CONFIG_SUPPORT_EEPROM_HWACCESS) )
-/**
- * @brief Performs presence detection against the EECACHE PNOR partition.
- *        In this case, the target is considered present if it has a
- *        corresponding record in the EECACHE header.
- *
- * @param[in] i_target the target to check for presence
- * @param[out] o_present the presence state of the target
- * @return errlHndl_t: nullptr on success; non-nullptr on error
- */
-errlHndl_t eecachePresenceDetect(TARGETING::Target* i_target,
-                                 bool& o_present)
-{
-    errlHndl_t l_errl = nullptr;
-    o_present = false;
-
-    do {
-    // Build an eecache header record out of the provided target
-    EEPROM::eeprom_addr_t l_eepromInfo;
-    EEPROM::eepromRecordHeader l_eepromRecordHeader {};
-    l_eepromInfo.eepromRole = EEPROM::VPD_PRIMARY;
-    l_errl = EEPROM::buildEepromRecordHeader(i_target,
-                                             l_eepromInfo,
-                                             l_eepromRecordHeader);
-    if(l_errl)
-    {
-        break;
-    }
-
-    o_present = EEPROM::isEepromRecordPresent(l_eepromRecordHeader);
-
-    }while(0);
-
-    return l_errl;
-}
-#endif
-
 /**
  * @brief Performs a presence detect operation on a Target that has the
  *        ATTR_FAPI_I2C_CONTROL_INFO and can be detected via that device
@@ -276,7 +239,7 @@ errlHndl_t ocmbI2CPresencePerformOp(DeviceFW::OperationType i_opType,
     bool l_ocmbPresent = true;
 
 #if( defined(CONFIG_SUPPORT_EEPROM_CACHING) && !defined(CONFIG_SUPPORT_EEPROM_HWACCESS) )
-    l_errl = eecachePresenceDetect(i_target, l_ocmbPresent);
+    l_errl = EEPROM::eecachePresenceDetect(i_target, l_ocmbPresent);
     if(l_errl)
     {
         TRACFCOMP(g_trac_i2c, "ocmbI2CPresencePerformOp: could not presence-"
@@ -332,7 +295,7 @@ errlHndl_t pmicI2CPresencePerformOp(DeviceFW::OperationType i_opType,
 #if( defined(CONFIG_SUPPORT_EEPROM_CACHING) && !defined(CONFIG_SUPPORT_EEPROM_HWACCESS) )
         // In the EECACHE presence detection mode, look at the presence state of
         // the parent OCMB instead of reading it.
-        l_errl = eecachePresenceDetect(l_parentOcmb, l_pmicPresent);
+        l_errl = EEPROM::eecachePresenceDetect(l_parentOcmb, l_pmicPresent);
         if(l_errl)
         {
             TRACFCOMP(g_trac_i2c, "pmicI2CPresencePerformOp: couldn't presence-"
