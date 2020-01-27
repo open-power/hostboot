@@ -192,21 +192,27 @@ struct hdatIplSpPvt_t
  */
 struct hdatDump_t
 {
-    union {uint16_t hdatFlags;                // word view unioned with bit view
-           uint16_t hdatRptPending    : 1,    // 1 = A dump exists and is
-                                              //        waiting to be extracted
-                    hdatHdwDumpExists : 1,    // 1 = Hardware dump exists
-                    hdatMemDumpExists : 1,    // 1 = Memory dump exists
-                    hdatHdwDumpErrs   : 1,    // 1 = Errors occurred during
-                                              //       hardware dump collection
-                    hdatMemDumpErrs   : 1,    // 1 = Errors occurred during
+    union
+    {
+        uint16_t hdatFlags;                // word view unioned with bit view
+        struct
+        {
+            uint16_t hdatRptPending    : 1;    // 1 = A dump exists and is
+                                               //        waiting to be extracted
+            uint16_t hdatHdwDumpExists : 1;    // 1 = Hardware dump exists
+            uint16_t hdatMemDumpExists : 1;    // 1 = Memory dump exists
+            uint16_t hdatHdwDumpErrs   : 1;    // 1 = Errors occurred during
+                                               //       hardware dump collection
+            uint16_t hdatMemDumpErrs   : 1;    // 1 = Errors occurred during
                                               //        memory dump collection
-                    hdatHdwDumpReq    : 1,    // 1 = Hardware dump requested
-                    hdatMemDumpReq    : 1,    // 1 = Memory dump requested
-                    hdatUserReq       : 1,    // 1 = User requested the dump
-                    hdatErrReq        : 1,    // 1 = Hardware or software
-                                              //        error caused the dump
-                    hdatReserved1     : 7;};  // Reserved for future use
+            uint16_t hdatHdwDumpReq    : 1;    // 1 = Hardware dump requested
+            uint16_t hdatMemDumpReq    : 1;    // 1 = Memory dump requested
+            uint16_t hdatUserReq       : 1;    // 1 = User requested the dump
+            uint16_t hdatErrReq        : 1;    // 1 = Hardware or software
+                                               //        error caused the dump
+            uint16_t hdatReserved1     : 7;    // Reserved for future use
+        } PACKED;
+    };
     uint8_t  hdatReserved2;
     uint8_t  hdatHypDumpPolicy;
     uint32_t hdatDumpId;
