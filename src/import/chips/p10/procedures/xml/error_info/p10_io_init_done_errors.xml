@@ -30,7 +30,6 @@
     <description>
       Timed out waiting for PHY PPE to complete io init
     </description>
-    <ffdc>TIMEOUT_INFO</ffdc>
     <callout>
         <target>TARGET</target>
         <priority>HIGH</priority>

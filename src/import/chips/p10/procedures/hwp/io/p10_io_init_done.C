@@ -43,55 +43,32 @@
 ///
 /// @param[in] i_pauc_target The PAUC target to read from
 /// @param[in] i_thread The thread to read
-/// @param[in] i_unit_name The io unit name
-/// @param[in] i_unit_inst The instance number of the io unit
 /// @param[out] o_done Set to false if something isn't done
-/// @param[in] i_collect_ffdc if true ffdc_info string is appended to
-/// @param[inout] io_ffdc_info Append ffdc_info
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode p10_io_init_done_check_thread_done(
     const fapi2::Target<fapi2::TARGET_TYPE_PAUC>& i_pauc_target,
     const int& i_thread,
-    std::string i_unit_name,
-    const int& i_unit_inst,
-    bool& o_done,
-    bool i_collect_ffdc,
-    std::string& io_ffdc_info)
+    bool& o_done)
 {
     fapi2::buffer<uint64_t> l_data = 0;
-    std::string l_debug_info;
 
     FAPI_TRY(p10_io_ppe_ext_cmd_done_hw_reg_init_pg[i_thread].getData(i_pauc_target, l_data, true));
+
+    FAPI_DBG("Thread: %d, ext_cmd_done_hw_reg_init: 0x%llx", i_thread, l_data);
 
     if (l_data == 0)
     {
         o_done = false;
-    }
-
-    l_debug_info = "Unit: " + i_unit_name + "[" + std::to_string(i_unit_inst) +
-                   "] thread: " + std::to_string(i_thread) + " reg_init done: " + std::to_string(l_data) + "\n";
-    FAPI_DBG("%s", l_debug_info.c_str());
-
-    if (i_collect_ffdc)
-    {
-        io_ffdc_info += l_debug_info;
     }
 
     FAPI_TRY(p10_io_ppe_ext_cmd_done_dccal_pl[i_thread].getData(i_pauc_target, l_data, true));
 
+    FAPI_DBG("Thread: %d, ext_cmd_done_dccal: 0x%llx", i_thread, l_data);
+
     if (l_data == 0)
     {
         o_done = false;
-    }
-
-    l_debug_info = "Unit: " + i_unit_name + "[" + std::to_string(i_unit_inst) +
-                   "] thread: " + std::to_string(i_thread) + " dccal done: " + std::to_string(l_data) + "\n";
-    FAPI_DBG("%s", l_debug_info.c_str());
-
-    if (i_collect_ffdc)
-    {
-        io_ffdc_info += l_debug_info;
     }
 
 fapi_try_exit:
@@ -107,8 +84,6 @@ fapi_try_exit:
 fapi2::ReturnCode p10_io_init_done(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     bool l_done = false;
-    bool l_collect_ffdc = false;
-    std::string l_ffdc_info;
     auto l_pauc_targets = i_target.getChildren<fapi2::TARGET_TYPE_PAUC>();
 
     //Poll for done
@@ -116,7 +91,6 @@ fapi2::ReturnCode p10_io_init_done(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
 
     for (int l_try = 0; l_try < POLLING_LOOPS && !l_done; l_try++)
     {
-        l_collect_ffdc = l_try == (POLLING_LOOPS - 1);
         l_done = true;
 
         for (auto l_pauc_target : l_pauc_targets)
@@ -124,7 +98,7 @@ fapi2::ReturnCode p10_io_init_done(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
             fapi2::ATTR_CHIP_UNIT_POS_Type l_pauc_num;
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_pauc_target, l_pauc_num),
                      "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
-            FAPI_DBG("Getting DCCAL status for PAUC: %d\n", l_pauc_num);
+            FAPI_DBG("Getting DCCAL status for PAUC: %d", l_pauc_num);
 
             auto l_iohs_targets = l_pauc_target.getChildren<fapi2::TARGET_TYPE_IOHS>();
             auto l_omic_targets = l_pauc_target.getChildren<fapi2::TARGET_TYPE_OMIC>();
@@ -139,9 +113,7 @@ fapi2::ReturnCode p10_io_init_done(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
 
                 FAPI_TRY(p10_io_get_iohs_thread(l_iohs_target, l_thread));
 
-                FAPI_TRY(p10_io_init_done_check_thread_done(l_pauc_target, l_thread, "IOHS", l_iohs_num,
-                         l_done, l_collect_ffdc, l_ffdc_info
-                                                           ));
+                FAPI_TRY(p10_io_init_done_check_thread_done(l_pauc_target, l_thread, l_done ));
 
             }
 
@@ -155,9 +127,7 @@ fapi2::ReturnCode p10_io_init_done(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
 
                 FAPI_TRY(p10_io_get_omic_thread(l_omic_target, l_thread));
 
-                FAPI_TRY(p10_io_init_done_check_thread_done(l_pauc_target, l_thread, "OMIC", l_omic_num,
-                         l_done, l_collect_ffdc, l_ffdc_info
-                                                           ));
+                FAPI_TRY(p10_io_init_done_check_thread_done(l_pauc_target, l_thread, l_done));
             }
         }
 
@@ -165,7 +135,7 @@ fapi2::ReturnCode p10_io_init_done(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
     }
 
     FAPI_ASSERT(l_done,
-                fapi2::P10_IO_INIT_DONE_TIMEOUT_ERROR().set_TIMEOUT_INFO(l_ffdc_info),
+                fapi2::P10_IO_INIT_DONE_TIMEOUT_ERROR(),
                 "Timeout waiting on io init to complete");
 fapi_try_exit:
     return fapi2::current_err;
