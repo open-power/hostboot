@@ -250,12 +250,11 @@ uint32_t __analyzeCmdComplete<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         {
             PRDF_ERR( PRDF_FUNC "__checkEcc<TYPE_OCMB_CHIP>(0x%08x) failed",
                       i_chip->getHuid() );
-            o_rc |= o_rc;
             break;
         }
 
         if ( errorsFound ) o_errorsFound = true;
-        if ( SUCCESS != o_rc ) break;
+
     } while (0);
 
     return o_rc;
