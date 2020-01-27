@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -379,14 +379,14 @@ template<>
 uint32_t checkEccFirs<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                        uint32_t & o_eccAttns )
 {
-    #define PRDF_FUNC "[checkEccFirs<TYPE_MEM_PORT>] "
+    #define PRDF_FUNC "[checkEccFirs<TYPE_OCMB_CHIP>] "
 
     uint32_t o_rc = SUCCESS;
 
     o_eccAttns = MAINT_NO_ERROR;
 
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MEM_PORT == i_chip->getType() );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
 
     SCAN_COMM_REGISTER_CLASS * rdffir    = i_chip->getRegister( "RDFFIR" );
     SCAN_COMM_REGISTER_CLASS * mcbistfir = i_chip->getRegister( "MCBISTFIR" );
