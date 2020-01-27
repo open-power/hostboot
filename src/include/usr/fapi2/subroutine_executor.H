@@ -90,6 +90,55 @@ errlHndl_t requestHwpViaSbe(const char * i_hwpName, Types... types)
     return l_errl;
 }
 
+/** @brief Helper struct to force evaluation of constexpr expressions at
+ *         compile-time.
+ */
+template<typename T, T x, T y>
+struct values_equal
+{
+    static constexpr bool value = x == y;
+};
+
+// The list of HWP names to execute on the HOST, as opposed to delegating them
+// to be run on the SBE.
+static constexpr const char* const hwp_whitelist[] =
+{
+  "p10_putmemproc"
+};
+
+/** @brief strcmp that can run at compile-time given constexpr arguments.
+ */
+static constexpr int compile_time_strcmp(const char* a, const char* b)
+{
+    while (*a && *a == *b)
+    {
+        ++a;
+        ++b;
+    }
+
+    return *a - *b;
+}
+
+/** @brief Determines whether the given HWP name should be run on the host.
+ *
+ * @param[in] name      Name of hardware procedure (not including arguemnts)
+ * @return              True if the HWP should be executed on the host, false otherwise
+ */
+static constexpr bool is_hwp_whitelisted(const char* const name)
+{
+    bool is_whitelisted = false;
+
+    for (size_t i = 0; i < std::size(hwp_whitelist); ++i) {
+        if (compile_time_strcmp(name, hwp_whitelist[i]) == 0)
+        {
+            is_whitelisted = true;
+            break;
+        }
+    }
+
+    return is_whitelisted;
+}
+
 /**
  * @brief Subroutine Executor macro example code - Platforms will need to
  *        implement as needed for their enviroment.
@@ -107,7 +156,7 @@ errlHndl_t requestHwpViaSbe(const char * i_hwpName, Types... types)
         const char* l_function = #FUNC; \
         do  \
         { \
-            if (0 == memcmp(l_function, "p10_putmemproc", 15)) \
+            if (values_equal<bool, is_hwp_whitelisted(#FUNC), true>::value) \
             { \
                 FAPI_INF("subroutine_executor: executing hwp %s natively", \
                          l_function); \
