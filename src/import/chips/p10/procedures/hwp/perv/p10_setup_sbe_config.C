@@ -355,16 +355,16 @@ fapi2::ReturnCode p10_setup_sbe_config(
     // set_scratch4_reg -- Nest/Boot frequency
     {
         fapi2::buffer<uint32_t> l_scratch4_reg = 0;
-        fapi2::ATTR_I2C_BUS_DIV_REF_Type l_attr_i2c_bus_div_ref;
+        fapi2::ATTR_SPI_BUS_DIV_REF_Type l_attr_spi_bus_div_ref;
         fapi2::ATTR_FREQ_CORE_BOOT_MHZ_Type l_attr_freq_core_boot_mhz;
 
-        FAPI_DBG("Reading ATTR_I2C_BUS_DIV_REF, ATTR_FREQ_CORE_BOOT_MHZ");
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_I2C_BUS_DIV_REF, i_target_chip, l_attr_i2c_bus_div_ref),
-                 "Error from FAPI_ATTR_GET (ATTR_I2C_BUS_DIV_REF");
+        FAPI_DBG("Reading ATTR_SPI_BUS_DIV_REF, ATTR_FREQ_CORE_BOOT_MHZ");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SPI_BUS_DIV_REF, i_target_chip, l_attr_spi_bus_div_ref),
+                 "Error from FAPI_ATTR_GET (ATTR_SPI_BUS_DIV_REF");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_BOOT_MHZ, i_target_chip, l_attr_freq_core_boot_mhz),
                  "Error from FAPI_ATTR_GET (ATTR_FREQ_CORE_BOOT_MHZ");
 
-        l_scratch4_reg.insertFromRight<ATTR_I2C_BUS_DIV_REF_STARTBIT, ATTR_I2C_BUS_DIV_REF_LENGTH>(l_attr_i2c_bus_div_ref);
+        l_scratch4_reg.insertFromRight<ATTR_SPI_BUS_DIV_REF_STARTBIT, ATTR_SPI_BUS_DIV_REF_LENGTH>(l_attr_spi_bus_div_ref);
         l_scratch4_reg.insertFromRight<ATTR_FREQ_CORE_BOOT_MHZ_STARTBIT, ATTR_FREQ_CORE_BOOT_MHZ_LENGTH>
         (l_attr_freq_core_boot_mhz);
 

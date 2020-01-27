@@ -238,7 +238,7 @@
   </entry>
   <!-- sampled: mailbox 4 -->
   <entry>
-    <name>ATTR_I2C_BUS_DIV_REF</name>
+    <name>ATTR_SPI_BUS_DIV_REF</name>
     <value>0x0041</value>
   </entry>
   <entry>

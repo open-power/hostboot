@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -213,10 +213,10 @@
  </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_I2C_BUS_DIV_REF</id>
+  <id>ATTR_SPI_BUS_DIV_REF</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
-    Ref clock I2C bus divider consumed by code running out of OTPROM
+    Ref clock SPI bus divider consumed by code running out of OTPROM
   </description>
   <valueType>uint16</valueType>
   <writeable/>

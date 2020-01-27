@@ -89,7 +89,7 @@ fapi2::ReturnCode writeMboxRegs (
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     P9XipItem l_item;
 
-    MBOX_ATTR_WRITE (ATTR_I2C_BUS_DIV_REF,          i_procTarget,   i_image);
+    MBOX_ATTR_WRITE (ATTR_SPI_BUS_DIV_REF,          i_procTarget,   i_image);
     MBOX_ATTR_WRITE (ATTR_EQ_GARD,                  i_procTarget,   i_image);
     MBOX_ATTR_WRITE (ATTR_EC_GARD,                  i_procTarget,   i_image);
     MBOX_ATTR_WRITE (ATTR_NEST_PLL_BUCKET,          FAPI_SYSTEM,    i_image);
