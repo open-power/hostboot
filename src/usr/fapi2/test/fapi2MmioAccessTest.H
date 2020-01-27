@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@
 #include <fapi2TestUtils.H>
 #include <p10_mmiotests.H>
 #include <plat_hwp_invoker.H>
+#include <test/exptest_utils.H>
 
 using namespace fapi2;
 
@@ -109,10 +110,23 @@ void test_fapi2MmioInvalidSizes()
     // Get a list of all of the OCMB chips
     TARGETING::getAllChips(l_ocmbTargetList, TARGETING::TYPE_OCMB_CHIP, true);
 
+    if (!iv_serializeTestMutex)
+    {
+        TS_FAIL("test_fapi2MmioInvalidSizes(): unable to get test mutex");
+        return;
+    }
+    mutex_lock(iv_serializeTestMutex);
+
     for (auto & l_ocmb: l_ocmbTargetList)
     {
         Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapi2_ocmbTarget( l_ocmb );
-
+        auto first_ocmb_info = l_ocmb->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
+        if (!first_ocmb_info.useInbandScom)
+        {
+            // TODO: RTC 249013 Enable checking once useInbandScom is implemented.
+            // TS_FAIL("test_fapi2MmioInvalidSizes() - scom access is not using inband");
+            continue;
+        }
         numTests++;
         FAPI_INVOKE_HWP(l_errl, p10_mmiotest_indivisible_by_section_size, fapi2_ocmbTarget);
         if(l_errl != nullptr)
@@ -124,6 +138,12 @@ void test_fapi2MmioInvalidSizes()
         {
             TS_FAIL("No error from p10_mmiotest_indivisible_by_section_size !!");
             numFails++;
+        }
+        auto second_ocmb_info = l_ocmb->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
+        if (!second_ocmb_info.useInbandScom)
+        {
+            TS_FAIL("p9_mmiotest_indivisible_by_section_size turned off mmio operations");
+            l_ocmb->setAttr<TARGETING::ATTR_SCOM_SWITCHES>(first_ocmb_info);
         }
 
         numTests++;
@@ -138,7 +158,14 @@ void test_fapi2MmioInvalidSizes()
             TS_FAIL("No error from p10_mmiotest_invalid_section_size !!");
             numFails++;
         }
+        auto third_ocmb_info = l_ocmb->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
+        if (!third_ocmb_info.useInbandScom)
+        {
+            TS_FAIL("p9_mmiotest_invalid_section_size turned off mmio operations");
+            l_ocmb->setAttr<TARGETING::ATTR_SCOM_SWITCHES>(first_ocmb_info);
+        }
     }
+    mutex_unlock(iv_serializeTestMutex);
 
     FAPI_INF("test_fapi2MmioInvalidSizes Test Complete. %d/%d fails", numFails, numTests);
 }
@@ -151,6 +178,7 @@ void test_fapi2MmioAccess()
     int numTests = 0;
     int numFails = 0;
 
+// TODO: RTC 249013 Enable the MmioAccess tests.
 #ifndef CONFIG_AXONE_BRING_UP
     errlHndl_t l_errl = nullptr;
 
@@ -160,6 +188,12 @@ void test_fapi2MmioAccess()
     // Get a list of all of the OCMB chips
     TARGETING::getAllChips(l_chipList, TARGETING::TYPE_OCMB_CHIP, true);
 
+    if (!iv_serializeTestMutex)
+    {
+        TS_FAIL("test_fapi2MmioAccess(): unable to get test mutex");
+        return;
+    }
+    mutex_lock(iv_serializeTestMutex);
     for (auto & l_ocmb: l_chipList)
     {
         Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi2_target( l_ocmb );
@@ -212,11 +246,55 @@ void test_fapi2MmioAccess()
             l_errl = nullptr;
         }
     }
+    mutex_unlock(iv_serializeTestMutex);
 #endif
-
     FAPI_INF("fapi2MmioAccessTest Test Complete. %d/%d fails", numFails, numTests);
 }
 
+/**
+ * @brief Constructor
+ */
+Fapi2MmioAccessTest() : CxxTest::TestSuite()
+{
+    mss_module_loaded = false;
+
+    // All modules are loaded by runtime,
+    // so testcase loading of modules is not required
+#ifndef __HOSTBOOT_RUNTIME
+    errlHndl_t err = nullptr;
+    err = exptest::loadModule(mss_module_loaded, exptest::MSS_LIBRARY_NAME);
+    if(err)
+    {
+        TS_FAIL("Fapi2MmioAccessTest() - Constuctor: failed to load MSS module");
+        errlCommit( err, TARG_COMP_ID );
+    }
+#endif
+    iv_serializeTestMutex = exptest::getTestMutex();
+};
+
+/**
+ * @brief Deconstructor
+ */
+~Fapi2MmioAccessTest()
+{
+    errlHndl_t err = nullptr;
+    if (mss_module_loaded)
+    {
+        err = exptest::unloadModule(exptest::MSS_LIBRARY_NAME);
+        if(err)
+        {
+            TS_FAIL("~Fapi2MmioAccessTest() - Destructor: failed to unload MSS module");
+            errlCommit( err, TARG_COMP_ID );
+        }
+    }
+}
+
+
+private:
+  // keep track if this test loaded mss_module
+  bool mss_module_loaded;
+  // This is used for tests that need to not run operations at the same time
+  TARGETING::HB_MUTEX_SERIALIZE_TEST_LOCK_ATTR iv_serializeTestMutex;
 
 };
 

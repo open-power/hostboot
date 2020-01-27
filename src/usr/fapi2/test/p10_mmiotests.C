@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,13 @@
 #include <sbe/sbe_common.H>
 
 
+// Write/Read from the inband response address (shouldn't hurt anything)
+//Constants from #include <exp_inband.H>
+static const uint64_t EXPLR_IB_MMIO_OFFSET   = 0x0000000100000000ull; // 4GB
+static const uint64_t EXPLR_IB_SRAM_BASE     = 0x01000000; // MSCCRNGE 01000000 020FFFFF
+static const uint64_t EXPLR_IB_RSP_SRAM_ADDR  = EXPLR_IB_SRAM_BASE | 0x03FF00;
+static const uint64_t EXPLR_IB_RSP_ADDR =  EXPLR_IB_MMIO_OFFSET | EXPLR_IB_RSP_SRAM_ADDR;
+
 fapi2::ReturnCode p10_mmiotest_getmmio_invalid_target(
                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
@@ -48,7 +55,7 @@ fapi2::ReturnCode p10_mmiotest_getmmio_invalid_target(
 
     FAPI_INF("Do getMMIO on a proc target for 8 bytes");
     FAPI_TRY(fapi2::getMMIO(i_target,
-                            0x1000,  // mmio address relative to target
+                            EXPLR_IB_RSP_ADDR, // mmio address relative to target
                             8,       // mmio transaction size
                             l_mmiodata));
  fapi_try_exit:
@@ -75,7 +82,7 @@ fapi2::ReturnCode p10_mmiotest_putmmio_invalid_target(
 
     FAPI_INF( "Do putMMIO on proc target" );
     FAPI_TRY(fapi2::putMMIO(i_target,
-                            0x1000,
+                            EXPLR_IB_RSP_ADDR,
                             4,
                             l_mmiodata));
 
@@ -100,7 +107,7 @@ fapi2::ReturnCode p10_mmiotest_indivisible_by_section_size(
 
     FAPI_INF("Do getMMIO on a target for 10 bytes");
     FAPI_TRY(fapi2::getMMIO(i_target,
-                            0x1000,  // mmio address relative to target
+                            EXPLR_IB_RSP_ADDR, // mmio address relative to target
                             8,       // mmio transaction size
                             l_mmiodata));
  fapi_try_exit:
@@ -123,7 +130,7 @@ fapi2::ReturnCode p10_mmiotest_invalid_section_size(
 
     FAPI_INF("Do getMMIO on a target for 12 bytes");
     FAPI_TRY(fapi2::getMMIO(i_target,
-                            0x1000,  // mmio address relative to target
+                            EXPLR_IB_RSP_ADDR,  // mmio address relative to target
                             12,      // mmio transaction size
                             l_mmiodata));
  fapi_try_exit:
@@ -149,7 +156,7 @@ fapi2::ReturnCode p10_mmiotest_getmmio_pass(
 
     FAPI_INF("Do single-read transaction getMMIO on an OCMB target");
     FAPI_TRY(fapi2::getMMIO(i_target,
-                            0x1000,
+                            EXPLR_IB_RSP_ADDR,
                             l_mmiodataSize,
                             l_mmiodata) );
 
@@ -157,7 +164,7 @@ fapi2::ReturnCode p10_mmiotest_getmmio_pass(
     l_mmiodata.resize(l_mmiodataSize*2); // do a double mmio transaction
     FAPI_INF("Do double-read transaction getMMIO on an OCMB target");
     FAPI_TRY(fapi2::getMMIO(i_target,
-                            0x1000,
+                            EXPLR_IB_RSP_ADDR,
                             l_mmiodataSize,
                             l_mmiodata) );
 
@@ -183,7 +190,7 @@ fapi2::ReturnCode p10_mmiotest_double_read_pass(
 
     FAPI_INF("Do first getMMIO on an ocmb target");
     FAPI_TRY(fapi2::getMMIO(i_target,
-                            0x1000,
+                            EXPLR_IB_RSP_ADDR,
                             l_mmioTransactionSize,
                             l_1st_read) );
 
@@ -195,7 +202,7 @@ fapi2::ReturnCode p10_mmiotest_double_read_pass(
 
     FAPI_INF("Do second getMMIO on an ocmb target");
     FAPI_TRY(fapi2::getMMIO(i_target,
-                            0x1000,
+                            EXPLR_IB_RSP_ADDR,
                             l_mmioTransactionSize,
                             l_2nd_read) );
 
@@ -237,7 +244,7 @@ fapi2::ReturnCode p10_mmiotest_putmmio_pass(
 
     FAPI_INF("Do putMMIO on OCMB target");
     FAPI_TRY(fapi2::putMMIO(i_target,
-                            0x1000,
+                            EXPLR_IB_RSP_ADDR,
                             4,
                             l_mmiodata));
  fapi_try_exit:
@@ -266,14 +273,14 @@ fapi2::ReturnCode p10_mmiotest_write_read_pass(
 
     // Write out a known value (name of this test)
     FAPI_INF("Calling putMMIO on the target (size: %d)", l_data_size);
-    FAPI_TRY(fapi2::putMMIO(i_target, 0x1000,
+    FAPI_TRY(fapi2::putMMIO(i_target, EXPLR_IB_RSP_ADDR,
                             l_mmioTransactionSize, l_mmio_data));
 
     // now read it out and verify it was written correctly
     FAPI_INF("Now read the just written data");
     l_read_mmio_data.resize(l_data_size);
     FAPI_TRY(fapi2::getMMIO(i_target,
-                            0x1000,
+                            EXPLR_IB_RSP_ADDR,
                             l_mmioTransactionSize,
                             l_read_mmio_data));
 

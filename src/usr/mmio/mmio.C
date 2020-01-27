@@ -884,6 +884,7 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
     errlHndl_t l_err         = nullptr;
     uint64_t   l_offset      = va_arg(i_args, uint64_t);
     uint64_t   l_accessLimit = va_arg(i_args, uint64_t);
+    bool invalidParmError = false;
 
     TRACDCOMP(g_trac_mmio, ENTER_MRK"ocmbMmioPerformOp");
     TRACDCOMP(g_trac_mmio, INFO_MRK"op=%d, target=0x%.8X",
@@ -909,6 +910,7 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
                                    l_accessLimit);
         if(l_err)
         {
+            invalidParmError = true;
             break;
         }
 
@@ -1231,9 +1233,13 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
 
     if (l_err)
     {
-        // Switch over to using I2C to prevent further MMIO access
-        // to this OCMB (error regs cannot be cleared on Explorer).
-        disableInbandScomsOcmb(i_ocmbTarget);
+        // Only disable if HW error, not for user parameter failures
+        if (!invalidParmError)
+        {
+            // Switch over to using I2C to prevent further MMIO access
+            // to this OCMB (error regs cannot be cleared on Explorer).
+            disableInbandScomsOcmb(i_ocmbTarget);
+        }
 
         l_err->collectTrace(MMIO_COMP_NAME);
     }

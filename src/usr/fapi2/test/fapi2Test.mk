@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2019
+# Contributors Listed Below - COPYRIGHT 2016,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -71,6 +71,7 @@ else
 ## All hostboot IPL time tests
 TESTS += ${shell ls ${ROOTPATH}/src/usr/fapi2/test/*Test.H | \
          sort | xargs}
+EXTRAINCDIR += ${ROOTPATH}/src/usr/expaccess/
 
 OBJS += p10_i2ctests.o
 OBJS += p10_mmiotests.o
