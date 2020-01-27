@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -966,7 +966,6 @@ void hdatGetMnfgFlags(hdatManf_t &o_hdatManfFlags)
  */
 void hdatGetPlatformDumpData(hdatDump_t &o_hdatDump)
 {
-
     o_hdatDump.hdatReserved2 = 0;
     o_hdatDump.hdatHypDumpPolicy = 0;
     memset(o_hdatDump.hdatReserved3, 0 , sizeof(o_hdatDump.hdatReserved3));
@@ -974,9 +973,27 @@ void hdatGetPlatformDumpData(hdatDump_t &o_hdatDump)
     o_hdatDump.hdatActHdwSize = 0;
     o_hdatDump.hdatMaxSpSize = 0;
 
-    o_hdatDump.hdatFlags = 0;
+    o_hdatDump.hdatFlags = 0x0;
+
+    //For the current OpenPOWER P9 systems (where hostboot
+    // builds the HDAT) anytime we do an MPIPL there
+    //will a memory dump.  Use the HDAT flags to indicate this
+    //Note that in the future there will be MPIPLs that
+    //are not dumps -- but will deal with that when the function
+    //has been added
+    // flags - set hdatRptPending, hdatMemDumpExists, hdatMemDumpReq:
+    TargetService& l_targetService = targetService();
+    Target* l_sys = nullptr;
+    l_targetService.getTopLevelTarget(l_sys);
+    if(l_sys->getAttr<ATTR_IS_MPIPL_HB>())
+    {
+        o_hdatDump.hdatRptPending = 0x1;
+        o_hdatDump.hdatMemDumpExists = 0x1;
+        o_hdatDump.hdatMemDumpReq = 0x1;
+    }
+
     o_hdatDump.hdatDumpId = 0;
-    o_hdatDump.hdatActPlatformDumpSize = 0;
+    o_hdatDump.hdatActPlatformDumpSize = 0; // PHYP/OPAL can query from MDRT
     o_hdatDump.hdatPlid = 0;
 
 }
