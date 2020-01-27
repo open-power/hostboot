@@ -33,6 +33,7 @@
 
 #include <fapi2.H>
 #include <vector>
+#include <utils.H>
 
 #ifndef _P10_IO_LIB__
 #define _P10_IO_LIB__
@@ -105,7 +106,7 @@ fapi2::ReturnCode p10_io_get_iohs_lanes(
 
     if (l_link_speed == fapi2::ENUM_ATTR_LINK_SPEED_50G)
     {
-        for (int l_lane = 0; l_lane < P10_IO_LIB_NUMBER_OF_IOHS_LANES; l_lane++)
+        for (size_t l_lane = 0; l_lane < ARRAY_SIZE(P10_IO_LIB_50G_IOHS_LANES); l_lane++)
         {
             o_lanes.push_back(P10_IO_LIB_50G_IOHS_LANES[l_lane]);
         }
