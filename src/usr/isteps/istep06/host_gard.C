@@ -52,10 +52,6 @@
 
 // Custom compile configs
 
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
-  #include <diag/attn/attn.H>
-#endif
-
 namespace ISTEP_06
 {
 
@@ -69,20 +65,6 @@ void* host_gard( void *io_pArgs )
         TARGETING::Target* l_pTopLevel = NULL;
         TARGETING::targetService().getTopLevelTarget( l_pTopLevel );
         assert(l_pTopLevel, "host_gard: no TopLevelTarget");
-
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   INFO_MRK"host_gard: invoke PRD to check for previous CS" );
-
-        l_err = ATTN::checkForCSAttentions();
-        if ( NULL != l_err )
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       ERR_MRK"host_gard: error from checkForCSAttentions" );
-            // commit and continue
-            errlCommit (l_err, ISTEP_COMP_ID);
-        }
-#endif
 
         // Check whether we're in MPIPL mode
         if (l_pTopLevel->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())

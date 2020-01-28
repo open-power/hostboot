@@ -172,7 +172,6 @@ void ServiceCommon::processAttnPreAck(const TargetHandle_t i_proc)
 
 void ServiceCommon::processAttentions(const TargetHandleList & i_procs)
 {
-/* FIXME RTC: 210975 PRD is not enabled yet
     errlHndl_t err = NULL;
     AttentionList attentions;
     // this should be the opposite of what we used for masking in preAck
@@ -246,7 +245,6 @@ void ServiceCommon::processAttentions(const TargetHandleList & i_procs)
 
     } while(!attentions.empty());
 
-*/
 }
 
 ServiceCommon::ServiceCommon()
@@ -262,7 +260,6 @@ ServiceCommon::~ServiceCommon()
 errlHndl_t ServiceCommon::handleAttentions(const TargetHandle_t i_proc)
 {
     errlHndl_t err = NULL;
-/* FIXME RTC: 210975 PRD is not enabled yet
     AttentionList attentions;
 
     ProcOps & procOps = getProcOps();
@@ -299,7 +296,6 @@ errlHndl_t ServiceCommon::handleAttentions(const TargetHandle_t i_proc)
        #endif //__HOSTBOOT_RUNTIME
 
    } while(!attentions.empty());
-*/
 
    return err;
 }

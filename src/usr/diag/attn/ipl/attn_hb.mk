@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2015
+# Contributors Listed Below - COPYRIGHT 2012,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -25,4 +25,3 @@
 
 ATTN_HB_OBJS += attn.o
 ATTN_HB_OBJS += attnsvc.o
-ATTN_HB_OBJS += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), attnfilereg.o)

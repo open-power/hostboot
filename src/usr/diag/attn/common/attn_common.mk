@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2019
+# Contributors Listed Below - COPYRIGHT 2012,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -30,6 +30,5 @@ ATTN_COMMON_OBJS += attntarget.o
 ATTN_COMMON_OBJS += attnscom.o
 ATTN_COMMON_OBJS += attnproc.o
 ATTN_COMMON_OBJS += attnmem.o
-# FIXME RTC: 210975
-#ATTN_COMMON_OBJS += attnprd.o
+ATTN_COMMON_OBJS += attnprd.o
 ATTN_COMMON_OBJS += attnsvc_common.o

@@ -45,11 +45,6 @@
 
 // Custom compile configs
 
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
-  #include "ipl/attnfilereg.H"
-  #include <diag/prdf/prdfPnorFirDataReader.H>
-#endif
-
 using namespace std;
 using namespace PRDF;
 using namespace TARGETING;
@@ -172,83 +167,5 @@ errlHndl_t checkForIplAttentions()
 
     return l_plidElog;
 }
-
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
-
-errlHndl_t checkForCSAttentions()
-{
-    ATTN_SLOW("Checking for checkstop attentions");
-
-    errlHndl_t errl = NULL;
-
-    assert(!Service::getGlobalInstance()->running());
-
-    do
-    {
-/* FIXME RTC: 210975 PRDF is not enabled yet
-        // Read register data from PNOR into memory.
-        PnorFirDataReader & firData = PnorFirDataReader::getPnorFirDataReader();
-        bool validData;
-        errl = firData.readPnor( validData );
-        if ( NULL != errl )
-        {
-            ATTN_ERR("PnorFirDataReader::readPnor() failed");
-            break;
-        }
-
-        // Check if there was valid data in PNOR.
-        if ( !validData )
-        {
-            // Nothing to do, exit quietly.
-            ATTN_SLOW("No PNOR data found, nothing to analyze.");
-            break;
-        }
-
-        // Install File scom implementation
-        FileRegSvc fileRegs;
-        fileRegs.installScomImpl();
-
-        TARGETING::Target   *l_sys = NULL;
-        TARGETING::targetService().getTopLevelTarget( l_sys );
-        assert(l_sys != NULL);
-        // Indicate to PRD that we are doing chkstop analysis
-        // on saved FIR data so you can read regs without HW issues.
-        uint8_t l_iplAnalysis = CHKSTOP_ANALYSIS_ON_STARTUP_ANALYZING_CHECKSTOP;
-        bool l_set =
-             l_sys->trySetAttr<ATTR_CHKSTOP_ANALYSIS_ON_STARTUP>(l_iplAnalysis);
-        ATTN_SLOW("Checkstop attribute set for PRD:%d", l_set);
-
-        // Process the checkstop attention
-        errl = Service::getGlobalInstance()->ProcessCheckstop();
-        if ( NULL != errl )
-        {
-            firData.addFfdc( errl );
-            errlCommit( errl, ATTN_COMP_ID );
-        }
-
-        // Ensure we don't leave analysis attribute set
-        l_iplAnalysis = CHKSTOP_ANALYSIS_ON_STARTUP_NOT_ANALYZING_DEFAULT;
-        l_sys->trySetAttr<ATTR_CHKSTOP_ANALYSIS_ON_STARTUP>(l_iplAnalysis);
-
-        // Uninstall File scom implementation.
-        Singleton<ScomImpl>::instance().installScomImpl();
-
-        // Analysis is complete. Clear the PNOR data.
-        errl = firData.clearPnor();
-        if ( NULL != errl )
-        {
-            ATTN_ERR("PnorFirDataReader::clearPnor() failed");
-            break;
-        }
-
-*/
-    } while (0);
-
-    ATTN_SLOW("checkForCSAttentions complete");
-
-    return errl;
-}
-
-#endif // CONFIG_ENABLE_CHECKSTOP_ANALYSIS
 
 }

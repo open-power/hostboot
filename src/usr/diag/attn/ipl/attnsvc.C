@@ -230,11 +230,11 @@ void Service::processIntrQMsgPreAck(const msg_t & i_msg)
     TargetHandle_t proc = NULL;
 
     // ---------------------------
-    // P8 used the XISR structure
-    // P9 uses the PIR structure
+    // P10 uses the PIR structure
+    // (but different format than P9)
     // ---------------------------
     // PIR structure is
-    // 17 bits unused, 4 bits group, 3 bits chipId, 1 unused,
+    // 17 bits unused, 3 bits spareId, 4 bits topology, 1 unused,
     // 5/4 CoreID(norm/fused), 2/3 ThreadId(norm/fused)
     PIR_t  l_pir;
     l_pir.word = i_msg.data[1];
@@ -292,59 +292,6 @@ void Service::processIntrQMsg(msg_t & i_msg)
     sync_cond_signal(&iv_cond);
 
 }
-
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
-
-errlHndl_t Service::processCheckstop()
-{
-    errlHndl_t err = NULL;
-/* FIXME RTC: 210975 PRD is not enabled yet
-    AttentionList attentions;
-
-    assert(!getGlobalInstance()->running());
-    TargetHandleList list;
-
-    ProcOps & procOps = getProcOps();
-    attentions.clear();
-
-    getTargetService().getAllChips(list, TYPE_PROC);
-
-    TargetHandleList::iterator tit = list.begin();
-
-    while(tit != list.end())
-    {
-        // query the proc resolver for active attentions
-        // (we also handle mem bufs in this routine)
-        err = procOps.resolve( *tit, 0, attentions);
-
-        if(err)
-        {
-            ATTN_ERR("procOps.resolve() returned error.HUID:0X%08X ",
-                      get_huid( *tit ));
-            break;
-        }
-
-        ++tit;
-    }
-
-    if ( NULL == err )
-    {
-        if(!attentions.empty())
-        {
-            err = getPrdWrapper().callPrd(attentions);
-        }
-
-        if(err)
-        {
-            ATTN_ERR("callPrd() returned error." )
-        }
-    }
-
-*/
-    return err;
-}
-
-#endif // CONFIG_ENABLE_CHECKSTOP_ANALYSIS
 
 
 void* Service::prdTaskWorker(void * i_svc)

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -155,8 +155,8 @@ bool getAddress(
         {CHECK_STOP,  0x500f001c},
         {RECOVERABLE, 0x500f001b},
         {SPECIAL,     0x500f001a},
-        {UNIT_CS,     0x50040018},
-        {HOST_ATTN,   0x50040009},
+        {UNIT_CS,     0x50040003},
+        {HOST_ATTN,   0x50040004},
     };
 
     static const RegAssoc * last = first +

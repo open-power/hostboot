@@ -93,18 +93,6 @@ class Service : public ServiceCommon
          */
         ~Service();
 
-        #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
-
-        /**
-         * @brief Process checlstop attentions.
-         *
-         * @retval[0] no error
-         * @retval[!0] unexpected error
-         */
-        errlHndl_t processCheckstop();
-
-        #endif // CONFIG_ENABLE_CHECKSTOP_ANALYSIS
-
         /**
          * @brief Returns the singleton instance of the Service class
          *

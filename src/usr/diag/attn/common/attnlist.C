@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,6 @@ namespace ATTN
 
 void AttentionList::getAttnList(PRDF::AttnList & o_dest) const
 {
-/* FIXME RTC: 210975 PRDF is not enabled yet
     // convert AttentionList to PRDF::AttnList
 
     const_iterator sit = begin();
@@ -58,13 +57,10 @@ void AttentionList::getAttnList(PRDF::AttnList & o_dest) const
 
         ++sit;
     }
-*/
 }
 
 void AttentionList::add(const Attention & i_attn)
 {
-/* FIXME RTC: 210975
     insert(lower_bound(begin(), end(), i_attn), i_attn);
-*/
 }
 }

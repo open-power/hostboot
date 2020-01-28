@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,11 +46,8 @@ namespace ATTN
 errlHndl_t ProcOps::query(AttnData & i_attnToCheck, bool & o_active)
 {
     errlHndl_t err = 0;
-/* FIXME RTC: 210975 no PRD attn yet
+
     uint64_t address = 0, checkbits = 0, scomData = 0;
-    AttnData  l_cenAttnData;
-    bool      l_cenAttnFound = false;
-    MemOps & memOps = getMemOps();
 
     GFIR::getAddress(i_attnToCheck.attnType, address);
 
@@ -66,36 +63,6 @@ errlHndl_t ProcOps::query(AttnData & i_attnToCheck, bool & o_active)
         if (scomData & checkbits)
         {
             o_active = true;
-
-            // NIMBUS has no memory buffers to look at
-            TARGETING::Target   *l_MasterProcTarget = NULL;
-            getTargetService().masterProcChipTargetHandle(
-                                             l_MasterProcTarget);
-
-            ATTR_MODEL_type l_model = l_MasterProcTarget->getAttr<ATTR_MODEL>();
-            if ( MODEL_CUMULUS == l_model )
-            {
-                // Attempt resolving to Centaur
-                // If we do, the attention target/type gets set.
-                // Else we will leave as proc attention
-                for ( uint32_t l_mc=0;
-                      ((l_mc < MC::numChiplets) && (false == l_cenAttnFound));
-                      l_mc++)
-                {
-                    if ( scomData & ((MC::firstChiplet) >> l_mc) )
-                    {
-                        // Will handle the first attention
-                        l_cenAttnFound = memOps.resolve( i_attnToCheck, l_mc,
-                                                     i_attnToCheck.targetHndl );
-                        // i_attnToCheck gets altered to membuf
-                        // if we found valid attention there
-
-                    } // end if this MC chiplet is active
-
-                } // end for on MC chiplets
-
-            } // end if CUMULUS
-
         } // end if active attention
         else
         {
@@ -103,7 +70,6 @@ errlHndl_t ProcOps::query(AttnData & i_attnToCheck, bool & o_active)
         }
     }
 
-*/
     return err;
 }
 
