@@ -1996,7 +1996,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
     uint8_t*   l_buffer         =
     reinterpret_cast<uint8_t*>(malloc(sizeof(voltageBucketData_t)) );
     uint8_t*   l_buffer_inc     = nullptr;
-    char       outstr[32];
+    char       outstr[50];
 
     do
     {
@@ -3315,6 +3315,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     const char*     idd_meas_str[IDDQ_MEASUREMENTS] = IDDQ_ARRAY_VOLTAGES_STR;
     char            l_buffer_str[1024];   // Temporary formatting string buffer
     char            l_line_str[1024];     // Formatted output line string
+    size_t          l_line_str_len;
 
     static const uint32_t IDDQ_DESC_SIZE = 56;
     static const uint32_t IDDQ_QUAD_SIZE = IDDQ_DESC_SIZE -
@@ -3347,7 +3348,8 @@ void iddq_print(IddqTable_t* i_iddqt)
 
     // Put out the measurement voltages to the trace.
     strcpy(l_line_str, "  Measurement voltages:");
-    sprintf(l_buffer_str, "%-*s ", IDDQ_DESC_SIZE, l_line_str);
+    l_line_str_len = strlen(l_line_str) - 1;
+    snprintf(l_buffer_str, l_line_str_len, "%-*s ", IDDQ_DESC_SIZE, l_line_str);
     strcpy(l_line_str, l_buffer_str);
     strcpy(l_buffer_str, "");
 
@@ -3373,7 +3375,8 @@ void iddq_print(IddqTable_t* i_iddqt)
 
 #define IDDQ_TRACE(string, size) \
         strcpy(l_line_str, string); \
-        sprintf(l_buffer_str, "%-*s", size, l_line_str);\
+        l_line_str_len = strlen(l_line_str) - 1; \
+        snprintf(l_buffer_str, l_line_str_len, "%-*s", size, l_line_str);\
         strcpy(l_line_str, l_buffer_str); \
         strcpy(l_buffer_str, "");
 

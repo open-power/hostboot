@@ -27,5 +27,5 @@
 -include 00p10_common.mk
 
 PROCEDURE=p10_throttle_sync
-$(eval $(call ADD_P10_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(MSS_P10_INCLUDES))
 $(call BUILD_PROCEDURE)

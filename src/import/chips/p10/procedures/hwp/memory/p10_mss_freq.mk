@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019
+# Contributors Listed Below - COPYRIGHT 2019,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -27,5 +27,5 @@
 -include 00p10_common.mk
 
 PROCEDURE=p10_mss_freq
-$(eval $(call ADD_P10_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(MSS_P10_INCLUDES))
 $(call BUILD_PROCEDURE)

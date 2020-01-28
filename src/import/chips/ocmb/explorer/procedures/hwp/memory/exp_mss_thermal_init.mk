@@ -27,5 +27,5 @@
 -include 00exp_common.mk
 
 PROCEDURE=exp_mss_thermal_init
-$(eval $(call ADD_EXP_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(MSS_EXP_INCLUDES))
 $(call BUILD_PROCEDURE)

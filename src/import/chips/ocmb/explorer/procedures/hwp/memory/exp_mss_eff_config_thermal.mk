@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019
+# Contributors Listed Below - COPYRIGHT 2019,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -26,6 +26,6 @@
 -include 00exp_common.mk
 
 PROCEDURE=exp_mss_eff_config_thermal
-$(eval $(call ADD_EXP_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(MSS_EXP_INCLUDES))
 lib$(PROCEDURE)_DEPLIBS+=exp_bulk_pwr_throttles
 $(call BUILD_PROCEDURE)

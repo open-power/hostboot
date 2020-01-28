@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -105,9 +105,9 @@ fapi_try_exit:
 template< fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
 fapi2::ReturnCode dq_to_symbol( const uint8_t i_dq, uint8_t& o_symbol )
 {
-    const auto& l_p = std::find(TT::symbol2dq, (TT::symbol2dq + TT::ECC_MAX_DQ_BITS), i_dq);
+    const auto& l_p = std::find(TT::symbol2dq, (TT::symbol2dq + TT::ECC_MAX_SYMBOLS), i_dq);
 
-    FAPI_ASSERT( l_p != (TT::symbol2dq + TT::ECC_MAX_DQ_BITS),
+    FAPI_ASSERT( l_p != (TT::symbol2dq + TT::ECC_MAX_SYMBOLS),
                  fapi2::MSS_INVALID_DQ_TO_SYMBOL()
                  .set_DQ(i_dq),
                  "Invalid DQ index: %d",
