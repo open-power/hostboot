@@ -29,29 +29,28 @@
 /**
  * @file    istep10list.H
  *
- *  Step 10 Hostboot SBE Centaur Init
- *  IPL FLow Doc        v1.07
+ *  Step 10 Hostboot Activate Power Bus
  *
  *    10.01    proc_build_smp
- *           : Integrate P9 Islands into SMP
+ *           : Integrate P10 Islands into SMP
  *    10.02    host_slave_sbe_update
  *           : Update slave SBE
- *    10.03    <empty>
+ *    10.03    host_secureboot_lockdown
  *           :
- *    10.04    proc_cen_ref_clk_enable
- *           : Setup centaur ref clocks
- *    10.05    proc_enable_osclite
- *           : Enable Osclite
- *    10.06    proc_chiplet_scominit
- *           : Scom inits to all chiplets (sans Quad)
+ *    10.04    proc_chiplet_scominit
+ *           : Scom inits to all chiplets (sans quad/fabric)
+ *    10.05    proc_pau_scominit
+ *           : Scom inits for the PAU unit
+ *    10.06    proc_pcie_scominit
+ *           : Apply scom inits to PCIe Chiplets
  *    10.07    proc_abus_scominit
  *           : Apply scom inits to Abus
  *    10.08    proc_obus_scominit
  *           : Apply scom inits to Obus
  *    10.09    proc_npu_scominit
  *           : Apply scom inits to Npu
- *    10.10    proc_pcie_scominit
- *           : Apply scom inits to PCIechiplets
+ *    10.10
+ *           :
  *    10.11    proc_scomoverride_chiplets
  *           : Apply sequenced scom inits
  *    10.12    proc_chiplet_enable_ridi
@@ -114,7 +113,7 @@ void* call_proc_enable_osclite(void *io_pArgs);
 /**
  *  @brief  proc_chiplet_scominit
  *
- *          Apply scom inits to chiplets
+ *     Apply scom inits to chiplets
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -228,6 +227,16 @@ const   TaskInfo    g_istep10[]  =   {
                 ISTEP_10::call_proc_build_smp,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
+        {
+                "", // empty istep
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
+        },
+        {
+                "", // empty istep
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
+        },
 /*
         {
                 ISTEPNAME(10,02,"host_slave_sbe_update"),
@@ -235,23 +244,25 @@ const   TaskInfo    g_istep10[]  =   {
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                "", // empty istep
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
+                ISTEPNAME(10,03,"host_secureboot_lockdown"),
+                ISTEP_10::call_host_secureboot_lockdown,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP?, true }
         },
+*/
         {
-                ISTEPNAME(10,04,"proc_cen_ref_clk_enable"),
-                ISTEP_10::call_proc_cen_ref_clk_enable,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-        {
-                ISTEPNAME(10,05,"proc_enable_osclite"),
-                ISTEP_10::call_proc_enable_osclite,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-        {
-                ISTEPNAME(10,06,"proc_chiplet_scominit"),
+                ISTEPNAME(10,04,"proc_chiplet_scominit"),
                 ISTEP_10::call_proc_chiplet_scominit,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+/*
+        {
+                ISTEPNAME(10,05,"proc_pau_scominit"),
+                ISTEP_10::call_proc_pau_scominit,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(10,06,"proc_pcie_scominit"),
+                ISTEP_10::call_proc_pcie_scominit,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {

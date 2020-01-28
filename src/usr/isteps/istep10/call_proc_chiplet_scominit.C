@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,20 +45,20 @@
 
 //  Error handling support
 #include <isteps/hwpisteperror.H>      // ISTEP_ERROR::IStepError
-// FIXME RTC: 210975
-//#include <istepHelperFuncs.H>          // captureError
 
 //  Tracing support
 #include <trace/interface.H>           // TRACFCOMP
 #include <initservice/isteps_trace.H>  // g_trac_isteps_trace
 #include <initservice/initserviceif.H>  // isSMPWrapConfig
-/* FIXME RTC: 210975
-//  HWP call support
-#include <nest/nestHwpHelperFuncs.H>   // fapiHWPCallWrapperForChip
-*/
 
 // Util TCE Support
 #include <util/utiltce.H>              // TCE::utilUseTcesForDmas
+
+#include <istepHelperFuncs.H>          // captureError
+#include <fapi2/target.H>
+#include <fapi2/plat_hwp_invoker.H>
+#include <p10_chiplet_scominit.H>
+#include <p10_psi_scominit.H>
 
 namespace ISTEP_10
 {
@@ -74,44 +74,80 @@ void* call_proc_chiplet_scominit( void *io_pArgs )
 {
     errlHndl_t l_err(nullptr);
     IStepError l_stepError;
+    TARGETING::TargetHandleList l_procTargetList;
 
     TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_proc_chiplet_scominit entry" );
 
     if (!INITSERVICE::isSMPWrapConfig())
     {
-/* FIXME RTC: 210975
-        // Make the FAPI call to p9_chiplet_scominit
-        // Make the FAPI call to p9_io_obus_firmask_save_restore, if previous call succeeded
-        // Make the FAPI call to p9_psi_scominit, if previous call succeeded
-        fapiHWPCallWrapperHandler(P9_CHIPLET_SCOMINIT, l_stepError,
-                                  HWPF_COMP_ID, TYPE_PROC)                &&
-        fapiHWPCallWrapperHandler(P9_OBUS_FIRMASK_SAVE_RESTORE, l_stepError,
-                                  HWPF_COMP_ID, TYPE_PROC)                &&
-        fapiHWPCallWrapperHandler(P9_PSI_SCOMINIT, l_stepError,
-                                  HWPF_COMP_ID, TYPE_PROC);
-*/
+        //Get a list of all proc chips
+        getAllChips(l_procTargetList, TYPE_PROC);
+
+        // Loop through all proc chips, convert to fap2 target, and execute hwp
+        for (const auto & curproc: l_procTargetList)
+        {
+            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                    l_fapi2_proc_target (curproc);
+
+            // Call p10_chiplet_scominit hwp
+            FAPI_INVOKE_HWP( l_err, p10_chiplet_scominit,
+                             l_fapi2_proc_target);
+
+            if(l_err)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "ERROR in p10_chiplet_scominit HWP(): failed on target 0x%.08X. "
+                           TRACE_ERR_FMT,
+                           get_huid(curproc),
+                           TRACE_ERR_ARGS(l_err));
+
+                // Capture error
+                captureError(l_err, l_stepError, HWPF_COMP_ID, curproc);
+
+                // Skip rest of functionality for this proc, but let others run.
+                continue;
+            }
+
+            // Call p10_psi_scominit hwp
+            FAPI_INVOKE_HWP( l_err, p10_psi_scominit,
+                                 l_fapi2_proc_target);
+
+            if(l_err)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "ERROR in p10_psi_scominit HWP(): failed on target 0x%.08X. "
+                           TRACE_ERR_FMT,
+                           get_huid(curproc),
+                           TRACE_ERR_ARGS(l_err));
+
+                // Capture error
+                captureError(l_err, l_stepError, HWPF_COMP_ID, curproc);
+
+                // Skip rest of functionality for this proc, but let others run.
+                continue;
+            }
+        }
     }
 
     // Enable TCEs with an empty TCE Table, if necessary
     // This will prevent the FSP from DMAing to system memory without
     // hostboot's knowledge
-    if ( TCE::utilUseTcesForDmas() )
+    if (l_stepError.isNull())
     {
-        l_err = TCE::utilEnableTcesWithoutTceTable();
-
-        if (l_err)
+        if ( TCE::utilUseTcesForDmas() )
         {
-            TRACFCOMP(g_trac_isteps_trace,
-                      "call_proc_chiplet_scominit: "
-                      "utilEnableTcesWithoutTceTable, returned ERROR 0x%.4X",
-                      l_err->reasonCode());
+            l_err = TCE::utilEnableTcesWithoutTceTable();
 
-/* FIXME RTC: 210975
-            // Capture error
-            captureError(l_err,
-                         l_stepError,
-                         HWPF_COMP_ID);
-*/
+            if (l_err)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"call_proc_chiplet_scominit: utilEnableTcesWithoutTceTable, returned ERROR"
+                           TRACE_ERR_FMT,
+                           TRACE_ERR_ARGS(l_err));
+
+                // Capture error
+                captureError(l_err, l_stepError, HWPF_COMP_ID);
+            }
         }
     }
 

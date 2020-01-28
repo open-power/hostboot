@@ -59,8 +59,8 @@ EXTRAINCDIR += ${PERV_HWP_PATH}
 OBJS += call_proc_build_smp.o
 #OBJS += call_host_slave_sbe_update.o
 #OBJS += call_proc_cen_ref_clk_enable.o
+OBJS += call_proc_chiplet_scominit.o
 #OBJS += call_proc_enable_osclite.o
-#OBJS += call_proc_chiplet_scominit.o
 #OBJS += call_proc_abus_scominit.o
 #OBJS += call_proc_obus_scominit.o
 #OBJS += call_proc_npu_scominit.o
@@ -79,6 +79,7 @@ OBJS += call_proc_build_smp.o
 # instead of using HWP p10_build_smp.mk.
 # This is done to avoid inter-isteps dependencies
 # p10_build_smp.mk
+# Istep 10.1 -- proc_build_smp
 OBJS+=p10_build_smp.o
 OBJS+=p10_build_smp_adu.o
 OBJS+=p10_build_smp_fbc_ab.o
@@ -89,8 +90,18 @@ OBJS+=p10_putmemproc.o
 OBJS+=p10_getputmemproc_utils.o
 OBJS+=p10_adu_access.o
 OBJS+=p10_adu_setup.o
-#OBJS+=p9_fbc_smp_utils.o
-#OBJS+=p9_build_smp_fbc_cd.o
+
+#Istep 10.4 -- proc_chiplet_scominit
+#              proc_psi_scominit
+OBJS+=p10_chiplet_scominit.o
+OBJS+=p10_psi_scominit.o
+OBJS+=p10_vas_scom.o
+OBJS+=p10_mcc_omi_scom.o
+OBJS+=p10_mi_omi_scom.o
+OBJS+=p10_psi_scom.o
+OBJS+=p10_int_scom.o
+OBJS+=p10_nx_scom.o
+
 
 VPATH += ${NEST_HWP_PATH}
 VPATH += ${INITFILES_HWP_PATH}
