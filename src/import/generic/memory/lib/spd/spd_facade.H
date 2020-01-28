@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1682,13 +1682,13 @@ class facade final
         }
 
         ///
-        /// @brief Decodes SPD Revision for bytes 192->447 -> SPD_REVISION
+        /// @brief Decodes SPD Revision for bytes 192->447 -> SPD_REV_DDIMM_MODULE
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        fapi2::ReturnCode ddimm_spd_revision(uint8_t& o_output) const
+        fapi2::ReturnCode ddimm_module_spd_revision(uint8_t& o_output) const
         {
-            FAPI_TRY( iv_dimm_module_decoder->ddimm_spd_revision(o_output) );
+            FAPI_TRY( iv_dimm_module_decoder->ddimm_module_spd_revision(o_output) );
 
         fapi_try_exit:
             return fapi2::current_err;

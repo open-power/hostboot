@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -3463,6 +3463,56 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
             attr_integral_type& o_setting)
     {
         return i_spd_data.module_base_height(o_setting);
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @note attr_engine_derived_fields, SPD_REVISION specialization
+///
+template < proc_type P >
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::SPD_REVISION>
+{
+    using attr_type = fapi2::ATTR_MEM_EFF_SPD_REVISION_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_SPD_REVISION_TargetType;
+    static constexpr generic_ffdc_codes FFDC_CODE = SET_SPD_REVISION;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_spd_revision(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the attr target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_spd_revision(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_efd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static inline fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+            attr_integral_type& o_setting)
+    {
+        return i_spd_data.revision(o_setting);
     }
 };
 

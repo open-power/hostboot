@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -114,13 +114,13 @@ class decoder< DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes SPD Revision for bytes 192->447 -> SPD_REVISION
+        /// @brief Decodes SPD Revision for bytes 192->447 -> SPD_REV_DDIMM_MODULE
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode ddimm_spd_revision(uint8_t& o_output) const override
+        virtual fapi2::ReturnCode ddimm_module_spd_revision(uint8_t& o_output) const override
         {
-            FAPI_TRY( (mss::spd::reader<fields_t::SPD_REVISION, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::SPD_REV_DDIMM_MODULE, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;

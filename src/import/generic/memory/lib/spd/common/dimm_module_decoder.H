@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -104,6 +104,17 @@ class dimm_module_decoder
         virtual void set_data(const std::vector<uint8_t>& i_spd_data)
         {
             iv_data = i_spd_data;
+        }
+
+        ///
+        /// @brief Decodes SPD Revision -> SPD_REVISION
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode revision(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
@@ -559,11 +570,11 @@ class dimm_module_decoder
         // DDIMM information from here on out
         //////////////////////////////////////////
         ///
-        /// @brief Decodes SPD Revision for bytes 192->447 -> SPD_REVISION
+        /// @brief Decodes SPD Revision for bytes 192->447 -> SPD_REV_DDIMM_MODULE
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode ddimm_spd_revision(uint8_t& o_output) const
+        virtual fapi2::ReturnCode ddimm_module_spd_revision(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;

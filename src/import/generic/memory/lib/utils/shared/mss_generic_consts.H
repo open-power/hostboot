@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] Evan Lojewski                                                      */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -271,6 +271,7 @@ enum generic_ffdc_codes
 
     SET_RCD_MFG_ID = 0x109B,
     SET_DRAM_MODULE_HEIGHT = 0x109C,
+    SET_SPD_REVISION = 0x109D,
 };
 
 ///

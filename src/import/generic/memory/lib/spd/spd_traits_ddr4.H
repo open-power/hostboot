@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -3690,11 +3690,11 @@ class readerTraits< fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_GAIN_ADJUST, R >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note SPD_REVISION field specialization
+/// @note SPD_REV_DDIMM_MODULE field specialization
 /// @note valid for all revs
 ///
 template< rev R >
-class readerTraits < fields< DDR4, DDIMM_MODULE>::SPD_REVISION, R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::SPD_REV_DDIMM_MODULE, R >
 {
     public:
 

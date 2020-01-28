@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -118,9 +118,10 @@ enum class attr_eff_engine_fields
     DRAM_MFG_ID = 23,
     RCD_MFG_ID = 24,
     DRAM_MODULE_HEIGHT = 25,
+    SPD_REVISION = 26,
 
     // Dispatcher set to last enum value
-    DISPATCHER = DRAM_MODULE_HEIGHT,
+    DISPATCHER = SPD_REVISION,
 };
 
 ///

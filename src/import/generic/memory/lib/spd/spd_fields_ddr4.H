@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -795,10 +795,10 @@ class fields<DDR4, DDIMM_MODULE>
         enum
         {
 
-            // Byte 192: SPD Revision for bytes 192->447
-            SPD_REV_BYTE = 192,
-            SPD_REVISION_START = 0,
-            SPD_REVISION_LEN = 8,
+            // Byte 192: SPD Revision DDIMM Module Type (bytes 192->447)
+            SPD_REV_DDIMM_MODULE_BYTE = 192,
+            SPD_REV_DDIMM_MODULE_START = 0,
+            SPD_REV_DDIMM_MODULE_LEN = 8,
 
             // Byte 193: Module Height
             MODULE_HEIGHT_BYTE = 193,
@@ -1192,8 +1192,8 @@ class fields<DDR4, DDIMM_MODULE>
         // Second field - start bit
         // Third field - bit length
 
-        // Byte 192: SPD Revision for bytes 192->447
-        static constexpr field_t SPD_REVISION{SPD_REV_BYTE, SPD_REVISION_START, SPD_REVISION_LEN};
+        // Byte 192: SPD Revision DDIMM Module Bytes (192->447)
+        static constexpr field_t SPD_REV_DDIMM_MODULE{SPD_REV_DDIMM_MODULE_BYTE, SPD_REV_DDIMM_MODULE_START, SPD_REV_DDIMM_MODULE_LEN};
 
         // Byte 193: Module Height
         static constexpr field_t MODULE_BASE_HEIGHT{MODULE_HEIGHT_BYTE, MODULE_BASE_HEIGHT_START, MODULE_BASE_HEIGHT_LEN};

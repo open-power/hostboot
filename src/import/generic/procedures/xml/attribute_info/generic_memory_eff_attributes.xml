@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -903,6 +903,18 @@
     <writeable/>
     <mssUnits> mV </mssUnits>
     <mssAccessorName>volt_vpp</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_SPD_REVISION</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      SPD Revision (SPD Byte 1)
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssAccessorName>spd_revision</mssAccessorName>
   </attribute>
 
 </attributes>
