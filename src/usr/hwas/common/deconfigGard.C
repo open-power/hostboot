@@ -1848,6 +1848,7 @@ pg_entry_t getDeconfigMaskedPGValue(const Target& i_target)
     size_t l_numPgRules = 0;
     const PartialGoodRule* l_pgRule_it = nullptr;
 
+#ifdef __HOSTBOOT_MODULE //@fixme-RTC:248610-Fips compatible C++
     auto l_errl = findRulesForTarget(&i_target, l_pgRule_it, l_numPgRules);
 
     if (l_errl)
@@ -1868,6 +1869,7 @@ pg_entry_t getDeconfigMaskedPGValue(const Target& i_target)
             ++l_pgRule_it;
         }
     }
+#endif
 
     return l_attrPGMask;
 } // getDeconfigMaskedPGValue

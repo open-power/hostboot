@@ -78,6 +78,7 @@ public:
 
 private:
 
+#ifdef __HOSTBOOT_MODULE //@fixme-RTC:248610-Fips compatible C++
     /**
      * @brief   parsePgData     HWASDiscovery function to parse out a PGV
      *
@@ -91,8 +92,13 @@ private:
      */
     virtual partialGoodVector parsePgData(const std::array<uint8_t,
         VPD_CP00_PG_DATA_LENGTH>& pgData);
+#endif //#ifdef __HOSTBOOT_MODULE @fixme-RTC:248610-Fips compatible C++
 
 };
+
+#ifndef __HOSTBOOT_MODULE  //@fixme-RTC:248610-Fips compatible C++
+errlHndl_t discoverTargets();
+#endif
 
 /**
  * @brief   initHardware   Common HWAS function to setup the hardware

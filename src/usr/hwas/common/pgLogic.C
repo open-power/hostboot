@@ -36,6 +36,7 @@
 
 using namespace HWAS::COMMON;
 
+#ifdef __HOSTBOOT_MODULE //@fixme-RTC:248610-Fips compatible C++
 using HWAS::cu_mask;
 
 namespace PARTIAL_GOOD
@@ -672,3 +673,4 @@ namespace PARTIAL_GOOD
         return l_errl;
     }
 }
+#endif //#ifdef __HOSTBOOT_MODULE @fixme-RTC:248610-Fips compatible C++

@@ -356,6 +356,7 @@ void hwasErrorUpdatePlid(errlHndl_t & io_errl,
                          uint32_t & io_plid);
 
 
+#ifdef __HOSTBOOT_MODULE //@fixme-RTC:248610-Fips compatible C++
 /**
  * @brief wrapper function to add a partial good user detail section to an error
  *        log in a platform-specific manner.
@@ -369,6 +370,7 @@ void hwasErrorUpdatePlid(errlHndl_t & io_errl,
 void hwasErrorAddPartialGoodFFDC(errlHndl_t & io_errl,
                                  const model_ag_entries& i_modelAgData,
                                  const partialGoodVector& i_pgData);
+#endif //#ifdef __HOSTBOOT_MODULE  @fixme-RTC:248610-Fips compatible C++
 
 
 /**

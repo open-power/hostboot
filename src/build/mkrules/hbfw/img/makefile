@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2019
+# Contributors Listed Below - COPYRIGHT 2012,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -54,7 +54,9 @@ SRCPATH = ${DEFAULT_PATH:M*src*}
 .endif
 
 build_all: $(BUILD_ALL_DEPS)
-install_all: gen_system_specific_images build_sbe_partitions build_pnor_images
+install_all:
+#install_all: gen_system_specific_images build_sbe_partitions build_pnor_images
+#TODO-RTC:246879-Reenable this after we get MRW going
 
 #Some useful search paths
 HBFW_OBJPATH  = ${.PATH:M*obj*}
@@ -299,19 +301,12 @@ clobber_cp_hbfiles:
 #################################################
 SBE_BUILD_SCRIPT = ${buildSbePart.pl:P}
 
-P10_SBE_IMG   = p9a.SbePartition.bin
+P10_SBE_IMG   = p10.SbePartition.bin
 
-P9N_EC20_BIN = ${SBEI_OBJPATH:Fp9n_20.sbe_seeprom.hdr.bin}
-P9N_EC21_BIN = ${SBEI_OBJPATH:Fp9n_21.sbe_seeprom.hdr.bin}
-P9N_EC22_BIN = ${SBEI_OBJPATH:Fp9n_22.sbe_seeprom.hdr.bin}
-P9N_EC23_BIN = ${SBEI_OBJPATH:Fp9n_23.sbe_seeprom.hdr.bin}
-P9C_EC13_BIN = ${SBEI_OBJPATH:Fp9c_13.sbe_seeprom.hdr.bin}
-P9C_EC11_BIN = ${SBEI_OBJPATH:Fp9c_11.sbe_seeprom.hdr.bin}
-P9C_EC12_BIN = ${SBEI_OBJPATH:Fp9c_12.sbe_seeprom.hdr.bin}
-P9A_EC10_BIN = ${SBEI_OBJPATH:Fp9a_10.sbe_seeprom.hdr.bin}
+P9A_EC10_BIN = ${SBEI_OBJPATH:Fp10_10.sbe_seeprom.hdr.bin}
 
 SBE_PART_INFO = \
-  ${P10_SBE_IMG}:10=${P9A_EC10_BIN}
+  ${P10_SBE_IMG}:10=${P10_EC10_BIN} 
 
 __SBE_PART_BUILD/% : .SPECTARG .PMAKE
 	@${MAKE:T:R} BUILD_SPECIFIC_SBEPART \
@@ -387,36 +382,26 @@ P10_HCODE_FINAL_IMG = P10.HCODE.bin
 P10_SBE_FINAL_IMG = P10.SBE.bin
 P10_OCC_FINAL_IMG = P10.OCC.bin
 ## System Specific
-ZEPPELIN_WOFDATA_FINAL_IMG = ZEPPELIN.WOFDATA.bin
+DENALI_WOFDATA_FINAL_IMG = DENALI.WOFDATA.bin
 # Fips has its own build process and will not use these, but rather what's
 # defined in fipsfs.db.
 
 
 
 # Decide which PNOR to build
-.if (${FAKEPNOR} == "")
-    # Paramemters passed into GEN_PNOR_IMAGE_SCRIPT.
-    .if (${PNOR_LAYOUT_SELECTED} == "STANDALONE")
-        GEN_P10_BIN_FILES = P10:SBE=${${P10_SBE_IMG}:P},HCODE=${${P10_HCODE_IMG}:P},OCC=${${P10_OCC_IMG}:P},HBD=${${P10_HBD_IMG}:P}
-    .else
-        GEN_P10_BIN_FILES = P10:SBE=${${P10_SBE_IMG}:P},HCODE=${${P10_HCODE_IMG}:P},OCC=${${P10_OCC_IMG}:P},HBD=${${P10_HBD_IMG}:P}
-
-    .endif
-    GEN_ZEPPELIN_BIN_FILES = ZEPPELIN:WOFDATA=${${ZEPPELIN_WOFDATA_IMG}:P}
-
-    SYSTEM_SPECIFIC_PARAMS = --install-all --emit-eccless ${TARGET_TEST:b--test} ${CONFIG_SECUREBOOT:b--secureboot}  \
-                             --pnorLayout ${PNOR_LAYOUT} ${CORRUPT_PARAMS} ${HB_STANDALONE:b--hb-standalone} \
-                             --systemBinFiles ${GEN_ZEPPELIN_BIN_FILES} \
-                             --systemBinFiles ${GEN_P10_BIN_FILES} \
-                             --hwKeyHashFile ${IMPRINT_HW_KEY_HASH} \
-                             --editedLayoutLocation ${EDITED_LAYOUT_PATH}
+# Paramemters passed into GEN_PNOR_IMAGE_SCRIPT.
+.if (${PNOR_LAYOUT_SELECTED} == "STANDALONE")
+    GEN_P10_BIN_FILES = P10:SBE=${${P10_SBE_IMG}:P},HCODE=${${P10_HCODE_IMG}:P},OCC=${${P10_OCC_IMG}:P},HBD=${${P10_HBD_IMG}:P}
 .else
-    # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
-    GEN_P10_BIN_FILES = P10:HBD=${${HBD_FAKE_IMG}:P}
-    SYSTEM_SPECIFIC_PARAMS = --pnorLayout ${PNOR_LAYOUT} \
-                             --systemBinFiles ${GEN_P10_BIN_FILES} \
-                             --editedLayoutLocation ${EDITED_LAYOUT_PATH}
+    GEN_P10_BIN_FILES = P10:SBE=${${P10_SBE_IMG}:P},HCODE=${${P10_HCODE_IMG}:P},OCC=${${P10_OCC_IMG}:P},HBD=${${P10_HBD_IMG}:P}
 .endif
+GEN_DENALI_BIN_FILES = DENALI:WOFDATA=${${DENALI_WOFDATA_IMG}:P}
+SYSTEM_SPECIFIC_PARAMS = --install-all --emit-eccless ${TARGET_TEST:b--test} ${CONFIG_SECUREBOOT:b--secureboot}  \
+                         --pnorLayout ${PNOR_LAYOUT} ${CORRUPT_PARAMS} ${HB_STANDALONE:b--hb-standalone} \
+                         --systemBinFiles ${GEN_DENALI_BIN_FILES} \
+                         --systemBinFiles ${GEN_P10_BIN_FILES} \
+                         --hwKeyHashFile ${IMPRINT_HW_KEY_HASH} \
+                         --editedLayoutLocation ${EDITED_LAYOUT_PATH}
 
 gen_system_specific_images_bypass_cache : dump-secureboot-config
 	# Call script to generate final bin file for chip/system specific images
@@ -436,7 +421,7 @@ gen_system_specific_images: build_sbe_partitions .PMAKE
     HOSTBOOT_DEFAULT_SECTIONS = HBBL=${HBBL_FINAL_IMG},HBB=${HBB_FINAL_IMG},HBI=${HBI_FINAL_IMG},HBRT=${HBRT_FINAL_IMG},TEST=${TEST_FINAL_IMG},TESTRO=${TESTRO_FINAL_IMG},TESTLOAD=${TESTLOAD_FINAL_IMG},HBEL=${HBEL_FINAL_IMG},GUARD=${GUARD_FINAL_IMG},PAYLOAD=${PAYLOAD_FINAL_IMG},RINGOVD=${RINGOVD_FINAL_IMG},SBKT=${SBKT_FINAL_IMG},FIRDATA=${FIRDATA_FINAL_IMG}
 .endif
 
-P10_SECT = HBD=${P10_HBD_FINAL_IMG},SBE=${P10_SBE_FINAL_IMG},HCODE=${P10_HCODE_FINAL_IMG},OCC=${P10_OCC_FINAL_IMG},WOFDATA=${ZEPPELIN_WOFDATA_FINAL_IMG},EECACHE=${EECACHE_FINAL_IMG},FIRDATA=${FIRDATA_FINAL_IMG},OCMBFW=${OCMBFW_FINAL_IMG}
+P10_SECT = HBD=${P10_HBD_FINAL_IMG},SBE=${P10_SBE_FINAL_IMG},HCODE=${P10_HCODE_FINAL_IMG},OCC=${P10_OCC_FINAL_IMG},WOFDATA=${DENALI_WOFDATA_FINAL_IMG},EECACHE=${EECACHE_FINAL_IMG},FIRDATA=${FIRDATA_FINAL_IMG},OCMBFW=${OCMBFW_FINAL_IMG}
 
 
 .if (${PNOR_LAYOUT_SELECTED} == "P10")
@@ -445,20 +430,6 @@ PNOR_IMG_INFO = \
 .else
 PNOR_IMG_INFO = \
    ${FIPS_PNOR_INFO}
-.endif
-
-# To build fake PNOR, set FAKEPNOR to filename of file to build,
-#    ie, 'export FAKEPNOR=fake8m.pnor'
-# To not build fake PNOR, do not set FAKEPNOR or clear its setting,
-#    ie, 'export FAKEPNOR='
-# Note: If FAKEPNOR defined, ONLY a FAKEPNOR will be generated, this is due to
-#    some limitations of GEN_PNOR_IMAGE_SCRIPT at the time of porting to p9
-.if (${FAKEPNOR} != "")
-    HOSTBOOT_DEFAULT_SECTIONS = HBI=${HBI_FINAL_IMG},HBEL=${HBEL_FINAL_IMG},EECACHE=${EECACHE_FINAL_IMG}
-    P10_SECT = HBD=${P10_HBD_FINAL_IMG}
-    PNOR_IMG_INFO = \
-        ${FAKEPNOR}:${PNOR_LAYOUT}:${HOSTBOOT_DEFAULT_SECTIONS},${P10_SECT} \
-        ${FIPS_PNOR_INFO}
 .endif
 
 # Added a different dependency chain for hostboot builds so we can compile
@@ -507,22 +478,15 @@ clobber_build_pnor_images:
 #################################################
 FLASH_DEST = $(MAKETOP)$(OBJECTDIRTOP)../images/$(CONTEXT)/lab/flash
 FLASH_IMG = ${HBB_IMG} ${HBB_ECC_IMG} ${HBBL_IMG}
-FAKE_PNOR = fake6m.pnor
 
 update_images_for_sandbox:  gen_default_images gen_system_specific_images build_sbe_partitions build_pnor_images
 	mkdir -p ${FLASH_DEST}
 	#Copy hostboot base image and bootloader image to flash dir
 	${FLASH_IMG:@image@${baseimg:!cd ${FLASH_DEST}; cp -f ${.PATH:F${image}} ${image};!e}@}
-	#Truncate fake pnor image down to 6MB and copy to flash dir
-	.if (${FAKEPNOR} != "")
-		${FAKE_PNOR_IMG_INFO:@image@${pnorimg:!dd if=${image:s/:/ /g:xs/ .*//} of=${FAKE_PNOR} bs=6M count=1; \
-			cp -f ${FAKE_PNOR} ${FLASH_DEST}/${FAKE_PNOR};!e}@}
-	.endif
 	#Copy pnor images to flash dir
 	${PNOR_IMG_INFO:@image@${pnorimg:!cd ${FLASH_DEST}; \
 		if [ "${PNOR}" == "${image:s/:/ /g:xs/ .*//}" ] || \
-			[ "${PNOR}" == "" ] || \
-			[ "${FAKEPNOR}" == "${image:s/:/ /g:xs/ .*//}" ]; \
+			[ "${PNOR}" == "" ] ; \
 		then cp -f ${.PATH:F${image:s/:/ /g:xs/ .*//}} ${image:s/:/ /g:xs/ .*//}; fi !e}@}
 
 .endif

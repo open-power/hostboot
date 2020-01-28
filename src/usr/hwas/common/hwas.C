@@ -67,8 +67,8 @@ using PARTIAL_GOOD::pg_entry_t;
 using PARTIAL_GOOD::pg_mask_t;
 
 // trace setup; used by HWAS_DBG and HWAS_ERR macros
-HWAS_TD_t g_trac_dbg_hwas   = nullptr; // debug - fast
-HWAS_TD_t g_trac_imp_hwas   = nullptr; // important - slow
+HWAS_TD_t g_trac_dbg_hwas   = NULL; // debug - fast
+HWAS_TD_t g_trac_imp_hwas   = NULL; // important - slow
 
 #ifdef __HOSTBOOT_MODULE
 TRAC_INIT(&g_trac_dbg_hwas, "HWAS",     KILOBYTE );
@@ -627,7 +627,7 @@ errlHndl_t discoverMuxTargetsAndEnable(const Target &i_sysTarget)
     return l_err;
 }
 
-
+#ifdef __HOSTBOOT_MODULE //@fixme-RTC:248610-Fips compatible C++
 // The Partial-good vector is stored in VPD as a series of 24-bit entries. To
 // make them easier to work with and to provide room to grow them in the future,
 // we work with them as 32-bit entries (pg_entry_t). This function converts from
@@ -660,6 +660,7 @@ partialGoodVector HWASDiscovery::parsePgData(const std::array<uint8_t,
 
     return expanded_entries;
 }
+#endif //#ifdef __HOSTBOOT_MODULE @fixme-RTC:248610-Fips compatible C++
 
 /**
  * @brief Do presence detect on only PMIC targets and enable HWAS state
@@ -713,6 +714,14 @@ errlHndl_t discoverPmicTargetsAndEnable(const Target &i_sysTarget)
 
     return l_err;
 }
+
+#ifndef __HOSTBOOT_MODULE //@fixme-RTC:248610-Fips compatible C++
+errlHndl_t discoverTargets()
+{
+    HWAS::HWASDiscovery l_HWASDiscovery;
+    return l_HWASDiscovery.discoverTargets();
+}
+#endif //#ifndef __HOSTBOOT_MODULE @fixme-RTC:248610-Fips compatible C++
 
 errlHndl_t HWASDiscovery::discoverTargets()
 {
@@ -925,6 +934,7 @@ errlHndl_t HWASDiscovery::discoverTargets()
                     }
                     else
                     {
+#ifdef __HOSTBOOT_MODULE //@fixme-RTC:248610-Fips compatible C++
                         pgData_expanded = parsePgData(pgData);
 
                         // look at the 'nest' logic to override the
@@ -954,6 +964,7 @@ errlHndl_t HWASDiscovery::discoverTargets()
                         // indicates we should use all available ECs
                         l_procEntry.maxECs = UINT32_MAX;
                         l_procRestrictList.push_back(l_procEntry);
+#endif //#ifdef __HOSTBOOT_MODULE  @fixme-RTC:248610-Fips compatible C++
                     }
                 } // TYPE_PROC
             } // CLASS_CHIP
@@ -998,6 +1009,7 @@ errlHndl_t HWASDiscovery::discoverTargets()
 
                 auto l_model = l_masterProc->getAttr<ATTR_MODEL>();
 
+#ifdef __HOSTBOOT_MODULE //@fixme-RTC:248610-Fips compatible C++
                 // Setup model-dependent all good data
                 model_ag_entries l_modelPgData = { };
 
@@ -1006,6 +1018,7 @@ errlHndl_t HWASDiscovery::discoverTargets()
                 (void)l_model;
 
                 hwasErrorAddPartialGoodFFDC(infoErrl, l_modelPgData, pgData_expanded);
+#endif //#ifdef __HOSTBOOT_MODULE  @fixme-RTC:248610-Fips compatible C++
                 errlCommit(infoErrl, HWAS_COMP_ID);
             }
             else
@@ -1147,6 +1160,7 @@ bool isChipFunctional(const TARGETING::TargetHandle_t &i_target,
 {
     bool l_chipFunctional = true;
 
+#ifdef __HOSTBOOT_MODULE //@fixme-RTC:248610-Fips compatible C++
     for (size_t i = 0; i < VPD_CP00_PG_ALWAYS_GOOD_INDEX.size(); ++i)
     {
         const auto l_index = VPD_CP00_PG_ALWAYS_GOOD_INDEX[i];
@@ -1164,6 +1178,7 @@ bool isChipFunctional(const TARGETING::TargetHandle_t &i_target,
             break;
         }
     }
+#endif //#ifdef __HOSTBOOT_MODULE @fixme-RTC:248610-Fips compatible C++
 
     return l_chipFunctional;
 } // isChipFunctional
@@ -1195,6 +1210,7 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
             break;
         }
 
+#ifdef __HOSTBOOT_MODULE //@fixme-RTC:248610-Fips compatible C++
         // Since the target has at least one functional child (or no children),
         // next we must apply the correct partial good rules to determine
         // functionality.
@@ -1252,6 +1268,7 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
                 }
             }
         }
+#endif //ifdef __HOSTBOOT_MODULE  @fixme-RTC:248610-Fips compatible C++
     } while(0);
 
     if (!l_previouslySeen)
@@ -2610,6 +2627,7 @@ void invokePresentByAssoc()
     presentByAssoc(l_funcTargetList);
 } // invokePresentByAssoc
 
+#ifdef __HOSTBOOT_MODULE  //@fixme-RTC:248610-Fips compatible C++
 /* @brief Constructor function for TargetInfo
  *
  * @param[in] i_targ             The target to create the TargetInfo from
@@ -2630,6 +2648,7 @@ static TargetInfo makeTargetInfo(
 
     return l_targetInfo;
 }
+#endif //#ifdef __HOSTBOOT_MODULE  @fixme-RTC:248610-Fips compatible C++
 
 void presentByAssoc(TargetHandleList& i_targets)
 {
@@ -2648,6 +2667,7 @@ void presentByAssoc(TargetHandleList& i_targets)
                          // given type
     };
 
+#ifdef __HOSTBOOT_MODULE  //@fixme-RTC:248610-Fips compatible C++
     // This structure contains a single rule for a parent/child
     // relationship. The rule is symmetrical (i.e. the child type must have (at
     // least) one parent of the parent type, and vice versa) unless checkParent
@@ -2837,6 +2857,7 @@ void presentByAssoc(TargetHandleList& i_targets)
                              l_allChildrenList.cend());
         }
     }
+#endif //#ifdef __HOSTBOOT_MODULE  @fixme-RTC:248610-Fips compatible C++
 }
 
 void setChipletGardsOnProc(TARGETING::Target * i_procTarget)

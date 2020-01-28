@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2019
+# Contributors Listed Below - COPYRIGHT 2012,2020
 # [+] International Business Machines Corp.
 # [+] YADRO
 #
@@ -3025,7 +3025,7 @@ sub writeAttrErrlHFile {
             {
                 if ($enumerationType->{id} eq $attribute->{id})
                 {
-                print $outFile "              switch (*l_ptr) {\n";
+                print $outFile "              switch (*((uint32_t*)l_ptr)) {\n";
                 foreach my $enumerator (@{$enumerationType->{enumerator}})
                 {
                     my $enumName = $attribute->{id} . "_" . $enumerator->{name};
@@ -4392,23 +4392,8 @@ sub getAttributeIdEnumeration {
             # attribute_types_hb.xml or attributes_types_fsp.
             else
             {
-                # Don't fail if we're in an FSPBUILD context and
-                # it is one of the *RUNN_* attributes.  This workaround
-                # is needed until we can get a P10 fips branch so that
-                # the *RUNN_* attributes can be removed from fips without
-                # breaking fips.
-                #
-                # TODO RTC 245621 - remove this check once fips is ready for p10
-                if ( ($env_chip ne 'FSPBUILD') || (index($attribute->{id}, "RUNN_") == -1) )
-                {
-                    croak("Error: AttributeId $attribute->{id} "
-                    .   "defined multiple times");
-                }
-                else
-                {
-                    print STDERR "**** CHIP = $env_chip, Ignoring duplicate attribute" .
-                          " for $attribute->{id} ****\n";
-                }
+                croak("Error: AttributeId $attribute->{id} "
+                    . "defined multiple times");
             }
         }
         else

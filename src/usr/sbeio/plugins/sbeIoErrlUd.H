@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,7 +65,7 @@
 << std::endl;}
 #define SBE_PARSER_PRINT_HEADING(x) { SBE_PARSER_PRINT_DELIMITER \
 std::cout << \
-"                             "x<< std::endl;\
+"                             " x << std::endl;\
 SBE_PARSER_PRINT_DELIMITER }
 
 namespace SBEIO

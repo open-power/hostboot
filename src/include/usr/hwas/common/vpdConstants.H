@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,7 +53,7 @@ typedef uint32_t pg_mask_t;
 // range [0, 63] can be represented.
 typedef uint64_t cu_mask_t;
 
-#ifdef __HOSTBOOT_MODULE
+#ifdef __HOSTBOOT_MODULE  //@fixme-RTC:248610-Fips compatible C++
 // Returns a single-bit mask for the given chip unit; i.e. chip unit 5 will
 // be 0x20, etc.
 static constexpr cu_mask_t cu_mask(const uint8_t i_chipUnit) {
@@ -178,7 +178,7 @@ const uint32_t VPD_CP00_PG_RESERVED_GOOD    = 0xFFFFFFFFu;
 // cannot use the chip.
 
 // This is required so that we can compile pre-c++11
-#ifdef __HOSTBOOT_MODULE
+#ifdef __HOSTBOOT_MODULE  //@fixme-RTC:248610-Fips compatible C++
 
 // The first contains the chiplet's index in the PGV of the PG data...
 const std::array<pg_idx_t, 16> VPD_CP00_PG_ALWAYS_GOOD_INDEX =
@@ -224,6 +224,7 @@ const std::array<pg_mask_t, VPD_CP00_PG_ALWAYS_GOOD_INDEX.size()>
     VPD_CP00_PG_EQ_ALWAYS_GOOD_MASK,
 };
 
+//#ifdef __HOSTBOOT_MODULE  @fixme-RTC:248610-Fips compatible C++
 #define CONSTEXPR constexpr
 #else
 #define CONSTEXPR const
