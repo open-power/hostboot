@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -80,7 +80,6 @@ extern "C"
     /// @retval uint32_t Return non-zero for error
     uint32_t p9_scominfo_isChipUnitScom(const uint64_t i_scomAddr, bool& o_chipUnitRelated,
                                         std::vector<p9_chipUnitPairing_t>& o_chipUnitPairing, const uint32_t i_mode = 0);
-
 
     /// @brief Alter the unit/unitnum of a target for spys where the clocks-on vs clocks-off targets are different.
     /// @param[in] i_p9CU target used for the spy request

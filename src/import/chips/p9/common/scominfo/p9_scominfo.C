@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1268,6 +1268,14 @@ extern "C"
                                                             P9_SCOMINFO_OMI_SWIZZLE[((l_chiplet_id - MC01_CHIPLET_ID) * 8) +
                                                                     ((l_sat_id - P9A_MC_DL_REG0_SAT_ID) * 3) +
                                                                     ((l_sat_offset / 16) - 1)]));
+                            }
+                            else
+                            {
+                                o_chipUnitRelated = true;
+                                o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_OMIC_CHIPUNIT,
+                                                            ((l_chiplet_id - MC01_CHIPLET_ID) * 3) +
+                                                            (l_sat_id - P9A_MC_DL_REG0_SAT_ID)));
+
                             }
                         }
                     }
