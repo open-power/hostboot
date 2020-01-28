@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,14 @@
 #include "p10_hcd_corecache_power_control.H"
 #include "p10_hcd_common.H"
 
+#ifdef __PPE_QME
+    #include "p10_ppe_c.H"
+    using namespace scomt::ppe_c;
+#else
+    #include "p10_scom_c.H"
+    using namespace scomt::c;
+#endif
+
 
 //------------------------------------------------------------------------------
 // Constant Definitions
@@ -62,6 +70,11 @@ p10_hcd_cache_poweroff(
     const fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > & i_target)
 {
     FAPI_INF(">>p10_hcd_cache_poweroff");
+
+    fapi2::buffer<buffer_t> l_mmioData = 0;
+
+    FAPI_DBG("Drop sram_enable via CPMS_L3_PFETCNTL[63:SRAM_ENABLE]");
+    FAPI_TRY( HCD_PUTMMIO_C( i_target, MMIO_LOWADDR(CPMS_L3_PFETCNTL_WO_CLEAR), MMIO_1BIT( MMIO_LOWBIT(63) ) ) );
 
     // VCS off first, VDD off after
     FAPI_TRY( p10_hcd_corecache_power_control( i_target, HCD_POWER_L3_OFF ) );

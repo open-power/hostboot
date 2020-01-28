@@ -98,6 +98,9 @@ p10_hcd_core_poweroff(
     FAPI_DBG("Drop VDD_PFET_REGULATION_FINGER_EN via CPMS_CL2_PFETCNTL[8]");
     FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_CL2_PFETCNTL_WO_CLEAR, MMIO_1BIT(8) ) );
 
+    FAPI_DBG("Drop sram_enable via CPMS_CL2_PFETCNTL[63:SRAM_ENABLE]");
+    FAPI_TRY( HCD_PUTMMIO_C( i_target, MMIO_LOWADDR(CPMS_CL2_PFETCNTL_WO_CLEAR), MMIO_1BIT( MMIO_LOWBIT(63) ) ) );
+
     // VCS off first, VDD off after
     FAPI_TRY( p10_hcd_corecache_power_control( i_target, HCD_POWER_CL2_OFF ) );
 
