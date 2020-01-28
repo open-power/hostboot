@@ -58,6 +58,7 @@ extern "C" fapi2::ReturnCode p10_proc_gettracearray(
     fapi2::variable_buffer& o_ta_data)
 {
     fapi2::ReturnCode l_fapiRc = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
     // mark HWP entry
     FAPI_INF("Entering ...");
@@ -91,30 +92,30 @@ extern "C" fapi2::ReturnCode p10_proc_gettracearray(
     }
 
 
-    o_ta_data.resize(NUM_TRACE_ROWS * P10_TRACEARRAY_BITS_PER_ROW).flush<0>();
-    uint64_t l_data_buffer[NUM_TRACE_ROWS * P10_TRACEARRAY_BITS_PER_ROW / 8 / sizeof(uint64_t)];
-
-    l_fapiRc = p10_sbe_tracearray(
-                   l_target,
-                   i_args,
-                   l_data_buffer,
-                   0,
-                   NUM_TRACE_ROWS);
-    FAPI_TRY(l_fapiRc,
-             "p10_sbe_tracearray failed");
-
-    for(uint32_t i = 0; i < NUM_TRACE_ROWS; i++)
     {
-        FAPI_TRY(o_ta_data.set<uint64_t>(l_data_buffer[2 * i + 0], 2 * i + 0),
-                 "Failed to insert data into trace buffer");
-        FAPI_TRY(o_ta_data.set<uint64_t>(l_data_buffer[2 * i + 1], 2 * i + 1),
-                 "Failed to insert data into trace buffer");
-    }
+        o_ta_data.resize(NUM_TRACE_ROWS * P10_TRACEARRAY_BITS_PER_ROW).flush<0>();
+        uint64_t l_data_buffer[NUM_TRACE_ROWS * P10_TRACEARRAY_BITS_PER_ROW / 8 / sizeof(uint64_t)];
 
+        l_fapiRc = p10_sbe_tracearray(
+                       l_target,
+                       i_args,
+                       l_data_buffer,
+                       0,
+                       NUM_TRACE_ROWS);
+        FAPI_TRY(l_fapiRc,
+                 "p10_sbe_tracearray failed");
+
+        for(uint32_t i = 0; i < NUM_TRACE_ROWS; i++)
+        {
+            FAPI_TRY(o_ta_data.set<uint64_t>(l_data_buffer[2 * i + 0], 2 * i + 0),
+                     "Failed to insert data into trace buffer");
+            FAPI_TRY(o_ta_data.set<uint64_t>(l_data_buffer[2 * i + 1], 2 * i + 1),
+                     "Failed to insert data into trace buffer");
+        }
+    }
 
     // mark HWP exit
     FAPI_INF("Success");
-    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
