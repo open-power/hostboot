@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2019
+# Contributors Listed Below - COPYRIGHT 2011,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -188,11 +188,11 @@ VMM_CONSTS_FILE = \
 
 GENFILES = ${XMLTOHB_TARGETS}
 
-XMLTOHB_SYSTEM_BINARIES += simics_P10_targeting.bin.protected
-XMLTOHB_SYSTEM_BINARIES += simics_P10_targeting.bin.unprotected
+XMLTOHB_SYSTEM_BINARIES += $(if $(CONFIG_FSP_BUILD),,simics_P10_targeting.bin.protected)
+XMLTOHB_SYSTEM_BINARIES += $(if $(CONFIG_FSP_BUILD),,simics_P10_targeting.bin.unprotected)
 
-XMLTOHB_SYSTEM_BINARIES += vbu_P10_targeting.bin.protected
-XMLTOHB_SYSTEM_BINARIES += vbu_P10_targeting.bin.unprotected
+XMLTOHB_SYSTEM_BINARIES += $(if $(CONFIG_FSP_BUILD),,vbu_P10_targeting.bin.protected)
+XMLTOHB_SYSTEM_BINARIES += $(if $(CONFIG_FSP_BUILD),,vbu_P10_targeting.bin.unprotected)
 #debug :
 #	@echo COMMON_TARGETING_PATH_PREFIX = ${COMMON_TARGETING_PATH_PREFIX}
 #	@echo COMMON_TARGETING_REL_PATH = ${COMMON_TARGETING_REL_PATH}

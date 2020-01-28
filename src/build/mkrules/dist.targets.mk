@@ -301,12 +301,6 @@ fsp.tar_CONTENTS = \
     src/build/buildpnor/pnorLayoutFSP.xml \
     src/build/buildpnor/pnorLayoutP10.xml \
     $(if $(FAKEPNOR), src/build/buildpnor/pnorLayoutFake.xml, ) \
-    img/simics_P10_targeting.bin \
-    img/simics_P10_targeting.bin.protected \
-    img/simics_P10_targeting.bin.unprotected \
-    img/vbu_P10_targeting.bin \
-    img/vbu_P10_targeting.bin.protected \
-    img/vbu_P10_targeting.bin.unprotected \
     obj/genfiles/fapiattrs.xml \
     obj/genfiles/attribute_types_sp.xml \
     obj/genfiles/target_types_sp.xml \
