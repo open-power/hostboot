@@ -32,7 +32,7 @@
 #include <prdfParserUtils.H>
 #include <prdfErrlUtil.H>
 #include <prdfMemUtils.H>
-#include <fapi2.H>
+#include <target_types.H>
 
 #ifdef __HOSTBOOT_MODULE
 #include <rowRepairsFuncs.H>
