@@ -32,3 +32,16 @@
 // *HWP FW Maintainer   : Raja Das (rajadas2@in.ibm.com)
 // *HWP Consumed by     : FSP, Hostboot
 //------------------------------------------------------------------------------
+
+#ifndef _P10_ENABLE_RIDI_H_
+#define _P10_ENABLE_RIDI_H_
+
+#include <fapi2.H>
+
+/// @brief Enable Drivers/Recievers for a pervasive target
+///
+/// @param[in]     i_target  Reference to TARGET_TYPE_PERV target
+/// @return  FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_enable_ridi(const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target);
+
+#endif
