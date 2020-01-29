@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -563,8 +563,8 @@
 
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PSTATE_PB_NEST_FREQ_EQ_ZERO</rc>
-    <description>The system attribute ATTR_FREQ_PB_MHZ has a zero
+    <rc>RC_PSTATE_PAU_FREQ_EQ_ZERO</rc>
+    <description>The system attribute ATTR_FREQ_PAU_MHZ has a zero
     value.  This is fatal to Pstate functionality.
     </description>
     <ffdc>CHIP_TARGET</ffdc>

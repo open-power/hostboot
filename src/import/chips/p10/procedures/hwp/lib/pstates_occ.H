@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -154,11 +154,35 @@ typedef struct
 
     IddqTable_t         iddq;
 
+    // Frequency minimum
     uint32_t            frequency_min_khz;
-    uint32_t            frequency_max_khz;    // Frequency of Pstate0
+
+    // Frequency of Pstate0
+    // This represents the highest valid frequency in the system and it
+    // may not correlate to this part's VPD Fmax frequency.
+    uint32_t            frequency_max_khz;
+
+    // Frequency step for each Pstate
     uint32_t            frequency_step_khz;
-    uint32_t            pstate_min;           // Pstate reflecting frequency_min_khz
+
+    // Pstate reflecting frequency_min_khz for this chip.
+    uint32_t            pstate_min;
+
+    // Frequency of the domain in which the OCC is running
     uint32_t            occ_complex_frequency_mhz;
+
+    // TDP WOF Base frequency from #V
+    uint32_t            tdp_wof_base_frequency_mhz;
+
+    // Fixed frequency mode frequency from #V
+    uint32_t            fixed_freq_mode_frequency_mhz;
+
+    // Pstate reflecting maximum amount of throttling.  The difference between
+    // pstate_max_throttle and pstate_min is the throttle Pstate space
+
+    // Note: while Pstats are unit8_t, this is stored as uint32_t as these
+    // are more efficient on PPE platforms
+    uint32_t            pstate_max_throttle;
 
 } OCCPstateParmBlock_t __attribute__((aligned(128))) ;
 

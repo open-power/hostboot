@@ -145,6 +145,8 @@
 #define DDS_DELAY_SLOPE_FP_SHIFT_12 12  //DDS Delay slope format 4.12
 #define DDS_SLOPE_FP_SHIFT_6         6  //DDS fields(except delay) slope format 2.6
 
+#define THROTTLE_PSTATES            64  //Number of Ptates to index into Throttle Table
+
 /// IDDQ readings,
 #define IDDQ_MEASUREMENTS     6
 #define MEASUREMENT_ELEMENTS  4    // Number of groups measured
@@ -223,7 +225,7 @@ typedef struct
     uint8_t  pad[3];        // Alignment padding
 } PoundVOpPoint_t;
 
-/// #V VPD Biasesﬂ
+/// #V VPD Biases
 ///
 /// Percent bias applied to VPD operating points prior to interolation
 ///
@@ -234,6 +236,52 @@ typedef struct
     int8_t vdd_ext_0p5pct[NUM_PV_POINTS];
     int8_t vcs_ext_0p5pct[NUM_PV_POINTS];
 } PoundVBias_t;
+
+///
+/// #V Static Rail content
+///
+typedef struct
+{
+    uint32_t vdn_mv;
+    uint32_t idn_tdp_ac_10ma;
+    uint32_t idn_tdp_dc_10ma;
+    uint32_t vio_mv;
+    uint32_t iio_tdp_ac_10ma;
+    uint32_t iio_tdp_dc_10ma;
+    uint32_t vpci_mv;
+    uint32_t ipci_tdp_ac_10ma;
+    uint32_t ipci_tdp_dc_10ma;;
+} PoundVStaticRails_t;
+
+///
+/// #V Other Info content
+///
+typedef struct
+{
+    uint32_t pau_frequency_mhz;
+    uint32_t total_sort_socket_power_target_W;
+    uint32_t vdn_sort_socket_power_alloc_W;
+    uint32_t vio_sort_socket_power_alloc_W;
+    uint32_t vpci_sort_socket_power_alloc_W;
+    uint32_t total_sort_socket_power_actual_0p1W;
+    uint32_t idd_rdp_limit_0p1A;
+    uint32_t vdd_tdp_wof_index;
+    uint32_t vcs_tdp_wof_index;
+    uint32_t vio_tdp_wof_index;
+    uint32_t amb_cond_tdp_wof_index;
+    uint32_t mode_interpolation;
+    uint32_t rdp_sort_power_temp_0p5C;
+    uint32_t tdp_sort_power_temp_0p5C;
+    uint32_t tdp_wof_base_freq_mhz;
+    uint32_t fixed_freq_mhz;
+    uint32_t powersave_freq_mhz;
+    uint32_t ultraturbo_freq_mhz;
+    uint32_t fmax_freq_mhz;
+    uint32_t mma_throttle_temp_0p5C;
+    uint32_t io_throttle_temp_0p5C;
+    uint32_t fixed_freq_mode_power_target_0p;
+} PoundVOtherInfo_t;
+
 
 /// System Power Distribution Paramenters
 ///

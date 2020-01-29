@@ -142,8 +142,8 @@ const fapi2::voltageBucketData_t g_vpd_PVData =
     {
 //      PAUFRQ  SSPTAR  VDNPOW  VIOPOW  PCIPOW  SSPACT  IDDRLT VDDTWI  VCSTWI VIOTWI  AMBTWI  MDINPLT
         0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,0x00,   0x00,  0x00,   0x00,   0x00,
-//      RDPSPT  TDPSPT  VDDTWCFRQ  FFRQMCFREQ
-        0x00,   0x00,   0x0000,    0x0000,    0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00,
+//      RDPSPT  TDPSPT  VDDTWCFRQ FFCFREQ  PSFREQ  UTFREQ  FMFREQ  MMATT   IOTT  FFPT
+        0x00,   0x00,   0x0DAC,   0x09C4,  0x07D0, 0x0EDA, 0x0FA0, 0x0000, 0x00, 0x00,
     },
 
 };
@@ -187,8 +187,8 @@ const uint8_t g_vpd_PVData[] =
         0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,
 //        PAUFRQ    SSPTAR     VDNPOW     VIOPOW     PCIPOW     SSPACT  IDDRLT  VDDTWI     VCSTWI VIOTWI  AMBTWI  MDINPLT
         0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00,0x00,   0x00,  0x00,   0x00,   0x00,
-//      RDPSPT  TDPSPT  VDDTWCFRQ  FFRQMCFREQ    VDDPsavCoreF VDDCF6CoreF VDDFmaxCF  MMATemp  IOTemp
-        0x00,   0x00,   0x00,0x00,    0x00,0x00,    0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,    0x00, 0x00,0x00,
+//      RDPSPT  TDPSPT  WOFBSCFRQ    FFCFREQ   VDDPsavCoreF VDDCF6CoreF VDDFmaxCF  MMATemp  IOTemp    FFMPT
+        0x00,   0x00,   0x0D,0xAC, 0x0B,0xB8, 0x07,0xD0,    0x0E,0xD8, 0x0F,0xA0, 0x00,    0x00,   0x00,0x00,
 };
 
 
@@ -844,7 +844,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         io_globalppb->frequency_step_khz = revle32(iv_frequency_step_khz);
 
         //PAU freq
-        io_globalppb->occ_complex_frequency_mhz = revle32(iv_attrs.attr_nest_frequency_mhz);;
+        io_globalppb->occ_complex_frequency_mhz = revle32(iv_attrs.attr_pau_frequency_mhz/4);
 
         FAPI_INF("Pstate Base Frequency %X (%d)",
                 revle32(io_globalppb->reference_frequency_khz),
@@ -1087,8 +1087,8 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
             iv_wof_enabled = false;
         }
 
-        //Update nest frequency in OPPB
-        i_occppb->occ_complex_frequency_mhz = revle32(iv_nest_freq_mhz);
+        //Update OCC frequency in OPPB
+        i_occppb->occ_complex_frequency_mhz = revle32(iv_occ_freq_mhz);
 
         // The minimum Pstate must be rounded FAST so that core floor
         // constraints are not violated.
@@ -1117,6 +1117,16 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
         i_occppb->pstate_min = revle32(i_occppb->pstate_min);
         FAPI_INF("l_occppb.pstate_min 0x%x (%u)", pstate_min, pstate_min);
 
+        //wof_base_frequency_mhz
+        i_occppb->tdp_wof_base_frequency_mhz =
+            revle32(iv_attr_mvpd_poundV_other_info.tdp_wof_base_freq_mhz);
+
+        //fixed_freq_mode_frequency_mhz
+        i_occppb->fixed_freq_mode_frequency_mhz =
+            revle32(iv_attr_mvpd_poundV_other_info.fixed_freq_mhz);
+
+        //pstate_max_throttle
+        i_occppb->pstate_max_throttle =  revle32(pstate_min + THROTTLE_PSTATES);
 
     }while(0);
 
@@ -1398,7 +1408,7 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
 
 
     // Frequency attributes
-    DATABLOCK_GET_ATTR(ATTR_FREQ_PAU_MHZ,            FAPI_SYSTEM, attr_nest_frequency_mhz);
+    DATABLOCK_GET_ATTR(ATTR_FREQ_PAU_MHZ,           FAPI_SYSTEM, attr_pau_frequency_mhz);
     DATABLOCK_GET_ATTR(ATTR_FREQ_CORE_CEILING_MHZ,  iv_procChip, attr_freq_core_ceiling_mhz);
     DATABLOCK_GET_ATTR(ATTR_FREQ_CORE_FLOOR_MHZ,    iv_procChip, attr_freq_core_floor_mhz);
 
@@ -1521,8 +1531,8 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
 
     // Deal with critical attributes that are not set and that any defaults chosen
     // could well be very wrong
-    FAPI_ASSERT(iv_attrs.attr_nest_frequency_mhz,
-                fapi2::PSTATE_PB_NEST_FREQ_EQ_ZERO()
+    FAPI_ASSERT(iv_attrs.attr_pau_frequency_mhz,
+                fapi2::PSTATE_PAU_FREQ_EQ_ZERO()
                 .set_CHIP_TARGET(iv_procChip),
                 "ATTR_FREQ_PAU_MHZ has a zero value");
 
@@ -1577,7 +1587,7 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
          iv_attrs.attr_freq_proc_refclock_khz,iv_attrs.attr_proc_dpll_divider);
     FAPI_INF ("iv_frequency_step_khz %08X %08X", iv_frequency_step_khz, revle32(iv_frequency_step_khz));
 
-    iv_nest_freq_mhz      = iv_attrs.attr_nest_frequency_mhz;
+    iv_occ_freq_mhz      = iv_attrs.attr_pau_frequency_mhz/4;
 
 
 fapi_try_exit:
@@ -1907,6 +1917,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
     uint8_t*   l_buffer         =
     reinterpret_cast<uint8_t*>(malloc(sizeof(voltageBucketData_t)) );
     uint8_t*   l_buffer_inc     = nullptr;
+    char       outstr[32];
 
     do
     {
@@ -2043,6 +2054,228 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
             FAPI_INF("PSTATE %x %x %d",iv_attr_mvpd_poundV_raw[CF6].frequency_mhz,
                      iv_attr_mvpd_poundV_raw[i].frequency_mhz,iv_attr_mvpd_poundV_raw[i].pstate);
         }
+
+        // Static Rails
+
+        strcpy(outstr, "vdn_mv");
+        iv_attr_mvpd_poundV_static_rails.vdn_mv = (uint32_t) UINT16_GET(l_buffer_inc);
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_static_rails.vdn_mv,
+                                                iv_attr_mvpd_poundV_static_rails.vdn_mv,
+                                                outstr);
+        l_buffer_inc += 2;
+
+        strcpy(outstr, "idn_tdp_ac_10ma");
+        iv_attr_mvpd_poundV_static_rails.idn_tdp_ac_10ma = (uint32_t) UINT16_GET(l_buffer_inc);
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_static_rails.idn_tdp_ac_10ma,
+                                                iv_attr_mvpd_poundV_static_rails.idn_tdp_ac_10ma,
+                                                outstr);
+        l_buffer_inc += 2;
+
+        strcpy(outstr, "idn_tdp_dc_10ma");
+        iv_attr_mvpd_poundV_static_rails.idn_tdp_dc_10ma = (uint32_t) UINT16_GET(l_buffer_inc);
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_static_rails.idn_tdp_dc_10ma,
+                                                iv_attr_mvpd_poundV_static_rails.idn_tdp_dc_10ma,
+                                                outstr);
+        l_buffer_inc += 2;
+
+        strcpy(outstr, "vio_mv");
+        iv_attr_mvpd_poundV_static_rails.vio_mv = (uint32_t) UINT16_GET(l_buffer_inc);
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_static_rails.vio_mv,
+                                                iv_attr_mvpd_poundV_static_rails.vio_mv,
+                                                outstr);
+        l_buffer_inc += 2;
+
+        strcpy(outstr, "iio_tdp_ac_10ma");
+        iv_attr_mvpd_poundV_static_rails.iio_tdp_ac_10ma = (uint32_t) UINT16_GET(l_buffer_inc);
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_static_rails.iio_tdp_ac_10ma,
+                                                iv_attr_mvpd_poundV_static_rails.iio_tdp_ac_10ma,
+                                                outstr);
+        l_buffer_inc += 2;
+
+        strcpy(outstr, "iio_tdp_dc_10ma");
+        iv_attr_mvpd_poundV_static_rails.iio_tdp_dc_10ma = (uint32_t) UINT16_GET(l_buffer_inc);
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_static_rails.iio_tdp_dc_10ma,
+                                                iv_attr_mvpd_poundV_static_rails.iio_tdp_dc_10ma,
+                                                outstr);
+        l_buffer_inc += 2;
+
+        strcpy(outstr, "vpci_mv");
+        iv_attr_mvpd_poundV_static_rails.vpci_mv = (uint32_t) UINT16_GET(l_buffer_inc);
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_static_rails.vpci_mv,
+                                                iv_attr_mvpd_poundV_static_rails.vpci_mv,
+                                                outstr);
+        l_buffer_inc += 2;
+
+        strcpy(outstr, "ipci_tdp_ac_10ma");
+        iv_attr_mvpd_poundV_static_rails.ipci_tdp_ac_10ma = (uint32_t) UINT16_GET(l_buffer_inc);
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_static_rails.ipci_tdp_ac_10ma,
+                                                iv_attr_mvpd_poundV_static_rails.ipci_tdp_ac_10ma,
+                                                outstr);
+        l_buffer_inc += 2;
+
+        strcpy(outstr, "ipci_tdp_dc_10ma");
+        iv_attr_mvpd_poundV_static_rails.ipci_tdp_dc_10ma = (uint32_t) UINT16_GET(l_buffer_inc);
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_static_rails.ipci_tdp_dc_10ma,
+                                                iv_attr_mvpd_poundV_static_rails.ipci_tdp_dc_10ma,
+                                                outstr);
+        l_buffer_inc += 19;
+
+
+        // Other Rails
+
+        strcpy(outstr, "pau_frequency_mhz");
+        iv_attr_mvpd_poundV_other_info.pau_frequency_mhz = (uint32_t) UINT16_GET(l_buffer_inc);
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_other_info.pau_frequency_mhz,
+                                                iv_attr_mvpd_poundV_other_info.pau_frequency_mhz,
+                                                outstr);
+        l_buffer_inc += 2;
+
+        strcpy(outstr, "total_sort_socket_power_target_W");
+        iv_attr_mvpd_poundV_other_info.total_sort_socket_power_target_W = (uint32_t) UINT16_GET(l_buffer_inc);
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_other_info.total_sort_socket_power_target_W,
+                                                iv_attr_mvpd_poundV_other_info.total_sort_socket_power_target_W,
+                                                outstr);
+        l_buffer_inc += 2;
+
+        strcpy(outstr, "vdn_sort_socket_power_alloc_W");
+        iv_attr_mvpd_poundV_other_info.vdn_sort_socket_power_alloc_W = (uint32_t) UINT16_GET(l_buffer_inc);
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_other_info.vdn_sort_socket_power_alloc_W,
+                                                iv_attr_mvpd_poundV_other_info.vdn_sort_socket_power_alloc_W,
+                                                outstr);
+        l_buffer_inc += 2;
+
+        strcpy(outstr, "vio_sort_socket_power_alloc_W");
+        iv_attr_mvpd_poundV_other_info.vio_sort_socket_power_alloc_W = (uint32_t) UINT16_GET(l_buffer_inc);
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_other_info.vio_sort_socket_power_alloc_W,
+                                                iv_attr_mvpd_poundV_other_info.vio_sort_socket_power_alloc_W,
+                                                outstr);
+        l_buffer_inc += 2;
+
+        strcpy(outstr, "vpci_sort_socket_power_alloc_W");
+        iv_attr_mvpd_poundV_other_info.vpci_sort_socket_power_alloc_W = (uint32_t) UINT16_GET(l_buffer_inc);
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_other_info.vpci_sort_socket_power_alloc_W,
+                                                iv_attr_mvpd_poundV_other_info.vpci_sort_socket_power_alloc_W,
+                                                outstr);
+        l_buffer_inc += 2;
+
+        strcpy(outstr, "total_sort_socket_power_actual_0p1W");
+        iv_attr_mvpd_poundV_other_info.total_sort_socket_power_actual_0p1W = (uint32_t) UINT16_GET(l_buffer_inc);
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_other_info.total_sort_socket_power_actual_0p1W,
+                                                iv_attr_mvpd_poundV_other_info.total_sort_socket_power_actual_0p1W,
+                                                outstr);
+        l_buffer_inc += 2;
+
+        strcpy(outstr, "idd_rdp_limit_0p1A");
+        iv_attr_mvpd_poundV_other_info.idd_rdp_limit_0p1A = (uint32_t) UINT16_GET(l_buffer_inc);
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_other_info.idd_rdp_limit_0p1A,
+                                                iv_attr_mvpd_poundV_other_info.idd_rdp_limit_0p1A,
+                                                outstr);
+        l_buffer_inc += 2;
+
+        strcpy(outstr, "vdd_tdp_wof_index");
+        iv_attr_mvpd_poundV_other_info.vdd_tdp_wof_index = (uint32_t) *l_buffer_inc;
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_other_info.vdd_tdp_wof_index,
+                                                iv_attr_mvpd_poundV_other_info.vdd_tdp_wof_index,
+                                                outstr);
+        l_buffer_inc += 1;
+
+        strcpy(outstr, "vcs_tdp_wof_index");
+        iv_attr_mvpd_poundV_other_info.vcs_tdp_wof_index = (uint32_t) *l_buffer_inc;
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_other_info.vcs_tdp_wof_index,
+                                                iv_attr_mvpd_poundV_other_info.vcs_tdp_wof_index,
+                                                outstr);
+        l_buffer_inc += 1;
+
+        strcpy(outstr, "vio_tdp_wof_index");
+        iv_attr_mvpd_poundV_other_info.vio_tdp_wof_index = (uint32_t) *l_buffer_inc;
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_other_info.vio_tdp_wof_index,
+                                                iv_attr_mvpd_poundV_other_info.vio_tdp_wof_index,
+                                                outstr);
+        l_buffer_inc += 1;
+
+        strcpy(outstr, "amb_cond_tdp_wof_index");
+        iv_attr_mvpd_poundV_other_info.amb_cond_tdp_wof_index = (uint32_t) *l_buffer_inc;
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_other_info.amb_cond_tdp_wof_index,
+                                                iv_attr_mvpd_poundV_other_info.amb_cond_tdp_wof_index,
+                                                outstr);
+        l_buffer_inc += 1;
+
+        strcpy(outstr, "mode_interpolation");
+        iv_attr_mvpd_poundV_other_info.mode_interpolation = (uint32_t) *l_buffer_inc;
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_other_info.mode_interpolation,
+                                                iv_attr_mvpd_poundV_other_info.mode_interpolation,
+                                                outstr);
+        l_buffer_inc += 1;
+
+        strcpy(outstr, "rdp_sort_power_temp_0p5C");
+        iv_attr_mvpd_poundV_other_info.rdp_sort_power_temp_0p5C = (uint32_t) *l_buffer_inc;
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_other_info.rdp_sort_power_temp_0p5C,
+                                                iv_attr_mvpd_poundV_other_info.rdp_sort_power_temp_0p5C,
+                                                outstr);
+        l_buffer_inc += 1;
+
+        strcpy(outstr, "tdp_sort_power_temp_0p5C");
+        iv_attr_mvpd_poundV_other_info.tdp_sort_power_temp_0p5C = (uint32_t) *l_buffer_inc;
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_other_info.tdp_sort_power_temp_0p5C,
+                                                iv_attr_mvpd_poundV_other_info.tdp_sort_power_temp_0p5C,
+                                                outstr);
+        l_buffer_inc += 1;
+
+        strcpy(outstr, "tdp_wof_base_freq_mhz");
+        iv_attr_mvpd_poundV_other_info.tdp_wof_base_freq_mhz = (uint32_t) UINT16_GET(l_buffer_inc);
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_other_info.tdp_wof_base_freq_mhz,
+                                                iv_attr_mvpd_poundV_other_info.tdp_wof_base_freq_mhz,
+                                                outstr);
+        l_buffer_inc += 2;
+
+        strcpy(outstr, "fixed_freq_mhz");
+        iv_attr_mvpd_poundV_other_info.fixed_freq_mhz = (uint32_t) UINT16_GET(l_buffer_inc);
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_other_info.fixed_freq_mhz,
+                                                iv_attr_mvpd_poundV_other_info.fixed_freq_mhz,
+                                                outstr);
+        l_buffer_inc += 2;
+
+        strcpy(outstr, "powersave_freq_mhz");
+        iv_attr_mvpd_poundV_other_info.powersave_freq_mhz = (uint32_t) UINT16_GET(l_buffer_inc);
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_other_info.powersave_freq_mhz,
+                                                iv_attr_mvpd_poundV_other_info.powersave_freq_mhz,
+                                                outstr);
+        l_buffer_inc += 2;
+
+        strcpy(outstr, "ultraturbo_freq_mhz");
+        iv_attr_mvpd_poundV_other_info.ultraturbo_freq_mhz = (uint32_t) UINT16_GET(l_buffer_inc);
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_other_info.ultraturbo_freq_mhz,
+                                                iv_attr_mvpd_poundV_other_info.ultraturbo_freq_mhz,
+                                                outstr);
+        l_buffer_inc += 2;
+
+        strcpy(outstr, "fmax_freq_mhz");
+        iv_attr_mvpd_poundV_other_info.ultraturbo_freq_mhz = (uint32_t) UINT16_GET(l_buffer_inc);
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_other_info.fmax_freq_mhz,
+                                                iv_attr_mvpd_poundV_other_info.fmax_freq_mhz,
+                                                outstr);
+        l_buffer_inc += 2;
+
+        strcpy(outstr, "mma_throttle_temp_0p5C");
+        iv_attr_mvpd_poundV_other_info.mma_throttle_temp_0p5C = (uint32_t) *l_buffer_inc;
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_other_info.mma_throttle_temp_0p5C,
+                                                iv_attr_mvpd_poundV_other_info.mma_throttle_temp_0p5C,
+                                                outstr);
+        l_buffer_inc += 1;
+
+        strcpy(outstr, "io_throttle_temp_0p5C");
+        iv_attr_mvpd_poundV_other_info.io_throttle_temp_0p5C = (uint32_t) *l_buffer_inc;
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_other_info.io_throttle_temp_0p5C,
+                                                iv_attr_mvpd_poundV_other_info.io_throttle_temp_0p5C,
+                                                outstr);
+        l_buffer_inc += 1;
+
+        strcpy(outstr, "fixed_freq_mode_power_target_0p");
+        iv_attr_mvpd_poundV_other_info.fixed_freq_mode_power_target_0p = (uint32_t) UINT16_GET(l_buffer_inc);
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_other_info.fixed_freq_mode_power_target_0p,
+                                                iv_attr_mvpd_poundV_other_info.fixed_freq_mode_power_target_0p,
+                                                outstr);
+        l_buffer_inc += 2;
     }
     while(0);
 
@@ -4119,8 +4352,8 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
     {
         strcpy(l_line_str, "VRT:");
         sprintf(l_buffer_str, " %X Type %X Content %d Ver %d IO %d AC %d",
-                o_vrt_data->vrtHeader.fields.marker,
-                o_vrt_data->vrtHeader.fields.type,
+                revle16(o_vrt_data->vrtHeader.fields.marker),
+                revle16(o_vrt_data->vrtHeader.fields.type),
                 o_vrt_data->vrtHeader.fields.content,
                 o_vrt_data->vrtHeader.fields.version,
                 o_vrt_data->vrtHeader.fields.io_id,

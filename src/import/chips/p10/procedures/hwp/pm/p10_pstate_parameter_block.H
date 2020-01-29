@@ -103,8 +103,7 @@ typedef struct
 
     uint32_t attr_freq_proc_refclock_khz;
     uint32_t attr_proc_dpll_divider;
-    uint32_t attr_nest_frequency_mhz;
-
+    uint32_t attr_pau_frequency_mhz;
 
     uint32_t attr_dpll_bias;
     uint32_t attr_undervolting;
@@ -194,7 +193,7 @@ class PlatPmPPB
             iv_init_error(false), iv_procChip (i_target), iv_pstates_enabled(0), iv_resclk_enabled(0),
             iv_dds_enabled(0), iv_ivrm_enabled(0), iv_wof_enabled(0), iv_safe_voltage (0),
             iv_safe_frequency(0), iv_reference_frequency_mhz(0), iv_reference_frequency_khz(0),
-            iv_frequency_step_khz(0), iv_proc_dpll_divider(0), iv_nest_freq_mhz(0),
+            iv_frequency_step_khz(0), iv_proc_dpll_divider(0), iv_occ_freq_mhz(0),
             iv_wov_underv_enabled(0), iv_wov_overv_enabled(0), iv_poundV_fmax_enable(true)
 
         {
@@ -618,9 +617,9 @@ class PlatPmPPB
         uint32_t                  iv_safe_frequency;  // System safe frequency
         uint32_t                  iv_reference_frequency_mhz;  //System reference frequency
         uint32_t                  iv_reference_frequency_khz;  //System reference frequency
-        uint32_t                  iv_frequency_step_khz;   // System step frequency
+        uint32_t                  iv_frequency_step_khz;  // System step frequency
         uint32_t                  iv_proc_dpll_divider;   // proc dpll divider value
-        uint32_t                  iv_nest_freq_mhz;       //Nest frequency
+        uint32_t                  iv_occ_freq_mhz;        // OCC frequency
         uint8_t                   iv_wov_underv_enabled;
         uint8_t                   iv_wov_overv_enabled;
         bool                      iv_optional_pdv_pts_value_zero;
@@ -636,6 +635,10 @@ class PlatPmPPB
         PoundVBias_t              iv_bias;
 
         voltageBucketData_t       iv_poundV_raw_data;
+
+        PoundVStaticRails_t       iv_attr_mvpd_poundV_static_rails;
+        PoundVOtherInfo_t         iv_attr_mvpd_poundV_other_info;
+
         PoundW_t                  iv_poundW_data;
         IddqTable_t               iv_iddqt;
 
