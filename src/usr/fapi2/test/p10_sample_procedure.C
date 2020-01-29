@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,8 +44,8 @@
     {                                                               \
         uint8_t l_attr_scratch = 0;                                 \
         FAPI_ERR("Entering ...");                                   \
-        FAPI_ERR("Set Scratch Attr on PROC Target %p = %s",         \
-                 (TARGETING::Target*)i_target.get());               \
+        FAPI_ERR("Set Scratch Attr on PROC Target %p = %d",         \
+                 (TARGETING::Target*)i_target.get(), expectedValue);\
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SCRATCH_UINT8_1,         \
                                i_target,                            \
                                expectedValue));                     \
