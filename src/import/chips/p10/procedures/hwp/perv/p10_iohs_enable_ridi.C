@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 #include <p10_scom_iohs.H>
 #include <p10_perv_sbe_cmn.H>
 #include <target_filters.H>
+#include <p10_enable_ridi.H>
 
 /// @brief Enable Drivers/Receivers of IOHS Chiplet
 ///

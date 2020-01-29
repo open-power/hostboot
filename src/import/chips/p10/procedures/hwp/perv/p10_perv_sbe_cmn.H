@@ -171,12 +171,6 @@ fapi2::ReturnCode p10_perv_sbe_cmn_setup_putring_multicast(
     const fapi2::MulticastGroup i_group,
     const mc_ring_setup_t* i_ring_table);
 
-/// @brief Enable Drivers/Recievers for a pervasive target
-///
-/// @param[in]     i_target  Reference to TARGET_TYPE_PERV target
-/// @return  FAPI2_RC_SUCCESS if success, else error code.
-fapi2::ReturnCode p10_enable_ridi(const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target);
-
 fapi2::ReturnCode p10_perv_sbe_cmn_is_simulation_check(bool& is_simulation);
 
 fapi2::ReturnCode p10_perv_sbe_cmn_switch_mux_scom(
