@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,41 +47,37 @@ const uint32_t EPSILON_MAX_VALUE = 0xFFFFFFFF;
 const uint8_t NUM_EPSILON_READ_TIERS = 3;
 const uint8_t NUM_EPSILON_WRITE_TIERS = 2;
 
-// Low-end Epsilons (2 chips/group, 1 group)
-const uint32_t EPSILON_R_T0_LE[] = {   9,   9,  10,  10,  11 };
-const uint32_t EPSILON_R_T1_LE[] = {   9,   9,  10,  10,  11 };
-const uint32_t EPSILON_R_T2_LE[] = { 172, 179, 189, 204, 225 };
+// Low-end Epsilons (4 chips/group, 1 group), DLR disabled/half
+// Product offerings: Rainier (low-end with DCMs)
+const uint32_t EPSILON_R_T0_LE[] = {  10,  10,  10,  10,  11 };
+const uint32_t EPSILON_R_T1_LE[] = {  10,  10,  10,  10,  11 };
+const uint32_t EPSILON_R_T2_LE[] = { 285, 304, 328, 362, 413 };
 const uint32_t EPSILON_W_T0_LE[] = {   0,   0,   0,   0,   0 };
-const uint32_t EPSILON_W_T1_LE[] = {  96,  93,  89,  83,  75 };
+const uint32_t EPSILON_W_T1_LE[] = { 193, 198, 205, 215, 228 };
 
-// Low-end Epsilons (2 chips/group, 2 groups)
-const uint32_t EPSILON_R_T0_LD[] = {   9,   9,  10,  10,  11 };
-const uint32_t EPSILON_R_T1_LD[] = { 155, 163, 173, 188, 210 };
-const uint32_t EPSILON_R_T2_LD[] = { 298, 311, 329, 353, 390 };
-const uint32_t EPSILON_W_T0_LD[] = {  78,  75,  72,  67,  59 };
-const uint32_t EPSILON_W_T1_LD[] = { 202, 205, 210, 217, 227 };
+// Low-end Epsilons (4 chips/group, 1 group), DLR quarter-width
+// Product offerings: Rainier (low-end with DCMs)
+const uint32_t EPSILON_R_T0_LQ[] = {  10,  10,  10,  10,  11 };
+const uint32_t EPSILON_R_T1_LQ[] = {  10,  10,  10,  10,  11 };
+const uint32_t EPSILON_R_T2_LQ[] = { 360, 379, 403, 437, 488 };
+const uint32_t EPSILON_W_T0_LQ[] = {   0,   0,   0,   0,   0 };
+const uint32_t EPSILON_W_T1_LQ[] = { 268, 273, 280, 289, 303 };
 
-// Mid-range Epsilons (4 chips/group, 1 group)
-// @TODO RTC210056 Currently using F8 values; revisit when new values available
-const uint32_t EPSILON_R_T0_MR[] = {   9,   9,  10,  10,  11 };
-const uint32_t EPSILON_R_T1_MR[] = {   9,   9,  10,  10,  11 };
-const uint32_t EPSILON_R_T2_MR[] = { 208, 221, 237, 261, 295 };
+// Mid-range Epsilons (8 chips/group, 1 group)
+// Product offerings: Everest (mid-range with DCMs), Denali Flat-8
+const uint32_t EPSILON_R_T0_MR[] = {  10,  10,  10,  10,  11 };
+const uint32_t EPSILON_R_T1_MR[] = {  10,  10,  10,  10,  11 };
+const uint32_t EPSILON_R_T2_MR[] = { 276, 291, 310, 337, 377 };
 const uint32_t EPSILON_W_T0_MR[] = {   0,   0,   0,   0,   0 };
-const uint32_t EPSILON_W_T1_MR[] = {  93,  92,  91,  89,  87 };
-
-// Flat-8 Epsilons (8 chips/group, 1 group)
-const uint32_t EPSILON_R_T0_F8[] = {   9,   9,  10,  10,  11 };
-const uint32_t EPSILON_R_T1_F8[] = {   9,   9,  10,  10,  11 };
-const uint32_t EPSILON_R_T2_F8[] = { 208, 221, 237, 261, 295 };
-const uint32_t EPSILON_W_T0_F8[] = {   0,   0,   0,   0,   0 };
-const uint32_t EPSILON_W_T1_F8[] = {  93,  92,  91,  89,  87 };
+const uint32_t EPSILON_W_T1_MR[] = { 139, 137, 134, 130, 125 };
 
 // High-end Epsilons (4 chips/group, 4 groups)
-const uint32_t EPSILON_R_T0_HE[] = {   9,   9,  10,  10,  11 };
-const uint32_t EPSILON_R_T1_HE[] = { 174, 184, 196, 214, 240 };
-const uint32_t EPSILON_R_T2_HE[] = { 328, 344, 365, 395, 440 };
-const uint32_t EPSILON_W_T0_HE[] = {  85,  84,  82,  80,  76 };
-const uint32_t EPSILON_W_T1_HE[] = { 219, 226, 234, 246, 264 };
+// Product offerings: Denali (high-end with SCMs)
+const uint32_t EPSILON_R_T0_HE[] = {  10,  10,  10,  10,  11 };
+const uint32_t EPSILON_R_T1_HE[] = { 287, 305, 330, 363, 414 };
+const uint32_t EPSILON_R_T2_HE[] = { 293, 526, 570, 632, 724 };
+const uint32_t EPSILON_W_T0_HE[] = { 181, 186, 192, 202, 216 };
+const uint32_t EPSILON_W_T1_HE[] = { 367, 388, 417, 457, 516 };
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -149,6 +145,7 @@ fapi2::ReturnCode p10_fbc_eff_config_calc_epsilons(void)
     fapi2::ATTR_PROC_EPS_TABLE_TYPE_Type l_eps_table_type;
     fapi2::ATTR_PROC_FABRIC_BROADCAST_MODE_Type l_broadcast_mode;
     fapi2::ATTR_PROC_FABRIC_CORE_FREQ_RATIO_Type l_freq_ratio;
+    fapi2::ATTR_PROC_FABRIC_DLR_PSAVE_MODE_Type l_dlr_mode;
     uint32_t l_eps_r[NUM_EPSILON_READ_TIERS];
     uint32_t l_eps_w[NUM_EPSILON_WRITE_TIERS];
 
@@ -158,74 +155,102 @@ fapi2::ReturnCode p10_fbc_eff_config_calc_epsilons(void)
              "Error from FAPI_ATTR_GET(ATTR_PROC_FABRIC_BROADCAST_MODE)");
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_CORE_FREQ_RATIO, FAPI_SYSTEM, l_freq_ratio),
              "Error from FAPI_ATTR_GET(ATTR_PROC_FABRIC_CORE_FREQ_RATIO)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_DLR_PSAVE_MODE, FAPI_SYSTEM, l_dlr_mode),
+             "Error from FAPI_ATTR_GET(ATTR_PROC_FABRIC_DLR_PSAVE_MODE)");
 
-    FAPI_DBG("Using epsilons for table type (0x%.2X), broadcast mode (0x%.2X), freq ratio (0x%.2X)",
-             l_eps_table_type, l_broadcast_mode, l_freq_ratio);
+    FAPI_DBG("Using epsilons for table type (0x%.2X), broadcast mode (0x%.2X), freq ratio (0x%.2X), dlr mode (0x%.2X)",
+             l_eps_table_type, l_broadcast_mode, l_freq_ratio, l_dlr_mode);
 
-    // @TODO RTC210056 Update interpretation of epsilon values for P10
     switch(l_eps_table_type)
     {
         case fapi2::ENUM_ATTR_PROC_EPS_TABLE_TYPE_EPS_TYPE_LE:
 
-            // Low-end with DCMs
-            if (l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_2HOP_CHIP_IS_NODE)
+            if ((l_dlr_mode == fapi2::ENUM_ATTR_PROC_FABRIC_DLR_PSAVE_MODE_DISABLED)
+                || (l_dlr_mode == fapi2::ENUM_ATTR_PROC_FABRIC_DLR_PSAVE_MODE_HALF)
+                || (l_dlr_mode == fapi2::ENUM_ATTR_PROC_FABRIC_DLR_PSAVE_MODE_FULL_HALF))
             {
-                l_eps_r[0] = EPSILON_R_T0_LD[l_freq_ratio];
-                l_eps_r[1] = EPSILON_R_T1_LD[l_freq_ratio];
-                l_eps_r[2] = EPSILON_R_T2_LD[l_freq_ratio];
-                l_eps_w[0] = EPSILON_W_T0_LD[l_freq_ratio];
-                l_eps_w[1] = EPSILON_W_T1_LD[l_freq_ratio];
+                // Low-end with DCMs
+                if (l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_GROUP)
+                {
+                    l_eps_r[0] = EPSILON_R_T0_LE[l_freq_ratio];
+                    l_eps_r[1] = EPSILON_R_T1_LE[l_freq_ratio];
+                    l_eps_r[2] = EPSILON_R_T2_LE[l_freq_ratio];
+                    l_eps_w[0] = EPSILON_W_T0_LE[l_freq_ratio];
+                    l_eps_w[1] = EPSILON_W_T1_LE[l_freq_ratio];
+                }
+                // Low-end with SCMs (lab only)
+                else if (l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_NODE)
+                {
+                    l_eps_r[0] = EPSILON_R_T0_LE[l_freq_ratio];
+                    l_eps_r[1] = EPSILON_R_T2_LE[l_freq_ratio];
+                    l_eps_r[2] = EPSILON_R_T2_LE[l_freq_ratio];
+                    l_eps_w[0] = EPSILON_W_T0_LE[l_freq_ratio];
+                    l_eps_w[1] = EPSILON_W_T1_LE[l_freq_ratio];
+                }
+                else
+                {
+                    FAPI_ASSERT(false,
+                                fapi2::P10_FBC_EFF_CONFIG_EPSILON_UNSUPPORTED_BROADCAST_MODE_ERR()
+                                .set_TABLE_TYPE(l_eps_table_type)
+                                .set_BROADCAST_MODE(l_broadcast_mode),
+                                "Unsupported broadcast mode for the epsilon table type!");
+                }
             }
-            // Low-end with SCMs
-            else if (l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_GROUP)
+            else // DLR quarter-width psave mode
             {
-                l_eps_r[0] = EPSILON_R_T0_LE[l_freq_ratio];
-                l_eps_r[1] = EPSILON_R_T1_LE[l_freq_ratio];
-                l_eps_r[2] = EPSILON_R_T2_LE[l_freq_ratio];
-                l_eps_w[0] = EPSILON_W_T0_LE[l_freq_ratio];
-                l_eps_w[1] = EPSILON_W_T1_LE[l_freq_ratio];
-            }
-            // Low-end with SCMs (lab only)
-            else if (l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_NODE)
-            {
-                l_eps_r[0] = EPSILON_R_T0_LE[l_freq_ratio];
-                l_eps_r[1] = EPSILON_R_T2_LE[l_freq_ratio];
-                l_eps_r[2] = EPSILON_R_T2_LE[l_freq_ratio];
-                l_eps_w[0] = EPSILON_W_T0_LE[l_freq_ratio];
-                l_eps_w[1] = EPSILON_W_T1_LE[l_freq_ratio];
-            }
-            else
-            {
-                FAPI_ASSERT(false,
-                            fapi2::P10_FBC_EFF_CONFIG_EPSILON_UNSUPPORTED_BROADCAST_MODE_ERR()
-                            .set_TABLE_TYPE(l_eps_table_type)
-                            .set_BROADCAST_MODE(l_broadcast_mode),
-                            "Unsupported broadcast mode for the epsilon table type!");
+                // Low-end with DCMs
+                if (l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_GROUP)
+                {
+                    l_eps_r[0] = EPSILON_R_T0_LQ[l_freq_ratio];
+                    l_eps_r[1] = EPSILON_R_T1_LQ[l_freq_ratio];
+                    l_eps_r[2] = EPSILON_R_T2_LQ[l_freq_ratio];
+                    l_eps_w[0] = EPSILON_W_T0_LQ[l_freq_ratio];
+                    l_eps_w[1] = EPSILON_W_T1_LQ[l_freq_ratio];
+                }
+                // Low-end with SCMs (lab only)
+                else if (l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_NODE)
+                {
+                    l_eps_r[0] = EPSILON_R_T0_LQ[l_freq_ratio];
+                    l_eps_r[1] = EPSILON_R_T2_LQ[l_freq_ratio];
+                    l_eps_r[2] = EPSILON_R_T2_LQ[l_freq_ratio];
+                    l_eps_w[0] = EPSILON_W_T0_LQ[l_freq_ratio];
+                    l_eps_w[1] = EPSILON_W_T1_LQ[l_freq_ratio];
+                }
+                else
+                {
+                    FAPI_ASSERT(false,
+                                fapi2::P10_FBC_EFF_CONFIG_EPSILON_UNSUPPORTED_BROADCAST_MODE_ERR()
+                                .set_TABLE_TYPE(l_eps_table_type)
+                                .set_BROADCAST_MODE(l_broadcast_mode),
+                                "Unsupported broadcast mode for the epsilon table type!");
+                }
             }
 
             break;
 
         case fapi2::ENUM_ATTR_PROC_EPS_TABLE_TYPE_EPS_TYPE_MR:
 
-            // Mid-range with SCMs
+            // Mid-range with DCMs (same as Flat-8 configuration)
             if (l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_GROUP)
             {
-                l_eps_r[0] = EPSILON_R_T0_MR[l_freq_ratio];
-                l_eps_r[1] = EPSILON_R_T1_MR[l_freq_ratio];
-                l_eps_r[2] = EPSILON_R_T2_MR[l_freq_ratio];
-                l_eps_w[0] = EPSILON_W_T0_MR[l_freq_ratio];
-                l_eps_w[1] = EPSILON_W_T1_MR[l_freq_ratio];
+                if (l_dlr_mode == fapi2::ENUM_ATTR_PROC_FABRIC_DLR_PSAVE_MODE_DISABLED)
+                {
+                    l_eps_r[0] = EPSILON_R_T0_MR[l_freq_ratio];
+                    l_eps_r[1] = EPSILON_R_T1_MR[l_freq_ratio];
+                    l_eps_r[2] = EPSILON_R_T2_MR[l_freq_ratio];
+                    l_eps_w[0] = EPSILON_W_T0_MR[l_freq_ratio];
+                    l_eps_w[1] = EPSILON_W_T1_MR[l_freq_ratio];
+                }
+                else // DLR psave is not supported for 8-chips/group configuration
+                {
+                    FAPI_ASSERT(false,
+                                fapi2::P10_FBC_EFF_CONFIG_EPSILON_UNSUPPORTED_DLR_PSAVE_MODE_ERR()
+                                .set_TABLE_TYPE(l_eps_table_type)
+                                .set_DLR_PSAVE_MODE(l_dlr_mode),
+                                "Unsupported dlr psave mode for the epsilon table type!");
+                }
             }
-            // Mid-range with SCMs (lab only)
-            else if (l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_NODE)
-            {
-                l_eps_r[0] = EPSILON_R_T0_MR[l_freq_ratio];
-                l_eps_r[1] = EPSILON_R_T2_MR[l_freq_ratio];
-                l_eps_r[2] = EPSILON_R_T2_MR[l_freq_ratio];
-                l_eps_w[0] = EPSILON_W_T0_MR[l_freq_ratio];
-                l_eps_w[1] = EPSILON_W_T1_MR[l_freq_ratio];
-            }
-            else // Mid-range with DCMs should use EPS_TYPE_HE instead
+            else // 1HOP/2HOP_CHIP_IS_NODE not supported for EPS_TYPE_MR
             {
                 FAPI_ASSERT(false,
                             fapi2::P10_FBC_EFF_CONFIG_EPSILON_UNSUPPORTED_BROADCAST_MODE_ERR()
@@ -238,23 +263,47 @@ fapi2::ReturnCode p10_fbc_eff_config_calc_epsilons(void)
 
         case fapi2::ENUM_ATTR_PROC_EPS_TABLE_TYPE_EPS_TYPE_HE:
 
-            // High-end with SCMs, Mid-range with DCMs (lab only)
+            // High-end with SCMs
             if (l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_2HOP_CHIP_IS_NODE)
             {
-                l_eps_r[0] = EPSILON_R_T0_HE[l_freq_ratio];
-                l_eps_r[1] = EPSILON_R_T1_HE[l_freq_ratio];
-                l_eps_r[2] = EPSILON_R_T2_HE[l_freq_ratio];
-                l_eps_w[0] = EPSILON_W_T0_HE[l_freq_ratio];
-                l_eps_w[1] = EPSILON_W_T1_HE[l_freq_ratio];
+                if ((l_dlr_mode == fapi2::ENUM_ATTR_PROC_FABRIC_DLR_PSAVE_MODE_DISABLED)
+                    || (l_dlr_mode == fapi2::ENUM_ATTR_PROC_FABRIC_DLR_PSAVE_MODE_HALF)
+                    || (l_dlr_mode == fapi2::ENUM_ATTR_PROC_FABRIC_DLR_PSAVE_MODE_FULL_HALF))
+                {
+                    l_eps_r[0] = EPSILON_R_T0_HE[l_freq_ratio];
+                    l_eps_r[1] = EPSILON_R_T1_HE[l_freq_ratio];
+                    l_eps_r[2] = EPSILON_R_T2_HE[l_freq_ratio];
+                    l_eps_w[0] = EPSILON_W_T0_HE[l_freq_ratio];
+                    l_eps_w[1] = EPSILON_W_T1_HE[l_freq_ratio];
+                }
+                else // DLR quarter-width psave mode is not supported on HE configurations
+                {
+                    FAPI_ASSERT(false,
+                                fapi2::P10_FBC_EFF_CONFIG_EPSILON_UNSUPPORTED_DLR_PSAVE_MODE_ERR()
+                                .set_TABLE_TYPE(l_eps_table_type)
+                                .set_DLR_PSAVE_MODE(l_dlr_mode),
+                                "Unsupported dlr psave mode for the epsilon table type!");
+                }
             }
-            // High-end Flat-8, Mid-range with DCMs (lab only)
+            // High-end Flat-8 (lab only)
             else if(l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_GROUP)
             {
-                l_eps_r[0] = EPSILON_R_T0_F8[l_freq_ratio];
-                l_eps_r[1] = EPSILON_R_T1_F8[l_freq_ratio];
-                l_eps_r[2] = EPSILON_R_T2_F8[l_freq_ratio];
-                l_eps_w[0] = EPSILON_W_T0_F8[l_freq_ratio];
-                l_eps_w[1] = EPSILON_W_T1_F8[l_freq_ratio];
+                if (l_dlr_mode == fapi2::ENUM_ATTR_PROC_FABRIC_DLR_PSAVE_MODE_DISABLED)
+                {
+                    l_eps_r[0] = EPSILON_R_T0_MR[l_freq_ratio];
+                    l_eps_r[1] = EPSILON_R_T1_MR[l_freq_ratio];
+                    l_eps_r[2] = EPSILON_R_T2_MR[l_freq_ratio];
+                    l_eps_w[0] = EPSILON_W_T0_MR[l_freq_ratio];
+                    l_eps_w[1] = EPSILON_W_T1_MR[l_freq_ratio];
+                }
+                else // DLR psave is not supported for 8-chips/group configuration
+                {
+                    FAPI_ASSERT(false,
+                                fapi2::P10_FBC_EFF_CONFIG_EPSILON_UNSUPPORTED_DLR_PSAVE_MODE_ERR()
+                                .set_TABLE_TYPE(l_eps_table_type)
+                                .set_DLR_PSAVE_MODE(l_dlr_mode),
+                                "Unsupported dlr psave mode for the epsilon table type!");
+                }
             }
             else // 1HOP_CHIP_IS_NODE not supported for EPS_TYPE_HE
             {

@@ -38,6 +38,57 @@ fapi2::ReturnCode p10_pau_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAU>& TGT0
         fapi2::ATTR_NAME_Type l_chip_id;
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT1, l_chip_id));
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT1, l_chip_ec));
+        fapi2::ATTR_PROC_EPS_READ_CYCLES_T0_Type l_TGT2_ATTR_PROC_EPS_READ_CYCLES_T0;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T0, TGT2, l_TGT2_ATTR_PROC_EPS_READ_CYCLES_T0));
+        fapi2::ATTR_PROC_EPS_READ_CYCLES_T1_Type l_TGT2_ATTR_PROC_EPS_READ_CYCLES_T1;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T1, TGT2, l_TGT2_ATTR_PROC_EPS_READ_CYCLES_T1));
+        fapi2::ATTR_PROC_EPS_READ_CYCLES_T2_Type l_TGT2_ATTR_PROC_EPS_READ_CYCLES_T2;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T2, TGT2, l_TGT2_ATTR_PROC_EPS_READ_CYCLES_T2));
+        fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T1_Type l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T1;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T1, TGT2, l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T1));
+        fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T2_Type l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T2;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T2, TGT2, l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T2));
+        fapi2::buffer<uint64_t> l_scom_buffer;
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x10010802ull, l_scom_buffer ));
+
+            l_scom_buffer.insert<28, 12, 52, uint64_t>(l_TGT2_ATTR_PROC_EPS_READ_CYCLES_T0 );
+            l_scom_buffer.insert<40, 12, 52, uint64_t>(l_TGT2_ATTR_PROC_EPS_READ_CYCLES_T1 );
+            l_scom_buffer.insert<52, 12, 52, uint64_t>(l_TGT2_ATTR_PROC_EPS_READ_CYCLES_T2 );
+            l_scom_buffer.insert<4, 12, 52, uint64_t>(l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T1 );
+            l_scom_buffer.insert<16, 12, 52, uint64_t>(l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T2 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x10010802ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x10010862ull, l_scom_buffer ));
+
+            l_scom_buffer.insert<28, 12, 52, uint64_t>(l_TGT2_ATTR_PROC_EPS_READ_CYCLES_T0 );
+            l_scom_buffer.insert<40, 12, 52, uint64_t>(l_TGT2_ATTR_PROC_EPS_READ_CYCLES_T1 );
+            l_scom_buffer.insert<52, 12, 52, uint64_t>(l_TGT2_ATTR_PROC_EPS_READ_CYCLES_T2 );
+            l_scom_buffer.insert<4, 12, 52, uint64_t>(l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T1 );
+            l_scom_buffer.insert<16, 12, 52, uint64_t>(l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T2 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x10010862ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x100108c2ull, l_scom_buffer ));
+
+            l_scom_buffer.insert<28, 12, 52, uint64_t>(l_TGT2_ATTR_PROC_EPS_READ_CYCLES_T0 );
+            l_scom_buffer.insert<40, 12, 52, uint64_t>(l_TGT2_ATTR_PROC_EPS_READ_CYCLES_T1 );
+            l_scom_buffer.insert<52, 12, 52, uint64_t>(l_TGT2_ATTR_PROC_EPS_READ_CYCLES_T2 );
+            l_scom_buffer.insert<4, 12, 52, uint64_t>(l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T1 );
+            l_scom_buffer.insert<16, 12, 52, uint64_t>(l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T2 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x100108c2ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x10010922ull, l_scom_buffer ));
+
+            l_scom_buffer.insert<28, 12, 52, uint64_t>(l_TGT2_ATTR_PROC_EPS_READ_CYCLES_T0 );
+            l_scom_buffer.insert<40, 12, 52, uint64_t>(l_TGT2_ATTR_PROC_EPS_READ_CYCLES_T1 );
+            l_scom_buffer.insert<52, 12, 52, uint64_t>(l_TGT2_ATTR_PROC_EPS_READ_CYCLES_T2 );
+            l_scom_buffer.insert<4, 12, 52, uint64_t>(l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T1 );
+            l_scom_buffer.insert<16, 12, 52, uint64_t>(l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T2 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x10010922ull, l_scom_buffer));
+        }
 
     };
 fapi_try_exit:

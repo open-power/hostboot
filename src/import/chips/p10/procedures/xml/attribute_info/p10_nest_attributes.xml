@@ -603,6 +603,29 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_PROC_FABRIC_DLR_PSAVE_MODE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Fabric dynamic lane reduction psave mode.
+    Disabled     => psave disabled, same as forcing full width.
+    Quarter      => force quarter-width links.
+    Half         => force half-width links.
+    Full/quarter => start full width, can drop into quarter-width mode.
+    Full/half    => start full width, can drop into half-wdith mode.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    DISABLED     = 0x00,
+    QUARTER      = 0x02,
+    HALF         = 0x04,
+    FULL_QUARTER = 0x0A,
+    FULL_HALF    = 0x0C
+  </enum>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_FABRIC_CORE_FREQ_RATIO</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>

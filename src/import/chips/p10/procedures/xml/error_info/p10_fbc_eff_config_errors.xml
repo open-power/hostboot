@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -43,6 +43,19 @@
   </description>
   <ffdc>TABLE_TYPE</ffdc>
   <ffdc>BROADCAST_MODE</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_FBC_EFF_CONFIG_EPSILON_UNSUPPORTED_DLR_PSAVE_MODE_ERR</rc>
+  <description>
+    Unsupported combination of epsilon table type and dlr psave mode detected.
+  </description>
+  <ffdc>TABLE_TYPE</ffdc>
+  <ffdc>DLR_PSAVE_MODE</ffdc>
   <callout>
     <procedure>CODE</procedure>
     <priority>HIGH</priority>

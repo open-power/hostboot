@@ -38,6 +38,7 @@
 #include <p10_nx_scom.H>
 #include <p10_vas_scom.H>
 #include <p10_int_scom.H>
+#include <p10_nmmu_scom.H>
 #include <p10_mi_omi_scom.H>
 #include <p10_mcc_omi_scom.H>
 
@@ -47,7 +48,6 @@
 #include <fapi2_mem_access.H>
 
 #include <p10_scom_proc_7.H>
-#include <p10_scom_nmmu_e.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -116,51 +116,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-///
-/// @brief Setup nmmu epsilon values
-///        Note that the nmmu scom initfile is called in p10_sbe_scominit,
-///        but epsilon values were not yet determined at that point, therefore
-///        epsilons for nmmu are applied here outside of its scom initfile
-///
-/// @param[in] i_target         Reference to processor chip target
-/// @return fapi::ReturnCode    FAPI2_RC_SUCCESS if success, else error code.
-///
-fapi2::ReturnCode p10_chiplet_scominit_nmmu_epsilons(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
-{
-    using namespace scomt;
-    using namespace scomt::nmmu;
-
-    FAPI_DBG("Start");
-
-    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-    auto l_nmmu_targets = i_target.getChildren<fapi2::TARGET_TYPE_NMMU>();
-    fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T1_Type l_eps_write_cycles_t1;
-    fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T2_Type l_eps_write_cycles_t2;
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T1, FAPI_SYSTEM, l_eps_write_cycles_t1),
-             "Error from FAPI_ATTR_GET(ATTR_PROC_EPS_WRITE_CYCLES_T1)");
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T2, FAPI_SYSTEM, l_eps_write_cycles_t2),
-             "Error from FAPI_ATTR_GET(ATTR_PROC_EPS_WRITE_CYCLES_T2)");
-
-    for (auto& l_nmmu : l_nmmu_targets)
-    {
-        fapi2::buffer<uint64_t> l_scom_data;
-
-        FAPI_TRY(GET_FBC_CQ_WRAP_NXCQ_SCOM_MM_EPSILON_COUNTER_VALUE(l_nmmu, l_scom_data),
-                 "Error from getScom (FBC_CQ_WRAP_NXCQ_SCOM_MM_EPSILON_COUNTER_VALUE)");
-
-        SET_FBC_CQ_WRAP_NXCQ_SCOM_MM_EPSILON_COUNTER_VALUE_WR_EPSILON_TIER_1_CNT_VAL(l_eps_write_cycles_t1, l_scom_data);
-        SET_FBC_CQ_WRAP_NXCQ_SCOM_MM_EPSILON_COUNTER_VALUE_WR_EPSILON_TIER_2_CNT_VAL(l_eps_write_cycles_t2, l_scom_data);
-
-        FAPI_TRY(PUT_FBC_CQ_WRAP_NXCQ_SCOM_MM_EPSILON_COUNTER_VALUE(l_nmmu, l_scom_data),
-                 "Error from getScom (FBC_CQ_WRAP_NXCQ_SCOM_MM_EPSILON_COUNTER_VALUE)");
-    }
-
-fapi_try_exit:
-    FAPI_DBG("End");
-    return fapi2::current_err;
-}
-
 /// See doxygen comments in header file
 fapi2::ReturnCode p10_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
@@ -177,11 +132,6 @@ fapi2::ReturnCode p10_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PR
     FAPI_TRY(p10_chiplet_scominit_switch_cd(i_target),
              "Error from p10_chiplet_scominit_switch_cd");
 
-    // setup nmmu epsilon values
-    FAPI_DBG("Applying nmmu epsilon values on target %s...", l_tgt_str);
-    FAPI_TRY(p10_chiplet_scominit_nmmu_epsilons(i_target),
-             "Error from p10_chiplet_scominit_nmmu_epsilons");
-
     // apply nx scom initfile
     FAPI_DBG("Invoking p10.nx.scom.initfile on target %s...", l_tgt_str);
     FAPI_EXEC_HWP(l_rc, p10_nx_scom, i_target, FAPI_SYSTEM);
@@ -196,6 +146,14 @@ fapi2::ReturnCode p10_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PR
     FAPI_DBG("Invoking p10.int.scom.initfile on target %s...", l_tgt_str);
     FAPI_EXEC_HWP(l_rc, p10_int_scom, i_target, FAPI_SYSTEM);
     FAPI_TRY(l_rc, "Error from p10_int_scom");
+
+    // apply nmmu scom initfile
+    for(auto& l_nmmu_target : i_target.getChildren<fapi2::TARGET_TYPE_NMMU>())
+    {
+        FAPI_DBG("Invoking p10.nmmu.scom.initfile on target %s...", l_tgt_str);
+        FAPI_EXEC_HWP(l_rc, p10_nmmu_scom, l_nmmu_target, i_target, FAPI_SYSTEM);
+        FAPI_TRY(l_rc, "Error from p10_nmmu_scom");
+    }
 
     // apply omi scom initfiles
     for (const auto& l_mi_target : i_target.getChildren<fapi2::TARGET_TYPE_MI>())
