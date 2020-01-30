@@ -2412,9 +2412,8 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                                              TARGETING::targetService().end(),
                                              &l_functionalnode);
 
-        TARGETING::ATTR_HB_RSV_MEM_SIZE_MB_type l_rhbSize = 0;
-        //@TODO RTC 246357 missing attributes
-           // l_pSysTarget->getAttr<TARGETING::ATTR_HB_RSV_MEM_SIZE_MB>();
+        TARGETING::ATTR_HB_RSV_MEM_SIZE_MB_type l_rhbSize =
+            l_pSysTarget->getAttr<TARGETING::ATTR_HB_RSV_MEM_SIZE_MB>();
         if( 0 != l_rhbSize )
         {
             for(;l_nodes;++l_nodes)
