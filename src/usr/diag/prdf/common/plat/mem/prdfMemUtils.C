@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1387,8 +1387,12 @@ bool __queryUcsOmic( ExtensibleChip * i_omic, ExtensibleChip * i_mcc,
             uint8_t bitOff = omiPosRelOmic * 20;
 
             // Check if there is a UNIT_CS for the relevant bits in the OMIDLFIR
+            // Note: The OMIDLFIR can't actually be set up to report UNIT_CS
+            // attentions, instead, as a workaround, the relevant channel fail
+            // bits will be set as recoverable bits and we will manually set
+            // the attention types to UNIT_CS in our handling of those errors.
             if ( fir->IsBitSet(bitOff)  && !mask->IsBitSet(bitOff) &&
-                 act0->IsBitSet(bitOff) &&  act1->IsBitSet(bitOff) )
+                 !act0->IsBitSet(bitOff) &&  act1->IsBitSet(bitOff) )
             {
                 o_activeAttn = true;
             }
@@ -1586,7 +1590,11 @@ bool __analyzeChnlFail<TYPE_OMI>( TargetHandle_t i_omi,
         if ( __queryUcsOmic( omicChip, mccChip, i_omi ) )
         {
             // Analyze UNIT_CS on the OMIC chip
-            if ( SUCCESS == omicChip->Analyze(io_sc, UNIT_CS) )
+            // Note: The OMIDLFIR can't actually be set up to report UNIT_CS
+            // attentions, instead, as a workaround, the relevant channel fail
+            // bits will be set as recoverable bits and we will manually set
+            // the attention types to UNIT_CS in our handling of those errors.
+            if ( SUCCESS == omicChip->Analyze(io_sc, RECOVERABLE) )
             {
                 o_analyzed = true;
                 break;
