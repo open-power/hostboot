@@ -101,14 +101,15 @@ void*    call_host_slave_sbe_update( void    *io_pArgs );
 void* call_proc_cen_ref_clk_enable(void *io_pArgs);
 
 /**
- *  @brief proc_enable_osclite
+ *  @brief proc_pau_scominit
+ *
+ *    Apply scom inits to PAU
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return any error logs to istep
- *
  */
-void* call_proc_enable_osclite(void *io_pArgs);
+void* call_proc_pau_scominit(void *io_pArgs);
 
 /**
  *  @brief  proc_chiplet_scominit
@@ -254,12 +255,12 @@ const   TaskInfo    g_istep10[]  =   {
                 ISTEP_10::call_proc_chiplet_scominit,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
-/*
         {
                 ISTEPNAME(10,05,"proc_pau_scominit"),
                 ISTEP_10::call_proc_pau_scominit,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
+/*
         {
                 ISTEPNAME(10,06,"proc_pcie_scominit"),
                 ISTEP_10::call_proc_pcie_scominit,

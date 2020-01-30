@@ -60,7 +60,7 @@ OBJS += call_proc_build_smp.o
 #OBJS += call_host_slave_sbe_update.o
 #OBJS += call_proc_cen_ref_clk_enable.o
 OBJS += call_proc_chiplet_scominit.o
-#OBJS += call_proc_enable_osclite.o
+OBJS += call_proc_pau_scominit.o
 #OBJS += call_proc_abus_scominit.o
 #OBJS += call_proc_obus_scominit.o
 #OBJS += call_proc_npu_scominit.o
@@ -102,6 +102,9 @@ OBJS+=p10_psi_scom.o
 OBJS+=p10_int_scom.o
 OBJS+=p10_nx_scom.o
 
+#istep 10.5
+OBJS+=p10_pau_scominit.o
+OBJS+=p10_pau_scom.o
 
 VPATH += ${NEST_HWP_PATH}
 VPATH += ${INITFILES_HWP_PATH}
@@ -110,7 +113,6 @@ VPATH += ${PROCEDURES_PATH}/hwp/io
 VPATH += ${PROCEDURES_PATH}/hwp/pm
 VPATH += ${PROCEDURES_PATH}/hwp/lib
 VPATH += ${HWP_ACC_PATH}
-
 
 #Required include before all the procedure.mk are included
 #include ${ROOTPATH}/procedure.rules.mk
