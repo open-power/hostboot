@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -68,8 +68,7 @@ enum RingMode
     ///  pulse
     RING_MODE_SET_PULSE_ALL             = 0x00000010, ///< Set pulse with pulse
     ///  to all hold types
-    RING_MODE_FASTARRAY                 = 0x00000020, ///< Single clock pulse
-    ///  for fastarray
+    RING_MODE_FASTARRAY                 = 0x00000020, ///< Use fastarray TOR image
 };
 
 /// @enum OpModes operational Mode Error Functions
