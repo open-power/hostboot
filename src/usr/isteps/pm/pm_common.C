@@ -211,7 +211,7 @@ namespace HBPM
         assert( sysTarget != nullptr );
 
         l_config_data->version = OccHostDataVersion;
-        l_config_data->nestFrequency = sysTarget->getAttr<ATTR_FREQ_PB_MHZ>();
+        l_config_data->nestFrequency = sysTarget->getAttr<ATTR_FREQ_PAU_MHZ>();
 
         // Figure out the interrupt type
         if( INITSERVICE::spBaseServicesEnabled() )
