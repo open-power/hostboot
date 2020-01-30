@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2019
+# Contributors Listed Below - COPYRIGHT 2018,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -196,8 +196,10 @@ rule rOMIC
 };
 
 group gOMIC attntype CHECK_STOP, RECOVERABLE, UNIT_CS, HOST_ATTN
-    filter singlebit
+    filter priority(2,0,1)
 {
+    # We need to prioritize analysis to the OMIDLFIR here because of potential
+    # Channel Fail attentions in that FIR that will be reported as RECOVERABLE.
     (rOMIC, bit(0)) ? analyzeIOOMIFIR;
     (rOMIC, bit(1)) ? analyzeMCPPEFIR;
     (rOMIC, bit(2)) ? analyzeOMIDLFIR;
@@ -359,8 +361,8 @@ rule rOMIDLFIR
 };
 
 group gOMIDLFIR
-    filter singlebit,
-           cs_root_cause
+    filter priority(0,20,40),
+           cs_root_cause(0,20,40)
 {
     /** OMIDLFIR[0]
      *  OMI-DL0 fatal error

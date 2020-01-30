@@ -108,6 +108,12 @@ int32_t DlFatalError( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
 
     do
     {
+        // Note: The OMIDLFIR can't actually be set up to report UNIT_CS
+        // attentions, instead, as a workaround, the relevant channel fail
+        // bits will be set as recoverable bits and we will manually set
+        // the attention types to UNIT_CS in our handling of these errors.
+        io_sc.service_data->setPrimaryAttnType( UNIT_CS );
+
         char reg[64];
         sprintf( reg, "DL%d_ERROR_HOLD", i_dl );
 
