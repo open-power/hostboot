@@ -5424,6 +5424,37 @@
   </attribute>
 
   <attribute>
+    <id>NVDIMM_FORCE_FW_UPDATE</id>
+    <description>
+        If non-zero then just update FW level on all NVDIMMs
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
+    <id>NVDIMM_UPDATE_I2C_BLOCK_SIZE</id>
+    <description>
+        If non-zero, use this block size when updating FPGA code of NVDIMM
+        Valid sizes are 0, 2, 32
+      </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <id>NV_OPS_TIMEOUT_MSEC</id>
     <description>
         NVDIMM timeout value for 6 main operations

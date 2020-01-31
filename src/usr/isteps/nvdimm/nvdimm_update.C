@@ -392,6 +392,27 @@ errlHndl_t NvdimmInstalledImage::getBlockWriteSizeSupported(uint64_t & o_blockSi
                 "block size %d supported for 0x%.8X NVDIMM (version 0x%04X)",
                 iv_blockSizeSupported, TARGETING::get_huid(iv_dimm),
                 version );
+
+            // Get the sys target to check for attribute overrides
+            TARGETING::Target* sys = nullptr;
+            TARGETING::targetService().getTopLevelTarget(sys);
+            auto l_blockSize = sys->getAttr<TARGETING::ATTR_NVDIMM_UPDATE_I2C_BLOCK_SIZE>();
+            if (l_blockSize)
+            {
+                // only support 32 byte and word size
+                if ((l_blockSize == 32) || (l_blockSize == sizeof(uint16_t)))
+                {
+                    TRACFCOMP( g_trac_nvdimm_upd, "getBlockWriteSizeSupported: "
+                      "ATTR_NVDIMM_UPDATE_I2C_BLOCK_SIZE override block size: %d", l_blockSize );
+                    iv_blockSizeSupported = l_blockSize;
+                }
+                else
+                {
+                    TRACFCOMP( g_trac_nvdimm_upd, "getBlockWriteSizeSupported: "
+                      "ATTR_NVDIMM_UPDATE_I2C_BLOCK_SIZE has invalid size (%d)",
+                      l_blockSize );
+                }
+            }
         }
     } while (0);
     o_blockSize = iv_blockSizeSupported;
@@ -1996,6 +2017,13 @@ bool NvdimmsUpdate::runUpdateUsingLid(NvdimmLidImage * i_lidImage,
 {
     bool o_no_error_found = true;
 
+   // Get the sys target to check for attribute overrides.
+    TARGETING::Target* sys = nullptr;
+    TARGETING::targetService().getTopLevelTarget(sys);
+
+    auto l_forceFwUpdate =
+        sys->getAttr<TARGETING::ATTR_NVDIMM_FORCE_FW_UPDATE>();
+
     errlHndl_t l_err = nullptr;
     for (auto pInstalledImage : i_list)
     {
@@ -2016,7 +2044,8 @@ bool NvdimmsUpdate::runUpdateUsingLid(NvdimmLidImage * i_lidImage,
             o_no_error_found = false;
             continue;
         }
-        else if (updateNeeded)
+
+        if (updateNeeded || l_forceFwUpdate)
         {
             // shared trace variables
             uint32_t l_installed_type = INVALID_TYPE;
@@ -2053,7 +2082,8 @@ bool NvdimmsUpdate::runUpdateUsingLid(NvdimmLidImage * i_lidImage,
 
             // perform update for this DIMM with the current LID image
             TRACFCOMP(g_trac_nvdimm_upd, "NvdimmsUpdate::runUpdateUsingLid() - "
-                "now update nvdimm[0x%.8X]", l_nvdimm_huid);
+                "now update nvdimm[0x%.8X] -- force: %d, updateNeeded: %d",
+                l_nvdimm_huid, l_forceFwUpdate, updateNeeded);
 
             TRACFCOMP(g_trac_nvdimm_upd,"Updating with flash size: 0x%08X",
                 i_lidImage->getFlashImageSize());

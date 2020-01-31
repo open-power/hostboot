@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2020                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -2126,6 +2126,12 @@
     </attribute>
     <attribute>
       <id>NVDIMM_ENCRYPTION_KEYS_FW</id>
+    </attribute>
+    <attribute>
+      <id>NVDIMM_FORCE_FW_UPDATE</id>
+    </attribute>
+    <attribute>
+      <id>NVDIMM_UPDATE_I2C_BLOCK_SIZE</id>
     </attribute>
     <attribute>
       <id>OCMB_FW_UPDATE_OVERRIDE</id>
