@@ -204,25 +204,7 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
             }
             break;
         }
-#endif
 
-#if( defined(CONFIG_SUPPORT_EEPROM_CACHING) && !defined(CONFIG_SUPPORT_EEPROM_HWACCESS) )
-        err = EEPROM::eecachePresenceDetect(i_target, present);
-        if(err)
-        {
-            TRACFCOMP(g_trac_spd, ERR_MRK "dimmPresenceDetect() "
-                "detect target HUID 0x%.08x against the existing EECACHE "
-                "failed. rc=0x%X, plid=0x%X",
-                TARGETING::get_huid(i_target), ERRL_GETRC_SAFE(err),
-                ERRL_GETPLID_SAFE(err));
-            if (l_masterProc)
-            {
-                TRACFCOMP(g_trac_spd, "on master proc");
-            }
-            present = false;
-            errlCommit(err, VPD_COMP_ID);
-        }
-#else
         // TODO RTC 213602
         // Remove this exception logic once the I2C code has
         // been updated for P10 and all ports (0-15) are
@@ -242,6 +224,20 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
                       TARGETING::get_huid(i_target));
             present = false;
         }
+#endif // CONFIG_DJVPD_READ_FROM_HW
+
+#if( defined(CONFIG_SUPPORT_EEPROM_CACHING) && !defined(CONFIG_SUPPORT_EEPROM_HWACCESS) )
+        err = EEPROM::eecachePresenceDetect(i_target, present);
+        if(err)
+        {
+            TRACFCOMP(g_trac_spd, ERR_MRK "dimmPresenceDetect() "
+                "detect target HUID 0x%.08x against the existing EECACHE "
+                "failed. rc=0x%X, plid=0x%X",
+                TARGETING::get_huid(i_target), ERRL_GETRC_SAFE(err),
+                ERRL_GETPLID_SAFE(err));
+            present = false;
+            break;
+        }
 #endif
 
         if( present == false )
@@ -254,6 +250,8 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
             TRACUCOMP( g_trac_spd, INFO_MRK"dimmPresenceDetect() "
                        "Dimm was found to be present." );
         }
+
+
 
 #if defined(CONFIG_DJVPD_READ_FROM_HW) && defined(CONFIG_DJVPD_READ_FROM_PNOR)
         if( present )
