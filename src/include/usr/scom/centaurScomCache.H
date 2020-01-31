@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,11 +41,6 @@
 #include <errl/errlmanager.H>
 
 extern trace_desc_t* g_trac_scom;
-
-// These defines allow standard logging of error information in traces
-#define TRACE_ERR_FMT "Error info: PLID=0x%08X, EID=0x%08X, Reason=0x%04X. "
-#define TRACE_ERR_ARGS(pError) \
-    ERRL_GETPLID_SAFE(pError), ERRL_GETEID_SAFE(pError), ERRL_GETRC_SAFE(pError)
 
 namespace SECUREBOOT
 {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,7 +31,7 @@
 #include <time.h>
 #include <devicefw/userif.H>
 #include <trace/interface.H>
-#include <scom/centaurScomCache.H> // for TRACE_ERR_FMT, TRACE_ERR_ARGS
+#include <errl/errlentry.H> // for TRACE_ERR_FMT, TRACE_ERR_ARGS
 #include <secureboot/nodecommif.H>
 #include "../trusted/trustedboot.H"
 #include <secureboot/trustedbootif.H>

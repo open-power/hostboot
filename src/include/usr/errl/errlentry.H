@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1143,5 +1143,11 @@ inline bool ErrlEntry::getDoHbDump()
  * Retrieve the EID inside an error log, or return zero if the log is NULL
  */
 #define ERRL_GETEID_SAFE(errhdl) (errhdl == NULL ? 0 : errhdl->eid())
+
+// These defines allow standard logging of error information in traces
+#define TRACE_ERR_FMT "Error info: PLID=0x%08X, EID=0x%08X, Reason=0x%04X. "
+
+#define TRACE_ERR_ARGS(pError) \
+    ERRL_GETPLID_SAFE(pError), ERRL_GETEID_SAFE(pError), ERRL_GETRC_SAFE(pError)
 
 #endif //ERRLENTRY_H

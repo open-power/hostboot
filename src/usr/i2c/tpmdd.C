@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,7 +51,6 @@
 #include <i2c/i2cif.H>
 #include <secureboot/service.H>
 #include <secureboot/trustedbootif.H>
-#include <scom/centaurScomCache.H> // for TRACE_ERR_FMT, TRACE_ERR_ARGS
 #include "tpmdd.H"
 #include "errlud_i2c.H"
 
