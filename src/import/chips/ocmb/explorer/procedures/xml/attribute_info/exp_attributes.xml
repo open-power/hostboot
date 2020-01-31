@@ -540,4 +540,212 @@
         <mssAccessorName>disable_therm_init_read</mssAccessorName>
     </attribute>
 
+  <attribute>
+    <id>ATTR_MSS_EXP_RESP_DDR4_F0RC00</id>
+    <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    <description>
+      F0RC00: Global Features Control Word from the DDR4 RCD Spec.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <array>2</array>
+    <writeable/>
+    <mssAccessorName>exp_resp_ddr4_f0rc00</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_EXP_RESP_DDR4_F0RC01</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      F0RC01: Clock Driver Enable Control Word from the DDR4 RCD Spec.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <array>2</array>
+    <writeable/>
+    <mssAccessorName>exp_resp_ddr4_f0rc01</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_EXP_RESP_DDR4_F0RC03</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      F0RC03 - CA and CS Signals Driver Characteristics Control Word from the DDR4 RCD Spec.
+      From user_response_rc_msdg_t in draminit..
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <array>2</array>
+    <writeable/>
+    <mssAccessorName>exp_resp_ddr4_f0rc03</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_EXP_RESP_DDR4_F0RC04</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      F0RC04 - ODT and CKE Signals Driver Characteristics Control Word from the DDR4 RCD Spec.
+      From user_response_rc_msdg_t in draminit..
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <array>2</array>
+    <writeable/>
+    <mssAccessorName>exp_resp_ddr4_f0rc04</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_EXP_RESP_DDR4_F0RC05</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      F0RC05 - Clock Driver Characteristics Control Word from the DDR4 RCD Spec.
+      From user_response_rc_msdg_t in draminit..
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <array>2</array>
+    <writeable/>
+    <mssAccessorName>exp_resp_ddr4_f0rc05</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_EXP_RESP_DDR4_F0RC0B</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Operating Voltage VDD and VrefCA Source Control Word from the DDR4 RCD Spec.
+      From the DDR4 RCD Spec.
+      From user_response_rc_msdg_t in draminit..
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <array>2</array>
+    <writeable/>
+    <mssAccessorName>exp_resp_ddr4_f0rc0b</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_EXP_RESP_DDR4_F0RC0E</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      F0RC0E - Parity, NV Mode Enable, and ALERT Configuration Control Word from the DDR4 RCD Spec.
+      From user_response_rc_msdg_t in draminit..
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <array>2</array>
+    <writeable/>
+    <mssAccessorName>exp_resp_ddr4_f0rc0e</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_EXP_RESP_DDR4_F0RC0F</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      F0RC0F - Command Latency Adder Control Word from the DDR4 RCD Spec.
+      From user_response_rc_msdg_t in draminit..
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <array>2</array>
+    <writeable/>
+    <mssAccessorName>exp_resp_ddr4_f0rc0f</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_EXP_RESP_DDR4_F0RC1X</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      F0RC1x - Internal VrefCA Control Word from the DDR4 RCD Spec;
+      From user_response_rc_msdg_t in draminit..
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <array>2</array>
+    <writeable/>
+    <mssAccessorName>exp_resp_ddr4_f0rc1x</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_EXP_RESP_DDR4_F0RC7X</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      F0RC7x: IBT Control Word from the DDR4 RCD Spec;
+      From user_response_rc_msdg_t in draminit..
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <array>2</array>
+    <writeable/>
+    <mssAccessorName>exp_resp_ddr4_f0rc7x</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_EXP_RESP_DDR4_F1RC00</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      F1RC00: Data Buffer Interface Driver Characteristics Control Word from the DDR4 RCD Spec.
+      From user_response_rc_msdg_t in draminit..
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <array>2</array>
+    <writeable/>
+    <mssAccessorName>exp_resp_ddr4_f1rc00</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_EXP_RESP_DDR4_F1RC02</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      F1RC02 - CA and CS Output Slew Rate Control from the DDR4 RCD Spec.
+      From user_response_rc_msdg_t in draminit..
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <array>2</array>
+    <writeable/>
+    <mssAccessorName>exp_resp_ddr4_f1rc02</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_EXP_RESP_DDR4_F1RC03</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      F1RC03 - ODT and CKEn Output Slew Rate Control from the DDR4 RCD Spec.
+      From user_response_rc_msdg_t in draminit..
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <array>2</array>
+    <writeable/>
+    <mssAccessorName>exp_resp_ddr4_f1rc03</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_EXP_RESP_DDR4_F1RC04</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      F1RC04 - Clock Driver Output Slew Rate Control from the DDR4 RCD Spec.
+      From user_response_rc_msdg_t in draminit..
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <array>2</array>
+    <writeable/>
+    <mssAccessorName>exp_resp_ddr4_f1rc04</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_EXP_RESP_DDR4_F1RC05</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      F1RC05 - Data Buffer Interface Output Slew Rate Control from the DDR4 RCD Spec.
+      From user_response_rc_msdg_t in draminit..
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <array>2</array>
+    <writeable/>
+    <mssAccessorName>exp_resp_ddr4_f1rc05</mssAccessorName>
+  </attribute>
 </attributes>
