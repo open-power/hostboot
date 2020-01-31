@@ -166,6 +166,8 @@ uint32_t ScomAccessor::Access(TargetHandle_t i_target,
                     {
                         if( l_MaskReg[l_count]  == registerId )
                         {
+                            /* TODO RTC 247259
+
                             errlHndl_t err = nullptr;
                             uint32_t sec = (TYPE_CORE == type) ?
                                 PROC_STOP_SECTION_CORE :
@@ -186,6 +188,7 @@ uint32_t ScomAccessor::Access(TargetHandle_t i_target,
                                          " hcode_update");
                                 PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
                             }
+                            */
                             break;
                         }
                     }

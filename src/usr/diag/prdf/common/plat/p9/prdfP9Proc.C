@@ -358,6 +358,7 @@ int32_t handleSbeVital( ExtensibleChip * i_chip,
     // Hostboot code is suppose to handle all Vital attentions
     // and initiate recovery with FSP,etc... if needed
 #ifdef __HOSTBOOT_MODULE
+    /* TODO RTC 247259
     TARGETING::TargetHandle_t  l_target = i_chip->getTrgt();
     SCAN_COMM_REGISTER_CLASS * l_tpmask_or;
 
@@ -383,8 +384,8 @@ int32_t handleSbeVital( ExtensibleChip * i_chip,
         PRDF_ERR("handleVitalAttn failure");
         PRDF_COMMIT_ERRL( l_elog, ERRL_ACTION_REPORT );
     }
+    */
 #endif
-
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, handleSbeVital );

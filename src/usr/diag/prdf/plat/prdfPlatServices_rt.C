@@ -458,6 +458,7 @@ void requestNewTODTopology( uint32_t i_oscPos,
                             const TargetHandleList& i_badChipList,
                             bool i_informPhyp)
 {
+    /* TODO RTC 247259
     #define PRDF_FUNC "[PlatServices::requestNewTODTopology] "
     if ( i_badChipList.size() > 0 || i_procOscTgt != NULL )
     {
@@ -477,14 +478,16 @@ void requestNewTODTopology( uint32_t i_oscPos,
         PRDF_ERR( PRDF_FUNC "No chips in black list");
     }
     #undef PRDF_FUNC
+    */
 }
 
 int32_t getTodPortControlReg ( const TARGETING::TargetHandle_t& i_procTgt,
                                bool i_slvPath0,  uint32_t &o_regValue )
 {
     #define PRDF_FUNC "[PlatServices::getTodPortControlReg] "
-    errlHndl_t err = nullptr;
     int32_t l_rc = SUCCESS;
+    /* TODO RTC 247259
+    errlHndl_t err = nullptr;
     TOD::TodChipDataContainer todRegData;
     bool foundChip = false;
     uint32_t ordId = i_procTgt->getAttr<ATTR_ORDINAL_ID>();
@@ -518,7 +521,7 @@ int32_t getTodPortControlReg ( const TARGETING::TargetHandle_t& i_procTgt,
             l_rc = FAIL;
         }
     } while (0);
-
+    */
     return l_rc;
     #undef PRDF_FUNC
 }
