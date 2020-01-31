@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2019
+# Contributors Listed Below - COPYRIGHT 2011,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -25,14 +25,11 @@
 ROOTPATH = ../../../..
 
 MODULE = testsyslib
-#@TODO-RTC:151185-Turn enable all test cases
-#TESTS = *.H
+
+TESTS = *.H
 #TODO RTC:204720
 #TESTS += synctest.H
 
-TESTS = stltest.H
-TESTS += tls.H
-TESTS += integral.H
 SUBDIRS += runtime.d
 
 include ${ROOTPATH}/config.mk

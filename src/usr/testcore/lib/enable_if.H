@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,7 @@ typename std::enable_if<!std::is_integral<T>::value, T>::type
          std::is_same<double, typename std::remove_cv<T>::type>::value  ||
          std::is_same<long double, typename std::remove_cv<T>::type>::value )
     {
-        t += 1.1;
+        t -= 2;
     }
     return t;
 }
@@ -70,10 +70,10 @@ class STLEnableIfTest : public CxxTest::TestSuite
                 TS_TRACE("enable_if: expected integral function called");
             }
 
-            float f = 1.1;
-            if (STLEnableIfTest1(f) != 2.2)
+            float f = 1;
+            if (STLEnableIfTest1(f) != -1)
             {
-                TS_FAIL("enable_if: expected non-integral function call to return 2.2 but see %f",
+                TS_FAIL("enable_if: expected non-integral function call to return -1 but see %f",
                     STLEnableIfTest1(f));
             }
         }

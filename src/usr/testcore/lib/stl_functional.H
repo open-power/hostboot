@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,12 @@
 #include <vector>
 #include <list>
 #include <initializer_list>
+
+#define TS_ASSERT(...)                                                  \
+    if (!__VA_ARGS__)                                                   \
+    {                                                                   \
+        TS_FAIL("test comparison functors: Test " #__VA_ARGS__ " is false, should be true"); \
+    }
 
 static bool STLFunctionalTest__matches1(int i)
 {
@@ -178,7 +184,7 @@ class STLFunctionalTest : public CxxTest::TestSuite
             TS_ASSERT( std::less<uint16_t>()(5,20) );
             TS_ASSERT( !std::less<uint8_t>()(100,2) );
             TS_ASSERT( !std::less<int>()(-40,-40) );
-            TS_ASSERT( !std::less<int32_t>()(-40,-30) );
+            TS_ASSERT( std::less<int32_t>()(-40,-30) );
         }
 
         void test_lessEqualFun()
@@ -222,13 +228,15 @@ class STLFunctionalTest : public CxxTest::TestSuite
 
         void test_NotEqualTolFun()
         {
-            TS_ASSERT( std::not_equal_to<int>()(-40,-40) );
-            TS_ASSERT( std::not_equal_to<uint8_t>()(4,4) );
-            TS_ASSERT( !std::not_equal_to<uint8_t>()(4,200) );
-            TS_ASSERT( !std::not_equal_to<uint32_t>()(5,20) );
-            TS_ASSERT( !std::not_equal_to<int64_t>()(-5,-20) );
-            TS_ASSERT( !std::not_equal_to<uint16_t>()(300,50) );
+            TS_ASSERT( !std::not_equal_to<int>()(-40,-40) );
+            TS_ASSERT( !std::not_equal_to<uint8_t>()(4,4) );
+            TS_ASSERT( std::not_equal_to<uint8_t>()(4,200) );
+            TS_ASSERT( std::not_equal_to<uint32_t>()(5,20) );
+            TS_ASSERT( std::not_equal_to<int64_t>()(-5,-20) );
+            TS_ASSERT( std::not_equal_to<uint16_t>()(300,50) );
         }
 };
+
+#undef TS_ASSERT
 
 #endif
