@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -110,6 +110,12 @@ extern "C"
     /// *************************************
     ///          Ring ID enums
     /// *************************************
+
+    /// P10 TP chiplet ring ID enumeration
+    typedef enum
+    {
+        TP_OCC_RING_ID  = 0x2,
+    } p10_TP_RingId_t;
 
     /// P10 N0 chiplet ring ID enumeration
     typedef enum
