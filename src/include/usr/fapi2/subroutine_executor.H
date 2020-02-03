@@ -103,7 +103,8 @@ struct values_equal
 // to be run on the SBE.
 static constexpr const char* const hwp_whitelist[] =
 {
-  "p10_putmemproc"
+  "p10_putmemproc",
+  "p10_putsram"
 };
 
 /** @brief strcmp that can run at compile-time given constexpr arguments.
