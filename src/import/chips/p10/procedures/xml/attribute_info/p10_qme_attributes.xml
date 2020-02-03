@@ -84,7 +84,7 @@
   </entry>
   <entry>
           <name>ATTR_SMF_CONFIG</name>
-          <value>0x0</value>
+          <value>0x1</value>
   </entry>
   <!-- needed for qme sim -->
   <entry>
