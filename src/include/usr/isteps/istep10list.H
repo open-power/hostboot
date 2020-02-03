@@ -260,17 +260,24 @@ const   TaskInfo    g_istep10[]  =   {
                 ISTEP_10::call_proc_pau_scominit,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
+        {
+                "", // empty istep
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
+        },
 /*
         {
                 ISTEPNAME(10,06,"proc_pcie_scominit"),
                 ISTEP_10::call_proc_pcie_scominit,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
+**/
         {
-                ISTEPNAME(10,07,"proc_abus_scominit"),
-                ISTEP_10::call_proc_abus_scominit,
+                ISTEPNAME(10,07,"proc_scomoverride_chiplets"),
+                ISTEP_10::call_proc_scomoverride_chiplets,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
+/*
         {
                 ISTEPNAME(10,08,"proc_obus_scominit"),
                 ISTEP_10::call_proc_obus_scominit,
@@ -279,16 +286,6 @@ const   TaskInfo    g_istep10[]  =   {
         {
                 ISTEPNAME(10,09,"proc_npu_scominit"),
                 ISTEP_10::call_proc_npu_scominit,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-        {
-                ISTEPNAME(10,10,"proc_pcie_scominit"),
-                ISTEP_10::call_proc_pcie_scominit,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-        {
-                ISTEPNAME(10,11,"proc_scomoverride_chiplets"),
-                ISTEP_10::call_proc_scomoverride_chiplets,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {

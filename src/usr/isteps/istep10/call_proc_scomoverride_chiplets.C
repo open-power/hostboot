@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,10 +23,10 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
-   @file call_proc_scomoverride_chiplets.C
+ *  @file call_proc_scomoverride_chiplets.C
  *
- *  Support file for IStep: nest_chiplets
- *   Nest Chiplets
+ *  Support file for IStep: call_proc_scomoverride_chiplets
+ *       Apply any sequence driven scom overrides to chiplets
  *
  *  HWP_IGNORE_VERSION_CHECK
  *
@@ -50,19 +50,11 @@
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 
-/* FIXME RTC: 210975
+#include    <istepHelperFuncs.H>          // captureError
 #include    <fapi2/target.H>
 #include    <fapi2/plat_hwp_invoker.H>
-*/
 #include    <errl/errlmanager.H>
-
-//  MVPD
-#include <devicefw/userif.H>
-#include <vpd/mvpdenums.H>
-
-
-// FIXME RTC: 210975
-//#include <p9_scomoverride_chiplets.H>
+#include    <p10_scomoverride_chiplets.H>
 
 
 namespace   ISTEP_10
@@ -78,56 +70,53 @@ using   namespace   TARGETING;
 //*****************************************************************************
 void* call_proc_scomoverride_chiplets( void *io_pArgs )
 {
-    IStepError l_StepError;
+    errlHndl_t l_err(nullptr);
+    IStepError l_stepError;
+    TARGETING::TargetHandleList l_procTargetList;
 
-/* FIXME RTC: 210975
-    errlHndl_t l_errl = NULL;
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
              "call_proc_scomoverride_chiplets entry" );
 
-    //
-    //  get a list of all the procs in the system
-    //
-    TARGETING::TargetHandleList l_cpuTargetList;
-    getAllChips(l_cpuTargetList, TYPE_PROC);
+    // Get a list of all proc chips
+    getAllChips(l_procTargetList, TYPE_PROC);
 
-    // Loop through all processors, including master
-    for (const auto & l_cpu_target: l_cpuTargetList)
+    // Loop through all proc chips, convert to fap2 target, and execute hwp
+    for (const auto & curproc : l_procTargetList)
     {
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-            l_fapi2_proc_target (l_cpu_target);
+            l_fapi2_proc_target (curproc);
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running p9_scomoverride_chiplets HWP on processor target %.8X",
-                TARGETING::get_huid(l_cpu_target) );
+               "Running p10_scomoverride_chiplets HWP on processor target %.8X",
+               TARGETING::get_huid(curproc) );
 
-        FAPI_INVOKE_HWP(l_errl, p9_scomoverride_chiplets, l_fapi2_proc_target);
+        FAPI_INVOKE_HWP(l_err, p10_scomoverride_chiplets, l_fapi2_proc_target);
 
-        if (l_errl)
+        if (l_err)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                     "ERROR 0x%.8X : proc_scomoverride_chiplets "
-                     "HWP returns error",
-                     l_errl->reasonCode() );
+                     "ERROR : call p10_scomoverride_chiplets HWP(): failed on target 0x%08X. "
+                           TRACE_ERR_FMT,
+                           get_huid(curproc),
+                           TRACE_ERR_ARGS(l_err));
 
-            // Create IStep error log and cross reference to error that occurred
-            l_StepError.addErrorDetails( l_errl );
+            // Capture Error
+            captureError(l_err, l_stepError, HWPF_COMP_ID, curproc);
 
-            // Commit Error
-            errlCommit( l_errl, HWPF_COMP_ID );
+            // Run HWP on all procs even if one reports an error
+            continue;
         }
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                      "SUCCESS :  proc_scomoverride_chiplets HWP" );
         }
-    } // end of going through all processors
+    }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
              "call_proc_scomoverride_chiplets exit" );
-*/
 
     // end task, returning any errorlogs to IStepDisp
-    return l_StepError.getErrorHandle();
+    return l_stepError.getErrorHandle();
 }
 };
