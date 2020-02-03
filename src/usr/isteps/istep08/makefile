@@ -49,8 +49,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/sbeio/
 #OBJS += call_host_setup_sbe.o
 #OBJS += call_host_cbs_start.o
 #OBJS += call_proc_check_slave_sbe_seeprom_complete.o
-#OBJS += call_host_p9_fbc_eff_config.o
-#OBJS += call_host_p9_fbc_eff_config_links.o
+#OBJS += call_host_fbc_eff_config.o
+#OBJS += call_host_fbc_eff_config_links.o
 #OBJS += call_proc_attr_update.o
 #OBJS += call_proc_chiplet_fabric_scominit.o
 #OBJS += call_proc_xbus_scominit.o
@@ -77,8 +77,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/sbeio/
 #include ${PROCEDURES_PATH}/hwp/perv/p9_check_slave_sbe_seeprom_complete.mk
 #include ${PROCEDURES_PATH}/hwp/perv/p9_getecid.mk
 
-# host_p9_fbc_eff_config
-#include ${PROCEDURES_PATH}/hwp/nest/p9_fbc_eff_config.mk
+# host_fbc_eff_config
+#include ${PROCEDURES_PATH}/hwp/nest/p10_fbc_eff_config.mk
 
 # proc_attr_update: Proc ATTR Update
 #include ${PROCEDURES_PATH}/hwp/nest/p9_attr_update.mk

@@ -1,12 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep08/call_host_p9_fbc_eff_config.C $        */
+/* $Source: src/usr/isteps/istep08/call_host_fbc_eff_config.C $           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
-/* [+] International Business Machines Corp.                              */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -38,14 +37,14 @@
 namespace ISTEP_08
 {
 
-void* call_host_p9_fbc_eff_config( void *io_pArgs )
+void* call_host_fbc_eff_config( void *io_pArgs )
 {
     // FIXME RTC: 210975
     //errlHndl_t l_errl = NULL;
     ISTEP_ERROR::IStepError l_stepError;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_p9_fbc_eff_config entry" );
+               "call_host_fbc_eff_config entry" );
 /* FIXME RTC: 210975
    FAPI_INVOKE_HWP(l_errl,p9_fbc_eff_config);
    if(l_errl)
@@ -59,7 +58,7 @@ void* call_host_p9_fbc_eff_config( void *io_pArgs )
 */
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_p9_fbc_eff_config exit" );
+               "call_host_fbc_eff_config exit" );
 
     return l_stepError.getErrorHandle();
 }

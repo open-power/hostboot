@@ -41,9 +41,9 @@
  *           : Check Slave SBE Complete
  *    08.05    host_attnlisten_proc
  *           : Start attention poll for all P9(s)
- *    08.06    host_p9_fbc_eff_config
+ *    08.06    host_fbc_eff_config
  *           : Determine powerbus config
- *    08.07    host_p9_eff_config_links
+ *    08.07    host_eff_config_links
  *           : Powerbus link config
  *    08.08    proc_attr_update
  *           : Proc ATTR Update
@@ -113,22 +113,22 @@ void* call_proc_check_slave_sbe_seeprom_complete(void *io_pArgs);
 void* call_host_attnlisten_proc(void *io_pArgs);
 
 /**
- * @brief   host_p9_fbc_eff_config
+ * @brief   host_fbc_eff_config
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
  *  return  any error logs to istep
  */
-void* call_host_p9_fbc_eff_config (void * io_pArgs);
+void* call_host_fbc_eff_config (void * io_pArgs);
 
 /**
- * @brief   host_p9_fbc_eff_config_links
+ * @brief   host_fbc_eff_config_links
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
  *  return  any error logs to istep
  */
-void* call_host_p9_fbc_eff_config_links (void * io_pArgs);
+void* call_host_fbc_eff_config_links (void * io_pArgs);
 
 /**
  *  @brief  call_proc_attr_update
@@ -225,13 +225,13 @@ namespace   INITSERVICE
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(08,06,"host_p9_fbc_eff_config"),
-                ISTEP_08::call_host_p9_fbc_eff_config,
+                ISTEPNAME(08,06,"host_fbc_eff_config"),
+                ISTEP_08::call_host_fbc_eff_config,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(08,07,"host_p9_eff_config_links"),
-                ISTEP_08::call_host_p9_fbc_eff_config_links,
+                ISTEPNAME(08,07,"host_eff_config_links"),
+                ISTEP_08::call_host_fbc_eff_config_links,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {

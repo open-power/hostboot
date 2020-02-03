@@ -1,12 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep08/call_host_p9_fbc_eff_config_links.C $  */
+/* $Source: src/usr/isteps/istep08/call_host_fbc_eff_config_links.C $     */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
-/* [+] International Business Machines Corp.                              */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -53,14 +52,14 @@ using   namespace   ISTEPS_TRACE;
 using   namespace   TARGETING;
 
 //*****************************************************************************
-// Wrapper function to call host_p9_fbc_eff_config_links
+// Wrapper function to call host_fbc_eff_config_links
 //*****************************************************************************
-void* call_host_p9_fbc_eff_config_links( void *io_pArgs )
+void* call_host_fbc_eff_config_links( void *io_pArgs )
 {
     ISTEP_ERROR::IStepError l_stepError;
 
     TRACFCOMP(g_trac_isteps_trace,
-              ENTER_MRK"call_host_p9_fbc_eff_config_links entry" );
+              ENTER_MRK"call_host_fbc_eff_config_links entry" );
 /* FIXME RTC: 210975
     // Make the FAPI call to p9_fbc_eff_config_links
     // process electrical = true and process optical = false
@@ -69,7 +68,7 @@ void* call_host_p9_fbc_eff_config_links( void *io_pArgs )
 */
 
     TRACFCOMP(g_trac_isteps_trace,
-              EXIT_MRK"call_host_p9_fbc_eff_config_links exit" );
+              EXIT_MRK"call_host_fbc_eff_config_links exit" );
 
     return l_stepError.getErrorHandle();
 }
