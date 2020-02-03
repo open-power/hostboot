@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -35,9 +36,17 @@
 #include <devicefw/userif.H>
 #include <errl/errlmanager.H>
 #include <hbotcompid.H>
-
 #include <targeting/common/targetservice.H>
 
+extern const char* VFS_ROOT_MSG_MCTP_OUT;
+extern const char* VFS_ROOT_MSG_MCTP_IN;
+
+struct ctx {
+  struct mctp    *mctp;
+  struct binding *binding;
+  bool           verbose;
+  int            local_eid;
+};
 
 trace_desc_t* g_trac_mctp = nullptr;
 TRAC_INIT(&g_trac_mctp, MCTP_COMP_NAME, 4*KILOBYTE, TRACE::BUFFER_SLOW);
@@ -97,18 +106,24 @@ void MctpRP::poll_kcs_status(void)
 
         msg = msg_allocate();
         msg->type = l_status;
-        msg_send(iv_msgQ, msg);
+        msg_send(iv_inboundMsgQ, msg);
     }
 }
 
-static void * handle_kcs_cmd_task(void*)
+// TODO handle messages correctly
+static void rx_message(uint8_t i_eid, void * i_data, void *i_msg, size_t i_len)
 {
-    TRACFCOMP(g_trac_mctp, "Starting to handle kcs commands");
-    Singleton<MctpRP>::instance().handle_kcs_cmd();
+   TRACDBIN(g_trac_mctp, "mctp rx_message:", i_msg, i_len);
+}
+
+static void * handle_inbound_messages_task(void*)
+{
+    TRACFCOMP(g_trac_mctp, "Starting to handle inbound commands");
+    Singleton<MctpRP>::instance().handle_inbound_messages();
     return nullptr;
 }
 
-void MctpRP::handle_kcs_cmd(void)
+void MctpRP::handle_inbound_messages(void)
 {
     task_detach();
 
@@ -116,31 +131,34 @@ void MctpRP::handle_kcs_cmd(void)
 
     while(1)
     {
-        msg_t* msg = msg_wait(iv_msgQ);
+        msg_t* msg = msg_wait(iv_inboundMsgQ);
 
         switch(msg->type)
         {
           case MCTP::MSG_INIT:
-              // TODO
-              // Error because we should never see this
+              TRACFCOMP(g_trac_mctp,
+                        "Found kcs msg type: MCTP::MSG_INIT which we do not support, ignoring it",
+                        msg->type);
               break;
           case MCTP::MSG_TX_BEGIN:
-              // TODO
-              // Go read message from RX buffer
+              TRACDCOMP(g_trac_mctp, "BMC has sent us a message we need to read");
+              mctp_hostlpc_rx_start(iv_hostlpc);
               break;
           case MCTP::MSG_RX_COMPLETE:
-              // TODO
-              // Send next message if any are waiting
+              // BMC has completed receiving the message we sent
+              TRACDCOMP(g_trac_mctp, "BMC says they are complete reading what we sent");
+              mctp_hostlpc_tx_complete(iv_hostlpc);
               break;
           case MCTP::MSG_DUMMY:
               // This is used when the BMC wants to write the status register
               // and notify us that it was set
               l_rc = this->_mctp_process_version();
-              // Add trace that channel is active and what the negotiated version should be
               break;
           default:
-               // TODO
-              // Error because its an unknown type
+              // Just leave a trace and move on with our life
+              TRACFCOMP(g_trac_mctp,
+                        "Found invalid kcs msg type: 0x%.02x, ignoring it",
+                        msg->type);
               break;
         }
 
@@ -149,6 +167,60 @@ void MctpRP::handle_kcs_cmd(void)
             break;
         }
 
+    }
+}
+
+static void * handle_outbound_messages_task(void*)
+{
+    TRACFCOMP(g_trac_mctp, "Starting to handle outbound commands");
+    Singleton<MctpRP>::instance().handle_outbound_messages();
+    return nullptr;
+}
+
+void MctpRP::handle_outbound_messages(void)
+{
+    task_detach();
+
+    uint8_t l_rc = 0;
+
+    // in the case of PLDM extra_data contains the MCTP packet
+    // payload we must fill out the "message type" byte w/
+    // the PLDM type
+    constexpr uint8_t MCTP_MSG_TYPE_PLDM = 1;
+
+    // Do't start sending messages to the BMC until the channel is active
+    while(!iv_channelActive)
+    {
+        nanosleep(0, NS_PER_MSEC * 500);
+    }
+
+    while(1)
+    {
+        msg_t* msg = msg_wait(iv_outboundMsgQ);
+
+        switch(msg->type)
+        {
+
+          // Send a message
+          case MCTP::MSG_SEND_PLDM:
+              // Set first byte to be TYPE_PLDM (0x01) so BMC knows to route
+              // the MCTP message to it's PLDM driver
+              *reinterpret_cast<uint8_t *>(msg->extra_data) = MCTP_MSG_TYPE_PLDM;
+              TRACDBIN(g_trac_mctp, "pldm message : ", msg->extra_data , msg->data[0]);
+              mctp_message_tx(iv_mctp, BMC_EID, msg->extra_data, msg->data[0]);
+              break;
+          default:
+              // just mark a trace and move on with our lives
+              TRACFCOMP(g_trac_mctp,
+                        "Recieved am outbound MCTP message with a payload type 0x%.02x we do not know how to handle",
+                        msg->type);
+              break;
+        }
+
+        if(l_rc != 0)
+        {
+            break;
+        }
     }
 }
 
@@ -176,6 +248,10 @@ uint8_t MctpRP::_mctp_process_version(void)
         l_rc = 1;
         // Commit error
     }
+    else
+    {
+        iv_channelActive = true;
+    }
 
     // Read the negotiated version from the lpcmap hdr that the bmc should have
     // set prior to setting the KCS_STATUS_CHANNEL_ACTIVE bit
@@ -198,6 +274,10 @@ void MctpRP::init(errlHndl_t& o_errl)
 errlHndl_t MctpRP::_init(void)
 {
     TRACFCOMP(g_trac_mctp, "MctpRP::_init entry");
+
+    msg_q_register(iv_inboundMsgQ, VFS_ROOT_MSG_MCTP_IN);
+    msg_q_register(iv_outboundMsgQ, VFS_ROOT_MSG_MCTP_OUT);
+
     errlHndl_t l_errl = nullptr;
     // Get the virtual address for the LPC bar and add the offsets
     // to the MCTP/PLDM space within  the FW Space of the LPC window.
@@ -215,12 +295,26 @@ errlHndl_t MctpRP::_init(void)
     mctp_register_bus(iv_mctp, &iv_hostlpc->binding, HOST_EID);
 
     // Start cmd daemon first because we want it ready if poll daemon finds something right away
-    task_create(handle_kcs_cmd_task, NULL);
+    task_create(handle_inbound_messages_task, NULL);
+
+    task_create(handle_outbound_messages_task, NULL);
 
     // Start the poll kcs status daemon which will read the KCS status reg every 100 ms and if
     // we see that the OBF bit in the KCS status register is set we will read the OBR KCS data reg
-    // and send a message to the handle_kcs_cmd daemon
+    // and send a message to the handle_obf_status daemon
     task_create(poll_kcs_status_task, NULL);
+
+    // We this ctx struct is a way to pass information we want into the mctp core logic
+    // the core logic will call the registered rx_message function with the ctx struct as
+    // a parm, this allows use to pass information about the context we are in to that func
+    struct ctx *ctx, _ctx;
+    ctx = &_ctx;
+    ctx->local_eid = HOST_EID;
+    ctx->mctp = iv_mctp;
+
+    // Set the receive function to be rx_message which
+    // will handle the message in the RX space accordingly
+    mctp_set_rx_all(ctx->mctp, rx_message, ctx);
 
     TRACFCOMP(g_trac_mctp, "MctpRP::_init exit");
 
@@ -231,7 +325,9 @@ errlHndl_t MctpRP::_init(void)
 MctpRP::MctpRP(void):
     iv_hostlpc(nullptr),
     iv_mctp(mctp_init()),
-    iv_msgQ(msg_q_create())
+    iv_inboundMsgQ(msg_q_create()),
+    iv_outboundMsgQ(msg_q_create()),
+    iv_channelActive(false)
 {
 }
 

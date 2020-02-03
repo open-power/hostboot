@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,6 +29,9 @@
 #include <lpc/lpc_const.H>
 #include <lpc/lpcif.H>
 #include <sys/time.h>
+#include <trace/interface.H>
+
+extern trace_desc_t* g_trac_mctp;
 
 int __mctp_hostlpc_hostboot_kcs_read(void *arg,
                                      enum mctp_binding_lpc_kcs_reg reg,
@@ -37,6 +40,8 @@ int __mctp_hostlpc_hostboot_kcs_read(void *arg,
     errlHndl_t l_err = NULL;
     size_t l_len = sizeof(uint8_t);
 
+    // Do not put any traces in the function as poll_kcs_status will poll the status
+    // register ever 200 ms with this function so the traces get super spammy
     l_err = DeviceFW::deviceRead(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                                  val,
                                  l_len,
@@ -59,6 +64,7 @@ int __mctp_hostlpc_hostboot_kcs_write(void *arg,
     errlHndl_t l_err = NULL;
     size_t l_len = sizeof(uint8_t);
 
+    TRACDCOMP(g_trac_mctp, "kcs write:: write 0x%lx to 0x%x ", val, reg );
     l_err = DeviceFW::deviceWrite(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                                   &val,
                                   l_len,
@@ -71,7 +77,7 @@ int __mctp_hostlpc_hostboot_kcs_write(void *arg,
         l_rc = -1;
         ERRORLOG::errlCommit(l_err, MCTP_COMP_ID);
     }
-
+    TRACDCOMP(g_trac_mctp, "kcs write:: done ");
     return l_rc;
 }
 
@@ -80,21 +86,21 @@ int __mctp_hostlpc_hostboot_lpc_read(void *arg,
                                      uint64_t offset,
                                      size_t len)
 {
-    errlHndl_t l_err = NULL;
-
+    errlHndl_t l_err = nullptr;
+    TRACDCOMP(g_trac_mctp, "lpc read:: read from 0x%lx , len 0x%lx: ", offset, len );
+    // Read a given length from a given offset in the MCTP window of LPC space
     l_err = DeviceFW::deviceRead(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                                 static_cast<uint8_t*>(buf),
                                 len,
                                 DEVICE_LPC_ADDRESS(LPC::TRANS_FW,
                                                     offset + LPC::LPCHC_MCTP_PLDM_BASE));
-
     int l_rc = 0;
     if(l_err)
     {
         l_rc = 1;
         ERRORLOG::errlCommit(l_err, MCTP_COMP_ID);
     }
-
+    TRACDCOMP(g_trac_mctp, "lpc read:: done" );
     return l_rc;
 }
 
@@ -103,13 +109,15 @@ int __mctp_hostlpc_hostboot_lpc_write(void *arg,
                                       uint64_t offset,
                                       size_t len)
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
+    TRACDCOMP(g_trac_mctp, "lpc write:: write to 0x%lx , length 0x%lx", offset, len );
 
-    l_err = DeviceFW::deviceRead(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                                static_cast<uint8_t*>(buf),
-                                len,
-                                DEVICE_LPC_ADDRESS(LPC::TRANS_FW,
-                                                   offset + LPC::LPCHC_MCTP_PLDM_BASE));
+    // Write a given value to a given offset in the MCTP window of LPC space
+    l_err = DeviceFW::deviceWrite(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                                 static_cast<uint8_t*>(buf),
+                                 len,
+                                 DEVICE_LPC_ADDRESS(LPC::TRANS_FW,
+                                                    offset + LPC::LPCHC_MCTP_PLDM_BASE));
 
     int l_rc = 0;
     if(l_err)
@@ -117,7 +125,7 @@ int __mctp_hostlpc_hostboot_lpc_write(void *arg,
         l_rc = 1;
         ERRORLOG::errlCommit(l_err, MCTP_COMP_ID);
     }
-
+    TRACDCOMP(g_trac_mctp, "lpc write:: done ");
     return l_rc;
 }
 

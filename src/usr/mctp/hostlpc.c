@@ -98,17 +98,21 @@ static int mctp_binding_hostlpc_tx(struct mctp_binding *b,
     uint32_t len;
 
     len = mctp_pktbuf_size(pkt);
-    if (len > tx_size - 4) {
+    if (len > tx_size - sizeof(len)) {
         mctp_prwarn("invalid TX len 0x%x", len);
         return -1;
     }
 
+    // tx section starts with uint32_t variable followed by a uint8_t array
+
+    // first write the length and ensure its big-endian
     uint32_t tmp = htobe32(len);
     hostlpc->ops.lpc_write(hostlpc->ops_data, &tmp,
                            tx_offset, sizeof(tmp));
 
+    // then write the buffer to the tx space for len bytes
     hostlpc->ops.lpc_write(hostlpc->ops_data, mctp_pktbuf_hdr(pkt),
-                           tx_offset + 4, len);
+                           tx_offset + sizeof(len), len);
 
     mctp_binding_set_tx_enabled(b, false);
 
@@ -117,30 +121,36 @@ static int mctp_binding_hostlpc_tx(struct mctp_binding *b,
 }
 
 // This will go away in future commits
-static void mctp_hostlpc_rx_start(struct mctp_binding_hostlpc *hostlpc) __attribute__((unused));
+void mctp_hostlpc_rx_start(struct mctp_binding_hostlpc *hostlpc) __attribute__((unused));
 
-// Notify the bmc that we (the host) have finished reading a tx
-// they they had previously told us about
-static void mctp_hostlpc_rx_start(struct mctp_binding_hostlpc *hostlpc)
+// Read what was written to the LPC window by the BMC
+void mctp_hostlpc_rx_start(struct mctp_binding_hostlpc *hostlpc)
 {
     struct mctp_pktbuf *pkt;
     uint32_t len;
 
+    // rx section starts with uint32_t variable followed by a uint8_t array
+
+    // first read the length in big endian
     hostlpc->ops.lpc_read(hostlpc->ops_data, &len,
                           rx_offset, sizeof(len));
     len = be32toh(len);
 
-    if (len > rx_size - 4) {
+    // We cannot read lengths that exceed out pkt size the rx window
+    if (len > rx_size - sizeof(len)) {
         mctp_prwarn("invalid RX len 0x%x", len);
         return;
     }
 
+    // We cannot read lengths that exceed out pkt size
     if (len > hostlpc->binding.pkt_size) {
         mctp_prwarn("invalid RX len 0x%x, binding.pkt_size 0x%x",
                     len, hostlpc->binding.pkt_size );
         return;
     }
 
+    // now that we know the length allocate a pkt buffer
+    // which will get filled in on the next read
     pkt = mctp_pktbuf_alloc(&hostlpc->binding, len);
 
     if (!pkt)
@@ -148,8 +158,10 @@ static void mctp_hostlpc_rx_start(struct mctp_binding_hostlpc *hostlpc)
         goto out_complete;
     }
 
+    // after we get size and allocate the buffer then read the remainig
+    // contents of the rx window
     hostlpc->ops.lpc_read(hostlpc->ops_data, mctp_pktbuf_hdr(pkt),
-                          rx_offset + 4, len);
+                          rx_offset + sizeof(len), len);
 
     mctp_bus_rx(&hostlpc->binding, pkt);
 
@@ -158,11 +170,11 @@ out_complete:
 }
 
 // This will go away in future commits
-static void mctp_hostlpc_tx_complete(struct mctp_binding_hostlpc *hostlpc) __attribute__((unused));
+void mctp_hostlpc_tx_complete(struct mctp_binding_hostlpc *hostlpc) __attribute__((unused));
 
 // Hook into core code to state that we are ready for another tx
 // (IE this tx is complete so we are ready for more )
-static void mctp_hostlpc_tx_complete(struct mctp_binding_hostlpc *hostlpc)
+void mctp_hostlpc_tx_complete(struct mctp_binding_hostlpc *hostlpc)
 {
     mctp_binding_set_tx_enabled(&hostlpc->binding, true);
 }
@@ -191,6 +203,9 @@ static int mctp_hostlpc_init_hb(struct mctp_binding_hostlpc *hostlpc)
     {
         mctp_prwarn("bmc is not setup");
     }
+
+    // initialize the tx space to say the host is ready to use it
+    mctp_binding_set_tx_enabled(&hostlpc->binding, true);
 
     return rc;
 }

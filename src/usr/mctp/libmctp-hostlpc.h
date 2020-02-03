@@ -5,7 +5,8 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -36,7 +37,12 @@ extern "C" {
 
 #define HOST_VER_MIN 1
 #define HOST_VER_CUR 1
+// EID is the MCTP endpoint ID, which aids in routing MCTP packets
+// theorectically we could assign these dynamically but for now
+// we are saying that BMC is EID 8 and hostboot IPL time is HOST_EID 9
+#define BMC_EID 8
 #define HOST_EID 9
+
 
 struct mctp_binding_hostlpc {
   struct mctp_binding  binding;
@@ -52,6 +58,10 @@ struct mctp_binding_hostlpc {
 };
 
 struct mctp_binding_hostlpc *mctp_hostlpc_init_hostboot(uint64_t i_mctpVaddr);
+
+void mctp_hostlpc_tx_complete(struct mctp_binding_hostlpc *hostlpc);
+
+void mctp_hostlpc_rx_start(struct mctp_binding_hostlpc *hostlpc);
 
 #ifdef __cplusplus
 }

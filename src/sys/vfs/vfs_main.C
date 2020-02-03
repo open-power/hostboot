@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,8 @@ const char* VFS_ROOT_DATA = "/data/";
 const char* VFS_ROOT_MSG = "/msg/";
 const char* VFS_ROOT_MSG_VFS = "/msg/vfs";
 const char* VFS_ROOT_MSG_MBOX = "/msg/mbox";
+const char* VFS_ROOT_MSG_MCTP_IN = "/msg/mctpin";
+const char* VFS_ROOT_MSG_MCTP_OUT = "/msg/mctpout";
 
 void vfs_module_init();
 

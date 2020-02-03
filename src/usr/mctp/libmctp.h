@@ -56,7 +56,7 @@ struct mctp_hdr {
 #define MCTP_HDR_TAG_MASK  (0x7)
 
 /* Baseline maximum size of a MCTP packet */
-#define MCTP_BMTU_PAYLOAD  64
+#define MCTP_BMTU_PAYLOAD  248
 #define MCTP_BMTU    (MCTP_BMTU_PAYLOAD + sizeof(struct mctp_hdr))
 
 /* packet buffers */

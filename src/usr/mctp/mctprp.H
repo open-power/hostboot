@@ -31,12 +31,21 @@
 
 namespace MCTP
 {
-    enum msgq_msg_t
+    // Valid message types that are accepted
+    // by the mctp inbound msg q
+    enum inbound_msgq_msg_t
     {
         MSG_INIT        = 0x00,
         MSG_TX_BEGIN    = 0x01,
         MSG_RX_COMPLETE = 0x02,
         MSG_DUMMY       = 0xFF
+    };
+
+    // Valid message types that are accepted
+    // by the mctp outbound msg q
+    enum outbound_msgq_msg_t
+    {
+        MSG_SEND_PLDM        = 0x00
     };
 }
 
@@ -54,11 +63,23 @@ class MctpRP
       void poll_kcs_status(void);
      /**
      * Function that polls endlessly on a message Q that gets initialized
-     * in the MctpRP ctor. When a message is found it is handled accordingly
+     * in the MctpRP ctor. When a message is found in the ODR it is read and
+     *  handled by this queue.
+     *
      *
      * @return void
      */
-      void handle_kcs_cmd(void);
+      void handle_inbound_messages(void);
+
+     /**
+     * Function that polls endlessly on a message Q that gets initialized
+     * in the MctpRP ctor. Other userspace tasks can issue requests to this
+     * queue if they wish to send messages across MCTP to the BMC.
+     *
+     * @return void
+     */
+      void handle_outbound_messages(void);
+
       /**
       * Function that is called when libmctp.so is loaded by the initsvc. It will
       * create the mctp core struct and the hostlpc binding and initialize the
@@ -86,7 +107,9 @@ class MctpRP
 
       struct mctp_binding_hostlpc *iv_hostlpc; //!< ptr to hostlpc binding struct
       struct mctp *iv_mctp;    //!< ptr to struct that has business logic
-      msg_q_t     iv_msgQ;     //!< mctp cmd message queue
+      msg_q_t     iv_inboundMsgQ;     // mctp inbound messages
+      msg_q_t     iv_outboundMsgQ;    // mctp outbound messages
+      bool        iv_channelActive;   // MCTP channel ready for traffic
 
       // Disallow copying this class.
       MctpRP& operator=(const MctpRP&);
