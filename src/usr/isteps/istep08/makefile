@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -28,13 +28,11 @@ ROOTPATH = ../../../..
 #PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p9/procedures
 MODULE = istep08
 
-#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/pm/
 #EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/perv/
 #EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/sbe/
 #EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest/
 #EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/io/
 #EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/initfiles/
-#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/lib
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
@@ -46,7 +44,6 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/sbeio/
-#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/pm/include/registers
 
 #OBJS += call_host_slave_sbe_config.o
 #OBJS += call_host_setup_sbe.o
@@ -64,8 +61,6 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/sbeio/
 #VPATH += ${PROCEDURES_PATH}/hwp/perv/ ${PROCEDURES_PATH}/hwp/nest/
 #VPATH += ${PROCEDURES_PATH}/hwp/io/ ${PROCEDURES_PATH}/hwp/initfiles/
 #VPATH += ${PROCEDURES_PATH}/hwp/sbe/
-#VPATH += ${PROCEDURES_PATH}/hwp/pm/
-#VPATH += ${PROCEDURES_PATH}/hwp/lib
 
 #include ${ROOTPATH}/procedure.rules.mk
 
@@ -102,17 +97,6 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/sbeio/
 # proc_xbus_enable_ridi : Apply RI/DI for xbus
 #include ${PROCEDURES_PATH}/hwp/perv/p9_xbus_enable_ridi.mk
 
-#add objects from p9_setup_evid.mk directly to avoid duplicates
-#OBJS += p9_setup_evid.o
-#OBJS += p9_avsbus_lib.o
-#OBJS += p9_pstate_parameter_block.o
-#include ${PROCEDURES_PATH}/hwp/lib/p9_avsbus_lib.mk
-
-# p9_avsbus_lib.mk sets MODULE, reset here to istep08
 MODULE = istep08
-
-# TODO RTC: 164237
-# Take another look at PM lib
-#include $(PROCEDURES_PATH)/hwp/pm/p9_pm_utils.mk
 
 include ${ROOTPATH}/config.mk

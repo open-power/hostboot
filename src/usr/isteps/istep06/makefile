@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -68,27 +68,15 @@ EXTRAINCDIR += ${LIB_HWP_PATH}
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/pmlib/include/registers
 EXTRAINCDIR += ${ROOTPATH}/src/usr/
 #Required include before all the procedure.mk are included
 include ${ROOTPATH}/procedure.rules.mk
-
-#Include all the procedure makefiles
-#include $(NEST_HWP_PATH)/p9_revert_sbe_mcs_setup.mk
-#TODO RTC: 164237
-# Take another look at PM lib
-#include $(PM_HWP_PATH)/p9_pm_utils.mk
-
-include $(PM_HWP_PATH)/p10_setup_evid.mk
-include $(LIB_HWP_PATH)/p10_avsbus_lib.mk
-include $(LIB_HWP_PATH)/p10_pm_utils.mk
 
 #TODO RTC: 208838
 #include $(PERV_HWP_PATH)/p10_setup_sbe_config.mk
 #include $(PM_HWP_PATH)/p9_query_core_access_state.mk
 #include $(PM_HWP_PATH)/p9_query_cache_access_state.mk
 #include $(PM_HWP_PATH)/p9_quad_power_off.mk
-#include $(LIB_HWP_PATH)/p9_avsbus_lib.mk
 
 #OBJS+=p9_hcd_core_stopclocks.o
 #OBJS+=p9_hcd_cache_stopclocks.o
