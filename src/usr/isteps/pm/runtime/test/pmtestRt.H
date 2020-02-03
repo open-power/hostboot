@@ -43,13 +43,15 @@
 #include <runtime/runtime_reasoncodes.H>
 
 #include <isteps/pm/pm_common_ext.H>
-#include <pnor/pnorif.H>
 /* FIXME RTC: 210975
 #include <stopreg/p9_stop_api.H>
 */
 
 //trace
+namespace ISTEPS_TRACE
+{
 extern trace_desc_t* g_trac_isteps_trace;
+}
 
 using namespace RTPM;
 using namespace HBPM;

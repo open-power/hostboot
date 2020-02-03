@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] Evan Lojewski                                                      */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
@@ -534,6 +534,7 @@ errlHndl_t spdFetchData ( uint64_t              i_byteAddr,
         // Get the data
         if ( vpdSource == VPD::PNOR )
         {
+#ifdef CONFIG_DJVPD_READ_FROM_PNOR
             // Setup info needed to read from PNOR
             VPD::pnorInformation info;
             info.segmentSize = DIMM_SPD_SECTION_SIZE;
@@ -550,9 +551,13 @@ errlHndl_t spdFetchData ( uint64_t              i_byteAddr,
             {
                 break;
             }
+#else
+            assert( false, "spdFetchData> No PNOR support" );
+#endif
         }
         else if ( vpdSource == VPD::SEEPROM )
         {
+#ifdef CONFIG_DJVPD_READ_FROM_HW
             // Need to read directly from target's EEPROM.
             err = DeviceFW::deviceOp( DeviceFW::READ,
                                       i_target,
@@ -568,6 +573,9 @@ errlHndl_t spdFetchData ( uint64_t              i_byteAddr,
                         "ERROR: failing out of deviceOp in spd.C");
                 break;
             }
+#else
+            assert( false, "spdFetchData> No HW support" );
+#endif
         }
         else
         {
@@ -654,6 +662,7 @@ errlHndl_t spdWriteData ( uint64_t i_offset,
         {
             if( i_location != VPD::SEEPROM )
             {
+#ifdef CONFIG_DJVPD_WRITE_TO_PNOR
                 // Setup info needed to write to PNOR
                 VPD::pnorInformation info;
                 info.segmentSize = DIMM_SPD_SECTION_SIZE;
@@ -670,6 +679,9 @@ errlHndl_t spdWriteData ( uint64_t i_offset,
                 {
                     break;
                 }
+#else
+                assert( false, "spdWriteData> No PNOR support" );
+#endif
             }
         }
     } while( 0 );

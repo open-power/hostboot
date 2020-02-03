@@ -171,6 +171,7 @@ class SecurebootRtTestSuite: public CxxTest::TestSuite
      */
     void runAccessSecurePnorTest(PNOR::SectionId i_id)
     {
+#if 0 //@TODO-RTC:249470-Remove all runtime pnor access once PLDM is live
         errlHndl_t l_errl = nullptr;
         bool l_secure = PNOR::isEnforcedSecureSection(i_id);
         PNOR::SectionInfo_t l_info;
@@ -212,6 +213,7 @@ class SecurebootRtTestSuite: public CxxTest::TestSuite
         }
 
         SB_EXIT("runAccessSecurePnorTest");
+#endif
     }
 
     void testAccessSecurePnorSection()

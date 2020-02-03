@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2018
+# Contributors Listed Below - COPYRIGHT 2011,2020
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -51,7 +51,7 @@ OBJS += $(if $(CONFIG_SFC_IS_FAKE),sfc_fake.o)
 OBJS += $(if $(CONFIG_ALLOW_MICRON_PNOR),nor_micron.o)
 
 SUBDIRS += test.d
-SUBDIRS += runtime.d
+#SUBDIRS += runtime.d
 
 include ${ROOTPATH}/config.mk
 

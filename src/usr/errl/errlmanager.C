@@ -29,8 +29,6 @@
  *  @brief Implementation of ErrlManager class
  */
 
-#define STORE_ERRL_IN_L3
-
 /*****************************************************************************/
 // I n c l u d e s
 /*****************************************************************************/
@@ -64,7 +62,6 @@ mutex_t g_errlMutex = MUTEX_INITIALIZER;
 
 extern trace_desc_t* g_trac_errl;
 
-#ifdef STORE_ERRL_IN_L3
 // Store error logs in this memory buffer in L3 RAM.
 char* g_ErrlStorage = new char[ ERRL_STORAGE_SIZE ];
 
@@ -92,12 +89,6 @@ uint8_t ErrlManager::iv_hiddenErrLogsEnable =
 * Convert a marker_t pointer to its offset within the buffer.
 */
 #define POINTER2OFFSET(p) ((reinterpret_cast<char*>(p))-(g_ErrlStorage))
-
-#else
-
-char* g_ErrlStorage;
-
-#endif
 
 // Comparator function to check if a eid and a plid are equal
 bool compareEidToPlid(const uint32_t i_plid,
@@ -143,19 +134,17 @@ ErrlManager::ErrlManager() :
     iv_pnorAddr(nullptr),
     iv_maxErrlInPnor(0),
     iv_pnorOpenSlot(0),
-    iv_isSpBaseServices(true),  // queue msgs for fsp until we find we shouldn't
+    iv_isFSP(true),  // queue msgs for fsp until we find we shouldn't
     iv_isMboxEnabled(false),    // assume mbox isn't ready yet..
-    iv_isIpmiEnabled(false),    // assume ipmi isn't ready yet..
     iv_nonInfoCommitted(false),
     iv_isErrlDisplayEnabled(false),
+    iv_isIpmiEnabled(false),    // assume ipmi isn't ready yet..
     iv_versionPartitionCache(nullptr),
     iv_versionPartitionCacheSize(0)
 {
     TRACFCOMP( g_trac_errl, ENTER_MRK "ErrlManager::ErrlManager constructor" );
 
-#ifdef STORE_ERRL_IN_L3
-    // Scaffolding.
-    // For now, put error logs in a 64KB buffer in L3 RAM
+    // Put error logs in a 64KB buffer in memory
     // This buffer has a header (storage_header_t) followed by
     // storage.
     iv_pStorage = reinterpret_cast<storage_header_t*>(g_ErrlStorage);
@@ -172,7 +161,6 @@ ErrlManager::ErrlManager() :
     marker_t* l_pMarker = OFFSET2MARKER( iv_pStorage->offsetStart );
     l_pMarker->offsetNext = 0;
     l_pMarker->length     = 0;
-#endif
 
     DEBUG::add_debug_pointer(DEBUG::ERRORLOGS,
                              &g_ErrlStorage,
@@ -384,7 +372,7 @@ void ErrlManager::errlogMsgHndlr ()
                           sys->tryGetAttr<TARGETING::ATTR_SP_FUNCTIONS>(spfn) &&
                           spfn.baseServices))
                     {
-                        iv_isSpBaseServices = false;
+                        iv_isFSP = false;
 
                         // if there are queued errors, clear the Mbox flag
                         // since they will never be sent, which will delete
@@ -421,7 +409,7 @@ void ErrlManager::errlogMsgHndlr ()
                     }
 
                     // if we're supposed to and can now send msgs, do it.
-                    if (iv_isSpBaseServices && iv_isMboxEnabled)
+                    if (iv_isFSP && iv_isMboxEnabled)
                     {
                         // Register messageQ with Mailbox to receive message.
                         errlHndl_t l_err =
@@ -574,19 +562,17 @@ void ErrlManager::errlogMsgHndlr ()
                         _clearFlag(l_pair, PNOR_FLAG);
                     }
 
-#ifdef STORE_ERRL_IN_L3
-                    //Write the error log to L3 memory
+                    //Write the error log to local memory
                     //useful ONLY for the hb-errl tool
                     saveErrLogEntry ( l_err );
-#endif
 
                     //Try to send the error log if someone is there to receive
-                    if (!iv_isSpBaseServices)
+                    if (!iv_isFSP)
                     {
                         // Mark MBOX processing complete on this error
                         _clearFlag(l_pair, MBOX_FLAG);
                     }
-                    else if (iv_isSpBaseServices && iv_isMboxEnabled)
+                    else if (iv_isFSP && iv_isMboxEnabled)
                     {
                         sendErrLogToFSP(l_err);
 
@@ -827,7 +813,6 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err, compId_t i_committerComp )
    return;
 }
 
-#ifdef STORE_ERRL_IN_L3
 ///////////////////////////////////////////////////////////////////////////////
 // ErrlManager::saveErrLogEntry()
 ///////////////////////////////////////////////////////////////////////////////
@@ -875,7 +860,6 @@ void ErrlManager::saveErrLogEntry( errlHndl_t& io_err )
     TRACDCOMP( g_trac_errl, EXIT_MRK"ErrlManager::saveErrLogEntry" );
     return;
 }
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // ErrlManager::callFlushErrorLogs()

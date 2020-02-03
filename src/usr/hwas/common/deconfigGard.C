@@ -1636,133 +1636,6 @@ errlHndl_t DeconfigGard::_symmetryValidation(ProcInfoVector &io_procInfo)
 } // _symmetryValidation
 
 //******************************************************************************
-uint8_t DeconfigGard::clearBlockSpecDeconfigForReplacedTargets()
-{
-    HWAS_INF("Clear Block Spec Deconfig for replaced Targets");
-
-    // Get Block Spec Deconfig value
-    Target *pSys;
-    targetService().getTopLevelTarget(pSys);
-    ATTR_BLOCK_SPEC_DECONFIG_type l_block_spec_deconfig =
-        pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
-
-    do
-    {
-        // Check Block Spec Deconfig value
-        if(l_block_spec_deconfig == 0)
-        {
-            // Block Spec Deconfig is already cleared
-            HWAS_INF("Block Spec Deconfig already cleared");
-        }
-
-        // Create the predicate with HWAS changed state and our RESRC_RECOV bit
-        PredicateHwasChanged l_predicateHwasChanged;
-        l_predicateHwasChanged.changedBit(HWAS_CHANGED_BIT_RESRC_RECOV, true);
-
-        // Go through all targets
-        for (TargetIterator t_iter = targetService().begin();
-             t_iter != targetService().end();
-             ++t_iter)
-        {
-            Target* l_pTarget = *t_iter;
-
-            // Check if target has changed
-            if (l_predicateHwasChanged(l_pTarget))
-            {
-                // Check if Block Spec Deconfig is set
-                if(l_block_spec_deconfig == 1)
-                {
-                    l_block_spec_deconfig = 0;
-                    pSys->setAttr
-                        <ATTR_BLOCK_SPEC_DECONFIG>(l_block_spec_deconfig);
-                    HWAS_INF("Block Spec Deconfig cleared due to HWAS state "
-                             "change for 0x%.8x",
-                             get_huid(l_pTarget));
-                }
-
-                // Clear RESRC_RECOV bit in changed flags for the target
-                HWAS_DBG("RESRC_RECOV bit cleared for 0x%.8x",
-                         get_huid(l_pTarget));
-                clear_hwas_changed_bit(l_pTarget, HWAS_CHANGED_BIT_RESRC_RECOV);
-            }
-        } // for
-    } while (0);
-
-    return l_block_spec_deconfig;
-} // clearBlockSpecDeconfigForReplacedTargets
-
-//******************************************************************************
-errlHndl_t
-   DeconfigGard::clearBlockSpecDeconfigForUngardedTargets(uint8_t &io_blockAttr)
-{
-    HWAS_INF("Clear Block Spec Deconfig for ungarded Targets");
-
-    errlHndl_t l_pErr = NULL;
-    GardRecords_t l_records;
-
-    // Get system target
-    Target *pSys;
-    targetService().getTopLevelTarget(pSys);
-
-    do
-    {
-        // Check Block Spec Deconfig value
-        if(io_blockAttr == 0)
-        {
-            // Block Spec Deconfig is already cleared
-            HWAS_INF("Block Spec Deconfig already cleared");
-        }
-
-        // Create the predicate with HWAS changed state and our GARD_APPLIED bit
-        PredicateHwasChanged l_predicateHwasChanged;
-        l_predicateHwasChanged.changedBit(HWAS_CHANGED_BIT_GARD_APPLIED, true);
-
-        // Go through all targets
-        for (TargetIterator t_iter = targetService().begin();
-             t_iter != targetService().end();
-             ++t_iter)
-        {
-            Target* l_pTarget = *t_iter;
-
-            // Check if target has gard applied
-            if (l_predicateHwasChanged(l_pTarget))
-            {
-                // Get gard records for the target
-                l_pErr = platGetGardRecords(l_pTarget, l_records);
-                if (l_pErr)
-                {
-                    break;
-                }
-
-                // If there are gard records, continue to next target
-                if (l_records.size() > 0)
-                {
-                    continue;
-                }
-
-                // Check if Block Spec Deconfig is set
-                if(io_blockAttr == 1)
-                {
-                    io_blockAttr = 0;
-                    pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(io_blockAttr);
-                    HWAS_INF("Block Spec Deconfig cleared due to no gard "
-                             "records for 0x%.8x",
-                             get_huid(l_pTarget));
-                }
-
-                // Clear GARD_APPLIED bit in HWAS changed flags for the target
-                HWAS_INF("HWAS_CHANGED_BIT_GARD_APPLIED cleared for 0x%.8x",
-                         get_huid(l_pTarget));
-                clear_hwas_changed_bit(l_pTarget,
-                                       HWAS_CHANGED_BIT_GARD_APPLIED);
-            }
-        } // for
-    } while (0);
-
-    return l_pErr;
-} // clearBlockSpecDeconfigForUngardedTargets
-
-//******************************************************************************
 void updateAttrPG(Target& i_target, const bool i_shouldSetFunctional)
 {
 
@@ -3112,6 +2985,133 @@ void DeconfigGard::_clearFCODeconfigure(ConstTargetHandle_t i_nodeTarget)
         }
     }
 } // _clearFCODeconfigure
+
+//******************************************************************************
+uint8_t DeconfigGard::clearBlockSpecDeconfigForReplacedTargets()
+{
+    HWAS_INF("Clear Block Spec Deconfig for replaced Targets");
+
+    // Get Block Spec Deconfig value
+    Target *pSys;
+    targetService().getTopLevelTarget(pSys);
+    ATTR_BLOCK_SPEC_DECONFIG_type l_block_spec_deconfig =
+        pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+
+    do
+    {
+        // Check Block Spec Deconfig value
+        if(l_block_spec_deconfig == 0)
+        {
+            // Block Spec Deconfig is already cleared
+            HWAS_INF("Block Spec Deconfig already cleared");
+        }
+
+        // Create the predicate with HWAS changed state and our RESRC_RECOV bit
+        PredicateHwasChanged l_predicateHwasChanged;
+        l_predicateHwasChanged.changedBit(HWAS_CHANGED_BIT_RESRC_RECOV, true);
+
+        // Go through all targets
+        for (TargetIterator t_iter = targetService().begin();
+             t_iter != targetService().end();
+             ++t_iter)
+        {
+            Target* l_pTarget = *t_iter;
+
+            // Check if target has changed
+            if (l_predicateHwasChanged(l_pTarget))
+            {
+                // Check if Block Spec Deconfig is set
+                if(l_block_spec_deconfig == 1)
+                {
+                    l_block_spec_deconfig = 0;
+                    pSys->setAttr
+                        <ATTR_BLOCK_SPEC_DECONFIG>(l_block_spec_deconfig);
+                    HWAS_INF("Block Spec Deconfig cleared due to HWAS state "
+                             "change for 0x%.8x",
+                             get_huid(l_pTarget));
+                }
+
+                // Clear RESRC_RECOV bit in changed flags for the target
+                HWAS_DBG("RESRC_RECOV bit cleared for 0x%.8x",
+                         get_huid(l_pTarget));
+                clear_hwas_changed_bit(l_pTarget, HWAS_CHANGED_BIT_RESRC_RECOV);
+            }
+        } // for
+    } while (0);
+
+    return l_block_spec_deconfig;
+} // clearBlockSpecDeconfigForReplacedTargets
+
+//******************************************************************************
+errlHndl_t
+   DeconfigGard::clearBlockSpecDeconfigForUngardedTargets(uint8_t &io_blockAttr)
+{
+    HWAS_INF("Clear Block Spec Deconfig for ungarded Targets");
+
+    errlHndl_t l_pErr = NULL;
+    GardRecords_t l_records;
+
+    // Get system target
+    Target *pSys;
+    targetService().getTopLevelTarget(pSys);
+
+    do
+    {
+        // Check Block Spec Deconfig value
+        if(io_blockAttr == 0)
+        {
+            // Block Spec Deconfig is already cleared
+            HWAS_INF("Block Spec Deconfig already cleared");
+        }
+
+        // Create the predicate with HWAS changed state and our GARD_APPLIED bit
+        PredicateHwasChanged l_predicateHwasChanged;
+        l_predicateHwasChanged.changedBit(HWAS_CHANGED_BIT_GARD_APPLIED, true);
+
+        // Go through all targets
+        for (TargetIterator t_iter = targetService().begin();
+             t_iter != targetService().end();
+             ++t_iter)
+        {
+            Target* l_pTarget = *t_iter;
+
+            // Check if target has gard applied
+            if (l_predicateHwasChanged(l_pTarget))
+            {
+                // Get gard records for the target
+                l_pErr = platGetGardRecords(l_pTarget, l_records);
+                if (l_pErr)
+                {
+                    break;
+                }
+
+                // If there are gard records, continue to next target
+                if (l_records.size() > 0)
+                {
+                    continue;
+                }
+
+                // Check if Block Spec Deconfig is set
+                if(io_blockAttr == 1)
+                {
+                    io_blockAttr = 0;
+                    pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(io_blockAttr);
+                    HWAS_INF("Block Spec Deconfig cleared due to no gard "
+                             "records for 0x%.8x",
+                             get_huid(l_pTarget));
+                }
+
+                // Clear GARD_APPLIED bit in HWAS changed flags for the target
+                HWAS_INF("HWAS_CHANGED_BIT_GARD_APPLIED cleared for 0x%.8x",
+                         get_huid(l_pTarget));
+                clear_hwas_changed_bit(l_pTarget,
+                                       HWAS_CHANGED_BIT_GARD_APPLIED);
+            }
+        } // for
+    } while (0);
+
+    return l_pErr;
+} // clearBlockSpecDeconfigForUngardedTargets
 
 //******************************************************************************
 #endif // end #ifndef __HOSTBOOT_RUNTIME

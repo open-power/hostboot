@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,11 @@
 #include <errl/hberrltypes.H>
 #include <string.h>
 
-extern trace_desc_t* g_trac_pnor;
+namespace ISTEPS_TRACE
+{
+extern trace_desc_t* g_trac_isteps_trace;
+}
+using ISTEPS_TRACE::g_trac_isteps_trace;
 
 class FirmwareRequestTest : public CxxTest::TestSuite
 {
@@ -40,7 +44,7 @@ class FirmwareRequestTest : public CxxTest::TestSuite
      */
     void testFirmwareRequestHcodeUpdate (void)
     {
-        TRACFCOMP(g_trac_pnor, ENTER_MRK
+        TRACFCOMP(g_trac_isteps_trace, ENTER_MRK
                   "FirmwareRequestTest::testFirmwareRequestHcodeUpdate");
 
         if (g_hostInterfaces == NULL ||
@@ -69,7 +73,7 @@ class FirmwareRequestTest : public CxxTest::TestSuite
                                      sizeof(l_req_fw_msg), &l_req_fw_msg,
                                      &l_resp_fw_msg_size, &l_resp_fw_msg);
 
-            TRACFCOMP(g_trac_pnor,
+            TRACFCOMP(g_trac_isteps_trace,
                       "FirmwareRequestTest::testFirmwareRequestHcodeUpdate: "
                       "rc:%d, type:%d, resp:%d",
                       rc, l_resp_fw_msg.io_type,
@@ -97,7 +101,7 @@ class FirmwareRequestTest : public CxxTest::TestSuite
                         "received incorrect resp");
             }
         }  // end else
-        TRACFCOMP(g_trac_pnor, EXIT_MRK
+        TRACFCOMP(g_trac_isteps_trace, EXIT_MRK
                   "FirmwareRequestTest::testFirmwareRequestHcodeUpdate");
 
     }  // end testFirmwareRequestHcodeUpdate
@@ -108,7 +112,7 @@ class FirmwareRequestTest : public CxxTest::TestSuite
      */
     void testFirmwareRequestErrLogToFsp (void)
     {
-        TRACFCOMP(g_trac_pnor, ENTER_MRK
+        TRACFCOMP(g_trac_isteps_trace, ENTER_MRK
                   "FirmwareRequestTest::testFirmwareRequestErrLogToFsp");
 
         if (g_hostInterfaces == NULL ||
@@ -133,7 +137,7 @@ class FirmwareRequestTest : public CxxTest::TestSuite
                                      sizeof(l_req_fw_msg), &l_req_fw_msg,
                                      &l_resp_fw_msg_size, &l_resp_fw_msg);
 
-            TRACFCOMP(g_trac_pnor,
+            TRACFCOMP(g_trac_isteps_trace,
                       "FirmwareRequestTest::testFirmwareRequestErrLogToFsp: "
                       "rc:%d, type:%d, resp:%d",
                       rc, l_resp_fw_msg.io_type,
@@ -161,7 +165,7 @@ class FirmwareRequestTest : public CxxTest::TestSuite
                         "received incorrect resp");
             }
         }  // end else
-        TRACFCOMP(g_trac_pnor, EXIT_MRK
+        TRACFCOMP(g_trac_isteps_trace, EXIT_MRK
                   "FirmwareRequestTest::testFirmwareRequestErrLogToFsp");
 
     }  // end testFirmwareRequestErrLogToFsp
@@ -172,7 +176,7 @@ class FirmwareRequestTest : public CxxTest::TestSuite
      */
     void testFirmwareRequestHbrtToFsp (void)
     {
-        TRACFCOMP(g_trac_pnor, ENTER_MRK
+        TRACFCOMP(g_trac_isteps_trace, ENTER_MRK
                   "FirmwareRequestTest::testFirmwareRequestHbrtToFsp");
 
         if (g_hostInterfaces == NULL ||
@@ -251,7 +255,7 @@ class FirmwareRequestTest : public CxxTest::TestSuite
             l_req_fw_msg->generic_msg.__onlyError =
                                           GenericFspMboxMessage_t::ERROR_ONLY;
 
-            TRACFCOMP(g_trac_pnor,
+            TRACFCOMP(g_trac_isteps_trace,
                       "FirmwareRequestTest::testFirmwareRequestHbrtToFsp req: "
                       "type:%d, magic:0x%.8X, dataSize:%d, structVer:0x%.8X, "
                       "seqnum:%.8X, msgq:0x%.8X, msgType:0x%.8X, __req:%d, "
@@ -274,7 +278,7 @@ class FirmwareRequestTest : public CxxTest::TestSuite
                                                            &l_resp_fw_msg_size,
                                                            l_resp_fw_msg);
 
-            TRACFCOMP(g_trac_pnor,
+            TRACFCOMP(g_trac_isteps_trace,
                       "FirmwareRequestTest::testFirmwareRequestHbrtToFsp resp: "
                       "type:%d, magic:0x%.8X, dataSize:%d, structVer:0x%.8X, "
                       "seqnum:%.8X, msgq:0x%.8X, msgType:0x%.8X, __req:%d, "
@@ -370,7 +374,7 @@ class FirmwareRequestTest : public CxxTest::TestSuite
             delete[] l_resp_fw_msg;
             l_req_fw_msg = l_resp_fw_msg = nullptr;
        }
-       TRACFCOMP(g_trac_pnor, EXIT_MRK
+       TRACFCOMP(g_trac_isteps_trace, EXIT_MRK
                   "FirmwareRequestTest::testFirmwareRequestHbrtToFsp");
 
     }  // end testFirmwareRequestHbrtToFsp

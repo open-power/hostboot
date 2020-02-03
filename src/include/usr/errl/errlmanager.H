@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -363,6 +363,7 @@ private:
       */
      void sendAckErrorlog(uint32_t i_eid);
 
+#ifndef __HOSTBOOT_RUNTIME
     /**
      * @brief Access PNOR and get the address and size of the HBEL section in
      * PNOR; sets the iv_pnorAddr, iv_maxErrlInPnor, iv_pnorOpenSlot variables;
@@ -372,6 +373,7 @@ private:
      * @return NONE.
      */
     void setupPnorInfo();
+#endif //#ifndef __HOSTBOOT_RUNTIME
 
     /**
      * @brief Create and register the error log message queue
@@ -437,7 +439,6 @@ private:
      */
     void sendMboxMsg ( errlHndl_t& io_err );
 
-#ifdef STORE_ERRL_IN_L3
     /**
      * @brief Save errlog entry in the memory
      *
@@ -446,7 +447,6 @@ private:
      *
      */
     void saveErrLogEntry( errlHndl_t& io_err );
-#endif
 
     /**
      * @brief Shutdown error log manager
@@ -599,11 +599,13 @@ private:
     char *iv_pnorAddr;          // HBEL section in PNOR
     uint32_t iv_maxErrlInPnor;  // max number of errorlogs that will fit
     uint32_t iv_pnorOpenSlot;   // current open slot available for an errorlog
-    bool iv_isSpBaseServices;   // do we need to send to FSP
+#ifndef __HOSTBOOT_RUNTIME
+    bool iv_isFSP;              // do we need to send to FSP
     bool iv_isMboxEnabled;      // are we able to send to FSP
-    bool iv_isIpmiEnabled;      // are we able to send to BMC via IPMI
     bool iv_nonInfoCommitted;   // Keeps track of any non-informational logs.
     bool iv_isErrlDisplayEnabled; // are we able to use the errorDisplay
+#endif //#ifndef __HOSTBOOT_RUNTIME
+    bool iv_isIpmiEnabled;      // are we able to send to BMC via IPMI
 
     // Errl flags which represent processing needed by the errl
     // represented as a bit field (8 bits)
@@ -630,6 +632,17 @@ private:
     typedef std::list<ErrlFlagPair_t> ErrlList_t;
     typedef ErrlList_t::iterator ErrlListItr_t;
     ErrlList_t iv_errlList;
+
+#ifndef __HOSTBOOT_RUNTIME
+    const uint8_t* iv_versionPartitionCache; // The bin contents of the VERSION
+                                             // partition; once cached, the
+                                             // constents are never removed
+
+    size_t iv_versionPartitionCacheSize; // The size of the VERSION partition
+
+    bool iv_isVersionPartitionCached; // Whether the caching of the VERSION
+                                      // partition has been attempted
+#endif //#ifndef __HOSTBOOT_RUNTIME
 
     /**
      * @brief checks if the flag is set
@@ -691,15 +704,6 @@ private:
      */
     bool allowCallHomeEselsToBmc(void);
 #endif
-
-    const uint8_t* iv_versionPartitionCache; // The bin contents of the VERSION
-                                             // partition; once cached, the
-                                             // constents are never removed
-
-    size_t iv_versionPartitionCacheSize; // The size of the VERSION partition
-
-    bool iv_isVersionPartitionCached; // Whether the caching of the VERSION
-                                      // partition has been attempted
 
 };
 

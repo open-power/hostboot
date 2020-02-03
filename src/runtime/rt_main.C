@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,9 @@
 extern void* data_load_address;
 // Forward declaration to vfs code.
 void vfs_module_init();
+
+// Version string
+extern char hbi_ImageId;
 
 
 /** @fn _main
@@ -113,7 +116,9 @@ runtimeInterfaces_t* _main(hostInterfaces_t* intf, uint64_t base)
 
 runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
 {
-    (intf->puts)("Starting Runtime Services....\n");
+    (intf->puts)("Starting Hostboot Runtime Services....\n");
+    (intf->puts)(&hbi_ImageId);
+    (intf->puts)("\n");
 
     // Save a pointer to interfaces from Sapphire.
     g_hostInterfaces = intf;
@@ -140,10 +145,6 @@ runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
     // apply temp overrides
     rtPost->callApplyTempOverrides();
 
-    // load FIRDATA section into memory so PRD can access
-    // when PNOR is no longer accessible (ie SBE reboot)
-    rtPost->callInitPnor();
-
     // Make sure errlmanager is ready
     rtPost->callInitErrlManager();
 
@@ -168,6 +169,8 @@ runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
 
     // do any version mismatch fixups
     rt_version_fixup();
+
+    (intf->puts)("rt_start complete....\n");
 
     // Return our interface pointer structure.
     return rtInterfaces;

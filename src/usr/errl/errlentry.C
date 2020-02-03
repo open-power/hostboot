@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -680,6 +680,8 @@ void ErrlEntry::addVersionInfo()
 // Start of runtime block. Since runtime doesn't support securing load of PNOR
 // sections, we load the version info from reserved memory.
 
+
+#if 0 //@TODO-RTC:249470-Pull VERSION from BMC via PLDM
     // Version section of PNOR is only available to OpenPOWER systems.
     if (!INITSERVICE::spBaseServicesEnabled())
     {
@@ -760,6 +762,9 @@ void ErrlEntry::addVersionInfo()
 
 
     }
+#endif //#if 0
+
+
 #endif
 
     TRACFCOMP(g_trac_errl, EXIT_MRK"addVersionInfo()");

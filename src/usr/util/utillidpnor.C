@@ -35,6 +35,7 @@
 #include <initservice/initserviceif.H>
 #include <pnor/pnor_reasoncodes.H>
 
+
 namespace Util
 {
 
@@ -97,6 +98,9 @@ PNOR::SectionId getLidPnorSection(const LidId i_lid)
 
 } // end Util namespace
 
+// No support for PNOR at runtime
+#ifndef __HOSTBOOT_RUNTIME
+
 errlHndl_t UtilLidMgr::getLidPnorSectionInfo(const uint32_t i_lidId,
                                              PNOR::SectionInfo_t &o_lidPnorInfo,
                                              bool &o_isLidInPnor)
@@ -120,23 +124,9 @@ errlHndl_t UtilLidMgr::getLidPnorSectionInfo(const uint32_t i_lidId,
         // PNOR section is optional or lid is not in PNOR, so just delete error
         // During IPL
         //    PNOR section may be optional
-        // In Runtime
-        //    FSP - prohibit access to PNOR
-        //    OP - PNOR access of pre-verifed HB reserved memory sections not allowed.
-#ifdef __HOSTBOOT_RUNTIME
-        // Do not allow PNOR access at runtime on FSP based machines
-        if(INITSERVICE::spBaseServicesEnabled())
-        {
-            break;
-        }
-#endif
         l_err = PNOR::getSectionInfo(l_secId, o_lidPnorInfo);
         if (l_err &&
-#ifdef __HOSTBOOT_RUNTIME
-            (l_err->reasonCode() == PNOR::RC_RTPNOR_INVALID_SECTION)
-#else
             (l_err->reasonCode() == PNOR::RC_INVALID_SECTION)
-#endif
            )
         {
             o_lidPnorInfo.id = PNOR::INVALID_SECTION;
@@ -157,7 +147,6 @@ errlHndl_t UtilLidMgr::getLidPnorSectionInfo(const uint32_t i_lidId,
             o_isLidInPnor = true;
             UTIL_FT("UtilLidMgr::getLidPnorSectionInfo Lid 0x%X in PNOR", i_lidId);
 #ifdef CONFIG_SECUREBOOT
-#ifndef __HOSTBOOT_RUNTIME
             // The lid could be securely signed in PNOR
             if(o_lidPnorInfo.secure)
             {
@@ -187,10 +176,11 @@ errlHndl_t UtilLidMgr::getLidPnorSectionInfo(const uint32_t i_lidId,
                 }
             }
 #endif
-#endif
         }
     }
     } while(0);
 
     return l_err;
 }
+
+#endif //#ifndef __HOSTBOOT_RUNTIME

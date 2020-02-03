@@ -25,6 +25,19 @@
 #include <stdio.h>
 #include <algorithm>
 
+/***
+ * This class provides access to external data 'LIDs' at runtime.  The data
+ * can only exist in three places:
+ * - Inside HBRT reserved memory = iv_isLidInHbResvMem=true
+ *   - Data was placed into memory by Hostboot during the IPL.  It is
+ *     retrieved with the get_reserved_mem() call to the Host.  This is
+ *     used primarily for OpenPOWER systems.
+ * - Inside the HBRT code load itself = iv_isLidInVFS=true
+ *   - Data is stored as a module inside the code image itself.
+ * - Fetched from the service processor = other options false
+ *   - Data is retrieved with lid_load() call to the Host.
+ */
+
 #include <util/utillidmgr.H>
 #include <util/util_reasoncodes.H>
 #include <errl/errlmanager.H>
@@ -39,8 +52,10 @@
 
 extern trace_desc_t* g_trac_hbrt;
 
-UtilLidMgr::UtilLidMgr(uint32_t i_lidId) :
-    iv_isLidInPnor(false), iv_lidBuffer(nullptr), iv_lidSize(0),
+UtilLidMgr::UtilLidMgr(uint32_t i_lidId,
+                       errlHndl_t* o_errlog)
+:
+    iv_lidBuffer(nullptr), iv_lidSize(0),
     iv_isLidInVFS(false), iv_isLidInHbResvMem(false)
 {
     errlHndl_t l_err = nullptr;
@@ -50,7 +65,14 @@ UtilLidMgr::UtilLidMgr(uint32_t i_lidId) :
     {
         UTIL_FT(ERR_MRK"UtilLidMgr::UtilLidMgr() cstor failed to update Lid (0x%X)",
                 i_lidId);
-        errlCommit(l_err,UTIL_COMP_ID);
+        if( o_errlog )
+        {
+            *o_errlog = l_err;
+        }
+        else
+        {
+            errlCommit(l_err,UTIL_COMP_ID);
+        }
         // Set to invalid lid id and allow to continue
         iv_lidId = Util::INVALID_LIDID;
     }
@@ -137,14 +159,12 @@ errlHndl_t UtilLidMgr::getStoredLidImage(void*& o_pLidImage,
 errlHndl_t UtilLidMgr::releaseLidImage(void)
 {
     // we already figured out where the data is, remember that
-    bool l_inPnor = iv_isLidInPnor;
     bool l_inVFS = iv_isLidInVFS;
     bool l_inHbResvMem = iv_isLidInHbResvMem;
 
     errlHndl_t l_err = cleanup();
 
     // restore the presence info
-    iv_isLidInPnor = l_inPnor;
     iv_isLidInVFS = l_inVFS;
     iv_isLidInHbResvMem = l_inHbResvMem;
 
@@ -159,26 +179,59 @@ errlHndl_t UtilLidMgr::loadLid()
     const char* l_addr = nullptr;
     size_t l_size = 0;
     errlHndl_t l_errl = nullptr;
+    char* l_rsvd_mem_label = nullptr;
+    TARGETING::ATTR_PAYLOAD_KIND_type l_payload =
+      TARGETING::PAYLOAD_KIND_UNKNOWN;
 
     do
     {
         if(iv_isLidInHbResvMem)
         {
-            const auto pnorSectionId = Util::getLidPnorSection(
-                static_cast<Util::LidId>(iv_lidId));
+            // PHYP uses the lid number
+            if( TARGETING::is_phyp_load(&l_payload) )
+            {
+                l_rsvd_mem_label = new char[9];
+                sprintf( l_rsvd_mem_label, "%.8X", iv_lidId );
+            }
+            // OPAL uses the partition names
+            else
+            {
+                const auto pnorSectionId = Util::getLidPnorSection(
+                                           static_cast<Util::LidId>(iv_lidId));
+                if( pnorSectionId == PNOR::INVALID_SECTION )
+                {
+                    UTIL_FT("UtilLidMgr::loadLid - No PNOR section for lid %.8X",
+                            iv_lidId);
+                    iv_lidSize = 0;
+                    break;
+                }
 
-            UTIL_FT("UtilLidMgr::loadLid> iv_isLidInHbResvMem=true");
+                const char* tmpstr = PNOR::SectionIdToString(pnorSectionId);
+                if( tmpstr == nullptr )
+                {
+                    UTIL_FT("UtilLidMgr::loadLid - No string for section %d",
+                            pnorSectionId);
+                    iv_lidSize = 0;
+                    break;
+                }
+
+                l_rsvd_mem_label = new char[strlen(tmpstr)+1];
+                sprintf( l_rsvd_mem_label, "%s", tmpstr );
+            }
+
+            UTIL_FT("UtilLidMgr::loadLid> iv_isLidInHbResvMem=true, section=%s",
+                    l_rsvd_mem_label);
             iv_lidBuffer = reinterpret_cast<void*>(g_hostInterfaces->
-                get_reserved_mem(
-                   PNOR::SectionIdToString(pnorSectionId),
-                   0));
+                get_reserved_mem(l_rsvd_mem_label,0));
 
             // If nullptr returned, set size to 0 to indicate we could not find
             // the lid in HB resv memory
             if (iv_lidBuffer == nullptr)
             {
-                UTIL_FT("UtilLidMgr::loadLid - resv mem section not found");
+                UTIL_FT("UtilLidMgr::loadLid - resv mem section %s not found",
+                        l_rsvd_mem_label);
                 iv_lidSize = 0;
+                break;
             }
             else
             {
@@ -224,14 +277,7 @@ errlHndl_t UtilLidMgr::loadLid()
                     (l_addr));
             iv_lidSize = l_size;
         }
-        else if (iv_isLidInPnor)
-        {
-            UTIL_FT("UtilLidMgr::loadLid> iv_isLidInPnor=true");
-            iv_lidSize = iv_lidPnorInfo.size;
-            iv_lidBuffer = reinterpret_cast<char *>(iv_lidPnorInfo.vaddr);
-        }
-        else if( g_hostInterfaces->lid_load
-                 && iv_spBaseServicesEnabled  )
+        else if( g_hostInterfaces->lid_load )
         {
             UTIL_FT("UtilLidMgr::loadLid> Calling lid_load(0x%.8X)", iv_lidId);
             int rc = g_hostInterfaces->lid_load(iv_lidId, &iv_lidBuffer,
@@ -252,38 +298,56 @@ errlHndl_t UtilLidMgr::loadLid()
                     Util::UTIL_LIDMGR_RC_FAIL,
                     rc,
                     iv_lidId,
-                    true/*SW Error*/);
+                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                 break;
             }
+            UTIL_FT("UtilLidMgr::loadLid> size=%d, ptr=%p",
+                    iv_lidSize, iv_lidBuffer);
         }
+        //@TODO-RTC:249470-Might be a PLDM option as well for OpenPOWER
 
-        // Could not find the lid anywhere
-        if( iv_lidSize == 0 )
-        {
-            /*@
-             * @errortype
-             * @moduleid        Util::UTIL_LIDMGR_RT
-             * @reasoncode      Util::UTIL_LIDMGR_NOT_FOUND
-             * @userdata1       Lid number
-             * @devdesc         Unable to find Lid.
-             */
-            l_errl = new ERRORLOG::ErrlEntry(
-                                             ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                             Util::UTIL_LIDMGR_RT,
-                                             Util::UTIL_LIDMGR_NOT_FOUND,
-                                             iv_lidId,
-                                             0,
-                                             true/*SW Error*/);
-            break;
-        }
     } while (0);
+
+    // Could not find the lid anywhere
+    if( (l_errl == nullptr) && (iv_lidSize == 0) )
+    {
+        /*@
+         * @errortype
+         * @moduleid         Util::UTIL_LIDMGR_RT
+         * @reasoncode       Util::UTIL_LIDMGR_NOT_FOUND
+         * @userdata1        Lid number
+         * @userdata2[00:07] Lid is in reserved memory
+         * @userdata2[08:15] Lid is in VFS
+         * @userdata2[16:23] lid_load interface is available
+         * @userdata2[24:31] PAYLOAD_KIND
+         * @devdesc          Unable to find Lid.
+         */
+        l_errl = new ERRORLOG::ErrlEntry(
+                       ERRORLOG::ERRL_SEV_PREDICTIVE,
+                       Util::UTIL_LIDMGR_RT,
+                       Util::UTIL_LIDMGR_NOT_FOUND,
+                       iv_lidId,
+                       TWO_UINT32_TO_UINT64( FOUR_UINT8_TO_UINT32
+                           ( iv_isLidInHbResvMem,
+                             iv_isLidInVFS,
+                             (g_hostInterfaces->lid_load==nullptr) ? 0 : 1,
+                             l_payload ),
+                           0 ),
+                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+    }
+
+    if( l_rsvd_mem_label )
+    {
+        delete[] l_rsvd_mem_label;
+    }
+
     return l_errl;
 }
 
 errlHndl_t UtilLidMgr::cleanup()
 {
     errlHndl_t l_err = nullptr;
-    if ((!iv_isLidInVFS) && (!iv_isLidInPnor) && (nullptr != iv_lidBuffer) &&
+    if ((!iv_isLidInVFS) && (nullptr != iv_lidBuffer) &&
          !iv_isLidInHbResvMem)
     {
         int l_rc = g_hostInterfaces->lid_unload(iv_lidBuffer);
@@ -306,7 +370,6 @@ errlHndl_t UtilLidMgr::cleanup()
 
     iv_lidBuffer   = nullptr;
     iv_lidSize     = 0;
-    iv_isLidInPnor = false;
     iv_isLidInVFS  = false;
     iv_isLidInHbResvMem = false;
     return l_err;
@@ -322,30 +385,19 @@ errlHndl_t UtilLidMgr::updateLid(uint32_t i_lidId)
 
     // First check if lid is already in hostboot reserved memory
     // In securemode the lid is pre-verified
-    if (TARGETING::is_sapphire_load() && lidInHbResvMem(iv_lidId))
+    iv_isLidInHbResvMem = lidInHbResvMem(iv_lidId);
+    if (iv_isLidInHbResvMem)
     {
         UTIL_FT("UtilLidMgr::updateLid - lid in Hb Resv Mem");
-        iv_isLidInHbResvMem = true;
     }
-    // Check if PNOR is access is supported
-    else if (!g_hostInterfaces->pnor_read ||
-             iv_spBaseServicesEnabled )
-    {
-        iv_isLidInPnor = false;
-    }
-    else
-    {
-        UTIL_FT("UtilLidMgr::updateLid - lid in PNOR");
-        // If it's in PNOR it's not technically a lid
-        // so use a slightly different extension
-        l_err = getLidPnorSectionInfo(iv_lidId, iv_lidPnorInfo, iv_isLidInPnor);
-        if (l_err)
-        {
-            break;
-        }
-    }
+
+    // Also check if it is part of our image
     sprintf(iv_lidFileName, "%x.lidbin", iv_lidId);
     iv_isLidInVFS  = VFS::module_exists(iv_lidFileName);
+    if (iv_isLidInVFS)
+    {
+        UTIL_FT("UtilLidMgr::updateLid - lid in VFS");
+    }
 
     } while (0);
 
@@ -374,15 +426,26 @@ const uint32_t * UtilLidMgr::getLidList(size_t * o_num)
 
 bool UtilLidMgr::lidInHbResvMem(const uint32_t i_lidId) const
 {
-    return i_lidId == Util::OCC_LIDID ||
-           i_lidId == Util::OCC_CONTAINER_LIDID ||
-           i_lidId == Util::WOF_LIDID ||
-           i_lidId == Util::WOF_CONTAINER_LIDID ||
-           i_lidId == Util::P10_HCODE_LIDID ||
-           i_lidId == Util::HCODE_CONTAINER_LIDID ||
-           i_lidId == Util::HWREFIMG_RINGOVD_LIDID ||
-           i_lidId == Util::TARGETING_BINARY_LIDID ||
-           i_lidId == Util::VERSION_LIDID;
+    if( i_lidId == Util::VERSION_LIDID )
+    {
+        return true;
+    }
+    else if( TARGETING::is_sapphire_load() &&
+             ((i_lidId == Util::OCC_LIDID) ||
+              (i_lidId == Util::OCC_CONTAINER_LIDID) ||
+              (i_lidId == Util::WOF_LIDID) ||
+              (i_lidId == Util::WOF_CONTAINER_LIDID) ||
+              (i_lidId == Util::P10_HCODE_LIDID) ||
+              (i_lidId == Util::HCODE_CONTAINER_LIDID) ||
+              (i_lidId == Util::HWREFIMG_RINGOVD_LIDID) ||
+              (i_lidId == Util::TARGETING_BINARY_LIDID)) )
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 //------------------------------------------------------------------------

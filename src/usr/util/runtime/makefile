@@ -59,4 +59,9 @@ OBJS += rt_fwreq_helper.o
 SUBDIRS += test.d
 
 VPATH += ..
+
+# pull in pnor_utils explicitly without the rest of the module
+VPATH += ${ROOTPATH}/src/usr/pnor/
+OBJS += pnor_utils.o
+
 include $(ROOTPATH)/config.mk

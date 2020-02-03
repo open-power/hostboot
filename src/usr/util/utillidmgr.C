@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,7 +47,8 @@ mutex_t UtilLidMgr::cv_mutex = MUTEX_INITIALIZER;
 
 ///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
-UtilLidMgr::UtilLidMgr(uint32_t i_lidId)
+UtilLidMgr::UtilLidMgr(uint32_t i_lidId,
+                       errlHndl_t* o_errlog)
 : iv_needUnlock(false)
 ,iv_queueRegistered(false)
 ,iv_HbMsgQ(nullptr)
@@ -56,45 +57,63 @@ UtilLidMgr::UtilLidMgr(uint32_t i_lidId)
 ,iv_lidSize(0)
 {
     errlHndl_t l_err = nullptr;
-    iv_spBaseServicesEnabled = INITSERVICE::spBaseServicesEnabled();
-    l_err = updateLid(i_lidId);
-    if (l_err)
-    {
-        uint64_t l_reasonCode = l_err->reasonCode();
-        UTIL_FT(ERR_MRK"UtilLidMgr::UtilLidMgr() Failed to update Lid (0x%X) shutting down rc=0x%08X",
-                i_lidId, l_reasonCode);
-        errlCommit(l_err,UTIL_COMP_ID);
-        INITSERVICE::doShutdown(l_reasonCode);
-    }
 
-    // On non-FSP based systems only get LIDs from either PNOR or VFS
-    if ( (iv_spBaseServicesEnabled == false) &&
-         (iv_isLidInPnor == false) &&
-         (iv_isLidInVFS == false)
-       )
-    {
-        UTIL_FT(ERR_MRK"UtilLidMgr::UtilLidMgr() Requested lid 0x%X not in PNOR or VFS which is required on non-FSP based systems",
-                i_lidId);
+    do {
+        iv_spBaseServicesEnabled = INITSERVICE::spBaseServicesEnabled();
+        l_err = updateLid(i_lidId);
+        if (l_err)
+        {
+            UTIL_FT(ERR_MRK"UtilLidMgr::UtilLidMgr() Failed to update Lid (0x%X)",
+                    i_lidId);
+            break;
+        }
 
-        /*@
-         *   @errortype
-         *   @moduleid      Util::UTIL_LIDMGR_CSTOR
-         *   @reasoncode    Util::UTIL_LIDMGR_INVAL_LID_REQUEST
-         *   @userdata1     LID ID
-         *   @userdata2     0
-         *   @devdesc       Lid not in PNOR or VFS for non-FSP systems
-         *   @custdesc      Firmware encountered an internal error.
-         */
-        l_err = new ErrlEntry(
-                        ERRL_SEV_UNRECOVERABLE,
-                        Util::UTIL_LIDMGR_CSTOR,
-                        Util::UTIL_LIDMGR_INVAL_LID_REQUEST,
-                        i_lidId,
-                        0,
-                        true /*Add HB Software Callout*/);
+        // On non-FSP based systems only get LIDs from either PNOR or VFS
+        if ( (iv_spBaseServicesEnabled == false) &&
+             (iv_isLidInPnor == false) &&
+             (iv_isLidInVFS == false)
+             )
+        {
+            UTIL_FT(ERR_MRK"UtilLidMgr::UtilLidMgr() Requested lid 0x%X not in PNOR or VFS which is required on non-FSP based systems",
+                    i_lidId);
+
+            /*@
+             *   @errortype
+             *   @moduleid      Util::UTIL_LIDMGR_CSTOR
+             *   @reasoncode    Util::UTIL_LIDMGR_INVAL_LID_REQUEST
+             *   @userdata1     LID ID
+             *   @userdata2     0
+             *   @devdesc       Lid not in PNOR or VFS for non-FSP systems
+             *   @custdesc      Firmware encountered an internal error.
+             */
+            l_err = new ErrlEntry(
+                                  ERRL_SEV_UNRECOVERABLE,
+                                  Util::UTIL_LIDMGR_CSTOR,
+                                  Util::UTIL_LIDMGR_INVAL_LID_REQUEST,
+                                  i_lidId,
+                                  0,
+                                  ErrlEntry::ADD_SW_CALLOUT);
+            break;
+        }
+    } while(0);
+
+    if( l_err )
+    {
         l_err->collectTrace(UTIL_COMP_NAME);
-        errlCommit(l_err,UTIL_COMP_ID);
-        INITSERVICE::doShutdown(Util::UTIL_LIDMGR_INVAL_LID_REQUEST);
+        // If the user is just querying the lid then we might not want
+        //  to shut the whole system down
+        if( o_errlog )
+        {
+            *o_errlog = l_err;
+        }
+        else
+        {
+            uint32_t l_reasoncode = l_err->reasonCode();
+            errlCommit(l_err,UTIL_COMP_ID);
+            UTIL_FT("Shutting down due to rc=0x%08X", l_reasoncode);
+            INITSERVICE::doShutdown(l_reasoncode);
+        }
+        iv_lidId = Util::INVALID_LIDID;
     }
 
 }

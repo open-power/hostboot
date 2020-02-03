@@ -1260,6 +1260,7 @@ namespace HBPM
         do {
             io_overrideImg = nullptr;
 
+#if 0 //@TODO-RTC:249470-Reenable once we have PLDM in place
             // Block any use of overrides if we're secure
             if( PNOR::isInhibitedSection(PNOR::RINGOVD) )
             {
@@ -1267,6 +1268,7 @@ namespace HBPM
                            "getRingOvd: ignore overrides in secure mode" );
                 break;
             }
+#endif
 
             uint32_t l_lidId = Util::HWREFIMG_RINGOVD_LIDID;
             if(g_pRingOvdLidMgr.get() == nullptr)

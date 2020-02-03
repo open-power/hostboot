@@ -364,10 +364,13 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
         static int rt_lid_load(uint32_t lid, void** buffer, size_t* size)
         {
             errlHndl_t l_errl = NULL;
-            UtilLidMgr* lidmgr = new UtilLidMgr(lid);
+            UtilLidMgr* lidmgr = nullptr;
 
             do
             {
+                lidmgr = new UtilLidMgr(lid,&l_errl);
+                if (l_errl) break;
+
                 l_errl = lidmgr->getLidSize(*size);
                 if (l_errl) break;
 

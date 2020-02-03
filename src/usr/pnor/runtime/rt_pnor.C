@@ -937,8 +937,11 @@ errlHndl_t RtPnor::getMasterProcId()
 void initPnor()
 {
     TRACFCOMP(g_trac_pnor, ENTER_MRK"initPnor");
-    errlHndl_t l_errl = nullptr;
 
+    //@TODO-RTC:249470-Remove all runtime pnor access once PLDM is live
+    TRACFCOMP(g_trac_pnor,"No PNOR support");
+#if 0
+    errlHndl_t l_errl = nullptr;
     // Only run PNOR init on non-FSP based systems
     if ( !INITSERVICE::spBaseServicesEnabled() )
     {
@@ -953,6 +956,7 @@ void initPnor()
         errlCommit (l_errl, PNOR_COMP_ID);
       }
     }
+#endif
     TRACFCOMP(g_trac_pnor, EXIT_MRK"initPnor");
 }
 

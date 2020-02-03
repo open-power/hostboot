@@ -604,6 +604,7 @@ errlHndl_t IpVpdFacade::cmpSeepromToZero ( TARGETING::Target * i_target,
    ---- Till TARGN
 */
 
+#ifndef __HOSTBOOT_RUNTIME
 // ------------------------------------------------------------------
 // IpVpdFacade::loadPnor
 // ------------------------------------------------------------------
@@ -777,7 +778,6 @@ errlHndl_t IpVpdFacade::loadPnor ( TARGETING::Target * i_target )
     return err;
 }
 
-
 // ------------------------------------------------------------------
 // IpVpdFacade::invalidatePnor
 // ------------------------------------------------------------------
@@ -826,6 +826,7 @@ errlHndl_t IpVpdFacade::invalidatePnor ( TARGETING::Target * i_target )
 
     return err;
 }
+#endif
 
 // ------------------------------------------------------------------
 // IpVpdFacade::translateRecord
@@ -1902,6 +1903,7 @@ errlHndl_t IpVpdFacade::fetchDataFromPnor ( uint64_t i_byteAddr,
                 i_numBytes );
     do
     {
+#ifndef __HOSTBOOT_RUNTIME
         // Call a function in the common VPD code
         VPD::pnorInformation info;
         info.segmentSize = iv_vpdSectionSize;
@@ -1919,6 +1921,10 @@ errlHndl_t IpVpdFacade::fetchDataFromPnor ( uint64_t i_byteAddr,
         {
             break;
         }
+#else
+        assert( false, "IpVpdFacade::fetchDataFromPnor> No PNOR support in HBRT" );
+#endif
+
     } while( 0 );
 
     TRACSSCOMP( g_trac_vpd,
@@ -2359,6 +2365,7 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
         // Write the data
         if ( vpdDest == VPD::PNOR )
         {
+#ifndef __HOSTBOOT_RUNTIME
             // Setup info needed to write to PNOR
             VPD::pnorInformation info;
             info.segmentSize = iv_vpdSectionSize;
@@ -2397,6 +2404,9 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
             {
                 break;
             }
+#else
+            assert( false, "IpVpdFacade::writeKeyword> No PNOR support in HBRT" );
+#endif
         }
         else if ( vpdDest == VPD::SEEPROM )
         {

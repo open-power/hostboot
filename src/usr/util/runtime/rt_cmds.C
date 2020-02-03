@@ -33,7 +33,6 @@
 #include <targeting/common/predicates/predicateattrval.H>
 #include <targeting/common/iterators/rangefilter.H>
 #include <targeting/common/utilFilter.H>
-#include <pnor/pnorif.H>
 #include <devicefw/userif.H>
 #include <devicefw/driverif.H>
 #include <util/util_reasoncodes.H>
@@ -47,6 +46,7 @@
 #ifdef CONFIG_NVDIMM
 #include <isteps/nvdimm/nvdimm.H>  // notify NVDIMM protection change
 #endif
+#include <util/utillidmgr.H>
 
 extern char hbi_ImageId;
 
@@ -515,50 +515,6 @@ void cmd_readwritevpd(char*& o_output, DeviceFW::OperationType i_rtCmd,
                &o_readWriteCmd,
                ERRL_GETRC_SAFE(l_errhdl) );
    }
-}
-
-
-/**
- * @brief Read data out of pnor
- * @param[out] o_output  Output display buffer, memory allocated here
- * @param[in] i_section  PNOR section id
- * @param[in] i_bytes  Number of bytes to read
- */
-void cmd_readpnor( char*& o_output,
-                   uint32_t i_section,
-                   uint32_t i_bytes )
-{
-    UTIL_FT( "cmd_readpnor> section=%d, bytes=%d", i_section, i_bytes );
-
-    PNOR::SectionInfo_t l_pnor;
-    errlHndl_t l_errhdl = PNOR::getSectionInfo( (PNOR::SectionId)i_section,
-                                                l_pnor );
-    if( l_errhdl )
-    {
-        UTIL_FT( "cmd_readpnor> Error from getSectionInfo()" );
-        o_output = new char[100];
-        sprintf( o_output, "Error from getSectionInfo()" );
-        delete l_errhdl;
-        l_errhdl = nullptr;
-        return;
-    }
-
-    o_output = new char[50 + i_bytes*2];
-    sprintf( o_output, "PNOR[%d] : name=%s, size=0x%X = 0x",
-             i_section, l_pnor.name, l_pnor.size );
-    uint8_t* l_ptr = (uint8_t*)l_pnor.vaddr;
-    size_t l_len1 = strlen(o_output);
-    for( size_t i=0; i<i_bytes; i++ )
-    {
-        sprintf( &(o_output[l_len1+2*i]), "%.2X", l_ptr[i] );
-    }
-    o_output[l_len1+i_bytes*2] = '-';
-    o_output[l_len1+i_bytes*2+1] = '\n';
-    o_output[l_len1+i_bytes*2+2] = '\0';
-
-    UTIL_FT( "PNOR[%d] : name=%s, size=0x%X = 0x",
-             i_section, l_pnor.name, l_pnor.size );
-    TRACFBIN( Util::g_util_trace, "PNOR", l_ptr, i_bytes );
 }
 
 
@@ -1322,22 +1278,6 @@ int hbrtCommand( int argc,
                      "ERROR: getattr <huid> <attribute id> <size>\n" );
         }
     }
-    else if( !strcmp( argv[0], "readpnor" ) )
-    {
-        // readpnor <pnor section> <bytes to read>
-        if( argc == 3 )
-        {
-            cmd_readpnor( *l_output,
-                          strtou64( argv[1], NULL, 16 ),
-                          strtou64( argv[2], NULL, 16 ) );
-        }
-        else
-        {
-            *l_output = new char[100];
-            sprintf( *l_output,
-                     "ERROR: getpnor <pnor section> <bytes to read>\n" );
-        }
-    }
     else if( !strcmp( argv[0], "getscom" ) )
     {
         // getscom <huid> <address>
@@ -1536,6 +1476,69 @@ int hbrtCommand( int argc,
         }
     }
 #endif
+    else if( !strcmp( argv[0], "lidload" ) )
+    {
+        if (argc == 2)
+        {
+            *l_output = new char[100];
+            uint32_t i_lidnumber = strtou64(argv[1], NULL, 16);
+            size_t lidsize = 0;
+            UtilLidMgr thelid(i_lidnumber);
+            errlHndl_t l_err = thelid.getLidSize(lidsize);
+            if( l_err )
+            {
+                sprintf( *l_output, "Error calling getLidSize()"
+                         "(lid=0x%.8X), rc=0x%.8X, plid=0x%.8X",
+                         i_lidnumber, ERRL_GETRC_SAFE(l_err),
+                         l_err->plid() );
+                errlCommit(l_err, UTIL_COMP_ID);
+            }
+            else
+            {
+                sprintf( *l_output, "Lid %.8x is %d bytes",
+                         i_lidnumber, lidsize );
+            }
+        }
+        else
+        {
+            *l_output = new char[100];
+            sprintf(*l_output, "ERROR: lidload <lidnumber>");
+        }
+    }
+    else if( !strcmp( argv[0], "getcaps" ) )
+    {
+        if (argc == 1)
+        {
+            *l_output = new char[300];
+            char tmpstr[100];
+
+            sprintf(*l_output, "get_interface_capabilities> ");
+            UTIL_FT("::%s",*l_output);
+
+            uint64_t l_caps = g_hostInterfaces->
+              get_interface_capabilities(HBRT_CAPS_SET0_COMMON);
+            sprintf( tmpstr, "SET0_COMMON=%.16llX ", l_caps );
+            strcat( *l_output, tmpstr );
+            UTIL_FT("::%s",*l_output);
+
+            l_caps = g_hostInterfaces->
+              get_interface_capabilities(HBRT_CAPS_SET1_OPAL);
+            sprintf( tmpstr, "SET1_OPAL=%.16llX ", l_caps );
+            strcat( *l_output, tmpstr );
+            UTIL_FT("::%s",*l_output);
+
+            l_caps = g_hostInterfaces->
+              get_interface_capabilities(HBRT_CAPS_SET2_PHYP);
+            sprintf( tmpstr, "SET2_PHYP=%.16llX ", l_caps );
+            strcat( *l_output, tmpstr );
+            UTIL_FT("::%s",*l_output);
+        }
+        else
+        {
+            *l_output = new char[100];
+            sprintf(*l_output, "ERROR: getcaps");
+        }
+    }
     else
     {
         *l_output = new char[50+100*12];
@@ -1544,8 +1547,6 @@ int hbrtCommand( int argc,
         sprintf( l_tmpstr, "testRunCommand <args...>\n" );
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "getattr <huid> <attribute id> <size>\n" );
-        strcat( *l_output, l_tmpstr );
-        sprintf( l_tmpstr, "readpnor <pnor section> <bytes to read>\n" );
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "getscom <huid> <address>\n" );
         strcat( *l_output, l_tmpstr );
@@ -1576,6 +1577,10 @@ int hbrtCommand( int argc,
         sprintf( l_tmpstr, "nvdimm_protection <huid> <0 or 1>\n");
         strcat( *l_output, l_tmpstr );
 #endif
+        sprintf( l_tmpstr, "lidload <lid number>\n");
+        strcat( *l_output, l_tmpstr );
+        sprintf( l_tmpstr, "getcaps\n");
+        strcat( *l_output, l_tmpstr );
 
     }
 

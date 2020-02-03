@@ -73,6 +73,8 @@ using namespace HWAS::COMMON;
 using namespace TARGETING;
 
 const uint32_t EMPTY_GARD_RECORDID = 0xFFFFFFFF;
+
+#ifndef __HOSTBOOT_RUNTIME
 /**
  * @brief Guard PNOR section info, obtained once for efficiency
  */
@@ -82,6 +84,7 @@ static PNOR::SectionInfo_t g_GardSectionInfo;
  * @brief Flag indicating if getGardSectionInfo() was called previously
  */
 static bool getGardSectionInfoCalled;
+#endif //#ifndef __HOSTBOOT_RUNTIME
 
 //******************************************************************************
 // RUNTIME/NON-RUNTIME/HOSTBOOT/NON-HOSTBOOT methods
@@ -110,6 +113,7 @@ errlHndl_t DeconfigGard::platReLogGardError (GardRecord &i_gardRecord)
     return l_pErr;
 }
 
+#ifndef __HOSTBOOT_RUNTIME
 errlHndl_t DeconfigGard::platClearGardRecords(
     const Target * const i_pTarget)
 {
@@ -224,7 +228,7 @@ errlHndl_t DeconfigGard::platGetGardRecords(
     HWAS_INF("Get returning %d GARD Records", o_records.size());
     return l_pErr;
 }
-
+#endif //#ifndef __HOSTBOOT_RUNTIME
 
 errlHndl_t DeconfigGard::platCreateGardRecord(
         const Target * const i_pTarget,
@@ -433,6 +437,15 @@ errlHndl_t _GardRecordIdSetup( void *&io_platDeconfigGard)
             break;
         }
 
+#ifdef __HOSTBOOT_RUNTIME
+        //@TODO-RTC:249470-PLDM support for GUARD file
+        HWAS_ERR("_GardRecordIdSetup: No gard support at runtime yet!!!");
+        //falsify some data for now
+        PNOR::SectionInfo_t l_section;
+        l_section.size = 0x1000;
+        l_section.vaddr = reinterpret_cast<uint64_t>(malloc(0x1000));
+        break;
+#else
         // Get the PNOR Guard information
         PNOR::SectionInfo_t l_section;
         l_pErr = getGardSectionInfo(l_section);
@@ -449,6 +462,7 @@ errlHndl_t _GardRecordIdSetup( void *&io_platDeconfigGard)
             HWAS_ERR("_GardRecordIdSetup: No guard section skipping function");
             break;
         }
+#endif
 
         // allocate our memory and set things up
         io_platDeconfigGard = malloc(sizeof(HBDeconfigGard));
@@ -500,6 +514,7 @@ errlHndl_t _GardRecordIdSetup( void *&io_platDeconfigGard)
     return l_pErr;
 }
 
+
 void _flush(void *i_addr)
 {
 #ifndef __HOSTBOOT_RUNTIME
@@ -513,10 +528,11 @@ void _flush(void *i_addr)
     }
 #else
     HWAS_DBG("flushing all GARD in PNOR due to addr=%p", i_addr);
-    PNOR::flush(PNOR::GUARD_DATA);
+    //@TODO-RTC:249470-PLDM support for GUARD file
 #endif
 }
 
+#ifndef __HOSTBOOT_RUNTIME
 errlHndl_t getGardSectionInfo(PNOR::SectionInfo_t& o_sectionInfo)
 {
     errlHndl_t l_errl = NULL;
@@ -566,6 +582,7 @@ errlHndl_t getGardSectionInfo(PNOR::SectionInfo_t& o_sectionInfo)
 
     return l_errl;
 }
+#endif //#ifndef __HOSTBOOT_RUNTIME
 
 /**
  * @brief This will perform any post-deconfig operations,

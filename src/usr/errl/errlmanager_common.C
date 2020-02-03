@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,9 +35,13 @@
 #include <ipmi/ipmiconfiglookup.H>
 #endif // __HOSTBOOT_RUNTIME
 #endif
+
+#ifndef __HOSTBOOT_RUNTIME
+#include <pnor/pnorif.H>
+#endif
+
 #include <errl/errlentry.H>
 #include <sys/mm.h>
-#include <pnor/pnorif.H>
 #include <errl/errludstring.H>
 #include <map>
 #include <util/misc.H>
@@ -117,6 +121,7 @@ uint32_t ErrlManager::getUniqueErrId()
     return l_logId;
 }
 
+#ifndef __HOSTBOOT_RUNTIME
 // ------------------------------------------------------------------
 // setupPnorInfo
 // ------------------------------------------------------------------
@@ -140,7 +145,6 @@ void ErrlManager::setupPnorInfo()
         TRACFCOMP( g_trac_errl, INFO_MRK"setupPnorInfo sectionInfo id %d name \"%s\" size %d",
                 info.id, info.name, info.size );
 
-#ifndef __HOSTBOOT_RUNTIME
         // Set the globals appropriately
         iv_pnorAddr = reinterpret_cast<char *> (info.vaddr);
         iv_maxErrlInPnor = info.size / PNOR_ERROR_LENGTH;
@@ -188,9 +192,6 @@ void ErrlManager::setupPnorInfo()
 
 #ifdef CONFIG_BMC_IPMI
 
-// @TODO RTC: 244854
-// Re-enable as part of full runtime enablement
-#ifndef __HOSTBOOT_RUNTIME
                     // for IPMI systems, unflatten to send down to the BMC
                     err = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_UNRECOVERABLE, 0,0);
@@ -235,7 +236,6 @@ void ErrlManager::setupPnorInfo()
                             iv_errlList.push_back(l_pair);
                         }
                     }
-#endif // __HOSTBOOT_RUNTIME
 #else
                     // for FSP system, this shouldn't ever happen.
                     setACKInFlattened(i);
@@ -288,11 +288,11 @@ void ErrlManager::setupPnorInfo()
                 ++it;
             }
         }
-#endif // __HOSTBOOT_RUNTIME
     } while (0);
 
     TRACFCOMP( g_trac_errl, EXIT_MRK"setupPnorInfo");
 } // setupPnorInfo
+#endif // __HOSTBOOT_RUNTIME
 
 ///////////////////////////////////////////////////////////////////////////////
 // ErrlManager::incrementPnorOpenSlot()
@@ -355,9 +355,7 @@ bool ErrlManager::saveErrLogToPnor( errlHndl_t& io_err)
                     l_pnorAddr, 128);
 
                 // Ensure that this error log is pushed out to PNOR
-#ifdef __HOSTBOOT_RUNTIME
-                PNOR::flush(PNOR::HB_ERRLOGS);
-#else
+#ifndef __HOSTBOOT_RUNTIME
                 // FLUSH so that only the dirty pages get pushed out
                 int l_rc = mm_remove_pages(FLUSH,
                                 (void *) l_pnorAddr, l_errSize);
@@ -1077,8 +1075,7 @@ void ErrlManager::setErrlSkipFlag(errlHndl_t io_err)
                     HIDDEN_ERRLOGS_ENABLE_ALLOW_RECOVERED) ||
                (iv_hiddenErrLogsEnable ==
                 TARGETING::
-                    HIDDEN_ERRLOGS_ENABLE_ALLOW_ALL_LOGS)) &&
-                !iv_isSpBaseServices)
+                    HIDDEN_ERRLOGS_ENABLE_ALLOW_ALL_LOGS)))
             {
                 //Recovered error logs that are encountered
                 //before targeting and initservice are loaded,

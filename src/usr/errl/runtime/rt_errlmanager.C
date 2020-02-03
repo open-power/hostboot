@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,7 +34,6 @@
 #include <runtime/interface.h>   // g_hostInterfaces
 #include <util/runtime/rt_fwreq_helper.H>  // firmware_request_helper
 #include <targeting/common/targetservice.H>
-#include <pnor/pnorif.H>
 #include <hwas/common/deconfigGard.H>
 #include <initservice/initserviceif.H> // spBaseServiceEnabled()
 
@@ -78,7 +77,6 @@ ErrlManager::ErrlManager() :
         iv_pnorAddr(NULL),
         iv_maxErrlInPnor(0),
         iv_pnorOpenSlot(0),
-        iv_isSpBaseServices(false),
 #ifdef CONFIG_BMC_IPMI
         iv_isIpmiEnabled(true)
 #else
@@ -86,6 +84,7 @@ ErrlManager::ErrlManager() :
 #endif
 {
     TRACFCOMP( g_trac_errl, ENTER_MRK "ErrlManager::ErrlManager constructor." );
+    //Note - There is no PNOR access inside HBRT
 
     iv_hwasProcessCalloutFn = rt_processCallout;
 
@@ -119,23 +118,6 @@ ErrlManager::ErrlManager() :
         TRACFCOMP( g_trac_errl, ERR_MRK"HOSTSVC_PLID not available" );
     }
 
-    // check if there's an FSP. if not, then we write to PNOR
-    TARGETING::SpFunctions spfn;
-    if (!(sys &&
-          sys->tryGetAttr<TARGETING::ATTR_SP_FUNCTIONS>(spfn) &&
-          spfn.baseServices))
-    {
-        iv_isSpBaseServices = false;
-        TRACFCOMP( g_trac_errl, INFO_MRK"no baseServices, setting "
-                                "up to save to pnor" );
-        setupPnorInfo();
-    }
-    else
-    {
-        iv_isSpBaseServices = true;
-    }
-
-
     TRACFCOMP( g_trac_errl, EXIT_MRK "ErrlManager::ErrlManager constructor." );
 }
 
@@ -144,12 +126,6 @@ ErrlManager::ErrlManager() :
 ErrlManager::~ErrlManager()
 {
     TRACFCOMP( g_trac_errl, INFO_MRK"ErrlManager::ErrlManager destructor" );
-    if (!iv_isSpBaseServices)
-    {
-        // if we saved to PNOR, we need to flush
-        TRACFCOMP( g_trac_errl, INFO_MRK"no baseServices, flushing pnor" );
-        PNOR::flush(PNOR::HB_ERRLOGS);
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -163,32 +139,22 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
 
     do
     {
-        if (!iv_isSpBaseServices)
-        {
-            // save to PNOR
-            TRACFCOMP( g_trac_errl, INFO_MRK"no baseServices, saving to pnor" );
-            bool l_savedToPnor = saveErrLogToPnor(io_err);
-            if (!l_savedToPnor)
-            {
-                TRACFCOMP( g_trac_errl, ENTER_MRK"saveErrLogToPnor "
-                           "didn't save 0x%X", io_err->eid());
-            }
-        }
+        //@TODO-RTC:249470-Send PLDM message with PEL
+        TRACFCOMP( g_trac_errl, INFO_MRK"Skipping ErrlManager::sendMboxMsg until PLDM is in place" );
+        break;
 
 
 #ifdef CONFIG_BMC_IPMI
 
-// @TODO RTC: 244854
-// Re-enable as part of full runtime enablement
-#ifndef __HOSTBOOT_RUNTIME
         TRACFCOMP(g_trac_errl,INFO_MRK"Send msg to BMC for errlogId [0x%08x]",
                   io_err->plid() );
 
         // convert to SEL/eSEL and send to BMC over IPMI
         sendErrLogToBmc(io_err);
-#endif // __HOSTBOOT_RUNTIME
+
 #else
-        TRACDCOMP(g_trac_errl,
+
+        TRACFCOMP(g_trac_errl,
                   INFO_MRK"Send msg to FSP for errlogId [0x%08x]",
                   io_err->plid() );
 
@@ -287,6 +253,7 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
                       );
         }
 #endif
+
         delete io_err;
         io_err = NULL;
 

@@ -92,9 +92,12 @@ class UtilLidMgr
      *
      *  @param[in] i_lidId
      *                LID ID.
+     *  @param[out] o_errlog (optional)
+     *                Pointer to set with error log from constructor.
      *
      */
-    explicit UtilLidMgr(uint32_t i_lidId);
+    explicit UtilLidMgr(uint32_t i_lidId,
+                        errlHndl_t* o_errlog = nullptr);
 
     /**
      *  @brief Destroy the Lid Manager object resources
@@ -257,12 +260,13 @@ class UtilLidMgr
     */
    errlHndl_t cleanup();
 
+#ifndef __HOSTBOOT_RUNTIME
     /**
      * @brief value indicating if lid is in its own pnor partition
      *
      */
     bool iv_isLidInPnor;
-#ifndef __HOSTBOOT_RUNTIME
+
     /**
      *  @brief Get LID Size PNOR
      *

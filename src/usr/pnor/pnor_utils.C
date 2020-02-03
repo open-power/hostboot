@@ -34,20 +34,33 @@
 #include "pnor_utils.H"
 #include <pnor/pnor_const.H>
 
-#ifndef BOOTLOADER
-#include <errl/errlmanager.H>
-#include <assert.h>
-extern trace_desc_t* g_trac_pnor;
-#define PNOR_UTIL_TRACE(arg0, args...) TRACFCOMP(g_trac_pnor, args)
-#define PNOR_UTIL_TRACE_W_BRK(arg0, args...) TRACFCOMP(g_trac_pnor, args)
-#define PNOR_UTIL_TRACE_BL_SKIP(arg0, args...) TRACFCOMP(g_trac_pnor, args)
-#else
+#ifdef BOOTLOADER
 #include <bootloader/bootloader_trace.H>
 #include <bootloader/bootloader.H>
 #include <bootloader/hbblreasoncodes.H>
 #define PNOR_UTIL_TRACE(arg0, args...) BOOTLOADER_TRACE(arg0)
 #define PNOR_UTIL_TRACE_W_BRK(arg0, args...) BOOTLOADER_TRACE_W_BRK(arg0)
 #define PNOR_UTIL_TRACE_BL_SKIP(arg0, args...)
+
+#else // HBI and HBRT
+
+#include <errl/errlmanager.H>
+#include <assert.h>
+
+#ifdef __HOSTBOOT_RUNTIME
+extern trace_desc_t* g_trac_hbrt;;
+#define PNOR_UTIL_TRACE(arg0, args...) TRACFCOMP(g_trac_hbrt, args)
+#define PNOR_UTIL_TRACE_W_BRK(arg0, args...) TRACFCOMP(g_trac_hbrt, args)
+#define PNOR_UTIL_TRACE_BL_SKIP(arg0, args...) TRACFCOMP(g_trac_hbrt, args)
+
+#else //HBI
+extern trace_desc_t* g_trac_pnor;;
+#define PNOR_UTIL_TRACE(arg0, args...) TRACFCOMP(g_trac_pnor, args)
+#define PNOR_UTIL_TRACE_W_BRK(arg0, args...) TRACFCOMP(g_trac_pnor, args)
+#define PNOR_UTIL_TRACE_BL_SKIP(arg0, args...) TRACFCOMP(g_trac_pnor, args)
+
+#endif
+
 #endif
 
 
