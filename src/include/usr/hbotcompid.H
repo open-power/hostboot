@@ -517,6 +517,14 @@ const compId_t MCTP_COMP_ID = 0x4600;
 const char MCTP_COMP_NAME[] = "mctp";
 //@}
 
+/** @name PLDM
+ *  PLDM communication library module
+ */
+//@{
+const compId_t PLDM_COMP_ID = 0x4700;
+const char PLDM_COMP_NAME[] = "pldm";
+//@}
+
 //
 //
 /** @name HDAT

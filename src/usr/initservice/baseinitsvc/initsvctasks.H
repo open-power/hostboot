@@ -106,7 +106,19 @@ const TaskInfo    g_taskinfolist[]   =   {
                 }
         },
 #endif
-
+#ifdef CONFIG_PLDM
+        /**
+         * @brief   libpldm
+         */
+        {
+                "libpldm.so" ,                      // taskname
+                NULL,                               // no pointer to fn
+                {
+                        START_TASK,
+                        BASE_IMAGE,                  // Base Module
+                }
+        },
+#endif
         //  -----   Extended Image  -----------------------------------------------------
         /**
          * @brief   extinitsvc, initializes extended module area

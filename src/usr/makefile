@@ -58,6 +58,7 @@ SUBDIRS += mbox.d
 SUBDIRS += $(if $(CONFIG_MCTP),mctp.d)
 SUBDIRS += mmio.d
 SUBDIRS += $(if $(CONFIG_FSP_BUILD),,nvram.d)
+SUBDIRS += $(if $(CONFIG_PLDM),pldm.d)
 SUBDIRS += pnor.d
 SUBDIRS += runtime.d
 SUBDIRS += spi.d

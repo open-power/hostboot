@@ -35,6 +35,7 @@
 #include <lpc/lpc_const.H>
 #include <devicefw/userif.H>
 #include <errl/errlmanager.H>
+#include <mctp/mctp_message_types.H>
 #include <hbotcompid.H>
 #include <targeting/common/targetservice.H>
 
@@ -183,10 +184,7 @@ void MctpRP::handle_outbound_messages(void)
 
     uint8_t l_rc = 0;
 
-    // in the case of PLDM extra_data contains the MCTP packet
-    // payload we must fill out the "message type" byte w/
-    // the PLDM type
-    constexpr uint8_t MCTP_MSG_TYPE_PLDM = 1;
+
 
     // Do't start sending messages to the BMC until the channel is active
     while(!iv_channelActive)
@@ -203,8 +201,9 @@ void MctpRP::handle_outbound_messages(void)
 
           // Send a message
           case MCTP::MSG_SEND_PLDM:
-              // Set first byte to be TYPE_PLDM (0x01) so BMC knows to route
-              // the MCTP message to it's PLDM driver
+              // The first byte of MCTP payload describes the contents
+              // of the payload. Set first byte to be TYPE_PLDM (0x01)
+              // so BMC knows to route the MCTP message to it's PLDM driver.
               *reinterpret_cast<uint8_t *>(msg->extra_data) = MCTP_MSG_TYPE_PLDM;
               TRACDBIN(g_trac_mctp, "pldm message : ", msg->extra_data , msg->data[0]);
               mctp_message_tx(iv_mctp, BMC_EID, msg->extra_data, msg->data[0]);
@@ -304,7 +303,7 @@ errlHndl_t MctpRP::_init(void)
     // and send a message to the handle_obf_status daemon
     task_create(poll_kcs_status_task, NULL);
 
-    // We this ctx struct is a way to pass information we want into the mctp core logic
+    // This ctx struct is a way to pass information we want into the mctp core logic
     // the core logic will call the registered rx_message function with the ctx struct as
     // a parm, this allows use to pass information about the context we are in to that func
     struct ctx *ctx, _ctx;

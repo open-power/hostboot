@@ -1,0 +1,4 @@
+config PLDM
+  default y
+    help
+      If enabled Hostboot supports PLDM over MCTP.
