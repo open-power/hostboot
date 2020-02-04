@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -82,7 +82,7 @@ fapi2::ReturnCode p9a_get_mmio(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
     }
 
     FAPI_TRY(addOMIBase(i_target, l_addr));
-    FAPI_INF("Read address: 0x%lX  transaction size: %d", l_addr, l_tsize);
+    FAPI_DBG("Read address: 0x%lX  transaction size: %d", l_addr, l_tsize);
 
     l_proc_target = i_target.getParent<fapi2::TARGET_TYPE_OMI>().getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
 
@@ -120,7 +120,7 @@ fapi2::ReturnCode p9a_get_mmio(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
         sprintf(&l_hexdata[l_i * 2], "%02X", o_data[l_i]);
     }
 
-    FAPI_INF("Read data: 0x%s", l_hexdata);
+    FAPI_DBG("Read data: 0x%s", l_hexdata);
 
 fapi_try_exit:
 
