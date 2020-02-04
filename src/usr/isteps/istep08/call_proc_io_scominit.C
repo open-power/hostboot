@@ -57,6 +57,7 @@ void* call_proc_io_scominit(void *io_pArgs)
 {
     IStepError  l_stepError;
     errlHndl_t l_errl = nullptr;
+
     TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_proc_io_scominit");
 
     //  get a list of all the procs in the system
@@ -71,7 +72,7 @@ void* call_proc_io_scominit(void *io_pArgs)
 
         TRACFCOMP(g_trac_isteps_trace,
                   "Running proc_io_scominit PART1of2 p10_iohs_scominit HWP on processor target %.8X",
-                  get_huid(l_procChip) );
+                  get_huid(l_procChip));
 
         FAPI_INVOKE_HWP(l_errl,p10_iohs_scominit, l_fapi2_proc_target);
         if(l_errl)

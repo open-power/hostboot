@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,51 +25,34 @@
 /**
  *  @file call_host_slave_sbe_config.C
  *
- *  Support file for IStep: slave_sbe
+ *  Support file for IStep: host_slave_sbe_config
  *   Slave SBE
  *
- *  HWP_IGNORE_VERSION_CHECK
  */
 
 /******************************************************************************/
 // Includes
 /******************************************************************************/
-#include <stdint.h>
-#include <trace/interface.H>
-#include <initservice/taskargs.H>
-#include <errl/errlentry.H>
-#include <initservice/isteps_trace.H>
-#include <initservice/initserviceif.H>
-#include <initservice/initsvcreasoncodes.H>
-#include <sys/time.h>
-#include <devicefw/userif.H>
-#include <i2c/i2cif.H>
+#include <hbotcompid.H>           // HWPF_COMP_ID
+#include <attributeenums.H>       // TYPE_PROC
+#include <isteps/hwpisteperror.H> //ISTEP_ERROR:IStepError
+#include <istepHelperFuncs.H>     // captureError
+#include <fapi2/plat_hwp_invoker.H>
+#include <nest/nestHwpHelperFuncs.H>
+#include <initservice/mboxRegs.H>
 #include <sbe/sbeif.H>
 #include <hwas/common/hwas.H>
-//  targeting support
-#include <targeting/common/commontargeting.H>
-#include <targeting/common/utilFilter.H>
-#include <targeting/namedtarget.H>
-#include <targeting/attrsync.H>
-
-/* FIXME RTC: 210975
-#include <fapi2/target.H>
-#include <fapi2/plat_hwp_invoker.H>
-*/
-
-#include <errl/errlmanager.H>
-
-#include <isteps/hwpisteperror.H>
-
 #include <errl/errludtarget.H>
+#include <p10_setup_sbe_config.H>
 
-// FIXME RTC: 210975
-//#include <p9_setup_sbe_config.H>
-#include <initservice/mboxRegs.H>
-
+using namespace ISTEP;
 using namespace ISTEP_ERROR;
 using namespace ERRORLOG;
+using namespace ISTEPS_TRACE;
 using namespace TARGETING;
+using namespace HWAS;
+using namespace INITSERVICE::SPLESS;
+using namespace SBE;
 
 namespace ISTEP_08
 {
@@ -78,25 +61,24 @@ namespace ISTEP_08
 //******************************************************************************
 void* call_host_slave_sbe_config(void *io_pArgs)
 {
-    errlHndl_t l_errl = NULL;
     IStepError  l_stepError;
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-             "call_host_slave_sbe_config entry" );
+    errlHndl_t l_errl = nullptr;
 
-    TARGETING::Target* l_pMasterProcTarget = NULL;
-    TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcTarget);
+    TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_host_slave_sbe_config");
 
-    TARGETING::Target* l_sys = NULL;
+    Target* l_pMasterProcTarget = nullptr;
+    targetService().masterProcChipTargetHandle(l_pMasterProcTarget);
+
+    Target* l_sys = nullptr;
     targetService().getTopLevelTarget(l_sys);
-    assert( l_sys != NULL );
+    assert( l_sys != nullptr );
 
     // Setup the boot flags attribute for the slaves based on the data
     //  from the master proc
-    INITSERVICE::SPLESS::MboxScratch3_t l_scratch3;
-    TARGETING::ATTR_MASTER_MBOX_SCRATCH_type l_scratchRegs;
-    assert(l_sys->tryGetAttr<TARGETING::ATTR_MASTER_MBOX_SCRATCH>(l_scratchRegs),
-           "call_host_slave_sbe_config() failed to get MASTER_MBOX_SCRATCH");
-    l_scratch3.data32 = l_scratchRegs[INITSERVICE::SPLESS::MboxScratch3_t::REG_IDX];
+    MboxScratch3_t l_scratch3;
+    const auto l_scratchRegs = l_sys->getAttrAsStdArr<TARGETING::ATTR_MASTER_MBOX_SCRATCH>();
+
+    l_scratch3.data32 = l_scratchRegs[MboxScratch3_t::REG_IDX];
 
     // turn off the istep bit
     l_scratch3.fwModeCtlFlags.istepMode = 0;
@@ -104,82 +86,65 @@ void* call_host_slave_sbe_config(void *io_pArgs)
     // write the attribute
     l_sys->setAttr<ATTR_BOOT_FLAGS>(l_scratch3.data32);
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "ATTR_BOOT_FLAGS=%.8X", l_scratch3.data32 );
+    TRACFCOMP(g_trac_isteps_trace, "ATTR_BOOT_FLAGS=%.8X", l_scratch3.data32);
     if(l_scratch3.fwModeCtlFlags.overrideSecurity)
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+        TRACFCOMP(g_trac_isteps_trace, INFO_MRK
             "WARNING: Requesting security disable on non-master processors.");
     }
     if(l_scratch3.fwModeCtlFlags.allowAttrOverrides)
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+        TRACFCOMP(g_trac_isteps_trace, INFO_MRK
             "WARNING: Requesting allowing Attribute Overrides on "
             "non-master processors even if secure mode.");
     }
 
-    // execute p9_setup_sbe_config.C for non-primary processor targets
-    TARGETING::TargetHandleList l_cpuTargetList;
+    // execute p10_setup_sbe_config.C for non-primary processor targets
+    TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC);
 
     for (const auto & l_cpu_target: l_cpuTargetList)
     {
-        //Setup EC_GARD and EQ_GARD attrs on the proc before setting up sbe_config
-        HWAS::setChipletGardsOnProc(l_cpu_target);
-
         // do not call HWP on master processor
         if (l_cpu_target != l_pMasterProcTarget)
         {
-/* FIXME RTC: 210975
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                 l_fapi2_proc_target (l_cpu_target);
 
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                     "Running p9_setup_sbe_config HWP on processor target %.8X",
-                     TARGETING::get_huid(l_cpu_target) );
+            TRACFCOMP(g_trac_isteps_trace,
+                      "Running p10_setup_sbe_config HWP on processor target %.8X",
+                      get_huid(l_cpu_target));
 
-            FAPI_INVOKE_HWP(l_errl, p9_setup_sbe_config, l_fapi2_proc_target);
+            FAPI_INVOKE_HWP(l_errl, p10_setup_sbe_config, l_fapi2_proc_target);
 
-            if( l_errl )
+            if(l_errl)
             {
-                ErrlUserDetailsTarget(l_cpu_target).addToLog( l_errl );
+                TRACFCOMP(g_trac_isteps_trace,
+                          "ERROR : call p10_setup_sbe_config target %.8X"
+                          TRACE_ERR_FMT,
+                          get_huid(l_cpu_target),
+                          TRACE_ERR_ARGS(l_errl));
 
-                // Create IStep error log and cross ref error that occurred
-                l_stepError.addErrorDetails( l_errl );
-
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                         "ERROR : call p9_setup_sbe_config, "
-                         "PLID=0x%x", l_errl->plid() );
-
-                // Commit Error
-                errlCommit( l_errl, ISTEP_COMP_ID );
+                captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
+                continue;
             }
-*/
 
-            l_errl = SBE::updateSbeBootSeeprom(l_cpu_target);
+            l_errl = updateSbeBootSeeprom(l_cpu_target);
 
-            if( l_errl )
+            if(l_errl)
             {
-                ErrlUserDetailsTarget(l_cpu_target).addToLog( l_errl );
+                TRACFCOMP(g_trac_isteps_trace,
+                          "ERROR : updateSbeBootSeeprom target %.8X"
+                          TRACE_ERR_FMT,
+                          get_huid(l_cpu_target),
+                          TRACE_ERR_ARGS(l_errl)); 
 
-                // Create IStep error log and cross ref error that occurred
-                l_stepError.addErrorDetails( l_errl );
-
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "ERROR : updateSbeBootSeeprom target %.8X, "
-                           "PLID=0x%x",
-                           TARGETING::get_huid(l_cpu_target),
-                           l_errl->plid() );
-
-                // Commit Error
-                errlCommit( l_errl, ISTEP_COMP_ID );
+                captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
             }
         }
     } // end of cycling through all processor chips
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-             "call_host_slave_sbe_config exit" );
-
-    // end task, returning any errorlogs to IStepDisp
+    TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_host_slave_sbe_config");
     return l_stepError.getErrorHandle();
 
 }

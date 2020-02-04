@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,49 +25,26 @@
 /**
  *  @file call_host_setup_sbe.C
  *
- *  Support file for IStep: slave_sbe
+ *  Support file for IStep: host_setup_sbe
  *   Slave SBE
  *
- *  HWP_IGNORE_VERSION_CHECK
  */
 
 /******************************************************************************/
 // Includes
 /******************************************************************************/
-#include <stdint.h>
-#include <trace/interface.H>
-#include <initservice/taskargs.H>
-#include <errl/errlentry.H>
-#include <initservice/isteps_trace.H>
-#include <initservice/initserviceif.H>
-#include <initservice/initsvcreasoncodes.H>
-#include <sys/time.h>
-#include <devicefw/userif.H>
-#include <i2c/i2cif.H>
 
-//  targeting support
-#include <targeting/common/commontargeting.H>
-#include <targeting/common/utilFilter.H>
-#include <targeting/namedtarget.H>
-#include <targeting/attrsync.H>
-
-/* FIXME RTC: 210975
-#include <fapi2/target.H>
+#include <hbotcompid.H>           // HWPF_COMP_ID
+#include <attributeenums.H>       // TYPE_PROC
+#include <isteps/hwpisteperror.H> //ISTEP_ERROR:IStepError
+#include <istepHelperFuncs.H>     // captureError
 #include <fapi2/plat_hwp_invoker.H>
-*/
-
-#include <errl/errlmanager.H>
-
-#include <isteps/hwpisteperror.H>
-
-#include <errl/errludtarget.H>
-
-// FIXME RTC: 210975
-//#include <p9_set_fsi_gp_shadow.H>
+#include <nest/nestHwpHelperFuncs.H>
+#include <p10_set_fsi_gp_shadow.H>
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
-using namespace ERRORLOG;
+using namespace ISTEPS_TRACE;
 using namespace TARGETING;
 
 namespace ISTEP_08
@@ -79,22 +56,21 @@ namespace ISTEP_08
 void* call_host_setup_sbe(void *io_pArgs)
 {
     IStepError  l_stepError;
-/* FIXME RTC: 210975
-    errlHndl_t l_errl = NULL;
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_setup_sbe entry" );
+    errlHndl_t l_errl = nullptr;
+
+    TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_host_setup_sbe");
 
     //
     //  get a list of all the procs in the system
     //
-    TARGETING::TargetHandleList l_cpuTargetList;
+    TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC);
 
     //
     //  identify master processor target
     //
-    TARGETING::Target* l_pMasterProcTarget = NULL;
-    TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcTarget);
+    Target* l_pMasterProcTarget = nullptr;
+    targetService().masterProcChipTargetHandle(l_pMasterProcTarget);
 
     for (const auto & l_procChip: l_cpuTargetList)
     {
@@ -104,27 +80,26 @@ void* call_host_setup_sbe(void *io_pArgs)
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                 l_fapi2_proc_target (l_procChip);
 
-            //call p9_set_fsi_gp_shadow on non-master processors
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Running p9_set_fsi_gp_shadow HWP on processor target %.8X",
-                    TARGETING::get_huid(l_procChip) );
+            //call p10_set_fsi_gp_shadow on non-master processors
+            TRACFCOMP(g_trac_isteps_trace,
+                      "Running p10_set_fsi_gp_shadow HWP on processor target %.8X",
+                      get_huid(l_procChip));
 
-            FAPI_INVOKE_HWP(l_errl,p9_set_fsi_gp_shadow, l_fapi2_proc_target);
+            FAPI_INVOKE_HWP(l_errl,p10_set_fsi_gp_shadow, l_fapi2_proc_target);
             if(l_errl)
             {
-                l_stepError.addErrorDetails(l_errl);
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                         "ERROR : call p9_set_fsi_gp_shadow, PLID=0x%x",
-                         l_errl->plid() );
-                errlCommit(l_errl, HWPF_COMP_ID);
+                TRACFCOMP(g_trac_isteps_trace,
+                         "ERROR : call p10_set_fsi_gp_shadow target %.8X"
+                          TRACE_ERR_FMT,
+                          get_huid(l_procChip),
+                          TRACE_ERR_ARGS(l_errl));
+                captureError(l_errl, l_stepError, HWPF_COMP_ID, l_procChip);
             }
         }
 
     } // end of cycling through all processor chips
-*/
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "call_host_setup_sbe exit" );
+    TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_host_setup_sbe");
     return l_stepError.getErrorHandle();
 }
 };

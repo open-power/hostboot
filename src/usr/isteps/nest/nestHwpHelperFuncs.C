@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,6 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+/**
+ *  @file nestHwpHelperFuncs.C
+ *
+ *  Helper HWP functions
+ *
+ */
 
 /******************************************************************************/
 // Includes
@@ -35,33 +41,16 @@
 #include <trace/interface.H>           // TRACFCOMP
 #include <initservice/isteps_trace.H>  // g_trac_isteps_trace
 
-/* FIXME RTC: 210975
-//  Targeting support
-#include <fapi2/target.H>              // fapi2::Target
-#include <target.H>                    // TARGETING::Target
-*/
 #include <pnor/pnorif.H>
 
 //  Error handling support
 #include <istepHelperFuncs.H>          // captureError
 #include <errl/errlentry.H>            // errlHndl_t
 
-/* FIXME RTC: 210975
-//  HWP call support
-#include <fapi2/plat_hwp_invoker.H>    // FAPI_INVOKE_HWP
-#include <p9_chiplet_enable_ridi.H>
-#include <p9_chiplet_scominit.H>
-#include <p9_psi_scominit.H>
-#include <p9_npu_scominit.H>
-#include <p9_io_obus_scominit.H>
-#include <p9_xbus_enable_ridi.H>
-#include <p9_fbc_eff_config_links.H>
-#include <p9_sys_chiplet_scominit.H>
-#include <p9_chiplet_fabric_scominit.H>
-#include <p9_io_obus_firmask_save_restore.H>
-#include <p9_io_obus_image_build.H>
-#include <p9_io_xbus_image_build.H>
-*/
+#include <p10_fbc_eff_config_links.H>
+#include <p10_chiplet_fabric_scominit.H>
+
+#include <fapi2/plat_hwp_invoker.H>
 
 namespace ISTEP
 {
@@ -79,19 +68,9 @@ const char * hwpCallToString( HWP_CALL_TYPE i_hwpCall )
 {
     const static std::map<HWP_CALL_TYPE, const char*> hwpCallToStringMap =
     {
-        { P9_CHIPLET_ENABLE_RIDI, "p9_chiplet_enable_ridi"},
-        { P9_CHIPLET_FABRIC_SCOMINIT, "p9_chiplet_fabric_scominit" },
-        { P9_CHIPLET_SCOMINIT, "p9_chiplet_scominit" },
-        { P9_FBC_EFF_CONFIG_LINKS_T_F, "p9_fbc_eff_config_links" },
-        { P9_FBC_EFF_CONFIG_LINKS_F_T, "p9_fbc_eff_config_links" },
-        { P9_IO_OBUS_SCOMINIT, "p9_io_obus_scominit" },
-        { P9_NPU_SCOMINIT, "p9_npu_scominit" },
-        { P9_PSI_SCOMINIT, "p9_psi_scominit" },
-        { P9_SYS_CHIPLET_SCOMINIT, "p9_sys_chiplet_scominit" },
-        { P9_XBUS_ENABLE_RIDI, "p9_xbus_enable_ridi" },
-        { P9_OBUS_FIRMASK_SAVE_RESTORE, "p9_io_obus_firmask_save_restore" },
-        { P9_IO_OBUS_IMAGE_BUILD, "p9_io_obus_image_build" },
-        { P9_IO_XBUS_IMAGE_BUILD, "p9_io_xbus_image_build" },
+        { P10_CHIPLET_FABRIC_SCOMINIT, "p10_chiplet_fabric_scominit" },
+        { P10_FBC_EFF_CONFIG_LINKS_ELECTRICAL, "p10_fbc_eff_config_links" },
+        { P10_FBC_EFF_CONFIG_LINKS_OPTICAL, "p10_fbc_eff_config_links" },
     };
 
     if (hwpCallToStringMap.count(i_hwpCall) > 0)
@@ -102,53 +81,6 @@ const char * hwpCallToString( HWP_CALL_TYPE i_hwpCall )
     {
         return "";
     }
-}
-
-/**
- *  @brief Load HCODE image and return a pointer to it, or NULL
- *  @param[out] -   address of the HCODE image
- *  @return      NULL if success, errorlog if failure
- */
-errlHndl_t loadHcodeImage(char *& o_rHcodeAddr)
-{
-    errlHndl_t l_err = NULL;
-    PNOR::SectionInfo_t l_info;
-
-    do
-    {
-
-#ifdef CONFIG_SECUREBOOT
-        l_err = loadSecureSection(PNOR::HCODE);
-        if (l_err)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       ERR_MRK"loadHcodeImage() - Error from "
-                       "loadSecureSection(PNOR::HCODE)");
-
-            //No need to commit error here, it gets handled later
-            //just break out to escape this function
-            break;
-        }
-#endif
-
-        // Get HCODE/WINK PNOR section info from PNOR RP
-        l_err = PNOR::getSectionInfo( PNOR::HCODE, l_info );
-        if( l_err )
-        {
-            //No need to commit error here, it gets handled later
-            //just break out to escape this function
-            break;
-        }
-
-        o_rHcodeAddr = reinterpret_cast<char*>(l_info.vaddr);
-
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "HCODE addr = 0x%p ",
-                   o_rHcodeAddr);
-
-    } while ( 0 );
-
-    return  l_err;
 }
 
 /**
@@ -167,39 +99,14 @@ void fapiHWPCallWrapper(HWP_CALL_TYPE    i_hwpCall,
 
     // An error handler
     errlHndl_t l_err(nullptr);
-    char* l_pHcodeImage = NULL;
     TARGETING::TargetHandleList l_targetList;
 
     do {
-
-        // Load OBUS/XBUS image
-        if ( (P9_IO_OBUS_IMAGE_BUILD == i_hwpCall) ||
-             (P9_IO_XBUS_IMAGE_BUILD == i_hwpCall) )
-        {
-            l_err = loadHcodeImage(l_pHcodeImage);
-            if (l_err)
-            {
-                  TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                            "call_host_load_io_ppe ERROR : "
-                            "Unable to load HCODE image errorlog PLID=0x%x",
-                            l_err->plid());
-                  // Capture error and exit
-                  captureError(l_err,
-                               o_stepError,
-                               i_componentId,
-                               NULL);
-                  break;
-             }
-        }
 
         // Get a list of all the processors in the system
         if (TARGETING::TYPE_PROC == i_targetType)
         {
             getAllChips(l_targetList, i_targetType);
-        }
-        else if (TARGETING::TYPE_OBUS == i_targetType)
-        {
-            getAllChiplets(l_targetList, i_targetType);
         }
         else
         {
@@ -211,7 +118,6 @@ void fapiHWPCallWrapper(HWP_CALL_TYPE    i_hwpCall,
             TRACFCOMP(g_trac_isteps_trace, "Target list empty, no targets "
                       "found. HWP call %s will not be called", l_hwpCallStr);
         }
-/* FIXME RTC: 210975
         // Loop through all processors including master
         for (const auto & l_target: l_targetList)
         {
@@ -229,111 +135,34 @@ void fapiHWPCallWrapper(HWP_CALL_TYPE    i_hwpCall,
                 // Get a FAPI2 target of type PROC
                 const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapi2Target(l_target);
 
-                if (P9_XBUS_ENABLE_RIDI == i_hwpCall)
+                if (P10_FBC_EFF_CONFIG_LINKS_OPTICAL == i_hwpCall)
                 {
                     FAPI_INVOKE_HWP(l_err,
-                                    p9_xbus_enable_ridi,
-                                    l_fapi2Target);
-                }
-                else if (P9_CHIPLET_ENABLE_RIDI == i_hwpCall)
-                {
-                    FAPI_INVOKE_HWP(l_err,
-                                    p9_chiplet_enable_ridi,
-                                    l_fapi2Target);
-                }
-                else if (P9_CHIPLET_SCOMINIT == i_hwpCall)
-                {
-                    FAPI_INVOKE_HWP(l_err,
-                                    p9_chiplet_scominit,
-                                    l_fapi2Target);
-                }
-                else if (P9_PSI_SCOMINIT == i_hwpCall)
-                {
-                    FAPI_INVOKE_HWP(l_err,
-                                    p9_psi_scominit,
-                                    l_fapi2Target);
-                }
-                else if (P9_NPU_SCOMINIT == i_hwpCall)
-                {
-                    FAPI_INVOKE_HWP(l_err,
-                                    p9_npu_scominit,
-                                    l_fapi2Target);
-                }
-                else if (P9_FBC_EFF_CONFIG_LINKS_F_T == i_hwpCall)
-                {
-                    FAPI_INVOKE_HWP(l_err,
-                                    p9_fbc_eff_config_links,
+                                    p10_fbc_eff_config_links,
                                     l_fapi2Target,
-                                    SMP_ACTIVATE_PHASE2, // P9 build SMP operation
-                                    false,  // process electrical
-                                    true);  // process optical
+                                    SMP_ACTIVATE_PHASE2); // P10 build SMP operation
                 }
-                else if (P9_FBC_EFF_CONFIG_LINKS_T_F == i_hwpCall)
+                else if (P10_FBC_EFF_CONFIG_LINKS_ELECTRICAL == i_hwpCall)
                 {
                     FAPI_INVOKE_HWP(l_err,
-                                    p9_fbc_eff_config_links,
+                                    p10_fbc_eff_config_links,
                                     l_fapi2Target,
-                                    SMP_ACTIVATE_PHASE1, // P9 build SMP operation
-                                    true,    // process electrical
-                                    false);  // process optical
+                                    SMP_ACTIVATE_PHASE1); // P10 build SMP operation
                 }
-                else if (P9_SYS_CHIPLET_SCOMINIT == i_hwpCall)
+                else if (P10_CHIPLET_FABRIC_SCOMINIT == i_hwpCall)
                 {
                     FAPI_INVOKE_HWP(l_err,
-                                    p9_sys_chiplet_scominit,
-                                    l_fapi2Target);
-                }
-                else if (P9_CHIPLET_FABRIC_SCOMINIT == i_hwpCall)
-                {
-                    FAPI_INVOKE_HWP(l_err,
-                                    p9_chiplet_fabric_scominit,
-                                    l_fapi2Target);
-                }
-                else if (P9_OBUS_FIRMASK_SAVE_RESTORE == i_hwpCall)
-                {
-                    FAPI_INVOKE_HWP(l_err,
-                                    p9_io_obus_firmask_save_restore,
-                                    l_fapi2Target, p9iofirmasksaverestore::SAVE);
-                }
-                else if (P9_IO_XBUS_IMAGE_BUILD == i_hwpCall)
-                {
-                    FAPI_INVOKE_HWP(l_err,
-                                    p9_io_xbus_image_build,
-                                    l_fapi2Target, reinterpret_cast<void*>(l_pHcodeImage));
+                                    p10_chiplet_fabric_scominit,
+                                    l_fapi2Target,
+                                    false,
+                                    true);
                 }
                 else
                 {
-                    TRACFCOMP(g_trac_isteps_trace, "ERROR: Invalid/Uknown HWP call");
+                    TRACFCOMP(g_trac_isteps_trace, "ERROR: Invalid/Unknown HWP call");
                     break;
                 }
             }  // end if (TARGETING::TYPE_PROC == i_targetType)
-
-            // Call HWP calls for chiplets (target type: TYPE_OBUS)
-            else if (TARGETING::TYPE_OBUS == i_targetType)
-            {
-                // Get a FAPI2 target of type OBUS
-                const fapi2::Target<fapi2::TARGET_TYPE_OBUS>l_fapi2Target(l_target);
-
-                if (P9_IO_OBUS_SCOMINIT == i_hwpCall)
-                {
-                    FAPI_INVOKE_HWP(l_err,
-                                    p9_io_obus_scominit,
-                                    l_fapi2Target);
-                }
-                else if (P9_IO_OBUS_IMAGE_BUILD == i_hwpCall)
-                {
-                    FAPI_INVOKE_HWP(l_err,
-                                    p9_io_obus_image_build,
-                                    l_fapi2Target,
-                                    reinterpret_cast<void*>(l_pHcodeImage));
-                }
-                else
-                {
-                    TRACFCOMP(g_trac_isteps_trace,"ERROR: Invalid/Uknown HWP call");
-                    break;
-                }
-
-            }  // end else if (TARGETING::TYPE_OBUS == i_targetType)
             else
             {
                assert(0, "ERROR: Invalid target type %d", i_targetType);
@@ -348,11 +177,13 @@ void fapiHWPCallWrapper(HWP_CALL_TYPE    i_hwpCall,
             }
 
             TRACFCOMP(g_trac_isteps_trace,
-                      "%s: %s HWP returned %s with target HUID 0x%.8X",
+                      "%s: %s HWP returned %s with target HUID 0x%.8X"
+                      TRACE_ERR_FMT,
                       l_errorSuccesStr,
                       l_hwpCallStr,
                       (l_err ? "an error" : "success"),
-                      TARGETING::get_huid(l_target));
+                      get_huid(l_target),
+                      TRACE_ERR_ARGS(l_err));
 
             if (l_err)
             {
@@ -364,27 +195,8 @@ void fapiHWPCallWrapper(HWP_CALL_TYPE    i_hwpCall,
             }
 
         } // end for (const auto & l_target: l_targetList)
-*/
 
     } while (0);
-
-#ifdef CONFIG_SECUREBOOT
-    if ( (P9_IO_OBUS_IMAGE_BUILD == i_hwpCall) ||
-           (P9_IO_XBUS_IMAGE_BUILD == i_hwpCall) )
-    {
-        l_err = unloadSecureSection(PNOR::HCODE);
-        if (l_err)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       ERR_MRK"host_load_io_ppe() - Error from "
-                       "unloadSecureSection(PNOR::HCODE)");
-            captureError(l_err,
-                         o_stepError,
-                         i_componentId,
-                         NULL);
-        }
-    }
-#endif
 
     TRACFCOMP(g_trac_isteps_trace,
               EXIT_MRK"fapiHWPCallWrapper (%s) exit", l_hwpCallStr);
@@ -401,7 +213,6 @@ bool fapiHWPCallWrapperHandler(HWP_CALL_TYPE    i_hwpCall,
 {
     bool l_retSuccess = true;
 
-/* FIXME RTC: 210975
     fapiHWPCallWrapper(i_hwpCall, o_stepError, i_componentId, i_targetType);
 
     if (!o_stepError.isNull())
@@ -411,7 +222,6 @@ bool fapiHWPCallWrapperHandler(HWP_CALL_TYPE    i_hwpCall,
 
         l_retSuccess = false;
     }
-*/
 
     return l_retSuccess;
 }

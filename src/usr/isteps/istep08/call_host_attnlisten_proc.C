@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,38 +27,25 @@
  *
  *  Support file for IStep: host_attnlisten_proc
  *
- *  HWP_IGNORE_VERSION_CHECK
  */
 
 /******************************************************************************/
 // Includes
 /******************************************************************************/
-#include <stdint.h>
-#include <trace/interface.H>
-#include <initservice/taskargs.H>
-#include <errl/errlentry.H>
-#include <initservice/isteps_trace.H>
+
+#include <hbotcompid.H>           // HWPF_COMP_ID
+#include <attributeenums.H>       // TYPE_PROC
+#include <isteps/hwpisteperror.H> //ISTEP_ERROR:IStepError
+#include <istepHelperFuncs.H>     // captureError
+#include <initservice/istepdispatcherif.H> // INITSERVICE
 #include <initservice/initserviceif.H>
-#include <initservice/istepdispatcherif.H>
-#include <initservice/initsvcreasoncodes.H>
-#include <sys/time.h>
-#include <devicefw/userif.H>
-
-//  targeting support
-#include <targeting/common/commontargeting.H>
-#include <targeting/common/utilFilter.H>
-#include <targeting/namedtarget.H>
-#include <targeting/attrsync.H>
-
-#include <isteps/hwpisteperror.H>
-
-#include <errl/errludtarget.H>
-#include <errl/errlmanager.H>
+#include <fapi2/plat_hwp_invoker.H>
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
-using namespace ERRORLOG;
+using namespace ISTEPS_TRACE;
 using namespace TARGETING;
+using namespace INITSERVICE;
 
 namespace ISTEP_08
 {
@@ -70,20 +57,20 @@ namespace ISTEP_08
 void send_analyzable_procs(void)
 {
     errlHndl_t l_err = nullptr;
-    std::vector<TARGETING::ATTR_HUID_type> l_chipHuids;
+    std::vector<ATTR_HUID_type> l_chipHuids;
 
     // get all functional Proc targets
-    TARGETING::TargetHandleList l_procsList;
+    TargetHandleList l_procsList;
     getAllChips(l_procsList, TYPE_PROC);
 
     // now fill in the list with proc huids
     for (const auto & l_cpu_target : l_procsList)
     {
-        l_chipHuids.push_back(TARGETING::get_huid(l_cpu_target));
+        l_chipHuids.push_back(get_huid(l_cpu_target));
     }
 
     // send the message to alert ATTN to start monitoring these chips
-    l_err = INITSERVICE::sendAttnMonitorChipIdMsg(l_chipHuids);
+    l_err = sendAttnMonitorChipIdMsg(l_chipHuids);
     if (l_err)
     {
         errlCommit(l_err, ISTEP_COMP_ID);
@@ -98,8 +85,7 @@ void* call_host_attnlisten_proc(void *io_pArgs)
 {
     IStepError  l_stepError;
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_attnlisten_proc entry" );
+    TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_host_attnlisten_proc");
 
     // Function is a NOOP because with security enabled, PRD is unable
     // to write FIRs due to blacklist violations.  All of the slave
@@ -107,13 +93,12 @@ void* call_host_attnlisten_proc(void *io_pArgs)
 
     // Send list of functional procs that ATTN
     // can start monitoring for checkstop analysis
-    if( INITSERVICE::spBaseServicesEnabled() )
+    if(spBaseServicesEnabled())
     {
         send_analyzable_procs();
     }
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-             "call_host_attnlisten_proc exit" );
+    TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_host_attnlisten_proc");
     return l_stepError.getErrorHandle();
 }
 

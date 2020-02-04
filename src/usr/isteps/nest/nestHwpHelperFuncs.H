@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,19 +64,9 @@ namespace ISTEP
  */
 enum HWP_CALL_TYPE
 {
-    P9_CHIPLET_ENABLE_RIDI = 0, // Although it says chiplet, this uses proc chip
-    P9_CHIPLET_FABRIC_SCOMINIT, // Although it says chiplet, this uses proc chip
-    P9_CHIPLET_SCOMINIT,        // Although it says chiplet, this uses proc chip
-    P9_FBC_EFF_CONFIG_LINKS_T_F, // process electrical(T), process optical(F)
-    P9_FBC_EFF_CONFIG_LINKS_F_T, // process electrical(F), process optical(T)
-    P9_IO_OBUS_SCOMINIT,
-    P9_NPU_SCOMINIT,
-    P9_PSI_SCOMINIT,
-    P9_SYS_CHIPLET_SCOMINIT,  // Although it says chiplet, this uses proc chip
-    P9_XBUS_ENABLE_RIDI,
-    P9_OBUS_FIRMASK_SAVE_RESTORE, // loops on proc chip
-    P9_IO_OBUS_IMAGE_BUILD,
-    P9_IO_XBUS_IMAGE_BUILD,
+    P10_CHIPLET_FABRIC_SCOMINIT, // Although it says chiplet, this uses proc chip
+    P10_FBC_EFF_CONFIG_LINKS_ELECTRICAL, // process electrical
+    P10_FBC_EFF_CONFIG_LINKS_OPTICAL, // process optical
 };
 
 /**

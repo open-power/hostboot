@@ -57,6 +57,7 @@ void* call_proc_init_ioppe(void *io_pArgs)
 {
     IStepError  l_stepError;
     errlHndl_t l_errl = nullptr;
+
     TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_proc_init_ioppe");
 
     //  get a list of all the procs in the system

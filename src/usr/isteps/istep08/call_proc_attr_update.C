@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,50 +25,29 @@
 /**
    @file call_proc_attr_update.C
  *
- *  Support file for IStep: nest_chiplets
- *   Nest Chiplets
+ *  Support file for IStep: proc_attr_update
+ *   Proc ATTR Update
  *
- *  HWP_IGNORE_VERSION_CHECK
  *
  */
 /******************************************************************************/
 // Includes
 /******************************************************************************/
-#include    <stdint.h>
 
-#include    <trace/interface.H>
-#include    <initservice/taskargs.H>
-#include    <errl/errlentry.H>
-
-#include    <isteps/hwpisteperror.H>
-
-#include    <errl/errludtarget.H>
-
-#include    <initservice/isteps_trace.H>
-#include    <initservice/initserviceif.H>
-
-//  targeting support
-#include    <targeting/common/commontargeting.H>
-#include    <targeting/common/utilFilter.H>
-/* FIXME RTC: 210975
-#include    <fapi2/target.H>
-#include    <fapi2/plat_hwp_invoker.H>
-*/
-
-//  MVPD
-#include <devicefw/userif.H>
-#include <vpd/mvpdenums.H>
-
-
-// FIXME RTC: 210975
-//#include <p9_attr_update.H>
+#include <hbotcompid.H>           // HWPF_COMP_ID
+#include <attributeenums.H>       // TYPE_PROC
+#include <isteps/hwpisteperror.H> //ISTEP_ERROR:IStepError
+#include <istepHelperFuncs.H>     // captureError
+#include <fapi2/plat_hwp_invoker.H>
+#include <nest/nestHwpHelperFuncs.H>
+#include <p10_attr_update.H>
 
 namespace   ISTEP_08
 {
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
-using   namespace   ERRORLOG;
+using   namespace   ISTEPS_TRACE;
 using   namespace   TARGETING;
 
 //*****************************************************************************
@@ -76,17 +55,15 @@ using   namespace   TARGETING;
 //*****************************************************************************
 void * call_proc_attr_update( void * io_pArgs )
 {
-    IStepError l_StepError;
-/* FIXME RTC: 210975
-    errlHndl_t l_err = NULL;
+    IStepError l_stepError;
+    errlHndl_t l_err = nullptr;
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-             "call_proc_attr_update entry" );
+    TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_proc_attr_update");
 
     //
     //  get a list of all the procs in the system
     //
-    TARGETING::TargetHandleList l_cpuTargetList;
+    TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC);
 
     // Loop through all processors including master
@@ -95,28 +72,24 @@ void * call_proc_attr_update( void * io_pArgs )
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapi2_proc_target(
                   l_cpu_target);
 
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                 "Running p9_attr_update HWP on processor target %.8X",
-                 TARGETING::get_huid(l_cpu_target) );
+        TRACFCOMP(g_trac_isteps_trace,
+                  "Running p10_attr_update HWP on processor target %.8X",
+                  get_huid(l_cpu_target));
 
-        FAPI_INVOKE_HWP(l_err, p9_attr_update, l_fapi2_proc_target);
+        FAPI_INVOKE_HWP(l_err, p10_attr_update, l_fapi2_proc_target);
         if(l_err)
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                     "ERROR 0x%.8X : p9_attr_update "
-                     "HWP returns error for HUID %.8X",
-                     l_err->reasonCode(),
-                     TARGETING::get_huid(l_cpu_target) );
-            l_StepError.addErrorDetails(l_err);
-            errlCommit(l_err, HWPF_COMP_ID);
+            TRACFCOMP(g_trac_isteps_trace,
+                      "ERROR p10_attr_update target %.8X"
+                      TRACE_ERR_FMT,
+                      get_huid(l_cpu_target),
+                      TRACE_ERR_ARGS(l_err));
+            captureError(l_err, l_stepError, HWPF_COMP_ID, l_cpu_target);
         }
     } // end of going through all processors
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-             "call_proc_attr_update exit" );
-*/
-
-    return l_StepError.getErrorHandle();
+    TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_proc_attr_update");
+    return l_stepError.getErrorHandle();
 }
 
 };

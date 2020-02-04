@@ -23,80 +23,116 @@
 #
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
-
-# FIXME RTC: 210975 Uncomment the EKB paths in this file when the time comes
-#PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p9/procedures
 MODULE = istep08
 
-#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/perv/
-#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/sbe/
-#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest/
-#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/io/
-#EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/initfiles/
+PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p10/procedures
+HWP_PATH_P10 += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv
+
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest/
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/pm/
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/lib/
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/io/
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/initfiles/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/sbe/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/pmlib/include/registers/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/sbeio/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 
 #OBJS += call_host_slave_sbe_config.o
-#OBJS += call_host_setup_sbe.o
-#OBJS += call_host_cbs_start.o
+OBJS += call_host_setup_sbe.o
+OBJS += call_host_cbs_start.o
 #OBJS += call_proc_check_slave_sbe_seeprom_complete.o
-#OBJS += call_host_fbc_eff_config.o
-#OBJS += call_host_fbc_eff_config_links.o
-#OBJS += call_proc_attr_update.o
-#OBJS += call_proc_chiplet_fabric_scominit.o
-#OBJS += call_proc_xbus_scominit.o
-#OBJS += call_proc_xbus_enable_ridi.o
-#OBJS += call_host_attnlisten_proc.o
-#OBJS += call_host_set_voltages.o
+OBJS += call_host_attnlisten_proc.o
+OBJS += call_proc_fbc_eff_config.o
+OBJS += call_proc_eff_config_links.o
+OBJS += call_proc_attr_update.o
+OBJS += call_proc_chiplet_fabric_scominit.o
+OBJS += call_host_set_voltages.o
+OBJS += call_proc_io_scominit.o
+OBJS += call_proc_load_ioppe.o
+OBJS += call_proc_init_ioppe.o
+OBJS += call_proc_iohs_enable_ridi.o
 
-#VPATH += ${PROCEDURES_PATH}/hwp/perv/ ${PROCEDURES_PATH}/hwp/nest/
-#VPATH += ${PROCEDURES_PATH}/hwp/io/ ${PROCEDURES_PATH}/hwp/initfiles/
-#VPATH += ${PROCEDURES_PATH}/hwp/sbe/
+VPATH += $(PROCEDURES_PATH)/hwp/perv/ $(PROCEDURES_PATH)/hwp/nest/
+VPATH += ${ROOTPATH}/src/import/chips/p10/common/include/
+VPATH += ${PROCEDURES_PATH}/hwp/initfiles/
+VPATH += ${PROCEDURES_PATH}/hwp/lib/
+VPATH += ${PROCEDURES_PATH}/hwp/pm/
+VPATH += ${PROCEDURES_PATH}/hwp/io/
+VPATH += ${ROOTPATH}/src/usr/isteps/
 
-#include ${ROOTPATH}/procedure.rules.mk
+include ${ROOTPATH}/procedure.rules.mk
 
 # host_slave_sbe_config
-#include ${PROCEDURES_PATH}/hwp/perv/p9_setup_sbe_config.mk
+OBJS += p10_setup_sbe_config.o
+# proc_check_slave_sbe_seeprom_complete
+#OBJS += p10_getecid.o
 
 # host_setup_sbe
-#include ${PROCEDURES_PATH}/hwp/perv/p9_set_fsi_gp_shadow.mk
+OBJS += p10_set_fsi_gp_shadow.o
 
 # host_cbs_start
-#include ${PROCEDURES_PATH}/hwp/perv/p9_start_cbs.mk
+OBJS += p10_start_cbs.o
 
-# proc_check_slave_sbe_seeprom_complete : Check Slave SBE Complete
-#include ${PROCEDURES_PATH}/hwp/perv/p9_check_slave_sbe_seeprom_complete.mk
-#include ${PROCEDURES_PATH}/hwp/perv/p9_getecid.mk
+# proc_fbc_eff_config
+OBJS += p10_fbc_eff_config.o
 
-# host_fbc_eff_config
-#include ${PROCEDURES_PATH}/hwp/nest/p10_fbc_eff_config.mk
+# proc_eff_config_links
+OBJS += p10_fbc_eff_config_links.o
+OBJS += p10_fbc_utils.o
 
 # proc_attr_update: Proc ATTR Update
-#include ${PROCEDURES_PATH}/hwp/nest/p9_attr_update.mk
+OBJS += p10_attr_update.o
 
-# proc_chiplet_fabric_scominit : Scom inits to all chiplet fabric (sans Quad)
-#include ${PROCEDURES_PATH}/hwp/nest/p9_chiplet_fabric_scominit.mk
-#include ${PROCEDURES_PATH}/hwp/initfiles/p9_fbc_ioe_dl_scom.mk
-#include ${PROCEDURES_PATH}/hwp/initfiles/p9_fbc_no_hp_scom.mk
-#include ${PROCEDURES_PATH}/hwp/initfiles/p9_fbc_ioe_tl_scom.mk
+# proc_chiplet_fabric_scominit : Scom inits to all chiplet fabric
+OBJS += p10_smp_link_firs.o
+OBJS += p10_chiplet_fabric_scominit.o
+OBJS += p10_fbc_ptl_scom.o
+OBJS += p10_fbc_no_hp_scom.o
+OBJS += p10_fbc_dlp_scom.o
 
-# proc_xbus_scominit : Apply scom inits to Xbus
-#include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_scominit.mk
-#include ${PROCEDURES_PATH}/hwp/initfiles/p9_xbus_g0_scom.mk
-#include ${PROCEDURES_PATH}/hwp/initfiles/p9_xbus_g1_scom.mk
+# host_set_voltages
+# istep08Dependancies includes p10_pm_utils.o, libpm.so
+# istep06 and istep08 use p10_setup_evid.o
 
-# proc_xbus_enable_ridi : Apply RI/DI for xbus
-#include ${PROCEDURES_PATH}/hwp/perv/p9_xbus_enable_ridi.mk
+# proc_io_scominit
+OBJS += p10_iohs_scominit.o
+OBJS += p10_iohs_scom.o
+OBJS += p10_io_omi_scominit.o
+OBJS += p10_omi_scom.o
+OBJS += p10_omic_scom.o
 
-MODULE = istep08
+# proc_load_ioppe
+OBJS += p10_io_load_ppe.o
+OBJS += p10_putsram.o
+# p10_getputsram_utils.o needed by p10_putsram.o
+OBJS += p10_getputsram_utils.o
+OBJS += p10_putsram_io_ppe.o
+# p10_io_ppe_utils.o needed by p10_putsram_io_ppe.o
+OBJS += p10_io_ppe_utils.o
+# p10_write_xram.o needed by p10_putsram.o
+OBJS += p10_write_xram.o
+# need setPhyLoadDone
+OBJS += p10_iop_xram_utils.o
+# need p10_qme_sram_access_bytes
+OBJS += p10_qme_sram_access.o
+
+# proc_init_ioppe
+OBJS += p10_io_init_start_ppe.o
+OBJS += p10_io_ppe_lib.o
+OBJS += p10_io_ppe_regs.o
+
+# proc_iohs_enable_ridi : Apply RI/DI for IOHS
+OBJS += p10_iohs_enable_ridi.o
+OBJS += p10_enable_ridi.o
 
 include ${ROOTPATH}/config.mk

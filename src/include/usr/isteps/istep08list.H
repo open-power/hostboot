@@ -29,7 +29,7 @@
  * @file    istep08list.H
  *
  *  IStep 08        Nest Chiplets
- *  IPL FLow Doc    v1.07
+ *  IPL FLow Doc    v0.89.17 (Dec 10, 2019)
  *
  *    08.01    host_slave_sbe_config
  *           : Configure host slave sbe
@@ -40,21 +40,25 @@
  *    08.04    proc_check_slave_sbe_seeprom_complete
  *           : Check Slave SBE Complete
  *    08.05    host_attnlisten_proc
- *           : Start attention poll for all P9(s)
- *    08.06    host_fbc_eff_config
+ *           : Start attention poll for all
+ *    08.06    proc_fbc_eff_config
  *           : Determine powerbus config
- *    08.07    host_eff_config_links
+ *    08.07    proc_eff_config_links
  *           : Powerbus link config
  *    08.08    proc_attr_update
  *           : Proc ATTR Update
  *    08.09    proc_chiplet_fabric_scominit
  *           : Scom inits to all chiplet fabric (sans Quad)
- *    08.10    proc_xbus_scominit
- *           : Apply scom inits to Xbus
- *    08.11    proc_xbus_enable_ridi
- *           : Enable RI/DI for xbus
- *    08.12    host_set_voltages
+ *    08.10    host_set_voltages
  *           : Set correct chip voltages
+ *    08.11    proc_io_scominit
+ *           : Apply scom inits to iohs
+ *    08.12    proc_load_ioppe
+ *           : Load IO PPE images to their SRAMS
+ *    08.13    proc_init_ioppe
+ *           : Start and init IO PPE
+ *    08.14    proc_iohs_enable_ridi
+ *           : Enable RI/DI for iohs
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
  *
@@ -113,22 +117,22 @@ void* call_proc_check_slave_sbe_seeprom_complete(void *io_pArgs);
 void* call_host_attnlisten_proc(void *io_pArgs);
 
 /**
- * @brief   host_fbc_eff_config
+ * @brief   proc_fbc_eff_config
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
  *  return  any error logs to istep
  */
-void* call_host_fbc_eff_config (void * io_pArgs);
+void* call_proc_fbc_eff_config (void * io_pArgs);
 
 /**
- * @brief   host_fbc_eff_config_links
+ * @brief   proc_eff_config_links
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
  *  return  any error logs to istep
  */
-void* call_host_fbc_eff_config_links (void * io_pArgs);
+void* call_proc_eff_config_links (void * io_pArgs);
 
 /**
  *  @brief  call_proc_attr_update
@@ -155,26 +159,50 @@ void * call_proc_attr_update( void * io_pArgs );
 void*    call_proc_chiplet_fabric_scominit( void    *io_pArgs );
 
 /**
- *  @brief   proc_xbus_scominit
+ *  @brief   proc_io_scominit
  *
- *           Apply scom inits to Xbus
+ *           Apply scom inits to iohs
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return  any error logs to istep
  *
  */
-void*    call_proc_xbus_scominit( void    *io_pArgs );
+void*    call_proc_io_scominit( void    *io_pArgs );
 
 /**
- *  @brief   proc_xbus_enable_ridi
+ *  @brief   proc_load_ioppe
+ *
+ *           Load IOPPE
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return  any error logs to istep
  *
  */
-void*    call_proc_xbus_enable_ridi( void    *io_pArgs );
+void*    call_proc_load_ioppe( void    *io_pArgs );
+
+/**
+ *  @brief   proc_init_ioppe
+ *
+ *           Init IOPPE
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any error logs to istep
+ *
+ */
+void*    call_proc_init_ioppe( void    *io_pArgs );
+
+/**
+ *  @brief   proc_iohs_enable_ridi
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any error logs to istep
+ *
+ */
+void*    call_proc_iohs_enable_ridi( void    *io_pArgs );
 
 /**
  *  @brief host_set_voltages
@@ -199,11 +227,13 @@ namespace   INITSERVICE
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
+/* FIXME RTC 250718
         {
                 ISTEPNAME(08,01,"host_slave_sbe_config"),
                 ISTEP_08::call_host_slave_sbe_config,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
+*/
         {
                 ISTEPNAME(08,02,"host_setup_sbe"),
                 ISTEP_08::call_host_setup_sbe,
@@ -214,24 +244,26 @@ namespace   INITSERVICE
                 ISTEP_08::call_host_cbs_start,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
+/* FIXME RTC 250718
         {
                 ISTEPNAME(08,04,"proc_check_slave_sbe_seeprom_complete"),
                 ISTEP_08::call_proc_check_slave_sbe_seeprom_complete,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
+*/
         {
                 ISTEPNAME(08,05,"host_attnlisten_proc"),
                 ISTEP_08::call_host_attnlisten_proc,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(08,06,"host_fbc_eff_config"),
-                ISTEP_08::call_host_fbc_eff_config,
+                ISTEPNAME(08,06,"proc_fbc_eff_config"),
+                ISTEP_08::call_proc_fbc_eff_config,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(08,07,"host_eff_config_links"),
-                ISTEP_08::call_host_fbc_eff_config_links,
+                ISTEPNAME(08,07,"proc_eff_config_links"),
+                ISTEP_08::call_proc_eff_config_links,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
@@ -245,18 +277,28 @@ namespace   INITSERVICE
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(08,10,"proc_xbus_scominit"),
-                ISTEP_08::call_proc_xbus_scominit,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-        {
-                ISTEPNAME(08,11,"proc_xbus_enable_ridi"),
-                ISTEP_08::call_proc_xbus_enable_ridi,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-        {
-                ISTEPNAME(08,12,"host_set_voltages"),
+                ISTEPNAME(08,10,"host_set_voltages"),
                 ISTEP_08::call_host_set_voltages,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(08,11,"proc_io_scominit"),
+                ISTEP_08::call_proc_io_scominit,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(08,12,"proc_load_ioppe"),
+                ISTEP_08::call_proc_load_ioppe,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(08,13,"proc_init_ioppe"),
+                ISTEP_08::call_proc_init_ioppe,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(08,14,"proc_iohs_enable_ridi"),
+                ISTEP_08::call_proc_iohs_enable_ridi,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
 };

@@ -50,60 +50,6 @@ using namespace TARGETING;
 namespace ISTEP_08
 {
 
-/**
- *  @brief Load HCODE image and return a pointer to it, or NULL
- *
- *  @param[out] -   address of the HCODE image
- *
- *  @return      NULL if success, errorlog if failure
- *
- */
-
-errlHndl_t  loadHcodeImage(char *& o_rHcodeAddr)
-{
-    errlHndl_t l_errl = nullptr;
-    PNOR::SectionInfo_t l_info;
-
-    do
-    {
-
-#ifdef CONFIG_SECUREBOOT
-        l_errl = loadSecureSection(PNOR::HCODE);
-        if (l_errl)
-        {
-            TRACFCOMP(g_trac_isteps_trace,
-                       ERR_MRK"loadHcodeImage() - Error from "
-                       "loadSecureSection(PNOR::HCODE)");
-
-            //No need to commit error here, it gets handled later
-            //just break out to escape this function
-            break;
-        }
-#endif
-
-        // Get HCODE PNOR section info from PNOR RP
-        l_errl = PNOR::getSectionInfo( PNOR::HCODE, l_info );
-        if(l_errl)
-        {
-            //No need to commit error here, it gets handled later
-            //just break out to escape this function
-            TRACFCOMP(g_trac_isteps_trace,
-                       ERR_MRK"loadHcodeImage() - Error from "
-                       "getSectionInfo(PNOR::HCODE)");
-            break;
-        }
-
-        o_rHcodeAddr = reinterpret_cast<char*>(l_info.vaddr);
-
-        TRACFCOMP(g_trac_isteps_trace,
-                   "HCODE vaddr = 0x%p ",
-                   o_rHcodeAddr);
-
-    } while ( 0 );
-
-    return  l_errl;
-}
-
 //******************************************************************************
 // call_proc_load_ioppe()
 //******************************************************************************
@@ -112,22 +58,47 @@ void* call_proc_load_ioppe(void *io_pArgs)
     IStepError  l_stepError;
     errlHndl_t l_errl = nullptr;
     char* l_pHcodeImage = nullptr;
+    PNOR::SectionInfo_t l_info;
+#ifdef CONFIG_SECUREBOOT
+    bool unload_hcode_pnor_section = false;
+#endif
+
     TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_proc_load_ioppe");
 
     do
     {
         // Load IOPPE image
-        l_errl = loadHcodeImage(l_pHcodeImage);
+#ifdef CONFIG_SECUREBOOT
+        l_errl = loadSecureSection(PNOR::HCODE);
         if (l_errl)
         {
             TRACFCOMP(g_trac_isteps_trace,
                       "call_proc_load_ioppe ERROR : "
-                      "Unable to load HCODE image errorlog"
+                      "loadSecureSection(PNOR::HCODE)"
                       TRACE_ERR_FMT,
                       TRACE_ERR_ARGS(l_errl));
             captureError(l_errl, l_stepError, HWPF_COMP_ID);
             break;
         }
+        unload_hcode_pnor_section = true;
+#endif
+
+        // Get HCODE PNOR section info from PNOR RP
+        l_errl = PNOR::getSectionInfo(PNOR::HCODE, l_info);
+        if (l_errl)
+        {
+            TRACFCOMP(g_trac_isteps_trace,
+                      "call_proc_load_ioppe ERROR : "
+                      "getSectionInfo (PNOR::HCODE)"
+                      TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(l_errl));
+            captureError(l_errl, l_stepError, HWPF_COMP_ID);
+            break;
+        }
+
+        l_pHcodeImage = reinterpret_cast<char*>(l_info.vaddr);
+
+        TRACFCOMP(g_trac_isteps_trace, "HCODE vaddr = 0x%p ", l_pHcodeImage);
 
         //  get a list of all the procs in the system
         TargetHandleList l_cpuTargetList;
@@ -140,13 +111,13 @@ void* call_proc_load_ioppe(void *io_pArgs)
 
             TRACFCOMP(g_trac_isteps_trace,
                       "Running call_proc_load_ioppe p10_io_load_ppe HWP on processor target %.8X",
-                      get_huid(l_procChip) );
+                      get_huid(l_procChip));
 
             FAPI_INVOKE_HWP(l_errl,
                             p10_io_load_ppe,
                             l_fapi2_proc_target,
                             reinterpret_cast<void*>(l_pHcodeImage));
-            if(l_errl)
+            if (l_errl)
             {
                 TRACFCOMP(g_trac_isteps_trace,
                           "ERROR : call_proc_load_ioppe p10_io_load_ppe %.8X"
@@ -158,7 +129,13 @@ void* call_proc_load_ioppe(void *io_pArgs)
 
         } // end of cycling through all processor chips
 
+    } while (0);
+
 #ifdef CONFIG_SECUREBOOT
+    // if we had failed somewhere earlier we try to cleanup here
+    // add trace to help debug
+    if (unload_hcode_pnor_section == true)
+    {
         l_errl = unloadSecureSection(PNOR::HCODE);
         if (l_errl)
         {
@@ -169,9 +146,8 @@ void* call_proc_load_ioppe(void *io_pArgs)
                       TRACE_ERR_ARGS(l_errl));
             captureError(l_errl, l_stepError, HWPF_COMP_ID);
         }
+    }
 #endif
-
-    } while (0);
 
     TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_proc_load_ioppe");
     return l_stepError.getErrorHandle();

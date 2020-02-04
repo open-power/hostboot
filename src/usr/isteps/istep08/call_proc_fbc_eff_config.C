@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep08/call_host_fbc_eff_config_links.C $     */
+/* $Source: src/usr/isteps/istep08/call_proc_fbc_eff_config.C $           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -21,56 +21,50 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+/**
+ *  @file call_proc_fbc_eff_config.C
+ *
+ *  Support file for IStep: proc_fbc_eff_config
+ */
 
 /******************************************************************************/
 // Includes
 /******************************************************************************/
 
-//  Component ID support
-#include <hbotcompid.H>                // HWPF_COMP_ID
+#include <hbotcompid.H>           // HWPF_COMP_ID
+#include <attributeenums.H>       // TYPE_PROC
+#include <isteps/hwpisteperror.H> //ISTEP_ERROR:IStepError
+#include <istepHelperFuncs.H>     // captureError
+#include <fapi2/plat_hwp_invoker.H>
+#include <p10_fbc_eff_config.H>
 
-//  TARGETING support
-#include <attributeenums.H>            // TYPE_PROC
-
-//  Error handling support
-#include <isteps/hwpisteperror.H>      // ISTEP_ERROR::IStepError
-
-//  Tracing support
-#include <trace/interface.H>           // TRACFCOMP
-#include <initservice/isteps_trace.H>  // g_trac_isteps_trace
-
-/* FIXME RTC: 210975
-//  HWP call support
-#include <nest/nestHwpHelperFuncs.H>   // fapiHWPCallWrapperForChip
-*/
+using namespace ISTEP;
+using namespace ISTEP_ERROR;
+using namespace ISTEPS_TRACE;
+using namespace TARGETING;
 
 namespace ISTEP_08
 {
-using   namespace   ISTEP;
-using   namespace   ISTEP_ERROR;
-using   namespace   ISTEPS_TRACE;
-using   namespace   TARGETING;
 
-//*****************************************************************************
-// Wrapper function to call host_fbc_eff_config_links
-//*****************************************************************************
-void* call_host_fbc_eff_config_links( void *io_pArgs )
+void* call_proc_fbc_eff_config( void *io_pArgs )
 {
-    ISTEP_ERROR::IStepError l_stepError;
+    IStepError l_stepError;
+    errlHndl_t l_errl = nullptr;
 
-    TRACFCOMP(g_trac_isteps_trace,
-              ENTER_MRK"call_host_fbc_eff_config_links entry" );
-/* FIXME RTC: 210975
-    // Make the FAPI call to p9_fbc_eff_config_links
-    // process electrical = true and process optical = false
-    fapiHWPCallWrapperHandler(P9_FBC_EFF_CONFIG_LINKS_T_F, l_stepError,
-                              HWPF_COMP_ID, TYPE_PROC);
-*/
+    TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_proc_fbc_eff_config");
 
-    TRACFCOMP(g_trac_isteps_trace,
-              EXIT_MRK"call_host_fbc_eff_config_links exit" );
+    FAPI_INVOKE_HWP(l_errl,p10_fbc_eff_config);
+    if(l_errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                 "ERROR : call p10_fbc_eff_config"
+                 TRACE_ERR_FMT,
+                 TRACE_ERR_ARGS(l_errl));
+        captureError(l_errl, l_stepError, HWPF_COMP_ID);
+    }
 
+    TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_proc_fbc_eff_config");
     return l_stepError.getErrorHandle();
 }
 
-};   // end namespace ISTEP_08
+};

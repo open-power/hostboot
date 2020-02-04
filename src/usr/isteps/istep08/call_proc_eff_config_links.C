@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep08/call_host_fbc_eff_config.C $           */
+/* $Source: src/usr/isteps/istep08/call_proc_eff_config_links.C $         */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -21,46 +21,47 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include <stdint.h>
-#include <trace/interface.H>
-#include <errl/errlentry.H>
-#include <errl/errlmanager.H>
-#include <initservice/taskargs.H>
-#include <initservice/isteps_trace.H>
-#include <initservice/initserviceif.H>
-#include <isteps/hwpisteperror.H>
-/* FIXME RTC: 210975
+
+/**
+   @file call_proc_eff_config_links.C
+ *
+ *  Support file for IStep: proc_eff_config_links
+ *
+ */
+
+/******************************************************************************/
+// Includes
+/******************************************************************************/
+
+#include <hbotcompid.H>           // HWPF_COMP_ID
+#include <attributeenums.H>       // TYPE_PROC
+#include <isteps/hwpisteperror.H> //ISTEP_ERROR:IStepError
+#include <istepHelperFuncs.H>     // captureError
 #include <fapi2/plat_hwp_invoker.H>
-#include <p9_fbc_eff_config.H>
-*/
+#include <nest/nestHwpHelperFuncs.H>
 
 namespace ISTEP_08
 {
+using   namespace   ISTEP;
+using   namespace   ISTEP_ERROR;
+using   namespace   ISTEPS_TRACE;
+using   namespace   TARGETING;
 
-void* call_host_fbc_eff_config( void *io_pArgs )
+//*****************************************************************************
+// Wrapper function to call p10_fbc_eff_config_links
+//*****************************************************************************
+void* call_proc_eff_config_links( void *io_pArgs )
 {
-    // FIXME RTC: 210975
-    //errlHndl_t l_errl = NULL;
-    ISTEP_ERROR::IStepError l_stepError;
+    IStepError l_stepError;
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_fbc_eff_config entry" );
-/* FIXME RTC: 210975
-   FAPI_INVOKE_HWP(l_errl,p9_fbc_eff_config);
-   if(l_errl)
-   {
-       l_stepError.addErrorDetails(l_errl);
-       TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR : call p9_fbc_eff_config, PLID=0x%x",
-                l_errl->plid() );
-       errlCommit(l_errl, HWPF_COMP_ID);
-   }
-*/
+    TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_proc_eff_config_links");
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_fbc_eff_config exit" );
+    // Make the FAPI call to p10_fbc_eff_config_links
+    fapiHWPCallWrapperHandler(P10_FBC_EFF_CONFIG_LINKS_ELECTRICAL, l_stepError,
+                              HWPF_COMP_ID, TYPE_PROC);
 
+    TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_proc_eff_config_links");
     return l_stepError.getErrorHandle();
 }
 
-};
+};   // end namespace ISTEP_08

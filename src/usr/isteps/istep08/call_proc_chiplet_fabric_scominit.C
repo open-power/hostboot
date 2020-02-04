@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,10 +26,9 @@
 /**
    @file call_proc_chiplet_fabric_scominit.C
  *
- *  Support file for IStep: nest_chiplets
- *   Nest Chiplets
+ *  Support file for IStep: proc_chiplet_fabric_scominit
+ *   Scom inits to fabric chiplets
  *
- *  HWP_IGNORE_VERSION_CHECK
  *
  */
 
@@ -37,23 +36,12 @@
 // Includes
 /******************************************************************************/
 
-//  Component ID support
-#include <hbotcompid.H>                // HWPF_COMP_ID
-
-//  TARGETING support
-#include <attributeenums.H>            // TYPE_PROC
-
-//  Error handling support
-#include <isteps/hwpisteperror.H>      // ISTEP_ERROR::IStepError
-
-//  Tracing support
-#include <trace/interface.H>           // TRACFCOMP
-#include <initservice/isteps_trace.H>  // g_trac_isteps_trace
-
-/* FIXME RTC: 210975
-//  HWP call support
-#include <nest/nestHwpHelperFuncs.H>   // fapiHWPCallWrapperForChip
-*/
+#include <hbotcompid.H>           // HWPF_COMP_ID
+#include <attributeenums.H>       // TYPE_PROC
+#include <isteps/hwpisteperror.H> //ISTEP_ERROR:IStepError
+#include <istepHelperFuncs.H>     // captureError
+#include <fapi2/plat_hwp_invoker.H>
+#include <nest/nestHwpHelperFuncs.H>
 
 namespace ISTEP_08
 {
@@ -68,18 +56,14 @@ using   namespace   TARGETING;
 void* call_proc_chiplet_fabric_scominit( void *io_pArgs )
 {
     IStepError l_stepError;
-/* FIXME RTC: 210975
-    TRACFCOMP(g_trac_isteps_trace,
-              ENTER_MRK"call_proc_chiplet_fabric_scominit entry");
+
+    TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_proc_chiplet_fabric_scominit");
 
     // Make the FAPI call to p9_chiplet_fabric_scominit
-    fapiHWPCallWrapperHandler(P9_CHIPLET_FABRIC_SCOMINIT, l_stepError,
+    fapiHWPCallWrapperHandler(P10_CHIPLET_FABRIC_SCOMINIT, l_stepError,
                               HWPF_COMP_ID, TYPE_PROC);
 
-    TRACFCOMP(g_trac_isteps_trace,
-              EXIT_MRK"call_proc_chiplet_fabric_scominit exit");
-*/
-
+    TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_proc_chiplet_fabric_scominit");
     return l_stepError.getErrorHandle();
 }
 
