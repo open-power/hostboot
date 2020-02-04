@@ -58,5 +58,4 @@ static const uint64_t P9A_MC_REG0_OMI_FIR_ACTION1                           = 0x
 static const uint64_t P9A_MC_REG0_OMI_FIR_MASK_AND                          = 0x07013344ull;
 static const uint64_t P9A_MC_REG0_OMI_FIR_MASK_OR                           = 0x07013345ull;
 
-
 #endif

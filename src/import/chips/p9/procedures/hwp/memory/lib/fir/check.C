@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -254,23 +254,6 @@ static const std::vector<std::pair<uint64_t, uint64_t>> MCA_FIR_REGS =
     // DDRPHY FIR
     {MCA_IOM_PHY0_DDRPHY_FIR_REG, MCA_IOM_PHY0_DDRPHY_FIR_MASK_REG},
 };
-
-///
-/// @brief Helper function to log an error as related if needed
-/// @tparam T the target type on which to log the error
-/// @param[in] i_target - the target to log the error on
-/// @param[in] i_fir_error - true IFF a fir is present on the passed in target
-/// @param[in,out] io_rc - the return code to log
-///
-template< fapi2::TargetType T >
-void log_fir_helper( const fapi2::Target<T>& i_target, const bool i_fir_error, fapi2::ReturnCode& io_rc)
-{
-    if(i_fir_error && (io_rc != fapi2::FAPI2_RC_SUCCESS))
-    {
-        fapi2::log_related_error(i_target, io_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
-    }
-}
-
 
 
 ///

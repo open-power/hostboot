@@ -97,6 +97,16 @@ template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
 fapi2::ReturnCode after_phy_reset( const fapi2::Target<T>& i_target );
 
 ///
+/// @brief Unmask and setup actions performed after exp_omi_setup
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2::TargetType which hold the FIR bits
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
+fapi2::ReturnCode after_mc_omi_setup( const fapi2::Target<T>& i_target );
+
+///
 /// @brief Unmask and setup actions for memdiags related FIR
 /// @tparam MC the memory controller type
 /// @tparam T the fapi2::TargetType which hold the FIR bits

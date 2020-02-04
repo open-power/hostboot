@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,26 @@ namespace mss
 namespace check
 {
 #ifndef __PPE__
+///
+/// @brief Helper function to log an error as related if needed
+/// @tparam T the target type on which to log the error
+/// @param[in] i_target - the target to log the error on
+/// @param[in] i_fir_error - true IFF a fir is present on the passed in target
+/// @param[in,out] io_rc - the return code to log
+///
+template< fapi2::TargetType T >
+inline void log_fir_helper( const fapi2::Target<T>& i_target,
+                            const bool i_fir_error,
+                            fapi2::ReturnCode& io_rc)
+{
+    if(i_fir_error && (io_rc != fapi2::FAPI2_RC_SUCCESS))
+    {
+        fapi2::log_related_error(i_target, io_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+
+        io_rc = fapi2::FAPI2_RC_SUCCESS;
+    }
+}
+
 ///
 /// @brief Checks whether any FIRs have lit up on a target
 /// @tparam MC MC type for which to check FIR's

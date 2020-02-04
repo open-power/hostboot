@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,7 @@
 #include <generic/memory/mss_git_data_helper.H>
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/utils/mss_generic_check.H>
 
 extern "C"
 {
@@ -55,6 +56,7 @@ extern "C"
     fapi2::ReturnCode exp_omi_train(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
         mss::display_git_commit_info("exp_omi_train");
+        fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
 
         // Perform p9a workaround
         // Train mode 1 (PATTERN_A)
@@ -82,7 +84,10 @@ extern "C"
             if (l_ocmb_is_explorer)
             {
                 // Explorer & P9A environment should see a busy status until auto train is kicked off from both sides
-                FAPI_TRY(mss::exp::i2c::check_fw_status_busy(i_target));
+                l_rc = mss::exp::i2c::check_fw_status_busy(i_target);
+
+                // If BOOT_CONFIG_1 failed or timed out, we need to check some FIRs
+                FAPI_TRY(mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER>(i_target, l_rc));
             }
             else
             {

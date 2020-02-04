@@ -37,7 +37,7 @@
 #include <lib/shared/exp_defaults.H>
 #include <explorer_scom_addresses.H>
 #include <explorer_scom_addresses_fld.H>
-#include <lib/fir/exp_fir.H>
+#include <generic/memory/lib/utils/scom.H>
 #include <lib/fir/exp_fir_traits.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 
@@ -51,6 +51,7 @@ namespace unmask
 /// @brief Unmask and setup actions performed after draminit_mc
 /// @param[in] i_target the fapi2::Target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// @note mc_type::EXPLORER specialization
 ///
 template<>
 fapi2::ReturnCode after_draminit_mc<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
@@ -65,9 +66,9 @@ fapi2::ReturnCode after_draminit_mc<mss::mc_type::EXPLORER>( const fapi2::Target
     mss::fir::reg<EXPLR_SRQ_SRQFIRQ> l_exp_srq_reg(i_target, l_rc2);
     mss::fir::reg<EXPLR_RDF_FIR> l_exp_rdf_reg(i_target, l_rc3);
 
-    FAPI_TRY(l_rc1, "unable to create fir::reg for %d", EXPLR_MCBIST_MCBISTFIRQ);
-    FAPI_TRY(l_rc2, "unable to create fir::reg for %d", EXPLR_SRQ_SRQFIRQ);
-    FAPI_TRY(l_rc3, "unable to create fir::reg for %d", EXPLR_RDF_FIR);
+    FAPI_TRY(l_rc1, "unable to create fir::reg for EXPLR_MCBIST_MCBISTFIRQ 0x%08X", EXPLR_MCBIST_MCBISTFIRQ);
+    FAPI_TRY(l_rc2, "unable to create fir::reg for EXPLR_SRQ_SRQFIRQ 0x%08X", EXPLR_SRQ_SRQFIRQ);
+    FAPI_TRY(l_rc3, "unable to create fir::reg for EXPLR_RDF_FIR 0x%08X", EXPLR_RDF_FIR);
 
     // Write MCBISTFIR register per Explorer unmask spec
     FAPI_TRY(l_exp_mcbist_reg.attention<EXPLR_MCBIST_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE>()
@@ -80,12 +81,12 @@ fapi2::ReturnCode after_draminit_mc<mss::mc_type::EXPLORER>( const fapi2::Target
              .recoverable_error<EXPLR_RDF_FIR_RDDATA_VALID_ERROR>()
              .recoverable_error<EXPLR_RDF_FIR_SCOM_PARITY_CLASS_STATUS>()
              .recoverable_error<EXPLR_RDF_FIR_SCOM_PARITY_CLASS_RECOVERABLE>()
-             .checkstop<EXPLR_RDF_FIR_SCOM_PARITY_CLASS_UNRECOVERABLE>()
-             .checkstop<EXPLR_RDF_FIR_ECC_CORRECTOR_INTERNAL_PARITY_ERROR>()
+             .local_checkstop<EXPLR_RDF_FIR_SCOM_PARITY_CLASS_UNRECOVERABLE>()
+             .local_checkstop<EXPLR_RDF_FIR_ECC_CORRECTOR_INTERNAL_PARITY_ERROR>()
              .recoverable_error<EXPLR_RDF_FIR_ECC_RBUF_CE_DW0>()
              .recoverable_error<EXPLR_RDF_FIR_ECC_RBUF_CE_DW1>()
-             .checkstop<EXPLR_RDF_FIR_ECC_RBUF_UE_DW0>()
-             .checkstop<EXPLR_RDF_FIR_ECC_RBUF_UE_DW1>()
+             .local_checkstop<EXPLR_RDF_FIR_ECC_RBUF_UE_DW0>()
+             .local_checkstop<EXPLR_RDF_FIR_ECC_RBUF_UE_DW1>()
              .write());
 
     // Write SRQ FIR register per Explorer unmask spec
@@ -95,8 +96,6 @@ fapi2::ReturnCode after_draminit_mc<mss::mc_type::EXPLORER>( const fapi2::Target
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
-
-    FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);
     return fapi2::current_err;
 }
 
@@ -104,6 +103,7 @@ fapi_try_exit:
 /// @brief Unmask and setup actions performed after draminit_training
 /// @param[in] i_target the fapi2::Target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// @note mc_type::EXPLORER specialization
 ///
 template<>
 fapi2::ReturnCode after_draminit_training<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
@@ -116,37 +116,35 @@ fapi2::ReturnCode after_draminit_training<mss::mc_type::EXPLORER>( const fapi2::
     mss::fir::reg<EXPLR_MCBIST_MCBISTFIRQ> l_exp_mcbist_reg(i_target, l_rc1);
     mss::fir::reg<EXPLR_SRQ_SRQFIRQ> l_exp_srq_reg(i_target, l_rc2);
 
-    FAPI_TRY(l_rc1, "unable to create fir::reg for %d", EXPLR_MCBIST_MCBISTFIRQ);
-    FAPI_TRY(l_rc2, "unable to create fir::reg for %d", EXPLR_SRQ_SRQFIRQ);
+    FAPI_TRY(l_rc1, "unable to create fir::reg for EXPLR_MCBIST_MCBISTFIRQ 0x%08X", EXPLR_MCBIST_MCBISTFIRQ);
+    FAPI_TRY(l_rc2, "unable to create fir::reg for EXPLR_SRQ_SRQFIRQ 0x%08X", EXPLR_SRQ_SRQFIRQ);
 
     // Write MCBISTFIR register per Explorer unmask spec; omit bit 10 cmd_complete until draminit_mc
     FAPI_TRY(l_exp_mcbist_reg.recoverable_error<EXPLR_MCBIST_MCBISTFIRQ_COMMAND_ADDRESS_TIMEOUT>()
-             .checkstop<EXPLR_MCBIST_MCBISTFIRQ_INTERNAL_FSM_ERROR>()
-             .checkstop<EXPLR_MCBIST_MCBISTFIRQ_CCS_ARRAY_UNCORRECT_CE_OR_UE>()
+             .local_checkstop<EXPLR_MCBIST_MCBISTFIRQ_INTERNAL_FSM_ERROR>()
+             .local_checkstop<EXPLR_MCBIST_MCBISTFIRQ_CCS_ARRAY_UNCORRECT_CE_OR_UE>()
              .recoverable_error<EXPLR_MCBIST_MCBISTFIRQ_SCOM_RECOVERABLE_REG_PE>()
-             .checkstop<EXPLR_MCBIST_MCBISTFIRQ_SCOM_FATAL_REG_PE>()
+             .local_checkstop<EXPLR_MCBIST_MCBISTFIRQ_SCOM_FATAL_REG_PE>()
              .write());
 
     // Write SRQ FIR register per Explorer unmask spec
     FAPI_TRY(l_exp_srq_reg.recoverable_error<EXPLR_SRQ_SRQFIRQ_NCF_MCB_LOGIC_ERROR>()
-             .checkstop<EXPLR_SRQ_SRQFIRQ_NCF_MCB_PARITY_ERROR>()
+             .local_checkstop<EXPLR_SRQ_SRQFIRQ_NCF_MCB_PARITY_ERROR>()
              .recoverable_error<EXPLR_SRQ_SRQFIRQ_WRQ_RRQ_HANG_ERR>()
-             .checkstop<EXPLR_SRQ_SRQFIRQ_SM_1HOT_ERR>()
-             .checkstop<EXPLR_SRQ_SRQFIRQ_CMD_PARITY_ERROR>()
-             .checkstop<EXPLR_SRQ_SRQFIRQ_WDF_ERROR2>()
-             .checkstop<EXPLR_SRQ_SRQFIRQ_WDF_ERROR3>()
+             .local_checkstop<EXPLR_SRQ_SRQFIRQ_SM_1HOT_ERR>()
+             .local_checkstop<EXPLR_SRQ_SRQFIRQ_CMD_PARITY_ERROR>()
+             .local_checkstop<EXPLR_SRQ_SRQFIRQ_WDF_ERROR2>()
+             .local_checkstop<EXPLR_SRQ_SRQFIRQ_WDF_ERROR3>()
              .recoverable_error<EXPLR_SRQ_SRQFIRQ_WDF_ERROR7>()
-             .checkstop<EXPLR_SRQ_SRQFIRQ_NCF_UE>()
-             .checkstop<EXPLR_SRQ_SRQFIRQ_NCF_LOGIC_ERROR>()
-             .checkstop<EXPLR_SRQ_SRQFIRQ_NCF_PARITY_ERROR>()
+             .local_checkstop<EXPLR_SRQ_SRQFIRQ_NCF_UE>()
+             .local_checkstop<EXPLR_SRQ_SRQFIRQ_NCF_LOGIC_ERROR>()
+             .local_checkstop<EXPLR_SRQ_SRQFIRQ_NCF_PARITY_ERROR>()
              .recoverable_error<EXPLR_SRQ_SRQFIRQ_NCF_CORR_ERROR>()
              .write());
 
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
-
-    FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);
     return fapi2::current_err;
 }
 
@@ -261,6 +259,71 @@ template<>
 fapi2::ReturnCode after_phy_reset<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
 {
     return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Unmask and setup actions performed after exp_omi_setup
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// @note mc_type::EXPLORER specialization
+///
+template<>
+fapi2::ReturnCode after_mc_omi_setup<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target )
+{
+    fapi2::ReturnCode l_rc1 = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::ReturnCode l_rc2 = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::ReturnCode l_rc3 = fapi2::FAPI2_RC_SUCCESS;
+
+    // Create registers and check success
+    mss::fir::reg<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR> l_exp_local_fir_reg(i_target, l_rc1);
+    mss::fir::reg<EXPLR_TLXT_TLXFIRQ> l_exp_tlx_fir_reg(i_target, l_rc2);
+    mss::fir::reg<EXPLR_DLX_MC_OMI_FIR_REG> l_exp_mc_omi_fir_reg(i_target, l_rc3);
+
+    FAPI_TRY(l_rc1, "unable to create fir::reg for EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR 0x%08X", EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR);
+    FAPI_TRY(l_rc2, "unable to create fir::reg for EXPLR_TLXT_TLXFIRQ 0x%08X", EXPLR_TLXT_TLXFIRQ);
+    FAPI_TRY(l_rc3, "unable to create fir::reg for EXPLR_DLX_MC_OMI_FIR_REG 0x%08X", EXPLR_DLX_MC_OMI_FIR_REG);
+
+    // Write LOCAL_FIR register per Explorer unmask spec
+    FAPI_TRY(l_exp_local_fir_reg.recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_PCS_GPBC_IRQ_106>()
+             .local_checkstop<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_PCS_GPBC_IRQ_111>()
+             .recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_PCS_GPBC_IRQ_112>()
+             .recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_PROC_SS__TOP_FATAL>()
+             .recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_PROC_SS__TOP_NON_FATAL>()
+             .recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_FOXHOUND_LANE_7__FATAL>()
+             .recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_FOXHOUND_LANE_6__FATAL>()
+             .recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_FOXHOUND_LANE_5__FATAL>()
+             .recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_FOXHOUND_LANE_4__FATAL>()
+             .recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_FOXHOUND_LANE_3__FATAL>()
+             .recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_FOXHOUND_LANE_2__FATAL>()
+             .recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_FOXHOUND_LANE_1__FATAL>()
+             .recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_FOXHOUND_LANE_0__FATAL>()
+             .write());
+
+    // Write TLX FIR register per Explorer unmask spec
+    FAPI_TRY(l_exp_tlx_fir_reg.recoverable_error<EXPLR_TLXT_TLXFIRQ_INFO_REG_PARITY_ERROR>()
+             .local_checkstop<EXPLR_TLXT_TLXFIRQ_CTRL_REG_PARITY_ERROR>()
+             .local_checkstop<EXPLR_TLXT_TLXFIRQ_TLX_VC0_MAX_CRD_ERROR>()
+             .local_checkstop<EXPLR_TLXT_TLXFIRQ_TLX_VC1_MAX_CRD_ERROR>()
+             .local_checkstop<EXPLR_TLXT_TLXFIRQ_TLX_DCP0_MAX_CRD_ERROR>()
+             .local_checkstop<EXPLR_TLXT_TLXFIRQ_TLX_DCP3_MAX_CRD_ERROR>()
+             .local_checkstop<EXPLR_TLXT_TLXFIRQ_CREDIT_MGMT_ERROR>()
+             .local_checkstop<EXPLR_TLXT_TLXFIRQ_CREDIT_MGMT_PERROR>()
+             .write());
+
+    // Write MC_OMI FIR register per Explorer unmask spec
+    FAPI_TRY(l_exp_mc_omi_fir_reg.local_checkstop<EXPLR_DLX_MC_OMI_FIR_REG_DL0_FATAL_ERROR>()
+             .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_DATA_UE>()
+             .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_X4_MODE>()
+             .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_TIMEOUT>()
+             .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_ERROR_RETRAIN>()
+             .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_EDPL_RETRAIN>()
+             .write());
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///

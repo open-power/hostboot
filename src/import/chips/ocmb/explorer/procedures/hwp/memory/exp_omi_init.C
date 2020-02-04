@@ -43,7 +43,7 @@
 #include <lib/workarounds/exp_omi_workarounds.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
-#include <lib/fir/exp_fir.H>
+#include <generic/memory/lib/utils/fir/gen_mss_fir.H>
 
 ///
 /// @brief Verify we know how to talk to the connected device

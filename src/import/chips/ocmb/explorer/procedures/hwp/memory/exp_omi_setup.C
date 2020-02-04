@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,7 @@
 // *HWP Consumed by: Memory
 
 #include <fapi2.H>
+#include <lib/shared/exp_defaults.H>
 #include <exp_omi_setup.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/exp_attribute_accessors_manual.H>
@@ -44,6 +45,8 @@
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
+#include <generic/memory/lib/utils/mss_generic_check.H>
 
 extern "C"
 {
@@ -56,6 +59,7 @@ extern "C"
     fapi2::ReturnCode exp_omi_setup( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
         mss::display_git_commit_info("exp_omi_setup");
+        fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
         uint8_t l_gem_menterp_workaround = 0;
 
         // Declares variables
@@ -75,7 +79,17 @@ extern "C"
         FAPI_TRY(mss::exp::i2c::boot_config(i_target, l_boot_config_data));
 
         // Check FW status for success
-        FAPI_TRY(mss::exp::i2c::fw_status(i_target, mss::DELAY_1MS, 100));
+        l_rc = mss::exp::i2c::fw_status(i_target, mss::DELAY_1MS, 100);
+
+        // Note: It's still under discussion whether FIRs will be lit if BOOT_CONFIG_0 fails, and if
+        // the registers will be clocked so we can read them. Disabling FIR checking until this
+        // gets resolved.
+#ifdef FIRS_AVAIL_AFTER_BOOT_CONFIG_0_FAIL
+        // If BOOT_CONFIG_0 failed or timed out, we need to check some FIRs
+        FAPI_TRY(mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER>(i_target, l_rc));
+#else
+        FAPI_TRY(l_rc, "%s BOOT_CONFIG_0 either failed or timed out", mss::c_str(i_target));
+#endif
 
         FAPI_TRY(mss::exp::workarounds::omi::gem_menterp(i_target, l_gem_menterp_workaround));
 
@@ -128,6 +142,9 @@ extern "C"
         // Perform p9a workaround
         // Train mode 6 (state 3)
         FAPI_TRY(mss::exp::workarounds::omi::pre_training_prbs(i_target));
+
+        // Unmask FIRs
+        FAPI_TRY(mss::unmask::after_mc_omi_setup<mss::mc_type::EXPLORER>(i_target));
 
     fapi_try_exit:
         return fapi2::current_err;

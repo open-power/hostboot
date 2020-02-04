@@ -82,30 +82,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-namespace check
-{
-
-///
-/// @brief Checks whether any FIRs have lit up on a target - EXPLOER/OCMB specialization
-/// @param[in] i_target - the target on which to operate
-/// @param[in,out] io_rc - the return code for the function
-/// @param[out] o_fir_error - true iff a FIR was hit
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
-///
-// TK update this when FIR's are fully reviewed
-template<>
-fapi2::ReturnCode bad_fir_bits<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        fapi2::ReturnCode& io_rc,
-        bool& o_fir_error )
-
-{
-    FAPI_ERR("%s Checking for FIR's is currently unimplemented. Passing back the discovered RC", mss::c_str(i_target));
-    o_fir_error = false;
-    return fapi2::FAPI2_RC_SUCCESS;
-}
-
-} // ns check
-
 namespace exp
 {
 
