@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -479,8 +479,15 @@ inline std::vector<Target<K_CHILD, M, V> >
 {
     FAPI_DBG(ENTER_MRK "getChildren. Type 0x%08x State:0x%08x", K_CHILD, i_state);
 
-    static_assert(impl::isProperParent(K_CHILD, T_SELF),
-                  "improper child of fapi2::Target");
+    // first check if multicast, if it is not multicast then it will evaluate isProperParent
+    static_assert((T_SELF & TARGET_TYPE_MULTICAST) || (impl::isProperParent(K_CHILD, T_SELF)),
+        "improper unicast child of fapi2::Target, isProperParent failed");
+    // next check if it is multicast, then if multicast verify same by upcast K_CHILD
+    static_assert(!(T_SELF & TARGET_TYPE_MULTICAST) || (T_SELF == (K_CHILD | TARGET_TYPE_MULTICAST)),
+        "improper multicast usage of fapi2::Target, check multicast invocation");
+    // next check if it is multicast, then if multicast verify requested K_CHILD is proper type
+    static_assert(!(T_SELF & TARGET_TYPE_MULTICAST) || (K_CHILD & TARGET_TYPE_MULTICASTABLE) != 0,
+        "improper multicast usage of fapi2::Target, check multicastable invocation");
 
     std::vector<Target<K_CHILD, M, V>> l_children;
     //Get the platform target type of the current fapi2::target
