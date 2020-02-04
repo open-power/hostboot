@@ -281,8 +281,10 @@ is omitted, the default value of 0 is used.
 
 #### 2.7.4) Attribute `desc` (required)
 
-A short (50 character limit), human readable description of this bit. This
-description will be printed out in logs for human consumption.
+A human readable description of this bit. This description will be printed out
+in logs for human consumption. It is highly recommended to keep this description
+short and concise (~50 characters) because longer descriptions will likely be
+truncated depending on the application.
 
 ### 2.8) Special Element `<local_fir>` (optional)
 
@@ -311,7 +313,7 @@ of these registers exist, use the following values:
 | 2     | include ACT2 register               |
 | W2    | include both WOF and ACT2 registers |
 
-#### 2.8.3) Element `<instance>` (required)
+#### 2.8.3) Element `<instance>` (required 1 or more)
 
 The FIR instance. Defined exactly as the `<instance>` attribute of `<register>`
 where the `addr` attribute is the FIR address.
