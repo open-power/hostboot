@@ -198,17 +198,21 @@
         <id>OPEN_POWER_PROC_ERROR_TEMP_DEG_C</id>
         <default>95</default>
     </attribute>
+    <!-- TODO RTC: 249144
+         Adjust back to 5 when timeout issues resolved -->
     <attribute>
         <id>OPEN_POWER_PROC_READ_TIMEOUT_SEC</id>
-        <default>5</default>
+        <default>255</default>
     </attribute>
     <attribute>
         <id>OPEN_POWER_DIMM_ERROR_TEMP_DEG_C</id>
         <default>74</default>
     </attribute>
+    <!-- TODO RTC: 249144
+         Adjust back to 30 when timeout issues resolved -->
     <attribute>
         <id>OPEN_POWER_DIMM_READ_TIMEOUT_SEC</id>
-        <default>30</default>
+        <default>255</default>
     </attribute>
     <attribute>
         <id>OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C</id>
@@ -222,13 +226,17 @@
         <id>OPEN_POWER_GPU_MEM_ERROR_TEMP_DEG_C</id>
         <default>85</default>
     </attribute>
+    <!-- TODO RTC: 249144
+         Adjust back to 30 when timeout issues resolved -->
     <attribute>
         <id>OPEN_POWER_GPU_MEM_READ_TIMEOUT_SEC</id>
-        <default>30</default>
+        <default>255</default>
     </attribute>
+    <!-- TODO RTC: 249144
+         Adjust back to 30 when timeout issues resolved -->
     <attribute>
         <id>OPEN_POWER_GPU_READ_TIMEOUT_SEC</id>
-        <default>30</default>
+        <default>255</default>
     </attribute>
     <attribute>
       <id>OPEN_POWER_SOFT_MIN_PCAP_WATTS</id>
