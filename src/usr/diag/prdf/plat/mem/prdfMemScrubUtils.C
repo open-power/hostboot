@@ -33,7 +33,7 @@
 #include <prdfGlobal.H>
 #include <prdfPlatServices.H>
 #include <prdfTrace.H>
-#include <fapi2.H>
+#include <target_types.H>
 #include <prdfTargetServices.H>
 #include <prdfRegisterCache.H>
 
