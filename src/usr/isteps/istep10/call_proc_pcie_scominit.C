@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,8 +25,11 @@
 /**
    @file call_proc_pcie_scominit.C
  *
- *  Support file for IStep: nest_chiplets
- *   Nest Chiplets
+ *  Support file for IStep: call_proc_pcie_scominit
+ *    This istep will do 2 things:
+ *        1) Perform PCIE SCOM initialization
+ *        2) Setup necessary PCIe Attributes for later HWPs/FW
+ *           to properly enable PCIe devices
  *
  *  HWP_IGNORE_VERSION_CHECK
  *
@@ -41,7 +44,6 @@
 #include    <errl/errlentry.H>
 
 #include    <isteps/hwpisteperror.H>
-
 #include    <errl/errludtarget.H>
 
 #include    <initservice/isteps_trace.H>
@@ -51,18 +53,12 @@
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 
-/* FIXME RTC: 210975
-#include <fapi2/target.H>
-#include <fapi2/plat_hwp_invoker.H>
-*/
+#include    <istepHelperFuncs.H>          // captureError
+#include    <fapi2/target.H>
+#include    <fapi2/plat_hwp_invoker.H>
 
-//  MVPD
-#include <devicefw/userif.H>
-#include <vpd/mvpdenums.H>
-
-#include "host_proc_pcie_scominit.H"
-// FIXME RTC: 210975
-//#include <p9_pcie_scominit.H>
+#include    "host_proc_pcie_scominit.H"
+#include    <p10_pcie_scominit.H>
 
 namespace   ISTEP_10
 {
@@ -77,20 +73,25 @@ using   namespace   TARGETING;
 //******************************************************************************
 void*    call_proc_pcie_scominit( void    *io_pArgs )
 {
-    errlHndl_t          l_errl      =   NULL;
-    IStepError          l_StepError;
+    errlHndl_t l_err(nullptr);
+    IStepError l_stepError;
+    TARGETING::TargetHandleList l_procTargetList;
 
-    //
-    //  get a list of all the procs in the system
-    //
-    TARGETING::TargetHandleList l_cpuTargetList;
-    getAllChips(l_cpuTargetList, TYPE_PROC);
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+             "call_proc_pcie_scominit enter" );
 
-    for (const auto & l_cpu_target: l_cpuTargetList)
+    // Get a list of all proc chips
+    getAllChips(l_procTargetList, TYPE_PROC);
+
+    // Loop through all proc chips, set PCIe attrtibutes,
+    //  convert to fap2 target, and execute hwp
+    for (const auto & curproc : l_procTargetList)
     {
-        // Compute the PCIE attribute config on all systems
+        /* TODO RTC:249139 -- Need to set necessary PCIe attributes
+           for later HWPs/FW to enable the PCIe devices. Discussions
+           still underway on how MRW + HWPs want this data represented
         l_errl = computeProcPcieConfigAttrs(l_cpu_target);
-        if(l_errl != NULL)
+        if(l_errl != nullptr)
         {
             // Any failure to configure PCIE that makes it to this handler
             // implies a firmware bug that should be fixed, everything else
@@ -103,46 +104,43 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
             l_StepError.addErrorDetails(l_errl);
             errlCommit( l_errl, ISTEP_COMP_ID );
         }
+        **/
 
-/* FIXME RTC: 210975
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2_proc_target(
-                                                                 l_cpu_target);
+                                                                 curproc);
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Running p9_pcie_scominit HWP on "
-                   "target HUID %.8X", TARGETING::get_huid(l_cpu_target) );
+                   "Running p10_pcie_scominit HWP on "
+                   "target HUID %.8X", TARGETING::get_huid(curproc) );
 
-        //  call the HWP with each fapi2::Target
-        FAPI_INVOKE_HWP(l_errl, p9_pcie_scominit, l_fapi2_proc_target);
+        FAPI_INVOKE_HWP(l_err, p10_pcie_scominit, l_fapi2_proc_target);
 
-        if (l_errl)
+        if (l_err)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "ERROR 0x%.8X : p9_pcie_scominit HWP returned error",
-                       l_errl->reasonCode() );
+                     "ERROR : call p10_pcie_scominit HWP(): failed on target 0x%08X. "
+                           TRACE_ERR_FMT,
+                           get_huid(curproc),
+                           TRACE_ERR_ARGS(l_err));
 
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_cpu_target).addToLog( l_errl );
+            // Capture Error
+            captureError(l_err, l_stepError, HWPF_COMP_ID, curproc);
 
-            // Create IStep error log and cross reference to error that occurred
-            l_StepError.addErrorDetails( l_errl );
-
-            // Commit Error
-            errlCommit( l_errl, HWPF_COMP_ID );
+            // Run HWP on all procs even if one reports an error
+            continue;
 
         }
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "SUCCESS :  proc_pcie_scominit HWP" );
+                       "SUCCESS : proc_pcie_scominit HWP" );
         }
-*/
-    } // end of looping through all processors
+    }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
              "call_proc_pcie_scominit exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    return l_StepError.getErrorHandle();
+    return l_stepError.getErrorHandle();
 }
 };

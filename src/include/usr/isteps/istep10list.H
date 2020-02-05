@@ -261,17 +261,10 @@ const   TaskInfo    g_istep10[]  =   {
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                "", // empty istep
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
-        },
-/*
-        {
                 ISTEPNAME(10,06,"proc_pcie_scominit"),
                 ISTEP_10::call_proc_pcie_scominit,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
-**/
         {
                 ISTEPNAME(10,07,"proc_scomoverride_chiplets"),
                 ISTEP_10::call_proc_scomoverride_chiplets,

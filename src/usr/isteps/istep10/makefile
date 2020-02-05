@@ -61,8 +61,8 @@ OBJS += call_proc_build_smp.o
 #OBJS += call_proc_cen_ref_clk_enable.o
 OBJS += call_proc_chiplet_scominit.o
 OBJS += call_proc_pau_scominit.o
-#OBJS += call_proc_pcie_scominit.o
-#OBJS += host_proc_pcie_scominit.o
+OBJS += call_proc_pcie_scominit.o
+OBJS += host_proc_pcie_scominit.o
 OBJS += call_proc_scomoverride_chiplets.o
 #OBJS += call_proc_npu_scominit.o
 
@@ -107,8 +107,8 @@ OBJS+=p10_pau_scominit.o
 OBJS+=p10_pau_scom.o
 
 #istep 10.6 -- proc_pcie_scominit
-#OBJS+=p10_pcie_scominit.o
-#OBJS+=p10_pcie_scom.o
+OBJS+=p10_pcie_scominit.o
+OBJS+=p10_pcie_scom.o
 
 #istep10.7 -- proc_scomoverride_chiplets
 OBJS+=p10_scomoverride_chiplets.o
