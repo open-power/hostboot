@@ -239,7 +239,7 @@ sub main
         my $xmlFile = $targetObj->{serverwiz_file};
         print "\nPrinting out the HB target hierarchy from XML file $xmlFile.\n";
         print "All other options ignored and no processing of file done.\n";
-        print "I suggest piping this out to a file for prosperity.\n\n";
+        print "I suggest piping this out to a file for posterity.\n\n";
         printHostbootTargetHierarchy($targetObj, $xmlFile);
         return 0;
     }
@@ -249,7 +249,7 @@ sub main
         my $xmlFile = $targetObj->{serverwiz_file};
         print "\nPrinting out the Full target hierarchy from XML file $xmlFile.\n";
         print "All other options ignored and no processing of file done.\n";
-        print "I suggest piping this out to a file for prosperity.\n\n";
+        print "I suggest piping this out to a file for posterity.\n\n";
         $targetObj->printFullTargetHierarchy($xmlFile);
         return 0;
     }
@@ -747,6 +747,14 @@ sub processSystem
     $targetObj->setAttribute($target,"FAPI_POS",   $sysPos);
     $targetObj->setAttribute($target,"FAPI_NAME",  $fapiName);
 
+    # @TODO RTC 247128: Denali mrw has similiar inconsistency as other MRWs
+    # where sysPos is -1. For now, just change it to 0.
+    if ($sysPos < 0)
+    {
+        print "sysPos = [$sysPos]\n";
+        $sysPos = 0;
+    }
+
     # Save this target for retrieval later when printing the xml (sub printXML)
     $targetObj->{targeting}{SYS}[$sysPos]{KEY} = $target;
 
@@ -802,8 +810,15 @@ sub processNode
     my $sysParentAffinity = $targetObj->getAttribute($sysParent, "AFFINITY_PATH");
     my $sysParentPhysical = $targetObj->getAttribute($sysParent, "PHYS_PATH");
 
-    # Get the NODE's position for further use below
-    my $nodePosPerSystem = $targetObj->getTargetPosition($target);
+    # For high-end, multi-drawer systems there may be a control node that
+    # contains service processor logic but no CEC (processor) logic. Thus,
+    # the node count begins at 1 instead of zero and must be adjusted back to
+    # a zero based count to have affinity/physical paths remain CEC centric.
+    #
+    # To do this generically, we use a state (static) variable that will keep a
+    # running total of the number of nodes encountered in this mrw instead of
+    # the position that was provided to us in the xml.
+    state $nodePosPerSystem = 0;
 
     # Get the FAPI_NAME
     my $fapiName = $targetObj->getFapiName($type);
@@ -826,6 +841,11 @@ sub processNode
 
     # Mark this target as processed
     markTargetAsProcessed($targetObj, $target);
+
+    # Increment the state variable now that we have processed the target. That
+    # way the next node will be ready to process.
+    $nodePosPerSystem++;
+
 } # end sub processNode
 
 #--------------------------------------------------
@@ -879,6 +899,11 @@ sub processProcessorAndChildren
         my $socketPosition = $targetObj->getAttribute($socket, "POSITION");
         # Do the following math to get the unique position for a processor
         $procPosPerNode = ($socketPosition * MAX_PROCS_PER_SOCKET) + $procPosPerNode;
+    }
+    elsif ($systemName =~ /DENALI/i)
+    {
+        my $socketPosition = $targetObj->getAttribute($socket, "POSITION");
+        $procPosPerNode = $socketPosition;
     }
 
     # Increment the number of PROCs, per NODE, for data gathering
@@ -1447,10 +1472,9 @@ sub processUcd
     my $ucdPosPerSystem = $targetObj->getTargetPosition($target);
 
     # Take advantage of previous work done on the NODEs.  Use the parent NODE's
-    # physical path for our self and append power_sequencer to the end.  Use method
-    # getParentProcAffinityPath to get the UCD's affinity path.  NOTE: All PROC
-    # targets must have been processed before calling getParentProcAffinityPath.
-    my $ucdAffinity = $targetObj->getParentProcAffinityPath($target, $ucdPosPerSystem, $type);
+    # physical path for our self and append power_sequencer to the end.
+    # Use method getParentProcAffinityPath to get the UCD's affinity path.
+    my $ucdAffinity = getParentProcAffinityPath($targetObj, $target, $ucdPosPerSystem, $type);
     my $ucdPhysical = $nodeParentPhysical . "/power_sequencer-" . $ucdPosPerSystem;
 
     # Now that we collected all the data we need, set some target attributes
@@ -1503,9 +1527,8 @@ sub processTpm
 
     # Take advantage of previous work done on the NODEs.  Use the parent NODE's
     # physical path for our self and append tpm to the end.  Use method
-    # getParentProcAffinityPath to get the TPM's affinity path.  NOTE: All PROC
-    # targets must have been processed before calling getParentProcAffinityPath.
-    my $tpmAffinity = $targetObj->getParentProcAffinityPath($target, $tpmPosPerSystem, $type);
+    # getParentProcAffinityPath to get the TPM's affinity path.
+    my $tpmAffinity = getParentProcAffinityPath($targetObj, $target, $tpmPosPerSystem, $type);
     my $tpmPhysical = $nodeParentPhysical . "/tpm-" . $tpmPosPerSystem;
 
     # Now that we collected all the data we need, set some target attributes
