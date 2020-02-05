@@ -68,6 +68,7 @@ OBJS += p10_avsbus_lib.o
 OBJS += p10_pstate_parameter_block.o
 OBJS += p10_pm_get_poundv_bucket.o
 OBJS += p10_pm_get_poundw_bucket.o
+OBJS += p10_pm_sram_access_utils.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${HWP_PM_PATH}
