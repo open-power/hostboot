@@ -1134,10 +1134,11 @@ errlHndl_t NvdimmInstalledImage::waitFwOpsBlockReceived()
                               opStatus.whole);
         if (l_err)
         {
-            TRACFCOMP(g_trac_nvdimm_upd, ERR_MRK"waitFwOpsBlockReceived: "
+            TRACFCOMP( g_trac_nvdimm_upd, ERR_MRK"waitFwOpsBlockReceived: "
                 "FIRMWARE_OPS_STATUS read failed on NVDIMM 0x%.8X "
-                "(timeout: 0x%04X ms of 100 ms)",
-                TARGETING::get_huid(iv_dimm), timeout_ms_val);
+                "(timeout: %d ms out of %d ms)",
+                TARGETING::get_huid(iv_dimm),
+                timeout_ms_val, MAX_WAIT_FOR_OPS_BLOCK_RECEIVED );
             break;
         }
 
@@ -1185,7 +1186,7 @@ errlHndl_t NvdimmInstalledImage::waitFwOpsBlockReceived()
         l_err = new ERRORLOG::ErrlEntry(
                                ERRORLOG::ERRL_SEV_PREDICTIVE,
                                WAIT_FW_OPS_BLOCK_RECEIVED,
-                               NVDIMM_FW_OPS_IN_PROGRESS_TIMEOUT,
+                               NVDIMM_BLOCK_NOT_RECEIVED,
                                TARGETING::get_huid(iv_dimm),
                                TWO_UINT16_ONE_UINT32_TO_UINT64
                                (
