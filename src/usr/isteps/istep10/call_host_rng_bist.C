@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,10 +23,11 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
-   @file call_host_rng_bist.C
+ *  @file call_host_rng_bist.C
  *
- *  Support file for IStep: nest_chiplets
- *   Nest Chiplets
+ *  Support file for IStep: call_host_rng_bist
+ *     Trigger the Random Number Generator Built In Self Test (BIST).
+ *     Results are checked later in step16 when RNG is secured.
  *
  *  HWP_IGNORE_VERSION_CHECK
  *
@@ -51,14 +52,9 @@
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 
-//  MVPD
-#include <devicefw/userif.H>
-#include <vpd/mvpdenums.H>
-
-/* FIXME RTC: 210975
-#include <fapi2/plat_hwp_invoker.H>
-#include <p9_rng_init_phase1.H>
-*/
+#include    <istepHelperFuncs.H>          // captureError
+#include    <fapi2/plat_hwp_invoker.H>
+#include    <p10_rng_init_phase1.H>
 
 namespace   ISTEP_10
 {
@@ -73,51 +69,59 @@ using   namespace   TARGETING;
 //******************************************************************************
 void* call_host_rng_bist( void *io_pArgs )
 {
-    IStepError l_StepError;
-/* FIXME RTC: 210975
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err(nullptr);
+    IStepError l_stepError;
+    TARGETING::TargetHandleList l_procTargetList;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_rng_bist entry" );
-    //
-    //  get a list of all the procs in the system
-    //
-    TARGETING::TargetHandleList l_cpuTargetList;
-    getAllChips(l_cpuTargetList, TYPE_PROC);
 
-    // Loop through all processors including master
-    for (const auto & l_cpu_target: l_cpuTargetList)
+    // Get a list of all proc chips
+    getAllChips(l_procTargetList, TYPE_PROC);
+
+    // Loop through all proc chips
+    for (const auto & curproc: l_procTargetList)
     {
+        //Convert to fapi2 target
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapi2_proc_target(
-                l_cpu_target);
+                curproc);
+
         // Check for functional NX
         TARGETING::TargetHandleList l_nxTargetList;
-        getChildChiplets(l_nxTargetList, l_cpu_target, TYPE_NX, true);
+        getChildChiplets(l_nxTargetList, curproc, TYPE_NX, true);
         if (l_nxTargetList.empty())
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-              "p9_rng_init_phase1: no functional NX found for proc %.8X",
-              TARGETING::get_huid(l_cpu_target));
+                "p10_rng_init_phase1: no functional NX found for proc %.8X",
+                TARGETING::get_huid(curproc));
+            //Continue loop for other proc chips
             continue;
         }
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-          "Running p9_rng_init_phase1 HWP on processor target %.8X",
-          TARGETING::get_huid(l_cpu_target) );
 
-        FAPI_INVOKE_HWP(l_err, p9_rng_init_phase1, l_fapi2_proc_target);
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+          "Running p10_rng_init_phase1 HWP on processor target %.8X",
+          TARGETING::get_huid(curproc) );
+
+        FAPI_INVOKE_HWP(l_err, p10_rng_init_phase1, l_fapi2_proc_target);
         if(l_err)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR: call p9_rng_init_phase1, PLID=0x%x, rc=0x%.4X",
-                l_err->plid(), l_err->reasonCode());
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                 "ERROR : call p10_rng_init_phase1 HWP(): failed on target 0x%08X. "
+                           TRACE_ERR_FMT,
+                           get_huid(curproc),
+                           TRACE_ERR_ARGS(l_err));
 
+            //Loop through errorlog userdetails sections
             for (const auto l_callout : l_err->getUDSections(
                     HWPF_COMP_ID,
                     ERRORLOG::ERRL_UDT_CALLOUT))
             {
+                //Check if the callout type was a HW_CALLOUT
                 if(reinterpret_cast<HWAS::callout_ud_t*>
                     (l_callout)->type == HWAS::HW_CALLOUT)
                 {
+                    //Add a HW Callout for each NX target associated
+                    // with the proc that failed the HWP
                     for (const auto & l_nxTarget: l_nxTargetList)
                     {
                         l_err->addHwCallout( l_nxTarget,
@@ -128,16 +132,18 @@ void* call_host_rng_bist( void *io_pArgs )
                  }
             }
 
-            l_StepError.addErrorDetails(l_err);
-            errlCommit(l_err, HWPF_COMP_ID);
+            // Capture Error
+            captureError(l_err, l_stepError, HWPF_COMP_ID, curproc);
+
+            // Run HWP on all procs even if one reports an error
+            continue;
         }
-    } // end of going through all processors
+    }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_rng_bist exit");
 
-*/
-    return l_StepError.getErrorHandle();
+    return l_stepError.getErrorHandle();
 }
 
 };   // end namespace

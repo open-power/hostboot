@@ -43,22 +43,12 @@
  *           : Scom inits for the PAU unit
  *    10.06    proc_pcie_scominit
  *           : Apply scom inits to PCIe Chiplets
- *    10.07    proc_abus_scominit
- *           : Apply scom inits to Abus
- *    10.08    proc_obus_scominit
- *           : Apply scom inits to Obus
- *    10.09    proc_npu_scominit
- *           : Apply scom inits to Npu
- *    10.10
- *           :
- *    10.11    proc_scomoverride_chiplets
+ *    10.07    proc_scomoverride_chiplets
  *           : Apply sequenced scom inits
- *    10.12    proc_chiplet_enable_ridi
+ *    10.08    proc_chiplet_enable_ridi
  *           : Enable RI/DI chip wide
- *    10.13    call_host_rng_bist
+ *    10.09    call_host_rng_bist
  *           : Trigger Built In Self Test for RNG
- *    10.14    host_update_redundant_tpm
- *           : Update the Alt Master TPM
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
  */
@@ -92,15 +82,6 @@ void*    call_proc_build_smp( void    *io_pArgs );
 void*    call_host_slave_sbe_update( void    *io_pArgs );
 
 /**
- *  @brief  proc_cen_ref_clk_enable
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return any error logs to istep
- */
-void* call_proc_cen_ref_clk_enable(void *io_pArgs);
-
-/**
  *  @brief proc_pau_scominit
  *
  *    Apply scom inits to PAU
@@ -122,40 +103,6 @@ void* call_proc_pau_scominit(void *io_pArgs);
  *
  */
 void*    call_proc_chiplet_scominit( void    *io_pArgs );
-
-/**
- *  @brief   proc_abus_scominit
- *
- *           Apply scom inits to Abus
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any error logs to istep
- *
- */
-void*    call_proc_abus_scominit( void    *io_pArgs );
-
-/**
- *  @brief   proc_obus_scominit
- *
- *           Apply scom inits to OBUS
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any error logs to istep
- */
-void*    call_proc_obus_scominit( void     *io_pArgs );
-
-/**
- *  @brief   proc_npu_scominit
- *
- *           Apply scom inits to NPU
- *
- *  param[in.out]   -   pointer to any arguments, usually NULL
- *
- *  return  any error logs to istep
- */
-void*    call_proc_npu_scominit( void     *io_pArgs );
 
 /**
  *  @brief   proc_pcie_scominit
@@ -200,16 +147,6 @@ void*    call_proc_chiplet_enable_ridi( void    *io_pArgs );
  *
  */
 void*    call_host_rng_bist( void    *io_pArgs );
-
-/**
- *  @brief   host update redundant tpm
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any errlogs to istep
- *
- */
-void*    call_host_update_redundant_tpm( void    *io_pArgs );
 
 };
 
@@ -272,31 +209,21 @@ const   TaskInfo    g_istep10[]  =   {
         },
 /*
         {
-                ISTEPNAME(10,08,"proc_obus_scominit"),
-                ISTEP_10::call_proc_obus_scominit,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-        {
-                ISTEPNAME(10,09,"proc_npu_scominit"),
-                ISTEP_10::call_proc_npu_scominit,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-        {
-                ISTEPNAME(10,12,"proc_chiplet_enable_ridi"),
+                ISTEPNAME(10,08,"proc_chiplet_enable_ridi"),
                 ISTEP_10::call_proc_chiplet_enable_ridi,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
+**/
         {
-                ISTEPNAME(10,13,"host_rng_bist"),
+                "", // empty istep
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
+        },
+        {
+                ISTEPNAME(10,09,"host_rng_bist"),
                 ISTEP_10::call_host_rng_bist,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
-        {
-                ISTEPNAME(10,14,"host_update_redundant_tpm"),
-                ISTEP_10::call_host_update_redundant_tpm,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
-        },
-**/
 };
 
 const DepModInfo g_istep10Dependancies = {
