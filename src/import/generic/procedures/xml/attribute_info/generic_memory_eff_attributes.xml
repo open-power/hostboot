@@ -859,7 +859,7 @@
       For 3DS, The tRFC time to different logical ranks are defined as tRFC_dlr
     </description>
     <initToZero></initToZero>
-    <valueType>uint8</valueType>
+    <valueType>uint16</valueType>
     <writeable/>
     <mssUnits> nck </mssUnits>
     <mssAccessorName>dram_trfc_dlr</mssAccessorName>

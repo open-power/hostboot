@@ -3338,7 +3338,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
         uint8_t l_refresh_mode = 0;
         uint8_t l_dram_density = 0;
         uint64_t l_trfc_dlr_in_ps = 0;
-        uint8_t l_trfc_dlr_in_nck = 0;
+        attr_integral_type l_trfc_dlr_in_nck = 0;
 
         FAPI_TRY( attr::get_freq(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(l_dimm), l_freq) );
         FAPI_TRY( freq_to_ps(l_freq, l_tck_in_ps),
