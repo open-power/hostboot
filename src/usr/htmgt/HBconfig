@@ -1,5 +1,5 @@
 config HTMGT
-    default n
+    default y
     help
         Enable Host TMGT in hostboot/HBRT
 
