@@ -25,16 +25,15 @@
 ROOTPATH = ../../..
 MODULE = htmgt
 
-# FIXME RTC: 210975
-
 # objects common to hostboot and hbrt
 include htmgt_common.mk
 
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory
 EXTRAINCDIR += ${ROOTPATH}/src/import
 
-PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
-EXTRAINCDIR += $(PROCEDURES_PATH)/hwp/memory
+# RTC: 247144 - Add Mem Config Support
+#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory
+#EXTRAINCDIR += $(PROCEDURES_PATH)/hwp/memory
+#PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
 #include ${ROOTPATH}/procedure.rules.mk
 #OBJS += $(PROCEDURES_PATH)/hwp/memory/p9_mss_utils_to_throttle.o
 #OBJS += $(PROCEDURES_PATH)/hwp/memory/p9_mss_bulk_pwr_throttles.o

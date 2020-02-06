@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,6 +52,7 @@ class htmgtTest: public CxxTest::TestSuite
         bool verifyModuleLoaded(const char *i_modname)
         {
             bool loadedLocally = false;
+            TS_TRACE(ENTER_MRK"HTMGT: verifyModuleLoaded(%s)", i_modname);
 
             if(!VFS::module_is_loaded(i_modname))
             {
@@ -67,6 +68,8 @@ class htmgtTest: public CxxTest::TestSuite
                 }
             }
 
+            TS_TRACE(EXIT_MRK"HTMGT: verifyModuleLoaded returning loaded:%c",
+                     loadedLocally?'Y':'N');
             return loadedLocally;
         }
 
@@ -75,6 +78,7 @@ class htmgtTest: public CxxTest::TestSuite
         TARGETING::TargetHandle_t getFirstOccTarget()
         {
             TARGETING::TargetHandle_t o_occTarget = NULL;
+            TS_TRACE(ENTER_MRK"HTMGT: getFirstOccTarget");
 
             // Get all functional processors
             TARGETING::TargetHandleList pProcs;
@@ -102,13 +106,14 @@ class htmgtTest: public CxxTest::TestSuite
                 TS_FAIL("getFirstOccTarget: did not find functional OCC");
             }
 
+            TS_TRACE(EXIT_MRK"HTMGT: getFirstOccTarget");
             return o_occTarget;
         }
 
 
         void test_occdataattr(void)
         {
-            TS_TRACE("entered test_occdataattr");
+            TS_TRACE(ENTER_MRK"HTMGT: test_occdataattr");
 
             uint8_t occControlData[256];
             TargetHandleList procChips;
@@ -122,16 +127,15 @@ class htmgtTest: public CxxTest::TestSuite
                 itr[index]->tryGetAttr<ATTR_OCC_CONTROL_DATA>(occControlData);
                 TS_TRACE("test_occdataattr[%d]: 0x%08X ...",
                          index++, *wordPtr);
-                // TODO RTC 109066
             }
 
-            TS_TRACE("exiting test_occdataattr");
+            TS_TRACE(EXIT_MRK"test_occdataattr");
         }
 
 
         void test_occloadstartfail(void)
         {
-            TS_TRACE("entered test_occloadstartfail");
+            TS_TRACE(ENTER_MRK"HTMGT: test_occloadstartfail");
             const bool locallyLoaded = verifyModuleLoaded("libhtmgt.so");
 
             TARGETING::TargetHandle_t failedOcc = getFirstOccTarget();
@@ -146,13 +150,13 @@ class htmgtTest: public CxxTest::TestSuite
                 VFS::module_unload("libhtmgt.so");
             }
 
-            TS_TRACE("exiting test_occloadstartfail");
+            TS_TRACE(EXIT_MRK"test_occloadstartfail");
         }
 
 
         void test_occloadstartsuccess(void)
         {
-            TS_TRACE("entered test_occloadstartsuccess");
+            TS_TRACE(ENTER_MRK"HTMGT: test_occloadstartsuccess");
             const bool locallyLoaded = verifyModuleLoaded("libhtmgt.so");
 
             HTMGT::processOccStartStatus(true);
@@ -166,13 +170,13 @@ class htmgtTest: public CxxTest::TestSuite
                 VFS::module_unload("libhtmgt.so");
             }
 
-            TS_TRACE("exiting test_occloadstartsuccess");
+            TS_TRACE(EXIT_MRK"test_occloadstartsuccess");
         }
 
 
         void test_processoccerror(void)
         {
-            TS_TRACE("entered test_processoccerror");
+            TS_TRACE(ENTER_MRK"HTMGT: test_processoccerror");
             const bool locallyLoaded = verifyModuleLoaded("libhtmgt.so");
 
                 TARGETING::TargetHandle_t occTarget = getFirstOccTarget();
@@ -180,7 +184,6 @@ class htmgtTest: public CxxTest::TestSuite
                 if (HTMGT::occMgr::instance().getNumOccs() > 0)
                 {
                     HTMGT::processOccError(occTarget);
-                    // TODO RTC 109224
                 }
                 else
                 {
@@ -192,12 +195,12 @@ class htmgtTest: public CxxTest::TestSuite
                 VFS::module_unload("libhtmgt.so");
             }
 
-            TS_TRACE("exiting test_processoccerror");
+            TS_TRACE(EXIT_MRK"test_processoccerror");
         }
 
         void test_processoccreset(void)
         {
-            TS_TRACE("entered test_processoccreset");
+            TS_TRACE(ENTER_MRK"HTMGT: test_processoccreset");
             const bool locallyLoaded = verifyModuleLoaded("libhtmgt.so");
 
             TARGETING::TargetHandle_t occTarget = getFirstOccTarget();
@@ -205,7 +208,6 @@ class htmgtTest: public CxxTest::TestSuite
             if (HTMGT::occMgr::instance().getNumOccs() > 0)
             {
                 HTMGT::processOccReset(occTarget);
-                // TODO RTC 115296
             }
             else
             {
@@ -217,7 +219,7 @@ class htmgtTest: public CxxTest::TestSuite
                 VFS::module_unload("libhtmgt.so");
             }
 
-            TS_TRACE("exiting test_processoccreset");
+            TS_TRACE(EXIT_MRK"test_processoccreset");
         }
 
 };

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2019
+# Contributors Listed Below - COPYRIGHT 2014,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -28,15 +28,14 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = htmgt_rt
 
-# FIXME RTC: 210975
-
 #include common objects between hostboot and hostboot runtime
-#include ../htmgt_common.mk
+include ../htmgt_common.mk
 
 #include unique object modules
-#OBJS += rt_occ.o
+OBJS += rt_occ.o
 
+# Currently no runtime tests
 #SUBDIRS += test.d
 
-#VPATH += ..
+VPATH += ..
 include $(ROOTPATH)/config.mk

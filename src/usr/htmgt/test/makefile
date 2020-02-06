@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2019
+# Contributors Listed Below - COPYRIGHT 2014,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -28,8 +28,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 EXTRAINCDIR += ${ROOTPATH}/src/usr/htmgt
 
 MODULE = testhtmgt
-# FIXME RTC: 210975
 #TESTS = *.H
+TESTS = htmgtcfgtest.H
 
 include ${ROOTPATH}/config.mk
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,7 @@ using namespace TARGETING;
 using namespace HTMGT;
 
 
-class htmgtMemTest : public CxxTest::TestSuite
+class htmgtCfgTest : public CxxTest::TestSuite
 {
 
 private:
@@ -51,223 +51,7 @@ private:
 
 public:
 
-    htmgtMemTest()
-    {
-        if (!VFS::module_is_loaded("libmc_config.so"))
-        {
-            errlHndl_t err = VFS::module_load("libmc_config.so");
-            if (err)
-            {
-                TS_FAIL("Could not load mc_config module");
-                errlCommit(err, HTMGT_COMP_ID);
-            }
-
-            iv_mcConfigLoaded = true;
-        }
-        else
-        {
-            iv_mcConfigLoaded = false;
-        }
-
-        if (!VFS::module_is_loaded("libhtmgt.so"))
-        {
-            errlHndl_t err = VFS::module_load("libhtmgt.so");
-            if (err)
-            {
-                TS_FAIL("Could not load libhtmgt module");
-                errlCommit(err, HTMGT_COMP_ID);
-            }
-
-            iv_htmgtLoaded = true;
-        }
-        else
-        {
-            iv_htmgtLoaded = false;
-        }
-    }
-
-
-    ~htmgtMemTest()
-    {
-        if (iv_mcConfigLoaded)
-        {
-            errlHndl_t err = VFS::module_unload("libmc_config.so");
-            if (err)
-            {
-                TS_FAIL("Could not unload mc_config module");
-                errlCommit(err, HTMGT_COMP_ID);
-            }
-        }
-
-        if (iv_htmgtLoaded)
-        {
-            errlHndl_t err = VFS::module_unload("libhtmgt.so");
-            if (err)
-            {
-                TS_FAIL("Could not unload libhtmgt module");
-                errlCommit(err, HTMGT_COMP_ID);
-            }
-        }
-
-    }
-
-
-    void testThrottles()
-    {
-        TS_TRACE(ENTER_MRK"HTMGT: testThrottles");
-
-        calcMemThrottles();
-
-
-        TargetHandleList mbas;
-        TargetHandleList::iterator mba;
-
-        getAllChiplets(mbas, TYPE_MBA, true);
-
-        //Make sure all of the numerators are set
-        for (mba=mbas.begin();mba!=mbas.end();++mba)
-        {
-            ATTR_OT_MIN_N_PER_MBA_type n;
-            (*mba)->tryGetAttr<ATTR_OT_MIN_N_PER_MBA>(n);
-            if ((0 == n[0]) && (0 == n[1]))
-            {
-                TS_FAIL("MBA 0x%X has value of zero for OT_MIN_N_PER_MBA",
-                        (*mba)->getAttr<ATTR_HUID>());
-            }
-
-            (*mba)->tryGetAttr<ATTR_N_PLUS_ONE_N_PER_MBA>(n);
-            if ((0 == n[0]) && (0 == n[1]))
-            {
-                TS_FAIL("MBA 0x%X has value of zero for N_PLUS_ONE_N_PER_MBA",
-                        (*mba)->getAttr<ATTR_HUID>());
-            }
-
-            (*mba)->tryGetAttr<ATTR_N_PLUS_ONE_N_PER_CHIP>(n);
-            if ((0 == n[0]) && (0 == n[1]))
-            {
-                TS_FAIL("MBA 0x%X has value of zero for N_PLUS_ONE_N_PER_CHIP",
-                        (*mba)->getAttr<ATTR_HUID>());
-            }
-
-            (*mba)->tryGetAttr<ATTR_POWERCAP_N_PER_MBA>(n);
-            if ((0 == n[0]) && (0 == n[1]))
-            {
-                TS_FAIL("MBA 0x%X has value of zero for POWERCAP_N_PER_MBA",
-                        (*mba)->getAttr<ATTR_HUID>());
-            }
-
-            (*mba)->tryGetAttr<ATTR_POWERCAP_N_PER_CHIP>(n);
-            if ((0 == n[0]) && (0 == n[1]))
-            {
-                TS_FAIL("MBA 0x%X has value of zero for POWERCAP_N_PER_CHIP",
-                        (*mba)->getAttr<ATTR_HUID>());
-            }
-        }
-
-    }
-
-
-    void testThrottleConfigData()
-    {
-        TargetHandleList occs;
-        TargetHandleList::iterator occ;
-        uint8_t numSets = 0;
-        uint8_t data[4*KILOBYTE];
-        uint64_t size = 0;
-        uint64_t expectedSize = 0;
-        const size_t THROTTLE_DATA_SET_SIZE = 12;
-
-        TS_TRACE(ENTER_MRK"HTMGT: testThrottleConfigData");
-
-        getAllChiplets(occs, TYPE_OCC, true);
-
-        for (occ=occs.begin();occ!=occs.end();++occ)
-        {
-            memset(data, 0, 4*KILOBYTE);
-
-            getMemThrottleMessageData(*occ, 0, data, size);
-
-            if (data[0] != OCC_CFGDATA_MEM_THROTTLE)
-            {
-                TS_FAIL("Wrong format 0x%X for throttle config data command",
-                        data[0]);
-            }
-
-            //Note: Yes, the version number is hardcoded, but if the version
-            //changes then these testcases would have to change anyway.
-            if (data[1] != 0x10)
-            {
-                TS_FAIL("Wrong version 0x%X for throttle config data command",
-                        data[1]);
-            }
-
-            numSets = data[2];
-
-            TS_TRACE("HTMGT: testThrottleConfigData: OCC 0x%X returned message"
-                     " size %d num sets %d",
-                      (*occ)->getAttr<ATTR_HUID>(), size, numSets);
-
-            //3B header + 12B / set
-            expectedSize = 3 + (THROTTLE_DATA_SET_SIZE * numSets);
-            if (size != expectedSize)
-            {
-                TS_FAIL("Throttle data size %d did not match expected size %d"
-                        " for OCC 0x%X",
-                        size, expectedSize, (*occ)->getAttr<ATTR_HUID>());
-            }
-        }
-
-    }
-
-
-    void testMemConfigData()
-    {
-        TargetHandleList occs;
-        TargetHandleList::iterator occ;
-        uint8_t numSets = 0;
-        uint8_t data[4*KILOBYTE];
-        uint64_t size = 0;
-        uint64_t expectedSize = 0;
-        const size_t MEMCONFIG_DATA_SET_SIZE = 12;
-
-        TS_TRACE(ENTER_MRK"HTMGT: testMemConfigData");
-
-        getAllChiplets(occs, TYPE_OCC, true);
-
-        for (occ=occs.begin();occ!=occs.end();++occ)
-        {
-            memset(data, 0, 4*KILOBYTE);
-
-            getMemConfigMessageData(*occ, data, size);
-
-            if (data[0] != OCC_CFGDATA_MEM_CONFIG)
-            {
-                TS_FAIL("Wrong format 0x%X for mem config data command",
-                        data[0]);
-            }
-
-            if (data[1] != 0x10)
-            {
-                TS_FAIL("Wrong version 0x%X for mem config data command",
-                        data[1]);
-            }
-
-            numSets = data[2];
-
-            TS_TRACE("HTMGT: testMemConfigData: OCC 0x%X returned message "
-                     "size %d num sets %d",
-                     (*occ)->getAttr<ATTR_HUID>(), size, numSets);
-
-            expectedSize = 3 + (MEMCONFIG_DATA_SET_SIZE * numSets);
-            if (size != expectedSize)
-            {
-                TS_FAIL("MemConfig data size %d did notmatch expected "
-                        "size %d for OCC 0x%X",
-                        size, expectedSize, (*occ)->getAttr<ATTR_HUID>());
-            }
-        }
-
-    }
+    // TODO: RTC 247144 - Add Mem Config Support
 
     void testOCCRoleConfigData()
     {
@@ -317,6 +101,7 @@ public:
                     data[1]);
         }
 
+        TS_TRACE(EXIT_MRK"HTMGT: testOCCRoleConfigData");
     }
 
 
@@ -336,18 +121,19 @@ public:
                     data[0]);
         }
 
-        if (data[1] != 0x10)
+        if (data[1] != 0x20)
         {
             TS_FAIL("Wrong version 0x%X for power cap config data command",
                     data[1]);
         }
 
-        if (size != 8)
+        if (size != 10)
         {
             TS_FAIL("Wrong size %d for power cap config data command",
                     size);
         }
 
+        TS_TRACE(EXIT_MRK"HTMGT: testPowerCapConfigData");
     }
 
 
@@ -374,7 +160,7 @@ public:
                         data[0]);
             }
 
-            if (data[1] != 0x10)
+            if (data[1] != 0x30)
             {
                 TS_FAIL("Wrong version 0x%X for system config data command",
                         data[1]);
@@ -387,13 +173,14 @@ public:
                         data[2]);
             }
 
-            if (size != 57)
+            if (size != 163) // 32 cores
             {
                 TS_FAIL("wrong size %d for system config data command",
                         size);
             }
         }
 
+        TS_TRACE(EXIT_MRK"HTMGT: testSystemConfigData");
     }
 
 
@@ -413,49 +200,19 @@ public:
                     data[0]);
         }
 
-        if (data[1] != 0x10)
+        if (data[1] != 0x30)
         {
             TS_FAIL("Wrong version 0x%X for thermal config data command",
                     data[1]);
         }
 
-        if (size != 15)
+        if (size != 42)
         {
             TS_FAIL("wrong size %d for thermal control config data command",
                     size);
         }
 
-    }
-
-
-    void testFreqPointConfigData()
-    {
-        uint8_t data[4*KILOBYTE];
-        uint64_t size = 0;
-
-        TS_TRACE(ENTER_MRK"HTMGT: testThermalControlConfigData");
-        memset(data, 0, 4*KILOBYTE);
-
-        getFrequencyPointMessageData(data, size);
-
-        if (data[0] != OCC_CFGDATA_FREQ_POINT)
-        {
-            TS_FAIL("Wrong format 0x%X for frequency point data command",
-                    data[0]);
-        }
-
-        if (data[1] != 0x10)
-        {
-            TS_FAIL("Wrong version 0x%X for frequency point data command",
-                    data[1]);
-        }
-
-        if (size != 8)
-        {
-            TS_FAIL("wrong size %d for frequency point config data command",
-                    size);
-        }
-
+        TS_TRACE(EXIT_MRK"HTMGT: testThermalControlConfigData");
     }
 
 
@@ -464,7 +221,7 @@ public:
         uint64_t size = 256;
         uint8_t data[size];
 
-        TMGT_INF(ENTER_MRK"HTMGT::testApccConfigData");
+        TMGT_INF(ENTER_MRK"HTMGT: testApssConfigData");
         memset(data,0,size);
         size = 0;
 
@@ -472,10 +229,12 @@ public:
 
         TMGT_INF("APSS message size = %d bytes", size);
 
-        if(size != 216 || data[0] != HTMGT::OCC_CFGDATA_APSS_CONFIG)
+        if((size != 248) || (data[0] != HTMGT::OCC_CFGDATA_APSS_CONFIG))
         {
             TS_FAIL("Invalid APSS config size (%d) or format.",size);
         }
+
+        TMGT_INF(EXIT_MRK"HTMGT: testApssConfigData");
     }
 };
 

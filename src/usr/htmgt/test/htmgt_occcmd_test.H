@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,12 +50,11 @@ class htmgtOccCmdTest: public CxxTest::TestSuite
 {
     public:
 
-        // TODO RTC 118875
         void test_occcmd_poll(void)
         {
             errlHndl_t l_err = NULL;
             bool locallyLoaded = false;
-            TS_TRACE("entered test_occcmd_poll");
+            TS_TRACE(ENTER_MRK"HTMGT: test_occcmd_poll");
 
             if(!VFS::module_is_loaded("libhtmgt.so"))
             {
@@ -327,7 +326,7 @@ class htmgtOccCmdTest: public CxxTest::TestSuite
                 VFS::module_unload("libhtmgt.so");
             }
 
-            TS_TRACE("exiting test_occcmd_poll");
+            TS_TRACE(EXIT_MRK"test_occcmd_poll");
         }
 
 };
