@@ -23,8 +23,8 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __prdfP9RuleChipDomain_H
-#define __prdfP9RuleChipDomain_H
+#ifndef __prdfRuleChipDomain_H
+#define __prdfRuleChipDomain_H
 
 #include <iipDomainContainer.h>
 #include <prdfRuleChip.H>
@@ -97,4 +97,4 @@ class RuleChipDomain : public DomainContainer<RuleChip>
 
 } // end namespace PRDF
 
-#endif /* __prdfP9RuleChipDomain_H */
+#endif /* __prdfRuleChipDomain_H */

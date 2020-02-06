@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 /** @file  prdfMemRank.H
- *  @brief Memory rank container class for Centaur MBA and P9 MCBIST.
+ *  @brief Memory rank container class.
  */
 
 #ifndef __prdfMemRank_H

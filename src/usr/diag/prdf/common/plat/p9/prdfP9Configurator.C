@@ -48,7 +48,7 @@
 #include <prdfP9MiDomain.H>
 #include <prdfP9NpuDomain.H>
 #include <prdfP9ObusDomain.H>
-#include <prdfP9OcmbChipDomain.H>
+#include <prdfOcmbChipDomain.H>
 #include <prdfP9OmicDomain.H>
 #include <prdfP9PecDomain.H>
 #include <prdfP9PhbDomain.H>

@@ -40,6 +40,7 @@ include common/prdf_common_fsp_and_hb.mk
 include common/framework/prdf_framework.mk
 # TODO RTC 247259
 include common/plat/p9/prdf_plat_p9.mk
+include common/plat/p10/prdf_plat_p10.mk
 include common/plat/axone/prdf_plat_axone.mk
 include common/plat/mem/prdf_plat_mem.mk
 include common/plat/explorer/prdf_plat_explorer.mk

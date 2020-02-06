@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/p9/prdfP9OcmbChipDomain.C $     */
+/* $Source: src/usr/diag/prdf/common/plat/mem/prdfOcmbChipDomain.C $      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,11 +24,11 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 /**
- * @file prdfP9OcmbChipDomain.C
+ * @file prdfOcmbChipDomain.C
  * @brief chip Plug-in code for OCMB domain
  */
 
-#include <prdfP9OcmbChipDomain.H>
+#include <prdfOcmbChipDomain.H>
 
 // Framework includes
 #include <prdfExtensibleChip.H>

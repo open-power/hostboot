@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/p9/prdfP9OcmbChipDomain.H $     */
+/* $Source: src/usr/diag/prdf/common/plat/mem/prdfOcmbChipDomain.H $      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,8 +23,8 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __prdfP9OcmbChipDomain_H
-#define __prdfP9OcmbChipDomain_H
+#ifndef __prdfOcmbChipDomain_H
+#define __prdfOcmbChipDomain_H
 
 #include <prdfRuleChipDomain.H>
 
@@ -68,4 +68,4 @@ class OcmbChipDomain : public RuleChipDomain
 
 } // end namespace PRDF
 
-#endif /* __prdfP9OcmbChipDomain_H */
+#endif /* __prdfOcmbChipDomain_H */

@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/plat/mem/prdf_plat_mem.mk $
+# $Source: src/usr/diag/prdf/common/plat/p10/prdf_plat_p10.mk $
 #
 # OpenPOWER HostBoot Project
 #
@@ -29,26 +29,15 @@
 # Paths common to both FSP and Hostboot
 ################################################################################
 
-prd_vpath += ${PRD_SRC_PATH}/common/plat/mem
+prd_vpath += ${PRD_SRC_PATH}/common/plat/p10
 
-prd_incpath += ${PRD_SRC_PATH}/common/plat/mem
+prd_incpath += ${PRD_SRC_PATH}/common/plat/p10
 
 ################################################################################
 # Object files common to both FSP and Hostboot
 ################################################################################
 
 # non-rule plugin related
-prd_obj += prdfMemAddress.o
-prd_obj += prdfMemCaptureData.o
-prd_obj += prdfMemCeTable.o
-prd_obj += prdfMemDqBitmap.o
-prd_obj += prdfMemEccAnalysis.o
-prd_obj += prdfMemMark.o
-prd_obj += prdfMemRowRepair.o
-prd_obj += prdfMemSymbol.o
-prd_obj += prdfMemoryMru.o
-prd_obj += prdfMemUeTable.o
-prd_obj += prdfMemUtils.o
-prd_obj += prdfMemThresholds.o
-prd_obj += prdfOcmbChipDomain.o
+
+# rule plugin related
 

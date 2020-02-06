@@ -46,7 +46,7 @@
 #include <prdfMfgThresholdMgr.H>
 
 #ifdef __HOSTBOOT_RUNTIME
-#include <prdfP9OcmbChipDomain.H>
+#include <prdfOcmbChipDomain.H>
 #endif
 
 #if !defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
