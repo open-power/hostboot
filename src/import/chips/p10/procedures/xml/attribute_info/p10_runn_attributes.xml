@@ -113,11 +113,13 @@
   </description>
   <valueType>uint8</valueType>
   <initToZero/>
+  <writeable/>
   <enum>
     0_CYCLES = 0x0,
     1_CYCLE  = 0x1,
     2_CYCLES = 0x2,
-    3_CYCLES = 0x3
+    3_CYCLES = 0x3,
+    4_CYCLES = 0x4
   </enum>
 </attribute>
 <!-- ********************************************************************** -->
@@ -145,6 +147,20 @@
   <description>
     Use QME-sourced, cycle-reproducible timebase ("high-precision" mode)
     instead of PC-internal "standalone" mode timebase (also cycle-reproducible).
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <enum>
+    OFF = 0x0,
+    ON  = 0x1
+  </enum>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_RUNN_STOP_ON_XSTOP</id>
+  <targetType>TARGET_TYPE_PERV</targetType>
+  <description>
+    Stop OPCG RUNN counter and clocks when a checkstop occurs.
   </description>
   <valueType>uint8</valueType>
   <initToZero/>
