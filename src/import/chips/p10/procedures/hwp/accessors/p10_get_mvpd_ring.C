@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,7 +60,7 @@ extern "C"
     {
         fapi2::ReturnCode        l_fapirc;
 
-        FAPI_DBG("getMvpdRing: Called w/ringId=0x%x, chipletSel=0x%8x, size=0x%x",
+        FAPI_DBG("getMvpdRing: Called w/ringId=0x%x, chipletSel=0x%08x and bufsize=0x%x",
                  i_ringId,
                  i_chipletSel,
                  io_rRingBufsize  );
@@ -76,7 +76,7 @@ extern "C"
                                  io_rRingBufsize );
 
 
-        FAPI_DBG("getMvpdRing: exit rc=0x%x",
+        FAPI_DBG("getMvpdRing: Exit w/rc=0x%08x",
                  static_cast<uint32_t>(l_fapirc) );
 
         return  l_fapirc;

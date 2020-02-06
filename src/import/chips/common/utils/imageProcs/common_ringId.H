@@ -52,6 +52,7 @@ typedef uint16_t  TorOffset_t;      // Type for offset value to various TOR obje
 typedef uint8_t   MyBool_t;         // false:0, true:1, undefined:UNDEFINED_BOOLEAN
 
 #define  UNDEFINED_RING_ID         (RingId_t)0xffff
+#define  HOLE_RING_ID              (RingId_t)0xeeee
 #define  UNDEFINED_SCOM_ADDR       (uint32_t)0xffffffff
 #define  UNDEFINED_RING_CLASS      (RingClass_t)0xffff
 #define  UNDEFINED_CHIPLET_TYPE    (ChipletType_t)0xff
@@ -222,11 +223,12 @@ enum RingMarker
     RMRK_TIME        = (RingClass_t)0b0000000000010000, // Time ring marker bit
     RMRK_MVPD_PDG    = (RingClass_t)0b0000000010000000, // MVPD #G gptr/time ring marker bit
     RMRK_MVPD_PDP    = (RingClass_t)0b0000000100000000, // MVPD #P pll ring marker bit
-    RMRK_MVPD_PDR    = (RingClass_t)0b0000001000000000, // MVPD #G repr ring marker bit
-    RMRK_MVPD_NEST   = (RingClass_t)0b0000010000000000, // NEST (non-EQ) ring marker bit
-    RMRK_MVPD_EQ     = (RingClass_t)0b0000100000000000, // EQ (non-core) ring marker bit
-    RMRK_MVPD_CORE   = (RingClass_t)0b0001000000000000, // Core ring marker bit
-    RMRK_SCAN_BY_QME = (RingClass_t)0b0010000000000000, // QME scannable ring marker bit
+    RMRK_MVPD_PDR    = (RingClass_t)0b0000001000000000, // MVPD #R repr ring marker bit
+    RMRK_MVPD_PDS    = (RingClass_t)0b0000010000000000, // MVPD #S dts ring marker bit
+    RMRK_MVPD_NEST   = (RingClass_t)0b0000100000000000, // NEST (non-EQ) ring marker bit
+    RMRK_MVPD_EQ     = (RingClass_t)0b0001000000000000, // EQ (non-core) ring marker bit
+    RMRK_MVPD_CORE   = (RingClass_t)0b0010000000000000, // Core ring marker bit
+    RMRK_SCAN_BY_QME = (RingClass_t)0b0100000000000000, // QME scannable ring marker bit
 };
 
 //
@@ -245,6 +247,9 @@ enum RingMarker
 #define RCLS_MVPD_PDR_NEST      (RMRK_MVPD_PDR | RMRK_MVPD_NEST)
 #define RCLS_MVPD_PDR_EQ        (RMRK_MVPD_PDR | RMRK_MVPD_EQ)
 #define RCLS_MVPD_PDR_CORE      (RMRK_MVPD_PDR | RMRK_MVPD_CORE)
+#define RCLS_MVPD_PDS_NEST      (RMRK_MVPD_PDS | RMRK_MVPD_NEST)
+#define RCLS_MVPD_PDS_EQ        (RMRK_MVPD_PDS | RMRK_MVPD_EQ)
+#define RCLS_MVPD_PDS_CORE      (RMRK_MVPD_PDS | RMRK_MVPD_CORE)
 // MVPD keyword mask
 #define RCLS_MVPD_MASK          (RMRK_MVPD_PDG | RMRK_MVPD_PDP | RMRK_MVPD_PDR)
 
@@ -273,6 +278,7 @@ enum RingRequest
 typedef struct
 {
 #ifndef __PPE__
+    RingId_t      ringId;
     char          ringName[MAX_RING_NAME_LENGTH];
     uint32_t      scanScomAddr;
 #endif
@@ -323,7 +329,7 @@ typedef struct
 #define TOR_INVALID_MAGIC_NUMBER              INFRASTRUCT_NOOF_RCS + 2
 #define TOR_INVALID_CHIP_ID                   INFRASTRUCT_NOOF_RCS + 3
 #define TOR_INVALID_CHIPLET_TYPE              INFRASTRUCT_NOOF_RCS + 4
-#define TOR_INVALID_RING_ID                   INFRASTRUCT_NOOF_RCS + 5
+#define TOR_INVALID_RING_ID                   INFRASTRUCT_NOOF_RCS + 5  // ringId falls outside Mvpd and Ekb range
 #define TOR_INVALID_CHIPLET_ID                INFRASTRUCT_NOOF_RCS + 6
 #define TOR_INVALID_RING_REQUEST              INFRASTRUCT_NOOF_RCS + 7
 #define TOR_UNSUPPORTED_RING_SECTION          INFRASTRUCT_NOOF_RCS + 8
@@ -341,7 +347,7 @@ typedef struct
 #define TOR_RING_NAME_NOT_FOUND               INFRASTRUCT_NOOF_RCS + 20
 #define TOR_NO_RINGS_FOR_CHIP                 INFRASTRUCT_NOOF_RCS + 21
 #define TOR_DYN_RING_NOT_FOUND                INFRASTRUCT_NOOF_RCS + 22
-#define TOR_HOLE_RING_ID                      INFRASTRUCT_NOOF_RCS + 23
+#define TOR_HOLE_RING_ID                      INFRASTRUCT_NOOF_RCS + 23 // ringId is a "hole" ring
 
 // This function returns the main ring properties list associated w/the chip ID.
 int ringid_get_ringProps( ChipId_t           i_chipId,
@@ -388,6 +394,9 @@ MyBool_t ringid_is_mvpd_ring( ChipId_t  i_chipId,
 MyBool_t ringid_is_gptr_ring( ChipId_t  i_chipId,
                               RingId_t  i_ringId );
 
+// Check if ring is a Common or Instance ring
+MyBool_t ringid_is_instance_ring( RingId_t  i_rpIndex);
+
 // Check if ring has derivative, eg if it has bucket rings. Note that the actual
 // derivative ring itself, eg the *_bucket_n ring, will *not* be marked as derivative.
 // Only the "root ring", eg that does *not* have the *_bucket_n suffix, will be marked.
@@ -424,17 +433,6 @@ int ringidGetRootRingId( ChipId_t   i_chipId,
                          uint32_t   i_scanScomAddr,
                          RingId_t&  o_ringId,
                          bool       i_bTest = false );
-
-// This function returns the ringId associated with the effective ring index within a chiplet.
-// (Note that "effective" means the index is void of the instance marker bit.)
-int ringidGetRingId2( ChipId_t       i_chipId,
-                      uint32_t       i_torMagic,
-                      ChipletType_t  i_chipletType, // Ignored if only one chiplet in torMagic
-                      uint8_t        i_idxRing,     // The eEffective ring index within chiplet's
-                      // common or instance ring section
-                      MyBool_t       i_bInstCase,   // =0 common ring, =1 instance ring
-                      RingId_t&      o_ringId,
-                      bool           i_bTest = false );
 
 // This fumction returns the ringClass associated with the ringId.
 int ringidGetRingClass( ChipId_t      i_chipId,

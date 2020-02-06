@@ -60,6 +60,7 @@ int _tor_access_ring( void*          io_ringSection,   // Ring section ptr
     TorOffset_t       ringOffset16; // Offset to actual ring container (for PUT operation)
     uint32_t          torSlotNum; // TOR slot number (within a chiplet section)
     uint32_t          rs4Size;    // Size of RS4 ring container/block.
+    RingId_t          rpIndex = UNDEFINED_RING_ID;
     RingId_t          numRings;
     ChipletType_t     chipletType = UNDEFINED_CHIPLET_TYPE;
     ChipletType_t     chipletIndex = UNDEFINED_CHIPLET_TYPE; // Effective chiplet index
@@ -85,7 +86,13 @@ int _tor_access_ring( void*          io_ringSection,   // Ring section ptr
         return rc;
     }
 
-    chipletType = ringProps[i_ringId].chipletType;
+    // Get the ring properties (rp) index
+    rpIndex = ringid_convert_ringId_to_rpIndex(i_ringId);
+
+    // Note:  Prior to entering _tor_access_ring(), we must call _tor_header_check()
+    //        which also verifies valid ringId.  So no need to check ringId again.
+
+    chipletType = ringProps[rpIndex].chipletType;
 
     //
     // Get all other metadata for the chipletType
@@ -131,7 +138,7 @@ int _tor_access_ring( void*          io_ringSection,   // Ring section ptr
     //
     // Determine whether Common or Instance section based on the INSTANCE_RING_MARK
     //
-    if ( ringProps[i_ringId].idxRing & INSTANCE_RING_MARK )
+    if ( ringProps[rpIndex].idxRing & INSTANCE_RING_MARK )
     {
         bInstCase = 1;
     }
@@ -144,7 +151,7 @@ int _tor_access_ring( void*          io_ringSection,   // Ring section ptr
                    chipletData->numInstanceRings :
                    chipletData->numCommonRings;
 
-    idxRingEff   = ringProps[i_ringId].idxRing & INSTANCE_RING_MASK; // Always safe
+    idxRingEff   = ringProps[rpIndex].idxRing & INSTANCE_RING_MASK; // Always safe
 
     //
     // Check that chipletId is within chiplet's range (Note that we care only about Instance
@@ -371,18 +378,15 @@ int _tor_header_and_ring_check( void*           i_ringSection,  // Ring section 
 
     if ( rc != TOR_SUCCESS )
     {
-        if ( rc == TOR_HOLE_RING_ID )
+        // Only trace out what we know could be an error.
+        if ( rc == TOR_INVALID_CHIP_ID )
         {
-            // "hole" ring. Not an error. No info to retrieve.
-            return rc;
+            MY_ERR("ERROR: TOR ringId check: ringid_check_ringId() failed w/rc=0x%08x"
+                   " which is an invalid chipId(=0x%x)\n",
+                   rc, torHeader->chipId);
         }
-        else if ( rc == TOR_INVALID_RING_ID || rc == TOR_INVALID_CHIP_ID )
-        {
-            MY_ERR("ERROR: TOR ringId check: ringid_check_ringId() failed w/rc=0x%08x\n"
-                   " So either invalid ringId(=0x%x) or invalid chipId(=0x%x)\n",
-                   rc, i_ringId, torHeader->chipId);
-            return rc;
-        }
+
+        return rc;
     }
 
     // Check TOR header
@@ -438,12 +442,18 @@ int tor_get_single_ring ( void*         i_ringSection,  // Ring section ptr
                                      i_dbgl );
 
     // Explanation to the "list" of RCs that we exclude from tracing out:
-    // TOR_HOLE_RING_ID:   Normal scenario when rings are removed from the ring list
-    if ( rc &&
-         rc != TOR_HOLE_RING_ID )
+    // TOR_HOLE_RING_ID:    Can happen if a ring has been removed from the ring list
+    // TOR_INVALID_RING_ID: CAn happen if caller carelessly cycles through ringIds
+    if ( rc )
     {
-        MY_ERR("ERROR: tor_get_single_ring(): _tor_header_and_ring_check() failed w/rc=0x%08x\n",
-               rc);
+        if ( rc != TOR_HOLE_RING_ID &&
+             rc != TOR_INVALID_RING_ID )
+        {
+            MY_ERR("ERROR: tor_get_single_ring: _tor_header_and_ring_check() failed"
+                   " w/rc=0x%08x\n",
+                   rc);
+        }
+
         return rc;
     }
 
@@ -458,8 +468,6 @@ int tor_get_single_ring ( void*         i_ringSection,  // Ring section ptr
 
     // Explanation to the "list" of RCs that we exclude from tracing out:
     // TOR_RING_IS_EMPTY:  Normal scenario (will occur frequently).
-    // TOR_HOLE_RING_ID:   Normal scenario when rings are removed from the ring list
-    //                     and leaves behind a "hole".
     // TOR_RING_HAS_NO_TOR_SLOT:  Will be caused a lot by ipl_image_tool, but is an error if
     //                     called by any other user.
     // TOR_INVALID_CHIPLET_ID:  Not necessarily an error as a user may be sweeping through a
@@ -472,13 +480,12 @@ int tor_get_single_ring ( void*         i_ringSection,  // Ring section ptr
     //                     in both ipl_image_tool and ipl_customize (RT_QME phase).
     if ( rc &&
          rc != TOR_RING_IS_EMPTY &&
-         rc != TOR_HOLE_RING_ID &&
          rc != TOR_RING_HAS_NO_TOR_SLOT &&
          rc != TOR_INVALID_CHIPLET_ID &&
          rc != TOR_INVALID_CHIPLET_TYPE )
     {
-        MY_ERR("ERROR: tor_get_single_ring(): _tor_access_ring() failed w/rc=0x%08x\n", rc);
-
+        MY_ERR("ERROR: tor_get_single_ring: _tor_access_ring() failed w/rc=0x%08x\n",
+               rc);
         return rc;
     }
 
@@ -507,7 +514,7 @@ int tor_append_ring( void*           io_ringSection,       // Ring section ptr
 
     if (rc)
     {
-        MY_ERR("ERROR: tor_append_ring(): _tor_header_and_ring_check() failed w/rc=0x%08x\n",
+        MY_ERR("ERROR: tor_append_ring: _tor_header_and_ring_check() failed w/rc=0x%08x\n",
                rc);
         return rc;
     }
@@ -539,7 +546,7 @@ int tor_append_ring( void*           io_ringSection,       // Ring section ptr
     if ( rc &&
          rc != TOR_INVALID_CHIPLET_TYPE )
     {
-        MY_ERR("ERROR: tor_append_ring(): _tor_access_ring() failed w/rc=0x%08x for"
+        MY_ERR("ERROR: tor_append_ring: _tor_access_ring() failed w/rc=0x%08x for"
                " ringId=0x%x\n",
                rc, i_ringId);
         return rc;
@@ -768,19 +775,15 @@ int dyn_get_ring( void*          i_ringSection,
 
     if ( rc != TOR_SUCCESS )
     {
-        if ( rc == TOR_HOLE_RING_ID )
+        // Only trace out what we know could be an error.
+        if ( rc == TOR_INVALID_CHIP_ID )
         {
-            // "hole" ring. Not an error. No info to retrieve.
-            return rc;
+            MY_ERR("ERROR: dyn_get_ring: ringid_check_ringId() failed w/rc=0x%08x"
+                   " which is an invalid chipId(=0x%x)\n",
+                   rc, torHeader->chipId);
         }
-        else if ( rc == TOR_INVALID_RING_ID || rc == TOR_INVALID_CHIP_ID )
-        {
-            MY_ERR("ERROR: dyn_get_ring(): ringid_check_ringId() failed w/rc=0x%08x\n"
-                   " So either invalid ringId(=0x%x) or invalid chipId(=0x%x)\n",
-                   rc, i_ringId, torHeader->chipId);
 
-            return rc;
-        }
+        return rc;
     }
 
     // TOR header check
@@ -791,7 +794,7 @@ int dyn_get_ring( void*          i_ringSection,
          torHeader->ddLevel != i_ddLevel ||
          torHeader->rtVersion != RING_TABLE_VERSION_HWIMG )
     {
-        MY_ERR("ERROR: dyn_get_ring(): TOR header check failed as follows:\n"
+        MY_ERR("ERROR: dyn_get_ring: TOR header check failed as follows:\n"
                " torHeader->magic(=0x%08x) != TOR_MAGIC_DYN(=0x%08x)\n"
                " torHeader->version(=%u) != TOR_VERSION(=%u)\n"
                " torHeader->ddLevel(=0x%02x) != i_ddLevel(=0x%02x)\n"

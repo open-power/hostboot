@@ -1037,7 +1037,7 @@ fapi2::ReturnCode buildQmeSpecificRing( CONST_FAPI2_PROC& i_procTgt, Homerlayout
 
         FAPI_TRY( p10_qme_customize( i_procTgt,
                                      (uint8_t *)i_ringData.iv_pRingBuffer,
-                                     ( CUSTOM_RING_OP )l_superChiplet,
+                                     ( CUST_RING_OP )l_superChiplet,
                                      (uint8_t *)i_ringData.iv_pWorkBuf1,
                                      l_workBufSize,
                                      0 ),
@@ -1071,7 +1071,7 @@ fapi2::ReturnCode buildQmeSpecificRing( CONST_FAPI2_PROC& i_procTgt, Homerlayout
 
         FAPI_TRY( p10_qme_customize( i_procTgt,
                                      (uint8_t *)i_ringData.iv_pRingBuffer,
-                                     ( CUSTOM_RING_OP ) l_superChiplet,
+                                     ( CUST_RING_OP ) l_superChiplet,
                                      (uint8_t *)i_ringData.iv_pWorkBuf1,
                                      l_workBufSize,
                                      0 ),
@@ -1236,7 +1236,7 @@ fapi2::ReturnCode buildQmeRing( CONST_FAPI2_PROC& i_procTgt, void * const i_pIma
 
     FAPI_TRY( p10_qme_customize( i_procTgt,
                                  (uint8_t *)i_ringData.iv_pRingBuffer,
-                                 CUSTOMIZE_QME_COMMON_RING,
+                                 CUST_QME_COMMON_RING,
                                  (uint8_t *)i_ringData.iv_pWorkBuf1,
                                  l_workBufSize,
                                  0 ),

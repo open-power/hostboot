@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,55 +40,50 @@
 /**
  * @brief   various ring customization operation supported by HWP
  */
-enum CUSTOM_RING_OP
+enum CUST_RING_OP
 {
-    CUSTOMIZE_QME0_SPECIFIC_RING = 0x00,
-    CUSTOMIZE_QME1_SPECIFIC_RING = 0x01,
-    CUSTOMIZE_QME2_SPECIFIC_RING = 0x02,
-    CUSTOMIZE_QME3_SPECIFIC_RING = 0x03,
-    CUSTOMIZE_QME4_SPECIFIC_RING = 0x04,
-    CUSTOMIZE_QME5_SPECIFIC_RING = 0x05,
-    CUSTOMIZE_QME6_SPECIFIC_RING = 0x06,
-    CUSTOMIZE_QME7_SPECIFIC_RING = 0x07,
-    CUSTOMIZE_QME_COMMON_RING = 0x08,
-    NUM_CUSTOMIZE_QME_ENTRIES
+    CUST_QME0_INSTANCE_RING = 0x00,
+    CUST_QME1_INSTANCE_RING = 0x01,
+    CUST_QME2_INSTANCE_RING = 0x02,
+    CUST_QME3_INSTANCE_RING = 0x03,
+    CUST_QME4_INSTANCE_RING = 0x04,
+    CUST_QME5_INSTANCE_RING = 0x05,
+    CUST_QME6_INSTANCE_RING = 0x06,
+    CUST_QME7_INSTANCE_RING = 0x07,
+    CUST_QME_COMMON_RING = 0x08,
+    NUM_QME_CUST_OPS
 };
 
 typedef fapi2::ReturnCode (*p10_qme_customize_FP_t)(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procTarget,
-    uint8_t* i_bufQmeRings,
-    CUSTOM_RING_OP i_custOp,
-    uint8_t* io_bufCustRings,
-    uint32_t& io_bufCustRingsSize,
-    uint32_t i_dbgl);
+    uint8_t*      i_qmeRings,
+    CUST_RING_OP  i_custOp,
+    uint8_t*      io_bufCustRings,
+    uint32_t&     io_bufCustRingsSize,
+    uint32_t      i_dbgl);
 
 extern "C"
 {
 
 /// @brief          customizes QME ring section based on input.
 /// @param[in]      i_procTarget reference to processor chip target.
-/// @param[in/out]  i_bufQmeRings pointer to a buffer containing all
-///                     scan rings associated with QME image.
-/// @param[in]      i_custOp type of customization requested.
-/// @param[in/out]  io_bufCustRings pointer to a buffer containing
-///                     customized QME rings.
-/// @param[in/out]  io_bufCustRingsSize reference.
-///                     Input - max buffer size, must be greater than or
-///                         equal to the size in the TOR header of QME
-///                         ring section in the i_bufQmeRing buffer.
-///                     output- the actual buffer size of customized QME
-///                         rings.
-/// @param[in]      i_dbgl  debug level, default value is 0.
-/// @return         FAPI_RC_SUCCESS if the customization was successful,
-///                     error code otherwise.
+/// @param[in/out]  i_qmeRings  Pointer to the input QME ring section
+/// @param[in]      i_custOp  Type of customization requested.
+/// @param[in/out]  io_bufCustRings  Pointer to a buffer containing the customized QME rings.
+/// @param[in/out]  io_bufCustRingsSize  Size of customized QME ring section
+///                     Input - max buffer size, must be >= to the size in the TOR header of
+///                             the input QME ring section in i_qmeRings
+///                     Output- the actual size of the customized QME ring section
+/// @param[in]      i_dbgl  Debug level, default value is 0
+/// @return         FAPI_RC_SUCCESS if the customization was successful, otherwise error code
 
     fapi2::ReturnCode p10_qme_customize(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procTarget,
-        uint8_t* i_bufQmeRings,
-        CUSTOM_RING_OP i_custOp,
-        uint8_t* io_bufCustRings,
-        uint32_t& io_bufCustRingsSize,
-        uint32_t i_dbgl = 0);
+        uint8_t*      i_bufQmeRings,
+        CUST_RING_OP  i_custOp,
+        uint8_t*      io_bufCustRings,
+        uint32_t&     io_bufCustRingsSize,
+        uint32_t      i_dbgl = 0);
 
 } //extern "C"
 

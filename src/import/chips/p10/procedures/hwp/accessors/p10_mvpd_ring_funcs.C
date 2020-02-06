@@ -483,12 +483,10 @@ extern "C"
                 // found it, return pointer to ring
                 *o_pScanData = l_pScanData;
 
-                FAPI_DBG("mvpdRingFuncFindHdr: found RS4 ring for "
-                         "chipletSel 0x%08x and ringId %d "
-                         "at address 0x%x and with size %d",
+                FAPI_DBG("mvpdRingFuncFindHdr: Found RS4 ring for chipletSel=0x%08x and"
+                         " ringId=0x%x and ring size=%u",
                          i_chipletSel,
                          i_ringId,
-                         *o_pScanData,
                          be16toh((*o_pScanData)->iv_size));
             }
         }
@@ -552,19 +550,18 @@ extern "C"
         uint32_t            l_prevLen;
         uint32_t            l_recordBufLenLeft = i_recordBufLen;
 
-        FAPI_DBG("mvpdRingFuncFind: Called w/chipletSel=0x%08x, ringId=0x%x ",
+        FAPI_IMP("mvpdRingFuncFind: Enter w/chipletSel=0x%08x and ringId=0x%x ",
                  i_chipletSel,
                  i_ringId);
 
-        //  Find first RSA data block in ring (fixed offset defined by
-        //      MVPD spec)
+        //  Find first RSA data block in ring (fixed offset defined by MVPD spec)
         //
-        //  First byte in record should be the version number, skip
-        //      over this.
+        //  First byte in record's keyword is the version number which we skip
         //
-        FAPI_DBG( "mvpdRingFuncFind: record version = 0x%x", *i_pRecordBuf );
         i_pRecordBuf++;
         l_recordBufLenLeft--;
+
+        o_rRingLen = 0; // Just making sure this is zero in case of a fail or not found
 
         do
         {
@@ -610,12 +607,6 @@ extern "C"
         {
             o_rpRing   = (uint8_t*)l_pScanData;
             o_rRingLen = be16toh(l_pScanData->iv_size);
-
-            // Dump record info for debug
-            FAPI_DBG("mvpdRingFuncFind:ringId=0x%x chipletSel=0x%08x size=0x%x",
-                     i_ringId,
-                     i_chipletSel,
-                     be16toh(l_pScanData->iv_size));
         }
         else
         {
@@ -629,13 +620,12 @@ extern "C"
         // get current error
         l_fapirc = fapi2::current_err;
 
-        FAPI_DBG("mvpdRingFuncFind: exit *ring= 0x%p", o_rpRing);
-        FAPI_IMP("mvpdRingFuncFind: exit chipletSel=0x%08x, ringId=0x%x size=0x%x"
-                 " rc=0x%x",
+        FAPI_IMP("mvpdRingFuncFind: Exit w/rc=0x%08x for chipletSel=0x%08x, ringId=0x%x and"
+                 " ring size=%u (if size==0, then something failed)",
+                 static_cast<uint32_t>(l_fapirc),
                  i_chipletSel,
                  i_ringId,
-                 o_rRingLen,
-                 static_cast<uint32_t>(l_fapirc) );
+                 o_rRingLen);
 
         return  l_fapirc;
     }
@@ -717,7 +707,7 @@ extern "C"
                      "Test0x80: iv_ringId=0x%x    vs  i_ringId=0x%x \n"
                      "Test0x80: iv_scanAddr=0x%x  vs  i_chipletSel=0x%08x \n"
                      "Test0x80: iv_size=0x%x      vs  i_ringBufsize=0x%x  vs  sizeof(CompressedScanData)=0x%x \n"
-                     "Fail test vector: 0x0x%02x",
+                     "Fail test vector: 0x%02x",
                      be16toh(i_pRingBuf->iv_magic), RS4_MAGIC,
                      be16toh(i_pRingBuf->iv_ringId), i_ringId,
                      be32toh(i_pRingBuf->iv_scanAddr), i_chipletSel,
@@ -779,7 +769,7 @@ extern "C"
             }
 
             //  we're good, copy data into the passed-in buffer
-            FAPI_DBG( "mvpdRingFuncGet: memcpy 0x%p 0x%p 0x%x",
+            FAPI_DBG( "mvpdRingFuncGet: memcpy(0x%p,0x%p,%u)",
                       i_pCallerRingBuf,
                       i_pRing,
                       i_ringLen );
@@ -824,9 +814,9 @@ extern "C"
             io_rCallerRingBufLen = i_ringLen;
         }
 
-        FAPI_DBG( "mvpdRingFuncGet: exit bufsize= 0x%x rc= 0x%x",
-                  io_rCallerRingBufLen,
-                  static_cast<uint32_t>(l_fapirc) );
+        FAPI_DBG( "mvpdRingFuncGet: Exit w/rc=0x%08x and w/bufsize=0x%x",
+                  static_cast<uint32_t>(l_fapirc),
+                  io_rCallerRingBufLen );
 
         return l_fapirc;
     }

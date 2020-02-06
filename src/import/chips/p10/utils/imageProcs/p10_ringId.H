@@ -54,7 +54,7 @@
 //   circumstances exist - coordinate with infrastructure team).
 // - To allow the MVPD group to expand without affecting the ringId sequence of
 //   the EKB rings, the beginning of the EKB ring group is pushed out to
-//   RINGID_START_EKB. **This feature is currently inactive!**
+//   RINGID_START_EKB.
 //
 // p10_ring_properties.H
 // =====================
@@ -118,15 +118,55 @@ enum Chiplets
 
 const ChipletType_t QME_NUM_CHIPLETS = 1;
 
-
 #include "p10_ring_properties.H"
 
-static inline const char* ringid_get_ring_name(RingID i_id)
+
+//
+// ringid_convert_ringId_to_ringIndex()
+//
+// This function converts the enum ringId to the contiguous ringIndex that
+// we need for looking up ring metadata in the RING_PROPERTIES list.  Since
+// we have a gap between the MVPD and EKB group of rings in the main enum
+// ringId list, and since we cannot have a huge gap of empty entries in
+// the RING_PROPERTIES list as that would be a waste of Seeprom space, we
+// convert here the ringId into the ring properties (rp) index, rpIndex.
+//
+static inline const RingId_t  ringid_convert_ringId_to_rpIndex( RingId_t  i_ringId )
+{
+    if ( i_ringId >= RINGID_START_MVPD && i_ringId <= RINGID_END_MVPD )
+    {
+        return  i_ringId - RINGID_START_MVPD + RING_INDEX_START_MVPD;
+    }
+    else if ( i_ringId >= RINGID_START_EKB  && i_ringId <= RINGID_END_EKB )
+    {
+        return  i_ringId - RINGID_START_EKB + RING_INDEX_START_EKB;
+    }
+    else
+    {
+        return  UNDEFINED_RING_ID;
+    }
+}
+
+
+static inline const char* ringid_get_ring_name(RingId_t i_ringId)
 {
 #ifdef __PPE__
     return "";
 #else
-    return (i_id < NUM_RING_IDS) ? RING_PROPERTIES[i_id].ringName : "INVALID RING ID";
+
+    if ( i_ringId >= RINGID_START_MVPD && i_ringId <= RINGID_END_MVPD )
+    {
+        return RING_PROPERTIES[i_ringId - RINGID_START_MVPD + RING_INDEX_START_MVPD].ringName;
+    }
+    else if ( i_ringId >= RINGID_START_EKB  && i_ringId <= RINGID_END_EKB )
+    {
+        return RING_PROPERTIES[i_ringId - RINGID_START_EKB + RING_INDEX_START_EKB].ringName;
+    }
+    else
+    {
+        return "INVALID RING ID";
+    }
+
 #endif
 }
 
