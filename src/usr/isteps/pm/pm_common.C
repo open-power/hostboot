@@ -127,7 +127,11 @@ namespace HBPM
     std::shared_ptr<UtilLidMgr> g_pRingOvdLidMgr (nullptr);
 
     /**
-     *  @brief Convert HOMER physical address space to a vitual address
+     *  @brief Convert HOMER physical address space to a vitual address.
+     *         The input value of the physical HOMER address, along with the
+     *         converted virtual address, are saved into the attributes
+     *         ATTR_HOMER_PHYS_ADDR and ATTR_HOMER_VIRT_ADDR, respectively,
+     *         for future use.
      *  @param[in]  i_proc_target  Processsor target
      *  @param[in]  i_phys_addr    Physical address
      *  @return NULL on error, else virtual address
@@ -652,8 +656,7 @@ namespace HBPM
     errlHndl_t loadPMComplex(TARGETING::Target * i_target,
                              uint64_t i_homerPhysAddr,
                              uint64_t i_commonPhysAddr,
-                             loadPmMode i_mode,
-                             bool i_useSRAM)
+                             loadPmMode i_mode)
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    ENTER_MRK"loadPMComplex: %s",
@@ -677,8 +680,11 @@ namespace HBPM
                 }
             }
 
+            // Covert the input physical HOMER address and update the
+            // ATTR_HOMER_PHYS_ADDR and ATTR_HOMER_VIRT_ADDR for future
+            // use by startPMComplex (and everyone else).
             l_homerVAddr = convertHomerPhysToVirt(i_target,
-                                                        i_homerPhysAddr);
+                                                  i_homerPhysAddr);
             if(nullptr == l_homerVAddr)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -689,7 +695,7 @@ namespace HBPM
             }
 
             // Zero out the HOMER memory for LOAD only
-            if(PM_LOAD == i_mode && !i_useSRAM)
+            if(PM_LOAD == i_mode)
             {
                 memset(l_homerVAddr, 0, VMM_HOMER_INSTANCE_SIZE);
             }
@@ -795,8 +801,11 @@ namespace HBPM
 
         //Get homer image buffer
         uint64_t l_homerPhysAddr = 0x0;
+
+        // ATTR_HOMER_PHYS_ADDR was set as part of loadPMComplex
         l_homerPhysAddr = i_target->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>();
         void* l_homerVAddr = convertHomerPhysToVirt(i_target,l_homerPhysAddr);
+        assert(l_homerVAddr, "startPMComplex: l_homerVAddr is nullptr!");
 
         // cast OUR type of target to a FAPI type of target.
         // figure out homer offsets
@@ -861,6 +870,7 @@ namespace HBPM
                        i_target->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>();
         void* l_homerVAddr =
                            convertHomerPhysToVirt(i_target,l_homerPhysAddr);
+        assert(l_homerVAddr, "resetPMComplex: l_homerVAddr is nullptr!");
 
         // cast OUR type of target to a FAPI type of target.
         // figure out homer offsets

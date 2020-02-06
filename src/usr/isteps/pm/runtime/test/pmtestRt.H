@@ -43,6 +43,11 @@
 #include <runtime/runtime_reasoncodes.H>
 
 #include <isteps/pm/pm_common_ext.H>
+#include <pnor/pnorif.H>
+#include <hbotcompid.H>
+#include <targeting/runtime/rt_targeting.H>
+#include <sys/mm.h>
+
 /* FIXME RTC: 210975
 #include <stopreg/p9_stop_api.H>
 */
@@ -136,6 +141,73 @@ class PMTest : public CxxTest::TestSuite
 //         }
 //         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
 //             EXIT_MRK "test_hcode_update Exit");
+    }
+
+    void testLoadAndStartOcc(void)
+    {
+        Target* l_proc = nullptr;
+        errlHndl_t l_errl = nullptr;
+        int l_rc = 0;
+
+        do {
+        l_errl = targetService().queryMasterProcChipTargetHandle(l_proc);
+        if(l_errl)
+        {
+            TS_FAIL("testLoadAndStartOcc: could not fetch master proc target");
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+            break;
+        }
+
+        uint64_t l_occCommonAddr = 0;
+        uint64_t l_homerAddr = 0;
+        uint64_t l_chipId = l_proc->getAttr<ATTR_HBRT_HYP_ID>();
+
+        l_rc = g_hostInterfaces->get_pm_complex_addresses(l_chipId,
+                                                          l_homerAddr,
+                                                          l_occCommonAddr);
+        if(l_rc)
+        {
+            TS_FAIL("testLoadAndStartOcc: could not get PM complex addresses."
+                    " RC: %d",
+                    l_rc);
+            break;
+        }
+
+        TS_INFO("testLoadAndStartOcc: OCC common addr: 0x%016lx; HOMER addr: 0x%016lx",
+                l_occCommonAddr, l_homerAddr);
+
+        runtimeInterfaces_t* l_rtInterfaces = getRuntimeInterfaces();
+
+        if(l_rtInterfaces->load_pm_complex == nullptr)
+        {
+            TS_FAIL("testLoadAndStartOcc: no load_pm_complex interface found!");
+            break;
+        }
+
+        l_rc = l_rtInterfaces->load_pm_complex(l_chipId,
+                                               l_homerAddr,
+                                               l_occCommonAddr,
+                                               HBRT_PM_LOAD);
+        if(l_rc)
+        {
+            TS_FAIL("testLoadAndStartOcc: Could not load OCC; RC: %d", l_rc);
+            break;
+        }
+
+        if(l_rtInterfaces->start_pm_complex == nullptr)
+        {
+            TS_FAIL("testLoadAndStartOcc:no start_pm_complex interface found!");
+            break;
+        }
+
+        l_rc = l_rtInterfaces->start_pm_complex(l_chipId);
+        if(l_rc)
+        {
+            TS_FAIL("testLoadAndStartOcc: Could not start OCC; RC: %d", l_rc);
+            break;
+        }
+
+        }while(0);
     }
 };
 

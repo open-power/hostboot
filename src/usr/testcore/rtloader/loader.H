@@ -144,6 +144,10 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 intf->clock_gettime = clock_gettime;
                 intf->hcode_scom_update = rt_hcode_update;
                 intf->firmware_request = rt_firmware_request;
+                intf->get_pm_complex_addresses = rt_get_pm_complex_addresses;
+                intf->unmap_phys_mem = rt_unmap_phys_mem;
+                intf->map_phys_mem = rt_map_phys_mem;
+                intf->nanosleep = rt_nanosleep;
 
                 // Call init.
                 runtimeInterfaces_t* rtInterface =
@@ -251,6 +255,50 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             return result;
         }
 
+        static int rt_get_pm_complex_addresses(uint64_t i_chipId,
+                                               uint64_t& o_homerAddr,
+                                               uint64_t& o_occCommonAddr)
+        {
+            TARGETING::Target* l_sys = nullptr;
+            TARGETING::Target* l_proc = nullptr;
+            errlHndl_t l_errl = nullptr;
+
+            int l_rc = 0;
+
+            do {
+
+            TARGETING::targetService().getTopLevelTarget(l_sys);
+            l_errl =
+             TARGETING::targetService().queryMasterProcChipTargetHandle(l_proc);
+            if(l_errl)
+            {
+                TS_FAIL("rt_get_pm_complex_addresses: could not fetch proc target");
+                errlCommit(l_errl, CXXTEST_COMP_ID);
+                l_rc = -1;
+                break;
+            }
+
+            assert(l_sys, "rt_get_pm_complex_addresses:could not get top level target!");
+
+            o_homerAddr = l_proc->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>();
+            o_occCommonAddr =
+                    l_sys->getAttr<TARGETING::ATTR_OCC_COMMON_AREA_PHYS_ADDR>();
+
+            }while(0);
+
+            return l_rc;
+        }
+
+        static void* rt_map_phys_mem(uint64_t i_addr, size_t i_size)
+        {
+            return mm_block_map(reinterpret_cast<void*>(i_addr), i_size);
+        }
+
+        static int rt_unmap_phys_mem(void* i_addr)
+        {
+            return mm_block_unmap(i_addr);
+        }
+
         static void rt_puts(const char* str)
         {
             TRACFCOMP(g_trac_hbrt, "HBRT TRACE: %s", str);
@@ -266,6 +314,11 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             assert(false);
         }
 
+        static void rt_nanosleep(uint64_t i_sec, uint64_t i_nsec)
+        {
+            nanosleep(i_sec, i_nsec);
+        }
+
         static int rt_scom_read(uint64_t chipid,
                                  uint64_t addr,
                                  void* data)
@@ -277,27 +330,44 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                       chipid,
                       addr);
 
-            uint64_t * data64 = static_cast<uint64_t *>(data);
+            errlHndl_t l_errl = nullptr;
+            TARGETING::Target* l_target =
+                        TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
 
-            SCOM_KEY scomKey(chipid,addr);
-            SCOM_MAP::iterator it = cv_scomMap.find(scomKey);
+            // First attempt a real SCOM read
+            size_t l_size = sizeof(uint64_t);
+            l_errl = DeviceFW::deviceRead(l_target,
+                                          data,
+                                          l_size,
+                                          DEVICE_SCOM_ADDRESS(addr));
+            if(l_errl)
+            {
+                delete l_errl;
+                l_errl = nullptr;
 
-            if(it != cv_scomMap.end())
-            {
-                *data64 = it->second;
-            }
-            else
-            {
-                *data64 = 0;
-            }
+                // Use cache in the case of an error
+                uint64_t * data64 = static_cast<uint64_t *>(data);
 
-            // Fail on these addresses
-            // On real HW they would cause an error
-            // The test that sends these expects an error
-            if( addr == 0x11223344 ||
-                addr == 0x22334455 )
-            {
-                rc = HBRT_RC_PIBERR_100_INVALIDADDR;
+                SCOM_KEY scomKey(chipid,addr);
+                SCOM_MAP::iterator it = cv_scomMap.find(scomKey);
+
+                if(it != cv_scomMap.end())
+                {
+                    *data64 = it->second;
+                }
+                else
+                {
+                    *data64 = 0;
+                }
+
+                // Fail on these addresses
+                // On real HW they would cause an error
+                // The test that sends these expects an error
+                if( addr == 0x11223344 ||
+                    addr == 0x22334455 )
+                {
+                    rc = HBRT_RC_PIBERR_100_INVALIDADDR;
+                }
             }
 
             return rc;
@@ -308,25 +378,40 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                                   void* data)
         {
             int rc = 0;
-
             uint64_t * data64 = static_cast<uint64_t *>(data);
-
             TRACFCOMP(g_trac_hbrt,
                       "Scom write chipid:0x%.8x Address:0x%08x Data:0x%16x",
                       chipid,
                       addr,
                       *data64);
 
-            SCOM_KEY scomKey(chipid,addr);
-            cv_scomMap[scomKey] = *data64;
+            errlHndl_t l_errl = nullptr;
+            TARGETING::Target* l_target =
+                        TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
 
-            // Fail on these addresses
-            // On real HW they would cause an error
-            // The test that sends these expects an error
-            if( addr == 0x11223344 ||
-                addr == 0x22334455 )
+            // First attempt a real SCOM write
+            size_t l_size = sizeof(uint64_t);
+            l_errl = DeviceFW::deviceWrite(l_target,
+                                           data,
+                                           l_size,
+                                           DEVICE_SCOM_ADDRESS(addr));
+            if(l_errl)
             {
-                rc = 1;
+                delete l_errl;
+                l_errl = nullptr;
+
+                // Use cache on error
+                SCOM_KEY scomKey(chipid,addr);
+                cv_scomMap[scomKey] = *data64;
+
+                // Fail on these addresses
+                // On real HW they would cause an error
+                // The test that sends these expects an error
+                if( addr == 0x11223344 ||
+                    addr == 0x22334455 )
+                {
+                    rc = 1;
+                }
             }
 
             return rc;

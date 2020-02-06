@@ -84,9 +84,14 @@ namespace HTMGT
         OCC_RESET_REASON_POWER_FAULT       = 0x04,
         OCC_RESET_REASON_DIFF_OCC          = 0x05,
         OCC_RESET_REASON_OCC_REQUEST       = 0x06,
+        OCC_RESET_REASON_OCC_AFO           = 0x07,
+        OCC_RESET_REASON_CODE_UPDATE       = 0x08,
+        OCC_RESET_REASON_OCC_IN_DIFF_NODE  = 0x09,
         OCC_RESET_REASON_EXTERNAL_REQUEST  = 0x0A,
-        OCC_RESET_REASON_WOF_REQUEST       = 0x0C,
+        OCC_RESET_REASON_ATTR_CHANGE       = 0x0B,
+        OCC_RESET_REASON_WOF_RESET         = 0x0C,
         OCC_RESET_REASON_CHECKPOINT_FAIL   = 0x0D,
+        OCC_RESET_REASON_POWER_OFF         = 0xFF,
     };
 
     // OCC Callout Structure

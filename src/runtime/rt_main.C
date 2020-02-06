@@ -167,6 +167,9 @@ runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
         // (HTMGT not compiled in by default)
     }
 
+    // callLoadAndStartPMComplex is no-op on OPAL systems
+    rtPost->callLoadAndStartPMComplex();
+
     // do any version mismatch fixups
     rt_version_fixup();
 

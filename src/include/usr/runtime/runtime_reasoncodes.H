@@ -67,7 +67,9 @@ namespace RUNTIME
         MOD_INIT_RT_RES_MEM_TRACE_BUF    = 0x27,  /**< rt_rsvdtracebuffer.C */
         MOD_OPEN_UNTRUSTED_SP_AREAS      = 0x28,  /**< populate_hbruntime.C */
         MOD_SEND_ATTRIBUTES_TO_FSP       = 0x29,  /**< hbrt_utilities.H */
-        MOD_CONFIGURE_HBRT_HYP_IDS       = 0x2C,
+        MOD_CONFIGURE_HBRT_HYP_IDS       = 0x2C,  /**< customize_attrs_for_payload.C */
+        MOD_PM_RT_START_PM_COMPLEX       = 0x2D,  /**< rt_pm.C */
+        MOD_PM_RT_RESET_W_REASON         = 0x2E,  /**< rt_occ.C */
     };
 
     enum RuntimeReasonCode
@@ -148,6 +150,8 @@ namespace RUNTIME
         RT_NO_OMI_TARGET_FOUND         = RUNTIME_COMP_ID | 0x49,
         RC_LOG_GARD_EVENT_UNKNOWN_ERROR_TYPE   = RUNTIME_COMP_ID | 0x4A,
         RC_LOG_GARD_EVENT              = RUNTIME_COMP_ID | 0x4B,
+        RC_BAD_HOMER_PHYS_ADDR         = RUNTIME_COMP_ID | 0x4C,
+        RC_COULD_NOT_MAP_RESET_REASON  = RUNTIME_COMP_ID | 0x4D,
     };
 
     enum UserDetailsTypes

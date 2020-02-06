@@ -91,7 +91,11 @@ namespace HBPM
     };
 
     /**
-     *  @brief Convert HOMER physical address space to a vitual address
+     *  @brief Convert HOMER physical address space to a vitual address. The
+     *         input value of the physical HOMER address, along with the
+     *         converted virtual address, are saved into the attributes
+     *         ATTR_HOMER_PHYS_ADDR and ATTR_HOMER_VIRT_ADDR, respectively,
+     *         for future use.
      *  @param[in]  i_proc_target  Processsor target
      *  @param[in]  i_phys_addr    Physical address
      *  @return NULL on error, else virtual address

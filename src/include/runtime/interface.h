@@ -797,14 +797,14 @@ typedef struct hostInterfaces
      *   with the given processor chip.
      *
      * @param[in]   i_chipId         processor being asked about
-     * @param[out]  o_homerAddr      address of HOMER
-     * @param[out]  o_occCommonAddr  address of OCC Common
+     * @param[out]  o_homerAddr      physical address of HOMER
+     * @param[out]  o_occCommonAddr  physical address of OCC Common
      * @return 0 on success, else RC
      * @platform eBMC
      */
-    int (*get_pm_complex_addresses)( uint64_t i_chipId,
-                                     void*& o_homerAddr,
-                                     void*& o_occCommonAddr );
+    int (*get_pm_complex_addresses)( uint64_t  i_chipId,
+                                     uint64_t& o_homerAddr,
+                                     uint64_t& o_occCommonAddr );
 
 
     /* Reserve some space for future growth.

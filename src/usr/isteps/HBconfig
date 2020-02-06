@@ -14,6 +14,12 @@ config START_OCC_DURING_BOOT
     help
         Activates all the OCCs during IPL
 
+config AUTO_START_PM_COMPLEX_FOR_PHYP
+    default y
+    help
+        Load and start PM Complex automatically during HBRT startup. For PHYP
+        load only.
+
 config OPENPOWER_MEM_VOLT
     default n
     help

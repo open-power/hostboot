@@ -29,11 +29,20 @@
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/runtime/rt_targeting.H>
 #include    <targeting/translateTarget.H>
-
+#include    <runtime/runtime_reasoncodes.H>
+#include    <map>
 
 using namespace TARGETING;
 extern trace_desc_t* g_trac_hbrt;
 
+const std::map<OCC_RESET_REASON, HTMGT::occResetReason>g_PMComplexResetReasonMap =
+    {
+        {OCC_RESET_REASON_ERROR, HTMGT::OCC_RESET_REASON_ERROR},
+        {OCC_RESET_REASON_CODE_UPDATE, HTMGT::OCC_RESET_REASON_CODE_UPDATE},
+        // FIXME RTC: 214351 TMGT_REQUEST currently doesn't map
+        {OCC_RESET_REASON_TMGT_REQUEST, HTMGT::OCC_RESET_REASON_NONE},
+        {OCC_RESET_REASON_NA, HTMGT::OCC_RESET_REASON_NONE},
+    };
 
 namespace HTMGT
 {
@@ -50,7 +59,7 @@ namespace HTMGT
         {
             TMGT_ERR ("process_occ_error: getHbTarget"
                       " failed at %d chipId", i_chipId);
-            errlCommit (err, HWPF_COMP_ID);
+            errlCommit (err, RUNTIME_COMP_ID);
         }
         else
         {
@@ -75,7 +84,7 @@ namespace HTMGT
         {
             TMGT_ERR ("process_occ_reset: getHbTarget"
                       " failed at %d chipId", i_chipId);
-            errlCommit (err, HWPF_COMP_ID);
+            errlCommit (err, RUNTIME_COMP_ID);
         }
         else
         {
@@ -107,7 +116,7 @@ namespace HTMGT
             TMGT_ERR ("enable_occ_actuation: OCC state change"
                       " failed with rc=0x%04X (actuate=%d)",
                       err->reasonCode(), i_occ_activation);
-            errlCommit (err, HWPF_COMP_ID);
+            errlCommit (err, RUNTIME_COMP_ID);
         }
 #else
         rc = -1;
@@ -144,13 +153,76 @@ namespace HTMGT
                           " (%d bytes) failed with rc=0x%04X",
                           i_cmdData[0], i_cmdLength, err->reasonCode());
             }
-            errlCommit (err, HWPF_COMP_ID);
+            errlCommit (err, RUNTIME_COMP_ID);
         }
 #else
         o_rspLength = 0;
 #endif
         TRACFCOMP(g_trac_hbrt, EXIT_MRK" mfg_htmgt_pass_thru: rc=0x%X",rc);
         return rc;
+    }
+
+    //------------------------------------------------------------------------
+    int reset_pm_complex_with_reason(const OCC_RESET_REASON i_reason,
+                                     const uint64_t i_chipId)
+    {
+        uint16_t l_rc = 0;
+#ifdef CONFIG_HTMGT
+        errlHndl_t l_errl = nullptr;
+        TARGETING::Target* l_proc = nullptr;
+        do{
+        l_errl = RT_TARG::getHbTarget(i_chipId,
+                                      l_proc);
+        if(l_errl)
+        {
+            TRACFCOMP(g_trac_hbrt,ERR_MRK"Could not get TARGETING::Target* for chip ID 0x%08lx!", i_chipId);
+            l_rc = ERRL_GETRC_SAFE(l_errl);
+            errlCommit(l_errl, RUNTIME_COMP_ID);
+            break;
+        }
+
+        occResetReason l_resetReason = HTMGT::OCC_RESET_REASON_NONE;
+        auto l_mappedReason = g_PMComplexResetReasonMap.find(i_reason);
+        if(l_mappedReason == g_PMComplexResetReasonMap.end())
+        {
+            TRACFCOMP(g_trac_hbrt, ERR_MRK"Could not map OCC reset reason 0x%08x for chip ID 0x%08x",
+                      i_reason, i_chipId);
+            /*@
+            * @errortype
+            * @moduleid   RUNTIME::MOD_PM_RT_RESET_W_REASON
+            * @reasoncode RUNTIME::RC_COULD_NOT_MAP_RESET_REASON
+            * @userdata1  Input OCC reason code
+            * @userdata2  Chip ID of the input chip
+            * @devdesc    Could not map OCC reset reason from PHYP to HTMGT
+            * @custdesc   A failure occurred during runtime
+            */
+            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                             RUNTIME::MOD_PM_RT_RESET_W_REASON,
+                                             RUNTIME::RC_COULD_NOT_MAP_RESET_REASON,
+                                             i_reason,
+                                             i_chipId);
+            l_rc = ERRL_GETRC_SAFE(l_errl);
+            errlCommit(l_errl, RUNTIME_COMP_ID);
+            break;
+        }
+        else
+        {
+            l_resetReason = l_mappedReason->second;
+        }
+
+        l_errl = OccManager::resetOccs(l_proc,
+                                       false, //i_skipCountIncrement
+                                       false, //i_skipComm
+                                       l_resetReason);
+        if(l_errl)
+        {
+            l_rc = ERRL_GETRC_SAFE(l_errl);
+            errlCommit(l_errl, RUNTIME_COMP_ID);
+            break;
+        }
+        }while(0);
+#endif
+        return l_rc;
     }
 
     //------------------------------------------------------------------------
@@ -164,13 +236,15 @@ namespace HTMGT
             rt_intf->process_occ_reset  = &process_occ_reset;
             rt_intf->enable_occ_actuation  = &enable_occ_actuation;
             rt_intf->mfg_htmgt_pass_thru = &htmgt_pass_thru;
+            rt_intf->reset_pm_complex_with_reason =
+                    &reset_pm_complex_with_reason;
         }
     };
 
     registerOcc g_registerOcc;
 
 
-//------------------------------------------------------------------------
+    //------------------------------------------------------------------------
 
     void process_occ_clr_msgs( void )
     {
@@ -184,7 +258,6 @@ namespace HTMGT
                 " when HTMGT is not enabled");
 #endif
     }
-
 
     //------------------------------------------------------------------------
 

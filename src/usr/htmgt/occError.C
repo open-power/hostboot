@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -528,7 +528,7 @@ namespace HTMGT
         if (i_actions & TMGT_ERRL_ACTIONS_WOF_RESET_REQUIRED)
         {
             iv_failed = false;
-            iv_resetReason = OCC_RESET_REASON_WOF_REQUEST;
+            iv_resetReason = OCC_RESET_REASON_WOF_RESET;
             // Check if WOF resets are disabled
             if(int_flags_set(FLAG_WOF_RESET_DISABLED) == true)
             {

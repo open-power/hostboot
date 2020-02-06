@@ -34,6 +34,7 @@
 
 #include <pm/pm_common.H>
 #include <isteps/pm/pm_common_ext.H>
+#include <htmgt/htmgt.H>
 
 #include <runtime/interface.h>        // g_hostInterfaces
 #include <runtime/rt_fwreq_helper.H>  // firmware_request_helper
@@ -259,6 +260,11 @@ namespace RTPM
                 l_err = nullptr;
                 break;
             }
+
+#ifdef CONFIG_HTMGT
+            HTMGT::processOccStartStatus(true, // i_startCompleted
+                                         nullptr); // failed proc
+#endif
 
         } while(0);
 
@@ -524,6 +530,93 @@ namespace RTPM
         return l_err;
     }
 
+    void load_and_start_pm_complex()
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  ENTER_MRK"load_and_start_pm_complex");
+#ifdef CONFIG_AUTO_START_PM_COMPLEX_FOR_PHYP
+        Target* l_sys = nullptr;
+        targetService().getTopLevelTarget(l_sys);
+        assert(l_sys, "load_and_start_pm_complex: top level target is nullptr");
+
+        TargetHandleList l_procs;
+        getAllChips(l_procs, TYPE_PROC, true /*functional*/);
+
+        uint64_t l_homerPhysAddr = 0;
+        uint64_t l_occCommonAddr = 0;
+        int l_rc = 0;
+        errlHndl_t l_errl = nullptr;
+        Target* l_failedProc = nullptr;
+
+        do {
+
+        // No-op on non-PHYP systems
+        if(!is_phyp_load())
+        {
+            break;
+        }
+
+        if(g_hostInterfaces->get_pm_complex_addresses == nullptr)
+        {
+            // TODO RTC: 214351 Make this a visible error once PHYP support is
+            // in
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"load_and_start_pm_complex: no get_pm_complex_addresses interface provided!");
+            break;
+        }
+
+        for(auto& l_proc : l_procs)
+        {
+            auto l_chipId = l_proc->getAttr<ATTR_HBRT_HYP_ID>();
+            // PHYP decides the location for HOMER and OCC Common areas; need
+            // to call into PHYP to fetch them
+            l_rc = g_hostInterfaces->get_pm_complex_addresses(l_chipId,
+                                                              l_homerPhysAddr,
+                                                              l_occCommonAddr);
+            if(l_rc)
+            {
+                break;
+            }
+            // Update the address on each proc prior to loading/starting PM;
+            // loadAndStartPMAll relies on this attribute to be set.
+            l_proc->setAttr<ATTR_HOMER_PHYS_ADDR>(l_homerPhysAddr);
+        }
+        if(l_rc)
+        {
+            break;
+        }
+
+        // Also update the OCC Common address
+        l_sys->setAttr<ATTR_OCC_COMMON_AREA_PHYS_ADDR>(l_occCommonAddr);
+
+        l_errl = HBPM::loadAndStartPMAll(HBPM::PM_LOAD,
+                                         l_failedProc);
+        if(l_errl)
+        {
+            pm_complex_error(l_errl, l_rc);
+            break;
+        }
+
+        if(l_failedProc)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"load_and_start_pm_complex: could not load/start PM Complex on proc HUID 0x%08x",
+                      get_huid(l_failedProc));
+            break;
+        }
+
+        }while(0);
+
+        if(l_rc)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"load_and_start_pm_complex: error occurred; rc: %d", l_rc);
+        }
+
+#endif
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  EXIT_MRK"load_and_start_pm_complex");
+    }
 
     //------------------------------------------------------------------------
 
@@ -535,6 +628,10 @@ namespace RTPM
             rt_intf->load_pm_complex = &load_pm_complex;
             rt_intf->start_pm_complex = &start_pm_complex;
             rt_intf->reset_pm_complex = &reset_pm_complex;
+
+            postInitCalls_t* rt_postInits = getPostInitCalls();
+            rt_postInits->callLoadAndStartPMComplex =
+                    &load_and_start_pm_complex;
 
             // If we already loaded OCC during the IPL we need to fix up
             //  the virtual address because we're now not using virtual
