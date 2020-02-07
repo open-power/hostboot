@@ -32,11 +32,11 @@
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
-#include <lib/shared/exp_defaults.H>
 #include <fapi2.H>
+#include <generic/memory/lib/utils/scom.H>
+#include <lib/shared/exp_defaults.H>
 #include <explorer_scom_addresses.H>
 #include <explorer_scom_addresses_fld.H>
-#include <generic/memory/lib/utils/scom.H>
 #include <lib/fir/exp_fir.H>
 #include <lib/fir/exp_fir_traits.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
@@ -147,6 +147,97 @@ fapi2::ReturnCode after_draminit_training<mss::mc_type::EXPLORER>( const fapi2::
 fapi_try_exit:
 
     FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);
+    return fapi2::current_err;
+}
+
+
+///
+/// @brief Unmask Explorer Global FIR and SPECIAL ATTN mask registers afer exp_omi_init
+/// @param[in] i_target Explorer to initialize
+/// @return fapi2:ReturnCode FAPI2_RC_SUCCESS if success, else error code
+///
+template<>
+fapi2::ReturnCode after_mc_omi_init<mss::mc_type::EXPLORER>(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    fapi2::ReturnCode l_rc1 = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::ReturnCode l_rc2 = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::ReturnCode l_rc3 = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::ReturnCode l_rc4 = fapi2::FAPI2_RC_SUCCESS;
+
+    fapi2::buffer<uint64_t> l_global_fir_mask_reg;
+    fapi2::buffer<uint64_t> l_global_spa_attn_reg;
+
+    mss::fir::reg<EXPLR_MMIO_MFIR> l_exp_mmio_mfir_reg(i_target, l_rc1);
+    mss::fir::reg<EXPLR_TLXT_TLXFIRQ> l_exp_tlxt_fir_reg(i_target, l_rc2);
+    mss::fir::reg<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR> l_exp_local_fir_reg(i_target, l_rc3);
+    mss::fir::reg<EXPLR_DLX_MC_OMI_FIR_REG> l_exp_dlx_omi_fir_reg(i_target, l_rc4);
+
+    FAPI_TRY(l_rc1, "for target %s unable to create fir::reg for EXPLR_MMIO_MFIR 0x%0x",
+             mss::c_str(i_target), EXPLR_MMIO_MFIR);
+    FAPI_TRY(l_rc2, "for target %s unable to create fir::reg for EXPLR_TLXT_TLXFIRQ 0x%0x",
+             mss::c_str(i_target), EXPLR_TLXT_TLXFIRQ);
+    FAPI_TRY(l_rc3, "for target %s unable to create fir::reg for EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR 0x%0x",
+             mss::c_str(i_target), EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR);
+    FAPI_TRY(l_rc4, "for target %s unable to create fir::reg for EXPLR_DLX_MC_OMI_FIR_REG 0x%0x",
+             mss::c_str(i_target), EXPLR_DLX_MC_OMI_FIR_REG);
+
+    // Pull global fir mask state and unmask bits per spec
+    FAPI_TRY(fapi2::getScom(i_target, EXPLR_TP_MB_UNIT_TOP_FIR_MASK, l_global_fir_mask_reg));
+    l_global_fir_mask_reg.clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN3>()
+    .clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN4>()
+    .clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN7>()
+    .clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN8>()
+    .clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN9>()
+    .clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN11>()
+    .clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN12>();
+    FAPI_TRY(fapi2::putScom(i_target, EXPLR_TP_MB_UNIT_TOP_FIR_MASK, l_global_fir_mask_reg));
+
+    // Pull global special attn state and unmask bits per spec
+    FAPI_TRY(fapi2::getScom(i_target, EXPLR_TP_MB_UNIT_TOP_SPA_MASK, l_global_spa_attn_reg));
+    l_global_spa_attn_reg.clearBit<EXPLR_TP_MB_UNIT_TOP_SPATTN_IN5>();
+    FAPI_TRY(fapi2::putScom(i_target, EXPLR_TP_MB_UNIT_TOP_SPA_MASK, l_global_spa_attn_reg));
+
+    // Setup MMIO MFIR unmasks per spec
+    FAPI_TRY(l_exp_mmio_mfir_reg.recoverable_error<EXPLR_MMIO_MFIR_SCOM_ERR>()
+             .local_checkstop<EXPLR_MMIO_MFIR_FSM_PERR>()
+             .local_checkstop<EXPLR_MMIO_MFIR_FIFO_OVERFLOW>()
+             .local_checkstop<EXPLR_MMIO_MFIR_CTL_REG_PERR>()
+             .recoverable_error<EXPLR_MMIO_MFIR_INFO_REG_PERR>()
+             .write());
+
+    // Setup TLXT FIR unmasks per spec
+    FAPI_TRY(l_exp_tlxt_fir_reg.local_checkstop<EXPLR_TLXT_TLXFIRQ_TLXT_PARITY_ERROR>()
+             .recoverable_error<EXPLR_TLXT_TLXFIRQ_TLXT_RECOVERABLE_ERROR>()
+             .recoverable_error<EXPLR_TLXT_TLXFIRQ_TLXT_CONFIG_ERROR>()
+             .local_checkstop<EXPLR_TLXT_TLXFIRQ_TLXT_INFORMATIONAL_PERROR>()
+             .recoverable_error<EXPLR_TLXT_TLXFIRQ_TLXT_HARD_ERROR>()
+             .local_checkstop<EXPLR_TLXT_TLXFIRQ_TLXR_OC_MALFORMED>()
+             .recoverable_error<EXPLR_TLXT_TLXFIRQ_TLXR_OC_PROTOCOL_ERROR>()
+             .local_checkstop<EXPLR_TLXT_TLXFIRQ_TLXR_ADDR_XLAT>()
+             .local_checkstop<EXPLR_TLXT_TLXFIRQ_TLXR_METADATA_UNC_DPERR>()
+             .local_checkstop<EXPLR_TLXT_TLXFIRQ_TLXR_OC_UNSUPPORTED>()
+             .local_checkstop<EXPLR_TLXT_TLXFIRQ_TLXR_OC_FATAL>()
+             .local_checkstop<EXPLR_TLXT_TLXFIRQ_TLXR_CONTROL_ERROR>()
+             .local_checkstop<EXPLR_TLXT_TLXFIRQ_TLXR_INTERNAL_ERROR>()
+             .recoverable_error<EXPLR_TLXT_TLXFIRQ_TLXR_INFORMATIONAL>()
+             .write());
+
+    // Setup LOCAL FIR unmasks per spec
+    FAPI_TRY(l_exp_local_fir_reg.recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_IN0>()
+             .recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_IN1>()
+             .recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_IN2>()
+             .recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_IN8>()
+             .recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_IN63>()
+             .write());
+
+    // Setup MC OMI FIR unmasks per spec
+    FAPI_TRY(l_exp_dlx_omi_fir_reg.recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_FLIT_CE>()
+             .write());
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+
     return fapi2::current_err;
 }
 

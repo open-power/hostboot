@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,6 +65,16 @@ fapi2::ReturnCode after_draminit_mc( const fapi2::Target<T>& i_target );
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
 fapi2::ReturnCode after_draminit_training( const fapi2::Target<T>& i_target );
+
+///
+/// @brief Unmask and setup actions performed after *_omi_init
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2::TargetType which hold the FIR bits
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
+fapi2::ReturnCode after_mc_omi_init( const fapi2::Target<T>& i_target );
 
 ///
 /// @brief Unmask and setup actions performed after mss_scominit

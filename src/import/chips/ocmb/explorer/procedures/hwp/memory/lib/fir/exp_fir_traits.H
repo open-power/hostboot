@@ -95,5 +95,73 @@ struct firTraits<EXPLR_RDF_FIR>
     static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_OCMB_CHIP;
 };
 
+///
+/// @brief FIR Register Traits for Explorer LOCAL FIR
+///
+template <>
+struct firTraits<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR>
+{
+    static constexpr uint64_t REG = EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR;
+    static constexpr uint64_t ACT0 = EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_ACTION0;
+    static constexpr uint64_t ACT1 = EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_ACTION1;
+    static constexpr uint64_t MASK = EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_MASK;
+    static constexpr uint64_t MASK_AND = EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_MASK_AND;
+    static constexpr uint64_t MASK_OR = EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_MASK_OR;
+
+    // Target type of this register
+    static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_OCMB_CHIP;
+};
+
+///
+/// @brief FIR Register Traits for Explorer TLX FIR
+///
+template <>
+struct firTraits<EXPLR_TLXT_TLXFIRQ>
+{
+    static constexpr uint64_t REG = EXPLR_TLXT_TLXFIRQ;
+    static constexpr uint64_t ACT0 = EXPLR_TLXT_TLXFIRACT0;
+    static constexpr uint64_t ACT1 = EXPLR_TLXT_TLXFIRACT1;
+    static constexpr uint64_t MASK = EXPLR_TLXT_TLXFIRMASK;
+    static constexpr uint64_t MASK_AND = EXPLR_TLXT_TLXFIRMASK_AND;
+    static constexpr uint64_t MASK_OR = EXPLR_TLXT_TLXFIRMASK_OR;
+
+    // Target type of this register
+    static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_OCMB_CHIP;
+};
+
+///
+/// @brief FIR Register Traits for Explorer MC_OMI FIR
+///
+template <>
+struct firTraits<EXPLR_DLX_MC_OMI_FIR_REG>
+{
+    static constexpr uint64_t REG = EXPLR_DLX_MC_OMI_FIR_REG;
+    static constexpr uint64_t ACT0 = EXPLR_DLX_MC_OMI_FIR_ACTION0_REG;
+    static constexpr uint64_t ACT1 = EXPLR_DLX_MC_OMI_FIR_ACTION1_REG;
+    static constexpr uint64_t MASK = EXPLR_DLX_MC_OMI_FIR_MASK_REG;
+    static constexpr uint64_t MASK_AND = EXPLR_DLX_MC_OMI_FIR_MASK_REG_AND;
+    static constexpr uint64_t MASK_OR = EXPLR_DLX_MC_OMI_FIR_MASK_REG_OR;
+
+    // Target type of this register
+    static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_OCMB_CHIP;
+};
+
+///
+/// @brief FIR Register Traits for Explorer MMIO MFIR
+///
+template <>
+struct firTraits<EXPLR_MMIO_MFIR>
+{
+    static constexpr uint64_t REG = EXPLR_MMIO_MFIR;
+    static constexpr uint64_t ACT0 = EXPLR_MMIO_MFIRACT0;
+    static constexpr uint64_t ACT1 = EXPLR_MMIO_MFIRACT1;
+    static constexpr uint64_t MASK = EXPLR_MMIO_MFIRMASK;
+    static constexpr uint64_t MASK_AND = EXPLR_MMIO_MFIRMASK_AND;
+    static constexpr uint64_t MASK_OR = EXPLR_MMIO_MFIRMASK_OR;
+
+    // Target type of this register
+    static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_OCMB_CHIP;
+};
+
 } // end mss ns
 #endif

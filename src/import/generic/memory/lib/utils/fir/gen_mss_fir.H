@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,10 +52,8 @@ namespace mss
 /// @brief FIR Register Traits
 /// @tparam R FIR Register
 ///
-
 template <uint64_t R>
 struct firTraits;
-
 
 namespace fir
 {
@@ -232,6 +230,6 @@ class reg
         }
 };
 
-}
-}
+} // end ns fir
+} // end ns mss
 #endif

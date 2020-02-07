@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,7 @@
 // *HWP Level: 2
 // *HWP Consumed by: HB
 
+#include <lib/shared/exp_defaults.H>
 #include <exp_omi_init.H>
 #include <exp_oc_regs.H>
 #include <lib/inband/exp_inband.H>
@@ -41,6 +42,8 @@
 #include <generic/memory/mss_git_data_helper.H>
 #include <lib/workarounds/exp_omi_workarounds.H>
 #include <generic/memory/lib/utils/find.H>
+#include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
+#include <lib/fir/exp_fir.H>
 
 ///
 /// @brief Verify we know how to talk to the connected device
@@ -653,6 +656,7 @@ fapi2::ReturnCode exp_omi_init(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
     FAPI_TRY(omiSetMMIOEnableBAR(i_target));
     FAPI_TRY(omiSetACTagPASIDMetaData(i_target));
     FAPI_TRY(omiEnableAFU(i_target));
+    FAPI_TRY(mss::unmask::after_mc_omi_init<mss::mc_type::EXPLORER>(i_target));
 
 fapi_try_exit:
 
