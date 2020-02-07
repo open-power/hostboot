@@ -37,6 +37,7 @@ EXTRAINCDIR += ${HWP_PATH}/hwp/spi/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 
 #include unique objects
+OBJS += spi.o
 OBJS += spidd.o
 OBJS += errlud_spi.o
 

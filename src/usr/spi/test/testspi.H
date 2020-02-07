@@ -25,11 +25,15 @@
 #ifndef __TEST_SPI_H
 #define __TEST_SPI_H
 
+#include <map>
+
 #include <cxxtest/TestSuite.H>
 #include <devicefw/driverif.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <trace/interface.H>
+
+#include <spi/spi.H>
 
 #define SPI_TEST_IGNORE_DATA_COMPARE 0xFFFFFFFFFFFFFFFF
 
@@ -511,6 +515,129 @@ public:
         }
     }
 
+    static void printSpiDeviceList(const std::vector<SPI::spiSlaveDevice>& i_deviceInfo)
+    {
+        using namespace SPI;
+
+        TS_INFO("HDAT SPI device list:");
+
+        for (const auto& device : i_deviceInfo)
+        {
+            TS_INFO("Device: me=%u mp=%u khz=%u type=%u purp=%u",
+                    device.masterEngine,
+                    device.masterPort,
+                    device.busSpeedKhz,
+                    device.deviceType,
+                    device.devicePurpose);
+
+            TS_INFO("        id=(%u,%u,%u) slca=%u",
+                    device.deviceId.nodeOrdinal,
+                    device.deviceId.procId,
+                    device.deviceId.uniqueId,
+                    device.residentFruSlcaIndex);
+
+            TS_INFO("        description: %s,%s,%s,%s",
+                    device.description.vendor,
+                    device.description.deviceType,
+                    device.description.dataTypeOrPurpose,
+                    device.description.hwSubsystemOrScope);
+
+            for (const auto& part : device.partitions)
+            {
+                TS_INFO("  Partition: offset=%u size=%u purp=%u",
+                        part.offsetBytes,
+                        part.sizeBytes,
+                        part.partitionPurpose);
+
+                TS_INFO("             writescom: addr=0x%x bitpos=%u pol=%u sticky=%u",
+                        static_cast<unsigned>(part.writeAccessControl.scomAddress),
+                        part.writeAccessControl.secureBitPosition,
+                        part.writeAccessControl.bitPolarity,
+                        part.writeAccessControl.sticky);
+
+                TS_INFO("             readscom: addr=0x%x bitpos=%u pol=%u sticky=%u",
+                        static_cast<unsigned>(part.readAccessControl.scomAddress),
+                        part.readAccessControl.secureBitPosition,
+                        part.readAccessControl.bitPolarity,
+                        part.readAccessControl.sticky);
+            }
+        }
+    }
+
+    static void verifySpiSlaveIdUniqueness(const std::vector<SPI::spiSlaveDevice>& i_devices)
+    {
+        using namespace SPI;
+
+        TS_INFO(ENTER_MRK"verifySpiSlaveIdUniqueness");
+
+        union uniqueDeviceIdentifier
+        {
+            struct
+            {
+                uint8_t nodeId, procId, engine, zero;
+            };
+
+            uint32_t word = 0;
+        };
+
+        // A map from a unique nodeId+procId+engine value to a boolean
+        // (functionally a "set" datatype) to keep track of what devices we've
+        // already seen
+        std::map<uint32_t, bool> deviceNodeProcEngine;
+        std::map<uint32_t, bool> linkIds;
+
+        for (const spiSlaveDevice& device : i_devices)
+        {
+            const uniqueDeviceIdentifier devid { { device.deviceId.nodeOrdinal,
+                                                   device.deviceId.procId,
+                                                   device.masterEngine,
+                                                   0 } };
+
+            // If we see a duplicate device with these markers, error out
+            if (deviceNodeProcEngine.find(devid.word) != end(deviceNodeProcEngine))
+            {
+                TS_FAIL("Duplicate device node/proc/engine: "
+                        "nodeId=%d, procId=%d, engine=%d",
+                        devid.nodeId, devid.procId, devid.engine);
+            }
+
+            deviceNodeProcEngine[devid.word] = true;
+
+            if (linkIds.find(device.deviceId.word) != end(linkIds))
+            {
+                TS_FAIL("Duplicate link ID: "
+                        "nodeId=%d, procId=%d, linkId=%d",
+                        devid.nodeId, devid.procId, device.deviceId.uniqueId);
+            }
+
+            linkIds[device.deviceId.word] = true;
+        }
+
+        TS_INFO(EXIT_MRK"verifySpiSlaveIdUniqueness");
+    }
+
+    void testSpiHdatInterface() const
+    {
+        TS_INFO(ENTER_MRK"testSpiHdatInterface");
+
+        using namespace SPI;
+
+        std::vector<spiSlaveDevice> deviceInfo;
+
+        getSpiDeviceInfo(deviceInfo);
+
+        if (deviceInfo.empty())
+        {
+            TS_FAIL("spi device info list is empty");
+            return;
+        }
+
+        printSpiDeviceList(deviceInfo);
+
+        verifySpiSlaveIdUniqueness(deviceInfo);
+
+        TS_INFO(EXIT_MRK"testSpiHdatInterface");
+    }
 
 };
 

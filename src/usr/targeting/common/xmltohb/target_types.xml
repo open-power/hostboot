@@ -842,62 +842,46 @@
       <id>SBE_IS_STARTED</id>
     </attribute>
     <attribute>
-      <default>
-        <field>
-          <id>dataOffsetKB</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>dataSizeKB</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>eepromContentType</id>
-          <!--Since enum values cannot be used as default values in
-                  a complexType, this is a workaround to set the value to the
-                  corresponding enum value.-->
-          <!--value>IBM_MVPD</value-->
-          <value>0x3</value>
-        </field>
-        <field>
-          <id>engine</id>
-          <value>0xFF</value>
-        </field>
-        <field>
-          <id>spiMasterPath</id>
-          <value>physical:sys-0</value>
-        </field>
-      </default>
       <id>SPI_EEPROM_VPD_BACKUP_INFO</id>
     </attribute>
     <attribute>
-      <default>
-        <field>
-          <id>dataOffsetKB</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>dataSizeKB</id>
-          <value>0</value>
-        </field>
-        <field>
-          <id>eepromContentType</id>
-          <!--Since enum values cannot be used as default values in
-                  a complexType, this is a workaround to set the value to the
-                  corresponding enum value.-->
-          <!--value>IBM_MVPD</value-->
-          <value>0x3</value>
-        </field>
-        <field>
-          <id>engine</id>
-          <value>0xFF</value>
-        </field>
-        <field>
-          <id>spiMasterPath</id>
-          <value>physical:sys-0</value>
-        </field>
-      </default>
       <id>SPI_EEPROM_VPD_PRIMARY_INFO</id>
+    </attribute>
+    <attribute>
+      <id>SPI_KEYSTORE_INFO_HOSTBOOT</id>
+    </attribute>
+    <attribute>
+      <id>SPI_KEYSTORE_INFO_OPAL_0</id>
+    </attribute>
+    <attribute>
+      <id>SPI_KEYSTORE_INFO_OPAL_1</id>
+    </attribute>
+    <attribute>
+      <id>SPI_KEYSTORE_INFO_OPAL_2</id>
+    </attribute>
+    <attribute>
+      <id>SPI_KEYSTORE_INFO_PHYP</id>
+    </attribute>
+    <attribute>
+      <id>SPI_MVPD_BACKUP_INFO</id>
+    </attribute>
+    <attribute>
+      <id>SPI_MVPD_PRIMARY_INFO</id>
+    </attribute>
+    <attribute>
+      <id>SPI_SBE_BOOT_CODE_BACKUP_INFO</id>
+    </attribute>
+    <attribute>
+      <id>SPI_SBE_BOOT_CODE_PRIMARY_INFO</id>
+    </attribute>
+    <attribute>
+      <id>SPI_SBE_MEASUREMENT_CODE_BACKUP_INFO</id>
+    </attribute>
+    <attribute>
+      <id>SPI_SBE_MEASUREMENT_CODE_PRIMARY_INFO</id>
+    </attribute>
+    <attribute>
+      <id>SPI_WOF_DATA_INFO</id>
     </attribute>
     <attribute>
       <id>XIVE_CONTROLLER_BAR_ADDR</id>

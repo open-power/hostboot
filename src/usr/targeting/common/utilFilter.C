@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -584,7 +584,7 @@ Target * getImmediateParentByAffinity(const Target * i_child )
 }
 
 
-Target * getParent( const Target * i_unit , TARGETING::TYPE &i_pType)
+Target * getParent( const Target * i_unit , TARGETING::TYPE i_pType)
 {
     Target * l_parent = NULL;
     TARGETING::PredicateCTM l_predicate;

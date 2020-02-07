@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -413,7 +413,7 @@ const Target * getParentChip( const Target * i_pChiplet );
  *
  * @return Parent target pointer or NULL if error
  */
-Target * getParent( const Target * i_unit , TARGETING::TYPE &i_pType );
+Target * getParent( const Target * i_unit , TARGETING::TYPE i_pType );
 
 /**
  * @brief return the immediate parent target of the specified input child

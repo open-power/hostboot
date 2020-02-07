@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -122,7 +122,7 @@ constexpr size_t size(T(&array)[Size])
  *  size() member function).
  */
 template <typename Container>
-constexpr auto size(const Container& c)
+constexpr auto size(const Container& c) -> decltype(c.size())
 {
     return c.size();
 }

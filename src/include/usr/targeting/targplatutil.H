@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,7 @@
 #include <targeting/common/targreasoncodes.H>
 #include <targeting/common/trace.H>
 #include <targeting/common/target.H>
+#include <targeting/common/targetservice.H>
 
 namespace TARGETING
 {
@@ -57,6 +58,95 @@ namespace UTIL
     // IPMI sensors have the range 0x0-0xFE - 0xFF
     // is reserved for invalid sensor
     static const uint16_t INVALID_IPMI_SENSOR = 0xFF;
+
+/**
+ *  @brief Returns the top level physical target
+ *
+ *  Returns the top level (usually system) target. If there is no top
+ *  level target, an assertion failure is triggered. Caller does not
+ *  need to check for a NULL top level target
+ *
+ *  @returns  The top level target, never NULL.
+ */
+inline Target* assertGetToplevelTarget()
+{
+    Target* toplevelTarget = nullptr;
+    targetService().getTopLevelTarget(toplevelTarget);
+    assert(toplevelTarget, "Toplevel target is NULL");
+    return toplevelTarget;
+}
+
+/* @brief tryGetAttributes<Attrs...>
+ *
+ *        This is a utility template that iterates a list of attribute IDs,
+ *        attempts to read each one of them off of a given Target, and if the
+ *        read succeeds, invokes a callback on the value. This lets us read a
+ *        number of attributes without having to copy and paste a bunch of code
+ *        over and over. The types of the values of the attributes can be
+ *        heterogeneous; the only requirement is that the given functor be able
+ *        to accept an argument of the appropriate types.
+ *
+ * Example:
+ *
+ * tryGetAttributes<ATTR_HUID,
+ *                  ATTR_CLASS,
+ *                  ATTR_FAPI_POS>::get(target,
+ *                                      [](const ATTRIBUTE_ID id,
+ *                                         const auto& value)
+ *                                      { printk("attr %0x08x = 0x%08x",
+ *                                               id, value);
+ *                                      });
+ *
+ */
+
+template<ATTRIBUTE_ID... Attrs>
+struct tryGetAttributes;
+
+template<ATTRIBUTE_ID Attr, ATTRIBUTE_ID... Attrs>
+struct tryGetAttributes<Attr, Attrs...>
+{
+    /* @brief get
+     *
+     *        Reads one or more attributes off of i_target and invokes i_callback
+     *        on the values. This is the recursive case.
+     *
+     * @param[in] i_target    The target to read attributes from
+     * @param[in] i_callback  The callback to invoke per attribute value
+     */
+    template<typename Functor>
+    static void get(Target* const i_target, Functor&& i_callback)
+    {
+        // This function gets called when we have one or more attributes left to
+        // read. We read the attribute, call the callback if necessary, and then
+        // recur.
+
+        typename AttributeTraits<Attr>::Type attrvalue { };
+
+        if (i_target->tryGetAttr<Attr>(attrvalue))
+        {
+            i_callback(Attr, attrvalue);
+        }
+
+        tryGetAttributes<Attrs...>::get(i_target, std::forward<Functor>(i_callback));
+    }
+};
+
+template<>
+struct tryGetAttributes<>
+{
+    /* @brief get
+     *
+     *        Base case of recursion for tryGetAttributes<...>::get
+     *
+     * @param[in] i_target    The target to read attributes from
+     * @param[in] i_callback  The callback to invoke per attribute value
+     */
+    template<typename Functor>
+    static void get(Target* const i_target, Functor&& i_callback)
+    {
+        // This is the base case of the recursion, no more attributes to read.
+    }
+};
 
 /**
  *  @brief Creates a standard error log of tracing type
