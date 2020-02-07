@@ -539,8 +539,8 @@ errlHndl_t copyArchitectedRegs(void)
                     hostRegData->reg.num  = sbeRegData->regNum;
                     hostRegData->regVal  = sbeRegData->regVal;
 
-                    // If thread version is 2+, replace reg numbers with names
-                    if (procTableEntry->threadRegVersion >= 2)
+                    // If HOST type is PHYP replace register number with strings
+                    if (TARGETING::is_phyp_load())
                     {
                         replaceRegNumWithName(hostRegData);
                     }
@@ -574,6 +574,7 @@ errlHndl_t copyArchitectedRegs(void)
             }
         }
         // Update Process Dump Area tuple
+        procTableEntry->threadRegVersion = REG_DUMP_HDAT_STRUCT_VER;
         procTableEntry->capArrayAddr = procTableEntry->dstArrayAddr;
 
         // Update the PDA Table Entries to Attribute to be fetched in istep 21
