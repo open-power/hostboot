@@ -26,40 +26,40 @@
 
 <attn_node name="OCMB_LFIR" model_ec="EXPLORER_10" reg_type="SCOM">
 
-    <local_fir name="OCMB_LFIR">
+    <local_fir name="OCMB_LFIR" config="">
         <instance reg_inst="0" addr="0x0804000a" />
         <action attn_type="UCS" config="00" />
         <action attn_type="RE"  config="01" />
     </local_fir>
 
-    <bit pos= "0"    desc="CFIR access PCB error" />
-    <bit pos= "1"    desc="CFIR internal parity error" />
-    <bit pos= "2"    desc="LFIR internal parity error" />
-    <bit pos= "3"    desc="Debug scom satellite error" />
-    <bit pos= "4"    desc="PSCOM Logic: PCB Access Error" />
-    <bit pos= "5"    desc="PSCOM Logic: Summarized internal errors" />
-    <bit pos= "6"    desc="Trace Logic : Scom Satellite Error - Trace0" />
-    <bit pos= "7"    desc="Trace Logic : Scom Satellite Error - Trace1" />
-    <bit pos= "8"    desc="PIB2GIF parity error on FSM or Registers" />
-    <bit pos= "9"    desc="MSG access PCB error" />
-    <bit pos="10:18" desc="unused" />
-    <bit pos="19"    desc="DLL IRQ" />
-    <bit pos="20"    desc="Watchdog timer interrupt" />
-    <bit pos="21"    desc="internal temp sensor tripped a threshold" />
-    <bit pos="22"    desc="GPBC_FATAL_ERROR" />
-    <bit pos="23"    desc="GPBC_NON_FATAL_ERROR" />
-    <bit pos="24"    desc="early power off warning" />
-    <bit pos="25"    desc="TOP fatal interrupts" />
-    <bit pos="26"    desc="TOP non fatal interrupts" />
-    <bit pos="27:34" desc="Interrupt from OPSe to OCMB" />
-    <bit pos="35"    desc="DDR thermal event" />
-    <bit pos="36"    desc="DDR4 PHY fatal" />
-    <bit pos="37"    desc="DDR4 PHY non fatal" />
-    <bit pos="38"    desc="DDR4 PHY interrupt" />
-    <bit pos="39:46" desc="foxhound fatal" />
-    <bit pos="47:54" desc="foxhound non fatal" />
-    <bit pos="55:62" desc="foxhound serdes interrupt" />
-    <bit pos="63"    desc="GIF2PCB parity error on FSM or Registers" />
+    <bit pos= "0"   >CFIR access PCB error</bit>
+    <bit pos= "1"   >CFIR internal parity error</bit>
+    <bit pos= "2"   >LFIR internal parity error</bit>
+    <bit pos= "3"   >Debug scom satellite error</bit>
+    <bit pos= "4"   >PSCOM Logic: PCB Access Error</bit>
+    <bit pos= "5"   >PSCOM Logic: Summarized internal errors</bit>
+    <bit pos= "6"   >Trace Logic : Scom Satellite Error - Trace0</bit>
+    <bit pos= "7"   >Trace Logic : Scom Satellite Error - Trace1</bit>
+    <bit pos= "8"   >PIB2GIF parity error on FSM or Registers</bit>
+    <bit pos= "9"   >MSG access PCB error</bit>
+    <bit pos="10:18">unused</bit>
+    <bit pos="19"   >DLL IRQ</bit>
+    <bit pos="20"   >Watchdog timer interrupt</bit>
+    <bit pos="21"   >internal temp sensor tripped a threshold</bit>
+    <bit pos="22"   >GPBC_FATAL_ERROR</bit>
+    <bit pos="23"   >GPBC_NON_FATAL_ERROR</bit>
+    <bit pos="24"   >early power off warning</bit>
+    <bit pos="25"   >TOP fatal interrupts</bit>
+    <bit pos="26"   >TOP non fatal interrupts</bit>
+    <bit pos="27:34">Interrupt from OPSe to OCMB</bit>
+    <bit pos="35"   >DDR thermal event</bit>
+    <bit pos="36"   >DDR4 PHY fatal</bit>
+    <bit pos="37"   >DDR4 PHY non fatal</bit>
+    <bit pos="38"   >DDR4 PHY interrupt</bit>
+    <bit pos="39:46">foxhound fatal</bit>
+    <bit pos="47:54">foxhound non fatal</bit>
+    <bit pos="55:62">foxhound serdes interrupt</bit>
+    <bit pos="63"   >GIF2PCB parity error on FSM or Registers</bit>
 
 </attn_node>
 

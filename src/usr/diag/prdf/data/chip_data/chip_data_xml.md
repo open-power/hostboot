@@ -279,7 +279,25 @@ The target instance of the child node. This attribute should only exist when
 `child_node` is specified. Also, if `child_node` is specified and this attribute
 is omitted, the default value of 0 is used.
 
-#### 2.7.4) Attribute `desc` (required)
+**Important Note:**
+This value is actually interpreted as an array where the index is the instance
+value of the current node. Therefore, this requires the number of instances
+represented by this attribute to equal the number of instances represented by
+the current node.
+
+A list and/or range value (see appendix) may be used to represent the attribute
+value. For example, say we have a node with four possible instances and a bit
+defined as either of the following:
+
+    <bit pos="0" child_node="SOME_FIR" node_inst="4,5,6,7" ...
+    <bit pos="0" child_node="SOME_FIR" node_inst="4:7" ...
+    <bit pos="0" child_node="SOME_FIR" node_inst="4:5,6:7" ...
+
+All of which are equivalent once the lists/ranges are expanded. Then, if the
+input instance during isolation of this node is 1, the instance used for
+`SOME_FIR` will be 5.
+
+#### 2.7.4) Data for `<bit>` (required)
 
 A human readable description of this bit. This description will be printed out
 in logs for human consumption. It is highly recommended to keep this description
@@ -302,13 +320,14 @@ for these common patterns. Under the covers it will generate the required
 
 The FIR name. Defined exactly as the `name` attribute of `<register>`.
 
-#### 2.8.2) Attribute `config` (optional)
+#### 2.8.2) Attribute `config` (required)
 
 Not all FIRs will have a WOF or ACT2 (which is new to P10). If either, or both,
 of these registers exist, use the following values:
 
 | Value | Description                         |
 |-------|-------------------------------------|
+|       | neither WOF nor ACT2 registers      |
 | W     | include WOF register                |
 | 2     | include ACT2 register               |
 | W2    | include both WOF and ACT2 registers |

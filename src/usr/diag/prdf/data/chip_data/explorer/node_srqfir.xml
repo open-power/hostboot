@@ -33,36 +33,36 @@
         <action attn_type="HA"  config="10" />
     </local_fir>
 
-    <bit pos= "0" desc="SRQ recoverable error" />
-    <bit pos= "1" desc="SRQ nonrecoverable error" />
-    <bit pos= "2" desc="Refresh overrun" />
-    <bit pos= "3" desc="WAT error" />
-    <bit pos= "4" desc="RCD parity error" />
-    <bit pos= "5" desc="MCB logic error" />
-    <bit pos= "6" desc="Emergency throttle" />
-    <bit pos= "7" desc="NCF MCB parity error" />
-    <bit pos= "8" desc="DDR MBA event n" />
-    <bit pos= "9" desc="WRQ RRQ hang err" />
-    <bit pos="10" desc="SM one hot error" />
-    <bit pos="11" desc="Reg parity error" />
-    <bit pos="12" desc="Cmd parity error" />
-    <bit pos="13" desc="Port fail" />
-    <bit pos="14" desc="informational register parity error bit" />
-    <bit pos="15" desc="Debug parity error" />
-    <bit pos="16" desc="WDF unrecoverable mainline error" />
-    <bit pos="17" desc="WDF mmio error" />
-    <bit pos="18" desc="WDF array UE on mainline operations (SUE put in mem)" />
-    <bit pos="19" desc="WDF mainline dataflow error (SUE not reliably put in mem)" />
-    <bit pos="20" desc="WDF scom register parity err, affecting mainline config" />
-    <bit pos="21" desc="WDF scom register parity err, affecting scom ops only" />
-    <bit pos="22" desc="WDF SCOM fsm parity error" />
-    <bit pos="23" desc="WDF write buffer array CE" />
-    <bit pos="24" desc="NCF UE" />
-    <bit pos="25" desc="TBD" />
-    <bit pos="26" desc="NCF logic error" />
-    <bit pos="27" desc="NCF parity error" />
-    <bit pos="28" desc="NCF correctable error" />
-    <bit pos="29" desc="Internal scom error" />
-    <bit pos="30" desc="Internal scom error copy" />
+    <bit pos= "0">SRQ recoverable error</bit>
+    <bit pos= "1">SRQ nonrecoverable error</bit>
+    <bit pos= "2">Refresh overrun</bit>
+    <bit pos= "3">WAT error</bit>
+    <bit pos= "4">RCD parity error</bit>
+    <bit pos= "5">MCB logic error</bit>
+    <bit pos= "6">Emergency throttle</bit>
+    <bit pos= "7">NCF MCB parity error</bit>
+    <bit pos= "8">DDR MBA event n</bit>
+    <bit pos= "9">WRQ RRQ hang err</bit>
+    <bit pos="10">SM one hot error</bit>
+    <bit pos="11">Reg parity error</bit>
+    <bit pos="12">Cmd parity error</bit>
+    <bit pos="13">Port fail</bit>
+    <bit pos="14">informational register parity error bit</bit>
+    <bit pos="15">Debug parity error</bit>
+    <bit pos="16">WDF unrecoverable mainline error</bit>
+    <bit pos="17">WDF mmio error</bit>
+    <bit pos="18">WDF array UE on mainline operations (SUE put in mem)</bit>
+    <bit pos="19">WDF mainline dataflow error (SUE not reliably put in mem)</bit>
+    <bit pos="20">WDF scom register parity err, affecting mainline config</bit>
+    <bit pos="21">WDF scom register parity err, affecting scom ops only</bit>
+    <bit pos="22">WDF SCOM fsm parity error</bit>
+    <bit pos="23">WDF write buffer array CE</bit>
+    <bit pos="24">NCF UE</bit>
+    <bit pos="25">TBD</bit>
+    <bit pos="26">NCF logic error</bit>
+    <bit pos="27">NCF parity error</bit>
+    <bit pos="28">NCF correctable error</bit>
+    <bit pos="29">Internal scom error</bit>
+    <bit pos="30">Internal scom error copy</bit>
 
 </attn_node>

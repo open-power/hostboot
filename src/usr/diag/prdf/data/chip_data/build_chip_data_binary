@@ -1,0 +1,114 @@
+#!/usr/bin/perl
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/data/chip_data/build_chip_data_binary $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2020
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+use warnings;
+use strict;
+
+use Data::Dumper;
+use Getopt::Long qw(:config no_ignore_case);
+use File::Path qw(make_path);
+use XML::Simple qw(:strict);
+
+# Pull in from the lib directory
+use FindBin qw($RealBin);
+use FindBin qw($RealScript);
+use lib "$RealBin/lib";
+
+#-------------------------------------------------------------------------------
+# Help function
+#-------------------------------------------------------------------------------
+
+sub help()
+{
+    print <<EOF;
+Usage: $RealScript -h
+       $RealScript -i <input_dir> -o <output_dir>
+
+Builds Chip Data Binary files from the input Chip Data XML.
+
+Options:
+ -h, --help     Prints this menu.
+ -i, --input    Directory containing the Chip Data XML files.
+ -o, --output   Directory that will contain the Chip Data Binary files.
+EOF
+
+    exit;
+}
+
+#-------------------------------------------------------------------------------
+# Input
+#-------------------------------------------------------------------------------
+
+help() unless @ARGV; # print help if no arguments
+
+# Get options
+my ( $help, $src_dir, $dest_dir );
+help() unless GetOptions( 'h|help'     => \$help,
+                          'i|input=s'  => \$src_dir,
+                          'o|output=s' => \$dest_dir );
+
+help() if @ARGV; # print usage if there are extra arguments
+
+# -h,--help
+help() if ( $help );
+
+# -i,--input
+die "ERROR> Option -i required." unless ( defined $src_dir );
+die "ERROR> '$src_dir' is not a directory" unless ( -d $src_dir );
+
+# -o,--output
+die "ERROR> Option -o required." unless ( defined $dest_dir );
+make_path( $dest_dir, {error => \my $err} );
+if ( @{$err} )
+{
+    my ( $file, $message ) = %{shift @{$err}};
+    die "ERROR> $message: $file\n";
+}
+
+#-------------------------------------------------------------------------------
+# Support functions
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+# Main
+#-------------------------------------------------------------------------------
+
+# First, ensure the XML is well-formed and validates against the schema.
+foreach my $type ( "chip", "node" )
+{
+    foreach my $file ( <"$src_dir/$type\_*.xml"> )
+    {
+        system("xmllint --noout --schema $RealBin/$type.xsd $file");
+        if (0 != $?)
+        {
+            die "ERROR> RAS XML validation failed on $file\n";
+        }
+    }
+}
+
+# Very temporary, just to get things going.
+system( "date > $dest_dir/chip_data_explorer_10.cdb");
+

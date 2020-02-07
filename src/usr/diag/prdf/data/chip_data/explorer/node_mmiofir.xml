@@ -33,17 +33,17 @@
         <action attn_type="HA"  config="10" />
     </local_fir>
 
-    <bit pos= "0" desc="AFU desc unimp" />
-    <bit pos= "1" desc="MMIO err" />
-    <bit pos= "2" desc="SCOM err" />
-    <bit pos= "3" desc="FSM perr" />
-    <bit pos= "4" desc="FIFO overflow" />
-    <bit pos= "5" desc="Ctl reg parity err" />
-    <bit pos= "6" desc="Info reg parity error" />
-    <bit pos= "7" desc="SNSC both starts err" />
-    <bit pos= "8" desc="SNSC mult seq parity err" />
-    <bit pos= "9" desc="SNSC FSM parity err" />
-    <bit pos="10" desc="SNSC reg parity err" />
-    <bit pos="11" desc="acTAG PASID cfg err" />
+    <bit pos= "0">AFU desc unimp</bit>
+    <bit pos= "1">MMIO err</bit>
+    <bit pos= "2">SCOM err</bit>
+    <bit pos= "3">FSM perr</bit>
+    <bit pos= "4">FIFO overflow</bit>
+    <bit pos= "5">Ctl reg parity err</bit>
+    <bit pos= "6">Info reg parity error</bit>
+    <bit pos= "7">SNSC both starts err</bit>
+    <bit pos= "8">SNSC mult seq parity err</bit>
+    <bit pos= "9">SNSC FSM parity err</bit>
+    <bit pos="10">SNSC reg parity err</bit>
+    <bit pos="11">acTAG PASID cfg err</bit>
 
 </attn_node>

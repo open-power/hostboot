@@ -93,12 +93,13 @@
 
 <!-- Element: chip/bit -->
 <xsd:complexType name="bit">
-
-    <xsd:attribute name="pos"        type="int_range"  use="required"/>
-    <xsd:attribute name="child_node" type="name_type"  use="optional"/>
-    <xsd:attribute name="node_inst"  type="inst_type"  use="optional"/>
-    <xsd:attribute name="desc"       type="xsd:string" use="required"/>
-
+    <xsd:simpleContent>
+        <xsd:extension base="xsd:string">
+            <xsd:attribute name="pos"        type="int_range"  use="required"/>
+            <xsd:attribute name="child_node" type="name_type"  use="optional"/>
+            <xsd:attribute name="node_inst"  type="int_range"  use="optional"/>
+        </xsd:extension>
+    </xsd:simpleContent>
 </xsd:complexType>
 
 <!-- Element: chip/local_fir -->
@@ -112,7 +113,7 @@
     </xsd:sequence>
 
     <xsd:attribute name="name"   type="name_type"             use="required"/>
-    <xsd:attribute name="config" type="local_fir_config_enum" use="optional"/>
+    <xsd:attribute name="config" type="local_fir_config_enum" use="required"/>
 
 </xsd:complexType>
 
@@ -205,6 +206,7 @@
 <!-- Local FIR config. -->
 <xsd:simpleType name="local_fir_config_enum">
     <xsd:restriction base="xsd:string">
+        <xsd:enumeration value=""/>
         <xsd:enumeration value="W"/>
         <xsd:enumeration value="2"/>
         <xsd:enumeration value="W2"/>

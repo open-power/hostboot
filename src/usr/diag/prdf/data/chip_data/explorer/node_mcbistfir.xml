@@ -33,24 +33,24 @@
         <action attn_type="HA"  config="10" />
     </local_fir>
 
-    <bit pos= "0"    desc="Invalid maint address" />
-    <bit pos= "1"    desc="Command address timeout" />
-    <bit pos= "2"    desc="Internal FSM error" />
-    <bit pos= "3"    desc="MCBIST broadcast out of sync" />
-    <bit pos= "4"    desc="MCBIST data error" />
-    <bit pos= "5"    desc="Hard NCE ETE attn" />
-    <bit pos= "6"    desc="Soft NCE ETE attn" />
-    <bit pos= "7"    desc="Int NCE ETE attn" />
-    <bit pos= "8"    desc="RCE ETE attn" />
-    <bit pos= "9"    desc="ICE (IMPE) ETE attn" />
-    <bit pos="10"    desc="MCBIST program complete" />
-    <bit pos="11"    desc="MCBIST CCS subtest done" />
-    <bit pos="12"    desc="WAT debug bus attn" />
-    <bit pos="13"    desc="SCOM recoverable register parity error" />
-    <bit pos="14"    desc="SCOM fatal reg parity error" />
-    <bit pos="15"    desc="SCOM WAT and debug reg parity error" />
-    <bit pos="16:17" desc="Reserved" />
-    <bit pos="18"    desc="Internal SCOM error" />
-    <bit pos="19"    desc="Internal SCOM error clone" />
+    <bit pos= "0"   >Invalid maint address</bit>
+    <bit pos= "1"   >Command address timeout</bit>
+    <bit pos= "2"   >Internal FSM error</bit>
+    <bit pos= "3"   >MCBIST broadcast out of sync</bit>
+    <bit pos= "4"   >MCBIST data error</bit>
+    <bit pos= "5"   >Hard NCE ETE attn</bit>
+    <bit pos= "6"   >Soft NCE ETE attn</bit>
+    <bit pos= "7"   >Int NCE ETE attn</bit>
+    <bit pos= "8"   >RCE ETE attn</bit>
+    <bit pos= "9"   >ICE (IMPE) ETE attn</bit>
+    <bit pos="10"   >MCBIST program complete</bit>
+    <bit pos="11"   >MCBIST CCS subtest done</bit>
+    <bit pos="12"   >WAT debug bus attn</bit>
+    <bit pos="13"   >SCOM recoverable register parity error</bit>
+    <bit pos="14"   >SCOM fatal reg parity error</bit>
+    <bit pos="15"   >SCOM WAT and debug reg parity error</bit>
+    <bit pos="16:17">Reserved</bit>
+    <bit pos="18"   >Internal SCOM error</bit>
+    <bit pos="19"   >Internal SCOM error clone</bit>
 
 </attn_node>

@@ -33,33 +33,33 @@
         <action attn_type="HA"  config="10" />
     </local_fir>
 
-    <bit pos= "0"    desc="Info reg parity error" />
-    <bit pos= "1"    desc="Ctrl reg parity error" />
-    <bit pos= "2"    desc="TLX VC0 return credit counter overflow" />
-    <bit pos= "3"    desc="TLX VC1 return credit counter overflow" />
-    <bit pos= "4"    desc="TLX dcp0 return credit counter overflow" />
-    <bit pos= "5"    desc="TLX dcp1 return credit counter overflow" />
-    <bit pos= "6"    desc="TLX credit management block error" />
-    <bit pos= "7"    desc="TLX credit management block parity error" />
-    <bit pos= "8"    desc="TLXT fatal parity error" />
-    <bit pos= "9"    desc="TLXT recoverable error" />
-    <bit pos="10"    desc="TLXT configuration error" />
-    <bit pos="11"    desc="TLXT informational parity error" />
-    <bit pos="12"    desc="TLXT hard error" />
-    <bit pos="13:15" desc="Reserved" />
-    <bit pos="16"    desc="Corrupted pad mem pattern" />
-    <bit pos="17"    desc="Downstream OC parity error" />
-    <bit pos="18"    desc="OC malformed" />
-    <bit pos="19"    desc="OC protocol error" />
-    <bit pos="20"    desc="Address translate error" />
-    <bit pos="21"    desc="Metadata unc or data parity error" />
-    <bit pos="22"    desc="OC unsupported group 2" />
-    <bit pos="23"    desc="OC unsupported group 1" />
-    <bit pos="24"    desc="Bit flip control error" />
-    <bit pos="25"    desc="Control HW error" />
-    <bit pos="26"    desc="ECC corrected and others" />
-    <bit pos="27"    desc="Trace stop" />
-    <bit pos="28"    desc="Internal SCOM error" />
-    <bit pos="29"    desc="Internal SCOM error clone" />
+    <bit pos= "0"   >Info reg parity error</bit>
+    <bit pos= "1"   >Ctrl reg parity error</bit>
+    <bit pos= "2"   >TLX VC0 return credit counter overflow</bit>
+    <bit pos= "3"   >TLX VC1 return credit counter overflow</bit>
+    <bit pos= "4"   >TLX dcp0 return credit counter overflow</bit>
+    <bit pos= "5"   >TLX dcp1 return credit counter overflow</bit>
+    <bit pos= "6"   >TLX credit management block error</bit>
+    <bit pos= "7"   >TLX credit management block parity error</bit>
+    <bit pos= "8"   >TLXT fatal parity error</bit>
+    <bit pos= "9"   >TLXT recoverable error</bit>
+    <bit pos="10"   >TLXT configuration error</bit>
+    <bit pos="11"   >TLXT informational parity error</bit>
+    <bit pos="12"   >TLXT hard error</bit>
+    <bit pos="13:15">Reserved</bit>
+    <bit pos="16"   >Corrupted pad mem pattern</bit>
+    <bit pos="17"   >Downstream OC parity error</bit>
+    <bit pos="18"   >OC malformed</bit>
+    <bit pos="19"   >OC protocol error</bit>
+    <bit pos="20"   >Address translate error</bit>
+    <bit pos="21"   >Metadata unc or data parity error</bit>
+    <bit pos="22"   >OC unsupported group 2</bit>
+    <bit pos="23"   >OC unsupported group 1</bit>
+    <bit pos="24"   >Bit flip control error</bit>
+    <bit pos="25"   >Control HW error</bit>
+    <bit pos="26"   >ECC corrected and others</bit>
+    <bit pos="27"   >Trace stop</bit>
+    <bit pos="28"   >Internal SCOM error</bit>
+    <bit pos="29"   >Internal SCOM error clone</bit>
 
 </attn_node>
