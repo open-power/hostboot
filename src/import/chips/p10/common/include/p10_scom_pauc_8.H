@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -467,19 +467,19 @@ static const uint32_t TRA1_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
 static const uint32_t TRA1_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
 // pauc/reg00008.H
 
-static const uint64_t TXIRLM_REGS_TX_IMPCAL_P_4X_PB = 0x800f2c0010012c3full;
+static const uint64_t TXIRLM_REGS_TX_IMPCAL_P_4X_PB = 0x800f2dc010012c3full;
 
 static const uint32_t TXIRLM_REGS_TX_IMPCAL_P_4X_PB_TX_ZCAL_P_4X = 48;
 static const uint32_t TXIRLM_REGS_TX_IMPCAL_P_4X_PB_TX_ZCAL_P_4X_LEN = 5;
 // pauc/reg00008.H
 
-static const uint64_t TXIRLM_REGS_TX_IMPCAL_SWO5_PB = 0x800f540010012c3full;
+static const uint64_t TXIRLM_REGS_TX_IMPCAL_SWO5_PB = 0x800f55c010012c3full;
 
 static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO5_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XN_32_39 = 48;
 static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO5_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XN_32_39_LEN = 8;
 // pauc/reg00008.H
 
-static const uint64_t TXIRLM_REGS_ZCAL_FIR_RESET_PB = 0x800f800010012c3full;
+static const uint64_t TXIRLM_REGS_ZCAL_FIR_RESET_PB = 0x800f81c010012c3full;
 
 static const uint32_t TXIRLM_REGS_ZCAL_FIR_RESET_PB_CLR_PAR_ERRS = 62;
 static const uint32_t TXIRLM_REGS_ZCAL_FIR_RESET_PB_FIR_RESET = 63;

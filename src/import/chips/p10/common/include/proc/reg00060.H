@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26662,7 +26662,7 @@ static inline fapi2::ReturnCode PUT_TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
     FAPI_TRY(scomt::chkReg(TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_FSI,
-                           TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_FSI_BYTE, TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_RW));
+                           TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_FSI_BYTE, TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_RO));
 #endif
     return fapi2::putScom(i_target, TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_FSI, i_data);
 #ifdef SCOM_CHECKING
@@ -26708,7 +26708,7 @@ static inline fapi2::ReturnCode PUT_TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
     FAPI_TRY(scomt::chkReg(TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_FSI,
-                           TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_FSI_BYTE, TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_RW));
+                           TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_FSI_BYTE, TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_RO));
 #endif
     return fapi2::putScom(i_target, TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_FSI_BYTE, i_data);
 #ifdef SCOM_CHECKING
@@ -26718,12 +26718,12 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_RW(
+static inline fapi2::ReturnCode PREP_TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_RO(
     const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_RW;
+    scomt::last_scom = TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_RO;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -26733,14 +26733,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_RW(const fapi2::Target<K, M, V>&
+static inline fapi2::ReturnCode GET_TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_RO(const fapi2::Target<K, M, V>&
         i_target, fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_RW;
+    scomt::last_scom = TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_RO;
 #endif
-    return fapi2::getScom(i_target, TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_RW, o_data);
+    return fapi2::getScom(i_target, TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_RO, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -26748,15 +26748,15 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_RW(const fapi2::Target<K, M, V>&
+static inline fapi2::ReturnCode PUT_TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_RO(const fapi2::Target<K, M, V>&
         i_target, const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
     FAPI_TRY(scomt::chkReg(TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_FSI,
-                           TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_FSI_BYTE, TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_RW));
+                           TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_FSI_BYTE, TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_RO));
 #endif
-    return fapi2::putScom(i_target, TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_RW, i_data);
+    return fapi2::putScom(i_target, TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_RO, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -26770,7 +26770,7 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_FSI,
-                           TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_FSI_BYTE, TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_RW));
+                           TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_FSI_BYTE, TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_RO));
 #endif
     return o_data.insertFromRight<TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_SBE2FSI_INTR_STATUS_VEC,
            TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_SBE2FSI_INTR_STATUS_VEC_LEN>(i_data);
@@ -26788,7 +26788,7 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_FSI,
-                           TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_FSI_BYTE, TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_RW));
+                           TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_FSI_BYTE, TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_RO));
 #endif
     return o_data.insertFromRight<TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_SBE2FSI_INTR_STATUS_VEC,
            TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_SBE2FSI_INTR_STATUS_VEC_LEN>(i_data);
@@ -26806,7 +26806,7 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_FSI,
-                           TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_FSI_BYTE, TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_RW));
+                           TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_FSI_BYTE, TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_RO));
 #endif
     return i_data.extractToRight<TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_SBE2FSI_INTR_STATUS_VEC,
            TP_TPVSB_FSI_W_SBE_FIFO_SBE2FSI_INTR_STATUS_SBE2FSI_INTR_STATUS_VEC_LEN>(o_data);

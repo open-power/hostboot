@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,6 +77,174 @@ fapi_try_exit:
 #endif
 }
 
+
+static inline fapi2::buffer<uint64_t>& SET_CYA_BITS_PRBS15_NPRBS7_0(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CYA_BITS));
+#endif
+    return o_data.insertFromRight<CYA_BITS_PRBS15_NPRBS7_0,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CYA_BITS_PRBS15_NPRBS7_0 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CYA_BITS_PRBS15_NPRBS7_0(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CYA_BITS));
+#endif
+    return o_data.insertFromRight<CYA_BITS_PRBS15_NPRBS7_0,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CYA_BITS_PRBS15_NPRBS7_0 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CYA_BITS_PRBS15_NPRBS7_0(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CYA_BITS));
+#endif
+    return o_data.setBit<CYA_BITS_PRBS15_NPRBS7_0>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CYA_BITS_PRBS15_NPRBS7_0 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CYA_BITS_PRBS15_NPRBS7_0(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CYA_BITS));
+#endif
+    return o_data.clearBit<CYA_BITS_PRBS15_NPRBS7_0>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CYA_BITS_PRBS15_NPRBS7_0 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CYA_BITS_PRBS15_NPRBS7_0(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CYA_BITS));
+#endif
+    return i_data.extractToRight<CYA_BITS_PRBS15_NPRBS7_0,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CYA_BITS_PRBS15_NPRBS7_0 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_CYA_BITS_PRBS15_NPRBS7_0(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CYA_BITS));
+#endif
+    return i_data.getBit<CYA_BITS_PRBS15_NPRBS7_0>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CYA_BITS_PRBS15_NPRBS7_0 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CYA_BITS_PRBS15_NPRBS7_1(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CYA_BITS));
+#endif
+    return o_data.insertFromRight<CYA_BITS_PRBS15_NPRBS7_1,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CYA_BITS_PRBS15_NPRBS7_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CYA_BITS_PRBS15_NPRBS7_1(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CYA_BITS));
+#endif
+    return o_data.insertFromRight<CYA_BITS_PRBS15_NPRBS7_1,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CYA_BITS_PRBS15_NPRBS7_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CYA_BITS_PRBS15_NPRBS7_1(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CYA_BITS));
+#endif
+    return o_data.setBit<CYA_BITS_PRBS15_NPRBS7_1>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CYA_BITS_PRBS15_NPRBS7_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CYA_BITS_PRBS15_NPRBS7_1(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CYA_BITS));
+#endif
+    return o_data.clearBit<CYA_BITS_PRBS15_NPRBS7_1>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CYA_BITS_PRBS15_NPRBS7_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CYA_BITS_PRBS15_NPRBS7_1(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CYA_BITS));
+#endif
+    return i_data.extractToRight<CYA_BITS_PRBS15_NPRBS7_1,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CYA_BITS_PRBS15_NPRBS7_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_CYA_BITS_PRBS15_NPRBS7_1(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CYA_BITS));
+#endif
+    return i_data.getBit<CYA_BITS_PRBS15_NPRBS7_1>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CYA_BITS_PRBS15_NPRBS7_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
 
 static inline fapi2::buffer<uint64_t>& SET_CYA_BITS_BITS0_RSVD0(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
@@ -516,6 +684,96 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_CYA_BITS_TX_PSAVE_DELAY_TIMER0(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CYA_BITS));
+#endif
+    return o_data.insertFromRight<CYA_BITS_TX_PSAVE_DELAY_TIMER0,
+           CYA_BITS_TX_PSAVE_DELAY_TIMER0_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CYA_BITS_TX_PSAVE_DELAY_TIMER0 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CYA_BITS_TX_PSAVE_DELAY_TIMER0(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CYA_BITS));
+#endif
+    return o_data.insertFromRight<CYA_BITS_TX_PSAVE_DELAY_TIMER0,
+           CYA_BITS_TX_PSAVE_DELAY_TIMER0_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CYA_BITS_TX_PSAVE_DELAY_TIMER0 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CYA_BITS_TX_PSAVE_DELAY_TIMER0(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CYA_BITS));
+#endif
+    return i_data.extractToRight<CYA_BITS_TX_PSAVE_DELAY_TIMER0,
+           CYA_BITS_TX_PSAVE_DELAY_TIMER0_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CYA_BITS_TX_PSAVE_DELAY_TIMER0 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CYA_BITS_TX_PSAVE_DELAY_TIMER1(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CYA_BITS));
+#endif
+    return o_data.insertFromRight<CYA_BITS_TX_PSAVE_DELAY_TIMER1,
+           CYA_BITS_TX_PSAVE_DELAY_TIMER1_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CYA_BITS_TX_PSAVE_DELAY_TIMER1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CYA_BITS_TX_PSAVE_DELAY_TIMER1(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CYA_BITS));
+#endif
+    return o_data.insertFromRight<CYA_BITS_TX_PSAVE_DELAY_TIMER1,
+           CYA_BITS_TX_PSAVE_DELAY_TIMER1_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CYA_BITS_TX_PSAVE_DELAY_TIMER1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CYA_BITS_TX_PSAVE_DELAY_TIMER1(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CYA_BITS));
+#endif
+    return i_data.extractToRight<CYA_BITS_TX_PSAVE_DELAY_TIMER1,
+           CYA_BITS_TX_PSAVE_DELAY_TIMER1_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CYA_BITS_TX_PSAVE_DELAY_TIMER1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 static inline fapi2::buffer<uint64_t>& SET_CYA_BITS_FAST_RETRAIN_DISABLE0(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -684,86 +942,86 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CYA_BITS_BITS0_RSVD2(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CYA_BITS_FLT_TRUNC_FIX(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CYA_BITS));
 #endif
-    return o_data.insertFromRight<CYA_BITS_BITS0_RSVD2,
+    return o_data.insertFromRight<CYA_BITS_FLT_TRUNC_FIX,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CYA_BITS_BITS0_RSVD2 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CYA_BITS_FLT_TRUNC_FIX chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CYA_BITS_BITS0_RSVD2(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CYA_BITS_FLT_TRUNC_FIX(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CYA_BITS));
 #endif
-    return o_data.insertFromRight<CYA_BITS_BITS0_RSVD2,
+    return o_data.insertFromRight<CYA_BITS_FLT_TRUNC_FIX,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CYA_BITS_BITS0_RSVD2 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CYA_BITS_FLT_TRUNC_FIX chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CYA_BITS_BITS0_RSVD2(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CYA_BITS_FLT_TRUNC_FIX(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CYA_BITS));
 #endif
-    return o_data.setBit<CYA_BITS_BITS0_RSVD2>();
+    return o_data.setBit<CYA_BITS_FLT_TRUNC_FIX>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CYA_BITS_BITS0_RSVD2 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CYA_BITS_FLT_TRUNC_FIX chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CYA_BITS_BITS0_RSVD2(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CYA_BITS_FLT_TRUNC_FIX(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CYA_BITS));
 #endif
-    return o_data.clearBit<CYA_BITS_BITS0_RSVD2>();
+    return o_data.clearBit<CYA_BITS_FLT_TRUNC_FIX>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CYA_BITS_BITS0_RSVD2 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CYA_BITS_FLT_TRUNC_FIX chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CYA_BITS_BITS0_RSVD2(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CYA_BITS_FLT_TRUNC_FIX(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CYA_BITS));
 #endif
-    return i_data.extractToRight<CYA_BITS_BITS0_RSVD2,
+    return i_data.extractToRight<CYA_BITS_FLT_TRUNC_FIX,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CYA_BITS_BITS0_RSVD2 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CYA_BITS_FLT_TRUNC_FIX chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CYA_BITS_BITS0_RSVD2(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CYA_BITS_FLT_TRUNC_FIX(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CYA_BITS));
 #endif
-    return i_data.getBit<CYA_BITS_BITS0_RSVD2>();
+    return i_data.getBit<CYA_BITS_FLT_TRUNC_FIX>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CYA_BITS_BITS0_RSVD2 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CYA_BITS_FLT_TRUNC_FIX chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

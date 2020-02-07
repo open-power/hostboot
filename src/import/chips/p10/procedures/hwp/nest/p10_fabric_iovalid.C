@@ -426,11 +426,11 @@ fapi2::ReturnCode p10_fabric_iovalid_lane_validate(
         {
             if (i_even_not_odd)
             {
-                SET_DLP_FIR_REG_LINK0_SPARE_DONE(l_dl_fir);
+                SET_DLP_FIR_REG_0_SPARE_DONE(l_dl_fir);
             }
             else
             {
-                SET_DLP_FIR_REG_LINK1_SPARE_DONE(l_dl_fir);
+                SET_DLP_FIR_REG_1_SPARE_DONE(l_dl_fir);
             }
 
             FAPI_TRY(PUT_DLP_FIR_REG_WO_OR(i_iohs_target, l_dl_fir),
@@ -509,8 +509,8 @@ fapi2::ReturnCode p10_fabric_iovalid_link_validate(
 
         if (l_loc_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH)
         {
-            l_dl_trained = GET_DLP_FIR_REG_LINK0_TRAINED(l_dl_fir_reg) &&
-                           GET_DLP_FIR_REG_LINK1_TRAINED(l_dl_fir_reg);
+            l_dl_trained = GET_DLP_FIR_REG_0_TRAINED(l_dl_fir_reg) &&
+                           GET_DLP_FIR_REG_1_TRAINED(l_dl_fir_reg);
 
             if (!l_dl_trained)
             {
@@ -524,13 +524,13 @@ fapi2::ReturnCode p10_fabric_iovalid_link_validate(
         }
         else if (l_loc_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY)
         {
-            l_dl_trained = GET_DLP_FIR_REG_LINK0_TRAINED(l_dl_fir_reg);
+            l_dl_trained = GET_DLP_FIR_REG_0_TRAINED(l_dl_fir_reg);
             l_dl_fail_evn = !l_dl_trained;
             l_dl_fail_odd = true;
         }
         else
         {
-            l_dl_trained = GET_DLP_FIR_REG_LINK1_TRAINED(l_dl_fir_reg);
+            l_dl_trained = GET_DLP_FIR_REG_1_TRAINED(l_dl_fir_reg);
             l_dl_fail_evn = true;
             l_dl_fail_odd = !l_dl_trained;
         }

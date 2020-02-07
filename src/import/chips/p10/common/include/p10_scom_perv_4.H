@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,6 +64,12 @@ static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_CHICKEN_SWITCHES = 0x0001
 static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_CHICKEN_SWITCHES_STOP_ON_ERROR = 0;
 // perv/reg00008.H
 
+static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CACHE_SYNC_ENABLE = 0x00018331ull;
+
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CACHE_SYNC_ENABLE_ENABLE_OVERRIDE = 0;
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CACHE_SYNC_ENABLE_VALUE_OVERRIDE = 1;
+// perv/reg00008.H
+
 static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT = 0x00018328ull;
 
 static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT_WAIT_CNT_VALUE = 0;
@@ -87,10 +93,6 @@ static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_PDLYS_CACHE_
 // perv/reg00008.H
 
 static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE = 0x00014324ull;
-
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_ET_SINGLE_STEP_MD_SET = 0;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_TEP_COUNT = 1;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_TEP_COUNT_LEN = 32;
 // perv/reg00008.H
 
 static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_STICK_CACHE_SYNC_DONE = 0x00014333ull;
@@ -326,7 +328,7 @@ static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_SPARE_DI_CONTROL = 18;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_RI_DC_B = 19;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_DI1_DC_B = 20;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_DI2_DC_B = 21;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_ROOT_CTRL1_22_SPARE_TEST = 22;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_TPM_DI1_DC_B = 22;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_ROOT_CTRL1_23_SPARE_TEST = 23;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TP_TEST_BURNIN_MODE_DC = 24;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_TPFSI_ARRAY_SET_VBL_TO_VDD_DC = 25;
@@ -677,7 +679,7 @@ static const uint64_t SINGLE_OTP_ROM_OTPROM_REG41 = 0x00018029ull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG41_REGISTER41 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG41_REGISTER41_LEN = 64;
-// perv/reg00008.H
+// perv/reg00009.H
 
 static const uint64_t SINGLE_OTP_ROM_OTPROM_REG69 = 0x00018045ull;
 

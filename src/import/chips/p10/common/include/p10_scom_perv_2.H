@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,11 +67,6 @@ static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_3 = 26;
 static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_3_LEN = 6;
 // perv/reg00004.H
 
-static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE = 0x00014331ull;
-
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE_CACHE_SYNC_ENABLE_INVERT = 0;
-// perv/reg00004.H
-
 static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_SWAP_CACHE_INC_DEC = 0x0001432full;
 
 static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_SWAP_CACHE_INC_DEC_CACHE_INC_DEC_INVERT = 0;
@@ -122,6 +117,12 @@ static const uint32_t CLK_ADJ_03_DCADJ_WRAP_MEASURE_HISTORY_2_LEN = 8;
 static const uint64_t CLK_ADJ_03_DCADJ_WRAP_SET_ADJUST_MODE = 0x00011302ull;
 
 static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_ADJUST_MODE_SET_ADJUST_MD = 1;
+// perv/reg00004.H
+
+static const uint64_t CLK_ADJ_03_DCADJ_WRAP_SET_ENABLE_OVERRIDE = 0x00011312ull;
+
+static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_ENABLE_OVERRIDE_ENA = 0;
+static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_ENABLE_OVERRIDE_VAL = 1;
 // perv/reg00004.H
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SOFT_RESET = 0x00011325ull;
@@ -277,8 +278,9 @@ static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_PERV_CTRL0_3_6_RESERVED_LEN = 4;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_TP_TCPERV_VITL_SCIN_DC = 7;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_PERV_CTRL0_8_RESERVED = 8;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_TP_TCPERV_FLUSH_ALIGN_OVERWRITE = 9;
-static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_PERV_CTRL0_10_13_RESERVED = 10;
-static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_PERV_CTRL0_10_13_RESERVED_LEN = 4;
+static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_PERV_CTRL0_10_12_RESERVED = 10;
+static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_PERV_CTRL0_10_12_RESERVED_LEN = 3;
+static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_TP_TCPERV_SBE_CG_DIS = 13;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_TP_TCPERV_VITL_CG_DIS = 14;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_TP_TCPERV_VITL_FFDLYLCK_DC = 15;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_TP_VITL_CLKOFF_DC = 16;
@@ -352,8 +354,38 @@ static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_FSI = 0x0000281dull;
 static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_FSI_BYTE = 0x00002874ull;
 static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_RO = 0x0005001dull;
 
-static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_TPFSI_RCS_SENSE_DC_0_31 = 0;
-static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_TPFSI_RCS_SENSE_DC_0_31_LEN = 32;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_CLK_ERROR_A = 0;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_CLK_ERROR_B = 1;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_UNLOCKDET_A = 2;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_UNLOCKDET_B = 3;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_REFCLK_DATA_OUT_A = 4;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_REFCLK_DATA_OUT_B = 5;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_CHECK_ERROR_0_A = 6;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_CHECK_ERROR_1_A = 7;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_CHECK_ERROR_0_B = 8;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_CHECK_ERROR_1_B = 9;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_MUXSEL_BYP_A = 10;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_MUXSEL_BYP_B = 11;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_MUXSEL_CLK_A = 12;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_MUXSEL_CLK_B = 13;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_UNLOCK_UNSTICKY_A = 14;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_UNLOCK_UNSTICKY_B = 15;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_SWITCHED = 16;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_RESET_INT_A = 17;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_RESET_INT_B = 18;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_RESET_OR_INT_A = 19;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_RESET_OR_INT_B = 20;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_FORCE_CLK_INT_A = 21;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_FORCE_CLK_INT_B = 22;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_BYPASS_INT_A = 23;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_BYPASS_INT_B = 24;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_SWITCHOVER_INT_A = 25;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_SWITCHOVER_INT_B = 26;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_CLEAR_CLK_ERROR_INT_A = 27;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_CLEAR_CLK_ERROR_INT_B = 28;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_SET_BYPASS_A = 29;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_SET_BYPASS_B = 30;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_TPFSI_RCS_SENSE_DC_0_31 = 31;
 // perv/reg00004.H
 
 static const uint64_t L3TRA0_TR1_TRACE_HI_DATA_REG = 0x00018220ull;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -3881,87 +3881,86 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V2_HMER_V2_HMER_QME_REQUEST(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V2_HMER_SPARE_1(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V2_HMER_RW_WAND, EC_PC_COMMON_SPR_V2_HMER_WO_OR));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_V2_HMER_V2_HMER_QME_REQUEST,
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_V2_HMER_SPARE_1,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_V2_HMER_QME_REQUEST chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_SPARE_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V2_HMER_V2_HMER_QME_REQUEST(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V2_HMER_SPARE_1(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V2_HMER_RW_WAND, EC_PC_COMMON_SPR_V2_HMER_WO_OR));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_V2_HMER_V2_HMER_QME_REQUEST,
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_V2_HMER_SPARE_1,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_V2_HMER_QME_REQUEST chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_SPARE_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V2_HMER_V2_HMER_QME_REQUEST(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V2_HMER_SPARE_1(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V2_HMER_RW_WAND, EC_PC_COMMON_SPR_V2_HMER_WO_OR));
 #endif
-    return o_data.setBit<EC_PC_COMMON_SPR_V2_HMER_V2_HMER_QME_REQUEST>();
+    return o_data.setBit<EC_PC_COMMON_SPR_V2_HMER_SPARE_1>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_V2_HMER_QME_REQUEST chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_SPARE_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_V2_HMER_V2_HMER_QME_REQUEST(
-    fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_V2_HMER_SPARE_1(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V2_HMER_RW_WAND, EC_PC_COMMON_SPR_V2_HMER_WO_OR));
 #endif
-    return o_data.clearBit<EC_PC_COMMON_SPR_V2_HMER_V2_HMER_QME_REQUEST>();
+    return o_data.clearBit<EC_PC_COMMON_SPR_V2_HMER_SPARE_1>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_V2_HMER_QME_REQUEST chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_SPARE_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_V2_HMER_V2_HMER_QME_REQUEST(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_V2_HMER_SPARE_1(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V2_HMER_RW_WAND, EC_PC_COMMON_SPR_V2_HMER_WO_OR));
 #endif
-    return i_data.extractToRight<EC_PC_COMMON_SPR_V2_HMER_V2_HMER_QME_REQUEST,
+    return i_data.extractToRight<EC_PC_COMMON_SPR_V2_HMER_SPARE_1,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_V2_HMER_QME_REQUEST chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_SPARE_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_EC_PC_COMMON_SPR_V2_HMER_V2_HMER_QME_REQUEST(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_EC_PC_COMMON_SPR_V2_HMER_SPARE_1(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V2_HMER_RW_WAND, EC_PC_COMMON_SPR_V2_HMER_WO_OR));
 #endif
-    return i_data.getBit<EC_PC_COMMON_SPR_V2_HMER_V2_HMER_QME_REQUEST>();
+    return i_data.getBit<EC_PC_COMMON_SPR_V2_HMER_SPARE_1>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_V2_HMER_QME_REQUEST chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_SPARE_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -4060,86 +4059,90 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V2_HMER_SPARE_3(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V2_HMER_V2_HMER_SUSPEND_MODE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V2_HMER_RW_WAND, EC_PC_COMMON_SPR_V2_HMER_WO_OR));
+#endif
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_V2_HMER_V2_HMER_SUSPEND_MODE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_V2_HMER_SUSPEND_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V2_HMER_V2_HMER_SUSPEND_MODE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V2_HMER_RW_WAND, EC_PC_COMMON_SPR_V2_HMER_WO_OR));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_V2_HMER_SPARE_3,
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_V2_HMER_V2_HMER_SUSPEND_MODE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_SPARE_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_V2_HMER_SUSPEND_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V2_HMER_SPARE_3(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V2_HMER_V2_HMER_SUSPEND_MODE(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V2_HMER_RW_WAND, EC_PC_COMMON_SPR_V2_HMER_WO_OR));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_V2_HMER_SPARE_3,
-           1>(i_data);
+    return o_data.setBit<EC_PC_COMMON_SPR_V2_HMER_V2_HMER_SUSPEND_MODE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_SPARE_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_V2_HMER_SUSPEND_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V2_HMER_SPARE_3(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_V2_HMER_V2_HMER_SUSPEND_MODE(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V2_HMER_RW_WAND, EC_PC_COMMON_SPR_V2_HMER_WO_OR));
 #endif
-    return o_data.setBit<EC_PC_COMMON_SPR_V2_HMER_SPARE_3>();
+    return o_data.clearBit<EC_PC_COMMON_SPR_V2_HMER_V2_HMER_SUSPEND_MODE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_SPARE_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_V2_HMER_SUSPEND_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_V2_HMER_SPARE_3(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_V2_HMER_V2_HMER_SUSPEND_MODE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V2_HMER_RW_WAND, EC_PC_COMMON_SPR_V2_HMER_WO_OR));
 #endif
-    return o_data.clearBit<EC_PC_COMMON_SPR_V2_HMER_SPARE_3>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_SPARE_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_V2_HMER_SPARE_3(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V2_HMER_RW_WAND, EC_PC_COMMON_SPR_V2_HMER_WO_OR));
-#endif
-    return i_data.extractToRight<EC_PC_COMMON_SPR_V2_HMER_SPARE_3,
+    return i_data.extractToRight<EC_PC_COMMON_SPR_V2_HMER_V2_HMER_SUSPEND_MODE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_SPARE_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_V2_HMER_SUSPEND_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_EC_PC_COMMON_SPR_V2_HMER_SPARE_3(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_EC_PC_COMMON_SPR_V2_HMER_V2_HMER_SUSPEND_MODE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V2_HMER_RW_WAND, EC_PC_COMMON_SPR_V2_HMER_WO_OR));
 #endif
-    return i_data.getBit<EC_PC_COMMON_SPR_V2_HMER_SPARE_3>();
+    return i_data.getBit<EC_PC_COMMON_SPR_V2_HMER_V2_HMER_SUSPEND_MODE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_SPARE_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_V2_HMER_SUSPEND_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -4228,86 +4231,86 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V2_HMER_TFMR_PARITY_ERR(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V2_HMER_V2_HMER_TFX_ERR(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V2_HMER_RW_WAND, EC_PC_COMMON_SPR_V2_HMER_WO_OR));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_V2_HMER_TFMR_PARITY_ERR,
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_V2_HMER_V2_HMER_TFX_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_TFMR_PARITY_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_V2_HMER_TFX_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V2_HMER_TFMR_PARITY_ERR(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V2_HMER_V2_HMER_TFX_ERR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V2_HMER_RW_WAND, EC_PC_COMMON_SPR_V2_HMER_WO_OR));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_V2_HMER_TFMR_PARITY_ERR,
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_V2_HMER_V2_HMER_TFX_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_TFMR_PARITY_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_V2_HMER_TFX_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V2_HMER_TFMR_PARITY_ERR(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V2_HMER_V2_HMER_TFX_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V2_HMER_RW_WAND, EC_PC_COMMON_SPR_V2_HMER_WO_OR));
 #endif
-    return o_data.setBit<EC_PC_COMMON_SPR_V2_HMER_TFMR_PARITY_ERR>();
+    return o_data.setBit<EC_PC_COMMON_SPR_V2_HMER_V2_HMER_TFX_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_TFMR_PARITY_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_V2_HMER_TFX_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_V2_HMER_TFMR_PARITY_ERR(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_V2_HMER_V2_HMER_TFX_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V2_HMER_RW_WAND, EC_PC_COMMON_SPR_V2_HMER_WO_OR));
 #endif
-    return o_data.clearBit<EC_PC_COMMON_SPR_V2_HMER_TFMR_PARITY_ERR>();
+    return o_data.clearBit<EC_PC_COMMON_SPR_V2_HMER_V2_HMER_TFX_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_TFMR_PARITY_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_V2_HMER_TFX_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_V2_HMER_TFMR_PARITY_ERR(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_V2_HMER_V2_HMER_TFX_ERR(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V2_HMER_RW_WAND, EC_PC_COMMON_SPR_V2_HMER_WO_OR));
 #endif
-    return i_data.extractToRight<EC_PC_COMMON_SPR_V2_HMER_TFMR_PARITY_ERR,
+    return i_data.extractToRight<EC_PC_COMMON_SPR_V2_HMER_V2_HMER_TFX_ERR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_TFMR_PARITY_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_V2_HMER_TFX_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_EC_PC_COMMON_SPR_V2_HMER_TFMR_PARITY_ERR(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_EC_PC_COMMON_SPR_V2_HMER_V2_HMER_TFX_ERR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V2_HMER_RW_WAND, EC_PC_COMMON_SPR_V2_HMER_WO_OR));
 #endif
-    return i_data.getBit<EC_PC_COMMON_SPR_V2_HMER_TFMR_PARITY_ERR>();
+    return i_data.getBit<EC_PC_COMMON_SPR_V2_HMER_V2_HMER_TFX_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_TFMR_PARITY_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V2_HMER_V2_HMER_TFX_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

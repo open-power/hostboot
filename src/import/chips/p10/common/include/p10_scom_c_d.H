@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -129,11 +129,11 @@ static const uint64_t EC_PC_COMMON_SPR_V2_HMER_RW_WAND = 0x20020494ull;
 static const uint64_t EC_PC_COMMON_SPR_V2_HMER_WO_OR = 0x20020490ull;
 
 static const uint32_t EC_PC_COMMON_SPR_V2_HMER_V2_HMER_MALFUNCTION_ALERT = 0;
-static const uint32_t EC_PC_COMMON_SPR_V2_HMER_V2_HMER_QME_REQUEST = 1;
+static const uint32_t EC_PC_COMMON_SPR_V2_HMER_SPARE_1 = 1;
 static const uint32_t EC_PC_COMMON_SPR_V2_HMER_V2_HMER_PROC_RCVY_DONE = 2;
-static const uint32_t EC_PC_COMMON_SPR_V2_HMER_SPARE_3 = 3;
+static const uint32_t EC_PC_COMMON_SPR_V2_HMER_V2_HMER_SUSPEND_MODE = 3;
 static const uint32_t EC_PC_COMMON_SPR_V2_HMER_V2_HMER_TFAC_ERR = 4;
-static const uint32_t EC_PC_COMMON_SPR_V2_HMER_TFMR_PARITY_ERR = 5;
+static const uint32_t EC_PC_COMMON_SPR_V2_HMER_V2_HMER_TFX_ERR = 5;
 static const uint32_t EC_PC_COMMON_SPR_V2_HMER_SPARE_6 = 6;
 static const uint32_t EC_PC_COMMON_SPR_V2_HMER_SPARE_7 = 7;
 static const uint32_t EC_PC_COMMON_SPR_V2_HMER_V2_HMER_XSCOM_FAIL = 8;

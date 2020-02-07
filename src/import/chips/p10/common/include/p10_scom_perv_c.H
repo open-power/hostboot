@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,15 +61,9 @@ static const uint64_t CLK_ADJ_02_DCADJ_WRAP_SOFT_RESET = 0x00012305ull;
 // perv/reg00024.H
 
 static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_INIT_MODE = 0x00012320ull;
-
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_INIT_MODE_SET_INIT_MD = 4;
 // perv/reg00024.H
 
 static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE = 0x00012324ull;
-
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_ET_SINGLE_STEP_MD_SET = 0;
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_TEP_COUNT = 1;
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_TEP_COUNT_LEN = 32;
 // perv/reg00024.H
 
 static const uint64_t CLK_ADJ_03_DCADJ_WRAP_PHASE_MEASUREMENT = 0x00011318ull;
@@ -399,8 +393,14 @@ static const uint32_t FSXCOMP_FSXLOG_SNS2LTH_FSI = 0x0000281eull;
 static const uint32_t FSXCOMP_FSXLOG_SNS2LTH_FSI_BYTE = 0x00002878ull;
 static const uint32_t FSXCOMP_FSXLOG_SNS2LTH_RO = 0x0005001eull;
 
-static const uint32_t FSXCOMP_FSXLOG_SNS2LTH_TPFSI_RCS_SENSE_DC_32_63 = 0;
-static const uint32_t FSXCOMP_FSXLOG_SNS2LTH_TPFSI_RCS_SENSE_DC_32_63_LEN = 32;
+static const uint32_t FSXCOMP_FSXLOG_SNS2LTH_UP_DWN_OUT_A = 0;
+static const uint32_t FSXCOMP_FSXLOG_SNS2LTH_UP_DWN_OUT_A_LEN = 6;
+static const uint32_t FSXCOMP_FSXLOG_SNS2LTH_UP_DWN_OUT_B = 6;
+static const uint32_t FSXCOMP_FSXLOG_SNS2LTH_UP_DWN_OUT_B_LEN = 6;
+static const uint32_t FSXCOMP_FSXLOG_SNS2LTH_UP_DWN_MUX_CNTL_A = 12;
+static const uint32_t FSXCOMP_FSXLOG_SNS2LTH_UP_DWN_MUX_CNTL_B = 13;
+static const uint32_t FSXCOMP_FSXLOG_SNS2LTH_TPFSI_RCS_SENSE_DC_32_63 = 14;
+static const uint32_t FSXCOMP_FSXLOG_SNS2LTH_TPFSI_RCS_SENSE_DC_32_63_LEN = 18;
 // perv/reg00024.H
 
 static const uint64_t HOSTATTN_UNMASKED = 0x00040014ull;

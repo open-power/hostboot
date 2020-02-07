@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -95,8 +95,8 @@ static const uint32_t CPMS_CL2_PFETCNTL_SRAM_ENABLE = 63;
 // c/reg00003.H
 
 static const uint64_t CPMS_FDCR = 0x200e0e40ull;
-static const uint64_t CPMS_FDCR_SCOM1 = 0x200e0e43ull;
 static const uint64_t CPMS_FDCR_SCOM2 = 0x200e0e42ull;
+static const uint64_t CPMS_FDCR_WO_CLEAR = 0x200e0e43ull;
 
 static const uint32_t CPMS_FDCR_DISABLE = 0;
 static const uint32_t CPMS_FDCR_FORCE_SAMPLE = 1;
@@ -135,6 +135,12 @@ static const uint32_t CPMS_FDCR_SLOPEB_CYCLES = 60;
 static const uint32_t CPMS_FDCR_SLOPEB_CYCLES_LEN = 4;
 // c/reg00003.H
 
+static const uint64_t CPMS_PRSR = 0x200e0eacull;
+
+static const uint32_t CPMS_PRSR_CPMS_PPSR_PERIOD_PROXY_REMAIN = 0;
+static const uint32_t CPMS_PRSR_CPMS_PPSR_PERIOD_PROXY_REMAIN_LEN = 20;
+// c/reg00003.H
+
 static const uint64_t EC_LS_LSU_HOLD_OUT_REG9 = 0x200206c9ull;
 
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG9_DALC_MP3_L1WK_MP_ACCESS_CONCURRENTLY_ERROR_HOLD_OUT = 0;
@@ -157,11 +163,11 @@ static const uint64_t EC_PC_COMMON_SPR_V1_HMER_RW_WAND = 0x20020493ull;
 static const uint64_t EC_PC_COMMON_SPR_V1_HMER_WO_OR = 0x2002048full;
 
 static const uint32_t EC_PC_COMMON_SPR_V1_HMER_V1_HMER_MALFUNCTION_ALERT = 0;
-static const uint32_t EC_PC_COMMON_SPR_V1_HMER_V1_HMER_QME_REQUEST = 1;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_SPARE_1 = 1;
 static const uint32_t EC_PC_COMMON_SPR_V1_HMER_V1_HMER_PROC_RCVY_DONE = 2;
-static const uint32_t EC_PC_COMMON_SPR_V1_HMER_SPARE_3 = 3;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_V1_HMER_SUSPEND_MODE = 3;
 static const uint32_t EC_PC_COMMON_SPR_V1_HMER_V1_HMER_TFAC_ERR = 4;
-static const uint32_t EC_PC_COMMON_SPR_V1_HMER_TFMR_PARITY_ERR = 5;
+static const uint32_t EC_PC_COMMON_SPR_V1_HMER_V1_HMER_TFX_ERR = 5;
 static const uint32_t EC_PC_COMMON_SPR_V1_HMER_SPARE_6 = 6;
 static const uint32_t EC_PC_COMMON_SPR_V1_HMER_SPARE_7 = 7;
 static const uint32_t EC_PC_COMMON_SPR_V1_HMER_V1_HMER_XSCOM_FAIL = 8;

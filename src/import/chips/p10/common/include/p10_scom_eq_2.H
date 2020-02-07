@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,11 +67,6 @@ static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_3 = 26;
 static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_3_LEN = 6;
 // eq/reg00002.H
 
-static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE = 0x20014331ull;
-
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE_CACHE_SYNC_ENABLE_INVERT = 0;
-// eq/reg00002.H
-
 static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_SWAP_CACHE_INC_DEC = 0x2001432full;
 
 static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_SWAP_CACHE_INC_DEC_CACHE_INC_DEC_INVERT = 0;
@@ -122,6 +117,12 @@ static const uint32_t CLK_ADJ_03_DCADJ_WRAP_MEASURE_HISTORY_2_LEN = 8;
 static const uint64_t CLK_ADJ_03_DCADJ_WRAP_SET_ADJUST_MODE = 0x20011302ull;
 
 static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_ADJUST_MODE_SET_ADJUST_MD = 1;
+// eq/reg00002.H
+
+static const uint64_t CLK_ADJ_03_DCADJ_WRAP_SET_ENABLE_OVERRIDE = 0x20011312ull;
+
+static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_ENABLE_OVERRIDE_ENA = 0;
+static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_ENABLE_OVERRIDE_VAL = 1;
 // eq/reg00002.H
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SOFT_RESET = 0x20011325ull;
@@ -311,7 +312,7 @@ static const uint32_t QME_EISR_CPMS_INTERRUPT1_LEN = 4;
 static const uint64_t QME_LFIRACT1 = 0x200e000cull;
 
 static const uint32_t QME_LFIRACT1_FIR_ACTION1 = 0;
-static const uint32_t QME_LFIRACT1_FIR_ACTION1_LEN = 34;
+static const uint32_t QME_LFIRACT1_FIR_ACTION1_LEN = 36;
 // eq/reg00002.H
 
 static const uint64_t QME_SCOM_XIICAC = 0x200e0224ull;
@@ -327,11 +328,12 @@ static const uint32_t QME_SCOM_XIICAC_ICACHE_VALID_LEN = 4;
 
 static const uint64_t QME_SCOM_XISGB = 0x200e0220ull;
 
-static const uint32_t QME_SCOM_XISGB_TORE_ADDRESS = 0;
-static const uint32_t QME_SCOM_XISGB_TORE_ADDRESS_LEN = 32;
-static const uint32_t QME_SCOM_XISGB_GB_BYTE_VALID = 36;
-static const uint32_t QME_SCOM_XISGB_GB_BYTE_VALID_LEN = 4;
-static const uint32_t QME_SCOM_XISGB_GB_FLUSH_PENDING = 63;
+static const uint32_t QME_SCOM_XISGB_STORE_ADDRESS = 0;
+static const uint32_t QME_SCOM_XISGB_STORE_ADDRESS_LEN = 32;
+static const uint32_t QME_SCOM_XISGB_QME_SCOM_XIMEM_MEM_IMPRECISE_ERROR_PENDING = 35;
+static const uint32_t QME_SCOM_XISGB_SGB_BYTE_VALID = 36;
+static const uint32_t QME_SCOM_XISGB_SGB_BYTE_VALID_LEN = 4;
+static const uint32_t QME_SCOM_XISGB_SGB_FLUSH_PENDING = 63;
 // eq/reg00002.H
 
 static const uint64_t QME_SCRB_RW = 0x200e0128ull;

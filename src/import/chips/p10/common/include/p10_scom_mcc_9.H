@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -113,16 +113,16 @@ static const uint32_t WDF_WDFCFG_WDFCFG_3_8_SPARE_LEN = 6;
 static const uint32_t WDF_WDFCFG_CFG_OVERRUN_FORCE_SUE_ENABLE = 9;
 static const uint32_t WDF_WDFCFG_WDFCFG_10_11_SPARE = 10;
 static const uint32_t WDF_WDFCFG_WDFCFG_10_11_SPARE_LEN = 2;
-static const uint32_t WDF_WDFCFG_DSTL_DW0_ERR_INJ = 12;
-static const uint32_t WDF_WDFCFG_DSTL_DW0_ERR_INJ_LEN = 2;
-static const uint32_t WDF_WDFCFG_DSTL_DW1_ERR_INJ = 14;
-static const uint32_t WDF_WDFCFG_DSTL_DW1_ERR_INJ_LEN = 2;
-static const uint32_t WDF_WDFCFG_DSTL_DW2_ERR_INJ = 16;
-static const uint32_t WDF_WDFCFG_DSTL_DW2_ERR_INJ_LEN = 2;
-static const uint32_t WDF_WDFCFG_DSTL_DW3_ERR_INJ = 18;
-static const uint32_t WDF_WDFCFG_DSTL_DW3_ERR_INJ_LEN = 2;
-static const uint32_t WDF_WDFCFG_DSTL_ONE_SHOT_INJ = 20;
-static const uint32_t WDF_WDFCFG_DSTL_PERSISTANT_INJ = 21;
+static const uint32_t WDF_WDFCFG_RESERVED_DSTL_DW0_ERR_INJ = 12;
+static const uint32_t WDF_WDFCFG_RESERVED_DSTL_DW0_ERR_INJ_LEN = 2;
+static const uint32_t WDF_WDFCFG_RESERVED_DSTL_DW1_ERR_INJ = 14;
+static const uint32_t WDF_WDFCFG_RESERVED_DSTL_DW1_ERR_INJ_LEN = 2;
+static const uint32_t WDF_WDFCFG_RESERVED_DSTL_DW2_ERR_INJ = 16;
+static const uint32_t WDF_WDFCFG_RESERVED_DSTL_DW2_ERR_INJ_LEN = 2;
+static const uint32_t WDF_WDFCFG_RESERVED_DSTL_DW3_ERR_INJ = 18;
+static const uint32_t WDF_WDFCFG_RESERVED_DSTL_DW3_ERR_INJ_LEN = 2;
+static const uint32_t WDF_WDFCFG_RESERVED_DSTL_ONE_SHOT_INJ = 20;
+static const uint32_t WDF_WDFCFG_RESERVED_DSTL_PERSISTANT_INJ = 21;
 static const uint32_t WDF_WDFCFG_WDFCFG_22_31_SPARE = 22;
 static const uint32_t WDF_WDFCFG_WDFCFG_22_31_SPARE_LEN = 10;
 static const uint32_t WDF_WDFCFG_ECC_WDF_HCA_TIMEBASE_SELECT = 32;
@@ -140,16 +140,16 @@ static const uint32_t WRITE_WRTCFG_RESERVED_2_8_LEN = 7;
 static const uint32_t WRITE_WRTCFG_NEW_WRITE_64B_MODE = 9;
 static const uint32_t WRITE_WRTCFG_CFG_OVERRUN_FORCE_SUE_ENABLE = 10;
 static const uint32_t WRITE_WRTCFG_RESERVED_11 = 11;
-static const uint32_t WRITE_WRTCFG_DSTL_DW0_ERR_INJ = 12;
-static const uint32_t WRITE_WRTCFG_DSTL_DW0_ERR_INJ_LEN = 2;
-static const uint32_t WRITE_WRTCFG_DSTL_DW1_ERR_INJ = 14;
-static const uint32_t WRITE_WRTCFG_DSTL_DW1_ERR_INJ_LEN = 2;
-static const uint32_t WRITE_WRTCFG_DSTL_DW2_ERR_INJ = 16;
-static const uint32_t WRITE_WRTCFG_DSTL_DW2_ERR_INJ_LEN = 2;
-static const uint32_t WRITE_WRTCFG_DSTL_DW3_ERR_INJ = 18;
-static const uint32_t WRITE_WRTCFG_DSTL_DW3_ERR_INJ_LEN = 2;
-static const uint32_t WRITE_WRTCFG_DSTL_ONE_SHOT_INJ = 20;
-static const uint32_t WRITE_WRTCFG_DSTL_PERSISTANT_INJ = 21;
+static const uint32_t WRITE_WRTCFG_RESERVED_DSTL_DW0_ERR_INJ = 12;
+static const uint32_t WRITE_WRTCFG_RESERVED_DSTL_DW0_ERR_INJ_LEN = 2;
+static const uint32_t WRITE_WRTCFG_RESERVED_DSTL_DW1_ERR_INJ = 14;
+static const uint32_t WRITE_WRTCFG_RESERVED_DSTL_DW1_ERR_INJ_LEN = 2;
+static const uint32_t WRITE_WRTCFG_RESERVED_DSTL_DW2_ERR_INJ = 16;
+static const uint32_t WRITE_WRTCFG_RESERVED_DSTL_DW2_ERR_INJ_LEN = 2;
+static const uint32_t WRITE_WRTCFG_RESERVED_DSTL_DW3_ERR_INJ = 18;
+static const uint32_t WRITE_WRTCFG_RESERVED_DSTL_DW3_ERR_INJ_LEN = 2;
+static const uint32_t WRITE_WRTCFG_RESERVED_DSTL_ONE_SHOT_INJ = 20;
+static const uint32_t WRITE_WRTCFG_RESERVED_DSTL_PERSISTANT_INJ = 21;
 static const uint32_t WRITE_WRTCFG_RESERVED_22_31 = 22;
 static const uint32_t WRITE_WRTCFG_RESERVED_22_31_LEN = 10;
 // mcc/reg00009.H

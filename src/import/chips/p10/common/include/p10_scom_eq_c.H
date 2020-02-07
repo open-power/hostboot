@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,15 +61,9 @@ static const uint64_t CLK_ADJ_02_DCADJ_WRAP_SOFT_RESET = 0x20012305ull;
 // eq/reg00012.H
 
 static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_INIT_MODE = 0x20012320ull;
-
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_INIT_MODE_SET_INIT_MD = 4;
 // eq/reg00012.H
 
 static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE = 0x20012324ull;
-
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_ET_SINGLE_STEP_MD_SET = 0;
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_TEP_COUNT = 1;
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_TEP_COUNT_LEN = 32;
 // eq/reg00012.H
 
 static const uint64_t CLK_ADJ_03_DCADJ_WRAP_PHASE_MEASUREMENT = 0x20011318ull;

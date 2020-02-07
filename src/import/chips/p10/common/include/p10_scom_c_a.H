@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,23 +43,12 @@ static const uint64_t CPMS_DPMR = 0x200e0ea0ull;
 
 static const uint32_t CPMS_DPMR_POWER_PROXY_ENABLE = 0;
 static const uint32_t CPMS_DPMR_PROXY_CAL_MODE = 1;
-static const uint32_t CPMS_DPMR_ENERGY_PROXY_RESET_MODE = 2;
+static const uint32_t CPMS_DPMR_PIL_ENABLE = 2;
 static const uint32_t CPMS_DPMR_DDP_ENABLE = 3;
-static const uint32_t CPMS_DPMR_DDP_ACTIVATION_SELECT = 4;
-static const uint32_t CPMS_DPMR_DDP_ACTIVATION_SELECT_LEN = 2;
-static const uint32_t CPMS_DPMR_DDP_PROXY_SHIFT = 6;
-static const uint32_t CPMS_DPMR_DDP_PROXY_SHIFT_LEN = 2;
-static const uint32_t CPMS_DPMR_DDP_ADJ_CORE_SCALE = 8;
-static const uint32_t CPMS_DPMR_DDP_ADJ_CORE_SCALE_LEN = 4;
-static const uint32_t CPMS_DPMR_DDP_ADJ_GLOBAL_SCALE = 12;
-static const uint32_t CPMS_DPMR_DDP_ADJ_GLOBAL_SCALE_LEN = 4;
-static const uint32_t CPMS_DPMR_DDP_DDS_ADJUST_EN = 16;
-static const uint32_t CPMS_DPMR_DDP_DDS_ADJUST_SEL = 17;
-static const uint32_t CPMS_DPMR_DDP_DDS_ADJUST_SEL_LEN = 2;
-static const uint32_t CPMS_DPMR_PIL_ENABLE = 19;
-static const uint32_t CPMS_DPMR_PIL_THROTTLE_ENABLE = 20;
-static const uint32_t CPMS_DPMR_SPARE = 21;
-static const uint32_t CPMS_DPMR_SPARE_LEN = 3;
+static const uint32_t CPMS_DPMR_EMPATH_MODE_SEL = 4;
+static const uint32_t CPMS_DPMR_DDP_DDS_ADJUST_EN = 5;
+static const uint32_t CPMS_DPMR_SPARE = 6;
+static const uint32_t CPMS_DPMR_SPARE_LEN = 2;
 // c/reg00010.H
 
 static const uint64_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT1 = 0x20020601ull;

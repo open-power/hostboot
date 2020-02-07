@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,13 +78,13 @@ static const uint32_t RXCTL_DATASM_0_PLREGS_RX_STAT1_PL_PSAVE_REQ_DL_RO_SIGNAL =
 static const uint32_t RXCTL_DATASM_0_PLREGS_RX_STAT1_PL_PSAVE_STS_PHY_RO_SIGNAL = 53;
 // omi/reg00024.H
 
-static const uint64_t RXCTL_DATASM_10_PLREGS_RX_CNTL3_PL = 0x8003d84510012c3full;
+static const uint64_t RXCTL_DATASM_10_PLREGS_RX_CNTL3_PL = 0x8003d84210012c3full;
 
 static const uint32_t RXCTL_DATASM_10_PLREGS_RX_CNTL3_PL_REQ_ALT = 48;
 static const uint32_t RXCTL_DATASM_10_PLREGS_RX_CNTL3_PL_STS_ALT = 49;
 // omi/reg00024.H
 
-static const uint64_t RXCTL_DATASM_14_PLREGS_RX_CNTL2_PL = 0x8003c84110012c3full;
+static const uint64_t RXCTL_DATASM_14_PLREGS_RX_CNTL2_PL = 0x8003c84610012c3full;
 
 static const uint32_t RXCTL_DATASM_14_PLREGS_RX_CNTL2_PL_PHY_DL_INIT_DONE_SET_WO_PULSE_SLOW_SIGNAL = 48;
 static const uint32_t RXCTL_DATASM_14_PLREGS_RX_CNTL2_PL_PHY_DL_INIT_DONE_CLR_WO_PULSE_SLOW_SIGNAL = 49;
@@ -136,7 +136,7 @@ static const uint32_t RXCTL_DATASM_22_PLREGS_RX_CNTL2_PL_PHY_DL_RECAL_DONE_CLR_W
 static const uint32_t RXCTL_DATASM_22_PLREGS_RX_CNTL2_PL_DL_PHY_RECAL_ABORT_STICKY_CLR_WO_PULSE_SLOW_SIGNAL = 52;
 // omi/reg00024.H
 
-static const uint64_t RXCTL_DATASM_9_PLREGS_RX_CNTL3_PL = 0x8003d84610012c3full;
+static const uint64_t RXCTL_DATASM_9_PLREGS_RX_CNTL3_PL = 0x8003d84110012c3full;
 
 static const uint32_t RXCTL_DATASM_9_PLREGS_RX_CNTL3_PL_REQ_ALT = 48;
 static const uint32_t RXCTL_DATASM_9_PLREGS_RX_CNTL3_PL_STS_ALT = 49;

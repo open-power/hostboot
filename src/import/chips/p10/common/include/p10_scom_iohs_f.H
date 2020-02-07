@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -253,8 +253,8 @@ static const uint32_t DLP_LINK0_ERROR_STATUS_LINK0_ERROR_STATUS_TRAIN = 16;
 static const uint32_t DLP_LINK0_ERROR_STATUS_LINK0_ERROR_STATUS_TRAIN_LEN = 5;
 static const uint32_t DLP_LINK0_ERROR_STATUS_LINK0_ERROR_STATUS_UNRECOV = 24;
 static const uint32_t DLP_LINK0_ERROR_STATUS_LINK0_ERROR_STATUS_UNRECOV_LEN = 14;
-static const uint32_t DLP_LINK0_ERROR_STATUS_INTERNAL = 40;
-static const uint32_t DLP_LINK0_ERROR_STATUS_INTERNAL_LEN = 24;
+static const uint32_t DLP_LINK0_ERROR_STATUS_INTERNAL = 38;
+static const uint32_t DLP_LINK0_ERROR_STATUS_INTERNAL_LEN = 26;
 // iohs/reg00065.H
 
 static const uint64_t DLP_PERF_TRACE_CONFIG = 0x1801101cull;
@@ -317,7 +317,7 @@ static const uint32_t IOO_RX0_RXCTL_DATASM_REGS_RX_STAT28_PG_RX_QPA_VOTE_DIFF_RO
 static const uint32_t IOO_RX0_RXCTL_DATASM_REGS_RX_STAT28_PG_RX_QPA_VOTE_DIFF_RO_SIGNAL_LEN = 11;
 // iohs/reg00065.H
 
-static const uint64_t IOO_RX0_RXCTL_DATASM_10_PLREGS_RX_CNTL2_PL = 0x8003c81010012c3full;
+static const uint64_t IOO_RX0_RXCTL_DATASM_10_PLREGS_RX_CNTL2_PL = 0x8003c80a10012c3full;
 
 static const uint32_t IOO_RX0_RXCTL_DATASM_10_PLREGS_RX_CNTL2_PL_PHY_DL_INIT_DONE_SET_WO_PULSE_SLOW_SIGNAL = 48;
 static const uint32_t IOO_RX0_RXCTL_DATASM_10_PLREGS_RX_CNTL2_PL_PHY_DL_INIT_DONE_CLR_WO_PULSE_SLOW_SIGNAL = 49;
@@ -327,7 +327,7 @@ static const uint32_t IOO_RX0_RXCTL_DATASM_10_PLREGS_RX_CNTL2_PL_DL_PHY_RECAL_AB
     52;
 // iohs/reg00065.H
 
-static const uint64_t IOO_RX0_RXCTL_DATASM_12_PLREGS_RX_MODE1_PL = 0x8003d00e10012c3full;
+static const uint64_t IOO_RX0_RXCTL_DATASM_12_PLREGS_RX_MODE1_PL = 0x8003d00c10012c3full;
 
 static const uint32_t IOO_RX0_RXCTL_DATASM_12_PLREGS_RX_MODE1_PL_RECAL_REQ_DL_MASK = 48;
 static const uint32_t IOO_RX0_RXCTL_DATASM_12_PLREGS_RX_MODE1_PL_RECAL_DONE_DL_MASK = 49;
@@ -336,7 +336,7 @@ static const uint32_t IOO_RX0_RXCTL_DATASM_12_PLREGS_RX_MODE1_PL_RECAL_ABORT_DL_
 static const uint32_t IOO_RX0_RXCTL_DATASM_12_PLREGS_RX_MODE1_PL_INIT_DONE_DL_MASK = 52;
 // iohs/reg00065.H
 
-static const uint64_t IOO_RX0_RXCTL_DATASM_14_PLREGS_RX_CNTL3_PL = 0x8003d80c10012c3full;
+static const uint64_t IOO_RX0_RXCTL_DATASM_14_PLREGS_RX_CNTL3_PL = 0x8003d80e10012c3full;
 
 static const uint32_t IOO_RX0_RXCTL_DATASM_14_PLREGS_RX_CNTL3_PL_REQ_ALT = 48;
 static const uint32_t IOO_RX0_RXCTL_DATASM_14_PLREGS_RX_CNTL3_PL_STS_ALT = 49;
@@ -364,7 +364,7 @@ static const uint32_t IOO_RX0_RXCTL_DATASM_4_PLREGS_RX_STAT1_PL_PSAVE_REQ_DL_RO_
 static const uint32_t IOO_RX0_RXCTL_DATASM_4_PLREGS_RX_STAT1_PL_PSAVE_STS_PHY_RO_SIGNAL = 53;
 // iohs/reg00065.H
 
-static const uint64_t IOO_RX0_RXCTL_DATASM_9_PLREGS_RX_CNTL2_PL = 0x8003c81110012c3full;
+static const uint64_t IOO_RX0_RXCTL_DATASM_9_PLREGS_RX_CNTL2_PL = 0x8003c80910012c3full;
 
 static const uint32_t IOO_RX0_RXCTL_DATASM_9_PLREGS_RX_CNTL2_PL_PHY_DL_INIT_DONE_SET_WO_PULSE_SLOW_SIGNAL = 48;
 static const uint32_t IOO_RX0_RXCTL_DATASM_9_PLREGS_RX_CNTL2_PL_PHY_DL_INIT_DONE_CLR_WO_PULSE_SLOW_SIGNAL = 49;

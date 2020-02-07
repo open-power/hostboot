@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,18 +66,11 @@ static const uint32_t CLK_ADJ_00_DCADJ_WRAP_SET_COMP_DLY_COMP_DELAY_VALUE_LEN = 
 // perv/reg00020.H
 
 static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INIT_MODE = 0x00018320ull;
-
-static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INIT_MODE_SET_INIT_MD = 4;
 // perv/reg00020.H
 
 static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_PDLYS = 0x0001832dull;
 
 static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_PDLYS_CACHE_PDLYS_INVERT = 0;
-// perv/reg00020.H
-
-static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_SYNC_ENABLE = 0x00018330ull;
-
-static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_SYNC_ENABLE_CORE_SYNC_ENABLE_INVERT = 0;
 // perv/reg00020.H
 
 static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SOFT_RESET = 0x00018325ull;
@@ -144,21 +137,18 @@ static const uint64_t CLK_ADJ_03_DCADJ_WRAP_SET_INIT_MODE = 0x00011300ull;
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SENSOR_DATA = 0x00011339ull;
 
-static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CORE_IS_LATE = 3;
-static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CORE_IS_LATE_HIST = 4;
-static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CORE_IS_LATE_HIST_LEN = 4;
-static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CACHE_IS_LATE = 11;
-static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CACHE_IS_LATE_HIST = 12;
-static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CACHE_IS_LATE_HIST_LEN = 4;
-static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CORE_PDLY_CONFIG = 16;
-static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CORE_PDLY_CONFIG_LEN = 4;
-static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CACHE_PDLY_CONFIG = 20;
-static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CACHE_PDLY_CONFIG_LEN = 4;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SENSOR_DATA_ORE_IS_LATE = 3;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SENSOR_DATA_ORE_IS_LATE_HIST = 4;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SENSOR_DATA_ORE_IS_LATE_HIST_LEN = 4;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SENSOR_DATA_ACHE_IS_LATE = 11;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SENSOR_DATA_ACHE_IS_LATE_HIST = 12;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SENSOR_DATA_ACHE_IS_LATE_HIST_LEN = 4;
 // perv/reg00020.H
 
-static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE = 0x00011331ull;
+static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CORE_SYNC_ENABLE = 0x00011330ull;
 
-static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE_CACHE_SYNC_ENABLE_INVERT = 0;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CORE_SYNC_ENABLE_ENABLE_OVERRIDE = 0;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CORE_SYNC_ENABLE_VALUE_OVERRIDE = 1;
 // perv/reg00020.H
 
 static const uint64_t CLOCK_STAT_SL = 0x00030008ull;
@@ -432,6 +422,7 @@ static const uint32_t FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S0 = 14;
 static const uint32_t FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S1 = 15;
 static const uint32_t FSXCOMP_FSXLOG_SB_CS_BYPASSING_RESET_SEQUENCE_PIB_I2CM = 16;
 static const uint32_t FSXCOMP_FSXLOG_SB_CS_SELECT_SECONDARY_SEEPROM = 17;
+static const uint32_t FSXCOMP_FSXLOG_SB_CS_SELECT_SECONDARY_MEAS_SEEPROM = 18;
 // perv/reg00020.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -838,7 +829,7 @@ static const uint32_t TOD_VALUE_REG_TOD_VALUE = 0;
 static const uint32_t TOD_VALUE_REG_TOD_VALUE_LEN = 60;
 static const uint32_t TOD_VALUE_REG_WOF_COUNTER_VALUE = 60;
 static const uint32_t TOD_VALUE_REG_WOF_COUNTER_VALUE_LEN = 4;
-// perv/reg00021.H
+// perv/reg00020.H
 
 static const uint64_t TRA1_TR1_CONFIG_1 = 0x000104c4ull;
 

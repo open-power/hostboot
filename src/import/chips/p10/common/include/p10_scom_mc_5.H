@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -194,8 +194,12 @@ static const uint32_t SCOMFIR_MCERPT1_RCMD3_ADDRESS_PARITY_ERROR_ON_CAR3 = 63;
 
 static const uint64_t SCOMFIR_MCSYNC = 0x0c010c15ull;
 
-static const uint32_t SCOMFIR_MCSYNC_RESERVED_0_15 = 0;
-static const uint32_t SCOMFIR_MCSYNC_RESERVED_0_15_LEN = 16;
+static const uint32_t SCOMFIR_MCSYNC_RESERVED_0_7 = 0;
+static const uint32_t SCOMFIR_MCSYNC_RESERVED_0_7_LEN = 8;
+static const uint32_t SCOMFIR_MCSYNC_SYNC_TYPE = 8;
+static const uint32_t SCOMFIR_MCSYNC_SYNC_TYPE_LEN = 4;
+static const uint32_t SCOMFIR_MCSYNC_RESERVED_12_15 = 12;
+static const uint32_t SCOMFIR_MCSYNC_RESERVED_12_15_LEN = 4;
 static const uint32_t SCOMFIR_MCSYNC_SYNC_GO = 16;
 static const uint32_t SCOMFIR_MCSYNC_EN_SYNC_IN = 17;
 static const uint32_t SCOMFIR_MCSYNC_RESERVED_18_24 = 18;

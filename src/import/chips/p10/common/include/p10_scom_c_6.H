@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,14 +49,14 @@ static const uint32_t CPMS_CERR_L3_CLOCK_SYNC_ERR = 4;
 static const uint32_t CPMS_CERR_CL2_CLOCK_SYNC_ERR = 5;
 static const uint32_t CPMS_CERR_DPT_ACCESS_ERROR = 6;
 static const uint32_t CPMS_CERR_PROXY_UNDERFLOW = 7;
-static const uint32_t CPMS_CERR_SPARE_ERR1 = 8;
+static const uint32_t CPMS_CERR_PITCH_SATURATED = 8;
 static const uint32_t CPMS_CERR_FTC_DEBUG_EVENT = 9;
 static const uint32_t CPMS_CERR_FTC_DEBUG_EVENT_LEN = 3;
 // c/reg00006.H
 
 static const uint64_t CPMS_CUCR = 0x200e0e3cull;
-static const uint64_t CPMS_CUCR_SCOM1 = 0x200e0e3full;
 static const uint64_t CPMS_CUCR_SCOM2 = 0x200e0e3eull;
+static const uint64_t CPMS_CUCR_WO_CLEAR = 0x200e0e3full;
 
 static const uint32_t CPMS_CUCR_ENABLE_CORE_SHADOW = 0;
 static const uint32_t CPMS_CUCR_ENABLE_CORE_SAMPLE = 1;
@@ -101,30 +101,35 @@ static const uint32_t CPMS_CUCR_QME_TYPE0_EVENTC2_PENDING = 62;
 static const uint32_t CPMS_CUCR_QME_TYPE0_EVENTC3_PENDING = 63;
 // c/reg00006.H
 
-static const uint64_t CPMS_DPPR = 0x200e0ea8ull;
-static const uint64_t CPMS_DPPR_SCOM1 = 0x200e0eabull;
-static const uint64_t CPMS_DPPR_SCOM2 = 0x200e0eaaull;
+static const uint64_t CPMS_DMSR = 0x200e0e64ull;
 
-static const uint32_t CPMS_DPPR_RESET_ACTIVITY_PROXY = 0;
-static const uint32_t CPMS_DPPR_RESET_ENERGY_PROXY = 1;
-static const uint32_t CPMS_DPPR_RESET_ACTIVITY_ON_SAMPLE_DISABLE = 2;
-static const uint32_t CPMS_DPPR_RESET_ENERGY_ON_SAMPLE_ENABLE = 3;
-static const uint32_t CPMS_DPPR_PIL_INTERVAL_SEL = 4;
-static const uint32_t CPMS_DPPR_PIL_INTERVAL_SEL_LEN = 4;
-static const uint32_t CPMS_DPPR_PIL_RATE_FLOOR = 8;
-static const uint32_t CPMS_DPPR_PIL_RATE_FLOOR_LEN = 4;
-static const uint32_t CPMS_DPPR_PIL_RATE_OFFSET = 12;
-static const uint32_t CPMS_DPPR_PIL_RATE_OFFSET_LEN = 4;
-static const uint32_t CPMS_DPPR_PIL_BLOCKED_ADDER = 16;
-static const uint32_t CPMS_DPPR_PIL_BLOCKED_ADDER_LEN = 4;
-static const uint32_t CPMS_DPPR_PIL_BLOCKED_THRESH = 20;
-static const uint32_t CPMS_DPPR_PIL_BLOCKED_THRESH_LEN = 6;
-static const uint32_t CPMS_DPPR_OCP_ENABLE = 26;
-static const uint32_t CPMS_DPPR_OCP_ENABLE_LEN = 2;
-static const uint32_t CPMS_DPPR_OCP_FTX_TUNE = 28;
-static const uint32_t CPMS_DPPR_OCP_FTX_TUNE_LEN = 2;
-static const uint32_t CPMS_DPPR_OCP_LOCAL_ADDER = 30;
-static const uint32_t CPMS_DPPR_OCP_LOCAL_ADDER_LEN = 2;
+static const uint32_t CPMS_DMSR_0_COUNT = 0;
+static const uint32_t CPMS_DMSR_0_COUNT_LEN = 24;
+static const uint32_t CPMS_DMSR_1_COUNT = 32;
+static const uint32_t CPMS_DMSR_1_COUNT_LEN = 24;
+// c/reg00006.H
+
+static const uint64_t CPMS_DPPR = 0x200e0ea8ull;
+static const uint64_t CPMS_DPPR_WO_CLEAR = 0x200e0eabull;
+static const uint64_t CPMS_DPPR_WO_OR = 0x200e0eaaull;
+
+static const uint32_t CPMS_DPPR_PITCH_ABORT_INTERRUPT_ENABLE = 0;
+static const uint32_t CPMS_DPPR_PTSR_EVENT_SELECT = 1;
+static const uint32_t CPMS_DPPR_ENERGY_PROXY_RESET_MODE = 2;
+static const uint32_t CPMS_DPPR_PIL_THROTTLE_ENABLE = 3;
+static const uint32_t CPMS_DPPR_OCP_THROTTLE_ENABLE = 4;
+static const uint32_t CPMS_DPPR_OCP_INTERRUPT_ENABLE = 5;
+static const uint32_t CPMS_DPPR_OCP_ENABLE = 6;
+static const uint32_t CPMS_DPPR_SPARE = 7;
+static const uint32_t CPMS_DPPR_SPARE_LEN = 5;
+static const uint32_t CPMS_DPPR_PP0_THRESH_SCALE = 16;
+static const uint32_t CPMS_DPPR_PP0_THRESH_SCALE_LEN = 4;
+static const uint32_t CPMS_DPPR_PP0_THRESH_VALUE = 20;
+static const uint32_t CPMS_DPPR_PP0_THRESH_VALUE_LEN = 4;
+static const uint32_t CPMS_DPPR_PP1_THRESH_SCALE = 24;
+static const uint32_t CPMS_DPPR_PP1_THRESH_SCALE_LEN = 4;
+static const uint32_t CPMS_DPPR_PP1_THRESH_VALUE = 28;
+static const uint32_t CPMS_DPPR_PP1_THRESH_VALUE_LEN = 4;
 static const uint32_t CPMS_DPPR_OCP_WAIT_FOR_GRANT = 32;
 static const uint32_t CPMS_DPPR_OCP_LOCAL_MSB_MAX = 33;
 static const uint32_t CPMS_DPPR_OCP_LOCAL_MSB_MAX_LEN = 2;
@@ -134,11 +139,6 @@ static const uint32_t CPMS_DPPR_OCP_LOCAL_TANK_VALUE = 40;
 static const uint32_t CPMS_DPPR_OCP_LOCAL_TANK_VALUE_LEN = 10;
 static const uint32_t CPMS_DPPR_OCP_PITCH_OVERRIDE = 50;
 static const uint32_t CPMS_DPPR_OCP_OVERRIDE_HISTORY = 51;
-static const uint32_t CPMS_DPPR_PITCH_FTX_SAT_MAX = 52;
-static const uint32_t CPMS_DPPR_PITCH_FTX_SAT_MIN = 53;
-static const uint32_t CPMS_DPPR_PITCH_ACCERR_SAT_MAX = 54;
-static const uint32_t CPMS_DPPR_PITCH_ACCERR_SAT_MIN = 55;
-static const uint32_t CPMS_DPPR_PITCH_APP_SATURATED = 56;
 // c/reg00006.H
 
 static const uint64_t CPMS_MMA_PFETCNTL = 0x200e0e30ull;
@@ -184,11 +184,11 @@ static const uint64_t EC_PC_COMMON_SPR_V0_HMER_RW_WAND = 0x20020492ull;
 static const uint64_t EC_PC_COMMON_SPR_V0_HMER_WO_OR = 0x2002048eull;
 
 static const uint32_t EC_PC_COMMON_SPR_V0_HMER_V0_HMER_MALFUNCTION_ALERT = 0;
-static const uint32_t EC_PC_COMMON_SPR_V0_HMER_V0_HMER_QME_REQUEST = 1;
+static const uint32_t EC_PC_COMMON_SPR_V0_HMER_SPARE_1 = 1;
 static const uint32_t EC_PC_COMMON_SPR_V0_HMER_V0_HMER_PROC_RCVY_DONE = 2;
-static const uint32_t EC_PC_COMMON_SPR_V0_HMER_SPARE_3 = 3;
+static const uint32_t EC_PC_COMMON_SPR_V0_HMER_V0_HMER_SUSPEND_MODE = 3;
 static const uint32_t EC_PC_COMMON_SPR_V0_HMER_V0_HMER_TFAC_ERR = 4;
-static const uint32_t EC_PC_COMMON_SPR_V0_HMER_SPARE_5 = 5;
+static const uint32_t EC_PC_COMMON_SPR_V0_HMER_V0_HMER_TFX_ERR = 5;
 static const uint32_t EC_PC_COMMON_SPR_V0_HMER_SPARE_6 = 6;
 static const uint32_t EC_PC_COMMON_SPR_V0_HMER_SPARE_7 = 7;
 static const uint32_t EC_PC_COMMON_SPR_V0_HMER_V0_HMER_XSCOM_FAIL = 8;

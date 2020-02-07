@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -224,7 +224,7 @@ static const uint32_t TRA1_TR0_CONFIG_4_B = 24;
 static const uint32_t TRA1_TR0_CONFIG_4_B_LEN = 24;
 // pauc/reg00001.H
 
-static const uint64_t TXIRLM_REGS_TX_IMPCAL_SWO2_PB = 0x800f3c0010012c3full;
+static const uint64_t TXIRLM_REGS_TX_IMPCAL_SWO2_PB = 0x800f3dc010012c3full;
 
 static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO2_PB_IN_VAL = 48;
 static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO2_PB_IN_VAL_LEN = 7;

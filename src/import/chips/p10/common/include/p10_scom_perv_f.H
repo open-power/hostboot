@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -109,11 +109,6 @@ static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS = 0x000
 static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS_CORE_PDLYS_INVERT = 0;
 // perv/reg00030.H
 
-static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_SYNC_ENABLE = 0x00014330ull;
-
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_SYNC_ENABLE_CORE_SYNC_ENABLE_INVERT = 0;
-// perv/reg00030.H
-
 static const uint64_t CLK_ADJ_02_DCADJ_WRAP_AVERAGE_MEASUREMENT = 0x00012319ull;
 
 static const uint32_t CLK_ADJ_02_DCADJ_WRAP_AVERAGE_MEASUREMENT_MEASURE_HIST_VAL1 = 0;
@@ -136,8 +131,6 @@ static const uint32_t CLK_ADJ_02_DCADJ_WRAP_DCC_OVERRIDE_VALUE_LEN = 8;
 // perv/reg00030.H
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_INIT_MODE = 0x00011320ull;
-
-static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_INIT_MODE_SET_INIT_MD = 4;
 // perv/reg00030.H
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_SWAP_CACHE_INC_DEC = 0x0001132full;
@@ -163,19 +156,19 @@ static const uint32_t CPLT_CTRL5_03 = 3;
 static const uint32_t CPLT_CTRL5_3 = 3;
 static const uint32_t CPLT_CTRL5_VITL_DFT_FENCE_DC = 3;
 static const uint32_t CPLT_CTRL5_TC_CCFG_PCS01_MUX_SEL_DC = 4;
-static const uint32_t CPLT_CTRL5_TP_AN_EMO01_PFET_ENABLE_DC = 4;
+static const uint32_t CPLT_CTRL5_TP_AN_EMO67_PFET_ENABLE_DC = 4;
 static const uint32_t CPLT_CTRL5_4 = 4;
 static const uint32_t CPLT_CTRL5_REGION0_DFT_FENCE_DC = 4;
 static const uint32_t CPLT_CTRL5_TC_CCFG_PCS23_MUX_SEL_DC = 5;
-static const uint32_t CPLT_CTRL5_TP_AN_EMO23_PFET_ENABLE_DC = 5;
+static const uint32_t CPLT_CTRL5_TP_AN_EMO45_PFET_ENABLE_DC = 5;
 static const uint32_t CPLT_CTRL5_5 = 5;
 static const uint32_t CPLT_CTRL5_REGION1_DFT_FENCE_DC = 5;
 static const uint32_t CPLT_CTRL5_TC_CCFG_PIPE_LANEX_EXT_PLL_MODE_DC = 6;
-static const uint32_t CPLT_CTRL5_TP_AN_EMO45_PFET_ENABLE_DC = 6;
+static const uint32_t CPLT_CTRL5_TP_AN_EMO23_PFET_ENABLE_DC = 6;
 static const uint32_t CPLT_CTRL5_6 = 6;
 static const uint32_t CPLT_CTRL5_REGION2_DFT_FENCE_DC = 6;
 static const uint32_t CPLT_CTRL5_TC_CCFG_PHYX_CR_PARA_SEL_DC = 7;
-static const uint32_t CPLT_CTRL5_TP_AN_EMO67_PFET_ENABLE_DC = 7;
+static const uint32_t CPLT_CTRL5_TP_AN_EMO01_PFET_ENABLE_DC = 7;
 static const uint32_t CPLT_CTRL5_7 = 7;
 static const uint32_t CPLT_CTRL5_REGION3_DFT_FENCE_DC = 7;
 static const uint32_t CPLT_CTRL5_TC_CCFG_PHY_EXT_CTRL_SEL_DC = 8;
@@ -209,11 +202,11 @@ static const uint32_t CPLT_CTRL5_TP_AN_PAU7_PFET_ENABLE_DC = 15;
 static const uint32_t CPLT_CTRL5_15 = 15;
 static const uint32_t CPLT_CTRL5_REGION11_DFT_FENCE_DC = 15;
 static const uint32_t CPLT_CTRL5_016 = 16;
-static const uint32_t CPLT_CTRL5_TP_AN_PCIE0_PFET_ENABLE_DC = 16;
+static const uint32_t CPLT_CTRL5_TP_AN_PCIE1_PFET_ENABLE_DC = 16;
 static const uint32_t CPLT_CTRL5_16 = 16;
 static const uint32_t CPLT_CTRL5_REGION12_DFT_FENCE_DC = 16;
 static const uint32_t CPLT_CTRL5_017 = 17;
-static const uint32_t CPLT_CTRL5_TP_AN_PCIE1_PFET_ENABLE_DC = 17;
+static const uint32_t CPLT_CTRL5_TP_AN_PCIE0_PFET_ENABLE_DC = 17;
 static const uint32_t CPLT_CTRL5_17 = 17;
 static const uint32_t CPLT_CTRL5_REGION13_DFT_FENCE_DC = 17;
 static const uint32_t CPLT_CTRL5_018 = 18;
@@ -383,7 +376,7 @@ static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_SET_SPARE_DI_CONTROL = 18;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_SET_TP_RI_DC_B = 19;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_SET_TP_DI1_DC_B = 20;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_SET_TP_DI2_DC_B = 21;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_SET_ROOT_CTRL1_22_SPARE_TEST = 22;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_SET_TP_TPM_DI1_DC_B = 22;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_SET_ROOT_CTRL1_23_SPARE_TEST = 23;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_SET_TP_TEST_BURNIN_MODE_DC = 24;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_SET_TPFSI_ARRAY_SET_VBL_TO_VDD_DC = 25;
@@ -520,12 +513,30 @@ static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_FSI = 0x00002925ull;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_FSI_BYTE = 0x00002c94ull;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_WO_OR = 0x00050125ull;
 
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_RESET_DC = 0;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_BYPASS_DC = 1;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_FORCE_BYPASS_CLKSEL_DC = 2;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_CLK_TEST_IN_DC = 3;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_CONTROL_DC = 4;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_CONTROL_DC_LEN = 28;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_TPFSI_RCS_RESET_DC = 0;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_TPFSI_RCS_BYPASS_DC = 1;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_TPFSI_RCS_FORCE_BYPASS_CLKSEL_DC = 2;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_TPFSI_RCS_CLK_TEST_IN_DC = 3;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_SWO_FORCE_LOW = 4;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_BLOCK_SWO = 5;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_CLEAR_CLK_ERROR_A = 6;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_CLEAR_CLK_ERROR_B = 7;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_SEL_DEL = 8;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_DESKEW = 9;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_DESKEW_LEN = 3;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_FILT = 12;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_FILT_LEN = 4;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_PFD_PW_SEL = 16;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_FORCE_ERROR_HIGH = 17;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_TESTOUT_EN = 18;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_TESTOUT_SEL = 19;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_TESTOUT_SEL_LEN = 3;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_EN_OVERRIDE_A = 22;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_EN_OVERRIDE_B = 23;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_OVRBIT = 24;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_OVRBIT_LEN = 6;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_EN_REFCLK = 30;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SET_EN_ASYNC_OUT = 31;
 // perv/reg00030.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -702,7 +713,7 @@ static const uint32_t PROTECT_MODE_REG_READ_PROTECT_ENABLE = 0;
 static const uint32_t PROTECT_MODE_REG_WRITE_PROTECT_ENABLE = 1;
 // perv/reg00030.H
 
-static const uint64_t QMETRA0_TR1_CONFIG_1 = 0x00018424ull;
+static const uint64_t QMETRA0_TR1_CONFIG_1 = 0x00018444ull;
 
 static const uint32_t QMETRA0_TR1_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t QMETRA0_TR1_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
@@ -892,7 +903,7 @@ static const uint64_t SINGLE_OTP_ROM_OTPROM_REG65 = 0x00018041ull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG65_REGISTER65 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG65_REGISTER65_LEN = 64;
-// perv/reg00031.H
+// perv/reg00030.H
 
 static const uint64_t SINGLE_OTP_ROM_OTPROM_REG90 = 0x0001805aull;
 

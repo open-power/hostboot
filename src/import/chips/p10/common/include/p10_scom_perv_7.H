@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,8 +40,6 @@ namespace perv
 
 
 static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_ONE_SHOT_MODE = 0x00018323ull;
-
-static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_ONE_SHOT_MODE_SET_ONE_SHOT_MD_SET1 = 1;
 // perv/reg00014.H
 
 static const uint64_t CLK_ADJ_01_DCADJ_WRAP_PHASE_MEASUREMENT = 0x00014318ull;
@@ -52,6 +50,12 @@ static const uint32_t CLK_ADJ_01_DCADJ_WRAP_PHASE_MEASUREMENT_2_VAL_LEN = 7;
 static const uint32_t CLK_ADJ_01_DCADJ_WRAP_PHASE_MEASUREMENT_3_VAL = 8;
 static const uint32_t CLK_ADJ_01_DCADJ_WRAP_PHASE_MEASUREMENT_4_VAL = 9;
 static const uint32_t CLK_ADJ_01_DCADJ_WRAP_PHASE_MEASUREMENT_4_VAL_LEN = 7;
+// perv/reg00014.H
+
+static const uint64_t CLK_ADJ_01_DCADJ_WRAP_SET_ENABLE_OVERRIDE = 0x00014312ull;
+
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SET_ENABLE_OVERRIDE_ENA = 0;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SET_ENABLE_OVERRIDE_VAL = 1;
 // perv/reg00014.H
 
 static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_CACHE_OVERRIDE = 0x00014327ull;
@@ -71,6 +75,12 @@ static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_PDLYS = 0x00
 static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_PDLYS_CACHE_PDLYS_INVERT = 0;
 // perv/reg00014.H
 
+static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CACHE_SYNC_ENABLE = 0x00012331ull;
+
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CACHE_SYNC_ENABLE_ENABLE_OVERRIDE = 0;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CACHE_SYNC_ENABLE_VALUE_OVERRIDE = 1;
+// perv/reg00014.H
+
 static const uint64_t CLK_ADJ_03_DCADJ_WRAP_SET_DEC = 0x00011310ull;
 
 static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_DEC_DCC_VALUE = 0;
@@ -78,8 +88,74 @@ static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_DEC_DCC_VALUE_LEN = 8;
 // perv/reg00014.H
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_ONE_SHOT_MODE = 0x00011323ull;
+// perv/reg00014.H
 
-static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_ONE_SHOT_MODE_SET_ONE_SHOT_MD_SET1 = 1;
+static const uint64_t EPS_FIR_LOCAL_WOF = 0x00040108ull;
+
+static const uint32_t EPS_FIR_LOCAL_WOF_00 = 0;
+static const uint32_t EPS_FIR_LOCAL_WOF_01 = 1;
+static const uint32_t EPS_FIR_LOCAL_WOF_02 = 2;
+static const uint32_t EPS_FIR_LOCAL_WOF_03 = 3;
+static const uint32_t EPS_FIR_LOCAL_WOF_04 = 4;
+static const uint32_t EPS_FIR_LOCAL_WOF_05 = 5;
+static const uint32_t EPS_FIR_LOCAL_WOF_06 = 6;
+static const uint32_t EPS_FIR_LOCAL_WOF_07 = 7;
+static const uint32_t EPS_FIR_LOCAL_WOF_08 = 8;
+static const uint32_t EPS_FIR_LOCAL_WOF_09 = 9;
+static const uint32_t EPS_FIR_LOCAL_WOF_10 = 10;
+static const uint32_t EPS_FIR_LOCAL_WOF_11 = 11;
+static const uint32_t EPS_FIR_LOCAL_WOF_12 = 12;
+static const uint32_t EPS_FIR_LOCAL_WOF_13 = 13;
+static const uint32_t EPS_FIR_LOCAL_WOF_14 = 14;
+static const uint32_t EPS_FIR_LOCAL_WOF_15 = 15;
+static const uint32_t EPS_FIR_LOCAL_WOF_16 = 16;
+static const uint32_t EPS_FIR_LOCAL_WOF_17 = 17;
+static const uint32_t EPS_FIR_LOCAL_WOF_18 = 18;
+static const uint32_t EPS_FIR_LOCAL_WOF_19 = 19;
+static const uint32_t EPS_FIR_LOCAL_WOF_20 = 20;
+static const uint32_t EPS_FIR_LOCAL_WOF_21 = 21;
+static const uint32_t EPS_FIR_LOCAL_WOF_22 = 22;
+static const uint32_t EPS_FIR_LOCAL_WOF_23 = 23;
+static const uint32_t EPS_FIR_LOCAL_WOF_24 = 24;
+static const uint32_t EPS_FIR_LOCAL_WOF_25 = 25;
+static const uint32_t EPS_FIR_LOCAL_WOF_26 = 26;
+static const uint32_t EPS_FIR_LOCAL_WOF_27 = 27;
+static const uint32_t EPS_FIR_LOCAL_WOF_28 = 28;
+static const uint32_t EPS_FIR_LOCAL_WOF_29 = 29;
+static const uint32_t EPS_FIR_LOCAL_WOF_30 = 30;
+static const uint32_t EPS_FIR_LOCAL_WOF_31 = 31;
+static const uint32_t EPS_FIR_LOCAL_WOF_32 = 32;
+static const uint32_t EPS_FIR_LOCAL_WOF_33 = 33;
+static const uint32_t EPS_FIR_LOCAL_WOF_34 = 34;
+static const uint32_t EPS_FIR_LOCAL_WOF_35 = 35;
+static const uint32_t EPS_FIR_LOCAL_WOF_36 = 36;
+static const uint32_t EPS_FIR_LOCAL_WOF_37 = 37;
+static const uint32_t EPS_FIR_LOCAL_WOF_38 = 38;
+static const uint32_t EPS_FIR_LOCAL_WOF_39 = 39;
+static const uint32_t EPS_FIR_LOCAL_WOF_40 = 40;
+static const uint32_t EPS_FIR_LOCAL_WOF_41 = 41;
+static const uint32_t EPS_FIR_LOCAL_WOF_42 = 42;
+static const uint32_t EPS_FIR_LOCAL_WOF_43 = 43;
+static const uint32_t EPS_FIR_LOCAL_WOF_44 = 44;
+static const uint32_t EPS_FIR_LOCAL_WOF_45 = 45;
+static const uint32_t EPS_FIR_LOCAL_WOF_46 = 46;
+static const uint32_t EPS_FIR_LOCAL_WOF_47 = 47;
+static const uint32_t EPS_FIR_LOCAL_WOF_48 = 48;
+static const uint32_t EPS_FIR_LOCAL_WOF_49 = 49;
+static const uint32_t EPS_FIR_LOCAL_WOF_50 = 50;
+static const uint32_t EPS_FIR_LOCAL_WOF_51 = 51;
+static const uint32_t EPS_FIR_LOCAL_WOF_52 = 52;
+static const uint32_t EPS_FIR_LOCAL_WOF_53 = 53;
+static const uint32_t EPS_FIR_LOCAL_WOF_54 = 54;
+static const uint32_t EPS_FIR_LOCAL_WOF_55 = 55;
+static const uint32_t EPS_FIR_LOCAL_WOF_56 = 56;
+static const uint32_t EPS_FIR_LOCAL_WOF_57 = 57;
+static const uint32_t EPS_FIR_LOCAL_WOF_58 = 58;
+static const uint32_t EPS_FIR_LOCAL_WOF_59 = 59;
+static const uint32_t EPS_FIR_LOCAL_WOF_60 = 60;
+static const uint32_t EPS_FIR_LOCAL_WOF_61 = 61;
+static const uint32_t EPS_FIR_LOCAL_WOF_62 = 62;
+static const uint32_t EPS_FIR_LOCAL_WOF_63 = 63;
 // perv/reg00014.H
 
 static const uint64_t EPS_THERM_WSUB_CONTROL_REG = 0x00050012ull;
@@ -194,8 +270,9 @@ static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_SET_PERV_CTRL0_3_6_RESERVED_LEN 
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_SET_TP_TCPERV_VITL_SCIN_DC = 7;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_SET_PERV_CTRL0_8_RESERVED = 8;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_SET_TP_TCPERV_FLUSH_ALIGN_OVERWRITE = 9;
-static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_SET_PERV_CTRL0_10_13_RESERVED = 10;
-static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_SET_PERV_CTRL0_10_13_RESERVED_LEN = 4;
+static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_SET_PERV_CTRL0_10_12_RESERVED = 10;
+static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_SET_PERV_CTRL0_10_12_RESERVED_LEN = 3;
+static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_SET_TP_TCPERV_SBE_CG_DIS = 13;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_SET_TP_TCPERV_VITL_CG_DIS = 14;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_SET_TP_TCPERV_VITL_FFDLYLCK_DC = 15;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_SET_TP_VITL_CLKOFF_DC = 16;
@@ -544,19 +621,19 @@ static const uint64_t SINGLE_OTP_ROM_OTPROM_REG38 = 0x00018026ull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG38_REGISTER38 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG38_REGISTER38_LEN = 64;
-// perv/reg00014.H
+// perv/reg00015.H
 
 static const uint64_t SINGLE_OTP_ROM_OTPROM_REG46 = 0x0001802eull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG46_REGISTER46 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG46_REGISTER46_LEN = 64;
-// perv/reg00014.H
+// perv/reg00015.H
 
 static const uint64_t SINGLE_OTP_ROM_OTPROM_REG59 = 0x0001803bull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG59_REGISTER59 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG59_REGISTER59_LEN = 64;
-// perv/reg00014.H
+// perv/reg00015.H
 
 static const uint64_t SINGLE_OTP_ROM_OTPROM_REG71 = 0x00018047ull;
 

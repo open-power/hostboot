@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,14 +55,6 @@ static const uint32_t CPMS_CGCSR_L3_CACHE_SB_CTRL = 12;
 static const uint32_t CPMS_CGCSR_L3_CACHE_SB_CTRL_LEN = 4;
 static const uint32_t CPMS_CGCSR_L3_CLK_SYNC_DONE = 32;
 static const uint32_t CPMS_CGCSR_CL2_CLK_SYNC_DONE = 33;
-// c/reg00012.H
-
-static const uint64_t CPMS_DCSR = 0x200e0e64ull;
-
-static const uint32_t CPMS_DCSR_0_COUNT = 0;
-static const uint32_t CPMS_DCSR_0_COUNT_LEN = 24;
-static const uint32_t CPMS_DCSR_1_COUNT = 32;
-static const uint32_t CPMS_DCSR_1_COUNT_LEN = 24;
 // c/reg00012.H
 
 static const uint64_t CPMS_DHCR = 0x200e0e54ull;
@@ -197,6 +189,13 @@ static const uint64_t NC_NCMISC_NCSCOMS_NCU_DARN_BAR_REG = 0x20010651ull;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_DARN_BAR_REG_EN = 0;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_DARN_BAR_REG_ADDR = 12;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_DARN_BAR_REG_ADDR_LEN = 40;
+// c/reg00012.H
+
+static const uint64_t NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG = 0x20010658ull;
+
+static const uint32_t NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE = 0;
+static const uint32_t NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_SPARE = 1;
+static const uint32_t NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_SPARE_LEN = 3;
 // c/reg00012.H
 
 #ifndef __PPE_HCODE__

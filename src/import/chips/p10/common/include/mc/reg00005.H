@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -9865,47 +9865,137 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_SCOMFIR_MCSYNC_RESERVED_0_15(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_SCOMFIR_MCSYNC_RESERVED_0_7(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(SCOMFIR_MCSYNC));
 #endif
-    return o_data.insertFromRight<SCOMFIR_MCSYNC_RESERVED_0_15,
-           SCOMFIR_MCSYNC_RESERVED_0_15_LEN>(i_data);
+    return o_data.insertFromRight<SCOMFIR_MCSYNC_RESERVED_0_7,
+           SCOMFIR_MCSYNC_RESERVED_0_7_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access SCOMFIR_MCSYNC_RESERVED_0_15 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access SCOMFIR_MCSYNC_RESERVED_0_7 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_SCOMFIR_MCSYNC_RESERVED_0_15(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_SCOMFIR_MCSYNC_RESERVED_0_7(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(SCOMFIR_MCSYNC));
 #endif
-    return o_data.insertFromRight<SCOMFIR_MCSYNC_RESERVED_0_15,
-           SCOMFIR_MCSYNC_RESERVED_0_15_LEN>(i_data);
+    return o_data.insertFromRight<SCOMFIR_MCSYNC_RESERVED_0_7,
+           SCOMFIR_MCSYNC_RESERVED_0_7_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access SCOMFIR_MCSYNC_RESERVED_0_15 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access SCOMFIR_MCSYNC_RESERVED_0_7 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_SCOMFIR_MCSYNC_RESERVED_0_15(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_SCOMFIR_MCSYNC_RESERVED_0_7(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(SCOMFIR_MCSYNC));
 #endif
-    return i_data.extractToRight<SCOMFIR_MCSYNC_RESERVED_0_15,
-           SCOMFIR_MCSYNC_RESERVED_0_15_LEN>(o_data);
+    return i_data.extractToRight<SCOMFIR_MCSYNC_RESERVED_0_7,
+           SCOMFIR_MCSYNC_RESERVED_0_7_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access SCOMFIR_MCSYNC_RESERVED_0_15 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access SCOMFIR_MCSYNC_RESERVED_0_7 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_SCOMFIR_MCSYNC_SYNC_TYPE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SCOMFIR_MCSYNC));
+#endif
+    return o_data.insertFromRight<SCOMFIR_MCSYNC_SYNC_TYPE,
+           SCOMFIR_MCSYNC_SYNC_TYPE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SCOMFIR_MCSYNC_SYNC_TYPE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_SCOMFIR_MCSYNC_SYNC_TYPE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SCOMFIR_MCSYNC));
+#endif
+    return o_data.insertFromRight<SCOMFIR_MCSYNC_SYNC_TYPE,
+           SCOMFIR_MCSYNC_SYNC_TYPE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SCOMFIR_MCSYNC_SYNC_TYPE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_SCOMFIR_MCSYNC_SYNC_TYPE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SCOMFIR_MCSYNC));
+#endif
+    return i_data.extractToRight<SCOMFIR_MCSYNC_SYNC_TYPE,
+           SCOMFIR_MCSYNC_SYNC_TYPE_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SCOMFIR_MCSYNC_SYNC_TYPE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_SCOMFIR_MCSYNC_RESERVED_12_15(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SCOMFIR_MCSYNC));
+#endif
+    return o_data.insertFromRight<SCOMFIR_MCSYNC_RESERVED_12_15,
+           SCOMFIR_MCSYNC_RESERVED_12_15_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SCOMFIR_MCSYNC_RESERVED_12_15 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_SCOMFIR_MCSYNC_RESERVED_12_15(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SCOMFIR_MCSYNC));
+#endif
+    return o_data.insertFromRight<SCOMFIR_MCSYNC_RESERVED_12_15,
+           SCOMFIR_MCSYNC_RESERVED_12_15_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SCOMFIR_MCSYNC_RESERVED_12_15 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_SCOMFIR_MCSYNC_RESERVED_12_15(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SCOMFIR_MCSYNC));
+#endif
+    return i_data.extractToRight<SCOMFIR_MCSYNC_RESERVED_12_15,
+           SCOMFIR_MCSYNC_RESERVED_12_15_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SCOMFIR_MCSYNC_RESERVED_12_15 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

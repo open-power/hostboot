@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -418,7 +418,7 @@ static const uint32_t TRA0_TR0_CONFIG_3_D = 24;
 static const uint32_t TRA0_TR0_CONFIG_3_D_LEN = 24;
 // pauc/reg00003.H
 
-static const uint64_t TXIRLM_REGS_SPARE_MODE_PB = 0x800f7c0010012c3full;
+static const uint64_t TXIRLM_REGS_SPARE_MODE_PB = 0x800f7dc010012c3full;
 
 static const uint32_t TXIRLM_REGS_SPARE_MODE_PB_0 = 48;
 static const uint32_t TXIRLM_REGS_SPARE_MODE_PB_1 = 49;
@@ -430,7 +430,7 @@ static const uint32_t TXIRLM_REGS_SPARE_MODE_PB_6 = 54;
 static const uint32_t TXIRLM_REGS_SPARE_MODE_PB_7 = 55;
 // pauc/reg00003.H
 
-static const uint64_t TXIRLM_REGS_TX_IMPCAL_SWO7_PB = 0x800f640010012c3full;
+static const uint64_t TXIRLM_REGS_TX_IMPCAL_SWO7_PB = 0x800f65c010012c3full;
 
 static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO7_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XP_16_31 = 48;
 static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO7_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XP_16_31_LEN = 16;

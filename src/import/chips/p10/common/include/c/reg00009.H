@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -344,90 +344,6 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_DDSR_DPLL_ENCODED_MAX(fapi2::buf
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access CPMS_DDSR_DPLL_ENCODED_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DDSR_PDSR_RESET_OCCURRED(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DDSR));
-#endif
-    return o_data.insertFromRight<CPMS_DDSR_PDSR_RESET_OCCURRED,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DDSR_PDSR_RESET_OCCURRED chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DDSR_PDSR_RESET_OCCURRED(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DDSR));
-#endif
-    return o_data.insertFromRight<CPMS_DDSR_PDSR_RESET_OCCURRED,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DDSR_PDSR_RESET_OCCURRED chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DDSR_PDSR_RESET_OCCURRED(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DDSR));
-#endif
-    return o_data.setBit<CPMS_DDSR_PDSR_RESET_OCCURRED>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DDSR_PDSR_RESET_OCCURRED chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_DDSR_PDSR_RESET_OCCURRED(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DDSR));
-#endif
-    return o_data.clearBit<CPMS_DDSR_PDSR_RESET_OCCURRED>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DDSR_PDSR_RESET_OCCURRED chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CPMS_DDSR_PDSR_RESET_OCCURRED(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DDSR));
-#endif
-    return i_data.extractToRight<CPMS_DDSR_PDSR_RESET_OCCURRED,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DDSR_PDSR_RESET_OCCURRED chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_CPMS_DDSR_PDSR_RESET_OCCURRED(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DDSR));
-#endif
-    return i_data.getBit<CPMS_DDSR_PDSR_RESET_OCCURRED>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DDSR_PDSR_RESET_OCCURRED chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -981,170 +897,170 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_HALT_INJECT(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_UARCH_HALT_INJECT(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_FDIR_HALT_INJECT,
+    return o_data.insertFromRight<CPMS_FDIR_UARCH_HALT_INJECT,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_HALT_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_FDIR_UARCH_HALT_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_HALT_INJECT(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_UARCH_HALT_INJECT(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_FDIR_HALT_INJECT,
+    return o_data.insertFromRight<CPMS_FDIR_UARCH_HALT_INJECT,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_HALT_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_FDIR_UARCH_HALT_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_HALT_INJECT(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_UARCH_HALT_INJECT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
-    return o_data.setBit<CPMS_FDIR_HALT_INJECT>();
+    return o_data.setBit<CPMS_FDIR_UARCH_HALT_INJECT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_HALT_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_FDIR_UARCH_HALT_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_FDIR_HALT_INJECT(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_FDIR_UARCH_HALT_INJECT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
-    return o_data.clearBit<CPMS_FDIR_HALT_INJECT>();
+    return o_data.clearBit<CPMS_FDIR_UARCH_HALT_INJECT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_HALT_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_FDIR_UARCH_HALT_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_HALT_INJECT(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_UARCH_HALT_INJECT(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
-    return i_data.extractToRight<CPMS_FDIR_HALT_INJECT,
+    return i_data.extractToRight<CPMS_FDIR_UARCH_HALT_INJECT,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_HALT_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_FDIR_UARCH_HALT_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPMS_FDIR_HALT_INJECT(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPMS_FDIR_UARCH_HALT_INJECT(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
-    return i_data.getBit<CPMS_FDIR_HALT_INJECT>();
+    return i_data.getBit<CPMS_FDIR_UARCH_HALT_INJECT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_HALT_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_FDIR_UARCH_HALT_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_HALT_TOGGLE_INJECT(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_UARCH_HALT_TOGGLE_INJECT(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_FDIR_HALT_TOGGLE_INJECT,
+    return o_data.insertFromRight<CPMS_FDIR_UARCH_HALT_TOGGLE_INJECT,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_HALT_TOGGLE_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_FDIR_UARCH_HALT_TOGGLE_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_HALT_TOGGLE_INJECT(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_UARCH_HALT_TOGGLE_INJECT(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_FDIR_HALT_TOGGLE_INJECT,
+    return o_data.insertFromRight<CPMS_FDIR_UARCH_HALT_TOGGLE_INJECT,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_HALT_TOGGLE_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_FDIR_UARCH_HALT_TOGGLE_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_HALT_TOGGLE_INJECT(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPMS_FDIR_UARCH_HALT_TOGGLE_INJECT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
-    return o_data.setBit<CPMS_FDIR_HALT_TOGGLE_INJECT>();
+    return o_data.setBit<CPMS_FDIR_UARCH_HALT_TOGGLE_INJECT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_HALT_TOGGLE_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_FDIR_UARCH_HALT_TOGGLE_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_FDIR_HALT_TOGGLE_INJECT(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_FDIR_UARCH_HALT_TOGGLE_INJECT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
-    return o_data.clearBit<CPMS_FDIR_HALT_TOGGLE_INJECT>();
+    return o_data.clearBit<CPMS_FDIR_UARCH_HALT_TOGGLE_INJECT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_HALT_TOGGLE_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_FDIR_UARCH_HALT_TOGGLE_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_HALT_TOGGLE_INJECT(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPMS_FDIR_UARCH_HALT_TOGGLE_INJECT(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
-    return i_data.extractToRight<CPMS_FDIR_HALT_TOGGLE_INJECT,
+    return i_data.extractToRight<CPMS_FDIR_UARCH_HALT_TOGGLE_INJECT,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_HALT_TOGGLE_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_FDIR_UARCH_HALT_TOGGLE_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPMS_FDIR_HALT_TOGGLE_INJECT(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPMS_FDIR_UARCH_HALT_TOGGLE_INJECT(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPMS_FDIR, CPMS_FDIR_WO_CLEAR, CPMS_FDIR_WO_OR));
 #endif
-    return i_data.getBit<CPMS_FDIR_HALT_TOGGLE_INJECT>();
+    return i_data.getBit<CPMS_FDIR_UARCH_HALT_TOGGLE_INJECT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_FDIR_HALT_TOGGLE_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_FDIR_UARCH_HALT_TOGGLE_INJECT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

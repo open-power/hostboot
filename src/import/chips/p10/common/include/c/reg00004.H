@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -604,47 +604,47 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPCR_DDP_RECHARGE_DELAY(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPCR_PROXY_LEAKAGE_CONSTANT(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPMS_DPCR));
 #endif
-    return o_data.insertFromRight<CPMS_DPCR_DDP_RECHARGE_DELAY,
-           CPMS_DPCR_DDP_RECHARGE_DELAY_LEN>(i_data);
+    return o_data.insertFromRight<CPMS_DPCR_PROXY_LEAKAGE_CONSTANT,
+           CPMS_DPCR_PROXY_LEAKAGE_CONSTANT_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPCR_DDP_RECHARGE_DELAY chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPCR_PROXY_LEAKAGE_CONSTANT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPCR_DDP_RECHARGE_DELAY(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPCR_PROXY_LEAKAGE_CONSTANT(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPMS_DPCR));
 #endif
-    return o_data.insertFromRight<CPMS_DPCR_DDP_RECHARGE_DELAY,
-           CPMS_DPCR_DDP_RECHARGE_DELAY_LEN>(i_data);
+    return o_data.insertFromRight<CPMS_DPCR_PROXY_LEAKAGE_CONSTANT,
+           CPMS_DPCR_PROXY_LEAKAGE_CONSTANT_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPCR_DDP_RECHARGE_DELAY chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPCR_PROXY_LEAKAGE_CONSTANT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPMS_DPCR_DDP_RECHARGE_DELAY(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPMS_DPCR_PROXY_LEAKAGE_CONSTANT(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPMS_DPCR));
 #endif
-    return i_data.extractToRight<CPMS_DPCR_DDP_RECHARGE_DELAY,
-           CPMS_DPCR_DDP_RECHARGE_DELAY_LEN>(o_data);
+    return i_data.extractToRight<CPMS_DPCR_PROXY_LEAKAGE_CONSTANT,
+           CPMS_DPCR_PROXY_LEAKAGE_CONSTANT_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPCR_DDP_RECHARGE_DELAY chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPCR_PROXY_LEAKAGE_CONSTANT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

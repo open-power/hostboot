@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,7 +98,7 @@ static const uint32_t CPMS_FLMR_CORE_UCODE_GRANT_INJECT = 59;
 static const uint32_t CPMS_FLMR_FTC_RESET = 60;
 static const uint32_t CPMS_FLMR_IGNORE_IFU_THROTTLE_ACTIVE = 61;
 static const uint32_t CPMS_FLMR_PHASE1_DITHER_NTC = 62;
-static const uint32_t CPMS_FLMR_SPARE4 = 63;
+static const uint32_t CPMS_FLMR_CORE_UCODE_EXIT_DISABLE = 63;
 // c/reg00005.H
 
 static const uint64_t CPMS_WPCR = 0x200e0e94ull;
@@ -107,13 +107,19 @@ static const uint32_t CPMS_WPCR_SPARE = 0;
 static const uint32_t CPMS_WPCR_SPARE_LEN = 2;
 static const uint32_t CPMS_WPCR_BASE_THROTTLE_INDEX = 2;
 static const uint32_t CPMS_WPCR_BASE_THROTTLE_INDEX_LEN = 6;
-static const uint32_t CPMS_WPCR_INTERVAL_PROXY_TARGET = 8;
-static const uint32_t CPMS_WPCR_INTERVAL_PROXY_TARGET_LEN = 24;
+static const uint32_t CPMS_WPCR_INTERVAL_PROXY_TARGET = 12;
+static const uint32_t CPMS_WPCR_INTERVAL_PROXY_TARGET_LEN = 20;
 static const uint32_t CPMS_WPCR_SPARE2 = 32;
 static const uint32_t CPMS_WPCR_PROXY_THRESH_SELECT = 33;
 static const uint32_t CPMS_WPCR_PROXY_THRESH_SELECT_LEN = 3;
 static const uint32_t CPMS_WPCR_PROXY_CARRYOUT_SEL = 36;
 static const uint32_t CPMS_WPCR_PROXY_CARRYOUT_SEL_LEN = 4;
+static const uint32_t CPMS_WPCR_PITCH_FTX_SAT_MAX = 58;
+static const uint32_t CPMS_WPCR_PITCH_FTX_SAT_MIN = 59;
+static const uint32_t CPMS_WPCR_PITCH_ACCERR_SAT_MAX = 60;
+static const uint32_t CPMS_WPCR_PITCH_ACCERR_SAT_MIN = 61;
+static const uint32_t CPMS_WPCR_PITCH_APP_SATURATED = 62;
+static const uint32_t CPMS_WPCR_STOP_STATE_OCCURRED = 63;
 // c/reg00005.H
 
 static const uint64_t EC_LS_LSU_HOLD_OUT_REG8 = 0x200206c8ull;

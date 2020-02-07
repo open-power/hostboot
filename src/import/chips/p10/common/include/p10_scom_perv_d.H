@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -97,6 +97,12 @@ static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_FMS_HIST_3
 static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_FMS_HIST_3_LEN = 4;
 // perv/reg00026.H
 
+static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CORE_SYNC_ENABLE = 0x00014330ull;
+
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CORE_SYNC_ENABLE_ENABLE_OVERRIDE = 0;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CORE_SYNC_ENABLE_VALUE_OVERRIDE = 1;
+// perv/reg00026.H
+
 static const uint64_t CLK_ADJ_02_DCADJ_WRAP_SET_SINGLE_STEP_MODE = 0x00012304ull;
 
 static const uint32_t CLK_ADJ_02_DCADJ_WRAP_SET_SINGLE_STEP_MODE_ET_SINGLE_STEP_MD_SET = 0;
@@ -113,7 +119,11 @@ static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_CACHE_OVERRIDE_VALUE_LEN = 4;
 
 static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE = 0x00012321ull;
 
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_SET_HOLD_MD = 3;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_SINGLE_STEP_MD_SET = 0;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_ONE_SHOT_MD_SET = 1;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_ADJUST_MD_SET = 2;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_HOLD_MD_SET = 3;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_INIT_MD_SET = 4;
 // perv/reg00026.H
 
 static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS = 0x0001232cull;
@@ -243,12 +253,30 @@ static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_FSI = 0x00002815ull;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_FSI_BYTE = 0x00002854ull;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_RW = 0x00050015ull;
 
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_RESET_DC = 0;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_BYPASS_DC = 1;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_FORCE_BYPASS_CLKSEL_DC = 2;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_CLK_TEST_IN_DC = 3;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_CONTROL_DC = 4;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_CONTROL_DC_LEN = 28;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_TPFSI_RCS_RESET_DC = 0;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_TPFSI_RCS_BYPASS_DC = 1;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_TPFSI_RCS_FORCE_BYPASS_CLKSEL_DC = 2;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_TPFSI_RCS_CLK_TEST_IN_DC = 3;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SWO_FORCE_LOW = 4;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_BLOCK_SWO = 5;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_CLK_ERROR_A = 6;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_CLK_ERROR_B = 7;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_SEL_DEL = 8;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_DESKEW = 9;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_DESKEW_LEN = 3;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_FILT = 12;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_FILT_LEN = 4;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_PFD_PW_SEL = 16;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_FORCE_ERROR_HIGH = 17;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_TESTOUT_EN = 18;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_TESTOUT_SEL = 19;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_TESTOUT_SEL_LEN = 3;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_EN_OVERRIDE_A = 22;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_EN_OVERRIDE_B = 23;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_OVRBIT = 24;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_OVRBIT_LEN = 6;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_EN_REFCLK = 30;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL5_EN_ASYNC_OUT = 31;
 // perv/reg00026.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
@@ -439,7 +467,7 @@ static const uint32_t QMETRA0_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
 static const uint32_t QMETRA0_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
 // perv/reg00026.H
 
-static const uint64_t QMETRA0_TR1_CONFIG_9 = 0x00018429ull;
+static const uint64_t QMETRA0_TR1_CONFIG_9 = 0x00018449ull;
 
 static const uint32_t QMETRA0_TR1_CONFIG_9_DISABLE_COMPRESSION = 0;
 static const uint32_t QMETRA0_TR1_CONFIG_9_ERROR_BIT_COMPRESSION_CARE_MASK = 1;
@@ -678,7 +706,7 @@ static const uint32_t TOD_PSS_MSS_STATUS_REG_M_PATH_0_STEP_ALIGN_VALID_SWITCH = 
 static const uint32_t TOD_PSS_MSS_STATUS_REG_M_PATH_1_STEP_ALIGN_VALID_SWITCH = 29;
 static const uint32_t TOD_PSS_MSS_STATUS_REG_REG_0X08_SPARE_30 = 30;
 static const uint32_t TOD_PSS_MSS_STATUS_REG_M_PATH_SWITCH_TRIGGER = 31;
-// perv/reg00026.H
+// perv/reg00027.H
 
 static const uint64_t TOD_S_PATH_STATUS_REG = 0x0004000aull;
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -96,12 +96,12 @@ static const uint32_t USTL_USTLBADRESP_A_BAD_RESP_VAL = 0;
 static const uint32_t USTL_USTLBADRESP_A_BAD_RESP_IS_WRITE = 1;
 static const uint32_t USTL_USTLBADRESP_A_BAD_RESP_IS_GOOD = 2;
 static const uint32_t USTL_USTLBADRESP_A_BAD_RESP_TAG = 3;
-static const uint32_t USTL_USTLBADRESP_A_BAD_RESP_TAG_LEN = 6;
-static const uint32_t USTL_USTLBADRESP_B_BAD_RESP_VAL = 9;
-static const uint32_t USTL_USTLBADRESP_B_BAD_RESP_IS_WRITE = 10;
-static const uint32_t USTL_USTLBADRESP_B_BAD_RESP_IS_GOOD = 11;
-static const uint32_t USTL_USTLBADRESP_B_BAD_RESP_TAG = 12;
-static const uint32_t USTL_USTLBADRESP_B_BAD_RESP_TAG_LEN = 6;
+static const uint32_t USTL_USTLBADRESP_A_BAD_RESP_TAG_LEN = 7;
+static const uint32_t USTL_USTLBADRESP_B_BAD_RESP_VAL = 10;
+static const uint32_t USTL_USTLBADRESP_B_BAD_RESP_IS_WRITE = 11;
+static const uint32_t USTL_USTLBADRESP_B_BAD_RESP_IS_GOOD = 12;
+static const uint32_t USTL_USTLBADRESP_B_BAD_RESP_TAG = 13;
+static const uint32_t USTL_USTLBADRESP_B_BAD_RESP_TAG_LEN = 7;
 // mcc/reg00008.H
 
 static const uint64_t USTL_USTLERRPT = 0x0c010e16ull;

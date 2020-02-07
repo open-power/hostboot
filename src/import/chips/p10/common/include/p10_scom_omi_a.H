@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,7 +47,7 @@ static const uint32_t ERROR_CAPTURE_DL1_ERROR_CAPTURE_INFO = 1;
 static const uint32_t ERROR_CAPTURE_DL1_ERROR_CAPTURE_INFO_LEN = 63;
 // omi/reg00020.H
 
-static const uint64_t RXCTL_DATASM_11_PLREGS_RX_MODE1_PL = 0x8003d04410012c3full;
+static const uint64_t RXCTL_DATASM_11_PLREGS_RX_MODE1_PL = 0x8003d04310012c3full;
 
 static const uint32_t RXCTL_DATASM_11_PLREGS_RX_MODE1_PL_RECAL_REQ_DL_MASK = 48;
 static const uint32_t RXCTL_DATASM_11_PLREGS_RX_MODE1_PL_RECAL_DONE_DL_MASK = 49;
@@ -56,7 +56,7 @@ static const uint32_t RXCTL_DATASM_11_PLREGS_RX_MODE1_PL_RECAL_ABORT_DL_MASK = 5
 static const uint32_t RXCTL_DATASM_11_PLREGS_RX_MODE1_PL_INIT_DONE_DL_MASK = 52;
 // omi/reg00020.H
 
-static const uint64_t RXCTL_DATASM_13_PLREGS_RX_CNTL2_PL = 0x8003c84210012c3full;
+static const uint64_t RXCTL_DATASM_13_PLREGS_RX_CNTL2_PL = 0x8003c84510012c3full;
 
 static const uint32_t RXCTL_DATASM_13_PLREGS_RX_CNTL2_PL_PHY_DL_INIT_DONE_SET_WO_PULSE_SLOW_SIGNAL = 48;
 static const uint32_t RXCTL_DATASM_13_PLREGS_RX_CNTL2_PL_PHY_DL_INIT_DONE_CLR_WO_PULSE_SLOW_SIGNAL = 49;
@@ -93,7 +93,7 @@ static const uint32_t RXCTL_DATASM_7_PLREGS_RX_STAT1_PL_PSAVE_REQ_DL_RO_SIGNAL =
 static const uint32_t RXCTL_DATASM_7_PLREGS_RX_STAT1_PL_PSAVE_STS_PHY_RO_SIGNAL = 53;
 // omi/reg00020.H
 
-static const uint64_t RXCTL_DATASM_8_PLREGS_RX_MODE1_PL = 0x8003d04710012c3full;
+static const uint64_t RXCTL_DATASM_8_PLREGS_RX_MODE1_PL = 0x8003d04010012c3full;
 
 static const uint32_t RXCTL_DATASM_8_PLREGS_RX_MODE1_PL_RECAL_REQ_DL_MASK = 48;
 static const uint32_t RXCTL_DATASM_8_PLREGS_RX_MODE1_PL_RECAL_DONE_DL_MASK = 49;

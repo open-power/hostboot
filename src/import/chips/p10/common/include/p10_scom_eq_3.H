@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,10 +49,6 @@ static const uint32_t CLK_ADJ_00_DCADJ_WRAP_SET_MEAS_MODE_VEC_MEASURE_MODE_VECTO
 // eq/reg00003.H
 
 static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE = 0x20018324ull;
-
-static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_ET_SINGLE_STEP_MD_SET = 0;
-static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_TEP_COUNT = 1;
-static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_TEP_COUNT_LEN = 32;
 // eq/reg00003.H
 
 static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES = 0x2001433bull;
@@ -382,7 +378,7 @@ static const uint32_t QMETRA0_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t QMETRA0_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
 // eq/reg00003.H
 
-static const uint64_t QMETRA0_TR1_CONFIG_3 = 0x20018426ull;
+static const uint64_t QMETRA0_TR1_CONFIG_3 = 0x20018446ull;
 
 static const uint32_t QMETRA0_TR1_CONFIG_3_C = 0;
 static const uint32_t QMETRA0_TR1_CONFIG_3_C_LEN = 24;
@@ -413,25 +409,6 @@ static const uint32_t QME_PCBSID_EQ_LOCAL_ADDR = 16;
 static const uint32_t QME_PCBSID_EQ_LOCAL_ADDR_LEN = 16;
 // eq/reg00003.H
 
-static const uint64_t QME_RS4DBGS = 0x200e015cull;
-
-static const uint32_t QME_RS4DBGS_ACTUAL_BITS = 16;
-static const uint32_t QME_RS4DBGS_ACTUAL_BITS_LEN = 16;
-static const uint32_t QME_RS4DBGS_MACHINE_STATE = 32;
-static const uint32_t QME_RS4DBGS_MACHINE_STATE_LEN = 4;
-static const uint32_t QME_RS4DBGS_STATE_COUNT = 36;
-static const uint32_t QME_RS4DBGS_STATE_COUNT_LEN = 4;
-static const uint32_t QME_RS4DBGS_CURRENT_NIBBLE = 40;
-static const uint32_t QME_RS4DBGS_CURRENT_NIBBLE_LEN = 4;
-static const uint32_t QME_RS4DBGS_CARE_MASK = 44;
-static const uint32_t QME_RS4DBGS_CARE_MASK_LEN = 4;
-static const uint32_t QME_RS4DBGS_TERMINATE_COUNT = 48;
-static const uint32_t QME_RS4DBGS_TERMINATE_COUNT_LEN = 4;
-static const uint32_t QME_RS4DBGS_SCAN_MODE = 52;
-static const uint32_t QME_RS4DBGS_SCAN_COUNT = 58;
-static const uint32_t QME_RS4DBGS_SCAN_COUNT_LEN = 6;
-// eq/reg00003.H
-
 static const uint64_t QME_SCOM_XIVDR4 = 0x200e0288ull;
 
 static const uint32_t QME_SCOM_XIVDR4_4 = 0;
@@ -442,6 +419,8 @@ static const uint32_t QME_SCOM_XIVDR4_5_LEN = 32;
 
 static const uint64_t QME_SCOM_XIXCR = 0x200e0200ull;
 
+static const uint32_t QME_SCOM_XIXCR_XCR = 1;
+static const uint32_t QME_SCOM_XIXCR_XCR_LEN = 3;
 static const uint32_t QME_SCOM_XIXCR_CTR = 32;
 static const uint32_t QME_SCOM_XIXCR_CTR_LEN = 32;
 // eq/reg00003.H

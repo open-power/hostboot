@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -103,11 +103,6 @@ static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS = 0x200
 static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS_CORE_PDLYS_INVERT = 0;
 // eq/reg00015.H
 
-static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_SYNC_ENABLE = 0x20014330ull;
-
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_SYNC_ENABLE_CORE_SYNC_ENABLE_INVERT = 0;
-// eq/reg00015.H
-
 static const uint64_t CLK_ADJ_02_DCADJ_WRAP_AVERAGE_MEASUREMENT = 0x20012319ull;
 
 static const uint32_t CLK_ADJ_02_DCADJ_WRAP_AVERAGE_MEASUREMENT_MEASURE_HIST_VAL1 = 0;
@@ -130,8 +125,6 @@ static const uint32_t CLK_ADJ_02_DCADJ_WRAP_DCC_OVERRIDE_VALUE_LEN = 8;
 // eq/reg00015.H
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_INIT_MODE = 0x20011320ull;
-
-static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_INIT_MODE_SET_INIT_MD = 4;
 // eq/reg00015.H
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_SWAP_CACHE_INC_DEC = 0x2001132full;
@@ -281,15 +274,15 @@ static const uint32_t PROTECT_MODE_REG_READ_PROTECT_ENABLE = 0;
 static const uint32_t PROTECT_MODE_REG_WRITE_PROTECT_ENABLE = 1;
 // eq/reg00015.H
 
-static const uint64_t QMETRA0_TR1_CONFIG_1 = 0x20018424ull;
+static const uint64_t QMETRA0_TR1_CONFIG_1 = 0x20018444ull;
 
 static const uint32_t QMETRA0_TR1_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t QMETRA0_TR1_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
 // eq/reg00015.H
 
 static const uint64_t QME_PBCR = 0x200e0044ull;
-static const uint64_t QME_PBCR_SCOM1 = 0x200e0047ull;
 static const uint64_t QME_PBCR_SCOM2 = 0x200e0046ull;
+static const uint64_t QME_PBCR_WO_CLEAR = 0x200e0047ull;
 
 static const uint32_t QME_PBCR_DISABLE_LN_RD = 0;
 static const uint32_t QME_PBCR_DISABLE_NN_RN_RD = 1;

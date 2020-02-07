@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,14 +39,15 @@ namespace perv
 #endif
 
 
-static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE = 0x00018331ull;
-
-static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE_CACHE_SYNC_ENABLE_INVERT = 0;
-// perv/reg00028.H
-
 static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS = 0x0001832cull;
 
 static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS_CORE_PDLYS_INVERT = 0;
+// perv/reg00028.H
+
+static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CORE_SYNC_ENABLE = 0x00018330ull;
+
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CORE_SYNC_ENABLE_ENABLE_OVERRIDE = 0;
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CORE_SYNC_ENABLE_VALUE_OVERRIDE = 1;
 // perv/reg00028.H
 
 static const uint64_t CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY = 0x00014316ull;
@@ -92,7 +93,11 @@ static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_MEASURE_ONLY_MODE_SET_MEASURE_ON
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE = 0x00011321ull;
 
-static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_SET_HOLD_MD = 3;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_SINGLE_STEP_MD_SET = 0;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_ONE_SHOT_MD_SET = 1;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_ADJUST_MD_SET = 2;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_HOLD_MD_SET = 3;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_INIT_MD_SET = 4;
 // perv/reg00028.H
 
 static const uint64_t EPS_DBG_TRACE_REG_1 = 0x000107ceull;
@@ -263,8 +268,9 @@ static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_3_6_RESERVED_LE
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_SCIN_DC = 7;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_8_RESERVED = 8;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_FLUSH_ALIGN_OVERWRITE = 9;
-static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_10_13_RESERVED = 10;
-static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_10_13_RESERVED_LEN = 4;
+static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_10_12_RESERVED = 10;
+static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_PERV_CTRL0_10_12_RESERVED_LEN = 3;
+static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_SBE_CG_DIS = 13;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_CG_DIS = 14;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_TCPERV_VITL_FFDLYLCK_DC = 15;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_TP_VITL_CLKOFF_DC = 16;
@@ -547,7 +553,7 @@ static const uint32_t OTPC_M_MODE_REGISTER_ECC_ENABLE = 1;
 static const uint32_t OTPC_M_MODE_REGISTER_ECC_CHK_DISABLE = 3;
 // perv/reg00028.H
 
-static const uint64_t QMETRA0_TR1_TRACE_LO_DATA_REG = 0x00018421ull;
+static const uint64_t QMETRA0_TR1_TRACE_LO_DATA_REG = 0x00018441ull;
 
 static const uint32_t QMETRA0_TR1_TRACE_LO_DATA_REG_LO_DATA = 0;
 static const uint32_t QMETRA0_TR1_TRACE_LO_DATA_REG_LO_DATA_LEN = 32;
@@ -562,7 +568,7 @@ static const uint32_t QMETRA0_TR1_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t QMETRA0_TR1_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
 // perv/reg00028.H
 
-static const uint64_t QMETRA0_TR1_CONFIG = 0x00018422ull;
+static const uint64_t QMETRA0_TR1_CONFIG = 0x00018442ull;
 
 static const uint32_t QMETRA0_TR1_CONFIG_STORE_ON_TRIG_MODE = 0;
 static const uint32_t QMETRA0_TR1_CONFIG_WRITE_ON_RUN_MODE = 1;

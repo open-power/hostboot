@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -94,11 +94,6 @@ static const uint64_t EC_PC_COMMON_SPR_HMEER = 0x20020496ull;
 
 static const uint32_t EC_PC_COMMON_SPR_HMEER_ENABLE = 0;
 static const uint32_t EC_PC_COMMON_SPR_HMEER_ENABLE_LEN = 24;
-// c/reg00000.H
-
-static const uint64_t EC_PC_PMU_SPRCOR_INV_ERATE = 0x2002040full;
-
-static const uint32_t EC_PC_PMU_SPRCOR_INV_ERATE_INVALIDATE_ERAT = 63;
 // c/reg00000.H
 
 static const uint64_t EC_PC_TRACE1_TR0_CONFIG_5 = 0x20020a48ull;

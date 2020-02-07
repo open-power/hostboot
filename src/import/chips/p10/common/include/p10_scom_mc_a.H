@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -252,7 +252,7 @@ static const uint64_t SCOMFIR_MCMODE1 = 0x0c010c12ull;
 
 static const uint32_t SCOMFIR_MCMODE1_DISABLE_HIGH_PRIORITY = 0;
 static const uint32_t SCOMFIR_MCMODE1_DISABLE_HIGH_PRIORITY_LEN = 8;
-static const uint32_t SCOMFIR_MCMODE1_RESERVED_8 = 8;
+static const uint32_t SCOMFIR_MCMODE1_EN_BLOCK_PF_RD_IN_FLIGHT = 8;
 static const uint32_t SCOMFIR_MCMODE1_EN_EPF_CL_LIMIT = 9;
 static const uint32_t SCOMFIR_MCMODE1_RESERVED_10 = 10;
 static const uint32_t SCOMFIR_MCMODE1_DISABLE_CRC_ECC_BYPASS = 11;

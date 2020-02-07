@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -218,7 +218,7 @@ static const uint32_t TRA1_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT = 22;
 static const uint32_t TRA1_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
 // pauc/reg00006.H
 
-static const uint64_t TXIRLM_REGS_TX_IMPCAL_SWO6_PB = 0x800f5c0010012c3full;
+static const uint64_t TXIRLM_REGS_TX_IMPCAL_SWO6_PB = 0x800f5dc010012c3full;
 
 static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO6_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XP_0_15 = 48;
 static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO6_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XP_0_15_LEN = 16;

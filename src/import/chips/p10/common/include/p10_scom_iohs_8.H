@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -297,13 +297,13 @@ static const uint32_t IOO_RX0_RXCTL_DATASM_REGS_RX_STAT9_PG_N_16_23_RO_SIGNAL = 
 static const uint32_t IOO_RX0_RXCTL_DATASM_REGS_RX_STAT9_PG_N_16_23_RO_SIGNAL_LEN = 8;
 // iohs/reg00034.H
 
-static const uint64_t IOO_RX0_RXCTL_DATASM_12_PLREGS_RX_CNTL3_PL = 0x8003d80e10012c3full;
+static const uint64_t IOO_RX0_RXCTL_DATASM_12_PLREGS_RX_CNTL3_PL = 0x8003d80c10012c3full;
 
 static const uint32_t IOO_RX0_RXCTL_DATASM_12_PLREGS_RX_CNTL3_PL_REQ_ALT = 48;
 static const uint32_t IOO_RX0_RXCTL_DATASM_12_PLREGS_RX_CNTL3_PL_STS_ALT = 49;
 // iohs/reg00034.H
 
-static const uint64_t IOO_RX0_RXCTL_DATASM_14_PLREGS_RX_MODE1_PL = 0x8003d00c10012c3full;
+static const uint64_t IOO_RX0_RXCTL_DATASM_14_PLREGS_RX_MODE1_PL = 0x8003d00e10012c3full;
 
 static const uint32_t IOO_RX0_RXCTL_DATASM_14_PLREGS_RX_MODE1_PL_RECAL_REQ_DL_MASK = 48;
 static const uint32_t IOO_RX0_RXCTL_DATASM_14_PLREGS_RX_MODE1_PL_RECAL_DONE_DL_MASK = 49;
@@ -312,7 +312,7 @@ static const uint32_t IOO_RX0_RXCTL_DATASM_14_PLREGS_RX_MODE1_PL_RECAL_ABORT_DL_
 static const uint32_t IOO_RX0_RXCTL_DATASM_14_PLREGS_RX_MODE1_PL_INIT_DONE_DL_MASK = 52;
 // iohs/reg00034.H
 
-static const uint64_t IOO_RX0_RXCTL_DATASM_16_PLREGS_RX_CNTL2_PL = 0x8003c80a10012c3full;
+static const uint64_t IOO_RX0_RXCTL_DATASM_16_PLREGS_RX_CNTL2_PL = 0x8003c81010012c3full;
 
 static const uint32_t IOO_RX0_RXCTL_DATASM_16_PLREGS_RX_CNTL2_PL_PHY_DL_INIT_DONE_SET_WO_PULSE_SLOW_SIGNAL = 48;
 static const uint32_t IOO_RX0_RXCTL_DATASM_16_PLREGS_RX_CNTL2_PL_PHY_DL_INIT_DONE_CLR_WO_PULSE_SLOW_SIGNAL = 49;

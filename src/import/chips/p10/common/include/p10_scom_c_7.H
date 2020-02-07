@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,9 +45,10 @@ static const uint32_t CPMS_CERRMSK_PFET_SEQ_ERR_MASK = 0;
 static const uint32_t CPMS_CERRMSK_DDS_ERR_MASK = 1;
 static const uint32_t CPMS_CERRMSK_CLK_SYNC_ERR_MASK = 2;
 static const uint32_t CPMS_CERRMSK_DPT_ACCESS_MASK = 3;
-static const uint32_t CPMS_CERRMSK_SPARE_MASK = 4;
+static const uint32_t CPMS_CERRMSK_PROXY_MASK = 4;
 static const uint32_t CPMS_CERRMSK_FTC_EVENT_MASK = 5;
 static const uint32_t CPMS_CERRMSK_FTC_EVENT_MASK_LEN = 3;
+static const uint32_t CPMS_CERRMSK_PITCH_MASK = 8;
 // c/reg00007.H
 
 static const uint64_t EC_LS_LSU_HOLD_OUT_REG0 = 0x200206c0ull;
@@ -275,8 +276,8 @@ static const uint32_t QME_PSCRS3_PLS_LEN = 4;
 // c/reg00007.H
 
 static const uint64_t QME_SCSR = 0x200e0840ull;
-static const uint64_t QME_SCSR_SCOM1 = 0x200e0843ull;
 static const uint64_t QME_SCSR_SCOM2 = 0x200e0842ull;
+static const uint64_t QME_SCSR_WO_CLEAR = 0x200e0843ull;
 
 static const uint32_t QME_SCSR_ASSERT_PM_BLOCK_INTR = 0;
 static const uint32_t QME_SCSR_ASSERT_PM_EXIT = 1;
@@ -296,7 +297,7 @@ static const uint32_t QME_SCSR_SPARE_MODE = 14;
 static const uint32_t QME_SCSR_SRESET_REQ = 15;
 static const uint32_t QME_SCSR_ASSERT_SPECIAL_WKUP_DONE = 16;
 static const uint32_t QME_SCSR_SPARE_OUT = 17;
-static const uint32_t QME_SCSR_SPARE18 = 18;
+static const uint32_t QME_SCSR_CORE_INTR_SAMPLE = 18;
 static const uint32_t QME_SCSR_IGNORE_PMCR_RECENT = 19;
 static const uint32_t QME_SCSR_AUTO_SPECIAL_WAKEUP_DISABLE = 20;
 static const uint32_t QME_SCSR_HALTED_STOP_OVERRIDE_DISABLE = 21;
@@ -333,8 +334,8 @@ static const uint32_t QME_SCSR_PM_STATE_LEN = 4;
 // c/reg00007.H
 
 static const uint64_t QME_TFCSR = 0x200e0880ull;
-static const uint64_t QME_TFCSR_SCOM1 = 0x200e0883ull;
 static const uint64_t QME_TFCSR_SCOM2 = 0x200e0882ull;
+static const uint64_t QME_TFCSR_WO_CLEAR = 0x200e0883ull;
 
 static const uint32_t QME_TFCSR_XFER_START = 0;
 static const uint32_t QME_TFCSR_TFAC_RESET = 1;

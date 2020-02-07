@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,7 +71,11 @@ static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CACHE_OVERRIDE_VALUE_LEN = 4;
 
 static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE = 0x20018322ull;
 
-static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE_SET_ADJUST_MD = 2;
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE_SINGLE_STEP_MD_SET = 0;
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE_ONE_SHOT_MD_SET = 1;
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE_ADJUST_MD_SET = 2;
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE_HOLD_MD_SET = 3;
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE_INIT_MD_SET = 4;
 // eq/reg00001.H
 
 static const uint64_t CLK_ADJ_01_DCADJ_WRAP_SET_MEASURE_ONLY_MODE = 0x20014311ull;
@@ -312,7 +316,7 @@ static const uint64_t QME_LFIRMASK_WO_AND = 0x200e0005ull;
 static const uint64_t QME_LFIRMASK_WO_OR = 0x200e0006ull;
 
 static const uint32_t QME_LFIRMASK_FIR_MASK = 0;
-static const uint32_t QME_LFIRMASK_FIR_MASK_LEN = 34;
+static const uint32_t QME_LFIRMASK_FIR_MASK_LEN = 36;
 // eq/reg00001.H
 
 static const uint64_t QME_SCDR = 0x200e0144ull;

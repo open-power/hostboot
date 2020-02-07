@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -255,8 +255,10 @@ static const uint32_t PB_MISC_CFG_TRANSPORT_3_OB_MUX_CTL3 = 35;
 static const uint32_t PB_MISC_CFG_SCOM_PTLX_EMULATION_MODE = 36;
 static const uint32_t PB_MISC_CFG_SCOM_PTLY_EMULATION_MODE = 37;
 static const uint32_t PB_MISC_CFG_TRANSPORT_PRI_BUS_CTL = 38;
-static const uint32_t PB_MISC_CFG_MISC_SPARE = 39;
-static const uint32_t PB_MISC_CFG_MISC_SPARE_LEN = 13;
+static const uint32_t PB_MISC_CFG_ENABLE_DEGRADED_MODE = 39;
+static const uint32_t PB_MISC_CFG_HW517132_DISABLE = 40;
+static const uint32_t PB_MISC_CFG_MISC_SPARE = 41;
+static const uint32_t PB_MISC_CFG_MISC_SPARE_LEN = 11;
 // pauc/reg00009.H
 
 static const uint64_t PB_PERFTRACE_CFG_REG = 0x1001182bull;

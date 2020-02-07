@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -634,7 +634,7 @@ static const uint32_t PB_COM_SCOM_EQ5_STATION_FIR_REG_PB_CMD_SNOOPER_ERROR = 11;
 static const uint32_t PB_COM_SCOM_EQ5_STATION_FIR_REG_DATA_OVERFLOW_ERROR = 12;
 static const uint32_t PB_COM_SCOM_EQ5_STATION_FIR_REG_DATA_PROTOCOL_ERROR = 13;
 static const uint32_t PB_COM_SCOM_EQ5_STATION_FIR_REG_DATA_ROUTE_ERROR = 14;
-static const uint32_t PB_COM_SCOM_EQ5_STATION_FIR_REG_FIR_SPARE_15 = 15;
+static const uint32_t PB_COM_SCOM_EQ5_STATION_FIR_REG_FIR_COMPAB_TRIGGER = 15;
 static const uint32_t PB_COM_SCOM_EQ5_STATION_FIR_REG_LINK0_PROTOCOL_ERROR = 16;
 static const uint32_t PB_COM_SCOM_EQ5_STATION_FIR_REG_LINK0_OVERFLOW_ERROR = 17;
 static const uint32_t PB_COM_SCOM_EQ5_STATION_FIR_REG_LINK0_HW_PARITY_ERROR = 18;
@@ -1028,8 +1028,10 @@ static const uint32_t PB_PTLSCOM10_MISC_CFG_TRANSPORT_3_OB_MUX_CTL3 = 35;
 static const uint32_t PB_PTLSCOM10_MISC_CFG_SCOM_PTLX_EMULATION_MODE = 36;
 static const uint32_t PB_PTLSCOM10_MISC_CFG_SCOM_PTLY_EMULATION_MODE = 37;
 static const uint32_t PB_PTLSCOM10_MISC_CFG_TRANSPORT_PRI_BUS_CTL = 38;
-static const uint32_t PB_PTLSCOM10_MISC_CFG_MISC_SPARE = 39;
-static const uint32_t PB_PTLSCOM10_MISC_CFG_MISC_SPARE_LEN = 13;
+static const uint32_t PB_PTLSCOM10_MISC_CFG_ENABLE_DEGRADED_MODE = 39;
+static const uint32_t PB_PTLSCOM10_MISC_CFG_HW517132_DISABLE = 40;
+static const uint32_t PB_PTLSCOM10_MISC_CFG_MISC_SPARE = 41;
+static const uint32_t PB_PTLSCOM10_MISC_CFG_MISC_SPARE_LEN = 11;
 // proc/reg00070.H
 
 static const uint64_t PB_PTLSCOM10_PMU3_TLPM_COUNTER = 0x1001181eull;

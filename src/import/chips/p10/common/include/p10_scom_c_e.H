@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,8 +60,8 @@ static const uint32_t CPMS_ASSR_CPMS_L3_PFETSTAT_VCS_PFETS_ENABLED_SENSE = 12;
 static const uint32_t CPMS_ASSR_CPMS_L3_PFETSTAT_VCS_PFETS_DISABLED_SENSE = 13;
 static const uint32_t CPMS_ASSR_CPMS_CL2_PFETSTAT_VCS_PFETS_ENABLED_SENSE = 14;
 static const uint32_t CPMS_ASSR_CPMS_CL2_PFETSTAT_VCS_PFETS_DISABLED_SENSE = 15;
-static const uint32_t CPMS_ASSR_CPMS_CGCSR_L3_CLKGLM_SEL = 16;
-static const uint32_t CPMS_ASSR_CPMS_CGCSR_CL2_CLKGLM_SEL = 17;
+static const uint32_t CPMS_ASSR_L3_CLKGLM_SEL = 16;
+static const uint32_t CPMS_ASSR_L2_CLKGLM_SEL = 17;
 static const uint32_t CPMS_ASSR_CPMS_CGCSR_L3_CLK_SYNC_DONE = 18;
 static const uint32_t CPMS_ASSR_CPMS_CGCSR_CL2_CLK_SYNC_DONE = 19;
 static const uint32_t CPMS_ASSR_CL2_VDD_CURRENT_AVG = 27;
@@ -328,7 +328,8 @@ static const uint32_t L3_MISC_L3CERRS_FIR_MASK_REG_PB_MAST_RD_ACK_DEAD_MASK = 32
 
 static const uint64_t L3_MISC_L3CERRS_PM_LCO_DIS_REG = 0x20010616ull;
 
-static const uint32_t L3_MISC_L3CERRS_PM_LCO_DIS_REG_L3_PM_LCO_DIS_CFG = 0;
+static const uint32_t L3_MISC_L3CERRS_PM_LCO_DIS_REG_LCO_DIS_CFG = 0;
+static const uint32_t L3_MISC_L3CERRS_PM_LCO_DIS_REG_RCMD_DIS_CFG = 1;
 // c/reg00014.H
 
 static const uint64_t QME_CISR = 0x200e0878ull;

@@ -332,8 +332,8 @@ fapi2::ReturnCode p10_pm_occ_control
             break;
 
         case occ_ctrl::PPC405_HALT_OFF:
-            FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_WO_CLEAR(i_target,
-                     BIT64(TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_DBG_HALT)));
+            FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_WO_AND(i_target,
+                     ~BIT64(TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_DBG_HALT)));
             break;
 
         case occ_ctrl::PPC405_HALT_ON:
@@ -396,8 +396,8 @@ fapi2::ReturnCode p10_pm_occ_control
             // Put 405 into reset, unhalt 405 and clear the halted FIR bit.
             FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_OCB_PIB_OCR_WO_OR(i_target,
                      BIT64(TP_TPCHIP_OCC_OCI_OCB_PIB_OCR_CORE_RESET)));
-            FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_WO_CLEAR(i_target,
-                     BIT64(TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_DBG_HALT)));
+            FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_WO_AND(i_target,
+                     ~BIT64(TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_DBG_HALT)));
             FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_SCOM_OCCLFIR_WO_AND(i_target,
                      ~BIT64(TP_TPCHIP_OCC_OCI_SCOM_OCCLFIR_PPC405_DBGSTOPACK)));
 
@@ -409,8 +409,8 @@ fapi2::ReturnCode p10_pm_occ_control
 
             FAPI_INF("Starting the PPC405");
             // Clear the halt bit
-            FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_WO_CLEAR(i_target,
-                     BIT64(TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_DBG_HALT)));
+            FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_WO_AND(i_target,
+                     ~BIT64(TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_DBG_HALT)));
 
             // Set the reset bit
             FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_OCB_PIB_OCR_WO_OR(i_target,

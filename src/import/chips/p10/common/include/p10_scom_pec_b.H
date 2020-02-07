@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -257,8 +257,14 @@ static const uint32_t PB_PBCQ_PEPBREGS_NSTQSTKOVR_REG_ENABLE = 24;
 
 static const uint64_t PIPEDINCTL3 = 0x0801151cull;
 
-static const uint32_t PIPEDINCTL3_RESERVED_63_0 = 0;
-static const uint32_t PIPEDINCTL3_RESERVED_63_0_LEN = 64;
+static const uint32_t PIPEDINCTL3_PHY1_HANDSHAKE_RESULT = 0;
+static const uint32_t PIPEDINCTL3_PHY0_HANDSHAKE_RESULT = 1;
+static const uint32_t PIPEDINCTL3_RESERVED_61_4 = 2;
+static const uint32_t PIPEDINCTL3_RESERVED_61_4_LEN = 58;
+static const uint32_t PIPEDINCTL3_PHY1_DTB = 60;
+static const uint32_t PIPEDINCTL3_PHY1_DTB_LEN = 2;
+static const uint32_t PIPEDINCTL3_PHY0_DTB = 62;
+static const uint32_t PIPEDINCTL3_PHY0_DTB_LEN = 2;
 // pec/reg00011.H
 
 static const uint64_t PIPEDOUTCTL0 = 0x08011514ull;
@@ -273,8 +279,11 @@ static const uint32_t PIPEDOUTCTL0_PHY0_REFB_LANE_CLK_EN = 9;
 static const uint32_t PIPEDOUTCTL0_PHY0_REFB_CLKDET_EN = 10;
 static const uint32_t PIPEDOUTCTL0_PHY0_REFA_LANE_CLK_EN = 11;
 static const uint32_t PIPEDOUTCTL0_PHY0_REFA_CLKDET_EN = 12;
-static const uint32_t PIPEDOUTCTL0_RESERVED_50_0 = 13;
-static const uint32_t PIPEDOUTCTL0_RESERVED_50_0_LEN = 51;
+static const uint32_t PIPEDOUTCTL0_RESERVED_50_42 = 13;
+static const uint32_t PIPEDOUTCTL0_RESERVED_50_42_LEN = 9;
+static const uint32_t PIPEDOUTCTL0_PHY_RTUNE_REQ = 22;
+static const uint32_t PIPEDOUTCTL0_RESERVED_40_0 = 23;
+static const uint32_t PIPEDOUTCTL0_RESERVED_40_0_LEN = 41;
 // pec/reg00011.H
 
 static const uint64_t RECOV = 0x08040001ull;

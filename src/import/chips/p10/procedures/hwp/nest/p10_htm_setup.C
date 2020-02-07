@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -742,7 +742,7 @@ fapi2::ReturnCode setup_HTM_MODE(
 
     // Enable HTM
     FAPI_TRY(PREP_PB_BRIDGE_NHTM_SC_HTM_MODE(i_target));
-    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_HTM_ENABLE(l_HTM_mode_data);
+    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_TMSC_MODE_HTM_ENABLE(l_HTM_mode_data);
 
     // ATTR_NHTM_HTMSC_MODE_CONTENT_SEL
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NHTM_HTMSC_MODE_CONTENT_SEL, i_target,
@@ -750,7 +750,7 @@ fapi2::ReturnCode setup_HTM_MODE(
              "setup_HTM_MODE: Error getting ATTR_NHTM_HTMSC_MODE_CONTENT_SEL, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_NHTM_HTMSC_MODE_CONTENT_SEL      0x%.8X", l_uint8_attr);
-    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_CONTENT_SEL(l_uint8_attr, l_HTM_mode_data);
+    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_TMSC_MODE_CONTENT_SEL(l_uint8_attr, l_HTM_mode_data);
 
     // ATTR_NHTM_HTMSC_MODE_CAPTURE
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NHTM_HTMSC_MODE_CAPTURE,
@@ -759,7 +759,7 @@ fapi2::ReturnCode setup_HTM_MODE(
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_NHTM_HTMSC_MODE_CAPTURE_GENERATED_WRITES 0x%.8X", l_uint16_attr);
 
-    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_CAPTURE(l_uint16_attr, l_HTM_mode_data);
+    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_TMSC_MODE_CAPTURE(l_uint16_attr, l_HTM_mode_data);
 
     // ATTR_HTMSC_MODE_WRAP
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MODE_WRAP, i_target,
@@ -768,8 +768,8 @@ fapi2::ReturnCode setup_HTM_MODE(
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_MODE_WRAP                  0x%.8X", l_uint8_attr);
     (l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_WRAP_DISABLE) ?
-    CLEAR_PB_BRIDGE_NHTM_SC_HTM_MODE_WRAP(l_HTM_mode_data) :
-    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_WRAP(l_HTM_mode_data);
+    CLEAR_PB_BRIDGE_NHTM_SC_HTM_MODE_TMSC_MODE_WRAP(l_HTM_mode_data) :
+    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_TMSC_MODE_WRAP(l_HTM_mode_data);
 
     // ATTR_HTMSC_MODE_DIS_TSTAMP
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MODE_DIS_TSTAMP, i_target,
@@ -778,8 +778,8 @@ fapi2::ReturnCode setup_HTM_MODE(
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_MODE_DIS_TSTAMP            0x%.8X", l_uint8_attr);
     (l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_DIS_TSTAMP_DISABLE) ?
-    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_DIS_TSTAMP(l_HTM_mode_data) :
-    CLEAR_PB_BRIDGE_NHTM_SC_HTM_MODE_DIS_TSTAMP(l_HTM_mode_data);
+    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_TMSC_MODE_DIS_TSTAMP(l_HTM_mode_data) :
+    CLEAR_PB_BRIDGE_NHTM_SC_HTM_MODE_TMSC_MODE_DIS_TSTAMP(l_HTM_mode_data);
 
     // ATTR_HTMSC_MODE_SINGLE_TSTAMP
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MODE_SINGLE_TSTAMP, i_target,
@@ -788,8 +788,8 @@ fapi2::ReturnCode setup_HTM_MODE(
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_MODE_SINGLE_TSTAMP         0x%.8X", l_uint8_attr);
     (l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_SINGLE_TSTAMP_DISABLE) ?
-    CLEAR_PB_BRIDGE_NHTM_SC_HTM_MODE_SINGLE_TSTAMP(l_HTM_mode_data) :
-    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_SINGLE_TSTAMP(l_HTM_mode_data);
+    CLEAR_PB_BRIDGE_NHTM_SC_HTM_MODE_TMSC_MODE_SINGLE_TSTAMP(l_HTM_mode_data) :
+    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_TMSC_MODE_SINGLE_TSTAMP(l_HTM_mode_data);
 
     // ATTR_HTMSC_MODE_MARKERS_ONLY
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MODE_MARKERS_ONLY, i_target,
@@ -798,8 +798,8 @@ fapi2::ReturnCode setup_HTM_MODE(
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_MODE_MARKERS_ONLY          0x%.8X", l_uint8_attr);
     (l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_MARKERS_ONLY_DISABLE) ?
-    CLEAR_PB_BRIDGE_NHTM_SC_HTM_MODE_MARKERS_ONLY(l_HTM_mode_data) :
-    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_MARKERS_ONLY(l_HTM_mode_data);
+    CLEAR_PB_BRIDGE_NHTM_SC_HTM_MODE_TMSC_MODE_MARKERS_ONLY(l_HTM_mode_data) :
+    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_TMSC_MODE_MARKERS_ONLY(l_HTM_mode_data);
 
     // ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE,
@@ -808,8 +808,8 @@ fapi2::ReturnCode setup_HTM_MODE(
              "l_rc 0x%.8X",  (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE 0x%.8X", l_uint8_attr);
     (l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE_DISABLE) ?
-    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_DIS_FORCE_GROUP_SCOPE(l_HTM_mode_data) :
-    CLEAR_PB_BRIDGE_NHTM_SC_HTM_MODE_DIS_FORCE_GROUP_SCOPE(l_HTM_mode_data);
+    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_TMSC_MODE_DIS_FORCE_GROUP_SCOPE(l_HTM_mode_data) :
+    CLEAR_PB_BRIDGE_NHTM_SC_HTM_MODE_TMSC_MODE_DIS_FORCE_GROUP_SCOPE(l_HTM_mode_data);
 
     // ATTR_NHTM_HTMSC_MODE_SYNC_STAMP_FORCE
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NHTM_HTMSC_MODE_SYNC_STAMP_FORCE, i_target,
@@ -817,7 +817,7 @@ fapi2::ReturnCode setup_HTM_MODE(
              "setup_HTM_MODE: Error getting ATTR_NHTM_HTMSC_MODE_SYNC_STAMP_FORCE, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_NHTM_HTMSC_MODE_SYNC_STAMP_FORCE 0x%.8X", l_uint8_attr);
-    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_SYNC_STAMP_FORCE(l_uint8_attr, l_HTM_mode_data);
+    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_TMSC_MODE_SYNC_STAMP_FORCE(l_uint8_attr, l_HTM_mode_data);
 
     // ATTR_NHTM_HTMSC_MODE_WRITETOIO
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NHTM_HTMSC_MODE_WRITETOIO,
@@ -826,8 +826,8 @@ fapi2::ReturnCode setup_HTM_MODE(
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_NHTM_HTMSC_MODE_WRITETOIO        0x%.8X", l_uint8_attr);
     (l_uint8_attr == fapi2::ENUM_ATTR_NHTM_HTMSC_MODE_WRITETOIO_DISABLE) ?
-    CLEAR_PB_BRIDGE_NHTM_SC_HTM_MODE_WRITETOIO(l_HTM_mode_data) :
-    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_WRITETOIO(l_HTM_mode_data);
+    CLEAR_PB_BRIDGE_NHTM_SC_HTM_MODE_TMSC_MODE_WRITETOIO(l_HTM_mode_data) :
+    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_TMSC_MODE_WRITETOIO(l_HTM_mode_data);
 
     // ATTR_HTMSC_MODE_VGTARGET
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MODE_VGTARGET, i_target,
@@ -835,7 +835,7 @@ fapi2::ReturnCode setup_HTM_MODE(
              "setup_HTM_MODE: Error getting ATTR_HTMSC_MODE_VGTARGET, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
     FAPI_DBG("  ATTR_HTMSC_MODE_VGTARGET              0x%.8X", l_uint32_attr);
-    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_VGTARGET(~l_uint32_attr, l_HTM_mode_data);
+    SET_PB_BRIDGE_NHTM_SC_HTM_MODE_TMSC_MODE_VGTARGET(~l_uint32_attr, l_HTM_mode_data);
 
     // Display HTM_MODE reg setup value
     FAPI_INF("setup_HTM_MODE: HTM_MODE reg setup: 0x%016llX", l_HTM_mode_data);

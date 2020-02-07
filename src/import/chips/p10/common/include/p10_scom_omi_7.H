@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,10 +41,12 @@ namespace omi
 
 static const uint64_t CYA_BITS = 0x0c01141full;
 
-static const uint32_t CYA_BITS_BITS0_RSVD0 = 0;
-static const uint32_t CYA_BITS_BITS0_RSVD0_LEN = 23;
-static const uint32_t CYA_BITS_BITS1_RSVD0 = 0;
-static const uint32_t CYA_BITS_BITS1_RSVD0_LEN = 23;
+static const uint32_t CYA_BITS_PRBS15_NPRBS7_0 = 0;
+static const uint32_t CYA_BITS_PRBS15_NPRBS7_1 = 0;
+static const uint32_t CYA_BITS_BITS0_RSVD0 = 1;
+static const uint32_t CYA_BITS_BITS0_RSVD0_LEN = 22;
+static const uint32_t CYA_BITS_BITS1_RSVD0 = 1;
+static const uint32_t CYA_BITS_BITS1_RSVD0_LEN = 22;
 static const uint32_t CYA_BITS_RX_PN_SWAP_OVERRIDE_SELECT0 = 23;
 static const uint32_t CYA_BITS_RX_PN_SWAP_OVERRIDE_SELECT1 = 23;
 static const uint32_t CYA_BITS_RX_PN_SWAP_OVERRIDE0 = 24;
@@ -52,12 +54,16 @@ static const uint32_t CYA_BITS_RX_PN_SWAP_OVERRIDE0_LEN = 8;
 static const uint32_t CYA_BITS_RX_PN_SWAP_OVERRIDE1 = 24;
 static const uint32_t CYA_BITS_RX_PN_SWAP_OVERRIDE1_LEN = 8;
 static const uint32_t CYA_BITS_BITS0_RSVD1 = 32;
-static const uint32_t CYA_BITS_BITS0_RSVD1_LEN = 15;
+static const uint32_t CYA_BITS_BITS0_RSVD1_LEN = 12;
 static const uint32_t CYA_BITS_BITS1_RSVD1 = 32;
-static const uint32_t CYA_BITS_BITS1_RSVD1_LEN = 15;
+static const uint32_t CYA_BITS_BITS1_RSVD1_LEN = 12;
+static const uint32_t CYA_BITS_TX_PSAVE_DELAY_TIMER0 = 44;
+static const uint32_t CYA_BITS_TX_PSAVE_DELAY_TIMER0_LEN = 3;
+static const uint32_t CYA_BITS_TX_PSAVE_DELAY_TIMER1 = 44;
+static const uint32_t CYA_BITS_TX_PSAVE_DELAY_TIMER1_LEN = 3;
 static const uint32_t CYA_BITS_FAST_RETRAIN_DISABLE0 = 47;
 static const uint32_t CYA_BITS_FAST_RETRAIN_DISABLE1 = 47;
-static const uint32_t CYA_BITS_BITS0_RSVD2 = 48;
+static const uint32_t CYA_BITS_FLT_TRUNC_FIX = 48;
 static const uint32_t CYA_BITS_BITS1_RSVD2 = 48;
 static const uint32_t CYA_BITS_KILL_CRC_REPLAY0 = 49;
 static const uint32_t CYA_BITS_KILL_CRC_REPLAY1 = 49;
@@ -160,13 +166,13 @@ static const uint32_t RXCTL_DATASM_0_PLREGS_RX_CNTL3_PL_REQ_ALT = 48;
 static const uint32_t RXCTL_DATASM_0_PLREGS_RX_CNTL3_PL_STS_ALT = 49;
 // omi/reg00014.H
 
-static const uint64_t RXCTL_DATASM_10_PLREGS_RX_CNTL1_PL = 0x8003c04510012c3full;
+static const uint64_t RXCTL_DATASM_10_PLREGS_RX_CNTL1_PL = 0x8003c04210012c3full;
 
 static const uint32_t RXCTL_DATASM_10_PLREGS_RX_CNTL1_PL_INIT_DONE = 48;
 static const uint32_t RXCTL_DATASM_10_PLREGS_RX_CNTL1_PL_RECAL_DONE = 49;
 // omi/reg00014.H
 
-static const uint64_t RXCTL_DATASM_10_PLREGS_RX_STAT1_PL = 0x8003e04510012c3full;
+static const uint64_t RXCTL_DATASM_10_PLREGS_RX_STAT1_PL = 0x8003e04210012c3full;
 
 static const uint32_t RXCTL_DATASM_10_PLREGS_RX_STAT1_PL_DL_PHY_RUN_LANE_RO_SIGNAL = 48;
 static const uint32_t RXCTL_DATASM_10_PLREGS_RX_STAT1_PL_DL_PHY_RECAL_REQ_RO_SIGNAL = 49;
@@ -200,13 +206,13 @@ static const uint32_t RXCTL_DATASM_6_PLREGS_RX_MODE1_PL_RECAL_ABORT_DL_MASK = 51
 static const uint32_t RXCTL_DATASM_6_PLREGS_RX_MODE1_PL_INIT_DONE_DL_MASK = 52;
 // omi/reg00014.H
 
-static const uint64_t RXCTL_DATASM_9_PLREGS_RX_CNTL1_PL = 0x8003c04610012c3full;
+static const uint64_t RXCTL_DATASM_9_PLREGS_RX_CNTL1_PL = 0x8003c04110012c3full;
 
 static const uint32_t RXCTL_DATASM_9_PLREGS_RX_CNTL1_PL_INIT_DONE = 48;
 static const uint32_t RXCTL_DATASM_9_PLREGS_RX_CNTL1_PL_RECAL_DONE = 49;
 // omi/reg00014.H
 
-static const uint64_t RXCTL_DATASM_9_PLREGS_RX_STAT1_PL = 0x8003e04610012c3full;
+static const uint64_t RXCTL_DATASM_9_PLREGS_RX_STAT1_PL = 0x8003e04110012c3full;
 
 static const uint32_t RXCTL_DATASM_9_PLREGS_RX_STAT1_PL_DL_PHY_RUN_LANE_RO_SIGNAL = 48;
 static const uint32_t RXCTL_DATASM_9_PLREGS_RX_STAT1_PL_DL_PHY_RECAL_REQ_RO_SIGNAL = 49;

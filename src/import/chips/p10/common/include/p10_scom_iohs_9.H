@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,6 +73,74 @@ static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTO
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP13 = 24;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP14 = 25;
 static const uint32_t AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP15 = 26;
+// iohs/reg00038.H
+
+static const uint64_t AXON_EPS_FIR_LOCAL_WOF = 0x18040108ull;
+
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_00 = 0;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_01 = 1;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_02 = 2;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_03 = 3;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_04 = 4;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_05 = 5;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_06 = 6;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_07 = 7;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_08 = 8;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_09 = 9;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_10 = 10;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_11 = 11;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_12 = 12;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_13 = 13;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_14 = 14;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_15 = 15;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_16 = 16;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_17 = 17;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_18 = 18;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_19 = 19;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_20 = 20;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_21 = 21;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_22 = 22;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_23 = 23;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_24 = 24;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_25 = 25;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_26 = 26;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_27 = 27;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_28 = 28;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_29 = 29;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_30 = 30;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_31 = 31;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_32 = 32;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_33 = 33;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_34 = 34;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_35 = 35;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_36 = 36;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_37 = 37;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_38 = 38;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_39 = 39;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_40 = 40;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_41 = 41;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_42 = 42;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_43 = 43;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_44 = 44;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_45 = 45;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_46 = 46;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_47 = 47;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_48 = 48;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_49 = 49;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_50 = 50;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_51 = 51;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_52 = 52;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_53 = 53;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_54 = 54;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_55 = 55;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_56 = 56;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_57 = 57;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_58 = 58;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_59 = 59;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_60 = 60;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_61 = 61;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_62 = 62;
+static const uint32_t AXON_EPS_FIR_LOCAL_WOF_63 = 63;
 // iohs/reg00038.H
 
 static const uint64_t AXON_EPS_PSC_PSCOM_ERROR_MASK = 0x18010002ull;
@@ -238,67 +306,68 @@ static const uint64_t DLP_FIR_MASK_REG_RW = 0x18011003ull;
 static const uint64_t DLP_FIR_MASK_REG_WO_AND = 0x18011004ull;
 static const uint64_t DLP_FIR_MASK_REG_WO_OR = 0x18011005ull;
 
-static const uint32_t DLP_FIR_MASK_REG_LINK0_TRAINED_MASK = 0;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_TRAINED_MASK = 1;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_OP_IRQ_MASK = 2;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_OP_IRQ_MASK = 3;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_REPLAY_THRESHOLD_MASK = 4;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_REPLAY_THRESHOLD_MASK = 5;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_CRC_ERROR_MASK = 6;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_CRC_ERROR_MASK = 7;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_NAK_RECEIVED_MASK = 8;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_NAK_RECEIVED_MASK = 9;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_REPLAY_BUFFER_FULL_MASK = 10;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_REPLAY_BUFFER_FULL_MASK = 11;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_SL_ECC_THRESHOLD_MASK = 12;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_SL_ECC_THRESHOLD_MASK = 13;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_SL_ECC_CORRECTABLE_MASK = 14;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_SL_ECC_CORRECTABLE_MASK = 15;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_SL_ECC_UE_MASK = 16;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_SL_ECC_UE_MASK = 17;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_RETRAIN_THRESHOLD_MASK = 18;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_RETRAIN_THRESHOLD_MASK = 19;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_LOSS_BLOCK_ALIGN_MASK = 20;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_LOSS_BLOCK_ALIGN_MASK = 21;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_INVALID_BLOCK_MASK = 22;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_INVALID_BLOCK_MASK = 23;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_DESKEW_ERROR_MASK = 24;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_DESKEW_ERROR_MASK = 25;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_DESKEW_OVERFLOW_MASK = 26;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_DESKEW_OVERFLOW_MASK = 27;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_SW_RETRAIN_MASK = 28;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_SW_RETRAIN_MASK = 29;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_ACK_QUEUE_OVERFLOW_MASK = 30;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_ACK_QUEUE_OVERFLOW_MASK = 31;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_ACK_QUEUE_UNDERFLOW_MASK = 32;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_ACK_QUEUE_UNDERFLOW_MASK = 33;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_NUM_REPLAY_MASK = 34;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_NUM_REPLAY_MASK = 35;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_TRAINING_SET_RECEIVED_MASK = 36;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_TRAINING_SET_RECEIVED_MASK = 37;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_PRBS_SELECT_ERROR_MASK = 38;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_PRBS_SELECT_ERROR_MASK = 39;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_TCOMPLETE_BAD_MASK = 40;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_TCOMPLETE_BAD_MASK = 41;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_NO_SPARE_MASK = 42;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_NO_SPARE_MASK = 43;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_SPARE_DONE_MASK = 44;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_SPARE_DONE_MASK = 45;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_TOO_MANY_CRC_ERRORS_MASK = 46;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_TOO_MANY_CRC_ERRORS_MASK = 47;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_NPU_DLX_ERROR_MASK = 48;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_NPU_DLX_ERROR_MASK = 49;
-static const uint32_t DLP_FIR_MASK_REG_OSC_SWITCH_MASK = 51;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_CORRECTABLE_ARRAY_ERROR_MASK = 52;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_CORRECTABLE_ARRAY_ERROR_MASK = 53;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_UNCORRECTABLE_ARRAY_ERROR_MASK = 54;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_UNCORRECTABLE_ARRAY_ERROR_MASK = 55;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_TRAINING_FAILED_MASK = 56;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_TRAINING_FAILED_MASK = 57;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_UNRECOVERABLE_ERROR_MASK = 58;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_UNRECOVERABLE_ERROR_MASK = 59;
-static const uint32_t DLP_FIR_MASK_REG_LINK0_INTERNAL_ERROR_MASK = 60;
-static const uint32_t DLP_FIR_MASK_REG_LINK1_INTERNAL_ERROR_MASK = 61;
+static const uint32_t DLP_FIR_MASK_REG_0_TRAINED_MASK = 0;
+static const uint32_t DLP_FIR_MASK_REG_1_TRAINED_MASK = 1;
+static const uint32_t DLP_FIR_MASK_REG_0_OP_IRQ_MASK = 2;
+static const uint32_t DLP_FIR_MASK_REG_1_OP_IRQ_MASK = 3;
+static const uint32_t DLP_FIR_MASK_REG_0_REPLAY_THRESHOLD_MASK = 4;
+static const uint32_t DLP_FIR_MASK_REG_1_REPLAY_THRESHOLD_MASK = 5;
+static const uint32_t DLP_FIR_MASK_REG_0_CRC_ERROR_MASK = 6;
+static const uint32_t DLP_FIR_MASK_REG_1_CRC_ERROR_MASK = 7;
+static const uint32_t DLP_FIR_MASK_REG_0_NAK_RECEIVED_MASK = 8;
+static const uint32_t DLP_FIR_MASK_REG_1_NAK_RECEIVED_MASK = 9;
+static const uint32_t DLP_FIR_MASK_REG_0_REPLAY_BUFFER_FULL_MASK = 10;
+static const uint32_t DLP_FIR_MASK_REG_1_REPLAY_BUFFER_FULL_MASK = 11;
+static const uint32_t DLP_FIR_MASK_REG_0_SL_ECC_THRESHOLD_MASK = 12;
+static const uint32_t DLP_FIR_MASK_REG_1_SL_ECC_THRESHOLD_MASK = 13;
+static const uint32_t DLP_FIR_MASK_REG_0_SL_ECC_CORRECTABLE_MASK = 14;
+static const uint32_t DLP_FIR_MASK_REG_1_SL_ECC_CORRECTABLE_MASK = 15;
+static const uint32_t DLP_FIR_MASK_REG_0_SL_ECC_UE_MASK = 16;
+static const uint32_t DLP_FIR_MASK_REG_1_SL_ECC_UE_MASK = 17;
+static const uint32_t DLP_FIR_MASK_REG_0_RETRAIN_THRESHOLD_MASK = 18;
+static const uint32_t DLP_FIR_MASK_REG_1_RETRAIN_THRESHOLD_MASK = 19;
+static const uint32_t DLP_FIR_MASK_REG_0_LOSS_BLOCK_ALIGN_MASK = 20;
+static const uint32_t DLP_FIR_MASK_REG_1_LOSS_BLOCK_ALIGN_MASK = 21;
+static const uint32_t DLP_FIR_MASK_REG_0_INVALID_BLOCK_MASK = 22;
+static const uint32_t DLP_FIR_MASK_REG_1_INVALID_BLOCK_MASK = 23;
+static const uint32_t DLP_FIR_MASK_REG_0_DESKEW_ERROR_MASK = 24;
+static const uint32_t DLP_FIR_MASK_REG_1_DESKEW_ERROR_MASK = 25;
+static const uint32_t DLP_FIR_MASK_REG_0_DESKEW_OVERFLOW_MASK = 26;
+static const uint32_t DLP_FIR_MASK_REG_1_DESKEW_OVERFLOW_MASK = 27;
+static const uint32_t DLP_FIR_MASK_REG_0_SW_RETRAIN_MASK = 28;
+static const uint32_t DLP_FIR_MASK_REG_1_SW_RETRAIN_MASK = 29;
+static const uint32_t DLP_FIR_MASK_REG_0_ACK_QUEUE_OVERFLOW_MASK = 30;
+static const uint32_t DLP_FIR_MASK_REG_1_ACK_QUEUE_OVERFLOW_MASK = 31;
+static const uint32_t DLP_FIR_MASK_REG_0_ACK_QUEUE_UNDERFLOW_MASK = 32;
+static const uint32_t DLP_FIR_MASK_REG_1_ACK_QUEUE_UNDERFLOW_MASK = 33;
+static const uint32_t DLP_FIR_MASK_REG_0_NUM_REPLAY_MASK = 34;
+static const uint32_t DLP_FIR_MASK_REG_1_NUM_REPLAY_MASK = 35;
+static const uint32_t DLP_FIR_MASK_REG_0_TRAINING_SET_RECEIVED_MASK = 36;
+static const uint32_t DLP_FIR_MASK_REG_1_TRAINING_SET_RECEIVED_MASK = 37;
+static const uint32_t DLP_FIR_MASK_REG_0_PRBS_SELECT_ERROR_MASK = 38;
+static const uint32_t DLP_FIR_MASK_REG_1_PRBS_SELECT_ERROR_MASK = 39;
+static const uint32_t DLP_FIR_MASK_REG_0_TCOMPLETE_BAD_MASK = 40;
+static const uint32_t DLP_FIR_MASK_REG_1_TCOMPLETE_BAD_MASK = 41;
+static const uint32_t DLP_FIR_MASK_REG_0_NO_SPARE_MASK = 42;
+static const uint32_t DLP_FIR_MASK_REG_1_NO_SPARE_MASK = 43;
+static const uint32_t DLP_FIR_MASK_REG_0_SPARE_DONE_MASK = 44;
+static const uint32_t DLP_FIR_MASK_REG_1_SPARE_DONE_MASK = 45;
+static const uint32_t DLP_FIR_MASK_REG_0_TOO_MANY_CRC_ERRORS_MASK = 46;
+static const uint32_t DLP_FIR_MASK_REG_1_TOO_MANY_CRC_ERRORS_MASK = 47;
+static const uint32_t DLP_FIR_MASK_REG_0_NPU_DLX_ERROR_MASK = 48;
+static const uint32_t DLP_FIR_MASK_REG_1_NPU_DLX_ERROR_MASK = 49;
+static const uint32_t DLP_FIR_MASK_REG_0_OSC_SWITCH_MASK = 50;
+static const uint32_t DLP_FIR_MASK_REG_1_OSC_SWITCH_MASK = 51;
+static const uint32_t DLP_FIR_MASK_REG_0_CORRECTABLE_ARRAY_ERROR_MASK = 52;
+static const uint32_t DLP_FIR_MASK_REG_1_CORRECTABLE_ARRAY_ERROR_MASK = 53;
+static const uint32_t DLP_FIR_MASK_REG_0_UNCORRECTABLE_ARRAY_ERROR_MASK = 54;
+static const uint32_t DLP_FIR_MASK_REG_1_UNCORRECTABLE_ARRAY_ERROR_MASK = 55;
+static const uint32_t DLP_FIR_MASK_REG_0_TRAINING_FAILED_MASK = 56;
+static const uint32_t DLP_FIR_MASK_REG_1_TRAINING_FAILED_MASK = 57;
+static const uint32_t DLP_FIR_MASK_REG_0_UNRECOVERABLE_ERROR_MASK = 58;
+static const uint32_t DLP_FIR_MASK_REG_1_UNRECOVERABLE_ERROR_MASK = 59;
+static const uint32_t DLP_FIR_MASK_REG_0_INTERNAL_ERROR_MASK = 60;
+static const uint32_t DLP_FIR_MASK_REG_1_INTERNAL_ERROR_MASK = 61;
 // iohs/reg00038.H
 
 static const uint64_t DLP_LINK1_ERROR_STATUS = 0x18011017ull;
@@ -314,8 +383,8 @@ static const uint32_t DLP_LINK1_ERROR_STATUS_LINK1_ERROR_STATUS_TRAIN = 16;
 static const uint32_t DLP_LINK1_ERROR_STATUS_LINK1_ERROR_STATUS_TRAIN_LEN = 5;
 static const uint32_t DLP_LINK1_ERROR_STATUS_LINK1_ERROR_STATUS_UNRECOV = 24;
 static const uint32_t DLP_LINK1_ERROR_STATUS_LINK1_ERROR_STATUS_UNRECOV_LEN = 14;
-static const uint32_t DLP_LINK1_ERROR_STATUS_INTERNAL = 40;
-static const uint32_t DLP_LINK1_ERROR_STATUS_INTERNAL_LEN = 24;
+static const uint32_t DLP_LINK1_ERROR_STATUS_INTERNAL = 38;
+static const uint32_t DLP_LINK1_ERROR_STATUS_INTERNAL_LEN = 26;
 // iohs/reg00038.H
 
 static const uint64_t DLP_LINK1_TX_LANE_CONTROL = 0x18011011ull;
@@ -487,7 +556,7 @@ static const uint32_t IOO_RX0_RXCTL_DATASM_13_PLREGS_RX_CNTL3_PL_REQ_ALT = 48;
 static const uint32_t IOO_RX0_RXCTL_DATASM_13_PLREGS_RX_CNTL3_PL_STS_ALT = 49;
 // iohs/reg00038.H
 
-static const uint64_t IOO_RX0_RXCTL_DATASM_15_PLREGS_RX_MODE1_PL = 0x8003d00b10012c3full;
+static const uint64_t IOO_RX0_RXCTL_DATASM_15_PLREGS_RX_MODE1_PL = 0x8003d00f10012c3full;
 
 static const uint32_t IOO_RX0_RXCTL_DATASM_15_PLREGS_RX_MODE1_PL_RECAL_REQ_DL_MASK = 48;
 static const uint32_t IOO_RX0_RXCTL_DATASM_15_PLREGS_RX_MODE1_PL_RECAL_DONE_DL_MASK = 49;
@@ -496,7 +565,7 @@ static const uint32_t IOO_RX0_RXCTL_DATASM_15_PLREGS_RX_MODE1_PL_RECAL_ABORT_DL_
 static const uint32_t IOO_RX0_RXCTL_DATASM_15_PLREGS_RX_MODE1_PL_INIT_DONE_DL_MASK = 52;
 // iohs/reg00038.H
 
-static const uint64_t IOO_RX0_RXCTL_DATASM_17_PLREGS_RX_CNTL2_PL = 0x8003c80910012c3full;
+static const uint64_t IOO_RX0_RXCTL_DATASM_17_PLREGS_RX_CNTL2_PL = 0x8003c81110012c3full;
 
 static const uint32_t IOO_RX0_RXCTL_DATASM_17_PLREGS_RX_CNTL2_PL_PHY_DL_INIT_DONE_SET_WO_PULSE_SLOW_SIGNAL = 48;
 static const uint32_t IOO_RX0_RXCTL_DATASM_17_PLREGS_RX_CNTL2_PL_PHY_DL_INIT_DONE_CLR_WO_PULSE_SLOW_SIGNAL = 49;
@@ -671,7 +740,7 @@ static const uint32_t IOO_RX0_0_RD_2_RX_DAC_REGS_CNTL13_PL_PEAK1 = 52;
 static const uint32_t IOO_RX0_0_RD_2_RX_DAC_REGS_CNTL13_PL_PEAK1_LEN = 4;
 static const uint32_t IOO_RX0_0_RD_2_RX_DAC_REGS_CNTL13_PL_PEAK2 = 56;
 static const uint32_t IOO_RX0_0_RD_2_RX_DAC_REGS_CNTL13_PL_PEAK2_LEN = 4;
-// iohs/reg00038.H
+// iohs/reg00039.H
 
 static const uint64_t IOO_RX0_0_RD_3_RX_BIT_REGS_MODE3_PL = 0x8003300310012c3full;
 
@@ -1045,7 +1114,7 @@ static const uint32_t IOO_RX0_1_RD_4_RX_BIT_REGS_CNTLX1_PL_BANK_SEL_A = 59;
 static const uint32_t IOO_RX0_1_RD_4_RX_BIT_REGS_CNTLX1_PL_RLM_CLK_SEL_A = 60;
 static const uint32_t IOO_RX0_1_RD_4_RX_BIT_REGS_CNTLX1_PL_DL_CLK_SEL_A = 61;
 static const uint32_t IOO_RX0_1_RD_4_RX_BIT_REGS_CNTLX1_PL_DL_CLK_EN = 62;
-// iohs/reg00039.H
+// iohs/reg00040.H
 
 static const uint64_t IOO_RX0_1_RD_4_RX_BIT_REGS_FIR_MASK_PL = 0x8003101010012c3full;
 
@@ -1383,7 +1452,7 @@ static const uint64_t IOO_RX0_2_RD_5_RX_DAC_REGS_LOFF_B_CNTLX77_PL = 0x800268091
 
 static const uint32_t IOO_RX0_2_RD_5_RX_DAC_REGS_LOFF_B_CNTLX77_PL_RX_BD_LATCH_DAC_S010 = 56;
 static const uint32_t IOO_RX0_2_RD_5_RX_DAC_REGS_LOFF_B_CNTLX77_PL_RX_BD_LATCH_DAC_S010_LEN = 8;
-// iohs/reg00040.H
+// iohs/reg00041.H
 
 static const uint64_t IOO_RX0_2_RD_5_RX_DAC_REGS_CNTL10_PL = 0x8000500910012c3full;
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,12 @@ namespace perv
 {
 #endif
 
+
+static const uint64_t CLK_ADJ_00_DCADJ_WRAP_SET_ENABLE_OVERRIDE = 0x00018312ull;
+
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_SET_ENABLE_OVERRIDE_ENA = 0;
+static const uint32_t CLK_ADJ_00_DCADJ_WRAP_SET_ENABLE_OVERRIDE_VAL = 1;
+// perv/reg00010.H
 
 static const uint64_t CLK_ADJ_00_DCADJ_WRAP_SET_INIT_MODE = 0x00018300ull;
 // perv/reg00010.H
@@ -75,6 +81,12 @@ static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SYNC_DONE_FSM_STATES_ONE_SHOT
 static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SYNC_DONE_FSM_STATES_SKEW_ADJ_ACTIVE = 31;
 // perv/reg00010.H
 
+static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CACHE_SYNC_ENABLE = 0x00014331ull;
+
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CACHE_SYNC_ENABLE_ENABLE_OVERRIDE = 0;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CACHE_SYNC_ENABLE_VALUE_OVERRIDE = 1;
+// perv/reg00010.H
+
 static const uint64_t CLK_ADJ_02_DCADJ_WRAP_SET_CONFIG = 0x0001230cull;
 
 static const uint32_t CLK_ADJ_02_DCADJ_WRAP_SET_CONFIG_INVERT_SENSE = 0;
@@ -86,11 +98,6 @@ static const uint32_t CLK_ADJ_02_DCADJ_WRAP_SET_CONFIG_CHKSW_NO_DCC_CONFIG_VISIB
 static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_SWAP_CORE_INC_DEC = 0x0001232eull;
 
 static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_SWAP_CORE_INC_DEC_CORE_INC_DEC_INVERT = 0;
-// perv/reg00010.H
-
-static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_SYNC_ENABLE = 0x00011330ull;
-
-static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_SYNC_ENABLE_CORE_SYNC_ENABLE_INVERT = 0;
 // perv/reg00010.H
 
 static const uint64_t COMP_INTR_INTERRUPT1_REG_RW = 0x000f0020ull;
@@ -391,7 +398,7 @@ static const uint32_t OTPC_M_MEASURE_REG10_SEEPROM_MEASUREMENT10_DATA = 0;
 static const uint32_t OTPC_M_MEASURE_REG10_SEEPROM_MEASUREMENT10_DATA_LEN = 64;
 // perv/reg00010.H
 
-static const uint64_t QMETRA0_TR1_CONFIG_2 = 0x00018425ull;
+static const uint64_t QMETRA0_TR1_CONFIG_2 = 0x00018445ull;
 
 static const uint32_t QMETRA0_TR1_CONFIG_2_A = 0;
 static const uint32_t QMETRA0_TR1_CONFIG_2_A_LEN = 24;
@@ -667,7 +674,7 @@ static const uint32_t TRA2_TR0_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t TRA2_TR0_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
 static const uint32_t TRA2_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT = 22;
 static const uint32_t TRA2_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
-// perv/reg00010.H
+// perv/reg00011.H
 
 static const uint64_t TRA2_TR1_TRACE_LO_DATA_REG = 0x00010541ull;
 

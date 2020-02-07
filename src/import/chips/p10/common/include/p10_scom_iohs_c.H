@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -421,7 +421,7 @@ static const uint32_t IOO_RX0_RXCTL_DATASM_REGS_RX_STAT26_PG_RX_PSAVE_STS_PHY_0_
 static const uint32_t IOO_RX0_RXCTL_DATASM_REGS_RX_STAT26_PG_RX_PSAVE_STS_PHY_0_15_RO_SIGNAL_LEN = 16;
 // iohs/reg00051.H
 
-static const uint64_t IOO_RX0_RXCTL_DATASM_11_PLREGS_RX_MODE1_PL = 0x8003d00f10012c3full;
+static const uint64_t IOO_RX0_RXCTL_DATASM_11_PLREGS_RX_MODE1_PL = 0x8003d00b10012c3full;
 
 static const uint32_t IOO_RX0_RXCTL_DATASM_11_PLREGS_RX_MODE1_PL_RECAL_REQ_DL_MASK = 48;
 static const uint32_t IOO_RX0_RXCTL_DATASM_11_PLREGS_RX_MODE1_PL_RECAL_DONE_DL_MASK = 49;
@@ -440,7 +440,7 @@ static const uint32_t IOO_RX0_RXCTL_DATASM_13_PLREGS_RX_CNTL2_PL_DL_PHY_RECAL_AB
     52;
 // iohs/reg00051.H
 
-static const uint64_t IOO_RX0_RXCTL_DATASM_17_PLREGS_RX_CNTL3_PL = 0x8003d80910012c3full;
+static const uint64_t IOO_RX0_RXCTL_DATASM_17_PLREGS_RX_CNTL3_PL = 0x8003d81110012c3full;
 
 static const uint32_t IOO_RX0_RXCTL_DATASM_17_PLREGS_RX_CNTL3_PL_REQ_ALT = 48;
 static const uint32_t IOO_RX0_RXCTL_DATASM_17_PLREGS_RX_CNTL3_PL_STS_ALT = 49;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -96,8 +96,8 @@ static const uint64_t INT_PC_NXC_REGS_WATCH2_DATA3 = 0x02010ab7ull;
 
 static const uint64_t INT_PC_REGS_DBG_TRACE = 0x02010a33ull;
 
-static const uint32_t INT_PC_REGS_DBG_TRACE_0 = 0;
-static const uint32_t INT_PC_REGS_DBG_TRACE_1 = 1;
+static const uint32_t INT_PC_REGS_DBG_TRACE_MMIO_PIPE = 0;
+static const uint32_t INT_PC_REGS_DBG_TRACE_ARB_NRQ = 1;
 // proc/reg00004.H
 
 static const uint64_t INT_PC_REGS_ERR0_RECOV = 0x02010ac5ull;
@@ -550,7 +550,7 @@ static const uint32_t PB_COM_SCOM_EN4_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_
 static const uint32_t PB_COM_SCOM_EN4_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK = 12;
 static const uint32_t PB_COM_SCOM_EN4_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK = 13;
 static const uint32_t PB_COM_SCOM_EN4_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK = 14;
-static const uint32_t PB_COM_SCOM_EN4_STATION_FIR_MASK_REG_FIR_SPARE_15_MASK = 15;
+static const uint32_t PB_COM_SCOM_EN4_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK = 15;
 static const uint32_t PB_COM_SCOM_EN4_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK = 16;
 static const uint32_t PB_COM_SCOM_EN4_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK = 17;
 static const uint32_t PB_COM_SCOM_EN4_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK = 18;
@@ -1096,7 +1096,7 @@ static const uint32_t PB_COM_SCOM_ES2_STATION_FIR_REG_PB_CMD_SNOOPER_ERROR = 11;
 static const uint32_t PB_COM_SCOM_ES2_STATION_FIR_REG_DATA_OVERFLOW_ERROR = 12;
 static const uint32_t PB_COM_SCOM_ES2_STATION_FIR_REG_DATA_PROTOCOL_ERROR = 13;
 static const uint32_t PB_COM_SCOM_ES2_STATION_FIR_REG_DATA_ROUTE_ERROR = 14;
-static const uint32_t PB_COM_SCOM_ES2_STATION_FIR_REG_FIR_SPARE_15 = 15;
+static const uint32_t PB_COM_SCOM_ES2_STATION_FIR_REG_FIR_COMPAB_TRIGGER = 15;
 static const uint32_t PB_COM_SCOM_ES2_STATION_FIR_REG_LINK0_PROTOCOL_ERROR = 16;
 static const uint32_t PB_COM_SCOM_ES2_STATION_FIR_REG_LINK0_OVERFLOW_ERROR = 17;
 static const uint32_t PB_COM_SCOM_ES2_STATION_FIR_REG_LINK0_HW_PARITY_ERROR = 18;
@@ -1451,8 +1451,10 @@ static const uint32_t PB_PTLSCOM45_MISC_CFG_TRANSPORT_3_OB_MUX_CTL3 = 35;
 static const uint32_t PB_PTLSCOM45_MISC_CFG_SCOM_PTLX_EMULATION_MODE = 36;
 static const uint32_t PB_PTLSCOM45_MISC_CFG_SCOM_PTLY_EMULATION_MODE = 37;
 static const uint32_t PB_PTLSCOM45_MISC_CFG_TRANSPORT_PRI_BUS_CTL = 38;
-static const uint32_t PB_PTLSCOM45_MISC_CFG_MISC_SPARE = 39;
-static const uint32_t PB_PTLSCOM45_MISC_CFG_MISC_SPARE_LEN = 13;
+static const uint32_t PB_PTLSCOM45_MISC_CFG_ENABLE_DEGRADED_MODE = 39;
+static const uint32_t PB_PTLSCOM45_MISC_CFG_HW517132_DISABLE = 40;
+static const uint32_t PB_PTLSCOM45_MISC_CFG_MISC_SPARE = 41;
+static const uint32_t PB_PTLSCOM45_MISC_CFG_MISC_SPARE_LEN = 11;
 // proc/reg00005.H
 
 static const uint64_t PB_PTLSCOM45_PMU0_CNPM_COUNTER = 0x12011821ull;
@@ -2058,6 +2060,14 @@ static const uint32_t TP_TPBR_AD_TOPOID_XLAT_TBL1_15 = 36;
 static const uint32_t TP_TPBR_AD_TOPOID_XLAT_TBL1_15_LEN = 4;
 // proc/reg00005.H
 
+static const uint64_t TP_TPBR_PBA_PBAF_GOCPER = 0x03011dd7ull;
+
+static const uint32_t TP_TPBR_PBA_PBAF_GOCPER_0 = 8;
+static const uint32_t TP_TPBR_PBA_PBAF_GOCPER_0_LEN = 24;
+static const uint32_t TP_TPBR_PBA_PBAF_GOCPER_1 = 40;
+static const uint32_t TP_TPBR_PBA_PBAF_GOCPER_1_LEN = 24;
+// proc/reg00006.H
+
 static const uint64_t TP_TPBR_PBA_PBAF_PBAERRRPT1 = 0x03011dcdull;
 
 static const uint32_t TP_TPBR_PBA_PBAF_PBAERRRPT1_BADCRESP = 0;
@@ -2531,7 +2541,7 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPITASV0_6 = 24;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPITASV0_6_LEN = 4;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPITASV0_7 = 28;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPITASV0_7_LEN = 4;
-// proc/reg00006.H
+// proc/reg00007.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OPITCPRC_RO = 0x0006c688ull;
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OPITCPRC_RO_CLRPART = 0x0006c689ull;
@@ -2567,8 +2577,8 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_PIB_OCDBG_SPARE = 15;
 // proc/reg00007.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_PIB_OJIC = 0x0006d008ull;
-static const uint64_t TP_TPCHIP_OCC_OCI_OCB_PIB_OJIC_SCOM1 = 0x0006d009ull;
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_PIB_OJIC_SCOM2 = 0x0006d00aull;
+static const uint64_t TP_TPCHIP_OCC_OCI_OCB_PIB_OJIC_WO_AND = 0x0006d009ull;
 
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_PIB_OJIC_START_JTAG_CMD = 0;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_PIB_OJIC_DO_IR = 1;
@@ -3066,7 +3076,7 @@ static const uint64_t TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_RECEIVE_DATA_REG = 0x
 
 static const uint32_t TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_RECEIVE_DATA_REG_RECEIVE_DATA_REG_Q = 0;
 static const uint32_t TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_RECEIVE_DATA_REG_RECEIVE_DATA_REG_Q_LEN = 64;
-// proc/reg00007.H
+// proc/reg00008.H
 
 static const uint64_t TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_TRANSMIT_DATA_REG = 0x00070045ull;
 

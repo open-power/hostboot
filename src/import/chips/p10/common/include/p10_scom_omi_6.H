@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,13 +45,13 @@ static const uint32_t RXCTL_DATASM_1_PLREGS_RX_CNTL3_PL_REQ_ALT = 48;
 static const uint32_t RXCTL_DATASM_1_PLREGS_RX_CNTL3_PL_STS_ALT = 49;
 // omi/reg00012.H
 
-static const uint64_t RXCTL_DATASM_11_PLREGS_RX_CNTL1_PL = 0x8003c04410012c3full;
+static const uint64_t RXCTL_DATASM_11_PLREGS_RX_CNTL1_PL = 0x8003c04310012c3full;
 
 static const uint32_t RXCTL_DATASM_11_PLREGS_RX_CNTL1_PL_INIT_DONE = 48;
 static const uint32_t RXCTL_DATASM_11_PLREGS_RX_CNTL1_PL_RECAL_DONE = 49;
 // omi/reg00012.H
 
-static const uint64_t RXCTL_DATASM_11_PLREGS_RX_STAT1_PL = 0x8003e04410012c3full;
+static const uint64_t RXCTL_DATASM_11_PLREGS_RX_STAT1_PL = 0x8003e04310012c3full;
 
 static const uint32_t RXCTL_DATASM_11_PLREGS_RX_STAT1_PL_DL_PHY_RUN_LANE_RO_SIGNAL = 48;
 static const uint32_t RXCTL_DATASM_11_PLREGS_RX_STAT1_PL_DL_PHY_RECAL_REQ_RO_SIGNAL = 49;
@@ -85,13 +85,13 @@ static const uint32_t RXCTL_DATASM_7_PLREGS_RX_MODE1_PL_RECAL_ABORT_DL_MASK = 51
 static const uint32_t RXCTL_DATASM_7_PLREGS_RX_MODE1_PL_INIT_DONE_DL_MASK = 52;
 // omi/reg00012.H
 
-static const uint64_t RXCTL_DATASM_8_PLREGS_RX_CNTL1_PL = 0x8003c04710012c3full;
+static const uint64_t RXCTL_DATASM_8_PLREGS_RX_CNTL1_PL = 0x8003c04010012c3full;
 
 static const uint32_t RXCTL_DATASM_8_PLREGS_RX_CNTL1_PL_INIT_DONE = 48;
 static const uint32_t RXCTL_DATASM_8_PLREGS_RX_CNTL1_PL_RECAL_DONE = 49;
 // omi/reg00012.H
 
-static const uint64_t RXCTL_DATASM_8_PLREGS_RX_STAT1_PL = 0x8003e04710012c3full;
+static const uint64_t RXCTL_DATASM_8_PLREGS_RX_STAT1_PL = 0x8003e04010012c3full;
 
 static const uint32_t RXCTL_DATASM_8_PLREGS_RX_STAT1_PL_DL_PHY_RUN_LANE_RO_SIGNAL = 48;
 static const uint32_t RXCTL_DATASM_8_PLREGS_RX_STAT1_PL_DL_PHY_RECAL_REQ_RO_SIGNAL = 49;

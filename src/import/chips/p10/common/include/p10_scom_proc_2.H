@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1430,8 +1430,34 @@ static const uint64_t PB_BRIDGE_HCA_FIR_DATA_RW = 0x03011d40ull;
 static const uint64_t PB_BRIDGE_HCA_FIR_DATA_WO_AND = 0x03011d41ull;
 static const uint64_t PB_BRIDGE_HCA_FIR_DATA_WO_OR = 0x03011d42ull;
 
-static const uint32_t PB_BRIDGE_HCA_FIR_DATA_FIR_DATA_BITS = 0;
-static const uint32_t PB_BRIDGE_HCA_FIR_DATA_FIR_DATA_BITS_LEN = 28;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_RCMD_ADDR_PE_FIR = 0;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_RCMD_TTAG_PE_FIR = 1;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_CRESP_TTAG_PE_FIR = 2;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_CRESP_ATAG_PE_FIR = 3;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_UPDT_ADDR_ERR_CRESP_FIR = 4;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_UPDT_INVALID_CRESP_FIR = 5;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_UPDT_UNEXPECTED_CRESP_FIR = 6;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_UPDT_HANG_DETECTED_FIR = 7;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_RCMD_MULTIHIT_FIR = 8;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_CACHE_ECC_CE_FIR = 9;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_CACHE_ECC_UE_FIR = 10;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_RCMD_DROP_COUNT_OVERFLOW_FIR = 11;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_UPDT_DROP_COUNT_OVERFLOW_FIR = 12;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_UPDT_LOST_DECAY_FIR = 13;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_ADU_PSI_SMF_ERROR_FIR = 14;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_SPARE_15_FIR = 15;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_ADU_RECOV_ERR_0_FIR = 16;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_ADU_RECOV_ERR_1_FIR = 17;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_ADU_RECOV_ERR_2_FIR = 18;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_ADU_RECOV_ERR_3_FIR = 19;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_ADU_RECOV_ERR_4_FIR = 20;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_ADU_RECOV_ERR_5_FIR = 21;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_ADU_XSTOP_ERR_0_FIR = 22;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_ADU_XSTOP_ERR_1_FIR = 23;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_ADU_XSTOP_ERR_2_FIR = 24;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_ADU_XSTOP_ERR_3_FIR = 25;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_ADU_XSTOP_ERR_4_FIR = 26;
+static const uint32_t PB_BRIDGE_HCA_FIR_DATA_ADU_XSTOP_ERR_5_FIR = 27;
 // proc/reg00010.H
 
 static const uint64_t PB_BRIDGE_NHTM_SC_HTM_CTRL = 0x03011c86ull;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,7 +53,6 @@ static const uint32_t CPMS_DDSR_DPLL_ENCODED_MIN = 37;
 static const uint32_t CPMS_DDSR_DPLL_ENCODED_MIN_LEN = 3;
 static const uint32_t CPMS_DDSR_DPLL_ENCODED_MAX = 41;
 static const uint32_t CPMS_DDSR_DPLL_ENCODED_MAX_LEN = 3;
-static const uint32_t CPMS_DDSR_PDSR_RESET_OCCURRED = 59;
 static const uint32_t CPMS_DDSR_STOP_STATE_ACTIVE = 60;
 static const uint32_t CPMS_DDSR_CORE_SAMPLE_DISABLED = 61;
 static const uint32_t CPMS_DDSR_STOP_STATE_OCCURRED = 62;
@@ -65,8 +64,8 @@ static const uint64_t CPMS_FDIR_WO_CLEAR = 0x200e0e47ull;
 static const uint64_t CPMS_FDIR_WO_OR = 0x200e0e46ull;
 
 static const uint32_t CPMS_FDIR_INJECT_ENABLE = 0;
-static const uint32_t CPMS_FDIR_HALT_INJECT = 1;
-static const uint32_t CPMS_FDIR_HALT_TOGGLE_INJECT = 2;
+static const uint32_t CPMS_FDIR_UARCH_HALT_INJECT = 1;
+static const uint32_t CPMS_FDIR_UARCH_HALT_TOGGLE_INJECT = 2;
 static const uint32_t CPMS_FDIR_FETCH_THROTTLE10_INJECT = 3;
 static const uint32_t CPMS_FDIR_FETCH_THROTTLE01_INJECT = 4;
 static const uint32_t CPMS_FDIR_ISSUE_NTC_INJECT = 5;

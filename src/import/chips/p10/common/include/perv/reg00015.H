@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,276 @@ namespace perv
 {
 #endif
 
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_SINGLE_OTP_ROM_OTPROM_REG38(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = SINGLE_OTP_ROM_OTPROM_REG38;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_SINGLE_OTP_ROM_OTPROM_REG38(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = SINGLE_OTP_ROM_OTPROM_REG38;
+#endif
+    return fapi2::getScom(i_target, SINGLE_OTP_ROM_OTPROM_REG38, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_SINGLE_OTP_ROM_OTPROM_REG38(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(SINGLE_OTP_ROM_OTPROM_REG38));
+#endif
+    return fapi2::putScom(i_target, SINGLE_OTP_ROM_OTPROM_REG38, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_SINGLE_OTP_ROM_OTPROM_REG38_REGISTER38(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SINGLE_OTP_ROM_OTPROM_REG38));
+#endif
+    return o_data.insertFromRight<SINGLE_OTP_ROM_OTPROM_REG38_REGISTER38,
+           SINGLE_OTP_ROM_OTPROM_REG38_REGISTER38_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SINGLE_OTP_ROM_OTPROM_REG38_REGISTER38 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_SINGLE_OTP_ROM_OTPROM_REG38_REGISTER38(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SINGLE_OTP_ROM_OTPROM_REG38));
+#endif
+    return o_data.insertFromRight<SINGLE_OTP_ROM_OTPROM_REG38_REGISTER38,
+           SINGLE_OTP_ROM_OTPROM_REG38_REGISTER38_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SINGLE_OTP_ROM_OTPROM_REG38_REGISTER38 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_SINGLE_OTP_ROM_OTPROM_REG38_REGISTER38(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SINGLE_OTP_ROM_OTPROM_REG38));
+#endif
+    return i_data.extractToRight<SINGLE_OTP_ROM_OTPROM_REG38_REGISTER38,
+           SINGLE_OTP_ROM_OTPROM_REG38_REGISTER38_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SINGLE_OTP_ROM_OTPROM_REG38_REGISTER38 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_SINGLE_OTP_ROM_OTPROM_REG46(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = SINGLE_OTP_ROM_OTPROM_REG46;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_SINGLE_OTP_ROM_OTPROM_REG46(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = SINGLE_OTP_ROM_OTPROM_REG46;
+#endif
+    return fapi2::getScom(i_target, SINGLE_OTP_ROM_OTPROM_REG46, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_SINGLE_OTP_ROM_OTPROM_REG46(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(SINGLE_OTP_ROM_OTPROM_REG46));
+#endif
+    return fapi2::putScom(i_target, SINGLE_OTP_ROM_OTPROM_REG46, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_SINGLE_OTP_ROM_OTPROM_REG46_REGISTER46(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SINGLE_OTP_ROM_OTPROM_REG46));
+#endif
+    return o_data.insertFromRight<SINGLE_OTP_ROM_OTPROM_REG46_REGISTER46,
+           SINGLE_OTP_ROM_OTPROM_REG46_REGISTER46_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SINGLE_OTP_ROM_OTPROM_REG46_REGISTER46 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_SINGLE_OTP_ROM_OTPROM_REG46_REGISTER46(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SINGLE_OTP_ROM_OTPROM_REG46));
+#endif
+    return o_data.insertFromRight<SINGLE_OTP_ROM_OTPROM_REG46_REGISTER46,
+           SINGLE_OTP_ROM_OTPROM_REG46_REGISTER46_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SINGLE_OTP_ROM_OTPROM_REG46_REGISTER46 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_SINGLE_OTP_ROM_OTPROM_REG46_REGISTER46(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SINGLE_OTP_ROM_OTPROM_REG46));
+#endif
+    return i_data.extractToRight<SINGLE_OTP_ROM_OTPROM_REG46_REGISTER46,
+           SINGLE_OTP_ROM_OTPROM_REG46_REGISTER46_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SINGLE_OTP_ROM_OTPROM_REG46_REGISTER46 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_SINGLE_OTP_ROM_OTPROM_REG59(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = SINGLE_OTP_ROM_OTPROM_REG59;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_SINGLE_OTP_ROM_OTPROM_REG59(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = SINGLE_OTP_ROM_OTPROM_REG59;
+#endif
+    return fapi2::getScom(i_target, SINGLE_OTP_ROM_OTPROM_REG59, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_SINGLE_OTP_ROM_OTPROM_REG59(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(SINGLE_OTP_ROM_OTPROM_REG59));
+#endif
+    return fapi2::putScom(i_target, SINGLE_OTP_ROM_OTPROM_REG59, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_SINGLE_OTP_ROM_OTPROM_REG59_REGISTER59(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SINGLE_OTP_ROM_OTPROM_REG59));
+#endif
+    return o_data.insertFromRight<SINGLE_OTP_ROM_OTPROM_REG59_REGISTER59,
+           SINGLE_OTP_ROM_OTPROM_REG59_REGISTER59_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SINGLE_OTP_ROM_OTPROM_REG59_REGISTER59 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_SINGLE_OTP_ROM_OTPROM_REG59_REGISTER59(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SINGLE_OTP_ROM_OTPROM_REG59));
+#endif
+    return o_data.insertFromRight<SINGLE_OTP_ROM_OTPROM_REG59_REGISTER59,
+           SINGLE_OTP_ROM_OTPROM_REG59_REGISTER59_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SINGLE_OTP_ROM_OTPROM_REG59_REGISTER59 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_SINGLE_OTP_ROM_OTPROM_REG59_REGISTER59(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(SINGLE_OTP_ROM_OTPROM_REG59));
+#endif
+    return i_data.extractToRight<SINGLE_OTP_ROM_OTPROM_REG59_REGISTER59,
+           SINGLE_OTP_ROM_OTPROM_REG59_REGISTER59_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access SINGLE_OTP_ROM_OTPROM_REG59_REGISTER59 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_SINGLE_OTP_ROM_OTPROM_REG71(const fapi2::Target<K, M, V>& i_target)

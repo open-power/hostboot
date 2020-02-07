@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -550,7 +550,7 @@ static const uint32_t TRA1_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t TRA1_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
 // pauc/reg00000.H
 
-static const uint64_t TXIRLM_REGS_TX_IMPCAL_SWO9_PB = 0x800f740010012c3full;
+static const uint64_t TXIRLM_REGS_TX_IMPCAL_SWO9_PB = 0x800f75c010012c3full;
 
 static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO9_PB_1R_4XP = 48;
 static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO9_PB_1R_4XP_LEN = 10;
@@ -559,7 +559,7 @@ static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO9_PB_2R_1XP = 59;
 static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO9_PB_2R_1XN = 60;
 // pauc/reg00000.H
 
-static const uint64_t TXIRLM_REGS_ZCAL_FIR_ERROR_INJECT_PB = 0x800f980010012c3full;
+static const uint64_t TXIRLM_REGS_ZCAL_FIR_ERROR_INJECT_PB = 0x800f99c010012c3full;
 
 static const uint32_t TXIRLM_REGS_ZCAL_FIR_ERROR_INJECT_PB_ZCAL_FIR_ERR_INJ = 48;
 static const uint32_t TXIRLM_REGS_ZCAL_FIR_ERROR_INJECT_PB_ZCAL_FIR_ERR_INJ_LEN = 2;

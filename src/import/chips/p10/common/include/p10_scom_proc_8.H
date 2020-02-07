@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -508,7 +508,7 @@ static const uint32_t PB_COM_SCOM_EN3_STATION_FIR_REG_PB_CMD_SNOOPER_ERROR = 11;
 static const uint32_t PB_COM_SCOM_EN3_STATION_FIR_REG_DATA_OVERFLOW_ERROR = 12;
 static const uint32_t PB_COM_SCOM_EN3_STATION_FIR_REG_DATA_PROTOCOL_ERROR = 13;
 static const uint32_t PB_COM_SCOM_EN3_STATION_FIR_REG_DATA_ROUTE_ERROR = 14;
-static const uint32_t PB_COM_SCOM_EN3_STATION_FIR_REG_FIR_SPARE_15 = 15;
+static const uint32_t PB_COM_SCOM_EN3_STATION_FIR_REG_FIR_COMPAB_TRIGGER = 15;
 static const uint32_t PB_COM_SCOM_EN3_STATION_FIR_REG_LINK0_PROTOCOL_ERROR = 16;
 static const uint32_t PB_COM_SCOM_EN3_STATION_FIR_REG_LINK0_OVERFLOW_ERROR = 17;
 static const uint32_t PB_COM_SCOM_EN3_STATION_FIR_REG_LINK0_HW_PARITY_ERROR = 18;
@@ -605,7 +605,7 @@ static const uint32_t PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_
 static const uint32_t PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK = 12;
 static const uint32_t PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK = 13;
 static const uint32_t PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK = 14;
-static const uint32_t PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_FIR_SPARE_15_MASK = 15;
+static const uint32_t PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK = 15;
 static const uint32_t PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK = 16;
 static const uint32_t PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK = 17;
 static const uint32_t PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK = 18;

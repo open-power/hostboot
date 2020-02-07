@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,14 +39,15 @@ namespace eq
 #endif
 
 
-static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE = 0x20018331ull;
-
-static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_SYNC_ENABLE_CACHE_SYNC_ENABLE_INVERT = 0;
-// eq/reg00014.H
-
 static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS = 0x2001832cull;
 
 static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS_CORE_PDLYS_INVERT = 0;
+// eq/reg00014.H
+
+static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CORE_SYNC_ENABLE = 0x20018330ull;
+
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CORE_SYNC_ENABLE_ENABLE_OVERRIDE = 0;
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CORE_SYNC_ENABLE_VALUE_OVERRIDE = 1;
 // eq/reg00014.H
 
 static const uint64_t CLK_ADJ_01_DCADJ_WRAP_MEASURE_HISTORY = 0x20014316ull;
@@ -92,7 +93,11 @@ static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_MEASURE_ONLY_MODE_SET_MEASURE_ON
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE = 0x20011321ull;
 
-static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_SET_HOLD_MD = 3;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_SINGLE_STEP_MD_SET = 0;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_ONE_SHOT_MD_SET = 1;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_ADJUST_MD_SET = 2;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_HOLD_MD_SET = 3;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_INIT_MD_SET = 4;
 // eq/reg00014.H
 
 static const uint64_t EPS_DBG_TRACE_REG_1 = 0x200183eeull;
@@ -325,7 +330,7 @@ static const uint32_t OPCG_REG1_NSL_FILL_COUNT = 59;
 static const uint32_t OPCG_REG1_NSL_FILL_COUNT_LEN = 5;
 // eq/reg00014.H
 
-static const uint64_t QMETRA0_TR1_TRACE_LO_DATA_REG = 0x20018421ull;
+static const uint64_t QMETRA0_TR1_TRACE_LO_DATA_REG = 0x20018441ull;
 
 static const uint32_t QMETRA0_TR1_TRACE_LO_DATA_REG_LO_DATA = 0;
 static const uint32_t QMETRA0_TR1_TRACE_LO_DATA_REG_LO_DATA_LEN = 32;
@@ -340,7 +345,7 @@ static const uint32_t QMETRA0_TR1_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t QMETRA0_TR1_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
 // eq/reg00014.H
 
-static const uint64_t QMETRA0_TR1_CONFIG = 0x20018422ull;
+static const uint64_t QMETRA0_TR1_CONFIG = 0x20018442ull;
 
 static const uint32_t QMETRA0_TR1_CONFIG_STORE_ON_TRIG_MODE = 0;
 static const uint32_t QMETRA0_TR1_CONFIG_WRITE_ON_RUN_MODE = 1;
@@ -416,17 +421,21 @@ static const uint32_t QME_LFIR_PB_INVALID_TOPOTABLE_ENTRY = 28;
 static const uint32_t QME_LFIR_PB_TAG_PERR = 29;
 static const uint32_t QME_LFIR_PIG_PROTOCOL_ERR = 30;
 static const uint32_t QME_LFIR_LOCAL_ACCESS_ERR = 31;
-static const uint32_t QME_LFIR_SPARE1 = 32;
+static const uint32_t QME_LFIR_PB_SSA_CE = 32;
+static const uint32_t QME_LFIR_PB_SSA_UE = 33;
+static const uint32_t QME_LFIR_SPARE1 = 34;
 static const uint32_t QME_LFIR_SPARE1_LEN = 2;
 // eq/reg00014.H
 
 static const uint64_t QME_PCBSII = 0x200e0038ull;
 
-static const uint32_t QME_PCBSII_EQ_ACK = 0;
-static const uint32_t QME_PCBSII_SP_P = 1;
-static const uint32_t QME_PCBSII_SP_VLD = 4;
-static const uint32_t QME_PCBSII_SP_INFO = 5;
-static const uint32_t QME_PCBSII_SP_INFO_LEN = 3;
+static const uint32_t QME_PCBSII_PCB_REQ_ACK = 0;
+static const uint32_t QME_PCBSII_PCB_RSP_P = 1;
+static const uint32_t QME_PCBSII_PCB_RSP_VLD = 4;
+static const uint32_t QME_PCBSII_PCB_RSP_INFO = 5;
+static const uint32_t QME_PCBSII_PCB_RSP_INFO_LEN = 3;
+static const uint32_t QME_PCBSII_QUAD_ID = 33;
+static const uint32_t QME_PCBSII_QUAD_ID_LEN = 3;
 // eq/reg00014.H
 
 static const uint64_t SLAVE_CONFIG_REG = 0x200f001eull;

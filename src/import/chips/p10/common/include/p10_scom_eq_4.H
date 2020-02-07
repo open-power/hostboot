@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,6 +64,12 @@ static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_CHICKEN_SWITCHES = 0x2001
 static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_CHICKEN_SWITCHES_STOP_ON_ERROR = 0;
 // eq/reg00004.H
 
+static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CACHE_SYNC_ENABLE = 0x20018331ull;
+
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CACHE_SYNC_ENABLE_ENABLE_OVERRIDE = 0;
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CACHE_SYNC_ENABLE_VALUE_OVERRIDE = 1;
+// eq/reg00004.H
+
 static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT = 0x20018328ull;
 
 static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT_WAIT_CNT_VALUE = 0;
@@ -87,10 +93,6 @@ static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_PDLYS_CACHE_
 // eq/reg00004.H
 
 static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE = 0x20014324ull;
-
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_ET_SINGLE_STEP_MD_SET = 0;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_TEP_COUNT = 1;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_TEP_COUNT_LEN = 32;
 // eq/reg00004.H
 
 static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_STICK_CACHE_SYNC_DONE = 0x20014333ull;
@@ -331,7 +333,7 @@ static const uint32_t QME_FTXR_QOS_UPDATE_PENDING_LEN = 4;
 static const uint64_t QME_LFIRACT0 = 0x200e0008ull;
 
 static const uint32_t QME_LFIRACT0_FIR_ACTION0 = 0;
-static const uint32_t QME_LFIRACT0_FIR_ACTION0_LEN = 34;
+static const uint32_t QME_LFIRACT0_FIR_ACTION0_LEN = 36;
 // eq/reg00004.H
 
 static const uint64_t QME_PLSR = 0x200e0148ull;
@@ -400,18 +402,6 @@ static const uint32_t QME_RCSCR_2_TARGET_INDEX = 51;
 static const uint32_t QME_RCSCR_2_TARGET_INDEX_LEN = 5;
 static const uint32_t QME_RCSCR_3_TARGET_INDEX = 59;
 static const uint32_t QME_RCSCR_3_TARGET_INDEX_LEN = 5;
-// eq/reg00004.H
-
-static const uint64_t QME_RS4BAR = 0x200e0160ull;
-
-static const uint32_t QME_RS4BAR_BASE = 0;
-static const uint32_t QME_RS4BAR_BASE_LEN = 32;
-// eq/reg00004.H
-
-static const uint64_t QME_RS4DBGD = 0x200e0158ull;
-
-static const uint32_t QME_RS4DBGD_SCAN_DATA_IN = 0;
-static const uint32_t QME_RS4DBGD_SCAN_DATA_IN_LEN = 64;
 // eq/reg00004.H
 
 static const uint64_t REGION_CCFLUSH_STATUS = 0x20030016ull;

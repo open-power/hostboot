@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,10 +61,10 @@ static const uint64_t CPMS_DPCR = 0x200e0ea4ull;
 
 static const uint32_t CPMS_DPCR_PROXY_SCALE_FACTOR = 0;
 static const uint32_t CPMS_DPCR_PROXY_SCALE_FACTOR_LEN = 12;
-static const uint32_t CPMS_DPCR_DDP_RECHARGE_DELAY = 12;
-static const uint32_t CPMS_DPCR_DDP_RECHARGE_DELAY_LEN = 4;
-static const uint32_t CPMS_DPCR_DDP_RECHARGE_VALUE = 16;
-static const uint32_t CPMS_DPCR_DDP_RECHARGE_VALUE_LEN = 8;
+static const uint32_t CPMS_DPCR_PROXY_LEAKAGE_CONSTANT = 12;
+static const uint32_t CPMS_DPCR_PROXY_LEAKAGE_CONSTANT_LEN = 8;
+static const uint32_t CPMS_DPCR_DDP_RECHARGE_VALUE = 20;
+static const uint32_t CPMS_DPCR_DDP_RECHARGE_VALUE_LEN = 7;
 // c/reg00004.H
 
 static const uint64_t CPMS_PSSR = 0x200e0e9cull;

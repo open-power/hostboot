@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,7 +61,11 @@ static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_OP_MODE_FSM_STATE_OP_MODE_FSM
 
 static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE = 0x00018321ull;
 
-static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_SET_HOLD_MD = 3;
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_SINGLE_STEP_MD_SET = 0;
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_ONE_SHOT_MD_SET = 1;
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_ADJUST_MD_SET = 2;
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_HOLD_MD_SET = 3;
+static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_INIT_MD_SET = 4;
 // perv/reg00022.H
 
 static const uint64_t CLK_ADJ_01_DCADJ_WRAP_SET_COMP_DLY = 0x0001430bull;
@@ -87,16 +91,12 @@ static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_CORE_PDLY_FSM_STATES_3_LEN = 
 
 static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SENSOR_DATA = 0x00012339ull;
 
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CORE_IS_LATE = 3;
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CORE_IS_LATE_HIST = 4;
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CORE_IS_LATE_HIST_LEN = 4;
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CACHE_IS_LATE = 11;
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CACHE_IS_LATE_HIST = 12;
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CACHE_IS_LATE_HIST_LEN = 4;
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CORE_PDLY_CONFIG = 16;
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CORE_PDLY_CONFIG_LEN = 4;
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CACHE_PDLY_CONFIG = 20;
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CACHE_PDLY_CONFIG_LEN = 4;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SENSOR_DATA_ORE_IS_LATE = 3;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SENSOR_DATA_ORE_IS_LATE_HIST = 4;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SENSOR_DATA_ORE_IS_LATE_HIST_LEN = 4;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SENSOR_DATA_ACHE_IS_LATE = 11;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SENSOR_DATA_ACHE_IS_LATE_HIST = 12;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SENSOR_DATA_ACHE_IS_LATE_HIST_LEN = 4;
 // perv/reg00022.H
 
 static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_CHICKEN_SWITCHES = 0x00012335ull;
@@ -132,10 +132,6 @@ static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_OP_MODE_FSM_STATE_OP_MODE_FSM
 // perv/reg00022.H
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE = 0x00011324ull;
-
-static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_ET_SINGLE_STEP_MD_SET = 0;
-static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_TEP_COUNT = 1;
-static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_TEP_COUNT_LEN = 32;
 // perv/reg00022.H
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_WAIT_CNT = 0x00011328ull;
@@ -572,7 +568,7 @@ static const uint32_t QMETRA0_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t QMETRA0_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
 // perv/reg00022.H
 
-static const uint64_t QMETRA0_TR1_TRACE_HI_DATA_REG = 0x00018420ull;
+static const uint64_t QMETRA0_TR1_TRACE_HI_DATA_REG = 0x00018440ull;
 
 static const uint32_t QMETRA0_TR1_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t QMETRA0_TR1_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;

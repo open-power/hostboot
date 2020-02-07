@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -272,26 +272,26 @@ static const uint32_t TRA1_TR0_CONFIG_2_B = 24;
 static const uint32_t TRA1_TR0_CONFIG_2_B_LEN = 24;
 // pauc/reg00004.H
 
-static const uint64_t TXIRLM_REGS_TX_IMPCAL1_PB = 0x800f040010012c3full;
+static const uint64_t TXIRLM_REGS_TX_IMPCAL1_PB = 0x800f05c010012c3full;
 
 static const uint32_t TXIRLM_REGS_TX_IMPCAL1_PB_REQ_WO_PULSE_SLOW_SIGNAL = 48;
 static const uint32_t TXIRLM_REGS_TX_IMPCAL1_PB_FORCE_SAMPLE_WO_PULSE_SLOW_SIGNAL = 49;
 static const uint32_t TXIRLM_REGS_TX_IMPCAL1_PB_TEST_ENABLE_WO_PULSE_SLOW_SIGNAL = 50;
 // pauc/reg00004.H
 
-static const uint64_t TXIRLM_REGS_TX_IMPCAL_NVAL_PB = 0x800f1c0010012c3full;
+static const uint64_t TXIRLM_REGS_TX_IMPCAL_NVAL_PB = 0x800f1dc010012c3full;
 
 static const uint32_t TXIRLM_REGS_TX_IMPCAL_NVAL_PB_TX_ZCAL_N = 48;
 static const uint32_t TXIRLM_REGS_TX_IMPCAL_NVAL_PB_TX_ZCAL_N_LEN = 9;
 // pauc/reg00004.H
 
-static const uint64_t TXIRLM_REGS_TX_IMPCAL_SWO3_PB = 0x800f440010012c3full;
+static const uint64_t TXIRLM_REGS_TX_IMPCAL_SWO3_PB = 0x800f45c010012c3full;
 
 static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO3_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XN_0_15 = 48;
 static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO3_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XN_0_15_LEN = 16;
 // pauc/reg00004.H
 
-static const uint64_t TXIRLM_REGS_ZCAL_FIR_PB = 0x800f880010012c3full;
+static const uint64_t TXIRLM_REGS_ZCAL_FIR_PB = 0x800f89c010012c3full;
 
 static const uint32_t TXIRLM_REGS_ZCAL_FIR_PB_ZCAL_FIR_ERRS_RO_SIGNAL = 48;
 static const uint32_t TXIRLM_REGS_ZCAL_FIR_PB_ZCAL_FIR_ERRS_RO_SIGNAL_LEN = 2;

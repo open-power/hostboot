@@ -543,7 +543,7 @@ fapi2::ReturnCode initQmeBoot(
 
         //Kick off block copy
         l_qmcrReg.flush<0>().setBit( QME_QMCR_BCECSR_OVERRIDE_EN );
-        FAPI_TRY( putScom( l_eq_mc_or, QME_QMCR_WO_OR, l_qmcrReg ) );
+        FAPI_TRY( putScom( l_eq_mc_or, QME_QMCR_SCOM2, l_qmcrReg ) );
 
         FAPI_TRY( putScom( l_eq_mc_or, QME_BCECSR, l_bceCsrReg ) );
         FAPI_INF( "QME Hcode Transfer Initiated" );

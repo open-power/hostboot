@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -151,8 +151,10 @@ static const uint32_t PIPEDINCTL0_PHY0_MPLLA_FORCE_ACK = 63;
 
 static const uint64_t PIPEDOUTCTL3 = 0x08011517ull;
 
-static const uint32_t PIPEDOUTCTL3_RESERVED_63_0 = 0;
-static const uint32_t PIPEDOUTCTL3_RESERVED_63_0_LEN = 64;
+static const uint32_t PIPEDOUTCTL3_PHY1_HANDSHAKE = 0;
+static const uint32_t PIPEDOUTCTL3_PHY0_HANDSHAKE = 1;
+static const uint32_t PIPEDOUTCTL3_RESERVED_61_0 = 2;
+static const uint32_t PIPEDOUTCTL3_RESERVED_61_0_LEN = 62;
 // pec/reg00001.H
 
 static const uint64_t RECOV_INTERRUPT_REG = 0x080f001bull;

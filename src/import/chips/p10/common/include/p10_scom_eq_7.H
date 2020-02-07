@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,8 +40,6 @@ namespace eq
 
 
 static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_ONE_SHOT_MODE = 0x20018323ull;
-
-static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_ONE_SHOT_MODE_SET_ONE_SHOT_MD_SET1 = 1;
 // eq/reg00007.H
 
 static const uint64_t CLK_ADJ_01_DCADJ_WRAP_PHASE_MEASUREMENT = 0x20014318ull;
@@ -52,6 +50,12 @@ static const uint32_t CLK_ADJ_01_DCADJ_WRAP_PHASE_MEASUREMENT_2_VAL_LEN = 7;
 static const uint32_t CLK_ADJ_01_DCADJ_WRAP_PHASE_MEASUREMENT_3_VAL = 8;
 static const uint32_t CLK_ADJ_01_DCADJ_WRAP_PHASE_MEASUREMENT_4_VAL = 9;
 static const uint32_t CLK_ADJ_01_DCADJ_WRAP_PHASE_MEASUREMENT_4_VAL_LEN = 7;
+// eq/reg00007.H
+
+static const uint64_t CLK_ADJ_01_DCADJ_WRAP_SET_ENABLE_OVERRIDE = 0x20014312ull;
+
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SET_ENABLE_OVERRIDE_ENA = 0;
+static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SET_ENABLE_OVERRIDE_VAL = 1;
 // eq/reg00007.H
 
 static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_CACHE_OVERRIDE = 0x20014327ull;
@@ -71,6 +75,12 @@ static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_PDLYS = 0x20
 static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_PDLYS_CACHE_PDLYS_INVERT = 0;
 // eq/reg00007.H
 
+static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CACHE_SYNC_ENABLE = 0x20012331ull;
+
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CACHE_SYNC_ENABLE_ENABLE_OVERRIDE = 0;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CACHE_SYNC_ENABLE_VALUE_OVERRIDE = 1;
+// eq/reg00007.H
+
 static const uint64_t CLK_ADJ_03_DCADJ_WRAP_SET_DEC = 0x20011310ull;
 
 static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_DEC_DCC_VALUE = 0;
@@ -78,8 +88,74 @@ static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_DEC_DCC_VALUE_LEN = 8;
 // eq/reg00007.H
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_ONE_SHOT_MODE = 0x20011323ull;
+// eq/reg00007.H
 
-static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_ONE_SHOT_MODE_SET_ONE_SHOT_MD_SET1 = 1;
+static const uint64_t EPS_FIR_LOCAL_WOF = 0x20040108ull;
+
+static const uint32_t EPS_FIR_LOCAL_WOF_00 = 0;
+static const uint32_t EPS_FIR_LOCAL_WOF_01 = 1;
+static const uint32_t EPS_FIR_LOCAL_WOF_02 = 2;
+static const uint32_t EPS_FIR_LOCAL_WOF_03 = 3;
+static const uint32_t EPS_FIR_LOCAL_WOF_04 = 4;
+static const uint32_t EPS_FIR_LOCAL_WOF_05 = 5;
+static const uint32_t EPS_FIR_LOCAL_WOF_06 = 6;
+static const uint32_t EPS_FIR_LOCAL_WOF_07 = 7;
+static const uint32_t EPS_FIR_LOCAL_WOF_08 = 8;
+static const uint32_t EPS_FIR_LOCAL_WOF_09 = 9;
+static const uint32_t EPS_FIR_LOCAL_WOF_10 = 10;
+static const uint32_t EPS_FIR_LOCAL_WOF_11 = 11;
+static const uint32_t EPS_FIR_LOCAL_WOF_12 = 12;
+static const uint32_t EPS_FIR_LOCAL_WOF_13 = 13;
+static const uint32_t EPS_FIR_LOCAL_WOF_14 = 14;
+static const uint32_t EPS_FIR_LOCAL_WOF_15 = 15;
+static const uint32_t EPS_FIR_LOCAL_WOF_16 = 16;
+static const uint32_t EPS_FIR_LOCAL_WOF_17 = 17;
+static const uint32_t EPS_FIR_LOCAL_WOF_18 = 18;
+static const uint32_t EPS_FIR_LOCAL_WOF_19 = 19;
+static const uint32_t EPS_FIR_LOCAL_WOF_20 = 20;
+static const uint32_t EPS_FIR_LOCAL_WOF_21 = 21;
+static const uint32_t EPS_FIR_LOCAL_WOF_22 = 22;
+static const uint32_t EPS_FIR_LOCAL_WOF_23 = 23;
+static const uint32_t EPS_FIR_LOCAL_WOF_24 = 24;
+static const uint32_t EPS_FIR_LOCAL_WOF_25 = 25;
+static const uint32_t EPS_FIR_LOCAL_WOF_26 = 26;
+static const uint32_t EPS_FIR_LOCAL_WOF_27 = 27;
+static const uint32_t EPS_FIR_LOCAL_WOF_28 = 28;
+static const uint32_t EPS_FIR_LOCAL_WOF_29 = 29;
+static const uint32_t EPS_FIR_LOCAL_WOF_30 = 30;
+static const uint32_t EPS_FIR_LOCAL_WOF_31 = 31;
+static const uint32_t EPS_FIR_LOCAL_WOF_32 = 32;
+static const uint32_t EPS_FIR_LOCAL_WOF_33 = 33;
+static const uint32_t EPS_FIR_LOCAL_WOF_34 = 34;
+static const uint32_t EPS_FIR_LOCAL_WOF_35 = 35;
+static const uint32_t EPS_FIR_LOCAL_WOF_36 = 36;
+static const uint32_t EPS_FIR_LOCAL_WOF_37 = 37;
+static const uint32_t EPS_FIR_LOCAL_WOF_38 = 38;
+static const uint32_t EPS_FIR_LOCAL_WOF_39 = 39;
+static const uint32_t EPS_FIR_LOCAL_WOF_40 = 40;
+static const uint32_t EPS_FIR_LOCAL_WOF_41 = 41;
+static const uint32_t EPS_FIR_LOCAL_WOF_42 = 42;
+static const uint32_t EPS_FIR_LOCAL_WOF_43 = 43;
+static const uint32_t EPS_FIR_LOCAL_WOF_44 = 44;
+static const uint32_t EPS_FIR_LOCAL_WOF_45 = 45;
+static const uint32_t EPS_FIR_LOCAL_WOF_46 = 46;
+static const uint32_t EPS_FIR_LOCAL_WOF_47 = 47;
+static const uint32_t EPS_FIR_LOCAL_WOF_48 = 48;
+static const uint32_t EPS_FIR_LOCAL_WOF_49 = 49;
+static const uint32_t EPS_FIR_LOCAL_WOF_50 = 50;
+static const uint32_t EPS_FIR_LOCAL_WOF_51 = 51;
+static const uint32_t EPS_FIR_LOCAL_WOF_52 = 52;
+static const uint32_t EPS_FIR_LOCAL_WOF_53 = 53;
+static const uint32_t EPS_FIR_LOCAL_WOF_54 = 54;
+static const uint32_t EPS_FIR_LOCAL_WOF_55 = 55;
+static const uint32_t EPS_FIR_LOCAL_WOF_56 = 56;
+static const uint32_t EPS_FIR_LOCAL_WOF_57 = 57;
+static const uint32_t EPS_FIR_LOCAL_WOF_58 = 58;
+static const uint32_t EPS_FIR_LOCAL_WOF_59 = 59;
+static const uint32_t EPS_FIR_LOCAL_WOF_60 = 60;
+static const uint32_t EPS_FIR_LOCAL_WOF_61 = 61;
+static const uint32_t EPS_FIR_LOCAL_WOF_62 = 62;
+static const uint32_t EPS_FIR_LOCAL_WOF_63 = 63;
 // eq/reg00007.H
 
 static const uint64_t EPS_THERM_WSUB_CONTROL_REG = 0x20050012ull;
@@ -306,8 +382,8 @@ static const uint32_t QME_QHTTRIG_PAUSE = 2;
 // eq/reg00007.H
 
 static const uint64_t QME_QMCR = 0x200e0088ull;
+static const uint64_t QME_QMCR_SCOM2 = 0x200e008aull;
 static const uint64_t QME_QMCR_WO_CLEAR = 0x200e008bull;
-static const uint64_t QME_QMCR_WO_OR = 0x200e008aull;
 
 static const uint32_t QME_QMCR_PMCR_OVERRIDE_EN = 0;
 static const uint32_t QME_QMCR_PSCR_OVERRIDE_EN = 1;
@@ -323,6 +399,8 @@ static const uint32_t QME_QMCR_FUSED_CORE_PAIR_MODE = 10;
 static const uint32_t QME_QMCR_CYCLE_REPRO_MODE = 11;
 static const uint32_t QME_QMCR_QUEUED_WR_EN = 12;
 static const uint32_t QME_QMCR_QUEUED_RD_EN = 13;
+static const uint32_t QME_QMCR_RESET_IMPRECISE_QERR = 14;
+static const uint32_t QME_QMCR_RESET_PB_RAMP = 15;
 static const uint32_t QME_QMCR_LOPRI_STOP_WKUP_SEL = 16;
 static const uint32_t QME_QMCR_LOPRI_STOP_WKUP_SEL_LEN = 4;
 static const uint32_t QME_QMCR_LOPRI_STOP_ENTRY_SEL = 20;
@@ -331,7 +409,7 @@ static const uint32_t QME_QMCR_WRITE_PROTECT_ENABLE = 24;
 static const uint32_t QME_QMCR_TTSR_READ_ENABLE = 25;
 static const uint32_t QME_QMCR_PTSR_READ_ENABLE = 26;
 static const uint32_t QME_QMCR_RESET_QME_PCB_MASTER_INTERFACE = 27;
-static const uint32_t QME_QMCR_SPARE = 28;
+static const uint32_t QME_QMCR_OCP_REQUEST_ENABLE = 28;
 static const uint32_t QME_QMCR_STOP_SHIFTREG_OVERRIDE_EN = 29;
 static const uint32_t QME_QMCR_CPMS_PG_CLKOFF_DISABLE = 30;
 static const uint32_t QME_QMCR_CTFS_PG_CLKOFF_DISABLE = 31;
@@ -344,13 +422,6 @@ static const uint32_t QME_QMCR_SPARE2_LEN = 4;
 static const uint32_t QME_QMCR_FUSED_CORE_MODE = 47;
 static const uint32_t QME_QMCR_CORE_PARTIAL_GOOD = 60;
 static const uint32_t QME_QMCR_CORE_PARTIAL_GOOD_LEN = 4;
-// eq/reg00007.H
-
-static const uint64_t QME_RS4DBGC = 0x200e0154ull;
-
-static const uint32_t QME_RS4DBGC_SCAN_DATA_OUT = 0;
-static const uint32_t QME_RS4DBGC_SCAN_DATA_OUT_LEN = 56;
-static const uint32_t QME_RS4DBGC_LAST_CMD_TYPE = 63;
 // eq/reg00007.H
 
 static const uint64_t QME_SCOM_XIDBGINF = 0x200e023cull;

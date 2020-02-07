@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -97,6 +97,12 @@ static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_FMS_HIST_3
 static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_FMS_HIST_3_LEN = 4;
 // eq/reg00013.H
 
+static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CORE_SYNC_ENABLE = 0x20014330ull;
+
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CORE_SYNC_ENABLE_ENABLE_OVERRIDE = 0;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_OVERRIDE_CORE_SYNC_ENABLE_VALUE_OVERRIDE = 1;
+// eq/reg00013.H
+
 static const uint64_t CLK_ADJ_02_DCADJ_WRAP_SET_SINGLE_STEP_MODE = 0x20012304ull;
 
 static const uint32_t CLK_ADJ_02_DCADJ_WRAP_SET_SINGLE_STEP_MODE_ET_SINGLE_STEP_MD_SET = 0;
@@ -113,7 +119,11 @@ static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_CACHE_OVERRIDE_VALUE_LEN = 4;
 
 static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE = 0x20012321ull;
 
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_SET_HOLD_MD = 3;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_SINGLE_STEP_MD_SET = 0;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_ONE_SHOT_MD_SET = 1;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_ADJUST_MD_SET = 2;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_HOLD_MD_SET = 3;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_INIT_MD_SET = 4;
 // eq/reg00013.H
 
 static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_PDLYS = 0x2001232cull;
@@ -316,7 +326,7 @@ static const uint32_t QMETRA0_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
 static const uint32_t QMETRA0_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
 // eq/reg00013.H
 
-static const uint64_t QMETRA0_TR1_CONFIG_9 = 0x20018429ull;
+static const uint64_t QMETRA0_TR1_CONFIG_9 = 0x20018449ull;
 
 static const uint32_t QMETRA0_TR1_CONFIG_9_DISABLE_COMPRESSION = 0;
 static const uint32_t QMETRA0_TR1_CONFIG_9_ERROR_BIT_COMPRESSION_CARE_MASK = 1;

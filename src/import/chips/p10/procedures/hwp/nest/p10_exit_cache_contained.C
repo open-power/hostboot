@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -266,10 +266,10 @@ p10_exit_cache_contained_add_mcd_base_inits(
                  "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_PRESENT_GROUPS)");
 
         FAPI_TRY(PREP_MCD_BANK0_VGC(i_target));
-        SET_MCD_BANK0_VGC_BANK0_MCD_P10_AVAIL_GROUPS(l_fabric_present_groups, l_mcd_vgc_data);
-        SET_MCD_BANK0_VGC_BANK0_MCD_P10_AVAIL_GROUPS(l_valid_mask, l_mcd_vgc_valid_mask);
-        SET_MCD_BANK0_VGC_BANK0_MCD_HANG_POLL_ENABLE(l_mcd_vgc_data);
-        SET_MCD_BANK0_VGC_BANK0_MCD_HANG_POLL_ENABLE(l_mcd_vgc_valid_mask);
+        SET_MCD_BANK0_VGC_P10_AVAIL_GROUPS(l_fabric_present_groups, l_mcd_vgc_data);
+        SET_MCD_BANK0_VGC_P10_AVAIL_GROUPS(l_valid_mask, l_mcd_vgc_valid_mask);
+        SET_MCD_BANK0_VGC_HANG_POLL_ENABLE(l_mcd_vgc_data);
+        SET_MCD_BANK0_VGC_HANG_POLL_ENABLE(l_mcd_vgc_valid_mask);
 
         FAPI_TRY(p10_gen_xscom_init(i_target,
                                     l_cu_pairing,

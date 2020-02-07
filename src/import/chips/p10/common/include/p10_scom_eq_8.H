@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -117,26 +117,24 @@ static const uint32_t CLK_ADJ_01_DCADJ_WRAP_SINGLE_STEP_COUNT_STEP_COUNT_LEN = 1
 
 static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA = 0x20014339ull;
 
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CORE_IS_LATE = 3;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CORE_IS_LATE_HIST = 4;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CORE_IS_LATE_HIST_LEN = 4;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CACHE_IS_LATE = 11;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CACHE_IS_LATE_HIST = 12;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CACHE_IS_LATE_HIST_LEN = 4;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CORE_PDLY_CONFIG = 16;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CORE_PDLY_CONFIG_LEN = 4;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CACHE_PDLY_CONFIG = 20;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_CACHE_PDLY_CONFIG_LEN = 4;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_ORE_IS_LATE = 3;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_ORE_IS_LATE_HIST = 4;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_ORE_IS_LATE_HIST_LEN = 4;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_ACHE_IS_LATE = 11;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_ACHE_IS_LATE_HIST = 12;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SENSOR_DATA_ACHE_IS_LATE_HIST_LEN = 4;
 // eq/reg00008.H
 
 static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE = 0x20014321ull;
 
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_SET_HOLD_MD = 3;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_SINGLE_STEP_MD_SET = 0;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_ONE_SHOT_MD_SET = 1;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_ADJUST_MD_SET = 2;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_HOLD_MD_SET = 3;
+static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_HOLD_MODE_INIT_MD_SET = 4;
 // eq/reg00008.H
 
 static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_ONE_SHOT_MODE = 0x20014323ull;
-
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_ONE_SHOT_MODE_SET_ONE_SHOT_MD_SET1 = 1;
 // eq/reg00008.H
 
 static const uint64_t CLK_ADJ_02_DCADJ_WRAP_SET_COMP_DLY = 0x2001230bull;
@@ -160,8 +158,6 @@ static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_PDLY_FSM_STATES_ACHE_PDLY_STA
 // eq/reg00008.H
 
 static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_ONE_SHOT_MODE = 0x20012323ull;
-
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_ONE_SHOT_MODE_SET_ONE_SHOT_MD_SET1 = 1;
 // eq/reg00008.H
 
 static const uint64_t CLK_ADJ_03_DCADJ_WRAP_SET_DAC_DLY = 0x2001130aull;
@@ -192,7 +188,11 @@ static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_INC_DEC_FSM_STATES_FMS_HIST_3
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE = 0x20011322ull;
 
-static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE_SET_ADJUST_MD = 2;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE_SINGLE_STEP_MD_SET = 0;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE_ONE_SHOT_MD_SET = 1;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE_ADJUST_MD_SET = 2;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE_HOLD_MD_SET = 3;
+static const uint32_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE_INIT_MD_SET = 4;
 // eq/reg00008.H
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_IS_LATE = 0x2001132aull;
@@ -425,6 +425,8 @@ static const uint32_t QME_RVCR_RVID_VALUE_LEN = 7;
 
 static const uint64_t QME_SCOM_XIRAMRA = 0x200e0204ull;
 
+static const uint32_t QME_SCOM_XIRAMRA_QME_SCOM_XIXCR_XCR = 1;
+static const uint32_t QME_SCOM_XIRAMRA_QME_SCOM_XIXCR_XCR_LEN = 3;
 static const uint32_t QME_SCOM_XIRAMRA_SPRG0 = 32;
 static const uint32_t QME_SCOM_XIRAMRA_SPRG0_LEN = 32;
 // eq/reg00008.H

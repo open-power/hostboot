@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2124,137 +2124,47 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_PIPEDINCTL2_RESERVED_63_4(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_PIPEDINCTL2_RESERVED_63_0(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PIPEDINCTL2));
 #endif
-    return o_data.insertFromRight<PIPEDINCTL2_RESERVED_63_4,
-           PIPEDINCTL2_RESERVED_63_4_LEN>(i_data);
+    return o_data.insertFromRight<PIPEDINCTL2_RESERVED_63_0,
+           PIPEDINCTL2_RESERVED_63_0_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PIPEDINCTL2_RESERVED_63_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PIPEDINCTL2_RESERVED_63_0 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_PIPEDINCTL2_RESERVED_63_4(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_PIPEDINCTL2_RESERVED_63_0(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PIPEDINCTL2));
 #endif
-    return o_data.insertFromRight<PIPEDINCTL2_RESERVED_63_4,
-           PIPEDINCTL2_RESERVED_63_4_LEN>(i_data);
+    return o_data.insertFromRight<PIPEDINCTL2_RESERVED_63_0,
+           PIPEDINCTL2_RESERVED_63_0_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PIPEDINCTL2_RESERVED_63_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PIPEDINCTL2_RESERVED_63_0 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_PIPEDINCTL2_RESERVED_63_4(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_PIPEDINCTL2_RESERVED_63_0(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(PIPEDINCTL2));
 #endif
-    return i_data.extractToRight<PIPEDINCTL2_RESERVED_63_4,
-           PIPEDINCTL2_RESERVED_63_4_LEN>(o_data);
+    return i_data.extractToRight<PIPEDINCTL2_RESERVED_63_0,
+           PIPEDINCTL2_RESERVED_63_0_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PIPEDINCTL2_RESERVED_63_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PIPEDINCTL2_PHY1_DTB(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PIPEDINCTL2));
-#endif
-    return o_data.insertFromRight<PIPEDINCTL2_PHY1_DTB,
-           PIPEDINCTL2_PHY1_DTB_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PIPEDINCTL2_PHY1_DTB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PIPEDINCTL2_PHY1_DTB(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PIPEDINCTL2));
-#endif
-    return o_data.insertFromRight<PIPEDINCTL2_PHY1_DTB,
-           PIPEDINCTL2_PHY1_DTB_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PIPEDINCTL2_PHY1_DTB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PIPEDINCTL2_PHY1_DTB(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PIPEDINCTL2));
-#endif
-    return i_data.extractToRight<PIPEDINCTL2_PHY1_DTB,
-           PIPEDINCTL2_PHY1_DTB_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PIPEDINCTL2_PHY1_DTB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PIPEDINCTL2_PHY0_DTB(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PIPEDINCTL2));
-#endif
-    return o_data.insertFromRight<PIPEDINCTL2_PHY0_DTB,
-           PIPEDINCTL2_PHY0_DTB_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PIPEDINCTL2_PHY0_DTB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PIPEDINCTL2_PHY0_DTB(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PIPEDINCTL2));
-#endif
-    return o_data.insertFromRight<PIPEDINCTL2_PHY0_DTB,
-           PIPEDINCTL2_PHY0_DTB_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PIPEDINCTL2_PHY0_DTB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PIPEDINCTL2_PHY0_DTB(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(PIPEDINCTL2));
-#endif
-    return i_data.extractToRight<PIPEDINCTL2_PHY0_DTB,
-           PIPEDINCTL2_PHY0_DTB_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PIPEDINCTL2_PHY0_DTB chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access PIPEDINCTL2_RESERVED_63_0 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

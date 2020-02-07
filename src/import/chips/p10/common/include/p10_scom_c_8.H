@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -170,11 +170,11 @@ static const uint64_t EC_PC_COMMON_SPR_V3_HMER_RW_WAND = 0x20020495ull;
 static const uint64_t EC_PC_COMMON_SPR_V3_HMER_WO_OR = 0x20020491ull;
 
 static const uint32_t EC_PC_COMMON_SPR_V3_HMER_V3_HMER_MALFUNCTION_ALERT = 0;
-static const uint32_t EC_PC_COMMON_SPR_V3_HMER_V3_HMER_QME_REQUEST = 1;
+static const uint32_t EC_PC_COMMON_SPR_V3_HMER_SPARE_1 = 1;
 static const uint32_t EC_PC_COMMON_SPR_V3_HMER_V3_HMER_PROC_RCVY_DONE = 2;
-static const uint32_t EC_PC_COMMON_SPR_V3_HMER_SPARE_3 = 3;
+static const uint32_t EC_PC_COMMON_SPR_V3_HMER_V3_HMER_SUSPEND_MODE = 3;
 static const uint32_t EC_PC_COMMON_SPR_V3_HMER_V3_HMER_TFAC_ERR = 4;
-static const uint32_t EC_PC_COMMON_SPR_V3_HMER_TFMR_PARITY_ERR = 5;
+static const uint32_t EC_PC_COMMON_SPR_V3_HMER_V3_HMER_TFX_ERR = 5;
 static const uint32_t EC_PC_COMMON_SPR_V3_HMER_SPARE_6 = 6;
 static const uint32_t EC_PC_COMMON_SPR_V3_HMER_SPARE_7 = 7;
 static const uint32_t EC_PC_COMMON_SPR_V3_HMER_V3_HMER_XSCOM_FAIL = 8;
@@ -338,7 +338,9 @@ static const uint32_t QME_QOSR_2_QOS_INDEX_LEN = 6;
 static const uint32_t QME_QOSR_3_QOS_INDEX = 26;
 static const uint32_t QME_QOSR_3_QOS_INDEX_LEN = 6;
 static const uint32_t QME_QOSR_0_DTC_INDEX = 34;
-static const uint32_t QME_QOSR_0_DTC_INDEX_LEN = 4;
+static const uint32_t QME_QOSR_0_DTC_INDEX_LEN = 6;
+static const uint32_t QME_QOSR_1_DTC_INDEX = 42;
+static const uint32_t QME_QOSR_1_DTC_INDEX_LEN = 6;
 static const uint32_t QME_QOSR_2_DTC_INDEX = 50;
 static const uint32_t QME_QOSR_2_DTC_INDEX_LEN = 6;
 static const uint32_t QME_QOSR_3_DTC_INDEX = 58;

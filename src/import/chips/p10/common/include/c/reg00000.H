@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2512,135 +2512,6 @@ static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_HMEER_ENABLE(fapi2::
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_HMEER_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_EC_PC_PMU_SPRCOR_INV_ERATE(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = EC_PC_PMU_SPRCOR_INV_ERATE;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_EC_PC_PMU_SPRCOR_INV_ERATE(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = EC_PC_PMU_SPRCOR_INV_ERATE;
-#endif
-    return fapi2::getScom(i_target, EC_PC_PMU_SPRCOR_INV_ERATE, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_EC_PC_PMU_SPRCOR_INV_ERATE(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(EC_PC_PMU_SPRCOR_INV_ERATE));
-#endif
-    return fapi2::putScom(i_target, EC_PC_PMU_SPRCOR_INV_ERATE, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_PMU_SPRCOR_INV_ERATE_INVALIDATE_ERAT(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_PMU_SPRCOR_INV_ERATE));
-#endif
-    return o_data.insertFromRight<EC_PC_PMU_SPRCOR_INV_ERATE_INVALIDATE_ERAT,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_PMU_SPRCOR_INV_ERATE_INVALIDATE_ERAT chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_PMU_SPRCOR_INV_ERATE_INVALIDATE_ERAT(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_PMU_SPRCOR_INV_ERATE));
-#endif
-    return o_data.insertFromRight<EC_PC_PMU_SPRCOR_INV_ERATE_INVALIDATE_ERAT,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_PMU_SPRCOR_INV_ERATE_INVALIDATE_ERAT chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_PMU_SPRCOR_INV_ERATE_INVALIDATE_ERAT(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_PMU_SPRCOR_INV_ERATE));
-#endif
-    return o_data.setBit<EC_PC_PMU_SPRCOR_INV_ERATE_INVALIDATE_ERAT>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_PMU_SPRCOR_INV_ERATE_INVALIDATE_ERAT chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_PMU_SPRCOR_INV_ERATE_INVALIDATE_ERAT(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_PMU_SPRCOR_INV_ERATE));
-#endif
-    return o_data.clearBit<EC_PC_PMU_SPRCOR_INV_ERATE_INVALIDATE_ERAT>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_PMU_SPRCOR_INV_ERATE_INVALIDATE_ERAT chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_PMU_SPRCOR_INV_ERATE_INVALIDATE_ERAT(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_PMU_SPRCOR_INV_ERATE));
-#endif
-    return i_data.extractToRight<EC_PC_PMU_SPRCOR_INV_ERATE_INVALIDATE_ERAT,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_PMU_SPRCOR_INV_ERATE_INVALIDATE_ERAT chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_EC_PC_PMU_SPRCOR_INV_ERATE_INVALIDATE_ERAT(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_PMU_SPRCOR_INV_ERATE));
-#endif
-    return i_data.getBit<EC_PC_PMU_SPRCOR_INV_ERATE_INVALIDATE_ERAT>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_PMU_SPRCOR_INV_ERATE_INVALIDATE_ERAT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

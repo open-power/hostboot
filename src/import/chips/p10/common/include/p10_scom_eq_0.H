@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,6 +69,12 @@ static const uint32_t CLK_ADJ_02_DCADJ_WRAP_SET_DEC_DCC_VALUE = 0;
 static const uint32_t CLK_ADJ_02_DCADJ_WRAP_SET_DEC_DCC_VALUE_LEN = 8;
 // eq/reg00000.H
 
+static const uint64_t CLK_ADJ_02_DCADJ_WRAP_SET_ENABLE_OVERRIDE = 0x20012312ull;
+
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_SET_ENABLE_OVERRIDE_ENA = 0;
+static const uint32_t CLK_ADJ_02_DCADJ_WRAP_SET_ENABLE_OVERRIDE_VAL = 1;
+// eq/reg00000.H
+
 static const uint64_t CLK_ADJ_02_DCADJ_WRAP_SET_INC_DCC = 0x2001230eull;
 // eq/reg00000.H
 
@@ -77,12 +83,11 @@ static const uint64_t CLK_ADJ_02_DCADJ_WRAP_SET_INIT_MODE = 0x20012300ull;
 
 static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE = 0x20012322ull;
 
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE_SET_ADJUST_MD = 2;
-// eq/reg00000.H
-
-static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_SYNC_ENABLE = 0x20012330ull;
-
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_INVERT_CORE_SYNC_ENABLE_CORE_SYNC_ENABLE_INVERT = 0;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE_SINGLE_STEP_MD_SET = 0;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE_ONE_SHOT_MD_SET = 1;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE_ADJUST_MD_SET = 2;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE_HOLD_MD_SET = 3;
+static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_ADJUST_MODE_INIT_MD_SET = 4;
 // eq/reg00000.H
 
 static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES = 0x2001133bull;
@@ -586,7 +591,7 @@ static const uint32_t QMETRA0_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT = 22;
 static const uint32_t QMETRA0_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
 // eq/reg00000.H
 
-static const uint64_t QMETRA0_TR1_CONFIG_4 = 0x20018427ull;
+static const uint64_t QMETRA0_TR1_CONFIG_4 = 0x20018447ull;
 
 static const uint32_t QMETRA0_TR1_CONFIG_4_A = 0;
 static const uint32_t QMETRA0_TR1_CONFIG_4_A_LEN = 24;
@@ -669,21 +674,6 @@ static const uint64_t QME_RCTAR3 = 0x200e019cull;
 
 static const uint32_t QME_RCTAR3_DATA = 0;
 static const uint32_t QME_RCTAR3_DATA_LEN = 64;
-// eq/reg00000.H
-
-static const uint64_t QME_RS4CSR = 0x200e0168ull;
-
-static const uint32_t QME_RS4CSR_BUSY = 0;
-static const uint32_t QME_RS4CSR_ERROR = 1;
-static const uint32_t QME_RS4CSR_SCAN_MODE_OVERRIDE = 5;
-static const uint32_t QME_RS4CSR_SCAN_MODE_OVERRIDE_LEN = 2;
-static const uint32_t QME_RS4CSR_INJECT_ERR = 7;
-static const uint32_t QME_RS4CSR_ERR_CARE_MASK_INVALID = 9;
-static const uint32_t QME_RS4CSR_ERR_CHECKWORD_MISMATCH = 10;
-static const uint32_t QME_RS4CSR_ERR_SCAN_MODE_INVALID = 11;
-static const uint32_t QME_RS4CSR_ERR_ROTATE_AMOUNT = 12;
-static const uint32_t QME_RS4CSR_BAD_SCOM_RC = 13;
-static const uint32_t QME_RS4CSR_BAD_SCOM_RC_LEN = 3;
 // eq/reg00000.H
 
 static const uint64_t QME_SCOM_PBTXTR2 = 0x200e0042ull;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -750,86 +750,86 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_CERR_SPARE_ERR1(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_CERR_PITCH_SATURATED(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return o_data.insertFromRight<CPMS_CERR_SPARE_ERR1,
+    return o_data.insertFromRight<CPMS_CERR_PITCH_SATURATED,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_CERR_SPARE_ERR1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_CERR_PITCH_SATURATED chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_CERR_SPARE_ERR1(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_CERR_PITCH_SATURATED(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return o_data.insertFromRight<CPMS_CERR_SPARE_ERR1,
+    return o_data.insertFromRight<CPMS_CERR_PITCH_SATURATED,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_CERR_SPARE_ERR1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_CERR_PITCH_SATURATED chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_CERR_SPARE_ERR1(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPMS_CERR_PITCH_SATURATED(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return o_data.setBit<CPMS_CERR_SPARE_ERR1>();
+    return o_data.setBit<CPMS_CERR_PITCH_SATURATED>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_CERR_SPARE_ERR1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_CERR_PITCH_SATURATED chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CERR_SPARE_ERR1(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CERR_PITCH_SATURATED(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return o_data.clearBit<CPMS_CERR_SPARE_ERR1>();
+    return o_data.clearBit<CPMS_CERR_PITCH_SATURATED>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_CERR_SPARE_ERR1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_CERR_PITCH_SATURATED chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPMS_CERR_SPARE_ERR1(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPMS_CERR_PITCH_SATURATED(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return i_data.extractToRight<CPMS_CERR_SPARE_ERR1,
+    return i_data.extractToRight<CPMS_CERR_PITCH_SATURATED,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_CERR_SPARE_ERR1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_CERR_PITCH_SATURATED chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPMS_CERR_SPARE_ERR1(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPMS_CERR_PITCH_SATURATED(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CPMS_CERR));
 #endif
-    return i_data.getBit<CPMS_CERR_SPARE_ERR1>();
+    return i_data.getBit<CPMS_CERR_PITCH_SATURATED>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_CERR_SPARE_ERR1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_CERR_PITCH_SATURATED chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -912,52 +912,9 @@ static inline fapi2::ReturnCode PUT_CPMS_CUCR(const fapi2::Target<K, M, V>& i_ta
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return fapi2::putScom(i_target, CPMS_CUCR, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_CPMS_CUCR_SCOM1(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = CPMS_CUCR_SCOM1;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_CPMS_CUCR_SCOM1(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = CPMS_CUCR_SCOM1;
-#endif
-    return fapi2::getScom(i_target, CPMS_CUCR_SCOM1, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_CPMS_CUCR_SCOM1(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
-#endif
-    return fapi2::putScom(i_target, CPMS_CUCR_SCOM1, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -998,9 +955,52 @@ static inline fapi2::ReturnCode PUT_CPMS_CUCR_SCOM2(const fapi2::Target<K, M, V>
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return fapi2::putScom(i_target, CPMS_CUCR_SCOM2, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_CPMS_CUCR_WO_CLEAR(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = CPMS_CUCR_WO_CLEAR;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_CPMS_CUCR_WO_CLEAR(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = CPMS_CUCR_WO_CLEAR;
+#endif
+    return fapi2::getScom(i_target, CPMS_CUCR_WO_CLEAR, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_CPMS_CUCR_WO_CLEAR(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
+#endif
+    return fapi2::putScom(i_target, CPMS_CUCR_WO_CLEAR, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -1012,7 +1012,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_ENABLE_CORE_SHADOW(fapi2::b
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_ENABLE_CORE_SHADOW,
            1>(i_data);
@@ -1027,7 +1027,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_ENABLE_CORE_SHADOW(const ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_ENABLE_CORE_SHADOW,
            1>(i_data);
@@ -1041,7 +1041,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_ENABLE_CORE_SHADOW(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.setBit<CPMS_CUCR_ENABLE_CORE_SHADOW>();
 #ifdef SCOM_CHECKING
@@ -1054,7 +1054,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CUCR_ENABLE_CORE_SHADOW(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.clearBit<CPMS_CUCR_ENABLE_CORE_SHADOW>();
 #ifdef SCOM_CHECKING
@@ -1068,7 +1068,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_ENABLE_CORE_SHADOW(fapi2::b
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_ENABLE_CORE_SHADOW,
            1>(o_data);
@@ -1082,7 +1082,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_CUCR_ENABLE_CORE_SHADOW(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.getBit<CPMS_CUCR_ENABLE_CORE_SHADOW>();
 #ifdef SCOM_CHECKING
@@ -1096,7 +1096,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_ENABLE_CORE_SAMPLE(fapi2::b
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_ENABLE_CORE_SAMPLE,
            1>(i_data);
@@ -1111,7 +1111,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_ENABLE_CORE_SAMPLE(const ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_ENABLE_CORE_SAMPLE,
            1>(i_data);
@@ -1125,7 +1125,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_ENABLE_CORE_SAMPLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.setBit<CPMS_CUCR_ENABLE_CORE_SAMPLE>();
 #ifdef SCOM_CHECKING
@@ -1138,7 +1138,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CUCR_ENABLE_CORE_SAMPLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.clearBit<CPMS_CUCR_ENABLE_CORE_SAMPLE>();
 #ifdef SCOM_CHECKING
@@ -1152,7 +1152,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_ENABLE_CORE_SAMPLE(fapi2::b
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_ENABLE_CORE_SAMPLE,
            1>(o_data);
@@ -1166,7 +1166,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_CUCR_ENABLE_CORE_SAMPLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.getBit<CPMS_CUCR_ENABLE_CORE_SAMPLE>();
 #ifdef SCOM_CHECKING
@@ -1180,7 +1180,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_DPT_PER_THREAD_MODE(fapi2::
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_DPT_PER_THREAD_MODE,
            1>(i_data);
@@ -1195,7 +1195,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_DPT_PER_THREAD_MODE(const u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_DPT_PER_THREAD_MODE,
            1>(i_data);
@@ -1209,7 +1209,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_DPT_PER_THREAD_MODE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.setBit<CPMS_CUCR_DPT_PER_THREAD_MODE>();
 #ifdef SCOM_CHECKING
@@ -1222,7 +1222,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CUCR_DPT_PER_THREAD_MODE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.clearBit<CPMS_CUCR_DPT_PER_THREAD_MODE>();
 #ifdef SCOM_CHECKING
@@ -1236,7 +1236,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_DPT_PER_THREAD_MODE(fapi2::
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_DPT_PER_THREAD_MODE,
            1>(o_data);
@@ -1250,7 +1250,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_CUCR_DPT_PER_THREAD_MODE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.getBit<CPMS_CUCR_DPT_PER_THREAD_MODE>();
 #ifdef SCOM_CHECKING
@@ -1264,7 +1264,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_SPARE(fapi2::buffer<uint64_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_SPARE,
            CPMS_CUCR_SPARE_LEN>(i_data);
@@ -1279,7 +1279,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_SPARE(const uint64_t i_data
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_SPARE,
            CPMS_CUCR_SPARE_LEN>(i_data);
@@ -1294,7 +1294,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_SPARE(fapi2::buffer<uint64_
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_SPARE,
            CPMS_CUCR_SPARE_LEN>(o_data);
@@ -1309,7 +1309,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_CORE_MODE_SAMPLE_DISABLE(fa
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_CORE_MODE_SAMPLE_DISABLE,
            1>(i_data);
@@ -1324,7 +1324,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_CORE_MODE_SAMPLE_DISABLE(co
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_CORE_MODE_SAMPLE_DISABLE,
            1>(i_data);
@@ -1338,7 +1338,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_CORE_MODE_SAMPLE_DISABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.setBit<CPMS_CUCR_CORE_MODE_SAMPLE_DISABLE>();
 #ifdef SCOM_CHECKING
@@ -1351,7 +1351,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CUCR_CORE_MODE_SAMPLE_DISABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.clearBit<CPMS_CUCR_CORE_MODE_SAMPLE_DISABLE>();
 #ifdef SCOM_CHECKING
@@ -1365,7 +1365,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_CORE_MODE_SAMPLE_DISABLE(fa
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_CORE_MODE_SAMPLE_DISABLE,
            1>(o_data);
@@ -1379,7 +1379,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_CUCR_CORE_MODE_SAMPLE_DISABLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.getBit<CPMS_CUCR_CORE_MODE_SAMPLE_DISABLE>();
 #ifdef SCOM_CHECKING
@@ -1393,7 +1393,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_STOP01_SAMPLE_ENABLE(fapi2:
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_STOP01_SAMPLE_ENABLE,
            1>(i_data);
@@ -1408,7 +1408,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_STOP01_SAMPLE_ENABLE(const 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_STOP01_SAMPLE_ENABLE,
            1>(i_data);
@@ -1422,7 +1422,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_STOP01_SAMPLE_ENABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.setBit<CPMS_CUCR_STOP01_SAMPLE_ENABLE>();
 #ifdef SCOM_CHECKING
@@ -1435,7 +1435,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CUCR_STOP01_SAMPLE_ENABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.clearBit<CPMS_CUCR_STOP01_SAMPLE_ENABLE>();
 #ifdef SCOM_CHECKING
@@ -1449,7 +1449,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_STOP01_SAMPLE_ENABLE(fapi2:
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_STOP01_SAMPLE_ENABLE,
            1>(o_data);
@@ -1463,7 +1463,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_CUCR_STOP01_SAMPLE_ENABLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.getBit<CPMS_CUCR_STOP01_SAMPLE_ENABLE>();
 #ifdef SCOM_CHECKING
@@ -1477,7 +1477,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_REFRESH_FTC_SHADOW(fapi2::b
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_REFRESH_FTC_SHADOW,
            1>(i_data);
@@ -1492,7 +1492,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_REFRESH_FTC_SHADOW(const ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_REFRESH_FTC_SHADOW,
            1>(i_data);
@@ -1506,7 +1506,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_REFRESH_FTC_SHADOW(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.setBit<CPMS_CUCR_REFRESH_FTC_SHADOW>();
 #ifdef SCOM_CHECKING
@@ -1519,7 +1519,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CUCR_REFRESH_FTC_SHADOW(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.clearBit<CPMS_CUCR_REFRESH_FTC_SHADOW>();
 #ifdef SCOM_CHECKING
@@ -1533,7 +1533,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_REFRESH_FTC_SHADOW(fapi2::b
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_REFRESH_FTC_SHADOW,
            1>(o_data);
@@ -1547,7 +1547,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_CUCR_REFRESH_FTC_SHADOW(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.getBit<CPMS_CUCR_REFRESH_FTC_SHADOW>();
 #ifdef SCOM_CHECKING
@@ -1561,7 +1561,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_REFRESH_PP_SHADOW(fapi2::bu
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_REFRESH_PP_SHADOW,
            1>(i_data);
@@ -1576,7 +1576,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_REFRESH_PP_SHADOW(const uin
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_REFRESH_PP_SHADOW,
            1>(i_data);
@@ -1590,7 +1590,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_REFRESH_PP_SHADOW(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.setBit<CPMS_CUCR_REFRESH_PP_SHADOW>();
 #ifdef SCOM_CHECKING
@@ -1603,7 +1603,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CUCR_REFRESH_PP_SHADOW(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.clearBit<CPMS_CUCR_REFRESH_PP_SHADOW>();
 #ifdef SCOM_CHECKING
@@ -1617,7 +1617,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_REFRESH_PP_SHADOW(fapi2::bu
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_REFRESH_PP_SHADOW,
            1>(o_data);
@@ -1631,7 +1631,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_CUCR_REFRESH_PP_SHADOW(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.getBit<CPMS_CUCR_REFRESH_PP_SHADOW>();
 #ifdef SCOM_CHECKING
@@ -1645,7 +1645,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_REFRESH_DPT_SETTINGS(fapi2:
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_REFRESH_DPT_SETTINGS,
            1>(i_data);
@@ -1660,7 +1660,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_REFRESH_DPT_SETTINGS(const 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_REFRESH_DPT_SETTINGS,
            1>(i_data);
@@ -1674,7 +1674,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_REFRESH_DPT_SETTINGS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.setBit<CPMS_CUCR_REFRESH_DPT_SETTINGS>();
 #ifdef SCOM_CHECKING
@@ -1687,7 +1687,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CUCR_REFRESH_DPT_SETTINGS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.clearBit<CPMS_CUCR_REFRESH_DPT_SETTINGS>();
 #ifdef SCOM_CHECKING
@@ -1701,7 +1701,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_REFRESH_DPT_SETTINGS(fapi2:
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_REFRESH_DPT_SETTINGS,
            1>(o_data);
@@ -1715,7 +1715,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_CUCR_REFRESH_DPT_SETTINGS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.getBit<CPMS_CUCR_REFRESH_DPT_SETTINGS>();
 #ifdef SCOM_CHECKING
@@ -1729,7 +1729,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_INDUCED_DROOP_COUNT(fapi2::
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_INDUCED_DROOP_COUNT,
            CPMS_CUCR_INDUCED_DROOP_COUNT_LEN>(i_data);
@@ -1744,7 +1744,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_INDUCED_DROOP_COUNT(const u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_INDUCED_DROOP_COUNT,
            CPMS_CUCR_INDUCED_DROOP_COUNT_LEN>(i_data);
@@ -1759,7 +1759,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_INDUCED_DROOP_COUNT(fapi2::
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_INDUCED_DROOP_COUNT,
            CPMS_CUCR_INDUCED_DROOP_COUNT_LEN>(o_data);
@@ -1774,7 +1774,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_PCB_SKEW_ADJ(fapi2::buffer<
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_PCB_SKEW_ADJ,
            CPMS_CUCR_PCB_SKEW_ADJ_LEN>(i_data);
@@ -1789,7 +1789,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_PCB_SKEW_ADJ(const uint64_t
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_PCB_SKEW_ADJ,
            CPMS_CUCR_PCB_SKEW_ADJ_LEN>(i_data);
@@ -1804,7 +1804,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_PCB_SKEW_ADJ(fapi2::buffer<
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_PCB_SKEW_ADJ,
            CPMS_CUCR_PCB_SKEW_ADJ_LEN>(o_data);
@@ -1819,7 +1819,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_FDCR_UPDATE_INPROGRESS(fapi
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_FDCR_UPDATE_INPROGRESS,
            1>(i_data);
@@ -1834,7 +1834,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_FDCR_UPDATE_INPROGRESS(cons
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_FDCR_UPDATE_INPROGRESS,
            1>(i_data);
@@ -1848,7 +1848,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_FDCR_UPDATE_INPROGRESS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.setBit<CPMS_CUCR_FDCR_UPDATE_INPROGRESS>();
 #ifdef SCOM_CHECKING
@@ -1861,7 +1861,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CUCR_FDCR_UPDATE_INPROGRESS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.clearBit<CPMS_CUCR_FDCR_UPDATE_INPROGRESS>();
 #ifdef SCOM_CHECKING
@@ -1875,7 +1875,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_FDCR_UPDATE_INPROGRESS(fapi
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_FDCR_UPDATE_INPROGRESS,
            1>(o_data);
@@ -1889,7 +1889,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_CUCR_FDCR_UPDATE_INPROGRESS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.getBit<CPMS_CUCR_FDCR_UPDATE_INPROGRESS>();
 #ifdef SCOM_CHECKING
@@ -1903,7 +1903,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_CORE_SAMPLE_ENABLED_LT(fapi
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_CORE_SAMPLE_ENABLED_LT,
            1>(i_data);
@@ -1918,7 +1918,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_CORE_SAMPLE_ENABLED_LT(cons
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_CORE_SAMPLE_ENABLED_LT,
            1>(i_data);
@@ -1932,7 +1932,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_CORE_SAMPLE_ENABLED_LT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.setBit<CPMS_CUCR_CORE_SAMPLE_ENABLED_LT>();
 #ifdef SCOM_CHECKING
@@ -1945,7 +1945,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CUCR_CORE_SAMPLE_ENABLED_LT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.clearBit<CPMS_CUCR_CORE_SAMPLE_ENABLED_LT>();
 #ifdef SCOM_CHECKING
@@ -1959,7 +1959,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_CORE_SAMPLE_ENABLED_LT(fapi
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_CORE_SAMPLE_ENABLED_LT,
            1>(o_data);
@@ -1973,7 +1973,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_CUCR_CORE_SAMPLE_ENABLED_LT(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.getBit<CPMS_CUCR_CORE_SAMPLE_ENABLED_LT>();
 #ifdef SCOM_CHECKING
@@ -1987,7 +1987,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_FTC_SHADOW_STATE(fapi2::buf
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_FTC_SHADOW_STATE,
            CPMS_CUCR_FTC_SHADOW_STATE_LEN>(i_data);
@@ -2002,7 +2002,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_FTC_SHADOW_STATE(const uint
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_FTC_SHADOW_STATE,
            CPMS_CUCR_FTC_SHADOW_STATE_LEN>(i_data);
@@ -2017,7 +2017,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_FTC_SHADOW_STATE(fapi2::buf
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_FTC_SHADOW_STATE,
            CPMS_CUCR_FTC_SHADOW_STATE_LEN>(o_data);
@@ -2032,7 +2032,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_FTC_SHADOW_PENDING(fapi2::b
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_FTC_SHADOW_PENDING,
            CPMS_CUCR_FTC_SHADOW_PENDING_LEN>(i_data);
@@ -2047,7 +2047,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_FTC_SHADOW_PENDING(const ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_FTC_SHADOW_PENDING,
            CPMS_CUCR_FTC_SHADOW_PENDING_LEN>(i_data);
@@ -2062,7 +2062,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_FTC_SHADOW_PENDING(fapi2::b
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_FTC_SHADOW_PENDING,
            CPMS_CUCR_FTC_SHADOW_PENDING_LEN>(o_data);
@@ -2077,7 +2077,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_PP_SHADOW_STATE(fapi2::buff
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_PP_SHADOW_STATE,
            CPMS_CUCR_PP_SHADOW_STATE_LEN>(i_data);
@@ -2092,7 +2092,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_PP_SHADOW_STATE(const uint6
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_PP_SHADOW_STATE,
            CPMS_CUCR_PP_SHADOW_STATE_LEN>(i_data);
@@ -2107,7 +2107,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_PP_SHADOW_STATE(fapi2::buff
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_PP_SHADOW_STATE,
            CPMS_CUCR_PP_SHADOW_STATE_LEN>(o_data);
@@ -2122,7 +2122,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_PP_SHADOW_PENDING(fapi2::bu
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_PP_SHADOW_PENDING,
            CPMS_CUCR_PP_SHADOW_PENDING_LEN>(i_data);
@@ -2137,7 +2137,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_PP_SHADOW_PENDING(const uin
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_PP_SHADOW_PENDING,
            CPMS_CUCR_PP_SHADOW_PENDING_LEN>(i_data);
@@ -2152,7 +2152,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_PP_SHADOW_PENDING(fapi2::bu
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_PP_SHADOW_PENDING,
            CPMS_CUCR_PP_SHADOW_PENDING_LEN>(o_data);
@@ -2167,7 +2167,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_DPT_UPDATE_STATE(fapi2::buf
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_DPT_UPDATE_STATE,
            CPMS_CUCR_DPT_UPDATE_STATE_LEN>(i_data);
@@ -2182,7 +2182,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_DPT_UPDATE_STATE(const uint
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_DPT_UPDATE_STATE,
            CPMS_CUCR_DPT_UPDATE_STATE_LEN>(i_data);
@@ -2197,7 +2197,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_DPT_UPDATE_STATE(fapi2::buf
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_DPT_UPDATE_STATE,
            CPMS_CUCR_DPT_UPDATE_STATE_LEN>(o_data);
@@ -2212,7 +2212,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_DPT_UPDATE_PENDING(fapi2::b
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_DPT_UPDATE_PENDING,
            CPMS_CUCR_DPT_UPDATE_PENDING_LEN>(i_data);
@@ -2227,7 +2227,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_DPT_UPDATE_PENDING(const ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_DPT_UPDATE_PENDING,
            CPMS_CUCR_DPT_UPDATE_PENDING_LEN>(i_data);
@@ -2242,7 +2242,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_DPT_UPDATE_PENDING(fapi2::b
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_DPT_UPDATE_PENDING,
            CPMS_CUCR_DPT_UPDATE_PENDING_LEN>(o_data);
@@ -2257,7 +2257,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_CORE_REFRESH_ACTIVE(fapi2::
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_CORE_REFRESH_ACTIVE,
            CPMS_CUCR_CORE_REFRESH_ACTIVE_LEN>(i_data);
@@ -2272,7 +2272,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_CORE_REFRESH_ACTIVE(const u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_CORE_REFRESH_ACTIVE,
            CPMS_CUCR_CORE_REFRESH_ACTIVE_LEN>(i_data);
@@ -2287,7 +2287,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_CORE_REFRESH_ACTIVE(fapi2::
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_CORE_REFRESH_ACTIVE,
            CPMS_CUCR_CORE_REFRESH_ACTIVE_LEN>(o_data);
@@ -2302,7 +2302,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_DATA_TYPE1_PENDING(fapi
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_QME_DATA_TYPE1_PENDING,
            1>(i_data);
@@ -2317,7 +2317,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_DATA_TYPE1_PENDING(cons
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_QME_DATA_TYPE1_PENDING,
            1>(i_data);
@@ -2331,7 +2331,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_DATA_TYPE1_PENDING(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.setBit<CPMS_CUCR_QME_DATA_TYPE1_PENDING>();
 #ifdef SCOM_CHECKING
@@ -2344,7 +2344,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CUCR_QME_DATA_TYPE1_PENDING(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.clearBit<CPMS_CUCR_QME_DATA_TYPE1_PENDING>();
 #ifdef SCOM_CHECKING
@@ -2358,7 +2358,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_QME_DATA_TYPE1_PENDING(fapi
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_QME_DATA_TYPE1_PENDING,
            1>(o_data);
@@ -2372,7 +2372,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_CUCR_QME_DATA_TYPE1_PENDING(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.getBit<CPMS_CUCR_QME_DATA_TYPE1_PENDING>();
 #ifdef SCOM_CHECKING
@@ -2386,7 +2386,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_DATA_TYPE2_PENDING(fapi
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_QME_DATA_TYPE2_PENDING,
            1>(i_data);
@@ -2401,7 +2401,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_DATA_TYPE2_PENDING(cons
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_QME_DATA_TYPE2_PENDING,
            1>(i_data);
@@ -2415,7 +2415,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_DATA_TYPE2_PENDING(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.setBit<CPMS_CUCR_QME_DATA_TYPE2_PENDING>();
 #ifdef SCOM_CHECKING
@@ -2428,7 +2428,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CUCR_QME_DATA_TYPE2_PENDING(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.clearBit<CPMS_CUCR_QME_DATA_TYPE2_PENDING>();
 #ifdef SCOM_CHECKING
@@ -2442,7 +2442,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_QME_DATA_TYPE2_PENDING(fapi
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_QME_DATA_TYPE2_PENDING,
            1>(o_data);
@@ -2456,7 +2456,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_CUCR_QME_DATA_TYPE2_PENDING(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.getBit<CPMS_CUCR_QME_DATA_TYPE2_PENDING>();
 #ifdef SCOM_CHECKING
@@ -2470,7 +2470,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_DATA_TYPE3_PENDING(fapi
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_QME_DATA_TYPE3_PENDING,
            1>(i_data);
@@ -2485,7 +2485,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_DATA_TYPE3_PENDING(cons
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_QME_DATA_TYPE3_PENDING,
            1>(i_data);
@@ -2499,7 +2499,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_DATA_TYPE3_PENDING(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.setBit<CPMS_CUCR_QME_DATA_TYPE3_PENDING>();
 #ifdef SCOM_CHECKING
@@ -2512,7 +2512,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CUCR_QME_DATA_TYPE3_PENDING(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.clearBit<CPMS_CUCR_QME_DATA_TYPE3_PENDING>();
 #ifdef SCOM_CHECKING
@@ -2526,7 +2526,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_QME_DATA_TYPE3_PENDING(fapi
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_QME_DATA_TYPE3_PENDING,
            1>(o_data);
@@ -2540,7 +2540,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_CUCR_QME_DATA_TYPE3_PENDING(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.getBit<CPMS_CUCR_QME_DATA_TYPE3_PENDING>();
 #ifdef SCOM_CHECKING
@@ -2554,7 +2554,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_TYPE0_EVENTB0_PENDING(f
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_QME_TYPE0_EVENTB0_PENDING,
            1>(i_data);
@@ -2569,7 +2569,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_TYPE0_EVENTB0_PENDING(c
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_QME_TYPE0_EVENTB0_PENDING,
            1>(i_data);
@@ -2583,7 +2583,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_TYPE0_EVENTB0_PENDING(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.setBit<CPMS_CUCR_QME_TYPE0_EVENTB0_PENDING>();
 #ifdef SCOM_CHECKING
@@ -2596,7 +2596,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CUCR_QME_TYPE0_EVENTB0_PENDING(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.clearBit<CPMS_CUCR_QME_TYPE0_EVENTB0_PENDING>();
 #ifdef SCOM_CHECKING
@@ -2610,7 +2610,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_QME_TYPE0_EVENTB0_PENDING(f
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_QME_TYPE0_EVENTB0_PENDING,
            1>(o_data);
@@ -2624,7 +2624,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_CUCR_QME_TYPE0_EVENTB0_PENDING(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.getBit<CPMS_CUCR_QME_TYPE0_EVENTB0_PENDING>();
 #ifdef SCOM_CHECKING
@@ -2638,7 +2638,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_TYPE0_EVENTB1_PENDING(f
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_QME_TYPE0_EVENTB1_PENDING,
            1>(i_data);
@@ -2653,7 +2653,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_TYPE0_EVENTB1_PENDING(c
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_QME_TYPE0_EVENTB1_PENDING,
            1>(i_data);
@@ -2667,7 +2667,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_TYPE0_EVENTB1_PENDING(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.setBit<CPMS_CUCR_QME_TYPE0_EVENTB1_PENDING>();
 #ifdef SCOM_CHECKING
@@ -2680,7 +2680,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CUCR_QME_TYPE0_EVENTB1_PENDING(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.clearBit<CPMS_CUCR_QME_TYPE0_EVENTB1_PENDING>();
 #ifdef SCOM_CHECKING
@@ -2694,7 +2694,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_QME_TYPE0_EVENTB1_PENDING(f
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_QME_TYPE0_EVENTB1_PENDING,
            1>(o_data);
@@ -2708,7 +2708,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_CUCR_QME_TYPE0_EVENTB1_PENDING(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.getBit<CPMS_CUCR_QME_TYPE0_EVENTB1_PENDING>();
 #ifdef SCOM_CHECKING
@@ -2722,7 +2722,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_TYPE0_EVENTB2_PENDING(f
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_QME_TYPE0_EVENTB2_PENDING,
            1>(i_data);
@@ -2737,7 +2737,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_TYPE0_EVENTB2_PENDING(c
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_QME_TYPE0_EVENTB2_PENDING,
            1>(i_data);
@@ -2751,7 +2751,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_TYPE0_EVENTB2_PENDING(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.setBit<CPMS_CUCR_QME_TYPE0_EVENTB2_PENDING>();
 #ifdef SCOM_CHECKING
@@ -2764,7 +2764,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CUCR_QME_TYPE0_EVENTB2_PENDING(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.clearBit<CPMS_CUCR_QME_TYPE0_EVENTB2_PENDING>();
 #ifdef SCOM_CHECKING
@@ -2778,7 +2778,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_QME_TYPE0_EVENTB2_PENDING(f
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_QME_TYPE0_EVENTB2_PENDING,
            1>(o_data);
@@ -2792,7 +2792,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_CUCR_QME_TYPE0_EVENTB2_PENDING(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.getBit<CPMS_CUCR_QME_TYPE0_EVENTB2_PENDING>();
 #ifdef SCOM_CHECKING
@@ -2806,7 +2806,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_TYPE0_EVENTB3_PENDING(f
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_QME_TYPE0_EVENTB3_PENDING,
            1>(i_data);
@@ -2821,7 +2821,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_TYPE0_EVENTB3_PENDING(c
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_QME_TYPE0_EVENTB3_PENDING,
            1>(i_data);
@@ -2835,7 +2835,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_TYPE0_EVENTB3_PENDING(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.setBit<CPMS_CUCR_QME_TYPE0_EVENTB3_PENDING>();
 #ifdef SCOM_CHECKING
@@ -2848,7 +2848,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CUCR_QME_TYPE0_EVENTB3_PENDING(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.clearBit<CPMS_CUCR_QME_TYPE0_EVENTB3_PENDING>();
 #ifdef SCOM_CHECKING
@@ -2862,7 +2862,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_QME_TYPE0_EVENTB3_PENDING(f
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_QME_TYPE0_EVENTB3_PENDING,
            1>(o_data);
@@ -2876,7 +2876,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_CUCR_QME_TYPE0_EVENTB3_PENDING(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.getBit<CPMS_CUCR_QME_TYPE0_EVENTB3_PENDING>();
 #ifdef SCOM_CHECKING
@@ -2890,7 +2890,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_TYPE0_EVENTC0_PENDING(f
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_QME_TYPE0_EVENTC0_PENDING,
            1>(i_data);
@@ -2905,7 +2905,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_TYPE0_EVENTC0_PENDING(c
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_QME_TYPE0_EVENTC0_PENDING,
            1>(i_data);
@@ -2919,7 +2919,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_TYPE0_EVENTC0_PENDING(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.setBit<CPMS_CUCR_QME_TYPE0_EVENTC0_PENDING>();
 #ifdef SCOM_CHECKING
@@ -2932,7 +2932,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CUCR_QME_TYPE0_EVENTC0_PENDING(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.clearBit<CPMS_CUCR_QME_TYPE0_EVENTC0_PENDING>();
 #ifdef SCOM_CHECKING
@@ -2946,7 +2946,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_QME_TYPE0_EVENTC0_PENDING(f
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_QME_TYPE0_EVENTC0_PENDING,
            1>(o_data);
@@ -2960,7 +2960,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_CUCR_QME_TYPE0_EVENTC0_PENDING(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.getBit<CPMS_CUCR_QME_TYPE0_EVENTC0_PENDING>();
 #ifdef SCOM_CHECKING
@@ -2974,7 +2974,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_TYPE0_EVENTC1_PENDING(f
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_QME_TYPE0_EVENTC1_PENDING,
            1>(i_data);
@@ -2989,7 +2989,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_TYPE0_EVENTC1_PENDING(c
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_QME_TYPE0_EVENTC1_PENDING,
            1>(i_data);
@@ -3003,7 +3003,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_TYPE0_EVENTC1_PENDING(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.setBit<CPMS_CUCR_QME_TYPE0_EVENTC1_PENDING>();
 #ifdef SCOM_CHECKING
@@ -3016,7 +3016,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CUCR_QME_TYPE0_EVENTC1_PENDING(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.clearBit<CPMS_CUCR_QME_TYPE0_EVENTC1_PENDING>();
 #ifdef SCOM_CHECKING
@@ -3030,7 +3030,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_QME_TYPE0_EVENTC1_PENDING(f
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_QME_TYPE0_EVENTC1_PENDING,
            1>(o_data);
@@ -3044,7 +3044,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_CUCR_QME_TYPE0_EVENTC1_PENDING(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.getBit<CPMS_CUCR_QME_TYPE0_EVENTC1_PENDING>();
 #ifdef SCOM_CHECKING
@@ -3058,7 +3058,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_TYPE0_EVENTC2_PENDING(f
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_QME_TYPE0_EVENTC2_PENDING,
            1>(i_data);
@@ -3073,7 +3073,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_TYPE0_EVENTC2_PENDING(c
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_QME_TYPE0_EVENTC2_PENDING,
            1>(i_data);
@@ -3087,7 +3087,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_TYPE0_EVENTC2_PENDING(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.setBit<CPMS_CUCR_QME_TYPE0_EVENTC2_PENDING>();
 #ifdef SCOM_CHECKING
@@ -3100,7 +3100,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CUCR_QME_TYPE0_EVENTC2_PENDING(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.clearBit<CPMS_CUCR_QME_TYPE0_EVENTC2_PENDING>();
 #ifdef SCOM_CHECKING
@@ -3114,7 +3114,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_QME_TYPE0_EVENTC2_PENDING(f
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_QME_TYPE0_EVENTC2_PENDING,
            1>(o_data);
@@ -3128,7 +3128,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_CUCR_QME_TYPE0_EVENTC2_PENDING(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.getBit<CPMS_CUCR_QME_TYPE0_EVENTC2_PENDING>();
 #ifdef SCOM_CHECKING
@@ -3142,7 +3142,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_TYPE0_EVENTC3_PENDING(f
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_QME_TYPE0_EVENTC3_PENDING,
            1>(i_data);
@@ -3157,7 +3157,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_TYPE0_EVENTC3_PENDING(c
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.insertFromRight<CPMS_CUCR_QME_TYPE0_EVENTC3_PENDING,
            1>(i_data);
@@ -3171,7 +3171,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_CUCR_QME_TYPE0_EVENTC3_PENDING(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.setBit<CPMS_CUCR_QME_TYPE0_EVENTC3_PENDING>();
 #ifdef SCOM_CHECKING
@@ -3184,7 +3184,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_CUCR_QME_TYPE0_EVENTC3_PENDING(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return o_data.clearBit<CPMS_CUCR_QME_TYPE0_EVENTC3_PENDING>();
 #ifdef SCOM_CHECKING
@@ -3198,7 +3198,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_CUCR_QME_TYPE0_EVENTC3_PENDING(f
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.extractToRight<CPMS_CUCR_QME_TYPE0_EVENTC3_PENDING,
            1>(o_data);
@@ -3212,12 +3212,145 @@ fapi_try_exit:
 static inline bool GET_CPMS_CUCR_QME_TYPE0_EVENTC3_PENDING(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM1, CPMS_CUCR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_CUCR, CPMS_CUCR_SCOM2, CPMS_CUCR_WO_CLEAR));
 #endif
     return i_data.getBit<CPMS_CUCR_QME_TYPE0_EVENTC3_PENDING>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access CPMS_CUCR_QME_TYPE0_EVENTC3_PENDING chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_CPMS_DMSR(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = CPMS_DMSR;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_CPMS_DMSR(const fapi2::Target<K, M, V>& i_target, fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = CPMS_DMSR;
+#endif
+    return fapi2::getScom(i_target, CPMS_DMSR, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_CPMS_DMSR(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(CPMS_DMSR));
+#endif
+    return fapi2::putScom(i_target, CPMS_DMSR, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DMSR_0_COUNT(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_DMSR));
+#endif
+    return o_data.insertFromRight<CPMS_DMSR_0_COUNT,
+           CPMS_DMSR_0_COUNT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_DMSR_0_COUNT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DMSR_0_COUNT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_DMSR));
+#endif
+    return o_data.insertFromRight<CPMS_DMSR_0_COUNT,
+           CPMS_DMSR_0_COUNT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_DMSR_0_COUNT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CPMS_DMSR_0_COUNT(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_DMSR));
+#endif
+    return i_data.extractToRight<CPMS_DMSR_0_COUNT,
+           CPMS_DMSR_0_COUNT_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_DMSR_0_COUNT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DMSR_1_COUNT(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_DMSR));
+#endif
+    return o_data.insertFromRight<CPMS_DMSR_1_COUNT,
+           CPMS_DMSR_1_COUNT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_DMSR_1_COUNT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DMSR_1_COUNT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_DMSR));
+#endif
+    return o_data.insertFromRight<CPMS_DMSR_1_COUNT,
+           CPMS_DMSR_1_COUNT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_DMSR_1_COUNT chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CPMS_DMSR_1_COUNT(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_DMSR));
+#endif
+    return i_data.extractToRight<CPMS_DMSR_1_COUNT,
+           CPMS_DMSR_1_COUNT_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_DMSR_1_COUNT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -3255,7 +3388,7 @@ static inline fapi2::ReturnCode PUT_CPMS_DPPR(const fapi2::Target<K, M, V>& i_ta
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return fapi2::putScom(i_target, CPMS_DPPR, i_data);
 #ifdef SCOM_CHECKING
@@ -3265,11 +3398,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_CPMS_DPPR_SCOM1(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_CPMS_DPPR_WO_CLEAR(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = CPMS_DPPR_SCOM1;
+    scomt::last_scom = CPMS_DPPR_WO_CLEAR;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -3279,14 +3412,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_CPMS_DPPR_SCOM1(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_CPMS_DPPR_WO_CLEAR(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = CPMS_DPPR_SCOM1;
+    scomt::last_scom = CPMS_DPPR_WO_CLEAR;
 #endif
-    return fapi2::getScom(i_target, CPMS_DPPR_SCOM1, o_data);
+    return fapi2::getScom(i_target, CPMS_DPPR_WO_CLEAR, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -3294,13 +3427,13 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_CPMS_DPPR_SCOM1(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+static inline fapi2::ReturnCode PUT_CPMS_DPPR_WO_CLEAR(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return fapi2::putScom(i_target, CPMS_DPPR_SCOM1, i_data);
+    return fapi2::putScom(i_target, CPMS_DPPR_WO_CLEAR, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -3308,11 +3441,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_CPMS_DPPR_SCOM2(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_CPMS_DPPR_WO_OR(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = CPMS_DPPR_SCOM2;
+    scomt::last_scom = CPMS_DPPR_WO_OR;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -3322,14 +3455,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_CPMS_DPPR_SCOM2(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_CPMS_DPPR_WO_OR(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = CPMS_DPPR_SCOM2;
+    scomt::last_scom = CPMS_DPPR_WO_OR;
 #endif
-    return fapi2::getScom(i_target, CPMS_DPPR_SCOM2, o_data);
+    return fapi2::getScom(i_target, CPMS_DPPR_WO_OR, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -3337,13 +3470,13 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_CPMS_DPPR_SCOM2(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+static inline fapi2::ReturnCode PUT_CPMS_DPPR_WO_OR(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return fapi2::putScom(i_target, CPMS_DPPR_SCOM2, i_data);
+    return fapi2::putScom(i_target, CPMS_DPPR_WO_OR, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -3351,563 +3484,506 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_RESET_ACTIVITY_PROXY(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PITCH_ABORT_INTERRUPT_ENABLE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_DPPR_RESET_ACTIVITY_PROXY,
+    return o_data.insertFromRight<CPMS_DPPR_PITCH_ABORT_INTERRUPT_ENABLE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_RESET_ACTIVITY_PROXY chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_ABORT_INTERRUPT_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_RESET_ACTIVITY_PROXY(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PITCH_ABORT_INTERRUPT_ENABLE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_DPPR_RESET_ACTIVITY_PROXY,
+    return o_data.insertFromRight<CPMS_DPPR_PITCH_ABORT_INTERRUPT_ENABLE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_RESET_ACTIVITY_PROXY chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_ABORT_INTERRUPT_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_RESET_ACTIVITY_PROXY(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PITCH_ABORT_INTERRUPT_ENABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return o_data.setBit<CPMS_DPPR_RESET_ACTIVITY_PROXY>();
+    return o_data.setBit<CPMS_DPPR_PITCH_ABORT_INTERRUPT_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_RESET_ACTIVITY_PROXY chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_ABORT_INTERRUPT_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_DPPR_RESET_ACTIVITY_PROXY(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_DPPR_PITCH_ABORT_INTERRUPT_ENABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return o_data.clearBit<CPMS_DPPR_RESET_ACTIVITY_PROXY>();
+    return o_data.clearBit<CPMS_DPPR_PITCH_ABORT_INTERRUPT_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_RESET_ACTIVITY_PROXY chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_ABORT_INTERRUPT_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_RESET_ACTIVITY_PROXY(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_PITCH_ABORT_INTERRUPT_ENABLE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return i_data.extractToRight<CPMS_DPPR_RESET_ACTIVITY_PROXY,
+    return i_data.extractToRight<CPMS_DPPR_PITCH_ABORT_INTERRUPT_ENABLE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_RESET_ACTIVITY_PROXY chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_ABORT_INTERRUPT_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPMS_DPPR_RESET_ACTIVITY_PROXY(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPMS_DPPR_PITCH_ABORT_INTERRUPT_ENABLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return i_data.getBit<CPMS_DPPR_RESET_ACTIVITY_PROXY>();
+    return i_data.getBit<CPMS_DPPR_PITCH_ABORT_INTERRUPT_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_RESET_ACTIVITY_PROXY chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_ABORT_INTERRUPT_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_RESET_ENERGY_PROXY(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PTSR_EVENT_SELECT(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_DPPR_RESET_ENERGY_PROXY,
+    return o_data.insertFromRight<CPMS_DPPR_PTSR_EVENT_SELECT,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_RESET_ENERGY_PROXY chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PTSR_EVENT_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_RESET_ENERGY_PROXY(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PTSR_EVENT_SELECT(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_DPPR_RESET_ENERGY_PROXY,
+    return o_data.insertFromRight<CPMS_DPPR_PTSR_EVENT_SELECT,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_RESET_ENERGY_PROXY chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PTSR_EVENT_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_RESET_ENERGY_PROXY(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PTSR_EVENT_SELECT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return o_data.setBit<CPMS_DPPR_RESET_ENERGY_PROXY>();
+    return o_data.setBit<CPMS_DPPR_PTSR_EVENT_SELECT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_RESET_ENERGY_PROXY chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PTSR_EVENT_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_DPPR_RESET_ENERGY_PROXY(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_DPPR_PTSR_EVENT_SELECT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return o_data.clearBit<CPMS_DPPR_RESET_ENERGY_PROXY>();
+    return o_data.clearBit<CPMS_DPPR_PTSR_EVENT_SELECT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_RESET_ENERGY_PROXY chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PTSR_EVENT_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_RESET_ENERGY_PROXY(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_PTSR_EVENT_SELECT(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return i_data.extractToRight<CPMS_DPPR_RESET_ENERGY_PROXY,
+    return i_data.extractToRight<CPMS_DPPR_PTSR_EVENT_SELECT,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_RESET_ENERGY_PROXY chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PTSR_EVENT_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPMS_DPPR_RESET_ENERGY_PROXY(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPMS_DPPR_PTSR_EVENT_SELECT(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return i_data.getBit<CPMS_DPPR_RESET_ENERGY_PROXY>();
+    return i_data.getBit<CPMS_DPPR_PTSR_EVENT_SELECT>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_RESET_ENERGY_PROXY chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PTSR_EVENT_SELECT chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_RESET_ACTIVITY_ON_SAMPLE_DISABLE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_ENERGY_PROXY_RESET_MODE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_DPPR_RESET_ACTIVITY_ON_SAMPLE_DISABLE,
+    return o_data.insertFromRight<CPMS_DPPR_ENERGY_PROXY_RESET_MODE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_RESET_ACTIVITY_ON_SAMPLE_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_ENERGY_PROXY_RESET_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_RESET_ACTIVITY_ON_SAMPLE_DISABLE(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_ENERGY_PROXY_RESET_MODE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_DPPR_RESET_ACTIVITY_ON_SAMPLE_DISABLE,
+    return o_data.insertFromRight<CPMS_DPPR_ENERGY_PROXY_RESET_MODE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_RESET_ACTIVITY_ON_SAMPLE_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_ENERGY_PROXY_RESET_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_RESET_ACTIVITY_ON_SAMPLE_DISABLE(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_ENERGY_PROXY_RESET_MODE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return o_data.setBit<CPMS_DPPR_RESET_ACTIVITY_ON_SAMPLE_DISABLE>();
+    return o_data.setBit<CPMS_DPPR_ENERGY_PROXY_RESET_MODE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_RESET_ACTIVITY_ON_SAMPLE_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_ENERGY_PROXY_RESET_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_DPPR_RESET_ACTIVITY_ON_SAMPLE_DISABLE(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_DPPR_ENERGY_PROXY_RESET_MODE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return o_data.clearBit<CPMS_DPPR_RESET_ACTIVITY_ON_SAMPLE_DISABLE>();
+    return o_data.clearBit<CPMS_DPPR_ENERGY_PROXY_RESET_MODE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_RESET_ACTIVITY_ON_SAMPLE_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_ENERGY_PROXY_RESET_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_RESET_ACTIVITY_ON_SAMPLE_DISABLE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_ENERGY_PROXY_RESET_MODE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return i_data.extractToRight<CPMS_DPPR_RESET_ACTIVITY_ON_SAMPLE_DISABLE,
+    return i_data.extractToRight<CPMS_DPPR_ENERGY_PROXY_RESET_MODE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_RESET_ACTIVITY_ON_SAMPLE_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_ENERGY_PROXY_RESET_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPMS_DPPR_RESET_ACTIVITY_ON_SAMPLE_DISABLE(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPMS_DPPR_ENERGY_PROXY_RESET_MODE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return i_data.getBit<CPMS_DPPR_RESET_ACTIVITY_ON_SAMPLE_DISABLE>();
+    return i_data.getBit<CPMS_DPPR_ENERGY_PROXY_RESET_MODE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_RESET_ACTIVITY_ON_SAMPLE_DISABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_ENERGY_PROXY_RESET_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_RESET_ENERGY_ON_SAMPLE_ENABLE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PIL_THROTTLE_ENABLE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_DPPR_RESET_ENERGY_ON_SAMPLE_ENABLE,
+    return o_data.insertFromRight<CPMS_DPPR_PIL_THROTTLE_ENABLE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_RESET_ENERGY_ON_SAMPLE_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PIL_THROTTLE_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_RESET_ENERGY_ON_SAMPLE_ENABLE(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PIL_THROTTLE_ENABLE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_DPPR_RESET_ENERGY_ON_SAMPLE_ENABLE,
+    return o_data.insertFromRight<CPMS_DPPR_PIL_THROTTLE_ENABLE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_RESET_ENERGY_ON_SAMPLE_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PIL_THROTTLE_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_RESET_ENERGY_ON_SAMPLE_ENABLE(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PIL_THROTTLE_ENABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return o_data.setBit<CPMS_DPPR_RESET_ENERGY_ON_SAMPLE_ENABLE>();
+    return o_data.setBit<CPMS_DPPR_PIL_THROTTLE_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_RESET_ENERGY_ON_SAMPLE_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PIL_THROTTLE_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_DPPR_RESET_ENERGY_ON_SAMPLE_ENABLE(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_DPPR_PIL_THROTTLE_ENABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return o_data.clearBit<CPMS_DPPR_RESET_ENERGY_ON_SAMPLE_ENABLE>();
+    return o_data.clearBit<CPMS_DPPR_PIL_THROTTLE_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_RESET_ENERGY_ON_SAMPLE_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PIL_THROTTLE_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_RESET_ENERGY_ON_SAMPLE_ENABLE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_PIL_THROTTLE_ENABLE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return i_data.extractToRight<CPMS_DPPR_RESET_ENERGY_ON_SAMPLE_ENABLE,
+    return i_data.extractToRight<CPMS_DPPR_PIL_THROTTLE_ENABLE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_RESET_ENERGY_ON_SAMPLE_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PIL_THROTTLE_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CPMS_DPPR_RESET_ENERGY_ON_SAMPLE_ENABLE(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CPMS_DPPR_PIL_THROTTLE_ENABLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return i_data.getBit<CPMS_DPPR_RESET_ENERGY_ON_SAMPLE_ENABLE>();
+    return i_data.getBit<CPMS_DPPR_PIL_THROTTLE_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_RESET_ENERGY_ON_SAMPLE_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PIL_THROTTLE_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PIL_INTERVAL_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_THROTTLE_ENABLE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_DPPR_PIL_INTERVAL_SEL,
-           CPMS_DPPR_PIL_INTERVAL_SEL_LEN>(i_data);
+    return o_data.insertFromRight<CPMS_DPPR_OCP_THROTTLE_ENABLE,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PIL_INTERVAL_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_OCP_THROTTLE_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PIL_INTERVAL_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_THROTTLE_ENABLE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_DPPR_PIL_INTERVAL_SEL,
-           CPMS_DPPR_PIL_INTERVAL_SEL_LEN>(i_data);
+    return o_data.insertFromRight<CPMS_DPPR_OCP_THROTTLE_ENABLE,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PIL_INTERVAL_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_OCP_THROTTLE_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_PIL_INTERVAL_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_THROTTLE_ENABLE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
+#endif
+    return o_data.setBit<CPMS_DPPR_OCP_THROTTLE_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_DPPR_OCP_THROTTLE_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_DPPR_OCP_THROTTLE_ENABLE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
+#endif
+    return o_data.clearBit<CPMS_DPPR_OCP_THROTTLE_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_DPPR_OCP_THROTTLE_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_OCP_THROTTLE_ENABLE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return i_data.extractToRight<CPMS_DPPR_PIL_INTERVAL_SEL,
-           CPMS_DPPR_PIL_INTERVAL_SEL_LEN>(o_data);
+    return i_data.extractToRight<CPMS_DPPR_OCP_THROTTLE_ENABLE,
+           1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PIL_INTERVAL_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_OCP_THROTTLE_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PIL_RATE_FLOOR(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
+static inline bool GET_CPMS_DPPR_OCP_THROTTLE_ENABLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_DPPR_PIL_RATE_FLOOR,
-           CPMS_DPPR_PIL_RATE_FLOOR_LEN>(i_data);
+    return i_data.getBit<CPMS_DPPR_OCP_THROTTLE_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PIL_RATE_FLOOR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PIL_RATE_FLOOR(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return o_data.insertFromRight<CPMS_DPPR_PIL_RATE_FLOOR,
-           CPMS_DPPR_PIL_RATE_FLOOR_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PIL_RATE_FLOOR chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_PIL_RATE_FLOOR(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return i_data.extractToRight<CPMS_DPPR_PIL_RATE_FLOOR,
-           CPMS_DPPR_PIL_RATE_FLOOR_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PIL_RATE_FLOOR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_OCP_THROTTLE_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PIL_RATE_OFFSET(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_INTERRUPT_ENABLE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_DPPR_PIL_RATE_OFFSET,
-           CPMS_DPPR_PIL_RATE_OFFSET_LEN>(i_data);
+    return o_data.insertFromRight<CPMS_DPPR_OCP_INTERRUPT_ENABLE,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PIL_RATE_OFFSET chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_OCP_INTERRUPT_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PIL_RATE_OFFSET(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_INTERRUPT_ENABLE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_DPPR_PIL_RATE_OFFSET,
-           CPMS_DPPR_PIL_RATE_OFFSET_LEN>(i_data);
+    return o_data.insertFromRight<CPMS_DPPR_OCP_INTERRUPT_ENABLE,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PIL_RATE_OFFSET chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_OCP_INTERRUPT_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_PIL_RATE_OFFSET(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_INTERRUPT_ENABLE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
+#endif
+    return o_data.setBit<CPMS_DPPR_OCP_INTERRUPT_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_DPPR_OCP_INTERRUPT_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_DPPR_OCP_INTERRUPT_ENABLE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
+#endif
+    return o_data.clearBit<CPMS_DPPR_OCP_INTERRUPT_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_DPPR_OCP_INTERRUPT_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_OCP_INTERRUPT_ENABLE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return i_data.extractToRight<CPMS_DPPR_PIL_RATE_OFFSET,
-           CPMS_DPPR_PIL_RATE_OFFSET_LEN>(o_data);
+    return i_data.extractToRight<CPMS_DPPR_OCP_INTERRUPT_ENABLE,
+           1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PIL_RATE_OFFSET chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_OCP_INTERRUPT_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PIL_BLOCKED_ADDER(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
+static inline bool GET_CPMS_DPPR_OCP_INTERRUPT_ENABLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_DPPR_PIL_BLOCKED_ADDER,
-           CPMS_DPPR_PIL_BLOCKED_ADDER_LEN>(i_data);
+    return i_data.getBit<CPMS_DPPR_OCP_INTERRUPT_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PIL_BLOCKED_ADDER chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PIL_BLOCKED_ADDER(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return o_data.insertFromRight<CPMS_DPPR_PIL_BLOCKED_ADDER,
-           CPMS_DPPR_PIL_BLOCKED_ADDER_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PIL_BLOCKED_ADDER chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_PIL_BLOCKED_ADDER(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return i_data.extractToRight<CPMS_DPPR_PIL_BLOCKED_ADDER,
-           CPMS_DPPR_PIL_BLOCKED_ADDER_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PIL_BLOCKED_ADDER chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PIL_BLOCKED_THRESH(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return o_data.insertFromRight<CPMS_DPPR_PIL_BLOCKED_THRESH,
-           CPMS_DPPR_PIL_BLOCKED_THRESH_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PIL_BLOCKED_THRESH chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PIL_BLOCKED_THRESH(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return o_data.insertFromRight<CPMS_DPPR_PIL_BLOCKED_THRESH,
-           CPMS_DPPR_PIL_BLOCKED_THRESH_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PIL_BLOCKED_THRESH chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_PIL_BLOCKED_THRESH(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return i_data.extractToRight<CPMS_DPPR_PIL_BLOCKED_THRESH,
-           CPMS_DPPR_PIL_BLOCKED_THRESH_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PIL_BLOCKED_THRESH chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_OCP_INTERRUPT_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -3916,10 +3992,10 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_ENABLE(fapi2::buffer<ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_DPPR_OCP_ENABLE,
-           CPMS_DPPR_OCP_ENABLE_LEN>(i_data);
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access CPMS_DPPR_OCP_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
@@ -3931,10 +4007,36 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_ENABLE(const uint64_t i
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_DPPR_OCP_ENABLE,
-           CPMS_DPPR_OCP_ENABLE_LEN>(i_data);
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_DPPR_OCP_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_ENABLE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
+#endif
+    return o_data.setBit<CPMS_DPPR_OCP_ENABLE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_DPPR_OCP_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_DPPR_OCP_ENABLE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
+#endif
+    return o_data.clearBit<CPMS_DPPR_OCP_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access CPMS_DPPR_OCP_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
@@ -3946,10 +4048,10 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_OCP_ENABLE(fapi2::buffer<ui
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return i_data.extractToRight<CPMS_DPPR_OCP_ENABLE,
-           CPMS_DPPR_OCP_ENABLE_LEN>(o_data);
+           1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access CPMS_DPPR_OCP_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
@@ -3957,92 +4059,240 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_FTX_TUNE(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
+static inline bool GET_CPMS_DPPR_OCP_ENABLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_DPPR_OCP_FTX_TUNE,
-           CPMS_DPPR_OCP_FTX_TUNE_LEN>(i_data);
+    return i_data.getBit<CPMS_DPPR_OCP_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_OCP_FTX_TUNE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_FTX_TUNE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return o_data.insertFromRight<CPMS_DPPR_OCP_FTX_TUNE,
-           CPMS_DPPR_OCP_FTX_TUNE_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_OCP_FTX_TUNE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_OCP_FTX_TUNE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return i_data.extractToRight<CPMS_DPPR_OCP_FTX_TUNE,
-           CPMS_DPPR_OCP_FTX_TUNE_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_OCP_FTX_TUNE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_OCP_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_LOCAL_ADDER(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_SPARE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_DPPR_OCP_LOCAL_ADDER,
-           CPMS_DPPR_OCP_LOCAL_ADDER_LEN>(i_data);
+    return o_data.insertFromRight<CPMS_DPPR_SPARE,
+           CPMS_DPPR_SPARE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_OCP_LOCAL_ADDER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_LOCAL_ADDER(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_SPARE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return o_data.insertFromRight<CPMS_DPPR_OCP_LOCAL_ADDER,
-           CPMS_DPPR_OCP_LOCAL_ADDER_LEN>(i_data);
+    return o_data.insertFromRight<CPMS_DPPR_SPARE,
+           CPMS_DPPR_SPARE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_OCP_LOCAL_ADDER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_OCP_LOCAL_ADDER(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_SPARE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
-    return i_data.extractToRight<CPMS_DPPR_OCP_LOCAL_ADDER,
-           CPMS_DPPR_OCP_LOCAL_ADDER_LEN>(o_data);
+    return i_data.extractToRight<CPMS_DPPR_SPARE,
+           CPMS_DPPR_SPARE_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_OCP_LOCAL_ADDER chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CPMS_DPPR_SPARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PP0_THRESH_SCALE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
+#endif
+    return o_data.insertFromRight<CPMS_DPPR_PP0_THRESH_SCALE,
+           CPMS_DPPR_PP0_THRESH_SCALE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PP0_THRESH_SCALE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PP0_THRESH_SCALE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
+#endif
+    return o_data.insertFromRight<CPMS_DPPR_PP0_THRESH_SCALE,
+           CPMS_DPPR_PP0_THRESH_SCALE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PP0_THRESH_SCALE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_PP0_THRESH_SCALE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
+#endif
+    return i_data.extractToRight<CPMS_DPPR_PP0_THRESH_SCALE,
+           CPMS_DPPR_PP0_THRESH_SCALE_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PP0_THRESH_SCALE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PP0_THRESH_VALUE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
+#endif
+    return o_data.insertFromRight<CPMS_DPPR_PP0_THRESH_VALUE,
+           CPMS_DPPR_PP0_THRESH_VALUE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PP0_THRESH_VALUE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PP0_THRESH_VALUE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
+#endif
+    return o_data.insertFromRight<CPMS_DPPR_PP0_THRESH_VALUE,
+           CPMS_DPPR_PP0_THRESH_VALUE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PP0_THRESH_VALUE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_PP0_THRESH_VALUE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
+#endif
+    return i_data.extractToRight<CPMS_DPPR_PP0_THRESH_VALUE,
+           CPMS_DPPR_PP0_THRESH_VALUE_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PP0_THRESH_VALUE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PP1_THRESH_SCALE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
+#endif
+    return o_data.insertFromRight<CPMS_DPPR_PP1_THRESH_SCALE,
+           CPMS_DPPR_PP1_THRESH_SCALE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PP1_THRESH_SCALE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PP1_THRESH_SCALE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
+#endif
+    return o_data.insertFromRight<CPMS_DPPR_PP1_THRESH_SCALE,
+           CPMS_DPPR_PP1_THRESH_SCALE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PP1_THRESH_SCALE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_PP1_THRESH_SCALE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
+#endif
+    return i_data.extractToRight<CPMS_DPPR_PP1_THRESH_SCALE,
+           CPMS_DPPR_PP1_THRESH_SCALE_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PP1_THRESH_SCALE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PP1_THRESH_VALUE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
+#endif
+    return o_data.insertFromRight<CPMS_DPPR_PP1_THRESH_VALUE,
+           CPMS_DPPR_PP1_THRESH_VALUE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PP1_THRESH_VALUE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PP1_THRESH_VALUE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
+#endif
+    return o_data.insertFromRight<CPMS_DPPR_PP1_THRESH_VALUE,
+           CPMS_DPPR_PP1_THRESH_VALUE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PP1_THRESH_VALUE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_PP1_THRESH_VALUE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
+#endif
+    return i_data.extractToRight<CPMS_DPPR_PP1_THRESH_VALUE,
+           CPMS_DPPR_PP1_THRESH_VALUE_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CPMS_DPPR_PP1_THRESH_VALUE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -4051,7 +4301,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_WAIT_FOR_GRANT(fapi2::b
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_DPPR_OCP_WAIT_FOR_GRANT,
            1>(i_data);
@@ -4066,7 +4316,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_WAIT_FOR_GRANT(const ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_DPPR_OCP_WAIT_FOR_GRANT,
            1>(i_data);
@@ -4080,7 +4330,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_WAIT_FOR_GRANT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return o_data.setBit<CPMS_DPPR_OCP_WAIT_FOR_GRANT>();
 #ifdef SCOM_CHECKING
@@ -4093,7 +4343,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_DPPR_OCP_WAIT_FOR_GRANT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return o_data.clearBit<CPMS_DPPR_OCP_WAIT_FOR_GRANT>();
 #ifdef SCOM_CHECKING
@@ -4107,7 +4357,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_OCP_WAIT_FOR_GRANT(fapi2::b
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return i_data.extractToRight<CPMS_DPPR_OCP_WAIT_FOR_GRANT,
            1>(o_data);
@@ -4121,7 +4371,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_DPPR_OCP_WAIT_FOR_GRANT(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return i_data.getBit<CPMS_DPPR_OCP_WAIT_FOR_GRANT>();
 #ifdef SCOM_CHECKING
@@ -4135,7 +4385,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_LOCAL_MSB_MAX(fapi2::bu
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_DPPR_OCP_LOCAL_MSB_MAX,
            CPMS_DPPR_OCP_LOCAL_MSB_MAX_LEN>(i_data);
@@ -4150,7 +4400,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_LOCAL_MSB_MAX(const uin
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_DPPR_OCP_LOCAL_MSB_MAX,
            CPMS_DPPR_OCP_LOCAL_MSB_MAX_LEN>(i_data);
@@ -4165,7 +4415,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_OCP_LOCAL_MSB_MAX(fapi2::bu
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return i_data.extractToRight<CPMS_DPPR_OCP_LOCAL_MSB_MAX,
            CPMS_DPPR_OCP_LOCAL_MSB_MAX_LEN>(o_data);
@@ -4180,7 +4430,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_LOCAL_OVERAGE(fapi2::bu
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_DPPR_OCP_LOCAL_OVERAGE,
            CPMS_DPPR_OCP_LOCAL_OVERAGE_LEN>(i_data);
@@ -4195,7 +4445,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_LOCAL_OVERAGE(const uin
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_DPPR_OCP_LOCAL_OVERAGE,
            CPMS_DPPR_OCP_LOCAL_OVERAGE_LEN>(i_data);
@@ -4210,7 +4460,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_OCP_LOCAL_OVERAGE(fapi2::bu
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return i_data.extractToRight<CPMS_DPPR_OCP_LOCAL_OVERAGE,
            CPMS_DPPR_OCP_LOCAL_OVERAGE_LEN>(o_data);
@@ -4225,7 +4475,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_LOCAL_TANK_VALUE(fapi2:
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_DPPR_OCP_LOCAL_TANK_VALUE,
            CPMS_DPPR_OCP_LOCAL_TANK_VALUE_LEN>(i_data);
@@ -4240,7 +4490,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_LOCAL_TANK_VALUE(const 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_DPPR_OCP_LOCAL_TANK_VALUE,
            CPMS_DPPR_OCP_LOCAL_TANK_VALUE_LEN>(i_data);
@@ -4255,7 +4505,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_OCP_LOCAL_TANK_VALUE(fapi2:
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return i_data.extractToRight<CPMS_DPPR_OCP_LOCAL_TANK_VALUE,
            CPMS_DPPR_OCP_LOCAL_TANK_VALUE_LEN>(o_data);
@@ -4270,7 +4520,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_PITCH_OVERRIDE(fapi2::b
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_DPPR_OCP_PITCH_OVERRIDE,
            1>(i_data);
@@ -4285,7 +4535,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_PITCH_OVERRIDE(const ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_DPPR_OCP_PITCH_OVERRIDE,
            1>(i_data);
@@ -4299,7 +4549,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_PITCH_OVERRIDE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return o_data.setBit<CPMS_DPPR_OCP_PITCH_OVERRIDE>();
 #ifdef SCOM_CHECKING
@@ -4312,7 +4562,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_DPPR_OCP_PITCH_OVERRIDE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return o_data.clearBit<CPMS_DPPR_OCP_PITCH_OVERRIDE>();
 #ifdef SCOM_CHECKING
@@ -4326,7 +4576,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_OCP_PITCH_OVERRIDE(fapi2::b
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return i_data.extractToRight<CPMS_DPPR_OCP_PITCH_OVERRIDE,
            1>(o_data);
@@ -4340,7 +4590,7 @@ fapi_try_exit:
 static inline bool GET_CPMS_DPPR_OCP_PITCH_OVERRIDE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return i_data.getBit<CPMS_DPPR_OCP_PITCH_OVERRIDE>();
 #ifdef SCOM_CHECKING
@@ -4354,7 +4604,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_OVERRIDE_HISTORY(fapi2:
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_DPPR_OCP_OVERRIDE_HISTORY,
            1>(i_data);
@@ -4369,7 +4619,7 @@ static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_OVERRIDE_HISTORY(const 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return o_data.insertFromRight<CPMS_DPPR_OCP_OVERRIDE_HISTORY,
            1>(i_data);
@@ -4383,7 +4633,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_OCP_OVERRIDE_HISTORY(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return o_data.setBit<CPMS_DPPR_OCP_OVERRIDE_HISTORY>();
 #ifdef SCOM_CHECKING
@@ -4396,7 +4646,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_DPPR_OCP_OVERRIDE_HISTORY(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return o_data.clearBit<CPMS_DPPR_OCP_OVERRIDE_HISTORY>();
 #ifdef SCOM_CHECKING
@@ -4410,7 +4660,7 @@ static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_OCP_OVERRIDE_HISTORY(fapi2:
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return i_data.extractToRight<CPMS_DPPR_OCP_OVERRIDE_HISTORY,
            1>(o_data);
@@ -4424,432 +4674,12 @@ fapi_try_exit:
 static inline bool GET_CPMS_DPPR_OCP_OVERRIDE_HISTORY(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
+    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_WO_CLEAR, CPMS_DPPR_WO_OR));
 #endif
     return i_data.getBit<CPMS_DPPR_OCP_OVERRIDE_HISTORY>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access CPMS_DPPR_OCP_OVERRIDE_HISTORY chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PITCH_FTX_SAT_MAX(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return o_data.insertFromRight<CPMS_DPPR_PITCH_FTX_SAT_MAX,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_FTX_SAT_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PITCH_FTX_SAT_MAX(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return o_data.insertFromRight<CPMS_DPPR_PITCH_FTX_SAT_MAX,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_FTX_SAT_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PITCH_FTX_SAT_MAX(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return o_data.setBit<CPMS_DPPR_PITCH_FTX_SAT_MAX>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_FTX_SAT_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_DPPR_PITCH_FTX_SAT_MAX(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return o_data.clearBit<CPMS_DPPR_PITCH_FTX_SAT_MAX>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_FTX_SAT_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_PITCH_FTX_SAT_MAX(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return i_data.extractToRight<CPMS_DPPR_PITCH_FTX_SAT_MAX,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_FTX_SAT_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_CPMS_DPPR_PITCH_FTX_SAT_MAX(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return i_data.getBit<CPMS_DPPR_PITCH_FTX_SAT_MAX>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_FTX_SAT_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PITCH_FTX_SAT_MIN(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return o_data.insertFromRight<CPMS_DPPR_PITCH_FTX_SAT_MIN,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_FTX_SAT_MIN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PITCH_FTX_SAT_MIN(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return o_data.insertFromRight<CPMS_DPPR_PITCH_FTX_SAT_MIN,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_FTX_SAT_MIN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PITCH_FTX_SAT_MIN(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return o_data.setBit<CPMS_DPPR_PITCH_FTX_SAT_MIN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_FTX_SAT_MIN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_DPPR_PITCH_FTX_SAT_MIN(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return o_data.clearBit<CPMS_DPPR_PITCH_FTX_SAT_MIN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_FTX_SAT_MIN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_PITCH_FTX_SAT_MIN(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return i_data.extractToRight<CPMS_DPPR_PITCH_FTX_SAT_MIN,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_FTX_SAT_MIN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_CPMS_DPPR_PITCH_FTX_SAT_MIN(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return i_data.getBit<CPMS_DPPR_PITCH_FTX_SAT_MIN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_FTX_SAT_MIN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PITCH_ACCERR_SAT_MAX(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return o_data.insertFromRight<CPMS_DPPR_PITCH_ACCERR_SAT_MAX,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_ACCERR_SAT_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PITCH_ACCERR_SAT_MAX(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return o_data.insertFromRight<CPMS_DPPR_PITCH_ACCERR_SAT_MAX,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_ACCERR_SAT_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PITCH_ACCERR_SAT_MAX(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return o_data.setBit<CPMS_DPPR_PITCH_ACCERR_SAT_MAX>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_ACCERR_SAT_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_DPPR_PITCH_ACCERR_SAT_MAX(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return o_data.clearBit<CPMS_DPPR_PITCH_ACCERR_SAT_MAX>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_ACCERR_SAT_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_PITCH_ACCERR_SAT_MAX(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return i_data.extractToRight<CPMS_DPPR_PITCH_ACCERR_SAT_MAX,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_ACCERR_SAT_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_CPMS_DPPR_PITCH_ACCERR_SAT_MAX(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return i_data.getBit<CPMS_DPPR_PITCH_ACCERR_SAT_MAX>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_ACCERR_SAT_MAX chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PITCH_ACCERR_SAT_MIN(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return o_data.insertFromRight<CPMS_DPPR_PITCH_ACCERR_SAT_MIN,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_ACCERR_SAT_MIN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PITCH_ACCERR_SAT_MIN(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return o_data.insertFromRight<CPMS_DPPR_PITCH_ACCERR_SAT_MIN,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_ACCERR_SAT_MIN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PITCH_ACCERR_SAT_MIN(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return o_data.setBit<CPMS_DPPR_PITCH_ACCERR_SAT_MIN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_ACCERR_SAT_MIN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_DPPR_PITCH_ACCERR_SAT_MIN(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return o_data.clearBit<CPMS_DPPR_PITCH_ACCERR_SAT_MIN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_ACCERR_SAT_MIN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_PITCH_ACCERR_SAT_MIN(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return i_data.extractToRight<CPMS_DPPR_PITCH_ACCERR_SAT_MIN,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_ACCERR_SAT_MIN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_CPMS_DPPR_PITCH_ACCERR_SAT_MIN(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return i_data.getBit<CPMS_DPPR_PITCH_ACCERR_SAT_MIN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_ACCERR_SAT_MIN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PITCH_APP_SATURATED(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return o_data.insertFromRight<CPMS_DPPR_PITCH_APP_SATURATED,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_APP_SATURATED chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PITCH_APP_SATURATED(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return o_data.insertFromRight<CPMS_DPPR_PITCH_APP_SATURATED,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_APP_SATURATED chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_CPMS_DPPR_PITCH_APP_SATURATED(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return o_data.setBit<CPMS_DPPR_PITCH_APP_SATURATED>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_APP_SATURATED chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_CPMS_DPPR_PITCH_APP_SATURATED(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return o_data.clearBit<CPMS_DPPR_PITCH_APP_SATURATED>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_APP_SATURATED chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_CPMS_DPPR_PITCH_APP_SATURATED(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return i_data.extractToRight<CPMS_DPPR_PITCH_APP_SATURATED,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_APP_SATURATED chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_CPMS_DPPR_PITCH_APP_SATURATED(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(CPMS_DPPR, CPMS_DPPR_SCOM1, CPMS_DPPR_SCOM2));
-#endif
-    return i_data.getBit<CPMS_DPPR_PITCH_APP_SATURATED>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access CPMS_DPPR_PITCH_APP_SATURATED chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -7035,87 +6865,86 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V0_HMER_V0_HMER_QME_REQUEST(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V0_HMER_SPARE_1(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V0_HMER_RW_WAND, EC_PC_COMMON_SPR_V0_HMER_WO_OR));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_V0_HMER_V0_HMER_QME_REQUEST,
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_V0_HMER_SPARE_1,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_V0_HMER_QME_REQUEST chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_SPARE_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V0_HMER_V0_HMER_QME_REQUEST(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V0_HMER_SPARE_1(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V0_HMER_RW_WAND, EC_PC_COMMON_SPR_V0_HMER_WO_OR));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_V0_HMER_V0_HMER_QME_REQUEST,
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_V0_HMER_SPARE_1,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_V0_HMER_QME_REQUEST chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_SPARE_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V0_HMER_V0_HMER_QME_REQUEST(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V0_HMER_SPARE_1(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V0_HMER_RW_WAND, EC_PC_COMMON_SPR_V0_HMER_WO_OR));
 #endif
-    return o_data.setBit<EC_PC_COMMON_SPR_V0_HMER_V0_HMER_QME_REQUEST>();
+    return o_data.setBit<EC_PC_COMMON_SPR_V0_HMER_SPARE_1>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_V0_HMER_QME_REQUEST chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_SPARE_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_V0_HMER_V0_HMER_QME_REQUEST(
-    fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_V0_HMER_SPARE_1(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V0_HMER_RW_WAND, EC_PC_COMMON_SPR_V0_HMER_WO_OR));
 #endif
-    return o_data.clearBit<EC_PC_COMMON_SPR_V0_HMER_V0_HMER_QME_REQUEST>();
+    return o_data.clearBit<EC_PC_COMMON_SPR_V0_HMER_SPARE_1>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_V0_HMER_QME_REQUEST chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_SPARE_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_V0_HMER_V0_HMER_QME_REQUEST(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_V0_HMER_SPARE_1(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V0_HMER_RW_WAND, EC_PC_COMMON_SPR_V0_HMER_WO_OR));
 #endif
-    return i_data.extractToRight<EC_PC_COMMON_SPR_V0_HMER_V0_HMER_QME_REQUEST,
+    return i_data.extractToRight<EC_PC_COMMON_SPR_V0_HMER_SPARE_1,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_V0_HMER_QME_REQUEST chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_SPARE_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_EC_PC_COMMON_SPR_V0_HMER_V0_HMER_QME_REQUEST(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_EC_PC_COMMON_SPR_V0_HMER_SPARE_1(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V0_HMER_RW_WAND, EC_PC_COMMON_SPR_V0_HMER_WO_OR));
 #endif
-    return i_data.getBit<EC_PC_COMMON_SPR_V0_HMER_V0_HMER_QME_REQUEST>();
+    return i_data.getBit<EC_PC_COMMON_SPR_V0_HMER_SPARE_1>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_V0_HMER_QME_REQUEST chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_SPARE_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -7214,86 +7043,90 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V0_HMER_SPARE_3(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V0_HMER_V0_HMER_SUSPEND_MODE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V0_HMER_RW_WAND, EC_PC_COMMON_SPR_V0_HMER_WO_OR));
+#endif
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_V0_HMER_V0_HMER_SUSPEND_MODE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_V0_HMER_SUSPEND_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V0_HMER_V0_HMER_SUSPEND_MODE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V0_HMER_RW_WAND, EC_PC_COMMON_SPR_V0_HMER_WO_OR));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_V0_HMER_SPARE_3,
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_V0_HMER_V0_HMER_SUSPEND_MODE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_SPARE_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_V0_HMER_SUSPEND_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V0_HMER_SPARE_3(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V0_HMER_V0_HMER_SUSPEND_MODE(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V0_HMER_RW_WAND, EC_PC_COMMON_SPR_V0_HMER_WO_OR));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_V0_HMER_SPARE_3,
-           1>(i_data);
+    return o_data.setBit<EC_PC_COMMON_SPR_V0_HMER_V0_HMER_SUSPEND_MODE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_SPARE_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_V0_HMER_SUSPEND_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V0_HMER_SPARE_3(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_V0_HMER_V0_HMER_SUSPEND_MODE(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V0_HMER_RW_WAND, EC_PC_COMMON_SPR_V0_HMER_WO_OR));
 #endif
-    return o_data.setBit<EC_PC_COMMON_SPR_V0_HMER_SPARE_3>();
+    return o_data.clearBit<EC_PC_COMMON_SPR_V0_HMER_V0_HMER_SUSPEND_MODE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_SPARE_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_V0_HMER_SUSPEND_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_V0_HMER_SPARE_3(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_V0_HMER_V0_HMER_SUSPEND_MODE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V0_HMER_RW_WAND, EC_PC_COMMON_SPR_V0_HMER_WO_OR));
 #endif
-    return o_data.clearBit<EC_PC_COMMON_SPR_V0_HMER_SPARE_3>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_SPARE_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_V0_HMER_SPARE_3(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V0_HMER_RW_WAND, EC_PC_COMMON_SPR_V0_HMER_WO_OR));
-#endif
-    return i_data.extractToRight<EC_PC_COMMON_SPR_V0_HMER_SPARE_3,
+    return i_data.extractToRight<EC_PC_COMMON_SPR_V0_HMER_V0_HMER_SUSPEND_MODE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_SPARE_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_V0_HMER_SUSPEND_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_EC_PC_COMMON_SPR_V0_HMER_SPARE_3(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_EC_PC_COMMON_SPR_V0_HMER_V0_HMER_SUSPEND_MODE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V0_HMER_RW_WAND, EC_PC_COMMON_SPR_V0_HMER_WO_OR));
 #endif
-    return i_data.getBit<EC_PC_COMMON_SPR_V0_HMER_SPARE_3>();
+    return i_data.getBit<EC_PC_COMMON_SPR_V0_HMER_V0_HMER_SUSPEND_MODE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_SPARE_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_V0_HMER_SUSPEND_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -7382,86 +7215,86 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V0_HMER_SPARE_5(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V0_HMER_V0_HMER_TFX_ERR(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V0_HMER_RW_WAND, EC_PC_COMMON_SPR_V0_HMER_WO_OR));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_V0_HMER_SPARE_5,
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_V0_HMER_V0_HMER_TFX_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_SPARE_5 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_V0_HMER_TFX_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V0_HMER_SPARE_5(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V0_HMER_V0_HMER_TFX_ERR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V0_HMER_RW_WAND, EC_PC_COMMON_SPR_V0_HMER_WO_OR));
 #endif
-    return o_data.insertFromRight<EC_PC_COMMON_SPR_V0_HMER_SPARE_5,
+    return o_data.insertFromRight<EC_PC_COMMON_SPR_V0_HMER_V0_HMER_TFX_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_SPARE_5 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_V0_HMER_TFX_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V0_HMER_SPARE_5(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_COMMON_SPR_V0_HMER_V0_HMER_TFX_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V0_HMER_RW_WAND, EC_PC_COMMON_SPR_V0_HMER_WO_OR));
 #endif
-    return o_data.setBit<EC_PC_COMMON_SPR_V0_HMER_SPARE_5>();
+    return o_data.setBit<EC_PC_COMMON_SPR_V0_HMER_V0_HMER_TFX_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_SPARE_5 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_V0_HMER_TFX_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_V0_HMER_SPARE_5(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_COMMON_SPR_V0_HMER_V0_HMER_TFX_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V0_HMER_RW_WAND, EC_PC_COMMON_SPR_V0_HMER_WO_OR));
 #endif
-    return o_data.clearBit<EC_PC_COMMON_SPR_V0_HMER_SPARE_5>();
+    return o_data.clearBit<EC_PC_COMMON_SPR_V0_HMER_V0_HMER_TFX_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_SPARE_5 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_V0_HMER_TFX_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_V0_HMER_SPARE_5(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_COMMON_SPR_V0_HMER_V0_HMER_TFX_ERR(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V0_HMER_RW_WAND, EC_PC_COMMON_SPR_V0_HMER_WO_OR));
 #endif
-    return i_data.extractToRight<EC_PC_COMMON_SPR_V0_HMER_SPARE_5,
+    return i_data.extractToRight<EC_PC_COMMON_SPR_V0_HMER_V0_HMER_TFX_ERR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_SPARE_5 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_V0_HMER_TFX_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_EC_PC_COMMON_SPR_V0_HMER_SPARE_5(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_EC_PC_COMMON_SPR_V0_HMER_V0_HMER_TFX_ERR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(EC_PC_COMMON_SPR_V0_HMER_RW_WAND, EC_PC_COMMON_SPR_V0_HMER_WO_OR));
 #endif
-    return i_data.getBit<EC_PC_COMMON_SPR_V0_HMER_SPARE_5>();
+    return i_data.getBit<EC_PC_COMMON_SPR_V0_HMER_V0_HMER_TFX_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_SPARE_5 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_COMMON_SPR_V0_HMER_V0_HMER_TFX_ERR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

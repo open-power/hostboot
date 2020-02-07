@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,10 +49,6 @@ static const uint32_t CLK_ADJ_00_DCADJ_WRAP_SET_MEAS_MODE_VEC_MEASURE_MODE_VECTO
 // perv/reg00006.H
 
 static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE = 0x00018324ull;
-
-static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_ET_SINGLE_STEP_MD_SET = 0;
-static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_TEP_COUNT = 1;
-static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_SET_SINGLE_STEP_MODE_TEP_COUNT_LEN = 32;
 // perv/reg00006.H
 
 static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES = 0x0001433bull;
@@ -332,7 +328,7 @@ static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_SPARE_DI_CONTROL = 18;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_TP_RI_DC_B = 19;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_TP_DI1_DC_B = 20;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_TP_DI2_DC_B = 21;
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_ROOT_CTRL1_22_SPARE_TEST = 22;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_TP_TPM_DI1_DC_B = 22;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_ROOT_CTRL1_23_SPARE_TEST = 23;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_TP_TEST_BURNIN_MODE_DC = 24;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_TPFSI_ARRAY_SET_VBL_TO_VDD_DC = 25;
@@ -549,7 +545,7 @@ static const uint32_t QMETRA0_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t QMETRA0_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
 // perv/reg00006.H
 
-static const uint64_t QMETRA0_TR1_CONFIG_3 = 0x00018426ull;
+static const uint64_t QMETRA0_TR1_CONFIG_3 = 0x00018446ull;
 
 static const uint32_t QMETRA0_TR1_CONFIG_3_C = 0;
 static const uint32_t QMETRA0_TR1_CONFIG_3_C_LEN = 24;

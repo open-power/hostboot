@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,13 +39,13 @@ namespace omi
 #endif
 
 
-static const uint64_t RXCTL_DATASM_12_PLREGS_RX_CNTL1_PL = 0x8003c04310012c3full;
+static const uint64_t RXCTL_DATASM_12_PLREGS_RX_CNTL1_PL = 0x8003c04410012c3full;
 
 static const uint32_t RXCTL_DATASM_12_PLREGS_RX_CNTL1_PL_INIT_DONE = 48;
 static const uint32_t RXCTL_DATASM_12_PLREGS_RX_CNTL1_PL_RECAL_DONE = 49;
 // omi/reg00010.H
 
-static const uint64_t RXCTL_DATASM_12_PLREGS_RX_STAT1_PL = 0x8003e04310012c3full;
+static const uint64_t RXCTL_DATASM_12_PLREGS_RX_STAT1_PL = 0x8003e04410012c3full;
 
 static const uint32_t RXCTL_DATASM_12_PLREGS_RX_STAT1_PL_DL_PHY_RUN_LANE_RO_SIGNAL = 48;
 static const uint32_t RXCTL_DATASM_12_PLREGS_RX_STAT1_PL_DL_PHY_RECAL_REQ_RO_SIGNAL = 49;

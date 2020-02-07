@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -350,13 +350,13 @@ static const uint32_t IOO_RX0_RXCTL_DATASM_1_PLREGS_RX_STAT1_PL_PSAVE_REQ_DL_RO_
 static const uint32_t IOO_RX0_RXCTL_DATASM_1_PLREGS_RX_STAT1_PL_PSAVE_STS_PHY_RO_SIGNAL = 53;
 // iohs/reg00046.H
 
-static const uint64_t IOO_RX0_RXCTL_DATASM_11_PLREGS_RX_CNTL3_PL = 0x8003d80f10012c3full;
+static const uint64_t IOO_RX0_RXCTL_DATASM_11_PLREGS_RX_CNTL3_PL = 0x8003d80b10012c3full;
 
 static const uint32_t IOO_RX0_RXCTL_DATASM_11_PLREGS_RX_CNTL3_PL_REQ_ALT = 48;
 static const uint32_t IOO_RX0_RXCTL_DATASM_11_PLREGS_RX_CNTL3_PL_STS_ALT = 49;
 // iohs/reg00046.H
 
-static const uint64_t IOO_RX0_RXCTL_DATASM_15_PLREGS_RX_CNTL2_PL = 0x8003c80b10012c3full;
+static const uint64_t IOO_RX0_RXCTL_DATASM_15_PLREGS_RX_CNTL2_PL = 0x8003c80f10012c3full;
 
 static const uint32_t IOO_RX0_RXCTL_DATASM_15_PLREGS_RX_CNTL2_PL_PHY_DL_INIT_DONE_SET_WO_PULSE_SLOW_SIGNAL = 48;
 static const uint32_t IOO_RX0_RXCTL_DATASM_15_PLREGS_RX_CNTL2_PL_PHY_DL_INIT_DONE_CLR_WO_PULSE_SLOW_SIGNAL = 49;
@@ -366,7 +366,7 @@ static const uint32_t IOO_RX0_RXCTL_DATASM_15_PLREGS_RX_CNTL2_PL_DL_PHY_RECAL_AB
     52;
 // iohs/reg00046.H
 
-static const uint64_t IOO_RX0_RXCTL_DATASM_17_PLREGS_RX_MODE1_PL = 0x8003d00910012c3full;
+static const uint64_t IOO_RX0_RXCTL_DATASM_17_PLREGS_RX_MODE1_PL = 0x8003d01110012c3full;
 
 static const uint32_t IOO_RX0_RXCTL_DATASM_17_PLREGS_RX_MODE1_PL_RECAL_REQ_DL_MASK = 48;
 static const uint32_t IOO_RX0_RXCTL_DATASM_17_PLREGS_RX_MODE1_PL_RECAL_DONE_DL_MASK = 49;
