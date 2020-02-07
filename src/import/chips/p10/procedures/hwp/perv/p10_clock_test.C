@@ -108,7 +108,7 @@ static fapi2::ReturnCode p10_clock_test_latches(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CP_REFCLOCK_SELECT, i_target_chip, l_cp_refclck_select),
              "Error from FAPI_ATTR_GET (ATTR_CP_REFCLOCK_SELECT)");
 
-    l_data32.flush<0>().setBit<FSXCOMP_FSXLOG_ROOT_CTRL5_CLK_TEST_IN_DC>();
+    l_data32.flush<0>().setBit<FSXCOMP_FSXLOG_ROOT_CTRL5_TPFSI_RCS_CLK_TEST_IN_DC>();
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip,
                                     set_rcs_clock_test_in ? FSXCOMP_FSXLOG_ROOT_CTRL5_SET_FSI : FSXCOMP_FSXLOG_ROOT_CTRL5_CLEAR_FSI,
                                     l_data32));
