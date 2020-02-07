@@ -53,7 +53,7 @@ OBJS += call_proc_pau_scominit.o
 OBJS += call_proc_pcie_scominit.o
 OBJS += host_proc_pcie_scominit.o
 OBJS += call_proc_scomoverride_chiplets.o
-#OBJS += call_proc_chiplet_enable_ridi.o
+OBJS += call_proc_chiplet_enable_ridi.o
 OBJS += call_host_rng_bist.o
 
 #Sensor Based Bifurcation implementation
@@ -97,7 +97,11 @@ OBJS+=p10_pcie_scom.o
 #istep10.7 -- proc_scomoverride_chiplets
 OBJS+=p10_scomoverride_chiplets.o
 
-#istep10.9 -- 
+#istep10.8 -- proc_chiplet_enable_ridi
+OBJS+=p10_chiplet_enable_ridi.o
+OBJS+=p10_enable_ridi.o
+
+#istep 10.9 -- host_rng_bist
 OBJS+=p10_rng_init_phase1.o
 
 VPATH += ${NEST_HWP_PATH}

@@ -83,7 +83,7 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
     // Get a list of all proc chips
     getAllChips(l_procTargetList, TYPE_PROC);
 
-    // Loop through all proc chips, set PCIe attrtibutes,
+    // Loop through all proc chips, set PCIe attributes,
     //  convert to fap2 target, and execute hwp
     for (const auto & curproc : l_procTargetList)
     {

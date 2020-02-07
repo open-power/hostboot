@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,10 +51,10 @@
 #include <initservice/isteps_trace.H>  // g_trac_isteps_trace
 #include <initservice/initserviceif.H>  // isSMPWrapConfig
 
-/* FIXME RTC: 210975
-//  HWP call support
-#include <nest/nestHwpHelperFuncs.H>   // fapiHWPCallWrapperForChip
-*/
+#include <istepHelperFuncs.H>          // captureError
+#include <fapi2/target.H>
+#include <fapi2/plat_hwp_invoker.H>
+#include <p10_chiplet_enable_ridi.H>
 
 namespace ISTEP_10
 {
@@ -68,21 +68,46 @@ using   namespace   TARGETING;
 //******************************************************************************
 void* call_proc_chiplet_enable_ridi( void *io_pArgs )
 {
-    IStepError l_stepError;
-/* FIXME RTC: 210975
-
     TRACFCOMP(g_trac_isteps_trace,
               ENTER_MRK"call_proc_chiplet_enable_ridi entry");
 
+    IStepError l_stepError;
+    errlHndl_t l_err = nullptr;
+    TARGETING::TargetHandleList l_cpuTargetList;
+
     if (!INITSERVICE::isSMPWrapConfig())
     {
-        // Make the FAPI call to p9_chiplet_enable_ridi
-        fapiHWPCallWrapperHandler(P9_CHIPLET_ENABLE_RIDI, l_stepError,
-                                  HWPF_COMP_ID, TYPE_PROC);
+        //Get a list of proc chips
+        getAllChips(l_cpuTargetList, TYPE_PROC);
+
+        // Loop through all proc chips and convert them to FAPI targets
+        for (const auto & curproc: l_cpuTargetList)
+        {
+            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                    l_fapi2_proc_target (curproc);
+
+            FAPI_INVOKE_HWP( l_err, p10_chiplet_enable_ridi,
+                             l_fapi2_proc_target);
+
+            if(l_err)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR : call p10_chiplet_enable_ridi HWP(): failed on target 0x%08X. "
+                           TRACE_ERR_FMT,
+                           get_huid(curproc),
+                           TRACE_ERR_ARGS(l_err));
+
+                // Capture Error
+                captureError(l_err, l_stepError, HWPF_COMP_ID, curproc);
+
+                // Run HWP on all procs even if one reports an error
+                continue;
+            }
+        }
     }
+
     TRACFCOMP(g_trac_isteps_trace,
               EXIT_MRK"call_proc_chiplet_enable_ridi exit");
-*/
 
     return l_stepError.getErrorHandle();
 }

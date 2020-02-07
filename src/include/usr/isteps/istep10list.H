@@ -207,17 +207,10 @@ const   TaskInfo    g_istep10[]  =   {
                 ISTEP_10::call_proc_scomoverride_chiplets,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
-/*
         {
                 ISTEPNAME(10,08,"proc_chiplet_enable_ridi"),
                 ISTEP_10::call_proc_chiplet_enable_ridi,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-**/
-        {
-                "", // empty istep
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
                 ISTEPNAME(10,09,"host_rng_bist"),
