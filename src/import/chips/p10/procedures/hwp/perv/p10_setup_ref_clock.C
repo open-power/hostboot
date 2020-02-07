@@ -101,13 +101,13 @@ fapi2::ReturnCode p10_setup_ref_clock(const
 
     FAPI_DBG("Set RCS control signals to CFAM reset values");
     l_read_reg.flush<0>();
-    l_read_reg.setBit<FSXCOMP_FSXLOG_ROOT_CTRL5_RESET_DC>();  //Bit0 : RCS_RESET = 1
-    l_read_reg.setBit<FSXCOMP_FSXLOG_ROOT_CTRL5_BYPASS_DC>();  //Bit1 : RCS_BYPASS = 1
+    l_read_reg.setBit<FSXCOMP_FSXLOG_ROOT_CTRL5_TPFSI_RCS_RESET_DC>();  //Bit0 : RCS_RESET = 1
+    l_read_reg.setBit<FSXCOMP_FSXLOG_ROOT_CTRL5_TPFSI_RCS_BYPASS_DC>();  //Bit1 : RCS_BYPASS = 1
 
     if ( (l_cp_refclck_select == fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC1) ||
          (l_cp_refclck_select == fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_BOTH_OSC1))
     {
-        l_read_reg.setBit<FSXCOMP_FSXLOG_ROOT_CTRL5_FORCE_BYPASS_CLKSEL_DC>(); //Bit2 : RCS_BYPASS_CLKSEL = 1
+        l_read_reg.setBit<FSXCOMP_FSXLOG_ROOT_CTRL5_TPFSI_RCS_FORCE_BYPASS_CLKSEL_DC>(); //Bit2 : RCS_BYPASS_CLKSEL = 1
     }
 
     mux0_val = (l_attr_mux0a_rcs_pll | l_attr_mux0b_rcs_pll | l_attr_mux0c_rcs_pll | l_attr_mux0d_rcs_pll);
