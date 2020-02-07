@@ -430,8 +430,8 @@ fapi2::ReturnCode p10_build_smp_validate_link(
 
     if (i_link_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE)
     {
-        l_dl_trained  = GET_DLP_FIR_REG_LINK0_TRAINED(l_dl_fir_reg) &&
-                        GET_DLP_FIR_REG_LINK1_TRAINED(l_dl_fir_reg);
+        l_dl_trained  = GET_DLP_FIR_REG_0_TRAINED(l_dl_fir_reg) &&
+                        GET_DLP_FIR_REG_1_TRAINED(l_dl_fir_reg);
         l_tl_trained  = (i_link_id % 2) ?
                         (GET_PB_PTL_FIR_REG_FMR02_TRAINED(l_tl_fir_reg) && GET_PB_PTL_FIR_REG_FMR03_TRAINED(l_tl_fir_reg)) :
                         (GET_PB_PTL_FIR_REG_FMR00_TRAINED(l_tl_fir_reg) && GET_PB_PTL_FIR_REG_FMR01_TRAINED(l_tl_fir_reg));
@@ -441,7 +441,7 @@ fapi2::ReturnCode p10_build_smp_validate_link(
     }
     else if (i_link_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_EVEN_ONLY)
     {
-        l_dl_trained  = GET_DLP_FIR_REG_LINK0_TRAINED(l_dl_fir_reg);
+        l_dl_trained  = GET_DLP_FIR_REG_0_TRAINED(l_dl_fir_reg);
         l_tl_trained  = (i_link_id % 2) ?
                         (GET_PB_PTL_FIR_REG_FMR02_TRAINED(l_tl_fir_reg)) :
                         (GET_PB_PTL_FIR_REG_FMR00_TRAINED(l_tl_fir_reg));
@@ -451,7 +451,7 @@ fapi2::ReturnCode p10_build_smp_validate_link(
     }
     else if (i_link_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_ODD_ONLY)
     {
-        l_dl_trained  = GET_DLP_FIR_REG_LINK1_TRAINED(l_dl_fir_reg);
+        l_dl_trained  = GET_DLP_FIR_REG_1_TRAINED(l_dl_fir_reg);
         l_tl_trained  = (i_link_id % 2) ?
                         (GET_PB_PTL_FIR_REG_FMR03_TRAINED(l_tl_fir_reg)) :
                         (GET_PB_PTL_FIR_REG_FMR01_TRAINED(l_tl_fir_reg));
