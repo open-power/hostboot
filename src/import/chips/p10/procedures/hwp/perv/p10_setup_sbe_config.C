@@ -53,32 +53,60 @@ p10_sbe_scratch_calc_gard_vector(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
     uint32_t& o_gard_vector)
 {
+    // default to non-functional
     fapi2::buffer<uint32_t> l_functional = 0;
     fapi2::ATTR_CONTAINED_IPL_TYPE_Type l_attr_contained_ipl_type;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_unit_pos;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CONTAINED_IPL_TYPE, FAPI_SYSTEM, l_attr_contained_ipl_type),
              "Error from FAPI_ATTR_GET (ATTR_CONTAINED_IPL_TYPE)");
 
-    // no desire to enable async chiplets in contained modes, use gard vector
+    // in contained modes, no desire to enable async chiplets, use gard vector
     // content to enforce this
-    if ((l_attr_contained_ipl_type != fapi2::ENUM_ATTR_CONTAINED_IPL_TYPE_NONE) &&
-        ((T == fapi2::TARGET_TYPE_PEC)  ||
-         (T == fapi2::TARGET_TYPE_MC)   ||
-         (T == fapi2::TARGET_TYPE_PAUC) ||
-         (T == fapi2::TARGET_TYPE_PAU)  ||
-         (T == fapi2::TARGET_TYPE_IOHS)))
+    if (l_attr_contained_ipl_type != fapi2::ENUM_ATTR_CONTAINED_IPL_TYPE_NONE)
     {
-        goto fapi_try_exit;
+        if ((T == fapi2::TARGET_TYPE_PEC)  ||
+            (T == fapi2::TARGET_TYPE_MC)   ||
+            (T == fapi2::TARGET_TYPE_PAUC) ||
+            (T == fapi2::TARGET_TYPE_PAU)  ||
+            (T == fapi2::TARGET_TYPE_IOHS))
+        {
+            // maintain non-functional default
+            goto fapi_try_exit;
+        }
     }
 
+    // determine set of functional targets
     for (const auto& l_tgt : i_target_chip.getChildren<T>(fapi2::TARGET_STATE_FUNCTIONAL))
     {
-        fapi2::ATTR_CHIP_UNIT_POS_Type l_unit_pos;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_tgt, l_unit_pos),
                  "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS, functional)");
         FAPI_TRY(l_functional.setBit(l_unit_pos),
                  "Error from setBit (functional, unit target pos: %d)", l_unit_pos);
+    }
+
+    // in non-contained mode, PAUC chiplets may never be deconfigured
+    if ((l_attr_contained_ipl_type == fapi2::ENUM_ATTR_CONTAINED_IPL_TYPE_NONE) &&
+        (T == fapi2::TARGET_TYPE_PAUC))
+    {
+        fapi2::buffer<uint32_t> l_present = 0;
+
+        for (const auto& l_tgt : i_target_chip.getChildren<T>(fapi2::TARGET_STATE_PRESENT))
+        {
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_tgt, l_unit_pos),
+                     "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS, present)");
+            FAPI_TRY(l_present.setBit(l_unit_pos),
+                     "Error from setBit (present, unit target pos: %d)", l_unit_pos);
+        }
+
+        FAPI_ASSERT(l_present == l_functional,
+                    fapi2::P10_SBE_SCRATCH_REGS_PAUC_GARD_ERR()
+                    .set_TARGET_CHIP(i_target_chip)
+                    .set_CONTAINED_IPL_TYPE(l_attr_contained_ipl_type)
+                    .set_PAUC_FUNCTIONAL(l_functional)
+                    .set_PAUC_PRESENT(l_present),
+                    "PAUC chiplets may not be deconfigured for current IPL type!");
     }
 
 fapi_try_exit:

@@ -5,7 +5,8 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
@@ -43,6 +44,17 @@
   <ffdc>TARGET_CHIP</ffdc>
   <ffdc>TARGET_IOHS</ffdc>
   <ffdc>FREQ_IOHS_MHZ</ffdc>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_SBE_SCRATCH_REGS_PAUC_GARD_ERR</rc>
+  <description>
+    Requested PAUC GARD state is not supported by current IPL type
+  </description>
+  <ffdc>TARGET_CHIP</ffdc>
+  <ffdc>CONTAINED_IPL_TYPE</ffdc>
+  <ffdc>PAUC_FUNCTIONAL</ffdc>
+  <ffdc>PAUC_PRESENT</ffdc>
 </hwpError>
 <!-- ******************************************************************** -->
 </hwpErrors>
