@@ -34,7 +34,6 @@
 
 #include <p10_chiplet_enable_ridi.H>
 #include <p10_scom_perv.H>
-#include <p10_perv_sbe_cmn.H>
 #include <target_filters.H>
 #include <p10_enable_ridi.H>
 
