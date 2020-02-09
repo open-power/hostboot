@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -130,6 +130,21 @@
      - (if chip-contained) confirm all clocks started in-phase by comparing
        clock controller phase-counter values captured at clock start
     Note: this may compromise cycle-reproduceability!
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <enum>
+    OFF = 0x0,
+    ON  = 0x1
+  </enum>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_RUNN_USE_QME_TIMEBASE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Use QME-sourced, cycle-reproducible timebase ("high-precision" mode)
+    instead of PC-internal "standalone" mode timebase (also cycle-reproducible).
   </description>
   <valueType>uint8</valueType>
   <initToZero/>
