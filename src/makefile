@@ -385,7 +385,7 @@ securerom_LDFILE = securerom.ld
 securerom_NO_RELOCATION = 1
 
 # for PRDR_RULE_TABLE_TARGETS
-#include ${ROOTPATH}/src/usr/diag/prdf/common/rule/prdf_rule.mk
+include ${ROOTPATH}/src/usr/diag/prdf/common/rule/prdf_rule.mk
 
 hbicore_DATA_MODULES += $(if $(CONFIG_ENABLE_HDAT_IN_HOSTBOOT),pvpd_bp.dat)
 hbicore_DATA_MODULES += ${prd_rule_prf_targets}
