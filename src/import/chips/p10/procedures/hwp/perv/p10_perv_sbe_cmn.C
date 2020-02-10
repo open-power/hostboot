@@ -45,7 +45,9 @@
 #include <p10_scom_perv_c.H>
 #include <p10_scom_perv_e.H>
 #include <p10_scom_perv_f.H>
-#include <multicast_group_defs.H>
+#ifndef __PPE_QME
+    #include <multicast_group_defs.H>
+#endif
 #include <target_filters.H>
 #include <p10_ringId.H>
 
@@ -108,7 +110,6 @@ fapi2::ReturnCode p10_perv_sbe_cmn_array_init_module(const
     fapi2::buffer<uint16_t> l_misr_b_value;
     fapi2::buffer<uint16_t> l_regions;
     fapi2::buffer<uint64_t> l_read_reg;
-    bool l_abist_check = false;
     fapi2::buffer<uint64_t> l_data64;
     int l_timeout = 0;
 
@@ -206,8 +207,7 @@ fapi2::ReturnCode p10_perv_sbe_cmn_array_init_module(const
     FAPI_ASSERT(l_read_reg.getBit<CPLT_STAT0_ABIST_DONE_DC>() == 1,
                 fapi2::SRAM_ABIST_DONE_BIT_ERR()
                 .set_PERV_CPLT_STAT(l_read_reg)
-                .set_SELECT_SRAM(true)
-                .set_READ_ABIST_DONE(l_abist_check),
+                .set_SELECT_SRAM(true),
                 "ERROR:SRAM_ABIST_DONE_BIT_NOT_SET");
 
     FAPI_DBG("Clear OPCG Reg0");
@@ -338,6 +338,8 @@ fapi_try_exit:
     return fapi2::current_err;
 
 }
+
+#ifndef __PPE_QME
 
 /// @brief -- Utility function that can be used to start clocks for a specific input regions
 /// -- i_regions is to input regions
@@ -1139,4 +1141,7 @@ fapi2::ReturnCode p10_perv_sbe_cmn_switch_mux_cfam(
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+#endif
+
 #endif
