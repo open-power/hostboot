@@ -53,7 +53,6 @@ use constant
 
     HZ_PER_KHZ  => 1000,
     NUM_PROCS_PER_GROUP  => 4,
-    MAX_PROCS_PER_SOCKET => 2,
 };
 
 
@@ -115,6 +114,8 @@ my %MAX_INST_PER_PARENT =
     PEC       => 2, # Number of PECs per PROC
     PHB       => 3, # Number of PHBs per PEC
     SEEPROM   => 1, # Default to 1 for now
+    SBE       => 1, # Default to 1 for now
+    TPM       => 1, # Default to 1 for now
     OSCREFCLK => 1, # Default to 1 for now
     PERV      => 56, # Number of PERVs per PROC
                      # Only 39 used, but they are sparsely populated
@@ -175,6 +176,7 @@ my %MAX_INST_PER_PROC =
     MBA        => 16,
     PPE        => 51, # Only 21, but they are sparsely populated
     SBE        => 1,
+    TPM        => 1,
     SMPGROUP   => 8,
 );
 
@@ -428,7 +430,7 @@ sub processTargets
     # Process the targets in a breadth first fashion, allowing the children
     # targets to take advantage of the processed parents.
     #
-    # Although the targets DIMM, BMC, etc. or not at the same hierarchical
+    # Although the targets DIMM, BMC, etc. are not at the same hierarchical
     # level, the important thing is that their parents get processed first.
     #
     # Excluding the SYS target, which is the starting point, the targets in
@@ -653,8 +655,8 @@ sub errorCheckTheTargets
     {
         if ($targetObj->{TOPOLOGY}->{$n} > 1)
         {
-            print "ERROR: Fabric topology invalid.  2 targets have same ".
-                  "FABRIC_TOPOLOGY_ID ($n)\n";
+            print "ERROR: Fabric topology invalid. $targetObj->{TOPOLOGY}->{$n}"
+                  ." targets have same FABRIC_TOPOLOGY_ID ($n)\n";
             $targetObj->myExit(3);
         }
     }
@@ -738,7 +740,18 @@ sub processSystem
 
     my $type      = targetTypeSanityCheck($targetObj, $target, "SYS");
 
-    my $sysPos    = $targetObj->getTargetPosition($target);
+    # Getting the system position from the system target is unreliable because
+    # some MRWs have invalid (negative) values. Instead, use a static variable
+    # to keep track of the number of systems in the mrw.
+    state $sysPos = -1;
+    # Setting the position to -1 and then incrementing it to 0 right away
+    # ensures that the variable is initialized to a valid starting value and
+    # that as more are processed the value is updated correctly before it's used
+    #
+    # The other reason to do it here as opposed to on exit allows us to keep the
+    # logic together to avoid coding mistakes in the future.
+    $sysPos++;
+
     my $fapiName  = $targetObj->getFapiName($type);
 
     # SYS target has PHYS_PATH and AFFINITY_PATH defined in the XML
@@ -747,13 +760,6 @@ sub processSystem
     $targetObj->setAttribute($target,"FAPI_POS",   $sysPos);
     $targetObj->setAttribute($target,"FAPI_NAME",  $fapiName);
 
-    # @TODO RTC 247128: Denali mrw has similiar inconsistency as other MRWs
-    # where sysPos is -1. For now, just change it to 0.
-    if ($sysPos < 0)
-    {
-        print "sysPos = [$sysPos]\n";
-        $sysPos = 0;
-    }
 
     # Save this target for retrieval later when printing the xml (sub printXML)
     $targetObj->{targeting}{SYS}[$sysPos]{KEY} = $target;
@@ -818,7 +824,14 @@ sub processNode
     # To do this generically, we use a state (static) variable that will keep a
     # running total of the number of nodes encountered in this mrw instead of
     # the position that was provided to us in the xml.
-    state $nodePosPerSystem = 0;
+    state $nodePosPerSystem = -1;
+    # Setting the position to -1 and then incrementing it to 0 right away
+    # ensures that the variable is initialized to a valid starting value and
+    # that as more are processed the value is updated correctly before it's used
+    #
+    # The other reason to do it here as opposed to on exit allows us to keep the
+    # logic together to avoid coding mistakes in the future.
+    $nodePosPerSystem++;
 
     # Get the FAPI_NAME
     my $fapiName = $targetObj->getFapiName($type);
@@ -841,10 +854,6 @@ sub processNode
 
     # Mark this target as processed
     markTargetAsProcessed($targetObj, $target);
-
-    # Increment the state variable now that we have processed the target. That
-    # way the next node will be ready to process.
-    $nodePosPerSystem++;
 
 } # end sub processNode
 
@@ -881,32 +890,30 @@ sub processProcessorAndChildren
             "for $target.\nError";
     }
 
-    # Get the PROC position, will be useful later
-    my $procPosPerNode = $targetObj->getAttribute($target,"POSITION");
+    my $socketPosition = $targetObj->getAttribute($socket, "POSITION");
 
-    my $systemName = $targetObj->getSystemName();
+    # Get the PROC position. This is its position relative to the proc socket.
+    my $procPosPerSocket = $targetObj->getAttribute($target,"POSITION");
 
-    # @TODO RTC:247128.  Will need to do for Denali.  Better if can calculate
-    # the PROC position agnostic to system.
-    # Set position for RAINIER
-    if ($systemName =~ /RAINIER/i)
-    {
-        # There are 2 sockets comprising of 2 processors for a total of 4.
-        # For Rainier, the processors are unique to the system, not
-        # to a socket, therefore each processor gets their own position.
-        # The position of the socket is either 0 or 1 and the processors,
-        # within a socket, has position of either 0 or 1.
-        my $socketPosition = $targetObj->getAttribute($socket, "POSITION");
-        # Do the following math to get the unique position for a processor
-        $procPosPerNode = ($socketPosition * MAX_PROCS_PER_SOCKET) + $procPosPerNode;
-    }
-    elsif ($systemName =~ /DENALI/i)
-    {
-        my $socketPosition = $targetObj->getAttribute($socket, "POSITION");
-        $procPosPerNode = $socketPosition;
-    }
+    # To determine the processors position relative to the node we need to
+    # figure out the number of procs per socket.
+    #
+    # DCMs (Dual Chip Module) will have 2 procs per socket
+    # SCMs (Single Chip Module) will have 1 per socket
+    # NOTE: It looks like this state variable is unused but it is setting
+    # $targetObj->{NUM_PROCS_PER_NODE} and doing so in a way that will only set
+    # it once.
+    state $NumberProcsPerSocket = findProcPerSocket($targetObj, $target);
+
+    # Do the following math to get the unique position for a processor per node.
+    my $procPosPerNode = calculateProcPositionPerNode($targetObj,
+                                                      $socketPosition,
+                                                      $procPosPerSocket);
 
     # Increment the number of PROCs, per NODE, for data gathering
+    # @TODO RTC 247183 - This will be wrong for multi-node systems.
+    #       The correct count can be found by taking the number of sockets per
+    #       node and multipling that by $NumberProcsPerSocket.
     $targetObj->{NUM_PROCS_PER_NODE}++;
 
     # Get some useful info from the PROC parent's SYS and NODE targets
@@ -982,8 +989,9 @@ sub processDdimmAndChildren
 
     # The DDIMMs are behind the DDIMM conectors, a one to one relationship.
     # Get the DDIMM's position from the parent DDIMM connector
-    my $dimmPosPerSystem = $targetObj->getAttribute($targetObj->getTargetParent($target),
-                                      "POSITION");
+    my $dimmPosPerSystem = $targetObj->getAttribute(
+                                $targetObj->getTargetParent($target),
+                                "POSITION");
 
     my $ddimmAffinity = "ERR";
     my $ddimmPosPerParent = "ERR";
@@ -994,7 +1002,7 @@ sub processDdimmAndChildren
     if ($conn ne "")
     {
         # Find the OMI bus connection to determine target values
-        my $proc_num = "ERR";
+        my $procPosRelativeToNode = "ERR";
         my $mc_num   = "ERR";
         my $mi_num   = "ERR";
         my $mcc_num  = "ERR";
@@ -1005,50 +1013,66 @@ sub processDdimmAndChildren
         foreach my $conn (@{$conn->{CONN}})
         {
             my $source = $conn->{SOURCE};
-            my @targets = split(/\//, $source);
-
             # Split the source into proc#, mc#, mi#, mcc#, omic#, omi#
-            # Source example:    /sys-#/node-#/nisqually-#/proc_socket-#/godel-#/power10-#/mc#/mi#/mcc#/omic#/omi#
-            # Array index     0    1     2      3           4             5       6          7  8   9    10    11
+            my @targets = split(/\//, $source);
             # Splitting on "/" makes the first array index an empty string,
-            # therfore, target info start with index 1
+            # to correct for this we can simply shift off the first element.
+            shift @targets;
+            # After splitting and the shift:
+            # Source example:/sys-#/node-#/nisqually-#/proc_socket-#/godel-#/power10-#/mc#/mi#/mcc#/omic#/omi#
+            # Array index     0     1      2           3             4       5         6   7   8    9     10
 
+            # Strip down the target names to just the instance numbers.
+            # Due to inconsistent naming and numerical characters being present
+            # in some instance names that aren't the instance number this needs
+            # to be done in two steps.
             foreach my $target (@targets)
             {
+                # This removes all characters before the -
+                # ex. power10-1 becomes 1
+                $target =~ s/.*-//g;
+                # This removes all non-digit characters.
+                # ex. omi0 becomes 0
                 $target =~ s/\D//g;
             }
 
             # Index into the targets array, with identification of index data
-            use constant PROC_INDEX => 4;
-            use constant MC_INDEX   => 7;
-            use constant MI_INDEX   => 8;
-            use constant MCC_INDEX  => 9;
-            use constant OMI_INDEX  => 11;
+            use constant PROC_SOCKET_INDEX => 3;
+            use constant PROC_INDEX        => 5;
+            use constant MC_INDEX          => 6;
+            use constant MI_INDEX          => 7;
+            use constant MCC_INDEX         => 8;
+            use constant OMI_INDEX         => 10;
 
             # Target breakdown, excerpt from simics_P10.system.xml:
             # Each P10 has 4 MC units
-            #     Each MC unit has 1 MI unit (a total of 4 per chip)
-            #         Each MI unit has 2 MCC units (a total of 8 per chip)
-            #             Each MCC unit has 2 OMI Units (A total of 16 per chip)
-            #                 OMI Units are special as they have two parents (MCC + OMIC)
+            # =>Each MC unit has 1 MI unit (a total of 4 per chip)
+            # ==>Each MI unit has 2 MCC units (a total of 8 per chip)
+            # ===>Each MCC unit has 2 OMI Units (A total of 16 per chip)
+            # NOTE: OMI Units are special as they have two parents (MCC + OMIC)
             use integer;
-            $proc_num = $targets[PROC_INDEX];
-            my $maxMcPerProc = getMaxInstPerParent("MC");
-            $mc_num = ($dimmPosPerSystem / $maxMcPerProc) - ($proc_num * $maxMcPerProc);
+            $procPosRelativeToNode =
+                calculateProcPositionPerNode($targetObj,
+                                             $targets[PROC_SOCKET_INDEX],
+                                             $targets[PROC_INDEX]);
+
+            $mc_num = $targets[MC_INDEX] % getMaxInstPerParent("MC");
             $mi_num = $targets[MI_INDEX]   % getMaxInstPerParent("MI");
             $mcc_num = $targets[MCC_INDEX] % getMaxInstPerParent("MCC");
             $omi_num = $targets[OMI_INDEX] % getMaxInstPerParent("OMI");
-            # The values for these is 0
+
+            # The values for these are 0
+            # NOTE: Going on the assumption that 1 OCMB per DDIMM with
+            #       1 MEM_PORT and 1 DIMM, but this may not always be case.
             $ocmb_num = 0;
             $mem_num  = 0;
             $ddimmPosPerParent = 0;
 
-            # NOTE: Going on the assumption that 1 OCMB per DDIMM with
-            #       1 MEM_PORT and 1 DIMM, but this may not alwys be case.
             # Update the affinity path with the data gathered above.
-            $ddimmAffinity = "/proc-$proc_num/mc-$mc_num/mi-$mi_num" .
-                             "/mcc-$mcc_num/omi-$omi_num/ocmb_chip-$ocmb_num" .
-                             "/mem_port-$mem_num/dimm-$ddimmPosPerParent";
+            $ddimmAffinity = "/proc-$procPosRelativeToNode/mc-$mc_num/".
+                             "mi-$mi_num/mcc-$mcc_num/omi-$omi_num/".
+                             "ocmb_chip-$ocmb_num/mem_port-$mem_num/".
+                             "dimm-$ddimmPosPerParent";
 
         } # end foreach my $conn (@{$conn->{CONN}})
     } # end if ($conn ne "")
@@ -1845,6 +1869,70 @@ sub setProcMasterStatus
     }
 } # end sub setProcMasterStatus
 
+#--------------------------------------------------
+# @brief Finds the number of processors per socket in the system mrw by counting
+#        the number of procs under the socket target.
+#        NOTE: This function only needs to be called once and that occurs in
+#              processProcessorAndChildren(). This will create and set the
+#              variable NUMBER_PROCS_PER_SOCKET in the global target object.
+#
+# @param[in] $targetObj - The global target object blob
+# @param[in] $proc      - The PROC target
+#
+# @return    $numberOfProcsPerSocket - The number of procs per socket.
+#--------------------------------------------------
+sub findProcPerSocket
+{
+    my $targetObj = shift;
+    my $proc      = shift;
+
+    my $parent = $proc;
+    $parent = $targetObj->getTargetParent($proc);
+
+    my $numberOfProcsPerSocket = 0;
+    foreach my $child (@{ $targetObj->getTargetChildren($parent) })
+    {
+        if ($targetObj->doesAttributeExistForTarget($child, "TYPE"))
+        {
+            my $type = $targetObj->getType($child);
+            if ($type eq "PROC")
+            {
+                $numberOfProcsPerSocket++;
+            }
+        }
+    }
+
+    # Dynamically create and cache the number of procs per socket.
+    $targetObj->{NUMBER_PROCS_PER_SOCKET} = $numberOfProcsPerSocket;
+
+    return $numberOfProcsPerSocket;
+}
+
+#--------------------------------------------------
+# @brief Calculates the processor position with respect to the node it is a
+#        child of.
+#
+# @param[in] $targetObj                    - The global target object blob.
+# @param[in] $socketPosition               - The socket position relative to the
+#                                            node parent.
+# @param[in] $procPositionRelativeToSocket - The proc position relative to the
+#                                            socket parent.
+# @return $procPosRelativeToNode           - The procs position relative to the
+#                                            node parent.
+#--------------------------------------------------
+sub calculateProcPositionPerNode
+{
+    my $targetObj = shift;
+    my $socketPosition = shift;
+    my $procPositionRelativeToSocket = shift;
+
+    my $procPosRelativeToNode = ($socketPosition
+                              * $targetObj->{NUMBER_PROCS_PER_SOCKET})
+                              + $procPositionRelativeToSocket;
+
+    return $procPosRelativeToNode;
+}
+
 # Get the affinity path of the passed target. The affinity path is the physical
 # path of the target's I2C master which for this function is the parent
 # processor with chip unit number appended.
@@ -1949,6 +2037,7 @@ sub setEepromAttributeForDdimm
     # connections FROM this target ("") but find connections TO this target(1).
     # If not found, then throw an error and exit.
     my $i2cConn = $targetObj->findConnectionsByDirection($spdDevice, "I2C", "", 1);
+
     if ($i2cConn eq "")
     {
         select()->flush(); # flush buffer before spewing out error message
