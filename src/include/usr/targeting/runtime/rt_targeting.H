@@ -50,15 +50,6 @@ namespace RT_TARG
     };
 
     /**
-     * @brief Convert a runtime chip_id (target) into a TARGETING::Target
-     * @param[in] The rt chipId
-     * @param[out] The TARGETING::Target pointer
-     * @return error log handle on error else NULL
-     */
-    errlHndl_t getHbTarget(TARGETING::rtChipId_t i_rt_chip_id,
-                           TARGETING::Target *& o_target);
-
-    /**
      * @brief Save/Restore attribute values from current Reserved Memory data
      * into new LID Structure data
      * @param[in] Pointer to current Reserved Memory targeting binary data

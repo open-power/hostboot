@@ -130,13 +130,10 @@ errlHndl_t computeNonPhypRtTarget(
 
         if(targetingTargetType == TARGETING::TYPE_PROC)
         {
-            uint32_t fabId =
-                i_pTarget->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
+            const auto topologyId =
+                i_pTarget->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
 
-            uint32_t procPos =
-                i_pTarget->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
-
-            o_rtTargetId = PIR_t::createChipId( fabId, procPos );
+            o_rtTargetId = PIR_t::createChipId(topologyId);
         }
         else if(targetingTargetType == TARGETING::TYPE_CORE)
         {

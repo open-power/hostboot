@@ -26,6 +26,7 @@
 #include <targeting/common/commontargeting.H>
 #include <runtime/interface.h>
 #include <targeting/runtime/rt_targeting.H>
+#include <targeting/translateTarget.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <targeting/common/trace.H>

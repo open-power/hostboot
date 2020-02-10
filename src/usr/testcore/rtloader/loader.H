@@ -48,7 +48,7 @@
 #include <sys/misc.h>
 #include <errno.h>
 #include <isteps/mem_utils.H>
-
+#include <targeting/translateTarget.H>
 
 trace_desc_t* g_trac_hbrt = NULL;
 TRAC_INIT(&g_trac_hbrt, "HBRT_TEST", 12*KILOBYTE);
@@ -222,6 +222,18 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             {
                 TRACFCOMP( g_trac_hbrt,
                            "tearDown(): skipping unmap hb_data virt addr");
+            }
+
+            for(auto &proc : cv_homerAddr)
+            {
+                if(proc.second)
+                {
+                    const auto rc = mm_block_unmap(
+                        reinterpret_cast<void*>(proc.second));
+                    assert(!rc,"mm_block_unmap failed for 0x%016llX",
+                        proc.second);
+                    proc.second = 0;
+                }
             }
         }
 
@@ -398,12 +410,80 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
         static uint64_t rt_get_reserved_mem(const char* i_region,
                                             uint32_t i_instance)
         {
+            uint64_t addr = 0;
+
             if (0 == strcmp(i_region, HBRT_RSVD_MEM__SBE_COMM))
-                return rt_get_comm(i_instance);
+            {
+                addr = rt_get_comm(i_instance);
+            }
             else if (0 == strcmp(i_region, HBRT_RSVD_MEM__DATA))
-                return rt_get_hb_data(i_instance);
-            else
-                return 0;
+            {
+                addr = rt_get_hb_data(i_instance);
+            }
+            else if (0 == strcmp(i_region,HBRT_RSVD_MEM__HOMER))
+            {
+                addr = rt_get_homer_addr(i_instance);
+            }
+
+            TRACFCOMP(g_trac_hbrt,
+                      INFO_MRK"rt_get_reserved_mem> returning 0x%016llX for "
+                      "region %s, instance 0x%08X",
+                      addr,i_region,i_instance);
+
+            return addr;
+        }
+
+        /**
+         *  @brief Returns the HOMER address for a given runtime processor
+         *      instance
+         *
+         *  @param[in] i_instance Runtime processor instance
+         *
+         *  @return uint64_t HOMER address
+         */
+        static uint64_t rt_get_homer_addr(const uint32_t i_instance)
+        {
+            TRACFCOMP(g_trac_hbrt,ENTER_MRK
+                      "rt_get_homer_addr> i_instance=%d", i_instance);
+
+            uint64_t vAddr = 0;
+            TARGETING::TargetHandle_t pTarget = nullptr;
+            auto pError = RT_TARG::getHbTarget(i_instance,pTarget);
+            if(pError)
+            {
+                // API does not allow for surfacing an error back so commit
+                // the error and return 0 back to the caller.
+                errlCommit(pError,CXXTEST_COMP_ID);
+            }
+            else if(   (pTarget)
+                    && (   pTarget->getAttr<TARGETING::ATTR_TYPE>()
+                        == TARGETING::TYPE_PROC))
+            {
+                const auto procOrdinalId =
+                    pTarget->getAttr<TARGETING::ATTR_ORDINAL_ID>();
+
+                auto procItr = cv_homerAddr.find(procOrdinalId);
+                if(   (procItr == cv_homerAddr.end())
+                   || (!procItr->second))
+                {
+                    const auto physAddr =
+                        pTarget->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>();
+                    vAddr = reinterpret_cast<uint64_t>(mm_block_map(
+                       reinterpret_cast<void*>(physAddr),
+                       VMM_HOMER_INSTANCE_SIZE));
+
+                    assert(vAddr,"mm_block_map failed to map physical address "
+                        "0x%016llX",physAddr)
+
+                    cv_homerAddr[procOrdinalId] = vAddr;
+                }
+                else
+                {
+                    vAddr = cv_homerAddr[procOrdinalId];
+                }
+            }
+
+            return vAddr;
         }
 
         static uint64_t rt_get_hb_data(uint32_t i_instance)
@@ -1014,11 +1094,15 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
         static uint64_t cv_hb_data_addr;
         static uint64_t cv_comm_addr;
         static uint64_t cv_comm_phys_addr;
+
+        // Map which looks up a proc's HOMER address using a proc's ordinal ID
+        static std::map<uint32_t,uint64_t> cv_homerAddr;
 };
 
 
 RuntimeLoaderTest::SCOM_MAP RuntimeLoaderTest::cv_scomMap;
 std::map<void*, UtilLidMgr*> RuntimeLoaderTest::cv_loadedLids;
+std::map<uint32_t,uint64_t> RuntimeLoaderTest::cv_homerAddr;
 
 uint64_t RuntimeLoaderTest::cv_hb_data_addr = 0;
 uint64_t RuntimeLoaderTest::cv_comm_addr = 0;

@@ -42,3 +42,5 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 
 HOSTBOOT_RT_IPL_COMMON_OBJS += attrPlatOverride.o
+HOSTBOOT_RT_IPL_COMMON_OBJS += translateTarget.o
+

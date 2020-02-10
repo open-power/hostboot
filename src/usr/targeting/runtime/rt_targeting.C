@@ -39,7 +39,7 @@
 #include <targeting/attrrp.H>
 #include <arch/pirformat.H>
 #include <runtime/customize_attrs_for_payload.H>
-#include <targeting/runtime/rt_targeting.H>
+#include <targeting/translateTarget.H>
 #include <runtime/interface.h>
 #include <map>
 #include <util/memoize.H>
@@ -53,92 +53,6 @@ using namespace TARGETING;
 
 namespace RT_TARG
 {
-
-
-/**
- *  @brief API documentation same as for getHbTarget; this just implements the
- *      core logic (i.e. called when the memoizer doesn't have a cached answer)
- */
-errlHndl_t _getHbTarget(
-    const rtChipId_t          i_rtTargetId,
-          TARGETING::Target*& o_target)
-{
-    errlHndl_t pError = NULL;
-
-    do
-    {
-        // Don't even attempt the lookup if the unknown ID is used
-        TARGETING::TargetHandle_t pTarget = NULL;
-        if(i_rtTargetId != RUNTIME::HBRT_HYP_ID_UNKNOWN)
-        {
-            uint8_t l_maxNodeId =
-                TARGETING::targetService().getNumInitializedNodes();
-            for(uint8_t l_nodeId=NODE0; l_nodeId<l_maxNodeId; ++l_nodeId)
-            {
-                TRACFCOMP( g_trac_targeting, "Node %d beginning target %p",
-                l_nodeId,
-                *(TARGETING::targetService().begin(l_nodeId)));
-
-                for (TARGETING::TargetIterator pIt =
-                        TARGETING::targetService().begin(l_nodeId);
-                     pIt != TARGETING::targetService().end();
-                     ++pIt)
-                {
-                    auto rtTargetId = RUNTIME::HBRT_HYP_ID_UNKNOWN;
-                    if( (*pIt != nullptr)
-                       &&  ((*pIt)->tryGetAttr<
-                               TARGETING::ATTR_HBRT_HYP_ID>(rtTargetId))
-                       && (rtTargetId == i_rtTargetId))
-                    {
-                        pTarget = (*pIt);
-                        break;
-                    }
-                }
-
-                if(pTarget)
-                {
-                    break;
-                }
-            }
-        }
-
-        if(pTarget == NULL)
-        {
-            TRACFCOMP( g_trac_targeting, ERR_MRK
-                "Can't find targeting target for runtime target ID of "
-                "0x%16llX",
-                i_rtTargetId);
-            /*@
-             * @errortype
-             * @moduleid     TARGETING::TARG_RT_GET_HB_TARGET
-             * @reasoncode   TARGETING::TARG_RT_TARGET_TYPE_NOT_SUPPORTED
-             * @userdata1    Runtime target ID
-             * @userdata2    0
-             * @devdesc      Can't find targeting target for given runtime
-             *               target ID
-             */
-            pError = new ERRORLOG::ErrlEntry(
-                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                TARGETING::TARG_RT_GET_HB_TARGET,
-                TARGETING::TARG_RT_TARGET_TYPE_NOT_SUPPORTED,
-                i_rtTargetId,
-                0,
-                true);
-        }
-
-        o_target = pTarget;
-
-    } while(0);
-
-    return pError;
-}
-
-errlHndl_t getHbTarget(
-    const rtChipId_t          i_rtTargetId,
-          TARGETING::Target*& o_target)
-{
-      return Util::Memoize::memoize(_getHbTarget,i_rtTargetId,o_target);
-}
 
 /**
  * @brief Validate LID Structure against Reserved Memory.  Check that the

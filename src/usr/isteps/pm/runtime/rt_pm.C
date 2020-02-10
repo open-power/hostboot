@@ -46,6 +46,7 @@
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/common/targetservice.H>
 #include    <targeting/runtime/rt_targeting.H>
+#include    <targeting/translateTarget.H>
 
 #include <scom/scomif.H>
 #include <scom/wakeup.H>

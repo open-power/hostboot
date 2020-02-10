@@ -28,6 +28,7 @@
 #include    "../htmgt_utility.H"
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/runtime/rt_targeting.H>
+#include    <targeting/translateTarget.H>
 
 
 using namespace TARGETING;

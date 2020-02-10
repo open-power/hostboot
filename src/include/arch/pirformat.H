@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -170,6 +170,22 @@ struct PIR_t
 
         return l_chipId;
     }
+
+    /**
+     *  @brief Return a chip ID based on the input topology ID
+     *
+     *  @param[in] i_topologyId Processor topology ID
+     *
+     *  @return uint32_t The chip ID built from the input topology ID
+     */
+    inline static uint32_t createChipId(const topoId_t i_topologyId)
+    {
+        uint8_t groupId = 0;
+        uint8_t chipId = 0;
+        extractGroupAndChip(i_topologyId,groupId,chipId);
+        return ((groupId << BITS_IN_CHIP) | chipId);
+    }
+
 #endif
     inline static uint32_t coreFromPir( PIR_t i_pir ) {
         return i_pir.coreId;
