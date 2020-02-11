@@ -47,6 +47,16 @@
 </hwpError>
 <!-- ******************************************************************** -->
 <hwpError>
+  <rc>RC_P10_SBE_SCRATCH_REGS_PCIE_FREQ_LOOKUP_ERR</rc>
+  <description>
+    Frequency requested via ATTR_FREQ_PCIE_MHZ was not found in list
+    of supported frequency values
+  </description>
+  <ffdc>TARGET_CHIP</ffdc>
+  <ffdc>FREQ_PCIE_MHZ</ffdc>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
   <rc>RC_P10_SBE_SCRATCH_REGS_PAUC_GARD_ERR</rc>
   <description>
     Requested PAUC GARD state is not supported by current IPL type
@@ -65,6 +75,15 @@
   </description>
   <ffdc>TARGET_CHIP</ffdc>
   <ffdc>N1_PG_MVPD</ffdc>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_SBE_SCRATCH_REGS_INVALID_ACCESS_ERR</rc>
+  <description>
+    Requested hardware access method is not supported by platform
+  </description>
+  <ffdc>TARGET_CHIP</ffdc>
+  <ffdc>USE_SCOM</ffdc>
 </hwpError>
 <!-- ******************************************************************** -->
 </hwpErrors>

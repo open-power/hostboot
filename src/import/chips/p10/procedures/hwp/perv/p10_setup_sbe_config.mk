@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -24,4 +24,5 @@
 # IBM_PROLOG_END_TAG
 PROCEDURE=p10_setup_sbe_config
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/common/include)
+OBJS+=p10_sbe_scratch_regs.o
 $(call BUILD_PROCEDURE)

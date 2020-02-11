@@ -35,6 +35,8 @@
 #ifndef _P10_SBE_SCRATCH_REGS_H_
 #define _P10_SBE_SCRATCH_REGS_H_
 
+#include <p10_scom_perv.H>
+
 enum p10_sbe_scratch_regs
 {
     // Scratch_reg_1
@@ -106,6 +108,10 @@ enum p10_sbe_scratch_regs
     // Scratch_reg_6
     SCRATCH6_REG_VALID_BIT                          = 5,
 
+    ATTR_FILTER_PLL_BUCKET_STARTBIT                 = 0,
+    ATTR_FILTER_PLL_BUCKET_LENGTH                   = 2,
+    ATTR_PCI_PLL_BUCKET_STARTBIT                    = 2,
+    ATTR_PCI_PLL_BUCKET_LENGTH                      = 2,
     ATTR_SKEWADJ_BYPASS_BIT                         = 6,
     ATTR_DCADJ_BYPASS_BIT                           = 7,
     ATTR_CP_PLLTODFLT_BYPASS_BIT                    = 8,
@@ -129,13 +135,8 @@ enum p10_sbe_scratch_regs
     // Scratch_reg_7
     SCRATCH7_REG_VALID_BIT                          = 6,
 
-    NDL_GARD_STARTBIT                               = 8,
-    NDL_GARD_LENGTH                                 = 8,
-
     ATTR_CHIP_CONTAINED_ACTIVE_CORES_VEC_STARTBIT   = 0,
     ATTR_CHIP_CONTAINED_ACTIVE_CORES_VEC_LENGTH     = 32,
-
-    IOHS_PG_NDL_SHIFT                               = 15,
 
     // Scratch_reg_9
     SCRATCH9_REG_VALID_BIT                          = 8,
@@ -144,8 +145,6 @@ enum p10_sbe_scratch_regs
     ATTR_FREQ_PAU_MHZ_LENGTH                        = 16,
     ATTR_MC_PLL_BUCKET_STARTBIT                     = 16,
     ATTR_MC_PLL_BUCKET_LENGTH                       = 3,
-    ATTR_NDL_MESHCTRL_SETUP_STARTBIT                = 28,
-    ATTR_NDL_MESHCTRL_SETUP_LENGTH                  = 4,
 
     // Scratch_reg_10
     SCRATCH10_REG_VALID_BIT                         = 9,
@@ -156,5 +155,57 @@ enum p10_sbe_scratch_regs
     ATTR_CHIP_CONTAINED_BACKING_CACHES_VEC_STARTBIT = 0,
     ATTR_CHIP_CONTAINED_BACKING_CACHES_VEC_LENGTH   = 32,
 };
+
+struct p10_sbe_scratch_reg_id_t
+{
+    const uint8_t num;
+    const uint64_t scom_addr;
+    const uint32_t cfam_addr;
+};
+
+static const p10_sbe_scratch_reg_id_t SCRATCH_REGISTER1  = {  1, scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_1_RW,  scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_1_FSI  };
+static const p10_sbe_scratch_reg_id_t SCRATCH_REGISTER2  = {  2, scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_2_RW,  scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_2_FSI  };
+static const p10_sbe_scratch_reg_id_t SCRATCH_REGISTER3  = {  3, scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW,  scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI  };
+static const p10_sbe_scratch_reg_id_t SCRATCH_REGISTER4  = {  4, scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_4_RW,  scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_4_FSI  };
+static const p10_sbe_scratch_reg_id_t SCRATCH_REGISTER5  = {  5, scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_5_RW,  scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_5_FSI  };
+static const p10_sbe_scratch_reg_id_t SCRATCH_REGISTER6  = {  6, scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RW,  scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI  };
+static const p10_sbe_scratch_reg_id_t SCRATCH_REGISTER7  = {  7, scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_7_RW,  scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_7_FSI  };
+static const p10_sbe_scratch_reg_id_t SCRATCH_REGISTER8  = {  8, scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_RW,  scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_FSI  };
+static const p10_sbe_scratch_reg_id_t SCRATCH_REGISTER9  = {  9, scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_9_RW,  scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_9_FSI  };
+static const p10_sbe_scratch_reg_id_t SCRATCH_REGISTER10 = { 10, scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_10_RW, scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_10_FSI };
+
+
+///
+/// @brief Initialize SBE scratch registers based on platform attribute/
+/// targeting model
+///
+/// @param[in] i_target       Reference to processor chip target
+/// @param[in] i_update_all   True=Force all scratch registers to be updated
+///                           (service processor/p10_setup_sbe_config usage)
+///                           False=Update only if corresponding scratch valid
+///                           is not asserted (SBE/p10_sbe_attr_setup usage)
+/// @param[in] i_use_scom     True=perform all MBOX accesses via SCOM
+///                           False=use CFAM
+///
+/// @return fapi::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode p10_sbe_scratch_regs_update(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+    const bool i_update_all,
+    const bool i_use_scom);
+
+
+///
+/// @brief Calculate functional unit target number from pervasive target type
+///
+/// @param[in]    i_target_perv  Pervasive target instance
+/// @param[in]    i_type         Functional target type
+///
+/// @return uint8_t
+///
+uint8_t
+p10_sbe_scratch_regs_get_unit_num(
+    const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_perv,
+    const fapi2::TargetType i_type);
 
 #endif // _P10_SBE_SCRATCH_REGS_H_

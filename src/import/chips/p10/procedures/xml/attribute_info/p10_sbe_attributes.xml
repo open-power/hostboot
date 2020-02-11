@@ -149,46 +149,46 @@
     <!-- ATTR_PG will be calculated and written by HWP code, based on ATTR_PG_MVPD and -->
     <!-- the gard information passed in via mailbox                                    -->
     <name>ATTR_PG</name>
-    <value>0xFFFFFFFF</value> <!--  0 Unused -->
-    <value>0xFFFFFFFF</value> <!--  1 PERV   -->
-    <value>0xFFFFFFFF</value> <!--  2 N0     -->
-    <value>0xFFFFFFFF</value> <!--  3 N1     -->
+    <value>0xFFE03FFF</value> <!--  0 Unused -->
+    <value>0xFFE051FF</value> <!--  1 PERV   -->
+    <value>0xFFE37FFF</value> <!--  2 N0     -->
+    <value>0xFFE53FFF</value> <!--  3 N1     -->
     <value>0xFFFFFFFF</value> <!--  4 Unused -->
     <value>0xFFFFFFFF</value> <!--  5 Unused -->
     <value>0xFFFFFFFF</value> <!--  6 Unused -->
     <value>0xFFFFFFFF</value> <!--  7 Unused -->
-    <value>0xFFFFFFFF</value> <!--  8 PCI0   -->
-    <value>0xFFFFFFFF</value> <!--  9 PCI1   -->
+    <value>0XFFE00C1F</value> <!--  8 PCI0   -->
+    <value>0XFFE00C1F</value> <!--  9 PCI1   -->
     <value>0xFFFFFFFF</value> <!-- 10 Unused -->
     <value>0xFFFFFFFF</value> <!-- 11 Unused -->
-    <value>0xFFFFFFFF</value> <!-- 12 MC0    -->
-    <value>0xFFFFFFFF</value> <!-- 13 MC1    -->
-    <value>0xFFFFFFFF</value> <!-- 14 MC2    -->
-    <value>0xFFFFFFFF</value> <!-- 15 MC3    -->
-    <value>0xFFFFFFFF</value> <!-- 16 PAU0   -->
-    <value>0xFFFFFFFF</value> <!-- 17 PAU1   -->
-    <value>0xFFFFFFFF</value> <!-- 18 PAU2   -->
-    <value>0xFFFFFFFF</value> <!-- 19 PAU3   -->
+    <value>0xFFE21DFF</value> <!-- 12 MC0    -->
+    <value>0xFFE21DFF</value> <!-- 13 MC1    -->
+    <value>0xFFE21DFF</value> <!-- 14 MC2    -->
+    <value>0xFFE21DFF</value> <!-- 15 MC3    -->
+    <value>0xFFE39FFF</value> <!-- 16 PAU0   -->
+    <value>0xFFE39FFF</value> <!-- 17 PAU1   -->
+    <value>0xFFE19FFF</value> <!-- 18 PAU2   -->
+    <value>0xFFE19FFF</value> <!-- 19 PAU3   -->
     <value>0xFFFFFFFF</value> <!-- 20 Unused -->
     <value>0xFFFFFFFF</value> <!-- 21 Unused -->
     <value>0xFFFFFFFF</value> <!-- 22 Unused -->
     <value>0xFFFFFFFF</value> <!-- 23 Unused -->
-    <value>0xFFFFFFFF</value> <!-- 24 IOHS0  -->
-    <value>0xFFFFFFFF</value> <!-- 25 IOHS1  -->
-    <value>0xFFFFFFFF</value> <!-- 26 IOHS2  -->
-    <value>0xFFFFFFFF</value> <!-- 27 IOHS3  -->
-    <value>0xFFFFFFFF</value> <!-- 28 IOHS4  -->
-    <value>0xFFFFFFFF</value> <!-- 29 IOHS5  -->
-    <value>0xFFFFFFFF</value> <!-- 30 IOHS6  -->
-    <value>0xFFFFFFFF</value> <!-- 31 IOHS7  -->
-    <value>0xFFFFFFFF</value> <!-- 32 EQ0    -->
-    <value>0xFFFFFFFF</value> <!-- 33 EQ1    -->
-    <value>0xFFFFFFFF</value> <!-- 34 EQ2    -->
-    <value>0xFFFFFFFF</value> <!-- 35 EQ3    -->
-    <value>0xFFFFFFFF</value> <!-- 36 EQ4    -->
-    <value>0xFFFFFFFF</value> <!-- 37 EQ5    -->
-    <value>0xFFFFFFFF</value> <!-- 38 EQ6    -->
-    <value>0xFFFFFFFF</value> <!-- 39 EQ7    -->
+    <value>0xFFE33DFF</value> <!-- 24 IOHS0  -->
+    <value>0xFFE3BDFF</value> <!-- 25 IOHS1  -->
+    <value>0xFFE3BDFF</value> <!-- 26 IOHS2  -->
+    <value>0xFFE33DFF</value> <!-- 27 IOHS3  -->
+    <value>0xFFE33DFF</value> <!-- 28 IOHS4  -->
+    <value>0xFFE33DFF</value> <!-- 29 IOHS5  -->
+    <value>0xFFE33DFF</value> <!-- 30 IOHS6  -->
+    <value>0xFFE33DFF</value> <!-- 31 IOHS7  -->
+    <value>0xFFE0001F</value> <!-- 32 EQ0    -->
+    <value>0xFFE0001F</value> <!-- 33 EQ1    -->
+    <value>0xFFE0001F</value> <!-- 34 EQ2    -->
+    <value>0xFFE0001F</value> <!-- 35 EQ3    -->
+    <value>0xFFE0001F</value> <!-- 36 EQ4    -->
+    <value>0xFFE0001F</value> <!-- 37 EQ5    -->
+    <value>0xFFE0001F</value> <!-- 38 EQ6    -->
+    <value>0xFFE0001F</value> <!-- 39 EQ7    -->
     <value>0xFFFFFFFF</value> <!-- 40 Unused -->
     <value>0xFFFFFFFF</value> <!-- 41 Unused -->
     <value>0xFFFFFFFF</value> <!-- 42 Unused -->
