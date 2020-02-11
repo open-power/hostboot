@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -31,14 +31,22 @@
  * @file    istep21list.H
  *
  *  IStep 21    Start Payload
- *  IPL FLow Doc        v0.60 (06/02/15)
+ *  IPL FLow Doc        v0.89.17 (12/10/19)
  *
- *    21.1    host_runtime_setup
+ *    21.1    host_micro_update
+ *          :  Update System micro code (non-executable istep)
+ *    21.2    host_runtime_setup
  *          :  Start Payload
- *    21.2    host_verify_hdat
+ *    21.3    host_verify_hdat
  *          :  Start Payload
- *    21.3    host_start_payload
+ *    21.4    host_start_payload
  *          :  Start Payload
+ *    21.5    host_post_start_payload   (non-executable istep)
+ *          : Post payload start
+ *    21.6    switchbcu                 (non-executable istep)
+ *          : Switch BCU - send continue to phyp
+ *    21.7    completeipl               (non-executable istep)
+ *          : notify HMC
  *
  *
  *  Please see the note in initsvcstructs.H for description of
@@ -99,21 +107,40 @@ namespace   INITSERVICE
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
-                ISTEPNAME(21,01,"host_runtime_setup"),
+                ISTEPNAME(21,01,""),        // not used. host micro update
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
+        },
+        {
+                ISTEPNAME(21,02,"host_runtime_setup"),
                 ISTEP_21::call_host_runtime_setup,
                 { START_FN, EXT_IMAGE, MPIPL_OP | NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(21,02,"host_verify_hdat"),
+                ISTEPNAME(21,03,"host_verify_hdat"),
                 ISTEP_21::call_host_verify_hdat,
                 { START_FN, EXT_IMAGE, MPIPL_OP | NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(21,03,"host_start_payload"),
+                ISTEPNAME(21,04,"host_start_payload"),
                 ISTEP_21::call_host_start_payload,
                 { START_FN, EXT_IMAGE, MPIPL_OP | NORMAL_IPL_OP, false }
         },
-
+        {
+                ISTEPNAME(21,05,""),        // not used. Post payload start
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
+        },
+        {
+                ISTEPNAME(21,06,""),        // not used. Switch BCU - send continue to phyp
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
+        },
+        {
+                ISTEPNAME(21,07,""),        // not used. Notify HMC
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
+        },
 };
 
 const DepModInfo  g_istep21Dependancies = {
