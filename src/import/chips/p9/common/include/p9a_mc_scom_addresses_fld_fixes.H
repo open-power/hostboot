@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -116,5 +116,22 @@ static const uint8_t P9A_MC_REG0_CMN_CONFIG_CNTR0_EN = 63;
 static const uint8_t P9A_MC_REG2_DL0_CONFIG1_CFG_PREIPL_PRBS_ENA  = 4;
 static const uint8_t P9A_MC_REG2_DL0_CONFIG1_CFG_PREIPL_PRBS_TIME  = 5;
 static const uint8_t P9A_MC_REG2_DL0_CONFIG1_CFG_PREIPL_PRBS_TIME_LEN  = 3;
+
+static const uint8_t P9A_MCC_DSTLFIR_CONFIG_REG_RECOVERABLE_PARITY_ERROR     = 10  ;
+static const uint8_t P9A_MCC_DSTLFIR_CONFIG_REG_FATAL_PARITY_ERROR           = 11  ;
+static const uint8_t P9A_MCC_DSTLFIR_SUBCHANNEL_A_TIMEOUT_ERROR              = 14  ;
+static const uint8_t P9A_MCC_DSTLFIR_SUBCHANNEL_B_TIMEOUT_ERROR              = 15  ;
+static const uint8_t P9A_MCC_DSTLFIR_SUBCHANNEL_A_BUFFER_OVERUSE_ERROR       = 16  ;
+static const uint8_t P9A_MCC_DSTLFIR_SUBCHANNEL_B_BUFFER_OVERUSE_ERROR       = 17  ;
+static const uint8_t P9A_MCC_DSTLFIR_SUBCHANNEL_A_DL_LINK_DOWN               = 18  ;
+static const uint8_t P9A_MCC_DSTLFIR_SUBCHANNEL_B_DL_LINK_DOWN               = 19  ;
+static const uint8_t P9A_MCC_DSTLFIR_SUBCHANNEL_A_FAIL_ACTION                = 20  ;
+static const uint8_t P9A_MCC_DSTLFIR_SUBCHANNEL_B_FAIL_ACTION                = 21  ;
+static const uint8_t P9A_MCC_DSTLFIR_CHANNEL_TIMEOUT_SUBCH_A                 = 22  ;
+static const uint8_t P9A_MCC_DSTLFIR_CHANNEL_TIMEOUT_SUBCH_B                 = 23  ;
+static const uint8_t P9A_MCC_DSTLFIR_SPARE24                                 = 24  ;
+static const uint8_t P9A_MCC_DSTLFIR_SPARE25                                 = 25  ;
+static const uint8_t P9A_MCC_DSTLFIR_INTERNAL_SCOM_ERROR_FIX                 = 26  ;
+static const uint8_t P9A_MCC_DSTLFIR_INTERNAL_SCOM_ERROR_CLONE_FIX           = 27  ;
 
 #endif

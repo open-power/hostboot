@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2019
+# Contributors Listed Below - COPYRIGHT 2016,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -36,6 +36,9 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9a/procedures/hwp/memory/
+EXTRAINCDIR += ${ROOTPATH}/src/import/
+
 
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/initfiles
 

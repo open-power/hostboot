@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,6 +66,7 @@
 #include <p9_misc_scom_addresses_fld.H>
 #include <p9_perv_scom_addresses.H>
 #include <p9_obus_fir_utils.H>
+#include <lib/fir/p9a_fir.H>
 
 //------------------------------------------------------------------------------
 // Constant definitions
@@ -234,6 +235,8 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
                     fapi2::current_err = l_rc;
                     goto fapi_try_exit;
                 }
+
+                FAPI_TRY(mss::unmask::after_p9a_chiplet_scominit(l_mc_target));
             }
         }
 

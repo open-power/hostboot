@@ -1001,6 +1001,7 @@ struct mcTypeTraits<mc_type::EXPLORER>
     {
         MC_PER_PROC = 2,
         MI_PER_MC = 2,
+        OMIC_PER_MC = 3,
         MCC_PER_MI = 2,
         OMI_PER_MCC = 2,
         OCMB_PER_OMI = 1,
