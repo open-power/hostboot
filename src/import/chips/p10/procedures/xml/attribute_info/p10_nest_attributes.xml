@@ -554,35 +554,23 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_PROC_FABRIC_TID_TABLE_ENTRY_VALID</id>
+  <id>ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
-    Fabric topology ID table configuration.
-    Used to indicate whether the topology ID table entry is valid.
-  </description>
-  <valueType>uint8</valueType>
-  <array>32</array>
-  <enum>
-    FALSE = 0x0,
-    TRUE = 0x1
-  </enum>
-  <writeable/>
-  <initToZero/>
-</attribute>
-<!-- ********************************************************************** -->
-<attribute>
-  <id>ATTR_PROC_FABRIC_TID_TABLE_ENTRY_ID</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>
-    Fabric topology ID table configuration.
+    Fabric topology ID table configuration for smp links.
     Used to represent the corresponding ID for each topology ID table entry.
     Each topology ID table entry is programmed with the A/X link ID that
     routes this chip to the target chip identified by the topology ID table index.
-    Should be considered valid only if corresponding
-    ATTR_PROC_FABRIC_TID_TABLE_ENTRY_VALID index is true.
   </description>
   <valueType>uint8</valueType>
+  <enum>INVALID = 0xff</enum>
   <array>32</array>
+  <default>
+    INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,
+    INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,
+    INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,
+    INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,INVALID
+  </default>
   <writeable/>
   <initToZero/>
 </attribute>
