@@ -73,6 +73,12 @@ using   namespace   TARGETING;
 //******************************************************************************
 void*    call_proc_pcie_scominit( void    *io_pArgs )
 {
+    IStepError l_stepError;
+
+/* TODO RTC:249139 -- Need to set necessary PCIe attributes
+ * for later HWPs/FW to enable the PCIe devices. Discussions
+ * still underway on how MRW + HWPs want this data represented
+
     errlHndl_t l_err(nullptr);
     IStepError l_stepError;
     TARGETING::TargetHandleList l_procTargetList;
@@ -87,9 +93,6 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
     //  convert to fap2 target, and execute hwp
     for (const auto & curproc : l_procTargetList)
     {
-        /* TODO RTC:249139 -- Need to set necessary PCIe attributes
-           for later HWPs/FW to enable the PCIe devices. Discussions
-           still underway on how MRW + HWPs want this data represented
         l_errl = computeProcPcieConfigAttrs(l_cpu_target);
         if(l_errl != nullptr)
         {
@@ -104,7 +107,6 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
             l_StepError.addErrorDetails(l_errl);
             errlCommit( l_errl, ISTEP_COMP_ID );
         }
-        **/
 
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2_proc_target(
                                                                  curproc);
@@ -136,10 +138,9 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
                        "SUCCESS : proc_pcie_scominit HWP" );
         }
     }
-
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
              "call_proc_pcie_scominit exit" );
-
+**/
     // end task, returning any errorlogs to IStepDisp
     return l_stepError.getErrorHandle();
 }
