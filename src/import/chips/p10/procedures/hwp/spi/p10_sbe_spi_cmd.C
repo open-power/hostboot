@@ -457,7 +457,8 @@ spi_read_internal(SpiControlHandle& i_handle, uint32_t i_address, uint32_t i_len
         goto fapi_try_exit;
     }
 
-    /*Restore the default sdeq used by the side band path*/
+    /*Restore the default counter and sdeq used by the side band path*/
+    FAPI_TRY(putScom(i_handle.target_chip, base_addr + SPIM_COUNTERREG, 0x0ULL));
     FAPI_TRY(putScom(i_handle.target_chip,
                      base_addr + SPIM_SEQREG, SPI_DEFAULT_SEQ));
 
@@ -643,7 +644,8 @@ spi_write(SpiControlHandle& i_handle, uint32_t i_address,
         goto fapi_try_exit;
     }
 
-    /*Restore the default sdeq used by the side band path*/
+    /*Restore the default counter and sdeq used by the side band path*/
+    FAPI_TRY(putScom(i_handle.target_chip, base_addr + SPIM_COUNTERREG, 0x0ULL));
     FAPI_TRY(putScom( i_handle.target_chip,
                       base_addr + SPIM_SEQREG, SPI_DEFAULT_SEQ) );
 
