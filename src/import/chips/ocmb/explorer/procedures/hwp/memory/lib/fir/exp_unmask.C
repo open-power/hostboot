@@ -363,12 +363,31 @@ fapi2::ReturnCode after_memdiags<mss::mc_type::EXPLORER>( const fapi2::Target<fa
 /// @brief Unmask and setup actions for scrub related FIR
 /// @param[in] i_target the fapi2::Target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
-/// TODO: Need to implement this function
+/// @note mc_type::EXPLORER specialization
 template<>
 fapi2::ReturnCode after_background_scrub<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
         i_target )
 {
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
+    mss::fir::reg<EXPLR_RDF_FIR> l_exp_rdf_fir_reg(i_target, l_rc);
+
+    FAPI_TRY(l_rc, "unable to create fir::reg for EXPLR_RDF_FIR 0x%08X", EXPLR_RDF_FIR);
+
+    // Write RDF FIR per Explorer unmask spec
+    FAPI_TRY((
+                 l_exp_rdf_fir_reg.recoverable_error<EXPLR_RDF_FIR_MAINLINE_MPE_RANK_0_TO_7, EXPLR_RDF_FIR_MAINLINE_MPE_RANK_0_TO_7_LEN>()
+                 .recoverable_error<EXPLR_RDF_FIR_MAINLINE_NCE>()
+                 .recoverable_error<EXPLR_RDF_FIR_MAINLINE_TCE>()
+                 .recoverable_error<EXPLR_RDF_FIR_MAINLINE_IMPE>()
+                 .recoverable_error<EXPLR_RDF_FIR_MAINTENANCE_IMPE>()
+                 .write()));
+
     return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+
+    return fapi2::current_err;
 }
 
 } // end unmask ns
