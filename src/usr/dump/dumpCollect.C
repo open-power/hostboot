@@ -421,7 +421,6 @@ errlHndl_t copyArchitectedRegs(void)
             uint64_t procSrcAddr = (reinterpret_cast<uint64_t>(vMapSrcAddrBase)+
                                     procNum * VMM_ARCH_REG_DATA_PER_PROC_SIZE);
             TRACDCOMP(g_trac_dump, "SBE Proc[%d] [%p]", procNum, procSrcAddr);
-            procNum++;
 
             sbeArchRegDumpProcHdr_t *sbeProcHdr =
                        reinterpret_cast<sbeArchRegDumpProcHdr_t *>(procSrcAddr);
@@ -503,7 +502,7 @@ errlHndl_t copyArchitectedRegs(void)
                 hostHdr->pir = sbeTdHdr->pir;
                 hostHdr->coreState = sbeTdHdr->coreState;
                 hostHdr->iv_regArrayHdr.hdatOffset =
-                                              sizeof(hostArchRegDataHdr);
+                                              sizeof(HDAT::hdatHDIFDataArray_t);
                 hostHdr->iv_regArrayHdr.hdatArrayCnt = regCount;
                 hostHdr->iv_regArrayHdr.hdatAllocSize =
                                               sizeof(hostArchRegDataEntry);
