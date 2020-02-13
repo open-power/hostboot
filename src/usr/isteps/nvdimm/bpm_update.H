@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,7 +56,7 @@ enum COMMAND : uint8_t
 
     /*
      * These are LOCAL commands. These commands MUST be sent only outside of BSL
-     * BSL mode and must be paired with the BSP command BPM_LOCAL. Otherwise,
+     * mode and must be paired with the BSP command BPM_LOCAL. Otherwise,
      * unpredicatable errors will occur.
      *
      * When using issueCommand() for these commands they should always be sent
@@ -646,6 +646,31 @@ private:
      *                      Otherwise, pointer to an errlEntry.
      */
     errlHndl_t inUpdateMode();
+
+    /**
+     * @brief Transitions the BPM from normal mode to update mode to allow
+     *        updates to the device firmware and segment data. Since the
+     *        ordering of the "Enter Update Mode" command and BSL mode entry
+     *        commands must be executed in the correct sequence this function
+     *        ensures that all the various enter and exit update modes are
+     *        all executing in the same order.
+     *
+     *  @return     errlHndl_t   nullptr if no errors. Otherwise, pointer to
+     *                           error.
+     */
+    errlHndl_t transitionToUpdateMode();
+
+    /**
+     * @brief Transitions the BPM from update mode to normal mode to return
+     *        BPM to normal operational state. Since the ordering of the device
+     *        reset and exit update command must be executed in the correct
+     *        sequence this function ensures that all the various enter and exit
+     *        update modes are all executing in the same order.
+     *
+     *  @return     errlHndl_t   nullptr if no errors. Otherwise, pointer to
+     *                           error.
+     */
+    errlHndl_t transitionToNormalMode();
 
     /**
      * @brief Send the command to the BPM to enter update mode

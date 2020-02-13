@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,6 +71,14 @@ const uint16_t MAIN_PROGRAM_ADDRESS_ALT = 0xA000;
 const uint8_t BPM_PASSWORD[] = {0x53, 0x4D, 0x4F, 0x44};
 const size_t BPM_PASSWORD_LENGTH = 4;
 
+// These registers are used to directly write to the BPM. They are used to
+// switch the page on the BPM and to enter bootstrap loader (BSL) mode.
+const uint8_t SPECIAL_CONTROL_COMMAND1 = 0x3E;
+const uint8_t SPECIAL_CONTROL_COMMAND2 = 0x3F;
+
+// This is the code used to request direct transition to BSL mode.
+const uint16_t ENTER_BSL_MODE_CODE = 0x11B5;
+
 // These are the segment codes used to dump out a particular config data segment
 // on the BPM.
 const uint16_t DEFAULT_REG_PAGE     = 0x905E;
@@ -94,6 +102,13 @@ const std::map<uint16_t, size_t> segmentMap
     {SEGMENT_C_CODE, SEGMENT_C_START_ADDR},
     {SEGMENT_D_CODE, SEGMENT_D_START_ADDR},
 };
+
+// These are the magic registers that all magic values must be written to in
+// order to change the context in which the BPM processes information. Failure
+// to use the correct magic values for a given interaction will result in
+// unpredicatable errors.
+const uint16_t MAGIC_REGISTERS[NUM_MAGIC_REGISTERS] =
+    {BPM_MAGIC_REG1, BPM_MAGIC_REG2};
 
 const uint8_t MAX_RETRY = 3;
 
@@ -543,30 +558,9 @@ errlHndl_t Bpm::readBslVersion()
     errlHndl_t errl = nullptr;
 
     do {
-        // Enter Update mode
-        errl = enterUpdateMode();
-        if (errl != nullptr)
-        {
-            break;
-        }
 
-        // Verify in Update mode
-        errl = inUpdateMode();
-        if (errl != nullptr)
-        {
-            break;
-        }
-
-        // Enter Bootstrap Loader (BSL) mode
-        errl = enterBootstrapLoaderMode();
-        if (errl != nullptr)
-        {
-            break;
-        }
-
-        // Unlock the device. This is a BSL command so we must already be in
-        // BSL mode to execute it.
-        errl = unlockDevice();
+        // Transion the BPM from normal mode to update mode
+        errl = transitionToUpdateMode();
         if (errl != nullptr)
         {
             break;
@@ -605,14 +599,7 @@ errlHndl_t Bpm::readBslVersion()
     } while(0);
 
     // Reset the device. This will exit BSL mode.
-    errlHndl_t exitErrl = resetDevice();
-    if (exitErrl != nullptr)
-    {
-        handleMultipleErrors(errl, exitErrl);
-    }
-
-    // Exit update mode
-    exitErrl = exitUpdateMode();
+    errlHndl_t exitErrl = transitionToNormalMode();
     if (exitErrl != nullptr)
     {
         handleMultipleErrors(errl, exitErrl);
@@ -698,7 +685,56 @@ errlHndl_t Bpm::issueCommand(const uint8_t i_command,
 
     errlHndl_t errl = nullptr;
 
+    // BPM commands can only be issued when the magic registers are set to
+    // the UPDATE_MODE_MAGIC_VALUES. To prevent accidents, verify this is the
+    // case.
+    bool shouldRestoreOldMagic = false;
+    uint8_t magic_data[NUM_MAGIC_REGISTERS] = {PRODUCTION_MAGIC_VALUES[0],
+                                               PRODUCTION_MAGIC_VALUES[1]};
+
+    // Attempt the command up to 5 times.
+    int retry = 5;
+
     do {
+
+        // First, verify the magic values are set to the
+        // UPDATE_MODE_MAGIC_VALUES. If they aren't then we'll encounter errors
+        // when we attempt to issue a command.
+        for (size_t i = 0; i < NUM_MAGIC_REGISTERS; ++i)
+        {
+            errl = nvdimmReadReg(iv_nvdimm,
+                                 MAGIC_REGISTERS[i],
+                                 magic_data[i]);
+            if (errl != nullptr)
+            {
+                TRACFCOMP(g_trac_bpm, "Bpm::issueCommand(): "
+                          "Failed to read back magic values to verify that "
+                          "they were written.");
+                errl->collectTrace(BPM_COMP_NAME);
+                break;
+            }
+        }
+        if (errl != nullptr)
+        {
+            break;
+        }
+
+        // If either of the magic values stored in magic_data don't match the
+        // UPDATE_MODE_MAGIC_VALUES then we need to change the magic values to
+        // those.
+        if (  (magic_data[0] != UPDATE_MODE_MAGIC_VALUES[0])
+           || (magic_data[1] != UPDATE_MODE_MAGIC_VALUES[1]))
+        {
+            errl = writeToMagicRegisters(UPDATE_MODE_MAGIC_VALUES);
+            if (errl != nullptr)
+            {
+                TRACFCOMP(g_trac_bpm, "Bpm::issueCommand(): "
+                          "Failed to set the UPDATE_MODE_MAGIC_VALUES before "
+                          "issuing the requested command.");
+                break;
+            }
+            shouldRestoreOldMagic = true;
+        }
 
         // Check the full payload size to make sure it's not too large. Add the
         // size of the SYNC_BYTE that was dropped during payload creation to
@@ -822,6 +858,21 @@ errlHndl_t Bpm::issueCommand(const uint8_t i_command,
         errl = waitForCommandStatusBitReset(commandStatus);
         if (errl != nullptr)
         {
+            if ((errl->reasonCode() == BPM_RC::BPM_CMD_STATUS_ERROR_BIT_SET)
+                && (retry > 0))
+            {
+                retry--;
+                if (retry != 0)
+                {
+                    TRACFCOMP(g_trac_bpm, "Bpm::issueCommand() "
+                             "Encountered a retryable error with %d retries "
+                             "remaining. Delete error and try again.", retry);
+                    delete errl;
+                    errl = nullptr;
+                }
+                continue;
+            }
+
             break;
         }
 
@@ -872,7 +923,23 @@ errlHndl_t Bpm::issueCommand(const uint8_t i_command,
             }
         }
 
-    } while(0);
+        // If we made it this far then the command was issued successfully.
+        // Don't retry.
+        break;
+
+    } while(retry);
+
+    if (shouldRestoreOldMagic)
+    {
+        // The magic registers were not set to UPDATE_MODE_MAGIC_VALUES when a
+        // command was attempted to be issued. To not accidentally cause harm to
+        // the caller, put back the magic data we read earlier.
+        errlHndl_t magicErrl = writeToMagicRegisters(magic_data);
+        if (magicErrl != nullptr)
+        {
+            handleMultipleErrors(errl, magicErrl);
+        }
+    }
 
     return errl;
 }
@@ -1216,20 +1283,77 @@ errlHndl_t Bpm::inUpdateMode()
     return errl;
 }
 
+errlHndl_t Bpm::transitionToUpdateMode()
+{
+    errlHndl_t errl = nullptr;
+
+    do {
+
+        // Enter Update mode
+        errl = enterUpdateMode();
+        if (errl != nullptr)
+        {
+            break;
+        }
+
+        // Verify in Update mode
+        errl = inUpdateMode();
+        if (errl != nullptr)
+        {
+            break;
+        }
+
+        // Enter Bootstrap Loader (BSL) mode
+        errl = enterBootstrapLoaderMode();
+        if (errl != nullptr)
+        {
+            break;
+        }
+
+        // Unlock the device. This is a BSL command so we must already be in
+        // BSL mode to execute it.
+        errl = unlockDevice();
+        if (errl != nullptr)
+        {
+            break;
+        }
+
+    } while(0);
+
+    return errl;
+}
+
+errlHndl_t Bpm::transitionToNormalMode()
+{
+    errlHndl_t errl;
+
+    do {
+
+        // Reset the device. This will exit BSL mode.
+        errl = resetDevice();
+        if (errl != nullptr)
+        {
+            break;
+        }
+
+        // Exit update mode
+        errl = exitUpdateMode();
+        if (errl != nullptr)
+        {
+            break;
+        }
+
+    } while(0);
+
+    return errl;
+}
+
 errlHndl_t Bpm::enterUpdateMode()
 {
     TRACFCOMP(g_trac_bpm, ENTER_MRK"Bpm::enterUpdateMode()");
     errlHndl_t errl = nullptr;
 
     do {
-
-        // Disable write protection on the BPM. Otherwise, we can't write the
-        // magic values that enable the nvdimm-bpm interface.
-        errl = disableWriteProtection();
-        if (errl != nullptr)
-        {
-            break;
-        }
 
         // Write the magic values to enable nvdimm-bpm interface
         errl = writeToMagicRegisters(UPDATE_MODE_MAGIC_VALUES);
@@ -1273,7 +1397,6 @@ errlHndl_t Bpm::enterUpdateMode()
                              HWAS::BPM_PART_TYPE,
                              HWAS::SRCI_PRIORITY_HIGH);
         infoErrl->collectTrace(BPM_COMP_NAME);
-        nvdimmAddVendorLog(iv_nvdimm, infoErrl);
         nvdimmAddPage4Regs(iv_nvdimm, infoErrl);
         ERRORLOG::errlCommit(infoErrl, BPM_COMP_ID);
 
@@ -1289,6 +1412,12 @@ errlHndl_t Bpm::exitUpdateMode()
 
     do {
 
+        // First, check if the BPM is in update mode. If it's not, then we
+        // shouldn't send the exit update mode command because it might cause
+        // unpredicable errors.
+
+        // Need to set UPDATE_MODE_MAGIC_VALUES to send the command to ask if
+        // the BPM is in update mode.
         errl = writeToMagicRegisters(UPDATE_MODE_MAGIC_VALUES);
         if (errl != nullptr)
         {
@@ -1332,6 +1461,28 @@ errlHndl_t Bpm::exitUpdateMode()
             {
                 break;
             }
+
+            /*@
+            * @errortype
+            * @severity         ERRORLOG::ERRL_SEV_INFORMATIONAL
+            * @moduleid         BPM_RC::BPM_END_UPDATE
+            * @reasoncode       BPM_RC::BPM_EXIT_UPDATE_MODE
+            * @userdata1        NVDIMM Target HUID associated with this BPM
+            * @devdesc          BPM has exited update mode.
+            * @custdesc         Informational log associated with DIMM updates.
+            */
+            errlHndl_t infoErrl = new ERRORLOG::ErrlEntry(
+                                               ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                               BPM_RC::BPM_END_UPDATE,
+                                               BPM_RC::BPM_EXIT_UPDATE_MODE,
+                                               TARGETING::get_huid(iv_nvdimm));
+            infoErrl->addPartCallout(iv_nvdimm,
+                                 HWAS::BPM_PART_TYPE,
+                                 HWAS::SRCI_PRIORITY_HIGH);
+            infoErrl->collectTrace(BPM_COMP_NAME);
+            nvdimmAddVendorLog(iv_nvdimm, infoErrl);
+            nvdimmAddPage4Regs(iv_nvdimm, infoErrl);
+            ERRORLOG::errlCommit(infoErrl, BPM_COMP_ID);
         }
         else
         {
@@ -1349,28 +1500,6 @@ errlHndl_t Bpm::exitUpdateMode()
                       "disable update mode.");
             break;
         }
-
-        /*@
-        * @errortype
-        * @severity         ERRORLOG::ERRL_SEV_INFORMATIONAL
-        * @moduleid         BPM_RC::BPM_END_UPDATE
-        * @reasoncode       BPM_RC::BPM_EXIT_UPDATE_MODE
-        * @userdata1        NVDIMM Target HUID associated with this BPM
-        * @devdesc          BPM has exited update mode.
-        * @custdesc         Informational log associated with DIMM updates.
-        */
-        errlHndl_t infoErrl = new ERRORLOG::ErrlEntry(
-                                            ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                            BPM_RC::BPM_END_UPDATE,
-                                            BPM_RC::BPM_EXIT_UPDATE_MODE,
-                                            TARGETING::get_huid(iv_nvdimm));
-        infoErrl->addPartCallout(iv_nvdimm,
-                             HWAS::BPM_PART_TYPE,
-                             HWAS::SRCI_PRIORITY_HIGH);
-        infoErrl->collectTrace(BPM_COMP_NAME);
-        nvdimmAddVendorLog(iv_nvdimm, infoErrl);
-        nvdimmAddPage4Regs(iv_nvdimm, infoErrl);
-        ERRORLOG::errlCommit(infoErrl, BPM_COMP_ID);
 
     } while(0);
 
@@ -1608,7 +1737,6 @@ errlHndl_t Bpm::updateConfig()
             break;
         }
 
-
         // Erase Segment B on the BPM via the BSL interface.
         errl = eraseSegment(SEGMENT_B_CODE);
         if (errl != nullptr)
@@ -1646,7 +1774,6 @@ errlHndl_t Bpm::enterBootstrapLoaderMode()
 
         while (retry != 0)
         {
-
             errl = issueCommand(BPM_LOCAL,
                                 BCL_IS_BSL_MODE,
                                 WRITE,
@@ -2354,8 +2481,6 @@ errlHndl_t Bpm::switchBpmPage(uint16_t const i_segmentCode)
     errlHndl_t errl = nullptr;
 
     do {
-        const uint8_t SPECIAL_CONTROL_COMMAND1 = 0x3E;
-        const uint8_t SPECIAL_CONTROL_COMMAND2 = 0x3F;
         // Next, switch to the desired BPM segment by writing the segment code
         // to the BPM's Special Control Command registers.
         //
@@ -2431,13 +2556,19 @@ errlHndl_t Bpm::writeToMagicRegisters(
     errlHndl_t errl = nullptr;
 
     do {
-        const uint16_t magic_registers[NUM_MAGIC_REGISTERS] =
-            {BPM_MAGIC_REG1, BPM_MAGIC_REG2};
+
+        // Disable write protection on the BPM. Otherwise, we can't write the
+        // magic values that enable the nvdimm-bpm interface.
+        errl = disableWriteProtection();
+        if (errl != nullptr)
+        {
+            break;
+        }
 
         for (size_t i = 0; i < NUM_MAGIC_REGISTERS; ++i)
         {
             errl = nvdimmWriteReg(iv_nvdimm,
-                                  magic_registers[i],
+                                  MAGIC_REGISTERS[i],
                                   i_magicValues[i]);
             if (errl != nullptr)
             {
@@ -2458,7 +2589,7 @@ errlHndl_t Bpm::writeToMagicRegisters(
         for (size_t i = 0; i < NUM_MAGIC_REGISTERS; ++i)
         {
             errl = nvdimmReadReg(iv_nvdimm,
-                                 magic_registers[i],
+                                 MAGIC_REGISTERS[i],
                                  magic_data[i]);
             if (errl != nullptr)
             {
@@ -2564,15 +2695,7 @@ errlHndl_t Bpm::dumpSegment(uint16_t const i_segmentCode,
             TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::dumpSegment(): "
                      "BSL Mode is enabled. Attempting to exit BSL mode.");
 
-            // Try to exit BSL mode. This function will exit BSL.
-            errl = resetDevice();
-            if (errl != nullptr)
-            {
-                break;
-            }
-
-            // Exit update mode if on and write back production magic values.
-            errl = exitUpdateMode();
+            errl = transitionToNormalMode();
             if (errl != nullptr)
             {
                 break;
@@ -3603,59 +3726,69 @@ errlHndl_t Bpm::verifyGoodBpmState()
     scap_status_register_t status;
     const uint8_t BPM_PRESENT_AND_ENABLED = 0x11;
 
-    while (retry > 0)
-    {
-
-        errl = nvdimmReadReg(iv_nvdimm,
-                             SCAP_STATUS,
-                             status.full);
+    do {
+        // First make sure the BPM is not in BSL mode.
+        // If the BPM is already in normal mode then no commands are sent.
+        errl = transitionToNormalMode();
         if (errl != nullptr)
         {
-            TRACFCOMP(g_trac_bpm, "Bpm::verifyGoodBpmState(): "
-                      "Failed to read SCAP_STATUS to determine "
-                      "state of BPM.");
-            errl->collectTrace(BPM_COMP_NAME);
             break;
         }
 
-        if ((status.full & 0xFF) == BPM_PRESENT_AND_ENABLED)
+        while (retry > 0)
         {
-            // BPM is present and enabled. Stop retries.
-            break;
-        }
 
-        --retry;
-        nanosleep(0, 1 * NS_PER_MSEC);
-    }
-    if (retry <= 0)
-    {
-        TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::verifyGoodBpmState(): "
-                  "BPM failed to become present and enabled "
-                  "in 100 retries.");
-        /*@
-        * @errortype
-        * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
-        * @moduleid         BPM_RC::BPM_VERIFY_GOOD_BPM_STATE
-        * @reasoncode       BPM_RC::BPM_EXCEEDED_RETRY_LIMIT
-        * @userdata1        NVDIMM Target HUID associated with this BPM
-        * @userdata2        SCAP_STATUS register contents. See nvdimm.H
-        *                   for bits associated with this register.
-        * @devdesc          The BPM did not become present and enabled
-        *                   in given number of retries.
-        * @custdesc         A problem occurred during IPL of the system.
-        */
-        errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                   BPM_RC::BPM_VERIFY_GOOD_BPM_STATE,
-                                   BPM_RC::BPM_EXCEEDED_RETRY_LIMIT,
-                                   TARGETING::get_huid(iv_nvdimm),
-                                   status.full);
-        errl->collectTrace(BPM_COMP_NAME);
-        errl->addPartCallout(iv_nvdimm,
-                             HWAS::BPM_PART_TYPE,
-                             HWAS::SRCI_PRIORITY_HIGH);
-        nvdimmAddPage4Regs(iv_nvdimm,errl);
-        nvdimmAddVendorLog(iv_nvdimm, errl);
-    }
+            errl = nvdimmReadReg(iv_nvdimm,
+                                 SCAP_STATUS,
+                                 status.full);
+            if (errl != nullptr)
+            {
+                TRACFCOMP(g_trac_bpm, "Bpm::verifyGoodBpmState(): "
+                          "Failed to read SCAP_STATUS to determine "
+                          "state of BPM.");
+                errl->collectTrace(BPM_COMP_NAME);
+                break;
+            }
+
+            if ((status.full & 0xFF) == BPM_PRESENT_AND_ENABLED)
+            {
+                // BPM is present and enabled. Stop retries.
+                break;
+            }
+
+            --retry;
+            nanosleep(0, 1 * NS_PER_MSEC);
+        }
+        if (retry <= 0)
+        {
+            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::verifyGoodBpmState(): "
+                      "BPM failed to become present and enabled "
+                      "in 100 retries.");
+            /*@
+            * @errortype
+            * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
+            * @moduleid         BPM_RC::BPM_VERIFY_GOOD_BPM_STATE
+            * @reasoncode       BPM_RC::BPM_EXCEEDED_RETRY_LIMIT
+            * @userdata1        NVDIMM Target HUID associated with this BPM
+            * @userdata2        SCAP_STATUS register contents. See nvdimm.H
+            *                   for bits associated with this register.
+            * @devdesc          The BPM did not become present and enabled
+            *                   in given number of retries.
+            * @custdesc         A problem occurred during IPL of the system.
+            */
+            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                       BPM_RC::BPM_VERIFY_GOOD_BPM_STATE,
+                                       BPM_RC::BPM_EXCEEDED_RETRY_LIMIT,
+                                       TARGETING::get_huid(iv_nvdimm),
+                                       status.full);
+            errl->collectTrace(BPM_COMP_NAME);
+            errl->addPartCallout(iv_nvdimm,
+                                 HWAS::BPM_PART_TYPE,
+                                 HWAS::SRCI_PRIORITY_HIGH);
+            nvdimmAddPage4Regs(iv_nvdimm,errl);
+            nvdimmAddVendorLog(iv_nvdimm, errl);
+        }
+    } while(0);
 
     return errl;
 }
@@ -3738,29 +3871,7 @@ errlHndl_t Bpm::runConfigUpdates(BpmConfigLidImage i_configImage)
         }
 
         // Enter Update mode
-        errl = enterUpdateMode();
-        if (errl != nullptr)
-        {
-            break;
-        }
-
-        // Verify in Update mode
-        errl = inUpdateMode();
-        if (errl != nullptr)
-        {
-            break;
-        }
-
-        // Enter Bootstrap Loader (BSL) mode to perform firmware update
-        errl = enterBootstrapLoaderMode();
-        if (errl != nullptr)
-        {
-            break;
-        }
-
-        // Unlock the device. This is a BSL command so we must already be in
-        // BSL mode to execute it.
-        errl = unlockDevice();
+        errl = transitionToUpdateMode();
         if (errl != nullptr)
         {
             break;
@@ -3817,23 +3928,13 @@ errlHndl_t Bpm::runConfigUpdates(BpmConfigLidImage i_configImage)
     } while(0);
 
     // Reset the device. This will exit BSL mode.
-    errlHndl_t exitErrl = resetDevice();
+    errlHndl_t exitErrl = transitionToNormalMode();
     if (exitErrl != nullptr)
     {
         TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runConfigUpdates(): "
-                  "Failed to reset the device");
+                  "Failed to return the BPM to normal operational state.");
         handleMultipleErrors(errl, exitErrl);
     }
-
-    // Exit update mode
-    exitErrl = exitUpdateMode();
-    if (exitErrl != nullptr)
-    {
-        TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runConfigUpdates(): "
-                  "Failed to exit update mode");
-        handleMultipleErrors(errl, exitErrl);
-    }
-
 
     return errl;
 }
@@ -3846,29 +3947,7 @@ errlHndl_t Bpm::runFirmwareUpdates(BpmFirmwareLidImage i_image)
     do {
 
         // Enter Update mode
-        errl = enterUpdateMode();
-        if (errl != nullptr)
-        {
-            break;
-        }
-
-        // Verify in Update mode
-        errl = inUpdateMode();
-        if (errl != nullptr)
-        {
-            break;
-        }
-
-        // Enter Bootstrap Loader (BSL) mode to perform firmware update
-        errl = enterBootstrapLoaderMode();
-        if (errl != nullptr)
-        {
-            break;
-        }
-
-        // Unlock the device. This is a BSL command so we must already be in
-        // BSL mode to execute it.
-        errl = unlockDevice();
+        errl = transitionToUpdateMode();
         if (errl != nullptr)
         {
             break;
@@ -3900,20 +3979,11 @@ errlHndl_t Bpm::runFirmwareUpdates(BpmFirmwareLidImage i_image)
     } while(0);
 
     // Reset the device. This will exit BSL mode.
-    errlHndl_t exitErrl = resetDevice();
+    errlHndl_t exitErrl = transitionToNormalMode();
     if (exitErrl != nullptr)
     {
         TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runFirmwareUpdates(): "
-                  "Failed to reset the device");
-        handleMultipleErrors(errl, exitErrl);
-    }
-
-    // Exit update mode
-    exitErrl = exitUpdateMode();
-    if (exitErrl != nullptr)
-    {
-        TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::runFirmwareUpdates(): "
-                  "Failed to exit update mode");
+                  "Failed to return BPM to normal operational state.");
         handleMultipleErrors(errl, exitErrl);
     }
 
