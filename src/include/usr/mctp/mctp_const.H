@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/mctp/mctp_message_types.H $                   */
+/* $Source: src/include/usr/mctp/mctp_const.H $                           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,18 +22,30 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifndef MCTP_CONST_H
+#define MCTP_CONST_H
 
-// A flag that indicates that the MCTP message is carrying a PLDM message
-// If the 1st byte of the MCTP packet payload == MCTP_MSG_TYPE_PLDM we know
-// it is part of a PLDM message that is being transported.
+#include <mctp/mctp_message_types.H>
 
-#ifndef __MCTP_MESSAGE_TYPES_H
-#define __MCTP_MESSAGE_TYPES_H
 namespace MCTP
 {
+    constexpr uint8_t KCS_INIT        = 0x00;
+    constexpr uint8_t KCS_TX_BEGIN    = 0x01;
+    constexpr uint8_t KCS_RX_COMPLETE = 0x02;
+    constexpr uint8_t KCS_DUMMY       = 0xFF;
 
-    constexpr uint8_t MCTP_MSG_TYPE_PLDM = 1;
+    enum inbound_msgq_msg_t
+    {
+        MSG_INIT        = 0x00,
+        MSG_TX_BEGIN    = 0x01,
+        MSG_RX_COMPLETE = 0x02,
+        MSG_DUMMY       = 0xFF
+    };
 
+    enum outbound_msgq_msg_t
+    {
+        MSG_SEND_PLDM        = 0x00
+    };
 }
 
 #endif

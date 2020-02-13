@@ -41,6 +41,9 @@ const char* VFS_ROOT_MSG_VFS = "/msg/vfs";
 const char* VFS_ROOT_MSG_MBOX = "/msg/mbox";
 const char* VFS_ROOT_MSG_MCTP_IN = "/msg/mctpin";
 const char* VFS_ROOT_MSG_MCTP_OUT = "/msg/mctpout";
+const char* VFS_ROOT_MSG_PLDM_REQ_IN = "/msg/pldmreqin";
+const char* VFS_ROOT_MSG_PLDM_RSP_IN = "/msg/pldmrspin";
+const char* VFS_ROOT_MSG_PLDM_REQ_OUT= "/msg/pldrreqout";
 
 void vfs_module_init();
 

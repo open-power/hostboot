@@ -1,12 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/mctp/mctp_message_types.H $                   */
+/* $Source: src/include/usr/pldm/pldmif.H $                               */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2020                             */
-/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -22,18 +21,23 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifndef PLDMIF_H
+#define PLDMIF_H
 
-// A flag that indicates that the MCTP message is carrying a PLDM message
-// If the 1st byte of the MCTP packet payload == MCTP_MSG_TYPE_PLDM we know
-// it is part of a PLDM message that is being transported.
-
-#ifndef __MCTP_MESSAGE_TYPES_H
-#define __MCTP_MESSAGE_TYPES_H
-namespace MCTP
+#include <sys/msg.h>
+namespace PLDM
 {
 
-    constexpr uint8_t MCTP_MSG_TYPE_PLDM = 1;
-
+    /**
+    * @brief This function is intended to be used by the MCTP resource
+    *        provider when they find a PLDM message and want the PLDM
+    *        resource provider to handle it
+    *
+    * @param[in] i_msg  ptr to PLDM message
+    * @param[in] i_len  length of buffer containing PLDM message
+    * @return void
+    */
+    void routeInboundMessage(uint8_t * i_msg, size_t i_len);
 }
 
 #endif

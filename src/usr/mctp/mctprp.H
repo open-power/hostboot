@@ -25,29 +25,11 @@
 #ifndef MCTPRP_H
 #define MCTPRP_H
 
+// System Headers
 #include <sys/msg.h>
+// Userspace Headers
 #include <errl/errlentry.H>
-#include "libmctp-lpc.h"
-
-namespace MCTP
-{
-    // Valid message types that are accepted
-    // by the mctp inbound msg q
-    enum inbound_msgq_msg_t
-    {
-        MSG_INIT        = 0x00,
-        MSG_TX_BEGIN    = 0x01,
-        MSG_RX_COMPLETE = 0x02,
-        MSG_DUMMY       = 0xFF
-    };
-
-    // Valid message types that are accepted
-    // by the mctp outbound msg q
-    enum outbound_msgq_msg_t
-    {
-        MSG_SEND_PLDM        = 0x00
-    };
-}
+#include <mctp/mctp_const.H>
 
 class MctpRP
 {
@@ -94,22 +76,25 @@ class MctpRP
       // Constructor
       MctpRP(void);
   private:
-      // See public "init" function above
-      errlHndl_t _init(void);
+
+      // Private Member Functions
+      void _init(void);       // See public "init" function above
       /**
       * When we receive the "DUMMY" KCS command in the ODR we know
       * that the bmc has written the negotiated status and activated the channel
       * This is the function that is called when we receive that DUMMY message
       *
-      * @return uint8_t return 0 on success and !0 if there is a fail
+      * @return errlHndl_t return 0 on success and an error log if there is a fail
       */
-      uint8_t _mctp_process_version(void);
+      errlHndl_t _mctp_process_version(void);
 
-      struct mctp_binding_hostlpc *iv_hostlpc; //!< ptr to hostlpc binding struct
-      struct mctp *iv_mctp;    //!< ptr to struct that has business logic
-      msg_q_t     iv_inboundMsgQ;     // mctp inbound messages
-      msg_q_t     iv_outboundMsgQ;    // mctp outbound messages
-      bool        iv_channelActive;   // MCTP channel ready for traffic
+      // Private Member Variables
+      struct mctp_binding_hostlpc *iv_hostlpc; // ptr to hostlpc binding struct
+      struct mctp *iv_mctp;                    // ptr to struct that has business logic
+      msg_q_t     iv_inboundMsgQ;              // MCTP inbound messages
+      msg_q_t     iv_outboundMsgQ;             // MCTP outbound messages
+      bool        iv_channelActive;            // MCTP channel ready for traffic
+      uint16_t    iv_mctpVersion;              // MCTP version negotiated during initialization
 
       // Disallow copying this class.
       MctpRP& operator=(const MctpRP&);

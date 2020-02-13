@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/mctp/mctp_message_types.H $                   */
+/* $Source: src/include/usr/pldm/pldm_const.H $                           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,18 +22,33 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifndef PLDM_CONST_H
+#define PLDM_CONST_H
+typedef uint8_t mctp_eid_t;
 
-// A flag that indicates that the MCTP message is carrying a PLDM message
-// If the 1st byte of the MCTP packet payload == MCTP_MSG_TYPE_PLDM we know
-// it is part of a PLDM message that is being transported.
-
-#ifndef __MCTP_MESSAGE_TYPES_H
-#define __MCTP_MESSAGE_TYPES_H
-namespace MCTP
+namespace PLDM
 {
+    // These are the different types of PLDM message types we can expect
+    // See DSP0245 v1.2.0 Table 1
+    // When the MCTP layer creates a message to send to either inbound rsp
+    // or inbound req queues it will set the msg->type to be the PLDM msg
+    // type.
+    enum msgq_msg_t
+    {
+        MSG_CONTROL_DISCOVERY = 0x00,
+        MSG_SMBIOS            = 0x01,
+        MSG_MONITOR_CONTROL   = 0x02,
+        MSG_BIOS_CONTROL      = 0x03,
+        MSG_OEM               = 0x3F
+    };
 
-    constexpr uint8_t MCTP_MSG_TYPE_PLDM = 1;
 
+    // BMC currently does not support multi-part PLDM
+    // transmissions so we will ALWAYS send GET_FIRST_PART
+    // as the TransferOperationFlag and the data transfer
+    // handle will always be 0x00000000
+    const uint8_t GET_FIRST_PART = 0x01;
+    const uint8_t INITIAL_TRANS_HNDL = 0x00000000;
 }
 
 #endif

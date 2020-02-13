@@ -22,26 +22,42 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+// Headers from local directory
 #include "mctprp.H"
 #include "libmctp.h"
 #include "libmctp-hostlpc.h"
+// System Headers
 #include <stdlib.h>
 #include <string.h>
-#include <initservice/taskargs.H>
 #include <sys/time.h>
-#include <trace/interface.H>
+// Userspace Headers
+#include <devicefw/userif.H>
+#include <errl/errlmanager.H>
+#include <mctp/mctp_reasoncodes.H>
+#include <pldm/pldmif.H>
+#include <hbotcompid.H>
+#include <initservice/taskargs.H>
 #include <intr/interrupt.H>
 #include <lpc/lpcif.H>
 #include <lpc/lpc_const.H>
-#include <devicefw/userif.H>
-#include <errl/errlmanager.H>
-#include <mctp/mctp_message_types.H>
-#include <hbotcompid.H>
 #include <targeting/common/targetservice.H>
+#include <trace/interface.H>
+#include <initservice/initserviceif.H>
+#ifdef CONFIG_CONSOLE
+#include <console/consoleif.H>
+#endif
+
 
 extern const char* VFS_ROOT_MSG_MCTP_OUT;
 extern const char* VFS_ROOT_MSG_MCTP_IN;
 
+trace_desc_t* g_trac_mctp = nullptr;
+TRAC_INIT(&g_trac_mctp, MCTP_COMP_NAME, 4*KILOBYTE, TRACE::BUFFER_SLOW);
+
+// This isn't utilized right now but it gives us flexibility
+// with our binding in the future to pass parameters into the
+// rx logic
 struct ctx {
   struct mctp    *mctp;
   struct binding *binding;
@@ -49,9 +65,8 @@ struct ctx {
   int            local_eid;
 };
 
-trace_desc_t* g_trac_mctp = nullptr;
-TRAC_INIT(&g_trac_mctp, MCTP_COMP_NAME, 4*KILOBYTE, TRACE::BUFFER_SLOW);
-
+// Static function used to launch task calling poll_kcs_status on
+// the MctpRP singleton
 static void * poll_kcs_status_task(void*)
 {
     TRACFCOMP(g_trac_mctp, "Starting to poll status register");
@@ -111,12 +126,36 @@ void MctpRP::poll_kcs_status(void)
     }
 }
 
-// TODO handle messages correctly
 static void rx_message(uint8_t i_eid, void * i_data, void *i_msg, size_t i_len)
 {
    TRACDBIN(g_trac_mctp, "mctp rx_message:", i_msg, i_len);
+
+   uint8_t * l_pByteBuffer = reinterpret_cast<uint8_t *>(i_msg);
+
+   // First byte of the msg should be the MCTP payload type.
+   // For now we only support PLDM over MCTP
+   switch(*l_pByteBuffer)
+   {
+      case MCTP::MCTP_MSG_TYPE_PLDM :
+      {
+          // Offset into sizeof(MCTP::MCTP_MSG_TYPE_PLDM) MCTP packet payload
+          // as where PLDM message begins. (see DSP0236 v1.3.0 figure 4)
+          // Also update the len param to account for this offset
+          PLDM::routeInboundMessage(
+              (reinterpret_cast<uint8_t *>(i_msg) + sizeof(MCTP::MCTP_MSG_TYPE_PLDM)),
+              (i_len - sizeof(MCTP::MCTP_MSG_TYPE_PLDM)));
+          break;
+      }
+      default :
+      {
+          assert(0, "Recieved a MCTP message with a payload type we do not know how to handle");
+          break;
+      }
+   }
 }
 
+// Static function used to launch task calling handle_inbound_messages on
+// the MctpRP singleton
 static void * handle_inbound_messages_task(void*)
 {
     TRACFCOMP(g_trac_mctp, "Starting to handle inbound commands");
@@ -127,8 +166,7 @@ static void * handle_inbound_messages_task(void*)
 void MctpRP::handle_inbound_messages(void)
 {
     task_detach();
-
-    uint8_t l_rc = 0;
+    errlHndl_t l_errl = nullptr;
 
     while(1)
     {
@@ -151,9 +189,29 @@ void MctpRP::handle_inbound_messages(void)
               mctp_hostlpc_tx_complete(iv_hostlpc);
               break;
           case MCTP::MSG_DUMMY:
-              // This is used when the BMC wants to write the status register
-              // and notify us that it was set
-              l_rc = this->_mctp_process_version();
+
+              // The BMC will send us this message after writing the status register
+              // during the initization sequence to notify us they have filled out
+              // info in the config section of the lpc space and has activated the
+              // KCS interface
+              l_errl = this->_mctp_process_version();
+
+              if(l_errl)
+              {
+                  uint32_t l_fatalPlid = l_errl->plid();
+                  errlCommit(l_errl, MCTP_COMP_ID);
+#ifdef CONFIG_CONSOLE
+                  CONSOLE::displayf(NULL,
+                                    "MCTP initialization failed! The commited error log 0x%X will be in hostboot dump but will not make it to BMC",
+                                    l_fatalPlid);
+#endif
+
+                  // 2nd param "true" indicates we want to the call the
+                  // function to trigger a shutdown in a separate thread.
+                  // This allows us to register for and handle shutdown events
+                  // in this thread.
+                  INITSERVICE::doShutdown(l_fatalPlid, true);
+              }
               break;
           default:
               // Just leave a trace and move on with our life
@@ -162,15 +220,11 @@ void MctpRP::handle_inbound_messages(void)
                         msg->type);
               break;
         }
-
-        if(l_rc != 0)
-        {
-            break;
-        }
-
     }
 }
 
+// Static function used to launch task calling handle_outbound_messages on
+// the MctpRP singleton
 static void * handle_outbound_messages_task(void*)
 {
     TRACFCOMP(g_trac_mctp, "Starting to handle outbound commands");
@@ -184,9 +238,8 @@ void MctpRP::handle_outbound_messages(void)
 
     uint8_t l_rc = 0;
 
-
-
     // Do't start sending messages to the BMC until the channel is active
+    // TODO determine timeout
     while(!iv_channelActive)
     {
         nanosleep(0, NS_PER_MSEC * 500);
@@ -204,7 +257,7 @@ void MctpRP::handle_outbound_messages(void)
               // The first byte of MCTP payload describes the contents
               // of the payload. Set first byte to be TYPE_PLDM (0x01)
               // so BMC knows to route the MCTP message to it's PLDM driver.
-              *reinterpret_cast<uint8_t *>(msg->extra_data) = MCTP_MSG_TYPE_PLDM;
+              *reinterpret_cast<uint8_t *>(msg->extra_data) = MCTP::MCTP_MSG_TYPE_PLDM;
               TRACDBIN(g_trac_mctp, "pldm message : ", msg->extra_data , msg->data[0]);
               mctp_message_tx(iv_mctp, BMC_EID, msg->extra_data, msg->data[0]);
               break;
@@ -224,10 +277,11 @@ void MctpRP::handle_outbound_messages(void)
 }
 
 
-uint8_t MctpRP::_mctp_process_version(void)
+errlHndl_t MctpRP::_mctp_process_version(void)
 {
     errlHndl_t l_errl = nullptr;
-    uint8_t l_rc = 0;
+do
+{
     uint8_t l_status = 0;
     size_t l_size = sizeof(uint8_t);
     // Perform an LPC read on the KCS status register to verify the channel is active
@@ -238,46 +292,63 @@ uint8_t MctpRP::_mctp_process_version(void)
                                   DEVICE_LPC_ADDRESS(LPC::TRANS_IO,
                                                       LPC::KCS_STATUS_REG));
 
+    if(l_errl)
+    {
+        break;
+    }
+
     // Verify that the channel is active
     if(!(l_status & KCS_STATUS_CHANNEL_ACTIVE))
     {
         TRACFCOMP(g_trac_mctp, "mctp_process_version: Error ! Channel is not active!" );
-        // todo
-        errlCommit(l_errl, MCTP_COMP_ID);
-        l_rc = 1;
-        // Commit error
+        /*@errorlog
+        * @errortype       ERRL_SEV_UNRECOVERABLE
+        * @moduleid        MCTP::MOD_MCTP_PROCESS_VER
+        * @reasoncode      MCTP::RC_CHANNEL_INACTIVE
+        * @userdata1       kcs status register value
+        * @userdata2       mctp version
+        *                  (should not have been set but might be useful)
+        *
+        * @devdesc         Initialization of MCTP protocol between Host and BMC failed
+        * @custdesc        A problem occurred during the IPL of the system
+        *
+        */
+        l_errl = new ERRORLOG::ErrlEntry
+            (ERRORLOG::ERRL_SEV_UNRECOVERABLE, // severity
+             MCTP::MOD_MCTP_PROCESS_VER,   // moduleid
+             MCTP::RC_CHANNEL_INACTIVE,    // reason code
+             l_status, // KCS status register value
+             iv_hostlpc->lpc_hdr->negotiated_ver, // version
+             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
     }
     else
     {
         iv_channelActive = true;
+        // Read the negotiated version from the lpcmap hdr that the bmc should have
+        // set prior to setting the KCS_STATUS_CHANNEL_ACTIVE bit
+        iv_mctpVersion = iv_hostlpc->lpc_hdr->negotiated_ver;
+        TRACFCOMP(g_trac_mctp, "mctp_process_version: Negotiated version is : %d", iv_mctpVersion);
     }
 
-    // Read the negotiated version from the lpcmap hdr that the bmc should have
-    // set prior to setting the KCS_STATUS_CHANNEL_ACTIVE bit
-    {
-        struct mctp_lpcmap_hdr *hdr;
-        hdr = iv_hostlpc->lpc_hdr;
-        // todo set system attribute
-        TRACFCOMP(g_trac_mctp, "mctp_process_version: Negotiated version is : %d", hdr->negotiated_ver);
-    }
-    return l_rc;
+}while(0);
+
+  return l_errl;
 }
 
 void MctpRP::init(errlHndl_t& o_errl)
 {
     // This will call the MctpRP construction which initializes MCTP
     // polling loops
-    o_errl = Singleton<MctpRP>::instance()._init();;
+    return Singleton<MctpRP>::instance()._init();;
 }
 
-errlHndl_t MctpRP::_init(void)
+void MctpRP::_init(void)
 {
     TRACFCOMP(g_trac_mctp, "MctpRP::_init entry");
 
     msg_q_register(iv_inboundMsgQ, VFS_ROOT_MSG_MCTP_IN);
     msg_q_register(iv_outboundMsgQ, VFS_ROOT_MSG_MCTP_OUT);
 
-    errlHndl_t l_errl = nullptr;
     // Get the virtual address for the LPC bar and add the offsets
     // to the MCTP/PLDM space within  the FW Space of the LPC window.
     auto l_bar = LPC::get_lpc_virtual_bar() +
@@ -295,7 +366,6 @@ errlHndl_t MctpRP::_init(void)
 
     // Start cmd daemon first because we want it ready if poll daemon finds something right away
     task_create(handle_inbound_messages_task, NULL);
-
     task_create(handle_outbound_messages_task, NULL);
 
     // Start the poll kcs status daemon which will read the KCS status reg every 100 ms and if
@@ -316,8 +386,7 @@ errlHndl_t MctpRP::_init(void)
     mctp_set_rx_all(ctx->mctp, rx_message, ctx);
 
     TRACFCOMP(g_trac_mctp, "MctpRP::_init exit");
-
-    return l_errl;
+    return;
 }
 
 // Emtpy constructor will create the message queue and initialize the mctp core

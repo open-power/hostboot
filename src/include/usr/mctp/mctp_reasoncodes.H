@@ -1,12 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/mctp/mctp_message_types.H $                   */
+/* $Source: src/include/usr/mctp/mctp_reasoncodes.H $                     */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
-/* [+] International Business Machines Corp.                              */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -22,18 +21,23 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifndef __MCTP_REASONCODES_H
+#define __MCTP_REASONCODES_H
 
-// A flag that indicates that the MCTP message is carrying a PLDM message
-// If the 1st byte of the MCTP packet payload == MCTP_MSG_TYPE_PLDM we know
-// it is part of a PLDM message that is being transported.
+#include <hbotcompid.H>
 
-#ifndef __MCTP_MESSAGE_TYPES_H
-#define __MCTP_MESSAGE_TYPES_H
 namespace MCTP
 {
+    enum MCTPModuleId
+    {
+        MOD_MCTP_INVALID      = 0x00, /**< Zero is an invalid module id */
+        MOD_MCTP_PROCESS_VER  = 0x01, // _mctp_process_version
+    };
 
-    constexpr uint8_t MCTP_MSG_TYPE_PLDM = 1;
+    enum MCTPReasonCode
+    {
+        RC_CHANNEL_INACTIVE   = MCTP_COMP_ID | 0x01,
 
-}
-
+    };
+};
 #endif

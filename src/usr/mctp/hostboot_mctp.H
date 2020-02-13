@@ -46,4 +46,5 @@ int __mctp_hostlpc_hostboot_lpc_write(void *arg,
 extern "C"
 void __mctp_hostlpc_hostboot_nanosleep(uint64_t i_sec,
                                        uint64_t i_nsec);
+
 #endif
