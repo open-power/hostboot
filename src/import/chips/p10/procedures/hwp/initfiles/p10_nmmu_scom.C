@@ -29,6 +29,8 @@
 
 using namespace fapi2;
 
+constexpr uint64_t literal_0 = 0;
+constexpr uint64_t literal_0x001 = 0x001;
 
 fapi2::ReturnCode p10_nmmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_NMMU>& TGT0,
                                 const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT2)
@@ -40,6 +42,10 @@ fapi2::ReturnCode p10_nmmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_NMMU>& TG
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT1, l_chip_ec));
         fapi2::ATTR_PROC_FABRIC_BROADCAST_MODE_Type l_TGT2_ATTR_PROC_FABRIC_BROADCAST_MODE;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_BROADCAST_MODE, TGT2, l_TGT2_ATTR_PROC_FABRIC_BROADCAST_MODE));
+        fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T1_Type l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T1;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T1, TGT2, l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T1));
+        fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T2_Type l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T2;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T2, TGT2, l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T2));
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x2010c15ull, l_scom_buffer ));
@@ -56,6 +62,29 @@ fapi2::ReturnCode p10_nmmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_NMMU>& TG
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x2010c15ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x2010c1dull, l_scom_buffer ));
+
+            if ((l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T1 != literal_0))
+            {
+                l_scom_buffer.insert<0, 12, 52, uint64_t>(l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T1 );
+            }
+            else if ((l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T1 == literal_0))
+            {
+                l_scom_buffer.insert<0, 12, 52, uint64_t>(literal_0x001 );
+            }
+
+            if ((l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T2 != literal_0))
+            {
+                l_scom_buffer.insert<16, 12, 52, uint64_t>(l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T2 );
+            }
+            else if ((l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T2 == literal_0))
+            {
+                l_scom_buffer.insert<16, 12, 52, uint64_t>(literal_0x001 );
+            }
+
+            FAPI_TRY(fapi2::putScom(TGT0, 0x2010c1dull, l_scom_buffer));
         }
 
     };
