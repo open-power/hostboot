@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -196,6 +196,9 @@ namespace HTMGT
 
         do
         {
+
+// TODO: RTC 209572 Update with IPMI alternative
+#if 0
 #ifdef CONFIG_BMC_IPMI
             err = SENSOR::getUserPowerLimit(limit, active);
             if (err)
@@ -231,6 +234,7 @@ namespace HTMGT
                 sys->setAttr<TARGETING::ATTR_HTMGT_SAVED_POWER_LIMIT>
                     (saved_limit);
             }
+#endif
 #endif
 
             if (active)

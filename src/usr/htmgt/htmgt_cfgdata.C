@@ -634,7 +634,9 @@ uint16_t getMaxPowerCap(Target *i_sys, bool & o_is_redundant)
     {
         if (0 != hpc_pcap)
         {
-            // TODO: RTC 209572
+
+// TODO: RTC 209572 Update with IPMI alternative
+#if 0
 #ifdef CONFIG_BMC_IPMI
             // Check if redundant power supply policy is enabled (on BMC)
             SENSOR::getSensorReadingData redPolicyData;
@@ -666,6 +668,7 @@ uint16_t getMaxPowerCap(Target *i_sys, bool & o_is_redundant)
                          err->reasonCode());
                 ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
             }
+#endif
 #endif
         }
         // else no valid HPC limit, use default
@@ -1126,6 +1129,8 @@ bool bmcAllowsTurbo(Target* i_sys)
 {
     bool turboAllowed = true;
 
+// TODO: RTC 209572 Update with IPMI alternative
+#if 0
 #ifdef CONFIG_BMC_IPMI
     uint32_t sensorNum = UTIL::getSensorNumber(i_sys,
                                                SENSOR_NAME_TURBO_ALLOWED);
@@ -1160,6 +1165,7 @@ bool bmcAllowsTurbo(Target* i_sys)
     }
     // else, sensor not supported on this platform so turbo is allowed
 #endif
+#endif
 
     return turboAllowed;
 }
@@ -1193,6 +1199,8 @@ void getApssMessageData(uint8_t* o_data,
     CPPASSERT(sizeof(function) == 16);
     const uint32_t (*sensors)[16] = nullptr;
 
+// TODO: RTC 209572 Update with IPMI alternative
+#if 0
 #ifdef CONFIG_BMC_IPMI
     errlHndl_t err = SENSOR::getAPSSChannelSensorNumbers(sensors);
     if (err)
@@ -1202,6 +1210,7 @@ void getApssMessageData(uint8_t* o_data,
         ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
         sensors = nullptr;
     }
+#endif
 #endif
 
     o_data[0] = OCC_CFGDATA_APSS_CONFIG;
