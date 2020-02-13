@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -28,9 +28,9 @@ MODULE = istep21
 #TODO RTC:214285
 #PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
 
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/initfiles/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/initfiles/
 #EXTRAINCDIR += ${PROCEDURES_PATH}/utils/stopreg/
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/

@@ -27,7 +27,7 @@ MODULE = isteps_nest
 
 # FIXME RTC: 210975 Uncomment EKB paths
 
-#PROCEDURES_PATH += ${ROOTPATH}/src/import/chips/p9/procedures
+#PROCEDURES_PATH += ${ROOTPATH}/src/import/chips/p10/procedures
 
 #EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/initfiles
 #EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/io
@@ -68,7 +68,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 #include ${PROCEDURES_PATH}/hwp/nest/p9_chiplet_scominit.mk
 #include ${PROCEDURES_PATH}/hwp/nest/p9_psi_scominit.mk
 #include ${PROCEDURES_PATH}/hwp/initfiles/p9n_mcs_scom.mk
-#include ${PROCEDURES_PATH}/hwp/initfiles/p9_int_scom.mk
+#include ${PROCEDURES_PATH}/hwp/initfiles/p10_int_scom.mk
 #include ${PROCEDURES_PATH}/hwp/initfiles/p9a_mcc_omi_scom.mk
 #include ${PROCEDURES_PATH}/hwp/initfiles/p9a_omi_init_scom.mk
 #include ${PROCEDURES_PATH}/hwp/initfiles/p9a_omi_scom.mk

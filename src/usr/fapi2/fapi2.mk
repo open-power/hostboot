@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -180,11 +180,7 @@ include ${ROOTPATH}/src/import/hwpf/fapi2/tools/createIfAttrService.mk
 #include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundv_bucket_attr.mk
 #include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundw_bucket.mk
 #include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundw_bucket_attr.mk
-
-# We specifically removed this from the istep10.so and placed it here because
-# we have to reapply this init on the shutdown path after the interrupt resource
-# provider is shutdown
-#include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/initfiles/p9_int_scom.mk
+include $(ROOTPATH)/src/import/chips/p10/procedures/hwp/initfiles/p10_int_scom.mk
 
 VPATH += ${HWP_PATH_1}/hwp/accessors
 VPATH += ${ROOTPATH}/src/import/hwpf/fapi2/src/

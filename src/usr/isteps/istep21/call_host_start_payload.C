@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -49,17 +49,17 @@
 #include <devicefw/userif.H>
 #include <arch/pirformat.H>
 #include <isteps/hwpf_reasoncodes.H>
-/* FIXME RTC: 210975
+
+//Fapi support
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
+/* FIXME RTC: 210975
 #include <p9n2_quad_scom_addresses_fld.H>
 #include <p9_quad_scom_addresses.H>
 */
 #include <ipmi/ipmiwatchdog.H>
 #include <errno.h>
-/* FIXME RTC: 210975
-#include <p9_int_scom.H>
-*/
+#include <p10_int_scom.H>
 #include <sbeio/sbeioif.H>
 #include <runtime/runtime.H>
 /* FIXME RTC: 210975
@@ -73,6 +73,7 @@ using namespace ERRORLOG;
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
 using namespace TARGETING;
+using namespace fapi2;
 
 namespace ISTEP_21
 {
@@ -141,27 +142,38 @@ void msgHandler(msg_q_t i_msgQ)
         {
             case MSG_PRE_SHUTDOWN_INITS:
             {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Pre-Shutdown Inits event received");
-/* FIXME RTC: 243744
-                errlHndl_t l_errl = nullptr;
-                TARGETING::TargetHandleList l_cpuTargetList;
-                getAllChips(l_cpuTargetList, TYPE_PROC);
-                fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "call_host_start_payload::msgHandler: Pre-shutdown inits event received");
 
-                for (const auto & l_cpu_target: l_cpuTargetList)
+                errlHndl_t l_errl = nullptr;
+                TARGETING::TargetHandleList l_procTargetList;
+                const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+                // Get a list of all proc chips
+                getAllChips(l_procTargetList, TYPE_PROC);
+
+                for (const auto & l_cpu_target: l_procTargetList)
                 {
-                    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2_proc_target(l_cpu_target);
-                    FAPI_INVOKE_HWP( l_errl,
-                                     p9_int_scom,
-                                     l_cpu_target,
-                                     FAPI_SYSTEM);
+                    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                            l_fapi2_cpu_target (l_cpu_target);
+
+                    //Call p10_int_scom hwp
+                    FAPI_INVOKE_HWP( l_errl, p10_int_scom,
+                                     l_fapi2_cpu_target, FAPI_SYSTEM);
                     if(l_errl)
                     {
+                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                                   "ERROR in p10_int_scom HWP(): failed on target 0x%.08X. "
+                                   TRACE_ERR_FMT,
+                                   get_huid(l_cpu_target),
+                                   TRACE_ERR_ARGS(l_errl));
+
+                        // Commit Error
                         l_errl->collectTrace("ISTEPS_TRACE",256);
                         errlCommit(l_errl, ISTEP_COMP_ID );
-                    }
+                   }
                 }
-*/
+
                 msg_respond(i_msgQ, msg);
                 break;
             }
@@ -484,7 +496,7 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
                    payloadBase );
 
         // Get Istep Mode flag
-        istepModeFlag = sys->getAttr<ATTR_ISTEP_MODE>();
+        istepModeFlag = sys->getAttr<TARGETING::ATTR_ISTEP_MODE>();
         TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    INFO_MRK"Istep mode flag: %s",
                    ((istepModeFlag) ? "Enabled" : "Disabled") );
