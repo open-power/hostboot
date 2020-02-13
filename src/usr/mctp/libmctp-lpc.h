@@ -25,7 +25,8 @@
 #ifndef _LIBMCTP_LPCL_H
 #define _LIBMCTP_LPCL_H
 
-#include "libmctp.h"
+// Headers from local directory
+#include "extern/libmctp.h"
 
 struct mctp_lpcmap_hdr {
   uint32_t  magic;

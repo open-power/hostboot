@@ -1,12 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/mctp/libmctp-alloc.h $                                */
+/* $Source: src/usr/mctp/extern/libmctp-log.h $                           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2019,2020                        */
-/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -24,13 +23,18 @@
 /* IBM_PROLOG_END_TAG                                                     */
 /* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
 
-#ifndef _LIBMCTP_ALLOC_H
-#define _LIBMCTP_ALLOC_H
+#ifndef _LIBMCTP_LOG_H
+#define _LIBMCTP_LOG_H
 
-#include <stdlib.h>
+/* libmctp-internal logging */
 
-void *__mctp_alloc(size_t size);
-void __mctp_free(void *ptr);
-void *__mctp_realloc(void *ptr, size_t size);
+void mctp_prlog(int level, const char *fmt, ...)
+	__attribute__((format(printf, 2, 3)));
 
-#endif /* _LIBMCTP_ALLOC_H */
+#define mctp_prerr(fmt, ...)  mctp_prlog(MCTP_LOG_ERR, fmt, ##__VA_ARGS__)
+#define mctp_prwarn(fmt, ...) mctp_prlog(MCTP_LOG_WARNING, fmt, ##__VA_ARGS__)
+#define mctp_prinfo(fmt, ...) mctp_prlog(MCTP_LOG_INFO, fmt, ##__VA_ARGS__)
+#define mctp_prdebug(fmt, ...)  mctp_prlog(MCTP_LOG_DEBUG, fmt, ##__VA_ARGS__)
+
+
+#endif /* _LIBMCTP_LOG_H */

@@ -1,12 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/mctp/log.c $                                          */
+/* $Source: src/usr/mctp/extern/alloc.c $                                 */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2019,2020                        */
-/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -24,77 +23,58 @@
 /* IBM_PROLOG_END_TAG                                                     */
 /* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
 
-#include <stdarg.h>
-#include <stdio.h>
+#include <assert.h>
 
 #include "libmctp.h"
-#include "libmctp-log.h"
+#include "libmctp-alloc.h"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-#ifdef MCTP_HAVE_STDIO
-#include <stdio.h>
-#endif
 
-#ifdef MCTP_HAVE_SYSLOG
-#include <syslog.h>
-#endif
+struct {
+    void *(*m_alloc)(size_t);
+    void (*m_free)(void *);
+    void *(*m_realloc)(void *, size_t);
+} alloc_ops = {
+    malloc,
+    free,
+    realloc,
+};
 
-enum {
-  MCTP_LOG_NONE,
-  MCTP_LOG_STDIO,
-  MCTP_LOG_SYSLOG,
-  MCTP_LOG_CUSTOM,
-} log_type = MCTP_LOG_NONE;
-
-static int log_stdio_level;
-static void (*log_custom_fn)(int, const char *, va_list);
-
-void mctp_prlog(int level, const char *fmt, ...)
+/* internal-only allocation functions */
+void *__mctp_alloc(size_t size)
 {
-  va_list ap;
-
-  va_start(ap, fmt);
-
-  switch (log_type) {
-  case MCTP_LOG_NONE:
-    break;
-  case MCTP_LOG_STDIO:
-#ifdef MCTP_HAVE_STDIO
-    if (level <= log_stdio_level) {
-      vfprintf(stderr, fmt, ap);
-      fputs("\n", stderr);
-    }
-#endif
-    break;
-  case MCTP_LOG_SYSLOG:
-#ifdef MCTP_HAVE_SYSLOG
-    vsyslog(level, fmt, ap);
-#endif
-    break;
-  case MCTP_LOG_CUSTOM:
-    log_custom_fn(level, fmt, ap);
-    break;
-  }
-
-  va_end(ap);
+	if (alloc_ops.m_alloc)
+		return alloc_ops.m_alloc(size);
+	if (alloc_ops.m_realloc)
+		return alloc_ops.m_realloc(NULL, size);
+	assert(0);
 }
 
-void mctp_set_log_stdio(int level)
+void __mctp_free(void *ptr)
 {
-  log_type = MCTP_LOG_STDIO;
-  log_stdio_level = level;
+	if (alloc_ops.m_free)
+		alloc_ops.m_free(ptr);
+	else if (alloc_ops.m_realloc)
+		alloc_ops.m_realloc(ptr, 0);
+	else
+		assert(0);
 }
 
-void mctp_set_log_syslog(void)
+void *__mctp_realloc(void *ptr, size_t size)
 {
-  log_type = MCTP_LOG_SYSLOG;
+	if (alloc_ops.m_realloc)
+		return alloc_ops.m_realloc(ptr, size);
+	assert(0);
 }
 
-void mctp_set_log_custom(void (*fn)(int, const char *, va_list))
+void mctp_set_alloc_ops(void *(*m_alloc)(size_t),
+		void (*m_free)(void *),
+		void *(m_realloc)(void *, size_t))
 {
-  log_type = MCTP_LOG_CUSTOM;
-  log_custom_fn = fn;
+	alloc_ops.m_alloc = m_alloc;
+	alloc_ops.m_free = m_free;
+	alloc_ops.m_realloc = m_realloc;
 }

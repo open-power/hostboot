@@ -25,24 +25,29 @@
 #ifndef _HOSTBOOT_MCTP_H
 #define _HOSTBOOT_MCTP_H
 
+// Headers from local directory
 #include "libmctp-lpc.h"
 
+// Provide functions that will perform a KCS register
+// read/writes to fufill the binding requirements
 extern "C"
 int __mctp_hostlpc_hostboot_kcs_read(void *arg,
     enum mctp_binding_lpc_kcs_reg reg, uint8_t *val);
-
 extern "C"
 int __mctp_hostlpc_hostboot_kcs_write(void *arg,
     enum mctp_binding_lpc_kcs_reg reg, uint8_t val);
 
+// Provide functions that will perform a LPC read/writes
+// in the MCTP space to fufill the binding requirements
 extern "C"
 int __mctp_hostlpc_hostboot_lpc_read(void *arg,
     void * buf, uint64_t offset, size_t len);
-
 extern "C"
 int __mctp_hostlpc_hostboot_lpc_write(void *arg,
     void * buf, uint64_t offset, size_t len);
 
+// Provide a function that will print strings so the MCTP
+// core code has a way to print messages in host boot traces
 extern "C"
 void __mctp_hostlpc_hostboot_nanosleep(uint64_t i_sec,
                                        uint64_t i_nsec);

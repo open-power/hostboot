@@ -34,4 +34,6 @@ OBJS += hostlpc.o
 OBJS += log.o
 OBJS += mctprp.o
 
+VPATH += ./extern
+
 include ${ROOTPATH}/config.mk

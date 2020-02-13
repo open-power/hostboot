@@ -22,7 +22,10 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+// Headers from local directory
 #include "hostboot_mctp.H"
+// Userspace Headers
 #include <devicefw/userif.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>

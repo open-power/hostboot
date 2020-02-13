@@ -29,7 +29,7 @@
 extern "C" {
 #endif
 
-#include "libmctp.h"
+// Headers from local directory
 #include "libmctp-lpc.h"
 
 #define binding_to_hostlpc(b) \

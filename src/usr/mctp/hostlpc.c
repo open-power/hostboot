@@ -24,16 +24,15 @@
 /* IBM_PROLOG_END_TAG                                                     */
 /* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
 
+// System Headers
 #include <endian.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "libmctp.h"
-#include "libmctp-alloc.h"
-#include "libmctp-log.h"
+// Headers from local directory
 #include "libmctp-hostlpc.h"
-
+#include "extern/libmctp-alloc.h"
+#include "extern/libmctp-log.h"
 
 // List external IO function we get from hostboot_mctp
 extern int __mctp_hostlpc_hostboot_kcs_read(void *arg,
@@ -76,7 +75,7 @@ static int mctp_hostlpc_kcs_send(struct mctp_binding_hostlpc *hostlpc,
         }
         // 25 nanosecond sleep between status polls
         hostlpc->ops.nanosleep(0, 25);
-        /* todo: timeout */
+        /* TODO RTC: 249701 timeout */
     }
 
     rc = hostlpc->ops.kcs_write(hostlpc->ops_data,

@@ -25,7 +25,6 @@
 
 // Headers from local directory
 #include "mctprp.H"
-#include "libmctp.h"
 #include "libmctp-hostlpc.h"
 // System Headers
 #include <stdlib.h>
@@ -94,9 +93,9 @@ void MctpRP::poll_kcs_status(void)
         // If there was an error reading the status reg then something is wrong and we should exit
         if(l_errl)
         {
-            // todo
+            // TODO RTC: 249716
+            // Do something.. ? fail ? retry ?
             errlCommit(l_errl, MCTP_COMP_ID);
-            // Do something.. ? commit ?
             break;
         }
 
@@ -117,7 +116,10 @@ void MctpRP::poll_kcs_status(void)
 
         if(l_errl)
         {
-            // todo handle error ?
+            // TODO RTC: 249716
+            // Do something.. ? fail ? retry ?
+            errlCommit(l_errl, MCTP_COMP_ID);
+            break;
         }
 
         msg = msg_allocate();
@@ -238,8 +240,8 @@ void MctpRP::handle_outbound_messages(void)
 
     uint8_t l_rc = 0;
 
-    // Do't start sending messages to the BMC until the channel is active
-    // TODO determine timeout
+    // Don't start sending messages to the BMC until the channel is active
+    // TODO RTC: 249701 determine timeout
     while(!iv_channelActive)
     {
         nanosleep(0, NS_PER_MSEC * 500);
