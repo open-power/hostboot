@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,8 @@
 #include <generic/memory/lib/mss_generic_system_attribute_getters.H>
 #include <lib/shared/exp_consts.H>
 
+static constexpr uint8_t OPTIMAL_NUM_TL_CREDITS = 18;
+
 namespace mss
 {
 namespace exp
@@ -71,6 +73,11 @@ fapi2::ReturnCode setup_omi_dl0_config0(
 
     // CFG_DL0_HALF_WIDTH_BACKOFF_ENABLE: dl0 x4 backoff enabled
     l_config0.writeBit<EXPLR_DLX_DL0_CONFIG0_CFG_HALF_WIDTH_BACKOFF_ENABLE>(i_dl_x4_backoff_en);
+
+    // CFG_DL0_CFG_TL_CREDITS: dl0 TL credits - Maximum number of credits that can be sent to the TL
+    l_config0.insertFromRight<EXPLR_DLX_DL0_CONFIG0_CFG_CFG_TL_CREDITS, EXPLR_DLX_DL0_CONFIG0_CFG_CFG_TL_CREDITS_LEN>
+    (OPTIMAL_NUM_TL_CREDITS);
+
 
     // CFG_DL0_TRAIN_MODE: dl0 train mode
     l_config0.insertFromRight<EXPLR_DLX_DL0_CONFIG0_CFG_TRAIN_MODE,

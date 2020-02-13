@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,6 +50,8 @@
 #include <generic/memory/lib/mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <mss_p9a_attribute_getters.H>
+
+static constexpr uint8_t OPTIMAL_NUM_TL_CREDITS = 18;
 
 namespace mss
 {
@@ -182,7 +184,8 @@ fapi2::ReturnCode setup_mc_config0(
 
     // CFG_DL0_CFG_TL_CREDITS: dl0 TL credits - Maximum number of credits that can be sent to the TL
     l_val.template
-    insertFromRight<TT::MC_REG2_DL0_CONFIG0_CFG_CFG_TL_CREDITS, TT::MC_REG2_DL0_CONFIG0_CFG_CFG_TL_CREDITS_LEN>(32);
+    insertFromRight<TT::MC_REG2_DL0_CONFIG0_CFG_CFG_TL_CREDITS, TT::MC_REG2_DL0_CONFIG0_CFG_CFG_TL_CREDITS_LEN>
+    (OPTIMAL_NUM_TL_CREDITS);
 
     // CFG_DL0_TL_EVENT_ACTIONS: dl0 TL event actions
     // Bit 0 = Freeze all
