@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
@@ -22,7 +23,6 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<?xml version="1.0" encoding="UTF-8"?>
 
 <attn_node name="MMIOFIR" model_ec="EXPLORER_10" reg_type="SCOM">
 

@@ -887,6 +887,22 @@ sub addEmptyCopyrightBlock
             print OUTPUT $line;
         }
     }
+    elsif ( "xml" eq $filetype )
+    {
+        # Browsers will complain if the first line of the file contains
+        # anything but the <?xml version=...?> tag.
+        while ( $line = <INPUT> )
+        {
+            unless ( $line =~ m/^<\?xml/ )
+            {
+                print OUTPUT "$DELIMITER_BEGIN $DELIMITER_END\n";
+                print OUTPUT $line;
+                last;
+            }
+
+            print OUTPUT $line;
+        }
+    }
     else
     {
         print OUTPUT "$DELIMITER_BEGIN $DELIMITER_END\n";
