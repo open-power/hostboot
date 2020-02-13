@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] Inspur Power Systems Corp.                                         */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -61,7 +61,8 @@
 const uint8_t USTL_MDI_EQUAL_ONE   = 1;
 const uint8_t MAX_MC_PORTS_PER_MCS = 2;        // 2 MC ports per MCS
 const uint8_t NO_CHANNEL_PER_GROUP = 0xFF;     // Init value of channel per group
-
+const uint32_t GEMINI_GLOBAL_CL_DISABLE = 0x3C0; //Gemini can't handle too many operations at once
+const uint8_t GEMINI_FINE_CL_DISABLE   = 0x3F ;
 ///----------------------------------------------------------------------------
 /// Data structure definitions
 ///----------------------------------------------------------------------------
@@ -2412,10 +2413,20 @@ fapi2::ReturnCode applyGeminiFixes(const fapi2::Target<fapi2::TARGET_TYPE_MCC> i
         fapi2::Target<fapi2::TARGET_TYPE_MI> l_mi_target = i_target.getParent<fapi2::TARGET_TYPE_MI>();
         // Channel Timeout
         FAPI_TRY(fapi2::getScom(l_mi_target, P9A_MI_MCTO, l_scom_data),
-                 "Error reading from MCC_USTLCFG reg");
+                 "Error reading from MI_MCTO reg");
         l_scom_data.clearBit<P9A_MI_MCTO_ENABLE_CHANNEL_HANG>();
         FAPI_TRY(fapi2::putScom(l_mi_target, P9A_MI_MCTO, l_scom_data),
-                 "Error writing to MCC_USTLCFG reg");
+                 "Error writing to MI_MCTO reg");
+
+        //Disable Commandlists
+        FAPI_TRY(fapi2::getScom(l_mi_target, P9A_MI_MCMODE0, l_scom_data),
+                 "Error reading from MI_MCMODE0 reg");
+        l_scom_data.insertFromRight<P9A_MI_MCMODE0_CL_GLOBAL_DISABLE,
+                                    P9A_MI_MCMODE0_CL_GLOBAL_DISABLE_LEN>(GEMINI_GLOBAL_CL_DISABLE);
+        l_scom_data.insertFromRight<P9A_MI_MCMODE0_CL_FINE_DISABLE,
+                                    P9A_MI_MCMODE0_CL_FINE_DISABLE_LEN>(GEMINI_FINE_CL_DISABLE);
+        FAPI_TRY(fapi2::putScom(l_mi_target, P9A_MI_MCMODE0, l_scom_data),
+                 "Error writing to MI_MCMODE0 reg");
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
