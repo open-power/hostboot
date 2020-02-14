@@ -34,12 +34,14 @@
 
 #include <fapi2.H>
 #include <generic/memory/lib/utils/scom.H>
+#include <generic/memory/lib/utils/find.H>
 #include <lib/shared/exp_defaults.H>
 #include <explorer_scom_addresses.H>
 #include <explorer_scom_addresses_fld.H>
-#include <generic/memory/lib/utils/scom.H>
 #include <lib/fir/exp_fir_traits.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
+#include <mss_generic_attribute_getters.H>
+#include <mss_generic_system_attribute_getters.H>
 #include <mss_explorer_attribute_getters.H>
 
 namespace mss
@@ -446,11 +448,64 @@ fapi_try_exit:
 /// @brief Unmask and setup actions for memdiags related FIR
 /// @param[in] i_target the fapi2::Target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
-/// TODO: Need to implement this function
 template<>
 fapi2::ReturnCode after_memdiags<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
 {
-    return fapi2::FAPI2_RC_SUCCESS;
+    fapi2::ReturnCode l_rc1 = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::ReturnCode l_rc2 = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::buffer<uint64_t> l_reg_data;
+    uint64_t l_mnfg_flags = 0;
+    bool l_has_rcd = false;
+
+    mss::fir::reg<EXPLR_RDF_FIR> l_exp_rdf_fir_reg(i_target, l_rc1);
+    mss::fir::reg<EXPLR_SRQ_SRQFIRQ> l_exp_srq_srqfirq_reg(i_target, l_rc2);
+
+    FAPI_TRY(l_rc1, "unable to create fir::reg for EXPLR_RDF_FIR 0x%08X", EXPLR_RDF_FIR);
+    FAPI_TRY(l_rc2, "unable to create fir::reg for EXPLR_SRQ_SRQFIRQ 0x%08X", EXPLR_SRQ_SRQFIRQ);
+
+    FAPI_TRY(mss::attr::get_mnfg_flags(l_mnfg_flags), "unable to get MNFG Flags");
+
+    // Determine if dimm is a DIMM with RCD
+    // If so set RCD fir to recoverable
+    FAPI_TRY(mss::unmask::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
+
+    // Check if dimm is an ISDIMM with RCD
+    if (l_has_rcd)
+    {
+        l_exp_rdf_fir_reg.recoverable_error<EXPLR_RDF_FIR_MAINLINE_RCD>();
+    }
+
+    // Check MNFG Thresholds Policy flag
+    // Unmask FIR_MAINTENANCE_IUE to recoverable if not set
+    // TK This check will have to change for P10 when MNFG flags API is implemented
+    if( !(l_mnfg_flags & fapi2::ENUM_ATTR_MNFG_FLAGS_MNFG_THRESHOLDS) )
+    {
+        l_exp_rdf_fir_reg.recoverable_error<EXPLR_RDF_FIR_MAINTENANCE_IUE>();
+    }
+
+    // Write remainder of RDF FIR mask per Explorer unmask spec
+    FAPI_TRY(l_exp_rdf_fir_reg.local_checkstop<EXPLR_RDF_FIR_MAINLINE_AUE>()
+             .recoverable_error<EXPLR_RDF_FIR_MAINLINE_UE>()
+             .local_checkstop<EXPLR_RDF_FIR_MAINLINE_IAUE>()
+             .recoverable_error<EXPLR_RDF_FIR_MAINLINE_IUE>()
+             .local_checkstop<EXPLR_RDF_FIR_MAINTENANCE_AUE>()
+             .local_checkstop<EXPLR_RDF_FIR_MAINTENANCE_IAUE>()
+             .write());
+
+    // Write SRQ FIR mask per Explorer unmask spec
+    FAPI_TRY(l_exp_srq_srqfirq_reg.local_checkstop<EXPLR_SRQ_SRQFIRQ_PORT_FAIL>().write());
+
+    // Clear FARB0 54/57 bits for RCD recovery and port fail
+    FAPI_TRY(fapi2::getScom(i_target, EXPLR_SRQ_MBA_FARB0Q, l_reg_data));
+
+    l_reg_data.clearBit<EXPLR_SRQ_MBA_FARB0Q_CFG_DISABLE_RCD_RECOVERY>()
+    .clearBit<EXPLR_SRQ_MBA_FARB0Q_CFG_PORT_FAIL_DISABLE>();
+
+    FAPI_TRY(fapi2::putScom(i_target, EXPLR_SRQ_MBA_FARB0Q, l_reg_data));
+
+fapi_try_exit:
+
+    return fapi2::current_err;
 }
 
 ///

@@ -39,8 +39,6 @@
 #include <fapi2.H>
 
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
-#include <generic/memory/lib/mss_generic_attribute_getters.H>
-#include <generic/memory/lib/utils/find.H>
 
 namespace mss
 {
