@@ -230,6 +230,7 @@ endif
 #***************************************
 # Working test modules
 #***************************************
+ifndef VPO_COMPILE
 TESTCASE_MODULES += cxxtest
 TESTCASE_MODULES += testtrace
 TESTCASE_MODULES += testdevicefw
@@ -251,7 +252,7 @@ TESTCASE_MODULES += testtargeting
 TESTCASE_MODULES += testmemoize
 #TODO RTC 210975
 #TESTCASE_MODULES += testprdf
-#TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testmdia)
+#TESTCASE_MODULES += testmdia
 TESTCASE_MODULES += testpirformat
 TESTCASE_MODULES += testi2c
 TESTCASE_MODULES += testmbox
@@ -265,7 +266,7 @@ TESTCASE_MODULES += testvpd
 TESTCASE_MODULES += testsyslib
 TESTCASE_MODULES += testtlsmod
 TESTCASE_MODULES += testscom
-#TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testruntime)
+#TESTCASE_MODULES += testruntime
 TESTCASE_MODULES += testintr
 TESTCASE_MODULES += testfapi2
 TESTCASE_MODULES += $(if $(CONFIG_EARLY_TESTCASES) && $(FSP_BUILD) ,,testnvram)
@@ -275,6 +276,7 @@ TESTCASE_MODULES += testrtloader
 TESTCASE_MODULES += testexpupd
 TESTCASE_MODULES += testspi
 TESTCASE_MODULES += testmmio
+endif
 
 
 #******************************************************************
@@ -345,6 +347,7 @@ export RUNTIME_MODULES_GCOV_BLACKLIST:= vpd_rt
 
 RUNTIME_DATA_MODULES += $(if $(CONFIG_ENABLE_HDAT_IN_HOSTBOOT),pvpd_bp.dat)
 
+ifndef VPO_COMPILE
 RUNTIME_TESTCASE_MODULES += cxxtest_rt
 RUNTIME_TESTCASE_MODULES += testerrl_rt   # ~/src/usr/errl/runtime/test/
 RUNTIME_TESTCASE_MODULES += testtrace_rt  # ~/src/usr/trace/runtime/test/
@@ -364,6 +367,7 @@ RUNTIME_TESTCASE_MODULES += testsyslib_rt # ~/src/usr/testcore/lib/runtime/
 #RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_HBRT_PRD),testprdf_rt)
 #RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_HBRT_PRD),testattn_rt)
 #RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_BMC_IPMI),testipmi_rt)
+endif
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 
