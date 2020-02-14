@@ -92,4 +92,3 @@ config SUPPORT_EEPROM_HWACCESS
         the devices with associated records pre-populated into the EECACHE PNOR
         partition will be marked as present; all devices without existing EECACHE
         records will be marked as not present.
-

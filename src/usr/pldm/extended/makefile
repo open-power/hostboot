@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/pldm/makefile $
+# $Source: src/usr/pldm/extended/makefile $
 #
 # OpenPOWER HostBoot Project
 #
@@ -23,10 +23,19 @@
 #
 # IBM_PROLOG_END_TAG
 
-ROOTPATH = ../../..
+ROOTPATH = ../../../..
+MODULE = pldm_extended
 
-# Sub-directories that will compile into their own modules
-SUBDIRS += base.d
-SUBDIRS += extended.d
+CC_OVERRIDE = 1
+
+# From ../extern/
+OBJS += bios.o
+OBJS += bios_table.o
+OBJS += fru.o
+OBJS += platform.o
+OBJS += file_io.o
+# From this directory
+
+VPATH += ../extern
 
 include ${ROOTPATH}/config.mk

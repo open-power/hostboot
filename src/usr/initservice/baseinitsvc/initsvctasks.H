@@ -108,10 +108,10 @@ const TaskInfo    g_taskinfolist[]   =   {
 #endif
 #ifdef CONFIG_PLDM
         /**
-         * @brief   libpldm
+         * @brief   libpldm_base
          */
         {
-                "libpldm.so" ,                      // taskname
+                "libpldm_base.so" ,                 // taskname
                 NULL,                               // no pointer to fn
                 {
                         START_TASK,

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/pldm/pldmrp.C $                                       */
+/* $Source: src/usr/pldm/base/pldmrp.C $                                  */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -25,10 +25,11 @@
 
 
 // Headers from local directory
-#include "utils.h"
-#include "file_io.h"
-#include "base.h"
+#include "../extern/utils.h"
+#include "../extern/base.h"
+#include "../common/pldmtrace.H"
 #include "pldmrp.H"
+
 // Userspace Headers
 #include <trace/interface.H>
 #include <initservice/taskargs.H>
@@ -99,7 +100,7 @@ void routeInboundMessage(uint8_t* i_msg, size_t i_len)
 // the PldmRP singleton
 static void * handle_inbound_req_messages_task(void*)
 {
-    TRACFCOMP(g_trac_pldm, "Starting task to handle pldm inbound messages");
+    PLDM_INF("Starting task to handle pldm inbound messages");
     Singleton<PldmRP>::instance().handle_inbound_req_messages();
     return nullptr;
 }
@@ -145,7 +146,7 @@ void PldmRP::handle_inbound_req_messages(void)
 // the PldmRP singleton
 static void * handle_outbound_req_messages_task(void*)
 {
-    TRACFCOMP(g_trac_pldm, "Starting task to handle pldm inbound messages");
+    PLDM_INF("Starting task to handle pldm inbound messages");
     Singleton<PldmRP>::instance().handle_outbound_req_messages();
     return nullptr;
 }
@@ -199,7 +200,7 @@ void PldmRP::handle_outbound_req_messages(void)
         // waiting so we must respond.
         if(!l_asyncReq)
         {
-            TRACFCOMP(g_trac_pldm, "Responding to message %d", instance_id);
+            PLDM_INF("Responding to message %d", instance_id);
             msg_respond(iv_outboundReqMsgQ, req);
         }
         else
@@ -207,7 +208,7 @@ void PldmRP::handle_outbound_req_messages(void)
             // Parse out if response was at least valid else throw error
             // clean up buffers because caller will not
             // TODO 249702
-            TRACFCOMP(g_trac_pldm, "Async request we must handle it ourselves handle it");
+            PLDM_INF("Async request we must handle it ourselves handle it");
         }
 
         // Instance id is 5 bits so roll-back so valid numbers are 0-31
@@ -217,7 +218,7 @@ void PldmRP::handle_outbound_req_messages(void)
 }
 void PldmRP::_init(void)
 {
-    TRACFCOMP(g_trac_pldm, "PldmRP::_init entry");
+    PLDM_ENTER("PldmRP::_init entry");
 
     // Start cmd daemon first because we want it ready if poll
     // daemon finds something right away
@@ -237,7 +238,7 @@ void PldmRP::_init(void)
     // MCTP gets initialized first so its safe to assume the queue is initialized
     iv_mctpOutboundMsgQ = msg_q_resolve(VFS_ROOT_MSG_MCTP_OUT);
 
-    TRACFCOMP(g_trac_pldm, "PldmRP::_init exit");
+    PLDM_EXIT("PldmRP::_init exit");
 
     return;
 }
@@ -257,5 +258,5 @@ PldmRP::PldmRP(void):
 {
 }
 
-// Set the function that will be called when mctp.so is loaded
+// Set the function that will be called when pldm_base.so is loaded
 TASK_ENTRY_MACRO( PldmRP::init );

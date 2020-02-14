@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/pldm/makefile $
+# $Source: src/usr/pldm/base/makefile $
 #
 # OpenPOWER HostBoot Project
 #
@@ -23,10 +23,23 @@
 #
 # IBM_PROLOG_END_TAG
 
-ROOTPATH = ../../..
+ROOTPATH = ../../../..
+MODULE = pldm_base
+CC_OVERRIDE = 1
 
-# Sub-directories that will compile into their own modules
-SUBDIRS += base.d
-SUBDIRS += extended.d
+include ../common/common.mk
+
+# From ../extern/
+OBJS += base.o
+OBJS += utils.o
+# From ../common/
+OBJS += ${PLDM_COMMON_OBJS}
+# From this directory
+OBJS += pldmrp.o
+
+# add these paths to VPATH so compiler knows
+# where to find the .C/.c files we need
+VPATH += ../extern
+VPATH += ../common
 
 include ${ROOTPATH}/config.mk
