@@ -404,7 +404,7 @@ sub getPhysicalAddr
                    "Singleton<SegmentManager>::instance()::instance");
 
 
-    if (not defined @segment_manager_addr)
+    if (not @segment_manager_addr)
     {
         ::userDisplay "   VirtualToPhy: Cannot find SegmentManager symbol.\n";
         return NotFound;

@@ -73,7 +73,7 @@ sub main
     my @segment_manager_addr = ::findPointer("SGMNTMGR",
                    "Singleton<SegmentManager>::instance()::instance");
 
-    if (not defined @segment_manager_addr)
+    if (not @segment_manager_addr)
     {
 	::userDisplay "   VirtualToPhy: Cannot find Device Segment symbol.\n"; die;
     }
