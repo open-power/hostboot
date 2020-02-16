@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,7 +60,7 @@ fapi2::ReturnCode getDeconfiguredTargets(
 
         uint8_t l_eq_pos = l_perv.getChipletNumber() - EQ0_CHIPLET_ID;
 
-        uint8_t l_gard_value = (l_mvpd_pg & l_pg) >> 23;
+        uint8_t l_gard_value = (l_mvpd_pg ^ l_pg) >> (31 - 16);
 
         auto l_core_present_vector =
             l_eq.getChildren<fapi2::TARGET_TYPE_CORE>
