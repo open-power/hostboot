@@ -120,7 +120,8 @@ fapi2::ReturnCode verify_ec_hw_state(
                  l_core_unit_pos);
 
         //Check the clock state and power state
-        FAPI_TRY(p10_check_core_l3_clock_power_state(l_core, l_core_unit_pos));
+// RTC 249759: temporarily enable deconfigured cores/L3 to check for PFET state
+//        FAPI_TRY(p10_check_core_l3_clock_power_state(l_core, l_core_unit_pos));
 
     }
 
