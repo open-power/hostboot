@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,7 +48,7 @@ namespace fapi2
 
 #define NUM_OP_POINTS  8
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
     uint16_t core_frequency;
     uint16_t vdd_voltage;
@@ -69,7 +69,7 @@ typedef struct
 } poundV_entry_pts_t;
 
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
     uint16_t SRVdnVltg;
     uint16_t SRIdnTdpAcCurr;
@@ -80,10 +80,11 @@ typedef struct
     uint16_t SRVpciVltg;
     uint16_t SRIpciTdpAcCurr;
     uint16_t SRIpciTdpDcCurr;
-    uint8_t  SRRsvd[17];
+    uint8_t  modelDataFlag;
+    uint8_t  SRRsvd[16];
 } poundV_static_rails_t;
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
     uint16_t PAUFreq;
     uint16_t TSrtSocPowTgt;

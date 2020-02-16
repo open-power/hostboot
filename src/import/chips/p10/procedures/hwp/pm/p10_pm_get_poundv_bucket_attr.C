@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,7 +50,9 @@ fapi2::ReturnCode p10_pm_get_poundv_bucket_attr(
     uint8_t l_overridePresent = 0;
     uint32_t l_tempVpdSize = 0;
     uint32_t l_vpdSize = 0;
-    uint8_t l_bucketId = 0xFF;
+    //Default is going to bucket 1 always.To switch to other bucket,need to use
+    //the system level attribute
+    uint8_t l_bucketId = 1;
     uint16_t l_bucketSize = 0;
     *o_data = 0;
 
@@ -88,10 +90,6 @@ fapi2::ReturnCode p10_pm_get_poundv_bucket_attr(
                            l_fullVpdData,
                            l_tempVpdSize) );
 
-    //TODO
-    //RTC 207137
-    //Hardcode the bucketId until we decide the source of bucketid
-    l_bucketId = 1;
     l_bucketSize = VERSION_2_BUCKET_SIZE;
 
     //Version 2:
@@ -102,35 +100,6 @@ fapi2::ReturnCode p10_pm_get_poundv_bucket_attr(
     //PNP:      0x3 byte
     //bucket 1: 0x15E byte
     //bucket 2: 0x15E byte
-    if( *l_fullVpdData <= POUNDV_VERSION_2 &&
-        !l_bucketId)
-    {
-        //Set the size of the bucket
-        l_bucketSize = VERSION_2_BUCKET_SIZE;
-
-        //Reset VPD size because we want to find size of another VPD record
-        l_tempVpdSize = 0;
-
-        //First read is to get size of vpd record, note the o_buffer is NULL
-        FAPI_TRY( getMvpdField(fapi2::MVPD_RECORD_VINI,
-                               fapi2::MVPD_KEYWORD_PR,
-                               i_target,
-                               NULL,
-                               l_tempVpdSize) );
-
-        l_prDataPtr = reinterpret_cast<uint8_t*>(malloc(l_tempVpdSize));
-
-        //Second read is to get data of vpd record
-        FAPI_TRY( getMvpdField(fapi2::MVPD_RECORD_VINI,
-                               fapi2::MVPD_KEYWORD_PR,
-                               i_target,
-                               l_prDataPtr,
-                               l_tempVpdSize) );
-
-        //Bucket ID is byte[4] of the PR keyword
-        memcpy(&l_bucketId, (l_prDataPtr + 4), sizeof(uint8_t));
-
-    }
 
     l_vpdSize = l_vpdSize - POUNDV_BUCKET_OFFSET - ((l_bucketId - 1) *
                 l_bucketSize);

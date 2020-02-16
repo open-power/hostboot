@@ -613,6 +613,31 @@
     <overrideOnly/>
     <group>enablement</group>
   </attribute>
+  <attribute>
+    <id>ATTR_SYSTEM_SUSPEND_OCC_MODE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    pm_suspend_procedure will first put the system in safe mode and
+    we have 2 methods to do that, one is thru occ and if that fails then will do thru pgpe.
+    On awan/cronus if we want to test procedure, OCC won't be running, 
+    hence will use this attribute to disable occ method
+
+    Producer:Override
+
+    Consumers: p10_suspend_powman.C
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <enum>
+        OFF = 0x00,
+        ON = 0x01
+    </enum>
+    <default>OFF</default>
+    <overrideOnly/>
+    <group>enablement</group>
+  </attribute>
+
+
 
   <!-- ********************************************************************* -->
   <attribute>

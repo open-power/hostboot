@@ -1038,17 +1038,24 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
                              OCCPstateParmBlock_t *i_occppb )
 {
     FAPI_INF(">>>>>>>> oppb_init");
+
     do
     {
+        fapi2::ATTR_RVRM_VID_Type   l_rvrm_rvid;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_RVRM_VID,
+                               iv_procChip,
+                               l_rvrm_rvid));
         // -----------------------------------------------
         // OCC parameter block
         // -----------------------------------------------
         i_occppb->magic.value = revle64(OCC_PARMSBLOCK_MAGIC);
 
-    //    i_occppb->wof.wof_enabled = iv_wof_enabled;
         i_occppb->vdd_sysparm     = iv_vdd_sysparam;
         i_occppb->vcs_sysparm     = iv_vcs_sysparam;
         i_occppb->vdn_sysparm     = iv_vdn_sysparam;
+
+        memcpy(&i_occppb->attr, &iv_attrs, sizeof (Attributes_t));
 
         //load vpd operating points
         for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
@@ -1143,8 +1150,14 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
         //pstate_max_throttle
         i_occppb->pstate_max_throttle =  revle32(pstate_min + THROTTLE_PSTATES);
 
+        i_occppb->vdd_vret_mv =  l_rvrm_rvid << 3;
+
+        i_occppb->vdd_vret_mv = revle32(i_occppb->vdd_vret_mv);
+
+
     }while(0);
 
+fapi_try_exit:
     FAPI_INF("<<<<<<<< oppb_init");
     return fapi2::current_err;
 }
@@ -3224,10 +3237,36 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_iddq( void )
     //if yes then initialized to 0
     for (int i = 0; i < IDDQ_MEASUREMENTS; ++i)
     {
-       if ( iv_iddqt.iddq_all_good_cores_off_good_caches_off_5ma[i] & 0x8000)
-       {
-           iv_iddqt.iddq_all_good_cores_off_good_caches_off_5ma[i] = 0;
-       }
+        if ( iv_iddqt.iddq_all_good_cores_off_good_caches_off_5ma[i] & 0x8000)
+        {
+            iv_iddqt.iddq_all_good_cores_off_good_caches_off_5ma[i] = 0;
+        }
+    }
+    for (int i = 0; i < IDDQ_MEASUREMENTS; ++i)
+    {
+        iv_iddqt.iddq_all_good_cores_on_caches_on_5ma[i] = 
+            revle16(iv_iddqt.iddq_all_good_cores_on_caches_on_5ma[i]);
+        iv_iddqt.iddq_all_good_cores_off_good_caches_off_5ma[i] = 
+            revle16(iv_iddqt.iddq_all_good_cores_off_good_caches_off_5ma[i]);
+        iv_iddqt.iddq_all_good_cores_off_good_caches_on_5ma[i] = 
+            revle16(iv_iddqt.iddq_all_good_cores_off_good_caches_on_5ma[i]);
+        iv_iddqt.icsq_all_good_cores_on_caches_on_5ma[i] = 
+            revle16(iv_iddqt.icsq_all_good_cores_on_caches_on_5ma[i]);
+        iv_iddqt.icsq_all_good_cores_off_good_caches_off_5ma[i] = 
+            revle16(iv_iddqt.icsq_all_good_cores_off_good_caches_off_5ma[i]);
+        iv_iddqt.icsq_all_good_cores_off_good_caches_on_5ma[i] = 
+            revle16(iv_iddqt.icsq_all_good_cores_off_good_caches_on_5ma[i]);
+    }
+
+    for (int x = 0; x < MAXIMUM_EQ_SETS; ++x)
+    {
+        for (int i = 0; i < IDDQ_MEASUREMENTS; ++i)
+        {
+            iv_iddqt.iddq_eqs_good_cores_on_good_caches_on_5ma[x][i] = 
+                revle16(iv_iddqt.iddq_eqs_good_cores_on_good_caches_on_5ma[x][i]);
+            iv_iddqt.icsq_eqs_good_cores_on_good_caches_on_5ma[x][i] = 
+                revle16(iv_iddqt.icsq_eqs_good_cores_on_good_caches_on_5ma[x][i]);
+        }
     }
     // Put out the structure to the trace
     iddq_print(&iv_iddqt);
@@ -3300,7 +3339,7 @@ void iddq_print(IddqTable_t* i_iddqt)
 
 #define IDDQ_CURRENT_EXTRACT(_member) \
         { \
-        uint16_t _temp = revle16(i_iddqt->_member) * CONST_5MA_1MA;     \
+        uint16_t _temp = (i_iddqt->_member) * CONST_5MA_1MA;     \
         sprintf(l_buffer_str, "  %6.3f ", (double)_temp/1000);          \
         strcat(l_line_str, l_buffer_str); \
         }
