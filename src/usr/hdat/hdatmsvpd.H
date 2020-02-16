@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -653,6 +653,37 @@ class HdatMsVpd : public HdatHdif
                                  uint32_t i_hdatMemCntlID = 0,
                                  bool i_hdatSmf = false);
 
+        /**
+         * @brief Update the mainstore area to specify a mmio memory address
+         *        range. More than one address range can be added.
+         *
+         * @pre One cannot add any more address range entries than the
+         *      maximum supported limit.
+         *
+         * @post An address range entry has been added.
+         *
+         * @param[in] i_start      - The starting address of the range
+         * @param[in] i_end        - The ending address of the range
+         * @param[in] i_rangeSize  - MMIO address range size
+         * @param[in] i_mmioMemCntlId - Memory Controller ID
+         * @param[in] i_mmioProcPhyChipId - which is the chip id of the physical
+         *                                  processor
+         * @param[in] i_mmioHbrtChipId - MMIO HBRT Chip ID
+         * @param[in] i_mmioFlags -  MMIO flags
+         *
+         * @return A null error log handle if successful, else the return code
+         *         pointed to by o_errlHndl contains one of:
+         *
+         * @retval HDAT_ARRAY_ERROR
+         */
+
+         errlHndl_t addMsAreaMmioAddrRange(uint16_t i_msAreaId,
+                                           hdatMsAddr_t &i_start,
+                                           hdatMsAddr_t &i_end,
+                                           uint32_t i_mmioMemCntlId,
+                                           uint32_t i_mmioProcPhyChipId,
+                                           uint64_t i_mmioHbrtChipId,
+                                           uint64_t i_mmioFlags);
 
         /**
          * @brief Add engineering change information for memory interface chips

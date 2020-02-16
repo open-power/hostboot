@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -109,6 +109,7 @@ enum HDATModuleId
   MOD_TPMDATA_CONSTRUCTOR      = 0x32,
   MOD_TPMDATA_DESTRUCTOR       = 0x33,
   MOD_UTIL_SMP_LINK_INFO       = 0x34,
+  MOD_ADD_MMIO_ADDR_RANGE      = 0x35,
 };
 
 
