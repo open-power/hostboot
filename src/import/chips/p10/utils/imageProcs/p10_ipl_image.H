@@ -1956,7 +1956,8 @@ typedef enum
     P9_XIP_SECTION_QME_LVL2_BL   = P9_XIP_SECTIONS_PLUS(1),
     P9_XIP_SECTION_QME_HCODE     = P9_XIP_SECTIONS_PLUS(2),
     P9_XIP_SECTION_QME_RINGS     = P9_XIP_SECTIONS_PLUS(3),
-    P9_XIP_SECTIONS_QME          = P9_XIP_SECTIONS_PLUS(4) // # sections
+    P9_XIP_SECTION_QME_META_DATA = P9_XIP_SECTIONS_PLUS(4),
+    P9_XIP_SECTIONS_QME          = P9_XIP_SECTIONS_PLUS(5) // # sections
 } p9_xip_section_qme_t;
 
 #define P9_XIP_SECTION_NAMES_QME(var)          \
@@ -1964,19 +1965,21 @@ typedef enum
                          ".lvl1_bl",           \
                          ".lvl2_bl",           \
                          ".hcode",             \
-                         ".rings")
+                         ".rings",             \
+                         ".qme_meta_data")
 
 /**************************************************************************/
 /* XGPE Image                                                             */
 /**************************************************************************/
 typedef enum
 {
-    P9_XIP_SECTION_XGPE_XPMR_HDR = P9_XIP_SECTIONS_PLUS(0),
-    P9_XIP_SECTION_XGPE_LVL1_BL  = P9_XIP_SECTIONS_PLUS(1),
-    P9_XIP_SECTION_XGPE_LVL2_BL  = P9_XIP_SECTIONS_PLUS(2),
-    P9_XIP_SECTION_XGPE_HCODE    = P9_XIP_SECTIONS_PLUS(3),
-    P9_XIP_SECTION_XGPE_AUX_TASK = P9_XIP_SECTIONS_PLUS(4),
-    P9_XIP_SECTIONS_XGPE         = P9_XIP_SECTIONS_PLUS(5) // # sections
+    P9_XIP_SECTION_XGPE_XPMR_HDR    =   P9_XIP_SECTIONS_PLUS(0),
+    P9_XIP_SECTION_XGPE_LVL1_BL     =   P9_XIP_SECTIONS_PLUS(1),
+    P9_XIP_SECTION_XGPE_LVL2_BL     =   P9_XIP_SECTIONS_PLUS(2),
+    P9_XIP_SECTION_XGPE_HCODE       =   P9_XIP_SECTIONS_PLUS(3),
+    P9_XIP_SECTION_XGPE_AUX_TASK    =   P9_XIP_SECTIONS_PLUS(4),
+    P9_XIP_SECTION_XGPE_META_DATA   =   P9_XIP_SECTIONS_PLUS(5),
+    P9_XIP_SECTIONS_XGPE            =   P9_XIP_SECTIONS_PLUS(6) // # sections
 } p9_xip_section_xgpe_t;
 
 #define P9_XIP_SECTION_NAMES_XGPE(var)         \
@@ -1985,18 +1988,20 @@ typedef enum
                          ".lvl1_bl",           \
                          ".lvl2_bl",           \
                          ".hcode",             \
-                         ".aux_task")
+                         ".aux_task",          \
+                         ".xgpe_meta_data")
 
 /**************************************************************************/
 /* PGPE Image                                                             */
 /**************************************************************************/
 typedef enum
 {
-    P9_XIP_SECTION_PGPE_PPMR_HDR = P9_XIP_SECTIONS_PLUS(0),
-    P9_XIP_SECTION_PGPE_LVL1_BL  = P9_XIP_SECTIONS_PLUS(1),
-    P9_XIP_SECTION_PGPE_LVL2_BL  = P9_XIP_SECTIONS_PLUS(2),
-    P9_XIP_SECTION_PGPE_HCODE    = P9_XIP_SECTIONS_PLUS(3),
-    P9_XIP_SECTIONS_PGPE         = P9_XIP_SECTIONS_PLUS(4) // # sections
+    P9_XIP_SECTION_PGPE_PPMR_HDR    =   P9_XIP_SECTIONS_PLUS(0),
+    P9_XIP_SECTION_PGPE_LVL1_BL     =   P9_XIP_SECTIONS_PLUS(1),
+    P9_XIP_SECTION_PGPE_LVL2_BL     =   P9_XIP_SECTIONS_PLUS(2),
+    P9_XIP_SECTION_PGPE_HCODE       =   P9_XIP_SECTIONS_PLUS(3),
+    P9_XIP_SECTION_PGPE_META_DATA   =   P9_XIP_SECTIONS_PLUS(4),
+    P9_XIP_SECTIONS_PGPE            =   P9_XIP_SECTIONS_PLUS(5) // # sections
 } p9_xip_section_pgpe_t;
 
 #define P9_XIP_SECTION_NAMES_PGPE(var)         \
@@ -2004,7 +2009,8 @@ typedef enum
                          ".ppmr_hdr",          \
                          ".lvl1_bl",           \
                          ".lvl2_bl",           \
-                         ".hcode")
+                         ".hcode",             \
+                         ".pgpe_meta_data")
 
 /**************************************************************************/
 /* Core Restore Image                                                     */
