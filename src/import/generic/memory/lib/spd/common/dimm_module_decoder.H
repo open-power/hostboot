@@ -1688,6 +1688,18 @@ class dimm_module_decoder
             o_value = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
+
+
+        ///
+        /// @brief Decodes Registered Clock Drivers (RCD)
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode module_rcd(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
 };
 
 }// spd

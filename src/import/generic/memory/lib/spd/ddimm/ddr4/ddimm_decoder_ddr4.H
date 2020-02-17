@@ -1426,6 +1426,20 @@ class decoder< DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         }
 
         ///
+        /// @brief Decodes Registered Clock Drivers (RCD)
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        /// @note Byte 264 DDIMM SPD
+        ///
+        virtual fapi2::ReturnCode module_rcd(uint8_t& o_output) const override
+        {
+            FAPI_TRY((mss::spd::reader<fields_t::MODULE_RCD, R>(iv_target, iv_data, o_output)));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Decodes Thermal Sensor 0 Availability -> THERM_SENSOR_0_AVAIL
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay

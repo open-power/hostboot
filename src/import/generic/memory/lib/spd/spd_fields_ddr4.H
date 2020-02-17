@@ -1181,6 +1181,11 @@ class fields<DDR4, DDIMM_MODULE>
             PMIC1_PHASE_COMBIN_START = 4,
             PMIC1_PHASE_COMBIN_LEN = 4,
 
+            // Byte 264
+            MODULE_RCD_BYTE = 264,
+            MODULE_RCD_START = 6,
+            MODULE_RCD_LEN = 2,
+
             // Byte 268: Thermal Sensor 0 Profile
             THERM_SENSOR_0_PROFILE_BYTE = 268,
             THERM_SENSOR_0_AVAIL_START = 0,
@@ -1461,6 +1466,9 @@ class fields<DDR4, DDIMM_MODULE>
         // Byte 259: PMIC1 Phase Combination
         static constexpr field_t PMIC1_PHASE_COMBIN{PMIC1_PHASE_COMBIN_BYTE, PMIC1_PHASE_COMBIN_START, PMIC1_PHASE_COMBIN_LEN};
         static constexpr field_t PMIC1_REDUNDANCY{PMIC1_PHASE_COMBIN_BYTE, PMIC1_REDUNDANCY_START, PMIC1_REDUNDANCY_LEN};
+
+        // Byte 264: Registered Clock Drivers (RCD)
+        static constexpr field_t MODULE_RCD{MODULE_RCD_BYTE, MODULE_RCD_START, MODULE_RCD_LEN};
 
         // Byte 268: Thermal Sensor 0 Profile
         static constexpr field_t THERM_SENSOR_0_AVAIL{THERM_SENSOR_0_PROFILE_BYTE, THERM_SENSOR_0_AVAIL_START, THERM_SENSOR_0_AVAIL_LEN};

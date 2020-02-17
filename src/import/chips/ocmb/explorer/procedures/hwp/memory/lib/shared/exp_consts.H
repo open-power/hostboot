@@ -128,8 +128,10 @@ enum class attr_eff_engine_fields
     THERM_SENSOR_DIFF_USAGE = 22,
     THERM_SENSOR_DIFF_I2C_ADDR = 23,
 
+    SUPPORTED_RCD = 24,
+
     // Dispatcher set to last enum value
-    DISPATCHER = THERM_SENSOR_DIFF_I2C_ADDR,
+    DISPATCHER = SUPPORTED_RCD,
 };
 
 ///
@@ -190,6 +192,7 @@ enum ffdc_codes
     SET_THERM_SENSOR_DIFF_TYPE = 0x105C,
     SET_THERM_SENSOR_DIFF_USAGE = 0x105D,
     SET_THERM_SENSOR_DIFF_I2C_ADDR = 0x105E,
+    SET_SUPPORTED_RCD = 0x105F,
 };
 
 ///

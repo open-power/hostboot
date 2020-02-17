@@ -2795,6 +2795,19 @@ class facade final
         }
 
         ///
+        /// @brief Decodes Module RCD
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode module_rcd(uint8_t& o_output) const
+        {
+            FAPI_TRY( iv_dimm_module_decoder->module_rcd(o_output) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Decodes Thermal Sensor 0 Availability -> THERM_SENSOR_0_AVAIL
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
