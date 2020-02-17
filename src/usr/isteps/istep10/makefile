@@ -85,6 +85,7 @@ OBJS+=p10_mi_omi_scom.o
 OBJS+=p10_psi_scom.o
 OBJS+=p10_int_scom.o
 OBJS+=p10_nx_scom.o
+OBJS+=p10_nmmu_scom.o
 
 #istep 10.5 -- proc_pau_scominit
 OBJS+=p10_pau_scominit.o
@@ -103,6 +104,7 @@ OBJS+=p10_enable_ridi.o
 
 #istep 10.9 -- host_rng_bist
 OBJS+=p10_rng_init_phase1.o
+
 
 VPATH += ${NEST_HWP_PATH}
 VPATH += ${INITFILES_HWP_PATH}
