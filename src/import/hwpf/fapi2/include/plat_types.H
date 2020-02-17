@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,12 +41,13 @@ namespace fapi2
 
 enum PlatformType
 {
-    PLAT_EXAMPLE,    ///< FAPI2 example platform
-    PLAT_CRONUS,     ///< Cronus
-    PLAT_SBE,        ///< Self Boot Engine
-    PLAT_HOSTBOOT,   ///< HostBoot
-    PLAT_HWSV,       ///< FSP Hardware Server
-    PLAT_QME,        ///< Quad Management Engine
+    PLAT_EXAMPLE,             ///< FAPI2 example platform
+    PLAT_CRONUS,              ///< Cronus
+    PLAT_SBE,                 ///< Self Boot Engine
+    PLAT_HOSTBOOT,            ///< HostBoot
+    PLAT_HOSTBOOT_BOOTLOADER, ///< Hostboot Bootloader
+    PLAT_HWSV,                ///< FSP Hardware Server
+    PLAT_QME,                 ///< Quad Management Engine
 };
 
 }

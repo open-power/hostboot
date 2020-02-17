@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,7 +40,7 @@
 #include <buffer.H>
 
 // variable_buffer isn't supported on PPE
-#ifndef __PPE__
+#if !defined(__PPE__) && !defined(FAPI_VARIABLE_BUFFER_NOT_SUPPORTED)
     #include <variable_buffer.H>
 #endif
 
@@ -51,17 +51,20 @@
 
 namespace fapi2
 {
-//--------------------------------------------------------------------------
-// PIB Error Functions
-//--------------------------------------------------------------------------
+#ifndef PIB_ERROR_MASK_NOT_SUPPORTED
+    //--------------------------------------------------------------------------
+    // PIB Error Functions
+    //--------------------------------------------------------------------------
 
-/// @brief Sets the PIB error mask - platform dependant
-/// @param[in]  i_mask     The new error mask
-inline void setPIBErrorMask(uint8_t i_mask);
+    /// @brief Sets the PIB error mask - platform dependant
+    /// @param[in]  i_mask     The new error mask
+    inline void setPIBErrorMask(uint8_t i_mask);
 
-/// @brief Gets the PIB error mask - platform dependant
-/// @return uint8_t The current PIB error mask
-inline uint8_t getPIBErrorMask(void);
+    /// @brief Gets the PIB error mask - platform dependant
+    /// @return uint8_t The current PIB error mask
+    inline uint8_t getPIBErrorMask(void);
+
+#endif
 
 //--------------------------------------------------------------------------
 // Operational Mode Error Functions
@@ -185,7 +188,7 @@ ReturnCode putRing(const Target<K, M, V>& i_target,
                    const RingMode i_ringMode = RING_MODE_HEADER_CHECK);
 
 // variable_buffer isn't supported on PPE
-#ifndef __PPE__
+#if !defined(__PPE__) && !defined(FAPI_VARIABLE_BUFFER_NOT_SUPPORTED)
 /// @brief Reads a ring from a chip.
 /// @tparam K template parameter, passed in target.
 /// @param[in]  i_target   Target to operate on.
@@ -222,7 +225,7 @@ inline ReturnCode modifyRing(const Target<K, M, V>& i_target,
 // --------------------------------------------------------------------------
 
 // variable_buffer isn't supported on PPE
-#ifndef __PPE__
+#if !defined(__PPE__) && !defined(FAPI_VARIABLE_BUFFER_NOT_SUPPORTED)
 /// @brief Reads a spy from a chip.
 /// @tparam K template parameter, passed in target.
 /// @param[in]  TARGET   Target to operate on.
@@ -450,7 +453,7 @@ inline ReturnCode getSpyImage(const Target<K, M, V>& i_target,
                               const variable_buffer& i_imageData);
 #endif
 
-#endif // PPE
+#endif // PPE and FAPI_VARIABLE_BUFFER_NOT_SUPPORTED
 };
 
 #endif // _FAPI2_HWACCESS_H_

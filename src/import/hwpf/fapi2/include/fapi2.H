@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,10 @@
 
 #include <fapi2_hwp_executor.H>
 #include <fapi2_attribute_service.H>
-#include <fapi2_chip_ec_feature.H>
+
+#ifndef PLAT_EC_FEATURE_NOT_SUPPORTED
+    #include <fapi2_chip_ec_feature.H>
+#endif
 
 #include <mvpd_access.H>
 

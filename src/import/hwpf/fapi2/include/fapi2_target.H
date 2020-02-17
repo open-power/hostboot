@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -139,6 +139,7 @@ class Target
             iv_handle(Value)
         {
             plat_apply_target_limits<K, M, V>();
+#ifndef FAPI_PLAT_MULTICAST_NOT_SUPPORTED
 
             /* Iff this is a potential mcast target, update the handle.
              * We can't know the mcast op of the V handed in, so we have
@@ -148,6 +149,8 @@ class Target
             {
                 mcUpdateHandle();
             }
+
+#endif
         };
 
         ///
@@ -316,6 +319,8 @@ class Target
         getChildren(const TargetFilter i_filter,
                     const TargetState i_state = TARGET_STATE_FUNCTIONAL) const;
 
+
+#ifndef FAPI_PLAT_MULTICAST_NOT_SUPPORTED
         ///
         /// @brief Get a multicast target for a given chip
         /// @tparam T The type of target to return; TARGET_TYPE_MULTICAST is added automatically
@@ -345,6 +350,7 @@ class Target
         template< MulticastType O = MULTICAST_OR >
         inline Target < TARGET_TYPE_CORE | TARGET_TYPE_MULTICAST, O, V >
         getMulticast(const MulticastGroup i_group, const MulticastCoreSelect i_cores) const;
+#endif
 
         ///
         /// @brief Get the target at the other end of a bus
@@ -378,6 +384,7 @@ class Target
         inline uint8_t
         getChipletNumber(void) const;
 
+#ifndef FAPI_PLAT_MULTICAST_NOT_SUPPORTED
         ///
         /// @brief Returns the core select vector associated with a Core target
         /// @return The core select value for the target. For unicast core targets
@@ -390,6 +397,7 @@ class Target
             static_assert(K & TARGET_TYPE_CORE, "getCoreSelect is only applicable to TARGET_TYPE_CORE targets");
             return _getCoreSelect();
         }
+#endif
 
         ///
         /// @brief Copy from a Target<O, MO> to a Target<K, M>
@@ -409,11 +417,15 @@ class Target
             static_assert( bitCount<K>::count >= bitCount<O>::count,
                            "unable to cast to specialized Target");
 
+#ifndef FAPI_PLAT_MULTICAST_NOT_SUPPORTED
+
             // Only need to update the handle if we're coming from a target that's already MULTICAST
             if ((O & TARGET_TYPE_MULTICAST) && (MO != M))
             {
                 mcUpdateHandle();
             }
+
+#endif
         }
 
     private:
@@ -422,11 +434,13 @@ class Target
         static const TargetType iv_type = K;
         V iv_handle;
 
+#ifndef FAPI_PLAT_MULTICAST_NOT_SUPPORTED
         /// @brief if iv_handle is a multicast target, update its multicast type to M
         inline void mcUpdateHandle(void);
 
         /// @brief Internal implementation of getCoreSelect, filtered for CORE targets
         inline MulticastCoreSelect _getCoreSelect(void) const;
+#endif
 
         ///
         /// @brief Static checks for getParent.
@@ -457,6 +471,7 @@ class Target
                           "improper child of fapi2::TARGET_TYPE_MULTICAST");
         }
 
+#ifndef FAPI_PLAT_MULTICAST_NOT_SUPPORTED
         ///
         /// @brief Static checks for getMulticast(). Platforms are expected to call this.
         /// @tparam T The type of target to return; TARGET_TYPE_MULTICAST is added automatically
@@ -473,6 +488,7 @@ class Target
             static_assert(bitCount<T>::count == 1,
                           "Requested target type must be a single type, TARGET_TYPE_MULTICAST will be added automatically");
         }
+#endif
 
         ///
         /// @brief Static checks for getChipletNumber. Platforms are expected to call this.

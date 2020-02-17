@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,7 +32,10 @@
 
 #include <stdint.h>
 #include <plat_error_scope.H>
-#include <hwp_ffdc_classes.H>
+
+#ifndef FAPI2_NO_FFDC
+    #include <hwp_ffdc_classes.H>
+#endif
 
 /// @cond
 #define FAPI_VA_NARGS_IMPL(_1, _2, _3, _4, _5, N, ...) N
