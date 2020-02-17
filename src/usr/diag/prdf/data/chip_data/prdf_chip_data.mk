@@ -6,6 +6,7 @@
 # OpenPOWER HostBoot Project
 #
 # Contributors Listed Below - COPYRIGHT 2020
+# [+] International Business Machines Corp.
 #
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,7 +27,7 @@
 prd_cd_exp_trgts += chip_data_explorer_10.cdb
 
 # Chip Data Binary targets for the P10 Chip
-prd_cd_p10_trgts +=
+prd_cd_p10_trgts += chip_data_p10_10.cdb
 
 # All Chip Data Binary targets
 prd_chip_data_targets += ${prd_cd_exp_trgts}

@@ -111,4 +111,5 @@ foreach my $type ( "chip", "node" )
 
 # Very temporary, just to get things going.
 system( "date > $dest_dir/chip_data_explorer_10.cdb");
+system( "date > $dest_dir/chip_data_p10_10.cdb");
 
