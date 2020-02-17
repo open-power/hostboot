@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,11 +47,11 @@ constexpr uint64_t literal_2934 = 2934;
 constexpr uint64_t literal_12 = 12;
 constexpr uint64_t literal_13 = 13;
 constexpr uint64_t literal_0b1000 = 0b1000;
-constexpr uint64_t literal_0x0 = 0x0;
 constexpr uint64_t literal_511 = 511;
 constexpr uint64_t literal_132 = 132;
 constexpr uint64_t literal_8 = 8;
 constexpr uint64_t literal_100 = 100;
+constexpr uint64_t literal_0x0 = 0x0;
 constexpr uint64_t literal_0x02 = 0x02;
 constexpr uint64_t literal_0b1 = 0b1;
 constexpr uint64_t literal_0x01 = 0x01;
@@ -153,35 +153,18 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
         uint64_t l_def_MEM_EFF_FREQ_EQ_3200 = (l_TGT1_ATTR_MEM_EFF_FREQ >= literal_2934);
         fapi2::ATTR_MEM_REORDER_QUEUE_SETTING_Type l_TGT0_ATTR_MEM_REORDER_QUEUE_SETTING;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_REORDER_QUEUE_SETTING, TGT0, l_TGT0_ATTR_MEM_REORDER_QUEUE_SETTING));
-        fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE_Type l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE, TGT0,
-                               l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE));
-        fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE_Type l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE, TGT0, l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE));
-        fapi2::ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE_Type l_TGT0_ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE, TGT0,
-                               l_TGT0_ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE));
-        fapi2::ATTR_MSS_OCMB_ENTERPRISE_MODE_Type l_TGT0_ATTR_MSS_OCMB_ENTERPRISE_MODE;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_ENTERPRISE_MODE, TGT0, l_TGT0_ATTR_MSS_OCMB_ENTERPRISE_MODE));
-        uint64_t l_def_enterprise_mode = ((l_TGT0_ATTR_MSS_OCMB_ENTERPRISE_MODE == literal_1)
-                                          && (l_TGT0_ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE == literal_1));
-        uint64_t l_def_half_dimm_mode = ((l_def_enterprise_mode == literal_1)
-                                         && (((l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE == literal_1) && (l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE != literal_1))
-                                             || ((l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE == literal_0)
-                                                     && (l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE == literal_2))));
+        uint64_t l_def_disable_fast_act = literal_1;
         fapi2::ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM_Type l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM, TGT1,
                                l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM));
         uint64_t l_def_NUM_MRANKS_1 = ((l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_1] == literal_0x0) |
                                        l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_1]);
-        uint64_t l_def_NUM_MRANKS_0 = ((l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_0] == literal_0x0) |
-                                       l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_0]);
         fapi2::ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM_Type l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM, TGT1, l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM));
         uint64_t l_def_NUM_SRANKS_1 = (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] / l_def_NUM_MRANKS_1);
+        uint64_t l_def_NUM_MRANKS_0 = ((l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_0] == literal_0x0) |
+                                       l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_0]);
         uint64_t l_def_NUM_SRANKS_0 = (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] / l_def_NUM_MRANKS_0);
-        uint64_t l_def_disable_fast_act = ((((l_def_NUM_SRANKS_0 > literal_1) || (l_def_NUM_SRANKS_1 > literal_1))
-                                            && ((l_def_NUM_MRANKS_0 == literal_4) || (l_def_NUM_MRANKS_1 == literal_4))) || l_def_half_dimm_mode);
         fapi2::ATTR_MSS_MRW_DRAM_2N_MODE_Type l_TGT2_ATTR_MSS_MRW_DRAM_2N_MODE;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_DRAM_2N_MODE, TGT2, l_TGT2_ATTR_MSS_MRW_DRAM_2N_MODE));
         fapi2::ATTR_MEM_2N_MODE_Type l_TGT0_ATTR_MEM_2N_MODE;
@@ -217,6 +200,22 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
         fapi2::ATTR_MEM_EFF_DRAM_TRFC_DLR_Type l_TGT1_ATTR_MEM_EFF_DRAM_TRFC_DLR;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TRFC_DLR, TGT1, l_TGT1_ATTR_MEM_EFF_DRAM_TRFC_DLR));
         uint64_t l_def_REFR_CHECK_INTERVAL = (((l_def_REFRESH_INTERVAL * l_def_NUM_RANKS) * literal_6) / literal_5);
+        fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE_Type l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE, TGT0,
+                               l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE));
+        fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE_Type l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE, TGT0, l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE));
+        fapi2::ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE_Type l_TGT0_ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE, TGT0,
+                               l_TGT0_ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE));
+        fapi2::ATTR_MSS_OCMB_ENTERPRISE_MODE_Type l_TGT0_ATTR_MSS_OCMB_ENTERPRISE_MODE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_ENTERPRISE_MODE, TGT0, l_TGT0_ATTR_MSS_OCMB_ENTERPRISE_MODE));
+        uint64_t l_def_enterprise_mode = ((l_TGT0_ATTR_MSS_OCMB_ENTERPRISE_MODE == literal_1)
+                                          && (l_TGT0_ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE == literal_1));
+        uint64_t l_def_half_dimm_mode = ((l_def_enterprise_mode == literal_1)
+                                         && (((l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE == literal_1) && (l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE != literal_1))
+                                             || ((l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE == literal_0)
+                                                     && (l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE == literal_2))));
         uint64_t l_def_s0_val_0 = (l_def_NUM_SRANKS_0 > literal_4);
         uint64_t l_def_s1_val_0 = (l_def_NUM_SRANKS_0 >= literal_4);
         uint64_t l_def_s2_val_0 = (l_def_NUM_SRANKS_0 >= literal_2);
