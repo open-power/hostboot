@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -3146,7 +3146,19 @@ static const uint64_t EXP_DDR4_PHY_DBYTE9_RXPBDLYTG3_R6 = 0x040659acull;
 static const uint64_t EXP_DDR4_PHY_DBYTE9_RXPBDLYTG3_R7 = 0x04065dacull;
 static const uint64_t EXP_DDR4_PHY_DBYTE9_RXPBDLYTG3_R8 = 0x040661acull;
 static const uint64_t EXPLR_TP_MB_UNIT_TOP_TR1_TRACE_TRCTRL_CONFIG = 0x08010442ull;
-static const uint64_t EXP_APBONLY0_MICROCONTMUXSEL      = 0x04340000ull;
+
+static const uint64_t EXP_APBONLY0_MICROCONTMUXSEL       = 0x04340000ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE0_DQDQSRCVCNTRL1 = 0x04040128ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE1_DQDQSRCVCNTRL1 = 0x04044128ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE2_DQDQSRCVCNTRL1 = 0x04048128ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE3_DQDQSRCVCNTRL1 = 0x0404C128ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE4_DQDQSRCVCNTRL1 = 0x04050128ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE5_DQDQSRCVCNTRL1 = 0x04054128ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE6_DQDQSRCVCNTRL1 = 0x04058128ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE7_DQDQSRCVCNTRL1 = 0x0405C128ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE8_DQDQSRCVCNTRL1 = 0x04060128ull;
+static const uint64_t EXP_DDR4_PHY_DBYTE9_DQDQSRCVCNTRL1 = 0x04064128ull;
+
 static const uint64_t EXP_DDR4_PHY_DBYTE0_VREFDAC0_R0 = 0x4040100ull;
 static const uint64_t EXP_DDR4_PHY_DBYTE0_VREFDAC0_R1 = 0x4040500ull;
 static const uint64_t EXP_DDR4_PHY_DBYTE0_VREFDAC0_R2 = 0x4040900ull;
