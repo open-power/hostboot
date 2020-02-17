@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,35 +26,17 @@
 #define __ISTEPS_ISTEP11LIST_H
 
 /**
- *  Step 11 Hostboot Centaur Init  
- *  IPL FLow Doc        v1.07
+ *  Step 11 Hostboot OCMB Init
+ *  IPL FLow Doc        v0.89.17
  *
  *    11.01    host_prd_hwreconfig
- *           : Hook to handle HW reconfig 
- *    11.02    cen_tp_chiplet_init1
- *           : Centaur TP chiplet init, stage #1
- *    11.03    cen_pll_initf
- *           : Program Nest PLL
- *    11.04    cen_pll_setup
- *           : Setup Nest PLL
- *    11.05    cen_tp_chiplet_init2	
- *           : Centaur TP chiplet init, stage #2
- *    11.06    cen_tp_arrayinit
- *           : Centaur TP chiplet array init
- *    11.07    cen_tp_chiplet_init3
- *           : Centaur TP chiplet init, stage #3
- *    11.08    cen_chiplet_init
- *           : Centaur chiplet init
- *    11.09    cen_arrayinit
- *           : Centaur chiplet array init
- *    11.10    cen_initf
- *           : Centaur Scan overrides
- *    11.11    cen_do_manual_inits
- *           : Manual Centaur Scans
- *    11.12    cen_startclocks
- *           : Start Centaur Nest/MEM clocks
- *    11.13    cen_scominits
- *           : Perform Centaur SCOM inits
+ *           : Hook to handle HW reconfig
+ *    11.02    host_set_mem_volt
+ *           : Enable voltages on the DDIMMS
+ *    11.03    proc_ocmb_enable
+ *           : Release reset, start clocks to OCMB
+ *    11.04    ocmb_check_for_ready
+ *           : Check that OCMB is ready
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -83,130 +65,40 @@ namespace   ISTEP_11
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return any errlogs to istep 
+ *  return any errlogs to istep
  *
  */
 void*  call_host_prd_hwreconfig( void    *io_pArgs );
 
 /**
- *  @brief   cen_tp_chiplet_init1
+ *  @brief   host_set_mem_volt
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return any errlogs to istep 
+ *  return any errlogs to istep
  *
  */
-void*  call_cen_tp_chiplet_init1( void    *io_pArgs );
+void*  call_host_set_mem_volt( void    *io_pArgs );
 
 /**
- *  @brief   cen_pll_initf
+ *  @brief   proc_ocmb_enable
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return any errlogs to istep 
+ *  return any errlogs to istep
  *
  */
-void*  call_cen_pll_initf( void    *io_pArgs );
+void*  call_proc_ocmb_enable( void    *io_pArgs );
 
 /**
- *  @brief   cen_pll_setup
+ *  @brief   ocmb_check_for_ready
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return any errlogs to istep 
+ *  return any errlogs to istep
  *
  */
-void*  call_cen_pll_setup( void    *io_pArgs );
-
-/**
- *  @brief   cen_tp_chiplet_init2
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return any errlogs to istep 
- *
- */
-void*  call_cen_tp_chiplet_init2( void    *io_pArgs );
-
-/**
- *  @brief   cen_tp_arrayinit
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return any errlogs to istep 
- *
- */
-void*  call_cen_tp_arrayinit( void    *io_pArgs );
-
-/**
- *  @brief   cen_tp_chiplet_init3
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return any errlogs to istep 
- *
- */
-void*  call_cen_tp_chiplet_init3( void    *io_pArgs );
-
-/**
- *  @brief   cen_chiplet_init
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return any errlogs to istep 
- *
- */
-void*  call_cen_chiplet_init( void    *io_pArgs );
-
-/**
- *  @brief   cen_arrayinit
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return any errlogs to istep 
- *
- */
-void*  call_cen_arrayinit( void    *io_pArgs );
-
-/**
- *  @brief   cen_initf
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return any errlogs to istep 
- *
- */
-void*  call_cen_initf( void    *io_pArgs );
-
-/**
- *  @brief   cen_do_manual_inits
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return any errlogs to istep 
- *
- */
-void*  call_cen_do_manual_inits( void    *io_pArgs );
-
-/**
- *  @brief   cen_startclocks
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return any errlogs to istep 
- *
- */
-void*  call_cen_startclocks( void    *io_pArgs );
-
-/**
- *  @brief   cen_scominits
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return any errlogs to istep 
- *
- */
-void*  call_cen_scominits( void    *io_pArgs );
+void*  call_ocmb_check_for_ready( void    *io_pArgs );
 
 
 };
@@ -227,63 +119,18 @@ const   TaskInfo    g_istep11[]  =   {
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(11,02,"cen_tp_chiplet_init1"),
-                ISTEP_11::call_cen_tp_chiplet_init1,
+                ISTEPNAME(11,02,"host_set_mem_volt"),
+                ISTEP_11::call_host_set_mem_volt,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(11,03,"cen_pll_initf"),
-                ISTEP_11::call_cen_pll_initf,
+                ISTEPNAME(11,03,"proc_ocmb_enable"),
+                ISTEP_11::call_proc_ocmb_enable,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(11,04,"cen_pll_setup"),
-                ISTEP_11::call_cen_pll_setup,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(11,05,"cen_tp_chiplet_init2"),
-                ISTEP_11::call_cen_tp_chiplet_init2,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(11,06,"cen_tp_arrayinit"),
-                ISTEP_11::call_cen_tp_arrayinit,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(11,07,"cen_tp_chiplet_init3"),
-                ISTEP_11::call_cen_tp_chiplet_init3,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(11,08,"cen_chiplet_init"),
-                ISTEP_11::call_cen_chiplet_init,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(11,09,"cen_arrayinit"),
-                ISTEP_11::call_cen_arrayinit,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(11,10,"cen_initf"),
-                ISTEP_11::call_cen_initf,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(11,11,"cen_do_manual_inits"),
-                ISTEP_11::call_cen_do_manual_inits,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(11,12,"cen_startclocks"),
-                ISTEP_11::call_cen_startclocks,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(11,13,"cen_scominits"),
-                ISTEP_11::call_cen_scominits,
+                ISTEPNAME(11,04,"ocmb_check_for_ready"),
+                ISTEP_11::call_ocmb_check_for_ready,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
 
@@ -292,6 +139,7 @@ const   TaskInfo    g_istep11[]  =   {
 const DepModInfo g_istep11Dependancies = {
     {
         DEP_LIB(libistep11.so),
+        DEP_LIB(libisteps_mss.so),
         DEP_LIB(libimageprocs.so),
         NULL
     }

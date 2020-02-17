@@ -121,6 +121,8 @@ FAPI2_ERROR_XML += $(wildcard \
 FAPI2_ERROR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/ocmb/explorer/procedures/xml/error_info/*.xml)
 FAPI2_ERROR_XML += $(wildcard \
+  $(ROOTPATH)/src/import/chips/ocmb/common/procedures/xml/error_info/*.xml)
+FAPI2_ERROR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/p10/procedures/xml/error_info/*.xml)
 
 

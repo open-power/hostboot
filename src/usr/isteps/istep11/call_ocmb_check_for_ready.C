@@ -1,0 +1,180 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/isteps/istep11/call_ocmb_check_for_ready.C $          */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+/**
+ *  @file call_ocmb_check_for_ready.C
+ *
+ *  Support file for IStep: ocmb_check_for_ready
+ *    Check that OCMB is ready
+ *
+ */
+
+/******************************************************************************/
+// Includes
+/******************************************************************************/
+
+//  Error handling support
+#include <errl/errlentry.H>                     // errlHndl_t
+#include <errl/errlmanager.H>
+#include <errl/errludtarget.H>                  // ErrlUserDetailsTarget
+#include <istepHelperFuncs.H>                   // captureError
+
+//  FAPI support
+#include <fapi2.H>
+#include <plat_hwp_invoker.H>
+#include <isteps/hwpisteperror.H>               // IStepError
+
+//  Tracing support
+#include <initservice/isteps_trace.H>           // g_trac_isteps_trace
+
+//  Targeting support
+#include <attributeenums.H>                     // TYPE_PROC
+#include <targeting/common/utilFilter.H>        // getAllChips
+
+//  HWP call support
+#include <exp_check_for_ready.H>
+
+using namespace ISTEPS_TRACE;
+using namespace ISTEP_ERROR;
+using namespace ERRORLOG;
+using namespace TARGETING;
+
+namespace ISTEP_11
+{
+void* call_ocmb_check_for_ready (void *io_pArgs)
+{
+    TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_ocmb_check_for_ready");
+
+    errlHndl_t  l_errl = nullptr;
+    IStepError l_StepError;
+
+    TargetHandleList functionalProcChipList;
+
+    getAllChips(functionalProcChipList, TYPE_PROC, true);
+
+    // loop thru the list of processors
+    for (TargetHandleList::const_iterator
+            l_proc_iter = functionalProcChipList.begin();
+            l_proc_iter != functionalProcChipList.end();
+            ++l_proc_iter)
+    {
+
+        TargetHandleList l_functionalOcmbChipList;
+        getChildAffinityTargets( l_functionalOcmbChipList,
+                                 const_cast<Target*>(*l_proc_iter),
+                                 CLASS_CHIP,
+                                 TYPE_OCMB_CHIP,
+                                 true);
+
+        for (const auto & l_ocmb : l_functionalOcmbChipList)
+        {
+            TRACFCOMP(g_trac_isteps_trace,
+                        "Start : exp_check_for_ready "
+                        "for 0x%.08X", get_huid(l_ocmb));
+
+            fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP>
+                                    l_fapi_ocmb_target(l_ocmb);
+
+            // TODO CQ:SW482291 Remove this retry workaround when ocmb
+            //                  check_for_ready timeout issue is resolved
+            for(uint8_t i = 0; i < 10; i++)
+            {
+                FAPI_INVOKE_HWP(l_errl,
+                                exp_check_for_ready,
+                                l_fapi_ocmb_target);
+
+                // Preserve the error log if this is the last loop.
+                if(l_errl == nullptr || i == 9)
+                {
+                    break;
+                }
+                else
+                {
+                    delete l_errl;
+                    l_errl = nullptr;
+                }
+            }
+
+            if (l_errl)
+            {
+                TRACFCOMP(g_trac_isteps_trace,
+                          "ERROR : call_ocmb_check_for_ready HWP(): "
+                          "exp_check_for_ready failed on target 0x%08X."
+                          TRACE_ERR_FMT,
+                          get_huid(l_ocmb),
+                          TRACE_ERR_ARGS(l_errl));
+
+                // Capture error and continue to next OCMB
+                captureError(l_errl, l_StepError, HWPF_COMP_ID, l_ocmb);
+            }
+            else
+            {
+                TRACFCOMP(g_trac_isteps_trace,
+                          "SUCCESS : exp_check_for_ready "
+                          "completed ok");
+
+                size_t size = 0;
+
+                TRACFCOMP(g_trac_isteps_trace,
+                          "Read IDEC from OCMB 0x%.8X",
+                          get_huid(l_ocmb));
+
+                // This write gets translated into a read of the explorer chip
+                // in the device driver. First, a read of the chip's IDEC
+                // register occurs then ATTR_EC, ATTR_HDAT_EC, and ATTR_CHIP_ID
+                // are set with the values found in that register. So, this
+                // deviceWrite functions more as a setter for an OCMB target's
+                // attributes.
+                // Pass 2 as a va_arg to signal the ocmbIDEC function to execute
+                // phase 2 of its read process.
+                const uint64_t Phase2 = 2;
+                l_errl = DeviceFW::deviceWrite(l_ocmb,
+                                   nullptr,
+                                   size,
+                                   DEVICE_IDEC_ADDRESS(),
+                                   Phase2);
+                if (l_errl)
+                {
+                    // read of ID/EC failed even though we THOUGHT we were
+                    // present.
+                    TRACFCOMP(g_trac_isteps_trace,
+                              "ERROR : call_ocmb_check_for_ready HWP(): "
+                              "read IDEC failed on target 0x%08X (eid 0x%X)."
+                              TRACE_ERR_FMT,
+                              get_huid(l_ocmb),
+                              l_errl->eid(),
+                              TRACE_ERR_ARGS(l_errl));
+
+                    // Capture error and continue to next OCMB
+                    captureError(l_errl, l_StepError, HWPF_COMP_ID, l_ocmb);
+                }
+            }
+        }
+    }
+
+    TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_ocmb_check_for_ready");
+    return l_StepError.getErrorHandle();
+}
+
+};

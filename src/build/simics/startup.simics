@@ -188,3 +188,9 @@ if($vpo_compile == "1") {
     set-class-attr $proc_type pvr 0x809100
 }
 
+# Workaround for EXPLR_CHIP_INFO_REG
+# RTC:250627 Remove simics workaround to init EXPLR_CHIP_INFO_REG
+foreach $dimm_uchip in (get-object-list -all substr = uchip_space) {
+    ($dimm_uchip).write 0x2134 0xd2000610
+}
+

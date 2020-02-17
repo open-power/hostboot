@@ -74,9 +74,7 @@
 */
 #include    "istep09list.H"
 #include    "istep10list.H"
-/*
 #include    "istep11list.H"
-*/
 #include    "istep12list.H"
 /*
 #include    "istep13list.H"
@@ -109,14 +107,13 @@ const  ExtTaskInfo  g_isteps[]    =   {
         { NULL, 0, NULL },                              //  dummy IStep 8
         INITSERVICE::g_istep09TaskList,                 //        IStep 9
         INITSERVICE::g_istep10TaskList,                 //        IStep 10
-        { NULL, 0, NULL },                              //  dummy IStep 11
+        INITSERVICE::g_istep11TaskList,                 //        IStep 11
         INITSERVICE::g_istep12TaskList,                 //        IStep 12
         { NULL, 0, NULL },                              //  dummy IStep 13
         INITSERVICE::g_istep14TaskList,                 //        Istep 14
         INITSERVICE::g_istep15TaskList,                 //        IStep 15
 /*
         INITSERVICE::g_istep08TaskList,                 //        IStep 8
-        INITSERVICE::g_istep11TaskList,                 //        IStep 11
         INITSERVICE::g_istep12TaskList,                 //        IStep 12
         INITSERVICE::g_istep13TaskList,                 //        IStep 13
 */
