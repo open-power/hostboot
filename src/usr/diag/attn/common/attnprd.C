@@ -85,9 +85,9 @@ errlHndl_t PrdImpl::callPrd(const AttentionList & i_attentions)
         // requirement that the highest priority attention
         // appear first in the argument list is satisfied.
 
-        // FIXME RTC: 249300 for HW Diag call  err = PRDF::main(attnList.front().attnType, attnList);
-        // FIXME RTC: 249300   Undefined symbol right now in VPO testing
-
+#ifndef CONFIG_VPO_COMPILE
+        err = PRDF::main(attnList.front().attnType, attnList);
+#endif
     } // if attn list is not empty
 
     return err;
