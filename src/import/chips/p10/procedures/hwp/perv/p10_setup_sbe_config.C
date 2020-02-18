@@ -274,6 +274,30 @@ fapi2::ReturnCode p10_setup_sbe_config(
 
     FAPI_INF("p10_setup_sbe_config::  Entering ...");
 
+    {
+        fapi2::buffer<uint32_t> l_cbs_cs_reg;
+        fapi2::ATTR_SECURITY_MODE_Type l_attr_security_mode;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SECURITY_MODE, FAPI_SYSTEM, l_attr_security_mode),
+                 "Error from FAPI_ATTR_GET (ATTR_SECURITY_MODE)");
+
+        if (l_attr_security_mode == 0)
+        {
+            // The Secure Access Bit is only writeable on DD1 chips,
+            // so we won't need to put an EC level switch in here.
+            FAPI_DBG("Attempting to disable security");
+            FAPI_TRY(fapi2::getCfamRegister(i_target_chip,
+                                            FSXCOMP_FSXLOG_CBS_CS_FSI,
+                                            l_cbs_cs_reg),
+                     "Error reading CBS Control/Status register");
+            l_cbs_cs_reg.clearBit<FSXCOMP_FSXLOG_CBS_CS_SECURE_ACCESS_BIT>();
+            FAPI_TRY(fapi2::putCfamRegister(i_target_chip,
+                                            FSXCOMP_FSXLOG_CBS_CS_FSI,
+                                            l_cbs_cs_reg),
+                     "Error writing CBS Control/Status register");
+        }
+    }
+
     FAPI_TRY(fapi2::getCfamRegister(i_target_chip,
                                     FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_FSI,
                                     l_scratch8_reg),
