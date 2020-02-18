@@ -663,4 +663,16 @@
     </callout>
   </hwpError>
   <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_FEATURE_LIST_SIZE_OVERFLOW</rc>
+    <description>The ringId-feature list size has exceeded the max allowed size</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>FEAT_LIST_SIZE</ffdc>
+    <ffdc>FEAT_LIST_MAX_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
 </hwpErrors>

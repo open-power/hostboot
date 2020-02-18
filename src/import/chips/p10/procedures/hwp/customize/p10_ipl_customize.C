@@ -2804,8 +2804,8 @@ ReturnCode p10_ipl_customize (
                      fapi2::XIPC_XIP_API_MISC_ERROR().
                      set_CHIP_TARGET(i_procTarget).
                      set_XIP_RC(l_rc).
-                     set_OCCURRENCE(9),
-                     "p9_xip_image_size() failed (9) w/rc=0x%08X",
+                     set_OCCURRENCE(2),
+                     "p9_xip_image_size() failed (2) w/rc=0x%08X",
                      (uint32_t)l_rc );
 
         FAPI_DBG("Image size before XIP section removals: %d", l_currentImageSize);
@@ -2852,8 +2852,8 @@ ReturnCode p10_ipl_customize (
                      fapi2::XIPC_XIP_API_MISC_ERROR().
                      set_CHIP_TARGET(i_procTarget).
                      set_XIP_RC(l_rc).
-                     set_OCCURRENCE(8),
-                     "p9_xip_image_size() failed (7) w/rc=0x%08X",
+                     set_OCCURRENCE(3),
+                     "p9_xip_image_size() failed (3) w/rc=0x%08X",
                      (uint32_t)l_rc );
 
         FAPI_DBG("SBE image size w/empty .rings section after ipl image section removals: %d",
@@ -3325,12 +3325,26 @@ ReturnCode p10_ipl_customize (
         }
     }
 
-    // Now create the "anticipatory" dynamic init debug ring list.
-    // - This list lists all the ringIds that have received dynamic init overlays.
-    // - For each ringId, the complete final feature vector is included so it can be seen
-    //   which specific features were applied to a given ringId.
-    // - The list may come in handy in case of scanning issues with the final dynamic rings.
-    ringIdFeatListSize = ringIdFeatureVecMap.size() * (sizeof(uint64_t) + sizeof(RingId_t));
+    //
+    // Produce the "anticipatory" dynamic inits debug list and, so far, append it only to
+    // the Seeprom image. (Later, maybe PM team special delivery?)
+    //
+    ringIdFeatListSize = ringIdFeatureVecMap.size() * (sizeof(ringIdFeatureVecMap));
+
+    FAPI_DBG("ringIdFeatListSize = %u", ringIdFeatListSize);
+
+    if (ringIdFeatListSize > RINGID_FEAT_LIST_MAX_SIZE)
+    {
+        FAPI_ASSERT( false,
+                     fapi2::XIPC_FEATURE_LIST_SIZE_OVERFLOW().
+                     set_CHIP_TARGET(i_procTarget).
+                     set_FEAT_LIST_SIZE(ringIdFeatListSize).
+                     set_FEAT_LIST_MAX_SIZE(RINGID_FEAT_LIST_MAX_SIZE),
+                     "The ringId-feature list size(=%u) has exceeded the max allowed"
+                     " size(=%u).",
+                     ringIdFeatListSize, RINGID_FEAT_LIST_MAX_SIZE );
+    }
+
     ringIdFeatList = new uint8_t[ringIdFeatListSize];
 
     for( std::map<RingId_t, uint64_t>::iterator it = ringIdFeatureVecMap.begin();
@@ -3348,16 +3362,25 @@ ReturnCode p10_ipl_customize (
         ringIdFeatList += sizeof(it->second);
     }
 
-    //--------------------------------------------------------
-    // Append the updated .debug_map section to the Seeprom image
-    //--------------------------------------------------------
-    l_rc = p9_xip_append( io_image,
-                          P9_XIP_SECTION_SBE_RINGIDFEATLIST,
-                          ringIdFeatList,
-                          ringIdFeatListSize,
-                          RINGID_FEAT_LIST_MAX_SIZE,
-                          &l_sectionOffset,
-                          0 );
+    // Append .ringidfeatlist section to the Seeprom image
+    if (i_sysPhase ==  SYSPHASE_HB_SBE)
+    {
+        l_rc = p9_xip_append( io_image,
+                              P9_XIP_SECTION_SBE_RINGIDFEATLIST,
+                              ringIdFeatList,
+                              ringIdFeatListSize,
+                              l_maxImageSize,
+                              &l_sectionOffset,
+                              0 );
+
+        FAPI_ASSERT( l_rc == 0,
+                     fapi2::XIPC_XIP_API_MISC_ERROR().
+                     set_CHIP_TARGET(i_procTarget).
+                     set_XIP_RC(l_rc).
+                     set_OCCURRENCE(4),
+                     "p9_xip_append() failed (4) w/rc=0x%08x",
+                     (uint32_t)l_rc );
+    }
 
 
 
@@ -3369,6 +3392,10 @@ ReturnCode p10_ipl_customize (
     // Do some sysPhase specific initial operations:
     // - Determine if there GPTR support, and overlays support, through Mvpd
     //////////////////////////////////////////////////////////////////////////
+
+    //
+    // First, make sure the Mvpd rings RT version agrees with code header.
+    //
 
     // Fetching ring table version from code header
     mvpdRtvFromCode = ringid_get_ring_table_version_mvpd();
@@ -3431,6 +3458,9 @@ ReturnCode p10_ipl_customize (
         partialKwdData = NULL;
     }
 
+    //
+    // Now, append the Mvpd rings into the customized ringSection
+    //
     switch (i_sysPhase)
     {
 
