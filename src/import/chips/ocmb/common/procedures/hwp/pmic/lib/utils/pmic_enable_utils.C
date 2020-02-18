@@ -43,8 +43,8 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/index.H>
 #include <generic/memory/lib/utils/find.H>
-#include <mss_pmic_attribute_getters.H>
 #include <mss_generic_attribute_getters.H>
+#include <mss_pmic_attribute_accessors_manual.H>
 
 namespace mss
 {
@@ -116,7 +116,7 @@ fapi2::ReturnCode bias_with_spd_phase_comb(
 
     uint8_t l_phase_comb = 0;
     fapi2::buffer<uint8_t> l_phase;
-    FAPI_TRY(mss::pmic::get_phase_comb[i_id](i_ocmb_target, l_phase_comb));
+    FAPI_TRY(mss::attr::get_phase_comb[i_id](i_ocmb_target, l_phase_comb));
 
     // Read, replace bit, and then re-write
     FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R4F, l_phase));
@@ -151,10 +151,10 @@ fapi2::ReturnCode bias_with_spd_volt_ranges(
 
     fapi2::buffer<uint8_t> l_volt_range_buffer;
 
-    FAPI_TRY(mss::pmic::get_swa_voltage_range_select[i_id](i_ocmb_target, l_swa_range));
-    FAPI_TRY(mss::pmic::get_swb_voltage_range_select[i_id](i_ocmb_target, l_swb_range));
-    FAPI_TRY(mss::pmic::get_swc_voltage_range_select[i_id](i_ocmb_target, l_swc_range));
-    FAPI_TRY(mss::pmic::get_swd_voltage_range_select[i_id](i_ocmb_target, l_swd_range));
+    FAPI_TRY(mss::attr::get_swa_voltage_range_select[i_id](i_ocmb_target, l_swa_range));
+    FAPI_TRY(mss::attr::get_swb_voltage_range_select[i_id](i_ocmb_target, l_swb_range));
+    FAPI_TRY(mss::attr::get_swc_voltage_range_select[i_id](i_ocmb_target, l_swc_range));
+    FAPI_TRY(mss::attr::get_swd_voltage_range_select[i_id](i_ocmb_target, l_swd_range));
 
     // Read in what the register has, as to not overwrite any default values
     FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R2B, l_volt_range_buffer));
@@ -190,19 +190,6 @@ fapi2::ReturnCode bias_with_spd_startup_seq(
     using REGS = pmicRegs<J>;
     using CONSTS = mss::pmic::consts<J>;
 
-    // Arrays to key off of rail and PMIC ID
-    static const pmic_attr_ptr* l_get_sequence_order[] = {mss::pmic::get_swa_sequence_order,
-                                                          mss::pmic::get_swb_sequence_order,
-                                                          mss::pmic::get_swc_sequence_order,
-                                                          mss::pmic::get_swd_sequence_order
-                                                         };
-
-    static const pmic_attr_ptr* l_get_sequence_delay[] = {mss::pmic::get_swa_sequence_delay,
-                                                          mss::pmic::get_swb_sequence_delay,
-                                                          mss::pmic::get_swc_sequence_delay,
-                                                          mss::pmic::get_swd_sequence_delay
-                                                         };
-
     static const std::vector<uint8_t> SEQUENCE_REGS =
     {
         0, // 0 would imply no sequence config (won't occur due to assert in bias_with_spd_startup_seq)
@@ -220,8 +207,8 @@ fapi2::ReturnCode bias_with_spd_startup_seq(
     for (uint8_t l_rail_index = mss::pmic::rail::SWA; l_rail_index <= mss::pmic::rail::SWD; ++l_rail_index)
     {
         // We know after these FAPI_TRY's that all 4 entries must be populated, else the TRYs fail
-        FAPI_TRY(((l_get_sequence_order[l_rail_index][i_id]))(i_ocmb_target, l_sequence_orders[l_rail_index]));
-        FAPI_TRY(((l_get_sequence_delay[l_rail_index][i_id]))(i_ocmb_target, l_sequence_delays[l_rail_index]));
+        FAPI_TRY(((mss::attr::get_sequence_order[l_rail_index][i_id]))(i_ocmb_target, l_sequence_orders[l_rail_index]));
+        FAPI_TRY(((mss::attr::get_sequence_delay[l_rail_index][i_id]))(i_ocmb_target, l_sequence_delays[l_rail_index]));
 
         // The SPD allows for up to 8 sequences, but there are only 4 on the PMIC. The SPD defaults never go higher than 2.
         // We put this check in here as with anything over 4, we don't really know what we can do.
@@ -404,8 +391,8 @@ fapi2::ReturnCode order_pmics_by_sequence(
         uint8_t l_sequence_pmic_1 = 0;
 
         // Need to pull out the RC's manually. Goto's in lambdas apparently don't play nicely
-        fapi2::ReturnCode l_rc_0 = mss::pmic::get_sequence[mss::index(l_first_pmic)](i_ocmb_target, l_sequence_pmic_0);
-        fapi2::ReturnCode l_rc_1 = mss::pmic::get_sequence[mss::index(l_second_pmic)](i_ocmb_target, l_sequence_pmic_1);
+        fapi2::ReturnCode l_rc_0 = mss::attr::get_sequence[mss::index(l_first_pmic)](i_ocmb_target, l_sequence_pmic_0);
+        fapi2::ReturnCode l_rc_1 = mss::attr::get_sequence[mss::index(l_second_pmic)](i_ocmb_target, l_sequence_pmic_1);
 
         // Hold on to an error if we see one
         if (l_rc_0 != fapi2::FAPI2_RC_SUCCESS)
@@ -594,7 +581,7 @@ fapi2::ReturnCode pmic_enable_SPD(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
         uint16_t l_vendor_id = 0;
 
         // Get vendor ID
-        FAPI_TRY(mss::pmic::get_mfg_id[mss::index(l_pmic)](i_ocmb_target, l_vendor_id));
+        FAPI_TRY(mss::attr::get_mfg_id[mss::index(l_pmic)](i_ocmb_target, l_vendor_id));
 
         // Poll to make sure PBULK reports good, then we can enable the chip and write/read registers
         FAPI_TRY(mss::pmic::poll_for_pbulk_good(l_pmic),

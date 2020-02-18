@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -48,6 +48,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/sbeio/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/pm/include/registers
 EXTRAINCDIR += ${COMMON_PATH_OCMB}/procedures/hwp/pmic/
+EXTRAINCDIR += ${COMMON_PATH_OCMB}/procedures/hwp/pmic/lib/
 EXTRAINCDIR += ${COMMON_PATH_OCMB}/procedures/hwp/pmic/lib/utils/
 EXTRAINCDIR += ${COMMON_PATH_OCMB}/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/

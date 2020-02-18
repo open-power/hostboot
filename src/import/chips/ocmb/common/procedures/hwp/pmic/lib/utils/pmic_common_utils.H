@@ -49,16 +49,8 @@ namespace mss
 namespace pmic
 {
 
-// Attribute getter pointer for manufacturer/vendor ID
-typedef fapi2::ReturnCode (*mfg_id_attr_ptr)(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        uint16_t& o_value);
-
-// Manufacturer / Vendor ID
-static constexpr mfg_id_attr_ptr get_mfg_id[] =
-{
-    mss::attr::get_pmic0_mfg_id,
-    mss::attr::get_pmic1_mfg_id,
-};
+// For output traces
+const std::vector<const char*> PMIC_RAIL_NAMES = {"SWA", "SWB", "SWC", "SWD"};
 
 using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
 using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
@@ -177,6 +169,34 @@ fapi2::ReturnCode pmic_is_idt(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pm
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
 fapi2::ReturnCode pmic_is_ti(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target, bool& o_is_ti);
+
+
+///
+/// @brief Calcuate target voltage for PMIC from attribute settings
+///
+/// @param[in] i_ocmb_target OCMB parent target of pmic of PMIC (holds the attributes)
+/// @param[in] i_id ID of pmic (0,1)
+/// @param[in] i_rail RAIL to calculate voltage for
+/// @param[out] o_volt_bitmap output bitmap
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode calculate_voltage_bitmap_from_attr(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const mss::pmic::id i_id,
+    const uint8_t i_rail,
+    uint8_t& o_volt_bitmap);
+
+///
+/// @brief Get PMIC position/ID under OCMB target. There could be 4 pmics, but we care about whether its PMIC0(2) or PMIC1(3)
+///
+/// @param[in] i_pmic_target
+/// @return mss::pmic::id
+///
+inline mss::pmic::id get_relative_pmic_id(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target)
+{
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
+    return static_cast<mss::pmic::id>(mss::index(i_pmic_target) % CONSTS::NUM_UNIQUE_PMICS);
+}
 
 namespace status
 {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,7 @@
 #include <lib/utils/pmic_common_utils.H>
 #include <generic/memory/lib/utils/poll.H>
 #include <generic/memory/lib/utils/c_str.H>
+#include <mss_pmic_attribute_accessors_manual.H>
 
 namespace mss
 {
@@ -184,6 +185,37 @@ fapi2::ReturnCode pmic_is_ti(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmi
     FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R3D_VENDOR_ID_BYTE_1, l_reg_contents));
 
     o_is_ti = (l_reg_contents == mss::pmic::vendor::TI_SHORT);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Calculate target voltage for PMIC from attribute settings
+///
+/// @param[in] i_ocmb_target OCMB parent target of pmic of PMIC (holds the attributes)
+/// @param[in] i_id ID of pmic (0,1)
+/// @param[in] i_rail RAIL to calculate voltage for
+/// @param[out] o_volt_bitmap output bitmap
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode calculate_voltage_bitmap_from_attr(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const mss::pmic::id i_id,
+    const uint8_t i_rail,
+    uint8_t& o_volt_bitmap)
+{
+    uint8_t l_volt = 0;
+    int8_t l_volt_offset = 0;
+    int8_t l_efd_volt_offset = 0;
+
+    // Get the attributes corresponding to the rail and PMIC indices
+    FAPI_TRY(mss::attr::get_volt_setting[i_rail][i_id](i_ocmb_target, l_volt));
+    FAPI_TRY(mss::attr::get_volt_offset[i_rail][i_id](i_ocmb_target, l_volt_offset));
+    FAPI_TRY(mss::attr::get_efd_volt_offset[i_rail][i_id](i_ocmb_target, l_efd_volt_offset));
+
+    // Set output buffer
+    o_volt_bitmap = l_volt + l_volt_offset + l_efd_volt_offset;
 
 fapi_try_exit:
     return fapi2::current_err;
