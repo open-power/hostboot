@@ -43,6 +43,7 @@
 #include <lib/shared/exp_consts.H>
 #include <generic/memory/mss_git_data_helper.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
+#include <generic/memory/lib/utils/mss_generic_check.H>
 
 extern "C"
 {
@@ -100,6 +101,7 @@ extern "C"
         // Due to the RAS/PRD requirements, we need to check for FIR's
         // If any FIR's have lit up, this draminit fail could have been caused by the FIR, rather than bad hardware
         // So, let PRD retrigger this step to see if we can resolve the issue
-        return mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER>(i_target, fapi2::current_err);
+        return mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER, mss::check::firChecklist::DRAMINIT>(i_target,
+                fapi2::current_err);
     }
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -91,6 +91,7 @@ inline void combine_bad_bits(const uint8_t (&i_new_bad_bits)[BAD_BITS_RANKS][BAD
 /// @tparam I Interface class used to abstract converting bad bits into the attribute
 /// @param[in] i_target the fapi2 target oon which training was conducted
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
+/// @note calling GENERIC bad_fir_bits to cover this case in HB -- GENERIC firChecklist not specified (see bad_fir_bits for more details)
 ///
 template <mss::mc_type MC, fapi2::TargetType T, class I >
 inline fapi2::ReturnCode record_bad_bits( const fapi2::Target<T>& i_target, const I& i_helper )
@@ -103,7 +104,8 @@ inline fapi2::ReturnCode record_bad_bits( const fapi2::Target<T>& i_target, cons
     // Note: using success here will cause an RC to not be logged
     // We can still see if we do have a FIR error though
     fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
-    FAPI_TRY((mss::check::bad_fir_bits<MC, T>(i_target, l_rc, l_fir_error)), "%s took an error while checking FIR's",
+    FAPI_TRY((mss::check::bad_fir_bits<MC, mss::check::firChecklist::GENERIC, T>(i_target, l_rc, l_fir_error)),
+             "%s took an error while checking FIR's",
              mss::c_str(i_target));
 
     // Exit if we took a FIR error - PRD will handle bad bits

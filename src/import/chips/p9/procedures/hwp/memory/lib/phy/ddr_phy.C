@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -724,7 +724,8 @@ fapi_try_exit:
              mss::c_str(l_mca));
 
     // Checks the FIR's, if need be
-    return mss::check::fir_or_pll_fail<mss::mc_type::NIMBUS>( l_mca, fapi2::current_err, l_check_firs);
+    return mss::check::fir_or_pll_fail<mss::mc_type::NIMBUS, mss::check::firChecklist::GENERIC>( l_mca, fapi2::current_err,
+            l_check_firs);
 }
 
 ///

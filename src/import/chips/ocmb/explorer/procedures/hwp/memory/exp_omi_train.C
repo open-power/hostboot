@@ -87,7 +87,7 @@ extern "C"
                 l_rc = mss::exp::i2c::check_fw_status_busy(i_target);
 
                 // If BOOT_CONFIG_1 failed or timed out, we need to check some FIRs
-                FAPI_TRY(mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER>(i_target, l_rc));
+                FAPI_TRY( (mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER, mss::check::firChecklist::OMI>(i_target, l_rc)) );
             }
             else
             {

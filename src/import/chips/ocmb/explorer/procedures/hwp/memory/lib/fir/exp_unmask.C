@@ -136,6 +136,7 @@ fapi2::ReturnCode after_draminit_mc<mss::mc_type::EXPLORER>( const fapi2::Target
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
+
     return fapi2::current_err;
 }
 
@@ -185,6 +186,7 @@ fapi2::ReturnCode after_draminit_training<mss::mc_type::EXPLORER>( const fapi2::
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
+
     return fapi2::current_err;
 }
 

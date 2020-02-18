@@ -54,7 +54,6 @@ extern "C"
     {
         mss::display_git_commit_info("exp_draminit_mc");
 
-
         FAPI_INF("%s Start exp_draminit MC", mss::c_str(i_target));
 
         //skip this ocmb_chip if we have no DIMM's configured
@@ -100,13 +99,18 @@ extern "C"
         FAPI_TRY( mss::enable_read_ecc<mss::mc_type::EXPLORER>(i_target), "%s Failed enable_read_ecc", mss::c_str(i_target) );
 
         // Apply marks from OCMB VPD
-        FAPI_TRY( mss::apply_mark_store(i_target), "%s Failed enable_read_ecc", mss::c_str(i_target) );
+        FAPI_TRY(mss::apply_mark_store(i_target), "%s Failed apply_mark_store", mss::c_str(i_target));
 
         // Unmask registers after draminit_mc
         FAPI_TRY(mss::unmask::after_draminit_mc(i_target), "%s Failed after_draminit_mc", mss::c_str(i_target));
 
-    fapi_try_exit:
+        // TODO: Implement apply row repairs and perform fir_or_pll_fail for firChecklist::CCS
+
         FAPI_INF("%s End exp_draminit MC", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+
+    fapi_try_exit:
+
         return fapi2::current_err;
     }
 }

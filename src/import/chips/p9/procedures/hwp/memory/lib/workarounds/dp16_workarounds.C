@@ -736,7 +736,8 @@ fapi2::ReturnCode dqs_align_workaround(const fapi2::Target<fapi2::TARGET_TYPE_MC
 fapi_try_exit:
 
     // If the FIR's are cal fails, then check to see if FIR's or PLL's could be the cause
-    return mss::check::fir_or_pll_fail<mss::mc_type::NIMBUS>(i_target, fapi2::current_err, l_cal_fail);
+    return mss::check::fir_or_pll_fail<mss::mc_type::NIMBUS, mss::check::firChecklist::GENERIC>(i_target,
+            fapi2::current_err, l_cal_fail);
 }
 
 ///

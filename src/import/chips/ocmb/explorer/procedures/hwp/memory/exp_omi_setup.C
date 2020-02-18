@@ -86,7 +86,7 @@ extern "C"
         // gets resolved.
 #ifdef FIRS_AVAIL_AFTER_BOOT_CONFIG_0_FAIL
         // If BOOT_CONFIG_0 failed or timed out, we need to check some FIRs
-        FAPI_TRY(mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER>(i_target, l_rc));
+        FAPI_TRY( (mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER, mss::check::firChecklist::OMI>(i_target, l_rc)) );
 #else
         FAPI_TRY(l_rc, "%s BOOT_CONFIG_0 either failed or timed out", mss::c_str(i_target));
 #endif

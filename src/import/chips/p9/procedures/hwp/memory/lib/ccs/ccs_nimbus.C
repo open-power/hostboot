@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -162,7 +162,8 @@ fapi_try_exit:
     // Due to the PRD update, we need to check for FIR's
     // If any FIR's have lit up, this CCS fail could have been caused by the FIR
     // So, let PRD retrigger this step to see if we can resolve the issue
-    return mss::check::fir_or_pll_fail<mss::mc_type::NIMBUS>(i_target, fapi2::current_err);
+    return mss::check::fir_or_pll_fail<mss::mc_type::NIMBUS, mss::check::firChecklist::GENERIC>(i_target,
+            fapi2::current_err);
 }
 
 ///

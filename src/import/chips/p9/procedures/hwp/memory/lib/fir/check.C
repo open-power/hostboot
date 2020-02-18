@@ -44,6 +44,7 @@
 #include <lib/fir/check.H>
 #include <generic/memory/lib/utils/assert_noexit.H>
 #include <lib/utils/nimbus_find.H>
+#include <generic/memory/lib/utils/mss_generic_check.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -231,7 +232,8 @@ fapi2::ReturnCode during_draminit_training( const fapi2::Target<fapi2::TARGET_TY
 fapi_try_exit:
 
     // Handle any fails seen above accordingly
-    return mss::check::fir_or_pll_fail<mss::mc_type::NIMBUS>( l_mca, fapi2::current_err, l_check_fir);
+    return mss::check::fir_or_pll_fail<mss::mc_type::NIMBUS, firChecklist::GENERIC>( l_mca, fapi2::current_err,
+            l_check_fir);
 }
 
 // Declares FIR registers that are re-used between multiple functions
@@ -339,11 +341,13 @@ fapi_try_exit:
 /// @param[in,out] io_rc - the return code for the function
 /// @param[out] o_fir_error - true iff a FIR was hit
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// @note specialization for Nimbus and fir checklist for GENERIC case
 ///
 template< >
-fapi2::ReturnCode bad_fir_bits<mss::mc_type::NIMBUS>( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
-        fapi2::ReturnCode& io_rc,
-        bool& o_fir_error )
+fapi2::ReturnCode bad_fir_bits<mss::mc_type::NIMBUS, mss::check::firChecklist::GENERIC>
+( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+  fapi2::ReturnCode& io_rc,
+  bool& o_fir_error )
 {
     // Start by assuming we do not have a FIR
     o_fir_error = false;
@@ -401,11 +405,13 @@ fapi_try_exit:
 /// @param[in,out] io_rc - the return code for the function
 /// @param[out] o_fir_error - true iff a FIR was hit
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// @note specialization for Nimbus and fir checklist for GENERIC case
 ///
 template< >
-fapi2::ReturnCode bad_fir_bits<mss::mc_type::NIMBUS>( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        fapi2::ReturnCode& io_rc,
-        bool& o_fir_error )
+fapi2::ReturnCode bad_fir_bits<mss::mc_type::NIMBUS, mss::check::firChecklist::GENERIC>
+( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+  fapi2::ReturnCode& io_rc,
+  bool& o_fir_error )
 {
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
     // Start by assuming we do not have a FIR

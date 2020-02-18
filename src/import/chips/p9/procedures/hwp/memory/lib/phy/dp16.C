@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -4324,7 +4324,8 @@ fapi2::ReturnCode process_rdvref_cal_errors( const fapi2::Target<fapi2::TARGET_T
 fapi_try_exit:
 
     // If the FIR's are cal fails, then check to see if FIRs or PLL fails were the cause
-    return mss::check::fir_or_pll_fail<mss::mc_type::NIMBUS>( l_mca, fapi2::current_err, l_cal_fail);
+    return mss::check::fir_or_pll_fail<mss::mc_type::NIMBUS, mss::check::firChecklist::GENERIC>( l_mca, fapi2::current_err,
+            l_cal_fail);
 }
 
 ///
@@ -4426,7 +4427,8 @@ fapi2::ReturnCode process_wrvref_cal_errors( const fapi2::Target<fapi2::TARGET_T
 fapi_try_exit:
 
     // If the FIR's are cal fails, then check to see if FIR's were the cause
-    return mss::check::fir_or_pll_fail<mss::mc_type::NIMBUS>( l_mca, fapi2::current_err, l_cal_fail);
+    return mss::check::fir_or_pll_fail<mss::mc_type::NIMBUS, mss::check::firChecklist::GENERIC>( l_mca, fapi2::current_err,
+            l_cal_fail);
 }
 
 ///
