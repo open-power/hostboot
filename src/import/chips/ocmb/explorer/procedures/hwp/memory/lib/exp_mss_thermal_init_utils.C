@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,7 +87,7 @@ fapi2::ReturnCode sensor_interval_read(
                                            l_rsp_data),
                       "Failed getRSP() for  %s", mss::c_str(i_target) );
 
-            FAPI_TRY( mss::exp::check::sensor_response(i_target, l_response),
+            FAPI_TRY( mss::exp::check::sensor_response(i_target, l_response, l_cmd_sensor),
                       "Failed sensor_response() for  %s", mss::c_str(i_target) );
         }
     }
@@ -546,10 +546,12 @@ namespace check
 /// @brief Checks explorer response argument for a successful command
 /// @param[in] i_target OCMB target
 /// @param[in] i_rsp response command
+/// @param[in] i_cmd command response
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 fapi2::ReturnCode sensor_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                  const host_fw_response_struct& i_rsp)
+                                  const host_fw_response_struct& i_rsp,
+                                  const host_fw_command_struct& i_cmd)
 {
     uint32_t l_partition_id = 0;
     uint32_t l_fw_version_a = 0;
@@ -562,10 +564,15 @@ fapi2::ReturnCode sensor_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
     // Check if cmd was successful.
     // EXP_FW_TEMP_SENSOR_CONFIG_INTERVAL_READ has 2 error bytes
     // in response_argument[1] and [2], record and print both.
-    FAPI_ASSERT(i_rsp.response_argument[0] == mss::exp::omi::response_arg::RESPONSE_SUCCESS,
+    FAPI_ASSERT(i_rsp.response_argument[0] == mss::exp::omi::response_arg::RESPONSE_SUCCESS &&
+                i_rsp.request_identifier == i_cmd.request_identifier &&
+                i_rsp.response_id == i_cmd.cmd_id,
                 fapi2::MSS_EXP_SENSOR_CACHE_ENABLE_FAILED().
                 set_OCMB_TARGET(i_target).
                 set_RSP_ID(i_rsp.response_id).
+                set_CMD_ID(i_cmd.cmd_id).
+                set_RSP_REQUEST_ID(i_rsp.request_identifier).
+                set_CMD_REQUEST_ID(i_cmd.request_identifier).
                 set_ERROR_CODE_1(i_rsp.response_argument[1]).
                 set_ERROR_CODE_2(i_rsp.response_argument[2]).
                 set_FW_PARTITION_ID(l_partition_id).

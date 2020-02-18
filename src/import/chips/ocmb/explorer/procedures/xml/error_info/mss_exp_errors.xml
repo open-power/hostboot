@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -641,6 +641,9 @@
     </description>
     <ffdc>OCMB_TARGET</ffdc>
     <ffdc>RSP_ID</ffdc>
+    <ffdc>CMD_ID</ffdc>
+    <ffdc>RSP_REQUEST_ID</ffdc>
+    <ffdc>CMD_REQUEST_ID</ffdc>
     <ffdc>ERROR_CODE_1</ffdc>
     <ffdc>ERROR_CODE_2</ffdc>
     <ffdc>FW_PARTITION_ID</ffdc>

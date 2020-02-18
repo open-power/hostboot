@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -316,10 +316,12 @@ namespace check
 /// @brief Checks explorer response argument for a successful command
 /// @param[in] i_target OCMB target
 /// @param[in] i_rsp response command
+/// @param[in] i_cmd command response
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 fapi2::ReturnCode sensor_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                  const host_fw_response_struct& i_rsp);
+                                  const host_fw_response_struct& i_rsp,
+                                  const host_fw_command_struct& i_cmd);
 
 ///
 /// @brief Logs a return code as recovered if it is a temperature sensor RC
