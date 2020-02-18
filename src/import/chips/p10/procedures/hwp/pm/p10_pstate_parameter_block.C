@@ -980,8 +980,13 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         io_globalppb->pgpe_flags[PGPE_FLAG_WOV_OVERVOLT_ENABLE] = iv_wov_overv_enabled;
         io_globalppb->pgpe_flags[PGPE_FLAG_DDS_COARSE_THROTTLE_ENABLE] = iv_attrs.attr_dds_coarse_thr_enable;
         io_globalppb->pgpe_flags[PGPE_FLAG_PMCR_MOST_RECENT_ENABLE] = iv_attrs.attr_pmcr_most_recent_enable;
-        io_globalppb->pgpe_flags[PGPE_FLAG_OCC_IPC_IMMEDIATE_MODE] = iv_attrs.attr_pgpe_hcode_function_enable;
-        io_globalppb->pgpe_flags[PGPE_FLAG_WOF_IPC_IMMEDIATE_MODE] = iv_attrs.attr_pgpe_hcode_function_enable;
+        if (iv_attrs.attr_pgpe_hcode_function_enable == 0) {
+            io_globalppb->pgpe_flags[PGPE_FLAG_OCC_IPC_IMMEDIATE_MODE] = 1;
+            io_globalppb->pgpe_flags[PGPE_FLAG_WOF_IPC_IMMEDIATE_MODE] = 1;
+        } else {
+            io_globalppb->pgpe_flags[PGPE_FLAG_OCC_IPC_IMMEDIATE_MODE] = 0;
+            io_globalppb->pgpe_flags[PGPE_FLAG_WOF_IPC_IMMEDIATE_MODE] = 0;
+        }
         io_globalppb->pgpe_flags[PGPE_FLAG_PHANTOM_HALT_ENABLE] = iv_attrs.attr_phantom_halt_enable;
 
 
