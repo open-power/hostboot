@@ -408,7 +408,7 @@
     ENABLED = 0x01
   </enum>
   <platInit/>
-  <default>0x1</default>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>

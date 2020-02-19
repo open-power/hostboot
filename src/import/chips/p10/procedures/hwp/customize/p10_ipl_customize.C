@@ -3194,17 +3194,9 @@ ReturnCode p10_ipl_customize (
             featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_CHIP_CONTAINED;
         }
     }
-    else // runtime
+    else
     {
-        fapi2::ATTR_SMF_CONFIG_Type l_attrSmfConfig;
-
-        l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_SMF_CONFIG, FAPI_SYSTEM, l_attrSmfConfig);
-
-        if(l_attrSmfConfig == fapi2::ENUM_ATTR_SMF_CONFIG_DISABLED)
-        {
-            FAPI_DBG("Applying Dynamic Init Runtime Feature: HV_INITS");
-            featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_HV_INITS;
-        }
+        // runtime
     }
 
     l_fapiRc2 = FAPI_ATTR_SET(fapi2::ATTR_DYNAMIC_INIT_FEATURE_VEC,

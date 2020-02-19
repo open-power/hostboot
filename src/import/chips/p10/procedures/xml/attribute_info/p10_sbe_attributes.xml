@@ -470,7 +470,7 @@
   </entry>
   <entry>
     <name>ATTR_SMF_CONFIG</name>
-    <value>0x1</value>
+    <value>0x0</value>
   </entry>
   <entry>
     <name>ATTR_SBE_HBBL_EXCEPTION_INSTRUCT</name>
