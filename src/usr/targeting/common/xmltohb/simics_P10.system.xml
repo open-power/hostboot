@@ -342,7 +342,7 @@
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         400,400,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        400,400,0,0,0,0,0,0,400,400,400,400,0,0,0,0
+        400,400,0,0,0,0,0,0,400,400,400,400,400,400,0,0
       </default>
     </attribute>
     <!-- TODO RTC 213604: Remove i2c based module vpd once SPI support is added -->
@@ -6343,7 +6343,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>0</value></field>
+            <field><id>port</id><value>9</value></field>
             <field><id>devAddr</id><value>0x40</value></field>
         </default>
     </attribute>
@@ -6357,7 +6357,7 @@
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>0</value></field>
+            <field><id>port</id><value>9</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
@@ -6401,7 +6401,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>8</value></field>
             <field><id>devAddr</id><value>0x40</value></field>
         </default>
     </attribute>
@@ -6415,7 +6415,7 @@
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>8</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
@@ -6459,7 +6459,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>2</value></field>
+            <field><id>port</id><value>10</value></field>
             <field><id>devAddr</id><value>0x40</value></field>
         </default>
     </attribute>
@@ -6471,7 +6471,7 @@
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>2</value></field>
+            <field><id>port</id><value>10</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
@@ -6515,7 +6515,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>3</value></field>
+            <field><id>port</id><value>11</value></field>
             <field><id>devAddr</id><value>0x40</value></field>
         </default>
     </attribute>
@@ -6527,7 +6527,7 @@
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>3</value></field>
+            <field><id>port</id><value>11</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
@@ -6572,7 +6572,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>4</value></field>
+            <field><id>port</id><value>13</value></field>
             <field><id>devAddr</id><value>0x40</value></field>
         </default>
     </attribute>
@@ -6584,7 +6584,7 @@
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>4</value></field>
+            <field><id>port</id><value>13</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
@@ -6628,7 +6628,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>5</value></field>
+            <field><id>port</id><value>0</value></field>
             <field><id>devAddr</id><value>0x40</value></field>
         </default>
     </attribute>
@@ -6640,7 +6640,7 @@
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>5</value></field>
+            <field><id>port</id><value>0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
@@ -6684,7 +6684,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>6</value></field>
+            <field><id>port</id><value>12</value></field>
             <field><id>devAddr</id><value>0x40</value></field>
         </default>
     </attribute>
@@ -6696,7 +6696,7 @@
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>6</value></field>
+            <field><id>port</id><value>12</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
@@ -6740,7 +6740,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>7</value></field>
+            <field><id>port</id><value>1</value></field>
             <field><id>devAddr</id><value>0x40</value></field>
         </default>
     </attribute>
@@ -6752,7 +6752,7 @@
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>7</value></field>
+            <field><id>port</id><value>1</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
@@ -6796,7 +6796,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>8</value></field>
+            <field><id>port</id><value>0xFF</value></field>
             <field><id>devAddr</id><value>0x40</value></field>
         </default>
     </attribute>
@@ -6807,7 +6807,7 @@
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>8</value></field>
+            <field><id>port</id><value>0xFF</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
@@ -6852,7 +6852,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>9</value></field>
+            <field><id>port</id><value>0xFF</value></field>
             <field><id>devAddr</id><value>0x40</value></field>
         </default>
     </attribute>
@@ -6863,7 +6863,7 @@
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>9</value></field>
+            <field><id>port</id><value>0xFF</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
@@ -6908,7 +6908,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>10</value></field>
+            <field><id>port</id><value>0xFF</value></field>
             <field><id>devAddr</id><value>0x40</value></field>
         </default>
     </attribute>
@@ -6919,7 +6919,7 @@
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA4</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>10</value></field>
+            <field><id>port</id><value>0xFF</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
@@ -6964,7 +6964,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>11</value></field>
+            <field><id>port</id><value>0xFF</value></field>
             <field><id>devAddr</id><value>0x40</value></field>
         </default>
     </attribute>
@@ -6975,7 +6975,7 @@
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA6</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>11</value></field>
+            <field><id>port</id><value>0xFF</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
@@ -7020,7 +7020,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>12</value></field>
+            <field><id>port</id><value>0xFF</value></field>
             <field><id>devAddr</id><value>0x40</value></field>
         </default>
     </attribute>
@@ -7031,7 +7031,7 @@
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>12</value></field>
+            <field><id>port</id><value>0xFF</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
@@ -7076,7 +7076,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>13</value></field>
+            <field><id>port</id><value>0xFF</value></field>
             <field><id>devAddr</id><value>0x40</value></field>
         </default>
     </attribute>
@@ -7087,7 +7087,7 @@
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA4</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>13</value></field>
+            <field><id>port</id><value>0xFF</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
@@ -7132,7 +7132,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>14</value></field>
+            <field><id>port</id><value>0xFF</value></field>
             <field><id>devAddr</id><value>0x40</value></field>
         </default>
     </attribute>
@@ -7143,7 +7143,7 @@
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA6</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>14</value></field>
+            <field><id>port</id><value>0xFF</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
@@ -7188,7 +7188,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>15</value></field>
+            <field><id>port</id><value>0xFF</value></field>
             <field><id>devAddr</id><value>0x40</value></field>
         </default>
     </attribute>
@@ -7199,7 +7199,7 @@
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA8</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>15</value></field>
+            <field><id>port</id><value>0xFF</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
@@ -7237,7 +7237,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>0</value></field>
+            <field><id>port</id><value>9</value></field>
             <field><id>devAddr</id><value>0x90</value></field>
         </default>
     </attribute>
@@ -7279,7 +7279,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>0</value></field>
+            <field><id>port</id><value>9</value></field>
             <field><id>devAddr</id><value>0xC0</value></field>
         </default>
     </attribute>
@@ -7321,7 +7321,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>8</value></field>
             <field><id>devAddr</id><value>0x90</value></field>
         </default>
     </attribute>
@@ -7363,7 +7363,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>8</value></field>
             <field><id>devAddr</id><value>0xC0</value></field>
         </default>
     </attribute>
@@ -7405,7 +7405,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>2</value></field>
+            <field><id>port</id><value>10</value></field>
             <field><id>devAddr</id><value>0x90</value></field>
         </default>
     </attribute>
@@ -7447,7 +7447,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>2</value></field>
+            <field><id>port</id><value>10</value></field>
             <field><id>devAddr</id><value>0xC0</value></field>
         </default>
     </attribute>
@@ -7489,7 +7489,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>3</value></field>
+            <field><id>port</id><value>11</value></field>
             <field><id>devAddr</id><value>0x90</value></field>
         </default>
     </attribute>
@@ -7531,7 +7531,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>3</value></field>
+            <field><id>port</id><value>11</value></field>
             <field><id>devAddr</id><value>0xC0</value></field>
         </default>
     </attribute>
@@ -7570,7 +7570,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>4</value></field>
+            <field><id>port</id><value>13</value></field>
             <field><id>devAddr</id><value>0x90</value></field>
         </default>
     </attribute>
@@ -7612,7 +7612,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>4</value></field>
+            <field><id>port</id><value>13</value></field>
             <field><id>devAddr</id><value>0xC0</value></field>
         </default>
     </attribute>
@@ -7650,7 +7650,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>5</value></field>
+            <field><id>port</id><value>0</value></field>
             <field><id>devAddr</id><value>0x90</value></field>
         </default>
     </attribute>
@@ -7688,7 +7688,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>5</value></field>
+            <field><id>port</id><value>0</value></field>
             <field><id>devAddr</id><value>0xC0</value></field>
         </default>
     </attribute>
@@ -7730,7 +7730,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>6</value></field>
+            <field><id>port</id><value>12</value></field>
             <field><id>devAddr</id><value>0x90</value></field>
         </default>
     </attribute>
@@ -7768,7 +7768,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>6</value></field>
+            <field><id>port</id><value>12</value></field>
             <field><id>devAddr</id><value>0xC0</value></field>
         </default>
     </attribute>
@@ -7810,7 +7810,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>7</value></field>
+            <field><id>port</id><value>1</value></field>
             <field><id>devAddr</id><value>0x90</value></field>
         </default>
     </attribute>
@@ -7848,7 +7848,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>7</value></field>
+            <field><id>port</id><value>1</value></field>
             <field><id>devAddr</id><value>0xC0</value></field>
         </default>
     </attribute>
@@ -7890,7 +7890,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>8</value></field>
+            <field><id>port</id><value>0xFF</value></field>
             <field><id>devAddr</id><value>0x90</value></field>
         </default>
     </attribute>
@@ -7932,7 +7932,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>8</value></field>
+            <field><id>port</id><value>0xFF</value></field>
             <field><id>devAddr</id><value>0xC0</value></field>
         </default>
     </attribute>
@@ -8536,7 +8536,7 @@
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>0</value></field>
+            <field><id>port</id><value>9</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
@@ -8593,7 +8593,7 @@
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>8</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
@@ -8648,7 +8648,7 @@
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>2</value></field>
+            <field><id>port</id><value>10</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
@@ -8703,7 +8703,7 @@
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>3</value></field>
+            <field><id>port</id><value>11</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
@@ -8758,7 +8758,7 @@
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>4</value></field>
+            <field><id>port</id><value>13</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
@@ -8813,7 +8813,7 @@
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>5</value></field>
+            <field><id>port</id><value>0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
@@ -8868,7 +8868,7 @@
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>6</value></field>
+            <field><id>port</id><value>12</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
@@ -8923,7 +8923,7 @@
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>7</value></field>
+            <field><id>port</id><value>1</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
@@ -8977,7 +8977,7 @@
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>8</value></field>
+            <field><id>port</id><value>0xFF</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
@@ -9030,7 +9030,7 @@
         <default>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>9</value></field>
+            <field><id>port</id><value>0xFF</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
@@ -9085,7 +9085,7 @@
         <default>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>10</value></field>
+            <field><id>port</id><value>0xFF</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
@@ -9140,7 +9140,7 @@
         <default>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>11</value></field>
+            <field><id>port</id><value>0xFF</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
@@ -9195,7 +9195,7 @@
         <default>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>12</value></field>
+            <field><id>port</id><value>0xFF</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
@@ -9250,7 +9250,7 @@
         <default>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>13</value></field>
+            <field><id>port</id><value>0xFF</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
@@ -9305,7 +9305,7 @@
         <default>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>14</value></field>
+            <field><id>port</id><value>0xFF</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
@@ -9360,7 +9360,7 @@
         <default>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>15</value></field>
+            <field><id>port</id><value>0xFF</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
