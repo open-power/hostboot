@@ -2856,48 +2856,57 @@
     <id>KEY_CLEAR_REQUEST</id>
     <description>
         Enum indicating the different possible Key Clear Request values
+        NOTE: See "Host FW key clear requests" in HDAT spec
     </description>
     <enumerator>
       <description>
-          (Default) Key clear not requested
+          (Default) Key Clear not requested
       </description>
       <name>NONE</name>
       <value>0x0000</value>
     </enumerator>
     <enumerator>
       <description>
-          Clear/reset all sensitive data controlled by platform firmware
-          from the system
+          "Clear All" : Clear/reset all sensitive data controlled by platform
+          firmware from the system
       </description>
       <name>ALL</name>
       <value>0x8000</value>
     </enumerator>
     <enumerator>
       <description>
-          This indicates OPAL to clear the OS platform key
+          "Clear OS Keys" : This indicates OPAL to clear the OS secureboot keys
       </description>
-      <name>OS_PK</name>
+      <name>OS_KEYS</name>
       <value>0x4000</value>
     </enumerator>
     <enumerator>
       <description>
-          This indicates to OPAL/PEF to clear the System Security Officer
-          certificate
+          "Clear PEF SSO" : This indicates to OPAL/PEF to clear the
+          System Security Office certificate
       </description>
       <name>PEF_SSO</name>
       <value>0x2000</value>
     </enumerator>
     <enumerator>
       <description>
-          This indicates to PowerVM to clear the system key to the default state
+          "Clear PowerVM System Key" : This indicates to PowerVM to clear the
+          system key to the default state
       </description>
       <name>POWERVM_SYSKEY</name>
       <value>0x1000</value>
     </enumerator>
     <enumerator>
       <description>
-          Clear all sensitive data for MFG processing
-          Only valid on development drivers
+          Reserved bits
+      </description>
+      <name>RESERVED_1</name>
+      <value>0x0E00</value>
+    </enumerator>
+    <enumerator>
+      <description>
+          MFG mode and imprint driver only : Clear all sensitive data and
+          leave storage empty
       </description>
       <name>MFG</name>
       <value>0x0100</value>
@@ -2906,7 +2915,7 @@
       <description>
           Reserved bits
       </description>
-      <name>RESERVED</name>
+      <name>RESERVED_2</name>
       <value>0x00FF</value>
     </enumerator>
   </enumerationType>

@@ -305,6 +305,9 @@
       <id>PHYS_PRES_FAKE_ASSERT</id>
     </attribute>
     <attribute>
+      <id>PHYS_PRES_REIPL</id>
+    </attribute>
+    <attribute>
       <id>PHYS_PRES_REQUEST_OPEN_WINDOW</id>
     </attribute>
   </targetTypeExtension>
