@@ -676,4 +676,42 @@
     </callout>
   </hwpError>
   <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_EXPAND_RING_UTIL_INVALID_PARAMETERS</rc>
+    <description>
+        Error calling p10_expand_ring_util when checking input parameters
+    </description>
+    <ffdc>OUT_IMAGE</ffdc>
+    <ffdc>IN_IMAGE_SIZE</ffdc>
+    <ffdc>IN_IMAGE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_MVPD_MK_KEYWORD_VERSION_ERROR</rc>
+    <description>The MK Keyword version from MVPD, found to be invalid</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>MVPD_MK_KWD_VERSION</ffdc>
+    <ffdc>MVPD_MKSIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_MVPD_PG_KEYWORD_VERSION_ERROR</rc>
+    <description>The PG Keyword version from MVPD, found to be invalid</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>MVPD_PG_KWD_VERSION</ffdc>
+    <ffdc>MVPD_PGSIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
 </hwpErrors>

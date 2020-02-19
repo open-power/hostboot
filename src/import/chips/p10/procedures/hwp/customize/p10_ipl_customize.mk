@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2019
+# Contributors Listed Below - COPYRIGHT 2016,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -31,6 +31,7 @@ lib$(PROCEDURE)_DEPLIBS+=p10_tor
 lib$(PROCEDURE)_DEPLIBS+=common_ringId
 lib$(PROCEDURE)_DEPLIBS+=p10_ringId
 lib$(PROCEDURE)_DEPLIBS+=p10_ddco
+lib$(PROCEDURE)_DEPLIBS+=p10_ipl_section_append
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/utils/imageProcs)
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/common/utils/imageProcs)
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/procedures/hwp/accessors)

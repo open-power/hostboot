@@ -68,7 +68,8 @@ enum SYSPHASE
 {
     SYSPHASE_HB_SBE = 0,
     SYSPHASE_RT_QME = 1,
-    NOOF_SYSPHASES  = 2,
+    SYSPHASE_HB_MEAS = 2,
+    NOOF_SYSPHASES  = 3,
 };
 
 enum MvpdRingStatus

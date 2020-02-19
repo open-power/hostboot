@@ -40,9 +40,10 @@
 //
 const uint32_t  PCPLS = 1; // Physical Chips Per Logical Seeprom
 const uint32_t  SEEPROM_PHYS_CHIP_SIZE = (512 * 1024);
-const uint32_t  MAX_SBE_SEEPROM_SIZE    = PCPLS * SEEPROM_PHYS_CHIP_SIZE;
-const uint32_t  MAX_SEEPROM_IMAGE_SIZE  = PCPLS * (SEEPROM_PHYS_CHIP_SIZE / 9 * 8) - 256; // excl ECC bits
-const uint32_t  MAX_RT_IMAGE_SIZE       = 1024 * 1024;   // Max Runtime size.
+const uint32_t  MAX_SBE_SEEPROM_SIZE        = PCPLS * SEEPROM_PHYS_CHIP_SIZE;
+const uint32_t  MAX_SEEPROM_IMAGE_SIZE      = PCPLS * (SEEPROM_PHYS_CHIP_SIZE / 9 * 8) - 256; // excl ECC bits
+const uint32_t  MAX_MEAS_SEEPROM_IMAGE_SIZE = PCPLS * ((SEEPROM_PHYS_CHIP_SIZE * 3 / 8) / 9 * 8) - 256;
+const uint32_t  MAX_RT_IMAGE_SIZE           = 1024 * 1024;   // Max Runtime size.
 
 // The below buffer sizes are governed by the longest p10 engd ring, n1_fure, which is
 // 1,207,902 bits long (20200404).  And we need to hold both data *and* care parts in the buffer.

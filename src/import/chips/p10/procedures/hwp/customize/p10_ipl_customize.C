@@ -49,10 +49,10 @@
 #include <p10_scan_compression.H>
 #include <p10_infrastruct_help.H>
 #include <map>
+#include <p10_ipl_section_append.H>
 
 using namespace fapi2;
 
-#ifdef CHIP_GEN_P9
 #ifndef WIN32
 
 #define MBOX_ATTR_WRITE(ID,TARGET,IMAGE) \
@@ -63,6 +63,19 @@ using namespace fapi2;
         FAPI_TRY(p9_xip_set_scalar(IMAGE,#ID,ID##_attrVal),\
                  "MBOX_ATTR_WRITE: Error writing attr %s to seeprom image",\
                  #ID); \
+    }
+
+#define MBOX_ATTR_WRITE_VECTOR(ID,TARGET,IMAGE,SIZE) \
+    { \
+        fapi2::ID##_Type ID##_attrVal; \
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ID,TARGET,ID##_attrVal),\
+                 "MBOX_ATTR_WRITE_VECTOR: Error getting %s", #ID); \
+        for (auto idx = 0; idx < SIZE; idx++) \
+        { \
+            FAPI_TRY(p9_xip_set_element(IMAGE,#ID,idx,ID##_attrVal[idx]),    \
+                     "MBOX_ATTR_WRITE_VECTOR: Error writing attr %s to seeprom image",\
+                     #ID); \
+        } \
     }
 
 #define MBOX_ATTR_SET(ID,TARGET,IMAGE) \
@@ -81,74 +94,249 @@ using namespace fapi2;
                  #ID); \
     }
 
+#define MBOX_ATTR_CLEAR_VECTOR(ID,TARGET,IMAGE,SIZE)    \
+    { \
+        fapi2::ID##_Type ID##_attrVal; \
+        for (auto idx = 0; idx < SIZE; idx++) \
+        { \
+            ID##_attrVal[idx] = 0; \
+            FAPI_TRY(p9_xip_set_element(IMAGE,#ID,idx,ID##_attrVal[idx]),    \
+                     "MBOX_ATTR_CLEAR_VECTOR: Error writing attr %s to seeprom image",\
+                     #ID); \
+        } \
+    }
+
 fapi2::ReturnCode writeMboxRegs (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procTarget,
     void* i_image)
 {
     FAPI_DBG ("writeMboxRegs Entering...");
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_CONTAINED_IPL_TYPE_Type l_attr_contained_ipl_type;
     P9XipItem l_item;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CONTAINED_IPL_TYPE,
+                           FAPI_SYSTEM,
+                           l_attr_contained_ipl_type));
 
-    MBOX_ATTR_WRITE (ATTR_SPI_BUS_DIV_REF,          i_procTarget,   i_image);
-    MBOX_ATTR_WRITE (ATTR_EQ_GARD,                  i_procTarget,   i_image);
-    MBOX_ATTR_WRITE (ATTR_EC_GARD,                  i_procTarget,   i_image);
-    MBOX_ATTR_WRITE (ATTR_NEST_PLL_BUCKET,          FAPI_SYSTEM,    i_image);
-    MBOX_ATTR_WRITE (ATTR_BOOT_FREQ_MULT,           i_procTarget,   i_image);
-    MBOX_ATTR_WRITE (ATTR_CLOCK_PLL_MUX,            i_procTarget,   i_image);
-    MBOX_ATTR_WRITE (ATTR_DPLL_BYPASS,              i_procTarget,   i_image);
-    MBOX_ATTR_WRITE (ATTR_SS_FILTER_BYPASS,         i_procTarget,   i_image);
-    MBOX_ATTR_WRITE (ATTR_CP_FILTER_BYPASS,         i_procTarget,   i_image);
-    MBOX_ATTR_WRITE (ATTR_IO_FILTER_BYPASS,         i_procTarget,   i_image);
-    MBOX_ATTR_WRITE (ATTR_NEST_MEM_X_O_PCI_BYPASS,  i_procTarget,   i_image);
-    MBOX_ATTR_WRITE (ATTR_SYSTEM_IPL_PHASE,         FAPI_SYSTEM,    i_image);
-    MBOX_ATTR_WRITE (ATTR_SYS_FORCE_ALL_CORES,      FAPI_SYSTEM,    i_image);
-    MBOX_ATTR_CLEAR (ATTR_RISK_LEVEL,               FAPI_SYSTEM,    i_image);
-    MBOX_ATTR_WRITE (ATTR_DISABLE_HBBL_VECTORS,     FAPI_SYSTEM,    i_image);
-    MBOX_ATTR_WRITE (ATTR_MC_SYNC_MODE,             i_procTarget,   i_image);
-    MBOX_ATTR_WRITE (ATTR_SECURITY_MODE,            FAPI_SYSTEM,    i_image);
-    MBOX_ATTR_SET   (ATTR_PROC_SBE_MASTER_CHIP,     i_procTarget,   i_image);
-    MBOX_ATTR_CLEAR (ATTR_PROC_FABRIC_GROUP_ID,     i_procTarget,   i_image);
-    MBOX_ATTR_CLEAR (ATTR_PROC_FABRIC_CHIP_ID,      i_procTarget,   i_image);
-    MBOX_ATTR_WRITE (ATTR_DD1_SLOW_PCI_REF_CLOCK,   FAPI_SYSTEM,    i_image);
-    MBOX_ATTR_WRITE (ATTR_PROC_EFF_FABRIC_GROUP_ID, i_procTarget,   i_image);
-    MBOX_ATTR_WRITE (ATTR_PROC_EFF_FABRIC_CHIP_ID,  i_procTarget,   i_image);
-    MBOX_ATTR_WRITE (ATTR_PROC_EPS_READ_CYCLES_T0,  FAPI_SYSTEM,    i_image);
-    MBOX_ATTR_WRITE (ATTR_PROC_EPS_READ_CYCLES_T1,  FAPI_SYSTEM,    i_image);
-    MBOX_ATTR_WRITE (ATTR_PROC_EPS_READ_CYCLES_T2,  FAPI_SYSTEM,    i_image);
-    MBOX_ATTR_WRITE (ATTR_PROC_EPS_WRITE_CYCLES_T1, FAPI_SYSTEM,    i_image);
-    MBOX_ATTR_WRITE (ATTR_PROC_EPS_WRITE_CYCLES_T2, FAPI_SYSTEM,    i_image);
-    MBOX_ATTR_WRITE (ATTR_LPC_CONSOLE_CNFG,        i_procTarget,   i_image);
+    // customize only attributes
+    MBOX_ATTR_WRITE(ATTR_SECURITY_MODE,                         FAPI_SYSTEM,  i_image);
+    MBOX_ATTR_WRITE(ATTR_SECTOR_BUFFER_STRENGTH,                FAPI_SYSTEM,  i_image);
+    MBOX_ATTR_WRITE(ATTR_LPC_CONSOLE_CNFG,                      i_procTarget, i_image);
 
+    // mailbox 1,2
+    // covered by writePG() function
+    // mailbox 3
+    // not customized: ATTR_BOOT_FLAGS, ATTR_IS_MPIPL, ATTR_IS_SP_MODE
+
+    // mailbox 4
+    MBOX_ATTR_WRITE(ATTR_SPI_BUS_DIV_REF,                       i_procTarget, i_image);
+    MBOX_ATTR_WRITE(ATTR_FREQ_CORE_BOOT_MHZ,                    i_procTarget, i_image);
+
+    // mailbox 5
+    MBOX_ATTR_WRITE(ATTR_SYSTEM_IPL_PHASE,                      FAPI_SYSTEM,  i_image);
+    MBOX_ATTR_WRITE(ATTR_CONTAINED_IPL_TYPE,                    FAPI_SYSTEM,  i_image);
+    MBOX_ATTR_WRITE(ATTR_RUNN_MODE,                             FAPI_SYSTEM,  i_image);
+    MBOX_ATTR_WRITE(ATTR_DISABLE_HBBL_VECTORS,                  FAPI_SYSTEM,  i_image);
+    MBOX_ATTR_WRITE(ATTR_SBE_SELECT_EX_POLICY,                  FAPI_SYSTEM,  i_image);
+    MBOX_ATTR_WRITE(ATTR_CP_REFCLOCK_SELECT,                    i_procTarget, i_image);
+    MBOX_ATTR_WRITE_VECTOR(ATTR_CLOCK_MUX_IOHS_LCPLL_INPUT,     i_procTarget, i_image, 8);
+    MBOX_ATTR_WRITE_VECTOR(ATTR_CLOCK_MUX_PCI_LCPLL_INPUT,      i_procTarget, i_image, 2);
+
+    // mailbox 6
     // for backwards compatiblity with images that don't contain
-    // the OB/MC PLL bucket attributes, ensure that the item exists
+    // the new filter/PCI PLL bucket attributes, ensure that the item exists
     // prior to attempting an update which would otherwise fail
-    if (!p9_xip_find(i_image, "ATTR_OB0_PLL_BUCKET", &l_item))
+    if (!p9_xip_find(i_image, "ATTR_FILTER_PLL_BUCKET", &l_item))
     {
-        MBOX_ATTR_WRITE(ATTR_OB0_PLL_BUCKET, i_procTarget, i_image);
+        MBOX_ATTR_WRITE(ATTR_FILTER_PLL_BUCKET,                 i_procTarget, i_image);
     }
 
-    if (!p9_xip_find(i_image, "ATTR_OB1_PLL_BUCKET", &l_item))
+    if (!p9_xip_find(i_image, "ATTR_PCI_PLL_BUCKET", &l_item))
     {
-        MBOX_ATTR_WRITE(ATTR_OB1_PLL_BUCKET, i_procTarget, i_image);
+        MBOX_ATTR_WRITE(ATTR_PCI_PLL_BUCKET,                    i_procTarget, i_image);
     }
 
-    if (!p9_xip_find(i_image, "ATTR_OB2_PLL_BUCKET", &l_item))
+    MBOX_ATTR_WRITE(ATTR_CP_PLLTODFLT_BYPASS,                   i_procTarget, i_image);
+    MBOX_ATTR_WRITE(ATTR_CP_PLLNESTFLT_BYPASS,                  i_procTarget, i_image);
+    MBOX_ATTR_WRITE(ATTR_CP_PLLIOFLT_BYPASS,                    i_procTarget, i_image);
+    MBOX_ATTR_WRITE(ATTR_CP_PLLIOSSFLT_BYPASS,                  i_procTarget, i_image);
+    MBOX_ATTR_WRITE(ATTR_NEST_DPLL_BYPASS,                      i_procTarget, i_image);
+    MBOX_ATTR_WRITE(ATTR_PAU_DPLL_BYPASS,                       i_procTarget, i_image);
+    MBOX_ATTR_WRITE(ATTR_BOOT_PAU_DPLL_BYPASS,                  i_procTarget, i_image);
+    MBOX_ATTR_WRITE(ATTR_IO_TANK_PLL_BYPASS,                    i_procTarget, i_image);
+    MBOX_ATTR_WRITE(ATTR_SKEWADJ_BYPASS,                        i_procTarget, i_image);
+    MBOX_ATTR_WRITE(ATTR_DCADJ_BYPASS,                          i_procTarget, i_image);
+    MBOX_ATTR_CLEAR(ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID,           i_procTarget, i_image);
+    MBOX_ATTR_WRITE(ATTR_PROC_FABRIC_TOPOLOGY_MODE,             FAPI_SYSTEM,  i_image);
+    MBOX_ATTR_WRITE(ATTR_PROC_FABRIC_BROADCAST_MODE,            FAPI_SYSTEM,  i_image);
+    MBOX_ATTR_SET(ATTR_PROC_SBE_MASTER_CHIP,                    i_procTarget, i_image);
+    MBOX_ATTR_CLEAR(ATTR_PROC_FABRIC_TOPOLOGY_ID,               i_procTarget, i_image);
+    MBOX_ATTR_CLEAR_VECTOR(ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE,  i_procTarget, i_image, 32);
+
+    // mailbox 7
+    if (l_attr_contained_ipl_type == fapi2::ENUM_ATTR_CONTAINED_IPL_TYPE_CHIP)
     {
-        MBOX_ATTR_WRITE(ATTR_OB2_PLL_BUCKET, i_procTarget, i_image);
+        MBOX_ATTR_WRITE(ATTR_CHIP_CONTAINED_ACTIVE_CORES_VEC,   i_procTarget, i_image);
+    }
+    else
+    {
+        MBOX_ATTR_CLEAR(ATTR_CHIP_CONTAINED_ACTIVE_CORES_VEC,   i_procTarget, i_image);
     }
 
-    if (!p9_xip_find(i_image, "ATTR_OB3_PLL_BUCKET", &l_item))
-    {
-        MBOX_ATTR_WRITE(ATTR_OB3_PLL_BUCKET, i_procTarget, i_image);
-    }
+    // mailbox 9
+    MBOX_ATTR_WRITE(ATTR_FREQ_PAU_MHZ,                          FAPI_SYSTEM,  i_image);
+    MBOX_ATTR_WRITE_VECTOR(ATTR_MC_PLL_BUCKET,                  i_procTarget, i_image, 4);
 
-    if (!p9_xip_find(i_image, "ATTR_MC_PLL_BUCKET", &l_item))
+    // mailbox 10
+    MBOX_ATTR_WRITE_VECTOR(ATTR_IOHS_PLL_BUCKET,                i_procTarget, i_image, 8);
+
+    if (l_attr_contained_ipl_type == fapi2::ENUM_ATTR_CONTAINED_IPL_TYPE_CHIP)
     {
-        MBOX_ATTR_WRITE(ATTR_MC_PLL_BUCKET, FAPI_SYSTEM, i_image);
+        MBOX_ATTR_WRITE(ATTR_CHIP_CONTAINED_BACKING_CACHES_VEC, i_procTarget, i_image);
+    }
+    else
+    {
+        MBOX_ATTR_CLEAR(ATTR_CHIP_CONTAINED_BACKING_CACHES_VEC, i_procTarget, i_image);
     }
 
 fapi_try_exit:
     FAPI_DBG("writeMboxRegs Exiting...");
+    return fapi2::current_err;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Table structure for the expanded raw scoms
+///////////////////////////////////////////////////////////////////////////////
+////////// 1B Command // 1B LAST ROW // 2B PAD // 4B ADDR // 8B DATA //////////
+//////////////////////////////// N ROWS ///////////////////////////////////////
+fapi2::ReturnCode p10_expand_ring_util(
+    const uint8_t    i_chipletId,         // Chiplet to scan
+    const uint64_t   i_scanRegionType,    // Scan region and type register value for ring
+    uint8_t*         o_tbl_scom_data,     // Ptr to table of scoms per the struct
+    uint32_t&        o_tbl_size_in_bytes, // Size of generated table in bytes
+    uint32_t         i_size_in_bits,      // in: size of raw ring data in bits
+    const uint8_t*   i_raw_data)          // in: raw ring data ptr
+{
+    typedef struct
+    {
+        uint32_t cmd: 8;      // Getscom = 0, Putscom = 1, other val for future scope
+        uint32_t last_row: 8; // Set to 1, if last row
+        uint32_t pad: 16;     // Pad bytes for future use
+        uint32_t addr;        // Addr for the above cmd (getscom/putscom)
+        uint64_t data;        // Data for the above cmd (getscom/putscom)
+    } ringExpand_tbl_t;
+
+    const uint32_t SCAN_REGION_TYPE   = (i_chipletId << 24) | 0x00030005; // scan region and type address
+    const uint32_t SCAN_PUT_BASE_ADDR = (i_chipletId << 24) | 0x0003E000; // scan write base address
+    const uint32_t SCAN_GET_BASE_ADDR = (i_chipletId << 24) | 0x00038000; // scan read base address
+
+    const uint32_t EXPAND_RING_64BIT_LEN_MASK = 0x00000040;    // address mask for 64-bit shift
+    const uint64_t EXPAND_RING_HEADER = 0xA5A5A5A5A5A5A5A5ull; // header check data pattern
+
+    const uint8_t  ROW_LEN_IN_BYTES = 16;             // size of each table entry
+    const uint8_t  EXPAND_RING_GETSCOM_CMD = 0x00;    // getscom command
+    const uint8_t  EXPAND_RING_PUTSCOM_CMD = 0x01;    // putscom command
+    const uint8_t  SCOM_DATA_LEN_IN_BITS = 64;        // number of bits per SCOM update
+    const uint8_t  RING_HEADER_SKIP_LEN_IN_BITS = 64; // number of bits consumed by header
+    const uint8_t  LAST_ROW = 1;                      // last row identifier
+
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    uint32_t rowIterCnt = 0;
+    uint32_t numScoms = (i_size_in_bits / SCOM_DATA_LEN_IN_BITS);
+    o_tbl_size_in_bytes = 0;
+
+    FAPI_DBG(">>p10_expand_ring_util i_size_in_bits %d", i_size_in_bits);
+
+    FAPI_ASSERT((o_tbl_scom_data != NULL) &&
+                (i_size_in_bits > 0) &&
+                (i_raw_data != NULL),
+                fapi2::EXPAND_RING_UTIL_INVALID_PARAMETERS().
+                set_OUT_IMAGE(o_tbl_scom_data).
+                set_IN_IMAGE_SIZE(i_size_in_bits).
+                set_IN_IMAGE((uint8_t*)i_raw_data),
+                "at least one input parameter not valid");
+
+    if(i_size_in_bits % SCOM_DATA_LEN_IN_BITS)
+    {
+        numScoms = numScoms + 1;
+    }
+
+    // Additional rows for ring implementation
+    // 1 row for Setting Scan type and region
+    // 1 row for Header
+    // 1 row in footer for Header check
+    // 1 row in footer to clear Scan type and region
+    numScoms = numScoms + 4;
+
+    ringExpand_tbl_t row;
+    row.cmd = EXPAND_RING_PUTSCOM_CMD;
+    row.last_row = 0;
+
+    // Set up the scan type and region
+    row.addr = SCAN_REGION_TYPE;
+    row.addr = htobe32(row.addr);
+    row.data = i_scanRegionType;
+    row.data = htobe64(row.data);
+    memcpy( (o_tbl_scom_data + (ROW_LEN_IN_BYTES * rowIterCnt++) ),
+            (uint8_t*)&row,
+            sizeof(ringExpand_tbl_t) );
+    // Setup header
+    row.addr = SCAN_PUT_BASE_ADDR | EXPAND_RING_64BIT_LEN_MASK;
+    row.addr = htobe32(row.addr);
+    row.data = EXPAND_RING_HEADER;
+    row.data = htobe64(row.data);
+    memcpy( (o_tbl_scom_data + (ROW_LEN_IN_BYTES * rowIterCnt++) ),
+            (uint8_t*)&row,
+            sizeof(ringExpand_tbl_t) );
+
+    // Expand the ring into rows
+    for( uint32_t numBits = RING_HEADER_SKIP_LEN_IN_BITS; numBits < i_size_in_bits;
+         numBits = numBits + SCOM_DATA_LEN_IN_BITS )
+    {
+        if(numBits + SCOM_DATA_LEN_IN_BITS <= i_size_in_bits)
+        {
+            row.addr = SCAN_PUT_BASE_ADDR | EXPAND_RING_64BIT_LEN_MASK;
+            row.addr = htobe32(row.addr);
+        }
+        else // 64bits are not available to copy
+        {
+            uint8_t remain = i_size_in_bits - numBits;
+            row.addr = SCAN_PUT_BASE_ADDR | remain;
+            row.addr = htobe32(row.addr);
+        }
+
+        memcpy((uint8_t*)&row.data, (i_raw_data + numBits / 8), 8); //8bytes copy
+        memcpy( (o_tbl_scom_data + (ROW_LEN_IN_BYTES * rowIterCnt++)),
+                (uint8_t*)&row,
+                sizeof(ringExpand_tbl_t) );
+    }
+
+    // Setup footer, to verify the header bytes
+    row.cmd  = EXPAND_RING_GETSCOM_CMD;
+    row.addr = SCAN_GET_BASE_ADDR;
+    row.addr = htobe32(row.addr);
+    row.data = EXPAND_RING_HEADER;
+    row.data = htobe64(row.data);
+    memcpy( (o_tbl_scom_data + (ROW_LEN_IN_BYTES * rowIterCnt++) ),
+            (uint8_t*)&row,
+            sizeof(ringExpand_tbl_t) );
+
+    // Clear Scan type and region and set last row byte
+    row.cmd  = EXPAND_RING_PUTSCOM_CMD;
+    row.addr = SCAN_REGION_TYPE;
+    row.addr = htobe32(row.addr);
+    row.data = 0x0;
+
+    row.last_row = LAST_ROW;
+    memcpy( (o_tbl_scom_data + (ROW_LEN_IN_BYTES * rowIterCnt++) ),
+            (uint8_t*)&row,
+            sizeof(ringExpand_tbl_t) );
+
+    //Update the number of bytes in the table
+    o_tbl_size_in_bytes = ROW_LEN_IN_BYTES * rowIterCnt;
+
+fapi_try_exit:
+    FAPI_DBG("<<p10_expand_ring_util");
     return fapi2::current_err;
 }
 
@@ -157,54 +345,116 @@ fapi2::ReturnCode writePG(
     void* i_image)
 {
     const uint8_t  IMG_PG_ENTRIES = 64;
-    const uint16_t DEFAULT_PG_VAL = 0xffff;
+    const uint32_t DEFAULT_PG_VAL = 0xffffff;
+    const uint32_t STANDBY_PG_VAL = 0xffe03fff;
+    uint8_t l_pg_idx = 0;
 
     FAPI_DBG ("writePG Entering...");
 
-    // Make all chiplets "not good".
-    for (auto l_pg_idx = 0; l_pg_idx < IMG_PG_ENTRIES; l_pg_idx++)
+    // fill in ATTR_PG from platform attribute state
+    FAPI_DBG("Updating ATTR_PG...")
     {
-        FAPI_TRY( p9_xip_set_element(i_image, "ATTR_PG", l_pg_idx, DEFAULT_PG_VAL),
-                  "Error (1) from p9_xip_set_element (idx %d)", l_pg_idx );
+        // Make all chiplets "not good", excepting standby/FSI (chiplet ID=0)
+        FAPI_TRY( p9_xip_set_element(i_image, "ATTR_PG", l_pg_idx, STANDBY_PG_VAL),
+                  "Error (1)) from p9_xip_set_element (ATTR_PG idx %d)", l_pg_idx );
+
+        for (l_pg_idx = 1; l_pg_idx < IMG_PG_ENTRIES; l_pg_idx++)
+        {
+            FAPI_TRY( p9_xip_set_element(i_image, "ATTR_PG", l_pg_idx, DEFAULT_PG_VAL),
+                      "Error from p9_xip_set_element (ATTR_PG idx %d)", l_pg_idx );
+        }
+
+        // update results of functional chiplets only
+        for (auto l_perv_tgt : i_procTarget.getChildren<fapi2::TARGET_TYPE_PERV>())
+        {
+            uint8_t l_unit_id = 0;
+            uint32_t l_pg_data = 0;
+
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_perv_tgt, l_unit_id),
+                      "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)" );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_PG, l_perv_tgt, l_pg_data),
+                      "Error from FAPI_ATTR_GET (ATTR_PG)" );
+
+            l_pg_idx = l_unit_id;
+
+            FAPI_ASSERT( l_pg_idx < IMG_PG_ENTRIES,
+                         fapi2::XIPC_BAD_PG_XLATE().
+                         set_CHIP_TARGET(i_procTarget).
+                         set_CHIP_UNIT_POS(l_unit_id).
+                         set_PG_INDEX(l_pg_idx).
+                         set_IMG_PG_ENTRIES(IMG_PG_ENTRIES),
+                         "CODE BUG: Invalid translation from PERV chip unit position"
+                         " to image PG index: l_pg_idx=%d, IMG_PG_ENTRIES=%d",
+                         l_pg_idx, IMG_PG_ENTRIES );
+
+            // Update the image
+            FAPI_TRY( p9_xip_set_element(i_image, "ATTR_PG", l_pg_idx, l_pg_data),
+                      "Error (2) from p9_xip_set_element (ATTR_PG idx %d)", l_pg_idx );
+
+            FAPI_DBG("Write data for chiplet %d, PG = %08X", l_pg_idx, l_pg_data);
+        }
     }
 
-    for (auto l_perv_tgt : i_procTarget.getChildren<fapi2::TARGET_TYPE_PERV>())
+    // fill in ATTR_PG_MVPD from MVPD query
+    FAPI_DBG("Updating ATTR_PG_MVPD...")
     {
-        uint8_t l_unit_id = 0;
-        uint16_t l_pg_data = 0;
-        uint8_t l_pg_idx = 0;
+        uint32_t       sizeMvpdPGField = 0;
+        uint8_t*       fullPGData = nullptr;
+        const uint8_t  MVPD_PG_KWD_VER1 = 0x01;
+        const uint8_t  MVPD_PG_KWD_VER1_SIZE = 193;
 
-        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_perv_tgt, l_unit_id),
-                  "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)" );
-        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_PG, l_perv_tgt, l_pg_data),
-                  "Error from FAPI_ATTR_GET (ATTR_PG)" );
+        // Get Mvpd MK level
+        FAPI_TRY(getMvpdField(fapi2::MVPD_RECORD_CP00,
+                              fapi2::MVPD_KEYWORD_PG,
+                              i_procTarget,
+                              NULL,
+                              sizeMvpdPGField),
+                 "getMvpdField failed for CP00/PG (1) w/rc=0x%08x",
+                 (uint64_t)fapi2::current_err);
 
-        l_pg_idx = l_unit_id;
+        fullPGData = new uint8_t[sizeMvpdPGField]();
 
-        FAPI_ASSERT( l_pg_idx < IMG_PG_ENTRIES,
-                     fapi2::XIPC_BAD_PG_XLATE().
-                     set_CHIP_TARGET(i_procTarget).
-                     set_CHIP_UNIT_POS(l_unit_id).
-                     set_PG_INDEX(l_pg_idx).
-                     set_IMG_PG_ENTRIES(IMG_PG_ENTRIES),
-                     "CODE BUG: Invalid translation from PERV chip unit position"
-                     " to image PG index: l_pg_idx=%d, IMG_PG_ENTRIES=%d",
-                     l_pg_idx, IMG_PG_ENTRIES );
+        FAPI_TRY(getMvpdField(fapi2::MVPD_RECORD_CP00,
+                              fapi2::MVPD_KEYWORD_PG,
+                              i_procTarget,
+                              fullPGData,
+                              sizeMvpdPGField),
+                 "getMvpdField failed for CP00/PG (2) w/rc=0x%08x and"
+                 "PG size is of %u bytes",
+                 (uint64_t)fapi2::current_err, sizeMvpdPGField);
 
-        // Update the image
-        FAPI_TRY( p9_xip_set_element(i_image, "ATTR_PG", l_pg_idx, l_pg_data),
-                  "Error (2) from p9_xip_set_element (idx %d)", l_pg_idx );
+        //Size of PG keyword is 193 bytes. 1st byte is keyword version,
+        //Checking the keyword version
+        FAPI_ASSERT((fullPGData[0] == MVPD_PG_KWD_VER1) &&
+                    (sizeMvpdPGField == MVPD_PG_KWD_VER1_SIZE),
+                    fapi2::XIPC_MVPD_PG_KEYWORD_VERSION_ERROR().
+                    set_CHIP_TARGET(i_procTarget).
+                    set_MVPD_PG_KWD_VERSION(fullPGData[0]).
+                    set_MVPD_PGSIZE(sizeMvpdPGField),
+                    "PG Keyword version from MVPD is 0x%0x, "
+                    "size of PG keyword is %u",
+                    fullPGData[0], sizeMvpdPGField);
 
-        FAPI_DBG("Write value of pg_data[%d] = %08X", l_pg_idx, l_pg_data);
+        // copy results verbatim from MVPD
+        for (l_pg_idx = 0; l_pg_idx < IMG_PG_ENTRIES; l_pg_idx++)
+        {
+            // 3B of keyword data, stored right aligned in 4B attribute value
+            // initialize the first byte to all 1s per convention
+            uint32_t l_pg_mvpd_data = DEFAULT_PG_VAL & 0xFF000000;
+            uint8_t l_pg_byte = 1 + (3 * l_pg_idx);
+
+            l_pg_mvpd_data = (fullPGData[l_pg_byte] << 16) |
+                             (fullPGData[l_pg_byte + 1] << 8) |
+                             (fullPGData[l_pg_byte + 2]);
+
+            // Update the image
+            FAPI_TRY( p9_xip_set_element(i_image, "ATTR_PG_MVPD", l_pg_idx, l_pg_mvpd_data),
+                      "Error (2) from p9_xip_set_element (ATTR_PG_MVPD idx %d)", l_pg_idx );
+
+            FAPI_DBG("Write data for chiplet %d, PG MVPD = %08X", l_pg_idx, l_pg_mvpd_data);
+        }
     }
 
-    for (auto l_pg_idx = 0; l_pg_idx < IMG_PG_ENTRIES; l_pg_idx++)
-    {
-        uint64_t l_val;
-        FAPI_TRY( p9_xip_get_element(i_image, "ATTR_PG", l_pg_idx, &l_val),
-                  "Error from p9_xip_get_element (idx %d)", l_pg_idx );
-        FAPI_DBG("Read value of pg_data[%d] = %08X", l_pg_idx, l_val);
-    }
 
 fapi_try_exit:
     FAPI_DBG ("writePG Exiting...");
@@ -212,7 +462,6 @@ fapi_try_exit:
 }
 
 #endif
-#endif // #ifdef CHIP_GEN_P9
 
 // Function: get_overlays_ring()
 // @brief: This function is used to get a [Gptr] ring from the overlays section
@@ -2068,15 +2317,10 @@ fapi_try_exit:
 //  const fapi::Target &FAPI_SYSTEM:    System target.
 //  uint64_t& io_featureVec:            Bit vector of dynamic init features.
 //
-#ifdef WIN32
-int apply_fbc_dyninits(
-    int i_procTarget,
-    int FAPI_SYSTEM,
-#else
+#ifndef WIN32
 fapi2::ReturnCode apply_fbc_dyninits(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procTarget,
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& FAPI_SYSTEM,
-#endif
     uint64_t& io_featureVec)
 {
     FAPI_DBG("Entering apply_fbc_dyninits");
@@ -2260,7 +2504,7 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 //End of apply_fbc_dyninits
-
+#endif
 
 #ifndef WIN32
 fapi2::ReturnCode p10_ipl_customize (
@@ -2274,7 +2518,7 @@ ReturnCode p10_ipl_customize (
     uint32_t& io_imageSize,             // In: Max, Out: Actual
     void*     io_ringSectionBuf,
     uint32_t& io_ringSectionBufSize,    // In: Max, Out: Actual
-    uint8_t   i_sysPhase,               // {HB_SBE,RT_QME}
+    uint8_t   i_sysPhase,               // {HB_SBE,RT_QME,HB_MEAS}
     void*     i_ringBuf1,
     uint32_t  i_ringBufSize1,
     void*     i_ringBuf2,
@@ -2439,6 +2683,7 @@ ReturnCode p10_ipl_customize (
     // Make local copy of the [max] io_ringSectionBufSize before we start changing it
     l_ringSectionBufSize = io_ringSectionBufSize;
 
+#ifndef WIN32
 
     //-------------------------------------------
     // Verify that platform and Mvpd agree on:
@@ -2576,98 +2821,6 @@ ReturnCode p10_ipl_customize (
     delete fullCIData;
     fullCIData = NULL;
 
-#ifdef CHIP_GEN_P9
-#ifndef WIN32
-
-    ///////////////////////////////////////////////////////////////////////////
-    // CUSTOMIZE item:     Update Filter PLL attribute from MVPD AW keyword
-    // System phase:       HB_SBE
-    ///////////////////////////////////////////////////////////////////////////
-
-    if (i_sysPhase == SYSPHASE_HB_SBE)
-    {
-        fapi2::ATTR_MRW_FILTER_PLL_BUCKET_Type l_filterPllBucketMRW = 0;
-        uint8_t l_filterPllBucket = 0;
-        uint8_t l_keywordVersion = 0;
-        P9XipItem l_item;
-
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_FILTER_PLL_BUCKET,
-                               FAPI_SYSTEM,
-                               l_filterPllBucketMRW),
-                 "Error from FAPI_ATTR_GET (ATTR_MRW_FILTER_PLL_BUCKET)");
-
-        // set bucket based on MRW attribute if it is non zero
-        if (l_filterPllBucketMRW != 0)
-        {
-            l_filterPllBucket = l_filterPllBucketMRW;
-        }
-        // otherwise, set bucket from AW VPD data
-        else
-        {
-            uint32_t   l_sizeMvpdFieldExpected = 4;
-            uint32_t   l_sizeMvpdField = 0;
-            uint8_t*   l_bufMvpdField = (uint8_t*)i_ringBuf1;
-
-            FAPI_TRY( getMvpdField(MVPD_RECORD_CP00,
-                                   MVPD_KEYWORD_AW,
-                                   i_procTarget,
-                                   NULL,
-                                   l_sizeMvpdField),
-                      "getMvpdField(NULL buffer) failed w/rc=0x%08x",
-                      (uint64_t)fapi2::current_err );
-
-            FAPI_ASSERT( l_sizeMvpdField == l_sizeMvpdFieldExpected,
-                         fapi2::XIPC_MVPD_FIELD_SIZE_MESS().
-                         set_CHIP_TARGET(i_procTarget).
-                         set_MVPD_FIELD_SIZE(l_sizeMvpdField).
-                         set_EXPECTED_SIZE(l_sizeMvpdFieldExpected),
-                         "MVPD field size bug:\n"
-                         "  Returned MVPD field size of AW keyword = %d\n"
-                         "  Anticipated MVPD field size = %d",
-                         l_sizeMvpdField,
-                         l_sizeMvpdFieldExpected );
-
-            FAPI_TRY( getMvpdField(MVPD_RECORD_CP00,
-                                   MVPD_KEYWORD_AW,
-                                   i_procTarget,
-                                   l_bufMvpdField,
-                                   l_sizeMvpdField),
-                      "getMvpdField(valid buffer) failed w/rc=0x%08x",
-                      (uint64_t)fapi2::current_err );
-
-            // extract first byte (keyword version)
-            l_keywordVersion = (uint8_t)(*l_bufMvpdField);
-
-            if (l_keywordVersion == 2)
-            {
-                // extract data
-                l_filterPllBucket = (uint8_t)(*(l_bufMvpdField + 1));
-            }
-        }
-
-        FAPI_ASSERT( l_filterPllBucket <= MAX_FILTER_PLL_BUCKETS,
-                     fapi2::XIPC_MVPD_AW_FIELD_VALUE_ERR().
-                     set_CHIP_TARGET(i_procTarget).
-                     set_MVPD_VALUE(l_filterPllBucket),
-                     "MVPD AW field bug:\n"
-                     "  Value of filter PLL bucket select = %d\n"
-                     "  Anticipated range = 0..%d\n",
-                     l_filterPllBucket,
-                     MAX_FILTER_PLL_BUCKETS );
-
-        // set FAPI attribute
-        FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_FILTER_PLL_BUCKET,
-                                i_procTarget,
-                                l_filterPllBucket ),
-                 "Error from FAPI_ATTR_SET (ATTR_FILTER_PLL_BUCKET)" );
-
-        // customize attribute in SBE image, if field exists
-        if (!p9_xip_find(io_image, "ATTR_FILTER_PLL_BUCKET", &l_item))
-        {
-            MBOX_ATTR_WRITE(ATTR_FILTER_PLL_BUCKET, i_procTarget, io_image);
-        }
-    }
-
 
     ///////////////////////////////////////////////////////////////////////////
     // CUSTOMIZE item:     Write mailbox attributes
@@ -2679,98 +2832,186 @@ ReturnCode p10_ipl_customize (
         FAPI_TRY(writeMboxRegs(i_procTarget, io_image),
                  "p10_ipl_customize: error writing mbox regs in SBE image rc=0x%.8x",
                  (uint64_t)fapi2::current_err);
+
         FAPI_TRY(writePG(i_procTarget, io_image),
                  "p10_ipl_customize: error writing PG data in SBE image rc=0x%.8x",
                  (uint64_t)fapi2::current_err);
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // CUSTOMIZE item:     Update PIBMEM repair section in Seeprom image
+    // System phase:       HB_MEAS
+    ///////////////////////////////////////////////////////////////////////////
 
+    if (i_sysPhase == SYSPHASE_HB_MEAS)
+    {
+        uint8_t* bufMvpdField = (uint8_t*)i_ringBuf1;
+        uint32_t maxRingByteSize = MAX_RING_BUF_SIZE;
+        uint8_t* dataVpd = (uint8_t*)i_ringBuf2;
+        uint8_t* careVpd = (uint8_t*)i_ringBuf2 + maxRingByteSize / 2;
+        uint8_t* scomTbl = (uint8_t*)i_ringBuf3;
+        uint32_t uncmpSize = 0;
+        uint32_t tblSize = 0;
+        RingId_t perv_pib_repr = pib_repr;
+        uint32_t vpdRingSize = maxRingByteSize;
+        uint8_t  chipletId = 0x01; // TP chiplet
+        uint64_t scanRegionType = 0x0200000000000200ull; // pib_repr
+        l_rc = INFRASTRUCT_RC_SUCCESS;
+
+        // Memset the data
+        memset(dataVpd, 0, maxRingByteSize / 2);
+        memset(careVpd, 0, maxRingByteSize / 2);
+        memset(bufMvpdField, 0, maxRingByteSize);
+
+        // Fetch ring from the MVPD:
+        FAPI_TRY( getMvpdRing( i_procTarget,
+                               MVPD_RECORD_CP00,
+                               fapi2::MVPD_KEYWORD_PDR,
+                               (uint32_t) (chipletId << 24),
+                               perv_pib_repr,
+                               bufMvpdField,
+                               vpdRingSize ),
+                  "getMvpdRing() failed for PIBREPR Ring w/rc=0x%08X",
+                  (uint64_t)fapi2::current_err );
+
+        // Uncompress the RS4 to raw ring
+        l_rc = _rs4_decompress( dataVpd,
+                                careVpd,
+                                (maxRingByteSize / 2),
+                                &uncmpSize,
+                                (CompressedScanData*)bufMvpdField );
+
+        FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
+                     fapi2::XIPC_RS4_DECOMPRESS_ERROR().
+                     set_CHIP_TARGET(i_procTarget).
+                     set_RING_ID(perv_pib_repr).
+                     set_LOCAL_RC(l_rc).
+                     set_OCCURRENCE(3),
+                     "rs4_decompress() for pibmem repair: Failed w/rc=%i "
+                     "for perv_pib_repr ringId=0x%02x, chipletId=0x%d, "
+                     "occurrence=3 ", l_rc, perv_pib_repr, chipletId );
+
+        // Contruct repair table to encode raw bit stream into rows of scoms
+        // for the SBE bootloader to parse and execute in raw scoms
+        FAPI_TRY( p10_expand_ring_util( chipletId,
+                                        scanRegionType,
+                                        scomTbl,
+                                        tblSize,
+                                        uncmpSize,
+                                        dataVpd ),
+                  "Error in p10_expand_ring_util w/rc = 0x%08X",
+                  (uint64_t)fapi2::current_err );
+
+        FAPI_INF("p9_expand_ring_util returned a table of length %d from "
+                 "perv_pib_repr ring of size %d", tblSize, uncmpSize);
+
+        FAPI_TRY( p10_ipl_section_append( (void*)scomTbl,
+                                          tblSize,
+                                          P9_XIP_SECTION_SBE_PIBREPRDATA,
+                                          io_image,
+                                          io_imageSize),
+                  "p10_ipl_section_append() failed w/rc=0x%08X",
+                  (uint64_t)fapi2::current_err );
+    }
 
     ///////////////////////////////////////////////////////////////////////////
-    // CUSTOMIZE item:     Update PIBMEM repair attributes in Seeprom image
+    // CUSTOMIZE item:     Write progdelay/duty cycle attributes
     // System phase:       HB_SBE
     ///////////////////////////////////////////////////////////////////////////
 
     if (i_sysPhase == SYSPHASE_HB_SBE)
     {
-        uint8_t    l_pibmemRepVersion = 0;
-        uint64_t   l_pibmemRepData[4] = {0};
-        uint32_t   l_sizeMvpdFieldExpected = sizeof(l_pibmemRepVersion) + sizeof(l_pibmemRepData);
-        uint32_t   l_sizeMvpdField = 0;
-        uint8_t*   l_bufMvpdField = (uint8_t*)i_ringBuf1;
 
-        FAPI_TRY( getMvpdField(MVPD_RECORD_CP00,
-                               MVPD_KEYWORD_PB,
-                               i_procTarget,
-                               NULL,
-                               l_sizeMvpdField),
-                  "getMvpdField(NULL buffer) failed w/rc=0x%08x",
-                  (uint64_t)fapi2::current_err );
+        uint32_t       sizeMvpdMKField = 0;
+        uint8_t*       fullMKData = nullptr;
+        const uint8_t  MVPD_MK_KWD_VER1 = 0x01;
 
-        FAPI_ASSERT( l_sizeMvpdField == l_sizeMvpdFieldExpected,
-                     fapi2::XIPC_MVPD_FIELD_SIZE_MESS().
-                     set_CHIP_TARGET(i_procTarget).
-                     set_MVPD_FIELD_SIZE(l_sizeMvpdField).
-                     set_EXPECTED_SIZE(l_sizeMvpdFieldExpected),
-                     "MVPD field size bug:\n"
-                     "  Returned MVPD field size of PB keyword = %d\n"
-                     "  Anticipated MVPD field size = %d",
-                     l_sizeMvpdField,
-                     l_sizeMvpdFieldExpected );
+        fapi2::ATTR_SKEWADJ_CORE_PDLY_OVERRIDE_Type  l_attr_skewadj_core_pdly_override = 0;
+        fapi2::ATTR_SKEWADJ_CACHE_PDLY_OVERRIDE_Type l_attr_skewadj_cache_pdly_override = 0;
+        fapi2::ATTR_DCADJ_DCC_OVERRIDE_Type          l_attr_dcadj_dcc_override = 0;
+        fapi2::ATTR_DCADJ_TARGET_OVERRIDE_Type       l_attr_dcadj_target_override = 0;
 
-        FAPI_TRY( getMvpdField(MVPD_RECORD_CP00,
-                               MVPD_KEYWORD_PB,
-                               i_procTarget,
-                               l_bufMvpdField,
-                               l_sizeMvpdField),
-                  "getMvpdField(valid buffer) failed w/rc=0x%08x",
-                  (uint64_t)fapi2::current_err );
+        // Get Mvpd MK level
+        FAPI_TRY(getMvpdField(fapi2::MVPD_RECORD_CP00,
+                              fapi2::MVPD_KEYWORD_MK,
+                              i_procTarget,
+                              NULL,
+                              sizeMvpdMKField),
+                 "getMvpdField failed for CP00/MK (1) w/rc=0x%08x",
+                 (uint64_t)fapi2::current_err);
 
-        // Copy over the data into suitable 8Byte containers
-        l_pibmemRepVersion = (uint8_t)(*l_bufMvpdField);
-        l_pibmemRepData[0] = htobe64( *((uint64_t*)(l_bufMvpdField + 1)) );
-        l_pibmemRepData[1] = htobe64( *((uint64_t*)(l_bufMvpdField + 1 + 8)) );
-        l_pibmemRepData[2] = htobe64( *((uint64_t*)(l_bufMvpdField + 1 + 16)) );
-        l_pibmemRepData[3] = htobe64( *((uint64_t*)(l_bufMvpdField + 1 + 24)) );
+        fullMKData = new uint8_t[sizeMvpdMKField]();
 
-        FAPI_DBG("Retrieved Mvpd PB keyword field:\n");
-        FAPI_DBG(" l_pibmemRepVersion = 0x%02x\n"
-                 " l_pibmemRepData[1] = 0x%016llx\n"
-                 " l_pibmemRepData[1] = 0x%016llx\n"
-                 " l_pibmemRepData[2] = 0x%016llx\n"
-                 " l_pibmemRepData[3] = 0x%016llx\n",
-                 l_pibmemRepVersion,
-                 l_pibmemRepData[0],
-                 l_pibmemRepData[1],
-                 l_pibmemRepData[2],
-                 l_pibmemRepData[3]);
+        FAPI_TRY(getMvpdField(fapi2::MVPD_RECORD_CP00,
+                              fapi2::MVPD_KEYWORD_MK,
+                              i_procTarget,
+                              fullMKData,
+                              sizeMvpdMKField),
+                 "getMvpdField failed for CP00/MK (2) w/rc=0x%08x and"
+                 "MK size is of %u bytes",
+                 (uint64_t)fapi2::current_err, sizeMvpdMKField);
 
-        FAPI_TRY( p9_xip_set_scalar(io_image, "ATTR_PIBMEM_REPAIR0", l_pibmemRepData[0]),
-                  "p9_xip_set_scalar(ATTR_PIBMEM_REPAIR0) failed w/rc=0x%08x",
-                  (uint64_t)fapi2::current_err );
+        //Size of MK keyword is 7 bytes. 1st byte is keyword version,
+        //Checking the keyword version
+        FAPI_ASSERT((fullMKData[0] == MVPD_MK_KWD_VER1),
+                    fapi2::XIPC_MVPD_MK_KEYWORD_VERSION_ERROR().
+                    set_CHIP_TARGET(i_procTarget).
+                    set_MVPD_MK_KWD_VERSION(fullMKData[0]).
+                    set_MVPD_MKSIZE(sizeMvpdMKField),
+                    "MK Keyword version from MVPD is 0x%0x, "
+                    "size of MK keyword is %u",
+                    fullMKData[0], sizeMvpdMKField);
 
-        FAPI_TRY( p9_xip_set_scalar(io_image, "ATTR_PIBMEM_REPAIR1", l_pibmemRepData[1]),
-                  "p9_xip_set_scalar(ATTR_PIBMEM_REPAIR1) failed w/rc=0x%08x",
-                  (uint64_t)fapi2::current_err );
+        if (fullMKData[1] & 0x80)
+        {
+            l_attr_skewadj_core_pdly_override = 0x8000 |
+                                                ((fullMKData[1] >> 0) & 0x0F);
+        }
 
-        FAPI_TRY( p9_xip_set_scalar(io_image, "ATTR_PIBMEM_REPAIR2", l_pibmemRepData[2]),
-                  "p9_xip_set_scalar(ATTR_PIBMEM_REPAIR2) failed w/rc=0x%08x",
-                  (uint64_t)fapi2::current_err );
+        if (fullMKData[1] & 0x40)
+        {
+            l_attr_skewadj_cache_pdly_override = 0x8000 |
+                                                 ((fullMKData[2] >> 4) & 0x0F);
+        }
 
+        if (fullMKData[2] & 0x08)
+        {
+            l_attr_dcadj_dcc_override = 0x8000 |
+                                        (fullMKData[3]);
+        }
+
+        if (fullMKData[2] & 0x04)
+        {
+            l_attr_dcadj_target_override = 0x8000 |
+                                           (fullMKData[4]);
+        }
+
+        // populate platform attribute state
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SKEWADJ_CORE_PDLY_OVERRIDE,  i_procTarget, l_attr_skewadj_core_pdly_override));
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SKEWADJ_CACHE_PDLY_OVERRIDE, i_procTarget, l_attr_skewadj_cache_pdly_override));
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_DCADJ_DCC_OVERRIDE,          i_procTarget, l_attr_dcadj_dcc_override));
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_DCADJ_TARGET_OVERRIDE,       i_procTarget, l_attr_dcadj_target_override));
+
+        // customize image
+        MBOX_ATTR_WRITE(ATTR_SKEWADJ_CORE_PDLY_OVERRIDE,  i_procTarget, io_image);
+        MBOX_ATTR_WRITE(ATTR_SKEWADJ_CACHE_PDLY_OVERRIDE, i_procTarget, io_image);
+        MBOX_ATTR_WRITE(ATTR_DCADJ_DCC_OVERRIDE,          i_procTarget, io_image);
+        MBOX_ATTR_WRITE(ATTR_DCADJ_TARGET_OVERRIDE,       i_procTarget, io_image);
+
+        delete fullMKData;
+        fullMKData = NULL;
     }
 
-#endif // ifdef CHIP_GEN_P9
-#endif // ifndef WIN32
-
-
+#endif
 
     ///////////////////////////////////////////////////////////////////////////
     // CUSTOMIZE item:  Removal of .toc, .fixed_toc and .strings and adjustment
     //                  of max Seeprom image size.
-    // System phase:    HB_SBE
+    // System phase:    HB_SBE/HB_MEAS
     ///////////////////////////////////////////////////////////////////////////
 
-    if (i_sysPhase == SYSPHASE_HB_SBE)
+    if (i_sysPhase == SYSPHASE_HB_SBE ||
+        i_sysPhase == SYSPHASE_HB_MEAS)
     {
         // Test the size of the DD specific SBE image's .rings section (it better be ==0).
         l_rc = p9_xip_get_section(io_image, P9_XIP_SECTION_SBE_RINGS, &iplImgSection);
@@ -2857,72 +3098,89 @@ ReturnCode p10_ipl_customize (
 
         l_imageSizeWithoutRings = l_currentImageSize;
 
-        // Adjust the local size of MAX_SEEPROM_IMAGE_SIZE to accommodate enlarged image for Cronus
-        l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_MAX_SBE_SEEPROM_SIZE, FAPI_SYSTEM, attrMaxSbeSeepromSize);
-
-        FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
-                     fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
-                     set_CHIP_TARGET(i_procTarget).
-                     set_OCCURRENCE(3),
-                     "FAPI_ATTR_GET(ATTR_MAX_SBE_SEEPROM_SIZE) failed."
-                     " Unable to determine ATTR_MAX_SBE_SEEPROM_SIZE,"
-                     " so don't know what what max image size." );
-
-        if (attrMaxSbeSeepromSize == MAX_SBE_SEEPROM_SIZE)
+        // confirm image size
+        if (i_sysPhase == SYSPHASE_HB_SBE)
         {
-            l_maxImageSize = MAX_SEEPROM_IMAGE_SIZE;
-        }
-        else if (attrMaxSbeSeepromSize > MAX_SBE_SEEPROM_SIZE)
-        {
-            l_maxImageSize = attrMaxSbeSeepromSize;
+            // Adjust the local size of MAX_SEEPROM_IMAGE_SIZE to accommodate enlarged image for Cronus
+            l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_MAX_SBE_SEEPROM_SIZE, FAPI_SYSTEM, attrMaxSbeSeepromSize);
+
+            FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
+                         fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
+                         set_CHIP_TARGET(i_procTarget).
+                         set_OCCURRENCE(3),
+                         "FAPI_ATTR_GET(ATTR_MAX_SBE_SEEPROM_SIZE) failed."
+                         " Unable to determine ATTR_MAX_SBE_SEEPROM_SIZE,"
+                         " so don't know what what max image size." );
+
+            if (attrMaxSbeSeepromSize == MAX_SBE_SEEPROM_SIZE)
+            {
+                l_maxImageSize = MAX_SEEPROM_IMAGE_SIZE;
+            }
+            else if (attrMaxSbeSeepromSize > MAX_SBE_SEEPROM_SIZE)
+            {
+                l_maxImageSize = attrMaxSbeSeepromSize;
+            }
+            else
+            {
+                FAPI_ASSERT( false,
+                             fapi2::XIPC_ATTR_MAX_SBE_SEEPROM_SIZE_TOO_SMALL().
+                             set_CHIP_TARGET(i_procTarget).
+                             set_ATTR_MAX_SBE_SEEPROM_SIZE(attrMaxSbeSeepromSize).
+                             set_MAX_SBE_SEEPROM_SIZE(MAX_SBE_SEEPROM_SIZE),
+                             "SBE Seeprom size reported in attribute (=0x%x) is smaller than"
+                             " MAX_SBE_SEEPROM_SIZE (=0x%x)",
+                             attrMaxSbeSeepromSize,
+                             MAX_SBE_SEEPROM_SIZE );
+            }
+
+            FAPI_DBG("Platform adjusted MAX_SEEPROM_IMAGE_SIZE: %d", l_maxImageSize);
+
+            // Make sure current image size isn't already too big for Seeprom
+            FAPI_ASSERT( l_currentImageSize <= l_maxImageSize,
+                         fapi2::XIPC_IMAGE_TOO_LARGE().
+                         set_CHIP_TARGET(i_procTarget).
+                         set_IMAGE_SIZE(l_currentImageSize).
+                         set_MAX_IMAGE_SIZE(l_maxImageSize).
+                         set_OCCURRENCE(1),
+                         "Image size before VPD updates (=%d) already exceeds max image size (=%d)",
+                         l_currentImageSize, l_maxImageSize );
+
+            // Test that supplied buffer spaces are big enough to hold max image size
+            FAPI_ASSERT( io_imageSize >= l_maxImageSize,
+                         fapi2::XIPC_INVALID_INPUT_BUFFER_SIZE_PARM().
+                         set_CHIP_TARGET(i_procTarget).
+                         set_INPUT_IMAGE_SIZE(l_inputImageSize).
+                         set_IMAGE_BUF_SIZE(io_imageSize).
+                         set_RING_SECTION_BUF_SIZE(l_ringSectionBufSize).
+                         set_RING_BUF_SIZE1(i_ringBufSize1).
+                         set_RING_BUF_SIZE2(i_ringBufSize2).
+                         set_OCCURRENCE(2),
+                         "One or more invalid input buffer sizes for HB_SBE phase:\n"
+                         "  l_maxImageSize=0x%016llx\n"
+                         "  io_imageSize=0x%016llx\n"
+                         "  l_ringSectionBufSize=0x%016llx\n",
+                         (uintptr_t)l_maxImageSize,
+                         (uintptr_t)io_imageSize,
+                         (uintptr_t)l_ringSectionBufSize );
         }
         else
         {
-            FAPI_ASSERT( false,
-                         fapi2::XIPC_ATTR_MAX_SBE_SEEPROM_SIZE_TOO_SMALL().
+            l_maxImageSize = MAX_MEAS_SEEPROM_IMAGE_SIZE;
+
+            // Make sure current image size isn't already too big for Seeprom
+            FAPI_ASSERT( l_currentImageSize <= l_maxImageSize,
+                         fapi2::XIPC_IMAGE_TOO_LARGE().
                          set_CHIP_TARGET(i_procTarget).
-                         set_ATTR_MAX_SBE_SEEPROM_SIZE(attrMaxSbeSeepromSize).
-                         set_MAX_SBE_SEEPROM_SIZE(MAX_SBE_SEEPROM_SIZE),
-                         "SBE Seeprom size reported in attribute (=0x%x) is smaller than"
-                         " MAX_SBE_SEEPROM_SIZE (=0x%x)",
-                         attrMaxSbeSeepromSize,
-                         MAX_SBE_SEEPROM_SIZE );
+                         set_IMAGE_SIZE(l_currentImageSize).
+                         set_MAX_IMAGE_SIZE(l_maxImageSize).
+                         set_OCCURRENCE(1),
+                         "Image size before VPD updates (=%d) already exceeds max image size (=%d)",
+                         l_currentImageSize, l_maxImageSize );
+
+            // done, no further customization required for measurement seeprom image
+            goto fapi_try_exit;
         }
-
-        FAPI_DBG("Platform adjusted MAX_SEEPROM_IMAGE_SIZE: %d", l_maxImageSize);
-
-        // Make sure current image size isn't already too big for Seeprom
-        FAPI_ASSERT( l_currentImageSize <= l_maxImageSize,
-                     fapi2::XIPC_IMAGE_TOO_LARGE().
-                     set_CHIP_TARGET(i_procTarget).
-                     set_IMAGE_SIZE(l_currentImageSize).
-                     set_MAX_IMAGE_SIZE(l_maxImageSize).
-                     set_OCCURRENCE(1),
-                     "Image size before VPD updates (=%d) already exceeds max image size (=%d)",
-                     l_currentImageSize, l_maxImageSize );
-
-        // Test that supplied buffer spaces are big enough to hold max image size
-        FAPI_ASSERT( io_imageSize >= l_maxImageSize,
-                     fapi2::XIPC_INVALID_INPUT_BUFFER_SIZE_PARM().
-                     set_CHIP_TARGET(i_procTarget).
-                     set_INPUT_IMAGE_SIZE(l_inputImageSize).
-                     set_IMAGE_BUF_SIZE(io_imageSize).
-                     set_RING_SECTION_BUF_SIZE(l_ringSectionBufSize).
-                     set_RING_BUF_SIZE1(i_ringBufSize1).
-                     set_RING_BUF_SIZE2(i_ringBufSize2).
-                     set_OCCURRENCE(2),
-                     "One or more invalid input buffer sizes for HB_SBE phase:\n"
-                     "  l_maxImageSize=0x%016llx\n"
-                     "  io_imageSize=0x%016llx\n"
-                     "  l_ringSectionBufSize=0x%016llx\n",
-                     (uintptr_t)l_maxImageSize,
-                     (uintptr_t)io_imageSize,
-                     (uintptr_t)l_ringSectionBufSize );
-
     }
-
-
-
 
     //////////////////////////////////////////////////////////////////////////
     // CUSTOMIZE item:     Copy DD-specific .fa_xyz fastarray binaries to
@@ -3177,8 +3435,9 @@ ReturnCode p10_ipl_customize (
                  l_maxRingSectionSize, l_ringSectionBufSize, l_maxImageSize );
 
 
-
-
+#ifdef WIN32
+    featureVec = 0x1000000000000000ULL; // select Hostboot feature only for MFT customization
+#else
     //////////////////////////////////////////////////////////////////////////
     // CUSTOMIZE item:     Append Dynamic-on-Base rings to io_ringSectionBuf
     // System phase:       All phases
@@ -3237,7 +3496,7 @@ ReturnCode p10_ipl_customize (
     {
         featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_HOSTBOOT;
 
-        // apply fabric dynamic inits
+        // apply fabric dynamic inits (skip for initial MFT customization)
         FAPI_TRY(apply_fbc_dyninits(i_procTarget, FAPI_SYSTEM, featureVec),
                  "Error applying fabric dynamic inits");
     }
@@ -3257,7 +3516,8 @@ ReturnCode p10_ipl_customize (
     else // Apply runtime dynamic inits
     {
         fapi2::ATTR_SMF_CONFIG_Type l_attrSmfConfig;
-        fapi2::ATTR_SYSTEM_MMA_POWEROFF_DISABLE_Type l_attrSystemMmaPoweroffDisable;
+        fapi2::ATTR_SYSTEM_MMA_POWERON_DISABLE_Type l_attrSystemMmaPoweronDisable;
+        fapi2::ATTR_MRW_L2_INCREASE_JITTER_Type l_attr_mrw_l2_increase_jitter;
 
         l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_SMF_CONFIG, FAPI_SYSTEM, l_attrSmfConfig);
 
@@ -3273,18 +3533,32 @@ ReturnCode p10_ipl_customize (
             featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_HV_INITS;
         }
 
-        l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_MMA_POWEROFF_DISABLE, FAPI_SYSTEM, l_attrSystemMmaPoweroffDisable);
+        l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_MMA_POWERON_DISABLE, FAPI_SYSTEM, l_attrSystemMmaPoweronDisable);
 
         FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
                      fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
                      set_CHIP_TARGET(i_procTarget).
                      set_OCCURRENCE(9),
-                     "Failed to retrieve ATTR_SYSTEM_MMA_POWEROFF_DISABLE" );
+                     "Failed to retrieve ATTR_SYSTEM_MMA_POWERON_DISABLE" );
 
-        if(l_attrSystemMmaPoweroffDisable == fapi2::ENUM_ATTR_SYSTEM_MMA_POWEROFF_DISABLE_ON)
+        if(l_attrSystemMmaPoweronDisable == fapi2::ENUM_ATTR_SYSTEM_MMA_POWERON_DISABLE_ON)
         {
             FAPI_DBG("Applying Dynamic Init Runtime Feature: HMMA_STATIC_POWEROFF");
             featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_MMA_STATIC_POWEROFF;
+        }
+
+        l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_MRW_L2_INCREASE_JITTER, FAPI_SYSTEM, l_attr_mrw_l2_increase_jitter);
+
+        FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
+                     fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
+                     set_CHIP_TARGET(i_procTarget).
+                     set_OCCURRENCE(10),
+                     "Failed to retrieve ATTR_MRW_L2_INCREASE_JITTER ");
+
+        if(l_attr_mrw_l2_increase_jitter == fapi2::ENUM_ATTR_MRW_L2_INCREASE_JITTER_TRUE)
+        {
+            FAPI_DBG("Applying Dynamic Init Runtime Feature: L2RC_HIGH_JITTER");
+            featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_L2RC_HIGH_JITTER;
         }
 
         // clear undesireable features
@@ -3303,6 +3577,8 @@ ReturnCode p10_ipl_customize (
                  set_CHIP_TARGET(i_procTarget).
                  set_OCCURRENCE(8),
                  "Failed to set the dynamic init feature vector attribute" );
+
+#endif // WIN32
 
     FAPI_IMP("Dynamic inits featureVec = 0x%016llx (SET to plat attribute)", featureVec);
 

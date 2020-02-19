@@ -69,25 +69,6 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_PULSE_MODE_ENABLE</id>
-  <targetType>TARGET_TYPE_SYSTEM</targetType>
-  <description>enable the pulse mode</description>
-  <valueType>uint8</valueType>
-  <enum>ENABLE = 0x1, DISABLE = 0x0</enum>
-  <platInit/>
-  <default>DISABLE</default>
-</attribute>
-<!-- ********************************************************************** -->
-<attribute>
-  <id>ATTR_PULSE_MODE_VALUE</id>
-  <targetType>TARGET_TYPE_SYSTEM</targetType>
-  <description>value for pulse mode</description>
-  <valueType>uint8</valueType>
-  <platInit/>
-  <default>0</default>
-</attribute>
-<!-- ********************************************************************** -->
-<attribute>
   <id>ATTR_NDL_MESHCTRL_SETUP</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Control NDL training:meshctrl setup</description>
@@ -248,7 +229,7 @@
     Taken from CP00 MK keyword in VPD
   </description>
   <valueType>uint16</valueType>
-  <platInit/>
+  <writeable/>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -262,7 +243,7 @@
     Taken from CP00 MK keyword in VPD
   </description>
   <valueType>uint16</valueType>
-  <platInit/>
+  <writeable/>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -289,7 +270,7 @@
     Taken from CP00 MK keyword in VPD
   </description>
   <valueType>uint16</valueType>
-  <platInit/>
+  <writeable/>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -303,7 +284,7 @@
     Taken from CP00 MK keyword in VPD
   </description>
   <valueType>uint16</valueType>
-  <platInit/>
+  <writeable/>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
