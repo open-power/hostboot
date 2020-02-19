@@ -1149,6 +1149,10 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
             mvpdKeyword = fapi2::MVPD_KEYWORD_PDR;
             break;
 
+        case RMRK_MVPD_PDS: // #S Repair rings
+            mvpdKeyword = fapi2::MVPD_KEYWORD_PDS;
+            break;
+
         default:
             FAPI_ASSERT( false,
                          fapi2::XIPC_INVALID_MVPD_RINGCLASS().
@@ -1156,8 +1160,8 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                          set_RING_ID(i_ringId).
                          set_RING_CLASS(ringClass).
                          set_KWD_MASK(RCLS_MVPD_MASK),
-                         "CODE BUG: Unsupported value of ringClass (=0x%4x) or keyword"
-                         " mask (=0x%4x) for ringId=0x%x",
+                         "CODE BUG: Unsupported value of ringClass (=0x%04x) or keyword"
+                         " mask (=0x%04x) for ringId=0x%x",
                          ringClass, RCLS_MVPD_MASK, i_ringId );
             break;
     }
@@ -1538,7 +1542,9 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
         if ( ( ringClass != UNDEFINED_RING_CLASS )  &&
              ( ringClass & RCLS_MVPD_MASK )  &&
              ( (ringClass & RCLS_MVPD_PDR_EQ) != RCLS_MVPD_PDR_EQ )  &&
-             ( (ringClass & RCLS_MVPD_PDR_CORE) != RCLS_MVPD_PDR_CORE ) )
+             ( (ringClass & RCLS_MVPD_PDR_CORE) != RCLS_MVPD_PDR_CORE ) &&
+             ( (ringClass & RCLS_MVPD_PDS_EQ) != RCLS_MVPD_PDS_EQ )  &&
+             ( (ringClass & RCLS_MVPD_PDS_CORE) != RCLS_MVPD_PDS_CORE ) )
         {
             l_rc = ringid_get_chipletProps( CID_P10,
                                             torMagic,
@@ -1653,7 +1659,8 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
             ringClass = i_ringProps[rpIndex].ringClass;
 
             if ( ( ringClass != UNDEFINED_RING_CLASS )  &&
-                 ( (ringClass & RCLS_MVPD_PDR_EQ) == RCLS_MVPD_PDR_EQ )  &&
+                 ( ( (ringClass & RCLS_MVPD_PDR_EQ) == RCLS_MVPD_PDR_EQ )  ||
+                   ( (ringClass & RCLS_MVPD_PDS_EQ) == RCLS_MVPD_PDS_EQ ) )  &&
                  ( i_sysPhase == SYSPHASE_HB_SBE  ||
                    ( i_sysPhase == SYSPHASE_RT_QME && (ringClass & RMRK_SCAN_BY_QME) ) ) )
             {
@@ -1771,7 +1778,8 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                 ringClass = i_ringProps[rpIndex].ringClass;
 
                 if ( ( ringClass != UNDEFINED_RING_CLASS )  &&
-                     ( (ringClass & RCLS_MVPD_PDR_CORE) == RCLS_MVPD_PDR_CORE )  &&
+                     ( ( (ringClass & RCLS_MVPD_PDR_CORE) == RCLS_MVPD_PDR_CORE )  ||
+                       ( (ringClass & RCLS_MVPD_PDS_CORE) == RCLS_MVPD_PDS_CORE ) )  &&
                      ( i_sysPhase == SYSPHASE_HB_SBE  ||
                        ( i_sysPhase == SYSPHASE_RT_QME && (ringClass & RMRK_SCAN_BY_QME) ) ) )
                 {
@@ -3416,24 +3424,30 @@ ReturnCode p10_ipl_customize (
     mvpdRtvFromCode = ringid_get_ring_table_version_mvpd();
 
     // Fetching ring table version from the MVPD
-    for(uint8_t i = 0; i < MVPD_RING_TYPES; i++)
+    for (uint8_t iType = 0; iType < MVPD_RING_TYPES; iType++)
     {
-        if(i == MVPD_RING_PDG)
+        switch (iType)
         {
-            mvpdKeyword = fapi2::MVPD_KEYWORD_PDG;
-        }
-        else if(i == MVPD_RING_PDP)
-        {
-            continue; // Reinstate next line when HB supports #P
-            //mvpdKeyword = fapi2::MVPD_KEYWORD_PDP;
-        }
-        else if(i == MVPD_RING_PDR)
-        {
-            mvpdKeyword = fapi2::MVPD_KEYWORD_PDR;
-        }
-        else
-        {
-            mvpdKeyword = fapi2::MVPD_KEYWORD_UNDEFINED;
+            case MVPD_RING_PDG:
+                mvpdKeyword = fapi2::MVPD_KEYWORD_PDG;
+                break;
+
+            case MVPD_RING_PDP:
+                // Reinstate next line when/if #P needs support
+                //mvpdKeyword = fapi2::MVPD_KEYWORD_PDP;
+                continue;
+
+            case MVPD_RING_PDR:
+                mvpdKeyword = fapi2::MVPD_KEYWORD_PDR;
+                break;
+
+            case MVPD_RING_PDS:
+                mvpdKeyword = fapi2::MVPD_KEYWORD_PDS;
+                break;
+
+            default:
+                mvpdKeyword = fapi2::MVPD_KEYWORD_UNDEFINED;
+                break;
         }
 
         FAPI_TRY(getMvpdField(fapi2::MVPD_RECORD_CP00,

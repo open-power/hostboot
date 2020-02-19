@@ -378,7 +378,7 @@ int _tor_header_and_ring_check( void*           i_ringSection,  // Ring section 
 
     if ( rc != TOR_SUCCESS )
     {
-        // Only trace out what we know could be an error.
+        // Only trace out what we know could be an error. Return any rc!=success.
         if ( rc == TOR_INVALID_CHIP_ID )
         {
             MY_ERR("ERROR: TOR ringId check: ringid_check_ringId() failed w/rc=0x%08x"
@@ -443,14 +443,13 @@ int tor_get_single_ring ( void*         i_ringSection,  // Ring section ptr
 
     // Explanation to the "list" of RCs that we exclude from tracing out:
     // TOR_HOLE_RING_ID:    Can happen if a ring has been removed from the ring list
-    // TOR_INVALID_RING_ID: CAn happen if caller carelessly cycles through ringIds
+    // TOR_INVALID_RING_ID: Can happen if caller carelessly cycles through ringIds
     if ( rc )
     {
         if ( rc != TOR_HOLE_RING_ID &&
              rc != TOR_INVALID_RING_ID )
         {
-            MY_ERR("ERROR: tor_get_single_ring: _tor_header_and_ring_check() failed"
-                   " w/rc=0x%08x\n",
+            MY_ERR("ERROR: tor_get_single_ring: _tor_header_and_ring_check() failed w/rc=0x%08x\n",
                    rc);
         }
 
@@ -775,7 +774,7 @@ int dyn_get_ring( void*          i_ringSection,
 
     if ( rc != TOR_SUCCESS )
     {
-        // Only trace out what we know could be an error.
+        // Only trace out what we know could be an error. Return any rc!=success.
         if ( rc == TOR_INVALID_CHIP_ID )
         {
             MY_ERR("ERROR: dyn_get_ring: ringid_check_ringId() failed w/rc=0x%08x"

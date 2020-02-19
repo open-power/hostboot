@@ -251,7 +251,7 @@ enum RingMarker
 #define RCLS_MVPD_PDS_EQ        (RMRK_MVPD_PDS | RMRK_MVPD_EQ)
 #define RCLS_MVPD_PDS_CORE      (RMRK_MVPD_PDS | RMRK_MVPD_CORE)
 // MVPD keyword mask
-#define RCLS_MVPD_MASK          (RMRK_MVPD_PDG | RMRK_MVPD_PDP | RMRK_MVPD_PDR)
+#define RCLS_MVPD_MASK          (RMRK_MVPD_PDG | RMRK_MVPD_PDP | RMRK_MVPD_PDR | RMRK_MVPD_PDS)
 
 // Ring types supported.
 // - This enum also reflects the order with which they appear in various images' .rings section.

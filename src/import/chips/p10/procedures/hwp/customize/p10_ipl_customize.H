@@ -58,7 +58,8 @@ enum MvpdRingType
     MVPD_RING_PDG = (uint8_t)0,
     MVPD_RING_PDP = (uint8_t)1,
     MVPD_RING_PDR = (uint8_t)2,
-    MVPD_RING_TYPES = (uint8_t)3
+    MVPD_RING_PDS = (uint8_t)3,
+    MVPD_RING_TYPES = (uint8_t)4
 };
 
 #define RINGID_FEAT_LIST_MAX_SIZE (uint16_t)1024

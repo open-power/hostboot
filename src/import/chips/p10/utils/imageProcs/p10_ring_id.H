@@ -41,7 +41,7 @@ enum RingID
     sbe_gptr                 = 4, //0x04
     sbe_repr                 = 5, //0x05
     sbe_time                 = 6, //0x06
-    // invalid_ring: 7, //0x07
+    // hole_ring: 7, //0x07
     perv_dpll_gptr           = 8, //0x08
     perv_pll_gptr            = 9, //0x09
     n0_gptr                  = 10, //0x0A
@@ -195,7 +195,14 @@ enum RingID
     ec1_l3_repr              = 158, //0x9E
     ec2_l3_repr              = 159, //0x9F
     ec3_l3_repr              = 160, //0xA0
-    NUM_RING_IDS_MVPD        = 161,
+    n0_gptr_ovly             = 161, //0xA1
+    n1_gptr_ovly             = 162, //0xA2
+    pau0_gptr_ovly           = 163, //0xA3
+    pau1_gptr_ovly           = 164, //0xA4
+    pau2_gptr_ovly           = 165, //0xA5
+    pau3_gptr_ovly           = 166, //0xA6
+    eq_gptr_ovly             = 167, //0xA7
+    NUM_RING_IDS_MVPD        = 168,
 
     // EKB Rings:
     perv_fure                = 256, //0x100
@@ -297,7 +304,7 @@ enum RingID
     ec_mma_abst              = 352, //0x160
     NUM_RING_IDS_EKB         = 97,
 
-    NUM_RING_IDS             = 258, // = NUM_RING_IDS_MVPD + NUM_RING_IDS_EKB
+    NUM_RING_IDS             = 265, // = NUM_RING_IDS_MVPD + NUM_RING_IDS_EKB
 }; // enum RingID
 
 #endif  // _P10_RING_ID_H_

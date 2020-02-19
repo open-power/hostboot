@@ -236,7 +236,7 @@ int ringid_check_ringId( ChipId_t  i_chipId,
 {
     if ( i_ringId == HOLE_RING_ID )
     {
-        // A hole ring is benign. Let caller decide.
+        // A hole ring is usually benign. No tracing. Let caller decide.
         return TOR_HOLE_RING_ID;
     }
 
@@ -248,7 +248,7 @@ int ringid_check_ringId( ChipId_t  i_chipId,
         case CID_P10:
             if ( rpIndex >= P10_RID::NUM_RING_IDS )
             {
-                // Not necessarily an error. Let caller decide.
+                // Not necessarily an error. No tracing. Let caller decide.
                 return TOR_INVALID_RING_ID;
             }
 
@@ -513,7 +513,8 @@ int ringidGetRootRingId( ChipId_t    i_chipId,
         {
             if ( ringProps[iRpIndex].scanScomAddr == i_scanScomAddr )
             {
-                if ( ringProps[iRpIndex].ringClass & RMRK_ROOT )
+                if ( ringProps[iRpIndex].ringClass & RMRK_ROOT &&
+                     !( ringProps[iRpIndex].ringClass & RMRK_MVPD_PDS ) )
                 {
                     if (bFound)
                     {

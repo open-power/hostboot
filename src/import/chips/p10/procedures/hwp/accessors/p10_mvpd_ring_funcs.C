@@ -97,6 +97,7 @@ extern "C"
     {
         { MVPD_RECORD_CP00, MVPD_KEYWORD_PDR },
         { MVPD_RECORD_CP00, MVPD_KEYWORD_PDG },
+        { MVPD_RECORD_CP00, MVPD_KEYWORD_PDS },
     };
 
     /**

@@ -62,8 +62,9 @@ extern "C"
      * @param i_record          -   Record enumerator
      * @param i_keyword         -   Keyword enumerator
      * Supported Rings are:
-     *                   MVPD_RECORD_CP00 - MVPD_KEYWORD_PDR
      *                   MVPD_RECORD_CP00 - MVPD_KEYWORD_PDG
+     *                   MVPD_RECORD_CP00 - MVPD_KEYWORD_PDR
+     *                   MVPD_RECORD_CP00 - MVPD_KEYWORD_PDS
      * @param i_chipletSel      -   Chiplet Select (chiplet ID + quad region select)
      *                              Note that the quad region select MUST only be
      *                              non-zero for the EQ chiplet core instance rings.
