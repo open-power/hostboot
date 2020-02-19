@@ -1648,6 +1648,8 @@ fapi2::ReturnCode buildPpmrHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
     l_pPpmrHdr->iv_gpspbLength      =   htobe32(l_pPpmrHdr->iv_gpspbLength);
     l_pPpmrHdr->iv_opspbOffset      =   htobe32(l_pPpmrHdr->iv_opspbOffset);
     l_pPpmrHdr->iv_opspbLength      =   htobe32(l_pPpmrHdr->iv_opspbLength);
+    l_pPpmrHdr->iv_pstateOffset     =   htobe32(l_pPpmrHdr->iv_pstateOffset);
+    l_pPpmrHdr->iv_pstateLength     =   htobe32(l_pPpmrHdr->iv_pstateLength);
     l_pPpmrHdr->iv_wofTableOffset   =   htobe32(l_pPpmrHdr->iv_wofTableOffset);
     l_pPpmrHdr->iv_wofTableLength   =   htobe32(l_pPpmrHdr->iv_wofTableLength);
 
@@ -1661,6 +1663,8 @@ fapi2::ReturnCode buildPpmrHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
     FAPI_DBG( "PPMR GPSPB Length          0x%08x", htobe32(l_pPpmrHdr->iv_gpspbLength));
     FAPI_DBG( "PPMR OPSPB Offset          0x%08x", htobe32(l_pPpmrHdr->iv_opspbOffset));
     FAPI_DBG( "PPMR OPSPB Length          0x%08x", htobe32(l_pPpmrHdr->iv_opspbLength));
+    FAPI_DBG( "PPMR Pstate Offset         0x%08x", htobe32(l_pPpmrHdr->iv_pstateOffset));
+    FAPI_DBG( "PPMR Pstate Length         0x%08x", htobe32(l_pPpmrHdr->iv_pstateLength));
     FAPI_DBG( "PGPE SRAM Image Length     0x%08x", htobe32(l_pPpmrHdr->iv_sramSize));
     FAPI_DBG( "WOF Table Offset           0x%08x", htobe32(l_pPpmrHdr->iv_wofTableOffset));
     FAPI_DBG( "WOF Table Length           0x%08x", htobe32(l_pPpmrHdr->iv_wofTableLength));
