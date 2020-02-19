@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,6 +53,10 @@ uint64_t get_top_mem_addr()
         }
 
     } while(0);
+
+    // Need to make sure we don't choose a range that is owned by
+    // the NVDIMMs
+    l_top_addr = NVDIMM::get_top_addr_with_no_nvdimms(l_top_addr);
 
     return l_top_addr;
 }
@@ -161,6 +165,14 @@ uint64_t get_top_smf_mem_addr()
         l_top_addr = std::max(l_top_addr, get_top_smf_mem_addr(l_pProc));
     }
 
+    // There should be no NVDIMM's while in SMF mode, but there is no fast and
+    // easy way to determine if the system has NVDIMMs or not.  This call should
+    // return the same input value, if there are no NVDIMMs.  If the value
+    // returned is not the same as the input value, then there is a
+    // configuration issue, therefore assert stating so.
+    assert((l_top_addr == NVDIMM::get_top_addr_with_no_nvdimms(l_top_addr)),
+           "Sytem Configuration Issue: Found NVDIMMs while in SMF mode.");
+
     return l_top_addr;
 }
 
@@ -187,13 +199,20 @@ uint64_t get_top_smf_mem_addr(const TARGETING::Target* i_proc)
 }
 
 /**
- * @brief Utility function to fetch the top of the HOMER memory;
- *        when SMF is enabled, the function will return the highest
- *        available SMF BAR on a proc, so the top of the HOMER memory
- *        will be pointed to the top of SMF memory, and all of the
- *        contents will be put in secure memory space. When SMF is not
- *        enabled, the function will return the highest known address
- *        on the system.
+ * @brief Utility function to fetch the top of the HOMER memory address
+ *
+ * @details * When SMF is enabled, the function will return the highest
+ *            available SMF BAR on a proc, so the top of the HOMER memory
+ *            will be pointed to the top of SMF memory, and all of the
+ *            contents will be put in secure memory space.
+ *          * When SMF is not enabled, the function will return the highest
+ *            known address on the system, that does not collide with an
+ *            NVDIMM's address.
+ *
+ * @note: There should be no NVDIMMs when in SMF mode
+ *
+ * @return the top HOMER memory address that does not collide with an NVDIMM
+ *         if there are NVDIMMs.
  */
 uint64_t get_top_homer_mem_addr()
 {
@@ -208,11 +227,6 @@ uint64_t get_top_homer_mem_addr()
         {
             l_top_homer_addr = get_top_mem_addr();
         }
-
-        // Need to make sure we don't choose a range that is owned by
-        //  the NVDIMMs
-        l_top_homer_addr =
-          NVDIMM::get_top_addr_with_no_nvdimms(l_top_homer_addr);
 
     }while(0);
 
