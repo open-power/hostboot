@@ -40,6 +40,10 @@
 
 #include <prdfMemCaptureData.H>
 
+#if !defined(__HOSTBOOT_MODULE) && !defined(ESW_SIM_COMPILE)
+#include <server/services/hostService/hwsvHostSvcUtil.H> // setRegNodeBootStatus
+#endif
+
 // For compression routines
 #define PRDF_COMPRESSBUFFER_COMPRESS_FUNCTIONS
 #include <prdfCompressBuffer.H>
@@ -212,6 +216,23 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             if ( MRU_LOW == it->priority )
             {
                 sappHwNoGardReq = true;
+            }
+
+            if ( MACHINE_CHECK == i_attnType && it->isDefault )
+            {
+                #if !defined(__HOSTBOOT_MODULE) && !defined(ESW_SIM_COMPILE)
+                TargetHandle_t trgt = thiscallout.getTarget();
+                TargetHandle_t node = getConnectedParent( trgt, TYPE_NODE );
+
+                errlHndl_t errl = HWSV::HostSvc::setRegNodeBootStatus( node );
+                if ( nullptr != errl )
+                {
+                    PRDF_ERR( PRDF_FUNC "Error from HWSV::HostSvc::"
+                              "setRegNodeBootStatus(0x%08x)", getHuid(node) );
+                    PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+                    continue;
+                }
+                #endif
             }
         }
     }

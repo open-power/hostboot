@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,14 +87,14 @@ public:
   /**
    Resolve by adding the error type to the service data collector
    <ul>
-   <br><b>Parameters:  </b> ServiceDataCollector
+   <br><b>Parameters:  </b> ServiceDataCollector, i_default
    <br><b>Returns:     </b> Return code [SUCCESS | nonZero]
    <br><b>Requirements:</b> none.
    <br><b>Promises:    </b> sdc.GetErrorType() == ErrorType
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-  virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & sdc);
+  virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & sdc, bool i_default = false);
 
 private:  // functions
 private:  // Data

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,8 @@
 namespace PRDF
 {
 
-int32_t DumpResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
+int32_t DumpResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData,
+                                 bool i_default )
 {
     // Note: Dump is not supported on hostboot.
     return SUCCESS;

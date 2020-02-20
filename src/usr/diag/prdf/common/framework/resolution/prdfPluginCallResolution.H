@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2005,2014              */
+/* Contributors Listed Below - COPYRIGHT 2005,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -54,7 +56,8 @@ class PluginCallResolution : public Resolution
           return (iv_function == r.iv_function);
         }
 
-        virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & i_error)
+        virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & i_error,
+                                bool i_default = false)
         {
             // In Isolation only pass, we are only interested in error
             // signature. So we will not execute plugin resolution as it may

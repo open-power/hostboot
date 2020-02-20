@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,7 @@ namespace PRDF
 // Member Function Specifications
 //---------------------------------------------------------------------
 
-int32_t FlagResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
+int32_t FlagResolution::Resolve(STEP_CODE_DATA_STRUCT & error, bool i_default)
 {
   uint32_t rc = SUCCESS;
   error.service_data->setFlag(xFlag);

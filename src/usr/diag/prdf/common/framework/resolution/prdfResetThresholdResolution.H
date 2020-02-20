@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -94,6 +94,7 @@ public:
   /**
    Resolve this part of the error (increment count)
    @param error, Access to ServiceDataCollector @see ServiceDataCollector
+   @param i_default default resolution
    @returns [SUCCESS| return code]
    @pre none
    @post 1) ++count.
@@ -101,7 +102,8 @@ public:
              maskId is sent to serviceDataCollector.
          3)Chained resolution called if one was provided in ctor
    */
-  virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & error);
+  virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & error,
+                          bool i_default = false);
 
 
 private:  // functions
