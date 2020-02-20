@@ -41,6 +41,7 @@ ROOTPATH = ../../..
 
 # Content targets.
 VALID_TARGETS = fsp tools openpower vpo errltool openpower-sim
+RELEASE_TARGETS = fsp tools errltool
 
 #
 # Files which are to be directly copied into content targets.
@@ -365,22 +366,5 @@ fsp.tar_CONTENTS = \
     src/usr/targeting/attroverride/attrTextToBinaryBlob.H \
     src/include/usr/sbe/sbe_common.H
 
-
-#
-# Portions of the FSP sandbox which must be rebuilt based on file changes.
-#
-# Format is <fsp dir>:<mk target>:<context>:<dependency>.
-#
-# NOTARGET is a special target which indicates to just run 'mk'.
-# FORCE_ALWAYS is a special dependency that causes the 'mk' to always be
-# executed.
-#
-# Example:
-# 	hbfw:expand_tars:ppc:FORCE_ALWAYS indicates that the src/hbfw
-# 	directory should have 'mk expand_tars' executed in the ppc context.
-#
-fsp_ODE_REMAKES = \
-    hbfw:expand_tars:ppc:FORCE_ALWAYS \
-    hbfw/simics:NOTARGET:ppc:$(TARGET_DIR)/simics.tar 
 
 include dist.rules.mk

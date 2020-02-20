@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2018
+# Contributors Listed Below - COPYRIGHT 2012,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -37,6 +37,9 @@
 .DEFAULT_GOAL := ALL
 .PHONY: ALL
 ALL: $(addsuffix _TARGET_AS_SUBDIR, $(VALID_TARGETS))
+
+# When doing a RELEASE put all of the results into a subdir
+RELEASE: $(addsuffix _TARGET_AS_SUBDIR, $(RELEASE_TARGETS))
 
 # Dummy target to force building of some ODE mk directives.
 .PHONY: FORCE_ALWAYS

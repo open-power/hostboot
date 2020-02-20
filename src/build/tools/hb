@@ -338,11 +338,13 @@ hb_prime()
          if [ ${SBDRIVER} != ${DRIVER} ]; then
              echo "ERROR: Driver mismatch between sandbox and src/build/citest/etc/bbuild."
              echo "Sandbox at ${SBDRIVER}"
+             echo "bbuild at ${DRIVER}"
              echo "Update sandbox with 'hb simsetup'."
              exit 1
          fi
     fi
 
+echo "Calling hbDistribute --hb-standalone "
     hbDistribute --hb-standalone $*
 
 }

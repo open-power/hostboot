@@ -29,16 +29,15 @@ set -exo pipefail
 
 TARGET_DIR="invalid directory"
 TARGET="fsp_TARGET"
-SBFW_DIR="invalid directory"
 TEST_TEST=0
 
 print_usage()
 {
     echo "Usage: $0 [--help] | "
-    echo "          [<path>] [--test] [--release | --vpo | --simics | --fsp]"
+    echo "          [<path>] [--test] [--release | --vpo | --fsp]"
     echo
-    echo "    This script will deliver the defined content for a distribition"
-    echo "    target.  Typically this is used to populate an ODE sandbox with"
+    echo "    This script will deliver the defined content for a distribution"
+    echo "    target.  This can be used to populate an ODE sandbox with"
     echo "    images and debug tools or for the generation of a build release"
     echo "    directory."
     echo "    However, if building for P10 Standalone, an ODE sandbox will not"
@@ -56,7 +55,7 @@ print_usage()
     echo
     echo "    --release: Create a full release distribution (all targets)."
     echo "    --vpo: Generate just 'vpo' content."
-    echo "    --simics/--fsp: *default* Generate just 'fsp' content"
+    echo "    --fsp: *default* Generate just 'fsp' content"
     echo "    --hb-standalone: Indicate if in hb-standalone mode for compile optimizing"
     echo "    --corrupt <Partition name>[= pro|unpro] (Note: requires '--secureboot')"
     echo "        Partition 'eyeCatch' name to corrupt a byte of."
@@ -90,7 +89,7 @@ do
             shift
         ;;
 
-        "--simics" | "--fsp")
+        "--fsp")
             TARGET="fsp_TARGET"
             shift
         ;;
@@ -110,8 +109,13 @@ do
             shift
         ;;
 
+        "--tools")
+            TARGET="tools_TARGET"
+            shift
+        ;;
+
         "--release")
-            TARGET="ALL"
+            TARGET="RELEASE"
             shift
         ;;
 
@@ -180,33 +184,23 @@ if [[ $HB_STANDALONE != "1" ]] || [ $PNOR_LAYOUT_SELECTED == "FSP" ];then
 # The following should not run if we are distributing for a ${HB_STANDALONE}
 # system, i.e. when using an ODE SB
 
-    echo "sbroot=${SANDBOXROOT} sbname=${SANDBOXNAME}"
+    echo "sbroot=${SANDBOXROOT} sbname=${SANDBOXNAME} sbbase=${SANDBOXBASE}"
     echo "target dir ${TARGET_DIR}"
     # Verify target directory or default to sandbox.
     if [ "${TARGET_DIR}" == "invalid directory" ]; then
-        if [ -z "${SANDBOXROOT}" -o -z "${SANDBOXNAME}" ]; then
-            echo "ERROR: TARGET_DIR - No path specified and \$SANDBOXBASE undefined."
-            print_usage
-            exit -1
+        if [ -z "${SANDBOXBASE}" ]; then
+           if [ -z "${SANDBOXROOT}" -o -z "${SANDBOXNAME}" ]; then
+               echo "ERROR: TARGET_DIR - No path specified and \$SANDBOXBASE undefined."
+               print_usage
+               exit -1
+           else
+               TARGET_DIR=${SANDBOXROOT}/${SANDBOXNAME}/src/hbfw
+           fi
         else
-            TARGET_DIR=${SANDBOXROOT}/${SANDBOXNAME}/src/hbfw
+            TARGET_DIR=${SANDBOXBASE}/src/hbfw
         fi
     fi
 
-    echo "sbfw dir = ${SBFW_DIR}"
-    # Verify SBFW directory or default to sandbox.
-    if [ "${SBFW_DIR}" == "invalid directory" -a \
-        "${TARGET}" != "openpower_TARGET" -a \
-        "${TARGET}" != "openpower-sim_TARGET" -a \
-        "${TARGET}" != "errltool_TARGET" ]; then
-        if [ -z "${SANDBOXROOT}" -o -z "${SANDBOXNAME}" ]; then
-            echo "ERROR:SBFW - No path specified and \$SANDBOXBASE undefined."
-            print_usage
-            exit -1
-        else
-            SBFW_DIR=${SANDBOXROOT}/${SANDBOXNAME}/src/sbei/sbfw
-        fi
-    fi
 fi
 
 # Find root of repository.
@@ -252,10 +246,8 @@ rm -f ${SANDBOXROOT}/${SANDBOXNAME}/obj/ppc/hbfw/img/rand-*
 
 # Execute makefile for distribution.
 mkdir -p $TARGET_DIR
-mkdir -p $SBFW_DIR
 export TARGET_TEST
 export TARGET_DIR
-export SBFW_DIR
 export HB_STANDALONE
 export CORRUPT_PARAMS
 if [ -n "$CORRUPT_PARAMS" ]; then

@@ -303,10 +303,10 @@ SBE_BUILD_SCRIPT = ${buildSbePart.pl:P}
 
 P10_SBE_IMG   = p10.SbePartition.bin
 
-P9A_EC10_BIN = ${SBEI_OBJPATH:Fp10_10.sbe_seeprom.hdr.bin}
+P10_EC10_BIN = ${SBEI_OBJPATH:Fp10_10.sbe_seeprom.hdr.bin}
 
 SBE_PART_INFO = \
-  ${P10_SBE_IMG}:10=${P10_EC10_BIN} 
+  ${P10_SBE_IMG}:10=${P10_EC10_BIN}
 
 __SBE_PART_BUILD/% : .SPECTARG .PMAKE
 	@${MAKE:T:R} BUILD_SPECIFIC_SBEPART \
@@ -363,7 +363,7 @@ ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
 ## Chip Specific
 P10_HBD_IMG = simics_P10_targeting.bin
 
-P10_HCODE_IMG = ${ENGD_SRCPATH:Fp9a.hw_ref_image.bin}
+P10_HCODE_IMG = ${ENGD_SRCPATH:Fp10.hw_ref_image.bin}
 
 P10_OCC_IMG = ${bb}/images/ppc/lab/fs/p9le/rootfs/opt/extucode/81e00430.lid
 
