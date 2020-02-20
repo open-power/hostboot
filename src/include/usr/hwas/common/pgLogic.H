@@ -41,8 +41,26 @@ namespace PARTIAL_GOOD
     using HWAS::pg_entry_t;
     using HWAS::pg_idx_t;
     using HWAS::pg_mask_t;
-    using HWAS::cu_mask_t;
     using HWAS::partialGoodVector;
+
+    // cu_mask_t represents a set of chip units to which a particular PG rule
+    // should apply. The value of the bit at displacement N from the LSB
+    // represents the presence (1) or absence (0) of chip unit N in the set.
+    // Only chip units in the range [0, 63] can be represented.
+    typedef uint64_t cu_mask_t;
+
+    // Returns a single-bit mask for the given chip unit; i.e. chip unit 5 will
+    // be 0x20, etc.
+    static constexpr cu_mask_t cu_mask(const uint8_t i_chipUnit)
+    {
+        // The chip unit mask of CU 0 is represented by a mask with only the
+        // least significant bit set.
+
+        // Left shift the encoded value a number of times equal to the value
+        // of i_chipUnit. This puts the ON bit under the correct position to
+        // be compared against the chip unit mask.
+        return 1ull << i_chipUnit;
+    }
 
     // This struct represents a "row" in the partial good rules map. It contains
     // all the information necessary to verify one or more rules for a target.
@@ -195,6 +213,8 @@ namespace PARTIAL_GOOD
         {
             return iv_pgMask;
         }
+
+        bool operator<(const TARGETING::TYPE rhs) const;
 
     private:
 

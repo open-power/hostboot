@@ -269,22 +269,19 @@ private:
     a manipulated PG vector. The PGV being returned will pretend that all the
     PECs are not functional.
     */
-    partialGoodVector parsePgData(const std::array<uint8_t,
-        VPD_CP00_PG_DATA_LENGTH>& pgData) override
+    void parsePgData(
+            const std::array<uint8_t, VPD_CP00_PG_DATA_LENGTH>& pgData,
+            partialGoodVector& o_pgDataAllGood) override
     {
 
         // Copy of the P10 all good PG vector.
-        // partialGoodVector l_pgDataAllGood = pgDataAllGood;
-        partialGoodVector l_pgDataAllGood;
-        memcpy(&l_pgDataAllGood, &pgDataAllGood, sizeof(pgDataAllGood));
+        memcpy(&o_pgDataAllGood, &pgDataAllGood, sizeof(pgDataAllGood));
 
         // Set all the PECs bad
         for (const int l_pecIdx : VPD_CP00_PG_PCI_INDEX)
         {
-            l_pgDataAllGood[l_pecIdx] |= (~VPD_CP00_PG_PCI_ALL_GOOD);
+            o_pgDataAllGood[l_pecIdx] |= (~VPD_CP00_PG_PCI_ALL_GOOD);
         }
-
-        return l_pgDataAllGood;
 
     }
 

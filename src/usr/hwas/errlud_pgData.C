@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,7 +53,8 @@ HWAS::ErrlUdPartialGoodData::ErrlUdPartialGoodData(
     // NUM_PG_ENTRIES       : uint32_t
     // PG_ENTRIES           : pg_entry_t[NUM_PG_ENTRIES]
 
-    l_memBuf << static_cast<uint32_t>(i_modelAgData.size());
+    // @TODO RTC 249996 i_modelAgData.size() instead of MODEL_AG_DATA_ENTRIES
+    l_memBuf << static_cast<uint32_t>(MODEL_AG_DATA_ENTRIES);
 
     // Store the model-specific All Good values in the buffer
     for (const auto entry : i_modelAgData)

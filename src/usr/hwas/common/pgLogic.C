@@ -36,9 +36,6 @@
 
 using namespace HWAS::COMMON;
 
-#ifdef __HOSTBOOT_MODULE //@fixme-RTC:248610-Fips compatible C++
-using HWAS::cu_mask;
-
 namespace PARTIAL_GOOD
 {
     // Target Type Masks
@@ -171,7 +168,7 @@ namespace PARTIAL_GOOD
     // 1. Add a member to the model_mask_t enumeration above
     // 2. Add an entry to model_lookup_table below associating the new model
     //    mask with the new model type constant
-    const model_to_model_mask model_lookup_table[] =
+    const std::array<model_to_model_mask, 1> model_lookup_table =
     {
         { TARGETING::MODEL_POWER10, MODEL_MASK_POWER10 }
     };
@@ -180,19 +177,21 @@ namespace PARTIAL_GOOD
     // MODEL_MASK_NONE if there is no association.
     static const model_mask_t lookup_model_mask(const TARGETING::ATTR_MODEL_type model)
     {
-        const auto end = model_lookup_table + std::size(model_lookup_table);
-        const auto it = std::find_if(model_lookup_table,
-                                     end,
-                                     [model](const model_to_model_mask pair) {
-                                         return pair.model == model;
-                                     });
+        model_mask_t mask = MODEL_MASK_NONE;
 
-        if (it == end)
+        for (auto it = model_lookup_table.begin();
+             it != model_lookup_table.end();
+             it++)
         {
-            return MODEL_MASK_NONE;
+            if (it->model == model)
+            {
+                mask = it->model_mask;
+                break;
+            }
         }
 
-        return it->model_mask;
+        return mask;
+
     }
 
     constexpr PartialGoodRule::specialRuleFuncPtr_t NO_SPECIAL_RULE = nullptr;
@@ -536,6 +535,8 @@ namespace PARTIAL_GOOD
         { TARGETING::TYPE_FC },
     }; // End of pgRules_map Rules
 
+// @TODO RTC 249996 remove ifdef once fips compiler supports C++14 and beyond
+#ifdef __HOSTBOOT_MODULE
     // A helper function to determine whether a sequence of rules is sorted with
     // respect to target type.
     template<typename It>
@@ -548,12 +549,21 @@ namespace PARTIAL_GOOD
                 : (begin->type() > (begin+1)->type()
                    ? false
                    : is_sorted(begin + 1, end)));
+
     }
 
     // Statically enforce the requirement that the PG rules map is in sorted
     // order, because we binary search it.
     static_assert(is_sorted(pgRules_map.cbegin(), pgRules_map.cend()),
                   "PG rules map must be in sorted order");
+#endif // @TODO RTC 249996
+
+
+    // @TODO RTC 249996 Drop this overloaded operator
+    bool PartialGoodRule::operator<(const TARGETING::TYPE rhs) const
+    {
+        return iv_type < rhs;
+    }
 
     errlHndl_t findRulesForTarget(
             const TARGETING::ConstTargetHandle_t i_target,
@@ -574,11 +584,11 @@ namespace PARTIAL_GOOD
         // Lookup the target in the PG Rules Table
         auto l_rulesIterator
             = std::lower_bound(pgRules_map.cbegin(), pgRules_map.cend(),
-                               l_targetType,
+                               l_targetType/*, @TODO RTC 249996 Uncomment
                                [](const PartialGoodRule& r, const TYPE t)
                                {
                                    return r.type() < t;
-                               });
+                               }*/);
 
         o_pgRules = &*l_rulesIterator;
 
@@ -673,4 +683,3 @@ namespace PARTIAL_GOOD
         return l_errl;
     }
 }
-#endif //#ifdef __HOSTBOOT_MODULE @fixme-RTC:248610-Fips compatible C++

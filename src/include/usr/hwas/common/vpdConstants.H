@@ -28,6 +28,9 @@
 
 #include <targeting/common/commontargeting.H>
 
+// @TODO RTC 249996 std::array isn't available pre-C++11. The reason we're
+//                  keeping it in conditionally is so that the static_assert
+//                  below can still be used during Hostboot compiles.
 #ifdef __HOSTBOOT_MODULE
 #include <array>
 #endif
@@ -47,26 +50,6 @@ typedef uint8_t pg_idx_t;
 // pg_mask_t represents a mask that will be applied to a pg_entry_t.
 typedef uint32_t pg_mask_t;
 
-// cu_mask_t represents a set of chip units to which a particular PG rule should
-// apply. The value of the bit at displacement N from the LSB represents the
-// presence (1) or absence (0) of chip unit N in the set. Only chip units in the
-// range [0, 63] can be represented.
-typedef uint64_t cu_mask_t;
-
-#ifdef __HOSTBOOT_MODULE  //@fixme-RTC:248610-Fips compatible C++
-// Returns a single-bit mask for the given chip unit; i.e. chip unit 5 will
-// be 0x20, etc.
-static constexpr cu_mask_t cu_mask(const uint8_t i_chipUnit) {
-    // The chip unit mask of CU 0 is represented by a mask with only the
-    // least significant bit set.
-
-    // Left shift the encoded value a number of times equal to the value
-    // of i_chipUnit. This puts the ON bit under the correct position to
-    // be compared against the chip unit mask.
-    return 1ull << i_chipUnit;
-}
-#endif
-
 // NOTE: Many of the VPD_CP00_PG_X constants are used to construct an "All Good"
 //       vector to compare against the PG vector of a system. Changes to
 //       constants in this file should be reflected in
@@ -74,12 +57,16 @@ static constexpr cu_mask_t cu_mask(const uint8_t i_chipUnit) {
 
 // constants the platReadPartialGood will use for looking at the VPD data
 const pg_idx_t VPD_CP00_PG_DATA_LENGTH      = 192;
-const pg_idx_t VPD_CP00_PG_HDR_LENGTH       = 1; // TODO RTC 208782: Update if necessary
+// TODO RTC 208782: Update VPD_CP00_PG_HDR_LENGTH if necessary
+const pg_idx_t VPD_CP00_PG_HDR_LENGTH       = 1;
 const uint32_t VPD_CP00_PG_ENTRY_SIZE       = 3;
-const uint32_t VPD_CP00_PG_DATA_ENTRIES     = VPD_CP00_PG_DATA_LENGTH / VPD_CP00_PG_ENTRY_SIZE;
+const uint32_t VPD_CP00_PG_DATA_ENTRIES     = VPD_CP00_PG_DATA_LENGTH
+                                            / VPD_CP00_PG_ENTRY_SIZE;
 
 // The pgv type holds the entirety of the PGV after it is read and unpacked from
 // the VPD.
+// @TODO RTC 249996 std::array isn't available pre-C++11 but needed for
+//                  static_assert during Hostboot compiles.
 #ifdef __HOSTBOOT_MODULE
 typedef std::array<pg_entry_t, VPD_CP00_PG_DATA_ENTRIES> partialGoodVector;
 #else
@@ -101,8 +88,8 @@ typedef pg_entry_t partialGoodVector[VPD_CP00_PG_DATA_ENTRIES];
 // the entire chip is considered nonfunctional.
 //
 // The *_INDEX constants are the offset in number-of-entries (whether in 3-byte
-// chunks in the VPD or in 4-byte chunks post-extension) from the beginning of the
-// PGV at which the given value is located.
+// chunks in the VPD or in 4-byte chunks post-extension) from the beginning of
+// the PGV at which the given value is located.
 
 // UNSET: vital, fsia, fsi0, fsi1, fsi0ll, fsi1ll, fsi0inv
 const pg_entry_t VPD_CP00_PG_FSI_ALL_GOOD = 0xFFE03FFFu;
@@ -177,11 +164,8 @@ const uint32_t VPD_CP00_PG_RESERVED_GOOD    = 0xFFFFFFFFu;
 // chiplet in these arrays fails to pass the ALWAYS GOOD mask check, Hostboot
 // cannot use the chip.
 
-// This is required so that we can compile pre-c++11
-#ifdef __HOSTBOOT_MODULE  //@fixme-RTC:248610-Fips compatible C++
-
 // The first contains the chiplet's index in the PGV of the PG data...
-const std::array<pg_idx_t, 16> VPD_CP00_PG_ALWAYS_GOOD_INDEX =
+const pg_idx_t VPD_CP00_PG_ALWAYS_GOOD_INDEX[16] =
 {
     VPD_CP00_PG_FSI_INDEX,
     VPD_CP00_PG_PRV_INDEX,
@@ -201,10 +185,12 @@ const std::array<pg_idx_t, 16> VPD_CP00_PG_ALWAYS_GOOD_INDEX =
     VPD_CP00_PG_EQ_INDEX[7],
 };
 
+const size_t ALWAYS_GOOD_INDEX_SIZE = sizeof(VPD_CP00_PG_ALWAYS_GOOD_INDEX)
+                                    / sizeof(VPD_CP00_PG_ALWAYS_GOOD_INDEX[0]);
+
 // ...and the second contains the mask of bits which MUST be GOOD (0) for the
 // part to be considered functional.
-const std::array<pg_mask_t, VPD_CP00_PG_ALWAYS_GOOD_INDEX.size()>
-    VPD_CP00_PG_ALWAYS_GOOD_MASKS =
+const pg_mask_t VPD_CP00_PG_ALWAYS_GOOD_MASKS[ALWAYS_GOOD_INDEX_SIZE] =
 {
     VPD_CP00_PG_FSI_ALWAYS_GOOD_MASK,
     VPD_CP00_PG_PRV_ALWAYS_GOOD_MASK,
@@ -224,16 +210,16 @@ const std::array<pg_mask_t, VPD_CP00_PG_ALWAYS_GOOD_INDEX.size()>
     VPD_CP00_PG_EQ_ALWAYS_GOOD_MASK,
 };
 
-//#ifdef __HOSTBOOT_MODULE  @fixme-RTC:248610-Fips compatible C++
-#define CONSTEXPR constexpr
-#else
-#define CONSTEXPR const
-#endif // #ifdef __HOSTBOOT_MODULE
-
 // This is a P10 Partial-Good Vector with every partial- and always-good bit
 // unset, and every reserved bit set, used for tests.
 // This is defined in this header because it is used by both hwas1test.H and by
 // errludParser_pgData.H
+// @TODO RTC 249996 static_assert requires this to be constexpr
+#ifdef __HOSTBOOT_MODULE
+#define CONSTEXPR constexpr
+#else
+#define CONSTEXPR const
+#endif
 CONSTEXPR partialGoodVector pgDataAllGood =
 {
     VPD_CP00_PG_FSI_ALL_GOOD,
@@ -314,16 +300,16 @@ CONSTEXPR partialGoodVector pgDataAllGood =
 // There are no model-specific AG entries as yet.
 const uint8_t MODEL_AG_DATA_ENTRIES = 0;
 
-// We don't want this area to be compiled when we're doing e.g. an FSP build
-// (old compiler doesn't support C++11)
+// @TODO 249996 - compiler for hb errlparser didn't support static_assert(C++11)
+//                check if this is still the case.
 #ifdef __HOSTBOOT_MODULE
-
 // We need to initialize every element of our test PGV, and by default elements
 // will be initialized to 0, so if the last element is 0 then we know that we
 // used too few initializers. This will catch errors if the number of PGV
 // entries increases in the future.
 static_assert(pgDataAllGood.back() != 0,
               "pgDataAllGood has too few initializers");
+#endif
 
 // model_ag_entry represents a model-specific entry in the all-good AGV
 struct model_ag_entry
@@ -339,8 +325,7 @@ struct model_ag_entry
 // It is used by the error log for Partial-Good issues (ErrlUdPartialGoodData)
 // so that the parser can reconstruct an all-good AGV for a particular chip
 // model when it prints expected vs. actual pg values.
-typedef std::array<model_ag_entry, MODEL_AG_DATA_ENTRIES> model_ag_entries;
-#endif
+typedef model_ag_entry model_ag_entries[MODEL_AG_DATA_ENTRIES];
 
 // constants the platReadLx will use for looking at the VPD data
 const uint32_t VPD_CRP0_LX_HDR_DATA_LENGTH       = 256;
@@ -353,4 +338,4 @@ const uint8_t  VPD_CRP0_LX_MAX_X                 = 8;
 
 }
 
-#endif
+#endif // VPD_CONSTANTS_H

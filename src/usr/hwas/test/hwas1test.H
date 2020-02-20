@@ -50,6 +50,8 @@
 
 using PARTIAL_GOOD::pg_entry_t;
 using PARTIAL_GOOD::pg_mask_t;
+using PARTIAL_GOOD::cu_mask_t;
+using PARTIAL_GOOD::cu_mask;
 
 using namespace HWAS;
 using namespace TARGETING;
@@ -449,7 +451,7 @@ public:
             // always-good (i.e. necessary for a chip to be considered even
             // minimally functional) and set it to BAD, to ensure that
             // isChipFunctional considers the entire chip to be bad.
-            for (size_t i = 0; i < VPD_CP00_PG_ALWAYS_GOOD_INDEX.size(); ++i)
+            for (size_t i = 0; i < ALWAYS_GOOD_INDEX_SIZE; ++i)
             {
                 const auto l_pgIndex = VPD_CP00_PG_ALWAYS_GOOD_INDEX[i];
                 const auto l_alwaysGoodMask = VPD_CP00_PG_ALWAYS_GOOD_MASKS[i];
