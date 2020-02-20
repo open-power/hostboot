@@ -102,32 +102,28 @@ void runDumpCalls()
 
     do
     {
-        // In non-FSP based system SBE collects architected register
-        // data. Copy architected register data from Reserved Memory
-        // to hypervisor memory.
-        if ( !INITSERVICE::spBaseServicesEnabled() )
+        //Copy architected register data from Reserved
+        //Memory to hypervisor memory.
+        l_err = DUMP::copyArchitectedRegs();
+
+        if (l_err)
         {
-            l_err = DUMP::copyArchitectedRegs();
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                       "ERROR: DUMP::copyArchitectedRegs failed"
+                       TRACE_ERR_FMT,
+                       TRACE_ERR_ARGS(l_err) );
 
-            if (l_err)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
-                           "ERROR: DUMP::copyArchitectedRegs failed"
-                           TRACE_ERR_FMT,
-                           TRACE_ERR_ARGS(l_err) );
+            l_dumpCallFailed = true;
 
-                l_dumpCallFailed = true;
+            // Commit the error and break
+            errlCommit( l_err, HWPF_COMP_ID );
 
-                // Commit the error and break
-                errlCommit( l_err, HWPF_COMP_ID );
-
-                break;
-            }
-            else
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
-                           "SUCCESS: DUMP::copyArchitectedRegs" );
-            }
+            break;
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                       "SUCCESS: DUMP::copyArchitectedRegs" );
         }
 
         // Send a Start Mbox Msg to FSP
