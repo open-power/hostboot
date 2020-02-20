@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2009,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -74,7 +76,8 @@ public:
    * @param[io] io_data Reference to STEP_CODE_DATA_STRUCT
    * @return    Non-SUCCESS if an internal function fails, SUCCESS otherwise
   */
-  virtual int32_t Resolve( STEP_CODE_DATA_STRUCT & io_data );
+  virtual int32_t Resolve( STEP_CODE_DATA_STRUCT & io_data,
+                           bool i_default = false );
 
   /*
    * base class defines operator== so one is needed here

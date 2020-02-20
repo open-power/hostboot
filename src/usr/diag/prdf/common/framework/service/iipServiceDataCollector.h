@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -101,19 +101,26 @@ struct SdcCallout {
   PRDcallout callout;
   PRDpriority priority;
   GARD_POLICY gardState;
+  bool isDefault;
 
   //bool gard;
   SdcCallout() :
-    callout(NULL), priority(MRU_LOW), gardState( NO_GARD )
+    callout(NULL), priority(MRU_LOW), gardState( NO_GARD ), isDefault(false)
   {}
 
   SdcCallout(PRDcallout & mru, PRDpriority p, GARD_POLICY i_gardState )
-    : callout(mru), priority(p), gardState( i_gardState )
+    : callout(mru), priority(p), gardState( i_gardState ), isDefault(false)
+  {}
+
+  SdcCallout(PRDcallout & mru, PRDpriority p, GARD_POLICY i_gardState,
+             bool i_default )
+    : callout(mru), priority(p), gardState( i_gardState ), isDefault(i_default)
   {}
 
   SdcCallout( TARGETING::TargetHandle_t i_calloutTgt,
               PRDpriority p, GARD_POLICY i_gardState )
-    : callout( i_calloutTgt ), priority( p ), gardState( i_gardState )
+    : callout( i_calloutTgt ), priority( p ), gardState( i_gardState ),
+      isDefault(false)
   {}
 };
 
@@ -334,7 +341,7 @@ public:
    </ul><br>
    */
   void SetCallout( PRDcallout mru, PRDpriority priority = MRU_MED,
-                   GARD_POLICY i_gardState = GARD );
+                   GARD_POLICY i_gardState = GARD, bool i_default = false );
 
   /**
    Add a change to the prd signature List

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -91,7 +91,8 @@ Resolution::~Resolution() {}
 // EregResolution Member Function Specifications
 //---------------------------------------------------------------------
 
-int32_t EregResolution::Resolve( STEP_CODE_DATA_STRUCT & io_data )
+int32_t EregResolution::Resolve( STEP_CODE_DATA_STRUCT & io_data,
+                                 bool i_default )
 {
     int32_t rc = PRD_INTERNAL_CODE_ERROR;
     if( errorRegister != NULL )
@@ -104,7 +105,8 @@ int32_t EregResolution::Resolve( STEP_CODE_DATA_STRUCT & io_data )
 //--------------------------------------------------------------------
 // CalloutGardResolution Member Functions
 //--------------------------------------------------------------------
-int32_t CalloutGardResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
+int32_t CalloutGardResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData,
+                                        bool i_default )
 {
     /*
     This resolution is only needed when we callout self. So, during RuleChip
@@ -123,7 +125,8 @@ int32_t CalloutGardResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
         PRDcallout l_targetCallout( ServiceDataCollector::getTargetAnalyzed() );
         io_serviceData.service_data->SetCallout( l_targetCallout,
                                                  iv_calloutPriority,
-                                                 iv_gardState );
+                                                 iv_gardState,
+                                                 i_default );
     }
     else
     {
@@ -138,7 +141,8 @@ int32_t CalloutGardResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 // ResolutionList Member Functions
 //--------------------------------------------------------------------
 
-int32_t ResolutionList::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
+int32_t ResolutionList::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData,
+                                 bool i_default )
 {
     int32_t rc = SUCCESS;
     for(std::vector<void *>::iterator iter = resolutionList.begin();
@@ -155,7 +159,8 @@ int32_t ResolutionList::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 //--------------------------------------------------------------------
 // Call all chips raising attention as reported by sp sysdebug area
 //--------------------------------------------------------------------
-int32_t CallAttnResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
+int32_t CallAttnResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData,
+                                     bool i_default )
 {
     int32_t rc = NO_DOMAINS_AT_ATTENTION;
     SYSTEM_DEBUG_CLASS systemDebug;
@@ -174,7 +179,8 @@ int32_t CallAttnResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 
 // ********************************************************************
 
-int32_t TerminateResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
+int32_t TerminateResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData,
+                                      bool i_default )
 {
     io_serviceData.service_data->SetTerminate();
     return(SUCCESS);
@@ -182,7 +188,8 @@ int32_t TerminateResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 
 // ********************************************************************
 
-int32_t AnalyzeChipResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
+int32_t AnalyzeChipResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData,
+                                        bool i_default )
 {
     // mk442956 a
     return xChip.Analyze( io_serviceData,
@@ -191,7 +198,8 @@ int32_t AnalyzeChipResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 
 // ********************************************************************
 
-int32_t TryResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
+int32_t TryResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData,
+                                bool i_default )
 {
     // Save the current error signature
     ErrorSignature * es = io_serviceData.service_data->GetErrorSignature();
@@ -211,7 +219,8 @@ int32_t TryResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 //--------------------------------------------------------------------
 // CalloutConnectedGard Member Functions
 //--------------------------------------------------------------------
-int32_t CalloutConnectedGard::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
+int32_t CalloutConnectedGard::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData,
+                                       bool i_default )
 {
     using namespace TARGETING;
 
@@ -276,7 +285,8 @@ int32_t CalloutConnectedGard::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 //--------------------------------------------------------------------
 // AnalyzeConnected Member Functions
 //--------------------------------------------------------------------
-int32_t AnalyzeConnected::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
+int32_t AnalyzeConnected::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData,
+                                   bool i_default )
 {
     using namespace TARGETING;
 

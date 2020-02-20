@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -83,7 +83,8 @@ public:
   //
   // End Function Specification ****************************************
 
-  virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & error);
+  virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & error,
+                          bool i_default = false);
   // Function Specification ********************************************
   //
   // Purpose:      Resolve service data - callout all chips at attention as

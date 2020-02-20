@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -250,10 +250,11 @@ int32_t ErrorRegister::Lookup(STEP_CODE_DATA_STRUCT & sdc, BitKey & bl)
 {
     int32_t rc = SUCCESS;
     ResolutionList rList;
-    rc = rMap.LookUp( rList,bl,sdc );
+    bool isDefault = false;
+    rc = rMap.LookUp( rList,bl,sdc,isDefault );
     for( ResolutionList::iterator i = rList.begin(); i != rList.end(); ++i )
     {
-        rc |= (*i)->Resolve( sdc );
+        rc |= (*i)->Resolve( sdc, isDefault );
     }
 
     return rc;

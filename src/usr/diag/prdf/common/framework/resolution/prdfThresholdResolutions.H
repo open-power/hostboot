@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2003,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -74,7 +76,8 @@ class MaskResolution: public Resolution
      @return SUCCESS | non-zero
      @note Acts like Threshold Resolution with a threshold of one
      */
-    virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & error);
+    virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & error,
+                            bool i_default = false);
 
     virtual void ResetCount();          // wl01
 
@@ -157,7 +160,8 @@ class ThresholdResolution : public MaskResolution
      @return SUCCESS | non-zero
      @note In mfg mode the threshold is one
      */
-    virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & error);
+    virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & error,
+                            bool i_default = false);
 
     virtual void ResetCount();          // wl01
 
@@ -227,7 +231,8 @@ class ThresholdSigResolution: public Resolution
          *        error count is over the policy limits, sets mask id and
          *        AT_THRESHOLD flag and then resets the error count.
          */
-        virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & error);
+        virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & error,
+                                bool i_default = false);
 
         /** operator==
          *        Compare two ThresholdSigResolutions by policies.

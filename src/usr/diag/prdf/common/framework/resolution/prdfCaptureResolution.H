@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2006,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -47,9 +49,11 @@ class CaptureResolution : public Resolution
 
         /** @brief      Perform capture.
          *  @param[io]  io_serviceData Reference to STEP_CODE_DATA_STRUCT
+         *  @param[i]   i_default Default resolution
          *  @return     SUCCESS| FAIL
          */
-        virtual int32_t Resolve( STEP_CODE_DATA_STRUCT & io_serviceData );
+        virtual int32_t Resolve( STEP_CODE_DATA_STRUCT & io_serviceData,
+                                 bool i_default = false );
 
         /**
          *  Comparison operator to aid in ResolutionFactory.

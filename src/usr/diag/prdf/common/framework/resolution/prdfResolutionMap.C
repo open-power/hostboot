@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,7 @@
 #include <string.h>
 
 #include <prdfResolutionMap.H>
+#include <iipResolutionFactory.h>
 #include <iipstep.h>
 #include <iipServiceDataCollector.h>
 #include <prdfErrorSignature.H>
@@ -251,8 +252,10 @@ void ResolutionMap::Add(const uint8_t *i_ble,
 
 int32_t ResolutionMap::LookUp( ResolutionList & o_list,
                                BitKey & io_bitList,
-                               STEP_CODE_DATA_STRUCT & scd )
+                               STEP_CODE_DATA_STRUCT & scd,
+                               bool & o_default )
 {
+    o_default = false;
     uint32_t lsize = o_list.size();
     int32_t l_rc = SUCCESS;
 
@@ -295,22 +298,25 @@ int32_t ResolutionMap::LookUp( ResolutionList & o_list,
             o_list.push_back( i->iv_res );
         }
     }
-    // we didn't find anything to add, so use default
-    if( lsize == o_list.size() )
-    {
-        // if it is a primary pass and we haven't found any bit set, let us
-        // prevent default resolution from getting executed. It is primarily
-        // because end of primary pass doesn't necessarily mean end of analysis.
-        // There may be a case when a FIR has only a secondary bit on. In that
-        // case, primary pass shall fail to find any bit set and initiate
-        // secondary pass. In secondary pass, bits set shall be identified and
-        // associated resolution shall be executed.
 
-        if ( !(scd.service_data->isPrimaryPass() &&
-               scd.service_data->isSecondaryErrFound()) )
-        {
-            o_list.push_back( defaultRes );
-        }
+    // we didn't find anything to add, so use default
+    // if it is a primary pass and we haven't found any bit set, let us
+    // prevent default resolution from getting executed. It is primarily
+    // because end of primary pass doesn't necessarily mean end of analysis.
+    // There may be a case when a FIR has only a secondary bit on. In that
+    // case, primary pass shall fail to find any bit set and initiate
+    // secondary pass. In secondary pass, bits set shall be identified and
+    // associated resolution shall be executed.
+
+    if ( lsize == o_list.size() &&
+         CHECK_STOP == scd.service_data->getPrimaryAttnType() &&
+         (!scd.service_data->isPrimaryPass() ||
+          !scd.service_data->isSecondaryErrFound()) )
+    {
+        o_default = true;
+        ResolutionFactory & resFac = ResolutionFactory::Access();
+        Resolution & defRes = resFac.getCalloutGardResol( NULL, MRU_MED, GARD );
+        o_list.push_back( &defRes );
     }
 
     if( iv_filter != NULL )

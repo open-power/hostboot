@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -85,9 +85,11 @@ public:
   /**
    * @brief     Resolve the service data for this error syndrome
    * @param[io] io_data Reference to STEP_CODE_DATA_STRUCT
+   * @param[i]  i_default
    * @return    SUCCESS | non-zero
    */
-  virtual int32_t Resolve( STEP_CODE_DATA_STRUCT & io_data ) = 0;
+  virtual int32_t Resolve( STEP_CODE_DATA_STRUCT & io_data,
+                           bool i_default = false ) = 0;
   // Function Specification ********************************************
   //
   // Purpose:      Resolve service data for a specific error bit (Pure Virtual)

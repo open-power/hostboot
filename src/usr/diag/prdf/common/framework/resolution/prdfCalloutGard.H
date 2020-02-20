@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,7 +73,8 @@ class CalloutGardResolution: public Resolution
      * @brief Executes the callout and enforces gard policy.
      * @param error step code data struct.
      */
-    virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & error);
+    virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & error,
+                            bool i_default = false);
 
     /**
      * @brief compares if two CalloutGardResolution are identical.

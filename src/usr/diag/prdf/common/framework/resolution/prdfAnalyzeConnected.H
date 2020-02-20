@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,12 +79,14 @@ public:
    * @brief     Determine chip object for current connected unit and call its
    *            analyze func.
    * @param[io] io_service_data References to STEP_CODE_DATA_STRUCT
+   * @param[i]  i_default Default resolution
    * @return    SUCCESS | non-zero if chip not found.
    * @note      if the call to getConnected yields NULL  than the
    *            altResolution is called. If the altResolution is NULL than the
    *            source is added to the callout list.
    */
-  virtual int32_t Resolve( STEP_CODE_DATA_STRUCT & io_service_data );
+  virtual int32_t Resolve( STEP_CODE_DATA_STRUCT & io_service_data,
+                           bool i_default = false );
 
   virtual bool operator==(const AnalyzeConnected & r) const;
 

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1997,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -91,7 +93,8 @@ public:
    <br><b>Notes:</b>        {optional}
    </ul><br>
    */
-  virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & serviceData);
+  virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & serviceData,
+                          bool i_default = false);
 
 private:  // functions
 private:  // Data

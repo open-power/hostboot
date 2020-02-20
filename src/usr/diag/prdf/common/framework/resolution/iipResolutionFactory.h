@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -351,7 +351,8 @@ public:
         return xlnk1 >= r.xlnk1;
     };
 
-    virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & serviceData);
+    virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & serviceData,
+                            bool i_default = false);
   private: // data
     Resolution * xlnk1;
     Resolution * xlnk2;

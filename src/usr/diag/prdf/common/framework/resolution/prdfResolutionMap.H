@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -187,11 +187,12 @@ public:
     *                      is stacked in this list.
     * @param    io_bitList bit key under analysis.
     * @param    scd        reference to STEP_CODE_STRUCT
+    * @param    o_default  default resolution returned
     * @return   PRD_SCAN_COMM_REGISTER_ZERO, if filter returns bitkey of zero
     *           size, SUCCESS otherwise.
     */
    int32_t  LookUp( ResolutionList & o_list, BitKey & io_bitList,
-                    STEP_CODE_DATA_STRUCT & scd );
+                    STEP_CODE_DATA_STRUCT & scd, bool & o_default );
 
   /**
    * @brief Get the stored filter associated with this resolution map.

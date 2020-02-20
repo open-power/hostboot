@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,7 +40,8 @@ namespace PRDF
 //------------------------------------------------------------------------------
 
 // Find the active clock source and blame it
-int32_t ClockResolution::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
+int32_t ClockResolution::Resolve(STEP_CODE_DATA_STRUCT & serviceData,
+                                 bool i_default)
 {
     using namespace TARGETING;
 
