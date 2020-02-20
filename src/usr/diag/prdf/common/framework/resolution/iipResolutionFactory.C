@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -128,7 +128,8 @@ Resolution & ResolutionFactory::LinkResolutions(Resolution & r1,
 // ---------------------------------------------------------------------
 
 int32_t ResolutionFactory::ResolutionLink::Resolve(
-                                           STEP_CODE_DATA_STRUCT & serviceData )
+                                           STEP_CODE_DATA_STRUCT & serviceData,
+                                           bool i_default )
 {
   int32_t rc = xlnk1->Resolve(serviceData);
   if (rc == SUCCESS) rc = xlnk2->Resolve(serviceData);

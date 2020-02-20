@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2003,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2003,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,7 +76,8 @@ class MaskResolution: public Resolution
      @return SUCCESS | non-zero
      @note Acts like Threshold Resolution with a threshold of one
      */
-    virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & error);
+    virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & error,
+                            bool i_default = false);
 
     virtual void ResetCount();          // wl01
 
@@ -160,7 +161,8 @@ class ThresholdResolution : public MaskResolution
      @return SUCCESS | non-zero
      @note In mfg mode the threshold is one
      */
-    virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & error);
+    virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & error,
+                            bool i_default = false);
 
     virtual void ResetCount();          // wl01
 
@@ -230,7 +232,8 @@ class ThresholdSigResolution: public Resolution
          *        error count is over the policy limits, sets mask id and
          *        AT_THRESHOLD flag and then resets the error count.
          */
-        virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & error);
+        virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & error,
+                                bool i_default = false);
 
         /** operator==
          *        Compare two ThresholdSigResolutions by policies.

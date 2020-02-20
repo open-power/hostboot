@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1996,2014              */
+/* Contributors Listed Below - COPYRIGHT 1996,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -93,7 +95,8 @@ class EregResolution : public Resolution
   // Copy ctor   - compiler default is sufficient
   // Assignment  - compiler default is sufficient
 
-    virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & data);
+    virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & data,
+                            bool i_default = false);
   // Function Specification ********************************************
   //
   // Purpose:

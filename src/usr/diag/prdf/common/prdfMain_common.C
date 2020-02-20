@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -347,12 +347,15 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_priAttnType,
         {
             (serviceData.GetErrorSignature())->setErrCode(
                                                     (uint16_t)analyzeRc );
-            serviceData.SetCallout(SP_CODE);
-            serviceData.SetCallout( LEVEL2_SUPPORT, MRU_LOW );
+            serviceData.SetCallout( SP_CODE, MRU_MED, NO_GARD );
+            serviceData.SetCallout( LEVEL2_SUPPORT, MRU_LOW, NO_GARD );
             serviceData.setServiceCall();
-            // We don't want to gard unless we have a good
+            // We don't want to gard for non-checkstops unless we have a good
             // return code
-            serviceData.clearMruListGard();
+            if ( CHECK_STOP != serviceData.getPrimaryAttnType() )
+            {
+                serviceData.clearMruListGard();
+            }
         }
     }
 

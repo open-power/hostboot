@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2001,2014              */
+/* Contributors Listed Below - COPYRIGHT 2001,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -120,7 +122,8 @@ public:
   // copy ctor - Compiler default ok
   // Assignment - Compiler default ok
 
-  virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & error);
+  virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & error,
+                          bool i_default = false);
   // Function Specification ********************************************
   //
   // Purpose:      Resolve service data for a specific error bit

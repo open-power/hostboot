@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -82,7 +82,7 @@ const ThresholdResolution::ThresholdPolicy ThresholdResolution::cv_pllDefault
 // Member Function Specifications
 //---------------------------------------------------------------------
 
-int32_t MaskResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
+int32_t MaskResolution::Resolve(STEP_CODE_DATA_STRUCT & error, bool i_default)
 {
   error.service_data->SetHits(1);
   error.service_data->SetThreshold(1);
@@ -133,7 +133,8 @@ ThresholdResolution::ThresholdResolution( uint32_t maskId,
 
 //---------------------------------------------------------------------
 
-int32_t ThresholdResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
+int32_t ThresholdResolution::Resolve(STEP_CODE_DATA_STRUCT & error,
+                                     bool i_default)
 {
   int32_t rc = SUCCESS;
   Timer curTime = error.service_data->GetTOE();    // get timestamp (Time Of Error) from SDC
@@ -213,7 +214,8 @@ ThresholdSigResolution::ThresholdSigResolution() :
 
 //---------------------------------------------------------------------
 
-int32_t ThresholdSigResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
+int32_t ThresholdSigResolution::Resolve(STEP_CODE_DATA_STRUCT & error,
+                                        bool i_default)
 {
     int32_t l_rc = SUCCESS;
 

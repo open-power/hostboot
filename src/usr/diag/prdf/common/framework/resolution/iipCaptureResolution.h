@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -100,7 +100,8 @@ public:
    @return returncode [SUCCESS | mop return code]
    @No definition exist for this until we prove we need it again!
   */
-  virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & error);
+  virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & error,
+                          bool i_default = false);
 
   private:  // functions
   private:  // Data

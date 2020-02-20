@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -805,7 +805,8 @@ Resolution * RuleMetaData::createActionClass( uint32_t i_action,
         class NullResolution : public Resolution
         {
             public:
-                int32_t Resolve( STEP_CODE_DATA_STRUCT & io_data )
+                int32_t Resolve( STEP_CODE_DATA_STRUCT & io_data,
+                                 bool i_default )
                             { return SUCCESS; };
         };
 

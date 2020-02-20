@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -125,7 +125,8 @@ inline TARGETING::TargetHandle_t buffer_getTarget( const uint8_t *&ptr )
 
 void ServiceDataCollector::SetCallout( PRDcallout mru,
                                        PRDpriority priority,
-                                       GARD_POLICY i_gardState )
+                                       GARD_POLICY i_gardState,
+                                       bool i_default )
 {
     bool found = false;
 
@@ -140,9 +141,15 @@ void ServiceDataCollector::SetCallout( PRDcallout mru,
         }
     }
 
+    bool gardExists = false;
     for ( SDC_MRU_LIST::iterator i = xMruList.begin();
-          i != xMruList.end() && found == false; ++i )
+          i != xMruList.end() && found == false; )
     {
+        if ( i->gardState != NO_GARD )
+        {
+            gardExists = true;
+        }
+
         if ( i->callout == mru )
         {
             found = true;
@@ -156,11 +163,27 @@ void ServiceDataCollector::SetCallout( PRDcallout mru,
                 i->gardState = i_gardState;
             }
         }
+
+        // The default gard callouts should only be used if there is no other gard coming from
+        // another callout. So if a new callout with a gard comes in after we already stored
+        // a default callout, we remove the default one in favor of the new callout.
+        if ( NO_GARD != i_gardState && !i_default && i->isDefault )
+        {
+            // Remove the default callout in favor of a new callout
+            i = xMruList.erase(i);
+        }
+        else
+        {
+            ++i;
+        }
+
     }
 
-    if ( found == false )
+    // If this is the default callout and a gard callout already exists we
+    // don't want to add the default callout to the list.
+    if ( found == false && (!i_default || (i_default && !gardExists)) )
     {
-        xMruList.push_back( SdcCallout(mru, priority, i_gardState) );
+        xMruList.push_back( SdcCallout(mru, priority, i_gardState, i_default) );
     }
 }
 
