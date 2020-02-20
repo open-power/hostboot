@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -157,10 +157,18 @@ void* call_host_mpipl_service (void *io_pArgs)
 
             do
             {
-                // In OPAL based system SBE collects architected register
-                // data. Copy architected register data from Reserved Memory
-                // to hypervisor memory.
-                if( TARGETING::is_sapphire_load() )
+                //SBE collects architected register data for below combination
+                //of systems.Hence Copy architected register data from Reserved
+                //Memory to hypervisor memory.
+                //
+                //1) FSP - OPAL
+                //2) BMC - OPAL
+                //3) BMC - PHYP
+
+    
+                //Copy Architected register data if sys is **NOT** (FSP + PHYP)
+                //combination.
+                if( !(is_phyp_load() && INITSERVICE::spBaseServicesEnabled()) )
                 {
                     l_err = DUMP::copyArchitectedRegs();
                     if (l_err)
