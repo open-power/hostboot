@@ -277,7 +277,7 @@ struct hdatSysParms_t
     uint32_t hdatNestFreq;             // Nest Clock Frequency in MHz
     uint8_t  hdatSplitCoreMode;        // Split Core Mode
     uint8_t  hdatReserved4;            // Reserved
-    uint16_t hdatReserved5;            // Reserved
+    uint16_t hdatKeyClearRequest;      // Host FW key clear requests
     uint8_t  hdatSystemVendorName[64]; // System Vendor Name
     uint16_t hdatSysSecuritySetting;   // System Security Settings
     uint16_t hdatTpmConfBits;          // TPM Configuration Bits
@@ -286,7 +286,6 @@ struct hdatSysParms_t
     uint8_t  hdatHwKeyHashValue[64];   // Hardware Keys Hash Value
     char     hdatSystemFamily[64];     // System Family/Vendor Name
     char     hdatSystemType[64];       // System Type/Vendor Type
-    uint16_t hdatKeyClearRequest;      // Host FW key clear requests
 } __attribute__ ((packed));
 
 
