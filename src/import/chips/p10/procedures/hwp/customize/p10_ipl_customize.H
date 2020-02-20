@@ -45,6 +45,14 @@
 #define QUAD0_CORES_MASK (uint32_t)0xF0000000
 #define CORE0_MASK       (uint32_t)0x80000000
 
+enum FastArrayIplSections
+{
+    FA_EC_CL2_FAR = (uint8_t)0,
+    FA_EC_MMA_FAR = (uint8_t)1,
+    FA_RING_OVRD  = (uint8_t)2,
+    FA_IPL_SECTIONS = (uint8_t)3
+};
+
 enum MvpdRingType
 {
     MVPD_RING_PDG = (uint8_t)0,

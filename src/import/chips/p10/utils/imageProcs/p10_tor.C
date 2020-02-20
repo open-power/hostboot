@@ -315,12 +315,12 @@ int _tor_access_ring( void*          io_ringSection,   // Ring section ptr
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-///                       [internal] TOR Header Check function
+///               [internal] TOR Header and Ring Check function
 //////////////////////////////////////////////////////////////////////////////////////////
-int _tor_header_check( void*           i_ringSection,  // Ring section ptr
-                       RingId_t        i_ringId,       // Ring ID
-                       uint8_t         i_ddLevel,      // DD level
-                       uint32_t        i_dbgl )
+int _tor_header_and_ring_check( void*           i_ringSection,  // Ring section ptr
+                                RingId_t        i_ringId,       // Ring ID
+                                uint8_t         i_ddLevel,      // DD level
+                                uint32_t        i_dbgl )
 {
     int            rc = TOR_SUCCESS;
     uint32_t       torMagic;
@@ -374,10 +374,9 @@ int _tor_header_check( void*           i_ringSection,  // Ring section ptr
         }
         else if ( rc == TOR_INVALID_RING_ID || rc == TOR_INVALID_CHIP_ID )
         {
-            MY_ERR("ERROR: tor_access_ring(): ringid_check_ringId() failed w/rc=0x%08x\n"
+            MY_ERR("ERROR: TOR ringId check: ringid_check_ringId() failed w/rc=0x%08x\n"
                    " So either invalid ringId(=0x%x) or invalid chipId(=0x%x)\n",
                    rc, i_ringId, torHeader->chipId);
-
             return rc;
         }
     }
@@ -389,7 +388,7 @@ int _tor_header_check( void*           i_ringSection,  // Ring section ptr
          torHeader->version != TOR_VERSION ||
          torHeader->rtVersion > RING_TABLE_VERSION_HWIMG )
     {
-        MY_ERR("ERROR: TOR header check failure:\n"
+        MY_ERR("ERROR: TOR header check:\n"
                "  magic:       0x%08x (TOR_MAGIC: 0x%08x)\n"
                "  version:     %u (TOR_VERSION: %u)\n"
                "  rtVersion:   %u (RING_TABLE_VERSION_HWIMG: %u)\n"
@@ -405,14 +404,14 @@ int _tor_header_check( void*           i_ringSection,  // Ring section ptr
     if ( i_ddLevel != torHeader->ddLevel &&
          i_ddLevel != UNDEFINED_DD_LEVEL )
     {
-        MY_ERR("ERROR: Requested DD level (=0x%x) doesn't match TOR header DD level (=0x%x)"
-               " nor UNDEFINED_DD_LEVEL (=0x%x)\n",
+        MY_ERR("ERROR: TOR DD check: Requested DD level (=0x%x) doesn't match TOR header DD"
+               " level (=0x%x) nor UNDEFINED_DD_LEVEL (=0x%x)\n",
                i_ddLevel, torHeader->ddLevel, UNDEFINED_DD_LEVEL);
         return TOR_DD_LEVEL_NOT_FOUND;
     }
 
     return rc;
-} // End of _tor_header_check()
+} // End of _tor_header_and_ring_check()
 
 
 
@@ -429,14 +428,18 @@ int tor_get_single_ring ( void*         i_ringSection,  // Ring section ptr
 {
     int          rc = TOR_SUCCESS;
 
-    rc = _tor_header_check( i_ringSection,
-                            i_ringId,
-                            i_ddLevel,
-                            i_dbgl );
+    rc = _tor_header_and_ring_check( i_ringSection,
+                                     i_ringId,
+                                     i_ddLevel,
+                                     i_dbgl );
 
-    if (rc)
+    // Explanation to the "list" of RCs that we exclude from tracing out:
+    // TOR_HOLE_RING_ID:   Normal scenario when rings are removed from the ring list
+    if ( rc &&
+         rc != TOR_HOLE_RING_ID )
     {
-        MY_ERR("ERROR: tor_get_single_ring() : _tor_header_check() failed w/rc=0x%08x\n", rc);
+        MY_ERR("ERROR: tor_get_single_ring(): _tor_header_and_ring_check() failed w/rc=0x%08x\n",
+               rc);
         return rc;
     }
 
@@ -463,16 +466,14 @@ int tor_get_single_ring ( void*         i_ringSection,  // Ring section ptr
     //                     that is valid for the context. But really this is a gray area.
     //                     For now, we omit to trace out as we will hit this rc condition
     //                     in both ipl_image_tool and ipl_customize (RT_QME phase).
-    if (rc)
+    if ( rc &&
+         rc != TOR_RING_IS_EMPTY &&
+         rc != TOR_HOLE_RING_ID &&
+         rc != TOR_RING_HAS_NO_TOR_SLOT &&
+         rc != TOR_INVALID_CHIPLET_ID &&
+         rc != TOR_INVALID_CHIPLET_TYPE )
     {
-        if ( rc != TOR_RING_IS_EMPTY &&
-             rc != TOR_HOLE_RING_ID &&
-             rc != TOR_RING_HAS_NO_TOR_SLOT &&
-             rc != TOR_INVALID_CHIPLET_ID &&
-             rc != TOR_INVALID_CHIPLET_TYPE )
-        {
-            MY_ERR("ERROR: tor_get_single_ring() : _tor_access_ring() failed w/rc=0x%08x\n", rc);
-        }
+        MY_ERR("ERROR: tor_get_single_ring(): _tor_access_ring() failed w/rc=0x%08x\n", rc);
 
         return rc;
     }
@@ -495,20 +496,21 @@ int tor_append_ring( void*           io_ringSection,       // Ring section ptr
     int          rc = TOR_SUCCESS;
     uint32_t     ringBufSize;
 
-    rc = _tor_header_check( io_ringSection,
-                            i_ringId,
-                            UNDEFINED_DD_LEVEL,
-                            i_dbgl );
+    rc = _tor_header_and_ring_check( io_ringSection,
+                                     i_ringId,
+                                     UNDEFINED_DD_LEVEL,
+                                     i_dbgl );
 
     if (rc)
     {
-        MY_ERR("ERROR: tor_append_ring() : _tor_header_check() failed w/rc=0x%08x\n", rc);
+        MY_ERR("ERROR: tor_append_ring(): _tor_header_and_ring_check() failed w/rc=0x%08x\n",
+               rc);
         return rc;
     }
 
     if ( ringid_has_derivs( ((TorHeader_t*)io_ringSection)->chipId, i_ringId) )
     {
-        MY_DBG("Can't append ringId=0x%x since it has derivatives. Only the"
+        MY_DBG("INFO(NOT-AN-ERROR): Can't append ringId=0x%x since it has derivatives. Only the"
                " derivative rings, e.g. *_bucket, can be appended.\n",
                i_ringId);
         return TOR_RING_HAS_DERIVS;
@@ -530,15 +532,12 @@ int tor_append_ring( void*           io_ringSection,       // Ring section ptr
     //                     indicated in ringSection's torMagic. But this is a gray area.
     //                     For now, we omit to trace out as we will hit this rc condition
     //                     in ipl_customize (RT_QME phase).
-    if (rc)
+    if ( rc &&
+         rc != TOR_INVALID_CHIPLET_TYPE )
     {
-        if (rc != TOR_INVALID_CHIPLET_TYPE)
-        {
-            MY_ERR("ERROR: tor_append_ring() : _tor_access_ring() failed w/rc=0x%08x for"
-                   " ringId=0x%x\n",
-                   rc, i_ringId);
-        }
-
+        MY_ERR("ERROR: tor_append_ring(): _tor_access_ring() failed w/rc=0x%08x for"
+               " ringId=0x%x\n",
+               rc, i_ringId);
         return rc;
     }
 

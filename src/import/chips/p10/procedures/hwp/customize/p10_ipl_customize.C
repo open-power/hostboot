@@ -991,8 +991,8 @@ fapi2::ReturnCode resolve_gptr_overlays(
                  set_XIP_RC(l_rc).
                  set_SECTION_ID(P9_XIP_SECTION_HW_OVERLAYS).
                  set_DDLEVEL(o_ddLevel).
-                 set_OCCURRENCE(5),
-                 "p9_xip_get_section() failed (5) w/rc=0x%08X getting .overlays"
+                 set_OCCURRENCE(6),
+                 "p9_xip_get_section() failed (6) w/rc=0x%08X getting .overlays"
                  " section for ddLevel=0x%x",
                  (uint32_t)l_rc, o_ddLevel );
 
@@ -1735,7 +1735,7 @@ fapi2::ReturnCode process_base_and_dynamic_rings(
                                                  set_OCCURRENCE(1),
                                                  "Bit conflict at bit=%d found while processing "
                                                  "dynamic rings for ringId=0x%0x at feature=%d and "
-                                                 "featureVecAcc=0x%0llx)",
+                                                 "featureVecAcc=0x%016llx)",
                                                  8 * i + j, i_ringId, nextFeature, featureVecAcc);
                                 }
                                 else
@@ -1789,7 +1789,7 @@ fapi2::ReturnCode process_base_and_dynamic_rings(
                                                  set_OCCURRENCE(2),
                                                  "Bit conflict at bit=0x%d found while processing "
                                                  "dynamic rings for ringId=0x%0x at feature=%d and "
-                                                 "featureVecAcc=0x%0llx)",
+                                                 "featureVecAcc=0x%016llx)",
                                                  8 * i + j, i_ringId, nextFeature, featureVecAcc);
                                 }
                                 else
@@ -2929,7 +2929,8 @@ ReturnCode p10_ipl_customize (
 
 
     //////////////////////////////////////////////////////////////////////////
-    // CUSTOMIZE item:     Common for all subsequent customization steps
+    // CUSTOMIZE item:     Get the platform's DD level. (Needed for all
+    //                     subsequent customization steps)
     // System phase:       All phases
     //////////////////////////////////////////////////////////////////////////
 
@@ -2942,6 +2943,78 @@ ReturnCode p10_ipl_customize (
                  "FAPI_ATTR_GET(ATTR_EC) failed." );
 
     FAPI_DBG("attrDdLevel = 0x%x", attrDdLevel);
+
+
+
+
+    //////////////////////////////////////////////////////////////////////////
+    // CUSTOMIZE item:     Copy DD-specific .fa_xyz fastarray binaries to
+    //                     Seeprom image.
+    // System phase:       HB_SBE
+    //////////////////////////////////////////////////////////////////////////
+
+    if (i_sysPhase == SYSPHASE_HB_SBE)
+    {
+        // Setup up nested section ID combination for SBE PPE image
+        mainSectionID = P9_XIP_SECTION_HW_SBE;
+
+        for (uint8_t iSection = 0; iSection < FA_IPL_SECTIONS; iSection++)
+        {
+            switch (iSection)
+            {
+                case FA_EC_CL2_FAR:
+                    subSectionID = P9_XIP_SECTION_SBE_FA_EC_CL2_FAR;
+                    break;
+
+                case FA_EC_MMA_FAR:
+                    subSectionID = P9_XIP_SECTION_SBE_FA_EC_MMA_FAR;
+                    break;
+
+                case FA_RING_OVRD:
+                    subSectionID = P9_XIP_SECTION_SBE_FA_RING_OVRD;
+                    break;
+
+                default:
+                    subSectionID = UNDEFINED_IPL_IMAGE_SID;
+                    break;
+            }
+
+            l_rc = p9_xip_get_sub_section( i_hwImage,
+                                           mainSectionID,
+                                           subSectionID,
+                                           &iplImgSection,
+                                           attrDdLevel );
+
+            FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
+                         fapi2::XIPC_XIP_GET_SECTION_ERROR().
+                         set_CHIP_TARGET(i_procTarget).
+                         set_XIP_RC(l_rc).
+                         set_SECTION_ID(subSectionID).
+                         set_DDLEVEL(attrDdLevel).
+                         set_OCCURRENCE(2),
+                         "p9_xip_get_sub_section() failed (2) w/rc=0x%08X retrieving SBE IPL"
+                         " section ID=%u and ddLevel=0x%x",
+                         (uint32_t)l_rc, subSectionID, attrDdLevel );
+
+            l_rc = p9_xip_append( io_image,       // *must* be an SBE image
+                                  subSectionID,
+                                  (void*)((uint8_t*)i_hwImage + iplImgSection.iv_offset),
+                                  iplImgSection.iv_size,
+                                  l_maxImageSize,
+                                  &l_sectionOffset,
+                                  0 );
+
+            FAPI_ASSERT( l_rc == 0,
+                         fapi2::XIPC_XIP_APPEND_ERROR().
+                         set_CHIP_TARGET(i_procTarget).
+                         set_XIP_RC(l_rc).
+                         set_SECTION_ID(subSectionID).
+                         set_MAX_IMAGE_SIZE(l_maxImageSize).
+                         set_OCCURRENCE(1),
+                         "ERROR(1,%u): p9_xip_append() failed w/rc=0x%08x",
+                         iSection, (uint32_t)l_rc );
+        }
+    }
 
 
 
@@ -2973,8 +3046,8 @@ ReturnCode p10_ipl_customize (
                          set_XIP_RC(l_rc).
                          set_SECTION_ID(subSectionID).
                          set_DDLEVEL(attrDdLevel).
-                         set_OCCURRENCE(2),
-                         "p9_xip_get_sub_section() failed (2) w/rc=0x%08X retrieving .sbe.rings"
+                         set_OCCURRENCE(3),
+                         "p9_xip_get_sub_section() failed (3) w/rc=0x%08X retrieving .sbe.rings"
                          " section and ddLevel=0x%x",
                          (uint32_t)l_rc, attrDdLevel );
 
@@ -2998,8 +3071,8 @@ ReturnCode p10_ipl_customize (
                          set_XIP_RC(l_rc).
                          set_SECTION_ID(subSectionID).
                          set_DDLEVEL(attrDdLevel).
-                         set_OCCURRENCE(3),
-                         "p9_xip_get_sub_section() failed (3) w/rc=0x%08x retrieving .qme.rings"
+                         set_OCCURRENCE(4),
+                         "p9_xip_get_sub_section() failed (4) w/rc=0x%08x retrieving .qme.rings"
                          " section and ddLevel=0x%x",
                          (uint32_t)l_rc, attrDdLevel );
 
@@ -3233,8 +3306,8 @@ ReturnCode p10_ipl_customize (
                  set_XIP_RC(l_rc).
                  set_SECTION_ID(P9_XIP_SECTION_HW_DYNAMIC).
                  set_DDLEVEL(attrDdLevel).
-                 set_OCCURRENCE(4),
-                 "p9_xip_get_section() failed (4) w/rc=0x%08X getting .dynamic"
+                 set_OCCURRENCE(5),
+                 "p9_xip_get_section() failed (5) w/rc=0x%08X getting .dynamic"
                  " section for ddLevel=0x%x",
                  (uint32_t)l_rc, attrDdLevel );
 
@@ -3365,7 +3438,7 @@ ReturnCode p10_ipl_customize (
          it != ringIdFeatureVecMap.end();
          it++ )
     {
-        FAPI_IMP("(ringId,featureVecAcc)=(0x%x,0x%0llx)\n", it->first, it->second);
+        FAPI_IMP("(ringId,featureVecAcc)=(0x%x,0x%016llx)\n", it->first, it->second);
 
         RingId_t* pKey = (RingId_t*)ringIdFeatList;
         *pKey = htobe16(it->first);
@@ -3388,11 +3461,13 @@ ReturnCode p10_ipl_customize (
                               0 );
 
         FAPI_ASSERT( l_rc == 0,
-                     fapi2::XIPC_XIP_API_MISC_ERROR().
+                     fapi2::XIPC_XIP_APPEND_ERROR().
                      set_CHIP_TARGET(i_procTarget).
                      set_XIP_RC(l_rc).
-                     set_OCCURRENCE(4),
-                     "p9_xip_append() failed (4) w/rc=0x%08x",
+                     set_SECTION_ID(P9_XIP_SECTION_SBE_RINGIDFEATLIST).
+                     set_MAX_IMAGE_SIZE(l_maxImageSize).
+                     set_OCCURRENCE(2),
+                     "ERROR(2): p9_xip_append() failed w/rc=0x%08x",
                      (uint32_t)l_rc );
     }
 
@@ -3593,20 +3668,20 @@ ReturnCode p10_ipl_customize (
             l_rc = p9_xip_append( io_image,
                                   P9_XIP_SECTION_SBE_RINGS,
                                   io_ringSectionBuf,
-                                  (const uint32_t)io_ringSectionBufSize,
-                                  (const uint32_t)l_maxImageSize,
+                                  io_ringSectionBufSize,
+                                  l_maxImageSize,
                                   &l_sectionOffset,
                                   0 );
 
             FAPI_ASSERT( l_rc == 0,
-                         fapi2::XIPC_XIP_API_MISC_ERROR().
+                         fapi2::XIPC_XIP_APPEND_ERROR().
                          set_CHIP_TARGET(i_procTarget).
                          set_XIP_RC(l_rc).
-                         set_OCCURRENCE(5),
-                         "p9_xip_append() failed w/rc=0x%08x",
+                         set_SECTION_ID(P9_XIP_SECTION_SBE_RINGS).
+                         set_MAX_IMAGE_SIZE(l_maxImageSize).
+                         set_OCCURRENCE(3),
+                         "ERROR(3): p9_xip_append() failed w/rc=0x%08x",
                          (uint32_t)l_rc );
-
-            FAPI_DBG("sectionOffset=0x%08X", l_sectionOffset);
 
             l_rc = p9_xip_image_size(io_image, &l_currentImageSize);
 
@@ -3614,8 +3689,8 @@ ReturnCode p10_ipl_customize (
                          fapi2::XIPC_XIP_API_MISC_ERROR().
                          set_CHIP_TARGET(i_procTarget).
                          set_XIP_RC(l_rc).
-                         set_OCCURRENCE(6),
-                         "p9_xip_image_size() failed (6) w/rc=0x%08X",
+                         set_OCCURRENCE(4),
+                         "p9_xip_image_size() failed (4) w/rc=0x%08X",
                          (uint32_t)l_rc );
 
             FAPI_DBG( "SBE image size after VPD updates: %d", l_currentImageSize );

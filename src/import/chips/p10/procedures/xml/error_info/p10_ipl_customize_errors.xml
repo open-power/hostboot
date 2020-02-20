@@ -280,6 +280,20 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <rc>RC_XIPC_XIP_APPEND_ERROR</rc>
+    <description>p9_xip_append() failed appending an an IPL (XIP) section to the image</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>XIP_RC</ffdc>
+    <ffdc>SECTION_ID</ffdc>
+    <ffdc>MAX_IMAGE_SIZE</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
     <rc>RC_XIPC_XIP_API_MISC_ERROR</rc>
     <description>An XIP API call failed with a non-categorized error</description>
     <ffdc>CHIP_TARGET</ffdc>
