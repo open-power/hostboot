@@ -1966,7 +1966,8 @@ errlHndl_t populate_hbSecurebootData ( void )
                  (key_clear_request & KEY_CLEAR_REQUEST_MFG))
         {
             auto temp_key_clear_request =
-                   (key_clear_request & ~KEY_CLEAR_REQUEST_MFG);
+                   static_cast<ATTR_KEY_CLEAR_REQUEST_type>(
+                     key_clear_request & ~KEY_CLEAR_REQUEST_MFG);
 
             TRACFCOMP(g_trac_runtime, INFO_MRK"populate_hbSecurebootData: "
                       "Physical Presence asserted on production driver with "
