@@ -593,8 +593,26 @@ void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
                     (TARGETING::EntityPath::MAX_PATH_ELEMENTS - ep.size()) *
                         sizeof(TARGETING::EntityPath::PathElement);
 
+        // There is a problem if Hostboot sends an error log with a regular DECONFIG option and then
+        //  fails the istep.  In this case, HWSV has a race in the order that it processes the
+        //  deconfig request and the istep fail message.  If the istep failure happens before the
+        //  deconfig takes place (inside of HWSV) it will be treated as a hard failure.  The correct
+        //  behavior is that when there is a deconfig during an istep failure that we trigger a
+        //  reconfig loop.  Therefore this issue results in an IPL failure instead of a reconfig
+        //  loop, which is not correct.  To avoid this issue we will always use DELAYED_DECONFIG
+        //  while inside our IPL context which will force HWSV to act the way we want them to.
+        HWAS::DeconfigEnum l_deconfigState = i_deconfigState;
+#ifndef __HOSTBOOT_RUNTIME
+        if( INITSERVICE::spBaseServicesEnabled()
+            && (i_deconfigState == HWAS::DECONFIG) )
+        {
+            TRACFCOMP( g_trac_errl, "addHwCallout> Forcing delayed deconfig from standard deconfig" );
+            l_deconfigState = HWAS::DELAYED_DECONFIG;
+        }
+#endif //#ifndef __HOSTBOOT_RUNTIME
+
         ErrlUserDetailsCallout(&ep, size1,
-                i_priority, i_deconfigState, i_gardErrorType).addToLog(this);
+                i_priority, l_deconfigState, i_gardErrorType).addToLog(this);
 
     }
     if (i_gardErrorType != GARD_NULL)
