@@ -1,0 +1,23 @@
+# $hb_repopath should be set to the root of a Hostboot repo that has a standalone build 
+# $hb_lidpath should be set to the location of updated HBRT+MLL lids
+
+# Update HB/HBB (IPL) images
+if defined hb_repopath {
+    # Patch Hostboot onto the BMC and update tools path
+    bmc_console.con.input "cp /host/"+$hb_repopath+"/standalone/pnor/HBB.bin /usr/local/share/pnor/HBB\n"
+    bmc_console.con.input "cp /host/"+$hb_repopath+"/standalone/pnor/HBI.bin /usr/local/share/pnor/HBI\n"
+    bmc_console.con.input "cp /host/"+$hb_repopath+"/standalone/pnor/HBRT.bin /usr/local/share/pnor/HBRT\n"
+    @os.environ['HB_TOOLPATH']=simenv.hb_repopath+"/standalone/simics/hbfw/"
+} else {
+   echo "Must set $hb_repopath to something valid"
+}
+
+# Update HBRT (Runtime) lid
+if defined hb_lidpath {
+   bmc_console.con.input "mkdir -p /usr/local/share/host-fw\n"
+   bmc_console.con.input "cp /host/"+$hb_lidpath+"/81e00300.lid /usr/local/share/host-fw\n"
+   bmc_console.con.input "cp /host/"+$hb_lidpath+"/81e002ff.lid /usr/local/share/host-fw\n"
+} else {
+   echo "Must set $hb_lidpath to something valid"
+}
+

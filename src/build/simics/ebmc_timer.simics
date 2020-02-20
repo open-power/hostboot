@@ -1,0 +1,62 @@
+# Template for a boot script to use on a Rainier simics session
+#  Add this to your run script : user_script_to_run=./boot_rainier.simics
+
+$timer_simics_start=(date)
+
+# Enable extra istep output to the simics console
+alloc0.log-level 2
+
+script-branch {
+    # Log when we start the model
+    wait-for-simulation-started
+    $timer_model_start=(date)
+}
+script-branch {
+    # Catch the CEC starting
+    bmc_console.con.wait-for-string "obmcutil poweron"
+
+    # Log when we power on
+    $timer_boot_start=(date)
+}
+script-branch {
+    # Log when SBE starts
+    wait-for-log "SBE::isSimicsRunning"
+    $timer_sbe_start=(date)
+}
+script-branch {
+    # Log when Hostboot starts
+    wait-for-log "istep 6.2"
+    $timer_hostboot_start=(date)
+}
+script-branch {
+    # Log when we PHYP starts
+    wait-for-log "istep 21.4"
+    $timer_phyp_start=(date)
+}
+script-branch {
+    # Log when we hit PHYP standby
+    wait-for-log "SRC: 00000000"
+    $timer_phyp_standby=(date)
+
+    if defined timer_simics_start {
+      echo "Simics Start:   "+$timer_simics_start
+    }
+    if defined timer_model_start {
+      echo "Model Start:    "+$timer_model_start
+    }
+    if defined timer_boot_start {
+      echo "Power On:       "+$timer_boot_start
+    }
+    if defined timer_sbe_start {
+      echo "SBE Start:      "+$timer_sbe_start
+    }
+    if defined timer_hostboot_start {
+      echo "Hostboot Start: "+$timer_hostboot_start
+    }
+    if defined timer_phyp_start {
+      echo "PHYP Start:     "+$timer_phyp_start
+    }
+    if defined timer_phyp_standby {
+      echo "PHYP Standby:   "+$timer_phyp_standby
+    }
+}

@@ -1,0 +1,18 @@
+# $hb_lidpath should be set to the location of updated lids
+script-branch {
+if defined hb_lidpath {
+   lpc_console.con.input "vsp -id 32769 -off\n"
+   lpc_console.con.wait-for-string "phyp #"
+   bmc_console.con.input "mkdir -p /usr/local/share/host-fw\n"
+   bmc_console.con.input "cp /host/"+$hb_lidpath+"/81e00300.lid /usr/local/share/host-fw\n"
+   bmc_console.con.input "cp /host/"+$hb_lidpath+"/81e002ff.lid /usr/local/share/host-fw\n"
+   lpc_console.con.input "lidmgrp cache flush 81e00300\n"
+   lpc_console.con.wait-for-string "phyp #"
+   lpc_console.con.input "lidmgrp cache flush\n"
+   lpc_console.con.wait-for-string "phyp #"
+   lpc_console.con.input "vsp -id 32769 -on\n"
+   lpc_console.con.wait-for-string "phyp #"
+} else {
+   echo "Must set $hb_lidpath to something valid"
+}
+}
