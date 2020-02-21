@@ -77,6 +77,7 @@ MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/omi/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/i2c/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/fir/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/mcbist/
+MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/plug_rules/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/phy/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/ecc/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/inband/
