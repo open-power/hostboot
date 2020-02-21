@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,9 +67,15 @@ enum ReturnCodes : uint32_t
     FAPI2_RC_SUCCESS = 0,
 
     // Flag bits indicating which code generated the error.
+    FAPI2_RC_PHAL_MASK = 0x08000000, ///< PHAL mask
     FAPI2_RC_FAPI2_MASK = 0x04000000, ///< FAPI2 mask
     FAPI2_RC_PLAT_MASK =  0x02000000, ///< Platform mask
     FAPI2_RC_HWP_MASK =   0x00000000, ///< HWP mask
+
+    //
+    // PHAL generic return codes
+    //
+    FAPI2_RC_PHAL_NOT_SUPPORTED = FAPI2_RC_PHAL_MASK | 0x01,
 
     //
     // FAPI generated return codes
