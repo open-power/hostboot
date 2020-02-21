@@ -5415,17 +5415,36 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
             break;
         }
 
-        // Check notification status and errors
-        l_err = nvdimmReadReg(l_nvdimm, SET_EVENT_NOTIFICATION_STATUS, l_data);
+        // Poll for a status update since it might not be updated immediately
+        // Status update should be valid by 1ms (usual range: 300 - 400 us)
+        // A non-zero means the status has been updated
+        l_data = 0x00;
+        int status_wait_time = NS_PER_MSEC; // wait 1 msec
+        while (l_data == 0x00 && status_wait_time > 0)
+        {
+            // Check notification status and errors
+            l_err = nvdimmReadReg(l_nvdimm, SET_EVENT_NOTIFICATION_STATUS, l_data);
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm, ERR_MRK"NVDIMM[%X] read of SET_EVENT_NOTIFICATION_STATUS failed (%d ns remained)",
+                        get_huid(l_nvdimm), status_wait_time);
+                break;
+            }
+            nanosleep(0, NS_PER_MSEC/10); // sleep 100us (.1 ms) between reads
+            status_wait_time -= (NS_PER_MSEC/10);
+        }
+        // if error found from nvdimmReadReg
         if (l_err)
         {
+            // i2c read failure, exit main nvdimmArm() loop
             break;
         }
-        else if (((l_data & SET_EVENT_NOTIFICATION_ERROR) == SET_EVENT_NOTIFICATION_ERROR)
-                   || ((l_data & NOTIFICATIONS_ENABLED) != NOTIFICATIONS_ENABLED))
+
+        if (((l_data & SET_EVENT_NOTIFICATION_ERROR) == SET_EVENT_NOTIFICATION_ERROR)
+              || ((l_data & NOTIFICATIONS_ENABLED) != NOTIFICATIONS_ENABLED))
         {
-            TRACFCOMP(g_trac_nvdimm, "nvdimmArm() nvdimm[%X] failed to set event notification",
-                      get_huid(l_nvdimm));
+            TRACFCOMP(g_trac_nvdimm, "nvdimmArm() nvdimm[%X] failed to set event notification (last status: 0x%02X)",
+                      get_huid(l_nvdimm), l_data);
 
             // Set NVDIMM Status flag to partial working, as error detected but data might persist
             notifyNvdimmProtectionChange(l_nvdimm, NVDIMM_RISKY_HW_ERROR);
@@ -5436,7 +5455,7 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
             *@severity         ERRORLOG_SEV_PREDICTIVE
             *@moduleid         NVDIMM_SET_EVENT_NOTIFICATION
             *@userdata1[0:31]  Target Huid
-            *@userdata2        <UNUSED>
+            *@userdata2        SET_EVENT_NOTIFICATION_STATUS
             *@devdesc          NVDIMM threw an error or failed to set event
             *                  notifications during arming
             *@custdesc         NVDIMM failed to enable event notificaitons
@@ -5445,7 +5464,7 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
                                              NVDIMM_SET_EVENT_NOTIFICATION,
                                              NVDIMM_SET_EVENT_NOTIFICATION_ERROR,
                                              TARGETING::get_huid(l_nvdimm),
-                                             0x0,
+                                             l_data,
                                              ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
 
             l_err->collectTrace( NVDIMM_COMP_NAME );
