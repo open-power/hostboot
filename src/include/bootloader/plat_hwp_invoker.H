@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/fapi2/plat_hwp_invoker.H $                    */
+/* $Source: src/include/bootloader/plat_hwp_invoker.H $                   */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -25,24 +25,17 @@
 /**
  *  @file plat_hwp_invoker.H
  *
- *  @brief Defines the HostBoot HWP invoker macro and a function to convert a
- *         fapi::ReturnCode to an error log
+ *  @brief Defines the Bootloader HWP invoker macro
  */
 
 ///
-/// @brief Defines the HostBoot FAPI2 HWP invoker macro and a function to
-/// convert a fapi2::ReturnCode to an error log
+/// @brief Defines the Bootloader FAPI2 HWP invoker macro
 ///
 /// Note that platform code must provide the code.
 ///
 
-#ifndef PLATHWPINVOKER_H_
-#define PLATHWPINVOKER_H_
-
-#include <return_code.H>
-#include <hw_access_def.H>
-#include "plat_utils.H"
-#include <xscom/piberror.H>
+#ifndef PLAT_HWP_INVOKER_BOOTLOADER
+#define PLAT_HWP_INVOKER_BOOTLOADER
 
 namespace fapi2 {
 /*
@@ -52,61 +45,9 @@ void hwpResetGlobals(void);
 }
 
 /**
- * @brief HWP Invoker macro
- *
- * This macro is called by HostBoot PLAT code to invoke a HW Procedure (HWP).
- * The caller must create any necessary fapi::Targets and pass them as
- * parameters. This macro simply calls the FAPI HWP executor macro and converts
- * the returned fapi::Return code to a HostBoot error log
- *
- * ERRHNDL    - local errlHndl_t
- * FUNC       - HWP function name
- * _args_...  - Any additional arguments that the HWP requires
- */
-
-#define FAPI_INVOKE_HWP(ERRHNDL, FUNC, _args_...) \
-    {\
-        fapi2::hwpResetGlobals(); \
-        fapi2::ReturnCode invoke_rc; \
-        FAPI_EXEC_HWP(invoke_rc, FUNC, ##_args_); \
-        ERRHNDL = fapi2::rcToErrl(invoke_rc);\
-        if( ERRHNDL ) {\
-            ERRHNDL->collectTrace(FAPI_IMP_TRACE_NAME,256);\
-            ERRHNDL->collectTrace(FAPI_TRACE_NAME,384);\
-        }\
-        fapi2::hwpResetGlobals(); \
-    }
-
-/**
- * @brief HWP Invoker macro that returns the fapi RC
- *
- * This macro is called by HostBoot PLAT code to invoke a HW Procedure (HWP).
- * The caller must create any necessary fapi::Targets and pass them as
- * parameters. This macro simply calls the FAPI HWP executor macro and converts
- * the returned fapi::Return code to a HostBoot error log
- *
- * ERRHNDL    - local errlHndl_t
- * _RC        - local fapi2::ReturnCode
- * FUNC       - HWP function name
- * _args_...  - Any additional arguments that the HWP requires
- */
-
-#define FAPI_INVOKE_HWP_RC(ERRHNDL, _RC, FUNC, _args_...) \
-    {\
-        fapi2::hwpResetGlobals(); \
-        FAPI_EXEC_HWP(_RC, FUNC, ##_args_); \
-        ERRHNDL = fapi2::rcToErrl(_RC);\
-        if( ERRHNDL ) {\
-            ERRHNDL->collectTrace(FAPI_IMP_TRACE_NAME,256);\
-            ERRHNDL->collectTrace(FAPI_TRACE_NAME,384);\
-        }\
-        fapi2::hwpResetGlobals(); \
-    }
-
-/**
  * @brief Pseudo-HWP Invoker macro
  *
- * This macro is called by HostBoot PLAT code to invoke a HW Procedure (HWP)
+ * This macro is called by Bootloader PLAT code to invoke a HW Procedure (HWP)
  * that returns a ReturnCode
  *
  *  RETURN  - Local var to store the return value
@@ -123,7 +64,7 @@ void hwpResetGlobals(void);
 /**
  * @brief Pseudo-HWP Invoker macro
  *
- * This macro is called by HostBoot PLAT code to invoke a HW Procedure (HWP)
+ * This macro is called by Bootloader PLAT code to invoke a HW Procedure (HWP)
  * that does not return a ReturnCode
  *
  *  FUNC    - HWP function name
@@ -137,4 +78,4 @@ void hwpResetGlobals(void);
    }
 
 
-#endif // PLATHWPINVOKER_H_
+#endif // PLAT_HWP_INVOKER_BOOTLOADER

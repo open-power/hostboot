@@ -59,6 +59,8 @@
 #include <pnor/pnorif.H>
 #include <kernel/memstate.H>
 
+#include <p10_sbe_spi_cmd.H>
+
 using namespace MEMMAP;
 
 extern char bootloader_end_address;

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -23,6 +23,7 @@
 #
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../..
+HWP_PATH = ${ROOTPATH}/src/import/chips/p10/procedures
 
 # Bootloader omitted from profiling to keep size down
 HOSTBOOT_PROFILE_ARTIFACT=
@@ -35,8 +36,20 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/pnor/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/lpc/
 
 COMMONFLAGS += -DBOOTLOADER
+COMMONFLAGS += -DFAPI2_NO_FFDC
+COMMONFLAGS += -DFAPI_VARIABLE_BUFFER_NOT_SUPPORTED
+COMMONFLAGS += -DFAPI_PLAT_MULTICAST_NOT_SUPPORTED
+COMMONFLAGS += -DPLAT_EC_FEATURE_NOT_SUPPORTED
 
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/nest/
+EXTRAINCDIR += ${HWP_PATH}/hwp/nest/
+EXTRAINCDIR += ${HWP_PATH}/hwp/spi/
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+EXTRAINCDIR += ${ROOTPATH}/src/include/
+EXTRAINCDIR += ${ROOTPATH}/src/include/bootloader/
+# @TODO RTC 216130 Investigate removal of imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
+
+SUBDIRS += fapi2.d
 
 OBJS += bl_start.o
 OBJS += bootloader.o
@@ -50,6 +63,12 @@ OBJS += bl_console.o
 
 OPT_LEVEL = -Os
 
+VPATH += ${HWP_PATH}/hwp/spi
+
+include ${ROOTPATH}/procedure.rules.mk
+# @TODO RTC 216130 fapi2 HWP makefiles shouldn't be included directly,
+#                  investigate removal based on prior interlock discussion.
+include ${HWP_PATH}/hwp/spi/p10_sbe_spi_cmd.mk
 include ${ROOTPATH}/config.mk
 
-vpath ${ROOTPATH}/src/usr/console/uart.H
+vpath ${ROOTPATH}/src/usr/console/uart.H  ${HWP_PATH}/hwp/spi/p10_sbe_spi_cmd.H

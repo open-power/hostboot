@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,7 +51,7 @@ static const PlatformType PLATFORM = PLAT_HOSTBOOT;
 ///  @brief This function answers the question, is scand tracing turned on?
 ///  The implementation of this function is specific to the platform.
 ///
-///  @returns Boolean indication
+///  @returns Boolean indicates whether the SCAN trace is enabled
 ///
 bool platIsScanTraceEnabled();
 

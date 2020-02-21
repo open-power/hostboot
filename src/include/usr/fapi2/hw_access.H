@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -206,7 +206,7 @@ inline ReturnCode modifyCfamRegister(const Target<K, M, V>& i_target,
 }
 
 // variable_buffer isn't supported on PPE
-#ifndef __PPE__
+#if !defined(__PPE__) && !defined(FAPI_VARIABLE_BUFFER_NOT_SUPPORTED)
 ///
 /// @brief Platform-level implementation of getRing()
 /// Hardware procedures writers will not call this function.

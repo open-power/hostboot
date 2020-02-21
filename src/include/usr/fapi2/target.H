@@ -84,8 +84,8 @@ namespace fapi2
 ///                iv_handle to.
 /// @return void
 ///
-/// @note          the default templated constructor is delagated to constructors
-///                take take in a plat_target_handle_t
+/// @note          the default templated constructor is delagated to
+////               constructors take in a plat_target_handle_t
 ///
 template<>
 inline Target<TARGET_TYPE_SYSTEM, MULTICAST_OR, plat_target_handle_t>
@@ -119,11 +119,21 @@ template<TargetType K, MulticastType M, typename V>
 bool Target<K, M, V>::operator==(const Target& i_right) const
 { return i_right.iv_handle == iv_handle; }
 
+///
+/// @brief Apply any platform specific static assertions to target construction
+/// @tparam K the type of target to be constructed
+/// @tparam M the multicast type of the target to be constructed
+/// @tparam V the value type of the target to be constructed
+///
 template<TargetType K, MulticastType M, typename V>
 static constexpr void plat_apply_target_limits(void)
 {
 }
 
+/// @brief if iv_handle is a multicast target, update its multicast type to M
+/// @tparam K the type of target
+/// @tparam M the multicast type of the target
+/// @tparam V the value type of the target
 template<TargetType K, MulticastType M, typename V>
 inline void Target<K, M, V>::mcUpdateHandle()
 {
@@ -132,6 +142,7 @@ inline void Target<K, M, V>::mcUpdateHandle()
 ///
 /// @brief Inquality Comparison Operator
 /// @tparam K The type of target on which this is called
+/// @tparam M The multicast type of target on which this is called
 /// @tparam V the type of the target's Value
 /// @param[in] i_right Reference to Target to compare.
 /// @return bool. True if not equal.
