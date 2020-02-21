@@ -414,6 +414,18 @@ errlHndl_t copyArchitectedRegs(void)
             uint16_t threadCount = sbeProcHdr->thread_cnt;
             uint16_t regCount = sbeProcHdr->reg_cnt;
 
+            //FSP has a non-HW dump collection MPIPL flow. In that flow SBE is
+            //not called to collect the  spr/gpr.There is no way for hostboot to
+            //know , its non-hw dump mode of MPIPL. Hence check the thread count
+            //and skip copying of the data.
+            if(threadCount == 0)
+             {
+                 TRACFCOMP(g_trac_dump, "copyArchitectedRegs(): Data not not "
+                 "collected by SBE coreCount=%d threadCount=%d and regCount=%d",
+                  sbeProcHdr->core_cnt,threadCount,regCount);
+                 continue;
+             }
+
             //Validate the structure versions used by SBE and HB for sharing the
             //data
             if( sbeProcHdr->version != REG_DUMP_SBE_HB_STRUCT_VER )
