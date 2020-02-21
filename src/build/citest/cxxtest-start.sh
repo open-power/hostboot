@@ -48,6 +48,7 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
 
     SBE_STANDALONE_IMG=${STANDALONE_SIMICS}/sbe_seeprom_p10.bin.ecc
     SBE_STANDALONE_MEASURE_IMG=${STANDALONE_SIMICS}/sbe_measurement_p10.bin.ecc
+    SBE_STANDALONE_OTPROM_IMG=${STANDALONE_SIMICS}/sbe_otprom_p10.bin
 
     export START_SIMICS_CMD="\
         runsim -m ${MACHINE} \
@@ -55,36 +56,13 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
         pnor_img=${STANDALONE}/pnor/P10.pnor \
         sbe_seeprom_img=${SBE_STANDALONE_IMG} \
         sbe_meas_seeprom_img=${SBE_STANDALONE_MEASURE_IMG} \
-        sbe_boot_mem=seeprom \
+        sbe_otprom_img=${SBE_STANDALONE_OTPROM_IMG} \
         enable_lpc_console=TRUE \
         fused_core=TRUE \
         xive_gen=2 \
         bmc_files=/host/genEecache:/usr/local/share/pnor/EECACHE \
         eecacheEcc=1"
 
-else
-    # do not set this for FSP build
-    if [ "$MACHINE" != "FSPBUILD" ];then
-
-        echo "autocitest setup for non-FSP and non-P10 Standalone"
-
-        # Env. vars. for startup.simics and hb-tools scripts
-        export HBBLPATH=${SANDBOXBASE}/obj/ppc/hbfw/img/hbbl.bin
-        export HBICORE_EXTENDED_PATH=${SANDBOXBASE}/src/hbfw/img/hostboot_extended.bin
-        export STARTUPSIMICS=$SANDBOXBASE/obj/ppc/simu/scripts/hbfw/startup.simics
-        export PATH=$PATH:$SANDBOXBASE/simics/
-        SBE_SEEPROM_IMG=/gsa/ausgsa/projects/h/hostboot/simbuild/SBE_19b2530_HB_c391a8a_sbe_seeprom_p10.bin.ecc
-
-        export START_SIMICS_CMD="\
-            runsim -m $MACHINE \
-            hb_script_to_run=${STARTUPSIMICS} \
-            pnor_img=$SANDBOXBASE/obj/ppc/hbfw/img/p10.pnor \
-            sbe_seeprom_img=${SBE_SEEPROM_IMG} \
-            sbe_boot_mem=seeprom \
-            enable_lpc_console=TRUE \
-            fused_core=TRUE \
-            xive_gen=2"
-    fi
 fi
 
 #   Front end to autocitest - script to execute unit tests under simics.
