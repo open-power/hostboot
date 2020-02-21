@@ -118,12 +118,15 @@ fapi2::ReturnCode doPhyReset(
     fapi2::buffer<uint64_t> l_arrayModeReg(0);
     uint64_t l_xramBaseReg = 0;
     uint32_t l_pollCount = 0;
-    char l_target_str[fapi2::MAX_ECMD_STRING_LEN];
 
     // display target information for this chip
+#ifdef __PPE__
+    FAPI_INF("Input Multicast Target:0x%.8x", i_target.get());
+#else
+    char l_target_str[fapi2::MAX_ECMD_STRING_LEN];
     fapi2::toString(i_target, l_target_str, sizeof(l_target_str));
     FAPI_INF("Target: %s", l_target_str);
-
+#endif
 
     // Note: Reset CPLT_CTRL0 bit 55 feeds to both iop_top instances and both PHYs
     //    1. Drive PHY reset to 1
@@ -148,10 +151,6 @@ fapi2::ReturnCode doPhyReset(
     {
         for (uint8_t l_top = 0; l_top < NUM_OF_IO_TOPS; l_top++)
         {
-            fapi2::toString(i_target, l_target_str, sizeof(l_target_str));
-            FAPI_INF("doPhyReset: Check SRAM init done on %s, top %d",
-                     l_target_str, l_top);
-
             l_pollCount = 0;
 
             while (l_pollCount <= SRAM_INIT_DONE_POLLS)
@@ -178,12 +177,11 @@ fapi2::ReturnCode doPhyReset(
                          .set_TARGET(l_pec)
                          .set_TOP(l_top)
                          .set_ARRAY_MODE_REG(l_arrayModeReg),
-                         "doPhyReset: SRAM init_done timeout error on %s, top %d.",
-                         l_target_str, l_top);
+                         "doPhyReset: SRAM init_done timeout error , top %d.", l_top);
 
-            FAPI_INF("doPhyReset: SRAM init done set for %s", l_target_str);
         }
     }
+
 
 fapi_try_exit:
     FAPI_DBG("End");
