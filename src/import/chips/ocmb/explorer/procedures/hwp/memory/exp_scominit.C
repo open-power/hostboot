@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,9 @@
 #include <generic/memory/lib/utils/find.H>
 #include <explorer_scom.H>
 #include <generic/memory/mss_git_data_helper.H>
+#include <lib/shared/exp_defaults.H>
+#include <lib/shared/exp_consts.H>
+#include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 
 extern "C"
 {
@@ -75,6 +78,9 @@ extern "C"
 
             FAPI_TRY(l_rc, "Error from explorer.scom.initfile %s", mss::c_str(l_port));
         }
+
+        // Run required unmasks for LOCAL_FIR, FABR0, SRQFIR after scominit
+        FAPI_TRY(mss::unmask::after_scominit<mss::mc_type::EXPLORER>(i_target));
 
         return fapi2::FAPI2_RC_SUCCESS;
 

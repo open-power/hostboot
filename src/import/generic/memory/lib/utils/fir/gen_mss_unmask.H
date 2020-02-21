@@ -39,12 +39,26 @@
 #include <fapi2.H>
 
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/mss_generic_attribute_getters.H>
+#include <generic/memory/lib/utils/find.H>
 
 namespace mss
 {
 
 namespace unmask
 {
+
+///
+/// @brief Check if any dimms exist that have RCD enabled
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2::TargetType (derived)
+/// @param[in] i_target - the fapi2::Target we are starting from
+/// @param[out] o_has_rcd - true iff any DIMM with RCD detected
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
+fapi2::ReturnCode has_rcd( const fapi2::Target<T>& i_target,
+                           bool& o_has_rcd );
 
 ///
 /// @brief Unmask and setup actions performed after draminit_mc

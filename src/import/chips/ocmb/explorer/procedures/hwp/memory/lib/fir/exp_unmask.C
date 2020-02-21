@@ -40,12 +40,52 @@
 #include <generic/memory/lib/utils/scom.H>
 #include <lib/fir/exp_fir_traits.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
+#include <mss_explorer_attribute_getters.H>
 
 namespace mss
 {
 
 namespace unmask
 {
+
+///
+/// @brief Check if any dimms exist that have RCD enabled
+/// @param[in] i_target - the fapi2::Target we are starting from
+/// @param[out] o_has_rcd - true iff any DIMM with RCD detected
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode has_rcd<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        bool& o_has_rcd )
+{
+    // Assume RCD is not supported at beginning of check
+    o_has_rcd = false;
+
+    // Nested for loops to determine DIMM type if DIMMs exist
+    for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+    {
+        for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_port))
+        {
+            uint8_t l_dimm_type = 0;
+            uint8_t l_rcd_supported = 0;
+
+            FAPI_TRY(mss::attr::get_dimm_type(l_dimm, l_dimm_type));
+            FAPI_TRY(mss::attr::get_supported_rcd(l_dimm, l_rcd_supported));
+
+            // OR with tmp_rcd to maintain running true/false if RCD on *any* DIMM
+            o_has_rcd |= ((l_dimm_type == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_RDIMM) ||
+                          (l_dimm_type == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_LRDIMM));
+
+            o_has_rcd |= (l_rcd_supported == fapi2::ENUM_ATTR_MEM_EFF_SUPPORTED_RCD_RCD_PER_CHANNEL_1);
+        }
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Unmask and setup actions performed after draminit_mc
@@ -243,11 +283,63 @@ fapi_try_exit:
 /// @brief Unmask and setup actions performed after mss_scominit
 /// @param[in] i_target the fapi2::Target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
-/// TODO: Need to implement this function
+///
 template<>
 fapi2::ReturnCode after_scominit<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
 {
+    fapi2::ReturnCode l_rc1 = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::ReturnCode l_rc2 = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::buffer<uint64_t> l_reg_data;
+    bool l_has_rcd = false;
+
+    mss::fir::reg<EXPLR_SRQ_SRQFIRQ> l_exp_srqfir_reg(i_target, l_rc1);
+    mss::fir::reg<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR> l_exp_local_fir_reg(i_target, l_rc2);
+
+    FAPI_TRY(l_rc1, "for target %s unable to create fir::reg for EXPLR_SRQ_SRQFIRQ 0x%016x",
+             mss::c_str(i_target), EXPLR_SRQ_SRQFIRQ);
+    FAPI_TRY(l_rc2, "for target %s unable to create fir::reg for EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR 0x%0x",
+             mss::c_str(i_target), EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR);
+
+    FAPI_TRY(mss::unmask::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
+
+    // Check if dimm is an ISDIMM with RCD
+    if (l_has_rcd)
+    {
+        l_exp_srqfir_reg.recoverable_error<EXPLR_SRQ_SRQFIRQ_RCD_PARITY_ERROR>();
+    }
+
+    // Unmask SRQFIR bits specified by PRD spec
+    FAPI_TRY(l_exp_srqfir_reg.recoverable_error<EXPLR_SRQ_SRQFIRQ_MBA_RECOVERABLE_ERROR>()
+             .local_checkstop<EXPLR_SRQ_SRQFIRQ_MBA_NONRECOVERABLE_ERROR>()
+             .local_checkstop<EXPLR_SRQ_SRQFIRQ_REG_PARITY_ERROR>()
+             .recoverable_error<EXPLR_SRQ_SRQFIRQ_INFO_REG_PARITY_ERROR>()
+             .recoverable_error<EXPLR_SRQ_SRQFIRQ_DEBUG_PARITY_ERROR>()
+             .local_checkstop<EXPLR_SRQ_SRQFIRQ_WDF_ERROR0>()
+             .local_checkstop<EXPLR_SRQ_SRQFIRQ_WDF_ERROR1>()
+             .local_checkstop<EXPLR_SRQ_SRQFIRQ_WDF_ERROR4>()
+             .recoverable_error<EXPLR_SRQ_SRQFIRQ_WDF_ERROR5>()
+             .local_checkstop<EXPLR_SRQ_SRQFIRQ_WDF_ERROR6>()
+             .write());
+
+    // Unmask DDR4_PHY bits per PRD spec
+    FAPI_TRY(l_exp_local_fir_reg.recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_DDR4_PHY__FATAL>()
+             .recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_DDR4_PHY__NON_FATAL>()
+             .recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_DDR4_PHY__DDR_PHY_IRQ0>()
+             .write());
+
+    // Set FARB0 [54,57] to disable RCD recovery and port fail
+    FAPI_TRY(fapi2::getScom(i_target, EXPLR_SRQ_MBA_FARB0Q, l_reg_data));
+
+    l_reg_data.setBit<EXPLR_SRQ_MBA_FARB0Q_CFG_DISABLE_RCD_RECOVERY>()
+    .setBit<EXPLR_SRQ_MBA_FARB0Q_CFG_PORT_FAIL_DISABLE>();
+
+    FAPI_TRY(fapi2::putScom(i_target, EXPLR_SRQ_MBA_FARB0Q, l_reg_data));
+
     return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+
+    return fapi2::current_err;
 }
 
 ///
