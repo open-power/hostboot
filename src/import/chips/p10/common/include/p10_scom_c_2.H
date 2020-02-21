@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -203,19 +203,19 @@ static const uint32_t EC_PC_TOD_SYNC101_CHIP_TOD_STATUS = 60;
 static const uint32_t EC_PC_TOD_SYNC101_CHIP_TOD_STATUS_LEN = 4;
 // c/reg00002.H
 
-static const uint64_t EC_PC_TRACE1_TR0_TRACE_LO_DATA_REG = 0x20020a41ull;
+static const uint64_t EC_PC_TRACE1_TR_TR0_TRACE_LO_DATA_REG = 0x20020a41ull;
 
-static const uint32_t EC_PC_TRACE1_TR0_TRACE_LO_DATA_REG_LO_DATA = 0;
-static const uint32_t EC_PC_TRACE1_TR0_TRACE_LO_DATA_REG_LO_DATA_LEN = 32;
-static const uint32_t EC_PC_TRACE1_TR0_TRACE_LO_DATA_REG_ADDRESS = 32;
-static const uint32_t EC_PC_TRACE1_TR0_TRACE_LO_DATA_REG_ADDRESS_LEN = 10;
-static const uint32_t EC_PC_TRACE1_TR0_TRACE_LO_DATA_REG_LAST_BANK = 42;
-static const uint32_t EC_PC_TRACE1_TR0_TRACE_LO_DATA_REG_LAST_BANK_LEN = 9;
-static const uint32_t EC_PC_TRACE1_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID = 51;
-static const uint32_t EC_PC_TRACE1_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN = 52;
-static const uint32_t EC_PC_TRACE1_TR0_TRACE_LO_DATA_REG_RUNNING = 53;
-static const uint32_t EC_PC_TRACE1_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
-static const uint32_t EC_PC_TRACE1_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
+static const uint32_t EC_PC_TRACE1_TR_TR0_TRACE_LO_DATA_REG_LO_DATA = 0;
+static const uint32_t EC_PC_TRACE1_TR_TR0_TRACE_LO_DATA_REG_LO_DATA_LEN = 32;
+static const uint32_t EC_PC_TRACE1_TR_TR0_TRACE_LO_DATA_REG_ADDRESS = 32;
+static const uint32_t EC_PC_TRACE1_TR_TR0_TRACE_LO_DATA_REG_ADDRESS_LEN = 10;
+static const uint32_t EC_PC_TRACE1_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK = 42;
+static const uint32_t EC_PC_TRACE1_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK_LEN = 9;
+static const uint32_t EC_PC_TRACE1_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID = 51;
+static const uint32_t EC_PC_TRACE1_TR_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN = 52;
+static const uint32_t EC_PC_TRACE1_TR_TR0_TRACE_LO_DATA_REG_RUNNING = 53;
+static const uint32_t EC_PC_TRACE1_TR_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
+static const uint32_t EC_PC_TRACE1_TR_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
 // c/reg00002.H
 
 static const uint64_t L2_L2MISC_L2CERRS_ERR_RPT0 = 0x20020012ull;

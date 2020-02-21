@@ -114,16 +114,16 @@ static const uint32_t EC_PC_THRCTL_TCTLCOM_RAS_MODEREG_BLOCK_HMI_IN_MAINT = 62;
 static const uint32_t EC_PC_THRCTL_TCTLCOM_RAS_MODEREG_FENCE_INTR_ON_CHECKSTOP = 63;
 // c/reg00007.H
 
-static const uint64_t EC_PC_TRACE1_TR0_TRACE_HI_DATA_REG = 0x20020a40ull;
+static const uint64_t EC_PC_TRACE1_TR_TR0_TRACE_HI_DATA_REG = 0x20020a40ull;
 
-static const uint32_t EC_PC_TRACE1_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
-static const uint32_t EC_PC_TRACE1_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
+static const uint32_t EC_PC_TRACE1_TR_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
+static const uint32_t EC_PC_TRACE1_TR_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
 // c/reg00007.H
 
-static const uint64_t EC_PC_TRACE2_TR0_CONFIG_0 = 0x20020a83ull;
+static const uint64_t EC_PC_TRACE2_TR_TR0_CONFIG_0 = 0x20020a83ull;
 
-static const uint32_t EC_PC_TRACE2_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
-static const uint32_t EC_PC_TRACE2_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
+static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
+static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
 // c/reg00007.H
 
 static const uint64_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT1 = 0x20020641ull;
@@ -265,8 +265,8 @@ static const uint32_t QME_PSCRS3_HYP_DB_EXIT_ENABLE = 10;
 static const uint32_t QME_PSCRS3_EXT_EXIT_ENABLE = 11;
 static const uint32_t QME_PSCRS3_DEC_EXIT_ENABLE = 12;
 static const uint32_t QME_PSCRS3_HMI_EXIT_ENABLE = 13;
-static const uint32_t QME_PSCRS3_ = 14;
-static const uint32_t QME_PSCRS3__LEN = 2;
+static const uint32_t QME_PSCRS3_TR = 14;
+static const uint32_t QME_PSCRS3_TR_LEN = 2;
 static const uint32_t QME_PSCRS3_MTL = 16;
 static const uint32_t QME_PSCRS3_MTL_LEN = 4;
 static const uint32_t QME_PSCRS3_RL = 20;

@@ -8993,11 +8993,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_CBS_FSI(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_CBS_TR_FSI(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_CBS_FSI;
+    scomt::last_scom = FSXCOMP_FSXLOG_CBS_TR_FSI;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -9007,14 +9007,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_CBS_FSI(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_CBS_TR_FSI(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_CBS_FSI;
+    scomt::last_scom = FSXCOMP_FSXLOG_CBS_TR_FSI;
 #endif
-    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_CBS_FSI, o_data);
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_CBS_TR_FSI, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -9022,14 +9022,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_CBS_FSI(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_CBS_TR_FSI(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_FSI, FSXCOMP_FSXLOG_CBS_FSI_BYTE, FSXCOMP_FSXLOG_CBS_RO));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_TR_FSI, FSXCOMP_FSXLOG_CBS_TR_FSI_BYTE, FSXCOMP_FSXLOG_CBS_TR_RO));
 #endif
-    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_CBS_FSI, i_data);
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_CBS_TR_FSI, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -9037,11 +9037,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_CBS_FSI_BYTE(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_CBS_TR_FSI_BYTE(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_CBS_FSI_BYTE;
+    scomt::last_scom = FSXCOMP_FSXLOG_CBS_TR_FSI_BYTE;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -9051,14 +9051,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_CBS_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_CBS_TR_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_CBS_FSI_BYTE;
+    scomt::last_scom = FSXCOMP_FSXLOG_CBS_TR_FSI_BYTE;
 #endif
-    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_CBS_FSI_BYTE, o_data);
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_CBS_TR_FSI_BYTE, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -9066,14 +9066,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_CBS_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_CBS_TR_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_FSI, FSXCOMP_FSXLOG_CBS_FSI_BYTE, FSXCOMP_FSXLOG_CBS_RO));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_TR_FSI, FSXCOMP_FSXLOG_CBS_TR_FSI_BYTE, FSXCOMP_FSXLOG_CBS_TR_RO));
 #endif
-    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_CBS_FSI_BYTE, i_data);
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_CBS_TR_FSI_BYTE, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -9081,11 +9081,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_CBS_RO(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_CBS_TR_RO(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_CBS_RO;
+    scomt::last_scom = FSXCOMP_FSXLOG_CBS_TR_RO;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -9095,14 +9095,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_CBS_RO(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_CBS_TR_RO(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_CBS_RO;
+    scomt::last_scom = FSXCOMP_FSXLOG_CBS_TR_RO;
 #endif
-    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_CBS_RO, o_data);
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_CBS_TR_RO, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -9110,13 +9110,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_CBS_RO(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_CBS_TR_RO(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_FSI, FSXCOMP_FSXLOG_CBS_FSI_BYTE, FSXCOMP_FSXLOG_CBS_RO));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_TR_FSI, FSXCOMP_FSXLOG_CBS_TR_FSI_BYTE, FSXCOMP_FSXLOG_CBS_TR_RO));
 #endif
-    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_CBS_RO, i_data);
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_CBS_TR_RO, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -9124,102 +9125,102 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_CBS_SIGNATURE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_CBS_TR_SIGNATURE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_FSI, FSXCOMP_FSXLOG_CBS_FSI_BYTE, FSXCOMP_FSXLOG_CBS_RO));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_TR_FSI, FSXCOMP_FSXLOG_CBS_TR_FSI_BYTE, FSXCOMP_FSXLOG_CBS_TR_RO));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_CBS_SIGNATURE,
-           FSXCOMP_FSXLOG_CBS_SIGNATURE_LEN>(i_data);
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_CBS_TR_SIGNATURE,
+           FSXCOMP_FSXLOG_CBS_TR_SIGNATURE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_CBS_SIGNATURE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_CBS_TR_SIGNATURE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_CBS_SIGNATURE(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_CBS_TR_SIGNATURE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_FSI, FSXCOMP_FSXLOG_CBS_FSI_BYTE, FSXCOMP_FSXLOG_CBS_RO));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_TR_FSI, FSXCOMP_FSXLOG_CBS_TR_FSI_BYTE, FSXCOMP_FSXLOG_CBS_TR_RO));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_CBS_SIGNATURE,
-           FSXCOMP_FSXLOG_CBS_SIGNATURE_LEN>(i_data);
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_CBS_TR_SIGNATURE,
+           FSXCOMP_FSXLOG_CBS_TR_SIGNATURE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_CBS_SIGNATURE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_CBS_TR_SIGNATURE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_CBS_SIGNATURE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_CBS_TR_SIGNATURE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_FSI, FSXCOMP_FSXLOG_CBS_FSI_BYTE, FSXCOMP_FSXLOG_CBS_RO));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_TR_FSI, FSXCOMP_FSXLOG_CBS_TR_FSI_BYTE, FSXCOMP_FSXLOG_CBS_TR_RO));
 #endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_CBS_SIGNATURE,
-           FSXCOMP_FSXLOG_CBS_SIGNATURE_LEN>(o_data);
+    return i_data.extractToRight<FSXCOMP_FSXLOG_CBS_TR_SIGNATURE,
+           FSXCOMP_FSXLOG_CBS_TR_SIGNATURE_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_CBS_SIGNATURE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_CBS_TR_SIGNATURE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_CBS_TRANS_DELAY(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_CBS_TR_TRANS_DELAY(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_FSI, FSXCOMP_FSXLOG_CBS_FSI_BYTE, FSXCOMP_FSXLOG_CBS_RO));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_TR_FSI, FSXCOMP_FSXLOG_CBS_TR_FSI_BYTE, FSXCOMP_FSXLOG_CBS_TR_RO));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_CBS_TRANS_DELAY,
-           FSXCOMP_FSXLOG_CBS_TRANS_DELAY_LEN>(i_data);
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_CBS_TR_TRANS_DELAY,
+           FSXCOMP_FSXLOG_CBS_TR_TRANS_DELAY_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_CBS_TRANS_DELAY chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_CBS_TR_TRANS_DELAY chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_CBS_TRANS_DELAY(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_CBS_TR_TRANS_DELAY(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_FSI, FSXCOMP_FSXLOG_CBS_FSI_BYTE, FSXCOMP_FSXLOG_CBS_RO));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_TR_FSI, FSXCOMP_FSXLOG_CBS_TR_FSI_BYTE, FSXCOMP_FSXLOG_CBS_TR_RO));
 #endif
-    return o_data.insertFromRight<FSXCOMP_FSXLOG_CBS_TRANS_DELAY,
-           FSXCOMP_FSXLOG_CBS_TRANS_DELAY_LEN>(i_data);
+    return o_data.insertFromRight<FSXCOMP_FSXLOG_CBS_TR_TRANS_DELAY,
+           FSXCOMP_FSXLOG_CBS_TR_TRANS_DELAY_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_CBS_TRANS_DELAY chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_CBS_TR_TRANS_DELAY chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_CBS_TRANS_DELAY(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_CBS_TR_TRANS_DELAY(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_FSI, FSXCOMP_FSXLOG_CBS_FSI_BYTE, FSXCOMP_FSXLOG_CBS_RO));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_TR_FSI, FSXCOMP_FSXLOG_CBS_TR_FSI_BYTE, FSXCOMP_FSXLOG_CBS_TR_RO));
 #endif
-    return i_data.extractToRight<FSXCOMP_FSXLOG_CBS_TRANS_DELAY,
-           FSXCOMP_FSXLOG_CBS_TRANS_DELAY_LEN>(o_data);
+    return i_data.extractToRight<FSXCOMP_FSXLOG_CBS_TR_TRANS_DELAY,
+           FSXCOMP_FSXLOG_CBS_TR_TRANS_DELAY_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_CBS_TRANS_DELAY chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_CBS_TR_TRANS_DELAY chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_CBS_HIST(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_CBS_TR_HIST(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_CBS_HIST;
+    scomt::last_scom = FSXCOMP_FSXLOG_CBS_TR_HIST;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -9229,14 +9230,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_CBS_HIST(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_CBS_TR_HIST(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_CBS_HIST;
+    scomt::last_scom = FSXCOMP_FSXLOG_CBS_TR_HIST;
 #endif
-    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_CBS_HIST, o_data);
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_CBS_TR_HIST, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -9244,14 +9245,15 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_CBS_HIST(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_CBS_TR_HIST(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_HIST, FSXCOMP_FSXLOG_CBS_HIST_FSI, FSXCOMP_FSXLOG_CBS_HIST_FSI_BYTE));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_TR_HIST, FSXCOMP_FSXLOG_CBS_TR_HIST_FSI,
+                           FSXCOMP_FSXLOG_CBS_TR_HIST_FSI_BYTE));
 #endif
-    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_CBS_HIST, i_data);
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_CBS_TR_HIST, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -9259,11 +9261,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_CBS_HIST_FSI(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_CBS_TR_HIST_FSI(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_CBS_HIST_FSI;
+    scomt::last_scom = FSXCOMP_FSXLOG_CBS_TR_HIST_FSI;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -9273,14 +9275,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_CBS_HIST_FSI(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_CBS_TR_HIST_FSI(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_CBS_HIST_FSI;
+    scomt::last_scom = FSXCOMP_FSXLOG_CBS_TR_HIST_FSI;
 #endif
-    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_CBS_HIST_FSI, o_data);
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_CBS_TR_HIST_FSI, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -9288,14 +9290,15 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_CBS_HIST_FSI(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_CBS_TR_HIST_FSI(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_HIST, FSXCOMP_FSXLOG_CBS_HIST_FSI, FSXCOMP_FSXLOG_CBS_HIST_FSI_BYTE));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_TR_HIST, FSXCOMP_FSXLOG_CBS_TR_HIST_FSI,
+                           FSXCOMP_FSXLOG_CBS_TR_HIST_FSI_BYTE));
 #endif
-    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_CBS_HIST_FSI, i_data);
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_CBS_TR_HIST_FSI, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -9303,11 +9306,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_CBS_HIST_FSI_BYTE(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_CBS_TR_HIST_FSI_BYTE(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_CBS_HIST_FSI_BYTE;
+    scomt::last_scom = FSXCOMP_FSXLOG_CBS_TR_HIST_FSI_BYTE;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -9317,14 +9320,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_CBS_HIST_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_CBS_TR_HIST_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_CBS_HIST_FSI_BYTE;
+    scomt::last_scom = FSXCOMP_FSXLOG_CBS_TR_HIST_FSI_BYTE;
 #endif
-    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_CBS_HIST_FSI_BYTE, o_data);
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_CBS_TR_HIST_FSI_BYTE, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -9332,14 +9335,15 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_CBS_HIST_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_CBS_TR_HIST_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_HIST, FSXCOMP_FSXLOG_CBS_HIST_FSI, FSXCOMP_FSXLOG_CBS_HIST_FSI_BYTE));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_CBS_TR_HIST, FSXCOMP_FSXLOG_CBS_TR_HIST_FSI,
+                           FSXCOMP_FSXLOG_CBS_TR_HIST_FSI_BYTE));
 #endif
-    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_CBS_HIST_FSI_BYTE, i_data);
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_CBS_TR_HIST_FSI_BYTE, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;

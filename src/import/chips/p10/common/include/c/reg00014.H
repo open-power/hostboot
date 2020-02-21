@@ -7223,11 +7223,11 @@ fapi_try_exit:
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_EC_PC_TRACE2_TR0_CONFIG_4(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_EC_PC_TRACE2_TR_TR0_CONFIG_4(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = EC_PC_TRACE2_TR0_CONFIG_4;
+    scomt::last_scom = EC_PC_TRACE2_TR_TR0_CONFIG_4;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -7237,14 +7237,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_EC_PC_TRACE2_TR0_CONFIG_4(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_EC_PC_TRACE2_TR_TR0_CONFIG_4(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = EC_PC_TRACE2_TR0_CONFIG_4;
+    scomt::last_scom = EC_PC_TRACE2_TR_TR0_CONFIG_4;
 #endif
-    return fapi2::getScom(i_target, EC_PC_TRACE2_TR0_CONFIG_4, o_data);
+    return fapi2::getScom(i_target, EC_PC_TRACE2_TR_TR0_CONFIG_4, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -7252,14 +7252,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_EC_PC_TRACE2_TR0_CONFIG_4(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_EC_PC_TRACE2_TR_TR0_CONFIG_4(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_CONFIG_4));
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_CONFIG_4));
 #endif
-    return fapi2::putScom(i_target, EC_PC_TRACE2_TR0_CONFIG_4, i_data);
+    return fapi2::putScom(i_target, EC_PC_TRACE2_TR_TR0_CONFIG_4, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -7267,92 +7267,92 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR0_CONFIG_4_A(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR_TR0_CONFIG_4_A(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_CONFIG_4));
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_CONFIG_4));
 #endif
-    return o_data.insertFromRight<EC_PC_TRACE2_TR0_CONFIG_4_A,
-           EC_PC_TRACE2_TR0_CONFIG_4_A_LEN>(i_data);
+    return o_data.insertFromRight<EC_PC_TRACE2_TR_TR0_CONFIG_4_A,
+           EC_PC_TRACE2_TR_TR0_CONFIG_4_A_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_CONFIG_4_A chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_CONFIG_4_A chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR0_CONFIG_4_A(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR_TR0_CONFIG_4_A(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_CONFIG_4));
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_CONFIG_4));
 #endif
-    return o_data.insertFromRight<EC_PC_TRACE2_TR0_CONFIG_4_A,
-           EC_PC_TRACE2_TR0_CONFIG_4_A_LEN>(i_data);
+    return o_data.insertFromRight<EC_PC_TRACE2_TR_TR0_CONFIG_4_A,
+           EC_PC_TRACE2_TR_TR0_CONFIG_4_A_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_CONFIG_4_A chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_CONFIG_4_A chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_TRACE2_TR0_CONFIG_4_A(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_TRACE2_TR_TR0_CONFIG_4_A(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_CONFIG_4));
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_CONFIG_4));
 #endif
-    return i_data.extractToRight<EC_PC_TRACE2_TR0_CONFIG_4_A,
-           EC_PC_TRACE2_TR0_CONFIG_4_A_LEN>(o_data);
+    return i_data.extractToRight<EC_PC_TRACE2_TR_TR0_CONFIG_4_A,
+           EC_PC_TRACE2_TR_TR0_CONFIG_4_A_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_CONFIG_4_A chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_CONFIG_4_A chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR0_CONFIG_4_B(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR_TR0_CONFIG_4_B(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_CONFIG_4));
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_CONFIG_4));
 #endif
-    return o_data.insertFromRight<EC_PC_TRACE2_TR0_CONFIG_4_B,
-           EC_PC_TRACE2_TR0_CONFIG_4_B_LEN>(i_data);
+    return o_data.insertFromRight<EC_PC_TRACE2_TR_TR0_CONFIG_4_B,
+           EC_PC_TRACE2_TR_TR0_CONFIG_4_B_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_CONFIG_4_B chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_CONFIG_4_B chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR0_CONFIG_4_B(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR_TR0_CONFIG_4_B(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_CONFIG_4));
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_CONFIG_4));
 #endif
-    return o_data.insertFromRight<EC_PC_TRACE2_TR0_CONFIG_4_B,
-           EC_PC_TRACE2_TR0_CONFIG_4_B_LEN>(i_data);
+    return o_data.insertFromRight<EC_PC_TRACE2_TR_TR0_CONFIG_4_B,
+           EC_PC_TRACE2_TR_TR0_CONFIG_4_B_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_CONFIG_4_B chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_CONFIG_4_B chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_TRACE2_TR0_CONFIG_4_B(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_TRACE2_TR_TR0_CONFIG_4_B(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_CONFIG_4));
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_CONFIG_4));
 #endif
-    return i_data.extractToRight<EC_PC_TRACE2_TR0_CONFIG_4_B,
-           EC_PC_TRACE2_TR0_CONFIG_4_B_LEN>(o_data);
+    return i_data.extractToRight<EC_PC_TRACE2_TR_TR0_CONFIG_4_B,
+           EC_PC_TRACE2_TR_TR0_CONFIG_4_B_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_CONFIG_4_B chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_CONFIG_4_B chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

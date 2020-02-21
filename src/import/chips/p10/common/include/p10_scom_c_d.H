@@ -264,12 +264,12 @@ static const uint32_t EC_PC_TOD_READ_TOD = 0;
 static const uint32_t EC_PC_TOD_READ_TOD_LEN = 60;
 // c/reg00013.H
 
-static const uint64_t EC_PC_TRACE2_TR0_CONFIG_3 = 0x20020a86ull;
+static const uint64_t EC_PC_TRACE2_TR_TR0_CONFIG_3 = 0x20020a86ull;
 
-static const uint32_t EC_PC_TRACE2_TR0_CONFIG_3_C = 0;
-static const uint32_t EC_PC_TRACE2_TR0_CONFIG_3_C_LEN = 24;
-static const uint32_t EC_PC_TRACE2_TR0_CONFIG_3_D = 24;
-static const uint32_t EC_PC_TRACE2_TR0_CONFIG_3_D_LEN = 24;
+static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_3_C = 0;
+static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_3_C_LEN = 24;
+static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_3_D = 24;
+static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_3_D_LEN = 24;
 // c/reg00013.H
 
 static const uint64_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT2 = 0x20020642ull;
@@ -410,8 +410,8 @@ static const uint32_t QME_PSCRS0_HYP_DB_EXIT_ENABLE = 10;
 static const uint32_t QME_PSCRS0_EXT_EXIT_ENABLE = 11;
 static const uint32_t QME_PSCRS0_DEC_EXIT_ENABLE = 12;
 static const uint32_t QME_PSCRS0_HMI_EXIT_ENABLE = 13;
-static const uint32_t QME_PSCRS0_ = 14;
-static const uint32_t QME_PSCRS0__LEN = 2;
+static const uint32_t QME_PSCRS0_TR = 14;
+static const uint32_t QME_PSCRS0_TR_LEN = 2;
 static const uint32_t QME_PSCRS0_MTL = 16;
 static const uint32_t QME_PSCRS0_MTL_LEN = 4;
 static const uint32_t QME_PSCRS0_RL = 20;

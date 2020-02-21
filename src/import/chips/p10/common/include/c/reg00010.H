@@ -8993,11 +8993,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG;
+    scomt::last_scom = EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -9007,14 +9007,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG;
+    scomt::last_scom = EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG;
 #endif
-    return fapi2::getScom(i_target, EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG, o_data);
+    return fapi2::getScom(i_target, EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -9022,14 +9022,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
 #endif
-    return fapi2::putScom(i_target, EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG, i_data);
+    return fapi2::putScom(i_target, EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -9037,458 +9037,471 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LO_DATA(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
-#endif
-    return o_data.insertFromRight<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LO_DATA,
-           EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LO_DATA_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LO_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LO_DATA(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
-#endif
-    return o_data.insertFromRight<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LO_DATA,
-           EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LO_DATA_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LO_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LO_DATA(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
-#endif
-    return i_data.extractToRight<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LO_DATA,
-           EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LO_DATA_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LO_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_ADDRESS(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
-#endif
-    return o_data.insertFromRight<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_ADDRESS,
-           EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_ADDRESS_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_ADDRESS chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_ADDRESS(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
-#endif
-    return o_data.insertFromRight<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_ADDRESS,
-           EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_ADDRESS_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_ADDRESS chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_ADDRESS(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
-#endif
-    return i_data.extractToRight<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_ADDRESS,
-           EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_ADDRESS_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_ADDRESS chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
-#endif
-    return o_data.insertFromRight<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK,
-           EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
-#endif
-    return o_data.insertFromRight<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK,
-           EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
-#endif
-    return i_data.extractToRight<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK,
-           EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID(
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LO_DATA(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
 #endif
-    return o_data.insertFromRight<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID,
-           1>(i_data);
+    return o_data.insertFromRight<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LO_DATA,
+           EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LO_DATA_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LO_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LO_DATA(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
 #endif
-    return o_data.insertFromRight<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID,
-           1>(i_data);
+    return o_data.insertFromRight<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LO_DATA,
+           EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LO_DATA_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LO_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
-#endif
-    return o_data.setBit<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
-#endif
-    return o_data.clearBit<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID(
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LO_DATA(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
 #endif
-    return i_data.extractToRight<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID,
-           1>(o_data);
+    return i_data.extractToRight<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LO_DATA,
+           EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LO_DATA_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LO_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
-#endif
-    return i_data.getBit<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN(
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_ADDRESS(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
 #endif
-    return o_data.insertFromRight<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN,
-           1>(i_data);
+    return o_data.insertFromRight<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_ADDRESS,
+           EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_ADDRESS_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_ADDRESS chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_ADDRESS(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
 #endif
-    return o_data.insertFromRight<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN,
-           1>(i_data);
+    return o_data.insertFromRight<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_ADDRESS,
+           EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_ADDRESS_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_ADDRESS chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
-#endif
-    return o_data.setBit<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
-#endif
-    return o_data.clearBit<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN(
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_ADDRESS(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
 #endif
-    return i_data.extractToRight<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN,
-           1>(o_data);
+    return i_data.extractToRight<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_ADDRESS,
+           EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_ADDRESS_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_ADDRESS chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
-#endif
-    return i_data.getBit<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_RUNNING(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
-#endif
-    return o_data.insertFromRight<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_RUNNING,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_RUNNING chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_RUNNING(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
-#endif
-    return o_data.insertFromRight<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_RUNNING,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_RUNNING chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_RUNNING(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
-#endif
-    return o_data.setBit<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_RUNNING>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_RUNNING chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_RUNNING(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
-#endif
-    return o_data.clearBit<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_RUNNING>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_RUNNING chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_RUNNING(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
-#endif
-    return i_data.extractToRight<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_RUNNING,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_RUNNING chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_RUNNING(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
-#endif
-    return i_data.getBit<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_RUNNING>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_RUNNING chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS(
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
 #endif
-    return o_data.insertFromRight<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS,
-           EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN>(i_data);
+    return o_data.insertFromRight<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK,
+           EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
 #endif
-    return o_data.insertFromRight<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS,
-           EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN>(i_data);
+    return o_data.insertFromRight<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK,
+           EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS(
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG));
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
 #endif
-    return i_data.extractToRight<EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS,
-           EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN>(o_data);
+    return i_data.extractToRight<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK,
+           EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
+#endif
+    return o_data.insertFromRight<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
+#endif
+    return o_data.insertFromRight<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
+#endif
+    return o_data.setBit<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
+#endif
+    return o_data.clearBit<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
+#endif
+    return i_data.extractToRight<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
+#endif
+    return i_data.getBit<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
+#endif
+    return o_data.insertFromRight<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
+#endif
+    return o_data.insertFromRight<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
+#endif
+    return o_data.setBit<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
+#endif
+    return o_data.clearBit<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
+#endif
+    return i_data.extractToRight<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
+#endif
+    return i_data.getBit<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_RUNNING(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
+#endif
+    return o_data.insertFromRight<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_RUNNING,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_RUNNING chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_RUNNING(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
+#endif
+    return o_data.insertFromRight<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_RUNNING,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_RUNNING chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_RUNNING(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
+#endif
+    return o_data.setBit<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_RUNNING>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_RUNNING chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_RUNNING(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
+#endif
+    return o_data.clearBit<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_RUNNING>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_RUNNING chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_RUNNING(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
+#endif
+    return i_data.extractToRight<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_RUNNING,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_RUNNING chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_RUNNING(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
+#endif
+    return i_data.getBit<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_RUNNING>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_RUNNING chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
+#endif
+    return o_data.insertFromRight<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS,
+           EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
+#endif
+    return o_data.insertFromRight<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS,
+           EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG));
+#endif
+    return i_data.extractToRight<EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS,
+           EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif

@@ -96,12 +96,12 @@ static const uint32_t EC_PC_COMMON_SPR_HMEER_ENABLE = 0;
 static const uint32_t EC_PC_COMMON_SPR_HMEER_ENABLE_LEN = 24;
 // c/reg00000.H
 
-static const uint64_t EC_PC_TRACE1_TR0_CONFIG_5 = 0x20020a48ull;
+static const uint64_t EC_PC_TRACE1_TR_TR0_CONFIG_5 = 0x20020a48ull;
 
-static const uint32_t EC_PC_TRACE1_TR0_CONFIG_5_C = 0;
-static const uint32_t EC_PC_TRACE1_TR0_CONFIG_5_C_LEN = 24;
-static const uint32_t EC_PC_TRACE1_TR0_CONFIG_5_D = 24;
-static const uint32_t EC_PC_TRACE1_TR0_CONFIG_5_D_LEN = 24;
+static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_5_C = 0;
+static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_5_C_LEN = 24;
+static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_5_D = 24;
+static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_5_D_LEN = 24;
 // c/reg00000.H
 
 static const uint64_t L2TRA_TR0_CONFIG_3 = 0x20020046ull;

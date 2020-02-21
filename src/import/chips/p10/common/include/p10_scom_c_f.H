@@ -140,16 +140,16 @@ static const uint32_t EC_PC_PWM_EVENTS_PMCM_THRESHOLD = 62;
 static const uint32_t EC_PC_PWM_EVENTS_PMCM_THRESHOLD_LEN = 2;
 // c/reg00015.H
 
-static const uint64_t EC_PC_TRACE1_TR0_CONFIG_0 = 0x20020a43ull;
+static const uint64_t EC_PC_TRACE1_TR_TR0_CONFIG_0 = 0x20020a43ull;
 
-static const uint32_t EC_PC_TRACE1_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
-static const uint32_t EC_PC_TRACE1_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
+static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
+static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
 // c/reg00015.H
 
-static const uint64_t EC_PC_TRACE2_TR0_TRACE_HI_DATA_REG = 0x20020a80ull;
+static const uint64_t EC_PC_TRACE2_TR_TR0_TRACE_HI_DATA_REG = 0x20020a80ull;
 
-static const uint32_t EC_PC_TRACE2_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
-static const uint32_t EC_PC_TRACE2_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
+static const uint32_t EC_PC_TRACE2_TR_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
+static const uint32_t EC_PC_TRACE2_TR_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
 // c/reg00015.H
 
 static const uint64_t L2_L2MISC_L2CERRS_ERR_INJ_REG = 0x2002000cull;

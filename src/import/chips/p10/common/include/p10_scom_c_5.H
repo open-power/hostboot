@@ -168,12 +168,12 @@ static const uint32_t EC_PC_TOD_SYNC110_CHIP_TOD_STATUS = 60;
 static const uint32_t EC_PC_TOD_SYNC110_CHIP_TOD_STATUS_LEN = 4;
 // c/reg00005.H
 
-static const uint64_t EC_PC_TRACE1_TR0_CONFIG_3 = 0x20020a46ull;
+static const uint64_t EC_PC_TRACE1_TR_TR0_CONFIG_3 = 0x20020a46ull;
 
-static const uint32_t EC_PC_TRACE1_TR0_CONFIG_3_C = 0;
-static const uint32_t EC_PC_TRACE1_TR0_CONFIG_3_C_LEN = 24;
-static const uint32_t EC_PC_TRACE1_TR0_CONFIG_3_D = 24;
-static const uint32_t EC_PC_TRACE1_TR0_CONFIG_3_D_LEN = 24;
+static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_3_C = 0;
+static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_3_C_LEN = 24;
+static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_3_D = 24;
+static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_3_D_LEN = 24;
 // c/reg00005.H
 
 static const uint64_t L2TRA_TR0_CONFIG_5 = 0x20020048ull;

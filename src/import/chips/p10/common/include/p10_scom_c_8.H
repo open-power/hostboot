@@ -223,12 +223,12 @@ static const uint32_t EC_PC_PMU_SPRCOR_SHID0_DIS_TRACE_SPR = 1;
 static const uint64_t EC_PC_SCR7 = 0x2002048dull;
 // c/reg00008.H
 
-static const uint64_t EC_PC_TRACE2_TR0_CONFIG_5 = 0x20020a88ull;
+static const uint64_t EC_PC_TRACE2_TR_TR0_CONFIG_5 = 0x20020a88ull;
 
-static const uint32_t EC_PC_TRACE2_TR0_CONFIG_5_C = 0;
-static const uint32_t EC_PC_TRACE2_TR0_CONFIG_5_C_LEN = 24;
-static const uint32_t EC_PC_TRACE2_TR0_CONFIG_5_D = 24;
-static const uint32_t EC_PC_TRACE2_TR0_CONFIG_5_D_LEN = 24;
+static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_5_C = 0;
+static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_5_C_LEN = 24;
+static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_5_D = 24;
+static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_5_D_LEN = 24;
 // c/reg00008.H
 
 static const uint64_t L2_L2MISC_L2CERRS_TOPOTABLE0 = 0x20020014ull;

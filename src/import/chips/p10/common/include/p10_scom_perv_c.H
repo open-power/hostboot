@@ -247,21 +247,21 @@ static const uint32_t FSXCOMP_FSXLOG_CBS_STAT_TP_TPFSI_CBS_ACK = 31;
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_CBS_FSI = 0x00002802ull;
-static const uint32_t FSXCOMP_FSXLOG_CBS_FSI_BYTE = 0x00002808ull;
-static const uint32_t FSXCOMP_FSXLOG_CBS_RO = 0x00050002ull;
+static const uint32_t FSXCOMP_FSXLOG_CBS_TR_FSI = 0x00002802ull;
+static const uint32_t FSXCOMP_FSXLOG_CBS_TR_FSI_BYTE = 0x00002808ull;
+static const uint32_t FSXCOMP_FSXLOG_CBS_TR_RO = 0x00050002ull;
 
-static const uint32_t FSXCOMP_FSXLOG_CBS_SIGNATURE = 0;
-static const uint32_t FSXCOMP_FSXLOG_CBS_SIGNATURE_LEN = 16;
-static const uint32_t FSXCOMP_FSXLOG_CBS_TRANS_DELAY = 22;
-static const uint32_t FSXCOMP_FSXLOG_CBS_TRANS_DELAY_LEN = 10;
+static const uint32_t FSXCOMP_FSXLOG_CBS_TR_SIGNATURE = 0;
+static const uint32_t FSXCOMP_FSXLOG_CBS_TR_SIGNATURE_LEN = 16;
+static const uint32_t FSXCOMP_FSXLOG_CBS_TR_TRANS_DELAY = 22;
+static const uint32_t FSXCOMP_FSXLOG_CBS_TR_TRANS_DELAY_LEN = 10;
 // perv/reg00024.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_CBS_HIST = 0x00050005ull;
-static const uint32_t FSXCOMP_FSXLOG_CBS_HIST_FSI = 0x00002805ull;
-static const uint32_t FSXCOMP_FSXLOG_CBS_HIST_FSI_BYTE = 0x00002814ull;
+static const uint32_t FSXCOMP_FSXLOG_CBS_TR_HIST = 0x00050005ull;
+static const uint32_t FSXCOMP_FSXLOG_CBS_TR_HIST_FSI = 0x00002805ull;
+static const uint32_t FSXCOMP_FSXLOG_CBS_TR_HIST_FSI_BYTE = 0x00002814ull;
 // perv/reg00024.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.

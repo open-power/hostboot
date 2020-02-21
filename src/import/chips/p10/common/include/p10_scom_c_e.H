@@ -201,12 +201,12 @@ static const uint64_t EC_PC_PMU_SPRCOR_OCC_SCOMD = 0x20020411ull;
 static const uint64_t EC_PC_SCR6 = 0x2002048cull;
 // c/reg00014.H
 
-static const uint64_t EC_PC_TRACE2_TR0_CONFIG_4 = 0x20020a87ull;
+static const uint64_t EC_PC_TRACE2_TR_TR0_CONFIG_4 = 0x20020a87ull;
 
-static const uint32_t EC_PC_TRACE2_TR0_CONFIG_4_A = 0;
-static const uint32_t EC_PC_TRACE2_TR0_CONFIG_4_A_LEN = 24;
-static const uint32_t EC_PC_TRACE2_TR0_CONFIG_4_B = 24;
-static const uint32_t EC_PC_TRACE2_TR0_CONFIG_4_B_LEN = 24;
+static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_4_A = 0;
+static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_4_A_LEN = 24;
+static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_4_B = 24;
+static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_4_B_LEN = 24;
 // c/reg00014.H
 
 static const uint64_t L2_L2MISC_L2CERRS_TOPOTABLE1 = 0x20020015ull;
