@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2019
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -34,6 +34,7 @@ ifdef MODULE
 COMMONFLAGS += -fPIC -Bsymbolic -Bsymbolic-functions
 CFLAGS += -D__HOSTBOOT_MODULE=$(MODULE)
 CFLAGS += -DNO_INITIALIZER_LIST
+CFLAGS += -DNO_PLAT_STD_STRING_SUPPORT
 #CFLAGS += -DPLAT_NO_THREAD_LOCAL_STORAGE
 CFLAGS += -D__FAPI
 endif
