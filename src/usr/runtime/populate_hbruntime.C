@@ -1664,9 +1664,6 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
 
             if(SECUREBOOT::SMF::isSmfEnabled())
             {
-                auto l_unsecureHomerSize = l_sys->
-                                 getAttr<TARGETING::ATTR_UNSECURE_HOMER_SIZE>();
-
                 // The address of unsecure HOMER is the same among all the
                 // procs, so we can just fetch it from the master proc.
                 TARGETING::Target* l_masterProc = nullptr;
@@ -1676,6 +1673,9 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                 {
                     break;
                 }
+
+                const auto l_unsecureHomerSize
+                    = l_masterProc->getAttr<TARGETING::ATTR_UNSECURE_HOMER_SIZE>();
 
                 auto l_unsecureHomerAddr = l_masterProc->
                               getAttr<TARGETING::ATTR_UNSECURE_HOMER_ADDRESS>();
