@@ -65,7 +65,6 @@ use Cwd;
 #------------------------------------------------------------------------------
 my $ReleaseYear = `date +%Y`;
 chomp( $ReleaseYear );
-$ReleaseYear = $ENV{'DATE_OVERRIDE'} if defined $ENV{'DATE_OVERRIDE'};
 
 my $copyrightSymbol = "";
 # my $copyrightSymbol = "(C)";  # Uncomment if unable to use  character.
@@ -126,6 +125,7 @@ use constant    RC_NO_LICENSE_PROLOG_FILE       => 6;
 #------------------------------------------------------------------------------
 my  $opt_help               =   0;
 my  $opt_debug              =   0;
+my  $mirror_mode            =   0;  #Update is being run inside of a mirror
 my  $operation              =   "";
 my  $opt_logfile            =   "";
 
@@ -165,6 +165,7 @@ GetOptions( "help|?"                    =>  \$opt_help,
             "copyright-check"           => \$copyright_check,
             "log-failed-files=s"        =>  \$opt_logfile,
             "debug"                     =>  \$opt_debug,
+            "mirror"                    =>  \$mirror_mode,
           );
 
 ##  scan through remaining args and store all files in @Files
@@ -715,7 +716,7 @@ sub createYearString($)
     ##  new files will not have a log, so the "git log" call above will
     ##  return nothing.
     ##  Push any year we find onto the @years array
-    my  $cmd = "git log -- $filename | grep Date: | tail -n 1";
+    my  $cmd = 'git log -n1 -- $filename | grep "Date" ';
     ## print "run $cmd\n";
     my @logstrings = split( " ", `$cmd` );
     if ( $? )   {   die "ERROR $? : Could not run $cmd $!\n";   }
