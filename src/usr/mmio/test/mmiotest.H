@@ -22,6 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+/**
+ *  @file mmiotest.H
+ *
+ *  @brief Test cases for MMIO code
+ */
+
 #include <cxxtest/TestSuite.H>
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
@@ -63,7 +69,6 @@ class MmioTest : public CxxTest::TestSuite
         errlHndl_t l_err = nullptr;
         uint32_t regdata4 = 0;
         size_t op_size = 0;
-        uint64_t l_buffer64;
 
         // Needed since the device operations could be using inband communication in error path
         HB_MUTEX_SERIALIZE_TEST_LOCK_ATTR l_mutex = exptest::getTestMutex();
@@ -138,7 +143,7 @@ class MmioTest : public CxxTest::TestSuite
             // 'invalid address'
             // NOTE: must byteswap to little endian before writing
             uint64_t GIF2PCB_INVALID_SCOM_ADDR_ERROR = 0x0080000000000000ull;
-            l_buffer64 = BYTESWAP64(GIF2PCB_INVALID_SCOM_ADDR_ERROR);
+            uint64_t l_buffer64 = BYTESWAP64(GIF2PCB_INVALID_SCOM_ADDR_ERROR);
             op_size = sizeof(l_buffer64);
             l_err = DeviceFW::deviceWrite(
                               explr_target,

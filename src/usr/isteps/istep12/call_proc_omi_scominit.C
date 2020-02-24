@@ -56,7 +56,7 @@
 #include <p10_omi_setup_bars.H>
 #include <p10_omi_scominit.H>
 
-//#include    <mmio/mmio.H>
+#include    <mmio/mmio.H>
 
 
 using   namespace   ISTEP;
@@ -152,21 +152,18 @@ void* call_proc_omi_scominit (void *io_pArgs)
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, EXIT_MRK"p10_omi_setup_bars");
 
     // map OCMBs into Hostboot memory
-/*    l_err = MMIO::mmioSetup();
+    l_err = MMIO::mmioSetup();
     if ( l_err )
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "ERROR 0x%.8X:  call_proc_omi_scominit, unable to"
-            " initialize MMIO!",
-            l_err->reasonCode() );
+            "ERROR : call mmioSetup() : unable to initialize MMIO! "
+            TRACE_ERR_FMT,
+            TRACE_ERR_ARGS(l_err));
 
-        // Create IStep error log and cross reference to error that occurred
-        l_StepError.addErrorDetails( l_err );
-
-        // Commit Error
-        errlCommit( l_err, ISTEP_COMP_ID );
+        // Capture error
+        captureError(l_err, l_StepError, ISTEP_COMP_ID);
     }
-*/
+
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_omi_scominit exit");
 
     // end task, returning any errorlogs to IStepDisp

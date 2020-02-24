@@ -30,22 +30,19 @@ SUBDIRS += runtime.d
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 
-# FIXME RTC 210975
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/
+EXTRAINCDIR += ${ROOTPATH}/src/import/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/inband/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 
-# FIXME RTC: 210975 mmio.C has references to p9a_mc_scom_addresses.H
-
 #include unique object modules
-#OBJS += mmio.o
-#OBJS += mmio_explorer.o
+OBJS += mmio.o
+OBJS += mmio_explorer.o
 
-#VPATH += ..
 include $(ROOTPATH)/config.mk

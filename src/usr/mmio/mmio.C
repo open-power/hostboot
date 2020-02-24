@@ -22,6 +22,13 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+/**
+ * @file mmio.C
+ *
+ * @brief Implementation of MMIO operations to Explorer chips
+ *
+ */
+
 #include <sys/mmio.h>
 #include <devicefw/driverif.H>
 #include <errl/errlentry.H>
@@ -38,27 +45,24 @@
 #include <mmio/mmio.H>
 #include <mmio/mmio_reasoncodes.H>
 
-#include <p9a_mc_scom_addresses.H>
-#include <p9a_mc_scom_addresses_fld.H>
+#include <p10_scom_mcc_b.H>
 #include <error_info_defs.H>
 
 #include "mmio_explorer.H"
 #include <utils/chipids.H>
 
 // Trace definition
-trace_desc_t* g_trac_mmio = NULL;
+trace_desc_t* g_trac_mmio = nullptr;
 TRAC_INIT(&g_trac_mmio, MMIO_COMP_NAME, 2*KILOBYTE, TRACE::BUFFER_SLOW);
 
-#define OMI_PER_MC 8
+#define OMI_PER_MC 4
 
 using namespace TARGETING;
+using namespace MEMMAP;
+using namespace scomt::mcc;
 
 namespace MMIO
 {
-
-// TODO RTC 201493 - Remove these consts once HW group has defined them.
-static const uint8_t P9A_MC_DSTLFIR_SUBCHANNEL_A_FAIL_ACTION = 20;
-static const uint8_t P9A_MC_DSTLFIR_SUBCHANNEL_B_FAIL_ACTION = 21;
 
 // Helper function declarations (definitions at the bottom of this file)
 static
@@ -92,14 +96,20 @@ errlHndl_t mmioSetup()
     // called after OMI bars have been written to HW registers
     do
     {
-        // map 8 OCMBs at a time, set MMIO_VM_ADDR on each OCMB
+        // map all OCMBs on a MC at a time, set MMIO_VM_ADDR on each OCMB
         //
         // loop through all the Memory Channels (MC Targets)
-        //     call allocate of 32 GB virtual memory space with mmio_dev_map() for each MC
+        //     call allocate of 16 GB virtual memory space with mmio_dev_map()
+        //     for each MC
+        //
+        // On a p10 system, each MC has 1 MI that contains 2 MCC.
+        //     Each MCC has 2 OMIs and each OMI has 1 OCMB.
+        //     So each MC has 4 OCMBs.
+        //     At 4GB per OCMB, each MC is allocated 16GB.
         TargetHandleList l_mcTargetList;
         getAllChiplets(l_mcTargetList, TYPE_MC);
 
-        TARGETING::Target * l_sys = NULL;
+        TARGETING::Target * l_sys = nullptr;
         TARGETING::targetService().getTopLevelTarget( l_sys );
         assert(l_sys, "mmioSetup: no TopLevelTarget");
         const auto l_topoMode =
@@ -110,7 +120,8 @@ errlHndl_t mmioSetup()
             uint32_t  l_mcChipUnit =
                               l_mcTarget->getAttr<ATTR_CHIP_UNIT>();
 
-            // Get the base BAR address for OpenCapi Memory Interfaces (OMIs) of this Memory Controller (MC)
+            // Get the base BAR address for OpenCapi Memory Interfaces (OMIs)
+            // of this Memory Controller (MC)
             auto l_omiBaseAddr =
                   l_mcTarget->getAttr<ATTR_OMI_INBAND_BAR_BASE_ADDR_OFFSET>();
 
@@ -126,13 +137,14 @@ errlHndl_t mmioSetup()
             //  Apply the MMIO base offset so we get the final address
             l_realAddr += l_omiBaseAddr;
 
-            // Map the device with a kernel call, each device, the MC,  is 32 GB
+            // Map the device with a kernel call, each device, the MC, is 16 GB
             uint64_t l_virtAddr = reinterpret_cast<uint64_t>
                          (mmio_dev_map(reinterpret_cast<void *>(l_realAddr),
-                                       THIRTYTWO_GB));
+                                       16*GIGABYTE));
 
-            TRACFCOMP ( g_trac_mmio, "MC%.02X (0x%.08X) MMIO BAR PHYSICAL ADDR = 0x%lX     VIRTUAL ADDR = 0x%lX" ,
-                        l_mcChipUnit ? 0x23 : 0x01, get_huid(l_mcTarget),
+            TRACFCOMP ( g_trac_mmio, "MC%.02X (0x%.08X) MMIO BAR PHYSICAL ADDR "
+                        "= 0x%lX     VIRTUAL ADDR = 0x%lX" ,
+                        l_mcChipUnit, get_huid(l_mcTarget),
                         l_realAddr, l_virtAddr);
 
             // set VM_ADDR on each OCMB
@@ -178,8 +190,12 @@ errlHndl_t mmioSetup()
                 if(l_omiBarAttrVal != l_calulatedRealAddr)
                 {
                     TRACFCOMP(g_trac_mmio,
-                              "Discrepancy found between calculated OMI MMIO bar offset and what we found in ATTR_OMI_INBAND_BAR_BASE_ADDR_OFFSET");
-                    TRACFCOMP(g_trac_mmio, "Calculated Offset: 0x%lX,  Attribute Value : 0x%lX", l_calulatedRealAddr, l_omiBarAttrVal);
+                              "Discrepancy found between calculated OMI MMIO "
+                              "bar offset and what we found in "
+                              "ATTR_OMI_INBAND_BAR_BASE_ADDR_OFFSET");
+                    TRACFCOMP(g_trac_mmio, "Calculated Offset: 0x%lX, "
+                              "Attribute Value : 0x%lX",
+                              l_calulatedRealAddr, l_omiBarAttrVal);
 
                     /*@
                     * @errortype   ERRORLOG::ERRL_SEV_UNRECOVERABLE
@@ -247,7 +263,7 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
  */
 void disableInbandScomsOcmb(const TargetHandle_t i_ocmbTarget)
 {
-    mutex_t* l_mutex = NULL;
+    mutex_t* l_mutex = nullptr;
 
     TRACFCOMP(g_trac_mmio,
               "disableInbandScomsOcmb: switching to use I2C on OCMB 0x%08x",
@@ -341,7 +357,6 @@ errlHndl_t checkOcmbError(const TargetHandle_t i_ocmbTarget,
     switch(l_ocmbChipId)
     {
         case POWER_CHIPID::EXPLORER_16:
-        case POWER_CHIPID::GEMINI_16:
             l_err = MMIOEXP::checkExpError(i_ocmbTarget,
                                            i_va,
                                            i_accessLimit,
@@ -405,7 +420,6 @@ void determineCallouts(const TargetHandle_t i_ocmbTarget,
     switch(l_ocmbChipId)
     {
         case POWER_CHIPID::EXPLORER_16:
-        case POWER_CHIPID::GEMINI_16:
             l_err = MMIOEXP::determineExpCallouts(i_ocmbTarget,
                                                   i_offset,
                                                   i_opType,
@@ -497,26 +511,28 @@ errlHndl_t checkChannelCheckstop(const TargetHandle_t i_ocmbTarget,
     uint64_t   l_scom_mask = 0;
 
     auto l_err = getProcScom(i_ocmbTarget,
-                             P9A_MCC_DSTLFIR,
+                             DSTL_DSTLFIR_RW, // 0x0C010D00
                              l_scom_data);
     if (l_err)
     {
         TRACFCOMP(g_trac_mmio, ERR_MRK
-                 "checkChannelCheckstop: getscom(P9A_MCC_DSTLFIR) failed"
+                 "checkChannelCheckstop: getscom(DSTL_DSTLFIR_RW) failed"
                  " on OCMB[0x%08x]", get_huid(i_ocmbTarget));
     }
     else
     {
         // Check for channel checkstop on our sub-channel
+        // bit 20: subchannel A has entered the fail state
+        // bit 21: subchannel B has entered the fail state
         l_scom_mask = (isSubChannelA(i_ocmbTarget))?
-             (1ull << P9A_MC_DSTLFIR_SUBCHANNEL_A_FAIL_ACTION):
-             (1ull << P9A_MC_DSTLFIR_SUBCHANNEL_B_FAIL_ACTION);
+             (1ull << DSTL_DSTLFIR_SUBCHANNEL_A_FAIL_ACTION):
+             (1ull << DSTL_DSTLFIR_SUBCHANNEL_B_FAIL_ACTION);
         if (l_scom_data & l_scom_mask)
         {
             // A channel checkstop has occurred. (our bus is down)
             TRACFCOMP(g_trac_mmio, ERR_MRK
                  "checkChannelCheckstop: there was a channel checkstop on"
-                 " OCMB[0x%08x], P9A_MCC_DSTLFIR=0x%llX",
+                 " OCMB[0x%08x], DSTL_DSTLFIR_RW=0x%llX",
                  get_huid(i_ocmbTarget), l_scom_data);
             l_checkstopExists = true;
 
@@ -562,7 +578,6 @@ errlHndl_t validateOcmbMmioOp(DeviceFW::OperationType   i_opType,
         switch(l_ocmbChipId)
         {
             case POWER_CHIPID::EXPLORER_16:
-            case POWER_CHIPID::GEMINI_16:
                 break;
             default:
                 TRACFCOMP(g_trac_mmio, ERR_MRK
@@ -1004,7 +1019,7 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
                     // mutex.  Skip this call for now.
                     //
                     //errlHndl_t l_prd_err = ATTN::checkForIplAttentions();
-                    errlHndl_t l_prd_err = NULL;
+                    errlHndl_t l_prd_err = nullptr;
                     if(l_prd_err)
                     {
                         TRACFCOMP(g_trac_mmio,

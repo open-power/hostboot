@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -967,6 +967,15 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
                                  io_buffer,
                                  io_buflen,
                                  DEVICE_SBEFIFOSCOM_ADDRESS(i_addr));
+                if( l_err ) { break; }
+            }
+            else if(scomSetting.useInbandScom)
+            {   //do IBSCOM
+                l_err = deviceOp(i_opType,
+                                 i_target,
+                                 io_buffer,
+                                 io_buflen,
+                                 DEVICE_IBSCOM_ADDRESS(i_addr));
                 if( l_err ) { break; }
             }
             else if(scomSetting.useFsiScom)
