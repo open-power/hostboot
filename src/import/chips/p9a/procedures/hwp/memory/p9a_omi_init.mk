@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/import/chips/p9/procedures/hwp/memory/p9a_omi_init.mk $
+# $Source: src/import/chips/p9a/procedures/hwp/memory/p9a_omi_init.mk $
 #
 # OpenPOWER HostBoot Project
 #
@@ -22,9 +22,8 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-# Makefile for p9a_omi_init HWP
+-include 00p9a_common.mk
 
 PROCEDURE=p9a_omi_init
-$(eval $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9a/procedures/hwp/memory/))
-$(eval $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)))
+$(eval $(call ADD_P9A_MEMORY_INCDIRS,$(PROCEDURE)))
 $(call BUILD_PROCEDURE)
