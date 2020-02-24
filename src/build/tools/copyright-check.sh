@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2016
+# Contributors Listed Below - COPYRIGHT 2011,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -34,18 +34,13 @@ export ADDCOPYRIGHT=${WORKSPACE_DIR}/src/build/tools/addCopyright
 
 ##  run git show to get a list of checked in files
 CHECKINFILES=`git show --pretty=format: --name-only -n1 | tr '\n' ' '`
-##  use git log to determine the year of the commit.
-##     Since commits have their copyright updated at the time they are
-##     committed, a commit might have a copyright date in its prolog of
-##     last year.  Set the DATE_OVERRIDE variable to the 'validate' to allow
-##     slightly-old prologs (ie. ones corresponding to the date in the msg).
-export DATE_OVERRIDE=`git log -n1 --date=short | grep "Date" | sed "s/Date: *//" | sed "s/-.*//"`
 
 echo "========================================================================"
 
-echo "  Checking Copyright blocks for checked-in files:"
+echo "  Checking Copyright blocks for checked-in files (with $ADDCOPYRIGHT):"
 echo "  $CHECKINFILES"
 echo
+echo $ADDCOPYRIGHT validate  $CHECKINFILES --copyright-check
 $ADDCOPYRIGHT validate  $CHECKINFILES --copyright-check
 
 if [ $? -eq 0 ]; then
