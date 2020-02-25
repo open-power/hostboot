@@ -37,6 +37,7 @@
 #include <lib/shared/axone_consts.H>
 #include <algorithm>
 
+#include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/assert_noexit.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/c_str.H>
@@ -153,6 +154,17 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode enforce_pre_freq(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
+    uint8_t l_ignore_plug_rules = 0;
+
+    FAPI_TRY( mss::attr::get_ignore_mem_plug_rules(l_ignore_plug_rules) );
+
+    // Skip plug rule checks if set to ignore (e.g. on Apollo)
+    if (l_ignore_plug_rules == fapi2::ENUM_ATTR_MEM_IGNORE_PLUG_RULES_YES)
+    {
+        FAPI_INF("Attribute set to ignore plug rule checking");
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
     // If there are no DIMM, we can just get out.
     if (mss::count_dimm(mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target)) == 0)
     {

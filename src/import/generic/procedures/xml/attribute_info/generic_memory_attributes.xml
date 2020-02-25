@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -408,6 +408,20 @@
     <platInit/>
     <initToZero/>
     <mssAccessorName>mss_omi_edpl_disable</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_IGNORE_PLUG_RULES</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Set to YES if you want to ignore the plug rules. Sometimes
+      this is needed in a partial-good configuration or on a test board.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>NO = 0, YES = 1</enum>
+    <mssAccessorName>ignore_mem_plug_rules</mssAccessorName>
   </attribute>
 
   <attribute>
