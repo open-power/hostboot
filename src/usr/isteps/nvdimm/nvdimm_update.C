@@ -618,7 +618,9 @@ errlHndl_t NvdimmInstalledImage::updateImage(NvdimmLidImage * i_lidImage)
                                       0x0000),
                                    ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
             l_err->collectTrace( NVDIMM_COMP_NAME, 256 );
-            nvdimmAddVendorLog(iv_dimm, l_err);
+
+            // Do not add vendor log as it messes with fw update mode
+            //nvdimmAddVendorLog(iv_dimm, l_err);
 
             // maybe some data was altered on the NV controller
             l_err->addPartCallout( iv_dimm,
@@ -998,7 +1000,8 @@ errlHndl_t NvdimmInstalledImage::updateImageData(NvdimmLidImage * i_lidImage)
                                           hostCksm, nvCksm,
                                           region, data_len),
                                        ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
-                nvdimmAddVendorLog(iv_dimm, l_err);
+                // Do not add vendor log as it messes with fw update mode
+                // and will prevent retries from working
                 l_err->addPartCallout( iv_dimm,
                                        HWAS::NV_CONTROLLER_PART_TYPE,
                                        HWAS::SRCI_PRIORITY_HIGH );
