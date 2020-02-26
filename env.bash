@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2019
+# Contributors Listed Below - COPYRIGHT 2010,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -32,6 +32,11 @@ fi
 if [ -n "${OPENPOWER_BUILD}" ]; then
     export SKIP_BINARY_FILES=1
     export JAILCMD=""
+elif [ -n "${NO_BUILD_TOOLS}" ]; then
+    # The git pre-commit hook requires certain environment variables that are
+    # defined by this file. However, not all developement environments can
+    # support the default Hostboot build tools.
+    echo "WARNING: customrc has disabled use of the build tools"
 else
     # Setup for RHEL 6 and 7 machines:
     export CROSS_PREFIX=${CROSS_PREFIX:-/opt/mcp/shared/powerpc64-gcc-20190822/bin/powerpc64le-buildroot-linux-gnu-}
