@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -163,6 +163,7 @@ constexpr uint64_t literal_0b0000000 = 0b0000000;
 constexpr uint64_t literal_0b011 = 0b011;
 constexpr uint64_t literal_0b00000000000 = 0b00000000000;
 constexpr uint64_t literal_0b0001100000 = 0b0001100000;
+constexpr uint64_t literal_0b0010011000 = 0b0010011000;
 constexpr uint64_t literal_0b0001000000 = 0b0001000000;
 constexpr uint64_t literal_0b0000110000 = 0b0000110000;
 constexpr uint64_t literal_0b0000100000 = 0b0000100000;
@@ -206,6 +207,7 @@ constexpr uint64_t literal_0b000111 = 0b000111;
 constexpr uint64_t literal_0b000100 = 0b000100;
 constexpr uint64_t literal_0b001011 = 0b001011;
 constexpr uint64_t literal_0b000010 = 0b000010;
+constexpr uint64_t literal_18 = 18;
 constexpr uint64_t literal_0b100011 = 0b100011;
 constexpr uint64_t literal_0b0000000000000000 = 0b0000000000000000;
 constexpr uint64_t literal_0x000000000 = 0x000000000;
@@ -1288,10 +1290,10 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
         uint64_t l_def_mba23_num_ranks = (l_TGT0_ATTR_CEN_EFF_NUM_RANKS_PER_DIMM[literal_1][literal_0] +
                                           l_TGT0_ATTR_CEN_EFF_NUM_RANKS_PER_DIMM[literal_1][literal_1]);
         uint64_t l_def_mba23_refresh_interval = (l_TGT0_ATTR_CEN_EFF_DRAM_TRFI / (literal_8 * l_def_mba23_num_ranks));
-        fapi2::ATTR_CEN_EFF_DRAM_DLL_PPD_Type l_TGT0_ATTR_CEN_EFF_DRAM_DLL_PPD;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_DLL_PPD, TGT0, l_TGT0_ATTR_CEN_EFF_DRAM_DLL_PPD));
         fapi2::ATTR_CEN_EFF_DRAM_DENSITY_Type l_TGT0_ATTR_CEN_EFF_DRAM_DENSITY;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_DENSITY, TGT0, l_TGT0_ATTR_CEN_EFF_DRAM_DENSITY));
+        fapi2::ATTR_CEN_EFF_DRAM_DLL_PPD_Type l_TGT0_ATTR_CEN_EFF_DRAM_DLL_PPD;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_DLL_PPD, TGT0, l_TGT0_ATTR_CEN_EFF_DRAM_DLL_PPD));
         uint64_t l_def_2400_8gb_fast_exit_pd_ddr4 = ((((l_TGT1_ATTR_CEN_MSS_FREQ == literal_2400)
                 && (l_TGT0_ATTR_CEN_EFF_DRAM_DENSITY == literal_8)) && (l_TGT0_ATTR_CEN_EFF_DRAM_DLL_PPD == literal_1))
                 && (l_TGT0_ATTR_CEN_EFF_DRAM_GEN == literal_2));
@@ -1455,49 +1457,77 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                 l_TGT0_ATTR_CEN_EFF_DRAM_TRFI / literal_8) / literal_10));
         fapi2::ATTR_CEN_VPD_CKE_PRI_MAP_Type l_TGT0_ATTR_CEN_VPD_CKE_PRI_MAP;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_CKE_PRI_MAP, TGT0, l_TGT0_ATTR_CEN_VPD_CKE_PRI_MAP));
-        uint64_t l_def_MBARPC0Q_cfg_pup_pdn_dly4 = (((((((((((((((((l_def_1333_2gb || l_def_1333_4gb) || l_def_1333_8gb)
+        uint64_t l_def_1600_16gb_fast_exit_pd_ddr4 = ((((l_TGT1_ATTR_CEN_MSS_FREQ == literal_1600)
+                && (l_TGT0_ATTR_CEN_EFF_DRAM_DENSITY == literal_16)) && (l_TGT0_ATTR_CEN_EFF_DRAM_DLL_PPD == literal_1))
+                && (l_TGT0_ATTR_CEN_EFF_DRAM_GEN == literal_2));
+        uint64_t l_def_1600_16gb_ddr4 = ((((l_TGT1_ATTR_CEN_MSS_FREQ == literal_1600)
+                                           && (l_TGT0_ATTR_CEN_EFF_DRAM_DENSITY == literal_16)) && (l_TGT0_ATTR_CEN_EFF_DRAM_DLL_PPD == literal_0))
+                                         && (l_TGT0_ATTR_CEN_EFF_DRAM_GEN == literal_2));
+        uint64_t l_def_MBARPC0Q_cfg_pup_pdn_dly4 = (((((((((((((((((((l_def_1333_2gb || l_def_1333_4gb) || l_def_1333_8gb)
                 || l_def_1600_2gb) || l_def_1600_4gb) || l_def_1600_8gb) || l_def_1333_2gb_fast_exit_pd)
                 || l_def_1333_4gb_fast_exit_pd) || l_def_1333_8gb_fast_exit_pd) || l_def_1600_2gb_fast_exit_pd)
                 || l_def_1600_4gb_fast_exit_pd) || l_def_1600_8gb_fast_exit_pd) || l_def_1600_2gb_ddr4) || l_def_1600_4gb_ddr4)
-                || l_def_1600_8gb_ddr4) || l_def_1600_2gb_fast_exit_pd_ddr4) || l_def_1600_4gb_fast_exit_pd_ddr4)
-                || l_def_1600_8gb_fast_exit_pd_ddr4);
-        uint64_t l_def_MBARPC0Q_cfg_pup_pdn_dly5 = (((((((((((l_def_1866_2gb || l_def_1866_4gb) || l_def_1866_8gb)
+                || l_def_1600_8gb_ddr4) || l_def_1600_16gb_ddr4) || l_def_1600_2gb_fast_exit_pd_ddr4)
+                || l_def_1600_4gb_fast_exit_pd_ddr4) || l_def_1600_8gb_fast_exit_pd_ddr4) || l_def_1600_16gb_fast_exit_pd_ddr4);
+        uint64_t l_def_1866_16gb_fast_exit_pd_ddr4 = ((((l_TGT1_ATTR_CEN_MSS_FREQ == literal_1866)
+                && (l_TGT0_ATTR_CEN_EFF_DRAM_DENSITY == literal_16)) && (l_TGT0_ATTR_CEN_EFF_DRAM_DLL_PPD == literal_1))
+                && (l_TGT0_ATTR_CEN_EFF_DRAM_GEN == literal_2));
+        uint64_t l_def_1866_16gb_ddr4 = ((((l_TGT1_ATTR_CEN_MSS_FREQ == literal_1866)
+                                           && (l_TGT0_ATTR_CEN_EFF_DRAM_DENSITY == literal_16)) && (l_TGT0_ATTR_CEN_EFF_DRAM_DLL_PPD == literal_0))
+                                         && (l_TGT0_ATTR_CEN_EFF_DRAM_GEN == literal_2));
+        uint64_t l_def_MBARPC0Q_cfg_pup_pdn_dly5 = (((((((((((((l_def_1866_2gb || l_def_1866_4gb) || l_def_1866_8gb)
                 || l_def_1866_2gb_fast_exit_pd) || l_def_1866_4gb_fast_exit_pd) || l_def_1866_8gb_fast_exit_pd) || l_def_1866_2gb_ddr4)
-                || l_def_1866_4gb_ddr4) || l_def_1866_8gb_ddr4) || l_def_1866_2gb_fast_exit_pd_ddr4)
-                || l_def_1866_4gb_fast_exit_pd_ddr4) || l_def_1866_8gb_fast_exit_pd_ddr4);
+                || l_def_1866_4gb_ddr4) || l_def_1866_8gb_ddr4) || l_def_1866_16gb_ddr4) || l_def_1866_2gb_fast_exit_pd_ddr4)
+                || l_def_1866_4gb_fast_exit_pd_ddr4) || l_def_1866_8gb_fast_exit_pd_ddr4) || l_def_1866_16gb_fast_exit_pd_ddr4);
         uint64_t l_def_MBARPC0Q_cfg_pup_pdn_dly3 = (((((l_def_1066_2gb || l_def_1066_4gb) || l_def_1066_8gb)
                 || l_def_1066_2gb_fast_exit_pd) || l_def_1066_4gb_fast_exit_pd) || l_def_1066_8gb_fast_exit_pd);
-        uint64_t l_def_MBARPC0Q_cfg_pup_pdn_dly6 = (((((((((((l_def_2133_2gb_ddr4 || l_def_2133_4gb_ddr4)
-                || l_def_2133_8gb_ddr4) || l_def_2400_2gb_ddr4) || l_def_2400_4gb_ddr4) || l_def_2400_8gb_ddr4)
-                || l_def_2133_2gb_fast_exit_pd_ddr4) || l_def_2133_4gb_fast_exit_pd_ddr4) || l_def_2133_8gb_fast_exit_pd_ddr4)
-                || l_def_2400_2gb_fast_exit_pd_ddr4) || l_def_2400_4gb_fast_exit_pd_ddr4) || l_def_2400_8gb_fast_exit_pd_ddr4);
+        uint64_t l_def_2400_16gb_fast_exit_pd_ddr4 = ((((l_TGT1_ATTR_CEN_MSS_FREQ == literal_2400)
+                && (l_TGT0_ATTR_CEN_EFF_DRAM_DENSITY == literal_16)) && (l_TGT0_ATTR_CEN_EFF_DRAM_DLL_PPD == literal_1))
+                && (l_TGT0_ATTR_CEN_EFF_DRAM_GEN == literal_2));
+        uint64_t l_def_2133_16gb_fast_exit_pd_ddr4 = ((((l_TGT1_ATTR_CEN_MSS_FREQ == literal_2133)
+                && (l_TGT0_ATTR_CEN_EFF_DRAM_DENSITY == literal_16)) && (l_TGT0_ATTR_CEN_EFF_DRAM_DLL_PPD == literal_1))
+                && (l_TGT0_ATTR_CEN_EFF_DRAM_GEN == literal_2));
+        uint64_t l_def_2400_16gb_ddr4 = ((((l_TGT1_ATTR_CEN_MSS_FREQ == literal_2400)
+                                           && (l_TGT0_ATTR_CEN_EFF_DRAM_DENSITY == literal_16)) && (l_TGT0_ATTR_CEN_EFF_DRAM_DLL_PPD == literal_0))
+                                         && (l_TGT0_ATTR_CEN_EFF_DRAM_GEN == literal_2));
+        uint64_t l_def_2133_16gb_ddr4 = ((((l_TGT1_ATTR_CEN_MSS_FREQ == literal_2133)
+                                           && (l_TGT0_ATTR_CEN_EFF_DRAM_DENSITY == literal_16)) && (l_TGT0_ATTR_CEN_EFF_DRAM_DLL_PPD == literal_0))
+                                         && (l_TGT0_ATTR_CEN_EFF_DRAM_GEN == literal_2));
+        uint64_t l_def_MBARPC0Q_cfg_pup_pdn_dly6 = (((((((((((((((l_def_2133_2gb_ddr4 || l_def_2133_4gb_ddr4)
+                || l_def_2133_8gb_ddr4) || l_def_2133_16gb_ddr4) || l_def_2400_2gb_ddr4) || l_def_2400_4gb_ddr4)
+                || l_def_2400_8gb_ddr4) || l_def_2400_16gb_ddr4) || l_def_2133_2gb_fast_exit_pd_ddr4)
+                || l_def_2133_4gb_fast_exit_pd_ddr4) || l_def_2133_8gb_fast_exit_pd_ddr4) || l_def_2133_16gb_fast_exit_pd_ddr4)
+                || l_def_2400_2gb_fast_exit_pd_ddr4) || l_def_2400_4gb_fast_exit_pd_ddr4) || l_def_2400_8gb_fast_exit_pd_ddr4)
+                || l_def_2400_16gb_fast_exit_pd_ddr4);
         fapi2::ATTR_CEN_VPD_POWER_CONTROL_CAPABLE_Type l_TGT1_ATTR_CEN_VPD_POWER_CONTROL_CAPABLE;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_POWER_CONTROL_CAPABLE, TGT1, l_TGT1_ATTR_CEN_VPD_POWER_CONTROL_CAPABLE));
         fapi2::ATTR_CEN_MRW_POWER_CONTROL_REQUESTED_Type l_TGT2_ATTR_CEN_MRW_POWER_CONTROL_REQUESTED;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MRW_POWER_CONTROL_REQUESTED, TGT2, l_TGT2_ATTR_CEN_MRW_POWER_CONTROL_REQUESTED));
-        uint64_t l_def_MBARPC0Q_cfg_pup_avail_dly7 = ((l_def_2133_2gb_fast_exit_pd_ddr4 || l_def_2133_4gb_fast_exit_pd_ddr4)
-                || l_def_2133_8gb_fast_exit_pd_ddr4);
+        uint64_t l_def_MBARPC0Q_cfg_pup_avail_dly7 = (((l_def_2133_2gb_fast_exit_pd_ddr4 || l_def_2133_4gb_fast_exit_pd_ddr4)
+                || l_def_2133_8gb_fast_exit_pd_ddr4) || l_def_2133_16gb_fast_exit_pd_ddr4);
         uint64_t l_def_margin_pup_slow = literal_0;
-        uint64_t l_def_MBARPC0Q_cfg_pup_avail_dly5 = (((((l_def_1600_2gb_fast_exit_pd || l_def_1600_4gb_fast_exit_pd)
+        uint64_t l_def_MBARPC0Q_cfg_pup_avail_dly5 = ((((((l_def_1600_2gb_fast_exit_pd || l_def_1600_4gb_fast_exit_pd)
                 || l_def_1600_8gb_fast_exit_pd) || l_def_1600_2gb_fast_exit_pd_ddr4) || l_def_1600_4gb_fast_exit_pd_ddr4)
-                || l_def_1600_8gb_fast_exit_pd_ddr4);
-        uint64_t l_def_MBARPC0Q_cfg_pup_avail_dly29 = ((l_def_2400_2gb_ddr4 || l_def_2400_4gb_ddr4) || l_def_2400_8gb_ddr4);
+                || l_def_1600_8gb_fast_exit_pd_ddr4) || l_def_1600_16gb_fast_exit_pd_ddr4);
+        uint64_t l_def_MBARPC0Q_cfg_pup_avail_dly29 = (((l_def_2400_2gb_ddr4 || l_def_2400_4gb_ddr4) || l_def_2400_8gb_ddr4)
+                || l_def_2400_16gb_ddr4);
         uint64_t l_def_margin_pup_fast = literal_0;
-        uint64_t l_def_MBARPC0Q_cfg_pup_avail_dly6 = (((((l_def_1866_2gb_fast_exit_pd || l_def_1866_4gb_fast_exit_pd)
+        uint64_t l_def_MBARPC0Q_cfg_pup_avail_dly6 = ((((((l_def_1866_2gb_fast_exit_pd || l_def_1866_4gb_fast_exit_pd)
                 || l_def_1866_8gb_fast_exit_pd) || l_def_1866_2gb_fast_exit_pd_ddr4) || l_def_1866_4gb_fast_exit_pd_ddr4)
-                || l_def_1866_8gb_fast_exit_pd_ddr4);
+                || l_def_1866_8gb_fast_exit_pd_ddr4) || l_def_1866_16gb_fast_exit_pd_ddr4);
         uint64_t l_def_MBARPC0Q_cfg_pup_avail_dly13 = ((l_def_1066_2gb || l_def_1066_4gb) || l_def_1066_8gb);
-        uint64_t l_def_MBARPC0Q_cfg_pup_avail_dly8 = ((l_def_2400_2gb_fast_exit_pd_ddr4 || l_def_2400_4gb_fast_exit_pd_ddr4)
-                || l_def_2400_8gb_fast_exit_pd_ddr4);
-        uint64_t l_def_MBARPC0Q_cfg_pup_avail_dly26 = ((l_def_2133_2gb_ddr4 || l_def_2133_4gb_ddr4) || l_def_2133_8gb_ddr4);
+        uint64_t l_def_MBARPC0Q_cfg_pup_avail_dly8 = (((l_def_2400_2gb_fast_exit_pd_ddr4 || l_def_2400_4gb_fast_exit_pd_ddr4)
+                || l_def_2400_8gb_fast_exit_pd_ddr4) || l_def_2400_16gb_fast_exit_pd_ddr4);
+        uint64_t l_def_MBARPC0Q_cfg_pup_avail_dly26 = (((l_def_2133_2gb_ddr4 || l_def_2133_4gb_ddr4) || l_def_2133_8gb_ddr4)
+                || l_def_2133_16gb_ddr4);
         uint64_t l_def_MBARPC0Q_cfg_pup_avail_dly16 = ((l_def_1333_2gb || l_def_1333_4gb) || l_def_1333_8gb);
-        uint64_t l_def_MBARPC0Q_cfg_pup_avail_dly20 = (((((l_def_1600_2gb || l_def_1600_4gb) || l_def_1600_8gb)
-                || l_def_1600_2gb_ddr4) || l_def_1600_4gb_ddr4) || l_def_1600_8gb_ddr4);
+        uint64_t l_def_MBARPC0Q_cfg_pup_avail_dly20 = ((((((l_def_1600_2gb || l_def_1600_4gb) || l_def_1600_8gb)
+                || l_def_1600_2gb_ddr4) || l_def_1600_4gb_ddr4) || l_def_1600_8gb_ddr4) || l_def_1600_16gb_ddr4);
         uint64_t l_def_MBARPC0Q_cfg_pup_avail_dly4 = (((((l_def_1066_2gb_fast_exit_pd || l_def_1066_4gb_fast_exit_pd)
                 || l_def_1066_8gb_fast_exit_pd) || l_def_1333_2gb_fast_exit_pd) || l_def_1333_4gb_fast_exit_pd)
                 || l_def_1333_8gb_fast_exit_pd);
-        uint64_t l_def_MBARPC0Q_cfg_pup_avail_dly23 = (((((l_def_1866_2gb || l_def_1866_4gb) || l_def_1866_8gb)
-                || l_def_1866_2gb_ddr4) || l_def_1866_4gb_ddr4) || l_def_1866_8gb_ddr4);
+        uint64_t l_def_MBARPC0Q_cfg_pup_avail_dly23 = ((((((l_def_1866_2gb || l_def_1866_4gb) || l_def_1866_8gb)
+                || l_def_1866_2gb_ddr4) || l_def_1866_4gb_ddr4) || l_def_1866_8gb_ddr4) || l_def_1866_16gb_ddr4);
         uint64_t l_def_MBARPC0Q_cfg_pdn_pup_dly4 = l_def_MBARPC0Q_cfg_pup_pdn_dly4;
         uint64_t l_def_MBARPC0Q_cfg_pdn_pup_dly5 = l_def_MBARPC0Q_cfg_pup_pdn_dly5;
         uint64_t l_def_MBARPC0Q_cfg_pdn_pup_dly3 = l_def_MBARPC0Q_cfg_pup_pdn_dly3;
@@ -3561,147 +3591,163 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
         uint64_t l_def_mcb_addr_bank3_27 = ((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16));
         uint64_t l_def_mcb_addr_row10_16 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
+                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                            || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                                && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                        || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                        || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_row10_17 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row10_14 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row10_15 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
+                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                            || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                                && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                        || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                        || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_row15_9 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)
-                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)
+                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row15_11 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)
-                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)
-                                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
+                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)
+                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                            || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                                && (((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                        || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_unset_row15 = ((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15));
         uint64_t l_def_mcb_addr_row15_10 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)
-                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)
-                                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
+                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)
+                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                            || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                                && (((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                        || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_row15_12 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && (((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row8_16 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row8_17 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
-        uint64_t l_def_mcb_addr_row8_18 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
-        uint64_t l_def_mcb_addr_row8_19 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
-        uint64_t l_def_mcb_addr_row11_16 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
-        uint64_t l_def_mcb_addr_row11_14 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
-        uint64_t l_def_mcb_addr_row11_15 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
-        uint64_t l_def_mcb_addr_row11_13 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
-        uint64_t l_def_mcb_addr_row16_9 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
                                            || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
-                                               && (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                               && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
+        uint64_t l_def_mcb_addr_row8_18 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                           || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                               && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
+        uint64_t l_def_mcb_addr_row8_19 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
+                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
+                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
+        uint64_t l_def_mcb_addr_row11_16 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
+        uint64_t l_def_mcb_addr_row11_14 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
+                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
+                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                            || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                                && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                        || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                        || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
+        uint64_t l_def_mcb_addr_row11_15 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
+                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
+                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                            || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                                && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                        || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                        || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
+        uint64_t l_def_mcb_addr_row11_13 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
+        uint64_t l_def_mcb_addr_row16_9 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
+                                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)
+                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_row16_11 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17));
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_unset_row16 = (((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                 || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16));
         uint64_t l_def_mcb_addr_row16_8 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17));
+                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)
+                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row16_10 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
-                                            || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
-                                                && (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)
+                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
+                                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)
+                                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_row9_16 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                           || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                               && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_row9_17 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                           || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                               && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_row9_15 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row9_18 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row12_14 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
+                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                            || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                                && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                        || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                        || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_row12_15 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row12_12 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row12_13 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
+                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                            || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                                && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                        || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                        || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_bank0_28 = ((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
                                             && ((l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16) || (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)));
         uint64_t l_def_mcb_addr_bank0_30 = ((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
@@ -3709,225 +3755,247 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
         uint64_t l_def_mcb_addr_bank0_29 = ((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
                                             && ((l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16) || (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)));
         uint64_t l_def_mcb_addr_row13_14 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row13_11 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row13_12 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
-        uint64_t l_def_mcb_addr_row13_13 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
-        uint64_t l_def_mcb_addr_row14_11 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)
-                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)))
+                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
                                             || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
-                                                && (((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                        || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
+                                                && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                        || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                        || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
+        uint64_t l_def_mcb_addr_row13_13 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
+                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
+                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                            || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                                && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                        || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                        || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
+        uint64_t l_def_mcb_addr_row14_11 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
+                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)
+                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
+                                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)
+                                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_unset_row14 = (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14);
         uint64_t l_def_mcb_addr_row14_10 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row14_12 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)
-                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)))
-                                            || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
-                                                && (((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                        || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
+                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)
+                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
+                                                              && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)
+                                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_row14_13 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && (((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row1_24 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                           || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                               && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_row1_26 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row1_23 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row1_25 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                           || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                               && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_row0_24 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row0_26 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                           || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                               && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_row0_25 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                           || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                               && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_row0_27 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row2_22 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row2_24 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                           || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                               && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_row2_23 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                           || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                               && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_row2_25 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row5_22 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row5_20 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                           || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                               && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_row5_21 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                           || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                               && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_row5_19 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row3_22 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                           || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                               && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_row3_24 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row3_21 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row3_23 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                           || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                               && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_col13_29 = (l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12);
         uint64_t l_def_mcb_addr_unset_col13 = ((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
                                                || (l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11));
         uint64_t l_def_mcb_addr_row7_17 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row7_20 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row7_18 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                           || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                               && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_row7_19 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                           || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                               && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_row6_20 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                           || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                               && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_row6_21 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row6_18 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row6_19 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                           || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                               && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_row4_22 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                           || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                               && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_row4_20 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_row4_21 = ((((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
-                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_16)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                      || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))) || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12)
-                                                             && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))));
+                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)))
+                                           || (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12) && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8))
+                                               && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17))
+                                                       || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18))));
         uint64_t l_def_mcb_addr_row4_23 = (((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10)
-                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && ((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
+                                            && (l_TGT0_ATTR_CEN_EFF_DRAM_BANKS == literal_8)) && (((((l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_14)
                                                     || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_15)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_16))
-                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)));
+                                                    || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_17)) || (l_TGT0_ATTR_CEN_EFF_DRAM_ROWS == literal_18)));
         uint64_t l_def_mcb_addr_col11_30 = ((l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_11)
                                             || (l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_12));
         uint64_t l_def_mcb_addr_unset_col11 = (l_TGT0_ATTR_CEN_EFF_DRAM_COLS == literal_10);
@@ -6430,10 +6498,17 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                 l_scom_buffer.insert<9, 11, 53, uint64_t>(l_def_mba23_refresh_interval );
             }
 
-            if (((((l_def_ddr4_1600_13_12_11 == literal_1) || (l_def_ddr4_1600_14_13_12 == literal_1))
-                  || (l_def_ddr4_1600_14_13_12R == literal_1)) || (l_def_IS3A_IS3B == literal_1)))
+            if ((((((l_def_ddr4_1600_13_12_11 == literal_1) || (l_def_ddr4_1600_14_13_12 == literal_1))
+                   || (l_def_ddr4_1600_14_13_12R == literal_1)) || (l_def_IS3A_IS3B == literal_1))
+                 && (l_TGT0_ATTR_CEN_EFF_DRAM_DENSITY == literal_8)))
             {
                 l_scom_buffer.insert<40, 10, 54, uint64_t>(literal_0b0001100000 );
+            }
+            else if ((((((l_def_ddr4_1600_13_12_11 == literal_1) || (l_def_ddr4_1600_14_13_12 == literal_1))
+                        || (l_def_ddr4_1600_14_13_12R == literal_1)) || (l_def_IS3A_IS3B == literal_1))
+                      && (l_TGT0_ATTR_CEN_EFF_DRAM_DENSITY == literal_16)))
+            {
+                l_scom_buffer.insert<40, 10, 54, uint64_t>(literal_0b0010011000 );
             }
             else if ((l_def_MBAREF0Q_cfg_refr_tsv_stack_dly64 == literal_1))
             {

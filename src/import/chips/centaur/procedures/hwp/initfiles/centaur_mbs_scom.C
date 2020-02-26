@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,10 +60,11 @@ constexpr uint64_t literal_0b10000 = 0b10000;
 constexpr uint64_t literal_32 = 32;
 constexpr uint64_t literal_0b11001 = 0b11001;
 constexpr uint64_t literal_2 = 2;
-constexpr uint64_t literal_8 = 8;
-constexpr uint64_t literal_0b10 = 0b10;
 constexpr uint64_t literal_4 = 4;
 constexpr uint64_t literal_0b01 = 0b01;
+constexpr uint64_t literal_8 = 8;
+constexpr uint64_t literal_0b10 = 0b10;
+constexpr uint64_t literal_16 = 16;
 constexpr uint64_t literal_0b1 = 0b1;
 constexpr uint64_t literal_13 = 13;
 constexpr uint64_t literal_10 = 10;
@@ -79,7 +80,6 @@ constexpr uint64_t literal_7 = 7;
 constexpr uint64_t literal_5 = 5;
 constexpr uint64_t literal_6 = 6;
 constexpr uint64_t literal_0b0010 = 0b0010;
-constexpr uint64_t literal_16 = 16;
 constexpr uint64_t literal_15 = 15;
 constexpr uint64_t literal_1400 = 1400;
 constexpr uint64_t literal_0b0101 = 0b0101;
@@ -966,13 +966,17 @@ fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
             {
                 l_scom_buffer.insert<6, 2, 62, uint64_t>(literal_0b00 );
             }
+            else if ((l_TGT1_ATTR_CEN_EFF_DRAM_DENSITY == literal_4))
+            {
+                l_scom_buffer.insert<6, 2, 62, uint64_t>(literal_0b01 );
+            }
             else if ((l_TGT1_ATTR_CEN_EFF_DRAM_DENSITY == literal_8))
             {
                 l_scom_buffer.insert<6, 2, 62, uint64_t>(literal_0b10 );
             }
-            else if ((l_TGT1_ATTR_CEN_EFF_DRAM_DENSITY == literal_4))
+            else if ((l_TGT1_ATTR_CEN_EFF_DRAM_DENSITY == literal_16))
             {
-                l_scom_buffer.insert<6, 2, 62, uint64_t>(literal_0b01 );
+                l_scom_buffer.insert<6, 2, 62, uint64_t>(literal_0b11 );
             }
 
             if ((l_TGT1_ATTR_CEN_EFF_DRAM_WIDTH == literal_8))
@@ -1072,13 +1076,17 @@ fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
             {
                 l_scom_buffer.insert<6, 2, 62, uint64_t>(literal_0b00 );
             }
+            else if ((l_TGT1_ATTR_CEN_EFF_DRAM_DENSITY == literal_4))
+            {
+                l_scom_buffer.insert<6, 2, 62, uint64_t>(literal_0b01 );
+            }
             else if ((l_TGT1_ATTR_CEN_EFF_DRAM_DENSITY == literal_8))
             {
                 l_scom_buffer.insert<6, 2, 62, uint64_t>(literal_0b10 );
             }
-            else if ((l_TGT1_ATTR_CEN_EFF_DRAM_DENSITY == literal_4))
+            else if ((l_TGT1_ATTR_CEN_EFF_DRAM_DENSITY == literal_16))
             {
-                l_scom_buffer.insert<6, 2, 62, uint64_t>(literal_0b01 );
+                l_scom_buffer.insert<6, 2, 62, uint64_t>(literal_0b11 );
             }
 
             if (((l_TGT0_ATTR_CEN_MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE == literal_0) || ((l_TGT2_ATTR_FUNCTIONAL == literal_0)
