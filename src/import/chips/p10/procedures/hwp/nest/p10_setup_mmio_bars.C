@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -286,6 +286,7 @@ p10_setup_mmio_bars_pau(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
     {
         fapi2::ATTR_PROC_PAU_MMIO_BAR_ENABLE_Type l_mmio_enable;
         fapi2::ATTR_CHIP_UNIT_POS_Type l_unit_pos;
+
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PAU_MMIO_BAR_ENABLE, l_pau_target, l_mmio_enable),
                  "Error from FAPI_ATTR_GET (ATTR_PROC_PAU_MMIO_BAR_ENABLE)");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_pau_target, l_unit_pos),
@@ -312,11 +313,6 @@ p10_setup_mmio_bars_pau(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
             SET_CS_SM0_SNP_MISC_PAUMMIO_BAR_CONFIG_PAUMMIO_BAR_ADDR(
                 ((i_chip_info.base_address_mmio & PAU_BAR_MASK) |
                  l_mmio_offset) >> PAU_BAR_SHIFT, l_mmio_bar);
-
-            if (l_mmio_offset.getBit<FABRIC_ADDR_SMF_BIT>())
-            {
-                SET_CS_SM0_SNP_MISC_PAUMMIO_BAR_CONFIG_PAUMMIO_BAR_SECURE_A12(l_mmio_bar);
-            }
 
             FAPI_TRY(PUT_CS_SM0_SNP_MISC_PAUMMIO_BAR(l_pau_target, l_mmio_bar));
 
