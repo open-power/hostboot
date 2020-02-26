@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -138,8 +138,8 @@ p10_gen_xscom_init(
                                l_xscom_bar_base_addr_offset),
                  "Error from FAPI_ATTR_GET (ATTR_PROC_XSCOM_BAR_BASE_ADDR_OFFSET)");
 
-        l_xscom_addr = l_base_address_mmio +
-                       l_xscom_bar_base_addr_offset;
+        l_xscom_addr = l_base_address_mmio + l_xscom_bar_base_addr_offset;
+        l_xscom_addr |= FABRIC_ADDR_SMF_MASK;
 
         // merge SCOM/PIB address into position for XSCOM address
         // PIB address 1:31 -> XSCOM address 30:60
