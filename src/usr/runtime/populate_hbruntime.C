@@ -1750,7 +1750,6 @@ errlHndl_t populate_hbSecurebootData ( void )
 
     errlHndl_t l_elog = nullptr;
 
-/* FIXME RTC: 210975 not needed for now
     do {
         // pass 0 since sys parms has only one record
         const uint64_t l_instance = 0;
@@ -1777,7 +1776,12 @@ errlHndl_t populate_hbSecurebootData ( void )
         // populate secure setting for trusted boot
         bool trusted = false;
 #ifdef CONFIG_TPMDD
-        trusted = TRUSTEDBOOT::functionalPrimaryTpmExists();
+        trusted =
+#ifdef CONFIG_DISABLE_TPM_IN_HDAT
+            false;
+#else
+            TRUSTEDBOOT::functionalPrimaryTpmExists();
+#endif // CONFIG_DISABLE_TPM_IN_HDAT
 
         if(trusted)
         {
@@ -1817,7 +1821,12 @@ errlHndl_t populate_hbSecurebootData ( void )
         // populate TPM config bits in hdat
         bool tpmRequired = false;
 #ifdef CONFIG_TPMDD
-        tpmRequired = TRUSTEDBOOT::isTpmRequired();
+        tpmRequired =
+#ifdef CONFIG_DISABLE_TPM_IN_HDAT
+            false;
+#else
+            TRUSTEDBOOT::isTpmRequired();
+#endif //CONFIG_DISABLE_TPM_IN_HDAT
 #endif
 
         l_sysParmsPtr->hdatTpmConfBits = tpmRequired? TPM_REQUIRED_BIT: 0;
@@ -1844,15 +1853,12 @@ errlHndl_t populate_hbSecurebootData ( void )
 
     } while(0);
 
-*/
     return (l_elog);
 } // end populate_hbRuntime
 
 errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
 {
     errlHndl_t l_elog = nullptr;
-//FIXME RTC: 210975 not needed at the moment
-#if 0
     do {
 
         uint64_t l_baseAddr = 0;
@@ -2022,7 +2028,10 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
                                                     (l_baseAddr + l_currOffset);
 
     TARGETING::TargetHandleList tpmList;
+
+#ifndef CONFIG_DISABLE_TPM_IN_HDAT
     TRUSTEDBOOT::getTPMs(tpmList, TRUSTEDBOOT::TPM_FILTER::ALL_IN_BLUEPRINT);
+#endif
 
     // Put the primary TPM first in the list of TPMs to simplify alignment of
     // trusted boot enabled bits across the nodes.
@@ -2154,6 +2163,7 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
         l_tpmInstInfo->hdatLocality3Addr = l_tpmInfo.devAddrLocality3;
         l_tpmInstInfo->hdatLocality4Addr = l_tpmInfo.devAddrLocality4;
 
+#ifndef CONFIG_DISABLE_TPM_IN_HDAT
         auto hwasState = pTpm->getAttr<TARGETING::ATTR_HWAS_STATE>();
 
         if (hwasState.functional && hwasState.present)
@@ -2167,6 +2177,7 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
             l_tpmInstInfo->hdatFunctionalStatus = HDAT::TpmPresentNonFunctional;
         }
         else
+#endif
         {
             // not present
             l_tpmInstInfo->hdatFunctionalStatus = HDAT::TpmNonPresent;
@@ -2316,10 +2327,12 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
                 tpmLogAlignedSize,
                 tpmLogNewVirtAddr);
 
+#ifndef CONFIG_DISABLE_TPM_IN_HDAT
             // Move TPM log to the new virtual memory mapping
             TRUSTEDBOOT::TpmLogMgr_relocateTpmLog(pLogMgr,
                           reinterpret_cast<uint8_t*>(tpmLogNewVirtAddr),
                           logSize);
+#endif
             #endif
         }
         else
@@ -2800,7 +2813,6 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
 
     } while (0);
 
-#endif
     return (l_elog);
 }
 

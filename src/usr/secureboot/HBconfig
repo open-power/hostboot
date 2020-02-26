@@ -23,3 +23,9 @@ config PHYS_PRES_JUMPER
     help
         Support asserting Physical Presence via a jumper on the TPM Card
         Currently not supported.
+
+config DISABLE_TPM_IN_HDAT
+    default y
+    help
+        Disable reporting the state of the TPMs in the system to HDAT.
+        Used for bringup purposes
