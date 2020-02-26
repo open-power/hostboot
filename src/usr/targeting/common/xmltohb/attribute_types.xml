@@ -7238,6 +7238,7 @@
     </simpleType>
     <readable/>
     <writeable/>
+    <no_export/>
   </attribute>
 
   <attribute>
