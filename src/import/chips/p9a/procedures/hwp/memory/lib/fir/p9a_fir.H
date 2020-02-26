@@ -226,19 +226,53 @@ fapi_try_exit:
 /// @brief Clear error bits P9A_MC_REGm_DLn_ERROR_MASK registers m[0:2], n[0:2] since they are now "active"
 /// @tparam R the REG_DL register we want to write to
 /// @param[in] i_target MC target to find targets to initialize
-/// @param[in] i_state state to set FIR masks to
 /// @return fapi2::FAPI2_RC_SUCCESS iff ok
 ///
 template<uint64_t R>
-inline fapi2::ReturnCode setup_reg_dl_helper(const fapi2::Target<fapi2::TARGET_TYPE_MC>& i_target,
-        const mss::states i_state)
+inline fapi2::ReturnCode setup_reg_dl_after_omi_init_helper(const fapi2::Target<fapi2::TARGET_TYPE_MC>& i_target)
 {
     fapi2::buffer<uint64_t> l_reg_data;
 
     FAPI_TRY(fapi2::getScom(i_target, R, l_reg_data));
-    l_reg_data.writeBit<P9A_MC_REG2_DL2_ERROR_MASK_34>(i_state)
-    .writeBit<P9A_MC_REG2_DL2_ERROR_MASK_33>(i_state)
-    .writeBit<P9A_MC_REG2_DL2_ERROR_MASK_32>(i_state);
+    l_reg_data.clearBit<P9A_MC_REG2_DL2_ERROR_MASK_34>()
+    .clearBit<P9A_MC_REG2_DL2_ERROR_MASK_33>();
+    FAPI_TRY(fapi2::putScom(i_target, R, l_reg_data));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Set up error bits P9A_MC_REGm_DLn_ERROR_MASK registers m[0:2], n[0:2] after chiplet_scominit
+/// @tparam R the REG_DL register we want to write to
+/// @param[in] i_target MC target to find targets to initialize
+/// @return fapi2::FAPI2_RC_SUCCESS iff ok
+///
+template<uint64_t R>
+inline fapi2::ReturnCode setup_reg_dl_after_chiplet_scominit_helper(const fapi2::Target<fapi2::TARGET_TYPE_MC>&
+        i_target)
+{
+    fapi2::buffer<uint64_t> l_reg_data;
+
+    FAPI_TRY(fapi2::getScom(i_target, R, l_reg_data));
+    l_reg_data.setBit<P9A_MC_REG2_DL2_ERROR_MASK_47>()
+    .setBit<P9A_MC_REG2_DL2_ERROR_MASK_46>()
+    .setBit<P9A_MC_REG2_DL2_ERROR_MASK_45>()
+    .setBit<P9A_MC_REG2_DL2_ERROR_MASK_44>()
+    .setBit<P9A_MC_REG2_DL2_ERROR_MASK_43>()
+    .setBit<P9A_MC_REG2_DL2_ERROR_MASK_42>()
+    .setBit<P9A_MC_REG2_DL2_ERROR_MASK_41>()
+    .setBit<P9A_MC_REG2_DL2_ERROR_MASK_40>()
+    .setBit<P9A_MC_REG2_DL2_ERROR_MASK_38>()
+    .clearBit<P9A_MC_REG2_DL2_ERROR_MASK_37>()
+    .setBit<P9A_MC_REG2_DL2_ERROR_MASK_36>()
+    .setBit<P9A_MC_REG2_DL2_ERROR_MASK_34>()
+    .setBit<P9A_MC_REG2_DL2_ERROR_MASK_33>()
+    .setBit<P9A_MC_REG2_DL2_ERROR_MASK_32>()
+    .clearBit<P9A_MC_REG2_DL2_ERROR_MASK_17>()
+    .clearBit<P9A_MC_REG2_DL2_ERROR_MASK_16>()
+    .clearBit<P9A_MC_REG2_DL2_ERROR_MASK_15>()
+    .clearBit<P9A_MC_REG2_DL2_ERROR_MASK_14>();
     FAPI_TRY(fapi2::putScom(i_target, R, l_reg_data));
 
 fapi_try_exit:
@@ -288,7 +322,7 @@ inline fapi2::ReturnCode after_p9a_chiplet_scominit(const fapi2::Target<fapi2::T
         switch(l_pos)
         {
             case 0:
-                l_mc_omi_fir_reg.local_checkstop<P9A_MC_MC_OMI_FIR_REG_DL0_FATAL_ERROR>()
+                l_mc_omi_fir_reg.recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL0_FATAL_ERROR>()
                 .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL0_DATA_UE>()
                 .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL0_X4_MODE>()
                 .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL0_TIMEOUT>()
@@ -297,7 +331,7 @@ inline fapi2::ReturnCode after_p9a_chiplet_scominit(const fapi2::Target<fapi2::T
                 break;
 
             case 1:
-                l_mc_omi_fir_reg.local_checkstop<P9A_MC_MC_OMI_FIR_REG_DL1_FATAL_ERROR>()
+                l_mc_omi_fir_reg.recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL1_FATAL_ERROR>()
                 .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL1_DATA_UE>()
                 .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL1_X4_MODE>()
                 .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL1_TIMEOUT>()
@@ -306,7 +340,7 @@ inline fapi2::ReturnCode after_p9a_chiplet_scominit(const fapi2::Target<fapi2::T
                 break;
 
             case 2:
-                l_mc_omi_fir_reg.local_checkstop<P9A_MC_MC_OMI_FIR_REG_DL2_FATAL_ERROR>()
+                l_mc_omi_fir_reg.recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL2_FATAL_ERROR>()
                 .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL2_DATA_UE>()
                 .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL2_X4_MODE>()
                 .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL2_TIMEOUT>()
@@ -377,16 +411,16 @@ inline fapi2::ReturnCode after_p9a_chiplet_scominit(const fapi2::Target<fapi2::T
                  .write());
     }
 
-    // Set ERROR_MASK on REGm_DLn 0:2 registers because they are not considered valid at this point
-    FAPI_TRY(setup_reg_dl_helper<MCT::REG0_DL0_ERROR_MASK>(i_target, mss::HIGH));
-    FAPI_TRY(setup_reg_dl_helper<MCT::REG0_DL1_ERROR_MASK>(i_target, mss::HIGH));
-    FAPI_TRY(setup_reg_dl_helper<MCT::REG0_DL2_ERROR_MASK>(i_target, mss::HIGH));
-    FAPI_TRY(setup_reg_dl_helper<MCT::REG1_DL0_ERROR_MASK>(i_target, mss::HIGH));
-    FAPI_TRY(setup_reg_dl_helper<MCT::REG1_DL1_ERROR_MASK>(i_target, mss::HIGH));
-    FAPI_TRY(setup_reg_dl_helper<MCT::REG1_DL2_ERROR_MASK>(i_target, mss::HIGH));
-    FAPI_TRY(setup_reg_dl_helper<MCT::REG2_DL0_ERROR_MASK>(i_target, mss::HIGH));
-    FAPI_TRY(setup_reg_dl_helper<MCT::REG2_DL1_ERROR_MASK>(i_target, mss::HIGH));
-    FAPI_TRY(setup_reg_dl_helper<MCT::REG2_DL2_ERROR_MASK>(i_target, mss::HIGH));
+    // Set up ERROR_MASK on REGm_DLn 0:2 registers
+    FAPI_TRY(setup_reg_dl_after_chiplet_scominit_helper<MCT::REG0_DL0_ERROR_MASK>(i_target));
+    FAPI_TRY(setup_reg_dl_after_chiplet_scominit_helper<MCT::REG0_DL1_ERROR_MASK>(i_target));
+    FAPI_TRY(setup_reg_dl_after_chiplet_scominit_helper<MCT::REG0_DL2_ERROR_MASK>(i_target));
+    FAPI_TRY(setup_reg_dl_after_chiplet_scominit_helper<MCT::REG1_DL0_ERROR_MASK>(i_target));
+    FAPI_TRY(setup_reg_dl_after_chiplet_scominit_helper<MCT::REG1_DL1_ERROR_MASK>(i_target));
+    FAPI_TRY(setup_reg_dl_after_chiplet_scominit_helper<MCT::REG1_DL2_ERROR_MASK>(i_target));
+    FAPI_TRY(setup_reg_dl_after_chiplet_scominit_helper<MCT::REG2_DL0_ERROR_MASK>(i_target));
+    FAPI_TRY(setup_reg_dl_after_chiplet_scominit_helper<MCT::REG2_DL1_ERROR_MASK>(i_target));
+    FAPI_TRY(setup_reg_dl_after_chiplet_scominit_helper<MCT::REG2_DL2_ERROR_MASK>(i_target));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -411,15 +445,15 @@ inline fapi2::ReturnCode after_p9a_omi_init_omi_fir_helper(const fapi2::Target<f
     using MCT = mss::mcTraits<mss::proc_type::AXONE>;
 
     // Clear ERROR_MASK on REGm_DLn 0:2 registers because they are now considered valid
-    FAPI_TRY(setup_reg_dl_helper<MCT::REG0_DL0_ERROR_MASK>(i_target, mss::LOW));
-    FAPI_TRY(setup_reg_dl_helper<MCT::REG0_DL1_ERROR_MASK>(i_target, mss::LOW));
-    FAPI_TRY(setup_reg_dl_helper<MCT::REG0_DL2_ERROR_MASK>(i_target, mss::LOW));
-    FAPI_TRY(setup_reg_dl_helper<MCT::REG1_DL0_ERROR_MASK>(i_target, mss::LOW));
-    FAPI_TRY(setup_reg_dl_helper<MCT::REG1_DL1_ERROR_MASK>(i_target, mss::LOW));
-    FAPI_TRY(setup_reg_dl_helper<MCT::REG1_DL2_ERROR_MASK>(i_target, mss::LOW));
-    FAPI_TRY(setup_reg_dl_helper<MCT::REG2_DL0_ERROR_MASK>(i_target, mss::LOW));
-    FAPI_TRY(setup_reg_dl_helper<MCT::REG2_DL1_ERROR_MASK>(i_target, mss::LOW));
-    FAPI_TRY(setup_reg_dl_helper<MCT::REG2_DL2_ERROR_MASK>(i_target, mss::LOW));
+    FAPI_TRY(setup_reg_dl_after_omi_init_helper<MCT::REG0_DL0_ERROR_MASK>(i_target));
+    FAPI_TRY(setup_reg_dl_after_omi_init_helper<MCT::REG0_DL1_ERROR_MASK>(i_target));
+    FAPI_TRY(setup_reg_dl_after_omi_init_helper<MCT::REG0_DL2_ERROR_MASK>(i_target));
+    FAPI_TRY(setup_reg_dl_after_omi_init_helper<MCT::REG1_DL0_ERROR_MASK>(i_target));
+    FAPI_TRY(setup_reg_dl_after_omi_init_helper<MCT::REG1_DL1_ERROR_MASK>(i_target));
+    FAPI_TRY(setup_reg_dl_after_omi_init_helper<MCT::REG1_DL2_ERROR_MASK>(i_target));
+    FAPI_TRY(setup_reg_dl_after_omi_init_helper<MCT::REG2_DL0_ERROR_MASK>(i_target));
+    FAPI_TRY(setup_reg_dl_after_omi_init_helper<MCT::REG2_DL1_ERROR_MASK>(i_target));
+    FAPI_TRY(setup_reg_dl_after_omi_init_helper<MCT::REG2_DL2_ERROR_MASK>(i_target));
 
 fapi_try_exit:
 

@@ -271,6 +271,8 @@ template<>
 fapi2::ReturnCode after_mc_omi_setup<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
         i_target )
 {
+    fapi2::buffer<uint64_t> l_dl0_error_mask;
+
     fapi2::ReturnCode l_rc1 = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ReturnCode l_rc2 = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ReturnCode l_rc3 = fapi2::FAPI2_RC_SUCCESS;
@@ -286,7 +288,7 @@ fapi2::ReturnCode after_mc_omi_setup<mss::mc_type::EXPLORER>( const fapi2::Targe
 
     // Write LOCAL_FIR register per Explorer unmask spec
     FAPI_TRY(l_exp_local_fir_reg.recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_PCS_GPBC_IRQ_106>()
-             .local_checkstop<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_PCS_GPBC_IRQ_111>()
+             .recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_PCS_GPBC_IRQ_111>()
              .recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_PCS_GPBC_IRQ_112>()
              .recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_PROC_SS__TOP_FATAL>()
              .recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_PROC_SS__TOP_NON_FATAL>()
@@ -319,6 +321,26 @@ fapi2::ReturnCode after_mc_omi_setup<mss::mc_type::EXPLORER>( const fapi2::Targe
              .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_ERROR_RETRAIN>()
              .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_EDPL_RETRAIN>()
              .write());
+
+    FAPI_TRY(fapi2::getScom(i_target, EXPLR_DLX_DL0_ERROR_MASK, l_dl0_error_mask));
+    l_dl0_error_mask.setBit<EXPLR_DLX_DL0_ERROR_MASK_47>()
+    .setBit<EXPLR_DLX_DL0_ERROR_MASK_46>()
+    .setBit<EXPLR_DLX_DL0_ERROR_MASK_45>()
+    .setBit<EXPLR_DLX_DL0_ERROR_MASK_44>()
+    .setBit<EXPLR_DLX_DL0_ERROR_MASK_43>()
+    .setBit<EXPLR_DLX_DL0_ERROR_MASK_42>()
+    .setBit<EXPLR_DLX_DL0_ERROR_MASK_41>()
+    .setBit<EXPLR_DLX_DL0_ERROR_MASK_40>()
+    .setBit<EXPLR_DLX_DL0_ERROR_MASK_38>()
+    .clearBit<EXPLR_DLX_DL0_ERROR_MASK_37>()
+    .setBit<EXPLR_DLX_DL0_ERROR_MASK_36>()
+    .clearBit<EXPLR_DLX_DL0_ERROR_MASK_33>()
+    .setBit<EXPLR_DLX_DL0_ERROR_MASK_32>()
+    .clearBit<EXPLR_DLX_DL0_ERROR_MASK_17>()
+    .clearBit<EXPLR_DLX_DL0_ERROR_MASK_16>()
+    .clearBit<EXPLR_DLX_DL0_ERROR_MASK_15>()
+    .clearBit<EXPLR_DLX_DL0_ERROR_MASK_14>();
+    FAPI_TRY(fapi2::putScom(i_target, EXPLR_DLX_DL0_ERROR_MASK, l_dl0_error_mask));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
