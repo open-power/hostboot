@@ -163,6 +163,7 @@ static const uint8_t ATTR_MEMORY_BAR_REGS_MASK_IDX = 1;
 /// @brief Program MCD range register to track region of real address space
 ///
 /// @param[in] i_target             Processor chip target
+/// @param[in] i_target_sys         System level target
 /// @param[in] i_addr_range         Address space to cover
 /// @param[in] i_mcd_range_reg      Enum identifying MCD range register resource to
 ///                                 service mapping
@@ -171,6 +172,7 @@ static const uint8_t ATTR_MEMORY_BAR_REGS_MASK_IDX = 1;
 fapi2::ReturnCode
 p10_exit_cache_contained_add_mcd_tracked_range(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target_sys,
     const p10_setup_bars_addr_range& i_addr_range,
     const mcd_range_reg_t i_mcd_range_reg,
     std::vector<std::pair<uint64_t, uint64_t>>& o_xscom_inits)
@@ -182,9 +184,12 @@ p10_exit_cache_contained_add_mcd_tracked_range(
 
     if (i_addr_range.enabled)
     {
+        fapi2::ATTR_SMF_CONFIG_Type l_smf_config;
+
         fapi2::buffer<uint64_t> l_mcd_cfg_reg = 0;
         fapi2::buffer<uint64_t> l_mcd_cfg_reg_valid_mask;
         l_mcd_cfg_reg_valid_mask.flush<1>();
+
         std::map<uint64_t, uint64_t>::const_iterator l_iter = p10_mcd_grp_size::xlate_map.find(i_addr_range.size);
         FAPI_ASSERT(l_iter != p10_mcd_grp_size::xlate_map.end(),
                     fapi2::P10_EXIT_CACHE_CONTAINED_INVALID_MCD_GROUP_SIZE_ERR().
@@ -194,10 +199,18 @@ p10_exit_cache_contained_add_mcd_tracked_range(
                     set_MCD_RANGE_REG(i_mcd_range_reg),
                     "Invalid MCD group size!");
 
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SMF_CONFIG, i_target_sys, l_smf_config),
+                 "Error from FAPI_ATTR_GET (ATTR_SMF_CONFIG)");
+
         // form register content
         FAPI_TRY(PREP_MCD_BANK0_TOP(i_target));
         SET_MCD_BANK0_TOP_VALID(l_mcd_cfg_reg);
-        SET_MCD_BANK0_TOP_SMF_ENABLE(l_mcd_cfg_reg);
+
+        if(l_smf_config == fapi2::ENUM_ATTR_SMF_CONFIG_ENABLED)
+        {
+            SET_MCD_BANK0_TOP_SMF_ENABLE(l_mcd_cfg_reg);
+        }
+
         SET_MCD_BANK0_TOP_GRP_SIZE(l_iter->second, l_mcd_cfg_reg);
         SET_MCD_BANK0_TOP_GRP_BASE(i_addr_range.base_addr >>  MCD_BASE_ADDR_SHIFT, l_mcd_cfg_reg);
 
@@ -414,6 +427,7 @@ p10_exit_cache_contained_append_mcd_bar_inits(
                     //   nm0 = MCD_TOP, nm1 = MCD_STR
                     FAPI_TRY(p10_exit_cache_contained_add_mcd_tracked_range(
                                  l_target,
+                                 i_target_sys,
                                  l_nm_range[ii],
                                  ((ii == 0) ? (TOP) : (STR)),
                                  o_xscom_inits),
@@ -468,6 +482,7 @@ p10_exit_cache_contained_append_mcd_bar_inits(
                 //   m = MCD_BOT
                 FAPI_TRY(p10_exit_cache_contained_add_mcd_tracked_range(
                              l_target,
+                             i_target_sys,
                              l_m_range,
                              BOT,
                              o_xscom_inits),
