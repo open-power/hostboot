@@ -50,27 +50,6 @@ using namespace scomt;
 using namespace scomt::perv;
 using namespace scomt::eq;
 
-//------------------------------------------------------------------------------
-// Constant definitions
-//------------------------------------------------------------------------------
-
-// in TOD counts of 32Mhz clock; needs to account for SCOM latency and number of chips to be
-// started in sync
-const uint64_t  C_SSCG_START_DELAY      = 0x100000;
-// 31.25 rounded up
-const uint64_t  C_SSCG_NS_PER_TOD_COUNT = 32;
-const uint64_t  C_SSCG_START_POLL_COUNT = 10;
-// Make the total polling delay equal to twice the expected delay
-// and divide the total polling delay up between each of the polling cycles.
-const uint64_t  C_SSCG_START_POLL_DELAY_NS = (2 * C_SSCG_START_DELAY* C_SSCG_NS_PER_TOD_COUNT) /
-        C_SSCG_START_POLL_COUNT;
-const uint64_t  C_SSCG_SIM_CYCLES_PER_TOD_CLOCK = 2000;
-const uint64_t  C_SSCG_START_POLL_DELAY_SIM_CYCLES = (2 * C_SSCG_START_DELAY* C_SSCG_SIM_CYCLES_PER_TOD_CLOCK) /
-        C_SSCG_START_POLL_COUNT;
-
-// FIXME @RTC 213485 -- temporary, if defined, then implement workaround for defect HW500611.
-// Left available for older builds.
-// #define P10_TOD_HW500611_IMPLEMENT_WORKAROUND
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -146,11 +125,27 @@ fapi_try_exit:
 /// @brief Distribute synchronization signal to SS PLL using
 ///        TOD network
 /// @param[in] i_tod_node Reference to TOD topology
+/// @param[in] i_is_simulation True if simulation, else false
 /// @return FAPI2_RC_SUCCESS if TOD sync is succesful else error
 fapi2::ReturnCode sync_spread(
-    const tod_topology_node* i_tod_node)
+    const tod_topology_node* i_tod_node,
+    const bool i_is_simulation)
 {
     FAPI_DBG("Start");
+
+    // in TOD counts of 32Mhz clock; needs to account for SCOM latency
+    // and number of chips to be started in sync
+    const uint64_t C_SSCG_START_DELAY = ((i_is_simulation) ? (0x40) : (0x100000));
+    // 31.25 rounded up
+    const uint64_t  C_SSCG_NS_PER_TOD_COUNT = 32;
+    const uint64_t  C_SSCG_START_POLL_COUNT = 10;
+    // Make the total polling delay equal to twice the expected delay
+    // and divide the total polling delay up between each of the polling cycles.
+    const uint64_t  C_SSCG_START_POLL_DELAY_NS = (2 * C_SSCG_START_DELAY * C_SSCG_NS_PER_TOD_COUNT) /
+            C_SSCG_START_POLL_COUNT;
+    const uint64_t  C_SSCG_SIM_CYCLES_PER_TOD_CLOCK = 2000;
+    const uint64_t  C_SSCG_START_POLL_DELAY_SIM_CYCLES = (2 * C_SSCG_START_DELAY * C_SSCG_SIM_CYCLES_PER_TOD_CLOCK) /
+            C_SSCG_START_POLL_COUNT;
 
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>> l_targets;
     get_targets(i_tod_node, 0, l_targets);
@@ -274,11 +269,6 @@ fapi2::ReturnCode init_tod_node(
         FAPI_TRY(PUT_TOD_LOAD_REG(l_target, l_data),
                  "Master: Error from PUT_TOD_LOAD_REG");
 
-#ifdef P10_TOD_HW500611_IMPLEMENT_WORKAROUND
-        // FIXME @RTC 213485 -- temporary, workaround for defect HW500611
-        FAPI_INF("Implementing workaround for defect HW500611");
-#else
-
         // STEP checking enable:
         // TOD_TX_TTYPE_2_REG(@0x13)[00] = 0b1: TX-TTYPE-2
         FAPI_DBG("Master: Chip TOD step checkers enable");
@@ -318,8 +308,6 @@ fapi2::ReturnCode init_tod_node(
         SET_TOD_TX_TTYPE_2_REG_TX_TTYPE_2_TRIGGER(l_data);
         FAPI_TRY(PUT_TOD_TX_TTYPE_2_REG(l_target, l_data),
                  "Master: Error from PUT_TOD_TX_TTYPE_2_REG");
-
-#endif
 
         FAPI_DBG("Master: Chip TOD start_tod (switch local Chip TOD to 'Running' state)");
         FAPI_TRY(PREP_TOD_START_REG(l_target));
@@ -490,6 +478,10 @@ fapi2::ReturnCode p10_tod_init(
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>* o_failingTodProc)
 {
     FAPI_DBG("Start");
+    fapi2::ATTR_IS_SIMULATION_Type l_attr_is_simulation;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION,
+                           fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_attr_is_simulation));
 
     FAPI_ASSERT((i_tod_node != NULL) &&
                 (i_tod_node->i_target != NULL),
@@ -512,14 +504,9 @@ fapi2::ReturnCode p10_tod_init(
     FAPI_TRY(init_tod_node(i_tod_node, o_failingTodProc),
              "Error from init_tod_node!");
 
-#ifdef P10_TOD_HW500611_IMPLEMENT_WORKAROUND
-    // FIXME @RTC 213485 -- temporary, workaround for defect HW500611
-    FAPI_INF("Implementing workaround for defect HW500611");
-#else
     // sync spread across chips in topology
-    FAPI_TRY(sync_spread(i_tod_node),
+    FAPI_TRY(sync_spread(i_tod_node, l_attr_is_simulation),
              "Error from sync_spread!");
-#endif
 
     // Notify the QMEs in each node that TOD setup is complete;
     //     (qme_tod_notify will recurse on each child)
