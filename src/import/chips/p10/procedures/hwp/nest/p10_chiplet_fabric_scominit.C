@@ -53,31 +53,37 @@ fapi2::ReturnCode p10_chiplet_fabric_scominit(
     const bool i_config_intranode)
 {
     FAPI_DBG("Start");
+    FAPI_DBG("  i_config_internode: %d", i_config_internode);
+    FAPI_DBG("  i_config_intranode: %d", i_config_intranode);
 
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     auto l_iohs_targets = i_target.getChildren<fapi2::TARGET_TYPE_IOHS>();
     char l_tgt_str[fapi2::MAX_ECMD_STRING_LEN];
     fapi2::ReturnCode l_rc;
 
-    // apply FBC non-hotplug scom initfile
-    fapi2::toString(i_target, l_tgt_str, sizeof(l_tgt_str));
-    FAPI_DBG("Invoking p10.fbc.no_hp.scom.initfile on target %s...", l_tgt_str);
-    FAPI_EXEC_HWP(l_rc, p10_fbc_no_hp_scom, i_target, FAPI_SYSTEM);
-    FAPI_TRY(l_rc, "Error from p10_fbc_no_hp_scom");
-
-    // mask FIRs on proc/pauc scope if there are no valid links
-    if(!l_iohs_targets.size())
+    if (i_config_internode)
     {
-        auto l_iohs_present = i_target.getChildren<fapi2::TARGET_TYPE_IOHS>(fapi2::TARGET_STATE_PRESENT);
+        // apply FBC non-hotplug scom initfile
+        fapi2::toString(i_target, l_tgt_str, sizeof(l_tgt_str));
+        FAPI_DBG("Invoking p10.fbc.no_hp.scom.initfile on target %s...", l_tgt_str);
+        FAPI_EXEC_HWP(l_rc, p10_fbc_no_hp_scom, i_target, FAPI_SYSTEM);
+        FAPI_TRY(l_rc, "Error from p10_fbc_no_hp_scom");
 
-        for(auto l_iohs : l_iohs_present)
+        // mask FIRs on proc/pauc scope if there are no valid links
+        if(!l_iohs_targets.size())
         {
-            FAPI_TRY(p10_smp_link_firs(l_iohs, sublink_t::BOTH, action_t::INACTIVE),
-                     "Error from p10_smp_link_firs when masking firs for all links");
-        }
+            auto l_iohs_present = i_target.getChildren<fapi2::TARGET_TYPE_IOHS>(fapi2::TARGET_STATE_PRESENT);
 
-        goto fapi_try_exit;
+            for(auto l_iohs : l_iohs_present)
+            {
+                FAPI_TRY(p10_smp_link_firs(l_iohs, sublink_t::BOTH, action_t::INACTIVE),
+                         "Error from p10_smp_link_firs when masking firs for all links");
+            }
+
+            goto fapi_try_exit;
+        }
     }
+
 
     for (auto l_iohs : l_iohs_targets)
     {
@@ -141,8 +147,11 @@ fapi2::ReturnCode p10_chiplet_fabric_scominit(
         else
         {
             // mask TL/DL FIRs for links that are not configured for smp operations
-            FAPI_TRY(p10_smp_link_firs(l_iohs, sublink_t::BOTH, action_t::INACTIVE),
-                     "Error from p10_smp_link_firs when configuring both sublinks for inactive operations");
+            if (i_config_internode)
+            {
+                FAPI_TRY(p10_smp_link_firs(l_iohs, sublink_t::BOTH, action_t::INACTIVE),
+                         "Error from p10_smp_link_firs when configuring both sublinks for inactive operations");
+            }
         }
     }
 

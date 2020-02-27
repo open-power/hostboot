@@ -326,7 +326,7 @@ fapi2::ReturnCode p10_fbc_eff_config_links(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     p10_build_smp_operation i_op)
 {
-    FAPI_DBG("Start");
+    FAPI_DBG("Start, i_op = %d", i_op);
 
     ////////////////////////////////////////////////////////
     // Local variables

@@ -93,7 +93,8 @@ fapi2::ReturnCode p10_fabric_link_layer(
     const bool i_train_internode,
     const bool i_train_intranode)
 {
-    FAPI_DBG("Start");
+    FAPI_DBG("Start, i_train_internode = %d, i_train_intranode = %d",
+             i_train_internode, i_train_intranode);
 
     fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_Type l_x_en;
     fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_Type l_a_en;
