@@ -59,39 +59,49 @@ try {
 
 
 # Build EECACHE
-try {
-    if defined bmc_files {
+if defined bmc_files {
         # load EECACHE creation tool
         run-python-file (lookup-file hbfw/eecache-gen.py)
 
         #echo "Find eecache file name from: "+$bmc_files
         @simenv.eecache_file = find_eecache_file( simenv.bmc_files )
 
-        # Create EECACHE file using version 1
-        @eecache_gen( simenv.eecache_file, 1)
-
-        # check if ECC needs to be added to the EECACHE file
-        if defined eecacheEcc {
-           try {
-              # load ECC tools
-              run-python-file (lookup-file hbfw/ecc.py)
-
-              # pad the eecache file to nearest 4K boundary
-              @alignFileByValue( simenv.eecache_file, 4096 )
-
-              # add ECC to the eecache file
-              @injectECC( simenv.eecache_file, simenv.eecache_file )
-
-              echo "Successfully created "+$eecache_file+" with ECC"
-           } except { echo "ERROR: Failed to load ECC tool (ecc.py)" }
-
-        } else {
-            echo "Successfully created "+$eecache_file
+        $hb_skip_eecache = 0
+        try {
+            $eecache_file = (lookup-file $eecache_file)
+            #echo "FOUND EECACHE: "+$eecache_file
+        } except {
+             echo "No eecache file found in bmc_files:"+$bmc_files+", skip EECACHE generation"
+             $hb_skip_eecache = 1;
         }
-    } else {
-        echo "bmc_files not specified, so no EECACHE auto generated"
-    }
-} except { echo "ERROR: Failed to load EECACHE generator framework (eecache-gen.py)" }
+
+        if ($hb_skip_eecache != 1) {
+            @simenv.bmc_files = resolve_eecache_path( simenv.bmc_files, simenv.eecache_file )
+            #echo "Resolved eecache path: "+$bmc_files
+
+            # Create EECACHE file using version 1
+            @eecache_gen( simenv.eecache_file, 1)
+
+            # check if ECC needs to be added to the EECACHE file
+            if defined eecacheEcc {
+                # load ECC tools
+                run-python-file (lookup-file hbfw/ecc.py)
+
+                # pad the eecache file to nearest 4K boundary
+                @alignFileByValue( simenv.eecache_file, 4096 )
+
+                # add ECC to the eecache file
+                @injectECC( simenv.eecache_file, simenv.eecache_file )
+
+                echo "Successfully created "+$eecache_file+" with ECC"
+            } else {
+                echo "Successfully created "+$eecache_file
+            }
+        }
+
+} else {
+    echo "bmc_files not specified, so no EECACHE auto generated"
+}
 
 
 # Determine security state

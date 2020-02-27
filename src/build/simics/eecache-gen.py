@@ -85,6 +85,7 @@ def write_i2c_eecache_record(f, huid, port, engine, devAddr, mux, size, offset, 
 #
 # See eeprom_const.H for header information
 # Version 1 only supports i2c
+# Version 2a - changes version 1 to version 2 (intermediate, just i2c)
 # Version 2 supports i2c and spi access (adds another byte to header size)
 #
 ###########################################################################
@@ -106,8 +107,22 @@ def hb_eecache_setup(file_name, version, verbose):
             # 47 more record headers need to fill up
             for x in range(47):
                 write_eecache_record_v1(f, 0, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0);
+        elif version == 2:
+            # version 1 byte. (version 2 but no SPI access yet)
+            f.write(struct.pack('>B', 2));
+            # end of cache 4 bytes
+            f.write(struct.pack('>i', 0x12389));
+            # eepromRecordHeader for MVPD
+            write_i2c_eecache_record(f, 0x50000, 0, 1, 0xA0, 0xFF, 64, 0x389, 0xC0);
+            # for DIMM port 0
+            write_i2c_eecache_record(f, 0x50000, 0, 3, 0xA0, 0xFF, 4, 0x10389, 0xC0);
+            # for DIMM port 1
+            write_i2c_eecache_record(f, 0x50000, 1, 3, 0xA0, 0xFF, 4, 0x11389, 0xC0);
+            # 47 more record headers need to fill up
+            for x in range(47):
+                write_i2c_eecache_record(f, 0, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0);
         else:
-            # version 1 byte. Supports version 2
+            # version 1 byte. Supports version 2 with SPI
             f.write(struct.pack('>B', 2));
             # end of cache 4 bytes
             f.write(struct.pack('>i', 0x12389));
@@ -172,11 +187,25 @@ def find_eecache_file( bmc_files_str ):
       return x.group(1)
     return None
 
+##########################################################################
+# Resolve the relative simics path to absolute path
+# This is to support copying EECACHE to the BMC
+# @param bmc_files_str - simics bmc_files string
+# @param absolute_simics_eecache - result of lookup-file on eecache part
+# @return Altered version of bmc_files_string where relative eecache is
+#         replaced with absolute_simics_eecache
+##########################################################################
+def resolve_eecache_path( bmc_files_str, absolute_simics_eecache ):
+    #print "resolve_eecache_path("+bmc_files_str+ ", "+absolute_simics_eecache+")"
+    x = re.sub(r'([^,]+):/usr/local/share/pnor/EECACHE', absolute_simics_eecache+":/usr/local/share/pnor/EECACHE", bmc_files_str)
+    if x != None:
+      return x
+    return None
 
 ###########################################################################
 # Generate eecache (MAIN FUNCTION)
 # @param eecache_file = local file to create for EECACHE
-# @param version = 1 or 2 (1 = i2c only, 2 = i2c + spi)
+# @param version = 1 or 2 (1 = i2c only, 2 = i2c version 2, 3 = i2c + spi)
 ###########################################################################
 def eecache_gen(eecache_file, version):
     if eecache_file != None:
