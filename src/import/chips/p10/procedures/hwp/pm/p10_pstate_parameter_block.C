@@ -4022,8 +4022,8 @@ void PlatPmPPB::compute_PStateV_I_slope(
                 !(iv_operating_points[pt_set][CF2].pstate) ||
                 !(iv_operating_points[pt_set][CF3].pstate) ||
                 !(iv_operating_points[pt_set][CF4].pstate) ||
-                !(iv_operating_points[pt_set][CF5].pstate) ||
-                (!(iv_operating_points[pt_set][CF6].pstate) && iv_poundV_fmax_enable))
+                !(iv_operating_points[pt_set][CF5].pstate))
+//                (!(iv_operating_points[pt_set][CF6].pstate) && iv_poundV_fmax_enable)) //TBD
         {
             FAPI_ERR("Non-UltraTurbo PSTATE value shouldn't be zero for %s", vpdSetStr[pt_set]);
             return;
