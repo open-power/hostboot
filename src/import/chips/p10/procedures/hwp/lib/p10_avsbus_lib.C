@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -164,18 +164,20 @@ avsInitExtVoltageControl(
     if (l_value == 0)
     {
         l_avsbus_frequency = p10avslib::AVSBUS_FREQUENCY / 1000;
+        FAPI_INF("Using default AVSBus frequency value of %d", l_avsbus_frequency);
     }
     else
     {
         l_avsbus_frequency = l_value / 1000;
+        FAPI_INF("AVSBus frequency value is %d", l_avsbus_frequency);
     }
 
     // Divider = Nest Frequency / (AVSBus Frequency * 8) - 1
     l_divider = (l_nest_frequency / (l_avsbus_frequency * 8)) - 1;
 
-    FAPI_INF("Nest frequency value is %d", l_nest_frequency);
-    FAPI_INF("AVSBus frequency value is %d", l_avsbus_frequency);
-    FAPI_INF("Divider value is %d", l_divider);
+    FAPI_INF("AVSBus number is %d using bridge %d", i_avsBusNum, i_o2sBridgeNum );
+    FAPI_INF("Const frequency value is %d", l_nest_frequency);
+    FAPI_INF("Divider value is %d (0x%X)", l_divider, l_divider);
 
     O2SCTRL1_value.fields.o2s_clock_divider_n = l_divider;
     O2SCTRL1_value.fields.o2s_nr_of_frames_n = 1;
@@ -498,7 +500,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     else
     {
 
-        FAPI_INF("Incorrect response received - Computed CRC %X Received %X - Full Response %08X",
+        FAPI_INF("Non-clean response received: Computed CRC vs %X Received CRC %X;  Full Response %08X",
                  l_rsp_computed_crc, l_rsp_rcvd_crc, l_rsp_data);
 
         if(l_rsp_data == 0x00000000)
@@ -523,7 +525,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         }
         else if(l_rsp_rcvd_crc != l_rsp_computed_crc)
         {
-            FAPI_DBG("ERROR: AVS command failed failed. Bad CRC detected by P10 on AVSBus Slave Segement.");
+            FAPI_DBG("ERROR: AVS command failed. Bad CRC detected by P10 on AVSBus Slave Segement.");
             FAPI_ASSERT((i_throw_assert != true),
                         fapi2::PM_AVSBUS_MASTER_BAD_CRC_ERROR()
                         .set_TARGET(i_target)
@@ -533,7 +535,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         }
         else if(l_data_status_code == 0x02)
         {
-            FAPI_DBG("ERROR: AVS command failed failed. Bad CRC indicated by Slave VRM on AVSBus Master Segement.");
+            FAPI_DBG("ERROR: AVS command failed. Bad CRC indicated by Slave VRM on AVSBus Master Segement.");
             FAPI_ASSERT((i_throw_assert != true),
                         fapi2::PM_AVSBUS_SLAVE_BAD_CRC_ERROR()
                         .set_TARGET(i_target)
@@ -543,7 +545,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         }
         else if(l_data_status_code == 0x01)
         {
-            FAPI_DBG("ERROR: AVS command failed failed. Valid data sent but no action is taken due to unavailable resource.");
+            FAPI_DBG("WARNING: AVS command no action.  Valid data sent but no action is taken due to unavailable resource.");
             FAPI_ASSERT((i_throw_assert != true),
                         fapi2::PM_AVSBUS_UNAVAILABLE_RESOURCE_ERROR()
                         .set_TARGET(i_target)
@@ -553,7 +555,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         }
         else if(l_data_status_code == 0x03)
         {
-            FAPI_DBG("ERROR: AVS command failed failed. Unknown resource, invalid data, incorrect data or incorrect action.");
+            FAPI_DBG("ERROR: AVS command failed. Unknown resource, invalid data, incorrect data or incorrect action.");
             FAPI_ASSERT((i_throw_assert != true),
                         fapi2::PM_AVSBUS_INVALID_DATA_ERROR()
                         .set_TARGET(i_target)

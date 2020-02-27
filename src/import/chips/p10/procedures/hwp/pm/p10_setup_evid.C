@@ -52,10 +52,19 @@
 #include <p10_scom_pauc.H>
 #include <p10_scom_iohs.H>
 #include <p10_scom_pec.H>
+#include <p10_scom_proc.H>
 #include <multicast_group_defs.H>
 
 using namespace pm_pstate_parameter_block;
 using namespace scomt;
+
+static const uint32_t NEST_DPLL_FREQ             = TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_FREQ;
+static const uint32_t NEST_DPLL_FREQ_FMULT       = TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_FREQ_FMULT;
+static const uint32_t NEST_DPLL_FREQ_FMULT_LEN   = TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_FREQ_FMULT_LEN;
+static const uint32_t NEST_DPLL_FREQ_FMAX        = TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_FREQ_FMAX;
+static const uint32_t NEST_DPLL_FREQ_FMAX_LEN    = TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_FREQ_FMAX_LEN;
+static const uint32_t NEST_DPLL_FREQ_FMIN        = TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_FREQ_FMIN;
+static const uint32_t NEST_DPLL_FREQ_FMIN_LEN    = TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_FREQ_FMIN_LEN;
 
 fapi2::ReturnCode
 p10_update_net_ctrl(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
@@ -87,7 +96,6 @@ struct avsbus_attrs_t
     uint32_t freq_proc_refclock_khz;
     uint32_t proc_dpll_divider;
 };
-// compute_boot_safe
 
 /////////////////////////////////////////////////////////////////
 //////p10_setup_evid
@@ -101,7 +109,7 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     uint32_t l_present_boot_voltage[MAX_VRM];
     bool  l_dpll_lesser_value = false;
     fapi2::buffer<uint64_t> l_fmult_data(0);
-//    uint32_t l_safe_model_dpll_value = 0;
+    uint32_t l_safe_mode_dpll_value = 0;
     //Instantiate PPB object
     PlatPmPPB l_pmPPB(i_target);
 
@@ -127,27 +135,25 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         //so for now this code will be commented.
         //RTC:207137 will be used to enable this code.
         //HW491247:to track nest dpll issue
-#if 0
+
         // Read and compare DPLL and safe mode value
         FAPI_TRY (p10_read_dpll_value(i_target,
                                       attrs.freq_proc_refclock_khz,
                                       attrs.proc_dpll_divider,
                                       l_dpll_lesser_value,
                                       l_fmult_data,
-                                      l_safe_model_dpll_value),
+                                      l_safe_mode_dpll_value),
                   "Error from p10_read_dpll_value function");
-#endif
 
         //if DPLL is greater than safe mode freq then first set the dpll to safe
         //model freq.
         if (!l_dpll_lesser_value)
         {
-#if 0
+
             // Set the DPLL frequency values to safe mode values
             FAPI_TRY (p10_update_dpll_value(i_target,
-                                            l_safe_model_dpll_value),
+                                            l_safe_mode_dpll_value),
                       "Error from p10_update_dpll_value function");
-#endif
         }
 
         //Read VDD and VCS present voltage from HW
@@ -176,12 +182,10 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         // mode freq.
         if (l_dpll_lesser_value)
         {
-#if 0
             // Set the DPLL frequency values to safe mode values
             FAPI_TRY (p10_update_dpll_value(i_target,
-                                            l_safe_model_dpll_value),
+                                            l_safe_mode_dpll_value),
                       "Error from p10_update_dpll_value function");
-#endif
         }
 
         // Set Boot VDN Voltage
@@ -210,6 +214,8 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                 }
             }
         }
+
+        // AVSbus fails at this point in sim
 
         // Set Boot VIO Voltage
         if(attrs.attr_avs_bus_num[VIO] == INVALID_BUS_NUM)
@@ -300,15 +306,16 @@ p10_setup_evid_voltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
                 break;
 
             default:
+                strcpy(rail_str, "ERR");
                 ;
         }
 
-        if (i_evid_value != VCS_SETUP)
+        if (i_evid_value != VIO_SETUP)
         {
             // Initialize the buses
             FAPI_TRY(avsInitExtVoltageControl(i_target,
                                               i_bus_num[i_evid_value], BRIDGE_NUMBER),
-                     "Initializing avsBus VDD/VDN, bridge %d", BRIDGE_NUMBER);
+                     "Initializing AVSBus for %s, bridge %d", rail_str, BRIDGE_NUMBER);
         }
 
         // Drive AVS Bus with a frame value 0xFFFFFFFF (idle frame) to
@@ -322,7 +329,7 @@ p10_setup_evid_voltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         do
         {
-
+            ;
             FAPI_TRY(avsVoltageRead(i_target, i_bus_num[i_evid_value], BRIDGE_NUMBER,
                                     i_rail_select[i_evid_value], l_present_voltage_mv),
                      "AVS Voltage read transaction failed to %d, Bridge %d",
@@ -342,7 +349,7 @@ p10_setup_evid_voltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         }
         while (!l_goodResponse);
 
-        FAPI_DBG("%s voltage read: %d mv", &rail_str, l_present_voltage_mv);
+        FAPI_DBG("%s voltage read: %d mv", rail_str, l_present_voltage_mv);
         o_voltage_mv[i_evid_value] = l_present_voltage_mv;
     } //end of for
 
@@ -559,21 +566,13 @@ p10_read_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
                      const uint32_t i_proc_dpll_divider,
                      bool&  o_dpll_lesser_value,
                      fapi2::buffer<uint64_t>& o_fmult_data,
-                     uint32_t& o_safe_model_dpll_value)
+                     uint32_t& o_safe_mode_dpll_value)
 
 {
     fapi2::buffer<uint64_t> l_data64;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ_Type l_attr_safe_mode_freq;
     fapi2::ATTR_SAFE_MODE_VOLTAGE_MV_Type l_attr_safe_mode_mv;
-    //TBD  will remove once register defined in scom address file
-    uint32_t NEST_DPLL_FREQ = 0x01060151;
-#define NEST_DPLL_FREQ_FMULT  17
-#define NEST_DPLL_FREQ_FMULT_LEN  11
-#define NEST_DPLL_FREQ_FMAX  1
-#define NEST_DPLL_FREQ_FMAX_LEN  11
-#define NEST_DPLL_FREQ_FMIN  33
-#define NEST_DPLL_FREQ_FMIN_LEN  11
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ, i_target, l_attr_safe_mode_freq));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_VOLTAGE_MV, i_target, l_attr_safe_mode_mv));
@@ -582,6 +581,8 @@ p10_read_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
     {
         if (!l_attr_safe_mode_freq )
         {
+
+            FAPI_INF("NEST DPLL: safe mode attribute not set");
             break;
         }
 
@@ -597,13 +598,13 @@ p10_read_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
 
         // Convert frequency value to a format that needs to be written to the
         // register
-        o_safe_model_dpll_value = ((l_attr_safe_mode_freq * 1000) * i_proc_dpll_divider) /
-                                  i_freq_proc_refclock_khz;
+        o_safe_mode_dpll_value = ((l_attr_safe_mode_freq * 1000) * i_proc_dpll_divider) /
+                                 i_freq_proc_refclock_khz;
 
         FAPI_INF("NEST DPLL fmult 0x%08X safe_mode_dpll_value 0x%08X (%d)",
-                 o_fmult_data, o_safe_model_dpll_value, o_safe_model_dpll_value);
+                 o_fmult_data, o_safe_mode_dpll_value, o_safe_mode_dpll_value);
 
-        if (o_fmult_data >= o_safe_model_dpll_value)
+        if (o_fmult_data >= o_safe_mode_dpll_value)
         {
             o_dpll_lesser_value = false;
             FAPI_INF("DPLL setting: Lowering the dpll frequency");
@@ -627,7 +628,7 @@ fapi2::ReturnCode
 p10_update_net_ctrl(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 
 {
-    FAPI_INF(">>>>>>>>> p10_update_net_ctrl");
+    FAPI_INF("> p10_update_net_ctrl");
     fapi2::buffer<uint64_t> l_data64;
 
     do
@@ -655,7 +656,7 @@ p10_update_net_ctrl(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
     while (0);
 
 fapi_try_exit:
-    FAPI_INF("<<<<<<<<< p10_update_net_ctrl");
+    FAPI_INF("< p10_update_net_ctrl");
     return fapi2::current_err;
 }
 
@@ -668,14 +669,6 @@ p10_update_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targ
 
 {
     fapi2::buffer<uint64_t> l_data64;
-    //TBD  will remove once register defined in scom address file
-    uint32_t NEST_DPLL_FREQ = 0x01060151;
-#define NEST_DPLL_FREQ_FMULT  17
-#define NEST_DPLL_FREQ_FMULT_LEN  11
-#define NEST_DPLL_FREQ_FMAX  1
-#define NEST_DPLL_FREQ_FMAX_LEN  11
-#define NEST_DPLL_FREQ_FMIN  33
-#define NEST_DPLL_FREQ_FMIN_LEN  11
 
     do
     {

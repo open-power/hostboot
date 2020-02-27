@@ -1331,11 +1331,12 @@ void oppb_print(OCCPstateParmBlock_t* i_oppb)
 ///////////////////////////////////////////////////////////
 void PlatPmPPB::attr_init( void )
 {
-    const uint32_t EXT_VRM_TRANSITION_START_NS[] = {8000, 8000};
-    const uint32_t EXT_VRM_TRANSITION_RATE_INC_UV_PER_US[] = {10000,10000};
-    const uint32_t EXT_VRM_TRANSITION_RATE_DEC_UV_PER_US[] = {10000,10000};
-    const uint32_t EXT_VRM_STABILIZATION_TIME_NS[] = {5,5};
-    const uint32_t EXT_VRM_STEPSIZE_MV[] = {50, 50};
+    // Rails:  0-VDD; 1-VCS; 2-VDN; 3-VIO
+    const uint32_t EXT_VRM_TRANSITION_START_NS[] = {8000, 8000, 8000, 0};
+    const uint32_t EXT_VRM_TRANSITION_RATE_INC_UV_PER_US[] = {10000, 10000, 10000, 0};
+    const uint32_t EXT_VRM_TRANSITION_RATE_DEC_UV_PER_US[] = {10000, 10000, 10000, 0};
+    const uint32_t EXT_VRM_STABILIZATION_TIME_NS[] = {5, 5, 5, 0};
+    const uint32_t EXT_VRM_STEPSIZE_MV[] = {50, 50, 50, 0};
 
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
@@ -1479,16 +1480,50 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
                 #_attr_name, iv_attrs._attr_name[1], iv_attrs._attr_name[1]); \
     }
 
+#define SET_DEFAULT_4(_attr_name, _attr_default_0,_attr_default_1, _attr_default_2,_attr_default_3) \
+    if (!(iv_attrs._attr_name[0] && iv_attrs._attr_name[1] && iv_attrs._attr_name[2] && iv_attrs._attr_name[3])) \
+    { \
+       iv_attrs._attr_name[0] = _attr_default_0; \
+       iv_attrs._attr_name[1] = _attr_default_1; \
+       iv_attrs._attr_name[2] = _attr_default_2; \
+       iv_attrs._attr_name[3] = _attr_default_3; \
+       FAPI_INF("Setting %-44s[0] = 0x%08x %d (internal default) %-44s[0] = 0x%08x %d (internal default) " \
+                "%-44s[0] = 0x%08x %d (internal default) %-44s[0] = 0x%08x %d (internal default)", \
+                #_attr_name, iv_attrs._attr_name[0], iv_attrs._attr_name[0],\
+                #_attr_name, iv_attrs._attr_name[1], iv_attrs._attr_name[1],\
+                #_attr_name, iv_attrs._attr_name[2], iv_attrs._attr_name[2],\
+                #_attr_name, iv_attrs._attr_name[3], iv_attrs._attr_name[3]);\
+    }
+
 
 
 //    SET_DEFAULT(attr_freq_proc_refclock_khz, 133333);
 //    SET_DEFAULT(freq_proc_refclock_khz,      133333); // Future: collapse this out
-    SET_DEFAULT_2(attr_ext_vrm_transition_start_ns, EXT_VRM_TRANSITION_START_NS[0],EXT_VRM_TRANSITION_START_NS[1])
-    SET_DEFAULT_2(attr_ext_vrm_transition_rate_inc_uv_per_us, EXT_VRM_TRANSITION_RATE_INC_UV_PER_US[0], EXT_VRM_TRANSITION_RATE_INC_UV_PER_US[1])
-    SET_DEFAULT_2(attr_ext_vrm_transition_rate_dec_uv_per_us, EXT_VRM_TRANSITION_RATE_DEC_UV_PER_US[0],EXT_VRM_TRANSITION_RATE_DEC_UV_PER_US[1])
-    SET_DEFAULT_2(attr_ext_vrm_stabilization_time_us, EXT_VRM_STABILIZATION_TIME_NS[0],EXT_VRM_STABILIZATION_TIME_NS[1])
-    SET_DEFAULT_2(attr_ext_vrm_step_size_mv, EXT_VRM_STEPSIZE_MV[0],EXT_VRM_STEPSIZE_MV[1])
-
+    SET_DEFAULT_4(attr_ext_vrm_transition_start_ns,
+        EXT_VRM_TRANSITION_START_NS[0],
+        EXT_VRM_TRANSITION_START_NS[1],
+        EXT_VRM_TRANSITION_START_NS[2],
+        EXT_VRM_TRANSITION_START_NS[3]);
+    SET_DEFAULT_4(attr_ext_vrm_transition_rate_inc_uv_per_us,
+        EXT_VRM_TRANSITION_RATE_INC_UV_PER_US[0],
+        EXT_VRM_TRANSITION_RATE_INC_UV_PER_US[1],
+        EXT_VRM_TRANSITION_RATE_INC_UV_PER_US[2],
+        EXT_VRM_TRANSITION_RATE_INC_UV_PER_US[3]);
+    SET_DEFAULT_4(attr_ext_vrm_transition_rate_dec_uv_per_us,
+        EXT_VRM_TRANSITION_RATE_DEC_UV_PER_US[0],
+        EXT_VRM_TRANSITION_RATE_DEC_UV_PER_US[1],
+        EXT_VRM_TRANSITION_RATE_DEC_UV_PER_US[2],
+        EXT_VRM_TRANSITION_RATE_DEC_UV_PER_US[3]);
+    SET_DEFAULT_4(attr_ext_vrm_stabilization_time_us,
+        EXT_VRM_STABILIZATION_TIME_NS[0],
+        EXT_VRM_STABILIZATION_TIME_NS[1],
+        EXT_VRM_STABILIZATION_TIME_NS[3],
+        EXT_VRM_STABILIZATION_TIME_NS[3]);
+    SET_DEFAULT_4(attr_ext_vrm_step_size_mv,
+        EXT_VRM_STEPSIZE_MV[0],
+        EXT_VRM_STEPSIZE_MV[1],
+        EXT_VRM_STEPSIZE_MV[2],
+        EXT_VRM_STEPSIZE_MV[3]);
 
     SET_DEFAULT(attr_wov_sample_125us, 2);
     SET_DEFAULT(attr_wov_max_droop_pct, 125);

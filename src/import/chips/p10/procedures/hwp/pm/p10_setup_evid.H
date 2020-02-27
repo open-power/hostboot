@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,10 +47,12 @@ enum P10_SETUP_EVID_CONSTANTS
 
 // Default voltages if mailbox -> attributes are not setup
     AVSBUS_RETRY_COUNT = 5,
-    VDD_SETUP = 6,
-    VDN_SETUP = 7,
-    VCS_SETUP = 8,
-    VIO_SETUP = 9,
+
+// VRM rails
+    VDD_SETUP = 0,
+    VDN_SETUP = 1,
+    VCS_SETUP = 2,
+    VIO_SETUP = 3,
 };
 
 
