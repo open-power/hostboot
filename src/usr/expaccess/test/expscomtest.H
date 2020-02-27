@@ -148,12 +148,6 @@ public:
         fapi2::buffer<uint64_t> l_scom_buffer;
 
         do{
-//TODO: RTC 249013 enable the test
-// Causing a data storage exception in c_str...
-#ifdef CONFIG_AXONE_BRING_UP
-TRACFCOMP( g_trac_expscom,"skipping testExpscomI2c");
-break;
-#endif
             if (!iv_serializeTestMutex)
             {
                 TS_FAIL("iv_serializedTestMutex is not setup");
@@ -430,13 +424,6 @@ break;
         TargetHandleList l_explorerList;
 
         do{
-// TODO: RTC 249013 enable the test
-// Causing a data storage exception in c_str...
-#ifdef CONFIG_AXONE_BRING_UP
-TRACFCOMP( g_trac_expscom,"skipping testExpscomI2cPlatformPlatform");
-break;
-#endif
-
             if (!iv_serializeTestMutex)
             {
                 TS_FAIL("iv_serializedTestMutex is not setup");

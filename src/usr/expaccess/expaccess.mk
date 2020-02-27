@@ -23,17 +23,16 @@
 #
 # IBM_PROLOG_END_TAG
 # FIXME RTC: 210975
-#EXTRAINCDIR += ${ROOTPATH}/src/import
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/inband/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
-#EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
+EXTRAINCDIR += ${ROOTPATH}/src/import
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 
 VPATH += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/inband/
+VPATH += ${ROOTPATH}//src/import/generic/memory/lib/utils/
 
 # Need to build exp_inband to use EKB's getMMIO/putMMIO/getCMD/getRSP
 #OBJS += exp_inband.o
@@ -44,3 +43,4 @@ OBJS += mmioscomdd.o
 #OBJS += exp_fw_log.o
 #OBJS += exp_fw_log_data.o
 #OBJS += errlud_expscom.o
+OBJS += c_str.o
