@@ -1,0 +1,107 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_l3err_extract_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+   <hwpError>
+    <rc>RC_P10_L3ERR_EXTRACT_UNKNOWN_SYNDROME_ECC</rc>
+    <description>
+      Procedure: p10_l3err_extract
+      Syndrome ECC is unknown
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>SYNDROME</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError> 
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P10_L3ERR_LINE_DELETE_REG_BUSY</rc>
+    <description>
+      Procedure: p10_l3err_linedelete
+      Time out waiting for PRD L3 Purge engine busy bit.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>COUNT_THRESHOLD</ffdc>
+    <ffdc>PRD_PURGE_REG</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError> 
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P10_L3ERR_EXTRACT_TA_WRONG_SIZE_ERR</rc>
+    <description>
+      Procedure: p10_l3err_extract
+      Specified trace array length does not match expected length
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>TA_DATA_SIZE</ffdc>
+    <ffdc>EXP_TA_DATA_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P10_L3ERR_EXTRACT_SYNDROME_NOT_FOUND</rc>
+    <description>
+      Procedure: p10_l3err_extract
+      Could not find syndrome
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>TRACE_ARRAY_1</ffdc>
+    <ffdc>TRACE_ARRAY_2</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P10_L3ERR_RD_CMD_NOT_FOUND</rc>
+    <description>
+      Procedure: p10_l3err_extract
+      Could not find rd_cmd
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>TRACE_ARRAY_6_0</ffdc>
+    <ffdc>TRACE_ARRAY_6_1</ffdc>
+    <ffdc>TRACE_ARRAY_7_0</ffdc>
+    <ffdc>TRACE_ARRAY_7_1</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>
