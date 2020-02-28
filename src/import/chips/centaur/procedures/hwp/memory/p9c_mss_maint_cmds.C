@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,7 @@
 
 #include <p9c_mss_maint_cmds.H>
 #include <cen_gen_scom_addresses.H>
+#include <cen_gen_scom_addresses_fld.H>
 #include <p9c_dimmBadDqBitmapFuncs.H>
 #include <generic/memory/lib/utils/c_str.H>
 
@@ -93,9 +94,10 @@ namespace mss_memconfig
 /// @brief DRAM size in gigabits, used to determine address range for maint cmds
 enum DramSize
 {
-    GBIT_2 = 0,
-    GBIT_4 = 1,
-    GBIT_8 = 2,
+    GBIT_2  = 0,
+    GBIT_4  = 1,
+    GBIT_8  = 2,
+    GBIT_16 = 3,
 };
 
 /// @brief DRAM width, used to determine address range for maint cmds
@@ -1570,6 +1572,7 @@ fapi2::ReturnCode mss_MaintCmd::loadStartAddress()
 
     // Load address bits 0:39
     l_data.insert<0, 40, 0>(iv_start_addr);
+    l_data.writeBit<CEN_MBA_MBMACAQ_CMD_ROW17>(iv_start_addr.getBit<CEN_MBA_MBMACAQ_CMD_ROW17>());
     // Clear error status bits 40:46
     l_data.clearBit<40, 7>();
     FAPI_TRY(fapi2::putScom(iv_target, CEN_MBA_MBMACAQ, l_data));
@@ -1588,7 +1591,7 @@ fapi2::ReturnCode mss_MaintCmd::loadEndAddress()
     fapi2::buffer<uint64_t> l_data;
     FAPI_INF("ENTER mss_MaintCmd::loadEndAddress()");
     FAPI_TRY(fapi2::getScom(iv_target, CEN_MBA_MBMEAQ, l_data));
-    l_data.insert<0, 40, 0>(iv_end_addr);
+    l_data.insert<0, 41, 0>(iv_end_addr);
     FAPI_TRY(fapi2::putScom(iv_target, CEN_MBA_MBMEAQ, l_data));
 
     FAPI_INF("EXIT mss_MaintCmd::loadEndAddress()");
@@ -3268,6 +3271,7 @@ fapi2::ReturnCode mss_get_address_range( const fapi2::Target<fapi2::TARGET_TYPE_
     uint8_t l_end_master_rank = 0;
     uint8_t l_end_slave_rank = 0;
     uint8_t l_dram_gen = 0;
+    bool l_row18 = false;
 
     // Get Centaur target for the given MBA
     const auto l_targetCentaur = i_target.getParent<fapi2::TARGET_TYPE_MEMBUF_CHIP>();
@@ -3311,6 +3315,7 @@ fapi2::ReturnCode mss_get_address_range( const fapi2::Target<fapi2::TARGET_TYPE_
         l_row =     mss_memconfig::ROW_15;
         l_col =     mss_memconfig::COL_10;
         l_bank =    mss_memconfig::BANK_3;
+        l_row18 = false;
     }
 
     else if((l_dramWidth == mss_memconfig::X8) &&
@@ -3322,6 +3327,7 @@ fapi2::ReturnCode mss_get_address_range( const fapi2::Target<fapi2::TARGET_TYPE_
         l_row =     mss_memconfig::ROW_14;
         l_col =     mss_memconfig::COL_10;
         l_bank =    mss_memconfig::BANK_4;
+        l_row18 = false;
     }
 
     else if((l_dramWidth == mss_memconfig::X4) &&
@@ -3333,6 +3339,7 @@ fapi2::ReturnCode mss_get_address_range( const fapi2::Target<fapi2::TARGET_TYPE_
         l_row =     mss_memconfig::ROW_15;
         l_col =     mss_memconfig::COL_11;
         l_bank =    mss_memconfig::BANK_3;
+        l_row18 = false;
     }
 
     else if((l_dramWidth == mss_memconfig::X4) &&
@@ -3344,6 +3351,7 @@ fapi2::ReturnCode mss_get_address_range( const fapi2::Target<fapi2::TARGET_TYPE_
         l_row =     mss_memconfig::ROW_15;
         l_col =     mss_memconfig::COL_10;
         l_bank =    mss_memconfig::BANK_4;
+        l_row18 = false;
     }
 
     else if((l_dramWidth == mss_memconfig::X8) &&
@@ -3355,6 +3363,7 @@ fapi2::ReturnCode mss_get_address_range( const fapi2::Target<fapi2::TARGET_TYPE_
         l_row =     mss_memconfig::ROW_16;
         l_col =     mss_memconfig::COL_10;
         l_bank =    mss_memconfig::BANK_3;
+        l_row18 = false;
     }
 
     else if((l_dramWidth == mss_memconfig::X8) &&
@@ -3366,6 +3375,7 @@ fapi2::ReturnCode mss_get_address_range( const fapi2::Target<fapi2::TARGET_TYPE_
         l_row =     mss_memconfig::ROW_15;
         l_col =     mss_memconfig::COL_10;
         l_bank =    mss_memconfig::BANK_4;
+        l_row18 = false;
     }
 
 
@@ -3378,6 +3388,7 @@ fapi2::ReturnCode mss_get_address_range( const fapi2::Target<fapi2::TARGET_TYPE_
         l_row =     mss_memconfig::ROW_16;
         l_col =     mss_memconfig::COL_11;
         l_bank =     mss_memconfig::BANK_3;
+        l_row18 = false;
     }
 
     else if((l_dramWidth == mss_memconfig::X4) &&
@@ -3389,6 +3400,7 @@ fapi2::ReturnCode mss_get_address_range( const fapi2::Target<fapi2::TARGET_TYPE_
         l_row =     mss_memconfig::ROW_16;
         l_col =     mss_memconfig::COL_10;
         l_bank =     mss_memconfig::BANK_4;
+        l_row18 = false;
     }
 
     else if((l_dramWidth == mss_memconfig::X8) &&
@@ -3400,6 +3412,7 @@ fapi2::ReturnCode mss_get_address_range( const fapi2::Target<fapi2::TARGET_TYPE_
         l_row =     mss_memconfig::ROW_16;
         l_col =     mss_memconfig::COL_11;
         l_bank =     mss_memconfig::BANK_3;
+        l_row18 = false;
     }
 
     else if((l_dramWidth == mss_memconfig::X8) &&
@@ -3411,6 +3424,7 @@ fapi2::ReturnCode mss_get_address_range( const fapi2::Target<fapi2::TARGET_TYPE_
         l_row =     mss_memconfig::ROW_16;
         l_col =     mss_memconfig::COL_10;
         l_bank =     mss_memconfig::BANK_4;
+        l_row18 = false;
     }
 
 
@@ -3423,6 +3437,7 @@ fapi2::ReturnCode mss_get_address_range( const fapi2::Target<fapi2::TARGET_TYPE_
         l_row =     mss_memconfig::ROW_16;
         l_col =     mss_memconfig::COL_12;
         l_bank =     mss_memconfig::BANK_3;
+        l_row18 = false;
     }
 
     else if((l_dramWidth == mss_memconfig::X4) &&
@@ -3434,6 +3449,33 @@ fapi2::ReturnCode mss_get_address_range( const fapi2::Target<fapi2::TARGET_TYPE_
         l_row =     mss_memconfig::ROW_17;
         l_col =     mss_memconfig::COL_10;
         l_bank =     mss_memconfig::BANK_4;
+        l_row18 = false;
+    }
+
+    else if((l_dramWidth == mss_memconfig::X4) &&
+            (l_dramSize == mss_memconfig::GBIT_16) &&
+            (l_dram_gen == fapi2::ENUM_ATTR_CEN_EFF_DRAM_GEN_DDR4))
+    {
+        // For memory part Size = 4Gbx4 (16Gb), row/col/bank = 18/10/4
+        FAPI_INF("Forosr memory part Size = 4Gbx4 (16Gb), row/col/bank = 18/10/4, DDR4");
+
+        // Only up to row 17 is contiguous, we set row 18 below
+        l_row =     mss_memconfig::ROW_17;
+        l_col =     mss_memconfig::COL_10;
+        l_bank =     mss_memconfig::BANK_4;
+        l_row18 = true;
+    }
+
+    else if((l_dramWidth == mss_memconfig::X8) &&
+            (l_dramSize == mss_memconfig::GBIT_16) &&
+            (l_dram_gen == fapi2::ENUM_ATTR_CEN_EFF_DRAM_GEN_DDR4))
+    {
+        // For memory part Size = 2Gbx8 (16Gb), row/col/bank = 17/10/4
+        FAPI_INF("Forosr memory part Size = 2Gbx8 (16Gb), row/col/bank = 17/10/4, DDR4");
+        l_row =     mss_memconfig::ROW_17;
+        l_col =     mss_memconfig::COL_10;
+        l_bank =     mss_memconfig::BANK_4;
+        l_row18 = false;
     }
     else
     {
@@ -3534,6 +3576,9 @@ fapi2::ReturnCode mss_get_address_range( const fapi2::Target<fapi2::TARGET_TYPE_
 
             // COL = 28:39, note: c2, c1, c0 always 0
             o_end_addr.insert < 28, 12, 32 - 12 > ((uint32_t)l_col);
+
+            // Updates Row address 17 (bit 40) if we have 18 rows for this configuration
+            o_end_addr.writeBit<CEN_MBA_MBMEAQ_CMD_ROW17>(l_row18);
         }
     }
     //********************************************************************
@@ -3594,12 +3639,12 @@ fapi2::ReturnCode mss_get_address_range( const fapi2::Target<fapi2::TARGET_TYPE_
             o_end_addr.insert < 11, 17, 32 - 17 > ((uint32_t)l_row);
             // COL = 28:36
             o_end_addr.insert < 28, 12, 32 - 12 > ((uint32_t)l_col);
+
+            // Updates Row address 17 (bit 40) if we have 18 rows for this configuration
+            o_end_addr.writeBit<CEN_MBA_MBMEAQ_CMD_ROW17>(l_row18);
         }
 
     }
-
-
-
 
     FAPI_INF("EXIT mss_get_address_range()");
 fapi_try_exit:
