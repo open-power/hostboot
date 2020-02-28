@@ -50,6 +50,15 @@
 #include <string.h>
 #include "generic_hbrt_fsp_message.H"
 
+/* An enum governing the reason for resetting OCC/PM Complex */
+enum OCC_RESET_REASON
+{
+    OCC_RESET_REASON_ERROR             = 0x00,
+    OCC_RESET_REASON_CODE_UPDATE       = 0x01,
+    OCC_RESET_REASON_TMGT_REQUEST      = 0x02,
+    OCC_RESET_REASON_NA                = 0xFF,
+};
+
 /** Memory error types defined for memory_error() interface. */
 enum MemoryError_t
 {
@@ -736,7 +745,7 @@ typedef struct hostInterfaces
     };  // end struct hbrt_fw_msg
 
     // Created a static constexpr to return the base size of hbrt_fw_msg
-    // Can't do #define - sizeof not allowed to be used in #defines
+    // Cannot do #define - sizeof not allowed to be used in #defines
     static constexpr size_t HBRT_FW_MSG_BASE_SIZE =
                                             sizeof(hbrt_fw_msg::io_type);
 
@@ -763,24 +772,60 @@ typedef struct hostInterfaces
                              uint64_t* o_respLen,
                              void *o_resp );
 
-    // Reserve some space for future growth.
-    // do NOT ever change this number, even if you add functions.
-    //
-    // The value of 32 was somewhat arbitrarily chosen.
-    //
-    // If either side modifies the interface.h file we're suppose to be able to
-    // tolerate the other side not supporting the function yet.  The function
-    // pointer can be NULL.  So if we require a new interface from OPAL, like
-    // "read_iic", we need to be able to tolerate that function pointer being
-    // NULL and do something sane (and erroring out is not consider sane).
-    //
-    // The purpose of this is to give us the ability to update Hostboot and
-    // OPAL independently.  It is pretty rare that we both have function ready
-    // at the same time.  The "reserve" is there so that the structures are
-    // allocated with sufficient space and populated with NULL function
-    // pointers.  32 is big enough that we should not likely add that many
-    // functions from either direction in between any two levels of support.
-    void (*reserved[27])(void);
+    /**
+     * @brief Queue up a callback into hostboot runtime.  Once the
+     *   timer elapses, the host will call firmware_notify() with
+     *   the buffer that they are given in this call.
+     *
+     * @param[in] i_waitTimeMS  time to wait before calling in
+     *                            milliseconds,
+     *                          Zero is a special value that will cancel
+     8                            a previous request with the same i_buffer
+     * @param[in] i_len         length of i_buffer (bytes)
+     * @param[in] i_buffer      buffer to pass back to firmware_notify
+     *
+     * @return 0 on success, else RC
+     * @platform FSP, OpenPOWER
+     */
+    int (*host_callback)( uint64_t i_waitTimeMS,
+                          size_t i_len,
+                          void* i_buffer );
+
+    /**
+     * @brief Retrieve the desired physical addresses for the
+     *   pinned Power Management Complex memory locations associated
+     *   with the given processor chip.
+     *
+     * @param[in]   i_chipId         processor being asked about
+     * @param[out]  o_homerAddr      address of HOMER
+     * @param[out]  o_occCommonAddr  address of OCC Common
+     * @return 0 on success, else RC
+     * @platform eBMC
+     */
+    int (*get_pm_complex_addresses)( uint64_t i_chipId,
+                                     void*& o_homerAddr,
+                                     void*& o_occCommonAddr );
+
+
+    /* Reserve some space for future growth.
+       do NOT ever change this number, even if you add functions.
+
+       The value of 32 was somewhat arbitrarily chosen.
+
+       If either side modifies the interface.h file we are suppose to be able to
+       tolerate the other side not supporting the function yet.  The function
+       pointer can be NULL.  So if we require a new interface from OPAL, like
+       "read_iic", we need to be able to tolerate that function pointer being
+       NULL and do something sane (and erroring out is not consider sane).
+
+       The purpose of this is to give us the ability to update Hostboot and
+       OPAL independently.  It is pretty rare that we both have function ready
+       at the same time.  The "reserve" is there so that the structures are
+       allocated with sufficient space and populated with NULL function
+       pointers.  32 is big enough that we should not likely add that many
+       functions from either direction in between any two levels of support.
+    */
+    void (*reserved[25])(void);
 
 } hostInterfaces_t;
 
@@ -1052,6 +1097,16 @@ typedef struct runtimeInterfaces
      */
     int (*prepare_hbrt_update)( void );
 
+    /**
+     * @brief Reset OCC/PM complex with the given reason.
+     *
+     * @param[in] i_reason the reason for resetting OCC/PM complex
+     * @param[in] i_chipId the chip ID for which to reset OCC/PM complex
+     * @return int return code: 0 = Success; non-0: Failure
+     */
+    int (*reset_pm_complex_with_reason)(enum OCC_RESET_REASON i_reason,
+                                        uint64_t i_chipId);
+
     // Reserve some space for future growth.
     // Currently are decrementing this number as we add functions.
     //
@@ -1069,7 +1124,7 @@ typedef struct runtimeInterfaces
     // allocated with sufficient space and populated with NULL function
     // pointers.  32 is big enough that we should not likely add that many
     // functions from either direction in between any two levels of support.
-    void (*reserved[21])(void);
+    void (*reserved[20])(void);
 
     #ifdef PROFILE_CODE
     /**
@@ -1133,6 +1188,13 @@ struct postInitCalls_t
      *      RsvdTraceBufService::init()
      */
     void (*callCommitRsvdTraceBufErrl)();
+
+    /** @brief Loads and starts PM Complex. PHYP is iterrogated
+     *         for the HOMER/OCC Common physical addresses at which PM complex is to be
+     *         loaded. The OCC startup status is checked after OCC is started as part of
+     *         this flow.
+     */
+    void (*callLoadAndStartPMComplex)();
 
 };
 
