@@ -952,9 +952,10 @@ fapi2::ReturnCode buildCoreRestoreImage( void* const i_pImageIn,
     {
         memset( i_pChipHomer->iv_cpmrRegion.iv_selfRestoreRegion.iv_coreScom,
                 0x00, SCOM_RESTORE_SIZE_TOTAL );
-        i_qmeBuildRecord.setSection( "SCOM", SCOM_RESTORE_CPMR_OFFSET, SCOM_RESTORE_SIZE_TOTAL );
         //FIXME Update SCOM restore offset to i_qmeBuildRecord
     }
+
+    i_qmeBuildRecord.setSection( "SCOM", SCOM_RESTORE_CPMR_OFFSET, SCOM_RESTORE_SIZE_TOTAL );
 
 fapi_try_exit:
     FAPI_INF("<< buildCoreRestoreImage")
@@ -976,12 +977,15 @@ fapi_try_exit:
 fapi2::ReturnCode buildQmeSpecificRing( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t *i_pChipHomer, RingBufData & i_ringData,
                                         P10FuncModel & i_procFuncModel, ImageBuildRecord & i_qmeBuildRecord )
 {
+    FAPI_DBG(" >> buildQmeSpecificRing " );
     uint32_t l_maxQmeRingSize   =   0;
     uint32_t l_instRingOffset   =   i_qmeBuildRecord.getCurrentOffset();
     uint32_t l_localPsParam     =   0;
     uint32_t l_instSpecLength   =   l_localPsParam;
     uint32_t l_currentIndex     =   l_instRingOffset - QME_IMAGE_CPMR_OFFSET;
     uint32_t l_workBufSize      =   i_ringData.iv_sizeWorkBuf1;
+
+    FAPI_INF( "Qme Instance Ring Start Index 0x%08x", l_instRingOffset );
 
     //let us make Instance Ring start a multiple of 32B for compatibility with QME BCE
     l_currentIndex      =   l_currentIndex + BCE_RD_BLOCK_SIZE - 1;
@@ -1041,8 +1045,6 @@ fapi2::ReturnCode buildQmeSpecificRing( CONST_FAPI2_PROC& i_procTgt, Homerlayout
         memcpy( &i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion[l_currentIndex],
             i_ringData.iv_pWorkBuf1, l_workBufSize );
 
-        FAPI_INF( "Current Index 0x%08x", l_currentIndex );
-
         l_currentIndex  +=  l_instSpecLength;
 
     }
@@ -1050,6 +1052,7 @@ fapi2::ReturnCode buildQmeSpecificRing( CONST_FAPI2_PROC& i_procTgt, Homerlayout
     i_qmeBuildRecord.setSection( "QME Inst Sectn", l_instRingOffset, l_instSpecLength );
 
 fapi_try_exit:
+    FAPI_DBG(" << buildQmeSpecificRing " );
     return fapi2::current_err;;
 }
 
