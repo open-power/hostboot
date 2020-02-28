@@ -128,7 +128,7 @@ def hb_eecache_setup(file_name, version, verbose):
         # simics object for the image
         image = simics.SIM_get_object(ret)
         # string of bytes from simics interface
-        read_buf = image.iface.image.get(0, 0x10000) # interface takes start and length
+        read_buf = image.iface.image.get(0x30000, 0x10000) # interface takes start and length
 
         # Probably this file will be deleted once we write to BMC
         with open(file_name, 'ab') as f:
