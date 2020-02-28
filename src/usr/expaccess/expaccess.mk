@@ -32,7 +32,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 
 VPATH += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/inband/
-VPATH += ${ROOTPATH}//src/import/generic/memory/lib/utils/
+VPATH += ${ROOTPATH}/src/import/generic/memory/lib/utils/
 
 # Need to build exp_inband to use EKB's getMMIO/putMMIO/getCMD/getRSP
 #OBJS += exp_inband.o

@@ -85,6 +85,7 @@ OBJS += call_omi_attr_update.o
 OBJS += call_proc_omi_scominit.o
 OBJS += call_ocmb_omi_scominit.o
 OBJS += call_omi_pre_trainadv.o
+OBJS += call_omi_setup.o
 #OBJS += call_dmi_io_run_training.o
 #OBJS += call_dmi_post_trainadv.o
 #OBJS += call_proc_cen_framelock.o
@@ -113,12 +114,13 @@ include ${ROOTPATH}/procedure.rules.mk
 
 #VPATH += $(if $(CONFIG_AXONE),${P9A_MSS_HWP_PATH},)
 VPATH += ${EXPLORER_HWP_PATH}
+VPATH += ${EXPLORER_HWP_PATH}/lib/workarounds
 #VPATH += $(if $(CONFIG_AXONE),${EXPLORER_OMI_HWP_PATH},)
 #VPATH += $(if $(CONFIG_AXONE),${P9_MEMORY_HWP_PATH},)
 #VPATH += $(if $(CONFIG_AXONE),${GEM_PROCEDURES_PATH}/hwp/memory,)
 
 #OBJS  += $(if $(CONFIG_AXONE),exp_omi_utils.o,)
-#OBJS  += $(if $(CONFIG_AXONE),exp_omi_setup.o,)
+OBJS  += exp_omi_setup.o
 #OBJS  += $(if $(CONFIG_AXONE),exp_omi_train.o,)
 #OBJS  += $(if $(CONFIG_AXONE),p9a_omi_train.o,)
 #OBJS  += $(if $(CONFIG_AXONE),p9a_omi_train_check.o,)

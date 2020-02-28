@@ -122,6 +122,16 @@ void*  call_ocmb_omi_scominit( void    *io_pArgs );
 void*  call_omi_pre_trainadv( void    *io_pArgs );
 
 /**
+ *  @brief   omi_setup
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return any errlogs to istep
+ *
+ */
+void*  call_omi_setup( void    *io_pArgs );
+
+/**
  *  @brief   dmi_io_run_training
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
@@ -218,12 +228,12 @@ const   TaskInfo    g_istep12[]  =   {
                 ISTEP_12::call_omi_pre_trainadv,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-/*        {
+        {
                 ISTEPNAME(12,06,"omi_setup"),
                 ISTEP_12::call_omi_setup,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-        {
+/*        {
                 ISTEPNAME(12,07,"omi_io_run_training"),
                 ISTEP_12::call_omi_io_run_training,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
