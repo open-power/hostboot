@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -524,7 +524,8 @@ extern "C"
         l_value = i;
         FAPI_TRY(fapi2::getScom(i_target_mba, CEN_MBA_MCBAMR2A0Q, l_data_buffer_64));
 
-        if (l_num_cols >= 12)
+        // Column 13 doubles up as row 17 for DDR4 x4, 16Gb parts
+        if (l_num_cols >= 12 || l_dram_rows >= 18)
         {
             FAPI_TRY(l_data_buffer_64.insertFromRight(l_value, l_sbit, 6));
             FAPI_TRY(fapi2::putScom(i_target_mba, CEN_MBA_MCBAMR2A0Q, l_data_buffer_64));
