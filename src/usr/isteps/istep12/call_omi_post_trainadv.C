@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep12/call_omi_setup.C $                     */
+/* $Source: src/usr/isteps/istep12/call_omi_post_trainadv.C $             */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,13 +23,12 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
- * @file    call_omi_setup.C
+ * @file    call_omi_post_trainadv.C
  *
- *  Contains the wrapper for Istep 12.6
- *      exp_omi_setup
- *      p10_omi_setup
+ *  Support file for Istep 12.9 OMI post train routines
+ *      p10_io_omi_post_trainadv
+ *
  */
-
 #include    <stdint.h>
 
 #include    <trace/interface.H>
@@ -40,68 +39,26 @@
 #include    <errl/errludtarget.H>
 
 #include    <initservice/isteps_trace.H>
-#include    <istepHelperFuncs.H>          // captureError
-
-// Fapi Support
-#include    <config.h>
-#include    <fapi2/plat_hwp_invoker.H>
-
-// HWP
-#include    <exp_omi_setup.H>
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
-using   namespace   ERRORLOG;
-using   namespace   TARGETING;
 using   namespace   ISTEPS_TRACE;
 
 namespace ISTEP_12
 {
-void* call_omi_setup (void *io_pArgs)
+
+void* call_omi_post_trainadv (void *io_pArgs)
 {
     IStepError l_StepError;
-    errlHndl_t l_err = nullptr;
-    TRACFCOMP( g_trac_isteps_trace, "call_omi_setup entry" );
 
-    // 12.6.a exp_omi_setup.C
-    //        - Set any register (via I2C) on the Explorer before OMI is trained
-    TargetHandleList l_ocmbTargetList;
-    getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
-    TRACFCOMP(g_trac_isteps_trace,
-              "call_omi_setup: %d OCMBs found",
-              l_ocmbTargetList.size());
+    TRACFCOMP( g_trac_isteps_trace, "call_omi_post_trainadv entry" );
 
-    for (const auto & l_ocmb_target : l_ocmbTargetList)
-    {
-        //  call the HWP with each target
-        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target
-            (l_ocmb_target);
-
-        TRACFCOMP(g_trac_isteps_trace,
-                "exp_omi_setup HWP target HUID 0x%.08x",
-                get_huid(l_ocmb_target));
-
-        FAPI_INVOKE_HWP(l_err, exp_omi_setup, l_fapi_ocmb_target);
-
-        //  process return code
-        if ( l_err )
-        {
-            TRACFCOMP(g_trac_isteps_trace,
-                 "ERROR : call exp_omi_setup HWP(): failed on target 0x%08X. "
-                 TRACE_ERR_FMT,
-                 get_huid(l_ocmb_target),
-                 TRACE_ERR_ARGS(l_err));
-
-            // Capture error
-            captureError(l_err, l_StepError, HWPF_COMP_ID, l_ocmb_target);
-        }
-    }
-
-    // 12.6.b p10_omi_setup.C
-    //        - File does not currently exist
+    // 12.9.a p10_io_omi_post_trainadv.C
+    //        - Currently doesn't exist
+    //        - Debug routine for IO characterization
     //        - TODO: RTC 248244
 
-    TRACFCOMP(g_trac_isteps_trace, "call_omi_setup exit" );
+    TRACFCOMP( g_trac_isteps_trace, "call_omi_post_trainadv exit" );
 
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();

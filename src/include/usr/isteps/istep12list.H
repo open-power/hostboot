@@ -30,7 +30,7 @@
  * @file    istep12list.H
  *
  *  IStep 12    Step 12 OMI Training
- *  P10 IPL FLow Doc        v0.89.16
+ *  P10 IPL FLow Doc        v0.89.17
  *
  * 12.1  mss_getecid
  *       :  Read out ECID off all Explorers
@@ -132,44 +132,44 @@ void*  call_omi_pre_trainadv( void    *io_pArgs );
 void*  call_omi_setup( void    *io_pArgs );
 
 /**
- *  @brief   dmi_io_run_training
+ *  @brief   omi_io_run_training
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return any errlogs to istep
  *
  */
-void*  call_dmi_io_run_training( void    *io_pArgs );
+void*  call_omi_io_run_training( void    *io_pArgs );
 
 /**
- *  @brief   dmi_post_trainadv
+ *  @brief   omi_post_trainadv
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return any errlogs to istep
  *
  */
-void*  call_dmi_post_trainadv( void    *io_pArgs );
+void*  call_omi_post_trainadv( void    *io_pArgs );
 
 /**
- *  @brief   proc_cen_framelock
+ *  @brief   omi_train_check
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return any errlogs to istep
  *
  */
-void*  call_proc_cen_framelock( void    *io_pArgs );
+void*  call_omi_train_check( void    *io_pArgs );
 
 /**
- *  @brief   host_startprd_dmi
+ *  @brief   host_omi_init
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return any errlogs to istep
  *
  */
-void*  call_host_startprd_dmi( void    *io_pArgs );
+void*  call_host_omi_init( void    *io_pArgs );
 
 /**
  *  @brief   host_attnlisten_memb
@@ -182,14 +182,14 @@ void*  call_host_startprd_dmi( void    *io_pArgs );
 void*  call_host_attnlisten_memb( void    *io_pArgs );
 
 /**
- *  @brief   cen_set_inband_addr
+ *  @brief   update_omi_firmware
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return any errlogs to istep
  *
  */
-void*  call_cen_set_inband_addr( void    *io_pArgs );
+void*  call_update_omi_firmware( void    *io_pArgs );
 
 };
 
@@ -233,22 +233,22 @@ const   TaskInfo    g_istep12[]  =   {
                 ISTEP_12::call_omi_setup,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-/*        {
+        {
                 ISTEPNAME(12,07,"omi_io_run_training"),
                 ISTEP_12::call_omi_io_run_training,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-        {
+/*        {
                 ISTEPNAME(12,08,"omi_train_check"),
                 ISTEP_12::call_omi_train_check,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
+        },*/
         {
                 ISTEPNAME(12,09,"omi_post_trainadv"),
                 ISTEP_12::call_omi_post_trainadv,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-        {
+/*        {
                 ISTEPNAME(12,10,"host_attnlisten_memb"),
                 ISTEP_12::call_host_attnlisten_memb,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
