@@ -330,8 +330,8 @@ fapi2::ReturnCode setup_cmd_args(
         ///
         enum read_interval_fld
         {
-            MS_1000_LOWER = 0x00,
-            MS_1000_UPPER = 0x1E,
+            MS_1000_LOWER = 0xE8,
+            MS_1000_UPPER = 0x03,
         };
 
         o_cmd.command_argument[12] = MS_1000_LOWER;
