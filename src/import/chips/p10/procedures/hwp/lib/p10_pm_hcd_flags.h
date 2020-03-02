@@ -147,7 +147,8 @@ enum PM_QME_FLAG_DEFS
     QME_FLAGS_PMCR_READY                    = 17,
     QME_FLAGS_PGPE_HB_LOSS_SAFE_MODE        = 18,
     QME_FLAGS_RCLK_OPERABLE                 = 19,
-    QME_FLAGS_DDS_OPERABLE                  = 20
+    QME_FLAGS_DDS_OPERABLE                  = 20,
+    QME_FLAGS_RUNNING_SIMICS                = 63
 };
 
 //
