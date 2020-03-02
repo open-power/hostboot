@@ -78,8 +78,6 @@
 #include <arch/ppc.H>
 #include <isteps/pm/occAccess.H>
 
-#include <isteps/pm/occCheckstop.H>
-
 /* FIXME RTC: 210975
 #include    <p10_core_checkstop_handler.H>
 */
@@ -211,7 +209,7 @@ namespace HBPM
         assert( sysTarget != nullptr );
 
         l_config_data->version = OccHostDataVersion;
-        l_config_data->nestFrequency = sysTarget->getAttr<ATTR_FREQ_PAU_MHZ>();
+        l_config_data->occFrequency = sysTarget->getAttr<ATTR_FREQ_PAU_MHZ>();
 
         // Figure out the interrupt type
         if( INITSERVICE::spBaseServicesEnabled() )

@@ -37,7 +37,7 @@ namespace HBPM
         uint32_t version;
 
         //For computation of timebase frequency
-        uint32_t nestFrequency;
+        uint32_t occFrequency;
 
         // For determining the interrupt type to Host
         //  0x00000000 = Use FSI2HOST Mailbox

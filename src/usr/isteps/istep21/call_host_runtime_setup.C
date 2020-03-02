@@ -56,11 +56,6 @@
 
 #include "freqAttrData.H"
 
-#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
-  #include <isteps/pm/occAccess.H>
-  #include <isteps/pm/occCheckstop.H>
-#endif
-
 #ifdef CONFIG_UCD_FLASH_UPDATES
 #include "call_update_ucd_flash.H"
 #endif

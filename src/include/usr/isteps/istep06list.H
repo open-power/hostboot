@@ -54,7 +54,7 @@
  *  06.10   host_revert_sbe_mcs_setup
  *      :   Clean up MCS extent regs (moved to istep14)
  *  06.11   host_start_occ_xstop_handler
- *      :   Start OpenPOWER xstop
+ *      :   No longer used
  *  06.12   host_voltage_config
  *      :   Calculate correct chip voltage
  *
@@ -133,16 +133,7 @@ void* host_gard( void *io_pArgs );
  */
 
 /**
- * @brief   host_start_occ_xstop_handler (istep 6.11)
- *
- *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
- *                              or NULL.
- *  return  any error logs to istep
- */
-void* host_start_occ_xstop_handler (void * io_pArgs);
-
-/**
- * @brief   host_voltage_config (istep 6.12)
+ * @brief   host_voltage_config (istep 6.11)
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -213,19 +204,11 @@ const   TaskInfo    g_istep06[]  =   {
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-        {// @TODO RTC 213026: Remove this fake entry and restore the real 6.11
-         // when we implement the OCC in simics
-                ISTEPNAME(06,11,""),
+        {
+                ISTEPNAME(06,11,""),        // not used.
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-        /*
-        {
-                ISTEPNAME(06,11,"host_start_occ_xstop_handler"),
-                ISTEP_06::host_start_occ_xstop_handler,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
-        },
-        */
         {
                 ISTEPNAME(06,12,"host_voltage_config"),
                 ISTEP_06::call_host_voltage_config,

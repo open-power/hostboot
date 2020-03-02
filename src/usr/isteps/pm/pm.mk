@@ -61,7 +61,6 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/util/
 #common PM Complex functions between ipl and runtime
 OBJS += pm_common.o
 OBJS += occAccess.o
-#OBJS += occCheckstop.o
 OBJS += p10_pm_utils.o
 OBJS += p10_setup_evid.o
 OBJS += p10_avsbus_lib.o

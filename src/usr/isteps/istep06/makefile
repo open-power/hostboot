@@ -30,7 +30,6 @@ OBJS += host_set_ipl_parms.o
 OBJS += host_discover_targets.o
 OBJS += call_host_update_master_tpm.o
 OBJS += host_gard.o
-OBJS += host_start_occ_xstop_handler.o
 OBJS += call_host_voltage_config.o
 
 SUBDIRS	+= thread_activate.d

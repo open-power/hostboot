@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,10 +38,6 @@
 #include <lib/fir/memdiags_fir.H> // for mss::unmask::after_memdiags
 #include <lib/mc/port.H>          // for mss::reset_reorder_queue_settings
 */
-
-#if defined(CONFIG_IPLTIME_CHECKSTOP_ANALYSIS) && !defined(__HOSTBOOT_RUNTIME)
-  #include <isteps/pm/occCheckstop.H>
-#endif
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -98,13 +94,6 @@ void* call_mss_memdiag (void* io_pArgs)
 
     TARGETING::Target* masterproc = nullptr;
     TARGETING::targetService().masterProcChipTargetHandle(masterproc);
-
-#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
-    errl = HBOCC::loadHostDataToSRAM(masterproc,
-                                        PRDF::ALL_PROC_MEM_MASTER_CORE);
-    assert(nullptr == errl,
-           "Error returned from call to HBOCC::loadHostDataToSRAM");
-#endif
 
     do
     {

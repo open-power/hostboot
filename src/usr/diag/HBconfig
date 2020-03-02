@@ -6,11 +6,6 @@ config HBRT_PRD
 config ENABLE_CHECKSTOP_ANALYSIS
     default n
     help
-        Enable collection of FIR data by OCC for checkstops and
+        Enable collection of FIR data for checkstops and
         post-checkstop analysis by PRD on system reboot
 
-config IPLTIME_CHECKSTOP_ANALYSIS
-    default n
-    help
-        Enable collection of FIR data by the OCC for checkstops
-        during the IPL.

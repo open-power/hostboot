@@ -48,7 +48,7 @@ namespace Util
 enum LidId
 {
     TEST_LIDID = 0x00000111,
-    VERSION_LIDID = 0x0000FFFF,  
+    VERSION_LIDID = 0x0000FFFF,
     OCC_LIDID = 0x81e00430,
     OCC_CONTAINER_LIDID = 0x80d0000b,
     MCL_LIDID = 0x80d00020,
@@ -200,28 +200,6 @@ class UtilLidMgr
      *                  return errl !=  nullptr  -> failure
      */
     errlHndl_t releaseLidImage(void);
-
-#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
-    /**
-     *  @brief Get lid managers' pointer to the lid vaddr.
-     *
-     *  @return void* - Returns pointer to virtual address the lid lives in.
-     *                  Null if the lid is not in virtual address space.
-     *                  NOTE: Only supporting PNOR Virt Addr now
-     */
-    inline const void* getLidVirtAddr() const
-    {
-        const void* l_addr = nullptr;
-        // Get pointer to PNOR vaddr
-        if (iv_isLidInPnor)
-        {
-            l_addr = reinterpret_cast<const void*>(iv_lidPnorInfo.vaddr);
-        }
-        // Add support for other virtual address spaces here
-
-        return l_addr;
-    }
-#endif
 
 #ifdef __HOSTBOOT_RUNTIME
     /**
