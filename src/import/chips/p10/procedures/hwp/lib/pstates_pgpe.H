@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,6 +52,10 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+
+#define SAFE_VOLTAGE_SIZE   2
+#define SAFE_VOLTAGE_VDD    0
+#define SAFE_VOLTAGE_VCS    1
 
 enum POUNDW_DDS_FIELDS
 {
@@ -342,8 +346,9 @@ typedef struct
     /// #W Other Settings
     VRMParms_t          ext_vrm_parms;
 
-    uint32_t            safe_voltage_mv;
+    uint32_t            safe_voltage_mv[SAFE_VOLTAGE_SIZE];
     uint32_t            safe_frequency_khz;
+    uint32_t            safe_throttle_idx;
 
     /// DDS Data
     /// DDSParmBlock dds;

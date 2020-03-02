@@ -592,8 +592,8 @@ void gppb_print(GlobalPstateParmBlock_t* i_gppb)
              revle32(i_gppb->safe_frequency_khz));
     FAPI_INF("  %-30s : %04X (%3d) ",
              "Voltage",
-             revle32(i_gppb->safe_voltage_mv),
-             revle32(i_gppb->safe_voltage_mv));
+             revle32(i_gppb->safe_voltage_mv[SAFE_VOLTAGE_VDD]),
+             revle32(i_gppb->safe_voltage_mv[SAFE_VOLTAGE_VDD]));
 
     FAPI_INF("External VRM Parameters:");
     for (auto i=0; i < RUNTIME_RAILS; ++i)
@@ -890,7 +890,8 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         // safe_voltage_mv TBD
 //        io_globalppb->safe_voltage_mv[VDD] = revle32(iv_attrs.attr_pm_safe_voltage_mv[VDD]);
   //      io_globalppb->safe_voltage_mv[VCS] = revle32(iv_attrs.attr_pm_safe_voltage_mv[VCS]);
-        io_globalppb->safe_voltage_mv = revle32(iv_attrs.attr_pm_safe_voltage_mv[VDD]);
+        io_globalppb->safe_voltage_mv[SAFE_VOLTAGE_VDD] = revle32(iv_attrs.attr_pm_safe_voltage_mv[VDD]);
+        io_globalppb->safe_voltage_mv[SAFE_VOLTAGE_VCS] = revle32(iv_attrs.attr_pm_safe_voltage_mv[VCS]);
 
         // safe_frequency_khz
         io_globalppb->safe_frequency_khz =
@@ -899,8 +900,8 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         FAPI_INF("Safe Mode Frequency %d (0x%X) kHz; VDD Voltage %d (0x%X) mV ",
                 revle32(io_globalppb->safe_frequency_khz),
                 revle32(io_globalppb->safe_frequency_khz),
-                revle32(io_globalppb->safe_voltage_mv),
-                revle32(io_globalppb->safe_voltage_mv));
+                revle32(io_globalppb->safe_voltage_mv[SAFE_VOLTAGE_VDD]),
+                revle32(io_globalppb->safe_voltage_mv[SAFE_VOLTAGE_VDD]));
 
 #if 0
 
