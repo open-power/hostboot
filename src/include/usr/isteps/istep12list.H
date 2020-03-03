@@ -238,11 +238,11 @@ const   TaskInfo    g_istep12[]  =   {
                 ISTEP_12::call_omi_io_run_training,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-/*        {
+        {
                 ISTEPNAME(12,08,"omi_train_check"),
                 ISTEP_12::call_omi_train_check,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },*/
+        },
         {
                 ISTEPNAME(12,09,"omi_post_trainadv"),
                 ISTEP_12::call_omi_post_trainadv,
