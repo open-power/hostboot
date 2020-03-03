@@ -814,7 +814,6 @@ int dyn_get_ring( void*          i_ringSection,
 
         // Look for a match
         if ( be16toh(nextRs4->iv_magic) == RS4_MAGIC &&
-             (nextRs4->iv_type & RS4_IV_TYPE_SEL_MASK) == RS4_IV_TYPE_SEL_DYN &&
              be16toh(nextRs4->iv_ringId) == i_ringId &&
              be16toh(nextRs4->iv_selector) == i_selector )
         {

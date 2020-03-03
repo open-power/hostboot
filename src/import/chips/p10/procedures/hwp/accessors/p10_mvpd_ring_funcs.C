@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -784,35 +784,29 @@ extern "C"
                       i_pRing,
                       i_ringLen );
 
-            // Backwards compatibility w/RS4v3 MVPDs by accommodating the new iv_selector
-            // and iv_undefined fields located at the very end of the RS4 V4 header.
-            if ( ((CompressedScanData*)i_pRing)->iv_version == 3 && RS4_VERSION == 4 )
+            memcpy( i_pCallerRingBuf, i_pRing, i_ringLen );
+
+//CMO-20200410: Temp fix to avoid coreq w/Mvpd using RS4 V4
+            FAPI_DBG("MVPD ring's (iv_version,iv_type)=(%u,0x%x)",
+                     ((CompressedScanData*)i_pCallerRingBuf)->iv_version,
+                     ((CompressedScanData*)i_pCallerRingBuf)->iv_type);
+
+            if ( ((CompressedScanData*)i_pRing)->iv_version == RS4_VERSION )
             {
-                uint8_t sizeOfV4Hdr = sizeof(CompressedScanData);
-                uint8_t sizeOfV3Hdr = sizeOfV4Hdr - RS4_V3TOV4_SIZE_INC;
-                // Copy RS4v3 header container into beginning of our buffer
-                memcpy( i_pCallerRingBuf, i_pRing, sizeOfV3Hdr );
-                // Copy RS4v3 RS4 string into its spot after the RS4v4 header
-                memcpy( i_pCallerRingBuf + sizeOfV4Hdr,
-                        i_pRing + sizeOfV3Hdr,
-                        i_ringLen - sizeOfV3Hdr );
-                // Update RS4 header fields
-                // - Version is now V4
-                // - Make all Mvpd rings of type: non-Cmsk,flush and Base selector
-                // - Update the size
-                // - Indicate undefined selector value
-                // - Clear the undefined field
-                ((CompressedScanData*)i_pCallerRingBuf)->iv_version = RS4_VERSION;
-                ((CompressedScanData*)i_pCallerRingBuf)->iv_type  = RS4_IV_TYPE_CMSK_NON_CMSK;
-                ((CompressedScanData*)i_pCallerRingBuf)->iv_type |= RS4_IV_TYPE_OVRD_FLUSH;
-                ((CompressedScanData*)i_pCallerRingBuf)->iv_type |= RS4_IV_TYPE_SEL_BASE;
-                ((CompressedScanData*)i_pCallerRingBuf)->iv_size += htobe16(RS4_V3TOV4_SIZE_INC);
-                ((CompressedScanData*)i_pCallerRingBuf)->iv_selector = UNDEFINED_RS4_SELECTOR;
-                ((CompressedScanData*)i_pCallerRingBuf)->iv_undefined = 0;
+                // Update the iv_type field to ensure it indicates Mvpd origination for a V5 Mvpd
+                // Note that the V5 Mvpd should already be encoding OVRD for *_gptr_ovly rings
+                // and FLUSH for all other rings.
+                ((CompressedScanData*)i_pCallerRingBuf)->iv_type &= ~RS4_IV_TYPE_ORIG_MASK;
+                ((CompressedScanData*)i_pCallerRingBuf)->iv_type |= RS4_IV_TYPE_ORIG_MVPD;
             }
             else
             {
-                memcpy( i_pCallerRingBuf, i_pRing, i_ringLen );
+                // Update the iv_type field to ensure it indicates FLUSH and MVPD origination for a V4 Mvpd
+                ((CompressedScanData*)i_pCallerRingBuf)->iv_type = 0;
+                ((CompressedScanData*)i_pCallerRingBuf)->iv_type |= RS4_IV_TYPE_SCAN_FLUSH;
+                ((CompressedScanData*)i_pCallerRingBuf)->iv_type |= RS4_IV_TYPE_ORIG_MVPD;
+                // And now we're RS4 V5 compliant
+                ((CompressedScanData*)i_pCallerRingBuf)->iv_version = RS4_VERSION;
             }
 
             io_rCallerRingBufLen =   i_ringLen;

@@ -86,7 +86,6 @@ typedef struct
     uint16_t      iv_undefined; // Must be last (temp assumption in Mvpd accessor)
 } CompressedScanData;
 
-#define RS4_V3TOV4_SIZE_INC  4 // Header increase from V3 to V4 (needed by Mvpd accessor)
 #define RS4_MIN_RING_SIZE   20 // Min value of iv_size, e.g. flush size of short ring.
 
 /// Endian-translate a CompressedScanData structure
@@ -277,22 +276,13 @@ int
 rs4_redundant( const CompressedScanData* i_data, MyBool_t& o_redundant );
 
 
-/// Check for CMSK ring in RS4
-///
-/// \param[in] i_rs4 A pointer to the RS4 CompressedScanData [header + data]
-///
-/// \returns   true if CMSK ring, false if non-CMSK ring and UNDEFINED_BOOLEAN if any other type
-MyBool_t
-rs4_is_cmsk( const CompressedScanData* i_rs4, uint8_t& o_ivType );
-
-
 /// Check for Override or Flush ring in RS4
 ///
 /// \param[in] i_rs4 A pointer to the RS4 CompressedScanData [header + data]
 ///
-/// \returns  true if Ovrd ring, false if flush ring and UNDEFINED_BOOLEAN if any other type
+/// \returns  true if Ovrd ring, false if Flush ring and UNDEFINED_BOOLEAN if any other type
 MyBool_t
-rs4_is_ovrd(const CompressedScanData* i_rs4, uint8_t& o_ivType);
+rs4_is_ovrd(const CompressedScanData* i_rs4);
 
 
 /// Embed CMSK ring into an RS4 ring
@@ -364,31 +354,34 @@ int rs4_extract_cmsk( const CompressedScanData* i_rs4,
 ///
 /// This constant is required to be a #define to guarantee consistency between
 /// the header format and compiled code.
-// #define RS4_VERSION 1  // Version from P8
-// #define RS4_VERSION 2  // Added ability to write zeros using a care mask
-// #define RS4_VERSION 3  // Reduced header size to 12 bytes
-#define RS4_VERSION 4  // Updated definition of RS4 header's iv_type field
+/// #define RS4_VERSION 1  // Version from P8
+/// #define RS4_VERSION 2  // Added ability to write zeros using a care mask
+/// #define RS4_VERSION 3  // Reduced header size to 12 bytes
+/// #define RS4_VERSION 4  // iv_type chg: Added SEL
+#define RS4_VERSION 5  // iv_type chg: Remvd CMSK, movd/renmd OVRD->SCAN, expnded/renmd SEL->ORIG
 
 /// @}
 
-/// Scan data types (used for coding bit fields within iv_type in RS4 header)
+
+/// Scan and Origination ring types (used for encoding RS4 header's iv_type)
 ///
-/// Non-CMSK or CMSK
-#define RS4_IV_TYPE_CMSK_MASK       (uint8_t)0b00000011
-#define RS4_IV_TYPE_CMSK_NON_CMSK   (uint8_t)0b00000001
-#define RS4_IV_TYPE_CMSK_CMSK       (uint8_t)0b00000010
-#define RS4_IV_TYPE_CMSK_CTX        (uint8_t)0b00000011
-/// Flush or override marking
-#define RS4_IV_TYPE_OVRD_MASK       (uint8_t)0b00001100
-#define RS4_IV_TYPE_OVRD_FLUSH      (uint8_t)0b00000100
-#define RS4_IV_TYPE_OVRD_OVRD       (uint8_t)0b00001000
-#define RS4_IV_TYPE_OVRD_CTX        (uint8_t)0b00001100
-/// Base, dynamic or PLL type of ring
-#define RS4_IV_TYPE_SEL_MASK        (uint8_t)0b11110000
-#define RS4_IV_TYPE_SEL_BASE        (uint8_t)0b00010000 // Base or Gptr
-#define RS4_IV_TYPE_SEL_DYN         (uint8_t)0b00100000 // Dynamic init
-#define RS4_IV_TYPE_SEL_PLL         (uint8_t)0b01000000 // PLL
-#define RS4_IV_TYPE_SEL_FINAL       (uint8_t)0b10000000 // Final overlaid ring
+/// Scan type: Flush or Override (Governs scan controller setup)
+//CMO-20200410: Temp fix to avoid coreq
+#define RS4_IV_TYPE_SCAN_MASK_V4    (uint8_t)0b00001100
+#define RS4_IV_TYPE_SCAN_FLUSH_V4   (uint8_t)0b00000100
+#define RS4_IV_TYPE_SCAN_OVRD_V4    (uint8_t)0b00001000
+/// Scan type: Flush or Override (Governs scan controller setup)
+#define RS4_IV_TYPE_SCAN_MASK       (uint8_t)0b00000011
+#define RS4_IV_TYPE_SCAN_FLUSH      (uint8_t)0b00000001
+#define RS4_IV_TYPE_SCAN_OVRD       (uint8_t)0b00000010
+#define RS4_IV_TYPE_SCAN_CTX        (uint8_t)0b00000011
+/// Origination of ring: Base, Mvpd, Overlays, Dynamic, Overrides (Used for customized debug)
+#define RS4_IV_TYPE_ORIG_MASK       (uint8_t)0b01111100
+#define RS4_IV_TYPE_ORIG_BASE       (uint8_t)0b00000100 // Base (.{sbe,qme}.rings)
+#define RS4_IV_TYPE_ORIG_MVPD       (uint8_t)0b00001000 // Mvpd (#R/G/S/P)
+#define RS4_IV_TYPE_ORIG_OVLY       (uint8_t)0b00010000 // Overlays (.overlays)
+#define RS4_IV_TYPE_ORIG_DYN        (uint8_t)0b00100000 // Dynamic (.dynamic)
+#define RS4_IV_TYPE_ORIG_OVRD       (uint8_t)0b01000000 // Overrides (.overrides,.fa_ring_ovrd)
 
 #define UNDEFINED_RS4_SELECTOR (Rs4Selector_t)0xffff
 #define MAX_RS4_SELECTOR       (Rs4Selector_t)0xff // Practical upper limit of 255

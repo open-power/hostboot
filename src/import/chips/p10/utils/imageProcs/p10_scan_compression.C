@@ -186,7 +186,7 @@
 // unique names to support concurrent update.  Most routines defined here have
 // some variant of 'rs4' in their names; others should be inherently unique.
 
-#if RS4_VERSION != 4
+#if RS4_VERSION != 5
     #error This code assumes CompressedScanData structure version 4 layout
 #endif
 
@@ -646,29 +646,17 @@ _rs4_compress(CompressedScanData* io_rs4,
 
         io_rs4->iv_magic    = htobe16(RS4_MAGIC);
         io_rs4->iv_version  = RS4_VERSION;
+        //io_rs4->iv_type is set below after sanity checking i_type
         io_rs4->iv_size     = htobe16(bytes);
         io_rs4->iv_ringId   = htobe16(i_ringId);
         io_rs4->iv_scanAddr = htobe32(i_scanAddr);
+        io_rs4->iv_selector = htobe16(i_selector);
         io_rs4->iv_undefined = 0;
 
-        // Check for valid iv_type and iv_selector settings
+        // Check for valid iv_type
 
-        // iv_type check:  CMSK
-        if ( (i_type & RS4_IV_TYPE_CMSK_MASK) == RS4_IV_TYPE_CMSK_NON_CMSK ||
-             (i_type & RS4_IV_TYPE_CMSK_MASK) == RS4_IV_TYPE_CMSK_CMSK )
-        {
-            // Valid CMSK settings.
-        }
-        else
-        {
-            return BUGX(SCAN_COMPRESSION_IV_TYPE_ERROR,
-                        "_rs4_compress: Invalid iv_type(=0x%02x) value for CMSK settings\n",
-                        i_type);
-        }
-
-        // iv_type check:  flush/override
-        if ( (i_type & RS4_IV_TYPE_OVRD_MASK) == RS4_IV_TYPE_OVRD_FLUSH ||
-             (i_type & RS4_IV_TYPE_OVRD_MASK) == RS4_IV_TYPE_OVRD_OVRD )
+        // flush/override - any non-zero will do
+        if ( i_type & RS4_IV_TYPE_SCAN_MASK )
         {
             // Valid flush/override settings.
         }
@@ -679,24 +667,20 @@ _rs4_compress(CompressedScanData* io_rs4,
                         i_type);
         }
 
-        // iv_type check: selector
-        if ( ( i_selector == UNDEFINED_RS4_SELECTOR ) ||
-             ( i_selector != UNDEFINED_RS4_SELECTOR &&
-               ( (i_type & RS4_IV_TYPE_SEL_MASK) == RS4_IV_TYPE_SEL_DYN ||
-                 (i_type & RS4_IV_TYPE_SEL_MASK) == RS4_IV_TYPE_SEL_PLL ) ) )
+        // origination - any non-zero will do
+        if ( i_type & RS4_IV_TYPE_ORIG_MASK )
         {
-            // Valid iv_selector settings.
+            // Valid ring origination settings.
         }
         else
         {
             return BUGX(SCAN_COMPRESSION_IV_TYPE_ERROR,
-                        "_rs4_compress: Invalid iv_type(=0x%02x) and iv_selector(=0x%04x)"
-                        " combination for selector settings\n",
-                        i_type, i_selector);
+                        "_rs4_compress: Invalid iv_type(=0x%02x) value for ring origination"
+                        " settings\n",
+                        i_type);
         }
 
         io_rs4->iv_type     = i_type;
-        io_rs4->iv_selector = htobe16(i_selector);
     }
 
     return rc;
@@ -857,16 +841,10 @@ _rs4_decompress(uint8_t* o_data_str,
         return BUG(SCAN_DECOMPRESSION_MAGIC_ERROR);
     }
 
-    if (i_rs4->iv_version != RS4_VERSION)
-    {
-        return BUG(SCAN_COMPRESSION_VERSION_ERROR);
-    }
-
     memset(o_data_str, 0, i_size);
     memset(o_care_str, 0, i_size);
 
-    return __rs4_decompress(o_data_str, o_care_str, i_size,
-                            o_length, rs4_str);
+    return __rs4_decompress(o_data_str, o_care_str, i_size, o_length, rs4_str);
 }
 
 
@@ -909,6 +887,7 @@ rs4_decompress(uint8_t** o_data_str,
 }
 
 
+// Check if the ring content will result in no latches being changed
 int
 rs4_redundant(const CompressedScanData* i_data, MyBool_t& o_redundant)
 {
@@ -951,177 +930,43 @@ rs4_redundant(const CompressedScanData* i_data, MyBool_t& o_redundant)
     return SCAN_COMPRESSION_OK;
 }
 
-// Check if RS4 container contains an CMSK or non-CMSK ring and also return masked off
-// iv_type field.
+
+// Check if RS4 container contains a ring intended to be scanned onto
+// a scan chain that's been previously scanned (ie, Override scan mode)
+// or a scan chain in flush state (ie, Flush scan mode)
 MyBool_t
-rs4_is_cmsk(const CompressedScanData* i_rs4, uint8_t& o_ivType)
+rs4_is_ovrd(const CompressedScanData* i_rs4)
 {
-    o_ivType = i_rs4->iv_type;
-
-    switch (o_ivType & RS4_IV_TYPE_CMSK_MASK)
+//CMO-20200410: Temp fix to avoid coreq
+    if (i_rs4->iv_version == RS4_VERSION)
     {
-        case RS4_IV_TYPE_CMSK_CMSK:
-            return true;
+        switch (i_rs4->iv_type & RS4_IV_TYPE_SCAN_MASK)
+        {
+            case RS4_IV_TYPE_SCAN_OVRD:
+                return true;
 
-        case RS4_IV_TYPE_CMSK_NON_CMSK:
-            return false;
+            case RS4_IV_TYPE_SCAN_FLUSH:
+                return false;
 
-        default:
-            return UNDEFINED_BOOLEAN;
+            default:
+                return UNDEFINED_BOOLEAN;
+        }
+    }
+    else
+    {
+        //V4 back support
+        switch (i_rs4->iv_type & RS4_IV_TYPE_SCAN_MASK_V4)
+        {
+            case RS4_IV_TYPE_SCAN_OVRD_V4:
+                return true;
+
+            case RS4_IV_TYPE_SCAN_FLUSH_V4:
+                return false;
+
+            default:
+                return UNDEFINED_BOOLEAN;
+        }
     }
 
     return UNDEFINED_BOOLEAN;
-}
-
-// Check if RS4 container contains an Override or Flush ring and also return masked off
-// iv_type field
-MyBool_t
-rs4_is_ovrd(const CompressedScanData* i_rs4, uint8_t& o_ivType)
-{
-    o_ivType = i_rs4->iv_type;
-
-    switch (o_ivType & RS4_IV_TYPE_OVRD_MASK)
-    {
-        case RS4_IV_TYPE_OVRD_OVRD:
-            return true;
-
-        case RS4_IV_TYPE_OVRD_FLUSH:
-            return false;
-
-        default:
-            return UNDEFINED_BOOLEAN;
-    }
-
-    return UNDEFINED_BOOLEAN;
-}
-
-
-// Embed CMSK ring container into RS4 container:
-// |------RS4 Header------|
-// |-----CMSK Header------|
-// |-----CMSK RS4 Data----|
-// |----Stump RS4 Data----|
-int
-rs4_embed_cmsk( CompressedScanData** io_rs4,
-                CompressedScanData*  i_rs4Cmsk )
-{
-    char* embeddedAddr = (char*)(*io_rs4 + 1);
-    size_t embeddedSize = be16toh(i_rs4Cmsk->iv_size);
-    size_t totalSize   = be16toh((*io_rs4)->iv_size) + embeddedSize;
-
-    // Enlarge RS4 container to accomodate cmsk ring
-    *io_rs4 = (CompressedScanData*)realloc(*io_rs4, totalSize);
-
-    if (!*io_rs4)
-    {
-        return BUG(SCAN_COMPRESSION_NO_MEMORY);
-    }
-
-    // Make space for cmsk ring
-    memmove(embeddedAddr + embeddedSize,
-            embeddedAddr,
-            be16toh((*io_rs4)->iv_size) - sizeof(CompressedScanData));
-
-    // Copy cmsk ring into rs4
-    memcpy(embeddedAddr,
-           i_rs4Cmsk,
-           embeddedSize);
-
-    // Update header fields
-    (*io_rs4)->iv_size = htobe16(totalSize);
-    (*io_rs4)->iv_type &= ~RS4_IV_TYPE_CMSK_MASK;
-    (*io_rs4)->iv_type |= RS4_IV_TYPE_CMSK_CMSK;
-
-    return SCAN_COMPRESSION_OK;
-}
-
-
-// Extract Stump & Cmsk ring containers (assumes pre-allocation of ring buffers)
-int
-_rs4_extract_cmsk( const CompressedScanData* i_rs4,
-                   size_t                    i_size,
-                   CompressedScanData*       o_rs4Stump,
-                   CompressedScanData*       o_rs4Cmsk )
-{
-    if (be16toh(i_rs4->iv_magic) != RS4_MAGIC)
-    {
-        return BUG(SCAN_DECOMPRESSION_MAGIC_ERROR);
-    }
-
-    if (i_rs4->iv_version != RS4_VERSION)
-    {
-        return BUG(SCAN_COMPRESSION_VERSION_ERROR);
-    }
-
-    memset((uint8_t*)o_rs4Stump, 0, i_size);
-    memset((uint8_t*)o_rs4Cmsk, 0, i_size);
-
-    const CompressedScanData* embeddedAddr = i_rs4 + 1;
-
-    // Get size of Stump and Cmsk rings
-    size_t embeddedSize = be16toh(embeddedAddr->iv_size);
-    size_t stumpSize    = be16toh(i_rs4->iv_size) - embeddedSize;
-
-    if (stumpSize > i_size || embeddedSize > i_size)
-    {
-        return BUG(SCAN_COMPRESSION_BUFFER_OVERFLOW);
-    }
-
-    // Copy Cmsk ring - (header+data)
-    memcpy(o_rs4Cmsk,
-           embeddedAddr,
-           embeddedSize);
-
-    // Copy Stump ring - header
-    memcpy(o_rs4Stump,
-           i_rs4,
-           sizeof(CompressedScanData));
-
-    // Copy Stump ring - data
-    memcpy(o_rs4Stump + 1,
-           (uint8_t*)embeddedAddr + embeddedSize,
-           stumpSize - sizeof(CompressedScanData));
-
-    // Update header fields - stump
-    o_rs4Stump->iv_size = htobe16(stumpSize);
-    o_rs4Stump->iv_type &= ~RS4_IV_TYPE_CMSK_MASK;
-    o_rs4Stump->iv_type |= RS4_IV_TYPE_CMSK_NON_CMSK;
-
-    return SCAN_COMPRESSION_OK;
-}
-
-
-// Extract Stump & Cmsk ring containers (local allocation of ring buffers)
-int
-rs4_extract_cmsk( const CompressedScanData*   i_rs4,
-                  CompressedScanData**        o_rs4Stump,
-                  CompressedScanData**        o_rs4Cmsk )
-{
-    int rc;
-    uint32_t size = MAX_RING_BUF_SIZE_TOOL;
-
-    // Allocate memory for Stump and Cmsk rings
-    *o_rs4Stump = (CompressedScanData*)(operator new(size));
-    *o_rs4Cmsk  = (CompressedScanData*)(operator new(size));
-
-    if (!*o_rs4Stump || !*o_rs4Cmsk)
-    {
-        operator delete(*o_rs4Stump);
-        operator delete(*o_rs4Cmsk);
-        *o_rs4Stump = NULL;
-        *o_rs4Cmsk = NULL;
-        return BUG(SCAN_COMPRESSION_NO_MEMORY);
-    }
-
-    rc = _rs4_extract_cmsk(i_rs4, size, *o_rs4Stump, *o_rs4Cmsk);
-
-    if (rc != SCAN_COMPRESSION_OK)
-    {
-        operator delete(*o_rs4Stump);
-        operator delete(*o_rs4Cmsk);
-        *o_rs4Stump = NULL;
-        *o_rs4Cmsk = NULL;
-    }
-
-    return rc;
 }

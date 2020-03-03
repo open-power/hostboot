@@ -206,8 +206,6 @@ enum ChipId
 // NONFLUSH:  Ring created with the assumption the scan chain has been previously scanned.
 // EKB_RINGS: Ring content [possibly partly] from initfiles. Destined for .rings ringSection.
 // GPTR_OVLY: Ring content [possibly partly] from initfiles. Destined for .overlays ringSection.
-// CMSK:      CMSK setup ring.
-// STUMPED:   The shortened (stumped) actual ring to utilize CMSK scanning.
 // MVPD_PDG:  #G Gptr/Time MVPD ring.
 // MVPD_PDP:  #P Pll       MVPD ring.
 // MVPD_PDR:  #R Repr      MVPD ring.
@@ -222,8 +220,6 @@ enum RingMarker
     RMRK_EKB_RINGS   = (RingClass_t)0b0000000000000100, // EKB .rings and .dynamic marker bit
     RMRK_GPTR_OVLY   = (RingClass_t)0b0000000000001000, // Gptr overlay ring marker bit
     RMRK_TIME        = (RingClass_t)0b0000000000010000, // Time ring marker bit
-    RMRK_CMSK        = (RingClass_t)0b0000000000100000, // CMSK marker bit (setup ring)
-    RMRK_STUMPED     = (RingClass_t)0b0000000001000000, // CMSK stump marker bit (short actual ring)
     RMRK_MVPD_PDG    = (RingClass_t)0b0000000010000000, // MVPD #G gptr/time ring marker bit
     RMRK_MVPD_PDP    = (RingClass_t)0b0000000100000000, // MVPD #P pll ring marker bit
     RMRK_MVPD_PDR    = (RingClass_t)0b0000001000000000, // MVPD #G repr ring marker bit
@@ -249,9 +245,6 @@ enum RingMarker
 #define RCLS_MVPD_PDR_NEST      (RMRK_MVPD_PDR | RMRK_MVPD_NEST)
 #define RCLS_MVPD_PDR_EQ        (RMRK_MVPD_PDR | RMRK_MVPD_EQ)
 #define RCLS_MVPD_PDR_CORE      (RMRK_MVPD_PDR | RMRK_MVPD_CORE)
-// CMSK rings
-#define RCLS_EKB_STUMPED        (RMRK_EKB_RINGS | RMRK_STUMPED)
-#define RCLS_EKB_CMSK           (RMRK_EKB_RINGS | RMRK_CMSK)
 // MVPD keyword mask
 #define RCLS_MVPD_MASK          (RMRK_MVPD_PDG | RMRK_MVPD_PDP | RMRK_MVPD_PDR)
 
