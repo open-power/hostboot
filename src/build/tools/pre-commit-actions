@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2018
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -32,7 +32,7 @@ my $xmlSortingScript = "applyTargetingStyle";
 
 ##  Make up a list of all staged files ( --cached --name-only )
 ##  Filter for only Added or Modified ( --diff-filter=AM )
-chomp( my @fileList = `git diff --cached --name-only --diff-filter=AM` );
+chomp( my @fileList = `git diff --cached --name-only --diff-filter=AMR` );
 
 
 if ( @fileList )

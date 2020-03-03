@@ -693,37 +693,19 @@ sub createYearString($)
     my ( $filename ) = @_;
 
     # The list of years starts with the years in the current prolog and the
-    # current release year.
-    my @years = ();
-
-    # Get size of array @CopyRightYears
-    my $size = @CopyRightYears;
-    if ( $size < 2 )   ## If less than 2 then date entry has only a year mentioned
-    {
-        @years = @CopyRightYears;
-        # add current year if not already in list
-        if ( ($years[0] ne $ReleaseYear) )
-        {
-            push @years, $ReleaseYear ;
-        }
-    }
-    else
-    {
-        @years = ( @CopyRightYears, $ReleaseYear );
-    }
+    # current release year. Note that duplicates will be stripped later.
+    my @years = ( @CopyRightYears, $ReleaseYear );
 
     ##  Make a call to git to find the earliest commit date of the file
     ##  new files will not have a log, so the "git log" call above will
     ##  return nothing.
     ##  Push any year we find onto the @years array
-    my  $cmd = 'git log -n1 -- $filename | grep "Date" ';
+    my  $cmd = "git log -n1 -- $filename | grep 'Date' ";
     ## print "run $cmd\n";
     my @logstrings = split( " ", `$cmd` );
-    if ( $? )   {   die "ERROR $? : Could not run $cmd $!\n";   }
-
-    if ( scalar(@logstrings) >= 5 )
+    if ( not $? and (5 <= scalar @logstrings) )
     {
-        push @years, $logstrings[5] ;
+        push @years, $logstrings[5];
     }
 
     # Get a unique list of years and sort the list.
