@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,6 +53,8 @@ static const PnorLidsMap PnorToLidsMap =
     { PNOR::WOFDATA, LidAndContainerLid(WOF_LIDID, WOF_CONTAINER_LIDID)},
     { PNOR::HCODE,   LidAndContainerLid(NIMBUS_HCODE_LIDID, HCODE_CONTAINER_LIDID)},
     { PNOR::RINGOVD, LidAndContainerLid(HWREFIMG_RINGOVD_LIDID,INVALID_LIDID)},
+    // Note - This list does not include data that is used on non-OPAL
+    //   systems, e.g. CUMULUS_HCODE, WOF_GEN4
 };
 
 LidAndContainerLid getPnorSecLidIds(const PNOR::SectionId i_sec)

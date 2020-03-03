@@ -8747,7 +8747,6 @@
     </description>
     <simpleType>
       <uint32_t>
-        <!-- @todo-RTC:172776-Get rid of default value that points to ZZ -->
         <default>0x81E00440</default>
       </uint32_t>
     </simpleType>
