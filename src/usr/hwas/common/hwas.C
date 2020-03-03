@@ -639,18 +639,18 @@ errlHndl_t discoverMuxTargetsAndEnable(const Target &i_sysTarget)
 // order.
 void HWASDiscovery::parsePgData(
         const std::array<uint8_t, VPD_CP00_PG_DATA_LENGTH>& i_pgData,
-        partialGoodVector& io_pgDataExpanded)
+        partialGoodVector&                                  o_pgDataExpanded)
 {
     for (size_t i = 0; i < VPD_CP00_PG_DATA_ENTRIES; ++i)
     {
         // We put all 1s in the high byte (this gets shifted over three times as
         // the three data bytes get read) to indicate that none of the bits are
         // "functional" because they don't represent hardware
-        io_pgDataExpanded[i] = 0xFF;
+        o_pgDataExpanded[i] = 0xFF;
 
         for (size_t j = 0; j < VPD_CP00_PG_ENTRY_SIZE; ++j)
         {
-            io_pgDataExpanded[i] = (io_pgDataExpanded[i] << 8)
+            o_pgDataExpanded[i] = (o_pgDataExpanded[i] << 8)
                                  | i_pgData[i * VPD_CP00_PG_ENTRY_SIZE + j];
         }
     }
@@ -2685,39 +2685,23 @@ void presentByAssoc(TargetHandleList& i_targets)
         getRelatives_t getParent = getParentAffinityTargetsByState,
                        getChildren = getChildAffinityTargetsByState;
 
-        // @TODO RTC 249996 These constructors are not necessary for later C++
+        // @TODO RTC 249996 This constructor is not necessary for later C++
         //                  versions. Investigate possible removal.
-        presentRule(TARGETING::TYPE parent,
-                    TARGETING::TYPE child,
-                    DeconfigGard::DeconfiguredByReason parentReason,
-                    DeconfigGard::DeconfiguredByReason childReason)
-            : parentType(parent), childType(child),
-              parentDeconfigReason(parentReason),
-              childDeconfigReason(childReason) {}
-
-        presentRule(TARGETING::TYPE parent,
-                    TARGETING::TYPE child,
-                    DeconfigGard::DeconfiguredByReason parentReason,
-                    DeconfigGard::DeconfiguredByReason childReason,
-                    parentCheck_t check)
-            : parentType(parent), childType(child),
-              parentDeconfigReason(parentReason),
-              childDeconfigReason(childReason),
-              checkParent(check) {}
-
-        presentRule(TARGETING::TYPE parent,
-                    TARGETING::TYPE child,
-                    DeconfigGard::DeconfiguredByReason parentReason,
-                    DeconfigGard::DeconfiguredByReason childReason,
-                    parentCheck_t check,
-                    getRelatives_t relativeParent,
-                    getRelatives_t relativeChildren)
-            : parentType(parent), childType(child),
-              parentDeconfigReason(parentReason),
-              childDeconfigReason(childReason),
-              checkParent(check),
-              getParent(relativeParent),
-              getChildren(relativeChildren){}
+        presentRule(
+              TARGETING::TYPE parent,
+              TARGETING::TYPE child,
+              DeconfigGard::DeconfiguredByReason parentReason,
+              DeconfigGard::DeconfiguredByReason childReason,
+              parentCheck_t check = CHECK_PARENT,
+              getRelatives_t relativeParent = getParentAffinityTargetsByState,
+              getRelatives_t relativeChildren = getChildAffinityTargetsByState)
+                : parentType(parent), childType(child),
+                  parentDeconfigReason(parentReason),
+                  childDeconfigReason(childReason),
+                  checkParent(check),
+                  getParent(relativeParent),
+                  getChildren(relativeChildren)
+                {}
     }
     static const l_rules[] =
     {

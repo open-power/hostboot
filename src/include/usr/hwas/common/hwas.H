@@ -85,14 +85,14 @@ private:
      *  representing VPD data. This function is virtual so that it
      *  can be overridden during test cases.
      *
-     * @param[in]     pgData           Array representing 24-bit partial good
+     * @param[in]     i_pgData           Array representing 24-bit partial good
      *                                 data
      *
-     * @param[in/out] pgDataExpanded   PGV representing 32-bit pg entries
+     * @param[out]    o_pgDataExpanded   PGV representing 32-bit pg entries
      */
     virtual void parsePgData(
             const std::array<uint8_t, VPD_CP00_PG_DATA_LENGTH>& i_pgData,
-            partialGoodVector& io_pgDataExpanded);
+            partialGoodVector& o_pgDataExpanded);
 
 };
 
