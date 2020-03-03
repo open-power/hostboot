@@ -31,6 +31,7 @@
 
 #include <targeting/common/util.H>
 #include <targeting/common/target.H>
+#include <targeting/targplatutil.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
@@ -38,12 +39,14 @@
 #include <console/consoleif.H>
 #include <util/misc.H>
 #include <initservice/initserviceif.H>
+#include <initservice/initsvcreasoncodes.H>
 #include <initservice/istepdispatcherif.H>
 #include <secureboot/secure_reasoncodes.H>
 #include <secureboot/phys_presence_if.H>
 #include <secureboot/key_clear_if.H>
 #include "../common/securetrace.H"
 #include <gpio/gpioif.H>
+#include <pnor/pnorif.H>
 
 using namespace TARGETING;
 using namespace GPIO;
@@ -77,12 +80,10 @@ errlHndl_t detectPhysPresence(void)
     uint8_t led_phys_pres_asserted = 0;
     bool is_window_open = false;
     bool is_phys_pres_asserted = false;
+    bool doesKeyClearRequestPhysPres = false;
 
     // Get the attributes associated with Physical Presence
-    TargetService& tS = targetService();
-    Target* sys = nullptr;
-    (void) tS.getTopLevelTarget( sys );
-    assert(sys, "detectPhysPresence: system target is nullptr");
+    Target* sys = UTIL::assertGetToplevelTarget();
 
     do
     {
@@ -100,15 +101,27 @@ errlHndl_t detectPhysPresence(void)
            attr_open_window, attr_open_window,
            attr_fake_assert, attr_fake_assert);
 
+
+    // Get info associated with Key Clear Requests to see if physical presence
+    // detection is REALLY necessary
+    KEY_CLEAR_REQUEST keyClearRequests = KEY_CLEAR_REQUEST_NONE;
+#ifdef CONFIG_KEY_CLEAR
+    getKeyClearRequest(doesKeyClearRequestPhysPres, keyClearRequests);
+    SB_INF("detectPhysPresence: call to getKeyClearRequest "
+           "returned: doesKeyClearRequestPhysPres=%d, "
+           "keyClearRequests=0x%.4X",
+           doesKeyClearRequestPhysPres,keyClearRequests);
+#endif
+
     // The PCA9551 device that controls the "window open" and
     // "physical presence asserted" logic is connected to the master processor
     err = targetService().queryMasterProcChipTargetHandle(mproc);
     if(err)
     {
         SB_ERR("detectPhysPresence: call to queryMasterProcChipTargetHandle "
-               "failed.  err_plid=0x%X, err_rc=0x%X",
-               ERRL_GETPLID_SAFE(err),
-               ERRL_GETRC_SAFE(err));
+               "failed. "
+               TRACE_ERR_FMT,
+               TRACE_ERR_ARGS(err));
 
         err->collectTrace(SECURE_COMP_NAME);
         break;
@@ -289,9 +302,21 @@ errlHndl_t detectPhysPresence(void)
 
         if (err_close)
         {
+            if (doesKeyClearRequestPhysPres == false)
+            {
+                err_close->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                SB_ERR("detectPhysPresence: Error in closing window. "
+                       "Setting ERR to informational because we don't want a "
+                       "physical presence detection err to halt the IPL if "
+                       "there was no key clear request: "
+                       TRACE_ERR_FMT,
+                       TRACE_ERR_ARGS(err_close));
+                err_close->collectTrace( SECURE_COMP_NAME );
+            }
+
             if (err)
             {
-                // commit new erro with PLID  or original err
+                // commit new error with PLID of original err
                 err_close->plid(err->plid());
                 SB_ERR("detectPhysPresence: Error in closing window. "
                        "Committing err_close eid=0x%X  "
@@ -304,8 +329,8 @@ errlHndl_t detectPhysPresence(void)
             else
             {
                 SB_ERR("detectPhysPresence: Error in closing window. "
-                       "err_close eid=0x%X plid=0x%X",
-                       err_close->eid(), err_close->plid());
+                       TRACE_ERR_FMT,
+                       TRACE_ERR_ARGS(err));
                 err_close->collectTrace( SECURE_COMP_NAME );
                 err = err_close;
                 err_close = nullptr;
@@ -318,6 +343,23 @@ errlHndl_t detectPhysPresence(void)
         // If no error, including in closing the window, then write attribute
         // for Physical Presence Assertion
         sys->setAttr<ATTR_PHYS_PRES_ASSERTED>(is_phys_pres_asserted);
+    }
+
+    // If there is an error, but there was not a key clear request requiring
+    // the assertion of physical presence, make the error informational and
+    // commit it here so as not to halt the IPL
+    if ((err != nullptr) &&
+        (doesKeyClearRequestPhysPres == false))
+    {
+        err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+        SB_ERR("detectPhysPresence: Setting ERR to informational and "
+               "committing here. Don't want a physical presence detection "
+               "err to halt the IPL if there was no key clear request: "
+               TRACE_ERR_FMT,
+               TRACE_ERR_ARGS(err));
+         err->collectTrace( SECURE_COMP_NAME );
+         errlCommit(err, SECURE_COMP_ID);
+         err = nullptr;
     }
 
     SB_EXIT("detectPhysPresence: err rc=0x%X",
@@ -339,6 +381,7 @@ errlHndl_t handlePhysPresenceWindow(void)
     ATTR_GPIO_INFO_PHYS_PRES_type gpioInfo = {};
     uint8_t led_window_open = 0;
     bool is_window_open = false;
+    bool doesKeyClearRequestPhysPres = false;
 
     do
     {
@@ -351,10 +394,7 @@ errlHndl_t handlePhysPresenceWindow(void)
     }
 
     // Get the attributes associated with Physical Presence
-    TargetService& tS = targetService();
-    Target* sys = nullptr;
-    (void) tS.getTopLevelTarget( sys );
-    assert(sys, "handlePhysPresenceWindow: system target is nullptr");
+    Target* sys = UTIL::assertGetToplevelTarget();
 
     // NOTE: Using attributes to request opening the physical presence window
     // and/or fake the assertion of physical presence is only for testing
@@ -370,28 +410,21 @@ errlHndl_t handlePhysPresenceWindow(void)
 
     // Get info associated with Key Clear Requests - another possible reason
     // to open the Physical Presence Window
-    bool doesKeyClearRequestPhysPres = false;
     KEY_CLEAR_REQUEST keyClearRequests = KEY_CLEAR_REQUEST_NONE;
 #ifdef CONFIG_KEY_CLEAR
-    err = getKeyClearRequest(doesKeyClearRequestPhysPres, keyClearRequests);
-    if(err)
-    {
-        SB_ERR("handlePhysPresenceWindow: call to getKeyClearRequest "
-               "failed.  err_plid=0x%X, err_rc=0x%X",
-               ERRL_GETPLID_SAFE(err),
-               ERRL_GETRC_SAFE(err));
-
-        err->collectTrace(SECURE_COMP_NAME);
-        break;
-    }
-    else
-    {
-        SB_INF("handlePhysPresenceWindow: call to getKeyClearRequest "
-               "returned: doesKeyClearRequestPhysPres=%d, "
-               "keyClearRequests=0x%X",
-               doesKeyClearRequestPhysPres,keyClearRequests);
-    }
+    getKeyClearRequest(doesKeyClearRequestPhysPres, keyClearRequests);
+    SB_INF("handlePhysPresenceWindow: call to getKeyClearRequest "
+           "returned: doesKeyClearRequestPhysPres=%d, "
+           "keyClearRequests=0x%X",
+           doesKeyClearRequestPhysPres,keyClearRequests);
 #endif
+
+    // Trace decision-related variables
+    SB_INF("handlePhysPresenceWindow: attr_open_window=0x%.2X, "
+           "doesKeyClearRequestPhysPres=%d, attr_phys_pres_asserted=0x%.2X, "
+           "attr_phys_pres_reipl=0x%.2X",
+           attr_open_window, doesKeyClearRequestPhysPres,
+           attr_phys_pres_asserted, attr_phys_pres_reipl);
 
     // If physical presence is already asserted, then there's no need to open
     // the window
@@ -463,9 +496,9 @@ errlHndl_t handlePhysPresenceWindow(void)
     if(err)
     {
         SB_ERR("handlePhysPresenceWindow: call to queryMasterProcChipTargetHandle "
-               "failed.  err_plid=0x%X, err_rc=0x%X",
-               ERRL_GETPLID_SAFE(err),
-               ERRL_GETRC_SAFE(err));
+               "failed.  "
+               TRACE_ERR_FMT,
+               TRACE_ERR_ARGS(err));
 
         err->collectTrace(SECURE_COMP_NAME);
         break;
@@ -555,12 +588,18 @@ errlHndl_t handlePhysPresenceWindow(void)
 
     // Close request to open the window and sync attributes
     sys->setAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>(0x00);
+    attr_open_window = sys->getAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>();
 
     // Set the attribute telling us that this re-IPL is purposely for
     // opening a physical presence window
     sys->setAttr<ATTR_PHYS_PRES_REIPL>(0x01);
+    attr_phys_pres_reipl = sys->getAttr<ATTR_PHYS_PRES_REIPL>();
 
+    SB_INF("handlePhysPresenceWindow: Closing attr_open_window=0x0 (0x%.2X), "
+           "and setting ATTR_PHYS_PRES_REIPL to 0x01 (0x%.2X)",
+           attr_open_window, attr_phys_pres_reipl);
 
+    // Sync attributes for FSP systems
     if(INITSERVICE::spBaseServicesEnabled())
     {
         // Sync all attributes to FSP before powering off
@@ -571,9 +610,9 @@ errlHndl_t handlePhysPresenceWindow(void)
             // necessarily fatal.  The power off will continue,
             // but this issue will be logged.
             SB_ERR("handlePhysPresenceWindow: Error syncing "
-                   "attributes to FSP, RC=0x%04X, PLID=0x%08X",
-                   ERRL_GETRC_SAFE(err),
-                   ERRL_GETPLID_SAFE(err));
+                   "attributes to FSP. "
+                   TRACE_ERR_FMT,
+                   TRACE_ERR_ARGS(err));
             errlCommit(err,SECURE_COMP_ID );
         }
     }
@@ -589,9 +628,8 @@ errlHndl_t handlePhysPresenceWindow(void)
 #ifdef CONFIG_BMC_IPMI
     // Initiate a graceful power off
     SB_INF("handlePhysPresenceWindow: Opened Physical Presence Detection Window. "
-           "System Will Power Off and Wait For Manual Power On. "
-           "Requesting power off");
-    INITSERVICE::requestPowerOff();
+           "System Will Power Off and Wait For Manual Power On");
+    INITSERVICE::requestSoftPowerOff();
 #else //non-IPMI
     SB_INF("handlePhysPresenceWindow: Opened Physical Presence Detection Window. "
            "Calling INITSERVICE::doShutdown() with "
@@ -602,6 +640,23 @@ errlHndl_t handlePhysPresenceWindow(void)
 
 
     } while (0);
+
+    // If there is an error, but there was not a key clear request requiring
+    // the assertion of physical presence, make the error informational and
+    // commit it here so as not to halt the IPL
+    if ((err != nullptr) &&
+        (doesKeyClearRequestPhysPres == false))
+    {
+        err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+        SB_ERR("handlePhysPresenceWindow: Setting ERR to informational and "
+               "committing here. Don't want a physical presence detection "
+               "err to halt the IPL if there was no key clear request: "
+               TRACE_ERR_FMT,
+               TRACE_ERR_ARGS(err));
+         err->collectTrace( SECURE_COMP_NAME );
+         errlCommit(err, SECURE_COMP_ID);
+         err = nullptr;
+    }
 
     SB_EXIT("handlePhysPresenceWindow: err_rc=0x%X",
             ERRL_GETRC_SAFE(err));

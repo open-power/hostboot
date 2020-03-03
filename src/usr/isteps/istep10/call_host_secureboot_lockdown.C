@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep06/call_host_update_master_tpm.C $        */
+/* $Source: src/usr/isteps/istep10/call_host_secureboot_lockdown.C $      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,72 +22,65 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+/**
+   @file call_host_secureboot_lockdown.C
+ *
+ *  Support file for IStep: host_secureboot_lockdown
+ *    This istep will do these things:
+ *      1) Check for TPM policies are valid
+ *      2) Check for secureboot consistency between procs
+ *      3) Set the SUL security bit so that SBE image cannot be updated
+ *      4) Ensure that the SAB security bit is read only
+ *      5) If a TPM is non functional, set the TDP (TPM Deconfig Protection)
+ *         to prevent attack vector
+ *      6) Check for a reason, such as a Key Clear Request, to re-IPL the
+ *         system so the system owner can assert physical presence
+ *
+ */
 
-#include <stdint.h>
-#include <trace/interface.H>
+// For istep and error logging support
+#include <isteps/hwpisteperror.H>
+#include <isteps/istep_reasoncodes.H>
+#include <initservice/initserviceif.H>
+#include <istepHelperFuncs.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
-#include <isteps/hwpisteperror.H>
-#include <trustedbootif.H>
-#include <initservice/isteps_trace.H>
-#include <secureboot/service.H>
+
+
+// For Secureboot, Trustedboot support
 #include <secureboot/phys_presence_if.H>
-#include <config.h>
 
-namespace ISTEP_06
+namespace ISTEP_10
 {
 
-void* call_host_update_master_tpm( void *io_pArgs )
+void* call_host_secureboot_lockdown (void *io_pArgs)
 {
-    ISTEP_ERROR::IStepError l_stepError;
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                ENTER_MRK"call_host_secureboot_lockdown");
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_update_master_tpm entry" );
+    ISTEP_ERROR::IStepError l_istepError;
 
-    errlHndl_t l_err = nullptr;
-
-    (void)SECUREBOOT::logPlatformSecurityConfiguration();
-
-#ifdef CONFIG_TPMDD
-    // Initialize the master TPM
-    l_err = (errlHndl_t)TRUSTEDBOOT::host_update_master_tpm(io_pArgs);
-    if (l_err)
-    {
-        l_stepError.addErrorDetails(l_err);
-        ERRORLOG::errlCommit( l_err, TRBOOT_COMP_ID );
-    }
-#endif
-
-    l_err = SECUREBOOT::traceSecuritySettings(true);
-    if (l_err)
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "call_host_update_master_tpm: Error back from "
-                   "SECUREBOOT::traceSecuritySettings: rc=0x%X, plid=0x%X",
-                   ERRL_GETRC_SAFE(l_err), ERRL_GETPLID_SAFE(l_err));
-        l_stepError.addErrorDetails(l_err);
-        ERRORLOG::errlCommit( l_err, SECURE_COMP_ID );
-    }
-
-    // Check for Physical Presence
 #ifdef CONFIG_PHYS_PRES_PWR_BUTTON
-    l_err = SECUREBOOT::detectPhysPresence();
+    // Check to see if a Physical Presence Window should be opened,
+    // and if so, open it.  This could result in the system being shutdown
+    // to allow the system administrator to assert physical presence
+    errlHndl_t l_err = nullptr;
+    l_err = SECUREBOOT::handlePhysPresenceWindow();
     if (l_err)
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "call_host_update_master_tpm: Error back from "
-                   "SECUREBOOT::detectPhysPresence: "
+                   "call_host_secureboot_lockdown: Error back from "
+                   "SECUREBOOT::handlePhysPresence: "
                    TRACE_ERR_FMT,
                    TRACE_ERR_ARGS(l_err));
-        l_stepError.addErrorDetails(l_err);
+        l_istepError.addErrorDetails(l_err);
     }
 #endif
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_update_master_tpm exit" );
-    return l_stepError.getErrorHandle();
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                EXIT_MRK"call_host_secureboot_lockdown");
 
-
+    return l_istepError.getErrorHandle();
 }
 
 };

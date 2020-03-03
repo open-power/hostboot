@@ -82,6 +82,16 @@ void*    call_proc_build_smp( void    *io_pArgs );
 void*    call_host_slave_sbe_update( void    *io_pArgs );
 
 /**
+ *  @brief   call_host_secureboot_lockdown
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep
+ *
+ */
+void*    call_host_secureboot_lockdown( void    *io_pArgs );
+
+/**
  *  @brief proc_pau_scominit
  *
  *    Apply scom inits to PAU
@@ -181,12 +191,12 @@ const   TaskInfo    g_istep10[]  =   {
                 ISTEP_10::call_host_slave_sbe_update,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
+*/
         {
                 ISTEPNAME(10,03,"host_secureboot_lockdown"),
                 ISTEP_10::call_host_secureboot_lockdown,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP?, true }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
         },
-*/
         {
                 ISTEPNAME(10,04,"proc_chiplet_scominit"),
                 ISTEP_10::call_proc_chiplet_scominit,

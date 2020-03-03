@@ -30,6 +30,7 @@
 
 #include <targeting/common/util.H>
 #include <targeting/common/target.H>
+#include <targeting/targplatutil.H>
 #include <attributeenums.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
@@ -40,19 +41,138 @@
 #include "../common/securetrace.H"
 #include <secureboot/service.H>    // for getSbeSecurityBackdoor();
 
+#ifdef CONFIG_BMC_IPMI
+#include <ipmi/ipmisensor.H>
+#endif
+
 using namespace TARGETING;
+using namespace ERRORLOG;
 
 namespace SECUREBOOT
 {
 
 #ifdef CONFIG_BMC_IPMI
 
+void getKeyClearRequestSensor(TARGETING::KEY_CLEAR_REQUEST & o_keyClearRequests)
+{
+    errlHndl_t err = nullptr;
+    o_keyClearRequests = KEY_CLEAR_REQUEST_NONE;
+
+    SB_ENTER("getKeyClearRequestSensor");
+
+    // The sensor has a size of one byte that maps to the MSB of the
+    // TARGETING::KEY_CLEAR_REQUEST struct (aka attribute)
+    uint8_t value = 0;
+    SENSOR::KeyClearRequestSensor sensor;
+
+    err = sensor.getKeyClearRequest( value );
+    if ( err )
+    {
+        err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+        SB_ERR("getKeyClearRequestSensor: FAIL Getting Key Clear Request Sensor"
+               ". Setting to ERRL_SEV_INFORMATIONAL and commiting it here: "
+               TRACE_ERR_FMT,
+               TRACE_ERR_ARGS(err));
+        err->collectTrace( SECURE_COMP_NAME );
+        errlCommit(err, SECURE_COMP_ID);
+
+    }
+    else
+    {
+        // Need to shift the value 8 bits to the left to make it the MSBits of
+        // the o_keyClearRequests struct (aka attribute)
+        o_keyClearRequests = static_cast<TARGETING::KEY_CLEAR_REQUEST>(value << 8);
+    }
+
+    SB_EXIT("getKeyClearRequestSensor: err rc=0x%X, "
+            "o_keyClearRequests = 0x%.04X",
+            ERRL_GETRC_SAFE(err),
+            o_keyClearRequests);
+
+    return;
+}
+
 errlHndl_t clearKeyClearSensor(void)
 {
     errlHndl_t err = nullptr;
+    TARGETING::KEY_CLEAR_REQUEST keyClearRequests = KEY_CLEAR_REQUEST_NONE;
 
-    // TODO RTC 210301 - Add Support for this function
     SB_ENTER("clearKeyClearSensor");
+
+    do
+    {
+
+    // First Get Current Key Clear Request Sensor Value
+    getKeyClearRequestSensor(keyClearRequests);
+
+    // Check if it needs to be cleared
+    if (keyClearRequests == KEY_CLEAR_REQUEST_NONE)
+    {
+        SB_INF("clearKeyClearSensor: no need to clear sensor as it is "
+               "already 0x%.4X",
+               keyClearRequests);
+        break;
+    }
+
+    // Need to write zero back to sensor value
+    // NOTE: the sensor value is only a uint8_t whereas
+    // keyClearRequests is a uint16_t
+    uint8_t clear_value = 0;
+    SENSOR::KeyClearRequestSensor sensor;
+
+    err = sensor.setKeyClearRequest( clear_value );
+    if ( err )
+    {
+        SB_ERR("clearKeyClearSensor: "
+               "FAIL Setting Key Clear Request Sensor: "
+               TRACE_ERR_FMT,
+               TRACE_ERR_ARGS(err));
+        break;
+    }
+
+    // Read back to make sure it's cleared
+    getKeyClearRequestSensor(keyClearRequests);
+
+    // Check if it needs to be cleared
+    if (keyClearRequests == KEY_CLEAR_REQUEST_NONE)
+    {
+        SB_INF("clearKeyClearSensor: Key Clear Requests Sensor has been cleared");
+    }
+    else
+    {
+        SB_ERR("clearKeyClearSensor: Failed to clear KeyClearRequestSensor: "
+               "Expected 0x%.4X, Actual 0x%.4X",
+               KEY_CLEAR_REQUEST_NONE, keyClearRequests);
+
+        /*@
+         * @errortype
+         * @reasoncode       RC_CLEARING_KEY_CLEAR_SENSOR_FAILED
+         * @severity         ERRL_SEV_UNRECOVERABLE
+         * @moduleid         MOD_CLEAR_KEY_CLEAR_SENSOR
+         * @userdata1        Expected Key Clear Request Sensor Value
+         * @userdata2        Actual Key Clear Request Sensor Value
+         * @devdesc          Attempt to clear the Key Clear Request Sensor
+         *                   failed as it still requests some keys to be cleared
+         * @custdesc         A problem occurred during the IPL
+         *                   of the system.
+         */
+        err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                            MOD_CLEAR_KEY_CLEAR_SENSOR,
+                            RC_CLEARING_KEY_CLEAR_SENSOR_FAILED,
+                            KEY_CLEAR_REQUEST_NONE,
+                            keyClearRequests,
+                            ErrlEntry::ADD_SW_CALLOUT);
+
+        break;
+
+    }
+
+    } while(0);
+
+    if (err)
+    {
+        err->collectTrace( SECURE_COMP_NAME );
+    }
 
     SB_EXIT("clearKeyClearSensor: err rc=0x%X",
             ERRL_GETRC_SAFE(err));
@@ -60,54 +180,28 @@ errlHndl_t clearKeyClearSensor(void)
     return err;
 }
 
-errlHndl_t getKeyClearRequestSensor(
-                    TARGETING::KEY_CLEAR_REQUEST & o_keyClearRequests)
-{
-    errlHndl_t err = nullptr;
-
-    // TODO RTC 210301 - Add Support for this function
-    SB_ENTER("getKeyClearRequestSensor");
-
-    SB_EXIT("getKeyClearRequestSensor: err rc=0x%X, "
-            "o_keyClearRequests = 0x%.04X",
-            ERRL_GETRC_SAFE(err),
-            o_keyClearRequests);
-
-    return err;
-}
 #endif // (#ifdef CONFIG_BMC_IPMI)
 
 #ifndef CONFIG_BMC_IPMI
-static errlHndl_t getKeyClearRequestAttr(
-                    TARGETING::KEY_CLEAR_REQUEST & o_keyClearRequests)
+void getKeyClearRequestAttr(TARGETING::KEY_CLEAR_REQUEST & o_keyClearRequests)
 {
-    errlHndl_t err = nullptr;
-
     SB_ENTER("getKeyClearRequestAttr");
 
     // Get the attributes associated with Key Clear Requests
-    TargetService& tS = targetService();
-    Target* sys = nullptr;
-    (void) tS.getTopLevelTarget( sys );
-    assert(sys, "getKeyClearRequestAttr: system target is nullptr");
+    Target* sys = UTIL::assertGetToplevelTarget();
 
     o_keyClearRequests = sys->getAttr<ATTR_KEY_CLEAR_REQUEST>();
 
-    SB_EXIT("getKeyClearRequestAttr: err rc=0x%X, "
-            "o_keyClearRequests = 0x%.04X",
-            ERRL_GETRC_SAFE(err),
+    SB_EXIT("getKeyClearRequestAttr: o_keyClearRequests = 0x%.04X",
             o_keyClearRequests);
 
-    return err;
+    return;
 }
 #endif // (#ifndef CONFIG_BMC_IPMI)
 
-errlHndl_t getKeyClearRequest(
-                   bool & o_requestPhysPres,
-                   TARGETING::KEY_CLEAR_REQUEST & o_keyClearRequests)
+void getKeyClearRequest(bool & o_requestPhysPres,
+                        TARGETING::KEY_CLEAR_REQUEST & o_keyClearRequests)
 {
-    errlHndl_t err = nullptr;
-
     SB_ENTER("getKeyClearRequest");
 
     o_requestPhysPres = false;
@@ -127,30 +221,10 @@ errlHndl_t getKeyClearRequest(
     // Get Key Clear Request information
 #ifndef CONFIG_BMC_IPMI
     SB_DBG("getKeyClearRequest: calling getKeyClearRequestAttr");
-    err = getKeyClearRequestAttr(l_keyClearRequests);
-    if(err)
-    {
-        SB_ERR("getKeyClearRequest: call to getKeyClearRequestAttr failed. "
-               "err_plid=0x%X, err_rc=0x%X",
-               ERRL_GETPLID_SAFE(err),
-               ERRL_GETRC_SAFE(err));
-
-        err->collectTrace(SECURE_COMP_NAME);
-        break;
-    }
+    getKeyClearRequestAttr(l_keyClearRequests);
 #else
     SB_DBG("getKeyClearRequest: calling getKeyClearRequestSensor");
-    err = getKeyClearRequestSensor(l_keyClearRequests);
-    if(err)
-    {
-        SB_ERR("getKeyClearRequest: call to getKeyClearRequestSensor failed. "
-               "err_plid=0x%X, err_rc=0x%X",
-               ERRL_GETPLID_SAFE(err),
-               ERRL_GETRC_SAFE(err));
-
-        err->collectTrace(SECURE_COMP_NAME);
-        break;
-    }
+    getKeyClearRequestSensor(l_keyClearRequests);
 #endif
 
     // First check if the KEY_CLEAR_REQUEST_MFG bit is set and we have a
@@ -207,16 +281,18 @@ errlHndl_t getKeyClearRequest(
         }
     }
 
+    // Set (potentially updated) Key Clear Requests attribute
+    Target* sys = UTIL::assertGetToplevelTarget();
+    sys->setAttr<ATTR_KEY_CLEAR_REQUEST>(l_keyClearRequests);
+
     } while (0);
 
-    SB_EXIT("getKeyClearRequest: err rc=0x%X, "
-            "o_requestPhysPres = %s, "
+    SB_EXIT("getKeyClearRequest: o_requestPhysPres = %s, "
             "o_keyClearRequests = 0x%.04X",
-            ERRL_GETRC_SAFE(err),
             o_requestPhysPres ? "TRUE" : "FALSE",
             o_keyClearRequests);
 
-    return err;
+    return;
 }
 
 } // namespace SECUREBOOT

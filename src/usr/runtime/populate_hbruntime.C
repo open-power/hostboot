@@ -1909,10 +1909,18 @@ errlHndl_t populate_hbSecurebootData ( void )
         l_elog = SECUREBOOT::clearKeyClearSensor();
         if(l_elog != nullptr)
         {
-            TRACFCOMP( g_trac_runtime, ERR_MRK "populate_hbSecurebootData: "
-                    "SECUREBOOT::clearKeyClearSensor() falied");
-            break;
-
+            l_elog->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+            TRACFCOMP(g_trac_runtime, ERR_MRK "populate_hbSecurebootData: "
+                      "SECUREBOOT::clearKeyClearSensor() falied. "
+                      "Setting ERR to informational and committing here. "
+                      "Don't want this fail to halt the IPL: "
+                      TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(l_elog));
+            l_elog->collectTrace(SECURE_COMP_NAME);
+            l_elog->collectTrace(RUNTIME_COMP_NAME);
+            errlCommit(l_elog, RUNTIME_COMP_ID);
+            l_elog = nullptr;
+            // no "break;" - just continue
         }
 #endif // CONFIG_BMC_IPMI
 #endif // CONFIG_KEY_CLEAR

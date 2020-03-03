@@ -75,7 +75,7 @@ namespace SECUREBOOT
         // Requests
         MOD_DETECT_PHYS_PRES                = 0x40,
         MOD_HANDLE_PHYS_PRES_WINDOW         = 0x41,
-
+        MOD_CLEAR_KEY_CLEAR_SENSOR          = 0x42,
     };
 
     enum SECUREReasonCode
@@ -141,7 +141,7 @@ namespace SECUREBOOT
         RC_PHYS_PRES_WINDOW_NOT_OPENED      = SECURE_COMP_ID | 0x43,
         RC_PHYS_PRES_ASSERTED               = SECURE_COMP_ID | 0x44,
         RC_PHYS_PRES_REIPL                  = SECURE_COMP_ID | 0x45,
-
+        RC_CLEARING_KEY_CLEAR_SENSOR_FAILED = SECURE_COMP_ID | 0x46,
 
         // Reason codes 0xA0 - 0xEF reserved for trustedboot_reasoncodes.H
     };

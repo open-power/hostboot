@@ -1852,6 +1852,15 @@ void IStepDispatcher::requestPowerOff()
     // Send a power off message to the BMC
     (void)IPMI::initiatePowerOff();
 }
+
+void IStepDispatcher::requestSoftPowerOff()
+{
+    // Always stop dispatching isteps before calling for the power off
+    INITSERVICE::stopIpl();
+
+    // Send a soft power off message to the BMC
+    (void)IPMI::initiateSoftPowerOff();
+}
 #endif
 // ----------------------------------------------------------------------------
 // IStepDispatcher::shutdownDuringIpl()
@@ -2781,6 +2790,11 @@ void requestReboot()
 void requestPowerOff()
 {
     IStepDispatcher::getTheInstance().requestPowerOff();
+}
+
+void requestSoftPowerOff()
+{
+    IStepDispatcher::getTheInstance().requestSoftPowerOff();
 }
 #endif
 

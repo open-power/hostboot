@@ -48,6 +48,7 @@ EXTRAINCDIR += ${PERV_HWP_PATH}
 
 OBJS += call_proc_build_smp.o
 #OBJS += call_host_slave_sbe_update.o
+OBJS += call_host_secureboot_lockdown.o
 OBJS += call_proc_chiplet_scominit.o
 OBJS += call_proc_pau_scominit.o
 OBJS += call_proc_pcie_scominit.o

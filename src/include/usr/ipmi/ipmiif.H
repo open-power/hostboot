@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Maxim Polyakov                                                     */
@@ -57,8 +57,11 @@ namespace IPMI
         // initiate a reboot request
         MSG_STATE_INITIATE_POWER_CYCLE,
 
+        // initiate a soft power off
+        MSG_STATE_INITIATE_SOFT_POWER_OFF,
+
         // Used to check range. Leave as last.
-        MSG_LAST_TYPE = MSG_STATE_INITIATE_POWER_CYCLE,
+        MSG_LAST_TYPE = MSG_STATE_INITIATE_SOFT_POWER_OFF,
     };
 
     /**
@@ -74,16 +77,20 @@ namespace IPMI
     {
         return (   (i_msgType == MSG_STATE_SHUTDOWN)
                 || (i_msgType == MSG_STATE_GRACEFUL_SHUTDOWN)
+                || (i_msgType == MSG_STATE_INITIATE_SOFT_POWER_OFF)
                 || (i_msgType == MSG_STATE_INITIATE_POWER_CYCLE));
     }
 
     // chassis power off request types
+    // See Section 28.3, Table 28 "Chassis Control Command" in IPMI spec v2.0
     enum power_request_type
     {
         CHASSIS_POWER_OFF = 0x00,
-        CHASSIS_POWER_SOFT_RESET = 0x01,
+        CHASSIS_POWER_ON = 0x01,
         CHASSIS_POWER_CYCLE = 0x02,
         CHASSIS_POWER_RESET = 0x03,
+        CHASSIS_POWER_PULSE_DIAGNOSTIC_INTR = 0x04,
+        CHASSIS_POWER_SOFT_OFF_VIA_OVER_TEMP = 0x05, // Use for Soft Power Off
     };
 
     // Used in the factory for creating the proper subclass.
@@ -417,6 +424,11 @@ namespace IPMI
      *  @brief Initiate a power off sequence via the IPMI resource provider
      */
     void initiatePowerOff();
+
+    /**
+     *  @brief Initiate a soft power off sequence via the IPMI resource provider
+     */
+    void initiateSoftPowerOff();
 
     /**
      * Structure to return BMC/IPMI information in

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -462,18 +462,6 @@ void IpmiRP::handlePowerMessage( IPMI::oemSEL* i_event )
 #endif
 
         }
-        // If the event type is a power soft reset, send a chasis reset
-        // update the modifier to send to the BMC
-        else if( i_event->iv_cmd[1] == IPMI::CHASSIS_POWER_SOFT_RESET )
-        {
-            // handle the message as a power reset request
-            IPMI_TRAC("IPMI power reset request received");
-            iv_chassis_power_mod = IPMI::CHASSIS_POWER_RESET;
-#ifdef CONFIG_CONSOLE
-            CONSOLE::displayf(NULL, "IPMI: power cycle requested");
-            CONSOLE::flush();
-#endif
-        }
         else
         {
             //Ignore this message - It is an undefined/unsupported command
@@ -725,16 +713,32 @@ void IpmiRP::execute(void)
 
         // begin a graceful reboot initiated by us
         case IPMI::MSG_STATE_INITIATE_POWER_CYCLE:
+        case IPMI::MSG_STATE_INITIATE_SOFT_POWER_OFF:
             {
                 msg_free(msg);
 
 #ifdef CONFIG_CONSOLE
-                CONSOLE::displayf(NULL, "IPMI: Initiate power cycle");
+                if (msg_type == IPMI::MSG_STATE_INITIATE_POWER_CYCLE)
+                {
+                    CONSOLE::displayf(NULL, "IPMI: Initiate power cycle");
+                }
+                else // == IPMI::MSG_STATE_INITIATE_SOFT_POWER_OFF
+                {
+                    CONSOLE::displayf(NULL, "IPMI: Initiate soft power off");
+                }
                 CONSOLE::flush();
 #endif
                 // setup the power cmd modifier to tell the bmc to
-                // do a power reset
-                iv_chassis_power_mod = IPMI::CHASSIS_POWER_RESET;
+                // do a power reset or soft power off
+                if (msg_type == IPMI::MSG_STATE_INITIATE_POWER_CYCLE)
+                {
+                    iv_chassis_power_mod =  IPMI::CHASSIS_POWER_RESET;
+                }
+                else // == IPMI::MSG_STATE_INITIATE_SOFT_POWER_OFF
+                {
+                    iv_chassis_power_mod =
+                       IPMI::CHASSIS_POWER_SOFT_OFF_VIA_OVER_TEMP;
+                }
 
                 // register for the post memory flush callback
                 INITSERVICE::registerShutdownEvent(IPMI_COMP_ID, iv_msgQ,
@@ -1098,6 +1102,11 @@ namespace IPMI
     void initiatePowerOff()
     {
         (void)initiateShutdownOrReboot(MSG_STATE_GRACEFUL_SHUTDOWN);
+    }
+
+    void initiateSoftPowerOff()
+    {
+        (void)initiateShutdownOrReboot(MSG_STATE_INITIATE_SOFT_POWER_OFF);
     }
 
     ///
