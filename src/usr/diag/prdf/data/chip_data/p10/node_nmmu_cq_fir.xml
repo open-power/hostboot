@@ -2,7 +2,7 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/diag/prdf/data/chip_data/p10/node_cfir_pci_spa_ha.xml $ -->
+<!-- $Source: src/usr/diag/prdf/data/chip_data/p10/node_nmmu_cq_fir.xml $   -->
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
@@ -23,46 +23,32 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<attn_node model_ec="P10_10" name="CFIR_PCI_SPA_HA" reg_type="SCOM">
-    <register name="CFIR_PCI_SPATTN">
-        <instance addr="0x08040002" reg_inst="0"/>
-        <instance addr="0x09040002" reg_inst="1"/>
-    </register>
-    <register name="CFIR_PCI_SPATTN_MASK">
-        <instance addr="0x08040042" reg_inst="0"/>
-        <instance addr="0x09040042" reg_inst="1"/>
-    </register>
-    <register name="CFIR_PCI_HOSTATTN">
-        <instance addr="0x08040004" reg_inst="0"/>
-        <instance addr="0x09040004" reg_inst="1"/>
-    </register>
-    <register name="CFIR_PCI_HOSTATTN_MASK">
-        <instance addr="0x08040044" reg_inst="0"/>
-        <instance addr="0x09040044" reg_inst="1"/>
-    </register>
-    <capture_group node_inst="0:1">
-        <capture_register reg_inst="0:1" reg_name="CFIR_PCI_SPATTN"/>
-        <capture_register reg_inst="0:1" reg_name="CFIR_PCI_SPATTN_MASK"/>
-        <capture_register reg_inst="0:1" reg_name="CFIR_PCI_HOSTATTN"/>
-        <capture_register reg_inst="0:1" reg_name="CFIR_PCI_HOSTATTN_MASK"/>
-    </capture_group>
-    <rule attn_type="SPA" node_inst="0:1">
-        <expr type="and">
-            <expr type="reg" value1="CFIR_PCI_SPATTN"/>
-            <expr type="not">
-                <expr type="reg" value1="CFIR_PCI_SPATTN_MASK"/>
-            </expr>
-            <expr type="int" value1="0x0FFFFFFFFFFFFFFF"/>
-        </expr>
-    </rule>
-    <rule attn_type="HA" node_inst="0:1">
-        <expr type="and">
-            <expr type="reg" value1="CFIR_PCI_HOSTATTN"/>
-            <expr type="not">
-                <expr type="reg" value1="CFIR_PCI_HOSTATTN_MASK"/>
-            </expr>
-            <expr type="int" value1="0x0FFFFFFFFFFFFFFF"/>
-        </expr>
-    </rule>
-    <bit child_node="PCI_LOCAL_FIR" node_inst="0,1" pos="4">Local FIR</bit>
+<attn_node model_ec="P10_10" name="NMMU_CQ_FIR" reg_type="SCOM">
+    <local_fir config="W" name="NMMU_CQ_FIR">
+        <instance addr="0x02010C00" reg_inst="0"/>
+        <instance addr="0x03010C00" reg_inst="1"/>
+        <action attn_type="CS" config="00"/>
+        <action attn_type="RE" config="01"/>
+        <action attn_type="UCS" config="11"/>
+    </local_fir>
+    <bit pos="0">PBI internal parity error</bit>
+    <bit pos="1">PowerBus command hang error</bit>
+    <bit pos="2">PowerBus read address error</bit>
+    <bit pos="3">PowerBus write address error</bit>
+    <bit pos="4">PowerBus miscellaneous error</bit>
+    <bit pos="5">Reserved</bit>
+    <bit pos="6">PowerBus Xlate UE error</bit>
+    <bit pos="7">PowerBus Xlate SUE error</bit>
+    <bit pos="8">PowerBus CE error</bit>
+    <bit pos="9">PowerBus UE error</bit>
+    <bit pos="10">PowerBus SUE error</bit>
+    <bit pos="11">Inbound LCO_ARRAY CE error</bit>
+    <bit pos="12">Inbound LCO_ARRAY UE error</bit>
+    <bit pos="13">Inbound LCO_ARRAY SUE error</bit>
+    <bit pos="14">Inbound array CE error</bit>
+    <bit pos="15">Inbound array UE error</bit>
+    <bit pos="16">internal state error</bit>
+    <bit pos="17">ACK_DEAD cresp received by read command</bit>
+    <bit pos="18">ACK_DEAD cresp received by write command</bit>
+    <bit pos="19">Link check aborted while waiting on data</bit>
 </attn_node>

@@ -38,17 +38,15 @@
     </capture_group>
     <rule attn_type="SPA" node_inst="0:1">
         <expr type="and">
-            <expr type="and">
-                <expr type="reg" value1="CFIR_PAUW_SPATTN"/>
-                <expr type="not">
-                    <expr type="reg" value1="CFIR_PAUW_SPATTN_MASK"/>
-                </expr>
+            <expr type="reg" value1="CFIR_PAUW_SPATTN"/>
+            <expr type="not">
+                <expr type="reg" value1="CFIR_PAUW_SPATTN_MASK"/>
             </expr>
             <expr type="int" value1="0x0FFFFFFFFFFFFFFF"/>
         </expr>
     </rule>
-    <bit child_node="PAU_LFIR" node_inst="2,3" pos="4">Local FIR</bit>
-    <bit child_node="OMI_PHY_FIR" node_inst="2,3" pos="13">Local FIR register for the chip pervasive logic</bit>
-    <bit child_node="OMI_DL_FIR" node_inst="2,3" pos="14">Local FIR register for the chip pervasive logic</bit>
-    <bit child_node="PB_PTL_FIR" node_inst="2,3" pos="16"/>
+    <bit child_node="PAU_LOCAL_FIR" node_inst="2,3" pos="4">Local FIR</bit>
+    <bit child_node="PAU_PHY_FIR" node_inst="2,3" pos="13">Local FIR register for the chip pervasive logic</bit>
+    <bit child_node="PAU_DL_FIR" node_inst="2,3" pos="14">Local FIR register for the chip pervasive logic</bit>
+    <bit child_node="PAU_PTL_FIR" node_inst="2,3" pos="16"/>
 </attn_node>

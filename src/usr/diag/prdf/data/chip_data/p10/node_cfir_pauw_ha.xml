@@ -38,14 +38,12 @@
     </capture_group>
     <rule attn_type="HA" node_inst="0:1">
         <expr type="and">
-            <expr type="and">
-                <expr type="reg" value1="CFIR_PAUW_HOSTATTN"/>
-                <expr type="not">
-                    <expr type="reg" value1="CFIR_PAUW_HOSTATTN_MASK"/>
-                </expr>
+            <expr type="reg" value1="CFIR_PAUW_HOSTATTN"/>
+            <expr type="not">
+                <expr type="reg" value1="CFIR_PAUW_HOSTATTN_MASK"/>
             </expr>
             <expr type="int" value1="0x0FFFFFFFFFFFFFFF"/>
         </expr>
     </rule>
-    <bit child_node="PAU_LFIR" node_inst="2,3" pos="4">Local FIR</bit>
+    <bit child_node="PAU_LOCAL_FIR" node_inst="2,3" pos="4">Local FIR</bit>
 </attn_node>

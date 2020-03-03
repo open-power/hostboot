@@ -48,33 +48,29 @@
     </capture_group>
     <rule attn_type="CS" node_inst="0:1">
         <expr type="and">
-            <expr type="and">
-                <expr type="reg" value1="CFIR_PCI_XSTOP"/>
-                <expr type="not">
-                    <expr type="reg" value1="CFIR_PCI_XSTOP_MASK"/>
-                </expr>
+            <expr type="reg" value1="CFIR_PCI_XSTOP"/>
+            <expr type="not">
+                <expr type="reg" value1="CFIR_PCI_XSTOP_MASK"/>
             </expr>
             <expr type="int" value1="0x0FFFFFFFFFFFFFFF"/>
         </expr>
     </rule>
     <rule attn_type="RE" node_inst="0:1">
         <expr type="and">
-            <expr type="and">
-                <expr type="reg" value1="CFIR_PCI_RECOV"/>
-                <expr type="not">
-                    <expr type="reg" value1="CFIR_PCI_RECOV_MASK"/>
-                </expr>
+            <expr type="reg" value1="CFIR_PCI_RECOV"/>
+            <expr type="not">
+                <expr type="reg" value1="CFIR_PCI_RECOV_MASK"/>
             </expr>
             <expr type="int" value1="0x0FFFFFFFFFFFFFFF"/>
         </expr>
     </rule>
-    <bit child_node="PCI_LFIR" node_inst="0,1" pos="4">Local FIR</bit>
+    <bit child_node="PCI_LOCAL_FIR" node_inst="0,1" pos="4">Local FIR</bit>
     <bit child_node="PCI_ETU_FIR" node_inst="0,3" pos="5">ETU FIR Register</bit>
     <bit child_node="PCI_ETU_FIR" node_inst="1,4" pos="6">ETU FIR Register</bit>
     <bit child_node="PCI_ETU_FIR" node_inst="2,5" pos="7">ETU FIR Register</bit>
-    <bit child_node="PCI_PB_FIR" node_inst="0,3" pos="9">PCI FIR Register</bit>
-    <bit child_node="PCI_PB_FIR" node_inst="1,4" pos="10">PCI FIR Register</bit>
-    <bit child_node="PCI_PB_FIR" node_inst="2,5" pos="11">PCI FIR Register</bit>
-    <bit child_node="IOP_FIR" node_inst="0,2" pos="12">IOP Local Fault Isolation Register.  Register bits are set for any error condition detected by the IOP.  The IOPFIR will freeze upon logging the first error not masked in IOPMASK.</bit>
-    <bit child_node="IOP_FIR" node_inst="1,3" pos="13">IOP Local Fault Isolation Register.  Register bits are set for any error condition detected by the IOP.  The IOPFIR will freeze upon logging the first error not masked in IOPMASK.</bit>
+    <bit child_node="PCI_FIR" node_inst="0,3" pos="9">PCI FIR Register</bit>
+    <bit child_node="PCI_FIR" node_inst="1,4" pos="10">PCI FIR Register</bit>
+    <bit child_node="PCI_FIR" node_inst="2,5" pos="11">PCI FIR Register</bit>
+    <bit child_node="PCI_IOP_FIR" node_inst="0,2" pos="12">IOP Local Fault Isolation Register.  Register bits are set for any error condition detected by the IOP.  The IOPFIR will freeze upon logging the first error not masked in IOPMASK.</bit>
+    <bit child_node="PCI_IOP_FIR" node_inst="1,3" pos="13">IOP Local Fault Isolation Register.  Register bits are set for any error condition detected by the IOP.  The IOPFIR will freeze upon logging the first error not masked in IOPMASK.</bit>
 </attn_node>

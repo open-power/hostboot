@@ -72,42 +72,38 @@
     </capture_group>
     <rule attn_type="CS" node_inst="0:7">
         <expr type="and">
-            <expr type="and">
-                <expr type="reg" value1="CFIR_EQ_XSTOP"/>
-                <expr type="not">
-                    <expr type="reg" value1="CFIR_EQ_XSTOP_MASK"/>
-                </expr>
+            <expr type="reg" value1="CFIR_EQ_XSTOP"/>
+            <expr type="not">
+                <expr type="reg" value1="CFIR_EQ_XSTOP_MASK"/>
             </expr>
             <expr type="int" value1="0x0FFFFFFFFFFFFFFF"/>
         </expr>
     </rule>
     <rule attn_type="RE" node_inst="0:7">
         <expr type="and">
-            <expr type="and">
-                <expr type="reg" value1="CFIR_EQ_RECOV"/>
-                <expr type="not">
-                    <expr type="reg" value1="CFIR_EQ_RECOV_MASK"/>
-                </expr>
+            <expr type="reg" value1="CFIR_EQ_RECOV"/>
+            <expr type="not">
+                <expr type="reg" value1="CFIR_EQ_RECOV_MASK"/>
             </expr>
             <expr type="int" value1="0x0FFFFFFFFFFFFFFF"/>
         </expr>
     </rule>
-    <bit child_node="EQ_LFIR" node_inst="0,1,2,3,4,5,6,7" pos="4">Local FIR</bit>
-    <bit child_node="L2_FIR" node_inst="0,4,8,12,16,20,24,28" pos="9">L2 FIR Register</bit>
-    <bit child_node="L2_FIR" node_inst="1,5,9,13,17,21,25,29" pos="10">L2 FIR Register</bit>
-    <bit child_node="L2_FIR" node_inst="2,6,10,14,18,22,26,30" pos="11">L2 FIR Register</bit>
-    <bit child_node="L2_FIR" node_inst="3,7,11,15,19,23,27,31" pos="12">L2 FIR Register</bit>
-    <bit child_node="L3_FIR" node_inst="0,4,8,12,16,20,24,28" pos="13">L3 FIR Register</bit>
-    <bit child_node="L3_FIR" node_inst="1,5,9,13,17,21,25,29" pos="14">L3 FIR Register</bit>
-    <bit child_node="L3_FIR" node_inst="2,6,10,14,18,22,26,30" pos="15">L3 FIR Register</bit>
-    <bit child_node="L3_FIR" node_inst="3,7,11,15,19,23,27,31" pos="16">L3 FIR Register</bit>
-    <bit child_node="NCU_FIR" node_inst="0,4,8,12,16,20,24,28" pos="17">NCU FIR Register</bit>
-    <bit child_node="NCU_FIR" node_inst="1,5,9,13,17,21,25,29" pos="18">NCU FIR Register</bit>
-    <bit child_node="NCU_FIR" node_inst="2,6,10,14,18,22,26,30" pos="19">NCU FIR Register</bit>
-    <bit child_node="NCU_FIR" node_inst="3,7,11,15,19,23,27,31" pos="20">NCU FIR Register</bit>
-    <bit child_node="QME_FIR" node_inst="0,1,2,3,4,5,6,7" pos="21">QME Local Fault Isolation Register</bit>
-    <bit child_node="CORE_FIR" node_inst="0,4,8,12,16,20,24,28" pos="5">Core Fault Isolation Register</bit>
-    <bit child_node="CORE_FIR" node_inst="1,5,9,13,17,21,25,29" pos="6">Core Fault Isolation Register</bit>
-    <bit child_node="CORE_FIR" node_inst="2,6,10,14,18,22,26,30" pos="7">Core Fault Isolation Register</bit>
-    <bit child_node="CORE_FIR" node_inst="3,7,11,15,19,23,27,31" pos="8">Core Fault Isolation Register</bit>
+    <bit child_node="EQ_LOCAL_FIR" node_inst="0,1,2,3,4,5,6,7" pos="4">Local FIR</bit>
+    <bit child_node="EQ_L2_FIR" node_inst="0,4,8,12,16,20,24,28" pos="9">L2 FIR Register</bit>
+    <bit child_node="EQ_L2_FIR" node_inst="1,5,9,13,17,21,25,29" pos="10">L2 FIR Register</bit>
+    <bit child_node="EQ_L2_FIR" node_inst="2,6,10,14,18,22,26,30" pos="11">L2 FIR Register</bit>
+    <bit child_node="EQ_L2_FIR" node_inst="3,7,11,15,19,23,27,31" pos="12">L2 FIR Register</bit>
+    <bit child_node="EQ_L3_FIR" node_inst="0,4,8,12,16,20,24,28" pos="13">L3 FIR Register</bit>
+    <bit child_node="EQ_L3_FIR" node_inst="1,5,9,13,17,21,25,29" pos="14">L3 FIR Register</bit>
+    <bit child_node="EQ_L3_FIR" node_inst="2,6,10,14,18,22,26,30" pos="15">L3 FIR Register</bit>
+    <bit child_node="EQ_L3_FIR" node_inst="3,7,11,15,19,23,27,31" pos="16">L3 FIR Register</bit>
+    <bit child_node="EQ_NCU_FIR" node_inst="0,4,8,12,16,20,24,28" pos="17">NCU FIR Register</bit>
+    <bit child_node="EQ_NCU_FIR" node_inst="1,5,9,13,17,21,25,29" pos="18">NCU FIR Register</bit>
+    <bit child_node="EQ_NCU_FIR" node_inst="2,6,10,14,18,22,26,30" pos="19">NCU FIR Register</bit>
+    <bit child_node="EQ_NCU_FIR" node_inst="3,7,11,15,19,23,27,31" pos="20">NCU FIR Register</bit>
+    <bit child_node="EQ_QME_FIR" node_inst="0,1,2,3,4,5,6,7" pos="21">QME Local Fault Isolation Register</bit>
+    <bit child_node="EQ_CORE_FIR" node_inst="0,4,8,12,16,20,24,28" pos="5">Core Fault Isolation Register</bit>
+    <bit child_node="EQ_CORE_FIR" node_inst="1,5,9,13,17,21,25,29" pos="6">Core Fault Isolation Register</bit>
+    <bit child_node="EQ_CORE_FIR" node_inst="2,6,10,14,18,22,26,30" pos="7">Core Fault Isolation Register</bit>
+    <bit child_node="EQ_CORE_FIR" node_inst="3,7,11,15,19,23,27,31" pos="8">Core Fault Isolation Register</bit>
 </attn_node>

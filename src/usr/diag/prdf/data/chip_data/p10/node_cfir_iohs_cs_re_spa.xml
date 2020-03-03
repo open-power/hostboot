@@ -2,11 +2,12 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/diag/prdf/data/chip_data/p10/node_cfir_axon_cs_re_spa.xml $ -->
+<!-- $Source: src/usr/diag/prdf/data/chip_data/p10/node_cfir_iohs_cs_re_spa.xml $ -->
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
 <!-- Contributors Listed Below - COPYRIGHT 2020                             -->
+<!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
@@ -93,37 +94,31 @@
     </capture_group>
     <rule attn_type="CS" node_inst="0:7">
         <expr type="and">
-            <expr type="and">
-                <expr type="reg" value1="CFIR_IOHS_XSTOP"/>
-                <expr type="not">
-                    <expr type="reg" value1="CFIR_IOHS_XSTOP_MASK"/>
-                </expr>
+            <expr type="reg" value1="CFIR_IOHS_XSTOP"/>
+            <expr type="not">
+                <expr type="reg" value1="CFIR_IOHS_XSTOP_MASK"/>
             </expr>
             <expr type="int" value1="0x0FFFFFFFFFFFFFFF"/>
         </expr>
     </rule>
     <rule attn_type="RE" node_inst="0:7">
         <expr type="and">
-            <expr type="and">
-                <expr type="reg" value1="CFIR_IOHS_RECOV"/>
-                <expr type="not">
-                    <expr type="reg" value1="CFIR_IOHS_RECOV_MASK"/>
-                </expr>
+            <expr type="reg" value1="CFIR_IOHS_RECOV"/>
+            <expr type="not">
+                <expr type="reg" value1="CFIR_IOHS_RECOV_MASK"/>
             </expr>
             <expr type="int" value1="0x0FFFFFFFFFFFFFFF"/>
         </expr>
     </rule>
     <rule attn_type="SPA" node_inst="0:7">
         <expr type="and">
-            <expr type="and">
-                <expr type="reg" value1="CFIR_IOHS_SPATTN"/>
-                <expr type="not">
-                    <expr type="reg" value1="CFIR_IOHS_SPATTN_MASK"/>
-                </expr>
+            <expr type="reg" value1="CFIR_IOHS_SPATTN"/>
+            <expr type="not">
+                <expr type="reg" value1="CFIR_IOHS_SPATTN_MASK"/>
             </expr>
             <expr type="int" value1="0x0FFFFFFFFFFFFFFF"/>
         </expr>
     </rule>
-    <bit child_node="IOHS_LFIR" node_inst="0,1,2,3,4,5,6,7" pos="4">Local FIR</bit>
-    <bit child_node="OMI_DLP_FIR" node_inst="0,1,2,3,4,5,6,7" pos="5">PowerBus OLL FIR Register</bit>
+    <bit child_node="IOHS_LOCAL_FIR" node_inst="0,1,2,3,4,5,6,7" pos="4">Local FIR</bit>
+    <bit child_node="IOHS_DLP_FIR" node_inst="0,1,2,3,4,5,6,7" pos="5">PowerBus OLL FIR Register</bit>
 </attn_node>

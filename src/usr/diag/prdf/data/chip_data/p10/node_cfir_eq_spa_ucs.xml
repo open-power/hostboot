@@ -72,29 +72,25 @@
     </capture_group>
     <rule attn_type="SPA" node_inst="0:7">
         <expr type="and">
-            <expr type="and">
-                <expr type="reg" value1="CFIR_EQ_SPATTN"/>
-                <expr type="not">
-                    <expr type="reg" value1="CFIR_EQ_SPATTN_MASK"/>
-                </expr>
+            <expr type="reg" value1="CFIR_EQ_SPATTN"/>
+            <expr type="not">
+                <expr type="reg" value1="CFIR_EQ_SPATTN_MASK"/>
             </expr>
             <expr type="int" value1="0x0FFFFFFFFFFFFFFF"/>
         </expr>
     </rule>
     <rule attn_type="UCS" node_inst="0:7">
         <expr type="and">
-            <expr type="and">
-                <expr type="reg" value1="CFIR_EQ_LOCAL_XSTOP"/>
-                <expr type="not">
-                    <expr type="reg" value1="CFIR_EQ_LOCAL_XSTOP_MASK"/>
-                </expr>
+            <expr type="reg" value1="CFIR_EQ_LOCAL_XSTOP"/>
+            <expr type="not">
+                <expr type="reg" value1="CFIR_EQ_LOCAL_XSTOP_MASK"/>
             </expr>
             <expr type="int" value1="0x0FFFFFFFFFFFFFFF"/>
         </expr>
     </rule>
-    <bit child_node="EQ_LFIR" node_inst="0,1,2,3,4,5,6,7" pos="4">Local FIR</bit>
-    <bit child_node="CORE_FIR" node_inst="0,4,8,12,16,20,24,28" pos="5">Core Fault Isolation Register</bit>
-    <bit child_node="CORE_FIR" node_inst="1,5,9,13,17,21,25,29" pos="6">Core Fault Isolation Register</bit>
-    <bit child_node="CORE_FIR" node_inst="2,6,10,14,18,22,26,30" pos="7">Core Fault Isolation Register</bit>
-    <bit child_node="CORE_FIR" node_inst="3,7,11,15,19,23,27,31" pos="8">Core Fault Isolation Register</bit>
+    <bit child_node="EQ_LOCAL_FIR" node_inst="0,1,2,3,4,5,6,7" pos="4">Local FIR</bit>
+    <bit child_node="EQ_CORE_FIR" node_inst="0,4,8,12,16,20,24,28" pos="5">Core Fault Isolation Register</bit>
+    <bit child_node="EQ_CORE_FIR" node_inst="1,5,9,13,17,21,25,29" pos="6">Core Fault Isolation Register</bit>
+    <bit child_node="EQ_CORE_FIR" node_inst="2,6,10,14,18,22,26,30" pos="7">Core Fault Isolation Register</bit>
+    <bit child_node="EQ_CORE_FIR" node_inst="3,7,11,15,19,23,27,31" pos="8">Core Fault Isolation Register</bit>
 </attn_node>

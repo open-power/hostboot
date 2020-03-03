@@ -44,34 +44,30 @@
     </capture_group>
     <rule attn_type="CS" node_inst="0">
         <expr type="and">
-            <expr type="and">
-                <expr type="reg" value1="CFIR_N0_XSTOP"/>
-                <expr type="not">
-                    <expr type="reg" value1="CFIR_N0_XSTOP_MASK"/>
-                </expr>
+            <expr type="reg" value1="CFIR_N0_XSTOP"/>
+            <expr type="not">
+                <expr type="reg" value1="CFIR_N0_XSTOP_MASK"/>
             </expr>
             <expr type="int" value1="0x0FFFFFFFFFFFFFFF"/>
         </expr>
     </rule>
     <rule attn_type="RE" node_inst="0">
         <expr type="and">
-            <expr type="and">
-                <expr type="reg" value1="CFIR_N0_RECOV"/>
-                <expr type="not">
-                    <expr type="reg" value1="CFIR_N0_RECOV_MASK"/>
-                </expr>
+            <expr type="reg" value1="CFIR_N0_RECOV"/>
+            <expr type="not">
+                <expr type="reg" value1="CFIR_N0_RECOV_MASK"/>
             </expr>
             <expr type="int" value1="0x0FFFFFFFFFFFFFFF"/>
         </expr>
     </rule>
-    <bit child_node="N0_LFIR" node_inst="0" pos="4">Local FIR</bit>
-    <bit child_node="MMU_NX_FIR" node_inst="0" pos="5">PBI CQ FIR Register</bit>
-    <bit child_node="MMU_FIR" node_inst="0" pos="6">NMMU FIR1 Register</bit>
-    <bit child_node="INT_FIR" node_inst="0" pos="7">Primary Error Register for INT_CQ.  This contains all of the individual errors detected by INT_CQ, plus summary error indicators from VC and PC (see bits 43:63).</bit>
+    <bit child_node="N0_LOCAL_FIR" node_inst="0" pos="4">Local FIR</bit>
+    <bit child_node="NMMU_CQ_FIR" node_inst="0" pos="5">PBI CQ FIR Register</bit>
+    <bit child_node="NMMU_FIR" node_inst="0" pos="6">NMMU FIR1 Register</bit>
+    <bit child_node="INT_CQ_FIR" node_inst="0" pos="7">Primary Error Register for INT_CQ.  This contains all of the individual errors detected by INT_CQ, plus summary error indicators from VC and PC (see bits 43:63).</bit>
     <bit child_node="VAS_FIR" node_inst="0" pos="8">Local FIR register for the VAS unit logic</bit>
-    <bit child_node="NX_DMA_FIR" node_inst="0" pos="9">DMA and Engine Fault Isolation Register</bit>
-    <bit child_node="NX_FIR" node_inst="0" pos="10">PBI CQ FIR Register</bit>
-    <bit child_node="PCI_NFIR" node_inst="3" pos="13">PCI Nest FIR Register</bit>
-    <bit child_node="PCI_NFIR" node_inst="4" pos="14">PCI Nest FIR Register</bit>
-    <bit child_node="PCI_NFIR" node_inst="5" pos="15">PCI Nest FIR Register</bit>
+    <bit child_node="NX_DMA_ENG_FIR" node_inst="0" pos="9">DMA and Engine Fault Isolation Register</bit>
+    <bit child_node="NX_CQ_FIR" node_inst="0" pos="10">PBI CQ FIR Register</bit>
+    <bit child_node="PCI_NEST_FIR" node_inst="3" pos="13">PCI Nest FIR Register</bit>
+    <bit child_node="PCI_NEST_FIR" node_inst="4" pos="14">PCI Nest FIR Register</bit>
+    <bit child_node="PCI_NEST_FIR" node_inst="5" pos="15">PCI Nest FIR Register</bit>
 </attn_node>

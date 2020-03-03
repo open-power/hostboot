@@ -36,16 +36,14 @@
     </capture_group>
     <rule attn_type="UCS" node_inst="0">
         <expr type="and">
-            <expr type="and">
-                <expr type="reg" value1="CFIR_N1_LOCAL_XSTOP"/>
-                <expr type="not">
-                    <expr type="reg" value1="CFIR_N1_LOCAL_XSTOP_MASK"/>
-                </expr>
+            <expr type="reg" value1="CFIR_N1_LOCAL_XSTOP"/>
+            <expr type="not">
+                <expr type="reg" value1="CFIR_N1_LOCAL_XSTOP_MASK"/>
             </expr>
             <expr type="int" value1="0x0FFFFFFFFFFFFFFF"/>
         </expr>
     </rule>
-    <bit child_node="N1_LFIR" node_inst="0" pos="4">Local FIR</bit>
-    <bit child_node="MMU_NX_FIR" node_inst="1" pos="5">PBI CQ FIR Register</bit>
-    <bit child_node="MMU_FIR" node_inst="1" pos="6">NMMU FIR1 Register</bit>
+    <bit child_node="N1_LOCAL_FIR" node_inst="0" pos="4">Local FIR</bit>
+    <bit child_node="NMMU_CQ_FIR" node_inst="1" pos="5">PBI CQ FIR Register</bit>
+    <bit child_node="NMMU_FIR" node_inst="1" pos="6">NMMU FIR1 Register</bit>
 </attn_node>

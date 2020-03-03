@@ -44,27 +44,23 @@
     </capture_group>
     <rule attn_type="CS" node_inst="0">
         <expr type="and">
-            <expr type="and">
-                <expr type="reg" value1="CFIR_TP_XSTOP"/>
-                <expr type="not">
-                    <expr type="reg" value1="CFIR_TP_XSTOP_MASK"/>
-                </expr>
+            <expr type="reg" value1="CFIR_TP_XSTOP"/>
+            <expr type="not">
+                <expr type="reg" value1="CFIR_TP_XSTOP_MASK"/>
             </expr>
             <expr type="int" value1="0x0FFFFFFFFFFFFFFF"/>
         </expr>
     </rule>
     <rule attn_type="RE" node_inst="0">
         <expr type="and">
-            <expr type="and">
-                <expr type="reg" value1="CFIR_TP_RECOV"/>
-                <expr type="not">
-                    <expr type="reg" value1="CFIR_TP_RECOV_MASK"/>
-                </expr>
+            <expr type="reg" value1="CFIR_TP_RECOV"/>
+            <expr type="not">
+                <expr type="reg" value1="CFIR_TP_RECOV_MASK"/>
             </expr>
             <expr type="int" value1="0x0FFFFFFFFFFFFFFF"/>
         </expr>
     </rule>
-    <bit child_node="TP_LFIR" node_inst="0" pos="4">Local FIR</bit>
+    <bit child_node="TP_LOCAL_FIR" node_inst="0" pos="4">Local FIR</bit>
     <bit child_node="OCC_FIR" node_inst="0" pos="5">OCC Local Fault Isolation Register</bit>
     <bit child_node="PBAO_FIR" node_inst="0" pos="6">PBA Local Fault Isolation Register.  Register bits are set for any error condition detected by the PBA.  The PBAFIR will freeze upon logging the first error not masked in PBAFIRMASK.</bit>
 </attn_node>

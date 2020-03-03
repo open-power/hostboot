@@ -50,14 +50,12 @@
     </capture_group>
     <rule attn_type="HA" node_inst="0:7">
         <expr type="and">
-            <expr type="and">
-                <expr type="reg" value1="CFIR_EQ_HOSTATTN"/>
-                <expr type="not">
-                    <expr type="reg" value1="CFIR_EQ_HOSTATTN_MASK"/>
-                </expr>
+            <expr type="reg" value1="CFIR_EQ_HOSTATTN"/>
+            <expr type="not">
+                <expr type="reg" value1="CFIR_EQ_HOSTATTN_MASK"/>
             </expr>
             <expr type="int" value1="0x0FFFFFFFFFFFFFFF"/>
         </expr>
     </rule>
-    <bit child_node="EQ_LFIR" node_inst="0,1,2,3,4,5,6,7" pos="4">Local FIR</bit>
+    <bit child_node="EQ_LOCAL_FIR" node_inst="0,1,2,3,4,5,6,7" pos="4">Local FIR</bit>
 </attn_node>
