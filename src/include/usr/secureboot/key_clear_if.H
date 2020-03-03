@@ -45,17 +45,22 @@ namespace SECUREBOOT
      * @brief Returns Key Clear Request information and if a Physical Presence
      *        check is requested
      *
-     *  @param[out] o_requestPhysPresence  - If true, then physical presence
-     *                                       assertion is requested; otherwise
-     *                                       false
+     * @param[out] o_requestPhysPresence  - If true, then physical presence
+     *                                      assertion is requested; otherwise
+     *                                      false
      *
-     *  @param[out] o_keyClearRequests - Struct containing the specifics of
-     *                                   the key clear requests
+     * @param[out] o_keyClearRequests - Struct containing the specifics of
+     *                                  the key clear requests
+     *
+     * @note Any error logs generated will be handled internally
+     *
+     * @note The associated ATTR_KEY_CLEAR_REQUEST will also be updated by
+     *       this function
+     *
      * @return errlHndl_t nullptr on success; non-nullptr on error.
      */
-    errlHndl_t getKeyClearRequest(
-                   bool & o_requestPhysPresence,
-                   TARGETING::KEY_CLEAR_REQUEST & o_keyClearRequests);
+    void getKeyClearRequest(bool & o_requestPhysPresence,
+                            TARGETING::KEY_CLEAR_REQUEST & o_keyClearRequests);
 
 #ifdef CONFIG_BMC_IPMI
     /*

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1013,6 +1013,71 @@ namespace SENSOR
 
         return writeSensorData();
     };
+
+    //
+    // KeyClearRequestSensor constructor - uses system target
+    //
+    KeyClearRequestSensor::KeyClearRequestSensor()
+        :SensorBase(TARGETING::SENSOR_NAME_KEY_CLEAR_REQUEST, nullptr)
+    {
+        // message buffer created and initialized in base object.
+
+    }
+
+    //
+    // KeyClearRequestSensor destructor
+    //
+    KeyClearRequestSensor::~KeyClearRequestSensor(){};
+
+    //
+    // setKeyClearRequest - send a new value for the key clear request sensor
+    //                      to the BMC.
+    //
+    errlHndl_t KeyClearRequestSensor::setKeyClearRequest(const uint8_t i_value)
+    {
+        // This is a threshhhold sensor that sets one byte of data in the
+        // iv_sensor_reading field
+        iv_msg->iv_sensor_reading = i_value;
+
+        return writeSensorData();
+    }
+
+    //
+    // getKeyClearRequest - Get the value of the key clear request sensor from the BMC
+    //
+    errlHndl_t KeyClearRequestSensor::getKeyClearRequest( uint8_t &o_value )
+    {
+        // This is a threshhhold sensor that returns one byte of data in
+        // the sensor_status field
+        getSensorReadingData l_data;
+
+        errlHndl_t l_err = readSensorData( l_data );
+
+        if( l_err == nullptr )
+        {
+            o_value = l_data.sensor_status;
+        }
+
+        // It's possible that the sensor_status byte being used as "data" has
+        // bits on that are treated as "status" and causing errors to be
+        // created in readSensorData.
+        // Look for that specific error and delete it, as the "data" should
+        // still be good
+        else if ((l_err->moduleId() == IPMI::MOD_IPMISENSOR) &&
+                 (l_err->reasonCode() == IPMI::RC_SENSOR_READING_NOT_AVAIL))
+        {
+            o_value = l_data.sensor_status;
+
+            TRACFCOMP(g_trac_ipmi, INFO_MRK "getKeyClearRequest() failed in "
+                      "an expected way. Deleting this error and returning good "
+                      "data 0x%.2X: "
+                      TRACE_ERR_FMT,
+                      o_value, TRACE_ERR_ARGS(l_err));
+            delete l_err;
+            l_err = nullptr;
+        }
+        return l_err;
+    }
 
     //
     //  Used to update the sensor status for a specific set of target types

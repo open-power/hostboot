@@ -1309,7 +1309,7 @@
         <default>0x0</default>
       </uint8_t>
     </simpleType>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>
   </attribute>
@@ -1555,6 +1555,10 @@
     <enumerator>
       <name>PCI_BIFURCATED</name>
       <value>0xCD03</value>
+    </enumerator>
+    <enumerator>
+      <name>KEY_CLEAR_REQUEST</name>
+      <value>0xCDD0</value>
     </enumerator>
   </enumerationType>
 

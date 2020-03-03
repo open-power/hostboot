@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1055,6 +1055,66 @@ namespace SENSOR
         private:
             // disable the default constructor
             OCCActiveSensor();
+
+    };
+
+    /**
+     *  @class KeyClearRequestSensor
+     *
+     *  @brief Specialized class for the key clear request sensor
+     *
+     *  @par Detailed Description:
+     *      Provides the functionality needed to set the key clear request
+     *      sensor.  The key clear request sensor is a special sensor
+     *      maintained by the BMC.
+     *
+     *   Usage:
+     *      uint8_t key_clear_request_value = 0x0100;
+     *      KeyClearRequestSensor l_sensor;
+     *      l_sensor.setKeyClearRequestValue( key_clear_request_value );
+     *
+     */
+    class KeyClearRequestSensor : public SensorBase
+    {
+
+        public:
+
+            /**
+             *  @brief Constructor for the KeyClearRequestSensor
+             *
+             *  The key clear request sensor is used to notify various firmware
+             *  levels (like hostboot, OPAL, PHYP, etc) if there is a request
+             *  to clear certain security keys or certificates.
+             *
+             *  The system target holds the IPMI sensor number for this sensor.
+             */
+            KeyClearRequestSensor();
+
+            /**
+             *  @brief Destructor for the KeyClearRequestSensor
+             *
+             */
+            ~KeyClearRequestSensor();
+
+            /**
+             * @brief Set the value for the key clear request sensor on the BMC.
+             *
+             * @param[in] i_value - new key clear sensor value.
+             *
+             * @return Errorlog handle
+             *
+             */
+            errlHndl_t setKeyClearRequest( uint8_t i_value );
+
+            /**
+             * @brief Get the value of the key clear request sensor from the BMC
+             *
+             * @param[o] o_value - new key clear request value.
+             *
+             * @return Errorlog handle
+             *
+             */
+            errlHndl_t getKeyClearRequest( uint8_t & o_value );
 
     };
 

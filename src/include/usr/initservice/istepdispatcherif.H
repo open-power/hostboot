@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -107,6 +107,12 @@ void requestReboot( void );
  *    initiate a system power off via IPMI commands
  */
 void requestPowerOff( void );
+
+/**
+ *  @brief This function is to be used by external code to
+ *    initiate a soft system power off via IPMI commands
+ */
+void requestSoftPowerOff( void );
 #endif
 
 /**

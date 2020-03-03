@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,15 +76,12 @@ void* call_host_update_redundant_tpm (void *io_pArgs)
     l_err = SECUREBOOT::handlePhysPresenceWindow();
     if (l_err)
     {
-        // @TODO RTC 210301 - Handle Error Log Correctly, but for now
-        // just delete it
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "call_host_update_redundant_tpm: Error back from "
-                   "SECUREBOOT::handlePhysPresence: rc=0x%X, plid=0x%X. "
-                   "Deleting error for now",
-                   ERRL_GETRC_SAFE(l_err), ERRL_GETPLID_SAFE(l_err));
-        delete l_err;
-        l_err = nullptr;
+                   "SECUREBOOT::handlePhysPresence: "
+                   TRACE_ERR_FMT,
+                   TRACE_ERR_ARGS(l_err));
+        l_istepError.addErrorDetails(l_err);
     }
 #endif
 

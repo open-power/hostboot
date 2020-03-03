@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1845,6 +1845,15 @@ void IStepDispatcher::requestPowerOff()
     // Send a power off message to the BMC
     (void)IPMI::initiatePowerOff();
 }
+
+void IStepDispatcher::requestSoftPowerOff()
+{
+    // Always stop dispatching isteps before calling for the power off
+    INITSERVICE::stopIpl();
+
+    // Send a soft power off message to the BMC
+    (void)IPMI::initiateSoftPowerOff();
+}
 #endif
 // ----------------------------------------------------------------------------
 // IStepDispatcher::shutdownDuringIpl()
@@ -2763,6 +2772,11 @@ void requestReboot()
 void requestPowerOff()
 {
     IStepDispatcher::getTheInstance().requestPowerOff();
+}
+
+void requestSoftPowerOff()
+{
+    IStepDispatcher::getTheInstance().requestSoftPowerOff();
 }
 #endif
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -227,6 +227,11 @@ public:
      * @brief Trigger a power off via IPMI commands
      */
     void requestPowerOff();
+
+    /**
+     * @brief Trigger a soft power off via IPMI commands
+     */
+    void requestSoftPowerOff();
 #endif
 
     /**
