@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,24 +40,19 @@
 #include <i2c_access.H>
 #include <vector>
 
+// reused TARGTIDFORMAT defined in generic/memory/lib/utils/mss_generic_check.H
 #ifdef __PPE__
     #include <exp_i2c_fields.H>
     #include <endian_utils.H>
+    //Macro
+    #define MSSTARGID i_target.get
 #else
     #include <generic/memory/lib/utils/poll.H>
     #include <lib/i2c/exp_i2c_fields.H>
     #include <generic/memory/lib/utils/pos.H>
     #include <generic/memory/lib/utils/endian_utils.H>
-#endif
-
-
-//Macro
-#ifdef __PPE__
-    #define TARGIDFORMAT "0x%08X"
-    #define TARGID i_target.get()
-#else
-    #define TARGIDFORMAT "%s"
-    #define TARGID mss::c_str(i_target)
+    //Macro
+    #define MSSTARGID mss::c_str(i_target)
 #endif
 
 namespace mss
@@ -104,8 +99,8 @@ inline fapi2::ReturnCode status_code( const fapi2::Target<fapi2::TARGET_TYPE_OCM
                  set_TARGET(i_target).
                  set_STATUS_CODE(l_status).
                  set_CMD_ID(i_cmd_id),
-                 "Status code did not return SUCCESS (%d), received (%d) for " TARGIDFORMAT ,
-                 status_codes::SUCCESS, l_status, TARGID );
+                 "Status code did not return SUCCESS (%d), received (%d) for " TARGTIDFORMAT ,
+                 status_codes::SUCCESS, l_status, MSSTARGID );
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -229,22 +224,22 @@ inline fapi2::ReturnCode fw_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
         FAPI_TRY( fapi2::delay( i_delay, 200) );
     }
 
-    FAPI_DBG(TARGIDFORMAT " stopped on loop %u/%u", TARGID , l_loop, i_loops);
+    FAPI_DBG(TARGTIDFORMAT " stopped on loop %u/%u", MSSTARGID , l_loop, i_loops);
     // Check that Explorer is not still in FW_BUSY state
 
     FAPI_ASSERT( !l_busy,
                  fapi2::MSS_EXP_I2C_FW_STATUS_BUSY().
                  set_TARGET(i_target),
-                 "Polling timeout on FW_STATUS command (still FW_BUSY) for " TARGIDFORMAT,
-                 TARGID );
+                 "Polling timeout on FW_STATUS command (still FW_BUSY) for " TARGTIDFORMAT,
+                 MSSTARGID );
     // Check that Explorer is in RUNTIME_FW boot stage
     FAPI_ASSERT( (l_boot_stage == EXPECTED_BOOT_STAGE),
                  fapi2::MSS_EXP_I2C_WRONG_BOOT_STAGE().
                  set_TARGET(i_target).
                  set_BOOT_STAGE(l_boot_stage).
                  set_EXPECTED_BOOT_STAGE(EXPECTED_BOOT_STAGE),
-                 "Polling timeout on FW_STATUS command (wrong boot stage: 0x%01x, expected 0x%01x) for " TARGIDFORMAT,
-                 l_boot_stage, EXPECTED_BOOT_STAGE, TARGID );
+                 "Polling timeout on FW_STATUS command (wrong boot stage: 0x%01x, expected 0x%01x) for " TARGTIDFORMAT,
+                 l_boot_stage, EXPECTED_BOOT_STAGE, MSSTARGID );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -324,8 +319,8 @@ inline fapi2::ReturnCode check_fw_status_busy(const fapi2::Target<fapi2::TARGET_
                  set_TARGET(i_target).
                  set_STATUS_CODE(l_status).
                  set_CMD_ID(FW_STATUS),
-                 "Status code did not return BUSY (%d) as expected post BOOT_CONFIG1, received (%d) for " TARGIDFORMAT ,
-                 status_codes::FW_BUSY, l_status, TARGID );
+                 "Status code did not return BUSY (%d) as expected post BOOT_CONFIG1, received (%d) for " TARGTIDFORMAT ,
+                 status_codes::FW_BUSY, l_status, MSSTARGID );
 
     return fapi2::FAPI2_RC_SUCCESS;
 

@@ -38,10 +38,20 @@
 
 #include <fapi2.H>
 
-#ifndef __PPE__
+#ifdef __PPE__
+    //Macro -- PPE doesn't want to include generic_consts.H
+    // so we'll define it here directly
+    #define TARGTIDFORMAT "0x%08X"
+    #define TARGTID i_target.get()
+
+#else
     #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
     #include <generic/memory/lib/utils/scom.H>
     #include <generic/memory/lib/utils/c_str.H>
+    //Macro -- PPE doesn't want to include generic_consts.H
+    // so we'll define it here directly
+    #define TARGTIDFORMAT "%s"
+    #define TARGTID spd::c_str(i_target)
 #endif
 
 namespace mss
@@ -220,31 +230,18 @@ inline fapi2::ReturnCode invalid_value(const fapi2::Target<T>& i_target,
                                        const FFDC i_ffdc_codes,
                                        const char* i_err_str = "")
 {
-#ifdef __PPE__
     FAPI_ASSERT(i_conditional,
                 fapi2::MSS_FAILED_DATA_INTEGRITY_CHECK().
                 set_VALUE(i_data).
                 set_BYTE(i_byte_index).
                 set_TARGET(i_target).
                 set_FFDC_CODE(i_ffdc_codes),
-                "%s Byte %d, Data returned: %d.",
+                "%s Byte %d, Data returned: %d for " TARGTIDFORMAT,
                 i_err_str,
                 i_byte_index,
-                i_data);
-#else
-    FAPI_ASSERT(i_conditional,
-                fapi2::MSS_FAILED_DATA_INTEGRITY_CHECK().
-                set_VALUE(i_data).
-                set_BYTE(i_byte_index).
-                set_TARGET(i_target).
-                set_FFDC_CODE(i_ffdc_codes),
-                "%s %s Byte %d, Data returned: %d.",
-                spd::c_str(i_target),
-                i_err_str,
-                i_byte_index,
-                i_data);
+                i_data,
+                TARGTID);
 
-#endif
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:

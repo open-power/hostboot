@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,14 +44,7 @@
     #include <generic/memory/lib/utils/mss_generic_check.H>
 #endif
 
-//Macro
-#ifdef __PPE__
-    #define TARGIDFORMAT "0x%08X"
-    #define TARGTID i_target.get()
-#else
-    #define TARGIDFORMAT "%s"
-    #define TARGTID spd::c_str(i_target)
-#endif
+// reused TARGTID & TARGTIDFORMAT macro defined in generic/memory/lib/utils/mss_generic_check.H
 
 namespace mss
 {
@@ -203,7 +196,7 @@ inline fapi2::ReturnCode get_field(const fapi2::Target<T>& i_target,
                  .set_LIST_SIZE(i_data.size())
                  .set_FUNCTION(i_ffdc_codes)
                  .set_TARGET(i_target),
-                 "Out of bounds indexing (with %d) on a list of size %d for " TARGIDFORMAT,
+                 "Out of bounds indexing (with %d) on a list of size %d for " TARGTIDFORMAT,
                  BYTE,
                  i_data.size(),
                  TARGTID);
@@ -213,7 +206,7 @@ inline fapi2::ReturnCode get_field(const fapi2::Target<T>& i_target,
         const fapi2::buffer<OT> l_buffer(i_data[BYTE]);
         l_buffer.template extractToRight<F.get_start(), F.get_length()>(o_value);
 
-        FAPI_DBG(TARGIDFORMAT " data[%d] = 0x%02x. Field with start bit %d, bit len %d, has data 0x%02x.",
+        FAPI_DBG(TARGTIDFORMAT " data[%d] = 0x%02x. Field with start bit %d, bit len %d, has data 0x%02x.",
                  TARGTID,
                  BYTE,
                  i_data[BYTE],
@@ -318,7 +311,7 @@ inline fapi2::ReturnCode get_field( const fapi2::Target<T>& i_target,
 {
     IT l_temp = 0;
     FAPI_TRY( (get_field<E, F>(i_target, i_data, i_ffdc_codes, l_temp)),
-              "Failed get_field() for " TARGIDFORMAT, TARGTID );
+              "Failed get_field() for " TARGTIDFORMAT, TARGTID );
 
     // Test if retrieved data seems valid
     FAPI_TRY( check::invalid_value(i_target,
@@ -340,7 +333,7 @@ inline fapi2::ReturnCode get_field( const fapi2::Target<T>& i_target,
                  .set_CONVERTED_VAL(o_value)
                  .set_TARGET(i_target)
                  .set_FUNCTION(i_ffdc_codes),
-                 "Conversion error between original %d to converted %d value for " TARGIDFORMAT,
+                 "Conversion error between original %d to converted %d value for " TARGTIDFORMAT,
                  l_temp, o_value, TARGTID);
 
     FAPI_DBG("%s: 0x%02x for %s",
