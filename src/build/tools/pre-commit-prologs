@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2016
+# Contributors Listed Below - COPYRIGHT 2011,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -30,7 +30,7 @@ my $script = "addCopyright";
 
 ##  Make up a list of all staged files ( --cached --name-only )
 ##  Filter for only Added or Modified ( --diff-filter=AM )
-chomp( my @fileList = `git diff --cached --name-only --diff-filter=AM` );
+chomp( my @fileList = `git diff --cached --name-only --diff-filter=AMR` );
 
 if ( @fileList )
 {
