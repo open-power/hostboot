@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -695,7 +695,7 @@ void test_fapi2getChildTargetsForCDG()
             break;
         }
 
-        l_expectedDimms = 4;
+        l_expectedDimms = 8;
 
         Target<fapi2::TARGET_TYPE_PROC_CHIP> fapi2_procTarget(l_proc);
         // Now get all dimms under this processor

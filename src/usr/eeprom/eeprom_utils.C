@@ -86,6 +86,21 @@ bool eepromPresence ( TARGETING::Target * i_target )
             break;
         }
 
+        // Master proc is taken as always present. Validate other targets.
+        TARGETING::targetService().masterProcChipTargetHandle(l_masterProcTarget );
+        if (l_eepromMasterTarget != l_masterProcTarget)
+        {
+            // Use the FSI slave presence detection to see if master can be found
+            if( ! FSI::isSlavePresent(l_eepromMasterTarget) )
+            {
+                TRACDCOMP( g_trac_eeprom,
+                           "eepromPresence> FSI::isSlavePresent returned false for eeprom Master Target %.08X",
+                           TARGETING::get_huid(l_eepromMasterTarget) );
+                l_present = false;
+                break;
+            }
+        }
+
         if (eepInfo.accessMethod == EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_I2C)
         {
             // If the target has dynamic device address attribute, then use that instead of the
@@ -119,20 +134,6 @@ bool eepromPresence ( TARGETING::Target * i_target )
             */
             // For now just default to true if the eeprom masterTarget is present
             l_present = true;
-
-            // Master proc is taken as always present. Validate other targets.
-            TARGETING::targetService().masterProcChipTargetHandle(l_masterProcTarget );
-            if (l_eepromMasterTarget != l_masterProcTarget)
-            {
-                // Use the FSI slave presence detection to see if master can be found
-                if( ! FSI::isSlavePresent(l_eepromMasterTarget) )
-                {
-                    TRACDCOMP( g_trac_eeprom,
-                        "eepromPresence> FSI::isSlavePresent returned false for eeprom Master Target %.08X",
-                        TARGETING::get_huid(l_eepromMasterTarget) );
-                    l_present = false;
-                }
-            }
         }
         if( !l_present )
         {
@@ -997,10 +998,10 @@ void getEEPROMs( std::list<EepromInfo_t>& o_info )
     TRACFCOMP(g_trac_eeprom,">>getEEPROMs()");
 
     // We only want to have a single entry in our list per
-    // physical EEPROM.  Since multiple targets could be
-    // using the same EEPROM, we need to have a hierarchy
-    // of importance.
-    // node/planar > proc > membuf > dimm
+    //  physical EEPROM.  Since multiple targets could be
+    //  using the same EEPROM, we need to have a hierarchy
+    //  of importance.
+    //    node/planar > proc > membuf > dimm
 
     // predicate to only look for this that are actually there
     TARGETING::PredicateHwas isPresent;
@@ -1108,7 +1109,7 @@ void cacheEepromAncillaryRoles()
     errlHndl_t errl = nullptr;
     std::list<EepromInfo_t> l_eepromTargets;
 
-    TRACUCOMP(g_trac_eeprom,">> cacheEepromAncillaryRoles()");
+    TRACFCOMP(g_trac_eeprom,">> cacheEepromAncillaryRoles()");
 
     // Grab list of all present targets that potentially have eeproms
 

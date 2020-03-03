@@ -205,7 +205,13 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
 
 #endif // CONFIG_DJVPD_READ_FROM_HW && def(CONFIG_SUPPORT_EEPROM_HWACCESS)
 
-#if( defined(CONFIG_SUPPORT_EEPROM_CACHING) && !defined(CONFIG_SUPPORT_EEPROM_HWACCESS) )
+
+        // Check if the SPD is there if we are talking to real hardware
+#ifdef CONFIG_SUPPORT_EEPROM_HWACCESS
+        present = spdPresent( i_target );
+
+        // Otherwise just check the eeprom cache
+#elif defined(CONFIG_SUPPORT_EEPROM_CACHING)
         err = EEPROM::eecachePresenceDetect(i_target, present);
         if(err)
         {
@@ -321,7 +327,7 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
 
     } while( 0 );
 
-    TRACSSCOMP( g_trac_spd, EXIT_MRK"dimmPresenceDetect()" );
+    TRACSSCOMP( g_trac_spd, EXIT_MRK"dimmPresenceDetect() = %d", present );
 
     return err;
 } // end dimmPresenceDetect

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -544,23 +544,6 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
     AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
     ? fapi2::ReturnCode() : \
     fapi2::platAttrSvc::platErrorOnSet(TARGET, VAL)
-
-//----------------------------------------------------------------------------
-// MACRO to route ATTR_MC_PLL_BUCKET access to the correct HB function
-//----------------------------------------------------------------------------
-
-#undef ATTR_MC_PLL_BUCKET_GETMACRO
-#define ATTR_MC_PLL_BUCKET_GETMACRO(ID, TARGET, VAL) \
-    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
-    ? fapi2::ReturnCode() : \
-    fapi2::platAttrSvc::\
-    platGetMcPllBucket(TARGET, VAL)
-#undef ATTR_MC_PLL_BUCKET_SETMACRO
-#define ATTR_MC_PLL_BUCKET_SETMACRO(ID, TARGET, VAL) \
-    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
-    ? fapi2::ReturnCode() : \
-    fapi2::platAttrSvc::platErrorOnSet(TARGET, VAL)
-
 */
 
 #endif // ATTRIBUTESERVICE_H_

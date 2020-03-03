@@ -3814,6 +3814,9 @@ public:
     void testDeconfigureAssocProc1()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc1: Started");
+
+        HWAS_INF("testDeconfigureAssocProc1: Skipping");
+#if 0 //@TODO-RTC:246169
         HWAS_INF("testDeconfigureAssocProc1: Started");
 
         // This test populates structs which contain information
@@ -3914,6 +3917,7 @@ public:
         {
             TS_FAIL("testDeconfigureAssocProc1: incorrect configuration returned");
         }
+#endif //@TODO-RTC:246169
     }
 
 
@@ -3923,6 +3927,9 @@ public:
     void testDeconfigureAssocProc2()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc2: Started");
+
+        HWAS_INF("testDeconfigureAssocProc2: Skipping");
+#if 0 //@TODO-RTC:246169
         HWAS_INF("testDeconfigureAssocProc2: Started");
 
         // This test populates structs which contain information
@@ -4021,6 +4028,7 @@ public:
         {
             TS_FAIL("testDeconfigureAssocProc2: incorrect configuration returned");
         }
+#endif //@TODO-RTC:246169
     }
 
     /**
@@ -4029,6 +4037,9 @@ public:
     void testDeconfigureAssocProc3()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc3: Started");
+
+        HWAS_INF("testDeconfigureAssocProc3: Skipping");
+#if 0 //@TODO-RTC:246169
         HWAS_INF("testDeconfigureAssocProc3: Started");
 
         // This test populates structs which contain information
@@ -4190,6 +4201,7 @@ public:
         {
             TS_FAIL("testDeconfigureAssocProc3: incorrect configuration returned");
         }
+#endif //@TODO-RTC:246169
     }
 
 
@@ -4199,6 +4211,9 @@ public:
     void testDeconfigureAssocProc4()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc4: Started");
+
+        HWAS_INF("testDeconfigureAssocProc4: Skipping");
+#if 0 //@TODO-RTC:246169
         HWAS_INF("testDeconfigureAssocProc4: Started");
 
         // This test populates structs which contain information
@@ -4362,6 +4377,7 @@ public:
         {
             TS_FAIL("testDeconfigureAssocProc4: incorrect configuration returned");
         }
+#endif //@TODO-RTC:246169
     }
 
 
@@ -4371,6 +4387,9 @@ public:
     void testDeconfigureAssocProc5()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc5: Started");
+
+        HWAS_INF("testDeconfigureAssocProc5: Skipping");
+#if 0 //@TODO-RTC:246169
         HWAS_INF("testDeconfigureAssocProc5: Started");
 
         // This test populates structs which contain information
@@ -4541,6 +4560,7 @@ public:
         {
             TS_FAIL("testDeconfigureAssocProc5: incorrect configuration returned");
         }
+#endif //@TODO-RTC:246169
     }
 
 
@@ -4550,6 +4570,9 @@ public:
     void testDeconfigureAssocProc6()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc6: Started");
+
+        HWAS_INF("testDeconfigureAssocProc6: Skipping");
+#if 0 //@TODO-RTC:246169
         HWAS_INF("testDeconfigureAssocProc6: Started");
 
         // This test populates structs which contain information
@@ -4647,6 +4670,7 @@ public:
         {
             TS_FAIL("testDeconfigureAssocProc6: incorrect configuration returned");
         }
+#endif //@TODO-RTC:246169
     }
 
 
@@ -4805,6 +4829,9 @@ public:
     void testDeconfigureAssocProc8()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc8: Started");
+
+        HWAS_INF("testDeconfigureAssocProc8: Skipping");
+#if 0 //@TODO-RTC:246169
         HWAS_INF("testDeconfigureAssocProc8: Started");
 
         // This test populates structs which contain information
@@ -4905,6 +4932,7 @@ public:
         {
             TS_FAIL("testDeconfigureAssocProc8: incorrect configuration returned");
         }
+#endif //@TODO-RTC:246169
     }
 
     /**
@@ -4913,6 +4941,9 @@ public:
     void testDeconfigureAssocProc9()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc9: Started");
+
+        HWAS_INF("testDeconfigureAssocProc9: Skipping");
+#if 0 //@TODO-RTC:246169
         HWAS_INF("testDeconfigureAssocProc9: Started");
 
         // This test populates structs which contain information
@@ -5002,6 +5033,7 @@ public:
         {
             TS_FAIL("testDeconfigureAssocProc9: incorrect configuration returned");
         }
+#endif //@TODO-RTC:246169
     }
 
     /**
@@ -5010,6 +5042,9 @@ public:
     void testDeconfigureAssocProc10()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc10: Started");
+
+        HWAS_INF("testDeconfigureAssocProc10: Skipping");
+#if 0 //@TODO-RTC:246169
         HWAS_INF("testDeconfigureAssocProc10: Started");
 
         // This test populates structs which contain information
@@ -5105,6 +5140,7 @@ public:
         {
             TS_FAIL("testDeconfigureAssocProc10: incorrect configuration returned");
         }
+#endif //@TODO-RTC:246169
     }
 
     /**
@@ -5113,6 +5149,9 @@ public:
     void testDeconfigureAssocProc11()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc11: Started");
+
+        HWAS_INF("testDeconfigureAssocProc11: Skipping");
+#if 0 //@TODO-RTC:246169
         HWAS_INF("testDeconfigureAssocProc11: Started");
 
         // This test populates structs which contain information
@@ -5208,6 +5247,7 @@ public:
         {
             TS_FAIL("testDeconfigureAssocProc11: incorrect configuration returned");
         }
+#endif //@TODO-RTC:246169
     }
 
     /**
@@ -5216,6 +5256,9 @@ public:
     void testDeconfigureAssocProc12()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc12: Started");
+
+        HWAS_INF("testDeconfigureAssocProc12: Skipping");
+#if 0 //@TODO-RTC:246169
         HWAS_INF("testDeconfigureAssocProc12: Started");
 
         // This test populates structs which contain information
@@ -5311,6 +5354,7 @@ public:
         {
             TS_FAIL("testDeconfigureAssocProc12: incorrect configuration returned");
         }
+#endif //@TODO-RTC:246169
     }
 
     /**
@@ -5319,6 +5363,10 @@ public:
     void testDeconfigureAssocProc13()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc13: Started");
+
+
+        HWAS_INF("testDeconfigureAssocProc13: Skipping");
+#if 0 //@TODO-RTC:246169
         HWAS_INF("testDeconfigureAssocProc13: Started");
 
         // This test populates structs which contain information
@@ -5417,6 +5465,7 @@ public:
         {
             TS_FAIL("testDeconfigureAssocProc13: incorrect configuration returned");
         }
+#endif //@TODO-RTC:246169
     }
 
     // @brief Simple type/instance pair describing a component of an entity path
@@ -5496,7 +5545,8 @@ public:
     }
 
     // @brief This function is called at the end of the test
-    // runDeconfigPresentByAssocTest() to check the PAUC chips are functional.
+    // runDeconfigPresentByAssocTest() to check that the present PAUC units
+    //   are functional.
     static bool isPaucFunctional()
     {
         bool rc = true;
@@ -5510,7 +5560,8 @@ public:
                 l_index++)
             {
                 TargetHandle_t l_pPauc = l_funcPAUCTargetList[l_index];
-                if (!l_pPauc->getAttr<ATTR_HWAS_STATE>().functional)
+                if( (!l_pPauc->getAttr<ATTR_HWAS_STATE>().functional)
+                    && (l_pPauc->getAttr<ATTR_HWAS_STATE>().present) )
                 {
                     TS_FAIL("isPaucFunctional: PAUC%d not functional", l_index);
                     rc = false;

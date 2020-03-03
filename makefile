@@ -153,6 +153,6 @@ $(GENDIR)/.$(notdir $(CONFIG_FILE)).config: \
     ifneq (,$(findstring fsprelease.config, $(strip $(CONFIG_FILE))))
 	    @touch $(HB_FSP_RELEASE)
     endif
-    ifneq (,$(findstring simics_p10.config, $(strip $(CONFIG_FILE))))
+    ifneq (,$(findstring simics_p10, $(strip $(CONFIG_FILE))))
 	    @touch $(HB_P10_RELEASE)
     endif

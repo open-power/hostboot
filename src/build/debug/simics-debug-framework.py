@@ -517,7 +517,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
     #   and if we take the modulo of Y by 1 GB, the residual is 768 MB.
     # 0x40000000=1GB, 0x30000000= 768 MB
     if( (cpu.hrmor % 0x40000000) != 0x30000000 ):
-        print 'Skipping HB magic (outside of HB)', arg
+        print 'Skipping HB magic (outside of HB): magic=', arg, ', hrmor=', cpu.hrmor, ', pir=', cpu.pir
         return
 
     if arg == 7006:   # MAGIC_SHUTDOWN
@@ -610,6 +610,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
         cpu_list=hb_get_objects_by_class("ppc_power10_mambo_core")
         for othercpu in cpu_list:
             othercpu.urmor = cpu.urmor
+            othercpu.hrmor = cpu.hrmor
 
     if arg == 7022:  # MAGIC_SET_LOG_LEVEL
         if( not os.environ.has_key('ENABLE_HB_SIMICS_LOGS') ):

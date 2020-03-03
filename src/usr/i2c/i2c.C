@@ -4851,7 +4851,7 @@ errlHndl_t i2cSetupActiveMasters ( i2cProcessType i_setupType,
 // ------------------------------------------------------------------
 void i2cSetAccessMode( i2cSetAccessModeType i_setModeType )
 {
-    TRACUCOMP( g_trac_i2c,
+    TRACFCOMP( g_trac_i2c,
                ENTER_MRK"i2cSetAccessMode(): %d", i_setModeType );
 
     TARGETING::I2cSwitches switches;
@@ -4969,7 +4969,7 @@ void i2cSetAccessMode( i2cSetAccessModeType i_setModeType )
 
     } while( 0 );
 
-    TRACUCOMP( g_trac_i2c,
+    TRACFCOMP( g_trac_i2c,
                EXIT_MRK"i2cSetAccessMode");
 
     return;

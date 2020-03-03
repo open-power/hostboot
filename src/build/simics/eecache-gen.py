@@ -97,27 +97,38 @@ def hb_eecache_setup(file_name, version, verbose):
             # version 1 byte. only supports version 1
             f.write(struct.pack('>B', 1));
             # end of cache 4 bytes
-            f.write(struct.pack('>i', 0x12357));
-            # eepromRecordHeader for MVPD
+            f.write(struct.pack('>i', 0x24357));
+
+            # eepromRecordHeader for MVPD (proc 0)
             write_eecache_record_v1(f, 0x50000, 0, 1, 0xA0, 0xFF, 64, 0x357, 0x80);
             # for DIMM port 0
-            write_eecache_record_v1(f, 0x50000, 0, 3, 0xA0, 0xFF, 4, 0x10357, 0x80);
+            write_eecache_record_v1(f, 0x50000, 9, 3, 0xA0, 0xFF, 4, 0x10357, 0x80);
             # for DIMM port 1
-            write_eecache_record_v1(f, 0x50000, 1, 3, 0xA0, 0xFF, 4, 0x11357, 0x80);
-            # 47 more record headers need to fill up
-            for x in range(47):
+            write_eecache_record_v1(f, 0x50000, 8, 3, 0xA0, 0xFF, 4, 0x11357, 0x80);
+
+            # eepromRecordHeader for MVPD (proc 1)
+            write_eecache_record_v1(f, 0x50001, 0, 1, 0xA0, 0xFF, 64, 0x12357, 0x80);
+            # for DIMM port 0
+            write_eecache_record_v1(f, 0x50001, 9, 3, 0xA0, 0xFF, 4,  0x22357, 0x80);
+            # for DIMM port 1
+            write_eecache_record_v1(f, 0x50001, 8, 3, 0xA0, 0xFF, 4,  0x23357, 0x80);
+
+            # 44 more record headers need to fill up
+            for x in range(44):
                 write_eecache_record_v1(f, 0, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0);
         elif version == 2:
             # version 1 byte. (version 2 but no SPI access yet)
             f.write(struct.pack('>B', 2));
             # end of cache 4 bytes
             f.write(struct.pack('>i', 0x12389));
-            # eepromRecordHeader for MVPD
+    
+            # eepromRecordHeader for MVPD (proc 0)
             write_i2c_eecache_record(f, 0x50000, 0, 1, 0xA0, 0xFF, 64, 0x389, 0xC0);
             # for DIMM port 0
             write_i2c_eecache_record(f, 0x50000, 0, 3, 0xA0, 0xFF, 4, 0x10389, 0xC0);
             # for DIMM port 1
             write_i2c_eecache_record(f, 0x50000, 1, 3, 0xA0, 0xFF, 4, 0x11389, 0xC0);
+
             # 47 more record headers need to fill up
             for x in range(47):
                 write_i2c_eecache_record(f, 0, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0);
@@ -136,6 +147,7 @@ def hb_eecache_setup(file_name, version, verbose):
             for x in range(47):
                 write_i2c_eecache_record(f, 0, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0);
 
+    ##################################### Populate Proc 0 Records ####################################
     # now add 64K mvpd record for processor 0 (0x50000)
     ret = cli.run_command("get-seeprom 0 0 2") # reading MVPD
 
@@ -163,6 +175,44 @@ def hb_eecache_setup(file_name, version, verbose):
 
     # now add 4K DDIMM VPD port 1
     ret = cli.run_command("get-dimm-seeprom 0 0 3 1") # reading DDIMM VPD port 1
+    if ret != None:
+        # simics object for the image
+        image = simics.SIM_get_object(ret)
+        #string of bytes from simics interface
+        read_buf = image.iface.image.get(0, image.size) # interface takes start and length
+
+        # Probably this file will be deleted once we write to BMC
+        with open(file_name, 'ab') as f:
+            f.write(read_buf)
+
+    ##################################### Populate Proc 1 Records ####################################
+    # now add 64K mvpd record for processor 1 (0x50001)
+    ret = cli.run_command("get-seeprom 0 1 2") # reading MVPD
+
+    if ret != None:
+        # simics object for the image
+        image = simics.SIM_get_object(ret)
+        # string of bytes from simics interface
+        read_buf = image.iface.image.get(0x30000, 0x10000) # interface takes start and length
+
+        # Probably this file will be deleted once we write to BMC
+        with open(file_name, 'ab') as f:
+            f.write(read_buf)
+
+    # now add 4K DDIMM VPD port 0
+    ret = cli.run_command("get-dimm-seeprom 0 1 3 2") # reading DDIMM VPD port 0
+    if ret != None:
+        # simics object for the image
+        image = simics.SIM_get_object(ret)
+        # string of bytes from simics interface
+        read_buf = image.iface.image.get(0, image.size) # interface takes start and length
+
+        # Probably this file will be deleted once we write to BMC
+        with open(file_name, 'ab') as f:
+            f.write(read_buf)
+
+    # now add 4K DDIMM VPD port 1
+    ret = cli.run_command("get-dimm-seeprom 0 1 3 3") # reading DDIMM VPD port 1
     if ret != None:
         # simics object for the image
         image = simics.SIM_get_object(ret)

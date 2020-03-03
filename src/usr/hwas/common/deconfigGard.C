@@ -2654,6 +2654,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             } // while
         }
 
+#if 0 //@TODO-RTC:246169 - Skip all of the SMP deconfigs
         if (iv_XAOBusEndpointDeconfigured)
         {
             // Check if Abus deconfigures should be considered in algorithm
@@ -2681,6 +2682,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             }
             setXAOBusEndpointDeconfigured(false);
         }
+#endif //@TODO-RTC:246169 - Skip all of the SMP deconfigs
     }
     while (0);
 

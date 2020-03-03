@@ -107,23 +107,19 @@ class MiscTest : public CxxTest::TestSuite
               TARGETING::targetService().toTarget(epath);
             if(l_targ != NULL)
             {
-                uint64_t xscom =
+                uint64_t xscom_virt =
                   l_targ->getAttr<TARGETING::ATTR_XSCOM_VIRTUAL_ADDR>();
-                phys = mm_virt_to_phys( (void*)xscom );
-                if( (phys != (1020*TERABYTE+32*GIGABYTE))
-                    && (xscom != 0) ) //never got set
+                uint64_t xscom_phys =
+                  l_targ->getAttr<TARGETING::ATTR_XSCOM_BASE_ADDRESS>();
+                phys = mm_virt_to_phys( (void*)xscom_virt );
+                if( (phys != xscom_phys)
+                    && (xscom_virt != 0) ) //never got set
                 {
                     TS_FAIL("Unexpected Physical Address for MMIO.");
-                    TS_TRACE( "mmio1> virt=%lX, phys=%lX\n", xscom, phys );
+                    TS_INFO( "mmio1> virt=%lX, phys=%lX, expected=%lX\n",
+                             xscom_virt, phys, xscom_phys );
                 }
             }
-
-
-            /* Hardcoded interrupt presenter address for testing on 1-proc model
-            uint64_t intr = 0x20800000000;
-            phys = mm_virt_to_phys( (void*)intr );
-            TS_TRACE( "mmio2> virt=%lX, phys=%lX\n", intr, phys );
-            */
         }
 };
 

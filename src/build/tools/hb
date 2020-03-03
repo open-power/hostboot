@@ -535,6 +535,7 @@ hb_startsimics()
             STARTSIMCMD+=(sbe_scripts_path=${SBE_SCRIPT_PATH})
             STARTSIMCMD+=(enable_lpc_console=TRUE)
             STARTSIMCMD+=(fused_core=TRUE)
+            STARTSIMCMD+=(num_sockets=1)
         else
             # This allows to not run SBE automatically
             STARTSIMCMD+=(sbe_boot_mem=pibmem)

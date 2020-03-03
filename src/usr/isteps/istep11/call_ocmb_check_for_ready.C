@@ -51,6 +51,7 @@
 //  Targeting support
 #include <attributeenums.H>                     // TYPE_PROC
 #include <targeting/common/utilFilter.H>        // getAllChips
+#include <util/misc.H>
 
 //  HWP call support
 #include <exp_check_for_ready.H>
@@ -98,22 +99,22 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
 
             // TODO CQ:SW482291 Remove this retry workaround when ocmb
             //                  check_for_ready timeout issue is resolved
-            for(uint8_t i = 0; i < 10; i++)
+            uint8_t NUM_LOOPS = 10;
+            if( Util::isSimicsRunning() )
             {
-                FAPI_INVOKE_HWP(l_errl,
-                                exp_check_for_ready,
-                                l_fapi_ocmb_target);
-
-                // Preserve the error log if this is the last loop.
-                if(l_errl == nullptr || i == 9)
-                {
-                    break;
-                }
-                else
+                NUM_LOOPS = 1;
+            }
+            for(uint8_t i = 0; i < NUM_LOOPS; i++)
+            {
+                // Delete the log from the previous iteration
+                if( l_errl )
                 {
                     delete l_errl;
                     l_errl = nullptr;
                 }
+                FAPI_INVOKE_HWP(l_errl,
+                                exp_check_for_ready,
+                                l_fapi_ocmb_target);
             }
 
             if (l_errl)

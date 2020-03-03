@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -39,8 +39,8 @@ struct _futex_imp_t
     tid_t iv_owner;
     bool iv_recursive;
 
-    _futex_imp_t () : iv_val(0), iv_ownerLockCount(0),
-                      iv_owner(0), iv_recursive(false) {}
+    _futex_imp_t (bool i_recursive = false) : iv_val(0), iv_ownerLockCount(0),
+                      iv_owner(0), iv_recursive(i_recursive) {}
 };
 
 typedef _futex_imp_t mutex_t;
@@ -59,6 +59,7 @@ struct _barrier_imp_t
 typedef _barrier_imp_t barrier_t;
 
 #define MUTEX_INITIALIZER mutex_t()
+#define MUTEX_RECURSIVE_INITIALIZER mutex_t(true)
 
 /**
  * Conditional variable types

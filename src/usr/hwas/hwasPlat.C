@@ -1468,84 +1468,93 @@ void HWASPlatVerification::verifyDeconfiguration()
 
         for (const auto l_unitTypeOffset: l_unitMboxOffsetData)
         {
-            TargetHandleList l_childChiplets;
+            // Only valid to evaluate chips that we actually detected
+            TargetHandleList l_validChips;
+            getChildAffinityTargetsByState (l_validChips, l_topSysTarget,
+                CLASS_CHIP, TYPE_NA, UTIL_FILTER_PRESENT);
 
-            getChildAffinityTargetsByState (l_childChiplets, l_topSysTarget,
-                CLASS_NA, l_unitTypeOffset.type, UTIL_FILTER_ALL);
-
-            for (const auto l_chip: l_childChiplets)
+            for (const auto l_chip: l_validChips)
             {
+                TargetHandleList l_childChiplets;
+                getChildAffinityTargetsByState (l_childChiplets,
+                                                l_chip,
+                                                CLASS_NA,
+                                                l_unitTypeOffset.type,
+                                                UTIL_FILTER_ALL);
 
-                // Getting functional state as saved from SBE
-
-                AttributeTraits<ATTR_CHIP_UNIT>::Type l_chipUnit;
-                if(!l_chip->tryGetAttr<ATTR_CHIP_UNIT>(l_chipUnit))
+                for (const auto l_chiplet: l_childChiplets)
                 {
-                    HWAS_ERR("verifyDeconfiguration: Failed to get chip unit "
-                        "for %s with HUID %.8X",
-                        l_chip->getAttrAsString<ATTR_TYPE>(),
-                        l_chip->getAttr<ATTR_HUID>()
-                    );
-                    continue;
+                    // Getting functional state as saved from SBE
+
+                    AttributeTraits<ATTR_CHIP_UNIT>::Type l_chipUnit;
+                    if(!l_chiplet->tryGetAttr<ATTR_CHIP_UNIT>(l_chipUnit))
+                    {
+                        HWAS_ERR("verifyDeconfiguration: Failed to get chip unit "
+                                 "for %s with HUID %.8X",
+                                 l_chiplet->getAttrAsString<ATTR_TYPE>(),
+                                 l_chiplet->getAttr<ATTR_HUID>()
+                                 );
+                        continue;
+                    }
+
+                    // see src/include/usr/initservice/mboxRegs.H, MboxScratch2_t
+                    // There's a gard bit only for NMMU with CHIP_UNIT value
+                    // of 1, therefore CHIP_UNIT value of 0 is ignored
+                    if (l_unitTypeOffset.type == TYPE_NMMU && l_chipUnit == 0)
+                    {
+                        continue;
+                    }
+
+                    // Calculating the offset at which this l_chiplet's gard data is
+                    // written in the scratch register
+                    uint32_t l_chipUnitOffset = l_chipUnit +
+                      l_unitTypeOffset.startBitPosition;
+
+                    if (l_unitTypeOffset.type == TYPE_NMMU && l_chipUnit == 1)
+                    {
+                        // Value for TYPE_NMMU with l_chipUnit equal to 1 does not
+                        // use l_chipUnit to calculate offset
+                        l_chipUnitOffset = l_unitTypeOffset.startBitPosition;
+                    }
+
+                    if (l_chipUnitOffset > l_unitTypeOffset.endBitPosition)
+                    {
+                        HWAS_ERR("verifyDeconfiguration: l_chipUnitOffset %u is "
+                                 "going beyond l_unitTypeOffset.endBitPosition %u",
+                                 l_chipUnitOffset, l_unitTypeOffset.endBitPosition);
+                        continue;
+                    }
+
+                    const uint32_t l_scratchReg =
+                      l_scratchRegs[l_unitTypeOffset.mboxReg];
+
+                    bool l_sbeFunctional =
+                      ((0x80000000ull >> l_chipUnitOffset) & l_scratchReg) == 0;
+
+                    // Getting functional state as known to HB from ATTR_PG
+
+                    Target* const l_perv = getTargetWithPGAttr(*l_chiplet);
+                    bool l_hostbootFunctional = false;
+
+                    if (l_perv)
+                    {
+                        pg_entry_t l_attrPGMask = getDeconfigMaskedPGValue(*l_chiplet);
+                        l_hostbootFunctional =
+                          (l_attrPGMask & l_perv->getAttr<ATTR_PG>()) == 0;
+                    }
+                    else
+                    {
+                        HWAS_ERR("verifyDeconfiguration: Failed to get pervasive "
+                                 "target for chip unit type %s with HUID  %.8X",
+                                 l_chiplet->getAttrAsString<ATTR_TYPE>(),
+                                 l_chiplet->getAttr<ATTR_HUID>());
+                        continue;
+                    }
+
+                    verificationMatchHandler(l_chiplet, l_hostbootFunctional,
+                                             l_sbeFunctional);
+
                 }
-
-                // see src/include/usr/initservice/mboxRegs.H, MboxScratch2_t
-                // There's a gard bit only for NMMU with CHIP_UNIT value
-                // of 1, therefore CHIP_UNIT value of 0 is ignored
-                if (l_unitTypeOffset.type == TYPE_NMMU && l_chipUnit == 0)
-                {
-                    continue;
-                }
-
-                // Calculating the offset at which this l_chip's gard data is
-                // written in the scratch register
-                uint32_t l_chipUnitOffset = l_chipUnit +
-                    l_unitTypeOffset.startBitPosition;
-
-                if (l_unitTypeOffset.type == TYPE_NMMU && l_chipUnit == 1)
-                {
-                    // Value for TYPE_NMMU with l_chipUnit equal to 1 does not
-                    // use l_chipUnit to calculate offset
-                    l_chipUnitOffset = l_unitTypeOffset.startBitPosition;
-                }
-
-                if (l_chipUnitOffset > l_unitTypeOffset.endBitPosition)
-                {
-                    HWAS_ERR("verifyDeconfiguration: l_chipUnitOffset %u is "
-                        "going beyond l_unitTypeOffset.endBitPosition %u",
-                        l_chipUnitOffset, l_unitTypeOffset.endBitPosition);
-                    continue;
-                }
-
-                const uint32_t l_scratchReg =
-                    l_scratchRegs[l_unitTypeOffset.mboxReg];
-
-                bool l_sbeFunctional =
-                    ((0x80000000ull >> l_chipUnitOffset) & l_scratchReg) == 0;
-
-                // Getting functional state as known to HB from ATTR_PG
-
-                Target* const l_perv = getTargetWithPGAttr(*l_chip);
-                bool l_hostbootFunctional = false;
-
-                if (l_perv)
-                {
-                    pg_entry_t l_attrPGMask = getDeconfigMaskedPGValue(*l_chip);
-                    l_hostbootFunctional =
-                        (l_attrPGMask & l_perv->getAttr<ATTR_PG>()) == 0;
-                }
-                else
-                {
-                    HWAS_ERR("verifyDeconfiguration: Failed to get pervasive "
-                        "target for chip unit type %s with HUID  %.8X",
-                        l_chip->getAttrAsString<ATTR_TYPE>(),
-                        l_chip->getAttr<ATTR_HUID>());
-                    continue;
-                }
-
-                verificationMatchHandler(l_chip, l_hostbootFunctional,
-                    l_sbeFunctional);
-
             }
         }
     } while (0);

@@ -1196,7 +1196,8 @@ class TargetingTestSuite : public CxxTest::TestSuite
 //                       break;
                   default:
                       TS_FAIL("testGetMemTargetMmioInfo::"
-                                    "We are processing a position we shouldn't be, investigation required.");
+                              "We are processing a position (%d) we don't support",
+                              l_pos);
                       break;
                 }
             }

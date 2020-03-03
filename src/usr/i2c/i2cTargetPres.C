@@ -249,7 +249,7 @@ errlHndl_t ocmbI2CPresencePerformOp(DeviceFW::OperationType i_opType,
         errlCommit(l_errl, I2C_COMP_ID);
     }
 #else
-    bool l_ocmbPresent = EEPROM::eepromPresence(i_target);
+    l_ocmbPresent = EEPROM::eepromPresence(i_target);
 #endif
 
     memcpy(io_buffer, &l_ocmbPresent, sizeof(l_ocmbPresent));

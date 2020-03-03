@@ -789,6 +789,9 @@
     <attribute>
       <id>VPD_REC_NUM</id>
     </attribute>
+    <attribute>
+      <id>XSCOM_VIRTUAL_ADDR</id>
+    </attribute>
   </targetType>
 
   <targetType>
@@ -2988,6 +2991,9 @@
     </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
+    </attribute>
+    <attribute>
+      <id>PEER_PATH</id>
     </attribute>
     <attribute>
       <id>PEER_TARGET</id>

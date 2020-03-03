@@ -3292,24 +3292,6 @@
   </attribute>
 
   <attribute>
-    <id>MC_PLL_BUCKET</id>
-    <description>
-        MC pll bucket selection in async mode for Cumulus
-    </description>
-    <simpleType>
-      <uint8_t/>
-      <array>4</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_MC_PLL_BUCKET</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-  </attribute>
-
-  <attribute>
     <description>Memory AVDD voltage domain offset in mV.</description>
     <id>MEM_AVDD_OFFSET_MILLIVOLTS</id>
     <persistency>volatile-zeroed</persistency>

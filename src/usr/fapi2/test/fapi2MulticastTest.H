@@ -793,7 +793,7 @@ void testMulticastCoreSelect()
     size_t l_size = sizeof(l_dataToWrite);
 
     TARGETING::TargetHandleList l_cores;
-    TARGETING::getAllChiplets(l_cores, TARGETING::TYPE_CORE, false);
+    TARGETING::getAllChiplets(l_cores, TARGETING::TYPE_CORE, true);
     assert(l_cores.size() != 0, "testMulticastCoreSelect: "
            "could not find any cores!");
     errlHndl_t l_errl = nullptr;

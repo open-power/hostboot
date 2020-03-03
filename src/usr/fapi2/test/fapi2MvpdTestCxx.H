@@ -194,7 +194,7 @@ public:
       TARGETING::TargetHandleList l_chipList;
 
       // Get a list of all of the proc chips
-      TARGETING::getAllChips(l_chipList, TARGETING::TYPE_PROC, false);
+      TARGETING::getAllChips(l_chipList, TARGETING::TYPE_PROC, true);
 
       // Loop through the record
       FAPI_INF( "testMvpdValidate l_chipList.size()= 0x%x ",

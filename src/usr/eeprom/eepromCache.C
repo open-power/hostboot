@@ -59,7 +59,7 @@ namespace EEPROM
 
 // Any time we access either any of the global variables defined below we want
 // to wrap the call in this mutex to avoid multi-threading issues
-mutex_t g_eecacheMutex = MUTEX_INITIALIZER;
+mutex_t g_eecacheMutex = MUTEX_RECURSIVE_INITIALIZER;
 
 // Global variable that will keep track of the virtual address which
 // points to the start of the EECACHE section, and the size of this section.
@@ -75,18 +75,6 @@ uint64_t g_eecachePnorSize  = 0;
 //         and other points to the location of the cache, and a byte indicating
 //         if this eeprom's hardware has changed this IPL
 std::map<eepromRecordHeader, EeepromEntryMetaData_t> g_cachedEeproms;
-
-bool isEepromRecordPresent(const eepromRecordHeader& i_eepromRecordHeader)
-{
-    bool l_isRecordCached = false;
-
-    mutex_lock(&g_eecacheMutex);
-    l_isRecordCached = (g_cachedEeproms.find(i_eepromRecordHeader) !=
-                        g_cachedEeproms.end());
-    mutex_unlock(&g_eecacheMutex);
-
-    return l_isRecordCached;
-}
 
 /**
  * @brief A helper function to populate the global variables used by
@@ -114,12 +102,12 @@ errlHndl_t populateEecacheGlobals()
             break;
         }
 
-        mutex_lock(&g_eecacheMutex);
+        recursive_mutex_lock(&g_eecacheMutex);
         g_eecachePnorVaddr = l_sectionInfo.vaddr;
         g_eecachePnorSize = l_sectionInfo.size;
         TRACFCOMP( g_trac_eeprom, "populateEecacheGlobals() vaddr for EECACHE start = 0x%lx , size = 0x%lx!!",
                    g_eecachePnorVaddr, g_eecachePnorSize);
-        mutex_unlock(&g_eecacheMutex);
+        recursive_mutex_unlock(&g_eecacheMutex);
     }
     } while(0);
     return l_errl;
@@ -348,7 +336,7 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
                 l_eepromRecordHeader.completeRecord.internal_offset  =
                         l_recordHeaderToUpdate->completeRecord.internal_offset;
 
-                TRACSSCOMP(g_trac_eeprom,
+                TRACFCOMP(g_trac_eeprom,
                           "cacheEeprom() already found copy for eeprom role %d "
                           "for target w/ HUID 0x%08X in EECACHE table of contents"
                           " at 0x%X internal address",
@@ -503,11 +491,11 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
         // steps that update the eeprom's cached data if we were told to do so.
         if( l_updateContents )
         {
-            assert(l_recordHeaderToUpdateIndex != INVALID_EEPROM_INDEX,
-                    "Exceeded the max %d records in PNOR EECACHE", MAX_EEPROMS_LATEST);
-
             TRACFCOMP( g_trac_eeprom, "cacheEeprom() updating cache entry for 0x%.8X target of type %d",
                       get_huid(i_target), i_eepromType );
+
+            assert(l_recordHeaderToUpdateIndex != INVALID_EEPROM_INDEX,
+                    "Exceeded the max %d records in PNOR EECACHE", MAX_EEPROMS_LATEST);
 
             void * l_tmpBuffer;
 
@@ -853,11 +841,11 @@ bool addEepromToCachedList(const eepromRecordHeader & i_eepromRecordHeader,
 {
     bool l_matchFound = true;
 
-    if(!isEepromRecordPresent(i_eepromRecordHeader))
+    recursive_mutex_lock(&g_eecacheMutex);
+    if(g_cachedEeproms.find(i_eepromRecordHeader) == g_cachedEeproms.end())
     {
         // Map accesses aren't thread safe, make sure this is always wrapped in
         // mutex
-        mutex_lock(&g_eecacheMutex);
         g_cachedEeproms[i_eepromRecordHeader].cache_entry_address =
               g_eecachePnorVaddr + i_eepromRecordHeader.completeRecord.internal_offset;
 
@@ -894,8 +882,8 @@ bool addEepromToCachedList(const eepromRecordHeader & i_eepromRecordHeader,
 
         }
         l_matchFound = false;
-        mutex_unlock(&g_eecacheMutex);
     }
+    recursive_mutex_unlock(&g_eecacheMutex);
 
     return l_matchFound;
 }
@@ -965,7 +953,7 @@ void printTableOfContentsFromPnor(bool i_only_valid_entries)
 
 void printTableOfContentsFromGlobalMemory(bool i_only_valid_entries)
 {
-    mutex_lock(&g_eecacheMutex);
+    recursive_mutex_lock(&g_eecacheMutex);
     for (auto& cachedEeprom : g_cachedEeproms)
     {
         const eepromRecordHeader * pHeader = &cachedEeprom.first;
@@ -1016,7 +1004,7 @@ void printTableOfContentsFromGlobalMemory(bool i_only_valid_entries)
                    cachedEeprom.second.mark_target_changed );
 
     }
-    mutex_unlock(&g_eecacheMutex);
+    recursive_mutex_unlock(&g_eecacheMutex);
 }
 
 
@@ -1026,15 +1014,18 @@ void getMasterEepromCacheState(const eepromRecordHeader & i_eepromRecordHeader,
     o_valid = false;
     o_changed = false;
 
+    TRACSSBIN(g_trac_eeprom,
+              "getMasterEepromCacheState: Looking for",
+              &i_eepromRecordHeader,
+              sizeof(i_eepromRecordHeader));
+
     // find master for this eeprom
     // Map accesses are not thread safe, make sure this is always wrapped in mutex
-    mutex_lock(&g_eecacheMutex);
+    recursive_mutex_lock(&g_eecacheMutex);
     for (auto& cachedEeprom : g_cachedEeproms)
     {
         const eepromRecordHeader * pHeader = &cachedEeprom.first;
-        if ((pHeader->completeRecord.accessType ==
-            i_eepromRecordHeader.completeRecord.accessType) &&
-            eepromsMatch(const_cast<eepromRecordHeader*>(&i_eepromRecordHeader),
+        if (eepromsMatch(const_cast<eepromRecordHeader*>(&i_eepromRecordHeader),
                          const_cast<eepromRecordHeader*>(pHeader)) &&
            (pHeader->completeRecord.master_eeprom == 1) )
         {
@@ -1050,7 +1041,7 @@ void getMasterEepromCacheState(const eepromRecordHeader & i_eepromRecordHeader,
             break;
         }
     }
-    mutex_unlock(&g_eecacheMutex);
+    recursive_mutex_unlock(&g_eecacheMutex);
 }
 
 
@@ -1059,14 +1050,14 @@ bool hasEeepromChanged(const eepromRecordHeader & i_eepromRecordHeader)
     bool l_eepromHasChanged = false;
 
     // Map accesses are not thread safe, make sure this is always wrapped in mutex
-    mutex_lock(&g_eecacheMutex);
+    recursive_mutex_lock(&g_eecacheMutex);
 
     if(g_cachedEeproms.find(i_eepromRecordHeader) != g_cachedEeproms.end())
     {
         l_eepromHasChanged = g_cachedEeproms[i_eepromRecordHeader].mark_target_changed;
     }
 
-    mutex_unlock(&g_eecacheMutex);
+    recursive_mutex_unlock(&g_eecacheMutex);
 
     return l_eepromHasChanged;
 }
@@ -1075,21 +1066,21 @@ void setEeepromChanged(const eepromRecordHeader & i_eepromRecordHeader)
 {
 
     // Map accesses are not thread safe, make sure this is always wrapped in mutex
-    mutex_lock(&g_eecacheMutex);
+    recursive_mutex_lock(&g_eecacheMutex);
 
     if(g_cachedEeproms.find(i_eepromRecordHeader) != g_cachedEeproms.end())
     {
         g_cachedEeproms[i_eepromRecordHeader].mark_target_changed = true;
     }
 
-    mutex_unlock(&g_eecacheMutex);
+    recursive_mutex_unlock(&g_eecacheMutex);
 
 }
 
 void clearCachedEeprom(const eepromRecordHeader & i_eepromRecordHeader)
 {
     // Map accesses are not thread safe, make sure this is always wrapped in mutex
-    mutex_lock(&g_eecacheMutex);
+    recursive_mutex_lock(&g_eecacheMutex);
 
     if(g_cachedEeproms.find(i_eepromRecordHeader) != g_cachedEeproms.end())
     {
@@ -1100,7 +1091,7 @@ void clearCachedEeprom(const eepromRecordHeader & i_eepromRecordHeader)
         g_cachedEeproms[i_eepromRecordHeader].cache_entry_address = 0;
     }
 
-    mutex_unlock(&g_eecacheMutex);
+    recursive_mutex_unlock(&g_eecacheMutex);
 }
 
 uint64_t lookupEepromCacheAddr(const eepromRecordHeader& i_eepromRecordHeader)
@@ -1109,7 +1100,7 @@ uint64_t lookupEepromCacheAddr(const eepromRecordHeader& i_eepromRecordHeader)
     std::map<eepromRecordHeader, EeepromEntryMetaData_t>::iterator l_it;
 
     // Wrap lookup in mutex because reads are not thread safe
-    mutex_lock(&g_eecacheMutex);
+    recursive_mutex_lock(&g_eecacheMutex);
 
     if (i_eepromRecordHeader.completeRecord.accessType == EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_I2C)
     {
@@ -1138,7 +1129,7 @@ uint64_t lookupEepromCacheAddr(const eepromRecordHeader& i_eepromRecordHeader)
         l_vaddr = l_it->second.cache_entry_address;
     }
 
-    mutex_unlock(&g_eecacheMutex);
+    recursive_mutex_unlock(&g_eecacheMutex);
 
     return l_vaddr;
 }
@@ -1150,14 +1141,14 @@ uint64_t lookupEepromHeaderAddr(const eepromRecordHeader& i_eepromRecordHeader)
     std::map<eepromRecordHeader, EeepromEntryMetaData_t>::iterator l_it;
 
     // Wrap lookup in mutex because reads are not thread safe
-    mutex_lock(&g_eecacheMutex);
+    recursive_mutex_lock(&g_eecacheMutex);
     l_it = g_cachedEeproms.find(i_eepromRecordHeader);
 
     if(l_it != g_cachedEeproms.end())
     {
         l_vaddr = l_it->second.header_entry_address;
     }
-    mutex_unlock(&g_eecacheMutex);
+    recursive_mutex_unlock(&g_eecacheMutex);
 
     if(l_vaddr == 0)
     {
@@ -1256,6 +1247,7 @@ errlHndl_t eecachePresenceDetect(TARGETING::Target* i_target,
 {
     errlHndl_t l_errl = nullptr;
     o_present = false;
+    TRACSCOMP(g_trac_eeprom,"eecachePresenceDetect> Looking for %.8X", TARGETING::get_huid(i_target));
 
     do {
     // Build an eecache header record out of the provided target
@@ -1269,9 +1261,26 @@ errlHndl_t eecachePresenceDetect(TARGETING::Target* i_target,
     {
         break;
     }
+    TRACSSBIN(g_trac_eeprom,
+              "Lookup",
+              &l_eepromRecordHeader,
+              sizeof(l_eepromRecordHeader));
 
-    o_present = isEepromRecordPresent(l_eepromRecordHeader);
+    // Check if we have a valid record in our cache
+    auto header = g_cachedEeproms.find(l_eepromRecordHeader);
+    if( header != g_cachedEeproms.end() )
+    {
+        TRACSSBIN(g_trac_eeprom,
+                  "Found",
+                  &(header->first),
+                  sizeof(eepromRecordHeader));
+        if( header->first.completeRecord.cached_copy_valid )
+        {
+            o_present = true;
+        }
+    }
 
+    TRACSCOMP(g_trac_eeprom,"eecachePresenceDetect> %.8X present=%d", TARGETING::get_huid(i_target), o_present);
     }while(0);
 
     return l_errl;
