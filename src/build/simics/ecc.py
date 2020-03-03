@@ -74,12 +74,14 @@ eccMatrix = [
 # @param[in] i_int_type - integer
 # @return 1 if odd parity, 0 if even parity
 ###############################################################
-def findParity( i_int_type )
+def findParity( i_int_type ):
       parity = 0
       while i_int_type:
         parity = ~parity
         i_int_type = i_int_type & (i_int_type - 1)
-      return (parity)
+      if (parity & 1):
+          return 1;
+      return 0;
 
 ###############################################################
 # Create the ECC field corresponding to a 8-byte data field
