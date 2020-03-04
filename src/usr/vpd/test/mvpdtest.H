@@ -468,6 +468,7 @@ class MVPDTest: public CxxTest::TestSuite
         void testMvpdWrite ( void )
         {
 // @TODO: RTC 244854: This test is currently only working in HB runtime
+//                    When running under HB IPL, calls never return and thus fails
 #ifdef __HOSTBOOT_RUNTIME
             auto l_record  = MVPD::VWML;
             auto l_keyword = MVPD::pdI;

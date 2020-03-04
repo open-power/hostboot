@@ -289,8 +289,6 @@ class SPDTest: public CxxTest::TestSuite
          */
         void testSpdWriteDQ ( void )
         {
-// @TODO: RTC 244854: This is broke for P10.  Fix and enable when can
-#if 0
 #ifndef __HOSTBOOT_RUNTIME
             errlHndl_t err = NULL;
             uint64_t cmds = 0x0;
@@ -522,8 +520,7 @@ class SPDTest: public CxxTest::TestSuite
             TRACFCOMP( g_trac_spd,
                        "testSpdWriteDQ - %d/%d fails",
                        fails, cmds );
-#endif
-#endif
+#endif  // #ifndef __HOSTBOOT_RUNTIME
         }
 
         /**
@@ -722,7 +719,7 @@ class SPDTest: public CxxTest::TestSuite
             TRACFCOMP( g_trac_spd,
                        "testSpdWriteSmall - %d/%d fails",
                        fails, cmds );
-#endif
+#endif  // #ifndef __HOSTBOOT_RUNTIME
         }
         /**
          * @brief Test an invalid Keyword to a DIMM target.
@@ -909,7 +906,7 @@ class SPDTest: public CxxTest::TestSuite
             TRACFCOMP( g_trac_spd,
                        "testSpdInvalidWrite - %d/%d fails",
                        fails, cmds );
-#endif
+#endif  // #ifndef __HOSTBOOT_RUNTIME
         }
 
         /**

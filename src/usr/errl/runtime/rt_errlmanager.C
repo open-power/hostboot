@@ -354,9 +354,6 @@ bool rt_processCallout(errlHndl_t &io_errl,
         if ((pCalloutUD->type == HWAS::HW_CALLOUT) &&
             (pCalloutUD->gardErrorType != HWAS::GARD_NULL))
         {
-                // @TODO RTC: 244854
-                // Re-enable as part of primary runtime enablement
-                /*
                 TARGETING::Target *pTarget = NULL;
                 uint8_t * l_uData = (uint8_t *)(pCalloutUD + 1);
                 bool l_err = HWAS::retrieveTarget(l_uData, pTarget, io_errl);
@@ -374,8 +371,6 @@ bool rt_processCallout(errlHndl_t &io_errl,
                         errlCommit(errl, HWAS_COMP_ID);
                     }
                 }
-                */
-
         }
     }
     return true;

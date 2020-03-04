@@ -965,11 +965,6 @@ void ErrlEntry::addPartIdInfoToErrLog
 
 #ifdef CONFIG_BMC_IPMI
 
-// @TODO RTC: 244854
-// Re-enable as part of full runtime enablement
-#ifndef __HOSTBOOT_RUNTIME
-// Find the FRU ID associated with target.
-// Returns first FRU ID found as it navigates the target's parent hierarchy
 TARGETING::ATTR_FRU_ID_type getFRU_ID(TARGETING::Target * i_target)
 {
     TARGETING::ATTR_FRU_ID_type l_fruid = 0;  // set to invalid FRU ID
@@ -1026,6 +1021,9 @@ TARGETING::ATTR_FRU_ID_type getFRU_ID(TARGETING::Target * i_target)
     return l_fruid;
 }
 
+#ifndef __HOSTBOOT_RUNTIME
+// @TODO: RTC 244854: Enable when can
+//        Having linking issue with symbol getFaultSensorNumber for Jenkins OP-BUILD
 void ErrlEntry::addSensorDataToErrLog(TARGETING::Target * i_target,
                                       HWAS::callOutPriority i_priority )
 {
@@ -1042,7 +1040,7 @@ void ErrlEntry::addSensorDataToErrLog(TARGETING::Target * i_target,
     TRACDCOMP(g_trac_errl, EXIT_MRK"ErrlEntry::addSensorDataToErrLog()");
 }
 
-#endif // __HOSTBOOT_RUNTIME
+#endif // #ifndef __HOSTBOOT_RUNTIME
 
 #endif
 
@@ -1110,11 +1108,11 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
                         addPartIdInfoToErrLog( l_target );
 #ifdef CONFIG_BMC_IPMI
 
-// @TODO RTC: 244854
-// Re-enable as part of full runtime enablement
+// @TODO: RTC 244854: Enable when can
+//        Having linking issue with symbol addSensorDataToErrLog for Jenkins OP-BUILD
 #ifndef __HOSTBOOT_RUNTIME
                         addSensorDataToErrLog( l_target, l_ud->priority);
-#endif // __HOSTBOOT_RUNTIME
+#endif
 
 #endif
                     }

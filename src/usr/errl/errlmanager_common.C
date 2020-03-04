@@ -25,15 +25,11 @@
 #include <errl/errlmanager.H>
 #include <hwas/common/hwasCallout.H>
 #include <errl/errlreasoncodes.H>
-#ifdef CONFIG_BMC_IPMI
 
-// @TODO RTC: 244854
-// Re-enable as part of full runtime enablement
-#ifndef __HOSTBOOT_RUNTIME
+#ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmisel.H>
 #include <ipmi/ipmisensor.H>
 #include <ipmi/ipmiconfiglookup.H>
-#endif // __HOSTBOOT_RUNTIME
 #endif
 
 #ifndef __HOSTBOOT_RUNTIME
@@ -231,15 +227,15 @@ void ErrlManager::setupPnorInfo()
                             ErrlFlagPair_t l_pair(err, IPMI_NOSEL_FLAG
 #ifdef CONFIG_CONSOLE_OUTPUT_ERRORDISPLAY
                                                          | ERRLDISP_FLAG
-#endif
+#endif  // #ifdef CONFIG_CONSOLE_OUTPUT_ERRORDISPLAY
                                                  );
                             iv_errlList.push_back(l_pair);
                         }
                     }
-#else
+#else  // #ifdef CONFIG_BMC_IPMI
                     // for FSP system, this shouldn't ever happen.
                     setACKInFlattened(i);
-#endif
+#endif // #else ... #ifdef CONFIG_BMC_IPMI
                 } // not ACKed
             } // not empty
         } // for
@@ -292,7 +288,7 @@ void ErrlManager::setupPnorInfo()
 
     TRACFCOMP( g_trac_errl, EXIT_MRK"setupPnorInfo");
 } // setupPnorInfo
-#endif // __HOSTBOOT_RUNTIME
+#endif // #ifndef __HOSTBOOT_RUNTIME
 
 ///////////////////////////////////////////////////////////////////////////////
 // ErrlManager::incrementPnorOpenSlot()
@@ -365,7 +361,7 @@ bool ErrlManager::saveErrLogToPnor( errlHndl_t& io_err)
                     TRACFCOMP(g_trac_errl, ERR_MRK "Fail to flush the page %p size %d",
                             l_pnorAddr, l_errSize);
                 }
-#endif
+#endif // #ifndef __HOSTBOOT_RUNTIME
             }
             else
             {
@@ -497,9 +493,6 @@ void ErrlManager::setACKInFlattened(uint32_t i_position)
 
 #ifdef CONFIG_BMC_IPMI
 
-// @TODO RTC: 244854
-// Re-enable as part of full runtime enablement
-#ifndef __HOSTBOOT_RUNTIME
 void getSensorOffsetBasedOnSeverity(errlHndl_t & io_err,
                                     uint8_t &o_eventDirType,
                                     uint8_t & o_offset );
@@ -600,6 +593,11 @@ bool ErrlManager::allowCallHomeEselsToBmc(void)
 
     return l_allowed;
 }
+
+#ifndef __HOSTBOOT_RUNTIME
+// @TODO: RTC 244854: Enable when can
+//        Having linking issue with symbols IPMI::IpmiConfigLookup::getSensorType
+//        and SENSOR::getFaultSensorNumber for Jenkins OP-BUILD
 
 ///////////////////////////////////////////////////////////////////////////////
 // ErrlManager::sendErrLogToBmc()
@@ -1003,6 +1001,8 @@ uint8_t getSensorInfo(HWAS::callout_ud_t *i_ud,
     return l_num_sensors;
 }
 
+#endif // #ifndef __HOSTBOOT_RUNTIME
+
 void getSensorOffsetBasedOnSeverity(errlHndl_t & io_err,
         uint8_t &o_eventDirType,
         uint8_t & o_eventOffset )
@@ -1039,8 +1039,7 @@ void getSensorOffsetBasedOnSeverity(errlHndl_t & io_err,
             break;
     }
 }
-#endif // __HOSTBOOT_RUNTIME
-#endif // CONFIG_BMC_IPMI
+#endif // #ifdef CONFIG_BMC_IPMI
 
 void ErrlManager::setErrlSkipFlag(errlHndl_t io_err)
 {

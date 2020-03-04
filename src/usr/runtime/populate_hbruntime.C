@@ -3437,9 +3437,6 @@ errlHndl_t populate_hbRuntimeData( void )
                             TARGETING::TYPE_PROC,
                             true);
 
-                // @TODO RTC: 244854
-                // Re-enable this branch as part of runtime enablement work
-                /*
                 //Pass start address down to SBE via chipop
                 // Loop through all functional Procs
                 for (const auto & l_procChip: l_procChips)
@@ -3455,7 +3452,6 @@ errlHndl_t populate_hbRuntimeData( void )
                         break;
                     }
                 }
-                */
             }
         }
         else

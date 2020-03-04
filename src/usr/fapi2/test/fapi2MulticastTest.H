@@ -342,7 +342,7 @@ void testMulticastWriteOp()
     }
 
     } while(0);
-#endif
+#endif // #ifndef __HOSTBOOT_RUNTIME
 }
 
 void testMulticastWriteOpBadParam()
@@ -586,7 +586,7 @@ void testMulticastReadOr()
     }
 
     }while(0);
-#endif
+#endif // #ifndef __HOSTBOOT_RUNTIME
 }
 
 void testMulticastReadAnd()
@@ -757,7 +757,7 @@ void testMulticastReadAnd()
     }
 
     } while(0);
-#endif
+#endif // #ifndef __HOSTBOOT_RUNTIME
 }
 
 void testMulticastCoreSelect()
@@ -923,7 +923,7 @@ void testMulticastCoreSelect()
         break;
     }
     } while(0);
-#endif
+#endif // #ifndef __HOSTBOOT_RUNTIME
 }
 
 void testMulticastCompare()
@@ -1129,7 +1129,7 @@ void testMulticastCompare()
     {
         errlCommit(l_errl, CXXTEST_COMP_ID);
     }
-#endif
+#endif // #ifndef __HOSTBOOT_RUNTIME
 }
 
 }; //class FapiMulticastTest

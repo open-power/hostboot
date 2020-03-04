@@ -41,8 +41,6 @@ public:
 //******************************************************************************
 void test_fapi2Hwp()
 {
-// @TODO: RTC 244854: This test does not work for the RUNTIME environment
-#ifndef __HOSTBOOT_RUNTIME
     int numTests = 0;
     int numFails = 0;
     errlHndl_t l_errl = nullptr;
@@ -90,7 +88,6 @@ void test_fapi2Hwp()
 
     }while(0);
     FAPI_INF("test_fapiHWP:: Test Complete. %d/%d fails",  numFails,numTests);
-#endif
 }
 
 };

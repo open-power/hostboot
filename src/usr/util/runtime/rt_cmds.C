@@ -733,7 +733,8 @@ int cmd_reload_pm_complex( char*& o_output, uint64_t stopAt )
     //       the normal 64K hbrt stack
     int rc = 0;
 
-// @TODO: RTC 244854 Re-enable, when can
+// @TODO: RTC 244854 stopImageSection::SprRestoreArea_t for P10 is not defined.
+//        Need to define the ADT or rework this method
 #if 0
     o_output = new char[100*8];
     char l_tmpstr[100];
@@ -903,7 +904,7 @@ int cmd_reload_pm_complex( char*& o_output, uint64_t stopAt )
     sprintf(l_tmpstr, "<< cmd_reload_pm_complex\n");
     strcat(o_output, l_tmpstr);
     UTIL_FT("<< cmd_reload_pm_complex");
-#endif
+#endif  // #if 0
     return rc;
 }
 

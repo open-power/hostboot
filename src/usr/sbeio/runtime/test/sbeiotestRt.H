@@ -737,6 +737,8 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
         void testSbeMessagePassingDefaultPath(void)
         {
 // @TODO RTC 244854 Re-enable the '#ifdef CONFIG_HTMGT', when runtime HTMGT is enabled
+//      Test fails with message from line 801:
+//      Unexpected response from RT SBE message passing. Testing default path for chipID: 0x00000000
 //#ifdef CONFIG_HTMGT
 #if 0
             // Test entry
@@ -817,11 +819,11 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
             // Test exit
             TRACFCOMP(g_trac_sbeio, EXIT_MRK "SbeMessagePassingRtTest::"
                                     "testSbeMessagePassingDefaultPath");
-#else
+#else  // #if 0
             TRACFCOMP(g_trac_sbeio, "SbeMessagePassingRtTest::"
                                     "testSbeMessagePassingDefaultPath skipped "
                                     "because HTMGT is not supported");
-#endif
+#endif // #else ... #if 0
         }
 
         /**
