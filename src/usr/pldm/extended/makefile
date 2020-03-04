@@ -26,7 +26,7 @@
 ROOTPATH = ../../../..
 MODULE = pldm_extended
 
-CC_OVERRIDE = 1
+include ../common/common.mk
 
 # From ../extern/
 OBJS += bios.o
@@ -34,8 +34,9 @@ OBJS += bios_table.o
 OBJS += fru.o
 OBJS += platform.o
 OBJS += file_io.o
-# From this directory
+# From ../requests/
+OBJS += pldm_fru_requests.o
 
-VPATH += ../extern
+
 
 include ${ROOTPATH}/config.mk

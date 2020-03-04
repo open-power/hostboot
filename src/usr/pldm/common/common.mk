@@ -22,4 +22,20 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
+
+# This .mk is included in both src/usr/pldm/base/makefile and
+# src/usr/pldm/extended/makefile so it is expected to include
+# anything common between those two makefiles
+
+COMMON_ROOTPATH = ../../../..
+
 PLDM_COMMON_OBJS += pldmtrace.o
+
+CC_OVERRIDE = 1
+
+# add these paths to VPATH so compiler knows
+# where to find the .C/.c files we need
+VPATH += ${COMMON_ROOTPATH}/src/usr/pldm/extern
+VPATH += ${COMMON_ROOTPATH}/src/usr/pldm/common
+VPATH += ${COMMON_ROOTPATH}/src/usr/pldm/requests

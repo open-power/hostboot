@@ -232,6 +232,8 @@ my $resident_modules = {
     "libmmio.so"                => '1',
     "libsmf.so"                 => '1',
     "libmctp.so"                => '1',
+    "libpldm_base.so"           => '1',
+    "libpldm_extended.so"       => '1',
 };
 
 # A list of the dependent libraries in each istep.

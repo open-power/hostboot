@@ -185,6 +185,10 @@ void PldmRP::handle_outbound_req_messages(void)
         // PLDM could be using the MCTP layer simultaneously so this is important.
         req->type = MCTP::MSG_SEND_PLDM;
 
+        PLDM_DBG_BIN("handle_outbound_req_messages: msg sent to mctp outbound: ",
+                    reinterpret_cast<uint8_t *>(req->extra_data),
+                    req->data[0] );
+
         // Note we do not need to wait for the response on this queue because
         // the message will come back on the response Q
         msg_send(iv_mctpOutboundMsgQ, req);

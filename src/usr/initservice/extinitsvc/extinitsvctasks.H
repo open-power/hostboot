@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -86,7 +86,20 @@ const TaskInfo g_exttaskinfolist[]   =   {
         },
 #endif
 #endif
+#ifdef CONFIG_PLDM
+        /**
+         * @brief   PLDM Extended
+         */
+        {
+            "libpldm_extended.so",                      // taskname
+            NULL,                                       // no ptr to fnct
+            {
 
+                INIT_TASK,                              // task type
+                EXT_IMAGE,                              // Extended Module
+            }
+        },
+#endif
         /**
          * @brief   targeting task,
          */

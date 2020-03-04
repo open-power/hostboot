@@ -228,6 +228,7 @@ EXTENDED_MODULES += nestmemutils
 EXTENDED_MODULES += $(if $(CONFIG_ENABLE_HDAT_IN_HOSTBOOT),hdat)
 EXTENDED_MODULES += xz
 EXTENDED_MODULES += $(if $(CONFIG_CONSOLE_OUTPUT_ERRORDISPLAY),errldisplay)
+EXTENDED_MODULES += $(if $(CONFIG_PLDM),pldm_extended,)
 endif
 
 #***************************************
