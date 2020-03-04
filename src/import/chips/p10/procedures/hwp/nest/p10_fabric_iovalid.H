@@ -74,8 +74,8 @@ extern "C"
 ///
 /// @param[in] i_target             Reference to processor chip target
 /// @param[in] i_set_not_clear      Define iovalid operation (true=set, false=clear)
-/// @param[in] i_update_internode   Update iovalid state on internode links (X)
-/// @param[in] i_update_intranode   Update iovalid state on intranode links (X,A)
+/// @param[in] i_update_intranode   Update iovalid state on intranode links (X)
+/// @param[in] i_update_internode   Update iovalid state on internode links (X,A)
 /// @param[out] o_dl_fail_rcs       Vector of return code objects, to append
 ///                                 in case of IOHS DL training failures
 ///
@@ -84,8 +84,8 @@ extern "C"
     fapi2::ReturnCode p10_fabric_iovalid(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         const bool i_set_not_clear,
-        const bool i_update_internode,
         const bool i_update_intranode,
+        const bool i_update_internode,
         std::vector<fapi2::ReturnCode>& o_dl_fail_rcs);
 
 } // extern "C"

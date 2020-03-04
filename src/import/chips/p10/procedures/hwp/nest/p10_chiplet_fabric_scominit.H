@@ -58,14 +58,14 @@ extern "C"
 /// @brief Apply fabric scom inits
 ///
 /// @param[in] i_target             Reference to processor chip target
-/// @param[in] i_config_internode   Configure internode links (X)?
-/// @param[in] i_config_intranode   Configure intranode links (X,A)?
+/// @param[in] i_config_intranode   Configure intranode links (X)?
+/// @param[in] i_config_internode   Configure internode links (X,A)?
 /// @return fapi2::ReturnCode       FAPI2_RC_SUCCESS if success, else error code.
 ///
     fapi2::ReturnCode p10_chiplet_fabric_scominit(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        const bool i_config_internode,
-        const bool i_config_intranode);
+        const bool i_config_intranode,
+        const bool i_config_internode);
 
 } // extern "C"
 

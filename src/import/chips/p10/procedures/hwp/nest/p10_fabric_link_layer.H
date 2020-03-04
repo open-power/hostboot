@@ -69,15 +69,15 @@ extern "C"
 /// @brief Train fabric DLL/TL layers
 ///
 /// @param[in] i_target             Reference to processor chip target
-/// @param[in] i_train_internode    Train internode links (X)?
-/// @param[in] i_train_intranode    Train intranode links (X,A)?
+/// @param[in] i_train_intranode    Train intranode links (X)?
+/// @param[in] i_train_internode    Train internode links (X,A)?
 ///
 /// @return fapi::ReturnCode        FAPI2_RC_SUCCESS if success, else error code.
 ///
     fapi2::ReturnCode p10_fabric_link_layer(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        const bool i_train_internode,
-        const bool i_train_intranode);
+        const bool i_train_intranode,
+        const bool i_train_internode);
 
 } // extern "C"
 

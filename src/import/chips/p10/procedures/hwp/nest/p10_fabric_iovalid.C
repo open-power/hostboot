@@ -705,7 +705,7 @@ fapi_try_exit:
 ///
 /// @param[in] i_iohs_target        Reference to IOHS target
 /// @param[in] i_link_id            Link ID for given IOHS target
-/// @param[in] i_update_intranode   True if IOHS link is used as intranode connection
+/// @param[in] i_update_internode   True if IOHS link is used as internode connection
 /// @param[out] o_retrain           Indication that DL link training should be re-attempted
 /// @param[out] o_rcs               Vector of return code objects, to append
 ///                                 in case of reported DL training failure
@@ -715,7 +715,7 @@ fapi_try_exit:
 fapi2::ReturnCode p10_fabric_iovalid_link_validate_wrap(
     const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target,
     const fapi2::ATTR_CHIP_UNIT_POS_Type& i_link_id,
-    const bool i_update_intranode,
+    const bool i_update_internode,
     bool& o_retrain,
     std::vector<fapi2::ReturnCode>& o_rcs)
 {
@@ -724,7 +724,7 @@ fapi2::ReturnCode p10_fabric_iovalid_link_validate_wrap(
 
     if (((l_rc == (fapi2::ReturnCode) fapi2::RC_P10_FAB_IOVALID_DL_NOT_TRAINED_RETRAIN_NONE_ERR) ||
          (l_rc == (fapi2::ReturnCode) fapi2::RC_P10_FAB_IOVALID_DL_NOT_TRAINED_RETRAIN_HALF_ERR))
-        && i_update_intranode)
+        && i_update_internode)
     {
         o_retrain = true;
         o_rcs.push_back(l_rc);
@@ -935,8 +935,8 @@ fapi_try_exit:
 fapi2::ReturnCode p10_fabric_iovalid(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const bool i_set_not_clear,
-    const bool i_update_internode,
     const bool i_update_intranode,
+    const bool i_update_internode,
     std::vector<fapi2::ReturnCode>& o_dl_fail_rcs)
 {
     FAPI_DBG("Start");
@@ -971,9 +971,9 @@ fapi2::ReturnCode p10_fabric_iovalid(
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_DRAWER_INTERCONNECT, l_iohs, l_drawer_interconnect),
                  "Error from FAPI_ATTR_GET (ATTR_IOHS_DRAWER_INTERCONNECT)");
 
-        if ((l_x_en[l_link] && i_update_internode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_FALSE))
-            || (l_x_en[l_link] && i_update_intranode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_TRUE))
-            || (l_a_en[l_link] && i_update_intranode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_TRUE)))
+        if ((l_x_en[l_link] && i_update_intranode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_FALSE))
+            || (l_x_en[l_link] && i_update_internode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_TRUE))
+            || (l_a_en[l_link] && i_update_internode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_TRUE)))
         {
             FAPI_DBG("Updating iovalid for link %d (%s)", l_link, l_x_en[l_link] ? ("SMPX") : ("SMPA"));
 
@@ -985,7 +985,7 @@ fapi2::ReturnCode p10_fabric_iovalid(
                 FAPI_TRY(p10_fabric_iovalid_link_validate_wrap(
                              l_iohs,
                              l_link,
-                             i_update_intranode,
+                             i_update_internode,
                              l_link_needs_retraining,
                              o_dl_fail_rcs),
                          "Error from p10_fabric_iovalid_link_validate_wrap");
@@ -1024,8 +1024,8 @@ fapi2::ReturnCode p10_fabric_iovalid(
             fapi2::toString(l_iohs, l_targetStr, fapi2::MAX_ECMD_STRING_LEN);
 
             FAPI_DBG("Skipping iovalid update for %s", l_targetStr);
-            FAPI_DBG("  i_update_internode:     %d", i_update_internode);
             FAPI_DBG("  i_update_intranode:     %d", i_update_intranode);
+            FAPI_DBG("  i_update_internode:     %d", i_update_internode);
             FAPI_DBG("  l_drawer_interconnect:  %d", l_drawer_interconnect);
             FAPI_DBG("  x_enable:               %d", l_x_en[l_link]);
             FAPI_DBG("  a_enable:               %d", l_a_en[l_link]);

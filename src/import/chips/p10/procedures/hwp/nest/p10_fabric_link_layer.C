@@ -90,11 +90,11 @@ fapi_try_exit:
 /// See doxygen comments in header file
 fapi2::ReturnCode p10_fabric_link_layer(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const bool i_train_internode,
-    const bool i_train_intranode)
+    const bool i_train_intranode,
+    const bool i_train_internode)
 {
-    FAPI_DBG("Start, i_train_internode = %d, i_train_intranode = %d",
-             i_train_internode, i_train_intranode);
+    FAPI_DBG("Start, i_train_intranode = %d, i_train_internode = %d",
+             i_train_intranode, i_train_internode);
 
     fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_Type l_x_en;
     fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_Type l_a_en;
@@ -114,9 +114,9 @@ fapi2::ReturnCode p10_fabric_link_layer(
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_DRAWER_INTERCONNECT, l_iohs, l_drawer_interconnect),
                  "Error from FAPI_ATTR_GET (ATTR_IOHS_DRAWER_INTERCONNECT)");
 
-        if ((l_x_en[l_link] && i_train_internode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_FALSE))
-            || (l_x_en[l_link] && i_train_intranode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_TRUE))
-            || (l_a_en[l_link] && i_train_intranode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_TRUE)))
+        if ((l_x_en[l_link] && i_train_intranode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_FALSE))
+            || (l_x_en[l_link] && i_train_internode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_TRUE))
+            || (l_a_en[l_link] && i_train_internode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_TRUE)))
         {
             FAPI_DBG("Training link %d (%s)", l_link, l_x_en[l_link] ? ("SMPX") : ("SMPA"));
 
@@ -131,8 +131,8 @@ fapi2::ReturnCode p10_fabric_link_layer(
             fapi2::toString(l_iohs, l_targetStr, fapi2::MAX_ECMD_STRING_LEN);
 
             FAPI_DBG("Skipping link training for %s", l_targetStr);
-            FAPI_DBG("  i_train_internode:      %d", i_train_internode);
             FAPI_DBG("  i_train_intranode:      %d", i_train_intranode);
+            FAPI_DBG("  i_train_internode:      %d", i_train_internode);
             FAPI_DBG("  l_drawer_interconnect:  %d", l_drawer_interconnect);
             FAPI_DBG("  l_x_enable:             %d", l_x_en[l_link]);
             FAPI_DBG("  l_a_enable:             %d", l_a_en[l_link]);

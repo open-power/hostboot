@@ -49,19 +49,19 @@
 
 fapi2::ReturnCode p10_chiplet_fabric_scominit(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const bool i_config_internode,
-    const bool i_config_intranode)
+    const bool i_config_intranode,
+    const bool i_config_internode)
 {
     FAPI_DBG("Start");
-    FAPI_DBG("  i_config_internode: %d", i_config_internode);
     FAPI_DBG("  i_config_intranode: %d", i_config_intranode);
+    FAPI_DBG("  i_config_internode: %d", i_config_internode);
 
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     auto l_iohs_targets = i_target.getChildren<fapi2::TARGET_TYPE_IOHS>();
     char l_tgt_str[fapi2::MAX_ECMD_STRING_LEN];
     fapi2::ReturnCode l_rc;
 
-    if (i_config_internode)
+    if (i_config_intranode)
     {
         // apply FBC non-hotplug scom initfile
         fapi2::toString(i_target, l_tgt_str, sizeof(l_tgt_str));
@@ -98,8 +98,8 @@ fapi2::ReturnCode p10_chiplet_fabric_scominit(
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_DRAWER_INTERCONNECT, l_iohs, l_drawer_interconnect),
                      "Error from FAPI_ATTR_GET (ATTR_IOHS_DRAWER_INTERCONNECT)");
 
-            if((i_config_internode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_FALSE)) ||
-               (i_config_intranode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_TRUE)))
+            if((i_config_intranode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_FALSE)) ||
+               (i_config_internode && (l_drawer_interconnect == fapi2::ENUM_ATTR_IOHS_DRAWER_INTERCONNECT_TRUE)))
             {
                 auto l_pauc = l_iohs.getParent<fapi2::TARGET_TYPE_PAUC>();
                 fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train;
@@ -147,7 +147,7 @@ fapi2::ReturnCode p10_chiplet_fabric_scominit(
         else
         {
             // mask TL/DL FIRs for links that are not configured for smp operations
-            if (i_config_internode)
+            if (i_config_intranode)
             {
                 FAPI_TRY(p10_smp_link_firs(l_iohs, sublink_t::BOTH, action_t::INACTIVE),
                          "Error from p10_smp_link_firs when configuring both sublinks for inactive operations");
