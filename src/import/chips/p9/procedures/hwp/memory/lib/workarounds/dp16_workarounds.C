@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -125,6 +125,35 @@ fapi2::ReturnCode adjust_rd_dq_delay( const fapi2::Target<fapi2::TARGET_TYPE_MCA
 
     // Write
     FAPI_TRY(mss::scom_blastah(i_target, TT::READ_DELAY_REG[i_rp], l_data));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check if the NVDIMM CMD_PRECEDE_TIME workaround is needed
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_is_needed true if workaround is needed
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode is_cmd_precede_time_workaround_needed( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        bool& o_is_needed )
+{
+    o_is_needed = false;
+    uint8_t l_hybrid[mss::MAX_DIMM_PER_PORT] = {};
+    uint8_t l_hybrid_type[mss::MAX_DIMM_PER_PORT] = {};
+    uint32_t l_size[mss::MAX_DIMM_PER_PORT] = {};
+
+    FAPI_TRY(mss::eff_hybrid(i_target, l_hybrid));
+    FAPI_TRY(mss::eff_hybrid_memory_type(i_target, l_hybrid_type));
+    FAPI_TRY(mss::eff_dimm_size(i_target, l_size));
+
+    if (l_hybrid[0] == fapi2::ENUM_ATTR_EFF_HYBRID_IS_HYBRID &&
+        l_hybrid_type[0] == fapi2::ENUM_ATTR_EFF_HYBRID_MEMORY_TYPE_NVDIMM &&
+        l_size[0] == fapi2::ENUM_ATTR_EFF_DIMM_SIZE_16GB)
+    {
+        o_is_needed = true;
+    }
 
 fapi_try_exit:
     return fapi2::current_err;

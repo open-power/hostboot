@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -91,6 +91,15 @@ fapi2::ReturnCode is_adjust_rd_dq_delay_needed( const fapi2::Target<fapi2::TARGE
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
 fapi2::ReturnCode adjust_rd_dq_delay( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, const uint64_t i_rp );
+
+///
+/// @brief Check if the NVDIMM CMD_PRECEDE_TIME workaround is needed
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_is_needed true if workaround is needed
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode is_cmd_precede_time_workaround_needed( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        bool& o_is_needed );
 
 } // close namespace nvdimm
 

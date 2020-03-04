@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2019
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -64,6 +64,7 @@ prd_incpath += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/memory/lib/sh
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/common/include/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/
+prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/mcbist/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/utils/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/io/

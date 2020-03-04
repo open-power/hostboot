@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@
 
 #include <fapi2.H>
 #include <p9_mc_scom_addresses.H>
+#include <lib/workarounds/dp16_workarounds.H>
 
 namespace mss
 {
@@ -494,12 +495,23 @@ inline fapi2::ReturnCode reset_vref_config1( const fapi2::Target<T>& i_target )
     fapi2::buffer<uint64_t> l_data;
     uint8_t l_al = 0;
     uint8_t l_cl = 0;
+    uint8_t l_offset = 15;
+    bool l_is_workaround_needed = false;
+
     FAPI_TRY( mss::eff_dram_al(i_target, l_al) );
     FAPI_TRY( mss::eff_dram_cl(i_target, l_cl) );
+    FAPI_TRY( mss::workarounds::nvdimm::is_cmd_precede_time_workaround_needed(i_target, l_is_workaround_needed));
+
+    if (l_is_workaround_needed)
+    {
+        // Per Jeremy Neaton's characterization, 16GB NVDIMM requires a 4-tick bump from the current offset
+        // due to read sensitivity
+        l_offset = l_offset + 4;
+    }
 
     // Per Ryan King's characterization:
-    // The recommended setting is (AL + CL + 15).
-    l_data.insertFromRight<TT::CMD_PRECEDE_TIME, TT::CMD_PRECEDE_TIME_LEN>(l_al + l_cl + 15);
+    // The recommended setting is (AL + CL + offset). Current offset is set to 15
+    l_data.insertFromRight<TT::CMD_PRECEDE_TIME, TT::CMD_PRECEDE_TIME_LEN>(l_al + l_cl + l_offset);
     l_data.insertFromRight<TT::MPR_PAGE, TT::MPR_PAGE_LEN>(0b0100); // From R. King
 
     // Note: when initial cal is setup, this register will change to accomodate the
