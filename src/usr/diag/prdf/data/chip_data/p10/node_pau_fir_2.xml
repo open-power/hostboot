@@ -26,11 +26,11 @@
 <attn_node model_ec="P10_10" name="PAU_FIR_2" reg_type="SCOM">
     <local_fir config="" name="PAU_FIR_2">
         <instance addr="0x10010C80" reg_inst="0"/>
-        <instance addr="0x11010C80" reg_inst="1"/>
-        <instance addr="0x12010C80" reg_inst="2"/>
-        <instance addr="0x12011480" reg_inst="3"/>
-        <instance addr="0x13010C80" reg_inst="4"/>
-        <instance addr="0x13011480" reg_inst="5"/>
+        <instance addr="0x11010C80" reg_inst="3"/>
+        <instance addr="0x12010C80" reg_inst="4"/>
+        <instance addr="0x12011480" reg_inst="5"/>
+        <instance addr="0x13010C80" reg_inst="6"/>
+        <instance addr="0x13011480" reg_inst="7"/>
         <action attn_type="CS" config="00"/>
         <action attn_type="RE" config="01"/>
         <action attn_type="UCS" config="11"/>

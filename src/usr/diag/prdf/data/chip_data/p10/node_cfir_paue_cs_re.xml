@@ -65,9 +65,9 @@
         </expr>
     </rule>
     <bit child_node="PAU_LOCAL_FIR" node_inst="0,1" pos="4">Local FIR</bit>
-    <bit child_node="PAU_FIR_0" node_inst="0,1" pos="5">Local FIR register for the PAU (1 of 3)</bit>
-    <bit child_node="PAU_FIR_1" node_inst="0,1" pos="6">Local FIR register for the PAU (2 of 3)</bit>
-    <bit child_node="PAU_FIR_2" node_inst="0,1" pos="7">Local FIR register for the PAU (3 of 3)</bit>
+    <bit child_node="PAU_FIR_0" node_inst="0,3" pos="5">Local FIR register for the PAU (1 of 3)</bit>
+    <bit child_node="PAU_FIR_1" node_inst="0,3" pos="6">Local FIR register for the PAU (2 of 3)</bit>
+    <bit child_node="PAU_FIR_2" node_inst="0,3" pos="7">Local FIR register for the PAU (3 of 3)</bit>
     <bit child_node="PAU_PHY_FIR" node_inst="0,1" pos="13">Local FIR register for the chip pervasive logic</bit>
     <bit child_node="PAU_DL_FIR" node_inst="0,1" pos="14">Local FIR register for the chip pervasive logic</bit>
     <bit child_node="PAU_PTL_FIR" node_inst="0,1" pos="16"/>
