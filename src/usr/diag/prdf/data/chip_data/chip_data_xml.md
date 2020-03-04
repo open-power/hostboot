@@ -178,9 +178,14 @@ See the `name` attribute of `<register>`.
 
 ##### 2.5.2.2) Attribute `reg_inst` (required)
 
-See the `reg_inst` attribute for each `<instance>` of `<register>`. A list
-and/or range value (see appendix) may be used to indicate this node will capture
-more than one instance of a register.
+See the `reg_inst` attribute for each `<instance>` of `<register>`.
+
+**Important Note:**
+This value is interpreted as an array, where the index is the instance value of
+the `node_inst` attribute of the `<capture_group>` element. Therefore, this
+requires the number of instances represented by this attribute to equal the
+number of instances represented by the the `node_inst` attribute of the
+`<capture_group>` element.
 
 ### 2.6) Element `<rule>` (required 1 or more)
 
