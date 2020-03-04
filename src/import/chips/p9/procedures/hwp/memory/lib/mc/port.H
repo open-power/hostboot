@@ -803,26 +803,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-
-///
-/// @brief Enable the MC Periodic calibration functionality
-/// @tparam T the fapi2 target type of the target
-/// @tparam TT the class traits for the port
-/// @param[in] i_target the target
-/// @return FAPI2_RC_SUCCESS if and only if ok
-///
-template< fapi2::TargetType T, typename TT = portTraits<mss::mc_type::NIMBUS> >
-fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<T>& i_target );
-
-///
-/// @brief Enable the MC Periodic calibration functionality - MCA specialization
-/// @param[in] i_target the target
-/// @return FAPI2_RC_SUCCESS if and only if ok
-///
-template<>
-fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
-
-
 ///
 /// @brief Change the state of the force_str bit - mc_type::NIMBUS specialization
 /// @tparam MC the memory controller type

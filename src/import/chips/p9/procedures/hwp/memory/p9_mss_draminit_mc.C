@@ -137,7 +137,7 @@ extern "C"
             // Power management is handled in the init file. (or should be BRS)
 
             // Enabling periodic calibration
-            FAPI_TRY( mss::enable_periodic_cal(p), "%s Failed enable_periodic_cal", mss::c_str(i_target) );
+            FAPI_TRY( mss::enable_periodic_cal<mss::mc_type::NIMBUS>(p), "%s Failed enable_periodic_cal", mss::c_str(i_target) );
 
             // Step Six: Setup Control Bit ECC
             FAPI_TRY( mss::enable_read_ecc<mss::mc_type::NIMBUS>(p), "%s Failed enable_read_ecc", mss::c_str(i_target) );

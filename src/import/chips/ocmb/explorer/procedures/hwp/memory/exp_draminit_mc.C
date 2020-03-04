@@ -92,6 +92,10 @@ extern "C"
         // Enable periodic short zq cal
         FAPI_TRY( mss::enable_zq_cal(i_target), "%s Failed enable_zq_cal", mss::c_str(i_target) );
 
+        // Enable periodic mem calibration
+        FAPI_TRY( mss::enable_periodic_cal<mss::mc_type::EXPLORER>(i_target), "%s Failed enable_periodic_cal",
+                  mss::c_str(i_target) );
+
         // Enable ecc checking
         FAPI_TRY( mss::enable_read_ecc<mss::mc_type::EXPLORER>(i_target), "%s Failed enable_read_ecc", mss::c_str(i_target) );
 

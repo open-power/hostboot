@@ -68,12 +68,13 @@ constexpr uint64_t BIT_SPARE_6 = 14;        //       6: SPARE
 constexpr uint64_t BIT_SPARE_7 = 15;        //       7: SPARE
 
 ///
-/// @brief Enable the MC Periodic calibration functionality - MCA specialization
+/// @brief Enable the MC Periodic calibration functionality
 /// @param[in] i_target the target
 /// @return FAPI2_RC_SUCCESS if and only if ok
+/// @note NIMBUS, MCA specialization
 ///
 template<>
-fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+fapi2::ReturnCode enable_periodic_cal<mss::mc_type::NIMBUS>( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
 {
     typedef portTraits<mss::mc_type::NIMBUS> TT;
 
