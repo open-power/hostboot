@@ -139,6 +139,7 @@ class Target
             iv_handle(Value)
         {
             plat_apply_target_limits<K, M, V>();
+            // No multicast support for Hostboot Bootloader
 #ifndef FAPI_PLAT_MULTICAST_NOT_SUPPORTED
 
             /* Iff this is a potential mcast target, update the handle.
@@ -320,6 +321,7 @@ class Target
                     const TargetState i_state = TARGET_STATE_FUNCTIONAL) const;
 
 
+        // No multicast support for Hostboot Bootloader
 #ifndef FAPI_PLAT_MULTICAST_NOT_SUPPORTED
         ///
         /// @brief Get a multicast target for a given chip
@@ -384,6 +386,8 @@ class Target
         inline uint8_t
         getChipletNumber(void) const;
 
+
+        // No multicast support for Hostboot Bootloader
 #ifndef FAPI_PLAT_MULTICAST_NOT_SUPPORTED
         ///
         /// @brief Returns the core select vector associated with a Core target
@@ -417,6 +421,7 @@ class Target
             static_assert( bitCount<K>::count >= bitCount<O>::count,
                            "unable to cast to specialized Target");
 
+            // No multicast support for Hostboot Bootloader
 #ifndef FAPI_PLAT_MULTICAST_NOT_SUPPORTED
 
             // Only need to update the handle if we're coming from a target that's already MULTICAST
@@ -434,6 +439,7 @@ class Target
         static const TargetType iv_type = K;
         V iv_handle;
 
+        // No multicast support for Hostboot Bootloader
 #ifndef FAPI_PLAT_MULTICAST_NOT_SUPPORTED
         /// @brief if iv_handle is a multicast target, update its multicast type to M
         inline void mcUpdateHandle(void);
@@ -471,6 +477,7 @@ class Target
                           "improper child of fapi2::TARGET_TYPE_MULTICAST");
         }
 
+        // No multicast support for Hostboot Bootloader
 #ifndef FAPI_PLAT_MULTICAST_NOT_SUPPORTED
         ///
         /// @brief Static checks for getMulticast(). Platforms are expected to call this.

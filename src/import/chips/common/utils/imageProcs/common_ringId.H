@@ -448,6 +448,7 @@ int ringidGetRingClass( ChipId_t      i_chipId,
                         RingId_t      i_ringId,
                         RingClass_t&  o_ringClass );
 
+// string is not supported by Hostboot or Hostboot Bootloader
 #if !defined(FIPSODE) && !defined(NO_PLAT_STD_STRING_SUPPORT)
 
 #include <string>

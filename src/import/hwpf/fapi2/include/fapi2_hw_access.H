@@ -39,7 +39,7 @@
 #include <stdint.h>
 #include <buffer.H>
 
-// variable_buffer isn't supported on PPE
+// variable_buffer isn't supported on PPE or Hostboot Bootloader
 #if !defined(__PPE__) && !defined(FAPI_VARIABLE_BUFFER_NOT_SUPPORTED)
     #include <variable_buffer.H>
 #endif
@@ -51,6 +51,7 @@
 
 namespace fapi2
 {
+// No PIB error masks supported by Hostboot Bootloader
 #ifndef PIB_ERROR_MASK_NOT_SUPPORTED
     //--------------------------------------------------------------------------
     // PIB Error Functions

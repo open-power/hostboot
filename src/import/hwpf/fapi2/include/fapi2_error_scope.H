@@ -33,6 +33,7 @@
 #include <stdint.h>
 #include <plat_error_scope.H>
 
+// No advanced FFDC is supported for Hostboot Bootloader
 #ifndef FAPI2_NO_FFDC
     #include <hwp_ffdc_classes.H>
 #endif

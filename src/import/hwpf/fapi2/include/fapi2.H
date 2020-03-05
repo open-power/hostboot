@@ -43,6 +43,7 @@
 #include <fapi2_hwp_executor.H>
 #include <fapi2_attribute_service.H>
 
+// Not supported by Hostboot Bootloader
 #ifndef PLAT_EC_FEATURE_NOT_SUPPORTED
     #include <fapi2_chip_ec_feature.H>
 #endif
