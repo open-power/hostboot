@@ -24,7 +24,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attn_node model_ec="P10_10" name="EQ_CORE_FIR" reg_type="SCOM">
-    <local_fir config="W" name="EQ_CORE_FIR">
+    <register name="EQ_CORE_FIR">
         <instance addr="0x20028440" reg_inst="0"/>
         <instance addr="0x20024440" reg_inst="1"/>
         <instance addr="0x20022440" reg_inst="2"/>
@@ -57,11 +57,189 @@
         <instance addr="0x27024440" reg_inst="29"/>
         <instance addr="0x27022440" reg_inst="30"/>
         <instance addr="0x27021440" reg_inst="31"/>
-        <action attn_type="CS" config="00"/>
-        <action attn_type="RE" config="01"/>
-        <action attn_type="SPA" config="10"/>
-        <action attn_type="UCS" config="11"/>
-    </local_fir>
+    </register>
+    <register name="EQ_CORE_FIR_MASK">
+        <instance addr="0x20028443" reg_inst="0"/>
+        <instance addr="0x20024443" reg_inst="1"/>
+        <instance addr="0x20022443" reg_inst="2"/>
+        <instance addr="0x20021443" reg_inst="3"/>
+        <instance addr="0x21028443" reg_inst="4"/>
+        <instance addr="0x21024443" reg_inst="5"/>
+        <instance addr="0x21022443" reg_inst="6"/>
+        <instance addr="0x21021443" reg_inst="7"/>
+        <instance addr="0x22028443" reg_inst="8"/>
+        <instance addr="0x22024443" reg_inst="9"/>
+        <instance addr="0x22022443" reg_inst="10"/>
+        <instance addr="0x22021443" reg_inst="11"/>
+        <instance addr="0x23028443" reg_inst="12"/>
+        <instance addr="0x23024443" reg_inst="13"/>
+        <instance addr="0x23022443" reg_inst="14"/>
+        <instance addr="0x23021443" reg_inst="15"/>
+        <instance addr="0x24028443" reg_inst="16"/>
+        <instance addr="0x24024443" reg_inst="17"/>
+        <instance addr="0x24022443" reg_inst="18"/>
+        <instance addr="0x24021443" reg_inst="19"/>
+        <instance addr="0x25028443" reg_inst="20"/>
+        <instance addr="0x25024443" reg_inst="21"/>
+        <instance addr="0x25022443" reg_inst="22"/>
+        <instance addr="0x25021443" reg_inst="23"/>
+        <instance addr="0x26028443" reg_inst="24"/>
+        <instance addr="0x26024443" reg_inst="25"/>
+        <instance addr="0x26022443" reg_inst="26"/>
+        <instance addr="0x26021443" reg_inst="27"/>
+        <instance addr="0x27028443" reg_inst="28"/>
+        <instance addr="0x27024443" reg_inst="29"/>
+        <instance addr="0x27022443" reg_inst="30"/>
+        <instance addr="0x27021443" reg_inst="31"/>
+    </register>
+    <register name="EQ_CORE_FIR_ACT0">
+        <instance addr="0x20028446" reg_inst="0"/>
+        <instance addr="0x20024446" reg_inst="1"/>
+        <instance addr="0x20022446" reg_inst="2"/>
+        <instance addr="0x20021446" reg_inst="3"/>
+        <instance addr="0x21028446" reg_inst="4"/>
+        <instance addr="0x21024446" reg_inst="5"/>
+        <instance addr="0x21022446" reg_inst="6"/>
+        <instance addr="0x21021446" reg_inst="7"/>
+        <instance addr="0x22028446" reg_inst="8"/>
+        <instance addr="0x22024446" reg_inst="9"/>
+        <instance addr="0x22022446" reg_inst="10"/>
+        <instance addr="0x22021446" reg_inst="11"/>
+        <instance addr="0x23028446" reg_inst="12"/>
+        <instance addr="0x23024446" reg_inst="13"/>
+        <instance addr="0x23022446" reg_inst="14"/>
+        <instance addr="0x23021446" reg_inst="15"/>
+        <instance addr="0x24028446" reg_inst="16"/>
+        <instance addr="0x24024446" reg_inst="17"/>
+        <instance addr="0x24022446" reg_inst="18"/>
+        <instance addr="0x24021446" reg_inst="19"/>
+        <instance addr="0x25028446" reg_inst="20"/>
+        <instance addr="0x25024446" reg_inst="21"/>
+        <instance addr="0x25022446" reg_inst="22"/>
+        <instance addr="0x25021446" reg_inst="23"/>
+        <instance addr="0x26028446" reg_inst="24"/>
+        <instance addr="0x26024446" reg_inst="25"/>
+        <instance addr="0x26022446" reg_inst="26"/>
+        <instance addr="0x26021446" reg_inst="27"/>
+        <instance addr="0x27028446" reg_inst="28"/>
+        <instance addr="0x27024446" reg_inst="29"/>
+        <instance addr="0x27022446" reg_inst="30"/>
+        <instance addr="0x27021446" reg_inst="31"/>
+    </register>
+    <register name="EQ_CORE_FIR_ACT1">
+        <instance addr="0x20028447" reg_inst="0"/>
+        <instance addr="0x20024447" reg_inst="1"/>
+        <instance addr="0x20022447" reg_inst="2"/>
+        <instance addr="0x20021447" reg_inst="3"/>
+        <instance addr="0x21028447" reg_inst="4"/>
+        <instance addr="0x21024447" reg_inst="5"/>
+        <instance addr="0x21022447" reg_inst="6"/>
+        <instance addr="0x21021447" reg_inst="7"/>
+        <instance addr="0x22028447" reg_inst="8"/>
+        <instance addr="0x22024447" reg_inst="9"/>
+        <instance addr="0x22022447" reg_inst="10"/>
+        <instance addr="0x22021447" reg_inst="11"/>
+        <instance addr="0x23028447" reg_inst="12"/>
+        <instance addr="0x23024447" reg_inst="13"/>
+        <instance addr="0x23022447" reg_inst="14"/>
+        <instance addr="0x23021447" reg_inst="15"/>
+        <instance addr="0x24028447" reg_inst="16"/>
+        <instance addr="0x24024447" reg_inst="17"/>
+        <instance addr="0x24022447" reg_inst="18"/>
+        <instance addr="0x24021447" reg_inst="19"/>
+        <instance addr="0x25028447" reg_inst="20"/>
+        <instance addr="0x25024447" reg_inst="21"/>
+        <instance addr="0x25022447" reg_inst="22"/>
+        <instance addr="0x25021447" reg_inst="23"/>
+        <instance addr="0x26028447" reg_inst="24"/>
+        <instance addr="0x26024447" reg_inst="25"/>
+        <instance addr="0x26022447" reg_inst="26"/>
+        <instance addr="0x26021447" reg_inst="27"/>
+        <instance addr="0x27028447" reg_inst="28"/>
+        <instance addr="0x27024447" reg_inst="29"/>
+        <instance addr="0x27022447" reg_inst="30"/>
+        <instance addr="0x27021447" reg_inst="31"/>
+    </register>
+    <register name="EQ_CORE_FIR_WOF">
+        <instance addr="0x20028448" reg_inst="0"/>
+        <instance addr="0x20024448" reg_inst="1"/>
+        <instance addr="0x20022448" reg_inst="2"/>
+        <instance addr="0x20021448" reg_inst="3"/>
+        <instance addr="0x21028448" reg_inst="4"/>
+        <instance addr="0x21024448" reg_inst="5"/>
+        <instance addr="0x21022448" reg_inst="6"/>
+        <instance addr="0x21021448" reg_inst="7"/>
+        <instance addr="0x22028448" reg_inst="8"/>
+        <instance addr="0x22024448" reg_inst="9"/>
+        <instance addr="0x22022448" reg_inst="10"/>
+        <instance addr="0x22021448" reg_inst="11"/>
+        <instance addr="0x23028448" reg_inst="12"/>
+        <instance addr="0x23024448" reg_inst="13"/>
+        <instance addr="0x23022448" reg_inst="14"/>
+        <instance addr="0x23021448" reg_inst="15"/>
+        <instance addr="0x24028448" reg_inst="16"/>
+        <instance addr="0x24024448" reg_inst="17"/>
+        <instance addr="0x24022448" reg_inst="18"/>
+        <instance addr="0x24021448" reg_inst="19"/>
+        <instance addr="0x25028448" reg_inst="20"/>
+        <instance addr="0x25024448" reg_inst="21"/>
+        <instance addr="0x25022448" reg_inst="22"/>
+        <instance addr="0x25021448" reg_inst="23"/>
+        <instance addr="0x26028448" reg_inst="24"/>
+        <instance addr="0x26024448" reg_inst="25"/>
+        <instance addr="0x26022448" reg_inst="26"/>
+        <instance addr="0x26021448" reg_inst="27"/>
+        <instance addr="0x27028448" reg_inst="28"/>
+        <instance addr="0x27024448" reg_inst="29"/>
+        <instance addr="0x27022448" reg_inst="30"/>
+        <instance addr="0x27021448" reg_inst="31"/>
+    </register>
+    <capture_group node_inst="0:31">
+        <capture_register reg_inst="0:31" reg_name="EQ_CORE_FIR"/>
+        <capture_register reg_inst="0:31" reg_name="EQ_CORE_FIR_MASK"/>
+        <capture_register reg_inst="0:31" reg_name="EQ_CORE_FIR_ACT0"/>
+        <capture_register reg_inst="0:31" reg_name="EQ_CORE_FIR_ACT1"/>
+        <capture_register reg_inst="0:31" reg_name="EQ_CORE_FIR_WOF"/>
+    </capture_group>
+    <rule attn_type="CS" node_inst="0:31">
+        <!-- FIR & ~MASK & ~ACT0 & ~ACT1 -->
+        <expr type="and">
+            <expr type="reg" value1="EQ_CORE_FIR"/>
+            <expr type="not">
+                <expr type="reg" value1="EQ_CORE_FIR_MASK"/>
+            </expr>
+            <expr type="not">
+                <expr type="reg" value1="EQ_CORE_FIR_ACT0"/>
+            </expr>
+            <expr type="not">
+                <expr type="reg" value1="EQ_CORE_FIR_ACT1"/>
+            </expr>
+        </expr>
+    </rule>
+    <rule attn_type="RE" node_inst="0:31">
+        <!-- WOF & ~MASK & ~ACT0 & ACT1 -->
+        <expr type="and">
+            <expr type="reg" value1="EQ_CORE_FIR_WOF"/>
+            <expr type="not">
+                <expr type="reg" value1="EQ_CORE_FIR_MASK"/>
+            </expr>
+            <expr type="not">
+                <expr type="reg" value1="EQ_CORE_FIR_ACT0"/>
+            </expr>
+            <expr type="reg" value1="EQ_CORE_FIR_ACT1"/>
+        </expr>
+    </rule>
+    <rule attn_type="UCS" node_inst="0:31">
+        <!-- FIR & ~MASK & ACT0 & ACT1 -->
+        <expr type="and">
+            <expr type="reg" value1="EQ_CORE_FIR"/>
+            <expr type="not">
+                <expr type="reg" value1="EQ_CORE_FIR_MASK"/>
+            </expr>
+            <expr type="reg" value1="EQ_CORE_FIR_ACT0"/>
+            <expr type="reg" value1="EQ_CORE_FIR_ACT1"/>
+        </expr>
+    </rule>
     <bit pos="0">IFU SRAM recoverable error (ICACHE parity error, etc)</bit>
     <bit pos="1">TC checkstop</bit>
     <bit pos="2">IFU RegFile recoverable error</bit>
