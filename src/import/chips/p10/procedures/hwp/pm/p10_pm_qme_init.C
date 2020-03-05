@@ -463,6 +463,7 @@ fapi2::ReturnCode initQmeBoot(
     fapi2::buffer<uint64_t> l_bceBarReg;
     fapi2::buffer<uint64_t> l_bceCsrReg;
     fapi2::buffer<uint64_t> l_qmcrReg;
+    fapi2::buffer<uint64_t> l_qmcData;
     uint32_t l_bceTimeOut = TIMEOUT_COUNT;
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     std::vector<uint64_t> l_topo_scoms;
@@ -470,6 +471,8 @@ fapi2::ReturnCode initQmeBoot(
     FAPI_INF(">> initQmeBoot");
 
     // mc_or target will be used for putscom too
+    auto l_eq_mc_and  =
+        i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_AND >(fapi2::MCGROUP_GOOD_EQ);
     auto l_eq_mc_or  =
         i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_OR >(fapi2::MCGROUP_GOOD_EQ);
     auto l_eq_mc_cmp =
@@ -500,7 +503,7 @@ fapi2::ReturnCode initQmeBoot(
         // and includes the region size. The hardware is read as some systems
         // may move HOMER upon PM Restart actions.
         FAPI_TRY(fapi2::getScom(l_eq_mc_cmp, QME_BCEBAR0, l_bceBarReg));
-        FAPI_DBG("l_bceBarReg BEFORE: 0x%016llX", l_bceBarReg);
+        FAPI_DBG("l_bceBar0Reg BEFORE: 0x%016llX", l_bceBarReg);
 
         // Clear the size field to set specifically for QME
         l_bceBarReg.clearBit(61, 3);
@@ -508,7 +511,7 @@ fapi2::ReturnCode initQmeBoot(
         FAPI_DBG("l_cpmrBase AFTER: 0x%016llX", l_cpmrBase);
 
         FAPI_TRY( putScom( l_eq_mc_or, QME_BCEBAR0, l_cpmrBase ) );
-
+        FAPI_TRY( putScom( l_eq_mc_or, QME_BCEBAR1, l_cpmrBase ) );
         // Check for invalid hardare state
         FAPI_TRY( getScom( l_eq_mc_or, QME_BCECSR, l_bceCsrReg ) );
 
@@ -555,7 +558,7 @@ fapi2::ReturnCode initQmeBoot(
         do
         {
             fapi2::delay(QME_POLLTIME_MS * 1000, QME_POLLTIME_MCYCLES * 1000 * 1000);
-            FAPI_TRY( getScom( l_eq_mc_or, QME_BCECSR, l_bceCsrReg ) );
+            FAPI_TRY( getScom( l_eq_mc_and, QME_BCECSR, l_bceCsrReg ) );
             l_bceCsrReg.extractToRight(l_qmeRunningCount, QME_BCECSR_NUM_BLOCKS, QME_BCECSR_NUM_BLOCKS_LEN );
             FAPI_DBG("l_qmeRunningCount LOOP: %u (0x%X)", l_qmeRunningCount, l_qmeRunningCount);
             ++loop_count;

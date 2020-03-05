@@ -1438,10 +1438,7 @@ fapi2::ReturnCode initCpmrAttribute( Homerlayout_t   *i_pChipHomer,
     l_tempCount     =   l_imgSectn.iv_sectnLength;
     i_qmeBuildRecord.getSection( "QME Common Ring", l_imgSectn );
     l_tempCount    +=   l_imgSectn.iv_sectnLength;
-    i_qmeBuildRecord.getSection( "QME Inst Sectn", l_imgSectn );
-    l_tempCount    +=   l_imgSectn.iv_sectnLength;
-
-    l_blockCount    = l_tempCount >> QME_BLK_SIZE_SHIFT;
+    l_blockCount    =   (( l_tempCount + BCE_RD_BLOCK_SIZE - 1 ) >>  SHIFT_RD_BLOCK_SIZE );
 
     FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_QME_HCODE_BLOCK_COUNT,
                             FAPI_SYSTEM,
