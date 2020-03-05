@@ -861,6 +861,7 @@ static void adjustMemoryMap( TargetService& i_targetService )
 
             l_swapAttrs[ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID] = l_topologyId;
             l_swapAttrs[ATTR_XSCOM_BASE_ADDRESS] = l_xscomBAR;
+            l_pTopLevel->setAttr<ATTR_XSCOM_BASE_ADDRESS>(l_curXscomBAR);
         }
 
         // Compute default LPC BAR
