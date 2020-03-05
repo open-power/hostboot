@@ -828,14 +828,15 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
         }
         else if ( TYPE_MCC == trgtType && TYPE_OCMB_CHIP == i_connType )
         {
-            // i_connPos is position relative to MCC (0-1)
-            itr = std::find_if( list.begin(), list.end(),
-                    [&](const TargetHandle_t & t)
-                    {
-                        uint32_t ocmbPos = getTargetPosition(t);
-                        return (trgtPos   == (ocmbPos / MAX_OCMB_PER_MCC)) &&
-                               (i_connPos == (ocmbPos % MAX_OCMB_PER_MCC));
-                    } );
+            // getTargetPosition for OCMBs will return the position relative to
+            // the node. This won't work for how we typically handle getting
+            // the child target, so we instead just get the child OMI and then
+            // get the OCMB from the OMI. This will work because the OMI and
+            // OCMB have a 1-to-1 relationship (see above where we return the
+            // only one in the list for OMI to OCMB connections).
+            TargetHandle_t omi = getConnectedChild( i_target, TYPE_OMI,
+                                                    i_connPos );
+            o_child = getConnectedChild( omi, TYPE_OCMB_CHIP, 0 );
         }
         else if ( TYPE_MC == trgtType && TYPE_OMIC == i_connType )
         {
