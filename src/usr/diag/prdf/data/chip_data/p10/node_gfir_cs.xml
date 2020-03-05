@@ -54,12 +54,12 @@
     <bit child_node="CFIR_IOHS_CS_RE_SPA" node_inst="5" pos="29">XSTOP Register - after masking - OLD XFIR</bit>
     <bit child_node="CFIR_IOHS_CS_RE_SPA" node_inst="6" pos="30">XSTOP Register - after masking - OLD XFIR</bit>
     <bit child_node="CFIR_IOHS_CS_RE_SPA" node_inst="7" pos="31">XSTOP Register - after masking - OLD XFIR</bit>
-    <bit child_node="CFIR_EQ_CS_RE" node_inst="0" pos="32">XSTOP Register - after masking - OLD XFIR</bit>
-    <bit child_node="CFIR_EQ_CS_RE" node_inst="1" pos="33">XSTOP Register - after masking - OLD XFIR</bit>
-    <bit child_node="CFIR_EQ_CS_RE" node_inst="2" pos="34">XSTOP Register - after masking - OLD XFIR</bit>
-    <bit child_node="CFIR_EQ_CS_RE" node_inst="3" pos="35">XSTOP Register - after masking - OLD XFIR</bit>
-    <bit child_node="CFIR_EQ_CS_RE" node_inst="4" pos="36">XSTOP Register - after masking - OLD XFIR</bit>
-    <bit child_node="CFIR_EQ_CS_RE" node_inst="5" pos="37">XSTOP Register - after masking - OLD XFIR</bit>
-    <bit child_node="CFIR_EQ_CS_RE" node_inst="6" pos="38">XSTOP Register - after masking - OLD XFIR</bit>
-    <bit child_node="CFIR_EQ_CS_RE" node_inst="7" pos="39">XSTOP Register - after masking - OLD XFIR</bit>
+    <bit child_node="CFIR_EQ_CS" node_inst="0" pos="32">XSTOP Register - after masking - OLD XFIR</bit>
+    <bit child_node="CFIR_EQ_CS" node_inst="1" pos="33">XSTOP Register - after masking - OLD XFIR</bit>
+    <bit child_node="CFIR_EQ_CS" node_inst="2" pos="34">XSTOP Register - after masking - OLD XFIR</bit>
+    <bit child_node="CFIR_EQ_CS" node_inst="3" pos="35">XSTOP Register - after masking - OLD XFIR</bit>
+    <bit child_node="CFIR_EQ_CS" node_inst="4" pos="36">XSTOP Register - after masking - OLD XFIR</bit>
+    <bit child_node="CFIR_EQ_CS" node_inst="5" pos="37">XSTOP Register - after masking - OLD XFIR</bit>
+    <bit child_node="CFIR_EQ_CS" node_inst="6" pos="38">XSTOP Register - after masking - OLD XFIR</bit>
+    <bit child_node="CFIR_EQ_CS" node_inst="7" pos="39">XSTOP Register - after masking - OLD XFIR</bit>
 </attn_node>

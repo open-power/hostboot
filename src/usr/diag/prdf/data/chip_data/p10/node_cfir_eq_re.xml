@@ -2,12 +2,11 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/diag/prdf/data/chip_data/p10/node_cfir_eq_cs_re.xml $ -->
+<!-- $Source: src/usr/diag/prdf/data/chip_data/p10/node_cfir_eq_re.xml $    -->
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
 <!-- Contributors Listed Below - COPYRIGHT 2020                             -->
-<!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
@@ -23,27 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<attn_node model_ec="P10_10" name="CFIR_EQ_CS_RE" reg_type="SCOM">
-    <register name="CFIR_EQ_XSTOP">
-        <instance addr="0x20040000" reg_inst="0"/>
-        <instance addr="0x21040000" reg_inst="1"/>
-        <instance addr="0x22040000" reg_inst="2"/>
-        <instance addr="0x23040000" reg_inst="3"/>
-        <instance addr="0x24040000" reg_inst="4"/>
-        <instance addr="0x25040000" reg_inst="5"/>
-        <instance addr="0x26040000" reg_inst="6"/>
-        <instance addr="0x27040000" reg_inst="7"/>
-    </register>
-    <register name="CFIR_EQ_XSTOP_MASK">
-        <instance addr="0x20040040" reg_inst="0"/>
-        <instance addr="0x21040040" reg_inst="1"/>
-        <instance addr="0x22040040" reg_inst="2"/>
-        <instance addr="0x23040040" reg_inst="3"/>
-        <instance addr="0x24040040" reg_inst="4"/>
-        <instance addr="0x25040040" reg_inst="5"/>
-        <instance addr="0x26040040" reg_inst="6"/>
-        <instance addr="0x27040040" reg_inst="7"/>
-    </register>
+<attn_node model_ec="P10_10" name="CFIR_EQ_RE" reg_type="SCOM">
     <register name="CFIR_EQ_RECOV">
         <instance addr="0x20040001" reg_inst="0"/>
         <instance addr="0x21040001" reg_inst="1"/>
@@ -65,29 +44,19 @@
         <instance addr="0x27040041" reg_inst="7"/>
     </register>
     <capture_group node_inst="0:7">
-        <capture_register reg_inst="0:7" reg_name="CFIR_EQ_XSTOP"/>
-        <capture_register reg_inst="0:7" reg_name="CFIR_EQ_XSTOP_MASK"/>
         <capture_register reg_inst="0:7" reg_name="CFIR_EQ_RECOV"/>
         <capture_register reg_inst="0:7" reg_name="CFIR_EQ_RECOV_MASK"/>
     </capture_group>
-    <rule attn_type="CS" node_inst="0:7">
-        <expr type="and">
-            <expr type="reg" value1="CFIR_EQ_XSTOP"/>
-            <expr type="not">
-                <expr type="reg" value1="CFIR_EQ_XSTOP_MASK"/>
-            </expr>
-            <expr type="int" value1="0x0FFFFFFFFFFFFFFF"/>
-        </expr>
-    </rule>
     <rule attn_type="RE" node_inst="0:7">
         <expr type="and">
             <expr type="reg" value1="CFIR_EQ_RECOV"/>
             <expr type="not">
                 <expr type="reg" value1="CFIR_EQ_RECOV_MASK"/>
             </expr>
-            <expr type="int" value1="0x0FFFFFFFFFFFFFFF"/>
+            <expr type="int" value1="0x2FFFFFFFFFFFFFFF"/>
         </expr>
     </rule>
+    <bit pos="2">recovery with any local checkstop</bit>
     <bit child_node="EQ_LOCAL_FIR" node_inst="0,1,2,3,4,5,6,7" pos="4">Local FIR</bit>
     <bit child_node="EQ_L2_FIR" node_inst="0,4,8,12,16,20,24,28" pos="9">L2 FIR Register</bit>
     <bit child_node="EQ_L2_FIR" node_inst="1,5,9,13,17,21,25,29" pos="10">L2 FIR Register</bit>
