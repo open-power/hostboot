@@ -148,7 +148,7 @@ struct spiSlaveDevice
 
     enum class slaveDeviceType_t : uint8_t
     {
-        NUVOTON_TPM               = 0x01,
+        TCG_SPI_TPM               = 0x01,
         SEEPROM_MICROCHIP_25CSM04 = 0x02,
 
         UNKNOWN                   = 0xFF

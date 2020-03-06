@@ -88,43 +88,23 @@ void calcSpiDeviceDescription(spiSlaveDevice& io_deviceInfo)
     switch (io_deviceInfo.deviceType)
     {
     case slaveDeviceType_t::SEEPROM_MICROCHIP_25CSM04:
-        deviceType = "25csm04";
-        break;
-    case slaveDeviceType_t::NUVOTON_TPM:
-        deviceType = "tcg.tpm_spi_ptp";
-        break;
-    default: break;
-    }
-
-    switch (io_deviceInfo.deviceType)
-    {
-    case slaveDeviceType_t::SEEPROM_MICROCHIP_25CSM04:
         vendor = "microchip";
+        deviceType = "25CSM04";
+        dataTypeOrPurpose = "seeprom";
+        hwSubsystemOrScope = "processor";
         break;
-    case slaveDeviceType_t::NUVOTON_TPM:
-        vendor = "nuvoton";
-        break;
-    default: break;
-    }
-
-    switch (io_deviceInfo.masterEngine)
-    {
-    case 0: // Engines 0 and 1 are SBE SEEPROMS
-    case 1:
-        dataTypeOrPurpose = "boot-image";
-        hwSubsystemOrScope = "sbe";
-        break;
-    case 2: // Engine 2 holds measurement/MVPD/WOF-related data
-        dataTypeOrPurpose = "mvpd";
-        hwSubsystemOrScope = "module";
-        break;
-    case 3: // Engine 3 holds measurement/MVPD/keystore-related data
-        dataTypeOrPurpose = "keystore";
-        hwSubsystemOrScope = "module";
-        break;
-    case 4: // Engine 4 is a TPM
+    case slaveDeviceType_t::TCG_SPI_TPM:
+        vendor = "tcg";
+        deviceType = "tpm_tis-spi";
         dataTypeOrPurpose = "tpm";
         hwSubsystemOrScope = "host";
+        break;
+    case slaveDeviceType_t::UNKNOWN:
+        break;
+    default:
+        TRACFCOMP(g_trac_spi,
+                  ERR_MRK"calcSpiDeviceDescription: Unknown SPI deviceType 0x%08x",
+                  io_deviceInfo.deviceType);
         break;
     }
 
@@ -349,7 +329,7 @@ void collectSpiSlaveDeviceInfo(spiSlaveDevice& o_devInfo,
         o_devInfo.devicePurpose = spiSlaveDevice::slaveDevicePurpose_t::SEEPROM;
         break;
     case 4:
-        o_devInfo.deviceType = spiSlaveDevice::slaveDeviceType_t::NUVOTON_TPM;
+        o_devInfo.deviceType = spiSlaveDevice::slaveDeviceType_t::TCG_SPI_TPM;
         o_devInfo.devicePurpose = spiSlaveDevice::slaveDevicePurpose_t::TPM;
         break;
     default:
