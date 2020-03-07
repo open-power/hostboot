@@ -38,7 +38,6 @@
 #include <p10_omi_train.H>
 #include <p10_scom_omi.H>
 #include <p10_scom_omic.H>
-#include <p10_io_lib.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
