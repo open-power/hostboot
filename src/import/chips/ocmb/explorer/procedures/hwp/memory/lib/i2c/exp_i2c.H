@@ -40,7 +40,6 @@
 #include <i2c_access.H>
 #include <vector>
 
-// reused TARGTIDFORMAT defined in generic/memory/lib/utils/mss_generic_check.H
 #ifdef __PPE__
     #include <exp_i2c_fields.H>
     #include <endian_utils.H>
@@ -54,6 +53,8 @@
     //Macro
     #define MSSTARGID mss::c_str(i_target)
 #endif
+
+// reused TARGTIDFORMAT defined in generic/memory/lib/utils/mss_generic_check.H
 
 namespace mss
 {

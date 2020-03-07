@@ -247,8 +247,44 @@ inline fapi2::ReturnCode invalid_value(const fapi2::Target<T>& i_target,
 fapi_try_exit:
     return fapi2::current_err;
 
-} // fail_for_invalid_value
+} // invalid_value
 
+///
+/// @brief Checks conditional passes and implements traces & exits if it fails
+/// @tparam T fapi2 target type
+/// @tparam IT input data type
+/// @tparam FFDC error callout code type
+/// @param[in] i_target fapi2 target
+/// @param[in] i_conditional conditional that we are testing against
+/// @param[in] i_byte_index byte index
+/// @param[in] i_data debug data
+/// @param[in] i_ffdc_codes FFDC code
+/// @param[in] i_err_str error string - defaulted to ""
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template< typename OT, fapi2::TargetType T, typename IT, typename FFDC >
+inline fapi2::ReturnCode invalid_type_conversion(const fapi2::Target<T>& i_target,
+        const IT& i_data,
+        const FFDC i_ffdc_codes,
+        const char* i_err_str = "")
+{
+    OT l_temp = static_cast<OT>(i_data);
+
+    FAPI_ASSERT( i_data == l_temp,
+                 fapi2::MSS_CONVERSION_ERROR()
+                 .set_ORIGINAL_VAL(i_data)
+                 .set_CONVERTED_VAL(l_temp)
+                 .set_TARGET(i_target)
+                 .set_FUNCTION(i_ffdc_codes),
+                 "Conversion error between original %d to converted %d value for " TARGTIDFORMAT,
+                 i_data, l_temp, TARGTID);
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+} // invalid_type_conversion
 } // check
 }// mss
 
