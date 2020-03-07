@@ -25,7 +25,7 @@
 #ifndef _P10_RING_PROPERTIES_H_
 #define _P10_RING_PROPERTIES_H_
 
-static const uint8_t RING_TABLE_VERSION_DOC = 21;
+static const uint8_t RING_TABLE_VERSION_DOC = 22;
 static const uint8_t RING_TABLE_VERSION_MVPD = 21;
 static const uint8_t RING_TABLE_VERSION_EKB = 21;
 
@@ -74,6 +74,7 @@ enum RingOffset
     n0_fure                  = 0,
     n0_gptr                  = 1,
     n0_time                  = 2,
+    n0_abst                  = 3,
     // Instance Rings
     n0_repr                  = (0 | INSTANCE_RING_MARK),
 };
@@ -82,7 +83,7 @@ static const ChipletData_t g_chipletData =
 {
     0x02, // Base chiplet/instance ID.
     1,  // Number of chiplet instances
-    3,  // 3 common rings for N0 Chiplet
+    4,  // 4 common rings for N0 Chiplet
     1,  // 1 instance specific rings for N0 Chiplet
 };
 }; // end of namespace N0
@@ -98,6 +99,8 @@ enum RingOffset
     n1_nmmu1_fure            = 3,
     n1_nmmu1_gptr            = 4,
     n1_nmmu1_time            = 5,
+    n1_abst                  = 6,
+    n1_nmmu1_abst            = 7,
     // Instance Rings
     n1_repr                  = (0 | INSTANCE_RING_MARK),
     n1_nmmu1_repr            = (1 | INSTANCE_RING_MARK),
@@ -107,7 +110,7 @@ static const ChipletData_t g_chipletData =
 {
     0x03, // Base chiplet/instance ID.
     1,  // Number of chiplet instances
-    6,  // 6 common rings for N1 Chiplet
+    8,  // 8 common rings for N1 Chiplet
     2,  // 2 instance specific rings for N1 Chiplet
 };
 }; // end of namespace N1
@@ -564,6 +567,8 @@ enum RingOffset
     ec_l3_cmsk               = 26,
     ec_l3_inex               = 27,
     ec_l3_mode               = 28,
+    ec_cl2_abst              = 29,
+    ec_mma_abst              = 30,
     // Instance Rings
     eq_repr                  = (0 | INSTANCE_RING_MARK),
     eq_clkadj_repr           = (1 | INSTANCE_RING_MARK),
@@ -585,7 +590,7 @@ static const ChipletData_t g_chipletData =
 {
     0x20, // Base chiplet/instance ID.
     8,  // Number of chiplet instances
-    29, // 29 common rings for EQ Chiplet
+    31, // 31 common rings for EQ Chiplet
     14, // 14 instance specific rings for EQ Chiplet
 };
 }; // end of namespace EQ
@@ -850,6 +855,11 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {"ec_l3_cmsk"              , 0x2003020A, EQ::ec_l3_cmsk                , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME            }, // 250
     {"ec_l3_inex"              , 0x2003020B, EQ::ec_l3_inex                , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME            }, // 251
     {"ec_l3_mode"              , 0x20030201, EQ::ec_l3_mode                , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME            }, // 252
+    {"n0_abst"                 , 0x02036405, N0::n0_abst                   , N0_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 253
+    {"n1_abst"                 , 0x03035405, N1::n1_abst                   , N1_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 254
+    {"n1_nmmu1_abst"           , 0x03030205, N1::n1_nmmu1_abst             , N1_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 255
+    {"ec_cl2_abst"             , 0x20032005, EQ::ec_cl2_abst               , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 256
+    {"ec_mma_abst"             , 0x20830005, EQ::ec_mma_abst               , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 257
 };
 #endif
 
@@ -1112,6 +1122,11 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {EQ::ec_l3_cmsk                , EQ_TYPE   }, // 250
     {EQ::ec_l3_inex                , EQ_TYPE   }, // 251
     {EQ::ec_l3_mode                , EQ_TYPE   }, // 252
+    {N0::n0_abst                   , N0_TYPE   }, // 253
+    {N1::n1_abst                   , N1_TYPE   }, // 254
+    {N1::n1_nmmu1_abst             , N1_TYPE   }, // 255
+    {EQ::ec_cl2_abst               , EQ_TYPE   }, // 256
+    {EQ::ec_mma_abst               , EQ_TYPE   }, // 257
 };
 #endif  // __PPE__
 

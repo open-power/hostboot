@@ -290,9 +290,14 @@ enum RingID
     ec_l3_cmsk               = 250, //0xFA
     ec_l3_inex               = 251, //0xFB
     ec_l3_mode               = 252, //0xFC
-    NUM_RING_IDS_EKB         = 92,
+    n0_abst                  = 253, //0xFD
+    n1_abst                  = 254, //0xFE
+    n1_nmmu1_abst            = 255, //0xFF
+    ec_cl2_abst              = 256, //0x100
+    ec_mma_abst              = 257, //0x101
+    NUM_RING_IDS_EKB         = 97,
 
-    NUM_RING_IDS             = 253, // = NUM_RING_IDS_MVPD + NUM_RING_IDS_EKB
+    NUM_RING_IDS             = 258, // = NUM_RING_IDS_MVPD + NUM_RING_IDS_EKB
 }; // enum RingID
 
 #endif  // _P10_RING_ID_H_
