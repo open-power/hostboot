@@ -209,6 +209,7 @@ fapi2::ReturnCode fir_or_pll_fail( const fapi2::Target<T>& i_target,
 }
 
 #endif
+
 ///
 /// @brief Checks conditional passes and implements traces & exits if it fails
 /// @tparam T fapi2 target type
@@ -236,11 +237,8 @@ inline fapi2::ReturnCode invalid_value(const fapi2::Target<T>& i_target,
                 set_BYTE(i_byte_index).
                 set_TARGET(i_target).
                 set_FFDC_CODE(i_ffdc_codes),
-                "%s Byte %d, Data returned: %d for " TARGTIDFORMAT,
-                i_err_str,
-                i_byte_index,
-                i_data,
-                TARGTID);
+                "%s. Byte %d, Data returned: %d for " TARGTIDFORMAT,
+                i_err_str, i_byte_index, i_data, TARGTID );
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -251,6 +249,7 @@ fapi_try_exit:
 
 ///
 /// @brief Checks conditional passes and implements traces & exits if it fails
+/// @tparam OT data type we want to check safe conversion against (explicit)
 /// @tparam T fapi2 target type
 /// @tparam IT input data type
 /// @tparam FFDC error callout code type
@@ -276,8 +275,8 @@ inline fapi2::ReturnCode invalid_type_conversion(const fapi2::Target<T>& i_targe
                  .set_CONVERTED_VAL(l_temp)
                  .set_TARGET(i_target)
                  .set_FUNCTION(i_ffdc_codes),
-                 "Conversion error between original %d to converted %d value for " TARGTIDFORMAT,
-                 i_data, l_temp, TARGTID);
+                 "%s. Conversion error between original %d to converted %d value for " TARGTIDFORMAT,
+                 i_err_str, i_data, l_temp, TARGTID );
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -285,6 +284,45 @@ fapi_try_exit:
     return fapi2::current_err;
 
 } // invalid_type_conversion
+
+///
+/// @brief Checks conditional passes and implements traces & exits if it fails
+/// @tparam T fapi2 target type
+/// @tparam IT index type
+/// @tparam VT vector data type
+/// @tparam FFDC error callout code type
+/// @param[in] i_target fapi2 target
+/// @param[in] i_index desired vector index
+/// @param[in] i_data vector data
+/// @param[in] i_ffdc_codes FFDC code
+/// @param[in] i_err_str error string - defaulted to ""
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template< fapi2::TargetType T, typename IT, typename VT, typename FFDC >
+fapi2::ReturnCode index_within_bounds(const fapi2::Target<T>& i_target,
+                                      const IT i_index,
+                                      const std::vector<VT>& i_data,
+                                      const FFDC i_ffdc_codes,
+                                      const char* i_err_str = "")
+{
+    const auto l_size = i_data.size();
+
+    FAPI_ASSERT( i_index < l_size,
+                 fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
+                 .set_INDEX(i_index)
+                 .set_LIST_SIZE(l_size)
+                 .set_FUNCTION(i_ffdc_codes)
+                 .set_TARGET(i_target),
+                 "%s. Out of bounds indexing (with %d) on a list of size %d for " TARGTIDFORMAT,
+                 i_err_str, i_index, l_size, TARGTID );
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+} // invalid_type_conversion
+
 } // check
 }// mss
 

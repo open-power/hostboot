@@ -184,23 +184,14 @@ inline fapi2::ReturnCode get_field(const fapi2::Target<T>& i_target,
                                    OT& o_value)
 {
     const size_t BYTE = F.get_byte(i_data);
-
-    FAPI_ASSERT( BYTE < i_data.size(),
-                 fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
-                 .set_INDEX(BYTE)
-                 .set_LIST_SIZE(i_data.size())
-                 .set_FUNCTION(i_ffdc_codes)
-                 .set_TARGET(i_target),
-                 "Out of bounds indexing (with %d) on a list of size %d for " TARGTIDFORMAT,
-                 BYTE,
-                 i_data.size(),
-                 TARGTID);
+    FAPI_TRY(check::index_within_bounds(i_target, BYTE, i_data, i_ffdc_codes));
 
     {
         // clear out stale state
         o_value = 0;
 
         // Extracting desired bits
+        // API enforces uint8_t vector data, so no conversion check needed to uint8_t buffer
         fapi2::buffer<uint8_t>(i_data[BYTE]).extractToRight<F.get_start(), F.get_length()>(o_value);
 
         FAPI_DBG(TARGTIDFORMAT " data[%d] = 0x%02x. Field with start bit %d, bit len %d, has data 0x%02x.",
@@ -211,8 +202,6 @@ inline fapi2::ReturnCode get_field(const fapi2::Target<T>& i_target,
                  F.get_length(),
                  o_value);
     }
-
-    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -244,17 +233,7 @@ inline fapi2::ReturnCode set_field(const fapi2::Target<T>& i_target,
 {
     const size_t BYTE = F.get_byte(io_data);
 
-    FAPI_ASSERT( BYTE < io_data.size(),
-                 fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
-                 .set_INDEX(BYTE)
-                 .set_LIST_SIZE(io_data.size())
-                 .set_FUNCTION(i_ffdc_codes)
-                 .set_TARGET(i_target),
-                 "Out of bounds indexing (with %d) on a list of size %d for %s",
-                 BYTE,
-                 io_data.size(),
-                 spd::c_str(i_target));
-
+    FAPI_TRY(check::index_within_bounds(i_target, BYTE, io_data, i_ffdc_codes));
     FAPI_TRY(check::invalid_type_conversion<uint8_t>(i_target, i_setting, i_ffdc_codes));
 
     {
@@ -273,8 +252,6 @@ inline fapi2::ReturnCode set_field(const fapi2::Target<T>& i_target,
              F.get_start(),
              F.get_length(),
              i_setting);
-
-    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
