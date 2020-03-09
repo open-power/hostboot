@@ -136,9 +136,8 @@ sub main
 
     my ($packName,$args) = @_;
 
-    # @HBBL_SIZE_SYNC@
-    # Offset from Hostboot's HRMOR (2MB + HBBL_MAX_SIZE + 12K exception vectors)
-    my $traceAddr = 0x20B000;
+    # Offset from Hostboot's HRMOR (2MB + HBBL_MAX_SIZE + 12K exception vectors + size of TI area (128B))
+    my $traceAddr = 0x20B080;
     my $traceSize = 64;
 
     # Parse trace address from options.

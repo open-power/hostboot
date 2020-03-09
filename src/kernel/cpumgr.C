@@ -122,15 +122,15 @@ void CpuManager::requestShutdown(uint64_t i_status, uint32_t i_error_data)
 
     // If the shutdown was not called with a Good shutdown status
     // then we know we are shutting down due to error.  We need to
-    // figure out if the error provided is a PLID or reasoncode
+    // figure out if the error provided is an EID or reasoncode
     // and write it appropriately.
-    // Hostboot PLIDs always start with 0x9 (32-bit)
-    static const uint64_t PLID_MASK = 0x0000000090000000;
+    // Hostboot EIDs always start with 0x9 (32-bit)
+    static const uint64_t EID_MASK = 0x0000000090000000;
     if (i_status != SHUTDOWN_STATUS_GOOD)
     {
-        if ((i_status & 0x00000000F0000000) == PLID_MASK)
+        if ((i_status & 0x00000000F0000000) == EID_MASK)
         {
-            termWritePlid(TI_SHUTDOWN, i_status);
+            termWriteEid(TI_SHUTDOWN, i_status);
         }
         else
         {

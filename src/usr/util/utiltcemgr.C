@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -305,12 +305,13 @@ UtilTceMgr::UtilTceMgr(const uint64_t i_tableAddr, const size_t i_tableSize)
     auto errl = UtilTceMgr::initTceInHdw();
     if (errl)
     {
-        uint32_t errl_plid = errl->plid();
-        TRACFCOMP(g_trac_tce,"UtilTceMgr::UtilTceMgr initTceInHdw() failed with rc=0x%X, plid=0x%X. Shutting down",ERRL_GETRC_SAFE(errl), errl_plid);
+        uint32_t errl_eid = errl->eid();
+        TRACFCOMP(g_trac_tce,"UtilTceMgr::UtilTceMgr initTceInHdw() failed with rc=0x%X. Shutting down"
+                  TRACE_ERR_FMT, ERRL_GETRC_SAFE(errl), TRACE_ERR_ARGS(errl));
         errl->setSev(ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM);
         errl->collectTrace(UTILTCE_TRACE_NAME,KILOBYTE);
         errlCommit( errl, UTIL_COMP_ID );
-        INITSERVICE::doShutdown(errl_plid, true);
+        INITSERVICE::doShutdown(errl_eid, true);
     }
 
 };

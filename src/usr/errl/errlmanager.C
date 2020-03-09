@@ -601,7 +601,7 @@ void ErrlManager::errlogMsgHndlr ()
                                    "Terminating error was committed"
                                    " errlmanager is reqesting a shutdown.");
 
-                        INITSERVICE::doShutdown(l_err->plid(), true);
+                        INITSERVICE::doShutdown(l_err->eid(), true);
 
                         TRACDCOMP( g_trac_errl,
                                 INFO_MRK"shutdown in progress" );

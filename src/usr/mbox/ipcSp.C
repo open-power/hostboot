@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -165,9 +165,9 @@ void IpcSp::msgHandler()
 
                 if (err)
                 {
-                    const auto l_errPlid = err->plid();
+                    const auto l_errEid = err->eid();
                     errlCommit(err, IPC_COMP_ID);
-                    INITSERVICE::doShutdown(l_errPlid, true);
+                    INITSERVICE::doShutdown(l_errEid, true);
                 }
 
                 if(mod_loaded)
@@ -185,10 +185,10 @@ void IpcSp::msgHandler()
                 err = MBOX::send(MBOX::HB_POP_TPM_INFO_MSGQ, msg, msg->data[1]);
                 if (err)
                 {
-                    const auto l_errPlid = err->plid();
+                    const auto l_errEid = err->eid();
                     errlCommit(err,IPC_COMP_ID);
                     msg_free(msg);
-                    INITSERVICE::doShutdown(l_errPlid, true);
+                    INITSERVICE::doShutdown(l_errEid, true);
                 }
                 break;
             }
@@ -223,9 +223,9 @@ void IpcSp::msgHandler()
                 if (err)
                 {
                     TRACFCOMP( g_trac_ipc, "In ipcSp: populate_node_attribute errored - must shutdown now!!!");
-                    uint32_t l_errPlid = err->plid();
+                    uint32_t l_errEid = err->eid();
                     errlCommit(err, IPC_COMP_ID);
-                    INITSERVICE::doShutdown(l_errPlid, true);
+                    INITSERVICE::doShutdown(l_errEid, true);
                 }
 
                 if(mod_loaded)
@@ -243,9 +243,9 @@ void IpcSp::msgHandler()
                 err = MBOX::send(MBOX::HB_POP_ATTR_MSGQ, msg, msg->data[1] );
                 if (err)
                 {
-                    uint32_t l_errPlid = err->plid();
+                    uint32_t l_errEid = err->eid();
                     errlCommit(err,IPC_COMP_ID);
-                    INITSERVICE::doShutdown(l_errPlid, true);
+                    INITSERVICE::doShutdown(l_errEid, true);
                 }
                 break;
 
@@ -299,9 +299,9 @@ void IpcSp::msgHandler()
                 err = MBOX::send(MBOX::HB_SBE_SYSCONFIG_MSGQ, msg, msg->data[1] );
                 if (err)
                 {
-                    uint32_t l_errPlid = err->plid();
+                    uint32_t l_errEid = err->eid();
                     errlCommit(err,IPC_COMP_ID);
-                    INITSERVICE::doShutdown(l_errPlid, true);
+                    INITSERVICE::doShutdown(l_errEid, true);
                 }
                 break;
              }
@@ -339,9 +339,9 @@ void IpcSp::msgHandler()
                 if(err)
                 {
                     TRACFCOMP( g_trac_ipc, "In ipcSp: SBEIO::sendSystemConfig errored - must shutdown now!!!");
-                    uint32_t l_errPlid = err->plid();
+                    uint32_t l_errEid = err->eid();
                     errlCommit(err, IPC_COMP_ID);
-                    INITSERVICE::doShutdown(l_errPlid, true);
+                    INITSERVICE::doShutdown(l_errEid, true);
                 }
                 else
                 {
@@ -353,9 +353,9 @@ void IpcSp::msgHandler()
                 err = MBOX::send(MBOX::HB_SBE_SYSCONFIG_MSGQ, msg, msg->data[1] );
                 if (err)
                 {
-                    uint32_t l_errPlid = err->plid();
+                    uint32_t l_errEid = err->eid();
                     errlCommit(err,IPC_COMP_ID);
-                    INITSERVICE::doShutdown(l_errPlid, true);
+                    INITSERVICE::doShutdown(l_errEid, true);
                 }
                 break;
              }
@@ -407,9 +407,9 @@ void IpcSp::msgHandler()
 
                 if (err)
                 {
-                   uint32_t l_errPlid = err->plid();
+                   uint32_t l_errEid = err->eid();
                    errlCommit(err,IPC_COMP_ID);
-                   INITSERVICE::doShutdown(l_errPlid, true);
+                   INITSERVICE::doShutdown(l_errEid, true);
                 }
 
                 for (auto cnt = 0; cnt < NUM_MOD; ++cnt)
@@ -432,9 +432,9 @@ void IpcSp::msgHandler()
 
                  if (err)
                  {
-                    uint32_t l_errPlid = err->plid();
+                    uint32_t l_errEid = err->eid();
                     errlCommit(err,IPC_COMP_ID);
-                    INITSERVICE::doShutdown(l_errPlid, true);
+                    INITSERVICE::doShutdown(l_errEid, true);
                  }
 
 
@@ -487,9 +487,9 @@ void IpcSp::msgHandler()
 
                 if(err)
                 {
-                    uint32_t l_errPlid = err->plid();
+                    uint32_t l_errEid = err->eid();
                     errlCommit(err, IPC_COMP_ID);
-                    INITSERVICE::doShutdown(l_errPlid, true);
+                    INITSERVICE::doShutdown(l_errEid, true);
                 }
 
                 for (auto cnt = 0; cnt < NUM_MOD; ++cnt)
@@ -547,9 +547,9 @@ void IpcSp::msgHandler()
 
                 if(err)
                 {
-                    uint32_t l_errPlid = err->plid();
+                    uint32_t l_errEid = err->eid();
                     errlCommit(err, IPC_COMP_ID);
-                    INITSERVICE::doShutdown(l_errPlid, true);
+                    INITSERVICE::doShutdown(l_errEid, true);
                 }
 
                 if(mod_loaded)
@@ -570,9 +570,9 @@ void IpcSp::msgHandler()
                 err = MBOX::send(MBOX::HB_CLOSE_TCES_MSGQ, msg, msg->data[1] );
                 if (err)
                 {
-                    uint32_t l_errPlid = err->plid();
+                    uint32_t l_errEid = err->eid();
                     errlCommit(err,IPC_COMP_ID);
-                    INITSERVICE::doShutdown(l_errPlid, true);
+                    INITSERVICE::doShutdown(l_errEid, true);
                 }
 
                 break;

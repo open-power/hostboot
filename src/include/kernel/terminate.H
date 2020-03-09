@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,6 +29,7 @@
 #define __KERNEL_TERMINATE_H
 
 #include <kernel/types.h>
+#include <kernel/hbterminatetypes.H>
 
 /** @fn terminateExecuteTI
  *  @brief Sequence to execute a TI attn
@@ -41,13 +42,13 @@ void terminateExecuteTI();
  */
 void initKernelTIMutex();
 
-/** @fn termWritePlid
- *  Update TI data area with a PLID.
+/** @fn termWriteEid
+ *  Update TI data area with an EID.
  *  @param[in] i_source:  indicates what type of fail forced the TI
- *  @param[in] i_plid:    plid to be stored
+ *  @param[in] i_eid:     eid to be stored
  *  @param[out] NONE:
  */
-void termWritePlid(uint16_t i_source, uint32_t plid);
+void termWriteEid(hb_terminate_source i_source, uint32_t i_eid);
 
 /** @fn termWriteSRC
  *  Create an SRC and Update the TI data area with the src created
@@ -59,11 +60,11 @@ void termWritePlid(uint16_t i_source, uint32_t plid);
  *             the passed parameters.
  *  @param[out] NONE:
  */
-void termWriteSRC(uint16_t i_source,
-                    uint16_t i_reasoncode,
-                    uint64_t i_failAddr = 0,
-                    uint32_t i_error_info = 0,
-                    bool i_forceWrite = false);
+void termWriteSRC(hb_terminate_source i_source,
+                  uint16_t i_reasoncode,
+                  uint64_t i_failAddr = 0,
+                  uint32_t i_error_info = 0,
+                  bool i_forceWrite = false);
 
 /** @fn termModifySRC
  *  Modify an SRC and the TI data area for Bootloader

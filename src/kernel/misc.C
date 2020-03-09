@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -80,10 +80,6 @@ namespace KernelMisc
                 printk("Shutdown Requested. PLID = %lx (due to failure)\n",
                        status);
             }
-
-            // Call to set the Core Scratch Reg 0 with the status
-            updateScratchReg(MMIO_SCRATCH_PROGRESS_CODE, status);
-
         }
 
         // If the Shutdown was called with a status of GOOD then

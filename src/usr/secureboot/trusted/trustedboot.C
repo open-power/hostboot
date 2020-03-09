@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1179,11 +1179,11 @@ void tpmVerifyFunctionalPrimaryTpmExists(
         err = SECUREBOOT::getJumperState(l_state);
         if (err)
         {
-            auto errPlid = err->plid();
+            auto errEid = err->eid();
             errlCommit(err, TRBOOT_COMP_ID);
 
             // we should not continue if we could not read the jumper state
-            INITSERVICE::doShutdown(errPlid,isBackgroundShutdown);
+            INITSERVICE::doShutdown(errEid,isBackgroundShutdown);
         }
         else if (l_state == SECUREBOOT::SecureJumperState::SECURITY_ASSERTED)
         {

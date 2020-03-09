@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -161,8 +161,8 @@ errlHndl_t platHandleHWCallout(
             if (!hwasState.functional)
             {
                 HWAS_ERR("master proc deconfigured - Shutdown due to plid 0x%X",
-                        io_errl->plid());
-                INITSERVICE::doShutdown(io_errl->plid(), true);
+                        io_errl->eid());
+                INITSERVICE::doShutdown(io_errl->eid(), true);
             }
         }
     } // PLD
@@ -295,8 +295,8 @@ errlHndl_t platHandleClockCallout(
             HWAS_INF(
                 "Clock deconfiguration considered fatal, requesting "
                 "shutdown.  See PLID = 0x%X for details.",
-                io_errl->plid());
-            INITSERVICE::doShutdown(io_errl->plid(), true);
+                io_errl->eid());
+            INITSERVICE::doShutdown(io_errl->eid(), true);
         }
 
 #endif

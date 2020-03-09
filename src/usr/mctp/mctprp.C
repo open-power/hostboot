@@ -200,19 +200,19 @@ void MctpRP::handle_inbound_messages(void)
 
               if(l_errl)
               {
-                  uint32_t l_fatalPlid = l_errl->plid();
+                  uint32_t l_fatalEid = l_errl->eid();
                   errlCommit(l_errl, MCTP_COMP_ID);
 #ifdef CONFIG_CONSOLE
                   CONSOLE::displayf(NULL,
                                     "MCTP initialization failed! The commited error log 0x%X will be in hostboot dump but will not make it to BMC",
-                                    l_fatalPlid);
+                                    l_fatalEid);
 #endif
 
                   // 2nd param "true" indicates we want to the call the
                   // function to trigger a shutdown in a separate thread.
                   // This allows us to register for and handle shutdown events
                   // in this thread.
-                  INITSERVICE::doShutdown(l_fatalPlid, true);
+                  INITSERVICE::doShutdown(l_fatalEid, true);
               }
               break;
           default:

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -750,7 +750,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
     if( l_errhdl )
     {
         l_rc = EACCES;
-        uint32_t l_errPlid = l_errhdl->plid();
+        uint32_t l_errEid = l_errhdl->eid();
         iv_startupRC = l_errhdl->reasonCode();
         TRACFCOMP(g_trac_pnor,ERR_MRK"SPnorRP::verifySections there was an error");
         if (failedVerify)
@@ -760,9 +760,9 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
         else
         {
             errlCommit(l_errhdl,PNOR_COMP_ID);
-            INITSERVICE::doShutdown(l_errPlid, true);
+            INITSERVICE::doShutdown(l_errEid, true);
         }
-        o_plid=l_errPlid;
+        o_plid=l_errhdl->plid();
     }
 
     return l_rc;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,8 +88,8 @@ void mmio_hmer_write(uint64_t value);
  */
 enum MMIO_Scratch_Register
 {
-        /** Progress Code / Status. */
-    MMIO_SCRATCH_PROGRESS_CODE = 0x0,
+        /** HB TI Area location in memory */
+    MMIO_SCRATCH_TI_AREA_LOCATION = 0x0,
         /** Identifies where hostboot currently resides and how large the
          *  space is */
     MMIO_SCRATCH_MEMORY_STATE = 0x08,

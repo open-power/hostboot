@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,12 @@
 namespace Bootloader{
     typedef struct blData
     {
+        // Instance of the TI Data Area
+        HB_TI_DataArea bl_TIDataArea;
+        static_assert( sizeof(HB_TI_DataArea) == 128, "HB_TI_DataArea "
+                       "size changed.  Check bootloader_data.H alignment.  "
+                       "Fix BlData.pm processing.");
+
         // @name bl_trace
         // @brief Buffer for Bootloader Trace data
         // Buffer with bootloader trace entries.  There are 64 one-byte entries
@@ -71,12 +77,6 @@ namespace Bootloader{
         // Address used on first attempt to read TOC from PNOR.
         uint64_t bl_first_pnor_mmio;
 
-        // Instance of the TI Data Area
-        HB_TI_DataArea bl_TIDataArea;
-        static_assert( sizeof(HB_TI_DataArea) == 48, "HB_TI_DataArea "
-                       "size changed.  Check bootloader_data.H alignment.  "
-                       "Fix BlData.pm processing.");
-
         // Buffer to save HBB PNOR section data
         PNOR::SectionData_t bl_hbbSection;
         uint8_t bl_reserved3[(64 - sizeof(PNOR::SectionData_t)) % 16];
@@ -96,7 +96,7 @@ namespace Bootloader{
         static_assert( sizeof(BlToHbData) == 2414, "BlToHbData "
                        "size changed.  Check bootloader_data.H alignment.  "
                        "Fix BlData.pm processing.");
-    } blData_t;
+    } blData_t __attribute__((aligned(128)));
 } // end namespace Bootloader
 
 /**

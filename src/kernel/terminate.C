@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,6 +27,7 @@
 #include <kernel/hbterminatetypes.H>
 #include <kernel/terminate.H>
 #include <sys/sync.h>
+#include <sys/mmio.h>
 #include <arch/ppc.H>
 #ifndef BOOTLOADER
 #include <stdint.h>
@@ -60,6 +61,12 @@ void terminateExecuteTI()
     // Trigger a hostboot dump in Simics
     MAGIC_INSTRUCTION(MAGIC_HB_DUMP);
 
+    // Save off the TI Area so that SBE can fetch it from the scratch reg
+    uint64_t l_tiAreaAddr = reinterpret_cast<uint64_t>(&kernel_TIDataArea);
+    // HB TI pointer is relative to HRMOR, so need to OR HRMOR in
+    l_tiAreaAddr |= getHRMOR();
+    writeScratchReg(MMIO_SCRATCH_TI_AREA_LOCATION, l_tiAreaAddr);
+
     // Call the function that actually executes the TI code.
     p9_force_attn();
 }
@@ -72,16 +79,19 @@ void initKernelTIMutex()
 }
 
 #ifndef BOOTLOADER
-void termWritePlid(uint16_t i_source, uint32_t plid)
+void termWriteEid(hb_terminate_source i_source, uint32_t i_eid)
 {
-    kernel_TIDataArea.type = TI_WITH_PLID;
+    kernel_TIDataArea.tiAreaValid = 0x1;
+    kernel_TIDataArea.command = DEFAULT_COMMAND;
+    kernel_TIDataArea.hardwareDumpType = SW_DUMP;
+    kernel_TIDataArea.type = TI_WITH_EID;
     kernel_TIDataArea.source = i_source;
-    kernel_TIDataArea.plid = plid;
+    kernel_TIDataArea.eid = i_eid;
 }
 #endif // BOOTLOADER
 
-void termWriteSRC(uint16_t i_source, uint16_t i_reasoncode,uint64_t i_failAddr,
-                  uint32_t i_error_data, bool i_forceWrite)
+void termWriteSRC(hb_terminate_source i_source, uint16_t i_reasoncode,
+                  uint64_t i_failAddr, uint32_t i_error_data, bool i_forceWrite)
 {
 #ifndef BOOTLOADER
     mutex_lock(&g_kernelMutex);
@@ -92,6 +102,9 @@ void termWriteSRC(uint16_t i_source, uint16_t i_reasoncode,uint64_t i_failAddr,
     // information.
     if(kernel_TIDataArea.src.reasoncode == NO_TI_ERROR || i_forceWrite)
     {
+        kernel_TIDataArea.tiAreaValid = 0x1;
+        kernel_TIDataArea.command = DEFAULT_COMMAND;
+        kernel_TIDataArea.hardwareDumpType = SW_DUMP;
         // Update the TI structure with the type of TI, who called,
         // and extra error data (if applicable, otherwise 0)
         kernel_TIDataArea.type = TI_WITH_SRC;
@@ -109,6 +122,7 @@ void termWriteSRC(uint16_t i_source, uint16_t i_reasoncode,uint64_t i_failAddr,
         // Update User Data with address of fail location
         kernel_TIDataArea.src.word6 = i_failAddr;
     }
+
 #ifndef BOOTLOADER
     mutex_unlock(&g_kernelMutex);
 #endif

@@ -206,18 +206,18 @@ static void initTargeting(errlHndl_t& io_pError)
             io_pError = l_targetService.modifyReadOnlyPagePermissions(true);
             if(io_pError)
             {
-                auto l_plid = io_pError->plid();
+                auto l_eid = io_pError->eid();
                 errlCommit(io_pError, TARG_COMP_ID);
-                INITSERVICE::doShutdown(l_plid, true);
+                INITSERVICE::doShutdown(l_eid, true);
             }
 
             io_pError = TARGETING::AssociationManager::
                                                     reconnectSyAndNodeTargets();
             if(io_pError)
             {
-                auto l_plid = io_pError->plid();
+                auto l_eid = io_pError->eid();
                 errlCommit(io_pError, TARG_COMP_ID);
-                INITSERVICE::doShutdown(l_plid,  true);
+                INITSERVICE::doShutdown(l_eid,  true);
             }
         }
 

@@ -172,13 +172,13 @@ void * Service::intrTask(void * i_svc)
         INTR::unRegisterMsgQ(INTR::LSI_LCL_FIR);
 
         // Save PLID for TI purposes
-        uint32_t l_fatalPlid = l_err->plid();
+        uint32_t l_fatalEid = l_err->eid();
 
         // Commit the elog
         ATTN_ERR("Committing INTR task crash elog");
         errlCommit(l_err, ATTN_COMP_ID);
         // Crash now
-        INITSERVICE::doShutdown(l_fatalPlid, true);
+        INITSERVICE::doShutdown(l_fatalEid, true);
 
     } // end if crashed
 
@@ -366,13 +366,13 @@ void* Service::prdTask(void * i_svc)
         l_err->collectTrace("ATTN_FAST" , 512 );
 
         // Save PLID for TI purposes
-        uint32_t l_fatalPlid = l_err->plid();
+        uint32_t l_fatalEid = l_err->eid();
 
         // Commit the elog
         ATTN_ERR("Committing PRD task crash elog");
         errlCommit(l_err, ATTN_COMP_ID);
         // Crash now
-        INITSERVICE::doShutdown(l_fatalPlid, true);
+        INITSERVICE::doShutdown(l_fatalEid, true);
 
     } // end if crashed
 

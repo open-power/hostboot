@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,7 @@
 #include <bootloader/bootloader_trace.H>
 #include <bootloader/bootloader_data.H>
 #include <bootloader/hbblreasoncodes.H>
+#include <sys/mmio.h>
 
 extern "C" void task_end_stub();
 extern "C" void enterHBB(uint64_t i_hbb_hrmor, uint64_t i_hbb_offset);
@@ -151,17 +152,6 @@ namespace Bootloader{
         asm volatile("mfspr %0, 287" : "=r" (pvr));
         return pvr;
     }
-
-
-     /**Core Scratch Register 1 which tells HRMOR and memsize.
-        This is passed into writeScratchReg to select which scratch
-        reg you are writing */
-#define MMIO_SCRATCH_MEMORY_STATE             0x08
-
-     /**Core Scratch Register 3 which tells the state of hostboot.
-        This is passed into writeScratchReg to select which scratch
-        reg you are writing */
-#define MMIO_SCRATCH_HOSTBOOT_ACTIVE          0x18
 
     /**
      * @brief Pointer to bootloader scratch space
