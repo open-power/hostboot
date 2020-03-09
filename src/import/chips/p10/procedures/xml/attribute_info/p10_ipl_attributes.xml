@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -120,7 +120,17 @@
 <attribute>
   <id>ATTR_BACKUP_SEEPROM_SELECT</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Select Primary or Backup SEEPROM</description>
+  <description>Select Primary or Backup Boot SEEPROM</description>
+  <valueType>uint8</valueType>
+  <enum>PRIMARY = 0x0,SECONDARY = 0x1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_BACKUP_MEASUREMENT_SEEPROM_SELECT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Select Primary or Backup Measurement SEEPROM</description>
   <valueType>uint8</valueType>
   <enum>PRIMARY = 0x0,SECONDARY = 0x1</enum>
   <platInit/>
