@@ -29,6 +29,9 @@
 
 using namespace fapi2;
 
+constexpr uint64_t literal_1 = 1;
+constexpr uint64_t literal_4 = 4;
+constexpr uint64_t literal_0 = 0;
 
 fapi2::ReturnCode p10_pau_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAU>& TGT0,
                                const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT2)
@@ -48,6 +51,25 @@ fapi2::ReturnCode p10_pau_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAU>& TGT0
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T1, TGT2, l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T1));
         fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T2_Type l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T2;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T2, TGT2, l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T2));
+        fapi2::ATTR_PROC_FABRIC_SL_DOMAIN_Type l_TGT1_ATTR_PROC_FABRIC_SL_DOMAIN;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_SL_DOMAIN, TGT1, l_TGT1_ATTR_PROC_FABRIC_SL_DOMAIN));
+        fapi2::ATTR_PROC_LCO_TARGETS_VECTOR_Type l_TGT1_ATTR_PROC_LCO_TARGETS_VECTOR;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_LCO_TARGETS_VECTOR, TGT1, l_TGT1_ATTR_PROC_LCO_TARGETS_VECTOR));
+        uint64_t l_def_LCO_TARGETS_VECTOR_CHIP =
+            l_TGT1_ATTR_PROC_LCO_TARGETS_VECTOR[fapi2::ENUM_ATTR_PROC_LCO_TARGETS_VECTOR_CHIP];
+        fapi2::ATTR_CHIP_UNIT_POS_Type l_TGT0_ATTR_CHIP_UNIT_POS;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, TGT0, l_TGT0_ATTR_CHIP_UNIT_POS));
+        uint64_t l_def_WEST_PAU = ((l_TGT0_ATTR_CHIP_UNIT_POS / literal_4) == literal_1);
+        uint64_t l_def_LCO_TARGETS_VECTOR_WEST =
+            l_TGT1_ATTR_PROC_LCO_TARGETS_VECTOR[fapi2::ENUM_ATTR_PROC_LCO_TARGETS_VECTOR_WEST];
+        uint64_t l_def_EAST_PAU = ((l_TGT0_ATTR_CHIP_UNIT_POS / literal_4) == literal_0);
+        uint64_t l_def_LCO_TARGETS_VECTOR_EAST =
+            l_TGT1_ATTR_PROC_LCO_TARGETS_VECTOR[fapi2::ENUM_ATTR_PROC_LCO_TARGETS_VECTOR_EAST];
+        fapi2::ATTR_PROC_LCO_TARGETS_MIN_Type l_TGT1_ATTR_PROC_LCO_TARGETS_MIN;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_LCO_TARGETS_MIN, TGT1, l_TGT1_ATTR_PROC_LCO_TARGETS_MIN));
+        uint64_t l_def_LCO_TARGETS_MIN_CHIP = l_TGT1_ATTR_PROC_LCO_TARGETS_MIN[fapi2::ENUM_ATTR_PROC_LCO_TARGETS_MIN_CHIP];
+        uint64_t l_def_LCO_TARGETS_MIN_WEST = l_TGT1_ATTR_PROC_LCO_TARGETS_MIN[fapi2::ENUM_ATTR_PROC_LCO_TARGETS_MIN_WEST];
+        uint64_t l_def_LCO_TARGETS_MIN_EAST = l_TGT1_ATTR_PROC_LCO_TARGETS_MIN[fapi2::ENUM_ATTR_PROC_LCO_TARGETS_MIN_EAST];
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x10010802ull, l_scom_buffer ));
@@ -88,6 +110,37 @@ fapi2::ReturnCode p10_pau_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAU>& TGT0
             l_scom_buffer.insert<4, 12, 52, uint64_t>(l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T1 );
             l_scom_buffer.insert<16, 12, 52, uint64_t>(l_TGT2_ATTR_PROC_EPS_WRITE_CYCLES_T2 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x10010922ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x100109a7ull, l_scom_buffer ));
+
+            if ((l_TGT1_ATTR_PROC_FABRIC_SL_DOMAIN == fapi2::ENUM_ATTR_PROC_FABRIC_SL_DOMAIN_CHIP))
+            {
+                l_scom_buffer.insert<0, 32, 32, uint64_t>(l_def_LCO_TARGETS_VECTOR_CHIP );
+            }
+            else if (((l_TGT1_ATTR_PROC_FABRIC_SL_DOMAIN == fapi2::ENUM_ATTR_PROC_FABRIC_SL_DOMAIN_HEMISPHERE) && l_def_WEST_PAU))
+            {
+                l_scom_buffer.insert<0, 32, 32, uint64_t>(l_def_LCO_TARGETS_VECTOR_WEST );
+            }
+            else if (((l_TGT1_ATTR_PROC_FABRIC_SL_DOMAIN == fapi2::ENUM_ATTR_PROC_FABRIC_SL_DOMAIN_HEMISPHERE) && l_def_EAST_PAU))
+            {
+                l_scom_buffer.insert<0, 32, 32, uint64_t>(l_def_LCO_TARGETS_VECTOR_EAST );
+            }
+
+            if ((l_TGT1_ATTR_PROC_FABRIC_SL_DOMAIN == fapi2::ENUM_ATTR_PROC_FABRIC_SL_DOMAIN_CHIP))
+            {
+                l_scom_buffer.insert<35, 5, 59, uint64_t>(l_def_LCO_TARGETS_MIN_CHIP );
+            }
+            else if (((l_TGT1_ATTR_PROC_FABRIC_SL_DOMAIN == fapi2::ENUM_ATTR_PROC_FABRIC_SL_DOMAIN_HEMISPHERE) && l_def_WEST_PAU))
+            {
+                l_scom_buffer.insert<35, 5, 59, uint64_t>(l_def_LCO_TARGETS_MIN_WEST );
+            }
+            else if (((l_TGT1_ATTR_PROC_FABRIC_SL_DOMAIN == fapi2::ENUM_ATTR_PROC_FABRIC_SL_DOMAIN_HEMISPHERE) && l_def_EAST_PAU))
+            {
+                l_scom_buffer.insert<35, 5, 59, uint64_t>(l_def_LCO_TARGETS_MIN_EAST );
+            }
+
+            FAPI_TRY(fapi2::putScom(TGT0, 0x100109a7ull, l_scom_buffer));
         }
 
     };

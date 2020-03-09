@@ -715,6 +715,63 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_PROC_LCO_TARGETS_COUNT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Number of eligible L3 LCO targets.
+  </description>
+  <valueType>uint8</valueType>
+  <array>3</array>
+  <enum>
+    CHIP = 0,
+    WEST = 1,
+    EAST = 2
+  </enum>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_LCO_TARGETS_VECTOR</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Bit vector of eligible L3 LCO targets.
+    Bit 0 = EC0
+    Bit 1 = EC1
+    ...
+    Bit 30 = EC30
+    Bit 31 = EC31
+  </description>
+  <valueType>uint32</valueType>
+  <array>3</array>
+  <enum>
+    CHIP = 0,
+    WEST = 1,
+    EAST = 2
+  </enum>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_LCO_TARGETS_MIN</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Minimum number of eligible L3 LCO targets.
+  </description>
+  <valueType>uint8</valueType>
+  <array>3</array>
+  <enum>
+    CHIP = 0,
+    WEST = 1,
+    EAST = 2,
+    NUM_DOMAINS = 3
+  </enum>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_SBE_MCS_SETUP_REG_STATES</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>

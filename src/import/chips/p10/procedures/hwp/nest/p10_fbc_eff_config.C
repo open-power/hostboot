@@ -79,6 +79,9 @@ const uint32_t EPSILON_R_T2_HE[] = { 293, 526, 570, 632, 724 };
 const uint32_t EPSILON_W_T0_HE[] = { 181, 186, 192, 202, 216 };
 const uint32_t EPSILON_W_T1_HE[] = { 367, 388, 417, 457, 516 };
 
+// LCO constants
+const uint8_t MAX_L3_TARGETS = 32;
+
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
@@ -524,6 +527,85 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Initialize attributes related to LCO configuration
+/// @return fapi2::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode p10_fbc_eff_config_lco_attrs(void)
+{
+    FAPI_DBG("Start");
+
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+    for (auto& l_target : FAPI_SYSTEM.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
+    {
+        fapi2::ATTR_PROC_LCO_TARGETS_COUNT_Type l_lco_count = {0};
+        fapi2::ATTR_PROC_LCO_TARGETS_VECTOR_Type l_lco_targets = {0};
+        fapi2::ATTR_PROC_LCO_TARGETS_MIN_Type l_lco_min = {0};
+        fapi2::ATTR_PROC_LCO_TARGETS_MIN_Type l_lco_min_threshold = {0};
+
+        // lco_targets_count: number of valid L3 targets
+        // lco_targets_vector: enable only valid L3s
+        for (auto& l_core : l_target.getChildren<fapi2::TARGET_TYPE_CORE>())
+        {
+            fapi2::ATTR_CHIP_UNIT_POS_Type l_core_id;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_core, l_core_id),
+                     "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+            l_lco_count[fapi2::ENUM_ATTR_PROC_LCO_TARGETS_COUNT_CHIP]++;
+            l_lco_targets[fapi2::ENUM_ATTR_PROC_LCO_TARGETS_VECTOR_CHIP] |= (0x1 << (31 - l_core_id));
+
+            if((l_core_id / 4) % 2)
+            {
+                l_lco_count[fapi2::ENUM_ATTR_PROC_LCO_TARGETS_COUNT_EAST]++;
+                l_lco_targets[fapi2::ENUM_ATTR_PROC_LCO_TARGETS_VECTOR_EAST] |= (0x1 << (31 - l_core_id));
+            }
+            else
+            {
+                l_lco_count[fapi2::ENUM_ATTR_PROC_LCO_TARGETS_COUNT_WEST]++;
+                l_lco_targets[fapi2::ENUM_ATTR_PROC_LCO_TARGETS_VECTOR_WEST] |= (0x1 << (31 - l_core_id));
+            }
+        }
+
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_LCO_TARGETS_COUNT, l_target, l_lco_count),
+                 "Error from FAPI_ATTR_SET (ATTR_PROC_LCO_TARGETS_COUNT)");
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_LCO_TARGETS_VECTOR, l_target, l_lco_targets),
+                 "Error from FAPI_ATTR_SET (ATTR_PROC_LCO_TARGETS_VECTOR)");
+
+        // lco_targets_min:
+        // let lco_min_threshold = 2/3 of max possible L3s in a chip/hemisphere
+        //   if 0 L3s or 1 L3, set to zero/one respectively
+        //   if lco_min_threshold or less, set to one less than number of L3s
+        //   if more than lco_min_threshold, set to lco_min_threshold
+        l_lco_min_threshold[fapi2::ENUM_ATTR_PROC_LCO_TARGETS_MIN_CHIP] = ((2 * MAX_L3_TARGETS) / 3);
+        l_lco_min_threshold[fapi2::ENUM_ATTR_PROC_LCO_TARGETS_MIN_WEST] = ((2 * (MAX_L3_TARGETS / 2)) / 3);
+        l_lco_min_threshold[fapi2::ENUM_ATTR_PROC_LCO_TARGETS_MIN_EAST] = ((2 * (MAX_L3_TARGETS / 2)) / 3);
+
+        for(uint8_t l_domain = 0; l_domain < fapi2::ENUM_ATTR_PROC_LCO_TARGETS_MIN_NUM_DOMAINS; l_domain++)
+        {
+            if ((l_lco_count[l_domain] == 0) || (l_lco_count[l_domain] == 1))
+            {
+                l_lco_min[l_domain] = l_lco_count[l_domain];
+            }
+            else if (l_lco_count[l_domain] < l_lco_min_threshold[l_domain])
+            {
+                l_lco_min[l_domain] = l_lco_count[l_domain] - 1;
+            }
+            else
+            {
+                l_lco_min[l_domain] = l_lco_min_threshold[l_domain];
+            }
+        }
+
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_LCO_TARGETS_MIN, l_target, l_lco_min),
+                 "Error from FAPI_ATTR_SET (ATTR_PROC_LCO_TARGETS_MIN)");
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
 /// See doxygen comments in header file
 fapi2::ReturnCode p10_fbc_eff_config(void)
 {
@@ -535,6 +617,8 @@ fapi2::ReturnCode p10_fbc_eff_config(void)
              "Error from p10_fbc_eff_config_calc_epsilons");
     FAPI_TRY(p10_fbc_eff_config_link_attrs(),
              "Error from p10_fbc_eff_config_link_attrs");
+    FAPI_TRY(p10_fbc_eff_config_lco_attrs(),
+             "Error from p10_fbc_eff_config_lco_attrs");
 
 fapi_try_exit:
     FAPI_DBG("End");
