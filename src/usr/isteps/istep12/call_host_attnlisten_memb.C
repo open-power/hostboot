@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,12 +22,19 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+/**
+ * @file    call_host_attnlisten_memb.C
+ *
+ *  Contains the implementation for Istep 12.10
+ *      Start attention poll for membuf
+ */
 #include    <errl/errlentry.H>
 
 #include    <initservice/isteps_trace.H>
 #include    <isteps/hwpisteperror.H>
 #include    <errl/errludtarget.H>
 #include    <errl/errlmanager.H>
+#include    <istepHelperFuncs.H>          // captureError
 
 //  targeting support.
 #include    <targeting/common/commontargeting.H>
@@ -41,57 +48,73 @@ using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
+using   namespace   ISTEPS_TRACE;
 
 
 namespace ISTEP_12
 {
 /**
- * @brief  Send a list of functional procs and centaurs that ATTN
+ * @brief  Send a list of functional procs and membuf chips that ATTN
  *         can start monitoring for checkstop analysis
  */
-void send_analyzable_procs_and_centaurs()
+errlHndl_t send_analyzable_procs_and_membufs()
 {
     errlHndl_t l_err = nullptr;
-    std::vector<TARGETING::ATTR_HUID_type> l_chipHuids;
+    std::vector<ATTR_HUID_type> l_chipHuids;
 
-    // Get all functional Centaur targets
-    TARGETING::TargetHandleList l_membufTargetList;
-    getAllChips(l_membufTargetList, TYPE_MEMBUF);
+    // Get all functional membuf (OCMB) targets
+    TargetHandleList l_membufTargetList;
+    getAllChips(l_membufTargetList, TYPE_OCMB_CHIP);
 
     // Get all functional Proc targets
-    TARGETING::TargetHandleList l_procsList;
+    TargetHandleList l_procsList;
     getAllChips(l_procsList, TYPE_PROC);
+    TRACFCOMP(g_trac_isteps_trace,
+              "send_analyzable_procs_and_membufs: %d PROCs & %d OCMBs found",
+              l_procsList.size(), l_membufTargetList.size());
 
     // now fill in the list with proc huids
     for (const auto & l_cpu_target : l_procsList)
     {
-        l_chipHuids.push_back(TARGETING::get_huid(l_cpu_target));
+        l_chipHuids.push_back(get_huid(l_cpu_target));
     }
 
-    // now fill in the list with Centaur huids
+    // now fill in the list with membuf huids
     for (const auto & l_membuf_target : l_membufTargetList)
     {
-        l_chipHuids.push_back(TARGETING::get_huid(l_membuf_target));
+        l_chipHuids.push_back(get_huid(l_membuf_target));
     }
 
     // send the message to alert ATTN to start monitoring these chips
     l_err = INITSERVICE::sendAttnMonitorChipIdMsg(l_chipHuids);
-    if (l_err)
-    {
-        errlCommit(l_err, ISTEP_COMP_ID);
-    }
+
+    return l_err;
 }
 
 void* call_host_attnlisten_memb (void *io_pArgs)
 {
     IStepError l_StepError;
+    errlHndl_t l_err = nullptr;
 
-    // Send list of functional procs and centaurs that ATTN
+    TRACFCOMP( g_trac_isteps_trace, "call_host_attnlisten_memb entry" );
+
+    // Send list of functional procs and membufs that ATTN
     // can start monitoring for checkstop analysis
     if( INITSERVICE::spBaseServicesEnabled() )
     {
-        send_analyzable_procs_and_centaurs();
+        l_err = send_analyzable_procs_and_membufs();
     }
+
+    if (l_err)
+    {
+        TRACFCOMP(g_trac_isteps_trace,
+                 "ERROR : call send_analyzable_procs_and_membufs(): failed. "
+                 TRACE_ERR_FMT,
+                 TRACE_ERR_ARGS(l_err));
+        captureError(l_err, l_StepError, ISTEP_COMP_ID);
+    }
+
+    TRACFCOMP(g_trac_isteps_trace, "call_host_attnlisten_memb exit" );
 
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();

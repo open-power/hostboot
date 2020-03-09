@@ -91,7 +91,7 @@ OBJS += call_omi_io_run_training.o
 OBJS += call_omi_post_trainadv.o
 #OBJS += call_proc_cen_framelock.o
 #OBJS += call_host_startprd_dmi.o
-#OBJS += call_host_attnlisten_memb.o
+OBJS += call_host_attnlisten_memb.o
 #OBJS += call_cen_set_inband_addr.o
 
 # HWP objects needed to set inband addr in istep 12

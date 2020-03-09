@@ -248,12 +248,12 @@ const   TaskInfo    g_istep12[]  =   {
                 ISTEP_12::call_omi_post_trainadv,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-/*        {
+        {
                 ISTEPNAME(12,10,"host_attnlisten_memb"),
                 ISTEP_12::call_host_attnlisten_memb,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-        {
+/*        {
                 ISTEPNAME(12,11,"host_omi_init"),
                 ISTEP_12::call_host_omi_init,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
