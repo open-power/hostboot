@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -442,7 +442,7 @@ uint32_t __analyzeHealthStatus0Reg(STEP_CODE_DATA_STRUCT & io_sc,
             PRDF_ERR( PRDF_FUNC "Failed to read Health Status0 Register. "
                       "HUID: 0x%08x", getHuid(i_dimm) );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL;
+            o_rc = PRD_SCANCOM_FAILURE;
             break;
         }
         std::map<uint8_t,bool> bitList = __nvdimmGetActiveBits( data );
@@ -551,7 +551,7 @@ uint32_t __analyzeHealthStatus1Reg( STEP_CODE_DATA_STRUCT & io_sc,
             PRDF_ERR( PRDF_FUNC "Failed to read Health Status1 Register. "
                       "HUID: 0x%08x", getHuid(i_dimm) );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL;
+            o_rc = PRD_SCANCOM_FAILURE;
             break;
         }
         std::map<uint8_t,bool> bitList = __nvdimmGetActiveBits( data );
@@ -710,7 +710,7 @@ uint32_t __readTemp( TargetHandle_t i_dimm, uint16_t i_tempMsbReg,
             PRDF_ERR( PRDF_FUNC "Failed to read ES Temperature MSB Register. "
                       "HUID: 0x%08x", getHuid(i_dimm) );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL;
+            o_rc = PRD_SCANCOM_FAILURE;
             break;
         }
 
@@ -721,7 +721,7 @@ uint32_t __readTemp( TargetHandle_t i_dimm, uint16_t i_tempMsbReg,
             PRDF_ERR( PRDF_FUNC "Failed to read ES Temperature LSB Register. "
                       "HUID: 0x%08x", getHuid(i_dimm) );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL;
+            o_rc = PRD_SCANCOM_FAILURE;
             break;
         }
 
@@ -768,7 +768,7 @@ uint32_t __analyzeErrorThrStatusReg( STEP_CODE_DATA_STRUCT & io_sc,
             PRDF_ERR( PRDF_FUNC "Failed to read Error Threshold Status Reg. "
                       "HUID: 0x%08x", getHuid(i_dimm) );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL;
+            o_rc = PRD_SCANCOM_FAILURE;
             break;
         }
         std::map<uint8_t,bool> bitList = __nvdimmGetActiveBits( data );
@@ -899,7 +899,7 @@ uint32_t __adjustThreshold( STEP_CODE_DATA_STRUCT & io_sc,
             PRDF_ERR( PRDF_FUNC "Failed to read Warning Threshold Reg. HUID: "
                       "0x%08x", getHuid(i_dimm) );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL;
+            o_rc = PRD_SCANCOM_FAILURE;
             break;
         }
 
@@ -912,7 +912,7 @@ uint32_t __adjustThreshold( STEP_CODE_DATA_STRUCT & io_sc,
             PRDF_ERR( PRDF_FUNC "Failed to read Error Threshold Reg. HUID: "
                       "0x%08x", getHuid(i_dimm) );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL;
+            o_rc = PRD_SCANCOM_FAILURE;
             break;
         }
 
@@ -941,7 +941,7 @@ uint32_t __adjustThreshold( STEP_CODE_DATA_STRUCT & io_sc,
                 PRDF_ERR( PRDF_FUNC "Failed to clear Set Event Notification "
                           "Cmd Reg. HUID: 0x%08x", getHuid(i_dimm) );
                 PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-                o_rc = FAIL;
+                o_rc = PRD_SCANCOM_FAILURE;
                 break;
             }
 
@@ -955,7 +955,7 @@ uint32_t __adjustThreshold( STEP_CODE_DATA_STRUCT & io_sc,
                 PRDF_ERR( PRDF_FUNC "Failed to read Set Event Notification "
                           "Status Reg. HUID: 0x%08x", getHuid(i_dimm) );
                 PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-                o_rc = FAIL;
+                o_rc = PRD_SCANCOM_FAILURE;
                 break;
             }
             std::map<uint8_t,bool> bitList = __nvdimmGetActiveBits( notifStat );
@@ -991,7 +991,7 @@ uint32_t __adjustThreshold( STEP_CODE_DATA_STRUCT & io_sc,
                 PRDF_ERR( PRDF_FUNC "Failed to write Warning Threshold Reg. "
                           "HUID: 0x%08x", getHuid(i_dimm) );
                 PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-                o_rc = FAIL;
+                o_rc = PRD_SCANCOM_FAILURE;
                 break;
             }
 
@@ -1004,7 +1004,7 @@ uint32_t __adjustThreshold( STEP_CODE_DATA_STRUCT & io_sc,
                 PRDF_ERR( PRDF_FUNC "Failed to write Set Event Notification "
                           "Cmd Reg. HUID: 0x%08x", getHuid(i_dimm) );
                 PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-                o_rc = FAIL;
+                o_rc = PRD_SCANCOM_FAILURE;
                 break;
             }
 
@@ -1017,7 +1017,7 @@ uint32_t __adjustThreshold( STEP_CODE_DATA_STRUCT & io_sc,
                 PRDF_ERR( PRDF_FUNC "Failed to read Set Event Notification "
                           "Status Reg. HUID: 0x%08x", getHuid(i_dimm) );
                 PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-                o_rc = FAIL;
+                o_rc = PRD_SCANCOM_FAILURE;
                 break;
             }
             bitList = __nvdimmGetActiveBits( notifStat );
@@ -1084,7 +1084,7 @@ uint32_t __analyzeWarningThrStatusReg(STEP_CODE_DATA_STRUCT & io_sc,
             PRDF_ERR( PRDF_FUNC "Failed to read Warning Threshold Status Reg. "
                       "HUID: 0x%08x", getHuid(i_dimm) );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL;
+            o_rc = PRD_SCANCOM_FAILURE;
             break;
         }
         std::map<uint8_t,bool> bitList = __nvdimmGetActiveBits( data );
@@ -1298,7 +1298,7 @@ uint32_t __deassertEventN( TargetHandle_t i_dimm )
             PRDF_ERR( PRDF_FUNC "Failed to read NVDIMM_MGT_CMD1. "
                       "HUID: 0x%08x", getHuid(i_dimm) );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL;
+            o_rc = PRD_SCANCOM_FAILURE;
             break;
         }
 
@@ -1313,7 +1313,7 @@ uint32_t __deassertEventN( TargetHandle_t i_dimm )
             PRDF_ERR( PRDF_FUNC "Failed to write NVDIMM_MGT_CMD1. "
                       "HUID: 0x%08x", getHuid(i_dimm) );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL;
+            o_rc = PRD_SCANCOM_FAILURE;
             break;
         }
 
@@ -1378,6 +1378,20 @@ int32_t AnalyzeNvdimmHealthStatRegs( ExtensibleChip * i_chip,
             PRDF_ERR( PRDF_FUNC "Failed to read Module Health Register. "
                       "HUID: 0x%08x", getHuid(dimm) );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+
+            // If we got a failure reading one of the NVDIMM registers,
+            // add a signature and make the log predictive.
+            __addSignature( io_sc, i_chip->getTrgt(), errFound,
+                            PRDFSIG_NvdimmReadFail );
+            errFound = true;
+            io_sc.service_data->SetThresholdMaskId(0);
+
+            // Callout NVDIMM
+            io_sc.service_data->SetCallout( dimm, MRU_MED, NO_GARD );
+
+            // Send message to PHYP that save/restore may work
+            l_rc = PlatServices::nvdimmNotifyProtChange( dimm,
+                NVDIMM::NVDIMM_RISKY_HW_ERROR );
             continue;
         }
         std::map<uint8_t,bool> bitList = __nvdimmGetActiveBits( data );
@@ -1387,17 +1401,33 @@ int32_t AnalyzeNvdimmHealthStatRegs( ExtensibleChip * i_chip,
         {
             // Analyze Health Status0 Reg, Health Status1 Reg,
             // and Error Theshold Status Reg
-            l_rc = __analyzeHealthStatus0Reg( io_sc, dimm, errFound );
-            if ( SUCCESS != l_rc ) continue;
-            l_rc = __analyzeHealthStatus1Reg( io_sc, dimm, errFound );
-            if ( SUCCESS != l_rc ) continue;
-            bool esTempErr = false;
-            l_rc = __analyzeErrorThrStatusReg(io_sc, dimm, errFound, esTempErr);
-            if ( SUCCESS != l_rc ) continue;
+            bool esTmpErr = false;
+            uint32_t l_rcStat0 = SUCCESS;
+            uint32_t l_rcStat1 = SUCCESS;
+            uint32_t l_rcErrTh = SUCCESS;
+            l_rcStat0 = __analyzeHealthStatus0Reg( io_sc, dimm, errFound );
+            l_rcStat1 = __analyzeHealthStatus1Reg( io_sc, dimm, errFound );
+            l_rcErrTh = __analyzeErrorThrStatusReg( io_sc, dimm, errFound,
+                                                    esTmpErr );
+
+            if ( PRD_SCANCOM_FAILURE == l_rcStat0 ||
+                 PRD_SCANCOM_FAILURE == l_rcStat1 ||
+                 PRD_SCANCOM_FAILURE == l_rcErrTh )
+            {
+                // If we got a failure reading one of the NVDIMM registers,
+                // add a signature and make the log predictive.
+                __addSignature( io_sc, i_chip->getTrgt(), errFound,
+                                PRDFSIG_NvdimmReadFail );
+                errFound = true;
+                io_sc.service_data->SetThresholdMaskId(0);
+
+                // Callout NVDIMM
+                io_sc.service_data->SetCallout( dimm, MRU_MED, NO_GARD );
+            }
 
             // If we hit an ES temperature error and have not yet hit threshold,
             // then keep the log hidden.
-            if ( esTempErr && !io_sc.service_data->IsAtThreshold() ) continue;
+            if ( esTmpErr && !io_sc.service_data->IsAtThreshold() ) continue;
 
             // If we didn't find any error, then keep the log hidden.
             if ( !errFound )
@@ -1426,7 +1456,22 @@ int32_t AnalyzeNvdimmHealthStatRegs( ExtensibleChip * i_chip,
         else if ( bitList.count(1) )
         {
             l_rc = __analyzeWarningThrStatusReg( io_sc, dimm, errFound );
-            if ( SUCCESS != l_rc ) continue;
+            if ( PRD_SCANCOM_FAILURE == l_rc )
+            {
+                // If we got a failure reading one of the NVDIMM registers,
+                // add a signature and make the log predictive.
+                __addSignature( io_sc, i_chip->getTrgt(), errFound,
+                                PRDFSIG_NvdimmReadFail );
+                errFound = true;
+                io_sc.service_data->SetThresholdMaskId(0);
+
+                // Callout NVDIMM
+                io_sc.service_data->SetCallout( dimm, MRU_MED, NO_GARD );
+
+                // Send message to PHYP that save/restore may work
+                l_rc = PlatServices::nvdimmNotifyProtChange( dimm,
+                    NVDIMM::NVDIMM_RISKY_HW_ERROR );
+            }
 
             if ( !errFound )
             {

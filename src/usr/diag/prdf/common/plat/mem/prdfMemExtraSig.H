@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -102,18 +102,19 @@ PRDR_ERROR_SIGNATURE(EsLifeErr,     0xffff0090, "", "NVDIMM Final Energy Source 
 PRDR_ERROR_SIGNATURE(EsTmpErrHigh,  0xffff0091, "", "NVDIMM Energy Source Temperature Error - High Temp Threshold");
 PRDR_ERROR_SIGNATURE(EsTmpErrLow,   0xffff0092, "", "NVDIMM Energy Source Temperature Error - Low Temp Threshold");
 
-PRDR_ERROR_SIGNATURE(NvmLifeWarn1,  0xffff0093, "", "NVDIMM First NVM Lifetime Warning");
-PRDR_ERROR_SIGNATURE(NvmLifeWarn2,  0xffff0094, "", "NVDIMM Second NVM Lifetime Warning");
-PRDR_ERROR_SIGNATURE(EsLifeWarn1,   0xffff0095, "", "NVDIMM First Energy Source Lifetime Warning");
-PRDR_ERROR_SIGNATURE(EsLifeWarn2,   0xffff0096, "", "NVDIMM Second Energy Source Lifetime Warning");
-PRDR_ERROR_SIGNATURE(EsTmpWarnHigh, 0xffff0097, "", "NVDIMM Energy Source Temperature Warning - High Temp Threshold");
-PRDR_ERROR_SIGNATURE(EsTmpWarnLow,  0xffff0098, "", "NVDIMM Energy Source Temperature Warning - Low Temp Threshold");
-PRDR_ERROR_SIGNATURE(BelowWarnTh,   0xffff0099, "", "NVDIMM Below Warning Threshold");
-PRDR_ERROR_SIGNATURE(IntNvdimmErr,  0xffff009A, "", "NVDIMM Intermittent error");
-PRDR_ERROR_SIGNATURE(NotifStatErr,  0xffff009B, "", "NVDIMM Set Event Notification Status Error");
-PRDR_ERROR_SIGNATURE(FirEvntGone,   0xffff009C, "", "NVDIMM Event Triggering the FIR no longer present");
-PRDR_ERROR_SIGNATURE(EsTmpWarnFa,   0xffff009D, "", "NVDIMM Energy Source Temperature Warning - False Alarm");
-PRDR_ERROR_SIGNATURE(EsTmpErrFa,    0xffff009E, "", "NVDIMM Energy Source Temperature Error - False Alarm");
+PRDR_ERROR_SIGNATURE(NvmLifeWarn1,   0xffff0093, "", "NVDIMM First NVM Lifetime Warning");
+PRDR_ERROR_SIGNATURE(NvmLifeWarn2,   0xffff0094, "", "NVDIMM Second NVM Lifetime Warning");
+PRDR_ERROR_SIGNATURE(EsLifeWarn1,    0xffff0095, "", "NVDIMM First Energy Source Lifetime Warning");
+PRDR_ERROR_SIGNATURE(EsLifeWarn2,    0xffff0096, "", "NVDIMM Second Energy Source Lifetime Warning");
+PRDR_ERROR_SIGNATURE(EsTmpWarnHigh,  0xffff0097, "", "NVDIMM Energy Source Temperature Warning - High Temp Threshold");
+PRDR_ERROR_SIGNATURE(EsTmpWarnLow,   0xffff0098, "", "NVDIMM Energy Source Temperature Warning - Low Temp Threshold");
+PRDR_ERROR_SIGNATURE(BelowWarnTh,    0xffff0099, "", "NVDIMM Below Warning Threshold");
+PRDR_ERROR_SIGNATURE(IntNvdimmErr,   0xffff009A, "", "NVDIMM Intermittent error");
+PRDR_ERROR_SIGNATURE(NotifStatErr,   0xffff009B, "", "NVDIMM Set Event Notification Status Error");
+PRDR_ERROR_SIGNATURE(FirEvntGone,    0xffff009C, "", "NVDIMM Event Triggering the FIR no longer present");
+PRDR_ERROR_SIGNATURE(EsTmpWarnFa,    0xffff009D, "", "NVDIMM Energy Source Temperature Warning - False Alarm");
+PRDR_ERROR_SIGNATURE(EsTmpErrFa,     0xffff009E, "", "NVDIMM Energy Source Temperature Error - False Alarm");
+PRDR_ERROR_SIGNATURE(NvdimmReadFail, 0xffff009F, "", "NVDIMM Failure to read NVDIMM register");
 
 #endif // __prdfMemExtraSig_H
 
