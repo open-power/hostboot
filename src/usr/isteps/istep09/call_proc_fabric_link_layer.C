@@ -90,20 +90,20 @@ void* call_proc_fabric_link_layer(void* const io_pArgs)
     {
         fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_procChip(l_handle);
 
-        const bool l_trainInternode = false,
-                   l_trainIntranode = true;
-
         TRACFCOMP(g_trac_isteps_trace,
                   "call_proc_fabric_link_layer: Invoking p10_fabric_link_layer on "
                   "PROC HUID 0x%08x",
                   get_huid(l_handle));
 
+        const bool l_trainInternode = false,
+                   l_trainIntranode = true;
+
         errlHndl_t l_errl = nullptr;
         FAPI_INVOKE_HWP(l_errl,
                         p10_fabric_link_layer,
                         l_procChip,
-                        l_trainInternode,
-                        l_trainIntranode);
+                        l_trainIntranode,
+                        l_trainInternode);
 
         if (l_errl)
         {

@@ -193,15 +193,11 @@ void* call_proc_fabric_iovalid(void* const io_pArgs)
                        l_update_internode = true,
                        l_update_intranode = true;
 
-            // @TODO RTC 250721: The order of the inter- and intra-node
-            // parameters is incorrect in p10_fabric_iovalid and is due to
-            // change. Fix this call site after the HWP is updated.
-
             FAPI_INVOKE_HWP(l_errl, p10_fabric_iovalid,
                             l_fapi2_proc_target,
                             l_set_not_clear,
-                            l_update_internode,
                             l_update_intranode,
+                            l_update_internode,
                             l_fapiRcs);
 
             if ((l_errl == nullptr) && !l_fapiRcs.empty())
@@ -248,12 +244,8 @@ void* call_proc_fabric_iovalid(void* const io_pArgs)
 #endif
         {
             const bool l_set_not_clear = true,
-                       l_update_internode = true,
-                       l_update_intranode = false;
-
-            // @TODO RTC 250721: The order of the inter- and intra-node
-            // parameters is incorrect in p10_fabric_iovalid and is due to
-            // change. Fix this call site after the HWP is updated.
+                       l_update_internode = false,
+                       l_update_intranode = true;
 
             // Note:
             // When this HWP gets run under HB, it should only train X PHYS, not As.
@@ -263,8 +255,8 @@ void* call_proc_fabric_iovalid(void* const io_pArgs)
             FAPI_INVOKE_HWP(l_errl, p10_fabric_iovalid,
                             l_fapi2_proc_target,
                             l_set_not_clear,
-                            l_update_internode,
                             l_update_intranode,
+                            l_update_internode,
                             l_fapiRcs);
         }
 

@@ -151,11 +151,14 @@ void fapiHWPCallWrapper(HWP_CALL_TYPE    i_hwpCall,
                 }
                 else if (P10_CHIPLET_FABRIC_SCOMINIT == i_hwpCall)
                 {
+                    const bool l_train_internode = false,
+                               l_train_intranode = true;
+
                     FAPI_INVOKE_HWP(l_err,
                                     p10_chiplet_fabric_scominit,
                                     l_fapi2Target,
-                                    false,
-                                    true);
+                                    l_train_intranode,
+                                    l_train_internode);
                 }
                 else
                 {
