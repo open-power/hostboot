@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -296,6 +296,7 @@ struct attrEngineTraits<proc_type::NIMBUS, generic_metadata_fields, generic_meta
 {
     using attr_type = fapi2::ATTR_MEM_DIMM_TYPE_METADATA_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_DIMM_TYPE_METADATA_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DIMM_TYPE_METADATA;
 
@@ -377,6 +378,7 @@ struct attrEngineTraits<proc_type::NIMBUS, generic_metadata_fields, generic_meta
 {
     using attr_type = fapi2::ATTR_MEM_DRAM_GEN_METADATA_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_DRAM_GEN_METADATA_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DRAM_GEN_METADATA;
 
@@ -427,6 +429,7 @@ struct attrEngineTraits<proc_type::NIMBUS, generic_metadata_fields, generic_meta
 {
     using attr_type = fapi2::ATTR_MEM_DIMM_POS_METADATA_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_DIMM_POS_METADATA_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DIMM_POS_METADATA;
 

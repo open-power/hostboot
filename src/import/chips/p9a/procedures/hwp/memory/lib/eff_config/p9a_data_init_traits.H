@@ -55,6 +55,7 @@ struct attrEngineTraits<proc_type::AXONE, pre_data_init_fields, pre_data_init_fi
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DIMM_TYPE_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DIMM_TYPE_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DIMM_TYPE;
 
@@ -128,6 +129,7 @@ struct attrEngineTraits<proc_type::AXONE, pre_data_init_fields, pre_data_init_fi
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_GEN_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_GEN_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DRAM_GEN;
 
@@ -199,6 +201,7 @@ struct attrEngineTraits<proc_type::AXONE, pre_data_init_fields, pre_data_init_fi
 {
     using attr_type = fapi2::ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_HOST_TO_DDR_SPEED_RATIO;
 
@@ -277,6 +280,7 @@ struct attrEngineTraits<proc_type::AXONE, pre_data_init_fields, pre_data_init_fi
 {
     using attr_type = fapi2::ATTR_MEM_EFF_HYBRID_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_HYBRID_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_HYBRID;
 
@@ -349,6 +353,7 @@ struct attrEngineTraits<proc_type::AXONE, pre_data_init_fields, pre_data_init_fi
 {
     using attr_type = fapi2::ATTR_MEM_EFF_HYBRID_MEMORY_TYPE_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_HYBRID_MEMORY_TYPE_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_HYBRID_MEDIA;
 
@@ -421,6 +426,7 @@ struct attrEngineTraits<proc_type::AXONE, pre_data_init_fields, pre_data_init_fi
 {
     using attr_type = fapi2::ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_MRANKS;
 
@@ -494,6 +500,7 @@ struct attrEngineTraits<proc_type::AXONE, pre_data_init_fields, pre_data_init_fi
 
     using attr_type = fapi2::ATTR_MEM_EFF_DIMM_RANKS_CONFIGED_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static const fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DIMM_RANKS_CONFIGED_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DIMM_RANKS_CNFG;
 
@@ -550,6 +557,6 @@ struct attrEngineTraits<proc_type::AXONE, pre_data_init_fields, pre_data_init_fi
     }
 };
 
-}//mss
+} // namespace mss
 
 #endif

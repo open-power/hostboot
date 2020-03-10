@@ -74,6 +74,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_MFG_ID_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_MFG_ID_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_MFG_ID;
 
@@ -125,6 +126,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWA_VOLTAGE_SETTING_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_SWA_VOLTAGE_SETTING_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_SWA_VOLTAGE_SETTING;
 
@@ -176,6 +178,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWA_VOLTAGE_RANGE_SELECT_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_SWA_VOLTAGE_RANGE_SELECT_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_SWA_VOLTAGE_RANGE_SELECT;
 
@@ -227,6 +230,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWA_VOLTAGE_OFFSET_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_SWA_VOLTAGE_OFFSET_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_SWA_VOLTAGE_OFFSET;
 
@@ -286,6 +290,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWA_SEQUENCE_DELAY_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_SWA_SEQUENCE_DELAY_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_SWA_SEQUENCE_DELAY;
 
@@ -337,6 +342,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWA_SEQUENCE_ORDER_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_SWA_SEQUENCE_ORDER_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_SWA_SEQUENCE_ORDER;
 
@@ -388,6 +394,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWB_VOLTAGE_SETTING_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_SWB_VOLTAGE_SETTING_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_SWB_VOLTAGE_SETTING;
 
@@ -439,6 +446,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWB_VOLTAGE_RANGE_SELECT_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_SWB_VOLTAGE_RANGE_SELECT_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_SWB_VOLTAGE_RANGE_SELECT;
 
@@ -490,6 +498,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWB_VOLTAGE_OFFSET_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_SWB_VOLTAGE_OFFSET_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_SWB_VOLTAGE_OFFSET;
 
@@ -549,6 +558,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWB_SEQUENCE_DELAY_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_SWB_SEQUENCE_DELAY_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_SWB_SEQUENCE_DELAY;
 
@@ -600,6 +610,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWB_SEQUENCE_ORDER_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_SWB_SEQUENCE_ORDER_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_SWB_SEQUENCE_ORDER;
 
@@ -640,7 +651,6 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
     }
 };
 
-
 ///
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
@@ -652,6 +662,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWC_VOLTAGE_SETTING_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_SWC_VOLTAGE_SETTING_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_SWC_VOLTAGE_SETTING;
 
@@ -703,6 +714,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWC_VOLTAGE_RANGE_SELECT_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_SWC_VOLTAGE_RANGE_SELECT_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_SWC_VOLTAGE_RANGE_SELECT;
 
@@ -754,6 +766,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWC_VOLTAGE_OFFSET_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_SWC_VOLTAGE_OFFSET_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_SWC_VOLTAGE_OFFSET;
 
@@ -813,6 +826,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWC_SEQUENCE_DELAY_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_SWC_SEQUENCE_DELAY_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_SWC_SEQUENCE_DELAY;
 
@@ -864,6 +878,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWC_SEQUENCE_ORDER_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_SWC_SEQUENCE_ORDER_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_SWC_SEQUENCE_ORDER;
 
@@ -904,7 +919,6 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
     }
 };
 
-
 ///
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
@@ -916,6 +930,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWD_VOLTAGE_SETTING_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_SWD_VOLTAGE_SETTING_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_SWD_VOLTAGE_SETTING;
 
@@ -967,6 +982,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWD_VOLTAGE_RANGE_SELECT_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_SWD_VOLTAGE_RANGE_SELECT_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_SWD_VOLTAGE_RANGE_SELECT;
 
@@ -1018,6 +1034,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWD_VOLTAGE_OFFSET_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_SWD_VOLTAGE_OFFSET_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_SWD_VOLTAGE_OFFSET;
 
@@ -1077,6 +1094,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWD_SEQUENCE_DELAY_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_SWD_SEQUENCE_DELAY_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_SWD_SEQUENCE_DELAY;
 
@@ -1128,6 +1146,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SWD_SEQUENCE_ORDER_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_SWD_SEQUENCE_ORDER_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_SWD_SEQUENCE_ORDER;
 
@@ -1179,6 +1198,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_PHASE_COMB_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_PHASE_COMB_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_PHASE_COMB;
 
@@ -1230,6 +1250,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_REDUNDANCY_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_REDUNDANCY_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_REDUNDANCY;
 
@@ -1286,6 +1307,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_MFG_ID_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_MFG_ID_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_MFG_ID;
 
@@ -1337,6 +1359,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWA_VOLTAGE_SETTING_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_SWA_VOLTAGE_SETTING_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_SWA_VOLTAGE_SETTING;
 
@@ -1388,6 +1411,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWA_VOLTAGE_RANGE_SELECT_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_SWA_VOLTAGE_RANGE_SELECT_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_SWA_VOLTAGE_RANGE_SELECT;
 
@@ -1439,6 +1463,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWA_VOLTAGE_OFFSET_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_SWA_VOLTAGE_OFFSET_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_SWA_VOLTAGE_OFFSET;
 
@@ -1498,6 +1523,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWA_SEQUENCE_DELAY_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_SWA_SEQUENCE_DELAY_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_SWA_SEQUENCE_DELAY;
 
@@ -1549,6 +1575,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWA_SEQUENCE_ORDER_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_SWA_SEQUENCE_ORDER_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_SWA_SEQUENCE_ORDER;
 
@@ -1600,6 +1627,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWB_VOLTAGE_SETTING_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_SWB_VOLTAGE_SETTING_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_SWB_VOLTAGE_SETTING;
 
@@ -1651,6 +1679,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWB_VOLTAGE_RANGE_SELECT_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_SWB_VOLTAGE_RANGE_SELECT_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_SWB_VOLTAGE_RANGE_SELECT;
 
@@ -1702,6 +1731,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWB_VOLTAGE_OFFSET_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_SWB_VOLTAGE_OFFSET_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_SWB_VOLTAGE_OFFSET;
 
@@ -1761,6 +1791,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWB_SEQUENCE_DELAY_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_SWB_SEQUENCE_DELAY_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_SWB_SEQUENCE_DELAY;
 
@@ -1812,6 +1843,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWB_SEQUENCE_ORDER_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_SWB_SEQUENCE_ORDER_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_SWB_SEQUENCE_ORDER;
 
@@ -1863,6 +1895,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWC_VOLTAGE_SETTING_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_SWC_VOLTAGE_SETTING_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_SWC_VOLTAGE_SETTING;
 
@@ -1914,6 +1947,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWC_VOLTAGE_RANGE_SELECT_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_SWC_VOLTAGE_RANGE_SELECT_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_SWC_VOLTAGE_RANGE_SELECT;
 
@@ -1965,6 +1999,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWC_VOLTAGE_OFFSET_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_SWC_VOLTAGE_OFFSET_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_SWC_VOLTAGE_OFFSET;
 
@@ -2024,6 +2059,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWC_SEQUENCE_DELAY_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_SWC_SEQUENCE_DELAY_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_SWC_SEQUENCE_DELAY;
 
@@ -2075,6 +2111,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWC_SEQUENCE_ORDER_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_SWC_SEQUENCE_ORDER_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_SWC_SEQUENCE_ORDER;
 
@@ -2126,6 +2163,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWD_VOLTAGE_SETTING_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_SWD_VOLTAGE_SETTING_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_SWD_VOLTAGE_SETTING;
 
@@ -2177,6 +2215,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWD_VOLTAGE_RANGE_SELECT_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_SWD_VOLTAGE_RANGE_SELECT_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_SWD_VOLTAGE_RANGE_SELECT;
 
@@ -2228,6 +2267,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWD_VOLTAGE_OFFSET_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_SWD_VOLTAGE_OFFSET_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_SWD_VOLTAGE_OFFSET;
 
@@ -2287,6 +2327,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWD_SEQUENCE_DELAY_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_SWD_SEQUENCE_DELAY_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_SWD_SEQUENCE_DELAY;
 
@@ -2338,6 +2379,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SWD_SEQUENCE_ORDER_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_SWD_SEQUENCE_ORDER_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_SWD_SEQUENCE_ORDER;
 
@@ -2389,6 +2431,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_PHASE_COMB_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_PHASE_COMB_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_PHASE_COMB;
 
@@ -2440,6 +2483,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_REDUNDANCY_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_REDUNDANCY_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_REDUNDANCY;
 
@@ -2491,6 +2535,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_SEQUENCE_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_SEQUENCE_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_SEQUENCE;
 
@@ -2542,6 +2587,7 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_SEQUENCE_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_SEQUENCE_TargetType;
     static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_SEQUENCE;
 
@@ -2582,6 +2628,6 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
     }
 };
 
-}//mss
+} // namespace mss
 
 #endif

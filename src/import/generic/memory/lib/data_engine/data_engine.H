@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,7 +65,7 @@ struct attr_engine<P, ET, F, TT, false>
     template < typename IT >
     static fapi2::ReturnCode single_set(const IT& i_input)
     {
-        typename TT::attr_integral_type l_value = 0;
+        typename TT::attr_type_to_set l_value = {};
 
         FAPI_TRY( TT::get_value_to_set(i_input, l_value),
                   "Failed get_value_to_set() for proc_type: %d and enum val: %d", P, F);
@@ -86,6 +86,7 @@ struct attr_engine<P, ET, F, TT, false>
     template < typename IT >
     static fapi2::ReturnCode set(const IT& i_input)
     {
+        FAPI_DBG("Processing field %u", F);
         FAPI_TRY( (attr_engine<P, ET, F, TT, static_cast<size_t>(F) == 0u>::single_set(i_input)),
                   "Failed attr_engine<P, ET, F>::single_set() for proc_type: %d and enum val: %d", P, F);
 

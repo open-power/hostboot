@@ -331,14 +331,14 @@ fapi_try_exit:
 /// @param[out] o_data output to set
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-template < fapi2::TargetType T,
-           typename IT,
-           typename FFDC,
-           typename OT >
-inline fapi2::ReturnCode update_data( const fapi2::Target<T>& i_target,
-                                      const IT i_setting,
-                                      const FFDC i_ffdc_code,
-                                      OT& o_data )
+template <fapi2::TargetType T,
+          typename IT,
+          typename FFDC,
+          typename OT>
+inline fapi2::ReturnCode update_data(const fapi2::Target<T>& i_target,
+                                     const IT& i_setting,
+                                     const FFDC i_ffdc_code,
+                                     OT& o_data)
 {
     FAPI_DBG("Updating data with %d for %s", i_setting, spd::c_str(i_target));
     o_data = i_setting;
@@ -356,14 +356,14 @@ inline fapi2::ReturnCode update_data( const fapi2::Target<T>& i_target,
 /// @param[out] o_data output to set
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-template < typename DT,
-           typename IT,
-           typename FFDC,
-           typename OT >
-inline fapi2::ReturnCode update_data( const DT& i_data,
-                                      const IT i_setting,
-                                      const FFDC i_ffdc_code,
-                                      OT& o_data )
+template <typename DT,
+          typename IT,
+          typename FFDC,
+          typename OT>
+inline fapi2::ReturnCode update_data(const DT& i_data,
+                                     const IT& i_setting,
+                                     const FFDC i_ffdc_code,
+                                     OT& o_data)
 {
     o_data = i_setting;
     return fapi2::FAPI2_RC_SUCCESS;
@@ -413,7 +413,7 @@ template< typename TT,
           typename DT,
           typename IT >
 inline fapi2::ReturnCode set_field(const DT& i_data,
-                                   const IT i_setting)
+                                   const IT& i_setting)
 {
     // Grab the target associated w/the data (e.g. SPD or EFD)
     const auto l_attr_target = get<TT::TARGET_TYPE, DT>::target(i_data);
@@ -525,7 +525,7 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-}// gen
-}//mss
+} // namespace gen
+} // namespace mss
 
 #endif

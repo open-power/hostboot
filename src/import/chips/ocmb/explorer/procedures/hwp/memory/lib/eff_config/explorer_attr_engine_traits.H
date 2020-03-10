@@ -72,7 +72,6 @@ struct setTimingTraits< exp::attr_eff_engine_fields, exp::attr_eff_engine_fields
 // Traits for explorer specific attr_eff_engine_fields
 ////////////////////////////////////////////////////////
 
-
 ///
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
@@ -94,6 +93,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
 {
     using attr_type = fapi2::ATTR_MEM_EXP_DRAM_ADDRESS_MIRRORING_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EXP_DRAM_ADDRESS_MIRRORING_TargetType;
     static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_EXP_DRAM_ADDRESS_MIRRORING;
 
@@ -145,6 +145,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
 {
     using attr_type = fapi2::ATTR_MEM_EFF_BYTE_ENABLES_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_BYTE_ENABLES_TargetType;
     static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_BYTE_ENABLES;
 
@@ -196,6 +197,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
 {
     using attr_type = fapi2::ATTR_MEM_EFF_NIBBLE_ENABLES_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_NIBBLE_ENABLES_TargetType;
     static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_NIBBLE_ENABLES;
 
@@ -247,6 +249,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
 {
     using attr_type = fapi2::ATTR_MEM_EXP_SPD_TAA_MIN_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EXP_SPD_TAA_MIN_TargetType;
     static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_TAA_MIN;
 
@@ -283,7 +286,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return  mss::calc_spd_time_in_ps<exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::SPD_TAA_MIN>(i_spd_data,
+        return mss::calc_spd_time_in_ps<exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::SPD_TAA_MIN>(i_spd_data,
                 o_setting);
     }
 };
@@ -294,11 +297,12 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
 /// @tparam P processor type
 /// @note attr_eff_engine_fields, FOUR_RANK_MODE specialization
 ///
-template< proc_type P >
+template <proc_type P>
 struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fields::FOUR_RANK_MODE>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_FOUR_RANK_MODE_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_FOUR_RANK_MODE_TargetType;
     static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_FOUR_RANK_MODE;
 
@@ -357,6 +361,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DDP_COMPATIBILITY_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DDP_COMPATIBILITY_TargetType;
     static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_DDP_COMPATIBILITY;
 
@@ -415,6 +420,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
 {
     using attr_type = fapi2::ATTR_MEM_EFF_TSV_8H_SUPPORT_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_TSV_8H_SUPPORT_TargetType;
     static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_TSV_8H_SUPPORT;
 
@@ -466,6 +472,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PSTATES_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PSTATES_TargetType;
     static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_PSTATES;
 
@@ -517,6 +524,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
 {
     using attr_type = fapi2::ATTR_MEM_EFF_MRAM_SUPPORT_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_MRAM_SUPPORT_TargetType;
     static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_MRAM_SUPPORT;
 
@@ -575,6 +583,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
 {
     using attr_type = fapi2::ATTR_MEM_EXP_SPD_CL_SUPPORTED_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EXP_SPD_CL_SUPPORTED_TargetType;
     static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_SPD_CL_SUPPORTED;
 
@@ -684,6 +693,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
 {
     using attr_type = fapi2::ATTR_MEM_EFF_MODULE_THERMAL_SENSORS_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_MODULE_THERMAL_SENSORS_TargetType;
     static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_MODULE_THERMAL_SENSORS;
 
@@ -735,6 +745,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
 {
     using attr_type = fapi2::ATTR_MEM_EFF_THERM_SENSOR_0_AVAIL_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_THERM_SENSOR_0_AVAIL_TargetType;
     static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_THERM_SENSOR_0_AVAIL;
 
@@ -787,6 +798,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
 {
     using attr_type = fapi2::ATTR_MEM_EFF_THERM_SENSOR_0_TYPE_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_THERM_SENSOR_0_TYPE_TargetType;
     static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_THERM_SENSOR_0_TYPE;
 
@@ -838,6 +850,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
 {
     using attr_type = fapi2::ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_TargetType;
     static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_THERM_SENSOR_0_USAGE;
 
@@ -889,6 +902,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
 {
     using attr_type = fapi2::ATTR_MEM_EFF_THERM_SENSOR_0_I2C_ADDR_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_THERM_SENSOR_0_I2C_ADDR_TargetType;
     static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_THERM_SENSOR_0_I2C_ADDR;
 
@@ -940,6 +954,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
 {
     using attr_type = fapi2::ATTR_MEM_EFF_THERM_SENSOR_1_AVAIL_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_THERM_SENSOR_1_AVAIL_TargetType;
     static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_THERM_SENSOR_1_AVAIL;
 
@@ -992,6 +1007,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
 {
     using attr_type = fapi2::ATTR_MEM_EFF_THERM_SENSOR_1_TYPE_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_THERM_SENSOR_1_TYPE_TargetType;
     static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_THERM_SENSOR_1_TYPE;
 
@@ -1043,6 +1059,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
 {
     using attr_type = fapi2::ATTR_MEM_EFF_THERM_SENSOR_1_USAGE_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_THERM_SENSOR_1_USAGE_TargetType;
     static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_THERM_SENSOR_1_USAGE;
 
@@ -1094,6 +1111,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
 {
     using attr_type = fapi2::ATTR_MEM_EFF_THERM_SENSOR_1_I2C_ADDR_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_THERM_SENSOR_1_I2C_ADDR_TargetType;
     static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_THERM_SENSOR_1_I2C_ADDR;
 
@@ -1145,6 +1163,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
 {
     using attr_type = fapi2::ATTR_MEM_EFF_THERM_SENSOR_DIFF_AVAIL_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_THERM_SENSOR_DIFF_AVAIL_TargetType;
     static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_THERM_SENSOR_DIFF_AVAIL;
 
@@ -1197,6 +1216,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
 {
     using attr_type = fapi2::ATTR_MEM_EFF_THERM_SENSOR_DIFF_TYPE_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_THERM_SENSOR_DIFF_TYPE_TargetType;
     static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_THERM_SENSOR_DIFF_TYPE;
 
@@ -1248,6 +1268,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
 {
     using attr_type = fapi2::ATTR_MEM_EFF_THERM_SENSOR_DIFF_USAGE_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_THERM_SENSOR_DIFF_USAGE_TargetType;
     static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_THERM_SENSOR_DIFF_USAGE;
 
@@ -1299,6 +1320,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
 {
     using attr_type = fapi2::ATTR_MEM_EFF_THERM_SENSOR_DIFF_I2C_ADDR_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_THERM_SENSOR_DIFF_I2C_ADDR_TargetType;
     static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_THERM_SENSOR_DIFF_I2C_ADDR;
 
@@ -1349,11 +1371,12 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
 /// @tparam P processor type
 /// @note AXONE, DIMM_TYPE_METADATA specialization
 ///
-template< proc_type P >
+template <proc_type P>
 struct attrEngineTraits<P, generic_metadata_fields, generic_metadata_fields::DIMM_TYPE_METADATA>
 {
     using attr_type = fapi2::ATTR_MEM_DIMM_TYPE_METADATA_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_DIMM_TYPE_METADATA_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DIMM_TYPE_METADATA;
 
@@ -1439,6 +1462,7 @@ struct attrEngineTraits<P, generic_metadata_fields, generic_metadata_fields::DRA
 {
     using attr_type = fapi2::ATTR_MEM_DRAM_GEN_METADATA_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_DRAM_GEN_METADATA_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DRAM_GEN_METADATA;
 
@@ -1490,6 +1514,7 @@ struct attrEngineTraits<P, generic_metadata_fields, generic_metadata_fields::DIM
 {
     using attr_type = fapi2::ATTR_MEM_DIMM_POS_METADATA_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_DIMM_POS_METADATA_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DIMM_POS_METADATA;
 
@@ -1531,6 +1556,6 @@ struct attrEngineTraits<P, generic_metadata_fields, generic_metadata_fields::DIM
     }
 };
 
-}//mss
+} // namespace mss
 
 #endif

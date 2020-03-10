@@ -202,6 +202,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::PRIM_
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PRIM_STACK_TYPE_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PRIM_STACK_TYPE_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_PRIM_STACK_TYPE;
 
@@ -253,6 +254,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::PRIMA
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PRIM_DIE_COUNT_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PRIM_DIE_COUNT_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_PRIM_DIE_COUNT;
 
@@ -333,6 +335,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_DENSITY_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_DENSITY_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DRAM_DENSITY;
 
@@ -406,6 +409,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::PRIM_
 {
     using attr_type = fapi2::ATTR_MEM_EFF_PRIM_BUS_WIDTH_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PRIM_BUS_WIDTH_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_PRIM_BUS_WIDTH;
 
@@ -483,6 +487,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_WIDTH_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_WIDTH_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DRAM_WIDTH;
 
@@ -561,6 +566,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::COLUM
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_COLUMN_BITS_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_COLUMN_BITS_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_COL_ADDR_BITS;
 
@@ -626,6 +632,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::ROW_A
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_ROW_BITS_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_ROW_BITS_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_ROW_ADDR_BITS;
 
@@ -708,6 +715,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_R
 {
     using attr_type = fapi2::ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_SI_MC_RCV_IMP_DQ_DQS;
 
@@ -780,6 +788,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_D
 {
     using attr_type = fapi2::ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_SI_MC_DRV_IMP_DQ_DQS_PULL_UP;
 
@@ -865,6 +874,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_D
 {
     using attr_type = fapi2::ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN;
 
@@ -951,6 +961,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_D
 {
     using attr_type = fapi2::ATTR_MEM_SI_MC_DRV_SLEW_RATE_DQ_DQS_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_SI_MC_DRV_SLEW_RATE_DQ_DQS_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_SI_MC_DRV_SLEW_RATE_DQ_DQS;
 
@@ -1002,6 +1013,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_D
 {
     using attr_type = fapi2::ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_SI_MC_DRV_IMP_CMD_ADDR;
 
@@ -1075,6 +1087,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_D
 {
     using attr_type = fapi2::ATTR_MEM_SI_MC_DRV_SLEW_RATE_CMD_ADDR_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_SI_MC_DRV_SLEW_RATE_CMD_ADDR_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_SI_MC_DRV_SLEW_RATE_CMD_ADDR;
 
@@ -1126,6 +1139,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_D
 {
     using attr_type = fapi2::ATTR_MEM_SI_MC_DRV_IMP_CLK_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_SI_MC_DRV_IMP_CLK_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_SI_MC_DRV_IMP_CLK;
 
@@ -1199,6 +1213,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_D
 {
     using attr_type = fapi2::ATTR_MEM_SI_MC_DRV_SLEW_RATE_CLK_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_SI_MC_DRV_SLEW_RATE_CLK_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_SI_MC_DRV_SLEW_RATE_CLK;
 
@@ -1250,6 +1265,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_R
 {
     using attr_type = fapi2::ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_SI_MC_RCV_IMP_ALERT_N;
 
@@ -1323,6 +1339,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
 {
     using attr_type = fapi2::ATTR_MEM_SI_DRAM_RTT_NOM_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_SI_DRAM_RTT_NOM_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_SI_DRAM_RTT_NOM;
 
@@ -1423,6 +1440,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
 {
     using attr_type = fapi2::ATTR_MEM_SI_DRAM_RTT_WR_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_SI_DRAM_RTT_WR_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_SI_DRAM_RTT_WR;
 
@@ -1520,6 +1538,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
 {
     using attr_type = fapi2::ATTR_MEM_SI_DRAM_RTT_PARK_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_SI_DRAM_RTT_PARK_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_SI_DRAM_RTT_PARK;
 
@@ -1622,6 +1641,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
 {
     using attr_type = fapi2::ATTR_MEM_SI_DRAM_PREAMBLE_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_SI_DRAM_PREAMBLE_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_SI_DRAM_PREAMBLE;
 
@@ -1674,6 +1694,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_D
 {
     using attr_type = fapi2::ATTR_MEM_SI_MC_DRV_EQ_DQ_DQS_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_SI_MC_DRV_EQ_DQ_DQS_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_SI_MC_DRV_EQ_DQ_DQS;
 
@@ -1725,6 +1746,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
 {
     using attr_type = fapi2::ATTR_MEM_SI_DRAM_DRV_IMP_DQ_DQS_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_SI_DRAM_DRV_IMP_DQ_DQS_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_SI_DRAM_DRV_IMP_DQ_DQS;
 
@@ -1793,6 +1815,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_ODT_
 {
     using attr_type = fapi2::ATTR_MEM_SI_ODT_WR_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_SI_ODT_WR_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_SI_ODT_WR;
 
@@ -1884,6 +1907,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_ODT_
 {
     using attr_type = fapi2::ATTR_MEM_SI_ODT_RD_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_SI_ODT_RD_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_SI_ODT_RD;
 
@@ -1975,6 +1999,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_GEAR
 {
     using attr_type = fapi2::ATTR_MEM_SI_GEARDOWN_MODE_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_SI_GEARDOWN_MODE_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_SI_GEARDOWN_MODE;
 
@@ -2030,6 +2055,7 @@ struct attrEngineTraits<P, attr_engine_derived_fields, attr_engine_derived_field
 {
     using attr_type = fapi2::ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_LOGICAL_RANKS;
 
@@ -2100,6 +2126,7 @@ struct attrEngineTraits<P, attr_engine_derived_fields, attr_engine_derived_field
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DIMM_SIZE_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DIMM_SIZE_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DIMM_SIZE;
 
@@ -2170,6 +2197,7 @@ struct attrEngineTraits<P, attr_engine_derived_fields, attr_engine_derived_field
 {
     using attr_type = fapi2::ATTR_MEM_3DS_HEIGHT_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_3DS_HEIGHT_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_3DS_HEIGHT;
 
@@ -2243,6 +2271,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
 {
     using attr_type = fapi2::ATTR_MEM_DRAM_CWL_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_DRAM_CWL_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DRAM_CWL;
 
@@ -2340,6 +2369,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_MFG_ID_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_MFG_ID_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DRAM_MFG_ID;
 
@@ -2397,6 +2427,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TREFI_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_TREFI_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DRAM_TREFI;
 
@@ -2534,6 +2565,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TCCD_L_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_TCCD_L_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DRAM_TCCD_L;
 
@@ -2586,6 +2618,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TWTR_L_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_TWTR_L_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DRAM_TWTR_L;
 
@@ -2638,6 +2671,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TWTR_S_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_TWTR_S_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DRAM_TWTR_S;
 
@@ -2690,6 +2724,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TFAW_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_TFAW_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DRAM_TFAW;
 
@@ -2742,6 +2777,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TRCD_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_TRCD_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DRAM_TRCD;
 
@@ -2794,6 +2830,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TRP_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_TRP_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DRAM_TRP;
 
@@ -2846,6 +2883,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TRAS_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_TRAS_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DRAM_TRAS;
 
@@ -2898,6 +2936,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TWR_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_TWR_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DRAM_TWR;
 
@@ -2950,6 +2989,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TRTP_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_TRTP_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DRAM_TRTP;
 
@@ -3027,6 +3067,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TRRD_S_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_TRRD_S_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DRAM_TRRD_S;
 
@@ -3097,6 +3138,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TRRD_L_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_TRRD_L_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DRAM_TRRD_L;
 
@@ -3168,6 +3210,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TRFC_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_TRFC_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DRAM_TRFC;
 
@@ -3296,6 +3339,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_TRFC_DLR_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_TRFC_DLR_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DRAM_TRFC_DLR;
 
@@ -3376,6 +3420,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::RCD_M
 {
     using attr_type = fapi2::ATTR_MEM_EFF_RCD_MFG_ID_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_RCD_MFG_ID_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_RCD_MFG_ID;
 
@@ -3426,6 +3471,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DRAM_MODULE_HEIGHT;
 
@@ -3476,6 +3522,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::SPD_R
 {
     using attr_type = fapi2::ATTR_MEM_EFF_SPD_REVISION_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_SPD_REVISION_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_SPD_REVISION;
 
