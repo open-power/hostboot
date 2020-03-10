@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1481,7 +1481,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
 
         uint64_t l_xscom =
           l_pTarget->getAttr<TARGETING::ATTR_XSCOM_BASE_ADDRESS>();
-        if(l_xscom != 0x000603FC00000000ULL)
+        if(l_xscom != 0x000E03FC00000000ULL)
         {
             TARG_TS_FAIL("l_xscom value is 0x%016llX, not 0x%016llX as expected in direct "
                     "attribute access",l_xscom,0x000603FC00000000ULL);
