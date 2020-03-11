@@ -843,45 +843,367 @@
     </attribute>
     <attribute>
       <id>SPI_EEPROM_VPD_BACKUP_INFO</id>
+      <default>
+        <field>
+          <id>dataOffsetKB</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>dataSizeKB</id>
+          <value>512</value>
+        </field>
+        <!-- Corresponds to the RAW value of the EEPROM_CONTENT_TYPE enumeration -->
+        <field>
+          <id>eepromContentType</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>engine</id>
+          <value>3</value>
+        </field>
+        <field>
+          <id>spiMasterPath</id>
+          <value>physical:.</value>
+        </field>
+      </default>
     </attribute>
     <attribute>
       <id>SPI_EEPROM_VPD_PRIMARY_INFO</id>
+      <default>
+        <field>
+          <id>dataOffsetKB</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>dataSizeKB</id>
+          <value>512</value>
+        </field>
+        <!-- Corresponds to the RAW value of the EEPROM_CONTENT_TYPE enumeration -->
+        <field>
+          <id>eepromContentType</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>engine</id>
+          <value>2</value>
+        </field>
+        <field>
+          <id>spiMasterPath</id>
+          <value>physical:.</value>
+        </field>
+      </default>
     </attribute>
     <attribute>
       <id>SPI_KEYSTORE_INFO_HOSTBOOT</id>
+      <default>
+        <field>
+          <id>dataOffsetKB</id>
+          <value>480</value>
+        </field>
+        <field>
+          <id>dataSizeKB</id>
+          <value>32</value>
+        </field>
+        <!-- Corresponds to the KEYSTORE value of the EEPROM_CONTENT_TYPE enumeration -->
+        <field>
+          <id>eepromContentType</id>
+          <value>8</value>
+        </field>
+        <field>
+          <id>engine</id>
+          <value>3</value>
+        </field>
+        <field>
+          <id>spiMasterPath</id>
+          <value>physical:.</value>
+        </field>
+      </default>
     </attribute>
     <attribute>
       <id>SPI_KEYSTORE_INFO_OPAL_0</id>
+      <default>
+        <field>
+          <id>dataOffsetKB</id>
+          <value>256</value>
+        </field>
+        <field>
+          <id>dataSizeKB</id>
+          <value>64</value>
+        </field>
+        <!-- Corresponds to the KEYSTORE value of the EEPROM_CONTENT_TYPE enumeration -->
+        <field>
+          <id>eepromContentType</id>
+          <value>8</value>
+        </field>
+        <field>
+          <id>engine</id>
+          <value>3</value>
+        </field>
+        <field>
+          <id>spiMasterPath</id>
+          <value>physical:.</value>
+        </field>
+      </default>
     </attribute>
     <attribute>
       <id>SPI_KEYSTORE_INFO_OPAL_1</id>
+      <default>
+        <field>
+          <id>dataOffsetKB</id>
+          <value>320</value>
+        </field>
+        <field>
+          <id>dataSizeKB</id>
+          <value>64</value>
+        </field>
+        <!-- Corresponds to the KEYSTORE value of the EEPROM_CONTENT_TYPE enumeration -->
+        <field>
+          <id>eepromContentType</id>
+          <value>8</value>
+        </field>
+        <field>
+          <id>engine</id>
+          <value>3</value>
+        </field>
+        <field>
+          <id>spiMasterPath</id>
+          <value>physical:.</value>
+        </field>
+      </default>
     </attribute>
     <attribute>
       <id>SPI_KEYSTORE_INFO_OPAL_2</id>
+      <default>
+        <field>
+          <id>dataOffsetKB</id>
+          <value>384</value>
+        </field>
+        <field>
+          <id>dataSizeKB</id>
+          <value>64</value>
+        </field>
+        <!-- Corresponds to the KEYSTORE value of the EEPROM_CONTENT_TYPE enumeration -->
+        <field>
+          <id>eepromContentType</id>
+          <value>8</value>
+        </field>
+        <field>
+          <id>engine</id>
+          <value>3</value>
+        </field>
+        <field>
+          <id>spiMasterPath</id>
+          <value>physical:.</value>
+        </field>
+      </default>
     </attribute>
     <attribute>
       <id>SPI_KEYSTORE_INFO_PHYP</id>
+      <default>
+        <field>
+          <id>dataOffsetKB</id>
+          <value>448</value>
+        </field>
+        <field>
+          <id>dataSizeKB</id>
+          <value>32</value>
+        </field>
+        <!-- Corresponds to the KEYSTORE value of the EEPROM_CONTENT_TYPE enumeration -->
+        <field>
+          <id>eepromContentType</id>
+          <value>8</value>
+        </field>
+        <field>
+          <id>engine</id>
+          <value>3</value>
+        </field>
+        <field>
+          <id>spiMasterPath</id>
+          <value>physical:.</value>
+        </field>
+      </default>
     </attribute>
     <attribute>
       <id>SPI_MVPD_BACKUP_INFO</id>
+      <default>
+        <field>
+          <id>dataOffsetKB</id>
+          <value>0x00C0</value>
+        </field>
+        <field>
+          <id>dataSizeKB</id>
+          <value>0x40</value>
+        </field>
+        <!-- Corresponds to the IBM_MVPD value of the EEPROM_CONTENT_TYPE enumeration -->
+        <field>
+          <id>eepromContentType</id>
+          <value>3</value>
+        </field>
+        <field>
+          <id>engine</id>
+          <value>3</value>
+        </field>
+        <field>
+          <id>spiMasterPath</id>
+          <value>physical:.</value>
+        </field>
+      </default>
     </attribute>
     <attribute>
       <id>SPI_MVPD_PRIMARY_INFO</id>
+      <default>
+        <field>
+          <id>dataOffsetKB</id>
+          <value>0x00C0</value>
+        </field>
+        <field>
+          <id>dataSizeKB</id>
+          <value>0x40</value>
+        </field>
+        <!-- Corresponds to the IBM_MVPD value of the EEPROM_CONTENT_TYPE enumeration -->
+        <field>
+          <id>eepromContentType</id>
+          <value>3</value>
+        </field>
+        <field>
+          <id>engine</id>
+          <value>2</value>
+        </field>
+        <field>
+          <id>spiMasterPath</id>
+          <value>physical:.</value>
+        </field>
+      </default>
     </attribute>
     <attribute>
       <id>SPI_SBE_BOOT_CODE_BACKUP_INFO</id>
+      <default>
+        <field>
+          <id>dataOffsetKB</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>dataSizeKB</id>
+          <value>512</value>
+        </field>
+        <!-- Corresponds to the SBE_BOOT_CODE value of the EEPROM_CONTENT_TYPE enumeration -->
+        <field>
+          <id>eepromContentType</id>
+          <value>5</value>
+        </field>
+        <field>
+          <id>engine</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>spiMasterPath</id>
+          <value>physical:.</value>
+        </field>
+      </default>
     </attribute>
     <attribute>
       <id>SPI_SBE_BOOT_CODE_PRIMARY_INFO</id>
+      <default>
+        <field>
+          <id>dataOffsetKB</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>dataSizeKB</id>
+          <value>512</value>
+        </field>
+        <!-- Corresponds to the SBE_BOOT_CODE value of the EEPROM_CONTENT_TYPE enumeration -->
+        <field>
+          <id>eepromContentType</id>
+          <value>5</value>
+        </field>
+        <field>
+          <id>engine</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>spiMasterPath</id>
+          <value>physical:.</value>
+        </field>
+      </default>
     </attribute>
     <attribute>
       <id>SPI_SBE_MEASUREMENT_CODE_BACKUP_INFO</id>
+      <default>
+        <field>
+          <id>dataOffsetKB</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>dataSizeKB</id>
+          <value>192</value>
+        </field>
+        <!-- Corresponds to the SBE_MEASUREMENT_CODE value of the EEPROM_CONTENT_TYPE enumeration -->
+        <field>
+          <id>eepromContentType</id>
+          <value>6</value>
+        </field>
+        <field>
+          <id>engine</id>
+          <value>2</value>
+        </field>
+        <field>
+          <id>spiMasterPath</id>
+          <value>physical:.</value>
+        </field>
+      </default>
     </attribute>
     <attribute>
       <id>SPI_SBE_MEASUREMENT_CODE_PRIMARY_INFO</id>
+      <default>
+        <field>
+          <id>dataOffsetKB</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>dataSizeKB</id>
+          <value>192</value>
+        </field>
+        <!-- Corresponds to the SBE_MEASUREMENT_CODE value of the EEPROM_CONTENT_TYPE enumeration -->
+        <field>
+          <id>eepromContentType</id>
+          <value>6</value>
+        </field>
+        <field>
+          <id>engine</id>
+          <value>3</value>
+        </field>
+        <field>
+          <id>spiMasterPath</id>
+          <value>physical:.</value>
+        </field>
+      </default>
     </attribute>
     <attribute>
       <id>SPI_WOF_DATA_INFO</id>
+      <default>
+        <field>
+          <id>dataOffsetKB</id>
+          <value>256</value>
+        </field>
+        <field>
+          <id>dataSizeKB</id>
+          <value>160</value>
+        </field>
+        <!-- Corresponds to the WOF_DATA value of the EEPROM_CONTENT_TYPE enumeration -->
+        <field>
+          <id>eepromContentType</id>
+          <value>7</value>
+        </field>
+        <field>
+          <id>engine</id>
+          <value>2</value>
+        </field>
+        <field>
+          <id>spiMasterPath</id>
+          <value>physical:.</value>
+        </field>
+      </default>
     </attribute>
     <attribute>
       <id>XIVE_CONTROLLER_BAR_ADDR</id>

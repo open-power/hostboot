@@ -5463,7 +5463,7 @@ sub releaseAndClear {
 ################################################################################
 
 sub packComplexType {
-    my ($attributes,$complexType,$attributeDefault) = @_;
+    my ($attributes,$complexType,$attributeDefault,$attrhash) = @_;
 
     my $binaryData;
     my $simpleTypeProperties = simpleTypeProperties();
@@ -5499,7 +5499,8 @@ sub packComplexType {
                     if($field->{type} eq "EntityPath")
                     {
                          $binaryData .= packEntityPath($attributes,
-                            $default->{value});
+                                                       $default->{value},
+                                                       $attrhash);
                     }
                     # If not a defined simple type, process as an enumeration
                     elsif(!exists $simpleTypeProperties->{$field->{type}})
@@ -5564,7 +5565,7 @@ sub packComplexType {
 ################################################################################
 
 sub packEntityPath {
-    my($attributes,$value) = @_;
+    my($attributes,$value,$attrhash) = @_;
 
     my $binaryData;
 
@@ -5587,6 +5588,29 @@ sub packEntityPath {
     else
     {
         croak("Unsupported entity path type of [$value], [$typeStr], [$path].");
+    }
+
+    # If the EntityPath begins with a period, it's a relative path
+    if (substr($path, 0, 1) eq '.')
+    {
+        # We only support the relative path "." (i.e. "this target") for now
+        if ($path ne '.')
+        {
+            croak("This form of relative EntityPath not supported: $path");
+        }
+
+        my $pathAttributeID = ($typeStr eq "physical"
+                               ? "PHYS_PATH"
+                               : "AFFINITY_PATH");
+
+        if (!exists $attrhash->{$pathAttributeID}
+            || !exists $attrhash->{$pathAttributeID}->{default})
+        {
+            croak("Target has no $pathAttributeID attribute (when packing relative entity path)");
+        }
+
+        my $targetPath = $attrhash->{$pathAttributeID}->{default};
+        return packEntityPath($attributes, $targetPath);
     }
 
     if( (scalar @paths) > $maxPathElements)
@@ -5733,7 +5757,7 @@ sub packSingleSimpleTypeAttribute {
 ################################################################################
 
 sub packAttribute {
-    my($attributes,$attribute,$value) = @_;
+    my($attributes,$attribute,$value,$attrhash) = @_;
 
     $value = stripLeadingAndTrailingWhitespace($value);
 
@@ -5818,8 +5842,10 @@ sub packAttribute {
     {
         if(ref ($value) eq "HASH" )
         {
-            $binaryData = packComplexType($attributes,$attribute->{complexType},
-                $value);
+            $binaryData = packComplexType($attributes,
+                                          $attribute->{complexType},
+                                          $value,
+                                          $attrhash);
         }
         else
         {
@@ -5830,7 +5856,7 @@ sub packAttribute {
     {
         if($attribute->{nativeType}->{name} eq "EntityPath")
         {
-            $binaryData = packEntityPath($attributes,$value);
+            $binaryData = packEntityPath($attributes,$value,$attrhash);
         }
         else
         {
@@ -6641,8 +6667,9 @@ sub generateTargetingImage {
                 }
 
                 my ($rodata,$alignment) = packAttribute($attributes,
-                        $attributeDef,
-                        $attrhash{$attributeId}->{default});
+                                                        $attributeDef,
+                                                        $attrhash{$attributeId}->{default},
+                                                        \%attrhash);
 
                 # Align the data as necessary
                 my $pads = ($alignment - ($offset % $alignment))
@@ -6660,8 +6687,9 @@ sub generateTargetingImage {
             elsif($section eq "pnor-rw")
             {
                 my ($rwdata,$alignment) = packAttribute($attributes,
-                        $attributeDef,
-                        $attrhash{$attributeId}->{default});
+                                                        $attributeDef,
+                                                        $attrhash{$attributeId}->{default},
+                                                        \%attrhash);
 
                 #print "Wrote to pnor-rw value ",$attributeDef->{id}, ",
                 #", $attrhash{$attributeId}->{default}," \n";
@@ -6686,9 +6714,10 @@ sub generateTargetingImage {
             }
             elsif($section eq "heap-zero-initialized")
             {
-                my ($heapZeroInitData,$alignment) = packAttribute(
-                        $attributes,
-                        $attributeDef,$attrhash{$attributeId}->{default});
+                my ($heapZeroInitData,$alignment) = packAttribute($attributes,
+                                                                  $attributeDef,
+                                                                  $attrhash{$attributeId}->{default},
+                                                                  \%attrhash);
 
                 $biosData{$targetInstance->{id}}{$attributeId}{size} =
                     (length $heapZeroInitData);
@@ -6715,9 +6744,10 @@ sub generateTargetingImage {
             }
             elsif($section eq "heap-pnor-initialized")
             {
-                my ($heapPnorInitData,$alignment) = packAttribute(
-                        $attributes,
-                        $attributeDef,$attrhash{$attributeId}->{default});
+                my ($heapPnorInitData,$alignment) = packAttribute($attributes,
+                                                                  $attributeDef,
+                                                                  $attrhash{$attributeId}->{default},
+                                                                  \%attrhash);
 
                 $biosData{$targetInstance->{id}}{$attributeId}{size} =
                     (length $heapPnorInitData);
@@ -6743,9 +6773,10 @@ sub generateTargetingImage {
             # Split FSP section into more granular sections
             elsif($section eq "fspP0DefaultedFromZero")
             {
-                my ($fspP0ZeroData,$alignment) = packAttribute(
-                        $attributes,
-                        $attributeDef,$attrhash{$attributeId}->{default});
+                my ($fspP0ZeroData,$alignment) = packAttribute($attributes,
+                                                               $attributeDef,
+                                                               $attrhash{$attributeId}->{default},
+                                                               \%attrhash);
 
                 if($ifFspOnlyTargetWithCommonAttr eq "true")
                 {
@@ -6770,9 +6801,10 @@ sub generateTargetingImage {
             }
             elsif($section eq "fspP0DefaultedFromP3")
             {
-                my ($fspP0FlashData,$alignment) = packAttribute(
-                        $attributes,
-                        $attributeDef,$attrhash{$attributeId}->{default});
+                my ($fspP0FlashData,$alignment) = packAttribute($attributes,
+                                                                $attributeDef,
+                                                                $attrhash{$attributeId}->{default},
+                                                                \%attrhash);
 
                 if($ifFspOnlyTargetWithCommonAttr eq "true")
                 {
@@ -6797,9 +6829,10 @@ sub generateTargetingImage {
             }
             elsif($section eq "fspP3Ro")
             {
-                my ($fspP3RoData,$alignment) = packAttribute(
-                        $attributes,
-                        $attributeDef,$attrhash{$attributeId}->{default});
+                my ($fspP3RoData,$alignment) = packAttribute($attributes,
+                                                             $attributeDef,
+                                                             $attrhash{$attributeId}->{default},
+                                                             \%attrhash);
 
                 # Align the data as necessary
                 my $pads = ($alignment - ($fspP3RoOffset
@@ -6816,9 +6849,10 @@ sub generateTargetingImage {
             }
             elsif($section eq "fspP3Rw")
             {
-                my ($fspP3RwData,$alignment) = packAttribute(
-                        $attributes,
-                        $attributeDef,$attrhash{$attributeId}->{default});
+                my ($fspP3RwData,$alignment) = packAttribute($attributes,
+                                                             $attributeDef,
+                                                             $attrhash{$attributeId}->{default},
+                                                             \%attrhash);
 
                 my $hex = unpack ("H*",$fspP3RwData);
 
@@ -6840,9 +6874,10 @@ sub generateTargetingImage {
             }
             elsif($section eq "fspP1DefaultedFromZero")
             {
-                my ($fspP1ZeroData,$alignment) = packAttribute(
-                        $attributes,
-                        $attributeDef,$attrhash{$attributeId}->{default});
+                my ($fspP1ZeroData,$alignment) = packAttribute($attributes,
+                                                               $attributeDef,
+                                                               $attrhash{$attributeId}->{default},
+                                                               \%attrhash);
 
                 my $hex = unpack ("H*",$fspP1ZeroData);
 
@@ -6864,9 +6899,10 @@ sub generateTargetingImage {
             }
             elsif($section eq "fspP1DefaultedFromP3")
             {
-                my ($fspP1FlashData,$alignment) = packAttribute(
-                        $attributes,
-                        $attributeDef,$attrhash{$attributeId}->{default});
+                my ($fspP1FlashData,$alignment) = packAttribute($attributes,
+                                                                $attributeDef,
+                                                                $attrhash{$attributeId}->{default},
+                                                                \%attrhash);
 
                 my $hex = unpack ("H*",$fspP1FlashData);
 
@@ -6889,9 +6925,10 @@ sub generateTargetingImage {
             # Hostboot specific section
             elsif($section eq "hb-heap-zero-initialized")
             {
-                my ($hbHeapZeroInitData,$alignment) = packAttribute(
-                        $attributes,
-                        $attributeDef,$attrhash{$attributeId}->{default});
+                my ($hbHeapZeroInitData,$alignment) = packAttribute($attributes,
+                                                                    $attributeDef,
+                                                                    $attrhash{$attributeId}->{default},
+                                                                    \%attrhash);
 
                 $biosData{$targetInstance->{id}}{$attributeId}{size} =
                     (length $hbHeapZeroInitData);
