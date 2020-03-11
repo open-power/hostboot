@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -140,8 +140,9 @@ class instruction_t
         /// @param[in] i_rank_config the rank configuration
         /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
         ///
-        fapi2::ReturnCode configure_rank(const fapi2::Target<TT::PORT_TARGET_TYPE>& i_target,
-                                         const rank_configuration i_rank_config )
+        fapi2::ReturnCode configure_rank(
+            const fapi2::Target<TT::PORT_TARGET_TYPE>& i_target,
+            const rank_configuration i_rank_config )
         {
             // If this instrunction is set to not update the rank, then don't update the rank
             if(!iv_update_rank)
@@ -182,8 +183,8 @@ class instruction_t
                 constexpr uint64_t NON_DIMM_CS = 0b11;
 
                 // Assigns the CS based upon which DIMM we're at
-                const auto CS01 = l_is_dimm0 ? TT::CS_N[l_dimm_rank].first : NON_DIMM_CS;
-                const auto CS23 = l_is_dimm0 ? NON_DIMM_CS : TT::CS_N[l_dimm_rank].first;
+                const uint64_t CS01 = l_is_dimm0 ? TT::CS_N[l_dimm_rank].first : NON_DIMM_CS;
+                const uint64_t CS23 = l_is_dimm0 ? NON_DIMM_CS : TT::CS_N[l_dimm_rank].first;
 
                 // Setup that rank
                 arr0.insertFromRight<TT::ARR0_DDR_CSN_0_1,
@@ -201,8 +202,11 @@ class instruction_t
                 const bool l_is_dimm0 = iv_rank < TT::CCS_MAX_RANK_PER_DIMM;
 
                 // Assigns the CS based upon which DIMM we're at
-                const auto CS01 = l_is_dimm0 ? TT::CS_ND[l_dimm_rank].first : TT::CS_ND[l_dimm_rank].second;
-                const auto CS23 = l_is_dimm0 ? TT::CS_ND[l_dimm_rank].second : TT::CS_ND[l_dimm_rank].first;
+                const uint64_t CS01 = l_is_dimm0 ? TT::CS_ND[l_dimm_rank].first : TT::CS_ND[l_dimm_rank].second;
+                uint64_t CS23 = l_is_dimm0 ? TT::CS_ND[l_dimm_rank].second : TT::CS_ND[l_dimm_rank].first;
+
+                // Set CS23 <-- CS01 if CS needs to be tied
+                FAPI_TRY(TT::cs_tied(i_target, CS01, CS23));
 
                 // Setup that rank
                 arr0.insertFromRight<TT::ARR0_DDR_CSN_0_1,
@@ -215,7 +219,7 @@ class instruction_t
                 // 1) we are DIMM1
                 // 2) our DIMM rank is greater than the maximum allowed number of ranks on DIMM1
                 // So, we pass always if we're DIMM0, or if our DIMM rank is less than the maximum number of DIMM's on rank 1
-                FAPI_ASSERT(l_dimm_rank < TT::CCS_MAX_RANKS_DIMM1 || l_is_dimm0,
+                FAPI_ASSERT((l_dimm_rank < TT::CCS_MAX_RANKS_DIMM1) || l_is_dimm0,
                             fapi2::MSS_INVALID_RANK()
                             .set_PORT_TARGET(i_target)
                             .set_RANK(iv_rank)

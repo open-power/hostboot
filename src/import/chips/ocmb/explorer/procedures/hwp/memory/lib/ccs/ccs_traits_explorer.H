@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,7 @@
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/ccs/ccs_traits.H>
+#include <exp_attribute_accessors_manual.H>
 
 ///
 /// @class ccsTraits
@@ -228,6 +229,34 @@ class ccsTraits<mss::mc_type::EXPLORER>
             // CS0 H CS1 H => CS2 => H CS3 => L Rank 3
             { 0b11, 0b10 },
         };
+
+        ///
+        /// @brief Get and perform CS tied operation if needed
+        ///
+        /// @param[in] i_target PORT target type
+        /// @param[in] i_CS01 CS01
+        /// @param[in,out] io_CS23 CS23, to overwrite if tied
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        static fapi2::ReturnCode cs_tied(
+            const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+            const uint64_t i_CS01,
+            uint64_t& io_CS23)
+        {
+            bool l_cs_tied = false;
+            FAPI_TRY(mss::get_cs_tied(i_target, l_cs_tied));
+
+            if (l_cs_tied)
+            {
+                // Overwrite CS23 with CS01
+                io_CS23 = i_CS01;
+            }
+
+            // Else, not tied, and we leave them alone
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
 
         ///
         /// @brief Gets the attribute for checking our rank configuration

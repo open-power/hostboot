@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,7 +40,7 @@
 
 #include <fapi2.H>
 #include <mss_explorer_attribute_getters.H>
-
+#include <mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
 
@@ -186,6 +186,36 @@ inline fapi2::ReturnCode set_volt_vpp(const fapi2::Target<T>& i_target, uint32_t
 fapi_try_exit:
     FAPI_ERR("failed setting ATTR_MEM_EFF_VOLT_VPP: 0x%lx (target: %s)",
              uint64_t(fapi2::current_err), mss::c_str(i_target));
+    return fapi2::current_err;
+}
+
+///
+/// @brief Get whether the CS configuration should be tied (A0 == B0 A1 == B1)
+///
+/// @param[in] i_target MEM_PORT target
+/// @param[in] o_cs_tied true/false whether CS configuration should be tied
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+inline fapi2::ReturnCode get_cs_tied(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, bool& o_cs_tied)
+{
+    o_cs_tied = false;
+
+    bool l_four_rank_mode = false;
+    bool l_dual_drop = false;
+
+    uint8_t l_ranks_per_dimm[2] = {};
+    uint8_t l_four_rank_mode_attr[2] = {};
+
+    FAPI_TRY(mss::attr::get_num_master_ranks_per_dimm(i_target, l_ranks_per_dimm));
+    l_dual_drop = (l_ranks_per_dimm[0] > 0 && l_ranks_per_dimm[1] > 0) ? true : false;
+
+    FAPI_TRY(mss::attr::get_four_rank_mode(i_target, l_four_rank_mode_attr));
+    l_four_rank_mode = (l_four_rank_mode_attr[0] == fapi2::ENUM_ATTR_MEM_EFF_FOUR_RANK_MODE_ENABLE);
+
+    // This logic mirrors the logic for def_cs_tied in explorer.scom.initfile
+    o_cs_tied = (!l_four_rank_mode && !l_dual_drop);
+
+fapi_try_exit:
     return fapi2::current_err;
 }
 

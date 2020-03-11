@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -242,6 +242,22 @@ class ccsTraits<mss::mc_type::NIMBUS>
             // CS0 H CS1 H => CS2 => H CS3 => L Rank 3
             { 0b11, 0b10 },
         };
+
+        ///
+        /// @brief Get and perform CS tied operation (NO-OP for Nimbus)
+        ///
+        /// @param[in] i_target MCA target type
+        /// @param[in] i_CS01 CS01
+        /// @param[in,out] io_CS23 CS23, to overwrite if tied (NO-OP for Nimbus)
+        /// @return fapi2::FAPI2_RC_SUCCESS always
+        ///
+        static fapi2::ReturnCode cs_tied(
+            const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+            const uint64_t i_CS01,
+            uint64_t& io_CS23)
+        {
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
 
         ///
         /// @brief Gets the attribute for checking our rank configuration
