@@ -75,6 +75,15 @@ enum WorkFlowPhase
 };
 
 /**
+ * @brief Add relevant register FFDC for a MDIA timeout
+ *
+ * @param[in] i_target The target to collect the FFDC for
+ * @param[in/out] io_log The error log to add the FFDC to
+ */
+
+void addTimeoutFFDC(TARGETING::TargetHandle_t i_target, errlHndl_t & io_log);
+
+/**
  * @brief memory diagnostics step state machine
  */
 class StateMachine

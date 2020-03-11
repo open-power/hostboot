@@ -127,8 +127,20 @@ void addTimeoutFFDC(TargetHandle_t i_target, errlHndl_t & io_log)
         MC1_CHIPLET_HA_FIR_MASK ,
     };
 
-    // get the parent proc
-    ConstTargetHandle_t proc = getParentChip(i_target);
+    // Get the parent OMI
+    TargetHandleList targetList;
+    getParentAffinityTargets( targetList, i_target, CLASS_UNIT, TYPE_OMI );
+
+    assert( targetList.size() == 1, "[MDIA] addTimeoutFFDC: Multiple parent"
+            " OMIs found for OCMB i_target: 0x%08x", get_huid(i_target) );
+
+    TargetHandle_t omi = targetList[0];
+
+    // Get the parent proc
+    ConstTargetHandle_t proc = getParentChip(omi);
+
+    assert( nullptr != proc, "[MDIA] addTimeoutFFDC: Unable to get the "
+            "parent proc from omi: 0x%08x", get_huid(omi) );
 
     const struct Entry
     {
