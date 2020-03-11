@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -23,6 +23,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+/**
+ * @file sbe_update.C
+ *
+ * SBE Update
+ *
+ */
 
 #include <vector>
 #include <trace/interface.H>
@@ -75,11 +81,12 @@
 #include    <fapi2/hw_access.H>
 
 //Procedures
-#include <p9_xip_customize.H>
-#include <p9_xip_section_append.H>
-#include <p9_xip_image.h>
+#include <p10_ipl_customize.H>
+#include <p10_ipl_section_append.H>
+#include <p10_ipl_image.H>
 
-#include <p9_perv_scom_addresses.H>
+#include <p10_infrastruct_help.H>
+#include <p10_scom_perv_a.H>
 #include <initservice/mboxRegs.H>
 #include <bootloader/bootloaderif.H>
 #include <secureboot/service.H>
@@ -116,6 +123,15 @@ static std::list<PNOR::SectionId> g_loadedSections;
 
 using namespace ERRORLOG;
 using namespace TARGETING;
+using namespace scomt::perv;
+
+// FIXME RTC 208838 Remove VPD_PRIMARY VPD_BACKUP to proper SBE SPI values
+// The hack was to get this to compile since the updateProcessorSbeSeeproms path
+// is currently disabled, but the roots of stubbing this out were deep
+// host_discover_targets (istep 6.6)
+// host_gard (istep 6.8)
+// call_mss_freq (istep 7.3)
+// call_mss_attr_update (istep 7.5)
 
 namespace SBE
 {
@@ -141,8 +157,8 @@ namespace SBE
     errlHndl_t updateProcessorSbeSeeproms(
         const KEY_TRANSITION_PERM i_keyTransPerm)
     {
-        errlHndl_t err = NULL;
-        errlHndl_t err_cleanup = NULL;
+        errlHndl_t err = nullptr;
+        errlHndl_t err_cleanup = nullptr;
         sbeTargetState_t sbeState;
         std::vector<sbeTargetState_t> sbeStates_vector;
 
@@ -223,24 +239,23 @@ namespace SBE
             assert((FIXED_SEEPROM_WORK_SPACE <= VMM_SBE_UPDATE_SIZE/2),
                    "updateProcessorSbeSeeproms() FIXED_SEEPROM_WORK_SPACE "
                    "too large");
-            /* FIXME RTC: 210975
             assert((MAX_RING_BUF_SIZE <= VMM_SBE_UPDATE_SIZE/4),
                    "updateProcessorSbeSeeproms() MAX_RING_BUF_SIZE too "
                    "large");
-            */
 
             // reset global variables for MBOX Ipl Query
             g_mbox_query_done   = false;
             g_mbox_query_result = false;
 
-            // Create VMM space for p9_xip_customize() procedure
+            // Create VMM space for p10_ipl_customize() procedure
             err = createSbeImageVmmSpace();
             if (err)
             {
                 TRACFCOMP( g_trac_sbe,
                            INFO_MRK"updateProcessorSbeSeeproms(): "
-                           "createSbeImageVmmSpace() Failed. ",
-                           "rc=0x%.4X", err->reasonCode() );
+                           "createSbeImageVmmSpace() Failed. "
+                           TRACE_ERR_FMT,
+                           TRACE_ERR_ARGS(err));
 
                 break;
             }
@@ -277,13 +292,12 @@ namespace SBE
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"updateProcessorSbeSeeproms() - "
                            "queryMasterProcChipTargetHandle returned error. "
-                           "Commit here and continue.  Check below against "
-                           "masterProcChipTargetHandle=NULL is ok, "
-                           "RC=0x%X, PLID=0x%lX",
-                           ERRL_GETRC_SAFE(err),
-                           ERRL_GETPLID_SAFE(err));
-                 errlCommit( err, SBE_COMP_ID );
-                 err = NULL;
+                           "Commit here and continue.  Check against "
+                           "masterProcChipTargetHandle=NULL is ok "
+                           TRACE_ERR_FMT,
+                           TRACE_ERR_ARGS(err));
+                 errlCommit(err, SBE_COMP_ID);
+                 err = nullptr;
             }
 
             // Check if a key transition is allowed/needed
@@ -316,10 +330,10 @@ namespace SBE
                         // but this issue will be logged.
                         TRACFCOMP(g_trac_sbe, ERR_MRK
                             "updateProcessorSbeSeeproms: Error syncing "
-                            "attributes to FSP, RC=0x%04X, PLID=0x%08X",
-                            ERRL_GETRC_SAFE(err),
-                            ERRL_GETPLID_SAFE(err));
-                        errlCommit(err,SBE_COMP_ID );
+                            "attributes to FSP "
+                            TRACE_ERR_FMT,
+                            TRACE_ERR_ARGS(err));
+                        errlCommit(err,SBE_COMP_ID);
                     }
                 }
             }
@@ -374,9 +388,10 @@ namespace SBE
                     TRACFCOMP( g_trac_sbe,
                                INFO_MRK"updateProcessorSbeSeeproms(): "
                                "getSbeInfoState() Failed "
-                               "rc=0x%.4X, Target UID=0x%X",
-                               err->reasonCode(),
-                               TARGETING::get_huid(sbeState.target));
+                               "Target UID=0x%X "
+                               TRACE_ERR_FMT,
+                               TARGETING::get_huid(sbeState.target),
+                               TRACE_ERR_ARGS(err));
 
                     // Don't break - handle error at the end of the loop
                 }
@@ -393,10 +408,11 @@ namespace SBE
                     {
                         TRACFCOMP( g_trac_sbe,
                                    INFO_MRK"updateProcessorSbeSeeproms(): "
-                                   "getTargetUpdateActions() Failed "
-                                   "rc=0x%.4X, Target UID=0x%X",
-                                   err->reasonCode(),
-                                   TARGETING::get_huid(sbeState.target));
+                                   "getTargetUpdateActions() Failed"
+                                   "Target UID=0x%X "
+                                   TRACE_ERR_FMT,
+                                   TARGETING::get_huid(sbeState.target),
+                                   TRACE_ERR_ARGS(err));
 
                         // Don't break - handle error at the end of the loop,
                     }
@@ -408,9 +424,9 @@ namespace SBE
                 /**********************************************/
                 // Force an update of SEEPROM 0 or SEEPROM 1 if SB keyword
                 // flags is requesting an update for that particular seeprom
-                if (((sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY) &&
+                if (((sbeState.seeprom_side_to_update == EEPROM::VPD_PRIMARY) &&
                 (sbeState.mvpdSbKeyword.flags & SEEPROM_0_FORCE_UPDATE_MASK)) ||
-                    ((sbeState.seeprom_side_to_update == EEPROM::SBE_BACKUP) &&
+                    ((sbeState.seeprom_side_to_update == EEPROM::VPD_BACKUP) &&
                 (sbeState.mvpdSbKeyword.flags & SEEPROM_1_FORCE_UPDATE_MASK)))
                 {
                    // The DO_UPDATE flag alone might not be enough to
@@ -460,9 +476,10 @@ namespace SBE
                             TRACFCOMP( g_trac_sbe,
                                        INFO_MRK"updateProcessorSbeSeeproms(): "
                                        "performUpdateActions() Failed "
-                                       "rc=0x%.4X, Target UID=0x%X",
-                                       err->reasonCode(),
-                                       TARGETING::get_huid(sbeState.target));
+                                       "Target UID=0x%X "
+                                       TRACE_ERR_FMT,
+                                       TARGETING::get_huid(sbeState.target),
+                                       TRACE_ERR_ARGS(err));
 
                             //Don't break - handle error at the end of the loop,
                         }
@@ -491,13 +508,14 @@ namespace SBE
                     // or if no targets left, will just continue the IPL
                     TRACFCOMP( g_trac_sbe,
                                INFO_MRK"updateProcessorSbeSeeproms(): "
-                               "Committing Error Log rc=0x%.4X eid=0x%.8X "
-                               "plid=0x%.8X sev=0x%.2X for Target UID=0x%X, "
-                               "but continuing procedure",
-                               sbeState.err_rc, sbeState.err_eid,
-                               sbeState.err_plid, sbeState.err_sev,
-                               TARGETING::get_huid(sbeState.target));
-                    errlCommit( err, SBE_COMP_ID );
+                               "Committing Error Log "
+                               "sev=0x%.2X for Target UID=0x%X, "
+                               "but continuing procedure "
+                               TRACE_ERR_FMT,
+                               sbeState.err_sev,
+                               TARGETING::get_huid(sbeState.target),
+                               TRACE_ERR_ARGS(err));
+                    errlCommit(err, SBE_COMP_ID);
                 }
 
                 /**********************************************/
@@ -531,10 +549,11 @@ namespace SBE
                     // and continue with the Re-IPL Request
                     TRACFCOMP( g_trac_sbe,
                                INFO_MRK"updateProcessorSbeSeeproms(): "
-                               "Committing Error Log rc=0x%.4X from "
-                               "preReIplCheck(), but doing Re-IPL",
-                               err->reasonCode());
-                    errlCommit( err, SBE_COMP_ID );
+                               "Committing Error Log from "
+                               "preReIplCheck(), but doing Re-IPL "
+                               TRACE_ERR_FMT,
+                               TRACE_ERR_ARGS(err));
+                    errlCommit(err, SBE_COMP_ID);
                 }
 
                 err = sbeDoReboot();
@@ -557,8 +576,9 @@ namespace SBE
                     // Something failed on the check
                     TRACFCOMP( g_trac_sbe,
                                INFO_MRK"updateProcessorSbeSeeproms(): Call to "
-                               "masterVersionCompare() failed rc=0x%.4X",
-                               err->reasonCode());
+                               "masterVersionCompare() failed "
+                               TRACE_ERR_FMT,
+                               TRACE_ERR_ARGS(err));
                 }
             }
 
@@ -633,14 +653,14 @@ namespace SBE
                              size_t& o_imgSize,
                              sbe_image_version_t* o_version)
     {
-        errlHndl_t err = NULL;
+        errlHndl_t err = nullptr;
         PNOR::SectionInfo_t pnorInfo;
         sbeToc_t* sbeToc = NULL;
         uint8_t ec = 0;
         PNOR::SectionId pnorSectionId = PNOR::INVALID_SECTION;
 
-        void* hdr_Ptr  = NULL;
-        o_imgPtr = NULL;
+        void* hdr_Ptr  = nullptr;
+        o_imgPtr = nullptr;
         o_imgSize = 0;
 
         TRACDCOMP( g_trac_sbe,
@@ -689,8 +709,9 @@ namespace SBE
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"findSBEInPnor: Error calling "
-                           "loadPnorSection() rc=0x%.4X",
-                           err->reasonCode() );
+                           "loadPnorSection() "
+                           TRACE_ERR_FMT,
+                           TRACE_ERR_ARGS(err));
                 break;
             }
 
@@ -895,10 +916,8 @@ namespace SBE
                                void*     i_image,
                                uint32_t& io_image_size)
     {
-        errlHndl_t err = NULL;
-/* FIXME RTC: 210975
+        errlHndl_t err = nullptr;
         P9XipItem l_xipItem;
-*/
 
         TRACFCOMP( g_trac_sbe,
                    ENTER_MRK"appendHbblToSbe(): i_section=%p, "
@@ -909,28 +928,16 @@ namespace SBE
 
         do{
             // Call p9_xip_find to find HBBL image in SBE image
-            //const char* l_sectionId = ".hbbl"; // FIXME RTC: 210975
-            // Note - this is not a fapi2 function
-            int xip_rc = 0; // FIXME RTC: 210975 p9_xip_find( i_image, l_sectionId, &l_xipItem );*/
+            const char* l_sectionId = ".hbbl";
+            int xip_rc = p9_xip_find( i_image, l_sectionId, &l_xipItem );
 
             // Check the return code
-            if( xip_rc == P9_XIP_ITEM_NOT_FOUND )
+            if( xip_rc == P9_XIP_ITEM_NOT_FOUND || xip_rc == P9_XIP_DATA_NOT_PRESENT)
             {
-                TRACUCOMP( g_trac_sbe, "appendHbblToSbe(): "
-                           "p9_xip_find received expected return code, item "
-                           "not found, rc=0x%X",
-                           xip_rc );
-            }
-            else if( xip_rc == P9_XIP_DATA_NOT_PRESENT )
-            {
-// FIXME RTC: 210975
-#if 0
                 TRACFCOMP( g_trac_sbe, "appendHbblToSbe(): "
-                           "p9_xip_find located %s, rc=0x%X",
-                           xip_rc ? "TOC only" : "TOC and section data",
-                           xip_rc );
+                           "p9_xip_find NON CONCLUSIVE clean first rc=0x%X", xip_rc);
 
-                // Call p9_xip_delete_section to delete existing HBBL image
+                // Call p10_xip_delete_section to clean or delete existing HBBL image
                 // from SBE image
                 void *l_imageBuf =malloc(io_image_size);
                 xip_rc = p9_xip_delete_section(
@@ -939,6 +946,7 @@ namespace SBE
                                  io_image_size,
                                  P9_XIP_SECTION_SBE_HBBL );
                 free(l_imageBuf);
+                l_imageBuf = nullptr;
 
                 // Check for error
                 if( xip_rc )
@@ -967,7 +975,6 @@ namespace SBE
                     // exit loop
                     break;
                 }
-#endif
             }
             else
             {
@@ -998,9 +1005,9 @@ namespace SBE
                 break;
             }
 
-            // Invoke p9_xip_section_append to append HBBL image to SBE image
+            // Invoke p10_ipl_section_append to append HBBL image to SBE image
             FAPI_INVOKE_HWP( err,
-                             p9_xip_section_append,
+                             p10_ipl_section_append,
                              i_section,
                              i_section_size,
                              P9_XIP_SECTION_SBE_HBBL,
@@ -1011,8 +1018,9 @@ namespace SBE
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, "appendHbblToSbe(): "
-                           "p9_xip_section_append failed, rc=0x%X",
-                           err->reasonCode() );
+                           "p10_ipl_section_append failed "
+                           TRACE_ERR_FMT,
+                           TRACE_ERR_ARGS(err));
 
                 // exit loop
                 break;
@@ -1041,7 +1049,7 @@ namespace SBE
             if(l_err)
             {
                 delete l_err;
-                l_err = NULL;
+                l_err = nullptr;
                 TRACFCOMP( g_trac_sbe,
                            ERR_MRK"ringOvd():Error trying to read RINGOVD "
                            "from PNOR. Could be blocked in secure mode. "
@@ -1075,7 +1083,7 @@ namespace SBE
             TRACFCOMP( g_trac_sbe,
                        INFO_MRK"ringOvd():Valid overrides, applying them");
 
-            FAPI_INVOKE_HWP(l_err,p9_xip_section_append,
+            FAPI_INVOKE_HWP(l_err,p10_ipl_section_append,
                             (void *)l_pnorRingOvd.vaddr,
                             RING_OVD_SIZE,
                             P9_XIP_SECTION_SBE_OVERRIDES,
@@ -1086,8 +1094,9 @@ namespace SBE
             {
                 TRACFCOMP( g_trac_sbe,
                            ERR_MRK"ringOvd(): FAPI_INVOKE_HWP("
-                           "p9_xip_section_append) failed, PLID=0x%x",
-                           l_err->plid());
+                           "p10_ipl_section_append) failed "
+                           TRACE_ERR_FMT,
+                           TRACE_ERR_ARGS(l_err));
 
                 l_err->collectTrace(SBE_COMP_NAME, 256);
 
@@ -1108,7 +1117,7 @@ namespace SBE
                                    void* io_imgPtr,
                                    size_t& o_actImgSize)
     {
-        errlHndl_t err = NULL;
+        errlHndl_t err = nullptr;
         uint32_t tmpImgSize = static_cast<uint32_t>(i_maxImgSize);
         uint32_t coreMask = 0x00FFFFFF; // Bits(8:31) = EC00:EC23
         size_t maxCores = P9_MAX_EC_PER_PROC;
@@ -1133,12 +1142,12 @@ namespace SBE
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                 l_fapiTarg(i_target);
 
-            // The p9_xip_customize() procedure tries to include as much core
+            // The p10_ipl_customize() procedure tries to include as much core
             // information as possible, but is limited by SBE Image size
             // constraints.
             // First, maximize core mask for the target
             // Then loop on the procedure call, where the loop is designed to
-            // remove the number of cores passed into p9_xip_customize() until
+            // remove the number of cores passed into p10_ipl_customize() until
             // an image can be created successfully.
 
             // Maximize Core mask for this target
@@ -1148,11 +1157,13 @@ namespace SBE
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"procCustomizeSbeImg() - "
-                           "selectBestCores() failed rc=0x%X. "
+                           "selectBestCores() failed"
                            "MaxCores=0x%.8X. HUID=0x%X. Aborting "
-                           "Customization of SBE Image",
-                           err->reasonCode(), maxCores,
-                           TARGETING::get_huid(i_target));
+                           "Customization of SBE Image "
+                           TRACE_ERR_FMT,
+                           maxCores,
+                           TARGETING::get_huid(i_target),
+                           TRACE_ERR_ARGS(err));
                 break;
             }
 
@@ -1189,18 +1200,16 @@ namespace SBE
                          tmpImgSize);
 
                 procIOMask = coreMask;
-/* FIXME RTC: 210975
                 uint32_t l_ringSectionBufSize = MAX_SEEPROM_IMAGE_SIZE;
                 FAPI_INVOKE_HWP( err,
-                                 p9_xip_customize,
+                                 p10_ipl_customize,
                                  l_fapiTarg,
                                  i_hwImgPtr,
                                  io_imgPtr, //image in/out
-                                 tmpImgSize,
+                                 tmpImgSize, // In: Max, Out: Actual
                                  (void*)RING_SEC_VADDR,
                                  l_ringSectionBufSize,
                                  SYSPHASE_HB_SBE,
-                                 MODEBUILD_IPL,
                                  (void*)RING_BUF1_VADDR,
                                  (uint32_t)MAX_RING_BUF_SIZE,
                                  (void*)RING_BUF2_VADDR,
@@ -1221,24 +1230,24 @@ namespace SBE
                         o_actImgSize = static_cast<size_t>(tmpImgSize);
 
                         TRACUCOMP( g_trac_sbe, "procCustomizeSbeImg(): "
-                                 "p9_xip_customize success=%d, procIOMask=0x%X "
+                                 "p10_ipl_customize success=%d, procIOMask=0x%X "
                                  "o_actImgSize=0x%X",
                                  procedure_success, procIOMask, o_actImgSize);
 
                         // exit inner loop
                         break;
                     }  // end if (procIOMask == coreMask)
-                    // p9_xip_customize returned a different core mask:
+                    // p10_ipl_customize returned a different core mask:
                     // procIOMask != coreMask
                     else
                     {
                         // A different core mask is returned from
-                        // p9_xip_customize, when the cores sent in couldn't
+                        // p10_ipl_customize, when the cores sent in couldn't
                         // fit, but possibly a different procIOMask would work
 
                         TRACFCOMP( g_trac_sbe,
                                 ERR_MRK"procCustomizeSbeImg(): FAPI_INVOKE_HWP("
-                                "p9_xip_customize) returned rc=0x%X, "
+                                "p10_ipl_customize) returned rc=0x%X, "
                                 "XIPC_IMAGE_WOULD_OVERFLOW-Retry "
                                 "MaxCores=0x%.8X. HUID=0x%X. coreMask=0x%.8X, "
                                 "procIOMask=0x%.8X. coreCount=%d",
@@ -1255,11 +1264,13 @@ namespace SBE
                         {
                             TRACFCOMP(g_trac_sbe,
                                       ERR_MRK"procCustomizeSbeImg() - "
-                                      "selectBestCores() failed rc=0x%X. "
+                                      "selectBestCores() failed "
                                       "coreCount=0x%.8X. HUID=0x%X. Aborting "
-                                      "Customization of SBE Image",
-                                      err->reasonCode(), coreCount,
-                                      TARGETING::get_huid(i_target));
+                                      "Customization of SBE Image "
+                                      TRACE_ERR_FMT,
+                                      coreCount,
+                                      TARGETING::get_huid(i_target),
+                                      TRACE_ERR_ARGS(err));
 
                             // break from inner while loop
                             break;
@@ -1289,7 +1300,7 @@ namespace SBE
                     // Unexpected return code - create err and fail
                     TRACFCOMP( g_trac_sbe,
                                ERR_MRK"procCustomizeSbeImg(): FAPI_INVOKE_HWP("
-                               "p9_xip_customize) failed with rc=0x%X, "
+                               "p10_ipl_customize) failed with rc=0x%X, "
                                "MaxCores=0x%X. HUID=0x%X. coreMask=0x%.8X, "
                                "procIOMask=0x%.8X. coreCount=%d. Create "
                                "err and break loop",
@@ -1305,7 +1316,6 @@ namespace SBE
                     // break from inner while loop
                     break;
                 }  // end if (nullptr == err) ... else ...
-*/
             }  // end of inner while loop
 
             if(err)
@@ -1318,7 +1328,7 @@ namespace SBE
             {
                 // No err, but exit from while loop before successful
                 TRACFCOMP( g_trac_sbe, ERR_MRK"procCustomizeSbeImg() - "
-                           "Failure to successfully complete p9_xip_customize()"
+                           "Failure to successfully complete p10_ipl_customize()"
                            ". HUID=0x%X, rc=0x%X, coreCount=%d, coreMask=0x%.8X"
                            " procIOMask=0x%.8X, maxCores=0x%X, min_cores=0x%X, "
                            "desired_min_cores=0x%X",
@@ -1374,7 +1384,7 @@ namespace SBE
                    ENTER_MRK"selectBestCores(i_maxCores=0x%.8X)",
                    i_maxCores);
 
-        errlHndl_t err = NULL;
+        errlHndl_t err = nullptr;
         const uint32_t chipUnitMask = 0x00800000; // Bits(8:31) = EC00:EC23
         uint32_t manGuardEcs = 0x00000000;
         uint32_t remainingEcs = 0x00000000;
@@ -1515,7 +1525,7 @@ namespace SBE
                                  opType_t i_op,
                                  mvpdSbKeyword_t& io_sb_keyword)
     {
-        errlHndl_t err = NULL;
+        errlHndl_t err = nullptr;
         size_t vpdSize = 0;
 
         TRACUCOMP( g_trac_sbe,
@@ -1535,8 +1545,10 @@ namespace SBE
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSetMVPDVersion() - MVPD "
-                           "failure getting SB keywordw size HUID=0x%.8X",
-                           TARGETING::get_huid(i_target));
+                           "failure getting SB keywordw size HUID=0x%.8X "
+                           TRACE_ERR_FMT,
+                           TARGETING::get_huid(i_target),
+                           TRACE_ERR_ARGS(err));
                 break;
             }
 
@@ -1583,8 +1595,10 @@ namespace SBE
                 if(err)
                 {
                     TRACFCOMP( g_trac_sbe, ERR_MRK"getSetMVPDVersion() - MVPD "
-                               "failure reading SB keyword data HUID=0x%.8X",
-                               TARGETING::get_huid(i_target));
+                               "failure reading SB keyword data HUID=0x%.8X "
+                               TRACE_ERR_FMT,
+                               TARGETING::get_huid(i_target),
+                               TRACE_ERR_ARGS(err));
                     break;
                 }
                 TRACDBIN(g_trac_sbe, "MVPD:SB:r", &io_sb_keyword, vpdSize);
@@ -1602,8 +1616,10 @@ namespace SBE
                 if(err)
                 {
                     TRACFCOMP( g_trac_sbe, ERR_MRK"getSetMVPDVersion() - MVPD "
-                               "failure writing SB keyword data HUID=0x%.8X",
-                               TARGETING::get_huid(i_target));
+                               "failure writing SB keyword data HUID=0x%.8X "
+                               TRACE_ERR_FMT,
+                               TARGETING::get_huid(i_target),
+                               TRACE_ERR_ARGS(err));
                     break;
                 }
             }
@@ -1620,7 +1636,7 @@ namespace SBE
     errlHndl_t readPNORVersion(void*& i_pnorImgHdrPtr,
                                sbe_image_version_t& o_version)
     {
-        errlHndl_t err = NULL;
+        errlHndl_t err = nullptr;
         TRACDCOMP( g_trac_sbe,
                    ENTER_MRK"readPNORVersion()" );
 
@@ -1699,7 +1715,7 @@ namespace SBE
     {
         TRACFCOMP( g_trac_sbe, ENTER_MRK"getSbeBootSeeprom()" );
 
-        errlHndl_t err = NULL;
+        errlHndl_t err = nullptr;
         uint64_t scomData = 0x0;
         TARGETING::Target* masterProcChipTargetHandle = NULL;
 
@@ -1733,21 +1749,21 @@ namespace SBE
 
             }
 
-            // Read PERV_SB_CS_SCOM 0x00050008
+            // Read FSXCOMP_FSXLOG_SB_CS 0x00050008
             size_t op_size = sizeof(scomData);
             err = deviceRead( l_target,
                               &scomData,
                               op_size,
-                              DEVICE_SCOM_ADDRESS(PERV_SB_CS_SCOM) );
+                              DEVICE_SCOM_ADDRESS(FSXCOMP_FSXLOG_SB_CS) );
             if( err )
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeBootSeeprom() -Error "
                            "reading SB CS SCOM (0x%.8X) from Target :"
-                           "HUID=0x%.8X, RC=0x%X, PLID=0x%lX",
-                           PERV_SB_CS_SCOM, // 0x00050008
+                           "HUID=0x%.8X "
+                           TRACE_ERR_FMT,
+                           FSXCOMP_FSXLOG_SB_CS, // 0x00050008
                            TARGETING::get_huid(l_target),
-                           ERRL_GETRC_SAFE(err),
-                           ERRL_GETPLID_SAFE(err));
+                           TRACE_ERR_ARGS(err));
                 break;
             }
 
@@ -1777,30 +1793,29 @@ namespace SBE
     {
         TRACFCOMP( g_trac_sbe, ENTER_MRK"updateSbeBootSeeprom()" );
 
-        errlHndl_t err = NULL;
+        errlHndl_t err = nullptr;
         const uint32_t l_sbeBootSelectMask = SBE_BOOT_SELECT_MASK >> 32;
 
         size_t l_opSize = sizeof(uint32_t);
 
         do{
-            // Read PERV_SB_CS_FSI 0x2808 for target proc
+            // Read FSXCOMP_FSXLOG_SB_CS_FSI 0x2808 for target proc
             uint32_t l_targetReg = 0;
             err = DeviceFW::deviceOp(
                          DeviceFW::READ,
                          i_target,
                          &l_targetReg,
                          l_opSize,
-                         DEVICE_FSI_ADDRESS(PERV_SB_CS_FSI_BYTE) );
+                         DEVICE_FSI_ADDRESS(FSXCOMP_FSXLOG_SB_CS_FSI_BYTE) );
             if( err )
             {
                 TRACFCOMP( g_trac_sbe,
                            ERR_MRK"updateSbeBootSeeprom(): getCfamRegister, "
-                           "PERV_SB_CS_FSI (0x%.4X), proc target = %.8X, "
-                           "RC=0x%X, PLID=0x%lX",
-                           PERV_SB_CS_FSI, // 0x2808
+                           "FSXCOMP_FSXLOG_SB_CS_FSI (0x%.4X), proc target = %.8X "
+                           TRACE_ERR_FMT,
+                           FSXCOMP_FSXLOG_SB_CS_FSI, // 0x2808
                            TARGETING::get_huid(i_target),
-                           ERRL_GETRC_SAFE(err),
-                           ERRL_GETPLID_SAFE(err));
+                           TRACE_ERR_ARGS(err));
                 break;
             }
 
@@ -1814,10 +1829,9 @@ namespace SBE
             if( err )
             {
                 TRACFCOMP( g_trac_sbe,
-                           ERR_MRK"updateSbeBootSeeprom(): getSetMVPDVersion, "
-                           "RC=0x%X, PLID=0x%lX",
-                           ERRL_GETRC_SAFE(err),
-                           ERRL_GETPLID_SAFE(err));
+                           ERR_MRK"updateSbeBootSeeprom(): getSetMVPDVersion "
+                           TRACE_ERR_FMT,
+                           TRACE_ERR_ARGS(err));
                 break;
             }
 
@@ -1838,8 +1852,9 @@ namespace SBE
             if( err )
             {
                 TRACFCOMP( g_trac_sbe,
-                           ERR_MRK"updateSbeBootSeeprom(): call to getSbeBootSeeprom(master) failed : PLID=%.8X",
-                           ERRL_GETPLID_SAFE(err));
+                           ERR_MRK"updateSbeBootSeeprom(): call to getSbeBootSeeprom(master) failed "
+                           TRACE_ERR_FMT,
+                           TRACE_ERR_ARGS(err));
                 break;
             }
 
@@ -1874,23 +1889,22 @@ namespace SBE
                            TARGETING::get_huid(i_target) );
             }
 
-            // Write PERV_SB_CS_FSI 0x2808 back into target proc
+            // Write FSXCOMP_FSXLOG_SB_CS_FSI 0x2808 back into target proc
             err = DeviceFW::deviceOp(
                          DeviceFW::WRITE,
                          i_target,
                          &l_targetReg,
                          l_opSize,
-                         DEVICE_FSI_ADDRESS(PERV_SB_CS_FSI_BYTE) );
+                         DEVICE_FSI_ADDRESS(FSXCOMP_FSXLOG_SB_CS_FSI_BYTE) );
             if( err )
             {
                 TRACFCOMP( g_trac_sbe,
                            ERR_MRK"updateSbeBootSeeprom(): putCfamRegister, "
-                           "PERV_SB_CS_FSI (0x%.4X), proc target = %.8X, "
-                           "RC=0x%X, PLID=0x%lX",
-                           PERV_SB_CS_FSI, // 0x2808
+                           "FSXCOMP_FSXLOG_SB_CS_FSI (0x%.4X), proc target = %.8X "
+                           TRACE_ERR_FMT,
+                           FSXCOMP_FSXLOG_SB_CS_FSI, // 0x2808
                            TARGETING::get_huid(i_target),
-                           ERRL_GETRC_SAFE(err),
-                           ERRL_GETPLID_SAFE(err));
+                           TRACE_ERR_ARGS(err));
                 break;
             }
 
@@ -1905,7 +1919,7 @@ namespace SBE
     errlHndl_t loadPnorSection( PNOR::SectionId i_section,
                                 PNOR::SectionInfo_t& o_info)
     {
-        errlHndl_t l_errl = NULL;
+        errlHndl_t l_errl = nullptr;
 
         do
         {
@@ -1913,7 +1927,10 @@ namespace SBE
             l_errl = loadSecureSection(i_section);
             if (l_errl)
             {
-                TRACFCOMP( g_trac_sbe, ERR_MRK,"loadPnorSection() - Error from loadSecureSection(%d)", i_section);
+                TRACFCOMP( g_trac_sbe, ERR_MRK"loadPnorSection() - Error from loadSecureSection(%d) "
+                           TRACE_ERR_FMT,
+                           i_section,
+                           TRACE_ERR_ARGS(l_errl));
                 break;
             }
 #endif
@@ -1952,7 +1969,7 @@ namespace SBE
 /////////////////////////////////////////////////////////////////////
     errlHndl_t unloadPnorSection( PNOR::SectionId i_section)
     {
-        errlHndl_t l_errl = NULL;
+        errlHndl_t l_errl = nullptr;
 
         do
         {
@@ -2045,7 +2062,7 @@ namespace SBE
             {
 
                 l_err = getSeepromSideVersionViaI2c(io_sbeState.target,
-                                            EEPROM::SBE_PRIMARY,
+                                            EEPROM::VPD_PRIMARY,
                                             io_sbeState.seeprom_0_ver,
                                             io_sbeState.seeprom_0_ver_ECC_fail);
 
@@ -2115,7 +2132,7 @@ namespace SBE
                 l_errFoundDuringChipOp || Util::isSimicsRunning() )
             {
                 l_err = getSeepromSideVersionViaI2c(io_sbeState.target,
-                                            EEPROM::SBE_BACKUP,
+                                            EEPROM::VPD_BACKUP,
                                             io_sbeState.seeprom_1_ver,
                                             io_sbeState.seeprom_1_ver_ECC_fail);
 
@@ -2237,7 +2254,7 @@ namespace SBE
             /*******************************************/
             /*  Get PNOR SBE Version Information       */
             /*******************************************/
-            void* sbePnorPtr = NULL;
+            void* sbePnorPtr = nullptr;
             size_t sbePnorImageSize = 0;
             sbe_image_version_t tmp_pnorVersion;
 
@@ -2447,10 +2464,10 @@ namespace SBE
             }
 
             // Pass in the larger of our custom size or MAX_SEEPROM_IMAGE_SIZE
-            // -- p9_xip_customize is expecting at least MAX_SEEPROM_IMAGE_SIZE
-            /* FIXME RTC: 210975
+            // -- p10_ipl_customize expects minimum of MAX_SEEPROM_IMAGE_SIZE
+            // if custom size is NOT able to be pruned to fit physical SEEPROM
+            // by p10_ipl_customize, then error flows will handle
             sbeHbblImgSize = std::max(sbeHbblImgSize, MAX_SEEPROM_IMAGE_SIZE);
-            */
 
             /*******************************************/
             /*  Customize SBE/HBBL Image and           */
@@ -2480,7 +2497,7 @@ namespace SBE
             err = procCustomizeSbeImg(io_sbeState.target,
                                       l_hCodeAddr,    // HCODE in memory
                                       sbeHbblImgPtr,  //SBE, HBBL in memory
-                                      sbeHbblImgSize,
+                                      sbeHbblImgSize, // MAX size on INPUT
                                       pCustomizedBfr,  //destination
                                       sbeImgSize);
 
@@ -2506,7 +2523,7 @@ namespace SBE
             // Verify that HW Key Hash is included in customized image
             SHA512_t hash = {0};
             err = getHwKeyHashFromSbeImage(io_sbeState.target,  // ignored
-                                           EEPROM::SBE_PRIMARY, // ignored
+                                           EEPROM::VPD_PRIMARY, // ignored
                                            SBE_SEEPROM_INVALID, // ignored
                                            hash,
                                            pCustomizedBfr);
@@ -2594,10 +2611,9 @@ namespace SBE
                             Util::crc32_calc(pCustomizedBfr,
                                              sbeImgSize) ;
 
-            // FIXME RTC: 210975
             TRACFCOMP( g_trac_sbe, "getSbeInfoState() - procCustomizeSbeImg(): "
                        "maxSize=0x%X, actSize=0x%X, crc=0x%X",
-                       /*MAX_SEEPROM_IMAGE_SIZE*/0, sbeImgSize,
+                       MAX_SEEPROM_IMAGE_SIZE, sbeImgSize,
                        io_sbeState.customizedImage_crc);
 
             // restore the hbbl ID string
@@ -2662,7 +2678,7 @@ namespace SBE
                    ENTER_MRK"getSeepromSideVersionViaI2c(): HUID=0x%.8X, side:%d",
                    TARGETING::get_huid(i_target), i_seepromSide);
 
-        errlHndl_t err = NULL;
+        errlHndl_t err = nullptr;
         PNOR::ECC::eccStatus eccStatus = PNOR::ECC::CLEAN;
         o_seeprom_ver_ECC_fail = false;
 
@@ -2895,10 +2911,10 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
         CONSOLE::displayf(SBE_COMP_NAME,
                           "System Performing SBE Update for PROC %d, side %d",
                         io_sbeState.target->getAttr<TARGETING::ATTR_POSITION>(),
-                        io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY ? SBE_SEEPROM0 : SBE_SEEPROM1);
+                        io_sbeState.seeprom_side_to_update == EEPROM::VPD_PRIMARY ? SBE_SEEPROM0 : SBE_SEEPROM1);
 #endif
 
-        errlHndl_t err = NULL;
+        errlHndl_t err = nullptr;
         int64_t rc = 0;
 
         int64_t rc_readBack_ECC_memcmp = 0;
@@ -3165,11 +3181,11 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
 
 
             //Quiesce the SBE before writing current SBE
-            if ( ( ( io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY )
+            if ( ( ( io_sbeState.seeprom_side_to_update == EEPROM::VPD_PRIMARY )
                    &&
                    ( io_sbeState.cur_seeprom_side == SBE_SEEPROM0 ) )
                  ||
-                 ( ( io_sbeState.seeprom_side_to_update == EEPROM::SBE_BACKUP )
+                 ( ( io_sbeState.seeprom_side_to_update == EEPROM::VPD_BACKUP )
                    &&
                    ( io_sbeState.cur_seeprom_side == SBE_SEEPROM1 ) ) )
             {
@@ -3255,13 +3271,13 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
 
             // Successful update if we get here, so update internal code
             // structure with the new version information
-            memcpy( io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY
+            memcpy( io_sbeState.seeprom_side_to_update == EEPROM::VPD_PRIMARY
                     ? &io_sbeState.seeprom_0_ver : &io_sbeState.seeprom_1_ver,
                     &io_sbeState.new_seeprom_ver,
                     sbeInfoSize );
 
             // Also update with new Build date, time, and tag for MVPD
-            memcpy( io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY
+            memcpy( io_sbeState.seeprom_side_to_update == EEPROM::VPD_PRIMARY
                     ? &io_sbeState.mvpdSbKeyword.seeprom_0_build
                     : &io_sbeState.mvpdSbKeyword.seeprom_1_build,
                     &io_sbeState.new_imageBuild,
@@ -3277,9 +3293,9 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
 #ifdef CONFIG_SBE_UPDATE_SIMULTANEOUS
         // If no error, recursively call this function for the other SEEPROM
         if ( ( err == NULL ) &&
-             ( io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY ) )
+             ( io_sbeState.seeprom_side_to_update == EEPROM::VPD_PRIMARY ) )
         {
-            io_sbeState.seeprom_side_to_update = EEPROM::SBE_BACKUP;
+            io_sbeState.seeprom_side_to_update = EEPROM::VPD_BACKUP;
             TRACFCOMP( g_trac_sbe,
                        "updateSeepromSide(): Recursively calling itself: "
                        "HUID=0x%.8X, side=%d",
@@ -3295,10 +3311,10 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
         // If no error and a key transition in progress, recursively call this
         // function for the other SEEPROM
         if ( ( err == nullptr ) &&
-             ( io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY ) &&
+             ( io_sbeState.seeprom_side_to_update == EEPROM::VPD_PRIMARY ) &&
              ( g_do_hw_keys_hash_transition) )
         {
-            io_sbeState.seeprom_side_to_update = EEPROM::SBE_BACKUP;
+            io_sbeState.seeprom_side_to_update = EEPROM::VPD_BACKUP;
             TRACFCOMP( g_trac_sbe,
                        "updateSeepromSide(): Recursively calling itself: "
                        "HUID=0x%.8X, side=%d",
@@ -3316,9 +3332,9 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
         {
             // If no error, recursively call this function for the other SEEPROM
             if ( ( err == NULL ) &&
-                 ( io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY ) )
+                 ( io_sbeState.seeprom_side_to_update == EEPROM::VPD_PRIMARY ) )
             {
-                io_sbeState.seeprom_side_to_update = EEPROM::SBE_BACKUP;
+                io_sbeState.seeprom_side_to_update = EEPROM::VPD_BACKUP;
                 TRACFCOMP( g_trac_sbe, "UPDATE_BOTH_SIDES_OF_SBE MNFG Flag indicated, will update both sides" );
                 TRACFCOMP( g_trac_sbe,
                            "updateSeepromSide(): Recursively calling itself: "
@@ -3342,7 +3358,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                    ENTER_MRK"getTargetUpdateActions(): HUID=0x%.8X",
                    TARGETING::get_huid(io_sbeState.target));
 
-        errlHndl_t err = NULL;
+        errlHndl_t err = nullptr;
 
         bool seeprom_0_isDirty =    false;
         bool seeprom_1_isDirty =    false;
@@ -3607,7 +3623,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
             {
                 // Note: mvpdSbKeyword.flags updated in decisionTreeForUpdates()
 
-                if ( io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY )
+                if ( io_sbeState.seeprom_side_to_update == EEPROM::VPD_PRIMARY )
                 {
                     memcpy(&(io_sbeState.mvpdSbKeyword.seeprom_0_data_crc),
                            &(io_sbeState.customizedImage_crc),
@@ -3641,7 +3657,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
     errlHndl_t decisionTreeForUpdates(sbeTargetState_t& io_sbeState,
                                 uint8_t i_system_situation)
     {
-        errlHndl_t err = NULL;
+        errlHndl_t err = nullptr;
 
         uint32_t l_actions           = CLEAR_ACTIONS;
         io_sbeState.update_actions   = CLEAR_ACTIONS;
@@ -3740,7 +3756,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                         io_sbeState.seeprom_side_to_update =
                                     ( io_sbeState.cur_seeprom_side ==
                                                   SBE_SEEPROM0 )
-                                     ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP;
+                                     ? EEPROM::VPD_PRIMARY : EEPROM::VPD_BACKUP;
 
                         TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
                                    "cur side (%d) dirty. Update cur. Re-IPL. "
@@ -3814,7 +3830,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                         io_sbeState.seeprom_side_to_update =
                                     ( io_sbeState.alt_seeprom_side ==
                                                   SBE_SEEPROM0 )
-                                    ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
+                                    ? EEPROM::VPD_PRIMARY : EEPROM::VPD_BACKUP ;
 
                         // Update MVPD PERMANENT flag: make cur=perm
                         ( io_sbeState.cur_seeprom_side == SBE_SEEPROM0 ) ?
@@ -3865,7 +3881,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                         io_sbeState.seeprom_side_to_update =
                                     ( io_sbeState.alt_seeprom_side ==
                                                   SBE_SEEPROM0 )
-                                    ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
+                                    ? EEPROM::VPD_PRIMARY : EEPROM::VPD_BACKUP ;
 
 
                         // MVPD flag Update
@@ -3929,7 +3945,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                         io_sbeState.seeprom_side_to_update =
                                     ( io_sbeState.alt_seeprom_side ==
                                                   SBE_SEEPROM0 )
-                                    ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
+                                    ? EEPROM::VPD_PRIMARY : EEPROM::VPD_BACKUP ;
 
                         // Update MVPD RE-IPL SEEPROM flag: re-IPL on ALT:
                         ( io_sbeState.alt_seeprom_side == SBE_SEEPROM0 ) ?
@@ -4033,7 +4049,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                             io_sbeState.seeprom_side_to_update =
                                     ( io_sbeState.alt_seeprom_side ==
                                                   SBE_SEEPROM0 )
-                                    ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
+                                    ? EEPROM::VPD_PRIMARY : EEPROM::VPD_BACKUP ;
 
                             // Update MVPD RE-IPL SEEPROM flag: re-IPL on ALT:
                             ( io_sbeState.alt_seeprom_side == SBE_SEEPROM0 ) ?
@@ -4072,7 +4088,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                         io_sbeState.seeprom_side_to_update =
                                     ( io_sbeState.alt_seeprom_side ==
                                                   SBE_SEEPROM0 )
-                                    ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
+                                    ? EEPROM::VPD_PRIMARY : EEPROM::VPD_BACKUP ;
 
                         TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
                                    "cur=perm/clean(%d), alt=dirty. "
@@ -4167,7 +4183,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                     l_actions |= UPDATE_SBE;
 
                     // Set Update side to primary
-                    io_sbeState.seeprom_side_to_update =  EEPROM::SBE_PRIMARY;
+                    io_sbeState.seeprom_side_to_update =  EEPROM::VPD_PRIMARY;
 
                     TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
                                "side 0=dirty, side 1=%s. Boot side %d. "
@@ -4240,7 +4256,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                     l_actions |= UPDATE_SBE;
 
                     // Set Update side to backup
-                    io_sbeState.seeprom_side_to_update = EEPROM::SBE_BACKUP;
+                    io_sbeState.seeprom_side_to_update = EEPROM::VPD_BACKUP;
 
                     TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
                                "side 0=clean, side 1=dirty. Boot side 0. "
@@ -4339,7 +4355,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
 
                 // Set update side to Primary here, but both sides
                 // will be updated
-                io_sbeState.seeprom_side_to_update = EEPROM::SBE_PRIMARY;
+                io_sbeState.seeprom_side_to_update = EEPROM::VPD_PRIMARY;
                 // Update MVPD PERMANENT flag: make cur=perm
                 ( io_sbeState.cur_seeprom_side == SBE_SEEPROM0 ) ?
                      // clear bit 0
@@ -4388,8 +4404,8 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                    TARGETING::get_huid(io_sbeState.target),
                    io_sbeState.update_actions);
 
-        errlHndl_t err      = NULL;
-        errlHndl_t err_info = NULL;
+        errlHndl_t err      = nullptr;
+        errlHndl_t err_info = nullptr;
         uint32_t   l_actions = io_sbeState.update_actions;
 
         do{
@@ -4399,14 +4415,14 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
             if (l_actions & UPDATE_SBE)
             {
 #ifdef CONFIG_SBE_UPDATE_SIMULTANEOUS
-                io_sbeState.seeprom_side_to_update = EEPROM::SBE_PRIMARY;
+                io_sbeState.seeprom_side_to_update = EEPROM::VPD_PRIMARY;
 #endif
 
 #ifdef CONFIG_SBE_UPDATE_INDEPENDENT
                 if (g_update_both_sides)
                 {
                     TRACFCOMP( g_trac_sbe, "UPDATE_BOTH_SIDES_OF_SBE MNFG Flag indicated, will update both sides" );
-                    io_sbeState.seeprom_side_to_update = EEPROM::SBE_PRIMARY;
+                    io_sbeState.seeprom_side_to_update = EEPROM::VPD_PRIMARY;
                 }
 #endif
 
@@ -4414,7 +4430,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                 if (g_do_hw_keys_hash_transition)
                 {
                     TRACFCOMP( g_trac_sbe, "UPDATE_BOTH_SIDES_OF_SBE Key transition, will update both sides" );
-                    io_sbeState.seeprom_side_to_update = EEPROM::SBE_PRIMARY;
+                    io_sbeState.seeprom_side_to_update = EEPROM::VPD_PRIMARY;
                 }
 #endif
 
@@ -4562,7 +4578,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                    ENTER_MRK"createSbeImageVmmSpace");
 
         int64_t rc = 0;
-        errlHndl_t err = NULL;
+        errlHndl_t err = nullptr;
 
         do{
 
@@ -4664,7 +4680,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
         TRACDCOMP( g_trac_sbe,
                    ENTER_MRK"cleanupSbeImageVmmSpace");
 
-        errlHndl_t err = NULL;
+        errlHndl_t err = nullptr;
         int64_t rc = 0;
 
         do{
@@ -4765,7 +4781,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                    ENTER_MRK"isIplFromReIplRequest");
 
         bool o_reIplRequest = false;
-        errlHndl_t err = NULL;
+        errlHndl_t err = nullptr;
         msg_t * msg = msg_allocate();
 
         do{
@@ -4909,7 +4925,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
         TRACDCOMP( g_trac_sbe,
                    ENTER_MRK"preReIplCheck");
 
-        errlHndl_t err = NULL;
+        errlHndl_t err = nullptr;
 
         // MVPD PERMANENT and Re-IPL Seeprom flags
         uint8_t perm_and_reipl = 0x0;
@@ -5028,7 +5044,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
         TRACDCOMP( g_trac_sbe,
                    ENTER_MRK"masterVersionCompare");
 
-        errlHndl_t err = NULL;
+        errlHndl_t err = nullptr;
 
         uint8_t mP = UINT8_MAX;
         sbe_image_version_t mP_version;
@@ -5565,7 +5581,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
 /////////////////////////////////////////////////////////////////////
 errlHndl_t sbeDoReboot( void )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
     TRACFCOMP( g_trac_sbe, ENTER_MRK"sbeDoReboot");
 
     do{
@@ -5717,9 +5733,9 @@ errlHndl_t getHwKeyHashFromSbeImage(
     // TODO RTC:186269 Remove check forcing down I2C path when simics issue
     // is resolved
     bool l_useChipOp = (((i_bootSide == SBE_SEEPROM0) &&
-                         (i_seeprom == EEPROM::SBE_PRIMARY)) ||
+                         (i_seeprom == EEPROM::VPD_PRIMARY)) ||
                         ((i_bootSide == SBE_SEEPROM1) &&
-                        (i_seeprom == EEPROM::SBE_BACKUP)))
+                        (i_seeprom == EEPROM::VPD_BACKUP)))
                         && !Util::isSimicsRunning();
 
     // reading via ChipOp should be supported, but this parameter is still used
@@ -5741,7 +5757,7 @@ errlHndl_t getHwKeyHashFromSbeImage(
         // otherwise they're ignored as i_image_ptr is used
         assert(i_target != nullptr,"getHwKeyHashFromSbeImage i_target can't be NULL");
         assert(i_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_PROC, "getHwKeyHashFromSbeImage i_target must be TYPE_PROC");
-        assert(((i_seeprom == EEPROM::SBE_PRIMARY) || (i_seeprom == EEPROM::SBE_BACKUP)), "getHwKeyHashFromSbeImage i_seeprom=%d is invalid", i_seeprom);
+        assert(((i_seeprom == EEPROM::VPD_PRIMARY) || (i_seeprom == EEPROM::VPD_BACKUP)), "getHwKeyHashFromSbeImage i_seeprom=%d is invalid", i_seeprom);
     }
 
 
@@ -5805,7 +5821,7 @@ errlHndl_t getHwKeyHashFromSbeImage(
                            "Error getting SBE Data from Tgt=0x%X SEEPROM "
                            "(0x%X), RC=0x%X, PLID=0x%X",
                            get_huid(i_target),
-                           EEPROM::SBE_BACKUP,
+                           EEPROM::VPD_BACKUP,
                            ERRL_GETRC_SAFE(err),
                            ERRL_GETPLID_SAFE(err));
 
@@ -5885,12 +5901,10 @@ errlHndl_t getHwKeyHashFromSbeImage(
         // in SBE Image
         P9XipSection l_xipSection = {0};
 
-/* FIXME RTC: 210975
         // Call p9_xip_find to find HBBL image in SBE image
         auto l_sectionId = P9_XIP_SECTION_SBE_HBBL;
-*/
 
-        int xip_rc = 0; /* FIXME RTC: 210975 p9_xip_get_section( tmp_data, l_sectionId, &l_xipSection );*/
+        int xip_rc = p9_xip_get_section( tmp_data, l_sectionId, &l_xipSection );
 
         TRACUCOMP( g_trac_sbe, "getHwKeyHashFromSbeImage: xip_rc=%d: "
                    "Section iv_offset=0x%X, iv_size=0x%X, iv_alignment=0x%X",
@@ -5984,7 +5998,7 @@ errlHndl_t getHwKeyHashFromSbeImage(
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getHwKeyHashFromSbeImage() "
                            "Error getting HKH from SEEPROM (0x%X), "
                            "RC=0x%X, PLID=0x%X",
-                           EEPROM::SBE_BACKUP,
+                           EEPROM::VPD_BACKUP,
                            ERRL_GETRC_SAFE(err),
                            ERRL_GETPLID_SAFE(err));
 
@@ -6215,8 +6229,8 @@ errlHndl_t locateHbblIdStringBfr( void * i_pSourceBfr,
                                   uint32_t i_SourceBfrLen,
                                   void * & o_pHbblIdStringBfr )
 {
-    errlHndl_t l_errl = NULL;
-    o_pHbblIdStringBfr = NULL;
+    errlHndl_t l_errl = nullptr;
+    o_pHbblIdStringBfr = nullptr;
 
 
     // packing of ID string is defined in bl_start.S

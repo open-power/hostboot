@@ -227,13 +227,11 @@ namespace   INITSERVICE
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-/* FIXME RTC 250718
         {
                 ISTEPNAME(08,01,"host_slave_sbe_config"),
                 ISTEP_08::call_host_slave_sbe_config,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
-*/
         {
                 ISTEPNAME(08,02,"host_setup_sbe"),
                 ISTEP_08::call_host_setup_sbe,
@@ -244,13 +242,11 @@ namespace   INITSERVICE
                 ISTEP_08::call_host_cbs_start,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
-/* FIXME RTC 250718
         {
                 ISTEPNAME(08,04,"proc_check_slave_sbe_seeprom_complete"),
                 ISTEP_08::call_proc_check_slave_sbe_seeprom_complete,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
-*/
         {
                 ISTEPNAME(08,05,"host_attnlisten_proc"),
                 ISTEP_08::call_host_attnlisten_proc,

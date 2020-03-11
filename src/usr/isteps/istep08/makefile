@@ -47,10 +47,10 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/sbeio/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 
-#OBJS += call_host_slave_sbe_config.o
+OBJS += call_host_slave_sbe_config.o
 OBJS += call_host_setup_sbe.o
 OBJS += call_host_cbs_start.o
-#OBJS += call_proc_check_slave_sbe_seeprom_complete.o
+OBJS += call_proc_check_slave_sbe_seeprom_complete.o
 OBJS += call_host_attnlisten_proc.o
 OBJS += call_proc_fbc_eff_config.o
 OBJS += call_proc_eff_config_links.o
@@ -75,7 +75,7 @@ include ${ROOTPATH}/procedure.rules.mk
 # host_slave_sbe_config
 OBJS += p10_setup_sbe_config.o
 # proc_check_slave_sbe_seeprom_complete
-#OBJS += p10_getecid.o
+OBJS += p10_getecid.o
 
 # host_setup_sbe
 OBJS += p10_set_fsi_gp_shadow.o

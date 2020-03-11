@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,13 +22,20 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+/**
+ * @file sbe_retry_handler.H
+ *
+ * SBE Retry Handler
+ *
+ */
+
 #ifndef __SBE_RETRY_HANDLER_H
 #define __SBE_RETRY_HANDLER_H
 
 #include <isteps/hwpisteperror.H>
-/* FIXME RTC: 210975
+#include <p10_get_sbe_msg_register.H>
+/* TODO RTC: 248572
 #include <p9_extract_sbe_rc.H>
-#include <p9_get_sbe_msg_register.H>
 */
 #include <sys/time.h>
 
@@ -108,12 +115,12 @@ class SbeRetryHandler
             return iv_switchSidesCount;
         }
 
-/* FIXME RTC: 210975
         inline sbeMsgReg_t getSbeRegister()
         {
             return iv_sbeRegister;
         }
 
+/* TODO: RTC 248572
         inline P9_EXTRACT_SBE_RC::RETURN_ACTION getCurrentAction()
         {
             return iv_currentAction;
@@ -324,13 +331,12 @@ class SbeRetryHandler
         /*
          * @brief The current sbe register
          */
-        // FIXME RTC: 210975
-        //sbeMsgReg_t iv_sbeRegister;
+        sbeMsgReg_t iv_sbeRegister;
 
         /*
          * @brief The current SBE return action that has to be taken
          */
-        // FIXME RTC: 210975
+        // TODO RTC: 248572
         //P9_EXTRACT_SBE_RC::RETURN_ACTION iv_currentAction;
 
         /*
