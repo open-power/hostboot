@@ -46,6 +46,7 @@
 #include <mss_explorer_attribute_setters.H>
 #include <mss_generic_attribute_setters.H>
 #include <mss_generic_attribute_getters.H>
+#include <lib/eff_config/explorer_rc_resp_fields.H>
 
 namespace mss
 {
@@ -1553,6 +1554,1017 @@ struct attrEngineTraits<P, generic_metadata_fields, generic_metadata_fields::DIM
     {
         using TT = mss::dimmPosTraits<mss::mc_type::EXPLORER>;
         return gen::dimm_pos<TT>(i_target, o_setting);
+    }
+};
+
+////////////////////////////////////////////////////////
+// attrEngineTraits for explorer specific attr_rc_resp_engine_fields
+////////////////////////////////////////////////////////
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_rc_resp_engine_fields, F0RC00 specialization
+///
+template <proc_type P>
+struct attrEngineTraits<P, exp::attr_rc_resp_engine_fields, exp::attr_rc_resp_engine_fields::F0RC00>
+{
+    using attr_type = fapi2::ATTR_MSS_EXP_RESP_DDR4_F0RC00_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MSS_EXP_RESP_DDR4_F0RC00_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_F0RC00;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_exp_resp_ddr4_f0rc00(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_exp_resp_ddr4_f0rc00(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const exp::rc_resp_adaptor& i_rc_resp,
+            attr_integral_type& o_setting)
+    {
+        // Reusable data buffer
+        std::vector<attr_integral_type> l_data;
+
+        if(mss::index(i_rc_resp.get_target()) == 0)
+        {
+            get_data_F0RC_D0(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F0RC00>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+        else
+        {
+            get_data_F0RC_D1(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F0RC00>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_rc_resp_engine_fields, F0RC01 specialization
+///
+template <proc_type P>
+struct attrEngineTraits<P, exp::attr_rc_resp_engine_fields, exp::attr_rc_resp_engine_fields::F0RC01>
+{
+    using attr_type = fapi2::ATTR_MSS_EXP_RESP_DDR4_F0RC01_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MSS_EXP_RESP_DDR4_F0RC01_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_F0RC01;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_exp_resp_ddr4_f0rc01(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_exp_resp_ddr4_f0rc01(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const exp::rc_resp_adaptor& i_rc_resp,
+            attr_integral_type& o_setting)
+    {
+        // Reusable data buffer
+        std::vector<attr_integral_type> l_data;
+
+        if(mss::index(i_rc_resp.get_target()) == 0)
+        {
+            get_data_F0RC_D0(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F0RC01>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+        else
+        {
+            get_data_F0RC_D1(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F0RC01>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_rc_resp_engine_fields, F0RC03 specialization
+///
+template <proc_type P>
+struct attrEngineTraits<P, exp::attr_rc_resp_engine_fields, exp::attr_rc_resp_engine_fields::F0RC03>
+{
+    using attr_type = fapi2::ATTR_MSS_EXP_RESP_DDR4_F0RC03_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MSS_EXP_RESP_DDR4_F0RC03_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_F0RC03;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_exp_resp_ddr4_f0rc03(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_exp_resp_ddr4_f0rc03(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const exp::rc_resp_adaptor& i_rc_resp,
+            attr_integral_type& o_setting)
+    {
+        // Reusable data buffer
+        std::vector<attr_integral_type> l_data;
+
+        if(mss::index(i_rc_resp.get_target()) == 0)
+        {
+            get_data_F0RC_D0(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F0RC03>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+        else
+        {
+            get_data_F0RC_D1(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F0RC03>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_rc_resp_engine_fields, F0RC04 specialization
+///
+template <proc_type P>
+struct attrEngineTraits<P, exp::attr_rc_resp_engine_fields, exp::attr_rc_resp_engine_fields::F0RC04>
+{
+    using attr_type = fapi2::ATTR_MSS_EXP_RESP_DDR4_F0RC04_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MSS_EXP_RESP_DDR4_F0RC04_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_F0RC04;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_exp_resp_ddr4_f0rc04(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_exp_resp_ddr4_f0rc04(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const exp::rc_resp_adaptor& i_rc_resp,
+            attr_integral_type& o_setting)
+    {
+        // Reusable data buffer
+        std::vector<attr_integral_type> l_data;
+
+        if(mss::index(i_rc_resp.get_target()) == 0)
+        {
+            get_data_F0RC_D0(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F0RC04>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+        else
+        {
+            get_data_F0RC_D1(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F0RC04>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_rc_resp_engine_fields, F0RC05 specialization
+///
+template <proc_type P>
+struct attrEngineTraits<P, exp::attr_rc_resp_engine_fields, exp::attr_rc_resp_engine_fields::F0RC05>
+{
+    using attr_type = fapi2::ATTR_MSS_EXP_RESP_DDR4_F0RC05_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MSS_EXP_RESP_DDR4_F0RC05_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_F0RC05;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_exp_resp_ddr4_f0rc05(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_exp_resp_ddr4_f0rc05(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const exp::rc_resp_adaptor& i_rc_resp,
+            attr_integral_type& o_setting)
+    {
+        // Reusable data buffer
+        std::vector<attr_integral_type> l_data;
+
+        if(mss::index(i_rc_resp.get_target()) == 0)
+        {
+            get_data_F0RC_D0(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F0RC05>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+        else
+        {
+            get_data_F0RC_D1(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F0RC05>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_rc_resp_engine_fields, F0RC0B specialization
+///
+template <proc_type P>
+struct attrEngineTraits<P, exp::attr_rc_resp_engine_fields, exp::attr_rc_resp_engine_fields::F0RC0B>
+{
+    using attr_type = fapi2::ATTR_MSS_EXP_RESP_DDR4_F0RC0B_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MSS_EXP_RESP_DDR4_F0RC0B_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_F0RC0B;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_exp_resp_ddr4_f0rc0b(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_exp_resp_ddr4_f0rc0b(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const exp::rc_resp_adaptor& i_rc_resp,
+            attr_integral_type& o_setting)
+    {
+        // Reusable data buffer
+        std::vector<attr_integral_type> l_data;
+
+        if(mss::index(i_rc_resp.get_target()) == 0)
+        {
+            get_data_F0RC_D0(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F0RC0B>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+        else
+        {
+            get_data_F0RC_D1(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F0RC0B>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_rc_resp_engine_fields, F0RC0E specialization
+///
+template <proc_type P>
+struct attrEngineTraits<P, exp::attr_rc_resp_engine_fields, exp::attr_rc_resp_engine_fields::F0RC0E>
+{
+    using attr_type = fapi2::ATTR_MSS_EXP_RESP_DDR4_F0RC0E_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MSS_EXP_RESP_DDR4_F0RC0E_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_F0RC0E;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_exp_resp_ddr4_f0rc0e(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_exp_resp_ddr4_f0rc0e(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const exp::rc_resp_adaptor& i_rc_resp,
+            attr_integral_type& o_setting)
+    {
+        // Reusable data buffer
+        std::vector<attr_integral_type> l_data;
+
+        if(mss::index(i_rc_resp.get_target()) == 0)
+        {
+            get_data_F0RC_D0(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F0RC0E>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+        else
+        {
+            get_data_F0RC_D1(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F0RC0E>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_rc_resp_engine_fields, F0RC0F specialization
+///
+template <proc_type P>
+struct attrEngineTraits<P, exp::attr_rc_resp_engine_fields, exp::attr_rc_resp_engine_fields::F0RC0F>
+{
+    using attr_type = fapi2::ATTR_MSS_EXP_RESP_DDR4_F0RC0F_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MSS_EXP_RESP_DDR4_F0RC0F_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_F0RC0F;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_exp_resp_ddr4_f0rc0f(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_exp_resp_ddr4_f0rc0f(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const exp::rc_resp_adaptor& i_rc_resp,
+            attr_integral_type& o_setting)
+    {
+        // Reusable data buffer
+        std::vector<attr_integral_type> l_data;
+
+        if(mss::index(i_rc_resp.get_target()) == 0)
+        {
+            get_data_F0RC_D0(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F0RC0F>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+        else
+        {
+            get_data_F0RC_D1(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F0RC0F>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_rc_resp_engine_fields, F0RC1X specialization
+///
+template <proc_type P>
+struct attrEngineTraits<P, exp::attr_rc_resp_engine_fields, exp::attr_rc_resp_engine_fields::F0RC1X>
+{
+    using attr_type = fapi2::ATTR_MSS_EXP_RESP_DDR4_F0RC1X_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MSS_EXP_RESP_DDR4_F0RC1X_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_F0RC1X;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_exp_resp_ddr4_f0rc1x(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_exp_resp_ddr4_f0rc1x(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const exp::rc_resp_adaptor& i_rc_resp,
+            attr_integral_type& o_setting)
+    {
+        // Reusable data buffer
+        std::vector<attr_integral_type> l_data;
+
+        if(mss::index(i_rc_resp.get_target()) == 0)
+        {
+            get_data_F0RC_D0(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F0RC1X>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+        else
+        {
+            get_data_F0RC_D1(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F0RC1X>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_rc_resp_engine_fields, F0RC7X specialization
+///
+template <proc_type P>
+struct attrEngineTraits<P, exp::attr_rc_resp_engine_fields, exp::attr_rc_resp_engine_fields::F0RC7X>
+{
+    using attr_type = fapi2::ATTR_MSS_EXP_RESP_DDR4_F0RC7X_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MSS_EXP_RESP_DDR4_F0RC7X_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_F0RC7X;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_exp_resp_ddr4_f0rc7x(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_exp_resp_ddr4_f0rc7x(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const exp::rc_resp_adaptor& i_rc_resp,
+            attr_integral_type& o_setting)
+    {
+        // Reusable data buffer
+        std::vector<attr_integral_type> l_data;
+
+        if(mss::index(i_rc_resp.get_target()) == 0)
+        {
+            get_data_F0RC_D0(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F0RC7X>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+        else
+        {
+            get_data_F0RC_D1(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F0RC7X>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_rc_resp_engine_fields, F1RC00 specialization
+///
+template <proc_type P>
+struct attrEngineTraits<P, exp::attr_rc_resp_engine_fields, exp::attr_rc_resp_engine_fields::F1RC00>
+{
+    using attr_type = fapi2::ATTR_MSS_EXP_RESP_DDR4_F1RC00_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MSS_EXP_RESP_DDR4_F1RC00_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_F1RC00;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_exp_resp_ddr4_f1rc00(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_exp_resp_ddr4_f1rc00(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const exp::rc_resp_adaptor& i_rc_resp,
+            attr_integral_type& o_setting)
+    {
+        // Reusable data buffer
+        std::vector<attr_integral_type> l_data;
+
+        if(mss::index(i_rc_resp.get_target()) == 0)
+        {
+            get_data_F1RC_D0(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F1RC00>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+        else
+        {
+            get_data_F1RC_D1(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F1RC00>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_rc_resp_engine_fields, F1RC02 specialization
+///
+template <proc_type P>
+struct attrEngineTraits<P, exp::attr_rc_resp_engine_fields, exp::attr_rc_resp_engine_fields::F1RC02>
+{
+    using attr_type = fapi2::ATTR_MSS_EXP_RESP_DDR4_F1RC02_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MSS_EXP_RESP_DDR4_F1RC02_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_F1RC02;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_exp_resp_ddr4_f1rc02(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_exp_resp_ddr4_f1rc02(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const exp::rc_resp_adaptor& i_rc_resp,
+            attr_integral_type& o_setting)
+    {
+        // Reusable data buffer
+        std::vector<attr_integral_type> l_data;
+
+        if(mss::index(i_rc_resp.get_target()) == 0)
+        {
+            get_data_F1RC_D0(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F1RC02>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+        else
+        {
+            get_data_F1RC_D1(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F1RC02>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_rc_resp_engine_fields, F1RC03 specialization
+///
+template <proc_type P>
+struct attrEngineTraits<P, exp::attr_rc_resp_engine_fields, exp::attr_rc_resp_engine_fields::F1RC03>
+{
+    using attr_type = fapi2::ATTR_MSS_EXP_RESP_DDR4_F1RC03_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MSS_EXP_RESP_DDR4_F1RC03_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_F1RC03;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_exp_resp_ddr4_f1rc03(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_exp_resp_ddr4_f1rc03(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const exp::rc_resp_adaptor& i_rc_resp,
+            attr_integral_type& o_setting)
+    {
+        // Reusable data buffer
+        std::vector<attr_integral_type> l_data;
+
+        if(mss::index(i_rc_resp.get_target()) == 0)
+        {
+            get_data_F1RC_D0(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F1RC03>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+        else
+        {
+            get_data_F1RC_D1(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F1RC03>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+};
+
+///
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_rc_resp_engine_fields, F1RC04 specialization
+///
+template <proc_type P>
+struct attrEngineTraits<P, exp::attr_rc_resp_engine_fields, exp::attr_rc_resp_engine_fields::F1RC04>
+{
+    using attr_type = fapi2::ATTR_MSS_EXP_RESP_DDR4_F1RC04_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MSS_EXP_RESP_DDR4_F1RC04_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_F1RC04;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_exp_resp_ddr4_f1rc04(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_exp_resp_ddr4_f1rc04(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const exp::rc_resp_adaptor& i_rc_resp,
+            attr_integral_type& o_setting)
+    {
+        // Reusable data buffer
+        std::vector<attr_integral_type> l_data;
+
+        if(mss::index(i_rc_resp.get_target()) == 0)
+        {
+            get_data_F1RC_D0(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F1RC04>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+        else
+        {
+            get_data_F1RC_D1(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F1RC04>(i_rc_resp.get_target(), l_data, o_setting));
+        }
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+};
+
+//
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note attr_rc_resp_engine_fields, F1RC05 specialization
+///
+template <proc_type P>
+struct attrEngineTraits<P, exp::attr_rc_resp_engine_fields, exp::attr_rc_resp_engine_fields::F1RC05>
+{
+    using attr_type = fapi2::ATTR_MSS_EXP_RESP_DDR4_F1RC05_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MSS_EXP_RESP_DDR4_F1RC05_TargetType;
+    static constexpr exp::ffdc_codes FFDC_CODE = exp::SET_F1RC05;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_exp_resp_ddr4_f1rc05(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_exp_resp_ddr4_f1rc05(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const exp::rc_resp_adaptor& i_rc_resp,
+            attr_integral_type& o_setting)
+    {
+        // Reusable data buffer
+        const auto l_dimm = i_rc_resp.get_target();
+
+        std::vector<attr_integral_type> l_data;
+
+        if(mss::index(l_dimm) == 0)
+        {
+            get_data_F1RC_D0(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F1RC05>(l_dimm, l_data, o_setting));
+        }
+        else
+        {
+            get_data_F1RC_D1(i_rc_resp, l_data);
+            FAPI_TRY(exp::reader<exp::rc_rsp_fields::F1RC05>(l_dimm, l_data, o_setting));
+        }
+
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 };
 

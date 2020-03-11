@@ -542,7 +542,7 @@
 
   <attribute>
     <id>ATTR_MSS_EXP_RESP_DDR4_F0RC00</id>
-    <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
     <description>
       F0RC00: Global Features Control Word from the DDR4 RCD Spec.
     </description>

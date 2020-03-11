@@ -38,6 +38,8 @@
 #include <lib/phy/exp_train_display.H>
 #include <lib/phy/exp_train_handler.H>
 #include <exp_inband.H>
+#include <lib/eff_config/explorer_attr_engine_traits.H>
+#include <generic/memory/lib/data_engine/data_engine.H>
 
 namespace mss
 {
@@ -125,6 +127,31 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Helper function to set rc response attrs
+/// @param[in] i_target the fapi2 OCMB target
+/// @param[in] i_rc_resp the Explorer rc response
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+static fapi2::ReturnCode set_rc_resp_attr(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const user_response_rc_msdg_t& i_rc_resp)
+{
+    for (const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+    {
+        uint8_t l_is_rcd_supported = 0;
+        FAPI_TRY(mss::attr::get_supported_rcd(d, l_is_rcd_supported));
+
+        if(l_is_rcd_supported != fapi2::ENUM_ATTR_MEM_EFF_SUPPORTED_RCD_NO_RCD)
+        {
+            mss::exp::rc_resp_adaptor l_rcws(d, i_rc_resp);
+            FAPI_TRY((mss::gen::attr_engine<mss::proc_type::AXONE, mss::exp::attr_rc_resp_engine_fields>::set(l_rcws)));
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Perform host FW phy init with eye capture
 ///
 /// @param[in] i_target OCMB target
@@ -197,7 +224,31 @@ fapi2::ReturnCode host_fw_phy_init_with_eye_capture(const fapi2::Target<fapi2::T
         }
     }
 
-    // Check the return codes
+    // Set Explorer RC response attributes
+
+    if ((l_read_display_response_1_rc == fapi2::FAPI2_RC_SUCCESS && l_read_display_response_2_rc == fapi2::FAPI2_RC_SUCCESS)
+        || (l_read_display_response_1_rc == fapi2::FAPI2_RC_SUCCESS && l_read_display_response_2_rc != fapi2::FAPI2_RC_SUCCESS))
+    {
+        // If both init cmds pass, we use the 1st response arbitrarily
+        FAPI_TRY(set_rc_resp_attr(i_target, l_response_1.rc_resp));
+    }
+
+    else if (l_read_display_response_1_rc != fapi2::FAPI2_RC_SUCCESS
+             && l_read_display_response_2_rc == fapi2::FAPI2_RC_SUCCESS)
+    {
+        // If 1 of 2 init cmds fail, we run the attr_engine on the passing one.
+        FAPI_TRY(set_rc_resp_attr(i_target, l_response_2.rc_resp));
+    }
+
+    else
+    {
+        // If both init cmds fail, we don't run set the attributes (defaulted to 0)
+        FAPI_DBG("Bad ReturnCode for read display response 1 and 2, "
+                 "will NOT set Explorer rc response attrs for %s.",
+                 mss::c_str(i_target));
+    }
+
+    // Check the return codes and skip attr_engine
     FAPI_TRY(process_eye_capture_return_codes(i_target,
              l_response_1,
              l_response_2,
@@ -353,6 +404,9 @@ fapi2::ReturnCode read_and_display_normal_training_repsonse(
     // Displays the training response
     FAPI_INF("%s displaying user response data version %u", mss::c_str(i_target), l_train_response.version_number)
     FAPI_TRY( mss::exp::train::display_normal_info(i_target, l_train_response));
+
+    // Set RC response attributes
+    FAPI_TRY(set_rc_resp_attr(i_target, l_train_response.rc_resp));
 
     if(i_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -536,7 +590,7 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-}//check
+} // namespace check
 
-}// exp
-}// mss
+} // namespace exp
+} // namespace mss

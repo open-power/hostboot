@@ -183,8 +183,8 @@ struct get<fapi2::TARGET_TYPE_OCMB_CHIP, mss::spd::facade>
 /// @brief get struct for spd::facade specialization with default target type
 /// @tparam T TargetType with which to use
 ///
-template <fapi2::TargetType T>
-struct get<T, spd::facade>
+template <>
+struct get<fapi2::TARGET_TYPE_MEM_PORT, spd::facade>
 {
     ///
     /// @brief Get target for spd::facade and default target type for SPD attrs (MEM_PORT)
@@ -203,8 +203,8 @@ struct get<T, spd::facade>
 /// @brief get struct for efd::base_decoder specialization with default target type
 /// @tparam T TargetType with which to use
 ///
-template <fapi2::TargetType T>
-struct get<T, std::shared_ptr<efd::base_decoder>>
+template <>
+struct get<fapi2::TARGET_TYPE_MEM_PORT, std::shared_ptr<efd::base_decoder>>
 {
     ///
     /// @brief Get target for std::shared_ptr<efd::base_decoder> and default target type for EFD attrs (MEM_PORT)
@@ -234,10 +234,10 @@ template < size_t X,
            size_t Y,
            typename T,
            typename FFDC >
-inline fapi2::ReturnCode update_data(const std::shared_ptr<efd::base_decoder>& i_efd_data,
-                                     const T i_setting,
-                                     const FFDC i_ffdc_code,
-                                     T (&o_data)[X][Y])
+fapi2::ReturnCode update_data(const std::shared_ptr<efd::base_decoder>& i_efd_data,
+                              const T i_setting,
+                              const FFDC i_ffdc_code,
+                              T (&o_data)[X][Y])
 {
     const auto l_ocmb = i_efd_data->get_target();
 
@@ -257,25 +257,27 @@ fapi_try_exit:
 
 ///
 /// @brief Helper function to update the structure that holds attr data
-/// @tparam X size of 1st array index
+/// @tparam DT data type
 /// @tparam T Input/output data type
 /// @tparam FFDC the FFDC type
+/// @tparam X size of 1st array index
 /// @param[in] i_data the SPD data
-/// @param[in] i_target the DIMM target
 /// @param[in] i_setting array to set
 /// @param[in] i_ffdc_code FFDC function code
 /// @param[out] o_data attribute data structure to set
+/// @warn DT requires an adaptor that supports get_target()
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-template < size_t X,
+template < typename DT,
            typename T,
-           typename FFDC >
-inline fapi2::ReturnCode update_data( const spd::facade& i_spd_data,
-                                      const T i_setting,
-                                      const FFDC i_ffdc_code,
-                                      T (&o_data)[X])
+           typename FFDC,
+           size_t X >
+fapi2::ReturnCode update_data( const DT& i_data,
+                               const T i_setting,
+                               const FFDC i_ffdc_code,
+                               T (&o_data)[X])
 {
-    const auto l_dimm = i_spd_data.get_target();
+    const auto l_dimm = i_data.get_target();
     const size_t l_dimm_index = mss::index(l_dimm);
 
     FAPI_TRY( check::index_within_bounds(l_dimm, l_dimm_index, X, i_ffdc_code) );
@@ -303,10 +305,10 @@ template < fapi2::TargetType T,
            typename IT,
            typename FFDC,
            size_t X >
-inline fapi2::ReturnCode update_data( const fapi2::Target<T>& i_target,
-                                      const IT i_setting,
-                                      const FFDC i_ffdc_code,
-                                      IT (&o_data)[X])
+fapi2::ReturnCode update_data( const fapi2::Target<T>& i_target,
+                               const IT i_setting,
+                               const FFDC i_ffdc_code,
+                               IT (&o_data)[X])
 {
     const size_t l_dimm_index = mss::index(i_target);
 
@@ -344,6 +346,7 @@ inline fapi2::ReturnCode update_data(const fapi2::Target<T>& i_target,
     o_data = i_setting;
     return fapi2::FAPI2_RC_SUCCESS;
 }
+
 ///
 /// @brief Helper function to update the structure that holds attr data
 /// @tparam DT the data type
