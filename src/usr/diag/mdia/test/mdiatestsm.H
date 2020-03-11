@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,7 +64,7 @@ class MdiaSmTest : public CxxTest::TestSuite
             }
             else if (fapi2::TARGET_TYPE_OCMB_CHIP == type)
             {
-                TARGETING::getAllChiplets(tmp, TYPE_OCMB_CHIP);
+                TARGETING::getAllChips(tmp, TYPE_OCMB_CHIP);
             }
 
             TargetHandleList::iterator it = tmp.end();

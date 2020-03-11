@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2017
+# Contributors Listed Below - COPYRIGHT 2012,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -47,6 +47,6 @@ OBJS += mdiafakecm.o
 
 MODULE = testmdia
 
-TESTS = mdiatestsm.H mdiatesttrace.H mdiatest.H mdiatestworkitem.H mdiatestmonitor.H mdiatestmba.H
+TESTS = mdiatestsm.H mdiatesttrace.H mdiatest.H mdiatestworkitem.H mdiatestmonitor.H mdiatestmba.H mdiaTestTimeoutFfdc.H
 
 include ${ROOTPATH}/config.mk

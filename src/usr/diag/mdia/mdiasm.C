@@ -131,7 +131,6 @@ void addTimeoutFFDC(TargetHandle_t i_target, errlHndl_t & io_log)
         MCBIST_FIR_ACT1,
     };
 
-    /* TODO
     const uint64_t ocmbRegs[] = {
         OCMB_MCBIST_FIR,
         OCMB_MCBIST_FIR_AND,
@@ -144,7 +143,6 @@ void addTimeoutFFDC(TargetHandle_t i_target, errlHndl_t & io_log)
         OMIDLFIR_ACT0,
         OMIDLFIR_ACT1,
     };
-    */
 
     const uint64_t procRegs[] = {
         IPOLL_MASK,
@@ -258,9 +256,20 @@ void addTimeoutFFDC(TargetHandle_t i_target, errlHndl_t & io_log)
     }
     else if ( TYPE_OCMB_CHIP == i_target->getAttr<ATTR_TYPE>() )
     {
-        /*
-        // get the parent proc
-        ConstTargetHandle_t proc = getParentChip(i_target);
+        // Get the parent OMI
+        TargetHandleList targetList;
+        getParentAffinityTargets( targetList, i_target, CLASS_UNIT, TYPE_OMI );
+
+        assert( targetList.size() == 1, "[MDIA] addTimeoutFFDC: Multiple parent"
+                " OMIs found for OCMB i_target: 0x%08x", get_huid(i_target) );
+
+        TargetHandle_t omi = targetList[0];
+
+        // Get the parent proc
+        ConstTargetHandle_t proc = getParentChip(omi);
+
+        assert( nullptr != proc, "[MDIA] addTimeoutFFDC: Unable to get the "
+                "parent proc from omi: 0x%08x", get_huid(omi) );
 
         const struct Entry
         {
@@ -291,7 +300,6 @@ void addTimeoutFFDC(TargetHandle_t i_target, errlHndl_t & io_log)
                 udLogRegister.addToLog(io_log);
             }
         }
-        */
     }
     else
     {
