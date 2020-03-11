@@ -84,7 +84,7 @@ namespace fapi2
 ///                iv_handle to.
 /// @return void
 ///
-/// @note          the default templated constructor is delagated to
+/// @note          the default templated constructor is delegated to
 ////               constructors take in a plat_target_handle_t
 ///
 template<>
