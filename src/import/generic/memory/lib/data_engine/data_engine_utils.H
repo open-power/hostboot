@@ -245,32 +245,11 @@ inline fapi2::ReturnCode update_data(const std::shared_ptr<efd::base_decoder>& i
     const auto l_dimm_index = i_efd_data->get_rank() / mss::MAX_RANK_PER_DIMM;
     const auto l_dimm_rank = i_efd_data->get_rank() % mss::MAX_RANK_PER_DIMM;
 
-    FAPI_ASSERT( l_dimm_index < X,
-                 fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
-                 .set_INDEX(l_dimm_index)
-                 .set_LIST_SIZE(X)
-                 .set_FUNCTION(i_ffdc_code)
-                 .set_TARGET(l_ocmb),
-                 "Dimm index (%d) was larger than max (%d) on %s",
-                 l_dimm_index,
-                 X,
-                 mss::spd::c_str(l_ocmb) );
-
-    FAPI_ASSERT( l_dimm_rank < Y,
-                 fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
-                 .set_INDEX(l_dimm_rank)
-                 .set_LIST_SIZE(X)
-                 .set_FUNCTION(i_ffdc_code)
-                 .set_TARGET(l_ocmb),
-                 "Rank index (%d) was larger than max (%d) on %s",
-                 l_dimm_rank,
-                 Y,
-                 mss::spd::c_str(l_ocmb) );
+    FAPI_TRY( check::index_within_bounds(l_ocmb, l_dimm_index, X, i_ffdc_code) );
+    FAPI_TRY( check::index_within_bounds(l_ocmb, l_dimm_rank, Y, i_ffdc_code) );
 
     FAPI_DBG("Updating data[%d][%d] with %d for %s", l_dimm_index, l_dimm_rank, i_setting, spd::c_str(l_ocmb));
     o_data[l_dimm_index][l_dimm_rank] = i_setting;
-
-    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -299,21 +278,10 @@ inline fapi2::ReturnCode update_data( const spd::facade& i_spd_data,
     const auto l_dimm = i_spd_data.get_dimm_target();
     const size_t l_dimm_index = mss::index(l_dimm);
 
-    FAPI_ASSERT( l_dimm_index < X,
-                 fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
-                 .set_INDEX(l_dimm_index)
-                 .set_LIST_SIZE(X)
-                 .set_FUNCTION(i_ffdc_code)
-                 .set_TARGET(l_dimm),
-                 "Dimm index (%d) was larger than max (%d) on %s",
-                 l_dimm_index,
-                 X,
-                 mss::spd::c_str(l_dimm) );
+    FAPI_TRY( check::index_within_bounds(l_dimm, l_dimm_index, X, i_ffdc_code) );
 
     FAPI_DBG("Updating data[%d] with %d for %s", l_dimm_index, i_setting, spd::c_str(l_dimm));
     o_data[l_dimm_index] = i_setting;
-
-    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -342,21 +310,10 @@ inline fapi2::ReturnCode update_data( const fapi2::Target<T>& i_target,
 {
     const size_t l_dimm_index = mss::index(i_target);
 
-    FAPI_ASSERT( l_dimm_index < X,
-                 fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
-                 .set_INDEX(l_dimm_index)
-                 .set_LIST_SIZE(X)
-                 .set_FUNCTION(i_ffdc_code)
-                 .set_TARGET(i_target),
-                 "Dimm index (%d) was larger than max (%d) on %s",
-                 l_dimm_index,
-                 X,
-                 mss::spd::c_str(i_target) );
+    FAPI_TRY( check::index_within_bounds(i_target, l_dimm_index, X, i_ffdc_code) );
 
     FAPI_DBG("Updating data[%d] with %d for %s", l_dimm_index, i_setting, spd::c_str(i_target));
     o_data[l_dimm_index] = i_setting;
-
-    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;

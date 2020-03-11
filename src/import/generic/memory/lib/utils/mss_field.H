@@ -184,7 +184,7 @@ inline fapi2::ReturnCode get_field(const fapi2::Target<T>& i_target,
                                    OT& o_value)
 {
     const size_t BYTE = F.get_byte(i_data);
-    FAPI_TRY(check::index_within_bounds(i_target, BYTE, i_data, i_ffdc_codes));
+    FAPI_TRY(check::index_within_bounds(i_target, BYTE, i_data.size(), i_ffdc_codes));
 
     {
         // clear out stale state
@@ -233,7 +233,7 @@ inline fapi2::ReturnCode set_field(const fapi2::Target<T>& i_target,
 {
     const size_t BYTE = F.get_byte(io_data);
 
-    FAPI_TRY(check::index_within_bounds(i_target, BYTE, io_data, i_ffdc_codes));
+    FAPI_TRY(check::index_within_bounds(i_target, BYTE, io_data.size(), i_ffdc_codes));
     FAPI_TRY(check::invalid_type_conversion<uint8_t>(i_target, i_setting, i_ffdc_codes));
 
     {

@@ -289,32 +289,30 @@ fapi_try_exit:
 /// @brief Checks conditional passes and implements traces & exits if it fails
 /// @tparam T fapi2 target type
 /// @tparam IT index type
-/// @tparam VT vector data type
+/// @tparam ST size type
 /// @tparam FFDC error callout code type
 /// @param[in] i_target fapi2 target
 /// @param[in] i_index desired vector index
-/// @param[in] i_data vector data
+/// @param[in] i_size size of the list we are comparing
 /// @param[in] i_ffdc_codes FFDC code
 /// @param[in] i_err_str error string - defaulted to ""
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-template< fapi2::TargetType T, typename IT, typename VT, typename FFDC >
+template< fapi2::TargetType T, typename IT, typename ST, typename FFDC >
 fapi2::ReturnCode index_within_bounds(const fapi2::Target<T>& i_target,
                                       const IT i_index,
-                                      const std::vector<VT>& i_data,
+                                      const ST i_size,
                                       const FFDC i_ffdc_codes,
                                       const char* i_err_str = "")
 {
-    const auto l_size = i_data.size();
-
-    FAPI_ASSERT( i_index < l_size,
+    FAPI_ASSERT( i_index < i_size,
                  fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
                  .set_INDEX(i_index)
-                 .set_LIST_SIZE(l_size)
+                 .set_LIST_SIZE(i_size)
                  .set_FUNCTION(i_ffdc_codes)
                  .set_TARGET(i_target),
                  "%s. Out of bounds indexing (with %d) on a list of size %d for " TARGTIDFORMAT,
-                 i_err_str, i_index, l_size, TARGTID );
+                 i_err_str, i_index, i_size, TARGTID );
 
     return fapi2::FAPI2_RC_SUCCESS;
 
