@@ -48,6 +48,7 @@
 #include    <targeting/common/targetservice.H>
 #include    <targeting/runtime/rt_targeting.H>
 #include    <targeting/translateTarget.H>
+#include    <targeting/targplatutil.H>
 
 #include <scom/scomif.H>
 #include <scom/wakeup.H>
@@ -530,38 +531,30 @@ namespace RTPM
         return l_err;
     }
 
-    void load_and_start_pm_complex()
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  ENTER_MRK"load_and_start_pm_complex");
-#ifdef CONFIG_AUTO_START_PM_COMPLEX_FOR_PHYP
-        Target* l_sys = nullptr;
-        targetService().getTopLevelTarget(l_sys);
-        assert(l_sys, "load_and_start_pm_complex: top level target is nullptr");
 
+    /**
+     * @brief Helper function to map the HOMER phys addresses to virt for each
+     *        proc and set the OCC Common Phys addr attribute at the system
+     *        level.
+     *
+     * @return rc: 0 = success; non-0: error
+     */
+    int map_homer_and_occ_common()
+    {
+        int l_rc = 0;
+        uint64_t l_homerPhysAddr = 0;
+        uint64_t l_occCommonAddr = 0;
+        Target* l_sys = UTIL::assertGetToplevelTarget();
         TargetHandleList l_procs;
         getAllChips(l_procs, TYPE_PROC, true /*functional*/);
 
-        uint64_t l_homerPhysAddr = 0;
-        uint64_t l_occCommonAddr = 0;
-        int l_rc = 0;
-        errlHndl_t l_errl = nullptr;
-        Target* l_failedProc = nullptr;
-
         do {
-
-        // No-op on non-PHYP systems
-        if(!is_phyp_load())
-        {
-            break;
-        }
-
         if(g_hostInterfaces->get_pm_complex_addresses == nullptr)
         {
-            // TODO RTC: 214351 Make this a visible error once PHYP support is
+            // TODO RTC: 214355 Make this a visible error once PHYP support is
             // in
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      ERR_MRK"load_and_start_pm_complex: no get_pm_complex_addresses interface provided!");
+                      ERR_MRK"map_homer_and_occ_common: no get_pm_complex_addresses interface provided!");
             break;
         }
 
@@ -575,19 +568,109 @@ namespace RTPM
                                                               l_occCommonAddr);
             if(l_rc)
             {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"map_homer_and_occ_common: get_pm_complex_addresses failed! RC: %d", l_rc);
                 break;
             }
             // Update the address on each proc prior to loading/starting PM;
             // loadAndStartPMAll relies on this attribute to be set.
             l_proc->setAttr<ATTR_HOMER_PHYS_ADDR>(l_homerPhysAddr);
+
+            // This will populate the HOMER Virt addr attribute that
+            // processOccStartStatus uses
+            void* l_homerVAddr =
+                    HBPM::convertHomerPhysToVirt(l_proc,l_homerPhysAddr);
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      INFO_MRK"map_homer_and_occ_common: HOMER VAddr for HUID 0x%08x: %p",
+                      get_huid(l_proc),
+                      l_homerVAddr);
         }
         if(l_rc)
         {
             break;
         }
 
-        // Also update the OCC Common address
+                // Also update the OCC Common address
         l_sys->setAttr<ATTR_OCC_COMMON_AREA_PHYS_ADDR>(l_occCommonAddr);
+
+
+        }while(0);
+
+        return l_rc;
+    }
+
+    /**
+     * @brief Unmaps all HOMER Virt addresses (per each proc) and sets all HOMER
+     *        virt addr attributes to zero.
+     *
+     * @return rc: 0 = success; non-0: error
+     */
+    int unmap_homers()
+    {
+        int l_worstRc = 0;
+        TargetHandleList l_procs;
+        getAllChips(l_procs, TYPE_PROC, true /*functional*/);
+        // Unmap all virtual HOMER addresses
+        for(auto& l_proc : l_procs)
+        {
+            auto l_homerVirt = l_proc->getAttr<ATTR_HOMER_VIRT_ADDR>();
+            if(l_homerVirt == 0)
+            {
+                // No need to unmap nullptr
+                continue;
+            }
+
+            void* l_pHomerVirt = reinterpret_cast<void*>(l_homerVirt);
+            int l_tempRc = HBPM_UNMAP(l_pHomerVirt);
+            if(l_tempRc)
+            {
+                // Save off the bad return code and continue to unmap
+                l_worstRc = l_tempRc;
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "unmap_homers: could not unmap HOMER VAddr for proc HUID 0x%08x; RC: %d",
+                          get_huid(l_proc),
+                          l_tempRc);
+            }
+            else
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "unmap_homers: unmapped HOMER Vaddr for proc HUID 0x%08x",
+                          get_huid(l_proc));
+            }
+            // Zero out the attribute even if there was an error
+            uint64_t l_zero = 0;
+            l_proc->setAttr<ATTR_HOMER_VIRT_ADDR>(l_zero);
+        }
+
+        return l_worstRc;
+    }
+
+    void load_and_start_pm_complex()
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  ENTER_MRK"load_and_start_pm_complex");
+#ifdef CONFIG_AUTO_START_PM_COMPLEX_FOR_PHYP
+        int l_rc = 0;
+        errlHndl_t l_errl = nullptr;
+        Target* l_failedProc = nullptr;
+
+        do {
+
+        // No-op on non-PHYP systems
+        if(!is_phyp_load())
+        {
+            break;
+        }
+
+        // TODO RTC: 251394 Rework/remove manual mapping and unmapping of HOMER
+        // and OCC common.
+        l_rc = map_homer_and_occ_common();
+        if(l_rc)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"load_and_start_pm_complex: could not map HOMER and OCC Common Virt addresses");
+            break;
+        }
 
         l_errl = HBPM::loadAndStartPMAll(HBPM::PM_LOAD,
                                          l_failedProc);
@@ -605,7 +688,48 @@ namespace RTPM
             break;
         }
 
+        // Need to remap the HOMER/OCC Common addresses, since they get unmapped
+        // in loadAndStartPMAll
+        l_rc = map_homer_and_occ_common();
+        if(l_rc)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"load_and_start_pm_complex: could not remap HOMER and OCC Common Virt addresses");
+            break;
+        }
+
+#ifdef CONFIG_HTMGT
+        HTMGT::processOccStartStatus(true, //i_startCompleted
+                              l_failedProc); //this is nullptr at this point
+#else
+        l_errl = HBPM::verifyOccChkptAll();
+        if(l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"load_and_start_pm_complex: verifyOccChkptAll failed!");
+            pm_complex_error(l_errl, l_rc);
+            break;
+        }
+#endif
         }while(0);
+
+        // Since we manually remapped the HOMER virtual addresses, we need to
+        // unmap them here manually as well.
+        int l_unmapRc = unmap_homers();
+        if(l_unmapRc)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"load_and_start_pm_complex: could not unmap all HOMER VAddrs; RC: %d",
+                      l_unmapRc);
+            // If no error occurred prior, update the RC; else return the
+            // original RC, since it's possible that the unmap RC is related to
+            // the original.
+            if(!l_rc)
+            {
+                l_rc = l_unmapRc;
+            }
+        }
+
 
         if(l_rc)
         {

@@ -78,6 +78,8 @@ namespace ISTEP
         MOD_GET_OMI_FREQ                                  = 0x28,
         MOD_DISCOVER_TARGETS                              = 0x29,
         MOD_MSS_GETECID                                   = 0x30,
+        MOD_START_PM_COMPLEX                              = 0x31,
+        MOD_RESET_PM_COMPLEX                              = 0x32,
     };
 
     /**
@@ -155,6 +157,7 @@ namespace ISTEP
         RC_OMI_FREQ_MISMATCH                     = ISTEP_COMP_ID | 0x51,
         RC_CANNOT_BOOT_WITH_MISMATCHED_BARS      = ISTEP_COMP_ID | 0x52,
         RC_INVALID_OCMB_CHIP_ID                  = ISTEP_COMP_ID | 0x53,
+        RC_INVALID_HOMER_VADDR                   = ISTEP_COMP_ID | 0x54,
     };
 
 };

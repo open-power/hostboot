@@ -99,19 +99,6 @@
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
 
-// Definitions for convertHomerPhysToVirt()
-#ifndef __HOSTBOOT_RUNTIME
-#define HBPM_UNMAP     mm_block_unmap
-#define HBPM_MAP       mm_block_map
-#define HBPM_PHYS_ADDR (reinterpret_cast<void*>(i_phys_addr))
-#define UNSEC_HOMER_PHYS_ADDR (reinterpret_cast<void*>(l_unsecureHomerAddr))
-#else
-#define HBPM_UNMAP     g_hostInterfaces->unmap_phys_mem
-#define HBPM_MAP       g_hostInterfaces->map_phys_mem
-#define HBPM_PHYS_ADDR i_phys_addr
-#define UNSEC_HOMER_PHYS_ADDR l_unsecureHomerAddr
-#endif
-
 
 using namespace TARGETING;
 using namespace hcodeImageBuild;
@@ -805,7 +792,6 @@ namespace HBPM
         // ATTR_HOMER_PHYS_ADDR was set as part of loadPMComplex
         l_homerPhysAddr = i_target->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>();
         void* l_homerVAddr = convertHomerPhysToVirt(i_target,l_homerPhysAddr);
-        assert(l_homerVAddr, "startPMComplex: l_homerVAddr is nullptr!");
 
         // cast OUR type of target to a FAPI type of target.
         // figure out homer offsets
@@ -813,6 +799,30 @@ namespace HBPM
             l_fapiTarg(i_target);
 
         do {
+
+            if(l_homerVAddr == nullptr)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                     ERR_MRK"startPMComplex: returned HOMER VAddr is nullptr!");
+                /**
+                 * @errortype
+                 * @reasoncode ISTEP::RC_INVALID_HOMER_VADDR
+                 * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid   ISTEP::MOD_START_PM_COMPLEX
+                 * @userdata1  HUID
+                 * @userdata2  HOMER Phys Addr
+                 * @devdesc    Could not map HOMER Physical address to virt
+                 * @custdesc   A host failure occurred
+                 */
+                l_errl = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    ISTEP::MOD_START_PM_COMPLEX,
+                                    ISTEP::RC_INVALID_HOMER_VADDR,
+                                    get_huid(i_target),
+                                    l_homerPhysAddr,
+                                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                break;
+            }
             // Init path
             // p10_pm_init.C enum: PM_INIT
             if (TARGETING::is_phyp_load())
@@ -870,7 +880,6 @@ namespace HBPM
                        i_target->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>();
         void* l_homerVAddr =
                            convertHomerPhysToVirt(i_target,l_homerPhysAddr);
-        assert(l_homerVAddr, "resetPMComplex: l_homerVAddr is nullptr!");
 
         // cast OUR type of target to a FAPI type of target.
         // figure out homer offsets
@@ -879,6 +888,29 @@ namespace HBPM
 
         do
         {
+            if(l_homerVAddr == nullptr)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                     ERR_MRK"resetPMComplex: returned HOMER VAddr is nullptr!");
+                /**
+                 * @errortype
+                 * @reasoncode ISTEP::RC_INVALID_HOMER_VADDR
+                 * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid   ISTEP::MOD_RESET_PM_COMPLEX
+                 * @userdata1  HUID
+                 * @userdata2  HOMER Phys Addr
+                 * @devdesc    Could not map HOMER Physical address to virt
+                 * @custdesc   A host failure occurred
+                 */
+                l_errl = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    ISTEP::MOD_RESET_PM_COMPLEX,
+                                    ISTEP::RC_INVALID_HOMER_VADDR,
+                                    get_huid(i_target),
+                                    l_homerPhysAddr,
+                                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                break;
+            }
             // If this target was already reset previously by the runtime
             //  deconfig logic, then skip it.
             // ATTR_HB_INITIATED_PM_RESET set to COMPLETE signifies that this

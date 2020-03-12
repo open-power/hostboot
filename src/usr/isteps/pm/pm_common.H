@@ -32,6 +32,19 @@
 #include <isteps/pm/pm_common_ext.H>
 #include <istepHelperFuncs.H>
 
+// Definitions for convertHomerPhysToVirt()
+#ifndef __HOSTBOOT_RUNTIME
+#define HBPM_UNMAP     mm_block_unmap
+#define HBPM_MAP       mm_block_map
+#define HBPM_PHYS_ADDR (reinterpret_cast<void*>(i_phys_addr))
+#define UNSEC_HOMER_PHYS_ADDR (reinterpret_cast<void*>(l_unsecureHomerAddr))
+#else
+#define HBPM_UNMAP     g_hostInterfaces->unmap_phys_mem
+#define HBPM_MAP       g_hostInterfaces->map_phys_mem
+#define HBPM_PHYS_ADDR i_phys_addr
+#define UNSEC_HOMER_PHYS_ADDR l_unsecureHomerAddr
+#endif
+
 namespace HBPM
 {
     enum
