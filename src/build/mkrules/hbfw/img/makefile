@@ -54,9 +54,7 @@ SRCPATH = ${DEFAULT_PATH:M*src*}
 .endif
 
 build_all: $(BUILD_ALL_DEPS)
-install_all:
-#install_all: gen_system_specific_images build_sbe_partitions build_pnor_images
-#TODO-RTC:246879-Reenable this after we get MRW going
+install_all: gen_system_specific_images build_sbe_partitions build_pnor_images
 
 #Some useful search paths
 HBFW_OBJPATH  = ${.PATH:M*obj*}
@@ -122,7 +120,6 @@ HBEL_FINAL_IMG = HBEL.bin
 GUARD_FINAL_IMG = GUARD.bin
 DJVPD_FINAL_IMG = DJVPD.bin
 MVPD_FINAL_IMG = MVPD.bin
-CVPD_FINAL_IMG = CVPD.bin
 PAYLOAD_FINAL_IMG = PAYLOAD.bin
 RINGOVD_FINAL_IMG = RINGOVD.bin
 SBKT_FINAL_IMG = SBKT.bin
@@ -131,25 +128,25 @@ MEMD_FINAL_IMG = MEMD.bin
 EECACHE_FINAL_IMG = EECACHE.bin
 OCMBFW_FINAL_IMG = OCMBFW.bin
 FINAL_OUTPUT_IMAGES = ${HBBL_FINAL_IMG} ${HBB_FINAL_IMG} ${HBI_FINAL_IMG} \
-			  ${HBRT_FINAL_IMG} ${TEST_FINAL_IMG} ${TESTRO_FINAL_IMG} \
-			  ${HBEL_FINAL_IMG} ${GUARD_FINAL_IMG} \
-			  ${DJVPD_FINAL_IMG} ${MVPD_FINAL_IMG} ${CVPD_FINAL_IMG} \
-			  ${PAYLOAD_FINAL_IMG} ${RINGOVD_FINAL_IMG} ${SBKT_FINAL_IMG} \
-			  ${FIRDATA_FINAL_IMG} ${MEMD_FINAL_IMG} ${EECACHE_FINAL_IMG} \
-			  $(OCMBFW_FINAL_IMG}
+		      ${HBRT_FINAL_IMG} ${TEST_FINAL_IMG} ${TESTRO_FINAL_IMG} \
+		      ${HBEL_FINAL_IMG} ${GUARD_FINAL_IMG} \
+		      ${DJVPD_FINAL_IMG} ${MVPD_FINAL_IMG} \
+		      ${PAYLOAD_FINAL_IMG} ${RINGOVD_FINAL_IMG} ${SBKT_FINAL_IMG} \
+		      ${FIRDATA_FINAL_IMG} ${MEMD_FINAL_IMG} ${EECACHE_FINAL_IMG} \
+		      $(OCMBFW_FINAL_IMG}
 
 # Aggregate
 ALL_DEFAULT_IMAGES = ${DEFAULT_INPUT_IMAGES} ${FINAL_OUTPUT_IMAGES}
 
-# Imprint hw keys' hash
+# Imprint hw keys hash
 IMPRINT_HW_KEY_HASH = ${imprintHwKeyHash:P}
 
 # Script to manipulate bin files to prepare for buildpnor (install_all phase)
 # Note: sections with no input files are zero filled images and pass EMPTY as
-#       their input file name. This is so the script knows it needs to generate
-#       them, rather than use an input.
+#	their input file name. This is so the script knows it needs to generate
+#	them, rather than use an input.
 # Note: HBI depends on HBB for sw signatures. Ensure that both are passed into
-#       the same --systemBinFiles parameter for genPnorImages
+#	the same --systemBinFiles parameter for genPnorImages
 GEN_PNOR_IMAGE_SCRIPT = ${genPnorImages.pl:P}
 
 # Determine which version of Redhat we're building on and generate the
@@ -183,15 +180,15 @@ PATH%=/usr/bin:${SIGNING_DIR}:${SIGNING_DIR}/../sb-signing-framework/sb-signing-
 dump-secureboot-config : .FORCEBLD
 	echo -e "\n\n\
 Secure Boot Signing Config:\n\
-    Signing base dir     [${SIGNING_BASE_DIR}]\n\
-    Redhat subdir        [${RH_DIR}]\n\
+    Signing base dir	 [${SIGNING_BASE_DIR}]\n\
+    Redhat subdir	 [${RH_DIR}]\n\
     Signing utils subdir [${SIGNING_UTILS_DIR}]\n\
-    Final signing dir    [${SIGNING_DIR}]\n\
+    Final signing dir	 [${SIGNING_DIR}]\n\
     Development key dir  [${DEV_KEY_DIR}]\n\
-    Signing mode         [${BR2_OPENPOWER_SECUREBOOT_SIGN_MODE}]\n\
+    Signing mode	 [${BR2_OPENPOWER_SECUREBOOT_SIGN_MODE}]\n\
     Compile secureboot?  [${CONFIG_SECUREBOOT}]\n\
-    Libs to preload      [${SIGNING_LIBS}]\n\
-    Path                 [${PATH}]\n\n"
+    Libs to preload	 [${SIGNING_LIBS}]\n\
+    Path		 [${PATH}]\n\n"
 
 # Use FSP layout for any FSP based system
 # Use Default layout for standalone simics
@@ -225,34 +222,34 @@ GEN_STANDALONE_BIN_FILES = ${GEN_COMMON_BIN_FILES},TEST=EMPTY,TESTRO=EMPTY,TESTL
 .if (${FAKEPNOR} == "")
     # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
     .if (${PNOR_LAYOUT_SELECTED} == "STANDALONE")
-        GEN_DEFAULT_BIN_FILES = ${GEN_STANDALONE_BIN_FILES},MEMD=${${ZZ_MEMD_IMG}:P},CVPD=EMPTY,DJVPD=EMPTY,MVPD=EMPTY
+	GEN_DEFAULT_BIN_FILES = ${GEN_STANDALONE_BIN_FILES},MEMD=${${ZZ_MEMD_IMG}:P}DJVPD=EMPTY,MVPD=EMPTY,EECACHE=EMPTY
     .elif(${PNOR_LAYOUT_SELECTED} == "P10")
-    GEN_DEFAULT_BIN_FILES = ${GEN_STANDALONE_BIN_FILES},EECACHE=EMPTY,OCMBFW=${${OCMBFW_IMG}:P}
+	GEN_DEFAULT_BIN_FILES = ${GEN_STANDALONE_BIN_FILES},EECACHE=EMPTY,OCMBFW=${${OCMBFW_IMG}:P}
     .else
-        GEN_DEFAULT_BIN_FILES = ${GEN_COMMON_BIN_FILES},MEMD=${${ZZ_MEMD_IMG}:P},CVPD=EMPTY,DJVPD=EMPTY,MVPD=EMPTY
+	GEN_DEFAULT_BIN_FILES = ${GEN_COMMON_BIN_FILES},MEMD=${${ZZ_MEMD_IMG}:P},EECACHE=EMPTY,OCMBFW=${${OCMBFW_IMG}:P}
     .endif
     DEFAULT_PARAMS = --build-all --emit-eccless ${TARGET_TEST:b--test} ${HB_STANDALONE:b--hb-standalone} \
-                     ${CONFIG_SECUREBOOT:b--secureboot} --systemBinFiles ${GEN_DEFAULT_BIN_FILES} \
-                     --pnorLayout ${PNOR_LAYOUT} ${KEY_TRANSITION_PARAMS} ${CORRUPT_PARAMS} \
-                     --hwKeyHashFile ${IMPRINT_HW_KEY_HASH} \
-                     --editedLayoutLocation ${EDITED_LAYOUT_PATH}
+		     ${CONFIG_SECUREBOOT:b--secureboot} --systemBinFiles ${GEN_DEFAULT_BIN_FILES} \
+		     --pnorLayout ${PNOR_LAYOUT} ${KEY_TRANSITION_PARAMS} ${CORRUPT_PARAMS} \
+		     --hwKeyHashFile ${IMPRINT_HW_KEY_HASH} \
+		     --editedLayoutLocation ${EDITED_LAYOUT_PATH}
 .else
     PNOR_LAYOUT = ${pnorLayoutFake.xml:P}
     # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
     GEN_DEFAULT_BIN_FILES = HBI=${HBI_IMG},HBEL=EMPTY,EECACHE=${${EECACHE_FAKE_IMG}:P}
     DEFAULT_PARAMS = --systemBinFiles ${GEN_DEFAULT_BIN_FILES} --pnorLayout ${PNOR_LAYOUT} \
-                     --editedLayoutLocation ${EDITED_LAYOUT_PATH}
+		     --editedLayoutLocation ${EDITED_LAYOUT_PATH}
 .endif
 
 # rule to update hostboot image tags for custom CFM image, only enabled
 # when the enviroment variable CFM_TEST_IMAGE is populated
 update_image_id: cp_hbfiles validate_cfm_image_name
 	${IMAGE_EDIT_PROGRAM} --binFile=${CFM_TEST_IMAGE:p} \
-        --symsFile=${HBFW_SIMPATH:F${${CFM_TEST_IMAGE:R}_SYMS}}
+	--symsFile=${HBFW_SIMPATH:F${${CFM_TEST_IMAGE:R}_SYMS}}
 
 # make sure the files exist - the perl script isnt all that smart
 validate_cfm_image_name: ${CFM_TEST_IMAGE:p} \
-   	${HBFW_SIMPATH:F${${CFM_TEST_IMAGE:R}_SYMS}}
+	${HBFW_SIMPATH:F${${CFM_TEST_IMAGE:R}_SYMS}}
 
 cp_hbfiles: .SPECTARG
 	${BASE_IMAGES:@image@cp -f ${SRCPATH:F${image}} ${image};@}
@@ -261,22 +258,20 @@ gen_default_images: ${GEN_DEFAULT_IMAGES_DEPS}
 	currentsb -chain
 	ecc --inject ${HBB_IMG} --output ${HBB_ECC_IMG} --p8
 
-	.if (${PNOR_LAYOUT_SELECTED} == "P10")
-        # Create 4k ocmbfw image for now (all zeroes)
+	# Create 4k ocmbfw image for now (all zeroes)
 	dd if=/dev/zero of=${UNPKGD_OCMBFW_IMG} bs=1024 count=4
 
-        # Add header to ocmbfw image
+	# Add header to ocmbfw image
 	${PKG_OCMBFW_SCRIPT} --unpackagedBin ${UNPKGD_OCMBFW_IMG} --packagedBin ${OCMBFW_IMG} --timestamp "${DUMMY:!date!}" --vendorVersion "0.1" --vendorUrl "http://www.ibm.com"
 
-        # verify header sha512 hash value matches value calculated against image
+	# verify header sha512 hash value matches value calculated against image
 	${PKG_OCMBFW_SCRIPT} --verify --packagedBin ${OCMBFW_IMG}
-	.endif
 
     # Remove offset from start of Bootloader image for HBBL partition
     # Actual code is offset from HRMOR by 12k = 12 1k-blocks (space
     # reserved for exception vectors)
     # Note: ibs=8 conv=sync to ensure this ends at an 8byte boundary for the
-    #       securerom code to start at.
+    #	    securerom code to start at.
 	dd if=${BOOTLDR_IMG} of=${HBBL_IMG} ibs=8 skip=1536 conv=sync
 
     # Append Hostboot securerom code size to HBBL
@@ -303,7 +298,9 @@ SBE_BUILD_SCRIPT = ${buildSbePart.pl:P}
 
 P10_SBE_IMG   = p10.SbePartition.bin
 
-P10_EC10_BIN = ${SBEI_OBJPATH:Fp10_10.sbe_seeprom.hdr.bin}
+# Fix this when SBE is generating p10_10.sbe_seeprom.hdr.bin
+P10_EC10_BIN = ${HBB_IMG}
+#P10_EC10_BIN = ${SBEI_OBJPATH:Fp10_10.sbe_seeprom.hdr.bin}
 
 SBE_PART_INFO = \
   ${P10_SBE_IMG}:10=${P10_EC10_BIN}
@@ -369,6 +366,9 @@ P10_OCC_IMG = ${bb}/images/ppc/lab/fs/p9le/rootfs/opt/extucode/81e00430.lid
 
 ## System Specific
 ZEPPELIN_WOFDATA_IMG = ${ENGD_WOFPATH:Fzeppelin_wof_data.bin}
+#@TODO 250793 - Enable WOFDATA generation for Denali
+#DENALI_WOFDATA_IMG = ${ENGD_WOFPATH:Fdenali_wof_data.bin}
+DENALI_WOFDATA_IMG = ${ENGD_WOFPATH:Ffleetwood_wof_data.bin}
 # Create list of images for each node (in node order)
 # genPnorImages will handle multiple HBD=binfile pairs
 
@@ -397,11 +397,11 @@ DENALI_WOFDATA_FINAL_IMG = DENALI.WOFDATA.bin
 .endif
 GEN_DENALI_BIN_FILES = DENALI:WOFDATA=${${DENALI_WOFDATA_IMG}:P}
 SYSTEM_SPECIFIC_PARAMS = --install-all --emit-eccless ${TARGET_TEST:b--test} ${CONFIG_SECUREBOOT:b--secureboot}  \
-                         --pnorLayout ${PNOR_LAYOUT} ${CORRUPT_PARAMS} ${HB_STANDALONE:b--hb-standalone} \
-                         --systemBinFiles ${GEN_DENALI_BIN_FILES} \
-                         --systemBinFiles ${GEN_P10_BIN_FILES} \
-                         --hwKeyHashFile ${IMPRINT_HW_KEY_HASH} \
-                         --editedLayoutLocation ${EDITED_LAYOUT_PATH}
+			 --pnorLayout ${PNOR_LAYOUT} ${CORRUPT_PARAMS} ${HB_STANDALONE:b--hb-standalone} \
+			 --systemBinFiles ${GEN_DENALI_BIN_FILES} \
+			 --systemBinFiles ${GEN_P10_BIN_FILES} \
+			 --hwKeyHashFile ${IMPRINT_HW_KEY_HASH} \
+			 --editedLayoutLocation ${EDITED_LAYOUT_PATH}
 
 gen_system_specific_images_bypass_cache : dump-secureboot-config
 	# Call script to generate final bin file for chip/system specific images
@@ -416,11 +416,12 @@ gen_system_specific_images: build_sbe_partitions .PMAKE
 
 
 .if (${PNOR_LAYOUT_SELECTED} == "FSP")
-    HOSTBOOT_DEFAULT_SECTIONS = HBBL=${HBBL_FINAL_IMG},HBB=${HBB_FINAL_IMG},HBI=${HBI_FINAL_IMG},HBRT=${HBRT_FINAL_IMG},HBEL=${HBEL_FINAL_IMG},GUARD=${GUARD_FINAL_IMG},MVPD=${MVPD_FINAL_IMG},RINGOVD=${RINGOVD_FINAL_IMG},SBKT=${SBKT_FINAL_IMG}
+    HOSTBOOT_DEFAULT_SECTIONS = HBBL=${HBBL_FINAL_IMG},HBB=${HBB_FINAL_IMG},HBI=${HBI_FINAL_IMG},HBRT=${HBRT_FINAL_IMG},HBEL=${HBEL_FINAL_IMG},GUARD=${GUARD_FINAL_IMG},RINGOVD=${RINGOVD_FINAL_IMG},SBKT=${SBKT_FINAL_IMG}
 .else
     HOSTBOOT_DEFAULT_SECTIONS = HBBL=${HBBL_FINAL_IMG},HBB=${HBB_FINAL_IMG},HBI=${HBI_FINAL_IMG},HBRT=${HBRT_FINAL_IMG},TEST=${TEST_FINAL_IMG},TESTRO=${TESTRO_FINAL_IMG},TESTLOAD=${TESTLOAD_FINAL_IMG},HBEL=${HBEL_FINAL_IMG},GUARD=${GUARD_FINAL_IMG},PAYLOAD=${PAYLOAD_FINAL_IMG},RINGOVD=${RINGOVD_FINAL_IMG},SBKT=${SBKT_FINAL_IMG},FIRDATA=${FIRDATA_FINAL_IMG}
 .endif
 
+DENALI_SECT = HBD=${P10_HBD_FINAL_IMG},SBE=${P10_SBE_FINAL_IMG},HCODE=${P10_HCODE_FINAL_IMG},OCC=${P10_OCC_FINAL_IMG},WOFDATA=${DENALI_WOFDATA_FINAL_IMG},EECACHE=${EECACHE_FINAL_IMG},OCMBFW=${OCMBFW_FINAL_IMG}
 P10_SECT = HBD=${P10_HBD_FINAL_IMG},SBE=${P10_SBE_FINAL_IMG},HCODE=${P10_HCODE_FINAL_IMG},OCC=${P10_OCC_FINAL_IMG},WOFDATA=${DENALI_WOFDATA_FINAL_IMG},EECACHE=${EECACHE_FINAL_IMG},FIRDATA=${FIRDATA_FINAL_IMG},OCMBFW=${OCMBFW_FINAL_IMG}
 
 
