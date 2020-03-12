@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2020                             */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -24,20 +25,30 @@
 #ifndef PLDMIF_H
 #define PLDMIF_H
 
-#include <sys/msg.h>
+/**
+ * @file pldmif.H
+ *
+ * @brief PLDM's Interface for external userspace modules to call
+ *
+ */
+
+#include <cstddef>
+#include <errl/errlentry.H>
+
 namespace PLDM
 {
-
     /**
     * @brief This function is intended to be used by the MCTP resource
     *        provider when they find a PLDM message and want the PLDM
     *        resource provider to handle it
     *
-    * @param[in] i_msg  ptr to PLDM message
-    * @param[in] i_len  length of buffer containing PLDM message
-    * @return void
+    * @param[in] i_msg  A ptr to PLDM message, no change of memory ownership.
+    *                   Note that this func will assert is i_msg is nullptr.
+    * @param[in] i_len  Length of buffer containing PLDM message,
+                        i_len must be >= sizeof(pldm_msg_hdr).
+    *
+    * @return errHndl_t   nullptr unless error occurs
     */
-    void routeInboundMessage(uint8_t * i_msg, size_t i_len);
+    errlHndl_t routeInboundMsg(const uint8_t * i_msg, size_t i_len);
 }
-
 #endif

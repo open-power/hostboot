@@ -54,6 +54,14 @@ extern const char* VFS_ROOT_MSG_MCTP_IN;
 trace_desc_t* g_trac_mctp = nullptr;
 TRAC_INIT(&g_trac_mctp, MCTP_COMP_NAME, 4*KILOBYTE, TRACE::BUFFER_SLOW);
 
+namespace MCTP
+{
+    void register_mctp_bus(void)
+    {
+        return Singleton<MctpRP>::instance().register_mctp_bus();
+    }
+}
+
 // This isn't utilized right now but it gives us flexibility
 // with our binding in the future to pass parameters into the
 // rx logic
@@ -140,12 +148,22 @@ static void rx_message(uint8_t i_eid, void * i_data, void *i_msg, size_t i_len)
    {
       case MCTP::MCTP_MSG_TYPE_PLDM :
       {
+          errlHndl_t errl = nullptr;
           // Offset into sizeof(MCTP::MCTP_MSG_TYPE_PLDM) MCTP packet payload
           // as where PLDM message begins. (see DSP0236 v1.3.0 figure 4)
           // Also update the len param to account for this offset
-          PLDM::routeInboundMessage(
+          errl = PLDM::routeInboundMsg(
               (reinterpret_cast<uint8_t *>(i_msg) + sizeof(MCTP::MCTP_MSG_TYPE_PLDM)),
               (i_len - sizeof(MCTP::MCTP_MSG_TYPE_PLDM)));
+
+          if(errl)
+          {
+              TRACFBIN(g_trac_mctp,
+                       "mctp rx_messag: error occured attempting to process the PLDM message"
+                       , i_msg, i_len);
+              errl->collectTrace(MCTP_COMP_NAME);
+              errlCommit(errl, MCTP_COMP_ID);
+          }
           break;
       }
       default :
@@ -344,6 +362,18 @@ void MctpRP::init(errlHndl_t& o_errl)
     return Singleton<MctpRP>::instance()._init();;
 }
 
+
+void MctpRP::register_mctp_bus(void)
+{
+
+    // Register the binding to the LPC bus we are using for this
+    // MCTP configuration. NOTE this will trigger the "start" function
+    // associated with the iv_hostlpc binding which starts the
+    // KCS init handshake with the BMC
+    mctp_register_bus(iv_mctp, &iv_hostlpc->binding, HOST_EID);
+    return;
+}
+
 void MctpRP::_init(void)
 {
     TRACFCOMP(g_trac_mctp, "MctpRP::_init entry");
@@ -359,12 +389,6 @@ void MctpRP::_init(void)
 
     // Initialize the host-lpc binding for hostboot
     iv_hostlpc = mctp_hostlpc_init_hostboot(l_bar);
-
-    // Register the binding to the LPC bus we are using for this
-    // MCTP configuration. NOTE this will trigger the "start" function
-    // associated with the iv_hostlpc binding which does starts the
-    // KCS init handshake with the BMC
-    mctp_register_bus(iv_mctp, &iv_hostlpc->binding, HOST_EID);
 
     // Start cmd daemon first because we want it ready if poll daemon finds something right away
     task_create(handle_inbound_messages_task, NULL);

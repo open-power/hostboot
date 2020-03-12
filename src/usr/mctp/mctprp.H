@@ -73,6 +73,15 @@ class MctpRP
       */
       static void init(errlHndl_t& o_errl);
 
+      /**
+      * Register the LPC bus with the hostlpc binding. This will trigger the
+      * handshake between the host and the bmc over the KCS interface after
+      * which MCTP traffic will start flowing.
+      *
+      * @return void
+      */
+      void register_mctp_bus(void);
+
       // Constructor
       MctpRP(void);
   private:

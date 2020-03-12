@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/pldm/pldm_reasoncodes.H $                     */
+/* $Source: src/include/usr/mctp/mctpif.H $                               */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,37 +22,28 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __PLDM_REASONCODES_H
-#define __PLDM_REASONCODES_H
+#ifndef MCTPIF_H
+#define MCTPIF_H
 
 /**
- * @file pldm_reasoncodes.H
+ * @file mctpif.H
  *
- * @brief Reason codes and module ids for PLDM functionality
+ * @brief MCTP's interface for hostboot userspace modules to include
  *
  */
 
-#include <hbotcompid.H>
-
-namespace PLDM
+#include <sys/msg.h>
+namespace MCTP
 {
-    enum PLDMModuleId
-    {
-        MOD_PLDM_INVALID      = 0x00, /**< Zero is an invalid module id */
-        MOD_GET_FRU_METADATA  = 0x01, // getFruRecordTableMetaData
-        MOD_GET_FRU_TABLE     = 0x02, // getFruRecordTable
-        MOD_GET_PDR_REPO      = 0x03, // getRemotePdrRepository
-        MOD_ROUTE_MESSAGES    = 0x04, // routeInboundMsg
-    };
-
-    enum PLDMReasonCode
-    {
-        RC_MSG_DECODE_FAIL     = PLDM_COMP_ID | 0x01,
-        RC_MSG_ENCODE_FAIL     = PLDM_COMP_ID | 0x02,
-        RC_UNSUPPORTED_VERSION = PLDM_COMP_ID | 0x03,
-        RC_BAD_COMPLETION_CODE = PLDM_COMP_ID | 0x04,
-        RC_INVALID_LENGTH      = PLDM_COMP_ID | 0x05,
-        RC_MSG_SEND_FAIL       = PLDM_COMP_ID | 0x06,
-     };
+    /**
+    * @brief Register the LPC bus with the hostlpc binding. This will
+    *        trigger the handshake between the host and the bmc over
+    *        the KCS interface after which MCTP traffic will start
+    *        flowing.
+    * @note This function is just a wrapper that calls a function of the same
+    *       name on the mctpRp singleton that does the real work.
+    */
+    void register_mctp_bus(void);
 }
+
 #endif

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/pldm/base/pldmrp.H $                                  */
+/* $Source: src/usr/pldm/base/pldm_requester.H $                          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,29 +22,27 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef PLDMRP_H
-#define PLDMRP_H
+
+/**
+ * @file pldm_requester.H
+ *
+ * @brief Declares the pldmRequester singleton class which manages pldm requests
+ *        from other userspace modules in hostboot.
+ */
+
+#ifndef PLDMREQUESTER_H
+#define PLDMREQUESTER_H
 
 #include <sys/msg.h>
 #include <errl/errlentry.H>
-#include <pldm/pldm_const.H>
 
-class PldmRP
+class pldmRequester
 {
   public:
      /**
-     * Function that is called when libpldm.so is loaded by the initsvc. It will
-     * create the message queues responsible for routing PLDM inbound and output
-     * traffic
-     *
-     * @param[out] o_errl required by TASK_ENTRY_MACRO as a way to commit an error log
-     *                    if the task entry function fails (unused)
-     * @return void
-     */
-      static void init(errlHndl_t& o_errl);
-     /**
      * Function that polls endlessly on a message Q that gets initialized
-     * in the pldmRP ctor. When a message is found it is handled accordingly.
+     * in pldm_msg_queues.C in the pldm_base module. When a message is found
+     * it is handled accordingly.
      * Specifically this will handle PLDM requests from other user-space tasks
      * running on the host, send the requests to the MCTP transport, and
      * wait for a response.
@@ -52,50 +50,26 @@ class PldmRP
      * @return void
      */
       void handle_outbound_req_messages(void);
+
      /**
-     * Function that polls endlessly on a message Q that gets initialized
-     * in the pldmRP ctor. When a message is found it is handled accordingly.
-     * Specifically this will handle PLDM requests originating from the BMC,
-     * which is getting routed through Hostboot's MCTP stack and finally will
-     * get passed to this polling loop.
+     * Resolves outbound MCTP message queue and launches a task to handle
+     * outbound PLDM requests
      *
      * @return void
      */
-      void handle_inbound_req_messages(void);
-
-      /**
-      * Return a ptr to the message queue PLDM RP is waiting on for
-      * for inbound PLDM requests from the BMC
-      */
-      msg_q_t getInboundReqMsgQ(void)
-      {
-          return this->iv_inboundReqMsgQ;
-      }
-
-      /**
-      * Return a ptr to the message queue PLDM RP is waiting on for
-      * for inbound PLDM response from the BMC
-      */
-      msg_q_t getInboundRspMsgQ(void)
-      {
-          return this->iv_inboundRspMsgQ;
-      }
+      void init(void);
 
       // Constructor
-      PldmRP(void);
+      pldmRequester(void);
 
   private:
-      //Private Member Functions
-      void _init(void);             // See public "init" function above
+
       //Private Member Variables
-      msg_q_t     iv_inboundReqMsgQ;      // pldm inbound request msgQ
-      msg_q_t     iv_outboundReqMsgQ;     // pldm outbound request msgQ
-      msg_q_t     iv_inboundRspMsgQ;      // pldm inbound response msgQ
-      msg_q_t     iv_mctpOutboundMsgQ;    // mctp outbound rsp/req msgQ
+      msg_q_t     iv_mctpOutboundMsgQ; // mctp outbound rsp/req msgQ
 
       // Disallow copying this class.
-      PldmRP& operator=(const PldmRP&);
-      PldmRP(const PldmRP&);
+      pldmRequester& operator=(const pldmRequester&);
+      pldmRequester(const pldmRequester&);
 };
 
-#endif /* PLDMRP_H */
+#endif /* PLDMREQUESTER_H */

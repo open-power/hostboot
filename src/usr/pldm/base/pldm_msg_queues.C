@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/pldm/pldm_reasoncodes.H $                     */
+/* $Source: src/usr/pldm/base/pldm_msg_queues.C $                         */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,37 +22,43 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __PLDM_REASONCODES_H
-#define __PLDM_REASONCODES_H
+#include <sys/msg.h>
+#include "pldm_msg_queues.H"
 
 /**
- * @file pldm_reasoncodes.H
+ * @file pldm_msg_queues.C
  *
- * @brief Reason codes and module ids for PLDM functionality
- *
+ * @brief Source code for defining and registering the 3 message queues
+ *        that are used by both the pldm_base and pldm_extended modules.
+ *        This code should only get compiled into the base image, which will
+ *        always stay loaded. Therefore it is safe for the pldm_extended to
+ *        also make external refernces to these msg qs.
  */
 
-#include <hbotcompid.H>
+extern const char* VFS_ROOT_MSG_PLDM_REQ_IN;
+extern const char* VFS_ROOT_MSG_PLDM_RSP_IN;
+extern const char* VFS_ROOT_MSG_PLDM_REQ_OUT;
+
+// Create global message queues which will be used throughout the
+// pldm_base module
+msg_q_t g_outboundPldmReqMsgQ = msg_q_create(); // pldm outbound request msgQ
+msg_q_t g_inboundPldmRspMsgQ  = msg_q_create(); // pldm inbound response msgQ
+msg_q_t g_inboundPldmReqMsgQ  = msg_q_create(); // pldm inbound request msgQ
 
 namespace PLDM
 {
-    enum PLDMModuleId
-    {
-        MOD_PLDM_INVALID      = 0x00, /**< Zero is an invalid module id */
-        MOD_GET_FRU_METADATA  = 0x01, // getFruRecordTableMetaData
-        MOD_GET_FRU_TABLE     = 0x02, // getFruRecordTable
-        MOD_GET_PDR_REPO      = 0x03, // getRemotePdrRepository
-        MOD_ROUTE_MESSAGES    = 0x04, // routeInboundMsg
-    };
 
-    enum PLDMReasonCode
-    {
-        RC_MSG_DECODE_FAIL     = PLDM_COMP_ID | 0x01,
-        RC_MSG_ENCODE_FAIL     = PLDM_COMP_ID | 0x02,
-        RC_UNSUPPORTED_VERSION = PLDM_COMP_ID | 0x03,
-        RC_BAD_COMPLETION_CODE = PLDM_COMP_ID | 0x04,
-        RC_INVALID_LENGTH      = PLDM_COMP_ID | 0x05,
-        RC_MSG_SEND_FAIL       = PLDM_COMP_ID | 0x06,
-     };
+void registerPldmMsgQs(void)
+{
+    // PLDM extended module will need to be able to resolve these queues
+    // so register them
+    msg_q_register(g_inboundPldmReqMsgQ, VFS_ROOT_MSG_PLDM_REQ_IN);
+    msg_q_register(g_outboundPldmReqMsgQ, VFS_ROOT_MSG_PLDM_REQ_OUT);
+
+    // Also register the inbound PLDM response queues for any test code that might
+    // want to lookup this the inbound response q to simulate inbound responses
+    // coming from the bmc.
+    msg_q_register(g_inboundPldmRspMsgQ, VFS_ROOT_MSG_PLDM_RSP_IN);
 }
-#endif
+
+}

@@ -35,6 +35,9 @@ OBJS += utils.o
 # From ../common/
 OBJS += ${PLDM_COMMON_OBJS}
 # From this directory
-OBJS += pldmrp.o
+OBJS += pldm_msg_queues.o
+OBJS += pldm_base_init.o
+OBJS += pldm_msg_router.o
+OBJS += pldm_requester.o
 
 include ${ROOTPATH}/config.mk

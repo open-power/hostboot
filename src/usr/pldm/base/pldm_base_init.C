@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/pldm/pldm_reasoncodes.H $                     */
+/* $Source: src/usr/pldm/base/pldm_base_init.C $                          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,37 +22,47 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __PLDM_REASONCODES_H
-#define __PLDM_REASONCODES_H
 
 /**
- * @file pldm_reasoncodes.H
+ * @file pldm_base_init.C
  *
- * @brief Reason codes and module ids for PLDM functionality
+ * @brief Source code for the function that will be called when the pldm_base
+ *        module is loaded by the init service.
  *
  */
 
-#include <hbotcompid.H>
+#include <mctp/mctpif.H>
+#include "pldm_requester.H"
+#include "pldm_msg_queues.H"
+#include <initservice/taskargs.H>
 
 namespace PLDM
 {
-    enum PLDMModuleId
-    {
-        MOD_PLDM_INVALID      = 0x00, /**< Zero is an invalid module id */
-        MOD_GET_FRU_METADATA  = 0x01, // getFruRecordTableMetaData
-        MOD_GET_FRU_TABLE     = 0x02, // getFruRecordTable
-        MOD_GET_PDR_REPO      = 0x03, // getRemotePdrRepository
-        MOD_ROUTE_MESSAGES    = 0x04, // routeInboundMsg
-    };
+/**
+* @brief This is the function that gets called when pldm_base is loaded by
+*        initservice. It handles registering the pldm msg queues, initializing
+*        the pldm requester task, and telling the mctp layer we are ready to
+*        register the lpc bus to start MCTP traffic.
+*/
+static void base_init(errlHndl_t& o_errl)
+{
+    // register g_outboundPldmReqMsgQ, g_inboundPldmRspMsgQ,
+    // and g_inboundPldmReqMsgQ so external modules can resolve
+    // them easily
+    registerPldmMsgQs();
 
-    enum PLDMReasonCode
-    {
-        RC_MSG_DECODE_FAIL     = PLDM_COMP_ID | 0x01,
-        RC_MSG_ENCODE_FAIL     = PLDM_COMP_ID | 0x02,
-        RC_UNSUPPORTED_VERSION = PLDM_COMP_ID | 0x03,
-        RC_BAD_COMPLETION_CODE = PLDM_COMP_ID | 0x04,
-        RC_INVALID_LENGTH      = PLDM_COMP_ID | 0x05,
-        RC_MSG_SEND_FAIL       = PLDM_COMP_ID | 0x06,
-     };
+    // This will call the pldmRequester constructor which
+    // will launch the task waiting for inbound PLDM requests
+    // from the BMC
+    Singleton<pldmRequester>::instance().init();
+
+    // Notify MCTP layer that they can register the bus
+    // and start MCTP traffic
+    MCTP::register_mctp_bus();
+
+    return;
 }
-#endif
+
+}
+
+TASK_ENTRY_MACRO( PLDM::base_init );

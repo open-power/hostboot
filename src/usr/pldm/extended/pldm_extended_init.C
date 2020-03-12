@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/pldm/pldm_reasoncodes.H $                     */
+/* $Source: src/usr/pldm/extended/pldm_extended_init.C $                  */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,37 +22,32 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __PLDM_REASONCODES_H
-#define __PLDM_REASONCODES_H
 
 /**
- * @file pldm_reasoncodes.H
+ * @file pldm_extended_init.C
  *
- * @brief Reason codes and module ids for PLDM functionality
+ * @brief Source code for function that will be called when the pldm_extended module
+ *        is loaded by the init service.
  *
  */
 
-#include <hbotcompid.H>
+#include "pldm_responder.H"
+#include <initservice/taskargs.H>
 
 namespace PLDM
 {
-    enum PLDMModuleId
-    {
-        MOD_PLDM_INVALID      = 0x00, /**< Zero is an invalid module id */
-        MOD_GET_FRU_METADATA  = 0x01, // getFruRecordTableMetaData
-        MOD_GET_FRU_TABLE     = 0x02, // getFruRecordTable
-        MOD_GET_PDR_REPO      = 0x03, // getRemotePdrRepository
-        MOD_ROUTE_MESSAGES    = 0x04, // routeInboundMsg
-    };
 
-    enum PLDMReasonCode
-    {
-        RC_MSG_DECODE_FAIL     = PLDM_COMP_ID | 0x01,
-        RC_MSG_ENCODE_FAIL     = PLDM_COMP_ID | 0x02,
-        RC_UNSUPPORTED_VERSION = PLDM_COMP_ID | 0x03,
-        RC_BAD_COMPLETION_CODE = PLDM_COMP_ID | 0x04,
-        RC_INVALID_LENGTH      = PLDM_COMP_ID | 0x05,
-        RC_MSG_SEND_FAIL       = PLDM_COMP_ID | 0x06,
-     };
+/**
+* @brief This is the function that gets called when pldm_extended is loaded by
+*        initservice. It initializes the pldm responder task.
+*/
+static void extended_init(errlHndl_t& o_errl)
+{
+    // This will call the pldmResponder
+    Singleton<pldmResponder>::instance().init();
+    return;
 }
-#endif
+
+}
+
+TASK_ENTRY_MACRO( PLDM::extended_init );

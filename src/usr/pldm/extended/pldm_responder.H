@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/pldm/pldm_reasoncodes.H $                     */
+/* $Source: src/usr/pldm/extended/pldm_responder.H $                      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,37 +22,54 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __PLDM_REASONCODES_H
-#define __PLDM_REASONCODES_H
 
 /**
- * @file pldm_reasoncodes.H
+ * @file pldm_responder.H
  *
- * @brief Reason codes and module ids for PLDM functionality
- *
+ * @brief Declares the pldmResponder singleton class which handles and responds to
+ *        pldm requests from the BMC
  */
 
-#include <hbotcompid.H>
+#ifndef PLDMRESPONDER_H
+#define PLDMRESPONDER_H
 
-namespace PLDM
+#include <sys/msg.h>
+#include <errl/errlentry.H>
+
+class pldmResponder
 {
-    enum PLDMModuleId
-    {
-        MOD_PLDM_INVALID      = 0x00, /**< Zero is an invalid module id */
-        MOD_GET_FRU_METADATA  = 0x01, // getFruRecordTableMetaData
-        MOD_GET_FRU_TABLE     = 0x02, // getFruRecordTable
-        MOD_GET_PDR_REPO      = 0x03, // getRemotePdrRepository
-        MOD_ROUTE_MESSAGES    = 0x04, // routeInboundMsg
-    };
+  public:
+     /**
+     * Function that polls endlessly on a message Q that gets initialized
+     * in pldm_msg_queues.C in the pldm_base module. When a message is found
+     * it is handled accordingly.
+     * Specifically this will handle PLDM requests originating from the BMC,
+     * which is getting routed through Hostboot's MCTP stack and finally will
+     * get passed to this polling loop.
+     *
+     * @return void
+     */
+      void handle_inbound_req_messages(void);
 
-    enum PLDMReasonCode
-    {
-        RC_MSG_DECODE_FAIL     = PLDM_COMP_ID | 0x01,
-        RC_MSG_ENCODE_FAIL     = PLDM_COMP_ID | 0x02,
-        RC_UNSUPPORTED_VERSION = PLDM_COMP_ID | 0x03,
-        RC_BAD_COMPLETION_CODE = PLDM_COMP_ID | 0x04,
-        RC_INVALID_LENGTH      = PLDM_COMP_ID | 0x05,
-        RC_MSG_SEND_FAIL       = PLDM_COMP_ID | 0x06,
-     };
-}
-#endif
+     /**
+     * Resolves MCTP outbound message queue and launches task to handle
+     * inbound PLDM requests
+     *
+     * @return void
+     */
+      void init(void);
+
+      // Constructor
+      pldmResponder(void);
+
+  private:
+
+      //Private Member Variables
+      msg_q_t     iv_mctpOutboundMsgQ; // mctp outbound rsp/req msgQ
+
+      // Disallow copying this class.
+      pldmResponder& operator=(const pldmResponder&);
+      pldmResponder(const pldmResponder&);
+};
+
+#endif /* PLDMRESPONDER_H */
