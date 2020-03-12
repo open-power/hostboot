@@ -33,14 +33,17 @@
 //------------------------------------------------------------------------------
 
 #include "p10_getecid.H"
+#include "p10_scom_perv_1.H"
+#include "p10_scom_perv_7.H"
+#include "p10_scom_perv_b.H"
 
-#include <p9_misc_scom_addresses.H>
-#include <p9_misc_scom_addresses_fld.H>
-#include <p9_const_common.H>
 
 fapi2::ReturnCode p10_getecid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
                               fapi2::variable_buffer& o_fuseString)
 {
+    using namespace scomt;
+    using namespace scomt::perv;
+
     uint64_t attr_data[2];
     fapi2::buffer<uint64_t> l_ecid_part0_data64 = 0;
     fapi2::buffer<uint64_t> l_ecid_part1_data64 = 0;
@@ -50,9 +53,9 @@ fapi2::ReturnCode p10_getecid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
 
 
     FAPI_DBG("extract and manipulate ECID data");
-    FAPI_TRY(fapi2::getScom(i_target_chip, PU_OTPROM0_ECID_PART0_REGISTER, l_ecid_part0_data64));
-    FAPI_TRY(fapi2::getScom(i_target_chip, PU_OTPROM0_ECID_PART1_REGISTER, l_ecid_part1_data64));
-    FAPI_TRY(fapi2::getScom(i_target_chip, PU_OTPROM0_ECID_PART2_REGISTER, l_ecid_part2_data64));
+    FAPI_TRY(fapi2::getScom(i_target_chip, SINGLE_OTP_ROM_OTPROM_REG0, l_ecid_part0_data64));
+    FAPI_TRY(fapi2::getScom(i_target_chip, SINGLE_OTP_ROM_OTPROM_REG1, l_ecid_part1_data64));
+    FAPI_TRY(fapi2::getScom(i_target_chip, SINGLE_OTP_ROM_OTPROM_REG2, l_ecid_part2_data64));
 
     l_ecid_part0_data64.reverse();
     l_ecid_part1_data64.reverse();

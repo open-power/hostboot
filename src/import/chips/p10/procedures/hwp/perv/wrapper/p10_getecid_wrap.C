@@ -38,7 +38,7 @@
 #include <variable_buffer.H>
 #include <variable_buffer_utils.H>
 #include "p10_getecid.H"
-#include <p9_perv_scom_addresses.H>
+#include "p10_scom_proc_c.H"
 
 std::map<std::string, char> DT;  // decode table
 std::map<std::string, std::string> DD10LEVEL;
@@ -261,6 +261,8 @@ void help()
 int main(int argc,
          char* argv[])
 {
+    using namespace scomt;
+
     extern bool GLOBAL_SIM_MODE;
     extern bool GLOBAL_VERIF_MODE;
     uint64_t rc = ECMD_SUCCESS;
@@ -419,11 +421,11 @@ int main(int argc,
 
         }
 
-        rc = getCfamRegister(target, PERV_FSI2PIB_CHIPID_FSI, l_cfamid);
+        rc = getCfamRegister(target, proc::TP_TPVSB_FSI_W_FSI2PIB_CHIPID_FSI, l_cfamid);
 
         if (rc)
         {
-            ecmdOutput("Error from getCfamRegister (PERV_FSI2PIB_CHIPID_FSI)\n");
+            ecmdOutput("Error from getCfamRegister (TP_TPVSB_FSI_W_FSI2PIB_CHIPID_FSI)\n");
             return rc;
         }
 
