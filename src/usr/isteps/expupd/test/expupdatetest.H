@@ -92,7 +92,7 @@ class ExpUpdateTest: public CxxTest::TestSuite
         // Get a list of all of the functioning ocmb chips
         TARGETING::getAllChips(l_chipList, TARGETING::TYPE_OCMB_CHIP, true);
 
-#if 0 //@todo-RTC:243998-Enable update code
+        //Enable update code
         uint8_t l_dataBuffer[4096] = {0};
         errlHndl_t l_errl = nullptr;
 
@@ -132,7 +132,6 @@ class ExpUpdateTest: public CxxTest::TestSuite
                 errlCommit(l_errl, CXXTEST_COMP_ID);
             }
         }
-#endif
         TS_INFO("testExpFwUpdate: exiting");
     };
 
