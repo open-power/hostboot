@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -107,8 +107,10 @@ errlHndl_t getFlashedHash(TargetHandle_t i_target, sha512regs_t& o_regs)
         // copy scom buffer into the unformatted uint8_t array.
         // Even though the scom buffer is 8 bytes, only 4 bytes are read and
         // copied into the least significant 4 bytes.
-        memcpy(&o_regs.unformatted[l_bytesCopied], l_scomPtr + sizeof(uint32_t),
-                sizeof(uint32_t));
+        uint32_t regValue;
+        memcpy(&regValue, l_scomPtr + sizeof(uint32_t), sizeof(uint32_t));
+        regValue = le32toh( regValue );  // need to reverse byte order
+        memcpy(&o_regs.unformatted[l_bytesCopied], &regValue, sizeof(regValue));
     }
 
     return l_err;
