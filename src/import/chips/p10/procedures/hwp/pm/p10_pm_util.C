@@ -58,7 +58,23 @@ fapi2::ReturnCode getDeconfiguredTargets(
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG_MVPD, l_perv, l_mvpd_pg));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, l_perv, l_pg));
 
+#ifndef __HOSTBOOT_MODULE
+
+        // From Cronus point of view this data will be always F's and it lands
+        // into deconfigured list and tries to call entry procedure,which
+        // shouldn't be the case for good lists. So if the pg values are F's
+        // then will write the data as same mpvd_pg
+        if (l_pg == 0xFFFFFFFF)
+        {
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PG, l_perv, l_mvpd_pg));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, l_perv, l_pg));
+        }
+
+#endif
+
         uint8_t l_eq_pos = l_perv.getChipletNumber() - EQ0_CHIPLET_ID;
+
+        FAPI_INF("MVPD %08X %08X", l_mvpd_pg, l_pg);
 
         uint8_t l_gard_value = (l_mvpd_pg ^ l_pg) >> (31 - 16);
 

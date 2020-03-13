@@ -63,19 +63,27 @@ using namespace c;
 using namespace eq;
 
 
+#define CL2_START_POSITION 5
+#define L3_START_POSITION 9
+#define MMA_START_POSITION 15
 // -----------------------------------------------------------------------------
 //  Function prototypes
 // -----------------------------------------------------------------------------
 static fapi2::ReturnCode update_ec_config(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
-
 fapi2::ReturnCode verify_ec_hw_state(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
+fapi2::ReturnCode clear_atomic_lock(
+    const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_core_target,
+    const uint32_t i_lockId);
 
+fapi2::ReturnCode set_atomic_lock(
+    const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_core_target,
+    uint32_t& o_lockId);
 
-fapi2::ReturnCode p10_check_core_l3_clock_power_state(
+fapi2::ReturnCode powerdown_deconfigured_cl2_l3(
     const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_core_target,
     uint8_t i_core_unit_pos);
 
@@ -92,7 +100,7 @@ fapi2::ReturnCode p10_update_ec_state(
 
     FAPI_TRY(update_ec_config(i_target),
              "Error update_core_config detected");
-    //TODO Need to find the right way to get deconfigured target
+
     FAPI_TRY(verify_ec_hw_state(i_target));
 
 fapi_try_exit:
@@ -121,12 +129,12 @@ fapi2::ReturnCode verify_ec_hw_state(
 
         //Check the clock state and power state
 // RTC 249759: temporarily enable deconfigured cores/L3 to check for PFET state
-//        FAPI_TRY(p10_check_core_l3_clock_power_state(l_core, l_core_unit_pos));
+        FAPI_TRY(powerdown_deconfigured_cl2_l3(l_core, l_core_unit_pos));
 
     }
 
 fapi_try_exit:
-    FAPI_INF("< update_core_config...");
+    FAPI_INF("<< verify_hw_state...");
     return fapi2::current_err;
 
 }
@@ -138,12 +146,12 @@ fapi_try_exit:
 static fapi2::ReturnCode update_ec_config(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
-    FAPI_INF("> update_core_config...");
+    FAPI_INF("> update_ec_config...");
 
     uint8_t l_present_core_unit_pos;
     uint8_t l_functional_core_unit_pos;
     fapi2::buffer<uint64_t> l_core_config = 0;
-    fapi2::buffer<uint64_t> l_pscom_config = 0;
+    fapi2::buffer<uint64_t> l_pg_config = 0;
 
     auto l_core_present_vector =
         i_target.getChildren<fapi2::TARGET_TYPE_CORE>
@@ -157,7 +165,7 @@ static fapi2::ReturnCode update_ec_config(
              l_core_present_vector.size(),
              l_core_functional_vector.size());
 
-    // For each present core,  set multicast groups and the CCSR
+    // For each present core,set region partial good and OCC CCSR bits
     for (auto core_present_it : l_core_present_vector)
     {
         FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS,
@@ -187,10 +195,13 @@ static fapi2::ReturnCode update_ec_config(
 
                 l_present_core_unit_pos = l_present_core_unit_pos % 4;
 
-                //Update the pscom enable bit
-                l_pscom_config.setBit(l_present_core_unit_pos + 5);
+                //Update the pg bits
+                l_pg_config.setBit(l_present_core_unit_pos + CL2_START_POSITION); //ecl2
+                l_pg_config.setBit(l_present_core_unit_pos + L3_START_POSITION); //l3
+                l_pg_config.setBit(l_present_core_unit_pos + MMA_START_POSITION); //mma
 
-                FAPI_TRY(fapi2::putScom(l_eq, CPLT_CTRL3_WO_OR, l_pscom_config));
+                //setting Region Partial Good bits
+                FAPI_TRY(fapi2::putScom(l_eq, CPLT_CTRL2_WO_OR, l_pg_config));
                 break;
             }  // Current core
         } // Functional core loop
@@ -202,37 +213,70 @@ static fapi2::ReturnCode update_ec_config(
 
 
 fapi_try_exit:
-    FAPI_INF("< update_core_config...");
+    FAPI_INF("<< update_ec_config...");
     return fapi2::current_err;
 
 }
 
-#define CORE_START_POSITION 5
-#define CACHE_START_POSITION 9
 
-fapi2::ReturnCode p10_check_core_l3_clock_power_state(
+fapi2::ReturnCode powerdown_deconfigured_cl2_l3(
     const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_core_target,
     uint8_t i_core_unit_pos)
 {
     fapi2::buffer<uint64_t> l_data = 0;
-    uint64_t l_pfet_sense = 0;
+
+    uint64_t l_cl2_pfet_sense = 0;
+    uint64_t l_l3_pfet_sense = 0;
     uint8_t l_core_relative_pos  = i_core_unit_pos % 4;
-    uint8_t l_l3_relative_pos    = i_core_unit_pos % 4;
     uint8_t l_core_clock_State = 0;
     uint8_t l_l3_clock_State = 0;
+    fapi2::buffer<uint64_t> l_pscom_pg_config = 0;
+    uint32_t l_lockId = 0;
 
 
     do
     {
         auto l_eq_target = i_core_target.getParent<fapi2::TARGET_TYPE_EQ>();
-        //Read the power state of core/l2
-        FAPI_TRY(GET_CPMS_CL2_PFETSTAT(i_core_target, l_data));
-        GET_CPMS_CL2_PFETSTAT_VDD_PFETS_ENABLED_SENSE(l_data, l_pfet_sense);
+
+        FAPI_TRY(set_atomic_lock(i_core_target, l_lockId));
+
+        //Update the pscom enable and pg bits to temporarily allow controlling
+        //of now deconfigured elements.
+        l_pscom_pg_config.setBit(l_core_relative_pos + CL2_START_POSITION); //ecl2
+        l_pscom_pg_config.setBit(l_core_relative_pos + L3_START_POSITION); //l3
+        l_pscom_pg_config.setBit(l_core_relative_pos + MMA_START_POSITION); //mma
+
+        FAPI_TRY(fapi2::putScom(l_eq_target, CPLT_CTRL3_WO_OR, l_pscom_pg_config));
+        FAPI_TRY(fapi2::putScom(l_eq_target, CPLT_CTRL2_WO_OR, l_pscom_pg_config));
 
         //verify L3/core clocks are on
         FAPI_TRY(GET_CLOCK_STAT_SL(l_eq_target, l_data));
-        l_core_clock_State = l_data & BIT64(l_core_relative_pos + CORE_START_POSITION);
-        l_l3_clock_State   = l_data & BIT64(l_l3_relative_pos + CACHE_START_POSITION);
+
+        l_core_clock_State = l_data.getBit(l_core_relative_pos + CL2_START_POSITION);
+        l_l3_clock_State = l_data.getBit(l_core_relative_pos + L3_START_POSITION);
+        FAPI_INF("Core position %d CL2 state  %d L3 state %d", l_core_relative_pos,
+                 l_core_clock_State, l_l3_clock_State);
+
+        if (!l_core_clock_State)
+        {
+            //Read the power state of core/l2
+            FAPI_TRY(GET_CPMS_CL2_PFETSTAT(i_core_target, l_data));
+            GET_CPMS_CL2_PFETSTAT_VDD_PFETS_ENABLED_SENSE(l_data, l_cl2_pfet_sense);
+        }
+
+        if (!l_l3_clock_State)
+        {
+            //Read the power state of L3
+            FAPI_TRY(GET_CPMS_L3_PFETSTAT(i_core_target, l_data));
+            GET_CPMS_L3_PFETSTAT_VDD_PFETS_ENABLED_SENSE(l_data, l_l3_pfet_sense);
+        }
+
+        if ( l_core_clock_State && l_l3_clock_State)
+        {
+            FAPI_INF("Both L3 and L2 units are powered off and clock off");
+            break;
+        }
+
 
         //Verify core is powered on
         //If core is powered on
@@ -241,7 +285,7 @@ fapi2::ReturnCode p10_check_core_l3_clock_power_state(
         //  if L3 clocks are on
         //      then purge L3 and stop the l3 clocks
         //  Power off the core and L3
-        if( l_pfet_sense)
+        if( l_cl2_pfet_sense)
         {
             if (!l_core_clock_State)
             {
@@ -254,7 +298,10 @@ fapi2::ReturnCode p10_check_core_l3_clock_power_state(
             }
 
             FAPI_TRY(p10_hcd_core_poweroff(i_core_target));
+        }
 
+        if (l_l3_pfet_sense)
+        {
             if (!l_l3_clock_State)
             {
                 FAPI_TRY(p10_hcd_chtm_purge(i_core_target));
@@ -265,6 +312,12 @@ fapi2::ReturnCode p10_check_core_l3_clock_power_state(
 
             FAPI_TRY(p10_hcd_cache_poweroff(i_core_target));
         }
+
+        //Restore the original values
+        FAPI_TRY(fapi2::putScom(l_eq_target, CPLT_CTRL3_WO_CLEAR, l_pscom_pg_config));
+        FAPI_TRY(fapi2::putScom(l_eq_target, CPLT_CTRL2_WO_CLEAR, l_pscom_pg_config));
+
+        FAPI_TRY(clear_atomic_lock(i_core_target, l_lockId));
     }
     while(0);
 
@@ -272,4 +325,98 @@ fapi_try_exit:
     FAPI_INF("< p10_check_core_clock_power_state...");
     return fapi2::current_err;
 
+}
+
+
+fapi2::ReturnCode set_atomic_lock(
+    const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_core_target,
+    uint32_t& o_lock_id)
+{
+    fapi2::buffer<uint64_t> l_data = 0;
+    fapi2::buffer<uint64_t> l_buf = 0;
+    fapi2::ReturnCode l_rc;
+
+    auto l_eq_target = i_core_target.getParent<fapi2::TARGET_TYPE_EQ>();
+
+    //Grab the lock
+    FAPI_TRY(GET_CTRL_ATOMIC_LOCK_REG(l_eq_target, l_data));
+    SET_CTRL_ATOMIC_LOCK_REG_LOCK_ENABLE(l_data);
+    l_rc = PUT_CTRL_ATOMIC_LOCK_REG(l_eq_target, l_data);
+
+    if ( l_rc) //Resource busy
+    {
+        for (auto i = 0  ; i < 50; i++)
+        {
+            fapi2::delay(10000000, 10); //10ms
+            l_rc = PUT_CTRL_ATOMIC_LOCK_REG(l_eq_target, l_data);
+
+            if (l_rc == fapi2::FAPI2_RC_SUCCESS)
+            {
+                break;
+            }
+        }
+
+        if (l_rc)
+        {
+            FAPI_ASSERT(false,
+                        fapi2::SET_ATOMIC_LOCK_BUSY()
+                        .set_CORE_TARGET(i_core_target)
+                        .set_DATA(l_data),
+                        "Update ec: atomic lock access error");
+        }
+    }
+    else if (l_rc == fapi2::FAPI2_RC_SUCCESS)
+    {
+        FAPI_TRY(GET_CTRL_ATOMIC_LOCK_REG(l_eq_target, l_data));
+        GET_CTRL_ATOMIC_LOCK_REG_ID(l_data, l_buf);
+
+        if (!GET_CTRL_ATOMIC_LOCK_REG_LOCK_ENABLE(l_data)  ||
+            (l_buf != 0x9 && l_buf != 0x2 && l_buf != 0xE)) //hostboot Id/FSI2PIB/SBE
+        {
+            FAPI_ASSERT(false,
+                        fapi2::SET_ATOMIC_LOCK_FAIL()
+                        .set_CORE_TARGET(i_core_target)
+                        .set_DATA(l_data),
+                        "Update ec: couldn't grab atomic lock");
+        }
+    }
+
+    o_lock_id = l_buf;
+
+fapi_try_exit:
+    FAPI_INF("< set_atomic_lock...");
+    return fapi2::current_err;
+}
+
+fapi2::ReturnCode clear_atomic_lock(
+    const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_core_target,
+    const uint32_t i_lockId)
+{
+    fapi2::buffer<uint64_t> l_data = 0;
+    fapi2::buffer<uint64_t> l_buf = 0;
+    fapi2::ReturnCode l_rc;
+
+    auto l_eq_target = i_core_target.getParent<fapi2::TARGET_TYPE_EQ>();
+    //Clear the lock
+    FAPI_TRY(GET_CTRL_ATOMIC_LOCK_REG(l_eq_target, l_data));
+    GET_CTRL_ATOMIC_LOCK_REG_ID(l_data, l_buf);
+
+    if ( i_lockId == l_buf)
+    {
+        l_data.flush<0>();
+        FAPI_TRY(PUT_CTRL_ATOMIC_LOCK_REG(l_eq_target, l_data));
+    }
+    else
+    {
+        FAPI_ASSERT(false,
+                    fapi2::ATOMIC_LOCK_OWNER_ID_INVALID()
+                    .set_CORE_TARGET(i_core_target)
+                    .set_ACTUAL_LOCK_ID(l_buf)
+                    .set_EXPECTED_LOCK_ID(i_lockId),
+                    ": atomic lock access error");
+    }
+
+fapi_try_exit:
+    FAPI_INF("< p10_check_core_clock_power_state...");
+    return fapi2::current_err;
 }
