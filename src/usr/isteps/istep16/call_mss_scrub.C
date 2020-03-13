@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -102,7 +102,15 @@ void* call_mss_scrub (void *io_pArgs)
         if ( nullptr != errl ) break;
 
         // Start background scrubbing on all targets of this maintenance type.
-        TargetHandleList maintList; getAllChiplets( maintList, maintTrgtType );
+        TargetHandleList maintList;
+        if ( TYPE_OCMB_CHIP == maintTrgtType )
+        {
+            getAllChips( maintList, maintTrgtType );
+        }
+        else
+        {
+            getAllChiplets( maintList, maintTrgtType );
+        }
         for ( auto & maintTrgt : maintList )
         {
             bool start = true; // initially true except for MP-IPL conditions.
