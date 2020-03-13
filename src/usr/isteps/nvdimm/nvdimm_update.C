@@ -149,7 +149,7 @@ typedef union {
 constexpr uint8_t BYTES_PER_BLOCK = 32;
 
 // Maximum allowed region write retries
-constexpr uint8_t MAX_REGION_WRITE_RETRY_ATTEMPTS = 3;
+constexpr uint8_t MAX_REGION_WRITE_RETRY_ATTEMPTS = 5;
 
 ///////////////////////////////////////////////////////////////////////////////
 // NVDIMM LID Image
@@ -388,7 +388,7 @@ errlHndl_t NvdimmInstalledImage::getBlockWriteSizeSupported(uint64_t & o_blockSi
                 // default to word size max write
                 iv_blockSizeSupported = sizeof(uint16_t);
             }
-            TRACFCOMP( g_trac_nvdimm_upd, ERR_MRK"getBlockWriteSizeSupported: "
+            TRACFCOMP( g_trac_nvdimm_upd, "getBlockWriteSizeSupported: "
                 "block size %d supported for 0x%.8X NVDIMM (version 0x%04X)",
                 iv_blockSizeSupported, TARGETING::get_huid(iv_dimm),
                 version );
@@ -869,6 +869,29 @@ errlHndl_t NvdimmInstalledImage::updateImageData(NvdimmLidImage * i_lidImage)
         uint16_t region = 0;
         while (region < fw_img_total_regions)
         {
+            if ( l_err )
+            {
+                if ( l_region_write_retries++ < MAX_REGION_WRITE_RETRY_ATTEMPTS )
+                {
+                    TRACFCOMP(g_trac_nvdimm_upd, ERR_MRK"updateImageData: "
+                      "Region %d on NVDIMM 0x%.8X failed, retry %d",
+                      region, TARGETING::get_huid(iv_dimm),l_region_write_retries);
+                    l_err->collectTrace(NVDIMM_UPD, 512);
+
+                    // Change PREDICTIVE to INFORMATIONAL as this might be recoverable
+                    l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+
+                    // Commit this log and retry region write
+                    ERRORLOG::errlCommit(l_err, NVDIMM_COMP_ID);
+                    l_err = nullptr;
+                    iv_region_write_retries++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
             if (region % 100 == 0)
             {
                 TRACFCOMP(g_trac_nvdimm_upd,
@@ -886,7 +909,7 @@ errlHndl_t NvdimmInstalledImage::updateImageData(NvdimmLidImage * i_lidImage)
                 TRACFCOMP(g_trac_nvdimm_upd, ERR_MRK"updateImageData: "
                     "Write of 0x00 to BLOCK_ID failed on NVDIMM 0x%.8X",
                     TARGETING::get_huid(iv_dimm));
-                break;
+                continue;
             }
 
             // Update REGION_ID0(lsb) and REGION_ID1(msb)
@@ -897,7 +920,7 @@ errlHndl_t NvdimmInstalledImage::updateImageData(NvdimmLidImage * i_lidImage)
                 TRACFCOMP(g_trac_nvdimm_upd, ERR_MRK"updateImageData: "
                     "Write of 0x%02X to REGION_ID0 failed on NVDIMM 0x%.8X",
                     l_data, TARGETING::get_huid(iv_dimm));
-                break;
+                continue;
             }
             l_data = (((region & 0xFF00) >> 8) & 0x00FF);
             l_err = nvdimmWriteReg(iv_dimm, REGION_ID1, l_data);
@@ -906,7 +929,7 @@ errlHndl_t NvdimmInstalledImage::updateImageData(NvdimmLidImage * i_lidImage)
                 TRACFCOMP(g_trac_nvdimm_upd, ERR_MRK"updateImageData: "
                     "Region %d write of 0x%02X to REGION_ID1 failed on NVDIMM "
                     "0x%.8X", region, l_data, TARGETING::get_huid(iv_dimm));
-                break;
+                continue;
             }
 
             // 10.b Clear the firmware data block to ensure there is no
@@ -918,7 +941,7 @@ errlHndl_t NvdimmInstalledImage::updateImageData(NvdimmLidImage * i_lidImage)
                 TRACFCOMP(g_trac_nvdimm_upd, ERR_MRK"updateImageData: "
                     "Region %d: clearFwDataBlock() failed on NVDIMM 0x%.8X",
                     region, TARGETING::get_huid(iv_dimm));
-                break;
+                continue;
             }
 
             // 10.c Send the data over to nvdimm region by region.
@@ -945,7 +968,7 @@ errlHndl_t NvdimmInstalledImage::updateImageData(NvdimmLidImage * i_lidImage)
                 TRACFCOMP(g_trac_nvdimm_upd, ERR_MRK"updateImageData: "
                     "Region %d: byteRegionBlockTransfer() failed on NVDIMM 0x%.8X",
                     region, TARGETING::get_huid(iv_dimm));
-                break;
+                continue;
             }
 
             // 10.d-e After transferring each region, validate the transfer by checksum
@@ -957,7 +980,7 @@ errlHndl_t NvdimmInstalledImage::updateImageData(NvdimmLidImage * i_lidImage)
                 TRACFCOMP(g_trac_nvdimm_upd, ERR_MRK"updateImageData: "
                     "Region %d: clearFwOpsStatus() failed on NVDIMM 0x%.8X",
                     region, TARGETING::get_huid(iv_dimm));
-                break;
+                continue;
             }
             uint16_t nvCksm;
             l_err = calcAndGetCksm(nvCksm);
@@ -966,7 +989,7 @@ errlHndl_t NvdimmInstalledImage::updateImageData(NvdimmLidImage * i_lidImage)
                 TRACFCOMP(g_trac_nvdimm_upd, ERR_MRK"updateImageData: "
                     "Region %d: calcAndGetCksm() failed on NVDIMM 0x%.8X",
                     region, TARGETING::get_huid(iv_dimm));
-                break;
+                continue;
             }
             if (hostCksm != nvCksm)
             {
@@ -1010,29 +1033,7 @@ errlHndl_t NvdimmInstalledImage::updateImageData(NvdimmLidImage * i_lidImage)
                 nvdimmAddPage4Regs(iv_dimm,l_err);
                 nvdimmAddUpdateRegs(iv_dimm,l_err);
 
-                // Under the total retry attempts per region?
-                if (l_region_write_retries < MAX_REGION_WRITE_RETRY_ATTEMPTS)
-                {
-                    TRACFCOMP(g_trac_nvdimm_upd, ERR_MRK"updateImageData: "
-                      "Region %d on NVDIMM 0x%.8X failed, retry %d",
-                      region, TARGETING::get_huid(iv_dimm),l_region_write_retries);
-                    l_err->collectTrace(NVDIMM_UPD, 512);
-
-                    // Change PREDICTIVE to INFORMATIONAL as this might be recoverable
-                    l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-
-                    // Commit this log and retry region write
-                    ERRORLOG::errlCommit(l_err, NVDIMM_COMP_ID);
-                    l_err = nullptr;
-
-                    // Update total for this region
-                    l_region_write_retries++;
-
-                    // update total retries for entire NVDIMM
-                    iv_region_write_retries++;
-                    continue;
-                }
-                break;
+                continue;
             }
 
             // 10.f Commit the firmware data region transferred
@@ -1043,7 +1044,7 @@ errlHndl_t NvdimmInstalledImage::updateImageData(NvdimmLidImage * i_lidImage)
                 TRACFCOMP(g_trac_nvdimm_upd, ERR_MRK"updateImageData: "
                     "Region %d: commitFwRegion() failed on NVDIMM 0x%.8X",
                     region, TARGETING::get_huid(iv_dimm));
-                break;
+                continue;
             }
             region++;
         } // End of FW image data transfer
