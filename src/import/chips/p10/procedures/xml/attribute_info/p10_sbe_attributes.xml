@@ -478,7 +478,7 @@
   </entry>
   <entry>
     <name>ATTR_HOSTBOOT_HRMOR_OFFSET</name>
-    <value>0x8000000</value>
+    <value>0xF0000000</value>
   </entry>
   <entry>
     <name>ATTR_PROC_XSCOM_BAR_BASE_ADDR_OFFSET</name>

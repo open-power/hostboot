@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -46,7 +46,7 @@
 <attribute>
   <id>ATTR_HOSTBOOT_HRMOR_OFFSET</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
-  <description>Defines offset to be applied to SBE bootloader installation
+  <description>Defines offset to be applied to HB bootloader installation
   this will be added with the bootloader offset and the base address to get the
   target base addres</description>
   <valueType>uint64</valueType>
