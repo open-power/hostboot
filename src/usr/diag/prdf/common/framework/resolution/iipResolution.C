@@ -301,10 +301,22 @@ int32_t AnalyzeConnected::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData,
 
     // Analyze chip.
     if ( nullptr != connChip )
+    {
         return connChip->Analyze( io_serviceData,
                         io_serviceData.service_data->getSecondaryAttnType() );
+    }
     else
+    {
+        // Add a default callout for checkstops
+        if ( CHECK_STOP == io_serviceData.service_data->getPrimaryAttnType() )
+        {
+            PRDcallout l_targetCallout(
+                ServiceDataCollector::getTargetAnalyzed() );
+            io_serviceData.service_data->SetCallout( l_targetCallout,
+                                                     MRU_MED, GARD, true );
+        }
         return PRD_UNRESOLVED_CHIP_CONNECTION;
+    }
 }
 
 } // end namespace PRDF
