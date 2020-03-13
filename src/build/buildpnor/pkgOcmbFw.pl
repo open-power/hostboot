@@ -30,6 +30,13 @@
 # image or for verifying an existing OCMB firmware header of a pre-packaged
 # OCMB firmware image.
 #
+# Unpackaged OCMB firmware image format:
+#   At offset 0, is the Image fingerprint which is a 64-byte hash
+#     calculated from Byte 640(dec) till the end of the FW image.
+#     The hash algorithm used is SHA-512.
+#   At offset 640(dec) is the 4 byte FW length field.
+#   FW binary image begins at offset 2048(dec).
+#
 # OCMB Firmware Header Format:
 #    1. Magic number .. indicating this is OCMB firmware ('OCMBHDR'<null>).
 #       Can't ever change in presence or size.  8 bytes.
@@ -117,6 +124,7 @@ use constant HEADER_MAX_SIZE => 4096;
 use constant HEADER_MIN_SIZE => 96;
 use constant HEADER_BYTES_FOR_LENGTH_FIELD => 24;
 use constant HEADER_SHA512_SIZE => 64;
+use constant IMAGE_DATA_HEADER_SIZE => 640;
 
 # supported tag values for tagged triplets
 use constant TAG_SHA512 => 1;
@@ -135,6 +143,7 @@ my $g_vendorUrl = "";
 my $g_timestamp = "";
 my $g_verbose = 0;
 my $g_help = 0;
+my $g_skipVendorImageHashCheck = 0;
 
 # Holds a variable number of tagged triplets <tagId><size><data>
 my @g_taggedTriplets;
@@ -398,27 +407,39 @@ sub verifySHA512
     }
 
     my $firmwareImage;
+    my $imageSHA512;
     #read in the rest of the file for the firmware image contents
     {
         local $/; #unset the field separator special variable
         $firmwareImage = <$packagedDataFH>;
+
+        # grab the image SHA512 from header in image data
+        # See comments at top of the file for fw image layout
+        $imageSHA512 = substr $firmwareImage, 0, HEADER_SHA512_SIZE;
+
+        # skip past the header in the image data
+        $firmwareImage = substr $firmwareImage, IMAGE_DATA_HEADER_SIZE;
     }
 
-    my $imageSHA512 = sha512($firmwareImage);
+    my $calcImageSHA512 = sha512($firmwareImage);
 
-    trace(1, "\nSHA512 hash from firmware image: ".unpack("H*", $imageSHA512));
+    trace(1, "\nCalculated SHA512 hash from firmware image: ".unpack("H*", $calcImageSHA512)."\n");
 
-    #Now, compare the two hash values
-    if($imageSHA512 eq $headerSHA512)
+    # Make sure the calculated hash matches the hash we found in the image
+    # as well as the hash we found in the header
+    if (!$g_skipVendorImageHashCheck &&
+           (($calcImageSHA512 ne $imageSHA512) ||
+            ($calcImageSHA512 ne $headerSHA512) ))
+    {
+        traceErr("Calculated SHA512 hash from image data does not match value in firmware image and/or image header");
+        trace(1, "\nSHA512 hash in header data: ".unpack("H*", $headerSHA512));
+        trace(1, "\nSHA512 hash in image data: ".unpack("H*", $imageSHA512)."\n");
+        exit 2;
+    }
+    elsif($imageSHA512 eq $headerSHA512)
     {
         trace(1, "\nHeader successfully validated against firmware image.");
     }
-    else
-    {
-        traceErr("Header SHA512 hash does not match firmware image!");
-        exit 1;
-    }
-
     exit 0;
 }
 
@@ -465,6 +486,7 @@ print <<"ENDUSAGE";
   Usage:
     $g_progName --verify
                   --packagedBin <packaged binary file name>
+                  [--skipImageHashCheck]
                   [--verbose]
     $g_progName --packagedBin <packaged binary file name>
                   --unpackagedBin <unpackaged binary file name>
@@ -477,6 +499,7 @@ print <<"ENDUSAGE";
     -h                        Print this help text
     --verify                  Verify the SHA512 hash of a packaged binary file
     --packagedBin <file>      Name of packaged binary file
+    --skipImageHashCheck      Skip checking match of SHA512 hash from vendor image
     --unpackagedBin <file>    Name of unpackaged binary file
     --vendorVersion <string>  Quoted vendor version string
     --vendorUrl <string>      Quoted vendor URL string
@@ -503,6 +526,7 @@ GetOptions("verify" => \$g_verify,
            "vendorVersion=s" => \$g_vendorVersion,
            "vendorUrl=s" => \$g_vendorUrl,
            "timestamp=s" => \$g_timestamp,
+           "skipImageHashCheck" => \$g_skipVendorImageHashCheck,
            "verbose" => \$g_verbose,
            "help" => \$g_help);
 
@@ -527,7 +551,7 @@ if ($g_packagedBin eq "")
 # Check if we're just verifying an already packaged binary
 if ($g_verify)
 {
-    #this function does not return
+    #this function will exit the program and therefore does not return
     verifySHA512();
 }
 
@@ -556,8 +580,14 @@ my $unpackagedData;
     $unpackagedData = <UNPACKAGED_DATA>; #reads in entire file
 }
 
+# grab the image SHA512 from header in image data
+my $imageSHA512 = substr $unpackagedData, 0, HEADER_SHA512_SIZE;
+
+# skip past the header in the image data as that isn't part of the sha512 hash
+my $firmwareImage = substr $unpackagedData, IMAGE_DATA_HEADER_SIZE;
+
 # Generate sha512 hash of unpackaged file data
-my $sha512_hash = sha512($unpackagedData);
+my $sha512_hash = sha512($firmwareImage);
 
 # Generate the sha512 tagged triplet and add it to our list of tagged triplets
 push (@g_taggedTriplets, createTaggedTriplet(TAG_SHA512, $sha512_hash));

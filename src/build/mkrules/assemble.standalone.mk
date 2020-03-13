@@ -300,7 +300,8 @@ gen_default_images: copy_hb_bins
 		--vendorVersion "0.1" --vendorUrl "http://www.ibm.com"
 
 # verify header sha512 hash value matches value calculated against image
-	${PKG_OCMBFW_SCRIPT} --verify --packagedBin ${OCMBFW_IMG}
+# TODO RTC:195547 -- remove the skip when we have a good image packaged into the driver.
+	${PKG_OCMBFW_SCRIPT} --verify --packagedBin ${OCMBFW_IMG} --skipImageHashCheck
 
 # Remove offset from start of Bootloader image for HBBL partition
 # Actual code is offset from HRMOR by 12k = 12 1k-blocks (space
