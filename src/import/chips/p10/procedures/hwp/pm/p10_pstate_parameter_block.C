@@ -315,13 +315,15 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
                            uint32_t& io_size)
 {
     FAPI_DBG("> p10_pstate_parameter_block");
+    PlatPmPPB *l_pmPPB = new PlatPmPPB(i_target);
+    GlobalPstateParmBlock_t *l_globalppb = new GlobalPstateParmBlock_t;
+    OCCPstateParmBlock_t l_occppb;;
 
     do
     {
         //Instantiate pstate object
-        PlatPmPPB l_pmPPB(i_target);
 
-        FAPI_ASSERT(l_pmPPB.iv_init_error == false,
+        FAPI_ASSERT(l_pmPPB->iv_init_error == false,
                 fapi2::PSTATE_PB_ATTRIBUTE_ACCESS_ERROR()
                 .set_CHIP_TARGET(i_target),
                 "Pstate Parameter Block attribute access error");
@@ -337,16 +339,14 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
 
         //Local variables for Global,local and OCC parameter blocks
         // PGPE content
-        GlobalPstateParmBlock_t l_globalppb;
-        memset (&l_globalppb, 0, sizeof(GlobalPstateParmBlock_t));
+        memset (l_globalppb, 0, sizeof(GlobalPstateParmBlock_t));
 
         // OCC content
-        OCCPstateParmBlock_t l_occppb;
         memset (&l_occppb , 0, sizeof (OCCPstateParmBlock_t));
 
         //if PSTATES_MODE is off then we dont need to execute further to collect
         //the data.
-        if (l_pmPPB.isPstateModeEnabled())
+        if (l_pmPPB->isPstateModeEnabled())
         {
             FAPI_INF("Pstate mode is to not boot the PGPE.  Thus, none of the parameter blocks will be constructed");
 
@@ -359,33 +359,33 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
         // ----------------
         // get VPD data (#V,#W,IQ)
         // ----------------
-        FAPI_TRY(l_pmPPB.vpd_init(),"vpd_init function failed");
+        FAPI_TRY(l_pmPPB->vpd_init(),"vpd_init function failed");
 
         // ----------------
         // Compute VPD points for different regions
         // ----------------
-        l_pmPPB.compute_vpd_pts();
+        l_pmPPB->compute_vpd_pts();
 
         // ----------------
         // Safe mode freq and volt init
         // ----------------
-        FAPI_TRY(l_pmPPB.safe_mode_init());
+        FAPI_TRY(l_pmPPB->safe_mode_init());
 
         // ----------------
         // Retention voltage computation
         // ----------------
-        FAPI_TRY(l_pmPPB.compute_retention_vid());
+        FAPI_TRY(l_pmPPB->compute_retention_vid());
 
         // ----------------
         // Initialize GPPB structure
         // ----------------
-        FAPI_TRY(l_pmPPB.gppb_init(&l_globalppb));
+        FAPI_TRY(l_pmPPB->gppb_init(l_globalppb));
 
         // ----------------
         // WOF initialization
         // ----------------
         io_size = 0;
-        FAPI_TRY(l_pmPPB.wof_init(
+        FAPI_TRY(l_pmPPB->wof_init(
                  o_buf,
                  io_size),
                  "WOF initialization failure");
@@ -394,26 +394,28 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
         // ----------------
         //Initialize OPPB structure
         // ----------------
-        FAPI_TRY(l_pmPPB.oppb_init(&l_occppb));
+        FAPI_TRY(l_pmPPB->oppb_init(&l_occppb));
 
 
         // ----------------
         //Initialize pstate feature attribute state
         // ----------------
-        FAPI_TRY(l_pmPPB.set_global_feature_attributes());
+        FAPI_TRY(l_pmPPB->set_global_feature_attributes());
 
 
         // Put out the Parmater Blocks to the trace
-        gppb_print(&(l_globalppb));
-        oppb_print(&(l_occppb));
+        gppb_print((l_globalppb));
+        oppb_print((&l_occppb));
 
         // Populate Global,local and OCC parameter blocks into Pstate super structure
-        (*io_pss).iv_globalppb = l_globalppb;
+        (*io_pss).iv_globalppb = *l_globalppb;
         (*io_pss).iv_occppb = l_occppb;
     }
     while(0);
 
 fapi_try_exit:
+    delete l_pmPPB;
+    delete l_globalppb;
     FAPI_DBG("< p10_pstate_parameter_block");
     return fapi2::current_err;
 }
