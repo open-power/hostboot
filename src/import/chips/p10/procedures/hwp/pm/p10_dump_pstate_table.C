@@ -204,7 +204,7 @@ void gpi_print(FILE* stream, void* vgpi, uint32_t dump_flag)
 //
 // gppb_print
 //
-void gppb_print(FILE* stream, GlobalPstateParmBlock_t const* gppb, uint32_t  dump_flag)
+void gppb_print(FILE* stream, const GlobalPstateParmBlock_t* gppb, uint32_t  dump_flag)
 {
     uint32_t p, s, r;
     const char* vpdPvStr[NUM_OP_POINTS] = PV_OP_STR;
@@ -216,7 +216,15 @@ void gppb_print(FILE* stream, GlobalPstateParmBlock_t const* gppb, uint32_t  dum
     //Endian conversion
     uint32_t reference_frequency_khz = revle32(gppb->reference_frequency_khz);
     uint32_t frequency_step_khz = revle32(gppb->frequency_step_khz);
-    uint32_t occ_freq = revle32(gppb->occ_complex_frequency_mhz);
+    uint32_t occ_freq_mhz = revle32(gppb->occ_complex_frequency_mhz);
+    uint32_t safe_voltage_mv[SAFE_VOLTAGE_SIZE];
+
+    for (s = 0 ; s < SAFE_VOLTAGE_SIZE; s++)
+    {
+        safe_voltage_mv[s] = revle32(gppb->safe_voltage_mv[s]);
+    }
+
+    uint32_t safe_frequency_khz = revle32(gppb->safe_frequency_khz);
 
     fprintf(stream,
             "---------------------------------------------------------------------------------------------------------\n");
@@ -227,9 +235,14 @@ void gppb_print(FILE* stream, GlobalPstateParmBlock_t const* gppb, uint32_t  dum
     fprintf(stream, "Magic_Number:                      %s\n", (char*)&gppb->magic);
     fprintf(stream, "Reference_Frequency:               %u Khz\n", reference_frequency_khz);
     fprintf(stream, "Frequency_Step_Size:               %u Khz\n", frequency_step_khz);
-    fprintf(stream, "OCC Complex_Frequency:             %u Mhz\n", occ_freq);
-    fprintf(stream, "Safe_Voltage                       %u mV\n", revle32(gppb->safe_voltage_mv));
-    fprintf(stream, "Safe_Frequency                     %u Khz\n", revle32(gppb->safe_frequency_khz));
+    fprintf(stream, "OCC Complex_Frequency:             %u Mhz\n", occ_freq_mhz);
+
+    for (s = 0 ; s < SAFE_VOLTAGE_SIZE; s++)
+    {
+        fprintf(stream, "Safe_Voltage[%u]               %u mV\n", s, safe_voltage_mv[s]);
+    }
+
+    fprintf(stream, "Safe_Frequency                     %u Khz\n", safe_frequency_khz);
 
     for (s = 0 ; s < NUM_VPD_PTS_SET; s++)
     {
