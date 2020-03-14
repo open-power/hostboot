@@ -55,6 +55,7 @@
 #include <../vpd/ipvpd.H>
 #include <../vpd/pvpd.H>
 #include <i2c/i2cif.H>
+#include <targeting/common/hbrt_target.H>
 using namespace MVPD;
 using namespace PVPD;
 using namespace IPVPD;
@@ -116,6 +117,9 @@ namespace HDAT
 {
 
 extern trace_desc_t* g_trac_hdat;
+
+#define HDAT_8BYTE_ACCESS_SUPPORT 0x8000000000000000
+#define HDAT_4BYTE_ACCESS_SUPPORT 0x4000000000000000
 
 enum HOST_I2C_DEV_INFO_VERSION : uint32_t
 {
@@ -198,6 +202,19 @@ struct hdatProcEcLvlElement_t
     hdatEcLvl_t hdatEcLvl;  
     uint64_t    hdatEcid[2]; // Proc ECID
 } __attribute__ ((packed));
+
+/** @brief Address range array element information of MMIO regions for OCMB
+ *         access by HBRT
+ */
+struct hdatMsAreaMmioAddrRange_t
+{
+    hdatMsAddr_t hdatMmioAddrRngStrAddr;    // 0x0000 Range starting address
+    hdatMsAddr_t hdatMmioAddrRngEndAddr;    // 0x0008 Range ending address
+    uint32_t hdatMmioMemCtlId;              // 0x0010 Memory Controller ID
+    uint32_t hdatMmioProcPhyChipId;         // 0x0014 Processor Physical Chip ID
+    uint64_t hdatMmioHbrtChipId;            // 0x0018 HBRT Chip ID
+    uint64_t hdatMmioFlags;                 // 0x0020 Flags
+}  __attribute__ ((packed));
 
 /**
  * @brief Create/Build an Error log and add HADT component trace
@@ -611,6 +628,27 @@ uint32_t getMemBusFreq(const TARGETING::Target* i_pTarget);
  * @return        Memory bus frequency. upon any error conditions it returns 0.
 *******************************************************************************/
 uint32_t getMemBusFreqP10(const TARGETING::Target* i_pTarget);
+
+/*******************************************************************************
+ * hdatGetMemTargetMmioInfo
+ *
+ * @brief Routine returns the MMIO entries
+ *
+ * @pre None
+ *
+ * @post None
+ *
+ * @param[in] i_pTarget
+ *       The MMIO target handle
+ * @param[out] o_mmioEntries
+ *       The MMIO entries
+ *
+ * @return void
+ *
+*******************************************************************************/
+void hdatGetMemTargetMmioInfo(TARGETING::Target* i_pTarget,
+     std::vector<hdatMsAreaMmioAddrRange_t>&o_mmioEntries);
+
 };// end namespace
 
 #endif // HDATUTILITY_H

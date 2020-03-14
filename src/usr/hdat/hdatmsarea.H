@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,24 +64,25 @@ const char HDAT_MSAREA_STRUCT_NAME[] = "MSAREA";
  */
 const uint32_t HDAT_MAX_EC_ENTRIES = 5;
 const uint32_t HDAT_MAX_ADDR_RNG_ENTRIES = 4;
+const uint32_t HDAT_MAX_MMIO_ADDR_RNG_ENTRIES = 4;
 
  /** @enum hdatDataPtrs
  *  Constants for the internal data pointers that are added to the base class
  */
 enum hdatMsAreaDataPtrs
 {
-    HDAT_MS_AREA_FRU_ID    =  0,
-    HDAT_MS_AREA_KWD       =  1,
-    HDAT_MS_AREA_ID        =  2,
-    HDAT_MS_AREA_SIZE      =  3,
-    HDAT_MS_AREA_ADDR_RNG  =  4,
-    HDAT_MS_AREA_AFF       =  5,
-    HDAT_MS_AREA_EC_ARRAY  =  6,
-    HDAT_MS_AREA_HOST_I2C  =  7,
-    HDAT_MS_AREA_RESERVED1 =  8,
-    HDAT_MS_AREA_RESERVED2 =  9,
-    HDAT_MS_AREA_RESERVED3 = 10,
-    HDAT_MS_AREA_LAST      = 11
+    HDAT_MS_AREA_FRU_ID        =  0,
+    HDAT_MS_AREA_KWD           =  1,
+    HDAT_MS_AREA_ID            =  2,
+    HDAT_MS_AREA_SIZE          =  3,
+    HDAT_MS_AREA_ADDR_RNG      =  4,
+    HDAT_MS_AREA_AFF           =  5,
+    HDAT_MS_AREA_EC_ARRAY      =  6,
+    HDAT_MS_AREA_HOST_I2C      =  7,
+    HDAT_MS_AREA_MMIO_ADDR_RNG =  8,
+    HDAT_MS_AREA_RESERVED1     =  9,
+    HDAT_MS_AREA_RESERVED2     = 10,
+    HDAT_MS_AREA_LAST          = 11
 };
 
  
@@ -435,6 +436,35 @@ public:
                           uint32_t  i_memcntlrId,
                           bool i_hdatSmf);
 
+  /**
+   * @brief Update the mainstore area to specify a mmio memory address range.
+   *        More than one address range can be added.
+   *
+   * @pre One cannot add any more address range entries than was specified by
+   *      the i_mmioAddrRngCnt parameter on the HdatMsArea constructor.
+   *
+   * @post An address range entry has been added.
+   *
+   * @param[in] i_start      - The starting address of the range
+   * @param[in] i_end        - The ending address of the range
+   * @param[in] i_mmioMemCntlId - Memory Controller ID
+   * @param[in] i_mmioProcPhyChipId - which is the chip id of the physical
+   *                                  processor
+   * @param[in] i_mmioHbrtChipId - MMIO HBRT Chip ID
+   * @param[in] i_mmioFlags -  MMIO flags
+   *
+   * @return A null error log handle if successful, else the return code pointed
+   *         to by o_errlHndl indicates that the mmio array size
+   *         crossed the maximum allowed limit
+   *
+   * @retval RC_ERC_MAX_EXCEEDED
+   */
+  errlHndl_t addMmioAddrRange(hdatMsAddr_t &i_start,
+                              hdatMsAddr_t &i_end,
+                              uint32_t i_mmioMemCntlId,
+                              uint32_t i_mmioProcPhyChipId,
+                              uint64_t i_mmioHbrtChipId,
+                              uint64_t i_mmioFlags);
 
   /**
    * @brief Add engineering change information for memory interface chips
@@ -570,6 +600,8 @@ private:
      * @li iv_kwdSize         - size of the ASCII keyword
      * @li iv_maxAddrRngCnt   - maximum number of address range entries that
      *                          can be added
+     * @li iv_maxMmioAddrRngCnt - maximum number of mmio address range entries
+     *                          that can be added
      * @li iv_maxEcCnt        - maximum number of EC entries that can be added
      * @li iv_msaHostI2cCnt   - actual number of host I2C entries that can be
      *                          added
@@ -586,6 +618,8 @@ private:
      * @li iv_msSize          - mainstore size information
      * @li iv_AddrRngArrayHdr - data array header
      * @li iv_addrRange       - mainstore addresses
+     * @li iv_mmioAddrRngArrayHdr - MMIO address range array header
+     * @li iv_mmioAddrRngArray    - MMIO address range array
      * @li iv_aff             - CPU affinity information
      * @li iv_ecArrayHdr      - data array header
      * @li iv_ecLvl           - EC level array
@@ -596,6 +630,7 @@ private:
      */
     uint32_t                     iv_kwdSize;
     uint32_t                     iv_maxAddrRngCnt;
+    uint32_t                     iv_maxMmioAddrRngCnt;
     uint32_t                     iv_maxEcCnt;
     uint32_t                     iv_msaHostI2cCnt;
     uint32_t                     iv_msaHostI2cSize;
@@ -609,6 +644,8 @@ private:
     hdatMsAreaSize_t             iv_msSize;
     hdatHDIFDataArray_t          iv_addrRngArrayHdr;
     hdatMsAreaAddrRange_t        *iv_addrRange;
+    hdatHDIFDataArray_t          iv_mmioAddrRngArrayHdr;
+    hdatMsAreaMmioAddrRange_t    *iv_mmioAddrRngArray;
     hdatMsAreaAffinity_t         iv_aff;
     hdatHDIFDataArray_t          iv_ecArrayHdr;
     hdatEcLvl_t           *iv_ecLvl;

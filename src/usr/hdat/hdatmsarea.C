@@ -104,6 +104,7 @@ HdatMsArea::HdatMsArea(errlHndl_t &o_errlHndl,
     iv_msaHostI2cCnt = 0;
     iv_msaHostI2cSize = 0;
     iv_msaI2cDataPtr = NULL;
+    iv_mmioAddrRngArray = NULL;
 
     o_errlHndl = NULL;
     iv_fru.hdatResourceId = i_resourceId;
@@ -113,6 +114,7 @@ HdatMsArea::HdatMsArea(errlHndl_t &o_errlHndl,
     memset(&iv_aff, 0x00, sizeof(hdatMsAreaAffinity_t));
 
     iv_msId.hdatMsAreaId = i_msAreaId;
+    iv_maxMmioAddrRngCnt =  HDAT_MAX_MMIO_ADDR_RNG_ENTRIES;
 
     //TODO : RTC Story 161864
     //For Nimbus based systems, FSI device path length is always zero so hard
@@ -125,6 +127,11 @@ HdatMsArea::HdatMsArea(errlHndl_t &o_errlHndl,
     iv_addrRngArrayHdr.hdatArrayCnt  = 0;
     iv_addrRngArrayHdr.hdatAllocSize = sizeof(hdatMsAreaAddrRange_t);
     iv_addrRngArrayHdr.hdatActSize   = sizeof(hdatMsAreaAddrRange_t);
+
+    iv_mmioAddrRngArrayHdr.hdatOffset    = sizeof(hdatHDIFDataArray_t);
+    iv_mmioAddrRngArrayHdr.hdatArrayCnt  = 0;
+    iv_mmioAddrRngArrayHdr.hdatAllocSize = sizeof(hdatMsAreaMmioAddrRange_t);
+    iv_mmioAddrRngArrayHdr.hdatActSize   = sizeof(hdatMsAreaMmioAddrRange_t);
 
     iv_ecArrayHdr.hdatOffset    = sizeof(hdatHDIFDataArray_t);
     iv_ecArrayHdr.hdatArrayCnt  = 0;
@@ -179,6 +186,15 @@ HdatMsArea::HdatMsArea(errlHndl_t &o_errlHndl,
         iv_addrRange = new hdatMsAreaAddrRange_t[iv_maxAddrRngCnt];
         memset(iv_addrRange,0,
                 (sizeof(hdatMsAreaAddrRange_t) * iv_maxAddrRngCnt));
+    }
+
+    // Allocate space for the MMIO address range array
+    if (NULL == o_errlHndl)
+    {
+        iv_mmioAddrRngArray =
+            new hdatMsAreaMmioAddrRange_t[iv_maxMmioAddrRngCnt];
+        memset(iv_mmioAddrRngArray,0,
+                (sizeof(hdatMsAreaMmioAddrRange_t) * iv_maxMmioAddrRngCnt));
     }
 
     // Allocate space for the EC level array
@@ -362,6 +378,59 @@ errlHndl_t HdatMsArea::addAddrRange(hdatMsAddr_t &i_start,
     return l_errlHndl;
 }
 
+/** @brief See the prologue in hdatmsarea.H
+ */
+errlHndl_t HdatMsArea::addMmioAddrRange(hdatMsAddr_t &i_start,
+                                        hdatMsAddr_t &i_end,
+                                        uint32_t i_mmioMemCntlId,
+                                        uint32_t i_mmioProcPhyChipId,
+                                        uint64_t i_mmioHbrtChipId,
+                                        uint64_t i_mmioFlags)
+{
+    HDAT_ENTER();
+    errlHndl_t l_errlHndl = NULL;
+    hdatMsAreaMmioAddrRange_t *l_addr;
+
+    if (iv_mmioAddrRngArrayHdr.hdatArrayCnt < iv_maxMmioAddrRngCnt)
+    {
+        l_addr = reinterpret_cast<hdatMsAreaMmioAddrRange_t*>(
+            reinterpret_cast<char*>(iv_mmioAddrRngArray) +
+            iv_mmioAddrRngArrayHdr.hdatArrayCnt *
+            sizeof(hdatMsAreaMmioAddrRange_t));
+
+        l_addr->hdatMmioAddrRngStrAddr = i_start;
+        l_addr->hdatMmioAddrRngEndAddr = i_end;
+        l_addr->hdatMmioMemCtlId = i_mmioMemCntlId;
+        l_addr->hdatMmioProcPhyChipId = i_mmioProcPhyChipId;
+        l_addr->hdatMmioHbrtChipId = i_mmioHbrtChipId;
+        l_addr->hdatMmioFlags = i_mmioFlags;
+        iv_mmioAddrRngArrayHdr.hdatArrayCnt++;
+    }
+    else
+    {
+        /*@
+         * @errortype
+         * @refcode    LIC_REFCODE
+         * @subsys     EPUB_FIRMWARE_SP
+         * @reasoncode RC_ERC_MAX_EXCEEDED
+         * @moduleid   MOD_ADD_MMIO_ADDR_RANGE
+         * @userdata1  current no of mmio array entries
+         * @userdata2  maximum no of mmio array entries
+         * @userdata3  ID number of mainstore area
+         * @userdata4  none
+         * @devdesc    Failed trying to add another entry to a mainstore area
+         *             MMIO address range array
+         */
+        hdatBldErrLog(l_errlHndl,
+                      MOD_ADD_MMIO_ADDR_RANGE,             // SRC module ID
+                      RC_ERC_MAX_EXCEEDED,                 // SRC ext ref code
+                      iv_mmioAddrRngArrayHdr.hdatArrayCnt, // SRC hex word 1
+                      iv_maxMmioAddrRngCnt,                // SRC hex word 2
+                      iv_msId.hdatMsAreaId);               // SRC hex word 3
+    }
+    HDAT_EXIT();
+    return l_errlHndl;
+}
 
 /** @brief See the prologue in hdatmsarea.H
  */
@@ -529,6 +598,8 @@ void HdatMsArea::finalizeObjSize()
     this->addData(HDAT_MS_AREA_EC_ARRAY, sizeof(hdatHDIFDataArray_t) +
                     iv_maxEcCnt * sizeof(hdatEcLvl_t));
     this->addData(HDAT_MS_AREA_HOST_I2C, iv_msaHostI2cSize);
+    this->addData(HDAT_MS_AREA_MMIO_ADDR_RNG, sizeof(hdatHDIFDataArray_t) +
+                  iv_maxMmioAddrRngCnt * sizeof(hdatMsAreaMmioAddrRange_t));
 
     this->align();
 
@@ -597,6 +668,10 @@ uint32_t  HdatMsArea::getMsAreaSize()
     l_size += sizeof(iv_msaI2cHdr);
 
     l_size += (sizeof(hdatI2cData_t) * iv_msaHostI2cCnt);
+
+    l_size += sizeof(hdatHDIFDataArray_t);
+
+    l_size += (iv_maxMmioAddrRngCnt * sizeof(hdatMsAreaMmioAddrRange_t));
 
     l_size += this->endCommitSize();
     return l_size;
@@ -667,6 +742,11 @@ void HdatMsArea::commit(UtilMem &i_data)
             (iv_msaHostI2cSize - sizeof(iv_msaI2cHdr)));
     }
 
+    i_data.write(&iv_mmioAddrRngArrayHdr,sizeof(hdatHDIFDataArray_t));
+
+    i_data.write(iv_mmioAddrRngArray,
+        iv_maxMmioAddrRngCnt * sizeof(hdatMsAreaMmioAddrRange_t));
+
     this->endCommit(i_data);
 }
 /** @brief See the prologue in hdatmsarea.H
@@ -702,6 +782,7 @@ void HdatMsArea::prt()
     uint32_t l_cnt;
     hdatEcLvl_t *l_ec;
     hdatMsAreaAddrRange_t *l_addr;
+    hdatMsAreaMmioAddrRange_t *l_mmioAddr;
     HdatRam *l_ramObj;
 
     HDAT_INF("  **** HdatMsArea start ****");
@@ -760,6 +841,30 @@ void HdatMsArea::prt()
         HDAT_INF("      hdatChipEcLvl = %u", l_ec->hdatChipEcLvl);
         l_ec++;
     }
+    HDAT_INF("");
+
+    HDAT_INF("  **hdatMsAreaMmioAddrRange_t**");
+    hdatPrintHdrs(NULL, NULL, &iv_mmioAddrRngArrayHdr, NULL);
+    l_mmioAddr = iv_mmioAddrRngArray;
+    for (uint8_t l_mmioCnt = 0; l_mmioCnt < iv_mmioAddrRngArrayHdr.hdatArrayCnt;
+         l_mmioCnt++)
+    {
+        HDAT_INF("      hdatMmioAddrRngStrAddr = 0X %08X %08X ",
+                 l_mmioAddr->hdatMmioAddrRngStrAddr.hi,
+                 l_mmioAddr->hdatMmioAddrRngStrAddr.lo);
+        HDAT_INF("      hdatMmioAddrRngEndAddr = 0X %08X %08X ",
+                 l_mmioAddr->hdatMmioAddrRngEndAddr.hi,
+                 l_mmioAddr->hdatMmioAddrRngEndAddr.lo);
+        HDAT_INF("      hdatMmioMemCtlId = %u", l_mmioAddr->hdatMmioMemCtlId);
+        HDAT_INF("      hdatMmioProcPhyChipId = %u",
+                 l_mmioAddr->hdatMmioProcPhyChipId);
+        HDAT_INF("      hdatMmioHbrtChipId = %u",
+                 l_mmioAddr->hdatMmioHbrtChipId);
+        HDAT_INF("      hdatMmioFlags = %u", l_mmioAddr->hdatMmioFlags);
+        l_mmioAddr++;
+        l_mmioCnt++;
+    }
+    HDAT_INF("");
 
     HDAT_INF("  **** HdatMsArea end ****");
 

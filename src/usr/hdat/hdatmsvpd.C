@@ -648,6 +648,37 @@ errlHndl_t HdatMsVpd::addMsAreaAddr(uint16_t i_msAreaId,
     return l_errlHndl;
 }
 
+/** @brief See the prologue in hdatmsvpd.H
+ */
+errlHndl_t HdatMsVpd::addMsAreaMmioAddrRange(uint16_t i_msAreaId,
+                                             hdatMsAddr_t &i_start,
+                                             hdatMsAddr_t &i_end,
+                                             uint32_t i_mmioMemCntlId,
+                                             uint32_t i_mmioProcPhyChipId,
+                                             uint64_t i_mmioHbrtChipId,
+                                             uint64_t i_mmioFlags)
+{
+    errlHndl_t l_errlHndl = NULL;
+    HdatMsArea *l_obj;
+
+    if (i_msAreaId < iv_actMsAreaCnt)
+    {
+        l_obj = HDAT_MS_AREA(i_msAreaId);
+        l_errlHndl = l_obj->addMmioAddrRange(i_start,
+                                             i_end,
+                                             i_mmioMemCntlId,
+                                             i_mmioProcPhyChipId,
+                                             i_mmioHbrtChipId,
+                                             i_mmioFlags);
+    }
+    else
+    {
+        HDAT_INF( "HdatMsVpd::addMsAreaMmioAddrRange - invalid i_msAreadId "
+            "parameter");
+    }
+
+    return l_errlHndl;
+}
 
 /** @brief See the prologue in hdatmsvpd.H
  */
@@ -2371,6 +2402,38 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                                             l_smfStartAddr + l_smfSize,
                                             l_smfSize);
                                     }
+
+                                    // Add MMIO address range entries
+                                    std::vector<hdatMsAreaMmioAddrRange_t>
+                                        l_mmioDevEntries;
+
+                                    if (l_pOcmbTarget != NULL)
+                                    {
+                                        hdatGetMemTargetMmioInfo(l_pOcmbTarget,
+                                            l_mmioDevEntries);
+                                    }
+
+                                    if(l_mmioDevEntries.empty())
+                                    {
+                                        HDAT_INF("No MMIO entries found with "
+                                        "HUID of 0x%08X",
+                                        TARGETING::get_huid(l_pOcmbTarget));
+                                    }
+                                    else
+                                    {
+                                        for (auto& mmioDev : l_mmioDevEntries)
+                                        {
+                                            l_err = addMsAreaMmioAddrRange(
+                                                l_index,
+                                                mmioDev.hdatMmioAddrRngStrAddr,
+                                                mmioDev.hdatMmioAddrRngEndAddr,
+                                                l_hdatMemcntrlID,
+                                                l_procChipId,
+                                                mmioDev.hdatMmioHbrtChipId,
+                                                mmioDev.hdatMmioFlags);
+                                        }
+                                    }
+
                                     l_index++;
                                 } // end of OCMB_CHIP list
                                 if(l_err)

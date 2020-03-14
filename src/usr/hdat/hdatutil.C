@@ -2113,4 +2113,80 @@ uint32_t getMemBusFreqP10(const TARGETING::Target* i_pTarget)
     return l_MemBusFreqInMHz;
 }
 
+/*******************************************************************************
+ * hdatGetMemTargetMmioInfo
+ *
+ * @brief Routine returns the MMIO entries
+ *
+ * @pre None
+ *
+ * @post None
+ *
+ * @param[in] i_pTarget
+ *       The MMIO target handle
+ * @param[out] o_mmioEntries
+ *       The MMIO entries
+ *
+ * @return void
+ *
+*******************************************************************************/
+void hdatGetMemTargetMmioInfo(TARGETING::Target* i_pTarget,
+     std::vector<hdatMsAreaMmioAddrRange_t>&o_mmioEntries)
+{
+    HDAT_ENTER();
+
+    std::vector<ocmbMmioAddressRange_t> mmioInfo;
+    getMemTargetMmioInfo(i_pTarget, mmioInfo);
+
+    if(mmioInfo.empty())
+    {
+        HDAT_INF("No MMIO entries found with HUID of 0x%08X",
+                 TARGETING::get_huid(i_pTarget));
+    }
+    else // At least one entrey found
+    {
+        for (const auto& mmioDev : mmioInfo)
+        {
+            hdatMsAreaMmioAddrRange_t l_mmioObj;
+            memset(&l_mmioObj, 0x00, sizeof(hdatMsAreaMmioAddrRange_t));
+
+            l_mmioObj.hdatMmioAddrRngStrAddr.hi =
+                (mmioDev.mmioBaseAddr & 0xFFFFFFFF00000000ull) >> 32;
+            l_mmioObj.hdatMmioAddrRngStrAddr.lo =
+                mmioDev.mmioBaseAddr & 0x00000000FFFFFFFFull;
+            l_mmioObj.hdatMmioAddrRngStrAddr.hi |= HDAT_REAL_ADDRESS_MASK;
+
+            l_mmioObj.hdatMmioAddrRngEndAddr.hi =
+                (mmioDev.mmioEndAddr & 0xFFFFFFFF00000000ull) >> 32;
+            l_mmioObj.hdatMmioAddrRngEndAddr.lo =
+                mmioDev.mmioEndAddr & 0x00000000FFFFFFFFull;
+            l_mmioObj.hdatMmioAddrRngEndAddr.hi |= HDAT_REAL_ADDRESS_MASK;
+
+            l_mmioObj.hdatMmioHbrtChipId = mmioDev.hbrtId;
+
+            if (mmioDev.accessSize == 8)
+            {
+                l_mmioObj.hdatMmioFlags = HDAT_8BYTE_ACCESS_SUPPORT;
+            }
+            else if (mmioDev.accessSize == 4)
+            {
+                l_mmioObj.hdatMmioFlags = HDAT_4BYTE_ACCESS_SUPPORT;
+            }
+            o_mmioEntries.push_back(l_mmioObj);
+        }
+    }
+
+    for (const auto& mmioDev : mmioInfo)
+    {
+        HDAT_DBG("MMIO device attached to HUID=0x%08X: "
+            "hbrt Id=0x%02X, ",
+            "mmio flags=0x%02X, ",
+            TARGETING::get_huid(i_pTarget),
+            mmioDev.hbrtId,
+            mmioDev.accessSize);
+    }
+
+    HDAT_EXIT();
+}
+
 } //namespace HDAT
