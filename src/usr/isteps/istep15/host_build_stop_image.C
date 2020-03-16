@@ -215,21 +215,18 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
         //Read core's chip unit id attribute and store it as the core's id
          CHIP_UNIT_ATTR l_coreId =
                 (l_core)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-        //Read the processor's fabric group id
-        FABRIC_GROUP_ID_ATTR l_logicalGroupId =
-          l_processor->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
 
-        //Read the processor's fabric chip id
-        FABRIC_CHIP_ID_ATTR l_chipId =
-          l_processor->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+        //Read the processor's topology ID
+        const auto topologyId =
+            l_processor->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
 
-        TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "chip unit: %d  fabric group: %d    chip id: %d",
-                  l_coreId, l_logicalGroupId,l_chipId);
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "chip unit: %d, fabric topology ID: 0x%02X",
+                  l_coreId, topologyId);
 
-        //store the PIR value by passing the values read in above into the
+        //store the PIR value by passing the value read in above into the
         //PIR_t constructor and read the .word attribute on the new PIR struct
-        uint64_t l_pirVal = PIR_t(l_logicalGroupId, l_chipId, l_coreId).word;
+        uint64_t l_pirVal = PIR_t(topologyId, l_coreId).word;
 
         //The underlying stop API knows about fused/normal cores.  Need to take
         //this into account for fused mode.  If we are in fused mode, then
