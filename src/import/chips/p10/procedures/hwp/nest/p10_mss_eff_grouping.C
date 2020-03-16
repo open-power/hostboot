@@ -212,23 +212,21 @@ fapi2::ReturnCode EffGroupingSysAttrs::getAttrs()
 
     // Get SMF config setting
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SMF_CONFIG, FAPI_SYSTEM, iv_smfConfig),
-             "Error from FAPI_ATTR_GET (ATTR_SMF_CONFIG)");
+             "Error getting ATTR_SMF_CONFIG, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
 
     // Get mirror placement policy
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MIRROR_PLACEMENT_POLICY,
-                           FAPI_SYSTEM, iv_mirrorPlacement),
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MIRROR_PLACEMENT_POLICY, FAPI_SYSTEM, iv_mirrorPlacement),
              "Error getting ATTR_MEM_MIRROR_PLACEMENT_POLICY, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
     // Get mirror option
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_HW_MIRRORING_ENABLE,
-                           FAPI_SYSTEM, iv_hwMirrorEnabled),
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_HW_MIRRORING_ENABLE, FAPI_SYSTEM, iv_hwMirrorEnabled),
              "Error getting ATTR_MRW_HW_MIRRORING_ENABLE, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
     // Get interleave option
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_INTERLEAVE_ENABLE, FAPI_SYSTEM,
-                           iv_groupsAllowed),
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_INTERLEAVE_ENABLE, FAPI_SYSTEM, iv_groupsAllowed),
              "Error getting ATTR_MSS_INTERLEAVE_ENABLE, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
@@ -236,9 +234,9 @@ fapi2::ReturnCode EffGroupingSysAttrs::getAttrs()
     // Store ATTR_MAX_INTERLEAVE_GROUP_SIZE in GB for direct comparison with
     // group size attributes.
     iv_maxInterleaveGroupSize = MAX_INTERLEAVE_GROUP_SIZE >> 30;
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MAX_INTERLEAVE_GROUP_SIZE,
-                           FAPI_SYSTEM, iv_maxInterleaveGroupSize),
-             "Error from FAPI_ATTR_SET (ATTR_MAX_INTERLEAVE_GROUP_SIZE)");
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MAX_INTERLEAVE_GROUP_SIZE, FAPI_SYSTEM, iv_maxInterleaveGroupSize),
+             "Error setting ATTR_MAX_INTERLEAVE_GROUP_SIZE, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
 
     // Display attribute values
     FAPI_INF("EffGroupingSysAttrs: ");
@@ -339,14 +337,12 @@ fapi2::ReturnCode EffGroupingProcAttrs::getAttrs(
              (uint64_t)fapi2::current_err);
 
     // Get On Chip Controler (OCC) sandbox size
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_OCC_SANDBOX_SIZE, i_target,
-                           iv_occSandboxSize),
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_OCC_SANDBOX_SIZE, i_target, iv_occSandboxSize),
              "Error getting ATTR_PROC_OCC_SANDBOX_SIZE, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
     // Get Secure Memory (SMF) bar size
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_SMF_BAR_SIZE, i_target,
-                           iv_smfBarSize),
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_SMF_BAR_SIZE, i_target, iv_smfBarSize),
              "Error getting ATTR_PROC_SMF_BAR_SIZE, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
@@ -1415,66 +1411,56 @@ fapi2::ReturnCode EffGroupingBaseSizeData::setBaseSizeAttr(
              (uint64_t)fapi2::current_err);
 
     // Set ATTR_PROC_MEM_SIZES_ACK
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_MEM_SIZES_ACK, i_target,
-                           iv_memory_sizes_ack),
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_MEM_SIZES_ACK, i_target, iv_memory_sizes_ack),
              "Error setting ATTR_PROC_MEM_SIZES_ACK, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
     // Set ATTR_MSS_MCC_GROUP_32
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MSS_MCC_GROUP_32, i_target,
-                           io_groupData.iv_data),
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MSS_MCC_GROUP_32, i_target, io_groupData.iv_data),
              "Error setting ATTR_MSS_MCC_GROUP_32, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
     // Set ATTR_PROC_NHTM_BAR_BASE_ADDR
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_NHTM_BAR_BASE_ADDR, i_target,
-                           iv_nhtm_bar_base),
-             "Error setting ATTR_PROC_NHTM_BAR_BASE_ADDR, "
-             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_NHTM_BAR_BASE_ADDR, i_target, iv_nhtm_bar_base),
+             "Error setting ATTR_PROC_NHTM_BAR_BASE_ADDR, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
 
     // Set ATTR_PROC_CHTM_BAR_BASE_ADDR
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_CHTM_BAR_BASE_ADDR, i_target,
-                           iv_chtm_bar_bases),
-             "Error setting ATTR_PROC_CHTM_BAR_BASE_ADDR, "
-             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_CHTM_BAR_BASE_ADDR, i_target, iv_chtm_bar_bases),
+             "Error setting ATTR_PROC_CHTM_BAR_BASE_ADDR, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
 
     // Set ATTR_PROC_OCC_SANDBOX_BASE_ADDR
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_OCC_SANDBOX_BASE_ADDR, i_target,
-                           iv_occ_sandbox_base),
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_OCC_SANDBOX_BASE_ADDR, i_target, iv_occ_sandbox_base),
              "Error setting ATTR_PROC_OCC_SANDBOX_BASE_ADDR, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
     // Set ATTR_PROC_SMF_BAR_BASE_ADDR
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_SMF_BAR_BASE_ADDR, i_target,
-                           iv_smf_bar_base),
-             "Error setting ATTR_PROC_SMF_BAR_BASE_ADDR, "
-             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_SMF_BAR_BASE_ADDR, i_target, iv_smf_bar_base),
+             "Error setting ATTR_PROC_SMF_BAR_BASE_ADDR, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
 
     // Mirror mode attribute setting
     if (i_sysAttrs.iv_hwMirrorEnabled != fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_OFF)
     {
 
         // Set ATTR_PROC_MIRROR_BASES
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_MIRROR_BASES, i_target,
-                               iv_mirror_bases),
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_MIRROR_BASES, i_target, iv_mirror_bases),
                  "Error setting ATTR_PROC_MIRROR_BASES, l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
 
         // Set ATTR_PROC_MIRROR_BASES_ACK
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_MIRROR_BASES_ACK, i_target,
-                               iv_mirror_bases_ack),
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_MIRROR_BASES_ACK, i_target, iv_mirror_bases_ack),
                  "Error setting ATTR_PROC_MIRROR_BASES_ACK, l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
 
         // Set ATTR_PROC_MIRROR_SIZES
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_MIRROR_SIZES, i_target,
-                               iv_mirror_sizes),
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_MIRROR_SIZES, i_target, iv_mirror_sizes),
                  "Error setting ATTR_PROC_MIRROR_SIZES, l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
 
         // Set ATTR_PROC_MIRROR_SIZES_ACK
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_MIRROR_SIZES_ACK, i_target,
-                               iv_mirror_sizes_ack),
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_MIRROR_SIZES_ACK, i_target, iv_mirror_sizes_ack),
                  "Error setting ATTR_PROC_MIRROR_SIZES_ACK, l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
     }
@@ -3406,8 +3392,7 @@ fapi2::ReturnCode grouping_setATTR_MSS_MEM_MC_IN_GROUP(
                  ii, l_mcc_in_group[ii]);
     }
 
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MSS_MEM_MC_IN_GROUP, i_target,
-                           l_mcc_in_group),
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MSS_MEM_MC_IN_GROUP, i_target, l_mcc_in_group),
              "Error setting ATTR_MSS_MEM_MC_IN_GROUP, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
@@ -4590,6 +4575,8 @@ fapi2::ReturnCode p10_mss_eff_grouping(
     bool l_mirrorIsOn = false;
     // BAR registers values for ATTR_MEMORY_BAR_REGS
     fapi2::ATTR_MEMORY_BAR_REGS_Type l_memoryBarRegs;
+    // Used to indicate memory procedures are complete
+    fapi2::ATTR_MSS_MEM_IPL_COMPLETE_Type l_memIplComplete = fapi2::ENUM_ATTR_MSS_MEM_IPL_COMPLETE_TRUE;
 
     // Get MCC chiplets
     auto l_mccChiplets = i_target.getChildren<fapi2::TARGET_TYPE_MCC>();
@@ -4724,9 +4711,13 @@ fapi2::ReturnCode p10_mss_eff_grouping(
 
     // Write MC BAR registers data to ATTR_MEMORY_BAR_REGS
     displayMemoryBarRegs(l_memoryBarRegs);
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEMORY_BAR_REGS, i_target,
-                           l_memoryBarRegs),
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEMORY_BAR_REGS, i_target, l_memoryBarRegs),
              "Error setting ATTR_MEMORY_BAR_REGS, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+
+    // Write attribute signifying BAR calculations are complete
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MSS_MEM_IPL_COMPLETE, i_target, l_memIplComplete),
+             "Error setting ATTR_MSS_MEM_IPL_COMPLETE, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
 fapi_try_exit:

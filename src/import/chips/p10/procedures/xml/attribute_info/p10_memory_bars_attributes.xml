@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -360,10 +360,17 @@
   <id>ATTR_MSS_MEM_IPL_COMPLETE</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
-    A numerical number indicating if the memory procedures are complete.
-    written when the bars are now functional in the processor.
+    Written when memory calculations are complete. If true, memory
+    attributes are valid and can be reliably used. Note that this
+    has no implications on the processor state or memory state.
+    Set by p10_mss_eff_grouping.
+    Used by p10_query_mssinfo.
   </description>
   <valueType>uint8</valueType>
+  <enum>
+    FALSE = 0x0,
+    TRUE = 0x1
+  </enum>
   <writeable/>
   <persistRuntime/>
   <initToZero/>
