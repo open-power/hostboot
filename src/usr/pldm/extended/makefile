@@ -34,9 +34,9 @@ OBJS += bios_table.o
 OBJS += fru.o
 OBJS += platform.o
 OBJS += file_io.o
+OBJS += pdr.o
 # From ../requests/
 OBJS += pldm_fru_requests.o
-
-
+OBJS += pldm_pdr_requests.o
 
 include ${ROOTPATH}/config.mk

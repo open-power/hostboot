@@ -486,6 +486,15 @@ namespace std
                     return iv_start;
                 }
 
+                /*
+                 * direct access to the underlying array
+                 * (C++11)
+                 */
+                const T * data() const
+                {
+                    return iv_start;
+                }
+
                 // -- Modifiers -----------------------------
 
                 /*

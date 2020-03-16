@@ -1,0 +1,340 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/pldm/requests/pldm_pdr_requests.C $                   */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+
+// Standard library
+#include <vector>
+#include <cstdint>
+#include <memory>
+
+// Error logs
+#include <errl/errlentry.H>
+
+// IPC
+#include <sys/msg.h>
+
+// libpldm
+#include "../extern/platform.h"
+#include "../extern/pdr.h"
+
+// Hostboot PLDM/MCTP
+#include <mctp/mctp_message_types.H>
+#include <pldm/pldm_const.H>
+#include <pldm/requests/pldm_pdr_requests.H>
+#include <pldm/pldm_reasoncodes.H>
+#include <pldm/pldm_request.H>
+#include "../common/pldmtrace.H"
+
+// This is the name of the outgoing PLDM message queue.
+extern const char* VFS_ROOT_MSG_PLDM_REQ_OUT;
+
+namespace
+{
+
+using namespace PLDM;
+using namespace ERRORLOG;
+
+// (see DSP0248 v1.2.0, section 8 for general information about PDRs)
+struct pdr
+{
+    uint32_t record_handle;
+    std::vector<uint8_t> data;
+};
+
+/* @brief Retrieves one PDR from the BMC.
+ *
+ * @param[in] i_msgQ
+ *            A handle to the PLDM message queue
+ * @param[in/out] io_pdr_record_handle
+ *                The record handle for the PDR to retrieve. Set to the next PDR
+ *                in the repository as an output parameter.  Output not valid if
+ *                error returned.
+ * @param[out] o_pdr
+ *             The PDR from the BMC. Output not valid if error returned.
+ *             Pre-existing data will be cleared from the container.
+ * @return Error if any, otherwise nullptr.
+ */
+errlHndl_t getPDR(const msg_q_t i_msgQ,
+                  uint32_t& io_pdr_record_handle,
+                  pdr& o_pdr)
+{
+    PLDM_ENTER("getPDR");
+
+    struct get_pdr_response
+    {
+        uint8_t completion_code = 0;
+        uint32_t next_record_hndl = 0;
+        uint32_t next_data_transfer_hndl = 0;
+        uint8_t transfer_flag = 0;
+        uint16_t resp_cnt = 0;
+        std::vector<uint8_t> record_data;
+        uint8_t transfer_crc = 0;
+    };
+
+    o_pdr.data.clear();
+
+    pldm_get_pdr_req pdr_req
+    {
+        .record_handle = io_pdr_record_handle,
+        .data_transfer_handle = 0, // (0 if transfer op is FIRSTPART)
+        .transfer_op_flag = PLDM_GET_FIRSTPART, // transfer op flag
+        .request_count = SHRT_MAX, // Don't limit the size of the PDR
+        .record_change_number = 0 // record change number (0 for first request)
+    };
+
+    errlHndl_t errl = nullptr;
+
+    do
+    {
+        /* Make the getPDR request and get the response message bytes */
+
+        std::vector<uint8_t> response_bytes;
+
+        {
+            const int rc =
+                sendrecv_pldm_request<PLDM_GET_PDR_REQ_BYTES>
+                (response_bytes,
+                 i_msgQ,
+                 encode_get_pdr_req,
+                 0, // instance ID (0 for MCTP stack to auto-fill)
+                 pdr_req.record_handle,
+                 pdr_req.data_transfer_handle,
+                 pdr_req.transfer_op_flag,
+                 pdr_req.request_count,
+                 pdr_req.record_change_number);
+
+            if (rc != 0)
+            {
+                /*
+                 * @errortype  ERRL_SEV_UNRECOVERABLE
+                 * @moduleid   MOD_GET_PDR_REPO
+                 * @reasoncode RC_MSG_SEND_FAIL
+                 * @userdata1  RC returned from message send routine
+                 * @devdesc    Software problem, failed to send IPC message for getPDR request
+                 * @custdesc   A software error occurred during system boot
+                 */
+                errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                     MOD_GET_PDR_REPO,
+                                     RC_MSG_SEND_FAIL,
+                                     rc,
+                                     0,
+                                     ErrlEntry::ADD_SW_CALLOUT);
+                errl->collectTrace(PLDM_COMP_NAME);
+                break;
+            }
+        }
+
+        /* Decode the message twice; the first time, the payload buffer will be
+         * null so that the decoder will simply tell us how big the buffer
+         * should be. Then we create a suitable payload buffer and call the
+         * decoder again, this time with the real buffer so that it can fill it
+         * with data from the message. */
+
+        get_pdr_response response { };
+        uint8_t* payload_buffer = nullptr;
+
+        for (int i = 0; i < 2; ++i)
+        {
+            const pldm_completion_codes rc =
+                decode_pldm_response(decode_get_pdr_resp,
+                                     response_bytes,
+                                     &response.completion_code,
+                                     &response.next_record_hndl,
+                                     &response.next_data_transfer_hndl,
+                                     &response.transfer_flag,
+                                     &response.resp_cnt,
+                                     payload_buffer,
+                                     response.record_data.size(),
+                                     &response.transfer_crc);
+
+            if (rc != PLDM_SUCCESS)
+            {
+                /*
+                 * @errortype  ERRL_SEV_UNRECOVERABLE
+                 * @moduleid   MOD_GET_PDR_REPO
+                 * @reasoncode RC_MSG_DECODE_FAIL
+                 * @userdata1  RC returned from decode function
+                 * @userdata2  Decode iteration (1 or 2)
+                 * @devdesc    Software problem, failed to decode PLDM message
+                 * @custdesc   A software error occurred during system boot
+                 */
+                errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                     MOD_GET_PDR_REPO,
+                                     RC_MSG_DECODE_FAIL,
+                                     rc,
+                                     i + 1,
+                                     ErrlEntry::NO_SW_CALLOUT);
+
+                errl->collectTrace(PLDM_COMP_NAME);
+
+                // Call out service processor / BMC firmware as high priority
+                errl->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                          HWAS::SRCI_PRIORITY_HIGH);
+
+                // Call out Hostboot firmware as medium priority
+                errl->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                           HWAS::SRCI_PRIORITY_MED );
+                break;
+            }
+
+            response.record_data.resize(response.resp_cnt);
+            payload_buffer = response.record_data.data();
+        }
+
+        if (errl)
+        {
+            // Message decoding failed; break out of the block;
+            break;
+        }
+
+        /* Once we decode the message, then we can add the PDR to the caller's
+         * PDR byte buffer and return. */
+
+        if (response.completion_code != PLDM_SUCCESS)
+        {
+            // @TODO RTC 251835: libpldm does not have an enumeration for the
+            // REPOSITORY_UPDATE_IN_PROGRESS completion code, but if it adds
+            // that, we can retry the transfer here.
+
+            /*
+             * @errortype  ERRL_SEV_UNRECOVERABLE
+             * @moduleid   MOD_GET_PDR_REPO
+             * @reasoncode RC_BAD_COMPLETION_CODE
+             * @userdata1  Completion code
+             * @devdesc    Software problem, PLDM transaction failed
+             * @custdesc   A software error occured during system boot
+             */
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                 MOD_GET_PDR_REPO,
+                                 RC_BAD_COMPLETION_CODE,
+                                 response.completion_code,
+                                 0,
+                                 ErrlEntry::NO_SW_CALLOUT);
+
+            errl->collectTrace(PLDM_COMP_NAME);
+
+            // Call out service processor / BMC firmware as high priority
+            errl->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                      HWAS::SRCI_PRIORITY_HIGH);
+
+            // Call out Hostboot firmware as medium priority
+            errl->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                       HWAS::SRCI_PRIORITY_MED );
+            break;
+        }
+
+        /* If these assertions fail, then the other end is trying to do a
+         * multipart transfer, which we do not support. */
+
+        assert(response.transfer_flag == PLDM_START_AND_END
+               || response.transfer_flag == PLDM_START, // @TODO RTC 251836:
+                                                        // Remove this when BMC
+                                                        // fixes its code
+               "Expected PLDM response transfer flag to be PLDM_START_AND_END "
+               "got %d",
+               response.transfer_flag);
+
+        assert(response.next_data_transfer_hndl == 0,
+               "Expected PLDM next data transfer handle to be 0, got %d",
+               response.next_data_transfer_hndl);
+
+        o_pdr.data.assign(begin(response.record_data),
+                          begin(response.record_data) + response.resp_cnt);
+
+        const auto pdr_hdr = reinterpret_cast<pldm_pdr_hdr*>(o_pdr.data.data());
+        o_pdr.record_handle = le32toh(pdr_hdr->record_handle);
+
+        io_pdr_record_handle = response.next_record_hndl;
+    } while (false);
+
+    PLDM_EXIT("getPDR");
+
+    return errl;
+}
+
+/* @brief Retrieves all the BMC PDRs.
+ *
+ * @param[out] o_pdrs  The list of PDRs from the BMC
+ * @return errlHndl_t  Error if any, otherwise nullptr.
+ */
+errlHndl_t getAllPdrs(std::vector<pdr>& o_pdrs)
+{
+    constexpr uint32_t NO_MORE_PDRS = 0,
+                       GET_FIRST_PDR = 0; // 0 means "get first PDR in
+                                          // repository" in a request, and "no
+                                          // more PDRs" in a response
+
+    const msg_q_t msgQ = msg_q_resolve(VFS_ROOT_MSG_PLDM_REQ_OUT);
+    assert(msgQ != nullptr,
+           "getAllPdrs: PLDM Req Out Message queue did not resolve properly!");
+
+    uint32_t pdr_handle = GET_FIRST_PDR; // getPDR updates this for us
+    errlHndl_t errl = nullptr;
+
+    do
+    {
+        pdr result_pdr { };
+
+        errl = getPDR(msgQ, pdr_handle, result_pdr);
+
+        if (errl)
+        {
+            break;
+        }
+
+        o_pdrs.push_back(result_pdr);
+    } while (pdr_handle != NO_MORE_PDRS);
+
+    return errl;
+}
+
+}
+
+namespace PLDM
+{
+
+errlHndl_t getRemotePdrRepository(pldm_pdr_ptr& o_repo)
+{
+    pldm_pdr_ptr repo { pldm_pdr_init(), pldm_pdr_destroy };
+
+    std::vector<pdr> pdrs;
+
+    const errlHndl_t errl = getAllPdrs(pdrs);
+
+    if (!errl)
+    {
+        for (const auto& pdr : pdrs)
+        {
+            pldm_pdr_add(repo.get(),
+                         pdr.data.data(),
+                         pdr.data.size(),
+                         pdr.record_handle);
+        }
+    }
+
+    o_repo = move(repo);
+    return errl;
+}
+
+}

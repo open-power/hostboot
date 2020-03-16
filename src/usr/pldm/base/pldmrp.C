@@ -72,10 +72,7 @@ void routeInboundMessage(uint8_t* i_msg, size_t i_len)
 
     assert(l_msgQ != nullptr, "pldm inbound message queue is set to nullptr");
 
-    // set data[0] to be the length of the msg payload in extra_data except
-    // subtract 1 because we will not pass the MCTP payload type byte we
-    // processed above
-    l_msg->data[0] = i_len - sizeof(MCTP::MCTP_MSG_TYPE_PLDM);
+    l_msg->data[0] = i_len;
 
     // allocate a buffer which will be free'd by the PLDM handler
     l_msg->extra_data = malloc(l_msg->data[0]);

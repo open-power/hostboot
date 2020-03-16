@@ -1,12 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/limits.h $                                        */
+/* $Source: src/include/usr/pldm/requests/pldm_pdr_requests.H $           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
-/* [+] Google Inc.                                                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,18 +22,35 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __LIMITS_H
-#define __LIMITS_H
 
-#define KILOBYTE  (1024ul)            /**< 1 KB */
-#define MEGABYTE  (1024 * 1024ul)     /**< 1 MB */
-#define GIGABYTE  (MEGABYTE * 1024ul) /**< 1 GB */
-#define TERABYTE  (GIGABYTE * 1024ul) /**< 1 TB */
+/* @file pldm_pdr_requests.H
+ *
+ * Defines the interface for retrieving the BMC's list of PDRs.
+ */
 
-#define PAGESIZE  (4*KILOBYTE)  /**< 4 KB */
-#define PAGE_SIZE PAGESIZE
+#ifndef PLDM_PDR_REQEUSTS_H
+#define PLDM_PDR_REQUESTS_H
 
-#define INT_MAX   __INT_MAX__
-#define SHRT_MAX  __SHRT_MAX__
+#include <memory>
+#include <errl/errlentry.H>
+
+// Struct representing PDR repository (see DSP0248 v1.2.0, section 8)
+struct pldm_pdr;
+
+namespace PLDM
+{
+
+using pldm_pdr_free_t = void(*)(pldm_pdr*);
+using pldm_pdr_ptr = std::unique_ptr<pldm_pdr, pldm_pdr_free_t>;
+
+/* @brief Retrieves the PDRs from the BMC and returns the repository containing
+ *        them.
+ *
+ * @param[out] o_repo  Pointer to a new PDR repository containing the BMC PDRs.
+ * @return errlHndl_t  Error if any, otherwise nullptr.
+ */
+errlHndl_t getRemotePdrRepository(pldm_pdr_ptr& o_repo);
+
+}
 
 #endif

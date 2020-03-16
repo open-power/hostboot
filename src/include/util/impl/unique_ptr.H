@@ -145,7 +145,10 @@ namespace std
         template<typename K>
         void operator()(K value) const
         {
-            deleter_function(value);
+            if (value)
+            {
+                deleter_function(value);
+            }
         }
 
         /* This cast operator is used by the get_deleter() function of
@@ -255,8 +258,11 @@ namespace std
             */
             ~unique_ptr()
             {
-                get_deleter()(iv_ptr);
-                iv_ptr = nullptr;
+                if (iv_ptr)
+                {
+                    get_deleter()(iv_ptr);
+                    iv_ptr = nullptr;
+                }
             }
 
             /* @brief Copy-assignment operator. Deleted. */

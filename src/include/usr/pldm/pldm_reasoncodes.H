@@ -41,6 +41,7 @@ namespace PLDM
         MOD_PLDM_INVALID      = 0x00, /**< Zero is an invalid module id */
         MOD_GET_FRU_METADATA  = 0x01, // getFruRecordTableMetaData
         MOD_GET_FRU_TABLE     = 0x02, // getFruRecordTable
+        MOD_GET_PDR_REPO      = 0x03, // getRemotePdrRepository
     };
 
     enum PLDMReasonCode
@@ -50,6 +51,7 @@ namespace PLDM
         RC_UNSUPPORTED_VERSION = PLDM_COMP_ID | 0x03,
         RC_BAD_COMPLETION_CODE = PLDM_COMP_ID | 0x04,
         RC_INVALID_LENGTH      = PLDM_COMP_ID | 0x05,
-    };
+        RC_MSG_SEND_FAIL       = PLDM_COMP_ID | 0x06,
+     };
 }
 #endif
