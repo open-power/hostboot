@@ -298,6 +298,22 @@ fapi2::ReturnCode p10_setup_sbe_config(
         }
     }
 
+    {
+        fapi2::buffer<uint32_t> l_perv_ctrl0;
+        fapi2::ATTR_FUSED_CORE_MODE_Type l_attr_fused_core_mode;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FUSED_CORE_MODE, FAPI_SYSTEM, l_attr_fused_core_mode),
+                 "Error from FAPI_ATTR_GET (ATTR_FUSED_CORE_MODE)");
+
+        l_perv_ctrl0.flush<0>().setBit<FSXCOMP_FSXLOG_PERV_CTRL0_TP_OTP_SCOM_FUSED_CORE_MODE>();
+        FAPI_TRY(fapi2::putCfamRegister(i_target_chip,
+                                        (l_attr_fused_core_mode == fapi2::ENUM_ATTR_FUSED_CORE_MODE_CORE_FUSED) ?
+                                        FSXCOMP_FSXLOG_PERV_CTRL0_SET_FSI :
+                                        FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI,
+                                        l_perv_ctrl0),
+                 "Error updating Fused mode control in PERV_CTRL0");
+    }
+
     FAPI_TRY(fapi2::getCfamRegister(i_target_chip,
                                     FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_FSI,
                                     l_scratch8_reg),
