@@ -23,3 +23,8 @@ config NO_FAPI_IN_TRACE_LITE_OUTPUT
     default y
     help
         Do not output FAPI traces when CONSOLE_TRACE_LITE is enabled.
+
+config NO_FAPI_TRACE
+    default n
+    help
+        FAPI traces are not written to console or trace buffers.
