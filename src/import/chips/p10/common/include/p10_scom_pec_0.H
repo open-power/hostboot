@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -86,8 +86,8 @@ static const uint32_t CPLT_CONF0_RESERVED_22G = 22;
 static const uint32_t CPLT_CONF0_RESERVED_23G = 23;
 static const uint32_t CPLT_CONF0_CTRL_MISC_PROBE3_SEL_DC = 24;
 static const uint32_t CPLT_CONF0_CTRL_MISC_PROBE3_SEL_DC_LEN = 6;
-static const uint32_t CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_30G = 30;
-static const uint32_t CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_31G = 31;
+static const uint32_t CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC = 30;
+static const uint32_t CPLT_CONF0_TC_PHYX_REFA_REFB_CLK_SEL_DC_LEN = 2;
 static const uint32_t CPLT_CONF0_CTRL_MISC_OFLOW_FEH_SEL_DC = 32;
 static const uint32_t CPLT_CONF0_CTRL_CC_SCAN_PROTECT_DC = 33;
 static const uint32_t CPLT_CONF0_CTRL_CC_SDIS_DC_N = 34;
@@ -107,17 +107,14 @@ static const uint32_t CPLT_CONF0_TC_TOPOLOGY_MODE_DC = 47;
 static const uint32_t CPLT_CONF0_TC_TOPOLOGY_ID_DC = 48;
 static const uint32_t CPLT_CONF0_TC_TOPOLOGY_ID_DC_LEN = 4;
 static const uint32_t CPLT_CONF0_FREE_USAGE = 52;
-static const uint32_t CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_53G = 53;
-static const uint32_t CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_54G = 54;
-static const uint32_t CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_55G = 55;
-static const uint32_t CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_56G = 56;
-static const uint32_t CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_57G = 57;
+static const uint32_t CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC = 53;
+static const uint32_t CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_LEN = 5;
 static const uint32_t CPLT_CONF0_TC_PHY_LANEX_RX2TX_PAR_LB_EN_DC = 58;
 static const uint32_t CPLT_CONF0_TC_PIPE_LANEX_TX2RX_LOOPBK_DC = 59;
-static const uint32_t CPLT_CONF0_TC_PHYX_NOMINAL_VP_SEL_DC_60G = 60;
-static const uint32_t CPLT_CONF0_TC_PHYX_NOMINAL_VP_SEL_DC_61G = 61;
-static const uint32_t CPLT_CONF0_TC_PHYX_NOMINAL_VPH_SEL_DC_62G = 62;
-static const uint32_t CPLT_CONF0_TC_PHYX_NOMINAL_VPH_SEL_DC_63G = 63;
+static const uint32_t CPLT_CONF0_TC_PHYX_NOMINAL_VP_SEL_DC = 60;
+static const uint32_t CPLT_CONF0_TC_PHYX_NOMINAL_VP_SEL_DC_LEN = 2;
+static const uint32_t CPLT_CONF0_TC_PHYX_NOMINAL_VPH_SEL_DC = 62;
+static const uint32_t CPLT_CONF0_TC_PHYX_NOMINAL_VPH_SEL_DC_LEN = 2;
 // pec/reg00000.H
 
 static const uint64_t CPLT_CTRL0_RW = 0x08000000ull;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,36 +43,19 @@ static const uint64_t CPLT_CONF1_RW = 0x08000009ull;
 static const uint64_t CPLT_CONF1_WO_CLEAR = 0x08000029ull;
 static const uint64_t CPLT_CONF1_WO_OR = 0x08000019ull;
 
-static const uint32_t CPLT_CONF1_LANE_CFG_DC_0H = 0;
-static const uint32_t CPLT_CONF1_LANE_CFG_DC_1H = 1;
-static const uint32_t CPLT_CONF1_LANE_CFG_DC_2H = 2;
-static const uint32_t CPLT_CONF1_LANE_CFG_DC_3H = 3;
-static const uint32_t CPLT_CONF1_LANE_CFG_DC_4H = 4;
-static const uint32_t CPLT_CONF1_LANE_CFG_DC_5H = 5;
-static const uint32_t CPLT_CONF1_IOVALID_DC_8H = 8;
-static const uint32_t CPLT_CONF1_IOVALID_DC_9H = 9;
-static const uint32_t CPLT_CONF1_IOVALID_DC_10H = 10;
+static const uint32_t CPLT_CONF1_LANE_CFG_DC = 0;
+static const uint32_t CPLT_CONF1_LANE_CFG_DC_LEN = 2;
+static const uint32_t CPLT_CONF1_SWAP_DC = 2;
+static const uint32_t CPLT_CONF1_SWAP_DC_LEN = 3;
+static const uint32_t CPLT_CONF1_IOVALID_DC = 8;
+static const uint32_t CPLT_CONF1_IOVALID_DC_LEN = 3;
 static const uint32_t CPLT_CONF1_RATIO_OVERRIDE_DC = 11;
-static const uint32_t CPLT_CONF1_APP0_RATIO_DC_12H = 12;
-static const uint32_t CPLT_CONF1_APP0_RATIO_DC_13H = 13;
-static const uint32_t CPLT_CONF1_APP0_RATIO_DC_14H = 14;
-static const uint32_t CPLT_CONF1_APP0_RATIO_DC_15H = 15;
-static const uint32_t CPLT_CONF1_APP0_RATIO_DC_16H = 16;
-static const uint32_t CPLT_CONF1_APP1_RATIO_DC_17H = 17;
-static const uint32_t CPLT_CONF1_APP1_RATIO_DC_18H = 18;
-static const uint32_t CPLT_CONF1_APP1_RATIO_DC_19H = 19;
-static const uint32_t CPLT_CONF1_APP1_RATIO_DC_20H = 20;
-static const uint32_t CPLT_CONF1_APP1_RATIO_DC_21H = 21;
-static const uint32_t CPLT_CONF1_APP2_RATIO_DC_22H = 22;
-static const uint32_t CPLT_CONF1_APP2_RATIO_DC_23H = 23;
-static const uint32_t CPLT_CONF1_APP2_RATIO_DC_24H = 24;
-static const uint32_t CPLT_CONF1_APP2_RATIO_DC_25H = 25;
-static const uint32_t CPLT_CONF1_APP2_RATIO_DC_26H = 26;
-static const uint32_t CPLT_CONF1_APP3_RATIO_DC_27H = 27;
-static const uint32_t CPLT_CONF1_APP3_RATIO_DC_28H = 28;
-static const uint32_t CPLT_CONF1_APP3_RATIO_DC_29H = 29;
-static const uint32_t CPLT_CONF1_APP3_RATIO_DC_30H = 30;
-static const uint32_t CPLT_CONF1_APP3_RATIO_DC_31H = 31;
+static const uint32_t CPLT_CONF1_APP0_RATIO_DC = 12;
+static const uint32_t CPLT_CONF1_APP0_RATIO_DC_LEN = 5;
+static const uint32_t CPLT_CONF1_APP1_RATIO_DC = 17;
+static const uint32_t CPLT_CONF1_APP1_RATIO_DC_LEN = 5;
+static const uint32_t CPLT_CONF1_APP2_RATIO_DC = 22;
+static const uint32_t CPLT_CONF1_APP2_RATIO_DC_LEN = 5;
 // pec/reg00006.H
 
 static const uint64_t CPLT_CTRL1_RW = 0x08000001ull;

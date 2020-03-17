@@ -1978,6 +1978,7 @@ static const uint32_t TP_TPBR_PSI_WRAP_RX_CH_FSM_REG_RX_CH_FSM_LEN = 2;
 
 static const uint64_t TP_TPBR_PSIHB_ESB_CI_BASE = 0x03011d16ull;
 
+static const uint32_t TP_TPBR_PSIHB_ESB_CI_BASE_ESB_BASE_ENABLE_64K_PAGE = 1;
 static const uint32_t TP_TPBR_PSIHB_ESB_CI_BASE_ESB_BASE = 8;
 static const uint32_t TP_TPBR_PSIHB_ESB_CI_BASE_ESB_BASE_LEN = 40;
 static const uint32_t TP_TPBR_PSIHB_ESB_CI_BASE_ESB_BASE_VALID = 63;

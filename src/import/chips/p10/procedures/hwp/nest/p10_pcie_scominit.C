@@ -82,9 +82,7 @@ p10_pcie_scominit(
     {
         l_data = 0;
         FAPI_TRY(PREP_CPLT_CONF1_WO_OR(l_pec_target));
-        SET_CPLT_CONF1_IOVALID_DC_8H(l_data);
-        SET_CPLT_CONF1_IOVALID_DC_9H(l_data);
-        SET_CPLT_CONF1_IOVALID_DC_10H(l_data);
+        SET_CPLT_CONF1_IOVALID_DC(0x7ull, l_data);
         FAPI_TRY(PUT_CPLT_CONF1_WO_OR(l_pec_target, l_data));
     }
 
