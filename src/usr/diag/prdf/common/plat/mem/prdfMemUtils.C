@@ -268,13 +268,19 @@ void cleanupChnlAttns<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     #ifdef __HOSTBOOT_MODULE // only do cleanup in Hostboot, no-op in FSP
 
-    // Clear the associated FIR bits for all attention types. DSTLFIR[0:7]
+    // Get the subchannel pos (0:1)
+    TargetHandle_t ocmb = i_chip->getTrgt();
+    TargetHandle_t omi = getConnectedParent( ocmb, TYPE_OMI );
+    uint8_t chnlPos = getTargetPosition(omi) % MAX_OMI_PER_MCC;
+
+    // Clear the associated FIR bits for all attention types. DSTLFIR[0:3]
+    // for subchannel 0 or DSTLFIR[4:7] for subchannel 1
     ExtensibleChip * mcc = getConnectedParent( i_chip, TYPE_MCC );
 
     SCAN_COMM_REGISTER_CLASS * reg = mcc->getRegister( "DSTLFIR_AND" );
 
     reg->setAllBits();
-    reg->SetBitFieldJustified( 0, 8, 0 );
+    reg->SetBitFieldJustified( chnlPos*4, 4, 0 );
     reg->Write();
 
     #endif // Hostboot only
@@ -445,6 +451,7 @@ bool __queryUcsOcmb( ExtensibleChip * i_ocmb )
 
     bool o_activeAttn = false;
 
+    /* TODO
     // We can't use the GLOBAL_CS_FIR. It will not clear automatically when a
     // channel has failed because the hardware clocks have stopped. Also, since
     // it is a virtual register there really is no way to clear it. Fortunately
@@ -459,6 +466,7 @@ bool __queryUcsOcmb( ExtensibleChip * i_ocmb )
     {
         o_activeAttn = fir->IsBitSet(2); // Checkstop bit.
     }
+    */
 
     return o_activeAttn;
 }
@@ -730,11 +738,13 @@ void __cleanupChnlFail<TYPE_OMI>( TargetHandle_t i_omi,
         reg->Write();
 
 
+        /* TODO
         // To ensure FSP ATTN doesn't think there is an active attention on this
         // OCMB, manually clear the interrupt status register.
         reg = ocmbChip->getRegister( "INTER_STATUS_REG" );
         reg->clearAllBits(); // Blindly clear everything
         reg->Write();
+        */
 
         //   During runtime, send a dynamic memory deallocation message.
         //   During Memory Diagnostics, tell MDIA to stop pattern tests.
