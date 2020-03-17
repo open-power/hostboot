@@ -48,6 +48,7 @@ MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/dimm/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/dimm/ddr4/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/ecc/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/eff_config/
+MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/omi/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/fir/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/freq/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/mc/

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p10/procedures/hwp/io/p10_omi_train_check.C $ */
+/* $Source: src/import/chips/p10/procedures/hwp/memory/p10_omi_train_check.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -30,68 +30,33 @@
 /// *HW FW Maintainer: Ilya Smirnov <ismirno@us.ibm.com>
 /// *HW Consumed by  : HB
 //------------------------------------------------------------------------------
+#ifndef _P10_OMI_TRAIN_CHECK_H_
+#define _P10_OMI_TRAIN_CHECK_H_
+
+//------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include <p10_omi_train_check.H>
-#include <p10_scom_omi.H>
+#include <fapi2.H>
+
 
 //------------------------------------------------------------------------------
-// Function definitions
+// Function prototypes
 //------------------------------------------------------------------------------
+typedef fapi2::ReturnCode (*p10_omi_train_check_FP_t)(
+    const fapi2::Target<fapi2::TARGET_TYPE_OMI>&);
 
-fapi2::ReturnCode
-p10_omi_train_check(
-    const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target)
+extern "C"
 {
-    using namespace scomt::omi;
-    FAPI_DBG("Start");
 
-    // Const
-    constexpr uint8_t STATE_MACHINE_SUCCESS = 0b111;  // This value is from Lonny Lambrecht
-    constexpr uint8_t MAX_LOOP_COUNT = 20;  // Retry times
+///
+/// @brief Check training state of OMI
+///
+/// @param[in] i_target Reference to OMI endpoint target
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+    fapi2::ReturnCode p10_omi_train_check(
+        const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target);
 
-    // Declares variables
-    fapi2::buffer<uint64_t> l_omi_status;
-    fapi2::buffer<uint64_t> l_omi_training_status;
-    uint64_t l_state_machine_state = 0;
-    uint8_t l_tries = 0;
+} // extern "C"
 
-    FAPI_TRY(GET_STATUS(i_target, l_omi_status));
-    GET_STATUS_TRAINING_STATE_MACHINE(l_omi_status, l_state_machine_state);
-
-    while (l_tries < MAX_LOOP_COUNT && l_state_machine_state != STATE_MACHINE_SUCCESS)
-    {
-        // Delay
-        fapi2::delay(100, 50000000);
-
-        // Check OMI training status
-        FAPI_TRY(GET_STATUS(i_target, l_omi_status));
-        GET_STATUS_TRAINING_STATE_MACHINE(l_omi_status, l_state_machine_state);
-
-        // Note: this is very useful debug information while trying to debug training during polling
-        FAPI_TRY(GET_TRAINING_STATUS(i_target, l_omi_training_status));
-        l_tries++;
-    }
-
-    FAPI_ASSERT(l_state_machine_state == STATE_MACHINE_SUCCESS,
-                fapi2::P10_OMI_TRAIN_ERR()
-                .set_TARGET(i_target)
-                .set_EXPECTED_SM_STATE(STATE_MACHINE_SUCCESS)
-                .set_ACTUAL_SM_STATE(l_state_machine_state)
-                .set_DL0_STATUS(l_omi_status)
-                .set_DL0_TRAINING_STATUS(l_omi_training_status),
-                "OMI Training Failure, expected state:%d/actual state:%d",
-                STATE_MACHINE_SUCCESS,
-                l_state_machine_state
-               );
-
-    FAPI_INF("End p10_omi_train_check, expected state:%d/actual state:%d, DL0_STATUS:0x%016llx, DL0_TRAINING_STATUS:0x%016llx",
-             STATE_MACHINE_SUCCESS,
-             l_state_machine_state,
-             l_omi_status,
-             l_omi_training_status);
-
-fapi_try_exit:
-    FAPI_DBG("End");
-    return fapi2::current_err;
-}
+#endif // _P10_OMI_TRAIN_CHECK_H_
