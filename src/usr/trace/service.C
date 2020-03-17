@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -103,6 +103,14 @@ namespace TRACE
                 return;
             }
         }
+
+        #ifdef CONFIG_NO_FAPI_TRACE
+        // Skip FAPI trace
+        if (!strcmp( i_td->iv_compName, "FAPI" ))
+        {
+            return;
+        }
+        #endif
 
         #ifdef CONFIG_CONSOLE_OUTPUT_TRACE
         {
@@ -376,6 +384,14 @@ namespace TRACE
                 return;
             }
         }
+
+        #ifdef CONFIG_NO_FAPI_TRACE
+        // Skip FAPI trace
+        if (!strcmp( i_td->iv_compName, "FAPI" ))
+        {
+            return;
+        }
+        #endif
 
         #ifdef CONFIG_CONSOLE_OUTPUT_TRACE
         {
