@@ -139,13 +139,13 @@ errlHndl_t mmioSetup()
 
             // Map the device with a kernel call, each device, the MC, is 16 GB
             uint64_t l_virtMcAddr = reinterpret_cast<uint64_t>
-                         (mmio_dev_map(reinterpret_cast<void *>(l_mcBaseOffset),
+                         (mmio_dev_map(reinterpret_cast<void *>(l_physMcAddr),
                                        16*GIGABYTE));
 
             TRACFCOMP ( g_trac_mmio, "MC%.02X (0x%.08X) MMIO BAR PHYSICAL ADDR "
-                        "= 0x%lX     VIRTUAL ADDR = 0x%lX" ,
+                        "= 0x%lX, MC BASE OFFSET= 0x%lX, VIRTUAL ADDR = 0x%lX" ,
                         l_mcChipUnit, get_huid(l_mcTarget),
-                        l_mcBaseOffset, l_virtMcAddr);
+                        l_physMcAddr, l_mcBaseOffset, l_virtMcAddr);
 
 
             // set VM_ADDR on each OCMB

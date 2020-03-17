@@ -30,13 +30,12 @@ MODULE = istep12
 P10_PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p10/procedures
 #P9_PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
 P10_IO_HWP_PATH     = $(P10_PROCEDURES_PATH)/hwp/io
-P10_MEMORY_HWP_PATH = $(P10_PROCEDURES_PATH)/hwp/memory
 #P9_IO_HWP_PATH     = $(P9_PROCEDURES_PATH)/hwp/io
 #P9_PERV_HWP_PATH   = $(P9_PROCEDURES_PATH)/hwp/perv
 P10_NEST_HWP_PATH   = $(P10_PROCEDURES_PATH)/hwp/nest
 #P9_NEST_HWP_PATH   = $(P9_PROCEDURES_PATH)/hwp/nest
-#P9_INITFILE_PATH   = $(P9_PROCEDURES_PATH)/hwp/initfiles
-#P9_MEMORY_HWP_PATH = $(P9_PROCEDURES_PATH)/hwp/memory
+P10_INITFILE_PATH   = $(P10_PROCEDURES_PATH)/hwp/initfiles
+P10_MEMORY_HWP_PATH = $(P10_PROCEDURES_PATH)/hwp/memory
 
 #P9A_MSS_HWP_PATH      = ${ROOTPATH}/src/import/chips/p9a/procedures/hwp/memory/
 #P9A_MSS_ACCESSOR_PATH = ${ROOTPATH}/obj/genfiles/chips/p9a/procedures/hwp/memory/lib/
@@ -58,15 +57,15 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/p10/procedures/hwp/memory/lib/
 #EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 #EXTRAINCDIR += $(P9_PROCEDURES_PATH)/hwp/ffdc/
 EXTRAINCDIR += $(P10_IO_HWP_PATH)
-EXTRAINCDIR += $(P10_MEMORY_HWP_PATH)
 EXTRAINCDIR += $(P10_NEST_HWP_PATH)
 #EXTRAINCDIR += $(P9_PERV_HWP_PATH)
-#EXTRAINCDIR += $(P9_INITFILE_PATH)
-#EXTRAINCDIR += ${P9_MEMORY_HWP_PATH}
+EXTRAINCDIR += $(P10_INITFILE_PATH)
+EXTRAINCDIR += ${P10_MEMORY_HWP_PATH}
 #EXTRAINCDIR += ${P9A_MSS_HWP_PATH}
 EXTRAINCDIR += ${EXPLORER_HWP_PATH}
 EXTRAINCDIR += ${EXPLORER_HWP_PATH}/lib
@@ -80,8 +79,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 VPATH += $(P10_NEST_HWP_PATH)
 #VPATH += $(P9_PERV_HWP_PATH)
 VPATH += $(P10_IO_HWP_PATH)
-VPATH += $(P10_MEMORY_HWP_PATH)
-#VPATH += $(P9_INITFILE_PATH)
+VPATH += $(P10_INITFILE_PATH)
 #VAPTH += ${ROOTPATH}/src/usr/fapi2
 
 OBJS += call_mss_getecid.o
@@ -93,13 +91,8 @@ OBJS += call_omi_setup.o
 OBJS += call_omi_io_run_training.o
 OBJS += call_omi_post_trainadv.o
 OBJS += call_omi_train_check.o
-#OBJS += call_proc_cen_framelock.o
-#OBJS += call_host_startprd_dmi.o
 OBJS += call_host_attnlisten_memb.o
-#OBJS += call_cen_set_inband_addr.o
-
-# HWP objects needed to set inband addr in istep 12
-#OBJS+=p9c_set_inband_addr.o
+OBJS += call_host_omi_init.o
 
 #Required before all the <procedure>.mk are included
 include ${ROOTPATH}/procedure.rules.mk
@@ -121,7 +114,7 @@ include ${ROOTPATH}/procedure.rules.mk
 VPATH += ${EXPLORER_HWP_PATH}
 VPATH += ${EXPLORER_HWP_PATH}/lib/workarounds
 #VPATH += $(if $(CONFIG_AXONE),${EXPLORER_OMI_HWP_PATH},)
-#VPATH += $(if $(CONFIG_AXONE),${P9_MEMORY_HWP_PATH},)
+VPATH += ${P10_MEMORY_HWP_PATH}
 #VPATH += $(if $(CONFIG_AXONE),${GEM_PROCEDURES_PATH}/hwp/memory,)
 
 #OBJS  += $(if $(CONFIG_AXONE),exp_omi_utils.o,)
@@ -134,9 +127,10 @@ OBJS += p10_omi_scominit.o
 OBJS += p10_fbc_utils.o
 OBJS += p10_omi_setup_bars.o
 #OBJS  += $(if $(CONFIG_AXONE),p9a_addr_ext.o,)
-#OBJS  += $(if $(CONFIG_AXONE),exp_omi_init.o,)
-#OBJS  += $(if $(CONFIG_AXONE),p9a_omi_init.o,)
-#OBJS  += $(if $(CONFIG_AXONE),p9a_omi_init_scom.o,)
+OBJS += exp_omi_init.o
+OBJS += p10_omi_init.o
+OBJS += p10_omi_init_scom.o
+OBJS += p10_disable_ocmb_i2c.o
 #OBJS += $(if $(CONFIG_AXONE),p9a_omi_io_scom.o,)
 #OBJS += $(if $(CONFIG_AXONE),p9a_omic_io_scom.o,)
 #OBJS += $(if $(CONFIG_AXONE),p9a_io_omi_scominit.o,)

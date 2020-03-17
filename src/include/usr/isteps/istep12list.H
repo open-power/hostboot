@@ -253,12 +253,12 @@ const   TaskInfo    g_istep12[]  =   {
                 ISTEP_12::call_host_attnlisten_memb,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-/*        {
+        {
                 ISTEPNAME(12,11,"host_omi_init"),
                 ISTEP_12::call_host_omi_init,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-        {
+/*        {
                 ISTEPNAME(12,12,"update_omi_firmware"),
                 ISTEP_12::call_update_omi_firmware,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
