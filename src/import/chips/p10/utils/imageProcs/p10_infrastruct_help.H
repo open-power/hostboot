@@ -38,9 +38,10 @@
 //
 // Various image/ring buffer sizes. Must be used by all users (VBU, FSP, HB, HBI, Cronus)
 //
-const uint32_t  MAX_SBE_SEEPROM_SIZE    = 4 * 64 * 1024; // Max SBE Seeprom size
-const uint32_t  MAX_SEEPROM_IMAGE_SIZE  = 4 * ((64 * 1024) / 9 * 8) -
-        256; // Max Seeprom image size, excl ECC bits (4 banks).
+const uint32_t  PCPLS = 1; // Physical Chips Per Logical Seeprom
+const uint32_t  SEEPROM_PHYS_CHIP_SIZE = (512 * 1024);
+const uint32_t  MAX_SBE_SEEPROM_SIZE    = PCPLS * SEEPROM_PHYS_CHIP_SIZE;
+const uint32_t  MAX_SEEPROM_IMAGE_SIZE  = PCPLS * (SEEPROM_PHYS_CHIP_SIZE / 9 * 8) - 256; // excl ECC bits
 const uint32_t  MAX_RT_IMAGE_SIZE       = 1024 * 1024;   // Max Runtime size.
 
 // The below buffer sizes are governed by the longest p10 engd ring, n1_fure, which is
@@ -50,7 +51,7 @@ const uint32_t  MAX_RING_BUF_SIZE       = 650000;        // Max ring buffer size
 const uint32_t  MAX_RING_BUF_SIZE_TOOL  = 450000;        // Max ring buf size for tools.
 
 const uint32_t  MAX_OVERRIDES_SIZE      = 2 * 1024;      // Max overrides ring section size.
-const uint32_t  MAX_HBBL_SIZE           = 20 * 1024;     // Max hbbl bin section size.
+const uint32_t  MAX_HBBL_SIZE           = 24 * 1024;     // Max hbbl bin section size.
 
 const uint32_t  MAX_NOOF_DD_LEVELS_IN_IMAGE = 20;
 
