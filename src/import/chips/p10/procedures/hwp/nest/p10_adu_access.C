@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,25 +63,14 @@ fapi2::ReturnCode p10_adu_access(
     // Local variables
     ////////////////////////////////////////////////////////
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
-    adu_operationFlag l_aduFlag;
-    bool l_expBusyState;
+    adu_operationFlag l_flags;
 
     ////////////////////////////////////////////////////////
-    // Read input flags and fix unsupported conditions
-    // Note: Auto increment is only supported for dma
+    // Process and check input arguments/flags
     ////////////////////////////////////////////////////////
-    l_aduFlag.getFlag(i_flags);
 
-    // Verify flag is valid
-    FAPI_ASSERT(l_aduFlag.isFlagValid(),
-                fapi2::P10_ADU_UTILS_INVALID_FLAG()
-                .set_FLAGS(i_flags),
-                "p10_adu_access: there was an invalid argument passed in when building flag.  Check error trace!");
-
-    if (l_aduFlag.getOperationType() != adu_operationFlag::DMA_PARTIAL)
-    {
-        l_aduFlag.setAutoIncrement(false);
-    }
+    FAPI_TRY(p10_adu_utils_check_args(i_target, i_address, i_flags, l_flags),
+             "Error from p10_adu_utils_check_args");
 
     ////////////////////////////////////////////////////////
     // Exit if operation request is for a pre/post switch
@@ -89,9 +78,9 @@ fapi2::ReturnCode p10_adu_access(
     // actually broadcast a fabric transaction
     ////////////////////////////////////////////////////////
 
-    if ((l_aduFlag.getOperationType() == adu_operationFlag::PRE_SWITCH_AB) ||
-        (l_aduFlag.getOperationType() == adu_operationFlag::PRE_SWITCH_CD) ||
-        (l_aduFlag.getOperationType() == adu_operationFlag::POST_SWITCH))
+    if ((l_flags.getOperationType() == adu_operationFlag::PRE_SWITCH_AB) ||
+        (l_flags.getOperationType() == adu_operationFlag::PRE_SWITCH_CD) ||
+        (l_flags.getOperationType() == adu_operationFlag::POST_SWITCH))
     {
         goto fapi_try_exit;
     }
@@ -100,67 +89,42 @@ fapi2::ReturnCode p10_adu_access(
     // Clear autoinc flag if enabled and on last granule
     ////////////////////////////////////////////////////////
 
-    if (l_aduFlag.getAutoIncrement() && i_lastGranule)
+    if (l_flags.getAutoIncrement() && i_lastGranule)
     {
-        FAPI_TRY(p10_adu_utils_clear_autoinc(i_target), "Error from p10_adu_utils_clear_autoinc");
+        FAPI_TRY(p10_adu_utils_clear_autoinc(i_target),
+                 "Error from p10_adu_utils_clear_autoinc");
     }
 
     ////////////////////////////////////////////////////////
     // Execute the read/write operation
     ////////////////////////////////////////////////////////
 
-    if (l_aduFlag.isAddressOnly())
+    if (l_flags.isAddressOnly())
     {
         FAPI_TRY(fapi2::delay(P10_ADU_ACCESS_ADU_OPER_HW_NS_DELAY, P10_ADU_ACCESS_ADU_OPER_SIM_CYCLE_DELAY),
                  "Error with fapiDelay while waiting for an address-only adu operation");
+
+        FAPI_TRY(p10_adu_utils_status_check(i_target, false, true));
     }
     else
     {
-        // If we are doing a read operation read the data
         if (i_rnw)
         {
-            FAPI_TRY(p10_adu_utils_adu_read(i_target, i_firstGranule, i_address, l_aduFlag, io_data),
+            FAPI_TRY(p10_adu_utils_adu_read(i_target, i_firstGranule, i_lastGranule, i_address, l_flags, io_data),
                      "Error doing an adu read via p10_adu_utils_adu_read");
         }
-        // Otherwise this is a write operation write the data
         else
         {
-            FAPI_TRY(p10_adu_utils_adu_write(i_target, i_firstGranule, i_address, l_aduFlag, io_data),
+            FAPI_TRY(p10_adu_utils_adu_write(i_target, i_firstGranule, i_lastGranule, i_address, l_flags, io_data),
                      "Error doing an adu write via p10_adu_utils_adu_write");
         }
     }
 
-    ////////////////////////////////////////////////////////
-    // Check the adu status after operation is complete
-    ////////////////////////////////////////////////////////
-
-    // If we are not in fastmode or this is the last granule, check the status
-    if (!l_aduFlag.getFastMode() || i_lastGranule)
+    // Cleanup the adu if the last read/write operation
+    if (i_lastGranule)
     {
-        // If using autoincrement and this is not the last granule we expect the busy bit to still be set
-        if ((l_aduFlag.getAutoIncrement()) && !i_lastGranule)
-        {
-            l_expBusyState = true;
-        }
-        // Otherwise we expect the busy bit to be cleared
-        else
-        {
-            l_expBusyState = false;
-        }
-
-        // Only do the status check if this is not a ci operation
-        if (l_aduFlag.getOperationType() != adu_operationFlag::CACHE_INHIBIT)
-        {
-            FAPI_TRY(p10_adu_utils_status_check(i_target, l_expBusyState, l_aduFlag.isAddressOnly()),
-                     "Error checking adu status via p10_adu_utils_status_check");
-        }
-
-        // Cleanup the adu if the last read/write operation
-        if (i_lastGranule)
-        {
-            FAPI_TRY(p10_adu_utils_cleanup_adu(i_target),
-                     "Error cleaning up adu via p10_adu_utils_cleanup_adu");
-        }
+        FAPI_TRY(p10_adu_utils_cleanup_adu(i_target),
+                 "Error cleaning up adu via p10_adu_utils_cleanup_adu");
     }
 
 fapi_try_exit:
@@ -184,10 +148,10 @@ fapi_try_exit:
 
     l_rc = fapi2::current_err; // Save current_err
 
-    if (l_rc && l_aduFlag.getOperFailCleanup())
+    if (l_rc && l_flags.getOperFailCleanup())
     {
         (void) p10_adu_utils_reset_adu(i_target);
-        (void) p10_adu_utils_manage_lock(i_target, false, false, l_aduFlag.getNumLockAttempts());
+        (void) p10_adu_utils_manage_lock(i_target, false, false, l_flags.getNumLockAttempts());
     }
 
     FAPI_DBG("Exiting...");

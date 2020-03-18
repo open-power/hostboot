@@ -131,7 +131,7 @@ extern "C"
             {
                 o_aduFlags.setTransactionSize(adu_operationFlag::TSIZE_1);
             }
-            else if (i_bytes == 8)
+            else if ((i_bytes % 8) == 0)
             {
                 o_aduFlags.setTransactionSize(adu_operationFlag::TSIZE_8);
             }

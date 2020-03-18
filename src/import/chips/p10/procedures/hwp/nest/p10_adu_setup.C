@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,28 +55,19 @@ fapi2::ReturnCode p10_adu_setup(
     // Local variables
     ////////////////////////////////////////////////////////
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
-    adu_operationFlag l_aduFlag;
-    uint32_t l_flags;
+    adu_operationFlag l_flags;
     bool l_aduIsDirty = false;
 
+    // set default output value, modify only if handling
+    // auto-increment
+    o_numGranules = 1;
+
     ////////////////////////////////////////////////////////
-    // Read input flags and fix unsupported conditions
-    // Note: Auto increment is only supported for dma
+    // Process and check input arguments/flags
     ////////////////////////////////////////////////////////
-    l_aduFlag.getFlag(i_flags);
 
-    // Verify flag is valid
-    FAPI_ASSERT(l_aduFlag.isFlagValid(),
-                fapi2::P10_ADU_UTILS_INVALID_FLAG()
-                .set_FLAGS(i_flags),
-                "p10_adu_setup: there was an invalid argument passed in when building flag.  Check error trace!");
-
-    if (l_aduFlag.getOperationType() != adu_operationFlag::DMA_PARTIAL)
-    {
-        l_aduFlag.setAutoIncrement(false);
-    }
-
-    l_flags = l_aduFlag.setFlag();
+    FAPI_TRY(p10_adu_utils_check_args(i_target, i_address, i_flags, l_flags),
+             "Error from p10_adu_utils_check_args");
 
     ////////////////////////////////////////////////////////
     // For pre/post switch operations, modify the adu
@@ -85,54 +76,40 @@ fapi2::ReturnCode p10_adu_setup(
     // any following checks
     ////////////////////////////////////////////////////////
 
-    if ((l_aduFlag.getOperationType() == adu_operationFlag::PRE_SWITCH_AB) ||
-        (l_aduFlag.getOperationType() == adu_operationFlag::PRE_SWITCH_CD) ||
-        (l_aduFlag.getOperationType() == adu_operationFlag::POST_SWITCH))
+    if ((l_flags.getOperationType() == adu_operationFlag::PRE_SWITCH_AB) ||
+        (l_flags.getOperationType() == adu_operationFlag::PRE_SWITCH_CD) ||
+        (l_flags.getOperationType() == adu_operationFlag::POST_SWITCH))
     {
         FAPI_TRY(p10_adu_utils_set_switch_action(i_target,
-                 (l_aduFlag.getOperationType() == adu_operationFlag::PRE_SWITCH_AB),
-                 (l_aduFlag.getOperationType() == adu_operationFlag::PRE_SWITCH_CD)),
+                 (l_flags.getOperationType() == adu_operationFlag::PRE_SWITCH_AB),
+                 (l_flags.getOperationType() == adu_operationFlag::PRE_SWITCH_CD)),
                  "Error from p10_adu_utils_set_switch_action");
-        o_numGranules = 1;
         goto fapi_try_exit;
     }
 
     ////////////////////////////////////////////////////////
-    // Process coherent read/write options
-    // Note: Check the address alignment and figure out how
-    //       many granules can be requested before setup
-    //       needs to be run again
+    // Adjust granule count for auto-increment cases only
     ////////////////////////////////////////////////////////
 
-    if ((l_aduFlag.getOperationType() == adu_operationFlag::CACHE_INHIBIT) ||
-        (l_aduFlag.getOperationType() == adu_operationFlag::DMA_PARTIAL))
-    {
-        FAPI_TRY(p10_adu_utils_check_args(i_target, i_address, l_flags),
-                 "Error from p10_adu_utils_check_args");
-    }
-
-    if (l_aduFlag.getAutoIncrement() == true)
+    if (l_flags.getAutoIncrement() == true)
     {
         FAPI_TRY(p10_adu_utils_get_num_granules(i_address, o_numGranules),
                  "Error from p10_adu_utils_get_num_granules");
     }
-    else
-    {
-        o_numGranules = 1;
-    }
 
     ////////////////////////////////////////////////////////
     // Check fabric state, acquire lock, setup adu command
-    // Note: Only check fabric state if not doing a pbinit
+    // Note: Skip fabric state check for pbinit, since
+    ///      the fabric will potentially be unitialized
     ////////////////////////////////////////////////////////
 
-    if (l_aduFlag.getOperationType() != adu_operationFlag::PB_INIT_OPER)
+    if (l_flags.getOperationType() != adu_operationFlag::PB_INIT_OPER)
     {
         FAPI_TRY(p10_adu_utils_check_fbc_state(i_target),
                  "Error from p10_adu_utils_check_fbc_status");
     }
 
-    FAPI_TRY(p10_adu_utils_manage_lock(i_target, l_aduFlag.getLockControl(), true, l_aduFlag.getNumLockAttempts()),
+    FAPI_TRY(p10_adu_utils_manage_lock(i_target, l_flags.getLockControl(), true, l_flags.getNumLockAttempts()),
              "Error from p10_adu_utils_manage_lock");
 
     // Indicate that ADU lock needs to be released in case we fail after this point
@@ -162,10 +139,10 @@ fapi_try_exit:
 
     l_rc = fapi2::current_err; // Save current_err
 
-    if (l_rc && l_aduIsDirty && l_aduFlag.getOperFailCleanup())
+    if (l_rc && l_aduIsDirty && l_flags.getOperFailCleanup())
     {
         (void) p10_adu_utils_reset_adu(i_target);
-        (void) p10_adu_utils_manage_lock(i_target, false, false, l_aduFlag.getNumLockAttempts());
+        (void) p10_adu_utils_manage_lock(i_target, false, false, l_flags.getNumLockAttempts());
     }
 
     FAPI_DBG("Exiting...");

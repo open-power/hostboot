@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -112,6 +112,8 @@
   <ffdc>TARGET</ffdc>
   <ffdc>ADDRESS</ffdc>
   <ffdc>STATUSREG</ffdc>
+  <ffdc>EXP_BUSY_STATE</ffdc>
+  <ffdc>ADDR_ONLY_OPER</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_ADU_STATUS_REGISTER</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -112,61 +112,61 @@ extern"C"
 
             /// @brief Get the adu operation type setting
             /// @return iv_operType
-            inline const OperationType_t getOperationType(void)
+            inline OperationType_t getOperationType(void) const
             {
                 return iv_operType;
             }
             /// @brief Get the auto increment setting, for dma ops only
             /// @return iv_autoInc
-            inline const bool getAutoIncrement(void)
+            inline bool getAutoIncrement(void) const
             {
                 return iv_autoInc;
             }
             /// @brief Get the adu lock control setting
             /// @return iv_lockPick
-            inline const bool getLockControl(void)
+            inline bool getLockControl(void) const
             {
                 return iv_lockPick;
             }
             /// @brief Get number of lock attempts setting
             /// @return iv_numLockAttempts
-            inline const uint8_t getNumLockAttempts(void)
+            inline uint8_t getNumLockAttempts(void) const
             {
                 return iv_numLockAttempts;
             }
             /// @brief Get the cleanup for failed operation setting
             /// @return iv_cleanUp
-            inline const bool getOperFailCleanup(void)
+            inline bool getOperFailCleanup(void) const
             {
                 return iv_cleanUp;
             }
             /// @brief Get the fast mode setting
             /// @return iv_fastMode
-            inline const bool getFastMode(void)
+            inline bool getFastMode(void) const
             {
                 return iv_fastMode;
             }
             /// @brief Get the itag collection mode
             /// @return iv_itag
-            inline const bool getItagMode(void)
+            inline bool getItagMode(void) const
             {
                 return iv_itag;
             }
             /// @brief Get the ecc mode setting
             /// @return iv_ecc
-            inline const bool getEccMode(void)
+            inline bool getEccMode(void) const
             {
                 return iv_ecc;
             }
             /// @brief Get the overwrite ecc/itag data mode
             /// @return iv_eccItagOverwrite
-            inline const bool getEccItagOverrideMode(void)
+            inline bool getEccItagOverrideMode(void) const
             {
                 return iv_eccItagOverwrite;
             }
             /// @brief Get the transaction size
             /// @return iv_transSize
-            inline const Transaction_size_t getTransactionSize(void)
+            inline Transaction_size_t getTransactionSize(void) const
             {
                 return iv_transSize;
             }
@@ -282,7 +282,7 @@ extern"C"
 
             /// @brief Return flag valid status
             /// @return true if flag is valid
-            inline bool isFlagValid()
+            inline bool isFlagValid() const
             {
                 return (!iv_flagInvalid);
             }
@@ -398,18 +398,45 @@ extern"C"
         }
 
         // Debug trace
-        FAPI_DBG("adu_operationFlag::setFlag() // Flag value: 0x%.8X", l_aduFlag);
-        FAPI_DBG("    iv_operType 0x%.8X", iv_operType);
-        FAPI_DBG("    iv_autoInc 0x%.8X", iv_autoInc);
-        FAPI_DBG("    iv_lockPick 0x%.8X", iv_lockPick);
-        FAPI_DBG("    iv_numLockAttempts 0x%.8X", iv_numLockAttempts);
-        FAPI_DBG("    iv_cleanUp 0x%.8X", iv_cleanUp);
-        FAPI_DBG("    iv_fastMode 0x%.8X", iv_fastMode);
-        FAPI_DBG("    iv_itag 0x%.8X", iv_itag);
-        FAPI_DBG("    iv_ecc 0x%.8X", iv_ecc);
-        FAPI_DBG("    iv_eccItagOverwrite 0x%.8X", iv_eccItagOverwrite);
-        FAPI_DBG("    iv_transSize 0x%.8X", iv_transSize);
-        FAPI_DBG("    iv_flagInvalid 0x%.8X", iv_flagInvalid);
+        FAPI_DBG("adu_operationFlag::setFlag() // Flag value: 0x%.8X iv_operType 0x%.8X iv_TransSize 0x%.8X", l_aduFlag,
+                 iv_operType, iv_transSize);
+
+        if (iv_autoInc)
+        {
+            FAPI_DBG("    iv_autoInc 0x%.8X", iv_autoInc);
+        }
+
+        if (iv_lockPick)
+        {
+            FAPI_DBG("    iv_lockPick 0x%.8X", iv_lockPick);
+        }
+
+        if (iv_numLockAttempts)
+        {
+            FAPI_DBG("    iv_numLockAttempts 0x%.8X", iv_numLockAttempts);
+        }
+
+        if (iv_cleanUp)
+        {
+            FAPI_DBG("    iv_cleanUp 0x%.8X", iv_cleanUp);
+        }
+
+        if (iv_fastMode)
+        {
+            FAPI_DBG("    iv_fastMode 0x%.8X", iv_fastMode);
+        }
+
+        if (iv_eccItagOverwrite)
+        {
+            FAPI_DBG("    iv_itag 0x%.8X", iv_itag);
+            FAPI_DBG("    iv_ecc 0x%.8X", iv_ecc);
+            FAPI_DBG("    iv_eccItagOverwrite 0x%.8X", iv_eccItagOverwrite);
+        }
+
+        if (iv_flagInvalid)
+        {
+            FAPI_DBG("    iv_flagInvalid 0x%.8X", iv_flagInvalid);
+        }
 
         return l_aduFlag;
     }
@@ -462,18 +489,46 @@ extern"C"
         iv_flagInvalid = (i_flag & FLAG_ADU_INVALID_BIT);
 
         // Debug trace
-        FAPI_DBG("adu_operationFlag::getFlag() // Flag value: 0x%.8X", i_flag);
-        FAPI_DBG("    iv_operType 0x%.8X", iv_operType);
-        FAPI_DBG("    iv_autoInc 0x%.8X", iv_autoInc);
-        FAPI_DBG("    iv_lockPick 0x%.8X", iv_lockPick);
-        FAPI_DBG("    iv_numLockAttempts 0x%.8X", iv_numLockAttempts);
-        FAPI_DBG("    iv_cleanUp 0x%.8X", iv_cleanUp);
-        FAPI_DBG("    iv_fastMode 0x%.8X", iv_fastMode);
-        FAPI_DBG("    iv_itag 0x%.8X", iv_itag);
-        FAPI_DBG("    iv_ecc 0x%.8X", iv_ecc);
-        FAPI_DBG("    iv_eccItagOverwrite 0x%.8X", iv_eccItagOverwrite);
-        FAPI_DBG("    iv_transSize 0x%.8X", iv_transSize);
-        FAPI_DBG("    iv_flagInvalid 0x%.8X", iv_flagInvalid);
+        FAPI_DBG("adu_operationFlag::getFlag() // Flag value: 0x%.8X iv_operType 0x%.8X iv_TransSize 0x%.8X", i_flag,
+                 iv_operType, iv_transSize);
+
+        if (iv_autoInc)
+        {
+            FAPI_DBG("    iv_autoInc 0x%.8X", iv_autoInc);
+        }
+
+        if (iv_lockPick)
+        {
+            FAPI_DBG("    iv_lockPick 0x%.8X", iv_lockPick);
+        }
+
+        if (iv_numLockAttempts)
+        {
+            FAPI_DBG("    iv_numLockAttempts 0x%.8X", iv_numLockAttempts);
+        }
+
+        if (iv_cleanUp)
+        {
+            FAPI_DBG("    iv_cleanUp 0x%.8X", iv_cleanUp);
+        }
+
+        if (iv_fastMode)
+        {
+            FAPI_DBG("    iv_fastMode 0x%.8X", iv_fastMode);
+        }
+
+        if (iv_eccItagOverwrite)
+        {
+            FAPI_DBG("    iv_itag 0x%.8X", iv_itag);
+            FAPI_DBG("    iv_ecc 0x%.8X", iv_ecc);
+            FAPI_DBG("    iv_eccItagOverwrite 0x%.8X", iv_eccItagOverwrite);
+        }
+
+        if (iv_flagInvalid)
+        {
+            FAPI_DBG("    iv_flagInvalid 0x%.8X", iv_flagInvalid);
+        }
+
         return;
     }
 
@@ -481,14 +536,17 @@ extern"C"
 // Function prototypes
 //------------------------------------------------------------------------------
 
-/// @brief Checks that the address is cacheline aligned and within the fabric real address range
+/// @brief Validate input arguments/flags
 /// @param[in] i_target         Reference to processor chip target
 /// @param[in] i_address        Starting address for ADU operation
+/// @param[in] i_flags          Input flag request
+/// @param[in] o_flags          Structure representing ADU operation parameters
 /// @return FAPI_RC_SUCCESS if arguments are valid
     fapi2::ReturnCode p10_adu_utils_check_args(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         const uint64_t i_address,
-        const uint32_t i_flags);
+        const uint32_t i_flags,
+        adu_operationFlag& o_flags);
 
 /// @brief Ensures that fabric is initialized and stop control is not set (by checkstop/mode switch),
 ///        which if set would prohibit fabric commands from being broadcasted
@@ -525,47 +583,50 @@ extern"C"
 /// @param[in] i_target         Reference to processor chip target
 /// @param[in] i_address        Starting address for ADU operation
 /// @param[in] i_rnw            Whether the operation is a read or write
-/// @param[in] i_flags          Flags that contain information that the ADU needs to know to set up registers
+/// @param[in] i_flags          Structure representing ADU operation parameters
 /// @return FAPI_RC_SUCCESS if setting up the adu registers is a success
     fapi2::ReturnCode p10_adu_utils_setup_adu(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         const uint64_t i_address,
         const bool i_rnw,
-        const uint32_t i_flags);
+        const adu_operationFlag& i_flags);
 
 /// @brief Starts the operation that is set up in the adu command register
 /// @param[in] i_target         Reference to processor chip target
-/// @param[in] i_flags          Flags that contain information that the ADU needs to know to set up registers
 /// @return FAPI_RC_SUCCESS if setting up the adu registers is a success
     fapi2::ReturnCode p10_adu_utils_start_op(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 /// @brief Uses the ADU to do a coherent write operation
 /// @param[in] i_target         Reference to processor chip target
-/// @param[in] i_firstGranule   The first 8B granule that we are writing
+/// @param[in] i_firstGranule   The first 8B granule that we are writing?
+/// @param[in] i_lastGranule    The last 8B granule that we are writing?
 /// @param[in] i_address        Address for this write
-/// @param[in] i_aduOper        Contains information that the ADU needs to know to set up registers
+/// @param[in] i_flags          Structure representing ADU operation parameters
 /// @param[in] i_write_data     The data that is to be written to the ADU
 /// @return FAPI_RC_SUCCESS if writing the ADU is a success
     fapi2::ReturnCode p10_adu_utils_adu_write(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         const bool i_firstGranule,
+        const bool i_lastGranule,
         const uint64_t i_address,
-        adu_operationFlag& i_aduOper,
+        const adu_operationFlag& i_flags,
         const uint8_t i_write_data[]);
 
 /// @brief Uses the ADU to do a coherent read operation
 /// @param[in] i_target         Reference to processor chip target
-/// @param[in] i_firstGranule   the first 8B granule that we are reading
+/// @param[in] i_firstGranule   The first 8B granule that we are reading?
+/// @param[in] i_lastGranule    The last 8B granule that we are reading?
 /// @param[in] i_address        address for this read
-/// @param[in] i_aduOper        Contains information that the ADU needs to know to set up registers
+/// @param[in] i_flags          Structure representing ADU operation parameters
 /// @param[out] o_read_data     the data that is read from the ADU
 /// @return FAPI_RC_SUCCESS if reading the ADU is a success
     fapi2::ReturnCode p10_adu_utils_adu_read(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         const bool i_firstGranule,
+        const bool i_lastGranule,
         const uint64_t i_address,
-        adu_operationFlag& i_aduOper,
+        const adu_operationFlag& i_flags,
         uint8_t o_read_data[]);
 
 /// @brief Resets ADU state machines and status registers
@@ -586,26 +647,10 @@ extern"C"
     fapi2::ReturnCode p10_adu_utils_clear_autoinc(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
-/// @brief Polls the busy bit of the adu status register until it reaches expected state
-/// @param[in] i_target         Reference to processor chip target
-/// @param[in] i_expBusyState   True to wait for busy bit to be set, false to wait for busy bit to be clear
-/// @return FAPI_RC_SUCCESS if the status check is a success
-    fapi2::ReturnCode p10_adu_utils_busy_bit_poll(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        const bool i_expBusyState);
-
-/// @brief Checks the errors of the adu status register
-/// @param[in] i_target         Reference to processor chip target
-/// @param[in] i_addrOnlyOper   Indicate the check is called after an Address-only operation
-/// @return FAPI_RC_SUCCESS if the status check is a success
-    fapi2::ReturnCode p10_adu_utils_status_errors_check(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        const bool i_addrOnlyOper);
-
 /// @brief Checks the entire status of the adu
 /// @param[in] i_target         Reference to processor chip target
+/// @param[in] i_expBusyState   Expected state of ADU status busy bit.
 /// @param[in] i_addrOnlyOper   Indicate the check is called after an Address-only operation
-/// @param[out] o_busyStatus    ADU status busy bit.
 /// @return FAPI_RC_SUCCESS if the status check is a success
     fapi2::ReturnCode p10_adu_utils_status_check(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
@@ -627,7 +672,7 @@ extern"C"
 /// @brief Appends input data to the fapi2 return code if we got an error back
 /// @param[in] i_address        Address for the read or write
 /// @param[in] i_rnw            Whether the operation is a read or write
-/// @param[in] i_flags          Flags that contain information that the PBA needs to know to set up registers
+/// @param[in] i_flags          Flags that contain information that the ADU needs to know to set up registers
 /// @param[inout] o_rc          FAPI error code to be appended with input data
     void p10_adu_utils_append_input_data(
         const uint64_t i_address,

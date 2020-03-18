@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -100,56 +100,90 @@ const uint32_t PROC_ADU_UTILS_ADU_STATUS_MAX_WAIT_POLLS  = 10;
 fapi2::ReturnCode p10_adu_utils_check_args(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint64_t i_address,
-    const uint32_t i_flags)
+    const uint32_t i_flags,
+    adu_operationFlag& o_flags)
 {
     FAPI_DBG("Entering...");
 
-    adu_operationFlag l_myAduFlag;
-    adu_operationFlag::Transaction_size_t l_transSize;
-    uint32_t l_actualTransSize;
+    // process flags and fix unsupported/hazardous options
+    o_flags.getFlag(i_flags);
 
-    // Get the transaction size
-    l_myAduFlag.getFlag(i_flags);
+    // Verify flag is valid
+    FAPI_ASSERT(o_flags.isFlagValid(),
+                fapi2::P10_ADU_UTILS_INVALID_FLAG()
+                .set_FLAGS(i_flags),
+                "p10_adu_setup: there was an invalid argument passed in when building flag.  Check error trace!");
 
-    l_transSize = l_myAduFlag.getTransactionSize();
+    // validate transaction size/address and input flag requests
+    //  for cache-inhibited/DMA partial operations types that rely on these fields
+    if ((o_flags.getOperationType() == adu_operationFlag::CACHE_INHIBIT) ||
+        (o_flags.getOperationType() == adu_operationFlag::DMA_PARTIAL))
+    {
+        adu_operationFlag::Transaction_size_t l_transSize;
+        uint32_t l_actualTransSize;
 
-    // Translate the transaction size to the actual size (1, 2, 4, or 8 bytes)
-    if (l_transSize == adu_operationFlag::TSIZE_1)
-    {
-        l_actualTransSize = 1;
-    }
-    else if (l_transSize == adu_operationFlag::TSIZE_2)
-    {
-        l_actualTransSize = 2;
-    }
-    else if (l_transSize == adu_operationFlag::TSIZE_4)
-    {
-        l_actualTransSize = 4;
+        // Get the transaction size
+        l_transSize = o_flags.getTransactionSize();
+
+        // Translate the transaction size to the actual size (1, 2, 4, or 8 bytes)
+        if (l_transSize == adu_operationFlag::TSIZE_1)
+        {
+            l_actualTransSize = 1;
+        }
+        else if (l_transSize == adu_operationFlag::TSIZE_2)
+        {
+            l_actualTransSize = 2;
+        }
+        else if (l_transSize == adu_operationFlag::TSIZE_4)
+        {
+            l_actualTransSize = 4;
+        }
+        else
+        {
+            l_actualTransSize = 8;
+        }
+
+        // Check the address alignment
+        FAPI_ASSERT(!(i_address & (l_actualTransSize - 1)),
+                    fapi2::P10_ADU_UTILS_INVALID_ARGS()
+                    .set_TARGET(i_target)
+                    .set_ADDRESS(i_address)
+                    .set_MAXADDRESS(P10_FBC_UTILS_FBC_MAX_ADDRESS)
+                    .set_TSIZE(l_actualTransSize)
+                    .set_FLAGS(i_flags),
+                    "Address is not cacheline aligned!");
+
+        // Make sure the address is within the ADU bounds
+        FAPI_ASSERT(i_address <= P10_FBC_UTILS_FBC_MAX_ADDRESS,
+                    fapi2::P10_ADU_UTILS_INVALID_ARGS()
+                    .set_TARGET(i_target)
+                    .set_ADDRESS(i_address)
+                    .set_MAXADDRESS(P10_FBC_UTILS_FBC_MAX_ADDRESS)
+                    .set_TSIZE(l_actualTransSize)
+                    .set_FLAGS(i_flags),
+                    "Address exceeds supported fabric real address range!");
+
+        // ignore fastmode requests for cache inhibited ops
+        // this ensures per-transaction completion checks occur for these
+        // operations, which may be long running to MMIO resources
+        if (o_flags.getOperationType() == adu_operationFlag::CACHE_INHIBIT)
+        {
+            o_flags.setFastMode(false);
+        }
+
+        // ingore auto-increment requests for non-8B transactions
+        // ADU auto-increment HW only supports 8B stride
+        if (l_transSize != adu_operationFlag::TSIZE_8)
+        {
+            o_flags.setAutoIncrement(false);
+        }
+
     }
     else
     {
-        l_actualTransSize = 8;
+        o_flags.setAutoIncrement(false);
+        o_flags.setFastMode(false);
     }
-
-    // Check the address alignment
-    FAPI_ASSERT(!(i_address & (l_actualTransSize - 1)),
-                fapi2::P10_ADU_UTILS_INVALID_ARGS()
-                .set_TARGET(i_target)
-                .set_ADDRESS(i_address)
-                .set_MAXADDRESS(P10_FBC_UTILS_FBC_MAX_ADDRESS)
-                .set_TSIZE(l_actualTransSize)
-                .set_FLAGS(i_flags),
-                "Address is not cacheline aligned!");
-
-    // Make sure the address is within the ADU bounds
-    FAPI_ASSERT(i_address <= P10_FBC_UTILS_FBC_MAX_ADDRESS,
-                fapi2::P10_ADU_UTILS_INVALID_ARGS()
-                .set_TARGET(i_target)
-                .set_ADDRESS(i_address)
-                .set_MAXADDRESS(P10_FBC_UTILS_FBC_MAX_ADDRESS)
-                .set_TSIZE(l_actualTransSize)
-                .set_FLAGS(i_flags),
-                "Address exceeds supported fabric real address range!");
 
 fapi_try_exit:
     FAPI_DBG("Exiting...");
@@ -272,17 +306,16 @@ fapi2::ReturnCode p10_adu_utils_setup_adu(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint64_t i_address,
     const bool i_rnw,
-    const uint32_t i_flags)
+    const adu_operationFlag& i_flags)
 {
     using namespace scomt::proc;
 
     // Print the address and the flag along with start
-    FAPI_DBG("Entering... Addr 0x%.16llX, Flag 0x%.8X", i_address, i_flags);
+    FAPI_DBG("Entering... Addr 0x%.16llX", i_address);
 
     fapi2::buffer<uint64_t> altd_cmd_reg_data(0);
     fapi2::buffer<uint64_t> altd_addr_reg_data(i_address);
     fapi2::buffer<uint64_t> altd_option_reg_data(0);
-    adu_operationFlag l_myAduFlag;
     adu_operationFlag::OperationType_t l_operType;
     adu_operationFlag::Transaction_size_t l_transSize;
     uint32_t l_altd_cmd_reg_fbc_ttype = 0;
@@ -294,9 +327,8 @@ fapi2::ReturnCode p10_adu_utils_setup_adu(
              "Error writing to ALTD_ADDR Register");
 
     // Process input flag
-    l_myAduFlag.getFlag(i_flags);
-    l_operType = l_myAduFlag.getOperationType();
-    l_transSize = l_myAduFlag.getTransactionSize();
+    l_operType = i_flags.getOperationType();
+    l_transSize = i_flags.getTransactionSize();
 
     // Now work on getting the altd cmd register set up; go through all the bits and set/clear as needed
     // this routine assumes the lock is held by the caller, preserve this locked state
@@ -325,7 +357,7 @@ fapi2::ReturnCode p10_adu_utils_setup_adu(
         }
 
         // If auto-inc set the auto-inc bit
-        if (l_myAduFlag.getAutoIncrement() == true)
+        if (i_flags.getAutoIncrement() == true)
         {
             SET_TP_TPBR_AD_ALTD_CMD_REG_FBC_ALTD_AUTO_INC(altd_cmd_reg_data);
         }
@@ -539,8 +571,9 @@ fapi_try_exit:
 fapi2::ReturnCode p10_adu_utils_adu_write(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const bool i_firstGranule,
+    const bool i_lastGranule,
     const uint64_t i_address,
-    adu_operationFlag& i_aduOper,
+    const adu_operationFlag& i_flags,
     const uint8_t i_write_data[])
 {
     using namespace scomt::proc;
@@ -554,11 +587,12 @@ fapi2::ReturnCode p10_adu_utils_adu_write(
     int eccIndex = 8;
 
     // Get ADU operation info from flag
-    bool l_itagMode          = i_aduOper.getItagMode();
-    bool l_eccMode           = i_aduOper.getEccMode();
-    bool l_overrideEccMode   = i_aduOper.getEccItagOverrideMode();
-    bool l_autoIncMode       = i_aduOper.getAutoIncrement();
+    bool l_itagMode          = i_flags.getItagMode();
+    bool l_eccMode           = i_flags.getEccMode();
+    bool l_overrideEccMode   = i_flags.getEccItagOverrideMode();
+    bool l_autoIncMode       = i_flags.getAutoIncrement();
     bool l_accessForceEccReg = (l_itagMode | l_eccMode | l_overrideEccMode);
+    bool l_fastMode          = i_flags.getFastMode();
 
     // Dump ADU write settings
     FAPI_DBG("Modes: ITAG 0x%.8X, ECC 0x%.8X, OVERRIDE_ECC 0x%.8X, AUTOINC 0x%.8X",
@@ -615,20 +649,14 @@ fapi2::ReturnCode p10_adu_utils_adu_write(
         FAPI_TRY(p10_adu_utils_start_op(i_target), "Error returned from p10_adu_utils_start_op");
     }
 
-    // If this is a ci operation we want to poll the status register for completion
-    if (i_aduOper.getOperationType() == adu_operationFlag::CACHE_INHIBIT)
-    {
-        FAPI_TRY(p10_adu_utils_busy_bit_poll(i_target, false),
-                 "Error checking adu busy bit via p10_adu_utils_busy_bit_poll");
+    // Delay to allow time for the write to progress
+    FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_OPER_HW_NS_DELAY, PROC_ADU_UTILS_ADU_OPER_SIM_CYCLE_DELAY), "fapiDelay error");
 
-        FAPI_TRY(p10_adu_utils_status_errors_check(i_target, false),
-                 "Error checking adu status errors via p10_adu_utils_status_errors_check");
-    }
-    // If it is not a ci operation we just want to delay for a while and then this write is done
-    else
+
+    // check status
+    if (!l_fastMode || i_lastGranule)
     {
-        // Delay to allow time for the write to progress
-        FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_OPER_HW_NS_DELAY, PROC_ADU_UTILS_ADU_OPER_SIM_CYCLE_DELAY), "fapiDelay error");
+        FAPI_TRY(p10_adu_utils_status_check(i_target, l_autoIncMode && !i_lastGranule, false));
     }
 
 fapi_try_exit:
@@ -642,8 +670,9 @@ fapi_try_exit:
 fapi2::ReturnCode p10_adu_utils_adu_read(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const bool i_firstGranule,
+    const bool i_lastGranule,
     const uint64_t i_address,
-    adu_operationFlag& i_aduOper,
+    const adu_operationFlag& i_flags,
     uint8_t o_read_data[])
 {
     using namespace scomt::proc;
@@ -657,9 +686,10 @@ fapi2::ReturnCode p10_adu_utils_adu_read(
     int eccIndex = 8;
 
     // Get ADU operation info from flag
-    bool l_itagMode    = i_aduOper.getItagMode();
-    bool l_eccMode     = i_aduOper.getEccMode();
-    bool l_autoIncMode = i_aduOper.getAutoIncrement();
+    bool l_itagMode    = i_flags.getItagMode();
+    bool l_eccMode     = i_flags.getEccMode();
+    bool l_autoIncMode = i_flags.getAutoIncrement();
+    bool l_fastMode    = i_flags.getFastMode();
 
     // Dump ADU read settings
     FAPI_DBG("Modes: ITAG 0x%.8X, ECC 0x%.8X, AUTOINC 0x%.8X",
@@ -671,19 +701,13 @@ fapi2::ReturnCode p10_adu_utils_adu_read(
         FAPI_TRY(p10_adu_utils_start_op(i_target), "Error returned from p10_adu_utils_start_op");
     }
 
-    // If this is a ci operation we want to poll the status register for completion
-    if (i_aduOper.getOperationType() == adu_operationFlag::CACHE_INHIBIT)
-    {
-        FAPI_TRY(p10_adu_utils_busy_bit_poll(i_target, false),
-                 "Error checking adu busy bit via p10_adu_utils_busy_bit_poll");
+    // Delay to allow time for the read to progress
+    FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_OPER_HW_NS_DELAY, PROC_ADU_UTILS_ADU_OPER_SIM_CYCLE_DELAY), "fapiDelay error");
 
-        FAPI_TRY(p10_adu_utils_status_errors_check(i_target, false),
-                 "Error checking adu status errors via p10_adu_utils_status_errors_check");
-    }
-    else
+    // check before every read?
+    if (!l_fastMode)
     {
-        // Delay to allow time for the read to progress
-        FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_OPER_HW_NS_DELAY, PROC_ADU_UTILS_ADU_OPER_SIM_CYCLE_DELAY), "fapiDelay error");
+        FAPI_TRY(p10_adu_utils_status_check(i_target, l_autoIncMode && !(i_firstGranule && i_lastGranule), false));
     }
 
     // If we want to include the itag and ecc data collect them before the read
@@ -715,6 +739,12 @@ fapi2::ReturnCode p10_adu_utils_adu_read(
     for (int i = 0; i < 8; i++)
     {
         o_read_data[i] = (altd_data_reg_data >> (56 - (i * 8))) & 0xFFull;
+    }
+
+    // check after last read?
+    if (i_lastGranule)
+    {
+        FAPI_TRY(p10_adu_utils_status_check(i_target, false, false));
     }
 
 fapi_try_exit:
@@ -775,64 +805,15 @@ fapi_try_exit:
 }
 
 ////////////////////////////////////////////////////////
-// p10_adu_utils_busy_bit_poll
+// p10_adu_utils_status_check
 ////////////////////////////////////////////////////////
-fapi2::ReturnCode p10_adu_utils_busy_bit_poll(
+fapi2::ReturnCode p10_adu_utils_status_check(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const bool i_expBusyState)
-{
-    using namespace scomt::proc;
-
-    FAPI_DBG("Entering...");
-
-    fapi2::buffer<uint64_t> l_statusReg(0);
-    bool l_expectedState = false;
-    bool l_actBusyState = false;
-
-    // Check for a successful status max_wait_poll times
-    for (uint32_t i = 0; i < PROC_ADU_UTILS_ADU_STATUS_MAX_WAIT_POLLS; i++)
-    {
-        // Read ADU status register
-        FAPI_TRY(GET_TP_TPBR_AD_ALTD_STATUS_REG(i_target, l_statusReg),
-                 "Error reading from ALTD_STATUS Register");
-
-        l_actBusyState = GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_BUSY(l_statusReg);
-
-        // Form condition to determine whether busy bit is in the correct state
-        l_expectedState = (i_expBusyState && l_actBusyState) || (!i_expBusyState && !l_actBusyState);
-
-        // Break from poll if state of busy bit is as expected
-        if (l_expectedState)
-        {
-            FAPI_DBG("Hooray busy bit is in the expected state!");
-            break;
-        }
-
-        // Otherwise delay before polling the busy bit again
-        FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_STATUS_HW_NS_DELAY, PROC_ADU_UTILS_ADU_STATUS_SIM_CYCLE_DELAY),
-                 "Error with fapiDelay while waiting for adu busy bit to reach the desired state");
-    }
-
-    // Throw an error if busy bit is still in incorrect state at this point
-    FAPI_ASSERT(l_expectedState,
-                fapi2::P10_ADU_STATUS_REG_BAD_BUSY_STATE()
-                .set_TARGET(i_target)
-                .set_EXPBUSYBIT(i_expBusyState)
-                .set_ACTBUSYBIT(l_actBusyState),
-                "State of the adu busy bit remained in an unexpected state");
-
-fapi_try_exit:
-    FAPI_DBG("Exiting...");
-    return fapi2::current_err;
-}
-
-////////////////////////////////////////////////////////
-// p10_adu_utils_status_errors_check
-////////////////////////////////////////////////////////
-fapi2::ReturnCode p10_adu_utils_status_errors_check(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const bool i_expBusyState,
     const bool i_addrOnlyOper)
 {
+    FAPI_DBG("Entering...");
+
     using namespace scomt::proc;
 
     FAPI_DBG("Entering...");
@@ -882,6 +863,15 @@ fapi2::ReturnCode p10_adu_utils_status_errors_check(
             l_statusError |= !GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_DATA_DONE(l_statusReg);
         }
 
+        if (i_expBusyState)
+        {
+            l_statusError |= !GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_BUSY(l_statusReg);
+        }
+        else
+        {
+            l_statusError |= GET_TP_TPBR_AD_ALTD_STATUS_REG_FBC_ALTD_BUSY(l_statusReg);
+        }
+
         // Break out of checking status max_wait_poll times if status register is clean
         if (!l_statusError)
         {
@@ -908,31 +898,10 @@ fapi2::ReturnCode p10_adu_utils_status_errors_check(
     FAPI_ASSERT(l_statusError == false,
                 fapi2::P10_ADU_STATUS_REG_UNEXPECTED_ERR()
                 .set_TARGET(i_target)
-                .set_STATUSREG(l_statusReg),
-                "Unexpected errors in ADU Status Registers");
-
-fapi_try_exit:
-    FAPI_DBG("Exiting...");
-    return fapi2::current_err;
-}
-
-////////////////////////////////////////////////////////
-// p10_adu_utils_status_check
-////////////////////////////////////////////////////////
-fapi2::ReturnCode p10_adu_utils_status_check(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const bool i_expBusyState,
-    const bool i_addrOnlyOper)
-{
-    FAPI_DBG("Entering...");
-
-    // Poll busy bit to be in expected state
-    FAPI_TRY(p10_adu_utils_busy_bit_poll(i_target, i_expBusyState),
-             "Error returned from p10_adu_utils_busy_bit_poll");
-
-    // Check status register for any errors
-    FAPI_TRY(p10_adu_utils_status_errors_check(i_target, i_addrOnlyOper),
-             "Error retruned from p10_adu_utils_status_errors_check");
+                .set_STATUSREG(l_statusReg)
+                .set_EXP_BUSY_STATE(i_expBusyState)
+                .set_ADDR_ONLY_OPER(i_addrOnlyOper),
+                "Unexpected state in ADU Status Registers");
 
 fapi_try_exit:
     FAPI_DBG("Exiting...");
