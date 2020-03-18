@@ -758,7 +758,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_R
 
             // All others reserved
         };
-        const auto l_ocmb = i_efd_data->get_ocmb_target();
+        const auto l_ocmb = i_efd_data->get_target();
 
         FAPI_TRY(i_efd_data->phy_odt_impedance(l_odt_impedance));
         // Map SPD value to desired setting
@@ -842,7 +842,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_D
 
             // All others reserved
         };
-        const auto l_ocmb = i_efd_data->get_ocmb_target();
+        const auto l_ocmb = i_efd_data->get_target();
 
         FAPI_TRY(i_efd_data->phy_drive_impedance_pull_up(l_phy_drv_imp_pu));
         // Map SPD value to desired setting
@@ -927,7 +927,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_D
 
             // All others reserved
         };
-        const auto l_ocmb = i_efd_data->get_ocmb_target();
+        const auto l_ocmb = i_efd_data->get_target();
 
         FAPI_TRY(i_efd_data->phy_drive_impedance_pull_down(l_phy_drv_imp_pd));
         // Map SPD value to desired setting
@@ -1053,7 +1053,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_D
 
             // All others reserved
         };
-        const auto l_ocmb = i_efd_data->get_ocmb_target();
+        const auto l_ocmb = i_efd_data->get_target();
 
         FAPI_TRY(i_efd_data->atx_impedance(l_atx_impedance));
         // Map SPD value to desired setting
@@ -1177,7 +1177,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_D
 
             // All others reserved
         };
-        const auto l_ocmb = i_efd_data->get_ocmb_target();
+        const auto l_ocmb = i_efd_data->get_target();
 
         FAPI_TRY(i_efd_data->ck_impedance(l_ck_impedance));
         // Map SPD value to desired setting
@@ -1301,7 +1301,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_R
 
             // All others reserved
         };
-        const auto l_ocmb = i_efd_data->get_ocmb_target();
+        const auto l_ocmb = i_efd_data->get_target();
 
         FAPI_TRY(i_efd_data->alert_odt_impedance(l_alert_odt_imp));
         // Map SPD value to desired setting
@@ -1372,7 +1372,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
             {0b0110, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_NOM_OHM240},
             // All others reserved
         };
-        const auto l_ocmb = i_efd_data->get_ocmb_target();
+        const auto l_ocmb = i_efd_data->get_target();
 
         switch(i_efd_data->get_rank())
         {
@@ -1469,7 +1469,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
             {0b0011, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_WR_OHM240},
             // All others reserved
         };
-        const auto l_ocmb = i_efd_data->get_ocmb_target();
+        const auto l_ocmb = i_efd_data->get_target();
 
         switch(i_efd_data->get_rank())
         {
@@ -1571,7 +1571,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
             {0b0111, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM240},
             // All others reserved
         };
-        const auto l_ocmb = i_efd_data->get_ocmb_target();
+        const auto l_ocmb = i_efd_data->get_target();
 
         switch(i_efd_data->get_rank())
         {
@@ -1769,7 +1769,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
             {2, fapi2::ENUM_ATTR_MEM_SI_DRAM_DRV_IMP_DQ_DQS_OHM48},
         };
 
-        const auto l_ocmb = i_efd_data->get_ocmb_target();
+        const auto l_ocmb = i_efd_data->get_target();
 
         attr_integral_type l_dram_dic = 0;
         FAPI_TRY(i_efd_data->dram_dic(l_dram_dic))
@@ -1831,7 +1831,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_ODT_
     {
         uint8_t l_value = 0;
 
-        const auto l_ocmb = i_efd_data->get_ocmb_target();
+        const auto l_ocmb = i_efd_data->get_target();
 
         switch(i_efd_data->get_rank())
         {
@@ -1922,7 +1922,7 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_ODT_
     {
         uint8_t l_value = 0;
 
-        const auto l_ocmb = i_efd_data->get_ocmb_target();
+        const auto l_ocmb = i_efd_data->get_target();
 
         switch(i_efd_data->get_rank())
         {

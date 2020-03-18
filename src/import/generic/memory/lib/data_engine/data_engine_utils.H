@@ -214,7 +214,7 @@ struct get<T, std::shared_ptr<efd::base_decoder>>
     ///
     static fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> target(const std::shared_ptr<efd::base_decoder>& i_data)
     {
-        return mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_data->get_ocmb_target())[0];
+        return mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_data->get_target())[0];
     }
 };
 
@@ -239,7 +239,7 @@ inline fapi2::ReturnCode update_data(const std::shared_ptr<efd::base_decoder>& i
                                      const FFDC i_ffdc_code,
                                      T (&o_data)[X][Y])
 {
-    const auto l_ocmb = i_efd_data->get_ocmb_target();
+    const auto l_ocmb = i_efd_data->get_target();
 
     // mss::index of rank number will % 4 (RANKS_PER_DIMM) to get us the corresponding dimm
     const auto l_dimm_index = i_efd_data->get_rank() / mss::MAX_RANK_PER_DIMM;
