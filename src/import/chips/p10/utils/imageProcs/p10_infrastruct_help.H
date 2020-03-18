@@ -66,9 +66,9 @@ const uint32_t  MAX_NOOF_DD_LEVELS_IN_IMAGE = 20;
         #define MY_ERR(...) { printf(__VA_ARGS__); }
         #define MY_DBG(...) { printf(__VA_ARGS__); }
     #else
-        #define MY_INF(_fmt_, _args_...) printf(_fmt_, ##_args_)
+        #define MY_INF(_fmt_, _args_...) if (getenv("PRINT_INFO") != NULL) printf(_fmt_, ##_args_)
         #define MY_ERR(_fmt_, _args_...) printf(_fmt_, ##_args_)
-        #define MY_DBG(_fmt_, _args_...) printf(_fmt_, ##_args_)
+        #define MY_DBG(_fmt_, _args_...) if (getenv("PRINT_DEBUG") != NULL) printf(_fmt_, ##_args_)
     #endif
 #endif
 

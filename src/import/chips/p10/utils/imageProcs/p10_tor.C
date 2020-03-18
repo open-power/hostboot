@@ -98,7 +98,11 @@ int _tor_access_ring( void*          io_ringSection,   // Ring section ptr
 
     if (rc)
     {
-        MY_ERR("ringid_get_chipletProps() failed w/rc=0x%08x\n", rc);
+        if (rc != TOR_INVALID_CHIPLET_TYPE)
+        {
+            MY_ERR("ringid_get_chipletProps() failed w/rc=0x%08x\n", rc);
+        }
+
         return rc;
     }
 
