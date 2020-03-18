@@ -83,13 +83,16 @@ enum regType
 //FIR register offset from base
 enum FIROffset
 {
-    BASE_WAND_INCR  = 1,
-    BASE_WOR_INCR   = 2,
     MASK_INCR       = 3,
     MASK_WAND_INCR  = 4,
     MASK_WOR_INCR   = 5,
     ACTION0_INCR    = 6,
-    ACTION1_INCR    = 7
+    ACTION1_INCR    = 7,
+    EQ_MASK_INCR       = 4,
+    EQ_MASK_WAND_INCR  = 5,
+    EQ_MASK_WOR_INCR   = 6,
+    EQ_ACTION0_INCR    = 8,
+    EQ_ACTION1_INCR    = 12,
 };
 
 // Target type
@@ -124,6 +127,8 @@ class PMFir
         uint64_t iv_action0_address;
         uint64_t iv_action1_address;
         uint64_t iv_mask_address;
+        uint64_t iv_mask_and_address;
+        uint64_t iv_mask_or_address;
 
         // Flags if class value was modified
         bool iv_fir_write;
@@ -193,6 +198,8 @@ PMFir<FIRTYPE_OCC_LFIR, fapi2::TARGET_TYPE_PROC_CHIP>::PMFir(
     iv_action0_address = iv_fir_address + ACTION0_INCR;
     iv_action1_address = iv_fir_address + ACTION1_INCR;
     iv_mask_address = iv_fir_address + MASK_INCR;
+    iv_mask_and_address = iv_fir_address + MASK_WAND_INCR;
+    iv_mask_or_address = iv_fir_address + MASK_WOR_INCR;
     iv_proc = i_target;
     iv_targetType = PROC_TARGET;
     iv_fir_write = false;
@@ -216,6 +223,8 @@ PMFir<FIRTYPE_PBAO_LFIR, fapi2::TARGET_TYPE_PROC_CHIP>::PMFir(
     iv_action0_address = iv_fir_address + ACTION0_INCR;
     iv_action1_address = iv_fir_address + ACTION1_INCR;
     iv_mask_address = iv_fir_address + MASK_INCR;
+    iv_mask_and_address = iv_fir_address + MASK_WAND_INCR;
+    iv_mask_or_address = iv_fir_address + MASK_WOR_INCR;
     iv_proc = i_target;
     iv_targetType = PROC_TARGET;
     iv_fir_write = false;
@@ -239,6 +248,8 @@ PMFir<FIRTYPE_PBAF_LFIR, fapi2::TARGET_TYPE_PROC_CHIP>::PMFir(
     iv_action0_address = iv_fir_address + ACTION0_INCR;
     iv_action1_address = iv_fir_address + ACTION1_INCR;
     iv_mask_address = iv_fir_address + MASK_INCR;
+    iv_mask_and_address = iv_fir_address + MASK_WAND_INCR;
+    iv_mask_or_address = iv_fir_address + MASK_WOR_INCR;
     iv_proc = i_target;
     iv_targetType = PROC_TARGET;
     iv_fir_write = false;
@@ -273,12 +284,14 @@ PMFir<FIRTYPE_QME_LFIR, fapi2::TARGET_TYPE_EQ>::PMFir(
     // Fetch the position of the EQ Target
     fapi2::ReturnCode l_rc = FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target,
                                            l_chpltNumber);
-    FAPI_DBG("EQ number = %d", l_chpltNumber);
 
     iv_fir_address =  QME_LFIR_RW;
-    iv_action0_address = iv_fir_address + ACTION0_INCR;
-    iv_action1_address = iv_fir_address + ACTION1_INCR;
-    iv_mask_address = iv_fir_address + MASK_INCR;
+    iv_action0_address = iv_fir_address + EQ_ACTION0_INCR;
+    iv_action1_address = iv_fir_address + EQ_ACTION1_INCR;
+    iv_mask_address = iv_fir_address + EQ_MASK_INCR;
+    iv_mask_and_address = iv_fir_address + EQ_MASK_WAND_INCR;
+    iv_mask_or_address = iv_fir_address + EQ_MASK_WOR_INCR;
+    FAPI_DBG("EQ number = %d %08x", l_chpltNumber, iv_action0_address);
     iv_eq = i_target;
     iv_targetType = EQ_TARGET;
     iv_fir_write = false;
@@ -355,14 +368,12 @@ fapi2::ReturnCode PMFir<Ftype, K>::put()
 
     if (iv_mask_or_write == true)
     {
-        l_address = iv_fir_address + MASK_WOR_INCR;
-        FAPI_TRY(putScom(iv_target, l_address, iv_or_mask));
+        FAPI_TRY(putScom(iv_target, iv_mask_or_address, iv_or_mask));
     }
 
     if (iv_mask_and_write == true)
     {
-        l_address = iv_fir_address + MASK_WAND_INCR;
-        FAPI_TRY(putScom(iv_target, l_address, iv_and_mask));
+        FAPI_TRY(putScom(iv_target, iv_mask_and_address, iv_and_mask));
     }
 
     if (iv_mask_write == true)
