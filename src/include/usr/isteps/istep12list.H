@@ -258,12 +258,12 @@ const   TaskInfo    g_istep12[]  =   {
                 ISTEP_12::call_host_omi_init,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-/*        {
+        {
                 ISTEPNAME(12,12,"update_omi_firmware"),
                 ISTEP_12::call_update_omi_firmware,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-*/
+
 };
 
 const DepModInfo g_istep12Dependancies = {
@@ -271,7 +271,6 @@ const DepModInfo g_istep12Dependancies = {
         DEP_LIB(libistep12.so),
         DEP_LIB(libistep07.so),
         DEP_LIB(libnestmemutils.so),
-//        DEP_LIB(libisteps_io.so),
         DEP_LIB(libisteps_mss.so),
         DEP_LIB(libexpupd.so),
         NULL

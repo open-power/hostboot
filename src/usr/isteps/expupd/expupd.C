@@ -22,6 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+/**
+ * @file    expupd.C
+ *
+ * @brief   Check and update Explorer firmware
+ *          HWP: exp_fw_update
+ */
 
 #include <expupd/expupd_reasoncodes.H>
 #include <pnor/pnorif.H>
@@ -40,6 +46,7 @@
 #include "ocmbFwImage.H"
 #include <exp_fw_update.H>
 #include <initservice/istepdispatcherif.H>
+#include <istepHelperFuncs.H>               // captureError
 
 using namespace ISTEP_ERROR;
 using namespace ERRORLOG;
@@ -79,7 +86,7 @@ errlHndl_t getFlashedHash(TargetHandle_t i_target, sha512regs_t& o_regs)
 {
     fapi2::buffer<uint64_t> l_scomBuffer;
     uint8_t* l_scomPtr = reinterpret_cast<uint8_t*>(l_scomBuffer.pointer());
-    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>l_fapi2Target(i_target);
+    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi2Target(i_target);
     errlHndl_t l_err = nullptr;
 
     //Start addres of hash register (a.k.a. RAM1 register)
@@ -98,8 +105,10 @@ errlHndl_t getFlashedHash(TargetHandle_t i_target, sha512regs_t& o_regs)
         {
             TRACFCOMP(g_trac_expupd, ERR_MRK
                       "getFlashedHash: Failed reading SHA512 hash from"
-                      " ocmb[0x%08x]. bytesCopied[%u]",
-                      TARGETING::get_huid(i_target), l_bytesCopied);
+                      " ocmb[0x%08x]. bytesCopied[%u]. "
+                      TRACE_ERR_FMT,
+                      get_huid(i_target), l_bytesCopied,
+                      TRACE_ERR_ARGS(l_err));
 
             break;
         }
@@ -129,7 +138,7 @@ void updateAll(IStepError& o_stepError)
     bool l_rebootRequired = false;
 
     // Get a list of OCMB chips
-    TARGETING::TargetHandleList l_ocmbTargetList;
+    TargetHandleList l_ocmbTargetList;
     getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
 
     Target* l_pTopLevel = nullptr;
@@ -145,18 +154,19 @@ void updateAll(IStepError& o_stepError)
         // If no OCMB chips exist, we're done.
         if(l_ocmbTargetList.size() == 0)
         {
+            TRACFCOMP(g_trac_expupd, INFO_MRK "Skipping update, no OCMB found");
             break;
         }
 
         // Check if we have any overrides to force our behavior
         auto l_forced_behavior =
-            l_pTopLevel->getAttr<TARGETING::ATTR_OCMB_FW_UPDATE_OVERRIDE>();
+            l_pTopLevel->getAttr<ATTR_OCMB_FW_UPDATE_OVERRIDE>();
 
         // Exit now if told to
-        if( TARGETING::OCMB_FW_UPDATE_BEHAVIOR_PREVENT_UPDATE
-            == l_forced_behavior )
+        if( OCMB_FW_UPDATE_BEHAVIOR_PREVENT_UPDATE == l_forced_behavior )
         {
-            TRACFCOMP(g_trac_expupd, INFO_MRK "Skipping update due to override (PREVENT_UPDATE)");
+            TRACFCOMP(g_trac_expupd, INFO_MRK "Skipping update due to override "
+                "(PREVENT_UPDATE)");
             break;
         }
 
@@ -170,15 +180,14 @@ void updateAll(IStepError& o_stepError)
         {
             TRACFCOMP(g_trac_expupd, ERR_MRK
                       "updateAll: Failed to load OCMBFW section"
-                      " from PNOR!");
+                      " from PNOR! "
+                      TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(l_err));
 
             l_err->collectTrace(EXPUPD_COMP_NAME);
 
-            // Create IStep error log and cross reference to error that occurred
-            o_stepError.addErrorDetails( l_err );
-
-            // Commit Error
-            errlCommit( l_err, EXPUPD_COMP_ID );
+            // Capture error
+            captureError(l_err, o_stepError, EXPUPD_COMP_ID);
 
             break;
         }
@@ -191,15 +200,14 @@ void updateAll(IStepError& o_stepError)
         if(l_err)
         {
             TRACFCOMP(g_trac_expupd, ERR_MRK
-                      "updateAll: Failure in getSectionInfo()");
+                      "updateAll: Failure in getSectionInfo(). "
+                      TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(l_err));
 
             l_err->collectTrace(EXPUPD_COMP_NAME);
 
-            // Create IStep error log and cross reference to error that occurred
-            o_stepError.addErrorDetails( l_err );
-
-            // Commit Error
-            errlCommit( l_err, EXPUPD_COMP_ID );
+            // Capture error
+            captureError(l_err, o_stepError, EXPUPD_COMP_ID);
             break;
         }
 
@@ -212,32 +220,31 @@ void updateAll(IStepError& o_stepError)
         if(l_err)
         {
             TRACFCOMP(g_trac_expupd, ERR_MRK
-                      "updateAll: Failure in expupdValidateImage");
+                      "updateAll: Failure in ocmbFwValidateImage. "
+                      TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(l_err));
 
             l_err->collectTrace(EXPUPD_COMP_NAME);
 
-            // Create IStep error log and cross reference to error that occurred
-            o_stepError.addErrorDetails( l_err );
-
-            // Commit Error
-            errlCommit( l_err, EXPUPD_COMP_ID );
+            // Capture error
+            captureError(l_err, o_stepError, EXPUPD_COMP_ID);
             break;
         }
 
         // For each explorer chip, compare flash hash with PNOR hash and
         // create a list of explorer chips with differing hash values.
-        TARGETING::TargetHandleList l_flashUpdateList;
+        TargetHandleList l_flashUpdateList;
         for(const auto & l_ocmbTarget : l_ocmbTargetList)
         {
             sha512regs_t l_regs;
 
-            //skip all gemini ocmb chips (not updateable)
-            if(l_ocmbTarget->getAttr<TARGETING::ATTR_CHIP_ID>() ==
-                                                     POWER_CHIPID::GEMINI_16)
+            //skip all non-Explorer ocmb chips (not updateable)
+            if(l_ocmbTarget->getAttr<ATTR_CHIP_ID>() !=
+                                                     POWER_CHIPID::EXPLORER_16)
             {
                 TRACFCOMP(g_trac_expupd,
-                      "updateAll: skipping update of gemini OCMB 0x%08x",
-                      TARGETING::get_huid(l_ocmbTarget));
+                      "updateAll: skipping update of non-Explorer OCMB 0x%08x",
+                      get_huid(l_ocmbTarget));
                 continue;
             }
 
@@ -246,16 +253,15 @@ void updateAll(IStepError& o_stepError)
             if(l_err)
             {
                 TRACFCOMP(g_trac_expupd, ERR_MRK
-                         "updateAll: Failure in getFlashedHash(huid = 0x%08x)",
-                         TARGETING::get_huid(l_ocmbTarget));
+                         "updateAll: Failure in getFlashedHash(huid = 0x%08x). "
+                         TRACE_ERR_FMT,
+                         get_huid(l_ocmbTarget),
+                         TRACE_ERR_ARGS(l_err));
 
                 l_err->collectTrace(EXPUPD_COMP_NAME);
 
-                // Create IStep error log and cross reference to error
-                // that occurred
-                o_stepError.addErrorDetails(l_err);
-
-                errlCommit(l_err, EXPUPD_COMP_ID);
+                // Capture error
+                captureError(l_err, o_stepError, EXPUPD_COMP_ID, l_ocmbTarget);
 
                 //Don't stop on error, go to next target.
                 continue;
@@ -264,7 +270,7 @@ void updateAll(IStepError& o_stepError)
             // Trace the hash and image ID values
             TRACFCOMP(g_trac_expupd,
                       "updateAll: OCMB 0x%08x image ID=0x%08x",
-                      TARGETING::get_huid(l_ocmbTarget), l_regs.imageId);
+                      get_huid(l_ocmbTarget), l_regs.imageId);
             TRACFBIN(g_trac_expupd, "SHA512 HASH FROM EXPLORER",
                      l_regs.sha512Hash, HEADER_SHA512_SIZE);
 
@@ -274,7 +280,7 @@ void updateAll(IStepError& o_stepError)
             {
                 TRACFCOMP(g_trac_expupd,
                         "updateAll: SHA512 hash mismatch on ocmb[0x%08x]",
-                        TARGETING::get_huid(l_ocmbTarget));
+                        get_huid(l_ocmbTarget));
 
                 //add target to our list of targets needing an update
                 l_flashUpdateList.push_back(l_ocmbTarget);
@@ -284,27 +290,29 @@ void updateAll(IStepError& o_stepError)
                 TRACFCOMP(g_trac_expupd,
                           "updateAll: SHA512 hash for ocmb[0x%08x]"
                           " matches SHA512 hash of PNOR image.",
-                          TARGETING::get_huid(l_ocmbTarget));
+                          get_huid(l_ocmbTarget));
 
                 // Add every OCMB to the update list if told to
-                if( TARGETING::OCMB_FW_UPDATE_BEHAVIOR_FORCE_UPDATE
+                if( OCMB_FW_UPDATE_BEHAVIOR_FORCE_UPDATE
                     == l_forced_behavior )
                 {
-                    TRACFCOMP(g_trac_expupd, INFO_MRK "Forcing update due to override (FORCE_UPDATE)");
+                    TRACFCOMP(g_trac_expupd, INFO_MRK "Forcing update due to "
+                            "override (FORCE_UPDATE)");
                     l_flashUpdateList.push_back(l_ocmbTarget);
                 }
             }
-        }
+        } // All OCMB loop
 
         TRACFCOMP(g_trac_expupd,
                   "updateAll: updating flash for %d OCMB chips",
                   l_flashUpdateList.size());
 
         // Exit now if we were asked to only do the check portion
-        if( TARGETING::OCMB_FW_UPDATE_BEHAVIOR_CHECK_BUT_NO_UPDATE
+        if( OCMB_FW_UPDATE_BEHAVIOR_CHECK_BUT_NO_UPDATE
             == l_forced_behavior )
         {
-            TRACFCOMP(g_trac_expupd, INFO_MRK "Skipping update due to override (CHECK_BUT_NO_UPDATE)");
+            TRACFCOMP(g_trac_expupd, INFO_MRK "Skipping update due to override "
+                    "(CHECK_BUT_NO_UPDATE)");
             break;
         }
 
@@ -312,7 +320,7 @@ void updateAll(IStepError& o_stepError)
         for(const auto & l_ocmb : l_flashUpdateList)
         {
             TRACFCOMP(g_trac_expupd, "updateAll: updating OCMB 0x%08x",
-                      TARGETING::get_huid(l_ocmb));
+                      get_huid(l_ocmb));
             fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>l_fapi2Target(l_ocmb);
 
             // reset watchdog for each ocmb as this function can be very slow
@@ -324,16 +332,15 @@ void updateAll(IStepError& o_stepError)
             if (l_err)
             {
                 TRACFCOMP(g_trac_expupd,
-                          "Error from exp_fw_update for OCMB 0x%08x",
-                          TARGETING::get_huid(l_ocmb));
+                          "Error from exp_fw_update for OCMB 0x%08x. "
+                          TRACE_ERR_FMT,
+                          get_huid(l_ocmb),
+                          TRACE_ERR_ARGS(l_err));
 
                 l_err->collectTrace(EXPUPD_COMP_NAME);
 
-                // Create IStep error log and cross reference to error
-                // that occurred
-                o_stepError.addErrorDetails( l_err );
-
-                errlCommit(l_err, EXPUPD_COMP_ID);
+                // Capture error
+                captureError(l_err, o_stepError, EXPUPD_COMP_ID, l_ocmb );
 
                 // Don't stop on error, go to next target.
                 continue;
@@ -342,12 +349,12 @@ void updateAll(IStepError& o_stepError)
             {
                 TRACFCOMP(g_trac_expupd,
                         "updateAll: successfully updated OCMB 0x%08x",
-                        TARGETING::get_huid(l_ocmb));
+                        get_huid(l_ocmb));
 
                 // Request reboot for new firmware to be used
                 l_rebootRequired = true;
             }
-        }
+        } // OCMBs in flash update list
     }while(0);
 
     // unload explorer fw image
@@ -358,15 +365,14 @@ void updateAll(IStepError& o_stepError)
         if(l_err)
         {
             TRACFCOMP(g_trac_expupd, ERR_MRK
-                      "updateAll: Failed to unload OCMBFW");
+                      "updateAll: Failed to unload OCMBFW. "
+                      TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(l_err));
 
             l_err->collectTrace(EXPUPD_COMP_NAME);
 
-            // Create IStep error log and cross reference to error that occurred
-            o_stepError.addErrorDetails( l_err );
-
-            // Commit Error
-            errlCommit( l_err, EXPUPD_COMP_ID );
+            // Capture error
+            captureError(l_err, o_stepError, EXPUPD_COMP_ID);
         }
 #endif //CONFIG_SECUREBOOT
     }
@@ -377,9 +383,9 @@ void updateAll(IStepError& o_stepError)
         TRACFCOMP(g_trac_expupd,
                   "updateAll: OCMB chip(s) was updated.  Requesting reboot...");
         auto l_reconfigAttr =
-            l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
+            l_pTopLevel->getAttr<ATTR_RECONFIGURE_LOOP>();
         l_reconfigAttr |= RECONFIGURE_LOOP_OCMB_FW_UPDATE;
-        l_pTopLevel->setAttr<TARGETING::ATTR_RECONFIGURE_LOOP>(l_reconfigAttr);
+        l_pTopLevel->setAttr<ATTR_RECONFIGURE_LOOP>(l_reconfigAttr);
     }
     else
     {

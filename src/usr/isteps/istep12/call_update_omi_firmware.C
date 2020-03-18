@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep12/call_proc_cen_framelock.C $            */
+/* $Source: src/usr/isteps/istep12/call_update_omi_firmware.C $           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,6 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+/**
+ * @file    call_update_omi_firmware.C
+ *
+ *  Support file for Istep 12.12 Explorer firmware update
+ *
+ */
 #include    <stdint.h>
 
 #include    <trace/interface.H>
@@ -33,35 +39,47 @@
 
 #include    <initservice/isteps_trace.H>
 
-//  targeting support.
+// Targeting support
 #include    <targeting/common/commontargeting.H>
-#include    <targeting/common/utilFilter.H>
 
-//Fapi Support
-#include    <config.h>
-/* FIXME RTC: 210975
-#include    <fapi2.H>
-#include    <fapi2/plat_hwp_invoker.H>
-*/
-#include    <util/utilmbox_scratch.H>
+#include    <expupd/expupd.H>
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
-using   namespace   ERRORLOG;
 using   namespace   TARGETING;
-
+using   namespace   ISTEPS_TRACE;
 
 namespace ISTEP_12
 {
-void* call_proc_cen_framelock (void *io_pArgs)
+void* call_update_omi_firmware (void *io_pArgs)
 {
     IStepError l_StepError;
+    TRACFCOMP( g_trac_isteps_trace, "call_update_omi_firmware entry" );
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_cen_framelock entry" );
+    // Check if any explorer chips require a firmware update and update them
+    // (skipped on MPIPL)
+    // We should be checking for updates and perform the updates even if OMI
+    // initialization failed. It's possible that the OMI failure was due to
+    // the OCMB having an old image. The update code will automatically
+    // switch to using i2c if OMI is not enabled.
+    Target* l_pTopLevel = nullptr;
+    targetService().getTopLevelTarget( l_pTopLevel );
+    assert(l_pTopLevel, "call_update_omi_firmware: no TopLevelTarget");
+    if (l_pTopLevel->getAttr<ATTR_IS_MPIPL_HB>())
+    {
+        TRACFCOMP( g_trac_isteps_trace,
+                   "skipping expupd::UpdateAll() due to MPIPL");
+    }
+    else
+    {
+        expupd::updateAll(l_StepError);
+    }
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_cen_framelock exit" );
+    TRACFCOMP( g_trac_isteps_trace, "call_update_omi_firmware exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    return l_StepError.getErrorHandle();}
+    return l_StepError.getErrorHandle();
+
+}
 
 };

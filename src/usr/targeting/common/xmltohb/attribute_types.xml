@@ -5357,7 +5357,7 @@
     <simpleType>
       <uint8_t>
         <!-- Cannot use enumeration directly due to override issue -->
-        <default>2</default>
+        <default>3</default>
       </uint8_t>
     </simpleType>
   </attribute>

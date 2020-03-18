@@ -22,6 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+/**
+ * @file    ocmbFwImage.C
+ *
+ * @brief   Validate the OCMB firmware image from PNOR
+ *
+ */
 #include "ocmbFwImage.H"
 #include <expupd/ocmbFwImage_const.H>
 #include <expupd/expupd_reasoncodes.H>
@@ -196,6 +202,7 @@ errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
 
     do
     {
+        // Refer to src/build/buildpnor/pkgOcmbFw.pl for FW image layout
         const uint64_t l_minHeaderSize =
                           sizeof(ocmbFwHeader_t) +
                           sizeof(taggedTriplet_t) + HEADER_SHA512_SIZE;
@@ -336,8 +343,10 @@ errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
             {
                 TRACFCOMP(g_trac_expupd, ERR_MRK
                       "ocmbFwValidateImage: Failed parsing tagged data"
-                      " triplet %u of %u",
-                      l_curTriplet + 1, l_header->numTriplets);
+                      " triplet %u of %u. "
+                      TRACE_ERR_FMT,
+                      l_curTriplet + 1, l_header->numTriplets,
+                      TRACE_ERR_ARGS(l_err));
                 break;
             }
 
