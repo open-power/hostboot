@@ -106,7 +106,7 @@ static const uint8_t crc8_table[] = {
 
 uint32_t crc32(const void *data, size_t size)
 {
-	const uint8_t *p = reinterpret_cast<const uint8_t*>(data);
+	const uint8_t *p = data;
 	uint32_t crc = ~0U;
 	while (size--)
 		crc = crc32_tab[(crc ^ *p++) & 0xff] ^ (crc >> 8);
@@ -115,7 +115,7 @@ uint32_t crc32(const void *data, size_t size)
 
 uint8_t crc8(const void *data, size_t size)
 {
-	const uint8_t *p = reinterpret_cast<const uint8_t*>(data);
+	const uint8_t *p = data;
 	uint8_t crc = 0x00;
 	while (size--)
 		crc = crc8_table[crc ^ *p++];

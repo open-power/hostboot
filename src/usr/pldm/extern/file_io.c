@@ -54,7 +54,7 @@ int encode_rw_file_memory_resp(uint8_t instance_id, uint8_t command,
 			       uint8_t completion_code, uint32_t length,
 			       struct pldm_msg *msg)
 {
- pldm_header_info header;
+ struct pldm_header_info header = {0};
 	int rc = PLDM_SUCCESS;
 
 	header.msg_type = PLDM_RESPONSE;
@@ -81,7 +81,7 @@ int encode_rw_file_memory_req(uint8_t instance_id, uint8_t command,
 			      uint32_t length, uint64_t address,
 			      struct pldm_msg *msg)
 {
- pldm_header_info header;
+ struct pldm_header_info header = {0};
 	int rc = PLDM_SUCCESS;
 	if (msg == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
@@ -155,7 +155,7 @@ int encode_get_file_table_resp(uint8_t instance_id, uint8_t completion_code,
 			       uint8_t transfer_flag, const uint8_t *table_data,
 			       size_t table_size, struct pldm_msg *msg)
 {
- pldm_header_info header;
+ struct pldm_header_info header = {0};
 	int rc = PLDM_SUCCESS;
 
 	header.msg_type = PLDM_RESPONSE;
@@ -206,7 +206,7 @@ int decode_read_file_req(const struct pldm_msg *msg, size_t payload_length,
 int encode_read_file_req(uint8_t instance_id, uint32_t file_handle,
 			 uint32_t offset, uint32_t length, struct pldm_msg *msg)
 {
- pldm_header_info header;
+ struct pldm_header_info header = {0};
 	int rc = PLDM_SUCCESS;
 
 	header.msg_type = PLDM_REQUEST;
@@ -266,7 +266,7 @@ int decode_read_file_resp(const struct pldm_msg *msg, size_t payload_length,
 int encode_read_file_resp(uint8_t instance_id, uint8_t completion_code,
 			  uint32_t length, struct pldm_msg *msg)
 {
- pldm_header_info header;
+ struct pldm_header_info header = {0};
 	int rc = PLDM_SUCCESS;
 
 	header.msg_type = PLDM_RESPONSE;
@@ -324,7 +324,7 @@ int encode_write_file_req(uint8_t instance_id, uint32_t file_handle,
 			  uint32_t offset, uint32_t length,
 			  struct pldm_msg *msg)
 {
- pldm_header_info header;
+ struct pldm_header_info header = {0};
 	int rc = PLDM_SUCCESS;
 
 	header.msg_type = PLDM_REQUEST;
@@ -379,7 +379,7 @@ int decode_write_file_resp(const struct pldm_msg *msg, size_t payload_length,
 int encode_write_file_resp(uint8_t instance_id, uint8_t completion_code,
 			   uint32_t length, struct pldm_msg *msg)
 {
- pldm_header_info header;
+ struct pldm_header_info header = {0};
 	int rc = PLDM_SUCCESS;
 
 	header.msg_type = PLDM_RESPONSE;
@@ -436,7 +436,7 @@ int encode_rw_file_by_type_memory_resp(uint8_t instance_id, uint8_t command,
 				       uint8_t completion_code, uint32_t length,
 				       struct pldm_msg *msg)
 {
- pldm_header_info header;
+ struct pldm_header_info header = {0};
 	int rc = PLDM_SUCCESS;
 
 	if (msg == NULL) {
@@ -467,7 +467,7 @@ int encode_rw_file_by_type_memory_req(uint8_t instance_id, uint8_t command,
 				      uint32_t offset, uint32_t length,
 				      uint64_t address, struct pldm_msg *msg)
 {
- pldm_header_info header;
+ struct pldm_header_info header = {0};
 	int rc = PLDM_SUCCESS;
 
 	if (msg == NULL) {
@@ -542,7 +542,7 @@ int decode_new_file_req(const struct pldm_msg *msg, size_t payload_length,
 int encode_new_file_resp(uint8_t instance_id, uint8_t completion_code,
 			 struct pldm_msg *msg)
 {
- pldm_header_info header;
+ struct pldm_header_info header = {0};
 	int rc = PLDM_SUCCESS;
 
 	if (msg == NULL) {
@@ -569,7 +569,7 @@ int encode_new_file_req(uint8_t instance_id, uint16_t file_type,
 			uint32_t file_handle, uint32_t length,
 			struct pldm_msg *msg)
 {
- pldm_header_info header;
+ struct pldm_header_info header = {0};
 	int rc = PLDM_SUCCESS;
 
 	if (msg == NULL) {
@@ -640,7 +640,7 @@ int encode_rw_file_by_type_resp(uint8_t instance_id, uint8_t command,
 				uint8_t completion_code, uint32_t length,
 				struct pldm_msg *msg)
 {
- pldm_header_info header;
+ struct pldm_header_info header = {0};
 	int rc = PLDM_SUCCESS;
 
 	if (msg == NULL) {
@@ -675,7 +675,7 @@ int encode_rw_file_by_type_req(uint8_t instance_id, uint8_t command,
 			       uint32_t offset, uint32_t length,
 			       struct pldm_msg *msg)
 {
- pldm_header_info header;
+ struct pldm_header_info header = {0};
 	int rc = PLDM_SUCCESS;
 
 	if (msg == NULL) {
@@ -751,7 +751,7 @@ int decode_file_ack_req(const struct pldm_msg *msg, size_t payload_length,
 int encode_file_ack_resp(uint8_t instance_id, uint8_t completion_code,
 			 struct pldm_msg *msg)
 {
- pldm_header_info header;
+ struct pldm_header_info header = {0};
 	int rc = PLDM_SUCCESS;
 
 	if (msg == NULL) {
@@ -778,7 +778,7 @@ int encode_file_ack_req(uint8_t instance_id, uint16_t file_type,
 			uint32_t file_handle, uint8_t file_status,
 			struct pldm_msg *msg)
 {
- pldm_header_info header;
+ struct pldm_header_info header = {0};
 	int rc = PLDM_SUCCESS;
 
 	if (msg == NULL) {

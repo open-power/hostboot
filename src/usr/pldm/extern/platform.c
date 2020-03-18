@@ -32,7 +32,7 @@ int encode_set_state_effecter_states_resp(uint8_t instance_id,
 					  uint8_t completion_code,
 					  struct pldm_msg *msg)
 {
- pldm_header_info header;
+ struct pldm_header_info header = {0};
 	int rc = PLDM_SUCCESS;
 
 	msg->payload[0] = completion_code;
@@ -53,7 +53,7 @@ int encode_set_state_effecter_states_req(uint8_t instance_id,
 					 set_effecter_state_field *field,
 					 struct pldm_msg *msg)
 {
- pldm_header_info header;
+ struct pldm_header_info header = {0};
 	int rc = PLDM_SUCCESS;
 
 	header.msg_type = PLDM_REQUEST;
@@ -154,7 +154,7 @@ int encode_get_pdr_resp(uint8_t instance_id, uint8_t completion_code,
 			uint16_t resp_cnt, const uint8_t *record_data,
 			uint8_t transfer_crc, struct pldm_msg *msg)
 {
- pldm_header_info header;
+ struct pldm_header_info header = {0};
 	int rc = PLDM_SUCCESS;
 
 	if (msg == NULL) {
@@ -198,7 +198,7 @@ int encode_get_pdr_req(uint8_t instance_id, uint32_t record_hndl,
 		       uint16_t request_cnt, uint16_t record_chg_num,
 		       struct pldm_msg *msg, size_t payload_length)
 {
- pldm_header_info header;
+ struct pldm_header_info header = {0};
 	int rc = PLDM_SUCCESS;
 
 	if (msg == NULL) {

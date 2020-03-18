@@ -87,9 +87,9 @@ enum transfer_resp_flag {
  *  The different message types supported by the PLDM specification.
  */
 typedef enum {
-  PLDM_RESPONSE,       //!< PLDM response
+  PLDM_RESPONSE ,     //!< PLDM response
   PLDM_REQUEST,       //!< PLDM request
-  PLDM_RESERVED,       //!< Reserved
+  PLDM_RESERVED,      //!< Reserved
   PLDM_ASYNC_REQUEST_NOTIFY, //!< Unacknowledged PLDM request messages
 } MessageType;
 
@@ -157,13 +157,6 @@ struct pldm_header_info {
   uint8_t pldm_type;       //!< PLDM type
   uint8_t command;   //!< PLDM command code
   uint8_t completion_code; //!< PLDM completion code, applies for response
-  #ifdef __cplusplus
-  pldm_header_info (MessageType MSG_TYPE =PLDM_RESPONSE,
-                    uint8_t ISTANCE = 0,
-                    uint8_t PLDM_TYPE = 0,
-                    uint8_t COMMAND = 0,
-                    uint8_t COMPLETION_CODE = 0){}
-  #endif
 };
 
 /** @struct pldm_get_types_resp

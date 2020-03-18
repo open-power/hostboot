@@ -32,8 +32,6 @@ COMMON_ROOTPATH = ../../../..
 
 PLDM_COMMON_OBJS += pldmtrace.o
 
-CC_OVERRIDE = 1
-
 # add these paths to VPATH so compiler knows
 # where to find the .C/.c files we need
 VPATH += ${COMMON_ROOTPATH}/src/usr/pldm/extern

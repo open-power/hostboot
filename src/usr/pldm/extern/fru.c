@@ -34,7 +34,7 @@ int encode_get_fru_record_table_metadata_req(uint8_t instance_id,
     return PLDM_ERROR_INVALID_DATA;
   }
 
-  pldm_header_info header;
+  struct pldm_header_info header = {0};
   header.instance = instance_id;
   header.msg_type = PLDM_REQUEST;
   header.pldm_type = PLDM_FRU;
@@ -96,7 +96,7 @@ int encode_get_fru_record_table_metadata_resp(
     return PLDM_ERROR_INVALID_DATA;
   }
 
-  pldm_header_info header;
+  struct pldm_header_info header = {0};
   header.msg_type = PLDM_RESPONSE;
   header.instance = instance_id;
   header.pldm_type = PLDM_FRU;
@@ -132,7 +132,7 @@ int encode_get_fru_record_table_req(uint8_t instance_id,
   if (msg == NULL) {
     return PLDM_ERROR_INVALID_DATA;
   }
-  pldm_header_info header;
+  struct pldm_header_info header = {0};
   header.instance = instance_id;
   header.msg_type = PLDM_REQUEST;
   header.pldm_type = PLDM_FRU;
@@ -180,7 +180,7 @@ int encode_get_fru_record_table_resp(uint8_t instance_id,
              uint8_t transfer_flag,
              struct pldm_msg *msg)
 {
-  pldm_header_info header;
+  struct pldm_header_info header = {0};
   int rc = PLDM_ERROR_INVALID_DATA;
 
   header.msg_type = PLDM_RESPONSE;

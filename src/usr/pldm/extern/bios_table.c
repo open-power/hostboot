@@ -90,7 +90,7 @@ void pldm_bios_table_string_entry_encode(void *entry, size_t entry_length,
 {
   size_t length = pldm_bios_table_string_entry_encode_length(str_length);
   assert(length <= entry_length);
-  struct pldm_bios_string_table_entry *string_entry = reinterpret_cast<pldm_bios_string_table_entry *>(entry);
+  struct pldm_bios_string_table_entry *string_entry = entry;
   string_entry->string_handle = htole16(get_bios_string_handle());
   string_entry->string_length = htole16(str_length);
   memcpy(string_entry->name, str, str_length);
@@ -148,7 +148,7 @@ int pldm_bios_table_string_entry_decode_string_check(
 
 static size_t string_table_entry_length(const void *table_entry)
 {
-  const struct pldm_bios_string_table_entry *entry = reinterpret_cast<const pldm_bios_string_table_entry *>(table_entry);
+  const struct pldm_bios_string_table_entry *entry = table_entry;
   return sizeof(*entry) - sizeof(entry->name) +
          pldm_bios_table_string_entry_decode_string_length(entry);
 }
@@ -165,7 +165,7 @@ static void attr_table_entry_encode_header(void *entry, size_t length,
              uint8_t attr_type,
              uint16_t string_handle)
 {
-  struct pldm_bios_attr_table_entry *attr_entry = reinterpret_cast<pldm_bios_attr_table_entry *>(entry);
+  struct pldm_bios_attr_table_entry *attr_entry = entry;
   assert(sizeof(*attr_entry) <= length);
   attr_entry->attr_handle = htole16(get_bios_attr_handle());
   attr_entry->attr_type = attr_type;
@@ -192,7 +192,7 @@ void pldm_bios_table_attr_entry_enum_encode(
               : PLDM_BIOS_ENUMERATION;
   attr_table_entry_encode_header(entry, entry_length, attr_type,
                info->name_handle);
-  struct pldm_bios_attr_table_entry *attr_entry = reinterpret_cast<pldm_bios_attr_table_entry *>(entry);
+  struct pldm_bios_attr_table_entry *attr_entry = entry;
   attr_entry->metadata[0] = info->pv_num;
   uint16_t *pv_hdls =
       (uint16_t *)(attr_entry->metadata + 1 /* sizeof(pv num) */);
@@ -292,8 +292,8 @@ int pldm_bios_table_attr_entry_enum_decode_pv_hdls_check(
  */
 static size_t attr_table_entry_length_enum(const void *entry)
 {
-  uint8_t pv_num = pldm_bios_table_attr_entry_enum_decode_pv_num(reinterpret_cast<const pldm_bios_attr_table_entry *>(entry));
-  uint8_t def_num = pldm_bios_table_attr_entry_enum_decode_def_num(reinterpret_cast<const pldm_bios_attr_table_entry *>(entry));
+  uint8_t pv_num = pldm_bios_table_attr_entry_enum_decode_pv_num(entry);
+  uint8_t def_num = pldm_bios_table_attr_entry_enum_decode_def_num(entry);
   return pldm_bios_table_attr_entry_enum_encode_length(pv_num, def_num);
 }
 
@@ -325,7 +325,7 @@ void pldm_bios_table_attr_entry_string_encode(
       info->read_only ? PLDM_BIOS_STRING_READ_ONLY : PLDM_BIOS_STRING;
   attr_table_entry_encode_header(entry, entry_length, attr_type,
                info->name_handle);
-  struct pldm_bios_attr_table_entry *attr_entry = reinterpret_cast<pldm_bios_attr_table_entry *>(entry);
+  struct pldm_bios_attr_table_entry *attr_entry = entry;
   struct attr_table_string_entry_fields *attr_fields =
       (struct attr_table_string_entry_fields *)attr_entry->metadata;
   attr_fields->string_type = info->string_type;
@@ -413,7 +413,7 @@ int pldm_bios_table_attr_entry_string_decode_def_string_length_check(
 static size_t attr_table_entry_length_string(const void *entry)
 {
   uint16_t def_str_len =
-      pldm_bios_table_attr_entry_string_decode_def_string_length(reinterpret_cast<const pldm_bios_attr_table_entry *>(entry));
+      pldm_bios_table_attr_entry_string_decode_def_string_length(entry);
   return pldm_bios_table_attr_entry_string_encode_length(def_str_len);
 }
 
@@ -440,7 +440,7 @@ void pldm_bios_table_attr_entry_integer_encode(
       info->read_only ? PLDM_BIOS_INTEGER_READ_ONLY : PLDM_BIOS_INTEGER;
   attr_table_entry_encode_header(entry, entry_length, attr_type,
                info->name_handle);
-  struct pldm_bios_attr_table_entry *attr_entry = reinterpret_cast<pldm_bios_attr_table_entry *>(entry);
+  struct pldm_bios_attr_table_entry *attr_entry = entry;
   struct attr_table_integer_entry_fields *attr_fields =
       (struct attr_table_integer_entry_fields *)attr_entry->metadata;
   attr_fields->lower_bound = htole64(info->lower_bound);
@@ -544,7 +544,7 @@ static const struct table_entry_length attr_table_entries[] = {
 
 static size_t attr_table_entry_length(const void *table_entry)
 {
-  const struct pldm_bios_attr_table_entry *entry = reinterpret_cast<const pldm_bios_attr_table_entry *>(table_entry);
+  const struct pldm_bios_attr_table_entry *entry = table_entry;
   const struct table_entry_length *attr_table_entry =
       find_table_entry_length_by_type(entry->attr_type,
               attr_table_entries,
@@ -569,7 +569,7 @@ void pldm_bios_table_attr_value_entry_encode_enum(
       pldm_bios_table_attr_value_entry_encode_enum_length(count);
   assert(length <= entry_length);
 
-  struct pldm_bios_attr_val_table_entry *table_entry = reinterpret_cast<pldm_bios_attr_val_table_entry *>(entry);
+  struct pldm_bios_attr_val_table_entry *table_entry = entry;
   table_entry->attr_handle = htole16(attr_handle);
   table_entry->attr_type = attr_type;
   table_entry->value[0] = count;
@@ -602,7 +602,7 @@ int pldm_bios_table_attr_value_entry_encode_enum_check(
 static size_t attr_value_table_entry_length_enum(const void *entry)
 {
   uint8_t number =
-      pldm_bios_table_attr_value_entry_enum_decode_number(reinterpret_cast<const pldm_bios_attr_val_table_entry *>(entry));
+      pldm_bios_table_attr_value_entry_enum_decode_number(entry);
   return pldm_bios_table_attr_value_entry_encode_enum_length(number);
 }
 
@@ -621,7 +621,7 @@ void pldm_bios_table_attr_value_entry_encode_string(
       pldm_bios_table_attr_value_entry_encode_string_length(str_length);
   assert(length <= entry_length);
 
-  struct pldm_bios_attr_val_table_entry *table_entry = reinterpret_cast<pldm_bios_attr_val_table_entry *>(entry);
+  struct pldm_bios_attr_val_table_entry *table_entry = entry;
   table_entry->attr_handle = htole16(attr_handle);
   table_entry->attr_type = attr_type;
   if (str_length != 0)
@@ -658,7 +658,7 @@ int pldm_bios_table_attr_value_entry_encode_string_check(
 static size_t attr_value_table_entry_length_string(const void *entry)
 {
   uint16_t str_length =
-      pldm_bios_table_attr_value_entry_string_decode_length(reinterpret_cast<const pldm_bios_attr_val_table_entry *>(entry));
+      pldm_bios_table_attr_value_entry_string_decode_length(entry);
   return pldm_bios_table_attr_value_entry_encode_string_length(
       str_length);
 }
@@ -678,7 +678,7 @@ void pldm_bios_table_attr_value_entry_encode_integer(void *entry,
       pldm_bios_table_attr_value_entry_encode_integer_length();
   assert(length <= entry_length);
 
-  struct pldm_bios_attr_val_table_entry *table_entry = reinterpret_cast<pldm_bios_attr_val_table_entry *>(entry);
+  struct pldm_bios_attr_val_table_entry *table_entry = entry;
   table_entry->attr_handle = htole16(attr_handle);
   table_entry->attr_type = attr_type;
   cv = htole64(cv);
@@ -724,7 +724,7 @@ static const struct table_entry_length attr_value_table_entries[] = {
 
 static size_t attr_value_table_entry_length(const void *table_entry)
 {
-  const struct pldm_bios_attr_val_table_entry *entry = reinterpret_cast<const pldm_bios_attr_val_table_entry *>(table_entry);
+  const struct pldm_bios_attr_val_table_entry *entry = table_entry;
   const struct table_entry_length *entry_length =
       find_table_entry_length_by_type(
     entry->attr_type, attr_value_table_entries,
@@ -814,9 +814,9 @@ struct pldm_bios_table_iter *
 pldm_bios_table_iter_create(const void *table, size_t length,
           enum pldm_bios_table_types type)
 {
-  struct pldm_bios_table_iter *iter = reinterpret_cast<pldm_bios_table_iter *>(malloc(sizeof(*iter)));
+  struct pldm_bios_table_iter *iter = malloc(sizeof(*iter));
   assert(iter != NULL);
-  iter->table_data = reinterpret_cast<const uint8_t *>(table);
+  iter->table_data = table;
   iter->table_len = length;
   iter->current_pos = 0;
   iter->entry_length_handler = NULL;
@@ -892,7 +892,7 @@ pldm_bios_table_entry_find_from_table(const void *table, size_t length,
 
 static bool string_table_handle_equal(const void *entry, const void *key)
 {
-  const struct pldm_bios_string_table_entry *string_entry = reinterpret_cast<const pldm_bios_string_table_entry *>(entry);
+  const struct pldm_bios_string_table_entry *string_entry = entry;
   uint16_t handle = *(uint16_t *)key;
   if (pldm_bios_table_string_entry_decode_handle(string_entry) == handle)
     return true;
@@ -903,9 +903,9 @@ const struct pldm_bios_string_table_entry *
 pldm_bios_table_string_find_by_handle(const void *table, size_t length,
               uint16_t handle)
 {
-  return reinterpret_cast<const pldm_bios_string_table_entry *>(pldm_bios_table_entry_find_from_table(
+  return pldm_bios_table_entry_find_from_table(
       table, length, PLDM_BIOS_STRING_TABLE, string_table_handle_equal,
-      &handle));
+      &handle);
 }
 
 struct string_equal_arg {
@@ -915,8 +915,8 @@ struct string_equal_arg {
 
 static bool string_table_string_equal(const void *entry, const void *key)
 {
-  const struct pldm_bios_string_table_entry *string_entry = reinterpret_cast<const pldm_bios_string_table_entry *>(entry);
-  const struct string_equal_arg *arg = reinterpret_cast<const string_equal_arg *>(key);
+  const struct pldm_bios_string_table_entry *string_entry = entry;
+  const struct string_equal_arg *arg = key;
   if (arg->str_length !=
       pldm_bios_table_string_entry_decode_string_length(string_entry))
     return false;
@@ -931,22 +931,22 @@ pldm_bios_table_string_find_by_string(const void *table, size_t length,
 {
   uint16_t str_length = strlen(str);
   struct string_equal_arg arg = {str_length, str};
-  return reinterpret_cast<const pldm_bios_string_table_entry *>(pldm_bios_table_entry_find_from_table(
+  return pldm_bios_table_entry_find_from_table(
       table, length, PLDM_BIOS_STRING_TABLE, string_table_string_equal,
-      &arg));
+      &arg);
 }
 
 static bool attr_value_table_handle_equal(const void *entry, const void *key)
 {
   uint16_t handle = *(uint16_t *)key;
-  return pldm_bios_table_attr_value_entry_decode_handle(reinterpret_cast<const pldm_bios_attr_val_table_entry *>(entry)) == handle;
+  return pldm_bios_table_attr_value_entry_decode_handle(entry) == handle;
 }
 
 const struct pldm_bios_attr_val_table_entry *
 pldm_bios_table_attr_value_find_by_handle(const void *table, size_t length,
             uint16_t handle)
 {
-  return reinterpret_cast<const pldm_bios_attr_val_table_entry *>(pldm_bios_table_entry_find_from_table(
+  return pldm_bios_table_entry_find_from_table(
       table, length, PLDM_BIOS_ATTR_VAL_TABLE,
-      attr_value_table_handle_equal, &handle));
+      attr_value_table_handle_equal, &handle);
 }
