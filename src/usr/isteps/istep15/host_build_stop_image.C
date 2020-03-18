@@ -48,6 +48,7 @@
 #include    <errl/errlreasoncodes.H>
 #include    <isteps/hwpisteperror.H>
 #include    <initservice/isteps_trace.H>
+#include    <istepHelperFuncs.H> // captureError
 
 //PNOR Resource Provider
 #include    <pnor/pnorif.H>
@@ -89,56 +90,6 @@ using   namespace   fapi2;
 
 namespace ISTEP_15
 {
-
-/**
- *  @brief Load HCODE image and return a pointer to it, or nullptr
- *
- *  @param[out] -   address of the HCODE image
- *
- *  @return      nullptr if success, errorlog if failure
- *
- */
-errlHndl_t  loadHcodeImage(char *& o_rHcodeAddr)
-{
-    errlHndl_t l_errl = nullptr;
-    PNOR::SectionInfo_t l_info;
-
-    do
-    {
-
-#ifdef CONFIG_SECUREBOOT
-        l_errl = loadSecureSection(PNOR::HCODE);
-        if (l_errl)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       ERR_MRK"loadHcodeImage() - Error from "
-                       "loadSecureSection(PNOR::HCODE)");
-
-            //No need to commit error here, it gets handled later
-            //just break out to escape this function
-            break;
-        }
-#endif
-
-        // Get HCODE/WINK PNOR section info from PNOR RP
-        l_errl = PNOR::getSectionInfo( PNOR::HCODE, l_info );
-        if( l_errl )
-        {
-            //No need to commit error here, it gets handled later
-            //just break out to escape this function
-            break;
-        }
-
-        o_rHcodeAddr = reinterpret_cast<char*>(l_info.vaddr);
-
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "HCODE addr = 0x%p ",
-                   o_rHcodeAddr);
-
-    } while ( 0 );
-
-    return  l_errl;
-}
 
 /**
  * @brief   apply cpu reg information to the HCODE image using
@@ -385,14 +336,11 @@ void* host_build_stop_image (void *io_pArgs)
 
     errlHndl_t  l_errl           = nullptr;
 
-    // unload of HCODE PNOR section only necessary if SECUREBOOT compiled in
-#ifdef CONFIG_SECUREBOOT
-    bool unload_hcode_pnor_section = false;
-#endif
-
     char*       l_pHcodeImage    = nullptr;
     void*       l_pRealMemBase   = nullptr;
     void*       l_pVirtMemBase   = nullptr;
+
+    bool        l_hcodeLoaded    = false;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_build_stop_image entry" );
 
@@ -460,7 +408,7 @@ void* host_build_stop_image (void *io_pArgs)
         //  Continue, build hcode images
         //
         //Load the reference image from PNOR
-        l_errl  =   loadHcodeImage(  l_pHcodeImage );
+        l_errl = loadHcodeImage(l_pHcodeImage, l_hcodeLoaded);
         if ( l_errl )
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -469,9 +417,6 @@ void* host_build_stop_image (void *io_pArgs)
             // drop out of do block with errorlog.
             break;
         }
-#ifdef CONFIG_SECUREBOOT
-        unload_hcode_pnor_section = true;
-#endif
 
         // Pull build information from XIP header and trace it
         Util::imageBuild_t l_imageBuild;
@@ -722,7 +667,7 @@ void* host_build_stop_image (void *io_pArgs)
 
 #ifdef CONFIG_SECUREBOOT
     // securely unload HCODE PNOR section, if necessary
-    if ( unload_hcode_pnor_section == true )
+    if (l_hcodeLoaded)
     {
         l_errl = unloadSecureSection(PNOR::HCODE);
         if (l_errl)

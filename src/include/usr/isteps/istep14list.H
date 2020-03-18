@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -91,6 +91,16 @@ void*    call_mss_thermal_init( void    *io_pArgs );
 void*    call_proc_pcie_config( void    *io_pArgs );
 
 /**
+ *  @brief  proc_load_iop_xram
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep
+ *
+ */
+void*   call_proc_load_iop_xram( void   *io_pArgs );
+
+/**
  *  @brief   mss_power_cleanup
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
@@ -163,20 +173,14 @@ namespace   INITSERVICE
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
-                ISTEPNAME(14,03,"proc_pcie_config"),
-                nullptr, //ISTEP_14::call_proc_pcie_config,
-                //{ START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
+                ISTEPNAME(14,03,"proc_load_iop_xram"),
+                ISTEP_14::call_proc_load_iop_xram,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(14,04,"mss_power_cleanup"),
-                nullptr, //ISTEP_14::call_mss_power_cleanup,
-#ifdef CONFIG_NVDIMM
-                //{ START_FN, EXT_IMAGE, MPIPL_OP | NORMAL_IPL_OP, true }
-#else
-                //{ START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-#endif
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
+                ISTEPNAME(14,04,"proc_pcie_config"),
+                ISTEP_14::call_proc_pcie_config,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(14,05,"proc_setup_mmio_bars"),
@@ -204,6 +208,8 @@ namespace   INITSERVICE
 const DepModInfo g_istep14Dependancies = {
     {
         DEP_LIB(libistep14.so),
+        DEP_LIB(libpm.so),
+        DEP_LIB(libimageprocs.so),
 /*
         DEP_LIB(libdump.so),
         DEP_LIB(libruntime.so),

@@ -45,7 +45,6 @@
 
 #include <hwpf_fapi2_reasoncodes.H>
 
-
 // HB platform support
 #include <fapiPlatTrace.H>
 #include <targeting/common/target.H>
@@ -58,8 +57,6 @@
 //@TODO RTC:150675 get error info from getOtherEnd fails
 //#include <errl/errlentry.H>
 //#include <errl/errlmanager.H>
-
-
 
 namespace PLAT_TARGET
 {
@@ -415,58 +412,74 @@ inline Target<K_PARENT, M, V> Target<T_SELF, M, V>::getParent(void) const
                   "improper parent of fapi2::Target");
 
     TARGETING::TargetHandleList l_parentList;
-
     TARGETING::TYPE requiredPType =
-      fapi2::convertFapi2TypeToTargeting(K_PARENT);
+        fapi2::convertFapi2TypeToTargeting(K_PARENT);
 
-    if(K_PARENT == fapi2::TARGET_TYPE_PERV)
+    // Special case when performing multicast getParent on target proc looking
+    // for parent proc
+    if ((T_SELF & TARGET_TYPE_MULTICAST) != 0)
     {
-        TARGETING::getParentPervasiveTargetsByState(
-            l_parentList,
-            static_cast<TARGETING::Target*>(this->get()),
-            TARGETING::CLASS_NA,
-            requiredPType,
-            TARGETING::UTIL_FILTER_ALL);
-    }
-    else if(K_PARENT == fapi2::TARGET_TYPE_OMIC)
-    {
-        TARGETING::getParentOmicTargetsByState(
-            l_parentList,
-            static_cast<TARGETING::Target*>(this->get()),
-            TARGETING::CLASS_NA,
-            requiredPType,
-            TARGETING::UTIL_FILTER_ALL);
-    }
-    else if ((K_PARENT == fapi2::TARGET_TYPE_PAUC)
-             && (T_SELF == fapi2::TARGET_TYPE_OMIC))
-    {
-        TARGETING::getParentPaucTargetsByState(
-            l_parentList,
-            static_cast<TARGETING::Target*>(this->get()),
-            TARGETING::CLASS_NA,
-            requiredPType,
-            TARGETING::UTIL_FILTER_ALL);
+        TARGETING::Target* l_target = static_cast<TARGETING::Target*>(this->get());
+        assert(l_target != nullptr, "platform target handle is nullptr");
+        TARGETING::TYPE requiredCType =
+            l_target->getAttr<TARGETING::ATTR_TYPE>();
+        if (requiredCType == TARGETING::TYPE_PROC &&
+            requiredPType == TARGETING::TYPE_PROC)
+        {
+            l_parentList.push_back(this->get());
+        }
     }
     else
     {
-        TARGETING::getParentAffinityTargetsByState(
-            l_parentList,
-            static_cast<TARGETING::Target*>(this->get()),
-            TARGETING::CLASS_NA,
-            requiredPType,
-            TARGETING::UTIL_FILTER_ALL);
+        if(K_PARENT == fapi2::TARGET_TYPE_PERV)
+        {
+            TARGETING::getParentPervasiveTargetsByState(
+                l_parentList,
+                static_cast<TARGETING::Target*>(this->get()),
+                TARGETING::CLASS_NA,
+                requiredPType,
+                TARGETING::UTIL_FILTER_ALL);
+        }
+        else if(K_PARENT == fapi2::TARGET_TYPE_OMIC)
+        {
+            TARGETING::getParentOmicTargetsByState(
+                l_parentList,
+                static_cast<TARGETING::Target*>(this->get()),
+                TARGETING::CLASS_NA,
+                requiredPType,
+                TARGETING::UTIL_FILTER_ALL);
+        }
+        else if ((K_PARENT == fapi2::TARGET_TYPE_PAUC)
+                && (T_SELF == fapi2::TARGET_TYPE_OMIC))
+        {
+            TARGETING::getParentPaucTargetsByState(
+                l_parentList,
+                static_cast<TARGETING::Target*>(this->get()),
+                TARGETING::CLASS_NA,
+                requiredPType,
+                TARGETING::UTIL_FILTER_ALL);
+        }
+        else
+        {
+            TARGETING::getParentAffinityTargetsByState(
+                l_parentList,
+                static_cast<TARGETING::Target*>(this->get()),
+                TARGETING::CLASS_NA,
+                requiredPType,
+                TARGETING::UTIL_FILTER_ALL);
+        }
     }
-
     assert(l_parentList.size() == 1, "Found %d parents of the same type. Target HUID %x ,\
-          looking for parents of type %x", l_parentList.size(), TARGETING::get_huid(this->get()) , requiredPType);
+        looking for parents of type %x", l_parentList.size(), TARGETING::get_huid(this->get()) , requiredPType);
 
     TARGETING::Target * l_parentTarget = l_parentList[0];
 
     assert(l_parentTarget != nullptr,
-           "No parent of type %x was found for the target of type %x, Found required parent plat type to be %x",
-           K_PARENT, T_SELF, requiredPType);
+        "No parent of type %x was found for the target of type %x, Found required parent plat type to be %x",
+        K_PARENT, T_SELF, requiredPType);
 
     Target<K_PARENT, M, V> outTarget(l_parentTarget);
+
     FAPI_DBG(EXIT_MRK "getParent");
     return outTarget;
 }
@@ -484,7 +497,7 @@ inline Target<K_PARENT, M, V> Target<T_SELF, M, V>::getParent(void) const
 /// in order. That is, core 0 is std::vector[0].
 ///
 template<TargetType T_SELF, MulticastType M, typename V>
-template< TargetType K_CHILD>
+template<TargetType K_CHILD>
 inline std::vector<Target<K_CHILD, M, V> >
     Target<T_SELF, M, V>::getChildren(const TargetState i_state) const
 {
@@ -501,99 +514,65 @@ inline std::vector<Target<K_CHILD, M, V> >
         "improper multicast usage of fapi2::Target, check multicastable invocation");
 
     std::vector<Target<K_CHILD, M, V>> l_children;
-    //Get the platform target type of the current fapi2::target
+    // Get the platform target type of the current fapi2::target
     TARGETING::TYPE l_type = fapi2::convertFapi2TypeToTargeting(K_CHILD);
     TARGETING::TargetHandleList l_childList;
-    bool l_functional = (i_state & fapi2::TARGET_STATE_FUNCTIONAL)? true:false;
 
-    if(!l_functional)
+    bool l_functional = (i_state & fapi2::TARGET_STATE_FUNCTIONAL)? true:false;
+    if (T_SELF & TARGET_TYPE_MULTICAST)
     {
+        assert(l_functional, "multicast getChildren must be functional, present use case not implemented yet");
+        plat_target_handle_t l_handle = this->get();
+        l_childList = getMulticastChildren(l_handle, l_type);
+    }
+    else
+    {
+        TARGETING::ResourceState l_state = l_functional ? TARGETING::UTIL_FILTER_FUNCTIONAL : TARGETING::UTIL_FILTER_ALL;
+
+        if (K_CHILD == fapi2::TARGET_TYPE_DIMM && !l_functional)
+        {
+            l_state = TARGETING::UTIL_FILTER_PRESENT;
+        }
+
         // PERV targets use a special interface
         if(T_SELF == fapi2::TARGET_TYPE_PERV)
         {
             TARGETING::getPervasiveChildTargetsByState(l_childList,
-                          static_cast<TARGETING::Target*>(this->get()),
-                          TARGETING::CLASS_NA,
-                          l_type,
-                          TARGETING::UTIL_FILTER_ALL);
+                        static_cast<TARGETING::Target*>(this->get()),
+                        TARGETING::CLASS_NA,
+                        l_type,
+                        l_state);
         }
         else if(T_SELF == fapi2::TARGET_TYPE_OMIC)
         {
             TARGETING::getChildOmiTargetsByState(l_childList,
-                          static_cast<TARGETING::Target*>(this->get()),
-                          TARGETING::CLASS_NA,
-                          l_type,
-                          TARGETING::UTIL_FILTER_ALL);
+                            static_cast<TARGETING::Target*>(this->get()),
+                            TARGETING::CLASS_NA,
+                            l_type,
+                            l_state);
         }
         else if((T_SELF == fapi2::TARGET_TYPE_PAUC)
                 && (K_CHILD == fapi2::TARGET_TYPE_OMIC))
         {
             TARGETING::getChildPaucTargetsByState(l_childList,
-                          static_cast<TARGETING::Target*>(this->get()),
-                          TARGETING::CLASS_NA,
-                          l_type,
-                          TARGETING::UTIL_FILTER_ALL);
-        }
-        // DIMMs need to use PRESENT so that we don't report things
-        //  that aren't installed
-        else if(K_CHILD == fapi2::TARGET_TYPE_DIMM)
-        {
-            TARGETING::getChildAffinityTargetsByState(l_childList,
-                          static_cast<TARGETING::Target*>(this->get()),
-                          TARGETING::CLASS_NA,
-                          l_type,
-                          TARGETING::UTIL_FILTER_PRESENT);
+                            static_cast<TARGETING::Target*>(this->get()),
+                            TARGETING::CLASS_NA,
+                            l_type,
+                            l_state);
         }
         // All chiplets need to use ALL so that we report the architectural
         //  limits, versus what PG might say
         else
         {
             TARGETING::getChildAffinityTargetsByState(l_childList,
-                          static_cast<TARGETING::Target*>(this->get()),
-                          TARGETING::CLASS_NA,
-                          l_type,
-                          TARGETING::UTIL_FILTER_ALL);
+                            static_cast<TARGETING::Target*>(this->get()),
+                            TARGETING::CLASS_NA,
+                            l_type,
+                            l_state);
         }
     }
-    else
-    {
-        if(T_SELF == fapi2::TARGET_TYPE_PERV)
-        {
-            TARGETING::getPervasiveChildTargetsByState(l_childList,
-                          static_cast<TARGETING::Target*>(this->get()),
-                          TARGETING::CLASS_NA,
-                          l_type,
-                          TARGETING::UTIL_FILTER_FUNCTIONAL);
-        }
-        else if(T_SELF == fapi2::TARGET_TYPE_OMIC)
-        {
-            TARGETING::getChildOmiTargetsByState(l_childList,
-                          static_cast<TARGETING::Target*>(this->get()),
-                          TARGETING::CLASS_NA,
-                          l_type,
-                          TARGETING::UTIL_FILTER_FUNCTIONAL);
-        }
-        else if((T_SELF == fapi2::TARGET_TYPE_PAUC)
-                && (K_CHILD == fapi2::TARGET_TYPE_OMIC))
-        {
-            TARGETING::getChildPaucTargetsByState(l_childList,
-                          static_cast<TARGETING::Target*>(this->get()),
-                          TARGETING::CLASS_NA,
-                          l_type,
-                          TARGETING::UTIL_FILTER_FUNCTIONAL);
-        }
-        else
-        {
-             TARGETING::getChildAffinityTargetsByState(l_childList,
-                          static_cast<TARGETING::Target*>(this->get()),
-                          TARGETING::CLASS_NA,
-                          l_type,
-                          TARGETING::UTIL_FILTER_FUNCTIONAL);
-        }
-    }
-
     FAPI_DBG("getChildren: l_functional 0x%.8X, l_type = 0x%.8X, ChipUnitId 0x%.8X",
-                l_functional, l_type, TARGETING::get_huid(this->get()));
+            l_functional, l_type, TARGETING::get_huid(this->get()));
     FAPI_DBG("getChildren: l_childList size %d", l_childList.size());
 
     // Return fapi2::Targets to the caller
@@ -605,11 +584,8 @@ inline std::vector<Target<K_CHILD, M, V> >
         fapi2::Target<K_CHILD, M, V> l_target(*chipletIter);
         l_children.push_back(l_target);
     }
-    FAPI_DBG(EXIT_MRK "getChildren. %d results", l_children.size());
-
     return l_children;
 }
-
 
 ///
 /// @brief Get this target's children, filtered
@@ -1042,9 +1018,9 @@ Target<K, M, V>::getMulticast(const MulticastGroup i_group) const
     // called (a PROC_CHIP target). The multicast operation will always execute
     // against the proc.
     plat_target_handle_t l_target(this->iv_handle,
-                                  true, // multicast
-                                  i_group,
-                                  O); // Multicast op
+            true, // multicast
+            i_group,
+            O); // Multicast op
     return l_target;
 }
 

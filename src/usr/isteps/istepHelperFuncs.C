@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,9 @@
 #include    <config.h>
 #include    <util/align.H>
 #include    <util/algorithm.H>
+
+#include    <pnor/pnorif.H>
+#include    <pnor/pnor_const.H>
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -214,6 +217,50 @@ void set_eff_config_attrs_helper( const EFF_CONFIG_ATTRIBUTES_BASE i_base,
                "set_eff_config_attrs_helper: setting _EFF_CONFIG "
                "attributes exit");
 
+}
+
+errlHndl_t loadHcodeImage(char *& o_rHcodeAddr, bool &o_loadSuccess)
+{
+    errlHndl_t l_errl = nullptr;
+    PNOR::SectionInfo_t l_info;
+
+    o_loadSuccess = false;
+    do
+    {
+
+#ifdef CONFIG_SECUREBOOT
+        l_errl = loadSecureSection(PNOR::HCODE);
+        if (l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       ERR_MRK"loadHcodeImage() - Error from "
+                       "loadSecureSection(PNOR::HCODE)");
+
+            //No need to commit error here, it gets handled later
+            //just break out to escape this function
+            break;
+        }
+        o_loadSuccess = true;
+#endif
+
+        // Get HCODE/WINK PNOR section info from PNOR RP
+        l_errl = PNOR::getSectionInfo( PNOR::HCODE, l_info );
+        if( l_errl )
+        {
+            //No need to commit error here, it gets handled later
+            //just break out to escape this function
+            break;
+        }
+
+        o_rHcodeAddr = reinterpret_cast<char*>(l_info.vaddr);
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "HCODE addr = 0x%p ",
+                   o_rHcodeAddr);
+
+    } while ( 0 );
+
+    return  l_errl;
 }
 
 //

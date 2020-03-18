@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,10 @@
 #include <targeting/common/target.H>
 #include <multicast_defs.H>
 #include <multicast_group_defs.H>
+#include <devicefw/userif.H>
+#include <targeting/common/utilFilter.H>
+#include <fapiPlatTrace.H>
+#include <errl/errlmanager.H>
 
 namespace fapi2
 {
@@ -191,6 +195,84 @@ namespace fapi2
         }
 
     }; //class plat_target_handle_t
+
+    // Forward declaration
+    uint64_t getMulticastAddr(uint64_t i_addr,
+                              MulticastGroup i_group,
+                              MulticastType i_op,
+                              MulticastCoreSelect i_coreSelect);
+
+    /// @brief Get the multicast children targets
+    /// @param[in] i_target The parent target
+    /// @param[in] i_child The child targeting type
+    /// @return TargetHandleList a list of the multicast children targets
+    // TODO: move function to .C in other commit
+    inline TARGETING::TargetHandleList getMulticastChildren(plat_target_handle_t i_target,
+                                                            TARGETING::TYPE i_child)
+    {
+        errlHndl_t l_errl = nullptr;
+        uint64_t l_buffer = 0x0;
+        size_t l_size = sizeof(l_buffer);
+        // TODO: make these symbolic in other commit
+        uint64_t mcastGrp1ScomAddr = 0xF0001;
+        uint64_t mcastBitSelectAddr = 0xF0008;
+        TARGETING::TargetHandleList l_children, o_list;
+
+        uint64_t l_writeData = 0;
+        l_errl = deviceWrite(i_target, &l_writeData, l_size, DEVICE_SCOM_ADDRESS(mcastBitSelectAddr));
+        if (l_errl)
+        {
+            FAPI_ERR("getMulticastChildren: Error from deviceWrite");
+            errlCommit(l_errl, SECURE_COMP_ID);
+        }
+        else
+        {
+            assert(l_size == sizeof(l_buffer), "size of buffer changed after deviceWrite");
+            mcastGrp1ScomAddr = getMulticastAddr(mcastGrp1ScomAddr, i_target.getMulticastGroup(),
+                fapi2::MULTICAST_BITX, i_target.getCoreSelect());
+
+            // This function contains two scoms so not necessarily thread safe
+            // Each individual scom is protected, but not the greater operation
+            l_errl = deviceRead(i_target, static_cast<void *>(&l_buffer), l_size,
+                DEVICE_SCOM_ADDRESS(mcastGrp1ScomAddr));
+
+            if (l_errl)
+            {
+                FAPI_ERR("getMulticastChildren: Error from deviceRead");
+                errlCommit(l_errl, SECURE_COMP_ID);
+            }
+            else
+            {
+                assert(l_size == sizeof(l_buffer), "size of buffer changed after deviceRead");
+                getChildChiplets(l_children, i_target, i_child, false);
+                for (auto& l_tar : l_children)
+                {
+                    // Get each pervasive parent
+                    TARGETING::TargetHandleList l_parentList;
+                    TARGETING::getParentPervasiveTargetsByState(l_parentList,
+                            l_tar,
+                            TARGETING::CLASS_NA,
+                            TARGETING::TYPE_PERV,
+                            TARGETING::UTIL_FILTER_ALL);
+
+                    if (l_parentList.size() == 1)
+                    {
+                        TARGETING::Target* l_parentTarget = l_parentList[0];
+                        const int l_unit = l_parentTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+                        // Check if the chip_unit has an enabled bit from the deviceRead
+                        if ((l_buffer >> (63 - l_unit)) & 1)
+                        {
+                            o_list.push_back(l_tar);
+                        }
+                    }
+                }
+            }
+        }
+        return o_list;
+    }
+
+
 } // End namespace fapi2
 
 #endif // __FAPI2_PLAT_TARGET__

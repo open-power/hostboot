@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -112,6 +112,18 @@ bool _compareMcbistWrtVoltageDomain(
     return lhsDomain < rhsDomain;
 }
 
+/**
+ *  @brief Load HCODE image and return a pointer to it, or nullptr
+ *  Note that on failure (error log returned), o_loadSuccess is accurate
+ *  and o_rHcodeAddr should be ignored
+ *
+ *  @param[out] o_rHcodeAddr  -   address of the HCODE image
+ *  @param[out] o_loadSuccess -   load image successful
+ *
+ *  @return      nullptr if success, errorlog if failure
+ *
+ */
+errlHndl_t loadHcodeImage(char *& o_rHcodeAddr, bool &o_loadSuccess);
 
 //******************************************************************************
 // computeDynamicMemoryVoltage

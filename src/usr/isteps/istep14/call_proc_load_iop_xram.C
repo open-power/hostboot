@@ -1,12 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep14/call_proc_pcie_config.C $              */
+/* $Source: src/usr/isteps/istep14/call_proc_load_iop_xram.C $            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2015,2020                        */
-/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -22,6 +21,10 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+/**
+ *  @file  call_proc_load_iop_xram.C
+ *  @brief Contains the wrapper for istep 14.3
+ */
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
@@ -38,7 +41,7 @@
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
 #include <fapi2/target.H>
-#include <p10_pcie_config.H>
+#include <p10_load_iop_xram.H>
 
 
 using   namespace   ISTEP;
@@ -49,47 +52,79 @@ using   namespace   TARGETING;
 namespace ISTEP_14
 {
 
-void* call_proc_pcie_config (void *io_pArgs)
+void* call_proc_load_iop_xram (void *io_pArgs)
 {
     IStepError  l_stepError;
 
     errlHndl_t  l_errl  =   nullptr;
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_proc_pcie_config entry" );
+               "call_proc_load_iop_xram entry" );
 
-    TargetHandleList l_procChips;
-    getAllChips(l_procChips, TYPE_PROC );
-
-    for (const auto & l_procChip: l_procChips)
+    char* l_pHcodeImage = nullptr;
+    // Load the reference image from PNOR
+    bool l_hcodeLoaded = false;
+    l_errl = loadHcodeImage(l_pHcodeImage, l_hcodeLoaded);
+    if (l_errl)
     {
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-            l_fapi_cpu_target(l_procChip);
-        //  write HUID of target
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "target HUID %.8X", get_huid(l_procChip));
+                ERR_MRK"call_proc_load_iop_xram ERROR : errorlog PLID=0x%x "
+                TRACE_ERR_FMT,
+                TRACE_ERR_ARGS(l_errl));
+        captureError(l_errl, l_stepError, HWPF_COMP_ID);
+    }
+    else
+    {
+        TargetHandleList l_procChips;
+        getAllChips(l_procChips, TYPE_PROC );
 
-        //  call the HWP with each fapi::Target
-        FAPI_INVOKE_HWP( l_errl, p10_pcie_config, l_fapi_cpu_target );
-
-        if ( l_errl )
+        for (const auto & l_procChip: l_procChips)
         {
+            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                l_fapi_cpu_target(l_procChip);
+            //  write HUID of target
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      ERR_MRK"proc_pcie_config "
-                      TRACE_ERR_FMT,
-                      TRACE_ERR_ARGS(l_errl));
+                    "call_proc_load_iop_xram target HUID %.8X", get_huid(l_procChip));
 
-            captureError(l_errl, l_stepError, HWPF_COMP_ID);
-            continue;
-        }
-        else
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "SUCCESS : proc_pcie_config" );
+            //  call the HWP with each fapi::Target
+            FAPI_INVOKE_HWP( l_errl, p10_load_iop_xram, l_fapi_cpu_target, l_pHcodeImage );
+
+            if ( l_errl )
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        ERR_MRK"ERROR : proc_load_iop_xram "
+                        TRACE_ERR_FMT,
+                        TRACE_ERR_ARGS(l_errl));
+                captureError(l_errl, l_stepError, HWPF_COMP_ID);
+                continue;
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "SUCCESS : proc_load_iop_xram" );
+            }
         }
     }
 
+#ifdef CONFIG_SECUREBOOT
+    // securely unload HCODE PNOR section, if necessary
+    if (l_hcodeLoaded)
+    {
+        l_errl = unloadSecureSection(PNOR::HCODE);
+        if (l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       ERR_MRK"host_build_stop_image() - Error from "
+                       "unloadSecureSection(PNOR::HCODE) "
+                       TRACE_ERR_FMT,
+                       TRACE_ERR_ARGS(l_errl));
+            captureError(l_errl, l_stepError, HWPF_COMP_ID);
+        }
+    }
+#endif
+
+
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_proc_pcie_config exit" );
+               "call_proc_load_iop_xram exit" );
     // end task, returning any errorlogs to IStepDisp
     return l_stepError.getErrorHandle();
 }

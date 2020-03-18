@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2019
+# Contributors Listed Below - COPYRIGHT 2018,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -48,6 +48,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${IPL_CUSTOMIZE_PATH}
 EXTRAINCDIR += ${HWP_ACC_PATH}
+EXTRAINCDIR += ${ROOTPATH}/src/import
 
 include ${ROOTPATH}/procedure.rules.mk
 

@@ -40,6 +40,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/core/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/scominfo/
+EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/nest
 #EXTRAINCDIR += ${ROOTPATH}/src/import/
 #EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory
@@ -58,10 +59,12 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/shared/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/inband/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm/
 
 #OBJS += call_mss_memdiag.o
 #OBJS += call_mss_thermal_init.o
-#OBJS += call_proc_pcie_config.o
+OBJS += call_proc_pcie_config.o
+OBJS += call_proc_load_iop_xram.o
 #OBJS += call_mss_power_cleanup.o
 OBJS += call_proc_setup_mmio_bars.o
 OBJS += call_proc_htm_setup.o
@@ -83,6 +86,13 @@ OBJS += p10_adu_setup.o
 OBJS += p10_setup_mmio_bars.o
 OBJS += p10_putmemproc.o
 OBJS += p10_getputmemproc_utils.o
+OBJS += p10_putsram.o
+OBJS += p10_getputsram_utils.o
+OBJS += p10_putsram_io_ppe.o
+OBJS += p10_io_ppe_utils.o
+OBJS += p10_pcie_config.o
+OBJS += p10_write_xram.o
+OBJS += p10_qme_sram_access.o
 #OBJS += p9_htm_start.o
 #OBJS += p9_htm_reset.o
 #OBJS += p9_htm_adu_ctrl.o
@@ -92,7 +102,7 @@ OBJS += p10_getputmemproc_utils.o
 #OBJS += p9_mss_thermal_init.o
 
 include ${PROCEDURE_PATH}/hwp/nest/p10_htm_setup.mk
-#include ${PROCEDURE_PATH}/hwp/nest/p9_pcie_config.mk
+include ${PROCEDURE_PATH}/hwp/nest/p10_load_iop_xram.mk
 #include ${PROCEDURE_PATH}/hwp/nest/p9_setup_bars.mk
 # ---- End workaround
 
@@ -105,6 +115,7 @@ OBJS += p10_scominfo.o
 
 VPATH    += ${PROCEDURE_PATH}/hwp/nest/
 VPATH    += ${PROCEDURE_PATH}/hwp/core/
+VPATH	 += ${PROCEDURE_PATH}/hwp/pm/
 VPATH    += ${PROCEDURE_PATH}/hwp/memory/
 VPATH    += ${ROOTPATH}/src/import/chips/p10/common/scominfo/
 
