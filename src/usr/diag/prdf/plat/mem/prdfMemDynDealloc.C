@@ -673,7 +673,8 @@ uint32_t __insertGrpId<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     // subchannel select bit.
     if ( bothSubChansEnabled )
     {
-        uint8_t ocmbChnl = i_chip->getPos() % MAX_OCMB_PER_MCC; // 0:1
+        TargetHandle_t omi = getConnectedParent( i_chip->getTrgt(), TYPE_OMI );
+        uint8_t ocmbChnl = getTargetPosition(omi) % MAX_OMI_PER_MCC; // 0:1
         uint8_t bitInsert = 0;
 
         switch ( i_grpChnls )
