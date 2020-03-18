@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/cstddef $                                         */
+/* $Source: src/include/usr/pldm/extended/hb_pdrs.H $                     */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,17 +22,35 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __CSTDDEF_H
-#define __CSTDDEF_H
 
-#include <stddef.h>
-#include <stdint.h>
+/* @file hb_pdrs.H
+ *
+ * Defines the interface for adding Hostboot's PDRs to a PDR repository.
+ */
 
-namespace std
+#ifndef HB_PDRS_H
+#define HB_PDRS_H
+
+struct pldm_pdr;
+
+namespace PLDM
 {
-    typedef decltype(nullptr) nullptr_t;
-    using ::size_t;
+
+using terminus_id_t = uint16_t;
+
+/* @brief Adds Hostboot's PDRs to the given PDR repository.
+ *        These PDRs are:
+ *        1) FRU Record Set PDRs, one for each DIMM and PROC
+ *        2) Entity Association PDRs, one for each relationship between the
+ *           DIMMs/PROCs and the Backplane.
+ *
+ * @param[in/out] io_repository        The repository to add the PDRs to. Must not
+ *                                     be nullptr.
+ * @param[in]     i_terminus_id        ID of the terminus for the given repository.
+ */
+void addHostbootPdrs(pldm_pdr* io_repository,
+                     terminus_id_t i_terminus_id);
+
 }
 
 #endif
-/* vim: set filetype=cpp : */

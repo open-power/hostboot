@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/cstddef $                                         */
+/* $Source: src/usr/pldm/extended/test/test_pldm_pdr.H $                  */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,17 +22,57 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __CSTDDEF_H
-#define __CSTDDEF_H
 
-#include <stddef.h>
-#include <stdint.h>
+#ifndef __TEST_PLDM_PDR_EXTENDED
+#define __TEST_PLDM_PDR_EXTENDED
 
-namespace std
+#include <memory>
+
+#include <cxxtest/TestSuite.H>
+
+#include <pldm/extended/hb_pdrs.H>
+
+#include "../../extern/pdr.h"
+#include "../../extern/platform.h"
+
+class PldmPdrTestSuite : public CxxTest::TestSuite
 {
-    typedef decltype(nullptr) nullptr_t;
-    using ::size_t;
-}
+public:
+    void test_addHbPdrs()
+    {
+        TS_INFO("enter test_addHbPdrs");
+
+        using repo_ptr = std::unique_ptr<pldm_pdr, decltype(&pldm_pdr_destroy)>;
+        const repo_ptr repo { pldm_pdr_init(), pldm_pdr_destroy };
+
+        // Just use terminus 0, doesn't matter for the test
+        const int terminus_id = 0;
+
+        PLDM::addHostbootPdrs(repo.get(), terminus_id);
+
+        const pldm_pdr_types pdrTypes[] =
+        {
+            PLDM_PDR_ENTITY_ASSOCIATION,
+            PLDM_PDR_FRU_RECORD_SET
+        };
+
+        for (const auto pdrType : pdrTypes)
+        {
+            uint32_t pdrSize = 0;
+            uint8_t* pdrData = nullptr;
+
+            if (!pldm_pdr_find_record_by_type(repo.get(),
+                                              pdrType,
+                                              nullptr,
+                                              &pdrData,
+                                              &pdrSize))
+            {
+                TS_FAIL("test_addHbPdrs: no records of type %d", pdrType);
+            }
+        }
+
+        TS_INFO("exit test_addHbPdrs");
+    }
+};
 
 #endif
-/* vim: set filetype=cpp : */

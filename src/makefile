@@ -280,6 +280,7 @@ TESTCASE_MODULES += testrtloader
 TESTCASE_MODULES += testexpupd
 TESTCASE_MODULES += testspi
 TESTCASE_MODULES += testmmio
+TESTCASE_MODULES += $(if $(CONFIG_PLDM),testpldm_extended,)
 endif
 
 

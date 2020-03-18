@@ -1,12 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/pldm/extended/makefile $
+# $Source: src/usr/pldm/extended/test/makefile $
 #
 # OpenPOWER HostBoot Project
 #
 # Contributors Listed Below - COPYRIGHT 2020
-# [+] International Business Machines Corp.
 #
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,25 +22,10 @@
 #
 # IBM_PROLOG_END_TAG
 
-ROOTPATH = ../../../..
-MODULE = pldm_extended
+ROOTPATH = ../../../../..
 
-include ../common/common.mk
+MODULE = testpldm_extended
 
-# From ../extern/
-OBJS += bios.o
-OBJS += bios_table.o
-OBJS += fru.o
-OBJS += platform.o
-OBJS += file_io.o
-OBJS += pdr.o
-# From ../requests/
-OBJS += pldm_fru_requests.o
-OBJS += pldm_pdr_requests.o
-
-# From ../extended/
-OBJS += hb_pdrs.o
-
-SUBDIRS += test.d
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk
