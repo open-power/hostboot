@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,7 +51,7 @@ namespace mss
 /// @note pre_data_init_fields, DIMM_TYPE specialization
 ///
 template<>
-struct attrEngineTraits<proc_type::P10, pre_data_init_fields, pre_data_init_fields::DIMM_TYPE>
+struct attrEngineTraits<proc_type::PROC_P10, pre_data_init_fields, pre_data_init_fields::DIMM_TYPE>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DIMM_TYPE_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -124,7 +124,7 @@ struct attrEngineTraits<proc_type::P10, pre_data_init_fields, pre_data_init_fiel
 /// @note pre_data_init_fields, DRAM_GEN specialization
 ///
 template<>
-struct attrEngineTraits<proc_type::P10, pre_data_init_fields, pre_data_init_fields::DRAM_GEN>
+struct attrEngineTraits<proc_type::PROC_P10, pre_data_init_fields, pre_data_init_fields::DRAM_GEN>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_GEN_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -195,7 +195,7 @@ struct attrEngineTraits<proc_type::P10, pre_data_init_fields, pre_data_init_fiel
 /// @note pre_data_init_fields, HOST_TO_DDR_SPEED_RATIO specialization
 ///
 template<>
-struct attrEngineTraits<proc_type::P10, pre_data_init_fields, pre_data_init_fields::HOST_TO_DDR_SPEED_RATIO>
+struct attrEngineTraits<proc_type::PROC_P10, pre_data_init_fields, pre_data_init_fields::HOST_TO_DDR_SPEED_RATIO>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -273,7 +273,7 @@ struct attrEngineTraits<proc_type::P10, pre_data_init_fields, pre_data_init_fiel
 /// @note pre_data_init_fields, HYBRID specialization
 ///
 template<>
-struct attrEngineTraits<proc_type::P10, pre_data_init_fields, pre_data_init_fields::HYBRID>
+struct attrEngineTraits<proc_type::PROC_P10, pre_data_init_fields, pre_data_init_fields::HYBRID>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_HYBRID_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -345,7 +345,7 @@ struct attrEngineTraits<proc_type::P10, pre_data_init_fields, pre_data_init_fiel
 /// @note pre_data_init_fields, HYBRID_MEDIA specialization
 ///
 template<>
-struct attrEngineTraits<proc_type::P10, pre_data_init_fields, pre_data_init_fields::HYBRID_MEDIA>
+struct attrEngineTraits<proc_type::PROC_P10, pre_data_init_fields, pre_data_init_fields::HYBRID_MEDIA>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_HYBRID_MEMORY_TYPE_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -417,7 +417,7 @@ struct attrEngineTraits<proc_type::P10, pre_data_init_fields, pre_data_init_fiel
 /// @note pre_data_init_fields, MRANKS specialization
 ///
 template<>
-struct attrEngineTraits<proc_type::P10, pre_data_init_fields, pre_data_init_fields::MRANKS>
+struct attrEngineTraits<proc_type::PROC_P10, pre_data_init_fields, pre_data_init_fields::MRANKS>
 {
     using attr_type = fapi2::ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
@@ -489,7 +489,7 @@ struct attrEngineTraits<proc_type::P10, pre_data_init_fields, pre_data_init_fiel
 /// @note DIMM_RANKS_CNFG specialization
 ///
 template<>
-struct attrEngineTraits<proc_type::P10, pre_data_init_fields, pre_data_init_fields::DIMM_RANKS_CNFG>
+struct attrEngineTraits<proc_type::PROC_P10, pre_data_init_fields, pre_data_init_fields::DIMM_RANKS_CNFG>
 {
 
     using attr_type = fapi2::ATTR_MEM_EFF_DIMM_RANKS_CONFIGED_Type;
@@ -536,7 +536,7 @@ struct attrEngineTraits<proc_type::P10, pre_data_init_fields, pre_data_init_fiel
 
         // Make sure the number of master ranks is setup
         uint8_t l_master_ranks = 0;
-        FAPI_TRY( (attrEngineTraits<proc_type::P10, pre_data_init_fields, pre_data_init_fields::MRANKS>::get_value_to_set(
+        FAPI_TRY( (attrEngineTraits<proc_type::PROC_P10, pre_data_init_fields, pre_data_init_fields::MRANKS>::get_value_to_set(
                        i_spd_data,
                        l_master_ranks)) );
 

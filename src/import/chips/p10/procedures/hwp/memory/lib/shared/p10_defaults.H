@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,7 @@
 namespace mss
 {
 
-constexpr mss::proc_type DEFAULT_PROC_TYPE = mss::proc_type::P10;
+constexpr mss::proc_type DEFAULT_PROC_TYPE = mss::proc_type::PROC_P10;
 constexpr mss::mc_type DEFAULT_MC_TYPE = mss::mc_type::EXPLORER;
 
 } // ns mss

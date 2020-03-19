@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,17 +79,17 @@ fapi2::ReturnCode p10_mss_freq( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>
             FAPI_TRY( l_rc, "Failed to initialize SPD facade for %s", mss::spd::c_str(d) );
 
             // Set pre-eff_config SPD driven attributes
-            FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::P10, mss::pre_data_init_fields>::set(l_spd_decoder)),
-                      "Failed gen::attr_engine<mss::proc_type::P10, mss::pre_data_init_fields>::set on %s", mss::spd::c_str(d) );
+            FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::PROC_P10, mss::pre_data_init_fields>::set(l_spd_decoder)),
+                      "Failed gen::attr_engine<mss::proc_type::PROC_P10, mss::pre_data_init_fields>::set on %s", mss::spd::c_str(d) );
 
             // Set pre_eff_config attributes derived from other attributes
-            FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::P10, mss::generic_metadata_fields>::set(d)),
-                      "Failed gen::attr_engine<mss::proc_type::P10, mss::generic_metadata_fields>::set on %s", mss::spd::c_str(d) );
+            FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::PROC_P10, mss::generic_metadata_fields>::set(d)),
+                      "Failed gen::attr_engine<mss::proc_type::PROC_P10, mss::generic_metadata_fields>::set on %s", mss::spd::c_str(d) );
         }
 
     }
 
-    FAPI_TRY(mss::generate_freq<mss::proc_type::P10>(i_target));
+    FAPI_TRY(mss::generate_freq<mss::proc_type::PROC_P10>(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;

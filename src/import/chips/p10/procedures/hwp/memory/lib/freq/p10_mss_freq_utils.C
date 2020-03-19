@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,7 +51,7 @@
 namespace mss
 {
 
-const std::vector< uint64_t > frequency_traits<mss::proc_type::P10>::SUPPORTED_FREQS =
+const std::vector< uint64_t > frequency_traits<mss::proc_type::PROC_P10>::SUPPORTED_FREQS =
 {
     mss::DIMM_SPEED_2666,
     mss::DIMM_SPEED_2933,
@@ -65,7 +65,7 @@ const std::vector< uint64_t > frequency_traits<mss::proc_type::P10>::SUPPORTED_F
 /// @return     FAPI2_RC_SUCCESS iff ok
 ///
 template<>
-fapi2::ReturnCode set_CL_attr<mss::proc_type::P10>(
+fapi2::ReturnCode set_CL_attr<mss::proc_type::PROC_P10>(
     const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
     const uint64_t i_cas_latency)
 {
@@ -96,7 +96,7 @@ fapi_try_exit:
 /// @return     FAPI2_RC_SUCCESS iff ok
 ///
 template<>
-fapi2::ReturnCode set_freq<mss::proc_type::P10>(
+fapi2::ReturnCode set_freq<mss::proc_type::PROC_P10>(
     const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
     const uint64_t i_freq)
 {
@@ -113,11 +113,11 @@ fapi_try_exit:
 /// @return     FAPI2_RC_SUCCESS iff ok
 ///
 template<>
-fapi2::ReturnCode get_master_rank_per_dimm<mss::proc_type::P10>(
+fapi2::ReturnCode get_master_rank_per_dimm<mss::proc_type::PROC_P10>(
     const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
     uint8_t* o_master_ranks)
 {
-    using TT = mss::frequency_traits<mss::proc_type::P10>;
+    using TT = mss::frequency_traits<mss::proc_type::PROC_P10>;
 
     uint8_t l_master_ranks[TT::MAX_DIMM_PER_PORT] = {0};
     FAPI_TRY(mss::attr::get_num_master_ranks_per_dimm(i_target, l_master_ranks));
@@ -133,7 +133,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
-fapi2::ReturnCode get_dimm_type<mss::proc_type::P10>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+fapi2::ReturnCode get_dimm_type<mss::proc_type::PROC_P10>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_dimm_type)
 {
     return mss::attr::get_dimm_type(i_target, o_dimm_type);
@@ -145,7 +145,7 @@ fapi2::ReturnCode get_dimm_type<mss::proc_type::P10>(const fapi2::Target<fapi2::
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
-fapi2::ReturnCode max_allowed_dimm_freq<mss::proc_type::P10>(uint32_t* o_allowed_dimm_freq)
+fapi2::ReturnCode max_allowed_dimm_freq<mss::proc_type::PROC_P10>(uint32_t* o_allowed_dimm_freq)
 {
     uint32_t l_allowed_dimm_freq[NUM_MAX_FREQS] = {0};
     FAPI_TRY(mss::attr::get_max_allowed_dimm_freq(l_allowed_dimm_freq));
@@ -162,11 +162,11 @@ fapi_try_exit:
 /// @return     FAPI2_RC_SUCCESS iff ok
 ///
 template<>
-fapi2::ReturnCode get_dimm_type<mss::proc_type::P10>(
+fapi2::ReturnCode get_dimm_type<mss::proc_type::PROC_P10>(
     const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
     uint8_t* o_dimm_type)
 {
-    using TT = mss::frequency_traits<mss::proc_type::P10>;
+    using TT = mss::frequency_traits<mss::proc_type::PROC_P10>;
 
     uint8_t l_dimm_type[TT::MAX_DIMM_PER_PORT] = {0};
     FAPI_TRY(mss::attr::get_dimm_type(i_target, l_dimm_type));
@@ -183,11 +183,11 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
-fapi2::ReturnCode callout_bad_freq_calculated<mss::proc_type::P10>(
+fapi2::ReturnCode callout_bad_freq_calculated<mss::proc_type::PROC_P10>(
     const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
     const uint64_t i_final_freq)
 {
-    using TT = mss::frequency_traits<mss::proc_type::P10>;
+    using TT = mss::frequency_traits<mss::proc_type::PROC_P10>;
 
     // Declaring temporary variables to avoid linker errors associated with FAPI_ASSERT
     const auto FREQ0 = TT::SUPPORTED_FREQ0;
@@ -200,7 +200,7 @@ fapi2::ReturnCode callout_bad_freq_calculated<mss::proc_type::P10>(
                  fapi2::P10_MSS_BAD_FREQ_CALCULATED()
                  .set_MSS_FREQ(i_final_freq)
                  .set_TARGET(i_target)
-                 .set_PROC_TYPE(mss::proc_type::P10)
+                 .set_PROC_TYPE(mss::proc_type::PROC_P10)
                  .set_SUPPORTED_FREQ_0(FREQ0)
                  .set_SUPPORTED_FREQ_1(FREQ1)
                  .set_SUPPORTED_FREQ_2(FREQ2),
@@ -225,15 +225,15 @@ fapi2::ReturnCode get_ranks_for_vpd(
     const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
     std::vector<uint64_t>& o_ranks)
 {
-    using TT = mss::frequency_traits<mss::proc_type::P10>;
+    using TT = mss::frequency_traits<mss::proc_type::PROC_P10>;
 
     uint8_t l_rank_count_dimm[TT::MAX_DIMM_PER_PORT] = {};
     uint8_t l_dimm_type[TT::MAX_DIMM_PER_PORT] = {};
 
     o_ranks.clear();
 
-    FAPI_TRY( get_master_rank_per_dimm<mss::proc_type::P10>(i_target, &(l_rank_count_dimm[0])) );
-    FAPI_TRY( get_dimm_type<mss::proc_type::P10>(i_target, &(l_dimm_type[0])) );
+    FAPI_TRY( get_master_rank_per_dimm<mss::proc_type::PROC_P10>(i_target, &(l_rank_count_dimm[0])) );
+    FAPI_TRY( get_dimm_type<mss::proc_type::PROC_P10>(i_target, &(l_dimm_type[0])) );
 
     // So for LRDIMM, our SI works a bit differently than for non-LRDIMM
     // LRDIMM's have buffers that operate on a per-DIMM basis across multiple ranks
@@ -277,12 +277,12 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
-fapi2::ReturnCode check_freq_support_vpd<mss::proc_type::P10>( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
+fapi2::ReturnCode check_freq_support_vpd<mss::proc_type::PROC_P10>( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
         i_target,
         const uint64_t i_proposed_freq,
         bool& o_supported)
 {
-    using TT = mss::frequency_traits<mss::proc_type::P10>;
+    using TT = mss::frequency_traits<mss::proc_type::PROC_P10>;
     o_supported = false;
 
     std::vector<uint64_t> l_ranks;
@@ -310,7 +310,7 @@ fapi2::ReturnCode check_freq_support_vpd<mss::proc_type::P10>( const fapi2::Targ
                  mss::c_str(i_target), l_rank);
 
         // Check if this VPD configuration is supported
-        FAPI_TRY(is_vpd_config_supported<mss::proc_type::P10>(l_vpd_target, i_proposed_freq, l_vpd_info, o_supported),
+        FAPI_TRY(is_vpd_config_supported<mss::proc_type::PROC_P10>(l_vpd_target, i_proposed_freq, l_vpd_info, o_supported),
                  "%s failed to determine if %u freq is supported", mss::c_str(i_target), i_proposed_freq);
 
 
@@ -333,7 +333,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
-fapi2::ReturnCode limit_freq_by_processor<mss::proc_type::P10>(
+fapi2::ReturnCode limit_freq_by_processor<mss::proc_type::PROC_P10>(
     const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
     freq_scoreboard& io_scoreboard)
 {
@@ -362,7 +362,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
-fapi2::ReturnCode num_master_ranks_per_dimm<mss::proc_type::P10>(
+fapi2::ReturnCode num_master_ranks_per_dimm<mss::proc_type::PROC_P10>(
     const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     uint8_t& o_master_ranks)
 {
@@ -377,7 +377,7 @@ fapi2::ReturnCode num_master_ranks_per_dimm<mss::proc_type::P10>(
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
-fapi2::ReturnCode callout_no_common_freq<mss::proc_type::P10>(
+fapi2::ReturnCode callout_no_common_freq<mss::proc_type::PROC_P10>(
     const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
     const bool i_supported_freq,
     const uint64_t i_num_ports)
@@ -406,7 +406,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
-fapi2::ReturnCode callout_max_freq_empty_set<mss::proc_type::P10>(
+fapi2::ReturnCode callout_max_freq_empty_set<mss::proc_type::PROC_P10>(
     const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
     const std::vector<std::vector<uint32_t>>& i_vpd_supported_freqs)
 {
@@ -452,7 +452,7 @@ namespace check
 ///       and is not needed here.
 ///
 template<>
-fapi2::ReturnCode final_freq<mss::proc_type::P10>(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+fapi2::ReturnCode final_freq<mss::proc_type::PROC_P10>(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
 {
     return fapi2::FAPI2_RC_SUCCESS;
 }

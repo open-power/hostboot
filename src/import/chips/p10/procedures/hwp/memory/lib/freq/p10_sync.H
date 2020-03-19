@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -101,7 +101,7 @@ inline fapi2::ReturnCode convert_ddr_freq_to_omi_freq(const fapi2::Target<fapi2:
         const uint64_t i_ddr_freq,
         uint32_t& o_omi_freq)
 {
-    using TT = mss::frequency_traits<mss::proc_type::P10>;
+    using TT = mss::frequency_traits<mss::proc_type::PROC_P10>;
     constexpr uint64_t ROUND_UNITS = 10;
     uint64_t l_omi_freq = 0;
 
@@ -129,7 +129,7 @@ inline fapi2::ReturnCode convert_omi_freq_to_ddr_freq(const fapi2::Target<fapi2:
         const uint32_t i_omi_freq,
         uint64_t& o_ddr_freq)
 {
-    using TT = mss::frequency_traits<mss::proc_type::P10>;
+    using TT = mss::frequency_traits<mss::proc_type::PROC_P10>;
 
     // Get the OMI to DDR freq ratio
     uint8_t l_ratio[TT::MAX_DIMM_PER_PORT] = {0};

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,7 +45,7 @@ namespace mss
 /// @class Traits and policy class for frequency and synchronous code - specialization for the P10 processor type
 ///
 template<>
-class frequency_traits<mss::proc_type::P10>
+class frequency_traits<mss::proc_type::PROC_P10>
 {
     public:
         //////////////////////////////////////////////////////////////
