@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2018
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -121,7 +121,8 @@ if [[ -z ${NODE} ]]; then
     NODE=0
 fi
 
-HB_OFFSET=`expr 128 \* 1024 \* 1024`
+# HB HRMOR offset is at: 4 GB - 256 MB = 3840 MB
+HB_OFFSET=`expr 3840 \* 1024 \* 1024`
 #(32TB - 0x200000000000 OR 35184372088832)
 HB_BASE_HRMOR=`expr 32 \* 1024 \* 1024 \* 1024 \* 1024`
 

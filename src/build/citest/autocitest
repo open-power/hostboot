@@ -234,7 +234,7 @@ echo "Wait for SBE and Hostboot bootloader to complete."
 echo
 echo "==================================="
 echo
-BL_HRMOR=0x8200000
+BL_HRMOR=0xF0200000
 loopcount=1
 while true; do
     sleep 5

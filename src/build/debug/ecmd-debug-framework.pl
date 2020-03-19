@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2018
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -33,7 +33,8 @@ use lib dirname (__FILE__);
 
 use Hostboot::_DebugFramework;
 
-use constant DEFAULT_HRMOR => 128*1024*1024; # 128 MB.
+# HRMOR value: 4 GB - 256 MB = 3840 MB
+use constant DEFAULT_HRMOR => 3840*1024*1024;
 use constant PER_NODE_OFFSET => 32*1024*1024*1024*1024; # 32 TB.
 use constant UNSET_HRMOR => 0xFFFFFFFFFFFFFFFF;
 
@@ -161,7 +162,7 @@ sub getEnv
 
 # @sub getHRMOR
 #
-# Returns the HRMOR (128MB for a real system).
+# Returns the HRMOR (4GB-256MB for a real system).
 #
 sub getHRMOR
 {
@@ -444,7 +445,7 @@ List of arguments to pass to the tool as options.
 
 =item B<--force-hrmor>=value
 
-Set the HRMOR to be a non-default value.  The default is 128MB.
+Set the HRMOR to be a non-default value.  The default is 4GB-256MB.
 
 =item B<--toolhelp>
 

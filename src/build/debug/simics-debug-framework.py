@@ -522,9 +522,16 @@ def magic_instruction_callback(user_arg, cpu, arg):
         return
 
     # Disable our handler if we aren't inside HB part of IPL
-    #   If HB is running then HRMOR==128MB (ignoring high bits)
-    #   0x40000000=1GB, 0x8000000=128MB
-    if( (cpu.hrmor % 0x40000000) != 0x8000000 ):
+    # We're inside HB when HRMOR offset is 4 GB - 256 MB.
+    # Assuming that the HRMOR offset can be moved arround in multiples of 1 GB
+    # increments (e.g. the HRMOR base may find it self at 1 TB + 4 GB - 256 MB),
+    # then the following equation will always be true if we are in HB:
+    # (X GB + HRMOR_offset) % 1 GB = 768 MB
+    #   This is true because:
+    #   let Y = X GB + 4GB - 256MB = X GB + 3 GB + 768 MB
+    #   and if we take the modulo of Y by 1 GB, the residual is 768 MB.
+    # 0x40000000=1GB, 0x30000000= 768 MB
+    if( (cpu.hrmor % 0x40000000) != 0x30000000 ):
         print 'Skipping HB magic (outside of HB)', arg
         return
 
@@ -715,9 +722,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
             #entire base memory which is:  hrmor + 0x4000000 (64 MB)
             if ((entry[0] == hb_hrmor) or
                 ((entry[0] < hb_hrmor) and
-                 (entry[0] + entry[4] >= hb_hrmor + 0x4000000) or
-                 (entry[0] == 134217728) or
-                 (entry[0] == 136314880))): #0x8000000 or 0x8200000
+                 (entry[0] + entry[4] >= hb_hrmor + 0x4000000))):
                 obj = entry[1]
                 size = entry[4]
                 target = entry[5]

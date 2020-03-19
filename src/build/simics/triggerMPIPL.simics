@@ -13,15 +13,15 @@
 
 #set regs on master thread to prepare for bootloader
 ($hb_cpu).write-reg IAR 0x3000
-($hb_cpu).write-reg HRMOR 0x8200000
+($hb_cpu).write-reg HRMOR 0xF0200000
 ($hb_cpu).write-reg MSR 0xd000000000000000
 ($hb_cpu).write-reg LPCR 0x800040000000800c
 
 #load in the bootloader code
-system_cmp0.phys_mem.load-file ../obj/ppc/hbfw/img/hbbl.bin 0x8203000
+system_cmp0.phys_mem.load-file ../obj/ppc/hbfw/img/hbbl.bin 0xF0203000
 
 #set up memory that SBE usually sets
-system_cmp0.phys_mem.write address = 0x820000c value = 0x0000000000006000 size = 8
+system_cmp0.phys_mem.write address = 0xF020000c value = 0x0000000000006000 size = 8
 
 #set isMPIPL mode to be true
 ($hb_masterproc).proc_chip.invoke parallel_store SCOM 0x5003A "20000000_00000000" 64

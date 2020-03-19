@@ -127,7 +127,7 @@ enum BlockPriority
 #define SLBE_b 12
 
 /** Hostboot reserved memory */
-#define VMM_HRMOR_OFFSET (128*MEGABYTE)
+#define VMM_HRMOR_OFFSET ((4 * GIGABYTE) - (256*MEGABYTE))
 #define VMM_HB_RSV_MEM_SIZE (256*MEGABYTE)
 
 /** PHYP ATTN AREA OFFSET */
@@ -137,7 +137,7 @@ enum BlockPriority
 
 /** Hardwired offsets from HRMOR to HOMER images in real mem */
 /** HOMER starts immediately after our HB memory */
-/**    <n0p0 HRMOR = 128MB> + <memory size = 64MB> = 192 MB */
+/**    <n0p0 HRMOR = 4GB-256MB> + <memory size = 64MB> = 3904 MB */
 /** HOMER is 4 MB per proc, 4 procs = 16MB */
 /** Each HOMER must start on a 4MB offset to meet OCC requirements */
 #define VMM_HOMER_REGION_START_OFFSET (VMM_MEMORY_SIZE)

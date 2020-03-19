@@ -158,18 +158,18 @@ if($vpo_compile == "1") {
     # Manually populate the SBE to HBBL communication area since SBE isn't running in VPO
     #
     # The "Jump forward x3000 instruction"
-    system_cmp0.phys_mem.set address = 0x8200000 size = 4 0x48003000
+    system_cmp0.phys_mem.set address = 0xF0200000 size = 4 0x48003000
     # The version of SBE
-    system_cmp0.phys_mem.set address = 0x8200004 size = 4 0x00100001
+    system_cmp0.phys_mem.set address = 0xF0200004 size = 4 0x00100001
     # 0th byte: sbeBootSide 1 byte:lpcConsoleEnable 3-4 byte: cacheSizeMB (4MB)
-    system_cmp0.phys_mem.set address = 0x8200008 size = 4 0x00000004
+    system_cmp0.phys_mem.set address = 0xF0200008 size = 4 0x00000004
     # The size of the HBBL + 0x3000 offset
-    system_cmp0.phys_mem.set address = 0x820000c size = 8 0x9000
-    system_cmp0.phys_mem.set address = 0x8200014 size = 2 0x0900
+    system_cmp0.phys_mem.set address = 0xF020000c size = 8 0x9000
+    system_cmp0.phys_mem.set address = 0xF0200014 size = 2 0x0900
     # 0th byte: numKeyAddrPair; 1-7 byte: start of the XSCOM BAR
-    system_cmp0.phys_mem.set address = 0x8200016 size = 8 0x080006
-    system_cmp0.phys_mem.set address = 0x820001e size = 2 0x03fc
-    system_cmp0.phys_mem.set address = 0x8200020 size = 8 0x00060300
+    system_cmp0.phys_mem.set address = 0xF0200016 size = 8 0x080006
+    system_cmp0.phys_mem.set address = 0xF020001e size = 2 0x03fc
+    system_cmp0.phys_mem.set address = 0xF0200020 size = 8 0x00060300
 
     # Now force the HBBL, HBB, and PNOR images at their respective offsets into the L3 cache.
     $root = (env PROJECT_ROOT)
@@ -179,8 +179,8 @@ if($vpo_compile == "1") {
     (get-master-procs)[0].l3_img.load-file (lookup-file $root+"/standalone/pnor/VPO.pnor") 0x400000
 
     # Set up to run on core 1 (for testing purposes)
-    system_cmp0.cpu0_0_01_0->hrmor = 0x8200000
-    system_cmp0.cpu0_0_01_0->urmor = 0x8200000
+    system_cmp0.cpu0_0_01_0->hrmor = 0xF0200000
+    system_cmp0.cpu0_0_01_0->urmor = 0xF0200000
     system_cmp0.cpu0_0_01_0->iar = 0
     system_cmp0.cpu0_0_01_0.enable
     system_cmp0.cpu0_0_00_0.disable
@@ -196,3 +196,8 @@ foreach $dimm_uchip in (get-object-list -all substr = uchip_space) {
     ($dimm_uchip).write 0x2134 0xd2000610
 }
 
+# Changing the base of HRMOR to 4GB - 256MB for all procs
+echo "Setting l3_base"
+foreach $proc in (get-all-procs) {
+    $proc->l3_base=0xF0000000
+}

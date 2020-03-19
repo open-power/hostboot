@@ -86,8 +86,6 @@
 namespace RUNTIME
 {
 
-
-
 mutex_t g_rhbMutex = MUTEX_INITIALIZER;
 
 // used for populating the TPM required bit in HDAT
@@ -96,13 +94,14 @@ const uint16_t TPM_REQUIRED_BIT = 0x8000; //leftmost bit of uint16_t set to 1
 const uint8_t BITS_PER_BYTE = 8;
 
 const uint8_t HDAT_INVALID_NODE = 0xFF;
-// The upper limit of the hostboot reserved memory. Only applies to PHYP.
-// The lower limit is Hostboot HRMOR + 64MB (if not mirroring)
-const uint64_t HB_RES_MEM_UPPER_LIMIT = 256*MEGABYTE;
 
+// The upper limit of the hostboot reserved memory. Only applies to PHYP.
+const uint64_t HB_RES_MEM_UPPER_LIMIT = VMM_HRMOR_OFFSET + VMM_HB_RSV_MEM_SIZE;
+
+// The lower limit is Hostboot HRMOR + 64MB (if not mirroring)
 // The lower limit of the hostboot reserved memory. Do not allow to reserve
-// any memory below this limit.
-const uint64_t HB_RES_MEM_LOWER_LIMIT = VMM_MEMORY_SIZE + VMM_HRMOR_OFFSET;
+// any memory below this limit. Only applies to PHYP.
+const uint64_t HB_RES_MEM_LOWER_LIMIT = VMM_HRMOR_OFFSET + VMM_MEMORY_SIZE;
 
 trace_desc_t *g_trac_runtime = nullptr;
 TRAC_INIT(&g_trac_runtime, RUNTIME_COMP_NAME, KILOBYTE);
@@ -1119,39 +1118,26 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
             // Reserve the HRMOR space if it not at zero offset.
             ////////////////////////////////////////////////////////////////////
             // HRMOR Calculation on OPAL Vs PhyP systems
-            // For PhyP system, HRMOR is set to 128MB, which is calculated basis
-            // this theory ==>>
-            // "supported offset values are all values of the
-            // form i x 2 exp `r`, where 0 <= i <= 2 exp `j`, and j and r are
-            // implementation-dependent values having the properties that
-            // 12 <= r <= 26". (Texted quoted from PowerISA Doc)
-            // Basis the above, value of r is 26, which sets the offset
-            // granularity to 64MB, therefore value of i is '2', which makes the
-            // offset to 128MB.
-            // Basis the above calculation/assumption, calculation of HRMO in
-            // OPAL system is as follows -
-            // OPAL needs the HRMOR in the range of 4GB, so that HB reloading
-            // doesn't stamp on the OPAL/HostLinux Data. Now keeping the max
-            // granularity as 64MB, 'i' is the multiplication factor which comes
-            // to around 64 (64MB * 64 = 4096MB)
+            // For PhyP and OPAL systems, HRMOR is set to 4GB-256MB, which is
+            // calculated following PowerISA Doc:
+            // "The supported HRMOR values are the non-negative multiples of
+            // 2 to the power of r, where r is an implementation-dependent value
+            // and 12 <= r <= 26."
+            // Setting r to 26 sets the offset granularity to 64MB.
+            // 64MB * 60 = 3840MB, which is equal to 4GB-256MB.
             ////////////////////////////////////////////////////////////////////
             uint64_t l_hbAddr = cpu_spr_value(CPU_SPR_HRMOR) - VMM_HRMOR_OFFSET;
-            // if l_hbAddr is zero that means PhyP system where HRMOR is set to
-            // 128MB, if this is not zero that means OPAL system where HRMOR is
-            // set to 3968MB
-            if(l_hbAddr)
+
+            l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_PRIMARY,
+                    i_nodeId,
+                    l_hbAddr,
+                    VMM_HB_RSV_MEM_SIZE,
+                    HBRT_RSVD_MEM__PRIMARY,
+                    HDAT::RHB_READ_WRITE,
+                    false);
+            if(l_elog != nullptr)
             {
-                l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_PRIMARY,
-                        i_nodeId,
-                        l_hbAddr,
-                        VMM_HB_RSV_MEM_SIZE,
-                        HBRT_RSVD_MEM__PRIMARY,
-                        HDAT::RHB_READ_WRITE,
-                        false);
-                if(l_elog != nullptr)
-                {
-                    break;
-                }
+                break;
             }
 
             // Opal data goes at top_of_mem
