@@ -581,12 +581,6 @@ public:
         TRACFCOMP(g_trac_expscom, ">> Enter  testExpscomMmio");
 
         do{
-// TODO: RTC 249013 enable the test
-// Causing a data storage exception in c_str...
-#ifdef CONFIG_AXONE_BRING_UP
-TRACFCOMP( g_trac_expscom,"skipping testExpscomMmio");
-break;
-#endif
             if (!iv_serializeTestMutex)
             {
                 TS_FAIL("iv_serializedTestMutex is not setup");
@@ -764,12 +758,6 @@ break;
         TRACFCOMP(g_trac_expscom, ">> Enter  testExpscomCombined");
 
         do{
-// TODO: RTC 249013 enable the test
-// Causing a data storage exception in c_str...
-#ifdef CONFIG_AXONE_BRING_UP
-TRACFCOMP( g_trac_expscom,"skipping testExpscomCombined");
-break;
-#endif
             if (!iv_serializeTestMutex)
             {
                 TS_FAIL("iv_serializedTestMutex is not setup");
