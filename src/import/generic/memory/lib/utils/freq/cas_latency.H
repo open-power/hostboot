@@ -192,7 +192,7 @@ class cas_latency
             for ( const auto& l_cache : i_caches )
             {
                 // Retrieve timing values from the SPD
-                const auto l_target = l_cache.get_dimm_target();
+                const auto l_target = l_cache.get_target();
                 uint64_t l_taa_min_in_ps = 0;
                 uint64_t l_tckmax_in_ps = 0;
                 uint64_t l_tck_min_in_ps = 0;
@@ -544,7 +544,7 @@ class cas_latency
             int64_t l_temp = 0;
 
             // Retrieve timing parameters
-            const auto l_target = i_spd_decoder.get_dimm_target();
+            const auto l_target = i_spd_decoder.get_target();
 
             FAPI_TRY( get_timebases(i_spd_decoder, l_medium_timebase, l_fine_timebase),
                       "%s. Failed Failed get_timebases",  mss::spd::c_str(l_target) );

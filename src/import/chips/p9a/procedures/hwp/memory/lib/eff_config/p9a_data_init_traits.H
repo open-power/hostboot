@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -104,7 +104,7 @@ struct attrEngineTraits<proc_type::AXONE, pre_data_init_fields, pre_data_init_fi
             // All others reserved or not supported
         };
 
-        const auto l_dimm = i_spd_data.get_dimm_target();
+        const auto l_dimm = i_spd_data.get_target();
 
         attr_integral_type l_base_module_type = 0;
         FAPI_TRY( i_spd_data.base_module(l_base_module_type),
@@ -175,7 +175,7 @@ struct attrEngineTraits<proc_type::AXONE, pre_data_init_fields, pre_data_init_fi
             // Other key bytes reserved or not supported
         };
 
-        const auto l_dimm = i_spd_data.get_dimm_target();
+        const auto l_dimm = i_spd_data.get_target();
 
         attr_integral_type l_device_type = 0;
         FAPI_TRY( i_spd_data.device_type(l_device_type),
@@ -253,7 +253,7 @@ struct attrEngineTraits<proc_type::AXONE, pre_data_init_fields, pre_data_init_fi
             // All others reserved or not supported
         };
 
-        const auto l_dimm = i_spd_data.get_dimm_target();
+        const auto l_dimm = i_spd_data.get_target();
 
         attr_integral_type l_value = 0;
         FAPI_TRY( i_spd_data.host_to_ddr_speed_ratio(l_value),
@@ -325,7 +325,7 @@ struct attrEngineTraits<proc_type::AXONE, pre_data_init_fields, pre_data_init_fi
             // All others reserved or not supported
         };
 
-        const auto l_dimm = i_spd_data.get_dimm_target();
+        const auto l_dimm = i_spd_data.get_target();
 
         attr_integral_type l_spd_hybrid_type = 0;
         FAPI_TRY(i_spd_data.hybrid(l_spd_hybrid_type),
@@ -397,7 +397,7 @@ struct attrEngineTraits<proc_type::AXONE, pre_data_init_fields, pre_data_init_fi
             {1, fapi2::ENUM_ATTR_MEM_EFF_HYBRID_MEMORY_TYPE_NVDIMM},
             // All others reserved or not supported
         };
-        const auto l_dimm = i_spd_data.get_dimm_target();
+        const auto l_dimm = i_spd_data.get_target();
         attr_integral_type l_spd_hybrid_media = 0;
 
         FAPI_TRY( i_spd_data.hybrid_media(l_spd_hybrid_media),
@@ -469,7 +469,7 @@ struct attrEngineTraits<proc_type::AXONE, pre_data_init_fields, pre_data_init_fi
             {3, fapi2::ENUM_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM_4R},
         };
 
-        const auto l_dimm = i_spd_data.get_dimm_target();
+        const auto l_dimm = i_spd_data.get_target();
 
         attr_integral_type l_master_ranks_spd = 0;
         FAPI_TRY( i_spd_data.num_package_ranks_per_dimm(l_master_ranks_spd),
@@ -541,7 +541,7 @@ struct attrEngineTraits<proc_type::AXONE, pre_data_init_fields, pre_data_init_fi
                        l_master_ranks)) );
 
         FAPI_TRY( l_ranks_configed.setBit(0, l_master_ranks),
-                  "%s. Failed to setBit", spd::c_str(i_spd_data.get_dimm_target()) );
+                  "%s. Failed to setBit", spd::c_str(i_spd_data.get_target()) );
 
         o_setting = l_ranks_configed;
 

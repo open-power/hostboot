@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -83,7 +83,7 @@ fapi2::ReturnCode get_supported_voltages<mss::mc_type::NIMBUS, mss::spd::device_
     // Get dimms for each MCS
     for ( const auto& l_cache : l_spd_facades )
     {
-        const auto l_dimm = l_cache.get_dimm_target();
+        const auto l_dimm = l_cache.get_target();
         uint8_t l_dimm_nominal = 0;
         uint8_t l_dimm_endurant = 0;
 

@@ -85,7 +85,7 @@ fapi2::ReturnCode get_timebases( const mss::spd::facade& i_spd_decoder,
     };
 
     // Retrieve timing parameters
-    const auto l_target = i_spd_decoder.get_dimm_target();
+    const auto l_target = i_spd_decoder.get_target();
 
     int64_t l_spd_ftb = 0;
     int64_t l_spd_mtb = 0;
@@ -135,7 +135,7 @@ fapi2::ReturnCode get_tckmin( const mss::spd::facade& i_spd_decoder,
     int64_t l_temp = 0;
 
     // Retrieve timing parameters
-    const auto l_target = i_spd_decoder.get_dimm_target();
+    const auto l_target = i_spd_decoder.get_target();
 
     FAPI_TRY( get_timebases(i_spd_decoder, l_medium_timebase, l_fine_timebase),
               "%s. Failed get_timebases", spd::c_str(l_target) );
@@ -186,7 +186,7 @@ fapi2::ReturnCode get_tckmax( const mss::spd::facade& i_spd_decoder,
     int64_t l_temp = 0;
 
     // Retrieve timing parameters
-    const auto l_target = i_spd_decoder.get_dimm_target();
+    const auto l_target = i_spd_decoder.get_target();
 
     FAPI_TRY( get_timebases(i_spd_decoder, l_medium_timebase, l_fine_timebase),
               "%s. Failed get_timebases", spd::c_str(l_target) );

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -635,7 +635,7 @@ fapi2::ReturnCode eff_dimm::factory ( const spd::facade& i_spd_decoder,
     uint8_t l_master_ranks = 0;
 
     fapi2::ReturnCode l_rc;
-    const auto l_dimm = i_spd_decoder.get_dimm_target();
+    const auto l_dimm = i_spd_decoder.get_target();
 
     // Now time to get the three attributes to tell which dimm we're working with.
     // Dram_gen and dimm_type are set in mss_freq and we'll call the SPD decoder to get the reg and buff type

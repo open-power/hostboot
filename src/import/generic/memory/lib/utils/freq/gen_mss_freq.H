@@ -271,7 +271,7 @@ inline fapi2::ReturnCode spd_supported_freq(const fapi2::Target<TT::FREQ_DOMAIN_
     // This will further reduce supported frequencies the system can run on.
     for ( const auto& l_cache : l_spd_facades )
     {
-        const auto l_dimm = l_cache.get_dimm_target();
+        const auto l_dimm = l_cache.get_target();
         const auto l_port = mss::find_target<TT::PORT_TARGET_TYPE>(l_dimm);
         const auto l_port_pos = mss::relative_pos<TT::FREQ_DOMAIN_TARGET_TYPE>(l_port);
         uint64_t l_tckmax_in_ps = 0;

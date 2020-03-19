@@ -119,7 +119,7 @@ class facade final
         /// @brief Gets facade target
         /// @return fapi2::Target<fapi2::TARGET_TYPE_DIMM>
         ///
-        fapi2::Target<fapi2::TARGET_TYPE_DIMM> get_dimm_target() const
+        fapi2::Target<fapi2::TARGET_TYPE_DIMM> get_target() const
         {
             return iv_target;
         }

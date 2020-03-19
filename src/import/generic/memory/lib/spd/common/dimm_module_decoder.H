@@ -83,7 +83,7 @@ class dimm_module_decoder
         /// @brief Gets decoder target
         /// @return fapi2::Target<fapi2::TARGET_TYPE_DIMM>
         ///
-        virtual fapi2::Target<fapi2::TARGET_TYPE_DIMM> get_dimm_target() const
+        virtual fapi2::Target<fapi2::TARGET_TYPE_DIMM> get_target() const
         {
             return iv_target;
         }

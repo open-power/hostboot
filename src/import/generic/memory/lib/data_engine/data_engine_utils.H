@@ -76,7 +76,7 @@ template < typename ET,
 inline fapi2::ReturnCode calc_spd_time_in_ps(const spd::facade& i_spd,
         OT& o_timing_in_ps)
 {
-    const auto l_dimm = i_spd.get_dimm_target();
+    const auto l_dimm = i_spd.get_target();
     int64_t l_timing_mtb = 0;
     int64_t l_timing_ftb = 0;
     int64_t l_mtb = 0;
@@ -115,7 +115,7 @@ template < typename ET,
 inline fapi2::ReturnCode calc_spd_time_in_nck(const spd::facade& i_spd,
         OT& o_timing_in_nck)
 {
-    const auto l_dimm = i_spd.get_dimm_target();
+    const auto l_dimm = i_spd.get_target();
 
     // Calculate the DIMM speed in picoseconds (a.k.a tCK == clock period)
     int64_t l_tck_in_ps = 0;
@@ -174,7 +174,7 @@ struct get<fapi2::TARGET_TYPE_OCMB_CHIP, mss::spd::facade>
     static fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> target(const mss::spd::facade& i_data)
     {
         return mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(
-                   mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_data.get_dimm_target()));
+                   mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_data.get_target()));
     }
 };
 
@@ -194,7 +194,7 @@ struct get<T, spd::facade>
     ///
     static fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> target(const spd::facade& i_data)
     {
-        return mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_data.get_dimm_target());
+        return mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_data.get_target());
     }
 };
 
@@ -275,7 +275,7 @@ inline fapi2::ReturnCode update_data( const spd::facade& i_spd_data,
                                       const FFDC i_ffdc_code,
                                       T (&o_data)[X])
 {
-    const auto l_dimm = i_spd_data.get_dimm_target();
+    const auto l_dimm = i_spd_data.get_target();
     const size_t l_dimm_index = mss::index(l_dimm);
 
     FAPI_TRY( check::index_within_bounds(l_dimm, l_dimm_index, X, i_ffdc_code) );

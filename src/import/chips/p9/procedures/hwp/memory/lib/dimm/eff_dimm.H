@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -126,7 +126,7 @@ class eff_dimm
             iv_spd_decoder(i_spd_decoder)
         {
             // Targeting and index info
-            iv_dimm = i_spd_decoder.get_dimm_target();
+            iv_dimm = i_spd_decoder.get_target();
             FAPI_DBG("Constructing eff_dimm object for %s", mss::c_str(iv_dimm));
 
             iv_mca = find_target<fapi2::TARGET_TYPE_MCA>(iv_dimm);

@@ -309,7 +309,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::PRIMA
             {7, fapi2::ENUM_ATTR_MEM_EFF_PRIM_DIE_COUNT_D8}
         };
 
-        const auto l_dimm = i_spd_data.get_dimm_target();
+        const auto l_dimm = i_spd_data.get_target();
 
         attr_integral_type l_decoder_val = 0;
         FAPI_TRY( i_spd_data.prim_sdram_die_count(l_decoder_val) );
@@ -381,7 +381,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
             {6, fapi2::ENUM_ATTR_MEM_EFF_DRAM_DENSITY_16G},
         };
 
-        const auto l_dimm = i_spd_data.get_dimm_target();
+        const auto l_dimm = i_spd_data.get_target();
 
         attr_integral_type l_sdram_density = 0;
         FAPI_TRY( i_spd_data.sdram_density(l_sdram_density),
@@ -459,7 +459,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::PRIM_
             // All others reserved
         };
 
-        const auto l_dimm = i_spd_data.get_dimm_target();
+        const auto l_dimm = i_spd_data.get_target();
 
         attr_integral_type l_spd_bus_width = 0;
         FAPI_TRY( i_spd_data.prim_bus_width(l_spd_bus_width) );
@@ -537,7 +537,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
         };
 
         // Read SPD value
-        const auto l_dimm = i_spd_data.get_dimm_target();
+        const auto l_dimm = i_spd_data.get_target();
 
         attr_integral_type l_value = 0;
         FAPI_TRY( i_spd_data.device_width(l_value) );
@@ -602,7 +602,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::COLUM
             {0b001, fapi2::ENUM_ATTR_MEM_EFF_DRAM_COLUMN_BITS_NUM10},
         };
 
-        const auto l_dimm = i_spd_data.get_dimm_target();
+        const auto l_dimm = i_spd_data.get_target();
 
         attr_integral_type l_value = 0;
         FAPI_TRY(i_spd_data.column_address_bits(l_value))
@@ -671,7 +671,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::ROW_A
             {0b110, fapi2::ENUM_ATTR_MEM_EFF_DRAM_ROW_BITS_NUM18},
         };
 
-        const auto l_dimm = i_spd_data.get_dimm_target();
+        const auto l_dimm = i_spd_data.get_target();
 
         attr_integral_type l_value = 0;
         FAPI_TRY(i_spd_data.row_address_bits(l_value))
@@ -2301,7 +2301,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
             {3200, 18},
         };
 
-        const auto& l_dimm = i_spd_data.get_dimm_target();
+        const auto& l_dimm = i_spd_data.get_target();
         // TK This could change but not sure where to get this from
         constexpr size_t MAX_RANKS_PER_DIMM = 4;
         uint64_t l_freq = 0;
@@ -2433,7 +2433,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        const auto& l_dimm = i_spd_data.get_dimm_target();
+        const auto& l_dimm = i_spd_data.get_target();
         uint8_t l_refresh_mode = 0;
         uint8_t l_refresh_rate = 0;
         uint64_t l_trefi_in_ps = 0;
@@ -2986,7 +2986,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        const auto& l_dimm = i_spd_data.get_dimm_target();
+        const auto& l_dimm = i_spd_data.get_target();
         int64_t l_tck_in_ps = 0;
         uint64_t l_freq = 0;
 
@@ -3063,7 +3063,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        const auto& l_dimm = i_spd_data.get_dimm_target();
+        const auto& l_dimm = i_spd_data.get_target();
 
         // Taking the worst case required minimum JEDEC value
         // instead of calculating proposed value from SPD -- which selects optimistic values
@@ -3133,7 +3133,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        const auto& l_dimm = i_spd_data.get_dimm_target();
+        const auto& l_dimm = i_spd_data.get_target();
 
         // Taking the worst case required minimum JEDEC value
         // instead of calculating proposed value from SPD -- which selects optimistic values
@@ -3204,7 +3204,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        const auto& l_dimm = i_spd_data.get_dimm_target();
+        const auto& l_dimm = i_spd_data.get_target();
         int64_t l_tck_in_ps = 0;
         uint64_t l_freq = 0;
         uint8_t l_refresh_mode = 0;
@@ -3332,7 +3332,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        const auto& l_dimm = i_spd_data.get_dimm_target();
+        const auto& l_dimm = i_spd_data.get_target();
         int64_t l_tck_in_ps = 0;
         uint64_t l_freq = 0;
         uint8_t l_refresh_mode = 0;

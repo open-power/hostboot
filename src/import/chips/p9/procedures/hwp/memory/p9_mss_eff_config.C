@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -93,7 +93,7 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
     // on a port if we're in a dual-drop config
     for( const auto& l_spd : l_spd_facades )
     {
-        const auto l_dimm = l_spd.get_dimm_target();
+        const auto l_dimm = l_spd.get_target();
 
         std::shared_ptr<mss::eff_dimm> l_eff_dimm;
         FAPI_TRY( mss::eff_dimm::factory( l_spd, l_eff_dimm),
@@ -114,7 +114,7 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
     // Now we continue with the remainder of eff_config
     for( const auto& l_spd : l_spd_facades )
     {
-        const auto l_dimm = l_spd.get_dimm_target();
+        const auto l_dimm = l_spd.get_target();
 
         std::shared_ptr<mss::eff_dimm> l_eff_dimm;
         FAPI_TRY( mss::eff_dimm::factory( l_spd, l_eff_dimm),
