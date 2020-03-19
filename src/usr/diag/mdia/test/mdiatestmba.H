@@ -49,14 +49,27 @@ class MdiaMbaTest : public CxxTest::TestSuite
 
             TS_TRACE(ENTER_MRK "testGetDiagnosticMode");
 
-            TargetHandleList mbaList;
-            getAllChiplets(mbaList, TYPE_MBA);
+            TargetHandleList list;
+            fapi2::TargetType type = getMdiaTargetType();
+            if ( fapi2::TARGET_TYPE_MBA_CHIPLET == type )
+            {
+                TARGETING::getAllChiplets( list, TYPE_MBA );
+            }
+            else if ( fapi2::TARGET_TYPE_MCBIST == type )
+            {
+                TARGETING::getAllChiplets( list, TYPE_MCBIST );
+            }
+            else if ( fapi2::TARGET_TYPE_OCMB_CHIP == type )
+            {
+                TARGETING::getAllChips( list, TYPE_OCMB_CHIP );
+            }
 
             if( !mbaList.empty() )
             {
                 DiagMode mode;
                 Globals globals;
-                TargetHandle_t mba = mbaList[0];
+                globals.simicsRunning = true;
+                TargetHandle_t trgt = list[0];
 
                 errlHndl_t err = getDiagnosticMode(
                                         globals, mba, mode);
@@ -84,13 +97,29 @@ class MdiaMbaTest : public CxxTest::TestSuite
             TS_TRACE(ENTER_MRK "testGetWorkFlow");
 
             Globals globals;
-            TargetHandle_t mba = 0;
+            globals.simicsRunning = true;
+            TargetHandle_t trgt = 0;
             DiagMode mode;
             errlHndl_t err = NULL;
             TargetHandleList mbaList;
             getAllChiplets(mbaList, TYPE_MBA);
 
-            if( !mbaList.empty() )
+            TargetHandleList list;
+            fapi2::TargetType type = getMdiaTargetType();
+            if ( fapi2::TARGET_TYPE_MBA_CHIPLET == type )
+            {
+                TARGETING::getAllChiplets( list, TYPE_MBA );
+            }
+            else if ( fapi2::TARGET_TYPE_MCBIST == type )
+            {
+                TARGETING::getAllChiplets( list, TYPE_MCBIST );
+            }
+            else if ( fapi2::TARGET_TYPE_OCMB_CHIP == type )
+            {
+                TARGETING::getAllChips( list, TYPE_OCMB_CHIP );
+            }
+
+            if( !list.empty() )
             {
                 mba = mbaList[0];
                 err = getDiagnosticMode(
