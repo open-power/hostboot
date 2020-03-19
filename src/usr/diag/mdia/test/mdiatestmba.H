@@ -61,13 +61,14 @@ class MdiaMbaTest : public CxxTest::TestSuite
             }
             else if ( fapi2::TARGET_TYPE_OCMB_CHIP == type )
             {
-                TARGETING::getAllChiplets( list, TYPE_OCMB_CHIP );
+                TARGETING::getAllChips( list, TYPE_OCMB_CHIP );
             }
 
             if( !list.empty() )
             {
                 DiagMode mode;
                 Globals globals;
+                globals.simicsRunning = true;
                 TargetHandle_t trgt = list[0];
 
                 errlHndl_t err = getDiagnosticMode( globals, trgt, mode );
@@ -94,6 +95,7 @@ class MdiaMbaTest : public CxxTest::TestSuite
             TS_TRACE( ENTER_MRK "testGetWorkFlow" );
 
             Globals globals;
+            globals.simicsRunning = true;
             TargetHandle_t trgt = 0;
             DiagMode mode;
             errlHndl_t err = NULL;
@@ -110,7 +112,7 @@ class MdiaMbaTest : public CxxTest::TestSuite
             }
             else if ( fapi2::TARGET_TYPE_OCMB_CHIP == type )
             {
-                TARGETING::getAllChiplets( list, TYPE_OCMB_CHIP );
+                TARGETING::getAllChips( list, TYPE_OCMB_CHIP );
             }
 
             if( !list.empty() )
