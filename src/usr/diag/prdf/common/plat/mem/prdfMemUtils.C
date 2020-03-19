@@ -1508,22 +1508,20 @@ bool __queryUcsOcmb( ExtensibleChip * i_ocmb )
 
     bool o_activeAttn = false;
 
-    /* TODO
-    // We can't use the GLOBAL_CS_FIR. It will not clear automatically when a
-    // channel has failed because the hardware clocks have stopped. Also, since
-    // it is a virtual register there really is no way to clear it. Fortunately
-    // we have the INTER_STATUS_REG that will tell us if there is an active
-    // attention. Note that we clear this register as part of the channel
-    // failure cleanup. So we can rely on this register to determine if there is
-    // a new channel failure.
+    // Query the OCMB chiplet level FIR to determine if we have a UNIT_CS.
+    SCAN_COMM_REGISTER_CLASS * fir = i_ocmb->getRegister("OCMB_CHIPLET_CS_FIR");
+    SCAN_COMM_REGISTER_CLASS * mask =
+            i_ocmb->getRegister("OCMB_CHIPLET_FIR_MASK");
 
-    SCAN_COMM_REGISTER_CLASS * fir = i_ocmb->getRegister("INTER_STATUS_REG");
-
-    if ( SUCCESS == fir->Read() )
+    if ( SUCCESS == (fir->Read() | mask->Read()) )
     {
-        o_activeAttn = fir->IsBitSet(2); // Checkstop bit.
+        if ( 0 != (   fir->GetBitFieldJustified(0,64) &
+                    ~mask->GetBitFieldJustified(0,64) &
+                    0x1fffffffffffffff ) )
+        {
+            o_activeAttn = true;
+        }
     }
-    */
 
     return o_activeAttn;
 }
@@ -1920,15 +1918,6 @@ void __cleanupChnlFail<TYPE_OMI>( TargetHandle_t i_omi,
         reg = ocmbChip->getRegister( "OCMB_CHIPLET_FIR_MASK" );
         reg->setAllBits(); // Blindly mask everything
         reg->Write();
-
-
-        /* TODO
-        // To ensure FSP ATTN doesn't think there is an active attention on this
-        // OCMB, manually clear the interrupt status register.
-        reg = ocmbChip->getRegister( "INTER_STATUS_REG" );
-        reg->clearAllBits(); // Blindly clear everything
-        reg->Write();
-        */
 
         //   During runtime, send a dynamic memory deallocation message.
         //   During Memory Diagnostics, tell MDIA to stop pattern tests.
