@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -209,7 +209,7 @@ fapi2::ReturnCode p9c_mss_draminit_training_advanced(const fapi2::Target<fapi2::
     {
         FAPI_INF("%s +++++++++++++++++++++++++++++ - DDR4 - Skipping - V-Ref CAL Control +++++++++++++++++++++++++++++++++++++++++++++",
                  mss::c_str(i_target_mba));
-        l_cal_control[0] = mcbist_test_mem::SIMPLE_FIX_RF;
+        l_cal_control[0] = mcbist_test_mem::WRITE_READ_SF_RF;
         l_shmoo_param_valid_t = 1;
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_EFF_SCHMOO_ADDR_MODE, i_target_mba, l_shmoo_param_valid_t));
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_MCBIST_TEST_TYPE, i_target_mba, l_cal_control[0]));
@@ -233,7 +233,7 @@ fapi2::ReturnCode p9c_mss_draminit_training_advanced(const fapi2::Target<fapi2::
                  mss::c_str(i_target_mba));
 
         // Note: cannot be constant'ed due to FAPI_SET_ATTR's macro
-        uint32_t MCBIST_TESTTYPE = mcbist_test_mem::SIMPLE_FIX_RF;
+        uint32_t MCBIST_TESTTYPE = mcbist_test_mem::WRITE_READ_SF_RF;
         constexpr uint64_t MCBIST_START_ADDRESS = 0;
         constexpr uint64_t SHMOO_MCBIST_END_ADDRESS = 0x0000001fc0000000ull;
         constexpr uint32_t SHMOO_ALL_VREF = 0xFFFFFFFF;

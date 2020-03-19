@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,11 +76,11 @@ extern "C"
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MCBIST_TEST_TYPE, i_target_mba,  l_mcbtest));
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_MCBIST_ADDR_BANK, i_target_mba,  l_done_bit));
 
-        if (i_test_type == CENSHMOO)
+        if (i_test_type == WRITE_READ_SF_FIX)
         {
             if (l_print == 0)
             {
-                FAPI_DBG("Current MCBIST TESTTYPE : CENSHMOO ");
+                FAPI_DBG("Current MCBIST TESTTYPE : WRITE_READ_SF_FIX ");
             }
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
@@ -255,9 +255,9 @@ extern "C"
                                         RW, 4, RF, DATA_RF, 0, DEFAULT, FIX_ADDR, 0, 4, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
         }
-        else if (i_test_type == SIMPLE_FIX_RF)
+        else if (i_test_type == WRITE_READ_SF_RF)
         {
-            FAPI_DBG("%s:Current MCBIST TESTTYPE : SIMPLE_FIX_RF ",
+            FAPI_DBG("%s:Current MCBIST TESTTYPE : WRITE_READ_SF_RF ",
                      mss::c_str(i_target_mba));
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
                                         W, 0, SF, DATA_RF, 0, DEFAULT, FIX_ADDR, 0, 0, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");

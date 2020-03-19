@@ -1076,7 +1076,7 @@ class program
         program():
             iv_parameters(0),
             iv_addr_gen(0),
-            iv_test_type(CENSHMOO), // Used as default
+            iv_test_type(WRITE_READ_SF_FIX), // Used as default
             iv_addr_map0(0),
             iv_addr_map1(0),
             iv_addr_map2(0),

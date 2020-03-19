@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,7 +48,7 @@ extern "C" {
     fapi2::ReturnCode mss_eff_config_shmoo(const fapi2::Target<fapi2::TARGET_TYPE_MBA> i_target_mba)
     {
         uint32_t l_datapattern = 0; // mdb - type 8 is not valid per Saravanan's Sametime
-        uint32_t l_testtype = 37; // SIMPLE_FIX_RF
+        uint32_t l_testtype = 37; // WRITE_READ_SF_RF
         uint8_t l_addr_modes = 1;
         uint8_t l_rank = 0;
         uint64_t l_start_addr = 0;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,7 +77,7 @@ extern "C"
         uint8_t l_mba_position = 0;
         mcbist_test_mem i_mcbtest1;
         mcbist_data_gen i_mcbpatt1;
-        i_mcbtest1 = CENSHMOO;
+        i_mcbtest1 = WRITE_READ_SF_FIX;
         i_mcbpatt1 = ABLE_FIVE;
         uint8_t l_index = 0;
         uint8_t l_flag = 0;
@@ -2055,8 +2055,8 @@ extern "C"
                 break;
 
             case 1:
-                o_mcbtest = CENSHMOO;
-                FAPI_INF("%s:TESTTYPE :CENSHMOO", mss::c_str(i_target_mba));
+                o_mcbtest = WRITE_READ_SF_FIX;
+                FAPI_INF("%s:TESTTYPE :WRITE_READ_SF_FIX", mss::c_str(i_target_mba));
                 break;
 
             case 2:
@@ -2235,8 +2235,8 @@ extern "C"
                 break;
 
             case 37:
-                o_mcbtest = SIMPLE_FIX_RF;
-                FAPI_INF("%s:TESTTYPE :SIMPLE_FIX_RF", mss::c_str(i_target_mba));
+                o_mcbtest = WRITE_READ_SF_RF;
+                FAPI_INF("%s:TESTTYPE :WRITE_READ_SF_RF", mss::c_str(i_target_mba));
                 break;
 
             case 38:

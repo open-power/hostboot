@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,7 +51,7 @@ extern "C"
     enum mcbist_test_mem
     {
         USER_MODE = 0,
-        CENSHMOO = 1,
+        WRITE_READ_SF_FIX = 1,
         SUREFAIL = 2,
         MEMWRITE = 3,
         MEMREAD = 4,
@@ -87,7 +87,7 @@ extern "C"
         R_INFINITE1 = 34,
         R_INFINITE_RF = 35,
         MARCH = 36,
-        SIMPLE_FIX_RF = 37,
+        WRITE_READ_SF_RF = 37,
         SHMOO_STRESS = 38,
         SIMPLE_RAND_RA = 39,
         SIMPLE_FIX_RA = 40,
