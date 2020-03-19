@@ -33,8 +33,10 @@
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
-#include <lib/shared/exp_consts.H>
 #include <lib/shared/exp_defaults.H>
+#include <lib/shared/exp_consts.H>
+#include <lib/ccs/ccs_traits_explorer.H>
+#include <lib/dimm/exp_mrs_traits.H>
 #include <lib/inband/exp_inband.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/mss_bad_bits.H>

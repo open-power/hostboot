@@ -129,7 +129,6 @@ enum ffdc_function_codes
     MAP_RP_PRIMARY_TO_INIT_CAL = 60,
 
     // PDA function codes
-    PDA_WR_VREF_LATCH_CONTAINER = 80,
     PDA_WR_VREF_LATCH_VECTOR = 81,
     PDA_ADD_COMMAND = 82,
 

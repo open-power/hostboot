@@ -25,7 +25,7 @@
 
 ///
 /// @file mrs_load_ddr4_explorer.C
-/// @brief Specializations for Explorer's MRS code
+/// @brief Run and manage the DDR4 mrs loading
 ///
 // *HWP HWP Owner: Matthew Hickman <Matthew.Hickman@ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
@@ -64,6 +64,7 @@ fapi2::ReturnCode is_a17_needed<mss::mc_type::EXPLORER>(const fapi2::Target<fapi
 
     o_is_needed = (l_dram_density == fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G
                    && l_dram_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4);
+
     FAPI_INF("%s Turning A17 %s", mss::c_str(i_target), o_is_needed ? "on" : "off" );
 
 fapi_try_exit:
@@ -72,7 +73,7 @@ fapi_try_exit:
 
 ///
 /// @brief Helper function to determine whether the A17 is needed
-/// @param[in] i_target the MCA target
+/// @param[in] i_target the MEM_PORT target
 /// @param[out] o_is_needed boolean whether A17 should be turned on or off
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 /// @note Based off of Table 2.8 Proposed DDR4 Full spec update(79-4B) page 28

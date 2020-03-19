@@ -38,6 +38,7 @@
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 #include <lib/shared/mss_const.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <lib/mc/port.H>
 
 #include <generic/memory/lib/utils/c_str.H>
@@ -64,7 +65,7 @@ namespace pda
 {
 
 const std::vector<std::pair<uint64_t, uint64_t>>
-        pdaBitTraits<fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4, mss::mc_type::NIMBUS>::BIT_MAP =
+        pdaBitTraits<fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4>::BIT_MAP =
 {
     {MCA_DDRPHY_DP16_DATA_BIT_ENABLE1_P0_0, MCA_DDRPHY_DP16_DATA_BIT_ENABLE1_P0_0_01_MRS_CMD_N0},
     {MCA_DDRPHY_DP16_DATA_BIT_ENABLE1_P0_0, MCA_DDRPHY_DP16_DATA_BIT_ENABLE1_P0_0_01_MRS_CMD_N1},
@@ -91,7 +92,7 @@ const std::vector<std::pair<uint64_t, uint64_t>>
 };
 
 const std::vector<std::pair<uint64_t, uint64_t>>
-        pdaBitTraits<fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8, mss::mc_type::NIMBUS>::BIT_MAP =
+        pdaBitTraits<fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8>::BIT_MAP =
 {
     {MCA_DDRPHY_DP16_DATA_BIT_ENABLE1_P0_0, MCA_DDRPHY_DP16_DATA_BIT_ENABLE1_P0_0_01_MRS_CMD_N0},
     {MCA_DDRPHY_DP16_DATA_BIT_ENABLE1_P0_0, MCA_DDRPHY_DP16_DATA_BIT_ENABLE1_P0_0_01_MRS_CMD_N2},
@@ -115,10 +116,9 @@ const std::vector<std::pair<uint64_t, uint64_t>>
 /// @param[in] i_state - the state to write the bit(s) to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< >
-fapi2::ReturnCode change_dram_bit<mss::mc_type::NIMBUS>( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        const uint64_t i_dram,
-        const mss::states& i_state)
+fapi2::ReturnCode change_dram_bit( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                   const uint64_t i_dram,
+                                   const mss::states& i_state)
 {
     uint8_t l_dram_width[MAX_DIMM_PER_PORT] = {0};
     FAPI_TRY(mss::eff_dram_width(i_target, &(l_dram_width[0])), "Failed to get the DRAM's width for %s",
@@ -348,8 +348,7 @@ fapi_try_exit:
 /// @note A PDA latch of WR VREF settings is the most common PDA operations
 /// This function adds a bit of fanciness (compression) to speed up the overall runtime
 ///
-template<>
-fapi2::ReturnCode execute_wr_vref_latch<mss::mc_type::NIMBUS>( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+fapi2::ReturnCode execute_wr_vref_latch( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint64_t i_rank,
         const mss::ddr4::mrs06_data<mss::mc_type::NIMBUS>& i_mrs,
         const std::vector<uint64_t>& i_drams )
@@ -408,7 +407,7 @@ fapi2::ReturnCode execute_wr_vref_latch<mss::mc_type::NIMBUS>( const
     // If the commands passed in are empty, simply exit
     FAPI_ASSERT((!i_commands.empty()),
                 fapi2::MSS_EMPTY_PDA_VECTOR().
-                set_PROCEDURE(mss::ffdc_function_codes::PDA_WR_VREF_LATCH_CONTAINER),
+                set_PROCEDURE(mss::generic_ffdc_codes::PDA_WR_VREF_LATCH_CONTAINER),
                 "PDA commands map is empty, exiting");
 
     // Loop until all commands have been issued

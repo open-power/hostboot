@@ -64,8 +64,11 @@ class info
 {
 
     public:
-        // Delete default constructor
-        info() = delete;
+        ///
+        /// @default Constructor
+        /// @note this is needed for certain STL containers but shouldn't be used
+        ///
+        info() = default;
 
         ///
         /// @brief Constructor for info object
@@ -228,6 +231,37 @@ class info
             // Add on the dimm rank
             // Note that this logic does NOT apply in a hypothetical/impossible 2 4-rank dimm configuration
             return ((l_dimm_index * TT::PHY_RANK_INDEX_STEP) + (l_dimm_rank));
+        }
+
+        ///
+        /// @brief Comparison operator
+        /// @param[in] i_rhs object to compare against
+        /// @return true if this object is less than i_rhs
+        ///
+        bool operator<(const info& i_rhs) const
+        {
+            // Considering targets the most significant then the ranks
+            if(iv_port_target != i_rhs.iv_port_target)
+            {
+                return iv_port_target < i_rhs.iv_port_target;
+            }
+
+            if(iv_dimm_target != i_rhs.iv_dimm_target)
+            {
+                return iv_dimm_target < i_rhs.iv_dimm_target;
+            }
+
+            if(iv_port_rank != i_rhs.iv_port_rank)
+            {
+                return iv_port_rank < i_rhs.iv_port_rank;
+            }
+
+            if(iv_dimm_rank != i_rhs.iv_dimm_rank)
+            {
+                return iv_dimm_rank < i_rhs.iv_dimm_rank;
+            }
+
+            return iv_phy_rank < i_rhs.iv_phy_rank;
         }
 
     private:

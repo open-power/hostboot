@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -460,28 +460,6 @@
     <ffdc>MCA_TARGET</ffdc>
     <ffdc>DP</ffdc>
     <ffdc>LANE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_EMPTY_PDA_VECTOR</rc>
-    <description>Indicates a that a vector was empty when a procedure was called</description>
-    <ffdc>PROCEDURE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_PDA_DRAM_OUT_OF_RANGE</rc>
-    <description>Indicates a DRAM passed to the PDA code is out of range</description>
-    <ffdc>MCA_TARGET</ffdc>
-    <ffdc>DRAM</ffdc>
-    <ffdc>MAX_DRAM</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

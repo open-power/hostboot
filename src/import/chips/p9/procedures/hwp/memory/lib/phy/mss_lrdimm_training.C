@@ -67,6 +67,7 @@ namespace training
 
 namespace lrdimm
 {
+
 ///
 /// @brief Swizzles a DQ from the MC perspective to the DIMM perspective
 /// @param[in] i_target the MCA target on which to operate
