@@ -101,14 +101,21 @@ void StateMachine::running(bool & o_running)
 
 void addTimeoutFFDC(TargetHandle_t i_target, errlHndl_t & io_log)
 {
+
+    const uint64_t mccRegs[] = {
+        DSTLFIR,
+        DSTLFIR_MASK,
+        DSTLFIR_ACT0,
+        DSTLFIR_ACT1,
+        DSTLCFG2,
+    };
+
     const uint64_t ocmbRegs[] = {
         OCMB_MCBIST_FIR,
-        OCMB_MCBIST_FIR_AND,
         OCMB_MCBIST_FIR_MASK,
         OCMB_MCBIST_FIR_ACT0,
         OCMB_MCBIST_FIR_ACT1,
         OMIDLFIR,
-        OMIDLFIR_AND,
         OMIDLFIR_MASK,
         OMIDLFIR_ACT0,
         OMIDLFIR_ACT1,
@@ -142,6 +149,15 @@ void addTimeoutFFDC(TargetHandle_t i_target, errlHndl_t & io_log)
     assert( nullptr != proc, "[MDIA] addTimeoutFFDC: Unable to get the "
             "parent proc from omi: 0x%08x", get_huid(omi) );
 
+    // Get the parent MCC
+    TargetHandleList mccList;
+    getParentAffinityTargets( mccList, omi, CLASS_UNIT, TYPE_MCC );
+
+    assert( mccList.size() == 1, "[MDIA] addTimeoutFFDC: Multiple parent"
+            " MCCs found for OMI: 0x%08x", get_huid(omi) );
+
+    TargetHandle_t mcc = mccList[0];
+
     const struct Entry
     {
         TARGETING::ConstTargetHandle_t target;
@@ -150,6 +166,7 @@ void addTimeoutFFDC(TargetHandle_t i_target, errlHndl_t & io_log)
     } tables[] = {
         {i_target, ocmbRegs, ocmbRegs + sizeof(ocmbRegs)/sizeof(*ocmbRegs)},
         {proc, procRegs, procRegs + sizeof(procRegs)/sizeof(*procRegs)},
+        {mcc, mccRegs, mccRegs + sizeof(mccRegs)/sizeof(*mccRegs)},
     };
 
     for(const Entry * tableIt = tables;

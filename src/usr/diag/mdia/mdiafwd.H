@@ -74,6 +74,14 @@ enum DiagMode
  */
 enum
 {
+
+    // mcc dstlfir unit regs
+    DSTLFIR                 = 0x07010900,
+    DSTLFIR_MASK            = 0x07010903,
+    DSTLFIR_ACT0            = 0x07010906,
+    DSTLFIR_ACT1            = 0x07010907,
+    DSTLCFG2                = 0x0701090E,
+
     // ocmb mcbist unit regs
     OCMB_MCBIST_FIR         = 0x08011800,
     OCMB_MCBIST_FIR_AND     = 0x08011801,
@@ -83,7 +91,6 @@ enum
 
     // ocmb omidlfir unit regs
     OMIDLFIR                = 0x07013340,
-    OMIDLFIR_AND            = 0x07013341,
     OMIDLFIR_MASK           = 0x07013343,
     OMIDLFIR_ACT0           = 0x07013346,
     OMIDLFIR_ACT1           = 0x07013347,
