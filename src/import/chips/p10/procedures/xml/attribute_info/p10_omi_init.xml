@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -160,6 +160,42 @@
   <valueType>uint8</valueType>
   <default>0x0</default>
   <writeable/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_SYS_DISABLE_MCU_TIMEOUTS</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+      Enable MCU Timeouts
+  </description>
+  <valueType>uint8</valueType>
+  <default>0x0</default>
+  <overrideOnly/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_SYS_DISABLE_HWFM</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+      Enable Hardware Force Mirroring in the Memory Controller
+  </description>
+  <valueType>uint8</valueType>
+  <default>0x0</default>
+  <overrideOnly/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_SYS_ENABLE_MC_HW520600_X4CTR</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+      Enable double dead workaround, required for x4 mode + CTR encryption, adds 1 cycle of latency
+  </description>
+  <valueType>uint8</valueType>
+  <default>0x0</default>
+  <overrideOnly/>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->

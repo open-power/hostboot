@@ -163,7 +163,7 @@ fapi2::ReturnCode p10_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PR
             fapi2::toString(l_mcc_target, l_tgt_str, sizeof(l_tgt_str));
 
             FAPI_DBG("Invoking p10.mcc.omi.scom.initfile on target %s...", l_tgt_str);
-            FAPI_EXEC_HWP(l_rc, p10_mcc_omi_scom, l_mcc_target, FAPI_SYSTEM, i_target);
+            FAPI_EXEC_HWP(l_rc, p10_mcc_omi_scom, l_mcc_target, FAPI_SYSTEM);
             FAPI_TRY(l_rc, "Error from p10.mcc.omi.scom.initfile");
 
             for (auto l_omi_target : l_mcc_target.getChildren<fapi2::TARGET_TYPE_OMI>())
@@ -171,7 +171,7 @@ fapi2::ReturnCode p10_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PR
                 fapi2::toString(l_omi_target, l_tgt_str, sizeof(l_tgt_str));
 
                 FAPI_DBG("Invoking p10.mi.omi.scom.initfile on target %s...", l_tgt_str);
-                FAPI_EXEC_HWP(l_rc, p10_mi_omi_scom, l_mi_target, l_omi_target, l_mcc_target);
+                FAPI_EXEC_HWP(l_rc, p10_mi_omi_scom, l_mi_target, l_omi_target, l_mcc_target, FAPI_SYSTEM);
                 FAPI_TRY(l_rc, "Error from p10.mi.omi.scom.initfile");
             }
         }
