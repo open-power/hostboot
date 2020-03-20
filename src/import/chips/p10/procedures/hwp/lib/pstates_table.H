@@ -37,6 +37,7 @@
 
 #include <pstates_common.H>
 #include <pstates_pgpe.H>
+#include <p10_hcode_image_defines.H>
 
 /// Generated Pstate Table
 ///
@@ -112,6 +113,13 @@ typedef struct
     ///Generate table with vratio and vindex for all
     ///combinations of activeCores and sortCores
     VRatioVIndexTable_t vratio_vindex[MAX_VRATIO_VINDEX_TABLE_ENTRIES];
+
+#ifndef __PPE_PLAT
+    hcodeImageBuild::PgpeHeader_t pgpe_header;
+#else
+    ///PGPE Header
+    PgpeHeader_t pgpe_header;
+#endif
 } GeneratedPstateInfo_t;
 
 

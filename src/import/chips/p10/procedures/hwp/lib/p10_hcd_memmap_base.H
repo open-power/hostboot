@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -453,5 +453,6 @@ HCD_CONST(WOF_TABLE_RESERVE,
           OCC_WOF_TABLES_PPMR_OFFSET - (PGPE_PSTATE_OUTPUT_TABLES_PPMR_OFFSET + PGPE_PSTATE_OUTPUT_TABLES_REGION_SIZE))
 HCD_CONST(PGPE_IMAGE_RESERVE_SIZE,
           (OCC_PSTATE_PARAM_BLOCK_PPMR_OFFSET - PGPE_IMAGE_PPMR_OFFSET - PGPE_IMAGE_SIZE))
+HCD_CONST(PGPE_AUX_TASK_SIZE, (2 * ONE_KB))
 
 #endif /* __HCD_MEMMAP_BASE_H__ */

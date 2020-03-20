@@ -213,7 +213,7 @@ HCD_HDR_UINT32( g_pgpe_ivprAddress,         0);
 HCD_HDR_UINT32( g_pgpe_sharedLength,        0);
 HCD_HDR_UINT32( g_pgpe_buildDate,           0);
 HCD_HDR_UINT32( g_pgpe_buildVer,            0);
-HCD_HDR_UINT32( g_pgpe_pgpeFlags,           0);
+HCD_HDR_UINT32( g_pgpe_reserved0,           0);
 HCD_HDR_UINT32( g_pgpe_timeBaseHz,          0);
 HCD_HDR_UINT32( g_pgpe_gpspbSramAddress,    0);
 HCD_HDR_UINT32( g_pgpe_hcodeLength,         0);

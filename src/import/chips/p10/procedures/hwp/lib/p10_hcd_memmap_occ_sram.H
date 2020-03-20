@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,6 +60,9 @@ HCD_CONST(OCC_SRAM_TRACE_BUF_BASE_ERR,          0xFFFB4000)
 HCD_CONST(OCC_SRAM_TRACE_BUF_BASE_INF,          0xFFFB6000)
 HCD_CONST(OCC_SRAM_TRACE_BUF_BASE_IMP,          0xFFFB8000)
 HCD_CONST(OCC_SRAM_TRACE_BUF_BASE_SSX_PTR,      0xFFF40824)
+HCD_CONST(OCC_SRAM_PGPE_REGION_SIZE,            (PGPE_IMAGE_SIZE + PGPE_AUX_TASK_SIZE + PGPE_OCC_SHARED_SRAM_SIZE))
+HCD_CONST(OCC_SHARED_SRAM_ADDR_START,
+          ((PGPE_SRAM_BASE_ADDR + OCC_SRAM_PGPE_REGION_SIZE) - PGPE_OCC_SHARED_SRAM_SIZE))
 
 // Offset to trace buf ptr and trace buffer size from base
 HCD_CONST(GPE_DEBUG_PTR_OFFSET,                      0x180)
@@ -73,7 +76,6 @@ HCD_CONST(OCC_SRAM_TRACE_BUF_IMP_SIZE,          (8 * ONE_KB))
 HCD_CONST(OCC_SRAM_IPC_REGION_SIZE,             (4 * ONE_KB))
 HCD_CONST(OCC_SRAM_GPE0_REGION_SIZE,            (60 * ONE_KB))
 HCD_CONST(OCC_SRAM_GPE1_REGION_SIZE,            (64 * ONE_KB))
-HCD_CONST(OCC_SRAM_PGPE_REGION_SIZE,            (PGPE_IMAGE_SIZE + PGPE_OCC_SHARED_SRAM_SIZE ))
 HCD_CONST(OCC_SRAM_OCC_REGION_SIZE,             (512 * ONE_KB))
 
 HCD_CONST(OCC_SRAM_BEFORE_PGPE_REGION_SIZE_TOTAL,
