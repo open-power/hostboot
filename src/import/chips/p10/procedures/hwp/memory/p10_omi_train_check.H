@@ -22,40 +22,32 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 ///
-/// @file p10_omi_train_check.C
-/// @brief Wait until omi training is complete or timeout with error
-//------------------------------------------------------------------------------
-/// *HW HW Maintainer: Chris Steffen <cwsteffen@us.ibm.com>
-/// *HW FW Maintainer: Ilya Smirnov <ismirno@us.ibm.com>
-/// *HW Consumed by  : HB
-//------------------------------------------------------------------------------
+/// @file p10_omi_train_check.H
+/// @brief Poll for omi training completion / failure
+///
+// *HWP HWP Owner: Mark Pizzutillo <Mark.Pizzutillo@ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: FSP:HB
+
 #ifndef _P10_OMI_TRAIN_CHECK_H_
 #define _P10_OMI_TRAIN_CHECK_H_
 
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
 #include <fapi2.H>
 
-
-//------------------------------------------------------------------------------
-// Function prototypes
-//------------------------------------------------------------------------------
-typedef fapi2::ReturnCode (*p10_omi_train_check_FP_t)(
-    const fapi2::Target<fapi2::TARGET_TYPE_OMI>&);
+typedef fapi2::ReturnCode (*p10_omi_train_check_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OMI>&);
 
 extern "C"
 {
-
-///
-/// @brief Check training state of OMI
-///
-/// @param[in] i_target Reference to OMI endpoint target
-///
-/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-    fapi2::ReturnCode p10_omi_train_check(
-        const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target);
+    ///
+    /// @brief Check training state of OMI
+    /// @param[in] i_target Reference to OMI endpoint target
+    /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+    ///
+    fapi2::ReturnCode p10_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target);
 
 } // extern "C"
 

@@ -22,27 +22,34 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_P10_OMI_TRAIN_ERR</rc>
     <description>
-      Procedure: p10_omi_train failure
+      p10_omi_train_check did not see expected trained status from OMI status register
     </description>
-    <ffdc>TARGET</ffdc>
+    <ffdc>OMI_TARGET</ffdc>
     <ffdc>EXPECTED_SM_STATE</ffdc>
     <ffdc>ACTUAL_SM_STATE</ffdc>
-    <ffdc>DL0_STATUS</ffdc>
-    <ffdc>DL0_TRAINING_STATUS</ffdc>
+    <ffdc>STATUS</ffdc>
+    <ffdc>TRAINING_STATUS</ffdc>
+    <ffdc>CONFIG1</ffdc>
+    <ffdc>OMI_FREQ</ffdc>
     <callout>
-        <target>TARGET</target>
+        <target>OMI_TARGET</target>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+        <bus>OMI_TARGET, OCMB_TARGET</bus>
         <priority>HIGH</priority>
     </callout>
     <deconfigure>
-        <target>TARGET</target>
+        <target>OMI_TARGET</target>
     </deconfigure>
     <gard>
-        <target>TARGET</target>
+        <target>OMI_TARGET</target>
     </gard>
   </hwpError>
   <!-- ******************************************************************** -->

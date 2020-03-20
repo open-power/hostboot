@@ -523,6 +523,36 @@ namespace omi
 {
 
 ///
+/// @brief CFG_CMN_DEBUG_SELECT
+///
+enum cfg_cmn_debug_select
+{
+    CFG_CMN_DEBUG_NONE = 0b000,
+    DL0_TRACE_INFO = 0b001,
+    DL1_TRACE_INFO = 0b010,
+    DL2_TRACE_INFO = 0b011,
+    COMMON_MACRO_0_TRACE_INFO = 0b100,
+    COMMON_MACRO_2_TRACE_INFO = 0b101,
+
+    // 22 bits from common 0 +
+    // 11 bits from all 3 DLs +
+    // 33 bits from common macro 2
+    COMMON_0_AND_3_DLS_AND_COMMON_2 = 0b110,
+};
+
+///
+/// @brief DL0 TL error/event actions
+///
+enum tl_error_event_actions
+{
+    ERROR_EVENT_NONE                 = 0b0000,
+    FREEZE_ALL                       = 0b0001,
+    FREEZE_ALU_ONLY                  = 0b0010,
+    TRIGGER_INTERNAL_LOGIC_ANALYZERS = 0b0100,
+    BRING_DOWN_LINK                  = 0b1000,
+};
+
+///
 /// @brief dl0 no forward progress timer
 ///
 enum no_forward_progress_timer
@@ -543,6 +573,20 @@ enum no_forward_progress_timer
     NO_FORWARD_TIMER_8MS      = 0b1101,
     NO_FORWARD_TIMER_16MS     = 0b1110,
     NO_FORWARD_TIMER_DISABLED = 0b1111,
+};
+
+///
+/// @brief CFG_DL0 debug select
+///
+enum config0_debug_select
+{
+    CFG0_DEBUG_NONE   = 0b000,
+    RX_INFO           = 0b001,
+    TX_FLIT_INFO      = 0b010,
+    TX_TRAIN_INFO     = 0b011,
+    RX_INFO_11_BITS   = 0b100,
+    TX_FLIT_11_BITS   = 0b101,
+    TX_TRAIN_11_BITS  = 0b110,
 };
 
 ///
@@ -746,6 +790,28 @@ enum a_hysteresis
     A_HYSTERESIS_16K  = 0b1101,
     A_HYSTERESIS_32K  = 0b1110,
     A_HYSTERESIS_64K  = 0b1111,
+};
+
+///
+/// @brief CONFIG1 A/B pattern length: Number of consecutive 1s and 0s needed to represent training Pattern
+///
+enum pattern_length
+{
+    TWO_Xs  = 0b00,
+    ONE_X   = 0b01,
+    FOUR_Xs = 0b10,
+    // Note: value 0b11 is the same as 0b10
+};
+
+///
+/// @brief CONFIG1 RX/TX perf degraded, set error bit 26/25 if degraded by this value
+///
+enum perf_degraded
+{
+    ONE_PERCENT   = 0b00,
+    TWO_PERCENT   = 0b01,
+    THREE_PERCENT = 0b10,
+    FOUR_PERCENT  = 0b11,
 };
 
 ///

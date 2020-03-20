@@ -80,6 +80,7 @@ extern "C"
         // Skip the rest if we are in sim
         if (l_sim)
         {
+            FAPI_INF("Sim, exiting exp_omi_setup after boot_config 0 %s", mss::c_str(i_target));
             return fapi2::FAPI2_RC_SUCCESS;
         }
 

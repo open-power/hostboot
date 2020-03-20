@@ -73,9 +73,10 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
     uint8_t l_sim = 0;
     FAPI_TRY(mss::attr::get_is_simulation(l_sim));
 
-    // Skip this in sim
+    // Skip this in sim, check via I2C is not supported
     if (l_sim)
     {
+        FAPI_INF("Sim, exiting exp_omi_train_check %s", mss::c_str(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
 

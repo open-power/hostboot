@@ -22,5 +22,8 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+-include 00p10_common.mk
+
 PROCEDURE=p10_omi_train
+$(eval $(call ADD_P10_MEMORY_INCDIRS,$(PROCEDURE)))
 $(call BUILD_PROCEDURE)
