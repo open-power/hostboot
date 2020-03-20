@@ -62,6 +62,11 @@ extern "C"
         if (l_post_memdiags_subtest == fapi2::ENUM_ATTR_MSS_POST_MEMDIAGS_READ_SUBTEST_ENABLE)
         {
             FAPI_TRY(mss::exp::memdiags::perform_read_only_subtest(i_target));
+
+            // Turn off FIFO mode again
+            // Note this is normally done in mss_initialize_memory but
+            // the read-only subtest above switches back to FIFO mode
+            FAPI_TRY(mss::reset_reorder_queue_settings(i_target) );
         }
 
     fapi_try_exit:
