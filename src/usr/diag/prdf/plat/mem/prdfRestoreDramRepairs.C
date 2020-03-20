@@ -306,7 +306,7 @@ bool processBadDimms( TargetHandle_t i_trgt, uint8_t i_badDimmMask )
     errlHndl_t errl = NULL; // Initially NULL, will create if needed.
 
     // Iterate the list of all DIMMs
-    TargetHandleList dimms = getConnected( i_trgt, TYPE_DIMM );
+    TargetHandleList dimms = getConnectedChildren( i_trgt, TYPE_DIMM );
     for ( auto & dimm : dimms )
     {
         // i_badDimmMask is defined as a 2-bit mask where a bit set means that

@@ -932,8 +932,8 @@ void ErrDataService::deallocateDimms( const SDC_MRU_LIST & i_mruList )
                     case TYPE_MC:
                     case TYPE_MI:
                     {
-                        TargetHandleList dimms = getConnected( calloutTgt,
-                                                               TYPE_DIMM );
+                        TargetHandleList dimms = getConnectedChildren(
+                                calloutTgt, TYPE_DIMM );
                         dimmList.insert( dimmList.end(), dimms.begin(),
                                          dimms.end() );
                         break;

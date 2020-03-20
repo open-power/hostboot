@@ -542,7 +542,7 @@ int32_t RuleMetaData::CaptureErrorData( CaptureData & io_cap,
             {
                 bool l_indexValid =false;
                 TargetHandleList  l_ptargetHandleList  =
-                    PlatServices::getConnected(
+                    PlatServices::getConnectedChildren(
                                         l_pTargetAnalyzed,
                                         (TARGETING::TYPE) req.cv_TargetType );
 

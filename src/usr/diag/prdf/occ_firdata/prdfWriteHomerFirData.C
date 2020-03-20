@@ -700,7 +700,7 @@ uint32_t __getUnitMask( TargetHandle_t i_chip, TARGETING::TYPE i_unitType,
     }
 
     // Get the unit list for this chip.
-    TargetHandleList unitList = getConnected( i_chip, i_unitType );
+    TargetHandleList unitList = getConnectedChildren( i_chip, i_unitType );
 
     // Initially this variable will be null. It will only be set to a non-null
     // value if the hardware config indicates we only want the master core.

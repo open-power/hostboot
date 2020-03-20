@@ -396,191 +396,6 @@ uint8_t getChipLevel( TARGETING::TargetHandle_t i_trgt )
 //##
 //##############################################################################
 
-// This is a helper function for getConnected(). It will return the association
-// type (CHILD_BY_AFFINITY or PARENT_BY_AFFINITY) between a target and
-// destination target type. The function only characterizes parent or child
-// relationships. It does not do any peer-to-peer relationships. The function
-// will return non-SUCCESS if a relationship is not supported.
-
-struct conn_t
-{
-    TYPE from : 8;
-    TYPE to : 8;
-    TargetService::ASSOCIATION_TYPE type : 8;
-
-    static uint32_t getSortOrder( TYPE type )
-    {
-        // Can't trust that the order of the TYPE enum does not change so create
-        // our own sorting order.
-
-        uint32_t order = 0;
-
-        switch ( type )
-        {
-            case TYPE_SYS:          order =  0; break;
-            case TYPE_NODE:         order =  1; break;
-            case TYPE_PROC:         order =  2; break;
-            case TYPE_EQ:           order =  3; break;
-            case TYPE_EX:           order =  4; break;
-            case TYPE_CORE:         order =  5; break;
-            case TYPE_CAPP:         order =  6; break;
-            case TYPE_PEC:          order =  7; break;
-            case TYPE_PHB:          order =  8; break;
-            case TYPE_OBUS:         order =  9; break;
-            case TYPE_XBUS:         order = 10; break;
-            case TYPE_NX:           order = 11; break;
-            case TYPE_OCC:          order = 12; break;
-            case TYPE_PSI:          order = 13; break;
-            case TYPE_NPU:          order = 14; break;
-            case TYPE_MC:           order = 15; break;
-            case TYPE_MI:           order = 16; break;
-            case TYPE_OMIC:         order = 17; break;
-            case TYPE_MCC:          order = 18; break;
-            case TYPE_OMI:          order = 19; break;
-            case TYPE_OCMB_CHIP:    order = 20; break;
-            case TYPE_MEM_PORT:     order = 21; break;
-            case TYPE_DIMM:         order = 22; break;
-            default: ;
-        }
-
-        return order;
-    }
-
-    bool operator<( const conn_t & r )
-    {
-        uint32_t thisOrder = getSortOrder(this->from);
-        uint32_t thatOrder = getSortOrder(r.from);
-
-        if ( thisOrder == thatOrder )
-            return ( getSortOrder(this->to) < getSortOrder(r.to) );
-        else
-            return ( thisOrder < thatOrder );
-    }
-
-};
-
-TargetService::ASSOCIATION_TYPE getAssociationType( TargetHandle_t i_target,
-                                                    TYPE i_connType )
-{
-    #define PRDF_FUNC "[PlatServices::getAssociationType] "
-
-    PRDF_ASSERT( nullptr != i_target );
-
-    static conn_t lookups[] =
-    {
-        // This table must be sorted based on the < operator of struct conn_t.
-        { TYPE_SYS,    TYPE_NODE,       TargetService::CHILD_BY_AFFINITY  },
-
-        { TYPE_NODE,   TYPE_SYS,        TargetService::PARENT_BY_AFFINITY },
-        { TYPE_NODE,   TYPE_PROC,       TargetService::CHILD_BY_AFFINITY  },
-
-        { TYPE_PROC,   TYPE_NODE,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_PROC,   TYPE_EQ,         TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_EX,         TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_CORE,       TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_CAPP,       TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_PEC,        TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_PHB,        TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_OBUS,       TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_XBUS,       TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_NX,         TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_OCC,        TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_PSI,        TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_NPU,        TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_MC,         TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_MI,         TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_OMIC,       TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_MCC,        TargetService::CHILD_BY_AFFINITY  },
-
-        { TYPE_EQ,     TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_EQ,     TYPE_EX,         TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_EQ,     TYPE_CORE,       TargetService::CHILD_BY_AFFINITY  },
-
-        { TYPE_EX,     TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_EX,     TYPE_EQ,         TargetService::PARENT_BY_AFFINITY },
-        { TYPE_EX,     TYPE_CORE,       TargetService::CHILD_BY_AFFINITY  },
-
-        { TYPE_CORE,   TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_CORE,   TYPE_EQ,         TargetService::PARENT_BY_AFFINITY },
-        { TYPE_CORE,   TYPE_EX,         TargetService::PARENT_BY_AFFINITY },
-
-        { TYPE_CAPP,   TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
-
-        { TYPE_PEC,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_PEC,    TYPE_PHB,        TargetService::CHILD_BY_AFFINITY  },
-
-        { TYPE_PHB,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
-
-        { TYPE_OBUS,   TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
-
-        { TYPE_XBUS,   TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
-
-        { TYPE_NX,     TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
-
-        { TYPE_OCC,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
-
-        { TYPE_PSI,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
-
-        { TYPE_NPU,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
-
-        { TYPE_MC,     TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MC,     TYPE_MI,         TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_MC,     TYPE_OMIC,       TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_MC,     TYPE_MCC,        TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_MC,     TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
-
-        { TYPE_MI,     TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MI,     TYPE_MC,         TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MI,     TYPE_MCC,        TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_MI,     TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
-
-        { TYPE_OMIC,   TYPE_MC,         TargetService::PARENT_BY_AFFINITY },
-        { TYPE_OMIC,   TYPE_OMI,        TargetService::CHILD_BY_AFFINITY  },
-
-        { TYPE_MCC,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MCC,    TYPE_MC,         TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MCC,    TYPE_MI,         TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MCC,    TYPE_OMI,        TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_MCC,    TYPE_OCMB_CHIP,  TargetService::CHILD_BY_AFFINITY  },
-
-        { TYPE_OMI,    TYPE_OMIC,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_OMI,    TYPE_MCC,        TargetService::PARENT_BY_AFFINITY },
-        { TYPE_OMI,    TYPE_OCMB_CHIP,  TargetService::CHILD_BY_AFFINITY  },
-
-        { TYPE_OCMB_CHIP, TYPE_MCC,     TargetService::PARENT_BY_AFFINITY },
-        { TYPE_OCMB_CHIP, TYPE_OMI,     TargetService::PARENT_BY_AFFINITY },
-        { TYPE_OCMB_CHIP, TYPE_MEM_PORT,TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_OCMB_CHIP, TYPE_DIMM,    TargetService::CHILD_BY_AFFINITY  },
-
-        { TYPE_MEM_PORT, TYPE_OCMB_CHIP,TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MEM_PORT, TYPE_DIMM,     TargetService::CHILD_BY_AFFINITY  },
-
-        { TYPE_DIMM,   TYPE_OCMB_CHIP,  TargetService::PARENT_BY_AFFINITY },
-        { TYPE_DIMM,   TYPE_MEM_PORT,   TargetService::PARENT_BY_AFFINITY },
-
-    };
-
-    const size_t sz_lookups = sizeof(lookups) / sizeof(conn_t);
-
-    TYPE type = getTargetType(i_target);
-
-    conn_t match = { type, i_connType, TargetService::CHILD_BY_AFFINITY };
-
-    conn_t * it = std::lower_bound( lookups, lookups + sz_lookups, match );
-
-    if ( (it == lookups + sz_lookups) || // off the end
-         (type != it->from) || (i_connType != it->to) ) // not equals
-    {
-        PRDF_ERR( PRDF_FUNC "Look-up failed: i_target=0x%08x i_connType=%d",
-                  getHuid(i_target), i_connType );
-        PRDF_ASSERT(false);
-    }
-
-    return it->type;
-
-    #undef PRDF_FUNC
-}
-
 // Helper function for the various getConnected() functions.
 TargetHandleList getConnAssoc( TargetHandle_t i_target, TYPE i_connType,
                                TargetService::ASSOCIATION_TYPE i_assocType )
@@ -624,21 +439,12 @@ TargetHandleList getConnAssoc( TargetHandle_t i_target, TYPE i_connType,
 
 //------------------------------------------------------------------------------
 
-TargetHandleList getConnected( TargetHandle_t i_target, TYPE i_connType )
+TargetHandleList getConnectedChildren(TargetHandle_t i_target, TYPE i_connType)
 {
     PRDF_ASSERT( nullptr != i_target );
 
-    TargetHandleList o_list; // Default empty list
-
-    if ( getTargetType(i_target) == i_connType )
-    {
-        o_list.push_back( i_target );
-    }
-    else
-    {
-        o_list = getConnAssoc( i_target, i_connType,
-                               getAssociationType(i_target, i_connType) );
-    }
+    TargetHandleList o_list = getConnAssoc( i_target, i_connType,
+                                            TargetService::CHILD_BY_AFFINITY );
 
     return o_list;
 }
@@ -651,18 +457,9 @@ TargetHandle_t getConnectedParent( TargetHandle_t i_target, TYPE i_connType )
 
     PRDF_ASSERT( nullptr != i_target );
 
-    // Get the association type, must be PARENT_BY_AFFINITY.
-    TargetService::ASSOCIATION_TYPE assocType = getAssociationType( i_target,
-                                                                    i_connType);
-    if ( TargetService::PARENT_BY_AFFINITY != assocType )
-    {
-        PRDF_ERR( PRDF_FUNC "Unsupported parent connection: i_target=0x%08x "
-                  "i_connType=%d", getHuid(i_target), i_connType );
-        PRDF_ASSERT(false);
-    }
-
     // Get the connected parent, should be one and only one parent
-    TargetHandleList list = getConnAssoc( i_target, i_connType, assocType );
+    TargetHandleList list = getConnAssoc( i_target, i_connType,
+                                          TargetService::PARENT_BY_AFFINITY );
     if ( 1 != list.size() || nullptr == list[0] )
     {
         PRDF_ERR( PRDF_FUNC "Could not find parent: i_target=0x%08x "
@@ -686,18 +483,9 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
 
     TargetHandle_t o_child = nullptr;
 
-    // Get the association type, must be CHILD_BY_AFFINITY.
-    TargetService::ASSOCIATION_TYPE assocType = getAssociationType( i_target,
-                                                                    i_connType);
-    if ( TargetService::CHILD_BY_AFFINITY != assocType )
-    {
-        PRDF_ERR( PRDF_FUNC "Unsupported child connection: i_target=0x%08x "
-                  "i_connType=%d", getHuid(i_target), i_connType );
-        PRDF_ASSERT(false);
-    }
-
     // Get the list.
-    TargetHandleList list = getConnAssoc( i_target, i_connType, assocType );
+    TargetHandleList list = getConnAssoc( i_target, i_connType,
+                                          TargetService::CHILD_BY_AFFINITY );
     if ( !list.empty() )
     {
         // There are some special cases where we need something other than to
@@ -896,13 +684,14 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
 
 //------------------------------------------------------------------------------
 
-ExtensibleChipList getConnected( ExtensibleChip * i_chip, TYPE i_connType )
+ExtensibleChipList getConnectedChildren( ExtensibleChip * i_chip,
+                                         TYPE i_connType )
 {
     PRDF_ASSERT( nullptr != i_chip );
 
     ExtensibleChipList o_list; // Default empty list
 
-    TargetHandleList list = getConnected( i_chip->getTrgt(), i_connType );
+    TargetHandleList list = getConnectedChildren(i_chip->getTrgt(), i_connType);
     for ( auto & trgt : list )
     {
         // Check to make sure that if we have a non-null Target, we also
@@ -966,17 +755,13 @@ ExtensibleChip * getNeighborCore( ExtensibleChip * i_core )
     PRDF_ASSERT( nullptr != i_core );
 
     TargetHandle_t thisCore = i_core->getTrgt();
-    TargetHandleList parentEx = getConnected( thisCore, TYPE_EX );
-
-    // Check that there is still a functional parent EX
-    if (parentEx.size() == 0)
-        return nullptr;
+    TargetHandle_t parentEx = getConnectedParent( thisCore, TYPE_EX );
 
     ExtensibleChip * neighborCore = nullptr;
 
-    TargetHandleList coreList = getConnected( parentEx[0], TYPE_CORE);
+    TargetHandleList coreList = getConnectedChildren( parentEx, TYPE_CORE );
 
-    for ( auto & trgt : coreList)
+    for ( auto & trgt : coreList )
     {
         if ( trgt != thisCore )
         {
@@ -1086,7 +871,7 @@ TARGETING::TargetHandleList getConnectedDimms( TARGETING::TargetHandle_t i_trgt,
 
     TargetHandleList o_list;
 
-    TargetHandleList l_dimmList = getConnected( i_trgt, TYPE_DIMM );
+    TargetHandleList l_dimmList = getConnectedChildren( i_trgt, TYPE_DIMM );
     for ( auto & dimm : l_dimmList )
     {
         uint8_t l_dimmSlct = getDimmSlct( dimm );

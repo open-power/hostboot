@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -252,7 +252,7 @@ PRDF_PLUGIN_DEFINE( explorer_ocmb, DlFatalError );
 int32_t CalloutAttachedDimmsHigh( ExtensibleChip * i_chip,
                                   STEP_CODE_DATA_STRUCT & io_sc )
 {
-    for ( auto & dimm : getConnected(i_chip->getTrgt(), TYPE_DIMM) )
+    for ( auto & dimm : getConnectedChildren(i_chip->getTrgt(), TYPE_DIMM) )
         io_sc.service_data->SetCallout( dimm, MRU_HIGH );
 
     return SUCCESS; // nothing to return to rule code

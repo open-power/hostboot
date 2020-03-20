@@ -1267,27 +1267,9 @@ int32_t dimmList( TargetHandleList  & i_dimmList )
     {
         if ( i_dimmList.empty() ) break;
 
-        // Determine what target these DIMMs are connected to.
-        // Note that we cannot use getConnectedParent() because it will assert
-        // if there is no parent of that type.
+        o_rc = dimmList<TYPE_OCMB_CHIP>( i_dimmList );
 
-        TargetHandle_t dimmTrgt = i_dimmList.front();
-        TargetHandleList list;
-
-        // Third, check for OCMBs.
-        list = getConnected( dimmTrgt, TYPE_OCMB_CHIP );
-        if ( !list.empty() )
-        {
-            o_rc = dimmList<TYPE_OCMB_CHIP>( i_dimmList );
-            break;
-        }
-
-        // If we get here we did not find a supported target.
-        PRDF_ERR( PRDF_FUNC "Unsupported connected parent to dimm 0x%08x",
-                  getHuid(dimmTrgt) );
-        PRDF_ASSERT(false); // code bug
-
-    } while (0);
+    }while(0);
 
     return o_rc;
 

@@ -837,7 +837,7 @@ int32_t restartTraceArray(TargetHandle_t i_tgt)
         taArgs.trace_bus = PROC_TB_L20;
         // HWP requires an EX tgt here, all the traces within EQ/EX start/stop
         // so it doesn't matter which one, just use the first
-        TargetHandleList lst = getConnected(i_tgt, TYPE_EX);
+        TargetHandleList lst = getConnectedChildren(i_tgt, TYPE_EX);
         if (lst.size() > 0)
         {
             l_tgt = lst[0];

@@ -109,7 +109,7 @@ void getChpltList ( ExtensibleChip * i_chip,
     }
     else
     {
-        o_chpltList = PlatServices::getConnected(i_chip, i_chpltType);
+        o_chpltList = PlatServices::getConnectedChildren(i_chip, i_chpltType);
     }
 
     #undef PRDF_FUNC
@@ -574,7 +574,8 @@ int32_t capturePllFfdc( ExtensibleChip * i_chip,
     PLL::captureFsiStatusReg<TYPE_PROC>( i_chip, io_sc );
 
     // Add EX scom data
-    TargetHandleList exList = getConnected(i_chip->getTrgt(), TYPE_CORE);
+    TargetHandleList exList = getConnectedChildren( i_chip->getTrgt(),
+                                                    TYPE_CORE );
     ExtensibleChip * exChip;
     TargetHandleList::iterator itr = exList.begin();
     for( ; itr != exList.end(); ++itr)

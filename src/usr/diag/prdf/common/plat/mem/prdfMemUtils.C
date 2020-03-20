@@ -593,7 +593,7 @@ bool analyzeChnlFail<TYPE_MCC>( ExtensibleChip * i_mcc,
     if ( !io_sc.service_data->isMemChnlFail() )
     {
         // Loop through all the connected OMIs
-        for ( auto & omi : getConnected(i_mcc->getTrgt(), TYPE_OMI) )
+        for ( auto & omi : getConnectedChildren(i_mcc->getTrgt(), TYPE_OMI) )
         {
             o_analyzed = __analyzeChnlFail<TYPE_OMI>( omi, io_sc );
             if ( o_analyzed ) break;
@@ -615,7 +615,7 @@ bool analyzeChnlFail<TYPE_OMIC>( ExtensibleChip * i_omic,
     if ( !io_sc.service_data->isMemChnlFail() )
     {
         // Loop through all the connected OMIs
-        for ( auto & omi : getConnected(i_omic->getTrgt(), TYPE_OMI) )
+        for ( auto & omi : getConnectedChildren(i_omic->getTrgt(), TYPE_OMI) )
         {
             o_analyzed = __analyzeChnlFail<TYPE_OMI>( omi, io_sc );
             if ( o_analyzed ) break;
@@ -760,7 +760,7 @@ void cleanupChnlFail<TYPE_MCC>( ExtensibleChip * i_chip,
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_MCC == i_chip->getType() );
 
-    for ( auto & omi : getConnected(i_chip->getTrgt(), TYPE_OMI) )
+    for ( auto & omi : getConnectedChildren(i_chip->getTrgt(), TYPE_OMI) )
     {
         __cleanupChnlFail<TYPE_OMI>( omi, io_sc );
     }
@@ -773,7 +773,7 @@ void cleanupChnlFail<TYPE_OMIC>( ExtensibleChip * i_chip,
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_OMIC == i_chip->getType() );
 
-    for ( auto & omi : getConnected(i_chip->getTrgt(), TYPE_OMI) )
+    for ( auto & omi : getConnectedChildren(i_chip->getTrgt(), TYPE_OMI) )
     {
         __cleanupChnlFail<TYPE_OMI>( omi, io_sc );
     }

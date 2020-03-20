@@ -150,7 +150,8 @@ int32_t ClockResolution::Resolve(STEP_CODE_DATA_STRUCT & serviceData,
     {
         //Callout every device connected to this clock source.
         TargetHandleList l_targetsConnectedToClock =
-                PlatServices::getConnected( iv_ptargetClock, iv_targetType );
+                PlatServices::getConnectedChildren( iv_ptargetClock,
+                                                    iv_targetType );
 
         for( TargetHandleList::iterator i = l_targetsConnectedToClock.begin();
              i != l_targetsConnectedToClock.end(); ++i )

@@ -200,17 +200,14 @@ void hwpErrorIsolation( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc);
 //##############################################################################
 
 /**
- * @brief   Returns a list of functional targets of a given type that is
+ * @brief   Returns a list of functional child targets of a given type that is
  *          associated with the given target.
  * @param   i_target    The given target.
  * @param   i_connType  Type of target(s) return in list
  * @return  The connected list of targets. On error, the list will be empty.
- * @note    If the given target is the same type as the given type, only the
- *          given target is returned in the list.
- * @note    This function does not support peer-to-peer connections.
  */
-TARGETING::TargetHandleList getConnected( TARGETING::TargetHandle_t i_target,
-                                          TARGETING::TYPE i_connType );
+TARGETING::TargetHandleList getConnectedChildren(
+    TARGETING::TargetHandle_t i_target, TARGETING::TYPE i_connType );
 
 /**
  * @brief   Returns a functional parent target of a given type.
@@ -219,7 +216,7 @@ TARGETING::TargetHandleList getConnected( TARGETING::TargetHandle_t i_target,
  * @note    If the given target is the same type as the given type, the given
  *          target is returned.
  * @note    This function will assert if no valid parent is found.
- * @return  The requested parent target, NULL if something failed.
+ * @return  The requested parent target.
  */
 TARGETING::TargetHandle_t getConnectedParent(TARGETING::TargetHandle_t i_target,
                                              TARGETING::TYPE i_connType );
@@ -236,16 +233,13 @@ TARGETING::TargetHandle_t getConnectedChild( TARGETING::TargetHandle_t i_target,
                                              uint32_t i_position );
 
 /**
- * @brief  ExtensibleChip wrapper for targeting version of getConnected().
+ * @brief  ExtensibleChip wrapper for targeting version of getConnectedChildren.
  * @param  i_chip    The given chip.
  * @param  i_connType  Type of target(s) return in list
  * @return The connected list of chips. On error, the list will be empty.
- * @note   If the given chip is the same type as the given type, only the given
- *         chip is returned in the list.
- * @note   This function does not support peer-to-peer connections.
  */
-ExtensibleChipList getConnected( ExtensibleChip * i_chip,
-                                 TARGETING::TYPE i_connType );
+ExtensibleChipList getConnectedChildren( ExtensibleChip * i_chip,
+                                         TARGETING::TYPE i_connType );
 
 /**
  * @brief  ExtensibleChip wrapper for targeting version of getConnectedParent().

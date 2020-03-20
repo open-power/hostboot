@@ -209,7 +209,7 @@ TargetHandleList MemoryMru::getCalloutList() const
         {
             if ( CALLOUT_ALL_MEM == iv_special )
             {
-                o_list = getConnected( iv_target, TYPE_DIMM );
+                o_list = getConnectedChildren( iv_target, TYPE_DIMM );
             }
             else if ( (CALLOUT_RANK       == iv_special) ||
                       (NO_SPECIAL_CALLOUT == iv_special) )
