@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2019
+# Contributors Listed Below - COPYRIGHT 2016,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -613,6 +613,10 @@ sub manipulateImages
             my $final_bin_file = ($system_target eq "")? "$bin_dir/$eyeCatch$nodeIDstr.bin":
                                         "$bin_dir/$system_target.$eyeCatch$nodeIDstr.bin";
 
+            # Check if bin file is system specific and prefix target to the front
+            my $final_header_file = ($system_target eq "")? "$bin_dir/$eyeCatch$nodeIDstr.header":
+                                        "$bin_dir/$system_target.$eyeCatch$nodeIDstr.header";
+
             # Handle partitions that have an input binary.
             if (-e $bin_file)
             {
@@ -702,6 +706,7 @@ sub manipulateImages
 
                             run_command("$CUR_OPEN_SIGN_REQUEST "
                                 . "--protectedPayload $tempImages{PAYLOAD_TEXT} "
+                                . "--contrHdrOut $final_header_file "
                                 . "--out $tempImages{PROTECTED_PAYLOAD}");
 
                             run_command("cat $tempImages{PROTECTED_PAYLOAD} $bin_file > $tempImages{HDR_PHASE}");
@@ -711,6 +716,7 @@ sub manipulateImages
                         {
                             run_command("$CUR_OPEN_SIGN_REQUEST "
                                 . "--protectedPayload $bin_file.protected "
+                                . "--contrHdrOut $final_header_file "
                                 . "--out $tempImages{PROTECTED_PAYLOAD}");
 
                             run_command("cat $tempImages{PROTECTED_PAYLOAD} $bin_file.unprotected > $tempImages{HDR_PHASE}");
@@ -722,6 +728,7 @@ sub manipulateImages
                             run_command("$CUR_OPEN_SIGN_REQUEST "
                                 . "$codeStartOffset "
                                 . "--protectedPayload $bin_file "
+                                . "--contrHdrOut $final_header_file "
                                 . "--out $tempImages{HDR_PHASE}");
                         }
 
@@ -752,6 +759,7 @@ sub manipulateImages
                         $callerHwHdrFields{configure} = 1;
                         run_command("$CUR_OPEN_SIGN_REQUEST "
                             . "--protectedPayload $bin_file "
+                            . "--contrHdrOut $final_header_file "
                             . "--out $tempImages{HDR_PHASE}");
                     }
                     # Add non-secure version header
@@ -760,6 +768,7 @@ sub manipulateImages
                         # Attach signature-less secure header for OpenPOWER builds
                         run_command("$CUR_OPEN_SIGN_REQUEST "
                             . "--protectedPayload $bin_file "
+                            . "--contrHdrOut $final_header_file "
                             . "--out $tempImages{HDR_PHASE}");
                     }
                 }
@@ -867,6 +876,7 @@ sub manipulateImages
                             $callerHwHdrFields{configure} = 1;
                             run_command("$CUR_OPEN_SIGN_REQUEST "
                                 . "--protectedPayload $tempImages{TEMP_BIN} "
+                                . "--contrHdrOut $final_header_file "
                                 . "--out $tempImages{PAD_PHASE}");
                             setCallerHwHdrFields(\%callerHwHdrFields,
                                                  $tempImages{PAD_PHASE});
@@ -877,8 +887,16 @@ sub manipulateImages
                             # Attach signature-less secure header for OpenPOWER builds
                             run_command("$CUR_OPEN_SIGN_REQUEST "
                                 . "--protectedPayload $tempImages{TEMP_BIN} "
+                                . "--contrHdrOut $final_header_file "
                                 . "--out $tempImages{PAD_PHASE}");
                         }
+
+                        # Save a copy of the original binary to package later,
+                        #  only need this for sections that are temporarily zeros but eventually
+                        #  will have real content
+                        my $staged_bin_file = ($system_target eq "")? "$bin_dir/$eyeCatch$nodeIDstr.staged":
+                          "$bin_dir/$system_target.$eyeCatch$nodeIDstr.staged";
+                        run_command("cp -n $tempImages{TEMP_BIN} $staged_bin_file");
                     }
                     # Corrupt section if user specified to do so, before ECC injection.
                     if ($secureboot && exists $partitionsToCorrupt{$eyeCatch})
@@ -896,7 +914,6 @@ sub manipulateImages
                 {
                     run_command("cp $tempImages{PAD_PHASE} $bin_dir/sbkt.bin");
                 }
-
             }
 
             # ECC Phase
