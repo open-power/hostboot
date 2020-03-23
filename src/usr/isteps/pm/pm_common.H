@@ -31,6 +31,7 @@
 #include <diag/prdf/prdfWriteHomerFirData.H>
 #include <isteps/pm/pm_common_ext.H>
 #include <istepHelperFuncs.H>
+#include <sys/mm.h>
 
 // Definitions for convertHomerPhysToVirt()
 #ifndef __HOSTBOOT_RUNTIME

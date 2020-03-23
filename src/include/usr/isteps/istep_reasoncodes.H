@@ -80,6 +80,8 @@ namespace ISTEP
         MOD_MSS_GETECID                                   = 0x30,
         MOD_START_PM_COMPLEX                              = 0x31,
         MOD_RESET_PM_COMPLEX                              = 0x32,
+        MOD_SCOPED_HOMER_MAPPER_MAP                       = 0x33,
+        MOD_SCOPED_HOMER_MAPPER_UNMAP                     = 0x34,
     };
 
     /**
@@ -158,6 +160,10 @@ namespace ISTEP
         RC_CANNOT_BOOT_WITH_MISMATCHED_BARS      = ISTEP_COMP_ID | 0x52,
         RC_INVALID_OCMB_CHIP_ID                  = ISTEP_COMP_ID | 0x53,
         RC_INVALID_HOMER_VADDR                   = ISTEP_COMP_ID | 0x54,
+        RC_PM_COMPLEX_ADDRESSES_NOT_FOUND        = ISTEP_COMP_ID | 0x55,
+        RC_BAD_INTERFACE_RETURN_CODE             = ISTEP_COMP_ID | 0x56,
+        RC_COULD_NOT_MAP_HOMER                   = ISTEP_COMP_ID | 0x57,
+        RC_COULD_NOT_UNMAP_HOMER                 = ISTEP_COMP_ID | 0x58,
     };
 
 };
