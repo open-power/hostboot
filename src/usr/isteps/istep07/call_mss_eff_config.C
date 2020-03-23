@@ -69,6 +69,7 @@
 
 // SMF Support
 #include    <secureboot/smf.H>
+#include    <secureboot/smf_utils.H>
 
 
 #include    <nvram/nvram_interface.H>
@@ -286,12 +287,17 @@ void* call_mss_eff_config (void *io_pArgs)
 
         // Distribute the SMF Memory (if system appropriate)
         distributeSmfMemory();
-        // Run mss_eff_grouping again to update the state of
-        // SMF_CONFIG and SMF BAR sizes
-        call_mss_eff_grouping(l_StepError);
-        if(!l_StepError.isNull())
+
+        if(SECUREBOOT::SMF::isSmfEnabled())
         {
-            break;
+            // SMF is still enabled, which means that the requested amount of
+            // SMF memory may have changed. Rerun the mss_eff_grouping HWP
+            // to update the SMF BAR/SMF memory amounts.
+            call_mss_eff_grouping(l_StepError);
+            if(!l_StepError.isNull())
+            {
+                break;
+            }
         }
 
     } while(0);
