@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,9 +72,14 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
     // Verify offset is within scom mmio range
     if ( (l_offset >= (4 * GIGABYTE)) && (l_offset < (6 * GIGABYTE)) )
     {
+        // add the base physical address to create a complete system-wide
+        //  address
+        uint64_t l_fullAddr = i_ocmbTarget->getAttr<TARGETING::ATTR_MMIO_PHYS_ADDR>();
+        l_fullAddr += l_offset;
+
         // send message to hypervisor level to do the mmio operation
         l_err = SCOM::sendScomToHyp(i_opType, i_ocmbTarget,
-                                    l_offset, io_buffer);
+                                    l_fullAddr, io_buffer);
     }
     else
     {
