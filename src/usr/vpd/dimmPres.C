@@ -58,8 +58,8 @@ extern trace_desc_t * g_trac_spd;
 
 // ------------------------
 // Macros for unit testing
-//#define TRACUCOMP(args...)  TRACFCOMP(args)
-#define TRACUCOMP(args...)
+#define TRACUCOMP(args...)  TRACFCOMP(args)
+//#define TRACUCOMP(args...)
 //#define TRACSSCOMP(args...)  TRACFCOMP(args)
 #define TRACSSCOMP(args...)
 
@@ -125,7 +125,7 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
         }
 
         // Is the target present?
-#ifdef CONFIG_DJVPD_READ_FROM_HW
+#if defined(CONFIG_DJVPD_READ_FROM_HW) && defined(CONFIG_SUPPORT_EEPROM_HWACCESS)
         // Check if the i2c master is present.
         // If it is not then no reason to check the DIMM which would
         // otherwise generate tons of FSI errors.
@@ -133,7 +133,6 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
         // is functional because DIMM presence detect is called before
         // the parent MCS/MCA or MBA/MEMBUF is set as present/functional.
         bool l_i2cMasterPresent = false;
-        bool l_masterProc = true;
 
         do
         {
@@ -179,7 +178,6 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
             // Master proc is taken as always present. Validate other targets.
             if (l_i2cMasterTarget != masterProcTarget)
             {
-                l_masterProc = false;
                 l_i2cMasterPresent = FSI::isSlavePresent(l_i2cMasterTarget);
                 if( !l_i2cMasterPresent )
                 {
@@ -205,26 +203,7 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
             break;
         }
 
-        // TODO RTC 213602
-        // Remove this exception logic once the I2C code has
-        // been updated for P10 and all ports (0-15) are
-        // able to be used.  Currently only port 0..3 are available.
-        const auto i2cInfo = i_target->getAttr<
-            TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO>();
-        if(i2cInfo.port < 4  && l_masterProc)
-        {
-           present=true;
-        }
-        else
-        {
-            TRACFCOMP(g_trac_spd, INFO_MRK "dimmPresenceDetect() "
-                      "Marking DIMM 0x%08X not present since it's driven by "
-                      "i2c port %d which is not supported yet.  Only 0-3 are "
-                      "supported.",
-                      TARGETING::get_huid(i_target));
-            present = false;
-        }
-#endif // CONFIG_DJVPD_READ_FROM_HW
+#endif // CONFIG_DJVPD_READ_FROM_HW && def(CONFIG_SUPPORT_EEPROM_HWACCESS)
 
 #if( defined(CONFIG_SUPPORT_EEPROM_CACHING) && !defined(CONFIG_SUPPORT_EEPROM_HWACCESS) )
         err = EEPROM::eecachePresenceDetect(i_target, present);

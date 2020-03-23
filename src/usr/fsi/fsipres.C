@@ -119,10 +119,7 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
 
     if ( check_for_mvpd )
     {
-        // TODO RTC 213602
-        // Re-enable once presence detection is supported in simics
-        // mvpd_present = VPD::mvpdPresent( i_target );
-        mvpd_present = true;
+         mvpd_present = VPD::mvpdPresent( i_target );
     }
 
 #if defined(CONFIG_MVPD_READ_FROM_HW) && defined(CONFIG_MVPD_READ_FROM_PNOR)

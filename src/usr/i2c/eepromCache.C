@@ -393,14 +393,9 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
 
             if (i_present)
             {
-                // TODO RTC 213602
-                // Enable this once reading seeproms is supported
-                //l_errl = VPD::ensureEepromCacheIsInSync(i_target,
-                //                                        l_eepromContentType,
-                //                                        l_isInSync);
-                (void)l_eepromContentType;
-                l_isInSync = true;
-
+                l_errl = VPD::ensureEepromCacheIsInSync(i_target,
+                                                        l_eepromContentType,
+                                                        l_isInSync);
                 if (l_errl != nullptr)
                 {
                     break;

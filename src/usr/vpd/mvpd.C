@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -38,6 +38,8 @@
 #include <vpd/mvpdenums.H>
 #include <vpd/vpd_if.H>
 #include <i2c/eepromif.H>
+
+#include "../i2c/eepromCache.H"
 
 #include "mvpd.H"
 #include "ipvpd.H"
@@ -189,8 +191,13 @@ bool VPD::mvpdPresent( TARGETING::Target * i_target )
 {
     TRACSSCOMP(g_trac_vpd, ENTER_MRK"mvpdPresent()");
 #if(defined( CONFIG_MVPD_READ_FROM_HW ) && !defined( __HOSTBOOT_RUNTIME) )
-
-    return EEPROM::eepromPresence( i_target );
+#   if (defined (CONFIG_SUPPORT_EEPROM_CACHING) && !defined(CONFIG_SUPPORT_EEPROM_HWACCESS))
+        bool present = false;
+        EEPROM::eecachePresenceDetect(i_target, present);
+        return present;
+#   else
+        return EEPROM::eepromPresence( i_target );
+#   endif
 #else
     return Singleton<MvpdFacade>::instance().hasVpdPresent( i_target,
                                                             MVPD::CP00,
