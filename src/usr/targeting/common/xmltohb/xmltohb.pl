@@ -2438,9 +2438,12 @@ print $outFile <<VERBATIM;
 // STD
 #include <stdint.h>
 #include <stdlib.h>
-#ifdef __HOSTBOOT_MODULE
+
+// std::array support is dependent on the compiler supporting c++11
+#if __cplusplus >= 201103L
 #include <array>
 #endif
+
 VERBATIM
 
 foreach my $attribute (@{$attributes->{attribute}})
@@ -2647,7 +2650,7 @@ sub writeTraitFileTraits {
             if ($stdArrAddOn ne "")
             {
                 # Append typedef for std::array if attr holds array value
-                print $outFile "#ifdef __HOSTBOOT_MODULE\n";
+                print $outFile "#if __cplusplus >= 201103L \n";
                 print $outFile "        typedef $stdArrAddOn TypeStdArr;\n";
                 print $outFile "#endif\n";
             }
@@ -2665,7 +2668,7 @@ sub writeTraitFileTraits {
 
             if ($stdArrAddOn ne "")
             {
-                $typedefs .= "#ifdef __HOSTBOOT_MODULE\n";
+                $typedefs .= "#if __cplusplus >= 201103L \n";
                 $typedefs .= "typedef $stdArrAddOn "
                     ."ATTR_$attribute->{id}_typeStdArr;\n";
                 $typedefs .= "#endif\n";
