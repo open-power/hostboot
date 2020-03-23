@@ -875,7 +875,9 @@ class TargetingTestSuite : public CxxTest::TestSuite
             const uint64_t SM_MMIO_SPACE_OFFSET = 4 * GIGABYTE;
             const uint64_t SM_MMIO_SPACE_SIZE = 128 * MEGABYTE;
             const uint64_t IBM_MMIO_SPACE_OFFSET = SM_MMIO_SPACE_OFFSET + SM_MMIO_SPACE_SIZE;
-            const uint64_t IBM_MMIO_SPACE_SIZE = 16 * MEGABYTE;
+            // Actual MMIO SPACE for IBM scoms is only 16 MB but we reserve 
+            // remainder of the entire 2 GB window
+            const uint64_t IBM_MMIO_SPACE_RSV_SIZE = 2 * GIGABYTE - SM_MMIO_SPACE_SIZE;
             const uint8_t SUPPORTS_8_BYTE = 8;
             const uint8_t SUPPORTS_4_BYTE = 4;
 
@@ -895,7 +897,7 @@ class TargetingTestSuite : public CxxTest::TestSuite
                   // IBM MMIO Space
                   TARGETING::ocmbMmioAddressRange_t(OCMB0_RT_ID,
                                       OCMB0_MMIO_BAR + IBM_MMIO_SPACE_OFFSET,
-                                      IBM_MMIO_SPACE_SIZE + OCMB0_MMIO_BAR + IBM_MMIO_SPACE_OFFSET - 1,
+                                      IBM_MMIO_SPACE_RSV_SIZE + OCMB0_MMIO_BAR + IBM_MMIO_SPACE_OFFSET - 1,
                                       SUPPORTS_8_BYTE)
               },
               // OCMB 8 info
@@ -913,7 +915,7 @@ class TargetingTestSuite : public CxxTest::TestSuite
                   // IBM MMIO Space
                   TARGETING::ocmbMmioAddressRange_t(OCMB8_RT_ID,
                                       OCMB8_MMIO_BAR + IBM_MMIO_SPACE_OFFSET,
-                                      IBM_MMIO_SPACE_SIZE + OCMB8_MMIO_BAR + IBM_MMIO_SPACE_OFFSET -1,
+                                      IBM_MMIO_SPACE_RSV_SIZE + OCMB8_MMIO_BAR + IBM_MMIO_SPACE_OFFSET -1,
                                       SUPPORTS_8_BYTE)
               },
               // OCMB 16 info
@@ -931,7 +933,7 @@ class TargetingTestSuite : public CxxTest::TestSuite
                   // IBM MMIO Space
                   TARGETING::ocmbMmioAddressRange_t(OCMB16_RT_ID,
                                       OCMB16_MMIO_BAR + IBM_MMIO_SPACE_OFFSET,
-                                      IBM_MMIO_SPACE_SIZE + OCMB16_MMIO_BAR + IBM_MMIO_SPACE_OFFSET - 1,
+                                      IBM_MMIO_SPACE_RSV_SIZE + OCMB16_MMIO_BAR + IBM_MMIO_SPACE_OFFSET - 1,
                                       SUPPORTS_8_BYTE)
               },
               // OCMB 24 info
@@ -949,7 +951,7 @@ class TargetingTestSuite : public CxxTest::TestSuite
                   // IBM MMIO Space
                   TARGETING::ocmbMmioAddressRange_t(OCMB24_RT_ID,
                                       OCMB24_MMIO_BAR + IBM_MMIO_SPACE_OFFSET,
-                                      IBM_MMIO_SPACE_SIZE + OCMB24_MMIO_BAR + IBM_MMIO_SPACE_OFFSET - 1,
+                                      IBM_MMIO_SPACE_RSV_SIZE + OCMB24_MMIO_BAR + IBM_MMIO_SPACE_OFFSET - 1,
                                       SUPPORTS_8_BYTE)
               }
             };
