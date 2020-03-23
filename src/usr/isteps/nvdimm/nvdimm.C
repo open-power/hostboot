@@ -2268,6 +2268,27 @@ void nvdimm_thresholds(TARGETING::TargetHandleList &i_nvdimmList)
 
     for (const auto & l_nvdimm : i_nvdimmList)
     {
+        // Set ES Policy to enable setting the BPM-related threshold values
+        l_err = nvdimmSetESPolicy(l_nvdimm);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_thresholds() nvdimm[%X] failed to set ES Policy", get_huid(l_nvdimm));
+
+            // Committing the error as we don't want this to interrupt
+            // the boot. This will notify the user that action is needed
+            // on this module.
+            l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+            l_err->collectTrace(NVDIMM_COMP_NAME);
+
+            // Callout the nvdimm on high and gard
+            l_err->addHwCallout( l_nvdimm,
+                                   HWAS::SRCI_PRIORITY_HIGH,
+                                   HWAS::NO_DECONFIG,
+                                   HWAS::GARD_Fatal);
+
+            errlCommit( l_err, NVDIMM_COMP_ID );
+        }
+
         // ES_LIFETIME_WARNING_THRESHOLD
         l_err = nvdimmWriteReg(l_nvdimm,
                                ES_LIFETIME_WARNING_THRESHOLD,
@@ -4910,6 +4931,7 @@ errlHndl_t nvdimmArmPreCheck(Target* i_nvdimm)
     uint8_t l_ready = 0;
     uint8_t l_fwupdate = 0;
     uint8_t l_module_health = 0;
+    uint8_t l_es_policy_status = 0;
     uint8_t l_continue = true;
     auto l_RegInfo = nvdimm_reg_t();
 
@@ -4947,6 +4969,19 @@ errlHndl_t nvdimmArmPreCheck(Target* i_nvdimm)
             l_continue = false;
         }
 
+        // Read out the SET_ES_POLICY_STATUS register
+        // Adding a precheck here for SET_ES_POLICY to catch any ES_POLICY_ERROR in case
+        // SET_ES_POLICY had to be done prior. i.e. setting the ES policy to set the BPM
+        // threshold values
+        l_err = nvdimmReadReg(i_nvdimm, SET_ES_POLICY_STATUS, l_es_policy_status);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArmPreCheck() nvdimm[%X] - failed to read SET_ES_POLICY_STATUS register",
+                      get_huid(i_nvdimm));
+            errlCommit( l_err, NVDIMM_COMP_ID );
+            l_continue = false;
+        }
+
     }while(0);
 
     // Check ARM pre-requisites
@@ -4954,7 +4989,8 @@ errlHndl_t nvdimmArmPreCheck(Target* i_nvdimm)
     // before continuing with arm.
     if ((!l_continue) || (l_module_health & NVM_LIFETIME_ERROR)
                       || (l_ready != NV_READY)
-                      || (l_fwupdate & FW_OPS_UPDATE))
+                      || (l_fwupdate & FW_OPS_UPDATE)
+                      || (l_es_policy_status & ES_POLICY_ERROR))
     {
         TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArmPreCheck() nvdimm[%X] - failed NVDimm Arm prechecks",
                   get_huid(i_nvdimm));
@@ -4968,7 +5004,7 @@ errlHndl_t nvdimmArmPreCheck(Target* i_nvdimm)
         *@userdata1[40:47]  l_module_health
         *@userdata1[48:56]  l_ready
         *@userdata1[57:63]  l_fwupdate
-        *@userdata2         <UNUSED>
+        *@userdata2         l_es_policy_status
         *@devdesc           NVDIMM failed arm precheck. Refer to FFDC for exact reason
         *@custdesc          NVDIMM failed the arm precheck and is unable to arm
         */
@@ -4977,7 +5013,7 @@ errlHndl_t nvdimmArmPreCheck(Target* i_nvdimm)
                                          NVDIMM_ARM_PRE_CHECK_FAILED,
                                          NVDIMM_SET_USER_DATA_1(TARGETING::get_huid(i_nvdimm),
                                          FOUR_UINT8_TO_UINT32(l_continue, l_module_health, l_ready, l_fwupdate)),
-                                         0x0,
+                                         l_es_policy_status,
                                          ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
 
         l_err->collectTrace( NVDIMM_COMP_NAME );
