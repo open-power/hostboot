@@ -552,7 +552,7 @@ sub normalizeXML($)
         # <bit> elements.
         for ( @{$n->{bit}} )
         {
-            my $desc = substr($_->{content}, 0, 50); # limit 50 characters.
+            my $desc = $_->{content};
 
             # Fix special characters.
             $desc =~ s/&/&amp;/sg;
