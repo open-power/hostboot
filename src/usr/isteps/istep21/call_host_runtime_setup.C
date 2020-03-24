@@ -743,12 +743,20 @@ void* call_host_runtime_setup (void *io_pArgs)
             {
 #ifdef CONFIG_NVDIMM
                 // Arm the nvdimms
-                // Only get here if is_sapphire_load and PM started and have NVDIMMs
+                // Only get here if is_sapphire_load
+                // and PM started and have NVDIMMs
                 TARGETING::TargetHandleList l_nvdimmTargetList;
-                NVDIMM::nvdimm_getNvdimmList(l_nvdimmTargetList);
-                if (l_nvdimmTargetList.size() != 0)
+                TARGETING::TargetHandleList l_procList;
+                TARGETING::getAllChips(l_procList, TARGETING::TYPE_PROC, true);
+
+                // Arm nvdimms by proc
+                for (auto l_proc : l_procList)
                 {
-                    NVDIMM::nvdimmArm(l_nvdimmTargetList);
+                    l_nvdimmTargetList = TARGETING::getProcNVDIMMs(l_proc);
+                    if (l_nvdimmTargetList.size() != 0)
+                    {
+                        NVDIMM::nvdimmArm(l_nvdimmTargetList);
+                    }
                 }
 #endif
             }
