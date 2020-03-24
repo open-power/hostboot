@@ -2267,10 +2267,14 @@ void hdatGetMemTargetMmioInfo(TARGETING::Target* i_pTarget,
                 (mmioDev.mmioBaseAddr & 0xFFFFFFFF00000000ull) >> 32;
             l_mmioObj.hdatMmioAddrRngStrAddr.lo =
                 mmioDev.mmioBaseAddr & 0x00000000FFFFFFFFull;
+            l_mmioObj.hdatMmioAddrRngStrAddr.hi |= HDAT_REAL_ADDRESS_MASK;
+
             l_mmioObj.hdatMmioAddrRngEndAddr.hi =
                 (mmioDev.mmioEndAddr & 0xFFFFFFFF00000000ull) >> 32;
             l_mmioObj.hdatMmioAddrRngEndAddr.lo =
                 mmioDev.mmioEndAddr & 0x00000000FFFFFFFFull;
+            l_mmioObj.hdatMmioAddrRngEndAddr.hi |= HDAT_REAL_ADDRESS_MASK;
+
             l_mmioObj.hdatMmioHbrtChipId = mmioDev.hbrtId;
 
             if (mmioDev.accessSize == 8)
