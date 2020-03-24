@@ -505,7 +505,8 @@ fapi_try_exit:
 
 
 // Function: process_gptr_rings()
-// @brief: This function is used to check and process gptr rings.
+// @brief: This function is used to check and process gptr rings found in the overlays
+//         ring section and in the Mvpd.
 //
 // Parameter list:
 // const fapi2::Target &i_target: Processor chip target.
@@ -581,17 +582,12 @@ fapi2::ReturnCode process_gptr_rings(
                      ((CompressedScanData*)io_gptrRs4Ring)->iv_ringId,
                      ((CompressedScanData*)ovlyRs4Ring)->iv_type );
 
-// CMO-20200323:  TBD in follow-on commit:
-//                - Update code here so that actual overlay operation, ie
-//                      apply_overlay_ring, is only done if both rings have content:
-//                - We know at this point the ovly ring has content.
-//                - We need to determine if gptr ring is redundant:
-//                  - if io_gptrRs4Ring==redundant, copy ovlyRs4Ring into io_gptrRs4Ring;
-//                  - if io_gptrRs4Ring!=redundant, apply_overlay_ring.
-//                - Cleanup apply_overlay_ring
-
         //
-        // Do overlay operation: Overlay the overlays ring onto the Mvpd Gptr ring
+        // Overlay the overlays ring onto the Mvpd Gptr ring.
+        // Note that the overlay operation needs to be done even if the Mvpd Gptr ring is
+        // redundant so that any potential reset bits in the overlays ring get cleared in the
+        // care portion which wouldn't happen if we just memcpy the overlays ring into the final
+        // io_gptrRs4Ring.
         //
 
         // We need to preserve (for debugging purpose) where the ring contributions came from,
@@ -613,13 +609,14 @@ fapi2::ReturnCode process_gptr_rings(
     }
     else if ((uint32_t)fapiRc == RC_XIPC_OVERLAYS_RING_IS_EMPTY)
     {
-        // Finding an empty overlays ring will be a common scenario. There is not overlay to do.
+        // Finding an empty overlays ring will be a common scenario. There is no overlay to do.
         // The content in io_gptrRs4Ring will be the final overlaid Gptr ring.
         fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     }
     else
     {
-        // Nothing to do. Return the fapiRc from get_overlays_ring().
+        // Failure: Return the fapiRc from get_overlays_ring()
+        fapi2::current_err = fapiRc;
     }
 
 fapi_try_exit:
@@ -1245,7 +1242,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
             finalVpdRing = vpdRing; // This is also ringBuf1
         }
 
-        // Check final Vpd ring for redundancy
+        // Check final Mvpd ring for redundancy
         MyBool_t redundant = UNDEFINED_BOOLEAN;
 
         l_rc = rs4_redundant((CompressedScanData*)finalVpdRing, redundant);
@@ -1253,10 +1250,11 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
         FAPI_ASSERT( l_rc == 0 && redundant != UNDEFINED_BOOLEAN,
                      fapi2::XIPC_RS4_REDUNDANT_ERROR().
                      set_CHIP_TARGET(i_procTarget).
+                     set_LOCAL_RC(l_rc).
                      set_RING_ID(i_ringId).
                      set_CHIPLET_ID(l_chipletId).
                      set_REDUNDANT(redundant).
-                     set_LOCAL_RC(l_rc),
+                     set_OCCURRENCE(1),
                      "ERROR: rs4_redundant failed w/rc=0x%08x or redundant=%u for"
                      " ringId=0x%x, chipletId=0x%02x, occurrence=1 ",
                      l_rc, redundant, i_ringId, l_chipletId );
@@ -1265,9 +1263,9 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
         {
             io_ringStatusInMvpd = RING_REDUNDANT;
 
-            FAPI_DBG("Skipping redundant VPD ring: ringId=0x%x, chipletId=0x%02x ",
+            FAPI_DBG("Skipping redundant MVPD ring: ringId=0x%x, chipletId=0x%02x ",
                      i_ringId, l_chipletId);
-            fapi2::current_err = RC_MVPD_RING_REDUNDANT_DATA;
+            fapi2::current_err = RC_XIPC_RING_IS_REDUNDANT;
             goto fapi_try_exit;
         }
 
@@ -1386,54 +1384,6 @@ fapi_try_exit:
 } // End of  _fetch_and_insert_vpd_rings()
 
 
-//  Function: resolve_gptr_overlays()
-//
-//  Parameter list:
-//  const fapi::Target &i_target:    Processor chip target.
-//  void*      i_hwImage:            Ptr to ring section.
-//  void*      o_overlaysSection:    Ptr to extracted overlay DD section in hwImage.
-//  uint8_t    i_ddLevel:            DD level extracted from host services.
-#ifdef WIN32
-int resolve_gptr_overlays(
-    int i_procTarget,
-#else
-fapi2::ReturnCode resolve_gptr_overlays(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procTarget,
-#endif
-    void*    i_hwImage,
-    void*&   o_overlaysSection,
-    uint8_t  i_ddLevel )
-{
-
-    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-    P9XipSection l_xipSection;
-    int      l_rc = INFRASTRUCT_RC_SUCCESS;
-
-    FAPI_DBG("Entering resolve_gptr_overlays");
-
-    l_rc = p9_xip_get_section(i_hwImage, P9_XIP_SECTION_HW_OVERLAYS, &l_xipSection, i_ddLevel);
-
-    FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
-                 fapi2::XIPC_XIP_GET_SECTION_ERROR().
-                 set_CHIP_TARGET(i_procTarget).
-                 set_XIP_RC(l_rc).
-                 set_SECTION_ID(P9_XIP_SECTION_HW_OVERLAYS).
-                 set_DDLEVEL(i_ddLevel).
-                 set_OCCURRENCE(6),
-                 "p9_xip_get_section() failed (6) w/rc=0x%08x getting .overlays"
-                 " section for ddLevel=0x%x",
-                 (uint32_t)l_rc, i_ddLevel );
-
-    o_overlaysSection = (void*)((uint8_t*)i_hwImage + l_xipSection.iv_offset);
-    FAPI_DBG("GPTR support available in .overlays for ddLevel=0x%x "
-             "located at addr=0x%08x (and HW image located at addr=0x%08x)",
-             i_ddLevel, (uint32_t*)o_overlaysSection, (uint32_t*)i_hwImage);
-
-fapi_try_exit:
-    FAPI_DBG("Exiting resolve_gptr_overlays");
-    return fapi2::current_err;
-}
-
 
 //  Function: fetch_and_insert_vpd_rings()
 //
@@ -1498,7 +1448,6 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
     // Initialize activeCoreMask to be filled up with EC column filling as it progresses
     uint32_t l_activeCoreMask  = 0x0;
     uint32_t l_bootCoreMaskMin = 0x0;
-    void*    l_overlaysSection = NULL;
 
     TorHeader_t* torHeader  = (TorHeader_t*)i_ringSection;
     uint32_t     torMagic = be32toh(torHeader->magic);
@@ -1506,15 +1455,24 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
 
     FAPI_DBG("Entering fetch_and_insert_vpd_rings");
 
-// CMO-20200325:  TBD in follow-on commit:
-//                - Unroll this function call. We'll save 35-40 lines in total and improve
-//                  readability since it'll only add another 10 lines right here.
-    FAPI_TRY( resolve_gptr_overlays( i_procTarget,
-                                     i_hwImage,
-                                     l_overlaysSection,
-                                     i_ddLevel ),
-              "resolve_gptr_overlays() failed w/rc=0x%08x",
-              (uint32_t)current_err );
+
+    // Let's get the .overlays ring section up front
+    P9XipSection iplImgSection;
+    void* l_overlaysSection = NULL;
+    l_rc = p9_xip_get_section(i_hwImage, P9_XIP_SECTION_HW_OVERLAYS, &iplImgSection, i_ddLevel);
+
+    FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
+                 fapi2::XIPC_XIP_GET_SECTION_ERROR().
+                 set_CHIP_TARGET(i_procTarget).
+                 set_XIP_RC(l_rc).
+                 set_SECTION_ID(P9_XIP_SECTION_HW_OVERLAYS).
+                 set_DDLEVEL(i_ddLevel).
+                 set_OCCURRENCE(6),
+                 "p9_xip_get_section() failed (6) w/rc=0x%08x getting .overlays"
+                 " section for ddLevel=0x%x",
+                 (uint32_t)l_rc, i_ddLevel );
+
+    l_overlaysSection = (void*)((uint8_t*)i_hwImage + iplImgSection.iv_offset);
 
 
     // Walk through all Vpd rings and add any that's there to the image.
@@ -1616,7 +1574,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                                i_dynamicRingSection );
 
                 if (   (uint32_t)l_fapiRc == RC_XIPC_IMAGE_WOULD_OVERFLOW ||
-                       ( (uint32_t)l_fapiRc != RC_MVPD_RING_REDUNDANT_DATA &&
+                       ( (uint32_t)l_fapiRc != RC_XIPC_RING_IS_REDUNDANT &&
                          l_fapiRc != fapi2::FAPI2_RC_SUCCESS ) )
                 {
                     fapi2::current_err = l_fapiRc;
@@ -1745,7 +1703,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                     l_instanceVpdRing.chipletUnderProcess    = EQ_CHIPLET;
                     l_instanceVpdRing.instanceNumUnderProcess = eq;
                 }
-                else if ( (uint32_t)l_fapiRc != RC_MVPD_RING_REDUNDANT_DATA &&
+                else if ( (uint32_t)l_fapiRc != RC_XIPC_RING_IS_REDUNDANT &&
                           l_fapiRc != fapi2::FAPI2_RC_SUCCESS )
                 {
                     fapi2::current_err = l_fapiRc;
@@ -1890,7 +1848,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                         l_instanceVpdRing.chipletUnderProcess    = EC_CHIPLET;
                         l_instanceVpdRing.instanceNumUnderProcess = ec;
                     }
-                    else if ( (uint32_t)l_fapiRc != RC_MVPD_RING_REDUNDANT_DATA &&
+                    else if ( (uint32_t)l_fapiRc != RC_XIPC_RING_IS_REDUNDANT &&
                               l_fapiRc != fapi2::FAPI2_RC_SUCCESS )
                     {
                         fapi2::current_err = l_fapiRc;
@@ -1899,7 +1857,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                         goto fapi_try_exit;
                     }
                     else if ( ( l_fapiRc == fapi2::FAPI2_RC_SUCCESS     ||
-                                (uint32_t)l_fapiRc == RC_MVPD_RING_REDUNDANT_DATA ||
+                                (uint32_t)l_fapiRc == RC_XIPC_RING_IS_REDUNDANT ||
                                 (uint32_t)l_fapiRc == RC_MVPD_RING_NOT_FOUND ) &&
                               l_bImgOutOfSpace == false )
                     {
@@ -2401,7 +2359,7 @@ ReturnCode p10_ipl_customize (
     int mainSectionID = UNDEFINED_IPL_IMAGE_SID; // Represents the nested PPE image
     int subSectionID  = UNDEFINED_IPL_IMAGE_SID; // Represents .rings within nested image
     P9XipSection    iplImgSection;
-    //Suggested replacement name:
+    //Suggested replacement typedef name:
     //IplImgSection   iplImgSection; // Formerly: P9XipSection xipSection.
     uint32_t        l_inputImageSize;
     uint32_t        l_imageSizeWithoutRings;
@@ -3416,18 +3374,19 @@ ReturnCode p10_ipl_customize (
             continue;
         }
 
-        l_fapiRc = process_target_and_dynamic_rings( i_procTarget,
-                   true,//true means next arg is Base ringSection ptr
-                   baseRingSection,//Overloaded (false:RS4 ring in mid-Buf1,true:Base ringSection)
-                   dynamicRingSection,
-                   i_ringBuf1,//On return, contains Base ring overlaid with dynamic rings
-                   i_ringBuf2,
-                   i_ringBuf3,
-                   idxFeatureMap,
-                   ringIdFeatureVecMap,
-                   numberOfFeatures,
-                   ringId,
-                   attrDdLevel );
+        l_fapiRc = process_target_and_dynamic_rings(
+                       i_procTarget,
+                       true,//true means next arg is Base ringSection ptr
+                       baseRingSection,//Overloaded (false:RS4 ring in mid-Buf1,true:Base ringSection)
+                       dynamicRingSection,
+                       i_ringBuf1,//On return, contains Base ring overlaid with dynamic rings
+                       i_ringBuf2,
+                       i_ringBuf3,
+                       idxFeatureMap,
+                       ringIdFeatureVecMap,
+                       numberOfFeatures,
+                       ringId,
+                       attrDdLevel );
 
         FAPI_ASSERT( ((l_fapiRc == FAPI2_RC_SUCCESS) ||
                       ((uint32_t) l_fapiRc == RC_XIPC_DYNAMIC_NO_RINGS_FOUND)),

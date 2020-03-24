@@ -186,13 +186,19 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <rc>RC_XIPC_RING_IS_REDUNDANT</rc>
+      <description>Ring has redundant data (Not a bug. Info to caller.)</description>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
     <rc>RC_XIPC_RS4_REDUNDANT_ERROR</rc>
     <description>rs4_redundant() failed</description>
     <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>LOCAL_RC</ffdc>
     <ffdc>RING_ID</ffdc>
     <ffdc>CHIPLET_ID</ffdc>
     <ffdc>REDUNDANT</ffdc>
-    <ffdc>LOCAL_RC</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
