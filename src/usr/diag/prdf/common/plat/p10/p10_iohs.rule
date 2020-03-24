@@ -1,0 +1,988 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/p10/p10_iohs.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2020
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+chip p10_iohs
+{
+    name        "P10 IOHS target";
+    targettype  TYPE_IOHS;
+    sigoff      0x0000;
+    dump        DUMP_CONTENT_HW;
+    scomlen     64;
+
+ #############################################################################
+ #                                                                           #
+ #  ######                                                                   #
+ #  #     #  ######   ####     ###    ####    #####  ######  #####    ####   #
+ #  #     #  #       #    #     #    #          #    #       #    #  #       #
+ #  ######   #####   #          #     ####      #    #####   #    #   ####   #
+ #  #   #    #       #  ###     #         #     #    #       #####        #  #
+ #  #    #   #       #    #     #    #    #     #    #       #   #   #    #  #
+ #  #     #  ######   ####     ###    ####      #    ######  #    #   ####   #
+ #                                                                           #
+ #############################################################################
+
+    ############################################################################
+    # IOHS Chiplet Checkstop FIR
+    ############################################################################
+
+    register IOHS_CHIPLET_CS_FIR
+    {
+        name        "IOHS Chiplet Checkstop FIR";
+        scomaddr    0x18040000;
+        capture     group default;
+    };
+
+    register IOHS_CHIPLET_CS_FIR_MASK
+    {
+        name        "IOHS Chiplet Checkstop FIR MASK";
+        scomaddr    0x18040040;
+        capture     group default;
+    };
+
+    ############################################################################
+    # IOHS Chiplet Recoverable FIR
+    ############################################################################
+
+    register IOHS_CHIPLET_RE_FIR
+    {
+        name        "IOHS Chiplet Recoverable FIR";
+        scomaddr    0x18040001;
+        capture     group default;
+    };
+
+    register IOHS_CHIPLET_RE_FIR_MASK
+    {
+        name        "IOHS Chiplet Recoverable FIR MASK";
+        scomaddr    0x18040041;
+        capture     group default;
+    };
+
+    ############################################################################
+    # IOHS Chiplet Unit Checkstop FIR
+    ############################################################################
+
+    register IOHS_CHIPLET_UCS_FIR
+    {
+        name        "IOHS Chiplet Unit Checkstop FIR";
+        scomaddr    0x18040003;
+        capture     group default;
+    };
+
+    register IOHS_CHIPLET_UCS_FIR_MASK
+    {
+        name        "IOHS Chiplet Unit Checkstop FIR MASK";
+        scomaddr    0x18040043;
+        capture     group default;
+    };
+
+    ############################################################################
+    # IOHS Chiplet Host Attention FIR
+    ############################################################################
+
+    register IOHS_CHIPLET_HA_FIR
+    {
+        name        "IOHS Chiplet Host Attention FIR";
+        scomaddr    0x18040004;
+        capture     group default;
+    };
+
+    register IOHS_CHIPLET_HA_FIR_MASK
+    {
+        name        "IOHS Chiplet Host Attention FIR MASK";
+        scomaddr    0x18040044;
+        capture     group default;
+    };
+
+    ############################################################################
+    # P10 chip IOHS_LOCAL_FIR
+    ############################################################################
+
+    register IOHS_LOCAL_FIR
+    {
+        name        "P10 chip IOHS_LOCAL_FIR";
+        scomaddr    0x18040100;
+        reset       (&, 0x18040101);
+        mask        (|, 0x18040105);
+        capture     group default;
+    };
+
+    register IOHS_LOCAL_FIR_MASK
+    {
+        name        "P10 chip IOHS_LOCAL_FIR MASK";
+        scomaddr    0x18040103;
+        capture     group default;
+    };
+
+    register IOHS_LOCAL_FIR_ACT0
+    {
+        name        "P10 chip IOHS_LOCAL_FIR ACT0";
+        scomaddr    0x18040106;
+        capture     group default;
+        capture     req nonzero("IOHS_LOCAL_FIR");
+    };
+
+    register IOHS_LOCAL_FIR_ACT1
+    {
+        name        "P10 chip IOHS_LOCAL_FIR ACT1";
+        scomaddr    0x18040107;
+        capture     group default;
+        capture     req nonzero("IOHS_LOCAL_FIR");
+    };
+
+    register IOHS_LOCAL_FIR_ACT2
+    {
+        name        "P10 chip IOHS_LOCAL_FIR ACT2";
+        scomaddr    0x18040109;
+        capture     group default;
+        capture     req nonzero("IOHS_LOCAL_FIR");
+    };
+
+    ############################################################################
+    # P10 chip IOHS_DLP_FIR
+    ############################################################################
+
+    register IOHS_DLP_FIR
+    {
+        name        "P10 chip IOHS_DLP_FIR";
+        scomaddr    0x18011000;
+        reset       (&, 0x18011001);
+        mask        (|, 0x18011005);
+        capture     group default;
+    };
+
+    register IOHS_DLP_FIR_MASK
+    {
+        name        "P10 chip IOHS_DLP_FIR MASK";
+        scomaddr    0x18011003;
+        capture     group default;
+    };
+
+    register IOHS_DLP_FIR_ACT0
+    {
+        name        "P10 chip IOHS_DLP_FIR ACT0";
+        scomaddr    0x18011006;
+        capture     group default;
+        capture     req nonzero("IOHS_DLP_FIR");
+    };
+
+    register IOHS_DLP_FIR_ACT1
+    {
+        name        "P10 chip IOHS_DLP_FIR ACT1";
+        scomaddr    0x18011007;
+        capture     group default;
+        capture     req nonzero("IOHS_DLP_FIR");
+    };
+
+# Include registers not defined by the xml
+.include "p10_iohs_regs.rule";
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ # ####                                 #                                     #
+ # #   # #   # #    #####  ###      #  # #    ##  ##### ###  ###  #   #  ###  #
+ # #   # #   # #    #     #        #  #   #  #  #   #    #  #   # ##  # #     #
+ # ####  #   # #    ####   ###    #  ####### #      #    #  #   # # # #  ###  #
+ # #  #  #   # #    #         #  #   #     # #  #   #    #  #   # #  ##     # #
+ # #   #  ###  #### #####  ###  #    #     #  ##    #   ###  ###  #   #  ###  #
+ #                                                                            #
+ ##############################################################################
+
+################################################################################
+# IOHS Chiplet Checkstop FIR
+################################################################################
+
+rule rIOHS_CHIPLET_CS_FIR
+{
+  CHECK_STOP:
+    IOHS_CHIPLET_CS_FIR & ~IOHS_CHIPLET_CS_FIR_MASK & `0fffffffffffffff`;
+};
+
+group gIOHS_CHIPLET_CS_FIR attntype CHECK_STOP
+    filter singlebit
+{
+    /** IOHS_CHIPLET_CS_FIR[4]
+     *  Attention from IOHS_LOCAL_FIR
+     */
+    (rIOHS_CHIPLET_CS_FIR, bit(4)) ? analyze(gIOHS_LOCAL_FIR);
+
+    /** IOHS_CHIPLET_CS_FIR[5]
+     *  Attention from IOHS_DLP_FIR
+     */
+    (rIOHS_CHIPLET_CS_FIR, bit(5)) ? analyze(gIOHS_DLP_FIR);
+
+};
+
+################################################################################
+# IOHS Chiplet Recoverable FIR
+################################################################################
+
+rule rIOHS_CHIPLET_RE_FIR
+{
+  RECOVERABLE:
+    IOHS_CHIPLET_RE_FIR & ~IOHS_CHIPLET_RE_FIR_MASK & `0fffffffffffffff`;
+};
+
+group gIOHS_CHIPLET_RE_FIR attntype RECOVERABLE
+    filter singlebit
+{
+    /** IOHS_CHIPLET_RE_FIR[4]
+     *  Attention from IOHS_LOCAL_FIR
+     */
+    (rIOHS_CHIPLET_RE_FIR, bit(4)) ? analyze(gIOHS_LOCAL_FIR);
+
+    /** IOHS_CHIPLET_RE_FIR[5]
+     *  Attention from IOHS_DLP_FIR
+     */
+    (rIOHS_CHIPLET_RE_FIR, bit(5)) ? analyze(gIOHS_DLP_FIR);
+
+};
+
+################################################################################
+# IOHS Chiplet Unit Checkstop FIR
+################################################################################
+
+rule rIOHS_CHIPLET_UCS_FIR
+{
+  UNIT_CS:
+    IOHS_CHIPLET_UCS_FIR & ~IOHS_CHIPLET_UCS_FIR_MASK & `0fffffffffffffff`;
+};
+
+group gIOHS_CHIPLET_UCS_FIR attntype UNIT_CS
+    filter singlebit
+{
+    /** IOHS_CHIPLET_UCS_FIR[4]
+     *  Attention from IOHS_LOCAL_FIR
+     */
+    (rIOHS_CHIPLET_UCS_FIR, bit(4)) ? analyze(gIOHS_LOCAL_FIR);
+
+};
+
+################################################################################
+# IOHS Chiplet Host Attention FIR
+################################################################################
+
+rule rIOHS_CHIPLET_HA_FIR
+{
+  HOST_ATTN:
+    IOHS_CHIPLET_HA_FIR & ~IOHS_CHIPLET_HA_FIR_MASK & `0fffffffffffffff`;
+};
+
+group gIOHS_CHIPLET_HA_FIR attntype HOST_ATTN
+    filter singlebit
+{
+    /** IOHS_CHIPLET_HA_FIR[4]
+     *  Attention from IOHS_LOCAL_FIR
+     */
+    (rIOHS_CHIPLET_HA_FIR, bit(4)) ? analyze(gIOHS_LOCAL_FIR);
+
+};
+
+################################################################################
+# P10 chip IOHS_LOCAL_FIR
+################################################################################
+
+rule rIOHS_LOCAL_FIR
+{
+  CHECK_STOP:
+    IOHS_LOCAL_FIR & ~IOHS_LOCAL_FIR_MASK &  IOHS_LOCAL_FIR_ACT0 & ~IOHS_LOCAL_FIR_ACT1 & ~IOHS_LOCAL_FIR_ACT2;
+  HOST_ATTN:
+    IOHS_LOCAL_FIR & ~IOHS_LOCAL_FIR_MASK &  IOHS_LOCAL_FIR_ACT0 & ~IOHS_LOCAL_FIR_ACT1 &  IOHS_LOCAL_FIR_ACT2;
+  RECOVERABLE:
+    IOHS_LOCAL_FIR & ~IOHS_LOCAL_FIR_MASK &  IOHS_LOCAL_FIR_ACT0 &  IOHS_LOCAL_FIR_ACT1 & ~IOHS_LOCAL_FIR_ACT2;
+  UNIT_CS:
+    IOHS_LOCAL_FIR & ~IOHS_LOCAL_FIR_MASK & ~IOHS_LOCAL_FIR_ACT0 &  IOHS_LOCAL_FIR_ACT1 & ~IOHS_LOCAL_FIR_ACT2;
+};
+
+group gIOHS_LOCAL_FIR
+    filter singlebit,
+           cs_root_cause
+{
+    /** IOHS_LOCAL_FIR[0]
+     *  CFIR - Parity or PCB access error
+     */
+    (rIOHS_LOCAL_FIR, bit(0)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[1]
+     *  CPLT_CTRL - PCB access error
+     */
+    (rIOHS_LOCAL_FIR, bit(1)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[2]
+     *  CC - PCB access error - read and clear nn03000F
+     */
+    (rIOHS_LOCAL_FIR, bit(2)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[3]
+     *  CC - Clock Control Error - read and clear nn03000F
+     */
+    (rIOHS_LOCAL_FIR, bit(3)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[4]
+     *  PSC - PSCOM access error - read and clear nn01001
+     */
+    (rIOHS_LOCAL_FIR, bit(4)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[5]
+     *  PSC - internal or ring interface error - read and 
+     */
+    (rIOHS_LOCAL_FIR, bit(5)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[6]
+     *  THERM - pwr_comp_err, skitter_comp_err, scan_init_
+     */
+    (rIOHS_LOCAL_FIR, bit(6)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[7]
+     *  THERM - pcb error
+     */
+    (rIOHS_LOCAL_FIR, bit(7)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[8]
+     *  THERMTRIP - Critical temperature indicator
+     */
+    (rIOHS_LOCAL_FIR, bit(8)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[9]
+     *  THERMTRIP - Fatal temperature indicator
+     */
+    (rIOHS_LOCAL_FIR, bit(9)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[10]
+     *  VOLTTRIP - Voltage sense error
+     */
+    (rIOHS_LOCAL_FIR, bit(10)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[11]
+     *  DBG - scom parity fail
+     */
+    (rIOHS_LOCAL_FIR, bit(11)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[12]
+     *  reserved
+     */
+    (rIOHS_LOCAL_FIR, bit(12)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[13]
+     *  reserved
+     */
+    (rIOHS_LOCAL_FIR, bit(13)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[14]
+     *  reserved
+     */
+    (rIOHS_LOCAL_FIR, bit(14)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[15]
+     *  reserved
+     */
+    (rIOHS_LOCAL_FIR, bit(15)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[16]
+     *  reserved
+     */
+    (rIOHS_LOCAL_FIR, bit(16)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[17]
+     *  reserved
+     */
+    (rIOHS_LOCAL_FIR, bit(17)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[18]
+     *  reserved
+     */
+    (rIOHS_LOCAL_FIR, bit(18)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[19]
+     *  reserved
+     */
+    (rIOHS_LOCAL_FIR, bit(19)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[20]
+     *  Trace00 - scom parity err
+     */
+    (rIOHS_LOCAL_FIR, bit(20)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[21]
+     *  Trace01 - scom parity err - Unused in Axon,PCI
+     */
+    (rIOHS_LOCAL_FIR, bit(21)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[22]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(22)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[23]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(23)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[24]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(24)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[25]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(25)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[26]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(26)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[27]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(27)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[28]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(28)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[29]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(29)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[30]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(30)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[31]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(31)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[32]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(32)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[33]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(33)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[34]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(34)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[35]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(35)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[36]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(36)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[37]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(37)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[38]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(38)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[39]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(39)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[40]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(40)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[41]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(41)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[42]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(42)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[43]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(43)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[44]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(44)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[45]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(45)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[46]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(46)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[47]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(47)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[48]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(48)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[49]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(49)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[50]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(50)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[51]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(51)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[52]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(52)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[53]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(53)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[54]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(54)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[55]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(55)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[56]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(56)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[57]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(57)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[58]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(58)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[59]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(59)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[60]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(60)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[61]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(61)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[62]
+     *  unused
+     */
+    (rIOHS_LOCAL_FIR, bit(62)) ? defaultMaskedError;
+
+    /** IOHS_LOCAL_FIR[63]
+     *  ext_local_xstop
+     */
+    (rIOHS_LOCAL_FIR, bit(63)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# P10 chip IOHS_DLP_FIR
+################################################################################
+
+rule rIOHS_DLP_FIR
+{
+  CHECK_STOP:
+    IOHS_DLP_FIR & ~IOHS_DLP_FIR_MASK & ~IOHS_DLP_FIR_ACT0 & ~IOHS_DLP_FIR_ACT1;
+  RECOVERABLE:
+    IOHS_DLP_FIR & ~IOHS_DLP_FIR_MASK & ~IOHS_DLP_FIR_ACT0 &  IOHS_DLP_FIR_ACT1;
+};
+
+group gIOHS_DLP_FIR
+    filter singlebit,
+           cs_root_cause
+{
+    /** IOHS_DLP_FIR[0]
+     *  OLL link0 trained
+     */
+    (rIOHS_DLP_FIR, bit(0)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[1]
+     *  OLL link1 trained
+     */
+    (rIOHS_DLP_FIR, bit(1)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[2]
+     *  link0 op irq
+     */
+    (rIOHS_DLP_FIR, bit(2)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[3]
+     *  link1 op irq
+     */
+    (rIOHS_DLP_FIR, bit(3)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[4]
+     *  link0 replay threshold
+     */
+    (rIOHS_DLP_FIR, bit(4)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[5]
+     *  link1 replay threshold
+     */
+    (rIOHS_DLP_FIR, bit(5)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[6]
+     *  link0 crc error
+     */
+    (rIOHS_DLP_FIR, bit(6)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[7]
+     *  link1 crc error
+     */
+    (rIOHS_DLP_FIR, bit(7)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[8]
+     *  link0 nak received
+     */
+    (rIOHS_DLP_FIR, bit(8)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[9]
+     *  link1 nak received
+     */
+    (rIOHS_DLP_FIR, bit(9)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[10]
+     *  link0 replay buffer full
+     */
+    (rIOHS_DLP_FIR, bit(10)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[11]
+     *  link1 replay buffer full
+     */
+    (rIOHS_DLP_FIR, bit(11)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[12]
+     *  link0 sl ecc threshold
+     */
+    (rIOHS_DLP_FIR, bit(12)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[13]
+     *  link1 sl ecc threshold
+     */
+    (rIOHS_DLP_FIR, bit(13)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[14]
+     *  link0 sl ecc correctable
+     */
+    (rIOHS_DLP_FIR, bit(14)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[15]
+     *  link1 sl ecc correctable
+     */
+    (rIOHS_DLP_FIR, bit(15)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[16]
+     *  link0 sl ecc ue
+     */
+    (rIOHS_DLP_FIR, bit(16)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[17]
+     *  link1 sl ecc ue
+     */
+    (rIOHS_DLP_FIR, bit(17)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[18]
+     *  link0 retrain threshold
+     */
+    (rIOHS_DLP_FIR, bit(18)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[19]
+     *  link1 retrain threshold
+     */
+    (rIOHS_DLP_FIR, bit(19)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[20]
+     *  link0 loss block align
+     */
+    (rIOHS_DLP_FIR, bit(20)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[21]
+     *  link1 loss block align
+     */
+    (rIOHS_DLP_FIR, bit(21)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[22]
+     *  link0 invalid block
+     */
+    (rIOHS_DLP_FIR, bit(22)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[23]
+     *  link1 invalid block
+     */
+    (rIOHS_DLP_FIR, bit(23)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[24]
+     *  link0 deskew error
+     */
+    (rIOHS_DLP_FIR, bit(24)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[25]
+     *  link1 deskew error
+     */
+    (rIOHS_DLP_FIR, bit(25)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[26]
+     *  link0 deskew overflow
+     */
+    (rIOHS_DLP_FIR, bit(26)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[27]
+     *  link1 deskew overflow
+     */
+    (rIOHS_DLP_FIR, bit(27)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[28]
+     *  link0 sw retrain
+     */
+    (rIOHS_DLP_FIR, bit(28)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[29]
+     *  link1 sw retrain
+     */
+    (rIOHS_DLP_FIR, bit(29)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[30]
+     *  link0 ack queue overflow
+     */
+    (rIOHS_DLP_FIR, bit(30)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[31]
+     *  link1 ack queue overflow
+     */
+    (rIOHS_DLP_FIR, bit(31)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[32]
+     *  link0 ack queue underflow
+     */
+    (rIOHS_DLP_FIR, bit(32)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[33]
+     *  link1 ack queue underflow
+     */
+    (rIOHS_DLP_FIR, bit(33)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[34]
+     *  link0 num replay
+     */
+    (rIOHS_DLP_FIR, bit(34)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[35]
+     *  link1 num replay
+     */
+    (rIOHS_DLP_FIR, bit(35)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[36]
+     *  link0 training set received
+     */
+    (rIOHS_DLP_FIR, bit(36)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[37]
+     *  link1 training set received
+     */
+    (rIOHS_DLP_FIR, bit(37)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[38]
+     *  link0 prbs select error
+     */
+    (rIOHS_DLP_FIR, bit(38)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[39]
+     *  link1 prbs select error
+     */
+    (rIOHS_DLP_FIR, bit(39)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[40]
+     *  link0 tcomplete bad
+     */
+    (rIOHS_DLP_FIR, bit(40)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[41]
+     *  link1 tcomplete bad
+     */
+    (rIOHS_DLP_FIR, bit(41)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[42]
+     *  link0 no spare lane available
+     */
+    (rIOHS_DLP_FIR, bit(42)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[43]
+     *  link1 no spare lane available
+     */
+    (rIOHS_DLP_FIR, bit(43)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[44]
+     *  link0 spare done
+     */
+    (rIOHS_DLP_FIR, bit(44)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[45]
+     *  link1 spare done
+     */
+    (rIOHS_DLP_FIR, bit(45)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[46]
+     *  link0 too many crc errors
+     */
+    (rIOHS_DLP_FIR, bit(46)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[47]
+     *  link1 too many crc errors
+     */
+    (rIOHS_DLP_FIR, bit(47)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[48]
+     *  link0 npu/dlx error
+     */
+    (rIOHS_DLP_FIR, bit(48)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[49]
+     *  link1 npu/dlx error
+     */
+    (rIOHS_DLP_FIR, bit(49)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[50]
+     *  link0 osc switch
+     */
+    (rIOHS_DLP_FIR, bit(50)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[51]
+     *  link1 osc switch
+     */
+    (rIOHS_DLP_FIR, bit(51)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[52]
+     *  link0 correctable array error
+     */
+    (rIOHS_DLP_FIR, bit(52)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[53]
+     *  link1 correctable array error
+     */
+    (rIOHS_DLP_FIR, bit(53)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[54]
+     *  link0 uncorrectable array error
+     */
+    (rIOHS_DLP_FIR, bit(54)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[55]
+     *  link1 uncorrectable array error
+     */
+    (rIOHS_DLP_FIR, bit(55)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[56]
+     *  link0 training failed
+     */
+    (rIOHS_DLP_FIR, bit(56)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[57]
+     *  link1 training failed
+     */
+    (rIOHS_DLP_FIR, bit(57)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[58]
+     *  link0 unrecoverable error
+     */
+    (rIOHS_DLP_FIR, bit(58)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[59]
+     *  link1 unrecoverable error
+     */
+    (rIOHS_DLP_FIR, bit(59)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[60]
+     *  link0 internal error
+     */
+    (rIOHS_DLP_FIR, bit(60)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[61]
+     *  link1 internal error
+     */
+    (rIOHS_DLP_FIR, bit(61)) ? defaultMaskedError;
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ #    #                                  ###                                  #
+ #   # #    ##  ##### ###  ###  #   #   #   # #     #    ###   ###  ###  ###  #
+ #  #   #  #  #   #    #  #   # ##  #   #     #    # #  #     #     #   #     #
+ # ####### #      #    #  #   # # # #   #     #   #####  ###   ###  ##   ###  #
+ # #     # #  #   #    #  #   # #  ##   #   # #   #   #     #     # #       # #
+ # #     #  ##    #   ###  ###  #   #    ###  ### #   #  ###   ###  ###  ###  #
+ #                                                                            #
+ ##############################################################################
+
+# Include the actions defined for this target
+.include "p10_common_actions.rule";
+.include "p10_iohs_actions.rule";
+

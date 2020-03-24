@@ -1,0 +1,460 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/p10/p10_omic.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2020
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+chip p10_omic
+{
+    name        "P10 OMIC target";
+    targettype  TYPE_OMIC;
+    sigoff      0x0000;
+    dump        DUMP_CONTENT_HW;
+    scomlen     64;
+
+ #############################################################################
+ #                                                                           #
+ #  ######                                                                   #
+ #  #     #  ######   ####     ###    ####    #####  ######  #####    ####   #
+ #  #     #  #       #    #     #    #          #    #       #    #  #       #
+ #  ######   #####   #          #     ####      #    #####   #    #   ####   #
+ #  #   #    #       #  ###     #         #     #    #       #####        #  #
+ #  #    #   #       #    #     #    #    #     #    #       #   #   #    #  #
+ #  #     #  ######   ####     ###    ####      #    ######  #    #   ####   #
+ #                                                                           #
+ #############################################################################
+
+    ############################################################################
+    # P10 chip MC_OMI_DL_FIR
+    ############################################################################
+
+    register MC_OMI_DL_FIR
+    {
+        name        "P10 chip MC_OMI_DL_FIR";
+        scomaddr    0x0c011400;
+        reset       (&, 0x0c011401);
+        mask        (|, 0x0c011405);
+        capture     group default;
+    };
+
+    register MC_OMI_DL_FIR_MASK
+    {
+        name        "P10 chip MC_OMI_DL_FIR MASK";
+        scomaddr    0x0c011403;
+        capture     group default;
+    };
+
+    register MC_OMI_DL_FIR_ACT0
+    {
+        name        "P10 chip MC_OMI_DL_FIR ACT0";
+        scomaddr    0x0c011406;
+        capture     group default;
+        capture     req nonzero("MC_OMI_DL_FIR");
+    };
+
+    register MC_OMI_DL_FIR_ACT1
+    {
+        name        "P10 chip MC_OMI_DL_FIR ACT1";
+        scomaddr    0x0c011407;
+        capture     group default;
+        capture     req nonzero("MC_OMI_DL_FIR");
+    };
+
+# Include registers not defined by the xml
+.include "p10_omic_regs.rule";
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ # ####                                 #                                     #
+ # #   # #   # #    #####  ###      #  # #    ##  ##### ###  ###  #   #  ###  #
+ # #   # #   # #    #     #        #  #   #  #  #   #    #  #   # ##  # #     #
+ # ####  #   # #    ####   ###    #  ####### #      #    #  #   # # # #  ###  #
+ # #  #  #   # #    #         #  #   #     # #  #   #    #  #   # #  ##     # #
+ # #   #  ###  #### #####  ###  #    #     #  ##    #   ###  ###  #   #  ###  #
+ #                                                                            #
+ ##############################################################################
+
+################################################################################
+# Summary for OMIC
+################################################################################
+
+rule rOMIC
+{
+  CHECK_STOP:
+    summary( 0, rMC_OMI_DL_FIR );
+
+  RECOVERABLE:
+    summary( 0, rMC_OMI_DL_FIR );
+
+};
+
+group gOMIC attntype CHECK_STOP, RECOVERABLE
+    filter singlebit
+{
+    (rOMIC, bit(0)) ? analyze(gMC_OMI_DL_FIR);
+};
+
+################################################################################
+# P10 chip MC_OMI_DL_FIR
+################################################################################
+
+rule rMC_OMI_DL_FIR
+{
+  CHECK_STOP:
+    MC_OMI_DL_FIR & ~MC_OMI_DL_FIR_MASK & ~MC_OMI_DL_FIR_ACT0 & ~MC_OMI_DL_FIR_ACT1;
+  RECOVERABLE:
+    MC_OMI_DL_FIR & ~MC_OMI_DL_FIR_MASK & ~MC_OMI_DL_FIR_ACT0 &  MC_OMI_DL_FIR_ACT1;
+};
+
+group gMC_OMI_DL_FIR
+    filter singlebit,
+           cs_root_cause
+{
+    /** MC_OMI_DL_FIR[0]
+     *  OMI-DL0 fatal_error - see error hold register(54 t
+     */
+    (rMC_OMI_DL_FIR, bit(0)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[1]
+     *  OMI-DL0 UE on data flit - see error hold register(
+     */
+    (rMC_OMI_DL_FIR, bit(1)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[2]
+     *  OMI-DL0 CE on TL flit - see error hold register(48
+     */
+    (rMC_OMI_DL_FIR, bit(2)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[3]
+     *  OMI-DL0 detected a CRC error
+     */
+    (rMC_OMI_DL_FIR, bit(3)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[4]
+     *  OMI-DL0 received a nack
+     */
+    (rMC_OMI_DL_FIR, bit(4)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[5]
+     *  OMI-DL0 running in degraded mode - see error hold 
+     */
+    (rMC_OMI_DL_FIR, bit(5)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[6]
+     *  OMI-DL0 parity error detection on a lane - see err
+     */
+    (rMC_OMI_DL_FIR, bit(6)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[7]
+     *  OMI-DL0 retrained due to no forward progress
+     */
+    (rMC_OMI_DL_FIR, bit(7)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[8]
+     *  OMI-DL0 remote side initiated a retrain
+     */
+    (rMC_OMI_DL_FIR, bit(8)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[9]
+     *  OMI-DL0 retrain due to internal error or software 
+     */
+    (rMC_OMI_DL_FIR, bit(9)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[10]
+     *  OMI-DL0 threshold reached - see error hold registe
+     */
+    (rMC_OMI_DL_FIR, bit(10)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[11]
+     *  OMI-DL0 trained
+     */
+    (rMC_OMI_DL_FIR, bit(11)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[12]
+     *  OMI-DL0 endpoint error bit 0
+     */
+    (rMC_OMI_DL_FIR, bit(12)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[13]
+     *  OMI-DL0 endpoint error bit 1
+     */
+    (rMC_OMI_DL_FIR, bit(13)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[14]
+     *  OMI-DL0 endpoint error bit 2
+     */
+    (rMC_OMI_DL_FIR, bit(14)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[15]
+     *  OMI-DL0 endpoint error bit 3
+     */
+    (rMC_OMI_DL_FIR, bit(15)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[16]
+     *  OMI-DL0 endpoint error bit 4
+     */
+    (rMC_OMI_DL_FIR, bit(16)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[17]
+     *  OMI-DL0 endpoint error bit 5
+     */
+    (rMC_OMI_DL_FIR, bit(17)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[18]
+     *  OMI-DL0 endpoint error bit 6
+     */
+    (rMC_OMI_DL_FIR, bit(18)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[19]
+     *  OMI-DL0 endpoint error bit 7
+     */
+    (rMC_OMI_DL_FIR, bit(19)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[20]
+     *  OMI-DL1 fatal_error - see error hold register(54 t
+     */
+    (rMC_OMI_DL_FIR, bit(20)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[21]
+     *  OMI-DL1 UE on data flit - see error hold register(
+     */
+    (rMC_OMI_DL_FIR, bit(21)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[22]
+     *  OMI-DL1 CE on TL flit - see error hold register(48
+     */
+    (rMC_OMI_DL_FIR, bit(22)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[23]
+     *  OMI-DL1 detected a CRC error
+     */
+    (rMC_OMI_DL_FIR, bit(23)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[24]
+     *  OMI-DL1 received a nack
+     */
+    (rMC_OMI_DL_FIR, bit(24)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[25]
+     *  OMI-DL1 running in degraded mode - see error hold 
+     */
+    (rMC_OMI_DL_FIR, bit(25)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[26]
+     *  OMI-DL1 parity error detection on a lane - see err
+     */
+    (rMC_OMI_DL_FIR, bit(26)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[27]
+     *  OMI-DL1 retrained due to no forward progress
+     */
+    (rMC_OMI_DL_FIR, bit(27)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[28]
+     *  OMI-DL1 remote side initiated a retrain
+     */
+    (rMC_OMI_DL_FIR, bit(28)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[29]
+     *  OMI-DL1 retrain due to internal error or software 
+     */
+    (rMC_OMI_DL_FIR, bit(29)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[30]
+     *  OMI-DL1 threshold reached - see error hold registe
+     */
+    (rMC_OMI_DL_FIR, bit(30)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[31]
+     *  OMI-DL1 trained
+     */
+    (rMC_OMI_DL_FIR, bit(31)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[32]
+     *  OMI-DL1 endpoint error bit 0
+     */
+    (rMC_OMI_DL_FIR, bit(32)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[33]
+     *  OMI-DL1 endpoint error bit 1
+     */
+    (rMC_OMI_DL_FIR, bit(33)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[34]
+     *  OMI-DL1 endpoint error bit 2
+     */
+    (rMC_OMI_DL_FIR, bit(34)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[35]
+     *  OMI-DL1 endpoint error bit 3
+     */
+    (rMC_OMI_DL_FIR, bit(35)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[36]
+     *  OMI-DL1 endpoint error bit 4
+     */
+    (rMC_OMI_DL_FIR, bit(36)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[37]
+     *  OMI-DL1 endpoint error bit 5
+     */
+    (rMC_OMI_DL_FIR, bit(37)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[38]
+     *  OMI-DL1 endpoint error bit 6
+     */
+    (rMC_OMI_DL_FIR, bit(38)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[39]
+     *  OMI-DL1 endpoint error bit 7
+     */
+    (rMC_OMI_DL_FIR, bit(39)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[40]
+     *  OMI-DL2 unused
+     */
+    (rMC_OMI_DL_FIR, bit(40)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[41]
+     *  OMI-DL2 unused
+     */
+    (rMC_OMI_DL_FIR, bit(41)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[42]
+     *  OMI-DL2 unused
+     */
+    (rMC_OMI_DL_FIR, bit(42)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[43]
+     *  OMI-DL2 unused
+     */
+    (rMC_OMI_DL_FIR, bit(43)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[44]
+     *  OMI-DL2 unused
+     */
+    (rMC_OMI_DL_FIR, bit(44)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[45]
+     *  OMI-DL2 unused
+     */
+    (rMC_OMI_DL_FIR, bit(45)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[46]
+     *  OMI-DL2 unused
+     */
+    (rMC_OMI_DL_FIR, bit(46)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[47]
+     *  OMI-DL2 unused
+     */
+    (rMC_OMI_DL_FIR, bit(47)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[48]
+     *  OMI-DL2 unused
+     */
+    (rMC_OMI_DL_FIR, bit(48)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[49]
+     *  OMI-DL2 unused
+     */
+    (rMC_OMI_DL_FIR, bit(49)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[50]
+     *  OMI-DL2 unused
+     */
+    (rMC_OMI_DL_FIR, bit(50)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[51]
+     *  OMI-DL2 unused
+     */
+    (rMC_OMI_DL_FIR, bit(51)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[52]
+     *  OMI-DL2 unused
+     */
+    (rMC_OMI_DL_FIR, bit(52)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[53]
+     *  OMI-DL2 unused
+     */
+    (rMC_OMI_DL_FIR, bit(53)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[54]
+     *  OMI-DL2 unused
+     */
+    (rMC_OMI_DL_FIR, bit(54)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[55]
+     *  OMI-DL2 unused
+     */
+    (rMC_OMI_DL_FIR, bit(55)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[56]
+     *  OMI-DL2 unused
+     */
+    (rMC_OMI_DL_FIR, bit(56)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[57]
+     *  OMI-DL2 unused
+     */
+    (rMC_OMI_DL_FIR, bit(57)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[58]
+     *  OMI-DL2 unused
+     */
+    (rMC_OMI_DL_FIR, bit(58)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[59]
+     *  OMI-DL2 unused
+     */
+    (rMC_OMI_DL_FIR, bit(59)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[60]
+     *  performance monitor wrapped
+     */
+    (rMC_OMI_DL_FIR, bit(60)) ? defaultMaskedError;
+
+    /** MC_OMI_DL_FIR[61]
+     *  OMI-DL common FIR Register
+     */
+    (rMC_OMI_DL_FIR, bit(61)) ? defaultMaskedError;
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ #    #                                  ###                                  #
+ #   # #    ##  ##### ###  ###  #   #   #   # #     #    ###   ###  ###  ###  #
+ #  #   #  #  #   #    #  #   # ##  #   #     #    # #  #     #     #   #     #
+ # ####### #      #    #  #   # # # #   #     #   #####  ###   ###  ##   ###  #
+ # #     # #  #   #    #  #   # #  ##   #   # #   #   #     #     # #       # #
+ # #     #  ##    #   ###  ###  #   #    ###  ### #   #  ###   ###  ###  ###  #
+ #                                                                            #
+ ##############################################################################
+
+# Include the actions defined for this target
+.include "p10_common_actions.rule";
+.include "p10_omic_actions.rule";
+

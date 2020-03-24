@@ -1,0 +1,72 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/p10/p10_proc_actions.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2020
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+###############################################################################
+# Analyze connected
+###############################################################################
+
+actionclass analyzeConnectedEQ0   { analyze(connected(TYPE_EQ,   0)); };
+actionclass analyzeConnectedEQ1   { analyze(connected(TYPE_EQ,   1)); };
+actionclass analyzeConnectedEQ2   { analyze(connected(TYPE_EQ,   2)); };
+actionclass analyzeConnectedEQ3   { analyze(connected(TYPE_EQ,   3)); };
+actionclass analyzeConnectedEQ4   { analyze(connected(TYPE_EQ,   4)); };
+actionclass analyzeConnectedEQ5   { analyze(connected(TYPE_EQ,   5)); };
+actionclass analyzeConnectedEQ6   { analyze(connected(TYPE_EQ,   6)); };
+actionclass analyzeConnectedEQ7   { analyze(connected(TYPE_EQ,   7)); };
+actionclass analyzeConnectedIOHS0 { analyze(connected(TYPE_IOHS, 0)); };
+actionclass analyzeConnectedIOHS1 { analyze(connected(TYPE_IOHS, 1)); };
+actionclass analyzeConnectedIOHS2 { analyze(connected(TYPE_IOHS, 2)); };
+actionclass analyzeConnectedIOHS3 { analyze(connected(TYPE_IOHS, 3)); };
+actionclass analyzeConnectedIOHS4 { analyze(connected(TYPE_IOHS, 4)); };
+actionclass analyzeConnectedIOHS5 { analyze(connected(TYPE_IOHS, 5)); };
+actionclass analyzeConnectedIOHS6 { analyze(connected(TYPE_IOHS, 6)); };
+actionclass analyzeConnectedIOHS7 { analyze(connected(TYPE_IOHS, 7)); };
+actionclass analyzeConnectedMC0   { analyze(connected(TYPE_MC,   0)); };
+actionclass analyzeConnectedMC1   { analyze(connected(TYPE_MC,   1)); };
+actionclass analyzeConnectedMC2   { analyze(connected(TYPE_MC,   2)); };
+actionclass analyzeConnectedMC3   { analyze(connected(TYPE_MC,   3)); };
+actionclass analyzeConnectedNMMU0 { analyze(connected(TYPE_NMMU, 0)); };
+actionclass analyzeConnectedNMMU1 { analyze(connected(TYPE_NMMU, 1)); };
+actionclass analyzeConnectedPAU0  { analyze(connected(TYPE_PAU,  0)); };
+#actionclass analyzeConnectedPAU1  { analyze(connected(TYPE_PAU,  1)); };
+#actionclass analyzeConnectedPAU2  { analyze(connected(TYPE_PAU,  2)); };
+actionclass analyzeConnectedPAU3  { analyze(connected(TYPE_PAU,  3)); };
+actionclass analyzeConnectedPAU4  { analyze(connected(TYPE_PAU,  4)); };
+actionclass analyzeConnectedPAU5  { analyze(connected(TYPE_PAU,  5)); };
+actionclass analyzeConnectedPAU6  { analyze(connected(TYPE_PAU,  6)); };
+actionclass analyzeConnectedPAU7  { analyze(connected(TYPE_PAU,  7)); };
+actionclass analyzeConnectedPAUC0 { analyze(connected(TYPE_PAUC, 0)); };
+actionclass analyzeConnectedPAUC1 { analyze(connected(TYPE_PAUC, 1)); };
+actionclass analyzeConnectedPAUC2 { analyze(connected(TYPE_PAUC, 2)); };
+actionclass analyzeConnectedPAUC3 { analyze(connected(TYPE_PAUC, 3)); };
+actionclass analyzeConnectedPEC0  { analyze(connected(TYPE_PEC,  0)); };
+actionclass analyzeConnectedPEC1  { analyze(connected(TYPE_PEC,  1)); };
+actionclass analyzeConnectedPHB0  { analyze(connected(TYPE_PHB,  0)); };
+actionclass analyzeConnectedPHB1  { analyze(connected(TYPE_PHB,  1)); };
+actionclass analyzeConnectedPHB2  { analyze(connected(TYPE_PHB,  2)); };
+actionclass analyzeConnectedPHB3  { analyze(connected(TYPE_PHB,  3)); };
+actionclass analyzeConnectedPHB4  { analyze(connected(TYPE_PHB,  4)); };
+actionclass analyzeConnectedPHB5  { analyze(connected(TYPE_PHB,  5)); };
+

@@ -1,0 +1,754 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/p10/p10_phb.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2020
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+chip p10_phb
+{
+    name        "P10 PHB target";
+    targettype  TYPE_PHB;
+    sigoff      0x0000;
+    dump        DUMP_CONTENT_HW;
+    scomlen     64;
+
+ #############################################################################
+ #                                                                           #
+ #  ######                                                                   #
+ #  #     #  ######   ####     ###    ####    #####  ######  #####    ####   #
+ #  #     #  #       #    #     #    #          #    #       #    #  #       #
+ #  ######   #####   #          #     ####      #    #####   #    #   ####   #
+ #  #   #    #       #  ###     #         #     #    #       #####        #  #
+ #  #    #   #       #    #     #    #    #     #    #       #   #   #    #  #
+ #  #     #  ######   ####     ###    ####      #    ######  #    #   ####   #
+ #                                                                           #
+ #############################################################################
+
+    ############################################################################
+    # P10 chip PCI_NEST_FIR
+    ############################################################################
+
+    register PCI_NEST_FIR
+    {
+        name        "P10 chip PCI_NEST_FIR";
+        scomaddr    0x02011840;
+        reset       (&, 0x02011841);
+        mask        (|, 0x02011845);
+        capture     group default;
+    };
+
+    register PCI_NEST_FIR_MASK
+    {
+        name        "P10 chip PCI_NEST_FIR MASK";
+        scomaddr    0x02011843;
+        capture     group default;
+    };
+
+    register PCI_NEST_FIR_ACT0
+    {
+        name        "P10 chip PCI_NEST_FIR ACT0";
+        scomaddr    0x02011846;
+        capture     group default;
+        capture     req nonzero("PCI_NEST_FIR");
+    };
+
+    register PCI_NEST_FIR_ACT1
+    {
+        name        "P10 chip PCI_NEST_FIR ACT1";
+        scomaddr    0x02011847;
+        capture     group default;
+        capture     req nonzero("PCI_NEST_FIR");
+    };
+
+    ############################################################################
+    # P10 chip PCI_FIR
+    ############################################################################
+
+    register PCI_FIR
+    {
+        name        "P10 chip PCI_FIR";
+        scomaddr    0x08010840;
+        reset       (&, 0x08010841);
+        mask        (|, 0x08010845);
+        capture     group default;
+    };
+
+    register PCI_FIR_MASK
+    {
+        name        "P10 chip PCI_FIR MASK";
+        scomaddr    0x08010843;
+        capture     group default;
+    };
+
+    register PCI_FIR_ACT0
+    {
+        name        "P10 chip PCI_FIR ACT0";
+        scomaddr    0x08010846;
+        capture     group default;
+        capture     req nonzero("PCI_FIR");
+    };
+
+    register PCI_FIR_ACT1
+    {
+        name        "P10 chip PCI_FIR ACT1";
+        scomaddr    0x08010847;
+        capture     group default;
+        capture     req nonzero("PCI_FIR");
+    };
+
+    ############################################################################
+    # P10 chip PCI_ETU_FIR
+    ############################################################################
+
+    register PCI_ETU_FIR
+    {
+        name        "P10 chip PCI_ETU_FIR";
+        scomaddr    0x08010908;
+        reset       (&, 0x08010909);
+        mask        (|, 0x0801090d);
+        capture     group default;
+    };
+
+    register PCI_ETU_FIR_MASK
+    {
+        name        "P10 chip PCI_ETU_FIR MASK";
+        scomaddr    0x0801090b;
+        capture     group default;
+    };
+
+    register PCI_ETU_FIR_ACT0
+    {
+        name        "P10 chip PCI_ETU_FIR ACT0";
+        scomaddr    0x0801090e;
+        capture     group default;
+        capture     req nonzero("PCI_ETU_FIR");
+    };
+
+    register PCI_ETU_FIR_ACT1
+    {
+        name        "P10 chip PCI_ETU_FIR ACT1";
+        scomaddr    0x0801090f;
+        capture     group default;
+        capture     req nonzero("PCI_ETU_FIR");
+    };
+
+# Include registers not defined by the xml
+.include "p10_phb_regs.rule";
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ # ####                                 #                                     #
+ # #   # #   # #    #####  ###      #  # #    ##  ##### ###  ###  #   #  ###  #
+ # #   # #   # #    #     #        #  #   #  #  #   #    #  #   # ##  # #     #
+ # ####  #   # #    ####   ###    #  ####### #      #    #  #   # # # #  ###  #
+ # #  #  #   # #    #         #  #   #     # #  #   #    #  #   # #  ##     # #
+ # #   #  ###  #### #####  ###  #    #     #  ##    #   ###  ###  #   #  ###  #
+ #                                                                            #
+ ##############################################################################
+
+################################################################################
+# Summary for PHB
+################################################################################
+
+rule rPHB
+{
+  CHECK_STOP:
+    summary( 0, rPCI_NEST_FIR ) |
+    summary( 1, rPCI_FIR ) |
+    summary( 2, rPCI_ETU_FIR );
+
+  RECOVERABLE:
+    summary( 0, rPCI_NEST_FIR ) |
+    summary( 1, rPCI_FIR ) |
+    summary( 2, rPCI_ETU_FIR );
+
+};
+
+group gPHB attntype CHECK_STOP, RECOVERABLE
+    filter singlebit
+{
+    (rPHB, bit(0)) ? analyze(gPCI_NEST_FIR);
+    (rPHB, bit(1)) ? analyze(gPCI_FIR);
+    (rPHB, bit(2)) ? analyze(gPCI_ETU_FIR);
+};
+
+################################################################################
+# P10 chip PCI_NEST_FIR
+################################################################################
+
+rule rPCI_NEST_FIR
+{
+  CHECK_STOP:
+    PCI_NEST_FIR & ~PCI_NEST_FIR_MASK & ~PCI_NEST_FIR_ACT0 & ~PCI_NEST_FIR_ACT1;
+  RECOVERABLE:
+    PCI_NEST_FIR & ~PCI_NEST_FIR_MASK & ~PCI_NEST_FIR_ACT0 &  PCI_NEST_FIR_ACT1;
+};
+
+group gPCI_NEST_FIR
+    filter singlebit,
+           cs_root_cause
+{
+    /** PCI_NEST_FIR[0]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(0)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[1]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(1)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[2]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(2)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[3]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(3)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[4]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(4)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[5]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(5)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[6]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(6)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[7]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(7)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[8]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(8)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[9]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(9)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[10]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(10)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[11]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(11)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[12]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(12)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[13]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(13)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[14]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(14)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[15]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(15)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[16]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(16)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[17]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(17)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[18]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(18)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[19]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(19)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[20]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(20)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[21]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(21)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[22]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(22)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[23]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(23)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[24]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(24)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[25]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(25)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[26]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(26)) ? defaultMaskedError;
+
+    /** PCI_NEST_FIR[27]
+     *  PCI Nest FIR NFIR
+     */
+    (rPCI_NEST_FIR, bit(27)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# P10 chip PCI_FIR
+################################################################################
+
+rule rPCI_FIR
+{
+  CHECK_STOP:
+    PCI_FIR & ~PCI_FIR_MASK & ~PCI_FIR_ACT0 & ~PCI_FIR_ACT1;
+  RECOVERABLE:
+    PCI_FIR & ~PCI_FIR_MASK & ~PCI_FIR_ACT0 &  PCI_FIR_ACT1;
+};
+
+group gPCI_FIR
+    filter singlebit,
+           cs_root_cause
+{
+    /** PCI_FIR[0]
+     *  PCI FIR
+     */
+    (rPCI_FIR, bit(0)) ? defaultMaskedError;
+
+    /** PCI_FIR[1]
+     *  PCI FIR
+     */
+    (rPCI_FIR, bit(1)) ? defaultMaskedError;
+
+    /** PCI_FIR[2]
+     *  PCI FIR
+     */
+    (rPCI_FIR, bit(2)) ? defaultMaskedError;
+
+    /** PCI_FIR[3]
+     *  PCI FIR
+     */
+    (rPCI_FIR, bit(3)) ? defaultMaskedError;
+
+    /** PCI_FIR[4]
+     *  PCI FIR
+     */
+    (rPCI_FIR, bit(4)) ? defaultMaskedError;
+
+    /** PCI_FIR[5]
+     *  PCI FIR
+     */
+    (rPCI_FIR, bit(5)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# P10 chip PCI_ETU_FIR
+################################################################################
+
+rule rPCI_ETU_FIR
+{
+  CHECK_STOP:
+    PCI_ETU_FIR & ~PCI_ETU_FIR_MASK & ~PCI_ETU_FIR_ACT0 & ~PCI_ETU_FIR_ACT1;
+  RECOVERABLE:
+    PCI_ETU_FIR & ~PCI_ETU_FIR_MASK & ~PCI_ETU_FIR_ACT0 &  PCI_ETU_FIR_ACT1;
+};
+
+group gPCI_ETU_FIR
+    filter singlebit,
+           cs_root_cause
+{
+    /** PCI_ETU_FIR[0]
+     *  See Outbound Error Status Register, bit 0 for deta
+     */
+    (rPCI_ETU_FIR, bit(0)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[1]
+     *  See Outbound Error Status Register, bit 1/2 for de
+     */
+    (rPCI_ETU_FIR, bit(1)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[2]
+     *  See Outbound Error Status Register, bit 3/8 for de
+     */
+    (rPCI_ETU_FIR, bit(2)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[3]
+     *  See Outbound Error Status Register, bit 28 for det
+     */
+    (rPCI_ETU_FIR, bit(3)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[4]
+     *  See Outbound Error Status Register, bit 4/5/9/10/1
+     */
+    (rPCI_ETU_FIR, bit(4)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[5]
+     *  ETU FIR Register
+     */
+    (rPCI_ETU_FIR, bit(5)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[6]
+     *  See Outbound Error Status Register, bit 6 for deta
+     */
+    (rPCI_ETU_FIR, bit(6)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[7]
+     *  See Outbound Error Status Register, bit 13/22 for 
+     */
+    (rPCI_ETU_FIR, bit(7)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[8]
+     *  See Outbound Error Status Register, bit 23/37/38/4
+     */
+    (rPCI_ETU_FIR, bit(8)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[9]
+     *  See Outbound Error Status Register, bit 50/51/52 f
+     */
+    (rPCI_ETU_FIR, bit(9)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[10]
+     *  See Outbound Error Status Register, bit 19/20/21/5
+     */
+    (rPCI_ETU_FIR, bit(10)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[11]
+     *  See Outbound Error Status Register, bit 16 for det
+     */
+    (rPCI_ETU_FIR, bit(11)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[12]
+     *  See Outbound Error Status Register, bit 17 for det
+     */
+    (rPCI_ETU_FIR, bit(12)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[13]
+     *  See Outbound Error Status Register, bit 18 for det
+     */
+    (rPCI_ETU_FIR, bit(13)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[14]
+     *  See Outbound Error Status Register, bit 56/57 for 
+     */
+    (rPCI_ETU_FIR, bit(14)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[15]
+     *  See Outbound Error Status Register, bit 17 for det
+     */
+    (rPCI_ETU_FIR, bit(15)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[16]
+     *  See RSB Error Status Register, bit 00 for details.
+     */
+    (rPCI_ETU_FIR, bit(16)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[17]
+     *  See RSB Error Status Register, bit 2/3/5 for detai
+     */
+    (rPCI_ETU_FIR, bit(17)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[18]
+     *  See RSB Error Status Register, bit 1/4 for details
+     */
+    (rPCI_ETU_FIR, bit(18)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[19]
+     *  See RSB Error Status Register, bit 9/10 for detail
+     */
+    (rPCI_ETU_FIR, bit(19)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[20]
+     *  See RSB Error Status Register, bit 8 for details.
+     */
+    (rPCI_ETU_FIR, bit(20)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[21]
+     *  See RSB Error Status Register, bit 7 for details.
+     */
+    (rPCI_ETU_FIR, bit(21)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[22]
+     *  See RSB Error Status Register, bit 6 for details.
+     */
+    (rPCI_ETU_FIR, bit(22)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[23]
+     *  See RSB Error Status Register, bit 13/14 for detai
+     */
+    (rPCI_ETU_FIR, bit(23)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[24]
+     *  See RSB Error Status Register, bit 12 for details.
+     */
+    (rPCI_ETU_FIR, bit(24)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[25]
+     *  See Outbound Error Status Register, bit 11 for det
+     */
+    (rPCI_ETU_FIR, bit(25)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[26]
+     *  See Outbound Error Status Register, bit 15/27 for 
+     */
+    (rPCI_ETU_FIR, bit(26)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[27]
+     *  See RSB Error Status Register, bit 17/19 for detai
+     */
+    (rPCI_ETU_FIR, bit(27)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[28]
+     *  See RSB Error Status Register, bit 16/18 for detai
+     */
+    (rPCI_ETU_FIR, bit(28)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[29]
+     *  See RSB Error Status Register, bit 30/31 for detai
+     */
+    (rPCI_ETU_FIR, bit(29)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[30]
+     *  See RSB Error Status Register, bit 28/29 for detai
+     */
+    (rPCI_ETU_FIR, bit(30)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[31]
+     *  See RSB Error Status Register, bit 24/25/26 for de
+     */
+    (rPCI_ETU_FIR, bit(31)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[32]
+     *  See ARB Error Status Register, bit 33 for details.
+     */
+    (rPCI_ETU_FIR, bit(32)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[33]
+     *  See ARB Error Status Register, bit 27 for details.
+     */
+    (rPCI_ETU_FIR, bit(33)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[34]
+     *  See ARB Error Status Register, bit 02/03 for detai
+     */
+    (rPCI_ETU_FIR, bit(34)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[35]
+     *  See ARB Error Status Register, bit 26/28 for detai
+     */
+    (rPCI_ETU_FIR, bit(35)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[36]
+     *  See ARB Error Status Register, bit 57 for details.
+     */
+    (rPCI_ETU_FIR, bit(36)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[37]
+     *  See ARB Error Status Register, bit 58 for details.
+     */
+    (rPCI_ETU_FIR, bit(37)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[38]
+     *  See ARB Error Status Register, bit 59 for details.
+     */
+    (rPCI_ETU_FIR, bit(38)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[39]
+     *  See Outbound Error Status Register, bit 39 for det
+     */
+    (rPCI_ETU_FIR, bit(39)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[40]
+     *  See ARB Error Status Register, bit 4/7/8/9/10/11/1
+     */
+    (rPCI_ETU_FIR, bit(40)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[41]
+     *  See ARB Error Status Register, bit 32/41 for detai
+     */
+    (rPCI_ETU_FIR, bit(41)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[42]
+     *  See ARB Error Status Register, bit 00/01/19 for de
+     */
+    (rPCI_ETU_FIR, bit(42)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[43]
+     *  See ARB Error Status Register, bit 34/35 for detai
+     */
+    (rPCI_ETU_FIR, bit(43)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[44]
+     *  See ARB Error Status Register, bit 5/20/25/29 for 
+     */
+    (rPCI_ETU_FIR, bit(44)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[45]
+     *  See ARB Error Status Register, bit 6/26/30/31 for 
+     */
+    (rPCI_ETU_FIR, bit(45)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[46]
+     *  See ARB Error Status Register, bit 24 for details.
+     */
+    (rPCI_ETU_FIR, bit(46)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[47]
+     *  See ARB Error Status Register, bit 40 for details.
+     */
+    (rPCI_ETU_FIR, bit(47)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[48]
+     *  See MRG Error Status Register, bit 08-16/22/23/26/
+     */
+    (rPCI_ETU_FIR, bit(48)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[49]
+     *  See MRG Error Status Register, bit 51 for details.
+     */
+    (rPCI_ETU_FIR, bit(49)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[50]
+     *  See MRG Error Status Register, bit 40/56/58/60 for
+     */
+    (rPCI_ETU_FIR, bit(50)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[51]
+     *  See MRG Error Status Register, bit 41/57/59/61 for
+     */
+    (rPCI_ETU_FIR, bit(51)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[52]
+     *  See MRG Error Status Register, bit 24 for details.
+     */
+    (rPCI_ETU_FIR, bit(52)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[53]
+     *  See MRG Error Status Register, bit 17/18 for detai
+     */
+    (rPCI_ETU_FIR, bit(53)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[54]
+     *  ETU FIR Register
+     */
+    (rPCI_ETU_FIR, bit(54)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[55]
+     *  ETU FIR Register
+     */
+    (rPCI_ETU_FIR, bit(55)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[56]
+     *  See TCE Error Status Register, bit 01/02 for detai
+     */
+    (rPCI_ETU_FIR, bit(56)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[57]
+     *  See TCE Error Status Register, bit 08 for details.
+     */
+    (rPCI_ETU_FIR, bit(57)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[58]
+     *  See TCE Error Status Register, bit 13 for details.
+     */
+    (rPCI_ETU_FIR, bit(58)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[59]
+     *  See TCE Error Status Register for details.
+     */
+    (rPCI_ETU_FIR, bit(59)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[60]
+     *  See TCE Error Status Register, bit 09/11/25/27 for
+     */
+    (rPCI_ETU_FIR, bit(60)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[61]
+     *  See TCE Error Status Register, bit 10/12/26/28 for
+     */
+    (rPCI_ETU_FIR, bit(61)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[62]
+     *  ETU FIR Register
+     */
+    (rPCI_ETU_FIR, bit(62)) ? defaultMaskedError;
+
+    /** PCI_ETU_FIR[63]
+     *  FIR Internal Parity Error.
+     */
+    (rPCI_ETU_FIR, bit(63)) ? defaultMaskedError;
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ #    #                                  ###                                  #
+ #   # #    ##  ##### ###  ###  #   #   #   # #     #    ###   ###  ###  ###  #
+ #  #   #  #  #   #    #  #   # ##  #   #     #    # #  #     #     #   #     #
+ # ####### #      #    #  #   # # # #   #     #   #####  ###   ###  ##   ###  #
+ # #     # #  #   #    #  #   # #  ##   #   # #   #   #     #     # #       # #
+ # #     #  ##    #   ###  ###  #   #    ###  ### #   #  ###   ###  ###  ###  #
+ #                                                                            #
+ ##############################################################################
+
+# Include the actions defined for this target
+.include "p10_common_actions.rule";
+.include "p10_phb_actions.rule";
+

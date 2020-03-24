@@ -1,0 +1,936 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/p10/p10_pec.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2020
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+chip p10_pec
+{
+    name        "P10 PEC target";
+    targettype  TYPE_PEC;
+    sigoff      0x0000;
+    dump        DUMP_CONTENT_HW;
+    scomlen     64;
+
+ #############################################################################
+ #                                                                           #
+ #  ######                                                                   #
+ #  #     #  ######   ####     ###    ####    #####  ######  #####    ####   #
+ #  #     #  #       #    #     #    #          #    #       #    #  #       #
+ #  ######   #####   #          #     ####      #    #####   #    #   ####   #
+ #  #   #    #       #  ###     #         #     #    #       #####        #  #
+ #  #    #   #       #    #     #    #    #     #    #       #   #   #    #  #
+ #  #     #  ######   ####     ###    ####      #    ######  #    #   ####   #
+ #                                                                           #
+ #############################################################################
+
+    ############################################################################
+    # PCI Chiplet Checkstop FIR
+    ############################################################################
+
+    register PCI_CHIPLET_CS_FIR
+    {
+        name        "PCI Chiplet Checkstop FIR";
+        scomaddr    0x08040000;
+        capture     group default;
+    };
+
+    register PCI_CHIPLET_CS_FIR_MASK
+    {
+        name        "PCI Chiplet Checkstop FIR MASK";
+        scomaddr    0x08040040;
+        capture     group default;
+    };
+
+    ############################################################################
+    # PCI Chiplet Recoverable FIR
+    ############################################################################
+
+    register PCI_CHIPLET_RE_FIR
+    {
+        name        "PCI Chiplet Recoverable FIR";
+        scomaddr    0x08040001;
+        capture     group default;
+    };
+
+    register PCI_CHIPLET_RE_FIR_MASK
+    {
+        name        "PCI Chiplet Recoverable FIR MASK";
+        scomaddr    0x08040041;
+        capture     group default;
+    };
+
+    ############################################################################
+    # PCI Chiplet Unit Checkstop FIR
+    ############################################################################
+
+    register PCI_CHIPLET_UCS_FIR
+    {
+        name        "PCI Chiplet Unit Checkstop FIR";
+        scomaddr    0x08040003;
+        capture     group default;
+    };
+
+    register PCI_CHIPLET_UCS_FIR_MASK
+    {
+        name        "PCI Chiplet Unit Checkstop FIR MASK";
+        scomaddr    0x08040043;
+        capture     group default;
+    };
+
+    ############################################################################
+    # PCI Chiplet Host Attention FIR
+    ############################################################################
+
+    register PCI_CHIPLET_HA_FIR
+    {
+        name        "PCI Chiplet Host Attention FIR";
+        scomaddr    0x08040004;
+        capture     group default;
+    };
+
+    register PCI_CHIPLET_HA_FIR_MASK
+    {
+        name        "PCI Chiplet Host Attention FIR MASK";
+        scomaddr    0x08040044;
+        capture     group default;
+    };
+
+    ############################################################################
+    # P10 chip PCI_LOCAL_FIR
+    ############################################################################
+
+    register PCI_LOCAL_FIR
+    {
+        name        "P10 chip PCI_LOCAL_FIR";
+        scomaddr    0x08040100;
+        reset       (&, 0x08040101);
+        mask        (|, 0x08040105);
+        capture     group default;
+    };
+
+    register PCI_LOCAL_FIR_MASK
+    {
+        name        "P10 chip PCI_LOCAL_FIR MASK";
+        scomaddr    0x08040103;
+        capture     group default;
+    };
+
+    register PCI_LOCAL_FIR_ACT0
+    {
+        name        "P10 chip PCI_LOCAL_FIR ACT0";
+        scomaddr    0x08040106;
+        capture     group default;
+        capture     req nonzero("PCI_LOCAL_FIR");
+    };
+
+    register PCI_LOCAL_FIR_ACT1
+    {
+        name        "P10 chip PCI_LOCAL_FIR ACT1";
+        scomaddr    0x08040107;
+        capture     group default;
+        capture     req nonzero("PCI_LOCAL_FIR");
+    };
+
+    register PCI_LOCAL_FIR_ACT2
+    {
+        name        "P10 chip PCI_LOCAL_FIR ACT2";
+        scomaddr    0x08040109;
+        capture     group default;
+        capture     req nonzero("PCI_LOCAL_FIR");
+    };
+
+    ############################################################################
+    # P10 chip PCI_IOP_FIR 0
+    ############################################################################
+
+    register PCI_IOP_FIR_0
+    {
+        name        "P10 chip PCI_IOP_FIR 0";
+        scomaddr    0x08011100;
+        reset       (&, 0x08011101);
+        mask        (|, 0x08011105);
+        capture     group default;
+    };
+
+    register PCI_IOP_FIR_0_MASK
+    {
+        name        "P10 chip PCI_IOP_FIR 0 MASK";
+        scomaddr    0x08011103;
+        capture     group default;
+    };
+
+    register PCI_IOP_FIR_0_ACT0
+    {
+        name        "P10 chip PCI_IOP_FIR 0 ACT0";
+        scomaddr    0x08011106;
+        capture     group default;
+        capture     req nonzero("PCI_IOP_FIR_0");
+    };
+
+    register PCI_IOP_FIR_0_ACT1
+    {
+        name        "P10 chip PCI_IOP_FIR 0 ACT1";
+        scomaddr    0x08011107;
+        capture     group default;
+        capture     req nonzero("PCI_IOP_FIR_0");
+    };
+
+    ############################################################################
+    # P10 chip PCI_IOP_FIR 1
+    ############################################################################
+
+    register PCI_IOP_FIR_1
+    {
+        name        "P10 chip PCI_IOP_FIR 1";
+        scomaddr    0x08011500;
+        reset       (&, 0x08011501);
+        mask        (|, 0x08011505);
+        capture     group default;
+    };
+
+    register PCI_IOP_FIR_1_MASK
+    {
+        name        "P10 chip PCI_IOP_FIR 1 MASK";
+        scomaddr    0x08011503;
+        capture     group default;
+    };
+
+    register PCI_IOP_FIR_1_ACT0
+    {
+        name        "P10 chip PCI_IOP_FIR 1 ACT0";
+        scomaddr    0x08011506;
+        capture     group default;
+        capture     req nonzero("PCI_IOP_FIR_1");
+    };
+
+    register PCI_IOP_FIR_1_ACT1
+    {
+        name        "P10 chip PCI_IOP_FIR 1 ACT1";
+        scomaddr    0x08011507;
+        capture     group default;
+        capture     req nonzero("PCI_IOP_FIR_1");
+    };
+
+# Include registers not defined by the xml
+.include "p10_pec_regs.rule";
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ # ####                                 #                                     #
+ # #   # #   # #    #####  ###      #  # #    ##  ##### ###  ###  #   #  ###  #
+ # #   # #   # #    #     #        #  #   #  #  #   #    #  #   # ##  # #     #
+ # ####  #   # #    ####   ###    #  ####### #      #    #  #   # # # #  ###  #
+ # #  #  #   # #    #         #  #   #     # #  #   #    #  #   # #  ##     # #
+ # #   #  ###  #### #####  ###  #    #     #  ##    #   ###  ###  #   #  ###  #
+ #                                                                            #
+ ##############################################################################
+
+################################################################################
+# PCI Chiplet Checkstop FIR
+################################################################################
+
+rule rPCI_CHIPLET_CS_FIR
+{
+  CHECK_STOP:
+    PCI_CHIPLET_CS_FIR & ~PCI_CHIPLET_CS_FIR_MASK & `0fffffffffffffff`;
+};
+
+group gPCI_CHIPLET_CS_FIR attntype CHECK_STOP
+    filter singlebit
+{
+    /** PCI_CHIPLET_CS_FIR[4]
+     *  Attention from PCI_LOCAL_FIR
+     */
+    (rPCI_CHIPLET_CS_FIR, bit(4)) ? analyze(gPCI_LOCAL_FIR);
+
+    /** PCI_CHIPLET_CS_FIR[5]
+     *  Attention from PCI_ETU_FIR 0
+     */
+    (rPCI_CHIPLET_CS_FIR, bit(5)) ? analyzeConnectedPHB0;
+
+    /** PCI_CHIPLET_CS_FIR[6]
+     *  Attention from PCI_ETU_FIR 1
+     */
+    (rPCI_CHIPLET_CS_FIR, bit(6)) ? analyzeConnectedPHB1;
+
+    /** PCI_CHIPLET_CS_FIR[7]
+     *  Attention from PCI_ETU_FIR 2
+     */
+    (rPCI_CHIPLET_CS_FIR, bit(7)) ? analyzeConnectedPHB2;
+
+    /** PCI_CHIPLET_CS_FIR[9]
+     *  Attention from PCI_FIR 0
+     */
+    (rPCI_CHIPLET_CS_FIR, bit(9)) ? analyzeConnectedPHB0;
+
+    /** PCI_CHIPLET_CS_FIR[10]
+     *  Attention from PCI_FIR 1
+     */
+    (rPCI_CHIPLET_CS_FIR, bit(10)) ? analyzeConnectedPHB1;
+
+    /** PCI_CHIPLET_CS_FIR[11]
+     *  Attention from PCI_FIR 2
+     */
+    (rPCI_CHIPLET_CS_FIR, bit(11)) ? analyzeConnectedPHB2;
+
+    /** PCI_CHIPLET_CS_FIR[12]
+     *  Attention from PCI_IOP_FIR
+     */
+    (rPCI_CHIPLET_CS_FIR, bit(12)) ? analyze(gPCI_IOP_FIR_0);
+
+    /** PCI_CHIPLET_CS_FIR[13]
+     *  Attention from PCI_IOP_FIR
+     */
+    (rPCI_CHIPLET_CS_FIR, bit(13)) ? analyze(gPCI_IOP_FIR_1);
+
+};
+
+################################################################################
+# PCI Chiplet Recoverable FIR
+################################################################################
+
+rule rPCI_CHIPLET_RE_FIR
+{
+  RECOVERABLE:
+    PCI_CHIPLET_RE_FIR & ~PCI_CHIPLET_RE_FIR_MASK & `0fffffffffffffff`;
+};
+
+group gPCI_CHIPLET_RE_FIR attntype RECOVERABLE
+    filter singlebit
+{
+    /** PCI_CHIPLET_RE_FIR[4]
+     *  Attention from PCI_LOCAL_FIR
+     */
+    (rPCI_CHIPLET_RE_FIR, bit(4)) ? analyze(gPCI_LOCAL_FIR);
+
+    /** PCI_CHIPLET_RE_FIR[5]
+     *  Attention from PCI_ETU_FIR 0
+     */
+    (rPCI_CHIPLET_RE_FIR, bit(5)) ? analyzeConnectedPHB0;
+
+    /** PCI_CHIPLET_RE_FIR[6]
+     *  Attention from PCI_ETU_FIR 1
+     */
+    (rPCI_CHIPLET_RE_FIR, bit(6)) ? analyzeConnectedPHB1;
+
+    /** PCI_CHIPLET_RE_FIR[7]
+     *  Attention from PCI_ETU_FIR 2
+     */
+    (rPCI_CHIPLET_RE_FIR, bit(7)) ? analyzeConnectedPHB2;
+
+    /** PCI_CHIPLET_RE_FIR[9]
+     *  Attention from PCI_FIR 0
+     */
+    (rPCI_CHIPLET_RE_FIR, bit(9)) ? analyzeConnectedPHB0;
+
+    /** PCI_CHIPLET_RE_FIR[10]
+     *  Attention from PCI_FIR 1
+     */
+    (rPCI_CHIPLET_RE_FIR, bit(10)) ? analyzeConnectedPHB1;
+
+    /** PCI_CHIPLET_RE_FIR[11]
+     *  Attention from PCI_FIR 2
+     */
+    (rPCI_CHIPLET_RE_FIR, bit(11)) ? analyzeConnectedPHB2;
+
+    /** PCI_CHIPLET_RE_FIR[12]
+     *  Attention from PCI_IOP_FIR
+     */
+    (rPCI_CHIPLET_RE_FIR, bit(12)) ? analyze(gPCI_IOP_FIR_0);
+
+    /** PCI_CHIPLET_RE_FIR[13]
+     *  Attention from PCI_IOP_FIR
+     */
+    (rPCI_CHIPLET_RE_FIR, bit(13)) ? analyze(gPCI_IOP_FIR_1);
+
+};
+
+################################################################################
+# PCI Chiplet Unit Checkstop FIR
+################################################################################
+
+rule rPCI_CHIPLET_UCS_FIR
+{
+  UNIT_CS:
+    PCI_CHIPLET_UCS_FIR & ~PCI_CHIPLET_UCS_FIR_MASK & `0fffffffffffffff`;
+};
+
+group gPCI_CHIPLET_UCS_FIR attntype UNIT_CS
+    filter singlebit
+{
+    /** PCI_CHIPLET_UCS_FIR[4]
+     *  Attention from PCI_LOCAL_FIR
+     */
+    (rPCI_CHIPLET_UCS_FIR, bit(4)) ? analyze(gPCI_LOCAL_FIR);
+
+    /** PCI_CHIPLET_UCS_FIR[12]
+     *  Attention from PCI_IOP_FIR
+     */
+    (rPCI_CHIPLET_UCS_FIR, bit(12)) ? analyze(gPCI_IOP_FIR_0);
+
+    /** PCI_CHIPLET_UCS_FIR[13]
+     *  Attention from PCI_IOP_FIR
+     */
+    (rPCI_CHIPLET_UCS_FIR, bit(13)) ? analyze(gPCI_IOP_FIR_1);
+
+};
+
+################################################################################
+# PCI Chiplet Host Attention FIR
+################################################################################
+
+rule rPCI_CHIPLET_HA_FIR
+{
+  HOST_ATTN:
+    PCI_CHIPLET_HA_FIR & ~PCI_CHIPLET_HA_FIR_MASK & `0fffffffffffffff`;
+};
+
+group gPCI_CHIPLET_HA_FIR attntype HOST_ATTN
+    filter singlebit
+{
+    /** PCI_CHIPLET_HA_FIR[4]
+     *  Attention from PCI_LOCAL_FIR
+     */
+    (rPCI_CHIPLET_HA_FIR, bit(4)) ? analyze(gPCI_LOCAL_FIR);
+
+};
+
+################################################################################
+# P10 chip PCI_LOCAL_FIR
+################################################################################
+
+rule rPCI_LOCAL_FIR
+{
+  CHECK_STOP:
+    PCI_LOCAL_FIR & ~PCI_LOCAL_FIR_MASK &  PCI_LOCAL_FIR_ACT0 & ~PCI_LOCAL_FIR_ACT1 & ~PCI_LOCAL_FIR_ACT2;
+  HOST_ATTN:
+    PCI_LOCAL_FIR & ~PCI_LOCAL_FIR_MASK &  PCI_LOCAL_FIR_ACT0 & ~PCI_LOCAL_FIR_ACT1 &  PCI_LOCAL_FIR_ACT2;
+  RECOVERABLE:
+    PCI_LOCAL_FIR & ~PCI_LOCAL_FIR_MASK &  PCI_LOCAL_FIR_ACT0 &  PCI_LOCAL_FIR_ACT1 & ~PCI_LOCAL_FIR_ACT2;
+  UNIT_CS:
+    PCI_LOCAL_FIR & ~PCI_LOCAL_FIR_MASK & ~PCI_LOCAL_FIR_ACT0 &  PCI_LOCAL_FIR_ACT1 & ~PCI_LOCAL_FIR_ACT2;
+};
+
+group gPCI_LOCAL_FIR
+    filter singlebit,
+           cs_root_cause
+{
+    /** PCI_LOCAL_FIR[0]
+     *  CFIR - Parity or PCB access error
+     */
+    (rPCI_LOCAL_FIR, bit(0)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[1]
+     *  CPLT_CTRL - PCB access error
+     */
+    (rPCI_LOCAL_FIR, bit(1)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[2]
+     *  CC - PCB access error - read and clear nn03000F
+     */
+    (rPCI_LOCAL_FIR, bit(2)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[3]
+     *  CC - Clock Control Error - read and clear nn03000F
+     */
+    (rPCI_LOCAL_FIR, bit(3)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[4]
+     *  PSC - PSCOM access error - read and clear nn01001
+     */
+    (rPCI_LOCAL_FIR, bit(4)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[5]
+     *  PSC - internal or ring interface error - read and 
+     */
+    (rPCI_LOCAL_FIR, bit(5)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[6]
+     *  THERM - pwr_comp_err, skitter_comp_err, scan_init_
+     */
+    (rPCI_LOCAL_FIR, bit(6)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[7]
+     *  THERM - pcb error
+     */
+    (rPCI_LOCAL_FIR, bit(7)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[8]
+     *  THERMTRIP - Critical temperature indicator
+     */
+    (rPCI_LOCAL_FIR, bit(8)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[9]
+     *  THERMTRIP - Fatal temperature indicator
+     */
+    (rPCI_LOCAL_FIR, bit(9)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[10]
+     *  VOLTTRIP - Voltage sense error
+     */
+    (rPCI_LOCAL_FIR, bit(10)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[11]
+     *  DBG - scom parity fail
+     */
+    (rPCI_LOCAL_FIR, bit(11)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[12]
+     *  reserved
+     */
+    (rPCI_LOCAL_FIR, bit(12)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[13]
+     *  reserved
+     */
+    (rPCI_LOCAL_FIR, bit(13)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[14]
+     *  reserved
+     */
+    (rPCI_LOCAL_FIR, bit(14)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[15]
+     *  reserved
+     */
+    (rPCI_LOCAL_FIR, bit(15)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[16]
+     *  reserved
+     */
+    (rPCI_LOCAL_FIR, bit(16)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[17]
+     *  reserved
+     */
+    (rPCI_LOCAL_FIR, bit(17)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[18]
+     *  reserved
+     */
+    (rPCI_LOCAL_FIR, bit(18)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[19]
+     *  reserved
+     */
+    (rPCI_LOCAL_FIR, bit(19)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[20]
+     *  Trace00 - scom parity err
+     */
+    (rPCI_LOCAL_FIR, bit(20)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[21]
+     *  Trace01 - scom parity err - Unused in Axon,PCI
+     */
+    (rPCI_LOCAL_FIR, bit(21)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[22]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(22)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[23]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(23)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[24]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(24)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[25]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(25)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[26]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(26)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[27]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(27)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[28]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(28)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[29]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(29)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[30]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(30)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[31]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(31)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[32]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(32)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[33]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(33)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[34]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(34)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[35]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(35)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[36]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(36)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[37]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(37)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[38]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(38)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[39]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(39)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[40]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(40)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[41]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(41)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[42]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(42)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[43]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(43)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[44]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(44)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[45]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(45)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[46]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(46)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[47]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(47)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[48]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(48)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[49]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(49)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[50]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(50)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[51]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(51)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[52]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(52)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[53]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(53)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[54]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(54)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[55]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(55)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[56]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(56)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[57]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(57)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[58]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(58)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[59]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(59)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[60]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(60)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[61]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(61)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[62]
+     *  unused
+     */
+    (rPCI_LOCAL_FIR, bit(62)) ? defaultMaskedError;
+
+    /** PCI_LOCAL_FIR[63]
+     *  ext_local_xstop
+     */
+    (rPCI_LOCAL_FIR, bit(63)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# P10 chip PCI_IOP_FIR 0
+################################################################################
+
+rule rPCI_IOP_FIR_0
+{
+  CHECK_STOP:
+    PCI_IOP_FIR_0 & ~PCI_IOP_FIR_0_MASK & ~PCI_IOP_FIR_0_ACT0 & ~PCI_IOP_FIR_0_ACT1;
+  RECOVERABLE:
+    PCI_IOP_FIR_0 & ~PCI_IOP_FIR_0_MASK & ~PCI_IOP_FIR_0_ACT0 &  PCI_IOP_FIR_0_ACT1;
+  UNIT_CS:
+    PCI_IOP_FIR_0 & ~PCI_IOP_FIR_0_MASK &  PCI_IOP_FIR_0_ACT0 &  PCI_IOP_FIR_0_ACT1;
+};
+
+group gPCI_IOP_FIR_0
+    filter singlebit,
+           cs_root_cause
+{
+    /** PCI_IOP_FIR_0[0]
+     *  Correctable error in PH0 arrays
+     */
+    (rPCI_IOP_FIR_0, bit(0)) ? defaultMaskedError;
+
+    /** PCI_IOP_FIR_0[1]
+     *  Uncorrectable error in PH0 arrays
+     */
+    (rPCI_IOP_FIR_0, bit(1)) ? defaultMaskedError;
+
+    /** PCI_IOP_FIR_0[2]
+     *  Correctable error in PH1 arrays
+     */
+    (rPCI_IOP_FIR_0, bit(2)) ? defaultMaskedError;
+
+    /** PCI_IOP_FIR_0[3]
+     *  Uncorrectable error in PH1 arrays
+     */
+    (rPCI_IOP_FIR_0, bit(3)) ? defaultMaskedError;
+
+    /** PCI_IOP_FIR_0[4]
+     *  Correctable error from SCOM in WRAP0
+     */
+    (rPCI_IOP_FIR_0, bit(4)) ? defaultMaskedError;
+
+    /** PCI_IOP_FIR_0[5]
+     *  Uncorrectable error from SCOM in WRAP0
+     */
+    (rPCI_IOP_FIR_0, bit(5)) ? defaultMaskedError;
+
+    /** PCI_IOP_FIR_0[6]
+     *  Correctable error from SCOM in WRAP1
+     */
+    (rPCI_IOP_FIR_0, bit(6)) ? defaultMaskedError;
+
+    /** PCI_IOP_FIR_0[7]
+     *  Uncorrectable error from SCOM in WRAP1
+     */
+    (rPCI_IOP_FIR_0, bit(7)) ? defaultMaskedError;
+
+    /** PCI_IOP_FIR_0[8]
+     *  Correctable error from SCRUB in WRAP0
+     */
+    (rPCI_IOP_FIR_0, bit(8)) ? defaultMaskedError;
+
+    /** PCI_IOP_FIR_0[9]
+     *  Uncorrectable error from SCRUB in WRAP0
+     */
+    (rPCI_IOP_FIR_0, bit(9)) ? defaultMaskedError;
+
+    /** PCI_IOP_FIR_0[10]
+     *  Correctable error from SCRUB in WRAP1
+     */
+    (rPCI_IOP_FIR_0, bit(10)) ? defaultMaskedError;
+
+    /** PCI_IOP_FIR_0[11]
+     *  Uncorrectable error from SCRUB in WRAP1
+     */
+    (rPCI_IOP_FIR_0, bit(11)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# P10 chip PCI_IOP_FIR 1
+################################################################################
+
+rule rPCI_IOP_FIR_1
+{
+  CHECK_STOP:
+    PCI_IOP_FIR_1 & ~PCI_IOP_FIR_1_MASK & ~PCI_IOP_FIR_1_ACT0 & ~PCI_IOP_FIR_1_ACT1;
+  RECOVERABLE:
+    PCI_IOP_FIR_1 & ~PCI_IOP_FIR_1_MASK & ~PCI_IOP_FIR_1_ACT0 &  PCI_IOP_FIR_1_ACT1;
+  UNIT_CS:
+    PCI_IOP_FIR_1 & ~PCI_IOP_FIR_1_MASK &  PCI_IOP_FIR_1_ACT0 &  PCI_IOP_FIR_1_ACT1;
+};
+
+group gPCI_IOP_FIR_1
+    filter singlebit,
+           cs_root_cause
+{
+    /** PCI_IOP_FIR_1[0]
+     *  Correctable error in PH0 arrays
+     */
+    (rPCI_IOP_FIR_1, bit(0)) ? defaultMaskedError;
+
+    /** PCI_IOP_FIR_1[1]
+     *  Uncorrectable error in PH0 arrays
+     */
+    (rPCI_IOP_FIR_1, bit(1)) ? defaultMaskedError;
+
+    /** PCI_IOP_FIR_1[2]
+     *  Correctable error in PH1 arrays
+     */
+    (rPCI_IOP_FIR_1, bit(2)) ? defaultMaskedError;
+
+    /** PCI_IOP_FIR_1[3]
+     *  Uncorrectable error in PH1 arrays
+     */
+    (rPCI_IOP_FIR_1, bit(3)) ? defaultMaskedError;
+
+    /** PCI_IOP_FIR_1[4]
+     *  Correctable error from SCOM in WRAP0
+     */
+    (rPCI_IOP_FIR_1, bit(4)) ? defaultMaskedError;
+
+    /** PCI_IOP_FIR_1[5]
+     *  Uncorrectable error from SCOM in WRAP0
+     */
+    (rPCI_IOP_FIR_1, bit(5)) ? defaultMaskedError;
+
+    /** PCI_IOP_FIR_1[6]
+     *  Correctable error from SCOM in WRAP1
+     */
+    (rPCI_IOP_FIR_1, bit(6)) ? defaultMaskedError;
+
+    /** PCI_IOP_FIR_1[7]
+     *  Uncorrectable error from SCOM in WRAP1
+     */
+    (rPCI_IOP_FIR_1, bit(7)) ? defaultMaskedError;
+
+    /** PCI_IOP_FIR_1[8]
+     *  Correctable error from SCRUB in WRAP0
+     */
+    (rPCI_IOP_FIR_1, bit(8)) ? defaultMaskedError;
+
+    /** PCI_IOP_FIR_1[9]
+     *  Uncorrectable error from SCRUB in WRAP0
+     */
+    (rPCI_IOP_FIR_1, bit(9)) ? defaultMaskedError;
+
+    /** PCI_IOP_FIR_1[10]
+     *  Correctable error from SCRUB in WRAP1
+     */
+    (rPCI_IOP_FIR_1, bit(10)) ? defaultMaskedError;
+
+    /** PCI_IOP_FIR_1[11]
+     *  Uncorrectable error from SCRUB in WRAP1
+     */
+    (rPCI_IOP_FIR_1, bit(11)) ? defaultMaskedError;
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ #    #                                  ###                                  #
+ #   # #    ##  ##### ###  ###  #   #   #   # #     #    ###   ###  ###  ###  #
+ #  #   #  #  #   #    #  #   # ##  #   #     #    # #  #     #     #   #     #
+ # ####### #      #    #  #   # # # #   #     #   #####  ###   ###  ##   ###  #
+ # #     # #  #   #    #  #   # #  ##   #   # #   #   #     #     # #       # #
+ # #     #  ##    #   ###  ###  #   #    ###  ### #   #  ###   ###  ###  ###  #
+ #                                                                            #
+ ##############################################################################
+
+# Include the actions defined for this target
+.include "p10_common_actions.rule";
+.include "p10_pec_actions.rule";
+

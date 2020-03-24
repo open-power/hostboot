@@ -1,0 +1,1125 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/p10/p10_pauc.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2020
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+chip p10_pauc
+{
+    name        "P10 PAUC target";
+    targettype  TYPE_PAUC;
+    sigoff      0x0000;
+    dump        DUMP_CONTENT_HW;
+    scomlen     64;
+
+ #############################################################################
+ #                                                                           #
+ #  ######                                                                   #
+ #  #     #  ######   ####     ###    ####    #####  ######  #####    ####   #
+ #  #     #  #       #    #     #    #          #    #       #    #  #       #
+ #  ######   #####   #          #     ####      #    #####   #    #   ####   #
+ #  #   #    #       #  ###     #         #     #    #       #####        #  #
+ #  #    #   #       #    #     #    #    #     #    #       #   #   #    #  #
+ #  #     #  ######   ####     ###    ####      #    ######  #    #   ####   #
+ #                                                                           #
+ #############################################################################
+
+    ############################################################################
+    # P10 chip PAU_LOCAL_FIR
+    ############################################################################
+
+    register PAU_LOCAL_FIR
+    {
+        name        "P10 chip PAU_LOCAL_FIR";
+        scomaddr    0x10040100;
+        reset       (&, 0x10040101);
+        mask        (|, 0x10040105);
+        capture     group default;
+    };
+
+    register PAU_LOCAL_FIR_MASK
+    {
+        name        "P10 chip PAU_LOCAL_FIR MASK";
+        scomaddr    0x10040103;
+        capture     group default;
+    };
+
+    register PAU_LOCAL_FIR_ACT0
+    {
+        name        "P10 chip PAU_LOCAL_FIR ACT0";
+        scomaddr    0x10040106;
+        capture     group default;
+        capture     req nonzero("PAU_LOCAL_FIR");
+    };
+
+    register PAU_LOCAL_FIR_ACT1
+    {
+        name        "P10 chip PAU_LOCAL_FIR ACT1";
+        scomaddr    0x10040107;
+        capture     group default;
+        capture     req nonzero("PAU_LOCAL_FIR");
+    };
+
+    register PAU_LOCAL_FIR_ACT2
+    {
+        name        "P10 chip PAU_LOCAL_FIR ACT2";
+        scomaddr    0x10040109;
+        capture     group default;
+        capture     req nonzero("PAU_LOCAL_FIR");
+    };
+
+    ############################################################################
+    # P10 chip PAU_PTL_FIR
+    ############################################################################
+
+    register PAU_PTL_FIR
+    {
+        name        "P10 chip PAU_PTL_FIR";
+        scomaddr    0x10011800;
+        reset       (&, 0x10011801);
+        mask        (|, 0x10011805);
+        capture     group default;
+    };
+
+    register PAU_PTL_FIR_MASK
+    {
+        name        "P10 chip PAU_PTL_FIR MASK";
+        scomaddr    0x10011803;
+        capture     group default;
+    };
+
+    register PAU_PTL_FIR_ACT0
+    {
+        name        "P10 chip PAU_PTL_FIR ACT0";
+        scomaddr    0x10011806;
+        capture     group default;
+        capture     req nonzero("PAU_PTL_FIR");
+    };
+
+    register PAU_PTL_FIR_ACT1
+    {
+        name        "P10 chip PAU_PTL_FIR ACT1";
+        scomaddr    0x10011807;
+        capture     group default;
+        capture     req nonzero("PAU_PTL_FIR");
+    };
+
+    ############################################################################
+    # P10 chip PAU_PHY_FIR
+    ############################################################################
+
+    register PAU_PHY_FIR
+    {
+        name        "P10 chip PAU_PHY_FIR";
+        scomaddr    0x10012c00;
+        reset       (&, 0x10012c01);
+        mask        (|, 0x10012c05);
+        capture     group default;
+    };
+
+    register PAU_PHY_FIR_MASK
+    {
+        name        "P10 chip PAU_PHY_FIR MASK";
+        scomaddr    0x10012c03;
+        capture     group default;
+    };
+
+    register PAU_PHY_FIR_ACT0
+    {
+        name        "P10 chip PAU_PHY_FIR ACT0";
+        scomaddr    0x10012c06;
+        capture     group default;
+        capture     req nonzero("PAU_PHY_FIR");
+    };
+
+    register PAU_PHY_FIR_ACT1
+    {
+        name        "P10 chip PAU_PHY_FIR ACT1";
+        scomaddr    0x10012c07;
+        capture     group default;
+        capture     req nonzero("PAU_PHY_FIR");
+    };
+
+    ############################################################################
+    # P10 chip PAU_DL_FIR
+    ############################################################################
+
+    register PAU_DL_FIR
+    {
+        name        "P10 chip PAU_DL_FIR";
+        scomaddr    0x10012c40;
+        reset       (&, 0x10012c41);
+        mask        (|, 0x10012c45);
+        capture     group default;
+    };
+
+    register PAU_DL_FIR_MASK
+    {
+        name        "P10 chip PAU_DL_FIR MASK";
+        scomaddr    0x10012c43;
+        capture     group default;
+    };
+
+    register PAU_DL_FIR_ACT0
+    {
+        name        "P10 chip PAU_DL_FIR ACT0";
+        scomaddr    0x10012c46;
+        capture     group default;
+        capture     req nonzero("PAU_DL_FIR");
+    };
+
+    register PAU_DL_FIR_ACT1
+    {
+        name        "P10 chip PAU_DL_FIR ACT1";
+        scomaddr    0x10012c47;
+        capture     group default;
+        capture     req nonzero("PAU_DL_FIR");
+    };
+
+# Include registers not defined by the xml
+.include "p10_pauc_regs.rule";
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ # ####                                 #                                     #
+ # #   # #   # #    #####  ###      #  # #    ##  ##### ###  ###  #   #  ###  #
+ # #   # #   # #    #     #        #  #   #  #  #   #    #  #   # ##  # #     #
+ # ####  #   # #    ####   ###    #  ####### #      #    #  #   # # # #  ###  #
+ # #  #  #   # #    #         #  #   #     # #  #   #    #  #   # #  ##     # #
+ # #   #  ###  #### #####  ###  #    #     #  ##    #   ###  ###  #   #  ###  #
+ #                                                                            #
+ ##############################################################################
+
+################################################################################
+# Summary for PAUC
+################################################################################
+
+rule rPAUC
+{
+  CHECK_STOP:
+    summary( 0, rPAU_LOCAL_FIR ) |
+    summary( 1, rPAU_PTL_FIR ) |
+    summary( 2, rPAU_PHY_FIR ) |
+    summary( 3, rPAU_DL_FIR );
+
+  RECOVERABLE:
+    summary( 0, rPAU_LOCAL_FIR ) |
+    summary( 1, rPAU_PTL_FIR ) |
+    summary( 2, rPAU_PHY_FIR ) |
+    summary( 3, rPAU_DL_FIR );
+
+  UNIT_CS:
+    summary( 0, rPAU_LOCAL_FIR ) |
+    summary( 2, rPAU_PHY_FIR ) |
+    summary( 3, rPAU_DL_FIR );
+
+  HOST_ATTN:
+    summary( 0, rPAU_LOCAL_FIR );
+
+};
+
+group gPAUC attntype CHECK_STOP, RECOVERABLE, UNIT_CS, HOST_ATTN
+    filter singlebit
+{
+    (rPAUC, bit(0)) ? analyze(gPAU_LOCAL_FIR);
+    (rPAUC, bit(1)) ? analyze(gPAU_PTL_FIR);
+    (rPAUC, bit(2)) ? analyze(gPAU_PHY_FIR);
+    (rPAUC, bit(3)) ? analyze(gPAU_DL_FIR);
+};
+
+################################################################################
+# P10 chip PAU_LOCAL_FIR
+################################################################################
+
+rule rPAU_LOCAL_FIR
+{
+  CHECK_STOP:
+    PAU_LOCAL_FIR & ~PAU_LOCAL_FIR_MASK &  PAU_LOCAL_FIR_ACT0 & ~PAU_LOCAL_FIR_ACT1 & ~PAU_LOCAL_FIR_ACT2;
+  HOST_ATTN:
+    PAU_LOCAL_FIR & ~PAU_LOCAL_FIR_MASK &  PAU_LOCAL_FIR_ACT0 & ~PAU_LOCAL_FIR_ACT1 &  PAU_LOCAL_FIR_ACT2;
+  RECOVERABLE:
+    PAU_LOCAL_FIR & ~PAU_LOCAL_FIR_MASK &  PAU_LOCAL_FIR_ACT0 &  PAU_LOCAL_FIR_ACT1 & ~PAU_LOCAL_FIR_ACT2;
+  UNIT_CS:
+    PAU_LOCAL_FIR & ~PAU_LOCAL_FIR_MASK & ~PAU_LOCAL_FIR_ACT0 &  PAU_LOCAL_FIR_ACT1 & ~PAU_LOCAL_FIR_ACT2;
+};
+
+group gPAU_LOCAL_FIR
+    filter singlebit,
+           cs_root_cause
+{
+    /** PAU_LOCAL_FIR[0]
+     *  CFIR - Parity or PCB access error
+     */
+    (rPAU_LOCAL_FIR, bit(0)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[1]
+     *  CPLT_CTRL - PCB access error
+     */
+    (rPAU_LOCAL_FIR, bit(1)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[2]
+     *  CC - PCB access error - read and clear nn03000F
+     */
+    (rPAU_LOCAL_FIR, bit(2)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[3]
+     *  CC - Clock Control Error - read and clear nn03000F
+     */
+    (rPAU_LOCAL_FIR, bit(3)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[4]
+     *  PSC - PSCOM access error - read and clear nn01001
+     */
+    (rPAU_LOCAL_FIR, bit(4)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[5]
+     *  PSC - internal or ring interface error - read and 
+     */
+    (rPAU_LOCAL_FIR, bit(5)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[6]
+     *  THERM - pwr_comp_err, skitter_comp_err, scan_init_
+     */
+    (rPAU_LOCAL_FIR, bit(6)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[7]
+     *  THERM - pcb error
+     */
+    (rPAU_LOCAL_FIR, bit(7)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[8]
+     *  THERMTRIP - Critical temperature indicator
+     */
+    (rPAU_LOCAL_FIR, bit(8)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[9]
+     *  THERMTRIP - Fatal temperature indicator
+     */
+    (rPAU_LOCAL_FIR, bit(9)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[10]
+     *  VOLTTRIP - Voltage sense error
+     */
+    (rPAU_LOCAL_FIR, bit(10)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[11]
+     *  DBG - scom parity fail
+     */
+    (rPAU_LOCAL_FIR, bit(11)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[12]
+     *  reserved
+     */
+    (rPAU_LOCAL_FIR, bit(12)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[13]
+     *  reserved
+     */
+    (rPAU_LOCAL_FIR, bit(13)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[14]
+     *  reserved
+     */
+    (rPAU_LOCAL_FIR, bit(14)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[15]
+     *  reserved
+     */
+    (rPAU_LOCAL_FIR, bit(15)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[16]
+     *  reserved
+     */
+    (rPAU_LOCAL_FIR, bit(16)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[17]
+     *  reserved
+     */
+    (rPAU_LOCAL_FIR, bit(17)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[18]
+     *  reserved
+     */
+    (rPAU_LOCAL_FIR, bit(18)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[19]
+     *  reserved
+     */
+    (rPAU_LOCAL_FIR, bit(19)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[20]
+     *  Trace00 - scom parity err
+     */
+    (rPAU_LOCAL_FIR, bit(20)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[21]
+     *  Trace01 - scom parity err - Unused in Axon,PCI
+     */
+    (rPAU_LOCAL_FIR, bit(21)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[22]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(22)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[23]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(23)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[24]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(24)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[25]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(25)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[26]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(26)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[27]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(27)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[28]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(28)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[29]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(29)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[30]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(30)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[31]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(31)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[32]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(32)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[33]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(33)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[34]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(34)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[35]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(35)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[36]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(36)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[37]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(37)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[38]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(38)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[39]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(39)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[40]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(40)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[41]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(41)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[42]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(42)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[43]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(43)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[44]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(44)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[45]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(45)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[46]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(46)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[47]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(47)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[48]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(48)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[49]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(49)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[50]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(50)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[51]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(51)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[52]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(52)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[53]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(53)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[54]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(54)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[55]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(55)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[56]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(56)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[57]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(57)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[58]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(58)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[59]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(59)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[60]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(60)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[61]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(61)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[62]
+     *  unused
+     */
+    (rPAU_LOCAL_FIR, bit(62)) ? defaultMaskedError;
+
+    /** PAU_LOCAL_FIR[63]
+     *  ext_local_xstop
+     */
+    (rPAU_LOCAL_FIR, bit(63)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# P10 chip PAU_PTL_FIR
+################################################################################
+
+rule rPAU_PTL_FIR
+{
+  CHECK_STOP:
+    PAU_PTL_FIR & ~PAU_PTL_FIR_MASK & ~PAU_PTL_FIR_ACT0 & ~PAU_PTL_FIR_ACT1;
+  RECOVERABLE:
+    PAU_PTL_FIR & ~PAU_PTL_FIR_MASK & ~PAU_PTL_FIR_ACT0 &  PAU_PTL_FIR_ACT1;
+};
+
+group gPAU_PTL_FIR
+    filter singlebit,
+           cs_root_cause
+{
+    /** PAU_PTL_FIR[0]
+     *  fmr00 trained. Even PTL, even half.
+     */
+    (rPAU_PTL_FIR, bit(0)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[1]
+     *  fmr01 trained. Even PTL, odd half.
+     */
+    (rPAU_PTL_FIR, bit(1)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[2]
+     *  fmr02 trained. Odd PTL, even half.
+     */
+    (rPAU_PTL_FIR, bit(2)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[3]
+     *  fmr03 trained. Odd PTL, odd half.
+     */
+    (rPAU_PTL_FIR, bit(3)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[4]
+     *  dob01 ue
+     */
+    (rPAU_PTL_FIR, bit(4)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[5]
+     *  dob01 ce
+     */
+    (rPAU_PTL_FIR, bit(5)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[6]
+     *  dob01 sue
+     */
+    (rPAU_PTL_FIR, bit(6)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[7]
+     *  data outbound switch internal error - even PTL.
+     */
+    (rPAU_PTL_FIR, bit(7)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[8]
+     *  dob23 ue
+     */
+    (rPAU_PTL_FIR, bit(8)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[9]
+     *  dob23 ce
+     */
+    (rPAU_PTL_FIR, bit(9)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[10]
+     *  dob23 sue
+     */
+    (rPAU_PTL_FIR, bit(10)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[11]
+     *  data outbound switch internal error - odd PTL.
+     */
+    (rPAU_PTL_FIR, bit(11)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[12]
+     *  Even PTL, even framer internal error
+     */
+    (rPAU_PTL_FIR, bit(12)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[13]
+     *  Even PTL, outbound switch cmd/presp/cresp internal
+     */
+    (rPAU_PTL_FIR, bit(13)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[14]
+     *  Even PTL, odd framer internal error
+     */
+    (rPAU_PTL_FIR, bit(14)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[15]
+     *  Odd PTL, even framer internal error
+     */
+    (rPAU_PTL_FIR, bit(15)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[16]
+     *  Odd PTL, outbound switch cmd/presp/cresp internal 
+     */
+    (rPAU_PTL_FIR, bit(16)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[17]
+     *  Odd PTL, odd framer internal error
+     */
+    (rPAU_PTL_FIR, bit(17)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[18]
+     *  Even PTL, even parser internal error
+     */
+    (rPAU_PTL_FIR, bit(18)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[19]
+     *  Even PTL, odd parser internal error
+     */
+    (rPAU_PTL_FIR, bit(19)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[20]
+     *  Odd PTL, even parser internal error
+     */
+    (rPAU_PTL_FIR, bit(20)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[21]
+     *  Odd PTL, odd parser internal error
+     */
+    (rPAU_PTL_FIR, bit(21)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[22]
+     *  Even PTL, even link down
+     */
+    (rPAU_PTL_FIR, bit(22)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[23]
+     *  Even PTL, odd link down
+     */
+    (rPAU_PTL_FIR, bit(23)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[24]
+     *  Odd PTL, even link down
+     */
+    (rPAU_PTL_FIR, bit(24)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[25]
+     *  Odd PTL, odd link down
+     */
+    (rPAU_PTL_FIR, bit(25)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[26]
+     *  Even PTL data inbound switch internal error
+     */
+    (rPAU_PTL_FIR, bit(26)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[27]
+     *  Odd PTL data inbound switch internal error
+     */
+    (rPAU_PTL_FIR, bit(27)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[28]
+     *  mailbox 00 special attention. Gets set to 1 when a
+     */
+    (rPAU_PTL_FIR, bit(28)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[29]
+     *  mailbox 01 special attention. Gets set to 1 when a
+     */
+    (rPAU_PTL_FIR, bit(29)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[30]
+     *  mailbox 10 special attention. Gets set to 1 when a
+     */
+    (rPAU_PTL_FIR, bit(30)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[31]
+     *  mailbox 11 special attention. Gets set to 1 when a
+     */
+    (rPAU_PTL_FIR, bit(31)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[32]
+     *  mailbox 20 special attention. Gets set to 1 when a
+     */
+    (rPAU_PTL_FIR, bit(32)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[33]
+     *  mailbox 21 special attention. Gets set to 1 when a
+     */
+    (rPAU_PTL_FIR, bit(33)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[34]
+     *  mailbox 30 special attention. Gets set to 1 when a
+     */
+    (rPAU_PTL_FIR, bit(34)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[35]
+     *  mailbox 31 special attention. Gets set to 1 when a
+     */
+    (rPAU_PTL_FIR, bit(35)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[36]
+     *  ptl0 spare
+     */
+    (rPAU_PTL_FIR, bit(36)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[37]
+     *  ptl1 spare
+     */
+    (rPAU_PTL_FIR, bit(37)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[38]
+     *  ptl2 spare
+     */
+    (rPAU_PTL_FIR, bit(38)) ? defaultMaskedError;
+
+    /** PAU_PTL_FIR[39]
+     *  ptl3 spare
+     */
+    (rPAU_PTL_FIR, bit(39)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# P10 chip PAU_PHY_FIR
+################################################################################
+
+rule rPAU_PHY_FIR
+{
+  CHECK_STOP:
+    PAU_PHY_FIR & ~PAU_PHY_FIR_MASK & ~PAU_PHY_FIR_ACT0 & ~PAU_PHY_FIR_ACT1;
+  RECOVERABLE:
+    PAU_PHY_FIR & ~PAU_PHY_FIR_MASK & ~PAU_PHY_FIR_ACT0 &  PAU_PHY_FIR_ACT1;
+  UNIT_CS:
+    PAU_PHY_FIR & ~PAU_PHY_FIR_MASK &  PAU_PHY_FIR_ACT0 &  PAU_PHY_FIR_ACT1;
+};
+
+group gPAU_PHY_FIR
+    filter singlebit,
+           cs_root_cause
+{
+    /** PAU_PHY_FIR[0]
+     *  FIR Register - A RX state machine parity or mode r
+     */
+    (rPAU_PHY_FIR, bit(0)) ? defaultMaskedError;
+
+    /** PAU_PHY_FIR[1]
+     *  FIR Register - A RX state machine parity or mode r
+     */
+    (rPAU_PHY_FIR, bit(1)) ? defaultMaskedError;
+
+    /** PAU_PHY_FIR[2]
+     *  FIR Register - A RX state machine parity or mode r
+     */
+    (rPAU_PHY_FIR, bit(2)) ? defaultMaskedError;
+
+    /** PAU_PHY_FIR[3]
+     *  FIR Register - A RX state machine parity or mode r
+     */
+    (rPAU_PHY_FIR, bit(3)) ? defaultMaskedError;
+
+    /** PAU_PHY_FIR[4]
+     *  FIR Register - A TX state machine parity or mode r
+     */
+    (rPAU_PHY_FIR, bit(4)) ? defaultMaskedError;
+
+    /** PAU_PHY_FIR[5]
+     *  FIR Register - A TX state machine parity or mode r
+     */
+    (rPAU_PHY_FIR, bit(5)) ? defaultMaskedError;
+
+    /** PAU_PHY_FIR[6]
+     *  FIR Register - A TX state machine parity or mode r
+     */
+    (rPAU_PHY_FIR, bit(6)) ? defaultMaskedError;
+
+    /** PAU_PHY_FIR[7]
+     *  FIR Register - A TX state machine parity or mode r
+     */
+    (rPAU_PHY_FIR, bit(7)) ? defaultMaskedError;
+
+    /** PAU_PHY_FIR[8]
+     *  FIR Register - A TX ZCAL state machine parity or m
+     */
+    (rPAU_PHY_FIR, bit(8)) ? defaultMaskedError;
+
+    /** PAU_PHY_FIR[9]
+     *  FIR Register - A PPE internal error has occurred.
+     */
+    (rPAU_PHY_FIR, bit(9)) ? defaultMaskedError;
+
+    /** PAU_PHY_FIR[10]
+     *  FIR Register - A PPE external error has occurred.
+     */
+    (rPAU_PHY_FIR, bit(10)) ? defaultMaskedError;
+
+    /** PAU_PHY_FIR[11]
+     *  FIR Register - A PPE Halt due to Watchdog or Inter
+     */
+    (rPAU_PHY_FIR, bit(11)) ? defaultMaskedError;
+
+    /** PAU_PHY_FIR[12]
+     *  FIR Register - A PPE Halt due to Debug has occurre
+     */
+    (rPAU_PHY_FIR, bit(12)) ? defaultMaskedError;
+
+    /** PAU_PHY_FIR[13]
+     *  FIR Register - PPE Halted.
+     */
+    (rPAU_PHY_FIR, bit(13)) ? defaultMaskedError;
+
+    /** PAU_PHY_FIR[14]
+     *  FIR Register - A PPE Watchdog Timeout has occurred
+     */
+    (rPAU_PHY_FIR, bit(14)) ? defaultMaskedError;
+
+    /** PAU_PHY_FIR[15]
+     *  FIR Register - A PPE Array Scrub was missed.
+     */
+    (rPAU_PHY_FIR, bit(15)) ? defaultMaskedError;
+
+    /** PAU_PHY_FIR[16]
+     *  FIR Register - A PPE Array uncorrectable error has
+     */
+    (rPAU_PHY_FIR, bit(16)) ? defaultMaskedError;
+
+    /** PAU_PHY_FIR[17]
+     *  FIR Register - A PPE Array correctable error has o
+     */
+    (rPAU_PHY_FIR, bit(17)) ? defaultMaskedError;
+
+    /** PAU_PHY_FIR[18]
+     *  FIR Register - A PPE Code Recal Abort has occurred
+     */
+    (rPAU_PHY_FIR, bit(18)) ? defaultMaskedError;
+
+    /** PAU_PHY_FIR[19]
+     *  FIR Register - A PPE Code Fatal Error has occurred
+     */
+    (rPAU_PHY_FIR, bit(19)) ? defaultMaskedError;
+
+    /** PAU_PHY_FIR[20]
+     *  FIR Register - A PPE Code Warning has occurred.
+     */
+    (rPAU_PHY_FIR, bit(20)) ? defaultMaskedError;
+
+    /** PAU_PHY_FIR[21]
+     *  FIR Register - A PPE Code DFT Error has occurred.
+     */
+    (rPAU_PHY_FIR, bit(21)) ? defaultMaskedError;
+
+    /** PAU_PHY_FIR[22]
+     *  FIR Register - A PPE Code Recal Not Run has occurr
+     */
+    (rPAU_PHY_FIR, bit(22)) ? defaultMaskedError;
+
+    /** PAU_PHY_FIR[23]
+     *  FIR Register - A PPE Code Thread Locked has occurr
+     */
+    (rPAU_PHY_FIR, bit(23)) ? defaultMaskedError;
+
+    /** PAU_PHY_FIR[24]
+     *  FIR Register - A PPE Code FIR 6 has occurred.
+     */
+    (rPAU_PHY_FIR, bit(24)) ? defaultMaskedError;
+
+    /** PAU_PHY_FIR[25]
+     *  FIR Register - A PPE Code FIR 7 has occurred.
+     */
+    (rPAU_PHY_FIR, bit(25)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# P10 chip PAU_DL_FIR
+################################################################################
+
+rule rPAU_DL_FIR
+{
+  CHECK_STOP:
+    PAU_DL_FIR & ~PAU_DL_FIR_MASK & ~PAU_DL_FIR_ACT0 & ~PAU_DL_FIR_ACT1;
+  RECOVERABLE:
+    PAU_DL_FIR & ~PAU_DL_FIR_MASK & ~PAU_DL_FIR_ACT0 &  PAU_DL_FIR_ACT1;
+  UNIT_CS:
+    PAU_DL_FIR & ~PAU_DL_FIR_MASK &  PAU_DL_FIR_ACT0 &  PAU_DL_FIR_ACT1;
+};
+
+group gPAU_DL_FIR
+    filter singlebit,
+           cs_root_cause
+{
+    /** PAU_DL_FIR[0]
+     *  FIR Register - A RX state machine parity or mode r
+     */
+    (rPAU_DL_FIR, bit(0)) ? defaultMaskedError;
+
+    /** PAU_DL_FIR[1]
+     *  FIR Register - A RX state machine parity or mode r
+     */
+    (rPAU_DL_FIR, bit(1)) ? defaultMaskedError;
+
+    /** PAU_DL_FIR[2]
+     *  FIR Register - A RX state machine parity or mode r
+     */
+    (rPAU_DL_FIR, bit(2)) ? defaultMaskedError;
+
+    /** PAU_DL_FIR[3]
+     *  FIR Register - A RX state machine parity or mode r
+     */
+    (rPAU_DL_FIR, bit(3)) ? defaultMaskedError;
+
+    /** PAU_DL_FIR[4]
+     *  FIR Register - A TX state machine parity or mode r
+     */
+    (rPAU_DL_FIR, bit(4)) ? defaultMaskedError;
+
+    /** PAU_DL_FIR[5]
+     *  FIR Register - A TX state machine parity or mode r
+     */
+    (rPAU_DL_FIR, bit(5)) ? defaultMaskedError;
+
+    /** PAU_DL_FIR[6]
+     *  FIR Register - A TX state machine parity or mode r
+     */
+    (rPAU_DL_FIR, bit(6)) ? defaultMaskedError;
+
+    /** PAU_DL_FIR[7]
+     *  FIR Register - A TX state machine parity or mode r
+     */
+    (rPAU_DL_FIR, bit(7)) ? defaultMaskedError;
+
+    /** PAU_DL_FIR[8]
+     *  FIR Register - A TX ZCAL state machine parity or m
+     */
+    (rPAU_DL_FIR, bit(8)) ? defaultMaskedError;
+
+    /** PAU_DL_FIR[9]
+     *  FIR Register - A PPE internal error has occurred.
+     */
+    (rPAU_DL_FIR, bit(9)) ? defaultMaskedError;
+
+    /** PAU_DL_FIR[10]
+     *  FIR Register - A PPE external error has occurred.
+     */
+    (rPAU_DL_FIR, bit(10)) ? defaultMaskedError;
+
+    /** PAU_DL_FIR[11]
+     *  FIR Register - A PPE Halt due to Watchdog or Inter
+     */
+    (rPAU_DL_FIR, bit(11)) ? defaultMaskedError;
+
+    /** PAU_DL_FIR[12]
+     *  FIR Register - A PPE Halt due to Debug has occurre
+     */
+    (rPAU_DL_FIR, bit(12)) ? defaultMaskedError;
+
+    /** PAU_DL_FIR[13]
+     *  FIR Register - PPE Halted.
+     */
+    (rPAU_DL_FIR, bit(13)) ? defaultMaskedError;
+
+    /** PAU_DL_FIR[14]
+     *  FIR Register - A PPE Watchdog Timeout has occurred
+     */
+    (rPAU_DL_FIR, bit(14)) ? defaultMaskedError;
+
+    /** PAU_DL_FIR[15]
+     *  FIR Register - A PPE Array Scrub was missed.
+     */
+    (rPAU_DL_FIR, bit(15)) ? defaultMaskedError;
+
+    /** PAU_DL_FIR[16]
+     *  FIR Register - A PPE Array uncorrectable error has
+     */
+    (rPAU_DL_FIR, bit(16)) ? defaultMaskedError;
+
+    /** PAU_DL_FIR[17]
+     *  FIR Register - A PPE Array correctable error has o
+     */
+    (rPAU_DL_FIR, bit(17)) ? defaultMaskedError;
+
+    /** PAU_DL_FIR[18]
+     *  FIR Register - A PPE Code Recal Abort has occurred
+     */
+    (rPAU_DL_FIR, bit(18)) ? defaultMaskedError;
+
+    /** PAU_DL_FIR[19]
+     *  FIR Register - A PPE Code Fatal Error has occurred
+     */
+    (rPAU_DL_FIR, bit(19)) ? defaultMaskedError;
+
+    /** PAU_DL_FIR[20]
+     *  FIR Register - A PPE Code Warning has occurred.
+     */
+    (rPAU_DL_FIR, bit(20)) ? defaultMaskedError;
+
+    /** PAU_DL_FIR[21]
+     *  FIR Register - A PPE Code DFT Error has occurred.
+     */
+    (rPAU_DL_FIR, bit(21)) ? defaultMaskedError;
+
+    /** PAU_DL_FIR[22]
+     *  FIR Register - A PPE Code Recal Not Run has occurr
+     */
+    (rPAU_DL_FIR, bit(22)) ? defaultMaskedError;
+
+    /** PAU_DL_FIR[23]
+     *  FIR Register - A PPE Code Thread Locked has occurr
+     */
+    (rPAU_DL_FIR, bit(23)) ? defaultMaskedError;
+
+    /** PAU_DL_FIR[24]
+     *  FIR Register - A PPE Code FIR 6 has occurred.
+     */
+    (rPAU_DL_FIR, bit(24)) ? defaultMaskedError;
+
+    /** PAU_DL_FIR[25]
+     *  FIR Register - A PPE Code FIR 7 has occurred.
+     */
+    (rPAU_DL_FIR, bit(25)) ? defaultMaskedError;
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ #    #                                  ###                                  #
+ #   # #    ##  ##### ###  ###  #   #   #   # #     #    ###   ###  ###  ###  #
+ #  #   #  #  #   #    #  #   # ##  #   #     #    # #  #     #     #   #     #
+ # ####### #      #    #  #   # # # #   #     #   #####  ###   ###  ##   ###  #
+ # #     # #  #   #    #  #   # #  ##   #   # #   #   #     #     # #       # #
+ # #     #  ##    #   ###  ###  #   #    ###  ### #   #  ###   ###  ###  ###  #
+ #                                                                            #
+ ##############################################################################
+
+# Include the actions defined for this target
+.include "p10_common_actions.rule";
+.include "p10_pauc_actions.rule";
+

@@ -1,0 +1,1235 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/p10/p10_pau.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2020
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+chip p10_pau
+{
+    name        "P10 PAU target";
+    targettype  TYPE_PAU;
+    sigoff      0x0000;
+    dump        DUMP_CONTENT_HW;
+    scomlen     64;
+
+ #############################################################################
+ #                                                                           #
+ #  ######                                                                   #
+ #  #     #  ######   ####     ###    ####    #####  ######  #####    ####   #
+ #  #     #  #       #    #     #    #          #    #       #    #  #       #
+ #  ######   #####   #          #     ####      #    #####   #    #   ####   #
+ #  #   #    #       #  ###     #         #     #    #       #####        #  #
+ #  #    #   #       #    #     #    #    #     #    #       #   #   #    #  #
+ #  #     #  ######   ####     ###    ####      #    ######  #    #   ####   #
+ #                                                                           #
+ #############################################################################
+
+    ############################################################################
+    # P10 chip PAU_FIR_0
+    ############################################################################
+
+    register PAU_FIR_0
+    {
+        name        "P10 chip PAU_FIR_0";
+        scomaddr    0x10010c00;
+        reset       (&, 0x10010c01);
+        mask        (|, 0x10010c05);
+        capture     group default;
+    };
+
+    register PAU_FIR_0_MASK
+    {
+        name        "P10 chip PAU_FIR_0 MASK";
+        scomaddr    0x10010c03;
+        capture     group default;
+    };
+
+    register PAU_FIR_0_ACT0
+    {
+        name        "P10 chip PAU_FIR_0 ACT0";
+        scomaddr    0x10010c06;
+        capture     group default;
+        capture     req nonzero("PAU_FIR_0");
+    };
+
+    register PAU_FIR_0_ACT1
+    {
+        name        "P10 chip PAU_FIR_0 ACT1";
+        scomaddr    0x10010c07;
+        capture     group default;
+        capture     req nonzero("PAU_FIR_0");
+    };
+
+    ############################################################################
+    # P10 chip PAU_FIR_1
+    ############################################################################
+
+    register PAU_FIR_1
+    {
+        name        "P10 chip PAU_FIR_1";
+        scomaddr    0x10010c40;
+        reset       (&, 0x10010c41);
+        mask        (|, 0x10010c45);
+        capture     group default;
+    };
+
+    register PAU_FIR_1_MASK
+    {
+        name        "P10 chip PAU_FIR_1 MASK";
+        scomaddr    0x10010c43;
+        capture     group default;
+    };
+
+    register PAU_FIR_1_ACT0
+    {
+        name        "P10 chip PAU_FIR_1 ACT0";
+        scomaddr    0x10010c46;
+        capture     group default;
+        capture     req nonzero("PAU_FIR_1");
+    };
+
+    register PAU_FIR_1_ACT1
+    {
+        name        "P10 chip PAU_FIR_1 ACT1";
+        scomaddr    0x10010c47;
+        capture     group default;
+        capture     req nonzero("PAU_FIR_1");
+    };
+
+    ############################################################################
+    # P10 chip PAU_FIR_2
+    ############################################################################
+
+    register PAU_FIR_2
+    {
+        name        "P10 chip PAU_FIR_2";
+        scomaddr    0x10010c80;
+        reset       (&, 0x10010c81);
+        mask        (|, 0x10010c85);
+        capture     group default;
+    };
+
+    register PAU_FIR_2_MASK
+    {
+        name        "P10 chip PAU_FIR_2 MASK";
+        scomaddr    0x10010c83;
+        capture     group default;
+    };
+
+    register PAU_FIR_2_ACT0
+    {
+        name        "P10 chip PAU_FIR_2 ACT0";
+        scomaddr    0x10010c86;
+        capture     group default;
+        capture     req nonzero("PAU_FIR_2");
+    };
+
+    register PAU_FIR_2_ACT1
+    {
+        name        "P10 chip PAU_FIR_2 ACT1";
+        scomaddr    0x10010c87;
+        capture     group default;
+        capture     req nonzero("PAU_FIR_2");
+    };
+
+# Include registers not defined by the xml
+.include "p10_pau_regs.rule";
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ # ####                                 #                                     #
+ # #   # #   # #    #####  ###      #  # #    ##  ##### ###  ###  #   #  ###  #
+ # #   # #   # #    #     #        #  #   #  #  #   #    #  #   # ##  # #     #
+ # ####  #   # #    ####   ###    #  ####### #      #    #  #   # # # #  ###  #
+ # #  #  #   # #    #         #  #   #     # #  #   #    #  #   # #  ##     # #
+ # #   #  ###  #### #####  ###  #    #     #  ##    #   ###  ###  #   #  ###  #
+ #                                                                            #
+ ##############################################################################
+
+################################################################################
+# Summary for PAU
+################################################################################
+
+rule rPAU
+{
+  CHECK_STOP:
+    summary( 0, rPAU_FIR_0 ) |
+    summary( 1, rPAU_FIR_1 ) |
+    summary( 2, rPAU_FIR_2 );
+
+  RECOVERABLE:
+    summary( 0, rPAU_FIR_0 ) |
+    summary( 1, rPAU_FIR_1 ) |
+    summary( 2, rPAU_FIR_2 );
+
+  UNIT_CS:
+    summary( 0, rPAU_FIR_0 ) |
+    summary( 1, rPAU_FIR_1 ) |
+    summary( 2, rPAU_FIR_2 );
+
+};
+
+group gPAU attntype CHECK_STOP, RECOVERABLE, UNIT_CS
+    filter singlebit
+{
+    (rPAU, bit(0)) ? analyze(gPAU_FIR_0);
+    (rPAU, bit(1)) ? analyze(gPAU_FIR_1);
+    (rPAU, bit(2)) ? analyze(gPAU_FIR_2);
+};
+
+################################################################################
+# P10 chip PAU_FIR_0
+################################################################################
+
+rule rPAU_FIR_0
+{
+  CHECK_STOP:
+    PAU_FIR_0 & ~PAU_FIR_0_MASK & ~PAU_FIR_0_ACT0 & ~PAU_FIR_0_ACT1;
+  RECOVERABLE:
+    PAU_FIR_0 & ~PAU_FIR_0_MASK & ~PAU_FIR_0_ACT0 &  PAU_FIR_0_ACT1;
+  UNIT_CS:
+    PAU_FIR_0 & ~PAU_FIR_0_MASK &  PAU_FIR_0_ACT0 &  PAU_FIR_0_ACT1;
+};
+
+group gPAU_FIR_0
+    filter singlebit,
+           cs_root_cause
+{
+    /** PAU_FIR_0[0]
+     *  NTL array CE
+     */
+    (rPAU_FIR_0, bit(0)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[1]
+     *  NTL header array UE
+     */
+    (rPAU_FIR_0, bit(1)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[2]
+     *  NTL data array UE
+     */
+    (rPAU_FIR_0, bit(2)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[3]
+     *  NTL NVLInk Control/Header/AE Parity error
+     */
+    (rPAU_FIR_0, bit(3)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[4]
+     *  NTL NVLink Data Parity error
+     */
+    (rPAU_FIR_0, bit(4)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[5]
+     *  NTL NVLink Malformed Packet (illegal Cmd encode, e
+     */
+    (rPAU_FIR_0, bit(5)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[6]
+     *  NTL NVLink Unsupported Packet (receiving DGD, rece
+     */
+    (rPAU_FIR_0, bit(6)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[7]
+     *  NTL NVLink Config errors (Credits received > max c
+     */
+    (rPAU_FIR_0, bit(7)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[8]
+     *  NTL NVLink CRC errors or LMD=Stomp
+     */
+    (rPAU_FIR_0, bit(8)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[9]
+     *  NTL PRI errors (errors returned by NDL Wrapper on 
+     */
+    (rPAU_FIR_0, bit(9)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[10]
+     *  NTL logic error (overflow, underflow, etc)
+     */
+    (rPAU_FIR_0, bit(10)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[11]
+     *  NTL LMD=Data Poison
+     */
+    (rPAU_FIR_0, bit(11)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[12]
+     *  NTL data array SUE
+     */
+    (rPAU_FIR_0, bit(12)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[13]
+     *  CQ CTL/SM ASBE Array single-bit correctable error
+     */
+    (rPAU_FIR_0, bit(13)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[14]
+     *  CQ CTL/SM PBR  PowerBus Recoverable (ex: abort_trm
+     */
+    (rPAU_FIR_0, bit(14)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[15]
+     *  CQ CTL/SM REG  Register ring error (ie noack)
+     */
+    (rPAU_FIR_0, bit(15)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[16]
+     *  CQ CTL/SM DUE  Data Uncorrectable error for MMIO s
+     */
+    (rPAU_FIR_0, bit(16)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[17]
+     *  CQ CTL/SM UT=1 to frozen PE (for naples this was i
+     */
+    (rPAU_FIR_0, bit(17)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[18]
+     *  CQ CTL/SM NCF  NVLink configuration error (ex: Pro
+     */
+    (rPAU_FIR_0, bit(18)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[19]
+     *  CQ CTL/SM NVF  NVLink fatal (ex: rcv data resp to 
+     */
+    (rPAU_FIR_0, bit(19)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[20]
+     *  CQ CTL/SM OCR OpenCAPI Recoverable, Command failed
+     */
+    (rPAU_FIR_0, bit(20)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[21]
+     *  CQ CTL/SM AUE  Array uncorrectable error
+     */
+    (rPAU_FIR_0, bit(21)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[22]
+     *  CQ CTL/SM PBP  PowerBus parity error
+     */
+    (rPAU_FIR_0, bit(22)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[23]
+     *  CQ CTL/SM PBF  PowerBus Fatal (ex: addr_error CRes
+     */
+    (rPAU_FIR_0, bit(23)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[24]
+     *  CQ CTL/SM PBC  PowerBus configuration error (ex: g
+     */
+    (rPAU_FIR_0, bit(24)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[25]
+     *  CQ CTL/SM FWD  Forward-Progress (internal timer or
+     */
+    (rPAU_FIR_0, bit(25)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[26]
+     *  CQ CTL/SM NLG  PAU Logic error (ex: invalid state,
+     */
+    (rPAU_FIR_0, bit(26)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[27]
+     *  Cresp=Addr_Error received for a load command (Powe
+     */
+    (rPAU_FIR_0, bit(27)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[28]
+     *  Cresp=Addr_Error received for a store command (Pow
+     */
+    (rPAU_FIR_0, bit(28)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[29]
+     *  CQ DAT ECC UE on data/BE arrays. Relevant word is 
+     */
+    (rPAU_FIR_0, bit(29)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[30]
+     *  CQ DAT ECC CE on data/BE arrays
+     */
+    (rPAU_FIR_0, bit(30)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[31]
+     *  CQ DAT parity error on data/BE latches. Relevant w
+     */
+    (rPAU_FIR_0, bit(31)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[32]
+     *  CQ DAT parity errors on configuration registers
+     */
+    (rPAU_FIR_0, bit(32)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[33]
+     *  CQ DAT parity errors on received PowerBus rtag
+     */
+    (rPAU_FIR_0, bit(33)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[34]
+     *  CQ DAT parity errors on internal state latches
+     */
+    (rPAU_FIR_0, bit(34)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[35]
+     *  CQ DAT logic error (invalid state bit patterns, cr
+     */
+    (rPAU_FIR_0, bit(35)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[36]
+     *  CQ_DAT ECC SUE on data/BE arrays that can be due t
+     */
+    (rPAU_FIR_0, bit(36)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[37]
+     *  CQ_DAT ECC SUE on PB receive data (CANNOT be due t
+     */
+    (rPAU_FIR_0, bit(37)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[38]
+     *  CQ DAT Reserved, macro bit 9
+     */
+    (rPAU_FIR_0, bit(38)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[39]
+     *  CQ DAT Reserved, macro bit 10
+     */
+    (rPAU_FIR_0, bit(39)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[40]
+     *  XTS internal logic error
+     */
+    (rPAU_FIR_0, bit(40)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[41]
+     *  XTS correctable errors in XTS internal SRAM
+     */
+    (rPAU_FIR_0, bit(41)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[42]
+     *  XTS uncorrectable errors in XTS internal SRAM
+     */
+    (rPAU_FIR_0, bit(42)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[43]
+     *  XTS correctable error on incoming stack transactio
+     */
+    (rPAU_FIR_0, bit(43)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[44]
+     *  XTS uncorrectable/protocol errors on incoming stac
+     */
+    (rPAU_FIR_0, bit(44)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[45]
+     *  XTS protocol errors on incoming PBUS transaction
+     */
+    (rPAU_FIR_0, bit(45)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[46]
+     *  XTS Translate Request Fail
+     */
+    (rPAU_FIR_0, bit(46)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[47]
+     *  XTS informational fir that is set when the snooper
+     */
+    (rPAU_FIR_0, bit(47)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[48]
+     *  XTS Reserved, macro bit 8
+     */
+    (rPAU_FIR_0, bit(48)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[49]
+     *  XTS Reserved, macro bit 9
+     */
+    (rPAU_FIR_0, bit(49)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[50]
+     *  XTS Reserved, macro bit 10
+     */
+    (rPAU_FIR_0, bit(50)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[51]
+     *  XTS Reserved, macro bit 11
+     */
+    (rPAU_FIR_0, bit(51)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[52]
+     *  XTS Reserved, macro bit 12
+     */
+    (rPAU_FIR_0, bit(52)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[53]
+     *  XTS Reserved, macro bit 13
+     */
+    (rPAU_FIR_0, bit(53)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[54]
+     *  XTS Reserved, macro bit 14
+     */
+    (rPAU_FIR_0, bit(54)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[55]
+     *  XTS Reserved, macro bit 15
+     */
+    (rPAU_FIR_0, bit(55)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[56]
+     *  XTS Reserved, macro bit 16
+     */
+    (rPAU_FIR_0, bit(56)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[57]
+     *  XTS Reserved, macro bit 17
+     */
+    (rPAU_FIR_0, bit(57)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[58]
+     *  XTS Reserved, macro bit 18
+     */
+    (rPAU_FIR_0, bit(58)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[59]
+     *  AME Reserved, interrupt
+     */
+    (rPAU_FIR_0, bit(59)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[60]
+     *  AME data ECC UE
+     */
+    (rPAU_FIR_0, bit(60)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[61]
+     *  AME data SUE
+     */
+    (rPAU_FIR_0, bit(61)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[62]
+     *  Unused FIR
+     */
+    (rPAU_FIR_0, bit(62)) ? defaultMaskedError;
+
+    /** PAU_FIR_0[63]
+     *  Unused FIR
+     */
+    (rPAU_FIR_0, bit(63)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# P10 chip PAU_FIR_1
+################################################################################
+
+rule rPAU_FIR_1
+{
+  CHECK_STOP:
+    PAU_FIR_1 & ~PAU_FIR_1_MASK & ~PAU_FIR_1_ACT0 & ~PAU_FIR_1_ACT1;
+  RECOVERABLE:
+    PAU_FIR_1 & ~PAU_FIR_1_MASK & ~PAU_FIR_1_ACT0 &  PAU_FIR_1_ACT1;
+  UNIT_CS:
+    PAU_FIR_1 & ~PAU_FIR_1_MASK &  PAU_FIR_1_ACT0 &  PAU_FIR_1_ACT1;
+};
+
+group gPAU_FIR_1
+    filter singlebit,
+           cs_root_cause
+{
+    /** PAU_FIR_1[0]
+     *  NDL Brick0 stall
+     */
+    (rPAU_FIR_1, bit(0)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[1]
+     *  NDL Brick0 nostall
+     */
+    (rPAU_FIR_1, bit(1)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[2]
+     *  NDL Brick1 stall
+     */
+    (rPAU_FIR_1, bit(2)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[3]
+     *  NDL Brick1 nostall
+     */
+    (rPAU_FIR_1, bit(3)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[4]
+     *  NDL Brick2 stall
+     */
+    (rPAU_FIR_1, bit(4)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[5]
+     *  NDL Brick2 nostall
+     */
+    (rPAU_FIR_1, bit(5)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[6]
+     *  NDL Brick3 stall
+     */
+    (rPAU_FIR_1, bit(6)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[7]
+     *  NDL Brick3 nostall
+     */
+    (rPAU_FIR_1, bit(7)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[8]
+     *  NDL Brick4 stall
+     */
+    (rPAU_FIR_1, bit(8)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[9]
+     *  NDL Brick4 nostall
+     */
+    (rPAU_FIR_1, bit(9)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[10]
+     *  NDL Brick5 stall
+     */
+    (rPAU_FIR_1, bit(10)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[11]
+     *  NDL Brick5 nostall
+     */
+    (rPAU_FIR_1, bit(11)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[12]
+     *  MISC Register ring error (noack, >1 ack)
+     */
+    (rPAU_FIR_1, bit(12)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[13]
+     *  MISC Parity error from interrupt base real address
+     */
+    (rPAU_FIR_1, bit(13)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[14]
+     *  MISC Parity error on Indirect SCOM Address registe
+     */
+    (rPAU_FIR_1, bit(14)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[15]
+     *  MISC Parity error on MISC Control register
+     */
+    (rPAU_FIR_1, bit(15)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[16]
+     *  FIR1 Reserved, bit 16
+     */
+    (rPAU_FIR_1, bit(16)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[17]
+     *  ATS Invalid TVT entry (TCE Table Size = 0b00000)
+     */
+    (rPAU_FIR_1, bit(17)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[18]
+     *  ATS TVT Address range error (no xlate: EA out of r
+     */
+    (rPAU_FIR_1, bit(18)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[19]
+     *  ATS TCE Page access error during TCE cache lookup
+     */
+    (rPAU_FIR_1, bit(19)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[20]
+     *  ATS Effective Address hit multiple TCE cache entri
+     */
+    (rPAU_FIR_1, bit(20)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[21]
+     *  ATS TCE Page access error during TCE table-walk
+     */
+    (rPAU_FIR_1, bit(21)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[22]
+     *  ATS Timeout on TCE tree walk
+     */
+    (rPAU_FIR_1, bit(22)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[23]
+     *  ATS Parity error on TCE cache directory array
+     */
+    (rPAU_FIR_1, bit(23)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[24]
+     *  ATS Parity error on TCE cache data array
+     */
+    (rPAU_FIR_1, bit(24)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[25]
+     *  ATS ECC UE on Effective Address array
+     */
+    (rPAU_FIR_1, bit(25)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[26]
+     *  ATS ECC CE on Effective Address array
+     */
+    (rPAU_FIR_1, bit(26)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[27]
+     *  ATS ECC UE on TDRmem array (table-walk state machi
+     */
+    (rPAU_FIR_1, bit(27)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[28]
+     *  ATS ECC CE on TDRmem array
+     */
+    (rPAU_FIR_1, bit(28)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[29]
+     *  ATS ECC UE on CQ CTL DMA Read data to TDR_mem arra
+     */
+    (rPAU_FIR_1, bit(29)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[30]
+     *  ATS ECC CE on CQ CTL DMA Read data to TDR_mem arra
+     */
+    (rPAU_FIR_1, bit(30)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[31]
+     *  ATS Parity error on TVT entry
+     */
+    (rPAU_FIR_1, bit(31)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[32]
+     *  ATS Parity error on IODA Address Register
+     */
+    (rPAU_FIR_1, bit(32)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[33]
+     *  ATS Parity error on ATS Control Register
+     */
+    (rPAU_FIR_1, bit(33)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[34]
+     *  ATS Parity error on ATS Timeout Control register
+     */
+    (rPAU_FIR_1, bit(34)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[35]
+     *  ATS Invalid IODA Table Address Register Table Sele
+     */
+    (rPAU_FIR_1, bit(35)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[36]
+     *  ATS Reserved, macro bit 19
+     */
+    (rPAU_FIR_1, bit(36)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[37]
+     *  kill xlate epoch timeout.
+     */
+    (rPAU_FIR_1, bit(37)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[38]
+     *  XSL Reserved, macro bit 19.
+     */
+    (rPAU_FIR_1, bit(38)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[39]
+     *  XSL Reserved, macro bit 20.
+     */
+    (rPAU_FIR_1, bit(39)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[40]
+     *  XSL Reserved, macro bit 21.
+     */
+    (rPAU_FIR_1, bit(40)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[41]
+     *  XSL Reserved, macro bit 22.
+     */
+    (rPAU_FIR_1, bit(41)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[42]
+     *  XSL Reserved, macro bit 23.
+     */
+    (rPAU_FIR_1, bit(42)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[43]
+     *  XSL Reserved, macro bit 24.
+     */
+    (rPAU_FIR_1, bit(43)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[44]
+     *  XSL Reserved, macro bit 25.
+     */
+    (rPAU_FIR_1, bit(44)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[45]
+     *  XSL Reserved, macro bit 26.
+     */
+    (rPAU_FIR_1, bit(45)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[46]
+     *  XSL Reserved, macro bit 27.
+     */
+    (rPAU_FIR_1, bit(46)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[47]
+     *  NDL Brick6 stall
+     */
+    (rPAU_FIR_1, bit(47)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[48]
+     *  NDL Brick6 nostall
+     */
+    (rPAU_FIR_1, bit(48)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[49]
+     *  NDL Brick7 stall
+     */
+    (rPAU_FIR_1, bit(49)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[50]
+     *  NDL Brick7 nostall
+     */
+    (rPAU_FIR_1, bit(50)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[51]
+     *  NDL Brick8 stall
+     */
+    (rPAU_FIR_1, bit(51)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[52]
+     *  NDL Brick8 nostall
+     */
+    (rPAU_FIR_1, bit(52)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[53]
+     *  NDL Brick9 stall
+     */
+    (rPAU_FIR_1, bit(53)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[54]
+     *  NDL Brick9 nostall
+     */
+    (rPAU_FIR_1, bit(54)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[55]
+     *  NDL Brick10 stall
+     */
+    (rPAU_FIR_1, bit(55)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[56]
+     *  NDL Brick10 nostall
+     */
+    (rPAU_FIR_1, bit(56)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[57]
+     *  NDL Brick11 stall
+     */
+    (rPAU_FIR_1, bit(57)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[58]
+     *  NDL Brick11 nostall
+     */
+    (rPAU_FIR_1, bit(58)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[59]
+     *  AME ECC CE
+     */
+    (rPAU_FIR_1, bit(59)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[60]
+     *  MISC Pervasive SCOM satellite signaled internal FS
+     */
+    (rPAU_FIR_1, bit(60)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[61]
+     *  MISC Pervasive SCOM satellite signaled internal FS
+     */
+    (rPAU_FIR_1, bit(61)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[62]
+     *  Unused FIR
+     */
+    (rPAU_FIR_1, bit(62)) ? defaultMaskedError;
+
+    /** PAU_FIR_1[63]
+     *  Unused FIR
+     */
+    (rPAU_FIR_1, bit(63)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# P10 chip PAU_FIR_2
+################################################################################
+
+rule rPAU_FIR_2
+{
+  CHECK_STOP:
+    PAU_FIR_2 & ~PAU_FIR_2_MASK & ~PAU_FIR_2_ACT0 & ~PAU_FIR_2_ACT1;
+  RECOVERABLE:
+    PAU_FIR_2 & ~PAU_FIR_2_MASK & ~PAU_FIR_2_ACT0 &  PAU_FIR_2_ACT1;
+  UNIT_CS:
+    PAU_FIR_2 & ~PAU_FIR_2_MASK &  PAU_FIR_2_ACT0 &  PAU_FIR_2_ACT1;
+};
+
+group gPAU_FIR_2
+    filter singlebit,
+           cs_root_cause
+{
+    /** PAU_FIR_2[0]
+     *  OTL Brick2 translation fault
+     */
+    (rPAU_FIR_2, bit(0)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[1]
+     *  OTL Brick3 translation fault
+     */
+    (rPAU_FIR_2, bit(1)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[2]
+     *  OTL Brick4 translation fault
+     */
+    (rPAU_FIR_2, bit(2)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[3]
+     *  OTL Brick5 translation fault
+     */
+    (rPAU_FIR_2, bit(3)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[4]
+     *  OTL TL credit counter overflow caused by return_tl
+     */
+    (rPAU_FIR_2, bit(4)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[5]
+     *  OTL RX acTag specified in a command is outside the
+     */
+    (rPAU_FIR_2, bit(5)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[6]
+     *  OTL RX acTag specified in the command points to an
+     */
+    (rPAU_FIR_2, bit(6)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[7]
+     *  OTL RX reserved opcode used.
+     */
+    (rPAU_FIR_2, bit(7)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[8]
+     *  OTL RX return_tl_credit command found outside slot
+     */
+    (rPAU_FIR_2, bit(8)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[9]
+     *  OTL RX bad opcode and template combination.
+     */
+    (rPAU_FIR_2, bit(9)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[10]
+     *  OTL RX unsupported template format.
+     */
+    (rPAU_FIR_2, bit(10)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[11]
+     *  OTL RX bad template x00 format.
+     */
+    (rPAU_FIR_2, bit(11)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[12]
+     *  OTL RX control flit overrun.
+     */
+    (rPAU_FIR_2, bit(12)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[13]
+     *  OTL RX unexpected data flit.
+     */
+    (rPAU_FIR_2, bit(13)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[14]
+     *  OTL RX DL link down.
+     */
+    (rPAU_FIR_2, bit(14)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[15]
+     *  OTL RX bad data received on command.
+     */
+    (rPAU_FIR_2, bit(15)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[16]
+     *  OTL RX bad data received on response.
+     */
+    (rPAU_FIR_2, bit(16)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[17]
+     *  OTL RX AP response not allowed (CAPPTag not recogn
+     */
+    (rPAU_FIR_2, bit(17)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[18]
+     *  OR of all OTL parity errors.
+     */
+    (rPAU_FIR_2, bit(18)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[19]
+     *  OR of all OTL ECC CE errors.
+     */
+    (rPAU_FIR_2, bit(19)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[20]
+     *  OR of all OTL ECC UE errors.
+     */
+    (rPAU_FIR_2, bit(20)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[21]
+     *  RXO OP Errors.
+     */
+    (rPAU_FIR_2, bit(21)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[22]
+     *  RXO Internal Errors.
+     */
+    (rPAU_FIR_2, bit(22)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[23]
+     *  OTL RXI fifo overrun.
+     */
+    (rPAU_FIR_2, bit(23)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[24]
+     *  OTL RXI control flit data run length invalid.
+     */
+    (rPAU_FIR_2, bit(24)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[25]
+     *  OTL RXI opcode utilizing dLength specifies dL=0b00
+     */
+    (rPAU_FIR_2, bit(25)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[26]
+     *  OTL RXI bad data received vc2.
+     */
+    (rPAU_FIR_2, bit(26)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[27]
+     *  OTL RXI dcp2 fifo overrun.
+     */
+    (rPAU_FIR_2, bit(27)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[28]
+     *  OTL RXI vc1 fifo overrun.
+     */
+    (rPAU_FIR_2, bit(28)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[29]
+     *  OTL RXI vc2 fifo overrun.
+     */
+    (rPAU_FIR_2, bit(29)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[30]
+     *  Opcode data length not supported.
+     */
+    (rPAU_FIR_2, bit(30)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[31]
+     *  OTL TXI opcode error.
+     */
+    (rPAU_FIR_2, bit(31)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[32]
+     *  malformed packet error type 4 (rxi_misc_error_fiel
+     */
+    (rPAU_FIR_2, bit(32)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[33]
+     *  OTL Happi no bar match
+     */
+    (rPAU_FIR_2, bit(33)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[34]
+     *  OTL Reserved, macro bit 30.
+     */
+    (rPAU_FIR_2, bit(34)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[35]
+     *  OTL Reserved, macro bit 31.
+     */
+    (rPAU_FIR_2, bit(35)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[36]
+     *  MMIO invalidate requested while one is in progress
+     */
+    (rPAU_FIR_2, bit(36)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[37]
+     *  Unexpected ITAG returned on itag completion port 0
+     */
+    (rPAU_FIR_2, bit(37)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[38]
+     *  Unexpected ITAG returned on itag completion port 1
+     */
+    (rPAU_FIR_2, bit(38)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[39]
+     *  Unexpected Read PEE completion.
+     */
+    (rPAU_FIR_2, bit(39)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[40]
+     *  Unexpected Checkout response.
+     */
+    (rPAU_FIR_2, bit(40)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[41]
+     *  Translation request while SPAP is invalid.
+     */
+    (rPAU_FIR_2, bit(41)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[42]
+     *  Read a PEE which was not valid.
+     */
+    (rPAU_FIR_2, bit(42)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[43]
+     *  Bloom filter protection error.
+     */
+    (rPAU_FIR_2, bit(43)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[44]
+     *  Translation request to non-valid TA.
+     */
+    (rPAU_FIR_2, bit(44)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[45]
+     *  TA Translation request to an invalid TA.
+     */
+    (rPAU_FIR_2, bit(45)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[46]
+     *  correctable array error (SBE).
+     */
+    (rPAU_FIR_2, bit(46)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[47]
+     *  uncorrectable array error (UE or parity).
+     */
+    (rPAU_FIR_2, bit(47)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[48]
+     *  S/TLBI buffer overflow.
+     */
+    (rPAU_FIR_2, bit(48)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[49]
+     *  SBE correctable error on Powerbus checkout respons
+     */
+    (rPAU_FIR_2, bit(49)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[50]
+     *  UE  uncorrectable error on Powerbus checkout respo
+     */
+    (rPAU_FIR_2, bit(50)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[51]
+     *  SUE error on Powerbus checkout response data or Po
+     */
+    (rPAU_FIR_2, bit(51)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[52]
+     *  PA mem_hit when bar mode is nonzero .
+     */
+    (rPAU_FIR_2, bit(52)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[53]
+     *  XSL Reserved, macro bit 17.
+     */
+    (rPAU_FIR_2, bit(53)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[54]
+     *  OTL Brick0 translation fault
+     */
+    (rPAU_FIR_2, bit(54)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[55]
+     *  OTL Brick1 translation fault
+     */
+    (rPAU_FIR_2, bit(55)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[56]
+     *  AME ECC UE on control information or state bit err
+     */
+    (rPAU_FIR_2, bit(56)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[57]
+     *  AME ECC UE on control information or state bit err
+     */
+    (rPAU_FIR_2, bit(57)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[58]
+     *  AME Logic errors that are contained within AME and
+     */
+    (rPAU_FIR_2, bit(58)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[59]
+     *  AME Logic errors that can affect correctness of ex
+     */
+    (rPAU_FIR_2, bit(59)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[60]
+     *  AME firmware-detected fatal error conditions
+     */
+    (rPAU_FIR_2, bit(60)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[61]
+     *  AME Reserved
+     */
+    (rPAU_FIR_2, bit(61)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[62]
+     *  Unused FIR
+     */
+    (rPAU_FIR_2, bit(62)) ? defaultMaskedError;
+
+    /** PAU_FIR_2[63]
+     *  Unused FIR
+     */
+    (rPAU_FIR_2, bit(63)) ? defaultMaskedError;
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ #    #                                  ###                                  #
+ #   # #    ##  ##### ###  ###  #   #   #   # #     #    ###   ###  ###  ###  #
+ #  #   #  #  #   #    #  #   # ##  #   #     #    # #  #     #     #   #     #
+ # ####### #      #    #  #   # # # #   #     #   #####  ###   ###  ##   ###  #
+ # #     # #  #   #    #  #   # #  ##   #   # #   #   #     #     # #       # #
+ # #     #  ##    #   ###  ###  #   #    ###  ### #   #  ###   ###  ###  ###  #
+ #                                                                            #
+ ##############################################################################
+
+# Include the actions defined for this target
+.include "p10_common_actions.rule";
+.include "p10_pau_actions.rule";
+

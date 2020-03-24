@@ -1,0 +1,1043 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/p10/p10_eq.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2020
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+chip p10_eq
+{
+    name        "P10 EQ target";
+    targettype  TYPE_EQ;
+    sigoff      0x0000;
+    dump        DUMP_CONTENT_HW;
+    scomlen     64;
+
+ #############################################################################
+ #                                                                           #
+ #  ######                                                                   #
+ #  #     #  ######   ####     ###    ####    #####  ######  #####    ####   #
+ #  #     #  #       #    #     #    #          #    #       #    #  #       #
+ #  ######   #####   #          #     ####      #    #####   #    #   ####   #
+ #  #   #    #       #  ###     #         #     #    #       #####        #  #
+ #  #    #   #       #    #     #    #    #     #    #       #   #   #    #  #
+ #  #     #  ######   ####     ###    ####      #    ######  #    #   ####   #
+ #                                                                           #
+ #############################################################################
+
+    ############################################################################
+    # EQ Chiplet Checkstop FIR
+    ############################################################################
+
+    register EQ_CHIPLET_CS_FIR
+    {
+        name        "EQ Chiplet Checkstop FIR";
+        scomaddr    0x20040000;
+        capture     group default;
+    };
+
+    register EQ_CHIPLET_CS_FIR_MASK
+    {
+        name        "EQ Chiplet Checkstop FIR MASK";
+        scomaddr    0x20040040;
+        capture     group default;
+    };
+
+    ############################################################################
+    # EQ Chiplet Recoverable FIR
+    ############################################################################
+
+    register EQ_CHIPLET_RE_FIR
+    {
+        name        "EQ Chiplet Recoverable FIR";
+        scomaddr    0x20040001;
+        capture     group default;
+    };
+
+    register EQ_CHIPLET_RE_FIR_MASK
+    {
+        name        "EQ Chiplet Recoverable FIR MASK";
+        scomaddr    0x20040041;
+        capture     group default;
+    };
+
+    ############################################################################
+    # EQ Chiplet Unit Checkstop FIR
+    ############################################################################
+
+    register EQ_CHIPLET_UCS_FIR
+    {
+        name        "EQ Chiplet Unit Checkstop FIR";
+        scomaddr    0x20040003;
+        capture     group default;
+    };
+
+    register EQ_CHIPLET_UCS_FIR_MASK
+    {
+        name        "EQ Chiplet Unit Checkstop FIR MASK";
+        scomaddr    0x20040043;
+        capture     group default;
+    };
+
+    ############################################################################
+    # EQ Chiplet Host Attention FIR
+    ############################################################################
+
+    register EQ_CHIPLET_HA_FIR
+    {
+        name        "EQ Chiplet Host Attention FIR";
+        scomaddr    0x20040004;
+        capture     group default;
+    };
+
+    register EQ_CHIPLET_HA_FIR_MASK
+    {
+        name        "EQ Chiplet Host Attention FIR MASK";
+        scomaddr    0x20040044;
+        capture     group default;
+    };
+
+    ############################################################################
+    # P10 chip EQ_LOCAL_FIR
+    ############################################################################
+
+    register EQ_LOCAL_FIR
+    {
+        name        "P10 chip EQ_LOCAL_FIR";
+        scomaddr    0x20040100;
+        reset       (&, 0x20040101);
+        mask        (|, 0x20040105);
+        capture     group default;
+    };
+
+    register EQ_LOCAL_FIR_MASK
+    {
+        name        "P10 chip EQ_LOCAL_FIR MASK";
+        scomaddr    0x20040103;
+        capture     group default;
+    };
+
+    register EQ_LOCAL_FIR_ACT0
+    {
+        name        "P10 chip EQ_LOCAL_FIR ACT0";
+        scomaddr    0x20040106;
+        capture     group default;
+        capture     req nonzero("EQ_LOCAL_FIR");
+    };
+
+    register EQ_LOCAL_FIR_ACT1
+    {
+        name        "P10 chip EQ_LOCAL_FIR ACT1";
+        scomaddr    0x20040107;
+        capture     group default;
+        capture     req nonzero("EQ_LOCAL_FIR");
+    };
+
+    register EQ_LOCAL_FIR_ACT2
+    {
+        name        "P10 chip EQ_LOCAL_FIR ACT2";
+        scomaddr    0x20040109;
+        capture     group default;
+        capture     req nonzero("EQ_LOCAL_FIR");
+    };
+
+    ############################################################################
+    # P10 chip EQ_QME_FIR
+    ############################################################################
+
+    register EQ_QME_FIR
+    {
+        name        "P10 chip EQ_QME_FIR";
+        scomaddr    0x200e0000;
+        reset       (&, 0x200e0001);
+        mask        (|, 0x200e0005);
+        capture     group default;
+    };
+
+    register EQ_QME_FIR_MASK
+    {
+        name        "P10 chip EQ_QME_FIR MASK";
+        scomaddr    0x200e0003;
+        capture     group default;
+    };
+
+    register EQ_QME_FIR_ACT0
+    {
+        name        "P10 chip EQ_QME_FIR ACT0";
+        scomaddr    0x200e0006;
+        capture     group default;
+        capture     req nonzero("EQ_QME_FIR");
+    };
+
+    register EQ_QME_FIR_ACT1
+    {
+        name        "P10 chip EQ_QME_FIR ACT1";
+        scomaddr    0x200e0007;
+        capture     group default;
+        capture     req nonzero("EQ_QME_FIR");
+    };
+
+# Include registers not defined by the xml
+.include "p10_eq_regs.rule";
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ # ####                                 #                                     #
+ # #   # #   # #    #####  ###      #  # #    ##  ##### ###  ###  #   #  ###  #
+ # #   # #   # #    #     #        #  #   #  #  #   #    #  #   # ##  # #     #
+ # ####  #   # #    ####   ###    #  ####### #      #    #  #   # # # #  ###  #
+ # #  #  #   # #    #         #  #   #     # #  #   #    #  #   # #  ##     # #
+ # #   #  ###  #### #####  ###  #    #     #  ##    #   ###  ###  #   #  ###  #
+ #                                                                            #
+ ##############################################################################
+
+################################################################################
+# EQ Chiplet Checkstop FIR
+################################################################################
+
+rule rEQ_CHIPLET_CS_FIR
+{
+  CHECK_STOP:
+    EQ_CHIPLET_CS_FIR & ~EQ_CHIPLET_CS_FIR_MASK & `0fffffffffffffff`;
+};
+
+group gEQ_CHIPLET_CS_FIR attntype CHECK_STOP
+    filter singlebit
+{
+    /** EQ_CHIPLET_CS_FIR[4]
+     *  Attention from EQ_LOCAL_FIR
+     */
+    (rEQ_CHIPLET_CS_FIR, bit(4)) ? analyze(gEQ_LOCAL_FIR);
+
+    /** EQ_CHIPLET_CS_FIR[5]
+     *  Attention from EQ_CORE_FIR 0
+     */
+    (rEQ_CHIPLET_CS_FIR, bit(5)) ? analyzeConnectedCORE0;
+
+    /** EQ_CHIPLET_CS_FIR[6]
+     *  Attention from EQ_CORE_FIR 1
+     */
+    (rEQ_CHIPLET_CS_FIR, bit(6)) ? analyzeConnectedCORE1;
+
+    /** EQ_CHIPLET_CS_FIR[7]
+     *  Attention from EQ_CORE_FIR 2
+     */
+    (rEQ_CHIPLET_CS_FIR, bit(7)) ? analyzeConnectedCORE2;
+
+    /** EQ_CHIPLET_CS_FIR[8]
+     *  Attention from EQ_CORE_FIR 3
+     */
+    (rEQ_CHIPLET_CS_FIR, bit(8)) ? analyzeConnectedCORE3;
+
+    /** EQ_CHIPLET_CS_FIR[9]
+     *  Attention from EQ_L2_FIR 0
+     */
+    (rEQ_CHIPLET_CS_FIR, bit(9)) ? analyzeConnectedCORE0;
+
+    /** EQ_CHIPLET_CS_FIR[10]
+     *  Attention from EQ_L2_FIR 1
+     */
+    (rEQ_CHIPLET_CS_FIR, bit(10)) ? analyzeConnectedCORE1;
+
+    /** EQ_CHIPLET_CS_FIR[11]
+     *  Attention from EQ_L2_FIR 2
+     */
+    (rEQ_CHIPLET_CS_FIR, bit(11)) ? analyzeConnectedCORE2;
+
+    /** EQ_CHIPLET_CS_FIR[12]
+     *  Attention from EQ_L2_FIR 3
+     */
+    (rEQ_CHIPLET_CS_FIR, bit(12)) ? analyzeConnectedCORE3;
+
+    /** EQ_CHIPLET_CS_FIR[13]
+     *  Attention from EQ_L3_FIR 0
+     */
+    (rEQ_CHIPLET_CS_FIR, bit(13)) ? analyzeConnectedCORE0;
+
+    /** EQ_CHIPLET_CS_FIR[14]
+     *  Attention from EQ_L3_FIR 1
+     */
+    (rEQ_CHIPLET_CS_FIR, bit(14)) ? analyzeConnectedCORE1;
+
+    /** EQ_CHIPLET_CS_FIR[15]
+     *  Attention from EQ_L3_FIR 2
+     */
+    (rEQ_CHIPLET_CS_FIR, bit(15)) ? analyzeConnectedCORE2;
+
+    /** EQ_CHIPLET_CS_FIR[16]
+     *  Attention from EQ_L3_FIR 3
+     */
+    (rEQ_CHIPLET_CS_FIR, bit(16)) ? analyzeConnectedCORE3;
+
+    /** EQ_CHIPLET_CS_FIR[17]
+     *  Attention from EQ_NCU_FIR 0
+     */
+    (rEQ_CHIPLET_CS_FIR, bit(17)) ? analyzeConnectedCORE0;
+
+    /** EQ_CHIPLET_CS_FIR[18]
+     *  Attention from EQ_NCU_FIR 1
+     */
+    (rEQ_CHIPLET_CS_FIR, bit(18)) ? analyzeConnectedCORE1;
+
+    /** EQ_CHIPLET_CS_FIR[19]
+     *  Attention from EQ_NCU_FIR 2
+     */
+    (rEQ_CHIPLET_CS_FIR, bit(19)) ? analyzeConnectedCORE2;
+
+    /** EQ_CHIPLET_CS_FIR[20]
+     *  Attention from EQ_NCU_FIR 3
+     */
+    (rEQ_CHIPLET_CS_FIR, bit(20)) ? analyzeConnectedCORE3;
+
+    /** EQ_CHIPLET_CS_FIR[21]
+     *  Attention from EQ_QME_FIR
+     */
+    (rEQ_CHIPLET_CS_FIR, bit(21)) ? analyze(gEQ_QME_FIR);
+
+};
+
+################################################################################
+# EQ Chiplet Recoverable FIR
+################################################################################
+
+rule rEQ_CHIPLET_RE_FIR
+{
+  RECOVERABLE:
+    EQ_CHIPLET_RE_FIR & ~EQ_CHIPLET_RE_FIR_MASK & `2fffffffffffffff`;
+};
+
+group gEQ_CHIPLET_RE_FIR attntype RECOVERABLE
+    filter singlebit
+{
+    /** EQ_CHIPLET_RE_FIR[2]
+     *  Unit Checkstop from a CORE FIR
+     */
+    (rEQ_CHIPLET_RE_FIR, bit(2)) ? coreUnitCheckstop;
+
+    /** EQ_CHIPLET_RE_FIR[4]
+     *  Attention from EQ_LOCAL_FIR
+     */
+    (rEQ_CHIPLET_RE_FIR, bit(4)) ? analyze(gEQ_LOCAL_FIR);
+
+    /** EQ_CHIPLET_RE_FIR[5]
+     *  Attention from EQ_CORE_FIR 0
+     */
+    (rEQ_CHIPLET_RE_FIR, bit(5)) ? analyzeConnectedCORE0;
+
+    /** EQ_CHIPLET_RE_FIR[6]
+     *  Attention from EQ_CORE_FIR 1
+     */
+    (rEQ_CHIPLET_RE_FIR, bit(6)) ? analyzeConnectedCORE1;
+
+    /** EQ_CHIPLET_RE_FIR[7]
+     *  Attention from EQ_CORE_FIR 2
+     */
+    (rEQ_CHIPLET_RE_FIR, bit(7)) ? analyzeConnectedCORE2;
+
+    /** EQ_CHIPLET_RE_FIR[8]
+     *  Attention from EQ_CORE_FIR 3
+     */
+    (rEQ_CHIPLET_RE_FIR, bit(8)) ? analyzeConnectedCORE3;
+
+    /** EQ_CHIPLET_RE_FIR[9]
+     *  Attention from EQ_L2_FIR 0
+     */
+    (rEQ_CHIPLET_RE_FIR, bit(9)) ? analyzeConnectedCORE0;
+
+    /** EQ_CHIPLET_RE_FIR[10]
+     *  Attention from EQ_L2_FIR 1
+     */
+    (rEQ_CHIPLET_RE_FIR, bit(10)) ? analyzeConnectedCORE1;
+
+    /** EQ_CHIPLET_RE_FIR[11]
+     *  Attention from EQ_L2_FIR 2
+     */
+    (rEQ_CHIPLET_RE_FIR, bit(11)) ? analyzeConnectedCORE2;
+
+    /** EQ_CHIPLET_RE_FIR[12]
+     *  Attention from EQ_L2_FIR 3
+     */
+    (rEQ_CHIPLET_RE_FIR, bit(12)) ? analyzeConnectedCORE3;
+
+    /** EQ_CHIPLET_RE_FIR[13]
+     *  Attention from EQ_L3_FIR 0
+     */
+    (rEQ_CHIPLET_RE_FIR, bit(13)) ? analyzeConnectedCORE0;
+
+    /** EQ_CHIPLET_RE_FIR[14]
+     *  Attention from EQ_L3_FIR 1
+     */
+    (rEQ_CHIPLET_RE_FIR, bit(14)) ? analyzeConnectedCORE1;
+
+    /** EQ_CHIPLET_RE_FIR[15]
+     *  Attention from EQ_L3_FIR 2
+     */
+    (rEQ_CHIPLET_RE_FIR, bit(15)) ? analyzeConnectedCORE2;
+
+    /** EQ_CHIPLET_RE_FIR[16]
+     *  Attention from EQ_L3_FIR 3
+     */
+    (rEQ_CHIPLET_RE_FIR, bit(16)) ? analyzeConnectedCORE3;
+
+    /** EQ_CHIPLET_RE_FIR[17]
+     *  Attention from EQ_NCU_FIR 0
+     */
+    (rEQ_CHIPLET_RE_FIR, bit(17)) ? analyzeConnectedCORE0;
+
+    /** EQ_CHIPLET_RE_FIR[18]
+     *  Attention from EQ_NCU_FIR 1
+     */
+    (rEQ_CHIPLET_RE_FIR, bit(18)) ? analyzeConnectedCORE1;
+
+    /** EQ_CHIPLET_RE_FIR[19]
+     *  Attention from EQ_NCU_FIR 2
+     */
+    (rEQ_CHIPLET_RE_FIR, bit(19)) ? analyzeConnectedCORE2;
+
+    /** EQ_CHIPLET_RE_FIR[20]
+     *  Attention from EQ_NCU_FIR 3
+     */
+    (rEQ_CHIPLET_RE_FIR, bit(20)) ? analyzeConnectedCORE3;
+
+    /** EQ_CHIPLET_RE_FIR[21]
+     *  Attention from EQ_QME_FIR
+     */
+    (rEQ_CHIPLET_RE_FIR, bit(21)) ? analyze(gEQ_QME_FIR);
+
+};
+
+################################################################################
+# EQ Chiplet Unit Checkstop FIR
+################################################################################
+
+rule rEQ_CHIPLET_UCS_FIR
+{
+  UNIT_CS:
+    EQ_CHIPLET_UCS_FIR & ~EQ_CHIPLET_UCS_FIR_MASK & `0fffffffffffffff`;
+};
+
+group gEQ_CHIPLET_UCS_FIR attntype UNIT_CS
+    filter singlebit
+{
+    /** EQ_CHIPLET_UCS_FIR[4]
+     *  Attention from EQ_LOCAL_FIR
+     */
+    (rEQ_CHIPLET_UCS_FIR, bit(4)) ? analyze(gEQ_LOCAL_FIR);
+
+    /** EQ_CHIPLET_UCS_FIR[5]
+     *  Attention from EQ_CORE_FIR 0
+     */
+    (rEQ_CHIPLET_UCS_FIR, bit(5)) ? analyzeConnectedCORE0;
+
+    /** EQ_CHIPLET_UCS_FIR[6]
+     *  Attention from EQ_CORE_FIR 1
+     */
+    (rEQ_CHIPLET_UCS_FIR, bit(6)) ? analyzeConnectedCORE1;
+
+    /** EQ_CHIPLET_UCS_FIR[7]
+     *  Attention from EQ_CORE_FIR 2
+     */
+    (rEQ_CHIPLET_UCS_FIR, bit(7)) ? analyzeConnectedCORE2;
+
+    /** EQ_CHIPLET_UCS_FIR[8]
+     *  Attention from EQ_CORE_FIR 3
+     */
+    (rEQ_CHIPLET_UCS_FIR, bit(8)) ? analyzeConnectedCORE3;
+
+};
+
+################################################################################
+# EQ Chiplet Host Attention FIR
+################################################################################
+
+rule rEQ_CHIPLET_HA_FIR
+{
+  HOST_ATTN:
+    EQ_CHIPLET_HA_FIR & ~EQ_CHIPLET_HA_FIR_MASK & `0fffffffffffffff`;
+};
+
+group gEQ_CHIPLET_HA_FIR attntype HOST_ATTN
+    filter singlebit
+{
+    /** EQ_CHIPLET_HA_FIR[4]
+     *  Attention from EQ_LOCAL_FIR
+     */
+    (rEQ_CHIPLET_HA_FIR, bit(4)) ? analyze(gEQ_LOCAL_FIR);
+
+};
+
+################################################################################
+# P10 chip EQ_LOCAL_FIR
+################################################################################
+
+rule rEQ_LOCAL_FIR
+{
+  CHECK_STOP:
+    EQ_LOCAL_FIR & ~EQ_LOCAL_FIR_MASK &  EQ_LOCAL_FIR_ACT0 & ~EQ_LOCAL_FIR_ACT1 & ~EQ_LOCAL_FIR_ACT2;
+  HOST_ATTN:
+    EQ_LOCAL_FIR & ~EQ_LOCAL_FIR_MASK &  EQ_LOCAL_FIR_ACT0 & ~EQ_LOCAL_FIR_ACT1 &  EQ_LOCAL_FIR_ACT2;
+  RECOVERABLE:
+    EQ_LOCAL_FIR & ~EQ_LOCAL_FIR_MASK &  EQ_LOCAL_FIR_ACT0 &  EQ_LOCAL_FIR_ACT1 & ~EQ_LOCAL_FIR_ACT2;
+  UNIT_CS:
+    EQ_LOCAL_FIR & ~EQ_LOCAL_FIR_MASK & ~EQ_LOCAL_FIR_ACT0 &  EQ_LOCAL_FIR_ACT1 & ~EQ_LOCAL_FIR_ACT2;
+};
+
+group gEQ_LOCAL_FIR
+    filter singlebit,
+           cs_root_cause
+{
+    /** EQ_LOCAL_FIR[0]
+     *  CFIR - Parity or PCB access error
+     */
+    (rEQ_LOCAL_FIR, bit(0)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[1]
+     *  CPLT_CTRL - PCB access error
+     */
+    (rEQ_LOCAL_FIR, bit(1)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[2]
+     *  CC - PCB access error - read and clear nn03000F
+     */
+    (rEQ_LOCAL_FIR, bit(2)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[3]
+     *  CC - Clock Control Error - read and clear nn03000F
+     */
+    (rEQ_LOCAL_FIR, bit(3)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[4]
+     *  PSC - PSCOM access error - read and clear nn01001
+     */
+    (rEQ_LOCAL_FIR, bit(4)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[5]
+     *  PSC - internal or ring interface error - read and 
+     */
+    (rEQ_LOCAL_FIR, bit(5)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[6]
+     *  THERM1 - pwr_comp_err, skitter_comp_err, scan_init
+     */
+    (rEQ_LOCAL_FIR, bit(6)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[7]
+     *  THERM1 - pcb error
+     */
+    (rEQ_LOCAL_FIR, bit(7)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[8]
+     *  THERMTRIP1 - Critical temperature indicator
+     */
+    (rEQ_LOCAL_FIR, bit(8)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[9]
+     *  THERMTRIP1 - Fatal temperature indicator
+     */
+    (rEQ_LOCAL_FIR, bit(9)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[10]
+     *  VOLTTRIP1 - Voltage sense error
+     */
+    (rEQ_LOCAL_FIR, bit(10)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[11]
+     *  THERM2 - pwr_comp_err, skitter_comp_err, scan_init
+     */
+    (rEQ_LOCAL_FIR, bit(11)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[12]
+     *  THERM2 - pcb error
+     */
+    (rEQ_LOCAL_FIR, bit(12)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[13]
+     *  THERMTRIP2 - Critical temperature indicator
+     */
+    (rEQ_LOCAL_FIR, bit(13)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[14]
+     *  THERMTRIP2 - Fatal temperature indicator
+     */
+    (rEQ_LOCAL_FIR, bit(14)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[15]
+     *  VOLTTRIP2 - Voltage sense error
+     */
+    (rEQ_LOCAL_FIR, bit(15)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[16]
+     *  DBG - scom parity fail
+     */
+    (rEQ_LOCAL_FIR, bit(16)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[17]
+     *  reserved
+     */
+    (rEQ_LOCAL_FIR, bit(17)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[18]
+     *  reserved
+     */
+    (rEQ_LOCAL_FIR, bit(18)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[19]
+     *  reserved
+     */
+    (rEQ_LOCAL_FIR, bit(19)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[20]
+     *  L30 Trace Err
+     */
+    (rEQ_LOCAL_FIR, bit(20)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[21]
+     *  L31 Trace Err
+     */
+    (rEQ_LOCAL_FIR, bit(21)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[22]
+     *  L32 Trace Err
+     */
+    (rEQ_LOCAL_FIR, bit(22)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[23]
+     *  L33 Trace Err
+     */
+    (rEQ_LOCAL_FIR, bit(23)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[24]
+     *  DCADJ FIR ERR Core 0
+     */
+    (rEQ_LOCAL_FIR, bit(24)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[25]
+     *  DCADJ FIR ERR Core 1
+     */
+    (rEQ_LOCAL_FIR, bit(25)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[26]
+     *  DCADJ FIR ERR Core 2
+     */
+    (rEQ_LOCAL_FIR, bit(26)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[27]
+     *  DCADJ FIR ERR Core 3
+     */
+    (rEQ_LOCAL_FIR, bit(27)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[28]
+     *  SKEWADJ FIR ERR Core0
+     */
+    (rEQ_LOCAL_FIR, bit(28)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[29]
+     *  SKEWADJ FIR ERR Core1
+     */
+    (rEQ_LOCAL_FIR, bit(29)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[30]
+     *  SKEWADJ FIR ERR Core2
+     */
+    (rEQ_LOCAL_FIR, bit(30)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[31]
+     *  SKEWADJ FIR ERR Core3
+     */
+    (rEQ_LOCAL_FIR, bit(31)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[32]
+     *  DC_SCOM_ERR_0
+     */
+    (rEQ_LOCAL_FIR, bit(32)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[33]
+     *  DC_SCOM_ERR_1
+     */
+    (rEQ_LOCAL_FIR, bit(33)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[34]
+     *  DC_SCOM_ERR_2
+     */
+    (rEQ_LOCAL_FIR, bit(34)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[35]
+     *  DC_SCOM_ERR_3
+     */
+    (rEQ_LOCAL_FIR, bit(35)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[36]
+     *  SKEW_SCOM_ERR_0
+     */
+    (rEQ_LOCAL_FIR, bit(36)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[37]
+     *  SKEW_SCOM_ERR_1
+     */
+    (rEQ_LOCAL_FIR, bit(37)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[38]
+     *  SKEW_SCOM_ERR_2
+     */
+    (rEQ_LOCAL_FIR, bit(38)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[39]
+     *  SKEW_SCOM_ERR_3
+     */
+    (rEQ_LOCAL_FIR, bit(39)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[40]
+     *  unused
+     */
+    (rEQ_LOCAL_FIR, bit(40)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[41]
+     *  unused
+     */
+    (rEQ_LOCAL_FIR, bit(41)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[42]
+     *  unused
+     */
+    (rEQ_LOCAL_FIR, bit(42)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[43]
+     *  unused
+     */
+    (rEQ_LOCAL_FIR, bit(43)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[44]
+     *  unused
+     */
+    (rEQ_LOCAL_FIR, bit(44)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[45]
+     *  unused
+     */
+    (rEQ_LOCAL_FIR, bit(45)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[46]
+     *  unused
+     */
+    (rEQ_LOCAL_FIR, bit(46)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[47]
+     *  unused
+     */
+    (rEQ_LOCAL_FIR, bit(47)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[48]
+     *  unused
+     */
+    (rEQ_LOCAL_FIR, bit(48)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[49]
+     *  unused
+     */
+    (rEQ_LOCAL_FIR, bit(49)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[50]
+     *  unused
+     */
+    (rEQ_LOCAL_FIR, bit(50)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[51]
+     *  unused
+     */
+    (rEQ_LOCAL_FIR, bit(51)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[52]
+     *  unused
+     */
+    (rEQ_LOCAL_FIR, bit(52)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[53]
+     *  unused
+     */
+    (rEQ_LOCAL_FIR, bit(53)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[54]
+     *  unused
+     */
+    (rEQ_LOCAL_FIR, bit(54)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[55]
+     *  unused
+     */
+    (rEQ_LOCAL_FIR, bit(55)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[56]
+     *  unused
+     */
+    (rEQ_LOCAL_FIR, bit(56)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[57]
+     *  unused
+     */
+    (rEQ_LOCAL_FIR, bit(57)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[58]
+     *  unused
+     */
+    (rEQ_LOCAL_FIR, bit(58)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[59]
+     *  unused
+     */
+    (rEQ_LOCAL_FIR, bit(59)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[60]
+     *  unused
+     */
+    (rEQ_LOCAL_FIR, bit(60)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[61]
+     *  unused
+     */
+    (rEQ_LOCAL_FIR, bit(61)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[62]
+     *  unused
+     */
+    (rEQ_LOCAL_FIR, bit(62)) ? defaultMaskedError;
+
+    /** EQ_LOCAL_FIR[63]
+     *  ext_local_xstop
+     */
+    (rEQ_LOCAL_FIR, bit(63)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# P10 chip EQ_QME_FIR
+################################################################################
+
+rule rEQ_QME_FIR
+{
+  CHECK_STOP:
+    EQ_QME_FIR & ~EQ_QME_FIR_MASK & ~EQ_QME_FIR_ACT0 & ~EQ_QME_FIR_ACT1;
+  RECOVERABLE:
+    EQ_QME_FIR & ~EQ_QME_FIR_MASK & ~EQ_QME_FIR_ACT0 &  EQ_QME_FIR_ACT1;
+};
+
+group gEQ_QME_FIR
+    filter singlebit,
+           cs_root_cause
+{
+    /** EQ_QME_FIR[0]
+     *  PPE halted due to an error, which is an OR the 4 s
+     */
+    (rEQ_QME_FIR, bit(0)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[1]
+     *  PPE asserted debug trigger. Connected to PPEDBG[FI
+     */
+    (rEQ_QME_FIR, bit(1)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[2]
+     *  Used for TBD testing or workarounds
+     */
+    (rEQ_QME_FIR, bit(2)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[3]
+     *  PPE asserted a watchdog timeout condition.
+     */
+    (rEQ_QME_FIR, bit(3)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[4]
+     *  QME hardware detected its own timeout on the PCB S
+     */
+    (rEQ_QME_FIR, bit(4)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[5]
+     *  Either the Block Copy Engine or QME PPE direct acc
+     */
+    (rEQ_QME_FIR, bit(5)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[6]
+     *  SRAM Uncorrectable Error.
+     */
+    (rEQ_QME_FIR, bit(6)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[7]
+     *  SRAM Correctable Error.  QME received corrected da
+     */
+    (rEQ_QME_FIR, bit(7)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[8]
+     *  Resonant Clock Table array Parity Error.
+     */
+    (rEQ_QME_FIR, bit(8)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[9]
+     *  Hcode wrote the PIG to request a PCB interrupt bef
+     */
+    (rEQ_QME_FIR, bit(9)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[10]
+     *  Scrub timer tick occurred when scrub is still pend
+     */
+    (rEQ_QME_FIR, bit(10)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[11]
+     *  Refer to ERR bits of the same name to see which Co
+     */
+    (rEQ_QME_FIR, bit(11)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[12]
+     *  Refer to ERR bits of the same name to see which Co
+     */
+    (rEQ_QME_FIR, bit(12)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[13]
+     *  PGPE Heartbeat Lost indication from a hardware dea
+     */
+    (rEQ_QME_FIR, bit(13)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[14]
+     *  Notification that BCE has not made forward progres
+     */
+    (rEQ_QME_FIR, bit(14)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[15]
+     *  Resclk TARGET_PSTATE Change Protocol Error. PGPE c
+     */
+    (rEQ_QME_FIR, bit(15)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[16]
+     *  PCB Network or Endpoint Reset occurred when QME wa
+     */
+    (rEQ_QME_FIR, bit(16)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[17]
+     *  Firmware cleared their Special Wakeup request in S
+     */
+    (rEQ_QME_FIR, bit(17)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[18]
+     *  Indicates a window condition occurred where one fi
+     */
+    (rEQ_QME_FIR, bit(18)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[19]
+     *  Any of the Core External Interrupt wakeup sources 
+     */
+    (rEQ_QME_FIR, bit(19)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[20]
+     *  Any of the Core External Interrupts (os, hyp, msgs
+     */
+    (rEQ_QME_FIR, bit(20)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[21]
+     *  Notification that RS4 engine has not made forward 
+     */
+    (rEQ_QME_FIR, bit(21)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[22]
+     *  Data hang was detected in the powerbus logic, caus
+     */
+    (rEQ_QME_FIR, bit(22)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[23]
+     *  The PPE tried to write a protected address as defi
+     */
+    (rEQ_QME_FIR, bit(23)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[24]
+     *  DTC Sequencer read a UE from SRAM, causing it to a
+     */
+    (rEQ_QME_FIR, bit(24)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[25]
+     *  Correctable error detected on incoming data for a 
+     */
+    (rEQ_QME_FIR, bit(25)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[26]
+     *  UE Detected on incoming data for a PowerBus read.
+     */
+    (rEQ_QME_FIR, bit(26)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[27]
+     *  SUE Detected on incoming data for a PowerBus read.
+     */
+    (rEQ_QME_FIR, bit(27)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[28]
+     *  A Powerbus Request address has hit an invalid entr
+     */
+    (rEQ_QME_FIR, bit(28)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[29]
+     *  Parity error detected on a powerbus tag.  Includes
+     */
+    (rEQ_QME_FIR, bit(29)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[30]
+     *  Code attempted to write the PIG register when the 
+     */
+    (rEQ_QME_FIR, bit(30)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[31]
+     *  Set based on the OR of three ERR[LOCAL_ACCESS_*_ER
+     */
+    (rEQ_QME_FIR, bit(31)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[32]
+     *  CE detected on a read to the SSA located in the QM
+     */
+    (rEQ_QME_FIR, bit(32)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[33]
+     *  UE detected on a read to the SSA located in the QM
+     */
+    (rEQ_QME_FIR, bit(33)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[34]
+     *  Implemented but not used. Input tied to 0.
+     */
+    (rEQ_QME_FIR, bit(34)) ? defaultMaskedError;
+
+    /** EQ_QME_FIR[35]
+     *  Implemented but not used. Input tied to 0.
+     */
+    (rEQ_QME_FIR, bit(35)) ? defaultMaskedError;
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ #    #                                  ###                                  #
+ #   # #    ##  ##### ###  ###  #   #   #   # #     #    ###   ###  ###  ###  #
+ #  #   #  #  #   #    #  #   # ##  #   #     #    # #  #     #     #   #     #
+ # ####### #      #    #  #   # # # #   #     #   #####  ###   ###  ##   ###  #
+ # #     # #  #   #    #  #   # #  ##   #   # #   #   #     #     # #       # #
+ # #     #  ##    #   ###  ###  #   #    ###  ### #   #  ###   ###  ###  ###  #
+ #                                                                            #
+ ##############################################################################
+
+# Include the actions defined for this target
+.include "p10_common_actions.rule";
+.include "p10_eq_actions.rule";
+

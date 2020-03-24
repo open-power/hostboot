@@ -1,0 +1,744 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/p10/p10_mcc.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2020
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+chip p10_mcc
+{
+    name        "P10 MCC target";
+    targettype  TYPE_MCC;
+    sigoff      0x0000;
+    dump        DUMP_CONTENT_HW;
+    scomlen     64;
+
+ #############################################################################
+ #                                                                           #
+ #  ######                                                                   #
+ #  #     #  ######   ####     ###    ####    #####  ######  #####    ####   #
+ #  #     #  #       #    #     #    #          #    #       #    #  #       #
+ #  ######   #####   #          #     ####      #    #####   #    #   ####   #
+ #  #   #    #       #  ###     #         #     #    #       #####        #  #
+ #  #    #   #       #    #     #    #    #     #    #       #   #   #    #  #
+ #  #     #  ######   ####     ###    ####      #    ######  #    #   ####   #
+ #                                                                           #
+ #############################################################################
+
+    ############################################################################
+    # P10 chip MC_DSTL_FIR
+    ############################################################################
+
+    register MC_DSTL_FIR
+    {
+        name        "P10 chip MC_DSTL_FIR";
+        scomaddr    0x0c010d00;
+        reset       (&, 0x0c010d01);
+        mask        (|, 0x0c010d05);
+        capture     group default;
+    };
+
+    register MC_DSTL_FIR_MASK
+    {
+        name        "P10 chip MC_DSTL_FIR MASK";
+        scomaddr    0x0c010d03;
+        capture     group default;
+    };
+
+    register MC_DSTL_FIR_ACT0
+    {
+        name        "P10 chip MC_DSTL_FIR ACT0";
+        scomaddr    0x0c010d06;
+        capture     group default;
+        capture     req nonzero("MC_DSTL_FIR");
+    };
+
+    register MC_DSTL_FIR_ACT1
+    {
+        name        "P10 chip MC_DSTL_FIR ACT1";
+        scomaddr    0x0c010d07;
+        capture     group default;
+        capture     req nonzero("MC_DSTL_FIR");
+    };
+
+    register MC_DSTL_FIR_ACT2
+    {
+        name        "P10 chip MC_DSTL_FIR ACT2";
+        scomaddr    0x0c010d09;
+        capture     group default;
+        capture     req nonzero("MC_DSTL_FIR");
+    };
+
+    ############################################################################
+    # P10 chip MC_USTL_FIR
+    ############################################################################
+
+    register MC_USTL_FIR
+    {
+        name        "P10 chip MC_USTL_FIR";
+        scomaddr    0x0c010e00;
+        reset       (&, 0x0c010e01);
+        mask        (|, 0x0c010e05);
+        capture     group default;
+    };
+
+    register MC_USTL_FIR_MASK
+    {
+        name        "P10 chip MC_USTL_FIR MASK";
+        scomaddr    0x0c010e03;
+        capture     group default;
+    };
+
+    register MC_USTL_FIR_ACT0
+    {
+        name        "P10 chip MC_USTL_FIR ACT0";
+        scomaddr    0x0c010e06;
+        capture     group default;
+        capture     req nonzero("MC_USTL_FIR");
+    };
+
+    register MC_USTL_FIR_ACT1
+    {
+        name        "P10 chip MC_USTL_FIR ACT1";
+        scomaddr    0x0c010e07;
+        capture     group default;
+        capture     req nonzero("MC_USTL_FIR");
+    };
+
+    register MC_USTL_FIR_ACT2
+    {
+        name        "P10 chip MC_USTL_FIR ACT2";
+        scomaddr    0x0c010e09;
+        capture     group default;
+        capture     req nonzero("MC_USTL_FIR");
+    };
+
+# Include registers not defined by the xml
+.include "p10_mcc_regs.rule";
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ # ####                                 #                                     #
+ # #   # #   # #    #####  ###      #  # #    ##  ##### ###  ###  #   #  ###  #
+ # #   # #   # #    #     #        #  #   #  #  #   #    #  #   # ##  # #     #
+ # ####  #   # #    ####   ###    #  ####### #      #    #  #   # # # #  ###  #
+ # #  #  #   # #    #         #  #   #     # #  #   #    #  #   # #  ##     # #
+ # #   #  ###  #### #####  ###  #    #     #  ##    #   ###  ###  #   #  ###  #
+ #                                                                            #
+ ##############################################################################
+
+################################################################################
+# Summary for MCC
+################################################################################
+
+rule rMCC
+{
+  CHECK_STOP:
+    summary( 0, rMC_DSTL_FIR ) |
+    summary( 1, rMC_USTL_FIR );
+
+  RECOVERABLE:
+    summary( 0, rMC_DSTL_FIR ) |
+    summary( 1, rMC_USTL_FIR );
+
+  UNIT_CS:
+    summary( 0, rMC_DSTL_FIR ) |
+    summary( 1, rMC_USTL_FIR );
+
+  HOST_ATTN:
+    summary( 0, rMC_DSTL_FIR ) |
+    summary( 1, rMC_USTL_FIR );
+
+};
+
+group gMCC attntype CHECK_STOP, RECOVERABLE, UNIT_CS, HOST_ATTN
+    filter singlebit
+{
+    (rMCC, bit(0)) ? analyze(gMC_DSTL_FIR);
+    (rMCC, bit(1)) ? analyze(gMC_USTL_FIR);
+};
+
+################################################################################
+# P10 chip MC_DSTL_FIR
+################################################################################
+
+rule rMC_DSTL_FIR
+{
+  CHECK_STOP:
+    MC_DSTL_FIR & ~MC_DSTL_FIR_MASK &  MC_DSTL_FIR_ACT0 & ~MC_DSTL_FIR_ACT1 & ~MC_DSTL_FIR_ACT2;
+  HOST_ATTN:
+    MC_DSTL_FIR & ~MC_DSTL_FIR_MASK &  MC_DSTL_FIR_ACT0 & ~MC_DSTL_FIR_ACT1 &  MC_DSTL_FIR_ACT2;
+  RECOVERABLE:
+    MC_DSTL_FIR & ~MC_DSTL_FIR_MASK &  MC_DSTL_FIR_ACT0 &  MC_DSTL_FIR_ACT1 & ~MC_DSTL_FIR_ACT2;
+  UNIT_CS:
+    MC_DSTL_FIR & ~MC_DSTL_FIR_MASK & ~MC_DSTL_FIR_ACT0 &  MC_DSTL_FIR_ACT1 & ~MC_DSTL_FIR_ACT2;
+};
+
+group gMC_DSTL_FIR
+    filter singlebit,
+           cs_root_cause
+{
+    /** MC_DSTL_FIR[0]
+     *  AFU initiated Checkstop on Subchannel A
+     */
+    (rMC_DSTL_FIR, bit(0)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[1]
+     *  AFU initiated Recoverable Attention on Subchannel 
+     */
+    (rMC_DSTL_FIR, bit(1)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[2]
+     *  AFU initiated Special Attention on Subchannel A
+     */
+    (rMC_DSTL_FIR, bit(2)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[3]
+     *  AFU initiated Application Interrupt Attention on S
+     */
+    (rMC_DSTL_FIR, bit(3)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[4]
+     *  AFU initiated Checkstop on Subchannel B
+     */
+    (rMC_DSTL_FIR, bit(4)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[5]
+     *  AFU initiated Recoverable Attention on Subchannel 
+     */
+    (rMC_DSTL_FIR, bit(5)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[6]
+     *  AFU initiated Special Attention on Subchannel B
+     */
+    (rMC_DSTL_FIR, bit(6)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[7]
+     *  AFU initiated Application Interrupt Attention on S
+     */
+    (rMC_DSTL_FIR, bit(7)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[8]
+     *  Error on parity bits protecting incoming command f
+     */
+    (rMC_DSTL_FIR, bit(8)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[9]
+     *  A credit reset was attempted while rd and wdf buff
+     */
+    (rMC_DSTL_FIR, bit(9)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[10]
+     *  DSTL Configuration Register has taken a recoverabl
+     */
+    (rMC_DSTL_FIR, bit(10)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[11]
+     *  DSTL Configuration Register has taken a fatal pari
+     */
+    (rMC_DSTL_FIR, bit(11)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[12]
+     *  DSTL Subchannel A, a counter took an underflow or 
+     */
+    (rMC_DSTL_FIR, bit(12)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[13]
+     *  DSTL Subchannel B, a counter took an underflow or 
+     */
+    (rMC_DSTL_FIR, bit(13)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[14]
+     *  DSTL Subchannel A timed out having valid commands 
+     */
+    (rMC_DSTL_FIR, bit(14)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[15]
+     *  DSTL Subchannel B timed out having valid commands 
+     */
+    (rMC_DSTL_FIR, bit(15)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[16]
+     *  DSTL has detected that attached buffer on subchann
+     */
+    (rMC_DSTL_FIR, bit(16)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[17]
+     *  DSTL has detected that attached buffer on subchann
+     */
+    (rMC_DSTL_FIR, bit(17)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[18]
+     *  DSTL Subchannel A observed link going down.
+     */
+    (rMC_DSTL_FIR, bit(18)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[19]
+     *  DSTL Subchannel B observed link going down.
+     */
+    (rMC_DSTL_FIR, bit(19)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[20]
+     *  DSTL Subchannel A has entered the fail state.
+     */
+    (rMC_DSTL_FIR, bit(20)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[21]
+     *  DSTL Subchannel B has entered the fail state.
+     */
+    (rMC_DSTL_FIR, bit(21)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[22]
+     *  Channel timeout has occured on Subchannel A index.
+     */
+    (rMC_DSTL_FIR, bit(22)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[23]
+     *  Channel timeout has occured on Subchannel B index.
+     */
+    (rMC_DSTL_FIR, bit(23)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[24]
+     *  Error info from decrypt
+     */
+    (rMC_DSTL_FIR, bit(24)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[25]
+     *  Error info from decrypt
+     */
+    (rMC_DSTL_FIR, bit(25)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[26]
+     *  Error info from decrypt
+     */
+    (rMC_DSTL_FIR, bit(26)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[27]
+     *  Error info from decrypt
+     */
+    (rMC_DSTL_FIR, bit(27)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[28]
+     *  Error info from decrypt
+     */
+    (rMC_DSTL_FIR, bit(28)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[29]
+     *  Error info from encrypt
+     */
+    (rMC_DSTL_FIR, bit(29)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[30]
+     *  Error info from encrypt
+     */
+    (rMC_DSTL_FIR, bit(30)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[31]
+     *  Error info from encrypt
+     */
+    (rMC_DSTL_FIR, bit(31)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[32]
+     *  Error info from encrypt
+     */
+    (rMC_DSTL_FIR, bit(32)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[33]
+     *  On Subchhanel A, received an AFU initiated Applica
+     */
+    (rMC_DSTL_FIR, bit(33)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[34]
+     *  On Subchhanel B, received an AFU initiated Applica
+     */
+    (rMC_DSTL_FIR, bit(34)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[35]
+     *  A parity error local to Subchhanel A occurred.
+     */
+    (rMC_DSTL_FIR, bit(35)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[36]
+     *  A parity error local to Subchhanel B occurred.
+     */
+    (rMC_DSTL_FIR, bit(36)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[37]
+     *  Spare FIR bit 37.
+     */
+    (rMC_DSTL_FIR, bit(37)) ? defaultMaskedError;
+
+    /** MC_DSTL_FIR[38]
+     *  Spare FIR bit 38.
+     */
+    (rMC_DSTL_FIR, bit(38)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# P10 chip MC_USTL_FIR
+################################################################################
+
+rule rMC_USTL_FIR
+{
+  CHECK_STOP:
+    MC_USTL_FIR & ~MC_USTL_FIR_MASK &  MC_USTL_FIR_ACT0 & ~MC_USTL_FIR_ACT1 & ~MC_USTL_FIR_ACT2;
+  HOST_ATTN:
+    MC_USTL_FIR & ~MC_USTL_FIR_MASK &  MC_USTL_FIR_ACT0 & ~MC_USTL_FIR_ACT1 &  MC_USTL_FIR_ACT2;
+  RECOVERABLE:
+    MC_USTL_FIR & ~MC_USTL_FIR_MASK &  MC_USTL_FIR_ACT0 &  MC_USTL_FIR_ACT1 & ~MC_USTL_FIR_ACT2;
+  UNIT_CS:
+    MC_USTL_FIR & ~MC_USTL_FIR_MASK & ~MC_USTL_FIR_ACT0 &  MC_USTL_FIR_ACT1 & ~MC_USTL_FIR_ACT2;
+};
+
+group gMC_USTL_FIR
+    filter singlebit,
+           cs_root_cause
+{
+    /** MC_USTL_FIR[0]
+     *  Unexpected Flit Data showed up for Chana
+     */
+    (rMC_USTL_FIR, bit(0)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[1]
+     *  Unexpected Flit Data showed up for Chanb
+     */
+    (rMC_USTL_FIR, bit(1)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[2]
+     *  A unsupported template for a command flit for chan
+     */
+    (rMC_USTL_FIR, bit(2)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[3]
+     *  A unsupported template for a command flit for chan
+     */
+    (rMC_USTL_FIR, bit(3)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[4]
+     *  Reserved.
+     */
+    (rMC_USTL_FIR, bit(4)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[5]
+     *  Reserved.
+     */
+    (rMC_USTL_FIR, bit(5)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[6]
+     *  WDF CE detected on buffer output
+     */
+    (rMC_USTL_FIR, bit(6)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[7]
+     *  WDF UE detected on buffer output
+     */
+    (rMC_USTL_FIR, bit(7)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[8]
+     *  WDF SUE detected on buffer output
+     */
+    (rMC_USTL_FIR, bit(8)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[9]
+     *  WDF buffer overrun detected
+     */
+    (rMC_USTL_FIR, bit(9)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[10]
+     *  WDF detected parity on USTL tag interface
+     */
+    (rMC_USTL_FIR, bit(10)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[11]
+     *  WDF detected a scom sequencer error
+     */
+    (rMC_USTL_FIR, bit(11)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[12]
+     *  WDF detected a pwctl sequencer error
+     */
+    (rMC_USTL_FIR, bit(12)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[13]
+     *  WDF detected a parity error on the misc_reg scom r
+     */
+    (rMC_USTL_FIR, bit(13)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[14]
+     *  Parity Error detected in WDF for CL pop
+     */
+    (rMC_USTL_FIR, bit(14)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[15]
+     *  WDF detected a non-zero syndrome (CE ore UE) from 
+     */
+    (rMC_USTL_FIR, bit(15)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[16]
+     *  WDF UE detected a parity error on the CMT interfac
+     */
+    (rMC_USTL_FIR, bit(16)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[17]
+     *  Not used in Axone
+     */
+    (rMC_USTL_FIR, bit(17)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[18]
+     *  Not used in Axone
+     */
+    (rMC_USTL_FIR, bit(18)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[19]
+     *  Read Buffers overflowed/underflowed (more than 64 
+     */
+    (rMC_USTL_FIR, bit(19)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[20]
+     *  WRT CE detected on buffer output
+     */
+    (rMC_USTL_FIR, bit(20)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[21]
+     *  WRT UE detected on buffer output
+     */
+    (rMC_USTL_FIR, bit(21)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[22]
+     *  WRT SUE detected on buffer output
+     */
+    (rMC_USTL_FIR, bit(22)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[23]
+     *  WRT detected a scom sequencer error
+     */
+    (rMC_USTL_FIR, bit(23)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[24]
+     *  WRT detected a parity error on the misc_reg scom r
+     */
+    (rMC_USTL_FIR, bit(24)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[25]
+     *  WRT Data Syndrome not equal to 0 for input for wri
+     */
+    (rMC_USTL_FIR, bit(25)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[26]
+     *  No buffer error; Buffer manager parity error.
+     */
+    (rMC_USTL_FIR, bit(26)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[27]
+     *  A fail response set as checkstop occurred for chan
+     */
+    (rMC_USTL_FIR, bit(27)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[28]
+     *  A fail response set as checkstop occurred for chan
+     */
+    (rMC_USTL_FIR, bit(28)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[29]
+     *  A fail response set as recoverable occurred for ch
+     */
+    (rMC_USTL_FIR, bit(29)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[30]
+     *  A fail response set as recoverable occurred for ch
+     */
+    (rMC_USTL_FIR, bit(30)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[31]
+     *  A lol drop set as checkstop occurred for chana
+     */
+    (rMC_USTL_FIR, bit(31)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[32]
+     *  A lol drop set as checkstop occurred for chanb
+     */
+    (rMC_USTL_FIR, bit(32)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[33]
+     *  A lol drop set as recoverable occurred for chana
+     */
+    (rMC_USTL_FIR, bit(33)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[34]
+     *  A lol drop set as recoverable occurred for chanb
+     */
+    (rMC_USTL_FIR, bit(34)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[35]
+     *  flit data pariry error from dl for chana
+     */
+    (rMC_USTL_FIR, bit(35)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[36]
+     *  flit data pariry error from dl for chanb
+     */
+    (rMC_USTL_FIR, bit(36)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[37]
+     *  internal fifo parity error for chana
+     */
+    (rMC_USTL_FIR, bit(37)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[38]
+     *  internal fifo parity error for chanb
+     */
+    (rMC_USTL_FIR, bit(38)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[39]
+     *  Unexpected read or write response received, chana
+     */
+    (rMC_USTL_FIR, bit(39)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[40]
+     *  Unexpected read or write response received, chanb
+     */
+    (rMC_USTL_FIR, bit(40)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[41]
+     *  Bad data set for data that is not valid chana
+     */
+    (rMC_USTL_FIR, bit(41)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[42]
+     *  Bad data set for data that is not valid chanb
+     */
+    (rMC_USTL_FIR, bit(42)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[43]
+     *  Memory read data returned in template 0, chana
+     */
+    (rMC_USTL_FIR, bit(43)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[44]
+     *  Memory read data returned in template 0, chanb
+     */
+    (rMC_USTL_FIR, bit(44)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[45]
+     *  Recieved mmio response while in LOL mode chana
+     */
+    (rMC_USTL_FIR, bit(45)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[46]
+     *  Recieved mmio response while in LOL mode chanb
+     */
+    (rMC_USTL_FIR, bit(46)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[47]
+     *  valid bad data or SUE received channel a
+     */
+    (rMC_USTL_FIR, bit(47)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[48]
+     *  Valid bad data or SUE received chanb
+     */
+    (rMC_USTL_FIR, bit(48)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[49]
+     *  Data is valid in data buffers without a matching r
+     */
+    (rMC_USTL_FIR, bit(49)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[50]
+     *  Data is valid in data buffers without a matching r
+     */
+    (rMC_USTL_FIR, bit(50)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[51]
+     *  Commit state where commit data is not marked as va
+     */
+    (rMC_USTL_FIR, bit(51)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[52]
+     *  Commit state where commit data is not marked as va
+     */
+    (rMC_USTL_FIR, bit(52)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[53]
+     *  A fifo in the ustl chana overflowed
+     */
+    (rMC_USTL_FIR, bit(53)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[54]
+     *  A fifo in the ustl chanb overflowed
+     */
+    (rMC_USTL_FIR, bit(54)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[55]
+     *  Invalid command decoded in USTL FF subchannel A
+     */
+    (rMC_USTL_FIR, bit(55)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[56]
+     *  Invalid command decoded in USTL FF subchannel B
+     */
+    (rMC_USTL_FIR, bit(56)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[57]
+     *  Fatal register parity error
+     */
+    (rMC_USTL_FIR, bit(57)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[58]
+     *  recov register parity error
+     */
+    (rMC_USTL_FIR, bit(58)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[59]
+     *  A chana response with an invalid combination of dl
+     */
+    (rMC_USTL_FIR, bit(59)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[60]
+     *  A chanb response with an invalid combination of dl
+     */
+    (rMC_USTL_FIR, bit(60)) ? defaultMaskedError;
+
+    /** MC_USTL_FIR[61]
+     *  USTL spare FIR bits
+     */
+    (rMC_USTL_FIR, bit(61)) ? defaultMaskedError;
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ #    #                                  ###                                  #
+ #   # #    ##  ##### ###  ###  #   #   #   # #     #    ###   ###  ###  ###  #
+ #  #   #  #  #   #    #  #   # ##  #   #     #    # #  #     #     #   #     #
+ # ####### #      #    #  #   # # # #   #     #   #####  ###   ###  ##   ###  #
+ # #     # #  #   #    #  #   # #  ##   #   # #   #   #     #     # #       # #
+ # #     #  ##    #   ###  ###  #   #    ###  ### #   #  ###   ###  ###  ###  #
+ #                                                                            #
+ ##############################################################################
+
+# Include the actions defined for this target
+.include "p10_common_actions.rule";
+.include "p10_mcc_actions.rule";
+

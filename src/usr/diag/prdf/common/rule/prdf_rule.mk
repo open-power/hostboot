@@ -23,21 +23,19 @@
 #
 # IBM_PROLOG_END_TAG
 
-# P9 Axone Chip
-PRDR_RULE_TABLES += axone_proc.prf
-PRDR_RULE_TABLES += axone_eq.prf
-PRDR_RULE_TABLES += axone_ex.prf
-PRDR_RULE_TABLES += axone_ec.prf
-PRDR_RULE_TABLES += axone_capp.prf
-PRDR_RULE_TABLES += axone_npu.prf
-PRDR_RULE_TABLES += axone_pec.prf
-PRDR_RULE_TABLES += axone_phb.prf
-PRDR_RULE_TABLES += axone_xbus.prf
-PRDR_RULE_TABLES += axone_obus.prf
-PRDR_RULE_TABLES += axone_mc.prf
-PRDR_RULE_TABLES += axone_mi.prf
-PRDR_RULE_TABLES += axone_mcc.prf
-PRDR_RULE_TABLES += axone_omic.prf
+# P10 Chip
+PRDR_RULE_TABLES += p10_proc.prf
+PRDR_RULE_TABLES += p10_eq.prf
+PRDR_RULE_TABLES += p10_core.prf
+PRDR_RULE_TABLES += p10_nmmu.prf
+PRDR_RULE_TABLES += p10_pec.prf
+PRDR_RULE_TABLES += p10_phb.prf
+PRDR_RULE_TABLES += p10_pauc.prf
+PRDR_RULE_TABLES += p10_pau.prf
+PRDR_RULE_TABLES += p10_iohs.prf
+PRDR_RULE_TABLES += p10_mc.prf
+PRDR_RULE_TABLES += p10_mcc.prf
+PRDR_RULE_TABLES += p10_omic.prf
 
 # Explorer Chip
 PRDR_RULE_TABLES += explorer_ocmb.prf
