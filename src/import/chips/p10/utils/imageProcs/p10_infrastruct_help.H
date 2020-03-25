@@ -51,7 +51,9 @@ const uint32_t  MAX_RING_BUF_SIZE       = 650000;        // Max ring buffer size
 const uint32_t  MAX_RING_BUF_SIZE_TOOL  = 450000;        // Max ring buf size for tools.
 
 const uint32_t  MAX_OVERRIDES_SIZE      = 2 * 1024;      // Max overrides ring section size.
-const uint32_t  MAX_HBBL_SIZE           = 24 * 1024;     // Max hbbl bin section size.
+
+// @HBBL_SIZE_SYNC@
+const uint32_t  MAX_HBBL_SIZE           = 32 * 1024;     // Max hbbl bin section size.
 
 const uint32_t  MAX_NOOF_DD_LEVELS_IN_IMAGE = 20;
 
