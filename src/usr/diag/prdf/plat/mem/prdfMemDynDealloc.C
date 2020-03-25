@@ -1274,7 +1274,6 @@ int32_t dimmList( TargetHandleList  & i_dimmList )
         TargetHandle_t dimmTrgt = i_dimmList.front();
         TargetHandleList list;
 
-
         // Third, check for OCMBs.
         list = getConnected( dimmTrgt, TYPE_OCMB_CHIP );
         if ( !list.empty() )
