@@ -42,55 +42,83 @@ namespace FSP
 {
 #endif
 
+/* This table shows direct PARENT->CHILD relationships based on the targeting
+   structure for the P10 chip.
+|====================================================|
+| PARENT         | CHILD          | Max # per PARENT |
+|====================================================|
+| TYPE_SYS       | TYPE_NODE      | 8                |
+|----------------------------------------------------|
+| TYPE_NODE      | TYPE_PROC      | 8                |
+|----------------------------------------------------|
+| TYPE_PROC      | TYPE_EQ        | 8                |
+| TYPE_PROC      | TYPE_PAUC      | 4                |
+| TYPE_PROC      | TYPE_MC        | 4                |
+| TYPE_PROC      | TYPE_NMMU      | 2                |
+| TYPE_PROC      | TYPE_PEC       | 2                |
+|----------------------------------------------------|
+| TYPE_EQ        | TYPE_FC        | 2                |
+|----------------------------------------------------|
+| TYPE_PAUC      | TYPE_IOHS      | 2                |
+| TYPE_PAUC      | TYPE_OMIC      | 2                |
+|----------------------------------------------------|
+| TYPE_MC        | TYPE_OMIC      | 2                |
+| TYPE_MC        | TYPE_MI        | 1                |
+|----------------------------------------------------|
+| TYPE_PEC       | TYPE_PHB       | 3                |
+|----------------------------------------------------|
+| TYPE_FC        | TYPE_EC        | 2                |
+|----------------------------------------------------|
+| TYPE_IOHS      | TYPE_PAU       | 1                |
+|----------------------------------------------------|
+| TYPE_OMIC      | TYPE_OMI       | 2                |
+|----------------------------------------------------|
+| TYPE_MI        | TYPE_MCC       | 2                |
+|----------------------------------------------------|
+| TYPE_MCC       | TYPE_OMI       | 2                |
+|----------------------------------------------------|
+| TYPE_OMI       | TYPE_OCMB_CHIP | 1                |
+|----------------------------------------------------|
+| TYPE_OCMB_CHIP | TYPE_MEM_PORT  | 1                |
+|----------------------------------------------------|
+| TYPE_MEM_PORT  | TYPE_DIMM      | 2                |
+|----------------------------------------------------|
+|====================================================|
+*/
 enum PositionBounds
 {
     MAX_NODE_PER_SYS    = 8,
 
     MAX_PROC_PER_NODE   = 8,
 
-    MAX_EQ_PER_PROC     = 6,
+    MAX_EQ_PER_PROC     = 8,
 
-    MAX_EX_PER_EQ       = 2,
-    MAX_EX_PER_PROC     = MAX_EX_PER_EQ * MAX_EQ_PER_PROC,
+    MAX_EC_PER_EQ       = 4,
+    MAX_EC_PER_PROC     = MAX_EC_PER_EQ * MAX_EQ_PER_PROC,
 
-    MAX_EC_PER_EX       = 2,
-    MAX_EC_PER_EQ       = MAX_EC_PER_EX * MAX_EX_PER_EQ,
-    MAX_EC_PER_PROC     = MAX_EC_PER_EX * MAX_EX_PER_EQ * MAX_EQ_PER_PROC,
+    MAX_PEC_PER_PROC    = 2,
 
-    MAX_CAPP_PER_PROC   = 2,
+    MAX_PHB_PER_PEC     = 3,
+    MAX_PHB_PER_PROC    = MAX_PHB_PER_PEC * MAX_PEC_PER_PROC,
 
-    MAX_PEC_PER_PROC    = 3,
+    MAX_MC_PER_PROC     = 4,
 
-    MAX_PHB_PER_PEC0    = 1,
-    MAX_PHB_PER_PEC1    = 2,
-    MAX_PHB_PER_PEC2    = 3,
-    MAX_PHB_PER_PROC    = MAX_PHB_PER_PEC0 +
-                          MAX_PHB_PER_PEC1 +
-                          MAX_PHB_PER_PEC2,
-
-    MAX_OBUS_PER_PROC   = 4, // Nimbus 0 and 3, Cumulus 0, 1, 2, and 3
-
-    MAX_XBUS_PER_PROC   = 3, // Nimbus 1 and 2, Cumulus 0, 1, and 2
-
-    MAX_MC_PER_PROC     = 2,
-
-    MAX_MI_PER_MC       = 2,
+    MAX_MI_PER_MC       = 1,
     MAX_MI_PER_PROC     = MAX_MI_PER_MC * MAX_MC_PER_PROC,
 
     MAX_DIMM_PER_PORT   = 2,
     MAX_DIMM_PER_RANK   = 2,
-    MAX_L4_PER_MEMBUF   = 1,
 
     MAX_MCC_PER_MI      = 2,
     MAX_MCC_PER_MC      = MAX_MCC_PER_MI * MAX_MI_PER_MC,
     MAX_MCC_PER_PROC    = MAX_MCC_PER_MC * MAX_MC_PER_PROC,
 
-    MAX_OMIC_PER_MC     = 3,
+    MAX_OMIC_PER_MC     = 2,
     MAX_OMIC_PER_PROC   = MAX_OMIC_PER_MC * MAX_MC_PER_PROC,
 
     MAX_OMI_PER_MCC     = 2,
-    MAX_OMI_PER_OMIC    = 3,
-    MAX_OMI_PER_MC      = 8,
+    MAX_OMI_PER_OMIC    = 2,
+    MAX_OMI_PER_MC      = MAX_OMI_PER_MCC * MAX_MCC_PER_MC,
     MAX_OMI_PER_PROC    = MAX_OMI_PER_MC * MAX_MC_PER_PROC,
 
     MAX_OCMB_PER_OMI    = 1,
@@ -98,10 +126,6 @@ enum PositionBounds
 
     // TODO RTC 210072 - Support multiple ports
     MAX_PORT_PER_OCMB   = 1,
-
-    MAX_SUB_PORT        = 2,
-
-    MAX_NPU_PER_PROC    = 3,
 
     INVALID_POSITION_BOUND = 0xffffffff,
 };

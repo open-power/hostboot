@@ -474,81 +474,60 @@ TargetHandle_t getConnectedParent( TargetHandle_t i_target, TYPE i_connType )
 
 //------------------------------------------------------------------------------
 
-TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
-                                  uint32_t i_connPos )
+TargetHandle_t getConnectedChild( TargetHandle_t i_parent, TYPE i_childType,
+                                  uint32_t i_childPos )
 {
     #define PRDF_FUNC "[PlatServices::getConnectedChild] "
 
-    PRDF_ASSERT( nullptr != i_target );
+    PRDF_ASSERT( nullptr != i_parent );
 
     TargetHandle_t o_child = nullptr;
 
     // Get the list.
-    TargetHandleList list = getConnAssoc( i_target, i_connType,
+    TargetHandleList list = getConnAssoc( i_parent, i_childType,
                                           TargetService::CHILD_BY_AFFINITY );
     if ( !list.empty() )
     {
         // There are some special cases where we need something other than to
-        // match the unit positions. So check those first.
+        // match the unit position relative to the chip. So check those first.
 
-        TargetHandleList::iterator itr = list.end();
-        TYPE     trgtType = getTargetType(     i_target );
-        uint32_t trgtPos  = getTargetPosition( i_target );
+        TYPE parentType  = getTargetType( i_parent );
+        uint32_t parentPos = getTargetPosition( i_parent );
 
-        if ( TYPE_EQ == trgtType && TYPE_EX == i_connType )
+        // Many of our special cases can be handled in a similar way.
+        // We can use this map to avoid copying code in those cases.
+        std::map<std::pair<TYPE,TYPE>,uint8_t> connMap =
         {
-            // i_connPos is position relative to EQ (0-1)
-            itr = std::find_if( list.begin(), list.end(),
-                    [&](const TargetHandle_t & t)
-                    {
-                        uint32_t exPos = getTargetPosition(t);
-                        return (trgtPos   == (exPos / MAX_EX_PER_EQ)) &&
-                               (i_connPos == (exPos % MAX_EX_PER_EQ));
-                    } );
-        }
-        else if ( TYPE_EQ == trgtType && TYPE_CORE == i_connType )
+            { {TYPE_EQ,   TYPE_CORE}, MAX_EC_PER_EQ    },
+            { {TYPE_MC,   TYPE_MI  }, MAX_MI_PER_MC    },
+            { {TYPE_MC,   TYPE_MCC }, MAX_MCC_PER_MC   },
+            { {TYPE_MC,   TYPE_OMIC}, MAX_OMIC_PER_MC  },
+            { {TYPE_MI,   TYPE_MCC }, MAX_MCC_PER_MI   },
+            { {TYPE_MCC,  TYPE_OMI }, MAX_OMI_PER_MCC  },
+            { {TYPE_OMIC, TYPE_OMI }, MAX_OMI_PER_OMIC },
+            { {TYPE_PEC,  TYPE_PHB }, MAX_PHB_PER_PEC  },
+        };
+
+        // Connection found in connMap
+        auto mapIter = connMap.find({parentType, i_childType});
+        if ( connMap.end() != mapIter )
         {
-            // i_connPos is position relative to EQ (0-3)
-            itr = std::find_if( list.begin(), list.end(),
-                    [&](const TargetHandle_t & t)
-                    {
-                        uint32_t ecPos = getTargetPosition(t);
-                        return (trgtPos   == (ecPos / MAX_EC_PER_EQ)) &&
-                               (i_connPos == (ecPos % MAX_EC_PER_EQ));
-                    } );
+            uint8_t max = mapIter->second;
+            for ( const auto & child : list )
+            {
+                // Look for the child target who's target position matches
+                // both with the parent's target position and i_childPos
+                uint32_t pos = getTargetPosition(child);
+                if ( (parentPos  == (pos / max)) &&
+                     (i_childPos == (pos % max)) )
+                {
+                    o_child = child;
+                    break;
+                }
+            }
         }
-        else if ( TYPE_EX == trgtType && TYPE_CORE == i_connType )
-        {
-            // i_connPos is position relative to EX (0-1)
-            itr = std::find_if( list.begin(), list.end(),
-                    [&](const TargetHandle_t & t)
-                    {
-                        uint32_t ecPos = getTargetPosition(t);
-                        return (trgtPos   == (ecPos / MAX_EC_PER_EX)) &&
-                               (i_connPos == (ecPos % MAX_EC_PER_EX));
-                    } );
-        }
-        else if ( TYPE_PEC == trgtType && TYPE_PHB == i_connType )
-        {
-            // i_connPos is position relative to PEC (0, 0-1, or 0-2)
-            itr = std::find_if( list.begin(), list.end(),
-                    [&](const TargetHandle_t & t)
-                    {
-                        uint32_t relPec = 0;
-                        uint32_t relPhb = 0;
-                        switch ( getTargetPosition(t) )
-                        {
-                            case 0: relPec = 0; relPhb = 0; break;
-                            case 1: relPec = 1; relPhb = 0; break;
-                            case 2: relPec = 1; relPhb = 1; break;
-                            case 3: relPec = 2; relPhb = 0; break;
-                            case 4: relPec = 2; relPhb = 1; break;
-                            case 5: relPec = 2; relPhb = 2; break;
-                        }
-                        return (trgtPos == relPec) && (i_connPos == relPhb);
-                    } );
-        }
-        else if ( TYPE_MEM_PORT == trgtType && TYPE_DIMM == i_connType )
+        // Other special cases
+        else if ( TYPE_MEM_PORT == parentType && TYPE_DIMM == i_childType )
         {
             // i_connPos is the DIMM select (0-1). Note that we don't use
             // getTargetPosition() on the DIMM because that does not return a
@@ -560,62 +539,24 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
             // Fortunately, it will be very difficult to have a bug where the
             // getConnected code returns DIMMs on a different MEM_PORT
             // target. So this is an acceptable risk.
-            itr = std::find_if( list.begin(), list.end(),
-                    [&](const TargetHandle_t & t)
-                    { return ( i_connPos == t->getAttr<ATTR_REL_POS>() ); } );
+            for ( const auto & child : list )
+            {
+                if ( i_childPos == child->getAttr<ATTR_REL_POS>() )
+                {
+                    o_child = child;
+                    break;
+                }
+            }
         }
-        else if ( TYPE_MC == trgtType && TYPE_MI == i_connType )
-        {
-            // i_connPos is position relative to MC (0-1)
-            itr = std::find_if( list.begin(), list.end(),
-                    [&](const TargetHandle_t & t)
-                    {
-                        uint32_t miPos = getTargetPosition(t);
-                        return (trgtPos   == (miPos / MAX_MI_PER_MC)) &&
-                               (i_connPos == (miPos % MAX_MI_PER_MC));
-                    } );
-        }
-        else if ( TYPE_MC == trgtType && TYPE_MCC == i_connType )
-        {
-            // i_connPos is position relative to MC (0-3)
-            itr = std::find_if( list.begin(), list.end(),
-                    [&](const TargetHandle_t & t)
-                    {
-                        uint32_t mccPos = getTargetPosition(t);
-                        return (trgtPos   == (mccPos / MAX_MCC_PER_MC)) &&
-                               (i_connPos == (mccPos % MAX_MCC_PER_MC));
-                    } );
-        }
-        else if ( (TYPE_OMI == trgtType && TYPE_OCMB_CHIP == i_connType) ||
-                  (TYPE_OCMB_CHIP == trgtType && TYPE_MEM_PORT == i_connType) )
+        else if ( (TYPE_OMI == parentType && TYPE_OCMB_CHIP == i_childType) ||
+                  (TYPE_OCMB_CHIP == parentType && TYPE_MEM_PORT == i_childType)
+                )
         {
             // There should only be one in the list.
-            PRDF_ASSERT( 1 == list.size() ); // just in case
-            itr = list.begin();
+            PRDF_ASSERT( 1 == list.size() );
+            o_child = list[0];
         }
-        else if ( TYPE_MI == trgtType && TYPE_MCC == i_connType )
-        {
-            // i_connPos is position relative to MI (0-1)
-            itr = std::find_if( list.begin(), list.end(),
-                    [&](const TargetHandle_t & t)
-                    {
-                        uint32_t mccPos = getTargetPosition(t);
-                        return (trgtPos   == (mccPos / MAX_MCC_PER_MI)) &&
-                               (i_connPos == (mccPos % MAX_MCC_PER_MI));
-                    } );
-        }
-        else if ( TYPE_MCC == trgtType && TYPE_OMI == i_connType )
-        {
-            // i_connPos is position relative to MCC (0-1)
-            itr = std::find_if( list.begin(), list.end(),
-                    [&](const TargetHandle_t & t)
-                    {
-                        uint32_t omiPos = getTargetPosition(t);
-                        return (trgtPos   == (omiPos / MAX_OMI_PER_MCC)) &&
-                               (i_connPos == (omiPos % MAX_OMI_PER_MCC));
-                    } );
-        }
-        else if ( TYPE_MCC == trgtType && TYPE_OCMB_CHIP == i_connType )
+        else if ( TYPE_MCC == parentType && TYPE_OCMB_CHIP == i_childType )
         {
             // getTargetPosition for OCMBs will return the position relative to
             // the node. This won't work for how we typically handle getting
@@ -623,58 +564,24 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
             // get the OCMB from the OMI. This will work because the OMI and
             // OCMB have a 1-to-1 relationship (see above where we return the
             // only one in the list for OMI to OCMB connections).
-            TargetHandle_t omi = getConnectedChild( i_target, TYPE_OMI,
-                                                    i_connPos );
+            TargetHandle_t omi = getConnectedChild( i_parent, TYPE_OMI,
+                                                    i_childPos );
             o_child = getConnectedChild( omi, TYPE_OCMB_CHIP, 0 );
         }
-        else if ( TYPE_MC == trgtType && TYPE_OMIC == i_connType )
+        // Default case, i_connPos should match the unit pos within the chip
+        else
         {
-            // i_connPos is position relative to MC (0-2)
-            itr = std::find_if( list.begin(), list.end(),
-                    [&](const TargetHandle_t & t)
-                    {
-                        uint32_t omicPos = getTargetPosition(t);
-                        return (trgtPos   == (omicPos / MAX_OMIC_PER_MC)) &&
-                               (i_connPos == (omicPos % MAX_OMIC_PER_MC));
-                    } );
-        }
-        else if ( TYPE_OMIC == trgtType && TYPE_OMI == i_connType )
-        {
-            // i_connPos is position relative to OMIC (0-2)
-            for ( TargetHandleList::iterator trgtIt = list.begin();
-                  trgtIt != list.end(); trgtIt++ )
+            for ( const auto & child : list )
             {
-                uint8_t omiPos = 0;
-                if ( (*trgtIt)->tryGetAttr<ATTR_OMI_DL_GROUP_POS>(omiPos) &&
-                     (i_connPos == omiPos) )
+                if ( i_childPos == getTargetPosition(child) )
                 {
-                    itr = trgtIt;
+                    o_child = child;
                     break;
                 }
             }
-        }
-        else if ( TYPE_PROC == trgtType && TYPE_NPU == i_connType )
-        {
-            // i_connPos is position relative to MC (0-2)
-            itr = std::find_if( list.begin(), list.end(),
-                    [&](const TargetHandle_t & t)
-                    {
-                        uint32_t npuPos = getTargetPosition(t);
-                        return (trgtPos   == (npuPos / MAX_NPU_PER_PROC)) &&
-                               (i_connPos == (npuPos % MAX_NPU_PER_PROC));
-                    } );
-        }
-        else
-        {
-            // default, i_connPos should match the unit position within the chip
-            itr = std::find_if( list.begin(), list.end(),
-                                [&](const TargetHandle_t & t)
-                                { return i_connPos == getTargetPosition(t); } );
+
         }
 
-        // Get the target if found.
-        if ( list.end() != itr )
-            o_child = *itr;
     }
 
     return o_child;
@@ -814,6 +721,8 @@ TargetHandle_t getConnectedPeerProc( TargetHandle_t i_procTarget,
 {
     #define PRDF_FUNC "[PlatServices::getConnectedPeerProc] "
 
+    PRDF_ERR( PRDF_FUNC "Not supported for P10 yet" );
+    /* TODO RTC 252759
     PRDF_ASSERT( NULL != i_procTarget );
     PRDF_ASSERT( TYPE_PROC == getTargetType(i_procTarget) );
     PRDF_ASSERT( ((TYPE_XBUS == i_busType) && (MAX_XBUS_PER_PROC > i_busPos)) ||
@@ -836,8 +745,9 @@ TargetHandle_t getConnectedPeerProc( TargetHandle_t i_procTarget,
         o_target = getConnectedParent( destTarget, TYPE_PROC );
 
     } while(0);
+    */
 
-    return o_target;
+    return nullptr;
 
     #undef PRDF_FUNC
 }

@@ -223,14 +223,14 @@ TARGETING::TargetHandle_t getConnectedParent(TARGETING::TargetHandle_t i_target,
 
 /**
  * @brief   Returns a functional child target of a given type and position.
- * @param   i_target    The given target.
+ * @param   i_target    The given parent target.
  * @param   i_connType  Type of target(s) return in list
  * @param   i_position  Target position index
  * @return  The requested child target, NULL if target not found.
  */
-TARGETING::TargetHandle_t getConnectedChild( TARGETING::TargetHandle_t i_target,
-                                             TARGETING::TYPE i_connType,
-                                             uint32_t i_position );
+TARGETING::TargetHandle_t getConnectedChild( TARGETING::TargetHandle_t i_parent,
+                                             TARGETING::TYPE i_childType,
+                                             uint32_t i_childPos );
 
 /**
  * @brief  ExtensibleChip wrapper for targeting version of getConnectedChildren.

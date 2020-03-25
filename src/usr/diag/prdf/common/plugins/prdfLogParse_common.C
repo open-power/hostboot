@@ -174,31 +174,10 @@ void getTargetInfo( HUID i_chipId, TARGETING::TYPE & o_targetType,
                       l_node, l_chip, l_chiplet );
             break;
 
-        case TYPE_EX:
-            l_chip    = l_chip / MAX_EX_PER_PROC;
-            l_chiplet = l_chiplet % MAX_EX_PER_PROC;
-            snprintf( o_chipName, i_sz_chipName, "ex(n%dp%dc%d)",
-                      l_node, l_chip, l_chiplet );
-            break;
-
         case TYPE_CORE:
             l_chip    = l_chip / MAX_EC_PER_PROC;
             l_chiplet = l_chiplet % MAX_EC_PER_PROC;
             snprintf( o_chipName, i_sz_chipName, "ec(n%dp%dc%d)",
-                      l_node, l_chip, l_chiplet );
-            break;
-
-        case TYPE_CAPP:
-            l_chip    = l_chip / MAX_CAPP_PER_PROC;
-            l_chiplet = l_chiplet % MAX_CAPP_PER_PROC;
-            snprintf( o_chipName, i_sz_chipName, "capp(n%dp%dc%d)",
-                      l_node, l_chip, l_chiplet );
-            break;
-
-        case TYPE_NPU:
-            l_chip    = l_chip / MAX_NPU_PER_PROC;
-            l_chiplet = l_chiplet % MAX_NPU_PER_PROC;
-            snprintf( o_chipName, i_sz_chipName, "npu(n%dp%dc%d)",
                       l_node, l_chip, l_chiplet );
             break;
 
@@ -213,20 +192,6 @@ void getTargetInfo( HUID i_chipId, TARGETING::TYPE & o_targetType,
             l_chip    = l_chip / MAX_PHB_PER_PROC;
             l_chiplet = l_chiplet % MAX_PHB_PER_PROC;
             snprintf( o_chipName, i_sz_chipName, "phb(n%dp%dc%d)",
-                      l_node, l_chip, l_chiplet );
-            break;
-
-        case TYPE_OBUS:
-            l_chip    = l_chip / MAX_OBUS_PER_PROC;
-            l_chiplet = l_chiplet % MAX_OBUS_PER_PROC;
-            snprintf( o_chipName, i_sz_chipName, "ob(n%dp%dc%d)",
-                      l_node, l_chip, l_chiplet );
-            break;
-
-        case TYPE_XBUS:
-            l_chip    = l_chip / MAX_XBUS_PER_PROC;
-            l_chiplet = l_chiplet % MAX_XBUS_PER_PROC;
-            snprintf( o_chipName, i_sz_chipName, "xb(n%dp%dc%d)",
                       l_node, l_chip, l_chiplet );
             break;
 

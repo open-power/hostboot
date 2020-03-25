@@ -302,7 +302,7 @@ uint32_t __getBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
 
     BitmapData data;
 
-    for ( uint32_t ps = 0; ps < MAX_SUB_PORT; ps++ )
+    for ( uint32_t ps = 0; ps < MAX_PORT_PER_OCMB; ps++ )
     {
         // Skip if the DIMM doesn't exist
         if ( nullptr == getConnectedDimm(i_trgt, i_rank, ps) ) continue;
