@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2019
+# Contributors Listed Below - COPYRIGHT 2011,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -431,9 +431,9 @@ hb_startsimics()
         # also, if $POOL is defined, this indicates are already in
         # a vexec shell so do not vexec
         if [ "$*" = "-nre" ] || [ ! -z ${POOL} ]; then
-            VEXEC_STR=" vexec"
-        else
             VEXEC_STR=""
+        else
+            VEXEC_STR=" vexec"
         fi
         export RUNSIMCMD="cd ${SANDBOXBASE}/simics/ &&${VEXEC_STR} ./runsim -m ${MACHINE} hb_script_to_run=${MY_DIR}/startup.simics pnor_img=${MY_DIR}/../../../hbfw/img/axone.pnor sbe_seeprom_img=${SANDBOXBASE}/images/ppc/lab/flash/sbe_seeprom_p9a_10.bin.ecc num_procs=2 enable_lpc_console=TRUE hb_pnor_dir=${MY_DIR}/../../../hbfw/img/"
         echo "**********"
