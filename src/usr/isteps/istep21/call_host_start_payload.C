@@ -66,6 +66,7 @@
 #include <p9_stop_api.H>
 */
 #include <kernel/memstate.H>
+#include <kernel/misc.H>
 #include "../hdat/hdattpmdata.H"
 #include "hdatstructs.H"
 
@@ -625,6 +626,25 @@ errlHndl_t broadcastShutdown ( uint64_t i_hbInstance )
 
     do
     {
+        // First, save off the Payload's ATTN Area address into core scratch
+        // reg0.
+        uint64_t l_payloadAttnAreaAddr = 0;
+
+        if(!TARGETING::is_no_load())
+        {
+            err = RUNTIME::getPayloadAttnAreaAddr(l_payloadAttnAreaAddr);
+            if(err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                         "broadcastShutdown: could not get ATTN area address!");
+                break;
+            }
+
+            // Save off the calculated Payload TI Area addr
+            KernelMisc::g_payload_attn_area_addr =
+                l_payloadAttnAreaAddr;
+        }
+
         // Set up the start_payload_data_area before
         // broadcasting the shutdown to the slave HB instances
         memset(&KernelIpc::start_payload_data_area,
@@ -701,6 +721,8 @@ errlHndl_t broadcastShutdown ( uint64_t i_hbInstance )
                     msg->type = IPC::IPC_START_PAYLOAD;
                     msg->data[0] = i_hbInstance;
                     msg->data[1] = l_commBase;
+                    msg->extra_data =
+                        reinterpret_cast<void*>(l_payloadAttnAreaAddr);
                     err = MBOX::send(MBOX::HB_IPC_MSGQ, msg, node);
                     if (err)
                     {

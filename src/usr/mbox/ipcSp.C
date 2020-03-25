@@ -42,6 +42,8 @@
 #include <sys/internode.h>
 #include <sys/mmio.h>
 #include <xscom/xscomif.H>
+#include <sys/misc.h>
+#include <kernel/misc.H>
 
 namespace ISTEP_21
 {
@@ -445,6 +447,11 @@ void IpcSp::msgHandler()
 
              case IPC_START_PAYLOAD:
             {
+                // Save off the Payload ATTN area address that is passed to the
+                // slave nodes as extra_data.
+                uint64_t l_payloadAttnAreaAddr =
+                    reinterpret_cast<uint64_t>(msg->extra_data);
+                KernelMisc::g_payload_attn_area_addr = l_payloadAttnAreaAddr;
                 const int NUM_MOD = 4;
                 const char * mods[NUM_MOD] =
                    {"libp9_cpuWkup.so", "libistep21.so", "libpm.so",

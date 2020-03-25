@@ -4034,4 +4034,58 @@ errlHndl_t getRsvdMemTraceBuf(uint64_t& o_RsvdMemAddress, uint64_t& o_size)
 
 }
 
+errlHndl_t getPayloadAttnAreaAddr(uint64_t& o_payloadTiAddr)
+{
+    errlHndl_t l_errl = nullptr;
+    TARGETING::Target* l_sys = TARGETING::UTIL::assertGetToplevelTarget();
+    uint64_t l_payloadHrmor = l_sys->getAttr<TARGETING::ATTR_PAYLOAD_BASE>() *
+                              MEGABYTE;
+    const uint64_t l_instance = 0; // there is only one record
+    uint64_t l_cpuCtrlDataAddr = 0;
+    size_t l_cpuCtrlDataSizeMax = 0;
+
+    do {
+    l_errl = RUNTIME::get_host_data_section(RUNTIME::CPU_CTRL,
+                                            l_instance,
+                                            l_cpuCtrlDataAddr,
+                                            l_cpuCtrlDataSizeMax);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_runtime, ERR_MRK"getPayloadAttnAreaAddr: could not get CPU_CTRL HDAT section!");
+        break;
+    }
+
+    // calculate absolute address for PHYP SP ATTN area 1
+    if(TARGETING::is_phyp_load())
+    {
+        o_payloadTiAddr = RUNTIME::calcSpAttnAreaStart();
+        break;
+    }
+
+    // Fetch the SP ATTN area from HDAT for non-PHYP load
+    // Traverse CPU Controls Header Area pointer to find CPU Controls Structure
+    auto const l_pCpuCtrlHdr =
+        reinterpret_cast<hdatHDIF_t*>(l_cpuCtrlDataAddr);
+    auto const l_pCpuDataPointer =
+        reinterpret_cast<hdatHDIFDataHdr_t*>(l_cpuCtrlDataAddr +
+                                             l_pCpuCtrlHdr->hdatDataPtrOffset);
+    auto const l_pCpuCtrlInfo =
+        reinterpret_cast<hdatCpuCtrlInfo_t*>(l_cpuCtrlDataAddr +
+                                             l_pCpuDataPointer->hdatOffset);
+
+    // Get the address of the first SP ATTN. It is relative to HRMOR
+    o_payloadTiAddr = l_pCpuCtrlInfo->spAttnArea1.address + l_payloadHrmor;
+
+    }while(0);
+
+    if(l_errl)
+    {
+        o_payloadTiAddr = 0;
+    }
+
+    TRACFCOMP(g_trac_runtime, "getPayloadAreaAddr SP ATTN addr = 0x%016llx",
+              o_payloadTiAddr);
+    return l_errl;
+}
+
 } //namespace RUNTIME

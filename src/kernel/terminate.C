@@ -61,11 +61,8 @@ void terminateExecuteTI()
     // Trigger a hostboot dump in Simics
     MAGIC_INSTRUCTION(MAGIC_HB_DUMP);
 
-    // Save off the TI Area so that SBE can fetch it from the scratch reg
-    uint64_t l_tiAreaAddr = reinterpret_cast<uint64_t>(&kernel_TIDataArea);
-    // HB TI pointer is relative to HRMOR, so need to OR HRMOR in
-    l_tiAreaAddr |= getHRMOR();
-    writeScratchReg(MMIO_SCRATCH_TI_AREA_LOCATION, l_tiAreaAddr);
+    // Save off the location of the TI area before terminating.
+    setTiAreaScratchReg();
 
     // Call the function that actually executes the TI code.
     p9_force_attn();
@@ -154,5 +151,13 @@ void termSetIstep(uint32_t i_istep)
     return;
 }
 
-
 #endif // BOOTLOADER
+
+void setTiAreaScratchReg()
+{
+    // Save off the TI Area so that SBE can fetch it from the scratch reg
+    uint64_t l_tiAreaAddr = reinterpret_cast<uint64_t>(&kernel_TIDataArea);
+    // HB TI pointer is relative to HRMOR, so need to OR HRMOR in
+    l_tiAreaAddr |= getHRMOR();
+    writeScratchReg(MMIO_SCRATCH_TI_AREA_LOCATION, l_tiAreaAddr);
+}

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -133,6 +133,9 @@ namespace Systemcalls
 
             /** qryLocalIpcInfo() */
         QRY_LOCAL_IPC_INFO,
+
+            /** save_payload_attn_addr() */
+        SAVE_PAYLOAD_ATTN_ADDR,
 
         SYSCALL_MAX
     };

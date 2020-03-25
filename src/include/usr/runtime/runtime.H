@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -392,6 +392,14 @@ void findHdatLocation(uint64_t payloadBase_va,
  */
 errlHndl_t getRsvdMemTraceBuf(uint64_t& o_RsvdMemAddress, uint64_t& o_size);
 
+/**
+ * @brief Returns the physical address of SP ATTN area 1.
+ *
+ * @param[out] o_payloadTiAddr the output address of the first SP ATTN area;
+ *             zero in case of an error.
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t getPayloadAttnAreaAddr(uint64_t& o_payloadTiAddr);
 
 /*
  *  @brief Calculates the node's proposed start address for the system's

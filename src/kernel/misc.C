@@ -57,6 +57,7 @@ namespace KernelMisc
     uint64_t g_payload_base  = 0;
     uint64_t g_payload_entry = 0;
     uint64_t g_payload_data  = 0;
+    uint64_t g_payload_attn_area_addr = 0x0ul;
     uint64_t g_masterHBInstance = 0xfffffffffffffffful;
     uint32_t g_error_data    = 0;
 
@@ -208,6 +209,11 @@ namespace KernelMisc
                     } while(1);
 
                 }
+
+                // Update the Core scratch reg 0 with the TI location of the
+                // payload before passing to payload.
+                updateScratchReg(MMIO_SCRATCH_TI_AREA_LOCATION,
+                                 g_payload_attn_area_addr);
 
                 kernel_shutdown(p_spda->node_count,
                                 g_payload_base,

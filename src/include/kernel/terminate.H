@@ -99,4 +99,11 @@ void termSetHbDump(void);
  */
 void termSetIstep(uint32_t i_istep);
 
+/** @fn setTiAreaScratchReg
+ *
+ * @brief Updates Core Scratch Reg 0 with the address of the TI Area Structure
+ *
+ */
+void setTiAreaScratchReg();
+
 #endif

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,6 +51,8 @@ namespace KernelMisc
     extern uint64_t g_payload_data;
     /** @brief master host boot instance number (node) */
     extern uint64_t g_masterHBInstance;
+    /** @brief The address of payload's attention area. */
+    extern uint64_t g_payload_attn_area_addr;
     /** @brief master host boot additional error data (node) */
     extern uint32_t g_error_data;
 

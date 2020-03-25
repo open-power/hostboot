@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,7 @@
 #include <kernel/segmentmgr.H>
 #include <kernel/block.H>
 #include <kernel/terminate.H>
+#include <arch/ppc.H>
 
 #include <stdlib.h>
 
@@ -141,6 +142,8 @@ int main()
 
     // Let FSP/BMC know that Hostboot is now running
     KernelMisc::setHbScratchStatus(KernelMisc::HB_RUNNING);
+    // Set the scratch reg 0 to the TI Area location
+    setTiAreaScratchReg();
 
     // Initialize the debug pointer area
     debug_pointers = new DEBUG::DebugPointers_t();
@@ -170,6 +173,9 @@ int smp_slave_main(cpu_t* cpu)
 {
     // Erase task-pointer so that TaskManager::getCurrentTask() returns NULL.
     setSPRG3(NULL);
+
+    // Save off the TI Area location into Core scratch reg 0 for each slave core
+    setTiAreaScratchReg();
 
     CpuManager::init_slave_smp(cpu);
     VmmManager::init_slb();
