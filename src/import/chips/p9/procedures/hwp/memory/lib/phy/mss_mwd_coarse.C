@@ -529,8 +529,12 @@ fapi2::ReturnCode mwd_coarse::conduct_write_read( const fapi2::Target<fapi2::TAR
     // Smash some ODT's high originally
     {
         // ODT value buffer
-        const auto l_ccs_value = mss::ccs::convert_odt_attr_to_ccs(fapi2::buffer<uint8_t>
-                                 (l_wr_odt[l_dimm_rank]));
+        uint8_t l_ccs_value = 0;
+        FAPI_TRY(mss::ccs::convert_odt_attr_to_ccs(
+                     fapi2::buffer<uint8_t>(l_wr_odt[l_dimm_rank]),
+                     l_mca,
+                     l_ccs_value));
+
         // Inserts ODT values
         auto l_odt = mss::ccs::odt_command(l_ccs_value, ODT_CYCLE_LEN + 2);
         // Adds the instructions to the CCS program
@@ -543,8 +547,11 @@ fapi2::ReturnCode mwd_coarse::conduct_write_read( const fapi2::Target<fapi2::TAR
         auto l_wr = ccs::wr_command(i_rank);
 
         // ODT value buffer
-        const auto l_ccs_value = mss::ccs::convert_odt_attr_to_ccs(fapi2::buffer<uint8_t>
-                                 (l_wr_odt[l_dimm_rank]));
+        uint8_t l_ccs_value = 0;
+        FAPI_TRY(mss::ccs::convert_odt_attr_to_ccs(
+                     fapi2::buffer<uint8_t>(l_wr_odt[l_dimm_rank]),
+                     l_mca,
+                     l_ccs_value));
 
         // Ensures that we do not have any default idles or repeats
         l_wr.arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>(0);
@@ -560,8 +567,11 @@ fapi2::ReturnCode mwd_coarse::conduct_write_read( const fapi2::Target<fapi2::TAR
     // Hold the ODT's high for the whole write cycle
     {
         // ODT value buffer
-        const auto l_ccs_value = mss::ccs::convert_odt_attr_to_ccs(fapi2::buffer<uint8_t>
-                                 (l_wr_odt[l_dimm_rank]));
+        uint8_t l_ccs_value = 0;
+        FAPI_TRY(mss::ccs::convert_odt_attr_to_ccs(
+                     fapi2::buffer<uint8_t>(l_wr_odt[l_dimm_rank]),
+                     l_mca,
+                     l_ccs_value));
 
         // Inserts ODT values
         // Timing is ODT_CYCLE_LEN + 1
@@ -600,8 +610,12 @@ fapi2::ReturnCode mwd_coarse::conduct_write_read( const fapi2::Target<fapi2::TAR
 
     // Holds the RD ODT's for 5 cycles
     {
-        const auto l_ccs_value = mss::ccs::convert_odt_attr_to_ccs(fapi2::buffer<uint8_t>
-                                 (l_rd_odt[l_dimm_rank]));
+        uint8_t l_ccs_value = 0;
+        FAPI_TRY(mss::ccs::convert_odt_attr_to_ccs(
+                     fapi2::buffer<uint8_t>(l_rd_odt[l_dimm_rank]),
+                     l_mca,
+                     l_ccs_value));
+
         auto l_odt = mss::ccs::odt_command(l_ccs_value, ODT_CYCLE_LEN);
         l_program.iv_instructions.push_back(l_odt);
     }
