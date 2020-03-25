@@ -63,43 +63,57 @@ void* call_omi_setup (void *io_pArgs)
     errlHndl_t l_err = nullptr;
     TRACFCOMP( g_trac_isteps_trace, "call_omi_setup entry" );
 
-    // 12.6.a exp_omi_setup.C
-    //        - Set any register (via I2C) on the Explorer before OMI is trained
-    TargetHandleList l_ocmbTargetList;
-    getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
-    TRACFCOMP(g_trac_isteps_trace,
-              "call_omi_setup: %d OCMBs found",
-              l_ocmbTargetList.size());
-
-    for (const auto & l_ocmb_target : l_ocmbTargetList)
+    do
     {
-        //  call the HWP with each target
-        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target
-            (l_ocmb_target);
-
+        // 12.6.a exp_omi_setup.C
+        //        - Set any register (via I2C) on the Explorer before OMI is
+        //          trained
+        TargetHandleList l_ocmbTargetList;
+        getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
         TRACFCOMP(g_trac_isteps_trace,
-                "exp_omi_setup HWP target HUID 0x%.08x",
-                get_huid(l_ocmb_target));
+                "call_omi_setup: %d OCMBs found",
+                l_ocmbTargetList.size());
 
-        FAPI_INVOKE_HWP(l_err, exp_omi_setup, l_fapi_ocmb_target);
-
-        //  process return code
-        if ( l_err )
+        for (const auto & l_ocmb_target : l_ocmbTargetList)
         {
+            //  call the HWP with each target
+            fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target
+                (l_ocmb_target);
+
             TRACFCOMP(g_trac_isteps_trace,
-                 "ERROR : call exp_omi_setup HWP(): failed on target 0x%08X. "
-                 TRACE_ERR_FMT,
-                 get_huid(l_ocmb_target),
-                 TRACE_ERR_ARGS(l_err));
+                    "exp_omi_setup HWP target HUID 0x%.08x",
+                    get_huid(l_ocmb_target));
 
-            // Capture error
-            captureError(l_err, l_StepError, HWPF_COMP_ID, l_ocmb_target);
+            FAPI_INVOKE_HWP(l_err, exp_omi_setup, l_fapi_ocmb_target);
+
+            //  process return code
+            if ( l_err )
+            {
+                TRACFCOMP(g_trac_isteps_trace,
+                    "ERROR : call exp_omi_setup HWP: failed on target 0x%08X. "
+                    TRACE_ERR_FMT,
+                    get_huid(l_ocmb_target),
+                    TRACE_ERR_ARGS(l_err));
+
+                // Capture error
+                captureError(l_err, l_StepError, HWPF_COMP_ID, l_ocmb_target);
+            }
         }
-    }
 
-    // 12.6.b p10_omi_setup.C
-    //        - File does not currently exist
-    //        - TODO: RTC 248244
+        // Do not continue if an error was encountered
+        if(!l_StepError.isNull())
+        {
+            TRACFCOMP( g_trac_isteps_trace,
+                INFO_MRK "call_omi_setup exited early because exp_omi_setup "
+                "had failures" );
+            break;
+        }
+
+        // 12.6.b p10_omi_setup.C
+        //        - File does not currently exist
+        //        - TODO: RTC 248244
+
+    } while (0);
 
     TRACFCOMP(g_trac_isteps_trace, "call_omi_setup exit" );
 

@@ -62,7 +62,7 @@ using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
-
+using   namespace   ISTEPS_TRACE;
 
 namespace ISTEP_12
 {
@@ -73,10 +73,10 @@ void* call_mss_getecid (void *io_pArgs)
     errlHndl_t l_err = nullptr;
     compId_t  l_componentId = HWPF_COMP_ID;
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_getecid entry" );
+    TRACFCOMP( g_trac_isteps_trace, "call_mss_getecid entry" );
 
     // Get all OCMB targets
-    TARGETING::TargetHandleList l_ocmbTargetList;
+    TargetHandleList l_ocmbTargetList;
     getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
 
     for (const auto & l_ocmb_target : l_ocmbTargetList)
@@ -85,72 +85,42 @@ void* call_mss_getecid (void *io_pArgs)
             l_fapi_ocmb_target(l_ocmb_target);
 
         // check EXPLORER first as this is most likely the configuration
-        uint32_t chipId = l_ocmb_target->getAttr< TARGETING::ATTR_CHIP_ID>();
+        uint32_t chipId = l_ocmb_target->getAttr< ATTR_CHIP_ID>();
         if (chipId == POWER_CHIPID::EXPLORER_16)
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            TRACFCOMP( g_trac_isteps_trace,
                 "Running exp_getecid HWP on target HUID 0x%.8X",
-                TARGETING::get_huid(l_ocmb_target) );
+                get_huid(l_ocmb_target) );
             FAPI_INVOKE_HWP(l_err, exp_getecid, l_fapi_ocmb_target);
 
             if ( l_err )
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                TRACFCOMP( g_trac_isteps_trace,
                     "ERROR : call exp_getecid HWP(): failed on target 0x%08X. "
                     TRACE_ERR_FMT,
                     get_huid(l_ocmb_target),
                     TRACE_ERR_ARGS(l_err));
                 l_componentId = HWPF_COMP_ID;
+
+                // Capture error and continue to the next chip
+                captureError(l_err, l_StepError, l_componentId, l_ocmb_target);
+            }
+            else
+            {
+                TRACFCOMP( g_trac_isteps_trace,
+                    "SUCCESS running %s_getecid HWP on target HUID 0x%.8X",
+                    "exp", get_huid(l_ocmb_target) );
             }
         }
-        else
+        else // Not an Explorer, continue to the next chip.
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Unknown chip ID 0x%X on target HUID 0x%.8X",
-                chipId, TARGETING::get_huid(l_ocmb_target) );
-
-            /*@
-             *  @errortype
-             *  @reasoncode  ISTEP::RC_INVALID_OCMB_CHIP_ID
-             *  @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             *  @moduleid    ISTEP::MOD_MSS_GETECID
-             *  @userdata1   Huid of the ocmb target
-             *  @userdata2   Chip ID
-             *  @devdesc     Invalid chip ID (!= POWER_CHIPID::EXPLORER_16)
-             *  @custdesc    A problem occurred during the IPL of the system.
-             */
-            l_err = new ERRORLOG::ErrlEntry(
-                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                              MOD_MSS_GETECID,
-                              RC_INVALID_OCMB_CHIP_ID,
-                              TO_UINT64( TARGETING::get_huid(l_ocmb_target) ),
-                              TO_UINT64( chipId ) );
-            l_err->addHwCallout(l_ocmb_target,
-                               HWAS::SRCI_PRIORITY_HIGH,
-                               HWAS::DECONFIG,
-                               HWAS::GARD_NULL);
-
-            l_err->collectTrace(ISTEP_COMP_NAME);
-            l_componentId = ISTEP_COMP_ID;
+            TRACFCOMP( g_trac_isteps_trace,
+                "call_mss_getecid: Unknown chip ID 0x%X on target HUID 0x%.8X",
+                chipId, get_huid(l_ocmb_target) );
         }
+    } // OCMB loop
 
-        if ( l_err )
-        {
-            // Capture error
-            captureError(l_err, l_StepError, l_componentId, l_ocmb_target);
-
-            // Continue the next chip to gather up all the errors
-            continue;
-        }
-        else
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS running %s_getecid HWP on target HUID 0x%.8X",
-                "exp", TARGETING::get_huid(l_ocmb_target) );
-        }
-    }
-
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_getecid exit" );
+    TRACFCOMP( g_trac_isteps_trace, "call_mss_getecid exit" );
 
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();

@@ -40,7 +40,7 @@
 #include    <initservice/isteps_trace.H>
 
 // Targeting support
-#include    <targeting/common/commontargeting.H>
+#include    <targeting/targplatutil.H>
 
 #include    <expupd/expupd.H>
 
@@ -58,14 +58,7 @@ void* call_update_omi_firmware (void *io_pArgs)
 
     // Check if any explorer chips require a firmware update and update them
     // (skipped on MPIPL)
-    // We should be checking for updates and perform the updates even if OMI
-    // initialization failed. It's possible that the OMI failure was due to
-    // the OCMB having an old image. The update code will automatically
-    // switch to using i2c if OMI is not enabled.
-    Target* l_pTopLevel = nullptr;
-    targetService().getTopLevelTarget( l_pTopLevel );
-    assert(l_pTopLevel, "call_update_omi_firmware: no TopLevelTarget");
-    if (l_pTopLevel->getAttr<ATTR_IS_MPIPL_HB>())
+    if (UTIL::assertGetToplevelTarget()->getAttr<ATTR_IS_MPIPL_HB>())
     {
         TRACFCOMP( g_trac_isteps_trace,
                    "skipping expupd::UpdateAll() due to MPIPL");

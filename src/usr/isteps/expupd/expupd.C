@@ -31,7 +31,7 @@
 
 #include <expupd/expupd_reasoncodes.H>
 #include <pnor/pnorif.H>
-#include <targeting/common/commontargeting.H>
+#include <targeting/targplatutil.H>
 #include <targeting/common/utilFilter.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
@@ -141,9 +141,7 @@ void updateAll(IStepError& o_stepError)
     TargetHandleList l_ocmbTargetList;
     getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
 
-    Target* l_pTopLevel = nullptr;
-    targetService().getTopLevelTarget( l_pTopLevel );
-    assert(l_pTopLevel, "expupd::updateAll: no TopLevelTarget");
+    Target* l_pTopLevel = UTIL::assertGetToplevelTarget();
 
     TRACFCOMP(g_trac_expupd, ENTER_MRK
               "updateAll: %d ocmb chips found",

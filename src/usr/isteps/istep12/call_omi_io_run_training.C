@@ -67,88 +67,101 @@ void* call_omi_io_run_training (void *io_pArgs)
     errlHndl_t l_err = nullptr;
     TRACFCOMP( g_trac_isteps_trace, "call_omi_io_run_training entry" );
 
-    // 12.7.a exp_omi_train.C
-    TargetHandleList l_ocmbTargetList;
-    getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
-
-    for (const auto & l_ocmb_target : l_ocmbTargetList)
+    do
     {
-        //  call the HWP with each target
-        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target
-            (l_ocmb_target);
+        // 12.7.a exp_omi_train.C
+        TargetHandleList l_ocmbTargetList;
+        getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
 
-        // Only run exp_omi_train on EXPLORER OCMB targets.
-        uint32_t chipId = l_ocmb_target->getAttr< ATTR_CHIP_ID>();
-        if (chipId == POWER_CHIPID::EXPLORER_16)
+        for (const auto & l_ocmb_target : l_ocmbTargetList)
+        {
+            //  call the HWP with each target
+            fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target
+                (l_ocmb_target);
+
+            // Only run exp_omi_train on EXPLORER OCMB targets.
+            uint32_t chipId = l_ocmb_target->getAttr< ATTR_CHIP_ID>();
+            if (chipId == POWER_CHIPID::EXPLORER_16)
+            {
+                TRACFCOMP( g_trac_isteps_trace,
+                    "Start exp_omi_train on target HUID 0x%.8X",
+                    get_huid(l_ocmb_target) );
+                FAPI_INVOKE_HWP(l_err, exp_omi_train, l_fapi_ocmb_target);
+
+                //  process return code.
+                if ( l_err )
+                {
+                    TRACFCOMP( g_trac_isteps_trace,
+                    "ERROR : call exp_omi_train HWP(): failed on target 0x%08X."
+                        TRACE_ERR_FMT,
+                        get_huid(l_ocmb_target),
+                        TRACE_ERR_ARGS(l_err));
+
+                    // Capture error
+                    captureError(l_err, l_StepError, HWPF_COMP_ID,
+                                 l_ocmb_target);
+                }
+                else
+                {
+                    TRACFCOMP( g_trac_isteps_trace,
+                        "SUCCESS :  exp_omi_train HWP on target 0x%.08X",
+                        get_huid(l_ocmb_target));
+                }
+            }
+            else
+            {
+                // Skip exp_omi_train call on non-Explorer chips
+                TRACFCOMP( g_trac_isteps_trace,
+                    "Skipping exp_omi_train HWP on target HUID 0x%.8X, "
+                    "chipId 0x%.4X",
+                    get_huid(l_ocmb_target), chipId );
+            }
+        }
+
+        // Do not continue if an error was encountered
+        if(!l_StepError.isNull())
         {
             TRACFCOMP( g_trac_isteps_trace,
-                "Start exp_omi_train on target HUID 0x%.8X",
-                get_huid(l_ocmb_target) );
-            FAPI_INVOKE_HWP(l_err, exp_omi_train, l_fapi_ocmb_target);
+                INFO_MRK "call_omi_io_run_training exited early because "
+                "exp_omi_train had failures" );
+            break;
+        }
+
+        // 12.7.b p10_omi_train.C
+        TargetHandleList l_omicTargetList;
+        getAllChiplets(l_omicTargetList, TYPE_OMIC);
+
+        for (const auto & l_omic_target : l_omicTargetList)
+        {
+            TRACFCOMP(g_trac_isteps_trace, "p10_omi_train HWP target HUID %.8x",
+                get_huid(l_omic_target));
+
+            //  call the HWP with each OMIC target
+            fapi2::Target<fapi2::TARGET_TYPE_OMIC>
+                l_fapi_omic_target(l_omic_target);
+
+            FAPI_INVOKE_HWP(l_err, p10_omi_train, l_fapi_omic_target );
 
             //  process return code.
             if ( l_err )
             {
                 TRACFCOMP( g_trac_isteps_trace,
-                   "ERROR : call exp_omi_train HWP(): failed on target 0x%08X. "
+                    "ERROR : call p10_omi_train HWP: failed on target 0x%08X. "
                     TRACE_ERR_FMT,
-                    get_huid(l_ocmb_target),
+                    get_huid(l_omic_target),
                     TRACE_ERR_ARGS(l_err));
 
                 // Capture error
-                captureError(l_err, l_StepError, HWPF_COMP_ID, l_ocmb_target);
+                captureError(l_err, l_StepError, HWPF_COMP_ID, l_omic_target);
             }
             else
             {
                 TRACFCOMP( g_trac_isteps_trace,
-                     "SUCCESS :  exp_omi_train HWP on target 0x%.08X",
-                     get_huid(l_ocmb_target));
+                        "SUCCESS :  p10_omi_train HWP on 0x%.08X",
+                        get_huid(l_omic_target));
             }
         }
-        else
-        {
-            // Skip exp_omi_train call on non-Explorer chips
-            TRACFCOMP( g_trac_isteps_trace,
-                "Skipping exp_omi_train HWP on target HUID 0x%.8X, "
-                "chipId 0x%.4X",
-                get_huid(l_ocmb_target), chipId );
-        }
-    }
-
-    // 12.7.b p10_omi_train.C
-    TargetHandleList l_omicTargetList;
-    getAllChiplets(l_omicTargetList, TYPE_OMIC);
-
-    for (const auto & l_omic_target : l_omicTargetList)
-    {
-        TRACFCOMP( g_trac_isteps_trace, "p10_omi_train HWP target HUID %.8x",
-            get_huid(l_omic_target));
-
-        //  call the HWP with each OMIC target
-        fapi2::Target<fapi2::TARGET_TYPE_OMIC>
-            l_fapi_omic_target(l_omic_target);
-
-        FAPI_INVOKE_HWP(l_err, p10_omi_train, l_fapi_omic_target );
-
-        //  process return code.
-        if ( l_err )
-        {
-            TRACFCOMP( g_trac_isteps_trace,
-                 "ERROR : call p10_omi_train HWP(): failed on target 0x%08X. "
-                 TRACE_ERR_FMT,
-                 get_huid(l_omic_target),
-                 TRACE_ERR_ARGS(l_err));
-
-            // Capture error
-            captureError(l_err, l_StepError, HWPF_COMP_ID, l_omic_target);
-        }
-        else
-        {
-            TRACFCOMP( g_trac_isteps_trace,
-                      "SUCCESS :  p10_omi_train HWP on 0x%.08X",
-                       get_huid(l_omic_target));
-        }
-    }
+    } while (0);
 
     TRACFCOMP( g_trac_isteps_trace, "call_omi_io_run_training exit" );
 
