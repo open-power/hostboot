@@ -5543,15 +5543,12 @@
        Force specific behavior for the OCMB Firmware update function.
     </description>
     <id>OCMB_FW_UPDATE_OVERRIDE</id>
-    <!-- @fixme-RTC:244420-Should be volatile-zero -->
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <simpleType>
-      <uint8_t>
-        <!-- Cannot use enumeration directly due to override issue -->
-        <default>3</default>
-      </uint8_t>
+      <uint8_t/>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>

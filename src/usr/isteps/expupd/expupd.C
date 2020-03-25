@@ -42,11 +42,13 @@
 #include <fapi2/hw_access.H>
 #include <chipids.H>
 #include <trace/interface.H>
+#include <util/misc.H>
 #include <hbotcompid.H>
 #include "ocmbFwImage.H"
 #include <exp_fw_update.H>
 #include <initservice/istepdispatcherif.H>
 #include <istepHelperFuncs.H>               // captureError
+
 
 using namespace ISTEP_ERROR;
 using namespace ERRORLOG;
@@ -161,6 +163,12 @@ void updateAll(IStepError& o_stepError)
         // Check if we have any overrides to force our behavior
         auto l_forced_behavior =
             l_pTopLevel->getAttr<ATTR_OCMB_FW_UPDATE_OVERRIDE>();
+
+        if ( Util::isSimicsRunning() )
+        {
+            TRACFCOMP(g_trac_expupd, INFO_MRK "Simics running so just do the version check");
+            l_forced_behavior = TARGETING::OCMB_FW_UPDATE_BEHAVIOR_CHECK_BUT_NO_UPDATE;
+        }
 
         // Exit now if told to
         if( OCMB_FW_UPDATE_BEHAVIOR_PREVENT_UPDATE == l_forced_behavior )
