@@ -6559,7 +6559,6 @@
     </attribute>
 </targetInstance>
 
-<!-- TODO RTC 213602: Uncomment this once presence detection works
 <targetInstance>
     <id>sys0node0ocmb4</id>
     <type>chip-ocmb</type>
@@ -7231,7 +7230,6 @@
         </default>
     </attribute>
 </targetInstance>
--->
 
 <!-- ===================================================================== -->
 <!-- PMIC Units -->
@@ -7573,7 +7571,6 @@
     </attribute>
 </targetInstance>
 
-<!-- TODO RTC 213602: Uncomment this once presence detection works
 <targetInstance>
     <id>sys0node0pmic16</id>
     <type>pmic</type>
@@ -7973,7 +7970,6 @@
         <default>1</default>
     </attribute>
 </targetInstance>
--->
 
 <!-- ===================================================================== -->
 <!-- MEMPORT Units -->
