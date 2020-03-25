@@ -139,6 +139,7 @@ class MmioTest : public CxxTest::TestSuite
 
             // 1st valid write to SCOM register (also sets up
             // tests for forcing HW read/write failures)
+            // EXPLR_TP_MB_UNIT_TOP_GIF2PCB_ERROR_REG = 0x080F0000
             // Set the PCB error bits (8:10) to binary 100, which means
             // 'invalid address'
             // NOTE: must byteswap to little endian before writing
@@ -164,6 +165,7 @@ class MmioTest : public CxxTest::TestSuite
 
             // 2nd valid write to SCOM register (also sets up
             // tests for forcing HW read/write failures)
+            // EXPLR_TP_MB_UNIT_TOP_PIB2GIF_ERROR_REG = 0x080E0000
             // This register should contain a copy of the GIF2PCB error register
             // starting at bit 32
             // NOTE: must byteswap to little endian before writing data
@@ -192,6 +194,8 @@ class MmioTest : public CxxTest::TestSuite
 
             // Write to an "invalid" scom address.  Should
             // return with failure (now that we've set up the error regs).
+            // EXPLR_INVALID_SCOM_ADDR =
+            //   EXPLR_TP_MB_UNIT_TOP_TRACE_TRDATA_CONFIG_0 = 0x08010403
             // NOTE: Also, writing MMIO_OCMB_UE_DETECTED to this register
             //       sets up the following read to the same register
             //       to fail.

@@ -123,8 +123,7 @@ void test_fapi2MmioInvalidSizes()
         auto first_ocmb_info = l_ocmb->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
         if (!first_ocmb_info.useInbandScom)
         {
-            // TODO: RTC 249013 Enable checking once useInbandScom is implemented.
-            // TS_FAIL("test_fapi2MmioInvalidSizes() - scom access is not using inband");
+            TS_FAIL("test_fapi2MmioInvalidSizes() - scom access is not using inband");
             continue;
         }
         numTests++;
@@ -178,8 +177,6 @@ void test_fapi2MmioAccess()
     int numTests = 0;
     int numFails = 0;
 
-// TODO: RTC 249013 Enable the MmioAccess tests.
-#ifndef CONFIG_AXONE_BRING_UP
     errlHndl_t l_errl = nullptr;
 
     // Create a vector of TARGETING::Target pointers
@@ -247,7 +244,7 @@ void test_fapi2MmioAccess()
         }
     }
     mutex_unlock(iv_serializeTestMutex);
-#endif
+
     FAPI_INF("fapi2MmioAccessTest Test Complete. %d/%d fails", numFails, numTests);
 }
 

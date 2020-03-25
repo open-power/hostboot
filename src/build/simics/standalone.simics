@@ -56,7 +56,7 @@ try {
 foreach $obj in (get-object-list ocmb -all){
 
     # Allow for testing MMIO HW failures
-    # Forces write access to TRACE_TRDATA_CONFIG_0 to fail
+    # Forces write access to TRACE_TRDATA_CONFIG_0(0x08010403) to fail
     # in src/usr/mmio/test/mmiotest.H
     # NOTE: address is left shifted 3 and has MMIO
     #       offset (0x100000000) added.

@@ -24,14 +24,13 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 
-# FIXME RTC: 210975
 MODULE = testmmio
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/expaccess/
 
-#TESTS = *.H
+TESTS = *.H
 
 
 include ${ROOTPATH}/config.mk
