@@ -785,10 +785,22 @@ void pgpe_flags_print(FILE* stream,
             (gppb->pgpe_flags[PGPE_FLAG_WOV_UNDERVOLT_ENABLE]) ? "ENABLED" : "DISABLED");
     fprintf(stream, "\tWOV-OverVolt               = %s\n",
             (gppb->pgpe_flags[PGPE_FLAG_WOV_OVERVOLT_ENABLE]) ? "ENABLED" : "DISABLED");
-    fprintf(stream, "\tDDS-Calibration Pstate     = %s\n",
-            (gppb->pgpe_flags[PGPE_FLAG_DDS_CAL_PSTATE_ENABLE]) ? "ENABLED" : "DISABLED");
     fprintf(stream, "\tDDS-Coarse Throttle        = %s\n",
             (gppb->pgpe_flags[PGPE_FLAG_DDS_COARSE_THROTTLE_ENABLE]) ? "ENABLED" : "DISABLED");
+
+    if (gppb->pgpe_flags[PGPE_FLAG_DDS_SLEW_MODE] == 0x0)
+    {
+        fprintf(stream, "\tDDS-SlewMode           = %s\n", "NONE");
+    }
+    else if (gppb->pgpe_flags[PGPE_FLAG_DDS_SLEW_MODE] == 0x1)
+    {
+        fprintf(stream, "\tDDS-SlewMode           = %s\n", "JUMP_PROTECT");
+    }
+    else if (gppb->pgpe_flags[PGPE_FLAG_DDS_SLEW_MODE] == 0x2)
+    {
+        fprintf(stream, "\tDDS-SlewMode           = %s\n", "SLEW_MODE");
+    }
+
     fprintf(stream, "\tDDS-Frequency Jump         = %s\n",
             (gppb->pgpe_flags[PGPE_FLAG_FREQ_JUMP_ENABLE]) ? "ENABLED" : "DISABLED");
     fprintf(stream, "\tPMCR Most Recent           = %s\n",
