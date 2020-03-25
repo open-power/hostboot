@@ -287,6 +287,33 @@ class ccsTraits<mss::mc_type::EXPLORER>
         }
 
         ///
+        /// @brief Tie DIMM0 and DIMM1 ODTs if needed, when CS's are tied
+        ///
+        /// @param[in] i_target PORT target type
+        /// @param[in,out] io_ccs_value CCS values with ODT fields
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        static fapi2::ReturnCode odt_tied(
+            const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+            fapi2::buffer<uint8_t>& io_ccs_value)
+        {
+            bool l_cs_tied = false;
+            FAPI_TRY(mss::get_cs_tied(i_target, l_cs_tied));
+
+            if (l_cs_tied)
+            {
+                // Overwrite DIMM1 ODTs with DIMM0's, since they are mirrored
+                // when the CS's are mirrored
+                io_ccs_value.template writeBit<CCS_ODT_DIMM1_R0>(io_ccs_value.template getBit<CCS_ODT_DIMM0_R0>());
+                io_ccs_value.template writeBit<CCS_ODT_DIMM1_R1>(io_ccs_value.template getBit<CCS_ODT_DIMM0_R1>());
+            }
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+
+        ///
         /// @brief Gets the attribute for checking our rank configuration
         /// @param[in] i_target the port target on which to operate
         /// @param[out] o_ranks the rank data

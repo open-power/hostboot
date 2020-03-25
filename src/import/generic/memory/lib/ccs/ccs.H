@@ -504,12 +504,16 @@ inline instruction_t des_command(const uint16_t i_idle = 0)
 /// @brief Converts an ODT attribute to CCS array input
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_attr_value ODT attribute value
-/// @return CCS value for the ODT's
+/// @param[in] i_target PORT target type
+/// @param[out] CCS value for the ODT's
+/// @return FAPI2_RC_SUCCESS iff success, else error code
 ///
-inline uint8_t convert_odt_attr_to_ccs(const fapi2::buffer<uint8_t>& i_attr_value)
+template< typename TT = ccsTraits<DEFAULT_MC_TYPE> >
+inline fapi2::ReturnCode convert_odt_attr_to_ccs(
+    const fapi2::buffer<uint8_t>& i_attr_value,
+    const fapi2::Target<TT::PORT_TARGET_TYPE>& i_target,
+    uint8_t& o_ccs_value)
 {
-    using TT = ccsTraits<DEFAULT_MC_TYPE>;
-
     // ODT value buffer
     fapi2::buffer<uint8_t> l_ccs_value;
     l_ccs_value.template writeBit<TT::CCS_ODT_DIMM0_R0>(i_attr_value.template getBit<TT::ATTR_ODT_DIMM0_R0>())
@@ -518,7 +522,13 @@ inline uint8_t convert_odt_attr_to_ccs(const fapi2::buffer<uint8_t>& i_attr_valu
     .template writeBit<TT::CCS_ODT_DIMM1_R0>(i_attr_value.template getBit<TT::ATTR_ODT_DIMM1_R0>())
     .template writeBit<TT::CCS_ODT_DIMM1_R1>(i_attr_value.template getBit<TT::ATTR_ODT_DIMM1_R1>());
 
-    return uint8_t(l_ccs_value);
+    // Set ODT_DIMM1_R0 & R1 <-- ODT_DIMM0_R0 & R1 if CS/ODt needs to be tied
+    FAPI_TRY(TT::odt_tied(i_target, l_ccs_value));
+
+    o_ccs_value = uint8_t(l_ccs_value);
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///

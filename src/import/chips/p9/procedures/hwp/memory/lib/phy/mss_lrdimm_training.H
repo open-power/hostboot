@@ -666,8 +666,12 @@ inline fapi2::ReturnCode mpr_read( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
 
     // Holds the RD ODT's for 5 cycles
     {
-        const auto l_ccs_value = mss::ccs::convert_odt_attr_to_ccs(fapi2::buffer<uint8_t>
-                                 (l_rd_odt[l_dimm_rank]));
+        uint8_t l_ccs_value = 0;
+        FAPI_TRY(mss::ccs::convert_odt_attr_to_ccs(
+                     fapi2::buffer<uint8_t>(l_rd_odt[l_dimm_rank]),
+                     l_mca,
+                     l_ccs_value));
+
         auto l_odt = mss::ccs::odt_command(l_ccs_value, ODT_CYCLE_LEN);
         l_program.iv_instructions.push_back(l_odt);
     }

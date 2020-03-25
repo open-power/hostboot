@@ -289,6 +289,20 @@ class ccsTraits<mss::mc_type::NIMBUS>
         }
 
         ///
+        /// @brief Tie DIMM0 and DIMM1 ODTs if needed, when CS's are tied (NO-OP for Nimbus)
+        ///
+        /// @param[in] i_target PORT target type
+        /// @param[in,out] io_ccs_value CCS values with ODT fields
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        static fapi2::ReturnCode odt_tied(
+            const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+            fapi2::buffer<uint8_t>& io_ccs_value)
+        {
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
         /// @brief Gets the attribute for checking our rank configuration
         /// @param[in] i_target the port target on which to operate
         /// @param[out] o_ranks the rank data
