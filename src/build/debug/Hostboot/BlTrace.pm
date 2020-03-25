@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2019
+# Contributors Listed Below - COPYRIGHT 2016,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -136,7 +136,9 @@ sub main
 
     my ($packName,$args) = @_;
 
-    my $traceAddr = 0x209000; #offset from Hostboot's HRMOR (2MB+36KB)
+    # @HBBL_SIZE_SYNC@
+    # Offset from Hostboot's HRMOR (2MB + HBBL_MAX_SIZE + 12K exception vectors)
+    my $traceAddr = 0x20B000;
     my $traceSize = 64;
 
     # Parse trace address from options.

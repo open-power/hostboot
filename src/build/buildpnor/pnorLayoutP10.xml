@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -188,11 +188,13 @@ Layout Description
         <ecc/>
     </section>
     <section>
-        <description>Hostboot Bootloader (32K)</description>
+        <!-- @HBBL_SIZE_SYNC -->
+        <description>Hostboot Bootloader (44K)</description>
         <eyeCatch>HBBL</eyeCatch>
         <!-- Physical Size includes Header rounded to ECC valid size -->
-        <!-- Max size of actual HBBL content is 24K and 27K with ECC -->
-        <physicalRegionSize>0x8000</physicalRegionSize>
+        <!-- Max size of actual HBBL content is 4K secure header + 32K -->
+        <!-- logical content + ECC overhead = 44K -->
+        <physicalRegionSize>0xB000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
         <ecc/>

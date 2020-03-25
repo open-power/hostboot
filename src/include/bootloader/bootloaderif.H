@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,9 +30,12 @@
 #include <arch/memorymap.H>
 
 namespace Bootloader{
-// Max size of HBBL without ECC. Must match PNOR layout for eyeCatch HBBL
+
+// @HBBL_SIZE_SYNC@
+// Max logical size of HBBL without secure header, padding, or ECC.
+// Must match PNOR layout assumptions for eyeCatch HBBL
 // Must be aligned CACHELINE_SIZE of 128 bytes
-#define MAX_HBBL_SIZE (24 * KILOBYTE)
+#define MAX_HBBL_SIZE (32 * KILOBYTE)
 
 // Location of the HW Key Hash located at the end of the HBBL without ECC
 #define HBBL_HW_KEY_HASH_LOCATION  (MAX_HBBL_SIZE - sizeof(SHA512_t))

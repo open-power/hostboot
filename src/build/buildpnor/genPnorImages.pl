@@ -42,8 +42,9 @@ use constant BASE_IMAGE_INSTRUCTION_START_STACK_POINTER => 0x0000000008280000;
 
 use constant MAX_COMP_ID_LEN => 8;
 
-# Max HBBL content size is 24K
-my $MAX_HBBL_SIZE = 24576;
+# @HBBL_SIZE_SYNC@
+# Max logical HBBL content size is 32K
+my $MAX_HBBL_SIZE = 32768;
 
 ################################################################################
 # Be explicit with POSIX

@@ -2313,8 +2313,9 @@ namespace SBE
                    sizeof(pHbbl));
             const void* hbblPnorPtr = reinterpret_cast<const void*>(pHbbl);
 
-            // Use max hbbl size and not the PNOR size. The PNOR size can grow
-            // to add a secure header, but the code size limit is still 20K.
+            // Use logical HBBL content size limit of MAX_HBBL_SIZE.  The PNOR
+            // partition size potentially includes secure header, padding, and
+            // ECC overhead which are not applicable during SBE customization.
             TRACFCOMP( g_trac_sbe, "getSbeInfoState() - "
                        "hbblPnorPtr=%p, hbblMaxSize=0x%08X (%d)",
                        hbblPnorPtr, MAX_HBBL_SIZE, MAX_HBBL_SIZE);

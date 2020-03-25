@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -37,7 +37,11 @@
 # .set SBE_HB_LPCMMIOBAR,   sbe_hb_structures+32 ;// uint64_t
 .set HBBL_BASE_ADDRESS,   base_load_address
 .set HBBL_END_ADDRESS,    end_load_address
-.set HBBL_DATA_ADDR_OFFSET,      0x00009000 ;// offset of external data
+
+# @HBBL_SIZE_SYNC@
+# Should be HBBL_MAX_SIZE + 12K (0xB000 currently)
+.set HBBL_DATA_ADDR_OFFSET,      0x0000B000 ;// offset of external data
+
 .set HBBL_TI_OFFSET,             0x50       ;// offset within external data
 .set HBBL_SCRATCH_ADDR_OFFSET,   0x00010000 ;// offset of scratch space
 .set HBBL_system_reset,          0x100
