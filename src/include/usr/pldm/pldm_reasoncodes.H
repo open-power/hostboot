@@ -44,13 +44,12 @@ namespace PLDM
         MOD_GET_PDR_REPO              = 0x03, // getRemotePdrRepository
         MOD_ROUTE_MESSAGES            = 0x04, // routeInboundMsg
         MOD_PLDM_REQUESTER            = 0x05, // handle_outbound_req_messages
-        MOD_MAKE_PLDM_REQUEST_PAYLOAD = 0x06, // make_pldm_request_payload
-        MOD_DECODE_RESPONSE          = 0x07, // decode_pldm_response
-        MOD_MAKE_PLDM_REQUEST         = 0x08, // make_pldm_request
-        MOD_HANDLE_GET_PDR            = 0x09, // handleGetPdrRequest
-        MOD_SEND_PLDM_RESPONSE        = 0x0A, // send_pldm_response
-        MOD_HANDLE_INBOUND_REQ        = 0x0B, // handle_inbound_req
-        MOD_SEND_REPO_CHANGED_EVENT   = 0x0C, // sendRepositoryChangedEvent
+        MOD_DECODE_RESPONSE           = 0x06, // decode_pldm_response
+        MOD_MAKE_PLDM_REQUEST         = 0x07, // make_pldm_request
+        MOD_HANDLE_GET_PDR            = 0x08, // handleGetPdrRequest
+        MOD_SEND_PLDM_RESPONSE        = 0x09, // send_pldm_response
+        MOD_HANDLE_INBOUND_REQ        = 0x0A, // handle_inbound_req
+        MOD_SEND_REPO_CHANGED_EVENT   = 0x0B, // sendRepositoryChangedEvent
     };
 
     enum PLDMReasonCode

@@ -116,16 +116,16 @@ errlHndl_t getPDR(const msg_q_t i_msgQ,
 
         {
             errl =
-                sendrecv_pldm_request_payload<PLDM_GET_PDR_REQ_BYTES>
-                (response_bytes,
-                 i_msgQ,
-                 encode_get_pdr_req,
-                 DEFAULT_INSTANCE_ID,
-                 pdr_req.record_handle,
-                 pdr_req.data_transfer_handle,
-                 pdr_req.transfer_op_flag,
-                 pdr_req.request_count,
-                 pdr_req.record_change_number);
+              sendrecv_pldm_request<PLDM_GET_PDR_REQ_BYTES> (
+                  response_bytes,
+                  i_msgQ,
+                  encode_get_pdr_req,
+                  DEFAULT_INSTANCE_ID,
+                  pdr_req.record_handle,
+                  pdr_req.data_transfer_handle,
+                  pdr_req.transfer_op_flag,
+                  pdr_req.request_count,
+                  pdr_req.record_change_number);
 
             if (errl)
             {
@@ -341,7 +341,6 @@ errlHndl_t sendRepositoryChangedEvent(const terminus_id i_tid,
              * return PLDM_SUCCESS. Then we allocate the proper amount of memory and
              * call the encoder again, which will cause it to actually encode the
              * message. **/
-
             for (int i = 0; i < 2; ++i)
             {
                 const int rc
@@ -379,7 +378,7 @@ errlHndl_t sendRepositoryChangedEvent(const terminus_id i_tid,
                 // Value from DSP0248 section 16.6
                 const uint8_t DSP0248_V1_2_0_PLATFORM_EVENT_FORMAT_VERSION = 1;
 
-                errl = sendrecv_pldm_request_payload<PLDM_PLATFORM_EVENT_MESSAGE_MIN_REQ_BYTES>
+                errl = sendrecv_pldm_request<PLDM_PLATFORM_EVENT_MESSAGE_MIN_REQ_BYTES>
                     (response_bytes,
                      event_data_bytes,
                      msgQ,

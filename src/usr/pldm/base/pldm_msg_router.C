@@ -38,6 +38,7 @@
 // Userspace Includes
 #include <pldm/pldmif.H>
 #include <pldm/pldm_reasoncodes.H>
+#include <pldm/pldm_errl.H>
 #include <mctp/mctp_message_types.H>
 // From src/usr/pldm/extern/
 #include "../extern/base.h"
@@ -76,15 +77,7 @@ errlHndl_t routeInboundMsg(const uint8_t* const i_msg, const size_t i_len)
                              sizeof(pldm_msg_hdr),
                              ErrlEntry::NO_SW_CALLOUT);
 
-        errl->collectTrace(PLDM_COMP_NAME);
-
-        // Call out service processor / BMC firmware as high priority
-        errl->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
-                                    HWAS::SRCI_PRIORITY_HIGH);
-
-        // Call out Hostboot firmware as medium priority
-        errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                    HWAS::SRCI_PRIORITY_MED);
+        addBmcErrorCallouts(errl);
         break;
     }
 

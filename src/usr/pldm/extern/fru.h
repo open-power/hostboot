@@ -39,6 +39,7 @@ extern "C" {
 
 #include "base.h"
 
+#define PLDM_GET_FRU_RECORD_TABLE_METADATA_REQ_BYTES 0
 #define PLDM_GET_FRU_RECORD_TABLE_METADATA_RESP_BYTES 19
 #define PLDM_GET_FRU_RECORD_TABLE_REQ_BYTES 5
 #define PLDM_GET_FRU_RECORD_TABLE_MIN_RESP_BYTES 6
@@ -159,12 +160,14 @@ struct pldm_fru_record_data_format {
  *
  *  @param[in] instance_id - Message's instance id
  *  @param[in,out] msg - Message will be written to this
+ *  @param[in] payload_length - Length of the request message payload
  *  @return pldm_completion_codes
  *  @note  Caller is responsible for memory alloc and dealloc of param
  *         'msg.payload'
  */
 int encode_get_fru_record_table_metadata_req(uint8_t instance_id,
-               struct pldm_msg *msg);
+               struct pldm_msg *msg,
+               size_t payload_length);
 
 /** @brief Decode GetFruRecordTable response data
  *
@@ -226,12 +229,14 @@ int encode_get_fru_record_table_metadata_resp(
  *  @param[in] transfer_operation_flag - A flag that indicates whether this is
  *  the start of the transfer
  *  @param[in,out] msg - PLDM request message payload
+ *  @param[in] payload_length - Length of request message payload
  *  @return pldm_completion_codes
  */
 int encode_get_fru_record_table_req(uint8_t instance_id,
                                     uint32_t data_transfer_handle,
                                     uint8_t transfer_operation_flag,
-                                    struct pldm_msg *msg);
+                                    struct pldm_msg *msg,
+                                    size_t payload_length);
 
 /** @brief Decode GetFruRecordTable request data
  *

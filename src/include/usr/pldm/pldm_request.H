@@ -50,6 +50,7 @@
 #include "../../../usr/pldm/extern/platform.h"
 #include <pldm/pldmif.H>
 #include <pldm/pldm_const.H>
+#include <pldm/pldm_errl.H>
 
 using namespace ERRORLOG;
 
@@ -77,8 +78,27 @@ struct mctp_pldm_msg
     uint8_t body[MsgSize - sizeof(pldm_msg::payload)] = { };
 } __attribute__((packed));
 
-/* @brief Represents a PLDM message (without a payload) that will be sent
+/* @brief Represents a PLDM message, with a single byte payload, that will be
+ *        sent through the PLDM message queue to the MCTP stack.
+ *
+ */
+template<>
+struct mctp_pldm_msg<1>
+{
+    // This is set by the MCTP stack
+    decltype(MCTP::MCTP_MSG_TYPE_PLDM) mctp_message = 0;
+
+    pldm_msg pldm_message { };
+} __attribute__((packed));
+
+/* @brief Represents a PLDM message, without a payload, that will be sent
  *        through the PLDM message queue to the MCTP stack.
+ *
+ * @note  In this case, we will pass an extra byte ( sizeof(pldm_msg::payload) )
+ *        down to the MCTP layer. The MCTP layer will put this on the LPC bus
+ *        and it will get propagated to the BMC. This is okay because for
+ *        commands with no PLDM message payload the BMC will ignore the size and
+ *        just look at the first 3 bytes that make up the header.
  */
 template<>
 struct mctp_pldm_msg<0>
@@ -104,7 +124,7 @@ struct mctp_pldm_msg<0>
  * @return errlHndl_t            Error if any, otherwise nullptr.
  */
 template<size_t MsgSize, typename Encoder, typename... Args>
-errlHndl_t sendrecv_pldm_request_payload(std::vector<uint8_t>& o_response_bytes,
+errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_bytes,
                                          const std::vector<uint8_t>& i_payload_bytes,
                                          const msg_q_t i_msgQ,
                                          const Encoder i_encoder,
@@ -144,7 +164,7 @@ errlHndl_t sendrecv_pldm_request_payload(std::vector<uint8_t>& o_response_bytes,
             const uint64_t request_hdr_data = pldmHdrToUint64(*pldm_request);
             /*
             * @errortype  ERRL_SEV_UNRECOVERABLE
-            * @moduleid   MOD_MAKE_PLDM_REQUEST_PAYLOAD
+            * @moduleid   MOD_MAKE_PLDM_REQUEST
             * @reasoncode RC_SENDRECV_FAIL
             * @userdata1  Return code returned by msg_sendrecv
             * @userdata2  Header of pldm request
@@ -152,7 +172,7 @@ errlHndl_t sendrecv_pldm_request_payload(std::vector<uint8_t>& o_response_bytes,
             * @custdesc   A software error occurred during system boot
             */
             errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                  MOD_MAKE_PLDM_REQUEST_PAYLOAD,
+                                  MOD_MAKE_PLDM_REQUEST,
                                   RC_SENDRECV_FAIL,
                                   return_code,
                                   request_hdr_data,
@@ -203,100 +223,18 @@ errlHndl_t sendrecv_pldm_request_payload(std::vector<uint8_t>& o_response_bytes,
  * @note                         If message encoding fails, assert triggers.
  */
 template<size_t MsgSize, typename Encoder, typename... Args>
-errlHndl_t sendrecv_pldm_request_payload(std::vector<uint8_t>& o_response_bytes,
-                                         const msg_q_t i_msgQ,
-                                         const Encoder i_encoder,
-                                         Args... i_args)
+errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_bytes,
+                                 const msg_q_t i_msgQ,
+                                 const Encoder i_encoder,
+                                 Args... i_args)
 {
-    return sendrecv_pldm_request_payload<MsgSize>(o_response_bytes,
+    return sendrecv_pldm_request<MsgSize>(o_response_bytes,
                                                   std::vector<uint8_t> { }, // Empty variable-size payload
                                                                             // portion (this does not make any
                                                                             // dynamic allocation at runtime)
                                                   i_msgQ,
                                                   i_encoder,
                                                   i_args...);
-}
-
-/* @brief sendrecv_pldm_request
- *
- *        Makes a PLDM request with no payload to the BMC, and returns the bytes
- *        making up the response.
- *
- * @param[out] o_response_bytes  Output buffer to store response message from the BMC
- * @param[in]  i_msgQ            Handle to the outgoing PLDM request queue
- * @param[in]  i_encoder         Message encoder function
- * @param[in]  i_args...         Arguments to encoder, not including pldm_msg*
- * @return     errlHndl_t        Error if any, otherwise nullptr
- */
-template<size_t MsgSize, typename Encoder, typename... Args>
-errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_bytes,
-                                 const msg_q_t i_msgQ,
-                                 const Encoder i_encoder,
-                                 Args... i_args)
-{
-    errlHndl_t errl = nullptr;
-    o_response_bytes.clear();
-
-    mctp_pldm_msg<MsgSize> msgbuf { };
-
-    pldm_msg* const pldm_request = &msgbuf.pldm_message;
-
-    do
-    {
-        {
-            const int encoder_rc = i_encoder(i_args...,
-                                             pldm_request);
-
-            assert(encoder_rc == PLDM_SUCCESS,
-                   "PLDM message encoder at address %p failed with code %d",
-                   i_encoder,
-                   encoder_rc);
-        }
-
-        const std::unique_ptr<msg_t, decltype(&msg_free)> msg { msg_allocate(), msg_free };
-        msg->data[0] = sizeof(msgbuf);
-        msg->extra_data = &msgbuf;
-
-        // Place message on the queue and wait for a response
-        const int return_code = msg_sendrecv(i_msgQ, msg.get());
-
-        if(return_code)
-        {
-            const uint64_t request_hdr_data = pldmHdrToUint64(*pldm_request);
-            /*
-            * @errortype  ERRL_SEV_UNRECOVERABLE
-            * @moduleid   MOD_MAKE_PLDM_REQUEST
-            * @reasoncode RC_SENDRECV_FAIL
-            * @userdata1  Return code returned by msg_sendrecv
-            * @userdata2  Header of pldm request
-            * @devdesc    Software problem, failed to decode PLDM message
-            * @custdesc   A software error occurred during system boot
-            */
-            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                  MOD_MAKE_PLDM_REQUEST,
-                                  RC_SENDRECV_FAIL,
-                                  return_code,
-                                  request_hdr_data,
-                                  ErrlEntry::ADD_SW_CALLOUT);
-            errl->collectTrace(PLDM_COMP_NAME);
-            break;
-        }
-        else if(msg.get()->data[1] != REQ_SUCCESS)
-        {
-            errl = reinterpret_cast<errlHndl_t>(msg.get()->extra_data);
-            msg->extra_data = nullptr;
-            break;
-        }
-
-        // we own the memory pointed to by msg->extra_data
-        std::unique_ptr<uint8_t, decltype(&free)>
-            extra_data(static_cast<uint8_t*>(msg->extra_data), free);
-
-        o_response_bytes.assign(extra_data.get(),
-                                extra_data.get() + msg->data[0]);
-    } while (false);
-
-    return errl;
 }
 
 /* @brief Decode a PLDM response.
@@ -344,15 +282,7 @@ errlHndl_t decode_pldm_response(const Decoder i_decoder,
                               response_hdr_data,
                               ErrlEntry::NO_SW_CALLOUT);
 
-        errl->collectTrace(PLDM_COMP_NAME);
-
-        // Call out service processor / BMC firmware as high priority
-        errl->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
-                                  HWAS::SRCI_PRIORITY_HIGH);
-
-        // Call out Hostboot firmware as medium priority
-        errl->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
-                                    HWAS::SRCI_PRIORITY_MED );
+        addBmcErrorCallouts(errl);
     }
 
     return errl;

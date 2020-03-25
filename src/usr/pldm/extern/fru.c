@@ -28,10 +28,15 @@
 #include "fru.h"
 
 int encode_get_fru_record_table_metadata_req(uint8_t instance_id,
-               struct pldm_msg *msg)
+               struct pldm_msg *msg,
+               size_t payload_length)
 {
   if (msg == NULL) {
     return PLDM_ERROR_INVALID_DATA;
+  }
+
+  if (payload_length != PLDM_GET_FRU_RECORD_TABLE_METADATA_REQ_BYTES) {
+    return PLDM_ERROR_INVALID_LENGTH;
   }
 
   struct pldm_header_info header = {0};
@@ -43,6 +48,7 @@ int encode_get_fru_record_table_metadata_req(uint8_t instance_id,
   if (PLDM_SUCCESS != rc) {
     return rc;
   }
+
   return PLDM_SUCCESS;
 }
 
@@ -127,11 +133,17 @@ int encode_get_fru_record_table_metadata_resp(
 int encode_get_fru_record_table_req(uint8_t instance_id,
                              uint32_t data_transfer_handle,
                              uint8_t transfer_operation_flag,
-                             struct pldm_msg *msg)
+                             struct pldm_msg *msg,
+                             size_t payload_length)
 {
   if (msg == NULL) {
     return PLDM_ERROR_INVALID_DATA;
   }
+
+  if (payload_length != PLDM_GET_FRU_RECORD_TABLE_REQ_BYTES) {
+    return PLDM_ERROR_INVALID_LENGTH;
+  }
+
   struct pldm_header_info header = {0};
   header.instance = instance_id;
   header.msg_type = PLDM_REQUEST;

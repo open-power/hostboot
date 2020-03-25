@@ -59,35 +59,36 @@ struct pldm_fru_record_table_metadata_t
 } __attribute__((packed));
 
 /**
-  * @brief Make PLDM request to get the Fru Record Table meta data
-  *        from the BMC
-  *
-  * @param[out] o_table_metadata Meta Data returned from
-  *             getFruRecordTableMetaData request
-  *
-  * @note Caller is responsible for allocating pldm_fru_record_table_metadata
-  *       and freeing the space. This function is just filling out fields
-  *
-  * @return returns error log if error occurs, otherwise returns nullptr
-  */
+ * @brief Make PLDM request to get the Fru Record Table meta data
+ *        from the BMC
+ *
+ * @param[out] o_table_metadata Meta Data returned from
+ *                              getFruRecordTableMetaData request
+ *
+ * @note Caller is responsible for allocating pldm_fru_record_table_metadata
+ *       and freeing the space. This function is just filling out fields
+ *
+ * @return returns error log if error occurs, otherwise returns nullptr
+ */
 errlHndl_t getFruRecordTableMetaData(
                   pldm_fru_record_table_metadata_t&  o_table_metadata);
 
 /**
-  * @brief Make PLDM request to get the Fru Record Table
-  *
-  * @param[in] i_tableBufferLen Expected length of the Fru Record Table in
-  *                             bytes. It is expected that o_tableBuffer has
-  *                             been allocated to store this many bytes. This
-  *                             number is used to verify the resp we get from the
-  *                             getFruRecordTable request matches what we expect
-  * @param[out] o_tableBuffer   Pointer to a buffer of at least i_tableBufferLen.
-  *                             this buffer will be filled w/ data defined in
-  *                              Table 7 of DSP0257 v1.0.0
-  *
-  * @return returns error log if error occurs, otherwise returns nullptr
-  */
-errlHndl_t getFruRecordTable(size_t i_tableBufferLen,
-                             uint8_t* o_tableBuffer);
+ * @brief Make PLDM request to get the Fru Record Table
+ *
+ * @param[in] i_table_buffer_len Expected length of the Fru Record Table in
+ *                               bytes. It is expected that o_tableBuffer has
+ *                               been allocated to store this many bytes. This
+ *                               number is used to verify the resp we get from
+ *                               the getFruRecordTable request matches what we
+ *                               expect.
+ * @param[out] o_table_buffer    Pointer to a buffer of at least i_tableBufferLen.
+ *                               this buffer will be filled w/ data defined in
+ *                               Table 7 of DSP0257 v1.0.0
+ *
+ * @return returns error log if error occurs, otherwise returns nullptr
+ */
+errlHndl_t getFruRecordTable(size_t i_table_buffer_len,
+                             uint8_t* o_table_buffer);
 }
 #endif
