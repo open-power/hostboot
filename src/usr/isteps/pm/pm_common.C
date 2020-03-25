@@ -48,6 +48,8 @@
 #include    <targeting/common/targetservice.H>
 #include    <targeting/common/util.H>
 
+#include    <targeting/targplatutil.H>
+
 //  fapi support
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
@@ -77,6 +79,8 @@
 
 #include <arch/ppc.H>
 #include <isteps/pm/occAccess.H>
+
+#include <isteps/pm/scopedHomerMapper.H>
 
 /* FIXME RTC: 210975
 #include    <p10_core_checkstop_handler.H>
@@ -651,6 +655,7 @@ namespace HBPM
 
         errlHndl_t l_errl = nullptr;
         void* l_homerVAddr = nullptr;
+        ScopedHomerMapper l_homerMapper(i_target);
 
         do
         {
@@ -667,17 +672,25 @@ namespace HBPM
                 }
             }
 
-            // Covert the input physical HOMER address and update the
-            // ATTR_HOMER_PHYS_ADDR and ATTR_HOMER_VIRT_ADDR for future
-            // use by startPMComplex (and everyone else).
-            l_homerVAddr = convertHomerPhysToVirt(i_target,
-                                                  i_homerPhysAddr);
+            // Update the physical address prior to mapping to make sure
+            // it's current.
+            i_target->setAttr<ATTR_HOMER_PHYS_ADDR>(i_homerPhysAddr);
+
+            // Map the HOMER into virual space.
+            l_errl = l_homerMapper.map();
+            if(l_errl)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"loadPMComplex: could not map HOMER to virt space!");
+                break;
+            }
+
+            l_homerVAddr = reinterpret_cast<void*>(
+                                l_homerMapper.getHomerVirtAddr());
             if(nullptr == l_homerVAddr)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"loadPMComplex: "
-                           "convertHomerPhysToVirt failed! "
-                           "HOMER_Phys=0x%0lX", i_homerPhysAddr );
+                           ERR_MRK"loadPMComplex: HOMER mapped to nullptr! HOMER_Phys=0x%0lX", i_homerPhysAddr );
                 break;
             }
 
@@ -754,16 +767,6 @@ namespace HBPM
 
         } while(0);
 
-        if ((TARGETING::is_phyp_load()) && (nullptr != l_homerVAddr))
-        {
-            int lRc = HBPM_UNMAP(l_homerVAddr);
-            uint64_t lZeroAddr = 0;
-            i_target->setAttr<ATTR_HOMER_VIRT_ADDR>(reinterpret_cast<uint64_t>(lZeroAddr));
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "loadPMComplex:" "unmap, RC=0x%X." ,
-                      lRc);
-        }
-
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    EXIT_MRK"loadPMComplex: RC=0x%X, PLID=0x%lX",
                    ERRL_GETRC_SAFE(l_errl), ERRL_GETPLID_SAFE(l_errl) );
@@ -782,16 +785,11 @@ namespace HBPM
 
         errlHndl_t l_errl = nullptr;
 
-        TARGETING::Target * l_sys = nullptr;
-        TARGETING::targetService().getTopLevelTarget( l_sys );
-        assert(l_sys != nullptr);
+        TARGETING::Target * l_sys = UTIL::assertGetToplevelTarget();
 
-        //Get homer image buffer
-        uint64_t l_homerPhysAddr = 0x0;
+        ScopedHomerMapper l_homerMapper(i_target);
 
-        // ATTR_HOMER_PHYS_ADDR was set as part of loadPMComplex
-        l_homerPhysAddr = i_target->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>();
-        void* l_homerVAddr = convertHomerPhysToVirt(i_target,l_homerPhysAddr);
+        void* l_homerVAddr = nullptr;
 
         // cast OUR type of target to a FAPI type of target.
         // figure out homer offsets
@@ -799,7 +797,16 @@ namespace HBPM
             l_fapiTarg(i_target);
 
         do {
+            l_errl = l_homerMapper.map();
+            if(l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"startPMComplex: could not map HOMER to virt space!");
+                break;
+            }
 
+            l_homerVAddr = reinterpret_cast<void*>(
+                                l_homerMapper.getHomerVirtAddr());
             if(l_homerVAddr == nullptr)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -819,7 +826,7 @@ namespace HBPM
                                     ISTEP::MOD_START_PM_COMPLEX,
                                     ISTEP::RC_INVALID_HOMER_VADDR,
                                     get_huid(i_target),
-                                    l_homerPhysAddr,
+                                    l_homerMapper.getHomerPhysAddr(),
                                     ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                 break;
             }
@@ -847,16 +854,6 @@ namespace HBPM
 
         } while (0);
 
-        if ((TARGETING::is_phyp_load()) && (nullptr != l_homerVAddr))
-        {
-                int lRc = HBPM_UNMAP(l_homerVAddr);
-                uint64_t lZeroAddr = 0;
-                i_target->setAttr<ATTR_HOMER_VIRT_ADDR>(reinterpret_cast<uint64_t>(lZeroAddr));
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "startPMComplex:" "unmap, RC=0x%X" ,
-                   lRc );
-        }
-
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    EXIT_MRK"startPMComplex: RC=0x%X, PLID=0x%lX",
                    ERRL_GETRC_SAFE(l_errl), ERRL_GETPLID_SAFE(l_errl) );
@@ -873,13 +870,7 @@ namespace HBPM
                    ENTER_MRK" resetPMComplex");
 
         errlHndl_t l_errl = nullptr;
-
-        //Get homer image buffer
-        uint64_t l_homerPhysAddr = 0x0;
-        l_homerPhysAddr =
-                       i_target->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>();
-        void* l_homerVAddr =
-                           convertHomerPhysToVirt(i_target,l_homerPhysAddr);
+        ScopedHomerMapper l_homerMapper(i_target);
 
         // cast OUR type of target to a FAPI type of target.
         // figure out homer offsets
@@ -888,6 +879,17 @@ namespace HBPM
 
         do
         {
+            l_errl = l_homerMapper.map();
+            if(l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"resetPMComplex: could not map HOMER virt!");
+                break;
+            }
+
+            //Get homer image buffer
+            void* l_homerVAddr = reinterpret_cast<void*>(
+                                    l_homerMapper.getHomerVirtAddr());
             if(l_homerVAddr == nullptr)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -907,7 +909,7 @@ namespace HBPM
                                     ISTEP::MOD_RESET_PM_COMPLEX,
                                     ISTEP::RC_INVALID_HOMER_VADDR,
                                     get_huid(i_target),
-                                    l_homerPhysAddr,
+                                    l_homerMapper.getHomerPhysAddr(),
                                     ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                 break;
             }
@@ -996,17 +998,6 @@ namespace HBPM
 #endif
 
         } while(0);
-
-        if ((TARGETING::is_phyp_load()) && (nullptr != l_homerVAddr))
-        {
-            int lRc = HBPM_UNMAP(l_homerVAddr);
-            uint64_t lZeroAddr = 0;
-            i_target->setAttr<ATTR_HOMER_VIRT_ADDR>(
-                                     reinterpret_cast<uint64_t>(lZeroAddr));
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "resetPMComplex:" "unmap, RC=0x%X" ,
-                           lRc );
-        }
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    EXIT_MRK"resetPMComplex: RC=0x%X, PLID=0x%lX",

@@ -156,6 +156,9 @@ runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
     // check for possible missed in-flight messages/interrupts
     rtPost->callClearPendingSbeMsgs();
 
+    // callLoadAndStartPMComplex is no-op on OPAL systems
+    rtPost->callLoadAndStartPMComplex();
+
     // check for possible missed in-flight messages/interrupts
     if (rtPost->callClearPendingOccMsgs != nullptr )
     {
@@ -166,9 +169,6 @@ runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
     {
         // (HTMGT not compiled in by default)
     }
-
-    // callLoadAndStartPMComplex is no-op on OPAL systems
-    rtPost->callLoadAndStartPMComplex();
 
     // do any version mismatch fixups
     rt_version_fixup();
