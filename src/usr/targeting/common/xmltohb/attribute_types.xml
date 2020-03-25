@@ -1651,6 +1651,38 @@
 
   <attribute>
     <description>
+      This attribute represents the Maximum number of L2 Line Deletes allowed
+      in the Field.
+      creator: platform (generated based on MRW data)
+    </description>
+    <id>FIELD_TH_L2_LINE_DELETES</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t>
+        <default>6</default>
+      </uint8_t>
+    </simpleType>
+  </attribute>
+
+  <attribute>
+    <description>
+      This attribute represents the Maximum number of L3 Line Deletes allowed
+      in the Field.
+      creator: platform (generated based on MRW data)
+    </description>
+    <id>FIELD_TH_L3_LINE_DELETES</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t>
+        <default>6</default>
+      </uint8_t>
+    </simpleType>
+  </attribute>
+
+  <attribute>
+    <description>
       This attribute represents the Maximum number of L2 Column Repairs allowed
       in the Field.
       creator: platform (generated based on MRW data)
@@ -3766,6 +3798,102 @@
 
   <attribute>
     <description>
+      This attribute represents the Maximum number of L2 Cache CEs allowed
+      during Manufacturing.
+      creator: platform (generated based on MRW data)
+    </description>
+    <id>MNFG_TH_L2_CACHE_CES</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t>
+        <default>1</default>
+      </uint8_t>
+    </simpleType>
+  </attribute>
+
+  <attribute>
+    <description>
+      This attribute represents the Maximum number of L2 Directory CEs allowed
+      during Manufacturing.
+      creator: platform (generated based on MRW data)
+    </description>
+    <id>MNFG_TH_L2_DIR_CES</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t>
+        <default>1</default>
+      </uint8_t>
+    </simpleType>
+  </attribute>
+
+  <attribute>
+    <description>
+      This attribute represents the Maximum number of L2 Line Deletes allowed
+      during Manufacturing.
+      creator: platform (generated based on MRW data)
+    </description>
+    <id>MNFG_TH_L2_LINE_DELETES</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+  </attribute>
+
+  <attribute>
+    <description>
+      This attribute represents the Maximum number of L3 Cache CEs allowed
+      during Manufacturing.
+      creator: platform (generated based on MRW data)
+    </description>
+    <id>MNFG_TH_L3_CACHE_CES</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t>
+        <default>3</default>
+      </uint8_t>
+    </simpleType>
+  </attribute>
+
+  <attribute>
+    <description>
+      This attribute represents the Maximum number of L3 Directory CEs allowed
+      during Manufacturing.
+      creator: platform (generated based on MRW data)
+    </description>
+    <id>MNFG_TH_L3_DIR_CES</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t>
+        <default>1</default>
+      </uint8_t>
+    </simpleType>
+  </attribute>
+
+  <attribute>
+    <description>
+      This attribute represents the Maximum number of L3 Line Deletes allowed
+      during Manufacturing.
+      creator: platform (generated based on MRW data)
+    </description>
+    <id>MNFG_TH_L3_LINE_DELETES</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+  </attribute>
+
+  <attribute>
+    <description>
       With MNFG thresholds enabled, PRD will make a predictive callout when a
       memory intermittent MPE attention count is equal to this value. A value of
       0 defaults to the max threshold of 0xff.
@@ -3782,6 +3910,22 @@
 
   <attribute>
     <description>
+      This attribute represents the Base threshold (for 2GB DRAM ) of
+      Memory CEs allowed during IPL.
+      creator: platform (generated based on MRW data)
+    </description>
+    <id>MNFG_TH_MEMORY_IPL_SOFT_CE_TH_ALGO</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t>
+        <default>2</default>
+      </uint8_t>
+    </simpleType>
+  </attribute>
+
+  <attribute>
+    <description>
       With MNFG thresholds enabled, PRD will make a predictive callout when a
       memory intermittent UE attention count is equal to this value. A value of
       0 defaults to the max threshold of 0xff.
@@ -3792,6 +3936,54 @@
     <simpleType>
       <uint8_t>
         <default>1</default>
+      </uint8_t>
+    </simpleType>
+  </attribute>
+
+  <attribute>
+    <description>
+      With MNFG thresholds enabled, PRD will make a predictive callout when an
+      RCD parity error (recovery enabled) attention count is equal to this
+      value. A value of 0 defaults to the max threshold of 0xff.
+    </description>
+    <id>MNFG_TH_MEMORY_RCD_PARITY_ERRORS</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t>
+        <default>1</default>
+      </uint8_t>
+    </simpleType>
+  </attribute>
+
+  <attribute>
+    <description>
+      This attribute represents the maximum number of Memory RCEs
+      allowed per Rank during runtime.
+      creator: platform (generated based on MRW data)
+    </description>
+    <id>MNFG_TH_MEMORY_RT_RCE_PER_RANK</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t>
+        <default>2</default>
+      </uint8_t>
+    </simpleType>
+  </attribute>
+
+  <attribute>
+    <description>
+      This attribute represents the Base threshold (for 2GB DRAM ) of
+      Memory CEs allowed during runtime.
+      creator: platform (generated based on MRW data)
+    </description>
+    <id>MNFG_TH_MEMORY_RT_SOFT_CE_TH_ALGO</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t>
+        <default>2</default>
       </uint8_t>
     </simpleType>
   </attribute>

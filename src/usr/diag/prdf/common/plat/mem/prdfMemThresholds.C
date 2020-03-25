@@ -61,12 +61,12 @@ uint8_t getMnfgCeTh()
     #ifndef __HOSTBOOT_RUNTIME
 
     return MfgThresholdMgr::getInstance()->
-            getThreshold( TARGETING::ATTR_MNFG_TH_CEN_MBA_IPL_SOFT_CE_TH_ALGO );
+            getThreshold( TARGETING::ATTR_MNFG_TH_MEMORY_IPL_SOFT_CE_TH_ALGO );
 
     #else
 
     return MfgThresholdMgr::getInstance()->
-            getThreshold( TARGETING::ATTR_MNFG_TH_CEN_MBA_RT_SOFT_CE_TH_ALGO );
+            getThreshold( TARGETING::ATTR_MNFG_TH_MEMORY_RT_SOFT_CE_TH_ALGO );
 
     #endif
 
@@ -83,7 +83,7 @@ ThresholdResolution::ThresholdPolicy getRcdParityTh()
     if ( mfgMode() )
     {
         th = MfgThresholdMgr::getInstance()->
-                                   getThreshold(ATTR_MNFG_TH_RCD_PARITY_ERRORS);
+                            getThreshold(ATTR_MNFG_TH_MEMORY_RCD_PARITY_ERRORS);
     }
 
     return ThresholdResolution::ThresholdPolicy( th,
@@ -142,7 +142,7 @@ ThresholdResolution::ThresholdPolicy getRceThreshold()
     if ( mfgMode() )
     {
         th = MfgThresholdMgr::getInstance()->
-                           getThreshold( ATTR_MNFG_TH_CEN_MBA_RT_RCE_PER_RANK );
+                           getThreshold( ATTR_MNFG_TH_MEMORY_RT_RCE_PER_RANK );
 
         if( th > MBA_RCE_NON_MNFG_TH ) th = MBA_RCE_NON_MNFG_TH;
     }

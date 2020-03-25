@@ -26,7 +26,7 @@
 actionclass l3_cache_ce
 {
     calloutSelfMed;
-    threshold( field(128 / day), mfg_file(ATTR_MNFG_TH_P8EX_L3_CACHE_CES) );
+    threshold( field(128 / day), mfg_file(ATTR_MNFG_TH_L3_CACHE_CES) );
     funccall("L3CE");
 };
 
@@ -40,7 +40,7 @@ actionclass l3_cache_ue_UERE
 actionclass l3_dir_ce
 {
     calloutSelfMed;
-    threshold( field(32 / day), mfg_file(ATTR_MNFG_TH_P8EX_L3_DIR_CES) );
+    threshold( field(32 / day), mfg_file(ATTR_MNFG_TH_L3_DIR_CES) );
 };
 
 actionclass l3_lru_parity_error
@@ -51,7 +51,7 @@ actionclass l3_lru_parity_error
 actionclass l2_cache_ce
 {
     calloutSelfMed;
-    threshold( field(128 / day), mfg_file(ATTR_MNFG_TH_P8EX_L2_CACHE_CES) );
+    threshold( field(128 / day), mfg_file(ATTR_MNFG_TH_L2_CACHE_CES) );
     funccall("L2CE");
 };
 
@@ -65,7 +65,7 @@ actionclass l2_cache_ue_UERE
 actionclass l2_dir_ce
 {
     calloutSelfMed;
-    threshold( field(32 / day), mfg_file(ATTR_MNFG_TH_P8EX_L2_DIR_CES) );
+    threshold( field(32 / day), mfg_file(ATTR_MNFG_TH_L2_DIR_CES) );
 };
 
 actionclass l2_power_bus_ce

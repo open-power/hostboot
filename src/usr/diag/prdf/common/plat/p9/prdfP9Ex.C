@@ -283,10 +283,10 @@ int32_t L2CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 #endif
         if (mfgMode())
             l_maxLineDelAllowed =
-              getSystemTarget()->getAttr<ATTR_MNFG_TH_P8EX_L2_LINE_DELETES>();
+              getSystemTarget()->getAttr<ATTR_MNFG_TH_L2_LINE_DELETES>();
         else
             l_maxLineDelAllowed =
-              getSystemTarget()->getAttr<ATTR_FIELD_TH_P8EX_L2_LINE_DELETES>();
+              getSystemTarget()->getAttr<ATTR_FIELD_TH_L2_LINE_DELETES>();
 
         // Ensure we're still allowed to issue repairs
         if (l_bundle->iv_L2LDCount >= l_maxLineDelAllowed)
@@ -403,10 +403,10 @@ int32_t L3CE( ExtensibleChip * i_chip,
 
         if (mfgMode())
             l_maxLineDelAllowed =
-              getSystemTarget()->getAttr<ATTR_MNFG_TH_P8EX_L3_LINE_DELETES>();
+              getSystemTarget()->getAttr<ATTR_MNFG_TH_L3_LINE_DELETES>();
         else
             l_maxLineDelAllowed =
-              getSystemTarget()->getAttr<ATTR_FIELD_TH_P8EX_L3_LINE_DELETES>();
+              getSystemTarget()->getAttr<ATTR_FIELD_TH_L3_LINE_DELETES>();
 
         // Ensure we're still allowed to issue repairs
         if (l_bundle->iv_L3LDCount >= l_maxLineDelAllowed)

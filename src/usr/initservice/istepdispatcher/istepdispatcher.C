@@ -2866,7 +2866,7 @@ errlHndl_t IStepDispatcher::failedDueToDeconfig(
         }
     }
     auto l_rcdThreshold =
-        l_pTopLevel->getAttr<TARGETING::ATTR_MNFG_TH_RCD_PARITY_ERRORS>();
+        l_pTopLevel->getAttr<TARGETING::ATTR_MNFG_TH_MEMORY_RCD_PARITY_ERRORS>();
     auto l_rcdLoopsAllowed =
         l_pTopLevel->getAttr<ATTR_RCD_PARITY_RECONFIG_LOOPS_ALLOWED>();
 
@@ -2889,7 +2889,7 @@ errlHndl_t IStepDispatcher::failedDueToDeconfig(
      * @userdata2[24:31] Number of RCD reboots allowed
      *                   (ATTR_RCD_PARITY_RECONFIG_LOOPS_ALLOWED)
      * @userdata2[32:39] RCD parity error threshold
-     *                   (ATTR_MNFG_TH_RCD_PARITY_ERRORS)
+     *                   (ATTR_MNFG_TH_MEMORY_RCD_PARITY_ERRORS)
      * @userdata2[40:63] Unused
      * @devdesc          Hostboot has requested a reconfig loop due to a
      *                   hardware error.  Causes could be:
