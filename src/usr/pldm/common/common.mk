@@ -38,4 +38,5 @@ PLDM_COMMON_OBJS += pldm_utils.o
 VPATH += ${COMMON_ROOTPATH}/src/usr/pldm/extern
 VPATH += ${COMMON_ROOTPATH}/src/usr/pldm/common
 VPATH += ${COMMON_ROOTPATH}/src/usr/pldm/requests
+VPATH += ${COMMON_ROOTPATH}/src/usr/pldm/responses
 VPATH += ${COMMON_ROOTPATH}/src/usr/pldm/extended

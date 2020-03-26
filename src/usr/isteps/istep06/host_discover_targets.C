@@ -49,15 +49,13 @@
 #include <vpd/vpd_if.H>
 #include <console/consoleif.H>
 #include <attributetraits.H>
-#ifdef CONFIG_BMC_IPMI
-#include <ipmi/ipmifruinv.H>
-#include <ipmi/ipmisensor.H>
+#ifdef CONFIG_PLDM
+#include <pldm/extended/pdr_manager.H>
 #endif
 #include <fapi2/plat_hwp_invoker.H>
 #include <fapi2/target.H>
 #include <i2c/eepromCache.H>
 #include <runtime/customize_attrs_for_payload.H>
-
 
 //SBE interfacing
 #include <sbeio/sbeioif.H>
@@ -76,7 +74,6 @@
 
 #ifdef CONFIG_PRINT_SYSTEM_INFO
 #include <stdio.h>
-#include <attributetraits.H>
 #endif
 
 //  HWP call support
@@ -617,20 +614,30 @@ void* host_discover_targets( void *io_pArgs )
 #endif
     }
 
-#ifdef CONFIG_BMC_IPMI
+#ifdef CONFIG_PLDM
+    l_err = PLDM::thePdrManager().addRemotePdrs();
 
-    // @TODO RTC 245663
-    // FRU Inventory is not well supported until PLDM FRU inventory
-    // is implemented, so disable for now and revisit when that
-    // support is available.
+    if (l_err)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  ERR_MRK"Failed to add remote PDRs to PDR manager");
 
-    // Gather + Send the base IPMI Fru Inventory data to the BMC
-    //IPMIFRUINV::setData();
+        // Create IStep error log and cross reference error that occurred
+        l_stepError.addErrorDetails( l_err );
+        // Commit Error
+        errlCommit (l_err, ISTEP_COMP_ID);
+    }
+    else
+    {
+        PLDM::thePdrManager().addLocalPdrs();
 
-    // @TODO RTC 246392
-    // Sensors are not supported until PLDM sensors or their equivalent
-    // are implemented, so disable for now and revisit when that support
-    // is available.
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "Added %u PDRs to PDR manager",
+                  PLDM::thePdrManager().pdrCount());
+    }
+
+    // @TODO RTC 250690: Notify BMC that we're ready to send them back the PDR
+    // repo
 
     // send DIMM/CORE/PROC sensor status to the BMC
     //SENSOR::updateBMCSensorStatus();

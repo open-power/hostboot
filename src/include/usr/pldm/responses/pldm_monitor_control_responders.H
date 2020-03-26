@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/pldm/common/pldm_utils.C $                            */
+/* $Source: src/include/usr/pldm/responses/pldm_monitor_control_responders.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,26 +23,35 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/**
-* @file pldm_utils.C
-*
-* @brief Source code for utility functions defined in pldmif.H
-*/
+/* @file  pldm_monitor_control_responders.H
+ *
+ * @brief Contains definitions for PLDM message handlers for requests in the
+ *        Platform Monitor & Control category (see DSP0248 v1.0.1 for details).
+ */
 
-#include <pldm/pldmif.H>
-#include <cstring>
+#ifndef PLDM_MONITOR_CONTROL_RESPONDERS_H__
+#define PLDM_MONITOR_CONTROL_RESPONDERS_H__
+
+#include <sys/msg.h>
+#include <errl/errlentry.H>
+
+struct pldm_msg;
 
 namespace PLDM
 {
-uint64_t pldmHdrToUint64(const pldm_msg& i_pldmMsg)
-{
-    uint64_t request_hdr_data = 0;
-    const pldm_msg_hdr* const request_hdr = &i_pldmMsg.hdr;
 
-    static_assert(sizeof(pldm_msg_hdr) <= sizeof(request_hdr_data),
-                  "pldm_msg_hdr is too big for a 64-bit integer");
+/* @brief handleGetPdrRequest
+ *
+ *        Handler for getPDR requests. (See DSP0248 v1.0.0 section 26.2 for
+ *        details.)
+ *
+ * @param[in] i_msgQ      Handle to the MCTP outbound response message queue
+ * @param[in] i_msg       getPDR request message object
+ * @param[in] i_msg_len   Length of message in i_msg
+ * @return    errlHndl_t  Error if any, otherwise nullptr.
+ */
+errlHndl_t handleGetPdrRequest(msg_q_t i_msgQ, const pldm_msg* i_msg, size_t i_msg_len);
 
-    memcpy(&request_hdr_data, request_hdr, sizeof(pldm_msg_hdr));
-    return request_hdr_data;
 }
-}
+
+#endif

@@ -40,16 +40,14 @@ struct pldm_pdr;
 namespace PLDM
 {
 
-using pldm_pdr_free_t = void(*)(pldm_pdr*);
-using pldm_pdr_ptr = std::unique_ptr<pldm_pdr, pldm_pdr_free_t>;
-
-/* @brief Retrieves the PDRs from the BMC and returns the repository containing
- *        them.
+/* @brief Retrieves the PDRs from the BMC and adds them to the given
+ *        repository.
  *
- * @param[out] o_repo  Pointer to a new PDR repository containing the BMC PDRs.
- * @return errlHndl_t  Error if any, otherwise nullptr.
+ * @param[io/out] io_repo     Pointer to a PDR repository to store the BMC PDRs in.
+ *                            Must not be nullptr.
+ * @return        errlHndl_t  Error if any, otherwise nullptr.
  */
-errlHndl_t getRemotePdrRepository(pldm_pdr_ptr& o_repo);
+errlHndl_t getRemotePdrRepository(pldm_pdr* io_repo);
 
 }
 

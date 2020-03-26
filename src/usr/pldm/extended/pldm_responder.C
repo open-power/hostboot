@@ -23,7 +23,6 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-
 /**
  * @file pldm_responder.C
  *
@@ -39,18 +38,74 @@
 #include "../common/pldmtrace.H"
 #include "pldm_responder.H"
 
+// Standard library
+#include <memory>
+
 // Userspace Headers
 #include <trace/interface.H>
 #include <initservice/taskargs.H>
+
+// PLDM
+#include <pldm/pldm_errl.H>
 #include <pldm/pldm_const.H>
+#include <pldm/pldm_reasoncodes.H>
+#include <pldm/pldmif.H>
+#include <pldm/pldm_response.H>
+#include "../common/pldmtrace.H"
+#include "pldm_responder.H"
 
-extern const char* VFS_ROOT_MSG_MCTP_OUT;
+/// Message handler headers
+#include <pldm/responses/pldm_monitor_control_responders.H>
 
-extern msg_q_t g_inboundPldmReqMsgQ;  // pldm inbound response msgQ
+// libpldm
+#include "../extern/platform.h"
+#include "../extern/base.h"
+
+/* PLDM message handler lookup tables */
+
+using namespace PLDM;
+using namespace ERRORLOG;
+
+namespace
+{
+
+/** Types and tables for message handler lookup **/
+
+using msg_handler = errlHndl_t(*)(msg_q_t, const pldm_msg*, size_t);
+
+struct msg_type_handler
+{
+    uint8_t command;
+    msg_handler handler;
+};
+
+/*** Handlers for the MSG_MONITOR_CONTROL (PLDM_MC) type ***/
+
+const msg_type_handler pldm_monitor_control_handlers[] =
+{
+    { PLDM_GET_PDR, handleGetPdrRequest }
+};
+
+/*** Top-level table of handler tables ***/
+
+struct msg_category
+{
+    PLDM::msgq_msg_t category;
+    const msg_type_handler* handlers;
+    size_t num_handlers;
+};
+
+const msg_category pldm_message_categories[] =
+{
+    { PLDM::MSG_MONITOR_CONTROL, pldm_monitor_control_handlers,
+                                 std::size(pldm_monitor_control_handlers) }
+};
+
+/* Handler logic */
 
 // Static function used to launch task calling handle_inbound_req_messages on
 // the pldmResponder singleton
-static void * handle_inbound_req_messages_task(void*)
+void * handle_inbound_req_messages_task(void*)
 {
     PLDM_INF("Starting task to respond to pldm request messages");
     task_detach();
@@ -58,36 +113,257 @@ static void * handle_inbound_req_messages_task(void*)
     return nullptr;
 }
 
-void pldmResponder::handle_inbound_req_messages(void)
+/* @brief send_cc_only_response
+ *
+ *        Send a PLDM response that consists solely of a PLDM header and a
+ *        completion code.
+ *
+ * @param[in] i_msgQ  Handle to the MCTP outgoing response queue
+ * @param[in] i_msg   Message to respond to
+ * @param[in] i_cc    Completion code
+ */
+void send_cc_only_response(const msg_q_t i_msgQ,
+                           const pldm_msg* i_msg,
+                           const uint8_t i_cc)
 {
-    uint8_t l_rc = 0;
-    while(1)
+    static const int PLDM_CC_ONLY_RESP_BYTES = 1;
+
+    errlHndl_t errl =
+        send_pldm_response<PLDM_CC_ONLY_RESP_BYTES>
+        (i_msgQ,
+         encode_cc_only_resp,
+         0, // No variable-size payload
+         i_msg->hdr.instance_id,
+         i_msg->hdr.type,
+         i_msg->hdr.command,
+         i_cc);
+
+    if (errl)
     {
-        msg_t* msg = msg_wait(g_inboundPldmReqMsgQ);
-        assert(0, "Hostboot does not currently support handling PLDM requests");
-//      TODO RTC: 249696 Handle inbound PLDM Requests from the BMC
-//      pldm_msg * l_pldm_msg_ptr = reinterpret_cast<pldm_msg *>(msg->extra_data);
-//      size_t l_payloadLen = msg->data[0] - sizeof(pldm_msg_hdr);
-        switch(msg->type)
+        PLDM_INF("Failed to send completion code-only response");
+
+        errl->collectTrace(PLDM_COMP_NAME);
+        errlCommit(errl, PLDM_COMP_ID);
+    }
+}
+
+/* @brief handle_inbound_req
+ *
+ *        Dispatches incoming PLDM requests according to their contents.
+ *
+ * @param[in] i_msgQ      MCTP message queue handle
+ * @param[in] i_msg       PLDM message handle
+ * @return    errlHndl_t  Error if any, otherwise nullptr.
+ */
+errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const msg_t* i_msg)
+{
+    errlHndl_t errl = nullptr;
+
+    do
+    {
+        if (i_msg->data[0] < sizeof(pldm_msg_hdr))
         {
-          case PLDM::MSG_CONTROL_DISCOVERY: // PLDM_CD
-              break;
-          case PLDM::MSG_SMBIOS:  // PLDM_SMBIOS
-              break;
-          case PLDM::MSG_MONITOR_CONTROL: // PLDM_MC
-              break;
-          case PLDM::MSG_BIOS_CONTROL: // PLDM_BIOS
-              break;
-          case PLDM::MSG_OEM:  //PLDM_OEM
-              break;
-          default:
-              // Error because its an unknown type
-              break;
+            PLDM_INF("PLDM request shorter than PLDM header size (%u < %u)",
+                     static_cast<uint32_t>(i_msg->data[0]),
+                     static_cast<uint32_t>(sizeof(pldm_msg_hdr)));
+
+            /*
+             * @errortype  ERRL_SEV_UNRECOVERABLE
+             * @moduleid   MOD_HANDLE_INBOUND_REQ
+             * @reasoncode RC_INVALID_LENGTH
+             * @userdata1  The length of the short PLDM message
+             * @userdata2  Minimum length of a PLDM message
+             * @devdesc    Software problem, PLDM message is too short
+             * @custdesc   A software error occurred during system boot
+             */
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                 MOD_HANDLE_INBOUND_REQ,
+                                 RC_INVALID_LENGTH,
+                                 i_msg->data[0],
+                                 sizeof(pldm_msg_hdr),
+                                 ErrlEntry::NO_SW_CALLOUT);
+
+            addBmcErrorCallouts(errl);
+            break;
         }
 
-        if(l_rc != 0)
+        const pldm_msg* const pldm_message = reinterpret_cast<pldm_msg*>(i_msg->extra_data);
+        const uint64_t response_hdr_data = pldmHdrToUint64(*pldm_message);
+        const size_t payload_len = i_msg->data[0] - sizeof(pldm_msg_hdr);
+
+        /* Lookup the message category in the first-level dispatch table to get
+         * the second-level dispatch table */
+
+        const auto category = static_cast<PLDM::msgq_msg_t>(i_msg->type);
+
+        const auto cat_table =
+            std::find_if(std::cbegin(pldm_message_categories),
+                         std::cend(pldm_message_categories),
+                         [category](const msg_category& cat)
+                         { return cat.category == category; });
+
+        if (cat_table == std::cend(pldm_message_categories))
         {
+            PLDM_INF("Unsupported PLDM request category %d",
+                     category);
+
+            send_cc_only_response(i_msgQ, pldm_message, PLDM_ERROR_INVALID_PLDM_TYPE);
+
+            /*
+             * @errortype  ERRL_SEV_UNRECOVERABLE
+             * @moduleid   MOD_HANDLE_INBOUND_REQ
+             * @reasoncode RC_INVALID_MSG_CATEGORY
+             * @userdata1  The unsupported category of the PLDM message
+             * @userdata2  PLDM message header
+             * @devdesc    Software problem, unknown PLDM message category
+             * @custdesc   A software error occurred during system boot
+             */
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                 MOD_HANDLE_INBOUND_REQ,
+                                 RC_INVALID_MSG_CATEGORY,
+                                 category,
+                                 response_hdr_data,
+                                 ErrlEntry::NO_SW_CALLOUT);
+
+            addBmcErrorCallouts(errl);
             break;
+        }
+
+        /* Unpack the PLDM header so we can get the command type for the
+         * second-level dispatch table lookup */
+
+        pldm_header_info header_info { };
+
+        {
+            const int rc = unpack_pldm_header(&pldm_message->hdr, &header_info);
+
+            if (rc != 0)
+            {
+                PLDM_INF("Failed to unpack PLDM request header (rc = %d)",
+                         rc);
+
+                send_cc_only_response(i_msgQ, pldm_message, PLDM_ERROR_INVALID_DATA);
+
+                /*
+                 * @errortype  ERRL_SEV_UNRECOVERABLE
+                 * @moduleid   MOD_HANDLE_INBOUND_REQ
+                 * @reasoncode RC_INVALID_HEADER
+                 * @userdata1  Return code from unpack routine
+                 * @userdata2  PLDM message header
+                 * @devdesc    Software problem, cannot unpack PLDM header
+                 * @custdesc   A software error occurred during system boot
+                 */
+                errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                     MOD_HANDLE_INBOUND_REQ,
+                                     RC_INVALID_HEADER,
+                                     rc,
+                                     response_hdr_data,
+                                     ErrlEntry::NO_SW_CALLOUT);
+
+                addBmcErrorCallouts(errl);
+                break;
+            }
+        }
+
+        if (header_info.msg_type != PLDM_REQUEST)
+        {
+            PLDM_INF("PLDM message is not a request, "
+                     "expected PLDM_REQUEST (%d), got %d",
+                     PLDM_REQUEST,
+                     header_info.msg_type);
+
+            send_cc_only_response(i_msgQ, pldm_message, PLDM_ERROR);
+
+            /*
+             * @errortype  ERRL_SEV_UNRECOVERABLE
+             * @moduleid   MOD_HANDLE_INBOUND_REQ
+             * @reasoncode RC_INVALID_MSG_TYPE
+             * @userdata1  Unrecognized PLDM message type
+             * @userdata2  PLDM message header
+             * @devdesc    Software problem, invalid PLDM request type
+             * @custdesc   A software error occurred during system boot
+             */
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                 MOD_HANDLE_INBOUND_REQ,
+                                 RC_INVALID_MSG_TYPE,
+                                 header_info.msg_type,
+                                 response_hdr_data,
+                                 ErrlEntry::ADD_SW_CALLOUT);
+            break;
+        }
+
+        /* Lookup the command in the second-level dispatch table to get the
+         * handler function */
+
+        const uint8_t pldm_command = header_info.command;
+
+        const auto handler =
+            std::find_if(cat_table->handlers,
+                         cat_table->handlers + cat_table->num_handlers,
+                         [pldm_command](const msg_type_handler& handler)
+                         { return handler.command == pldm_command; });
+
+        if (handler == cat_table->handlers + cat_table->num_handlers)
+        {
+            PLDM_INF("Unsupported PLDM request command type "
+                     "(category = %d, command = %d)",
+                     category, pldm_command);
+
+            send_cc_only_response(i_msgQ, pldm_message, PLDM_ERROR_UNSUPPORTED_PLDM_CMD);
+
+            /*
+             * @errortype  ERRL_SEV_UNRECOVERABLE
+             * @moduleid   MOD_HANDLE_INBOUND_REQ
+             * @reasoncode RC_INVALID_COMMAND
+             * @userdata1  Unrecognized PLDM command
+             * @userdata2  PLDM message category
+             * @devdesc    Software problem, unrecognized PLDM command
+             * @custdesc   A software error occurred during system boot
+             */
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                 MOD_HANDLE_INBOUND_REQ,
+                                 RC_INVALID_COMMAND,
+                                 pldm_command,
+                                 category,
+                                 ErrlEntry::NO_SW_CALLOUT);
+
+            addBmcErrorCallouts(errl);
+            break;
+        }
+
+        /* Invoke the handler and return any error */
+
+        errl = handler->handler(i_msgQ, pldm_message, payload_len);
+    } while (false);
+
+    return errl;
+}
+
+}
+
+/* pldmResponder class implementation */
+
+extern msg_q_t g_inboundPldmReqMsgQ;  // pldm inbound request msgQ
+
+extern const char* VFS_ROOT_MSG_MCTP_OUT;
+
+void pldmResponder::handle_inbound_req_messages(void)
+{
+    while(1)
+    {
+        const std::unique_ptr<msg_t, decltype(&msg_free)> msg
+        {
+            msg_wait(g_inboundPldmReqMsgQ),
+            msg_free
+        };
+
+        errlHndl_t errl = handle_inbound_req(iv_mctpOutboundMsgQ, msg.get());
+
+        if (errl)
+        {
+            PLDM_INF("handle_inbound_req returned an error");
+
+            errlCommit(errl, PLDM_COMP_ID);
         }
     }
 }
@@ -96,12 +372,13 @@ void pldmResponder::init(void)
 {
     PLDM_ENTER("pldmResponder::_init entry");
 
-    // Resolve the pointer to the mctp outbound msg q
+    // Resolve the pointer to the MCTP outbound message queue
     // MCTP gets initialized first so its safe to assume the queue is initialized
     iv_mctpOutboundMsgQ = msg_q_resolve(VFS_ROOT_MSG_MCTP_OUT);
 
     assert(iv_mctpOutboundMsgQ != nullptr,
-           "pldmResponder: VFS_ROOT_MSG_MCTP_OUT resolved to be nullptr, we expected it to be registered during mctp init");
+           "pldmResponder: VFS_ROOT_MSG_MCTP_OUT resolved to be nullptr, we "
+           "expected it to be registered during mctp init");
 
     // Start cmd daemon first because we want it ready if poll
     // daemon finds something right away

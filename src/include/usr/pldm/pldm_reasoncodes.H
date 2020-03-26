@@ -45,19 +45,28 @@ namespace PLDM
         MOD_ROUTE_MESSAGES            = 0x04, // routeInboundMsg
         MOD_PLDM_REQUESTER            = 0x05, // handle_outbound_req_messages
         MOD_MAKE_PLDM_REQUEST_PAYLOAD = 0x06, // make_pldm_request_payload
-        MODE_DECODE_RESPONSE          = 0x08, // decode_pldm_response
+        MODE_DECODE_RESPONSE          = 0x07, // decode_pldm_response
+        MOD_MAKE_PLDM_REQUEST         = 0x08, // make_pldm_request
+        MOD_HANDLE_GET_PDR            = 0x09, // handleGetPdrRequest
+        MOD_SEND_PLDM_RESPONSE        = 0x0A, // send_pldm_response
+        MOD_HANDLE_INBOUND_REQ        = 0x0B, // handle_inbound_req
     };
 
     enum PLDMReasonCode
     {
-        RC_MSG_DECODE_FAIL     = PLDM_COMP_ID | 0x01,
-        RC_MSG_ENCODE_FAIL     = PLDM_COMP_ID | 0x02,
-        RC_UNSUPPORTED_VERSION = PLDM_COMP_ID | 0x03,
-        RC_BAD_COMPLETION_CODE = PLDM_COMP_ID | 0x04,
-        RC_INVALID_LENGTH      = PLDM_COMP_ID | 0x05,
-        RC_SENDRECV_FAIL       = PLDM_COMP_ID | 0x06,
-        RC_SEND_FAIL           = PLDM_COMP_ID | 0x07,
+        RC_MSG_DECODE_FAIL      = PLDM_COMP_ID | 0x01,
+        RC_MSG_ENCODE_FAIL      = PLDM_COMP_ID | 0x02,
+        RC_UNSUPPORTED_VERSION  = PLDM_COMP_ID | 0x03,
+        RC_BAD_COMPLETION_CODE  = PLDM_COMP_ID | 0x04,
+        RC_INVALID_LENGTH       = PLDM_COMP_ID | 0x05,
+        RC_MCTP_FAIL            = PLDM_COMP_ID | 0x06,
+        RC_SENDRECV_FAIL        = PLDM_COMP_ID | 0x07,
+        RC_SEND_FAIL            = PLDM_COMP_ID | 0x08,
+        RC_MSG_SEND_FAIL        = PLDM_COMP_ID | 0x09,
+        RC_INVALID_MSG_CATEGORY = PLDM_COMP_ID | 0x0A,
+        RC_INVALID_COMMAND      = PLDM_COMP_ID | 0x0B,
+        RC_INVALID_MSG_TYPE     = PLDM_COMP_ID | 0x0C,
+        RC_INVALID_HEADER       = PLDM_COMP_ID | 0x0D,
     };
-
 }
 #endif

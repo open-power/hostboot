@@ -283,10 +283,8 @@ errlHndl_t getAllPdrs(std::vector<pdr>& o_pdrs)
 namespace PLDM
 {
 
-errlHndl_t getRemotePdrRepository(pldm_pdr_ptr& o_repo)
+errlHndl_t getRemotePdrRepository(pldm_pdr* const io_repo)
 {
-    pldm_pdr_ptr repo { pldm_pdr_init(), pldm_pdr_destroy };
-
     std::vector<pdr> pdrs;
 
     const errlHndl_t errl = getAllPdrs(pdrs);
@@ -295,14 +293,13 @@ errlHndl_t getRemotePdrRepository(pldm_pdr_ptr& o_repo)
     {
         for (const auto& pdr : pdrs)
         {
-            pldm_pdr_add(repo.get(),
+            pldm_pdr_add(io_repo,
                          pdr.data.data(),
                          pdr.data.size(),
                          pdr.record_handle);
         }
     }
 
-    o_repo = move(repo);
     return errl;
 }
 

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/pldm/common/pldm_utils.C $                            */
+/* $Source: src/include/usr/pldm/pldm_errl.H $                            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,26 +23,40 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/**
-* @file pldm_utils.C
-*
-* @brief Source code for utility functions defined in pldmif.H
-*/
+/* @file   pldm_errl.H
+ *
+ * @brief  Contains definitions for error-related utility functions.
+ */
 
-#include <pldm/pldmif.H>
-#include <cstring>
+#ifndef PLDM_ERRL_H__
+#define PLDM_ERRL_H__
 
 namespace PLDM
 {
-uint64_t pldmHdrToUint64(const pldm_msg& i_pldmMsg)
+
+/* @brief addBmcErrorCallouts
+ *
+ *        Collect PLDM traces, and add a high-priority callout to the BMC and a
+ *        medium-priority callout to Hostboot to the error log.
+ *
+ * @param[in] i_errl  Error log to modify
+ */
+inline void addBmcErrorCallouts(const errlHndl_t i_errl)
 {
-    uint64_t request_hdr_data = 0;
-    const pldm_msg_hdr* const request_hdr = &i_pldmMsg.hdr;
+    assert(i_errl != nullptr,
+           "i_errl is nullptr in addBmcErrorCallouts");
 
-    static_assert(sizeof(pldm_msg_hdr) <= sizeof(request_hdr_data),
-                  "pldm_msg_hdr is too big for a 64-bit integer");
+    i_errl->collectTrace(PLDM_COMP_NAME);
 
-    memcpy(&request_hdr_data, request_hdr, sizeof(pldm_msg_hdr));
-    return request_hdr_data;
+    // Call out service processor / BMC firmware as high priority
+    i_errl->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                HWAS::SRCI_PRIORITY_HIGH);
+
+    // Call out Hostboot firmware as medium priority
+    i_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                HWAS::SRCI_PRIORITY_MED);
 }
+
 }
+
+#endif

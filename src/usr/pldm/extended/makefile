@@ -38,8 +38,11 @@ OBJS += pdr.o
 # From ../requests/
 OBJS += pldm_fru_requests.o
 OBJS += pldm_pdr_requests.o
+# From ../responses/
+OBJS += pldm_monitor_control_responders.o
 # From ../extended/
 OBJS += hb_pdrs.o
+OBJS += pdr_manager.o
 OBJS += pldm_responder.o
 OBJS += pldm_extended_init.o
 
