@@ -66,6 +66,8 @@ TRAC_INIT(&g_trac_nvdimm, NVDIMM_COMP_NAME, 2*KILOBYTE);
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
+#define SPLIT_SIZE 512
+#define BUFFER_SIZE 100
 
 
 namespace NVDIMM
@@ -4556,8 +4558,50 @@ void nvdimmAddVendorLog( TARGETING::Target* i_nvdimm, errlHndl_t& io_err )
 
         // Add vendor data to error log as string
         const char* l_fullChar = reinterpret_cast<char*>(l_fullData.data());
+
+        const char* l_copyChar = l_fullChar;
+        int l_length = strlen(l_copyChar);
+        int l_remaining = l_length;
+
+        // Count of number segments
+        const int l_totalCount = (l_length % SPLIT_SIZE == 0) ?
+            l_length/SPLIT_SIZE : l_length/SPLIT_SIZE + 1;
+        int l_count = l_totalCount;
+
+        // Move the string forward to the last 512 bytes
+        if (l_length > SPLIT_SIZE)
+        {
+            l_copyChar += l_length - SPLIT_SIZE;
+        }
+
         ERRORLOG::ErrlUserDetailsStringSet l_stringSet;
-        l_stringSet.add("Vendor Log", l_fullChar);
+        size_t l_copySize = SPLIT_SIZE;
+        while (l_remaining > 0)
+        {
+            char buffer[BUFFER_SIZE] = {0};
+
+            // If at the last segment
+            if (l_remaining <= SPLIT_SIZE)
+            {
+                l_copySize = l_remaining;
+                l_copyChar = l_fullChar;
+            }
+
+            char l_blob[l_copySize+1] = {0};
+            strncpy(l_blob, l_copyChar, l_copySize);
+            l_blob[l_copySize+1] = '\0';
+
+            snprintf(buffer, SPLIT_SIZE, "Vendor Log: page %d of %d, "
+                "bytes %d to %d", l_count, l_totalCount,
+                l_remaining - l_copySize, l_remaining - 1);
+            l_stringSet.add(buffer, l_blob);
+
+            // Move string back 512 bytes
+            l_copyChar -= SPLIT_SIZE;
+            l_remaining -= l_copySize;
+            l_count--;
+        }
+
         l_stringSet.addToLog(io_err);
 
         // Change back to default
