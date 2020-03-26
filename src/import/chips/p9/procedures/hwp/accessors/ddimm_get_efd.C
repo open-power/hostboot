@@ -997,9 +997,9 @@ extern "C"
                          io_vpdInfo.iv_omi_freq_mhz, l_freqMask,
                          io_vpdInfo.iv_rank, l_rankMask);
 
-            // If unable to collect FFDC and assert, at least trace out error
+            // If FFDC and assert are not desired, give an informational trace
             // and exit with false
-            FAPI_ERR ("ddr4_get_efd: ALL EFDs have been exhausted.  NO match "
+            FAPI_INF ("ddr4_get_efd: ALL EFDs have been exhausted.  NO match "
                       "for frequency = %d (frequency bit mask = 0x%.4X) and "
                       "master rank = %d (master rank bit mask = 0x%.2X), or "
                       "there was a match but the block is not implemented.",
