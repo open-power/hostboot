@@ -48,6 +48,7 @@
 #include <p10_scom_addr.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/namedtarget.H>
+#include <targeting/common/mfgFlagAccessors.H>
 #include <fapi2/plat_hw_access.H>
 
 

@@ -43,7 +43,7 @@
 #include <initservice/isteps_trace.H>
 
 //  targeting support
-#include    <targeting/common/util.H>
+#include    <targeting/common/mfgFlagAccessors.H>
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/common/targetservice.H>
 #include    <targeting/runtime/rt_targeting.H>

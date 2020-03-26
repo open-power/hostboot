@@ -25,6 +25,7 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/attributes.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/common/mfgFlagAccessors.H>
 #include "htmgt_cfgdata.H"
 #include "htmgt_utility.H"
 #include "htmgt_poll.H"

@@ -53,6 +53,7 @@
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/attrrp.H>
+#include    <targeting/common/mfgFlagAccessors.H>
 
 // HWAS
 #include    <hwas/common/hwas.H>

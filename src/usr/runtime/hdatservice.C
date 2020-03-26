@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,6 +27,7 @@
 #include <runtime/runtime_reasoncodes.H>
 #include <sys/mm.h>
 #include <targeting/common/commontargeting.H>
+#include <targeting/common/mfgFlagAccessors.H>
 #include <initservice/initserviceif.H>
 #include <runtime/runtime.H>
 #include <attributeenums.H>

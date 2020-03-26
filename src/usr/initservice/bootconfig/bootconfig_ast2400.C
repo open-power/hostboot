@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 #include <console/consoleif.H>
 #include <sio/sio.H>
 #include <devicefw/driverif.H>
+#include <targeting/common/mfgFlagAccessors.H>
 
 namespace INITSERVICE
 {
@@ -71,15 +72,12 @@ void AST2400BootConfig::configureBootMode(uint8_t i_bootMode )
         // set or if terminate on error is sufficient
         case TERMINATE_ON_ERROR:
             {
-
-                TARGETING::Target* l_pTopLevel = NULL;
-                TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
-
                 TRACFCOMP(g_bc_trace,
                         "configureBootMode() - Boot Mode = TERMINATE_ON_ERROR");
 
-                l_pTopLevel->setAttr<TARGETING::ATTR_MNFG_FLAGS>
-                                        (TARGETING::MNFG_FLAG_SRC_TERM );
+                // Set the SRC TERM flag
+                TARGETING::setMfgFlag(TARGETING::MFG_FLAGS_MNFG_SRC_TERM);
+
                 break;
             }
 

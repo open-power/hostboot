@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,7 @@
 #include <hdat/hdat_reasoncodes.H>
 #include "hdatutil.H"
 #include <hdat/hdat.H>
+#include <targeting/common/mfgFlagAccessors.H>
 
 namespace HDAT
 {
@@ -66,9 +67,9 @@ enum hdatIplDataPtrs
 {
   HDAT_IPL_SYS   = 0,
   HDAT_IPL_PARMS,
-  HDAT_IPL_TIME, 
-  HDAT_IPL_PVT, 
-  HDAT_IPL_DUMP, 
+  HDAT_IPL_TIME,
+  HDAT_IPL_PVT,
+  HDAT_IPL_DUMP,
   HDAT_IPL_HMC,
   HDAT_IPL_CUOD,
   HDAT_IPL_MANF,
@@ -241,14 +242,12 @@ struct hdatCuod_t
 const uint32_t HDAT_POWER_LOST = 0x80;
 const uint32_t HDAT_POWER_OFF = 0x40;
 
-
-const uint32_t HDAT_MNFG_MAX_CELLS = 0x04;
-
 /** @brief Structure definition for manufacturing mode information
  */
 struct hdatManf_t
 {
-    uint32_t hdatPolicyFlags[HDAT_MNFG_MAX_CELLS]; // 4 cells of mfg mode data
+    // 4 cells of mfg mode data
+    uint32_t hdatPolicyFlags[TARGETING::MFG_FLAG_NUM_CELLS];
 } __attribute__ ((packed));
 
 
@@ -295,7 +294,7 @@ const hdatIplpFeatureFlagSetting_t hdatIplpFeatureFlagSettingsArray[NUM_RISK_LEV
 {
 //RISK 0 (AIX/Linux/IBMi)
 {
-// Risk Level 0 , compat mode, nimbus DD2.0 / nimbus DD2.1 
+// Risk Level 0 , compat mode, nimbus DD2.0 / nimbus DD2.1
 {
 {"tm-suspend-mode",                                 0x0000000000000000},
 {"inst-spec-barrier-ori31,31,0",                    0x8000000000000000},
@@ -495,7 +494,7 @@ const hdatIplpFeatureFlagSetting_t hdatIplpFeatureFlagSettingsArray[NUM_RISK_LEV
 
 
 //Risk levels 3 is being skipped as of now. Add values if needed infuture.
-//RISK3 
+//RISK3
 {
 // Risk Level3 2.0 / nimbus DD 2.1
 {},
@@ -505,7 +504,7 @@ const hdatIplpFeatureFlagSetting_t hdatIplpFeatureFlagSettingsArray[NUM_RISK_LEV
 
 // Risk Level 3 nimbus DD2.3
 {},
-// End of Risk Level 3 
+// End of Risk Level 3
 },
 
 
@@ -592,7 +591,7 @@ const hdatIplpFeatureFlagSetting_t hdatIplpFeatureFlagSettingsArray[NUM_RISK_LEV
 #define HDAT_MULT_TPMDS                            0x80000000
 #define HDAT_SMM_ENABLED                           0x40000000
 #define HDAT_CRYPTO_DISABLED_BIT                   0x20000000
-#define HDAT_RISK_LEVEL_ELEVATED                   0x10000000       
+#define HDAT_RISK_LEVEL_ELEVATED                   0x10000000
 #define HDAT_MPIPL_SUPPORTED                       0x08000000
 
 #define HDAT_ECO_ENABLED                           0x80000000
@@ -603,30 +602,6 @@ const hdatIplpFeatureFlagSetting_t hdatIplpFeatureFlagSettingsArray[NUM_RISK_LEV
 #define HDAT_NONTURBO_EIGHT_CORE_PART_SIZE_256     0x8020
 #define HDAT_NONTURBO_SIX_CORE_PART_SIZE_24        0x0018
 #define HDAT_NONTURBO_SIX_CORE_PART_SIZE_256       0x8018
-
-
-#define HDAT_MFG_FLAGS_CELL_0                      0x00000000
-#define HDAT_MFG_FLAGS_CELL_1                      0x00020000
-#define HDAT_MFG_FLAGS_CELL_2                      0x00040000
-#define HDAT_MFG_FLAGS_CELL_3                      0x00080000
-
-#define HDAT_MFG_FLAG_AVP_ENABLED                  0x00000100
-#define HDAT_MFG_FLAG_HDAT_AVP_ENABLED             0x00000010
-#define HDAT_MNFG_FLAG_SRC_TERM                    0x00000200
-#define HDAT_MNFG_IPL_MEM_CE_CHECKING_ACTIVE       0x00000008
-#define HDAT_MNFG_FAST_BKG_SCRUB_ACTIVE            0x00000080
-#define HDAT_MNFG_TEST_DRAM_REPAIRS                0x00000200
-#define HDAT_MNFG_DISABLE_DRAM_REPAIRS             0x00000008
-#define HDAT_MNFG_ENABLE_EXHAUSTIVE_PATTERN_TEST   0x00000001
-#define HDAT_MNFG_ENABLE_STANDARD_PATTERN_TEST     0x00000002
-#define HDAT_MNFG_ENABLE_MIN_PATTERN_TEST          0x00000004
-#define HDAT_MNFG_DISABLE_FABRIC_ERPAIR            0x00000010
-#define HDAT_MNFG_DISABLE_MEMORY_ERPAIR            0x00000020
-#define HDAT_MNFG_FABRIC_DEPLOY_LANE_SPARES        0x00000200
-#define HDAT_MNFG_DMI_DEPLOY_LANE_SPARES           0x00000100
-#define HDAT_MNFG_PSI_DIAGNOSTIC                   0x00000001
-#define HDAT_MNFG_FSP_UPDATE_SBE_IMAGE             0x00000004
-#define HDAT_MNFG_UPDATE_BOTH_SIDES_OF_SBE         0x00000008
 
 enum hdatIPLParamsDataPtrs
 {

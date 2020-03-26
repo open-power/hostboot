@@ -42,6 +42,7 @@
 #include <sbeio/runtime/sbeio_attr_override.H>
 #include <sbeio/runtime/sbeio_vital_attn.H>
 #include <initservice/initserviceif.H>
+#include <targeting/common/mfgFlagAccessors.H>
 
 extern trace_desc_t* g_trac_sbeio;
 

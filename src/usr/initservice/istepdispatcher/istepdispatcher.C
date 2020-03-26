@@ -48,6 +48,7 @@
 #include <initservice/taskargs.H>        //  TASK_ENTRY_MACRO
 #include <initservice/initserviceif.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/common/mfgFlagAccessors.H>
 #include <targeting/attrsync.H>
 #include <targeting/attrrp.H>
 #include <fapi2/plat_attr_override_sync.H>
@@ -494,11 +495,8 @@ errlHndl_t IStepDispatcher::executeAllISteps()
     assert(l_pTopLevel != nullptr,"IstepDispatcher::executeAllISteps()"
         " expected top level target, but got nullptr.");
 
-    auto l_mnfgFlags =
-        l_pTopLevel->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
-
-    // Check to see if SRC_TERM bit is set in MNFG flags
-    if (l_mnfgFlags & TARGETING::MNFG_FLAG_SRC_TERM)
+    // Check to see if SRC_TERM bit is set in MFG flags
+    if (TARGETING::areAllSrcsTerminating())
     {
         TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps:"
                   " In manufacturing mode");
@@ -2864,9 +2862,7 @@ errlHndl_t IStepDispatcher::failedDueToDeconfig(
     assert( l_pTopLevel != nullptr );
     auto l_reconfigAttr =
       l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
-    auto l_mnfgFlags =
-        l_pTopLevel->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
-    bool l_mfgMode = (l_mnfgFlags & TARGETING::MNFG_FLAG_SRC_TERM);
+    bool l_mfgMode = TARGETING::areAllSrcsTerminating();
     TARGETING::TargetHandleList l_allFuncMca;
     TARGETING::getAllChiplets(l_allFuncMca, TARGETING::TYPE_MCA, true );
     uint8_t l_rcdLoops = 0;

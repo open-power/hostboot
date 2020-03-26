@@ -62,6 +62,7 @@
 #include <targeting/common/predicates/predicatectm.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/util.H>
+#include <targeting/common/mfgFlagAccessors.H>
 #include <mss_generic_consts.H>
 #include <util/utilcommonattr.H>
 
@@ -653,8 +654,9 @@ union wiringData
 // fapi2::platAttrSvc::__badDqBitmapGetHelperAttrs function
 //******************************************************************************
 ReturnCode __badDqBitmapGetHelperAttrs(
-    const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
-    wiringData &o_wiringData, uint64_t &o_allMnfgFlags, uint8_t &o_ps )
+                    const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
+                    wiringData &o_wiringData,
+                    uint8_t &o_ps )
 {
     // Get the MEM_PORT target
     Target<TARGET_TYPE_MEM_PORT> l_fapiMemPort =
@@ -672,14 +674,6 @@ ReturnCode __badDqBitmapGetHelperAttrs(
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_VPD_DQ_MAP, l_fapiMemPort,
                             o_wiringData.memport) );
-
-    // Manufacturing flags attribute
-    o_allMnfgFlags = 0;
-
-    // Get the manufacturing flags bitmap to be used in both get and set
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MNFG_FLAGS,
-                            fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                            o_allMnfgFlags) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -1168,11 +1162,9 @@ ReturnCode fapiAttrGetBadDqBitmap(
         Target<TARGET_TYPE_DIMM> l_fapiDimm( l_dimmTarget );
 
         wiringData l_wiringData;
-        uint64_t l_allMnfgFlags;
         uint8_t l_ps = 0;
 
-        FAPI_TRY( __badDqBitmapGetHelperAttrs(l_fapiDimm, l_wiringData,
-                                              l_allMnfgFlags, l_ps) );
+        FAPI_TRY( __badDqBitmapGetHelperAttrs(l_fapiDimm, l_wiringData, l_ps) );
 
         l_errl = deviceRead( l_dimmTarget, l_badDqData, DIMM_BAD_DQ_SIZE_BYTES,
                              DEVICE_SPD_ADDRESS(SPD::DIMM_BAD_DQ_DATA) );
@@ -1227,8 +1219,7 @@ ReturnCode fapiAttrGetBadDqBitmap(
             // Check spare DRAM.
             FAPI_TRY( __dimmUpdateDqBitmapSpareByte(l_fapiDimm, o_data) );
 
-            if ( l_allMnfgFlags &
-                    fapi2::ENUM_ATTR_MNFG_FLAGS_MNFG_DISABLE_DRAM_REPAIRS )
+            if (TARGETING::isDramRepairsDisabled())
             {
                 // Flag to set if the discrepancies are found.
                 bool l_mfgModeBadBitsPresent = false;
@@ -1305,12 +1296,10 @@ ReturnCode fapiAttrSetBadDqBitmap(
         Target<TARGET_TYPE_DIMM> l_fapiDimm( l_dimmTarget );
 
         wiringData l_wiringData;
-        uint64_t l_allMnfgFlags;
         uint8_t l_ps = 0;
 
         // Get the helper attributes
-        FAPI_TRY( __badDqBitmapGetHelperAttrs(l_fapiDimm, l_wiringData,
-                                              l_allMnfgFlags, l_ps) );
+        FAPI_TRY( __badDqBitmapGetHelperAttrs(l_fapiDimm, l_wiringData, l_ps) );
 
         // Make sure to update the ecc and spare bytes in the inputted bitmap
         // just to make sure we don't see any differences there.
@@ -1324,8 +1313,7 @@ ReturnCode fapiAttrSetBadDqBitmap(
         FAPI_TRY( __badDqBitmapCheckForReconfigLoop(l_fapiDimm, l_tmpBitmap) );
 
         // If system is in DISABLE_DRAM_REPAIRS mode
-        if ( l_allMnfgFlags &
-             fapi2::ENUM_ATTR_MNFG_FLAGS_MNFG_DISABLE_DRAM_REPAIRS )
+        if ( TARGETING::isDramRepairsDisabled() )
         {
 
             uint8_t l_eccSpareBitmap[mss::MAX_RANK_PER_DIMM]
@@ -1495,12 +1483,10 @@ ReturnCode __rowRepairTranslateDramPos(
     ATTR_ROW_REPAIR_DATA_Type & io_translatedData )
 {
     wiringData l_wiringData;
-    uint64_t l_allMnfgFlags;
     uint8_t l_ps = 0;
 
     // Get the wiring data and port select for translation.
-    FAPI_TRY( __badDqBitmapGetHelperAttrs(i_fapiDimm, l_wiringData,
-                                          l_allMnfgFlags, l_ps) );
+    FAPI_TRY( __badDqBitmapGetHelperAttrs(i_fapiDimm, l_wiringData, l_ps) );
 
     // Loop through each rank.
     for ( uint8_t rank = 0; rank < mss::MAX_RANK_PER_DIMM; rank++ )

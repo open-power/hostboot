@@ -35,7 +35,7 @@
 #include <htmgt/htmgt.H>
 #include <runtime/runtime.H>
 #include <runtime/customize_attrs_for_payload.H>
-#include <targeting/common/util.H>
+#include <targeting/common/mfgFlagAccessors.H>
 #include <targeting/targplatutil.H>
 #include <vpd/vpd_if.H>
 #include <util/utiltce.H>

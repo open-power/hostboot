@@ -43,6 +43,7 @@
 
 #ifdef __HOSTBOOT_MODULE
 #include <initservice/initserviceif.H>
+#include <targeting/common/mfgFlagAccessors.H>
 #endif
 
 #include <targeting/common/commontargeting.H>
@@ -1117,7 +1118,7 @@ errlHndl_t HWASDiscovery::discoverTargets()
         }
 
 #ifdef __HOSTBOOT_MODULE
-        if (INITSERVICE::isSMPWrapConfig())
+        if (TARGETING::isSMPWrapConfig())
         {
             //Due to fabric limitations, we can only have 2 parallel OBUS
             //connections at a time in wrap config. So, deconfigure appropriate

@@ -40,6 +40,7 @@
 #include <targeting/common/predicates/predicatectm.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/common/mfgFlagAccessors.H>
 #include <targeting/common/target.H>
 #include <targeting/targplatutil.H>
 #include <targeting/attrrp.H>
@@ -196,18 +197,29 @@ namespace SBE
             }
 
             /*****************************************************************/
-            /* Skip Update if MNFG_FLAG_FSP_UPDATE_SBE_IMAGE is set          */
-            /* AND there is a FSP present                                    */
+            /* Skip Update if manufactering flag to update SBE image         */
+            /* is set AND there is a FSP present                             */
             /*****************************************************************/
-            ATTR_MNFG_FLAGS_type mnfg_flags = sys->getAttr<ATTR_MNFG_FLAGS>();
-            if ( (mnfg_flags & MNFG_FLAG_FSP_UPDATE_SBE_IMAGE)
-                 && INITSERVICE::spBaseServicesEnabled() // true => FSP present
+            // Get the list of manufacturing flags to check against
+            TARGETING::ATTR_MFG_FLAGS_typeStdArr l_mfgFlags;
+            TARGETING::getAllMfgFlags(l_mfgFlags);
+
+            if ( TARGETING::isUpdateSbeImage(l_mfgFlags)       &&
+                 INITSERVICE::spBaseServicesEnabled() // true => FSP present
                )
             {
+                // Get all the manufacturing flags
+                TARGETING::ATTR_MFG_FLAGS_typeStdArr l_allMfgFlags;
+                TARGETING::getAllMfgFlags(l_allMfgFlags);
+
+                uint32_t l_cellIndex = TARGETING::getMfgFlagCellIndex
+                         (TARGETING::MFG_FLAGS_MNFG_FSP_UPDATE_SBE_IMAGE);
                 TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update skipped due to "
                            "FSP present and MNFG_FLAG_FSP_UPDATE_SBE_IMAGE "
-                           "(0x%.16X) is set in MNFG Flags 0x%.16X",
-                           MNFG_FLAG_FSP_UPDATE_SBE_IMAGE, mnfg_flags);
+                           "(0x%.16X) is set in MNFG Flags (Cell %d) 0x%08X",
+                           TARGETING::MFG_FLAGS_MNFG_FSP_UPDATE_SBE_IMAGE,
+                           l_cellIndex,
+                           l_allMfgFlags[l_cellIndex]);
                 break;
             }
 
@@ -218,7 +230,7 @@ namespace SBE
                 g_istep_mode = true;
             }
 
-            if (mnfg_flags & MNFG_FLAG_UPDATE_BOTH_SIDES_OF_SBE)
+            if ( TARGETING::isUpdateBothSidesOfSbe(l_mfgFlags) )
             {
                 TRACFCOMP(g_trac_sbe,
                             INFO_MRK"Update Both Sides of SBE Flag Indicated.");

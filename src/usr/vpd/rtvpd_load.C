@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,18 +22,18 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 #include <errl/errlentry.H>
 #include <targeting/common/target.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/common/mfgFlagAccessors.H>
 #include <sys/mm.h>
 #include <vmmconst.h>
 #include <pnor/pnorif.H>
 #include <vpd/vpdreasoncodes.H>
 #include <vpd/vpd_if.H>
 #include <errl/errlmanager.H>
-
-
 
 // ----------------------------------------------
 // Trace definitions
@@ -205,20 +205,11 @@ errlHndl_t VPD::goldenCacheInvalidate(void)
 
     do
     {
-        bool l_invalidateCaches = false;
-
         // In manufacturing mode the VPD PNOR cache needs to be cleared
         // And the VPD ATTR switch and flags need to be reset
         // Note: this code should do nothing when not in PNOR caching mode
-        TARGETING::Target* l_pTopLevel = NULL;
-        TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
-        TARGETING::ATTR_MNFG_FLAGS_type l_mnfgFlags =
-                    l_pTopLevel->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
         // @todo RTC 118752 Use generic mfg-mode attr when available
-        if (l_mnfgFlags & TARGETING::MNFG_FLAG_SRC_TERM)
-        {
-            l_invalidateCaches = true;
-        }
+        bool l_invalidateCaches = TARGETING::areAllSrcsTerminating();
 
 #ifdef CONFIG_PNOR_TWO_SIDE_SUPPORT
         // We also need to wipe the cache out after booting from the

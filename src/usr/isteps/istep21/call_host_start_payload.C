@@ -38,7 +38,7 @@
 #include <initservice/extinitserviceif.H>
 #include <hbotcompid.H>
 #include <sys/misc.h>
-#include <targeting/common/util.H>
+#include <targeting/common/mfgFlagAccessors.H>
 #include <targeting/targplatutil.H>
 #include <pnor/pnorif.H>
 #include <kernel/console.H>

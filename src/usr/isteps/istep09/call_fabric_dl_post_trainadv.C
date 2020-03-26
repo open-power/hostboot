@@ -45,7 +45,6 @@
 // Initservice
 #include <initservice/taskargs.H>
 #include <initservice/isteps_trace.H>
-#include <initservice/initserviceif.H>
 
 // Error log
 #include <errl/errlentry.H>
@@ -61,6 +60,7 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/trace.H>
+#include <targeting/common/mfgFlagAccessors.H>
 
 // FAPI
 #include <fapi2/target.H>
@@ -148,7 +148,7 @@ void* call_fabric_dl_post_trainadv(void* const io_pArgs)
         invoke_hwp({ l_pair.first }, { l_pair.second }, l_stepError);
     }
 
-    if (INITSERVICE::isSMPWrapConfig())
+    if (TARGETING::isSMPWrapConfig())
     {
         // TODO RTC 246933: Integrate SMP wrap functionality
     }

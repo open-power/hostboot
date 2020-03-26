@@ -31,7 +31,7 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
-#include <targeting/common/util.H>
+#include <targeting/common/mfgFlagAccessors.H>
 
 #include <scom/scomreasoncodes.H>
 #include <initservice/initserviceif.H>

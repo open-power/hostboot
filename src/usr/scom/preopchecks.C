@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,6 +27,7 @@
 #include <errl/errlmanager.H>
 #include <scom/scomreasoncodes.H>
 #include <scom/scomif.H>
+#include <targeting/common/mfgFlagAccessors.H>
 
 // Trace definition
 extern trace_desc_t* g_trac_scom;

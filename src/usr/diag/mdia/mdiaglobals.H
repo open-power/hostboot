@@ -32,6 +32,7 @@
 
 #include "mdiafwd.H"
 #include <stdint.h>
+#include <mfgFlagAccessors.H>
 
 namespace MDIA
 {
@@ -61,22 +62,20 @@ class Globals
         TARGETING::targetService().getTopLevelTarget(sysTrgt);
         assert( nullptr != sysTrgt );
 
-        uint64_t mfg = sysTrgt->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
+        // Get the list of manufacturing flags to check against
+        TARGETING::ATTR_MFG_FLAGS_typeStdArr mfg = {0};
+        TARGETING::getAllMfgFlags(mfg);
 
         // Set the diagnostics pattern mode.
-        if ( sysTrgt->getAttr<TARGETING::ATTR_RUN_MAX_MEM_PATTERNS>() )
+        if ( TARGETING::isExhaustivePatternTestEnabled(mfg) )
         {
             iv_diagMode = NINE_PATTERNS;
         }
-        else if ( mfg & TARGETING::MNFG_FLAG_ENABLE_EXHAUSTIVE_PATTERN_TEST )
-        {
-            iv_diagMode = NINE_PATTERNS;
-        }
-        else if ( mfg & TARGETING::MNFG_FLAG_ENABLE_STANDARD_PATTERN_TEST )
+        else if ( TARGETING::isStandardPatternTestEnabled(mfg) )
         {
             iv_diagMode = FOUR_PATTERNS;
         }
-        else if ( mfg & TARGETING::MNFG_FLAG_ENABLE_MINIMUM_PATTERN_TEST )
+        else if ( TARGETING::isMinimumPatternTestEnabled(mfg) )
         {
             iv_diagMode = ONE_PATTERN;
         }
@@ -86,7 +85,7 @@ class Globals
         }
 
         // Check if MNFG IPL CE checking is enabled.
-        if ( mfg & TARGETING::MNFG_FLAG_IPL_MEMORY_CE_CHECKING )
+        if ( TARGETING::isMfgCeCheckingEnabled(mfg) )
         {
             iv_mnfgIplCeChecking = true;
         }

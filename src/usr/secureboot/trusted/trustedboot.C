@@ -43,6 +43,7 @@
 #include <targeting/targplatutil.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/commontargeting.H>
+#include <targeting/common/mfgFlagAccessors.H>
 #include <secureboot/service.H>
 #include <secureboot/trustedbootif.H>
 #include <secureboot/trustedboot_reasoncodes.H>
@@ -516,16 +517,10 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget* const i_pTpm)
 
 #ifdef CONFIG_TPM_NVIDX_VALIDATE
         // Find out if in manufacturing mode
-        TARGETING::Target* pTopLevel = nullptr;
-        TARGETING::targetService().getTopLevelTarget(pTopLevel);
-        assert(pTopLevel != nullptr,"Top level target was nullptr");
-
-        auto mnfgFlags =
-            pTopLevel->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
-
         // Only validate during MFG IPL
-        if (mnfgFlags & TARGETING::MNFG_FLAG_SRC_TERM &&
-            !Util::isSimicsRunning()) {
+        if ( TARGETING::areAllSrcsTerminating() &&
+             !Util::isSimicsRunning())
+        {
             // TPM_GETCAPABILITY to validate NV Indexes
             err = tpmCmdGetCapNvIndexValidate(i_pTpm);
             if (nullptr != err)

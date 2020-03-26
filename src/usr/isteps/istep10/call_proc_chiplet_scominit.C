@@ -42,6 +42,7 @@
 
 //  TARGETING support
 #include <attributeenums.H>            // TYPE_PROC
+#include <targeting/common/mfgFlagAccessors.H>  // isSMPWrapConfig
 
 //  Error handling support
 #include <isteps/hwpisteperror.H>      // ISTEP_ERROR::IStepError
@@ -49,7 +50,6 @@
 //  Tracing support
 #include <trace/interface.H>           // TRACFCOMP
 #include <initservice/isteps_trace.H>  // g_trac_isteps_trace
-#include <initservice/initserviceif.H>  // isSMPWrapConfig
 
 // Util TCE Support
 #include <util/utiltce.H>              // TCE::utilUseTcesForDmas
@@ -78,7 +78,7 @@ void* call_proc_chiplet_scominit( void *io_pArgs )
 
     TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_proc_chiplet_scominit entry" );
 
-    if (!INITSERVICE::isSMPWrapConfig())
+    if (TARGETING::isSMPWrapConfig())
     {
         //Get a list of all proc chips
         getAllChips(l_procTargetList, TYPE_PROC);

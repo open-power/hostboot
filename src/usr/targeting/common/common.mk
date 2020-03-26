@@ -59,6 +59,7 @@ OTHER_OBJS += util.o
 OTHER_OBJS += utilFilter.o
 OTHER_OBJS += attributeTank.o
 OTHER_OBJS += mapattrmetadata.o
+OTHER_OBJS += mfgFlagAccessors.o
 
 # Common
 COMMON_TARGETING_OBJS += ${TARGET_OBJS}

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,8 +44,9 @@
 //  Tracing support
 #include <trace/interface.H>            // TRACFCOMP
 #include <initservice/isteps_trace.H>   // g_trac_isteps_trace
-#include <initservice/initserviceif.H>  // isSMPWrapConfig
+
 //  Targeting support
+#include <targeting/common/mfgFlagAccessors.H>  // isSMPWrapConfig
 /* FIXME RTC: 210975
 #include <fapi2/target.H>               // fapi2::Target
 #include <target.H>                     // TARGETING::Target
@@ -173,7 +174,7 @@ void* call_fabric_io_run_training( void *io_pArgs )
             }  // end for (const auto & l_pbusConnection: l_pbusConnections)
 */
         }  // end if (TYPE_XBUS == l_busSet[ii])
-        else if (INITSERVICE::isSMPWrapConfig() &&
+        else if (TARGETING::isSMPWrapConfig() &&
                 (TYPE_OBUS == l_busSet[ii]))
         {
 /* FIXME RTC: 210975

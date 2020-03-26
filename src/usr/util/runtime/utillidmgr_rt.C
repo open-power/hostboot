@@ -49,6 +49,7 @@
 #include "../utilbase.H"
 #include <util/utillidpnor.H>
 #include <pnor/pnor_reasoncodes.H>
+#include <targeting/common/mfgFlagAccessors.H>
 
 extern trace_desc_t* g_trac_hbrt;
 

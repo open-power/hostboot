@@ -31,6 +31,7 @@
 #include <scom/runtime/rt_scomif.H>
 #include <runtime/interface.h>
 #include <targeting/runtime/rt_targeting.H>
+#include <targeting/common/mfgFlagAccessors.H>
 #include <xscom/piberror.H>
 #include <runtime/hbrt_utilities.H>
 

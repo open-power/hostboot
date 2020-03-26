@@ -46,7 +46,6 @@
 // Initservice
 #include <initservice/taskargs.H>
 #include <initservice/isteps_trace.H>
-#include <initservice/initserviceif.H>
 
 // Error log
 #include <errl/errlentry.H>
@@ -62,10 +61,11 @@
 #include <hwas/common/deconfigGard.H>
 #include <hwas/common/hwasCommon.H>
 
-//  targeting support
+// Targeting support
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/trace.H>
+#include <targeting/common/mfgFlagAccessors.H>
 
 // FAPI
 #include <fapi2/target.H>
@@ -187,7 +187,7 @@ void* call_proc_fabric_iovalid(void* const io_pArgs)
                   get_huid(l_cpu_target));
 
 #if 0 // TODO RTC 246933: Reincorporate SMP wrap functionality
-        if (INITSERVICE::isSMPWrapConfig())
+        if (TARGETING::isSMPWrapConfig())
         {
             const bool l_set_not_clear = true,
                        l_update_internode = true,

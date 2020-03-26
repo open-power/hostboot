@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -116,78 +116,6 @@ void clear_hwas_changed_bit(Target * i_target, const HWAS_CHANGED_BIT i_bit)
         i_target->getAttr<ATTR_HWAS_STATE_CHANGED_FLAG>();
     hwasChangedState &= ~i_bit;
     i_target->setAttr<ATTR_HWAS_STATE_CHANGED_FLAG>(hwasChangedState);
-}
-
-/**
- * @brief   Checks if we are loading a PHYP payload
- */
-bool is_phyp_load( ATTR_PAYLOAD_KIND_type* o_type )
-{
-    Target* sys = NULL;
-    targetService().getTopLevelTarget( sys );
-    assert(sys != NULL);
-
-    // get the current payload kind
-    TARGETING::PAYLOAD_KIND payload_kind = sys->getAttr<ATTR_PAYLOAD_KIND>();
-
-    if( o_type )
-    {
-        *o_type = payload_kind;
-    }
-
-    //If in AVP mode default to false
-    bool is_phyp = false;
-    if(!is_avp_load())
-    {
-        is_phyp = (PAYLOAD_KIND_PHYP == payload_kind);
-    }
-    return is_phyp;
- }
-
-/**
- * @brief  Utility function to determine if Sapphire is the payload
- *
- * @description  If the payload kind is Sapphire returns true.  Does
- *    not matter if it is Sapphire with FSP or standalone
- *
- * @return bool  True when loadding sapphire
- */
-bool is_sapphire_load(void)
-{
-    TARGETING::Target * sys = NULL;
-    TARGETING::targetService().getTopLevelTarget( sys );
-    assert(sys != NULL);
-    bool is_sapphire = false;
-
-    //If in AVP mode default to false
-    if(!is_avp_load())
-    {
-        is_sapphire = (PAYLOAD_KIND_SAPPHIRE ==
-                       sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>());
-    }
-    return is_sapphire;
-}
-
-/**
- * @brief  Utility function to determine if an AVP is the payload
- *         Note the actual payload could be something else -- this
- *         is based solely on MFG flags
- *
- * @description  If MFG AVP mode flags are set then returns true
- *      Does not matter what the actual payload is
- *
- * @return bool  True when in AVP mode
- */
-bool is_avp_load(void)
-{
-    TARGETING::Target * sys = NULL;
-    TARGETING::targetService().getTopLevelTarget( sys );
-    assert(sys != NULL);
-
-    TARGETING::ATTR_MNFG_FLAGS_type mnfg_flags =
-      sys->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
-    return ((mnfg_flags & TARGETING::MNFG_FLAG_AVP_ENABLE)
-       || (mnfg_flags & TARGETING::MNFG_FLAG_HDAT_AVP_ENABLE));
 }
 
 /**

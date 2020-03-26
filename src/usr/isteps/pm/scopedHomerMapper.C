@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #include <isteps/pm/scopedHomerMapper.H>
-#include <targeting/common/util.H>
+#include <targeting/common/mfgFlagAccessors.H>
 #include <initservice/isteps_trace.H>
 #include <targeting/targplatutil.H>
 #include <runtime/interface.h>

@@ -48,6 +48,7 @@
 #include <algorithm>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/common/mfgFlagAccessors.H>
 
 // Platform includes
 #include <prdfMemAddress.H>
@@ -1615,61 +1616,35 @@ TARGETING::TargetHandle_t getClockId(TARGETING::TargetHandle_t
 //##############################################################################
 //##                     MNFG Policy Flag Functions
 //##############################################################################
-
-// Helper function to access the state of manufacturing policy flags.
-bool isMnfgFlagSet( uint32_t i_flag )
-{
-    bool o_rc = false;
-    ATTR_MNFG_FLAGS_type l_attrValue = 0;
-    TargetHandle_t l_pTopTarget= NULL;
-    targetService().getTopLevelTarget(l_pTopTarget);
-    if(l_pTopTarget)
-    {
-        l_attrValue = l_pTopTarget->getAttr<ATTR_MNFG_FLAGS>();
-        o_rc = l_attrValue & i_flag;
-    }
-    else
-    {
-        PRDF_ERR("[isMnfgFlagSet] error finding l_pTopTarget");
-    }
-
-    //PRDF_TRAC("[isMnfgFlagSet] MNFG Flags: 0x%016llX, i_flag: "
-    //          "0x%08X, o_rc: %d", l_attrValue, i_flag, o_rc);
-
-    return o_rc;
-}
-
-//------------------------------------------------------------------------------
-
 bool mfgMode()
-{ return isMnfgFlagSet( MNFG_FLAG_THRESHOLDS      ); }
+{ return TARGETING::areMfgThresholdsActive(); }
 
 bool isFabeRepairDisabled()
-{ return isMnfgFlagSet( MNFG_FLAG_DISABLE_FABRIC_eREPAIR ); }
+{ return TARGETING::isFabricRepairDisabled(); }
 
 bool isMemeRepairDisabled()
-{ return isMnfgFlagSet( MNFG_FLAG_DISABLE_MEMORY_eREPAIR ); }
+{ return TARGETING::isMemoryRepairDisabled(); }
 
 bool mnfgTerminate()
-{ return isMnfgFlagSet( MNFG_FLAG_SRC_TERM        ); }
+{ return TARGETING::areAllSrcsTerminating(); }
 
 bool areDramRepairsDisabled()
-{ return isMnfgFlagSet( MNFG_FLAG_DISABLE_DRAM_REPAIRS ); }
+{ return TARGETING::isDramRepairsDisabled(); }
 
 bool enableFastBgScrub()
-{ return isMnfgFlagSet( MNFG_FLAG_FAST_BACKGROUND_SCRUB ); }
+{ return TARGETING::isEnableFastBackgroundScrub(); }
 
 bool mnfgSpareDramDeploy()
-{ return isMnfgFlagSet( MNFG_FLAG_TEST_DRAM_REPAIRS ); }
+{ return TARGETING::isMfgSpareDramDeploy(); }
 
 bool isMfgCeCheckingEnabled()
-{ return isMnfgFlagSet( MNFG_FLAG_IPL_MEMORY_CE_CHECKING ); }
+{ return TARGETING::isMfgCeCheckingEnabled(); }
 
 bool isMfgAvpEnabled()
-{ return isMnfgFlagSet( MNFG_FLAG_AVP_ENABLE ); }
+{ return TARGETING::isMfgAvpEnabled(); }
 
 bool isMfgHdatAvpEnabled()
-{ return isMnfgFlagSet( MNFG_FLAG_HDAT_AVP_ENABLE ); }
+{ return TARGETING::isMfgHdatAvpEnabled(); }
 
 } // end namespace PlatServices
 

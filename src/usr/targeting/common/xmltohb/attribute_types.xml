@@ -3598,6 +3598,10 @@
 
   <enumerationType>
     <id>MNFG_FLAG</id>
+    <!-- NOTE: This flag is being deprecated and being replaced by attribute
+               ATTR_MFG_FLAGS found in file
+               hostboot/src/include/usr/targeting/common/mfgFlagAccessors.H.
+               Please switch over to the new attribute, ATTR_MFG_FLAGS. -->
     <description>Enumeration indicating the mnfg flags
         that are set by the user.  The values can be
         combined using a bitwise 'OR'.  The values will
@@ -3606,6 +3610,9 @@
         is used by the ATTR_MNFG_FLAGS attribute.  Should
         note that the MNFG_FLAG values are of type uint32_t
     </description>
+    <!-- TODO: RTC 249179 Can't Remove The Following, Needed by Fips 1020
+           They need to transition over to the enums in file
+           system_attributes.xml -->
     <enumerator>
       <!-- Use default mfg error thresholds and reporting values -->
       <name>THRESHOLDS</name>

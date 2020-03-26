@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -28,10 +28,10 @@
 
 #include <vmmconst.h>
 #include <sys/msg.h>
-#include    <targeting/common/commontargeting.H>
-#include    <targeting/common/utilFilter.H>
-#include    <targeting/namedtarget.H>
-#include    <targeting/attrsync.H>
+#include <targeting/common/commontargeting.H>
+#include <targeting/common/utilFilter.H>
+#include <targeting/namedtarget.H>
+#include <targeting/attrsync.H>
 
 #define THIS_NODE_NO_PAYLOAD 0xffffffffffffffffull
 
@@ -177,25 +177,6 @@ inline bool spBaseServicesEnabled()
     }
 
     return spBaseServicesEnabled;
-}
-
-/**
- * @brief Returns if we are in smp wrap config
- *
- * If true then we are running in wrap config
- *
- * @return bool - true if wrap config, else false
- */
-inline bool isSMPWrapConfig()
-{
-    TARGETING::Target * sys {nullptr};
-    TARGETING::targetService().getTopLevelTarget( sys );
-    TARGETING::ATTR_MNFG_FLAGS_type mnfg_flags;
-    return
-        ( sys &&
-            sys->tryGetAttr<TARGETING::ATTR_MNFG_FLAGS>(mnfg_flags) &&
-            (mnfg_flags & TARGETING::MNFG_FLAG_BRAZOS_WRAP_CONFIG)) ;
-
 }
 
 /**

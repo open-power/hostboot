@@ -58,6 +58,7 @@
 
 //Targeting Support
 #include    <targeting/common/utilFilter.H>
+#include    <targeting/common/mfgFlagAccessors.H>
 #include    <fapi2/target.H>
 
 //HWP Invoker

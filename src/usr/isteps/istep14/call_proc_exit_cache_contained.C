@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,7 +33,7 @@
 
 //  targeting support
 #include <targeting/common/commontargeting.H>
-#include <targeting/common/util.H>
+#include <targeting/common/mfgFlagAccessors.H>
 #include <targeting/common/utilFilter.H>
 #include <fapi2/target.H>
 

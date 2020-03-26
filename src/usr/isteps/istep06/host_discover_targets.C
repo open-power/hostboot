@@ -36,6 +36,7 @@
 #include <targeting/namedtarget.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/commontargeting.H>
+#include <targeting/common/mfgFlagAccessors.H>
 #include <targeting/common/entitypath.H>
 #include <initservice/taskargs.H>
 #include <initservice/isteps_trace.H>

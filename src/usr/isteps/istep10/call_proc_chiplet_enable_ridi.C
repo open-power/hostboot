@@ -42,6 +42,7 @@
 
 //  TARGETING support
 #include <attributeenums.H>            // TYPE_PROC
+#include <targeting/common/mfgFlagAccessors.H>  // isSMPWrapConfig
 
 //  Error handling support
 #include <isteps/hwpisteperror.H>      // ISTEP_ERROR::IStepError
@@ -49,7 +50,6 @@
 //  Tracing support
 #include <trace/interface.H>           // TRACFCOMP
 #include <initservice/isteps_trace.H>  // g_trac_isteps_trace
-#include <initservice/initserviceif.H>  // isSMPWrapConfig
 
 #include <istepHelperFuncs.H>          // captureError
 #include <fapi2/target.H>
@@ -75,7 +75,7 @@ void* call_proc_chiplet_enable_ridi( void *io_pArgs )
     errlHndl_t l_err = nullptr;
     TARGETING::TargetHandleList l_cpuTargetList;
 
-    if (!INITSERVICE::isSMPWrapConfig())
+    if (TARGETING::isSMPWrapConfig())
     {
         //Get a list of proc chips
         getAllChips(l_cpuTargetList, TYPE_PROC);

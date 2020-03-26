@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,6 +30,7 @@
 #include <isteps/istep_reasoncodes.H>
 #include <isteps/hwpf_reasoncodes.H>
 #include <targeting/common/commontargeting.H>
+#include <targeting/common/mfgFlagAccessors.H>
 #include <initservice/istepdispatcherif.H>
 #include <initservice/initserviceif.H>
 #include <pnor/pnorif.H>

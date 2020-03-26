@@ -61,41 +61,6 @@ extern trace_desc_t *g_trac_hdat;
 /*------------------------------------------------------------------------*/
 
 /**
- * @brief This routine checks if a certain manufacturing flag is set
- *
- * @pre None
- *
- * @post None
- *
- * @param i_flag - input parameter - Specific mnfg flag to check
- *
- * @return true  : The specified mnfg flag is set
- *         false : The specified mnfg flag is not set
- *
- * @retval HDAT_OTHER_COMP_ERROR
- */
-static bool isMnfgFlagSet( uint32_t i_flag )
-{
-    bool o_rc = false;
-    TARGETING::ATTR_MNFG_FLAGS_type l_attrValue = 0;
-    TARGETING::TargetHandle_t l_pTopTarget= NULL;
-    targetService().getTopLevelTarget(l_pTopTarget);
-
-    if(l_pTopTarget)
-    {
-        l_attrValue = l_pTopTarget->getAttr<ATTR_MNFG_FLAGS>();
-        o_rc = l_attrValue & i_flag;
-    }
-    else
-    {
-        HDAT_ERR("[isMnfgFlagSet] error finding l_pTopTarget");
-    }
-
-    return o_rc;
-}
-
-
-/**
  * @brief This routine gets number of cores in each processor
  *
  * @pre None
@@ -621,10 +586,10 @@ void HdatIplParms::hdatGetSystemParamters()
     strcpy(l_rawMTM,"8335.GTG");
     //@TODO: RTC 142465 missing attribute
     //RAW_MTM not defined
-    //@TODO RTC 243468 BP vpd to hold the VSYS TM and SE  
+    //@TODO RTC 243468 BP vpd to hold the VSYS TM and SE
     //@TODO RTC 216059 hostboot to read BP vpd via PLDM
-    //@TODO l_pSysTarget->getAttrAsStdArr<..>() to get array values using a get 
-   // if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_RAW_MTM>(l_rawMTM))
+    //@TODO l_pSysTarget->getAttrAsStdArr<..>() to get array values using a get
+    // if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_RAW_MTM>(l_rawMTM))
     if(1)
     {
         //we only want the last three bytes of the raw MTM, preceded by a 0x20
@@ -651,7 +616,7 @@ void HdatIplParms::hdatGetSystemParamters()
             this->iv_hdatIPLParams->iv_sysParms.hdatEffectivePvr);
 
     // Get system type
-    // @TODO RTC  142465 missing attribute 
+    // @TODO RTC  142465 missing attribute
     //iv_hdatIPLParams->iv_sysParms.hdatSysType =
       //       (l_pSysTarget->getAttr<TARGETING::ATTR_PHYP_SYSTEM_TYPE>());
     iv_hdatIPLParams->iv_sysParms.hdatSysType = 0x50300000;
@@ -682,8 +647,9 @@ void HdatIplParms::hdatGetSystemParamters()
     {
         HDAT_ERR(" Error in getting attribute FREQ_X_MHZ");
     }*/
-    
-    this->iv_hdatIPLParams->iv_sysParms.hdatWXYZBusSpeed = 0x000007d0;//hard coding as witherspoon 
+
+    // Hard coding as witherspoon
+    this->iv_hdatIPLParams->iv_sysParms.hdatWXYZBusSpeed = 0x000007d0;
 
     // NO ECO Support
     this->iv_hdatIPLParams->iv_sysParms.hdatSystemECOMode = 0;
@@ -720,8 +686,8 @@ void HdatIplParms::hdatGetSystemParamters()
    /* this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes |=
           l_pSysTarget->getAttr<ATTR_IS_MPIPL_SUPPORTED>() ? HDAT_MPIPL_SUPPORTED : 0 ;
 
-    HDAT_DBG("after mpipl supported");  */    
-    this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes |= 
+    HDAT_DBG("after mpipl supported");  */
+    this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes |=
                                                            HDAT_MPIPL_SUPPORTED;
 
     this->iv_hdatIPLParams->iv_sysParms.hdatMemoryScrubbing = 0;
@@ -916,67 +882,24 @@ void hdatGetIPLTimeData(hdatIplTimeData_t & o_iplTime)
  */
 void hdatGetMnfgFlags(hdatManf_t &o_hdatManfFlags)
 {
-    o_hdatManfFlags.hdatPolicyFlags[0] = HDAT_MFG_FLAGS_CELL_0;
-    o_hdatManfFlags.hdatPolicyFlags[1] = HDAT_MFG_FLAGS_CELL_1;
-    o_hdatManfFlags.hdatPolicyFlags[2] = HDAT_MFG_FLAGS_CELL_2;
-    o_hdatManfFlags.hdatPolicyFlags[3] = HDAT_MFG_FLAGS_CELL_3;
+    TARGETING::ATTR_MFG_FLAGS_typeStdArr l_allMfgFlags;
+    // Set HDAT Policy Flags to the manufacturing flags
+    TARGETING::getAllMfgFlags(l_allMfgFlags);
+    memcpy(o_hdatManfFlags.hdatPolicyFlags, l_allMfgFlags.data(),
+           TARGETING::MFG_FLAG_SIZE_OF_ALL_CELLS_IN_BYTES);
 
-    if(HDAT::isMnfgFlagSet(TARGETING::MNFG_FLAG_AVP_ENABLE))
-        o_hdatManfFlags.hdatPolicyFlags[1] |= HDAT_MFG_FLAG_AVP_ENABLED;
-
-    if(HDAT::isMnfgFlagSet(TARGETING::MNFG_FLAG_HDAT_AVP_ENABLE))
-        o_hdatManfFlags.hdatPolicyFlags[2] |= HDAT_MFG_FLAG_HDAT_AVP_ENABLED;
-
-    if(HDAT::isMnfgFlagSet(TARGETING::MNFG_FLAG_SRC_TERM))
-        o_hdatManfFlags.hdatPolicyFlags[0] |= HDAT_MNFG_FLAG_SRC_TERM;
-
-    if(HDAT::isMnfgFlagSet(TARGETING::MNFG_FLAG_IPL_MEMORY_CE_CHECKING))
-        o_hdatManfFlags.hdatPolicyFlags[2] |=
-                                   HDAT_MNFG_IPL_MEM_CE_CHECKING_ACTIVE;
-
-    if(HDAT::isMnfgFlagSet(TARGETING::MNFG_FLAG_FAST_BACKGROUND_SCRUB))
-        o_hdatManfFlags.hdatPolicyFlags[1] |= HDAT_MNFG_FAST_BKG_SCRUB_ACTIVE;
-
-    if(isMnfgFlagSet(TARGETING::MNFG_FLAG_TEST_DRAM_REPAIRS))
-        o_hdatManfFlags.hdatPolicyFlags[0] |= HDAT_MNFG_TEST_DRAM_REPAIRS;
-
-    if(isMnfgFlagSet(TARGETING::MNFG_FLAG_DISABLE_DRAM_REPAIRS))
-        o_hdatManfFlags.hdatPolicyFlags[0] |= HDAT_MNFG_DISABLE_DRAM_REPAIRS;
-
-    if(isMnfgFlagSet(TARGETING::MNFG_FLAG_ENABLE_EXHAUSTIVE_PATTERN_TEST))
-        o_hdatManfFlags.hdatPolicyFlags[2] |=
-                                 HDAT_MNFG_ENABLE_EXHAUSTIVE_PATTERN_TEST;
-
-    if(isMnfgFlagSet(TARGETING::MNFG_FLAG_ENABLE_STANDARD_PATTERN_TEST))
-        o_hdatManfFlags.hdatPolicyFlags[2] |=
-                                 HDAT_MNFG_ENABLE_STANDARD_PATTERN_TEST;
-
-    if(isMnfgFlagSet(TARGETING::MNFG_FLAG_ENABLE_MINIMUM_PATTERN_TEST))
-        o_hdatManfFlags.hdatPolicyFlags[2] |= HDAT_MNFG_ENABLE_MIN_PATTERN_TEST;
-
-    if(isMnfgFlagSet(TARGETING::MNFG_FLAG_DISABLE_FABRIC_eREPAIR))
-        o_hdatManfFlags.hdatPolicyFlags[1] |= HDAT_MNFG_DISABLE_FABRIC_ERPAIR;
-
-    if(isMnfgFlagSet(TARGETING::MNFG_FLAG_DISABLE_MEMORY_eREPAIR))
-        o_hdatManfFlags.hdatPolicyFlags[1] |= HDAT_MNFG_DISABLE_MEMORY_ERPAIR;
-
-    if(isMnfgFlagSet(TARGETING::MNFG_FLAG_FABRIC_DEPLOY_LANE_SPARES))
-        o_hdatManfFlags.hdatPolicyFlags[2] |=
-                                          HDAT_MNFG_FABRIC_DEPLOY_LANE_SPARES;
-
-    if(isMnfgFlagSet(TARGETING::MNFG_FLAG_DMI_DEPLOY_LANE_SPARES))
-        o_hdatManfFlags.hdatPolicyFlags[2] |= HDAT_MNFG_DMI_DEPLOY_LANE_SPARES;
-
-    if(isMnfgFlagSet(TARGETING::MNFG_FLAG_PSI_DIAGNOSTIC))
-        o_hdatManfFlags.hdatPolicyFlags[1] |= HDAT_MNFG_PSI_DIAGNOSTIC;
-
-    if(isMnfgFlagSet(TARGETING::MNFG_FLAG_FSP_UPDATE_SBE_IMAGE))
-        o_hdatManfFlags.hdatPolicyFlags[1] |= HDAT_MNFG_FSP_UPDATE_SBE_IMAGE;
-
-    if(isMnfgFlagSet(TARGETING::MNFG_FLAG_UPDATE_BOTH_SIDES_OF_SBE))
-        o_hdatManfFlags.hdatPolicyFlags[1] |=
-                                         HDAT_MNFG_UPDATE_BOTH_SIDES_OF_SBE;
-
+    // Explicitly set the mask to the individual cells to delineate each cell
+    // from each other and to explicitly mark each as cell 0, cell 1, etc.
+    // Identifying each cell is done to keep inline with previous
+    // code that did the same.
+    o_hdatManfFlags.hdatPolicyFlags[TARGETING::MFG_FLAG_CELL_0_INDEX] |=
+                                            TARGETING::MFG_FLAG_CELL_0_MASK;
+    o_hdatManfFlags.hdatPolicyFlags[TARGETING::MFG_FLAG_CELL_1_INDEX] |=
+                                            TARGETING::MFG_FLAG_CELL_1_MASK;
+    o_hdatManfFlags.hdatPolicyFlags[TARGETING::MFG_FLAG_CELL_2_INDEX] |=
+                                            TARGETING::MFG_FLAG_CELL_2_MASK;
+    o_hdatManfFlags.hdatPolicyFlags[TARGETING::MFG_FLAG_CELL_3_INDEX] |=
+                                            TARGETING::MFG_FLAG_CELL_3_MASK;
 }
 
 /**

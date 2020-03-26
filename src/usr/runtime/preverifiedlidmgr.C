@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 #include <arch/ppc.H>
 #include <targeting/common/target.H>
 #include <targeting/common/attributes.H>
+#include <targeting/common/mfgFlagAccessors.H>
 #include <secureboot/containerheader.H>
 #include <runtime/common/runtime_utils.H>
 #include <runtime/runtime_reasoncodes.H>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 #include <errl/errlmanager.H>
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/common/mfgFlagAccessors.H>
 #include <runtime/runtime.H>
 #include <util/align.H>
 #include <sys/mm.h>

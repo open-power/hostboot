@@ -39,6 +39,7 @@
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/entitypath.H>
 #include <targeting/common/commontargeting.H>
+#include <targeting/common/mfgFlagAccessors.H>
 #include <targeting/targplatutil.H>
 #include <runtime/runtime_reasoncodes.H>
 #include <runtime/runtime.H>

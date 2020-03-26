@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -149,15 +149,6 @@ void update_hwas_changed_mask(Target * i_target, const uint64_t i_bits);
  */
 void clear_hwas_changed_bit(Target * i_target, const HWAS_CHANGED_BIT i_bit);
 
-/**
- * @brief   Checks if we are loading a PHYP payload
- * @description  Looks at both ATTR_PAYLOAD_KIND and the MNFG flags
- *    to determine if we are really loading and starting PHYP
- * @param[out]   Current value of PAYLOAD_KIND
- * @return  True if PHYP will be loaded and started
- */
-bool is_phyp_load( ATTR_PAYLOAD_KIND_type* o_type = NULL );
-
 /*
  * brief   Checks if we are loading no payload (PAYLOAD_KIND_NONE)
  * @description  Looks at both ATTR_PAYLOAD_KIND
@@ -165,28 +156,6 @@ bool is_phyp_load( ATTR_PAYLOAD_KIND_type* o_type = NULL );
  * @return  True if No payload will be loaded or started
  */
 bool is_no_load( void );
-
-/**
- * @brief  Utility function to determine if Sapphire is the payload
- *
- * @description  If the payload kind is Sapphire returns true.  Does
- *    not matter if it is Sapphire with FSP or standalone
- *
- * @return bool  True when loadding sapphire
- */
-bool is_sapphire_load(void);
-
-/**
- * @brief  Utility function to determine if an AVP is the payload
- *         Note the actual payload could be something else -- this
- *         is based solely on MFG flags
- *
- * @description  If MFG AVP mode flags are set then returns true
- *      Does not matter what the actual payload is
- *
- * @return bool  True when in AVP mode
- */
-bool is_avp_load(void);
 
 /**
  * Order two processor targets by NODE_ID then CHIP_ID.
