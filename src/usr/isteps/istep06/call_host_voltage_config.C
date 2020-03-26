@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -104,45 +104,10 @@ void* call_host_voltage_config( void *io_pArgs )
 
         } // PROC for-loop
 
+        // ####################################################################
         //TODO RTC:244307 Revisit if other HWP's need to be called to Validate
         //                Volatge Settings
-
-        // for each proc target
-        for( const auto & l_proc : l_procList )
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "call_host_voltage_config: calling p10_setup_evid:"
-                "APPLY_VOLTAGE_SETTINGS, Tgt=%.08X: ",
-                get_huid(l_proc) );
-
-
-            // call p10_setup_evid for each processor to APPLY
-            // the voltage settings for each proc
-            fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
-            FAPI_INVOKE_HWP(l_err,
-                            p10_setup_evid,
-                            l_fapiProc,
-                            APPLY_VOLTAGE_SETTINGS);
-
-            if( l_err )
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,ERR_MRK
-                   "call_host_voltage_config: Error Back from p10_setup_evid:"
-                   " APPLY_VOLTAGE_SETTINGS, Tgt=%.08X: "
-                   TRACE_ERR_FMT,
-                   get_huid(l_proc),
-                   TRACE_ERR_ARGS(l_err));
-
-                // Create IStep error log and cross reference occurred error
-                l_stepError.addErrorDetails( l_err );
-
-                // Commit Error
-                errlCommit( l_err, ISTEP_COMP_ID );
-                continue;
-            }
-
-        } // PROC for-loop
-
+        // ###################################################################
     } while( 0 );
 
     if( l_err )

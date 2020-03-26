@@ -39,25 +39,18 @@
  *        : Setup host environment (non-executable istep)
  *  06.3    host_istep_enable
  *        : Hostboot istep ready (non-executable istep)
- *  06.4    host_init_bmc_pcie
- *        : Setup the PCIE to the BMC chip
- *  06.5    host_init_fsi
+ *  06.4    host_init_fsi
  *        : Setup the FSI links to slave chips
- *  06.6    host_set_ipl_parms
+ *  06.5    host_set_ipl_parms
  *        : Build ipl parameters
- *  06.7    host_discover_targets
- *      :   Builds targeting
- *  06.8    host_update_master_tpm
- *      :   Update master TPM
- *  06.9    host_gard
- *      :   Do Gard
- *  06.10   host_revert_sbe_mcs_setup
- *      :   Clean up MCS extent regs (moved to istep14)
- *  06.11   host_start_occ_xstop_handler
- *      :   No longer used
- *  06.12   host_voltage_config
- *      :   Calculate correct chip voltage
- *
+ *  06.6    host_discover_targets
+ *        : Builds targeting
+ *  06.7    host_update_master_tpm
+ *        : Update master TPM
+ *  06.8    host_gard
+ *        : Do Gard
+ *  06.9    host_voltage_config
+ *        : Calculate correct chip voltage
  */
 
 #include    <initservice/initsvcstructs.H>
@@ -169,48 +162,33 @@ const   TaskInfo    g_istep06[]  =   {
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
-                ISTEPNAME(06,04,""),        // No support for now. init bmc pcie
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
-        },
-        {
-                ISTEPNAME(06,05,"host_init_fsi"),
+                ISTEPNAME(06,04,"host_init_fsi"),
                 ISTEP_06::host_init_fsi,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false,
                         BASE_INITIALIZATION }
         },
         {
-                ISTEPNAME(06,06,"host_set_ipl_parms"),
+                ISTEPNAME(06,05,"host_set_ipl_parms"),
                 ISTEP_06::host_set_ipl_parms,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
         {
-                ISTEPNAME(06,07,"host_discover_targets"),
+                ISTEPNAME(06,06,"host_discover_targets"),
                 ISTEP_06::host_discover_targets,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
         {
-                ISTEPNAME(06,08,"host_update_master_tpm"),
+                ISTEPNAME(06,07,"host_update_master_tpm"),
                 ISTEP_06::call_host_update_master_tpm,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
         {
-                ISTEPNAME(06,09, "host_gard"),
+                ISTEPNAME(06,08, "host_gard"),
                 ISTEP_06::host_gard,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
         {
-                ISTEPNAME(06,10,""),        // not used. moved to istep14
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
-        },
-        {
-                ISTEPNAME(06,11,""),        // not used.
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
-        },
-        {
-                ISTEPNAME(06,12,"host_voltage_config"),
+                ISTEPNAME(06,09,"host_voltage_config"),
                 ISTEP_06::call_host_voltage_config,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
