@@ -2462,6 +2462,9 @@
       <default>0x000603FC00000000</default>
       <id>XSCOM_BASE_ADDRESS</id>
     </attribute>
+    <attribute>
+      <id>MIN_FREQ_MHZ</id>
+    </attribute>
   </targetType>
 
   <targetType>
