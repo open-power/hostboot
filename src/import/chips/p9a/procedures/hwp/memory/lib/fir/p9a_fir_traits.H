@@ -82,7 +82,7 @@ struct firTraits<P9A_MCC_USTLFIR>
 };
 
 ///
-/// @brief FIR Register Traits for base MC_OMI_FIR_REG
+/// @brief FIR Register Traits for base MC_REG0_OMI_FIR_REG
 ///
 template <>
 struct firTraits<P9A_MC_REG0_OMI_FIR>
@@ -93,6 +93,40 @@ struct firTraits<P9A_MC_REG0_OMI_FIR>
     static constexpr uint64_t MASK = P9A_MC_REG0_OMI_FIR_MASK;
     static constexpr uint64_t MASK_AND = P9A_MC_REG0_OMI_FIR_MASK_AND;
     static constexpr uint64_t MASK_OR = P9A_MC_REG0_OMI_FIR_MASK_OR;
+
+    // Target type of this register
+    static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_MC;
+};
+
+///
+/// @brief FIR Register Traits for base MC_REG1_OMI_FIR_REG
+///
+template <>
+struct firTraits<P9A_MC_REG1_OMI_FIR>
+{
+    static constexpr uint64_t REG = P9A_MC_REG1_OMI_FIR;
+    static constexpr uint64_t ACT0 = P9A_MC_REG1_OMI_FIR_ACTION0;
+    static constexpr uint64_t ACT1 = P9A_MC_REG1_OMI_FIR_ACTION1;
+    static constexpr uint64_t MASK = P9A_MC_REG1_OMI_FIR_MASK;
+    static constexpr uint64_t MASK_AND = P9A_MC_REG1_OMI_FIR_MASK_AND;
+    static constexpr uint64_t MASK_OR = P9A_MC_REG1_OMI_FIR_MASK_OR;
+
+    // Target type of this register
+    static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_MC;
+};
+
+///
+/// @brief FIR Register Traits for base MC_REG2_OMI_FIR_REG
+///
+template <>
+struct firTraits<P9A_MC_REG2_OMI_FIR>
+{
+    static constexpr uint64_t REG = P9A_MC_REG2_OMI_FIR;
+    static constexpr uint64_t ACT0 = P9A_MC_REG2_OMI_FIR_ACTION0;
+    static constexpr uint64_t ACT1 = P9A_MC_REG2_OMI_FIR_ACTION1;
+    static constexpr uint64_t MASK = P9A_MC_REG2_OMI_FIR_MASK;
+    static constexpr uint64_t MASK_AND = P9A_MC_REG2_OMI_FIR_MASK_AND;
+    static constexpr uint64_t MASK_OR = P9A_MC_REG2_OMI_FIR_MASK_OR;
 
     // Target type of this register
     static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_MC;

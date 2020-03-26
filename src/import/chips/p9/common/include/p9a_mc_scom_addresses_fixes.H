@@ -58,4 +58,18 @@ static const uint64_t P9A_MC_REG0_OMI_FIR_ACTION1                           = 0x
 static const uint64_t P9A_MC_REG0_OMI_FIR_MASK_AND                          = 0x07013344ull;
 static const uint64_t P9A_MC_REG0_OMI_FIR_MASK_OR                           = 0x07013345ull;
 
+static const uint64_t P9A_MC_REG1_OMI_FIR                                   = 0x07013380ull;
+static const uint64_t P9A_MC_REG1_OMI_FIR_MASK                              = 0x07013383ull;
+static const uint64_t P9A_MC_REG1_OMI_FIR_ACTION0                           = 0x07013386ull;
+static const uint64_t P9A_MC_REG1_OMI_FIR_ACTION1                           = 0x07013387ull;
+static const uint64_t P9A_MC_REG1_OMI_FIR_MASK_AND                          = 0x07013384ull;
+static const uint64_t P9A_MC_REG1_OMI_FIR_MASK_OR                           = 0x07013385ull;
+
+static const uint64_t P9A_MC_REG2_OMI_FIR                                   = 0x070133C0ull;
+static const uint64_t P9A_MC_REG2_OMI_FIR_MASK                              = 0x070133C3ull;
+static const uint64_t P9A_MC_REG2_OMI_FIR_ACTION0                           = 0x070133C6ull;
+static const uint64_t P9A_MC_REG2_OMI_FIR_ACTION1                           = 0x070133C7ull;
+static const uint64_t P9A_MC_REG2_OMI_FIR_MASK_AND                          = 0x070133C4ull;
+static const uint64_t P9A_MC_REG2_OMI_FIR_MASK_OR                           = 0x070133C5ull;
+
 #endif

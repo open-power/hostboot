@@ -291,15 +291,21 @@ inline fapi2::ReturnCode after_p9a_chiplet_scominit(const fapi2::Target<fapi2::T
     fapi2::ReturnCode l_rc1 = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ReturnCode l_rc2 = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ReturnCode l_rc3 = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::ReturnCode l_rc4 = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::ReturnCode l_rc5 = fapi2::FAPI2_RC_SUCCESS;
 
     // Create registers and check success
     mss::fir::reg<P9A_MC_LOCAL_FIR> l_mc_local_fir_reg(i_target, l_rc1);
     mss::fir::reg<P9A_MC_MCBISTFIRQ> l_mc_mcbistfirq_reg(i_target, l_rc2);
-    mss::fir::reg<P9A_MC_REG0_OMI_FIR> l_mc_omi_fir_reg(i_target, l_rc3);
+    mss::fir::reg<P9A_MC_REG0_OMI_FIR> l_mc_reg0_omi_fir_reg(i_target, l_rc3);
+    mss::fir::reg<P9A_MC_REG1_OMI_FIR> l_mc_reg1_omi_fir_reg(i_target, l_rc4);
+    mss::fir::reg<P9A_MC_REG2_OMI_FIR> l_mc_reg2_omi_fir_reg(i_target, l_rc5);
 
     FAPI_TRY(l_rc1, "unable to create fir::reg for P9A_MC_LOCAL_FIR 0x%08X", P9A_MC_LOCAL_FIR);
     FAPI_TRY(l_rc2, "unable to create fir::reg for P9A_MC_MCBISTFIRQ 0x%08X", P9A_MC_MCBISTFIRQ);
     FAPI_TRY(l_rc3, "unable to create fir::reg for P9A_MC_REG0_OMI_FIR 0x%08X", P9A_MC_REG0_OMI_FIR);
+    FAPI_TRY(l_rc4, "unable to create fir::reg for P9A_MC_REG1_OMI_FIR 0x%08X", P9A_MC_REG1_OMI_FIR);
+    FAPI_TRY(l_rc5, "unable to create fir::reg for P9A_MC_REG2_OMI_FIR 0x%08X", P9A_MC_REG2_OMI_FIR);
 
     // Write LOCAL_FIR register per Axone unmask spec
     FAPI_TRY(l_mc_local_fir_reg.recoverable_error<P9A_MC_LOCAL_FIR_IN0>()
@@ -322,30 +328,75 @@ inline fapi2::ReturnCode after_p9a_chiplet_scominit(const fapi2::Target<fapi2::T
         switch(l_pos)
         {
             case 0:
-                l_mc_omi_fir_reg.recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL0_FATAL_ERROR>()
+                l_mc_reg0_omi_fir_reg.recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL0_FATAL_ERROR>()
                 .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL0_DATA_UE>()
                 .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL0_X4_MODE>()
                 .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL0_TIMEOUT>()
                 .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL0_ERROR_RETRAIN>()
                 .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL0_EDPL_RETRAIN>();
+
+                l_mc_reg1_omi_fir_reg.recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL0_FATAL_ERROR>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL0_DATA_UE>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL0_X4_MODE>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL0_TIMEOUT>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL0_ERROR_RETRAIN>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL0_EDPL_RETRAIN>();
+
+                l_mc_reg2_omi_fir_reg.recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL0_FATAL_ERROR>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL0_DATA_UE>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL0_X4_MODE>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL0_TIMEOUT>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL0_ERROR_RETRAIN>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL0_EDPL_RETRAIN>();
+
                 break;
 
             case 1:
-                l_mc_omi_fir_reg.recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL1_FATAL_ERROR>()
+                l_mc_reg0_omi_fir_reg.recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL1_FATAL_ERROR>()
                 .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL1_DATA_UE>()
                 .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL1_X4_MODE>()
                 .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL1_TIMEOUT>()
                 .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL1_ERROR_RETRAIN>()
                 .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL1_EDPL_RETRAIN>();
+
+                l_mc_reg1_omi_fir_reg.recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL1_FATAL_ERROR>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL1_DATA_UE>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL1_X4_MODE>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL1_TIMEOUT>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL1_ERROR_RETRAIN>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL1_EDPL_RETRAIN>();
+
+                l_mc_reg2_omi_fir_reg.recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL1_FATAL_ERROR>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL1_DATA_UE>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL1_X4_MODE>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL1_TIMEOUT>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL1_ERROR_RETRAIN>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL1_EDPL_RETRAIN>();
+
                 break;
 
             case 2:
-                l_mc_omi_fir_reg.recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL2_FATAL_ERROR>()
+                l_mc_reg0_omi_fir_reg.recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL2_FATAL_ERROR>()
                 .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL2_DATA_UE>()
                 .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL2_X4_MODE>()
                 .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL2_TIMEOUT>()
                 .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL2_ERROR_RETRAIN>()
                 .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL2_EDPL_RETRAIN>();
+
+                l_mc_reg1_omi_fir_reg.recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL2_FATAL_ERROR>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL2_DATA_UE>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL2_X4_MODE>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL2_TIMEOUT>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL2_ERROR_RETRAIN>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL2_EDPL_RETRAIN>();
+
+                l_mc_reg2_omi_fir_reg.recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL2_FATAL_ERROR>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL2_DATA_UE>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL2_X4_MODE>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL2_TIMEOUT>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL2_ERROR_RETRAIN>()
+                .recoverable_error<P9A_MC_MC_OMI_FIR_REG_DL2_EDPL_RETRAIN>();
+
                 break;
 
             default:
@@ -389,7 +440,9 @@ inline fapi2::ReturnCode after_p9a_chiplet_scominit(const fapi2::Target<fapi2::T
     }
 
     // Write MC_OMI_FIR register now that it's been set up in the loop above
-    FAPI_TRY(l_mc_omi_fir_reg.write());
+    FAPI_TRY(l_mc_reg0_omi_fir_reg.write());
+    FAPI_TRY(l_mc_reg1_omi_fir_reg.write());
+    FAPI_TRY(l_mc_reg2_omi_fir_reg.write());
 
     for (const auto& l_mcc : mss::find_targets<fapi2::TARGET_TYPE_MCC>(i_target))
     {
