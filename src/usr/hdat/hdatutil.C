@@ -2189,4 +2189,148 @@ void hdatGetMemTargetMmioInfo(TARGETING::Target* i_pTarget,
     HDAT_EXIT();
 }
 
+/******************************************************************************/
+// hdatGetHostSpiDevInfo
+/******************************************************************************/
+void hdatGetHostSpiDevInfo(std::vector<hdatSpiDevData_t>&o_spiDevEntries,
+     std::vector<hdatEepromPartData_t>&o_eepromPartEntries)
+{
+    HDAT_ENTER();
+
+    std::vector<spiSlaveDevice> spiInfo;
+    getSpiDeviceInfo(spiInfo);
+    char *l_hwSubsystemOrScope = NULL;
+
+    if(spiInfo.empty())
+    {
+        HDAT_INF("No SPI entries found");
+    }
+    else // At least one entry found
+    {
+        for (const auto& spiDev : spiInfo)
+        {
+            hdatSpiDevData_t l_spiObj;
+            memset(&l_spiObj, 0x00, sizeof(hdatSpiDevData_t));
+
+            l_spiObj.hdatSpiDevId = spiDev.deviceId.word;
+            l_spiObj.hdatSpiMasterEngine = spiDev.masterEngine;
+            l_spiObj.hdatSpiMasterPort = spiDev.masterPort;
+            l_spiObj.hdatSpiBusSpeed = spiDev.busSpeedKhz;
+            l_spiObj.hdatSpiSlaveDevType =
+                static_cast<uint8_t>(spiDev.deviceType);
+            l_spiObj.hdatSpiDevPurp =
+                static_cast<uint8_t>(spiDev.devicePurpose);
+            l_spiObj.hdatSpiSlcaIndex = spiDev.residentFruSlcaIndex;
+            char *l_vendor = NULL;
+            l_vendor = const_cast<char *>(spiDev.description.vendor);
+            char *l_deviceType= NULL;
+            l_deviceType = const_cast<char *>(spiDev.description.deviceType);
+            char *l_dataTypeOrPurpose = NULL;
+            l_dataTypeOrPurpose =
+                const_cast<char *>(spiDev.description.dataTypeOrPurpose);
+            l_hwSubsystemOrScope =
+                const_cast<char *>(spiDev.description.hwSubsystemOrScope);
+            sprintf(l_spiObj.hdatSpiDevStr,
+                "%s,%s,%s,%s",
+                l_vendor, l_deviceType, l_dataTypeOrPurpose,
+                l_hwSubsystemOrScope);
+
+            o_spiDevEntries.push_back(l_spiObj);
+
+            if(spiDev.partitions.empty())
+            {
+                HDAT_INF("No EEPROM entries found");
+            }
+            else // At least one entry found
+            {
+                for (const auto& eepromDev : spiDev.partitions)
+                {
+                    hdatEepromPartData_t l_eepromObj;
+                    memset(&l_eepromObj, 0x00, sizeof(hdatEepromPartData_t));
+
+                    l_eepromObj.hdatSpiDevId = spiDev.deviceId.word;
+                    l_eepromObj.hdatEepmPartDevPurp =
+                        static_cast<uint32_t>(eepromDev.partitionPurpose);
+                    l_eepromObj.hdatEepmStartOffset = eepromDev.offsetBytes;
+                    l_eepromObj.hdatEepmSize = eepromDev.sizeBytes;
+
+                    l_eepromObj.hdatWriteLockInfo.hdatScomAddr.hi =
+                        ( eepromDev.writeAccessControl.scomAddress &
+                          0xFFFFFFFF00000000ull
+                        ) >> 32;
+                    l_eepromObj.hdatWriteLockInfo.hdatScomAddr.lo =
+                        eepromDev.writeAccessControl.scomAddress &
+                        0x00000000FFFFFFFFull;
+                    l_eepromObj.hdatWriteLockInfo.hdatScomAddr.hi |=
+                        HDAT_REAL_ADDRESS_MASK;
+                    l_eepromObj.hdatWriteLockInfo.hdatBitPol =
+                        static_cast<uint8_t>
+                        (eepromDev.writeAccessControl.bitPolarity);
+                    l_eepromObj.hdatWriteLockInfo.hdatIsSticky =
+                        eepromDev.writeAccessControl.sticky;
+                    l_eepromObj.hdatWriteLockInfo.hdatBitControl =
+                        eepromDev.writeAccessControl.secureBitPosition;
+
+                    l_eepromObj.hdatReadLockInfo.hdatScomAddr.hi =
+                        ( eepromDev.readAccessControl.scomAddress &
+                          0xFFFFFFFF00000000ull
+                        ) >> 32;
+                    l_eepromObj.hdatReadLockInfo.hdatScomAddr.lo =
+                        eepromDev.readAccessControl.scomAddress &
+                        0x00000000FFFFFFFFull;
+                    l_eepromObj.hdatReadLockInfo.hdatScomAddr.hi |=
+                        HDAT_REAL_ADDRESS_MASK;
+                    l_eepromObj.hdatReadLockInfo.hdatBitPol =
+                        static_cast<uint8_t>
+                        (eepromDev.readAccessControl.bitPolarity);
+                    l_eepromObj.hdatReadLockInfo.hdatIsSticky =
+                        eepromDev.readAccessControl.sticky;
+                    l_eepromObj.hdatReadLockInfo.hdatBitControl =
+                        eepromDev.readAccessControl.secureBitPosition;
+
+                    o_eepromPartEntries.push_back(l_eepromObj);
+                }
+            }
+
+            for (const auto& eepromDev : o_eepromPartEntries)
+            {
+                HDAT_INF("EEPROM partition info: ");
+                HDAT_INF("hdatSpiDevId=0x%08X ",eepromDev.hdatSpiDevId);
+                HDAT_INF("hdatEepmPartDevPurp=0x%08X ",
+                    eepromDev.hdatEepmPartDevPurp);
+                HDAT_INF("hdatEepmStartOffset=0x%08X ",
+                    eepromDev.hdatEepmStartOffset);
+                HDAT_INF("hdatEepmSize=0x%08X ",eepromDev.hdatEepmSize);
+                HDAT_INF("hdatWriteLockInfo.hdatBitPol=0x%02X ",
+                    eepromDev.hdatWriteLockInfo.hdatBitPol);
+                HDAT_INF("hdatWriteLockInfo.hdatIsSticky=0x%02X ",
+                    eepromDev.hdatWriteLockInfo.hdatIsSticky);
+                HDAT_INF("hdatWriteLockInfo.hdatBitControl=0x%02X ",
+                    eepromDev.hdatWriteLockInfo.hdatBitControl);
+                HDAT_INF("hdatReadLockInfo.hdatBitPol=0x%02X ",
+                    eepromDev.hdatReadLockInfo.hdatBitPol);
+                HDAT_INF("hdatReadLockInfo.hdatIsSticky=0x%02X ",
+                    eepromDev.hdatReadLockInfo.hdatIsSticky);
+                HDAT_INF("hdatReadLockInfo.hdatBitControl=0x%02X ",
+                    eepromDev.hdatReadLockInfo.hdatBitControl);
+            }
+        }
+    }
+
+    for (const auto& spiDev : o_spiDevEntries)
+    {
+        HDAT_INF("SPI device info: ");
+        HDAT_INF("hdatSpiDevId=0x%08X ", spiDev.hdatSpiDevId);
+        HDAT_INF("hdatSpiMasterEngine=0x%02X ",spiDev.hdatSpiMasterEngine);
+        HDAT_INF("hdatSpiMasterPort=0x%02X ",spiDev.hdatSpiMasterPort);
+        HDAT_INF("hdatSpiBusSpeed=0x%08X ",spiDev.hdatSpiBusSpeed);
+        HDAT_INF("hdatSpiSlaveDevType=0x%02X ",spiDev.hdatSpiSlaveDevType);
+        HDAT_INF("hdatSpiDevPurp=0x%08X ",spiDev.hdatSpiDevPurp);
+        HDAT_INF("hdatSpiSlcaIndex=0x%04X ",spiDev.hdatSpiSlcaIndex);
+        HDAT_INF("hdatSpiDevStr=%s ",spiDev.hdatSpiDevStr);
+    }
+
+    HDAT_EXIT();
+}
+
 } //namespace HDAT

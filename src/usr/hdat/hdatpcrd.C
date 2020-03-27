@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -122,6 +122,11 @@ static errlHndl_t hdatSetPcrdHdrs(hdatSpPcrd_t *i_pcrd)
     i_pcrd->hdatPcrdIntData[HDAT_PCRD_CHIP_EC_LVL].hdatOffset = 0;
     i_pcrd->hdatPcrdIntData[HDAT_PCRD_CHIP_EC_LVL].hdatSize   = 0;
 
+    i_pcrd->hdatPcrdIntData[HDAT_PCRD_DA_HOST_SPI].hdatOffset = 0;
+    i_pcrd->hdatPcrdIntData[HDAT_PCRD_DA_HOST_SPI].hdatSize   = 0;
+    i_pcrd->hdatPcrdIntData[HDAT_PCRD_DA_EEPROM_PART].hdatOffset = 0;
+    i_pcrd->hdatPcrdIntData[HDAT_PCRD_DA_EEPROM_PART].hdatSize   = 0;
+
   return l_errlHndl;
 }
 
@@ -137,7 +142,11 @@ HdatPcrd::HdatPcrd(errlHndl_t &o_errlHndl, const hdatMsAddr_t &i_msAddr)
            sizeof(hdatHDIFVersionedDataArray_t) + ((sizeof(hdatI2cData_t)
                * HDAT_PCRD_MAX_I2C_DEV))
                + sizeof(hdatHDIFDataArray_t)
-               + (sizeof(hdatSMPLinkInfo_t) * HDAT_PCRD_MAX_SMP_LINK);
+               + (sizeof(hdatSMPLinkInfo_t) * HDAT_PCRD_MAX_SMP_LINK
+               + sizeof(hdatHDIFDataArray_t) + sizeof(hdatProcEcLvlElement_t)
+               + sizeof(hdatHDIFVersionedDataArray_t)
+               + (sizeof(hdatSpiDevData_t) * HDAT_PCRD_MAX_SPI_DEV)
+               );
 
     // Allocate space for each CHIP -- will use max amount to start
     uint64_t l_base_addr = ((uint64_t) i_msAddr.hi << 32) | i_msAddr.lo;
@@ -671,6 +680,105 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
                                             (sizeof(hdatSMPLinkInfo_t) * HDAT_PCRD_MAX_SMP_LINK);
             this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_CHIP_EC_LVL].hdatSize = l_pcrdECLvlTotalSize;
             this->iv_spPcrd->hdatHdr.hdatSize += l_pcrdECLvlTotalSize;
+
+            // Setting Host SPI device entry data
+            hdatHDIFVersionedDataArray_t *l_spiDevPcrdHdrPtr =
+                reinterpret_cast<hdatHDIFVersionedDataArray_t *>
+                ((uint8_t*)l_ECLvlInfoPcrdHdrPtr + l_pcrdECLvlTotalSize);
+
+            // Get SPI device info
+            std::vector<hdatSpiDevData_t> l_spiDevEntries;
+            std::vector<hdatEepromPartData_t> l_eepromParts;
+
+            hdatGetHostSpiDevInfo(l_spiDevEntries, l_eepromParts);
+
+            const uint32_t l_pcrdSpiDevTotalSize =
+                sizeof(hdatHDIFVersionedDataArray_t) +
+                (sizeof(hdatSpiDevData_t) * l_spiDevEntries.size());
+
+            HDAT_INF("l_spiDevEntries=0x%x, l_pcrdSpiDevTotalSize=0x%x",
+                l_spiDevEntries.size(), l_pcrdSpiDevTotalSize);
+
+            l_spiDevPcrdHdrPtr->hdatOffset = HOST_SPI_EEPROM_OFFSET_TO_ARRAY;
+            l_spiDevPcrdHdrPtr->hdatArrayCnt =
+                     l_spiDevEntries.size();
+            l_spiDevPcrdHdrPtr->hdatAllocSize =
+                    sizeof(hdatSpiDevData_t);
+            l_spiDevPcrdHdrPtr->hdatActSize =
+                    sizeof(hdatSpiDevData_t);
+            l_spiDevPcrdHdrPtr->hdatVersion = HOST_SPI_DEV_INFO_VERSION;
+
+            hdatSpiDevData_t *l_spiDevPcrdDataPtr = NULL;
+            l_spiDevPcrdDataPtr = reinterpret_cast<hdatSpiDevData_t *>
+                ((uint8_t*)l_spiDevPcrdHdrPtr +
+                            sizeof(hdatHDIFVersionedDataArray_t));
+
+            if ( l_spiDevEntries.size() != 0 )
+            {
+                //copy data from vector to data ptr
+                std::copy(l_spiDevEntries.begin(),
+                    l_spiDevEntries.end(), l_spiDevPcrdDataPtr);
+            }
+            else
+            {
+                HDAT_INF("Empty SPI dev info vector : Size=%d",
+                    l_spiDevEntries.size());
+            }
+
+            this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_HOST_SPI].hdatOffset =
+            this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_CHIP_EC_LVL].hdatOffset +
+                sizeof(hdatHDIFDataArray_t) + sizeof(hdatProcEcLvlElement_t);
+            this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_HOST_SPI].hdatSize =
+                 l_pcrdSpiDevTotalSize;
+            this->iv_spPcrd->hdatHdr.hdatSize += l_pcrdSpiDevTotalSize;
+
+            // Setting EEPROM partition information
+            hdatHDIFVersionedDataArray_t *l_eepromPartPcrdHdrPtr =
+                reinterpret_cast<hdatHDIFVersionedDataArray_t *>
+                ((uint8_t*)l_spiDevPcrdHdrPtr + l_pcrdSpiDevTotalSize);
+
+            const uint32_t l_pcrdEepromPartTotalSize =
+                sizeof(hdatHDIFVersionedDataArray_t) +
+                (sizeof(hdatEepromPartData_t) * l_eepromParts.size());
+
+            HDAT_INF("l_eepromParts=0x%x, l_pcrdEepromPartTotalSize=0x%x",
+                l_eepromParts.size(), l_pcrdEepromPartTotalSize);
+
+            l_eepromPartPcrdHdrPtr->hdatOffset = HOST_SPI_EEPROM_OFFSET_TO_ARRAY;
+            l_eepromPartPcrdHdrPtr->hdatArrayCnt =
+                l_eepromParts.size();
+            l_eepromPartPcrdHdrPtr->hdatAllocSize =
+                sizeof(hdatEepromPartData_t);
+            l_eepromPartPcrdHdrPtr->hdatActSize =
+                sizeof(hdatEepromPartData_t);
+            l_eepromPartPcrdHdrPtr->hdatVersion = HOST_EEPROM_PART_VERSION;
+
+            hdatEepromPartData_t *l_eepromPartPcrdDataPtr = NULL;
+            l_eepromPartPcrdDataPtr = reinterpret_cast<hdatEepromPartData_t *>
+                ((uint8_t*)l_eepromPartPcrdHdrPtr +
+                sizeof(hdatHDIFVersionedDataArray_t));
+
+            if ( l_eepromParts.size() != 0 )
+            {
+                //copy data from vector to data ptr
+                std::copy(l_eepromParts.begin(),
+                    l_eepromParts.end(), l_eepromPartPcrdDataPtr);
+            }
+            else
+            {
+                HDAT_INF("Empty EEPROM partition info vector : Size=%d",
+                    l_eepromParts.size());
+            }
+
+            this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_EEPROM_PART].
+                hdatOffset =
+                this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_HOST_SPI].
+                hdatOffset +
+                sizeof(hdatHDIFVersionedDataArray_t) +
+                (sizeof(hdatSpiDevData_t) * HDAT_PCRD_MAX_SPI_DEV);
+            this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_EEPROM_PART].hdatSize=
+                l_pcrdEepromPartTotalSize;
+            this->iv_spPcrd->hdatHdr.hdatSize += l_pcrdEepromPartTotalSize;
 
             if( NULL != l_errl)
             {

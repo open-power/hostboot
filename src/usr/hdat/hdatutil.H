@@ -56,10 +56,13 @@
 #include <../vpd/pvpd.H>
 #include <i2c/i2cif.H>
 #include <targeting/common/hbrt_target.H>
+#include <spi/spi.H>
+
 using namespace MVPD;
 using namespace PVPD;
 using namespace IPVPD;
 using namespace I2C;
+using namespace SPI;
 
 
 /*----------------------------------------------------------------------------*/
@@ -215,6 +218,47 @@ struct hdatMsAreaMmioAddrRange_t
     uint64_t hdatMmioHbrtChipId;            // 0x0018 HBRT Chip ID
     uint64_t hdatMmioFlags;                 // 0x0020 Flags
 }  __attribute__ ((packed));
+
+/** @brief Defines the Host SPI device info
+ */
+struct hdatSpiDevData_t
+{
+    uint32_t hdatSpiDevId;
+    uint8_t  hdatSpiMasterEngine;
+    uint8_t  hdatSpiMasterPort;
+    uint16_t hdatReserved1;
+    uint16_t hdatSpiBusSpeed;
+    uint8_t  hdatSpiSlaveDevType;
+    uint16_t hdatReserved2;
+    uint8_t  hdatReserved3;
+    uint32_t hdatSpiDevPurp;
+    uint16_t hdatSpiSlcaIndex;
+    char     hdatSpiDevStr[64];
+}__attribute__ ((packed));
+
+/** @brief Structure for uart interrupt info
+*/
+struct lockData_t
+{
+    hdatMsAddr_t hdatScomAddr;
+    uint8_t  hdatBitPol;
+    uint8_t  hdatIsSticky;
+    uint8_t  hdatBitControl;
+    uint8_t  hdatReserved1;
+}__attribute__ ((packed));
+
+/** @brief Defines the EEPROM partition info
+ */
+struct hdatEepromPartData_t
+{
+    uint32_t hdatSpiDevId;
+    uint32_t hdatEepmPartDevPurp;
+    uint32_t hdatEepmStartOffset;
+    uint32_t hdatEepmSize;
+    lockData_t hdatWriteLockInfo;
+    lockData_t hdatReadLockInfo;
+
+}__attribute__ ((packed));
 
 /**
  * @brief Create/Build an Error log and add HADT component trace
@@ -648,6 +692,26 @@ uint32_t getMemBusFreqP10(const TARGETING::Target* i_pTarget);
 *******************************************************************************/
 void hdatGetMemTargetMmioInfo(TARGETING::Target* i_pTarget,
      std::vector<hdatMsAreaMmioAddrRange_t>&o_mmioEntries);
+
+/*******************************************************************************
+ * hdatGetHostSpiDevInfo
+ *
+ * @brief Routine returns the host SPI device entries
+ *
+ * @pre None
+ *
+ * @post None
+ *
+ * @param[out] o_spiDevEntries
+ *       The SPI device entries
+ * @param[out] o_eepromPartEntries
+ *       The EEPROM partition entries
+ *
+ * @return void
+ *
+*******************************************************************************/
+void hdatGetHostSpiDevInfo(std::vector<hdatSpiDevData_t>&o_spiDevEntries,
+    std::vector<hdatEepromPartData_t>&o_eepromPartEntries);
 
 };// end namespace
 

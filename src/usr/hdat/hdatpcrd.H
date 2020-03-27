@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,6 +61,12 @@ const char HDAT_PCRD_STRUCT_NAME[7] = "SPPCRD";
 //Max number of I2c devices for any given proc
 #define HDAT_PCRD_MAX_I2C_DEV  128
 #define HDAT_PCRD_MAX_SMP_LINK 12
+#define HDAT_PCRD_MAX_SPI_DEV  8
+#define HDAT_PCRD_MAX_EEPROM_PART 24
+
+const uint32_t HOST_SPI_DEV_INFO_VERSION = 0x00000001;
+const uint32_t HOST_EEPROM_PART_VERSION = 0x00000001;
+const uint32_t HOST_SPI_EEPROM_OFFSET_TO_ARRAY = 0x0014;
 
 /** @enum hdatDataPtrs
  * Enumeration which defines the data sections of the PCRD
@@ -77,8 +83,10 @@ enum hdatPcrdDataPtrs
     HDAT_PCRD_DA_PNOR           = 6,
     HDAT_PCRD_DA_SMP            = 7,
     HDAT_PCRD_CHIP_EC_LVL       = 8,
-    HDAT_PCRD_DA_CNT            = 9,
-    HDAT_PCRD_DA_LAST           = 10,
+    HDAT_PCRD_DA_HOST_SPI       = 9,
+    HDAT_PCRD_DA_EEPROM_PART    = 10,
+    HDAT_PCRD_DA_CNT            = 11,
+    HDAT_PCRD_DA_LAST           = 12,
 };
 
 /*----------------------------------------------------------------------------*/
