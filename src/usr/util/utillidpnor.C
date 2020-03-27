@@ -53,10 +53,6 @@ static const PnorLidsMap PnorToLidsMap =
     { PNOR::OCC,     LidAndContainerLid(OCC_LIDID, OCC_CONTAINER_LIDID)},
     { PNOR::WOFDATA, LidAndContainerLid(WOF_LIDID, WOF_CONTAINER_LIDID)},
     { PNOR::HCODE,   LidAndContainerLid(P10_HCODE_LIDID, HCODE_CONTAINER_LIDID)},
-    /* @TODO RTC:177927 - Figure out how to handle different Lids for the
-                              same PNOR section based on chip.
-    { PNOR::HCODE,   LidAndContainerLid(CUMULUS_HCODE_LIDID, HCODE_CONTAINER_LIDID)},
-    */
     { PNOR::RINGOVD, LidAndContainerLid(HWREFIMG_RINGOVD_LIDID,INVALID_LIDID)},
 };
 
@@ -64,7 +60,12 @@ LidAndContainerLid getPnorSecLidIds(const PNOR::SectionId i_sec)
 {
     LidAndContainerLid l_lids;
 
-    auto l_secIter = PnorToLidsMap.find(i_sec);
+    auto l_secIter = std::find_if(PnorToLidsMap.begin(),
+                                  PnorToLidsMap.end(),
+                                  [i_sec](const PnorLidsPair & pair) -> bool
+                                  {
+                                      return pair.first == i_sec;
+                                  });
     if (l_secIter != PnorToLidsMap.end())
     {
         l_lids.lid = l_secIter->second.lid;

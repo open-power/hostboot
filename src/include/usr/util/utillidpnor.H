@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,8 +52,8 @@ struct LidAndContainerLid
         lid(i_lid), containerLid(i_containerLid) {}
 };
 
-typedef std::map<PNOR::SectionId, LidAndContainerLid > PnorLidsMap;
 typedef std::pair<PNOR::SectionId, LidAndContainerLid> PnorLidsPair;
+typedef std::vector<PnorLidsPair> PnorLidsMap;
 
 /**
   * @brief Returns Lid and ContainerLid (Secure Header) Ids associated with a
