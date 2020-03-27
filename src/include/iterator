@@ -208,7 +208,8 @@ back_insert_iterator<BackInsertionSequence>
 
 /**
  * begin(array)
- * Returns pointer to beginning of array
+ * @param[in] c_array  - an array of arbitrary type
+ * @return Returns pointer to beginning of array
  *
  * Example:
  *    int c_array[] = {0, 1, 2};
@@ -222,7 +223,8 @@ constexpr T* begin(T (&c_array)[size])
 
 /**
  * end(array)
- * Returns pointer to end of array (i.e. the element after the last element)
+ * @param[in] c_array - an array of arbitrary type
+ * @return Returns pointer to end of array (i.e. the element after the last element)
  *
  * Example:
  *    int c_array[] = {0, 1, 2};
