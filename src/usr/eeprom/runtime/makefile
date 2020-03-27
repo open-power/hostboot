@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/i2c/makefile $
+# $Source: src/usr/eeprom/runtime/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2020
+# Contributors Listed Below - COPYRIGHT 2020
 # [+] International Business Machines Corp.
 #
 #
@@ -22,21 +22,17 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../..
-MODULE = i2c
+# EEPROM support for Hostboot Runtime
 
-EXTRAINCDIR += $(ROOTPATH)/src/include/
+HOSTBOOT_RUNTIME = 1
+ROOTPATH = ../../../../
+MODULE = eeprom_rt
 
-#include common objects between hb and runtime
-include i2c.mk
+#include common objects between hostboot and runtime hostboot
+include ../eeprom.mk
 
-#include unique objects
-OBJS += i2c.o
-OBJS += $(if $(CONFIG_TPMDD),tpmdd.o,)
-OBJS += fapi_i2c_dd.o
-OBJS += i2cTargetPres.o
+#add unique object modules
+OBJS += $(if $(CONFIG_SUPPORT_EEPROM_CACHING),rt_eepromCache.o)
+VPATH += ..
 
-SUBDIRS += test.d
-SUBDIRS += runtime.d
-
-include ${ROOTPATH}/config.mk
+include $(ROOTPATH)/config.mk

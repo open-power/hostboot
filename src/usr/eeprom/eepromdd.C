@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/i2c/eepromdd.C $                                      */
+/* $Source: src/usr/eeprom/eepromdd.C $                                   */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -41,8 +41,8 @@
                                 // va_list
 #include "eepromCache.H"
 #include "eepromdd_hardware.H"
-#include <i2c/eepromddreasoncodes.H>
-#include <i2c/eepromif.H>
+#include <eeprom/eepromddreasoncodes.H>
+#include <eeprom/eepromif.H>
 
 #ifdef __HOSTBOOT_RUNTIME
 // Need to be able to convert HB target id's to runtime target ids

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,7 +45,7 @@
 
 #include <errl/errlentry.H>
 #include <hwas/common/hwasCallout.H>
-#include <i2c/eepromif.H>
+#include <eeprom/eepromif.H>
 
 namespace ERRORLOG
 {

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -23,8 +23,4 @@
 #
 # IBM_PROLOG_END_TAG
 # common objects with runtime
-OBJS += eepromdd.o
-OBJS += eepromdd_hardware.o
-OBJS += eeprom_utils.o
 OBJS += errlud_i2c.o
-OBJS += $(if $(CONFIG_SUPPORT_EEPROM_CACHING),eepromCache_common.o)

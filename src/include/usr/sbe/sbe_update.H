@@ -38,7 +38,7 @@
 #include <errl/errlentry.H>           // errlHndl_t
 #include <errl/hberrltypes.H>         // ERRORLOG::errlSeverity_t
 #include <targeting/common/target.H>  // Target
-#include <i2c/eepromif.H>             // EEPROM_ROLE
+#include <eeprom/eepromif.H>          // EEPROM_ROLE
 #include <pnor/ecc.H>                 // PNOR::ECC::eccStatus
 #include <util/utilxipimage.H>        // Util::imageBuild_t
 #include <vector>

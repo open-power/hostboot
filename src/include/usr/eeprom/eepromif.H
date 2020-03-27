@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/i2c/eepromif.H $                              */
+/* $Source: src/include/usr/eeprom/eepromif.H $                           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -26,7 +26,7 @@
 #define __EEPROMIF_H
 
 #include <list>
-#include <i2c/eeprom_const.H>
+#include <eeprom/eeprom_const.H>
 
 namespace EEPROM
 {

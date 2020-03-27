@@ -58,7 +58,7 @@
 #include <hwas/common/hwas_reasoncodes.H>
 
 #ifdef CONFIG_SUPPORT_EEPROM_CACHING
-#include <i2c/eepromif.H>
+#include <eeprom/eepromif.H>
 #endif
 
 namespace HWAS

@@ -30,9 +30,9 @@
 #include <string.h>     // strlen
 #include "errlud_i2c.H"
 #include <i2c/i2creasoncodes.H>
-#include <i2c/eepromddreasoncodes.H>
+#include <eeprom/eepromddreasoncodes.H>
 #include <devicefw/driverif.H>
-#include "i2c.H"
+#include <i2c/i2c.H>
 
 namespace I2C
 {

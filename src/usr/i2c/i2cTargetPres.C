@@ -28,13 +28,13 @@
 #include <vpd/vpd_if.H>
 #include <i2c/i2cif.H>
 #include <i2c/i2creasoncodes.H>
-#include <i2c/eepromif.H>
+#include <eeprom/eepromif.H>
 #include <initservice/initserviceif.H>
 #include <errl/errlmanager.H>
-#include "i2c_common.H"
+#include <i2c/i2c_common.H>
 #include <vpd/spdenums.H>
 #include <fapiwrap/fapiWrapif.H>
-#include "eepromCache.H"
+#include "../eeprom/eepromCache.H"
 
 extern trace_desc_t* g_trac_i2c;
 

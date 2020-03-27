@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #include <vpd/spdenums.H>
 #include <devicefw/driverif.H>
-#include <i2c/eeprom_const.H>
+#include <eeprom/eeprom_const.H>
 #include <errl/errlentry.H>
 #include <vpd/vpdreasoncodes.H>
 

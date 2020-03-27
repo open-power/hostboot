@@ -41,7 +41,7 @@
 #include <targeting/common/targetservice.H>
 #include <devicefw/driverif.H>
 #include <devicefw/userif.H>
-#include <i2c/eepromif.H>
+#include <eeprom/eepromif.H>
 #include <vfs/vfs.H>
 #include <pnor/pnorif.H>
 #include <vpd/vpdreasoncodes.H>

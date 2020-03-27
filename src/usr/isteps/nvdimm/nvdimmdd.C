@@ -45,7 +45,7 @@
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/util.H>
 #include <devicefw/driverif.H>
-#include <i2c/eepromif.H>
+#include <eeprom/eepromif.H>
 #include <i2c/i2creasoncodes.H>
 #include <i2c/i2cif.H>
 #include <isteps/nvdimm/nvdimmreasoncodes.H>

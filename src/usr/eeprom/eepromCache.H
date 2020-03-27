@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/i2c/eepromCache.H $                                   */
+/* $Source: src/usr/eeprom/eepromCache.H $                                */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -25,7 +25,7 @@
 #ifndef __EEPROM_CACHE_H
 #define __EEPROM_CACHE_H
 
-#include <i2c/eeprom_const.H>
+#include <eeprom/eeprom_const.H>
 #include <errl/errlentry.H>
 
 namespace EEPROM

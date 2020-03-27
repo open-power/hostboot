@@ -50,11 +50,11 @@
 #include <i2c/i2creasoncodes.H>
 #include <i2c/i2cif.H>
 #include <attributetraits.H>
-#include "i2c.H"
+#include <i2c/i2c.H>
 #include "errlud_i2c.H"
 #include <secureboot/trustedbootif.H>
 #include <secureboot/service.H>
-#include <i2c/eepromif.H>
+#include <eeprom/eepromif.H>
 #include <hwas/common/hwas.H>  // HwasState
 #include <algorithm>
 

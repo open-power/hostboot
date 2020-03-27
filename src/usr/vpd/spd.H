@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] Evan Lojewski                                                      */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -40,7 +40,7 @@
 #include <vpd/spdenums.H>
 #include "vpd.H"
 #include <attributeenums.H>
-#include <i2c/eeprom_const.H>
+#include <eeprom/eeprom_const.H>
 
 namespace SPD
 {

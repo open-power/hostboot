@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/i2c/eeprom_utils.C $                                  */
+/* $Source: src/usr/eeprom/eeprom_utils.C $                               */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,13 +22,13 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include <i2c/eepromif.H>
+#include <eeprom/eepromif.H>
 #include <i2c/i2cif.H>
 #include <errl/errlmanager.H>
 #include <errl/errludstring.H>
-#include <i2c/eepromddreasoncodes.H>
-#include <i2c/eeprom_const.H>
-#include "i2c_common.H"
+#include <eeprom/eepromddreasoncodes.H>
+#include <eeprom/eeprom_const.H>
+#include <i2c/i2c_common.H>
 #include <fsi/fsiif.H>
 
 

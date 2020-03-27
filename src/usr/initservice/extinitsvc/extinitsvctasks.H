@@ -261,6 +261,18 @@ const TaskInfo g_exttaskinfolist[]   =   {
         },
 
         /**
+         * @brief   Eeprom Task
+         */
+        {
+            "libeeprom.so" ,                       // taskname
+            NULL,                               // no pointer to fn
+            {
+                INIT_TASK,                      // task type
+                EXT_IMAGE,                      // Extended Module
+            }
+        },
+
+        /**
          * @brief   fapi2 task, handles attribute override and fapi2 plat intf.
          */
         {

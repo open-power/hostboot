@@ -33,7 +33,6 @@ include ../i2c.mk
 
 # add unique object modules
 OBJS += rt_i2c.o
-OBJS += $(if $(CONFIG_SUPPORT_EEPROM_CACHING),rt_eepromCache.o)
 
 VPATH += ..
 

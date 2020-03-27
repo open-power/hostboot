@@ -43,7 +43,7 @@
 #include <vpd/spdenums.H>
 #include <initservice/initserviceif.H>
 #include <fsi/fsiif.H>
-#include "../i2c/eepromCache.H"
+#include "../eeprom/eepromCache.H"
 
 #include "spd.H"
 

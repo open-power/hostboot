@@ -34,7 +34,7 @@
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
 #include <attributeenums.H>
-#include <i2c/eepromif.H>
+#include <eeprom/eepromif.H>
 
 using namespace ERRORLOG;
 using namespace HWAS;

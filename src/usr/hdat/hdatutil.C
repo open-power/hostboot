@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include "hdatutil.H"
-#include <i2c/eepromif.H>
+#include <eeprom/eepromif.H>
 #include <stdio.h>
 #include <string.h>
 //*TODO RTC:216061 Re-enable when attr exists #include <p9_frequency_buckets.H>

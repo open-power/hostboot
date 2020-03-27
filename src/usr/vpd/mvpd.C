@@ -37,9 +37,9 @@
 #include <vpd/vpdreasoncodes.H>
 #include <vpd/mvpdenums.H>
 #include <vpd/vpd_if.H>
-#include <i2c/eepromif.H>
+#include <eeprom/eepromif.H>
 
-#include "../i2c/eepromCache.H"
+#include "../eeprom/eepromCache.H"
 
 #include "mvpd.H"
 #include "ipvpd.H"

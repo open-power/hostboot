@@ -32,7 +32,7 @@
 #include <pnor/pnorif.H>
 #include <devicefw/driverif.H>
 #include "vpd.H"
-#include <i2c/eeprom_const.H>
+#include <eeprom/eeprom_const.H>
 
 /** @file ipvpd.H
  *  @brief Provides base support for i/p-Series style IBM VPD

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/i2c/eepromdd_hardware.H $                             */
+/* $Source: src/usr/eeprom/eepromdd_hardware.H $                          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -32,7 +32,7 @@
  *      the system via the SPI and I2C device drivers
  */
 
-#include <i2c/eeprom_const.H>
+#include <eeprom/eeprom_const.H>
 #include <errl/errlentry.H>
 
 

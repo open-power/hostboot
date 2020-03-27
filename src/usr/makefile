@@ -34,6 +34,7 @@ SUBDIRS += cxxtest.d
 SUBDIRS += devicefw.d
 SUBDIRS += diag.d
 SUBDIRS += dump.d
+SUBDIRS += eeprom.d
 SUBDIRS += errl.d
 SUBDIRS += errldisplay.d
 SUBDIRS += expaccess.d

@@ -56,7 +56,7 @@
 #include <map>
 
 #ifdef CONFIG_SUPPORT_EEPROM_CACHING
-#include <i2c/eepromif.H>
+#include <eeprom/eepromif.H>
 #endif
 
 #include <vpd/vpd_if.H>

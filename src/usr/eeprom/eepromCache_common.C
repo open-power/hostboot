@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/i2c/eepromCache_common.C $                            */
+/* $Source: src/usr/eeprom/eepromCache_common.C $                         */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -24,8 +24,8 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #include "eepromCache.H"
 #include <errl/errlmanager.H>
-#include <i2c/eepromif.H>
-#include <i2c/eepromddreasoncodes.H>
+#include <eeprom/eepromif.H>
+#include <eeprom/eepromddreasoncodes.H>
 #include <errl/errludtarget.H>
 
 #ifdef __HOSTBOOT_RUNTIME

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/i2c/test/eepromddtest.H $                             */
+/* $Source: src/usr/eeprom/test/eepromddtest.H $                          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -36,22 +36,21 @@
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
 #include <devicefw/driverif.H>
-#include <i2c/eepromddreasoncodes.H>
-#include <i2c/eeprom_const.H>
-#include <i2c/eepromif.H>
+#include <eeprom/eepromddreasoncodes.H>
+#include <eeprom/eeprom_const.H>
+#include <eeprom/eepromif.H>
 #include <targeting/common/commontargeting.H>
 #include <pnor/pnorif.H>
-#include "i2ctest.H"
 
 #include <secureboot/service.H>
-
-extern trace_desc_t* g_trac_eeprom;
-
-// NOTE: TRACUCOMP defined/controlled in i2ctest.H
 
 using namespace TARGETING;
 using namespace EEPROM;
 
+#define TS_DEBUG(args...)
+//#define TS_DEBUG(args...) TS_INFO(args)
+
+extern trace_desc_t* g_trac_eeprom;
 
 class EEPROMTest: public CxxTest::TestSuite
 {
@@ -247,8 +246,7 @@ class EEPROMTest: public CxxTest::TestSuite
             int fails = 0;
             int num_ops = 0;
 
-            TRACFCOMP( g_trac_eeprom,
-                       "testEEPROMReadWrite - Start" );
+            TS_INFO("testEEPROMReadWrite - Start" );
 
             struct
             {
@@ -380,10 +378,9 @@ class EEPROMTest: public CxxTest::TestSuite
                         {
                             if( data != testData[i].data )
                             {
-                                TRACFCOMP( g_trac_eeprom,
-                                           "testEEPROMReadWrite - cmd: %d/%d, Data read: %016llx, "
-                                           "expected: %016llx",
-                                           i, NUM_CMDS, data, testData[i].data );
+                                TS_INFO("testEEPROMReadWrite - cmd: %d/%d, "
+                                        "Data read: %016llx, expected: %016llx",
+                                        i, NUM_CMDS, data, testData[i].data );
                                 TS_FAIL( "testEEPROMReadWrite - Failure comparing read data!" );
                                 fails++;
                                 continue;
@@ -394,9 +391,7 @@ class EEPROMTest: public CxxTest::TestSuite
 
             } while( 0 );
 
-            TRACFCOMP( g_trac_eeprom,
-                       "testEEPROMReadWrite - End: %d/%d fails",
-                       fails, num_ops );
+            TS_INFO("testEEPROMReadWrite - End: %d/%d fails", fails, num_ops );
         }
 
 
@@ -427,8 +422,7 @@ class EEPROMTest: public CxxTest::TestSuite
             uint8_t offset = 0x11;
 
 
-            TRACFCOMP( g_trac_eeprom,
-                       "testEEPROMReadWriteLarge - Start" );
+            TS_INFO("testEEPROMReadWriteLarge - Start" );
 
             // Skipping EEPROM test altogether in VBU/VPO environment or in
             // Secure mode
@@ -570,7 +564,7 @@ class EEPROMTest: public CxxTest::TestSuite
                         {
                             memcpy(original_data, testBuffer, testBufLen);
 
-                            TRACUCOMP(g_trac_eeprom,"testEEPROMReadWriteLarge:"
+                            TS_DEBUG("testEEPROMReadWriteLarge:"
                                       " saving original data. i=%d, j=%d",
                                       i, j);
                         }
@@ -581,9 +575,8 @@ class EEPROMTest: public CxxTest::TestSuite
                             // Compare the data
                             if ( memcmp(testBuffer, new_data, testBufLen) )
                             {
-                                TRACFCOMP(g_trac_eeprom,
-                                          "testEEPROMReadWriteLarge: MISCOMPARE"
-                                          " of new data, len=0x%X", testBufLen);
+                                TS_INFO("testEEPROMReadWriteLarge: MISCOMPARE"
+                                        " of new data, len=0x%X", testBufLen);
 
                                 TRACFBIN( g_trac_eeprom, "testBuffer=",
                                           testBuffer, testBufLen);
@@ -598,7 +591,7 @@ class EEPROMTest: public CxxTest::TestSuite
                             }
                             else
                             {
-                                TRACUCOMP(g_trac_eeprom,
+                                TS_DEBUG(
                                           "testEEPROMReadWriteLarge: New "
                                           "Data R/W Successful i=%d,j=%d",
                                           i, j);
@@ -612,10 +605,9 @@ class EEPROMTest: public CxxTest::TestSuite
                             // Compare the data
                             if ( memcmp(testBuffer, original_data, testBufLen) )
                             {
-                                TRACFCOMP(g_trac_eeprom,
-                                          "testEEPROMReadWriteLarge: MISCOMPARE"
-                                          " of original data, len=0x%X",
-                                          testBufLen);
+                                TS_INFO("testEEPROMReadWriteLarge: MISCOMPARE"
+                                        " of original data, len=0x%X",
+                                        testBufLen);
 
                                 TRACFBIN( g_trac_eeprom, "testBuffer=",
                                           testBuffer, testBufLen);
@@ -630,7 +622,7 @@ class EEPROMTest: public CxxTest::TestSuite
                             }
                             else
                             {
-                                TRACUCOMP(g_trac_eeprom,
+                                TS_DEBUG(
                                           "testEEPROMReadWriteLarge: Original "
                                           "Data R/W Successful i=%d,j=%d",
                                           i, j);
@@ -643,9 +635,9 @@ class EEPROMTest: public CxxTest::TestSuite
 
             } while( 0 );
 #endif
-            TRACFCOMP( g_trac_eeprom,
-                       "testEEPROMReadWriteLarge - End: %d/%d fails",
-                       fails, num_ops );
+
+            TS_INFO("testEEPROMReadWriteLarge - End: %d/%d fails", fails,
+                    num_ops );
         }
 
         /**
@@ -660,8 +652,7 @@ class EEPROMTest: public CxxTest::TestSuite
             uint64_t data = 0x0ull;
             size_t dataSize = 8;
 
-            TRACFCOMP( g_trac_eeprom,
-                       "testEEPROMInvalidOperation - Start" );
+            TS_INFO("testEEPROMInvalidOperation - Start" );
 
             do
             {
@@ -695,16 +686,15 @@ class EEPROMTest: public CxxTest::TestSuite
                 }
                 else
                 {
-                    TRACUCOMP(g_trac_eeprom, "testEEPROMInvalidOperation - "
+                    TS_DEBUG( "testEEPROMInvalidOperation - "
                               "Error log returned as expected. RC=0x%X",
                               err->reasonCode() );
                     delete err;
                     err = NULL;
                 }
             } while( 0 );
-            TRACFCOMP( g_trac_eeprom,
-                       "testEEPROMInvalidOperation - End: %d/%d fails",
-                       fails, num_ops );
+            TS_INFO("testEEPROMInvalidOperation - End: %d/%d fails",
+                    fails, num_ops );
         }
 
 
@@ -722,8 +712,7 @@ class EEPROMTest: public CxxTest::TestSuite
             size_t dataSize = 0;
             uint64_t offset = 0x0ull;
 
-            TRACFCOMP( g_trac_eeprom,
-                       "testEEPROMOverflow - Start" );
+            TS_INFO("testEEPROMOverflow - Start" );
 
             do
             {
@@ -762,7 +751,7 @@ class EEPROMTest: public CxxTest::TestSuite
                 }
                 else
                 {
-                    TRACUCOMP(g_trac_eeprom, "testEEPROMOverflow - "
+                    TS_DEBUG( "testEEPROMOverflow - "
                               "Error log returned as expectede. RC=0x%X",
                               err->reasonCode() );
                     delete err;
@@ -770,9 +759,8 @@ class EEPROMTest: public CxxTest::TestSuite
                 }
             } while( 0 );
 
-            TRACFCOMP( g_trac_eeprom,
-                       "testEEPROMOverflow - End: %d/%d fails",
-                       fails, num_ops );
+            TS_INFO("testEEPROMOverflow - End: %d/%d fails",
+                    fails, num_ops );
         }
 
 
@@ -788,8 +776,7 @@ class EEPROMTest: public CxxTest::TestSuite
             uint64_t data = 0x0ull;
             size_t dataSize = 8;
 
-            TRACFCOMP( g_trac_eeprom,
-                       "testEEPROMInvalidChip - Start" );
+            TS_INFO("testEEPROMInvalidChip - Start" );
 
             do
             {
@@ -825,7 +812,7 @@ class EEPROMTest: public CxxTest::TestSuite
                 }
                 else
                 {
-                    TRACUCOMP(g_trac_eeprom, "testEEPROMInvalidChip - "
+                    TS_DEBUG( "testEEPROMInvalidChip - "
                               "Error log returned as expected. RC=0x%x ",
                               err->reasonCode() );
                     delete err;
@@ -834,9 +821,8 @@ class EEPROMTest: public CxxTest::TestSuite
 
             } while( 0 );
 
-            TRACFCOMP( g_trac_eeprom,
-                       "testEEPROMInvalidChip - End: %d/%d fails",
-                       fails, num_ops );
+            TS_INFO("testEEPROMInvalidChip - End: %d/%d fails",
+                    fails, num_ops );
         }
 
         /**
@@ -844,7 +830,7 @@ class EEPROMTest: public CxxTest::TestSuite
          */
         void test_getEEPROMs( void )
         {
-            TRACFCOMP( g_trac_eeprom, ENTER_MRK"test_getEEPROMs" );
+            TS_INFO( ENTER_MRK"test_getEEPROMs" );
             std::list<EEPROM::EepromInfo_t> info;
             getEEPROMs( info );
             for( std::list<EEPROM::EepromInfo_t>::iterator eep = info.begin();
@@ -854,29 +840,27 @@ class EEPROMTest: public CxxTest::TestSuite
                 if ( eep->accessMethod ==
                      EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_I2C )
                 {
-                    TRACFCOMP( g_trac_eeprom,
-                        "Found I2C EEPROM: Master=%.8X, Eng=%d, Port=%d, "
-                        "Freq=%d, Addr=%.2X, Dev=%d, Targ=%.8X",
-                        TARGETING::get_huid(eep->eepromAccess.i2cInfo.i2cMaster),
-                        eep->eepromAccess.i2cInfo.engine,
-                        eep->eepromAccess.i2cInfo.port,
-                        eep->eepromAccess.i2cInfo.busFreq,
-                        eep->eepromAccess.i2cInfo.devAddr,
-                        eep->deviceRole, TARGETING::get_huid(eep->assocTarg) );
+                    TS_INFO("Found I2C EEPROM: Master=%.8X, Eng=%d, Port=%d, "
+                       "Freq=%d, Addr=%.2X, Dev=%d, Targ=%.8X",
+                       TARGETING::get_huid(eep->eepromAccess.i2cInfo.i2cMaster),
+                       eep->eepromAccess.i2cInfo.engine,
+                       eep->eepromAccess.i2cInfo.port,
+                       eep->eepromAccess.i2cInfo.busFreq,
+                       eep->eepromAccess.i2cInfo.devAddr,
+                       eep->deviceRole, TARGETING::get_huid(eep->assocTarg) );
                 }
                 else
                 {
-                    TRACFCOMP( g_trac_eeprom,
-                        "Found SPI EEPROM: Master=%.8X, Eng=%d, "
-                        "Role=%d, Targ=%.8X",
-                        TARGETING::get_huid(eep->eepromAccess.spiInfo.spiMaster),
-                        eep->eepromAccess.spiInfo.engine,
-                        eep->deviceRole, TARGETING::get_huid(eep->assocTarg) );
+                    TS_INFO("Found SPI EEPROM: Master=%.8X, Eng=%d, "
+                       "Role=%d, Targ=%.8X",
+                       TARGETING::get_huid(eep->eepromAccess.spiInfo.spiMaster),
+                       eep->eepromAccess.spiInfo.engine,
+                       eep->deviceRole, TARGETING::get_huid(eep->assocTarg) );
 
 
                 }
             }
-            TRACFCOMP( g_trac_eeprom, EXIT_MRK"test_getEEPROMs" );
+            TS_INFO( EXIT_MRK"test_getEEPROMs" );
         }
 
 };

@@ -41,7 +41,7 @@
 #include <targeting/common/predicates/predicates.H>
 #include <targeting/common/attributes.H>
 #include <targeting/common/utilFilter.H>
-#include "../i2c.H"
+#include <i2c/i2c.H>
 
 extern trace_desc_t* g_trac_i2c;
 

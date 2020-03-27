@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/i2c/eepromCache.C $                                   */
+/* $Source: src/usr/eeprom/eepromCache.C $                                */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -31,12 +31,12 @@
 #include <errl/errlmanager.H>
 #include <fsi/fsiif.H>
 #include <hwas/hwasPlat.H>
-#include "i2c.H"
+#include <i2c/i2c.H>
 #include "eepromCache.H"
 #include <i2c/i2cif.H>
-#include <i2c/eepromif.H>
+#include <eeprom/eepromif.H>
 
-#include <i2c/eepromddreasoncodes.H>
+#include <eeprom/eepromddreasoncodes.H>
 #include <initservice/initserviceif.H>
 #include <initservice/initsvcreasoncodes.H>
 #include <pnor/pnorif.H>
@@ -46,8 +46,6 @@
 #ifdef CONFIG_CONSOLE
 #include <console/consoleif.H>
 #endif
-
-
 
 extern trace_desc_t* g_trac_eeprom;
 

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/i2c/runtime/rt_eepromCache.C $                        */
+/* $Source: src/usr/eeprom/runtime/rt_eepromCache.C $                     */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -35,8 +35,8 @@
 
 #include <errl/errlentry.H>
 #include <devicefw/driverif.H>
-#include <i2c/eepromddreasoncodes.H>
-#include <i2c/eepromif.H>
+#include <eeprom/eepromddreasoncodes.H>
+#include <eeprom/eepromif.H>
 #include <runtime/interface.h>
 #include <targeting/runtime/rt_targeting.H>
 #include <targeting/common/utilFilter.H>

@@ -33,8 +33,8 @@
 
 #include <errl/errluserdetails.H>
 #include <devicefw/driverif.H>
-#include "i2c_common.H"
-#include <i2c/eeprom_const.H>
+#include <i2c/i2c_common.H>
+#include <eeprom/eeprom_const.H>
 
 namespace I2C
 {

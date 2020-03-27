@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/i2c/i2c.H $                                           */
+/* $Source: src/include/usr/i2c/i2c.H $                                   */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -35,9 +35,10 @@
 // ----------------------------------------------
 // Includes
 // ----------------------------------------------
+
 #include <errl/errlentry.H>
 #include <sys/time.h>
-#include "i2c_common.H"
+#include <i2c/i2c_common.H>
 
 namespace I2C
 {

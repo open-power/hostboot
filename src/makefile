@@ -192,6 +192,7 @@ EXTENDED_MODULES += mmio
 EXTENDED_MODULES += smf
 EXTENDED_MODULES += fapiwrap
 EXTENDED_MODULES += expaccess
+EXTENDED_MODULES += eeprom
 EXTENDED_MODULES += pm
 ifndef VPO_COMPILE
 EXTENDED_MODULES += istep07
@@ -283,6 +284,7 @@ TESTCASE_MODULES += testexpupd
 TESTCASE_MODULES += testspi
 TESTCASE_MODULES += testmmio
 TESTCASE_MODULES += $(if $(CONFIG_PLDM),testpldm_extended,)
+TESTCASE_MODULES += testeeprom
 endif
 
 
@@ -334,6 +336,7 @@ RUNTIME_MODULES += nestmemutils  # ~/src/usr/hwplibs/nest/ - no runtime test
 RUNTIME_MODULES += mss_rt        # ~/src/usr/isteps/mss/runtime/ - no runtime test
 RUNTIME_MODULES += pm_rt         # ~/src/usr/isteps/pm/runtime/
 RUNTIME_MODULES += expaccess_rt  # ~/src/usr/expaccess/runtime/
+RUNTIME_MODULES += eeprom_rt     # ~/src/usr/eeprom/runtime/
 RUNTIME_MODULES += $(if $(CONFIG_HBRT_PRD),prdf_rt) # ~/src/usr/diag/prdf/runtime/
 RUNTIME_MODULES += $(if $(CONFIG_HBRT_PRD),attn_rt) # ~/src/usr/diag/attn/runtime/
 RUNTIME_MODULES += $(if $(CONFIG_HTMGT),htmgt_rt)   # ~/src/usr/htmgt/runtime/

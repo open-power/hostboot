@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/i2c/eepromdd_hardware.C $                             */
+/* $Source: src/usr/eeprom/eepromdd_hardware.C $                          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -24,12 +24,12 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #include "eepromdd_hardware.H"
 #include <sys/time.h>
-#include "errlud_i2c.H"
-#include <i2c/eepromif.H>
+#include "../i2c/errlud_i2c.H"
+#include <eeprom/eepromif.H>
 #include <i2c/i2cif.H>
 #include <errl/errlmanager.H>
 #include <i2c/i2creasoncodes.H>
-#include <i2c/eepromddreasoncodes.H>
+#include <eeprom/eepromddreasoncodes.H>
 #include <errl/errludstring.H>
 #include <errl/errludtarget.H>
 

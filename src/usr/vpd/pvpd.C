@@ -38,7 +38,7 @@
 #include <vpd/vpdreasoncodes.H>
 #include <vpd/pvpdenums.H>
 #include <vpd/vpd_if.H>
-#include <i2c/eepromif.H>
+#include <eeprom/eepromif.H>
 #include "pvpd.H"
 #include "vpd.H"
 #include <initservice/initserviceif.H>

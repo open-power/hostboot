@@ -54,7 +54,7 @@
 #endif
 #include <fapi2/plat_hwp_invoker.H>
 #include <fapi2/target.H>
-#include <i2c/eepromCache.H>
+#include <eeprom/eepromCache.H>
 #include <runtime/customize_attrs_for_payload.H>
 
 //SBE interfacing

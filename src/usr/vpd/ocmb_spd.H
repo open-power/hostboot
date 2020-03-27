@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,7 +25,7 @@
 #ifndef __OCMB_SPD_H
 #define __OCMB_SPD_H
 
-#include <i2c/eeprom_const.H>
+#include <eeprom/eeprom_const.H>
 
 namespace SPD
 {
