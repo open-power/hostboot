@@ -51,17 +51,23 @@ static const PnorLidsMap PnorToLidsMap =
     { PNOR::VERSION, LidAndContainerLid(VERSION_LIDID, INVALID_LIDID)},
     { PNOR::OCC,     LidAndContainerLid(OCC_LIDID, OCC_CONTAINER_LIDID)},
     { PNOR::WOFDATA, LidAndContainerLid(WOF_LIDID, WOF_CONTAINER_LIDID)},
+    { PNOR::WOFDATA, LidAndContainerLid(WOF_GEN4_LIDID, WOF_GEN4_CONTAINER_LIDID)},
     { PNOR::HCODE,   LidAndContainerLid(NIMBUS_HCODE_LIDID, HCODE_CONTAINER_LIDID)},
     { PNOR::RINGOVD, LidAndContainerLid(HWREFIMG_RINGOVD_LIDID,INVALID_LIDID)},
     // Note - This list does not include data that is used on non-OPAL
-    //   systems, e.g. CUMULUS_HCODE, WOF_GEN4
+    //   systems, e.g. CUMULUS_HCODE
 };
 
 LidAndContainerLid getPnorSecLidIds(const PNOR::SectionId i_sec)
 {
     LidAndContainerLid l_lids;
 
-    auto l_secIter = PnorToLidsMap.find(i_sec);
+    auto l_secIter = std::find_if(PnorToLidsMap.begin(),
+                                  PnorToLidsMap.end(),
+                                  [i_sec](const PnorLidsPair & pair) -> bool
+                                  {
+                                      return pair.first == i_sec;
+                                  });
     if (l_secIter != PnorToLidsMap.end())
     {
         l_lids.lid = l_secIter->second.lid;
