@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -808,6 +808,68 @@ class STLTest : public CxxTest::TestSuite
                 if (baseA[i] != baseV[i])
                 {
                     TS_FAIL("testBaseTypeBeginEnd: No match at index %d (base %d vs vector %d)",
+                      i, baseA[i], baseV[i]);
+                }
+            }
+        }
+
+        /// Test std::begin() and std::end() on a vector
+        void testVectorTypeBeginEnd()
+        {
+            constexpr size_t MAX_ENTRIES = 1025;
+            std::vector<int> baseA(MAX_ENTRIES, 0); // base-type array
+
+            // Initialize base array to known values
+            for (size_t i = 0; i < baseA.size(); i++)
+            {
+                baseA[i] = i;
+            }
+
+            // use std::begin() and std::end() to copy base-type array to vector
+            std::vector<int> baseV ( std::begin(baseA), std::end(baseA));
+
+            if (baseV.size() != MAX_ENTRIES)
+            {
+                TS_FAIL("testVectorTypeBeginEnd: expected %d elements, found %d in vector",
+                  MAX_ENTRIES, baseV.size());
+            }
+
+            for (size_t i = 0; i < MAX_ENTRIES; i++)
+            {
+                if (baseA[i] != baseV[i])
+                {
+                    TS_FAIL("testVectorTypeBeginEnd: No match at index %d (base %d vs vector %d)",
+                      i, baseA[i], baseV[i]);
+                }
+            }
+        }
+
+        /// Test std::begin() and std::end() on a map
+        void testMapTypeBeginEnd()
+        {
+            constexpr size_t MAX_ENTRIES = 1025;
+            std::map<int, int> baseA; // base-type map
+
+            // Initialize base array to known values
+            for (size_t i = 0; i < MAX_ENTRIES; i++)
+            {
+                baseA[i] = i;
+            }
+
+            // use std::begin() and std::end() to copy base map to map
+            std::map<int, int> baseV ( std::begin(baseA), std::end(baseA));
+
+            if (baseV.size() != MAX_ENTRIES)
+            {
+                TS_FAIL("testMapTypeBeginEnd: expected %d elements, found %d in vector",
+                  MAX_ENTRIES, baseV.size());
+            }
+
+            for (size_t i = 0; i < MAX_ENTRIES; i++)
+            {
+                if (baseA[i] != baseV[i])
+                {
+                    TS_FAIL("testMapTypeBeginEnd: No match at index %d (base %d vs vector %d)",
                       i, baseA[i], baseV[i]);
                 }
             }

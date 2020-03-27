@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -182,7 +182,8 @@ back_insert_iterator<BackInsertionSequence>
 
 /**
  * begin(array)
- * Returns pointer to beginning of array
+ * @param[in] c_array  - an array of arbitrary type
+ * @return Returns pointer to beginning of array
  *
  * Example:
  *    int c_array[] = {0, 1, 2};
@@ -195,8 +196,41 @@ T* begin(T (&c_array)[size])
 }
 
 /**
+ * begin(container)
+ * @param[in] c - a container with a begin method
+ * @return Returns an iterator to the beginning of the sequence represented by c
+ *
+ * Example:
+ *      std::vector<int> v = { 3, 1, 4 };
+ *      auto vi = std::begin(v);
+ *      std::cout << *vi << '\n';
+ */
+template< typename C >
+auto begin(const C& c) -> decltype(c.begin())
+{
+    return c.begin();
+}
+
+/**
+ * begin(container)
+ * @param[in] c - a container with a begin method
+ * @return Returns an iterator to the beginning of the sequence represented by c
+ *
+ * Example:
+ *      std::vector<int> v = { 3, 1, 4 };
+ *      auto vi = std::begin(v);
+ *      std::cout << *vi << '\n';
+ */
+template< typename C >
+auto begin(C& c) -> decltype(c.begin())
+{
+    return c.begin();
+}
+
+/**
  * end(array)
- * Returns pointer to end of array (i.e. the element after the last element)
+ * @param[in] c_array - an array of arbitrary type
+ * @return Returns pointer to end of array (i.e. the element after the last element)
  *
  * Example:
  *    int c_array[] = {0, 1, 2};
@@ -206,6 +240,40 @@ template <typename T, size_t size>
 T* end(T (&c_array)[size])
 {
     return &c_array[0] + size;
+}
+
+/**
+ * end(container)
+ * @param[in] c - a container with an end method
+ * @return Returns an iterator to the ending of the sequence represented by c
+ *
+ * Example:
+ *      std::vector<int> v = { 3, 1, 4 };
+ *      if (std::find(std::begin(v), std::end(v), 5) != std::end(v)) {
+ *          std::cout << "found a 5 in vector v!\n";
+ *      }
+ */
+template< typename C >
+auto end(const C& c) -> decltype(c.end())
+{
+    return c.end();
+}
+
+/**
+ * end(container)
+ * @param[in] c - a container with an end method
+ * @return Returns an iterator to the ending of the sequence represented by c
+ *
+ * Example:
+ *      std::vector<int> v = { 3, 1, 4 };
+ *      if (std::find(std::begin(v), std::end(v), 5) != std::end(v)) {
+ *          std::cout << "found a 5 in vector v!\n";
+ *      }
+ */
+template< typename C >
+auto end(C& c) -> decltype(c.end())
+{
+    return c.end();
 }
 
 }; // namespace std.
