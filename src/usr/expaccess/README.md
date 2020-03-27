@@ -202,7 +202,7 @@ for OCMB target scoms so we will end up calling doScomOp
 * mmioScomPerformOp will call the hwp mss::exp::ib::getScom which is a in-band scom driver for the OCMB explorer chip
 
 
-    FAPI_EXEC_HWP(l_rc , mss::exp::ib::getScom, myOCMBTarget, scomAddr, io_buffer);
+    FAPI_INVOKE_HWP(l_rc , mss::exp::ib::getScom, myOCMBTarget, scomAddr, io_buffer);
 
 * mss::exp::ib::getScom will translate the scomAddress into a mmio address and perform a getMMIO64 operation
 

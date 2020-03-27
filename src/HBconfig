@@ -65,6 +65,11 @@ config AXONE_BRING_UP
     help
         Only enable for Axone bringup, will be removed eventually
 
+config P10_BRING_UP
+    default n
+    help
+        Only enable for P10 bringup, will be removed eventually
+
 config SUPPORT_EEPROM_CACHING
     default y
     help

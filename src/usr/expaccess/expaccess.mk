@@ -22,7 +22,6 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-# FIXME RTC: 210975
 EXTRAINCDIR += ${ROOTPATH}/src/import
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/inband/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
@@ -42,7 +41,7 @@ OBJS += expscom_trace.o
 OBJS += expscom_utils.o
 OBJS += i2cscomdd.o
 OBJS += mmioscomdd.o
-#OBJS += exp_fw_log.o
-#OBJS += exp_fw_log_data.o
-#OBJS += errlud_expscom.o
+OBJS += exp_fw_log.o
+OBJS += exp_fw_log_data.o
+OBJS += errlud_expscom.o
 OBJS += c_str.o

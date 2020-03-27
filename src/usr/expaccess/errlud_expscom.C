@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,13 +61,15 @@ bool EXPSCOM::expAddLog( const exp_log_type i_type,
         // Make HWP call to grab explorer error log data
         if (i_type == EXPSCOM::ACTIVE_LOG)
         {
-            TRACFCOMP( g_trac_expscom, INFO_MRK "FAPI_INVOKE_HWP exp_active_error_log");
+            TRACFCOMP( g_trac_expscom, INFO_MRK "FAPI_INVOKE_HWP "
+                            "exp_active_error_log");
             FAPI_INVOKE_HWP( l_errl, exp_active_log,
                              l_fapi_ocmb_target, l_error_log_data );
         }
         else
         {
-            TRACFCOMP( g_trac_expscom, INFO_MRK "FAPI_INVOKE_HWP exp_saved_error_log");
+            TRACFCOMP( g_trac_expscom, INFO_MRK "FAPI_INVOKE_HWP "
+                            "exp_saved_error_log");
             FAPI_INVOKE_HWP( l_errl, exp_saved_log,
                              l_fapi_ocmb_target, l_error_log_data );
         }
@@ -75,7 +77,8 @@ bool EXPSCOM::expAddLog( const exp_log_type i_type,
         if (l_errl)
         {
             // Unable to grab explorer error log data
-            TRACFCOMP( g_trac_expscom, ERR_MRK "Unable to grab explorer error log data");
+            TRACFCOMP( g_trac_expscom, ERR_MRK "Unable to grab explorer error "
+                            "log data");
             l_errl->collectTrace(EXPSCOM_COMP_NAME);
 
             // This error is not a system critical failure, should be just noted
@@ -92,35 +95,43 @@ bool EXPSCOM::expAddLog( const exp_log_type i_type,
             // so need to work backwards from the end
             l_header.error_data_size = FIRST_EXPLORER_DATA_SECTION_SIZE;
             uint32_t l_explorer_bytes_left = l_error_log_data.size();
-            uint8_t * l_end_ptr = l_error_log_data.data() + l_explorer_bytes_left;
+            uint8_t * l_end_ptr = l_error_log_data.data() +
+                                    l_explorer_bytes_left;
 
             // while explorer data to append
             while (l_explorer_bytes_left && l_bytesAvailableInLog)
             {
                 // Can we add a full packet size of error data?
-                if (l_bytesAvailableInLog > (l_header.error_data_size + META_SECTION_SIZE))
+                if (l_bytesAvailableInLog >
+                    (l_header.error_data_size + META_SECTION_SIZE))
                 {
                     // Check if we don't have full packet of explorer error data
                     if (l_explorer_bytes_left < l_header.error_data_size)
                     {
-                        // Reduce the packet size to include the last of explorer error data
+                        // Reduce the packet size to include the last of
+                        // explorer error data
                         l_header.error_data_size = l_explorer_bytes_left;
                     }
                 }
-                else if ( l_bytesAvailableInLog > META_SECTION_SIZE )  // Any room left for another section?
+                // Any room left for another section?
+                else if ( l_bytesAvailableInLog > META_SECTION_SIZE )
                 {
                     // Is there enough explorer error data for room available?
                     if ( l_explorer_bytes_left >=
                          (l_bytesAvailableInLog - META_SECTION_SIZE) )
                     {
-                        // Not enough room is available for all the remaining explorer error data
+                        // Not enough room is available for all the remaining
+                        // explorer error data
                         // Use up the rest of the space available
-                        l_header.error_data_size = l_bytesAvailableInLog - META_SECTION_SIZE;
+                        l_header.error_data_size = l_bytesAvailableInLog -
+                                                    META_SECTION_SIZE;
                     }
                     else
                     {
-                        // Room is available but not enough explorer data for full packet size
-                        // Reduce the packet size to include the last of explorer error data
+                        // Room is available but not enough explorer data for
+                        // full packet size
+                        // Reduce the packet size to include the last of
+                        // explorer error data
                         l_header.error_data_size = l_explorer_bytes_left;
                     }
                 }
@@ -137,21 +148,25 @@ bool EXPSCOM::expAddLog( const exp_log_type i_type,
                 // Add the section entry to the HWP error log
                 if ( i_type == EXPSCOM::ACTIVE_LOG )
                 {
-                    ExpscomActiveLogUD(l_header, (l_end_ptr - l_header.error_data_size)).
-                                addToLog(io_errl);
+                    ExpscomActiveLogUD(l_header,
+                                       (l_end_ptr - l_header.error_data_size)).
+                                        addToLog(io_errl);
                 }
                 else
                 {
-                    ExpscomSavedLogUD(l_header, (l_end_ptr - l_header.error_data_size)).
-                                addToLog(io_errl);
+                    ExpscomSavedLogUD(l_header,
+                                      (l_end_ptr - l_header.error_data_size)).
+                                        addToLog(io_errl);
                 }
                 l_logsAdded = true;
 
                 // Update to next packet of Explorer error log data
-                l_end_ptr -= l_header.error_data_size; // update to always be the tail of data to add
+                // Update to always be the tail of data to add
+                l_end_ptr -= l_header.error_data_size;
                 l_header.packet_num++;
                 l_explorer_bytes_left -= l_header.error_data_size;
-                l_bytesAvailableInLog -= (META_SECTION_SIZE + l_header.error_data_size);
+                l_bytesAvailableInLog -=
+                    (META_SECTION_SIZE + l_header.error_data_size);
                 l_header.error_data_size = FOLLOWING_EXPLORER_DATA_SECTION_SIZE;
             }
         }
@@ -160,7 +175,8 @@ bool EXPSCOM::expAddLog( const exp_log_type i_type,
     {
       TRACFCOMP( g_trac_expscom, INFO_MRK
             "expAddErrorLog: Unable to add any %d type error logs,"
-            " only have %d bytes available in log", i_type, l_bytesAvailableInLog );
+            " only have %d bytes available in log",
+            i_type, l_bytesAvailableInLog );
     }
     return l_logsAdded;
 }

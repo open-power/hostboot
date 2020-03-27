@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,7 @@ public:
     void testExpErrorLogRc(void)
     {
         // @todo RTC 214629 - disabled until simics implements exp_error_log
+        TS_INFO("testExpErrorLogRc skipped");
         return;
 
         if (!iv_serializeTestMutex)
@@ -75,6 +76,7 @@ public:
     void testExpErrorLogHb(void)
     {
         // @todo RTC 214629 - disabled until simics implements exp_error_log
+        TS_INFO("testExpErrorLogHb skipped");
         return;
 
         if (!iv_serializeTestMutex)
@@ -113,7 +115,7 @@ public:
         err = exptest::loadModule(exptest::MSS_LIBRARY_NAME);
         if(err)
         {
-            TS_FAIL("OCMBCommTest() - Constuctor: failed to load MSS module");
+            TS_FAIL("test_expErrorLog() - Constuctor: failed to load MSS module");
             errlCommit( err, TARG_COMP_ID );
         }
 #endif
