@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -198,6 +198,28 @@ fapi2::ReturnCode exp_continue_cmd( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
                                         mss::mcbist::stop_conditions<mss::mc_type::EXPLORER>
                                         (mss::mcbist::stop_conditions<mss::mc_type::EXPLORER>::DONT_CHANGE),
                                     const mss::mcbist::speed i_speed = mss::mcbist::speed::SAME_SPEED );
+
+///
+/// @brief Restore DRAM repairs wrapper for Nimbus
+/// @param[in] i_target A target representing a port
+/// @param[in,out] io_repairs_applied bit mask, where a bit set means a rank had repairs applied (bit0 = rank0, etc)
+/// @param[in,out] io_repairs_exceeded bit mask, where a bit set means a DIMM had more bad bits than could be repaired (bit0 = DIMM0 etc)
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode nim_restore_repairs( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                       fapi2::buffer<uint8_t>& io_repairs_applied,
+                                       fapi2::buffer<uint8_t>& io_repairs_exceeded );
+
+///
+/// @brief Restore DRAM repairs wrapper for Explorer
+/// @param[in] i_target A target representing a port
+/// @param[in,out] io_repairs_applied bit mask, where a bit set means a rank had repairs applied (bit0 = rank0, etc)
+/// @param[in,out] io_repairs_exceeded bit mask, where a bit set means a DIMM had more bad bits than could be repaired (bit0 = DIMM0 etc)
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode exp_restore_repairs( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                       fapi2::buffer<uint8_t>& io_repairs_applied,
+                                       fapi2::buffer<uint8_t>& io_repairs_exceeded );
 
 ///
 /// @brief Broadcast mode check wrapper for Nimbus

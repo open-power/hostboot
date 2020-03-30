@@ -139,6 +139,20 @@ fapi2::ReturnCode nim_continue_cmd( const fapi2::Target<fapi2::TARGET_TYPE_MCBIS
 }
 
 ///
+/// @brief Restore DRAM repairs wrapper for Nimbus
+/// @param[in] i_target A target representing a port
+/// @param[in,out] io_repairs_applied bit mask, where a bit set means a rank had repairs applied (bit0 = rank0, etc)
+/// @param[in,out] io_repairs_exceeded bit mask, where a bit set means a DIMM had more bad bits than could be repaired (bit0 = DIMM0 etc)
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode nim_restore_repairs( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                       fapi2::buffer<uint8_t>& io_repairs_applied,
+                                       fapi2::buffer<uint8_t>& io_repairs_exceeded )
+{
+    return mss::restore_repairs<mss::mc_type::NIMBUS>(i_target, io_repairs_applied, io_repairs_exceeded);
+}
+
+///
 /// @brief Broadcast mode check wrapper for Nimbus
 /// @param[in] i_target the target to effect
 /// @return o_capable - yes iff these vector of targets are broadcast capable
