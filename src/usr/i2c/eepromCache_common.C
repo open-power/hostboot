@@ -225,8 +225,14 @@ errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
               (l_eepromRecordHeader.completeRecord.cache_copy_size * KILOBYTE))
             {
                 TRACFCOMP(g_trac_eeprom,
-                          ERR_MRK"eepromPerformOpCache: i_eepromInfo.offset + i_offset is greater than size of eeprom (0x%x KB)",
-                          l_eepromRecordHeader.completeRecord.cache_copy_size);
+                          ERR_MRK"eepromPerformOpCache: %s at offset (0x%X) + "
+                          "io_buflen (0x%X) is greater than size of eeprom "
+                          "(0x%x KB = 0x%X)",
+                          (i_opType == DeviceFW::READ) ? "READ" : "WRITE",
+                          i_eepromInfo.offset, io_buflen,
+                          l_eepromRecordHeader.completeRecord.cache_copy_size,
+                          l_eepromRecordHeader.completeRecord.cache_copy_size *
+                          KILOBYTE );
                 /*@
                 * @errortype
                 * @moduleid     EEPROM_CACHE_PERFORM_OP
