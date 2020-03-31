@@ -314,6 +314,9 @@
     <attribute>
       <id>PHYS_PRES_REQUEST_OPEN_WINDOW</id>
     </attribute>
+    <attribute>
+      <id>PROC_MODULE_TYPE</id>
+    </attribute>
   </targetTypeExtension>
 
   <targetTypeExtension>

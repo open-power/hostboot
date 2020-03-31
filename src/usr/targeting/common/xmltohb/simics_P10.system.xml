@@ -113,6 +113,10 @@
         <default>0</default>
     </attribute>
     <attribute>
+        <id>PROC_MODULE_TYPE</id>
+        <default>GODEL</default>
+    </attribute>
+    <attribute>
         <id>PROC_EPS_TABLE_TYPE</id>
         <default>EPS_TYPE_LE</default>
     </attribute>
