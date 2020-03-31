@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -31,7 +31,7 @@
     </targetType>
     <description>
        An OMI target's relative logical postion to its OMIC parent target.
-      
+
        pos | DL_GROUP_POS
       -----+--------------
          4 | 0
@@ -48,7 +48,7 @@
         15 | 0
         10 | 1
         11 | 2
-         8 | 0 
+         8 | 0
          9 | 1
 
     </description>
@@ -63,7 +63,7 @@
       TARGET_TYPE_OMI
     </targetType>
     <description>
-      An OMI target's logical DL number 
+      An OMI target's logical DL number
 
        pos | DL_NUM
       -----+--------------
@@ -102,6 +102,33 @@
     <valueType>uint32</valueType>
     <platInit/>
     <default>0</default>
+  </attribute>
+  <!-- ******************************************************************************** -->
+  <attribute>
+    <id>ATTR_VIO_RAILS_NOT_POWERED</id>
+    <targetType>
+      TARGET_TYPE_PROC_CHIP
+    </targetType>
+    <description>
+      Indicates which, if any, VIO rails are not powered at the system level.
+
+      This value is overlaid onto the partial good information stored in VPD related to
+      memory controllers and/or AXO buses.
+
+       bit | Rail
+      -----+--------------
+         0 | VIO_MC01
+         1 | VIO_MC23
+         2 | VIO_OP01
+         3 | VIO_OP23
+         4 | VIO_OP45
+         5 | VIO_OP67
+
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <initToZero/>   <!-- Assumes all these rails are powered in the system by default   -->
+    <overrideOnly/> <!-- Keeps it from being MRW visible until exposure is needed       -->
   </attribute>
   <!-- ******************************************************************************** -->
 </attributes>
