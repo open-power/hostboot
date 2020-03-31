@@ -1079,7 +1079,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
         if(TARGETING::is_phyp_load())
         {
             // First phyp entry is for the entire 256M HB space
-            uint64_t l_hbAddr = cpu_spr_value(CPU_SPR_HRMOR) - VMM_HRMOR_OFFSET;
+            uint64_t l_hbAddr = cpu_spr_value(CPU_SPR_HRMOR);
 
             // If mirroring enabled,
             // change address start to be at its mirrored address equivalent
