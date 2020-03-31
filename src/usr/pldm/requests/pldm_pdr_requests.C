@@ -41,6 +41,7 @@
 // Hostboot PLDM/MCTP
 #include <mctp/mctp_message_types.H>
 #include <pldm/pldm_const.H>
+#include <pldm/pldmif.H>
 #include <pldm/requests/pldm_pdr_requests.H>
 #include <pldm/pldm_reasoncodes.H>
 #include <pldm/pldm_request.H>
@@ -112,35 +113,21 @@ errlHndl_t getPDR(const msg_q_t i_msgQ,
         std::vector<uint8_t> response_bytes;
 
         {
-            const int rc =
-                sendrecv_pldm_request<PLDM_GET_PDR_REQ_BYTES>
+            errl =
+                sendrecv_pldm_request_payload<PLDM_GET_PDR_REQ_BYTES>
                 (response_bytes,
                  i_msgQ,
                  encode_get_pdr_req,
-                 0, // instance ID (0 for MCTP stack to auto-fill)
+                 DEFAULT_INSTANCE_ID,
                  pdr_req.record_handle,
                  pdr_req.data_transfer_handle,
                  pdr_req.transfer_op_flag,
                  pdr_req.request_count,
                  pdr_req.record_change_number);
 
-            if (rc != 0)
+            if (errl)
             {
-                /*
-                 * @errortype  ERRL_SEV_UNRECOVERABLE
-                 * @moduleid   MOD_GET_PDR_REPO
-                 * @reasoncode RC_MSG_SEND_FAIL
-                 * @userdata1  RC returned from message send routine
-                 * @devdesc    Software problem, failed to send IPC message for getPDR request
-                 * @custdesc   A software error occurred during system boot
-                 */
-                errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                     MOD_GET_PDR_REPO,
-                                     RC_MSG_SEND_FAIL,
-                                     rc,
-                                     0,
-                                     ErrlEntry::ADD_SW_CALLOUT);
-                errl->collectTrace(PLDM_COMP_NAME);
+                PLDM_ERR("getPDR: Error occurred trying to send pldm request.");
                 break;
             }
         }
@@ -156,7 +143,7 @@ errlHndl_t getPDR(const msg_q_t i_msgQ,
 
         for (int i = 0; i < 2; ++i)
         {
-            const pldm_completion_codes rc =
+            errl =
                 decode_pldm_response(decode_get_pdr_resp,
                                      response_bytes,
                                      &response.completion_code,
@@ -168,33 +155,8 @@ errlHndl_t getPDR(const msg_q_t i_msgQ,
                                      response.record_data.size(),
                                      &response.transfer_crc);
 
-            if (rc != PLDM_SUCCESS)
+            if (errl)
             {
-                /*
-                 * @errortype  ERRL_SEV_UNRECOVERABLE
-                 * @moduleid   MOD_GET_PDR_REPO
-                 * @reasoncode RC_MSG_DECODE_FAIL
-                 * @userdata1  RC returned from decode function
-                 * @userdata2  Decode iteration (1 or 2)
-                 * @devdesc    Software problem, failed to decode PLDM message
-                 * @custdesc   A software error occurred during system boot
-                 */
-                errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                     MOD_GET_PDR_REPO,
-                                     RC_MSG_DECODE_FAIL,
-                                     rc,
-                                     i + 1,
-                                     ErrlEntry::NO_SW_CALLOUT);
-
-                errl->collectTrace(PLDM_COMP_NAME);
-
-                // Call out service processor / BMC firmware as high priority
-                errl->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
-                                          HWAS::SRCI_PRIORITY_HIGH);
-
-                // Call out Hostboot firmware as medium priority
-                errl->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
-                                           HWAS::SRCI_PRIORITY_MED );
                 break;
             }
 
@@ -205,6 +167,7 @@ errlHndl_t getPDR(const msg_q_t i_msgQ,
         if (errl)
         {
             // Message decoding failed; break out of the block;
+            PLDM_ERR("getPDR: Error occurred trying to decode pldm response.");
             break;
         }
 
@@ -217,22 +180,25 @@ errlHndl_t getPDR(const msg_q_t i_msgQ,
             // REPOSITORY_UPDATE_IN_PROGRESS completion code, but if it adds
             // that, we can retry the transfer here.
 
+            pldm_msg* const pldm_response =
+              reinterpret_cast<pldm_msg*>(response_bytes.data());
+            const uint64_t response_hdr_data = pldmHdrToUint64(*pldm_response);
+
             /*
              * @errortype  ERRL_SEV_UNRECOVERABLE
              * @moduleid   MOD_GET_PDR_REPO
              * @reasoncode RC_BAD_COMPLETION_CODE
              * @userdata1  Completion code
+             * @userdata2  Response Header Data
              * @devdesc    Software problem, PLDM transaction failed
-             * @custdesc   A software error occured during system boot
+             * @custdesc   A software error occurred during system boot
              */
             errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                  MOD_GET_PDR_REPO,
                                  RC_BAD_COMPLETION_CODE,
                                  response.completion_code,
-                                 0,
+                                 response_hdr_data,
                                  ErrlEntry::NO_SW_CALLOUT);
-
-            errl->collectTrace(PLDM_COMP_NAME);
 
             // Call out service processor / BMC firmware as high priority
             errl->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
@@ -241,6 +207,9 @@ errlHndl_t getPDR(const msg_q_t i_msgQ,
             // Call out Hostboot firmware as medium priority
             errl->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
                                        HWAS::SRCI_PRIORITY_MED );
+
+            errl->collectTrace(PLDM_COMP_NAME);
+
             break;
         }
 

@@ -47,6 +47,8 @@
 #include <console/consoleif.H>
 #endif
 
+using namespace ERRORLOG;
+using namespace MCTP;
 
 extern const char* VFS_ROOT_MSG_MCTP_OUT;
 extern const char* VFS_ROOT_MSG_MCTP_IN;
@@ -146,7 +148,7 @@ static void rx_message(uint8_t i_eid, void * i_data, void *i_msg, size_t i_len)
    // For now we only support PLDM over MCTP
    switch(*l_pByteBuffer)
    {
-      case MCTP::MCTP_MSG_TYPE_PLDM :
+      case MCTP_MSG_TYPE_PLDM :
       {
           errlHndl_t errl = nullptr;
           // Offset into sizeof(MCTP::MCTP_MSG_TYPE_PLDM) MCTP packet payload
@@ -194,21 +196,21 @@ void MctpRP::handle_inbound_messages(void)
 
         switch(msg->type)
         {
-          case MCTP::MSG_INIT:
+          case MSG_INIT:
               TRACFCOMP(g_trac_mctp,
                         "Found kcs msg type: MCTP::MSG_INIT which we do not support, ignoring it",
                         msg->type);
               break;
-          case MCTP::MSG_TX_BEGIN:
+          case MSG_TX_BEGIN:
               TRACDCOMP(g_trac_mctp, "BMC has sent us a message we need to read");
               mctp_hostlpc_rx_start(iv_hostlpc);
               break;
-          case MCTP::MSG_RX_COMPLETE:
+          case MSG_RX_COMPLETE:
               // BMC has completed receiving the message we sent
               TRACDCOMP(g_trac_mctp, "BMC says they are complete reading what we sent");
               mctp_hostlpc_tx_complete(iv_hostlpc);
               break;
-          case MCTP::MSG_DUMMY:
+          case MSG_DUMMY:
 
               // The BMC will send us this message after writing the status register
               // during the initization sequence to notify us they have filled out
@@ -273,14 +275,48 @@ void MctpRP::handle_outbound_messages(void)
         {
 
           // Send a message
-          case MCTP::MSG_SEND_PLDM:
+          case MSG_SEND_PLDM:
+          {
               // The first byte of MCTP payload describes the contents
               // of the payload. Set first byte to be TYPE_PLDM (0x01)
               // so BMC knows to route the MCTP message to it's PLDM driver.
-              *reinterpret_cast<uint8_t *>(msg->extra_data) = MCTP::MCTP_MSG_TYPE_PLDM;
+              *reinterpret_cast<uint8_t *>(msg->extra_data) = MCTP_MSG_TYPE_PLDM;
               TRACDBIN(g_trac_mctp, "pldm message : ", msg->extra_data , msg->data[0]);
-              mctp_message_tx(iv_mctp, BMC_EID, msg->extra_data, msg->data[0]);
+              int rc = mctp_message_tx(iv_mctp, BMC_EID, msg->extra_data, msg->data[0]);
+
+              if(rc != RC_MCTP_CORE_SUCCESS)
+              {
+                  // first 8 bytes of MCTP payload
+                  const uint64_t mctp_payload =
+                          *reinterpret_cast<uint64_t*>(msg->extra_data);
+                  /*
+                  * @errortype  ERRL_SEV_UNRECOVERABLE
+                  * @moduleid   MOD_HANDLE_OUTBOUND
+                  * @reasoncode RC_SEND_PLDM_FAIL
+                  * @userdata1  Return code returned by MCTP core logic
+                  * @userdata2  First 8 bytes of MCTP payload
+                  * @devdesc    Software problem while sending pldm message
+                  * @custdesc   A software error occured during system boot
+                  */
+                  errlHndl_t errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                        MOD_HANDLE_OUTBOUND,
+                                        RC_SEND_PLDM_FAIL,
+                                        rc,
+                                        mctp_payload,
+                                        ErrlEntry::ADD_SW_CALLOUT);
+                  errl->collectTrace(MCTP_COMP_NAME);
+                  errl->collectTrace(PLDM_COMP_NAME);
+
+                  // PLDM message msg originator must clean up original buffer in extra_data
+                  msg->extra_data = errl;
+                  errl = nullptr;
+                  msg->data[1] = rc;
+              }
+
+              rc = msg_respond(iv_outboundMsgQ, msg);
+              assert(rc == 0, "Failed attempting to respond to MSG_SEND_PLDM message got rc %d", rc);
               break;
+          }
           default:
               // just mark a trace and move on with our lives
               TRACFCOMP(g_trac_mctp,
@@ -323,8 +359,8 @@ do
         TRACFCOMP(g_trac_mctp, "mctp_process_version: Error ! Channel is not active!" );
         /*@errorlog
         * @errortype       ERRL_SEV_UNRECOVERABLE
-        * @moduleid        MCTP::MOD_MCTP_PROCESS_VER
-        * @reasoncode      MCTP::RC_CHANNEL_INACTIVE
+        * @moduleid        MOD_MCTP_PROCESS_VER
+        * @reasoncode      RC_CHANNEL_INACTIVE
         * @userdata1       kcs status register value
         * @userdata2       mctp version
         *                  (should not have been set but might be useful)
@@ -333,13 +369,12 @@ do
         * @custdesc        A problem occurred during the IPL of the system
         *
         */
-        l_errl = new ERRORLOG::ErrlEntry
-            (ERRORLOG::ERRL_SEV_UNRECOVERABLE, // severity
-             MCTP::MOD_MCTP_PROCESS_VER,   // moduleid
-             MCTP::RC_CHANNEL_INACTIVE,    // reason code
-             l_status, // KCS status register value
-             iv_hostlpc->lpc_hdr->negotiated_ver, // version
-             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE, // severity
+                               MOD_MCTP_PROCESS_VER,   // moduleid
+                               RC_CHANNEL_INACTIVE,    // reason code
+                               l_status, // KCS status register value
+                               iv_hostlpc->lpc_hdr->negotiated_ver, // version
+                               ErrlEntry::ADD_SW_CALLOUT);
     }
     else
     {

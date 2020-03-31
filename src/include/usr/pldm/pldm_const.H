@@ -42,6 +42,11 @@ namespace PLDM
         MSG_OEM               = 0x3F
     };
 
+    enum requester_rc_t
+    {
+        REQ_SUCCESS   = 0x00,
+        REQ_FAILED    = 0x01
+    };
 
     // BMC currently does not support multi-part PLDM
     // transmissions so we will ALWAYS send GET_FIRST_PART

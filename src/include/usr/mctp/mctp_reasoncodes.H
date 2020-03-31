@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -30,14 +31,15 @@ namespace MCTP
 {
     enum MCTPModuleId
     {
-        MOD_MCTP_INVALID      = 0x00, /**< Zero is an invalid module id */
+        MOD_MCTP_INVALID      = 0x00, // Zero is an invalid module id
         MOD_MCTP_PROCESS_VER  = 0x01, // _mctp_process_version
+        MOD_HANDLE_OUTBOUND   = 0x02, // handle_outbound_messages
     };
 
     enum MCTPReasonCode
     {
         RC_CHANNEL_INACTIVE   = MCTP_COMP_ID | 0x01,
-
+        RC_SEND_PLDM_FAIL     = MCTP_COMP_ID | 0x02,
     };
 };
 #endif

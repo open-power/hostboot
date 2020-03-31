@@ -102,8 +102,8 @@ errlHndl_t routeInboundMsg(const uint8_t* const i_msg, const size_t i_len)
     l_msg->extra_data = calloc(l_msg->data[0], 1);
 
     memcpy(l_msg->extra_data,
-            l_pldm_hdr,
-            l_msg->data[0]);
+           l_pldm_hdr,
+           l_msg->data[0]);
 
     // If pldm msg header tells us its a request, route to inbound
     // request queue, else route to inbound response queue
@@ -126,7 +126,7 @@ errlHndl_t routeInboundMsg(const uint8_t* const i_msg, const size_t i_len)
         /*@errorlog
         * @errortype   ERRL_SEV_PREDICTIVE
         * @moduleid    MOD_ROUTE_MESSAGES
-        * @reasoncode  RC_MSG_SEND_FAIL
+        * @reasoncode  RC_SEND_FAIL
         * @userdata1   rc from msg_send
         * @userdata2   ptr to message as uint64_t
         * @devdesc     PLDM message from BMC is too small to process
@@ -134,7 +134,7 @@ errlHndl_t routeInboundMsg(const uint8_t* const i_msg, const size_t i_len)
         */
         errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
                               MOD_ROUTE_MESSAGES,
-                              RC_MSG_SEND_FAIL,
+                              RC_SEND_FAIL,
                               rc,
                               reinterpret_cast<uint64_t>(l_msg),
                               ErrlEntry::ADD_SW_CALLOUT);

@@ -31,6 +31,7 @@
 COMMON_ROOTPATH = ../../../..
 
 PLDM_COMMON_OBJS += pldmtrace.o
+PLDM_COMMON_OBJS += pldm_utils.o
 
 # add these paths to VPATH so compiler knows
 # where to find the .C/.c files we need

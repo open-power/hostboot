@@ -38,11 +38,14 @@ namespace PLDM
 {
     enum PLDMModuleId
     {
-        MOD_PLDM_INVALID      = 0x00, /**< Zero is an invalid module id */
-        MOD_GET_FRU_METADATA  = 0x01, // getFruRecordTableMetaData
-        MOD_GET_FRU_TABLE     = 0x02, // getFruRecordTable
-        MOD_GET_PDR_REPO      = 0x03, // getRemotePdrRepository
-        MOD_ROUTE_MESSAGES    = 0x04, // routeInboundMsg
+        MOD_PLDM_INVALID              = 0x00, /**< Zero is an invalid module id */
+        MOD_GET_FRU_METADATA          = 0x01, // getFruRecordTableMetaData
+        MOD_GET_FRU_TABLE             = 0x02, // getFruRecordTable
+        MOD_GET_PDR_REPO              = 0x03, // getRemotePdrRepository
+        MOD_ROUTE_MESSAGES            = 0x04, // routeInboundMsg
+        MOD_PLDM_REQUESTER            = 0x05, // handle_outbound_req_messages
+        MOD_MAKE_PLDM_REQUEST_PAYLOAD = 0x06, // make_pldm_request_payload
+        MODE_DECODE_RESPONSE          = 0x08, // decode_pldm_response
     };
 
     enum PLDMReasonCode
@@ -52,7 +55,9 @@ namespace PLDM
         RC_UNSUPPORTED_VERSION = PLDM_COMP_ID | 0x03,
         RC_BAD_COMPLETION_CODE = PLDM_COMP_ID | 0x04,
         RC_INVALID_LENGTH      = PLDM_COMP_ID | 0x05,
-        RC_MSG_SEND_FAIL       = PLDM_COMP_ID | 0x06,
-     };
+        RC_SENDRECV_FAIL       = PLDM_COMP_ID | 0x06,
+        RC_SEND_FAIL           = PLDM_COMP_ID | 0x07,
+    };
+
 }
 #endif

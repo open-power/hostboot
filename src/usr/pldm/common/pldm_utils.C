@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/pldm/pldmif.H $                               */
+/* $Source: src/usr/pldm/common/pldm_utils.C $                            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,44 +22,23 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef PLDMIF_H
-#define PLDMIF_H
 
 /**
- * @file pldmif.H
- *
- * @brief PLDM's Interface for external userspace modules to call
- *
- */
+* @file pldm_utils.C
+*
+* @brief Source code for utility functions defined in pldmif.H
+*/
 
-#include <cstddef>
-#include "../../../src/usr/pldm/extern/base.h"
-#include <errl/errlentry.H>
+#include <pldm/pldmif.H>
+#include <cstring>
 
 namespace PLDM
 {
-    /**
-    * @brief This function is intended to be used by the MCTP resource
-    *        provider when they find a PLDM message and want the PLDM
-    *        resource provider to handle it
-    *
-    * @param[in] i_msg  A ptr to PLDM message, no change of memory ownership.
-    *                   Note that this func will assert is i_msg is nullptr.
-    * @param[in] i_len  Length of buffer containing PLDM message,
-                        i_len must be >= sizeof(pldm_msg_hdr).
-    *
-    * @return errHndl_t   nullptr unless error occurs
-    */
-    errlHndl_t routeInboundMsg(const uint8_t * i_msg, size_t i_len);
-
-    /**
-    * @brief Copy the 3 byte header of a PLDM message into a
-    *        uint64_t and return it
-    *
-    * @param[in] i_pldmMsg  PLDM message we want the header of as a uint64_t
-    *
-    * @return uint64_t      3 byte pldm message header as a uint64_t (left aligned)
-    */
-    uint64_t pldmHdrToUint64(const pldm_msg& i_pldmMsg);
+uint64_t pldmHdrToUint64(const pldm_msg& i_pldmMsg)
+{
+    uint64_t request_hdr_data = 0;
+    const pldm_msg_hdr* const request_hdr = &i_pldmMsg.hdr;
+    memcpy(&request_hdr_data, request_hdr, sizeof(pldm_msg_hdr));
+    return request_hdr_data;
 }
-#endif
+}

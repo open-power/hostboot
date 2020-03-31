@@ -34,7 +34,6 @@
 #define PLDMREQUESTER_H
 
 #include <sys/msg.h>
-#include <errl/errlentry.H>
 
 class pldmRequester
 {

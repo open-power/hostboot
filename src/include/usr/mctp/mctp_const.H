@@ -46,6 +46,8 @@ namespace MCTP
     {
         MSG_SEND_PLDM        = 0x00
     };
+
+    constexpr uint32_t RC_MCTP_CORE_SUCCESS = 0;
 }
 
 #endif
