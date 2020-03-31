@@ -490,7 +490,6 @@ sub manipulateImages
     my %hashPageTablePartitions = (HBI      => 1,
                                    WOFDATA  => 1,
                                    SBE      => 1,
-                                   HCODE    => 1,
                                    MEMD     => 1);
     if($ENV{'RM_HASH_PAGE_TABLE'})
     {
@@ -552,13 +551,13 @@ sub manipulateImages
         $isNormalSecure ||= ($eyeCatch eq "TESTLOAD");
         $isNormalSecure ||= ($eyeCatch eq "VERSION");
         $isNormalSecure ||= ($eyeCatch eq "CENHWIMG");
+        $isNormalSecure ||= ($eyeCatch eq "HCODE");
 
         my $isSpecialSecure = ($eyeCatch eq "HBB");
         $isSpecialSecure ||= ($eyeCatch eq "HBD");
         $isSpecialSecure ||= ($eyeCatch eq "HBI");
         $isSpecialSecure ||= ($eyeCatch eq "WOFDATA");
         $isSpecialSecure ||= ($eyeCatch eq "SBE");
-        $isSpecialSecure ||= ($eyeCatch eq "HCODE");
         $isSpecialSecure ||= ($eyeCatch eq "MEMD");
 
         # Used to indicate security is supported in firmware
