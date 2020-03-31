@@ -88,6 +88,7 @@ VPATH += ${MSS_LIB}
 #OBJS += mcbist_workarounds.o
 #OBJS += rank.o
 #OBJS += memory_size.o
+OBJS += gen_mss_mcbist_patterns.o
 #OBJS += axone_pos.o
 #OBJS += nimbus_pos.o
 
