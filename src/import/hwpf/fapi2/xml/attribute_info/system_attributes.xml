@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -48,9 +48,172 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_MFG_FLAGS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        The manufacturing flags.
+        These enums represent which bit/flag to set in numeric form, NOT
+        binary form.  These values/policies can no longer be bit wised together.
+        These numeric values match the flags as found in the PDF document:
+        'Hypervisor Interface Data Specifications v10.5o-1.pdf', section 6.1.9
+        and should stay in sync with this document and updated when said
+        document gets updated.
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <array>4</array>
+    <!-- * These enum names are taken verbatim, including duplicates, from file:
+           /fips950/src/mnfg/mfg/mnfgPolicyFlags.H
+         * The enum values below are broken apart on cell lines:
+           first group is cell 0: 0 to 31, second group is cell 1: 32 to 63,
+           third group is cell 2: 64 to 95 and fourth group is cell 3: 96 to 127
+         * The gaps in the sequence for each cell: cell 0: 12, 13 and 14;
+           cell 1: 44, 45 and 46; cell 2: 76, 77 and 78; and cell 3: 108, 109 and
+           110. The gaps are there to differentiate each cell from each other,
+           considering that each cell can be used as value on it's own.
+     -->
+    <enum>
+        MNFG_PHYP_VAPI                      = 0,
+        MNFG_PHYP_FAPI                      = 1,
+        MNFG_PHYP_NO_THRESHOLD              = 2,
+        MNFG_PHYP_TEST_RUN                  = 3,
+        MNFG_PHYP_TERM                      = 4,
+        MNFG_PHYP_NO_RR                     = 5,
+        MNFG_PHYP_ANCHOR                    = 6,
+        MNFG_PHYP_IGNORE_SPCN_ERROR         = 7,
+        MNFG_PHYP_NO_OS400_DUMP             = 8,
+        MNFG_PHYP_RUN_COMPU_GARD            = 9,
+        MNFG_PHYP_UNDEFINED_2               = 10,
+        MNFG_PHYP_UNDEFINED_1               = 11,
+        MNFG_CORONA_FBIST                   = 15,
+        MNFG_VERIFY_DMA_DATA                = 16,
+        MNFG_SVPD_USE_ONLY                  = 17,
+        MNFG_TERM_FSP_RR                    = 18,
+        MNFG_NO_RBOT                        = 19,
+        MNFG_NO_CAPTURE_VPD                 = 20,
+        MNFG_DO_NOT_PASS_TO_OS              = 21,
+        MNFG_TEST_RBS                       = 22,
+        MNFG_TEST_DRAM_REPAIRS              = 22,
+        MNFG_NO_AP                          = 23,
+        MNFG_NO_SYS_DUMP                    = 24,
+        MNFG_TEST_ALL_SPARE_DRAM_ROWS       = 25,
+        MNFG_SRC_TERM                       = 26,
+        MNFG_SPCN_USE_NVS_IP                = 27,
+        MNFG_NO_RBS                         = 28,
+        MNFG_DISABLE_DRAM_REPAIRS           = 28,
+        MNFG_THRESHOLDS                     = 29,
+        MNFG_NO_GARD                        = 30,
+        MNFG_ABIST_VPD_DATA                 = 31,
+
+        MNFG_GORM_MODE                      = 32,
+        MNFG_FAST_RDT                       = 33,
+        MNFG_AVP_COMPLETE                   = 34,
+        MNFG_DISABLE_MEM_FAST_IPL_SCRUB     = 35,
+        MNFG_DISABLE_L3_FAST_IPL_SCRUB      = 36,
+        MNFG_DISABLE_MEM_PATTERN            = 37,
+        MNFG_DISABLE_L3_PATTERN             = 38,
+        MNFG_DISABLE_WIRE_RDT               = 39,
+        MNFG_DISABLE_WIRE_CST               = 40,
+        MNFG_DISABLE_ABIST                  = 41,
+        MNFG_DISABLE_LBIST                  = 42,
+        MNFG_DISABLE_CHKRING                = 43,
+        MNFG_MSL_CHECK                      = 47,
+        MNFG_DISABLE_RWRAP                  = 48,
+        MNFG_ENABLE_PRBS_CMDLINE            = 49,
+        MNFG_ENABLE_DIMM_SCREEN             = 50,
+        MNFG_ENABLE_TORRENT_PRBS            = 51,
+        MNFG_ENABLE_TORRENT_ELCT            = 52,
+        MNFG_MR_EXT_AB_WRAPTEST_TWO         = 53,
+        MNFG_MORE_MEMORY_PATTERNS           = 54,
+        MNFG_AVP_ENABLE                     = 55,
+        MNFG_FAST_BACKGROUND_SCRUB          = 56,
+        MNFG_CLICK_TO_ACCEPT                = 57,
+        MNFG_DISABLE_MEMORY_eREPAIR         = 58,
+        MNFG_NO_MEM_EREPAIR                 = 58,
+        MNFG_DISABLE_FABRIC_eREPAIR         = 59,
+        MNFG_NO_L3_EREPAIR                  = 59,
+        MNFG_INFINIBAND_WRAP                = 60,
+        MNFG_SMA_LINK                       = 61,
+        MNFG_SYS_DUMP_TERM                  = 62,
+        MNFG_RIO_WRAP                       = 63,
+        MNFG_PSI_DIAGNOSTIC                 = 63,
+
+        MNFG_POLICY_FLAG_AVAIL_30           = 64,
+        MNFG_POLICY_FLAG_AVAIL_31           = 65,
+        MNFG_POLICY_FLAG_AVAIL_32           = 66,
+        MNFG_POLICY_FLAG_AVAIL_33           = 67,
+        MNFG_CHKRING_ENABLE                 = 68,
+        MNFG_RUN_CUSTOMER_IPL               = 69,
+        MNFG_ABIST_VIASCREEN                = 70,
+        MNFG_CLEAR_VPD_ARRAY_REPAIR_DATA    = 71,
+        MNFG_POWER_SAVE_CAPABLE             = 72,
+        MNFG_PREVENT_REDUNDANCY_AUTO_ENABLE = 73,
+        MNFG_PREVENT_RAE                    = 73,
+        MNFG_IB_FREQ_BIAS_HIGH              = 74,
+        MNFG_IB_FREQ_BIAS_LOW               = 75,
+        MNFG_POLICY_FLAG_AVAIL_34           = 79,
+        MNFG_POLICY_FLAG_AVAIL_35           = 80,
+        MNFG_POLICY_FLAG_AVAIL_36           = 81,
+        MNFG_POLICY_FLAG_AVAIL_37           = 82,
+        MNFG_POLICY_FLAG_AVAIL_38           = 83,
+        MNFG_POLICY_FLAG_AVAIL_39           = 84,
+        MNFG_ENABLE_DMIGB                   = 85,
+        MNFG_FABRIC_DEPLOY_LANE_SPARES      = 86,
+        MNFG_DMI_DEPLOY_ONE_SPARE_DATA_ONE_SPARE_CLOCK = 86,
+        MNFG_DMI_DEPLOY_LANE_SPARES         = 87,
+        MNFG_DMI_DEPLOY_TWO_SPARE_DATA      = 87,
+        MNFG_ENERGYSCALE_SPECIAL_POLICIES   = 88,
+        MNFG_TPMD_SPECIAL_POLICIES          = 88,
+        MNFG_DISABLE_PHYBIST                = 89,
+        MNFG_HDAT_AVP_COMPLETE              = 90,
+        MNFG_HDAT_AVP_ENABLE                = 91,
+        MNFG_IPL_MEMORY_CE_CHECKING         = 92,
+        MNFG_ENABLE_MINIMUM_PATTERN_TEST    = 93,
+        MNFG_ENABLE_STANDARD_PATTERN_TEST   = 94,
+        MNFG_ENABLE_EXHAUSTIVE_PATTERN_TEST = 95,
+
+        MNFG_POLICY_FLAG_AVAIL_01           = 96,
+        MNFG_POLICY_FLAG_AVAIL_02           = 97,
+        MNFG_POLICY_FLAG_AVAIL_03           = 98,
+        MNFG_POLICY_FLAG_AVAIL_04           = 99,
+        MNFG_POLICY_FLAG_AVAIL_05           = 100,
+        MNFG_POLICY_FLAG_AVAIL_06           = 101,
+        MNFG_POLICY_FLAG_AVAIL_07           = 102,
+        MNFG_POLICY_FLAG_AVAIL_08           = 103,
+        MNFG_POLICY_FLAG_AVAIL_09           = 104,
+        MNFG_POLICY_FLAG_AVAIL_10           = 105,
+        MNFG_POLICY_FLAG_AVAIL_11           = 106,
+        MNFG_POLICY_FLAG_AVAIL_12           = 107,
+        MNFG_POLICY_FLAG_AVAIL_13           = 111,
+        MNFG_POLICY_FLAG_AVAIL_14           = 112,
+        MNFG_POLICY_FLAG_AVAIL_15           = 113,
+        MNFG_POLICY_FLAG_AVAIL_16           = 114,
+        MNFG_POLICY_FLAG_AVAIL_17           = 115,
+        MNFG_POLICY_FLAG_AVAIL_18           = 116,
+        MNFG_POLICY_FLAG_AVAIL_19           = 117,
+        MNFG_POLICY_FLAG_AVAIL_20           = 118,
+        MNFG_POLICY_FLAG_AVAIL_21           = 119,
+        MNFG_POLICY_FLAG_AVAIL_22           = 120,
+        MNFG_POLICY_FLAG_AVAIL_23           = 121,
+        MNFG_UPDATE_BOTH_SIDES_OF_SBE       = 122,
+        MNFG_POLICY_FLAG_AVAIL_25           = 123,
+        MNFG_POLICY_FLAG_AVAIL_26           = 124,
+        MNFG_FSP_UPDATE_SBE_IMAGE           = 125,
+        MNFG_SMP_WRAP_CONFIG                = 126,
+        MNFG_POLICY_FLAG_AVAIL_29           = 127
+    </enum>
+    <platInit/>
+    <mssAccessorName>mfg_flags</mssAccessorName>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_MNFG_FLAGS</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
+        NOTE: This is being deprecated and being replaced by the attribute
+              ATTR_MFG_FLAGS, found above.
+              Please switch over to the new attribute, ATTR_MFG_FLAGS, ASAP.
+        @TODO: RTC 252027: Remove this attribute when possible
         The manufacturing flags.
         This is a bitfield. Each bit is a flag and multiple flags can be set
     </description>
@@ -81,6 +244,7 @@
     <platInit/>
     <mssAccessorName>mnfg_flags</mssAccessorName>
   </attribute>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_RECONFIGURE_LOOP</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
