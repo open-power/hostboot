@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,6 +22,13 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+/**
+ *  @file sbe_common.H
+ *
+ *  SBE common header
+ *
+ */
+
 #ifndef __SBE_SBE_COMMON_H
 #define __SBE_SBE_COMMON_H
 
@@ -54,7 +61,6 @@ namespace SBE
     enum sbeSeepromStructVersionInfo_t {
         STRUCT_VERSION_FIRST  = 0x1,
         STRUCT_VERSION_LATEST = 0x1,
-        STRUCT_VERSION_SIMICS = 0x5A5A5A5A,
     };
 
     #define STRUCT_VERSION_CHECK(version) (((version) >= STRUCT_VERSION_FIRST) \
@@ -66,20 +72,20 @@ namespace SBE
 
     // Used for locations of SBE_Version and SBE Image on a SEEPROM
     const uint64_t SBE_KILOBYTE                 = 1024;    // Size of a Kilobyte
+    const uint64_t SBE_SEEPROM_VERSION_READ_SIZE = 0x100; // 128 Bytes * 2  (256 decimal)
     const uint64_t SBE_IMAGE_SEEPROM_ADDRESS    = 0x00;          // 0
-    const uint64_t SBE_VERSION_SPACE_WITH_ECC   = (256 * 9) / 8; // 256B + ECC
-    const uint64_t SBE_SEEPROM_SIZE             = 64*SBE_KILOBYTE;   // 64KB
+    const uint64_t SBE_VERSION_SPACE_WITH_ECC   = (SBE_SEEPROM_VERSION_READ_SIZE * 9) / 8; // 256B + ECC
+    const uint64_t SBE_SEEPROM_SIZE             = 512*SBE_KILOBYTE;   // 512KB Physical size
+    const uint64_t PHYS_CHIPS_PER_LOGICAL_SEEPROM = 1; // EKB p10_infrastruct_help.H PCPLS
     const uint64_t SBE_SEEPROM_ECC_PAD          = SBE_SEEPROM_SIZE % 9;
-    const uint64_t SBE_SEEPROM_SIZE_WO_ECC      = ((64*SBE_KILOBYTE -
-                                                 SBE_SEEPROM_ECC_PAD) / 9) * 8 ;
-    // SBE Version (with ECC) kept at end of fourth 64KB memory
+    const uint64_t SBE_SEEPROM_SIZE_WO_ECC      = ((SBE_SEEPROM_SIZE - SBE_SEEPROM_ECC_PAD) / 9) * 8;
+    // SBE Version (with ECC) kept at end of the 512KB memory
     // Adjust end of usable memory with ECC to be a multiple of 9 bytes
-    const uint64_t SBE_VERSION_SEEPROM_ADDRESS  = 4*SBE_SEEPROM_SIZE
+    const uint64_t SBE_VERSION_SEEPROM_ADDRESS  = PHYS_CHIPS_PER_LOGICAL_SEEPROM * SBE_SEEPROM_SIZE
                                                 - SBE_SEEPROM_ECC_PAD
                                                 - SBE_VERSION_SPACE_WITH_ECC;
 
-    const uint64_t SBE_SEEPROM_VERSION_READ_SIZE = 0x100; // 128 Bytes * 2  (256 decimal)
-    const uint64_t END_OF_SEEPROM_MINUS_READ_SIZE = 4*SBE_SEEPROM_SIZE_WO_ECC
+    const uint64_t END_OF_SEEPROM_MINUS_READ_SIZE = PHYS_CHIPS_PER_LOGICAL_SEEPROM*SBE_SEEPROM_SIZE_WO_ECC
                                                - SBE_SEEPROM_VERSION_READ_SIZE;
 
     // Used to read SBE Boot Side from processor
@@ -149,9 +155,9 @@ namespace SBE
         uint32_t  struct_version;
         uint32_t  data_crc;
         uint8_t   image_version[SBE_IMAGE_VERSION_SIZE];
-        uint32_t  nest_freq_mhz;
+        uint8_t   unused1[4];     // unused space; added for alignment
         uint8_t   origin;        // set if SBE came from golden side
-        uint8_t   unused[3];     // unused space; added for alignment
+        uint8_t   unused2[3];     // unused space; added for alignment
     } PACKED;
 
     // This line forces a compile fail if struct is NOT 8-byte-aligned

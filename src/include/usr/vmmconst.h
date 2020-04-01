@@ -84,9 +84,10 @@
 /** Secure PNOR Resource Provider is at 8GB */
 #define VMM_VADDR_SPNOR_RP (VMM_VADDR_SPNOR_TEMP + VMM_VADDR_SPNOR_DELTA)
 
-/** SBE Update process is at 3GB, uses 512KB */
+/** SBE Update process is at 3GB, see the map layout in sbe_update.H */
 #define VMM_VADDR_SBE_UPDATE (3 * GIGABYTE)
-#define VMM_SBE_UPDATE_SIZE (1024 * KILOBYTE)
+/* See sbe_update.H SBE VADDR Layout map for usage and sizes needed */
+#define VMM_SBE_UPDATE_SIZE (4096 * KILOBYTE)
 #define VMM_VADDR_SBE_UPDATE_END (VMM_VADDR_SBE_UPDATE + VMM_SBE_UPDATE_SIZE)
 
 /** Debug Comm Channel is at 3.5GB, uses 32KB */

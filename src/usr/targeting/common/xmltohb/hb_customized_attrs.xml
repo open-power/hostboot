@@ -541,7 +541,7 @@
 
     <attribute>
           <id>ATTR_MAX_SBE_SEEPROM_SIZE</id>
-          <default>0x40000</default>
+          <default>0x80000</default>
      </attribute>
 
     <attribute>

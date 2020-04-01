@@ -2425,6 +2425,9 @@
       <id>REDUNDANT_CLOCKS</id>
     </attribute>
     <attribute>
+      <id>SBE_UPDATE_DISABLE</id>
+    </attribute>
+    <attribute>
       <id>SMF_MEM_AMT_REQUESTED</id>
     </attribute>
     <attribute>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -94,7 +94,7 @@ enum sbeReasonCode
     SBE_INVALID_SEEPROM_SIDE            = SBE_COMP_ID | 0x0E,
     SBE_ECC_FAIL                        = SBE_COMP_ID | 0x0F,
     SBE_PERM_SIDE_DIRTY_BAD_PATH        = SBE_COMP_ID | 0x10,
-    SBE_P9_XIP_CUSTOMIZE_UNSUCCESSFUL   = SBE_COMP_ID | 0x11,
+    SBE_P10_XIP_CUSTOMIZE_UNSUCCESSFUL  = SBE_COMP_ID | 0x11,
     SBE_INFO_LOG                        = SBE_COMP_ID | 0x12,
     SBE_MISCOMPARE_WITH_MASTER_VERSION  = SBE_COMP_ID | 0x13,
     SBE_ERROR_ON_UPDATE                 = SBE_COMP_ID | 0x14,

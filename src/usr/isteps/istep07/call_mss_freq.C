@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,25 +30,14 @@
 /******************************************************************************/
 // Includes
 /******************************************************************************/
-#include    <stdint.h>
 
-#include    <trace/interface.H>
-#include    <initservice/taskargs.H>
-#include    <errl/errlentry.H>
-
-#include    <isteps/hwpisteperror.H>
-#include    <errl/errludtarget.H>
-
-#include    <initservice/isteps_trace.H>
-
-//  targeting support
-#include    <targeting/common/commontargeting.H>
-#include    <targeting/common/utilFilter.H>
-
-#include    <config.h>
-#include    <fapi2.H>
-#include    <fapi2/plat_hwp_invoker.H>
-
+#include <hbotcompid.H>           // HWPF_COMP_ID
+#include <attributeenums.H>       // TYPE_PROC
+#include <isteps/hwpisteperror.H> //ISTEP_ERROR:IStepError
+#include <istepHelperFuncs.H>     // captureError
+#include <fapi2/plat_hwp_invoker.H>
+#include <errl/errlentry.H>
+#include <errl/errludtarget.H>
 
 // SBE
 #include    <sbeif.H>
@@ -57,12 +46,12 @@
 #include    <p10_mss_freq.H>
 #include    <p10_mss_freq_system.H>
 
-
 namespace   ISTEP_07
 {
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
+using   namespace   ISTEPS_TRACE;
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 
@@ -222,7 +211,6 @@ void*    call_mss_freq( void *io_pArgs )
         // system MRW ATTR and will customize the master SBE and reboot
         // if necessary(slaves get data via mbox scratch registers)
         //
-        // TODO RTC 208838 -- Which attributes need to be looked at???
         if(l_newOmiFreq  != l_originalOmiFreq)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -252,15 +240,16 @@ void*    call_mss_freq( void *io_pArgs )
                               TWO_UINT32_TO_UINT64(
                                   l_originalOmiFreq,
                                   l_newOmiFreq));
-               l_err->collectTrace("ISTEPS_TRACE");
+                l_err->collectTrace("ISTEPS_TRACE");
 
                 l_StepError.addErrorDetails( l_err );
                 errlCommit( l_err, ISTEP_COMP_ID );
             }
             else
             {
-                //TODO RTC 208838
-                //l_err = SBE::updateProcessorSbeSeeproms();
+                // RTC 249246 Needs SBE.bin with VERSION and p10_ipl_customize memory paging resolved
+                // Disabled until we can build customized image
+                // l_err = SBE::updateProcessorSbeSeeproms();
 
                 if(l_err)
                 {

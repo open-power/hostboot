@@ -55,6 +55,8 @@ enum EEPROM_ROLE
 {
   VPD_PRIMARY   = 0,
   VPD_BACKUP    = 1,
+  SBE_PRIMARY   = 2,
+  SBE_BACKUP    = 3,
   LAST_CHIP_TYPE,
   // Useful Enums
   INVALID_CHIP_TYPE = LAST_CHIP_TYPE,

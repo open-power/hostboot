@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,6 +22,13 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+/**
+ *  @file sbe_update.H
+ *
+ *  SBE common update header
+ *
+ */
+
 #ifndef __SBE_SBE_UPDATE_H
 #define __SBE_SBE_UPDATE_H
 
@@ -34,10 +41,8 @@
 #include <i2c/eepromif.H>             // EEPROM_ROLE
 #include <pnor/ecc.H>                 // PNOR::ECC::eccStatus
 #include <util/utilxipimage.H>        // Util::imageBuild_t
-// FIXME RTC: 210975
-//#include <p9_infrastruct_help.H>      // MAX_RING_BUF_SIZE, etc
-
 #include <vector>
+#include <p10_infrastruct_help.H>     // MAX_RING_BUF_SIZE
 
 namespace SBE
 {
@@ -84,29 +89,34 @@ namespace SBE
     /*  Enums                                 */
     /******************************************/
     // SBE VADDR Layout
-    // 000K - 256K  = Dest for Customized SBE image
+    // 000K - 512K  = Dest for SEEPROM SBE image
     //
-    // 256K - 316K  = Ring buf1
-    // 316K - 376K  = Ring buf2
-    // 376k - 436k  = Ring buf3
-    // 436K - 692K  = Ring Section buf
-    // ---- ALT use 256K-632K for SBE ECC image
-    // 692K - 948K  = SBE + HBBL image
+    //  512K - 1146K  = Ring buf1
+    // 1146K - 1780K  = Ring buf2
+    // 1780K - 2414K  = Ring buf3
+    // 2414K - 3048K  = Ring Section buf
+    // ---- Use 512K-3048K for SBE ECC image
+    // 3048K - 3560K  = SBE + HBBL image
     enum {
-        FIXED_SEEPROM_WORK_SPACE = 256 * 1024,
-        SBE_IMG_VADDR = VMM_VADDR_SBE_UPDATE,
+        FIXED_SEEPROM_WORK_SPACE = 512 * 1024,
+        SBE_IMG_VADDR = VMM_VADDR_SBE_UPDATE, // 3G address
         RING_BUF1_VADDR = FIXED_SEEPROM_WORK_SPACE + SBE_IMG_VADDR,
-        // FIXME RTC: 210975
-        RING_BUF2_VADDR = RING_BUF1_VADDR + 60000,//MAX_RING_BUF_SIZE,
-        RING_BUF3_VADDR = RING_BUF2_VADDR + 60000,//MAX_RING_BUF_SIZE,
-        RING_SEC_VADDR  = RING_BUF3_VADDR + 60000,//MAX_RING_BUF_SIZE,
+        RING_BUF2_VADDR = RING_BUF1_VADDR + MAX_RING_BUF_SIZE,
+        RING_BUF3_VADDR = RING_BUF2_VADDR + MAX_RING_BUF_SIZE,
+        RING_SEC_VADDR  = RING_BUF3_VADDR + MAX_RING_BUF_SIZE,
         //NOTE: recycling the same memory space for different
         //steps in the process.
         SBE_ECC_IMG_VADDR = RING_BUF1_VADDR,
-        // FIXME RTC: 210975
+        // for every 8 bytes of data use 1 byte for ECC = 9 bytes
+        // then take that result of the space needed to store ECC data
+        // and multiply by 8 bytes to know max data for ECC storage
+        // a 256 byte area left at tail for comfort
         SBE_ECC_IMG_MAX_SIZE =
-        (/*MAX_SEEPROM_IMAGE_SIZE*/ (4 * ((64 * 1024) / 9 * 8) - 256) * 9 / 8) +
-                               (3 * SBE_SEEPROM_ECC_PAD),
+        (/*MAX_SEEPROM_IMAGE_SIZE*/ (PHYS_CHIPS_PER_LOGICAL_SEEPROM * (SBE_SEEPROM_SIZE / 9 * 8)) - 256) +
+                               ((PHYS_CHIPS_PER_LOGICAL_SEEPROM-1) * SBE_SEEPROM_ECC_PAD),
+        // to keep physical to logical algorithm above, put the unused ECC space
+        // calculated for each physical chip back into the calculation to allow
+        // logical jump of offsets from physical chip to physical chip
         SBE_HBBL_IMG_VADDR = RING_SEC_VADDR + FIXED_SEEPROM_WORK_SPACE,
     };
 
@@ -136,7 +146,6 @@ namespace SBE
         MVPD_UPDATE_COMPLETE   = 0x00000008,
         UPDATE_SBE             = 0x00000010,
         SBE_UPDATE_COMPLETE    = 0x00000020,
-        UPDATE_NEST_FREQ       = 0x00000100,
         UNSUPPORTED_SITUATION  = 0x80000000,
     };
 
@@ -331,7 +340,7 @@ namespace SBE
                                  bool i_failoverToMaster = true);
 
     /**
-     * @brief Collects Version information from a specific SEEPROM using I2C
+     * @brief Collects Version information from a specific SEEPROM using SPI
      *
      * @param[in] i_target      Target processor to customize
      *
@@ -340,12 +349,12 @@ namespace SBE
      *
      * @param[out] o_info       Struct containing the SBE Version Information
      *
-     * @param[out] o_seeprom_ver_ECC_fail Reports if there was an ECC erorr on
+     * @param[out] o_seeprom_ver_ECC_fail Reports if there was an ECC error on
      *                                    the collected information
      *
      * @return errlHndl_t    Error log handle on failure.
      */
-    errlHndl_t getSeepromSideVersionViaI2c(TARGETING::Target* i_target,
+    errlHndl_t getSeepromSideVersionViaSPI(TARGETING::Target* i_target,
                                      EEPROM::EEPROM_ROLE i_seepromSide,
                                      sbeSeepromVersionInfo_t& o_info,
                                      bool& o_seeprom_ver_ECC_fail);
@@ -467,8 +476,8 @@ namespace SBE
 
     /**
      * @brief Select best cores to include in SBE Image.
-     *        The output is used to indicate to p8_xip_customize which cores
-     *        should be included in the SBE image.
+     *        The output is used to indicate to the image customization procedures
+     *        which cores should be included in the SBE image.
      *
      * @param[in] i_target   Target processor to use for core selection
      *
@@ -477,9 +486,9 @@ namespace SBE
      *
      * @param[out] o_coreMask  Core Mask for the target that does not exceed
      *                         the maximum number of cores
-     *                         NOTE: bits 8:31 = EC00:EC23
+     *                         NOTE: bits 0:31 = EC00:EC31
      *                         This value is used as input into
-     *                         p9_xip_customize.C
+     *                         the image customization procedures.
      *
      * @return errlHndl_t    Error log handle on failure.
      */

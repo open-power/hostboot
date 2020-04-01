@@ -362,6 +362,28 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
                 }
                 break;
 
+            case SBE_PRIMARY:
+                if ( i_target->
+                          tryGetAttr<TARGETING::ATTR_SPI_SBE_BOOT_CODE_PRIMARY_INFO>
+                          (reinterpret_cast<
+                           TARGETING::ATTR_SPI_SBE_BOOT_CODE_PRIMARY_INFO_type&>
+                           (spiEepromData)) )
+                {
+                    found_spi_eep = true;
+                }
+                break;
+
+            case SBE_BACKUP:
+                if ( i_target->
+                          tryGetAttr<TARGETING::ATTR_SPI_SBE_BOOT_CODE_BACKUP_INFO>
+                          (reinterpret_cast<
+                           TARGETING::ATTR_SPI_SBE_BOOT_CODE_BACKUP_INFO_type&>
+                           (spiEepromData)) )
+                {
+                    found_spi_eep = true;
+                }
+                break;
+
             default:
                 TRACFCOMP( g_trac_eeprom,ERR_MRK"eepromReadAttributes() - "
                            "Invalid chip (%d) to read attributes from!",
@@ -797,6 +819,28 @@ void add_to_list( std::list<EepromInfo_t>& io_list,
                 }
                 break;
 
+            case SBE_PRIMARY:
+                if (
+                  i_targ->tryGetAttr<TARGETING::ATTR_SPI_SBE_BOOT_CODE_PRIMARY_INFO>
+                  ( reinterpret_cast<
+                      TARGETING::ATTR_SPI_SBE_BOOT_CODE_PRIMARY_INFO_type&>
+                      (spiEepromData) ) )
+                {
+                    found_spi_eep = true;
+                }
+                break;
+
+            case SBE_BACKUP:
+                if (
+                  i_targ->tryGetAttr<TARGETING::ATTR_SPI_SBE_BOOT_CODE_BACKUP_INFO>
+                  ( reinterpret_cast<
+                      TARGETING::ATTR_SPI_SBE_BOOT_CODE_BACKUP_INFO_type&>
+                      (spiEepromData) ) )
+                {
+                    found_spi_eep = true;
+                }
+                break;
+
             case LAST_CHIP_TYPE:
                 //only included to catch additional types later on
                 found_i2c_eep = false;
@@ -1073,12 +1117,14 @@ void cacheEepromAncillaryRoles()
         add_to_list( l_eepromTargets, *eepromTarget_itr, allowDupEntries );
     }
 
-    // Go through list and call cachedEeprom on each non-VPD type
+    // Go through list and call cachedEeprom on each non-VPD and non-SBE type
     for (auto eepromTarget : l_eepromTargets)
     {
-        // Only update ancillary roles (non-VPD)
+        // Only update ancillary roles (non-VPD and non-SBE)
         if ( (eepromTarget.deviceRole != VPD_PRIMARY) &&
-             (eepromTarget.deviceRole != VPD_BACKUP) )
+             (eepromTarget.deviceRole != VPD_BACKUP) &&
+             (eepromTarget.deviceRole != SBE_PRIMARY) &&
+             (eepromTarget.deviceRole != SBE_BACKUP) )
         {
             bool present = true;
             size_t presentSize = sizeof(present);

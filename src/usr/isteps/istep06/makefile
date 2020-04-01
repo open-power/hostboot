@@ -59,6 +59,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include
 #EXTRAINCDIR += ${NEST_HWP_PATH}
 EXTRAINCDIR += ${PERV_HWP_PATH}
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${PM_HWP_PATH}
 EXTRAINCDIR += ${LIB_HWP_PATH}
@@ -71,8 +72,6 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/
 #Required include before all the procedure.mk are included
 include ${ROOTPATH}/procedure.rules.mk
 
-#TODO RTC: 208838
-#include $(PERV_HWP_PATH)/p10_setup_sbe_config.mk
 #include $(PM_HWP_PATH)/p9_query_core_access_state.mk
 #include $(PM_HWP_PATH)/p9_query_cache_access_state.mk
 #include $(PM_HWP_PATH)/p9_quad_power_off.mk

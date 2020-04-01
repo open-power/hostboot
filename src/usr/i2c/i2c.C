@@ -5329,21 +5329,6 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
                     / FREQ_CONVERSION::HZ_PER_KHZ;
                 l_currentDI.deviceType =
                     TARGETING::HDAT_I2C_DEVICE_TYPE_SEEPROM;
-                switch(l_eep->deviceRole)
-                {
-                    case EEPROM::VPD_PRIMARY:
-                    case EEPROM::VPD_BACKUP:
-                        l_currentDI.devicePurpose =
-                                TARGETING::HDAT_I2C_DEVICE_PURPOSE_MODULE_VPD;
-                        //TODO RTC:165485 this isn't currently right. we'll need
-                        //to add the changes in the enum and possibly the other
-                        //struct/attribute.
-                        strcpy(l_currentDI.deviceLabel,
-                               "?atmel,28c128,vpd,module");
-                        break;
-                    case EEPROM::LAST_CHIP_TYPE:
-                        break;
-                }
 
                 TRACUCOMP(g_trac_i2c,"Adding addr=0x%X", l_eep->eepromAccess.i2cInfo.devAddr);
                 o_deviceInfo.push_back(l_currentDI);

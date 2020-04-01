@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -57,6 +57,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 EXTRAINCDIR += ${HWP_PATH}
@@ -71,6 +72,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 VPATH += ${HWP_PATH}
 VPATH += $(PROCEDURES_PATH)/hwp/nest
 VPATH += ${HWP_PATH_PMIC}/lib/eff_config
+VPATH += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 
 #Required include before all the procedure.mk are included
 include ${ROOTPATH}/procedure.rules.mk
