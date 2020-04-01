@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -501,6 +501,8 @@ const char* EntityPath::pathElementTypeAsString(
             return "IOHS";
         case TYPE_PAUC:
             return "PAUC";
+        case TYPE_LPCREFCLKENDPT:
+            return "LPCREFCLKENDPT";
         default:
             return "Unknown path type";
     }
