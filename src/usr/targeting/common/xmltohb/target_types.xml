@@ -2272,6 +2272,9 @@
       <id>CDM_POLICIES</id>
     </attribute>
     <attribute>
+      <id>CEC_IPL_TYPE</id>
+    </attribute>
+    <attribute>
       <default>SYS</default>
       <id>CLASS</id>
     </attribute>
