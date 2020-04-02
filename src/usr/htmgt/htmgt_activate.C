@@ -36,6 +36,7 @@
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/attributes.H>
 #include <targeting/common/targetservice.H>
+#include <isteps/pm/scopedHomerMapper.H>
 
 #include <ipmi/ipmisensor.H>
 #include <sys/time.h>
@@ -45,11 +46,6 @@ using namespace TARGETING;
 
 namespace HTMGT
 {
-
-// TODO RTC 118875
-#ifdef SIMICS_TESTING
-    uint8_t * G_simicsHomerBuffer = NULL;
-#endif
 
 #define BMC_LIMIT_WAS_READ 0xFF000000
 
@@ -274,6 +270,20 @@ namespace HTMGT
             Occ* occ = occMgr::instance().getMasterOcc();
             if (occ)
             {
+                // MAP HOMER for this OCC
+                TARGETING::Target* procTarget = nullptr;
+                procTarget = TARGETING::getImmediateParentByAffinity(occ->getTarget());
+                HBPM::ScopedHomerMapper l_mapper(procTarget);
+                err = l_mapper.map();
+                if (err)
+                {
+                    TMGT_ERR("sendOccUserPowerCap: Unable to get HOMER virtual address for Master OCC (rc=0x%04X)",
+                             err->reasonCode());
+                    err->collectTrace(HTMGT_COMP_NAME);
+                    break;
+                }
+                occ->setHomerAddr(l_mapper.getHomerVirtAddr());
+
                 uint8_t data[2];
                 data[0] = limit >> 8;
                 data[1] = limit & 0xFF;
@@ -294,8 +304,10 @@ namespace HTMGT
                     TMGT_ERR("sendOccUserPowerCap: Failed sending command "
                              "to OCC%d with rc=0x%04X",
                              occ->getInstance(), err->reasonCode());
+                    occ->invalidateHomer();
                     break;
                 }
+                occ->invalidateHomer();
             }
             else
             {

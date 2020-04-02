@@ -42,6 +42,7 @@
 #include <errl/errludlogregister.H>
 
 #include <isteps/pm/pm_common_ext.H>
+#include <isteps/pm/scopedHomerMapper.H>
 
 namespace HTMGT
 {
@@ -62,7 +63,8 @@ namespace HTMGT
         iv_wofResetReasons(0),
         iv_failed(false),
         iv_seqNumber(0),
-        iv_homer(i_homer),
+        iv_homer(nullptr),
+        iv_homerValid(false),
         iv_target(i_target),
         iv_lastPollValid(false),
         iv_occsPresent(1 << i_instance),
@@ -382,6 +384,38 @@ namespace HTMGT
                            OCC_TRACE_INF );
     }
 
+    // Set the homer virtual address for this OCC (required to send cmds)
+    void Occ::setHomerAddr(const uint64_t i_homer_vaddress)
+    {
+        if (iv_homerValid)
+        {
+            TMGT_ERR("setHomerAddr(): HOMER was ALREADY VALID! 0x%08X", iv_homer);
+        }
+        // Get HOMER virtual address
+        iv_homer = (uint8_t*)i_homer_vaddress;
+        if (iv_homer != nullptr)
+        {
+            TMGT_INF("setHomerAddr(): 0x%08X", iv_homer);
+            iv_homerValid = true;
+        }
+        else
+        {
+            TMGT_ERR("setHomerAddr(): HOMER virutal address was null!");
+        }
+    }
+
+    // Invalidate the homer address for this OCC
+    void Occ::invalidateHomer()
+    {
+        if (iv_homerValid)
+        {
+            TMGT_INF("invalidateHomer(): Clearing homer (0x%08X)", iv_homer);
+            iv_homerValid = false;
+        }
+        iv_homer = nullptr;
+    };
+
+
     // Notify HostBoot which GPUs are present (after OCC goes active)
     void Occ::updateGpuPresence()
     {
@@ -483,34 +517,24 @@ namespace HTMGT
                 const uint8_t instance =
                     proc->getAttr<TARGETING::ATTR_POSITION>();
                 TMGT_INF("_buildOccs: PROC%d is functional", instance);
-                // Get HOMER virtual address
-                uint8_t * homer = (uint8_t*)
-                    (proc->getAttr<TARGETING::ATTR_HOMER_VIRT_ADDR>());
-                const uint8_t * homerPhys = (uint8_t*)
-                    (proc->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>());
-                TMGT_INF("_buildOccs: homer = 0x%08llX (virt) / 0x%08llX (phys)"
-                         " for Proc%d", homer, homerPhys, instance);
-//TODO: Remove once Boston Simics Model works with OCC
-#ifdef SIMICS_TESTING
-                // Starting of OCCs is not supported in SIMICS, so fake out
-                // HOMER memory area for testing
-                if (nullptr == homer)
+
+                // Check HOMER addresses
+                uint8_t * homer = nullptr;
+                HBPM::ScopedHomerMapper l_mapper(proc);
+                err = l_mapper.map();
+                if (nullptr == err)
                 {
-                    extern uint8_t * G_simicsHomerBuffer;
-
-                    if (nullptr == G_simicsHomerBuffer)
-                    {
-                        // Allocate a fake HOMER area
-                        G_simicsHomerBuffer =
-                            new uint8_t [OCC_CMD_ADDR+0x2000];
-                    }
-                    homer = G_simicsHomerBuffer;
-                    TMGT_ERR("_buildOccs: Using hardcoded HOMER of 0x%08lX",
-                             homer);
+                    // Save the HOMER virtual address
+                    homer = reinterpret_cast<uint8_t*>(l_mapper.getHomerVirtAddr());
                 }
-#endif
+                else
+                {
+                    err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                }
+                TMGT_INF("_buildOccs: Proc%d homer = 0x%08llX",
+                         instance, homer);
 
-                if ((nullptr != homer) && (nullptr != homerPhys))
+                if (nullptr != homer)
                 {
                     // Get functional OCC (one per proc)
                     TARGETING::TargetHandleList occs;
@@ -540,7 +564,6 @@ namespace HTMGT
                     // OCC will not be functional with no HOMER address
                     TMGT_ERR("_buildOccs: HOMER address for OCC%d is nullptr!",
                              instance);
-                    safeModeNeeded = true;
                     if (nullptr == err)
                     {
                         /*@
@@ -561,6 +584,13 @@ namespace HTMGT
                                   (uint64_t)homer&0xFFFFFFFF,
                                   ERRORLOG::ERRL_SEV_UNRECOVERABLE);
                     }
+                    else
+                    {
+                        err->collectTrace(HTMGT_COMP_NAME);
+                    }
+                    safeModeNeeded = true;
+                    iv_occMaster = nullptr;
+                    break;
                 }
 
             } // for each processor
@@ -635,7 +665,7 @@ namespace HTMGT
             {
                 TMGT_ERR("_buildOccs: HBPM::resetPMAll failed with rc 0x%04X",
                          err2->reasonCode());
-                err2->collectTrace("HTMGT");
+                err2->collectTrace(HTMGT_COMP_NAME);
                 ERRORLOG::errlCommit(err2, HTMGT_COMP_ID);
             }
 
@@ -732,7 +762,7 @@ namespace HTMGT
             l_err = _buildOccs(); // if not already built.
             if (nullptr == l_err)
             {
-                // Send poll cmd to confirm comm has been established.
+                // Poll all OCCs to confirm comm has been established.
                 // Flush old errors to ensure any new errors will be collected
                 l_err = _sendOccPoll(true, nullptr);
                 if (l_err)
@@ -745,34 +775,52 @@ namespace HTMGT
                 if (nullptr != iv_occMaster)
                 {
                     TMGT_INF("_setOccState(state=0x%02X)", requestedState);
-
-                    const uint8_t occInstance = iv_occMaster->getInstance();
-                    bool needsRetry = false;
-                    do
+                    // map HOMER for this OCC
+                    TARGETING::Target* procTarget = nullptr;
+                    procTarget = TARGETING::
+                        getImmediateParentByAffinity(iv_occMaster->getTarget());
+                    HBPM::ScopedHomerMapper l_mapper(procTarget);
+                    l_err = l_mapper.map();
+                    if (nullptr == l_err)
                     {
-                        l_err = iv_occMaster->setState(requestedState);
-                        if (nullptr == l_err)
+                        iv_occMaster->setHomerAddr(l_mapper.getHomerVirtAddr());
+
+                        const uint8_t occInstance = iv_occMaster->getInstance();
+                        bool needsRetry = false;
+                        do
                         {
-                            needsRetry = false;
-                        }
-                        else
-                        {
-                            TMGT_ERR("_setOccState: Failed to set OCC%d state,"
-                                     " rc=0x%04X",
-                                     occInstance, l_err->reasonCode());
-                            if (false == needsRetry)
+                            l_err = iv_occMaster->setState(requestedState);
+                            if (nullptr == l_err)
                             {
-                                ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
-                                needsRetry = true;
+                                needsRetry = false;
                             }
                             else
                             {
-                                // Only one retry, return error handle
-                                needsRetry = false;
+                                TMGT_ERR("_setOccState: Failed to set OCC%d state,"
+                                         " rc=0x%04X",
+                                         occInstance, l_err->reasonCode());
+                                if (false == needsRetry)
+                                {
+                                    ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                                    needsRetry = true;
+                                }
+                                else
+                                {
+                                    // Only one retry, return error handle
+                                    needsRetry = false;
+                                }
                             }
                         }
+                        while (needsRetry);
+                        iv_occMaster->invalidateHomer();
                     }
-                    while (needsRetry);
+                    else
+                    {
+                        TMGT_ERR("_setOccState: Unable to get HOMER virtual address for Master OCC (rc=0x%04X)",
+                                 l_err->reasonCode());
+                        l_err->collectTrace(HTMGT_COMP_NAME);
+                        l_err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                    }
                 }
                 else
                 {
@@ -934,10 +982,33 @@ namespace HTMGT
 
                     if (false == i_skipComm)
                     {
-                        // Send reset prep cmd to all OCCs
-                        if(occ->resetPrep())
+                        // map HOMER for this OCC (for resetPrep command)
+                        TARGETING::Target* procTarget = nullptr;
+                        procTarget = TARGETING::
+                            getImmediateParentByAffinity(occ->getTarget());
+                        HBPM::ScopedHomerMapper l_mapper(procTarget);
+                        err = l_mapper.map();
+                        if (nullptr == err)
                         {
-                            atThreshold = true;
+                            occ->setHomerAddr(l_mapper.getHomerVirtAddr());
+
+                            // Send reset prep cmd to each OCCs
+                            if(occ->resetPrep())
+                            {
+                                atThreshold = true;
+                            }
+
+                            occ->invalidateHomer();
+                        }
+                        else
+                        {
+                            // Unable to send resetPrep command to this OCC,
+                            // just commit and proceed with reset
+                            TMGT_ERR("_resetOccs: Unable to get HOMER virtual"
+                                     " address for OCC%d (rc=0x%04X)",
+                                     occ->getInstance(), err->reasonCode());
+                            err->collectTrace(HTMGT_COMP_NAME);
+                            ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
                         }
                     }
                     // If we need a WOF reset, skip system count increment
@@ -945,7 +1016,6 @@ namespace HTMGT
                     {
                         i_skipCountIncrement = true;
                     }
-
                 }
 
                 if ((false == i_skipCountIncrement) && (false == _occFailed()))
@@ -1015,7 +1085,7 @@ namespace HTMGT
                         TMGT_ERR("_resetOCCs: HBPM::resetPMAll failed. "
                                  "Leaving OCCs in reset state");
                         // pass err handle back
-                        err->collectTrace("HTMGT");
+                        err->collectTrace(HTMGT_COMP_NAME);
                     }
                 }
 
@@ -1037,7 +1107,7 @@ namespace HTMGT
                     if(err)
                     {
                         TMGT_ERR("_resetOCCs: loadAndStartPMAll failed. ");
-                        err->collectTrace("HTMGT");
+                        err->collectTrace(HTMGT_COMP_NAME);
                         processOccStartStatus(false, l_proc_target);
                     }
                     else

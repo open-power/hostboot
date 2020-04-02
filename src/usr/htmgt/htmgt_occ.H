@@ -330,6 +330,19 @@ namespace HTMGT
             void addOccTrace( errlHndl_t & io_errl );
 
 
+            /**
+             * @brief Set the HOMER address for this OCC (required for sending commands)
+             *
+             * @param[in] - the virtual address of HOMER
+             */
+            void setHomerAddr(const uint64_t i_homer_vaddress);
+
+
+            /**
+             * @brief Invalidate and zero the HOMER address for this OCC
+             */
+            void invalidateHomer();
+
         private:   // functions
 
             /**
@@ -421,6 +434,8 @@ namespace HTMGT
             uint8_t         iv_seqNumber;
             // HOMER base address
             uint8_t *       iv_homer;
+            // HOMER address valid?
+            bool            iv_homerValid;
             // OCC target
             TARGETING::TargetHandle_t iv_target;
             // Last poll response (excluding sensor data)

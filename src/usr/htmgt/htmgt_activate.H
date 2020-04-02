@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,10 +29,6 @@
 #include <stdint.h>
 #include "htmgt_occ.H"
 #include <errl/errlmanager.H>
-
-
-// TODO RTC 118875
-//#define SIMICS_TESTING
 
 
 namespace HTMGT

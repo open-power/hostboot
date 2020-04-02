@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/attributes.H>
 #include <targeting/common/targetservice.H>
+#include <isteps/pm/scopedHomerMapper.H>
 
 
 namespace HTMGT
@@ -47,12 +48,37 @@ namespace HTMGT
                                         TARGETING::Target * i_occTarget,
                                         const bool onlyIfEstablished)
     {
-        errlHndl_t l_err = nullptr;
+        errlHndl_t l_first_err = nullptr;
 
         TMGT_INF("sendOccPoll(flush=%c)", i_flushAllErrors?'y':'n');
 
         for( const auto & l_occ : iv_occArray )
         {
+            // map HOMER for this OCC
+            TARGETING::Target* procTarget = nullptr;
+            procTarget = TARGETING::getImmediateParentByAffinity(l_occ->getTarget());
+            HBPM::ScopedHomerMapper l_mapper(procTarget);
+            errlHndl_t l_err = l_mapper.map();
+            if (l_err)
+            {
+                TMGT_ERR("_sendOccPoll: Unable to get HOMER virtual address "
+                         "for OCC%d (rc=0x%04X)",
+                         l_occ->getInstance(), l_err->reasonCode());
+                l_err->collectTrace(HTMGT_COMP_NAME);
+                if (l_first_err == nullptr)
+                {
+                    l_first_err = l_err;
+                }
+                else
+                {
+                    // Link PLID to first error
+                    l_err->plid(l_first_err->plid());
+                    ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                }
+                continue;
+            }
+            l_occ->setHomerAddr(l_mapper.getHomerVirtAddr());
+
             if(nullptr == i_occTarget || l_occ->iv_target == i_occTarget)
             {
                 if ((l_occ->iv_commEstablished) ||
@@ -74,6 +100,7 @@ namespace HTMGT
                     }
                 }
             }
+            l_occ->invalidateHomer();
         }
 
         if (occNeedsReset())
@@ -81,7 +108,7 @@ namespace HTMGT
             TMGT_ERR("_sendOccPoll(): OCCs need to be reset");
         }
 
-        return l_err;
+        return l_first_err;
     }
 
 

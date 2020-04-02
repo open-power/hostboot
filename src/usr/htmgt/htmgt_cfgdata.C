@@ -32,6 +32,7 @@
 #include <htmgt/htmgt_reasoncodes.H>
 #include <fapi2_attribute_service.H>
 #include "htmgt_memthrottles.H"
+#include <isteps/pm/scopedHomerMapper.H>
 
 using namespace TARGETING;
 
@@ -47,14 +48,15 @@ namespace HTMGT
     uint8_t G_system_type = OCC_CFGDATA_OPENPOWER_OPALVM;
 
     // Send config format data to all OCCs
-    void sendOccConfigData(const occCfgDataFormat i_requestedFormat)
+    errlHndl_t sendOccConfigData(const occCfgDataFormat i_requestedFormat)
     {
+        errlHndl_t l_err = nullptr;
+        uint8_t cmdData[OCC_MAX_DATA_LENGTH] = {0};
+
         if (G_debug_trace & DEBUG_TRACE_VERBOSE)
         {
             TMGT_INF("sendOccConfigData called");
         }
-
-        uint8_t cmdData[OCC_MAX_DATA_LENGTH] = {0};
 
         const occCfgDataTable_t* start = &occCfgDataTable[0];
         const occCfgDataTable_t* end =
@@ -89,6 +91,21 @@ namespace HTMGT
                 Occ * occ = (*itr);
                 const uint8_t occInstance = occ->getInstance();
                 const occRole role = occ->getRole();
+
+                // MAP HOMER for this OCC
+                TARGETING::Target* procTarget = nullptr;
+                procTarget = TARGETING::getImmediateParentByAffinity(occ->getTarget());
+                HBPM::ScopedHomerMapper l_mapper(procTarget);
+                l_err = l_mapper.map();
+                if (l_err)
+                {
+                    TMGT_ERR("sendOccConfigData: Unable to get HOMER virtual address for OCC%d (rc=0x%04X)",
+                             occInstance, l_err->reasonCode());
+                    l_err->collectTrace(HTMGT_COMP_NAME);
+                    l_err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                    break;
+                }
+                occ->setHomerAddr(l_mapper.getHomerVirtAddr());
 
                 // Loop through all config data types
                 for (const occCfgDataTable_t *itr = start; itr < end; ++itr)
@@ -158,7 +175,7 @@ namespace HTMGT
                                 if (!int_flags_set(FLAG_DISABLE_MEM_CONFIG))
                                 {
                                     getMemThrottleMessageData(occ->getTarget(),
-                                             occInstance, cmdData, cmdDataLen);
+                                                              occInstance, cmdData, cmdDataLen);
                                 }
                                 break;
 
@@ -192,7 +209,7 @@ namespace HTMGT
                                      format, occInstance);
                             OccCmd cmd(occ, OCC_CMD_SETUP_CFG_DATA,
                                        cmdDataLen, cmdData);
-                            errlHndl_t l_err = cmd.sendOccCmd();
+                            l_err = cmd.sendOccCmd();
                             if (l_err != nullptr)
                             {
                                 TMGT_ERR("sendOccConfigData: OCC%d cfg "
@@ -214,7 +231,7 @@ namespace HTMGT
                             }
 
                             // Send poll between config packets to flush errors
-                            l_err = OccManager::sendOccPoll();
+                            l_err = occ->pollForErrors(false);
                             if (l_err)
                             {
                                 ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
@@ -228,9 +245,12 @@ namespace HTMGT
                     }
 
                 } // for each config format
+                occ->invalidateHomer();
 
             } // for each OCC
         }
+
+        return l_err;
 
     } // end sendOccConfigData()
 

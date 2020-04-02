@@ -188,7 +188,6 @@ namespace HTMGT
         };
 
         uint8_t l_idx = 0;
-        // TODO RTC 124739
         for (l_idx=0; l_idx < STATUS_STRING_COUNT; l_idx++)
         {
             if (i_status == L_status_string[l_idx].str_num)
@@ -371,9 +370,8 @@ namespace HTMGT
                                  iv_OccRsp.dataLength);
                     }
 
-                    if ( /*(TMGT_RC_CHECKSUM_FAIL == io_errlHndl->getRC()) ||*/
-                         (OCC_RC_CHECKSUM_FAILURE == iv_OccRsp.returnStatus) ||
-                         (OCC_RC_INTERNAL_ERROR == iv_OccRsp.returnStatus) )
+                    if ((OCC_RC_CHECKSUM_FAILURE == iv_OccRsp.returnStatus) ||
+                        (OCC_RC_INTERNAL_ERROR == iv_OccRsp.returnStatus) )
                     {
                         // failed due to rsp data checksum failure... reset OCC
                         TMGT_ERR("processOccResponse: OCC%d response had"
@@ -390,7 +388,7 @@ namespace HTMGT
         else
         {
             // Send of OCC command failed
-            if ( /*(TMGT_RC_SEND_FAIL == io_errlHndl->getRC()) &&*/
+            if ( /*(TMGT_RC_SEND_FAIL == io_errlHndl->reasonCode()) &&*/
                  (alreadyRetriedOnce == true) )
             {
                 // failed due to send/receive problem and retry has been
@@ -428,9 +426,8 @@ namespace HTMGT
                                  iv_OccRsp.dataLength);
                     }
 
-                    if ( /*(TMGT_RC_CHECKSUM_FAIL == io_errlHndl->getRC()) ||*/
-                         (OCC_RC_CHECKSUM_FAILURE == iv_OccRsp.returnStatus) ||
-                         (OCC_RC_INTERNAL_ERROR == iv_OccRsp.returnStatus) )
+                    if ((OCC_RC_CHECKSUM_FAILURE == iv_OccRsp.returnStatus) ||
+                        (OCC_RC_INTERNAL_ERROR == iv_OccRsp.returnStatus) )
                     {
                         // failed due to rsp data checksum failure... reset OCC
                         TMGT_ERR("processOccResponse: OCC%d response had"
@@ -573,6 +570,8 @@ namespace HTMGT
         static uint8_t L_state = 0;
         static uint8_t L_prior_status = 0x00;
         static uint8_t L_prior_sequence = 0x00;
+        assert(iv_Occ->iv_homerValid == true, "fakeOccResponse: HOMER is invalid");
+        assert(iv_Occ->iv_homer != nullptr, "fakeOccResponse: HOMER is null");
         uint8_t * const rspBuffer = iv_Occ->iv_homer + OCC_RSP_ADDR;
 
         if (0 == L_state)
@@ -682,6 +681,8 @@ namespace HTMGT
     // Returns true if timeout waiting for response
     bool OccCmd::waitForOccRsp(uint32_t i_timeout)
     {
+        assert(iv_Occ->iv_homerValid == true, "waitForOccRsp: HOMER is invalid");
+        assert(iv_Occ->iv_homer != nullptr, "waitForOccRsp: HOMER is null");
         const uint8_t * const rspBuffer = iv_Occ->iv_homer + OCC_RSP_ADDR;
         uint16_t rspLength = 0;
         if (G_debug_trace & DEBUG_TRACE_VERBOSE)
@@ -1029,6 +1030,8 @@ namespace HTMGT
 
             // The response buffer did not contain correct sequence number,
             // or status is still in progress ==> timeout
+            assert(iv_Occ->iv_homerValid == true, "writeOccCmd: HOMER is invalid");
+            assert(iv_Occ->iv_homer != nullptr, "writeOccCmd: HOMER is null");
             const uint8_t * const rspBuffer = iv_Occ->iv_homer + OCC_RSP_ADDR;
             l_err->addFFDC(HTMGT_COMP_ID,
                            rspBuffer,
@@ -1053,6 +1056,8 @@ namespace HTMGT
     // Copy OCC command into command buffer in HOMER
     uint16_t OccCmd::buildOccCmdBuffer()
     {
+        assert(iv_Occ->iv_homerValid == true, "buildOccCmdBuffer: HOMER is invalid");
+        assert(iv_Occ->iv_homer != nullptr, "buildOccCmdBuffer: HOMER is null");
         uint8_t * const cmdBuffer = iv_Occ->iv_homer + OCC_CMD_ADDR;
         uint16_t l_send_length = 0;
 
@@ -1120,6 +1125,8 @@ namespace HTMGT
     {
         errlHndl_t l_errlHndl = NULL;
         uint16_t l_index = 0;
+        assert(iv_Occ->iv_homerValid == true, "parseOccResponse: HOMER is invalid");
+        assert(iv_Occ->iv_homer != nullptr, "parseOccResponse: HOMER is null");
         const uint8_t * const rspBuffer = iv_Occ->iv_homer + OCC_RSP_ADDR;
         const uint16_t rspLen = OCC_RSP_HDR_LENGTH + UINT16_GET(&rspBuffer[3]);
 

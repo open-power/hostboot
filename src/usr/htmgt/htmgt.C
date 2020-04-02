@@ -38,6 +38,7 @@
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/attributes.H>
 #include <targeting/common/targetservice.H>
+#include <isteps/pm/scopedHomerMapper.H>
 
 #include <sys/time.h>
 #include <targeting/common/attributeTank.H>
@@ -134,7 +135,11 @@ namespace HTMGT
                             skip_comm = false;
 
                             // Send ALL config data
-                            sendOccConfigData();
+                            l_err = sendOccConfigData();
+                            if (l_err)
+                            {
+                                break;
+                            }
 
                             // Set the User PCAP
                             l_err = sendOccUserPowerCap();
@@ -610,26 +615,48 @@ namespace HTMGT
                             Occ *occPtr = OccManager::getOcc(occInstance);
                             if (occPtr)
                             {
-                                TMGT_INF("passThruCommand: Send OCC%d command "
-                                         "0x%02X (%d bytes)",
-                                         occInstance, occCmd, dataLen);
-                                OccCmd cmd(occPtr, occCmd, dataLen, &i_cmdData[3]);
-                                err = cmd.sendOccCmd();
-                                if (err != NULL)
+                                // Map HOMER for this OCC
+                                TARGETING::Target* procTarget = nullptr;
+                                procTarget = TARGETING::
+                                    getImmediateParentByAffinity
+                                    (occPtr->getTarget());
+                                HBPM::ScopedHomerMapper l_mapper(procTarget);
+                                err = l_mapper.map();
+                                if (nullptr == err)
                                 {
-                                    TMGT_ERR("passThruCommand: OCC%d cmd 0x%02X "
-                                             "failed with rc 0x%04X",
-                                             occInstance, occCmd,
-                                             err->reasonCode());
+                                    occPtr->setHomerAddr
+                                        (l_mapper.getHomerVirtAddr());
+
+                                    TMGT_INF("passThruCommand: Send OCC%d "
+                                             "command 0x%02X (%d bytes)",
+                                             occInstance, occCmd, dataLen);
+                                    OccCmd cmd(occPtr, occCmd, dataLen,
+                                               &i_cmdData[3]);
+                                    err = cmd.sendOccCmd();
+                                    if (err != NULL)
+                                    {
+                                        TMGT_ERR("passThruCommand: OCC%d cmd "
+                                                 "0x%02X failed with rc 0x%04X",
+                                                 occInstance, occCmd,
+                                                 err->reasonCode());
+                                    }
+                                    else
+                                    {
+                                        uint8_t *rspPtr = NULL;
+                                        o_rspLength = cmd.getResponseData(rspPtr);
+                                        memcpy(o_rspData, rspPtr, o_rspLength);
+                                        TMGT_INF("passThruCommand: OCC%d rsp status "
+                                                 "0x%02X (%d bytes)", occInstance,
+                                                 o_rspData[2], o_rspLength);
+                                    }
+                                    occPtr->invalidateHomer();
                                 }
                                 else
                                 {
-                                    uint8_t *rspPtr = NULL;
-                                    o_rspLength = cmd.getResponseData(rspPtr);
-                                    memcpy(o_rspData, rspPtr, o_rspLength);
-                                    TMGT_INF("passThruCommand: OCC%d rsp status "
-                                             "0x%02X (%d bytes)", occInstance,
-                                             o_rspData[2], o_rspLength);
+                                    TMGT_ERR("passThruCommand: Unable to get HOMER "
+                                             "virtual address for OCC%d (rc=0x%04X)",
+                                             occInstance, err->reasonCode());
+                                    err->collectTrace("HTMGT");
                                 }
                             }
                             else

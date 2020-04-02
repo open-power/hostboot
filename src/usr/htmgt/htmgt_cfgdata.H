@@ -141,9 +141,10 @@ namespace HTMGT
      *
      * @param[in]  config format to send.  Default is to send
      *             all config formats.
+     * @return NULL on success, else error handle
      */
-    void sendOccConfigData(const occCfgDataFormat i_requestedFormat =
-                           OCC_CFGDATA_CLEAR_ALL);
+    errlHndl_t sendOccConfigData(const occCfgDataFormat i_requestedFormat =
+                                 OCC_CFGDATA_CLEAR_ALL);
 
     /**
      * Fills in the Memory Config Configuration Data message buffer,
