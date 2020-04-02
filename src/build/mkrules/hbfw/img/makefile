@@ -300,8 +300,7 @@ SBE_BUILD_SCRIPT = ${buildSbePart.pl:P}
 P10_SBE_IMG   = p10.SbePartition.bin
 
 # Fix this when SBE is generating p10_10.sbe_seeprom.hdr.bin
-P10_EC10_BIN = ${HBB_IMG}
-#P10_EC10_BIN = ${SBEI_OBJPATH:Fp10_10.sbe_seeprom.hdr.bin}
+P10_EC10_BIN = ${SBEI_OBJPATH:Fp10_10.sbe_seeprom.hdr.bin}
 
 SBE_PART_INFO = \
   ${P10_SBE_IMG}:10=${P10_EC10_BIN}
