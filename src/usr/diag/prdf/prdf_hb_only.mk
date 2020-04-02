@@ -89,11 +89,27 @@ prd_incpath += ${ROOTPATH}/src/usr/isteps/nvdimm
 
 # For including hwp_wrappers.H
 prd_incpath += ${ROOTPATH}/src/import/generic/memory/lib/prd/
+#prd_incpath += ${ROOTPATH}/src/import/generic/memory/lib/ccs/
+#prd_incpath += ${ROOTPATH}/src/import/generic/memory/lib/spd/
+#prd_incpath += ${ROOTPATH}/src/import/generic/memory/lib/spd/rdimm/ddr4/
+#prd_incpath += ${ROOTPATH}/src/import/generic/memory/lib/spd/lrdimm/ddr4/
+#prd_incpath += ${ROOTPATH}/src/import/generic/memory/lib/dimm/ddr4/
+#prd_incpath += ${ROOTPATH}/src/import/generic/memory/lib/utils/
 prd_incpath += ${ROOTPATH}/src/import/generic/memory/lib/utils/mcbist/
+#prd_incpath += ${ROOTPATH}/src/import/generic/memory/lib/utils/freq/
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
+#prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/
+#prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/phy/
+#prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/ecc/
 prd_incpath += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 prd_incpath += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
+#prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/phy/
+#prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/dimm/
+#prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/dimm/ddr4/
+#prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/spd/
+#prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/ecc/
+#prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/mc/
 
 ################################################################################
 # Hostboot only object files common to both IPL and runtime
@@ -194,16 +210,75 @@ CLEAN_TARGETS += ${MFG_THRES_PATH}
 
 #TODO RTC 247259
 #prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/
+#prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/phy/
 #prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/eff_config/
 #prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/mcbist/
 #prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/utils
+#prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/ccs/
+#prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/fir/
+#prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/ecc/
 #prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/utils/
+#prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/phy/
+#prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/spd/
+#prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/ccs/
+#prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/dimm/
+#prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/dimm/ddr4/
+#prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/workarounds/
+#prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/fir/
+#prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/freq/
+#prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/ecc/
+#prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/mc/
+#prd_vpath += ${ROOTPATH}/src/import/generic/memory/lib/spd/
+#prd_vpath += ${ROOTPATH}/src/import/generic/memory/lib/spd/rdimm/ddr4/
+#prd_vpath += ${ROOTPATH}/src/import/generic/memory/lib/spd/lrdimm/ddr4/
 #prd_obj_no_sim += hwp_wrappers_nim.o
 #prd_obj_no_sim += hwp_wrappers_exp.o
+#prd_obj_no_sim += nimbus_pos.o
 #prd_obj_no_sim += explorer_pos.o
 #prd_obj_no_sim += exp_mcbist.o
 #prd_obj_no_sim += exp_memdiags.o
 #prd_obj_no_sim += explorer_memory_size.o
+#prd_obj_no_sim += exp_train_handler.o
+#prd_obj_no_sim += mss_training.o
+#prd_obj_no_sim += ddr_phy.o
+#prd_obj_no_sim += dp16.o
+#prd_obj_no_sim += ccs_explorer.o
+#prd_obj_no_sim += ccs_nimbus.o
+#prd_obj_no_sim += mrs_load_ddr4_nimbus.o
+#prd_obj_no_sim += dp16_workarounds.o
+#prd_obj_no_sim += phy_cntrl.o
+#prd_obj_no_sim += adr.o
+#prd_obj_no_sim += pda_nimbus.o
+#prd_obj_no_sim += latch_wr_vref.o
+#prd_obj_no_sim += ccs_workarounds.o
+#prd_obj_no_sim += eff_dimm.o
+#prd_obj_no_sim += eff_config_workarounds.o
+#prd_obj_no_sim += spd_utils.o
+#prd_obj_no_sim += seq_workarounds.o
+#prd_obj_no_sim += spd_factory.o
+#prd_obj_no_sim += exp_fir.o
+#prd_obj_no_sim += check.o
+#prd_obj_no_sim += seq.o
+#prd_obj_no_sim += dll_workarounds.o
+#prd_obj_no_sim += dqs_align_workarounds.o
+#prd_obj_no_sim += mss_lrdimm_training.o
+#prd_obj_no_sim += wr_vref_workarounds.o
+#prd_obj_no_sim += mrs03_nimbus.o
+#prd_obj_no_sim += mrs01_nimbus.o
+#prd_obj_no_sim += mrs02_nimbus.o
+#prd_obj_no_sim += mrs00_nimbus.o
+#prd_obj_no_sim += mrs06_nimbus.o
+#prd_obj_no_sim += mrs05_nimbus.o
+#prd_obj_no_sim += mrs04_nimbus.o
+#prd_obj_no_sim += nimbus_mss_freq.o
+#prd_obj_no_sim += freq_workarounds.o
+#prd_obj_no_sim += ecc_traits_explorer.o
+#prd_obj_no_sim += ecc_traits_nimbus.o
+#prd_obj_no_sim += adr32s.o
+#prd_obj_no_sim += adr32s_workarounds.o
+#prd_obj_no_sim += dcd.o
+#prd_obj_no_sim += rdimm_raw_cards.o
+#prd_obj_no_sim += lrdimm_raw_cards.o
 
 ################################################################################
 # The following are hardware procedure utilities that we are pulling into the
