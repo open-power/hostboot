@@ -486,10 +486,11 @@ sub manipulateImages
 
     # Partitions that have a hash page table at the beginning of the section
     # for secureboot purposes.
-    # TODO: add back SBE and HCODE as per story 209485
+    # TODO: add back HCODE as per story 209485
     my %hashPageTablePartitions = (HBI      => 1,
                                    WOFDATA  => 1,
                                    SBE      => 1,
+                                   OCMBFW   => 1,
                                    MEMD     => 1);
     if($ENV{'RM_HASH_PAGE_TABLE'})
     {
@@ -559,6 +560,7 @@ sub manipulateImages
         $isSpecialSecure ||= ($eyeCatch eq "WOFDATA");
         $isSpecialSecure ||= ($eyeCatch eq "SBE");
         $isSpecialSecure ||= ($eyeCatch eq "MEMD");
+        $isSpecialSecure ||= ($eyeCatch eq "OCMBFW");
 
         # Used to indicate security is supported in firmware
         my $secureSupported = $isNormalSecure || $isSpecialSecure;
