@@ -1291,7 +1291,7 @@
     <valueType>uint32</valueType>
     <array>4</array>
     <platInit/>
-    <initToZero/>    
+    <initToZero/>
     <group>vrm</group>
   </attribute>
 
@@ -2435,5 +2435,23 @@
     <default>OFF</default>
     <group>debug</group>
   </attribute>
+  <!-- *********************************************************************-->
+  <attribute>
+    <id>ATTR_WOF_ALTITUDE_TEMP_ADJUSTMENT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Temperature adjustment due to altitude in degrees Celcius/km*1000.
+
+    Default: 8C/2100m = 8C/2.1Km = 3.809 C/kM;  Encode: 3.809 C/kM*1000 = 3809
+    Producer:  Override
+    Consumers: p10_pm_pgpe_init
+    </description>
+    <valueType>uint16</valueType>
+    <platInit/>
+    <overrideOnly/>
+    <default>3809</default>
+    <group>debug</group>
+  </attribute>
+
   <!-- *********************************************************************-->
 </attributes>
