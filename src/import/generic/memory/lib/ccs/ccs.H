@@ -1198,9 +1198,9 @@ fapi2::ReturnCode update_initial_delays( const fapi2::Target<T>& i_target,
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template< fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<DEFAULT_MC_TYPE> >
-fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
-                           ccs::program& i_program,
-                           const std::vector< fapi2::Target<P> >& i_ports)
+static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
+        ccs::program& i_program,
+        const std::vector< fapi2::Target<P> >& i_ports)
 {
     // Subtract one for the idle we insert at the end
     constexpr size_t CCS_INSTRUCTION_DEPTH = TT::CCS_ARRAY_LEN - 1;
@@ -1315,9 +1315,9 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template< fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<DEFAULT_MC_TYPE> >
-fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
-                           ccs::program& i_program,
-                           const fapi2::Target<P>& i_port)
+static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
+        ccs::program& i_program,
+        const fapi2::Target<P>& i_port)
 {
     // Mmm. Might want to find a better way to do this - seems expensive. BRS
     std::vector< fapi2::Target<P> > l_ports{ i_port };
