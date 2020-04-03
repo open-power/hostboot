@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -41,9 +41,15 @@
 #include <hwas/common/hwasCallout.H>
 #include <console/console_reasoncodes.H>
 #include <console/uartif.H>
+#ifdef CONFIG_CONSOLE
+#include <targeting/common/target.H>
+#include <targeting/common/utilFilter.H>
+#endif
 
 namespace CONSOLE
 {
+// Compile getUartInfo regardless of CONFIG_CONSOLE
+#ifdef CONFIG_CONSOLE
     void Uart::initialize()
     {
         using namespace UARTREGS;
@@ -227,7 +233,7 @@ namespace CONSOLE
     }
 
     Uart* Uart::g_device = NULL;
-
+#endif
     /**
      * Retrieve some information about a UART and the connection
      * we have to it.
@@ -244,12 +250,28 @@ namespace CONSOLE
 
         if(i_uartId == VUART1)
         {
-            l_info.lpcBaseAddr = g_vuart1Base;
-            l_info.lpcSize = sizeof(uint8_t);
-            l_info.clockFreqHz = g_vuart1Clock;
-            l_info.freqHz = g_vuart1Baud;
-            l_info.interruptNum = VUART1_IRQ;
-            l_info.interruptTrigger = LOW_LEVEL_TRIG;
+            l_info.consoleEnabled = false;
+#ifdef CONFIG_CONSOLE
+            TARGETING::TargetHandleList l_procChips;
+            TARGETING::getAllChips(l_procChips, TARGETING::TYPE_PROC);
+            for (const auto & l_procChip: l_procChips)
+            {
+                bool lpcEnabled =
+                    l_procChip->getAttr<TARGETING::ATTR_LPC_CONSOLE_CNFG>();
+                if (lpcEnabled)
+                {
+                    // Only populate these fields if console is enabled
+                    l_info.consoleEnabled = true;
+                    l_info.lpcBaseAddr = g_vuart1Base;
+                    l_info.lpcSize = sizeof(uint8_t);
+                    l_info.clockFreqHz = g_vuart1Clock;
+                    l_info.freqHz = g_vuart1Baud;
+                    l_info.interruptNum = VUART1_IRQ;
+                    l_info.interruptTrigger = LOW_LEVEL_TRIG;
+                    break;
+                }
+            }
+#endif
         }
         else if(i_uartId == VUART2)
         {

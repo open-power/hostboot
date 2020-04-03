@@ -150,7 +150,7 @@ BASE_MODULES += $(if $(CONFIG_BMC_IPMI),ipmibase)
 BASE_MODULES += pnor
 BASE_MODULES += vfs
 BASE_MODULES += $(if $(CONFIG_AST2400) || $(CONFIG_AST2500), sio)
-BASE_MODULES += $(if $(CONFIG_CONSOLE),console)
+BASE_MODULES += console
 ifndef VPO_COMPILE
 BASE_MODULES += $(if $(CONFIG_MCTP),mctp,)
 BASE_MODULES += $(if $(CONFIG_PLDM),pldm_base,)

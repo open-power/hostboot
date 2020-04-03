@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2015
+# Contributors Listed Below - COPYRIGHT 2014,2020
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -26,7 +26,8 @@
 ROOTPATH = ../../..
 MODULE = console
 
-OBJS += daemon.o
+OBJS += $(if $(CONFIG_CONSOLE),daemon.o)
+# Compile in uart regardless of CONFIG_CONSOLE to access getUartInfo
 OBJS += uart.o
 OBJS += uartconfig.o
 OBJS += $(if $(and $(CONFIG_CONSOLE),$(CONFIG_BMC_AST2400)), ast2400.o)

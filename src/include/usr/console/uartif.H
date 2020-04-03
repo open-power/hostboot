@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,6 +72,7 @@ struct UartInfo_t
     uint32_t freqHz; //< Current baud rate of the UART device
     uint8_t interruptNum; //< UART Interrupt Number
     uint8_t interruptTrigger; //< UART trigger type
+    bool consoleEnabled; //< Hostboot console support enabled
         //< 0x01: low level, 0x02: rising edge, 0x03: high level
 };
 
