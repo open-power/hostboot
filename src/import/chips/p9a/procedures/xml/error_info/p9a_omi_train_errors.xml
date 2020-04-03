@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -36,6 +36,7 @@
     <ffdc>DL0_STATUS</ffdc>
     <ffdc>DL0_TRAINING_STATUS</ffdc>
     <ffdc>DL0_CONFIG1</ffdc>
+    <ffdc>DL0_ERROR_HOLD</ffdc>
     <ffdc>OMI_FREQ</ffdc>
     <callout>
         <target>OMI_TARGET</target>

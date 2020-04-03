@@ -86,6 +86,8 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
     FAPI_TRY(fapi2::getScom(i_target, EXPLR_DLX_DL0_CONFIG1, l_dl0_config1));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, l_proc, l_omi_freq));
 
+    // Check for errors in ERROR_HOLD until we get a proper FIR API setup
+    FAPI_TRY(fapi2::getScom(i_target, EXPLR_DLX_DL0_ERROR_HOLD, l_dl0_error_hold));
 
     FAPI_ASSERT(l_state_machine_state == STATE_MACHINE_SUCCESS,
                 fapi2::EXP_OMI_TRAIN_ERR()
@@ -96,20 +98,20 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
                 .set_DL0_STATUS(l_omi_status)
                 .set_DL0_TRAINING_STATUS(l_omi_training_status)
                 .set_DL0_CONFIG1(l_dl0_config1)
+                .set_DL0_ERROR_HOLD(l_dl0_error_hold)
                 .set_OMI_FREQ(l_omi_freq),
-                "%s EXP OMI Training Failure, expected state:%d/actual state:%d, DL0_STATUS:0x%016llx, DL0_TRAINING_STATUS:0x%016llx",
+                "%s EXP OMI Training Failure, expected state:%d/actual state:%d, "
+                "DL0_STATUS:0x%016llx, DL0_TRAINING_STATUS:0x%016llx, DL0_ERROR_HOLD:0x%016llx",
                 mss::c_str(i_target),
                 STATE_MACHINE_SUCCESS,
                 l_state_machine_state,
                 l_omi_status,
-                l_omi_training_status
+                l_omi_training_status,
+                l_dl0_error_hold
                );
 
     // Finally, make sure fw_status is good
     FAPI_TRY(mss::exp::i2c::fw_status(i_target, mss::common_timings::DELAY_1MS, 100));
-
-    // Check for errors in ERROR_HOLD until we get a proper FIR API setup
-    FAPI_TRY(fapi2::getScom(i_target, EXPLR_DLX_DL0_ERROR_HOLD, l_dl0_error_hold));
 
     // Training done bit
     l_expected_dl0_error_hold.setBit<EXPLR_DLX_DL0_ERROR_HOLD_CERR_39>();
