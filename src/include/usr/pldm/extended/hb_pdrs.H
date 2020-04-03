@@ -31,7 +31,7 @@
 #ifndef HB_PDRS_H
 #define HB_PDRS_H
 
-struct pldm_pdr;
+#include <pldm/requests/pldm_pdr_requests.H>
 
 namespace PLDM
 {

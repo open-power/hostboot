@@ -28,10 +28,9 @@
  * Defines the interface for retrieving the BMC's list of PDRs.
  */
 
-#ifndef PLDM_PDR_REQEUSTS_H
+#ifndef PLDM_PDR_REQUESTS_H
 #define PLDM_PDR_REQUESTS_H
 
-#include <memory>
 #include <errl/errlentry.H>
 
 // Struct representing PDR repository (see DSP0248 v1.2.0, section 8)
@@ -39,6 +38,13 @@ struct pldm_pdr;
 
 namespace PLDM
 {
+
+using terminus_id = uint16_t;
+
+using pdr_handle_t = uint32_t;
+
+static constexpr pdr_handle_t FIRST_PDR_HANDLE = 0,
+                              NO_MORE_PDR_HANDLES = 0;
 
 /* @brief Retrieves the PDRs from the BMC and adds them to the given
  *        repository.
@@ -48,6 +54,18 @@ namespace PLDM
  * @return        errlHndl_t  Error if any, otherwise nullptr.
  */
 errlHndl_t getRemotePdrRepository(pldm_pdr* io_repo);
+
+/* @brief Send a "PDR Repository Changed Event" to the BMC.
+ *
+ * @param[in] i_tid         The TID of the Hostboot PLDM terminus
+ * @param[in] i_repo        PDR Repository containing the changed PDRs
+ *                          (must not be nullptr)
+ * @param[in] i_handles     The set of PDRs which have been added to the repository.
+ * @return errlHndl_t       Error if any, otherwise nullptr.
+ */
+errlHndl_t sendRepositoryChangedEvent(const terminus_id i_tid,
+                                      const pldm_pdr* i_repo,
+                                      const std::vector<pdr_handle_t>& i_handles);
 
 }
 

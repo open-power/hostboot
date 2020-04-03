@@ -128,8 +128,10 @@ errlHndl_t handleGetPdrRequest(const msg_q_t i_msgQ,
             break;
         }
 
+        pdr_handle_t record_handle = pdr_req.record_handle;
+
         const bool record_found
-            = PLDM::thePdrManager().findPdr(pdr_req.record_handle,
+            = PLDM::thePdrManager().findPdr(record_handle,
                                             &pdr_data,
                                             next_record_handle);
 

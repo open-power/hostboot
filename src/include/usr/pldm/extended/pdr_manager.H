@@ -35,13 +35,10 @@
 #include <vector>
 #include <sys/sync.h>
 #include <errl/errlentry.H>
-
-struct pldm_pdr;
+#include <pldm/requests/pldm_pdr_requests.H>
 
 namespace PLDM
 {
-
-using pdr_handle_t = uint32_t;
 
 /* @brief  This class manages a global PDR repository for Hostboot (meant to be
  *         used through the Singleton class).
@@ -72,7 +69,9 @@ public:
 
     /* @brief  Find a PDR in the repository.
      *
-     * @param[in] i_record_handle  Record handle to search for
+     * @param[in/out] io_record_handle  Record handle to search for. Set to the
+     *                                  real record handle of the record, if
+     *                                  found.
      * @param[out] o_data  Container to hold PDR data, if found. Prior contents
      *                     of this container are erased if the PDR is found,
      *                     unaltered otherwise. If this parameter is nullptr,
@@ -82,9 +81,23 @@ public:
      *                                   unaltered otherwise.
      * @return  True if PDR is found, false otherwise.
      */
-    bool findPdr(pdr_handle_t i_record_handle,
+    bool findPdr(pdr_handle_t& io_record_handle,
                  std::vector<uint8_t>* o_data,
                  uint32_t& o_next_record_handle) const;
+
+    /* @brief Send an event to the BMC indicating that the given set of PDRs
+     *        has been added to the repository.
+     *
+     * @param[in] i_handles  PDR handles that have been added.
+     * @return errlHndl_t    Error if any, otherwise nullptr.
+     */
+    errlHndl_t sendPdrRepositoryChangeEvent(const std::vector<uint32_t>& i_handles) const;
+
+    /* @brief Retrieves a list of all the PDR handles in this repository.
+     *
+     * @return vector<uint32_t>  List of PDR handles in the repository
+     */
+    std::vector<uint32_t> getAllPdrHandles() const;
 
     /* @brief  Return the number of PDRs in the repository.
      *
@@ -94,7 +107,7 @@ public:
 
     // The BMC TID is 1, HB is 2. It is important that the terminus IDs in the
     // system do not conflict with one another.
-    static constexpr uint16_t hostboot_terminus_id = 2;
+    static constexpr terminus_id hostboot_terminus_id = 2;
 
 private:
     std::unique_ptr<pldm_pdr, void(*)(pldm_pdr*)> pdr_repo;

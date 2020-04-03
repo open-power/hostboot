@@ -29,6 +29,7 @@
 // PLDM
 #include <pldm/extended/hb_pdrs.H>
 #include "../extern/pdr.h"
+#include "../common/pldmtrace.H"
 
 // Targeting
 #include <targeting/common/targetservice.H>
@@ -122,6 +123,10 @@ void addHostbootPdrs(pldm_pdr* const io_repo,
                 // pldm_entity_association_tree_add below
                 .entity_type = entity.entityType
             };
+
+            PLDM_INF("Adding entity association and FRU record set PDRs for %s HUID 0x%x",
+                     TARGETING::attrToString<TARGETING::ATTR_TYPE>(entity.targetType),
+                     get_huid(targets[i]));
 
             // Add the Entity Assocation record to the tree (will be converted
             // to PDRs and stored in the repo at the end of this function)

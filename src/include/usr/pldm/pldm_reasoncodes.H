@@ -50,6 +50,7 @@ namespace PLDM
         MOD_HANDLE_GET_PDR            = 0x09, // handleGetPdrRequest
         MOD_SEND_PLDM_RESPONSE        = 0x0A, // send_pldm_response
         MOD_HANDLE_INBOUND_REQ        = 0x0B, // handle_inbound_req
+        MOD_SEND_REPO_CHANGED_EVENT   = 0x0C, // sendRepositoryChangedEvent
     };
 
     enum PLDMReasonCode
@@ -62,11 +63,10 @@ namespace PLDM
         RC_MCTP_FAIL            = PLDM_COMP_ID | 0x06,
         RC_SENDRECV_FAIL        = PLDM_COMP_ID | 0x07,
         RC_SEND_FAIL            = PLDM_COMP_ID | 0x08,
-        RC_MSG_SEND_FAIL        = PLDM_COMP_ID | 0x09,
-        RC_INVALID_MSG_CATEGORY = PLDM_COMP_ID | 0x0A,
-        RC_INVALID_COMMAND      = PLDM_COMP_ID | 0x0B,
-        RC_INVALID_MSG_TYPE     = PLDM_COMP_ID | 0x0C,
-        RC_INVALID_HEADER       = PLDM_COMP_ID | 0x0D,
+        RC_INVALID_MSG_CATEGORY = PLDM_COMP_ID | 0x09,
+        RC_INVALID_COMMAND      = PLDM_COMP_ID | 0x0A,
+        RC_INVALID_MSG_TYPE     = PLDM_COMP_ID | 0x0B,
+        RC_INVALID_HEADER       = PLDM_COMP_ID | 0x0C,
     };
 }
 #endif

@@ -46,7 +46,6 @@
 #include <mctp/mctp_message_types.H>
 
 // libpldm
-// TODO: do we want to relocate these headers to src/include?
 #include "../../../usr/pldm/extern/base.h"
 #include "../../../usr/pldm/extern/platform.h"
 #include <pldm/pldmif.H>
@@ -90,8 +89,98 @@ struct mctp_pldm_msg<0>
     pldm_msg pldm_message { };
 } __attribute__((packed));
 
-/* @brief Makes a PLDM request with a payload to the BMC, and returns the bytes
- *        making up the response.
+/* @brief sendrecv_pldm_request_payload
+ *
+ *        Encode and send a PLDM request with a fixed-size payload section and a
+ *        subsequent variable-size payload section to the BMC, and then receive
+ *        a reply.
+ *
+ * @param[out] o_response_bytes  Array of bytes of the response from the BMC
+ * @param[in] i_payload_bytes    Variable-length payload for the message
+ * @param[in] i_msgQ             Handle to the outgoing PLDM request message queue
+ * @param[in] i_encoder          Message encoder function
+ * @param[in] i_args...          Arguments to the encoder function, not including the
+ *                               pldm_msg* and payload size.
+ * @return errlHndl_t            Error if any, otherwise nullptr.
+ */
+template<size_t MsgSize, typename Encoder, typename... Args>
+errlHndl_t sendrecv_pldm_request_payload(std::vector<uint8_t>& o_response_bytes,
+                                         const std::vector<uint8_t>& i_payload_bytes,
+                                         const msg_q_t i_msgQ,
+                                         const Encoder i_encoder,
+                                         Args... i_args)
+{
+    errlHndl_t errl = nullptr;
+    o_response_bytes.clear();
+
+    std::vector<uint8_t> msgbuf_bytes(sizeof(mctp_pldm_msg<MsgSize>) + i_payload_bytes.size());
+
+    const auto msgbuf = reinterpret_cast<mctp_pldm_msg<MsgSize>*>(msgbuf_bytes.data());
+
+    pldm_msg* const pldm_request = &msgbuf->pldm_message;
+
+    do
+    {
+        {
+            const int encoder_rc = i_encoder(i_args...,
+                                             pldm_request,
+                                             MsgSize + i_payload_bytes.size());
+
+            assert(encoder_rc == PLDM_SUCCESS,
+                   "PLDM message encoder at address %p failed with code %d",
+                   i_encoder,
+                   encoder_rc);
+        }
+
+        const std::unique_ptr<msg_t, decltype(&msg_free)> msg { msg_allocate(), msg_free };
+        msg->data[0] = msgbuf_bytes.size();
+        msg->extra_data = msgbuf_bytes.data();
+
+        // Place message on the queue and wait for a response
+        const int return_code = msg_sendrecv(i_msgQ, msg.get());
+
+        if(return_code)
+        {
+            const uint64_t request_hdr_data = pldmHdrToUint64(*pldm_request);
+            /*
+            * @errortype  ERRL_SEV_UNRECOVERABLE
+            * @moduleid   MOD_MAKE_PLDM_REQUEST_PAYLOAD
+            * @reasoncode RC_SENDRECV_FAIL
+            * @userdata1  Return code returned by msg_sendrecv
+            * @userdata2  Header of pldm request
+            * @devdesc    Software problem, failed to decode PLDM message
+            * @custdesc   A software error occurred during system boot
+            */
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                  MOD_MAKE_PLDM_REQUEST_PAYLOAD,
+                                  RC_SENDRECV_FAIL,
+                                  return_code,
+                                  request_hdr_data,
+                                  ErrlEntry::ADD_SW_CALLOUT);
+            errl->collectTrace(PLDM_COMP_NAME);
+            break;
+        }
+        else if(msg.get()->data[1] != REQ_SUCCESS)
+        {
+            errl = reinterpret_cast<errlHndl_t>(msg.get()->extra_data);
+            msg->extra_data = nullptr;
+            break;
+        }
+
+        // we own the memory pointed to by msg->extra_data
+        std::unique_ptr<uint8_t, decltype(&free)>
+            extra_data(static_cast<uint8_t*>(msg->extra_data), free);
+
+        o_response_bytes.assign(extra_data.get(),
+                                extra_data.get() + msg->data[0]);
+
+    } while (false);
+
+    return errl;
+}
+
+/* @brief Makes a PLDM request with a fixed-size payload to the BMC, and returns
+ *        the bytes making up the response.
  *
  * Explicit template parameters:
  *
@@ -103,7 +192,6 @@ struct mctp_pldm_msg<0>
  * @param[out] o_response_bytes  The bytes of the response. Cleared before
  *                               storing response (i.e. does not concatenate).
  * @param[in]  i_msgQ            The PLDM message queue.
-
  * @param[in]  i_encoder         The function to encode the PLDM request with
  *                               the given arguments.
  * @param[in]  i_args            The arguments to i_encoder which comprise the
@@ -116,9 +204,35 @@ struct mctp_pldm_msg<0>
  */
 template<size_t MsgSize, typename Encoder, typename... Args>
 errlHndl_t sendrecv_pldm_request_payload(std::vector<uint8_t>& o_response_bytes,
-                          const msg_q_t i_msgQ,
-                          const Encoder i_encoder,
-                          Args... i_args)
+                                         const msg_q_t i_msgQ,
+                                         const Encoder i_encoder,
+                                         Args... i_args)
+{
+    return sendrecv_pldm_request_payload<MsgSize>(o_response_bytes,
+                                                  std::vector<uint8_t> { }, // Empty variable-size payload
+                                                                            // portion (this does not make any
+                                                                            // dynamic allocation at runtime)
+                                                  i_msgQ,
+                                                  i_encoder,
+                                                  i_args...);
+}
+
+/* @brief sendrecv_pldm_request
+ *
+ *        Makes a PLDM request with no payload to the BMC, and returns the bytes
+ *        making up the response.
+ *
+ * @param[out] o_response_bytes  Output buffer to store response message from the BMC
+ * @param[in]  i_msgQ            Handle to the outgoing PLDM request queue
+ * @param[in]  i_encoder         Message encoder function
+ * @param[in]  i_args...         Arguments to encoder, not including pldm_msg*
+ * @return     errlHndl_t        Error if any, otherwise nullptr
+ */
+template<size_t MsgSize, typename Encoder, typename... Args>
+errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_bytes,
+                                 const msg_q_t i_msgQ,
+                                 const Encoder i_encoder,
+                                 Args... i_args)
 {
     errlHndl_t errl = nullptr;
     o_response_bytes.clear();
@@ -131,14 +245,12 @@ errlHndl_t sendrecv_pldm_request_payload(std::vector<uint8_t>& o_response_bytes,
     {
         {
             const int encoder_rc = i_encoder(i_args...,
-                                     pldm_request,
-                                     MsgSize);
+                                             pldm_request);
 
             assert(encoder_rc == PLDM_SUCCESS,
                    "PLDM message encoder at address %p failed with code %d",
                    i_encoder,
                    encoder_rc);
-
         }
 
         const std::unique_ptr<msg_t, decltype(&msg_free)> msg { msg_allocate(), msg_free };
@@ -153,15 +265,15 @@ errlHndl_t sendrecv_pldm_request_payload(std::vector<uint8_t>& o_response_bytes,
             const uint64_t request_hdr_data = pldmHdrToUint64(*pldm_request);
             /*
             * @errortype  ERRL_SEV_UNRECOVERABLE
-            * @moduleid   MOD_MAKE_PLDM_REQUEST_PAYLOAD
+            * @moduleid   MOD_MAKE_PLDM_REQUEST
             * @reasoncode RC_SENDRECV_FAIL
             * @userdata1  Return code returned by msg_sendrecv
             * @userdata2  Header of pldm request
-            * @devdesc    Software problem, sendrecv from PLDM->MCTP layers
+            * @devdesc    Software problem, failed to decode PLDM message
             * @custdesc   A software error occurred during system boot
             */
             errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                  MOD_MAKE_PLDM_REQUEST_PAYLOAD,
+                                  MOD_MAKE_PLDM_REQUEST,
                                   RC_SENDRECV_FAIL,
                                   return_code,
                                   request_hdr_data,
@@ -169,10 +281,10 @@ errlHndl_t sendrecv_pldm_request_payload(std::vector<uint8_t>& o_response_bytes,
             errl->collectTrace(PLDM_COMP_NAME);
             break;
         }
-        else if(msg->data[1] != REQ_SUCCESS)
+        else if(msg.get()->data[1] != REQ_SUCCESS)
         {
-            errl = reinterpret_cast<errlHndl_t>(msg->extra_data);
-            msg->extra_data = 0;
+            errl = reinterpret_cast<errlHndl_t>(msg.get()->extra_data);
+            msg->extra_data = nullptr;
             break;
         }
 
@@ -182,9 +294,7 @@ errlHndl_t sendrecv_pldm_request_payload(std::vector<uint8_t>& o_response_bytes,
 
         o_response_bytes.assign(extra_data.get(),
                                 extra_data.get() + msg->data[0]);
-
     } while (false);
-
 
     return errl;
 }

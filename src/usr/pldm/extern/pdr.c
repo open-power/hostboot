@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2020                             */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -105,7 +106,7 @@ static pldm_pdr_record *make_new_record(const pldm_pdr *repo,
 		if (!record_handle) {
 			struct pldm_pdr_hdr *hdr =
 			    (struct pldm_pdr_hdr *)(record->data);
-			hdr->record_handle = record->record_handle;
+			hdr->record_handle = htole32(record->record_handle);
 		}
 	}
 	record->next = NULL;

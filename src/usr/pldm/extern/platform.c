@@ -27,6 +27,102 @@
 
 #include "platform.h"
 
+int encode_pldm_pdr_repository_chg_event_data(uint8_t event_data_format,
+                                              uint8_t number_of_change_records,
+                                              const uint8_t *event_data_operations,
+                                              const uint8_t *numbers_of_change_entries,
+                                              const uint32_t *const *change_entries,
+                                              struct pldm_pdr_repository_chg_event_data *event_data,
+                                              size_t *actual_change_records_size,
+                                              size_t max_change_records_size)
+{
+    if (event_data_operations == NULL || numbers_of_change_entries == NULL || change_entries == NULL) {
+        return PLDM_ERROR_INVALID_DATA;
+    }
+
+    size_t expected_size = sizeof(event_data_format) + sizeof(number_of_change_records);
+
+    expected_size += sizeof(*event_data_operations) * number_of_change_records;
+    expected_size += sizeof(*numbers_of_change_entries) * number_of_change_records;
+
+    for (uint8_t i = 0; i < number_of_change_records; ++i) {
+        expected_size += sizeof(*change_entries[0]) * numbers_of_change_entries[i];
+    }
+
+    *actual_change_records_size = expected_size;
+
+    if (event_data == NULL) {
+        return PLDM_SUCCESS;
+    }
+
+    if (max_change_records_size < expected_size) {
+        return PLDM_ERROR_INVALID_LENGTH;
+    }
+
+    event_data->event_data_format = event_data_format;
+    event_data->number_of_change_records = number_of_change_records;
+
+    struct pldm_pdr_repository_change_record_data* record_data =
+        (struct pldm_pdr_repository_change_record_data *)event_data->change_records;
+
+    for (uint8_t i = 0; i < number_of_change_records; ++i) {
+        record_data->event_data_operation = event_data_operations[i];
+        record_data->number_of_change_entries = numbers_of_change_entries[i];
+
+        for (uint8_t j = 0; j < record_data->number_of_change_entries; ++j) {
+            record_data->change_entry[j] = htole32(change_entries[i][j]);
+        }
+
+        record_data =
+            (struct pldm_pdr_repository_change_record_data *)(record_data->change_entry
+                                                              + record_data->number_of_change_entries);
+    }
+
+    return PLDM_SUCCESS;
+}
+
+int encode_platform_event_message_req(uint8_t instance_id,
+                                      uint8_t format_version,
+                                      uint8_t tid,
+                                      uint8_t event_class,
+                                      const void *event_data,
+                                      size_t event_data_length,
+                                      struct pldm_msg *msg,
+                                      size_t payload_length)
+{
+    if (event_data == NULL || msg == NULL) {
+        return PLDM_ERROR_INVALID_DATA;
+    }
+
+    if (payload_length != PLDM_PLATFORM_EVENT_MESSAGE_MIN_REQ_BYTES + event_data_length) {
+        return PLDM_ERROR_INVALID_LENGTH;
+    }
+
+	struct pldm_header_info header = {0};
+
+	header.msg_type = PLDM_REQUEST;
+	header.instance = instance_id;
+	header.pldm_type = PLDM_PLATFORM;
+	header.command = PLDM_PLATFORM_EVENT_MESSAGE;
+
+    int packrc = pack_pldm_header(&header, &msg->hdr);
+
+    if (packrc != PLDM_SUCCESS) {
+        return packrc;
+    }
+
+	struct pldm_platform_event_message_req *request =
+	    (struct pldm_platform_event_message_req *)msg->payload;
+
+    request->format_version = format_version;
+    request->tid = tid;
+    request->event_class = event_class;
+
+    memcpy(request->event_data, event_data, event_data_length);
+
+    return PLDM_SUCCESS;
+}
+
 int encode_set_state_effecter_states_resp(uint8_t instance_id,
 					  uint8_t completion_code,
 					  struct pldm_msg *msg)
@@ -595,6 +691,7 @@ int decode_platform_event_message_req(const struct pldm_msg *msg,
 	if (payload_length <= PLDM_PLATFORM_EVENT_MESSAGE_MIN_REQ_BYTES) {
 		return PLDM_ERROR_INVALID_LENGTH;
 	}
+
 	struct pldm_platform_event_message_req *response =
 	    (struct pldm_platform_event_message_req *)msg->payload;
 
@@ -632,6 +729,28 @@ int encode_platform_event_message_resp(uint8_t instance_id,
 		return rc;
 	}
 	return PLDM_SUCCESS;
+}
+
+int decode_platform_event_message_resp(const struct pldm_msg *msg,
+                                       size_t payload_length,
+                                       uint8_t *completion_code,
+                                       uint8_t *status)
+{
+    if (completion_code == NULL || status == NULL || msg == NULL) {
+        return PLDM_ERROR_INVALID_DATA;
+    }
+
+    if (payload_length < PLDM_PLATFORM_EVENT_MESSAGE_RESP_BYTES) {
+        return PLDM_ERROR_INVALID_LENGTH;
+    }
+
+	struct pldm_platform_event_message_resp *response =
+	    (struct pldm_platform_event_message_resp *)msg->payload;
+
+    *completion_code = response->completion_code;
+    *status = response->status;
+
+    return PLDM_SUCCESS;
 }
 
 int decode_sensor_event_data(const uint8_t *event_data,
@@ -778,5 +897,59 @@ int decode_numeric_sensor_data(const uint8_t *sensor_data,
 	default:
 		return PLDM_ERROR_INVALID_DATA;
 	}
+	return PLDM_SUCCESS;
+}
+
+int decode_pldm_pdr_repository_chg_event_data(const uint8_t *event_data,
+					      size_t event_data_size,
+					      uint8_t *event_data_format,
+					      uint8_t *number_of_change_records,
+					      size_t *change_record_data_offset)
+{
+	if (event_data == NULL) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+	if (event_data_size < PLDM_PDR_REPOSITORY_CHG_EVENT_MIN_LENGTH) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+
+	struct pldm_pdr_repository_chg_event_data
+	    *pdr_repository_chg_event_data =
+		(struct pldm_pdr_repository_chg_event_data *)event_data;
+
+	*event_data_format = pdr_repository_chg_event_data->event_data_format;
+	*number_of_change_records =
+	    pdr_repository_chg_event_data->number_of_change_records;
+	*change_record_data_offset =
+	    sizeof(*event_data_format) + sizeof(*number_of_change_records);
+
+	return PLDM_SUCCESS;
+}
+
+int decode_pldm_pdr_repository_change_record_data(
+    const uint8_t *change_record_data, size_t change_record_data_size,
+    uint8_t *event_data_operation, uint8_t *number_of_change_entries,
+    size_t *change_entry_data_offset)
+{
+	if (change_record_data == NULL) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+	if (change_record_data_size <
+	    PLDM_PDR_REPOSITORY_CHANGE_RECORD_MIN_LENGTH) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+
+	struct pldm_pdr_repository_change_record_data
+	    *pdr_repository_change_record_data =
+		(struct pldm_pdr_repository_change_record_data *)
+		    change_record_data;
+
+	*event_data_operation =
+	    pdr_repository_change_record_data->event_data_operation;
+	*number_of_change_entries =
+	    pdr_repository_change_record_data->number_of_change_entries;
+	*change_entry_data_offset =
+	    sizeof(*event_data_operation) + sizeof(*number_of_change_entries);
+
 	return PLDM_SUCCESS;
 }

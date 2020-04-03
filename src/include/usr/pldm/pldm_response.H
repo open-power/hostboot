@@ -150,15 +150,15 @@ errlHndl_t send_pldm_response(const msg_q_t i_msgQ,
             /*
              * @errortype  ERRL_SEV_UNRECOVERABLE
              * @moduleid   MOD_SEND_PLDM_RESPONSE
-             * @reasoncode RC_MSG_SEND_FAIL
+             * @reasoncode RC_SEND_FAIL
              * @userdata1  RC returned from message send routine
              * @userdata2  PLDM response message encoder function
              * @devdesc    Software problem, failed to send PLDM IPC message
-             * @custdesc   A software error occured during system boot
+             * @custdesc   A software error occurred during system boot
              */
             errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            MOD_SEND_PLDM_RESPONSE,
-                                           RC_MSG_SEND_FAIL,
+                                           RC_SEND_FAIL,
                                            rc,
                                            reinterpret_cast<uint64_t>(i_encoder),
                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);

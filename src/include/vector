@@ -288,7 +288,7 @@ namespace std
                  * @post None.
                  */
                 __attribute__ ((always_inline))
-                const_iterator cend()
+                const_iterator cend() const
                 {
                     return (iv_finish);
                 }

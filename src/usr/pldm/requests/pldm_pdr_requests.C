@@ -42,9 +42,11 @@
 #include <mctp/mctp_message_types.H>
 #include <pldm/pldm_const.H>
 #include <pldm/pldmif.H>
+#include <pldm/pldm_errl.H>
 #include <pldm/requests/pldm_pdr_requests.H>
 #include <pldm/pldm_reasoncodes.H>
 #include <pldm/pldm_request.H>
+#include <pldm/extended/pdr_manager.H>
 #include "../common/pldmtrace.H"
 
 // This is the name of the outgoing PLDM message queue.
@@ -59,7 +61,7 @@ using namespace ERRORLOG;
 // (see DSP0248 v1.2.0, section 8 for general information about PDRs)
 struct pdr
 {
-    uint32_t record_handle;
+    pdr_handle_t record_handle;
     std::vector<uint8_t> data;
 };
 
@@ -77,7 +79,7 @@ struct pdr
  * @return Error if any, otherwise nullptr.
  */
 errlHndl_t getPDR(const msg_q_t i_msgQ,
-                  uint32_t& io_pdr_record_handle,
+                  pdr_handle_t& io_pdr_record_handle,
                   pdr& o_pdr)
 {
     PLDM_ENTER("getPDR");
@@ -85,8 +87,8 @@ errlHndl_t getPDR(const msg_q_t i_msgQ,
     struct get_pdr_response
     {
         uint8_t completion_code = 0;
-        uint32_t next_record_hndl = 0;
-        uint32_t next_data_transfer_hndl = 0;
+        pdr_handle_t next_record_hndl = 0;
+        pdr_handle_t next_data_transfer_hndl = 0;
         uint8_t transfer_flag = 0;
         uint16_t resp_cnt = 0;
         std::vector<uint8_t> record_data;
@@ -249,16 +251,11 @@ errlHndl_t getPDR(const msg_q_t i_msgQ,
  */
 errlHndl_t getAllPdrs(std::vector<pdr>& o_pdrs)
 {
-    constexpr uint32_t NO_MORE_PDRS = 0,
-                       GET_FIRST_PDR = 0; // 0 means "get first PDR in
-                                          // repository" in a request, and "no
-                                          // more PDRs" in a response
-
     const msg_q_t msgQ = msg_q_resolve(VFS_ROOT_MSG_PLDM_REQ_OUT);
     assert(msgQ != nullptr,
            "getAllPdrs: PLDM Req Out Message queue did not resolve properly!");
 
-    uint32_t pdr_handle = GET_FIRST_PDR; // getPDR updates this for us
+    pdr_handle_t pdr_handle = FIRST_PDR_HANDLE; // getPDR updates this for us
     errlHndl_t errl = nullptr;
 
     do
@@ -273,7 +270,7 @@ errlHndl_t getAllPdrs(std::vector<pdr>& o_pdrs)
         }
 
         o_pdrs.push_back(result_pdr);
-    } while (pdr_handle != NO_MORE_PDRS);
+    } while (pdr_handle != NO_MORE_PDR_HANDLES);
 
     return errl;
 }
@@ -299,6 +296,161 @@ errlHndl_t getRemotePdrRepository(pldm_pdr* const io_repo)
                          pdr.record_handle);
         }
     }
+
+    return errl;
+}
+
+errlHndl_t sendRepositoryChangedEvent(const terminus_id i_tid,
+                                      const pldm_pdr* const i_repo,
+                                      const std::vector<pdr_handle_t>& i_handles)
+{
+    PLDM_ENTER("sendRepositoryChangedEvent");
+
+    assert(i_repo != nullptr,
+           "i_repo is nullptr in sendRepositoryChangedEvent");
+
+    errlHndl_t errl = nullptr;
+
+    if (i_handles.empty())
+    {
+        PLDM_INF("No PDRs have changed, not sending Repository Changed Event to BMC");
+    }
+    else
+    {
+        /* Encode the platform change event data */
+
+        std::vector<uint8_t> event_data_bytes;
+
+        {
+            const uint8_t event_data_operation = RECORDS_ADDED;
+            const size_t num_changed_pdrs = i_handles.size();
+
+            assert(num_changed_pdrs <= UINT8_MAX,
+                   "Too many changed PDRs; max supported %d, got %d",
+                   UINT8_MAX, static_cast<int>(num_changed_pdrs));
+
+            const uint8_t number_of_change_entries = num_changed_pdrs;
+            const uint32_t* const change_entries = i_handles.data();
+
+            size_t actual_change_records_size = 0;
+            pldm_pdr_repository_chg_event_data* event_data = nullptr;
+
+            /** The first time around this loop, event_data is nullptr which
+             * instructs the encoder to not actually do the encoding, but rather
+             * fill out actual_change_records_size with the correct size, stop and
+             * return PLDM_SUCCESS. Then we allocate the proper amount of memory and
+             * call the encoder again, which will cause it to actually encode the
+             * message. **/
+
+            for (int i = 0; i < 2; ++i)
+            {
+                const int rc
+                    = encode_pldm_pdr_repository_chg_event_data(FORMAT_IS_PDR_HANDLES,
+                                                                1, // only one change record (RECORDS_ADDED)
+                                                                &event_data_operation,
+                                                                &number_of_change_entries,
+                                                                &change_entries,
+                                                                event_data,
+                                                                &actual_change_records_size,
+                                                                event_data_bytes.size());
+
+                assert(rc == PLDM_SUCCESS,
+                       "encode_pldm_pdr_repository_chg_event_data failed in "
+                       " sendRepositoryChangedEvent, rc is %d",
+                       rc);
+
+                event_data_bytes.resize(actual_change_records_size);
+                event_data
+                    = reinterpret_cast<pldm_pdr_repository_chg_event_data*>(event_data_bytes.data());
+            }
+        }
+
+        /* Send the event request */
+
+        do
+        {
+            {
+                const msg_q_t msgQ = msg_q_resolve(VFS_ROOT_MSG_PLDM_REQ_OUT);
+                assert(msgQ != nullptr,
+                       "getAllPdrs: PLDM Req Out Message queue did not resolve properly!");
+
+                std::vector<uint8_t> response_bytes;
+
+                // Value from DSP0248 section 16.6
+                const uint8_t DSP0248_V1_2_0_PLATFORM_EVENT_FORMAT_VERSION = 1;
+
+                errl = sendrecv_pldm_request_payload<PLDM_PLATFORM_EVENT_MESSAGE_MIN_REQ_BYTES>
+                    (response_bytes,
+                     event_data_bytes,
+                     msgQ,
+                     encode_platform_event_message_req,
+                     DEFAULT_INSTANCE_ID,
+                     DSP0248_V1_2_0_PLATFORM_EVENT_FORMAT_VERSION,
+                     i_tid,
+                     PLDM_PDR_REPOSITORY_CHG_EVENT,
+                     event_data_bytes.data(),
+                     event_data_bytes.size());
+
+                if (errl)
+                {
+                    PLDM_INF("Failed to send/recv repository change event");
+                    break;
+                }
+
+                uint8_t completion_code = PLDM_SUCCESS;
+                uint8_t status = 0; // Don't really care about this status, it just
+                // tells us what happened with the logging (see
+                // DSP0248 1.2.0 section 16.6 for details)
+
+                /* @TODO RTC 252081: Uncomment this block when the BMC handles the
+                 * PdrRepositoryUpdate event. */
+#if 0
+                errl =
+                    decode_pldm_response(decode_platform_event_message_resp,
+                                         response_bytes,
+                                         &completion_code,
+                                         &status);
+
+                if (errl)
+                {
+                    PLDM_INF("Failed to decode repository change event");
+                    break;
+                }
+
+                if (completion_code != PLDM_SUCCESS)
+                {
+                    PLDM_INF("Event completion code is not PLDM_SUCCESS, is %d (status = %d)",
+                             completion_code,
+                             status);
+
+                    /*
+                     * @errortype  ERRL_SEV_UNRECOVERABLE
+                     * @moduleid   MOD_SEND_REPO_CHANGED_EVENT
+                     * @reasoncode RC_BAD_COMPLETION_CODE
+                     * @userdata1  Completion code returned from BMC
+                     * @userdata2  Status code returned from BMC
+                     * @devdesc    Software problem, PLDM Repo Changed notification unsuccessful
+                     * @custdesc   A software error occurred during system boot
+                     */
+                    errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                         MOD_SEND_REPO_CHANGED_EVENT,
+                                         RC_BAD_COMPLETION_CODE,
+                                         completion_code,
+                                         status,
+                                         ErrlEntry::NO_SW_CALLOUT);
+                    errl->collectTrace(PLDM_COMP_NAME);
+                    addBmcErrorCallouts(errl);
+                    break;
+                }
+#endif
+
+                PLDM_INF("Sent PDR Repository Changed Event successfully (code is %d, status is %d)",
+                         completion_code, status);
+            }
+        } while (false);
+    }
+
+    PLDM_EXIT("sendRepositoryChangedEvent");
 
     return errl;
 }

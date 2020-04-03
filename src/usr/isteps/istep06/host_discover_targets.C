@@ -616,6 +616,8 @@ void* host_discover_targets( void *io_pArgs )
     }
 
 #ifdef CONFIG_PLDM
+    PLDM::thePdrManager().resetPdrs();
+
     l_err = PLDM::thePdrManager().addRemotePdrs();
 
     if (l_err)
@@ -623,22 +625,47 @@ void* host_discover_targets( void *io_pArgs )
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   ERR_MRK"Failed to add remote PDRs to PDR manager");
 
-        // Create IStep error log and cross reference error that occurred
-        l_stepError.addErrorDetails( l_err );
-        // Commit Error
-        errlCommit (l_err, ISTEP_COMP_ID);
+        l_stepError.addErrorDetails(l_err);
+        errlCommit(l_err, ISTEP_COMP_ID);
     }
     else
     {
+        const auto bmc_pdr_handles = PLDM::thePdrManager().getAllPdrHandles();
+
         PLDM::thePdrManager().addLocalPdrs();
 
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "Added %u PDRs to PDR manager",
                   PLDM::thePdrManager().pdrCount());
-    }
 
-    // @TODO RTC 250690: Notify BMC that we're ready to send them back the PDR
-    // repo
+        auto hb_pdr_handles = PLDM::thePdrManager().getAllPdrHandles();
+
+        // Remove the BMC handles from the HB PDR handle list
+        const auto bmc_pdrs
+            = std::remove_if(begin(hb_pdr_handles), end(hb_pdr_handles),
+                             [&bmc_pdr_handles](const uint32_t handle)
+                             {
+                                 return (std::find(cbegin(bmc_pdr_handles), cend(bmc_pdr_handles), handle)
+                                         != cend(bmc_pdr_handles));
+                             });
+
+        hb_pdr_handles.erase(bmc_pdrs, end(hb_pdr_handles));
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "Sending PDR notification to the BMC for %llu PDRs",
+                  hb_pdr_handles.size());
+
+        l_err = PLDM::thePdrManager().sendPdrRepositoryChangeEvent(hb_pdr_handles);
+
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"Failed to send repository update event to BMC");
+
+            l_stepError.addErrorDetails(l_err);
+            errlCommit(l_err, ISTEP_COMP_ID);
+        }
+    }
 
     // send DIMM/CORE/PROC sensor status to the BMC
     //SENSOR::updateBMCSensorStatus();

@@ -49,11 +49,14 @@ extern "C" {
 /* Minimum response length */
 #define PLDM_GET_PDR_MIN_RESP_BYTES 12
 
+/* Minimum length for PLDM PlatformEventMessage response */
+#define PLDM_PLATFORM_EVENT_MESSAGE_RESP_BYTES 2
+
 /* Minimum length for PLDM PlatformEventMessage request */
 #define PLDM_PLATFORM_EVENT_MESSAGE_MIN_REQ_BYTES 3
 #define PLDM_PLATFORM_EVENT_MESSAGE_STATE_SENSOR_STATE_REQ_BYTES 6
 
-/* Minumum length of senson event data */
+/* Minumum length of sensor event data */
 #define PLDM_SENSOR_EVENT_DATA_MIN_LENGTH 5
 #define PLDM_SENSOR_EVENT_SENSOR_OP_STATE_DATA_LENGTH 2
 #define PLDM_SENSOR_EVENT_STATE_SENSOR_STATE_DATA_LENGTH 3
@@ -428,6 +431,60 @@ struct pldm_pdr_repository_change_record_data {
 	uint32_t change_entry[1];
 } __attribute__((packed));
 
+/* Minumum length of data for pldmPDRRepositoryChgEvent */
+
+#define PLDM_PDR_REPOSITORY_CHG_EVENT_MIN_LENGTH 2
+#define PLDM_PDR_REPOSITORY_CHANGE_RECORD_MIN_LENGTH 2
+
+/** @brief PLDM pldmPDRRepositoryChgEvent class changeRecord format
+ * eventDataOperation
+ */
+enum pldm_pdr_repository_chg_event_change_record_event_data_operation {
+	REFRESH_ALL_RECORDS,
+	RECORDS_DELETED,
+	RECORDS_ADDED,
+	RECORDS_MODIFIED
+};
+
+/** @brief Decode pldmPDRRepositoryChgEvent response data
+ *
+ *  @param[in] event_data - eventData for pldmPDRRepositoryChgEvent
+ *  @param[in] event_data_size - Length of event_data
+ *  @param[out] event_data_format - This field indicates if the changedRecords
+ * are of PDR Types or PDR Record Handles
+ *  @param[out] number_of_change_records - The number of changeRecords following
+ * this field
+ *  @param[out] change_record_data_offset - Identifies where changeRecord data
+ * is located within event_data
+ *  @return pldm_completion_codes
+ *  @note  Caller is responsible for memory alloc and dealloc of param
+ *         'event_data'
+ */
+int decode_pldm_pdr_repository_chg_event_data(
+    const uint8_t *event_data, size_t event_data_size,
+    uint8_t *event_data_format, uint8_t *number_of_change_records,
+    size_t *change_record_data_offset);
+
+/** @brief Decode PldmPDRRepositoryChangeRecord response data
+ *
+ *  @param[in] change_record_data - changeRecordData for
+ * pldmPDRRepositoryChgEvent
+ *  @param[in] change_record_data_size - Length of change_record_data
+ *  @param[out] event_data_operation - This field indicates the changeEntries
+ * operation types
+ *  @param[out] number_of_change_entries - The number of changeEntries following
+ * this field
+ *  @param[out] change_entry_data_offset - Identifies where changeEntries data
+ * is located within change_record_data
+ *  @return pldm_completion_codes
+ *  @note  Caller is responsible for memory alloc and dealloc of param
+ *         'change_record_data'
+ */
+int decode_pldm_pdr_repository_change_record_data(
+    const uint8_t *change_record_data, size_t change_record_data_size,
+    uint8_t *event_data_operation, uint8_t *number_of_change_entries,
+    size_t *change_entry_data_offset);
+
 /* Responder */
 
 /* SetNumericEffecterValue */
@@ -790,6 +847,64 @@ int decode_platform_event_message_req(const struct pldm_msg *msg,
 				      uint8_t *event_class,
 				      size_t *event_data_offset);
 
+/** @brief Encode PlatformEventMessage request data
+ *  @param[in] instance_id - Message's instance id
+ *  @param[in] format_version - Version of the event format
+ *  @param[in] tid - Terminus ID for the terminus that originated the event message
+ *  @param[in] event_class - The class of event being sent
+ *  @param[in] event_data - Event data being sent
+ *  @param[in] event_data_length - Length of event_data in bytes
+ *  @param[out] msg - Message will be written to this
+ *  @param[in] payload_length - Size allocated for msg payload
+ *  @return pldm_completion_codes
+ *  @note  Caller is responsible for memory alloc and dealloc of param 'msg.payload'
+ */
+int encode_platform_event_message_req(uint8_t instance_id,
+                                      uint8_t format_version,
+                                      uint8_t tid,
+                                      uint8_t event_class,
+                                      const void *event_data,
+                                      size_t event_data_length,
+                                      struct pldm_msg *msg,
+                                      size_t payload_length);
+
+/** @brief Encode PLDM PDR Repository Change eventData
+ *  @param[in] event_data_format - Format of this event data (e.g. FORMAT_IS_PDR_HANDLES)
+ *  @param[in] number_of_change_records - Number of changeRecords in this eventData
+ *  @param[in] event_data_operations - Array of eventDataOperations
+ *      (e.g. RECORDS_ADDED) for each changeRecord in this eventData. This array should
+ *      contain number_of_change_records elements.
+ *  @param[in] numbers_of_change_entries - Array of numbers of changeEntrys
+ *      for each changeRecord in this eventData. This array should contain
+ *      number_of_change_records elements.
+ *  @param[in] change_entries - 2-dimensional array of arrays of changeEntrys,
+ *      one array per changeRecord in this eventData. The toplevel array should
+ *      contain number_of_change_records elements. Each subarray [i] should
+ *      contain numbers_of_change_entries[i] elements.
+ *  @param[in] event_data - The eventData will be encoded into this. This entire
+ *      structure must be max_change_records_size long. It must be large enough
+ *      to accomodate the data to be encoded. The caller is responsible for
+ *      allocating and deallocating it, including the variable-size
+ *      'event_data.change_records' field. If this parameter is NULL,
+ *      PLDM_SUCCESS will be returned and actual_change_records_size will be set
+ *      to reflect the required size of the structure.
+ *  @param[out] actual_change_records_size - The actual number of meaningful
+ *      encoded bytes in event_data. The caller can over-allocate memory and use
+ *      this output to determine the real size of the structure.
+ *  @param[in] max_change_records_size - The size of event_data in bytes. If the
+ *      encoded message would be larger than this value, an error is returned.
+ *  @return pldm_completion_codes
+ *  @note  Caller is responsible for memory alloc and dealloc of param 'event_data.change_records'
+ */
+int encode_pldm_pdr_repository_chg_event_data(uint8_t event_data_format,
+                                              uint8_t number_of_change_records,
+                                              const uint8_t *event_data_operations,
+                                              const uint8_t *numbers_of_change_entries,
+                                              const uint32_t *const *change_entries,
+                                              struct pldm_pdr_repository_chg_event_data *event_data,
+                                              size_t *actual_change_records_size,
+                                              size_t max_change_records_size);
+
 /** @brief Encode PlatformEventMessage response data
  *  @param[in] instance_id - Message's instance id
  *  @param[in] completion_code - PLDM completion code
@@ -802,6 +917,18 @@ int decode_platform_event_message_req(const struct pldm_msg *msg,
 int encode_platform_event_message_resp(uint8_t instance_id,
 				       uint8_t completion_code, uint8_t status,
 				       struct pldm_msg *msg);
+
+/** @brief Decode PlatformEventMessage response data
+ *  @param[in] msg - Message to decode
+ *  @param[in] payload_length - Length of message payload
+ *  @param[out] completion_code - Completion code from message
+ *  @param[out] status - Status from message
+ *  @return pldm_completion_codes
+ */
+int decode_platform_event_message_resp(const struct pldm_msg *msg,
+                                       size_t payload_length,
+                                       uint8_t *completion_code,
+                                       uint8_t *status);
 
 /** @brief Decode sensorEventData response data
  *

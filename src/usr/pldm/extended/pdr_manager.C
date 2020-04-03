@@ -35,6 +35,9 @@
 #include <util/singleton.H>
 
 #include "../extern/pdr.h"
+#include "../extern/platform.h"
+
+using namespace PLDM;
 
 namespace
 {
@@ -51,6 +54,39 @@ mutex_lock_t scoped_mutex_lock(mutex_t& i_mutex)
 {
     mutex_lock(&i_mutex);
     return { &i_mutex, mutex_unlock };
+}
+
+/* @brief findPdr_impl
+ *
+ *        This function is the same as findPdr but doesn't lock the PdrManager
+ *        mutex. See PdrManager::findPdr for documentation.
+ */
+bool findPdr_impl(pdr_handle_t& io_record_handle,
+                  const uint8_t*& o_data,
+                  uint32_t& o_size,
+                  uint32_t& o_next_record_handle,
+                  const pldm_pdr* const i_pdr_repo)
+{
+    const bool found = pldm_pdr_find_record(i_pdr_repo,
+                                            io_record_handle,
+                                            const_cast<uint8_t**>(&o_data),
+                                            &o_size,
+                                            &o_next_record_handle);
+
+    if (found)
+    {
+        assert(o_size >= sizeof(pldm_pdr_hdr),
+               "PDR data is smaller than PDR header size (size is %u, expecting at least %llu)",
+               o_size,
+               sizeof(pldm_pdr_hdr));
+
+        // Update the record handle (specifically for the case where we request
+        // PDR handle 0, the real handle for the first PDR in the repository
+        // could be any number).
+        io_record_handle = le32toh(reinterpret_cast<const pldm_pdr_hdr*>(o_data)->record_handle);
+    }
+
+    return found;
 }
 
 }
@@ -94,21 +130,20 @@ size_t PdrManager::pdrCount() const
     return pldm_pdr_get_record_count(pdr_repo.get());
 }
 
-bool PdrManager::findPdr(const pdr_handle_t i_record_handle,
-                         std::vector<uint8_t>* o_data,
+bool PdrManager::findPdr(pdr_handle_t& io_record_handle,
+                         std::vector<uint8_t>* const o_data,
                          uint32_t& o_next_record_handle) const
 {
     const auto lock = scoped_mutex_lock(access_mutex);
 
-    uint8_t* data = nullptr;
+    const uint8_t* data = nullptr;
     uint32_t data_size = 0;
 
-    const bool found = (pldm_pdr_find_record(pdr_repo.get(),
-                                             i_record_handle,
-                                             &data,
-                                             &data_size,
-                                             &o_next_record_handle)
-                        != nullptr);
+    const bool found = findPdr_impl(io_record_handle,
+                                    data,
+                                    data_size,
+                                    o_next_record_handle,
+                                    pdr_repo.get());
 
     if (found && o_data)
     {
@@ -116,6 +151,42 @@ bool PdrManager::findPdr(const pdr_handle_t i_record_handle,
     }
 
     return found;
+}
+
+errlHndl_t PdrManager::sendPdrRepositoryChangeEvent(const std::vector<uint32_t>& i_handles) const
+{
+    const auto lock = scoped_mutex_lock(access_mutex);
+
+    return sendRepositoryChangedEvent(hostboot_terminus_id,
+                                      pdr_repo.get(),
+                                      i_handles);
+}
+
+std::vector<uint32_t> PdrManager::PdrManager::getAllPdrHandles() const
+{
+    const auto lock = scoped_mutex_lock(access_mutex);
+
+    std::vector<uint32_t> pdrs;
+
+    pdr_handle_t record_handle = FIRST_PDR_HANDLE,
+                 next_record_handle = 0;
+
+    do
+    {
+        const uint8_t* pdr_data = nullptr;
+        uint32_t pdr_size = 0;
+        if (!findPdr_impl(record_handle, pdr_data, pdr_size, next_record_handle, pdr_repo.get()))
+        {
+            assert(false,
+                   "PDR manager failed to find next record handle 0x%08x",
+                   record_handle);
+        }
+
+        pdrs.push_back(record_handle);
+        record_handle = next_record_handle;
+    } while (record_handle != NO_MORE_PDR_HANDLES);
+
+    return pdrs;
 }
 
 PdrManager& thePdrManager()
