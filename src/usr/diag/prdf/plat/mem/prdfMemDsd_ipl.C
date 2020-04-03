@@ -29,9 +29,10 @@
 #include <prdfMemDqBitmap.H>
 #include <prdfMemDsd.H>
 
-/* TODO RTC 247259
+#include <exp_defaults.H>
+#include <exp_rank.H>
+#include <kind.H>
 #include <hwp_wrappers.H>
-*/
 
 using namespace TARGETING;
 
@@ -191,10 +192,6 @@ uint32_t DsdEvent<TYPE_OCMB_CHIP>::startCmd()
 
     uint32_t o_rc = SUCCESS;
 
-    /* TODO RTC 247259
-
-    #ifdef CONFIG_AXONE
-
     mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
 
     switch ( iv_phase )
@@ -224,9 +221,6 @@ uint32_t DsdEvent<TYPE_OCMB_CHIP>::startCmd()
         default: PRDF_ASSERT( false ); // invalid phase
     }
 
-    #endif
-
-    */
     return o_rc;
 
     #undef PRDF_FUNC

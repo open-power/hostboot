@@ -135,7 +135,7 @@ void addL3LdCrFfdc( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
  */
 int32_t L2UE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 {
-    /* TODO RTC 247259
+    /* TODO RTC 256733
 #ifdef __HOSTBOOT_RUNTIME
     int32_t l_rc = SUCCESS;
     p9_l2err_extract_err_data errorAddr =
@@ -189,7 +189,7 @@ PRDF_PLUGIN_DEFINE_NS( axone_ex,   Ex, L2UE );
  */
 int32_t L3UE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 {
-    /* TODO RTC 247259
+    /* TODO RTC 256733
 #ifdef __HOSTBOOT_RUNTIME
     int32_t l_rc = SUCCESS;
     p9_l3err_extract_err_data errorAddr = { L3ERR_CE_UE, 0, 0, 0, 0, 0, 0 };
@@ -246,7 +246,7 @@ int32_t L2CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
         int32_t l_rc = SUCCESS;
 
 #ifdef __HOSTBOOT_RUNTIME
-        /* TODO RTC 247259
+        /* TODO RTC 256733
         p9_l2err_extract_err_data errorAddr =
             { L2ERR_CE_UE, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
@@ -318,7 +318,7 @@ int32_t L2CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
         PRDF_TRAC( "[L2CE] HUID: 0x%08x apply directed line delete",
                         i_chip->GetId());
 #ifdef __HOSTBOOT_RUNTIME
-        /* TODO RTC 247259
+        /* TODO RTC 256733
         l_rc = l2LineDelete(i_chip->getTrgt(), errorAddr);
         */
 #endif
@@ -367,7 +367,7 @@ int32_t L3CE( ExtensibleChip * i_chip,
         int32_t l_rc = SUCCESS;
 
 #ifdef __HOSTBOOT_RUNTIME
-        /* TODO RTC 247259
+        /* TODO RTC 256733
         p9_l3err_extract_err_data errorAddr =
             { L3ERR_CE_UE, 0, 0, 0, 0, 0, 0 };
 
@@ -459,7 +459,7 @@ int32_t L3CE( ExtensibleChip * i_chip,
         PRDF_TRAC( "[L3CE] HUID: 0x%08x apply directed line delete",
                 i_chip->GetId());
         #ifdef __HOSTBOOT_RUNTIME
-        /* TODO RTC 247259
+        /* TODO RTC 256733
         l_rc = l3LineDelete(i_chip->getTrgt(), errorAddr);
         */
         #endif

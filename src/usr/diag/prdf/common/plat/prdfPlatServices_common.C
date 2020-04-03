@@ -43,7 +43,7 @@
 #ifdef __HOSTBOOT_MODULE
 #include <prdfParserUtils.H>
 #include <dimmBadDqBitmapFuncs.H>
-/* TODO RTC 247259
+/* TODO RTC 256733
 #include <p9_io_xbus_read_erepair.H>
 #include <p9_io_xbus_pdwn_lanes.H>
 #include <p9_io_xbus_clear_firs.H>
@@ -96,7 +96,7 @@ int32_t readErepair<TYPE_XBUS>(TargetHandle_t i_rxBusTgt,
     #ifdef __HOSTBOOT_MODULE
     PRDF_ASSERT( nullptr != i_rxBusTgt);
     PRDF_ASSERT( TYPE_XBUS == getTargetType(i_rxBusTgt) );
-    /* TODO RTC 247259
+    /* TODO RTC 256733
     errlHndl_t err = nullptr;
 
     fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiTrgt (i_rxBusTgt);
@@ -130,7 +130,7 @@ int32_t clearIOFirs<TYPE_XBUS>(TargetHandle_t i_rxBusTgt)
     PRDF_ASSERT( nullptr != i_rxBusTgt);
     PRDF_ASSERT( TYPE_XBUS == getTargetType(i_rxBusTgt) );
 
-    /* TODO RTC 247259
+    /* TODO RTC 256733
     errlHndl_t err = nullptr;
 
     fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiTrgt (i_rxBusTgt);
@@ -167,7 +167,7 @@ int32_t powerDownLanes<TYPE_XBUS>( TargetHandle_t i_rxBusTgt,
     PRDF_ASSERT( nullptr != i_rxBusTgt);
     PRDF_ASSERT( TYPE_XBUS == getTargetType(i_rxBusTgt) );
 
-    /* TODO RTC 247259
+    /* TODO RTC 256733
     errlHndl_t err = nullptr;
 
     fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiTrgt (i_rxBusTgt);
@@ -205,7 +205,7 @@ int32_t getVpdFailedLanes<TYPE_XBUS>(TargetHandle_t i_rxBusTgt,
     PRDF_ASSERT( nullptr != i_rxBusTgt);
     PRDF_ASSERT( TYPE_XBUS == getTargetType(i_rxBusTgt) );
 
-    /* TODO RTC 247259
+    /* TODO RTC 256733
     errlHndl_t err = nullptr;
 
     fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiTrgt (i_rxBusTgt);
@@ -250,7 +250,7 @@ int32_t setVpdFailedLanes<TYPE_XBUS,TYPE_XBUS>(
     PRDF_ASSERT( TYPE_XBUS == getTargetType(i_rxBusTgt) );
     PRDF_ASSERT( TYPE_XBUS == getTargetType(i_txBusTgt) );
 
-    /* TODO RTC 247259
+    /* TODO RTC 256733
     errlHndl_t err = nullptr;
 
     fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiRxTrgt (i_rxBusTgt);
@@ -306,26 +306,23 @@ uint32_t __getBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
     {
         // Skip if the DIMM doesn't exist
         if ( nullptr == getConnectedDimm(i_trgt, i_rank, ps) ) continue;
-        /* TODO RTC 247259
 
         errlHndl_t errl = nullptr;
 
         fapi2::Target<T> l_fapiTrgt( i_trgt );
 
-//p10cleanup
-//        FAPI_INVOKE_HWP( errl, p9DimmGetBadDqBitmap, l_fapiTrgt,
-//                         i_rank.getDimmSlct(), i_rank.getRankSlct(),
-//                         data[ps].bitmap, ps );
+        FAPI_INVOKE_HWP( errl, p10DimmGetBadDqBitmap, l_fapiTrgt,
+                         i_rank.getDimmSlct(), i_rank.getRankSlct(),
+                         data[ps].bitmap, ps );
 
         if ( nullptr != errl )
         {
-            PRDF_ERR( PRDF_FUNC "p9DimmGetBadDqBitmap() failed: i_trgt=0x%08x "
+            PRDF_ERR( PRDF_FUNC "p10DimmGetBadDqBitmap() failed: i_trgt=0x%08x "
                     "ps=%d ds=%d rs=%d", getHuid(i_trgt), ps,
                     i_rank.getDimmSlct(), i_rank.getRankSlct() );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
             o_rc = FAIL; break;
        }
-       */
     }
 
     if ( SUCCESS == o_rc )
@@ -391,25 +388,22 @@ uint32_t __setBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
         {
             // Don't proceed unless the DIMM exists
             PRDF_ASSERT( nullptr != getConnectedDimm(i_trgt, i_rank, ps) );
-            /* TODO RTC 247259
             errlHndl_t errl = nullptr;
 
             fapi2::Target<T> l_fapiTrgt( i_trgt );
 
-//p10cleanup
-//            FAPI_INVOKE_HWP( errl, p9DimmSetBadDqBitmap, l_fapiTrgt,
-//                             i_rank.getDimmSlct(), i_rank.getRankSlct(),
-//                             data.at(ps).bitmap, ps );
+            FAPI_INVOKE_HWP( errl, p10DimmSetBadDqBitmap, l_fapiTrgt,
+                             i_rank.getDimmSlct(), i_rank.getRankSlct(),
+                             data.at(ps).bitmap, ps );
 
             if ( nullptr != errl )
             {
-                PRDF_ERR( PRDF_FUNC "p9DimmSetBadDqBitmap() failed: "
+                PRDF_ERR( PRDF_FUNC "p10DimmSetBadDqBitmap() failed: "
                           "i_trgt=0x%08x ps=%d ds=%d rs=%d", getHuid(i_trgt),
                           ps, i_rank.getDimmSlct(), i_rank.getRankSlct() );
                 PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
                 o_rc = FAIL;
             }
-            */
         }
     }
 

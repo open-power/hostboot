@@ -185,14 +185,8 @@ void* call_mss_memdiag (void*)
 
             if ( l_explorerChipList.size() )
             {
-#if 0
-// TODO: RTC:208831 - Methods ATTN::startService and MDIA::runStep are not
-// ready which is called by __runMemDiags, so best to not make the call to
-// __runMemDiags. Uncomment and call method __runMemDiags when said methods
-// are ready.
                 // Start Memory Diagnostics.
                 __runMemDiags( l_explorerChipList, l_iStepError );
-#endif
                 if ( !l_iStepError.isNull() )
                 {
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK

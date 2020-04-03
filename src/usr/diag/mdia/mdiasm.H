@@ -37,6 +37,11 @@
 #include "mdiaglobals.H"
 #include <targeting/namedtarget.H>
 
+#include <exp_defaults.H>
+#include <exp_rank.H>
+#include <kind.H>
+#include <hwp_wrappers.H>
+
 namespace MDIA
 {
 
@@ -45,7 +50,6 @@ namespace MDIA
  */
 enum WorkFlowPhase
 {
-    /* TODO RTC 247259 - hard coding the patterns for now, use vars later
     START_PATTERN_0 = mss::mcbist::PATTERN_0,
     START_PATTERN_1 = mss::mcbist::PATTERN_1,
     START_PATTERN_2 = mss::mcbist::PATTERN_2,
@@ -55,16 +59,6 @@ enum WorkFlowPhase
     START_PATTERN_6 = mss::mcbist::PATTERN_6,
     START_PATTERN_7 = mss::mcbist::PATTERN_7,
     START_RANDOM_PATTERN = mss::mcbist::PATTERN_RANDOM,
-    */
-    START_PATTERN_0 = 0,
-    START_PATTERN_1 = 1,
-    START_PATTERN_2 = 2,
-    START_PATTERN_3 = 3,
-    START_PATTERN_4 = 4,
-    START_PATTERN_5 = 5,
-    START_PATTERN_6 = 6,
-    START_PATTERN_7 = 7,
-    START_RANDOM_PATTERN = 8,
 
     DUMMY_SYNC_PHASE,
     DUMMY_ASYNC_PHASE,

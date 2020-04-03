@@ -53,18 +53,17 @@
 #include <prdfHomRegisterAccess.H>
 #include <ibscomreasoncodes.H>
 #include <scom/scomreasoncodes.H>
-// TODO RTC 247259 - need P10 version
+// TODO RTC 256733 - need P10 version
 //#include <p9_proc_gettracearray.H>
 #include <fapi2_spd_access.H>
 #include <prdfParserUtils.H>
-// TODO RTC 247259
-//#include <mcbist/gen_mss_mcbist_settings.H>
 #include <fapi2_hwp_executor.H>
 #include <errl/errludlogregister.H>
 
-/* TODO RTC 247259
+#include <exp_defaults.H>
+#include <exp_rank.H>
+#include <kind.H>
 #include <hwp_wrappers.H>
-*/
 
 #ifdef CONFIG_NVDIMM
 #include <nvdimm.H>
@@ -220,7 +219,6 @@ uint32_t getSpdData(TARGETING::TargetHandle_t i_target,
 {
 #define PRDF_FUNC "[PlatServices::getSPDdata] "
     uint32_t o_rc = SUCCESS;
-    /* TODO RTC 247259
 
     errlHndl_t l_errl = nullptr;
 
@@ -264,7 +262,6 @@ uint32_t getSpdData(TARGETING::TargetHandle_t i_target,
           break;
       }
     } while (0);
-    */
 
     return o_rc;
 #undef PRDF_FUNC
@@ -349,7 +346,6 @@ TARGETING::TargetHandle_t getActiveRefClk(TARGETING::TargetHandle_t
 //##                        Memory specific functions
 //##############################################################################
 
-/* TODO RTC 247259
 template<>
 uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                           const MemRank & i_rank,
@@ -358,8 +354,6 @@ uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                           AddrRangeType i_rangeType )
 {
     #define PRDF_FUNC "[PlatServices::getMemAddrRange<TYPE_OCMB_CHIP>] "
-
-    #ifdef CONFIG_AXONE
 
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
@@ -384,18 +378,14 @@ uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         PRDF_ASSERT(false);
     }
 
-    #endif
-
     return SUCCESS;
 
     #undef PRDF_FUNC
 }
-*/
 
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 247259
 MemAddr __convertMssMcbistAddr( const mss::mcbist::address & i_addr )
 {
     uint64_t dslct = i_addr.get_dimm();
@@ -409,7 +399,6 @@ MemAddr __convertMssMcbistAddr( const mss::mcbist::address & i_addr )
 
     return MemAddr ( MemRank ( mrnk, srnk ), bnk, row, col );
 }
-*/
 
 //------------------------------------------------------------------------------
 
@@ -420,7 +409,6 @@ uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                           MemAddr & o_endAddr,
                                           AddrRangeType i_rangeType )
 {
-    /* TODO RTC 247259
     mss::mcbist::address saddr, eaddr;
     uint32_t o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_chip, i_rank, saddr,
                                                      eaddr, i_rangeType );
@@ -431,8 +419,6 @@ uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     }
 
     return o_rc;
-    */
-    return SUCCESS;
 }
 
 //------------------------------------------------------------------------------
@@ -483,13 +469,11 @@ uint32_t getMemAddrRange( ExtensibleChip * i_chip, VT & o_startAddr,
     #undef PRDF_FUNC
 }
 
-/* TODO RTC 247259
 template
 uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                           mss::mcbist::address & o_startAddr,
                                           mss::mcbist::address & o_endAddr,
                                           uint8_t i_dimmSlct );
-*/
 
 template
 uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
@@ -655,9 +639,6 @@ uint32_t startBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
 
     uint32_t o_rc = SUCCESS;
 
-    /* TODO RTC 247259
-    #ifdef CONFIG_AXONE
-
     // Get the OCMB fapi target
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt (i_ocmb->getTrgt());
 
@@ -741,9 +722,7 @@ uint32_t startBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
         }
 
     } while (0);
-    #endif
 
-    */
     return o_rc;
 
     #undef PRDF_FUNC
@@ -751,8 +730,6 @@ uint32_t startBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 247259
-#ifdef CONFIG_AXONE
 template<>
 uint32_t startTdScrub<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
         const MemRank & i_rank, AddrRangeType i_rangeType,
@@ -812,8 +789,7 @@ uint32_t startTdScrub<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-#endif
-*/
+
 //##############################################################################
 //##                  Core/cache trace array functions
 //##############################################################################
@@ -821,7 +797,7 @@ uint32_t startTdScrub<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
 int32_t restartTraceArray(TargetHandle_t i_tgt)
 {
     int32_t o_rc = SUCCESS;
-    /* TODO RTC 247259 - need P10 version
+    /* TODO RTC 256733 - need P10 version
     errlHndl_t err = nullptr;
     TYPE tgtType = getTargetType(i_tgt);
     proc_gettracearray_args taArgs;

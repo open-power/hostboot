@@ -35,7 +35,7 @@
 #include <prdfParserEnums.H>
 #include <netinet/in.h>
 #include <prdfPlatProcConst.H>
-/* TODO RTC 247259
+/* TODO RTC 256733
 #include <p9n2_misc_scom_addresses.H>
 #include <p9_quad_scom_addresses.H>
 #include <p9_ppe_defs.H>
@@ -336,7 +336,7 @@ bool parseL3LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
  * @param[in] i_minNum  minor number
  * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
  */
-/* TODO RTC 247259
+/* TODO RTC 256733
 uint32_t parseRegFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length,
                        std::vector < std::string >& i_regList,
                        uint32_t i_majNum, uint32_t i_minNum )
@@ -451,7 +451,7 @@ uint32_t parseRegFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_lengt
  * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
  * @note      assumes just PPE XIRs
  */
-/* TODO RTC 247259
+/* TODO RTC 256733
 uint32_t parsePpeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length,
                        uint32_t i_majNum, uint32_t i_minNum )
 {
@@ -548,7 +548,7 @@ uint32_t parsePpeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_lengt
  * @param[in] i_length  length of the section
  * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
  */
-/* TODO RTC 247259
+/* TODO RTC 256733
 uint32_t parseCmeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length )
 {
     using namespace p9_stop_recov_ffdc;
@@ -611,7 +611,7 @@ uint32_t parseCmeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_lengt
  * @param[in] i_length  length of the section
  * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
  */
-/* TODO RTC 247259
+/* TODO RTC 256733
 uint32_t parseSgpeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length )
 {
     using namespace p9_stop_recov_ffdc;
@@ -648,7 +648,7 @@ uint32_t parseSgpeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_leng
  * @param[in] i_length  length of the section
  * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
  */
-/* TODO RTC 247259
+/* TODO RTC 256733
 uint32_t parsePgpeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length )
 {
     using namespace p9_stop_recov_ffdc;
@@ -685,7 +685,7 @@ uint32_t parsePgpeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_leng
  * @param[in] i_length  length of the section
  * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
  */
-/* TODO RTC 247259
+/* TODO RTC 256733
 uint32_t parseSysState( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length )
 {
     using namespace p9_stop_recov_ffdc;
@@ -745,7 +745,7 @@ uint32_t parseSysState( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_leng
  * @param[in] i_length  length of the section
  * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
  */
-/* TODO RTC 247259
+/* TODO RTC 256733
 uint32_t parseCppmFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length )
 {
     using namespace p9_stop_recov_ffdc;
@@ -809,7 +809,7 @@ uint32_t parseCppmFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_leng
  * @param[in] i_length  length of the section
  * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
  */
-/* TODO RTC 247259
+/* TODO RTC 256733
 uint32_t parseQppmFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length )
 {
     using namespace p9_stop_recov_ffdc;
@@ -873,7 +873,7 @@ uint32_t parseQppmFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_leng
  * @param[in] i_subsec  sub section id
  * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
  */
-/* TODO RTC 247259
+/* TODO RTC 256733
 bool parsePmFfdcData( void* i_buf, uint32_t i_length,
                       ErrlUsrParser& i_parser, errlver_t i_subsec )
 {

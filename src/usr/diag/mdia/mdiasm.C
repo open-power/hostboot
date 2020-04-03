@@ -46,8 +46,6 @@
 #include <initservice/initserviceif.H>
 #include <sys/time.h>
 #include <sys/misc.h>
-// TODO RTC 247259
-//#include <hwp_wrappers.H>
 
 using namespace TARGETING;
 using namespace ERRORLOG;
@@ -378,8 +376,7 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                 MDIA_FAST("sm: stopping command HUID:0x%08X", get_huid(target));
 
                 fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiOcmb(target);
-                // TODO RTC 247259
-                //FAPI_INVOKE_HWP( err, exp_stop, fapiOcmb );
+                FAPI_INVOKE_HWP( err, exp_stop, fapiOcmb );
                 if ( nullptr != err )
                 {
                     MDIA_ERR("sm: exp_stop failed");
@@ -678,11 +675,9 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
 
             case RESTORE_DRAM_REPAIRS:
             {
-                /* TODO RTC 247259
                 TargetHandle_t target = getTarget( *i_wfp );
                 rc = PRDF::restoreDramRepairs<TYPE_OCMB_CHIP>( target );
                 break;
-                */
             }
             case START_PATTERN_0:
             case START_PATTERN_1:
@@ -712,7 +707,6 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
             case ANALYZE_IPL_MNFG_CE_STATS:
             {
                 MDIA_FAST("Executing analyzeIplCEStats");
-                /* TODO RTC 247259 - PRD not compiled yet
                 bool calloutMade = false;
                 TargetHandle_t target = getTarget( *i_wfp );
                 rc = PRDF::analyzeIplCEStats( target,
@@ -731,7 +725,6 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
                     MDIA_FAST("PRD performed HW callouts during"
                               "analyzeIplCEStats");
                 }
-                */
 
             }
                 break;
@@ -795,37 +788,34 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
         // new command...use the full range
 
         fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiOcmb(target);
-        //TODO RTC 247259
-        //mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
+        mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
 
         switch(workItem)
         {
             case START_RANDOM_PATTERN:
 
-                // TODO RTC 247259
-                //FAPI_INVOKE_HWP( err, exp_sf_init, fapiOcmb,
-                //                 mss::mcbist::PATTERN_RANDOM );
+                FAPI_INVOKE_HWP( err, exp_sf_init, fapiOcmb,
+                                 mss::mcbist::PATTERN_RANDOM );
                 MDIA_FAST( "sm: random init %p on: %x", fapiOcmb,
                            get_huid(target) );
                 break;
 
             case START_SCRUB:
 
-                //TODO RTC 247259
-                //set stop conditions
-                //stopCond.set_pause_on_mpe(mss::ON);
-                //stopCond.set_pause_on_ue( mss::ON);
-                //stopCond.set_pause_on_aue(mss::ON);
-                //stopCond.set_nce_inter_symbol_count_enable(mss::ON);
-                //stopCond.set_nce_soft_symbol_count_enable( mss::ON);
-                //stopCond.set_nce_hard_symbol_count_enable( mss::ON);
-                //if ( iv_globals.queryMnfgIplCeChecking() )
-                //{
-                //    stopCond.set_pause_on_nce_hard(mss::ON);
-                //}
+                // set stop conditions
+                stopCond.set_pause_on_mpe(mss::ON);
+                stopCond.set_pause_on_ue( mss::ON);
+                stopCond.set_pause_on_aue(mss::ON);
+                stopCond.set_nce_inter_symbol_count_enable(mss::ON);
+                stopCond.set_nce_soft_symbol_count_enable( mss::ON);
+                stopCond.set_nce_hard_symbol_count_enable( mss::ON);
+                if ( iv_globals.queryMnfgIplCeChecking() )
+                {
+                    stopCond.set_pause_on_nce_hard(mss::ON);
+                }
 
-                //FAPI_INVOKE_HWP( err, exp_sf_read, fapiOcmb,
-                //                 stopCond );
+                FAPI_INVOKE_HWP( err, exp_sf_read, fapiOcmb,
+                                 stopCond );
                 MDIA_FAST( "sm: scrub %p on: %x", fapiOcmb,
                            get_huid(target) );
                 break;
@@ -839,9 +829,8 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
             case START_PATTERN_6:
             case START_PATTERN_7:
 
-                //TODO RTC 247259
-                //FAPI_INVOKE_HWP( err, exp_sf_init, fapiOcmb,
-                //                 workItem );
+                FAPI_INVOKE_HWP( err, exp_sf_init, fapiOcmb,
+                                 workItem );
                 MDIA_FAST( "sm: init %p on: %x", fapiOcmb,
                            get_huid(target) );
                 break;
@@ -1003,8 +992,7 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
         {
             MDIA_FAST("sm: stopping command: %p", target);
             fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiOcmb(target);
-            //TODO RTC 247259
-            //FAPI_INVOKE_HWP( err, exp_stop, fapiOcmb );
+            FAPI_INVOKE_HWP( err, exp_stop, fapiOcmb );
 
             if(nullptr != err)
             {

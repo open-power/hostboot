@@ -29,9 +29,10 @@
 
 // Platform includes
 
-/* TODO RTC 247259
+#include <exp_defaults.H>
+#include <exp_rank.H>
+#include <kind.H>
 #include <hwp_wrappers.H>
-*/
 
 using namespace TARGETING;
 
@@ -96,9 +97,6 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::startCmd()
     #define PRDF_FUNC "[VcmEvent::startCmd] "
 
     uint32_t o_rc = SUCCESS;
-    /* TODO RTC 247259
-
-    #ifdef CONFIG_AXONE
 
     // No stop conditions.
     mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
@@ -112,9 +110,6 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::startCmd()
                   iv_chip->getHuid(), getKey() );
     }
 
-    #endif
-
-    */
     return o_rc;
 
     #undef PRDF_FUNC

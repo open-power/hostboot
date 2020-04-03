@@ -42,7 +42,7 @@
 
 // Other includes
 #include <runtime/interface.h>
-/* TODO RTC 247259
+/* TODO RTC 256733
 #include <p9_l3err_extract.H>
 #include <p9_l2err_extract.H>
 #include <p9_l3err_linedelete.H>
@@ -53,9 +53,10 @@
 */
 #include <rt_todintf.H>
 
-/* TODO RTC 247259
+#include <exp_defaults.H>
+#include <exp_rank.H>
+#include <kind.H>
 #include <hwp_wrappers.H>
-*/
 
 //------------------------------------------------------------------------------
 
@@ -125,7 +126,6 @@ uint32_t stopBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
 
     uint32_t rc = SUCCESS;
 
-    /* TODO RTC 247259
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt ( i_chip->getTrgt() );
 
     errlHndl_t errl;
@@ -137,7 +137,6 @@ uint32_t stopBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         rc = FAIL;
     }
-    */
 
     return rc;
 
@@ -157,7 +156,6 @@ uint32_t resumeBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     uint32_t o_rc = SUCCESS;
 
-    /* TODO RTC 247259
     // Get the OCMB fapi target
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt ( i_chip->getTrgt() );
 
@@ -217,7 +215,6 @@ uint32_t resumeBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         }
 
     } while (0);
-    */
 
     return o_rc;
 
@@ -227,7 +224,7 @@ uint32_t resumeBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 //##############################################################################
 //##                       Line Delete Functions
 //##############################################################################
-/* TODO RTC 247259
+/* TODO RTC 256733
 int32_t extractL3Err( TargetHandle_t i_exTgt,
                       p9_l3err_extract_err_data &o_errorAddr)
 {
@@ -261,7 +258,7 @@ int32_t extractL3Err( TargetHandle_t i_exTgt,
 }
 */
 
-/* TODO RTC 247259
+/* TODO RTC 256733
 int32_t l3LineDelete(TargetHandle_t i_exTgt,
                      const p9_l3err_extract_err_data& i_l3_err_data)
 {
@@ -308,7 +305,7 @@ int32_t l3LineDelete(TargetHandle_t i_exTgt,
 }
 */
 
-/* TODO RTC 247259
+/* TODO RTC 256733
 int32_t extractL2Err( TargetHandle_t i_exTgt, bool i_ce,
                       p9_l2err_extract_err_data &o_errorAddr)
 {
@@ -367,7 +364,7 @@ int32_t extractL2Err( TargetHandle_t i_exTgt, bool i_ce,
 }
 */
 
-/* TODO RTC 247259
+/* TODO RTC 256733
 int32_t l2LineDelete(TargetHandle_t i_exTgt,
                      const p9_l2err_extract_err_data& i_l2_err_data)
 {
@@ -416,7 +413,7 @@ int32_t l2LineDelete(TargetHandle_t i_exTgt,
 }
 */
 
-/* TODO RTC 247259
+/* TODO RTC 256733
 int32_t pmCallout( TargetHandle_t i_tgt,
                    RasAction& o_ra,
                    uint32_t &o_deadCores,
@@ -458,7 +455,7 @@ void requestNewTODTopology( uint32_t i_oscPos,
                             const TargetHandleList& i_badChipList,
                             bool i_informPhyp)
 {
-    /* TODO RTC 247259
+    /* TODO RTC 256733
     #define PRDF_FUNC "[PlatServices::requestNewTODTopology] "
     if ( i_badChipList.size() > 0 || i_procOscTgt != NULL )
     {
@@ -486,7 +483,7 @@ int32_t getTodPortControlReg ( const TARGETING::TargetHandle_t& i_procTgt,
 {
     #define PRDF_FUNC "[PlatServices::getTodPortControlReg] "
     int32_t l_rc = SUCCESS;
-    /* TODO RTC 247259
+    /* TODO RTC 256733
     errlHndl_t err = nullptr;
     TOD::TodChipDataContainer todRegData;
     bool foundChip = false;

@@ -33,7 +33,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils
 
 ##########################################################
-# Following is needed to include memdiags.H
+# Following is needed to include hwp_wrappers.H
 ##########################################################
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/memory
@@ -45,17 +45,15 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/targeting/common
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/utils/dimm/
 EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/utils/mcbist
 EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/
-
-##########################################################
-# Following is needed to include p9c_mss_maint_cmds.H
-##########################################################
-
 EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/prd/
 EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/utils/mcbist/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/shared/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/dimm/
 
 MODULE = mdia
 

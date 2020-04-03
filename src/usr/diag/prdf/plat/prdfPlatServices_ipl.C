@@ -43,9 +43,10 @@
 
 #include <diag/mdia/mdia.H>
 
-/* TODO RTC 247259
+#include <exp_defaults.H>
+#include <exp_rank.H>
+#include <kind.H>
 #include <hwp_wrappers.H>
-*/
 
 using namespace TARGETING;
 
@@ -117,7 +118,6 @@ uint32_t mssRestoreDramRepairs<TYPE_OCMB_CHIP>( TargetHandle_t i_target,
                                                 uint8_t & o_badDimmMask )
 {
     uint32_t o_rc = SUCCESS;
-    /* TODO RTC 247259
 
     errlHndl_t errl = NULL;
 
@@ -137,7 +137,6 @@ uint32_t mssRestoreDramRepairs<TYPE_OCMB_CHIP>( TargetHandle_t i_target,
 
     o_repairedRankMask = (uint8_t)tmpRepairedRankMask;
     o_badDimmMask = (uint8_t)tmpBadDimmMask;
-    */
     return o_rc;
 }
 
@@ -150,18 +149,13 @@ bool isBroadcastModeCapable<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
 {
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
-    /* TODO RTC 247259
 
     mss::states l_ret = mss::states::NO;
-    #ifdef CONFIG_AXONE
 
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt ( i_chip->getTrgt() );
     FAPI_CALL_HWP( l_ret, exp_is_broadcast_capable, fapiTrgt );
 
-    #endif
-
     return ( mss::states::YES == l_ret );
-    */
     return false;
 }
 
@@ -179,9 +173,6 @@ uint32_t startSfRead<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_ocmb->getType() );
 
     uint32_t o_rc = SUCCESS;
-
-    /* TODO RTC 247259
-    #ifdef CONFIG_AXONE
 
     // Get the OCMB_CHIP fapi target
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt ( i_ocmb->getTrgt() );
@@ -234,9 +225,6 @@ uint32_t startSfRead<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
 
     } while (0);
 
-    #endif
-    */
-
     return o_rc;
 
     #undef PRDF_FUNC
@@ -252,7 +240,6 @@ uint32_t cleanupSfRead<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmbChip )
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 247259
 template<>
 uint32_t startTdSteerCleanup<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         const MemRank & i_rank, AddrRangeType i_rangeType,
@@ -304,11 +291,9 @@ uint32_t startTdSteerCleanup<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-*/
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 247259
 template<>
 uint32_t startTdSfRead<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
         const MemRank & i_rank, AddrRangeType i_rangeType,
@@ -370,7 +355,6 @@ uint32_t startTdSfRead<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-*/
 
 //------------------------------------------------------------------------------
 

@@ -35,9 +35,10 @@
 #include <prdfMemTps.H>
 #include <prdfTargetServices.H>
 
-/* TODO RTC 247259
+#include <exp_defaults.H>
+#include <exp_rank.H>
+#include <kind.H>
 #include <hwp_wrappers.H>
-*/
 
 using namespace TARGETING;
 
@@ -1189,15 +1190,11 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::startCmd()
 
     uint32_t o_rc = SUCCESS;
 
-    #ifdef CONFIG_AXONE
-
     // We don't need to set any stop-on-error conditions or thresholds for
     // soft/inter/hard CEs at runtime. The design is to let the command continue
     // to the end of the rank and we do diagnostics on the CE counts found in
     // the per-symbol counters. Therefore, all we need to do is tell the
     // hardware which CE types to count.
-
-    /* TODO RTC 247259
 
     mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
 
@@ -1226,9 +1223,6 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::startCmd()
         PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
                   iv_chip->getHuid(), getKey() );
     }
-    */
-
-    #endif
 
     return o_rc;
 

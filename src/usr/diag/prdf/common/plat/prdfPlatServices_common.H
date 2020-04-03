@@ -45,9 +45,7 @@
 #include <prdfMemSymbol.H>
 #include <prdfMemDqBitmap.H>
 
-/* TODO RTC 247259
 #include <plat_hwp_invoker.H>
-*/
 
 #include <errlentry.H>
 

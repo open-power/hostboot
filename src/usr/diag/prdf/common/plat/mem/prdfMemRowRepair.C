@@ -76,7 +76,6 @@ uint32_t __getRowRepairData( TargetHandle_t i_dimm, const MemRank & i_rank,
 
     uint32_t o_rc = SUCCESS;
 
-    /* TODO RTC 247259
 
     #ifdef __HOSTBOOT_MODULE
 
@@ -91,9 +90,8 @@ uint32_t __getRowRepairData( TargetHandle_t i_dimm, const MemRank & i_rank,
     TargetHandle_t l_mba = getConnectedParent( i_dimm, T );
     fapi2::Target<F> l_fapiMba( l_mba );
 
-//p10cleanup
-//    FAPI_INVOKE_HWP( l_errl, getRowRepair, l_fapiMba, i_rank.getDimmSlct(),
-//                     i_rank.getRankSlct(), l_data, l_ps );
+    FAPI_INVOKE_HWP( l_errl, getRowRepair, l_fapiMba, i_rank.getDimmSlct(),
+                     i_rank.getRankSlct(), l_data, l_ps );
     if ( nullptr != l_errl )
     {
         PRDF_ERR( PRDF_FUNC "getRowRepair() failed: i_dimm=0x%08x "
@@ -108,7 +106,6 @@ uint32_t __getRowRepairData( TargetHandle_t i_dimm, const MemRank & i_rank,
     }
 
     #endif // __HOSTBOOT_MODULE
-    */
 
     return o_rc;
 
@@ -140,7 +137,6 @@ uint32_t __setRowRepairData( TargetHandle_t i_dimm, const MemRank & i_rank,
     #define PRDF_FUNC "[PlatServices::__setRowRepairData] "
 
     uint32_t o_rc = SUCCESS;
-    /* TODO RTC 247259
 
     #ifdef __HOSTBOOT_MODULE
 
@@ -158,9 +154,8 @@ uint32_t __setRowRepairData( TargetHandle_t i_dimm, const MemRank & i_rank,
         TargetHandle_t l_mba = getConnectedParent(i_dimm, T);
         fapi2::Target<F> l_fapiMba( l_mba );
 
-//p10cleanup
-//        FAPI_INVOKE_HWP( l_errl, setRowRepair, l_fapiMba, i_rank.getDimmSlct(),
-//                         i_rank.getRankSlct(), l_data, l_ps );
+        FAPI_INVOKE_HWP( l_errl, setRowRepair, l_fapiMba, i_rank.getDimmSlct(),
+                         i_rank.getRankSlct(), l_data, l_ps );
         if ( nullptr != l_errl )
         {
             PRDF_ERR( PRDF_FUNC "setRowRepair() failed: i_dimm=0x%08x "
@@ -173,7 +168,6 @@ uint32_t __setRowRepairData( TargetHandle_t i_dimm, const MemRank & i_rank,
     }
 
     #endif // __HOSTBOOT_MODULE
-    */
     return o_rc;
 
     #undef PRDF_FUNC

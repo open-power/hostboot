@@ -28,7 +28,7 @@
 #include <prdfP10PmRecovery.H>
 #include <prdfErrlUtil.H>
 
-/* TODO RTC 247259
+/* TODO RTC 256733
 #include <hwas/common/hwas.H>
 #include <hwas/common/deconfigGard.H>
 */
@@ -44,7 +44,7 @@ int32_t pmRecovery( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[pmRecovery] "
     int32_t o_rc = SUCCESS;
-    /* TODO RTC 247259
+    /* TODO RTC 256733
     TargetHandle_t  target = i_chip->getTrgt();
 
     // p9_pm_callout HWP parameters
@@ -126,7 +126,7 @@ int32_t pmRecovery( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
      * @userdata2  deadCores bit vector
      * @devdesc    An errorlog containing extra FFDC collected by the HWP
      */
-    /* TODO RTC 247259
+    /* TODO RTC 256733
     errlHndl_t ffdcErrl = new ERRORLOG::ErrlEntry(
                                         ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                         PRDF_PM_RECOVERY_FFDC,

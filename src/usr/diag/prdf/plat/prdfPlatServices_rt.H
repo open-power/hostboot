@@ -26,7 +26,7 @@
 #ifndef __prdfPlatServices_rt_H
 #define __prdfPlatServices_rt_H
 
-/* TODO RTC 247259
+/* TODO RTC 256733
 #include <p9_l3err_extract.H>
 #include <p9_l2err_extract.H>
 #include <p9_pm_callout.H>
@@ -109,7 +109,7 @@ uint32_t resumeBgScrub( ExtensibleChip * i_chip,
  * @param o_errorAddr struct containing address of the CE
  * @return non-SUCCESS for failure, SUCCESS otherwise
  */
-/* TODO RTC 247259
+/* TODO RTC 256733
 int32_t extractL3Err( TARGETING::TargetHandle_t i_exTgt,
                       p9_l3err_extract_err_data &o_errorAddr);
 */
@@ -121,7 +121,7 @@ int32_t extractL3Err( TARGETING::TargetHandle_t i_exTgt,
  * @param i_errorAddr struct containing address of the CE
  * @return non-SUCCESS for failure, SUCCESS otherwise
  */
-/* TODO RTC 247259
+/* TODO RTC 256733
 int32_t l3LineDelete(TARGETING::TargetHandle_t i_exTgt,
                      const p9_l3err_extract_err_data& i_l3_err_data);
 */
@@ -133,7 +133,7 @@ int32_t l3LineDelete(TARGETING::TargetHandle_t i_exTgt,
  * @param o_errorAddr struct containing address of the CE
  * @return non-SUCCESS for failure, SUCCESS otherwise
  */
-/* TODO RTC 247259
+/* TODO RTC 256733
 int32_t extractL2Err( TARGETING::TargetHandle_t i_exTgt, bool i_ce,
                       p9_l2err_extract_err_data &o_errorAddr);
 */
@@ -145,7 +145,7 @@ int32_t extractL2Err( TARGETING::TargetHandle_t i_exTgt, bool i_ce,
  * @param i_errorAddr struct containing address of the CE
  * @return non-SUCCESS for failure, SUCCESS otherwise
  */
-/* TODO RTC 247259
+/* TODO RTC 256733
 int32_t l2LineDelete(TARGETING::TargetHandle_t i_exTgt,
                      const p9_l2err_extract_err_data& i_l2_err_data);
 */
@@ -160,7 +160,7 @@ int32_t l2LineDelete(TARGETING::TargetHandle_t i_exTgt,
  * @param o_ffdcList points to a list of STOP FFDC summary sub-sections
  * @return non-SUCCESS for failure, SUCCESS otherwise
  */
-/* TODO RTC 247259
+/* TODO RTC 256733
 int32_t pmCallout( TARGETING::TargetHandle_t i_tgt,
                    RasAction& o_ra,
                    uint32_t &o_deadCores,

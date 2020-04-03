@@ -28,9 +28,10 @@
 // Platform includes
 #include <prdfMemDsd.H>
 
-/* TODO RTC 247259
+#include <exp_defaults.H>
+#include <exp_rank.H>
+#include <kind.H>
 #include <hwp_wrappers.H>
-*/
 
 using namespace TARGETING;
 
@@ -180,8 +181,6 @@ uint32_t DsdEvent<TYPE_OCMB_CHIP>::startCmd()
 
     uint32_t o_rc = SUCCESS;
 
-    /* TODO RTC 247259
-
     mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
 
     stopCond.set_pause_on_ue(mss::ON);
@@ -194,7 +193,6 @@ uint32_t DsdEvent<TYPE_OCMB_CHIP>::startCmd()
         PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
                   iv_chip->getHuid(), getKey() );
     }
-    */
 
     return o_rc;
 

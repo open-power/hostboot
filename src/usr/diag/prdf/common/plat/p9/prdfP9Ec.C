@@ -77,7 +77,7 @@ void maskIfCoreCs( ExtensibleChip * i_chip )
 
 void rtDcnfgCore( ExtensibleChip * i_chip )
 {
-    /* TODO RTC 247259
+    /* TODO RTC 256733
     TargetHandle_t coreTgt = i_chip->getTrgt();
 
     // Get the Global Errorlog
@@ -112,7 +112,7 @@ int32_t PostAnalysis( ExtensibleChip * i_chip,
                       STEP_CODE_DATA_STRUCT & io_sc )
 {
 #ifdef __HOSTBOOT_RUNTIME
-    /* TODO RTC 247259
+    /* TODO RTC 256733
     if ( io_sc.service_data->isProcCoreCS() )
     {
         ExtensibleChip * n_chip = getNeighborCore(i_chip);
