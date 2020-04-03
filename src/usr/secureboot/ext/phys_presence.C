@@ -123,15 +123,15 @@ errlHndl_t detectPhysPresence(void)
                TRACE_ERR_FMT,
                TRACE_ERR_ARGS(err));
 
-        err->collectTrace(SECURE_COMP_NAME);
         break;
     }
 
     // Get the attribute with the needed GPIO information
     if (mproc->tryGetAttr<ATTR_GPIO_INFO_PHYS_PRES>(gpioInfo))
     {
-        SB_INF("detectPhysPresence: gpioInfo: e%d/p%d/devAddr=0x%X, "
-               "windowOpenPin=%d, physPresPin=%d",
+        SB_INF("detectPhysPresence: gpioInfo: mproc=0x%0.8X "
+               "e%d/p%d/devAddr=0x%X, windowOpenPin=%d, physPresPin=%d",
+               get_huid(mproc),
                gpioInfo.engine, gpioInfo.port, gpioInfo.devAddr,
                gpioInfo.windowOpenPin, gpioInfo.physicalPresencePin);
     }
@@ -159,7 +159,6 @@ errlHndl_t detectPhysPresence(void)
                             ATTR_GPIO_INFO_PHYS_PRES,
                             ErrlEntry::ADD_SW_CALLOUT);
 
-        err->collectTrace( SECURE_COMP_NAME );
         break;
     }
 
@@ -311,7 +310,6 @@ errlHndl_t detectPhysPresence(void)
                        "there was no key clear request: "
                        TRACE_ERR_FMT,
                        TRACE_ERR_ARGS(err_close));
-                err_close->collectTrace( SECURE_COMP_NAME );
             }
 
             if (err)
@@ -331,7 +329,6 @@ errlHndl_t detectPhysPresence(void)
                 SB_ERR("detectPhysPresence: Error in closing window. "
                        TRACE_ERR_FMT,
                        TRACE_ERR_ARGS(err));
-                err_close->collectTrace( SECURE_COMP_NAME );
                 err = err_close;
                 err_close = nullptr;
             }
@@ -360,6 +357,10 @@ errlHndl_t detectPhysPresence(void)
          err->collectTrace( SECURE_COMP_NAME );
          errlCommit(err, SECURE_COMP_ID);
          err = nullptr;
+    }
+    else if (err != nullptr)
+    {
+        err->collectTrace( SECURE_COMP_NAME );
     }
 
     SB_EXIT("detectPhysPresence: err rc=0x%X",
@@ -499,8 +500,6 @@ errlHndl_t handlePhysPresenceWindow(void)
                "failed.  "
                TRACE_ERR_FMT,
                TRACE_ERR_ARGS(err));
-
-        err->collectTrace(SECURE_COMP_NAME);
         break;
     }
 
@@ -515,6 +514,13 @@ errlHndl_t handlePhysPresenceWindow(void)
                               (led_window_open),
                             PCA9551_OUTPUT_LOW,
                             led_data);
+    if(err)
+    {
+        SB_ERR("handlePhysPresenceWindow: call to gpioPca9551SetLed failed. "
+               TRACE_ERR_FMT,
+               TRACE_ERR_ARGS(err));
+        break;
+    }
 
     // Verify that the "window open" LED is set
     // LEDs/PINs represent "WINDOW_OPEN_N" and "PHYS_PRESENCE_N" so need
@@ -555,7 +561,6 @@ errlHndl_t handlePhysPresenceWindow(void)
                           led_window_open),
                       ErrlEntry::ADD_SW_CALLOUT);
 
-        err->collectTrace( SECURE_COMP_NAME );
         break;
     }
 
@@ -613,6 +618,7 @@ errlHndl_t handlePhysPresenceWindow(void)
                    "attributes to FSP. "
                    TRACE_ERR_FMT,
                    TRACE_ERR_ARGS(err));
+            err->collectTrace( SECURE_COMP_NAME );
             errlCommit(err,SECURE_COMP_ID );
         }
     }
@@ -656,6 +662,10 @@ errlHndl_t handlePhysPresenceWindow(void)
          err->collectTrace( SECURE_COMP_NAME );
          errlCommit(err, SECURE_COMP_ID);
          err = nullptr;
+    }
+    else if (err != nullptr)
+    {
+        err->collectTrace( SECURE_COMP_NAME );
     }
 
     SB_EXIT("handlePhysPresenceWindow: err_rc=0x%X",
