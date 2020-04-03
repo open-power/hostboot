@@ -80,6 +80,7 @@ void* call_host_update_master_tpm( void *io_pArgs )
                    TRACE_ERR_FMT,
                    TRACE_ERR_ARGS(l_err));
         l_stepError.addErrorDetails(l_err);
+        ERRORLOG::errlCommit( l_err, SECURE_COMP_ID );
     }
 #endif
 
