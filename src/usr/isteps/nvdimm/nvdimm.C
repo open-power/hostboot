@@ -1513,10 +1513,11 @@ errlHndl_t nvdimmEraseCheck(Target *i_nvdimm, bool i_statusOnly)
 
         if(l_err)
         {
-           // Callout nvdimm on high, gard and deconfig
+           // Callout nvdimm on high and gard. No deconfig to prevent
+           // re-ipl for ESS config since this is called during IPL
            l_err->addHwCallout( i_nvdimm,
                                 HWAS::SRCI_PRIORITY_HIGH,
-                                HWAS::DECONFIG,
+                                HWAS::NO_DECONFIG,
                                 HWAS::GARD_Fatal);
 
            // Collect register data for FFDC Traces
