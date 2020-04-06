@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,6 +56,7 @@
 #include <util/utilmbox_scratch.H>
 #include <util/align.H>
 #include <errl/errludprintk.H>
+#include <util/misc.H>
 
 using namespace INTR;
 using namespace TARGETING;
@@ -1370,11 +1371,11 @@ void IntrRp::msgHandler()
                     PIR_t pir = msg->data[0];
                     TRACDCOMP(g_trac_intr, "IntrRp::msgHandler() CPU Timeout Message received for: %x",
                               pir.word);
-#ifndef CONFIG_SIMICS_SLAVECORE_HACK
-                    size_t count = msg->data[1];
 
-                    if(iv_ipisPending.count(pir))
+                    if(   !Util::requiresSlaveCoreWorkaround()
+                       && iv_ipisPending.count(pir))
                     {
+                        size_t count = msg->data[1];
                         if (count < CPU_WAKEUP_INTERVAL_COUNT)
                         {
                             TRACFCOMP(g_trac_intr,
@@ -1404,7 +1405,6 @@ void IntrRp::msgHandler()
                         }
                     }
                     else // Ended successfully.
-#endif //CONFIG_SIMICS_SLAVECORE_HACK
                     {
                         TRACFCOMP(g_trac_intr,
                                   INFO_MRK "Cpu wakeup completed on %x",

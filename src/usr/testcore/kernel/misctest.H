@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,8 @@
 #include <sys/misc.h>
 #include <kernel/cpumgr.H>
 #include <targeting/common/targetservice.H>
+#include <secureboot/smf_utils.H>
+#include <util/misc.H>
 
 /** @file misctest.H
  *
@@ -41,9 +43,28 @@ class MiscTest : public CxxTest::TestSuite
         /** Tests for cpu_spr_value() */
         void testCpuSprValue()
         {
-            if ((WAKEUP_MSR_VALUE | MSR_SMF_MASK) != cpu_spr_value(CPU_SPR_MSR))
+            const auto smfEnabled = SECUREBOOT::SMF::isSmfEnabled();
+            uint64_t smfMsrBit = smfEnabled ? MSR_SMF_MASK : 0;
+
+            // TODO RTC 252693
+            // Remove this once slave core workaround path is fixed to set the MSR SMF bit to 0
+            // when SMF is disabled in istep 16.
+            //
+            // In SIMICS and QME not enabled, the SMF bit is currently
+            // always being set
+            if(Util::requiresSlaveCoreWorkaround())
             {
-                TS_FAIL("MSR value is not as expected.");
+                smfMsrBit = MSR_SMF_MASK;
+            }
+
+            const uint64_t msrActual = cpu_spr_value(CPU_SPR_MSR);
+            if ((WAKEUP_MSR_VALUE | smfMsrBit) != msrActual)
+            {
+                TS_FAIL("With SMF %s, expected MSR value of 0x%016llX but got "
+                    "0x%016llX",
+                    smfEnabled ? "enabled" : "disabled",
+                    WAKEUP_MSR_VALUE | smfMsrBit,
+                    msrActual);
             }
 
             if (WAKEUP_LPCR_VALUE != cpu_spr_value(CPU_SPR_LPCR))

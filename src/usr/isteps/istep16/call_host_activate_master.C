@@ -265,10 +265,6 @@ void* call_host_activate_master(void* const io_pArgs)
                       "startDeadManLoop SUCCESS");
         }
 
-        // Need to indicate to PHYP to save HRMOR and other SPR Data to be
-        // applied during wakeup
-        MAGIC_INSTRUCTION(MAGIC_SIMICS_CORESTATESAVE);
-
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Draining interrupt queue");
         INTR::drainQueue();
 

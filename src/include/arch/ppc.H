@@ -504,6 +504,8 @@ enum
     MAGIC_FAKEPAYLOAD_ENTER   =  7010, // Entered the fake payload.
     MAGIC_SIMICS_CHECK        =  7011, // Check if system is running on simics
     MAGIC_LOAD_PAYLOAD        =  7012, // load payload from flash
+    MAGIC_IS_QME_ENABLED      =  7013, // Check if QME is enabled in the SIMICS
+                                       // model
     MAGIC_HB_DUMP             =  7014, // Create a hostboot dump
     MAGIC_BREAK_ON_ERROR      =  7018, // Breakpoint in error cases if
                                        //  env var HB_BREAK_ON_ERROR
@@ -612,13 +614,14 @@ enum
 
 /**
  * @brief Setup the thread with the given PIR with good default
- *        register values to allow it to run when enabled
- * @param[in]  pir value
+ *        register values to allow it to run when enabled.
+ * @param[in] _pir pir value
+ * @param[in] _smfEnabled Whether SMF is enabled or not
  */
-#define MAGIC_INST_SETUP_THREAD(_pir) \
-    asm volatile("mr 4, %0" :: \
-                 "r" (_pir) : \
-                 "4"); \
+#define MAGIC_INST_SETUP_THREAD(_pir,_smfEnabled) \
+    asm volatile("mr 4, %0; mr 5, %1" :: \
+                 "r" (_pir), "r" (_smfEnabled) : \
+                 "4","5"); \
     MAGIC_INSTRUCTION(MAGIC_SETUP_THREAD); \
 
 #endif

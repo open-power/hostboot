@@ -286,11 +286,6 @@ namespace KernelMisc
                 Singleton<CpuManager>::instance().startCPU(l_cput->cpu +
                                                            l_threadNum);
             }
-
-            // Tell SIMICS we expect more threads (one more core)
-            // to appear after doing the 'stop' instruction.
-            MAGIC_INSTRUCTION(MAGIC_SIMICS_FUSEDCOREWAKE);
-
         } // end if fused core mode
     }
 

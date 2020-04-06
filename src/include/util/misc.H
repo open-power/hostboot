@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,18 @@ namespace Util
      * @return bool         true if running in simics; otherwise false
      */
     bool isSimicsRunning( void );
+
+    /**
+     * @brief Determines whether the code is running under SIMICS, and if so,
+     *   whether the QME model is disabled.  Under that specific condition,
+     *   Hostboot must run its slave core workarounds in istep 16.1 and 16.2
+     *   in order to bring the cores up correctly, and the API returns true.
+     *   Otherwise, the API returns false.
+     *
+     * @retval true Slave core workaround required in istep 16.1/16.2
+     * @retval false Slave core workaround not required.
+     */
+    bool requiresSlaveCoreWorkaround( void );
 
     /**
      * @brief Determines if Targeting code has been loaded

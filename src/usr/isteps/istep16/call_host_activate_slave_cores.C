@@ -50,6 +50,10 @@
 #include <errl/errludprintk.H>
 #include <intr/intr_reasoncodes.H>
 #include <initservice/istepdispatcherif.H>
+#include <secureboot/smf_utils.H>
+#include <util/misc.H>
+#include <sys/misc.h>
+#include <algorithm>
 
 using namespace ERRORLOG;
 using namespace TARGETING;
@@ -107,7 +111,7 @@ void* call_host_activate_slave_cores(void* const io_pArgs)
         // Determine PIR and threads to enable for this core
         const uint64_t pir = PIR_t(topologyId, coreId).word;
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "pir for this core is: %lx", pir);
+                  "pir for this core is: 0x%016llX", pir);
 
         //Skip the master core that is already running
         if ((pir & ~PIR_t::THREAD_MASK) == l_masterPIR_wo_thread)
@@ -115,46 +119,51 @@ void* call_host_activate_slave_cores(void* const io_pArgs)
             continue;
         }
 
-#ifdef CONFIG_SIMICS_SLAVECORE_HACK
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "call_host_activate_slave_cores: Starting %x.",
-                  pir);
-
-        //Skip the first 4 threads, we already did them all
-        if( (pir>=0) & (pir<4) )
-        {
-            continue;
-        }
-
-        TRACFCOMP( g_fapiImpTd,
-                   "Before cpu_start_core - Setting up urmor for PIRs %d..%d",
-                   pir, pir+3 );
-        for( auto t = pir; t < (pir+4); t++ )
-        {
-            MAGIC_INST_SETUP_THREAD(t);
-        }
-        sync();
-
-        //Prepare the kernel for the new threads
-        const uint64_t en_threads = 0xF000000000000000;
-        int rc = cpu_start_core(pir, en_threads);
-        if( rc )
-        {
-            TRACFCOMP( g_fapiImpTd, "rc=%d from cpu_start_core" );
-        }
-
-#else //CONFIG_SIMICS_SLAVECORE_HACK
-
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "call_host_activate_slave_cores: Waking %x.",
-                  pir);
-
         int rc = 0;
-
         const uint64_t en_threads = sys->getAttr<ATTR_ENABLED_THREADS>();
-        rc = cpu_start_core(pir, en_threads);
+        if(Util::requiresSlaveCoreWorkaround())
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "call_host_activate_slave_cores: Starting 0x%016llX.",
+                      pir);
 
-#endif
+            const size_t maxCpuThreads = cpu_thread_count();
+            const int threadBits = __builtin_popcountl(en_threads);
+            const auto threadCount = std::min(static_cast<uint64_t>(threadBits),maxCpuThreads);
+
+            TRACFCOMP( g_fapiImpTd,
+                       "Before cpu_start_core - Setting up URMOR for %llu PIRs (enabled thread mask "
+                       "of 0x%016llX)",
+                       threadCount,en_threads);
+
+            const auto smfEnabled = SECUREBOOT::SMF::isSmfEnabled();
+            for( uint64_t thread = 0; thread < maxCpuThreads; ++thread)
+            {
+                if(en_threads & (0x8000000000000000ULL >> thread))
+                {
+                    const uint64_t threadPir = pir + thread;
+                    TRACFCOMP( g_fapiImpTd,
+                       "Setting URMOR for PIR 0x%016llX",threadPir);
+                    MAGIC_INST_SETUP_THREAD(threadPir,smfEnabled);
+                }
+            }
+            sync();
+
+            // Prepare the kernel for the new threads
+            rc = cpu_start_core(pir, en_threads);
+            if( rc )
+            {
+                TRACFCOMP( g_fapiImpTd, "rc=%d from cpu_start_core", rc);
+            }
+        }
+        else
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "call_host_activate_slave_cores: Waking 0x%016llX.",
+                      pir);
+
+            rc = cpu_start_core(pir, en_threads);
+        }
 
         // Handle time out error
         uint32_t l_checkidle_eid = 0;
@@ -162,7 +171,7 @@ void* call_host_activate_slave_cores(void* const io_pArgs)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "call_host_activate_slave_cores: "
-                      "Time out rc from kernel %d on core 0x%x",
+                      "Time out rc from kernel %d on core 0x%016llX",
                       rc,
                       pir);
 
@@ -214,7 +223,7 @@ void* call_host_activate_slave_cores(void* const io_pArgs)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "call_host_activate_slave_cores: "
-                       "Error from kernel %d on core %x",
+                       "Error from kernel %d on core 0x%016llX",
                        rc,
                        pir);
             /*@
@@ -284,7 +293,7 @@ void* call_host_activate_slave_cores(void* const io_pArgs)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "call_host_activate_slave_cores: "
-                       "Core errors during wakeup on core %x",
+                       "Core errors during wakeup on core 0x%016llX",
                        pir);
             /*@
              * @errortype

@@ -564,6 +564,11 @@ def magic_instruction_callback(user_arg, cpu, arg):
         #SIM_run_alone( run_command, cmd )
       print "MAGIC_LOAD_PAYLOAD not implemented\n";
 
+    if arg == 7013: # MAGIC_IS_QME_ENABLED
+        qmeEnabled = 0 if cpu.pcr_dev == None else 1
+        cpu.r3 = qmeEnabled
+        print "SIMICS QME model enabled = %d" % (qmeEnabled)
+
     if arg == 7014:   # MAGIC_HB_DUMP
         # Collect a hostboot dump
         # (no args)
@@ -614,6 +619,8 @@ def magic_instruction_callback(user_arg, cpu, arg):
 
     if arg == 7025:  # MAGIC_SETUP_THREAD
         pir = cpu.r4
+        # Hook to update SMF MSR bit if needed
+        smfEnabled = cpu.r5
         group_id = cpu.node_num
         chip_id = cpu.chip_num
         component = cpu.component

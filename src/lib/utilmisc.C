@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,24 @@ bool isSimicsRunning()
 {
     static bool simics = isSimics();
     return simics;
+}
+
+
+bool isQmeModelEnabled() __attribute__((alias("__isQmeEnabled")));
+extern "C" bool __isQmeEnabled() NEVER_INLINE;
+
+bool __isQmeEnabled()
+{
+    long register r3 asm("r3") = 0;
+    MAGIC_INSTRUCTION(MAGIC_IS_QME_ENABLED);
+    return r3;
+}
+
+bool requiresSlaveCoreWorkaround()
+{
+    static const auto required =
+        isSimicsRunning() && !isQmeModelEnabled();
+    return required;
 }
 
 static bool g_isTargetingLoaded = false;
