@@ -559,6 +559,149 @@ fapi2::ReturnCode check_for_valid_module_height(const fapi2::Target<fapi2::TARGE
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief Check that the vendor ID register and attribute match
+///
+/// @param[in] i_ocmb_target OCMB target
+/// @param[in] i_pmic_target PMIC target to check
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode check_matching_vendors(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target)
+{
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    const uint8_t l_pmic_id = mss::index(i_pmic_target);
+
+    uint16_t l_vendor_attr = 0;
+    fapi2::buffer<uint8_t> l_vendor_reg0;
+    fapi2::buffer<uint8_t> l_vendor_reg1;
+
+    // Get attribute
+    FAPI_TRY(mss::attr::get_mfg_id[l_pmic_id](i_ocmb_target, l_vendor_attr));
+
+    // Now check the register
+    FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R3C_VENDOR_ID_BYTE_0, l_vendor_reg0));
+    FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R3D_VENDOR_ID_BYTE_1, l_vendor_reg1));
+
+    FAPI_TRY(mss::pmic::check_matching_vendors_helper(
+                 i_pmic_target,
+                 l_vendor_attr,
+                 l_vendor_reg0(),
+                 l_vendor_reg1()));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Unit testable helper function: Check matching vendor ID between attr and reg values
+///
+/// @param[in] i_pmic_target PMIC target for FFDC
+/// @param[in] i_vendor_attr vendor attribute value
+/// @param[in] i_vendor_reg_lo vendor register low byte
+/// @param[in] i_vendor_reg_hi vendor register high byte
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
+///
+fapi2::ReturnCode check_matching_vendors_helper(
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    const uint16_t i_vendor_attr,
+    const uint8_t i_vendor_reg_lo,
+    const uint8_t i_vendor_reg_hi)
+{
+    static constexpr uint8_t HI_BYTE_START = 0;
+    static constexpr uint8_t HI_BYTE_LEN = 8;
+
+    fapi2::buffer<uint16_t> l_vendor_reg(i_vendor_reg_lo);
+    l_vendor_reg.insert<HI_BYTE_START, HI_BYTE_LEN>(i_vendor_reg_hi);
+
+    FAPI_ASSERT(l_vendor_reg == i_vendor_attr,
+                fapi2::PMIC_MISMATCHING_VENDOR_IDS()
+                .set_VENDOR_ATTR(i_vendor_attr)
+                .set_VENDOR_REG(l_vendor_reg)
+                .set_PMIC_TARGET(i_pmic_target),
+                "Mismatching vendor IDs for %s. ATTR: 0x%04X REG: 0x%04X",
+                mss::c_str(i_pmic_target),
+                i_vendor_attr,
+                l_vendor_reg());
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check that the IDT revision # register and attribute match
+///
+/// @param[in] i_ocmb_target OCMB target
+/// @param[in] i_pmic_target PMIC target to check
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
+///
+fapi2::ReturnCode check_valid_idt_revisions(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target)
+{
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    uint8_t l_pmic_id = mss::index(i_pmic_target);
+    uint8_t l_rev = 0;
+    fapi2::buffer<uint8_t> l_rev_reg;
+
+    // Get attribute
+    FAPI_TRY(mss::attr::get_revision[l_pmic_id](i_ocmb_target, l_rev));
+
+    // Now check the register
+    FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R3B_REVISION, l_rev_reg));
+
+    FAPI_TRY(mss::pmic::check_valid_idt_revisions_helper(i_pmic_target, l_rev, l_rev_reg()));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Unit testable helper function: Check that the IDT revision # register and attribute match
+///
+/// @param[in] i_pmic_target PMIC target (for FFDC)
+/// @param[in] i_rev_attr revision value from attribute
+/// @param[in] i_rev_reg revision value from register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
+///
+fapi2::ReturnCode check_valid_idt_revisions_helper(
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    const uint8_t i_rev_attr,
+    const uint8_t i_rev_reg)
+{
+    // At the moment, we only care that if we have C1 revision in either the SPD, or
+    // in the revision register, that the other matches. That way we use new C1 settings
+    // on C1 PMICs only, and vice-versa.
+    constexpr uint8_t IDT_C1_REV = 0x21;
+
+    // If neither are IDT_C1, return
+    if (i_rev_attr != IDT_C1_REV && i_rev_reg != IDT_C1_REV)
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    FAPI_ASSERT(i_rev_attr == i_rev_reg,
+                fapi2::PMIC_MISMATCHING_REVISIONS()
+                .set_REVISION_ATTR(i_rev_attr)
+                .set_REVISION_REG(i_rev_reg)
+                .set_PMIC_TARGET(i_pmic_target),
+                "Mismatching revisions for %s. ATTR: 0x%02X REG: 0x%02X",
+                mss::c_str(i_pmic_target),
+                i_rev_attr,
+                i_rev_reg);
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 ///
 /// @brief Enable PMIC for SPD mode
 ///
@@ -587,6 +730,15 @@ fapi2::ReturnCode pmic_enable_SPD(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
         FAPI_TRY(mss::pmic::poll_for_pbulk_good(l_pmic),
                  "pmic_enable: poll for pbulk good either failed, or returned not good status on PMIC %s",
                  mss::c_str(l_pmic));
+
+        // Check that the PMIC vendor ID register matches the attribute
+        // (and therefore has the correct settings)
+        FAPI_TRY(mss::pmic::check_matching_vendors(i_ocmb_target, l_pmic));
+
+        if (l_vendor_id == mss::pmic::vendor::IDT)
+        {
+            FAPI_TRY(mss::pmic::check_valid_idt_revisions(i_ocmb_target, l_pmic));
+        }
 
         // Call the enable procedure
         FAPI_TRY((mss::pmic::enable_chip_1U_2U(l_pmic, i_ocmb_target, l_vendor_id)),

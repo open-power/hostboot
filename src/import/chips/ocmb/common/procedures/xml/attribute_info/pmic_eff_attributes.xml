@@ -573,6 +573,30 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_REVISION</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          Revision ID of PMIC0
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic0_revision</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_REVISION</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          Revision ID of PMIC1
+        </description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <initToZero></initToZero>
+        <mssAccessorName>pmic1_revision</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MEM_EFF_PMIC1_PHASE_COMB</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>

@@ -68,6 +68,13 @@ typedef fapi2::ReturnCode (*pmic_attr_ptr_signed)(const fapi2::Target<fapi2::TAR
 
 // Pointers below allow for run-time attribute getter selection by PMIC ID (0,1)
 
+// PMIC0/1 Revision
+static constexpr pmic_attr_ptr get_revision[] =
+{
+    mss::attr::get_pmic0_revision,
+    mss::attr::get_pmic1_revision
+};
+
 // Voltage Setting
 static constexpr pmic_attr_ptr get_swa_voltage_setting[] =
 {
@@ -201,6 +208,7 @@ static constexpr pmic_attr_ptr get_sequence[] =
     mss::attr::get_pmic0_sequence,
     mss::attr::get_pmic1_sequence
 };
+
 // Sequence Delay
 static constexpr pmic_attr_ptr get_swa_sequence_delay[] =
 {

@@ -1291,6 +1291,57 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
     }
 };
 
+//
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC0_REVISION partial specialization
+///
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC0_REVISION>
+{
+    using attr_type = fapi2::ATTR_MEM_EFF_PMIC0_REVISION_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC0_REVISION_TargetType;
+    static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC0_REVISION;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return attr::get_pmic0_revision(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return attr::set_pmic0_revision(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+            attr_integral_type& o_setting)
+    {
+        return i_spd_data.revision_pmic0(o_setting);
+    }
+};
 
 //----------------------------------------
 // PMIC 1
@@ -2625,6 +2676,58 @@ struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_f
             attr_integral_type& o_setting)
     {
         return i_spd_data.sequence_pmic1(o_setting);
+    }
+};
+
+//
+/// @brief Traits for attr_engine
+/// @class attrEngineTraits
+/// @tparam P processor type
+/// @note P, pmic::attr_eff_engine_fields, PMIC1_REVISION partial specialization
+///
+template< proc_type P>
+struct attrEngineTraits<P, pmic::attr_eff_engine_fields, pmic::attr_eff_engine_fields::PMIC1_REVISION>
+{
+    using attr_type = fapi2::ATTR_MEM_EFF_PMIC1_REVISION_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_PMIC1_REVISION_TargetType;
+    static constexpr pmic::ffdc_codes FFDC_CODE = pmic::SET_PMIC1_REVISION;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the fapi2 target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return attr::get_pmic1_revision(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return attr::set_pmic1_revision(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data EFD data
+    /// @param[out] o_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+            attr_integral_type& o_setting)
+    {
+        return i_spd_data.revision_pmic1(o_setting);
     }
 };
 

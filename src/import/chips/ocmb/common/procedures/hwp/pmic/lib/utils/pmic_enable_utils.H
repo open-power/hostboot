@@ -403,6 +403,56 @@ fapi2::ReturnCode disable_and_reset_pmics(const std::vector<fapi2::Target<fapi2:
 fapi2::ReturnCode check_for_valid_module_height(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target);
 
 ///
+/// @brief Check that the vendor ID register and attribute match
+///
+/// @param[in] i_ocmb_target OCMB target
+/// @param[in] i_pmic_target PMIC target to check
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
+///
+fapi2::ReturnCode check_matching_vendors(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
+
+///
+/// @brief Unit testable helper function: Check matching vendor ID between attr and reg values
+///
+/// @param[in] i_pmic_target PMIC target for FFDC
+/// @param[in] i_vendor_attr vendor attribute value
+/// @param[in] i_vendor_reg_lo vendor register low byte
+/// @param[in] i_vendor_reg_hi vendor register high byte
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
+///
+fapi2::ReturnCode check_matching_vendors_helper(
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    const uint16_t i_vendor_attr,
+    const uint8_t i_vendor_reg_lo,
+    const uint8_t i_vendor_reg_hi);
+
+///
+/// @brief Check that the revision # register and attribute match
+///
+/// @param[in] i_ocmb_target OCMB target
+/// @param[in] i_pmic_target PMIC target to check
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
+///
+fapi2::ReturnCode check_matching_revisions(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
+
+///
+/// @brief Unit testable helper function: Check that the IDT revision # register and attribute match
+///
+/// @param[in] i_pmic_target PMIC target (for FFDC)
+/// @param[in] i_rev_attr revision value from attribute
+/// @param[in] i_rev_reg revision value from register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
+///
+fapi2::ReturnCode check_valid_idt_revisions_helper(
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    const uint8_t i_rev_attr,
+    const uint8_t i_rev_reg);
+
+///
 /// @brief Enable PMIC for SPD mode
 ///
 /// @param[in] i_ocmb_target OCMB target parent of PMICs
@@ -411,6 +461,7 @@ fapi2::ReturnCode check_for_valid_module_height(const fapi2::Target<fapi2::TARGE
 ///
 fapi2::ReturnCode pmic_enable_SPD(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
                                   std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& io_pmics);
+
 }
 } // mss
 
