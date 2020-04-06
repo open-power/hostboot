@@ -1035,7 +1035,7 @@ namespace SENSOR
     //
     errlHndl_t KeyClearRequestSensor::setKeyClearRequest(const uint8_t i_value)
     {
-        // This is a threshold sensor that sets one byte of data in the
+        // This is a threshhhold sensor that sets one byte of data in the
         // iv_sensor_reading field
         iv_msg->iv_sensor_reading = i_value;
 
@@ -1047,7 +1047,7 @@ namespace SENSOR
     //
     errlHndl_t KeyClearRequestSensor::getKeyClearRequest( uint8_t &o_value )
     {
-        // This is a threshold sensor that returns one byte of data in
+        // This is a threshhhold sensor that returns one byte of data in
         // the sensor_status field
         getSensorReadingData l_data;
 

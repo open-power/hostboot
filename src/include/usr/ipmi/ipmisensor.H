@@ -1069,7 +1069,7 @@ namespace SENSOR
      *      maintained by the BMC.
      *
      *   Usage:
-     *      uint8_t key_clear_request_value = 0x01; //MSByte of Key Clear value
+     *      uint8_t key_clear_request_value = 0x0100;
      *      KeyClearRequestSensor l_sensor;
      *      l_sensor.setKeyClearRequestValue( key_clear_request_value );
      *
