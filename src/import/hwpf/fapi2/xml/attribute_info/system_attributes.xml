@@ -53,7 +53,7 @@
     <description>
         The manufacturing flags.
         These enums represent which bit/flag to set in numeric form, NOT
-        binary form.  These values/policies can no longer be bit wised together.
+        binary form. These values/policies can no longer be bit wised together.
         These numeric values match the flags as found in the PDF document:
         'Hypervisor Interface Data Specifications v10.5o-1.pdf', section 6.1.9
         and should stay in sync with this document and updated when said
@@ -62,15 +62,15 @@
     <valueType>uint32</valueType>
     <writeable/>
     <array>4</array>
-    <!-- * These enum names are taken verbatim, including duplicates, from file:
-           /fips950/src/mnfg/mfg/mnfgPolicyFlags.H
+    <!-- * These enum names are taken verbatim, minus duplicates, from file:
+            /fips950/src/mnfg/mfg/mnfgPolicyFlags.H
          * The enum values below are broken apart on cell lines:
            first group is cell 0: 0 to 31, second group is cell 1: 32 to 63,
-           third group is cell 2: 64 to 95 and fourth group is cell 3: 96 to 127
+           third group is cell 2: 64 to 95, fourth group is cell 3: 96 to 127
          * The gaps in the sequence for each cell: cell 0: 12, 13 and 14;
-           cell 1: 44, 45 and 46; cell 2: 76, 77 and 78; and cell 3: 108, 109 and
-           110. The gaps are there to differentiate each cell from each other,
-           considering that each cell can be used as value on it's own.
+           cell 1: 44, 45 and 46; cell 2: 76, 77 and 78; and cell 3: 108, 109
+           and 110. The gaps are there to differentiate each cell from each
+           other, considering that each cell can be used as value on it's own.
      -->
     <enum>
         MNFG_PHYP_VAPI                      = 0,
@@ -93,14 +93,12 @@
         MNFG_NO_CAPTURE_VPD                 = 20,
         MNFG_DO_NOT_PASS_TO_OS              = 21,
         MNFG_TEST_RBS                       = 22,
-        MNFG_TEST_DRAM_REPAIRS              = 22,
         MNFG_NO_AP                          = 23,
         MNFG_NO_SYS_DUMP                    = 24,
         MNFG_TEST_ALL_SPARE_DRAM_ROWS       = 25,
         MNFG_SRC_TERM                       = 26,
         MNFG_SPCN_USE_NVS_IP                = 27,
         MNFG_NO_RBS                         = 28,
-        MNFG_DISABLE_DRAM_REPAIRS           = 28,
         MNFG_THRESHOLDS                     = 29,
         MNFG_NO_GARD                        = 30,
         MNFG_ABIST_VPD_DATA                 = 31,
@@ -129,13 +127,10 @@
         MNFG_FAST_BACKGROUND_SCRUB          = 56,
         MNFG_CLICK_TO_ACCEPT                = 57,
         MNFG_DISABLE_MEMORY_eREPAIR         = 58,
-        MNFG_NO_MEM_EREPAIR                 = 58,
         MNFG_DISABLE_FABRIC_eREPAIR         = 59,
-        MNFG_NO_L3_EREPAIR                  = 59,
         MNFG_INFINIBAND_WRAP                = 60,
         MNFG_SMA_LINK                       = 61,
         MNFG_SYS_DUMP_TERM                  = 62,
-        MNFG_RIO_WRAP                       = 63,
         MNFG_PSI_DIAGNOSTIC                 = 63,
 
         MNFG_POLICY_FLAG_AVAIL_30           = 64,
@@ -148,7 +143,6 @@
         MNFG_CLEAR_VPD_ARRAY_REPAIR_DATA    = 71,
         MNFG_POWER_SAVE_CAPABLE             = 72,
         MNFG_PREVENT_REDUNDANCY_AUTO_ENABLE = 73,
-        MNFG_PREVENT_RAE                    = 73,
         MNFG_IB_FREQ_BIAS_HIGH              = 74,
         MNFG_IB_FREQ_BIAS_LOW               = 75,
         MNFG_POLICY_FLAG_AVAIL_34           = 79,
@@ -159,11 +153,8 @@
         MNFG_POLICY_FLAG_AVAIL_39           = 84,
         MNFG_ENABLE_DMIGB                   = 85,
         MNFG_FABRIC_DEPLOY_LANE_SPARES      = 86,
-        MNFG_DMI_DEPLOY_ONE_SPARE_DATA_ONE_SPARE_CLOCK = 86,
         MNFG_DMI_DEPLOY_LANE_SPARES         = 87,
-        MNFG_DMI_DEPLOY_TWO_SPARE_DATA      = 87,
         MNFG_ENERGYSCALE_SPECIAL_POLICIES   = 88,
-        MNFG_TPMD_SPECIAL_POLICIES          = 88,
         MNFG_DISABLE_PHYBIST                = 89,
         MNFG_HDAT_AVP_COMPLETE              = 90,
         MNFG_HDAT_AVP_ENABLE                = 91,
