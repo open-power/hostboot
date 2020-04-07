@@ -45,9 +45,9 @@ const uint32_t  MAX_SEEPROM_IMAGE_SIZE  = PCPLS * (SEEPROM_PHYS_CHIP_SIZE / 9 * 
 const uint32_t  MAX_RT_IMAGE_SIZE       = 1024 * 1024;   // Max Runtime size.
 
 // The below buffer sizes are governed by the longest p10 engd ring, n1_fure, which is
-// some 1,775,113 bits long.  And we need to hold both data *and* care parts in the buffer.
-// So... 1,775,113 x 2 / 8 = 443,778 + size to grow
-const uint32_t  MAX_RING_BUF_SIZE       = 650000;        // Max ring buffer size (agreed w/HB).
+// 1,207,902 bits long (20200404).  And we need to hold both data *and* care parts in the buffer.
+// So... 1,207,902 x 2 / 8 ~ 302,000
+const uint32_t  MAX_RING_BUF_SIZE       = 650000;        // Max ring buffer size (for two rings)
 const uint32_t  MAX_RING_BUF_SIZE_TOOL  = 450000;        // Max ring buf size for tools.
 
 const uint32_t  MAX_OVERRIDES_SIZE      = 2 * 1024;      // Max overrides ring section size.

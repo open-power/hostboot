@@ -640,9 +640,9 @@ fapi_try_exit:
 //  bool            i_bBaseRing:  true: Base target ring, false: Gptr target ring
 //  void*           i_targetRingSectionOrRing: Has the ring to be overlaid
 //                                             **Overloaded** input arg as follows:
-//                                             if (bBaseRing==true)  => =Base ringSection (not a buffer!)
-//                                             if (bBaseRing==false) => =Gptr ring in ringBuf1
-//  void*           i_dynamicRingSection:      Has the overlay rings
+//                                             if (bBaseRing==true) => Base ringSection
+//                                             if (bBaseRing==false)=> Gptr ring in mid-ringBuf1
+//  void*           i_dynamicRingSection:      Dynamic overlay ringSection
 //  void*           io_ringBuf1                On return, has the final overlaid ring
 //  void*           i_ringBuf2
 //  void*           i_ringBuf3
@@ -882,8 +882,7 @@ fapi2::ReturnCode process_target_and_dynamic_rings(
     //
     // 2nd: Get the target ring
     //
-    if(i_bBaseRing)  // Here the target ring is copied from
-        // ***the Base ring section in targetRingSectionOrRing***
+    if(i_bBaseRing)  // Copy Target ring from **Base ringSection in i_targetRingSectionOrRing**
     {
         bufSize = MAX_RING_BUF_SIZE;
         l_rc = tor_get_single_ring(
@@ -914,8 +913,7 @@ fapi2::ReturnCode process_target_and_dynamic_rings(
             bTargetRingFound = true;
         }
     }
-    else  // Here the target ring is copied from
-        // ***the Mvpd Gptr RS4 ring in targetRingSectionOrRing***
+    else  // Copy Target ring from **Gptr RS4 ring in i_targetRingSectionOrRing**
     {
         memcpy( targetRs4,
                 i_targetRingSectionOrRing,
@@ -954,11 +952,11 @@ fapi2::ReturnCode process_target_and_dynamic_rings(
 
         // Note that apply_overlay_ring() will set iv_selector = UNDEFINED_RS4_SELECTOR.
         FAPI_TRY( apply_overlay_ring( i_procTarget,
-                                      targetRs4,  // (ringBuf1) In:  target (base) RS4 ring
+                                      targetRs4,  // (ringBuf1) In:  Target RS4 ring to be overlaid
                                       //            Out: overlaid RS4 ring
                                       i_ringBuf2, // (ringBuf2) In:  undefined
                                       //            Out: overlaid raw ring (not used here)
-                                      dataDynAcc, // (ringBuf3) In:  dynamic overlay raw ring
+                                      dataDynAcc, // (ringBuf3) In:  Dynamic overlay raw ring
                                       //            Out: same as In
                                       dynUncmpSize,
                                       (CompressedScanData*)targetRs4,
@@ -1051,12 +1049,12 @@ fapi_try_exit:
 //  void*      i_overlaysSection:    DD specific overlays ring section
 //  uint8_t    i_ddLevel:            DD level (to be used for TOR API level verif)
 //  uint8_t    i_sysPhase:           ={HB_SBE, RT_QME}
-//  void*      i_vpdRing:            VPD ring buffer. (Note, this is i_ringBuf1)
-//  uint32_t   i_vpdRingBufSize:     Size of VPD ring buffer.
-//  void*      i_ringBuf2:           Ring work buffer.
-//  uint32_t   i_ringBufSize2:       Size of ring work buffer.
-//  void*      i_ringBuf3:           Ring work buffer.
-//  uint32_t   i_ringBufSize3:       Size of ring work buffer.
+//  void*      i ringBuf1:           Ring buffer 1
+//  uint32_t   i_ringBufSize1:       Size of ring buffer 1
+//  void*      i_ringBuf2:           Ring buffer 2
+//  uint32_t   i_ringBufSize2:       Size of ring buffer 2
+//  void*      i_ringBuf3:           Ring buffer 3
+//  uint32_t   i_ringBufSize3:       Size of ring buffer 3
 //  RingProperties_t* i_ringProps:   Ptr to main ring properties list
 //  RingId_t   i_ringId:             Ring ID
 //  uint32_t   i_chipletSel:         Chiplet Select (chipletId + quad region select)
@@ -1077,8 +1075,8 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
     void*           i_overlaysSection,
     uint8_t         i_ddLevel,
     uint8_t         i_sysPhase,
-    void*           i_vpdRing,
-    uint32_t        i_vpdRingBufSize,
+    void*           i_ringBuf1,
+    uint32_t        i_ringBufSize1,
     void*           i_ringBuf2,
     uint32_t        i_ringBufSize2,
     void*           i_ringBuf3,
@@ -1101,10 +1099,11 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
     FAPI_DBG("_fetch_and_insert_vpd_ring: (ringId,chipletSel) = (0x%x,0x%08x)",
              i_ringId, i_chipletSel);
 
-    uint32_t     l_vpdRingSize = i_vpdRingBufSize;
+    void*        vpdRing = NULL;
+    uint32_t     vpdRingSize = 0;
+    void*        finalVpdRing = NULL;
     MvpdKeyword  l_mvpdKeyword;
     uint8_t      l_chipletId = (uint8_t)(i_chipletSel >> 24);
-    void*        finalVpdRing = NULL;
 
     RingClass_t l_ringClass = i_ringProps[i_ringId].ringClass;
 
@@ -1136,20 +1135,23 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
     }
 
     // Initialize data buffers to zeros
-    memset(i_vpdRing,  0, i_vpdRingBufSize);
+    memset(i_ringBuf1, 0, i_ringBufSize1);
     memset(i_ringBuf2, 0, i_ringBufSize2);
     memset(i_ringBuf3, 0, i_ringBufSize3);
 
     /////////////////////////////////////////////////////////////////////
     // Fetch ring from the MVPD:
     /////////////////////////////////////////////////////////////////////
+    vpdRing = i_ringBuf1;
+    vpdRingSize = i_ringBufSize1;
+
     l_fapiRc = getMvpdRing( i_procTarget,
                             MVPD_RECORD_CP00,
                             l_mvpdKeyword,
                             i_chipletSel,
                             i_ringId,
-                            (uint8_t*)i_vpdRing,
-                            l_vpdRingSize );
+                            (uint8_t*)vpdRing,
+                            vpdRingSize );
 
     ///////////////////////////////////////////////////////////////////////
     // Append VPD ring to the ring section
@@ -1160,7 +1162,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
         // Update for ring found in mvpd
         io_ringStatusInMvpd = RING_FOUND;
 
-        uint32_t l_scanAddr = be32toh(((CompressedScanData*)i_vpdRing)->iv_scanAddr);
+        uint32_t l_scanAddr = be32toh(((CompressedScanData*)vpdRing)->iv_scanAddr);
         uint32_t vpdChipletSel;
 
         // Even though success, check chipletSel didn't somehow get messed up (code bug).
@@ -1186,16 +1188,16 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                      vpdChipletSel, i_chipletSel );
 
         // Even though success, check for accidental buffer overflow (code bug).
-        FAPI_ASSERT( l_vpdRingSize <= i_vpdRingBufSize,
+        FAPI_ASSERT( vpdRingSize <= i_ringBufSize1,
                      fapi2::XIPC_MVPD_RING_SIZE_MESS().
                      set_CHIP_TARGET(i_procTarget).
                      set_RING_ID(i_ringId).
                      set_CHIPLET_ID(l_chipletId).
-                     set_RING_BUFFER_SIZE(i_vpdRingBufSize).
-                     set_MVPD_RING_SIZE(l_vpdRingSize),
+                     set_RING_BUFFER_SIZE(i_ringBufSize1).
+                     set_MVPD_RING_SIZE(vpdRingSize),
                      "_fetch_and_insert_vpd_ring: Code bug: VPD ring size (=0x%X) exceeds"
                      " allowed ring buffer size (=0x%X)",
-                     l_vpdRingSize, i_vpdRingBufSize );
+                     vpdRingSize, i_ringBufSize1 );
 
         // Check for Gptr ring in the .overlays section and if found overlay it onto
         // the Mvpd-Gptr ring.  Further, check for Gptr rings in the .dynamic section
@@ -1206,38 +1208,45 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                           i_procTarget,
                           i_overlaysSection,
                           i_ddLevel,
-                          i_vpdRing,
+                          vpdRing, //In:Mvpd Gptr ring, Out: Overlaid Gptr ring
                           i_ringBuf2,
                           i_ringBuf3),
                       "process_gptr_rings() failed w/rc=0x%08x",
                       (uint32_t)current_err );
 
-            // We need to overload i_ringBuf1 in order to call process_target_and_dynamic_rings
-            // since it uses i_ringBuf1, passed as finalVpdRing below, as a workbuffer and
-            // which is occupied by i_vpdRing, also passed below. So we move the buffer location
-            // of finalVpdRing to the mid-point of i_ringBuf1 to get around this.
-            finalVpdRing = (void*)((uint8_t*)i_vpdRing + MAX_RING_BUF_SIZE / 2);
+            // Here we need to overload the use of i_ringBuf1 in the call to
+            // process_target_and_dynamic_rings() because it uses i_ringBuf1 in two args. So
+            // we move the overlaid input Gptr ring in arg2 to the middle of ringBuf1 to allow
+            // continued use of ringBuf1 work buffer in arg4 as follows:
+            void* vpdRingCopy = (void*)((uint8_t*)vpdRing + MAX_RING_BUF_SIZE / 2);
 
-            FAPI_TRY( process_target_and_dynamic_rings( i_procTarget, false,
-                      i_vpdRing,
-                      i_dynamicRingSection,
-                      finalVpdRing,// Contains the final Gptr Vpd ring overlaid with dynamic rings
-                      i_ringBuf2,
-                      i_ringBuf3,
-                      i_idxFeatureMap,
-                      io_ringIdFeatureVecMap,
-                      i_numberOfFeatures,
-                      i_ringId,
-                      i_ddLevel ),
+            memcpy( vpdRingCopy,
+                    vpdRing,
+                    ((CompressedScanData*)vpdRing)->iv_size );
+
+            FAPI_TRY( process_target_and_dynamic_rings(
+                          i_procTarget,
+                          false,//false means next arg is the overlaid Mvpd Gptr RS4 ring
+                          vpdRingCopy,//Overloaded (false:RS4 ring in mid-Buf1,true:Base ringSection)
+                          i_dynamicRingSection,
+                          i_ringBuf1,//On return, contains final Gptr ring overlaid with dynamic rings
+                          i_ringBuf2,
+                          i_ringBuf3,
+                          i_idxFeatureMap,
+                          io_ringIdFeatureVecMap,
+                          i_numberOfFeatures,
+                          i_ringId,
+                          i_ddLevel ),
                       "process_target_and_dynamic_rings() failed w/rc=0x%08x",
                       (uint32_t)current_err );
 
-            // Update vpdRingSize to new value if any
-            l_vpdRingSize = be16toh(((CompressedScanData*)finalVpdRing)->iv_size);
+            // Update finalVpdRing and vpdRingSize to new value if any
+            finalVpdRing = i_ringBuf1;
+            vpdRingSize = be16toh(((CompressedScanData*)finalVpdRing)->iv_size);
         }
         else
         {
-            finalVpdRing = i_vpdRing;
+            finalVpdRing = vpdRing; // This is also ringBuf1
         }
 
         // Check final Vpd ring for redundancy
@@ -1274,7 +1283,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
         }
 
         // Checking for potential image overflow BEFORE appending the ring.
-        if ( (io_ringSectionSize + l_vpdRingSize) > i_maxRingSectionSize )
+        if ( (io_ringSectionSize + vpdRingSize) > i_maxRingSectionSize )
         {
             // Update flag as image would run out-of-space if we try to append
             // this ring
@@ -1288,7 +1297,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                          fapi2::XIPC_IMAGE_WOULD_OVERFLOW().
                          set_CHIP_TARGET(i_procTarget).
                          set_CURRENT_RING_SECTION_SIZE(io_ringSectionSize).
-                         set_SIZE_OF_THIS_RING(l_vpdRingSize).
+                         set_SIZE_OF_THIS_RING(vpdRingSize).
                          set_MAX_RING_SECTION_SIZE(i_maxRingSectionSize).
                          set_RING_ID(i_ringId).
                          set_CHIPLET_ID(l_chipletId).
@@ -1303,7 +1312,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                          "Current bootCoreMask: 0x%08x",
                          i_ringId,
                          l_chipletId,
-                         l_vpdRingSize,
+                         vpdRingSize,
                          io_ringSectionSize,
                          i_maxRingSectionSize,
                          io_bootCoreMask );
@@ -1353,17 +1362,17 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
 
         // getMvpdRing failed due to insufficient ring buffer space.
         // Assumption here is that getMvpdRing returns required buffer size
-        //   in l_vpdRingSize (and which it does!).
+        //   in vpdRingSize (and which it does!).
         FAPI_ASSERT( (uint32_t)l_fapiRc != RC_MVPD_RING_BUFFER_TOO_SMALL,
                      fapi2::XIPC_MVPD_RING_SIZE_TOO_BIG().
                      set_CHIP_TARGET(i_procTarget).
                      set_RING_ID(i_ringId).
                      set_CHIPLET_ID(l_chipletId).
-                     set_RING_BUFFER_SIZE(i_vpdRingBufSize).
-                     set_MVPD_RING_SIZE(l_vpdRingSize),
+                     set_RING_BUFFER_SIZE(i_ringBufSize1).
+                     set_MVPD_RING_SIZE(vpdRingSize),
                      "_fetch_and_insert_vpd_ring(): VPD ring size (=0x%X) exceeds"
                      " allowed ring buffer size (=0x%X)",
-                     l_vpdRingSize, i_vpdRingBufSize );
+                     vpdRingSize, i_ringBufSize1 );
 
         // getMvpdRing failed for some other reason aside from above handled cases.
         if (l_fapiRc != fapi2::FAPI2_RC_SUCCESS)
@@ -1439,12 +1448,12 @@ fapi_try_exit:
 //  uint32_t   i_maxRingSectionSize: Max ring section size
 //  void*      i_hwImage:            HW image (needed for .overlays)
 //  uint8_t    i_sysPhase:           ={IPL, RT_QME}
-//  void*      i_vpdRing:            VPD ring buffer.
-//  uint32_t   i_vpdRingBufSize:     Size of VPD ring buffer. (This is actually i_ringBuf1)
-//  void*      i_ringBuf2:           Ring work buffer.
-//  uint32_t   i_ringBufSize2:       Size of ring work buffer.
-//  void*      i_ringBuf3:           Ring work buffer.
-//  uint32_t   i_ringBufSize3:       Size of ring work buffer.
+//  void*      i_ringBuf1:           Ring buffer 1
+//  uint32_t   i_ringBufSize1:       Size of ring buffer 1
+//  void*      i_ringBuf2:           Ring buffer 2
+//  uint32_t   i_ringBufSize2:       Size of ring buffer 2
+//  void*      i_ringBuf3:           Ring buffer 3
+//  uint32_t   i_ringBufSize3:       Size of ring buffer 3
 //  uint32_t&  io_bootCoreMask:      Desired (in) and actual (out) boot cores.
 //  map&       i_idxFeatureMap:      List of indexed features
 //  map&       io_ringIdFeatureVecMap: List of the features applied onto each ringId
@@ -1464,8 +1473,8 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
     uint32_t        i_maxRingSectionSize,   // Max size
     void*           i_hwImage,
     uint8_t         i_sysPhase,
-    void*           i_vpdRing,
-    uint32_t        i_vpdRingBufSize,
+    void*           i_ringBuf1,
+    uint32_t        i_ringBufSize1,
     void*           i_ringBuf2,
     uint32_t        i_ringBufSize2,
     void*           i_ringBuf3,
@@ -1590,8 +1599,8 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                                l_overlaysSection,
                                i_ddLevel,
                                i_sysPhase,
-                               i_vpdRing,
-                               i_vpdRingBufSize,
+                               i_ringBuf1,
+                               i_ringBufSize1,
                                i_ringBuf2,
                                i_ringBufSize2,
                                i_ringBuf3,
@@ -1705,8 +1714,8 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                                l_overlaysSection,
                                i_ddLevel,
                                i_sysPhase,
-                               i_vpdRing,
-                               i_vpdRingBufSize,
+                               i_ringBuf1,
+                               i_ringBufSize1,
                                i_ringBuf2,
                                i_ringBufSize2,
                                i_ringBuf3,
@@ -1850,8 +1859,8 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                                    l_overlaysSection,
                                    i_ddLevel,
                                    i_sysPhase,
-                                   i_vpdRing,
-                                   i_vpdRingBufSize,
+                                   i_ringBuf1,
+                                   i_ringBufSize1,
                                    i_ringBuf2,
                                    i_ringBufSize2,
                                    i_ringBuf3,
@@ -3409,10 +3418,10 @@ ReturnCode p10_ipl_customize (
         }
 
         l_fapiRc = process_target_and_dynamic_rings( i_procTarget,
-                   true,
-                   baseRingSection,
+                   true,//true means next arg is Base ringSection ptr
+                   baseRingSection,//Overloaded (false:RS4 ring in mid-Buf1,true:Base ringSection)
                    dynamicRingSection,
-                   i_ringBuf1,
+                   i_ringBuf1,//On return, contains Base ring overlaid with dynamic rings
                    i_ringBuf2,
                    i_ringBuf3,
                    idxFeatureMap,
