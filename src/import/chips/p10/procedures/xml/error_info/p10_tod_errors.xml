@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -323,4 +323,61 @@
       Error translating chip unit relative SCOM address
     </description>
   </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P10_TOD_TIMER_STEP_COUNT_ERROR</rc>
+    <description>
+      Procedure: p10_tod_init
+      The TOD timer did not count as expected
+    </description>
+    <ffdc>TARGET</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_TOD_STATUS</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <ffdc>STEPS_PER_SYNC</ffdc>
+    <ffdc>TOD_VALUE</ffdc>
+    <ffdc>TOD_VALUE_INITIAL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P10_TOD_POLLING_DELAY_CALC_OVERFLOW</rc>
+    <description>
+      Procedure: p10_tod_init
+      Polling delay calculation exceeds numeric limits.
+    </description>
+    <ffdc>TOD_COUNT</ffdc>
+    <ffdc>TOD_DIVISOR</ffdc>
+    <ffdc>NUMERIC_LIMIT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P10_TOD_INVALID_SPS</rc>
+    <description>
+      Procedure: p10_tod_init
+      An invalid TOD SPS value has been passed into the procedure
+    </description>
+    <ffdc>TOD_SPS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>

@@ -111,7 +111,7 @@ const uint32_t TOD_M_PATH_CTRL_REG_M_PATH_SYNC_CREATE_SPS_256  = 7;
 // TOD_S_PATH_CTRL_REG register field definitions
 // The number of syncs that we are ok with the slave path missing (this must
 // be set to at least 1 or there will be a fail)
-const uint32_t TOD_S_PATH_CTRL_REG_REMOTE_SYNC_MISS_COUNT_2 = 5;
+const uint32_t TOD_S_PATH_CTRL_REG_REMOTE_SYNC_MISS_COUNT_2 = 2;
 
 // TOD_[MSI]_PATH_CTRL_REG register field definitions
 const uint32_t STEP_CHECK_CPS_DEVIATION_FACTOR_1 = 0;
