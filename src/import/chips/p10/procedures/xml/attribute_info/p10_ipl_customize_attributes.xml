@@ -46,7 +46,7 @@
       permitted by the platform.
       For platforms (FSP/HB FW) which require the image to be constrained into a
       physical storage device (SEEPROM), this should reflect the maximum size of that
-      memory (e.g., 256KB).
+      memory (e.g., 512KB).
       For platforms (Cronus) which may use a customized image in a virtual
       envrionment with no physical storage constraints, this size may be
       larger than the physical SEEPROM size.
