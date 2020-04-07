@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,10 +36,10 @@
 #include <fapi2.H>
 #include <exp_getidec.H>
 #include <lib/shared/exp_consts.H>
-#include <chips/ocmb/explorer/common/include/explorer_scom_addresses.H>
-#include <chips/ocmb/explorer/common/include/explorer_scom_addresses_fixes.H>
-#include <chips/ocmb/explorer/common/include/explorer_scom_addresses_fld.H>
-#include <chips/ocmb/explorer/common/include/explorer_scom_addresses_fld_fixes.H>
+#include <explorer_scom_addresses.H>
+#include <explorer_scom_addresses_fixes.H>
+#include <explorer_scom_addresses_fld.H>
+#include <explorer_scom_addresses_fld_fixes.H>
 #include <generic/memory/mss_git_data_helper.H>
 
 extern "C"
