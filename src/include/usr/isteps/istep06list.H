@@ -206,7 +206,6 @@ const DepModInfo  g_istep06Dependancies = {
 #endif
       DEP_LIB(libimageprocs.so),
       DEP_LIB(libp9_cpuWkup.so),
-      DEP_LIB(libisteps_nest.so),
       DEP_LIB(libruntime.so),
       NULL
     }
