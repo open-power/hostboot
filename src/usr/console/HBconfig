@@ -8,3 +8,9 @@ config CONSOLE_DEFAULT_UART
     depends on !BMC_AST2400
     help
         Enable a default UART driver for the console.
+
+config VIRTUAL_UART1_ENABLED
+    default y if CONSOLE
+    depends on CONSOLE
+    help
+        Enable console support for VUART1.

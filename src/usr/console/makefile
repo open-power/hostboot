@@ -29,7 +29,7 @@ MODULE = console
 OBJS += $(if $(CONFIG_CONSOLE),daemon.o)
 # Compile in uart regardless of CONFIG_CONSOLE to access getUartInfo
 OBJS += uart.o
-OBJS += uartconfig.o
+OBJS += $(if $(CONFIG_CONSOLE), uartconfig.o)
 OBJS += $(if $(and $(CONFIG_CONSOLE),$(CONFIG_BMC_AST2400)), ast2400.o)
 
 include $(ROOTPATH)/config.mk

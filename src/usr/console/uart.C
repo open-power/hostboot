@@ -275,12 +275,28 @@ namespace CONSOLE
         }
         else if(i_uartId == VUART2)
         {
-            l_info.lpcBaseAddr = g_vuart2Base;
-            l_info.lpcSize = sizeof(uint8_t);
-            l_info.clockFreqHz = g_vuart2Clock;
-            l_info.freqHz = g_vuart2Baud;
-            l_info.interruptNum = VUART2_IRQ;
-            l_info.interruptTrigger = LOW_LEVEL_TRIG;
+            l_info.consoleEnabled = false;
+#ifdef CONFIG_VIRTUAL_UART1_ENABLED
+            TARGETING::TargetHandleList l_procChips;
+            TARGETING::getAllChips(l_procChips, TARGETING::TYPE_PROC);
+            for (const auto & l_procChip: l_procChips)
+            {
+                bool lpcEnabled =
+                    l_procChip->getAttr<TARGETING::ATTR_LPC_CONSOLE_CNFG>();
+                if (lpcEnabled)
+                {
+                    // Only populate these fields if console is enabled
+                    l_info.consoleEnabled = true;
+                    l_info.lpcBaseAddr = g_vuart2Base;
+                    l_info.lpcSize = sizeof(uint8_t);
+                    l_info.clockFreqHz = g_vuart2Clock;
+                    l_info.freqHz = g_vuart2Baud;
+                    l_info.interruptNum = VUART2_IRQ;
+                    l_info.interruptTrigger = LOW_LEVEL_TRIG;
+                    break;
+                }
+            }
+#endif
         }
         else
         {
