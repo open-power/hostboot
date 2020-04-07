@@ -41,6 +41,7 @@
 #include <p10_scom_eq.H>
 #include <p10_pm_hcd_flags.h>
 #include <multicast_group_defs.H>
+#include <cstdint>
 
 //------------------------------------------------------------------------------
 // Namespace declarations
@@ -50,6 +51,11 @@ using namespace scomt;
 using namespace scomt::perv;
 using namespace scomt::eq;
 
+//------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
+// Implement workaround for P10 defect HW527708.
+const bool IMPLEMENT_HW527708_WORKAROUND = true;
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -122,6 +128,193 @@ fapi_try_exit:
     return;
 }
 
+/// @brief Decode the SPS (Steps per Sync) encoded field
+/// @param[in] i_sps Encoded SPS field
+/// @param[out] o_steps_per_sync Decoded SPS field
+/// @return FAPI2_RC_SUCCESS if succesful else error
+fapi2::ReturnCode p10_tod_decode_sps(
+    fapi2::buffer<uint64_t> i_sps,
+    uint64_t& o_steps_per_sync)
+{
+
+    switch (i_sps())
+    {
+        case TOD_M_PATH_CTRL_REG_M_PATH_SYNC_CREATE_SPS_512:
+            o_steps_per_sync = 512;
+            break;
+
+        case TOD_M_PATH_CTRL_REG_M_PATH_SYNC_CREATE_SPS_128:
+            o_steps_per_sync = 128;
+            break;
+
+        case TOD_M_PATH_CTRL_REG_M_PATH_SYNC_CREATE_SPS_64:
+            o_steps_per_sync = 64;
+            break;
+
+        case TOD_M_PATH_CTRL_REG_M_PATH_SYNC_CREATE_SPS_32:
+            o_steps_per_sync = 32;
+            break;
+
+        case TOD_M_PATH_CTRL_REG_M_PATH_SYNC_CREATE_SPS_4096:
+            o_steps_per_sync = 4096;
+            break;
+
+        case TOD_M_PATH_CTRL_REG_M_PATH_SYNC_CREATE_SPS_2048:
+            o_steps_per_sync = 2048;
+            break;
+
+        case TOD_M_PATH_CTRL_REG_M_PATH_SYNC_CREATE_SPS_1024:
+            o_steps_per_sync = 1024;
+            break;
+
+        case TOD_M_PATH_CTRL_REG_M_PATH_SYNC_CREATE_SPS_256:
+            o_steps_per_sync = 256;
+            break;
+
+        default:
+            // Should not ever reach this point, something wrong in the code.
+            FAPI_ASSERT(false,
+                        fapi2::P10_TOD_INVALID_SPS()
+                        .set_TOD_SPS(i_sps),
+                        "Invalid TOD SPS field in TOD_M_PATH_CTRL_REG!");
+            break;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+/// @brief Return the number of configured TOD Master Steps per Sync
+/// @param[in] i_tod_node Reference to TOD topology
+/// @return FAPI2_RC_SUCCESS if succesful else error
+fapi2::ReturnCode p10_tod_steps_per_sync(
+    const tod_topology_node* i_tod_node,
+    uint64_t& o_steps_per_sync)
+{
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target = *(i_tod_node->i_target);
+    fapi2::buffer<uint64_t> l_m_path_ctrl_reg = 0;
+    fapi2::buffer<uint64_t> l_sps_select = 0;
+
+    FAPI_DBG("Start");
+
+    // Read TOD_M_PATH_CTRL_REG
+    FAPI_TRY(GET_TOD_M_PATH_CTRL_REG(l_target, l_m_path_ctrl_reg),
+             "Error from GET_TOD_M_PATH_CTRL_REG");
+
+    // Get the SPS select field
+    GET_TOD_M_PATH_CTRL_REG_SYNC_CREATE_SPS_SELECT(l_m_path_ctrl_reg, l_sps_select);
+
+    FAPI_TRY(p10_tod_decode_sps(l_sps_select, o_steps_per_sync));
+
+    if (GET_TOD_M_PATH_CTRL_REG_STEP_CREATE_DUAL_EDGE_DISABLE(l_m_path_ctrl_reg))
+    {
+        // DUAL_EDGE_DISABLE has the effect of dividing the SPS by half.
+        o_steps_per_sync >>= 1;
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+/// @brief Convert TOD count into a polling delay in either NS or sim cycles
+/// @param[in] i_is_simulation True if simulation, else false
+/// @param[in] i_tod_count Number of TOD counts (step pulses)
+/// @param[in] i_polling_count Number of times to poll
+/// @param[out] o_poll_cycle_delay  Poll cycle delay in NS or sim cycles
+/// @return FAPI2_RC_SUCCESS if succesful else error
+fapi2::ReturnCode p10_tod_polling_delay(
+    const bool i_is_simulation,
+    const uint64_t& i_tod_count,
+    const uint64_t& i_polling_count,
+    uint64_t& o_poll_cycle_delay)
+{
+    // Number of simulation cycles per TOD clock.
+    const uint64_t  P10_TOD_SIM_CYCLES_PER_TOD_CLOCK = 2000;
+    // 31.25ns rounded up
+    const uint64_t  P10_TOD_NS_PER_TOD_COUNT = 32;
+    FAPI_DBG("Start");
+
+    FAPI_ASSERT(i_is_simulation ? (i_tod_count <= UINT64_MAX / P10_TOD_SIM_CYCLES_PER_TOD_CLOCK) :
+                (i_tod_count <= UINT64_MAX / P10_TOD_NS_PER_TOD_COUNT),
+                fapi2::P10_TOD_POLLING_DELAY_CALC_OVERFLOW()
+                .set_TOD_COUNT(i_tod_count)
+                .set_TOD_DIVISOR(i_is_simulation ? P10_TOD_SIM_CYCLES_PER_TOD_CLOCK : P10_TOD_NS_PER_TOD_COUNT)
+                .set_NUMERIC_LIMIT(UINT64_MAX),
+                "Polling delay calculation overflow!");
+
+    o_poll_cycle_delay = i_is_simulation ? (i_tod_count * P10_TOD_SIM_CYCLES_PER_TOD_CLOCK) :
+                         (i_tod_count * P10_TOD_NS_PER_TOD_COUNT) ;
+
+    // Divide the total polling delay amongst each polling cycle
+    o_poll_cycle_delay /= i_polling_count;
+
+    FAPI_DBG("i_tod_count = %llu i_polling_count = %llu o_poll_cycle_delay = %llu", i_tod_count, i_polling_count,
+             o_poll_cycle_delay);
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+/// @brief Wait one Sync period on the current TOD node
+/// @param[in] i_tod_node Reference to TOD topology
+/// @return FAPI2_RC_SUCCESS if succesful else error
+fapi2::ReturnCode p10_tod_wait_sync_period(
+    const tod_topology_node* i_tod_node,
+    const bool i_is_simulation)
+{
+    FAPI_DBG("Start");
+
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target = *(i_tod_node->i_target);
+    fapi2::buffer<uint64_t> l_tod_value_reg;
+    fapi2::buffer<uint64_t> l_tod_value_reg_tod_value_initial;
+    fapi2::buffer<uint64_t> l_tod_value_reg_tod_value;
+    fapi2::buffer<uint64_t> l_steps_per_sync = 0;
+    uint64_t l_poll_cycle_delay = 0;
+
+    // Read initial tod_value from TOD Value Register
+    FAPI_TRY(GET_TOD_VALUE_REG(l_target, l_tod_value_reg),
+             "Error from GET_TOD_VALUE_REG");
+    GET_TOD_VALUE_REG_TOD_VALUE(l_tod_value_reg, l_tod_value_reg_tod_value_initial);
+
+    // Get the number of Steps per Sync
+    FAPI_TRY(p10_tod_steps_per_sync(i_tod_node, l_steps_per_sync));
+
+    FAPI_TRY(p10_tod_polling_delay(i_is_simulation,
+                                   2 * l_steps_per_sync(),  // Wait twice the expected delay before declaring timeout
+                                   P10_TOD_UTIL_TIMEOUT_COUNT,
+                                   l_poll_cycle_delay));
+
+    // Wait until the TOD Timer has counted off the required number of TOD Steps
+    // which represent one Sync period.
+    for (uint32_t i = 0; i < P10_TOD_UTIL_TIMEOUT_COUNT ; i++)
+    {
+        fapi2::delay(l_poll_cycle_delay, l_poll_cycle_delay);
+
+        FAPI_TRY(GET_TOD_VALUE_REG(l_target, l_tod_value_reg),
+                 "Error from GET_TOD_VALUE_REG");
+        GET_TOD_VALUE_REG_TOD_VALUE(l_tod_value_reg, l_tod_value_reg_tod_value);
+
+        if (l_steps_per_sync < (l_tod_value_reg_tod_value - l_tod_value_reg_tod_value_initial))
+        {
+            break;
+        }
+    }
+
+    FAPI_ASSERT(l_steps_per_sync < (l_tod_value_reg_tod_value - l_tod_value_reg_tod_value_initial),
+                fapi2::P10_TOD_TIMER_STEP_COUNT_ERROR()
+                .set_TARGET(l_target)
+                .set_STEPS_PER_SYNC(l_steps_per_sync)
+                .set_TOD_VALUE(l_tod_value_reg_tod_value)
+                .set_TOD_VALUE_INITIAL(l_tod_value_reg_tod_value_initial),
+                "TOD Timer step count error!");
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
 /// @brief Distribute synchronization signal to SS PLL using
 ///        TOD network
 /// @param[in] i_tod_node Reference to TOD topology
@@ -135,17 +328,7 @@ fapi2::ReturnCode sync_spread(
 
     // in TOD counts of 32Mhz clock; needs to account for SCOM latency
     // and number of chips to be started in sync
-    const uint64_t C_SSCG_START_DELAY = ((i_is_simulation) ? (0x40) : (0x100000));
-    // 31.25 rounded up
-    const uint64_t  C_SSCG_NS_PER_TOD_COUNT = 32;
-    const uint64_t  C_SSCG_START_POLL_COUNT = 10;
-    // Make the total polling delay equal to twice the expected delay
-    // and divide the total polling delay up between each of the polling cycles.
-    const uint64_t  C_SSCG_START_POLL_DELAY_NS = (2 * C_SSCG_START_DELAY * C_SSCG_NS_PER_TOD_COUNT) /
-            C_SSCG_START_POLL_COUNT;
-    const uint64_t  C_SSCG_SIM_CYCLES_PER_TOD_CLOCK = 2000;
-    const uint64_t  C_SSCG_START_POLL_DELAY_SIM_CYCLES = (2 * C_SSCG_START_DELAY * C_SSCG_SIM_CYCLES_PER_TOD_CLOCK) /
-            C_SSCG_START_POLL_COUNT;
+    const uint64_t P10_TOD_SSCG_START_DELAY = ((i_is_simulation) ? (0x100) : (0x100000));
 
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>> l_targets;
     get_targets(i_tod_node, 0, l_targets);
@@ -153,6 +336,7 @@ fapi2::ReturnCode sync_spread(
     fapi2::buffer<uint64_t> l_tod_value_reg_tod_value;
     fapi2::buffer<uint64_t> l_tod_value_reg;
     fapi2::buffer<uint64_t> l_tod_timer_data;
+    uint64_t l_poll_cycle_delay = 0;
 
     FAPI_ASSERT(l_targets.size(),
                 fapi2::P10_TOD_SETUP_NULL_NODE(),
@@ -170,19 +354,24 @@ fapi2::ReturnCode sync_spread(
     for (auto l_chip : l_targets)
     {
         FAPI_TRY(PREP_TOD_TIMER_REG(l_chip));
-        SET_TOD_TIMER_REG_VALUE(l_tod_value_reg_tod_value + C_SSCG_START_DELAY, l_tod_timer_data);
+        SET_TOD_TIMER_REG_VALUE(l_tod_value_reg_tod_value + P10_TOD_SSCG_START_DELAY, l_tod_timer_data);
         SET_TOD_TIMER_REG_ENABLE0(l_tod_timer_data);
         SET_TOD_TIMER_REG_ENABLE1(l_tod_timer_data);
         FAPI_TRY(PUT_TOD_TIMER_REG(l_chip, l_tod_timer_data),
                  "Error from PUT_TOD_TIMER_REG");
     }
 
+    FAPI_TRY(p10_tod_polling_delay(i_is_simulation,
+                                   2 * P10_TOD_SSCG_START_DELAY,  // Wait twice the expected delay before declaring timeout
+                                   P10_TOD_UTIL_TIMEOUT_COUNT,
+                                   l_poll_cycle_delay));
+
     // Wait for SSCG start signal
     for (uint32_t i = 0;
-         (i < C_SSCG_START_POLL_COUNT) && !l_targets.empty();
+         (i < P10_TOD_UTIL_TIMEOUT_COUNT) && !l_targets.empty();
          i++)
     {
-        fapi2::delay(C_SSCG_START_POLL_DELAY_NS, C_SSCG_START_POLL_DELAY_SIM_CYCLES);
+        fapi2::delay(l_poll_cycle_delay, l_poll_cycle_delay);
 
         for (auto l_chip_it = l_targets.begin();
              l_chip_it != l_targets.end();
@@ -219,6 +408,7 @@ fapi_try_exit:
 
 /// @brief Helper function for p10_tod_init
 /// @param[in] i_tod_node Pointer to TOD topology (including FAPI targets)
+/// @param[in] i_is_simulation True if simulation, else false
 /// @param[out] o_failingTodProc Pointer to the fapi target, will be populated
 ///             with processor target unable to receive proper signals from OSC.
 //              Caller needs to look at this parameter only when p10_tod_init
@@ -227,6 +417,7 @@ fapi_try_exit:
 ///         else error
 fapi2::ReturnCode init_tod_node(
     const tod_topology_node* i_tod_node,
+    const bool i_is_simulation,
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>* o_failingTodProc)
 {
     // Timeout counter for bits that are cleared by hardware
@@ -258,6 +449,14 @@ fapi2::ReturnCode init_tod_node(
         SET_TOD_LOAD_MOD_REG_TRIGGER(l_data);
         FAPI_TRY(PUT_TOD_LOAD_MOD_REG(l_target, l_data),
                  "Master: Error from PUT_TOD_LOAD_MOD_REG");
+
+        if (IMPLEMENT_HW527708_WORKAROUND)
+        {
+            // Before enabling the Step checkers on the Slaves,
+            // wait for a full Sync period on the MDMT to workaround defect HW527708
+            FAPI_TRY(p10_tod_wait_sync_period(i_tod_node, i_is_simulation),
+                     "Error from p10_tod_wait_sync_period!");
+        }
 
         // Load-TOD:
         // TOD_LOAD_TOD_REG(@0x21)
@@ -298,17 +497,6 @@ fapi2::ReturnCode init_tod_node(
         FAPI_TRY(PUT_TOD_TX_TTYPE_4_REG(l_target, l_data),
                  "Master: Error from PUT_TOD_TX_TTYPE_4_REG");
 
-        // STEP checking enable:
-        // Initiate a TTYPE-2 from the TOD master:
-        // TOD_TX_TTYPE_2_REG(@0x13)[00] = 0b1
-        // Already done above.
-        FAPI_DBG("Master: Chip TOD step checkers enable");
-        FAPI_TRY(PREP_TOD_TX_TTYPE_2_REG(l_target));
-        l_data.flush<0>();
-        SET_TOD_TX_TTYPE_2_REG_TX_TTYPE_2_TRIGGER(l_data);
-        FAPI_TRY(PUT_TOD_TX_TTYPE_2_REG(l_target, l_data),
-                 "Master: Error from PUT_TOD_TX_TTYPE_2_REG");
-
         FAPI_DBG("Master: Chip TOD start_tod (switch local Chip TOD to 'Running' state)");
         FAPI_TRY(PREP_TOD_START_REG(l_target));
         l_data.flush<0>();
@@ -324,6 +512,8 @@ fapi2::ReturnCode init_tod_node(
 
     FAPI_DBG("Check TOD is Running");
 
+    // TODO: Can a better/more reliable estimate of the delay/polling count
+    // be calculated here using p10_tod_polling_delay()?
     while (l_tod_init_pending_count < P10_TOD_UTIL_TIMEOUT_COUNT)
     {
         FAPI_DBG("Waiting for TOD to assert TOD_FSM_REG_TOD_IS_RUNNING...");
@@ -420,7 +610,7 @@ fapi2::ReturnCode init_tod_node(
          l_child != (i_tod_node->i_children).end();
          ++l_child)
     {
-        FAPI_TRY(init_tod_node(*l_child, o_failingTodProc),
+        FAPI_TRY(init_tod_node(*l_child, i_is_simulation, o_failingTodProc),
                  "Failure configuring downstream node!");
     }
 
@@ -501,7 +691,7 @@ fapi2::ReturnCode p10_tod_init(
              "Error from p10_tod_clear_error_reg!");
 
     // Start configuring each node; (init_tod_node will recurse on each child)
-    FAPI_TRY(init_tod_node(i_tod_node, o_failingTodProc),
+    FAPI_TRY(init_tod_node(i_tod_node, l_attr_is_simulation, o_failingTodProc),
              "Error from init_tod_node!");
 
     // sync spread across chips in topology
