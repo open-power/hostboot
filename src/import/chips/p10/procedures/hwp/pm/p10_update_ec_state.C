@@ -274,43 +274,43 @@ fapi2::ReturnCode powerdown_deconfigured_cl2_l3(
         if ( l_core_clock_State && l_l3_clock_State)
         {
             FAPI_INF("Both L3 and L2 units are powered off and clock off");
-            break;
         }
-
-
-        //Verify core is powered on
-        //If core is powered on
-        //  then if core(ECl2) clocks are on
-        //      then need to purge the l2 and stop the core clocks
-        //  if L3 clocks are on
-        //      then purge L3 and stop the l3 clocks
-        //  Power off the core and L3
-        if( l_cl2_pfet_sense)
+        else
         {
-            if (!l_core_clock_State)
+            //Verify core is powered on
+            //If core is powered on
+            //  then if core(ECl2) clocks are on
+            //      then need to purge the l2 and stop the core clocks
+            //  if L3 clocks are on
+            //      then purge L3 and stop the l3 clocks
+            //  Power off the core and L3
+            if( l_cl2_pfet_sense)
             {
-                FAPI_TRY(p10_hcd_l2_purge(i_core_target));
-                FAPI_TRY(p10_hcd_l2_tlbie_quiesce(i_core_target));
-                FAPI_TRY(p10_hcd_ncu_purge(i_core_target));
-                FAPI_TRY(p10_hcd_core_shadows_disable(i_core_target));
-                FAPI_TRY(p10_hcd_core_stopclocks(i_core_target));
-                FAPI_TRY(p10_hcd_core_stopgrid(i_core_target));
+                if (!l_core_clock_State)
+                {
+                    FAPI_TRY(p10_hcd_l2_purge(i_core_target));
+                    FAPI_TRY(p10_hcd_l2_tlbie_quiesce(i_core_target));
+                    FAPI_TRY(p10_hcd_ncu_purge(i_core_target));
+                    FAPI_TRY(p10_hcd_core_shadows_disable(i_core_target));
+                    FAPI_TRY(p10_hcd_core_stopclocks(i_core_target));
+                    FAPI_TRY(p10_hcd_core_stopgrid(i_core_target));
+                }
+
+                FAPI_TRY(p10_hcd_core_poweroff(i_core_target));
             }
 
-            FAPI_TRY(p10_hcd_core_poweroff(i_core_target));
-        }
-
-        if (l_l3_pfet_sense)
-        {
-            if (!l_l3_clock_State)
+            if (l_l3_pfet_sense)
             {
-                FAPI_TRY(p10_hcd_chtm_purge(i_core_target));
-                FAPI_TRY(p10_hcd_l3_purge(i_core_target));
-                FAPI_TRY(p10_hcd_powerbus_purge(i_core_target));
-                FAPI_TRY(p10_hcd_cache_stopclocks(i_core_target));
-            }
+                if (!l_l3_clock_State)
+                {
+                    FAPI_TRY(p10_hcd_chtm_purge(i_core_target));
+                    FAPI_TRY(p10_hcd_l3_purge(i_core_target));
+                    FAPI_TRY(p10_hcd_powerbus_purge(i_core_target));
+                    FAPI_TRY(p10_hcd_cache_stopclocks(i_core_target));
+                }
 
-            FAPI_TRY(p10_hcd_cache_poweroff(i_core_target));
+                FAPI_TRY(p10_hcd_cache_poweroff(i_core_target));
+            }
         }
 
         //Restore the original values
