@@ -357,6 +357,11 @@ extern "C"
                         l_scom.set_ring(P9A_MC_OMIC0_PPE_RING_ID + (i_chipUnitNum % 3));
                     }
 
+                    if (P9A_MC_OMI_DL_RING_ID == l_ring)
+                    {
+                        l_scom.set_sat_id(P9A_MC_DL_REG0_SAT_ID + (i_chipUnitNum % 3));
+                    }
+
                     break;
 
                 case PU_OMI_CHIPUNIT:
