@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019
+# Contributors Listed Below - COPYRIGHT 2019,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -39,6 +39,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 # HWP include directories :
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/spd_access/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
+
 
 # to get multicast_group_defs.H
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
