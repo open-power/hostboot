@@ -279,13 +279,21 @@ if [[ $HB_STANDALONE -eq 1 ]] && [ $PNOR_LAYOUT_SELECTED != "FSP" ];then
         echo "Skipping build of HCODE due to user override"
     fi
 
+    cd ${PROJECT_ROOT}/standalone/pnor
+
+    # Copy over hbbl.bin to standalone/pnor for SBE build consumption
+    make -rR ${DEBUG:=} -f ${PROJECT_ROOT}/src/build/mkrules/assemble.standalone.mk gen_default_images
+
+    cd ${PROJECT_ROOT}/standalone/pnor
+    source standaloneHelper --generateSbeImage $BUILD_PARAMS
+
+    cd ${PROJECT_ROOT}/standalone/pnor
+    # Copy over sbe_seeprom_DD1.bin for PNOR build consumption
+    make -rR ${DEBUG:=} -f ${PROJECT_ROOT}/src/build/mkrules/assemble.standalone.mk copy_sbe_bins
+
     # Run makefile (generates PNOR)
     cd ${PROJECT_ROOT}/standalone/pnor
     make -rR ${DEBUG:=} -f ${PROJECT_ROOT}/src/build/mkrules/assemble.standalone.mk
-
-    # Send bootloader image to the cloned PPE repo to generate
-    # an ECC enabled SBE image
-    source standaloneHelper --generateSbeImage $BUILD_PARAMS
 
     exit 0
 

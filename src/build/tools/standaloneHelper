@@ -147,11 +147,13 @@ generate_sbe_image()
     SBE_SEEPROM_IMG=${PPE_DIR}/simics/import/boot_roms/sbe_seeprom_p10.bin.ecc
     SBE_MEASUREMENT_IMG=${PPE_DIR}/simics/import/boot_roms/sbe_measurement_p10.bin.ecc
     SBE_OTPROM_IMG=${PPE_DIR}/simics/import/boot_roms/sbe_otprom_p10.bin
+    SBE_SEEPROM_IMAGE_DD1=${PPE_DIR}/images/sbe_seeprom_DD1.bin
 
     if ! diff "$HBIBL_HASH_FILE" <(hash_file "$PROJECT_ROOT/img/hbibl.bin") &>/dev/null \
     || [ ! -f "$SBE_SEEPROM_IMG" ] \
     || [ ! -f "$SBE_MEASUREMENT_IMG" ] \
-    || [ ! -f "$SBE_OTPROM_IMG" ]
+    || [ ! -f "$SBE_OTPROM_IMG" ] \
+    || [ ! -f "$SBE_SEEPROM_IMAGE_DD1" ]
     then
         echo -e "\n\nGenerating SBE image..."
 
@@ -167,6 +169,7 @@ generate_sbe_image()
     cp "$SBE_SEEPROM_IMG" ${PROJECT_ROOT}/standalone/simics/sbe_seeprom_p10.bin.ecc
     cp "$SBE_MEASUREMENT_IMG" ${PROJECT_ROOT}/standalone/simics/sbe_measurement_p10.bin.ecc
     cp "$SBE_OTPROM_IMG" ${PROJECT_ROOT}/standalone/simics/sbe_otprom_p10.bin
+    cp "$SBE_SEEPROM_IMAGE_DD1" ${PROJECT_ROOT}/standalone/pnor/sbe_seeprom_DD1.bin
 }
 
 # Build the HCODE image inside the EKB repo

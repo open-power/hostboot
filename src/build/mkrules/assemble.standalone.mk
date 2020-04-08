@@ -45,6 +45,8 @@ endef
 TOOLSDIR := ${PROJECT_ROOT}/src/build/tools
 BUILDPNOR := ${PROJECT_ROOT}/src/build/buildpnor
 BASEIMAGESDIR := ${PROJECT_ROOT}/img
+PPE_DIR=${PROJECT_ROOT}/src/build/tools/extern/ppe
+SBE_SEEPROM_IMAGE_DD1 := ${PPE_DIR}/images/sbe_seeprom_DD1.bin
 STANDALONEDIR := ${PROJECT_ROOT}/standalone
 # FSS tools directory
 FFSTOOLS := ${STANDALONEDIR}/ffs
@@ -94,6 +96,11 @@ HBB_ECC_IMG := hostboot.bin.ecc
 OCMBFW_IMG = fwhdr.ocmbfw.bin
 VERSION_IMG := version.txt
 
+SBE_BASE_IMAGES := ${SBE_SEEPROM_IMAGE_DD1}
+SBE_SEEPROM_IMAGE_DD1 := ${PPE_DIR}/images/sbe_seeprom_DD1.bin
+SBE_SEEPROM_HDR_SHA_DD1 := ${STANDALONEDIR}/pnor/sbe_seeprom.sha.bin.DD1
+SBE_SEEPROM_HDR_BIN_DD1 := ${STANDALONEDIR}/pnor/sbe_seeprom.hdr.bin.DD1
+
 # # Input fake images
 HBD_FAKE = ${BASEIMAGESDIR}/vbu_P10_targeting.bin
 EECACHE_IMG = ${STANDALONEDIR}/simics/eecache_prebuilt.bin.ecc
@@ -125,7 +132,6 @@ WOFDATA_FINAL_IMG := WOFDATA.bin
 SBE_IMG := unprocessed.SBE.bin
 
 # Input image artifacts location
-SBE_ARTIFACTS_LOCATION := ${HB_SIM_DEPS_PATH}/sbe/${SBE_ARTIFACT_ID}/
 OCC_ARTIFACT_LOCATION := ${HB_SIM_DEPS_PATH}/occ/${OCC_ARTIFACT_ID}/
 WOF_ARTIFACT_LOCATION := ${HB_SIM_DEPS_PATH}/wof/${WOF_ARTIFACT_ID}/
 
@@ -133,7 +139,6 @@ WOF_ARTIFACT_LOCATION := ${HB_SIM_DEPS_PATH}/wof/${WOF_ARTIFACT_ID}/
 HBD_IMG := ${BASEIMAGESDIR}/simics_P10_targeting.bin
 WOFDATA_IMG := ${call get_files_full_path, ${WOF_ARTIFACT_LOCATION}}
 OCC_IMG := ${call get_files_full_path, ${OCC_ARTIFACT_LOCATION}}
-SBE_ECs := ${call get_files_full_path, ${SBE_ARTIFACTS_LOCATION}}
 
 # Allow for overriding the HCODE image with a user supplied image
 ifndef HCODE_OVERRIDE_IMAGE
@@ -331,13 +336,25 @@ gen_default_images: copy_hb_bins
 #    ${buildSbePart.pl:P} --sbeOutBin s1SbePartition.bin \
 #        --ecImg_10 ${S1_EC10_BIN}
 #################################################
-build_sbe_img:
-	${SBE_BUILD_SCRIPT} --sbeOutBin ${SBE_IMG} --ecImg_10 ${SBE_ECs}
+
+build_sbe_img: add_pnor_header
+	${SBE_BUILD_SCRIPT} --sbeOutBin ${SBE_IMG} --ecImg_10 ${SBE_SEEPROM_HDR_BIN_DD1}
+
+add_pnor_header:
+	echo -en VERSION\\0 > ${SBE_SEEPROM_HDR_SHA_DD1}
+	sha512sum ${SBE_SEEPROM_HDR_SHA_DD1} | awk '{print $1}' | xxd -pr -r >> ${SBE_SEEPROM_HDR_SHA_DD1}
+	dd if=${SBE_SEEPROM_HDR_SHA_DD1} of=${SBE_SEEPROM_HDR_BIN_DD1} ibs=4k conv=sync
+	cat $(shell basename ${SBE_SEEPROM_IMAGE_DD1}) >> ${SBE_SEEPROM_HDR_BIN_DD1}
 
 # Copy over hostboot bins
 copy_hb_bins:
 	${foreach img, ${BASE_IMAGES}, \
 		$(shell cp -f ${BASEIMAGESDIR}/$(shell basename ${img}) ${img} )}
+
+# Copy over SBE bins
+copy_sbe_bins:
+	${foreach img, ${SBE_BASE_IMAGES}, \
+		$(shell cp -f ${img} $(shell basename ${img}))}
 
 # rule to update hostboot image tags for custom CFM image, only enabled
 # when the enviroment variable CFM_TEST_IMAGE is populated
