@@ -35,6 +35,7 @@
 #include <vector>
 #include <sys/sync.h>
 #include <errl/errlentry.H>
+#include <sys/msg.h>
 #include <pldm/requests/pldm_pdr_requests.H>
 
 namespace PLDM
@@ -105,6 +106,34 @@ public:
      */
     size_t pdrCount() const;
 
+    /* @brief  Send notification that the BMC's PDR repository has changed. This
+     *         will cause one task blocking on awaitBmcPdrRepoChanged (on this
+     *         object) to wake up.
+     *
+     * @note After this function is called once, an error will be returned if it
+     *       is called again (on the same object).
+     *
+     * @return errlHndl_t  Error if any, otherwise nullptr.
+     */
+    errlHndl_t notifyBmcPdrRepoChanged();
+
+    // This value can be given to awaitBmcPdrRepoChanged to disable the watchdog
+    // timer.
+    static constexpr size_t TIMEOUT_NONE = 0;
+
+    /* @brief  Wait for notification that the BMC's PDR repository has changed
+     *         (i.e. some task called notifyBmcPdrRepoChanged on this object).
+     *
+     * @param[in] i_timeout_ms  Timeout in milliseconds. If this timeout elapses,
+     *                          then an error log is created and returned. A value
+     *                          of TIMEOUT_NONE means wait forever.
+     * @return errlHndl_t       Error if any, otherwise nullptr.
+     *
+     * @note After notifyBmcPdrRepoChanged() has been called once, this function
+     *       will return immediately, even on subsequent invocations.
+     */
+    errlHndl_t awaitBmcPdrRepoChanged(size_t i_timeout_ms = TIMEOUT_NONE);
+
     // The BMC TID is 1, HB is 2. It is important that the terminus IDs in the
     // system do not conflict with one another.
     static constexpr terminus_id hostboot_terminus_id = 2;
@@ -113,9 +142,12 @@ private:
     std::unique_ptr<pldm_pdr, void(*)(pldm_pdr*)> pdr_repo;
     mutable mutex_t access_mutex;
 
-    // This unique_ptr will call mutex_destroy on access_mutex when it is
-    // destroyed.
+    // This unique_ptr points to access_mutex, and it will call mutex_destroy on
+    // access_mutex when this object is destroyed.
     std::unique_ptr<mutex_t, void(*)(mutex_t*)> access_mutex_owner;
+
+    // Holds a msg_q_t
+    std::shared_ptr<void> bmc_repo_changed_event_q;
 
 protected:
     PdrManager();

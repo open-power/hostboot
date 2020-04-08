@@ -38,6 +38,9 @@
 #include <mctp/mctp_const.H>
 #include <mctp/mctp_message_types.H>
 #include <pldm/pldm_reasoncodes.H>
+#include <pldm/pldm_errl.H>
+#include <pldm/pldmif.H>
+#include "../../../src/usr/pldm/common/pldmtrace.H"
 #include "../../../src/usr/pldm/extern/base.h"
 
 // IPC
@@ -169,6 +172,60 @@ errlHndl_t send_pldm_response(const msg_q_t i_msgQ,
         }
 
         msg->extra_data = nullptr;
+    }
+
+    return errl;
+}
+
+/* @brief Decode a PLDM request.
+ *
+ * @param[in] i_decoder      The decoder function.
+ * @param[in] i_msg          The PLDM message to decode
+ * @param[in] i_payload_len  Length of PLDM message payload in i_msg
+ * @param[in] i_args         Arguments to i_decoder, not including the
+ *                           payload or payload size arguments.
+ * @return                   Error if any, otherwise nullptr.
+ */
+template<typename Decoder, typename... Args>
+errlHndl_t decode_pldm_request(const Decoder i_decoder,
+                               const pldm_msg* i_msg,
+                               const size_t i_payload_len,
+                               Args... i_args)
+{
+    using namespace ERRORLOG;
+
+    errlHndl_t errl = nullptr;
+
+    const int decoder_rc =
+        i_decoder(i_msg,
+                  i_payload_len,
+                  i_args...);
+
+    if(decoder_rc != PLDM_SUCCESS)
+    {
+        PLDM_INF("Failed to decode PLDM request (decoder at %p, payload length %u)",
+                 i_decoder,
+                 static_cast<unsigned int>(i_payload_len));
+
+        const uint64_t response_hdr_data = pldmHdrToUint64(*i_msg);
+
+        /*
+         * @errortype  ERRL_SEV_UNRECOVERABLE
+         * @moduleid   MOD_SEND_PLDM_RESPONSE
+         * @reasoncode RC_MSG_DECODE_FAIL
+         * @userdata1  RC returned from decode function
+         * @userdata2  PLDM Header (3 bytes)
+         * @devdesc    Software problem, failed to decode PLDM message
+         * @custdesc   A software error occurred during system boot
+         */
+        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                             MOD_SEND_PLDM_RESPONSE,
+                             RC_MSG_DECODE_FAIL,
+                             decoder_rc,
+                             response_hdr_data,
+                             ErrlEntry::NO_SW_CALLOUT);
+
+        addBmcErrorCallouts(errl);
     }
 
     return errl;

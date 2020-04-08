@@ -31,11 +31,15 @@
 #include <pldm/extended/pdr_manager.H>
 #include <pldm/extended/hb_pdrs.H>
 #include <pldm/requests/pldm_pdr_requests.H>
+#include <pldm/pldm_reasoncodes.H>
+#include "../common/pldmtrace.H"
 
 #include <util/singleton.H>
 
 #include "../extern/pdr.h"
 #include "../extern/platform.h"
+
+#include <sys/msg.h>
 
 using namespace PLDM;
 
@@ -97,7 +101,8 @@ namespace PLDM
 PdrManager::PdrManager()
     : pdr_repo(nullptr, pldm_pdr_destroy),
       access_mutex(MUTEX_INITIALIZER),
-      access_mutex_owner(&access_mutex, mutex_destroy)
+      access_mutex_owner(&access_mutex, mutex_destroy),
+      bmc_repo_changed_event_q(msg_q_create(), msg_q_destroy)
 {
     resetPdrs();
 }
@@ -187,6 +192,80 @@ std::vector<uint32_t> PdrManager::PdrManager::getAllPdrHandles() const
     } while (record_handle != NO_MORE_PDR_HANDLES);
 
     return pdrs;
+}
+
+errlHndl_t PdrManager::notifyBmcPdrRepoChanged()
+{
+    using namespace ERRORLOG;
+
+    errlHndl_t errl = nullptr;
+
+    /* Get an owning handle to the notification message queue. If it is null,
+     * the msg_send will fail and we will report an error. */
+
+    auto notify_q = bmc_repo_changed_event_q;
+
+    /* Send the event notification message */
+
+    // msg contains no data, we just use it for IPC synchronization
+    std::unique_ptr<msg_t, decltype(&msg_free)> msg
+        { msg_allocate(), msg_free };
+
+    const int rc = msg_send(notify_q.get(), msg.get());
+
+    if (rc == 0)
+    {
+        // Transfer ownership to the receiver of the message
+        msg.release();
+    }
+    else
+    {
+        PLDM_INF("PdrManager::notifyBmcPdrRepoChanged: msg_send failed (rc = %d)",
+                 rc);
+        /*
+         * @errortype  ERRL_SEV_UNRECOVERABLE
+         * @moduleid   MOD_PDR_MANAGER
+         * @reasoncode RC_SEND_FAIL
+         * @userdata1  Return code from message send routine
+         * @devdesc    Software problem, failed to send IPC message
+         * @custdesc   A software error occurred during system boot
+         */
+        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                             MOD_PDR_MANAGER,
+                             RC_SEND_FAIL,
+                             rc,
+                             0,
+                             ErrlEntry::ADD_SW_CALLOUT);
+    }
+
+    return errl;
+}
+
+errlHndl_t PdrManager::awaitBmcPdrRepoChanged(const size_t i_timeout_ms)
+{
+    const auto lock = scoped_mutex_lock(access_mutex);
+
+    // @TODO RTC 249701: Add watchdog timer for the msg_wait below
+    assert(i_timeout_ms == TIMEOUT_NONE,
+           "awaitBmcPdrRepoChanged: timeout not supported");
+
+    errlHndl_t errl = nullptr;
+
+    auto msgq = bmc_repo_changed_event_q;
+
+    if (msgq)
+    {
+        msg_t* msg = msg_wait(msgq.get());
+
+        msg_free(msg);
+        msg = nullptr;
+
+        // Null out the event queue to destroy it, to prevent messages from
+        // accumulating in the queue and never being dequeued.
+        bmc_repo_changed_event_q = nullptr;
+    }
+
+    return errl;
 }
 
 PdrManager& thePdrManager()

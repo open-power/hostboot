@@ -45,12 +45,26 @@ namespace PLDM
  *        Handler for getPDR requests. (See DSP0248 v1.0.0 section 26.2 for
  *        details.)
  *
- * @param[in] i_msgQ      Handle to the MCTP outbound response message queue
- * @param[in] i_msg       getPDR request message object
- * @param[in] i_msg_len   Length of message in i_msg
- * @return    errlHndl_t  Error if any, otherwise nullptr.
+ * @param[in] i_msgQ         Handle to the MCTP outbound response message queue
+ * @param[in] i_msg          getPDR request message object
+ * @param[in] i_payload_len  Length of PLDM message payload
+ * @return    errlHndl_t     Error if any, otherwise nullptr.
  */
-errlHndl_t handleGetPdrRequest(msg_q_t i_msgQ, const pldm_msg* i_msg, size_t i_msg_len);
+errlHndl_t handleGetPdrRequest(msg_q_t i_msgQ, const pldm_msg* i_msg, size_t i_payload_len);
+
+/* @brief handlePdrRepoChangeEventRequest
+ *
+ *        Handler for PDR Repository Change Event requests. (See DSP0248 v1.2.0
+ *        section 16.14 for details.)
+ *
+ * @param[in] i_msgQ         Handle to MCTP outbound request message queue
+ * @param[in] i_msg          The PLDM message received
+ * @param[in] i_payload_len  Length of PLDM message payload
+ * @return errlHndl_t        Error if any, otherwise nullptr.
+ */
+errlHndl_t handlePdrRepoChangeEventRequest(msg_q_t i_msgQ,
+                                           const pldm_msg* i_msg,
+                                           size_t i_payload_len);
 
 }
 

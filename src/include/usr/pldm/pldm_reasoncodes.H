@@ -47,11 +47,13 @@ namespace PLDM
         MOD_DECODE_RESPONSE           = 0x06, // decode_pldm_response
         MOD_MAKE_PLDM_REQUEST         = 0x07, // make_pldm_request
         MOD_HANDLE_GET_PDR            = 0x08, // handleGetPdrRequest
-        MOD_SEND_PLDM_RESPONSE        = 0x09, // send_pldm_response
+        MOD_SEND_PLDM_RESPONSE        = 0x09, // send_pldm_response, decode_pldm_request
         MOD_HANDLE_INBOUND_REQ        = 0x0A, // handle_inbound_req
         MOD_SEND_REPO_CHANGED_EVENT   = 0x0B, // sendRepositoryChangedEvent
         MOD_GET_FILE_TABLE            = 0x0C, // getFileTable
         MOD_GET_LID_FILE              = 0x0D, // getLidFile
+        MOD_HANDLE_REPO_CHANGED_EVENT = 0x0E, // handlePdrRepoChangeEventRequest
+        MOD_PDR_MANAGER               = 0x0F, // pdr_manager.C
     };
 
     enum PLDMReasonCode

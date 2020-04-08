@@ -365,7 +365,9 @@ namespace std
              *
              * @return T&   Reference to owned resource.
              */
-            T& operator*() const { return *iv_ptr; }
+            template<typename X=T>
+            X& operator*() const
+            { return *iv_ptr; }
 
             /* @brief Member access operator.
              *
@@ -400,8 +402,8 @@ namespace std
              * @param[in] i   Index into the array
              * @return        Value of T::operator[](i)
              */
-            template<typename Index>
-            typename enable_if<is_array<T>::value, decltype(declval<T>()[declval<Index>()])>::type
+            template<typename Index, typename X = T>
+            typename enable_if<is_array<X>::value, decltype(declval<X>()[declval<Index>()])>::type
             operator[](const Index i)
             {
                 return iv_ptr[i];

@@ -49,6 +49,9 @@
 // PdrManager
 #include <pldm/extended/pdr_manager.H>
 
+// Misc
+#include <errl/errlmanager.H>
+
 using namespace ERRORLOG;
 
 namespace PLDM
@@ -56,7 +59,7 @@ namespace PLDM
 
 errlHndl_t handleGetPdrRequest(const msg_q_t i_msgQ,
                                const pldm_msg* const i_msg,
-                               const size_t i_msg_len)
+                               const size_t i_payload_len)
 {
     PLDM_ENTER("handleGetPdrRequest");
 
@@ -71,7 +74,7 @@ errlHndl_t handleGetPdrRequest(const msg_q_t i_msgQ,
         {
             const int rc =
                 decode_get_pdr_req(i_msg,
-                                   i_msg_len,
+                                   i_payload_len,
                                    &pdr_req.record_handle,
                                    &pdr_req.data_transfer_handle,
                                    &pdr_req.transfer_op_flag,
@@ -80,7 +83,7 @@ errlHndl_t handleGetPdrRequest(const msg_q_t i_msgQ,
 
             if (rc != PLDM_SUCCESS)
             {
-                PLDM_INF("Failed to decode getPDR request, rc = %d",
+                PLDM_ERR("Failed to decode getPDR request, rc = %d",
                          rc);
 
                 /*
@@ -99,6 +102,9 @@ errlHndl_t handleGetPdrRequest(const msg_q_t i_msgQ,
                                      ErrlEntry::NO_SW_CALLOUT);
 
                 addBmcErrorCallouts(errl);
+                errlCommit(errl, PLDM_COMP_ID);
+
+                pldm_response_code = PLDM_ERROR_INVALID_DATA;
                 break;
             }
         }
@@ -106,7 +112,7 @@ errlHndl_t handleGetPdrRequest(const msg_q_t i_msgQ,
         if (pdr_req.data_transfer_handle != 0)
         {
             // We don't support multipart transfers
-            PLDM_INF("Got invalid data transfer handle 0x%x in getPDR request",
+            PLDM_ERR("Got invalid data transfer handle 0x%x in getPDR request",
                      pdr_req.data_transfer_handle);
             pldm_response_code = PLDM_PLATFORM_INVALID_DATA_TRANSFER_HANDLE;
             break;
@@ -114,7 +120,7 @@ errlHndl_t handleGetPdrRequest(const msg_q_t i_msgQ,
 
         if (pdr_req.transfer_op_flag != PLDM_GET_FIRSTPART)
         {
-            PLDM_INF("Got invalid transfer op flag 0x%x in getPDR request",
+            PLDM_ERR("Got invalid transfer op flag 0x%x in getPDR request",
                      pdr_req.transfer_op_flag);
             pldm_response_code = PLDM_PLATFORM_INVALID_TRANSFER_OPERATION_FLAG;
             break;
@@ -122,7 +128,7 @@ errlHndl_t handleGetPdrRequest(const msg_q_t i_msgQ,
 
         if (pdr_req.record_change_number != 0)
         {
-            PLDM_INF("Got invalid record change number 0x%x in getPDR request",
+            PLDM_ERR("Got invalid record change number 0x%x in getPDR request",
                      pdr_req.record_change_number);
             pldm_response_code = PLDM_PLATFORM_INVALID_RECORD_CHANGE_NUMBER;
             break;
@@ -135,53 +141,159 @@ errlHndl_t handleGetPdrRequest(const msg_q_t i_msgQ,
                                             &pdr_data,
                                             next_record_handle);
 
+        PLDM_INF("BMC requesting PDR handle 0x%08x, returning 0x%08x",
+                 pdr_req.record_handle,
+                 record_handle);
+
         if (!record_found)
         {
-            PLDM_INF("Got invalid record handle 0x%x in getPDR request",
+            PLDM_ERR("Got invalid record handle 0x%x in getPDR request",
                      pdr_req.record_handle);
             pldm_response_code = PLDM_PLATFORM_INVALID_RECORD_HANDLE;
             break;
         }
     } while (false);
 
-    if (!errl)
+    const size_t max_request_count = pdr_req.request_count;
+
+    // If we found the PDR with the given record handle, we send back at
+    // most the number of bytes that the client asked for.
+    const uint32_t response_pdr_size
+        = (pldm_response_code == PLDM_SUCCESS
+           ? std::min(pdr_data.size(), max_request_count)
+           : 0);
+
+    errl =
+        send_pldm_response<PLDM_GET_PDR_MIN_RESP_BYTES>
+        (i_msgQ,
+         encode_get_pdr_resp,
+         response_pdr_size,
+         i_msg->hdr.instance_id,
+         pldm_response_code,
+         next_record_handle,
+         0, // No remaining data
+         PLDM_START_AND_END,
+         payload_length_placeholder_t(),
+         pdr_data.data(),
+         0); // CRC, not used for START_AND_END
+
+    if (errl)
     {
-        const size_t max_request_count = pdr_req.request_count;
+        PLDM_ERR("Failed to encode and/or send getPDR response "
+                 "(response size = %d, response code = 0x%x, "
+                 "next record handle = 0x%08x)",
+                 response_pdr_size, pldm_response_code,
+                 next_record_handle);
 
-        // If we found the PDR with the given record handle, we send back at
-        // most the number of bytes that the client asked for.
-        const uint32_t response_pdr_size
-            = (pldm_response_code == PLDM_SUCCESS
-               ? std::min(pdr_data.size(), max_request_count)
-               : 0);
-
-        errl =
-            send_pldm_response<PLDM_GET_PDR_MIN_RESP_BYTES>
-            (i_msgQ,
-             encode_get_pdr_resp,
-             response_pdr_size,
-             i_msg->hdr.instance_id,
-             pldm_response_code,
-             next_record_handle,
-             0, // No remaining data
-             PLDM_START_AND_END,
-             payload_length_placeholder_t(),
-             pdr_data.data(),
-             0); // CRC, not used for START_AND_END
-
-        if (errl)
-        {
-            PLDM_INF("Failed to encode and/or send getPDR response "
-                     "(response size = %d, response code = 0x%x, "
-                     "next record handle = 0x%08x)",
-                     response_pdr_size, pldm_response_code,
-                     next_record_handle);
-
-            errl->collectTrace(PLDM_COMP_NAME);
-        }
+        errl->collectTrace(PLDM_COMP_NAME);
     }
 
     PLDM_EXIT("handleGetPdrRequest");
+
+    return errl;
+}
+
+errlHndl_t handlePdrRepoChangeEventRequest(const msg_q_t i_msgQ,
+                                           const pldm_msg* const i_msg,
+                                           const size_t i_payload_len)
+{
+    PLDM_ENTER("handlePdrRepoChangeEventRequest");
+
+    errlHndl_t errl = nullptr;
+    uint8_t response_code = PLDM_SUCCESS;
+
+    // This do/while block is for decoding and verifying the request
+    do
+    {
+        // All these variables except event_class are ignored, because we don't
+        // support any other event than the PDR Repo Changed event, and even in
+        // that case we don't need to read the event data (because we drop and
+        // refresh the entire repo).
+
+        uint8_t format_version = 0,
+                tid = 0,
+                event_class = 0;
+
+        size_t event_data_offset = 0;
+
+        errl = decode_pldm_request
+            (decode_platform_event_message_req,
+             i_msg,
+             i_payload_len,
+             &format_version,
+             &tid,
+             &event_class,
+             &event_data_offset);
+
+        if (errl)
+        {
+            PLDM_ERR("Failed to decode PLDM PDR Repository Changed Event request");
+            errlCommit(errl, PLDM_COMP_ID);
+            response_code = PLDM_ERROR;
+            break;
+        }
+
+        if (event_class != PLDM_PDR_REPOSITORY_CHG_EVENT)
+        {
+            PLDM_ERR("Invalid event class %d in platform event handler",
+                     event_class);
+
+            /*
+             * @errortype  ERRL_SEV_INFORMATIONAL
+             * @moduleid   MOD_HANDLE_REPO_CHANGED_EVENT
+             * @reasoncode RC_INVALID_MSG_TYPE
+             * @userdata1  Expected event class
+             * @userdata2  Actual event class
+             * @devdesc    Software problem, invalid event class received from BMC
+             * @custdesc   A software error occurred during system boot
+             */
+            errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                                 MOD_HANDLE_REPO_CHANGED_EVENT,
+                                 RC_INVALID_MSG_TYPE,
+                                 PLDM_PDR_REPOSITORY_CHG_EVENT,
+                                 event_class,
+                                 ErrlEntry::NO_SW_CALLOUT);
+
+            addBmcErrorCallouts(errl);
+            errlCommit(errl, PLDM_COMP_ID);
+            response_code = PLDM_ERROR;
+            break;
+        }
+    } while (false);
+
+    // This do/while is for sending a response
+    do
+    {
+        errl =
+            send_pldm_response<PLDM_PLATFORM_EVENT_MESSAGE_RESP_BYTES>
+            (i_msgQ,
+             encode_platform_event_message_resp,
+             0, // No payload after the header
+             i_msg->hdr.instance_id,
+             response_code,
+             PLDM_EVENT_NO_LOGGING);
+
+        if (errl)
+        {
+            PLDM_ERR("Failed to send PLDM PDR Repository Changed event response");
+            errl->collectTrace(PLDM_COMP_NAME);
+            break;
+        }
+
+        if (response_code == PLDM_SUCCESS)
+        {
+            errl = thePdrManager().notifyBmcPdrRepoChanged();
+
+            if (errl)
+            {
+                PLDM_ERR("Failed to notify PDR manager that BMC PDR repository changed");
+                errl->collectTrace(PLDM_COMP_NAME);
+                break;
+            }
+        }
+    } while (false);
+
+    PLDM_EXIT("handlePdrRepoChangeEventRequest");
 
     return errl;
 }

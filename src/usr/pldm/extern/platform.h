@@ -144,6 +144,17 @@ enum pldm_platform_completion_codes {
 	PLDM_PLATFORM_SET_EFFECTER_UNSUPPORTED_SENSORSTATE = 0x82,
 };
 
+/** @brief PLDM PlatformEventMessage response status
+ */
+enum pldm_platform_event_status {
+	PLDM_EVENT_NO_LOGGING = 0x00,
+	PLDM_EVENT_LOGGING_DISABLED = 0x01,
+	PLDM_EVENT_LOG_FULL = 0x02,
+	PLDM_EVENT_ACCEPTED_FOR_LOGGING = 0x03,
+	PLDM_EVENT_LOGGED = 0x04,
+	PLDM_EVENT_LOGGING_REJECTED = 0x05
+};
+
 /** @brief PLDM Event types
  */
 enum pldm_event_types {
