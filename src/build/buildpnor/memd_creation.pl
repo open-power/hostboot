@@ -6,8 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2018
+# Contributors Listed Below - COPYRIGHT 2017,2020
 # [+] International Business Machines Corp.
+# [+] Stewart Smith
 #
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,7 +67,7 @@ pod2usage(-verbose => 2) if $man;
 if($memd_dir)
 {
     print "Reading files from $memd_dir\n";
-    @memd_files = glob($memd_dir . '/*');
+    @memd_files = glob($memd_dir . '/*.rvpd');
 }
 elsif(@memd_files)
 {
