@@ -2280,6 +2280,9 @@
       <id>DPO_MIN_FREQ_PERCENT</id>
     </attribute>
     <attribute>
+      <id>EFFECTIVE_EC</id>
+    </attribute>
+    <attribute>
       <id>ENABLED_THREADS</id>
     </attribute>
     <attribute>
