@@ -30,6 +30,7 @@
 #include "htmgt_occcmd.H"
 #include "htmgt_cfgdata.H"
 #include "htmgt_poll.H"
+#include "htmgt_occmanager.H"
 
 //  Targeting support
 #include <targeting/common/commontargeting.H>

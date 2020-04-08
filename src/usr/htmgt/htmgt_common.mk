@@ -34,6 +34,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 # common objects between hostboot and hbrt
 OBJS += htmgt.o
 OBJS += htmgt_occ.o
+OBJS += htmgt_occmanager.o
 OBJS += htmgt_activate.o
 OBJS += htmgt_occcmd.o
 OBJS += htmgt_poll.o

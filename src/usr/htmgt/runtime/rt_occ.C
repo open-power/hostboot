@@ -26,6 +26,7 @@
 #include    <util/utillidmgr.H>
 #include    <htmgt/htmgt.H>
 #include    "../htmgt_utility.H"
+#include    "../htmgt_occmanager.H"
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/runtime/rt_targeting.H>
 #include    <targeting/translateTarget.H>

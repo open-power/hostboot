@@ -28,6 +28,7 @@
 #include "htmgt_utility.H"
 #include "occError.H"
 #include "htmgt_occcmd.H"
+#include "htmgt_occmanager.H"
 
 #include <isteps/pm/occAccess.H>
 #include <console/consoleif.H>

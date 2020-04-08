@@ -29,6 +29,7 @@
 #include "htmgt_cfgdata.H"
 #include "htmgt_utility.H"
 #include "htmgt_memthrottles.H"
+#include "htmgt_occmanager.H"
 #include "htmgt_poll.H"
 #include <devicefw/userif.H>
 #include <console/consoleif.H>

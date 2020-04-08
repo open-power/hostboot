@@ -28,6 +28,7 @@
 #include "htmgt_cfgdata.H"
 #include "htmgt_utility.H"
 #include "htmgt_poll.H"
+#include "htmgt_occmanager.H"
 #include "ipmi/ipmisensor.H"
 #include <htmgt/htmgt_reasoncodes.H>
 #include <fapi2_attribute_service.H>

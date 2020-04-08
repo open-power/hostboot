@@ -32,6 +32,7 @@
 #include "htmgt_cfgdata.H"
 #include "occError.H"
 #include <console/consoleif.H>
+#include "htmgt_occmanager.H"
 
 //  Targeting support
 #include <targeting/common/commontargeting.H>
