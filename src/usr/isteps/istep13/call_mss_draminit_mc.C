@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,144 +35,83 @@
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
 
-// Istep 13 framework
-#include "istep13consts.H"
+// Istep framework
+#include <istepHelperFuncs.H>
 
-/* FIXME RTC: 210975
 // fapi2 HWP invoker
+#include  <fapi2.H>
 #include  <fapi2/plat_hwp_invoker.H>
 
 //From Import Directory (EKB Repository)
 #include  <config.h>
-#include  <fapi2.H>
-#ifdef CONFIG_AXONE
+
 #include  <exp_draminit_mc.H>
 #include  <chipids.H> // for EXPLORER ID
-#else
-#include  <p9_mss_draminit_mc.H>
-#endif
-*/
-
-
 
 using namespace ERRORLOG;
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
 using namespace TARGETING;
+using namespace ISTEPS_TRACE;
 
 namespace ISTEP_13
 {
 void* call_mss_draminit_mc (void *io_pArgs)
 {
     IStepError l_stepError;
-/* FIXME RTC: 210975
     errlHndl_t l_err = NULL;
-    TARGETING::Target * sys = NULL;
-    TARGETING::targetService().getTopLevelTarget( sys );
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"call_mss_draminit_mc entry" );
+    TRACFCOMP( g_trac_isteps_trace, ENTER_MRK"call_mss_draminit_mc" );
 
-#ifndef CONFIG_AXONE
+    // Get all functional OCMB targets
+    TargetHandleList l_ocmbTargetList;
+    getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
 
-    // Get all MCBIST
-    TARGETING::TargetHandleList l_mcbistTargetList;
-    getAllChiplets(l_mcbistTargetList, TYPE_MCBIST);
-
-    for (const auto & l_mcbist_target : l_mcbistTargetList)
+    for (const auto & l_ocmb : l_ocmbTargetList)
     {
-        // Dump current run on target
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running p9_mss_draminit_mc HWP on "
-                "target HUID %.8X", TARGETING::get_huid(l_mcbist_target));
-
-        fapi2::Target<fapi2::TARGET_TYPE_MCBIST> l_fapi_mcbist_target
-            (l_mcbist_target);
-        FAPI_INVOKE_HWP(l_err, p9_mss_draminit_mc, l_fapi_mcbist_target);
-
-        if (l_err)
+        // check EXPLORER first as this is most likely the configuration
+        uint32_t chipId = l_ocmb->getAttr< ATTR_CHIP_ID>();
+        if (chipId == POWER_CHIPID::EXPLORER_16)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR 0x%.8X : p9_mss_draminit_mc HWP returns error",
-                    l_err->reasonCode());
+            fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target
+                (l_ocmb);
 
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_mcbist_target).addToLog( l_err );
+            // Dump current run on target
+            TRACFCOMP( g_trac_isteps_trace,
+                "Running exp_draminit_mc HWP on target HUID 0x%.8X",
+                get_huid(l_ocmb));
 
-            // Create IStep error log and cross reference to error that occurred
-            l_stepError.addErrorDetails( l_err );
-
-            // Commit Error
-            errlCommit( l_err, HWPF_COMP_ID );
+            //  call the HWP with each fapi2::Target
+            FAPI_INVOKE_HWP(l_err, exp_draminit_mc, l_fapi_ocmb_target);
         }
         else
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "SUCCESS running p9_mss_draminit_mc HWP on "
-                       "target HUID %.8X", TARGETING::get_huid(l_mcbist_target));
+            // Non-Explorer chip
+            TRACFCOMP( g_trac_isteps_trace,
+                "Skipping exp_draminit_mc HWP on target HUID 0x%.8X, chipId 0x%.4X",
+                get_huid(l_ocmb), chipId );
+            continue;
         }
-
-    } // End; memBuf loop
-
-#else
-
-        // Get all OCMB targets
-        TARGETING::TargetHandleList l_ocmbTargetList;
-        getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
-
-        for (const auto & l_ocmb_target : l_ocmbTargetList)
+        if (l_err)
         {
-            // check EXPLORER first as this is most likely the configuration
-            uint32_t chipId = l_ocmb_target->getAttr< TARGETING::ATTR_CHIP_ID>();
-            if (chipId == POWER_CHIPID::EXPLORER_16)
-            {
-                fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target
-                    (l_ocmb_target);
-
-                // Dump current run on target
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Running exp_draminit_mc HWP on "
-                    "target HUID %.8X", TARGETING::get_huid(l_ocmb_target));
-
-                //  call the HWP with each fapi2::Target
-                FAPI_INVOKE_HWP(l_err, exp_draminit_mc, l_fapi_ocmb_target);
-            }
-            else
-            {
-                // Gemini, NOOP
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Skipping draminit_mc HWP on target HUID 0x%.8X, chipId 0x%.4X",
-                    TARGETING::get_huid(l_ocmb_target), chipId );
-            }
-            if (l_err)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "ERROR 0x%.8X : exp_draminit_mc HWP returns error",
-                        l_err->reasonCode());
-
-                // capture the target data in the elog
-                ErrlUserDetailsTarget(l_ocmb_target).addToLog( l_err );
-
-                // Create IStep error log and cross reference to error that occurred
-                l_stepError.addErrorDetails( l_err );
-
-                // Commit Error
-                errlCommit( l_err, HWPF_COMP_ID );
-
-                break;
-            }
-            else if (chipId == POWER_CHIPID::EXPLORER_16)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "SUCCESS running exp_draminit_mc HWP on target HUID %.8X",
-                   TARGETING::get_huid(l_ocmb_target));
-            }
+            TRACFCOMP(g_trac_isteps_trace,
+                      "ERROR : exp_draminit_mc target 0x%.8X"
+                      TRACE_ERR_FMT,
+                      get_huid(l_ocmb),
+                      TRACE_ERR_ARGS(l_err));
+            // capture error and commit it
+            captureError(l_err, l_stepError, HWPF_COMP_ID, l_ocmb);
+            break;
         }
+        else
+        {
+            TRACFCOMP( g_trac_isteps_trace,
+               "SUCCESS running exp_draminit_mc HWP on target HUID 0x%.8X",
+               get_huid(l_ocmb) );
+        }
+    }
+    TRACFCOMP( g_trac_isteps_trace, EXIT_MRK"call_mss_draminit_mc" );
 
-#endif
-
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_mc exit" );
-
-*/
     return l_stepError.getErrorHandle();
 }
 

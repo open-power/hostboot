@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -24,102 +24,44 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 MODULE = istep13
-# FIXME RTC: 210975 Uncomment the EKB paths when the time comes
 
-#P9_PROCEDURES_PATH   = ${ROOTPATH}/src/import/chips/p9/procedures
-#OCMB_PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/ocmb/procedures
-#EXP_PROCEDURES_PATH  = ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures
-#EXP_INCLUDE_PATH     = ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
-#GEM_PROCEDURES_PATH  = ${ROOTPATH}/src/import/chips/ocmb/gemini/procedures
+OCMB_PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/ocmb/procedures
+EXP_INCLUDE_PATH     = ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
+EXPLORER_HWP_PATH  = ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 
 #Add all the extra include paths
-#EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles
-#EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
+EXTRAINCDIR += ${ROOTPATH}/src/import/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
-#EXTRAINCDIR += ${P9_PROCEDURES_PATH}/hwp/memory
-#EXTRAINCDIR += ${P9_PROCEDURES_PATH}/hwp/memory/lib
-#EXTRAINCDIR += ${P9_PROCEDURES_PATH}/hwp/memory/lib/utils
-#EXTRAINCDIR += ${P9_PROCEDURES_PATH}/hwp/memory/lib/mc/
-#EXTRAINCDIR += ${P9_PROCEDURES_PATH}/hwp/memory/lib/fir/
-#EXTRAINCDIR += ${P9_PROCEDURES_PATH}/hwp/perv
-#EXTRAINCDIR += ${P9_PROCEDURES_PATH}/hwp/nest
-#EXTRAINCDIR += ${P9_PROCEDURES_PATH}/hwp/initfiles
-#EXTRAINCDIR += ${ROOTPATH}/src/import/
 EXTRAINCDIR += ${ROOTPATH}/
-#EXTRAINCDIR += ${EXP_PROCEDURES_PATH}/hwp/memory/
-#EXTRAINCDIR += ${OCMB_PROCEDURES_PATH}/hwp/initfiles/
-#EXTRAINCDIR += ${EXP_INCLUDE_PATH}/
-#EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
-#EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
-#EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/
-#EXTRAINCDIR += ${GEM_PROCEDURES_PATH}/hwp/memory
-#EXTRAINCDIR += ${GEM_PROCEDURES_PATH}/hwp/memory/lib/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils
+EXTRAINCDIR += ${EXPLORER_HWP_PATH}
+EXTRAINCDIR += ${OCMB_PROCEDURES_PATH}/hwp/initfiles/
+EXTRAINCDIR += ${EXP_INCLUDE_PATH}
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils
 
 # from src/usr/isteps/istep13
-#OBJS += call_host_disable_memvolt.o
-#OBJS += call_mem_pll_reset.o
-#OBJS += call_mem_pll_initf.o
-#OBJS += call_mem_pll_setup.o
-#OBJS += call_mem_startclocks.o
-#OBJS += call_host_enable_memvolt.o
-#OBJS += call_mss_scominit.o
-#OBJS += call_mss_ddr_phy_reset.o
-#OBJS += call_mss_draminit.o
-#OBJS += call_mss_draminit_training.o
-#OBJS += call_mss_draminit_trainadv.o
-#OBJS += call_mss_draminit_mc.o
-
+OBJS += call_mss_scominit.o
+OBJS += call_mss_draminit.o
+OBJS += call_mss_draminit_mc.o
 
 #HWP build tool
-#include ${ROOTPATH}/procedure.rules.mk
+include ${ROOTPATH}/procedure.rules.mk
 
-# PLL HWPs
-#include ${P9_PROCEDURES_PATH}/hwp/perv/p9_mem_pll_initf.mk
-#include ${P9_PROCEDURES_PATH}/hwp/perv/p9_mem_pll_setup.mk
-#include ${P9_PROCEDURES_PATH}/hwp/perv/p9_mem_pll_reset.mk
-
-#Start Memclocks
-#include ${P9_PROCEDURES_PATH}/hwp/perv/p9_mem_startclocks.mk
-
-#Scom init
-#include ${P9_PROCEDURES_PATH}/hwp/memory/p9_mss_scominit.mk
-#include ${P9_PROCEDURES_PATH}/hwp/nest/p9_throttle_sync.mk
-
-#include ${P9_PROCEDURES_PATH}/hwp/initfiles/p9n_ddrphy_scom.mk
-#include ${P9_PROCEDURES_PATH}/hwp/initfiles/p9n_mca_scom.mk
-#include ${P9_PROCEDURES_PATH}/hwp/initfiles/p9n_mcbist_scom.mk
-
-#Dram init
-#include ${P9_PROCEDURES_PATH}/hwp/memory/p9_mss_draminit.mk
-#include ${P9_PROCEDURES_PATH}/hwp/memory/p9_mss_draminit_training.mk
-#include ${P9_PROCEDURES_PATH}/hwp/memory/p9_mss_draminit_mc.mk
-#include ${P9_PROCEDURES_PATH}/hwp/memory/p9_mss_ddr_phy_reset.mk
-#include ${P9_PROCEDURES_PATH}/hwp/memory/p9_mss_draminit_training_adv.mk
-
-#OBJS += $(if $(CONFIG_AXONE),exp_scominit.o,)
-#OBJS += $(if $(CONFIG_AXONE),explorer_scom.o,)
-#OBJS += $(if $(CONFIG_AXONE),exp_draminit_mc.o,)
-#OBJS += $(if $(CONFIG_AXONE),exp_draminit.o,)
-#OBJS += $(if $(CONFIG_AXONE),gem_draminit.o,)
+# EKB HWP
+OBJS += exp_scominit.o
+OBJS += explorer_scom.o
+OBJS += exp_draminit.o
+OBJS += exp_draminit_mc.o
 
 include ${ROOTPATH}/config.mk
 
-#VPATH    += ${P9_PROCEDURES_PATH}/hwp/memory ${P9_PROCEDURES_PATH}/hwp/nest ${P9_PROCEDURES_PATH}/hwp/perv ${P9_PROCEDURES_PATH}/hwp/initfiles/
-#VPATH    += ${P9_PROCEDURES_PATH}/hwp/memory/lib/ccs/ ${P9_PROCEDURES_PATH}/hwp/memory/lib/dimm/ ${P9_PROCEDURES_PATH}/hwp/memory/lib/utils/ ${P9_PROCEDURES_PATH}/hwp/memory/lib/phy/
-#VPATH    += ${P9_PROCEDURES_PATH}/hwp/memory/lib/mc/
-#VPATH    += ${P9_PROCEDURES_PATH}/hwp/memory/lib/fir/
-#VPATH    += ${P9_PROCEDURES_PATH}/hwp/memory/lib/dimm/ddr4/
-
-#VPATH += $(if $(CONFIG_AXONE),${EXP_PROCEDURES_PATH}/hwp/memory,)
-#VPATH += $(if $(CONFIG_AXONE),${GEM_PROCEDURES_PATH}/hwp/memory,)
-#VPATH += $(if $(CONFIG_AXONE),${OCMB_PROCEDURES_PATH}/hwp/initfiles/,)
+VPATH += ${EXPLORER_HWP_PATH}
+VPATH += ${OCMB_PROCEDURES_PATH}/hwp/initfiles/

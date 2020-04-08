@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -30,34 +30,14 @@
 /**
  * @file    istep13list.H
  *
- *  IStep 13    Step 13 DRAM Training 
- *  IPL FLow Doc        v1.07
+ *  IStep 13    Step 13 DRAM Training
+ *  P10 IPL FLow Doc        v0.90.01
  *
- *  13.1  host_disable_memvolt
- *      : Disable VDDR on Warm Reboots
- *  13.2  mem_pll_reset
- *      : Reset PLL for MCAs in async
- *  13.3  mem_pll_initf
- *      : PLL Initfile for MBAs
- *  13.4  mem_pll_setup
- *      : Setup PLL for MBAs
- *  13.5  proc_mcs_skewadjust
- *      : Update clock mesh deskew
- *  13.6  mem_startclocks
- *      : Start clocks on MBA/MCAs
- *  13.7  host_enable_memvolt
- *      : Enable the VDDR3 Voltage Rail 
- *  13.8  mss_scominit
+ *  13.1  mss_scominit
  *      : Perform scom inits to MC and PHY
- *  13.9  mss_ddr_phy_reset
- *      : Soft reset of DDR PHY macros
- *  13.10 mss_draminit
+ *  13.2 mss_draminit
  *      : Dram initialize
- *  13.11 mss_draminit_training
- *      : Dram training
- *  13.12 mss_draminit_trainadv
- *      : Advanced dram training
- *  13.12 mss_draminit_mc
+ *  13.3 mss_draminit_mc
  *      : Hand off control to MC
  *
  *  Please see the note in initsvcstructs.H for description of
@@ -72,85 +52,6 @@
 
 namespace   ISTEP_13
 {
-
-/**
- *  @brief   host_disable_memvolt
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return any errlogs to istep
- *
- */
-void*  call_host_disable_memvolt( void    *io_pArgs );
-
-
-
-/**
- *  @brief   mem_pll_reset
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any errlogs to istep
- *
- */
-void*    call_mem_pll_reset( void    *io_pArgs );
-
-
-
-/**
- *  @brief   mem_pll_initf
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any errlogs to istep
- *
- */
-void*    call_mem_pll_initf( void    *io_pArgs );
-
-
-
-/**
- *  @brief   mem_pll_setup
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any errlogs to istep
- *
- */
-void*    call_mem_pll_setup( void    *io_pArgs );
-
-
-/**
- *  @brief   proc_mcs_skewadjust
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any errlogs to istep
- *
- */
-void*    call_proc_mcs_skewadjust( void    *io_pArgs );
-
-
-/**
- *  @brief   mem_startclocks
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any errlogs to istep
- *
- */
-void*    call_mem_startclocks( void    *io_pArgs );
-
-/**
- *  @brief   host_enable_memvolt
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any errlogs to istep
- *
- */
-void*    call_host_enable_memvolt( void    *io_pArgs );
-
 /**
  *  @brief   mss_scominit
  *
@@ -162,16 +63,6 @@ void*    call_host_enable_memvolt( void    *io_pArgs );
 void*    call_mss_scominit( void    *io_pArgs );
 
 /**
- *  @brief   mss_ddr_phy_reset
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any errlogs to istep
- *
- */
-void*    call_mss_ddr_phy_reset( void    *io_pArgs );
-
-/**
  *  @brief   mss_draminit
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
@@ -181,25 +72,6 @@ void*    call_mss_ddr_phy_reset( void    *io_pArgs );
  */
 void*    call_mss_draminit( void    *io_pArgs );
 
-/**
- *  @brief   mss_draminit_training
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any errlogs to istep
- *
- */
-void*    call_mss_draminit_training( void    *io_pArgs );
-
-/**
- *  @brief   mss_draminit_trainadv
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any errlogs to istep
- *
- */
-void*    call_mss_draminit_trainadv( void    *io_pArgs );
 
 /**
  *  @brief   mss_draminit_mc
@@ -224,67 +96,18 @@ const   TaskInfo    g_istep13[]  =   {
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
-                ISTEPNAME(13,01,"host_disable_memvolt"),
-                ISTEP_13::call_host_disable_memvolt,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(13,02,"mem_pll_reset"),
-                ISTEP_13::call_mem_pll_reset,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(13,03,"mem_pll_initf"),
-                ISTEP_13::call_mem_pll_initf,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(13,04,"mem_pll_setup"),
-                ISTEP_13::call_mem_pll_setup,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(13,05,"proc_mcs_skewadjust"),
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
-        },
-        {
-                ISTEPNAME(13,06,"mem_startclocks"),
-                ISTEP_13::call_mem_startclocks,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(13,07,"host_enable_memvolt"),
-                ISTEP_13::call_host_enable_memvolt,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(13,08,"mss_scominit"),
+                ISTEPNAME(13,01,"mss_scominit"),
                 ISTEP_13::call_mss_scominit,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(13,09,"mss_ddr_phy_reset"),
-                ISTEP_13::call_mss_ddr_phy_reset,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(13,10,"mss_draminit"),
+                ISTEPNAME(13,02,"mss_draminit"),
                 ISTEP_13::call_mss_draminit,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+                // true covers part b) checking for attentions as memory attentions rollup to processors
         },
         {
-                ISTEPNAME(13,11,"mss_draminit_training"),
-                ISTEP_13::call_mss_draminit_training,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(13,12,"mss_draminit_trainadv"),
-                ISTEP_13::call_mss_draminit_trainadv,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(13,13,"mss_draminit_mc"),
+                ISTEPNAME(13,03,"mss_draminit_mc"),
                 ISTEP_13::call_mss_draminit_mc,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
@@ -294,7 +117,6 @@ const DepModInfo g_istep13Dependancies = {
     {
         DEP_LIB(libistep13.so),
         DEP_LIB(libisteps_mss.so),
-        DEP_LIB(libcen.so),
         NULL
     }
 };

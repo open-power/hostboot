@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,206 +35,89 @@
 #include    <targeting/common/util.H>
 #include    <targeting/common/utilFilter.H>
 
-/* FIXME RTC: 210975
+// Istep framework
+#include <istepHelperFuncs.H>
+
 // fapi2 HWP invoker
+#include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
-*/
+#include    <config.h>
 
 //From Import Directory (EKB Repository)
-#include    <config.h>
-/* FIXME RTC: 210975
-#include    <fapi2.H>
-#include    <p9_mss_scominit.H>
-#include    <p9_throttle_sync.H>
-#ifdef CONFIG_AXONE
 #include    <exp_scominit.H>
 #include    <chipids.H> // for EXPLORER ID
-#endif
-*/
+
 
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
+using   namespace   ISTEPS_TRACE;
 using   namespace   TARGETING;
 
 namespace ISTEP_13
 {
-void nimbus_call_mss_scominit(IStepError & io_istepError);
-void cumulus_call_mss_scominit(IStepError & io_istepError);
-void axone_call_mss_scominit(IStepError & io_istepError);
 
 void* call_mss_scominit (void *io_pArgs)
 {
-    IStepError l_StepError;
+    IStepError l_stepError;
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_scominit entry" );
-    auto l_procModel = TARGETING::targetService().getProcessorModel();
+    TRACFCOMP( g_trac_isteps_trace, ENTER_MRK"call_mss_scominit" );
 
-    switch (l_procModel)
-    {
-        case TARGETING::MODEL_CUMULUS:
-            cumulus_call_mss_scominit(l_StepError);
-            break;
-        case TARGETING::MODEL_AXONE:
-            axone_call_mss_scominit(l_StepError);
-            break;
-        case TARGETING::MODEL_NIMBUS:
-            nimbus_call_mss_scominit(l_StepError);
-            break;
-        default:
-            assert(0, "call_mss_scominit: Unsupported model type 0x%04X",
-                l_procModel);
-            break;
-    }
-
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_scominit exit" );
-
-    // end task, returning any errorlogs to IStepDisp
-    return l_StepError.getErrorHandle();
-}
-
-#ifndef CONFIG_AXONE
-
-void nimbus_call_mss_scominit(IStepError & io_istepError)
-{
-/* FIXME RTC: 210975
     errlHndl_t l_err = nullptr;
 
-    // Get all MCBIST targets
-    TARGETING::TargetHandleList l_mcbistTargetList;
-    getAllChiplets(l_mcbistTargetList, TYPE_MCBIST);
-
-    for (const auto & l_target : l_mcbistTargetList)
-    {
-        // Dump current run on target
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running p9_mss_scominit HWP on target HUID %.8X",
-                TARGETING::get_huid(l_target));
-
-        fapi2::Target <fapi2::TARGET_TYPE_MCBIST> l_fapi_target
-            (l_target);
-
-        //  call the HWP with each fapi2::Target
-        FAPI_INVOKE_HWP(l_err, p9_mss_scominit, l_fapi_target);
-
-        if (l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR 0x%.8X: p9_mss_scominit HWP returns error",
-                      l_err->reasonCode());
-
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_target).addToLog(l_err);
-
-            // Create IStep error log and cross reference to error that
-            // occurred
-            io_istepError.addErrorDetails( l_err );
-
-            // Commit Error
-            errlCommit( l_err, HWPF_COMP_ID );
-
-            break;
-        }
-        else
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "SUCCESS running p9_mss_scominit HWP on target HUID %.8X",
-                    TARGETING::get_huid(l_target));
-        }
-    }
-*/
-}
-
-void cumulus_call_mss_scominit(IStepError & io_istepError)
-{
-
-
-}
-#else
-void nimbus_call_mss_scominit(IStepError & io_istepError)
-{
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-              "Error: Trying to call 'p9_mss_scominit' but Nimbus code is not compiled in");
-    assert(0, "Calling wrong Model's HWPs");
-}
-
-void cumulus_call_mss_scominit(IStepError & io_istepError)
-{
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-              "Error: Trying to call 'p9c_mss_scominit' but Cumulus code is not compiled in");
-    assert(0, "Calling wrong Model's HWPs");
-}
-
-#endif
-
-#ifdef CONFIG_AXONE
-void axone_call_mss_scominit(IStepError & io_istepError)
-{
-/* FIXME RTC: 210975
-    errlHndl_t l_err = nullptr;
-
-    // Get all OCMB targets
-    TARGETING::TargetHandleList l_ocmbTargetList;
+    // Get all functional OCMB targets
+    TargetHandleList l_ocmbTargetList;
     getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
 
-    for (const auto & l_ocmb_target : l_ocmbTargetList)
+    for (const auto & l_ocmb : l_ocmbTargetList)
     {
         // check EXPLORER first as this is most likely the configuration
-        uint32_t chipId = l_ocmb_target->getAttr< TARGETING::ATTR_CHIP_ID>();
+        uint32_t chipId = l_ocmb->getAttr< ATTR_CHIP_ID>();
         if (chipId == POWER_CHIPID::EXPLORER_16)
         {
             fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target
-                (l_ocmb_target);
+                (l_ocmb);
 
             // Dump current run on target
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running exp_scominit HWP on target HUID %.8X",
-                TARGETING::get_huid(l_ocmb_target));
+            TRACFCOMP( g_trac_isteps_trace,
+                "Running exp_scominit HWP on target HUID 0x%.8X",
+                get_huid(l_ocmb) );
 
             //  call the HWP with each fapi2::Target
             FAPI_INVOKE_HWP(l_err, exp_scominit, l_fapi_ocmb_target);
         }
         else
         {
-            // Gemini, NOOP
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Skipping scominit HWP on target HUID 0x%.8X, chipId 0x%.4X",
-                TARGETING::get_huid(l_ocmb_target), chipId );
+            // non-Explorer chip
+            TRACFCOMP( g_trac_isteps_trace,
+                "Skipping exp_scominit HWP on target HUID 0x%.8X, chipId 0x%.4X",
+                get_huid(l_ocmb), chipId );
+            continue;
         }
 
         if (l_err)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR 0x%.8X: exp_scominit HWP returns error",
-                      l_err->reasonCode());
-
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_ocmb_target).addToLog(l_err);
-
-            // Create IStep error log and cross reference to error that
-            // occurred
-            io_istepError.addErrorDetails( l_err );
-
-            // Commit Error
-            errlCommit( l_err, HWPF_COMP_ID );
-
+            TRACFCOMP(g_trac_isteps_trace,
+                      "ERROR : exp_scominit target 0x%.8X"
+                      TRACE_ERR_FMT,
+                      get_huid(l_ocmb),
+                      TRACE_ERR_ARGS(l_err));
+            // capture error and commit it
+            captureError(l_err, l_stepError, HWPF_COMP_ID, l_ocmb);
             break;
         }
-        else if (chipId == POWER_CHIPID::EXPLORER_16)
+        else
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            TRACFCOMP( g_trac_isteps_trace,
                   "SUCCESS running exp_scominit HWP on "
-                  "target HUID %.8X", TARGETING::get_huid(l_ocmb_target));
+                  "target HUID 0x%.8X", get_huid(l_ocmb));
         }
     }
-*/
+
+    TRACFCOMP( g_trac_isteps_trace, EXIT_MRK"call_mss_scominit" );
+
+    // end task, returning any errorlogs to IStepDisp
+    return l_stepError.getErrorHandle();
 }
-#else
-void axone_call_mss_scominit(IStepError & io_istepError)
-{
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-              "Error: Trying to call 'exp_scominit' but Axone code is not compiled in");
-    assert(0, "Calling wrong Model's HWPs");
-}
-#endif
+
 };
