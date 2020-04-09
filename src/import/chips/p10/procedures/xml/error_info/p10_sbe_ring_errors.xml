@@ -131,7 +131,7 @@
   <!-- ******************************************************************** -->
   <hwpError>
   <sbeError/>
-  <rc>RC_FAPI2_RC_INVALID_PARAMETER</rc>
+  <rc>RC_PUTRING_INVALID_PARAMETER</rc>
   <description>Invalid parameter passed for scanning</description>
   </hwpError>
   <!-- ******************************************************************** -->
