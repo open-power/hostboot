@@ -45,6 +45,7 @@
 #include <generic/memory/mss_git_data_helper.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
+#include <lib/workarounds/exp_ccs_2666_write_workarounds.H>
 
 extern "C"
 {
@@ -87,6 +88,12 @@ extern "C"
         else
         {
             FAPI_TRY(mss::exp::host_fw_phy_init_with_eye_capture(i_target, l_crc, l_phy_params));
+        }
+
+        // Loops through the ports and issues the workaround for CCS writes at 2666
+        for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+        {
+            FAPI_TRY(mss::exp::workarounds::updates_mode_registers(l_port));
         }
 
         // Unmask registers after draminit training

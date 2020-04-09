@@ -43,7 +43,7 @@
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/ccs/ccs_traits.H>
-#include <exp_attribute_accessors_manual.H>
+#include <lib/exp_attribute_accessors_manual.H>
 
 ///
 /// @class ccsTraits

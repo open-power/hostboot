@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -34,6 +34,7 @@ HWP_PATH_P9A += ${ROOTPATH}/src/import/chips/p9a/procedures/hwp/memory
 HWP_PATH_P9A += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic
 # Explorer
 HWP_PATH_EXP += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory
+HWP_PATH_EXP += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib
 
 HWP_PATH += ${HWP_PATH_P9}/ ${HWP_PATH_CEN}/ ${HWP_PATH_P9A}/ ${HWP_PATH_EXP}/
 

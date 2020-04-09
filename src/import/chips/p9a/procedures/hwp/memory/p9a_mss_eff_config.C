@@ -51,6 +51,7 @@
 #include <lib/freq/axone_freq_traits.H>
 #include <lib/freq/axone_sync.H>
 #include <generic/memory/mss_git_data_helper.H>
+#include <lib/workarounds/exp_ccs_2666_write_workarounds.H>
 
 ///
 /// @brief Configure the attributes for each controller
@@ -134,6 +135,9 @@ fapi2::ReturnCode p9a_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
         FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::AXONE, mss::attr_engine_derived_fields>::set(dimm)) );
 
     }// dimm
+
+    // Conducts the workaround for CCS writes at 2666
+    FAPI_TRY(mss::exp::workarounds::update_cwl(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;
