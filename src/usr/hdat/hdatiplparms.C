@@ -128,7 +128,7 @@ static void hdatGetNumberOfCores(uint32_t &o_numCores)
  */
 static void hdatGetEnlargedIOCapacity(uint32_t &o_EnlargedSlotCount)
 {
-/* FIXME RTC: 210975 ATTR_ENLARGED_IO_SLOT_COUNT DNE anymore
+    HDAT_ENTER();
     TARGETING::PredicateCTM l_nodePredicate(TARGETING::CLASS_ENC,
                                              TARGETING::TYPE_NODE);
     TARGETING::PredicateHwas l_predHwas;
@@ -153,6 +153,7 @@ static void hdatGetEnlargedIOCapacity(uint32_t &o_EnlargedSlotCount)
         if(l_nodeTarget->tryGetAttr<TARGETING::ATTR_ENLARGED_IO_SLOT_COUNT>
                                                         (l_enlargedIOSlotCount))
         {
+            HDAT_DBG("l_enlargedIOSlotCount=0x%x",l_enlargedIOSlotCount);
             o_EnlargedSlotCount |= (uint32_t)l_enlargedIOSlotCount <<
                                                        (8 * l_nodeindex);
         }
@@ -162,7 +163,8 @@ static void hdatGetEnlargedIOCapacity(uint32_t &o_EnlargedSlotCount)
         }
         l_nodeindex--;
     }
-*/
+HDAT_DBG("o_EnlargedSlotCount=0x%x",o_EnlargedSlotCount);
+HDAT_EXIT();
 }
 
 /**
@@ -181,6 +183,7 @@ static void hdatGetEnlargedIOCapacity(uint32_t &o_EnlargedSlotCount)
  */
 static void hdatPopulateOtherIPLAttributes(hdatOtherIPLAttributes_t &o_hdatOTA)
 {
+    HDAT_ENTER();
     TARGETING::Target *l_pSysTarget = NULL;
     (void) TARGETING::targetService().getTopLevelTarget(l_pSysTarget);
 
@@ -190,7 +193,6 @@ static void hdatPopulateOtherIPLAttributes(hdatOtherIPLAttributes_t &o_hdatOTA)
         assert(l_pSysTarget != NULL);
     }
 
-/* FIXME RTC: 210975
     TARGETING::ATTR_IPL_ATTRIBUTES_type l_iplAttributes;
     l_iplAttributes = l_pSysTarget->getAttr<TARGETING::ATTR_IPL_ATTRIBUTES>();
 
@@ -203,7 +205,7 @@ static void hdatPopulateOtherIPLAttributes(hdatOtherIPLAttributes_t &o_hdatOTA)
     o_hdatOTA.hdatResetPCINOs = l_iplAttributes.resetPCINumbers;
 
     o_hdatOTA.hdatClrPhypNvram = l_iplAttributes.clearHypNVRAM;
-*/
+
 
     TARGETING::ATTR_PRESERVE_MDC_PARTITION_VPD_type l_preserveMDCPartitionVPD;
     if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_PRESERVE_MDC_PARTITION_VPD>
@@ -235,7 +237,7 @@ static void hdatPopulateOtherIPLAttributes(hdatOtherIPLAttributes_t &o_hdatOTA)
 
     //RPA AIX/Linux
     o_hdatOTA.hdatDefPartitionType = 1;
-
+    HDAT_EXIT();
 }
 
 /**
@@ -583,15 +585,9 @@ void HdatIplParms::hdatGetSystemParamters()
     uint32_t l_sysModel = 0;
 
     TARGETING::ATTR_RAW_MTM_type l_rawMTM = {0};
-    strcpy(l_rawMTM,"8335.GTG");
-    //@TODO: RTC 142465 missing attribute
-    //RAW_MTM not defined
-    //@TODO RTC 243468 BP vpd to hold the VSYS TM and SE
-    //@TODO RTC 216059 hostboot to read BP vpd via PLDM
-    //@TODO l_pSysTarget->getAttrAsStdArr<..>() to get array values using a get
-    // if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_RAW_MTM>(l_rawMTM))
-    if(1)
+    if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_RAW_MTM>(l_rawMTM))
     {
+        HDAT_DBG("fetched RAW_MTM as %s ", l_rawMTM);
         //we only want the last three bytes of the raw MTM, preceded by a 0x20
         l_sysModel = *((reinterpret_cast<uint32_t*>(l_rawMTM))+1);
         l_sysModel &= 0x00FFFFFF;
@@ -616,10 +612,8 @@ void HdatIplParms::hdatGetSystemParamters()
             this->iv_hdatIPLParams->iv_sysParms.hdatEffectivePvr);
 
     // Get system type
-    // @TODO RTC  142465 missing attribute
-    //iv_hdatIPLParams->iv_sysParms.hdatSysType =
-      //       (l_pSysTarget->getAttr<TARGETING::ATTR_PHYP_SYSTEM_TYPE>());
-    iv_hdatIPLParams->iv_sysParms.hdatSysType = 0x50300000;
+    iv_hdatIPLParams->iv_sysParms.hdatSysType =
+             (l_pSysTarget->getAttr<TARGETING::ATTR_PHYP_SYSTEM_TYPE>());
     HDAT_DBG("System Type:0X%08X", iv_hdatIPLParams->iv_sysParms.hdatSysType);
 
     //Get ABC Bus Speed
@@ -670,13 +664,12 @@ void HdatIplParms::hdatGetSystemParamters()
     }
     HDAT_DBG("after selective memory mirroring");
 
-    //@TODO: RTC 142465 missing attribut
-    //IS_MPIPL_SUPPORTED not present
-   /* this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes |=
+    //@TODO: RTC 256999 HDAT: Rainier- Revisit on MPIPL SUPPORTED flag
+    //Its returning zero value
+    this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes |=
           l_pSysTarget->getAttr<ATTR_IS_MPIPL_SUPPORTED>() ? HDAT_MPIPL_SUPPORTED : 0 ;
 
-    HDAT_DBG("after mpipl supported");  */
-    this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes |=
+    this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes |= 
                                                            HDAT_MPIPL_SUPPORTED;
 
     this->iv_hdatIPLParams->iv_sysParms.hdatMemoryScrubbing = 0;
@@ -689,7 +682,6 @@ void HdatIplParms::hdatGetSystemParamters()
                              <TARGETING::ATTR_OPEN_POWER_TURBO_MODE_SUPPORTED>
                                                         (l_turboModeSupported))
     {
-        HDAT_DBG("fetched OPEN_POWER_TURBO_MODE_SUPPORTED");
         HDAT::hdatGetNumberOfCores(l_numCores);
         HDAT_DBG("got number of cores %d",l_numCores);
 
@@ -713,7 +705,6 @@ void HdatIplParms::hdatGetSystemParamters()
     {
         HDAT_ERR("Error in getting OPEN_POWER_TURBO_MODE_SUPPORTED attribute");
     }
-    HDAT_DBG("after OPEN_POWER_TURBO_MODE_SUPPORTED");
 
     this->iv_hdatIPLParams->iv_sysParms.usePoreSleep  = 0x01;
 
@@ -791,8 +782,6 @@ void HdatIplParms::hdatGetSystemParamters()
         sizeof(this->iv_hdatIPLParams->iv_sysParms.hdatHwKeyHashValue));
     memset(this->iv_hdatIPLParams->iv_sysParms.hdatSystemFamily, 0x00, 64);
 
-    //TODO: RTC Story 246515 Miscellaneous Rainier Changes
-    /*
     TARGETING::ATTR_SYSTEM_FAMILY_type l_systemFamily = {0};
     if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_SYSTEM_FAMILY> (l_systemFamily))
     {
@@ -804,15 +793,10 @@ void HdatIplParms::hdatGetSystemParamters()
     {
         HDAT_ERR("Error in getting SYSTEM_FAMILY");
     }
-     */
-    strcpy(reinterpret_cast<char*>
-           (this->iv_hdatIPLParams->iv_sysParms.hdatSystemFamily),
-           "ibm,p10-openbmc");
+     
     HDAT_DBG("SYSTEM_FAMILY:%s",
         this->iv_hdatIPLParams->iv_sysParms.hdatSystemFamily);
 
-    //TODO: RTC Story 246515 Miscellaneous Rainier Changes
-    /*
     TARGETING::ATTR_SYSTEM_TYPE_type l_systemType = {0};
     if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_SYSTEM_TYPE> (l_systemType))
     {
@@ -824,10 +808,7 @@ void HdatIplParms::hdatGetSystemParamters()
     {
         HDAT_ERR("Error in getting SYSTEM_TYPE");
     }
-     */
-    strcpy(reinterpret_cast<char*>
-           (this->iv_hdatIPLParams->iv_sysParms.hdatSystemType),
-           "ibm,rainier");
+     
     HDAT_DBG("SYSTEM_TYPE:%s",
         this->iv_hdatIPLParams->iv_sysParms.hdatSystemType);
     HDAT_EXIT();

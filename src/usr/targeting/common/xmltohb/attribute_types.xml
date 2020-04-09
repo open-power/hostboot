@@ -8427,7 +8427,7 @@
     <readable/>
     <simpleType>
       <string>
-        <default>ibm,p9</default>
+        <default>ibm,p10-openbmc</default>
         <sizeInclNull>64</sizeInclNull>
       </string>
     </simpleType>
@@ -8446,12 +8446,15 @@
         used to identify the packaging, specific model numbers, etc.
         NOTE: No Hostboot code should ever key off of this value.
     </description>
+    <!-- TODO: RTC 256975 HDAT: Rainier system type for 2U and 4U
+         Need to have separate values for different rainier types.
+         SW497257 : To fix MRW value  -->
     <id>SYSTEM_TYPE</id>
     <persistency>non-volatile</persistency>
     <readable/>
     <simpleType>
       <string>
-        <default>ibm,miscopenpower</default>
+        <default>ibm,rainier</default>
         <sizeInclNull>64</sizeInclNull>
       </string>
     </simpleType>

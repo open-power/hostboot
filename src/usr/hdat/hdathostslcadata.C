@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -119,6 +119,7 @@ bool getVPDCollectedStatus(TARGETING::Target *i_Target)
 
 void hdatPopulateOrdinalId()
 {
+    HDAT_ENTER();
     TARGETING::Target *l_pSysTarget = NULL;
     (void) TARGETING::targetService().getTopLevelTarget(l_pSysTarget);
 
@@ -180,6 +181,7 @@ void hdatPopulateOrdinalId()
          HDAT_DBG("Added Ordinal IDs for Core : %d",l_coreOrdinalId);
     }
      HDAT_DBG("Added Ordinal IDs Proc: %d ",l_procOrdinalId);
+     HDAT_EXIT();
 }
 
 /**
@@ -792,6 +794,7 @@ errlHndl_t hdatBuildSLCA(const HDAT::hdatMsAddr_t &i_msAddr,
                                uint32_t &o_hdatslcaSize)
 
 {
+    HDAT_ENTER();
     std::vector<HDAT_slcaEntry_t> l_hdatslcaentries;
     hdatSLCAStruct_t l_hdatslcastruct;
     errlHndl_t l_errl = NULL;
@@ -861,6 +864,7 @@ errlHndl_t hdatBuildSLCA(const HDAT::hdatMsAddr_t &i_msAddr,
                 HDAT_VERSION1, false);
     }
 
+    HDAT_EXIT();
     return l_errl;
 }
 

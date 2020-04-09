@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -448,16 +448,18 @@
 
   <attribute>
     <id>PHYP_SYSTEM_TYPE</id>
-    <description>PHYP system type value for habanero
-            and barreleye (0x3015 and 0x3016 respectively).
-            The value is updated in the system xml.
+    <description>PHYP system type value for rainier is 0x5030
     </description>
+    <!-- TODO: RTC 257139 HDAT: Update on Rainier PHYP system type
+         Need to have this fetched from MRW.
+         SW497257 : To fix MRW value  -->
     <simpleType>
-      <uint32_t/>
+      <uint32_t>
+        <default>0x50300000</default>
+      </uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
   </attribute>
 
   <attribute>

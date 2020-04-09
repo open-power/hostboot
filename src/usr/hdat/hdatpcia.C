@@ -167,15 +167,10 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
         bool l_fused_core_support = is_fused_mode();
         HDAT_DBG("is_fused_mode=%d",l_fused_core_support);
 
-        l_coreThreadCount = 4;
-        HDAT_DBG("THREAD_COUNT is 0x%x",l_coreThreadCount);
-        size_t l_enabledThreads = l_coreThreadCount;
-        //@TODO RTC 246357 missing attribute
-        //l_coreThreadCount = l_pTopLevel->getAttr<ATTR_THREAD_COUNT>();
-        //
-        //@TODO RTC 246357 missing attribute
-        /*uint64_t en_thread_mask =
+        l_coreThreadCount = l_pTopLevel->getAttr<ATTR_THREAD_COUNT>();
+        uint64_t en_thread_mask =
           l_pTopLevel->getAttr<TARGETING::ATTR_ENABLED_THREADS>();
+          HDAT_INF("fetched en_thread_mask=0x%16x",en_thread_mask);
         //Check the enabled threads to see if user overrode to SMT1 or SMT2
         //Note this only handles specific SMT1/2 -- no other permutations
         size_t l_enabledThreads = l_coreThreadCount;
@@ -186,7 +181,7 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
         else if (en_thread_mask == 0xC000000000000000)
         {
              l_enabledThreads = 2;
-        }*/
+        }
         uint32_t l_procStatus;
         HDAT_DBG("Core Thread Count[%d], Enabled[%d]",
                  l_coreThreadCount, l_enabledThreads);
@@ -211,6 +206,8 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
             l_procStatus =
                 HDAT_PROC_NOT_INSTALLED | HDAT_PRIM_THREAD;
         }
+        l_coreThreadCount = is_fused_mode() ? l_coreThreadCount*2 : l_coreThreadCount;
+        HDAT_DBG("THREAD_COUNT is 0x%x",l_coreThreadCount);
 
         //for each procs in the system
         TARGETING::PredicateCTM l_procFilter(CLASS_CHIP, TYPE_PROC);
@@ -387,11 +384,6 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
         else
         {
             index = 0;
-            //ATTR_THREAD_COUNT always return 4 ir-respective of fused or
-            //non-fused mode. Updating the thread count to 8 only in case
-            //of fused core mode
-            l_coreThreadCount = l_coreThreadCount * 2;
-
             for (;l_filter;++l_filter)
             {
                 TARGETING::Target* l_pProcTarget = *l_filter;
@@ -758,48 +750,72 @@ errlHndl_t HdatPcia::hdatSetCoreInfo(const uint32_t i_index,
         // set the memory bus frequency
         iv_spPcia[i_index].hdatTime.pciaMemBusFreq = getMemBusFreq(i_pProcTarget);
 
-        // @TODO RTC 246357 missing attribute
-        // Need to update these values in MRW
-        /*
+        HDAT_INF("before setting cache info");
         //Set ICache Info
         //Cache Size Structure
         this->iv_spPcia[i_index].hdatCache.pciaICacheSize =
                  i_pProcTarget->getAttr<TARGETING::ATTR_ICACHE_SIZE>();
+        HDAT_DBG("hdatCache.pciaICacheSize=0x%x",
+                    this->iv_spPcia[i_index].hdatCache.pciaICacheSize);
         this->iv_spPcia[i_index].hdatCache.pciaICacheLineSize =
                  i_pProcTarget->getAttr<TARGETING::ATTR_ICACHE_LINE_SIZE>();
+        HDAT_DBG("hdatCache.pciaICacheLineSize=0x%x",
+                     this->iv_spPcia[i_index].hdatCache.pciaICacheLineSize);
         this->iv_spPcia[i_index].hdatCache.pciaICacheBlkSize =
                  i_pProcTarget->getAttr<TARGETING::ATTR_ICACHE_BLOCK_SIZE>();
+        HDAT_DBG("hdatCache.pciaICacheBlkSize=0x%x",
+                 this->iv_spPcia[i_index].hdatCache.pciaICacheBlkSize);
 
         this->iv_spPcia[i_index].hdatCache.pciaICacheAssocSets =
                  i_pProcTarget->getAttr<TARGETING::ATTR_ICACHE_ASSOC_SETS>();
+        HDAT_DBG("hdatCache.pciaICacheAssocSets=0x%x",
+                this->iv_spPcia[i_index].hdatCache.pciaICacheAssocSets);
 
         //Set DCache Info
         this->iv_spPcia[i_index].hdatCache.pciaDCacheBlkSize =
                  i_pProcTarget->getAttr<TARGETING::ATTR_DCACHE_LINE_SIZE>();
+        HDAT_DBG("hdatCache.pciaDCacheBlkSize=0x%x",
+                     this->iv_spPcia[i_index].hdatCache.pciaDCacheBlkSize);
         this->iv_spPcia[i_index].hdatCache.pciaDCacheAssocSets =
                  i_pProcTarget->getAttr<TARGETING::ATTR_DCACHE_ASSOC_SETS>();
+        HDAT_DBG("hdatCache.pciaDCacheAssocSets=0x%x",
+                      this->iv_spPcia[i_index].hdatCache.pciaDCacheAssocSets);
 
 
         //Set L1 Cache Info
         this->iv_spPcia[i_index].hdatCache.pciaL1DCacheSize =
                  i_pProcTarget->getAttr<TARGETING::ATTR_DATA_CACHE_SIZE>();
+        HDAT_DBG("hdatCache.pciaL1DCacheSize=0x%x",
+                      this->iv_spPcia[i_index].hdatCache.pciaL1DCacheSize);
         this->iv_spPcia[i_index].hdatCache.pciaL1DCacheLineSize =
                  i_pProcTarget->getAttr<TARGETING::ATTR_DATA_CACHE_LINE_SIZE>();
+        HDAT_DBG("hdatCache.pciaL1DCacheLineSize=0x%x",
+                      this->iv_spPcia[i_index].hdatCache.pciaL1DCacheLineSize);
 
         //Set L2 Cache Info
         this->iv_spPcia[i_index].hdatCache.pciaL2DCacheSize =
                   i_pProcTarget->getAttr<TARGETING::ATTR_L2_CACHE_SIZE>();
+        HDAT_DBG("hdatCache.pciaL2DCacheSize=0x%x",
+                     this->iv_spPcia[i_index].hdatCache.pciaL2DCacheSize);
         this->iv_spPcia[i_index].hdatCache.pciaL2DCacheLineSize =
                   i_pProcTarget->getAttr<TARGETING::ATTR_L2_CACHE_LINE_SIZE>();
+        HDAT_DBG("hdatCache.pciaL2DCacheLineSize=0x%x",
+               this->iv_spPcia[i_index].hdatCache.pciaL2DCacheLineSize);
 
         this->iv_spPcia[i_index].hdatCache.pciaL2AssocSets =
                   i_pProcTarget->getAttr<TARGETING::ATTR_L2_CACHE_ASSOC_SETS>();
+        HDAT_DBG("hdatCache.pciaL2AssocSets=0x%x",
+                 this->iv_spPcia[i_index].hdatCache.pciaL2AssocSets);
 
         //Set L3 Cache Info
         this->iv_spPcia[i_index].hdatCache.pciaL3DCacheSize =
             i_pProcTarget->getAttr<TARGETING::ATTR_L3_CACHE_SIZE>();
+        HDAT_DBG("hdatCache.pciaL3DCacheSize=0x%x",
+               this->iv_spPcia[i_index].hdatCache.pciaL3DCacheSize);
         this->iv_spPcia[i_index].hdatCache.pciaL3DCacheLineSize =
             i_pProcTarget->getAttr<TARGETING::ATTR_L3_CACHE_LINE_SIZE>();
+        HDAT_DBG("hdatCache.pciaL3DCacheLineSize=0x%x",
+               this->iv_spPcia[i_index].hdatCache.pciaL3DCacheLineSize);
 
         //ECO not supported initialize to 0
         this->iv_spPcia[i_index].hdatCache.pciaL3Pt5DCacheSize = 0;
@@ -808,21 +824,34 @@ errlHndl_t HdatPcia::hdatSetCoreInfo(const uint32_t i_index,
         //Set TLB info
         this->iv_spPcia[i_index].hdatCache.pciaITlbEntries =
                  i_pProcTarget->getAttr<TARGETING::ATTR_TLB_INSTR_ENTRIES>();
+        HDAT_DBG("hdatCache.pciaITlbEntries=0x%x",
+                       this->iv_spPcia[i_index].hdatCache.pciaITlbEntries);
         this->iv_spPcia[i_index].hdatCache.pciaITlbAssocSets =
                  i_pProcTarget->getAttr<TARGETING::ATTR_TLB_INSTR_ASSOC_SETS>();
+        HDAT_DBG("hdatCache.pciaITlbAssocSets=0x%x",
+                      this->iv_spPcia[i_index].hdatCache.pciaITlbAssocSets);
 
         this->iv_spPcia[i_index].hdatCache.pciaDTlbEntries =
                  i_pProcTarget->getAttr<TARGETING::ATTR_TLB_DATA_ENTRIES>();
+        HDAT_DBG("hdatCache.pciaDTlbEntries=0x%x",
+                        this->iv_spPcia[i_index].hdatCache.pciaDTlbEntries);
         this->iv_spPcia[i_index].hdatCache.pciaDTlbAssocSets =
                  i_pProcTarget->getAttr<TARGETING::ATTR_TLB_DATA_ASSOC_SETS>();
+        HDAT_DBG("hdatCache.pciaDTlbAssocSets=0x%x",
+                       this->iv_spPcia[i_index].hdatCache.pciaDTlbAssocSets);
 
         this->iv_spPcia[i_index].hdatCache.pciaReserveSize =
                  i_pProcTarget->getAttr<TARGETING::ATTR_TLB_RESERVE_SIZE>();
+        HDAT_DBG("hdatCache.pciaReserveSize=0x%x",
+                        this->iv_spPcia[i_index].hdatCache.pciaReserveSize);
 
         //Set CPU Attributes
         iv_spPcia[i_index].hdatAttr.pciaAttributes =
                         i_pProcTarget->getAttr<TARGETING::ATTR_CPU_ATTR>();
-        */
+        HDAT_DBG("hdatAttr.pciaAttributes=0x%x",
+                          iv_spPcia[i_index].hdatAttr.pciaAttributes );
+
+        //@TODO: RTC 253771 PCIE attributes for rainier not available
         //Set ICache Info
         //Cache Size Structure
         this->iv_spPcia[i_index].hdatCache.pciaICacheSize = 0x20;
@@ -865,6 +894,7 @@ errlHndl_t HdatPcia::hdatSetCoreInfo(const uint32_t i_index,
 
         //Set CPU Attributes
         iv_spPcia[i_index].hdatAttr.pciaAttributes = 0x0000001D;
+
     }
     while(0);
 

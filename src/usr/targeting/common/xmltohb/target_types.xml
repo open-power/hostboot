@@ -2563,6 +2563,9 @@
       <id>PROC_MODULE_TYPE</id>
     </attribute>
     <attribute>
+      <id>RAW_MTM</id>
+    </attribute>
+    <attribute>
       <id>RECONFIG_LOOP_TESTS_ENABLE</id>
     </attribute>
     <attribute>
@@ -2593,6 +2596,12 @@
       <id>SYNC_BETWEEN_STEPS</id>
     </attribute>
     <attribute>
+      <id>SYSTEM_FAMILY</id>
+    </attribute>
+    <attribute>
+      <id>SYSTEM_TYPE</id>
+    </attribute>
+    <attribute>
       <id>SYS_LOCATION_CODE</id>
     </attribute>
     <attribute>
@@ -2610,6 +2619,9 @@
     </attribute>
     <attribute>
       <id>TEST_NULL_STRING</id>
+    </attribute>
+    <attribute>
+      <id>THREAD_COUNT</id>
     </attribute>
     <attribute>
       <id>TPM_REQUIRED</id>

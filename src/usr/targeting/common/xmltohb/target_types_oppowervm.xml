@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -86,6 +86,19 @@
     <attribute>
       <id>SLCA_RID</id>
       <default>0x00001000</default>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
+    <id>enc-node-power10</id>
+    <attribute>
+      <id>ENLARGED_IO_SLOT_COUNT</id>
+    </attribute>
+    <attribute>
+      <id>SLCA_INDEX</id>
+    </attribute>
+    <attribute>
+      <id>SLCA_RID</id>
     </attribute>
   </targetTypeExtension>
 
@@ -178,6 +191,52 @@
     </attribute>
     <attribute>
       <id>SLCA_RID</id>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
+    <id>sys-sys-power10</id>
+    <attribute>
+      <id>HUGE_PAGE_COUNT</id>
+    </attribute>
+    <attribute>
+      <id>HUGE_PAGE_SIZE</id>
+    </attribute>
+    <attribute>
+      <id>HYP_DISPATCH_WHEEL</id>
+    </attribute>
+    <attribute>
+      <id>IPL_ATTRIBUTES</id>
+    </attribute>
+    <attribute>
+      <id>MAX_HSL_OPTICONNECT_CONNECTIONS</id>
+    </attribute>
+    <attribute>
+      <id>OS_IPL_MODE</id>
+    </attribute>
+    <attribute>
+      <id>PHYP_SYSTEM_TYPE</id>
+    </attribute>
+    <attribute>
+      <id>PRESERVE_MDC_PARTITION_VPD</id>
+    </attribute>
+    <attribute>
+      <id>SERIAL_NUMBER</id>
+    </attribute>
+    <attribute>
+      <id>SLCA_INDEX</id>
+    </attribute>
+    <attribute>
+      <id>SLCA_RID</id>
+    </attribute>
+    <attribute>
+      <id>SYSTEM_BRAND_NAME</id>
+    </attribute>
+    <attribute>
+      <id>VLAN_SWITCHES</id>
+    </attribute>
+    <attribute>
+      <id>VTPM_ENABLED</id>
     </attribute>
   </targetTypeExtension>
 

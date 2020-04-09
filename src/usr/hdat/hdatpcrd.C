@@ -214,11 +214,9 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
             break;
         }
 
-        // @TODO: RTC 142465. Add check to know whether in fused mode or not
-        // @TODO RTC 246357 missing attribute
-        
-        //l_coreThreadCount = l_pTopLevel->getAttr<ATTR_THREAD_COUNT>();
-        l_coreThreadCount = 8; //assuming fused core
+        l_coreThreadCount = l_pTopLevel->getAttr<ATTR_THREAD_COUNT>();
+        l_coreThreadCount = is_fused_mode() ? l_coreThreadCount*2 : l_coreThreadCount;
+        HDAT_INF("l_coreThreadCount in pcrd = 0x%x",l_coreThreadCount);
         uint32_t l_procStatus;
         if ( l_coreThreadCount == HDAT_MAX_EIGHT_THREADS_SUPPORTED )
         {
@@ -1036,19 +1034,15 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
         iv_spPcrd->hdatChipData.hdatPcrdCheckstopAddr = HDAT_SW_CHKSTP_FIR_SCOM;
         iv_spPcrd->hdatChipData.hdatPcrdSpareBitNum   = HDAT_SW_CHKSTP_FIR_SCOM_BIT_POS;
 
-        // @TODO RTC 246357 missing attribute
-        /*auto l_topIdTable = l_pSysTarget->getAttrAsStdArr
-            <TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE>();
-        std::copy(&l_topIdTable[0], &l_topIdTable[0]+std::size(l_topIdTable),
-            iv_spPcrd->hdatChipData.hdatPcrdTopologyIdTab);
-        iv_spPcrd->hdatChipData.hdatPcrdTopologyIdIndex =
-            iv_spPcrd->hdatChipData.hdatPcrdTopologyIdTab[0]; */
-        iv_spPcrd->hdatChipData.hdatPcrdTopologyIdTab[0] = 0;
+        // @TODO RTC 254289 :  HDAT : Topology Id Table and Effective 
+        // Topology Id Changes in Rainier    
+        iv_spPcrd->hdatChipData.hdatPcrdTopologyIdTab[0] = l_procEffFabricTopoId*2;
         for (uint8_t l_idx =1; l_idx <32; l_idx++)
         {
             iv_spPcrd->hdatChipData.hdatPcrdTopologyIdTab[l_idx] = 0xFF;
         }
         iv_spPcrd->hdatChipData.hdatPcrdTopologyIdIndex = 0;
+            
 
     }
     while(0);

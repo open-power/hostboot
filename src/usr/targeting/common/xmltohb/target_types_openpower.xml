@@ -221,6 +221,9 @@
       <id>IPMI_SENSORS</id>
     </attribute>
     <attribute>
+      <id>IS_MPIPL_SUPPORTED</id>
+    </attribute>
+    <attribute>
       <id>OPEN_POWER_DIMM_ERROR_TEMP_DEG_C</id>
     </attribute>
     <attribute>
@@ -285,6 +288,9 @@
     </attribute>
     <attribute>
       <id>OPEN_POWER_SOFT_MIN_PCAP_WATTS</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_TURBO_MODE_SUPPORTED</id>
     </attribute>
     <attribute>
       <id>OP_TRACE_LITE</id>

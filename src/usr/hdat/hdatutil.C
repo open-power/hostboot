@@ -294,6 +294,7 @@ errlHndl_t hdatGetHwCardId(const Target *i_pTarget, uint32_t &o_cardId)
  */
 void hdatPopulateMTMAndSerialNumber()
 {
+    HDAT_ENTER();
     //errlHndl_t l_errl = NULL;
     //@TODO RTC 246438  MTM and SN yet to be defined in workbook
     //VSYS TM and SE will be read from the bp vpd once defined
@@ -312,9 +313,14 @@ void hdatPopulateMTMAndSerialNumber()
         HDAT_ERR("Error in getting Top Level Target");
         assert(l_pSysTarget != NULL);
     }
+    l_pSysTarget->setAttr<TARGETING::ATTR_RAW_MTM>
+                             (l_rawMTM);
+    l_pSysTarget->setAttr
+              <TARGETING::ATTR_SERIAL_NUMBER>(l_serialNumber);
 
     //@TODO: RTC 246357 missing attrubute
-    //ATTR_SERIAL_NUMBER and ATTR_RAW_MTM not defined
+    //uncomment the following after DeviceRead support is enabled 
+    //to read the BP vpd
     //use STD Array format when reenabled
 
     /*TARGETING::PredicateCTM l_nodePredicate(TARGETING::CLASS_ENC,
@@ -413,6 +419,7 @@ void hdatPopulateMTMAndSerialNumber()
         ERRORLOG::errlCommit(l_errl,HDAT_COMP_ID);
     }*/
 
+HDAT_EXIT();
 }
 
 /**
@@ -439,8 +446,6 @@ void hdatGetLocationCodePrefix(char *o_locCode)
         assert(l_pSysTarget != NULL);
     }
 
-    //@TODO: RTC 246357 missing attribute
-    strcpy(l_rawMTM,"8335.GTG");
     strcpy(reinterpret_cast<char *>(l_serialNumber),"RAINIER");
 
     strcpy(o_locCode, "U");
@@ -451,11 +456,8 @@ void hdatGetLocationCodePrefix(char *o_locCode)
    // }
 
     //@TODO RTC 246357 attribute MTM and SERIAL_NUMBER not defined
-   // if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_RAW_MTM>(l_rawMTM))
-      if (1)
+    if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_RAW_MTM>(l_rawMTM))
     {
-       // if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_SERIAL_NUMBER>
-                 //                                        (l_serialNumber))
         if(1)
         {
             strcat(o_locCode,"OPWR");

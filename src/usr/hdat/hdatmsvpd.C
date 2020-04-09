@@ -1085,14 +1085,15 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
         uint32_t l_mostSigAffinityDomain_x = 0;
         uint32_t l_ueCount = 1;
 
-        //@TODO: RTC 246357 : HDAT: Support of missing attributes in P10 Rainer
-        /*TARGETING::ATTR_MIRROR_BASE_ADDRESS_type l_mirroringBaseAddress_x =
-            l_pSysTarget->getAttr<TARGETING::ATTR_MIRROR_BASE_ADDRESS>();*/
+        HDAT_INF("fetching ATTR_MIRROR_BASE_ADDRESS");
+        TARGETING::ATTR_MIRROR_BASE_ADDRESS_type l_mirroringBaseAddress_x =
+             l_pSysTarget->getAttr<TARGETING::ATTR_MIRROR_BASE_ADDRESS>();
+        HDAT_INF("fetched l_mirroringBaseAddress_x value= 0x%x",l_mirroringBaseAddress_x);
 
-        TARGETING::ATTR_MIRROR_BASE_ADDRESS_type l_mirrorBaseAddress_x = 0;
-         //   l_mirroringBaseAddress_x; //not supported
+        TARGETING::ATTR_MIRROR_BASE_ADDRESS_type l_mirrorBaseAddress_x = l_mirroringBaseAddress_x;
 
-       // l_mirroringBaseAddress_x |= HDAT_REAL_ADDRESS_MASK64; //not supported
+        l_mirroringBaseAddress_x |= HDAT_REAL_ADDRESS_MASK64;
+        HDAT_INF("after masking l_mirroringBaseAddress_x=0x%x",l_mirroringBaseAddress_x);
         //TODO : RTC Story 246361 HDAT Nimbus/Cumulus model code removal
         /*
         TARGETING::ATTR_MAX_MCS_PER_SYSTEM_type l_maxMsAreas =
@@ -1113,7 +1114,7 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
         // TODO : RTC Story 166994 to set the maximum number of Ms Area entries
         // from new attribute
         hdatInit(l_tmpMaxMsAddr,l_tmpMaxMsAddr,l_sizeConfigured,l_maxMsAreas,
-                l_mostSigAffinityDomain_x,l_ueCount,/*l_mirroringBaseAddress_x*/0); //mirroring not supported
+                l_mostSigAffinityDomain_x,l_ueCount,l_mirroringBaseAddress_x);
 
         TARGETING::ATTR_XSCOM_BASE_ADDRESS_type l_xscomAddr =
                  l_pSysTarget->getAttr<TARGETING::ATTR_XSCOM_BASE_ADDRESS>();
