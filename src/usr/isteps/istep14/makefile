@@ -28,11 +28,12 @@ MODULE = istep14
 # FIXME RTC: 210975
 
 PROCEDURE_PATH = ${ROOTPATH}/src/import/chips/p10/procedures
-#EXP_COMMON_PATH = ${ROOTPATH}/src/import/chips/ocmb/explorer/common
+EXPLORER_COMMON_PATH = ${ROOTPATH}/src/import/chips/ocmb/explorer/common
+EXPLORER_HWP_PATH = ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory
+OBJ_GENFILES = ${ROOTPATH}/obj/genfiles
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/plat
-EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
@@ -41,7 +42,6 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/core/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/scominfo/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
-EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/nest
 #EXTRAINCDIR += ${ROOTPATH}/src/import/
 #EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
@@ -52,19 +52,23 @@ EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/nest
 #EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/ddr4/
 #EXTRAINCDIR += ${EXP_COMMON_PATH}/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/nest/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/  # proc_somt.Hd
 #EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory
 EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/utils/  # gen_mss_unmask.H
 EXTRAINCDIR += ${ROOTPATH}/src/import/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/shared/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/inband/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/memory/   # p10_defaults.H
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/    # chipids.H
+EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/nest
+EXTRAINCDIR += ${EXPLORER_COMMON_PATH}/include/
+EXTRAINCDIR += ${EXPLORER_HWP_PATH}/lib/shared/
+EXTRAINCDIR += ${EXPLORER_HWP_PATH}/lib/inband/
+EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/ # mss_generic_attribute_getters.H
+EXTRAINCDIR += ${EXPLORER_HWP_PATH}/      # exp_mss_thermal_init_utils.H
+EXTRAINCDIR += ${EXPLORER_HWP_PATH}/lib/  # mss_explorer_attribute_getters.H
 
 OBJS += call_mss_memdiag.o
-#OBJS += call_mss_thermal_init.o
+OBJS += call_mss_thermal_init.o
 OBJS += call_proc_pcie_config.o
 OBJS += call_proc_load_iop_xram.o
 #OBJS += call_mss_power_cleanup.o
@@ -95,6 +99,8 @@ OBJS += p10_io_ppe_utils.o
 OBJS += p10_pcie_config.o
 OBJS += p10_write_xram.o
 OBJS += p10_qme_sram_access.o
+OBJS += exp_mss_thermal_init.o
+OBJS += p10_throttle_sync.o
 #OBJS += p9_htm_start.o
 #OBJS += p9_htm_reset.o
 #OBJS += p9_htm_adu_ctrl.o
@@ -115,11 +121,13 @@ include ${PROCEDURE_PATH}/hwp/nest/p10_load_iop_xram.mk
 
 OBJS += p10_scominfo.o
 
-VPATH    += ${PROCEDURE_PATH}/hwp/nest/
-VPATH    += ${PROCEDURE_PATH}/hwp/core/
-VPATH	 += ${PROCEDURE_PATH}/hwp/pm/
-VPATH    += ${PROCEDURE_PATH}/hwp/memory/
-VPATH    += ${ROOTPATH}/src/import/chips/p10/common/scominfo/
+VPATH += ${ROOTPATH}/src/import/chips/p10/common/scominfo/
+VPATH += ${PROCEDURE_PATH}/hwp/nest/
+VPATH += ${PROCEDURE_PATH}/hwp/core/
+VPATH += ${PROCEDURE_PATH}/hwp/pm/
+VPATH += ${PROCEDURE_PATH}/hwp/memory/
+VPATH += ${EXPLORER_HWP_PATH}/
+VPATH += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 
 include ${ROOTPATH}/config.mk
 #VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/eff_config/
