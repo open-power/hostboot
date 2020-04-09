@@ -24,7 +24,6 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 
 <hwpErrors>
-  <sbeTarget>MASTER_CHIP</sbeTarget>
   <!-- ******************************************************************** -->
   <hwpError>
       <sbeError/>
