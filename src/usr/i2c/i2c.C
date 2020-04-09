@@ -4242,12 +4242,21 @@ errlHndl_t i2cSetBusVariables ( TARGETING::Target * i_target,
             }
             else
             {
-                io_args.bus_speed = speed_array[io_args.engine][io_args.port];
+                // All bus speed computations must be based off of the logical
+                // engine/port mapping
+                size_t logicalEngine = io_args.engine;
+                size_t logicalPort = io_args.port;
+                if (io_args.switches.useFsiI2C)
+                {
+                    setLogicalFsiEnginePort(logicalEngine,logicalPort);
+                }
+
+                io_args.bus_speed = speed_array[logicalEngine][logicalPort];
 
                 assert(io_args.bus_speed,
-                       "i2cSetBusVariables: bus_speed array[%d][%d] for "
-                       "tgt 0x%X is 0",
-                       io_args.engine, io_args.port,
+                       "i2cSetBusVariables: bus speed for e%d/p%d (logical "
+                       "e%d/p%d) driven by HUID 0x%08X is 0",
+                       io_args.engine, io_args.port, logicalEngine, logicalPort,
                        TARGETING::get_huid(i_target));
             }
         }
