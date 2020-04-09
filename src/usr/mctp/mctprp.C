@@ -161,11 +161,13 @@ static void rx_message(uint8_t i_eid, void * i_data, void *i_msg, size_t i_len)
           if(errl)
           {
               TRACFBIN(g_trac_mctp,
-                       "mctp rx_messag: error occured attempting to process the PLDM message"
+                       "mctp rx_message: error occurred attempting to process the PLDM message"
                        , i_msg, i_len);
               errl->collectTrace(MCTP_COMP_NAME);
               errlCommit(errl, MCTP_COMP_ID);
           }
+
+          // i_msg buffer is managed by the mctp core logic so we do not need to worry about it
           break;
       }
       default :
@@ -286,6 +288,9 @@ void MctpRP::handle_outbound_messages(void)
 
               if(rc != RC_MCTP_CORE_SUCCESS)
               {
+                  TRACFCOMP(g_trac_mctp,
+                            "MSG_SEND_PLDM failed during mctp_message_tx  rc = 0x%x",
+                            rc);
                   // first 8 bytes of MCTP payload
                   const uint64_t mctp_payload =
                           *reinterpret_cast<uint64_t*>(msg->extra_data);
@@ -303,9 +308,17 @@ void MctpRP::handle_outbound_messages(void)
                                         RC_SEND_PLDM_FAIL,
                                         rc,
                                         mctp_payload,
-                                        ErrlEntry::ADD_SW_CALLOUT);
+                                        ErrlEntry::NO_SW_CALLOUT);
                   errl->collectTrace(MCTP_COMP_NAME);
                   errl->collectTrace(PLDM_COMP_NAME);
+
+                  // Call out service processor / BMC firmware as high priority
+                  errl->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                            HWAS::SRCI_PRIORITY_HIGH);
+
+                  // Call out Hostboot firmware as medium priority
+                  errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                            HWAS::SRCI_PRIORITY_MED);
 
                   // PLDM message msg originator must clean up original buffer in extra_data
                   msg->extra_data = errl;

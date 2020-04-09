@@ -330,7 +330,7 @@ errlHndl_t decode_pldm_response(const Decoder i_decoder,
 
         /*
           * @errortype  ERRL_SEV_UNRECOVERABLE
-          * @moduleid   MODE_DECODE_RESPONSE
+          * @moduleid   MOD_DECODE_RESPONSE
           * @reasoncode RC_MSG_DECODE_FAIL
           * @userdata1  RC returned from decode function
           * @userdata2  PLDM Header
@@ -338,7 +338,7 @@ errlHndl_t decode_pldm_response(const Decoder i_decoder,
           * @custdesc   A software error occurred during system boot
           */
         errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                              MODE_DECODE_RESPONSE,
+                              MOD_DECODE_RESPONSE,
                               RC_MSG_DECODE_FAIL,
                               decoder_rc,
                               response_hdr_data,

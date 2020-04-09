@@ -56,7 +56,7 @@ void registerPldmMsgQs(void)
     msg_q_register(g_outboundPldmReqMsgQ, VFS_ROOT_MSG_PLDM_REQ_OUT);
 
     // Also register the inbound PLDM response queues for any test code that might
-    // want to lookup this the inbound response q to simulate inbound responses
+    // want to lookup the inbound response q to simulate inbound responses
     // coming from the bmc.
     msg_q_register(g_inboundPldmRspMsgQ, VFS_ROOT_MSG_PLDM_RSP_IN);
 }

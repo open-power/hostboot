@@ -41,6 +41,8 @@
 #include <mctp/mctp_message_types.H>
 // From src/usr/pldm/extern/
 #include "../extern/base.h"
+// From src/usr/pldm/common/
+#include "../common/pldmtrace.H"
 
 using namespace ERRORLOG;
 
@@ -123,13 +125,15 @@ errlHndl_t routeInboundMsg(const uint8_t* const i_msg, const size_t i_len)
 
     if(rc)
     {
+        PLDM_ERR("routeInboundMsg: Failed sending a message to msg_q %p", l_msgQ);
+
         /*@errorlog
         * @errortype   ERRL_SEV_PREDICTIVE
         * @moduleid    MOD_ROUTE_MESSAGES
         * @reasoncode  RC_SEND_FAIL
         * @userdata1   rc from msg_send
         * @userdata2   ptr to message as uint64_t
-        * @devdesc     PLDM message from BMC is too small to process
+        * @devdesc     Error sending message to PLDM message q
         * @custdesc    A problem occurred during the IPL of the system
         */
         errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,

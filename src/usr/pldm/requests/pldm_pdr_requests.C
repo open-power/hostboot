@@ -159,6 +159,7 @@ errlHndl_t getPDR(const msg_q_t i_msgQ,
 
             if (errl)
             {
+                PLDM_ERR("getPDR: Error occurred trying to decode pldm response on pass %i", i);
                 break;
             }
 
@@ -169,7 +170,6 @@ errlHndl_t getPDR(const msg_q_t i_msgQ,
         if (errl)
         {
             // Message decoding failed; break out of the block;
-            PLDM_ERR("getPDR: Error occurred trying to decode pldm response.");
             break;
         }
 
