@@ -664,6 +664,41 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief FW_TWI_FFE_SETTINGS setup
+/// @param[in,out] io_data the data to go to the command
+///
+inline void ffe_settings_setup(std::vector<uint8_t>& io_data)
+
+{
+
+    // Need data length as well - ffe_settings can only ever be written
+    io_data.insert(io_data.begin(), FW_TWI_FFE_SETTINGS_BYTE_LEN);
+
+    // Then add the command
+    io_data.insert(io_data.begin(), FW_TWI_FFE_SETTINGS);
+}
+
+///
+/// @brief FW_TWI_FFE_SETTINGS
+/// @param[in] i_target the OCMB target
+/// @param[in] i_data the data to write
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode send_ffe_settings(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const std::vector<uint8_t>& i_data)
+{
+    // Retrieve setup data
+    std::vector<uint8_t> l_configured_data(i_data);
+    ffe_settings_setup(l_configured_data);
+
+    // Send the command
+    FAPI_TRY(fapi2::putI2c(i_target, l_configured_data));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 #endif
 
 }// i2c

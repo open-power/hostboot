@@ -315,7 +315,8 @@ enum cmd_id : uint8_t
     FW_PQM_HORIZONTAL_BATHTUB_GET            = 0x18,
     FW_PQM_VERTICAL_BATHTUB_GET              = 0x19,
     FW_PQM_2D_BATHTUB_GET                    = 0x1A,
-    EXP_FW_PQM_FORCE_DELAY_LINE_UPDATE       = 0x22,
+    FW_PQM_FORCE_DELAY_LINE_UPDATE           = 0x22,
+    FW_TWI_FFE_SETTINGS                      = 0x24,
 };
 
 ///
@@ -326,6 +327,7 @@ enum sizes
     // 32-bit commands
     FW_BOOT_CONFIG_BYTE_LEN = 4,
     FW_STATUS_BYTE_LEN      = 5,
+    FW_TWI_FFE_SETTINGS_BYTE_LEN = 8,
 
     FW_WRITE_REG_DATA_SIZE  = 0x08,
     FW_REG_ADDR_LATCH_SIZE  = 0x04,

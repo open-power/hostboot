@@ -61,12 +61,24 @@ extern "C"
         mss::display_git_commit_info("exp_omi_setup");
         fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
         uint8_t l_gem_menterp_workaround = 0;
+        uint8_t l_enable_ffe_settings = 0;
 
         // Declares variables
         std::vector<uint8_t> l_boot_config_data;
+        std::vector<uint8_t> l_ffe_setup_data;
 
         // BOOT CONFIG 0
         uint8_t l_dl_layer_boot_mode = fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE_NON_DL_TRAINING;
+
+        // FFE Setup
+        FAPI_TRY(mss::attr::get_omi_ffe_settings_command(i_target, l_enable_ffe_settings));
+
+        if (l_enable_ffe_settings == fapi2::ENUM_ATTR_OMI_FFE_SETTINGS_COMMAND_ENABLE)
+        {
+            FAPI_TRY(mss::exp::omi::ffe_setup(i_target, l_ffe_setup_data));
+            FAPI_TRY(mss::exp::i2c::send_ffe_settings(i_target, l_ffe_setup_data));
+            FAPI_TRY(mss::exp::i2c::fw_status(i_target, mss::DELAY_1MS, 100));
+        }
 
         // Gets the data setup
         FAPI_TRY(mss::exp::omi::train::setup_fw_boot_config(i_target, l_boot_config_data));

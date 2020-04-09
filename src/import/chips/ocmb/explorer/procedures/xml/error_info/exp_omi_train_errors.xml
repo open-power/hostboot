@@ -52,6 +52,21 @@
         <target>OCMB_TARGET</target>
     </gard>
   </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_FFE_CURSOR_OVERFLOW</rc>
+    <description>
+      Sum of FFE pre-cursor and post-cursor needs to be less than 64
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>PRE_CURSOR</ffdc>
+    <ffdc>POST_CURSOR</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
   <hwpError>
     <rc>RC_EXP_OMI_BUMP_SL_WORKAROUND_ERROR</rc>
     <description>

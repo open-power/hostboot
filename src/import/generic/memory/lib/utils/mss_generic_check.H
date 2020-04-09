@@ -262,8 +262,8 @@ inline fapi2::ReturnCode invalid_value(const fapi2::Target<T>& i_target,
                 set_BYTE(i_byte_index).
                 set_TARGET(i_target).
                 set_FFDC_CODE(i_ffdc_codes),
-                "%s. Byte %d, Data returned: %d for " TARGTIDFORMAT,
-                i_err_str, i_byte_index, i_data, TARGTID );
+                "%s. Byte %d, Data returned: %d (0x%016lx) for " TARGTIDFORMAT,
+                i_err_str, i_byte_index, i_data, i_data, TARGTID );
 
     return fapi2::FAPI2_RC_SUCCESS;
 

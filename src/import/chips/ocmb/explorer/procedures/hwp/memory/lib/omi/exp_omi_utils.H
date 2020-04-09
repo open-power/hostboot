@@ -222,6 +222,15 @@ fapi2::ReturnCode setup_omi_dl0_config0(
     const uint8_t i_train_mode,
     const uint8_t i_dl_x4_backoff_en);
 
+///
+/// @brief Sets up the FFE_SETTINGS command
+/// @param[in] i_target target on which the code is operating
+/// @param[out] o_data data for the FFE_SETTINGS command
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+///
+fapi2::ReturnCode ffe_setup( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                             std::vector<uint8_t>& o_data );
+
 namespace train
 {
 

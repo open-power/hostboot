@@ -100,6 +100,42 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Sets up the FFE_SETTINGS command
+/// @param[in] i_target target on which the code is operating
+/// @param[out] o_data data for the FFE_SETTINGS command
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+///
+fapi2::ReturnCode ffe_setup( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                             std::vector<uint8_t>& o_data )
+{
+    constexpr uint32_t MAX_CURSOR_SUM = 63;
+
+    uint32_t l_pre_cursor = 0;
+    uint32_t l_post_cursor = 0;
+
+    FAPI_TRY(mss::attr::get_omi_ffe_pre_cursor(i_target, l_pre_cursor));
+    FAPI_TRY(mss::attr::get_omi_ffe_post_cursor(i_target, l_post_cursor));
+
+    FAPI_ASSERT((l_pre_cursor + l_post_cursor) < MAX_CURSOR_SUM,
+                fapi2::MSS_FFE_CURSOR_OVERFLOW().
+                set_TARGET(i_target).
+                set_PRE_CURSOR(l_pre_cursor).
+                set_POST_CURSOR(l_post_cursor),
+                "%s Sum of FFE pre-cursor %d and post-cursor %d needs to be less than 64",
+                mss::c_str(i_target), l_pre_cursor, l_post_cursor);
+
+    // Clears o_data, just in case
+    o_data.clear();
+    o_data.assign(mss::exp::i2c::FW_TWI_FFE_SETTINGS_BYTE_LEN, 0);
+
+    FAPI_TRY(mss::exp::i2c::ffe_settings::set_pre_cursor( i_target, o_data, l_pre_cursor ));
+    FAPI_TRY(mss::exp::i2c::ffe_settings::set_post_cursor( i_target, o_data, l_post_cursor ));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 namespace train
 {
 
