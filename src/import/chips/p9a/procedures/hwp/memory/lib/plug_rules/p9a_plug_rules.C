@@ -68,7 +68,7 @@ fapi2::ReturnCode channel_a_before_channel_b_helper(const fapi2::Target<fapi2::T
         bool& o_pass)
 {
     // Create a vector of the channel A position for each OCMB (according to Swift Design Workbook v1.1 29May2019.pdf)
-    static const std::vector<uint8_t> l_dependencies = {0, 0, 0, 2, 0, 6, 0, 4, 0, 9, 0, 11, 0, 12, 0, 14};
+    static const std::vector<uint8_t> l_dependencies = {0, 0, 0, 2, 0, 4, 0, 6, 0, 9, 0, 11, 0, 12, 0, 14};
     uint64_t l_dependency = 0;
     auto l_ocmb_it = i_ocmbs.begin();
 
