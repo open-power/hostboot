@@ -513,6 +513,7 @@
     <description>
       The response_argument field of the host_fw_response_struct returned a FAILURE
     </description>
+    <ffdc>CMD_ID</ffdc>
     <ffdc>RSP_ID</ffdc>
     <ffdc>ERROR_CODE</ffdc>
     <ffdc>EXPECTED_REQID</ffdc>
@@ -753,6 +754,27 @@
     </description>
     <ffdc>OCMB_TARGET</ffdc>
     <ffdc>PHY_INIT_MODE</ffdc>
+    <ffdc>EXPECTED_LENGTH</ffdc>
+    <ffdc>ACTUAL_LENGTH</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_INVALID_FW_ADAPTER_PROPERTIES_RSP_DATA_LENGTH</rc>
+    <description>
+      The data buffer vector retrieved from the EXP_FW_ADAPTER_PROPERTIES_GET response did not match the expected length
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
     <ffdc>EXPECTED_LENGTH</ffdc>
     <ffdc>ACTUAL_LENGTH</ffdc>
     <callout>

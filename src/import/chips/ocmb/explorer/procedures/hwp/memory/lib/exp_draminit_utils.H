@@ -1369,22 +1369,6 @@ class phy_params
 
 };
 
-namespace check
-{
-
-///
-/// @brief Checks explorer response argument for a successful command
-/// @param[in] i_target OCMB target
-/// @param[in] i_rsp response from command
-/// @param[in] i_cmd original command
-/// @return FAPI2_RC_SUCCESS iff okay
-///
-fapi2::ReturnCode response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                           const host_fw_response_struct& i_rsp,
-                           const host_fw_command_struct& i_cmd);
-
-}//check
-
 }// exp
 }// mss
 

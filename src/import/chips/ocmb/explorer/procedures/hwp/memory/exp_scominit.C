@@ -42,6 +42,7 @@
 #include <lib/shared/exp_defaults.H>
 #include <lib/shared/exp_consts.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
+#include <lib/inband/exp_fw_adapter_properties.H>
 
 extern "C"
 {
@@ -81,6 +82,9 @@ extern "C"
 
         // Run required unmasks for LOCAL_FIR, FABR0, SRQFIR after scominit
         FAPI_TRY(mss::unmask::after_scominit<mss::mc_type::EXPLORER>(i_target));
+
+        // Print and record Explorer FW version info
+        FAPI_TRY( mss::exp::ib::run_fw_adapter_properties_get(i_target) );
 
         return fapi2::FAPI2_RC_SUCCESS;
 

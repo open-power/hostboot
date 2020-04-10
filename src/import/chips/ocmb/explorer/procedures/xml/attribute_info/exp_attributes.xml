@@ -541,6 +541,45 @@
     </attribute>
 
   <attribute>
+    <id>ATTR_MSS_EXP_FW_VERSION_A</id>
+    <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    <description>
+      Explorer firmware version loaded in partition A
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint32</valueType>
+    <default>0</default>
+    <writeable/>
+    <mssAccessorName>exp_fw_version_a</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_EXP_FW_VERSION_B</id>
+    <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    <description>
+      Explorer firmware version loaded in partition B
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint32</valueType>
+    <default>0</default>
+    <writeable/>
+    <mssAccessorName>exp_fw_version_b</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_EXP_FW_PARTITION_ID</id>
+    <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    <description>
+      ID of Explorer partition that firmware was booted from
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint32</valueType>
+    <default>0</default>
+    <writeable/>
+    <mssAccessorName>exp_fw_partition_id</mssAccessorName>
+  </attribute>
+
+  <attribute>
     <id>ATTR_MSS_EXP_RESP_DDR4_F0RC00</id>
     <targetType>TARGET_TYPE_MEM_PORT</targetType>
     <description>
