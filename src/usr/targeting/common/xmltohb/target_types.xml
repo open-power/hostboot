@@ -2127,7 +2127,6 @@
       <id>FRU_ID</id>
     </attribute>
     <attribute>
-      <default>POWER9</default>
       <id>MODEL</id>
     </attribute>
     <attribute>
@@ -3969,10 +3968,10 @@
 
   <targetType>
     <id>unit-occ-power10</id>
-    <parent>unit</parent>
+    <parent>occ</parent>
     <attribute>
-      <default>OCC</default>
-      <id>TYPE</id>
+      <default>POWER10</default>
+      <id>MODEL</id>
     </attribute>
   </targetType>
 

@@ -331,9 +331,6 @@
     <attribute>
       <id>IPMI_SENSORS</id>
     </attribute>
-    <attribute>
-      <id>OCC_MASTER_CAPABLE</id>
-    </attribute>
   </targetTypeExtension>
 
 </attributes>
