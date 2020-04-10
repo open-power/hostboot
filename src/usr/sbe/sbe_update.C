@@ -2555,7 +2555,7 @@ namespace SBE
 
             // save off the hbbl id and remove it from the image
             void * pSearchBfr = pCustomizedBfr;
-            uint32_t searchSize = sbePnorImageSize;
+            uint32_t searchSize = sbeImgSize; // Actual image size
             void * pHbblIdStringBfr;
 
             err = locateHbblIdStringBfr( pSearchBfr,
@@ -2566,7 +2566,7 @@ namespace SBE
                 //If string search failure, commit the error and move
                 //   to the next proc
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
-                           "Error searhing for HBBL ID string, "
+                           "Error searching for HBBL ID string, "
                            "RC=0x%X, PLID=0x%lX",
                            ERRL_GETRC_SAFE(err),
                            ERRL_GETPLID_SAFE(err));
@@ -6182,6 +6182,7 @@ errlHndl_t locateHbblIdStringBfr( void * i_pSourceBfr,
 {
     errlHndl_t l_errl = nullptr;
     o_pHbblIdStringBfr = nullptr;
+    bool found_hbbl = false;
 
 
     // packing of ID string is defined in bl_start.S
@@ -6235,12 +6236,31 @@ errlHndl_t locateHbblIdStringBfr( void * i_pSourceBfr,
                           pCurTestPosn,
                           (16+128) );
 
+                found_hbbl = true;
                 break;
             }
         } // end reverse bfr search
 
     } while(0);
 
+    if (! found_hbbl)
+    {
+        /*@
+         * @errortype
+         * @moduleid    SBE_CUSTOMIZE_IMG
+         * @reasoncode  SBE_HBBL_ID_NOT_FOUND
+         * @userdata1   i_SourceBfrLen
+         * @userdata2   Unused
+         * @devdesc     Did not find the HBBL ID signature in customized image
+         * @custdesc    A problem occurred while customizing image
+         */
+        l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                            SBE_CUSTOMIZE_IMG,
+                            SBE_HBBL_ID_NOT_FOUND,
+                            i_SourceBfrLen,
+                            0,
+                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+    }
     return l_errl;
 }
 

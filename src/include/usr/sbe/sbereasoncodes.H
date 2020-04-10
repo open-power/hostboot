@@ -107,6 +107,7 @@ enum sbeReasonCode
     SBE_UPDATE_DURING_MPIPL             = SBE_COMP_ID | 0x1B,
     SBE_BOOT_SIDE_DIRTY_BAD_PATH        = SBE_COMP_ID | 0x1C,
     SBE_UNSUPPORTED_EC                  = SBE_COMP_ID | 0x1D,
+    SBE_HBBL_ID_NOT_FOUND               = SBE_COMP_ID | 0x1E,
 };
 
 };  // end SBE
