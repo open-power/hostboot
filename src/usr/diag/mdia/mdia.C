@@ -55,29 +55,7 @@ errlHndl_t runStep(const TargetHandleList & i_targetList)
 
     errlHndl_t err = nullptr;
 
-    Globals globals;
-
-    TargetHandle_t top = nullptr;
-    targetService().getTopLevelTarget(top);
-
-    if(top)
-    {
-        globals.mfgPolicy = top->getAttr<ATTR_MNFG_FLAGS>();
-
-        uint8_t maxMemPatterns =
-            top->getAttr<ATTR_RUN_MAX_MEM_PATTERNS>();
-
-
-        // This registry / attr is the same as the
-        // exhaustive mnfg one
-        if(maxMemPatterns)
-        {
-            globals.mfgPolicy |=
-              MNFG_FLAG_ENABLE_EXHAUSTIVE_PATTERN_TEST;
-        }
-
-        globals.simicsRunning = Util::isSimicsRunning();
-    }
+    Globals globals {}; // Constructor initializes from targeting attributes.
 
     // get the workflow for each target mba passed in.
     // associate each workflow with the target handle.

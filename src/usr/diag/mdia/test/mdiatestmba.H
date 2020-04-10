@@ -42,53 +42,6 @@ class MdiaMbaTest : public CxxTest::TestSuite
 {
     public:
 
-        void testGetDiagnosticMode(void)
-        {
-            using namespace MDIA;
-            using namespace TARGETING;
-
-            TS_TRACE(ENTER_MRK "testGetDiagnosticMode");
-
-            TargetHandleList list;
-            fapi2::TargetType type = getMdiaTargetType();
-            if ( fapi2::TARGET_TYPE_MBA_CHIPLET == type )
-            {
-                TARGETING::getAllChiplets( list, TYPE_MBA );
-            }
-            else if ( fapi2::TARGET_TYPE_MCBIST == type )
-            {
-                TARGETING::getAllChiplets( list, TYPE_MCBIST );
-            }
-            else if ( fapi2::TARGET_TYPE_OCMB_CHIP == type )
-            {
-                TARGETING::getAllChips( list, TYPE_OCMB_CHIP );
-            }
-
-            if( !mbaList.empty() )
-            {
-                DiagMode mode;
-                Globals globals;
-                globals.simicsRunning = true;
-                TargetHandle_t trgt = list[0];
-
-                errlHndl_t err = getDiagnosticMode(
-                                        globals, mba, mode);
-
-                if(err)
-                {
-                    TS_FAIL("getDiagnosticMode failed "
-                            "unexpectedly");
-                }
-
-                if(mode != ONE_PATTERN)
-                {
-                    TS_FAIL("mode != ONE_PATTERN");
-                }
-            }
-
-            TS_TRACE(EXIT_MRK "testGetDiagnosticMode");
-        }
-
         void testGetWorkFlow(void)
         {
             using namespace MDIA;
@@ -96,34 +49,22 @@ class MdiaMbaTest : public CxxTest::TestSuite
 
             TS_TRACE(ENTER_MRK "testGetWorkFlow");
 
-            Globals globals;
-            globals.simicsRunning = true;
-            TargetHandle_t trgt = 0;
+            Globals globals {};
+            TargetHandle_t trgt = nullptr;
             DiagMode mode;
-            errlHndl_t err = NULL;
-            TargetHandleList mbaList;
-            getAllChiplets(mbaList, TYPE_MBA);
+            errlHndl_t err = nullptr;
 
             TargetHandleList list;
             fapi2::TargetType type = getMdiaTargetType();
-            if ( fapi2::TARGET_TYPE_MBA_CHIPLET == type )
-            {
-                TARGETING::getAllChiplets( list, TYPE_MBA );
-            }
-            else if ( fapi2::TARGET_TYPE_MCBIST == type )
-            {
-                TARGETING::getAllChiplets( list, TYPE_MCBIST );
-            }
-            else if ( fapi2::TARGET_TYPE_OCMB_CHIP == type )
+            if ( fapi2::TARGET_TYPE_OCMB_CHIP == type )
             {
                 TARGETING::getAllChips( list, TYPE_OCMB_CHIP );
             }
 
             if( !list.empty() )
             {
-                mba = mbaList[0];
-                err = getDiagnosticMode(
-                                globals, mba, mode);
+                trgt = list[0];
+                err = getDiagnosticMode(globals, trgt, mode);
 
                 if(err)
                 {
@@ -131,6 +72,7 @@ class MdiaMbaTest : public CxxTest::TestSuite
                             "failed unexpectedly");
                 }
 
+                // Default should be one pattern test.
                 if(mode != ONE_PATTERN)
                 {
                     TS_FAIL("mode != ONE_PATTERN");

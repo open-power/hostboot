@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -37,32 +39,69 @@ namespace MDIA
 /**
  * @brief memory diagnostics step global variables
  */
-struct Globals
+class Globals
 {
-    /**
-     * @brief policy flags
-     */
-    uint64_t mfgPolicy;
+  private:
 
-    /**
-     * @brief user interface policy
-     */
-    uint64_t userPolicy;
+    /** The number of diagnostic patterns to run. */
+    DiagMode iv_diagMode = ONE_PATTERN;
 
-    /**
-     * @brief flag to indicate running in simics env
-     */
-    bool simicsRunning;
+    /** True, if special pattern testing is explicitly enabled. */
+    bool iv_specialPatternTesting = true; // will be cleared in constructor
 
-    /**
-     * @brief flag to disable scrubs after pattern test
-     */
-    bool disableScrubs;
+    /** True, if MNFG IPL CE checking is enabled. */
+    bool iv_mnfgIplCeChecking = false;
 
+  public:
 
-    Globals(): mfgPolicy(0), userPolicy(0),
-       simicsRunning(false), disableScrubs(false) {}
+    /** @brief Default constructor. */
+    Globals()
+    {
+        TARGETING::TargetHandle_t sysTrgt = nullptr;
+        TARGETING::targetService().getTopLevelTarget(sysTrgt);
+        assert( nullptr != sysTrgt );
 
+        uint64_t mfg = sysTrgt->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
+
+        // Set the diagnostics pattern mode.
+        if ( sysTrgt->getAttr<TARGETING::ATTR_RUN_MAX_MEM_PATTERNS>() )
+        {
+            iv_diagMode = NINE_PATTERNS;
+        }
+        else if ( mfg & TARGETING::MNFG_FLAG_ENABLE_EXHAUSTIVE_PATTERN_TEST )
+        {
+            iv_diagMode = NINE_PATTERNS;
+        }
+        else if ( mfg & TARGETING::MNFG_FLAG_ENABLE_STANDARD_PATTERN_TEST )
+        {
+            iv_diagMode = FOUR_PATTERNS;
+        }
+        else if ( mfg & TARGETING::MNFG_FLAG_ENABLE_MINIMUM_PATTERN_TEST )
+        {
+            iv_diagMode = ONE_PATTERN;
+        }
+        else
+        {
+            iv_specialPatternTesting = false; // Normal pattern testing
+        }
+
+        // Check if MNFG IPL CE checking is enabled.
+        if ( mfg & TARGETING::MNFG_FLAG_IPL_MEMORY_CE_CHECKING )
+        {
+            iv_mnfgIplCeChecking = true;
+        }
+    }
+
+    /** @return The default diagnostics mode. */
+    DiagMode getDiagMode() const { return iv_diagMode; }
+
+    /** @return True, if MNFG IPL pattern testing is enabled. */
+    bool querySpecialPatternTesting() const { return iv_specialPatternTesting; }
+
+    /** @return True, if MNFG IPL CE checking is enabled. */
+    bool queryMnfgIplCeChecking() const { return iv_mnfgIplCeChecking; }
 };
-}
+
+} // namespace MDIA
+
 #endif

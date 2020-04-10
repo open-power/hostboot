@@ -38,60 +38,23 @@ using namespace TARGETING;
 namespace MDIA
 {
 
-errlHndl_t getDiagnosticMode(
-        const Globals & i_globals,
-        TargetHandle_t i_trgt,
-        DiagMode & o_mode)
+errlHndl_t getDiagnosticMode( const Globals & i_globals, TargetHandle_t i_trgt,
+                              DiagMode & o_mode )
 {
-    o_mode = ONE_PATTERN;
+    o_mode = i_globals.getDiagMode();
 
-    do
+    // Check the HW changed state of this target to determine if more testing
+    // is required.
+    if ( (ONE_PATTERN == o_mode) && isHWStateChanged(i_trgt) )
     {
+        // Run standard pattern testing.
+        o_mode = FOUR_PATTERNS;
+    }
 
-        if(MNFG_FLAG_ENABLE_EXHAUSTIVE_PATTERN_TEST
-           & i_globals.mfgPolicy)
-        {
-            o_mode = NINE_PATTERNS;
-        }
+    MDIA_FAST( "getDiagnosticMode i_trgt:0x%08x o_mode:0x%x",
+               get_huid(i_trgt), o_mode );
 
-        else if(MNFG_FLAG_ENABLE_STANDARD_PATTERN_TEST
-                & i_globals.mfgPolicy)
-        {
-            o_mode = FOUR_PATTERNS;
-        }
-
-        else if(MNFG_FLAG_ENABLE_MINIMUM_PATTERN_TEST
-                & i_globals.mfgPolicy)
-        {
-            o_mode = ONE_PATTERN;
-        }
-
-        else if(i_globals.simicsRunning)
-        {
-            o_mode = ONE_PATTERN;
-        }
-
-        // Only need to check hw changed state attributes
-        // when not already set to exhaustive and not in simics
-        if( ( NINE_PATTERNS != o_mode ) &&
-            ( FOUR_PATTERNS != o_mode ) &&
-            ( ! i_globals.simicsRunning ) )
-        {
-            if(isHWStateChanged(i_trgt))
-            {
-                // To reduce IPL times without broadcast mode, we will just run
-                // 4 patterns instead of 9.
-                o_mode = FOUR_PATTERNS;
-            }
-        }
-
-    } while(0);
-
-    MDIA_FAST("getDiagnosticMode: trgt: %x, o_mode: 0x%x, "
-              "simics: %d",
-              get_huid(i_trgt), o_mode, i_globals.simicsRunning);
-
-    return 0;
+    return nullptr;
 }
 
 errlHndl_t getWorkFlow(
@@ -145,8 +108,7 @@ errlHndl_t getWorkFlow(
             break;
     }
 
-    if(MNFG_FLAG_IPL_MEMORY_CE_CHECKING
-            & i_globals.mfgPolicy)
+    if ( i_globals.queryMnfgIplCeChecking() )
     {
         o_wf.push_back(ANALYZE_IPL_MNFG_CE_STATS);
     }

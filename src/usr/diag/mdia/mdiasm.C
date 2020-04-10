@@ -819,8 +819,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                 //stopCond.set_nce_inter_symbol_count_enable(mss::ON);
                 //stopCond.set_nce_soft_symbol_count_enable( mss::ON);
                 //stopCond.set_nce_hard_symbol_count_enable( mss::ON);
-                //if ( TARGETING::MNFG_FLAG_IPL_MEMORY_CE_CHECKING
-                //        & iv_globals.mfgPolicy )
+                //if ( iv_globals.queryMnfgIplCeChecking() )
                 //{
                 //    stopCond.set_pause_on_nce_hard(mss::ON);
                 //}
@@ -947,21 +946,16 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 
         MaintCommandEventType eventType = i_event.type;
 
-        // If shutdown is requested and we're not in MNFG mode
-        // skip testing on all MBAs
-        if(( INITSERVICE::isShutdownRequested() ) &&
-           ( COMMAND_COMPLETE == eventType ) &&
-           ! (( MNFG_FLAG_ENABLE_EXHAUSTIVE_PATTERN_TEST
-                & iv_globals.mfgPolicy) ||
-              ( MNFG_FLAG_ENABLE_STANDARD_PATTERN_TEST
-                & iv_globals.mfgPolicy) ||
-              ( MNFG_FLAG_ENABLE_MINIMUM_PATTERN_TEST
-                & iv_globals.mfgPolicy)))
+        // If shutdown is requested and we're not doing explicitly specified
+        // pattern testing, skip testing on all targets.
+        if ( INITSERVICE::isShutdownRequested() &&
+             (COMMAND_COMPLETE == eventType) &&
+             !iv_globals.querySpecialPatternTesting() )
         {
             MDIA_FAST("sm: shutdown requested, overrding event "
-                      "for: %x, target: %p, type: %x, globals: %x",
-                get_huid(getTarget(wfp)), target,
-                i_event.type, iv_globals.mfgPolicy);
+                      "for: 0x%08x, target: %p, type: 0x%x, policy: %d",
+                      get_huid(getTarget(wfp)), target, i_event.type,
+                      iv_globals.querySpecialPatternTesting());
 
             eventType = STOP_TESTING;
         }
