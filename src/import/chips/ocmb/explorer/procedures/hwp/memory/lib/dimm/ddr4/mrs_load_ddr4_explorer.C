@@ -92,7 +92,7 @@ fapi2::ReturnCode is_a17_needed<mss::mc_type::EXPLORER>(const fapi2::Target<fapi
         bool l_temp = false;
         FAPI_TRY( is_a17_needed<mss::mc_type::EXPLORER>( l_dimm, l_temp), "%s Failed to get a17 boolean", mss::c_str(l_dimm) );
 
-        o_is_needed = o_is_needed | l_temp;
+        o_is_needed = o_is_needed || l_temp;
     }
 
     // Returning success here for safety - if we don't have DIMM's we want to return successfully
@@ -101,4 +101,50 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+namespace ddr4
+{
+
+///
+/// @brief Checks if the RTT_NOM override should be run - explorer specialization
+/// @param[in] i_target the target on which to operate
+/// @param[out] o_run_override true if the override should be run
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template<>
+fapi2::ReturnCode is_rtt_nom_override_needed<mss::mc_type::EXPLORER>(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+    bool& o_run_override)
+{
+    // Always run for explorer as we're just using this for PDA and not for any initialization
+    o_run_override = true;
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Attribute getter helper for RTT_NOM - explorer specialization
+/// @param[in] i_target the target on which to operate
+/// @param[out] o_array the array with the attr values
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template<>
+fapi2::ReturnCode rtt_nom_attr_helper<mss::mc_type::EXPLORER>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        uint8_t (&o_array)[MAX_RANK_PER_DIMM])
+{
+    return mss::attr::get_exp_resp_dram_rtt_nom(i_target, o_array);
+}
+
+///
+/// @brief Attribute getter helper for RTT_WR - explorer specialization
+/// @param[in] i_target the target on which to operate
+/// @param[out] o_array the array with the attr values
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template<>
+fapi2::ReturnCode rtt_wr_attr_helper<mss::mc_type::EXPLORER>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        uint8_t (&o_array)[MAX_RANK_PER_DIMM])
+{
+    return mss::attr::get_exp_resp_dram_rtt_wr(i_target, o_array);
+}
+
+} // ns ddr4
 } // ns mss

@@ -281,176 +281,52 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Maps RTT_WR setting to equivalent RTT_NOM setting
-/// Specialization for TARGET_TYPE_DIMM
-/// @param[in] i_target a DIMM target
-/// @param[in] i_rtt_wr an RTT_WR setting
-/// @param[out] o_rtt_nom equivalent RTT_NOM setting
+/// @brief Checks if the RTT_NOM override should be run - nimbus specialization
+/// @param[in] i_target the target on which to operate
+/// @param[out] o_run_override true if the override should be run
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template<>
-fapi2::ReturnCode rtt_wr_to_rtt_nom_helper(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        const uint8_t i_rtt_wr,
-        uint8_t& o_rtt_nom)
+fapi2::ReturnCode is_rtt_nom_override_needed<mss::mc_type::NIMBUS>(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+    bool& o_run_override)
 {
-    switch(i_rtt_wr)
-    {
-        case RTT_WR_DYNAMIC_ODT_OFF:
-        case RTT_WR_HIZ:
-            o_rtt_nom = RTT_NOM_DISABLE;
-            break;
+    o_run_override = true;
 
-        case RTT_WR_RZQ_OVER_3:
-            o_rtt_nom = RTT_NOM_RZQ_OVER_3;
-            break;
-
-        case RTT_WR_RZQ_OVER_2:
-            o_rtt_nom = RTT_NOM_RZQ_OVER_2;
-            break;
-
-        case RTT_WR_RZQ_OVER_1:
-            o_rtt_nom = RTT_NOM_RZQ_OVER_1;
-            break;
-
-        default:
-            FAPI_ASSERT( false,
-                         fapi2::MSS_INVALID_RTT_WR_ENCODING().
-                         set_RTT_WR(i_rtt_wr).
-                         set_DIMM_TARGET(i_target),
-                         "Received invalid RTT_WR value: 0x%02x for %s.",
-                         i_rtt_wr, mss::c_str(i_target) );
-            break;
-    }
-
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Executes CCS instructions to set RTT_WR value into RTT_NOM
-/// Specialization for TARGET_TYPE_DIMM
-/// @param[in] i_target a DIMM target
-/// @param[in] i_rank selected rank
-/// @param[in,out] io_inst a vector of CCS instructions we should add to
-/// @return FAPI2_RC_SUCCESS if and only if ok
-///
-template<>
-fapi2::ReturnCode rtt_nom_override(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                   const uint64_t i_rank,
-                                   std::vector< ccs::instruction_t >& io_inst)
-{
     uint8_t l_rtt_nom_override_disable = 0;
-    uint8_t l_rtt_wr_value[MAX_RANK_PER_DIMM] = {0};
-    uint8_t l_rtt_nom_value[MAX_RANK_PER_DIMM] = {0};
-
-    // eff_dram* attributes use a per-DIMM rank index, so get that
-    const auto l_rank_idx = mss::index(i_rank);
-
     FAPI_TRY( mss::rtt_nom_override_disable(i_target, l_rtt_nom_override_disable) );
 
-    if ( fapi2::ENUM_ATTR_MSS_RTT_NOM_OVERRIDE_DISABLE_YES == l_rtt_nom_override_disable )
-    {
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
-
-    // Map RTT_WR settings to RTT_NOM
-    FAPI_TRY( mss::eff_dram_rtt_wr(i_target, &(l_rtt_wr_value[0])) );
-    FAPI_TRY( rtt_wr_to_rtt_nom_helper(i_target, l_rtt_wr_value[l_rank_idx], l_rtt_nom_value[l_rank_idx]) );
-
-    // Write the override values to RTT_NOM
-    FAPI_DBG("Overriding RTT_NOM value to 0x%01x to match original RTT_WR value 0x%01x on rank %d",
-             l_rtt_nom_value[l_rank_idx], l_rtt_wr_value[l_rank_idx], i_rank);
-    FAPI_TRY( rtt_nom_load(i_target, l_rtt_nom_value, i_rank, io_inst) );
+    // Run the override if the attribute is not disabled
+    o_run_override = fapi2::ENUM_ATTR_MSS_RTT_NOM_OVERRIDE_DISABLE_YES != l_rtt_nom_override_disable;
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
 ///
-/// @brief Executes CCS instructions to disable RTT_WR
-/// Specialization for TARGET_TYPE_DIMM
-/// @param[in] i_target a DIMM target
-/// @param[in] i_rank selected rank
-/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @brief Attribute getter helper for RTT_NOM - nimbus specialization
+/// @param[in] i_target the target on which to operate
+/// @param[out] o_array the array with the attr values
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template<>
-fapi2::ReturnCode rtt_wr_disable(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                 const uint64_t i_rank,
-                                 std::vector< ccs::instruction_t >& io_inst)
+fapi2::ReturnCode rtt_nom_attr_helper<mss::mc_type::NIMBUS>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        uint8_t (&o_array)[MAX_RANK_PER_DIMM])
 {
-    uint8_t l_rtt_wr_value[MAX_RANK_PER_DIMM] = {0};
-
-    // eff_dram* attributes use a per-DIMM rank index, so get that
-    const auto l_rank_idx = mss::index(i_rank);
-
-    // Write RTT_WR setting for the given rank to RTT_WR_DYNAMIC_ODT_OFF
-    FAPI_TRY( mss::eff_dram_rtt_wr(i_target, &(l_rtt_wr_value[0])) );
-    l_rtt_wr_value[l_rank_idx] = RTT_WR_DYNAMIC_ODT_OFF;
-
-    FAPI_TRY( rtt_wr_load(i_target, l_rtt_wr_value, i_rank, io_inst) );
-
-fapi_try_exit:
-    return fapi2::current_err;
+    return mss::eff_dram_rtt_nom(i_target, &(o_array[0]));
 }
 
 ///
-/// @brief Executes CCS instructions to restore original value of RTT_NOM
-/// Specialization for TARGET_TYPE_DIMM
-/// @param[in] i_target a DIMM target
-/// @param[in] i_rank selected rank
-/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @brief Attribute getter helper for RTT_WR - nimbus specialization
+/// @param[in] i_target the target on which to operate
+/// @param[out] o_array the array with the attr values
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template<>
-fapi2::ReturnCode rtt_nom_restore(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                  const uint64_t i_rank,
-                                  std::vector< ccs::instruction_t >& io_inst)
+fapi2::ReturnCode rtt_wr_attr_helper<mss::mc_type::NIMBUS>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        uint8_t (&o_array)[MAX_RANK_PER_DIMM])
 {
-    uint8_t l_rtt_nom_override_disable = 0;
-    uint8_t l_rtt_nom_value[MAX_RANK_PER_DIMM] = {0};
-
-    FAPI_TRY( mss::rtt_nom_override_disable(i_target, l_rtt_nom_override_disable) );
-
-    if ( fapi2::ENUM_ATTR_MSS_RTT_NOM_OVERRIDE_DISABLE_YES == l_rtt_nom_override_disable )
-    {
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
-
-    // Get original RTT_NOM value
-    FAPI_TRY( mss::eff_dram_rtt_nom(i_target, &(l_rtt_nom_value[0])) );
-
-    // Write the value to RTT_NOM
-    FAPI_TRY( rtt_nom_load(i_target, l_rtt_nom_value, i_rank, io_inst) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Executes CCS instructions to restore original value of RTT_WR
-/// Specialization for TARGET_TYPE_DIMM
-/// @param[in] i_target a DIMM target
-/// @param[in] i_rank selected rank
-/// @param[in,out] io_inst a vector of CCS instructions we should add to
-/// @return FAPI2_RC_SUCCESS if and only if ok
-///
-template<>
-fapi2::ReturnCode rtt_wr_restore(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                 const uint64_t i_rank,
-                                 std::vector< ccs::instruction_t >& io_inst)
-{
-    // Get original RTT_WR value
-    uint8_t l_rtt_wr_value[MAX_RANK_PER_DIMM] = {0};
-    FAPI_TRY( mss::eff_dram_rtt_wr(i_target, &(l_rtt_wr_value[0])) );
-
-    // Write the value to RTT_WR
-    FAPI_TRY( rtt_wr_load(i_target, l_rtt_wr_value, i_rank, io_inst) );
-
-fapi_try_exit:
-    return fapi2::current_err;
+    return mss::eff_dram_rtt_wr(i_target, &(o_array[0]));
 }
 
 } // ns ddr4

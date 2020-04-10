@@ -39,6 +39,7 @@
 #include <fapi2.H>
 #include <lib/workarounds/exp_ccs_2666_write_workarounds.H>
 #include <mss_generic_attribute_getters.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <generic/memory/lib/dimm/ddr4/mrs_load_ddr4.H>
 #include <lib/dimm/exp_rank.H>
@@ -60,7 +61,7 @@ namespace workarounds
 fapi2::ReturnCode is_ccs_2666_write_needed(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         bool& o_is_needed)
 {
-    constexpr uint64_t FREQ_NEEDS_WORKAROUND = 2666;
+    constexpr uint64_t FREQ_NEEDS_WORKAROUND = mss::DIMM_SPEED_2666;
     constexpr bool NO_RCD = false;
 
     uint64_t l_freq = 0;

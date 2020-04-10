@@ -231,6 +231,19 @@
     </callout>
   </hwpError>
 
+   <hwpError>
+    <rc>RC_MSS_INVALID_RTT_WR_ENCODING</rc>
+    <description>
+      An invalid/unsupported RTT_WR encoding was received
+    </description>
+    <ffdc>RTT_WR</ffdc>
+    <ffdc>TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+   </hwpError>
+
   <hwpError>
     <rc>RC_MSS_FREQ_NO_COMMON_SUPPORTED_CL</rc>
     <description>
