@@ -43,11 +43,22 @@
 #include <p10_scom_pec_2.H>
 #include <p10_scom_pec_4.H>
 #include <p10_scom_pec_6.H>
+#include <p10_scom_pec_7.H>
 #include <p10_scom_pec_8.H>
 #include <p10_scom_pec_e.H>
 #include <p10_scom_pec_f.H>
 #include <p10_scom_phb_e.H>
 #include <p10_fbc_utils.H>
+#include <p10_iop_xram_utils.H>
+
+
+//-----------------------------------------------------------------------------------
+// Constant definitions
+//-----------------------------------------------------------------------------------
+const uint8_t TC_PCI_IOVALID_DC_START = 8;
+const uint8_t TC_PCI_SWAP_DC_START = 2;
+const uint8_t NUM_STACK_CONFIG = 3;
+const uint64_t PIPEDOUTCTL2_OFFSET = 22;
 
 ///-----------------------------------------------------------------------------
 /// Function definitions
@@ -69,6 +80,10 @@ p10_pcie_scominit(
     auto l_pec_targets = i_target.getChildren<fapi2::TARGET_TYPE_PEC>();
     auto l_phb_targets = i_target.getChildren<fapi2::TARGET_TYPE_PHB>();
 
+    uint8_t l_attr_proc_pcie_phb_active[NUM_STACK_CONFIG] = {0};
+    uint8_t l_attr_proc_pcie_lane_reversal[NUM_STACK_CONFIG] = {0};
+    uint64_t l_xramBaseReg = 0;
+
     //Perform the PCIe Phase 1 Inits 1-8
     //Sets the lane config based on MRW attributes
     //Sets the swap bits based on MRW attributes
@@ -77,32 +92,70 @@ p10_pcie_scominit(
     //Set the IOP program complete bit
     //This is where the dSMP versus PCIE is selected in the PHY Link Layer
 
-    //Set io valids
+    //Set io for (auto l_pec_target : l_pec_targets)
     for (auto l_pec_target : l_pec_targets)
     {
+
+        // Grab PEC level attributes to configure LANE_CFG, IOVALIDs, and SWAP fields.
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PHB_ACTIVE, l_pec_target, l_attr_proc_pcie_phb_active),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_PCIE_PHB_ACTIVE");
+        FAPI_DBG("l_attr_proc_pcie_phb_active 0x%.0x", l_attr_proc_pcie_phb_active);
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_LANE_REVERSAL, l_pec_target, l_attr_proc_pcie_lane_reversal),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_PCIE_LANE_REVERSAL");
+        FAPI_DBG("l_attr_proc_pcie_lane_reversal 0x%.0x", l_attr_proc_pcie_lane_reversal);
+
+        // Loop through all PEC Stack configs and determine which IOVALIDs and SWAP should be active.
         l_data = 0;
         FAPI_TRY(PREP_CPLT_CONF1_WO_OR(l_pec_target));
-        SET_CPLT_CONF1_IOVALID_DC(0x7ull, l_data);
+
+        for (auto l_cur_stk = 0; l_cur_stk < NUM_STACK_CONFIG; l_cur_stk++)
+        {
+            // This sets the LANE_CFG and IOVALIDs.
+            if (l_attr_proc_pcie_phb_active[l_cur_stk] == fapi2::ENUM_ATTR_PROC_PCIE_PHB_ACTIVE_ENABLE)
+            {
+                SET_CPLT_CONF1_LANE_CFG_DC(l_cur_stk, l_data);
+                l_data.setBit(l_cur_stk + TC_PCI_IOVALID_DC_START);
+
+                // This sets the LANE_SWAP.
+                if (l_attr_proc_pcie_lane_reversal[l_cur_stk] == fapi2::ENUM_ATTR_PROC_PCIE_LANE_REVERSAL_ENABLE)
+                {
+                    l_data.setBit(l_cur_stk + TC_PCI_SWAP_DC_START);
+                }
+            }
+        }
+
         FAPI_TRY(PUT_CPLT_CONF1_WO_OR(l_pec_target, l_data));
+
+        //Initialize PCI CPLT_CNTL5
+        l_data = 0;
+        FAPI_TRY(PREP_CPLT_CTRL5_WO_OR(l_pec_target));
+        SET_CPLT_CTRL5_TC_CCFG_PIPE_LANEX_EXT_PLL_MODE_DC(l_data);
+        SET_CPLT_CTRL5_TC_CCFG_PHYX_CR_PARA_SEL_DC(l_data);
+        FAPI_TRY(PUT_CPLT_CTRL5_WO_OR(l_pec_target, l_data));
+
+        //Initialize PCIIOPP.TOP[0,1].PIPEDOUTCTL2 for HW525901
+        for (uint8_t l_top = 0; l_top < NUM_OF_IO_TOPS; l_top++)
+        {
+            l_data = 0;
+            l_xramBaseReg = getXramBaseReg(static_cast<xramIopTopNum_t>(l_top));
+            FAPI_TRY(fapi2::getScom(l_pec_target, l_xramBaseReg + PIPEDOUTCTL2_OFFSET, l_data), "Error from getScom 0x%.16llX",
+                     l_xramBaseReg + PIPEDOUTCTL2_OFFSET);
+            l_data.setBit<PIPEDOUTCTL2_RATIO_ALIGN_DISABLE>();
+            FAPI_TRY(fapi2::putScom(l_pec_target, l_xramBaseReg + PIPEDOUTCTL2_OFFSET, l_data), "Error from putScom 0x%.16llX",
+                     l_xramBaseReg + PIPEDOUTCTL2_OFFSET);
+        }
     }
 
-    //Reset PHBs
+    // Reset PHBs
+    // P9, we had the phb power up in reset and thus there is the instruction to take it out of reset.
+    // In P10, I move that register to a new grouping of latches and forgot to set the init value to '1'.
     for (auto l_phb_target : l_phb_targets)
     {
         l_data = 0;
         FAPI_TRY(PREP_REGS_PHBRESET_REG(l_phb_target));
         SET_REGS_PHBRESET_REG_PE_ETU_RESET(l_data);
         FAPI_TRY(PUT_REGS_PHBRESET_REG(l_phb_target, l_data));
-
-    }
-
-    for (auto l_pec_target : l_pec_targets)
-    {
-        l_data = 0;
-        FAPI_TRY(PREP_CPLT_CTRL5_WO_OR(l_pec_target));
-        SET_CPLT_CTRL5_TC_CCFG_PIPE_LANEX_EXT_PLL_MODE_DC(l_data);
-        SET_CPLT_CTRL5_TC_CCFG_PHYX_CR_PARA_SEL_DC(l_data);
-        FAPI_TRY(PUT_CPLT_CTRL5_WO_OR(l_pec_target, l_data));
     }
 
     //Run initfile

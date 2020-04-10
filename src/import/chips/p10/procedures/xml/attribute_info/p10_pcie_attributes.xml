@@ -26,124 +26,75 @@
 <attributes>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_PROC_PCIE_IOP_CONFIG</id>
+    <id>ATTR_PROC_PCIE_PHB_ACTIVE</id>
     <targetType>TARGET_TYPE_PEC</targetType>
     <description>
-      PCIE IOP lane configuration
+      This attribute controls the latches required to configure the PEC as a x16, x8x8, or x8x4x4 based on what PHBs are active defined from the MRW.
       creator: platform
       consumer: p10_pcie_scominit
       firmware notes:
         These are config dependent attributes based on PCIe Lane/sideband signal routing and PCIe endpoints attached.
 
-	ATTR_PROC_PCIE_IOP_CONFIG = 0x00 = No Furcation	
-	ATTR_PROC_PCIE_IOP_SWAP   = 0x00 = PHB0 (00:15); PHB1 X; PHB2 X
-				    0x04 = PHB0 (15:00); PHB1 X; PHB2 X
+       Attribute Name                Definition                Example      Comments       Targeted Register Latches
+       ATTR_PROC_PCIE_PHB_ACTIVE     (Stack0, Stack1, Stack2)  (1, 0, 0)    PHB0 enabled   TC_PCI_LANE_CFG_DC_0H, TC_PCI_LANE_CFG_DC_1H
+                                                                            PHB1 disabled
+                                                                            PHB2 disabled
 
-	ATTR_PROC_PCIE_IOP_CONFIG = 0x01 = Bi Furcation
-	ATTR_PROC_PCIE_IOP_SWAP   = 0x00 = PHB0 (00:07); PHB1 (00:07); PHB2 X
-				    0x01 = PHB0 (00:07); PHB1 (07:00); PHB2 X
-				    0x02 = PHB0 (07:00); PHB1 (00:07); PHB2 X
-				    0x03 = PHB0 (07:00); PHB1 (07:00); PHB2 X
+       Register Latch Definition:
+       PCI0 / PCI1                                
+       Register Address      Register Name             Bit    Signal Name                Bit Description
+       8000009 / 9000009     TPPCI.PCI.CPLT_CONF1      0      TC_PCI_LANE_CFG_DC_0H      MSB for  LANE CFG  in the logic that configures x16, x8x8, x8x4x4
+                                                       1      TC_PCI_LANE_CFG_DC_1H      LSB for LANE CFG  in the logic that configures x16, x8x8, x8x4x4
 
-	ATTR_PROC_PCIE_IOP_CONFIG = 0x10 = Tri Furcation
-	ATTR_PROC_PCIE_IOP_SWAP   = 0x00 = PHB0 (00:07); PHB1 (00:03); PHB2 (00:03)
-				    0x01 = PHB0 (00:07); PHB1 (00:03); PHB2 (03:00)
-				    0x02 = PHB0 (00:07); PHB1 (03:00); PHB2 (00:03)
-				    0x03 = PHB0 (00:07); PHB1 (03:00); PHB2 (03:00)
-				    0x04 = PHB0 (07:00); PHB1 (00:03); PHB2 (00:00)
-				    0x05 = PHB0 (07:00); PHB1 (00:03); PHB2 (03:00)
-				    0x06 = PHB0 (07:00); PHB1 (03:00); PHB2 (00:03)
-				    0x07 = PHB0 (07:00); PHB1 (03:00); PHB2 (03:00)
+                                                       2      TC_PCI_SWAP_DC_2H          LANE SWAP control for Stack0
+                                                       3      TC_PCI_SWAP_DC_3H          LANE SWAP control for Stack0
+                                                       4      TC_PCI_SWAP_DC_4H          LANE SWAP control for Stack0
+
+                                                       8      TC_PCI_IOVALID_DC_8H       IOVALID control for Stack0
+                                                       9      TC_PCI_IOVALID_DC_9H       IOVALID control for Stack1
+                                                       10     TC_PCI_IOVALID_DC_10H      IOVALID control for Stack2
 
     </description>
     <valueType>uint8</valueType>
-    <enum>NO_FURCATION = 0x00, BI_FURCATION = 0x01, TRI_FURCATION = 0x10</enum>
+    <enum>DISABLE = 0x00, ENABLE = 0x01</enum>
+    <array>3</array>
+    <default>ENABLE,DISABLE,DISABLE</default>
     <platInit/>
     <persistRuntime/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_PROC_PCIE_IOP_SWAP</id>
+    <id>ATTR_PROC_PCIE_LANE_REVERSAL</id>
     <targetType>TARGET_TYPE_PEC</targetType>
     <description>
-      PCIE IOP swap configuration
+      This attribute controls the latches required to configure the PHBs to swap its lanes if wiring to the connector/device is straight or reverse.
       creator: platform
       consumer: p10_pcie_scominit
       firmware notes:
         These are config dependent attributes based on PCIe Lane/sideband signal routing and PCIe endpoints attached.
 
-        ATTR_PROC_PCIE_IOP_CONFIG = 0x00 = No Furcation
-        ATTR_PROC_PCIE_IOP_SWAP   = 0x00 = PHB0 (00:15); PHB1 X; PHB2 X
-                                    0x04 = PHB0 (15:00); PHB1 X; PHB2 X
+       Attribute Name                  Definition                 Example    Comments                        Targeted HWP Attributes
+       ATTR_PROC_PCIE_LANE_REVERSAL    (Stack0, Stack1, Stack2)   (1, 0, 0)  Reverse lanes on PHB0.          TC_PCI_LANE_CFG_DC_2H
+                                                                             Do not reverse lanes on PHB1.   TC_PCI_LANE_CFG_DC_3H
+                                                                             Do not reverse lanes on PHB2.   TC_PCI_LANE_CFG_DC_4H
 
-        ATTR_PROC_PCIE_IOP_CONFIG = 0x01 = Bi Furcation
-        ATTR_PROC_PCIE_IOP_SWAP   = 0x00 = PHB0 (00:07); PHB1 (00:07); PHB2 X
-                                    0x01 = PHB0 (00:07); PHB1 (07:00); PHB2 X
-                                    0x02 = PHB0 (07:00); PHB1 (00:07); PHB2 X
-                                    0x03 = PHB0 (07:00); PHB1 (07:00); PHB2 X
+       Register Address      Register Name             Bit    Signal Name                Bit Description
+       8000009 / 9000009     TPPCI.PCI.CPLT_CONF1      0      TC_PCI_LANE_CFG_DC_0H      MSB for  LANE CFG  in the logic that configures x16, x8x8, x8x4x4
+                                                       1      TC_PCI_LANE_CFG_DC_1H      LSB for LANE CFG  in the logic that configures x16, x8x8, x8x4x4
 
-        ATTR_PROC_PCIE_IOP_CONFIG = 0x10 = Tri Furcation
-        ATTR_PROC_PCIE_IOP_SWAP   = 0x00 = PHB0 (00:07); PHB1 (00:03); PHB2 (00:03)
-                                    0x01 = PHB0 (00:07); PHB1 (00:03); PHB2 (03:00)
-                                    0x02 = PHB0 (00:07); PHB1 (03:00); PHB2 (00:03)
-                                    0x03 = PHB0 (00:07); PHB1 (03:00); PHB2 (03:00)
-                                    0x04 = PHB0 (07:00); PHB1 (00:03); PHB2 (00:00)
-                                    0x05 = PHB0 (07:00); PHB1 (00:03); PHB2 (03:00)
-                                    0x06 = PHB0 (07:00); PHB1 (03:00); PHB2 (00:03)
-                                    0x07 = PHB0 (07:00); PHB1 (03:00); PHB2 (03:00)
+                                                       2      TC_PCI_SWAP_DC_2H          LANE SWAP control for Stack0
+                                                       3      TC_PCI_SWAP_DC_3H          LANE SWAP control for Stack0
+                                                       4      TC_PCI_SWAP_DC_4H          LANE SWAP control for Stack0
+
+                                                       8      TC_PCI_IOVALID_DC_8H       IOVALID control for Stack0
+                                                       9      TC_PCI_IOVALID_DC_9H       IOVALID control for Stack1
+                                                       10     TC_PCI_IOVALID_DC_10H      IOVALID control for Stack2
 
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
-    <persistRuntime/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_PROC_PCIE_IOVALID_ENABLE</id>
-    <targetType>TARGET_TYPE_PEC</targetType>
-    <description>
-      PCIE iovalid enable valid mask
-      creator: platform
-      consumer: p10_pcie_scominit
-      firmware notes:
-        These are config dependent attributes based on PCIe Lane/sideband signal routing and PCIe endpoints attached.
-
-        We now have finite control of REFCLK at a PHB level versus PEC level for P9.
-
-        REFCLK will flush to 0.
-        REFCLK is gated by IOVALID.
-        Default is for REFCLK to equal 0b1 when IOVALID is enabled.
-        REFCLK will be persistent (sticky) through a PHB reset similar to PERST# signal.
-
-        In the scenario where a server does not use a PHB, p10_pcie_scominit shouldn't enable IOVALID so REFCLK should be off.
-
-    </description>
-    <valueType>uint8</valueType>
-    <platInit/>
-    <persistRuntime/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_PROC_PCIE_REFCLOCK_ENABLE</id>
-    <targetType>TARGET_TYPE_PEC</targetType>
-    <description>
-      PCIE refclock enable valid mask
-      creator: platform
-      consumer: p10_pcie_scominit
-      firmware notes:
-        These are config dependent attributes based on PCIe Lane/sideband signal routing and PCIe endpoints attached.
-
-	We now have finite control of REFCLK at a PHB level versus PEC level for P9.
-
-        REFCLK will flush to 0.
-        REFCLK is gated by IOVALID.
-        Default is for REFCLK to equal 0b1 when IOVALID is enabled.
-        REFCLK will be persistent (sticky) through a PHB reset similar to PERST# signal.
-
-        In the scenario where a server does not use a PHB, p10_pcie_scominit shouldn't enable IOVALID so REFCLK should be off.
-
-    </description>
-    <valueType>uint8</valueType>
+    <enum>DISABLE = 0x00, ENABLE = 0x01</enum>
+    <array>3</array>
+    <default>DISABLE,DISABLE,DISABLE</default>
     <platInit/>
     <persistRuntime/>
   </attribute>

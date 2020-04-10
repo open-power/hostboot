@@ -44,6 +44,8 @@
 // Constant definitions
 //------------------------------------------------------------------------------
 
+const uint8_t NUM_STACK_CONFIG = 3;
+
 // PCI MMIO BAR Register contstants
 const uint8_t P10_PCIE_CONFIG_BAR_SHIFT = 8;
 
@@ -98,7 +100,7 @@ fapi2::ReturnCode p10_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
     uint64_t l_base_addr_nm1;
     uint64_t l_base_addr_m;
     uint64_t l_base_addr_mmio;
-    uint8_t  l_attr_proc_pcie_iop_config;
+    uint8_t  l_attr_proc_pcie_phb_active[NUM_STACK_CONFIG] = {0};
     uint8_t  l_pec_id = 0;
 
     auto l_pec_chiplets_vec = i_target.getChildren<fapi2::TARGET_TYPE_PEC>(fapi2::TARGET_STATE_FUNCTIONAL);
@@ -136,9 +138,9 @@ fapi2::ReturnCode p10_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
                  "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
 
         // Grab the IOVALID attribute to determine if PEC is bifurcated or not.
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_IOP_CONFIG, l_pec_chiplet,
-                               l_attr_proc_pcie_iop_config));
-        FAPI_DBG("l_attr_proc_pcie_iop_config: %#x", l_attr_proc_pcie_iop_config);
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PHB_ACTIVE, l_pec_chiplet, l_attr_proc_pcie_phb_active),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_PCIE_PHB_ACTIVE");
+        FAPI_DBG("l_attr_proc_pcie_phb_active 0x%.0x", l_attr_proc_pcie_phb_active);
 
 
         // Phase2 init step 1
@@ -150,7 +152,7 @@ fapi2::ReturnCode p10_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
         // Set bit 33 = 0b1 Enable Channel Tag streaming behavior
         // Set bits 34:35 = 0b11 Set P9 Style cache-inject behavior
         // Set bit 60 = 0b1 only if PEC is bifurcated or trifurcated.
-        FAPI_TRY(GET_PB_PBCQ_PEPBREGS_PBCQHWCFG_REG(l_pec_chiplet, l_scom_data),
+        FAPI_TRY(PREP_PB_PBCQ_PEPBREGS_PBCQHWCFG_REG(l_pec_chiplet),
                  "Error from GET_PB_PBCQ_PEPBREGS_PBCQHWCFG_REG");
 
         SET_PB_PBCQ_PEPBREGS_PBCQHWCFG_REG_HANG_POLL_SCALE(PBCQ_HWCFG_HANG_POLL_SCALE, l_scom_data);
@@ -160,7 +162,8 @@ fapi2::ReturnCode p10_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
         SET_PB_PBCQ_PEPBREGS_PBCQHWCFG_REG_PE_CHANNEL_STREAMING_EN(l_scom_data);
         SET_PB_PBCQ_PEPBREGS_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_MODE(PBCQ_HWCFG_CACHE_INJ_MODE, l_scom_data);
 
-        if (l_attr_proc_pcie_iop_config != fapi2::ENUM_ATTR_PROC_PCIE_IOP_CONFIG_NO_FURCATION)
+        if ((l_attr_proc_pcie_phb_active[1] == fapi2::ENUM_ATTR_PROC_PCIE_PHB_ACTIVE_ENABLE)
+            || (l_attr_proc_pcie_phb_active[2] == fapi2::ENUM_ATTR_PROC_PCIE_PHB_ACTIVE_ENABLE))
         {
             SET_PB_PBCQ_PEPBREGS_PBCQHWCFG_REG_PE_DISABLE_TCE_ARBITRATION(l_scom_data);
         }
@@ -177,7 +180,7 @@ fapi2::ReturnCode p10_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
         // NestBase+0x03
         // Set bits 00:03 = 0b1001 Enable trace, and select
         // Inbound operations with addr information
-        FAPI_TRY(GET_PB_PBCQ_PEPBREGS_NESTTRC_REG(l_pec_chiplet, l_scom_data),
+        FAPI_TRY(PREP_PB_PBCQ_PEPBREGS_NESTTRC_REG(l_pec_chiplet),
                  "Error from GET_PB_PBCQ_PEPBREGS_NESTTRC_REG");
         SET_PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_A(PBCQ_NESTTRC_SEL_A, l_scom_data);
         FAPI_DBG("PEC%i: %#lx", l_pec_id, l_scom_data());
@@ -195,6 +198,7 @@ fapi2::ReturnCode p10_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
         // Phase2 init step 6
         // PCIBase +0x00
         // Set bits 30 = 0b1 Enable Trace
+        FAPI_TRY(PREP_PB_PBAIB_REGS_PBAIBHWCFG_REG(l_pec_chiplet), "Error from PREP_PB_PBAIB_REGS_PBAIBHWCFG_REG");
         SET_PB_PBAIB_REGS_PBAIBHWCFG_REG_PE_PCIE_CLK_TRACE_EN(l_scom_data);
         FAPI_DBG("PEC%i: %#lx", l_pec_id, l_scom_data());
         FAPI_TRY(PUT_PB_PBAIB_REGS_PBAIBHWCFG_REG(l_pec_chiplet, l_scom_data),
@@ -218,7 +222,6 @@ fapi2::ReturnCode p10_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
         // NestBase+StackBase+0xA
         // 0xFFFFFFFF_FFFFFFFF
         // Clear any spurious cerr_rpt0 bits (cerr_rpt0)
-        FAPI_DBG("PHB%i: %#lx", l_phb_id, l_data_ones());
         FAPI_TRY(PREP_REGS_CERR_RPT0_REG(l_phb_chiplet),
                  "Error from PREP_REGS_CERR_RPT0_REG");
         FAPI_TRY(PUT_REGS_CERR_RPT0_REG(l_phb_chiplet, l_data_ones),
@@ -228,7 +231,6 @@ fapi2::ReturnCode p10_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
         // NestBase+StackBase+0xB
         // 0xFFFFFFFF_FFFFFFFF
         // Clear any spurious cerr_rpt1 bits (cerr_rpt1)
-        FAPI_DBG("PHB%i: %#lx", l_phb_id, l_data_ones());
         FAPI_TRY(PREP_REGS_CERR_RPT1_REG(l_phb_chiplet),
                  "Error from PREP_REGS_CERR_RPT1_REG");
         FAPI_TRY(PUT_REGS_CERR_RPT1_REG(l_phb_chiplet, l_data_ones),
@@ -239,7 +241,6 @@ fapi2::ReturnCode p10_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
         // 0x00000000_00000000
         // Clear any spurious FIR
         // bits (NFIR)NFIR
-        FAPI_DBG("PHB%i: %#lx", l_phb_id, l_data_zeroes());
         FAPI_TRY(PREP_REGS_NFIR_REG_RW(l_phb_chiplet),
                  "Error from PREP_REGS_NFIR_REG_RW");
         FAPI_TRY(PUT_REGS_NFIR_REG_RW(l_phb_chiplet, l_data_zeroes),
@@ -250,7 +251,6 @@ fapi2::ReturnCode p10_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
         // 0x00000000_00000000
         // Clear any spurious WOF
         // bits (NFIRWOF)
-        FAPI_DBG("PHB%i: %#lx", l_phb_id, l_data_zeroes());
         FAPI_TRY(PREP_REGS_NFIRWOF_REG(l_phb_chiplet),
                  "Error from PREP_REGS_NFIRWOF_REG");
         FAPI_TRY(PUT_REGS_NFIRWOF_REG(l_phb_chiplet, l_data_zeroes),
@@ -259,7 +259,6 @@ fapi2::ReturnCode p10_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
         // Phase2 init step 9
         // NestBase+StackBase+0x6
         // Set the per FIR Bit Action 0 register
-        FAPI_DBG("PHB%i: %#lx", l_phb_id, NFIR_ACTION0_REG);
         FAPI_TRY(PREP_REGS_NFIRACTION0_REG(l_phb_chiplet),
                  "Error from PREP_REGS_NFIRACTION0_REG");
         FAPI_TRY(PUT_REGS_NFIRACTION0_REG(l_phb_chiplet, NFIR_ACTION0_REG),
@@ -268,7 +267,6 @@ fapi2::ReturnCode p10_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
         // Phase2 init step 10
         // NestBase+StackBase+0x7
         // Set the per FIR Bit Action 1 register
-        FAPI_DBG("PHB%i: %#lx", l_phb_id, NFIR_ACTION1_REG);
         FAPI_TRY(PREP_REGS_NFIRACTION1_REG(l_phb_chiplet),
                  "Error from PREP_REGS_NFIRACTION1_REG");
         FAPI_TRY(PUT_REGS_NFIRACTION1_REG(l_phb_chiplet, NFIR_ACTION1_REG),
@@ -277,49 +275,43 @@ fapi2::ReturnCode p10_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
         // Phase2 init step 11
         // NestBase+StackBase+0x3
         // Set FIR Mask Bits to allow errors (NFIRMask)
-        FAPI_DBG("PHB%i: %#lx", l_phb_id, NFIR_MASK_REG);
         FAPI_TRY(PREP_REGS_NFIRMASK_REG_RW(l_phb_chiplet),
-                 "Error from PREP_REGS_NFIRMASK_REG_RW");
+                 "Error from REGS_NFIRMASK_REG_RW");
         FAPI_TRY(PUT_REGS_NFIRMASK_REG_RW(l_phb_chiplet, NFIR_MASK_REG),
                  "Error from PUT_REGS_NFIRMASK_REG_RW");
 
-        // Phase2 init step 12
+        // Phase2 init step 12a
         // NestBase+StackBase+0x15
         // 0x00000000_00000000
         // Set Data Freeze Type Register for SUE handling (DFREEZE)
-        FAPI_DBG("PHB%i: %#lx", l_phb_id, l_data_zeroes());
         FAPI_TRY(PREP_REGS_PE_DFREEZE_REG(l_phb_chiplet),
                  "Error from PREP_REGS_PE_DFREEZE_REG");
         FAPI_TRY(PUT_REGS_PE_DFREEZE_REG(l_phb_chiplet, l_data_zeroes),
                  "Error from PUT_REGS_PE_DFREEZE_REG");
 
-        // Phase2 init step 13_a
-        // PCIBase+StackBase+0xB
+        // Phase2 init step 12_b
+        // NestBase+StackBase+0x17
+        // Set Enable cache inject for partial writes.
+        FAPI_TRY(PREP_REGS_PE_CACHE_INJECT_CNTL_REG(l_phb_chiplet),
+                 "Error from PREP_REGS_PE_CACHE_INJECT_CNTL_REG");
+        SET_REGS_PE_CACHE_INJECT_CNTL_REG_ENABLE_PARTIAL_CACHE_INJECTION(l_scom_data);
+        FAPI_TRY(PUT_REGS_PE_CACHE_INJECT_CNTL_REG(l_phb_chiplet, l_scom_data),
+                 "Error from PUT_REGS_PE_CACHE_INJECT_CNTL_REG");
+
+        //Phase2 init step 13_a
+        //PCIBase+StackBase+0xB
         // 0x00000000_00000000
-        // Clear any spurious pbaib_cerr_rpt bits
-        FAPI_DBG("PHB%i: %#lx", l_phb_id, l_data_zeroes());
+        // Clear any spurious pbaib_cerr_rpt_bits
         FAPI_TRY(PREP_REGS_PBAIB_CERR_RPT_REG(l_phb_chiplet),
                  "Error from PREP_REGS_PBAIB_CERR_RPT_REG");
         FAPI_TRY(PUT_REGS_PBAIB_CERR_RPT_REG(l_phb_chiplet, l_data_zeroes),
                  "Error from PUT_REGS_PBAIB_CERR_RPT_REG");
-
-        // Phase2 init step 13_b
-        // PCIBase+StackBase+0x0
-        // 0x00000000_00000000
-        // Clear any spurious FIR
-        // bits (PFIR)PFIR
-        FAPI_DBG("PHB%i: %#lx", l_phb_id, l_data_zeroes());
-        FAPI_TRY(PREP_REGS_PFIR_REG_RW(l_phb_chiplet),
-                 "Error from PREP_REGS_PFIR_REG_RW");
-        FAPI_TRY(PUT_REGS_PFIR_REG_RW(l_phb_chiplet, l_data_zeroes),
-                 "Error from PUT_REGS_PFIR_REG_RW");
 
         // Phase2 init step 14
         // PCIBase+StackBase+0x8
         // 0x00000000_00000000
         // Clear any spurious WOF
         // bits (PFIRWOF)
-        FAPI_DBG("PHB%i: %#lx", l_phb_id, l_data_zeroes());
         FAPI_TRY(PREP_REGS_PFIRWOF_REG(l_phb_chiplet),
                  "Error from PREP_REGS_PFIRWOF_REG");
         FAPI_TRY(PUT_REGS_PFIRWOF_REG(l_phb_chiplet, l_data_zeroes),
@@ -328,7 +320,6 @@ fapi2::ReturnCode p10_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
         // Phase2 init step 15
         // PCIBase+StackBase+0x6
         // Set the per FIR Bit Action 0 register
-        FAPI_DBG("PHB%i: %#lx", l_phb_id, PFIR_ACTION0_REG);
         FAPI_TRY(PREP_REGS_PFIRACTION0_REG(l_phb_chiplet),
                  "Error from PREP_REGS_PFIRACTION0_REG");
         FAPI_TRY(PUT_REGS_PFIRACTION0_REG(l_phb_chiplet, PFIR_ACTION0_REG),
@@ -337,7 +328,6 @@ fapi2::ReturnCode p10_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
         // Phase2 init step 16
         // PCIBase+StackBase+0x7
         // Set the per FIR Bit Action 1 register
-        FAPI_DBG("PHB%i: %#lx", l_phb_id, PFIR_ACTION1_REG);
         FAPI_TRY(PREP_REGS_PFIRACTION1_REG(l_phb_chiplet),
                  "Error from PREP_REGS_PFIRACTION1_REG");
         FAPI_TRY(PUT_REGS_PFIRACTION1_REG(l_phb_chiplet, PFIR_ACTION1_REG),
@@ -346,7 +336,6 @@ fapi2::ReturnCode p10_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
         // Phase2 init step 17
         // PCIBase+StackBase+0x3
         // Set FIR Mask Bits to allow errors (PFIRMask)
-        FAPI_DBG("PHB%i: %#lx", l_phb_id, PFIR_MASK_REG);
         FAPI_TRY(PREP_REGS_PFIRMASK_REG_RW(l_phb_chiplet),
                  "Error from PREP_REGS_PFIRMASK_REG_RW");
         FAPI_TRY(PUT_REGS_PFIRMASK_REG_RW(l_phb_chiplet, PFIR_MASK_REG),
@@ -432,7 +421,6 @@ fapi2::ReturnCode p10_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
         // PCIBase+StackBase +0x0A
         // 0x00000000_00000000
         // Remove ETU/AIB bus from reset (PHBReset)
-        FAPI_DBG("PHB%i: %#lx", l_phb_id, l_data_zeroes());
         FAPI_TRY(PREP_REGS_PHBRESET_REG(l_phb_chiplet),
                  "Error from PREP_REGS_PHBRESET_REG");
         FAPI_TRY(PUT_REGS_PHBRESET_REG(l_phb_chiplet, l_data_zeroes),
@@ -440,7 +428,6 @@ fapi2::ReturnCode p10_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
 
         // Configure ETU FIR (all masked)
         l_scom_data = l_data_zeroes;
-        FAPI_DBG("PHB%i ETU FIR setup", l_phb_id);
         FAPI_TRY(PREP_RSB_REGS_ACT0_REG(l_phb_chiplet),
                  "Error from PREP_RSB_REGS_ACT0_REG");
         FAPI_TRY(PUT_RSB_REGS_ACT0_REG(l_phb_chiplet, l_scom_data),
