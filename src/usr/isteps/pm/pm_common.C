@@ -1062,8 +1062,10 @@ namespace HBPM
                 break;
             }
 
-            for (const auto & l_procChip: l_procChips)
+            for (auto & l_procChip: l_procChips)
             {
+                ScopedHomerMapper l_homerMapper(l_procChip);
+                l_homerMapper.map();
                 // This attr was set during istep15 HCODE build
                 l_homerPhysAddr = l_procChip->
                         getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>();

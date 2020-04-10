@@ -84,7 +84,7 @@ errlHndl_t HBPM::ScopedHomerMapper::map()
         // Someone's already mapped the HOMER virt (may have been done
         // recursively), so we don't need to map it again here.
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-               INFO_MRK"ScopedHomerMapper::map: HOMER virt is already mapped.");
+               INFO_MRK"ScopedHomerMapper::map: HOMER virt is already mapped (potentially by another instance of ScopedHomerMapper).");
         // Set the internal virt addr so that it's still fetchable via
         // getHomerVirtAddr()
         iv_homerVirtAddr = iv_proc->getAttr<TARGETING::ATTR_HOMER_VIRT_ADDR>();
@@ -152,6 +152,10 @@ errlHndl_t HBPM::ScopedHomerMapper::map()
         iv_proc->setAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>(l_homerPhysAddr);
         TARGETING::UTIL::assertGetToplevelTarget()->
             setAttr<TARGETING::ATTR_OCC_COMMON_AREA_PHYS_ADDR>(l_occCommonAddr);
+#else
+        // During IPL-time, we rely on the attribute to tell us what HOMER
+        // phys address is, even in PHYP load.
+        l_homerPhysAddr = iv_proc->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>();
 #endif
     } // is_phyp_load
     else
@@ -246,7 +250,7 @@ errlHndl_t HBPM::ScopedHomerMapper::unmap()
     else
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  INFO_MRK"ScopedHomerMapper::unmap: HOMER is not mapped");
+                  INFO_MRK"ScopedHomerMapper::unmap: HOMER is not mapped by this instance of ScopedHomerMapper; skipping unmapping.");
     }
     } while(0);
     return l_errl;
