@@ -1,3 +1,9 @@
+config FORCE_SINGLE_CHIP
+    default y
+    help
+        Force FSI and MVPD presence detect to remote processor chips to return
+        false, causing Hostboot only to detect a single processor chip (master).
+
 config MEMVPD_READ_FROM_PNOR
     default y
     default n if SUPPORT_EEPROM_CACHING

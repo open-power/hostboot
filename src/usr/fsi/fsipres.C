@@ -106,7 +106,9 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
     }
     else
     {
+#ifndef CONFIG_FORCE_SINGLE_CHIP
         fsi_present = isSlavePresent(i_target);
+#endif
     }
 
     // Next look for valid Module VPD
@@ -115,6 +117,14 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
 
 #ifdef CONFIG_MVPD_READ_FROM_HW
     check_for_mvpd = fsi_present;
+#endif
+
+#ifdef CONFIG_FORCE_SINGLE_CHIP
+    if ((i_target != TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL) &&
+        (i_target != l_masterChip))
+    {
+        check_for_mvpd = false;
+    }
 #endif
 
     if ( check_for_mvpd )
