@@ -103,7 +103,8 @@ enum PGPE_FLAGS_IDX
     PGPE_FLAG_OCC_IPC_IMMEDIATE_MODE        = 10,
     PGPE_FLAG_WOF_IPC_IMMEDIATE_MODE        = 11,
     PGPE_FLAG_PHANTOM_HALT_ENABLE           = 12,
-    PGPE_FLAG_MAX_DEFINED                   = 13
+    PGPE_FLAG_RVRM_ENABLE                   = 13,
+    PGPE_FLAG_MAX_DEFINED                   = 14
 };
 
 /// Control Attributes
@@ -120,6 +121,7 @@ typedef union
         uint8_t underv_enabled;
         uint8_t overv_enabled;
         uint8_t throttle_control_enabled;
+        uint8_t rvrm_enabled;
     } fields;
 } Attributes_t;
 
@@ -420,7 +422,7 @@ typedef struct
     //WOV overvolting max percentage(in 0.1%, tenths of percent)
     uint8_t wov_overv_max_pct;
 
-    uint8_t pad;
+    uint8_t rvrm_deadzone_mv;
 
     //Determine how often to call the wov algorithm with respect
     //to PGPE FIT ticks

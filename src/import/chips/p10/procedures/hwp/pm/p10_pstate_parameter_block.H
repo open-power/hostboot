@@ -182,6 +182,7 @@ typedef struct
     uint8_t attr_wov_overv_max_pct;
     uint32_t attr_sram_write_assist_mv;
     uint32_t attr_array_write_assist_set;
+    uint8_t  attr_rvrm_deadzone_mv;
 
 } AttributeList;
 
@@ -192,7 +193,7 @@ class PlatPmPPB
         //Constructor with Proc target as input
         PlatPmPPB ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> i_target ) :
             iv_init_error(false), iv_procChip (i_target), iv_pstates_enabled(0), iv_resclk_enabled(0),
-            iv_dds_enabled(0), iv_ivrm_enabled(0), iv_wof_enabled(0), iv_safe_voltage (0),
+            iv_dds_enabled(0), iv_rvrm_enabled(0), iv_wof_enabled(0), iv_safe_voltage (0),
             iv_safe_frequency(0), iv_reference_frequency_mhz(0), iv_reference_frequency_khz(0),
             iv_frequency_step_khz(0), iv_proc_dpll_divider(0), iv_occ_freq_mhz(0),
             iv_wov_underv_enabled(0), iv_wov_overv_enabled(0), iv_poundV_fmax_enable(true)
@@ -329,6 +330,13 @@ class PlatPmPPB
         /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode compute_retention_vid();
+
+        /// -----------------------------------------------------------------------
+        /// @brief Compute the retention VID value
+        /// @attr[out]      ATTR_RVRM_RVID
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        fapi2::ReturnCode rvrm_enablement();
 
         /// -----------------------------------------------------------------------
         /// @brief Convert pstate to voltage
@@ -612,7 +620,7 @@ class PlatPmPPB
         uint8_t                   iv_pstates_enabled;
         uint8_t                   iv_resclk_enabled;
         uint8_t                   iv_dds_enabled;
-        uint8_t                   iv_ivrm_enabled;
+        uint8_t                   iv_rvrm_enabled;
         uint8_t                   iv_wof_enabled;
         uint32_t                  iv_safe_voltage;    // System safe voltage
         uint32_t                  iv_safe_frequency;  // System safe frequency

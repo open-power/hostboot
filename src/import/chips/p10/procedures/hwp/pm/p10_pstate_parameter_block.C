@@ -43,6 +43,7 @@
 // ----------------------------------------------------------------------
 #include <fapi2.H>
 #include <p10_pstate_parameter_block.H>
+#include <p10_setup_evid.H>
 #include <p10_pm_utils.H>
 #include <mvpd_access_defs.H>
 
@@ -375,6 +376,11 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
         // Retention voltage computation
         // ----------------
         FAPI_TRY(l_pmPPB->compute_retention_vid());
+
+        // ----------------
+        // RVRM enablement state
+        // ----------------
+        FAPI_TRY(l_pmPPB->rvrm_enablement());
 
         // ----------------
         // Initialize GPPB structure
@@ -858,6 +864,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
 
         io_globalppb->array_write_vdn_mv = iv_array_vdn_mv;
         io_globalppb->array_write_vdd_mv = iv_array_vdd_mv;
+        io_globalppb->rvrm_deadzone_mv   = iv_attrs.attr_rvrm_deadzone_mv;
 
 
 
@@ -1389,6 +1396,7 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
     DATABLOCK_GET_ATTR(ATTR_FREQ_BIAS, iv_procChip, attr_freq_bias);
 
     // Voltage Bias attributes
+    DATABLOCK_GET_ATTR(ATTR_RVRM_DEADZONE_MV, iv_procChip, attr_rvrm_deadzone_mv);
     DATABLOCK_GET_ATTR(ATTR_VOLTAGE_EXT_BIAS, iv_procChip, attr_voltage_ext_bias);
     DATABLOCK_GET_ATTR(ATTR_VOLTAGE_EXT_VDN_BIAS, iv_procChip, attr_voltage_ext_vdn_bias);
     DATABLOCK_GET_ATTR_4(ATTR_EXTERNAL_VRM_STEPSIZE, iv_procChip, attr_ext_vrm_step_size_mv);
@@ -1610,6 +1618,7 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
     SET_ATTR(fapi2::ATTR_PSTATES_ENABLED, iv_procChip, iv_pstates_enabled);
     SET_ATTR(fapi2::ATTR_RESCLK_ENABLED,  iv_procChip, iv_resclk_enabled);
     SET_ATTR(fapi2::ATTR_DDS_ENABLED,     iv_procChip, iv_dds_enabled);
+    SET_ATTR(fapi2::ATTR_RVRM_ENABLED,     iv_procChip, iv_rvrm_enabled);
     SET_ATTR(fapi2::ATTR_WOF_ENABLED,     iv_procChip, iv_wof_enabled);
     //SET_ATTR(fapi2::ATTR_WOV_UNDERV_ENABLED, iv_procChip, iv_wov_underv_enabled);
     //SET_ATTR(fapi2::ATTR_WOV_OVERV_ENABLED, iv_procChip, iv_wov_overv_enabled);
@@ -1617,6 +1626,7 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
     iv_pstates_enabled = true;
     iv_resclk_enabled  = true;
     iv_dds_enabled     = true;
+    iv_rvrm_enabled     = true;
     iv_wof_enabled     = true;
     //iv_wov_underv_enabled = true;
     //iv_wov_overv_enabled = true;
@@ -1651,7 +1661,7 @@ fapi2::ReturnCode PlatPmPPB::compute_boot_safe(
     iv_pstates_enabled = true;
     iv_resclk_enabled  = true;
     iv_dds_enabled     = true;
-    iv_ivrm_enabled    = true;
+    iv_rvrm_enabled    = true;
     iv_wof_enabled     = false;
 
     do
@@ -3869,6 +3879,45 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///////////////////////////////////////////////////////////
+////////   rvrm enablement
+///////////////////////////////////////////////////////////
+fapi2::ReturnCode PlatPmPPB::rvrm_enablement()
+{
+    fapi2::ATTR_RVRM_VID_Type   l_rvrm_rvid;
+    uint32_t l_rvrm_rvid_mv;
+    uint32_t l_present_boot_voltage;
+    iv_rvrm_enabled = false;
+
+    FAPI_INF("> PlatPmPPB:rvrm_enablement");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_RVRM_VID,
+                iv_procChip,
+                l_rvrm_rvid));
+
+    FAPI_DBG("Retention check VID: 0x%08X", l_rvrm_rvid);
+
+    // Rentention VID has 8mV granularity
+    l_rvrm_rvid_mv = l_rvrm_rvid << 3;
+
+
+    //Read the effective VDD voltage from hardware
+    FAPI_TRY(p10_setup_evid_voltageRead(iv_procChip,
+                            &iv_attrs.attr_avs_bus_num[VDD],
+                            &iv_attrs.attr_avs_bus_rail_select[VDD],
+                            &l_present_boot_voltage));
+
+    FAPI_DBG("Present VDD voltage %08x, RVRM_RVID %08x, RVRM_DEADZONE %08x",
+             l_present_boot_voltage,l_rvrm_rvid_mv,iv_attrs.attr_rvrm_deadzone_mv);
+    if ( l_present_boot_voltage > (l_rvrm_rvid_mv + iv_attrs.attr_rvrm_deadzone_mv))
+    {
+        iv_rvrm_enabled = true;
+    }
+
+fapi_try_exit:
+    FAPI_INF("< PlatPmPPB:rvrm_enablement");
+    return fapi2::current_err;
+}
+
 
 
 
@@ -4795,6 +4844,9 @@ fapi2::ReturnCode PlatPmPPB::set_global_feature_attributes()
     fapi2::ATTR_WOF_ENABLED_Type l_wof_enabled =
         (fapi2::ATTR_WOF_ENABLED_Type)fapi2::ENUM_ATTR_WOF_ENABLED_FALSE;
 
+    fapi2::ATTR_RVRM_ENABLED_Type l_rvrm_enabled =
+        (fapi2::ATTR_RVRM_ENABLED_Type)fapi2::ENUM_ATTR_RVRM_ENABLED_FALSE;
+
 // RTC 247962:need to revisit
 #if 0
     fapi2::ATTR_WOV_UNDERV_ENABLED_Type l_wov_underv_enabled =
@@ -4838,6 +4890,10 @@ fapi2::ReturnCode PlatPmPPB::set_global_feature_attributes()
         l_dds_enabled = (fapi2::ATTR_DDS_ENABLED_Type)fapi2::ENUM_ATTR_DDS_ENABLED_TRUE;
     }
 
+    if (iv_rvrm_enabled)
+    {
+        l_rvrm_enabled = (fapi2::ATTR_RVRM_ENABLED_Type)fapi2::ENUM_ATTR_RVRM_ENABLED_TRUE;
+    }
 
     if (iv_wof_enabled)
     {
@@ -4861,6 +4917,7 @@ fapi2::ReturnCode PlatPmPPB::set_global_feature_attributes()
     SET_ATTR(fapi2::ATTR_PSTATES_ENABLED, iv_procChip, l_ps_enabled);
     SET_ATTR(fapi2::ATTR_RESCLK_ENABLED, iv_procChip, l_resclk_enabled);
     SET_ATTR(fapi2::ATTR_DDS_ENABLED, iv_procChip, l_dds_enabled);
+    SET_ATTR(fapi2::ATTR_RVRM_ENABLED, iv_procChip, l_rvrm_enabled);
     SET_ATTR(fapi2::ATTR_WOF_ENABLED, iv_procChip, l_wof_enabled);
 //    SET_ATTR(fapi2::ATTR_WOV_UNDERV_ENABLED, iv_procChip, l_wov_underv_enabled);
   //  SET_ATTR(fapi2::ATTR_WOV_OVERV_ENABLED, iv_procChip, l_wov_overv_enabled);
