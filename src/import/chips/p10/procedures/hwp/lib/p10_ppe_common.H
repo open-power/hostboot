@@ -30,36 +30,38 @@
 
 const static uint64_t sbe_base_address = 0xE0000;
 
-// XSR defines
-enum PPE_XSR_DEFS
-{
-    PPE_XSR_HALTED_STATE         = 0,
-    PPE_XSR_HALT_CONDITION_START = 1,
-    PPE_XSR_HALT_CONDITION_LEN   = 3,
-    PPE_XSR_XCR_CMD_HALT         = 1,
-    PPE_XSR_WDT_HALT             = 2,
-    PPE_XSR_UMI_HALT             = 3,
-    PPE_XSR_DEBUG_HALT           = 4,
-    PPE_XSR_DBCR_HALT            = 5,
-    PPE_XSR_INPUT_HALT           = 6,
-    PPE_XSR_HW_FAILURE           = 7
-};
-
-// XCR defines
-enum PPE_XCR_DEFS
-{
-    PPE_XCR_CMD_START           = 1,
-    PPE_XCR_CMD_LEN             = 3,
-
-    PPE_XCR_CLEAR_DEBUG_STATUS  = 0,
-    PPE_XCR_HALT                = 1,
-    PPE_XCR_RESUME              = 2,
-    PPE_XCR_SINGLE_STEP         = 3,
-    PPE_XCR_TOGGLE_XSR_TRH      = 4,
-    PPE_XCR_SOFT_RESET          = 5,
-    PPE_XCR_HARD_RESET          = 6,
-    PPE_XCR_FORCE_HALT          = 7
-};
+// @sakorrap: Duplcates, as these are already declared in p10_ppe_util
+//
+//// XSR defines
+//enum PPE_XSR_DEFS
+//{
+//    PPE_XSR_HALTED_STATE         = 0,
+//    PPE_XSR_HALT_CONDITION_START = 1,
+//    PPE_XSR_HALT_CONDITION_LEN   = 3,
+//    PPE_XSR_XCR_CMD_HALT         = 1,
+//    PPE_XSR_WDT_HALT             = 2,
+//    PPE_XSR_UMI_HALT             = 3,
+//    PPE_XSR_DEBUG_HALT           = 4,
+//    PPE_XSR_DBCR_HALT            = 5,
+//    PPE_XSR_INPUT_HALT           = 6,
+//    PPE_XSR_HW_FAILURE           = 7
+//};
+//
+//// XCR defines
+//enum PPE_XCR_DEFS
+//{
+//    PPE_XCR_CMD_START           = 1,
+//    PPE_XCR_CMD_LEN             = 3,
+//
+//    PPE_XCR_CLEAR_DEBUG_STATUS  = 0,
+//    PPE_XCR_HALT                = 1,
+//    PPE_XCR_RESUME              = 2,
+//    PPE_XCR_SINGLE_STEP         = 3,
+//    PPE_XCR_TOGGLE_XSR_TRH      = 4,
+//    PPE_XCR_SOFT_RESET          = 5,
+//    PPE_XCR_HARD_RESET          = 6,
+//    PPE_XCR_FORCE_HALT          = 7
+//};
 
 fapi2::ReturnCode backup_gprs_sprs(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
@@ -91,6 +93,11 @@ fapi2::ReturnCode haltDone(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint64_t i_sbe_base_address);
 
+fapi2::ReturnCode RAMReadDone(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_sbe_base_address,
+    const fapi2::buffer<uint64_t> i_instruction,
+    fapi2::buffer<uint32_t>& o_data);
 
 
 
