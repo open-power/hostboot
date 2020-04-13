@@ -22,23 +22,56 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include <errl/errlentry.H>
-#include <errl/errlmanager.H>
-#include <isteps/hwpisteperror.H>
-#include <initservice/isteps_trace.H>
-#include <targeting/common/utilFilter.H>
-#include <diag/attn/attn.H>
-#include <diag/mdia/mdia.H>
-#include <targeting/common/targetservice.H>
-#include <util/misc.H>
 
-/* FIXME RTC: 210975
-#include <plat_hwp_invoker.H>     // for FAPI_INVOKE_HWP
-#include <lib/shared/nimbus_defaults.H> // Needed before memdiags_fir.H
-#include <lib/fir/memdiags_fir.H> // for mss::unmask::after_memdiags
-#include <lib/mc/port.H>          // for mss::reset_reorder_queue_settings
-*/
+/**
+ *  @file call_mss_memdiag.C
+ *
+ *  @details Run Memory Diagnostics on a set of targets
+ *
+ */
 
+/******************************************************************************/
+// Includes
+/******************************************************************************/
+
+// Standard headers
+#include <stdint.h>                      // uint32_t
+
+// Trace
+#include <trace/interface.H>             // TRACFCOMP
+#include <initservice/isteps_trace.H>    // ISTEPS_TRACE::g_trac_isteps_trace
+
+// Error logging
+#include <errl/errlentry.H>              // errlHndl_t
+#include <isteps/hwpisteperror.H>        // IStepError, getErrorHandle
+#include <istepHelperFuncs.H>            // captureError
+
+// Targeting support
+#include <targeting/common/target.H>     // TargetHandleList, getAttr
+#include <targeting/common/utilFilter.H> // getAllChips
+
+// Fapi
+#include <fapi2/target.H>                // fapi2::TARGET_TYPE_OCMB_CHIP
+#include <fapi2/plat_hwp_invoker.H>      // FAPI_INVOKE_HWP
+
+// HWP
+#include <lib/shared/p10_defaults.H>     // mss::DEFAULT_MC_TYPE, needed by gen_mss_unmask.H
+// Using a long path to ensure that the correct file for P10 is used
+#include <generic/memory/lib/utils/fir/gen_mss_unmask.H> // mss::unmask::after_memdiags
+#include <generic/memory/lib/utils/mc/gen_mss_port.H>    // mss::reset_reorder_queue_settings
+
+// Diagnostics
+#include <diag/attn/attn.H>              // ATTN::startService,stopService
+#include <diag/mdia/mdia.H>              // MDIA::runStep
+
+// Misc
+#include <util/misc.H>                   // Util::isSimicsRunning
+#include <chipids.H>                     // POWER_CHIPID::EXPLORER_16
+
+
+/******************************************************************************/
+// namespace shortcuts
+/******************************************************************************/
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
@@ -47,130 +80,222 @@ using   namespace   TARGETING;
 namespace ISTEP_14
 {
 
-// Helper function to run Memory Diagnostics on a list of targets.
-errlHndl_t __runMemDiags( TargetHandleList i_trgtList )
+/**
+ * @brief Helper function to run Memory Diagnostics on a list of targets.
+ *
+ * @param[in]  i_targetList - List of targets to run the memory diagnostics on
+ * @param[out] o_iStepError - Contains an error if an error occurs,
+ *                            else contains NULL
+ */
+void __runMemDiags( TargetHandleList i_targetList, IStepError &o_iStepError )
 {
-    errlHndl_t errl = nullptr;
+    errlHndl_t l_err(nullptr);
 
     do
     {
-        errl = ATTN::startService();
-        if ( nullptr != errl )
+        l_err = ATTN::startService();
+        if ( nullptr != l_err )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "ATTN::startService() failed" );
+
+            // Capture error, commit and continue
+            captureError(l_err, o_iStepError, HWPF_COMP_ID);
+
             break;
         }
 
-        errl = MDIA::runStep( i_trgtList );
-        if ( nullptr != errl )
+        l_err = MDIA::runStep( i_targetList );
+        if ( nullptr != l_err )
         {
+            // Do NOT break at this point.  Still prudent to stop the service,
+            // but DO capture error log
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "MDIA::runStep() failed" );
-            break;
+
+            // Capture error, commit and continue
+            captureError(l_err, o_iStepError, HWPF_COMP_ID);
         }
 
-        errl = ATTN::stopService();
-        if ( nullptr != errl )
+        // Stop service regardless if MDIA::runStep passes or fails
+        l_err = ATTN::stopService();
+        if ( nullptr != l_err )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "ATTN::stopService() failed" );
+
+            // Capture error, commit and continue
+            captureError(l_err, o_iStepError, HWPF_COMP_ID);
+
             break;
         }
 
     } while (0);
 
-    return errl;
-}
+} // __runMemDiags
 
-void* call_mss_memdiag (void* io_pArgs)
+/**
+ * @brief Run Memory Diagnostics on a list Explorer OCMB chips
+ *
+ * @return nullptr if success, else a handle to an error log
+ */
+void* call_mss_memdiag (void*)
 {
-    errlHndl_t errl = nullptr;
-
-    IStepError l_stepError;
-
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-              "call_mss_memdiag entry");
+              ENTER_MRK"call_mss_memdiag");
 
-    TARGETING::Target* masterproc = nullptr;
-    TARGETING::targetService().masterProcChipTargetHandle(masterproc);
+    errlHndl_t l_err(nullptr);
+    IStepError l_iStepError;
 
     do
     {
-        // Actions vary by processor type.
-        ATTR_MODEL_type procType = masterproc->getAttr<ATTR_MODEL>();
+        // Get a list of all OCMB chips to run Memory Diagnostics on
+        TargetHandleList l_ocmbTargetList;
+        getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
 
-        if ( MODEL_NIMBUS == procType )
+        // Run Memory Diagnostics on Explorer chip list, if not in SIMICS
+        if ( Util::isSimicsRunning() == false )
         {
-            TargetHandleList trgtList; getAllChiplets( trgtList, TYPE_MCBIST );
-
-            // @todo RTC 179458  Intermittent SIMICs action file issues
-            if ( Util::isSimicsRunning() == false )
+            // Only run Memory Diagnostics (memdiags) on Explorer OCMBs
+            TargetHandleList l_explorerChipList;
+            for ( const auto & l_ocmbTarget : l_ocmbTargetList )
             {
+                uint32_t l_chipId = l_ocmbTarget->getAttr<ATTR_CHIP_ID>();
+                if ( l_chipId == POWER_CHIPID::EXPLORER_16 )
+                {
+                    // Explorer chip found, trace out stating so
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                         "Adding Explorer OCMB, HUID 0x%.8X, chipId 0x%.8X, to "
+                         "list of explorer chips to run memory diagnostics on.",
+                         TARGETING::get_huid(l_ocmbTarget),
+                         l_chipId );
+
+                    l_explorerChipList.push_back(l_ocmbTarget);
+                }
+                else
+                {
+                    // Non-Explorer chip, a NOOP operation, trace out stating so
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                         "Skipping call to run memory diagnostics on target "
+                         "HUID 0x%.8X, chipId 0x%.8X is not an Explorer OCMB.",
+                         TARGETING::get_huid(l_ocmbTarget),
+                         l_chipId );
+               }
+            } // end for for ( const auto & l_ocmbTarget : l_ocmbTargetList )
+
+            if ( l_explorerChipList.size() )
+            {
+#if 0
+// TODO: RTC:208831 - Methods ATTN::startService and MDIA::runStep are not
+// ready which is called by __runMemDiags, so best to not make the call to
+// __runMemDiags. Uncomment and call method __runMemDiags when said methods
+// are ready.
                 // Start Memory Diagnostics.
-                errl = __runMemDiags( trgtList );
-                if ( nullptr != errl ) break;
+                __runMemDiags( l_explorerChipList, l_iStepError );
+#endif
+                if ( !l_iStepError.isNull() )
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                               "ERROR: Call to run memory diagnostics on "
+                               "list of Explorer chips failed." );
+                    break;
+                }
             }
-
-/* FIXME RTC: 210975
-            for ( auto & tt : trgtList )
+            else
             {
-                fapi2::Target<fapi2::TARGET_TYPE_MCBIST> ft ( tt );
-
-                // Unmask mainline FIRs.
-                FAPI_INVOKE_HWP( errl, mss::unmask::after_memdiags, ft );
-                if ( nullptr != errl )
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               "mss::unmask::after_memdiags(0x%08x) failed",
-                               get_huid(tt) );
-                    break;
-                }
-
-                // Turn off FIFO mode to improve performance.
-                FAPI_INVOKE_HWP( errl, mss::reset_reorder_queue_settings, ft );
-                if ( nullptr != errl )
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               "mss::reset_reorder_queue_settings(0x%08x) "
-                               "failed", get_huid(tt) );
-                    break;
-                }
+                // Non-Explorer chip, trace out stating so
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, WARN_MRK
+                           "Call to run memory diagnostics has been completely "
+                           "skipped, no Explorer OCMB chips found." );
             }
-*/
-            if ( nullptr != errl ) break;
         }
-        else if ( MODEL_CUMULUS == procType )
+
+        // If running Memory Diagnostics returns with no error, then unmask
+        // mainline FIRs.
+        for ( auto & l_ocmbTarget : l_ocmbTargetList )
         {
-            TargetHandleList trgtList; getAllChiplets( trgtList, TYPE_MBA );
+            fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
+                                             l_fapiOcmbTarget ( l_ocmbTarget );
 
-            if ( Util::isSimicsRunning() == false )
+
+            // Calling after_memdiags on target, trace out stating so
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                       "Running mss::unmask::after_memdiags HWP call "
+                       "on OCMB target HUID 0x%.8X.",
+                       TARGETING::get_huid(l_ocmbTarget));
+
+            // Unmask mainline FIRs.
+            FAPI_INVOKE_HWP( l_err,
+                             mss::unmask::after_memdiags,
+                             l_fapiOcmbTarget );
+
+            if (l_err )
             {
-                // Start Memory Diagnostics
-                errl = __runMemDiags( trgtList );
-                if ( nullptr != errl ) break;
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                           "ERROR: mss::unmask::after_memdiags HWP call "
+                           "on OCMB target HUID 0x%08x failed."
+                           TRACE_ERR_FMT,
+                           get_huid(l_ocmbTarget),
+                           TRACE_ERR_ARGS(l_err) );
+                break;
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                           "SUCCESS: mss::unmask::after_memdiags HWP call "
+                           "on OCMB target HUID 0x%08x.",
+                           get_huid(l_ocmbTarget) );
             }
 
-            // No need to unmask or turn off FIFO. That is already contained
-            // within the other Centaur HWPs.
-        }
+
+            // Calling reset_reorder_queue_settings on target, trace out stating so
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                       "Running mss::reset_reorder_queue_settings HWP call "
+                       "on OCMB target HUID 0x%.8X.",
+                       TARGETING::get_huid(l_ocmbTarget) );
+
+#if 0
+// TODO: RTC:208831 - Method mss::reset_reorder_queue_settings is not fully
+// baked yet. Uncomment and call 'FAPI_INVOKE_HWP' when method is ready.
+            // Turn off FIFO mode to improve performance.
+            FAPI_INVOKE_HWP( l_err,
+                             mss::reset_reorder_queue_settings,
+                             l_fapiOcmbTarget );
+#endif
+
+            if ( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                           "ERROR: mss::reset_reorder_queue_settings HWP call "
+                           "on OCMB target HUID 0x%08x failed."
+                           TRACE_ERR_FMT,
+                           get_huid(l_ocmbTarget),
+                           TRACE_ERR_ARGS(l_err) );
+                break;
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                           "SUCCESS: mss::reset_reorder_queue_settings HWP "
+                           "call on OCMB target HUID 0x%08x.",
+                           get_huid(l_ocmbTarget) );
+            }
+        } // end for ( auto & l_ocmbTarget : l_ocmbTargetList )
 
     } while (0);
 
-    if ( nullptr != errl )
+    if ( nullptr != l_err )
     {
-        // Create IStep error log and cross reference to error that occurred
-        l_stepError.addErrorDetails(errl);
-
-        // Commit Error
-        errlCommit(errl, HWPF_COMP_ID);
+        // Capture error, commit and continue
+        captureError( l_err, l_iStepError, HWPF_COMP_ID );
     }
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-              "call_mss_memdiag exit");
+              EXIT_MRK"call_mss_memdiag, returning %s",
+                      (l_iStepError.isNull()? "success" : "failure") );
 
     // end task, returning any errorlogs to IStepDisp
-    return l_stepError.getErrorHandle();
-}
+    return l_iStepError.getErrorHandle();
+} // call_mss_memdiag
 
-};
+};  // namespace ISTEP_14
