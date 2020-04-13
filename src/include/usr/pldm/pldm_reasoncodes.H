@@ -54,6 +54,9 @@ namespace PLDM
         MOD_GET_LID_FILE              = 0x0D, // getLidFile
         MOD_HANDLE_REPO_CHANGED_EVENT = 0x0E, // handlePdrRepoChangeEventRequest
         MOD_PDR_MANAGER               = 0x0F, // pdr_manager.C
+        MOD_PLDM_FRU_TO_IPZ           = 0x10, // generate_ipz_formatted_vpd
+        MOD_GENERATE_VTOC_RECORD      = 0x11, // generate_vtoc_record
+        MOD_GENERATE_PT_ENTRIES       = 0x12, // generate_pt_entries
     };
 
     enum PLDMReasonCode
@@ -71,6 +74,10 @@ namespace PLDM
         RC_INVALID_MSG_TYPE     = PLDM_COMP_ID | 0x0B,
         RC_INVALID_HEADER       = PLDM_COMP_ID | 0x0C,
         RC_BAD_TRANSFER_FLAG    = PLDM_COMP_ID | 0x0D,
+        RC_UNSUPPORTED_TYPE     = PLDM_COMP_ID | 0x0E,
+        RC_INVALID_IPZ_FORMAT   = PLDM_COMP_ID | 0x0F,
+        RC_UNSUPPORTED_RECORD   = PLDM_COMP_ID | 0x10,
+        RC_UNSUPPORTED_FIELD    = PLDM_COMP_ID | 0x11,
     };
 }
 #endif

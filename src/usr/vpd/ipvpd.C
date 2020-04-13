@@ -664,7 +664,7 @@ errlHndl_t IpVpdFacade::loadPnor ( TARGETING::Target * i_target )
     sRecArgs.location =
               static_cast<VPD::vpdCmdTarget>(VPD::SEEPROM | VPD::USEVPD);
 
-    std::list<TocPtRecord> recList;
+    std::list<pt_entry> recList;
     recList.clear();
     err = getRecordListSeeprom( recList,
                                 i_target,
@@ -675,7 +675,7 @@ errlHndl_t IpVpdFacade::loadPnor ( TARGETING::Target * i_target )
         return err;
     }
 
-    for ( std::list<TocPtRecord>::iterator it = recList.begin();
+    for ( std::list<pt_entry>::iterator it = recList.begin();
           it != recList.end(); it++ )
     {
         // Copy the record name to the toc structure asciiRec
@@ -1313,7 +1313,7 @@ errlHndl_t IpVpdFacade::findRecordOffsetSeeprom ( const char * i_record,
                 ENTER_MRK"IpVpdFacade::findRecordOffsetSeeprom()" );
 
     // Skip the ECC data + large resource ID in the VHDR
-    offset = VHDR_ECC_DATA_SIZE + VHDR_RESOURCE_ID_SIZE;
+    offset = VHDR_ECC_DATA_SIZE + RESOURCE_ID_SIZE;
 
     // Read PT keyword from VHDR to find the VTOC.
     size_t pt_len = sizeof(l_buffer);
@@ -1323,8 +1323,8 @@ errlHndl_t IpVpdFacade::findRecordOffsetSeeprom ( const char * i_record,
         return err;
     }
 
-    TocPtRecord *toc_rec = reinterpret_cast<TocPtRecord*>(l_buffer);
-    if (pt_len < sizeof(TocPtRecord) ||
+    pt_entry *toc_rec = reinterpret_cast<pt_entry*>(l_buffer);
+    if (pt_len < sizeof(pt_entry) ||
         (memcmp(toc_rec->record_name, "VTOC",
                 sizeof(toc_rec->record_name)) != 0))
     {
@@ -1385,9 +1385,9 @@ errlHndl_t IpVpdFacade::findRecordOffsetSeeprom ( const char * i_record,
         // Scan through the VTOC PT keyword records looking for a record
         // name match.
         for (size_t vtoc_pt_offset = 0; vtoc_pt_offset < pt_len;
-            vtoc_pt_offset += sizeof(TocPtRecord))
+            vtoc_pt_offset += sizeof(pt_entry))
         {
-            toc_rec = reinterpret_cast<TocPtRecord*>(l_buffer + vtoc_pt_offset);
+            toc_rec = reinterpret_cast<pt_entry*>(l_buffer + vtoc_pt_offset);
             TRACUCOMP( g_trac_vpd, "Scanning record %s", toc_rec->record_name);
 
             if (memcmp(toc_rec->record_name, i_record,
@@ -1450,7 +1450,7 @@ errlHndl_t IpVpdFacade::findRecordOffsetSeeprom ( const char * i_record,
 // IpVpdFacade::getRecordListSeeprom
 // ------------------------------------------------------------------
 errlHndl_t
-IpVpdFacade::getRecordListSeeprom ( std::list<TocPtRecord> & o_recList,
+IpVpdFacade::getRecordListSeeprom ( std::list<pt_entry> & o_recList,
                                     TARGETING::Target * i_target,
                                     input_args_t i_args )
 {
@@ -1461,7 +1461,7 @@ IpVpdFacade::getRecordListSeeprom ( std::list<TocPtRecord> & o_recList,
     TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::getRecordListSeeprom()" );
 
     // Skip the ECC data + large resource ID in the VHDR
-    offset = VHDR_ECC_DATA_SIZE + VHDR_RESOURCE_ID_SIZE;
+    offset = VHDR_ECC_DATA_SIZE + RESOURCE_ID_SIZE;
 
     // Read PT keyword from VHDR to find the VTOC.
     size_t pt_len = sizeof(l_buffer);
@@ -1478,8 +1478,8 @@ IpVpdFacade::getRecordListSeeprom ( std::list<TocPtRecord> & o_recList,
         return err;
     }
 
-    TocPtRecord *toc_rec = reinterpret_cast<TocPtRecord*>(l_buffer);
-    if (pt_len < sizeof(TocPtRecord) ||
+    pt_entry *toc_rec = reinterpret_cast<pt_entry*>(l_buffer);
+    if (pt_len < sizeof(pt_entry) ||
         (memcmp(toc_rec->record_name, "VTOC",
                 sizeof(toc_rec->record_name)) != 0))
     {
@@ -1558,11 +1558,11 @@ IpVpdFacade::getRecordListSeeprom ( std::list<TocPtRecord> & o_recList,
         // Copy the records to the list
         for ( size_t vtoc_pt_offset = 0;
               vtoc_pt_offset < pt_len;
-              vtoc_pt_offset += sizeof(TocPtRecord) )
+              vtoc_pt_offset += sizeof(pt_entry) )
         {
             bool l_found = false;
             toc_rec =
-                reinterpret_cast<TocPtRecord*>(l_buffer + vtoc_pt_offset);
+                reinterpret_cast<pt_entry*>(l_buffer + vtoc_pt_offset);
 
             // Save record if on the list for this target
             for ( uint32_t rec = 0; rec < l_primaryRecSize; rec++ )

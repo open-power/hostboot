@@ -33,6 +33,7 @@
 #include <devicefw/driverif.H>
 #include "vpd.H"
 #include <eeprom/eeprom_const.H>
+#include <vpd/ipz_vpd_consts.H>
 
 /** @file ipvpd.H
  *  @brief Provides base support for i/p-Series style IBM VPD
@@ -45,35 +46,6 @@
 class IpVpdFacade
 {
   public:
-
-    /**
-     * @brief Miscellaneous IPVPD definitions
-     */
-    enum
-    {
-        RECORD_BYTE_SIZE        = 4,
-        RECORD_ADDR_BYTE_SIZE   = 2,
-        KEYWORD_BYTE_SIZE       = 2,
-        KEYWORD_SIZE_BYTE_SIZE  = 1,
-        RECORD_TOC_UNUSED       = 2,
-        RT_SKIP_BYTES           = 3,
-        VHDR_ECC_DATA_SIZE      = 11,
-        VHDR_RESOURCE_ID_SIZE   = 1,
-    };
-
-    /**
-     * @brief Structure representing the format of each record
-     *      in the PT keyword of the VTOC or VHDR.
-     */
-    struct TocPtRecord {
-        char record_name[4];
-        // All uint16 fields are stored in little endian.
-        uint16_t record_type;
-        uint16_t record_offset;
-        uint16_t record_length;
-        uint16_t ecc_offset;
-        uint16_t ecc_length;
-    } PACKED;
 
     /**
      * @brief Structure for all VPD dd input parameter arguments
@@ -497,7 +469,8 @@ class IpVpdFacade
      * @brief This function will scan the SEEPROM and return a list of VPD
      *      records for this target.
      *
-     * @param[out] o_recList - The list of VPD records.
+     * @param[out] o_recList - The list of entries in the pt keyword representing
+     *                         VPD records.
      *
      * @param[in] i_target - The target to retrieve the data for.
      *
@@ -506,7 +479,7 @@ class IpVpdFacade
      * @return errHndl_t - NULL if successful, otherwise a pointer to the
      *      error log.
      */
-    errlHndl_t getRecordListSeeprom ( std::list<TocPtRecord> & o_recList,
+    errlHndl_t getRecordListSeeprom ( std::list<pt_entry> & o_recList,
                                       TARGETING::Target * i_target,
                                       input_args_t i_args );
 
