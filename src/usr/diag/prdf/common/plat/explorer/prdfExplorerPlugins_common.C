@@ -259,6 +259,35 @@ int32_t CalloutAttachedDimmsHigh( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE( explorer_ocmb, CalloutAttachedDimmsHigh );
 
+/**
+ * @brief  Plugin to clear the side-effect mainline IUEs (RDFFIR[17]) when
+ *         we get a mainline UE (RDFFIR[14])
+ * @param  i_chip An OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t ClearMainlineIue( ExtensibleChip * i_chip,
+                          STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[explorer_ocmb::ClearMainlineIue] "
+
+    SCAN_COMM_REGISTER_CLASS * rdffir_and = i_chip->getRegister( "RDFFIR_AND" );
+
+    rdffir_and->setAllBits();
+    rdffir_and->ClearBit(17);
+
+    if ( SUCCESS != rdffir_and->Write() )
+    {
+        PRDF_ERR( PRDF_FUNC "Write() failed on RDFFFIR_AND. i_chip huid=0x%08x",
+                  i_chip->getHuid() );
+    }
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( explorer_ocmb, ClearMainlineIue );
+
 //------------------------------------------------------------------------------
 
 /**

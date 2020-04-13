@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2019
+# Contributors Listed Below - COPYRIGHT 2018,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -326,6 +326,7 @@ actionclass mainline_ue_handling_UERE
 {
     SueSource;
     mainline_ue_handling;
+    funccall("ClearMainlineIue");
 };
 
 /** Handle Mainline IUEs */
