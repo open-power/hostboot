@@ -38,6 +38,8 @@
 
 namespace PLDM
 {
+    using terminus_id = uint16_t;
+
     /**
     * @brief This function is intended to be used by the MCTP resource
     *        provider when they find a PLDM message and want the PLDM

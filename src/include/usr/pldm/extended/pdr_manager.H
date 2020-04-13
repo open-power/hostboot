@@ -36,7 +36,11 @@
 #include <sys/sync.h>
 #include <errl/errlentry.H>
 #include <sys/msg.h>
+#include <pldm/extended/hb_pdrs.H>
 #include <pldm/requests/pldm_pdr_requests.H>
+#include <pldm/requests/pldm_fru_requests.H>
+
+class PldmPdrTestSuite;
 
 namespace PLDM
 {
@@ -92,13 +96,13 @@ public:
      * @param[in] i_handles  PDR handles that have been added.
      * @return errlHndl_t    Error if any, otherwise nullptr.
      */
-    errlHndl_t sendPdrRepositoryChangeEvent(const std::vector<uint32_t>& i_handles) const;
+    errlHndl_t sendPdrRepositoryChangeEvent(const std::vector<pdr_handle_t>& i_handles) const;
 
     /* @brief Retrieves a list of all the PDR handles in this repository.
      *
-     * @return vector<uint32_t>  List of PDR handles in the repository
+     * @return vector<pdr_handle_t>  List of PDR handles in the repository
      */
-    std::vector<uint32_t> getAllPdrHandles() const;
+    std::vector<pdr_handle_t> getAllPdrHandles() const;
 
     /* @brief  Return the number of PDRs in the repository.
      *
@@ -134,23 +138,34 @@ public:
      */
     errlHndl_t awaitBmcPdrRepoChanged(size_t i_timeout_ms = TIMEOUT_NONE);
 
+    /* @brief  Collect the FRU Record Set IDs from all FRU Record Set PDRs for
+     *         the given entity type.
+     *
+     * @param[in] i_entity_type  Entity type to filter by
+     * @return vector            List of FRU Record Set IDs for the given entity type
+     */
+    std::vector<fru_record_set_id> findFruRecordSetIdsByType(entity_type i_entity_type) const;
+
     // The BMC TID is 1, HB is 2. It is important that the terminus IDs in the
     // system do not conflict with one another.
     static constexpr terminus_id hostboot_terminus_id = 2;
 
 private:
-    std::unique_ptr<pldm_pdr, void(*)(pldm_pdr*)> pdr_repo;
-    mutable mutex_t access_mutex;
+    std::unique_ptr<pldm_pdr, void(*)(pldm_pdr*)> iv_pdr_repo;
+    mutable mutex_t iv_access_mutex;
 
     // This unique_ptr points to access_mutex, and it will call mutex_destroy on
     // access_mutex when this object is destroyed.
-    std::unique_ptr<mutex_t, void(*)(mutex_t*)> access_mutex_owner;
+    std::unique_ptr<mutex_t, void(*)(mutex_t*)> iv_access_mutex_owner;
 
     // Holds a msg_q_t
-    std::shared_ptr<void> bmc_repo_changed_event_q;
+    std::shared_ptr<void> iv_bmc_repo_changed_event_q;
 
 protected:
     PdrManager();
+
+    // For testcases
+    friend class ::PldmPdrTestSuite;
 };
 
 /* @brief  Fetch the global PDR manager object.

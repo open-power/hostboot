@@ -32,14 +32,13 @@
 #define PLDM_PDR_REQUESTS_H
 
 #include <errl/errlentry.H>
+#include <pldm/pldmif.H>
 
 // Struct representing PDR repository (see DSP0248 v1.2.0, section 8)
 struct pldm_pdr;
 
 namespace PLDM
 {
-
-using terminus_id = uint16_t;
 
 using pdr_handle_t = uint32_t;
 

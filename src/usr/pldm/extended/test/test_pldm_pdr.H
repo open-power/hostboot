@@ -31,9 +31,17 @@
 #include <cxxtest/TestSuite.H>
 
 #include <pldm/extended/hb_pdrs.H>
+#include <pldm/extended/pdr_manager.H>
 
 #include "../../extern/pdr.h"
 #include "../../extern/platform.h"
+
+#include <targeting/common/target.H>
+#include <targeting/common/predicates/predicatehwas.H>
+#include <targeting/common/predicates/predicatectm.H>
+#include <targeting/common/predicates/predicatepostfixexpr.H>
+#include <targeting/common/iterators/rangefilter.H>
+#include <targeting/common/targetservice.H>
 
 class PldmPdrTestSuite : public CxxTest::TestSuite
 {
@@ -72,6 +80,48 @@ public:
         }
 
         TS_INFO("exit test_addHbPdrs");
+    }
+
+    void test_fruRecordSetIdLookup()
+    {
+        using namespace PLDM;
+        using namespace TARGETING;
+
+        TS_INFO("enter test_fruRecordSetIdLookup");
+
+        PdrManager pdrmgr;
+
+        pdrmgr.addLocalPdrs();
+
+        const auto dimm_rsids = pdrmgr.findFruRecordSetIdsByType(ENTITY_TYPE_DIMM);
+
+        TargetHandleList dimm_targets;
+
+        { // collect a list of all the present DIMM targets in the system
+            PredicateHwas l_predPres;
+            l_predPres.present(true);
+            PredicateCTM l_CtmFilter(CLASS_LOGICAL_CARD, TYPE_DIMM);
+            PredicatePostfixExpr l_present;
+            l_present.push(&l_CtmFilter).push(&l_predPres).And();
+            TargetRangeFilter l_presTargetList(targetService().begin(),
+                                               targetService().end(),
+                                               &l_present);
+            for ( ; l_presTargetList; ++l_presTargetList)
+            {
+                dimm_targets.push_back(*l_presTargetList);
+            }
+        }
+
+
+        if (dimm_rsids.size() != dimm_targets.size())
+        {
+            TS_FAIL("test_fruRecordSetIdLookup: findFruRecordSetIdsByType(ENTITY_TYPE_DIMM) "
+                    "returned %d RSIDs, expected %d",
+                    static_cast<int>(dimm_rsids.size()),
+                    static_cast<int>(dimm_targets.size()));
+        }
+
+        TS_INFO("exit test_fruRecordSetIdLookup");
     }
 };
 
