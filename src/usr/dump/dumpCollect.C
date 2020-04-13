@@ -913,13 +913,26 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
                 curDestTableAddr = destTableEntry[curDestIndex].dataAddr;
                 bytesLeftInDest = destTableEntry[curDestIndex].dataSize;
 
+                destOffset = curDestTableAddr
+                    - ALIGN_PAGE_DOWN(curDestTableAddr);
+
                 //check to see if there are contiguous destination addresses
                 while ((destTableEntry[curDestIndex].dataAddr +
                         destTableEntry[curDestIndex].dataSize) ==
                        destTableEntry[curDestIndex+1].dataAddr)
                 {
+                    uint64_t destSize = bytesLeftInDest + destOffset;
+
+                    // dataSize in dumpEntry structure is defined as a uint32_t.
+                    // Also, DevMap currently limits the size to 32GB.
+                    destSize += destTableEntry[curDestIndex].dataSize;
+                    if (destSize >= THIRTYTWO_GB)
+                    {
+                        break;
+                    }
+
                     curDestIndex++;
-                    bytesLeftInDest +=destTableEntry[curDestIndex].dataSize;
+                    bytesLeftInDest += destTableEntry[curDestIndex].dataSize;
                 }
 
                 // If the current dest addr or the size to copy are zero.
@@ -932,7 +945,8 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
                     {
                         // Write an error because we have more src entries
                         // then destination space available.
-                        TRACFCOMP(g_trac_dump, "HBDumpCopySrcToDest: not enough Destination table space");
+                        TRACFCOMP(g_trac_dump, "HBDumpCopySrcToDest: not enough"
+                                  "Destination table space");
 
                         /*@
                          * @errortype
@@ -964,9 +978,6 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
 
                     break;
                 }
-
-                destOffset =  curDestTableAddr
-                  - ALIGN_PAGE_DOWN(curDestTableAddr);
 
                 // If the data size is less then 32GB after page alignment
                 if (bytesLeftInDest + destOffset > THIRTYTWO_GB)
