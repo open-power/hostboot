@@ -1293,6 +1293,17 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_INVALID_OMI_POSITION</rc>
+    <description> An invalid OMI position was found in FIR unmask function</description>
+    <ffdc>POSITION</ffdc>
+    <ffdc>OMI_TARGET</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_PLUG_RULES_SINGLE_DDIMM_IN_WRONG_SLOT</rc>
     <description>
         A single DIMM was plugged into a secondary channel slot without
