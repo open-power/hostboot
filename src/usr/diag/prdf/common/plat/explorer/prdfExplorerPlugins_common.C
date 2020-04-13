@@ -110,55 +110,6 @@ PRDF_PLUGIN_DEFINE( explorer_ocmb, PostAnalysis );
 //##############################################################################
 
 /**
- * @brief  OCMB_LFIR[38] - DDR4 PHY interrupt
- * @param  i_chip An OCMB chip.
- * @param  io_sc  The step code data struct.
- * @return SUCCESS
- */
-int32_t Ddr4PhyInterrupt( ExtensibleChip * i_chip,
-                          STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[explorer_ocmb::Ddr4PhyInterrupt] "
-
-    SCAN_COMM_REGISTER_CLASS * rdffir = i_chip->getRegister( "RDFFIR" );
-
-    // If Mainline UE (RDFFIR[14]) or Maint UE (RDFFIR[34]) are on at the same
-    // time as this:
-    if ( rdffir->IsBitSet(14) || rdffir->IsBitSet(34) )
-    {
-        // callout Explorer on 1st
-        io_sc.service_data->SetThresholdMaskId(0);
-
-        // mask maint and mainline UE which are assumed to be side-effects
-        SCAN_COMM_REGISTER_CLASS * rdffir_mask_or =
-            i_chip->getRegister( "RDFFIR_MASK_OR" );
-
-        rdffir_mask_or->SetBit(14);
-        rdffir_mask_or->SetBit(34);
-
-        if ( SUCCESS != rdffir_mask_or->Write() )
-        {
-            PRDF_ERR( PRDF_FUNC "Write() failed on RDFFIR_MASK_OR: 0x%08x",
-                      i_chip->getHuid() );
-        }
-    }
-    else
-    {
-        //TODO RTC 200583
-        // callout Explorer on threshold (5/day)
-        // NOTE: in this case we will have to clear both hw driven checkers
-        // manually before clearing the FIR
-    }
-
-    return SUCCESS;
-
-    #undef PRDF_FUNC
-}
-PRDF_PLUGIN_DEFINE( explorer_ocmb, Ddr4PhyInterrupt );
-
-//------------------------------------------------------------------------------
-
-/**
  * @brief  OCMB_LFIR[39:46] - Foxhound Fatal
  * @param  i_chip An OCMB chip.
  * @param  io_sc  The step code data struct.

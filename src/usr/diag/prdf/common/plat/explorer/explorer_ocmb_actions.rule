@@ -261,14 +261,6 @@ actionclass TBDDefaultCallout
 #                                 OCMB Actions                                 #
 ################################################################################
 
-/** DDR4 PHY Interrupt */
-actionclass ddr4_phy_interrupt
-{
-    calloutSelfHigh;
-    threshold5pday;
-    funccall("Ddr4PhyInterrupt");
-};
-
 /** Foxhound Fatal */
 actionclass foxhound_fatal
 {
