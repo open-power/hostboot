@@ -1080,14 +1080,26 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Execute a set of CCS instructions - multiple ports
-/// @tparam P  the port type for this CCS engine
+/// @brief Configures the chip to properly execute CCS instructions
 /// @tparam MC the MC type on which to operate
+/// @tparam P  the port type for this CCS engine - derived from i_ports
+/// @param[in] i_ports the vector of ports
+/// @return FAPI2_RC_SUCCSS iff ok
+/// @note Code location for pre CCS execute workarounds
+///
+template< mss::mc_type MC, fapi2::TargetType P>
+fapi2::ReturnCode setup_to_execute(const std::vector< fapi2::Target<P> >& i_ports);
+
+///
+/// @brief Cleans up the chip from executing CCS instructions
+/// @tparam MC the MC type on which to operate
+/// @tparam P  the port type for this CCS engine - derived from i_ports
 /// @param[in] i_program the vector of instructions
 /// @param[in] i_ports the vector of ports
 /// @return FAPI2_RC_SUCCSS iff ok
+/// @note Code location for post CCS execute workarounds
 ///
-template< fapi2::TargetType P, mss::mc_type MC>
+template< mss::mc_type MC, fapi2::TargetType P>
 fapi2::ReturnCode cleanup_from_execute(const ccs::program& i_program,
                                        const std::vector< fapi2::Target<P> >& i_ports);
 
@@ -1216,6 +1228,9 @@ static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
     std::vector<rank_configuration> l_rank_configs;
     FAPI_TRY(get_rank_config(i_target, l_rank_configs));
 
+    // Pre CCS execution configuration
+    FAPI_TRY(setup_to_execute<DEFAULT_MC_TYPE>(i_ports));
+
     // Stop the CCS engine just for giggles - it might be running ...
     FAPI_TRY( start_stop(i_target, mss::states::STOP), "Error in ccs::execute" );
 
@@ -1297,7 +1312,7 @@ static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
     }
 
     // Cleans up after executing the CCS program (runs workarounds if needed)
-    FAPI_TRY((cleanup_from_execute<P, DEFAULT_MC_TYPE>(i_program, i_ports)));
+    FAPI_TRY((cleanup_from_execute<DEFAULT_MC_TYPE>(i_program, i_ports)));
 
 fapi_try_exit:
     i_program.iv_instructions.clear();

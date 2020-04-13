@@ -86,13 +86,26 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Configures the chip to properly execute CCS instructions - NIMBUS specialization
+/// @param[in] i_ports the vector of ports
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template<>
+fapi2::ReturnCode setup_to_execute<mss::mc_type::NIMBUS>(const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> >&
+        i_ports)
+{
+    // Nothing to do here for nimbus
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
 /// @brief Execute a set of CCS instructions - multiple ports - NIMBUS specialization
 /// @param[in] i_program the vector of instructions
 /// @param[in] i_ports the vector of ports
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template<>
-fapi2::ReturnCode cleanup_from_execute<fapi2::TARGET_TYPE_MCA, mss::mc_type::NIMBUS>(const ccs::program& i_program,
+fapi2::ReturnCode cleanup_from_execute<mss::mc_type::NIMBUS>(const ccs::program& i_program,
         const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> >& i_ports)
 {
 #if LRDIMM_CAPABLE
