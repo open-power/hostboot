@@ -1228,6 +1228,12 @@ class fields<DDR4, DDIMM_MODULE>
             THERM_SENSOR_DIFF_I2C_ADDRESS_START = 0,
             THERM_SENSOR_DIFF_I2C_ADDRESS_LEN = 8,
 
+            // Byte 512-513
+            MODULE_MFG_ID_CODE_LSB_BYTE = 512,
+            MODULE_MFG_ID_CODE_MSB_BYTE = 513,
+            MODULE_MFG_ID_CODE_START = 0,
+            MODULE_MFG_ID_CODE_LEN = 8,
+
             // Byte 552-553
             DRAM_MFR_ID_CODE_LSB_BYTE = 552,
             DRAM_MFR_ID_CODE_MSB_BYTE = 553,
@@ -1493,6 +1499,14 @@ class fields<DDR4, DDIMM_MODULE>
 
         // Byte 273: Differential Sensor I2C Address
         static constexpr field_t THERM_SENSOR_DIFF_I2C_ADDRESS{THERM_SENSOR_DIFF_I2C_ADDRESS_BYTE, THERM_SENSOR_DIFF_I2C_ADDRESS_START, THERM_SENSOR_DIFF_I2C_ADDRESS_LEN};
+
+        // MANF Section:
+        // Section is not standardized across dimm types, so these fields will live in the
+        // ddimm specific section
+
+        // Byte 512 and 513 Module MFG ID
+        static constexpr field_t MODULE_MFG_ID_CODE_LSB{MODULE_MFG_ID_CODE_LSB_BYTE, MODULE_MFG_ID_CODE_START, MODULE_MFG_ID_CODE_LEN};
+        static constexpr field_t MODULE_MFG_ID_CODE_MSB{MODULE_MFG_ID_CODE_MSB_BYTE, MODULE_MFG_ID_CODE_START, MODULE_MFG_ID_CODE_LEN};
 
         // Byte 552 and 553: DRAM manufacturing ID for DDIMMs
         static constexpr field_t DRAM_MFR_ID_CODE_LSB{DRAM_MFR_ID_CODE_LSB_BYTE, DRAM_MFR_ID_CODE_START, DRAM_MFR_ID_CODE_LEN};

@@ -1048,19 +1048,6 @@ class facade final
         }
 
         ///
-        /// @brief Decodes module manufacturer ID code
-        /// @param[out] o_value SPD encoded value
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode module_manufacturer_id_code( uint16_t& o_value ) const
-        {
-            FAPI_TRY( iv_base_cnfg_decoder->module_manufacturer_id_code(o_value) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
         /// @brief Decodes Module Manufacturing Location
         /// @param[out] o_value SPD encoded value
         /// @return FAPI2_RC_SUCCESS iff okay
@@ -1106,6 +1093,29 @@ class facade final
         fapi2::ReturnCode module_revision_code( uint8_t& o_value ) const
         {
             FAPI_TRY( iv_base_cnfg_decoder->module_revision_code(o_value) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Module Manufacturer ID code
+        /// @param[out] o_value SPD encoded value
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        fapi2::ReturnCode module_manufacturer_id_code( uint16_t& o_value ) const
+        {
+            // Some module fields are duplicated in the general section and
+            // dimm module sections of the SPD.  For DDIMMs, we want get it
+            // from the dimm module section instead of the general section.
+            if( iv_dimm_type == spd::DDIMM )
+            {
+                FAPI_TRY( iv_dimm_module_decoder->module_manufacturer_id_code(o_value) );
+            }
+            else
+            {
+                FAPI_TRY( iv_base_cnfg_decoder->module_manufacturer_id_code(o_value) );
+            }
 
         fapi_try_exit:
             return fapi2::current_err;

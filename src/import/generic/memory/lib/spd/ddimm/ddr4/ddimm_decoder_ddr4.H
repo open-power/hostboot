@@ -1600,6 +1600,32 @@ class decoder< DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
+        virtual fapi2::ReturnCode module_manufacturer_id_code(uint16_t& o_output) const override
+        {
+            uint8_t l_byte0 = 0;
+            uint8_t l_byte1 = 0;
+
+            FAPI_TRY( (mss::spd::reader<fields_t::MODULE_MFG_ID_CODE_LSB, R>(iv_target, iv_data, l_byte0)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::MODULE_MFG_ID_CODE_MSB, R>(iv_target, iv_data, l_byte1)) );
+
+            {
+                fapi2::buffer<uint16_t> l_buffer;
+                right_aligned_insert(l_buffer, l_byte1, l_byte0);
+                o_output = l_buffer;
+                FAPI_INF("%s. Module Manufacturer ID Code: 0x%04x",
+                         spd::c_str(iv_target),
+                         o_output);
+            }
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes DRAM manufacturing ID Code
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
         virtual fapi2::ReturnCode dram_manufacturer_id_code(uint16_t& o_output) const override
         {
             uint8_t l_byte0 = 0;

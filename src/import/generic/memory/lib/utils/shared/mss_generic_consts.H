@@ -277,6 +277,8 @@ enum generic_ffdc_codes
     MRS_MIRROR_MODE = 0x109E,
     MRS01_GEN = 0x109F,
     MRS02_GEN = 0x10A0,
+
+    SET_MODULE_MFG_ID = 0x10A1,
 };
 
 ///
