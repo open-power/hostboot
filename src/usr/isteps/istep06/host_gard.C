@@ -194,7 +194,6 @@ void* host_gard( void *io_pArgs )
             }
             else
             {
-/* FIXME RTC: 208838 Uncomment during SBE update development
                 // The masterCore may have a GARD record, update SBE
                 // and let it reboot to another core
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK"host_gard: "
@@ -203,9 +202,10 @@ void* host_gard( void *io_pArgs )
                 if(l_err)
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "host_gard: Error calling updateProcessorSbeSeeproms");
+                        "host_gard: Error calling updateProcessorSbeSeeproms"
+                        TRACE_ERR_FMT,
+                        TRACE_ERR_ARGS(l_err));
                 }
-*/
             }
             break;
         }

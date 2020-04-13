@@ -209,7 +209,7 @@ void*    call_mss_freq( void *io_pArgs )
 
         // FW examines the master SBE boot scratch registers versus
         // system MRW ATTR and will customize the master SBE and reboot
-        // if necessary(slaves get data via mbox scratch registers)
+        // if necessary (slaves get data via mbox scratch registers)
         //
         if(l_newOmiFreq  != l_originalOmiFreq)
         {
@@ -247,9 +247,12 @@ void*    call_mss_freq( void *io_pArgs )
             }
             else
             {
-                // RTC 249246 Needs SBE.bin with VERSION and p10_ipl_customize memory paging resolved
-                // Disabled until we can build customized image
-                // l_err = SBE::updateProcessorSbeSeeproms();
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Need to updateProcessorSbeSeeproms due to "
+                    "OMI frequency desired changed from system MRW ATTR "
+                    " Original Omi : %d New Omi : %d",
+                    l_originalOmiFreq, l_newOmiFreq);
+                l_err = SBE::updateProcessorSbeSeeproms();
 
                 if(l_err)
                 {

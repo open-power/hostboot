@@ -41,6 +41,7 @@
 #include <initservice/isteps_trace.H>
 #include <initservice/initserviceif.H>
 #include <isteps/hwpisteperror.H>
+#include <istepHelperFuncs.H>
 #include <initservice/isteps_trace.H>
 #include <hwas/common/hwas.H>
 #include <hwas/common/hwasCommon.H>
@@ -665,8 +666,6 @@ void* host_discover_targets( void *io_pArgs )
     print_system_info();
 #endif
 
-#if 0  // FIXME RTC: 208838 Uncomment during SBE update development
-
     // Handle the case where we don't have a valid memory map swap victim due
     //  to a module swap - See TARGETING::adjustMemoryMap()
     if( l_pTopLevel->getAttr<TARGETING::ATTR_FORCE_SBE_UPDATE>()
@@ -677,9 +676,10 @@ void* host_discover_targets( void *io_pArgs )
         if(l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "host_discover_targets: Error calling updateProcessorSbeSeeproms");
-            l_stepError.addErrorDetails( l_err );
-            errlCommit( l_err, ISTEP_COMP_ID );
+                      "host_discover_targets: Error calling updateProcessorSbeSeeproms"
+                      TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(l_err));
+            captureError(l_err, l_stepError, ISTEP_COMP_ID);
         }
 
         // We should never get here, if we do that means the SBE update didn't
@@ -719,7 +719,6 @@ void* host_discover_targets( void *io_pArgs )
         l_stepError.addErrorDetails( l_err );
         errlCommit( l_err, ISTEP_COMP_ID );
     }
-#endif
 
     // Now that we have all of the targets set up we can assign HBRT ids
     // to all of the targets. These are the IDs the Hypervisors use to ID

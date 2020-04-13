@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -258,7 +258,13 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
             // Update attributes
             (l_procIds[i].proc)->
               setAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>(l_procIds[i].topoId);
-
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "Need to run updateProcessorSbeSeeproms due to "
+                  "topology checks "
+                  "Proc %.8X: topoIdEff = %d, topoId = %d",
+                  get_huid(l_procIds[i].proc),
+                  l_procIds[i].topoIdEff,
+                  l_procIds[i].topoId);
             l_updateNeeded = true;
         }
 
@@ -298,9 +304,7 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
                           "Attributes to FSP" );
             }
 
-            // Rebuild SBE image and trigger reconfig loop
-            // TODO RTC 208838 -- P10 SBE Update
-            //l_err = SBE::updateProcessorSbeSeeproms();
+            l_err = SBE::updateProcessorSbeSeeproms();
 
             if( l_err )
             {
@@ -384,8 +388,7 @@ void check_hrmor_within_range (ATTR_PROC_MEM_TO_USE_type i_proc_mem_to_use,
             "check_hrmor_within_range: sbe is downleveled - update required");
 
         // Rebuild SBE image and trigger reconfig loop
-        // TODO RTC 208838 -- P10 SBE Update
-        //l_err = SBE::updateProcessorSbeSeeproms();
+        l_err = SBE::updateProcessorSbeSeeproms();
         if( l_err )
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -526,8 +529,7 @@ void*    call_mss_attr_update( void *io_pArgs )
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                           "Forcing SBE update to fix old memory swap");
-                // TODO RTC 208838 -- P10 SBE Update
-                //l_err = SBE::updateProcessorSbeSeeproms();
+                l_err = SBE::updateProcessorSbeSeeproms();
                 if( l_err )
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
