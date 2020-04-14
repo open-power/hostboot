@@ -6581,6 +6581,40 @@
   </enumerationType>
 
   <enumerationType>
+    <description>
+        Enumeration for processor module type that come from HDAT spec
+        0x50 = DCM
+        0x51 = SCM
+    </description>
+    <enumerator>
+      <name>GODEL</name>
+      <value>0x50</value>
+    </enumerator>
+    <enumerator>
+      <name>BLAISE</name>
+      <value>0x51</value>
+    </enumerator>
+    <id>PROC_MODULE_TYPE</id>
+  </enumerationType>
+
+  <attribute>
+    <id>PROC_MODULE_TYPE</id>
+    <description>
+      Enumeration of the type of processor module used in the system.
+      Expected to be filled out by the MRW and expected to be the same
+      for every processor module in the system
+    </description>
+    <simpleType>
+      <enumeration>
+        <id>PROC_MODULE_TYPE</id>
+      </enumeration>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <mrwRequired/>
+  </attribute>
+
+  <enumerationType>
     <description>Enumeration indicating which _PBIEX_ASYNC_SEL should be use</description>
     <enumerator>
       <name>SEL0</name>
