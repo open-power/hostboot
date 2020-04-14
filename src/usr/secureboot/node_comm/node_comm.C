@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -84,7 +84,7 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
     const uint64_t interval_ns = NODE_COMM_POLL_DELAY_NS;
     uint64_t time_polled_ns = 0;
 
-    TRACUCOMP(g_trac_nc,ENTER_MRK"nodeCommAbusRecvMessage: pProc=0x%.08X",
+    TRACUTCOMP(g_trac_nc,ENTER_MRK"nodeCommAbusRecvMessage: pProc=0x%.08X",
               get_huid(i_pProc));
 
     do
@@ -109,7 +109,7 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
         }
         if (attn_found == true)
         {
-            TRACUCOMP(g_trac_nc,INFO_MRK"nodeCommAbusRecvMessage: "
+            TRACUTCOMP(g_trac_nc,INFO_MRK"nodeCommAbusRecvMessage: "
               "nodeCommMapAttn attn_found (%d) for Tgt=0x%.08X, link=%d, "
               "mbox=%d",
               attn_found, get_huid(i_pProc), actual_linkId, actual_mboxId);
@@ -257,7 +257,7 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
 
     } while( 0 );
 
-    TRACUCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusRecvMessage: "
+    TRACUTCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusRecvMessage: "
               "Tgt=0x%.08X, link=%d, mbox=%d attn_found=%d: "
               "data=0x%.16llX. "
               TRACE_ERR_FMT,
@@ -281,7 +281,7 @@ errlHndl_t nodeCommAbusSendMessage(TARGETING::Target* i_pProc,
 {
     errlHndl_t err = nullptr;
 
-    TRACUCOMP(g_trac_nc,ENTER_MRK"nodeCommAbusSendMessage: iProc=0x%.08X "
+    TRACUTCOMP(g_trac_nc,ENTER_MRK"nodeCommAbusSendMessage: iProc=0x%.08X "
               "to send data=0x%.16llX through linkId=%d mboxId=%d",
               get_huid(i_pProc), i_data, i_linkId, i_mboxId);
 
@@ -312,7 +312,7 @@ errlHndl_t nodeCommAbusSendMessage(TARGETING::Target* i_pProc,
 
     } while( 0 );
 
-    TRACUCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusSendMessage: iProc=0x%.08X "
+    TRACUTCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusSendMessage: iProc=0x%.08X "
               "send data=0x%.16llX through linkId=%d mboxId=%d: "
               TRACE_ERR_FMT,
               get_huid(i_pProc), i_data, i_linkId, i_mboxId,
@@ -351,7 +351,7 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
 
     const size_t expSize = sizeof(fir_data);
 
-    TRACUCOMP(g_trac_nc,ENTER_MRK
+    TRACUTCOMP(g_trac_nc,ENTER_MRK
               "nodeCommMapAttn: tgt=0x%X, mode=%s, fir_addr=0x%.16llX",
               get_huid(i_pProc),
               (i_mode == NCDD_MODE_ABUS)
@@ -386,13 +386,13 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
     // Map Attention bits in the FIR
     fir_data_with_mask = fir_data & fir_mask;
     const int bit_count = __builtin_popcount(fir_data_with_mask);
-    TRACUCOMP(g_trac_nc,"nodeCommMapAttn: FIR data = 0x%.16llX, "
+    TRACUTCOMP(g_trac_nc,"nodeCommMapAttn: FIR data = 0x%.16llX, "
               "mask=0x%.16llX, data+mask=0x%.16llX, count=%d",
               fir_data, fir_mask, fir_data_with_mask, bit_count);
 
     if (bit_count == 0)
     {
-        TRACUCOMP(g_trac_nc,INFO_MRK"nodeCommMapAttn: no attentions found: "
+        TRACUTCOMP(g_trac_nc,INFO_MRK"nodeCommMapAttn: no attentions found: "
                   "FIR data = 0x%.16llX, mask=0x%.16llX, data+mask=0x%.16llX",
                   fir_data, fir_mask, fir_data_with_mask);
         break;
@@ -453,7 +453,7 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
             o_linkId = (bit / 2);
             o_mboxId = (bit % 2);
 
-            TRACUCOMP(g_trac_nc,INFO_MRK"nodeCommMapAttn: tgt=0x%X: "
+            TRACUTCOMP(g_trac_nc,INFO_MRK"nodeCommMapAttn: tgt=0x%X: "
                       "o_attn_found=%d, o_linkId=%d, mboxId=%d, "
                       TRACE_ERR_FMT,
                       get_huid(i_pProc), o_attn_found, o_linkId, o_mboxId,
@@ -464,7 +464,7 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
 
     } while( 0 );
 
-    TRACUCOMP(g_trac_nc,EXIT_MRK"nodeCommMapAttn: tgt=0x%X: "
+    TRACUTCOMP(g_trac_nc,EXIT_MRK"nodeCommMapAttn: tgt=0x%X: "
               "o_attn_found=%d, o_linkId=%d, mboxId=%d, "
               TRACE_ERR_FMT,
               get_huid(i_pProc), o_attn_found, o_linkId, o_mboxId,
@@ -507,7 +507,7 @@ errlHndl_t getObusTrainedLinks(TARGETING::Target* i_pObus,
 
     assert(i_pObus != nullptr, "getObusTrainedLinks: i_pObus == nullptr");
 
-    TRACUCOMP(g_trac_nc,ENTER_MRK
+    TRACUTCOMP(g_trac_nc,ENTER_MRK
               "getObusTrainedLinks: OBUS tgt=0x%X",
               get_huid(i_pObus));
 
@@ -690,7 +690,7 @@ void addNodeCommBusCallout(const node_comm_modes_t i_mode,
         }
         l_ep2_path_str = l_ep2.toString();
 
-        TRACUCOMP(g_trac_nc,INFO_MRK"addNodeCommBusCallout: Checking "
+        TRACUTCOMP(g_trac_nc,INFO_MRK"addNodeCommBusCallout: Checking "
                       "i_pProc 0x%.08X BUS HUID 0x%.08X's (%s) PEER_PATH: %s",
                       get_huid(i_pProc), get_huid(l_busTgt),
                       l_ep1_path_str,
@@ -700,7 +700,7 @@ void addNodeCommBusCallout(const node_comm_modes_t i_mode,
                                   l_ep2.pathElementOfType(l_type);
         if(l_ep2_peBus.type == TYPE_NA)
         {
-            TRACUCOMP(g_trac_nc,INFO_MRK"addNodeCommBusCallout: "
+            TRACUTCOMP(g_trac_nc,INFO_MRK"addNodeCommBusCallout: "
                       "Skipping i_pProc 0x%.08X "
                       "BUS HUID 0x%.08X's (%s) PEER_PATH %s because "
                       "cannot find BUS in PEER_PATH",
@@ -766,7 +766,7 @@ void addNodeCommBusCallout(const node_comm_modes_t i_mode,
                     }
                     l_ep2_path_str = l_smpGroup_peer_ep.toString();
 
-                    TRACUCOMP(g_trac_nc,INFO_MRK"addNodeCommBusCallout: "
+                    TRACUTCOMP(g_trac_nc,INFO_MRK"addNodeCommBusCallout: "
                               "SMPGROUP HUID: 0x%.08X (%s): rel_pos=%d, "
                               "instance=%d: peer=%s",
                               get_huid(l_smpGroup),
@@ -776,7 +776,7 @@ void addNodeCommBusCallout(const node_comm_modes_t i_mode,
                               l_ep2_path_str);
 
                     // Find matching instance and relative link Id
-                    if ((l_smpGroup_ep_peSmpGroup.instance % 2) == 
+                    if ((l_smpGroup_ep_peSmpGroup.instance % 2) ==
                         (i_linkId % 2))
                     {
                         found_peer_endpoint = true;
@@ -813,7 +813,7 @@ void addNodeCommBusCallout(const node_comm_modes_t i_mode,
         }
         else
         {
-            TRACUCOMP(g_trac_nc,INFO_MRK"addNodeCommBusCallout: "
+            TRACUTCOMP(g_trac_nc,INFO_MRK"addNodeCommBusCallout: "
                       "Skipping i_pProc 0x%.08X BUS HUID 0x%.08X's "
                       "PEER_PATH %s because ep1 bus instance (%d) does not "
                       "match instance (%d) converted from i_linkId (%d)",

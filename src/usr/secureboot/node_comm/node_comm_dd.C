@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -177,7 +177,7 @@ errlHndl_t nodeCommPerformOp( DeviceFW::OperationType i_opType,
         break;
     }
 
-    TRACUCOMP(g_trac_nc,ENTER_MRK"nodeCommPerformOp: %s: %s: "
+    TRACUTCOMP(g_trac_nc,ENTER_MRK"nodeCommPerformOp: %s: %s: "
               "tgt=0x%X, LinkId=%d, MboxId=%d, data=0x%.16llX",
               (node_comm_args.mode == NCDD_MODE_ABUS)
               ? NCDD_ABUS_STRING : NCDD_XBUS_STRING,
@@ -253,7 +253,7 @@ errlHndl_t nodeCommPerformOp( DeviceFW::OperationType i_opType,
     }
 
 
-    TRACUCOMP (g_trac_nc, EXIT_MRK"nodeCommPerformOp: %s: %s: "
+    TRACUTCOMP (g_trac_nc, EXIT_MRK"nodeCommPerformOp: %s: %s: "
                "tgt=0x%X, LinkId=%d, MboxId=%d, data=0x%.16llX. "
                TRACE_ERR_FMT,
                (node_comm_args.mode == NCDD_MODE_ABUS)
@@ -321,7 +321,7 @@ errlHndl_t ncddRead(node_comm_args_t & i_args)
 
     uint64_t reg_addr = getLinkMboxRegAddr(NCDD_REG_FIR_WOX_AND, i_args.mode);
 
-    TRACUCOMP(g_trac_nc,"ncddRead: Clearing FIR bit 0x%.16llX based on "
+    TRACUTCOMP(g_trac_nc,"ncddRead: Clearing FIR bit 0x%.16llX based on "
               "linkId=%d, mboxId=%d, mode=%s, by writing 0x%.16llX to FIR Reg "
               "Addr 0x%.16llX on Target 0x%X",
               fir_attn_bit, i_args.linkId, i_args.mboxId,
@@ -348,7 +348,7 @@ errlHndl_t ncddRead(node_comm_args_t & i_args)
 
     } while( 0 );
 
-    TRACUCOMP( g_trac_nc,EXIT_MRK"ncddRead: "
+    TRACUTCOMP( g_trac_nc,EXIT_MRK"ncddRead: "
                TRACE_ERR_FMT,
                TRACE_ERR_ARGS(err));
 
@@ -457,7 +457,7 @@ errlHndl_t ncddWrite (node_comm_args_t & i_args)
 
     } while( 0 );
 
-    TRACUCOMP( g_trac_nc,EXIT_MRK"ncddWrite: "
+    TRACUTCOMP( g_trac_nc,EXIT_MRK"ncddWrite: "
                TRACE_ERR_FMT,
                TRACE_ERR_ARGS(err));
 
@@ -472,7 +472,7 @@ errlHndl_t ncddCheckStatus (node_comm_args_t & i_args,
     errlHndl_t err = nullptr;
     bool errorFound = false;
 
-    TRACUCOMP( g_trac_nc,
+    TRACUTCOMP( g_trac_nc,
                ENTER_MRK"ncddCheckStatus(): Tgt=0x%X: 0x%.16llX",
                i_args.tgt_huid,
                i_statusVal.value );
@@ -550,7 +550,7 @@ errlHndl_t ncddCheckStatus (node_comm_args_t & i_args,
 
     } while( 0 );
 
-    TRACUCOMP( g_trac_nc,EXIT_MRK"ncddCheckStatus: "
+    TRACUTCOMP( g_trac_nc,EXIT_MRK"ncddCheckStatus: "
                TRACE_ERR_FMT,
                TRACE_ERR_ARGS(err));
 
@@ -567,7 +567,7 @@ errlHndl_t ncddWaitForCmdComp (node_comm_args_t & i_args,
     int timeout_ns = NODE_COMM_DD_POLL_DELAY_TOTAL_NS;
     ctrl_reg_t ctrl_reg_status;
 
-    TRACUCOMP(g_trac_nc, "ncddWaitForCmdComp(): timeout_ns=%d, "
+    TRACUTCOMP(g_trac_nc, "ncddWaitForCmdComp(): timeout_ns=%d, "
               "interval_ns=%d", timeout_ns, interval_ns);
 
     do
@@ -660,7 +660,7 @@ errlHndl_t ncddWaitForCmdComp (node_comm_args_t & i_args,
 
     o_statusVal = ctrl_reg_status;
 
-    TRACUCOMP( g_trac_nc,EXIT_MRK"ncddWaitForCmdComp: "
+    TRACUTCOMP( g_trac_nc,EXIT_MRK"ncddWaitForCmdComp: "
                TRACE_ERR_FMT,
                TRACE_ERR_ARGS(err));
 
@@ -729,7 +729,7 @@ errlHndl_t ncddRegisterOp ( DeviceFW::OperationType i_opType,
     const size_t expSize = sizeof(i_reg);
     uint64_t l_reg = getLinkMboxRegAddr(i_reg, i_args.mode);
 
-    TRACUCOMP(g_trac_nc,ENTER_MRK"ncddRegisterOp: %s: %s: "
+    TRACUTCOMP(g_trac_nc,ENTER_MRK"ncddRegisterOp: %s: %s: "
               "tgt=0x%X, reg_addr=0x%.16llX, data=0x%.16llX",
               (i_args.mode == NCDD_MODE_ABUS)
                 ? NCDD_ABUS_STRING : NCDD_XBUS_STRING,
@@ -764,7 +764,7 @@ errlHndl_t ncddRegisterOp ( DeviceFW::OperationType i_opType,
 
     } while (0);
 
-    TRACUCOMP(g_trac_nc,EXIT_MRK"ncddRegisterOp: %s: %s: "
+    TRACUTCOMP(g_trac_nc,EXIT_MRK"ncddRegisterOp: %s: %s: "
               "tgt=0x%X, reg_addr=0x%.16llX, data=0x%.16llX. "
               TRACE_ERR_FMT,
               (i_args.mode == NCDD_MODE_ABUS)

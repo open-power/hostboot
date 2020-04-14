@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -214,27 +214,30 @@ namespace TRUSTEDBOOT
         size_t newLogSize = TCG_PCR_EVENT2_marshalSize(i_logEvent);
 
         TRACUCOMP( g_trac_trustedboot,
-                   ">>tpmAddEvent() PCR:%d Type:%d Size:%d",
+                   ">>tpmAddEvent() PCR:%d Type:%d Size:%d. "
+                   "(Current LS(%d) Max LS(%d))",
                    i_logEvent->pcrIndex,
                    i_logEvent->eventType,
-                   (int)newLogSize);
+                   static_cast<int>(newLogSize),
+                   static_cast<int>(i_val->logSize),
+                   static_cast<int>(i_val->logMaxSize));
 
         mutex_lock( &i_val->logMutex );
 
         do
         {
-
             // Need to ensure we have room for the new event
             // We have to leave room for the log full event as well
-            if (NULL == i_val->newEventPtr ||
-                i_val->logSize + newLogSize > i_val->logMaxSize)
+            if ((NULL == i_val->newEventPtr) ||
+                (i_val->logSize + newLogSize > i_val->logMaxSize) ||
+                (newLogSize > MAX_TPM_LOG_MSG))
             {
                 TRACFCOMP( g_trac_trustedboot,
                            "TPM LOG ADD FAIL PNULL(%d) LS(%d) New LS(%d)"
-                           " Max LS(%d)",
+                           " Max LS(%d) Max LMS(%d)",
                            (NULL == i_val->newEventPtr ? 0 : 1),
                            (int)i_val->logSize, (int)newLogSize,
-                           (int)i_val->logMaxSize);
+                           (int)i_val->logMaxSize, MAX_TPM_LOG_MSG);
 
                 /*@
                  * @errortype
@@ -243,17 +246,22 @@ namespace TRUSTEDBOOT
                  * @moduleid       MOD_TPMLOGMGR_ADDEVENT
                  * @userdata1[0:31]  Max log size
                  * @userdata1[32:63] Log buffer NULL
-                 * @userdata2[0:31]  Current Log Size
+                 * @userdata2[0:15]  Current Log Size
+                 * @userdata2[16:31] Max TPM Log Message Size
                  * @userdata2[32:63] New entry size
                  * @devdesc        TPM log buffer add failure.
                  * @custdesc       TPM log overflow
                  */
                 err = tpmCreateErrorLog( MOD_TPMLOGMGR_ADDEVENT,
                                          RC_TPMLOGMGR_ADDEVENT_FAIL,
-                                         (uint64_t)i_val->logMaxSize << 32 |
+                                         static_cast<uint64_t>(
+                                           i_val->logMaxSize) << 32 |
                                          (NULL == i_val->newEventPtr ? 0 : 1),
-                                         (uint64_t)i_val->logSize << 32 |
-                                         newLogSize);
+                                         TWO_UINT16_ONE_UINT32_TO_UINT64(
+                                           static_cast<uint16_t>(
+                                             i_val->logSize),
+                                           MAX_TPM_LOG_MSG,
+                                           newLogSize));
 
                 break;
             }

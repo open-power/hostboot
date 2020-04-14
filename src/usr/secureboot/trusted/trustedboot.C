@@ -71,7 +71,7 @@
 #include <algorithm>
 #include <util/misc.H>
 #include <hwas/common/hwasCommon.H>
-
+#include <kernel/bltohbdatamgr.H>
 
 namespace TRUSTEDBOOT
 {
@@ -663,6 +663,10 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* const i_pTpm)
                             TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL);
         if (l_err)
         {
+            TRACFCOMP(g_trac_trustedboot, ERR_MRK"tpmLogConfigEntries() - "
+                      "Call to SECUREBOOT::getSecuritySwitch Failed: "
+                      TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(l_err));
             break;
         }
         TRACFCOMP(g_trac_trustedboot, "security switch value = 0x%016lX",
@@ -675,6 +679,10 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* const i_pTpm)
                           l_sswitchesLogMsg, sizeof(l_sswitchesLogMsg));
         if (l_err)
         {
+            TRACFCOMP(g_trac_trustedboot, ERR_MRK"tpmLogConfigEntries() - "
+                      "Call to pcrExtend for Security Switches Failed: "
+                      TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(l_err));
             break;
         }
         memset(l_digest, 0, sizeof(uint64_t));
@@ -698,6 +706,10 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* const i_pTpm)
                           sizeof(l_pvrLogMsg));
         if (l_err)
         {
+            TRACFCOMP(g_trac_trustedboot, ERR_MRK"tpmLogConfigEntries() - "
+                      "Call to pcrExtend for PVR of Chip Failed: "
+                      TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(l_err));
             break;
         }
         memset(l_digest, 0, sizeof(uint64_t));
@@ -713,7 +725,7 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* const i_pTpm)
         uint64_t l_nodeid = l_pathElement.instance;
         // Extend to TPM - PCR_1,4,5,6
         memcpy(l_digest, &l_nodeid, sizeof(l_nodeid));
-        const TPM_Pcr l_pcrs[] = {PCR_1,PCR_4,PCR_5,PCR_6};
+        const TPM_Pcr l_pcrs[] = {PCR_1,PCR_4,PCR_5};
         for (size_t i = 0; i < (sizeof(l_pcrs)/sizeof(TPM_Pcr)) ; ++i)
         {
             uint8_t l_nodeIdLogMsg[] = "Node id";
@@ -724,6 +736,12 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* const i_pTpm)
                               sizeof(l_nodeIdLogMsg));
             if (l_err)
             {
+                TRACFCOMP(g_trac_trustedboot, ERR_MRK"tpmLogConfigEntries() - "
+                          "Call to pcrExtend for Node id Failed for "
+                          "l_pcrs[i=%d]: %d. "
+                          TRACE_ERR_FMT,
+                          i, l_pcrs[i],
+                          TRACE_ERR_ARGS(l_err));
                 break;
             }
         }
@@ -743,6 +761,10 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* const i_pTpm)
                           sizeof(l_tpmRequiredLogMsg));
         if (l_err)
         {
+            TRACFCOMP(g_trac_trustedboot, ERR_MRK"tpmLogConfigEntries() - "
+                      "Call to pcrExtend for TPM Required Failed: "
+                      TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(l_err));
             break;
         }
 
@@ -750,16 +772,84 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* const i_pTpm)
         SHA512_t l_hw_key_hash;
         SECUREBOOT::getHwKeyHash(l_hw_key_hash);
         uint8_t l_hwKeyHashLogMsg[] = "HW KEY HASH";
-        l_err = pcrExtend(PCR_1, EV_PLATFORM_CONFIG_FLAGS,
-                          l_hw_key_hash,
-                          sizeof(SHA512_t),l_hwKeyHashLogMsg,
-                          sizeof(l_hwKeyHashLogMsg));
+        const TPM_Pcr l_pcrs2[] = {PCR_1,PCR_6};
+        for (size_t i = 0; i < (sizeof(l_pcrs2)/sizeof(TPM_Pcr)) ; ++i)
+        {
+            l_err = pcrExtend(l_pcrs2[i],
+                              EV_PLATFORM_CONFIG_FLAGS,
+                              l_hw_key_hash,
+                              sizeof(SHA512_t),
+                              l_hwKeyHashLogMsg,
+                              sizeof(l_hwKeyHashLogMsg));
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_trustedboot, ERR_MRK"tpmLogConfigEntries() - "
+                          "Call to pcrExtend for HW Key Hash "
+                          "l_pcrs2[i=%d]: %d. "
+                          TRACE_ERR_FMT,
+                          i, l_pcrs2[i],
+                          TRACE_ERR_ARGS(l_err));
+                break;
+            }
+        }
         if (l_err)
         {
             break;
         }
 
+        // Put Security jumper state boolean into PCR_6
+        bool l_jumper_state = (l_securitySwitchValue &
+                               static_cast<uint64_t>(
+                                 SECUREBOOT::ProcCbsControl::JumperStateBit));
+
+        memset(l_digest, 0, sizeof(uint64_t));
+        l_digest[0] = static_cast<uint8_t>(l_jumper_state);
+        uint8_t l_jumperStateLogMsg[] = "Security Jumper State";
+        l_err = pcrExtend(PCR_6, EV_PLATFORM_CONFIG_FLAGS,
+                          l_digest, sizeof(l_jumper_state),
+                          l_jumperStateLogMsg,
+                          sizeof(l_jumperStateLogMsg));
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_trustedboot, ERR_MRK"tpmLogConfigEntries() - "
+                      "Call to pcrExtend for Jumper State Bit Failed: "
+                      TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(l_err));
+            break;
+        }
+
+        // Put truncated SHA512 hash of SBE secureboot validation code
+        // (aka SecureROM) into PCR_6
+        if (g_BlToHbDataManager.isValid())
+        {
+            // Get location and size of SecureROM and then hash it
+            const void * l_secureRomLocation = g_BlToHbDataManager.getSecureRom();
+            size_t l_secureRomSize = g_BlToHbDataManager.getSecureRomSize();
+
+            SHA512_t l_secure_rom_hash={0};
+            SECUREBOOT::hashBlob(l_secureRomLocation, l_secureRomSize, l_secure_rom_hash);
+
+            // Extend hash to PCR_6
+            uint8_t l_secureRomLogMsg[] = "SecureROM HASH";
+            l_err = pcrExtend(PCR_6,
+                              EV_PLATFORM_CONFIG_FLAGS,
+                              l_secure_rom_hash,
+                              sizeof(SHA512_t),
+                              l_secureRomLogMsg,
+                              sizeof(l_secureRomLogMsg));
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_trustedboot, ERR_MRK"tpmLogConfigEntries() - "
+                          "Call to pcrExtend for SecureROM Hash Failed: "
+                          TRACE_ERR_FMT,
+                          TRACE_ERR_ARGS(l_err));
+                break;
+            }
+        }
+
     } while(0);
+
+    TRACUCOMP(g_trac_trustedboot, EXIT_MRK"tpmLogConfigEntries()");
 
     return l_err;
 }
@@ -852,6 +942,8 @@ void pcrExtendSeparator(TpmTarget* const i_pTpm)
     assert(i_pTpm->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_TPM,
            "pcrExtendSeparator: BUG! Expected target to be of TPM type, but "
            "it was of type 0x%08X",i_pTpm->getAttr<TARGETING::ATTR_TYPE>());
+
+    TRACUCOMP(g_trac_trustedboot, ENTER_MRK"pcrExtendSeparator()");
 
     errlHndl_t err = nullptr;
     TCG_PCR_EVENT2 eventLog = {0};
@@ -946,6 +1038,9 @@ void pcrExtendSeparator(TpmTarget* const i_pTpm)
     {
         mutex_unlock( i_pTpm->getHbMutexAttr<TARGETING::ATTR_HB_TPM_MUTEX>() ) ;
     }
+
+    TRACUCOMP(g_trac_trustedboot, EXIT_MRK"pcrExtendSeparator()");
+
     return;
 }
 

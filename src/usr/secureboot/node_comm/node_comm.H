@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,9 @@
 // ----------------------------------------------
 #define NODECOMM_TRACE_NAME "NODECOMM"
 extern trace_desc_t* g_trac_nc;
+
+// Switch from TRACDCOMP to TRACFCOMP to enable unit test tracing
+#define TRACUTCOMP(args...) TRACDCOMP(args)
 
 namespace SECUREBOOT
 {
