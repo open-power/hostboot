@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -277,7 +277,6 @@ struct DeviceInfo_t
     // describes i2c device, null-terminated string
     // SEEPROMS:        <vendor>,<device type>,<data type>,<hw subsystem>
     // GPIO expanders:  <vendor>,<device type>,<domain>,<purpose>
-    // TPM:             <vendor>,<device type>,<purpose>,<scope>
     char deviceLabel[64];
 };
 

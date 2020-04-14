@@ -6,7 +6,6 @@ and slave devices. For P10, there are 5 SPI engines.
 Engines 0 and 1 are for the boot primary and backup seeproms.
 Engines 2 and 3 are for the MVPD/Measurement primary and backups.
 Engine 4 is for the TPM.
-Engine 5 is for the DUMP.
 
 There are two ways to access Engines 0-3, CFAM and PIB. These paths are
 controlled via a mux that is set by a root control register.

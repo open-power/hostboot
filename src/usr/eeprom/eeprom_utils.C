@@ -997,16 +997,16 @@ void getEEPROMs( std::list<EepromInfo_t>& o_info )
     TRACFCOMP(g_trac_eeprom,">>getEEPROMs()");
 
     // We only want to have a single entry in our list per
-    //  physical EEPROM.  Since multiple targets could be
-    //  using the same EEPROM, we need to have a hierarchy
-    //  of importance.
-    //    node/planar > proc > membuf > dimm
+    // physical EEPROM.  Since multiple targets could be
+    // using the same EEPROM, we need to have a hierarchy
+    // of importance.
+    // node/planar > proc > membuf > dimm
 
     // predicate to only look for this that are actually there
     TARGETING::PredicateHwas isPresent;
     isPresent.reset().poweredOn(true).present(true);
 
-    bool allowDupEntries = true;
+    bool allowDupEntries = false;
 
     // #1 - Nodes
     TARGETING::PredicateCTM nodes( TARGETING::CLASS_ENC,
@@ -1019,7 +1019,7 @@ void getEEPROMs( std::list<EepromInfo_t>& o_info )
                                            &l_nodeFilter );
     for( ; node_itr; ++node_itr )
     {
-        add_to_list( o_info, *node_itr, !allowDupEntries );
+        add_to_list( o_info, *node_itr, allowDupEntries );
     }
 
     // #2 - Procs
@@ -1033,7 +1033,7 @@ void getEEPROMs( std::list<EepromInfo_t>& o_info )
                                            &l_procFilter );
     for( ; proc_itr; ++proc_itr )
     {
-        add_to_list( o_info, *proc_itr, !allowDupEntries );
+        add_to_list( o_info, *proc_itr, allowDupEntries );
     }
 
     // #3 - DIMMs
@@ -1047,7 +1047,7 @@ void getEEPROMs( std::list<EepromInfo_t>& o_info )
                                            &l_dimmFilter );
     for( ; dimm_itr; ++dimm_itr )
     {
-        add_to_list( o_info, *dimm_itr, !allowDupEntries );
+        add_to_list( o_info, *dimm_itr, allowDupEntries );
     }
 
     TRACFCOMP(g_trac_eeprom,"<<getEEPROMs()");

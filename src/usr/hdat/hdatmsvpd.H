@@ -724,11 +724,11 @@ class HdatMsVpd : public HdatHdif
          *
          * @post None
          *
-         * @param i_msAreaId     - input parameter - A unique id for each main
+         * @param[in] i_msAreaId - A unique id for each main
          *                         store area associated with a mainstore VPD
          *                         object.  The id identifies the mainstore area
          *                         that is to be updated.
-         * @param i_I2cDevEntries- input parameter - host I2c device info
+         * @param[in] i_I2cDevEntries - host I2c device info
          */
         void setMsaI2cInfo(uint16_t i_msAreaId,
             std::vector<hdatI2cData_t>& i_I2cDevEntries);

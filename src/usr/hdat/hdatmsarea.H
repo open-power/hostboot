@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #ifndef HDATMSAREA_H
 #define HDATMSAREA_H
- 
+
 /**
  *  @file hdatmsarea.H
  *
@@ -85,7 +85,7 @@ enum hdatMsAreaDataPtrs
     HDAT_MS_AREA_LAST          = 11
 };
 
- 
+
 /*----------------------------------------------------------------------------*/
 /* Typedefs                                                                   */
 /*----------------------------------------------------------------------------*/
@@ -173,10 +173,10 @@ enum hdatMsAreaChildPtrs
 /* C++ class definition                                                       */
 /*----------------------------------------------------------------------------*/
 
-/** Begin Class Description                                                 
+/** Begin Class Description
  *
  * @brief  The HdatMsArea class is used to construct objects which describe
- *         main store areas.  
+ *         main store areas.
  *
  * Description: This class defines a specialized object.  It is not intended
  *              that anyone can create an object of this type.  In particular,
@@ -191,25 +191,25 @@ enum hdatMsAreaChildPtrs
  *
  * Thread safety:  An HdatMsArea object is not thread safe.  That is, a single
  *                 object cannot be shared and used concurrently by
- *                 multiple threads at the same time.  An object can be used by 
+ *                 multiple threads at the same time.  An object can be used by
  *                 multiple threads if the threads serialize access.  And of
  *                 course, each thread can use its own object with no concerns
  *                 about what other threads are doing.
  *
- * Signal handler usage: This class is not intended to be used in a signal 
+ * Signal handler usage: This class is not intended to be used in a signal
  * handler and nothing has been done to try and make it safe to use
  * in a signal handler.
- *                                             
+ *
  * End Class Description
  */
 class HdatMsArea : public HdatHdif
 {
 public:
 
-  /** 
+  /**
    * @brief Construct an HdatMsArea object.
    *
-   *       This is the constructor for the HdatMsArea object.  
+   *       This is the constructor for the HdatMsArea object.
    *
    *       If you are constructing this object on the heap by using new, then
    *       you must check the pointer returned from new to see if it is null.
@@ -222,7 +222,7 @@ public:
    *
    * @pre None
    *
-   * @post An HdatMsArea object has been constructed.  
+   * @post An HdatMsArea object has been constructed.
    *     Heap storage has been allocated.
    *
    * @param[out] o_errlHndl - If any errors occur, the HdatMsArea object
@@ -240,7 +240,7 @@ public:
    *                       cannot be computed, a maximum number can be provided.
    * @param[in] i_addrRngCnt  - The number of address range entries that
    *                        will be added to the mainstore area.  If an exact
-   *                        count cannot be computed, a maximum number can be 
+   *                        count cannot be computed, a maximum number can be
    *                        provided.
    * @param[in] i_resourceId - The FRU's resource id
    * @param[in] i_slcaIdx   - SLCA index for this FRU (only meaningful
@@ -250,7 +250,7 @@ public:
    * @param[in] i_kwd       - ASCII keyword data if available, otherwise
    *                        NULL.
    *
-   * @return A null error log handle if successful, else the return code point 
+   * @return A null error log handle if successful, else the return code point
    *         to by o_errlHndl contains one of:
    *
    * @retval HDAT_ALLOC_ERROR
@@ -342,14 +342,14 @@ public:
     void setInterleavedId(uint16_t i_id);
 
 
-  /** 
+  /**
    * @brief Update the mainstore area to specify the total size of the mainstore
    *        area.
    *
    * @pre None
    *
    * @post None
-   *            
+   *
    * @param[in] i_size - The total size of the configured mainstore
    *             area in megabytes.  It is the (high address of the mainstore
    *             area + 1 minus the low address of the mainstore area) divided
@@ -364,7 +364,7 @@ public:
    * @pre None
    *
    * @post None
-   *               
+   *
    * @param[in] i_moduleId - The Module Id of the processor
    *                     associated with this mainstore area.
    */
@@ -378,7 +378,7 @@ public:
    * @post None
    *
    * @param[in] i_affinityDomain - The Affinity Domain
-   *                           associated with this mainstore area. 
+   *                           associated with this mainstore area.
    */
     void setAffinityDomain(uint32_t i_affinityDomain);
 
@@ -485,17 +485,17 @@ public:
     errlHndl_t addEcEntry(uint32_t i_manfId,
                         uint32_t i_ecLvl);
 
-   /** 
+   /**
     * @brief Update the Host I2C device info
     *
     * @pre None
     *
     * @post None
-    *               
-    * @param i_I2cDevEntries - input parameter - This contains I2C master infoi,
+    *
+    * @param[in] i_I2cDevEntries - This contains I2C master info,
     *     I2C slave device type and I2C device purpose
     *
-    * @retval void         
+    * @retval void
     */
    void setMsaI2cInfo (
        std::vector<hdatI2cData_t>& i_I2cDevEntries );
@@ -531,7 +531,7 @@ public:
    * @brief Print an HdatMsArea object.
    *
    *     This method is a debug mthod which prints out a mainstore area object.
-   *    
+   *
    * @pre None
    *
    * @post None

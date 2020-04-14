@@ -5280,18 +5280,12 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
         std::list<I2C::MasterInfo_t> l_i2cInfo;
         I2C::getMasterInfo( pChipTarget, l_i2cInfo );
 
-        //Find all the EEPROMs connected via i2c (and spi - todo: RTC 212110)
+        // Get all the EEPROMs
         std::list<EEPROM::EepromInfo_t> l_eepromInfo;
         EEPROM::getEEPROMs( l_eepromInfo );
 
-    // @TODO RTC 212110: Move this functionality to SPI
-    #if 0 // CONFIG_TPMDD
-        TPMDD::tpm_info_t tpmInfo;
-        errlHndl_t l_err = nullptr;
-        TARGETING::TargetHandleList tpmList;
-        TRUSTEDBOOT::getTPMs(tpmList);
-    #endif
-
+        // Loop through i2c masters and push into o_deviceInfo all
+        // the EEPROMs connected via i2c
         for(auto const& i2cm : l_i2cInfo)
         {
             TRACUCOMP(g_trac_i2c,"i2c loop - eng=%.8X", TARGETING::get_huid(pChipTarget));
@@ -5314,7 +5308,7 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
                 //ignore the devices that aren't on the current target
                 if( l_eep->eepromAccess.i2cInfo.i2cMaster != pChipTarget )
                 {
-                    TRACUCOMP(g_trac_i2c,"skipping unmatched i2cmaster");
+                    TRACUCOMP(g_trac_i2c,"skipping unmatched i2c master");
                     l_eep = l_eepromInfo.erase(l_eep);
                     continue;
                 }
@@ -5339,6 +5333,26 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
                 l_currentDI.deviceType =
                     TARGETING::HDAT_I2C_DEVICE_TYPE_SEEPROM;
 
+                switch(l_eep->deviceRole)
+                {
+                    case EEPROM::VPD_PRIMARY:
+                    case EEPROM::VPD_BACKUP:
+                        // See i2c.C removeI2cDeviceDuplicates(...) If a
+                        // duplicate of this i2c device is found, the duplicate
+                        // without the "?" in the device label will be
+                        // kept in o_deviceInfo.
+                        strcpy(l_currentDI.deviceLabel, "?");
+                        break;
+                    case EEPROM::SBE_PRIMARY:
+                    case EEPROM::SBE_BACKUP:
+                        strcpy(l_currentDI.deviceLabel, "?");
+                        break;
+                    case EEPROM::LAST_CHIP_TYPE:
+                    case EEPROM::SPARE_TEST:
+                        strcpy(l_currentDI.deviceLabel, "?");
+                        break;
+                }
+
                 TRACUCOMP(g_trac_i2c,"Adding addr=0x%X", l_eep->eepromAccess.i2cInfo.devAddr);
                 o_deviceInfo.push_back(l_currentDI);
                 l_eep = l_eepromInfo.erase(l_eep);
@@ -5346,6 +5360,12 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
 
     // @TODO RTC 212110: Move this functionality to SPI
     #if 0 // CONFIG_TPMDD
+
+            TPMDD::tpm_info_t tpmInfo;
+            errlHndl_t l_err = nullptr;
+            TARGETING::TargetHandleList tpmList;
+            TRUSTEDBOOT::getTPMs(tpmList);
+
             for(auto pTpm : tpmList)
             {
                 DeviceInfo_t l_currentDI;
@@ -5485,14 +5505,6 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
             l_idx < l_arrayLength;
             ++l_idx)
         {
-            if(   (   pChipTarget->getAttr<TARGETING::ATTR_TYPE>()
-                   == TARGETING::TYPE_PROC)
-               && (l_i2cEngine[l_idx] == 0))
-            {
-                // We never expose proc engine 0 devices to host, since they are
-                // owned by SBE
-                continue;
-            }
 
             if(l_i2cAddr[l_idx] == UINT8_MAX)
             {

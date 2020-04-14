@@ -60,7 +60,7 @@ I2cDevInfos::I2cDevInfos()
     for(;l_targetFilter; ++l_targetFilter)
     {
         const TARGETING::Target* l_tgt = (*l_targetFilter);
-        // Looking to see if we have any info about VPD or SBE Seeproms
+        // Looking to see if we have any info about VPD
         {
             TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO_type d; // local scope
             if (l_tgt->tryGetAttr<TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO>(d))
@@ -78,18 +78,6 @@ I2cDevInfos::I2cDevInfos()
                 iv_i2cdvs.push_back({d.i2cMasterPath, d.engine, d.port,
                                      d.devAddr, d.chipCount, EEPROM::VPD_BACKUP,
                                      l_tgt, getDepth(l_tgt)});
-            }
-        }
-        // try for a TPM
-        {
-            TARGETING::ATTR_TPM_INFO_type t;
-            if (l_tgt->tryGetAttr<TARGETING::ATTR_TPM_INFO>(t))
-            {
-                // String literal is used for comparison below, must stay sync'd
-                iv_i2cdvs.push_back({t.i2cMasterPath, t.engine, t.port,
-                                     t.devAddrLocality0, 0,
-                                     EEPROM::INVALID_CHIP_TYPE, l_tgt,
-                                     getDepth(l_tgt)});
             }
         }
         // UCD
@@ -197,7 +185,7 @@ void handleI2cDeviceCalloutWithinHostboot(
                                        (i2cd.chipType==EEPROM::VPD_PRIMARY ||
                                         i2cd.chipType==EEPROM::VPD_BACKUP)?
                                            HWAS::VPD_PART_TYPE:
-                                           HWAS::SBE_SEEPROM_PART_TYPE,
+                                           HWAS::NO_PART_TYPE,
                                        l_priority,
                                        HWAS::NO_DECONFIG,
                                        HWAS::GARD_NULL);
