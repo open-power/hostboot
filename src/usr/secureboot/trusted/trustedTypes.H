@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,7 +71,7 @@ namespace TRUSTEDBOOT
     /// Common static values
     enum
     {
-        MAX_TPM_LOG_MSG = PAGESIZE,    ///< Maximum log message size
+        MAX_TPM_LOG_MSG = PAGESIZE * 2,  ///< Maximum log message size
 
         HASH_COUNT            = 2,       ///< Maximum # of digests
 

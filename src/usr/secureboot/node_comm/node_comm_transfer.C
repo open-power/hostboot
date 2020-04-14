@@ -117,7 +117,7 @@ errlHndl_t nodeCommTransferSend(TARGETING::Target* i_pProc,
         // Loop of sending messages (initiation and data) and receiving ACKs
         for ( ; msg_seq <= total_data_msgs; ++msg_seq)
         {
-            TRACUCOMP(g_trac_nc,INFO_MRK"nodeCommTransferSend: loop start: "
+            TRACUTCOMP(g_trac_nc,INFO_MRK"nodeCommTransferSend: loop start: "
                       "seq = %d (msg %d of %d)",
                       msg_seq, msg_seq+1, total_data_msgs);
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,7 +88,7 @@ errlHndl_t nodeCommXbus2ProcTest(void)
         break;
     }
 
-    TRACUCOMP(g_trac_nc,ENTER_MRK"nodeCommXbus2ProcTest: Running with %d procs",
+    TRACUTCOMP(g_trac_nc,ENTER_MRK"nodeCommXbus2ProcTest: Running with %d procs",
               l_cpuTargetList.size());
 
     // 1) Send Data Out of First Proc Xbus Link Mailbox
@@ -191,7 +191,7 @@ errlHndl_t nodeCommXbus2ProcTest(void)
     }
     else
     {
-        TRACUCOMP(g_trac_nc,INFO_MRK"nodeCommXbus2ProcTest: "
+        TRACUTCOMP(g_trac_nc,INFO_MRK"nodeCommXbus2ProcTest: "
                   "Attention was found (%d) on tgt=0x%.08X",
                   attn_found, get_huid(read_tgt));
     }

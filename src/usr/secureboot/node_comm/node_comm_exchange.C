@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -135,7 +135,7 @@ errlHndl_t nodeCommAbusGetRandom(uint64_t & o_nonce)
 #ifdef CONFIG_TPMDD
     Target* tpm_tgt = nullptr;
 
-    TRACUCOMP(g_trac_nc,ENTER_MRK"nodeCommAbusGetRandom:");
+    TRACUTCOMP(g_trac_nc,ENTER_MRK"nodeCommAbusGetRandom:");
 
     do
     {
@@ -149,7 +149,7 @@ errlHndl_t nodeCommAbusGetRandom(uint64_t & o_nonce)
     if(tpm_tgt)
     {
         hwasState = tpm_tgt->getAttr<TARGETING::ATTR_HWAS_STATE>();
-        TRACUCOMP(g_trac_nc,INFO_MRK
+        TRACUTCOMP(g_trac_nc,INFO_MRK
                   "TPM HUID 0x%08X has state of {present=%d, "
                   "functional=%d}",
                   get_huid(tpm_tgt),
@@ -255,7 +255,7 @@ errlHndl_t nodeCommAbusLogNonce(uint64_t & i_nonce)
 {
     errlHndl_t err = nullptr;
 
-    TRACUCOMP(g_trac_nc,ENTER_MRK"nodeCommAbusLogNonce: i_nonce=0x%.16llX",
+    TRACUTCOMP(g_trac_nc,ENTER_MRK"nodeCommAbusLogNonce: i_nonce=0x%.16llX",
               i_nonce);
 
     do
@@ -764,7 +764,7 @@ errlHndl_t nodeCommProcessSlaveQuote(uint8_t* const i_slaveQuote,
 {
     errlHndl_t l_errl = nullptr;
 #ifdef CONFIG_TPMDD
-    TRACFCOMP(g_trac_nc, ENTER_MRK"nodeCommProcessSlaveQuote");
+    TRACFCOMP(g_trac_nc, ENTER_MRK"nodeCommProcessSlaveQuote: size=0x%016llX",i_slaveQuoteSize);
     bool l_tpmRequired = TRUSTEDBOOT::isTpmRequired();
     bool l_errorOccurred = false;
 
