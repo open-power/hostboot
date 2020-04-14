@@ -30,6 +30,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/usr/pldm/extern
 
 # common objects between hostboot and hbrt
 OBJS += htmgt.o

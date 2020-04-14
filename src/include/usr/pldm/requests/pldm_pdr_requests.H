@@ -71,6 +71,7 @@ errlHndl_t sendRepositoryChangedEvent(const pldm_pdr* i_repo,
 
 using sensor_state_t = uint8_t;
 using sensor_id_t = uint16_t;
+using effector_id_t = uint16_t;
 
 /* @brief Send a Platform Event Message indicating a "Sensor State Changed"
  *        event to the BMC.
@@ -100,6 +101,11 @@ enum occ_state : sensor_state_t
 errlHndl_t sendOccStateChangedEvent(const TARGETING::Target* i_proc_target,
                                     occ_state i_new_state);
 
+/* @brief Send a PLDM command notifying the BMC that Hostboot wants to be rebooted
+ *
+ * @return errlHndl_t          Error if any, otherwise nullptr.
+ */
+errlHndl_t sendGracefulRebootRequest();
 }
 
 #endif

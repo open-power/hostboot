@@ -68,6 +68,9 @@ namespace PLDM
 
         //addOccStateControlPdrs
         MOD_ADD_OCC_PDRS              = 0x18,
+
+        // sendSetStateEffecterStatesRequest
+        MOD_SEND_SET_STATE_EFFECTER_STATES_REQUEST = 0x19,
     };
 
     enum PLDMReasonCode

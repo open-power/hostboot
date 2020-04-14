@@ -6,6 +6,7 @@
 # OpenPOWER HostBoot Project
 #
 # Contributors Listed Below - COPYRIGHT 2020
+# [+] International Business Machines Corp.
 #
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +24,8 @@
 # IBM_PROLOG_END_TAG
 
 ROOTPATH = ../../../../..
+
+include ../../common/common.mk
 
 MODULE = testpldm_extended
 

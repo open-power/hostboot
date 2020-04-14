@@ -42,6 +42,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 
+EXTRAINCDIR += ${ROOTPATH}/src/usr/pldm/extern/
+
 OBJS += utilbase.o
 OBJS += utilstream.o
 OBJS += utilmem.o

@@ -171,6 +171,12 @@ enum pldm_effecter_init {
 	PLDM_DISABLE_EFECTER
 };
 
+/** @brief PLDM set effecter state msg fields
+ */
+enum pldm_effecter_state_fields{
+    PLDM_GRACEFUL_REBOOT = 0x6,
+};
+
 /** @brief PLDM Platform M&C completion codes
  */
 enum pldm_platform_completion_codes {
@@ -1057,6 +1063,7 @@ int decode_get_pdr_resp(const struct pldm_msg *msg, size_t payload_length,
  *         field parameter as sizeof(set_effecter_state_field) *
  *         comp_effecter_count
  *  @param[out] msg - Message will be written to this
+ *  @param[in] payload_length - Length of request message payload
  *  @return pldm_completion_codes
  *  @note  Caller is responsible for memory alloc and dealloc of param
  *         'msg.payload'
@@ -1066,7 +1073,7 @@ int encode_set_state_effecter_states_req(uint8_t instance_id,
 					 uint16_t effecter_id,
 					 uint8_t comp_effecter_count,
 					 set_effecter_state_field *field,
-					 struct pldm_msg *msg);
+					 struct pldm_msg *msg, size_t payload_length);
 
 /** @brief Decode SetStateEffecterStates response data
  *

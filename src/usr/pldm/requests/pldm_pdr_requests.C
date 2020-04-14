@@ -601,4 +601,128 @@ errlHndl_t sendOccStateChangedEvent(const TARGETING::Target* const i_proc_target
                                        new_occ_state);
 }
 
+errlHndl_t sendSetStateEffecterStatesRequest(
+                                    const effector_id_t i_effecter_id,
+                                    const std::vector<set_effecter_state_field>& i_state_fields)
+{
+    PLDM_ENTER("sendSetStateEffecterStatesRequest");
+
+    struct set_effecter_state_response
+    {
+        uint8_t completion_code = 0;
+    };
+
+    std::vector<uint8_t> response_bytes;
+
+    assert(!i_state_fields.empty(),
+           "Trying to write empty state fields list to pldm state effecter");
+    constexpr uint8_t max_fields = 8;
+    assert(i_state_fields.size() <= max_fields,
+           "Trying to write more than max fields allowed to pldm state effecter");
+
+    pldm_set_state_effecter_states_req effecter_req
+    {
+        .effecter_id = i_effecter_id,
+        .comp_effecter_count = static_cast<uint8_t>(i_state_fields.size()),
+        .field = {0}
+    };
+
+    memcpy(effecter_req.field,
+           i_state_fields.data(),
+           sizeof(i_state_fields[0]) * i_state_fields.size());
+
+    PLDM_DBG_BIN("effecter req:" , static_cast<void*>(&effecter_req), sizeof(pldm_set_state_effecter_states_req));
+
+
+    errlHndl_t errl = nullptr;
+
+    do
+    {
+        /* Make the effecter state request */
+        const msg_q_t msgQ = MSG_Q_RESOLVE("sendSetStateEffecterStatesRequest",
+                                          VFS_ROOT_MSG_PLDM_REQ_OUT);
+        std::vector<uint8_t> response_bytes;
+
+        errl =
+            sendrecv_pldm_request<PLDM_SET_STATE_EFFECTER_STATES_REQ_BYTES> (
+              response_bytes,
+              msgQ,
+              encode_set_state_effecter_states_req,
+              DEFAULT_INSTANCE_ID, // 0x00
+              effecter_req.effecter_id,
+              effecter_req.comp_effecter_count,
+              effecter_req.field);
+
+        if (errl)
+        {
+            PLDM_ERR("setEffecter: Error occurred trying to send pldm request.");
+            break;
+        }
+
+        // pack the PLDM header of the response into a uint64_t which can
+        // be used for error logging / debugging
+        uint64_t response_hdr_data =
+          pldmHdrToUint64(*reinterpret_cast<pldm_msg*>(response_bytes.data()));
+
+        set_effecter_state_response response { };
+
+        errl =
+            decode_pldm_response(decode_set_state_effecter_states_resp,
+                                 response_bytes,
+                                 &response.completion_code);
+
+        if (errl)
+        {
+            // Message decoding failed; break out of the block;
+            PLDM_ERR("getEffecter: Error occurred trying to decode pldm response.");
+            break;
+        }
+
+        if (response.completion_code != PLDM_SUCCESS)
+        {
+
+            PLDM_ERR("decode_set_state_effecter_states_resp failed with rc 0x%.02x",
+                    response.completion_code);
+
+            /*
+            * @errortype  ERRL_SEV_UNRECOVERABLE
+            * @moduleid   MOD_SEND_SET_STATE_EFFECTER_STATES_REQUEST
+            * @reasoncode RC_BAD_COMPLETION_CODE
+            * @userdata1  Complete code returned
+            * @userdata2  Response header data (see pldm_msg_hdr struct)
+            * @devdesc    Software problem, BMC returned bad PLDM response code
+            * @custdesc   A software error occurred during system boot
+            */
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                   PLDM::MOD_SEND_SET_STATE_EFFECTER_STATES_REQUEST ,
+                                   PLDM::RC_BAD_COMPLETION_CODE,
+                                   response.completion_code,
+                                   response_hdr_data,
+                                   ErrlEntry::NO_SW_CALLOUT);
+            addBmcErrorCallouts(errl);
+
+            break;
+        }
+
+    } while (false);
+
+    PLDM_EXIT("sendSetStateEffecterStatesRequest");
+
+    return errl;
+}
+
+errlHndl_t sendGracefulRebootRequest()
+{
+    // TODO RTC: 259581 Dynamically fetch this effecter from BMC instead of
+    // assuming its value.
+    const effector_id_t SOFTWARE_TERMINATION_STATUS_EFFECTER_ID = 0x0003;
+    std::vector<set_effecter_state_field> fields_to_set;
+    constexpr uint8_t graceful_reboot =
+            pldm_effecter_state_fields::PLDM_GRACEFUL_REBOOT;
+    fields_to_set.push_back({set_request::PLDM_REQUEST_SET, graceful_reboot});
+
+    return sendSetStateEffecterStatesRequest(SOFTWARE_TERMINATION_STATUS_EFFECTER_ID,
+                                             fields_to_set);
+}
+
 }

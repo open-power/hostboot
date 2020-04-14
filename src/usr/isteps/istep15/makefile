@@ -49,6 +49,8 @@ OBJS += host_build_stop_image.o
 OBJS += proc_set_homer_bar.o
 OBJS += host_start_stop_engine.o
 OBJS += host_establish_ec_chiplet.o
+OBJS += p10_stop_api.o
+OBJS += p10_stop_util.o
 
 include ${ROOTPATH}/procedure.rules.mk
 include $(PROCEDURES_PATH)/hwp/pm/p10_pm_set_homer_bar.mk
@@ -65,3 +67,4 @@ include ${ROOTPATH}/config.mk
 VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm/
 VPATH += ${PROCEDURES_PATH}/hwp/corecache/
 VPATH += ${PROCEDURES_PATH}/hwp/perv
+VPATH += ${PROCEDURES_PATH}/utils/stopreg/

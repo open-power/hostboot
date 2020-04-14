@@ -30,6 +30,8 @@
 
 COMMON_ROOTPATH = ../../../..
 
+EXTRAINCDIR += ${ROOTPATH}/src/usr/pldm/extern/
+
 PLDM_BASE_COMMON_OBJS += pldmtrace.o
 PLDM_BASE_COMMON_OBJS += pldm_utils.o
 # From ../extern/
@@ -59,8 +61,8 @@ PLDM_EXTENDED_COMMON_OBJS += pldm_fru_data_responders.o
 
 # add these paths to VPATH so compiler knows
 # where to find the .C/.c files we need
-VPATH += ${COMMON_ROOTPATH}/src/usr/pldm/extern
-VPATH += ${COMMON_ROOTPATH}/src/usr/pldm/common
-VPATH += ${COMMON_ROOTPATH}/src/usr/pldm/requests
-VPATH += ${COMMON_ROOTPATH}/src/usr/pldm/responses
-VPATH += ${COMMON_ROOTPATH}/src/usr/pldm/extended
+VPATH += ${ROOTPATH}/src/usr/pldm/extern
+VPATH += ${ROOTPATH}/src/usr/pldm/common
+VPATH += ${ROOTPATH}/src/usr/pldm/requests
+VPATH += ${ROOTPATH}/src/usr/pldm/responses
+VPATH += ${ROOTPATH}/src/usr/pldm/extended
