@@ -50,18 +50,19 @@ fapi2::ReturnCode p10_fbc_dlp_scom(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>&
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT1, l_chip_ec));
         fapi2::ATTR_IOHS_LINK_TRAIN_Type l_TGT0_ATTR_IOHS_LINK_TRAIN;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, TGT0, l_TGT0_ATTR_IOHS_LINK_TRAIN));
-        uint64_t l_def_ODD_ENABLED = ((l_TGT0_ATTR_IOHS_LINK_TRAIN == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH)
-                                      || (l_TGT0_ATTR_IOHS_LINK_TRAIN == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY));
-        uint64_t l_def_EVN_ENABLED = ((l_TGT0_ATTR_IOHS_LINK_TRAIN == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH)
-                                      || (l_TGT0_ATTR_IOHS_LINK_TRAIN == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY));
-        fapi2::ATTR_LINK_SPEED_Type l_TGT0_ATTR_LINK_SPEED;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_LINK_SPEED, TGT0, l_TGT0_ATTR_LINK_SPEED));
-        uint64_t l_def_50G_MODE = (l_TGT0_ATTR_LINK_SPEED == fapi2::ENUM_ATTR_LINK_SPEED_50G);
         fapi2::ATTR_IOHS_CONFIG_MODE_Type l_TGT0_ATTR_IOHS_CONFIG_MODE;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_CONFIG_MODE, TGT0, l_TGT0_ATTR_IOHS_CONFIG_MODE));
         uint64_t l_def_FBC_ENABLED = ((l_TGT0_ATTR_IOHS_CONFIG_MODE == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX)
                                       || (l_TGT0_ATTR_IOHS_CONFIG_MODE == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPA));
-        uint64_t l_def_OCAPI_ENABLED = (l_TGT0_ATTR_IOHS_CONFIG_MODE == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_OCAPI);
+        uint64_t l_def_FBC_ODD_ENABLED = (l_def_FBC_ENABLED
+                                          && ((l_TGT0_ATTR_IOHS_LINK_TRAIN == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH)
+                                              || (l_TGT0_ATTR_IOHS_LINK_TRAIN == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY)));
+        uint64_t l_def_FBC_EVN_ENABLED = (l_def_FBC_ENABLED
+                                          && ((l_TGT0_ATTR_IOHS_LINK_TRAIN == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH)
+                                              || (l_TGT0_ATTR_IOHS_LINK_TRAIN == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY)));
+        fapi2::ATTR_LINK_SPEED_Type l_TGT0_ATTR_LINK_SPEED;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_LINK_SPEED, TGT0, l_TGT0_ATTR_LINK_SPEED));
+        uint64_t l_def_50G_MODE = (l_TGT0_ATTR_LINK_SPEED == fapi2::ENUM_ATTR_LINK_SPEED_50G);
         fapi2::ATTR_IS_SIMULATION_Type l_TGT2_ATTR_IS_SIMULATION;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, TGT2, l_TGT2_ATTR_IS_SIMULATION));
         uint64_t l_def_IS_SIM = (l_TGT2_ATTR_IS_SIMULATION == literal_1);
@@ -69,7 +70,7 @@ fapi2::ReturnCode p10_fbc_dlp_scom(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>&
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x1801100aull, l_scom_buffer ));
 
-            if ((l_def_EVN_ENABLED && l_def_ODD_ENABLED))
+            if ((l_def_FBC_EVN_ENABLED && l_def_FBC_ODD_ENABLED))
             {
                 constexpr auto l_DLP0_DLP_CONFIG_LINK_PAIR_ON = 0x1;
                 l_scom_buffer.insert<0, 1, 63, uint64_t>(l_DLP0_DLP_CONFIG_LINK_PAIR_ON );
@@ -105,19 +106,14 @@ fapi2::ReturnCode p10_fbc_dlp_scom(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>&
                 constexpr auto l_DLP0_DLP_CONFIG_DL_SELECT_DLP = 0x1;
                 l_scom_buffer.insert<62, 2, 62, uint64_t>(l_DLP0_DLP_CONFIG_DL_SELECT_DLP );
             }
-            else if (l_def_OCAPI_ENABLED)
-            {
-                constexpr auto l_DLP0_DLP_CONFIG_DL_SELECT_DLO = 0x2;
-                l_scom_buffer.insert<62, 2, 62, uint64_t>(l_DLP0_DLP_CONFIG_DL_SELECT_DLO );
-            }
 
-            if (l_def_EVN_ENABLED)
+            if (l_def_FBC_EVN_ENABLED)
             {
                 constexpr auto l_DLP0_DLP_CONFIG_LINK0_SELECT_ON = 0x1;
                 l_scom_buffer.insert<56, 1, 63, uint64_t>(l_DLP0_DLP_CONFIG_LINK0_SELECT_ON );
             }
 
-            if (l_def_ODD_ENABLED)
+            if (l_def_FBC_ODD_ENABLED)
             {
                 constexpr auto l_DLP0_DLP_CONFIG_LINK1_SELECT_ON = 0x1;
                 l_scom_buffer.insert<57, 1, 63, uint64_t>(l_DLP0_DLP_CONFIG_LINK1_SELECT_ON );

@@ -54,6 +54,7 @@ extern "C"
 
 ///
 /// @brief Apply SCOM overrides for the PAU unit via an initfile
+///        and configures DL/TL for OpenCAPI links
 ///
 /// @param[in] i_target         Reference to processor chip target
 /// @return fapi2::ReturnCode   FAPI2_RC_SUCCESS if success, else error code.

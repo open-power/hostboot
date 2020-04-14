@@ -786,6 +786,19 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_IOHS_PHY_TO_PAU_MAPPING</id>
+  <targetType>TARGET_TYPE_IOHS</targetType>
+  <description>
+    Effective physical link to PAU mapping (given as chiplet ID).
+    Should be considered valid only if ATTR_IOHS_CONFIG_MODE for
+    the given link is configured as OCAPI.
+  </description>
+  <valueType>uint8</valueType>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_SBE_MCS_SETUP_REG_STATES</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>

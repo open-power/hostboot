@@ -39,6 +39,16 @@ namespace pau
 #endif
 
 
+//>> [MISC_REGS_OPTICAL_IO_CONFIG]
+static const uint64_t MISC_REGS_OPTICAL_IO_CONFIG = 0x10010b33ull;
+
+static const uint32_t MISC_REGS_OPTICAL_IO_CONFIG_NTL0_NOT_OTH = 0;
+static const uint32_t MISC_REGS_OPTICAL_IO_CONFIG_NTL1_NOT_OTH = 1;
+static const uint32_t MISC_REGS_OPTICAL_IO_CONFIG_OTL0_NOT_OTH = 2;
+static const uint32_t MISC_REGS_OPTICAL_IO_CONFIG_OTL1_NOT_OTH = 3;
+//<< [MISC_REGS_OPTICAL_IO_CONFIG]
+// pau/reg00000.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
