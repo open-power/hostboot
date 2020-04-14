@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,14 +79,6 @@ enum sizes
     WR_LVL_SMALL_STEP = 0b000,
     WR_LVL_PRE_DLY = 0b101010,
     WR_LVL_NUM_VALID_SAMPLES = 0x5,
-
-    // WR VREF JEDEC values - we're using em in multiple places, so let's define them in one
-    // Single range max is the maximum range for a single WR VREF range in JEDEC - 0b110010
-    WR_VREF_SINGLE_RANGE_MAX = 0b110010,
-    // Crossover range is where the top of Range 2 (the lower range) equals the bottom of Range 1 (the upper range)
-    WR_VREF_CROSSOVER_RANGE  = 0b011000,
-    // Max range is computed from single range max (50) + the crossover range (24)
-    WR_VREF_MAX_COMPOSITE_RANGE = WR_VREF_SINGLE_RANGE_MAX + WR_VREF_CROSSOVER_RANGE,
 
     // Attribute? BRS
     COARSE_CAL_STEP_SIZE = 0x4,

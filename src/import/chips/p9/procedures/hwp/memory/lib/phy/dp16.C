@@ -4519,10 +4519,7 @@ namespace wr_vref
 ///
 uint8_t get_range(const uint64_t i_value)
 {
-    // According to JEDEC range 1 uses a 0 and range 2 uses a 1
-    constexpr uint64_t RANGE1 = 0x00;
-    constexpr uint64_t RANGE2 = 0x01;
-    const uint8_t l_range = ((i_value >= WR_VREF_CROSSOVER_RANGE) ? RANGE1 : RANGE2);
+    const uint8_t l_range = ((i_value >= WR_VREF_CROSSOVER_RANGE) ? WR_VREF_RANGE1 : WR_VREF_RANGE2);
     return l_range;
 }
 

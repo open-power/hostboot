@@ -326,6 +326,24 @@ enum ddr_dimm_speeds
     DDR5_MAX_SPEED = 4800,
 };
 
+///
+/// @brief DDR4 JEDEC constants
+///
+enum ddr4_consts
+{
+    // WR VREF JEDEC values - we're using em in multiple places, so let's define them in one
+    // Single range max is the maximum range for a single WR VREF range in JEDEC - 0b110010
+    WR_VREF_SINGLE_RANGE_MAX = 0b110010,
+    // Crossover range is where the top of Range 2 (the lower range) equals the bottom of Range 1 (the upper range)
+    WR_VREF_CROSSOVER_RANGE  = 0b011000,
+    // Max range is computed from single range max (50) + the crossover range (24)
+    WR_VREF_MAX_COMPOSITE_RANGE = WR_VREF_SINGLE_RANGE_MAX + WR_VREF_CROSSOVER_RANGE,
+
+    // Yes, Range 1 is 0 and Range 2 is 1
+    WR_VREF_RANGE1 = 0,
+    WR_VREF_RANGE2 = 1,
+};
+
 enum states
 {
     LOW = 0,
