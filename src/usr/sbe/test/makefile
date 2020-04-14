@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2019
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -25,17 +25,19 @@
 ROOTPATH = ../../../..
 
 MODULE = testsbe
-# FIXME RTC: 210975
-#TESTS = *.H
+TESTS = *.H
 
-##      support for fapi2
-EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
-
-## pointer to common HWP files
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+# needed for sbe_update.H p10_infrastruct_help.H
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
+# needed for fapi2.H pulled by p10_infrastruct_help.H
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+# needed for target.H pulled by fapi2.H
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+# needed for multicast_group_defs.H pulled by plat_target.H
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
+# needed for common_ringId.H pulled by plat_hw_access.H
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
+# needed for ffdc_includes.H pulled by hwp_ffdc_classes.H
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 
 include ${ROOTPATH}/config.mk
