@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,11 +48,14 @@ bool __nimbusDD1Workaround( TargetHandle_t i_trgt )
 
     bool slowRead = false;
 
-    ConstTargetHandle_t parent = getParentChip( i_trgt );
+    TARGETING::Target* masterProc = nullptr;
+    TARGETING::targetService().masterProcChipTargetHandle(masterProc);
 
     // The workaround only applies to Nimbus
-    if ( MODEL_NIMBUS == parent->getAttr<ATTR_MODEL>() )
+    if ( MODEL_NIMBUS == masterProc->getAttr<ATTR_MODEL>() )
     {
+        ConstTargetHandle_t parent = getParentChip( i_trgt );
+
         // check if DD1.x
         if ( 0x20 > parent->getAttr<ATTR_EC>() )
         {
