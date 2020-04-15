@@ -144,10 +144,10 @@ generate_sbe_image()
 
     mkdir -p "$PROJECT_ROOT/standalone/imghash"
     HBIBL_HASH_FILE="$PROJECT_ROOT/standalone/imghash/hbibl.bin.hash"
-    SBE_SEEPROM_IMG=${PPE_DIR}/simics/import/boot_roms/sbe_seeprom_p10.bin.ecc
-    SBE_MEASUREMENT_IMG=${PPE_DIR}/simics/import/boot_roms/sbe_measurement_p10.bin.ecc
-    SBE_OTPROM_IMG=${PPE_DIR}/simics/import/boot_roms/sbe_otprom_p10.bin
-    SBE_SEEPROM_IMAGE_DD1=${PPE_DIR}/images/sbe_seeprom_DD1.bin
+    SBE_SEEPROM_IMG=${PROJECT_ROOT}/standalone/simics/sbe_seeprom_p10.bin.ecc
+    SBE_MEASUREMENT_IMG=${PROJECT_ROOT}/standalone/simics/sbe_measurement_p10.bin.ecc
+    SBE_OTPROM_IMG=${PROJECT_ROOT}/standalone/simics/sbe_otprom_p10.bin
+    SBE_SEEPROM_IMAGE_DD1=${PROJECT_ROOT}/standalone/pnor/sbe_seeprom_DD1.bin
 
     if ! diff "$HBIBL_HASH_FILE" <(hash_file "$PROJECT_ROOT/img/hbibl.bin") &>/dev/null \
     || [ ! -f "$SBE_SEEPROM_IMG" ] \
@@ -159,17 +159,12 @@ generate_sbe_image()
 
         cp ${PROJECT_ROOT}/standalone/pnor/hbbl.bin ${PPE_DIR}/src/tools/debug/hbbl.bin
         cd ${PPE_DIR}
-        ./sb workon<<<'make install $1 && ./sb prime && exit'
+        ./sb workon<<<'make install $1 && ./sb prime -m $PROJECT_ROOT/standalone/simics -b 1 && exit'
         hash_file "$PROJECT_ROOT/img/hbibl.bin" >"$HBIBL_HASH_FILE"
         cd ${PROJECT_ROOT}
     else
         echo 'SBE image is already up to date.'
     fi
-
-    cp "$SBE_SEEPROM_IMG" ${PROJECT_ROOT}/standalone/simics/sbe_seeprom_p10.bin.ecc
-    cp "$SBE_MEASUREMENT_IMG" ${PROJECT_ROOT}/standalone/simics/sbe_measurement_p10.bin.ecc
-    cp "$SBE_OTPROM_IMG" ${PROJECT_ROOT}/standalone/simics/sbe_otprom_p10.bin
-    cp "$SBE_SEEPROM_IMAGE_DD1" ${PROJECT_ROOT}/standalone/pnor/sbe_seeprom_DD1.bin
 }
 
 # Build the HCODE image inside the EKB repo

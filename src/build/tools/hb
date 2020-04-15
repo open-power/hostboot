@@ -482,23 +482,37 @@ hb_startsimics()
             exit 1
         fi
 
-        SBE_STANDALONE_IMG=${PROJECT_ROOT}/standalone/simics/sbe_seeprom_p10.bin.ecc
+        SBE_STANDALONE_IMG=${PROJECT_ROOT}/standalone/simics/import/boot_roms/sbe_seeprom_p10.bin.ecc
         if [[ ! -f ${SBE_STANDALONE_IMG} ]]; then
             echo "File does not exist: " ${SBE_STANDALONE_IMG}
             echo "Please make sure to run \"hb prime\" to create it."
             exit 1
         fi
 
-        SBE_STANDALONE_MEASURE_IMG=${PROJECT_ROOT}/standalone/simics/sbe_measurement_p10.bin.ecc
+        SBE_STANDALONE_MEASURE_IMG=${PROJECT_ROOT}/standalone/simics/import/boot_roms/sbe_measurement_p10.bin.ecc
         if [[ ! -f ${SBE_STANDALONE_MEASURE_IMG} ]]; then
             echo "File does not exist: " ${SBE_STANDALONE_MEASURE_IMG}
             echo "Please make sure to run \"hb prime\" to create it."
             exit 1
         fi
 
-        SBE_STANDALONE_OTPROM_IMG=${PROJECT_ROOT}/standalone/simics/sbe_otprom_p10.bin
+        SBE_STANDALONE_OTPROM_IMG=${PROJECT_ROOT}/standalone/simics/import/boot_roms/sbe_otprom_p10.bin
         if [[ ! -f ${SBE_STANDALONE_OTPROM_IMG} ]]; then
             echo "File does not exist: " ${SBE_STANDALONE_OTPROM_IMG}
+            echo "Please make sure to run \"hb prime\" to create it."
+            exit 1
+        fi
+
+        SBE_SCRIPT_TO_RUN=${PROJECT_ROOT}/standalone/simics/targets/p10_standalone/sbeTest/sbe_startup_p10_standalone.simics
+        if [[ ! -f ${SBE_SCRIPT_TO_RUN} ]]; then
+            echo "File does not exist: " ${SBE_SCRIPT_TO_RUN}
+            echo "Please make sure to run \"hb prime\" to create it."
+            exit 1
+        fi
+
+        SBE_SCRIPT_PATH=${PROJECT_ROOT}/standalone/simics/targets/p10_standalone/sbeTest/
+        if [[ ! -d ${SBE_SCRIPT_PATH} ]]; then
+            echo "Dir does not exist: " ${SBE_SCRIPT_PATH}
             echo "Please make sure to run \"hb prime\" to create it."
             exit 1
         fi
@@ -517,6 +531,8 @@ hb_startsimics()
             STARTSIMCMD+=(sbe_seeprom_img=${SBE_STANDALONE_IMG})
             STARTSIMCMD+=(sbe_meas_seeprom_img=${SBE_STANDALONE_MEASURE_IMG})
             STARTSIMCMD+=(sbe_otprom_img=${SBE_STANDALONE_OTPROM_IMG})
+            STARTSIMCMD+=(sbe_script_to_run=${SBE_SCRIPT_TO_RUN})
+            STARTSIMCMD+=(sbe_scripts_path=${SBE_SCRIPT_PATH})
             STARTSIMCMD+=(enable_lpc_console=TRUE)
             STARTSIMCMD+=(fused_core=TRUE)
         else

@@ -46,9 +46,11 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
 
     export PATH=${STANDALONE_SIMICS}:${PATH}
 
-    SBE_STANDALONE_IMG=${STANDALONE_SIMICS}/sbe_seeprom_p10.bin.ecc
-    SBE_STANDALONE_MEASURE_IMG=${STANDALONE_SIMICS}/sbe_measurement_p10.bin.ecc
-    SBE_STANDALONE_OTPROM_IMG=${STANDALONE_SIMICS}/sbe_otprom_p10.bin
+    SBE_STANDALONE_IMG=${STANDALONE_SIMICS}/import/boot_roms/sbe_seeprom_p10.bin.ecc
+    SBE_STANDALONE_MEASURE_IMG=${STANDALONE_SIMICS}/import/boot_roms/sbe_measurement_p10.bin.ecc
+    SBE_STANDALONE_OTPROM_IMG=${STANDALONE_SIMICS}/import/boot_roms/sbe_otprom_p10.bin
+    SBE_SCRIPTS_PATH=${STANDALONE_SIMICS}/targets/p10_standalone/sbeTest/
+    SBE_SCRIPT_TO_RUN=${SBE_SCRIPTS_PATH}/sbe_startup_p10_standalone.simics
 
     export START_SIMICS_CMD="\
         runsim -m ${MACHINE} \
@@ -57,6 +59,8 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
         sbe_seeprom_img=${SBE_STANDALONE_IMG} \
         sbe_meas_seeprom_img=${SBE_STANDALONE_MEASURE_IMG} \
         sbe_otprom_img=${SBE_STANDALONE_OTPROM_IMG} \
+        sbe_script_to_run=${SBE_SCRIPT_TO_RUN} \
+        sbe_scripts_path=${SBE_SCRIPTS_PATH} \
         enable_lpc_console=TRUE \
         fused_core=TRUE \
         xive_gen=2 \
