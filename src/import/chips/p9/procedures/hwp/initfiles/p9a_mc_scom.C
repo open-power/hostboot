@@ -29,6 +29,7 @@
 
 using namespace fapi2;
 
+constexpr uint64_t literal_0xFFFFFFFFFFFFFFFF = 0xFFFFFFFFFFFFFFFF;
 constexpr uint64_t literal_0x0000000000000000 = 0x0000000000000000;
 constexpr uint64_t literal_0x7FF777FF777FF770 = 0x7FF777FF777FF770;
 
@@ -51,7 +52,7 @@ fapi2::ReturnCode p9a_mc_scom(const fapi2::Target<fapi2::TARGET_TYPE_MC>& TGT0,
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x7013343ull, l_scom_buffer ));
 
-            l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0x0000000000000000 );
+            l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0xFFFFFFFFFFFFFFFF );
             FAPI_TRY(fapi2::putScom(TGT0, 0x7013343ull, l_scom_buffer));
         }
         {
@@ -69,7 +70,7 @@ fapi2::ReturnCode p9a_mc_scom(const fapi2::Target<fapi2::TARGET_TYPE_MC>& TGT0,
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x7013383ull, l_scom_buffer ));
 
-            l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0x0000000000000000 );
+            l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0xFFFFFFFFFFFFFFFF );
             FAPI_TRY(fapi2::putScom(TGT0, 0x7013383ull, l_scom_buffer));
         }
         {
@@ -87,7 +88,7 @@ fapi2::ReturnCode p9a_mc_scom(const fapi2::Target<fapi2::TARGET_TYPE_MC>& TGT0,
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x70133c3ull, l_scom_buffer ));
 
-            l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0x0000000000000000 );
+            l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0xFFFFFFFFFFFFFFFF );
             FAPI_TRY(fapi2::putScom(TGT0, 0x70133c3ull, l_scom_buffer));
         }
         {
