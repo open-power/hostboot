@@ -305,6 +305,7 @@ HCD_CONST(QME_DEBUG_PTRS_OFFSET,                0x200)
 HCD_CONST(QME_DEBUG_PTRS_SIZE,                  0x24)
 HCD_CONST(QME_INSTRUMENTATION_SIZE,             HALF_KB)
 HCD_CONST(QME_SRAM_HCODE_OFFSET,                0)
+HCD_CONST(QME_OVERRIDE_RING_SIZE,               (2 * ONE_KB))
 
 // QME Hcode + Core Scan + Pstate
 HCD_CONST(QME_REGION_SIZE,                      (128 * ONE_KB))

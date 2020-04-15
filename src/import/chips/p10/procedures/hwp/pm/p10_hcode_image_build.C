@@ -108,11 +108,12 @@ struct RingBufData
     uint32_t     iv_sizeWorkBuf2;
     void* iv_pWorkBuf3;
     uint32_t     iv_sizeWorkBuf3;
+    void *       iv_pOverride;
 
     RingBufData( void* i_pRingBuf1, const uint32_t i_ringSize,
                  void* i_pWorkBuf1, const uint32_t i_sizeWorkBuf1,
                  void* i_pWorkBuf2, const uint32_t i_sizeWorkBuf2,
-                 void* i_pWorkBuf3, const uint32_t i_sizeWorkBuf3 ) :
+                 void* i_pWorkBuf3, const uint32_t i_sizeWorkBuf3, void *i_pRingOverride  ) :
         iv_pRingBuffer( i_pRingBuf1 ),
         iv_ringBufSize( i_ringSize ),
         iv_pWorkBuf1( i_pWorkBuf1 ),
@@ -120,7 +121,8 @@ struct RingBufData
         iv_pWorkBuf2( i_pWorkBuf2 ),
         iv_sizeWorkBuf2( i_sizeWorkBuf2 ),
         iv_pWorkBuf3( i_pWorkBuf3 ),
-        iv_sizeWorkBuf3( i_sizeWorkBuf3 )
+        iv_sizeWorkBuf3( i_sizeWorkBuf3 ),
+        iv_pOverride( i_pRingOverride )
 
     {}
 
@@ -132,7 +134,8 @@ struct RingBufData
         iv_pWorkBuf2( NULL ),
         iv_sizeWorkBuf2( 0 ),
         iv_pWorkBuf3( NULL ),
-        iv_sizeWorkBuf3( 0 )
+        iv_sizeWorkBuf3( 0 ),
+        iv_pOverride( NULL )
     { }
 };
 
@@ -159,6 +162,7 @@ class ImageBuildRecord
         iv_maxSizeList["XGPE Hcode"]        =   XGPE_HCODE_SIZE;
         iv_maxSizeList["QME Hcode"]         =   QME_HCODE_SIZE;
         iv_maxSizeList["QME Common Ring"]   =   QME_COMMON_RING_SIZE;
+        iv_maxSizeList["QME Override Ring"] =   QME_OVERRIDE_RING_SIZE;
         iv_maxSizeList["QME Inst Sectn"]    =   QME_INST_RING_SIZE;
         iv_maxSizeList["QME SRAM Size"]     =   QME_SRAM_SIZE;
         iv_maxSizeList["SELF BIN"]          =   SMF_THREAD_LAUNCHER_SIZE;
@@ -332,7 +336,7 @@ void ImageBuildRecord::dumpBuildRecord( )
 
     for( auto sectn : iv_sectnList )
     {
-        FAPI_DBG( "%-25s   :   0x%08x   :   Length   :   0x%08x",
+        FAPI_DBG( "%-35s   :   0x%08x   :   Length   :   0x%08x",
                   sectn.iv_sectnName, sectn.iv_sectnOffset, sectn.iv_sectnLength );
     }
 
@@ -756,6 +760,37 @@ fapi_try_exit:
     FAPI_INF( " << buildXpmrImage" );
 }
 
+//-------------------------------------------------------------------------------------------------------
+
+fapi2::ReturnCode parseRingOverride( void* const  i_pRingOverride )
+{
+    FAPI_INF( ">> parseRingOverride" );
+    TorHeader_t * l_pOvrdTorHdr =   NULL;
+    uint32_t l_overrideSize     =   0;
+
+    if( !i_pRingOverride )
+    {
+        goto fapi_try_exit;
+    }
+
+    l_pOvrdTorHdr   =   ( TorHeader_t * )i_pRingOverride;
+    l_overrideSize  =   htobe32( l_pOvrdTorHdr->size );
+
+    FAPI_INF( "============================ Override Details ==========================================" );
+    FAPI_INF( "Override Size        0x%08x  ", l_overrideSize );
+    FAPI_INF( "Override DD Level    0x%02x  ", l_pOvrdTorHdr->ddLevel );
+    FAPI_INF( "Override Ver Level   0x%02x  ", l_pOvrdTorHdr->version );
+    FAPI_INF( "============================ Override Details Ends =====================================" );
+
+    FAPI_ASSERT( (l_overrideSize <= QME_OVERRIDE_RING_SIZE),
+                 fapi2::BAD_OVERRIDE_SIZE()
+                 .set_BAD_OVERRIDE_BIN_SIZE( l_overrideSize ),
+                 "Override Binary Is Bigger Then Temp Buffer 0x%08x", l_overrideSize );
+fapi_try_exit:
+    FAPI_INF( "<< parseRingOverride" );
+    return fapi2::current_err;
+}
+
 //------------------------------------------------------------------------------------------------------
 
 /**
@@ -1118,9 +1153,46 @@ fapi2::ReturnCode buildQmeImage( void* const i_pImageIn, Homerlayout_t* i_pChipH
     }   //i_imgType.qmeHcodeBuild
 
 fapi_try_exit:
-
     FAPI_INF("<< buildQmeImage")
     return fapi2::current_err;
+}
+
+//----------------------------------------------------------------------------------------------
+
+fapi2::ReturnCode buildQmeOverride( Homerlayout_t *i_pChipHomer, RingBufData & i_ringData,
+                                    ImageBuildRecord & i_qmeBuildRecord )
+{
+    FAPI_INF( ">> buildQmeOverride" );
+    ImgSectnSumm l_qmeSectn;
+    l_qmeSectn.iv_sectnOffset = 0;
+    l_qmeSectn.iv_sectnLength = 0;
+
+    if( i_ringData.iv_pOverride )
+    {
+        TorHeader_t * l_pOvrdTorHdr =   ( TorHeader_t * )i_ringData.iv_pOverride;
+        uint32_t l_overrideSize     =   htobe32( l_pOvrdTorHdr->size );
+        uint32_t l_buildIndex       =   0;
+
+        i_qmeBuildRecord.getSection( "QME Common Ring", l_qmeSectn );
+        l_qmeSectn.iv_sectnOffset   =   l_qmeSectn.iv_sectnOffset + l_qmeSectn.iv_sectnLength;
+        l_buildIndex                =   ( ( ( l_qmeSectn.iv_sectnOffset  + 15 )/16 ) * 16 );
+
+        l_qmeSectn.iv_sectnLength   =   l_overrideSize;
+
+        memcpy( (uint8_t *)&i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion[l_buildIndex - QME_IMAGE_CPMR_OFFSET ],
+                (uint8_t *)i_ringData.iv_pOverride,
+                l_qmeSectn.iv_sectnLength );
+
+
+        FAPI_INF( "Override Offset   0x%08x  Override Length   0x%08x",
+                   l_qmeSectn.iv_sectnOffset, l_qmeSectn.iv_sectnLength );
+    }
+
+    i_qmeBuildRecord.setSection( "QME Override Ring", l_qmeSectn.iv_sectnOffset, l_qmeSectn.iv_sectnLength );
+
+
+    FAPI_INF("<< buildQmeOverride")
+     return fapi2::FAPI2_RC_SUCCESS;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1141,7 +1213,6 @@ fapi2::ReturnCode buildQmeRing( CONST_FAPI2_PROC& i_procTgt, void * const i_pIma
     FAPI_INF( ">> buildQmeRing" );
     uint32_t l_hwImgSize       =   0;
     ImgSectnSumm    l_qmeSectn;
-
     p9_xip_image_size( i_pImageIn, &l_hwImgSize );
 
     uint32_t  l_bootCoreMask   =   ENABLE_ALL_CORE;
@@ -1182,6 +1253,12 @@ fapi2::ReturnCode buildQmeRing( CONST_FAPI2_PROC& i_procTgt, void * const i_pIma
                               ( &i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion[l_qmeSectn.iv_sectnLength] - (uint8_t *)&i_pChipHomer->iv_cpmrRegion ),
                                 i_ringData.iv_ringBufSize );
 
+    FAPI_TRY( parseRingOverride( i_ringData.iv_pOverride ),
+              "Failed To Parse Override Ring" );
+
+    FAPI_TRY( buildQmeOverride( i_pChipHomer, i_ringData, i_qmeBuildRecord ),
+              "Failed To Build Scan Ring Override" );
+
     FAPI_TRY( buildQmeSpecificRing( i_procTgt, i_pChipHomer, i_ringData, i_procFuncModel, i_qmeBuildRecord ),
               "QME Instance Specific Section Build Failed" );
 
@@ -1207,6 +1284,7 @@ fapi2::ReturnCode buildQmeHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   *
     ImgSectnSumm    l_imgSectn;
     uint64_t l_cpmrPhyAddr      =   0;
     uint32_t l_tempWord         =   0;
+    uint32_t l_temp             =   0;
 
     if( !i_qmeBuildRecord.getSection( "QME Hcode", l_imgSectn ) )
     {
@@ -1233,6 +1311,16 @@ fapi2::ReturnCode buildQmeHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   *
     {
         pImgHdr->g_qme_common_ring_offset   =   l_imgSectn.iv_sectnOffset - l_tempWord;
         pImgHdr->g_qme_common_ring_length   =   l_imgSectn.iv_sectnLength;
+        l_temp  =   l_imgSectn.iv_sectnLength;
+    }
+
+    if( !i_qmeBuildRecord.getSection( "QME Override Ring", l_imgSectn ) )
+    {
+        if( l_imgSectn.iv_sectnOffset )
+        {
+            pImgHdr->g_qme_cmn_ring_ovrd_offset =   l_imgSectn.iv_sectnOffset - l_tempWord;
+            pImgHdr->g_qme_common_ring_length   =   l_imgSectn.iv_sectnLength + l_temp;
+        }
     }
 
     if( !i_qmeBuildRecord.getSection( "QME Inst Sectn", l_imgSectn ) )
@@ -1248,10 +1336,12 @@ fapi2::ReturnCode buildQmeHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   *
    pImgHdr->g_qme_common_ring_length    =   htobe32(pImgHdr->g_qme_common_ring_length);
    pImgHdr->g_qme_inst_spec_ring_offset =   htobe32(pImgHdr->g_qme_inst_spec_ring_offset);
    pImgHdr->g_qme_max_spec_ring_length  =   htobe32(pImgHdr->g_qme_max_spec_ring_length);
+   pImgHdr->g_qme_cmn_ring_ovrd_offset  =   htobe32(pImgHdr->g_qme_cmn_ring_ovrd_offset);
 
    FAPI_DBG( "===================== QME Ring Header ============================== " );
    FAPI_DBG( "Common Ring Offset        0x%08x" , htobe32(pImgHdr->g_qme_common_ring_offset));
    FAPI_DBG( "Common Ring Length        0x%08x" , htobe32(pImgHdr->g_qme_common_ring_length));
+   FAPI_DBG( "Override Ring Offset      0x%08x" , htobe32(pImgHdr->g_qme_cmn_ring_ovrd_offset));
    FAPI_DBG( "Instance Ring Offset      0x%08x" , htobe32(pImgHdr->g_qme_inst_spec_ring_offset));
    FAPI_DBG( "Instance Ring Length      0x%08x" , htobe32(pImgHdr->g_qme_max_spec_ring_length));
 
@@ -1980,6 +2070,7 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+
 //-------------------------------------------------------------------------------------------------------
 
 fapi2::ReturnCode p10_hcode_image_build(    CONST_FAPI2_PROC& i_procTgt,
@@ -2010,7 +2101,8 @@ fapi2::ReturnCode p10_hcode_image_build(    CONST_FAPI2_PROC& i_procTgt,
                             i_pBuf3,
                             i_sizeBuf3,
                             i_pBuf4,
-                            i_sizeBuf4 );
+                            i_sizeBuf4,
+                            i_pRingOverride );
 
     FAPI_TRY( validateInputArguments( i_pImageIn,
                                       i_pHomerImage,
@@ -2043,9 +2135,11 @@ fapi2::ReturnCode p10_hcode_image_build(    CONST_FAPI2_PROC& i_procTgt,
                                i_imgType, l_chipFuncModel ),
               "Failed To Build XPMR Region of HOMER " );
 
+
     FAPI_TRY( buildCpmrImage( i_procTgt, i_pImageIn, pChipHomer, i_phase,
                               i_imgType, l_chipFuncModel, l_ringData ),
               "Failed To Build CPMR Region of HOMER " );
+
     FAPI_TRY( buildPpmrImage( i_procTgt, i_pImageIn, pChipHomer, i_phase,
                               i_imgType, l_chipFuncModel ),
               "Failed To Build PPMR Region of HOMER" );

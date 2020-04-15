@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -736,6 +736,17 @@
     <description>Attribute ATTR_UNSECURE_HOMER_ADDRESS is initialized with bad value. Address
     is either not aligned with 2MB boundary or b15 of of address value is not 0</description>
     <ffdc>UNSECURE_HOMER_ADDRESS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_BAD_OVERRIDE_SIZE</rc>
+    <description>Override binary is bigger then temp buffer. It may mean override binary is not built
+    correct. It is not expected to be more than 2KB.</description>
+    <ffdc>BAD_OVERRIDE_BIN_SIZE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
