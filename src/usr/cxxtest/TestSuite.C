@@ -44,7 +44,7 @@ namespace CxxTest
 /******************************************************************************/
 //This is a list of testcases that are expected to run in a serial manner
 //   example: std::vector<const char *> CxxSerialTests{"libtestrtloader.so"};
-std::vector<const char *> CxxSerialTests{"libtesthwas.so"};
+std::vector<const char *> CxxSerialTests{"libtesthwas.so", "libtesteeprom.so"};
 
 //
 // TestSuite members
