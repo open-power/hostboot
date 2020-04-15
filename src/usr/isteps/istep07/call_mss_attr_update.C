@@ -39,7 +39,9 @@
 #include    <errl/errlentry.H>
 #include    <errl/errlmanager.H>
 
+#include    <hbotcompid.H>           // HWPF_COMP_ID
 #include    <isteps/hwpisteperror.H>
+#include    <istepHelperFuncs.H>     // captureError
 
 #include    <errl/errludtarget.H>
 #include    <initservice/isteps_trace.H>
@@ -54,6 +56,7 @@
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/attrrp.H>
 #include    <targeting/common/mfgFlagAccessors.H>
+#include    <targeting/targplatutil.H> //assertGetToplevelTarget
 
 // HWAS
 #include    <hwas/common/hwas.H>
@@ -118,7 +121,6 @@ const uint8_t INVALID_PROC = 0xFF;
 errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
 {
     errlHndl_t l_err = nullptr;
-    bool l_updateNeeded = false;
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
               "check_proc0_memory_config entry");
@@ -132,6 +134,9 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
     uint8_t i = 0;
     uint8_t l_proc0 = INVALID_PROC;
     uint8_t l_victim = INVALID_PROC;
+
+    Target* l_sys = UTIL::assertGetToplevelTarget();
+
     for (const auto & l_procChip : l_procsList)
     {
         l_procIds[i].proc = l_procChip;
@@ -259,14 +264,17 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
             // Update attributes
             (l_procIds[i].proc)->
               setAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>(l_procIds[i].topoId);
+            ATTR_FORCE_SBE_UPDATE_type l_sbe_update =
+                l_sys->getAttr<TARGETING::ATTR_FORCE_SBE_UPDATE>();
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "Need to run updateProcessorSbeSeeproms due to "
-                  "topology checks "
-                  "Proc %.8X: topoIdEff = %d, topoId = %d",
+                  "updateProcessorSbeSeeproms needed due to "
+                  "topology checks, will set ATTR_FORCE_SBE_UPDATE "
+                  "Proc %.8X: topoIdEff = %d, topoId = %d l_sbe_update=0x%X",
                   get_huid(l_procIds[i].proc),
                   l_procIds[i].topoIdEff,
-                  l_procIds[i].topoId);
-            l_updateNeeded = true;
+                  l_procIds[i].topoId, l_sbe_update);
+            l_sys->setAttr<TARGETING::ATTR_FORCE_SBE_UPDATE>
+              (l_sbe_update | TARGETING::SBE_UPDATE_TYPE_TOPOLOGY_CHECKS);
         }
 
         TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -280,54 +288,12 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
               (l_procIds[i].proc)->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>());
     }
 
-    if(l_updateNeeded)
-    {
-        do
-        {
-            // Sync all attributes to the FSP
-            l_err = AttrRP::syncAllAttributesToFsp();
-            if( l_err )
-            {
-                // Something failed on the sync.  Commit the error here
-                // and continue with the Re-IPL Request
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          ERR_MRK"check_proc0_memory_config() - Error "
-                          "syncing attributes to FSP. "
-                          TRACE_ERR_FMT,
-                          TRACE_ERR_ARGS(l_err));
-                io_istepErr.addErrorDetails(l_err);
-                errlCommit(l_err, HWPF_COMP_ID);
-            }
-            else
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          INFO_MRK"check_proc0_memory_config() - Sync "
-                          "Attributes to FSP" );
-            }
-
-            l_err = SBE::updateProcessorSbeSeeproms();
-
-            if( l_err )
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          ERR_MRK"check_proc0_memory_config() - Error calling "
-                          "updateProcessorSbeSeeproms. "
-                          TRACE_ERR_FMT,
-                          TRACE_ERR_ARGS(l_err));
-
-                break;
-            }
-        } while(0);
-    }
-
     return l_err;
 } // end check_proc0_memory_config()
 
 void check_hrmor_within_range (ATTR_PROC_MEM_TO_USE_type i_proc_mem_to_use,
                                IStepError & io_StepError)
 {
-    errlHndl_t l_err {nullptr};
-
     // TODO RTC 212966 - Support for topology id
     //extract group and chip id from PROC_MEM_TO_USE attribute
     uint8_t l_grp  {0};
@@ -363,7 +329,7 @@ void check_hrmor_within_range (ATTR_PROC_MEM_TO_USE_type i_proc_mem_to_use,
     //if we find it, then we check that the hrmor is within
     //range of configured mem.
     //
-    //Otherwise, we want to go down the sbe upate and TI path
+    //Otherwise, we want to go down the sbe update and TI path
     bool l_sbeUpdateTIRequired = true;
     if (l_procTgtMemUsed)
     {
@@ -385,23 +351,20 @@ void check_hrmor_within_range (ATTR_PROC_MEM_TO_USE_type i_proc_mem_to_use,
 
     if (l_sbeUpdateTIRequired)
     {
+        Target* l_sys = UTIL::assertGetToplevelTarget();
+        ATTR_FORCE_SBE_UPDATE_type l_sbe_update =
+            l_sys->getAttr<TARGETING::ATTR_FORCE_SBE_UPDATE>();
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-            "check_hrmor_within_range: sbe is downleveled - update required");
-
-        // Rebuild SBE image and trigger reconfig loop
-        l_err = SBE::updateProcessorSbeSeeproms();
-        if( l_err )
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR: updateProcessorSbeSeeproms");
-            io_StepError.addErrorDetails(l_err);
-            errlCommit(l_err, HWPF_COMP_ID);
-        }
+            "updateProcessorSbeSeeproms needed check_hrmor_within_range, "
+            "will set ATTR_FORCE_SBE_UPDATE l_sbe_update=0x%X",
+            l_sbe_update);
+        l_sys->setAttr<TARGETING::ATTR_FORCE_SBE_UPDATE>
+          (l_sbe_update | TARGETING::SBE_UPDATE_TYPE_HRMOR_OUTSIDE_CONFIGURED_MEM);
     }
     else
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-            "check_hrmor_within_range: sbe update is NOT required");
+            "check_hrmor_within_range: SBE update is NOT required");
     }
 }
 
@@ -419,6 +382,8 @@ void*    call_mss_attr_update( void *io_pArgs )
     {
         bool l_isPhyp = is_phyp_load();
         bool l_spEnabled = INITSERVICE::spBaseServicesEnabled();
+
+        Target* l_sys = UTIL::assertGetToplevelTarget();
 
         // Check the memory on master proc chip
         // Use this mechanism for:
@@ -505,7 +470,6 @@ void*    call_mss_attr_update( void *io_pArgs )
             // Need to handle some code upgrade scenarios where the
             // swap values aren't getting updated on the SP.
             // We will force the EFF attributes to match.
-            bool l_mismatch = false;
             TargetHandleList l_procTargetList;
             getAllChips(l_procTargetList, TYPE_PROC);
             for (const auto & l_proc: l_procTargetList)
@@ -516,30 +480,17 @@ void*    call_mss_attr_update( void *io_pArgs )
                   l_proc->getAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>();
                 if( l_topoId != l_effTopoId )
                 {
+                    ATTR_FORCE_SBE_UPDATE_type l_sbe_update =
+                        l_sys->getAttr<TARGETING::ATTR_FORCE_SBE_UPDATE>();
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "Mismatch on proc %.8X : topoId=%.8X, effTopoId=%.8X",
-                              get_huid(l_proc), l_topoId, l_effTopoId);
-                    l_mismatch = true;
+                        "Mismatch on proc %.8X : topoId=%.8X, effTopoId=%.8X "
+                        "will set ATTR_FORCE_SBE_UPDATE l_sbe_update=0x%X",
+                              get_huid(l_proc), l_topoId, l_effTopoId, l_sbe_update);
+                    l_sys->setAttr<TARGETING::ATTR_FORCE_SBE_UPDATE>
+                      (l_sbe_update | TARGETING::SBE_UPDATE_TYPE_FABRIC_EFF_TOPOLOGY);
                     l_proc->setAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>
                       (l_topoId);
                 }
-            }
-
-            // force an update to the SBE if needed
-            if( l_mismatch )
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "Forcing SBE update to fix old memory swap");
-                l_err = SBE::updateProcessorSbeSeeproms();
-                if( l_err )
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "ERROR: updateProcessorSbeSeeproms");
-                    l_StepError.addErrorDetails(l_err);
-                    errlCommit(l_err, HWPF_COMP_ID);
-                }
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "Unexpectedly didn't do a SBE update when we should have...");
             }
         }
 
@@ -568,6 +519,111 @@ void*    call_mss_attr_update( void *io_pArgs )
                 l_StepError.addErrorDetails(l_err);
                 errlCommit( l_err, HWPF_COMP_ID );
             }
+        }
+        ATTR_FORCE_SBE_UPDATE_type l_sbe_update =
+            l_sys->getAttr<TARGETING::ATTR_FORCE_SBE_UPDATE>();
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Checking FORCE_SBE_UPDATE=0x%X",
+            l_sbe_update);
+        if (l_sbe_update != 0)
+        {
+            if (l_sys->getAttr<ATTR_IS_MPIPL_HB>() == true)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "SBE update NOT allowed during MPIPL!");
+
+                /*@
+                 * @errortype
+                 * @moduleid          MOD_CALL_MSS_ATTR_UPDATE
+                 * @reasoncode        RC_SBE_UPDATE_IN_MPIPL
+                 * @userdata1         ATTR_FORCE_SBE_UPDATE, bit mask of reasons
+                 *                    See SBE_UPDATE_TYPE from attribute_types_hb.xml
+                 * @userdata2         0
+                 * @devdesc           SBE cannot be reset during MPIPL
+                 * @custdesc          Not allowed to update SBE during MPIPL boot
+                 */
+                l_err = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                              MOD_CALL_MSS_ATTR_UPDATE,
+                              RC_SBE_UPDATE_IN_MPIPL,
+                              l_sbe_update,
+                              0);
+                l_err->collectTrace("ISTEPS_TRACE");
+                errlCommit(l_err, HWPF_COMP_ID);
+            }
+            else
+            {
+                l_err = SBE::updateProcessorSbeSeeproms();
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "WARNING: Return from updateProcessorSbeSeeproms "
+                    "this may OR may -NOT- be an issue, "
+                    "if undesired, check any configuration overrides. "
+                    "FORCE_SBE_UPDATE=0x%X bit mask indicates reasons",
+                    l_sbe_update);
+                // See attribute_types_hb.xml for SBE_UPDATE_TYPE ^^
+                // SBE_UPDATE_DISABLE and NO_SBE_UPDATES can influence
+                // Next clear FORCE_SBE_UPDATE for any future usages
+                // Clearing is just to remove the mark on the wall in case
+                // in the future we want to set/trigger in other logic
+                // and avoids conflicting signals in later isteps
+                //
+                // In updateProcessorSbeSeeproms sbeDoReboot is called,
+                // so we should be IPL'ing at this point causing hostboot
+                // to restart, thus returning from the reboot request
+                // is an error, either the request for reboot explicitly
+                // failed (error) -or- hostboot unexpectedly returned
+                // from the call without a reboot happening (also an error).
+                //
+                // If a developer overrides with SBE_UPDATE_DISABLE or
+                // NO_SBE_UPDATES this needs to be managed outside the
+                // scope of this logic.
+                //
+                l_sys->setAttr<TARGETING::ATTR_FORCE_SBE_UPDATE>
+                  (TARGETING::SBE_UPDATE_TYPE_CLEAR);
+                if(l_err)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "ERROR: updateProcessorSbeSeeproms");
+                    l_err->collectTrace("ISTEPS_TRACE");
+                    captureError(l_err, l_StepError, HWPF_COMP_ID);
+                }
+                else
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR: updateProcessorSbeSeeproms"
+                          " unexpectedly returned");
+                    /*@
+                     * @errortype
+                     * @moduleid     MOD_CALL_MSS_ATTR_UPDATE
+                     * @reasoncode   RC_SBE_UPDATE_UNEXPECTEDLY_FAILED
+                     * @userdata1    ATTR_FORCE_SBE_UPDATE, bit mask of reasons
+                     *               See SBE_UPDATE_TYPE from attribute_types_hb.xml
+                     * @userdata2    0
+                     * @devdesc      An IPL failure occurred
+                     * @custdesc     Return from updateProcessorSbeSeeproms unexpectedly
+                     */
+                    l_err = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    MOD_CALL_MSS_ATTR_UPDATE,
+                                    RC_SBE_UPDATE_UNEXPECTEDLY_FAILED,
+                                    l_sys->getAttr<TARGETING::ATTR_FORCE_SBE_UPDATE>(),
+                                    0);
+                    TargetHandle_t l_pMasterProcChip(nullptr);
+                    targetService().masterProcChipTargetHandle(l_pMasterProcChip);
+                    l_err->addHwCallout(l_pMasterProcChip,
+                                         HWAS::SRCI_PRIORITY_HIGH,
+                                         HWAS::NO_DECONFIG,
+                                         HWAS::GARD_NULL);
+                    l_err->collectTrace(TARG_COMP_NAME);
+                    l_err->collectTrace(SBE_COMP_NAME);
+                    captureError(l_err, l_StepError, HWPF_COMP_ID);
+                }
+            }
+        }
+        else
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ATTR_FORCE_SBE_UPDATE -NOT- "
+                      "set to call updateProcessorSbeSeeproms,"
+                      " skipped calling updateProcessSbeSeeproms");
         }
     } while (0);
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_attr_update exit" );

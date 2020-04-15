@@ -965,9 +965,9 @@ static void adjustMemoryMap( TargetService& i_targetService )
                                    l_bootIndex);
         l_pMasterProcChip->setAttr<ATTR_PSI_HB_ESB_ADDR>(l_psiHbEsbBAR);
 
-        // Set the attribute to force a SBE update later
+        // Set the initialization of attribute to force an SBE update later
         l_pTopLevel->setAttr<TARGETING::ATTR_FORCE_SBE_UPDATE>
-          (TARGETING::FORCE_SBE_UPDATE_BAR_MISMATCH);
+          (TARGETING::SBE_UPDATE_TYPE_BAR_MISMATCH);
     }
     // Now swap the BARs between the master and the victim if needed
     else if( l_swapVictim != l_pMasterProcChip )

@@ -38,6 +38,7 @@
 #include <fapi2/plat_hwp_invoker.H>
 #include <errl/errlentry.H>
 #include <errl/errludtarget.H>
+#include    <targeting/targplatutil.H> //assertGetToplevelTarget
 
 // SBE
 #include    <sbeif.H>
@@ -115,9 +116,7 @@ void*    call_mss_freq( void *io_pArgs )
             break;
         }
 
-        Target * l_sys = nullptr;
-        targetService().getTopLevelTarget( l_sys );
-        assert(l_sys != nullptr, "call_mss_freq: l_sys == nullptr!!!");
+        Target * l_sys = UTIL::assertGetToplevelTarget();
 
         // Save off current settings for OMI frequency
         ATTR_FREQ_OMI_MHZ_type l_originalOmiFreq = 0;
@@ -126,21 +125,6 @@ void*    call_mss_freq( void *io_pArgs )
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                      "call_mss_freq: 1st call to getOmiFreq failed. "
-                     TRACE_ERR_FMT,
-                     TRACE_ERR_ARGS(l_err));
-            l_StepError.addErrorDetails( l_err );
-            l_err->collectTrace("ISTEPS_TRACE");
-            errlCommit( l_err, ISTEP_COMP_ID );
-            break;
-        }
-
-        Target * l_masterProc = nullptr;
-
-        l_err = targetService().queryMasterProcChipTargetHandle(l_masterProc);
-        if(l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                     "call_mss_freq: call to queryMasterProcChipTargetHandle failed. "
                      TRACE_ERR_FMT,
                      TRACE_ERR_ARGS(l_err));
             l_StepError.addErrorDetails( l_err );
@@ -194,6 +178,10 @@ void*    call_mss_freq( void *io_pArgs )
 
         // Check if desired OMI frequency setting changed
         ATTR_FREQ_OMI_MHZ_type l_newOmiFreq = 0;
+        ATTR_FORCE_SBE_UPDATE_type l_sbe_update =
+            l_sys->getAttr<TARGETING::ATTR_FORCE_SBE_UPDATE>();
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            "call_mss_freq: FORCE_SBE_UPDATE l_sbe_update=0x%X", l_sbe_update);
         l_err = fapi2::platAttrSvc::getOmiFreq(l_newOmiFreq);
         if(l_err)
         {
@@ -208,74 +196,23 @@ void*    call_mss_freq( void *io_pArgs )
         }
 
         // FW examines the master SBE boot scratch registers versus
-        // system MRW ATTR and will customize the master SBE and reboot
-        // if necessary (slaves get data via mbox scratch registers)
-        //
-        if(l_newOmiFreq  != l_originalOmiFreq)
+        // system MRW ATTR and will customize the master SBE
+        // Set ATTR_FORCE_SBE_UPDATE to trigger SBE update in later IPL flow
+        // (slaves will get data via mbox scratch registers)
+        if (l_newOmiFreq  != l_originalOmiFreq)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "call_mss_freq: The OMI frequency changed!"
-                  " Original Omi : %d New Omi : %d",
-                  l_originalOmiFreq, l_newOmiFreq);
-            if(l_sys->getAttr<ATTR_IS_MPIPL_HB>() == true)
-            {
-
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "call_mss_freq: SBE update not allowed during MPIPL!");
-
-                /*@
-                * @errortype
-                * @moduleid          MOD_SBE_PERFORM_UPDATE_CHECK
-                * @reasoncode        RC_SBE_UPDATE_IN_MPIPL
-                * @userdata1         0
-                * @userdata2[0:31]   original OMI frequency
-                * @userdata2[32:63]  new OMI frequency
-                * @devdesc           SBE cannot be reset during MPIPL
-                * @custdesc          Illegal action during boot
-                */
-                l_err = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
-                              MOD_SBE_PERFORM_UPDATE_CHECK,
-                              RC_SBE_UPDATE_IN_MPIPL,
-                              0,
-                              TWO_UINT32_TO_UINT64(
-                                  l_originalOmiFreq,
-                                  l_newOmiFreq));
-                l_err->collectTrace("ISTEPS_TRACE");
-
-                l_StepError.addErrorDetails( l_err );
-                errlCommit( l_err, ISTEP_COMP_ID );
-            }
-            else
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Need to updateProcessorSbeSeeproms due to "
-                    "OMI frequency desired changed from system MRW ATTR "
-                    " Original Omi : %d New Omi : %d",
-                    l_originalOmiFreq, l_newOmiFreq);
-                l_err = SBE::updateProcessorSbeSeeproms();
-
-                if(l_err)
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "call_mss_freq: updateProcessorSbeSeeproms Failed "
-                        TRACE_ERR_FMT, TRACE_ERR_ARGS(l_err));
-
-                    l_err->collectTrace("ISTEPS_TRACE");
-
-                    // Create IStep error log and cross reference to error
-                    // that occurred
-                    l_StepError.addErrorDetails(l_err);
-
-                    // Commit Error
-                    errlCommit(l_err, ISTEP_COMP_ID);
-                }
-            }
+                "call_mss_freq: OMI frequency changed!"
+                " Original Omi : %d New Omi : %d "
+                " set ATTR_FORCE_SBE_UPDATE for deferred action",
+                l_originalOmiFreq, l_newOmiFreq);
+            l_sys->setAttr<TARGETING::ATTR_FORCE_SBE_UPDATE>
+              (l_sbe_update | TARGETING::SBE_UPDATE_TYPE_MSS_FREQ_CHANGE);
         }
 
     } while(0);
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq exit");
-
 
     return l_StepError.getErrorHandle();
 }

@@ -694,60 +694,6 @@ void* host_discover_targets( void *io_pArgs )
     print_system_info();
 #endif
 
-    // Handle the case where we don't have a valid memory map swap victim due
-    //  to a module swap - See TARGETING::adjustMemoryMap()
-    if( l_pTopLevel->getAttr<TARGETING::ATTR_FORCE_SBE_UPDATE>()
-        == TARGETING::FORCE_SBE_UPDATE_BAR_MISMATCH )
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Forcing SBE update to handle swapped memory map" );
-        l_err = SBE::updateProcessorSbeSeeproms();
-        if(l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "host_discover_targets: Error calling updateProcessorSbeSeeproms"
-                      TRACE_ERR_FMT,
-                      TRACE_ERR_ARGS(l_err));
-            captureError(l_err, l_stepError, ISTEP_COMP_ID);
-        }
-
-        // We should never get here, if we do that means the SBE update didn't
-        //  actually happen.  That is a problem since we're currently running
-        //  with mismatched BAR data
-        TARGETING::ATTR_XSCOM_BASE_ADDRESS_type l_xscom =
-          l_pMasterProcChip->getAttr<TARGETING::ATTR_XSCOM_BASE_ADDRESS>();
-        TARGETING::ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID_type l_topoid =
-          l_pMasterProcChip->getAttr<TARGETING::ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>();
-        /*@
-         * @errortype
-         * @moduleid     ISTEP::MOD_DISCOVER_TARGETS
-         * @reasoncode   ISTEP::RC_CANNOT_BOOT_WITH_MISMATCHED_BARS
-         * @userdata1    Current XSCOM BAR
-         * @userdata2[0-31]  Desired ATTR_PROC_EFF_FABRIC_GROUP_ID
-         * @userdata2[32:63] Desired ATTR_PROC_EFF_FABRIC_GROUP_ID
-         * @devdesc      Not able to update the SBE to correct the BAR mismatch
-         * @custdesc     Required module update failed
-         */
-        l_err = new ERRORLOG::ErrlEntry(
-                                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                        ISTEP::MOD_DISCOVER_TARGETS,
-                                        ISTEP::RC_CANNOT_BOOT_WITH_MISMATCHED_BARS,
-                                        l_xscom,
-                                        l_topoid);
-
-        l_err->addHwCallout( l_pMasterProcChip,
-                             HWAS::SRCI_PRIORITY_HIGH,
-                             HWAS::NO_DECONFIG,
-                             HWAS::GARD_NULL );
-
-        l_err->collectTrace(TARG_COMP_NAME);
-        l_err->collectTrace(SBE_COMP_NAME);
-        l_err->collectTrace("ISTEPS_TRACE",256);
-
-        // Create IStep error log and cross ref error that occurred
-        l_stepError.addErrorDetails( l_err );
-        errlCommit( l_err, ISTEP_COMP_ID );
-    }
-
     // Now that we have all of the targets set up we can assign HBRT ids
     // to all of the targets. These are the IDs the Hypervisors use to ID
     // a given target. We set them up now because we want to make sure the

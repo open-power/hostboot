@@ -201,32 +201,16 @@
     <writeable/>
   </attribute>
 
-  <enumerationType>
-    <description>
-        Enumeration specifying if and why a SBE update should be forced
-    </description>
-    <default>NO</default>
-    <enumerator>
-      <name>NO</name>
-      <value>0</value>
-    </enumerator>
-    <enumerator>
-      <name>BAR_MISMATCH</name>
-      <value>1</value>
-    </enumerator>
-    <id>FORCE_SBE_UPDATE</id>
-  </enumerationType>
-
   <attribute>
     <id>FORCE_SBE_UPDATE</id>
     <description>
-        Set to non-zero to force a SBE update at various places in the IPL.
+        Set bits to indicate reason to force an SBE update at various places in the IPL.
+        See SBE_UPDATE_TYPE enum for values.
     </description>
     <simpleType>
-      <enumeration>
-        <id>FORCE_SBE_UPDATE</id>
-        <default>NO</default>
-      </enumeration>
+      <uint16_t>
+        <default>0x0</default>
+      </uint16_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -1211,6 +1195,59 @@
     <writeable/>
     <hbOnly/>
   </attribute>
+
+  <enumerationType>
+    <id>SBE_UPDATE_TYPE</id>
+    <description> Enumeration used in OR expression to indicate why to update SBE.
+    </description>
+    <enumerator>
+      <description>
+        Just clears the value
+      </description>
+      <name>CLEAR</name>
+      <value>0x0</value>
+    </enumerator>
+    <enumerator>
+      <description>
+        See targetservicestart for details, if processor is swapped
+        need to update SBE.
+      </description>
+      <name>BAR_MISMATCH</name>
+      <value>0x1</value>
+    </enumerator>
+    <enumerator>
+      <description>
+        See call_mss_freq for details, if new and old frequency
+        changes need to update SBE.
+      </description>
+      <name>MSS_FREQ_CHANGE</name>
+      <value>0x2</value>
+    </enumerator>
+    <enumerator>
+      <description>
+        See call_mss_attr_update for details, if topology changes
+        need to update SBE.
+      </description>
+      <name>TOPOLOGY_CHECKS</name>
+      <value>0x4</value>
+    </enumerator>
+    <enumerator>
+      <description>
+        See call_mss_attr_update for details, if HRMOR
+        outside configured range need to update SBE.
+      </description>
+      <name>HRMOR_OUTSIDE_CONFIGURED_MEM</name>
+      <value>0x8</value>
+    </enumerator>
+    <enumerator>
+      <description>
+        See call_mss_attr_update for details, if fabric topology
+        changes need to update SBE.
+      </description>
+      <name>FABRIC_EFF_TOPOLOGY</name>
+      <value>0x10</value>
+    </enumerator>
+  </enumerationType>
 
   <attribute>
     <id>SCAN_MUTEX</id>
