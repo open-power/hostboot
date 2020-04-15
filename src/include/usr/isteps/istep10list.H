@@ -176,22 +176,10 @@ const   TaskInfo    g_istep10[]  =   {
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                "", // empty istep
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
-        },
-        {
-                "", // empty istep
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
-        },
-/*
-        {
                 ISTEPNAME(10,02,"host_slave_sbe_update"),
                 ISTEP_10::call_host_slave_sbe_update,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-*/
         {
                 ISTEPNAME(10,03,"host_secureboot_lockdown"),
                 ISTEP_10::call_host_secureboot_lockdown,

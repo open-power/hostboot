@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,6 +26,7 @@
 #include    <errl/errludtarget.H>
 #include    <errl/errlmanager.H>
 #include    <isteps/hwpisteperror.H>
+#include    <istepHelperFuncs.H>
 #include    <isteps/istep_reasoncodes.H>
 #include    <initservice/isteps_trace.H>
 #include    <initservice/istepdispatcherif.H>
@@ -47,13 +48,11 @@
 #include    <sys/time.h>
 #include    <hwas/common/hwasCommon.H>
 
-/* FIXME RTC: 210975
 // fapi2 HWP invoker
 #include    <fapi2/plat_hwp_invoker.H>
 
 #include    <fapi2.H>
-#include    <p9_sbe_lpc_init.H>
-*/
+#include    <p10_sbe_lpc_init.H>
 
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
@@ -127,9 +126,9 @@ errlHndl_t rediscoverI2CTargets(void)
         if (err)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "rediscoverI2CTargets: HWAS::platPresenceDetect "
-                       "returned err plid=0x%X, rc=0x%X",
-                       err->plid(), err->reasonCode());
+                       "rediscoverI2CTargets: HWAS::platPresenceDetect"
+                       TRACE_ERR_FMT,
+                       TRACE_ERR_ARGS(err));
             break;
         }
 
@@ -209,13 +208,11 @@ errlHndl_t rediscoverI2CTargets(void)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            ERR_MRK"rediscoverI2CTargets: "
-                           "FAIL Writing Reboot Sensor Count to %d. "
-                           "Committing Error Log rc=0x%.4X eid=0x%.8X "
-                           "plid=0x%.8X, but continuing shutdown",
+                           "FAIL Writing Reboot Sensor Count to %d, "
+                           "but continuing shutdown"
+                           TRACE_ERR_FMT,
                            count,
-                           new_err->reasonCode(),
-                           new_err->eid(),
-                           new_err->plid());
+                           TRACE_ERR_ARGS(new_err));
                 new_err->collectTrace(ISTEP_COMP_NAME);
                 errlCommit( new_err, ISTEP_COMP_ID );
 
@@ -227,8 +224,8 @@ errlHndl_t rediscoverI2CTargets(void)
                    "rediscoverI2CTargets: requesting power cycle");
             INITSERVICE::requestReboot();
 
-            // sleep here to give IPMI code so that the istep doesn't
-            // continue with SBE Update
+            // sleep here to give BMC a chance to get us rebooting so
+            // SBE Update will not take place
             while (true)
             {
                 nanosleep(60,0); // 60 seconds
@@ -278,7 +275,6 @@ void* call_host_slave_sbe_update (void *io_pArgs)
             errlCommit( l_errl, HWPF_COMP_ID );
         }
 
-        #ifndef CONFIG_AXONE_BRING_UP
         // Call to check state of Processor SBE SEEPROMs and
         // make any necessary updates
         l_errl = SBE::updateProcessorSbeSeeproms(
@@ -292,8 +288,6 @@ void* call_host_slave_sbe_update (void *io_pArgs)
             errlCommit( l_errl, HWPF_COMP_ID );
             break;
         }
-
-        #endif
 
         // Run LPC Init on Alt Master Procs
         // Get list of all processors
@@ -311,16 +305,17 @@ void* call_host_slave_sbe_update (void *io_pArgs)
 
             if ( type_enum == TARGETING::PROC_MASTER_TYPE_MASTER_CANDIDATE )
             {
-/* FIXME RTC: 210975
-                // Initialize the LPC Bus by calling the p9_sbe_lpc_init hwp
+                // Initialize the LPC Bus by calling the p10_sbe_lpc_init hwp
                 fapi2::Target <fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_target (l_target);
-                FAPI_INVOKE_HWP(l_errl, p9_sbe_lpc_init, l_fapi_target);
+                FAPI_INVOKE_HWP(l_errl, p10_sbe_lpc_init, l_fapi_target);
 
                 if (l_errl)
                 {
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               INFO_MRK"PNOR::validateAltMaster> p9_sbe_lpc_init returns error, rc=0x%X",
-                               l_errl->reasonCode());
+                               ERR_MRK"PNOR::validateAltMaster> p10_sbe_lpc_init target 0x%.8X"
+                               TRACE_ERR_FMT,
+                               get_huid(l_target),
+                               TRACE_ERR_ARGS(l_errl));
 
                     // capture the target data in the elog
                     ErrlUserDetailsTarget(l_target).addToLog(l_errl);
@@ -334,10 +329,9 @@ void* call_host_slave_sbe_update (void *io_pArgs)
                 else
                 {
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "SUCCESS running p9_sbe_lpc_init HWP on "
+                           "SUCCESS running p10_sbe_lpc_init HWP on "
                            "target HUID %.8X", TARGETING::get_huid(l_target));
                 }
-*/
             }
         }
 
