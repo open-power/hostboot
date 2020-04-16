@@ -168,7 +168,7 @@ class ImageBuildRecord
         iv_maxSizeList["PGPE Boot Loader"]  =   PGPE_BOOT_LOADER_SIZE;
         iv_maxSizeList["PGPE Hcode"]        =   PGPE_HCODE_SIZE;
         iv_maxSizeList["GPSPB"]             =   PGPE_GLOBAL_PSTATE_PARAM_BLOCK_SIZE;
-        iv_maxSizeList["PGPE SRAM Size"]    =   PGPE_SRAM_SIZE;
+        iv_maxSizeList["PGPE SRAM Size"]    =   OCC_SRAM_PGPE_REGION_SIZE;
         iv_maxSizeList["OPSPB"]             =   OCC_PSTATE_PARAM_BLOCK_REGION_SIZE;
         iv_maxSizeList["PState Table"]      =   PGPE_PSTATE_OUTPUT_TABLES_REGION_SIZE;
         iv_maxSizeList["WOF Tables"]        =   OCC_WOF_TABLES_SIZE;
@@ -1648,7 +1648,8 @@ fapi2::ReturnCode buildPpmrHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
     l_pPpmrHdr->iv_pstateLength =   l_sectn.iv_sectnLength;
 
     //PGPE SRAM
-    l_pPpmrHdr->iv_sramSize     =   l_pPpmrHdr->iv_hcodeLength + l_pPpmrHdr->iv_gpspbLength;
+    l_pPpmrHdr->iv_sramSize     =   l_pPpmrHdr->iv_hcodeLength + l_pPpmrHdr->iv_gpspbLength +
+                                        PGPE_OCC_SHARED_SRAM_SIZE + PGPE_SRAM_BOOT_REGION;
 
     //WOF Table
     i_ppmrBuildRecord.getSection( "WOF Tables", l_sectn );
@@ -1959,19 +1960,19 @@ fapi2::ReturnCode verifySramImageSize( Homerlayout_t * i_pChipHomer, P10FuncMode
                  .set_MAX_QME_IMG_SIZE_ALLOWED( QME_SRAM_SIZE )
                  .set_EC_LEVEL( i_chipFuncModel.getChipLevel() ),
                  "QME Image Size Check Failed Actual 0x%08x Max Allowed 0x%08x",
-                 l_imageSize, PGPE_SRAM_SIZE );
+                 l_imageSize, QME_SRAM_SIZE );
 
     FAPI_INF( "----- QME Image Check Success  -----" );
 
     l_imageSize     =   htobe32( l_pPpmrHdr->iv_sramSize );
 
-    FAPI_ASSERT( ( l_imageSize <= PGPE_SRAM_SIZE ),
+    FAPI_ASSERT( ( l_imageSize <= OCC_SRAM_PGPE_REGION_SIZE ),
                  fapi2::PGPE_IMG_EXCEED_SRAM_SIZE()
                  .set_BAD_IMG_SIZE( l_imageSize )
-                 .set_MAX_PGPE_IMG_SIZE_ALLOWED(PGPE_SRAM_SIZE)
+                 .set_MAX_PGPE_IMG_SIZE_ALLOWED(OCC_SRAM_PGPE_REGION_SIZE)
                  .set_EC_LEVEL( i_chipFuncModel.getChipLevel() ),
                  "PGPE Image Size Check Failed Actual 0x%08x Max Allowed 0x%08x",
-                 l_imageSize, PGPE_SRAM_SIZE );
+                 l_imageSize, OCC_SRAM_PGPE_REGION_SIZE );
 
     FAPI_INF( "----- PGPE Image Check Success -----" );
 
