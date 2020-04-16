@@ -1022,7 +1022,7 @@ sub getTargetParent
 #
 # @details Traverse the parent lineage and return the parent that matches the
 #          type search criteria.  If the top level target is hit and it's
-#          type does not match search criteria and error out flag is set to
+#          type does not match search criteria an error out flag is set to
 #          true, or not set, then the this will exit via confess.  If the
 #          error out flag is set to false then "" will be returned.
 #

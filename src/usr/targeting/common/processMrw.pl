@@ -119,6 +119,10 @@ my %MAX_INST_PER_PARENT =
     OSCREFCLK => 1, # Default to 1 for now
     PERV      => 56, # Number of PERVs per PROC
                      # Only 39 used, but they are sparsely populated
+    PCICLKENDPT => 1, # Number of PCICLKENDPTs per PROC
+    LPCREFCLKENDPT => 1, # Number of LPCREFCLKENDPTs per PROC
+    OMIC_CLK => 1, # Number of OMIC_CLK per PROC
+    CAPP => 2, # Number of CAPP per PROC
 );
 
 # The maximum number of target instances per PROC.  Please use wrapper methods
@@ -178,6 +182,10 @@ my %MAX_INST_PER_PROC =
     SBE        => 1,
     TPM        => 1,
     SMPGROUP   => 8,
+    PCICLKENDPT => getMaxInstPerParent("PCICLKENDPT"),
+    LPCREFCLKENDPT => getMaxInstPerParent("LPCREFCLKENDPT"),
+    OMIC_CLK => getMaxInstPerParent("OMIC_CLK"),
+    CAPP => getMaxInstPerParent("CAPP"),
 );
 
 
