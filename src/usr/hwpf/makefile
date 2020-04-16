@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -402,18 +402,26 @@ $(call GENTARGET, ${IF_CMP_FLEX_TARGET}) : \
 	$(C2) "    FLEX       $(notdir $<)"
 	$(C1)flex -o$@ $^
 
+try = $(shell set -e; if ($(1)) >/dev/null 2>&1; \
+        then echo "$(2)"; \
+        else echo "$(3)"; fi )
+
+try-cflag = $(call try,$(1) $(2) -x c -c /dev/null -o /dev/null,$(2))
+HOSTCFLAGS:=-O3
+HOSTCFLAGS+=$(call try-cflag,$(HOST_PREFIX)g++,-std=gnu++03)
+
 $(GENDIR)/$(IF_CMP_SUBDIR)/%.host.o: \
 	    ifcompiler/%.C $(IF_COMPILER_H_FILES) \
 	    $(GENDIR)/$(IF_CMP_YACC_H_TARGET)
 	$(C2) "    CXX        $(notdir $<)"
-	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 $< -I ifcompiler -I $(GENDIR) \
+	$(C1)$(CCACHE) $(HOST_PREFIX)g++ $(HOSTCFLAGS) $< -I ifcompiler -I $(GENDIR) \
 			-I $(GENDIR)/$(IF_CMP_SUBDIR) \
 			-I $(ROOTPATH)/src/include/usr/hwpf/hwp -c -o $@
 
 $(GENDIR)/$(IF_CMP_YACC_C_TARGET:.c=.host.o): \
     $(GENDIR)/$(IF_CMP_YACC_C_TARGET) $(IF_COMPILER_H_FILES)
 	$(C2) "    CXX        $(notdir $<)"
-	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 $< -I ifcompiler -I $(GENDIR) \
+	$(C1)$(CCACHE) $(HOST_PREFIX)g++ $(HOSTCFLAGS) $< -I ifcompiler -I $(GENDIR) \
 			-I $(GENDIR)/$(IF_CMP_SUBDIR) \
 			-I $(ROOTPATH)/src/include/usr/hwpf/hwp -c -o $@
 
@@ -421,7 +429,7 @@ $(GENDIR)/$(IF_CMP_FLEX_TARGET:.c=.host.o): \
     $(GENDIR)/$(IF_CMP_FLEX_TARGET) $(IF_COMPILER_H_FILES) \
     $(GENDIR)/$(IF_CMP_YACC_H_TARGET)
 	$(C2) "    CXX        $(notdir $<)"
-	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -DHOSTBOOT_COMPILE $< -I ifcompiler -I $(GENDIR) \
+	$(C1)$(CCACHE) $(HOST_PREFIX)g++ $(HOSTCFLAGS) -DHOSTBOOT_COMPILE $< -I ifcompiler -I $(GENDIR) \
 			-I $(GENDIR)/$(IF_CMP_SUBDIR) \
 			-I $(ROOTPATH)/src/include/usr/hwpf/hwp -c -o $@
 

@@ -227,6 +227,13 @@ namespace getAttrData
         uint8_t              iv_systemType;
         uint8_t              iv_systemType_ext;
         uint8_t              iv_dataVersion;
+    public:
+	MBvpdVMKeyword() : iv_version(0),iv_systemType(0),
+			   iv_systemType_ext(0),iv_dataVersion(0) {};
+	operator uint32_t() const {
+		return iv_version << 24 | iv_systemType << 16 |
+			iv_systemType_ext << 8 | iv_dataVersion;
+	}
     };
 //  Attribute definition
     struct MBvpdAttrDef

@@ -50,7 +50,7 @@ cpu_t** CpuManager::cv_cpus[KERNEL_MAX_SUPPORTED_NODES];
 bool CpuManager::cv_shutdown_requested = false;
 uint64_t CpuManager::cv_shutdown_status = 0;
 size_t CpuManager::cv_cpuSeq = 0;
-bool CpuManager::cv_forcedMemPeriodic = false;
+uint8_t CpuManager::cv_forcedMemPeriodic = 0;
 InteractiveDebug CpuManager::cv_interactive_debug;
 
 CpuManager::CpuManager() : iv_lastStartTimebase(0)
@@ -361,7 +361,7 @@ void CpuManager::executePeriodics(cpu_t * i_cpu)
         }
 
         bool forceMemoryPeriodic = __sync_fetch_and_and(&cv_forcedMemPeriodic,
-                                                        false);
+                                                        0);
 
         ++(i_cpu->periodic_count);
         if((0 == (i_cpu->periodic_count % CPU_PERIODIC_CHECK_MEMORY)) ||
@@ -461,7 +461,7 @@ size_t CpuManager::getThreadCount()
 
 void CpuManager::forceMemoryPeriodic()
 {
-    cv_forcedMemPeriodic = true;
+    cv_forcedMemPeriodic = 1;
 }
 
 

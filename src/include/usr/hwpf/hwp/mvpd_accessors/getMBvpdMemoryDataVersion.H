@@ -33,7 +33,6 @@
 #define _HWP_GETMBVPDMEMDATAVERSION_
 
 #include <fapi.H>
-#define VM_KEYWORD_DEFAULT_VALUE 0x00000000
 
 // function pointer typedef definition for HWP call support
 typedef fapi::ReturnCode (*getMBvpdMemoryDataVersion_FP_t)

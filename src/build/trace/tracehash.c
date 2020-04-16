@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -471,14 +471,7 @@ void create_sections(bfd* inFile, asection* s, void* param)
             // for this section to point to the group
             // symbol
             // Binutils 2.24 BFD requires an offset of 176
-            // Binutils 2.22 BFD requires an offset of 168
-            // So we're just going to key off a define that's only in 2.24
-            // TODO RTC 123492
-#ifdef bfd_find_nearest_line_discriminator
             uint32_t offset = 176;
-#else
-            uint32_t offset = 168;
-#endif
             void *ptr_sym_offset = s->used_by_bfd + offset;
             asymbol **tsym = (asymbol **)ptr_sym_offset;
             *tsym = gsym;
@@ -672,7 +665,10 @@ char* create_format_string(const char* string)
     size_t r_pos = 0; // Current position in result string.
 
     // Iterate through source string looking for format tags.
-    for(size_t pos = 0; pos < length; pos++)
+    // length - 2 was used because "length" already includes the 0 terminal byte
+    //   and we want to make sure we have at least one char beyond the "%"
+    //   that way we have two which should deal with most cases
+    for(size_t pos = 0; pos < (length-2); pos++)
     {
         // Skip if not %.
         if (string[pos] != '%') continue;
@@ -889,7 +885,7 @@ void parse_traceinfo(bfd* inFile, asection* s)
             static const char filesep[] = ": ";
 
             size_t len_begin = replace_pos - (char*)&contents[pos];
-            size_t len_end = strlen(&contents[pos]) -
+            size_t len_end = strlen(&contents[pos + len_begin]) -
                              strlen(TRACEPP_REPLACE_WITH_FILENAME);
             size_t length = len_begin + strlen(filename) + len_end +
                             strlen(filesep) + 1;

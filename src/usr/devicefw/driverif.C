@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -31,6 +33,16 @@
 
 namespace DeviceFW
 {
+
+// This extension will silence warnings relating to the mis-match of argument
+// types used in the various aliases created in this document.
+
+// The following flag is only available in GCC 8
+#if __GNUC__ >= 8
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattribute-alias"
+#endif
+
     /** @brief Wrapper function to call singleton instance for registerRoute.
      *
      *  This is defined as an extern "C" function so that it can be aliased
@@ -198,5 +210,9 @@ namespace DeviceFW
                           void* io_buffer, size_t& io_buflen,
                           AccessType_DriverOnly i_accessType, va_list i_args)
         __attribute__((alias("DeviceFW_deviceOpValist")));        
+
+#if __GNUC__ >= 8
+#pragma GCC diagnostic pop
+#endif
 
 };
