@@ -820,3 +820,69 @@ int decode_file_ack_resp(const struct pldm_msg *msg, size_t payload_length,
 
 	return PLDM_SUCCESS;
 }
+
+int encode_get_file_table_req(uint8_t instance_id, uint32_t transfer_handle,
+                              uint8_t operation_flag, uint8_t table_type,
+                              struct pldm_msg* msg, size_t payload_length)
+{
+    int rc = PLDM_SUCCESS;
+    struct pldm_header_info header = {0};
+
+    if (msg == NULL) {
+        return PLDM_ERROR_INVALID_DATA;
+    }
+
+    struct pldm_get_file_table_req *request =
+        (struct pldm_get_file_table_req *)msg->payload;
+
+    header.msg_type = PLDM_REQUEST;
+    header.instance = instance_id;
+    header.pldm_type = PLDM_OEM;
+    header.command = PLDM_GET_FILE_TABLE;
+
+    if ((rc = pack_pldm_header(&header, &(msg->hdr))) > PLDM_SUCCESS) {
+        return rc;
+    }
+
+
+    if (payload_length != PLDM_GET_FILE_TABLE_REQ_BYTES) {
+        return PLDM_ERROR_INVALID_LENGTH;
+    }
+
+    request->transfer_handle = transfer_handle;
+    request->operation_flag = operation_flag;
+    request->table_type = table_type;
+
+    return rc;
+}
+
+int decode_get_file_table_resp(const struct pldm_msg *msg,
+                               size_t payload_length,
+                               uint8_t* completion_code,
+                               uint32_t* next_transfer_handle,
+                               uint8_t* transfer_flag, size_t* table_size,
+                               uint8_t* table_data)
+{
+    if(msg == NULL || completion_code == NULL || next_transfer_handle == NULL ||
+       transfer_flag == NULL || table_size == NULL) {
+        return PLDM_ERROR_INVALID_DATA;
+    }
+
+    if(payload_length < PLDM_GET_FILE_TABLE_MIN_RESP_BYTES) {
+        return PLDM_ERROR_INVALID_LENGTH;
+    }
+
+    *completion_code = msg->payload[0];
+
+    struct pldm_get_file_table_resp *response =
+        (struct pldm_get_file_table_resp *)msg->payload;
+
+    *next_transfer_handle = le32toh(response->next_transfer_handle);
+    *transfer_flag = response->transfer_flag;
+    *table_size = payload_length - PLDM_GET_FILE_TABLE_MIN_RESP_BYTES;
+    if(table_data) {
+        memcpy(table_data, response->table_data, *table_size);
+    }
+
+    return PLDM_SUCCESS;
+}

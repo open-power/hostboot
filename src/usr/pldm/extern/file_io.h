@@ -200,6 +200,42 @@ struct pldm_get_file_table_resp {
 	uint8_t table_data[1];	 //!< Table Data
 } __attribute__((packed));
 
+/** @brief Encode GetFileTable command request
+ *
+ * @param[in] instance_id - Message's instance id
+ * @param[in] transfer_handle - Handle to identify the next part of the exchange
+ * @param[in] operation_flag - Flag indicating the current part of the transfer
+ * @param[in] table_type - The type of table to return
+ * @param[in] msg - Pointer to PLDM message
+ * @param[in] payload_length - The length of the request
+ * @return pldm_completion_codes
+ */
+int encode_get_file_table_req(uint8_t instance_id, uint32_t transfer_handle,
+                              uint8_t operation_flag, uint8_t table_type,
+                              struct pldm_msg* msg, size_t payload_length);
+
+/** @brief Decode GetFileTable response
+ *
+ * @param[in] msg - The pointer to PLDM response message
+ * @param[in] payload_length - The size of the response message
+ * @param[out] completion_code - The completion code of the operation
+ * @param[out] next_transfer_code - Handle to identify the next part of the
+ *             exchange
+ * @param[out] transfer_flag - Transfer operation flag
+ * @param[out] table_size - The size of the requested table (in bytes)
+ * @param[out] table_data - The pointer to the beginning of the returned table;
+ *             if table_data is NULL, table_size will be set, but no data will
+ *             be copied into table_data
+ * @return pldm_completion_codes
+ */
+int decode_get_file_table_resp(const struct pldm_msg *msg,
+                               size_t payload_length,
+                               uint8_t* completion_code,
+                               uint32_t* next_transfer_handle,
+                               uint8_t* transfer_flag,
+                               size_t* table_size,
+                               uint8_t* table_data);
+
 /** @brief Decode GetFileTable command request data
  *
  *  @param[in] msg - Pointer to PLDM request message

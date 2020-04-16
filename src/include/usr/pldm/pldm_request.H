@@ -51,6 +51,7 @@
 #include <pldm/pldmif.H>
 #include <pldm/pldm_const.H>
 #include <pldm/pldm_errl.H>
+#include <pldm/pldm_reasoncodes.H>
 
 using namespace ERRORLOG;
 

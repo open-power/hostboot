@@ -50,6 +50,7 @@ namespace PLDM
         MOD_SEND_PLDM_RESPONSE        = 0x09, // send_pldm_response
         MOD_HANDLE_INBOUND_REQ        = 0x0A, // handle_inbound_req
         MOD_SEND_REPO_CHANGED_EVENT   = 0x0B, // sendRepositoryChangedEvent
+        MOD_GET_FILE_TABLE            = 0x0C, // getFileTable
     };
 
     enum PLDMReasonCode
@@ -66,6 +67,7 @@ namespace PLDM
         RC_INVALID_COMMAND      = PLDM_COMP_ID | 0x0A,
         RC_INVALID_MSG_TYPE     = PLDM_COMP_ID | 0x0B,
         RC_INVALID_HEADER       = PLDM_COMP_ID | 0x0C,
+        RC_BAD_TRANSFER_FLAG    = PLDM_COMP_ID | 0x0D,
     };
 }
 #endif
