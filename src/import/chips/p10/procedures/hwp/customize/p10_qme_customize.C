@@ -231,6 +231,7 @@ fapi2::ReturnCode p10_qme_customize(
                                      chipletId, //Arg ignored for Common rings
                                      nextRing,
                                      remBufSize,
+                                     true, //This is a customized QME ringSection
                                      i_dbgl);
 
 
@@ -273,6 +274,7 @@ fapi2::ReturnCode p10_qme_customize(
                              ringId,
                              chipletId, //Arg ignored for Common rings
                              (void*)nextRing,
+                             true, //Indicate producing customized ring section
                              i_dbgl);
 
         FAPI_ASSERT(rc == TOR_SUCCESS,

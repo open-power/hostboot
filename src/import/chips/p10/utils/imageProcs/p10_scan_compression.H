@@ -366,11 +366,6 @@ int rs4_extract_cmsk( const CompressedScanData* i_rs4,
 /// Scan and Origination ring types (used for encoding RS4 header's iv_type)
 ///
 /// Scan type: Flush or Override (Governs scan controller setup)
-//CMO-20200410: Temp fix to avoid coreq
-#define RS4_IV_TYPE_SCAN_MASK_V4    (uint8_t)0b00001100
-#define RS4_IV_TYPE_SCAN_FLUSH_V4   (uint8_t)0b00000100
-#define RS4_IV_TYPE_SCAN_OVRD_V4    (uint8_t)0b00001000
-/// Scan type: Flush or Override (Governs scan controller setup)
 #define RS4_IV_TYPE_SCAN_MASK       (uint8_t)0b00000011
 #define RS4_IV_TYPE_SCAN_FLUSH      (uint8_t)0b00000001
 #define RS4_IV_TYPE_SCAN_OVRD       (uint8_t)0b00000010

@@ -213,7 +213,21 @@ int _tor_access_ring( void*          io_ringSection,   // Ring section ptr
                 rs4Size = be16toh( ((CompressedScanData*)
                                     ((uint8_t*)io_ringSection + ringOffset))->iv_size );
 
-                if (io_ringBufSize < rs4Size)
+                if (rs4Size <= io_ringBufSize)
+                {
+                    memcpy( io_rs4Ring,
+                            (void*)((uint8_t*)io_ringSection + ringOffset),
+                            rs4Size );
+
+                    if (i_dbgl > 0)
+                    {
+                        MY_DBG("Found a ring:  ringId=0x%x and rs4Size=%u\n",
+                               i_ringId, rs4Size);
+                    }
+
+                    rc = TOR_SUCCESS;
+                }
+                else
                 {
                     if (i_dbgl > 0)
                     {
@@ -224,20 +238,6 @@ int _tor_access_ring( void*          io_ringSection,   // Ring section ptr
                     io_ringBufSize = rs4Size;
                     return TOR_BUFFER_TOO_SMALL;
                 }
-
-                // Produce return parms
-                memcpy( io_rs4Ring,
-                        (void*)((uint8_t*)io_ringSection + ringOffset),
-                        rs4Size );
-                io_ringBufSize = rs4Size;
-
-                if (i_dbgl > 0)
-                {
-                    MY_DBG("Found a ring:  ringId=0x%x and rs4Size=%u\n",
-                           i_ringId, rs4Size);
-                }
-
-                rc = TOR_SUCCESS;
             }
             else
             {
@@ -326,12 +326,12 @@ int _tor_access_ring( void*          io_ringSection,   // Ring section ptr
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-///               [internal] TOR Header and Ring Check function
+///               [internal] TOR Header and RingId Check function
 //////////////////////////////////////////////////////////////////////////////////////////
-int _tor_header_and_ring_check( void*           i_ringSection,  // Ring section ptr
-                                RingId_t        i_ringId,       // Ring ID
-                                uint8_t         i_ddLevel,      // DD level
-                                uint32_t        i_dbgl )
+int _tor_header_and_ringId_check( void*           i_ringSection,  // Ring section ptr
+                                  RingId_t        i_ringId,       // Ring ID
+                                  uint8_t         i_ddLevel,      // DD level
+                                  uint32_t        i_dbgl )
 {
     int            rc = TOR_SUCCESS;
     uint32_t       torMagic;
@@ -419,8 +419,116 @@ int _tor_header_and_ring_check( void*           i_ringSection,  // Ring section 
     }
 
     return rc;
-} // End of _tor_header_and_ring_check()
+} // End of _tor_header_and_ringId_check()
 
+
+//////////////////////////////////////////////////////////////////////////////////////////
+///                     [internal] TOR RS4 Header Check function
+//////////////////////////////////////////////////////////////////////////////////////////
+/// Notes:
+/// - The checks in this function is not necessarily catastrophic. We merely make a note
+///   of any inconsistencies and leave it up to caller to decide the action.
+///
+int _tor_rs4_header_check( void*                i_ringSection,
+                           CompressedScanData*  i_rs4Ring,
+                           MyBool_t             i_bCustom ) // Indicates custom SBE or QME section
+{
+    int      rc = TOR_SUCCESS;
+
+    TorHeader_t* torHeader = (TorHeader_t*)i_ringSection;
+    uint32_t     torMagic = be32toh(torHeader->magic);
+    uint8_t      expectedOrigType = 0;
+
+    switch (torMagic)
+    {
+        case TOR_MAGIC_SBE:
+        case TOR_MAGIC_QME:
+            if (i_bCustom)
+            {
+                expectedOrigType = RS4_IV_TYPE_ORIG_BASE |
+                                   RS4_IV_TYPE_ORIG_MVPD |
+                                   RS4_IV_TYPE_ORIG_OVLY |
+                                   RS4_IV_TYPE_ORIG_DYN;
+            }
+            else
+            {
+                expectedOrigType = RS4_IV_TYPE_ORIG_BASE;
+            }
+
+            break;
+
+        case TOR_MAGIC_OVLY:
+            expectedOrigType = RS4_IV_TYPE_ORIG_OVLY;
+            break;
+
+        case TOR_MAGIC_DYN:
+            expectedOrigType = RS4_IV_TYPE_ORIG_DYN;
+            break;
+
+        case TOR_MAGIC_OVRD:
+            expectedOrigType = RS4_IV_TYPE_ORIG_OVRD;
+            break;
+
+        default:
+            MY_ERR("ERROR: _tor_rs4_header_check: Invalid torMagic(=0x%08x)\n",
+                   torMagic);
+            return TOR_INVALID_MAGIC_NUMBER;
+            break;
+    }
+
+    //
+    // Check for RS4 header inconsistency (in order of decreasing severity)
+    //
+    // Since the error checking below is a little unusual, here's why:
+    // - On first inconsistency check a) trace out partial info, b) make a  note of rc
+    //   condition, and c) skip any further checks and break out.
+    // - After break out, continue tracing out full details.
+    //
+    do
+    {
+        if ( be16toh(i_rs4Ring->iv_magic) != RS4_MAGIC )
+        {
+            MY_ERR("_tor_rs4_header_check: RS4->iv_magic is invalid for");
+            rc = TOR_INVALID_RS4_MAGIC;
+            break;
+        }
+
+        if ( i_rs4Ring->iv_version != RS4_VERSION )
+        {
+            MY_ERR("_tor_rs4_header_check: RS4->iv_version is invalid for");
+            rc = TOR_INVALID_RS4_VERSION;
+            break;
+        }
+
+        if ( ((i_rs4Ring->iv_type & RS4_IV_TYPE_ORIG_MASK) & expectedOrigType) == false )
+        {
+            MY_ERR("_tor_rs4_header_check: RS4->iv_type is invalid for");
+            rc = TOR_INVALID_RS4_TYPE;
+            break;
+        }
+    }
+    while (0);
+
+    // ..if rc==true from above check, continue tracing out full details.
+    if (rc)
+    {
+        MY_ERR(" ringId=0x%04x, selector=0x%04x and bCustom=%i in ringSection w/TOR magic=0x%08x:\n"
+               "  iv_magic: 0x%04x (RS4_MAGIC: 0x%04x)\n"
+               "  iv_version: %u (RS4_VERSION: %u)\n"
+               "  iv_type: 0x%02x (RS4_IV_TYPE_ORIG_MASK: 0x%02x, expectedOrigType: 0x%02x",
+               be16toh(i_rs4Ring->iv_ringId), be16toh(i_rs4Ring->iv_selector), i_bCustom,
+               torMagic,
+               be16toh(i_rs4Ring->iv_magic), RS4_MAGIC,
+               i_rs4Ring->iv_version, RS4_VERSION,
+               i_rs4Ring->iv_type, RS4_IV_TYPE_ORIG_MASK, expectedOrigType);
+
+        return rc;
+    }
+    else
+    {
+        return TOR_SUCCESS;
+    }
+} // End of _tor_rs4_header_check()
 
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -431,15 +539,16 @@ int tor_get_single_ring ( void*         i_ringSection,  // Ring section ptr
                           RingId_t      i_ringId,       // Ring ID
                           uint8_t       i_chipletId,    // Chiplet ID (ignored for Common rings)
                           void*         io_rs4Ring,     // IO RS4 ring buffer (caller mgd)
-                          uint32_t&     io_ringBufSize, // Query, rs4Size, or max buf size
+                          uint32_t&     io_ringBufSize, // (See header)
+                          MyBool_t      i_bCustom,      // Indicates whether custom ringSection
                           uint32_t      i_dbgl )
 {
     int          rc = TOR_SUCCESS;
 
-    rc = _tor_header_and_ring_check( i_ringSection,
-                                     i_ringId,
-                                     i_ddLevel,
-                                     i_dbgl );
+    rc = _tor_header_and_ringId_check( i_ringSection,
+                                       i_ringId,
+                                       i_ddLevel,
+                                       i_dbgl );
 
     // Explanation to the "list" of RCs that we exclude from tracing out:
     // TOR_HOLE_RING_ID:    Can happen if a ring has been removed from the ring list
@@ -449,7 +558,8 @@ int tor_get_single_ring ( void*         i_ringSection,  // Ring section ptr
         if ( rc != TOR_HOLE_RING_ID &&
              rc != TOR_INVALID_RING_ID )
         {
-            MY_ERR("ERROR: tor_get_single_ring: _tor_header_and_ring_check() failed w/rc=0x%08x\n",
+            MY_ERR("ERROR: tor_get_single_ring: _tor_header_and_ringId_check() failed"
+                   " w/rc=0x%08x\n",
                    rc);
         }
 
@@ -488,6 +598,15 @@ int tor_get_single_ring ( void*         i_ringSection,  // Ring section ptr
         return rc;
     }
 
+    if ( rc == TOR_SUCCESS )
+    {
+        rc = _tor_rs4_header_check( i_ringSection,
+                                    (CompressedScanData*)io_rs4Ring,
+                                    i_bCustom );
+        // Do not trace out. Let caller decide if acceptable error
+        return rc;
+    }
+
     return rc;
 } // End of tor_get_single_ring()
 
@@ -501,19 +620,20 @@ int tor_append_ring( void*           io_ringSection,       // Ring section ptr
                      RingId_t        i_ringId,             // Ring ID to append
                      uint8_t         i_chipletId,          // Chiplet ID (ignored for Common rings)
                      void*           i_rs4Ring,            // RS4 ring container
+                     MyBool_t        i_bCustom,            // Indicates whether custom ringSection
                      uint32_t        i_dbgl )              // Debug option
 {
     int          rc = TOR_SUCCESS;
     uint32_t     ringBufSize;
 
-    rc = _tor_header_and_ring_check( io_ringSection,
-                                     i_ringId,
-                                     UNDEFINED_DD_LEVEL,
-                                     i_dbgl );
+    rc = _tor_header_and_ringId_check( io_ringSection,
+                                       i_ringId,
+                                       UNDEFINED_DD_LEVEL,
+                                       i_dbgl );
 
     if (rc)
     {
-        MY_ERR("ERROR: tor_append_ring: _tor_header_and_ring_check() failed w/rc=0x%08x\n",
+        MY_ERR("ERROR: tor_append_ring: _tor_header_and_ringId_check() failed w/rc=0x%08x\n",
                rc);
         return rc;
     }
@@ -524,6 +644,17 @@ int tor_append_ring( void*           io_ringSection,       // Ring section ptr
                " derivative rings, e.g. *_bucket, can be appended.\n",
                i_ringId);
         return TOR_RING_HAS_DERIVS;
+    }
+
+    rc = _tor_rs4_header_check( io_ringSection,
+                                (CompressedScanData*)i_rs4Ring,
+                                i_bCustom );
+
+    if (rc)
+    {
+        MY_ERR("ERROR: tor_append_ring: _tor_rs4_header_check() failed w/rc=0x%08x",
+               rc);
+        return rc;
     }
 
     rc =  _tor_access_ring( io_ringSection,
@@ -707,7 +838,7 @@ int tor_skeleton_generation( void*         io_ringSection,
 
 
 //
-// Inform caller of TOR version.
+// Return this code's TOR version.
 //
 uint8_t tor_version( void)
 {
@@ -724,10 +855,23 @@ int dyn_append_ring( void*     io_ringSection,        // Ring section ptr
                      void*     i_rs4Ring,             // RS4 ring
                      uint32_t  i_dbgl )               // Debug option
 {
+    int rc = TOR_SUCCESS;
+
     uint32_t   rs4Size = 0;
     uint32_t   ringSectionSize = 0;
 
     TorHeader_t* torHeader = (TorHeader_t*)io_ringSection;
+
+    rc = _tor_rs4_header_check( io_ringSection,
+                                (CompressedScanData*)i_rs4Ring,
+                                UNDEFINED_BOOLEAN ); // Only relevant for SBE and QME sections
+
+    if (rc)
+    {
+        MY_ERR("ERROR: dyn_append_ring: _tor_rs4_header_check() failed w/rc=0x%08x",
+               rc);
+        return rc;
+    }
 
     ringSectionSize = be32toh(torHeader->size);
     rs4Size         = be16toh(((CompressedScanData*)i_rs4Ring)->iv_size);
@@ -754,12 +898,15 @@ int dyn_append_ring( void*     io_ringSection,        // Ring section ptr
 
 
 
+////////////////////////////////////////////////////////////////////////////////////////
+//                           Dynamic Inits Get Ring API
+///////////////////////////////////////////////////////////////////////////////////////
 int dyn_get_ring( void*          i_ringSection,
                   RingId_t       i_ringId,
                   Rs4Selector_t  i_selector,
                   uint8_t        i_ddLevel,
-                  void*          io_rs4Ring,     // IO RS4 ring buffer (caller mgd)
-                  uint32_t&      io_ringBufSize, // Query, ring size, or max buffer size
+                  void*          io_rs4Ring,
+                  uint32_t&      io_ringBufSize,
                   uint32_t       i_dbgl )
 {
     int  rc = TOR_SUCCESS;
@@ -815,11 +962,10 @@ int dyn_get_ring( void*          i_ringSection,
         rs4Size = be16toh(nextRs4->iv_size);
 
         // Look for a match
-        if ( be16toh(nextRs4->iv_magic) == RS4_MAGIC &&
-             be16toh(nextRs4->iv_ringId) == i_ringId &&
+        if ( be16toh(nextRs4->iv_ringId) == i_ringId &&
              be16toh(nextRs4->iv_selector) == i_selector )
         {
-            if (rs4Size < io_ringBufSize)
+            if (rs4Size <= io_ringBufSize)
             {
                 memcpy( io_rs4Ring, (void*)nextRs4, rs4Size );
                 bFound = true;
@@ -827,7 +973,7 @@ int dyn_get_ring( void*          i_ringSection,
             }
             else
             {
-                MY_ERR("COND in dyn_get_ring: Size of ring(=%d) > size of buffer(=%d)."
+                MY_ERR("COND in dyn_get_ring: Size of ring(=%u) > size of buffer(=%u)."
                        " Returning required buffer size.",
                        rs4Size, io_ringBufSize);
                 io_ringBufSize = rs4Size;
@@ -856,7 +1002,12 @@ int dyn_get_ring( void*          i_ringSection,
 
     if (bFound == true)
     {
-        return TOR_SUCCESS;
+        // Check for valid RS4 header
+        rc = _tor_rs4_header_check( i_ringSection,
+                                    (CompressedScanData*)io_rs4Ring,
+                                    UNDEFINED_BOOLEAN ); //The dynamic section is never customized
+        // Do not trace out. Let caller decide if acceptable error
+        return rc;
     }
     else
     {

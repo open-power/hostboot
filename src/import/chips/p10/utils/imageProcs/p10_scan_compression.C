@@ -841,6 +841,11 @@ _rs4_decompress(uint8_t* o_data_str,
         return BUG(SCAN_DECOMPRESSION_MAGIC_ERROR);
     }
 
+    if (i_rs4->iv_version != RS4_VERSION)
+    {
+        return BUG(SCAN_COMPRESSION_VERSION_ERROR);
+    }
+
     memset(o_data_str, 0, i_size);
     memset(o_care_str, 0, i_size);
 
@@ -937,35 +942,16 @@ rs4_redundant(const CompressedScanData* i_data, MyBool_t& o_redundant)
 MyBool_t
 rs4_is_ovrd(const CompressedScanData* i_rs4)
 {
-//CMO-20200410: Temp fix to avoid coreq
-    if (i_rs4->iv_version == RS4_VERSION)
+    switch (i_rs4->iv_type & RS4_IV_TYPE_SCAN_MASK)
     {
-        switch (i_rs4->iv_type & RS4_IV_TYPE_SCAN_MASK)
-        {
-            case RS4_IV_TYPE_SCAN_OVRD:
-                return true;
+        case RS4_IV_TYPE_SCAN_OVRD:
+            return true;
 
-            case RS4_IV_TYPE_SCAN_FLUSH:
-                return false;
+        case RS4_IV_TYPE_SCAN_FLUSH:
+            return false;
 
-            default:
-                return UNDEFINED_BOOLEAN;
-        }
-    }
-    else
-    {
-        //V4 back support
-        switch (i_rs4->iv_type & RS4_IV_TYPE_SCAN_MASK_V4)
-        {
-            case RS4_IV_TYPE_SCAN_OVRD_V4:
-                return true;
-
-            case RS4_IV_TYPE_SCAN_FLUSH_V4:
-                return false;
-
-            default:
-                return UNDEFINED_BOOLEAN;
-        }
+        default:
+            return UNDEFINED_BOOLEAN;
     }
 
     return UNDEFINED_BOOLEAN;

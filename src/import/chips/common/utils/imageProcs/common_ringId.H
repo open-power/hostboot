@@ -347,7 +347,10 @@ typedef struct
 #define TOR_RING_NAME_NOT_FOUND               INFRASTRUCT_NOOF_RCS + 20
 #define TOR_NO_RINGS_FOR_CHIP                 INFRASTRUCT_NOOF_RCS + 21
 #define TOR_DYN_RING_NOT_FOUND                INFRASTRUCT_NOOF_RCS + 22
-#define TOR_HOLE_RING_ID                      INFRASTRUCT_NOOF_RCS + 23 // ringId is a "hole" ring
+#define TOR_HOLE_RING_ID                      INFRASTRUCT_NOOF_RCS + 23
+#define TOR_INVALID_RS4_MAGIC                 INFRASTRUCT_NOOF_RCS + 24
+#define TOR_INVALID_RS4_VERSION               INFRASTRUCT_NOOF_RCS + 25
+#define TOR_INVALID_RS4_TYPE                  INFRASTRUCT_NOOF_RCS + 26
 
 // This function returns the main ring properties list associated w/the chip ID.
 int ringid_get_ringProps( ChipId_t           i_chipId,

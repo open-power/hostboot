@@ -777,28 +777,21 @@ extern "C"
 
             memcpy( i_pCallerRingBuf, i_pRing, i_ringLen );
 
-//CMO-20200410: Temp fix to avoid coreq w/Mvpd using RS4 V4
-            FAPI_DBG("MVPD ring's (iv_version,iv_type)=(%u,0x%x)",
-                     ((CompressedScanData*)i_pCallerRingBuf)->iv_version,
-                     ((CompressedScanData*)i_pCallerRingBuf)->iv_type);
-
-            if ( ((CompressedScanData*)i_pRing)->iv_version == RS4_VERSION )
-            {
-                // Update the iv_type field to ensure it indicates Mvpd origination for a V5 Mvpd
-                // Note that the V5 Mvpd should already be encoding OVRD for *_gptr_ovly rings
-                // and FLUSH for all other rings.
-                ((CompressedScanData*)i_pCallerRingBuf)->iv_type &= ~RS4_IV_TYPE_ORIG_MASK;
-                ((CompressedScanData*)i_pCallerRingBuf)->iv_type |= RS4_IV_TYPE_ORIG_MVPD;
-            }
-            else
-            {
-                // Update the iv_type field to ensure it indicates FLUSH and MVPD origination for a V4 Mvpd
-                ((CompressedScanData*)i_pCallerRingBuf)->iv_type = 0;
-                ((CompressedScanData*)i_pCallerRingBuf)->iv_type |= RS4_IV_TYPE_SCAN_FLUSH;
-                ((CompressedScanData*)i_pCallerRingBuf)->iv_type |= RS4_IV_TYPE_ORIG_MVPD;
-                // And now we're RS4 V5 compliant
-                ((CompressedScanData*)i_pCallerRingBuf)->iv_version = RS4_VERSION;
-            }
+//CMO-20200611: We should check here several RS4 header fields:that iv_type
+//            if ( ((CompressedScanData*)i_pCallerRingBuf)->iv_version R== RS4_VERSION  &&
+//                 (((CompressedScanData*)i_pCallerRingBuf)->iv_type & RS4_IV_TYPE_ORIG_MVPD) ==
+//                   RS4_IV_TYPE_ORIG_MVPD  &&
+//                 ((((CompressedScanData*)i_pCallerRingBuf)->iv_type & RS4_IV_TYPE_SCAN_FLUSH) ==
+//                   RS4_IV_TYPE_SCAN_FLUSH  &&  ringType != PDS )  &&
+//                 ((((CompressedScanData*)i_pCallerRingBuf)->iv_type & RS4_IV_TYPE_SCAN_OVRD) ==
+//                   RS4_IV_TYPE_SCAN_OVRD  &&  ringType == PDS ) )
+//            {
+//                break;
+//            }
+//            else
+//            {
+//                FAPI_ERR();
+//            }
 
             io_rCallerRingBufLen =   i_ringLen;
         }

@@ -71,8 +71,11 @@ int tor_skeleton_generation( void*         io_ringSection,
 /// \param[in/out] io_rs4Ring  A void pointer. Contains copied ring. Note that
 ///                            it's caller's responsibility to manage buffer.
 ///
-/// \param[in/out] io_ringBufSize  A variable that returns size of ring
-///                                copied into io_rs4Ring
+/// \param[in/out] io_ringBufSize  If this size is too small on input, it will contain exact
+///                                RS4 ring size on output.  Othersize, if big enough to hold
+///                                rs4Ring, it's unchanged on output.
+///
+/// \param[in] i_bCustom  Indicates whether customized SBE or QME ringSection
 ///
 /// \param[in] i_debug  Debug level [0:3].
 ///
@@ -84,7 +87,8 @@ int tor_get_single_ring ( void*          i_ringSection,
                           RingId_t       i_ringId,
                           uint8_t        i_chipletId,
                           void*          io_rs4Ring,
-                          uint32_t&      io_ringBufSize, // Query, rs4Size, or max buf size
+                          uint32_t&      io_ringBufSize,
+                          MyBool_t       i_bCustom,
                           uint32_t       i_dbgl = 0 );
 
 
@@ -102,6 +106,8 @@ int tor_get_single_ring ( void*          i_ringSection,
 ///
 /// \param[in] i_rs4Ring  Pointer to the RS4 compressed ring container.
 ///
+/// \param[in] i_bCustom  Indicates whether customized SBE or QME ringSection
+///
 /// \param[in] i_debug  Debug level [0:3].
 ///
 /// \retval 0 Success
@@ -112,7 +118,8 @@ int tor_append_ring( void*           io_ringSection,
                      uint32_t        i_maxRingSectionSize,
                      RingId_t        i_ringId,
                      uint8_t         i_chipletId,
-                     void*           i_rs4Ring, // Ptr to the RS4 ring container
+                     void*           i_rs4Ring,
+                     MyBool_t        i_bCustom,
                      uint32_t        i_dbgl = 0 );
 
 
@@ -138,9 +145,9 @@ uint8_t tor_version( void);
 /// \param[in/out] io_rs4Ring The IO ring buffer (caller managed) and will contain the
 ///                           retrieved ring with matching (ringId,selector).
 ///
-/// \param[in/out] io_ringBufSize 1) if ==0 on input, contains RS4 ring size on output.
-///                               2) if >0 on input it is assumed it represents max buffer
-///                                  size and will contain exact RS4 ring size on output.
+/// \param[in/out] io_ringBufSize  If this size is too small on input, it will contain exact
+///                                RS4 ring size on output.  Othersize, if big enough to hold
+///                                rs4Ring, it's unchanged on output.
 ///
 /// \param[in] i_debug Debug level [0:3].
 ///
@@ -152,9 +159,9 @@ int dyn_get_ring( void*         i_ringSection,
                   RingId_t      i_ringId,
                   Rs4Selector_t i_selector,
                   uint8_t       i_ddLevel,
-                  void*         io_rs4Ring,     // IO ring buffer (caller mgd)
-                  uint32_t&     io_ringBufSize, // Query, rs4Size, or max buf size
-                  uint32_t      i_dbgl );
+                  void*         io_rs4Ring,
+                  uint32_t&     io_ringBufSize,
+                  uint32_t      i_dbgl = 0 );
 
 
 /// Append a single RS4 ring to the end of a Dynamic ring section (non-TOR layout).

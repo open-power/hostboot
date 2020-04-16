@@ -253,8 +253,9 @@ fapi2::ReturnCode get_overlays_ring(
              i_ddLevel,
              i_ringId,
              chipletId,
-             io_ovlyRs4,  //Has RS4 overlays ring on return
-             bufSize );
+             io_ovlyRs4,
+             bufSize,
+             UNDEFINED_BOOLEAN ); //The overlays section is never customized
 
     if (rc == TOR_SUCCESS)
     {
@@ -358,6 +359,7 @@ fapi2::ReturnCode apply_overlay_ring(
     // contaminate i_rs4RefHeader as this may be pointing to one of our work
     // buffers.
     CompressedScanData l_rs4RefHeader;
+    l_rs4RefHeader.iv_magic = be16toh(i_rs4RefHeader->iv_magic);
     l_rs4RefHeader.iv_version = i_rs4RefHeader->iv_version;
     l_rs4RefHeader.iv_type = i_rs4RefHeader->iv_type;
     l_rs4RefHeader.iv_ringId = be16toh(i_rs4RefHeader->iv_ringId);
@@ -402,7 +404,7 @@ fapi2::ReturnCode apply_overlay_ring(
                  set_CHIP_TARGET(i_procTarget).
                  set_OCCURRENCE(3),
                  "ERROR: Code bug(3): Wrong programming of SCAN iv_type field. rs4_is_ovrd()"
-                 " returned bOvrd=%u and RS4->iv_version=%u and RS4->iv_type=0x%x. Fix code!",
+                 " returned bOvrd=%u and RS4->iv_version=%u and RS4->iv_type=0x%02x. Fix code!",
                  bOvrd, l_rs4RefHeader.iv_version, l_rs4RefHeader.iv_type );
 
     //
@@ -557,6 +559,7 @@ fapi2::ReturnCode process_gptr_rings(
     if (fapiRc == fapi2::FAPI2_RC_SUCCESS) // An overlays ring with content was found
     {
         // Check that RS4 headers of the Mvpd and overlay rings match wrt:
+        // - version
         // - ringId
         // - scanAddr
         FAPI_ASSERT( ( ((CompressedScanData*)io_gptrRs4Ring)->iv_ringId ==
@@ -593,27 +596,29 @@ fapi2::ReturnCode process_gptr_rings(
         // io_gptrRs4Ring.
         //
 
-        // We need to preserve (for debugging purpose) where the ring contributions came from,
-        // ie the RS4_IV_TYPE_SEL_* settings.  Since we know at this point that the non-SEL
-        // part of iv_type agree between the two rings, we can simply OR the iv_types here.
+        // Check that iv_type's non-ORIG part is the same in both rings. If they differ,
+        // that shows an error in either the programming of the Mvpd ring or the Overlays ring.
+        // (The ORIG bits have already been checked as part of the ring retrieval APIs)
         uint8_t mvpdTypeField = ((CompressedScanData*)io_gptrRs4Ring)->iv_type;
         uint8_t ovlyTypeField = ((CompressedScanData*)ovlyRs4Ring)->iv_type;
-        uint8_t finalTypeField = mvpdTypeField | ovlyTypeField;
 
-//CMO-20200412: Temp fix to avoid coreq - Uncomment in follow-on coreq "revert" commit
-        /*
-                // Check that all iv_type's non-ORIG fields are the same in the two rings
-                FAPI_ASSERT( !((targetTypeField ^ dynTypeField) & ~RS4_IV_TYPE_ORIG_MASK),
-                             fapi2::XIPC_TYPE_FIELD_MISMATCH().
-                             set_CHIP_TARGET(i_procTarget).
-                             set_RING_ID(i_ringId).
-                             set_RING1_TYPE_FIELD(mvpdTypeField).
-                             set_RING2_TYPE_FIELD(ovlyTypeField).
-                             set_OCCURRENCE(1),
-                             "ERROR: process_gptr_rings: The RS4 iv_type field differs in the non-ORIG"
-                             " bits between Mvpd Gptr(type=0x%02x) and Overlays(type=0x%02x) rings",
-                             mvpdTypeField, ovlyTypeField );
-        */
+        FAPI_ASSERT( !((mvpdTypeField ^ ovlyTypeField) & ~RS4_IV_TYPE_ORIG_MASK),
+                     fapi2::XIPC_TYPE_FIELD_MISMATCH().
+                     set_CHIP_TARGET(i_procTarget).
+                     set_RING_ID(be16toh(((CompressedScanData*)ovlyRs4Ring)->iv_ringId)).
+                     set_RING1_TYPE_FIELD(mvpdTypeField).
+                     set_RING2_TYPE_FIELD(ovlyTypeField).
+                     set_OCCURRENCE(1),
+                     "ERROR: process_gptr_rings: The RS4 iv_type field differs in the non-ORIG"
+                     " bits between Mvpd Gptr(type=0x%02x) and Overlays(type=0x%02x) rings for"
+                     " ringId=0x%x",
+                     mvpdTypeField, ovlyTypeField,
+                     be16toh(((CompressedScanData*)ovlyRs4Ring)->iv_ringId) );
+
+        // We need to preserve (for debugging purpose) where the ring contributions came from,
+        // ie the RS4_IV_TYPE_ORIG_* settings.  Since we know at this point that the non-ORIG
+        // part of iv_type agree between the two rings, we can OR the iv_types here.
+        uint8_t finalTypeField = mvpdTypeField | ovlyTypeField;
 
         FAPI_TRY( apply_overlay_ring(
                       i_procTarget,
@@ -623,8 +628,10 @@ fapi2::ReturnCode process_gptr_rings(
                       ovlyRawLength,
                       (CompressedScanData*)ovlyRs4Ring, // ovlyRs4 is as good as gptrRs4
                       finalTypeField ),
-                  "apply_overlay_ring() failed w/rc=0x%08x for ringId=0x%x",
-                  (uint32_t)current_err, be16toh(((CompressedScanData*)ovlyRs4Ring)->iv_ringId));
+                  "apply_overlay_ring() failed w/rc=0x%08x for ringId=0x%x and"
+                  " finalTypeField=0x%x",
+                  (uint32_t)current_err, be16toh(((CompressedScanData*)ovlyRs4Ring)->iv_ringId),
+                  finalTypeField );
     }
     else if ((uint32_t)fapiRc == RC_XIPC_OVERLAYS_RING_IS_EMPTY)
     {
@@ -736,8 +743,7 @@ fapi2::ReturnCode process_target_and_dynamic_rings(
                              nextFeature,
                              i_ddLevel,
                              dynRs4,
-                             bufSize,
-                             0 );
+                             bufSize );
 
         if(l_rc == TOR_SUCCESS)
         {
@@ -881,7 +887,7 @@ fapi2::ReturnCode process_target_and_dynamic_rings(
                          set_FEATURE(nextFeature).
                          set_MAX_RING_BUF_SIZE(MAX_RING_BUF_SIZE).
                          set_LOCAL_RC(l_rc),
-                         "dyn_get_ring() failed w/rc=0x%08x during fetch of ringId=0x%x and feature=%u",
+                         "ERROR: dyn_get_ring() failed w/rc=0x%08x during fetch of ringId=0x%x and feature=%u",
                          l_rc, i_ringId, nextFeature );
         }
     }
@@ -903,7 +909,8 @@ fapi2::ReturnCode process_target_and_dynamic_rings(
                    i_ringId,
                    UNDEFINED_CHIPLET_ID,
                    targetRs4,
-                   bufSize );
+                   bufSize,
+                   false ); //We're retrieving from non-customized SBE and QME sections
 
         FAPI_ASSERT( l_rc == TOR_SUCCESS ||
                      l_rc == TOR_RING_IS_EMPTY ||
@@ -947,21 +954,23 @@ fapi2::ReturnCode process_target_and_dynamic_rings(
         //
         FAPI_DBG("ringId=0x%x: Target ring found. Dynamic ring found.", i_ringId);
 
-//CMO-20200412: Temp fix to avoid coreq - Uncomment in follow-on coreq "revert" commit
-        /*
-                // Check that all iv_type's non-ORIG fields are the same in the two rings
-                FAPI_ASSERT( !((targetTypeField ^ dynTypeField) & ~RS4_IV_TYPE_ORIG_MASK),
-                             fapi2::XIPC_TYPE_FIELD_MISMATCH().
-                             set_CHIP_TARGET(i_procTarget).
-                             set_RING_ID(i_ringId).
-                             set_RING1_TYPE_FIELD(targetTypeField).
-                             set_RING2_TYPE_FIELD(dynTypeField).
-                             set_OCCURRENCE(2),
-                             "ERROR: process_target_and_dynamic_rings: The RS4 iv_type field differs in the"
-                             " non-ORIG bits between target(type=0x%02x) and dynamic(type=0x%02x) rings",
-                             targetTypeField, dynTypeField );
-        */
+        // Check that iv_type's non-ORIG part is the same in both rings. If they differ,
+        // that shows an error in either the programming of the Target ring or the Dynamic ring.
+        FAPI_ASSERT( !((targetTypeField ^ dynTypeField) & ~RS4_IV_TYPE_ORIG_MASK),
+                     fapi2::XIPC_TYPE_FIELD_MISMATCH().
+                     set_CHIP_TARGET(i_procTarget).
+                     set_RING_ID(i_ringId).
+                     set_RING1_TYPE_FIELD(targetTypeField).
+                     set_RING2_TYPE_FIELD(dynTypeField).
+                     set_OCCURRENCE(2),
+                     "ERROR: process_target_and_dynamic_rings: The RS4 iv_type field differs in the"
+                     " non-ORIG bits between target(type=0x%02x) and dynamic(type=0x%02x) rings"
+                     " for ringId=0x%x",
+                     targetTypeField, dynTypeField, i_ringId );
 
+        // We need to preserve (for debugging purpose) where the ring contributions came from,
+        // ie the RS4_IV_TYPE_ORIG_* settings.  Since we know at this point that the non-ORIG
+        // part of iv_type agree between the two rings, we can OR the iv_types here.
         finalTypeField = targetTypeField | dynTypeField;
 
         // Note that apply_overlay_ring() will set iv_selector = UNDEFINED_RS4_SELECTOR.
@@ -976,8 +985,8 @@ fapi2::ReturnCode process_target_and_dynamic_rings(
                                       (CompressedScanData*)targetRs4,
                                       finalTypeField ),
                   "apply_overlay_ring() for Dynamic overlay: Failed "
-                  "w/rc=0x%08x for ringId=0x%x",
-                  (uint32_t)current_err, i_ringId );
+                  "w/rc=0x%08x for ringId=0x%x and finalTypeField=0x%x",
+                  (uint32_t)current_err, i_ringId, finalTypeField );
 
         fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     }
@@ -1357,7 +1366,8 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                    i_maxRingSectionSize,
                    i_ringId,
                    chipletId,
-                   finalVpdRing );
+                   finalVpdRing,
+                   true ); //Indicate producing customized SBE/QME sections
 
         FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
                      fapi2::XIPC_TOR_APPEND_RING_FAILED().
@@ -3357,7 +3367,8 @@ ReturnCode p10_ipl_customize (
                        l_maxRingSectionSize,
                        ringId,
                        UNDEFINED_CHIPLET_ID,
-                       i_ringBuf1 );
+                       i_ringBuf1,
+                       true ); //We're customizing the SBE/QME sections now
 
             FAPI_ASSERT( l_rc == TOR_SUCCESS ||
                          l_rc == TOR_INVALID_CHIPLET_TYPE || // Will get this for RT_QME phase
