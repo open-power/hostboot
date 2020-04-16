@@ -1367,9 +1367,6 @@
       <id>PROC_DCM_INSTALLED</id>
     </attribute>
     <attribute>
-      <id>PROC_PCIE_PHB_ACTIVE</id>
-    </attribute>
-    <attribute>
       <id>PSI_BRIDGE_BASE_ADDR</id>
     </attribute>
     <attribute>

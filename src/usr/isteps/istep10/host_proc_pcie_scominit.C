@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,10 +41,8 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
 
-/* FIXME RTC: 210975
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
-*/
 #include <devicefw/userif.H>
 #include "host_proc_pcie_scominit.H"
 #include <hwas/common/hwas.H>
@@ -58,6 +56,9 @@ using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
+
+#if 0 // TODO RTC:249139 -- Need to set necessary PCIe attributes
+
 
 // Maps the iop number to a mask which indicates which
 // PHB numbers are valid for the given PEC
@@ -1103,5 +1104,7 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
 
     return pError;
 }
+#endif // TODO RTC:249139 -- Need to set necessary PCIe attributes
+
 
 };

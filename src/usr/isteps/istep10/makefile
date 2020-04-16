@@ -99,6 +99,7 @@ OBJS+=p10_pau_scom.o
 #istep 10.6 -- proc_pcie_scominit
 OBJS+=p10_pcie_scominit.o
 OBJS+=p10_pcie_scom.o
+OBJS+=p10_iop_xram_utils.o
 
 #istep10.7 -- proc_scomoverride_chiplets
 OBJS+=p10_scomoverride_chiplets.o

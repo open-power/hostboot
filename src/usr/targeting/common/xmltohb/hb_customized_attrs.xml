@@ -857,6 +857,13 @@
         <id>ATTR_UNSECURE_HOMER_SIZE</id>
         <default>0x1000</default>
     </attribute>
+
+    <attribute>
+        <id>ATTR_PROC_PCIE_PHB_ACTIVE</id>
+        <writeable/>
+  </attribute>
+
+
     <!-- =====================================================================
      End of customizations definitions
      ================================================================= -->

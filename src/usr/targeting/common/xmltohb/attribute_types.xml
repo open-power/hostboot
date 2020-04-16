@@ -6901,23 +6901,6 @@
   </attribute>
 
   <attribute>
-    <id>PROC_PCIE_PHB_ACTIVE</id>
-    <description>PCIE PHB valid mask
-      creator: platform
-      consumer: proc_pcie_scominit
-      firmware notes:
-        Bit mask defining set of active/valid PHBs
-        bit0=PHB0, bit1=PHB1, bit2=PHB2, bit3=PHB3
-  </description>
-    <simpleType>
-      <uint8_t/>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <writeable/>
-  </attribute>
-
-  <attribute>
     <id>PROC_PCIE_REFCLOCK_ENABLE</id>
     <description>PCIE refclock enable valid mask
       PCIE refclock enable valid mask
