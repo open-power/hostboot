@@ -225,19 +225,18 @@ static errlHndl_t hdatGetPathInfo(
                                hdatIsURARTValid = HDAT_UART_IS_VALID;
 #endif
 
-// TODO : RTC Story 246408 - Enable IPMI BT support in SP Subsystem
-// 151618 Will relook at this once we get mail from Tom.
-#if 0 //Temp remove until ready CONFIG_BMC_IPMI
+// Enablng IPMI BT support in SP Subsystem
+#ifdef CONFIG_BMC_IPMI
         IPMI::BmcInfo_t l_bmcInfo = IPMI::getBmcInfo();
 
-        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatBARofBTDevAdrSpc =
-                                                l_bmcInfo.bulkTransferLpcBaseAddr;
-        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatSizeofBTDevAdrSpc =
-                                                l_bmcInfo.bulkTransferSize;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatBarOfBTDev =
+                                              l_bmcInfo.bulkTransferLpcBaseAddr;
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatSizeofBTAdrSpc =
+                                              l_bmcInfo.bulkTransferSize;
         o_pathArray[o_arrayHdr.hdatArrayCnt].hdatBTInterruptDetails.
-                                 hdatSMSAttnIntrNum = l_bmcInfo.smsAttnInterrupt;
+                                hdatSMSAttnIntrNum = l_bmcInfo.smsAttnInterrupt;
         o_pathArray[o_arrayHdr.hdatArrayCnt].hdatBTInterruptDetails.
-                                 hdatBMCtoHostRespIntrNum = l_bmcInfo.bmcToHostInterrupt;
+                        hdatBMCtoHostRespIntrNum = l_bmcInfo.bmcToHostInterrupt;
 #endif
 
         // LPC link doesn't have any FRU's in the path

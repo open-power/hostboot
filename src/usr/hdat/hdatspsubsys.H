@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,7 +73,7 @@ const uint8_t HDAT_UART_IS_VALID = 1;
 
 /** @brief Structure version number
  */
-const uint16_t HDAT_SP_SUBSYS_VERSION = 0x0021;
+const uint16_t HDAT_SP_SUBSYS_VERSION = 0x0040;
 
 /** @brief Structure definition for service processor hardware and software.
     Reserved bytes are added to make the structure a multiple of 4 bytes.
@@ -134,20 +134,25 @@ struct hdatSpIoPath_t
     uint32_t     hdatCurVUART1DevBaudRate;    // 0x0030 Current Baud rate of
                                               //        VUART1 device
     uartIntData_t  hdatVUART1InterruptDetails;// 0x0034 VUART1 interrupt details
-    uint16_t     hdatKCSDataRegAddr;          // 0x0038 KCS Data Register
+    uint64_t     hdatBarOfBTDev;              // 0x0038 BAR of BT device on LPC
+                                              //        bus
+    uint32_t     hdatSizeofBTAdrSpc;          // 0x0040 Size of BT device adr
+                                              //        space
+    btIntData_t  hdatBTInterruptDetails;      // 0x0044 BT interrupt details
+    uint16_t     hdatKCSDataRegAddr;          // 0x0048 KCS Data Register
                                               //        Address
-    uint16_t     hdatKCSStatusRegAddr;        // 0x003A KCS Status Register
+    uint16_t     hdatKCSStatusRegAddr;        // 0x004A KCS Status Register
                                               //        Address
-    uint8_t      hdatKCSInterruptNum;         // 0x003C KCS Interrupt Number
-    uint64_t     hdatBarOfVUART2Dev;          // 0x003D BAR of VUART2 device on
+    uint8_t      hdatKCSInterruptNum;         // 0x004C KCS Interrupt Number
+    uint64_t     hdatBarOfVUART2Dev;          // 0x004D BAR of VUART2 device on
                                               //        LPC bus
-    uint32_t     hdatSizeofVUART2AdrSpc;      // 0x0045 Size of VUART2 device
+    uint32_t     hdatSizeofVUART2AdrSpc;      // 0x0055 Size of VUART2 device
                                               //        adr space
-    uint32_t     hdatVUART2FreqHz;            // 0x0049 Clock Frequcny of VUART2
+    uint32_t     hdatVUART2FreqHz;            // 0x0059 Clock Frequcny of VUART2
                                               //        buad clock
-    uint32_t     hdatCurVUART2DevBaudRate;    // 0x004D Current Baud rate of
+    uint32_t     hdatCurVUART2DevBaudRate;    // 0x005D Current Baud rate of
                                               //        VUART2 device
-    uartIntData_t  hdatVUART2InterruptDetails;// 0x0051 VUART2 interrupt details
+    uartIntData_t  hdatVUART2InterruptDetails;// 0x0061 VUART2 interrupt details
 } __attribute__ ((packed));
 
 #define HDAT_NON_FUNCTIONAL 0 // PSI link is not functional
