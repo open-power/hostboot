@@ -563,6 +563,10 @@ sub postProcessTargets
         {
             postProcessTpm($targetObj, $target);
         }
+        elsif ($type eq "IOHS")
+        {
+            postProcessIohs($targetObj, $target);
+        }
 
         postProcessIpmiSensors($targetObj, $target);
     } # end foreach my $target (@targets)
@@ -678,6 +682,10 @@ sub errorCheckTheTargets
 
 #--------------------------------------------------
 # @brief Write out the results to an XML file
+#
+# @note Blank attributes are skipped and not printed out within this method
+#       call chain: Targets.pm::printXML -> Targets.pm::printTarget
+#                   -> Targets.pm::printAttribute
 #
 # @param [in] $targetObj - The global target object.
 #--------------------------------------------------
@@ -2594,7 +2602,7 @@ sub postProcessProcessor
 #--------------------------------------------------
 # @brief Post process targets of type OMI
 #
-# @detials This methods corrects the OMIC_PATH attribute.  Also calculates and
+# @details This method corrects the OMIC_PATH attribute.  Also calculates and
 #          sets the attribute OMI_INBAND_BAR_BASE_ADDR_OFFSET.
 #
 # @note The majority of the OMI's attributes are done via:
@@ -3003,6 +3011,329 @@ sub postProcessTpm
         }
     }
 } # end sub postProcessTpm
+
+#--------------------------------------------------
+# @brief Post process targets of type IOHS
+#
+# @details This method sets up the SMP bus for the IOHS.
+#
+# @note The majority of the IOHS' attributes are done via:
+#       processTargets()->processProcessorAndChildren()->
+#       iterateOverChiplets()->setCommonAttrForChiplet()
+#
+# @param[in] $targetObj - The global target object blob
+# @param[in] $target    - The IOHS target
+#--------------------------------------------------
+sub postProcessIohs
+{
+    my $targetObj    = shift;
+    my $target       = shift;
+
+    # Some sanity checks.  Make sure we are processing the correct target type
+    # and make sure the target has been already processed.
+    my $targetType = targetTypeSanityCheck($targetObj, $target, "IOHS");
+    validateTargetHasBeenPreProcessed($targetObj, $target);
+
+    my $iohsConfigMode = $targetObj->getAttribute($target, "IOHS_CONFIG_MODE");
+    if ($iohsConfigMode eq "SMPA")
+    {
+        # Iterate over the children looking for ABUS
+        foreach my $child (@{ $targetObj->getTargetChildren($target) })
+        {
+            my $childType = $targetObj->getType($child);
+            if ($childType eq "ABUS")
+            {
+                processSmpA($targetObj, $child, $target);
+            }
+        } # foreach my $child (@{ $targetObj->getTargetChildren($target) })
+    }
+    elsif ($iohsConfigMode eq "SMPX")
+    {
+        # Iterate over the children looking for XBUS
+        foreach my $child (@{ $targetObj->getTargetChildren($target) })
+        {
+            my $childType = $targetObj->getType($child);
+            if ($childType eq "XBUS")
+            {
+                processSmpX($targetObj, $child, $target);
+            }
+        } # foreach my $child (@{ $targetObj->getTargetChildren($target) })
+    } # end if ($iohsConfigMode eq "SMPA") ... elseif ...
+
+} # end sub postProcessIohs
+
+#--------------------------------------------------
+# @brief Set up the SMPX bus for the IOHS target
+#
+# @param[in] $targetObj    - The global target object blob
+# @param[in] $target       - The XBUS target
+# @param[in] $parentTarget - The IOHS target
+#--------------------------------------------------
+sub processSmpX
+{
+    my $targetObj     = shift;
+    my $target        = shift;
+    my $parentTarget  = shift;
+
+    my $busConnection = $targetObj->getFirstConnectionBus($target);
+
+    # Only proceed if a bus connection exists ...
+    if ($busConnection ne "")
+    {
+        ## Ascertain the configuration
+        # Create some useful variables to help w/sorting out the configuration
+        my $defaultConfig = "d";
+        my $wrapConfig    = "w";
+        my $config = $defaultConfig;
+
+        if ($targetObj->isBusConnBusAttrDefined($busConnection, "CONFIG_APPLY"))
+        {
+            $config = $targetObj->getBusConnBusAttr($busConnection, "CONFIG_APPLY");
+        }
+
+        # Validate the config value retrieved. If none retrieved or no config
+        # given, then use the default value.
+        if ($config eq "")
+        {
+            if (0 == $targetObj->{stealth_mode})
+            {
+                print STDOUT "No value found for CONFIG_APPLY, default to using default value ($defaultConfig)\n";
+            }
+            $config = $defaultConfig;
+        }
+
+        # The CONFIG_APPLY bus attribute carries a comma separated values for each
+        # X-bus connection. It can currently take the following values.
+        # "w" - This connection is applicable only in wrap config
+        # "d" - This connection is applicable in default config (non-wrap mode).
+        # If CONFIG_APPLY does not match the system configuration we are
+        # running for, then mark the peers null.
+        # For example, in wrap config, CONFIG_APPLY is expected to have "w"
+        # If "w" is not there, then we skip the connection and mark peers
+        # as NULL
+        my $systemConfig = $targetObj->{system_config};
+        if (($systemConfig eq $wrapConfig && $config =~ /$wrapConfig/) ||
+           ($systemConfig ne $wrapConfig && $config =~ /$defaultConfig/))
+        {
+            # Don't nullify the configuration attributes
+            my $nullifyFlag = false;
+            setCommonConfigAttributes($targetObj, $target, $parentTarget,
+                                      $busConnection, $nullifyFlag);
+        }
+        else
+        {
+            # Nullify the configuration attributes
+            my $nullifyFlag = true;
+            setCommonConfigAttributes($targetObj, $target, $parentTarget,
+                                      $busConnection, $nullifyFlag);
+        } # end (($system_config eq $wrapConfig ...
+    } # end if ($busConnection ne "")
+} # end sub processSmpX
+
+
+#--------------------------------------------------
+# @brief Set up the SMPA bus for the IOHS target
+#
+# @param[in] $targetObj    - The global target object blob
+# @param[in] $target       - The ABUS target
+# @param[in] $parentTarget - The IOHS target
+#--------------------------------------------------
+sub processSmpA
+{
+    my $targetObj       = shift;
+    my $target          = shift;
+    my $parentTarget    = shift;
+
+    my $busConnection = $targetObj->getFirstConnectionBus($target);
+
+    # Only proceed if a bus connection exists ...
+    if ($busConnection ne "")
+    {
+        ## Ascertain the configuration
+        # Create some useful variables to help w/sorting out the configuration
+        my $applyConfiguration = 0;
+        my $twoNode = "2";
+        my $threeNode = "3";
+        my $fourNode = "4";
+        my $config = "";
+
+        if ($targetObj->isBusAttributeDefined($target, 0, "CONFIG_APPLY"))
+        {
+            $config = $targetObj->getBusAttribute($target, 0, "CONFIG_APPLY");
+        }
+
+        # The CONFIG_APPLY bus attribute carries a comma separated values
+        # for each A-bus connection. For eg.,
+        # "2,3,4" - This connection is applicable in 2,3 and 4 node config
+        # "w" - This connection is applicable only in wrap config
+        # "2" - This connection is applicable only in 2 node config
+        # "4" - This connection is applicable only in 4 node config
+        # The below logic looks for these values (w, 2, 3, and 4) and decides
+        # whether a certain A-bus connection has to be considered or not.
+        # If user has passed 2N as argument, then we consider only those
+        # A-bus connections where value "2" is present in the configuration.
+        my $systemConfig = $targetObj->{system_config};
+        if ($systemConfig eq "2N" && $config =~ /$twoNode/)
+        {
+            # MRW configuration matches system configuration for a 2 node,
+            # therefore apply configuration.
+            $applyConfiguration = 1;
+        }
+        elsif ($systemConfig eq "")
+        {
+            # No system configuration, is MRW configuration for a 3 or 4 node system?
+            # This will skip any connections specific to ONLY 2 node systems
+            if($config =~ /$threeNode/ || $config =~ /$fourNode/)
+            {
+                # MRW configuration is for a 3 or 4 node system,
+                # therefore apply configuration.
+                $applyConfiguration = 1;
+            }
+        }
+        elsif ($config =~ /$systemConfig/)
+        {
+            # If system configuration matches the MRW configuration, then
+            # apply configuration. Ex: wrap config
+            $applyConfiguration = 1;
+        }
+        else
+        {
+            # No valid configuration given via MRW nor system,
+            # therefore DO NOT apply configuration.
+            $applyConfiguration = 0;
+        }
+
+        # Only proceed if a valid configuration has been ascertained  ...
+        if ($applyConfiguration eq 1)
+        {
+            my $busSrcTarget = "";
+            my $busDestTarget = "";
+
+            # Don't nullify the configuration attributes
+            my $nullifyFlag = false;
+            ($busSrcTarget, $busDestTarget) =
+                   setCommonConfigAttributes($targetObj, $target, $parentTarget,
+                                             $busConnection, $nullifyFlag);
+
+=comment
+Currently attribute EI_BUS_TX_MSBSWAP is not implemented.   Once implemented
+uncomment this block and reactivate this code snippet.
+            # Set bus transmit MSBSWAP for both source and destination targets
+            if ($targetObj->isBusConnBusAttrDefined($busConnection, "SOURCE_TX_MSBSWAP"))
+            {
+                my $srcTxMsbSawp = $targetObj->getBusConnBusAttr($busConnection, "SOURCE_TX_MSBSWAP");
+                $targetObj->setAttribute($busSrcTarget, "EI_BUS_TX_MSBSWAP",  $srcTxMsbSawp);
+            }
+            if ($targetObj->isBusConnBusAttrDefined($busConnection, "DEST_TX_MSBSWAP"))
+            {
+                my $destTxMsbSawp = $targetObj->getBusConnBusAttr($busConnection, "DEST_TX_MSBSWAP");
+                $targetObj->setAttribute($busDestTarget, "EI_BUS_TX_MSBSWAP",  $destTxMsbSawp);
+            }
+=cut
+
+            # Set the wrap config for both source and destination targets
+            my $linkSet = "SET_NONE";
+
+            if ($targetObj->isBusConnBusAttrDefined($busConnection, "MFG_WRAP_TEST_ABUS_LINKS_SET"))
+            {
+                $linkSet  = $targetObj->getBusConnBusAttr($busConnection, "MFG_WRAP_TEST_ABUS_LINKS_SET");
+            }
+            $targetObj->setAttribute($busSrcTarget,  "MFG_WRAP_TEST_ABUS_LINKS_SET", $linkSet);
+            $targetObj->setAttribute($busDestTarget, "MFG_WRAP_TEST_ABUS_LINKS_SET", $linkSet);
+        } # end if($applyConfiguration eq 1)
+    } # end if ($busConnection ne "")
+} # end sub processSmpA
+
+#--------------------------------------------------
+# @brief Set the common configuration attributes, 'PEER_TARGET', 'PEER_PATH'
+#        'PEER_HUID' and 'BUS_TYPE', that are associated with configuring a bus
+#
+# @param[in] $targetObj     - The global target object blob
+# @param[in] $target        - The BUS (ABUS/XBUS) target
+# @param[in] $parentTarget  - The IOHS target - the BUS parent target
+# @param[in] $busConnection - Handle to the bus connection configuration info
+# @param[in] $nullifyFlag   - If false, then config attributes with valid data,
+#                             else nullify the config attributes
+# @return - A multiple variable return
+#         $Var1 - The bus source absolute path
+#         $Var2 - The bus destination absolute path
+#--------------------------------------------------
+sub setCommonConfigAttributes
+{
+    my $targetObj      = shift;
+    my $target         = shift;
+    my $parentTarget   = shift;
+    my $busConnection  = shift;
+    my $nullifyFlag    = shift;
+
+    ## Get the source and destination paths of the target ends, do some sanity
+    ## checks and expand the paths from relative to absolute.
+    # Get the bus source and destination paths.
+    my $busSrcPath  = $busConnection->{source_path};
+    my $busDestPath = $busConnection->{dest_path};
+
+    # Remove the ending, extraneous '/' character
+    chop($busSrcPath);
+    chop($busDestPath);
+
+    # Sanity check. The parent target paths should be made up of the source
+    # path. If not, then there is an issue with the MRW or Targets.pm
+    if ($parentTarget !~ /$busSrcPath/)
+    {
+        select()->flush(); # flush buffer before spewing out error message
+        die "ERROR: Target ($parentTarget) path is not comprised of the bus " .
+            "source path ($busSrcPath).  Possible issue with MRW or Targets.pm ";
+    }
+
+    # Get the missing absolute path data
+    my $prependingPathData = $parentTarget;
+    $prependingPathData =~ s/$busSrcPath//;
+
+    # Convert the target's relative path to an absolute path.  Targets.pm
+    # can only work with targets that have absolute paths.
+    my $busSrcTarget = $prependingPathData . $busSrcPath;
+    my $busDestTarget = $prependingPathData . $busDestPath;
+
+    if ( $nullifyFlag == false )
+    {
+        ## Get and set attributes of the target ends with valid data
+        # Pre-fetch the BUS_TYPE, HUID and PHYS_PATH of the source and
+        # destination targets
+        my $busType = $busConnection->{bus_type};
+
+        my $busSrcHuid = $targetObj->getAttribute($busSrcTarget, "HUID");
+        my $busSrcPhysicalPath = $targetObj->getAttribute($busSrcTarget, "PHYS_PATH");
+
+        my $busDestHuid = $targetObj->getAttribute($busDestTarget, "HUID");
+        my $busDestPhysicalPath = $targetObj->getAttribute($busDestTarget, "PHYS_PATH");
+
+        # Set attributes for the target ends
+        $targetObj->setAttribute($busSrcTarget, "PEER_TARGET", $busDestPhysicalPath);
+        $targetObj->setAttribute($busSrcTarget, "PEER_PATH",   $busDestPhysicalPath);
+        $targetObj->setAttribute($busSrcTarget, "PEER_HUID",   $busDestHuid);
+        $targetObj->setAttribute($busSrcTarget, "BUS_TYPE",    $busType);
+
+        $targetObj->setAttribute($busDestTarget, "PEER_TARGET", $busSrcPhysicalPath);
+        $targetObj->setAttribute($busDestTarget, "PEER_PATH",   $busSrcPhysicalPath);
+        $targetObj->setAttribute($busDestTarget, "PEER_HUID",   $busSrcHuid);
+        $targetObj->setAttribute($busDestTarget, "BUS_TYPE",    $busType);
+    }
+    else
+    {
+        # Nullify these attributes for the target ends
+        $targetObj->setAttribute($busSrcTarget, "PEER_TARGET", "NULL");
+        $targetObj->setAttribute($busSrcTarget, "PEER_PATH",   "physical:na");
+        $targetObj->setAttribute($busSrcTarget, "PEER_HUID",   "NULL");
+        $targetObj->setAttribute($busSrcTarget, "BUS_TYPE",    "NA");
+
+        $targetObj->setAttribute($busDestTarget, "PEER_TARGET", "NULL");
+        $targetObj->setAttribute($busDestTarget, "PEER_PATH",   "physical:na");
+        $targetObj->setAttribute($busDestTarget, "PEER_HUID",   "NULL");
+        $targetObj->setAttribute($busDestTarget, "BUS_TYPE",    "NA");
+    } # end if ( $nullifyFlag == false ) ... else ...
+
+    return ($busSrcTarget, $busDestTarget);
+} # end sub setCommonConfigAttributes
 
 sub postProcessIpmiSensors {
     my $targetObj=shift;

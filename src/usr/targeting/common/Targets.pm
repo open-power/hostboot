@@ -1745,6 +1745,63 @@ sub isBusAttributeDefined
             ->{$attr}->{default});
 }
 
+#--------------------------------------------------
+# @brief Returns a bus connection's, bus attribute's, attribute's default value
+#
+# @detail Bus connections have a list of attributes under the 'bus_attribute'
+#         name which consists of attribute names with default values.
+#
+# @note Will exit if the bus connection ($busConnection) and/or the attribute
+#       ($attribute) are invalid or does not exist.
+#
+# @param[in] $self          - The global target object blob
+# @param[in] $busConnection - A hande to a bus connection @see getFirstConnectionBus
+# @param[in] $attribute     - The name of the attribute to retrieve a default value from
+#--------------------------------------------------
+sub getBusConnBusAttr
+{
+    my $self          = shift;
+    my $busConnection = shift;
+    my $attribute     = shift;
+
+    if ( !defined($busConnection->{bus_attribute}->{$attribute}->{default}) )
+    {
+        printf("ERROR: getBusConnBusAttr(%s, %s) | " .
+               "Attribute not defined\n", $busConnection, $attribute);
+        $self->myExit(4);
+    }
+
+    if (ref($busConnection->{bus_attribute}->{$attribute}->{default}) eq  "HASH")
+    {
+        return  "";
+    }
+
+    return $busConnection->{bus_attribute}->{$attribute}->{default};
+}
+
+#--------------------------------------------------
+# @brief Returns true/false if a bus connection's, bus attribute's,
+#        attribute's default value exists.
+#
+# @detail Bus connections have a list of attributes under the 'bus_attribute'
+#         name which consists of attribute names with default values.
+#         This method will determin if caller provided attribute ($attribute)
+#         exits for the bus connection.
+#
+# @param[in] $self          - The global target object blob
+# @param[in] $busConnection - A hande to a bus connection @see getFirstConnectionBus
+# @param[in] $attribute     - The name of the attribute to determine if an
+#                             default value exists
+#--------------------------------------------------
+sub isBusConnBusAttrDefined
+{
+    my $self          = shift;
+    my $busConnection = shift;
+    my $attribute     = shift;
+
+    return defined($busConnection->{bus_attribute}->{$attribute}->{default});
+}
+
 ## returns a pointer to an array of children target names
 sub getTargetChildren
 {
