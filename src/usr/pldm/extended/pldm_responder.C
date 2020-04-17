@@ -54,12 +54,14 @@
 #include "../common/pldmtrace.H"
 #include "pldm_responder.H"
 
-/// Message handler headers
-#include <pldm/responses/pldm_monitor_control_responders.H>
-
 // libpldm
-#include "../extern/platform.h"
 #include "../extern/base.h"
+#include "../extern/platform.h"
+#include "../extern/fru.h"
+
+// Message handler headers
+#include <pldm/responses/pldm_monitor_control_responders.H>
+#include <pldm/responses/pldm_fru_data_responders.H>
 
 /* PLDM message handler lookup tables */
 
@@ -87,6 +89,14 @@ const msg_type_handler pldm_monitor_control_handlers[] =
     { PLDM_PLATFORM_EVENT_MESSAGE, handlePdrRepoChangeEventRequest }
 };
 
+/*** Handlers for the MSG_FRU_DATA type ***/
+
+const msg_type_handler pldm_fru_data_handlers[] =
+{
+    { PLDM_GET_FRU_RECORD_TABLE_METADATA, handleGetFruRecordTableMetadataRequest },
+    { PLDM_GET_FRU_RECORD_TABLE, handleGetFruRecordTableRequest }
+};
+
 /*** Top-level table of handler tables ***/
 
 struct msg_category
@@ -99,7 +109,9 @@ struct msg_category
 const msg_category pldm_message_categories[] =
 {
     { PLDM::MSG_MONITOR_CONTROL, pldm_monitor_control_handlers,
-                                 std::size(pldm_monitor_control_handlers) }
+                                 std::size(pldm_monitor_control_handlers) },
+    { PLDM::MSG_FRU_DATA,        pldm_fru_data_handlers,
+                                 std::size(pldm_fru_data_handlers) }
 };
 
 /* Handler logic */
@@ -158,6 +170,8 @@ void send_cc_only_response(const msg_q_t i_msgQ,
  */
 errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const msg_t* i_msg)
 {
+    PLDM_INF("Handling inbound PLDM request");
+
     errlHndl_t errl = nullptr;
 
     do
@@ -333,6 +347,9 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const msg_t* i_msg)
         }
 
         /* Invoke the handler and return any error */
+
+        PLDM_INF("Invoking handler for category %d message type %d",
+                 category, pldm_command);
 
         errl = handler->handler(i_msgQ, pldm_message, payload_len);
     } while (false);

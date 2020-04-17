@@ -41,6 +41,7 @@ OBJS += pldm_pdr_requests.o
 OBJS += pldm_fileio_requests.o
 # From ../responses/
 OBJS += pldm_monitor_control_responders.o
+OBJS += pldm_fru_data_responders.o
 # From ../extended/
 OBJS += hb_pdrs.o
 OBJS += pdr_manager.o

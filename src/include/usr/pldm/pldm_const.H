@@ -56,6 +56,7 @@ namespace PLDM
         MSG_SMBIOS            = 0x01,
         MSG_MONITOR_CONTROL   = 0x02,
         MSG_BIOS_CONTROL      = 0x03,
+        MSG_FRU_DATA          = 0x04,
         MSG_OEM               = 0x3F
     };
 
