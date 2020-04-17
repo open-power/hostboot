@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -154,9 +154,9 @@ extern "C"
                               (l_scom.getChipletId() <= PAU3_CHIPLET_ID) )
                     {
                         // PAU0 --> IOHS0, IOHS1
-                        // PAU1 --> IOHS2, IOHS3
-                        // PAU2 --> IOHS4, IOHS5
-                        // PAU3 --> IOHS6, IOHS7
+                        // PAU1 --> IOHS3, IOHS2
+                        // PAU2 --> IOHS5, IOHS4
+                        // PAU3 --> IOHS7, IOHS6
                         o_chipletId = (i_chipUnitNum / 2) + PAU0_CHIPLET_ID;
                     }
                     else
@@ -435,15 +435,34 @@ extern "C"
                     if ( (l_scom.getChipletId() >= PAU0_CHIPLET_ID) &&   // 0x10
                          (l_scom.getChipletId() <= PAU3_CHIPLET_ID) )    // 0x13
                     {
-                        // for odd IOHS instances, set IO group = 1
-                        if ( i_chipUnitNum % 2 )
+                        //AX0/1 logic is flipped for PAUC1..3
+                        //Note, IOHS chiplets are ok, connections to AX0/1 are
+                        //flipped for ioo1..ioo3 in e10_chip.vhdl
+                        if (i_chipUnitNum < 2)
                         {
-                            l_scom.setIoGroupAddr(0x1);
+                            // for odd IOHS instances, set IO group = 1
+                            if ( i_chipUnitNum % 2 )
+                            {
+                                l_scom.setIoGroupAddr(0x1);
+                            }
+                            // for even IOHS instances, set IO group = 0
+                            else
+                            {
+                                l_scom.setIoGroupAddr(0x0);
+                            }
                         }
-                        // for even IOHS instances, set IO group = 0
                         else
                         {
-                            l_scom.setIoGroupAddr(0x0);
+                            // for even IOHS instances, set IO group = 1
+                            if ( i_chipUnitNum % 2 == 0 )
+                            {
+                                l_scom.setIoGroupAddr(0x1);
+                            }
+                            // for odd IOHS instances, set IO group = 1
+                            else
+                            {
+                                l_scom.setIoGroupAddr(0x0);
+                            }
                         }
                     }
 

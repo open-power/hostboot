@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -424,9 +424,9 @@ extern "C"
             // If chiplet ID is PAU then this is indirect address.
             // Use PAU and Group address (bits 22:26) to calculate instance.
             //   PAU0 (lower right) -> IOHS0 + IOHS1
-            //   PAU1 (upper right) -> IOHS2 + IOHS3
-            //   PAU2 (lower left)  -> IOHS4 + IOHS5
-            //   PAU3 (upper left)  -> IOHS6 + IOHS7
+            //   PAU1 (upper right) -> IOHS3 + IOHS2
+            //   PAU2 (lower left)  -> IOHS5 + IOHS4
+            //   PAU3 (upper left)  -> IOHS7 + IOHS6
             //
             // Group address bits (22:26) of upper 32-bit
             //   Group 0: IOHS[0]
@@ -436,9 +436,22 @@ extern "C"
             {
                 l_instance = (getChipletId() - PAU0_CHIPLET_ID) * 2;
 
-                if (getIoGroupAddr() == 0x1)
+                //AX0/1 instances are flipped for pauc1..3
+                //Note, IOHS chiplets are ok, connections to AX0/1 are
+                //flipped for ioo1..ioo3 in e10_chip.vhdl
+                if (getChipletId() == PAU0_CHIPLET_ID)
                 {
-                    l_instance += 1;
+                    if (getIoGroupAddr() == 0x1)
+                    {
+                        l_instance += 1;
+                    }
+                }
+                else
+                {
+                    if (getIoGroupAddr() == 0x0)
+                    {
+                        l_instance += 1;
+                    }
                 }
             }
         }
