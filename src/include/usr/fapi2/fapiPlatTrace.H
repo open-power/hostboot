@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,19 +60,19 @@ extern trace_desc_t* g_fapiDbgTd;
 extern trace_desc_t* g_fapiMfgTd;
 
 // Information traces (go into fast trace buffer that can wrap often)
-#define FAPI_INF(_fmt_, _args_...) TRACFCOMP(g_fapiTd, TRACE_FILENAME _fmt_, ##_args_ )
+#define FAPI_INF(_fmt_, _args_...) TRACFCOMP_CHECKED(true, g_fapiTd, TRACE_FILENAME _fmt_, ##_args_ )
 
 // Important traces (go into slow trace buffer that should not wrap often)
-#define FAPI_IMP(_fmt_, _args_...) TRACFCOMP(g_fapiImpTd, TRACE_FILENAME _fmt_, ##_args_ )
+#define FAPI_IMP(_fmt_, _args_...) TRACFCOMP_CHECKED(true, g_fapiImpTd, TRACE_FILENAME _fmt_, ##_args_ )
 
 // Error traces (go into slow trace buffer that should not wrap often)
-#define FAPI_ERR(_fmt_, _args_...) TRACFCOMP(g_fapiImpTd, TRACE_FILENAME _fmt_, ##_args_ )
+#define FAPI_ERR(_fmt_, _args_...) TRACFCOMP_CHECKED(true, g_fapiImpTd, TRACE_FILENAME _fmt_, ##_args_ )
 
 // Debug traces
-#define FAPI_DBG(_fmt_, _args_...) TRACSCOMP(g_fapiDbgTd, TRACE_FILENAME _fmt_, ##_args_)
+#define FAPI_DBG(_fmt_, _args_...) TRACSCOMP_CHECKED(true, g_fapiDbgTd, TRACE_FILENAME _fmt_, ##_args_)
 
 // Scan traces
-#define FAPI_SCAN(_fmt_, _args_...) TRACSCOMP(g_fapiScanTd, _fmt_, ##_args_)
+#define FAPI_SCAN(_fmt_, _args_...) TRACSCOMP_CHECKED(true, g_fapiScanTd, _fmt_, ##_args_)
 
 // FAPI Mfg traces
 #if defined(CONFIG_CONSOLE) && !defined(__HOSTBOOT_RUNTIME) && \
@@ -89,7 +89,7 @@ extern trace_desc_t* g_fapiMfgTd;
 #else
     // Just define to standard TRACS buffer
 #define FAPI_MFG(_fmt_, _args_...) \
-    TRACSCOMP(g_fapiMfgTd, _fmt_, ##_args_)
+    TRACSCOMP_CHECKED(true, g_fapiMfgTd, _fmt_, ##_args_)
 #endif
 
 

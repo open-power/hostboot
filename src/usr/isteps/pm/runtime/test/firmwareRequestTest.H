@@ -258,8 +258,7 @@ class FirmwareRequestTest : public CxxTest::TestSuite
             TRACFCOMP(g_trac_isteps_trace,
                       "FirmwareRequestTest::testFirmwareRequestHbrtToFsp req: "
                       "type:%d, magic:0x%.8X, dataSize:%d, structVer:0x%.8X, "
-                      "seqnum:%.8X, msgq:0x%.8X, msgType:0x%.8X, __req:%d, "
-                      "__onlyError:%d, data:0x%.8X, plid:0x%.8X, huid:0x%.8X",
+                      "seqnum:%.8X, msgq:0x%.8X, msgType:0x%.8X, __req:%d, ",
                       l_req_fw_msg->io_type,
                       l_req_fw_msg->generic_msg.magic,
                       l_req_fw_msg->generic_msg.dataSize,
@@ -267,7 +266,9 @@ class FirmwareRequestTest : public CxxTest::TestSuite
                       l_req_fw_msg->generic_msg.seqnum,
                       l_req_fw_msg->generic_msg.msgq,
                       l_req_fw_msg->generic_msg.msgType,
-                      l_req_fw_msg->generic_msg.__req,
+                      l_req_fw_msg->generic_msg.__req);
+            TRACFCOMP(g_trac_isteps_trace,
+                      "__onlyError:%d, data:0x%.8X, plid:0x%.8X, huid:0x%.8X",
                       l_req_fw_msg->generic_msg.__onlyError,
                       l_req_fw_msg->generic_msg.data,
                       l_req_fw_msg->generic_msg.data >> 32,
@@ -281,9 +282,7 @@ class FirmwareRequestTest : public CxxTest::TestSuite
             TRACFCOMP(g_trac_isteps_trace,
                       "FirmwareRequestTest::testFirmwareRequestHbrtToFsp resp: "
                       "type:%d, magic:0x%.8X, dataSize:%d, structVer:0x%.8X, "
-                      "seqnum:%.8X, msgq:0x%.8X, msgType:0x%.8X, __req:%d, "
-                      "__onlyError:%d, data:0x%.8X, plid:0x%.8X, huid:0x%.8X, "
-                      "rc=%d",
+                      "seqnum:%.8X, msgq:0x%.8X, msgType:0x%.8X, __req:%d, ",
                       l_resp_fw_msg->io_type,
                       l_resp_fw_msg->generic_msg.magic,
                       l_resp_fw_msg->generic_msg.dataSize,
@@ -291,7 +290,10 @@ class FirmwareRequestTest : public CxxTest::TestSuite
                       l_resp_fw_msg->generic_msg.seqnum,
                       l_resp_fw_msg->generic_msg.msgq,
                       l_resp_fw_msg->generic_msg.msgType,
-                      l_resp_fw_msg->generic_msg.__req,
+                      l_resp_fw_msg->generic_msg.__req);
+            TRACFCOMP(g_trac_isteps_trace,
+                      "__onlyError:%d, data:0x%.8X, plid:0x%.8X, huid:0x%.8X, "
+                      "rc=%d",
                       l_resp_fw_msg->generic_msg.__onlyError,
                       l_resp_fw_msg->generic_msg.data,
                       l_resp_fw_msg->generic_msg.data >> 32,

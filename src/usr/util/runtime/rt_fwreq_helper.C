@@ -180,14 +180,15 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
                     TRACFCOMP(g_trac_runtime,
                              "FSP is doing a reset/reload, "
                              "sending a message to the FSP failed. "
-                             "retry:%d/%d, rc:%d, io_type:%d, dataSize:%d, "
-                             "seqnum:0x%X, msgq:0x%X, msgType:0x%X, __req:%d, "
-                             "__onlyError:%d",
+                             "retry:%d/%d, rc:%d, io_type:%d, dataSize:%d, ",
                              i,
                              HBRT_FW_REQUEST_RETRIES,
                              rc,
                              l_req_fw_msg->io_type,
-                             l_req_fw_msg->generic_msg.dataSize,
+                             l_req_fw_msg->generic_msg.dataSize);
+                    TRACFCOMP(g_trac_runtime,
+                             "seqnum:0x%X, msgq:0x%X, msgType:0x%X, __req:%d, "
+                             "__onlyError:%d",
                              l_req_fw_msg->generic_msg.seqnum,
                              l_req_fw_msg->generic_msg.msgq,
                              l_req_fw_msg->generic_msg.msgType,

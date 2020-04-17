@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -117,7 +117,6 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
 
 /* direct them to real function calls */
 
-
 /**
  * @fn void TRACDCOMP0(des, printf_string)
  * @brief Defines all Debug Component Traces
@@ -137,6 +136,7 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
 /* a macro w/o the param number suffix. number is calculated from printf string */
 #define TRACDCOMP(des,printf_string,args...) \
     { \
+        TRAC_CHECK_ARGS(printf_string, args);    \
         __TRACE_HASH_STRUCTURES(printf_string); \
         TRACE::trace_adal_write_all((des), \
                                     &__traceData_codeInfo, \
@@ -175,32 +175,65 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
 #endif /* HOSTBOOT_DEBUG */
 #endif /* TRAC_DEBUG_OUT */
 
+/* These few structs and functions are to implement TRAC_CHECK_ARGS macro, which
+ * checks at compile time that too many arguments are not passed to a trace
+ * function. */
+
+template<typename... Args>
+struct TRAC_ARG_TUPLE
+{
+    static constexpr size_t num_args = sizeof...(Args);
+};
+
+template<typename... Args>
+TRAC_ARG_TUPLE<Args...> TRAC_MAKE_ARG_TUPLE(Args... args);
+
+template<typename T>
+inline constexpr size_t TRAC_COUNT_ARGS()
+{
+    return T::num_args;
+}
+
+#define TRAC_CHECK_ARGS(skip, printf_string, args...)                    \
+    static_assert(skip || TRAC_COUNT_ARGS<decltype(TRAC_MAKE_ARG_TUPLE(args))>() <= TRAC_MAX_ARGS, \
+                  "Too many arguments to trace function");
+
 /**
- * @fn void TRACFCOMP0(des, printf_string)
+ * @fn void TRACFCOMP_CHECKED(skip_check, des, printf_string, p1, p2, ...)
  * @brief Defines all Field Component Traces
  *
  * The user can pass 0 to 9 parameters to the macro.  These trace calls will
  * always be written to the trace memory buffer.
  *
+ * @param skip_check If true, skip the max arg count check
  * @param des This is assigned by TRAC_INIT_BUFFER
  * @param printf_string String describing the trace entry and providing the
  *                      formatting flags for any parameters passed.
  * @param p1,p2... Optional parameters
  *
  * @return void
-*/
+ * @note If skip_check is false, this macro will check that the number of
+ *       optional parameters does not exceed TRAC_MAX_ARGS. If it is true, the
+ *       check is skipped.
+ */
 
 /* a macro w/o the param number suffix. number is calculated from printf string */
-#define TRACFCOMP(des,printf_string,args...) \
-    { \
-        __TRACE_HASH_STRUCTURES(printf_string); \
-        TRACE::trace_adal_write_all((des), \
-                                    &__traceData_codeInfo, \
-                                    __LINE__, \
-                                    TRACE_FIELD, \
-                                    ##args); \
+#define TRACFCOMP_CHECKED(skip_check,des,printf_string,args...)  \
+    {                                                            \
+        TRAC_CHECK_ARGS(skip_check,printf_string,args);          \
+        __TRACE_HASH_STRUCTURES(printf_string);                  \
+        TRACE::trace_adal_write_all((des),                       \
+                                    &__traceData_codeInfo,       \
+                                    __LINE__,                    \
+                                    TRACE_FIELD,                 \
+                                    ##args);                     \
     }
 
+/**
+ * @brief Forward arguments to TRACFCOMP_CHECKED, and enable max arg count check.
+ */
+#define TRACFCOMP(des,printf_string,args...) \
+    TRACFCOMP_CHECKED(false,des,printf_string,##args)
 
 /**
  * @fn void TRACFBIN(des,descString,address,len)
@@ -228,27 +261,32 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
     }
 
 /**
-@fn void TRACSCOMP(des, printf_string, args...)
-@brief Defines all Strace Component Traces
-
-The user can pass 0 to 9 parameters to the macro.  These traces will be treated
-as debug traces but will never be compiled out of the code so that they can always be
-dynamically turned on/off.
-
-@note If you are passing parameters then make sure 'printf_string' has the
-@note necessary parameter formatting i.e. 'p1' = "hello" make sure
-@note 'printf_string' has '%s' somewhere in it to corretcly format p1.
-@return void The user will not be impacted by the failure of this function
-@param des This is assigned by TRAC_INIT_BUFFER
-@param printf_string string describing the trace entry and providing the formatting flags for any parameters passed.
-@param p1,p2... Optional parameters
-
-tracepp replaces trace_adal_hash() with hash value and reduced format string
+ * @fn void TRACSCOMP_CHECKED(skip_check, des, printf_string, p1, p2...)
+ * @brief Defines all Strace Component Traces
+ *
+ * The user can pass 0 to 9 parameters to the macro.  These traces will be treated
+ * as debug traces but will never be compiled out of the code so that they can always be
+ * dynamically turned on/off.
+ *
+ * @note If you are passing parameters then make sure 'printf_string' has the
+ * @note necessary parameter formatting i.e. 'p1' = "hello" make sure
+ * @note 'printf_string' has '%s' somewhere in it to corretcly format p1.
+ * @return void The user will not be impacted by the failure of this function
+ * @param skip_check If true, skip the max arg count check
+ * @param des This is assigned by TRAC_INIT_BUFFER
+ * @param printf_string string describing the trace entry and providing the formatting flags for any parameters passed.
+ * @param p1,p2... Optional parameters
+ * @note If skip_check is false, this macro will check that the number of
+ *       optional parameters does not exceed TRAC_MAX_ARGS. If it is true, the
+ *       check is skipped.
+ *
+ * tracepp replaces trace_adal_hash() with hash value and reduced format string
 */
 
 /* a macro w/o the param number suffix. number is calculated from printf string */
-#define TRACSCOMP(des,printf_string,args...) \
+#define TRACSCOMP_CHECKED(skip_check,des,printf_string,args...) \
     { \
+        TRAC_CHECK_ARGS(skip_check,printf_string,##args);   \
         __TRACE_HASH_STRUCTURES(printf_string); \
         TRACE::trace_adal_write_all((des), \
                                     &__traceData_codeInfo, \
@@ -256,6 +294,12 @@ tracepp replaces trace_adal_hash() with hash value and reduced format string
                                     TRACE_DEBUG, \
                                     ##args); \
     }
+
+/**
+ * @brief Forward arguments to TRACSCOMP_CHECKED, and enable max arg count check.
+ */
+#define TRACSCOMP(des,printf_string,args...) \
+    TRACSCOMP_CHECKED(false,des,printf_string,args)
 
 
 /**

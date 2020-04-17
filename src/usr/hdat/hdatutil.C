@@ -494,13 +494,13 @@ void hdatGetLocationCode(TARGETING::Target *i_pFruTarget,
     TARGETING::ATTR_LOCATION_CODE_type l_locationCode;
     char *l_pPhysPath;
     char l_locCode[64] = {0};
-    
-    
+
+
     if(i_pFruTarget->tryGetAttr<TARGETING::ATTR_LOCATION_CODE>(l_locationCode)
                     && (strlen(l_locationCode) > 0))
     {
         sprintf(l_locCode, "%s-%s",i_locCodePrefix,l_locationCode);
-    }   
+    }
     else if(i_pFruTarget->tryGetAttr<TARGETING::ATTR_PHYS_PATH>(l_physPath))
     {
         char *l_cutString;
@@ -1724,28 +1724,30 @@ void hdatGetI2cDeviceInfo(
 
     for(auto const& i2cDevice : o_i2cDevEntries)
     {
+
         HDAT_DBG("Unique I2C device attached to HUID=0x%08X: "
-            "engine=0x%02X, "
-            "port=0x%02X, "
-            "speed=0x%04X, "
-            "slave type=0x%02X, "
-            "slave address=0x%02X, "
-            "slave port=0x%02X, "
-            "slave purpose=0x%08X, "
-            "link ID=0x%08X, "
-            "SLCA index=0x%04X, "
-            "slave label=\"%s\"",
-            TARGETING::get_huid(i_pTarget),
-            i2cDevice.hdatI2cEngine,
-            i2cDevice.hdatI2cMasterPort,
-            i2cDevice.hdatI2cBusSpeed,
-            i2cDevice.hdatI2cSlaveDevType,
-            i2cDevice.hdatI2cSlaveDevAddr,
-            i2cDevice.hdatI2cSlavePort,
-            i2cDevice.hdatI2cSlaveDevPurp,
-            i2cDevice.hdatI2cLinkId,
-            i2cDevice.hdatI2cSlcaIndex,
-            i2cDevice.hdatI2cLabel);
+                 "engine=0x%02X, "
+                 "port=0x%02X, "
+                 "speed=0x%04X, "
+                 "slave type=0x%02X, "
+                 "slave address=0x%02X, ",
+                 TARGETING::get_huid(i_pTarget),
+                 i2cDevice.hdatI2cEngine,
+                 i2cDevice.hdatI2cMasterPort,
+                 i2cDevice.hdatI2cBusSpeed,
+                 i2cDevice.hdatI2cSlaveDevType,
+                 i2cDevice.hdatI2cSlaveDevAddr);
+
+        HDAT_DBG("slave port=0x%02X, "
+                 "slave purpose=0x%08X, "
+                 "link ID=0x%08X, "
+                 "SLCA index=0x%04X, "
+                 "slave label=\"%s\"",
+                 i2cDevice.hdatI2cSlavePort,
+                 i2cDevice.hdatI2cSlaveDevPurp,
+                 i2cDevice.hdatI2cLinkId,
+                 i2cDevice.hdatI2cSlcaIndex,
+                 i2cDevice.hdatI2cLabel);
     }
 
     HDAT_EXIT();
@@ -2090,7 +2092,7 @@ uint32_t getMemBusFreq(const TARGETING::Target* i_pTarget)
         HDAT_ERR(" Input target with HUID [0x%08X] is not of proc/mcbist target type",
                         i_pTarget->getAttr<TARGETING::ATTR_HUID>());
     }
- 
+
     HDAT_EXIT();
     return l_MemBusFreqInMHz;
     **/

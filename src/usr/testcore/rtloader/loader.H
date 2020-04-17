@@ -1019,15 +1019,17 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                   TRACFCOMP(g_trac_hbrt,
                       "rt_firmware_request request: "
                       "type:%d, magic:0x%.8X, dataSize:%d, "
-                      "structVer:0x%.8X, seqnum:%d, msgq:0x%.8X, "
-                      "msgType:0x%.8X, __req:%d, __onlyError:%d, "
-                      "data:0x%.8X, plid:0x%.8X, huid:0x%.8X",
+                      "structVer:0x%.8X, seqnum:%d, msgq:0x%.8X, ",
                       l_req_fw_msg->io_type,
                       l_req_fw_msg->generic_msg.magic,
                       l_req_fw_msg->generic_msg.dataSize,
                       l_req_fw_msg->generic_msg.structVer,
                       l_req_fw_msg->generic_msg.seqnum,
-                      l_req_fw_msg->generic_msg.msgq,
+                      l_req_fw_msg->generic_msg.msgq);
+
+                  TRACFCOMP(g_trac_hbrt,
+                      "msgType:0x%.8X, __req:%d, __onlyError:%d, "
+                      "data:0x%.8X, plid:0x%.8X, huid:0x%.8X",
                       l_req_fw_msg->generic_msg.msgType,
                       l_req_fw_msg->generic_msg.__req,
                       l_req_fw_msg->generic_msg.__onlyError,
@@ -1151,9 +1153,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                   TRACFCOMP(g_trac_hbrt,
                       "rt_firmware_request response: "
                       "type:%d, magic:0x%.8X, dataSize:%d, structVer:0x%.8X, "
-                      "seqnum:%d, msgq:0x%.8X, msgType:0x%.8X, __req:%d, "
-                      "__onlyError:%d, data:0x%.8X, plid:0x%.8X, huid:0x%.8X, "
-                      "retVal=%d",
+                      "seqnum:%d, msgq:0x%.8X, msgType:0x%.8X, __req:%d, ",
                       l_resp_fw_msg->io_type,
                       l_resp_fw_msg->generic_msg.magic,
                       l_resp_fw_msg->generic_msg.dataSize,
@@ -1161,7 +1161,11 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                       l_resp_fw_msg->generic_msg.seqnum,
                       l_resp_fw_msg->generic_msg.msgq,
                       l_resp_fw_msg->generic_msg.msgType,
-                      l_resp_fw_msg->generic_msg.__req,
+                      l_resp_fw_msg->generic_msg.__req);
+
+                  TRACFCOMP(g_trac_hbrt,
+                      "__onlyError:%d, data:0x%.8X, plid:0x%.8X, huid:0x%.8X, "
+                      "retVal=%d",
                       l_resp_fw_msg->generic_msg.__onlyError,
                       l_resp_fw_msg->generic_msg.data,
                       l_resp_fw_msg->generic_msg.data >> 32,
