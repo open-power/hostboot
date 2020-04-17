@@ -392,6 +392,8 @@ template<>
 fapi2::ReturnCode after_mc_omi_setup<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
         i_target )
 {
+    constexpr uint64_t MASK_ALL = ~0ull;
+
     fapi2::buffer<uint64_t> l_dl0_error_mask;
 
     fapi2::ReturnCode l_rc1 = fapi2::FAPI2_RC_SUCCESS;
@@ -435,6 +437,9 @@ fapi2::ReturnCode after_mc_omi_setup<mss::mc_type::EXPLORER>( const fapi2::Targe
              .write());
 
     // Write MC_OMI FIR register per Explorer unmask spec
+    // Note: Explorer doesn't initialize its DLX_MC_OMI_FIR masks to the masked state, so mask them all first
+    FAPI_DBG("Masking entire EXPLR_DLX_MC_OMI_FIR_MASK_REG on %s", mss::c_str(i_target));
+    FAPI_TRY(fapi2::putScom(i_target, EXPLR_DLX_MC_OMI_FIR_MASK_REG, MASK_ALL));
     FAPI_TRY(l_exp_mc_omi_fir_reg.local_checkstop<EXPLR_DLX_MC_OMI_FIR_REG_DL0_FATAL_ERROR>()
              .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_DATA_UE>()
              .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_X4_MODE>()
