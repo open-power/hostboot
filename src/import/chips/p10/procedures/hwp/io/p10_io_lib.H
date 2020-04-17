@@ -66,6 +66,13 @@ fapi2::ReturnCode p10_io_get_iohs_thread(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_iohs_target, l_iohs_num),
              "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
     o_thread = l_iohs_num % P10_IO_LIB_NUMBER_OF_IOHS_THREADS;
+
+    if (l_iohs_num >= 2)
+    {
+        //AX0/1 are swapped for ioo1..3
+        o_thread = (P10_IO_LIB_NUMBER_OF_IOHS_THREADS - 1) - o_thread;
+    }
+
 fapi_try_exit:
     return fapi2::current_err;
 }
