@@ -626,8 +626,8 @@ fapi2::ReturnCode p10_fbc_ptl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>&
             {
                 l_scom_buffer.insert<16, 1, 63, uint64_t>(literal_0b1 );
             }
-            else if (((l_def_AX1_EVN_CNFG == literal_1) && (((l_def_OPTX == literal_3) || (l_def_OPTX == literal_5))
-                      || (l_def_OPTX == literal_7))))
+            else if (((l_def_AX1_EVN_CNFG == literal_1) && (((l_def_OPTY == literal_3) || (l_def_OPTY == literal_5))
+                      || (l_def_OPTY == literal_7))))
             {
                 l_scom_buffer.insert<16, 1, 63, uint64_t>(literal_0b0 );
             }
@@ -636,8 +636,8 @@ fapi2::ReturnCode p10_fbc_ptl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>&
             {
                 l_scom_buffer.insert<18, 1, 63, uint64_t>(literal_0b1 );
             }
-            else if (((l_def_AX1_ODD_CNFG == literal_1) && (((l_def_OPTX == literal_3) || (l_def_OPTX == literal_5))
-                      || (l_def_OPTX == literal_7))))
+            else if (((l_def_AX1_ODD_CNFG == literal_1) && (((l_def_OPTY == literal_3) || (l_def_OPTY == literal_5))
+                      || (l_def_OPTY == literal_7))))
             {
                 l_scom_buffer.insert<18, 1, 63, uint64_t>(literal_0b0 );
             }
@@ -681,8 +681,8 @@ fapi2::ReturnCode p10_fbc_ptl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>&
                 l_scom_buffer.insert<8, 1, 59, uint64_t>(literal_0b11000 );
                 l_scom_buffer.insert<20, 4, 60, uint64_t>(literal_0b11000 );
             }
-            else if (((l_def_AX0_EVN_CNFG == literal_1) && (((l_def_OPTY == literal_2) || (l_def_OPTY == literal_4))
-                      || (l_def_OPTY == literal_6))))
+            else if (((l_def_AX0_EVN_CNFG == literal_1) && (((l_def_OPTX == literal_2) || (l_def_OPTX == literal_4))
+                      || (l_def_OPTX == literal_6))))
             {
                 l_scom_buffer.insert<8, 1, 59, uint64_t>(literal_0b10000 );
                 l_scom_buffer.insert<20, 4, 60, uint64_t>(literal_0b10000 );
@@ -698,8 +698,8 @@ fapi2::ReturnCode p10_fbc_ptl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>&
                 l_scom_buffer.insert<9, 1, 59, uint64_t>(literal_0b11000 );
                 l_scom_buffer.insert<24, 4, 60, uint64_t>(literal_0b11000 );
             }
-            else if (((l_def_AX0_ODD_CNFG == literal_1) && (((l_def_OPTY == literal_2) || (l_def_OPTY == literal_4))
-                      || (l_def_OPTY == literal_6))))
+            else if (((l_def_AX0_ODD_CNFG == literal_1) && (((l_def_OPTX == literal_2) || (l_def_OPTX == literal_4))
+                      || (l_def_OPTX == literal_6))))
             {
                 l_scom_buffer.insert<9, 1, 59, uint64_t>(literal_0b10000 );
                 l_scom_buffer.insert<24, 4, 60, uint64_t>(literal_0b10000 );
