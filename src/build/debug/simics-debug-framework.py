@@ -493,21 +493,6 @@ except:
 
 hb_attr_dump_file = open('hb_attr_dump.bin', 'wb')
 
-# Get CPU per group/chip/core/thread specified
-def get_host_cpu(system_cmp, group_id, chip_id, core, thread):
-    # Get all the proc components for the system
-    chips = system_cmp.chips
-    active_chip = None
-    host_cpu = None
-    # Find the proc that matches group_id/chip_id
-    for cur_chip in chips:
-        if(cur_chip.group_id == group_id and
-           cur_chip.chip_id == chip_id):
-            active_chip = cur_chip
-            break
-    # Get the core/thread associated with that proc
-    host_cpu=SIM_get_interface(active_chip, "proc_notify").get_host_cpu(None, core, thread)
-    return host_cpu
 
 
 # MAGIC_INSTRUCTION hap handler
@@ -617,18 +602,14 @@ def magic_instruction_callback(user_arg, cpu, arg):
         dateCommand = "shell \" date +'%s > TRACE REGS: %d %d' \""%(percent_s,first_num,second_num)
         SIM_run_alone(run_command, dateCommand )
 
-    if arg == 7025:  # MAGIC_SETUP_THREAD
-        pir = cpu.r4
+    if arg == 7025:  # MAGIC_SETUP_THREADS
+        print "Setting up urmor for all PIRs"
         # Hook to update SMF MSR bit if needed
-        smfEnabled = cpu.r5
-        group_id = cpu.node_num
-        chip_id = cpu.chip_num
-        component = cpu.component
-        core = (pir//8)*2 + pir%2
-        thread = (pir%8)//2
-        cpuobj=get_host_cpu(component, group_id, chip_id, core, thread)
-        print "Setting up urmor for PIR ", pir, cpuobj.name
-        cpuobj.urmor = cpu.urmor
+        smfEnabled = cpu.r4
+
+        cpu_list=hb_get_objects_by_class("ppc_power10_mambo_core")
+        for othercpu in cpu_list:
+            othercpu.urmor = cpu.urmor
 
     if arg == 7022:  # MAGIC_SET_LOG_LEVEL
         if( not os.environ.has_key('ENABLE_HB_SIMICS_LOGS') ):

@@ -515,7 +515,7 @@ enum
     MAGIC_SET_LOG_LEVEL       =  7022, // Set log level for given component
     MAGIC_TOGGLE_OUTPUT       =  7023, // Enable simic log capture
 
-    MAGIC_SETUP_THREAD        =  7025, // Manually set thread regs pre-enable
+    MAGIC_SETUP_THREADS       =  7025, // Manually set thread regs pre-enable
 
     MAGIC_CONTINUOUS_TRACE    =  7055, // extract mixed trace buffer
     MAGIC_GCOV_MODULE_UNLOAD  =  7056, // extract gcov info
@@ -613,15 +613,14 @@ enum
 
 
 /**
- * @brief Setup the thread with the given PIR with good default
- *        register values to allow it to run when enabled.
- * @param[in] _pir pir value
+ * @brief Setup all threads with good default
+ *        register values to allow them to run when enabled.
  * @param[in] _smfEnabled Whether SMF is enabled or not
  */
-#define MAGIC_INST_SETUP_THREAD(_pir,_smfEnabled) \
-    asm volatile("mr 4, %0; mr 5, %1" :: \
-                 "r" (_pir), "r" (_smfEnabled) : \
-                 "4","5"); \
-    MAGIC_INSTRUCTION(MAGIC_SETUP_THREAD); \
+#define MAGIC_INST_SETUP_THREADS(_smfEnabled) \
+    asm volatile("mr 4, %0" :: \
+                 "r" (_smfEnabled) : \
+                 "4"); \
+    MAGIC_INSTRUCTION(MAGIC_SETUP_THREADS); \
 
 #endif

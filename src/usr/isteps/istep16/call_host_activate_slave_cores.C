@@ -89,6 +89,15 @@ void* call_host_activate_slave_cores(void* const io_pArgs)
     assert(sys != nullptr, "Toplevel target must not be null");
     uint32_t l_numCores = 0;
 
+    // Force some updates in Simics if the QME model isn't enabled
+    if(Util::requiresSlaveCoreWorkaround())
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "Triggering Simics QME workaround");
+        const auto smfEnabled = SECUREBOOT::SMF::isSmfEnabled();
+        MAGIC_INST_SETUP_THREADS(smfEnabled);
+    }
+
     // keep track of which cores started
     TargetHandleList l_startedCores;
 
@@ -121,49 +130,11 @@ void* call_host_activate_slave_cores(void* const io_pArgs)
 
         int rc = 0;
         const uint64_t en_threads = sys->getAttr<ATTR_ENABLED_THREADS>();
-        if(Util::requiresSlaveCoreWorkaround())
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "call_host_activate_slave_cores: Starting 0x%016llX.",
-                      pir);
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "call_host_activate_slave_cores: Waking 0x%016llX.",
+                  pir);
 
-            const size_t maxCpuThreads = cpu_thread_count();
-            const int threadBits = __builtin_popcountl(en_threads);
-            const auto threadCount = std::min(static_cast<uint64_t>(threadBits),maxCpuThreads);
-
-            TRACFCOMP( g_fapiImpTd,
-                       "Before cpu_start_core - Setting up URMOR for %llu PIRs (enabled thread mask "
-                       "of 0x%016llX)",
-                       threadCount,en_threads);
-
-            const auto smfEnabled = SECUREBOOT::SMF::isSmfEnabled();
-            for( uint64_t thread = 0; thread < maxCpuThreads; ++thread)
-            {
-                if(en_threads & (0x8000000000000000ULL >> thread))
-                {
-                    const uint64_t threadPir = pir + thread;
-                    TRACFCOMP( g_fapiImpTd,
-                       "Setting URMOR for PIR 0x%016llX",threadPir);
-                    MAGIC_INST_SETUP_THREAD(threadPir,smfEnabled);
-                }
-            }
-            sync();
-
-            // Prepare the kernel for the new threads
-            rc = cpu_start_core(pir, en_threads);
-            if( rc )
-            {
-                TRACFCOMP( g_fapiImpTd, "rc=%d from cpu_start_core", rc);
-            }
-        }
-        else
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "call_host_activate_slave_cores: Waking 0x%016llX.",
-                      pir);
-
-            rc = cpu_start_core(pir, en_threads);
-        }
+        rc = cpu_start_core(pir, en_threads);
 
         // Handle time out error
         uint32_t l_checkidle_eid = 0;
