@@ -2386,7 +2386,7 @@ fapi2::ReturnCode apply_fbc_dyninits(
     // MC Fast Settings
     if(l_fmc_valid && (l_fmc > 1610))
     {
-        io_featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_MC_FAST;
+        io_featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_MC_FAST;
     }
 
     // PBI Async Settings
@@ -2436,67 +2436,67 @@ fapi2::ReturnCode apply_fbc_dyninits(
 
     if(l_rt2pa_nominal)
     {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2PA_NOMINAL;
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_RT2PA_NOMINAL;
     }
 
     if(l_rt2pa_safe)
     {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2PA_SAFE;
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_RT2PA_SAFE;
     }
 
     if(l_pa2rt_turbo)
     {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_PA2RT_TURBO;
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_PA2RT_TURBO;
     }
 
     if(l_pa2rt_nominal)
     {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_PA2RT_NOMINAL;
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_PA2RT_NOMINAL;
     }
 
     if(l_pa2rt_safe)
     {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_PA2RT_SAFE;
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_PA2RT_SAFE;
     }
 
     if(l_rt2mc_ultraturbo)
     {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC_ULTRATURBO;
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_RT2MC_ULTRATURBO;
     }
 
     if(l_rt2mc_turbo)
     {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC_TURBO;
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_RT2MC_TURBO;
     }
 
     if(l_rt2mc_nominal)
     {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC_NOMINAL;
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_RT2MC_NOMINAL;
     }
 
     if(l_rt2mc_safe)
     {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC_SAFE;
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_RT2MC_SAFE;
     }
 
     if(l_mc2rt_ultraturbo)
     {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT_ULTRATURBO;
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_MC2RT_ULTRATURBO;
     }
 
     if(l_mc2rt_turbo)
     {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT_TURBO;
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_MC2RT_TURBO;
     }
 
     if(l_mc2rt_nominal)
     {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT_NOMINAL;
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_MC2RT_NOMINAL;
     }
 
     if(l_mc2rt_safe)
     {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT_SAFE;
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_MC2RT_SAFE;
     }
 
 fapi_try_exit:
@@ -2565,6 +2565,7 @@ ReturnCode p10_ipl_customize (
     RingId_t        rpIndex = UNDEFINED_RING_ID; // Ring properties (rp) index
 
     uint64_t        featureVec = 0; // Dynamic inits feature vector from platform attribute
+    fapi2::ATTR_DYNAMIC_INIT_FEATURE_VEC_Type l_attrInitFeatureVec;
     fapi2::ATTR_SYSTEM_IPL_PHASE_Type l_attrSystemIplPhase;
     fapi2::ATTR_CONTAINED_IPL_TYPE_Type l_attrContainedIplType;
     std::map< Rs4Selector_t,  Rs4Selector_t> idxFeatureMap;
@@ -3459,7 +3460,9 @@ ReturnCode p10_ipl_customize (
     //
     l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_DYNAMIC_INIT_FEATURE_VEC,
                               FAPI_SYSTEM,
-                              featureVec);
+                              l_attrInitFeatureVec);
+
+    featureVec = (uint64_t)l_attrInitFeatureVec;
 
     FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
                  fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
@@ -3568,9 +3571,10 @@ ReturnCode p10_ipl_customize (
         featureVec &= ~fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_CHIP_CONTAINED;
     }
 
+    l_attrInitFeatureVec[0] = (uint64_t)featureVec;
     l_fapiRc2 = FAPI_ATTR_SET(fapi2::ATTR_DYNAMIC_INIT_FEATURE_VEC,
                               FAPI_SYSTEM,
-                              featureVec);
+                              l_attrInitFeatureVec);
 
     FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
                  fapi2::XIPC_FAPI_ATTR_SVC_FAIL().

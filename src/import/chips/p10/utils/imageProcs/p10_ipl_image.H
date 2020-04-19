@@ -104,6 +104,7 @@ typedef enum {
     IST_TOR,  // A standalone TOR ring section image
     IST_DDCO, // A standalone DD level container
     IST_MVPD, // An Mvpd file
+    IST_DYN,  // A dynamic feature/service binary image
     NOOF_IST,
     IST_UNDEFINED = 0xff
 } image_section_type_t;
