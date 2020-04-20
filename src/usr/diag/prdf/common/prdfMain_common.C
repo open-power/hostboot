@@ -110,6 +110,7 @@ errlHndl_t noLock_initialize()
 
     g_prd_errlHndl = NULL; // This forces any previous errls to be committed
 
+/* RTC 253001: Temporarily disable
     // Synchronize SCOM access to hardware
     // Start un-synchronized so hardware is accessed
     RegDataCache::getCachedRegisters().flush();
@@ -174,6 +175,7 @@ errlHndl_t noLock_initialize()
     }
 
     #endif
+*/
 
     PRDF_EXIT( PRDF_FUNC );
 
@@ -209,6 +211,7 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_priAttnType,
     // These have to be outside of system scope lock
     errlHndl_t retErrl = NULL;
 
+/* RTC 253001: Temporarily disable
     { // system scope lock starts ------------------------------------------
 
     // will unlock when going out of scope
@@ -378,6 +381,7 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_priAttnType,
     retErrl = g_prd_errlHndl.release();
 
     } // system scope lock ends ------------------------------------------
+*/
 
     PRDF_EXIT( "PRDF::main()" );
 
@@ -392,6 +396,7 @@ errlHndl_t noLock_refresh()
 
     errlHndl_t l_errl = NULL;
 
+/* RTC 253001: Temporarily disable
     if((false == g_initialized) || (NULL == systemPtr))
     {
         l_errl = noLock_initialize();
@@ -402,6 +407,7 @@ errlHndl_t noLock_refresh()
         // remove any non-functional chips
         systemPtr->RemoveNonFunctionalChips();
     }
+*/
 
     PRDF_EXIT("PRDF::noLock_refresh()");
 

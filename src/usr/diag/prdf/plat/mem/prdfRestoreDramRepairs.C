@@ -427,6 +427,7 @@ uint32_t restoreDramRepairs( TargetHandle_t i_trgt )
 
     bool calloutMade = false;
 
+/* RTC 253001: Temporarily disable
     do
     {
         // Will need the chip and system objects initialized for several parts
@@ -497,6 +498,7 @@ uint32_t restoreDramRepairs( TargetHandle_t i_trgt )
             calloutMade = true;
 
     } while(0);
+*/
 
     PRDF_EXIT( PRDF_FUNC "(0x%08x)", getHuid(i_trgt) );
 
