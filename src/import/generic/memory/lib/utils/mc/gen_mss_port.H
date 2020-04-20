@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,7 @@
 #include <generic/memory/lib/utils/mc/gen_mss_port_traits.H>
 #include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/c_str.H>
+#include <generic/memory/lib/utils/find.H>  // mss::find_targets
 
 namespace mss
 {
