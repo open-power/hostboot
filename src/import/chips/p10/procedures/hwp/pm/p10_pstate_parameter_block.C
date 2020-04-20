@@ -3889,6 +3889,10 @@ fapi2::ReturnCode PlatPmPPB::rvrm_enablement()
     uint32_t l_present_boot_voltage;
     iv_rvrm_enabled = false;
 
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_IS_SIMULATION_Type is_sim;
+    FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_IS_SIMULATION, FAPI_SYSTEM, is_sim));
+
     FAPI_INF("> PlatPmPPB:rvrm_enablement");
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_RVRM_VID,
                 iv_procChip,
@@ -3899,12 +3903,18 @@ fapi2::ReturnCode PlatPmPPB::rvrm_enablement()
     // Rentention VID has 8mV granularity
     l_rvrm_rvid_mv = l_rvrm_rvid << 3;
 
-
-    //Read the effective VDD voltage from hardware
-    FAPI_TRY(p10_setup_evid_voltageRead(iv_procChip,
-                            &iv_attrs.attr_avs_bus_num[VDD],
-                            &iv_attrs.attr_avs_bus_rail_select[VDD],
-                            &l_present_boot_voltage));
+    if (is_sim)
+    {
+        l_present_boot_voltage = iv_attrs.attr_boot_voltage_mv[VDD];
+    }
+    else
+    {
+        //Read the effective VDD voltage from hardware
+        FAPI_TRY(p10_setup_evid_voltageRead(iv_procChip,
+                    &iv_attrs.attr_avs_bus_num[VDD],
+                    &iv_attrs.attr_avs_bus_rail_select[VDD],
+                    &l_present_boot_voltage));
+    }
 
     FAPI_DBG("Present VDD voltage %08x, RVRM_RVID %08x, RVRM_DEADZONE %08x",
              l_present_boot_voltage,l_rvrm_rvid_mv,iv_attrs.attr_rvrm_deadzone_mv);
