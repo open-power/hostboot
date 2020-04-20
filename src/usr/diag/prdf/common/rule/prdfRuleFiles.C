@@ -33,23 +33,23 @@
 
 namespace PRDF
 {
-    // P9 Axone Chip
-    const char * axone_proc = "axone_proc";
-    const char * axone_eq   = "axone_eq";
-    const char * axone_ex   = "axone_ex";
-    const char * axone_ec   = "axone_ec";
-    const char * axone_capp = "axone_capp";
-    const char * axone_npu  = "axone_npu";
-    const char * axone_pec  = "axone_pec";
-    const char * axone_phb  = "axone_phb";
-    const char * axone_xbus = "axone_xbus";
-    const char * axone_obus = "axone_obus";
-    const char * axone_mc   = "axone_mc";
-    const char * axone_mi   = "axone_mi";
-    const char * axone_mcc  = "axone_mcc";
-    const char * axone_omic = "axone_omic";
+    // P10 Chip
+    const char * p10_proc = "p10_proc";
+    const char * p10_eq   = "p10_eq";
+    const char * p10_core = "p10_core";
+    const char * p10_pec  = "p10_pec";
+    const char * p10_phb  = "p10_phb";
+    const char * p10_mc   = "p10_mc";
+    const char * p10_mi   = "p10_mi";
+    const char * p10_mcc  = "p10_mcc";
+    const char * p10_omic = "p10_omic";
+    const char * p10_iohs = "p10_iohs";
+    const char * p10_nmmu = "p10_nmmu";
+    const char * p10_pauc = "p10_pauc";
+    const char * p10_pau  = "p10_pau";
 
-    // P9 Explorer Chip
+
+    // Explorer Chip
     const char * explorer_ocmb = "explorer_ocmb";
 
 } // end namespace PRDF

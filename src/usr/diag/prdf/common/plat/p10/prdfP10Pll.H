@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/rule/prdfRuleFiles.H $               */
+/* $Source: src/usr/diag/prdf/common/plat/p10/prdfP10Pll.H $              */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,35 +22,25 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
-#ifndef __PRDFRULEFILES_H
-#define __PRDFRULEFILES_H
-
-/**
- * @file prdfRuleFiles.H
- * @brief Contains the name of each chip's associated .prf file.
- */
+#ifndef __prdfP10Pll_H
+#define __prdfP10Pll_H
 
 namespace PRDF
 {
-    // P10 Chip
-    extern const char * p10_proc;
-    extern const char * p10_eq;
-    extern const char * p10_core;
-    extern const char * p10_pec;
-    extern const char * p10_phb;
-    extern const char * p10_mc;
-    extern const char * p10_mcc;
-    extern const char * p10_omic;
-    extern const char * p10_iohs;
-    extern const char * p10_nmmu;
-    extern const char * p10_pauc;
-    extern const char * p10_pau;
+namespace PLL
+{
 
-    // Explorer Chip
-    extern const char * explorer_ocmb;
+typedef enum
+{
+    SYS_PLL_UNLOCK = 0x01,
+    PCI_PLL_UNLOCK = 0x02,
+    SYS_OSC_FAILOVER = 0x04,
+    PCI_OSC_FAILOVER = 0x08,
+} PllErrorType;
 
+} // end namespace PLL
 } // end namespace PRDF
 
-#endif
+
+#endif // __prdfP10Pll_H
 

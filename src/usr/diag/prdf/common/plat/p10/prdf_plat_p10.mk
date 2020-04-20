@@ -38,6 +38,11 @@ prd_incpath += ${PRD_SRC_PATH}/common/plat/p10
 ################################################################################
 
 # non-rule plugin related
+prd_obj += prdfP10Configurator.o
+prd_obj += prdfP10PllDomain.o
+prd_obj += prdfP10ProcDomain.o
+prd_obj += prdfFsiCapUtil.o
 
 # rule plugin related
+prd_rule_plugin += prdfP10Pll.o
 

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/rule/prdfRuleFiles.H $               */
+/* $Source: src/usr/diag/prdf/common/plat/p10/prdfP10ProcExtraSig.H $     */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,34 +23,14 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __PRDFRULEFILES_H
-#define __PRDFRULEFILES_H
+#ifndef __prdfP10ProcExtraSig_H
+#define __prdfP10ProcExtraSig_H
 
-/**
- * @file prdfRuleFiles.H
- * @brief Contains the name of each chip's associated .prf file.
- */
+#include <prdrSignatures.H>
 
-namespace PRDF
-{
-    // P10 Chip
-    extern const char * p10_proc;
-    extern const char * p10_eq;
-    extern const char * p10_core;
-    extern const char * p10_pec;
-    extern const char * p10_phb;
-    extern const char * p10_mc;
-    extern const char * p10_mcc;
-    extern const char * p10_omic;
-    extern const char * p10_iohs;
-    extern const char * p10_nmmu;
-    extern const char * p10_pauc;
-    extern const char * p10_pau;
-
-    // Explorer Chip
-    extern const char * explorer_ocmb;
-
-} // end namespace PRDF
-
-#endif
-
+/* PLL Extra signatures */
+PRDR_ERROR_SIGNATURE( PLL_ERROR, 0x00ed0000, "","PLL error" );
+PRDR_ERROR_SIGNATURE( MF_REF_FAILOVER, 0x00ed0001, "", "MF Ref Clk failover" );
+PRDR_ERROR_SIGNATURE( SYS_REF_FAILOVER, 0x00ed0002, "",
+                      "Sys Ref Clk failover" );
+#endif // __prdfP10ProcExtraSig_H

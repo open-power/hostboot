@@ -38,36 +38,31 @@ class RuleChipDomain : public DomainContainer<RuleChip>
 
     enum DefaultDomainSize
     {
-        // At minimum, should allocate for a fully configured single P9 Nimbus
-        // system.
+        // At minimum, should allocate for a fully configured single P10 system.
 
         PROC_DOMAIN_SIZE   = 1,
         EQ_DOMAIN_SIZE     = PROC_DOMAIN_SIZE * 6,
-        EX_DOMAIN_SIZE     = EQ_DOMAIN_SIZE * 2,
-        EC_DOMAIN_SIZE     = EX_DOMAIN_SIZE * 2,
-        OBUS_DOMAIN_SIZE   = PROC_DOMAIN_SIZE * 2,
-        XBUS_DOMAIN_SIZE   = PROC_DOMAIN_SIZE * 2,
+        NMMU_DOMAIN_SIZE   = PROC_DOMAIN_SIZE * 2,
+        PAUC_DOMAIN_SIZE   = PROC_DOMAIN_SIZE * 4,
+        IOHS_DOMAIN_SIZE   = PAUC_DOMAIN_SIZE * 4,
+        PAU_DOMAIN_SIZE    = IOHS_DOMAIN_SIZE,
+        EC_DOMAIN_SIZE     = PROC_DOMAIN_SIZE * 4,
         PEC_DOMAIN_SIZE    = PROC_DOMAIN_SIZE * 3,
         PHB_DOMAIN_SIZE    = PROC_DOMAIN_SIZE * 6,
-        CAPP_DOMAIN_SIZE   = PROC_DOMAIN_SIZE * 2,
         MC_DOMAIN_SIZE     = PROC_DOMAIN_SIZE * 2,
-        MI_DOMAIN_SIZE     = MC_DOMAIN_SIZE * 2,
-        DMI_DOMAIN_SIZE    = MI_DOMAIN_SIZE * 2,
-        NPU_DOMAIN_SIZE    = PROC_DOMAIN_SIZE * 3,
-        MCC_DOMAIN_SIZE    = MI_DOMAIN_SIZE * 2,
+        MCC_DOMAIN_SIZE    = MC_DOMAIN_SIZE * 2,
         OMIC_DOMAIN_SIZE   = MC_DOMAIN_SIZE * 3,
         OMI_DOMAIN_SIZE    = MCC_DOMAIN_SIZE * 2,
         OCMB_DOMAIN_SIZE   = OMI_DOMAIN_SIZE,
 
-        TOTAL_CHIPS = PROC_DOMAIN_SIZE +
-                      EQ_DOMAIN_SIZE + EX_DOMAIN_SIZE + EC_DOMAIN_SIZE +
-                      OBUS_DOMAIN_SIZE + XBUS_DOMAIN_SIZE +
-                      PEC_DOMAIN_SIZE + PHB_DOMAIN_SIZE +
-                      CAPP_DOMAIN_SIZE + NPU_DOMAIN_SIZE +
-                      MCC_DOMAIN_SIZE + OMIC_DOMAIN_SIZE + OMI_DOMAIN_SIZE +
+        TOTAL_CHIPS = PROC_DOMAIN_SIZE + IOHS_DOMAIN_SIZE + NMMU_DOMAIN_SIZE +
+                      PAUC_DOMAIN_SIZE + PAU_DOMAIN_SIZE +
+                      EQ_DOMAIN_SIZE + EC_DOMAIN_SIZE +
+                      PEC_DOMAIN_SIZE + PHB_DOMAIN_SIZE + MC_DOMAIN_SIZE +
+                      MCC_DOMAIN_SIZE + OMIC_DOMAIN_SIZE +
                       OCMB_DOMAIN_SIZE,
 
-        TOTAL_DOMAINS = 16,
+        TOTAL_DOMAINS = 13,
     };
 
     /** @fn RuleChipDomain

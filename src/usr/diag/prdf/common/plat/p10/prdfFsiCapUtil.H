@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/rule/prdfRuleFiles.H $               */
+/* $Source: src/usr/diag/prdf/common/plat/p10/prdfFsiCapUtil.H $          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,34 +23,36 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __PRDFRULEFILES_H
-#define __PRDFRULEFILES_H
+#ifndef FSI_CAP_UTIL_H
+#define FSI_CAP_UTIL_H
 
 /**
- * @file prdfRuleFiles.H
- * @brief Contains the name of each chip's associated .prf file.
+ * @file    prdfFsiCapUtil.H
+ * @brief   Captures FSI status register for FFDC.
  */
+
+// Platform includes
+#include <prdfTargetServices.H>
 
 namespace PRDF
 {
-    // P10 Chip
-    extern const char * p10_proc;
-    extern const char * p10_eq;
-    extern const char * p10_core;
-    extern const char * p10_pec;
-    extern const char * p10_phb;
-    extern const char * p10_mc;
-    extern const char * p10_mcc;
-    extern const char * p10_omic;
-    extern const char * p10_iohs;
-    extern const char * p10_nmmu;
-    extern const char * p10_pauc;
-    extern const char * p10_pau;
 
-    // Explorer Chip
-    extern const char * explorer_ocmb;
+class ExtensibleChip;
+struct STEP_CODE_DATA_STRUCT;
+namespace PLL
+{
 
-} // end namespace PRDF
+/**
+ * @brief   capture FSI Status Reg for FFDC
+ * @param   i_chip   Extensible chip
+ * @param   i_sc     service data collector
+ */
+template<TARGETING::TYPE T>
+void captureFsiStatusReg( ExtensibleChip * i_chip,
+                        STEP_CODE_DATA_STRUCT & io_sc );
 
-#endif
+}// namespace PLL
 
+} //namespace PRDF
+
+#endif  //FSI_CAP_UTIL_H

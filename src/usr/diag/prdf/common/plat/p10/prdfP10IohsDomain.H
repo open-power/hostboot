@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/rule/prdfRuleFiles.H $               */
+/* $Source: src/usr/diag/prdf/common/plat/p10/prdfP10IohsDomain.H $       */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,35 +22,39 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifndef __prdfP10IohsDomain_H
+#define __prdfP10IohsDomain_H
 
-#ifndef __PRDFRULEFILES_H
-#define __PRDFRULEFILES_H
-
-/**
- * @file prdfRuleFiles.H
- * @brief Contains the name of each chip's associated .prf file.
- */
+#include <prdfRuleChipDomain.H>
 
 namespace PRDF
 {
-    // P10 Chip
-    extern const char * p10_proc;
-    extern const char * p10_eq;
-    extern const char * p10_core;
-    extern const char * p10_pec;
-    extern const char * p10_phb;
-    extern const char * p10_mc;
-    extern const char * p10_mcc;
-    extern const char * p10_omic;
-    extern const char * p10_iohs;
-    extern const char * p10_nmmu;
-    extern const char * p10_pauc;
-    extern const char * p10_pau;
 
-    // Explorer Chip
-    extern const char * explorer_ocmb;
+class IohsDomain : public RuleChipDomain
+{
+  public:
+
+    /**
+     * @brief Constructor
+     * @param i_did  The domain ID
+     * @param i_size The projected size of the domain
+     */
+    IohsDomain( DOMAIN_ID i_did, uint32_t i_size = IOHS_DOMAIN_SIZE ) :
+                RuleChipDomain( i_did, i_size )
+    {}
+
+    /**
+     * @brief  Query for an attention of a specific type in this domain
+     * @param  i_attnType [MACHINE_CHECK | RECOVERABLE | SPECIAL]
+     * @return false
+     * @note   This function will always return false. That way PRD will look
+     *         for the attention via the processor chip.
+     */
+    virtual bool Query( ATTENTION_TYPE i_attnType )
+    {  return false;  }
+
+};
 
 } // end namespace PRDF
 
-#endif
-
+#endif /* __prdfP10IohsDomain_H */
