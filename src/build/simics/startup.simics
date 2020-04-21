@@ -1,5 +1,6 @@
 # We need to add the script directory in the P10 simics model
 if defined hb_script_to_run {
+    $hb_script_to_run = (lookup-file $hb_script_to_run)
     $hb_script_location = (python "''.join(map('/'.__add__,\""+$hb_script_to_run+"\"[1:].split('/')[0:-1]))")
     $script_dir = (python "''.join(map('/'.__add__,\""+$hb_script_location+"\"[1:].split('/')[0:-1]))")
     add-directory $script_dir
@@ -60,6 +61,7 @@ try {
 
 # Build EECACHE
 if defined bmc_files {
+    if $bmc_files != NIL {
         # load EECACHE creation tool
         run-python-file (lookup-file hbfw/eecache-gen.py)
 
@@ -100,7 +102,9 @@ if defined bmc_files {
                 echo "Successfully created "+$eecache_file
             }
         }
-
+    } else {
+        echo "bmc_files is NIL, so no EECACHE auto generated"
+    }
 } else {
     echo "bmc_files not specified, so no EECACHE auto generated"
 }
