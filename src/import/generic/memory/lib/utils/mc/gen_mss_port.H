@@ -43,6 +43,7 @@
 #include <generic/memory/lib/utils/mc/gen_mss_port_traits.H>
 #include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/c_str.H>
+#include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/ecc/ecc.H>
 #include <generic/memory/lib/utils/mss_bad_bits.H>
 #include <generic/memory/lib/utils/mss_rank.H>
