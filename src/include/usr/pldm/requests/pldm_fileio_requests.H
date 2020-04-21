@@ -46,6 +46,40 @@ namespace PLDM {
  */
 errlHndl_t getFileTable(std::vector<uint8_t>& o_table);
 
+/**
+ * @brief Requests a lid file from the BMC.
+ *
+ * @param[in] i_fileHandle the lid id (lid number) of the file
+ * @param[in/out] io_numBytesToRead the number of bytes to read from the file.
+ *                When the function returns, this will contain the number of
+ *                bytes that were actually read. If the input is 0, the function
+ *                will keep reading the data until BMC indicates that there is
+ *                no more data to read.
+ * @param[out] o_file the pointer to memory where the file is to be written
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t getLidFile(uint32_t i_fileHandle,
+                      uint32_t& io_numBytesToRead,
+                      uint8_t* o_file);
+
+/**
+ * @brief Requests a lid file starting with the specified offset from the BMC.
+ *
+ * @param[in] i_fileHandle the lid id (lid number) of the file
+ * @param[in] i_offset the offset at which to start reading the lid file
+ * @param[in/out] io_numBytesToRead the number of bytes to read from the file.
+ *                When the function returns, this will contain the number of
+ *                bytes that were actually read. If the input is 0, the function
+ *                will keep reading the data until BMC indicates that there is
+ *                no more data to read.
+ * @param[out] o_file the pointer to memory where the file is to be written
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t getLidFileFromOffset(uint32_t i_fileHandle,
+                                uint32_t i_offset,
+                                uint32_t& io_numBytesToRead,
+                                uint8_t* o_file);
+
 } // namespace PLDM
 
 #endif // PLDM_FILEIO_REQUESTS_H

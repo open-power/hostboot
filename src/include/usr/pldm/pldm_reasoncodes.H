@@ -51,6 +51,7 @@ namespace PLDM
         MOD_HANDLE_INBOUND_REQ        = 0x0A, // handle_inbound_req
         MOD_SEND_REPO_CHANGED_EVENT   = 0x0B, // sendRepositoryChangedEvent
         MOD_GET_FILE_TABLE            = 0x0C, // getFileTable
+        MOD_GET_LID_FILE              = 0x0D, // getLidFile
     };
 
     enum PLDMReasonCode

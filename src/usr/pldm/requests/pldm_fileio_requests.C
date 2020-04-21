@@ -191,4 +191,183 @@ errlHndl_t getFileTable(std::vector<uint8_t>& o_table)
     return l_errl;
 }
 
+errlHndl_t getLidFile(const uint32_t i_fileHandle,
+                      uint32_t& io_numBytesToRead,
+                      uint8_t* o_file)
+{
+    PLDM_ENTER("getLidFile");
+    errlHndl_t l_errl = getLidFileFromOffset(i_fileHandle,
+                                             0, // Start at offset 0
+                                             io_numBytesToRead,
+                                             o_file);
+
+    PLDM_EXIT("getLidFile");
+    return l_errl;
+}
+
+errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
+                                const uint32_t i_offset,
+                                uint32_t& io_numBytesToRead,
+                                uint8_t* o_file)
+{
+    PLDM_ENTER("getLidFileFromOffset: File handle 0x%08x, Input size 0x%08x, Offset 0x%08x",
+               i_fileHandle, io_numBytesToRead, i_offset);
+    errlHndl_t l_errl = nullptr;
+    // Currently the maximum transfer size is defined as 180K; we want to have
+    // our max transfer size be slightly below that number.
+    const uint32_t MAX_TRANSFER_SIZE = 150 * 1024;
+    size_t l_numTransfers = 1;
+    uint32_t l_totalRead = 0;
+    uint8_t* l_currPtr = o_file;
+
+    struct pldm_read_write_file_by_type_req l_req
+    {
+        // PERM or TEMP will return the same file
+        .file_type = PLDM_FILE_TYPE_LID_PERM,
+        .file_handle = i_fileHandle,
+        .offset = i_offset,
+        .length = 0, // calculated later
+    };
+
+    if(io_numBytesToRead > MAX_TRANSFER_SIZE)
+    {
+        // Round up
+        l_numTransfers = (io_numBytesToRead + MAX_TRANSFER_SIZE - 1) /
+                         MAX_TRANSFER_SIZE;
+        l_req.length = MAX_TRANSFER_SIZE;
+    }
+    else if (io_numBytesToRead == 0)
+    {
+        // The caller doesn't know the size of the file, so we need to
+        // read it until BMC indicates that the file ended (returned read
+        // size is less than requested read size). Set the number of transfers
+        // to a really large number.
+        l_req.length = MAX_TRANSFER_SIZE;
+        l_numTransfers = 0xFFFFFFFF;
+    }
+    else
+    {
+        l_req.length = io_numBytesToRead;
+    }
+
+    PLDM_INF("getLidFileFromOffset: %d transfers to get 0x%08x of data",
+             l_numTransfers, io_numBytesToRead);
+
+    std::vector<uint8_t>l_responseBytes;
+    const msg_q_t l_msgQ = msg_q_resolve(VFS_ROOT_MSG_PLDM_REQ_OUT);
+    assert(l_msgQ, "getLidFileFromOffset: message queue not found!");
+
+    do {
+    for(size_t i = 0; i < l_numTransfers; ++i)
+    {
+        l_req.offset = i_offset + (i * MAX_TRANSFER_SIZE);
+        l_errl = sendrecv_pldm_request<PLDM_RW_FILE_BY_TYPE_REQ_BYTES>(
+                    l_responseBytes,
+                    l_msgQ,
+                    encode_rw_file_by_type_req,
+                    DEFAULT_INSTANCE_ID,
+                    PLDM_READ_FILE_BY_TYPE,
+                    l_req.file_type,
+                    l_req.file_handle,
+                    l_req.offset,
+                    l_req.length);
+        if(l_errl)
+        {
+            PLDM_ERR("getLidFileFromOffset: Could not send the PLDM request");
+            break;
+        }
+
+        struct pldm_read_write_file_by_type_resp l_resp {};
+
+        l_errl = decode_pldm_response(decode_rw_file_by_type_resp,
+                                      l_responseBytes,
+                                      &l_resp.completion_code,
+                                      &l_resp.length,
+                                      l_currPtr);
+        if(l_errl)
+        {
+            PLDM_ERR("getLidFileFromOffset: Could not decode PLDM response");
+            break;
+        }
+
+        if(l_resp.completion_code != PLDM_SUCCESS)
+        {
+            PLDM_ERR("getLidFileFromOffset: PLDM op returned code %d",
+                     l_resp.completion_code);
+            pldm_msg* const l_pldmResponse =
+                reinterpret_cast<pldm_msg*>(l_responseBytes.data());
+            const uint64_t l_responseHeader =
+                pldmHdrToUint64(*l_pldmResponse);
+
+            /*
+             * @errortype
+             * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid   MOD_GET_LID_FILE
+             * @reasoncode RC_BAD_COMPLETION_CODE
+             * @userdata1  Completion code
+             * @userdata2  Response header data
+             * @devdesc    File request completed unsuccessfully
+             * @custdesc   A host failure occurred
+             */
+            l_errl = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            MOD_GET_LID_FILE,
+                            RC_BAD_COMPLETION_CODE,
+                            l_resp.completion_code,
+                            l_responseHeader);
+            addBmcErrorCallouts(l_errl);
+            break;
+        }
+
+        if(l_resp.length == 0)
+        {
+            PLDM_INF("getLidFileFromOffset: BMC returned size 0 for file handle 0x%08x at offset 0x%08x",
+                     i_fileHandle, l_req.offset);
+            break;
+        }
+        else
+        {
+            PLDM_INF("getLidFileFromOffset: Response %llu; the actual size of read is 0x%08x",
+                     i, l_resp.length);
+        }
+
+        l_totalRead += l_resp.length;
+        l_currPtr += l_resp.length;
+        if(io_numBytesToRead == l_totalRead)
+        {
+            break;
+        }
+        else if(l_resp.length != l_req.length)
+        {
+            PLDM_INF("getLidFileFromOffset: BMC returned length 0x%08x of file read; requested length was 0x%08x. That indicates End Of File",
+                     l_resp.length, l_req.length);
+            break;
+        }
+        else if((MAX_TRANSFER_SIZE > (io_numBytesToRead - l_totalRead)) &&
+                (io_numBytesToRead != 0))
+        {
+            // We need to request a smaller chunk than MAX_TRANSFER_SIZE
+            l_req.length = io_numBytesToRead - l_totalRead;
+        }
+
+        if(l_errl)
+        {
+            break;
+        }
+
+    } // number of transfers
+
+    io_numBytesToRead = l_totalRead;
+
+    if(l_errl)
+    {
+        break;
+    }
+
+    }while(0);
+
+    PLDM_EXIT("getLidFileFromOffset");
+    return l_errl;
+}
+
 } // namespace PLDM
