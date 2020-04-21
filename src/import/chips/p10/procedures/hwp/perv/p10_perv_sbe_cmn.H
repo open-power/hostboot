@@ -176,6 +176,27 @@ fapi2::ReturnCode p10_perv_sbe_cmn_is_simulation_check(bool& is_simulation);
 fapi2::ReturnCode p10_perv_sbe_cmn_switch_mux_scom(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip, mux_type i_mux_setup);
 
+/**
+ * @brief Poll for lock of one or more PLLs
+ *
+ * Will poll for all requested lock indicators to turn on within 5ms, returning early
+ * as soon as all PLLs are locked. If after the timeout not all requested PLLs are locked,
+ * will return FAPI2_RC_FALSE, otherwise FAPI2_RC_SUCCESS (or something else on a SCOM error).
+ *
+ * @param[in]  i_target        Target chiplet(s) to check
+ * @param[in]  i_bits_to_check Bits of the PLL_LOCK register that must be 1
+ * @param[out] o_read_value    Last value read from the PLL_LOCK register for FFDC
+ *
+ * @return FAPI2_RC_SUCCESS if all PLLs locked in time
+ *         FAPI2_RC_FALSE   if not all PLLs locked before the timeout
+ *         others           if the SCOM read failed
+ */
+fapi2::ReturnCode p10_perv_sbe_cmn_poll_pll_lock(
+    const fapi2::Target < fapi2::TARGET_TYPE_PERV | fapi2::TARGET_TYPE_MULTICAST,
+    fapi2::MULTICAST_AND > & i_target,
+    const fapi2::buffer<uint64_t> i_bits_to_check,
+    fapi2::buffer<uint64_t>& o_read_value);
+
 fapi2::ReturnCode p10_perv_sbe_cmn_switch_mux_cfam(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip, mux_type i_mux_setup);
 

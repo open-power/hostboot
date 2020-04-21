@@ -33,18 +33,7 @@
 //------------------------------------------------------------------------------
 //
 #include <p10_perv_sbe_cmn.H>
-#include <p10_scom_perv_0.H>
-#include <p10_scom_perv_2.H>
-#include <p10_scom_perv_3.H>
-#include <p10_scom_perv_4.H>
-#include <p10_scom_perv_6.H>
-#include <p10_scom_perv_7.H>
-#include <p10_scom_perv_8.H>
-#include <p10_scom_perv_9.H>
-#include <p10_scom_perv_a.H>
-#include <p10_scom_perv_c.H>
-#include <p10_scom_perv_e.H>
-#include <p10_scom_perv_f.H>
+#include <p10_scom_perv.H>
 #ifndef __PPE_QME
     #include <multicast_group_defs.H>
 #endif
@@ -64,7 +53,10 @@ enum P10_PERV_SBE_CMN_Private_Constants
     P10_OPCG_DONE_ARRAYINIT_HW_NS_DELAY = 200000, // unit is nano seconds [min : 400k/2 = 200k ns = 200 us
     //                       max : 200k /25 = 8000 us = 8 ms]
     P10_OPCG_DONE_ARRAYINIT_POLL_COUNT = 400, // Arrayinit Poll count
-    P10_OPCG_DONE_ARRAYINIT_SIM_CYCLE_DELAY = 1120000 // unit is cycles,to match the poll count change ( 280000 * 4 )
+    P10_OPCG_DONE_ARRAYINIT_SIM_CYCLE_DELAY = 1120000, // unit is cycles,to match the poll count change ( 280000 * 4 )
+    PLL_LOCK_DELAY_NS = 100000,
+    PLL_LOCK_DELAY_CYCLES = 100000,
+    PLL_LOCK_DELAY_LOOPS = 50,
 };
 
 /// @brief Seeprom array Init Module
@@ -1086,6 +1078,33 @@ fapi2::ReturnCode p10_perv_sbe_cmn_switch_mux_scom(
     FAPI_TRY(fapi2::putScom(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_WO_CLEAR, l_data64_root_ctrl0));
 
     FAPI_DBG("p10_perv_sbe_cmn_switch_mux_scom : Exiting");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+fapi2::ReturnCode p10_perv_sbe_cmn_poll_pll_lock(
+    const fapi2::Target < fapi2::TARGET_TYPE_PERV | fapi2::TARGET_TYPE_MULTICAST,
+    fapi2::MULTICAST_AND > & i_target,
+    const fapi2::buffer<uint64_t> i_bits_to_check,
+    fapi2::buffer<uint64_t>& o_read_value)
+{
+    uint64_t l_timeout = PLL_LOCK_DELAY_LOOPS;
+
+    while (l_timeout)
+    {
+        FAPI_TRY(fapi2::getScom(i_target, scomt::perv::PLL_LOCK_REG, o_read_value));
+
+        if ((o_read_value & i_bits_to_check) == i_bits_to_check)
+        {
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        l_timeout--;
+        fapi2::delay(PLL_LOCK_DELAY_NS, PLL_LOCK_DELAY_CYCLES);
+    }
+
+    return fapi2::FAPI2_RC_FALSE;
 
 fapi_try_exit:
     return fapi2::current_err;
