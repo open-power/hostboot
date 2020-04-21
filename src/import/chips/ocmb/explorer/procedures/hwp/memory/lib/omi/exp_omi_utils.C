@@ -85,7 +85,7 @@ fapi2::ReturnCode setup_omi_dl0_config0(
 
     l_config0.writeBit<EXPLR_DLX_DL0_CONFIG0_CFG_PWRMGT_ENABLE>(0);
 
-    FAPI_DBG("Writing 0x%16llx to EXPLR_DLX_DL0_CONFIG0 (0x%16llx) of %s",
+    FAPI_DBG("Writing 0x%016llx to EXPLR_DLX_DL0_CONFIG0 (0x%016llx) of %s",
              l_config0, EXPLR_DLX_DL0_CONFIG0, mss::c_str(i_target));
 
     // All other bits will be left at their default values

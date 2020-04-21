@@ -504,16 +504,11 @@ fapi_try_exit:
 template<>
 fapi2::ReturnCode after_memdiags<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
 {
-    constexpr uint64_t MNFG_THRESHOLDS_ARRAY_SLOT = 0;
-    constexpr uint64_t MNFG_THRESHOLDS_BIT_SLOT = fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS - 32 *
-            MNFG_THRESHOLDS_ARRAY_SLOT;
-
     fapi2::ReturnCode l_rc1 = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ReturnCode l_rc2 = fapi2::FAPI2_RC_SUCCESS;
     fapi2::buffer<uint64_t> l_reg_data;
+    uint32_t l_mfg_flags[4] = {};
     bool l_has_rcd = false;
-    fapi2::ATTR_MFG_FLAGS_Type l_mfg_array = {0};
-    fapi2::buffer<uint32_t> l_mfg_flags;
 
     mss::fir::reg<EXPLR_RDF_FIR> l_exp_rdf_fir_reg(i_target, l_rc1);
     mss::fir::reg<EXPLR_SRQ_SRQFIRQ> l_exp_srq_srqfirq_reg(i_target, l_rc2);
@@ -521,9 +516,7 @@ fapi2::ReturnCode after_memdiags<mss::mc_type::EXPLORER>( const fapi2::Target<fa
     FAPI_TRY(l_rc1, "unable to create fir::reg for EXPLR_RDF_FIR 0x%08X", EXPLR_RDF_FIR);
     FAPI_TRY(l_rc2, "unable to create fir::reg for EXPLR_SRQ_SRQFIRQ 0x%08X", EXPLR_SRQ_SRQFIRQ);
 
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MFG_FLAGS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_mfg_array),
-              "%s: Failed mfg_flags check", mss::c_str(i_target) );
-    l_mfg_flags = l_mfg_array[MNFG_THRESHOLDS_ARRAY_SLOT];
+    FAPI_TRY(mss::attr::get_mfg_flags(l_mfg_flags), "unable to get MFG Flags");
 
     // Determine if dimm is a DIMM with RCD
     // If so set RCD fir to recoverable
@@ -535,9 +528,10 @@ fapi2::ReturnCode after_memdiags<mss::mc_type::EXPLORER>( const fapi2::Target<fa
         l_exp_rdf_fir_reg.recoverable_error<EXPLR_RDF_FIR_MAINLINE_RCD>();
     }
 
-    // Check MNFG Thresholds Policy flag
+    // Check MFG Thresholds Policy flag
     // Unmask FIR_MAINTENANCE_IUE to recoverable if not set
-    if( !(l_mfg_flags.getBit<MNFG_THRESHOLDS_BIT_SLOT>()) )
+    // MNFG_TRHESHOLDS = 29, so will be in first entry in uint32_t array
+    if( !(l_mfg_flags[0] & fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS) )
     {
         l_exp_rdf_fir_reg.recoverable_error<EXPLR_RDF_FIR_MAINTENANCE_IUE>();
     }
