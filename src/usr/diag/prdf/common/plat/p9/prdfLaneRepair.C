@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1074,7 +1074,9 @@ int32_t omiParentCalloutBusInterfacePlugin( ExtensibleChip * i_chip,
                                             uint8_t i_pos )
 {
     TargetHandle_t omi  = getConnectedChild(i_chip->getTrgt(), TYPE_OMI, i_pos);
+    PRDF_ASSERT( nullptr != omi );
     TargetHandle_t ocmb = getConnectedChild( omi, TYPE_OCMB_CHIP, 0 );
+    PRDF_ASSERT( nullptr != ocmb );
 
     // Callout both ends of the bus as well (OMI and OCMB)
     io_sc.service_data->SetCallout( omi,  MRU_MEDA );
