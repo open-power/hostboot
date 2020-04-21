@@ -566,6 +566,7 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_parent, TYPE i_childType,
             // only one in the list for OMI to OCMB connections).
             TargetHandle_t omi = getConnectedChild( i_parent, TYPE_OMI,
                                                     i_childPos );
+            PRDF_ASSERT( nullptr != omi );
             o_child = getConnectedChild( omi, TYPE_OCMB_CHIP, 0 );
         }
         // Default case, i_connPos should match the unit pos within the chip
@@ -1116,6 +1117,9 @@ void getMasterRanks<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
                                      std::vector<MemRank> & o_ranks,
                                      uint8_t i_ds )
 {
+    PRDF_ASSERT( nullptr != i_trgt );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_trgt) );
+
     // TODO RTC 210072 - Explorer only has one port, however, multiple ports
     // will be supported in the future. Updates will need to be made here so we
     // can get the relevant port.
@@ -1205,6 +1209,9 @@ template<>
 uint8_t getNumMasterRanksPerDimm<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
                                                   uint8_t i_ds )
 {
+    PRDF_ASSERT( nullptr != i_trgt );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_trgt) );
+
     // TODO RTC 210072 - Explorer only has one port, however, multiple ports
     // will be supported in the future. Updates will need to be made here so we
     // can get the relevant port.
@@ -1243,6 +1250,9 @@ uint8_t __getNumRanksPerDimm( TargetHandle_t i_trgt, uint8_t i_ds )
 template<>
 uint8_t getNumRanksPerDimm<TYPE_OCMB_CHIP>(TargetHandle_t i_trgt, uint8_t i_ds)
 {
+    PRDF_ASSERT( nullptr != i_trgt );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_trgt) );
+
     // TODO RTC 210072 - Explorer only has one port, however, multiple ports
     // will be supported in the future. Updates will need to be made here so we
     // can get the relevant port.

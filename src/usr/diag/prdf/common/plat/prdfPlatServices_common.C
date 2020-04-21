@@ -667,6 +667,9 @@ template<>
 int32_t getDimmSpareConfig<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
                         MemRank i_rank, uint8_t i_ps, uint8_t & o_spareConfig )
 {
+    PRDF_ASSERT( nullptr != i_ocmb );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_ocmb) );
+
     TargetHandle_t memPort = getConnectedChild( i_ocmb, TYPE_MEM_PORT, i_ps );
     return getDimmSpareConfig<TYPE_MEM_PORT>( memPort, i_rank, i_ps,
                                               o_spareConfig );
