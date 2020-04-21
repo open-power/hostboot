@@ -65,6 +65,9 @@ extern "C"
         FAPI_TRY(mss::exp::setup_phy_params(i_target, l_phy_params),
                  "Failed setup_phy_params() for %s", mss::c_str(i_target));
 
+        FAPI_TRY(mss::exp::print_phy_params(i_target, l_phy_params),
+                 "Failed print_phy_params() for %s", mss::c_str(i_target));
+
         // Copy the PHY initialization parameters into the internal buffer of Explorer
         FAPI_TRY( mss::exp::ib::putUserInputMsdg(i_target, l_phy_params, l_crc),
                   "Failed putUserInputMsdg() for %s", mss::c_str(i_target) );

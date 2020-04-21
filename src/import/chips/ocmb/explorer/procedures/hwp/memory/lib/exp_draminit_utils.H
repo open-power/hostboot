@@ -309,6 +309,15 @@ fapi2::ReturnCode setup_phy_params(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
                                    user_input_msdg& o_param );
 
 ///
+/// @brief Print user_input_msdg structure
+/// @param[in] i_target the fapi2 target
+/// @param[in] i_phy_params the phy params data struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode print_phy_params(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                   const user_input_msdg& i_phy_params);
+
+///
 /// @class phy_params_t
 /// @brief Structure of variables
 ///
