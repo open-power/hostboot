@@ -38,13 +38,15 @@
    <hwpError>
      <rc>RC_FILT_PLL_LOCK_ERR</rc>
      <description>Filter pll not locked</description>
+     <ffdc>PLL_EXPECT</ffdc>
      <ffdc>PLL_READ</ffdc>
    </hwpError>
    <!-- ******************************************************************** -->
    <hwpError>
      <rc>RC_DPLL_LOCK_ERR</rc>
      <description>NEST/PAU DPLL not locked</description>
-     <ffdc>DPLL_READ</ffdc> 
+     <ffdc>PLL_EXPECT</ffdc>
+     <ffdc>PLL_READ</ffdc>
    </hwpError>
    <!-- ******************************************************************** -->
 </hwpErrors>
