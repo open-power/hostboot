@@ -353,7 +353,6 @@ fapi2::ReturnCode after_scominit<mss::mc_type::EXPLORER>( const fapi2::Target<fa
     // Unmask DDR4_PHY bits per PRD spec
     FAPI_TRY(l_exp_local_fir_reg.recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_DDR4_PHY__FATAL>()
              .recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_DDR4_PHY__NON_FATAL>()
-             .recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_DDR4_PHY__DDR_PHY_IRQ0>()
              .write());
 
     // Set FARB0 [54,57] to disable RCD recovery and port fail
