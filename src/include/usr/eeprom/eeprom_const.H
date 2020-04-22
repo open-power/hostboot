@@ -57,8 +57,12 @@ enum EEPROM_ROLE
   VPD_BACKUP    = 1,
   SBE_PRIMARY   = 2,
   SBE_BACKUP    = 3,
-  SPARE_TEST    = 4,
   LAST_CHIP_TYPE,
+
+  // Test-only eeprom_role
+  // Keep after LAST_CHIP_TYPE so these are not cached/used in production code
+  SPARE_TEST    = 10,
+
   // Useful Enums
   INVALID_CHIP_TYPE = LAST_CHIP_TYPE,
   FIRST_CHIP_TYPE = VPD_PRIMARY
