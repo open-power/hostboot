@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -372,8 +372,8 @@ class TodProc
 
     private:
         /*
-         * @brief Helper method to initialize the bus parameters
-         *  iv_xbusTargetList and iv_abusTargetList) and iv_tod_node_data,
+         * @brief Helper method to initialize the bus parameter
+         *  iv_iohsTargetList and iv_tod_node_data,
          *  for this object.
          *   It will be called from the constructor.
          *
@@ -389,11 +389,8 @@ class TodProc
         //belong
         const TodDrawer * iv_parentDrawer;
 
-        //List of X bus targets for this processor
-        TARGETING::TargetHandleList iv_xbusTargetList;
-
-        //List of A bus targets for this processor
-        TARGETING::TargetHandleList iv_abusTargetList;
+        //List of IOHS bus targets for this processor
+        TARGETING::TargetHandleList iv_iohsTargetList;
 
         //List of children that will receive TOD signal from this processor
         //belongs

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,11 +67,12 @@ TodDrawer::TodDrawer(const uint8_t i_drawerId,
           i_drawerId);
           break;
       }
-      TOD_ENTER("Created TOD drawer with id 0x%.2X, parent node 0x%.8X",
+      TOD_ENTER("TodDrawer constructor: "
+                "Created TOD drawer with id 0x%.2X, parent node 0x%.8X",
                  i_drawerId,
                  i_parentNode->getAttr<TARGETING::ATTR_HUID>());
     } while (0);
-    TOD_EXIT();
+    TOD_EXIT("TodDrawer constructor");
 }
 
 //******************************************************************************
@@ -79,7 +80,7 @@ TodDrawer::TodDrawer(const uint8_t i_drawerId,
 //******************************************************************************
 TodDrawer::~TodDrawer()
 {
-    TOD_ENTER();
+    TOD_ENTER("TodDrawer destructor");
 
     for(TodProcContainer::iterator l_itr = iv_todProcList.begin();
         l_itr != iv_todProcList.end();
@@ -88,7 +89,7 @@ TodDrawer::~TodDrawer()
         delete (*l_itr);
     }
     iv_todProcList.clear();
-    TOD_EXIT();
+    TOD_EXIT("TodDrawer destructor");
 }
 
 //******************************************************************************
@@ -158,7 +159,7 @@ void TodDrawer::getProcWithMaxCores(
 
     }while(0);
 
-    TOD_EXIT();
+    TOD_EXIT("getProcWithMaxCores");
 }
 
 
@@ -167,7 +168,7 @@ void TodDrawer::getProcWithMaxCores(
 //******************************************************************************
 errlHndl_t TodDrawer::findMasterProc(TodProc*& o_drawerMaster) const
 {
-    TOD_ENTER();
+    TOD_ENTER("TodDrawer::findMasterProc");
 
     errlHndl_t l_errHdl = nullptr;
 
@@ -211,7 +212,7 @@ errlHndl_t TodDrawer::findMasterProc(TodProc*& o_drawerMaster) const
 
     o_drawerMaster = l_pMasterProc;
 
-    TOD_EXIT();
+    TOD_EXIT("TodDrawer::findMasterProc");
 
     return l_errHdl;
 }
@@ -291,7 +292,7 @@ void TodDrawer::getPotentialMdmts(
         l_isGARDed = false;
 
     }//End of for loop
-    TOD_EXIT();
+    TOD_EXIT("TodDrawer::getPotentialMdmts");
 }
 
 }//end of namespace

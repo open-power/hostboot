@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -148,7 +148,7 @@ errlHndl_t getMaxConfigParams(
 
     } while(0);
 
-    TOD_EXIT();
+    TOD_EXIT("getMaxConfigParams");
 
     return l_err;
 }

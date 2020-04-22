@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,7 +52,7 @@ namespace TOD
 
 errlHndl_t todSetupHwp(const p10_tod_setup_tod_sel i_topologyType)
 {
-    TOD_ENTER();
+    TOD_ENTER("todSetupHwp");
 
     errlHndl_t l_errHdl = nullptr;
 
@@ -87,7 +87,7 @@ errlHndl_t todSetupHwp(const p10_tod_setup_tod_sel i_topologyType)
         }
     }while(0);
 
-    TOD_EXIT();
+    TOD_EXIT("todSetupHwp");
 
     return l_errHdl;
 }
@@ -95,7 +95,7 @@ errlHndl_t todSetupHwp(const p10_tod_setup_tod_sel i_topologyType)
 
 errlHndl_t todSaveRegsHwp(const p10_tod_setup_tod_sel i_topologyType)
 {
-    TOD_ENTER();
+    TOD_ENTER("todSaveRegsHwp");
 
     errlHndl_t l_errHdl = nullptr;
 
@@ -132,7 +132,7 @@ errlHndl_t todSaveRegsHwp(const p10_tod_setup_tod_sel i_topologyType)
                         l_pMDMT->getTopologyNode());
         if(l_errHdl)
         {
-            TOD_ERR("Error in call to p9_tod_save_config. "
+            TOD_ERR("Error in call to p10_tod_save_config. "
                     "Topology type 0x%.8X. "
                     "MDMT's HUID is 0x%.8X. "
                     "MDMT Master type : 0x%.8X. "
@@ -146,7 +146,7 @@ errlHndl_t todSaveRegsHwp(const p10_tod_setup_tod_sel i_topologyType)
         }
     }while(0);
 
-    TOD_EXIT();
+    TOD_EXIT("todSaveRegsHwp");
     return l_errHdl;
 }
 
@@ -155,7 +155,7 @@ errlHndl_t todSaveRegsHwp(const p10_tod_setup_tod_sel i_topologyType)
 //*****************************************************************************
 errlHndl_t todInitHwp()
 {
-    TOD_ENTER();
+    TOD_ENTER("todInitHwp");
     errlHndl_t l_errHdl = nullptr;
     do
     {
@@ -220,7 +220,7 @@ errlHndl_t todInitHwp()
 
     }while(0);
 
-    TOD_EXIT();
+    TOD_EXIT("todInitHwp");
     return l_errHdl;
 }//todInitHwp
 

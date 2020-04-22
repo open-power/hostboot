@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -80,7 +80,7 @@ errlHndl_t todSetupHwp(const p10_tod_setup_tod_sel i_topologyType);
  *      topology and fills up, for each TOD proc datastructure, an output
  *      field which corresponds to the TOD registers for that proc. The HWP
  *      gets the register content by scomming the register.
- *      Check p9_tod_utils.H : proc_tod_setup_conf_regs for the list of regs.
+ *      Check p10_tod_utils.H : proc_tod_setup_conf_regs for the list of regs.
  *
  *  @param[in] i_topologyType
  *      Topology type : primary/secondary

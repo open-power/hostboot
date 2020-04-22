@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -94,7 +94,7 @@ TodControls::~TodControls()
 errlHndl_t TodControls::pickMdmt(const p10_tod_setup_tod_sel i_config)
 {
 
-   TOD_ENTER("Input config is 0x%.2X", i_config);
+   TOD_ENTER("TodControls::pickMdmt: Input config is 0x%.2X", i_config);
 
    errlHndl_t l_errHdl = nullptr;
 
@@ -276,7 +276,7 @@ errlHndl_t TodControls::pickMdmt(const p10_tod_setup_tod_sel i_config)
                  getTarget()->getAttr<TARGETING::ATTR_HUID>());
     }
 
-    TOD_EXIT();
+    TOD_EXIT("TodControls::pickMdmt");
 
     return l_errHdl;
 }
@@ -292,7 +292,7 @@ errlHndl_t  TodControls::buildTodDrawers(
 
     do{
 
-        TARGETING::TargetHandleList l_funcNodeTargetList;
+        TARGETING::TargetHandleList l_funcNodes;
 
         //Get the system pointer
         TARGETING::Target* l_pSysTarget = nullptr;
@@ -307,7 +307,7 @@ errlHndl_t  TodControls::buildTodDrawers(
 
         //Build the list of functional nodes
         l_errHdl =  TOD::TodSvcUtil::getFuncNodeTargetsOnSystem( l_pSysTarget,
-                l_funcNodeTargetList, true);
+                l_funcNodes);
         if ( l_errHdl )
         {
             TOD_ERR("For System target 0x%08X getFuncNodeTargetsOnSystem "
@@ -317,7 +317,7 @@ errlHndl_t  TodControls::buildTodDrawers(
         }
 
         //If there was no functional  node found then we must return
-        if ( l_funcNodeTargetList.empty() )
+        if ( l_funcNodes.empty() )
         {
             TOD_ERR("For System target 0x%08X no functional node found ",
                     l_pSysTarget->getAttr<TARGETING::ATTR_HUID>());
@@ -339,8 +339,16 @@ errlHndl_t  TodControls::buildTodDrawers(
             break;
         }
 
+        TodDrawerContainer& l_todDrawerList =
+            iv_todConfig[i_config].iv_todDrawerList;
+        if (!l_todDrawerList.empty())
+        {
+            TOD_ERR_ASSERT("TOD drawer list must be empty");
+            break;
+        }
+
         //For each node target find the prcessor chip on it
-        TARGETING::TargetHandleList l_funcProcTargetList;
+        TARGETING::TargetHandleList l_funcProcs;
 
         TARGETING::PredicateCTM
             l_procCTM(TARGETING::CLASS_CHIP,TARGETING::TYPE_PROC);
@@ -350,91 +358,33 @@ errlHndl_t  TodControls::buildTodDrawers(
         TARGETING::PredicatePostfixExpr l_funcProcPostfixExpr;
         l_funcProcPostfixExpr.push(&l_procCTM).push(&l_funcPred).And();
 
-        TodDrawerContainer& l_todDrawerList =
-            iv_todConfig[i_config].iv_todDrawerList;
-        TodDrawerContainer::iterator l_todDrawerIter;
-        bool b_foundDrawer = false;
-
-        for( uint32_t l_nodeIndex = 0;
-                l_nodeIndex < l_funcNodeTargetList.size();
-                ++l_nodeIndex )
+        for (auto l_node : l_funcNodes)
         {
-            l_funcProcTargetList.clear();
+            //Create a new TOD drawer and add it to the TOD drawer list
+            //Create a TOD drawer with the drawer id same as
+            //node's id , and the pointer to the node target
+            TodDrawer *l_pTodDrawer = new
+                TodDrawer(l_node->getAttr<TARGETING::ATTR_ORDINAL_ID>(),
+                              l_node);
+            l_todDrawerList.push_back(l_pTodDrawer);
 
-            //Find the funcational Proc targets on the system
-            TARGETING::targetService().getAssociated(l_funcProcTargetList,
-                    l_funcNodeTargetList[l_nodeIndex],
+            l_funcProcs.clear();
+            TARGETING::targetService().getAssociated(l_funcProcs,
+                    l_node,
                     TARGETING::TargetService::CHILD,
-                    TARGETING::TargetService::ALL,
+                    TARGETING::TargetService::IMMEDIATE,
                     &l_funcProcPostfixExpr);
 
-            //Go over the list of procs and insert them in respective TOD drawer
-            for ( uint32_t l_procIndex =0 ;
-                    l_procIndex < l_funcProcTargetList.size();
-                    ++l_procIndex )
+            for (auto l_proc : l_funcProcs)
             {
-                b_foundDrawer = false;
-
-                //Get the ordinal id of the parent node and find if there is an
-                //existing TOD drawer whose id matches with the ordinal id of
-                //this node
-                for ( l_todDrawerIter = l_todDrawerList.begin() ;
-                        l_todDrawerIter != l_todDrawerList.end() ;
-                        ++l_todDrawerIter)
-                {
-                    if ( (*l_todDrawerIter)->getId() ==
-                            l_funcNodeTargetList[l_nodeIndex]->
-                            getAttr<TARGETING::ATTR_ORDINAL_ID>())
-                    {
-                        //Add the proc to this TOD drawer, such that
-                        //TodProc has the target pointer and the pointer to
-                        //the TOD drawer to which it belongs
-                        TodProc *l_procPtr =
-                            new TodProc
-                            (l_funcProcTargetList[l_procIndex],
-                             (*l_todDrawerIter));
-                        (*l_todDrawerIter)->addProc(l_procPtr);
-                        l_procPtr = nullptr; //Nullifying the pointer after
-                        //transferring ownership
-
-                        b_foundDrawer = true;
-                        break;
-                    }
-
-                } // end drawer list loop
-
-                if (!b_foundDrawer )
-                {
-                    //Create a new TOD drawer and add it to the TOD drawer list
-                    //Create a TOD drawer with the drawer id same as parent
-                    //node's id , and the pointer to the node target to which
-                    //the TOD drawer belongs
-                    TodDrawer *l_pTodDrawer = new
-                        TodDrawer(l_funcNodeTargetList[l_nodeIndex]->
-                                getAttr<TARGETING::ATTR_ORDINAL_ID>(),
-                                l_funcNodeTargetList[l_nodeIndex]);
-
-                    //Create a TodProc passing the target pointer and the
-                    //pointer of TodDrawer to which this processor belongs
-                    TodProc *l_pTodProc = new
-                        TodProc(l_funcProcTargetList[l_procIndex],
-                                l_pTodDrawer);
-
-                    //push the processor ( TodProc ) , into the TOD drawer
-                    l_pTodDrawer->addProc(l_pTodProc);
-
-                    //push the Tod drawer ( TodDrawer ) , into the
-                    //TodControls
-                    l_todDrawerList.push_back(l_pTodDrawer);
-                    //Delete the pointers after transfering the ownership
-                    l_pTodDrawer = nullptr;
-                    l_pTodProc = nullptr;
-
-                }
-
-            }// end proc list loop
-
-        } // end node list loop
+                //Create a TodProc passing the target pointer and the
+                //pointer of TodDrawer to which this processor belongs
+                TodProc *l_pTodProc = new TodProc(l_proc, l_pTodDrawer);
+                l_pTodDrawer->addProc(l_pTodProc);
+                l_pTodProc = nullptr;
+            }
+            l_pTodDrawer = nullptr;
+        }
 
         //Validate that we had at least one TOD drawer at the end of this
         // process else generate an error
@@ -497,7 +447,7 @@ errlHndl_t TodControls ::isTodRunning(bool& o_isTodRunning)const
 
         //If there is atleast one MDMT
         //configured , check the chipTOD HW status by reading the TOD
-        //register PERV_TOD_FSM_REG
+        //register scomt::perv::TOD_FSM_REG
 
         fapi2::variable_buffer l_primaryMdmtBuf(64);
         l_primaryMdmtBuf.flush<0>();
@@ -512,7 +462,7 @@ errlHndl_t TodControls ::isTodRunning(bool& o_isTodRunning)const
             if(l_errHdl)
             {
                 TOD_ERR("Scom failed for TOD FSM register "
-                        "PERV_TOD_FSM_REG on primary MDMT");
+                        "scomt::perv::TOD_FSM_REG on primary MDMT");
                 break;
             }
 
@@ -526,12 +476,12 @@ errlHndl_t TodControls ::isTodRunning(bool& o_isTodRunning)const
             if(l_errHdl)
             {
                 TOD_ERR("Scom failed for TOD FSM register "
-                       "PERV_TOD_FSM_REG on secondary MDMT");
+                       "scomt::perv::TOD_FSM_REG on secondary MDMT");
                 break;
             }
         }
 
-        //If the bit 4 of the TOD_FSM_REG related to primary or
+        //If the bit 4 of the scomt::perv::TOD_FSM_REG related to primary or
         //secondary topology is set then the chip TOD logic is considered to
         //be in the running state.
         if(l_primaryMdmtBuf.isBitSet(TOD_FSM_REG_TOD_IS_RUNNING))
@@ -548,7 +498,7 @@ errlHndl_t TodControls ::isTodRunning(bool& o_isTodRunning)const
         }
     }while(0);
 
-    TOD_EXIT("TOD HW State = %d",o_isTodRunning);
+    TOD_EXIT("isTodRunning: TOD HW State = %d",o_isTodRunning);
     return l_errHdl;
 }
 
@@ -561,7 +511,7 @@ errlHndl_t TodControls ::queryActiveConfig(
         TARGETING::Target*& o_mdmtOnActiveTopology,
         bool i_determineTodRunningState)const
 {
-    TOD_ENTER();
+    TOD_ENTER("TodControls::queryActiveConfig");
     errlHndl_t l_errHdl = nullptr;
     TARGETING::Target* l_primaryMdmt = nullptr;
     TARGETING::Target* l_secondaryMdmt = nullptr;
@@ -760,7 +710,7 @@ errlHndl_t TodControls ::queryActiveConfig(
                 "details!!");
     }
 
-    TOD_EXIT();
+    TOD_EXIT("TodControls::queryActiveConfig");
 
     return l_errHdl;
 }
@@ -863,7 +813,7 @@ errlHndl_t TodControls ::getConfiguredMdmt(
 
     }while(0);
 
-    TOD_EXIT();
+    TOD_EXIT("getConfiguredMdmt");
     return l_errHdl;
 }
 
@@ -890,7 +840,7 @@ void TodControls::destroy(const p10_tod_setup_tod_sel i_config)
     iv_todChipDataVector.clear();
     iv_BlackListedProcs.clear();
     iv_gardedTargets.clear();
-    TOD_EXIT();
+    TOD_EXIT("TodControls::destroy");
 }
 
 //******************************************************************************
@@ -1044,7 +994,7 @@ TodProc* TodControls ::pickMdmt(
                                   const p10_tod_setup_tod_sel& i_config,
                                   const bool i_setMdmt)
 {
-    TOD_ENTER("Other MDMT : 0x%.8X, "
+    TOD_ENTER("TodControls::pickMdmt: Other MDMT : 0x%.8X, "
                "Input config : 0x%.2X",
                GETHUID(i_otherConfigMdmt->getTarget()),
                i_config);
@@ -1248,7 +1198,7 @@ TodProc* TodControls ::pickMdmt(
         }
     }while(0);
 
-    TOD_EXIT();
+    TOD_EXIT("TodControls::pickMdmt");
 
     return l_newMdmt;
 }
@@ -1286,7 +1236,7 @@ void  TodControls ::setMdmtOfActiveConfig(
               i_config,
               GETHUID(iv_todConfig[i_config].iv_mdmt->getTarget()));
     } while (0);
-    TOD_EXIT();
+    TOD_EXIT("setMdmtOfActiveConfig");
 }
 
 //******************************************************************************
@@ -1325,7 +1275,7 @@ errlHndl_t TodControls::setMdmt(const p10_tod_setup_tod_sel i_config,
                    getTarget()->getAttr<TARGETING::ATTR_HUID>());
 
     } while (0);
-    TOD_EXIT();
+    TOD_EXIT("setMdmt");
 
     return l_errHdl;
 }
@@ -1337,7 +1287,7 @@ bool  TodControls::isProcBlackListed (
         TARGETING::ConstTargetHandle_t i_procTarget
         )const
 {
-    TOD_ENTER();
+    TOD_ENTER("TodControls::isProcBlackListed");
 
     bool l_blackListed = false;
 
@@ -1369,7 +1319,7 @@ bool  TodControls::isProcBlackListed (
           l_blackListed = true;
       }
     } while (0);
-    TOD_EXIT();
+    TOD_EXIT("TodControls::isProcBlackListed");
 
     return l_blackListed;
 }
@@ -1420,7 +1370,7 @@ errlHndl_t TodControls::buildGardedTargetsList()
     {
         iv_gardListInitialized = true;
     }
-    TOD_EXIT();
+    TOD_EXIT("buildGardedTargetsList");
 
     return l_errHdl;
 
@@ -1459,7 +1409,7 @@ errlHndl_t TodControls::checkGardStatusOfTarget(
 
     }while(0);
 
-    TOD_EXIT("Target 0x%08X is %s",
+    TOD_EXIT("checkGardStatusOfTarget: Target 0x%08X is %s",
             GETHUID(i_target),o_isTargetGarded?"garded":"not garded");
     return l_errHdl;
 }
@@ -1553,7 +1503,7 @@ errlHndl_t TodControls::gardGetGardedUnits(
     {
         o_gardedUnitList.clear();
     }
-    TOD_EXIT();
+    TOD_EXIT("gardGetGardedUnits");
 
     return l_err;
 }
@@ -1577,7 +1527,7 @@ void TodControls::getTargetFromPhysicalPath(
                 getPhysicalPathString(i_path));
     }
     while(0);
-    TOD_EXIT();
+    TOD_EXIT("getTargetFromPhysicalPath");
 }
 
 //******************************************************************************
@@ -1705,7 +1655,7 @@ errlHndl_t TodControls::getParent(const TARGETING::Target *i_pTarget,
 
     }
 
-    TOD_EXIT();
+    TOD_EXIT("getParent");
     return l_errl;
 
 }

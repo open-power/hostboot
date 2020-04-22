@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,7 +71,7 @@ public:
 
     /**
      * @brief This interface should be called during IPL to setup the
-     *     time of day logic on the P9 processors sitting on the system.
+     *     time of day logic on the P10 processors sitting on the system.
      *
      * @par Detailed Description:
      *     All processors of a symmetric multiprocessor model must appear to
@@ -154,11 +154,11 @@ public:
 
      /**
      * @brief This interface should be called during IPL to initialize the
-     *     time of day logic on the P9 processors to running state.
+     *     time of day logic on the P10 processors to running state.
      *
      * @par Detailed Description:
      *  Once the TOD topology is setup on the system , the todinit is called
-     *  to initialize the time of day logic on the P9 processors to running
+     *  to initialize the time of day logic on the P10 processors to running
      *  state. FSPFW needs to do this initialization explicitly for the
      *  Manufacturing AVP tests to pass. Once the FSP reaches runtime PHYP
      *  re-initializes it to the running state.

@@ -61,10 +61,13 @@ namespace TOD
 static const char* TOD_PRIMARY_TOPOLOGY = "PRIMARY";
 static const char* TOD_SECONDARY_TOPOLOGY = "SECONDARY";
 static const char* NO_BUS  = "NONE";
-static const char* X_BUS_0 = "XBUS0";
-static const char* X_BUS_1 = "XBUS1";
-static const char* X_BUS_2 = "XBUS2";
-
+static const char* IOHS_0 = "IOHS0";
+static const char* IOHS_1 = "IOHS1";
+static const char* IOHS_2 = "IOHS2";
+static const char* IOHS_3 = "IOHS3";
+static const char* IOHS_4 = "IOHS4";
+static const char* IOHS_5 = "IOHS5";
+static const char* IOHS_6 = "IOHS6";
 //******************************************************************************
 //TodTopologyManager::TodTopologyManager
 //******************************************************************************
@@ -72,18 +75,19 @@ TodTopologyManager::TodTopologyManager(
                         const p10_tod_setup_tod_sel i_topologyType) :
     iv_topologyType(i_topologyType)
 {
-    TOD_ENTER("Topology type 0X%.8X", i_topologyType);
+    TOD_ENTER("TodTopologyManager constructor: "
+              "Topology type 0X%.8X", i_topologyType);
 
-    TOD_EXIT();
+    TOD_EXIT("TodTopologyManager constructor");
 }
 //******************************************************************************
 //TodTopologyManager::~TodTopologyManager
 //******************************************************************************
 TodTopologyManager::~TodTopologyManager()
 {
-    TOD_ENTER();
+    TOD_ENTER("TodTopologyManager destructor");
 
-    TOD_EXIT();
+    TOD_EXIT("TodTopologyManager destructor");
 }
 
 //******************************************************************************
@@ -211,7 +215,7 @@ errlHndl_t TodTopologyManager::create()
         }
     }while(0);
 
-    TOD_EXIT();
+    TOD_EXIT("TodTopologyManager::create");
 
     return l_errHdl;
 }
@@ -221,7 +225,7 @@ errlHndl_t TodTopologyManager::create()
 //******************************************************************************
 errlHndl_t TodTopologyManager::wireProcs(const TodDrawer* i_pTodDrawer)
 {
-    TOD_ENTER();
+    TOD_ENTER("TodTopologyManager::wireProcs");
 
     errlHndl_t l_errHdl = nullptr;
 
@@ -294,7 +298,7 @@ errlHndl_t TodTopologyManager::wireProcs(const TodDrawer* i_pTodDrawer)
                 l_targetItr != l_targetsList.end();)
             {
                 l_errHdl = (*l_sourceItr)->connect(*l_targetItr,
-                                                   TARGETING::TYPE_XBUS,
+                                                   TARGETING::TYPE_IOHS,
                                                    l_connected);
                 if(l_errHdl)
                 {
@@ -319,6 +323,10 @@ errlHndl_t TodTopologyManager::wireProcs(const TodDrawer* i_pTodDrawer)
                 {
                     ++l_targetItr;
                 }
+            }
+            if(l_targetsList.empty())
+            {
+                break;
             }
             ++l_sourceItr;
         }
@@ -360,7 +368,7 @@ errlHndl_t TodTopologyManager::wireProcs(const TodDrawer* i_pTodDrawer)
         }
     }while(0);
 
-    TOD_EXIT();
+    TOD_EXIT("TodTopologyManager::wireProcs");
 
     return l_errHdl;
 }
@@ -450,7 +458,7 @@ errlHndl_t TodTopologyManager::wireTodDrawer(TodDrawer* i_pTodDrawer)
             ++l_itr)
         {
             l_errHdl = l_pMDMT->connect(*l_itr,
-                                        TARGETING::TYPE_ABUS,
+                                        TARGETING::TYPE_IOHS,
                                         l_connected);
             if(l_errHdl)
             {
@@ -496,7 +504,7 @@ errlHndl_t TodTopologyManager::wireTodDrawer(TodDrawer* i_pTodDrawer)
         }
     }while(0);
 
-    TOD_EXIT();
+    TOD_EXIT("wireTodDawer");
 
     return l_errHdl;
 }
@@ -510,9 +518,13 @@ void TodTopologyManager::dumpTopology() const
 
     static const char* busnames[TOD_SETUP_BUS_BUS_MAX+1] = {0};
     busnames[TOD_SETUP_BUS_NONE] = NO_BUS;
-    busnames[TOD_SETUP_BUS_IOHS0] = X_BUS_0;
-    busnames[TOD_SETUP_BUS_IOHS1] = X_BUS_1;
-    busnames[TOD_SETUP_BUS_IOHS2] = X_BUS_2;
+    busnames[TOD_SETUP_BUS_IOHS0] = IOHS_0;
+    busnames[TOD_SETUP_BUS_IOHS1] = IOHS_1;
+    busnames[TOD_SETUP_BUS_IOHS2] = IOHS_2;
+    busnames[TOD_SETUP_BUS_IOHS3] = IOHS_3;
+    busnames[TOD_SETUP_BUS_IOHS4] = IOHS_4;
+    busnames[TOD_SETUP_BUS_IOHS0] = IOHS_5;
+    busnames[TOD_SETUP_BUS_IOHS0] = IOHS_6;
 
     static const char* topologynames[2] = {0};
     topologynames[TOD_PRIMARY] = TOD_PRIMARY_TOPOLOGY;
@@ -544,6 +556,7 @@ void TodTopologyManager::dumpTopology() const
                     (*l_procItr)->getTarget()->getAttr<TARGETING::ATTR_HUID>());
                 }
 
+                //Get the children for this TOD proc
                 TodProcContainer l_childList;
                 (*l_procItr)->getChildren(l_childList);
                 TodProcContainer::const_iterator l_childItr =
@@ -572,7 +585,7 @@ void TodTopologyManager::dumpTopology() const
 //******************************************************************************
 void TodTopologyManager::dumpTodRegs() const
 {
-    TOD_ENTER();
+    TOD_ENTER("TodTopologyManager::dumpTodRegs");
 
     static const char* topologynames[2] = {0};
     topologynames[TOD_PRIMARY] = TOD_PRIMARY_TOPOLOGY;
@@ -645,7 +658,7 @@ void TodTopologyManager::dumpTodRegs() const
         TOD_INF("TOD REGDUMP> End");
     }while(0);
 
-    TOD_EXIT();
+    TOD_EXIT("TodTopologyManager::dumpTodRegs");
 }
 
 //******************************************************************************
@@ -655,7 +668,7 @@ errlHndl_t TodTopologyManager::wireProcsInSmpWrapMode(
                                        TodProcContainer& io_sourcesList,
                                        TodProcContainer& io_targetsList)
 {
-    TOD_ENTER();
+    TOD_ENTER("TodTopologyManager::wireProcsInSmpWrapMode");
 
     errlHndl_t l_errHdl = nullptr;
 
@@ -670,7 +683,7 @@ errlHndl_t TodTopologyManager::wireProcsInSmpWrapMode(
                 l_targetItr != io_targetsList.end();)
             {
                 l_errHdl = (*l_sourceItr)->connect(*l_targetItr,
-                                                   TARGETING::TYPE_ABUS,
+                                                   TARGETING::TYPE_IOHS,
                                                    l_connected);
                 if(l_errHdl)
                 {
@@ -697,7 +710,7 @@ errlHndl_t TodTopologyManager::wireProcsInSmpWrapMode(
         }
     }while(0);
 
-    TOD_EXIT();
+    TOD_EXIT("TodTopologyManager::wireProcsInSmpWrapMode");
 
     return l_errHdl;
 }

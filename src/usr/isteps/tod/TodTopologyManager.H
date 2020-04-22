@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -108,7 +108,7 @@ public:
     /**
      * @brief Dumps the topology connections in this format to fsp-trace:
      *     parent---bus out---bus in---child. An example would be
-     *     pu:k0:n0:s0:p00---XBUS1---XBUS1---pu:k0:n0:s0:p01
+     *     pu:k0:n0:s0:p00---IOHS_1---IOHS_1---pu:k0:n0:s0:p01
      *
      * @return N/A
      */

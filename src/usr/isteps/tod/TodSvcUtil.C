@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,9 +52,70 @@ namespace TOD
 namespace TodSvcUtil{
 
 //******************************************************************************
+//calloutTodOsc
+//******************************************************************************
+void calloutTodOsc( const TARGETING::Target* i_pTodOsc,
+        const TARGETING::TargetHandleList& i_todEndPointList,
+        errlHndl_t& io_errHdl )
+{
+    TOD_ENTER("calloutTodOsc");
+
+    /*@
+     * @errortype
+     * @moduleid     TOD_OSC_CALLOUT
+     * @reasoncode   TOD_BAD_OSC
+     * @userdata1    EMOD_CALLOUT_TOD_OSC
+     * @userdata2    HUID of the TOD OSC through which good signals are not
+     *               received.
+     * @devdesc      This TOD OSC is not able to provide good signals to the
+     *               processor. This OSC will be called out.
+     *               Associated TOD end points on the processor side will also
+     *               be called out, look for other callout details on this error
+     *               log.
+     * @custdesc     There was a problem in configuring Time Of Day on the Host
+     *               processor.
+     *
+     */
+    io_errHdl = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        TOD_OSC_CALLOUT,
+                        TOD_BAD_OSC,
+                        EMOD_CALLOUT_TOD_OSC,
+                        GETHUID(i_pTodOsc));
+
+   io_errHdl->addHwCallout(
+            i_pTodOsc,
+            HWAS::SRCI_PRIORITY_HIGH,
+            HWAS::DECONFIG,
+            HWAS::GARD_Fatal);
+
+    //Add low priority  procedure callout EPUB_PRC_TOD_CLOCK_ERR
+    io_errHdl->addProcedureCallout(
+            HWAS::EPUB_PRC_TOD_CLOCK_ERR,
+            HWAS::SRCI_PRIORITY_LOW);
+
+    //Iterate over the input list of TOD end points and callout
+    TARGETING::TargetHandleList::const_iterator
+        i_todEndPointIter = i_todEndPointList.begin();
+
+    for ( ; i_todEndPointIter != i_todEndPointList.end();
+        ++i_todEndPointIter)
+    {
+        io_errHdl->addHwCallout(
+            *i_todEndPointIter,
+            HWAS::SRCI_PRIORITY_HIGH,
+            HWAS::DECONFIG,
+            HWAS::GARD_Fatal);
+    }
+
+  TOD_EXIT("calloutTodOsc");
+}
+
+//******************************************************************************
 //calloutTodEndPoint
 //******************************************************************************
 void calloutTodEndPoint( const TARGETING::Target* const i_pTodEndPoint,
+            const TARGETING::Target* i_pOscTarget,
             errlHndl_t& io_errHdl )
 {
 
@@ -62,8 +123,9 @@ void calloutTodEndPoint( const TARGETING::Target* const i_pTodEndPoint,
      * @errortype
      * @moduleid     TOD_ENDPOINT_CALLOUT
      * @reasoncode   TOD_MASTER_PATH_ERROR
-     * @userdata1    TOD_ENDPOINT_CALLOUT
+     * @userdata1    EMOD_CALLOUT_TOD_ENDPOINT
      * @userdata2    HUID of the TOD end point that is not receiving signal
+     *               HUID of the OSC from which signal is not received
      * @devdesc      This TOD end point target on processor is not receiving
      *               signal from the OSC.
      * @custdesc     There was a problem in configuring Time Of Day on the Host
@@ -76,7 +138,8 @@ void calloutTodEndPoint( const TARGETING::Target* const i_pTodEndPoint,
                         TOD_ENDPOINT_CALLOUT,
                         TOD_MASTER_PATH_ERROR,
                         EMOD_CALLOUT_TOD_ENDPOINT,
-                        GETHUID(i_pTodEndPoint));
+                        TWO_UINT32_TO_UINT64(GETHUID(i_pTodEndPoint),
+                                             GETHUID(i_pOscTarget)));
 
     io_errHdl->addHwCallout(
             i_pTodEndPoint,
@@ -84,7 +147,7 @@ void calloutTodEndPoint( const TARGETING::Target* const i_pTodEndPoint,
             HWAS::DECONFIG,
             HWAS::GARD_Fatal);
 
-    //Get the PEER TOD end point on the OSC and callout as low
+    //Add low priority  procedure callout EPUB_PRC_TOD_CLOCK_ERR
     io_errHdl->addProcedureCallout(
             HWAS::EPUB_PRC_TOD_CLOCK_ERR,
             HWAS::SRCI_PRIORITY_LOW);
@@ -203,6 +266,7 @@ uint32_t getMaxProcsOnSystem()
         errlCommit(l_errHdl, TOD_COMP_ID);
     }
 
+    TOD_EXIT("getMaxProcsOnSystem");
     return (l_maxProcCount);
 }
 
@@ -233,7 +297,7 @@ errlHndl_t getFuncNodeTargetsOnSystem(
                TARGETING::TargetHandleList& o_nodeList,
                const bool i_skipFuncCheck){
 
-    TOD_ENTER("Function Node Target On System");
+    TOD_ENTER("getFuncNodeTargetsOnSystem");
 
     errlHndl_t l_errHdl = nullptr;
 
@@ -317,6 +381,7 @@ errlHndl_t getFuncNodeTargetsOnSystem(
         }
     }while(0);
 
+    TOD_EXIT("getFuncNodeTargetsOnSystem");
     return l_errHdl;
 }
 

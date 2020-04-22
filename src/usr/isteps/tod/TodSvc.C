@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -238,7 +238,7 @@ errlHndl_t TodSvc::todSetup()
 
     TOD::clearGardedTargetsList();
 
-    TOD_EXIT();
+    TOD_EXIT("TodSvc::todSetup");
 
     return l_errHdl;
 }
@@ -294,7 +294,7 @@ errlHndl_t TodSvc::readTod(uint64_t& o_todValue) const
         o_todValue = o_todValueBuf.get<int32_t>(0);
     }while(0);
 
-    TOD_EXIT();
+    TOD_EXIT("readTod");
 
     return l_errHdl;
 }
@@ -304,9 +304,9 @@ errlHndl_t TodSvc::readTod(uint64_t& o_todValue) const
 //******************************************************************************
 TodSvc::TodSvc()
 {
-    TOD_ENTER();
+    TOD_ENTER("TodSvc constructor");
 
-    TOD_EXIT();
+    TOD_EXIT("TodSvc constructor");
 }
 
 //******************************************************************************
@@ -314,13 +314,13 @@ TodSvc::TodSvc()
 //******************************************************************************
 TodSvc::~TodSvc()
 {
-    TOD_ENTER();
+    TOD_ENTER("TodSvc destructor");
 
     //Free up held memory
     TOD::destroy(TOD_PRIMARY);
     TOD::destroy(TOD_SECONDARY);
 
-    TOD_EXIT();
+    TOD_EXIT("TodSvc destructor");
 }
 
 //******************************************************************************
@@ -328,7 +328,7 @@ TodSvc::~TodSvc()
 //******************************************************************************
 errlHndl_t TodSvc::todInit()
 {
-    TOD_ENTER();
+    TOD_ENTER("TodSvc::todInit");
     errlHndl_t l_errHdl = nullptr;
     bool l_isTodRunning = false;
     do
@@ -381,7 +381,7 @@ errlHndl_t TodSvc::todInit()
         }
 
     }while(0);
-    TOD_EXIT();
+    TOD_EXIT("TodSvc::todInit");
     return l_errHdl;
 }
 
@@ -510,7 +510,6 @@ errlHndl_t TodSvc::setActiveMdmtForResetBackup(
                     (TOD::TodSvcUtil::
                      topologyTypeToString(i_activeConfig)));
 
-            //FIX_ME_BEFORE_PRODUCTION_Q1
             bool l_masterProcNotFound = ( !l_masterProc )? true : false;
             bool l_masterDrawerNotFound = ( !l_masterDrawer )? true : false;
 
@@ -550,7 +549,7 @@ errlHndl_t TodSvc::setActiveMdmtForResetBackup(
 
     }while(0);
 
-    TOD_EXIT();
+    TOD_EXIT("setActiveMdmtForResetBackup");
     return l_errHdl;
 }
 
@@ -590,7 +589,7 @@ errlHndl_t TodSvc::isMPIPL( bool& o_mpIPL )
         }
     }while(0);
 
-    TOD_EXIT( "Output Params - o_mpIPL: %d", o_mpIPL );
+    TOD_EXIT( "isMPIPL: Output Params - o_mpIPL: %d", o_mpIPL );
 
     return l_errHdl;
 }

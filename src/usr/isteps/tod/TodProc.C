@@ -70,7 +70,7 @@ TodProc::TodProc(
            iv_tod_node_data(nullptr),
            iv_masterType(NOT_MASTER)
 {
-    TOD_ENTER();
+    TOD_ENTER("TodProc constructor");
 
     do
     {
@@ -109,8 +109,7 @@ TodProc::~TodProc()
         iv_tod_node_data = nullptr;
     }
 
-    iv_xbusTargetList.clear();
-    iv_abusTargetList.clear();
+    iv_iohsTargetList.clear();
 
     TOD_EXIT("TodProc destructor");
 }
@@ -180,48 +179,23 @@ void TodProc::init()
     }
     iv_tod_node_data->i_children.clear();
 
-    iv_xbusTargetList.clear();
-    iv_abusTargetList.clear();
+    iv_iohsTargetList.clear();
 
     //Make a list of outgoing bus targets for this processor
     TARGETING::PredicateCTM
-        l_xbusCTM(TARGETING::CLASS_UNIT,TARGETING::TYPE_XBUS);
-    TARGETING::PredicateCTM
-        l_abusCTM(TARGETING::CLASS_UNIT,TARGETING::TYPE_ABUS);
+        l_iohsCTM(TARGETING::CLASS_UNIT,TARGETING::TYPE_IOHS);
 
-    TARGETING::TargetHandleList l_xbusTargetList;
-    TARGETING::TargetHandleList l_abusTargetList;
+    TARGETING::TargetHandleList l_iohsTargetList;
 
     TARGETING::PredicateIsFunctional l_func;
-    TARGETING::PredicatePostfixExpr l_funcAndXbusFilter;
-    TARGETING::PredicatePostfixExpr l_funcAndAbusFilter;
-    l_funcAndXbusFilter.push(&l_xbusCTM).push(&l_func).And();
-    l_funcAndAbusFilter.push(&l_abusCTM).push(&l_func).And();
+    TARGETING::PredicatePostfixExpr l_funcAndIohsFilter;
+    l_funcAndIohsFilter.push(&l_iohsCTM).push(&l_func).And();
 
-    TARGETING::targetService().getAssociated(l_xbusTargetList,
+    TARGETING::targetService().getAssociated(iv_iohsTargetList,
             iv_procTarget,
             TARGETING::TargetService::CHILD,
             TARGETING::TargetService::ALL,
-            &l_funcAndXbusFilter);
-
-    //Push the X bus targets found to the iv_xbusTargetList
-    for(uint32_t l_index =0 ; l_index < l_xbusTargetList.size();
-        ++l_index)
-    {
-        iv_xbusTargetList.push_back(l_xbusTargetList[l_index]);
-    }
-
-    TARGETING::targetService().getAssociated(l_abusTargetList,
-            iv_procTarget,
-            TARGETING::TargetService::CHILD,
-            TARGETING::TargetService::ALL,
-            &l_funcAndAbusFilter);
-    //Push the A bus targets found to the iv_abusTargetList
-    for(uint32_t l_index =0 ; l_index < l_abusTargetList.size();
-        ++l_index)
-    {
-        iv_abusTargetList.push_back(l_abusTargetList[l_index]);
-    }
+            &l_funcAndIohsFilter);
 
     TOD_EXIT("init");
 
@@ -236,7 +210,7 @@ errlHndl_t TodProc::connect(
         const TARGETING::TYPE i_busChipUnitType,
         bool& o_isConnected)
 {
-    TOD_ENTER("Source proc HUID = 0x%08X "
+    TOD_ENTER("TodProc::connect: Source proc HUID = 0x%08X "
         "Destination proc HUID = 0x%08X "
         "Bus type for connection = 0x%08X ",
         iv_procTarget->getAttr<TARGETING::ATTR_HUID>(),
@@ -258,14 +232,9 @@ errlHndl_t TodProc::connect(
 
         TARGETING::TargetHandleList* l_pBusList = nullptr;
 
-        //Check whether we've to connect over X or A bus
-        if(TARGETING::TYPE_XBUS == i_busChipUnitType)
+        if(TARGETING::TYPE_IOHS == i_busChipUnitType)
         {
-            l_pBusList = &iv_xbusTargetList;
-        }
-        else if(TARGETING::TYPE_ABUS == i_busChipUnitType)
-        {
-            l_pBusList = &iv_abusTargetList;
+            l_pBusList = &iv_iohsTargetList;
         }
         else
         {
@@ -278,14 +247,15 @@ errlHndl_t TodProc::connect(
         //From this proc (iv_procTarget), find if destination(i_destination)
         //has a connection via the bus type i_busChipUnitType :
 
-        //Step 1: Sequentially pick buses from either iv_xbusTargetList or
-        //iv_abusTargetList depending on the bus type specified as input
-        //Step 2: Get the parent of peer target of the bus target found in the
-        //previous step. If it matches with the destination, we got a connection
+        //Step 1: Sequentially pick buses from iv_iohsTargetList
+        //Step 2: Get the peer target of the bus target found in the previous
+        //step.
+        //For the parent processor of PEER target and the parent processor
+        //matches with the destination, we got a connection.
         //Step 3: If a match is found then fill the i_bus_tx and i_bus_rx
         //attributes for the destination proc and return
 
-        //Predicates tp look for a functional proc who's HUID is same as
+        //Predicates to look for a functional proc whose HUID is same as
         //that of i_destination. This predicate will be applied as a result
         //filter to getPeerTargets to determine the connected proc.
         TARGETING::PredicateCTM
@@ -303,21 +273,11 @@ errlHndl_t TodProc::connect(
             And();
 
         TARGETING::TargetHandleList l_procList;
-        TARGETING::TargetHandleList l_busList;
 
         TARGETING::TargetHandleList::iterator l_busIter = (*l_pBusList).begin();
         for(;l_busIter != (*l_pBusList).end() ; ++l_busIter)
         {
             l_procList.clear();
-            l_busList.clear();
-
-            //Need this call without result filter to get a handle to the
-            //peer (bus). I need to access its HUID and chip unit.
-            TARGETING::getPeerTargets(
-                 l_busList,
-                 *l_busIter,
-                 nullptr,
-                 nullptr);
 
             //The call below is to determine the connected proc
             TARGETING::getPeerTargets(
@@ -329,7 +289,9 @@ errlHndl_t TodProc::connect(
 
             if(l_procList.size())
             {
-                if(l_busList.empty())
+                auto busPeer = (*l_busIter)->
+                                   getAttr<TARGETING::ATTR_PEER_TARGET>();
+                if(!busPeer)
                 {
                     //This is unlikely, since the proc list is not empty,
                     //we should have also found a bus, but just a safety check.
@@ -337,7 +299,6 @@ errlHndl_t TodProc::connect(
                         "Couldn't find a peer for bus 0x%.8X on proc 0x%.8X",
                         (*l_busIter)->getAttr<TARGETING::ATTR_HUID>(),
                         iv_procTarget->getAttr<TARGETING::ATTR_HUID>());
-                    break;
                 }
                 //We found a connection :
                 //iv_procTarget --- i_busChipUnitType --- i_destination
@@ -349,10 +310,10 @@ errlHndl_t TodProc::connect(
                     i_destination->iv_procTarget->
                         getAttr<TARGETING::ATTR_HUID>(),
                     (*l_busIter)->getAttr<TARGETING::ATTR_HUID>(),
-                    l_busList[0]->getAttr<TARGETING::ATTR_HUID>(),
+                    busPeer->getAttr<TARGETING::ATTR_HUID>(),
                     i_busChipUnitType);
 
-                //Determine the bus type as per our format, for eg XBUS0
+                //Determine the bus type as per our format, for eg IOHS0
                 //ATTR_CHIP_UNIT gives the instance number of
                 //the bus and it has direct correspondance to
                 //the port no.
@@ -368,11 +329,11 @@ errlHndl_t TodProc::connect(
                 if(nullptr == l_errHndl)
                 {
                     l_errHndl = getBusPort(i_busChipUnitType,
-                        l_busList[0]->
+                        busPeer->
                             getAttr<TARGETING::ATTR_CHIP_UNIT>(),
                         l_busIn);
                 }
-                else
+                if(l_errHndl)
                 {
                     //Should not be hitting this path if HW procedure is
                     //correctly defining all the bus types and ports
@@ -420,7 +381,7 @@ errlHndl_t TodProc::getBusPort(
 
     errlHndl_t l_errHndl = nullptr;
 
-    if(TARGETING::TYPE_XBUS == i_busChipUnitType)
+    if(TARGETING::TYPE_IOHS == i_busChipUnitType)
     {
         switch(i_busPort)
         {
@@ -433,22 +394,18 @@ errlHndl_t TodProc::getBusPort(
             case 2:
                 o_busPort = TOD_SETUP_BUS_IOHS2;
                 break;
-            case 7:
-                o_busPort = TOD_SETUP_BUS_IOHS7;
+            case 3:
+                o_busPort = TOD_SETUP_BUS_IOHS3;
                 break;
-            default:
-                TOD_ERR("Port 0x%.8X not supported for X bus",
-                    i_busPort);
-                logUnsupportedBusPort(i_busPort,
-                    i_busChipUnitType,
-                    l_errHndl);
+            case 4:
+                o_busPort = TOD_SETUP_BUS_IOHS4;
                 break;
-        }
-    }
-    else if(TARGETING::TYPE_ABUS == i_busChipUnitType)
-    {
-        switch(i_busPort)
-        {
+            case 5:
+                o_busPort = TOD_SETUP_BUS_IOHS5;
+                break;
+            case 6:
+                o_busPort = TOD_SETUP_BUS_IOHS6;
+                break;
             default:
                 TOD_ERR("Port 0x%.8X not supported for A bus",
                     i_busPort);
@@ -485,7 +442,7 @@ void TodProc::logUnsupportedBusType(const int32_t i_busChipUnitType,
      *               getBusPort method has not been updated to support all the
      *               bus type on a given system.
      *               Resolution:Development team should be contacted.
-     * @custdesc     Service Processor Firmware encountered an internal error
+     * @custdesc     Host Firmware encountered an internal error
      */
     io_errHdl = new ERRORLOG::ErrlEntry(
                            ERRORLOG::ERRL_SEV_INFORMATIONAL,
@@ -512,9 +469,9 @@ void TodProc::logUnsupportedBusPort(
      *               bus type.
      *               Possible Causes: Invalid bus configuration in targeting, or
      *               getBusPort method has not been updated to support all the
-     *               possible port for a bus on a given system type.
+     *               possible port for a particular type of bus on the system.
      *               Resolution:Development team should be contacted.
-     * @custdescoff     Service Processor Firmware encountered an internal error
+     * @custdesc     Host Firmware encountered an internal error
      */
     io_errHdl = new ERRORLOG::ErrlEntry(
                            ERRORLOG::ERRL_SEV_INFORMATIONAL,

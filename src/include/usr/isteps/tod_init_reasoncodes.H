@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,6 +65,7 @@ namespace TOD
         TOD_IS_MPIPL                          = 0x1E,
         TOD_RT_TOPOLOGY_RESET_BACKUP          = 0x1F,
         TOD_RT_TOPOLOGY_DATA                  = 0x20,
+        TOD_OSC_CALLOUT                       = 0x21,
     };
 
     enum TODReasonCode
@@ -94,6 +95,7 @@ namespace TOD
         TOD_DRAWER_SET_MDMT                   = TOD_COMP_ID | 0x18,
         TOD_TOP_LEVEL_TARGET_NOT_FOUND        = TOD_COMP_ID | 0x19,
         TOD_RT_NULL_FIRMWARE_REQUEST_PTR      = TOD_COMP_ID | 0x1A,
+        TOD_BAD_OSC                           = TOD_COMP_ID | 0x1B,
         TOD_XXX                               = TOD_COMP_ID | 0x1C,
     };
 
@@ -103,6 +105,7 @@ namespace TOD
         EMOD_TOD_INIT_HWP                     = 0x02,
         EMOD_TOD_INIT                         = 0x03,
         EMOD_CALLOUT_TOD_ENDPOINT             = 0x04,
+        EMOD_CALLOUT_TOD_OSC                  = 0x05,
     };
 
 };
