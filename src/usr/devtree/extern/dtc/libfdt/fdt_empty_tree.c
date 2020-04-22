@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/errno.h $                                         */
+/* $Source: src/usr/devtree/extern/dtc/libfdt/fdt_empty_tree.c $          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,43 +22,41 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef _ERRNO_H
-#define _ERRNO_H
-
-/**
- * @file errno.h
- * @brief Defines error number for standard errors
- */
-
-#include <map>
-
-#define ENOENT           2      // No such file or directory
-#define	EIO              5      // I/O error
-#define ENXIO            6      // No such device or address
-#define ENOEXEC          8      // Exec format error
-#define EBADF            9      // Bad file descriptor
-#define EAGAIN          11      // Try again
-#define ENOMEM          12      // Not enough space
-#define EACCES          13      // Permission denied
-#define	EFAULT          14      // Bad address
-#define EINVAL          22      // Invalid argument
-#define ENFILE          23      // Too many open files in system
-#define EDEADLK         35      // Operation would cause deadlock.
-#define ETIME           62      // Time expired.
-#define EALREADY        114     // Operation already in progress
-
-#define EWOULDBLOCK     EAGAIN  // operation would block
-
-/**
-  * @brief Returns string representation of an errno.
-  *
-  * @param[in] i_errno     errno to get string for.
-  *
-  * @return  const char*  - If found, String associated with errno
-  *                         else, "UNKNOWN" string
-  *
+// SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
+/*
+* libfdt - Flat Device Tree manipulation
+* Copyright (C) 2012 David Gibson, IBM Corporation.
 */
-const char * ErrnoToString( int i_errno );
+#include "libfdt_env.h"
 
+#include <fdt.h>
+#include <libfdt.h>
 
-#endif
+#include "libfdt_internal.h"
+
+int fdt_create_empty_tree(void *buf, int bufsize)
+{
+    int err;
+
+    err = fdt_create(buf, bufsize);
+    if (err)
+        return err;
+
+    err = fdt_finish_reservemap(buf);
+    if (err)
+        return err;
+
+    err = fdt_begin_node(buf, "");
+    if (err)
+        return err;
+
+    err =  fdt_end_node(buf);
+    if (err)
+        return err;
+
+    err = fdt_finish(buf);
+    if (err)
+        return err;
+
+    return fdt_open_into(buf, buf, bufsize);
+}

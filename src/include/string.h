@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,6 +24,11 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #ifndef __STRING_H
 #define __STRING_H
+
+/**
+ * @file string.h
+ * @brief Standard C string and memory handling functions
+ */
 
 #include <stdint.h>
 
@@ -50,6 +55,8 @@ extern "C"
     char* strncat(char* d, const char* s, size_t n);
 
     char* strchr(const char* s, int c) __attribute__((pure));
+    const void* memchr(const void *ptr, int c, size_t n) __attribute__((pure));
+    const char* strrchr(const char *s, int c) __attribute__((pure));
 
     char* strdup(const char* s);
 

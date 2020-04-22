@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/errno.h $                                         */
+/* $Source: src/usr/devtree/extern/dtc/libfdt/fdt_strerror.c $            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,43 +22,64 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef _ERRNO_H
-#define _ERRNO_H
-
-/**
- * @file errno.h
- * @brief Defines error number for standard errors
- */
-
-#include <map>
-
-#define ENOENT           2      // No such file or directory
-#define	EIO              5      // I/O error
-#define ENXIO            6      // No such device or address
-#define ENOEXEC          8      // Exec format error
-#define EBADF            9      // Bad file descriptor
-#define EAGAIN          11      // Try again
-#define ENOMEM          12      // Not enough space
-#define EACCES          13      // Permission denied
-#define	EFAULT          14      // Bad address
-#define EINVAL          22      // Invalid argument
-#define ENFILE          23      // Too many open files in system
-#define EDEADLK         35      // Operation would cause deadlock.
-#define ETIME           62      // Time expired.
-#define EALREADY        114     // Operation already in progress
-
-#define EWOULDBLOCK     EAGAIN  // operation would block
-
-/**
-  * @brief Returns string representation of an errno.
-  *
-  * @param[in] i_errno     errno to get string for.
-  *
-  * @return  const char*  - If found, String associated with errno
-  *                         else, "UNKNOWN" string
-  *
+// SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-2-Clause)
+/*
+* libfdt - Flat Device Tree manipulation
+* Copyright (C) 2006 David Gibson, IBM Corporation.
+*     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-const char * ErrnoToString( int i_errno );
+#include "libfdt_env.h"
 
+#include <fdt.h>
+#include <libfdt.h>
 
-#endif
+#include "libfdt_internal.h"
+
+struct fdt_errtabent {
+    const char *str;
+};
+
+/*
+#define FDT_ERRTABENT(val) \
+    [(val)] = { .str = #val, }
+*/
+
+static struct fdt_errtabent fdt_errtable[] = {
+    "FDT_ERR_NOTFOUND",
+    "FDT_ERR_EXISTS",
+    "FDT_ERR_NOSPACE",
+
+    "FDT_ERR_BADOFFSET",
+    "FDT_ERR_BADPATH",
+    "FDT_ERR_BADPHANDLE",
+    "FDT_ERR_BADSTATE",
+
+    "FDT_ERR_TRUNCATED",
+    "FDT_ERR_BADMAGIC",
+    "FDT_ERR_BADVERSION",
+    "FDT_ERR_BADSTRUCTURE",
+    "FDT_ERR_BADLAYOUT",
+    "FDT_ERR_INTERNAL",
+    "FDT_ERR_BADNCELLS",
+    "FDT_ERR_BADVALUE",
+    "FDT_ERR_BADOVERLAY",
+    "FDT_ERR_NOPHANDLES",
+    "FDT_ERR_BADFLAGS",
+};
+#define FDT_ERRTABSIZE  (sizeof(fdt_errtable) / sizeof(fdt_errtable[0]))
+
+const char *fdt_strerror(int errval)
+{
+    if (errval > 0)
+        return "<valid offset/length>";
+    else if (errval == 0)
+        return "<no error>";
+    else if (errval < (int)FDT_ERRTABSIZE) {
+        const char *s = (const char *)(&(fdt_errtable[-errval]));
+
+        if (s)
+            return s;
+    }
+
+    return "<unknown error>";
+}

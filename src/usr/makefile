@@ -32,6 +32,7 @@ OBJS += module_init.o
 SUBDIRS += console.d
 SUBDIRS += cxxtest.d
 SUBDIRS += devicefw.d
+SUBDIRS += $(if $(CONFIG_DEVTREE),devtree.d)
 SUBDIRS += diag.d
 SUBDIRS += dump.d
 SUBDIRS += eeprom.d

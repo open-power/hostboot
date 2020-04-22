@@ -232,6 +232,7 @@ EXTENDED_MODULES += $(if $(CONFIG_ENABLE_HDAT_IN_HOSTBOOT),hdat)
 EXTENDED_MODULES += xz
 EXTENDED_MODULES += $(if $(CONFIG_CONSOLE_OUTPUT_ERRORDISPLAY),errldisplay)
 EXTENDED_MODULES += $(if $(CONFIG_PLDM)$(CONFIG_PLDM_TESTCASES),pldm_extended)
+EXTENDED_MODULES += $(if $(CONFIG_DEVTREE),devtree)
 endif
 
 #***************************************

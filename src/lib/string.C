@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,6 +22,10 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+/** @file string.C
+ *  @brief Standard C string and memory hanling functions
+ */
+
 #include <string.h>
 #include <stdlib.h>
 
@@ -166,6 +170,39 @@ extern "C" char* strchr(const char* s, int c)
 
     if (*s == c) return (char*)s;
     return NULL;
+}
+
+extern "C" const void* memchr(const void *ptr, int c, size_t n)
+{
+    unsigned char ch = static_cast<unsigned char>(c);
+    const unsigned char *p = static_cast<const unsigned char *>(ptr);
+
+    while (n-- > 0)
+    {
+        if (*p == ch)
+        {
+            return reinterpret_cast<const void *>(p);
+        }
+        p += 1;
+    }
+
+    return NULL;
+}
+
+extern "C" const char *strrchr(const char *s, int c)
+{
+  const char *last = nullptr;
+  char cb = c;
+
+  while (*s != 0) {
+      if (*s == cb)
+      {
+          last = s;
+      }
+      s += 1;
+  }
+
+  return last;
 }
 
 char* strdup(const char* s)

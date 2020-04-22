@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/errno.h $                                         */
+/* $Source: src/usr/devtree/devtree.C $                                   */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,43 +22,36 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef _ERRNO_H
-#define _ERRNO_H
-
 /**
- * @file errno.h
- * @brief Defines error number for standard errors
+ *  @file devtree.C
+ *
+ *  @brief Implementation of DEVTREE sync
  */
 
-#include <map>
+#include <trace/interface.H>
+#include <errl/errlentry.H>
+#include <pnor/pnorif.H>
 
-#define ENOENT           2      // No such file or directory
-#define	EIO              5      // I/O error
-#define ENXIO            6      // No such device or address
-#define ENOEXEC          8      // Exec format error
-#define EBADF            9      // Bad file descriptor
-#define EAGAIN          11      // Try again
-#define ENOMEM          12      // Not enough space
-#define EACCES          13      // Permission denied
-#define	EFAULT          14      // Bad address
-#define EINVAL          22      // Invalid argument
-#define ENFILE          23      // Too many open files in system
-#define EDEADLK         35      // Operation would cause deadlock.
-#define ETIME           62      // Time expired.
-#define EALREADY        114     // Operation already in progress
+#include <devtree/devtree.H>
 
-#define EWOULDBLOCK     EAGAIN  // operation would block
+using namespace TARGETING;
+
+// Trace definition
+trace_desc_t* g_trac_devtree = nullptr;
+TRAC_INIT(&g_trac_devtree, DEVTREE_COMP_NAME, 2*KILOBYTE, TRACE::BUFFER_SLOW);
+
+namespace DEVTREE
+{
+
 
 /**
-  * @brief Returns string representation of an errno.
-  *
-  * @param[in] i_errno     errno to get string for.
-  *
-  * @return  const char*  - If found, String associated with errno
-  *                         else, "UNKNOWN" string
-  *
-*/
-const char * ErrnoToString( int i_errno );
+ * @brief Function to sync targeting attributes to devtree
+ */
+void devtreeSyncAttrs()
+{
+    TRACFCOMP(g_trac_devtree,"devtreeSyncAttrs()");
+
+} // devtreeSyncAttrs()
 
 
-#endif
+} // end namespace
