@@ -1,0 +1,2 @@
+# DEVTREE artifact ID used to assemble PNOR image
+export DEVTREE_ARTIFACT_ID=613f7f528a0b66367282325c1620e59ce510e675

@@ -436,6 +436,9 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
         "HDAT",        /**< PNOR::HDAT           : Hdat Data */
         "EECACHE",     /**< PNOR::EECACHE        : Cached data from various EEPROMs */
         "OCMBFW",      /**< PNOR::OCMBFW         : OCMB image */
+#ifdef CONFIG_DEVTREE
+        "DEVTREE",     /**< PNOR::DEVTREE        : DEVTREE image */
+#endif
 #ifdef CONFIG_LOAD_PHYP_FROM_BOOTKERNEL
         "BOOTKERNEL",  /**< PNOR::BOOTKERNEL     : OPAL == petitboot,PHYP == PowerVM */
 #endif

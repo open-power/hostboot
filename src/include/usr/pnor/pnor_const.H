@@ -71,6 +71,9 @@ enum SectionId
     HDAT,           /**< HDAT data */
     EECACHE,        /**< EEPROM Cache */
     OCMBFW,         /**< OCMB image */
+#ifdef CONFIG_DEVTREE
+    DEVTREE,        /**< DEVTREE image */
+#endif
 #ifdef CONFIG_LOAD_PHYP_FROM_BOOTKERNEL
     BOOTKERNEL,     /**< Bootkernel -- HB uses for  PHYP */
 #endif

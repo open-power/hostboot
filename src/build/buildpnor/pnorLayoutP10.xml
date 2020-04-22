@@ -287,5 +287,13 @@ Layout Description
         <sha512Version></sha512Version>
         <readOnly/>
     </section>
+    <section>
+        <description>Device tree partition (1 MB)</description>
+        <eyeCatch>DEVTREE</eyeCatch>
+        <physicalRegionSize>0x100000</physicalRegionSize>
+        <!-- Temporarily disabling SHA512 for DEVTREE bringup
+        <sha512Version/> -->
+        <side>sideless</side>
+    </section>
 
 </pnor>

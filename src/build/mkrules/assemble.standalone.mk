@@ -130,15 +130,18 @@ SBE_FINAL_IMG := SBE.bin
 OCC_FINAL_IMG := OCC.bin
 WOFDATA_FINAL_IMG := WOFDATA.bin
 SBE_IMG := unprocessed.SBE.bin
+DEVTREE_FINAL_IMG := DEVTREE.bin
 
 # Input image artifacts location
 OCC_ARTIFACT_LOCATION := ${HB_SIM_DEPS_PATH}/occ/${OCC_ARTIFACT_ID}/
 WOF_ARTIFACT_LOCATION := ${HB_SIM_DEPS_PATH}/wof/${WOF_ARTIFACT_ID}/
+DEVTREE_ARTIFACT_LOCATION := ${HB_SIM_DEPS_PATH}/devtree/${DEVTREE_ARTIFACT_ID}/
 
 # Input Images
 HBD_IMG := ${BASEIMAGESDIR}/simics_P10_targeting.bin
 WOFDATA_IMG := ${call get_files_full_path, ${WOF_ARTIFACT_LOCATION}}
 OCC_IMG := ${call get_files_full_path, ${OCC_ARTIFACT_LOCATION}}
+DEVTREE_IMG := ${call get_files_full_path, ${DEVTREE_ARTIFACT_LOCATION}}
 
 # Allow for overriding the HCODE image with a user supplied image
 ifndef HCODE_OVERRIDE_IMAGE
@@ -171,7 +174,7 @@ ifeq (${FAKEPNOR},)
 
 # Parameters passed to GEN_PNOR_IMAGE_SCRIPT.
     _GEN_BIN_FILES := SBE=${SBE_IMG},HCODE=${HCODE_IMG},OCC=${OCC_IMG},\
-    	HBD=${HBD_IMG},WOFDATA=${WOFDATA_IMG}
+    	HBD=${HBD_IMG},WOFDATA=${WOFDATA_IMG},DEVTREE=${DEVTREE_IMG}
     GEN_BIN_FILES := $(shell echo ${_GEN_BIN_FILES} | sed 's/ //g')
     SYSTEM_SPECIFIC_PARAMS := --install-all --emit-eccless \
         $(if ${TARGET_TEST},--test) $(if ${CONFIG_SECUREBOOT},--secureboot) \
@@ -191,7 +194,7 @@ ifeq (${FAKEPNOR},)
     SECT := HBD=${HBD_FINAL_IMG} SBE=${SBE_FINAL_IMG} HCODE=${HCODE_FINAL_IMG} \
     	OCC=${OCC_FINAL_IMG} WOFDATA=${WOFDATA_FINAL_IMG} \
     	EECACHE=${EECACHE_FINAL_IMG} FIRDATA=${FIRDATA_FINAL_IMG} \
-    	OCMBFW=${OCMBFW_FINAL_IMG}
+    	OCMBFW=${OCMBFW_FINAL_IMG} DEVTREE=${DEVTREE_FINAL_IMG}
 else
 # Parameters passed to GEN_PNOR_IMAGE_SCRIPT.
     PNOR_LAYOUT = ${BUILDPNOR}/pnorLayoutFake.xml

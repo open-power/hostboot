@@ -1,0 +1,4 @@
+config DEVTREE
+  default y
+    help
+      If enabled Hostboot supports DEVTREE.
