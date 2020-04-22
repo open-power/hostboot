@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,9 @@
 #include <explorer_scom_addresses.H>
 #include <explorer_scom_addresses_fld.H>
 #include <generic/memory/lib/utils/c_str.H>
+
+static constexpr uint8_t OPTIMAL_NUM_TL_CREDITS = 18;
+static constexpr uint8_t STATE_MACHINE_SUCCESS = 0b111; // This value is from Lonny Lambrecht
 
 namespace mss
 {
@@ -242,6 +245,27 @@ fapi2::ReturnCode setup_fw_boot_config( const fapi2::Target<fapi2::TARGET_TYPE_O
 fapi2::ReturnCode omi_train_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                    uint8_t& o_state_machine_state,
                                    fapi2::buffer<uint64_t>& o_omi_training_status);
+
+///
+/// @brief Helper function to perform BUMP_SL workaround
+///
+/// @param[in] i_omi OMI target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode bump_sl_workaround(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_omi);
+
+///
+/// @brief Poll for OMI training completion
+///
+/// @param[in] i_target OCMB target
+/// @param[out] o_state_machine_state state machine state
+/// @param[out] o_omi_status omi status register buffer
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode poll_for_training_completion(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    uint8_t& o_state_machine_state,
+    fapi2::buffer<uint64_t>& o_omi_status);
 
 } // ns train
 

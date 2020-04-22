@@ -60,6 +60,7 @@ MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/spd/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/utils/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/workarounds/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/rosetta_map/
+MSS_LIB += ${PROCEDURES_PATH}/hwp/io/
 MSS_LIB += ${ROOTPATH}/src/import/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/spd/lrdimm/ddr4/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/spd/rdimm/ddr4/

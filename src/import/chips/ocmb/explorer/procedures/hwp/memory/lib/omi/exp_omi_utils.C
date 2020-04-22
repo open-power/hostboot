@@ -42,7 +42,11 @@
 #include <generic/memory/lib/mss_generic_system_attribute_getters.H>
 #include <lib/shared/exp_consts.H>
 
-static constexpr uint8_t OPTIMAL_NUM_TL_CREDITS = 18;
+// P9 cross-includes
+#include <p9_io_scom.H>
+#include <p9_io_regs.H>
+#include <p9a_mc_scom_addresses.H>
+#include <p9a_mc_scom_addresses_fld.H>
 
 namespace mss
 {
@@ -176,6 +180,87 @@ fapi2::ReturnCode omi_train_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
     o_state_machine_state = 0;
     l_omi_status.extractToRight<EXPLR_DLX_DL0_STATUS_STS_TRAINING_STATE_MACHINE,
                                 EXPLR_DLX_DL0_STATUS_STS_TRAINING_STATE_MACHINE_LEN>(o_state_machine_state);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function to perform BUMP_SL workaround
+///
+/// @param[in] i_omi OMI target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode bump_sl_workaround(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_omi)
+{
+    FAPI_DBG("Performing BUMP_SL workaround on %s", mss::c_str(i_omi));
+
+    const auto& l_omic = mss::find_target<fapi2::TARGET_TYPE_OMIC>(i_omi);
+
+    fapi2::buffer<uint64_t> l_omi_status;
+    uint8_t l_state_machine_state_omi = 0;
+
+    // Check OMI training status
+    FAPI_TRY(mss::getScom(i_omi, P9A_MC_REG2_DL0_STATUS, l_omi_status));
+    l_omi_status.extractToRight<P9A_MC_REG2_DL0_STATUS_STS_TRAINING_STATE_MACHINE,
+                                P9A_MC_REG2_DL0_STATUS_STS_TRAINING_STATE_MACHINE_LEN>(l_state_machine_state_omi);
+
+    if (l_state_machine_state_omi == mss::omi::train_mode::TX_TRAINING_STATE1)
+    {
+        // Perform the real workaround
+        uint8_t l_group_pos = 0;
+        uint32_t l_lane = 0;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_DL_GROUP_POS, i_omi, l_group_pos));
+
+        l_lane = l_group_pos * mss::conversions::BITS_PER_BYTE; // tk 8 = bits_per_byte
+
+        // Set
+        FAPI_TRY(io::rmw(OPT_RX_PR_BUMP_SL_1UI, // reg, fld, len
+                         l_omic, // target
+                         0,      // group
+                         l_lane, // lane
+                         1));    // data
+
+        // Reset
+        FAPI_TRY(io::rmw(OPT_RX_PR_BUMP_SL_1UI, // reg, fld, len
+                         l_omic, // target
+                         0,      // group
+                         l_lane, // lane
+                         0));    // data
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Poll for OMI training completion
+///
+/// @param[in] i_target OCMB target
+/// @param[out] o_state_machine_state state machine state
+/// @param[out] o_omi_status omi status register buffer
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode poll_for_training_completion(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    uint8_t& o_state_machine_state,
+    fapi2::buffer<uint64_t>& o_omi_status)
+{
+    constexpr uint8_t MAX_LOOP_COUNT = 10;  // Retry times
+    uint8_t l_tries = 0;
+
+    do
+    {
+        // Delay
+        fapi2::delay(500 * mss::DELAY_1MS, 10 * mss::DELAY_1MS);
+
+        // Check OMI training status
+        FAPI_TRY(mss::exp::omi::train::omi_train_status(i_target, o_state_machine_state, o_omi_status));
+        l_tries++;
+
+    }
+    while (l_tries < MAX_LOOP_COUNT && o_state_machine_state != STATE_MACHINE_SUCCESS);
 
 fapi_try_exit:
     return fapi2::current_err;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -652,7 +652,9 @@
 #define OPT_RX_PR_DDC_B                                    0x800248000000003f, 54,  1 // enables ddc state machine to go through its ddc routine on pr b.  works by shifting to the left and right looking for errors to find the edges, then adds an offset that centers the data between the 2 edges.
 #define OPT_RX_PR_BUMP_TO_EDGE_A                           0x800248000000003f, 55,  1 // bumps pr a position to the edge => +(16 - clkadj).
 #define OPT_RX_PR_BUMP_TO_EDGE_B                           0x800248000000003f, 56,  1 // bumps pr b position to the edge. (not supported)
+*/
 #define OPT_RX_PR_BUMP_SL_1UI                              0x800248000000003f, 57,  1 // bumps the pr position of all prs to the next eye by shifting 32-steps. (not supported)
+/*
 #define OPT_RX_PR_BUMP_SR_1UI                              0x800248000000003f, 58,  1 // bumps the pr position to the previous eye by shifting 32-steps. (not supported)
 #define OPT_RX_PR_DATA_OFFSET_DISABLE_A                    0x800248000000003f, 59,  1 // disables phase rotator offset for a bank (dd2
 #define OPT_RX_PR_DATA_OFFSET_DISABLE_B                    0x800248000000003f, 60,  1 // disables phase rotator offset for b bank (dd2

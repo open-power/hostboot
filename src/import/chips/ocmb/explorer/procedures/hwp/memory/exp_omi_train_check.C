@@ -53,9 +53,6 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
 
     FAPI_INF("%s Start exp_omi_train_check", mss::c_str(i_target));
 
-    // Const
-    constexpr uint8_t STATE_MACHINE_SUCCESS = 0b111;  // This value is from Lonny Lambrecht
-    constexpr uint8_t MAX_LOOP_COUNT = 10;  // Retry times
     const auto& l_omi = mss::find_target<fapi2::TARGET_TYPE_OMI>(i_target);
     const auto& l_proc = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
 
@@ -66,20 +63,17 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
     fapi2::buffer<uint64_t> l_expected_dl0_error_hold;
     fapi2::buffer<uint64_t> l_dl0_config1;
     uint8_t l_state_machine_state = 0;
-    uint8_t l_tries = 0;
     uint32_t l_omi_freq = 0;
 
-    do
+    FAPI_TRY(mss::exp::omi::train::poll_for_training_completion(i_target, l_state_machine_state, l_omi_status));
+
+    if (l_state_machine_state == mss::omi::train_mode::TX_TRAINING_STATE2)
     {
-        // Delay
-        fapi2::delay(500 * mss::DELAY_1MS, 10 * mss::DELAY_1MS);
+        FAPI_TRY(mss::exp::omi::train::bump_sl_workaround(l_omi));
 
-        // Check OMI training status
-        FAPI_TRY(mss::exp::omi::train::omi_train_status(i_target, l_state_machine_state, l_omi_status));
-        l_tries++;
-
+        // Now poll once more
+        FAPI_TRY(mss::exp::omi::train::poll_for_training_completion(i_target, l_state_machine_state, l_omi_status));
     }
-    while (l_tries < MAX_LOOP_COUNT && l_state_machine_state != STATE_MACHINE_SUCCESS);
 
     // Note: this is very useful debug information while trying to debug training during polling
     FAPI_TRY(fapi2::getScom(i_target, EXPLR_DLX_DL0_TRAINING_STATUS, l_omi_training_status));
