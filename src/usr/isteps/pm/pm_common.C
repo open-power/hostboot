@@ -452,7 +452,7 @@ namespace HBPM
 
             PpmrHeader_t* pPpmrHeader = (PpmrHeader_t *)pChipHomer->iv_ppmrRegion.iv_ppmrHeader;
             PgpeHeader_t* pPgpeHeader = (PgpeHeader_t*)
-               (&(pChipHomer->iv_ppmrRegion.iv_pgpeSramRegion[PGPE_SRAM_SIZE]));
+               (&(pChipHomer->iv_ppmrRegion.iv_pgpeSramRegion[OCC_SRAM_PGPE_REGION_SIZE]));
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "PGPE header -- Date:0x%08X, Version:0x%08X, "
                       "Hcode offset:0x%08X, Hcode length:0x%08X",
