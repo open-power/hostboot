@@ -26,10 +26,14 @@
 #define __HBRT_TARGET_H
 
 #include <targeting/common/error.H>
+#include <targeting/common/attributes.H>
 
 namespace TARGETING
 {
     typedef uint64_t rtChipId_t;
+
+    static const TARGETING::ATTR_HBRT_HYP_ID_type HBRT_HYP_ID_UNKNOWN
+       = 0xFFFFFFFFFFFFFFFFULL;
 
     struct ocmbMmioAddressRange_t {
         rtChipId_t hbrtId;  // Keep hbrtId as the first member of this struct

@@ -353,26 +353,6 @@
     <readable/>
   </attribute>
 
-  <!-- TODO RTC 122856 When support for HB only volatile attributes with non-zero
-     default is implemented, update default value to match the description,
-     Until that happens, code must set the appropriate default if needed. -->
-  <attribute>
-    <id>HBRT_HYP_ID</id>
-    <description>
-      Effective ID used by the hypervisor to specify a given target. A value
-      of 0xFFFFFFFFFFFFFFFF means invalid/unknown.
-  </description>
-    <simpleType>
-      <uint64_t>
-        <default>0</default>
-      </uint64_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-  </attribute>
-
   <attribute>
     <id>HB_EXISTING_IMAGE</id>
     <description>Indicates which logical nodes have a hostboot image.</description>
@@ -858,22 +838,6 @@
     <simpleType>
       <uint32_t/>
       <array>16</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-  </attribute>
-
-  <attribute>
-    <id>MMIO_PHYS_ADDR</id>
-    <description>
-            Physical memory address this device has been mapped to.
-    </description>
-    <simpleType>
-      <uint64_t>
-        <default>0</default>
-      </uint64_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>

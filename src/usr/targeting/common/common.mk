@@ -51,6 +51,7 @@ TARGET_OBJS += target.o
 TARGET_OBJS += targetservice.o
 TARGET_OBJS += entitypath.o
 TARGET_OBJS += associationmanager.o
+TARGET_OBJS += hbrt_target.o
 
 TARGUTILBASE ?= targutilbase.o # only set UTILBASE if not already defined
 OTHER_OBJS += ${TARGUTILBASE}

@@ -23,15 +23,22 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include <limits.h>
+
 #include <targeting/common/hbrt_target.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/targreasoncodes.H>
-#include <runtime/customize_attrs_for_payload.H>
 #include <targeting/common/trace.H>
+#include <targeting/targplatutil.H>
 #ifdef __HOSTBOOT_MODULE
 #include <errl/errludtarget.H>
+#include <limits.h>
+#else
+#define KILOBYTE  (1024ul)            /**< 1 KB */
+#define MEGABYTE  (1024 * 1024ul)     /**< 1 MB */
+#define GIGABYTE  (MEGABYTE * 1024ul) /**< 1 GB */
+#define TERABYTE  (GIGABYTE * 1024ul) /**< 1 TB */
 #endif
+
 
 extern trace_desc_t* g_trac_hbrt;
 using namespace TARGETING;
@@ -55,12 +62,12 @@ errlHndl_t getRtTarget(
             i_pTarget = masterProcChip;
         }
 
-        auto hbrtHypId = RUNTIME::HBRT_HYP_ID_UNKNOWN;
+        TARGETING::ATTR_HBRT_HYP_ID_type hbrtHypId = HBRT_HYP_ID_UNKNOWN;
         if(   (!i_pTarget->tryGetAttr<TARGETING::ATTR_HBRT_HYP_ID>(hbrtHypId))
-           || (hbrtHypId == RUNTIME::HBRT_HYP_ID_UNKNOWN))
+           || (hbrtHypId == HBRT_HYP_ID_UNKNOWN))
         {
-            auto huid = get_huid(i_pTarget);
-            auto targetingTargetType =
+            TARGETING::ATTR_HUID_type huid = get_huid(i_pTarget);
+            TARGETING::ATTR_TYPE_type targetingTargetType =
                 i_pTarget->getAttr<TARGETING::ATTR_TYPE>();
             TARG_ERR("getRtTarget: Targeting target type of 0x%08X not supported. "
                      "HUID: 0x%08X",
@@ -75,21 +82,18 @@ errlHndl_t getRtTarget(
              * @devdesc     Targeting target's type not supported by runtime
              *              code
              */
-            pError = new ERRORLOG::ErrlEntry(
-                ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                TARGETING::TARG_RT_GET_RT_TARGET,
-                TARGETING::TARG_RT_TARGET_TYPE_NOT_SUPPORTED,
-                huid,
-                targetingTargetType
+            UTIL::createTracingError(TARGETING::TARG_RT_GET_RT_TARGET,
+                               TARGETING::TARG_RT_TARGET_TYPE_NOT_SUPPORTED,
+                               huid,
+                               targetingTargetType,
+                               0,0,
+                               pError);
 #ifdef __HOSTBOOT_MODULE
-                ,true);
 
             ERRORLOG::ErrlUserDetailsTarget(i_pTarget,"Targeting Target").
                 addToLog(pError);
-#else
-                );  // if not in hostboot code then skip last param of error log
-                    // and do not create a user details section
 #endif
+            break;
         }
 
         o_rtTargetId = hbrtHypId;
@@ -108,7 +112,7 @@ errlHndl_t getMemTargetMmioInfo ( TARGETING::Target * i_memTarget,
         TARGETING::ocmbMmioAddressRange_t l_tmpRange;
         TARGETING::ATTR_TYPE_type l_targetType = i_memTarget->getAttr<TARGETING::ATTR_TYPE>();
 
-        assert(l_targetType == TARGETING::TYPE_OCMB_CHIP,
+        TARG_ASSERT(l_targetType == TARGETING::TYPE_OCMB_CHIP,
               "Target type % passed to getMemTargetMmioInfo."
               " Currently this function only supports TYPE_OCMB_CHIP",
                l_targetType);
@@ -126,7 +130,7 @@ errlHndl_t getMemTargetMmioInfo ( TARGETING::Target * i_memTarget,
         TARGETING::ATTR_MMIO_PHYS_ADDR_type l_ocmbBaseMmioPhysAddr =
                     i_memTarget->getAttr<TARGETING::ATTR_MMIO_PHYS_ADDR>();
 
-        assert(l_ocmbBaseMmioPhysAddr != 0,
+        TARG_ASSERT(l_ocmbBaseMmioPhysAddr != 0,
                "0 returned for physical address of OCMB's MMIO space. MMIO map probably isn't set up yet.");
 
         // CONFIG space ( 2 GB )

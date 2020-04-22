@@ -32,14 +32,7 @@
   <targetTypeExtension>
     <id>chip-ocmb</id>
     <attribute>
-      <id>HBRT_HYP_ID</id>
-    </attribute>
-    <attribute>
       <id>IBSCOM_MUTEX</id>
-    </attribute>
-    <attribute>
-      <default>0</default>
-      <id>MMIO_PHYS_ADDR</id>
     </attribute>
     <attribute>
       <default>0</default>
@@ -67,9 +60,6 @@
     </attribute>
     <attribute>
       <id>GPIO_INFO_PHYS_PRES</id>
-    </attribute>
-    <attribute>
-      <id>HBRT_HYP_ID</id>
     </attribute>
     <attribute>
       <id>HB_INITIATED_PM_RESET</id>
@@ -319,9 +309,6 @@
   <targetTypeExtension>
     <id>unit-core-power10</id>
     <attribute>
-      <id>HBRT_HYP_ID</id>
-    </attribute>
-    <attribute>
       <id>HB_TARGET_SCOMABLE</id>
     </attribute>
     <attribute>
@@ -338,9 +325,6 @@
 
   <targetTypeExtension>
     <id>unit-fc-power10</id>
-    <attribute>
-      <id>HBRT_HYP_ID</id>
-    </attribute>
     <attribute>
       <id>HB_TARGET_SCOMABLE</id>
     </attribute>

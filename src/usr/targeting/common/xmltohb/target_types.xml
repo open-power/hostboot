@@ -511,9 +511,16 @@
       <id>FRU_ID</id>
     </attribute>
     <attribute>
+      <id>HBRT_HYP_ID</id>
+    </attribute>
+    <attribute>
       <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD -->
       <default>0x00000033</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+    </attribute>
+    <attribute>
+      <default>0</default>
+      <id>MMIO_PHYS_ADDR</id>
     </attribute>
     <attribute>
       <default>OCMB</default>
@@ -629,6 +636,9 @@
     </attribute>
     <attribute>
       <id>FABRIC_GROUP_ID</id>
+    </attribute>
+    <attribute>
+      <id>HBRT_HYP_ID</id>
     </attribute>
     <attribute>
       <id>HOT_PLUG_POWER_CONTROLLER_INFO</id>
@@ -2682,6 +2692,9 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <id>HBRT_HYP_ID</id>
+    </attribute>
+    <attribute>
       <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
       <default>0x00000031</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
@@ -2931,6 +2944,9 @@
     <attribute>
       <default>1</default>
       <id>DECONFIG_GARDABLE</id>
+    </attribute>
+    <attribute>
+      <id>HBRT_HYP_ID</id>
     </attribute>
     <attribute>
       <!-- GARD_APPLIED, RESRC_RECOV, GARD -->

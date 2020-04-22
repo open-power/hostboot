@@ -2028,6 +2028,22 @@
   </enumerationType>
 
   <attribute>
+    <id>HBRT_HYP_ID</id>
+    <description>
+      Effective ID used by the hypervisor to specify a given target. A value
+      of 0xFFFFFFFFFFFFFFFF means invalid/unknown.
+  </description>
+    <simpleType>
+      <uint64_t>
+        <default>0</default>
+      </uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <description>Hostboot HRMOR = (HB_HRMOR_NODAL_BASE * node) + offset. </description>
     <id>HB_HRMOR_NODAL_BASE</id>
     <persistency>volatile</persistency>
@@ -3530,6 +3546,21 @@
       <id>ATTR_MIRROR_BASE_ADDRESS</id>
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+  </attribute>
+
+  <attribute>
+    <id>MMIO_PHYS_ADDR</id>
+    <description>
+            Physical memory address this device has been mapped to.
+    </description>
+    <simpleType>
+      <uint64_t>
+        <default>0</default>
+      </uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
   </attribute>
 
   <attribute>
