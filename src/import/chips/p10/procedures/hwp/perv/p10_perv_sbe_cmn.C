@@ -1091,7 +1091,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-#ifndef __PPE__
 /// @brief mux setup
 //
 /// @param[in]     i_target_chip      Reference to TARGET_TYPE_PROC_CHIP
@@ -1142,6 +1141,5 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-#endif
 
 #endif

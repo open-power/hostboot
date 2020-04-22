@@ -176,9 +176,7 @@ fapi2::ReturnCode p10_perv_sbe_cmn_is_simulation_check(bool& is_simulation);
 fapi2::ReturnCode p10_perv_sbe_cmn_switch_mux_scom(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip, mux_type i_mux_setup);
 
-#ifndef __PPE__
 fapi2::ReturnCode p10_perv_sbe_cmn_switch_mux_cfam(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip, mux_type i_mux_setup);
-#endif
 
 #endif
