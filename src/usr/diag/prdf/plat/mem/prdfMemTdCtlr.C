@@ -354,7 +354,7 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
     if ( nullptr == iv_curProcedure && 0 == queueCount ) return;
 
     // Get the version to use.
-    uint8_t version = TD_CTLR_DATA::VERSION_2;
+    uint8_t version = TD_CTLR_DATA::VERSION_1;
 
     // Get the IPL state.
     #ifdef __HOSTBOOT_RUNTIME
@@ -388,9 +388,6 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
         curSrnk  = iv_curProcedure->getRank().getSlave();
         curPhase = iv_curProcedure->getPhase();
         curType  = iv_curProcedure->getType();
-
-        TargetHandle_t portTrgt = iv_curProcedure->getChip()->getTrgt();
-        curPort = portTrgt->getAttr<ATTR_REL_POS>();
     }
 
     uint32_t pos = 0;
@@ -415,9 +412,6 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
         uint8_t itSrnk = queue[n]->getRank().getSlave();
         uint8_t itType = queue[n]->getType();
         uint8_t itPort = 0;
-
-        TargetHandle_t portTrgt = queue[n]->getChip()->getTrgt();
-        itPort = portTrgt->getAttr<ATTR_REL_POS>();
 
         bsb.setFieldJustify( pos, 3, itMrnk ); pos+=3;
         bsb.setFieldJustify( pos, 3, itSrnk ); pos+=3;

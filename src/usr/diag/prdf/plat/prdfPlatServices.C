@@ -509,7 +509,7 @@ bool isRowRepairEnabled<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     bool o_isEnabled = false;
 
-    /* TODO RTC 247259
+    /* TODO RTC 199035
     do
     {
         // Don't do row repair if DRAM repairs is disabled.
