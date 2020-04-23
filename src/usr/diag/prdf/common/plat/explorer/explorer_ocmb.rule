@@ -31,6 +31,9 @@ chip explorer_ocmb
     dump        DUMP_CONTENT_HW;
     scomlen     64;
 
+# Import signatures
+.include "prdfMemExtraSig.H";
+
  #############################################################################
  #                                                                           #
  #  ######                                                                   #
