@@ -286,10 +286,17 @@ if( !($cfgSrcOutputDir =~ "none") )
 
     open(ATTR_TARG_MAP_FILE,">$cfgSrcOutputDir"."targAttrOverrideData.H")
       or croak("Target Attribute data file: \"$cfgSrcOutputDir"
-        . "getTargAttrData.C\" could not be opened.");
+        . "targAttrOverrideData.H\" could not be opened.");
     my $targAttrFile = *ATTR_TARG_MAP_FILE;
     writeTargAttrMap($attributes, $targAttrFile);
     close $targAttrFile;
+
+    open(ATTR_ID_MAP_FILE,">$cfgSrcOutputDir"."targRwAttrIdToName.H")
+      or croak("Target Attribute ID to Name map file: \"$cfgSrcOutputDir"
+        . "targRwAttrIdToName.H\" could not be opened.");
+    my $targAttrIdNameFile = *ATTR_ID_MAP_FILE;
+    writeAttrIdNameMap($attributes, $targAttrIdNameFile);
+    close $targAttrIdNameFile;
 
     open(MUTEX_ATTR_FILE, ">$cfgSrcOutputDir"."mutexattributes.H")
       or croak ("Mutex Attribute file: \"$cfgSrcOutputDir"
@@ -2315,6 +2322,63 @@ sub writeTargAttrMap {
 
     }
 
+    print $outFile "};\n";
+}
+
+###############################################################################
+# Writes code to populate Attribute ID to Attribute Name Map File
+###############################################################################
+sub writeAttrIdNameMap {
+    my($attributes,$outFile) = @_;
+
+    my $attributeIdEnum = getAttributeIdEnumeration($attributes);
+
+    # file description
+    print $outFile "// Attribute ID -> Attribute Name Map File\n";
+    print $outFile "// Only includes writeable attributes\n\n";
+
+    # includes
+    print $outFile "#include <map>\n\n";
+
+    # attribute id -> attribute info map
+    print $outFile
+        "const static std::map<uint32_t,const char*>g_attrIdToNameMap = {\n";
+
+    # loop through every attribute
+    foreach my $attribute
+        (sort { $a->{id} cmp $b->{id} } @{$attributes->{attribute}})
+    {
+
+        # Only want to add writeable attr
+        if (!(exists $attribute->{writeable}))
+        {
+            next;
+        }
+
+        # Simple or complex types
+        if ((exists $attribute->{simpleType}) ||
+            (exists $attribute->{complexType}))
+        {
+            # This loops through all attributes to add id and name
+            # not just enumerated attributes
+            foreach my $enum (@{$attributeIdEnum->{enumerator}})
+            {
+                if($enum->{name} eq $attribute->{id})
+                {
+                    # start attribute map data
+                    print $outFile "\t{\n";
+                    # attribute id
+                    print $outFile "\t\t$enum->{value},\n";
+                    # attribute name
+                    print $outFile "\t\t\"ATTR_$attribute->{id}\"\n";
+                    # end attribute map data
+                    print $outFile "\t},\n";
+                }
+            }
+        }
+    }
+
+    # end of map
     print $outFile "};\n";
 }
 

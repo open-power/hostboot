@@ -2,3 +2,8 @@ config DEVTREE
   default y
     help
       If enabled Hostboot supports DEVTREE.
+
+config DEVTREE_DEBUG
+  default n
+    help
+      If enabled execute DEVTREE debug functions.

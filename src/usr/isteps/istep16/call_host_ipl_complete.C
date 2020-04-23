@@ -49,6 +49,9 @@
 #ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmisensor.H>
 #endif
+#ifdef CONFIG_DEVTREE
+#include <devtree/devtree.H>
+#endif
 
 #include <vmmconst.h>
 #include <targeting/targplatutil.H>
@@ -196,6 +199,11 @@ void* call_host_ipl_complete(void* const io_pArgs)
                       spAttnArea1Addr,
                       spAttnArea2Addr);
         }
+
+#ifdef CONFIG_DEVTREE
+        // Test devtree sync
+        DEVTREE::devtreeSyncAttrs();
+#endif
 
         // Sync attributes to Fsp
         l_err = TARGETING::AttrRP::syncAllAttributesToFsp();

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -160,6 +160,9 @@ const DepModInfo g_istep16Dependancies =
         DEP_LIB(libpm.so),
         DEP_LIB(libimageprocs.so),
         DEP_LIB(libisteps_nest.so),
+#ifdef CONFIG_DEVTREE
+        DEP_LIB(libdevtree.so),
+#endif
         nullptr
     }
 };

@@ -110,6 +110,16 @@ namespace TARGETING
 }
 #endif
 
+// for friend declaration
+#ifndef __HOSTBOOT_RUNTIME
+#ifdef CONFIG_DEVTREE
+namespace DEVTREE
+{
+    void devtreeSyncAttrs();
+}
+#endif
+#endif
+
 namespace TARGETING
 {
 
@@ -948,6 +958,12 @@ class Target
 
 #ifdef __HOSTBOOT_MODULE
         friend void UTIL::dumpHBAttrs(uint32_t i_huid);
+#endif
+
+#ifndef __HOSTBOOT_RUNTIME
+#ifdef CONFIG_DEVTREE
+        friend void DEVTREE::devtreeSyncAttrs();
+#endif
 #endif
 } PACKED;
 
