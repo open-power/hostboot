@@ -583,9 +583,16 @@ uint32_t MemDqBitmap::isSpareAvailable( uint8_t i_portSlct, bool & o_dramSpare,
             }
 
             // Check for ECC spare
-            uint8_t eccDqBits =
-                iv_data.at(ECC_SPARE_PORT).bitmap[ECC_SPARE_BYTE];
-            o_eccSpare = ( 0 == (eccDqBits & 0x0f) );
+            // Note: ECC spares only exist when we have DIMM pairs. We don't
+            // want to check the iv_data map for data that won't exist
+            // if there is no DIMM on the ECC_SPARE_PORT, so we confirm
+            // that a paired DIMM exists here first.
+            if ( nullptr != getConnectedDimm(iv_trgt, iv_rank, ECC_SPARE_PORT) )
+            {
+                uint8_t eccDqBits =
+                    iv_data.at(ECC_SPARE_PORT).bitmap[ECC_SPARE_BYTE];
+                o_eccSpare = ( 0 == (eccDqBits & 0x0f) );
+            }
         }
         else
         {

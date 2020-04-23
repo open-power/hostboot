@@ -434,13 +434,7 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
 
     // Get the version to use.
     uint8_t version = TD_CTLR_DATA::VERSION_1;
-    bool isNimbus = false;
     if ( MODEL_NIMBUS == getChipModel(getMasterProc()) )
-    {
-        version = TD_CTLR_DATA::VERSION_2;
-        isNimbus = true;
-    }
-    else if ( MODEL_AXONE == getChipModel(getMasterProc()) )
     {
         version = TD_CTLR_DATA::VERSION_2;
     }
@@ -486,11 +480,6 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
         if ( TD_CTLR_DATA::VERSION_2 == version )
         {
             curPort = iv_curProcedure->getChip()->getPos() % MAX_MCA_PER_MCBIST;
-            if ( !isNimbus )
-            {
-                TargetHandle_t portTrgt = iv_curProcedure->getChip()->getTrgt();
-                curPort = portTrgt->getAttr<ATTR_REL_POS>();
-            }
         }
     }
 
@@ -523,11 +512,6 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
         if ( TD_CTLR_DATA::VERSION_2 == version )
         {
             itPort = queue[n]->getChip()->getPos() % MAX_MCA_PER_MCBIST;
-            if ( !isNimbus )
-            {
-                TargetHandle_t portTrgt = queue[n]->getChip()->getTrgt();
-                itPort = portTrgt->getAttr<ATTR_REL_POS>();
-            }
         }
 
         bsb.setFieldJustify( pos, 3, itMrnk ); pos+=3;
