@@ -5575,9 +5575,11 @@ uint64_t I2C_SET_USER_DATA_2 ( misc_args_t args)
 
 void setLogicalFsiEnginePort(size_t &io_logical_engine, size_t &io_logical_port)
 {
-    assert( (io_logical_engine == 0),
-            "setLogicalFsiEnginePort not intended for engines other than 0."
-            " Engine passed in: %d", io_logical_engine);
+    // This is a NOOP for any engine except A
+    if( io_logical_engine != 0 )
+    {
+        return;
+    }
 
     /* Inclusive ranges:
 
