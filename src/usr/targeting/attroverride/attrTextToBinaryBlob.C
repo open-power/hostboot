@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -105,8 +105,8 @@ TargStrToType CHIP_TYPE_TARG_STR_TO_TYPE [] =
     {"dimm"       , fapi2::TARGET_TYPE_DIMM        , TARGETING::TYPE_DIMM},
     {"p8"         , fapi2::TARGET_TYPE_PROC_CHIP   , TARGETING::TYPE_PROC},
     {"p9"         , fapi2::TARGET_TYPE_PROC_CHIP   , TARGETING::TYPE_PROC},
+    {"ocmb"       , fapi2::TARGET_TYPE_OCMB_CHIP   , TARGETING::TYPE_OCMB_CHIP},
     {"LAST"       , 0                              , 0}
-
 };
 
 TargStrToType CHIP_UNIT_TYPE_TARG_STR_TO_TYPE [] =
@@ -133,7 +133,6 @@ TargStrToType CHIP_UNIT_TYPE_TARG_STR_TO_TYPE [] =
     {"omi"      , fapi2::TARGET_TYPE_OMI        , TARGETING::TYPE_OMI},
     {"omic"     , fapi2::TARGET_TYPE_OMIC       , TARGETING::TYPE_OMIC},
     {"mcc"      , fapi2::TARGET_TYPE_MCC        , TARGETING::TYPE_MCC},
-    {"ocmb"     , fapi2::TARGET_TYPE_OCMB_CHIP  , TARGETING::TYPE_OCMB_CHIP},
     {"mp"       , fapi2::TARGET_TYPE_MEM_PORT   , TARGETING::TYPE_MEM_PORT},
     {"LAST"     , 0                             , 0}
 };
