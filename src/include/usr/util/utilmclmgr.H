@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -228,6 +228,12 @@ struct CompInfo
     void print() const;
 };
 
+// A global POWERVM component info struct. This struct is populated in istep20
+// by eBMC with the lid numbers of the POWERVM component and their sizes. It is
+// later used to populate the reserved memory areas correctly with the right
+// lids of the right sizes.
+extern CompInfo g_PowervmCompInfo;
+
 // Structure for Comp Info cache
 typedef std::map<ComponentID, CompInfo> CompInfoMap;
 
@@ -300,6 +306,9 @@ class MasterContainerLidMgr
      *  @param[out] o_info  Information (LID ID, size, virtual address, etc.)
      *      for the LIDs that were loaded.
      *
+     *  @param[in] i_forceProcessPhyp the flag to force processing of the PHYP
+     *             component. False by default.
+     *
      *  @note: The container will go out of scope if another container is loaded
      *      or the MCL manager goes out of scope.
      *
@@ -311,7 +320,8 @@ class MasterContainerLidMgr
      */
     errlHndl_t processSingleComponent(
         const ComponentID&           i_compId,
-              CompInfo&              o_info);
+              CompInfo&              o_info,
+              bool                   i_forceProcessPhyp = false);
 
     /**
      * @brief TPM extend information for secure components
@@ -418,13 +428,16 @@ class MasterContainerLidMgr
      * @brief Process single component in the MCL.
      *        Loads, verifies, tpm extends lids and loads into hb resv memory
      *
-     * @param[in] i_compId - Component Id
-     * @param[in] io_compInfo - Component info of component to process
+     * @param[in]     i_compId - Component Id
+     * @param[in/out] io_compInfo - Component info of component to process
+     * @param[in]     i_forceProcessPhyp - the flag to force processing of the
+     *                PHYP component. False by default.
      *
      * @return Error handle if error
      */
     errlHndl_t processComponent(const ComponentID& i_compId,
-                                CompInfo& io_compInfo);
+                                CompInfo& io_compInfo,
+                                bool i_forceProcessPhyp = false);
 
     /**
      * @brief Load all lids associated with a Component into contiguous memory

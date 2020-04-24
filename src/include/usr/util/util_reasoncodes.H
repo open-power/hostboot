@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,6 +54,7 @@ namespace Util
         UTIL_LIDMGR_CSTOR       = 0x15,       // UtilLidMgr::UtilLidMgr
         UTIL_MCL_PROCESS_SINGLE_COMP = 0x16,  // UtilLidMgr::processSingleComponent
         UTIL_MOD_TP_SHUTDOWN    = 0x17,       // Util::__Util_ThreadPool_Impl::ThreadPoolImpl::__shutdown
+        UTIL_LIDMGR_GET_LID_BMC = 0x18,       // UtilLigMgr::getLidFromBMC
     };
 
     enum ReasonCode
@@ -87,6 +88,7 @@ namespace Util
         UTIL_LIDMGR_INVAL_LID_REQUEST    = UTIL_COMP_ID | 0x1C,
         UTIL_LIDMGR_INVAL_COMP           = UTIL_COMP_ID | 0x1D,
         UTIL_RC_CHILD_TASK_FAILED        = UTIL_COMP_ID | 0x1E,
+        UTIL_LIDMGR_LID_TOO_BIG          = UTIL_COMP_ID | 0x1F,
     };
 };
 

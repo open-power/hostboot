@@ -40,6 +40,7 @@
 #include <hbotcompid.H>
 #include <hwas/common/hwasCallout.H>
 #include <pldm/pldm_errl.H>
+#include <limits.h>
 
 // This is the name of the outgoing PLDM message queue.
 extern const char* VFS_ROOT_MSG_PLDM_REQ_OUT;
@@ -219,9 +220,14 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
     PLDM_ENTER("getLidFileFromOffset: File handle 0x%08x, Input size 0x%08x, Offset 0x%08x",
                i_fileHandle, io_numBytesToRead, i_offset);
     errlHndl_t l_errl = nullptr;
-    // Currently the maximum transfer size is defined as 180K; we want to have
-    // our max transfer size be slightly below that number.
-    const uint32_t MAX_TRANSFER_SIZE = 150 * 1024;
+    // Currently the maximum transfer size for PLDM is defined as 180K; however,
+    // we shoudn't be allocating that much memory on the heap in HB. It was
+    // found experimentally that the optimal transfer size that doesn't make
+    // HB crash is (127k + 1) bytes. That specific number will ask kernel for
+    // 128k of memory, which will have enough space to accomodate PLDM headers
+    // that are not part of the actual payload without fragmenting the memory
+    // too much.
+    const uint32_t MAX_TRANSFER_SIZE = 127 * KILOBYTE + 1;
     size_t l_numTransfers = 1;
     uint32_t l_totalRead = 0;
     uint8_t* l_currPtr = o_file;
@@ -300,6 +306,25 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
             break;
         }
 
+        // PLDM_DATA_OUT_OF_RANGE is another signal for the end-of-file.
+        // If the file is an exact multiple of MAX_TRANSFER_SIZE, and
+        // if we read the last part of the file during the last read, we
+        // will have advanced the file offset pointer past the end of the
+        // file. If we make another request with the offset past the end
+        // of the file, the BMC will respond with PLDM_DATA_OUT_OF_RANGE rc.
+        // We need to stop reading the file and return (without error).
+        if(l_resp.completion_code == PLDM_DATA_OUT_OF_RANGE)
+        {
+            PLDM_INF("getLidFileFromOffset: PLDM_DATA_OUT_OF_RANGE EOF condition encountered");
+            if(l_errl)
+            {
+                delete l_errl;
+                l_errl = nullptr;
+            }
+            l_resp.completion_code = PLDM_SUCCESS;
+        }
+
+
         if(l_resp.completion_code != PLDM_SUCCESS)
         {
             PLDM_ERR("getLidFileFromOffset: PLDM op returned code %d",
@@ -337,7 +362,7 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
         }
         else
         {
-            PLDM_INF("getLidFileFromOffset: Response %llu; the actual size of read is 0x%08x",
+            PLDM_DBG("getLidFileFromOffset: Response %llu; the actual size of read is 0x%08x",
                      i, l_resp.length);
         }
 
@@ -349,8 +374,8 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
         }
         else if(l_resp.length != l_req.length)
         {
-            PLDM_INF("getLidFileFromOffset: BMC returned length 0x%08x of file read; requested length was 0x%08x. That indicates End Of File",
-                     l_resp.length, l_req.length);
+            PLDM_INF("getLidFileFromOffset: BMC returned length 0x%08x of file read; requested length was 0x%08x. That indicates End Of File (total length: 0x%08x).",
+                     l_resp.length, l_req.length, l_totalRead);
             break;
         }
         else if((MAX_TRANSFER_SIZE > (io_numBytesToRead - l_totalRead)) &&

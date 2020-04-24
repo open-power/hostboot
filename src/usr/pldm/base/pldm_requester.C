@@ -197,7 +197,7 @@ void pldmRequester::handle_outbound_req_messages(void)
         // waiting so we must respond.
         if(!l_asyncReq)
         {
-            PLDM_INF("Responding to message %d", instance_id);
+            PLDM_DBG("Responding to message %d", instance_id);
             const int rc = msg_respond(g_outboundPldmReqMsgQ, req);
             assert(rc == 0, "handle_outbound_req_messages: failed to respond to message");
         }

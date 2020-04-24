@@ -78,9 +78,11 @@ config SUPPORT_EEPROM_CACHING
 
 config LOAD_PHYP_FROM_BOOTKERNEL
     default n
+    depends on !LOAD_LIDS_VIA_PLDM
     help
         If enabled will load PHYP from the BOOTKERNEL partition
-        of PNOR.
+        of PNOR. PHYP can be loaded either via BOOTKERNEL or via
+        PLDM, but not both.
 
 config SUPPORT_EEPROM_HWACCESS
     default n
