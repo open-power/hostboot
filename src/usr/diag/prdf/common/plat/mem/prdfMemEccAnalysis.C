@@ -100,50 +100,27 @@ uint32_t handleMemUe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     do
     {
-        // First check to see if this is a side-effect UE.
-        SCAN_COMM_REGISTER_CLASS * fir  = i_chip->getRegister("OCMB_LFIR");
-        o_rc = fir->Read();
+        // Handle the memory UE.
+        o_rc = __handleMemUe<TYPE_OCMB_CHIP>( i_chip, i_addr, i_type, io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "Read() failed on OCMB_LFIR: i_chip=0x%08x",
-                      i_chip->getHuid() );
+            PRDF_ERR( PRDF_FUNC "__handleMemUe(0x%08x,%d) failed",
+                      i_chip->getHuid(), i_type );
             break;
         }
 
-        // Check OCMB_LFIR[38] to determine if this is a side-effect.
-        if ( fir->IsBitSet(38) )
+        #ifdef __HOSTBOOT_RUNTIME
+        // Increment the UE counter and store the rank we're on, resetting
+        // the UE and CE counts if we have stopped on a new rank.
+        OcmbDataBundle * ocmbdb = getOcmbDataBundle(i_chip);
+        if ( ocmbdb->iv_ceUeRank != i_addr.getRank() )
         {
-            // This is a side-effect. Callout the OCMB.
-            PRDF_TRAC( PRDF_FUNC "Memory UE is side-effect of DDRPHY error" );
-            io_sc.service_data->SetCallout( i_chip->getTrgt() );
-            io_sc.service_data->setServiceCall();
+            ocmbdb->iv_ceStopCounter.reset();
+            ocmbdb->iv_ueStopCounter.reset();
         }
-        else
-        {
-            // Handle the memory UE.
-            o_rc = __handleMemUe<TYPE_OCMB_CHIP>( i_chip, i_addr, i_type,
-                                                  io_sc );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "__handleMemUe(0x%08x,%d) failed",
-                          i_chip->getHuid(), i_type );
-                break;
-            }
-
-            #ifdef __HOSTBOOT_RUNTIME
-            // Increment the UE counter and store the rank we're on, resetting
-            // the UE and CE counts if we have stopped on a new rank.
-            OcmbDataBundle * ocmbdb = getOcmbDataBundle(i_chip);
-            if ( ocmbdb->iv_ceUeRank != i_addr.getRank() )
-            {
-                ocmbdb->iv_ceStopCounter.reset();
-                ocmbdb->iv_ueStopCounter.reset();
-            }
-            ocmbdb->iv_ueStopCounter.inc( io_sc );
-            ocmbdb->iv_ceUeRank = i_addr.getRank();
-            #endif
-
-        }
+        ocmbdb->iv_ueStopCounter.inc( io_sc );
+        ocmbdb->iv_ceUeRank = i_addr.getRank();
+        #endif
 
     } while (0);
 
