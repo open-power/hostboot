@@ -148,12 +148,12 @@ fapi2::ReturnCode after_draminit_mc<mss::mc_type::EXPLORER>( const fapi2::Target
              .recoverable_error<EXPLR_RDF_FIR_RDDATA_VALID_ERROR>()
              .recoverable_error<EXPLR_RDF_FIR_SCOM_PARITY_CLASS_STATUS>()
              .recoverable_error<EXPLR_RDF_FIR_SCOM_PARITY_CLASS_RECOVERABLE>()
-             .local_checkstop<EXPLR_RDF_FIR_SCOM_PARITY_CLASS_UNRECOVERABLE>()
-             .local_checkstop<EXPLR_RDF_FIR_ECC_CORRECTOR_INTERNAL_PARITY_ERROR>()
+             .checkstop<EXPLR_RDF_FIR_SCOM_PARITY_CLASS_UNRECOVERABLE>()
+             .checkstop<EXPLR_RDF_FIR_ECC_CORRECTOR_INTERNAL_PARITY_ERROR>()
              .recoverable_error<EXPLR_RDF_FIR_ECC_RBUF_CE_DW0>()
              .recoverable_error<EXPLR_RDF_FIR_ECC_RBUF_CE_DW1>()
-             .local_checkstop<EXPLR_RDF_FIR_ECC_RBUF_UE_DW0>()
-             .local_checkstop<EXPLR_RDF_FIR_ECC_RBUF_UE_DW1>()
+             .checkstop<EXPLR_RDF_FIR_ECC_RBUF_UE_DW0>()
+             .checkstop<EXPLR_RDF_FIR_ECC_RBUF_UE_DW1>()
              .write());
 
     // Write SRQ FIR register per Explorer unmask spec
@@ -189,24 +189,24 @@ fapi2::ReturnCode after_draminit_training<mss::mc_type::EXPLORER>( const fapi2::
 
     // Write MCBISTFIR register per Explorer unmask spec; omit bit 10 cmd_complete until draminit_mc
     FAPI_TRY(l_exp_mcbist_reg.recoverable_error<EXPLR_MCBIST_MCBISTFIRQ_COMMAND_ADDRESS_TIMEOUT>()
-             .local_checkstop<EXPLR_MCBIST_MCBISTFIRQ_INTERNAL_FSM_ERROR>()
-             .local_checkstop<EXPLR_MCBIST_MCBISTFIRQ_CCS_ARRAY_UNCORRECT_CE_OR_UE>()
+             .checkstop<EXPLR_MCBIST_MCBISTFIRQ_INTERNAL_FSM_ERROR>()
+             .checkstop<EXPLR_MCBIST_MCBISTFIRQ_CCS_ARRAY_UNCORRECT_CE_OR_UE>()
              .recoverable_error<EXPLR_MCBIST_MCBISTFIRQ_SCOM_RECOVERABLE_REG_PE>()
-             .local_checkstop<EXPLR_MCBIST_MCBISTFIRQ_SCOM_FATAL_REG_PE>()
+             .checkstop<EXPLR_MCBIST_MCBISTFIRQ_SCOM_FATAL_REG_PE>()
              .write());
 
     // Write SRQ FIR register per Explorer unmask spec
     FAPI_TRY(l_exp_srq_reg.recoverable_error<EXPLR_SRQ_SRQFIRQ_NCF_MCB_LOGIC_ERROR>()
-             .local_checkstop<EXPLR_SRQ_SRQFIRQ_NCF_MCB_PARITY_ERROR>()
+             .checkstop<EXPLR_SRQ_SRQFIRQ_NCF_MCB_PARITY_ERROR>()
              .recoverable_error<EXPLR_SRQ_SRQFIRQ_WRQ_RRQ_HANG_ERR>()
-             .local_checkstop<EXPLR_SRQ_SRQFIRQ_SM_1HOT_ERR>()
-             .local_checkstop<EXPLR_SRQ_SRQFIRQ_CMD_PARITY_ERROR>()
-             .local_checkstop<EXPLR_SRQ_SRQFIRQ_WDF_ERROR2>()
-             .local_checkstop<EXPLR_SRQ_SRQFIRQ_WDF_ERROR3>()
+             .checkstop<EXPLR_SRQ_SRQFIRQ_SM_1HOT_ERR>()
+             .checkstop<EXPLR_SRQ_SRQFIRQ_CMD_PARITY_ERROR>()
+             .checkstop<EXPLR_SRQ_SRQFIRQ_WDF_ERROR2>()
+             .checkstop<EXPLR_SRQ_SRQFIRQ_WDF_ERROR3>()
              .recoverable_error<EXPLR_SRQ_SRQFIRQ_WDF_ERROR7>()
-             .local_checkstop<EXPLR_SRQ_SRQFIRQ_NCF_UE>()
-             .local_checkstop<EXPLR_SRQ_SRQFIRQ_NCF_LOGIC_ERROR>()
-             .local_checkstop<EXPLR_SRQ_SRQFIRQ_NCF_PARITY_ERROR>()
+             .checkstop<EXPLR_SRQ_SRQFIRQ_NCF_UE>()
+             .checkstop<EXPLR_SRQ_SRQFIRQ_NCF_LOGIC_ERROR>()
+             .checkstop<EXPLR_SRQ_SRQFIRQ_NCF_PARITY_ERROR>()
              .recoverable_error<EXPLR_SRQ_SRQFIRQ_NCF_CORR_ERROR>()
              .write());
 
@@ -266,26 +266,26 @@ fapi2::ReturnCode after_mc_omi_init<mss::mc_type::EXPLORER>(const fapi2::Target<
 
     // Setup MMIO MFIR unmasks per spec
     FAPI_TRY(l_exp_mmio_mfir_reg.recoverable_error<EXPLR_MMIO_MFIR_SCOM_ERR>()
-             .local_checkstop<EXPLR_MMIO_MFIR_FSM_PERR>()
-             .local_checkstop<EXPLR_MMIO_MFIR_FIFO_OVERFLOW>()
-             .local_checkstop<EXPLR_MMIO_MFIR_CTL_REG_PERR>()
+             .checkstop<EXPLR_MMIO_MFIR_FSM_PERR>()
+             .checkstop<EXPLR_MMIO_MFIR_FIFO_OVERFLOW>()
+             .checkstop<EXPLR_MMIO_MFIR_CTL_REG_PERR>()
              .recoverable_error<EXPLR_MMIO_MFIR_INFO_REG_PERR>()
              .write());
 
     // Setup TLXT FIR unmasks per spec
-    FAPI_TRY(l_exp_tlxt_fir_reg.local_checkstop<EXPLR_TLXT_TLXFIRQ_TLXT_PARITY_ERROR>()
+    FAPI_TRY(l_exp_tlxt_fir_reg.checkstop<EXPLR_TLXT_TLXFIRQ_TLXT_PARITY_ERROR>()
              .recoverable_error<EXPLR_TLXT_TLXFIRQ_TLXT_RECOVERABLE_ERROR>()
              .recoverable_error<EXPLR_TLXT_TLXFIRQ_TLXT_CONFIG_ERROR>()
-             .local_checkstop<EXPLR_TLXT_TLXFIRQ_TLXT_INFORMATIONAL_PERROR>()
+             .checkstop<EXPLR_TLXT_TLXFIRQ_TLXT_INFORMATIONAL_PERROR>()
              .recoverable_error<EXPLR_TLXT_TLXFIRQ_TLXT_HARD_ERROR>()
-             .local_checkstop<EXPLR_TLXT_TLXFIRQ_TLXR_OC_MALFORMED>()
+             .checkstop<EXPLR_TLXT_TLXFIRQ_TLXR_OC_MALFORMED>()
              .recoverable_error<EXPLR_TLXT_TLXFIRQ_TLXR_OC_PROTOCOL_ERROR>()
-             .local_checkstop<EXPLR_TLXT_TLXFIRQ_TLXR_ADDR_XLAT>()
-             .local_checkstop<EXPLR_TLXT_TLXFIRQ_TLXR_METADATA_UNC_DPERR>()
-             .local_checkstop<EXPLR_TLXT_TLXFIRQ_TLXR_OC_UNSUPPORTED>()
-             .local_checkstop<EXPLR_TLXT_TLXFIRQ_TLXR_OC_FATAL>()
-             .local_checkstop<EXPLR_TLXT_TLXFIRQ_TLXR_CONTROL_ERROR>()
-             .local_checkstop<EXPLR_TLXT_TLXFIRQ_TLXR_INTERNAL_ERROR>()
+             .checkstop<EXPLR_TLXT_TLXFIRQ_TLXR_ADDR_XLAT>()
+             .checkstop<EXPLR_TLXT_TLXFIRQ_TLXR_METADATA_UNC_DPERR>()
+             .checkstop<EXPLR_TLXT_TLXFIRQ_TLXR_OC_UNSUPPORTED>()
+             .checkstop<EXPLR_TLXT_TLXFIRQ_TLXR_OC_FATAL>()
+             .checkstop<EXPLR_TLXT_TLXFIRQ_TLXR_CONTROL_ERROR>()
+             .checkstop<EXPLR_TLXT_TLXFIRQ_TLXR_INTERNAL_ERROR>()
              .recoverable_error<EXPLR_TLXT_TLXFIRQ_TLXR_INFORMATIONAL>()
              .write());
 
@@ -339,15 +339,15 @@ fapi2::ReturnCode after_scominit<mss::mc_type::EXPLORER>( const fapi2::Target<fa
 
     // Unmask SRQFIR bits specified by PRD spec
     FAPI_TRY(l_exp_srqfir_reg.recoverable_error<EXPLR_SRQ_SRQFIRQ_MBA_RECOVERABLE_ERROR>()
-             .local_checkstop<EXPLR_SRQ_SRQFIRQ_MBA_NONRECOVERABLE_ERROR>()
-             .local_checkstop<EXPLR_SRQ_SRQFIRQ_REG_PARITY_ERROR>()
+             .checkstop<EXPLR_SRQ_SRQFIRQ_MBA_NONRECOVERABLE_ERROR>()
+             .checkstop<EXPLR_SRQ_SRQFIRQ_REG_PARITY_ERROR>()
              .recoverable_error<EXPLR_SRQ_SRQFIRQ_INFO_REG_PARITY_ERROR>()
              .recoverable_error<EXPLR_SRQ_SRQFIRQ_DEBUG_PARITY_ERROR>()
-             .local_checkstop<EXPLR_SRQ_SRQFIRQ_WDF_ERROR0>()
-             .local_checkstop<EXPLR_SRQ_SRQFIRQ_WDF_ERROR1>()
-             .local_checkstop<EXPLR_SRQ_SRQFIRQ_WDF_ERROR4>()
+             .checkstop<EXPLR_SRQ_SRQFIRQ_WDF_ERROR0>()
+             .checkstop<EXPLR_SRQ_SRQFIRQ_WDF_ERROR1>()
+             .checkstop<EXPLR_SRQ_SRQFIRQ_WDF_ERROR4>()
              .recoverable_error<EXPLR_SRQ_SRQFIRQ_WDF_ERROR5>()
-             .local_checkstop<EXPLR_SRQ_SRQFIRQ_WDF_ERROR6>()
+             .checkstop<EXPLR_SRQ_SRQFIRQ_WDF_ERROR6>()
              .write());
 
     // Unmask DDR4_PHY bits per PRD spec
@@ -426,20 +426,20 @@ fapi2::ReturnCode after_mc_omi_setup<mss::mc_type::EXPLORER>( const fapi2::Targe
 
     // Write TLX FIR register per Explorer unmask spec
     FAPI_TRY(l_exp_tlx_fir_reg.recoverable_error<EXPLR_TLXT_TLXFIRQ_INFO_REG_PARITY_ERROR>()
-             .local_checkstop<EXPLR_TLXT_TLXFIRQ_CTRL_REG_PARITY_ERROR>()
-             .local_checkstop<EXPLR_TLXT_TLXFIRQ_TLX_VC0_MAX_CRD_ERROR>()
-             .local_checkstop<EXPLR_TLXT_TLXFIRQ_TLX_VC1_MAX_CRD_ERROR>()
-             .local_checkstop<EXPLR_TLXT_TLXFIRQ_TLX_DCP0_MAX_CRD_ERROR>()
-             .local_checkstop<EXPLR_TLXT_TLXFIRQ_TLX_DCP3_MAX_CRD_ERROR>()
-             .local_checkstop<EXPLR_TLXT_TLXFIRQ_CREDIT_MGMT_ERROR>()
-             .local_checkstop<EXPLR_TLXT_TLXFIRQ_CREDIT_MGMT_PERROR>()
+             .checkstop<EXPLR_TLXT_TLXFIRQ_CTRL_REG_PARITY_ERROR>()
+             .checkstop<EXPLR_TLXT_TLXFIRQ_TLX_VC0_MAX_CRD_ERROR>()
+             .checkstop<EXPLR_TLXT_TLXFIRQ_TLX_VC1_MAX_CRD_ERROR>()
+             .checkstop<EXPLR_TLXT_TLXFIRQ_TLX_DCP0_MAX_CRD_ERROR>()
+             .checkstop<EXPLR_TLXT_TLXFIRQ_TLX_DCP3_MAX_CRD_ERROR>()
+             .checkstop<EXPLR_TLXT_TLXFIRQ_CREDIT_MGMT_ERROR>()
+             .checkstop<EXPLR_TLXT_TLXFIRQ_CREDIT_MGMT_PERROR>()
              .write());
 
     // Write MC_OMI FIR register per Explorer unmask spec
     // Note: Explorer doesn't initialize its DLX_MC_OMI_FIR masks to the masked state, so mask them all first
     FAPI_DBG("Masking entire EXPLR_DLX_MC_OMI_FIR_MASK_REG on %s", mss::c_str(i_target));
     FAPI_TRY(fapi2::putScom(i_target, EXPLR_DLX_MC_OMI_FIR_MASK_REG, MASK_ALL));
-    FAPI_TRY(l_exp_mc_omi_fir_reg.local_checkstop<EXPLR_DLX_MC_OMI_FIR_REG_DL0_FATAL_ERROR>()
+    FAPI_TRY(l_exp_mc_omi_fir_reg.checkstop<EXPLR_DLX_MC_OMI_FIR_REG_DL0_FATAL_ERROR>()
              .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_DATA_UE>()
              .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_X4_MODE>()
              .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_TIMEOUT>()
@@ -513,16 +513,16 @@ fapi2::ReturnCode after_memdiags<mss::mc_type::EXPLORER>( const fapi2::Target<fa
     }
 
     // Write remainder of RDF FIR mask per Explorer unmask spec
-    FAPI_TRY(l_exp_rdf_fir_reg.local_checkstop<EXPLR_RDF_FIR_MAINLINE_AUE>()
+    FAPI_TRY(l_exp_rdf_fir_reg.checkstop<EXPLR_RDF_FIR_MAINLINE_AUE>()
              .recoverable_error<EXPLR_RDF_FIR_MAINLINE_UE>()
-             .local_checkstop<EXPLR_RDF_FIR_MAINLINE_IAUE>()
+             .checkstop<EXPLR_RDF_FIR_MAINLINE_IAUE>()
              .recoverable_error<EXPLR_RDF_FIR_MAINLINE_IUE>()
-             .local_checkstop<EXPLR_RDF_FIR_MAINTENANCE_AUE>()
-             .local_checkstop<EXPLR_RDF_FIR_MAINTENANCE_IAUE>()
+             .checkstop<EXPLR_RDF_FIR_MAINTENANCE_AUE>()
+             .checkstop<EXPLR_RDF_FIR_MAINTENANCE_IAUE>()
              .write());
 
     // Write SRQ FIR mask per Explorer unmask spec
-    FAPI_TRY(l_exp_srq_srqfirq_reg.local_checkstop<EXPLR_SRQ_SRQFIRQ_PORT_FAIL>().write());
+    FAPI_TRY(l_exp_srq_srqfirq_reg.checkstop<EXPLR_SRQ_SRQFIRQ_PORT_FAIL>().write());
 
     // Clear FARB0 54/57 bits for RCD recovery and port fail
     FAPI_TRY(fapi2::getScom(i_target, EXPLR_SRQ_MBA_FARB0Q, l_reg_data));
