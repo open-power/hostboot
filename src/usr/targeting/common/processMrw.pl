@@ -1681,7 +1681,9 @@ sub iterateOverChiplets
                 #So, we can avoid them with this conditional
                 if ($unit_type ne "PCI" && $unit_type ne "NA" &&
                     $unit_type ne "FSI" && $unit_type ne "PSI" &&
-                    $unit_type ne "SYSREFCLKENDPT" && $unit_type ne "MFREFCLKENDPT")
+                    $unit_type ne "SYSREFCLKENDPT" &&
+                    $unit_type ne "PCICLKENDPT" &&
+                    $unit_type ne "LPCREFCLKENDPT")
                 {
 
                     # @TODO Remove this check once ABUS and XBUS

@@ -236,9 +236,13 @@ sub printTarget
         {
             print $fh "\t<type>"."unit-sysclk-slave"."</type>\n";
         }
-        elsif($target_TYPE eq 'MFREFCLKENDPT')
+        elsif($target_TYPE eq 'PCICLKENDPT')
         {
-            print $fh "\t<type>"."unit-mfclk-slave"."</type>\n";
+            print $fh "\t<type>"."unit-pciclk-slave"."</type>\n";
+        }
+        elsif($target_TYPE eq 'LPCREFCLKENDPT')
+        {
+            print $fh "\t<type>"."unit-lpcclk-slave"."</type>\n";
         }
     }
     elsif($self->getTargetType($target) eq 'unit-clk-master')
@@ -247,9 +251,13 @@ sub printTarget
         {
             print $fh "\t<type>"."unit-sysclk-master"."</type>\n";
         }
-        elsif($target_TYPE eq 'MFREFCLKENDPT')
+        elsif($target_TYPE eq 'PCICLKENDPT')
         {
-            print $fh "\t<type>"."unit-mfclk-master"."</type>\n";
+            print $fh "\t<type>"."unit-pciclk-master"."</type>\n";
+        }
+        elsif($target_TYPE eq 'LPCREFCLKENDPT')
+        {
+            print $fh "\t<type>"."unit-lpcclk-master"."</type>\n";
         }
     }
     elsif($self->getTargetType($target) eq 'enc-node-power9')
