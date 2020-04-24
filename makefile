@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2019
+# Contributors Listed Below - COPYRIGHT 2010,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -80,7 +80,12 @@ gcov:
 .PHONY: lcov
 lcov: $(LCOV_TOOL) $(GENHTML_TOOL)
 	rm -f obj/lcov_data
-	$(LCOV_TOOL) -c --dir . -o obj/lcov_data --gcov-tool $(GCOV)
+	# Write initial baseline (all-zero) coverage data
+	$(LCOV_TOOL) --initial -c --dir . -o obj/zero_lcov_data --gcov-tool $(GCOV)
+	# Collect real coverage data from the traces
+	$(LCOV_TOOL) -c --dir . -o obj/real_lcov_data --gcov-tool $(GCOV)
+	# Combine the initial and the real data into one report
+	$(LCOV_TOOL) --dir . -a obj/real_lcov_data -a obj/zero_lcov_data -o obj/lcov_data --gcov-tool $(GCOV)
 	rm -rf obj/gcov_report
 	$(GENHTML_TOOL) obj/lcov_data -o obj/gcov_report --ignore-errors source
 	@echo Coverage report now available in obj/gcov_report
