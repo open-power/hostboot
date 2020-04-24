@@ -69,3 +69,21 @@ config SUPPORT_EEPROM_CACHING
     help
         If enabled will read data off eeproms and cache in PNOR's
         EECACHE section.
+
+config LOAD_PHYP_FROM_BOOTKERNEL
+    default n
+    depends on !LOAD_LIDS_VIA_PLDM
+    help
+        If enabled will load PHYP from the BOOTKERNEL partition
+        of PNOR. PHYP can be loaded either via BOOTKERNEL or via
+        PLDM, but not both.
+
+config SUPPORT_EEPROM_HWACCESS
+    default n
+    help
+        Hostboot will directly access EEPROM hardware for presence detection,
+        vpd collection, and any modifications to the contents.  If not set,
+        Hostboot will use pre-built EECACHE to perform presence detection. Only
+        the devices with associated records pre-populated into the EECACHE PNOR
+        partition will be marked as present; all devices without existing EECACHE
+        records will be marked as not present.

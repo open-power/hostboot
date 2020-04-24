@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,8 @@
 #include <secureboot/service.H>
 #endif
 
+#include <pldm/requests/pldm_fileio_requests.H>
+
 using namespace ERRORLOG;
 mutex_t UtilLidMgr::cv_mutex = MUTEX_INITIALIZER;
 
@@ -56,6 +58,7 @@ UtilLidMgr::UtilLidMgr(uint32_t i_lidId)
 ,iv_lidSize(0)
 {
     errlHndl_t l_err = nullptr;
+#ifndef CONFIG_PLDM
     iv_spBaseServicesEnabled = INITSERVICE::spBaseServicesEnabled();
     l_err = updateLid(i_lidId);
     if (l_err)
@@ -96,6 +99,28 @@ UtilLidMgr::UtilLidMgr(uint32_t i_lidId)
         errlCommit(l_err,UTIL_COMP_ID);
         INITSERVICE::doShutdown(Util::UTIL_LIDMGR_INVAL_LID_REQUEST);
     }
+#else
+    do {
+        iv_spBaseServicesEnabled = INITSERVICE::spBaseServicesEnabled();
+        l_err = updateLid(i_lidId);
+        if (l_err)
+        {
+            UTIL_FT(ERR_MRK"UtilLidMgr::UtilLidMgr() Failed to update Lid (0x%X)",
+                    i_lidId);
+            break;
+        }
+    } while(0);
+
+    if( l_err )
+    {
+        l_err->collectTrace(UTIL_COMP_NAME);
+        uint32_t l_reasoncode = l_err->reasonCode();
+        errlCommit(l_err,UTIL_COMP_ID);
+        UTIL_FT("Shutting down due to rc=0x%08X", l_reasoncode);
+        INITSERVICE::doShutdown(l_reasoncode);
+        iv_lidId = Util::INVALID_LIDID;
+    }
+#endif
 
 }
 
@@ -199,6 +224,11 @@ errlHndl_t UtilLidMgr::getLidSize(size_t& o_lidSize)
             // for a syncronous message we need to free the message
             msg_free( l_pMsg );
             l_pMsg = nullptr;
+        }
+        else
+        {
+            UTIL_FT(INFO_MRK"getLidSize: lid's 0x%08x size will be determined by reading it from BMC until it signals the end of the file",
+                   iv_lidId);
         }
 
     }while(0);
@@ -371,7 +401,8 @@ errlHndl_t UtilLidMgr::getLidPnor(void* i_dest,
 
 ///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
-errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
+errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize,
+                              uint32_t* o_lidSize)
 {
     errlHndl_t errl = nullptr;
     uint32_t curLid = 0;
@@ -628,6 +659,33 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
                 }
 
             }while(transferred_data < iv_lidSize);
+        } // iv_spBaseServicesEnabled
+        else
+        {
+#ifdef CONFIG_PLDM
+            uint32_t l_reportedLidSize = 0;
+            // We don't know the exact size of the lid, so we will have to rely
+            // on BMC to tell us how big the lid is. However, we can still limit
+            // the size by the amount of space left in the memory we reserved
+            // for lids (i_destSize).
+            errl = getLidFromBMC(i_destSize, i_dest, l_reportedLidSize);
+            if(errl)
+            {
+                UTIL_FT(ERR_MRK"getLid: could not get lid 0x%08x from BMC!",
+                        iv_lidId);
+                break;
+            }
+            if(o_lidSize)
+            {
+                *o_lidSize = l_reportedLidSize;
+            }
+#else
+            // Weird scenario. Invalidate the output size.
+            if(o_lidSize)
+            {
+                *o_lidSize = 0;
+            }
+#endif
         }
         if(errl)
         {
@@ -666,6 +724,60 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
     }
 
     return errl;
+}
+
+errlHndl_t UtilLidMgr::getLidFromBMC(size_t i_size, void* o_dest,
+                                     uint32_t& o_actualSize)
+{
+    errlHndl_t l_errl = nullptr;
+    UTIL_FT(ENTER_MRK"getLidFromBMC: getting lid 0x%08x of size 0x%08x",
+            iv_lidId, i_size);
+#ifdef CONFIG_PLDM
+    uint32_t l_lidSize = 0;
+
+    do {
+    uint8_t* l_dest = reinterpret_cast<uint8_t*>(o_dest);
+    l_errl = PLDM::getLidFile(iv_lidId, l_lidSize, l_dest);
+    if(l_errl)
+    {
+        UTIL_FT(ERR_MRK"getLidFromBMC: Could not get lid 0x%08x from BMC!",
+                iv_lidId);
+        break;
+    }
+
+    if(l_lidSize > i_size)
+    {
+        /*@
+         * @errortype
+         * @moduleid         Util::UTIL_LIDMGR_GET_LID_BMC
+         * @reasoncode       Util::UTIL_LIDMGR_LID_TOO_BIG
+         * @userdata1        LID ID
+         * @userdata2[0:31]  Requested lid size
+         * @userdata2[32:63] Lid size returned by BMC
+         * @devdesc BMC returned a lid of size larger than the size of lid's
+         *          destination
+         * @custdesc A host failure occurred
+         */
+        l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                               Util::UTIL_LIDMGR_GET_LID_BMC,
+                               Util::UTIL_LIDMGR_LID_TOO_BIG,
+                               iv_lidId,
+                               TWO_UINT32_TO_UINT64(
+                                    static_cast<uint32_t>(i_size),
+                                    l_lidSize),
+                               ErrlEntry::ADD_SW_CALLOUT);
+        l_errl->collectTrace(UTIL_COMP_NAME);
+        break;
+    }
+    o_actualSize = l_lidSize;
+    }while(0);
+#else
+    // Weird scenario. Invalidate the actual size read
+    o_actualSize = 0;
+#endif
+    UTIL_FT(EXIT_MRK"getLidFromBMC: lid 0x%08x; actual size: 0x%08x",
+            iv_lidId, o_actualSize);
+    return l_errl;
 }
 
 ///////////////////////////////////////////////////////////

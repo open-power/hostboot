@@ -83,6 +83,7 @@
 #include <isteps/mem_utils.H>
 #include <secureboot/smf_utils.H>
 #include <secureboot/smf.H>
+#include <isteps/istep_reasoncodes.H>
 
 namespace RUNTIME
 {
@@ -1714,10 +1715,15 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                 break;
             }
 
-            // Load lids from Master Container Lid Container provided by FSP and
-            // in POWERVM mode
-            if (INITSERVICE::spBaseServicesEnabled() &&
-                    TARGETING::is_phyp_load())
+            bool l_processMCL = INITSERVICE::spBaseServicesEnabled() &&
+                                TARGETING::is_phyp_load();
+
+#ifdef CONFIG_LOAD_LIDS_VIA_PLDM
+            l_processMCL = TARGETING::is_phyp_load();
+#endif
+
+            // Load lids from Master Container Lid Container in POWERVM mode
+            if (l_processMCL)
             {
                 MCL::MasterContainerLidMgr l_mcl;
                 l_elog = l_mcl.processComponents();
@@ -4125,4 +4131,399 @@ errlHndl_t getRsvdMemTraceBuf(uint64_t& o_RsvdMemAddress, uint64_t& o_size)
 
 }
 
+errlHndl_t verifyAndMovePayload(void)
+{
+    TRACFCOMP( g_trac_runtime,
+               ENTER_MRK"verifyAndMovePayload()" );
+
+    errlHndl_t l_err = nullptr;
+    void * payload_tmp_virt_addr = nullptr;
+    void * payloadBase_virt_addr = nullptr;
+    void * hdat_tmp_virt_addr = nullptr;
+    void * hdat_final_virt_addr = nullptr;
+
+    enum Map_FailLocs_t {
+        NO_MAP_FAIL             = 0x0,
+        PAYLOAD_TMP_MAP_FAIL    = 0x1, // payload_tmp_virt_addr
+        PAYLOAD_BASE_MAP_FAIL   = 0x2, // payloadBase_virt_addr
+        HDAT_TMP_MAP_FAIL       = 0x3, // hdat_tmp_virt_addr
+        HDAT_FINAL_MAP_FAIL     = 0x4, // hdat_final_virt_addr
+
+        PAYLOAD_TMP_UNMAP_FAIL  = 0x5, // payload_tmp_virt_addr
+        PAYLOAD_BASE_UNMAP_FAIL = 0x6, // payloadBase_virt_addr
+        HDAT_TMP_UNMAP_FAIL     = 0x7, // hdat_tmp_virt_addr
+        HDAT_FINAL_UNMAP_FAIL   = 0x8, // hdat_final_virt_addr
+    };
+
+    Map_FailLocs_t blockMapFail = NO_MAP_FAIL;
+
+    // Make sure these constants are page-aligned, as they are used below for
+    // mm_block_map:
+    static_assert((MCL_TMP_ADDR % PAGESIZE) == 0, "verifyAndMovePayload() MCL_TMP_ADDR isn't page-aligned");
+    static_assert((MCL_TMP_SIZE % PAGESIZE) == 0, "verifyAndMovePayload() MCL_TMP_SIZE isn't page-aligned");
+    static_assert((HDAT_TMP_ADDR % PAGESIZE) == 0, "verifyAndMovePayload() HDAT_TMP_ADDR isn't page-aligned");
+
+    do{
+
+    if (!TARGETING::is_phyp_load())
+    {
+        // Non-PHYP load, no need to verify and move
+        break;
+    }
+
+    TARGETING::ATTR_PAYLOAD_KIND_type payload_kind =
+      TARGETING::PAYLOAD_KIND_NONE;
+    bool is_phyp = TARGETING::is_phyp_load(&payload_kind);
+
+    // Only Supporting PHYP/POWERVM and SAPPHIRE/OPAL at this time
+    // @TODO RTC 183831 in case we ever need to support Payload AVPS
+    if( !(TARGETING::PAYLOAD_KIND_PHYP == payload_kind ) &&
+        !(TARGETING::PAYLOAD_KIND_SAPPHIRE == payload_kind ) )
+    {
+        break;
+    }
+
+    // Setup componend IDs and strings
+    const MCL::ComponentID l_compId = is_phyp ? MCL::g_PowervmCompId
+                                              : MCL::g_OpalCompId;
+    MCL::CompIdString l_IdStr = {};
+    MCL::compIdToString(l_compId, l_IdStr);
+
+    // Get Temporary Virtual Address To Payload
+    // - Need to make Memory spaces HRMOR-relative
+    uint64_t hrmorVal = cpu_spr_value(CPU_SPR_HRMOR);
+    uint64_t payload_tmp_phys_addr = hrmorVal - VMM_HRMOR_OFFSET +
+                                     MCL_TMP_ADDR;
+    uint64_t payload_size          = MCL_TMP_SIZE;
+
+    payload_tmp_virt_addr = mm_block_map(
+                             reinterpret_cast<void*>(payload_tmp_phys_addr),
+                             payload_size);
+
+    // Check for nullptr being returned
+    if (payload_tmp_virt_addr == nullptr)
+    {
+        blockMapFail = PAYLOAD_TMP_MAP_FAIL;
+        TRACFCOMP( g_trac_runtime,
+                   ERR_MRK"verifyAndMovePayload(): Fail to mm_block_map "
+                   "payload_tmp_virt_addr (loc=0x%X)",
+                   blockMapFail);
+        // Error log created outside of do-while loop
+        break;
+    }
+
+    TRACFCOMP( g_trac_runtime,"verifyAndMovePayload() "
+               "Processing PAYLOAD_KIND = %d (Id='%s') (is_phyp=%d): "
+               "physAddr=0x%.16llX, virtAddr=0x%.16llX",
+               payload_kind, l_IdStr, is_phyp, payload_tmp_phys_addr,
+               payload_tmp_virt_addr );
+
+
+    // Parse Container Header
+    SECUREBOOT::ContainerHeader l_conHdr;
+    l_err = l_conHdr.setHeader(payload_tmp_virt_addr);
+    if (l_err)
+    {
+        TRACFCOMP( g_trac_runtime,
+                   ERR_MRK"verifyAndMovePayload(): Fail to parse container "
+                   "header at payload_tmp_virt_addr = 0x%.16llX",
+                   payload_tmp_virt_addr);
+        break;
+    }
+
+    // If in Secure Mode Verify Payload at Temporary TCE-related Memory Location
+    if (SECUREBOOT::enabled())
+    {
+        TRACDCOMP( g_trac_runtime,"verifyAndMovePayload() "
+                   "Verifying PAYLOAD: physAddr=0x%.16llX, virtAddr=0x%.16llX",
+                   payload_tmp_phys_addr, payload_tmp_virt_addr );
+
+        // Verify Container
+        l_err = SECUREBOOT::verifyContainer(payload_tmp_virt_addr);
+        if (l_err)
+        {
+            TRACFCOMP( g_trac_runtime,
+                "verifyAndMovePayload(): failed verifyContainer");
+            l_err->collectTrace("",256);
+            SECUREBOOT::handleSecurebootFailure(l_err);
+            assert(false,"Bug! handleSecurebootFailure shouldn't return!");
+        }
+
+        // Get PAYLOAD size from verified Header
+        payload_size = l_conHdr.payloadTextSize() + PAGESIZE;
+        assert(payload_size <= MCL_TMP_SIZE, "verifyAndMovePayload payload_size 0x%X must be <= MCL_TMP_SIZE (0x%X)", payload_size, MCL_TMP_SIZE );
+
+        // Verify ASCII Component Id in the Secure Header matches expected value
+        l_err = SECUREBOOT::verifyComponentId(l_conHdr, l_IdStr);
+        if (l_err)
+        {
+            TRACFCOMP( g_trac_runtime,
+                       ERR_MRK"verifyAndMovePayload(): Fail to verify component"
+                       "Id %s in header at payload_tmp_virt_addr = 0x%.16llX",
+                       l_IdStr, payload_tmp_virt_addr);
+            break;
+        }
+    }
+
+    if(is_phyp)
+    {
+        MCL::MasterContainerLidMgr::cachePhypHeader(
+            reinterpret_cast<uint8_t*>(payload_tmp_virt_addr));
+    }
+
+    // Extend PAYLOAD
+    l_err = MCL::MasterContainerLidMgr::tpmExtend(l_compId, l_conHdr);
+    if (l_err)
+    {
+        TRACFCOMP( g_trac_runtime,
+                   ERR_MRK"verifyAndMovePayload(): Fail to tpmExend "
+                   "Id %s in header at payload_tmp_virt_addr = 0x%.16llX",
+                   l_IdStr, payload_tmp_virt_addr);
+        break;
+    }
+
+    // Move PAYLOAD to Final Location
+    // Get Target Service, and the system target.
+    TARGETING::TargetService& tS = TARGETING::targetService();
+    TARGETING::Target* sys = nullptr;
+    (void) tS.getTopLevelTarget( sys );
+    assert(sys != nullptr, "verifyAndMovePayload() sys target is NULL");
+    uint64_t payloadBase = sys->getAttr<TARGETING::ATTR_PAYLOAD_BASE>();
+
+    payloadBase = payloadBase * MEGABYTE;
+
+    // Move virtual address past payload header for memcpy below
+    payload_tmp_virt_addr = reinterpret_cast<void*>(
+                              reinterpret_cast<uint64_t>(
+                                payload_tmp_virt_addr) +
+                                PAGESIZE);
+    payload_size -= PAGESIZE;
+
+    payloadBase_virt_addr = mm_block_map(
+                               reinterpret_cast<void*>(payloadBase),
+                               payload_size);
+
+    // Check for nullptr being returned
+    if (payloadBase_virt_addr == nullptr)
+    {
+        blockMapFail = PAYLOAD_BASE_MAP_FAIL;
+        TRACFCOMP( g_trac_runtime,
+                   ERR_MRK"verifyAndMovePayload(): Fail to mm_block_map "
+                   "payloadBase_virt_addr (loc=0x%X)",
+                   blockMapFail);
+        // Error log created outside of do-while loop
+        break;
+    }
+
+    TRACFCOMP( g_trac_runtime,
+                "verifyAndMovePayload(): Copy PAYLOAD from 0x%.16llX (va="
+                "0x%llX) to PAYLOAD_BASE = 0x%.16llX (va=0x%llX), size=0x%llX",
+                payload_tmp_phys_addr, payload_tmp_virt_addr, payloadBase,
+                payloadBase_virt_addr, payload_size);
+
+    memcpy (payloadBase_virt_addr,
+            payload_tmp_virt_addr,
+            payload_size);
+
+    // No need to move HDAT on eBMC, since at the time of the execution of this
+    // function, it would not have been built yet.
+    if(!INITSERVICE::spBaseServicesEnabled())
+    {
+        break;
+    }
+
+    uint64_t payloadBase_va = reinterpret_cast<uint64_t>(payloadBase_virt_addr);
+
+    // Move HDAT into its proper place after it was temporarily put into
+    // HDAT_TMP_ADDR-relative-to-HRMOR (HDAT_TMP_SIZE) by the FSP via TCEs
+    uint64_t hdat_tmp_phys_addr = hrmorVal - VMM_HRMOR_OFFSET + HDAT_TMP_ADDR;
+
+    hdat_tmp_virt_addr = mm_block_map(
+                            reinterpret_cast<void*>(hdat_tmp_phys_addr),
+                            HDAT_TMP_SIZE);
+
+    // Check for nullptr being returned
+    if (hdat_tmp_virt_addr == nullptr)
+    {
+        blockMapFail = HDAT_TMP_MAP_FAIL;
+        TRACFCOMP( g_trac_runtime,
+                   ERR_MRK"verifyAndMovePayload(): Fail to mm_block_map "
+                   "hdat_tmp_virt_addr (loc=0x%X)",
+                   blockMapFail);
+        // Error log created outside of do-while loop
+        break;
+    }
+
+    // Determine location and size of HDAT from NACA section of PAYLOAD
+    uint64_t hdat_cpy_offset = 0;
+    size_t   hdat_cpy_size   = 0;
+
+    RUNTIME::findHdatLocation(payloadBase_va, hdat_cpy_offset, hdat_cpy_size);
+
+
+    // Check that the size PAYLOAD allocated for HDAT is less than
+    // temporary HDAT space
+    if ( hdat_cpy_size > HDAT_TMP_SIZE)
+    {
+       TRACFCOMP( g_trac_runtime,ERR_MRK
+                  "verifyAndMovePayload(): PAYLOAD's allocated HDAT size 0x%X "
+                  "Exceeds Maximum Temporary HDAT Size 0x%X",
+                  hdat_cpy_size, HDAT_TMP_SIZE);
+
+        /*@
+         * @errortype
+         * @reasoncode       ISTEP::RC_HDAT_SIZE_CHECK_FAILED
+         * @severity         ERRL_SEV_UNRECOVERABLE
+         * @moduleid         MOD_VERIFY_AND_MOVE_PAYLOAD
+         * @userdata1        Allocated HDAT size from PAYLOAD
+         * @userdata2        Temporary HDAT size
+         * @devdesc          PAYLOAD allocated more HDAT space than temporary
+         *                   space that Hostboot uses
+         * @custdesc         A problem occurred during the IPL
+         *                   of the system.
+         */
+        l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                              MOD_VERIFY_AND_MOVE_PAYLOAD,
+                              ISTEP::RC_HDAT_SIZE_CHECK_FAILED,
+                              hdat_cpy_size,
+                              HDAT_TMP_SIZE,
+                              true /*Add HB SW Callout*/);
+        l_err ->collectTrace("",256);
+        break;
+    }
+
+    TRACFCOMP( g_trac_runtime,
+               "verifyAndMovePayload(): hdat_copy_offset = 0x%X and size=0x%X",
+               hdat_cpy_offset, hdat_cpy_size);
+
+    hdat_final_virt_addr = mm_block_map(
+                              reinterpret_cast<void*>(payloadBase +
+                                                      hdat_cpy_offset),
+                              hdat_cpy_size);
+
+    // Check for nullptr being returned
+    if (hdat_final_virt_addr == nullptr)
+    {
+        blockMapFail = HDAT_FINAL_MAP_FAIL;
+        TRACFCOMP( g_trac_runtime,
+                   ERR_MRK"verifyAndMovePayload(): Fail to mm_block_map "
+                   "hdat_final_virt_addr (loc=0x%X)",
+                   blockMapFail);
+        // Error log created outside of do-while loop
+        break;
+    }
+
+    TRACFCOMP( g_trac_runtime,
+                "verifyAndMovePayload(): Copy HDAT from 0x%.16llX (va="
+                "0x%llX) to HDAT_FINAL = 0x%.16llX (va=0x%llX), size=0x%llX",
+                hdat_tmp_phys_addr, hdat_tmp_virt_addr,
+                payloadBase+hdat_cpy_offset, hdat_final_virt_addr,
+                hdat_cpy_size);
+
+    memcpy(hdat_final_virt_addr,
+           hdat_tmp_virt_addr,
+           hdat_cpy_size);
+
+    } while(0);
+
+    // Handle Possible mm_block_map fails here
+    if (blockMapFail != NO_MAP_FAIL)
+    {
+        // Trace done above. Just create error log here.
+
+        /*@
+         * @errortype
+         * @reasoncode       ISTEP::RC_MM_MAP_ERR
+         * @severity         ERRL_SEV_UNRECOVERABLE
+         * @moduleid         MOD_VERIFY_AND_MOVE_PAYLOAD
+         * @userdata1        Map Fail Location
+         * @userdata2        <UNUSED>
+         * @devdesc          mm_block_map failed and returned nullptr
+         * @custdesc         A problem occurred during the IPL
+         *                   of the system.
+         */
+        errlHndl_t map_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           MOD_VERIFY_AND_MOVE_PAYLOAD,
+                                           ISTEP::RC_MM_MAP_ERR,
+                                           blockMapFail,
+                                           0x0,
+                                           true /*Add HB SW Callout*/);
+        map_err->collectTrace("",256);
+
+        // if l_err already exists just commit this log; otherwise set to l_err
+        if (l_err == nullptr)
+        {
+            l_err = map_err;
+            map_err = nullptr;
+        }
+        else
+        {
+            errlCommit(map_err, ISTEP_COMP_ID);
+        }
+    }
+
+    // Cleanup/Unmap Memory Blocks
+    std::map<void*,Map_FailLocs_t> ptrs_to_unmap =
+    {
+        { payload_tmp_virt_addr, PAYLOAD_TMP_UNMAP_FAIL },
+        { payloadBase_virt_addr, PAYLOAD_BASE_UNMAP_FAIL },
+        { hdat_tmp_virt_addr,    HDAT_TMP_UNMAP_FAIL },
+        { hdat_final_virt_addr,  HDAT_FINAL_UNMAP_FAIL },
+    };
+
+    for ( auto ptr : ptrs_to_unmap )
+    {
+        if (ptr.first == nullptr)
+        {
+            continue;
+        }
+
+        int rc = mm_block_unmap(ptr.first);
+
+        if (rc != 0)
+        {
+            TRACFCOMP( g_trac_runtime,
+                       ERR_MRK"verifyAndMovePayload(): Failed to unmap "
+                       "0x%.16llX (loc=0x%X)",
+                       ptr.first, ptr.second);
+
+            /*@
+             * @errortype
+             * @reasoncode       ISTEP::RC_MM_UNMAP_ERR
+             * @severity         ERRL_SEV_UNRECOVERABLE
+             * @moduleid         MOD_VERIFY_AND_MOVE_PAYLOAD
+             * @userdata1        Map Fail Location
+             * @userdata2        Return code from mm_block_unmap
+             * @devdesc          mm_block_unmap failed and returned nullptr
+             * @custdesc         A problem occurred during the IPL
+             *                   of the system.
+             */
+            errlHndl_t unmap_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                 MOD_VERIFY_AND_MOVE_PAYLOAD,
+                                                 ISTEP::RC_MM_UNMAP_ERR,
+                                                 ptr.second,
+                                                 rc,
+                                                 true /*Add HB SW Callout*/);
+            unmap_err->collectTrace("",256);
+
+            // if l_err already exists just commit this log;
+            // otherwise set to l_err
+            if (l_err == nullptr)
+            {
+                l_err = unmap_err;
+                unmap_err = nullptr;
+            }
+            else
+            {
+                errlCommit(unmap_err, ISTEP_COMP_ID);
+            }
+        }
+    }
+
+    TRACFCOMP( g_trac_runtime,
+               EXIT_MRK"verifyAndMovePayload(): l_err rc = 0x%X",
+               ERRL_GETRC_SAFE(l_err) );
+
+    return l_err;
+}
 } //namespace RUNTIME

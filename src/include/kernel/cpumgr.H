@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,7 +81,8 @@ class CpuManager
             CPU_PERIODIC_CHECK_MEMORY = 128,    // Is this even needed anymore?
 #endif
             CPU_PERIODIC_FLUSH_PAGETABLE = 256,
-            CPU_PERIODIC_DEFRAG = 400,  // TODO Any bigger not currently hit
+            CPU_PERIODIC_DEFRAG = 200,  // TODO Any bigger than 400 not
+                                        // currently hit
         };
 
         /** @fn getCurrentCPU

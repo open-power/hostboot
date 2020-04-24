@@ -98,7 +98,8 @@ errlHndl_t UtilLidMgr::getLidSize(size_t& o_lidSize)
     return l_err;
 }
 
-errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
+errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize,
+                              uint32_t* o_lidSize)
 {
     errlHndl_t l_err = loadLid();
 

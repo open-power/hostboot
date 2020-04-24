@@ -137,7 +137,10 @@ class UtilLidMgr
      *          this is only the size of the LID in bytes.
      *
      *  @param[out] o_lidSize
-     *                   Size of the LID in bytes.
+     *                   Size of the LID in bytes. On BMC systems, this
+     *                   will always be zero. In order to find the size
+     *                   of the lid on BMC, we need to read it
+     *                   (see getLidFromBMC).
      *
      *  @return     errlHndl_t
      *                  return errl ==  nullptr  -> success
@@ -162,11 +165,15 @@ class UtilLidMgr
      *          Reserved space in bytes at destintion address
      *          for LID.
      *
+     *  @param[out] o_lidSize
+     *          The actual size of the lid read (used in the eBMC case)
+     *
      *  @return     errlHndl_t
      *                  return errl ==  nullptr  -> success
      *                  return errl !=  nullptr  -> failure
      */
-    errlHndl_t getLid(void* i_dest, size_t i_destSize);
+    errlHndl_t getLid(void* i_dest, size_t i_destSize,
+                      uint32_t* o_lidSize = nullptr);
 
     /**
      *  @brief Get Stored LID Image
@@ -258,11 +265,24 @@ class UtilLidMgr
      */
     errlHndl_t updateLid(uint32_t i_lidId);
 
-   /**
-    *  @brief performs object cleanup when a new lidId is set
-    *         Function is also called by the destructor.
-    */
-   errlHndl_t cleanup();
+    /**
+     *  @brief performs object cleanup when a new lidId is set
+     *         Function is also called by the destructor.
+     */
+    errlHndl_t cleanup();
+
+    /**
+     * @brief Fetches the lid file from BMC
+     *
+     * @param[in] i_size the size of lid to request. Passing a size of 0 will
+     *            read the file until BMC indicates an end-of-file condition.
+     * @param[out] o_dest where to put the returned lid file
+     * @param[out] o_actualSize the actual size of the read lid (may not equal
+     *             the requested size)
+     * @return nullptr on success; non-nullptr on error
+     */
+    errlHndl_t getLidFromBMC(size_t i_size, void* o_dest,
+                             uint32_t& o_actualSize);
 
     /**
      * @brief value indicating if lid is in its own pnor partition

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,8 @@ const ComponentID g_PowervmCompId {"POWERVM"};
 const ComponentID g_OpalCompId {"OPAL"};
 const ComponentID g_UcdCompId {"UCD9090"};
 const ComponentID g_NvdimmCompId {"NVDIMM"};
+
+CompInfo g_PowervmCompInfo;
 
 void compIdToString(const ComponentID i_compId, CompIdString o_compIdStr)
 {
@@ -356,7 +358,8 @@ void MasterContainerLidMgr::printCompInfoCache()
 
 errlHndl_t MasterContainerLidMgr::processSingleComponent(
     const ComponentID& i_compId,
-          CompInfo&    o_info)
+          CompInfo&    o_info,
+    const bool i_forceProcessPhyp)
 {
     errlHndl_t pError = nullptr;
     const CompInfo empty;
@@ -371,7 +374,8 @@ errlHndl_t MasterContainerLidMgr::processSingleComponent(
         compIdToString(compInfoPairItr->first, iv_curCompIdStr);
 
         pError = processComponent(compInfoPairItr->first,
-                                  compInfoPairItr->second);
+                                  compInfoPairItr->second,
+                                  i_forceProcessPhyp);
         if (pError)
         {
             UTIL_FT(ERR_MRK "MasterContainerLidMgr::processSingleComponent: "
@@ -431,6 +435,16 @@ errlHndl_t MasterContainerLidMgr::processComponents()
 
         // Cache Component ID string
         compIdToString(compInfoPair.first, iv_curCompIdStr);
+#ifdef CONFIG_PLDM
+        // On eBMC systems, fetch the POWERVM component info that
+        // we've populated in istep20
+        if(!INITSERVICE::spBaseServicesEnabled() &&
+           (compInfoPair.first == g_PowervmCompId))
+        {
+            UTIL_FT(INFO_MRK"MasterContainerLidMgr::processComponents fetching the pre-populated POWERVM Component Info");
+            compInfoPair.second = g_PowervmCompInfo;
+        }
+#endif
 
         l_errl = processComponent(compInfoPair.first, compInfoPair.second);
         if (l_errl)
@@ -450,7 +464,8 @@ errlHndl_t MasterContainerLidMgr::processComponents()
 
 errlHndl_t MasterContainerLidMgr::processComponent(
     const ComponentID& i_compId,
-          CompInfo&    io_compInfo)
+          CompInfo&    io_compInfo,
+    const bool         i_forceProcessPhyp)
 {
     UTIL_FT(ENTER_MRK"MasterContainerLidMgr::processComponent %s",
             iv_curCompIdStr);
@@ -458,8 +473,10 @@ errlHndl_t MasterContainerLidMgr::processComponent(
     errlHndl_t l_errl = nullptr;
     do {
 
-    // Check if Component is POWERVM (aka PHYP)
-    bool isPhypComp = (i_compId == g_PowervmCompId) ? true : false;
+    // Check if Component is POWERVM (aka PHYP). Still process PHYP
+    // component if we're told to.
+    bool l_skipPhypComp = i_forceProcessPhyp ? false :
+                                               (i_compId == g_PowervmCompId);
 
     // Only process components if they are marked PRE_VERIFY or we're in load only mode
     if(   (   (io_compInfo.flags & CompFlags::PRE_VERIFY)
@@ -470,10 +487,10 @@ errlHndl_t MasterContainerLidMgr::processComponent(
         break;
     }
 
-    // Total size of all LIDs in component reported by the FSP
+    // Total size of all LIDs in component reported by the FSP/BMC
     size_t l_reportedSize = 0;
     // Load lids into temp mainstore memory
-    l_errl = loadLids(io_compInfo, l_reportedSize, isPhypComp);
+    l_errl = loadLids(io_compInfo, l_reportedSize, l_skipPhypComp);
     if (l_errl)
     {
         break;
@@ -484,7 +501,7 @@ errlHndl_t MasterContainerLidMgr::processComponent(
     io_compInfo.totalSize = l_reportedSize;
 
     // Phyp component has already been loaded and verified before MCL mgr
-    if (!isPhypComp)
+    if (!l_skipPhypComp)
     {
         // Verify component's lids
         l_errl = verifyExtend(i_compId, io_compInfo);
@@ -554,7 +571,8 @@ errlHndl_t MasterContainerLidMgr::processComponent(
 
     // Clear unused memory
     // Note: Phyp component has already been loaded and verified before MCL mgr
-    if ( !isPhypComp && (io_compInfo.totalSize < iv_maxSize) )
+    // on FSP platforms.
+    if ( !l_skipPhypComp && (io_compInfo.totalSize < iv_maxSize) )
     {
         // Get pointer to end of used space
         uint8_t* l_pUnused = reinterpret_cast<uint8_t*>(iv_pVaddr) +
@@ -577,7 +595,7 @@ errlHndl_t MasterContainerLidMgr::processComponent(
             l_errl = PreVerifiedLidMgr::loadFromMCL(lidInfo.id,
                                                     l_curAddr,
                                                     lidInfo.size,
-                                                    isPhypComp,
+                                                    l_skipPhypComp,
                                                     l_firstLid,
                                                     l_addr);
             if(l_errl)
@@ -610,7 +628,7 @@ errlHndl_t MasterContainerLidMgr::processComponent(
 
 errlHndl_t MasterContainerLidMgr::loadLids(CompInfo& io_compInfo,
                                            size_t& o_totalSize,
-                                           const bool i_isPhypComp)
+                                           const bool i_skipPhypComp)
 {
     UTIL_DT(ENTER_MRK"MasterContainerLidMgr::loadLids");
     errlHndl_t l_errl = nullptr;
@@ -626,7 +644,7 @@ errlHndl_t MasterContainerLidMgr::loadLids(CompInfo& io_compInfo,
     // NOTE: iterate by reference to update lidInfo
     for (auto & lidInfo : io_compInfo.lidIds)
     {
-        // Get Lid from FSP
+        // Get Lid from FSP/BMC
         UtilLidMgr l_lidMgr(lidInfo.id);
         // Get size of current lid to be loaded
         size_t l_lidSize = 0;
@@ -637,21 +655,26 @@ errlHndl_t MasterContainerLidMgr::loadLids(CompInfo& io_compInfo,
                     lidInfo.id);
             break;
         }
-        // Update lid size
-        lidInfo.size = l_lidSize;
 
-        // Phyp component has already been loaded and verified before MCL mgr
-        if (!i_isPhypComp)
+        // Phyp component has already been loaded and verified before MCL mgr on
+        // FSP systems. On BMC systems, we still need to load the Phyp component
+        if (!i_skipPhypComp)
         {
+            uint32_t l_reportedLidSize = 0;
             // Load lid into vaddr location. API will check if remaining size is
             // enough; throwing an error if not.
             l_errl = l_lidMgr.getLid(reinterpret_cast<void*>(l_pLidVaddr),
-                                     l_remainSize);
+                                     l_remainSize,
+                                     &l_reportedLidSize);
             if(l_errl)
             {
                 UTIL_FT(ERR_MRK"MasterContainerLidMgr::loadLids - Error getting lidId=0x%.8x",
                         lidInfo.id);
                 break;
+            }
+            if(l_reportedLidSize)
+            {
+                l_lidSize = l_reportedLidSize;
             }
 
             // Store current LID load virtual address
@@ -669,10 +692,13 @@ errlHndl_t MasterContainerLidMgr::loadLids(CompInfo& io_compInfo,
             {
                 l_remainSize -= l_lidSize;
             }
+
+            // Update lid size
+            lidInfo.size = l_lidSize;
         }
 
         // Increment total size
-        o_totalSize += l_lidSize;
+        o_totalSize += lidInfo.size;
     }
 
     UTIL_DT(EXIT_MRK"MasterContainerLidMgr::loadLids");

@@ -70,6 +70,9 @@ namespace RUNTIME
         MOD_RT_DO_NVDIMM_OP              = 0x2A,  /**< rt_fwnotify.C */
         SET_ATTR_NVDIMM_ENCRYPTION_ENABLE = 0x2B, /**< rt_fwnotify.C */
         MOD_CONFIGURE_HBRT_HYP_IDS       = 0x2C,
+        MOD_PM_RT_START_PM_COMPLEX       = 0x2D,  /**< rt_pm.C */
+        MOD_PM_RT_RESET_W_REASON         = 0x2E,  /**< rt_occ.C */
+        MOD_VERIFY_AND_MOVE_PAYLOAD      = 0x2F,  /**< populate_hbruntime.C */
     };
 
     enum RuntimeReasonCode

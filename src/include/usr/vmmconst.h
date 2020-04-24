@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -258,7 +258,11 @@ enum BlockPriority
 // Note: 2 spaces needed so the MCL can be initialized without wiping out PHYP
 // Location for the MCL itself to sit in.
 #define MCL_ADDR (4*MEGABYTE)
+#ifndef CONFIG_PLDM
 #define MCL_SIZE (16*KILOBYTE)
+#else
+#define MCL_SIZE (20*KILOBYTE)
+#endif
 // Location for PHYP to be loaded into and reused for all Master Container Lids
 // Verification is done in a temporary, non-secure area of mainstore memory,
 // then relocated to its final, secure location in mainstore.

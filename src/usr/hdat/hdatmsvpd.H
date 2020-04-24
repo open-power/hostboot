@@ -60,7 +60,12 @@ const uint32_t HDAT_BITS_PER_BYTE = 8;
 const uint32_t HDAT_MB_PER_GB = 1024;
 const uint32_t MAX_CHIP_EC_CNT_PER_MSAREA = 2;
 const uint32_t HDAT_START_INSTANCE = 0;
+#ifndef CONFIG_PLDM
 const uint32_t HDAT_RHB_MAX_RANGE_ENTRIES = 20;
+#else
+const uint32_t HDAT_RHB_MAX_RANGE_ENTRIES = 80;
+#endif
+
 const uint32_t MAX_DIMMS_PER_MCBIST = 8;
 
 //@TODO:RTC 213230(HDAT Axone additional support)

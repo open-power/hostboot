@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -188,7 +188,11 @@ errlHndl_t sendSBESystemConfig();
 // HOMER*8/OCC_Common/VPD/ATTR/HBRT_Image/Res/Res/Res
 // should be the same as HDAT_RHB_MAX_RANGE_ENTRIES_PER_NODE in
 // src/hdat/fsp/hdat.H
+#ifndef CONFIG_PLDM
 #define HB_RSV_MEM_NUM_PTRS  60
+#else
+#define HB_RSV_MEM_NUM_PTRS  80
+#endif
 
 //Note this means the Reserved Mem sub-section is the 6th
 //(0 based) of the MDT section (See HDAT spec 11.1.1)
@@ -407,8 +411,14 @@ inline uint64_t calcSpAttnAreaStart()
                                               | VmmManager::FORCE_PHYS_ADDR;
 }
 
+/*
+ * @brief Verify PAYLOAD and move PAYLOAD + HDAT to proper location
+ *
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t verifyAndMovePayload(void);
 
-}
+} // namespace RUNTIME
 
 #endif
 

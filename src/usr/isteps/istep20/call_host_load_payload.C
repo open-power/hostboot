@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,6 +30,7 @@
 #include <isteps/istep_reasoncodes.H>
 #include <isteps/hwpf_reasoncodes.H>
 #include <targeting/common/commontargeting.H>
+#include <targeting/targplatutil.H>
 #include <initservice/istepdispatcherif.H>
 #include <initservice/initserviceif.H>
 #include <pnor/pnorif.H>
@@ -38,6 +39,8 @@
 #include <arch/ppc.H>
 #include <kernel/console.H>
 #include <xz/xz.h>
+#include <util/utilmclmgr.H>
+#include <runtime/runtime.H>
 
 
 using namespace ERRORLOG;
@@ -66,42 +69,13 @@ void* call_host_load_payload (void *io_pArgs)
     errlHndl_t  l_err  =   NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               ENTER_MRK"call_host_start_payload entry" );
+               ENTER_MRK"call_host_load_payload entry" );
 
     do
     {
-        // Get Target Service, and the system target.
-        TargetService& tS = targetService();
-        TARGETING::Target* sys = NULL;
-        (void) tS.getTopLevelTarget( sys );
-        if( NULL == sys )
-        {
-            // Error getting system target to get payload related values.  We
-            // will create an error to be passed back.  This will cause the
-            // istep to fail.
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       ERR_MRK"call_load_payload: System Target was NULL!" );
-
-            /*@
-             * @errortype
-             * @reasoncode       RC_TARGET_NULL
-             * @severity         ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM
-             * @moduleid         MOD_LOAD_PAYLOAD
-             * @userdata1        <UNUSED>
-             * @userdata2        <UNUSED>
-             * @devdesc          System target was NULL!
-             * @custdesc         A problem occurred during the IPL
-             *                   of the system.
-             */
-            l_err = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                            MOD_LOAD_PAYLOAD,
-                            RC_TARGET_NULL,
-                            0x0,
-                            0x0 );
-
-            break;
-        }
+        TARGETING::Target* sys = nullptr;
+        TARGETING::targetService().getTopLevelTarget( sys );
+        assert(sys != nullptr, "closeNonMasterTces() system target is nullptr");
 
         if(INITSERVICE::spBaseServicesEnabled())
         {
@@ -112,27 +86,62 @@ void* call_host_load_payload (void *io_pArgs)
         // Get Payload base/entry from attributes
         uint64_t payloadBase = sys->getAttr<TARGETING::ATTR_PAYLOAD_BASE>();
         TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,INFO_MRK
-                   "call_load_payload: Payload Base: 0x%08x MB, Base:0x%08x",
+                   "call_host_load_payload: Payload Base: 0x%08x MB, Base:0x%08x",
                    payloadBase, (payloadBase * MEGABYTE) );
 
         payloadBase = payloadBase * MEGABYTE;
 
-        // Load payload data in PHYP mode or in Sapphire mode
-        if(is_sapphire_load() || is_phyp_load())
+        // Load payload data from PNOR in Sapphire mode
+        if(is_sapphire_load())
         {
             PNOR::SectionId l_secID = PNOR::PAYLOAD;
-            if (is_phyp_load())
-            {
-                l_secID = PNOR::BOOTKERNEL;
-            }
 
             l_err = load_pnor_section( l_secID, payloadBase );
             if ( l_err )
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "call_load_payload: error loading pnor section");
+                          "call_host_load_payload: error loading pnor section");
                 break;
             }
+        }
+        else if(is_phyp_load())
+        {
+#ifndef CONFIG_LOAD_LIDS_VIA_PLDM
+            PNOR::SectionId l_secID = PNOR::BOOTKERNEL;
+            l_err = load_pnor_section(l_secID, payloadBase);
+            if (l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "call_host_load_payload: could not load BOOTKERNEL");
+                break;
+            }
+#else
+            MCL::MasterContainerLidMgr l_mcl(true);// load only
+            l_err = l_mcl.processSingleComponent(MCL::g_PowervmCompId,
+                                                 MCL::g_PowervmCompInfo,
+                                                 true); // force PHYP to be
+                                                        // processed
+            if(l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "call_host_load_payload: could not process POWERVM component!");
+                break;
+            }
+
+            // On eBMC systems, move the PAYLOAD to the final location.
+            // We need to do that here and not in istep 21 so that HDAT can be
+            // built correctly.
+            if(!INITSERVICE::spBaseServicesEnabled())
+            {
+                l_err = RUNTIME::verifyAndMovePayload();
+                if(l_err)
+                {
+                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "call_host_load_payload: could not move PAYLOAD");
+                    break;
+                }
+            }
+#endif
         }
 
     }while(0);
