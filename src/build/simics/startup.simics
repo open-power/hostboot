@@ -42,12 +42,20 @@ echo "Defaulting to CPU "+$hb_cpu+" for Hostboot tools"
 
 # Prevent SBE Updates from happening on an IPL
 echo "Altering SBE SEEPROM Versions to disable Update in IPL"
-foreach $cc in (get-all-procs) {
-# These commands cause P10 simics to fail because the seeprom*_image component
-# is not yet implemented in P10 simics. The lines need to be uncommented when
-# the SBE is implemented in the P10 model.
-        #($cc).seeprom1_image.set 0x3FED9 0x5A5A5A5A 8 -l
-        #($cc).seeprom3_image.set 0x3FED9 0x5A5A5A5A 8 -l
+
+# Max sockets we'll see in P10 is 8
+$maxSockets=8
+# At most two chips to a DCM (only 1 for SCM)
+$maxChipsPerSocket=2
+# SPI engines 0 and 1 are the SBE SEEPROMs
+$spiEngines = [0,1]
+foreach $socket in (range 0 $maxSockets) {
+    foreach $chip in (range 0 $maxChipsPerSocket) {
+        foreach $spiEngine in $spiEngines {
+            $sbeSeeprom = (get-seeprom $socket $chip $spiEngine)
+            if($sbeSeeprom != NIL) { ($sbeSeeprom).set 0x7FEDE 0x5A5A5A5A 8 -l }
+        }
+    }
 }
 
 # Load HB debug tools.

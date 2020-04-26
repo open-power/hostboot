@@ -61,6 +61,7 @@ namespace SBE
     enum sbeSeepromStructVersionInfo_t {
         STRUCT_VERSION_FIRST  = 0x1,
         STRUCT_VERSION_LATEST = 0x1,
+        STRUCT_VERSION_SIMICS = 0x5A5A5A5A,
     };
 
     #define STRUCT_VERSION_CHECK(version) (((version) >= STRUCT_VERSION_FIRST) \

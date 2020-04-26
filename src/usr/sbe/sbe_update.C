@@ -3376,6 +3376,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
 
         bool pnor_check_dirty     = false;
         bool crc_check_dirty      = false;
+        bool isSimics_check       = false;
 
         // Set system_situation - bits defined in sbe_update.H
         uint8_t system_situation = 0x00;
@@ -3401,28 +3402,43 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                 crc_check_dirty = true;
             }
 
-            if (pnor_check_dirty || crc_check_dirty)
+            // Check if seeprom version simics is 0x5A5A5A5A and we are running simics
+            // This is the case for HW builds which desire to skip updating seeproms
+            // since HW builds do not use a special simics xml configuration
+            // See CONFIG option set or unset NO_SBE_UPDATES
+            if ( ( io_sbeState.seeprom_0_ver.struct_version ==
+                   STRUCT_VERSION_SIMICS )
+                 && ( Util::isSimicsRunning() )
+               )
+            {
+                TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update will be skipped on Seeprom0 due to running in simics");
+                isSimics_check = true;
+            }
+
+            if ((pnor_check_dirty || crc_check_dirty) && !isSimics_check)
             {
                 seeprom_0_isDirty = true;
 #ifdef CONFIG_SBE_UPDATE_CONSECUTIVE
                 system_situation |= SITUATION_SIDE_0_DIRTY;
 #endif
                 TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: Seeprom0 "
-                           "dirty: pnor=%d, crc=%d (custom=0x%X/s0=0x%X)",
+                           "dirty: pnor=%d, crc=%d (custom=0x%X/s0=0x%X) isSimics_check=0x%X",
                            TARGETING::get_huid(io_sbeState.target),
                            pnor_check_dirty, crc_check_dirty,
                            io_sbeState.customizedImage_crc,
-                           io_sbeState.seeprom_0_ver.data_crc);
+                           io_sbeState.seeprom_0_ver.data_crc,
+                           isSimics_check);
             }
             else
             {
                 TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: Seeprom0 "
                            "flagged as clean: pnor=%d, crc=%d "
-                           "(custom=0x%X/s0=0x%X)",
+                           "(custom=0x%X/s0=0x%X) isSimics_check=0x%X",
                            TARGETING::get_huid(io_sbeState.target),
                            pnor_check_dirty, crc_check_dirty,
                            io_sbeState.customizedImage_crc,
-                           io_sbeState.seeprom_0_ver.data_crc);
+                           io_sbeState.seeprom_0_ver.data_crc,
+                           isSimics_check);
             }
 
             /**************************************************************/
@@ -3432,6 +3448,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
             // reset dirty variables
             pnor_check_dirty     = false;
             crc_check_dirty      = false;
+            isSimics_check       = false;
 
             // Check PNOR and SEEPROM 1 Version
             if ( 0 != memcmp(&(io_sbeState.pnorVersion),
@@ -3448,28 +3465,43 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                 crc_check_dirty = true;
             }
 
-            if (pnor_check_dirty || crc_check_dirty)
+            // Check if seeprom version simics is 0x5A5A5A5A and we are running simics
+            // This is the case for HW builds which desire to skip updating seeproms
+            // since HW builds do not use a special simics xml configuration
+            // See CONFIG option set or unset NO_SBE_UPDATES
+            if ( ( io_sbeState.seeprom_1_ver.struct_version ==
+                   STRUCT_VERSION_SIMICS )
+                 && ( Util::isSimicsRunning() )
+               )
+            {
+                TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update will be skipped on Seeprom1 due to running in simics");
+                isSimics_check = true;
+            }
+
+            if ((pnor_check_dirty || crc_check_dirty) && !isSimics_check)
             {
                 seeprom_1_isDirty = true;
 #ifdef CONFIG_SBE_UPDATE_CONSECUTIVE
                 system_situation |= SITUATION_SIDE_1_DIRTY;
 #endif
                 TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: Seeprom1 "
-                           "dirty: pnor=%d, crc=%d (custom=0x%X/s1=0x%X)",
+                           "dirty: pnor=%d, crc=%d (custom=0x%X/s1=0x%X) isSimics_check 0x%X",
                            TARGETING::get_huid(io_sbeState.target),
                            pnor_check_dirty, crc_check_dirty,
                            io_sbeState.customizedImage_crc,
-                           io_sbeState.seeprom_1_ver.data_crc);
+                           io_sbeState.seeprom_1_ver.data_crc,
+                           isSimics_check);
             }
             else
             {
                 TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: Seeprom1 "
                            "flagged as clean: pnor=%d, crc=%d "
-                           "(custom=0x%X/s1=0x%X)",
+                           "(custom=0x%X/s1=0x%X) isSimics_check 0x%X",
                            TARGETING::get_huid(io_sbeState.target),
                            pnor_check_dirty, crc_check_dirty,
                            io_sbeState.customizedImage_crc,
-                           io_sbeState.seeprom_1_ver.data_crc);
+                           io_sbeState.seeprom_1_ver.data_crc,
+                           isSimics_check);
             }
 
 
