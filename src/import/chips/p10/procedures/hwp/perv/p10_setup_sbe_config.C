@@ -312,6 +312,13 @@ fapi2::ReturnCode p10_setup_sbe_config(
                                         FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI,
                                         l_perv_ctrl0),
                  "Error updating Fused mode control in PERV_CTRL0");
+
+        FAPI_TRY(fapi2::getCfamRegister(i_target_chip, FSXCOMP_FSXLOG_PERV_CTRL0_COPY_FSI, l_perv_ctrl0),
+                 "Error reading PERV_CTRL0_COPY");
+        l_perv_ctrl0.writeBit<FSXCOMP_FSXLOG_PERV_CTRL0_TP_OTP_SCOM_FUSED_CORE_MODE>(
+            l_attr_fused_core_mode == fapi2::ENUM_ATTR_FUSED_CORE_MODE_CORE_FUSED);
+        FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_PERV_CTRL0_COPY_FSI, l_perv_ctrl0),
+                 "Error writing PERV_CTRL0_COPY");
     }
 
     FAPI_TRY(fapi2::getCfamRegister(i_target_chip,
