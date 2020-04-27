@@ -451,6 +451,23 @@ static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_STAT_TP_TPFSI_CB
 //<< [TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_STAT]
 // proc/reg00044.H
 
+//>> [PSI_MAC_SCOM_REGS_TX_MODE]
+static const uint64_t PSI_MAC_SCOM_REGS_TX_MODE = 0x01011031ull;
+
+static const uint32_t PSI_MAC_SCOM_REGS_TX_MODE_PC_TEST_MODE = 0;
+static const uint32_t PSI_MAC_SCOM_REGS_TX_MODE_MAIN_EN_ENC = 4;
+static const uint32_t PSI_MAC_SCOM_REGS_TX_MODE_MAIN_EN_ENC_LEN = 4;
+static const uint32_t PSI_MAC_SCOM_REGS_TX_MODE_PC_EN_ENC = 12;
+static const uint32_t PSI_MAC_SCOM_REGS_TX_MODE_PC_EN_ENC_LEN = 4;
+static const uint32_t PSI_MAC_SCOM_REGS_TX_MODE_SLEWCTL = 16;
+static const uint32_t PSI_MAC_SCOM_REGS_TX_MODE_SLEWCTL_LEN = 4;
+static const uint32_t PSI_MAC_SCOM_REGS_TX_MODE_PVTNL_ENC = 24;
+static const uint32_t PSI_MAC_SCOM_REGS_TX_MODE_PVTNL_ENC_LEN = 2;
+static const uint32_t PSI_MAC_SCOM_REGS_TX_MODE_PVTPL_ENC = 28;
+static const uint32_t PSI_MAC_SCOM_REGS_TX_MODE_PVTPL_ENC_LEN = 2;
+//<< [PSI_MAC_SCOM_REGS_TX_MODE]
+// proc/reg00042.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
