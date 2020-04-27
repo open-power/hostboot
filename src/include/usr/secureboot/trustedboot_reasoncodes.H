@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -80,6 +80,7 @@ namespace TRUSTEDBOOT
         MOD_PCR_READ                        = 0x22,
         MOD_EXPAND_TPM_LOG                  = 0x23,
         MOD_TPM_CMD_EXPAND_TPM_LOG          = 0x24,
+        MOD_MARK_TPM_UNUSABLE               = 0x25,
    };
 
     enum TRUSTEDReasonCode
@@ -117,6 +118,7 @@ namespace TRUSTEDBOOT
         RC_RAND_NUM_TOO_BIG              = TRBOOT_COMP_ID | 0xBB,
         RC_TPM_BAD_RESP                  = TRBOOT_COMP_ID | 0xBC,
         RC_NO_TPM_LOG_MGR                = TRBOOT_COMP_ID | 0xBD,
+        RC_TPM_IS_UNUSABLE               = TRBOOT_COMP_ID | 0xBE,
     };
 #ifdef __cplusplus
 }
