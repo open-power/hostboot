@@ -41,6 +41,9 @@
 namespace ERRORLOG
 {
 
+// Declared in errlentry.C
+extern std::map<uint8_t, const char *> errl_sev_str_map;
+
 // Allow Hidden error logs to be shown by default
 uint8_t ErrlManager::iv_hiddenErrLogsEnable =
             TARGETING::HIDDEN_ERRLOGS_ENABLE_ALLOW_ALL_LOGS;
@@ -347,9 +350,8 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err, compId_t i_committerComp )
             sys->setAttr<TARGETING::ATTR_HOSTSVC_PLID>(io_err->eid()+1);
         }
 
-        TRACFCOMP(g_trac_errl, "commitErrLog() called by %.4X for plid=0x%X,"
-                               "Reasoncode=%.4X", i_committerComp,
-                               io_err->plid(), io_err->reasonCode() );
+        TRACFCOMP(g_trac_errl, "commitErrLog() called by %.4X for eid=%.8x, Reasoncode=%.4X, Sev=%s",
+                  i_committerComp, io_err->eid(), io_err->reasonCode(), errl_sev_str_map.at(io_err->sev()) );
 
         // Deferred callouts not allowed at runtime - this call will check,
         // flag and change any that are found.
