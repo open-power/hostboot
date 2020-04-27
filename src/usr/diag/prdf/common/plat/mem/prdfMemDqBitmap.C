@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -506,16 +506,14 @@ uint32_t __getSpareInfo( TargetHandle_t i_trgt, MemRank i_rank,
         // Generic/MEM_PORT case
         else
         {
-            /* TODO RTC 192544
-            o_noSpare     = CEN_VPD_DIMM_SPARE_NO_SPARE;
-            o_lowNibble   = CEN_VPD_DIMM_SPARE_LOW_NIBBLE;
-            o_highNibble  = CEN_VPD_DIMM_SPARE_HIGH_NIBBLE;
-            o_spareConfig = CEN_VPD_DIMM_SPARE_NO_SPARE;
+            o_noSpare     = MEM_EFF_DIMM_SPARE_NO_SPARE;
+            o_lowNibble   = MEM_EFF_DIMM_SPARE_LOW_NIBBLE;
+            o_highNibble  = MEM_EFF_DIMM_SPARE_HIGH_NIBBLE;
+            o_spareConfig = MEM_EFF_DIMM_SPARE_NO_SPARE;
             TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT,
                                                         i_portSlct );
             o_rc = getDimmSpareConfig<TYPE_MEM_PORT>( memPort, i_rank,
                 i_portSlct, o_spareConfig );
-            */
         }
 
         if( SUCCESS != o_rc )
