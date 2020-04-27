@@ -2497,6 +2497,9 @@
       <id>ULTRA_TURBO_FREQ_MHZ</id>
     </attribute>
     <attribute>
+      <id>USE_TCES_FOR_DMAS</id>
+    </attribute>
+    <attribute>
       <default>0x000603FC00000000</default>
       <id>XSCOM_BASE_ADDRESS</id>
     </attribute>
