@@ -381,10 +381,7 @@ void* host_update_master_tpm( void *io_pArgs )
                 primaryTpmAvail = false;
                 if(isTpmRequired())
                 {
-                    TRACFCOMP(g_trac_trustedboot,ERR_MRK
-                        "Marking Primary TPM HUID 0x%08X as unusable",
-                        TARGETING::get_huid(pPrimaryTpm));
-                    pPrimaryTpm->setAttr<TARGETING::ATTR_TPM_UNUSABLE>(true);
+                    markTpmUnusable(pPrimaryTpm);
                 }
             }
         }
@@ -1145,7 +1142,7 @@ void tpmMarkFailed(TpmTarget* const i_pTpm,
     if(isTpmRequired())
     {
         // Mark the TPM as unusable so that FSP can perform alignment check
-        i_pTpm->setAttr<TARGETING::ATTR_TPM_UNUSABLE>(true);
+        markTpmUnusable(i_pTpm, io_err);
     }
 
     #ifdef CONFIG_SECUREBOOT
@@ -1574,7 +1571,7 @@ void doInitBackupTpm()
 
             if(!l_backupHwasState.present || !l_backupHwasState.functional)
             {
-                l_backupTpm->setAttr<TARGETING::ATTR_TPM_UNUSABLE>(true);
+                markTpmUnusable(l_backupTpm);
             }
         }
     }
@@ -2420,6 +2417,77 @@ errlHndl_t poisonAllTpms()
     } while(0);
 #endif
     return l_errl;
+}
+
+void markTpmUnusable(TARGETING::Target* i_tpm,
+                     const errlHndl_t i_associatedErrl)
+{
+    do {
+
+    if(i_tpm->getAttr<TARGETING::ATTR_TPM_UNUSABLE>())
+    {
+        TRACFCOMP(g_trac_trustedboot, "TPM HUID 0x%08x is already set as UNUSABLE; will not create additional error logs",
+                  TARGETING::get_huid(i_tpm));
+        break;
+    }
+
+    TRACFCOMP(g_trac_trustedboot, "Marking TPM HUID 0x%08x as UNUSABLE",
+              TARGETING::get_huid(i_tpm));
+    i_tpm->setAttr<TARGETING::ATTR_TPM_UNUSABLE>(true);
+    /* @
+     * @errortype
+     * @reasoncode RC_TPM_IS_UNUSABLE
+     * @moduleid   MOD_MARK_TPM_UNUSABLE
+     * @severity   ERRL_SEV_UNRECOVERABLE
+     * @userdata1  The HUID of the affected TPM
+     * @devdesc    One of the TPMs on the system has been diabled and flagged as
+     *             UNUSABLE. The affected TPM will remain UNUSABLE until it has
+     *             been explicitly re-enabled.  To re-enable the TPM, power the
+     *             system off, disable the TPM Required policy, and boot the
+     *             system.  With the TPM back in service, power the system off,
+     *             restore the original TPM Required policy, and boot one final
+     *             time.
+     *             Potential reasons:
+     *             - TPM was not detected present
+     *             - TPM was detected by later failed
+     *             - TPM was disabled by the OS due to error
+     * @custdesc   One of the TPMs on the system has been diabled and flagged as
+     *             UNUSABLE. The affected TPM will remain UNUSABLE until it has
+     *             been explicitly re-enabled.  To re-enable the TPM, power the
+     *             system off, disable the TPM Required policy, and boot the
+     *             system.  With the TPM back in service, power the system off,
+     *             restore the original TPM Required policy, and boot one final
+     *             time.
+     */
+    errlHndl_t l_errl =
+                   new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           MOD_MARK_TPM_UNUSABLE,
+                                           RC_TPM_IS_UNUSABLE,
+                                           TARGETING::get_huid(i_tpm));
+    // High priority callout for TPM
+    l_errl->addHwCallout(i_tpm,
+                         HWAS::SRCI_PRIORITY_HIGH,
+                         HWAS::NO_DECONFIG,
+                         HWAS::GARD_NULL);
+
+    // Medium priority callout for Hostboot firmware
+    l_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                HWAS::SRCI_PRIORITY_MED);
+
+    ERRORLOG::ErrlUserDetailsTarget(i_tpm).addToLog(l_errl);
+
+    l_errl->collectTrace(SECURE_COMP_NAME);
+    l_errl->collectTrace(TRBOOT_COMP_NAME);
+    l_errl->collectTrace(I2C_COMP_NAME);
+    l_errl->collectTrace(HWAS_COMP_NAME);
+
+    if(i_associatedErrl)
+    {
+        l_errl->plid(i_associatedErrl->plid());
+    }
+
+    errlCommit(l_errl, TRBOOT_COMP_ID);
+    }while(0);
 }
 
 } // end TRUSTEDBOOT
