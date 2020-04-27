@@ -29,12 +29,12 @@
  * @file    istep08list.H
  *
  *  IStep 08        Nest Chiplets
- *  IPL FLow Doc    v0.89.17 (Dec 10, 2019)
+ *  IPL FLow Doc    v0.90.05 (Apr 27, 2020)
  *
- *    08.01    host_slave_sbe_config
- *           : Configure host slave sbe
- *    08.02    host_setup_sbe
+ *    08.01    host_setup_sbe
  *           : Setup host sbe
+ *    08.02    host_slave_sbe_config
+ *           : Configure host slave sbe
  *    08.03    host_cbs_start
  *           : Start cbs
  *    08.04    proc_check_slave_sbe_seeprom_complete
@@ -228,13 +228,13 @@ namespace   INITSERVICE
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
-                ISTEPNAME(08,01,"host_slave_sbe_config"),
-                ISTEP_08::call_host_slave_sbe_config,
+                ISTEPNAME(08,01,"host_setup_sbe"),
+                ISTEP_08::call_host_setup_sbe,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(08,02,"host_setup_sbe"),
-                ISTEP_08::call_host_setup_sbe,
+                ISTEPNAME(08,02,"host_slave_sbe_config"),
+                ISTEP_08::call_host_slave_sbe_config,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
