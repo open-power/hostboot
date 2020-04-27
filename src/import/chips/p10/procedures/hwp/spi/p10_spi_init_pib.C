@@ -37,29 +37,44 @@ fapi2::ReturnCode p10_spi_init_pib(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     // Give these constants more managable names.
-    const uint64_t ROOT_CTRL_8 =
-        static_cast<uint64_t>(scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL8_RW);
-    const uint64_t SPIM_PORT_MUX_SELECT =
-        scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL8_TPFSI_SPIMST0_PORT_MUX_SEL_DC;
+    // Use this atomic clear register to set 0 bits in ROOT_CTRL_8 register
+    const uint64_t ROOT_CTRL_8_CLEAR =
+        static_cast<uint64_t>(scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL8_CLEAR_WO_CLEAR);
 
-    fapi2::buffer<uint64_t> root_ctrl_buffer;
+    // Select SPIM_0 for BOOT0 SEEPROM
+    const uint64_t SPIM0_PORT_MUX_SELECT =
+        scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL8_CLEAR_TPFSI_SPIMST0_PORT_MUX_SEL_DC;
 
-    // Get the contents of root control register 8 which controls whether
-    // we're accessing over PIB or FSI.
-    FAPI_TRY(fapi2::getScom(
-                 i_target,
-                 ROOT_CTRL_8,
-                 root_ctrl_buffer));
+    // Select SPIM_1 for BOOT1 SEEPROM
+    const uint64_t SPIM1_PORT_MUX_SELECT =
+        scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL8_CLEAR_TPFSI_SPIMST1_PORT_MUX_SEL_DC;
 
-    // Force root control reg 8 to use PIB for SPI Master
-    // clearing the bit to 0 forces the SPI Master to use the PIB path.
-    root_ctrl_buffer.clearBit<SPIM_PORT_MUX_SELECT>();
+    // Select SPIM_2 for MVPD/KEYSTORE SEEPROM
+    const uint64_t SPIM2_PORT_MUX_SELECT =
+        scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL8_CLEAR_TPFSI_SPIMST2_PORT_MUX_SEL_DC;
 
-    // Write the buffer back to the register.
+    // Select SPIM_3 for MEASUREMENT ROM
+    const uint64_t SPIM3_PORT_MUX_SELECT =
+        scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL8_CLEAR_TPFSI_SPIMST3_PORT_MUX_SEL_DC;
+
+
+    fapi2::buffer<uint64_t> root_ctrl_clear_buffer;
+
+    // Force root control reg 8 to use PIB for SPI Master for all 4 SPI engines
+    // CLEAR function: for clearing individual bits
+    // (set logical '0' value = PIB mode), take corresponding CLEAR address
+    // of the given register and write a '1' into that bit positions that
+    // needs to be cleared.
+    root_ctrl_clear_buffer.setBit<SPIM0_PORT_MUX_SELECT>();
+    root_ctrl_clear_buffer.setBit<SPIM1_PORT_MUX_SELECT>();
+    root_ctrl_clear_buffer.setBit<SPIM2_PORT_MUX_SELECT>();
+    root_ctrl_clear_buffer.setBit<SPIM3_PORT_MUX_SELECT>();
+
+    // Update ROOT_CTRL_8 register via its atomic clear register
     FAPI_TRY(fapi2::putScom(
                  i_target,
-                 ROOT_CTRL_8,
-                 root_ctrl_buffer));
+                 ROOT_CTRL_8_CLEAR,
+                 root_ctrl_clear_buffer));
 
 fapi_try_exit:
     FAPI_INF("p10_spi_init_pib: Exit");
