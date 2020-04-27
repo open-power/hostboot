@@ -1188,18 +1188,20 @@ void ErrlEntry::setSubSystemIdBasedOnCallouts()
 
     // if this pointer is not null it will be pointing to the
     // highest priority entry
-    if((highestPriorityCallout == NULL) ||
-       (highestPriorityCallout->priority == HWAS::SRCI_PRIORITY_NONE) )
+    if( (highestPriorityCallout == NULL) ||
+        (highestPriorityCallout->priority == HWAS::SRCI_PRIORITY_NONE) )
     {
-        // no callouts in log, add default callout for hb code and
-        // add trace
-        TRACFCOMP(g_trac_errl, "WRN>> No callouts in elog %.8X", eid());
-        TRACFCOMP(g_trac_errl, "Adding default callout EPUB_PRC_HB_CODE ");
-        addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
-                             HWAS::SRCI_PRIORITY_LOW);
+       if( sev() != ERRL_SEV_INFORMATIONAL )
+       {
+           // no callouts in log, add default callout for hb code and
+           // add trace
+           TRACFCOMP(g_trac_errl, "WRN>> No callouts in elog %.8X", eid());
+           TRACFCOMP(g_trac_errl, "Adding default callout EPUB_PRC_HB_CODE ");
+           addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                HWAS::SRCI_PRIORITY_LOW);
+       }
 
-        iv_User.setSubSys( EPUB_FIRMWARE_HOSTBOOT );
-
+       iv_User.setSubSys( EPUB_FIRMWARE_HOSTBOOT );
     }
     else
     {

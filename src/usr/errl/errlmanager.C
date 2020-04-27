@@ -57,6 +57,9 @@
 namespace ERRORLOG
 {
 
+// Declared in errlentry.C
+extern std::map<uint8_t, const char *> errl_sev_str_map;
+
 // Used in VERSION partition caching
 mutex_t g_errlMutex = MUTEX_INITIALIZER;
 
@@ -782,8 +785,8 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err, compId_t i_committerComp )
             break;
         }
 
-        TRACFCOMP(g_trac_errl, "commitErrLog() called by %.4X for eid=%.8x, Reasoncode=%.4X",
-                    i_committerComp, io_err->eid(), io_err->reasonCode() );
+        TRACFCOMP(g_trac_errl, "commitErrLog() called by %.4X for eid=%.8x, Reasoncode=%.4X, Sev=%s",
+                  i_committerComp, io_err->eid(), io_err->reasonCode(), errl_sev_str_map.at(io_err->sev()) );
 
         if ( (io_err->sev() != ERRORLOG::ERRL_SEV_INFORMATIONAL) &&
              (io_err->sev() != ERRORLOG::ERRL_SEV_RECOVERED) )
