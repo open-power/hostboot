@@ -696,7 +696,9 @@ extern "C"
 
         // NMMU registers
         // nmmu: 0..1
-        if (l_scom.isNmmuTarget())
+        if (l_scom.isNmmuTarget() &&
+            // prevent matching on NMMU SCOMs in ENGD build mode
+            (i_mode != P10_ENGD_BUILD_MODE))
         {
             o_chipUnitRelated = true;
             // PU_NMMU_CHIPUNIT
