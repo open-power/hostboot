@@ -23,7 +23,15 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+/**
+ * @file eepromCache.C
+ * @brief Source file for code relating to caching eeproms in the EECACHE
+ *        section of PNOR
+ */
+
 #include <builtins.h>
+#include <memory>
+#include <assert.h>
 #include <stdarg.h>
 #include <sys/mm.h>
 #include <limits.h>
@@ -35,7 +43,7 @@
 #include "eepromCache.H"
 #include <i2c/i2cif.H>
 #include <eeprom/eepromif.H>
-
+#include <pldm/pldm_errl.H>
 #include <eeprom/eepromddreasoncodes.H>
 #include <initservice/initserviceif.H>
 #include <initservice/initsvcreasoncodes.H>
@@ -113,21 +121,55 @@ errlHndl_t populateEecacheGlobals()
     return l_errl;
 }
 
+uint64_t packEepromHdrIntoUint64(const eepromRecordHeader & i_eepromRecordHeader)
+{
+    uint64_t retVal = 0;
+    if (i_eepromRecordHeader.completeRecord.accessType ==
+        EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_I2C)
+    {
+        retVal = TWO_UINT32_TO_UINT64(
+            i_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.i2c_master_huid,
+            TWO_UINT16_TO_UINT32(
+              TWO_UINT8_TO_UINT16(i_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.port,
+                                  i_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.engine),
+              TWO_UINT8_TO_UINT16(i_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.devAddr,
+                                  i_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.mux_select)));
+    }
+    else
+    {
+        retVal = TWO_UINT32_TO_UINT64(
+            i_eepromRecordHeader.completeRecord.eepromAccess.spiAccess.spi_master_huid,
+            TWO_UINT16_TO_UINT32(
+              TWO_UINT8_TO_UINT16(0xFF,
+                i_eepromRecordHeader.completeRecord.eepromAccess.spiAccess.engine),
+                i_eepromRecordHeader.completeRecord.eepromAccess.spiAccess.offset_KB) );
+    }
+
+    return retVal;
+}
+
 /**
  * @brief Lookup I2C information for given eeprom, check if eeprom exists in cache.
  *        If it exists already determine if any updates are required. If it is not
  *        in the cache yet, add it to the cache.
  *
- * @param[in]   i_target     Presence detect target
- * @param[in]   i_present    Describes whether or not target is present
- *                           ( CANNOT RELY ON HWAS_STATE!! )
- * @param[in]   i_eepromType Describes which EEPROM associated to the target
- *                           that is being requested to cache. (PRIMARY/BACKUP etc)
+ * @param[in]   i_target       Presence detect target
+ * @param[in]   i_present      Describes whether or not target is present
+ *                             ( CANNOT RELY ON HWAS_STATE!! )
+ * @param[in]   i_eepromType   Describes which EEPROM associated to the target
+ *                             that is being requested to cache. (PRIMARY/BACKUP etc)
+ * @param[in]   i_eepromBuffer Ptr to a buffer containing data to load into EECACHE
+ *                             if nullptr, HW lookup for data will be attempted if
+ *                             target is present.
+ * @param[in]   i_eepromBuflen Length of i_eepromBuffer, if i_eepromBuffer is nullptr
+ *                             then this should be 0
  * @return  errlHndl_t
  */
 errlHndl_t cacheEeprom(TARGETING::Target* i_target,
-                       bool i_present,
-                       EEPROM::EEPROM_ROLE i_eepromType)
+                       const bool i_present,
+                       const EEPROM::EEPROM_ROLE i_eepromType,
+                       const void * const i_eepromBuffer,
+                       const size_t i_eepromBuflen)
 {
     TRACSSCOMP( g_trac_eeprom, ENTER_MRK "cacheEeprom() target HUID 0x%.08X, present %d, role %d",
       TARGETING::get_huid(i_target), i_present, i_eepromType);
@@ -215,6 +257,42 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
 
         size_t l_eepromLen = l_eepromInfo.devSize_KB  * KILOBYTE;
 
+        if(i_eepromBuffer &&
+           i_eepromBuflen > l_eepromLen )
+        {
+            TRACFCOMP(g_trac_eeprom,
+                      "cacheEeprom() - attempting to cache size 0x%.016x buffer on target 0x%.8X w/ eepromRole = %d but eeprom is only 0x%.08x bytes",
+                      i_eepromBuflen, TARGETING::get_huid(i_target),
+                      i_eepromType, l_eepromLen);
+            uint64_t l_userdata2 = packEepromHdrIntoUint64(l_eepromRecordHeader);
+            /*@
+            * @errortype    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+            * @moduleid     EEPROM_CACHE_EEPROM
+            * @reasoncode   EEPROM_INVALID_LENGTH
+            * @userdata1[0:63]  Size of buffer
+            * @userdata2[0:31]  HUID of Master
+            * @userdata2[32:39] Port (or 0xFF)
+            * @userdata2[40:47] Engine
+            * @userdata2[48:55] devAddr    (or byte 0 of offset_KB)
+            * @userdata2[56:63] mux_select (or byte 1 of offset_KB)
+            * @devdesc     Attempting to overwrite eeprom cache with a
+            *              buffer that is larger than the eeprom device
+            *              itself
+            * @custdesc    Firmware detected a problem during the boot
+            */
+            l_errl = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_PREDICTIVE,
+                        EEPROM_CACHE_EEPROM,
+                        EEPROM_INVALID_LENGTH,
+                        i_eepromBuflen,
+                        l_userdata2,
+                        ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+            l_errl->collectTrace(EEPROM_COMP_NAME, 256);
+
+            PLDM::addBmcErrorCallouts(l_errl);
+            break;
+        }
+
         // Parse through PNOR section header to determine if a copy of this
         // eeprom already exists, or if we need to add it, and where we should add it
         // if we need to.
@@ -264,40 +342,20 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
                 l_newEntryDetected = false;
 
                 if( l_recordHeaderToUpdate->completeRecord.cache_copy_size !=
-                    l_eepromRecordHeader.completeRecord.cache_copy_size )
+                     l_eepromRecordHeader.completeRecord.cache_copy_size)
                 {
                     // This indicates that a part size has changed, caching
                     // algorithm cannot account for size changes.
                     // Invalidate entire cache and TI to trigger re-ipl
                     l_errl = PNOR::clearSection(PNOR::EECACHE);
 
-                    // If there was an error clearing the cache commit is because we are TIing
+                    // If there was an error clearing the cache commit it because we are TIing
                     if(l_errl)
                     {
                         errlCommit(l_errl, EEPROM_COMP_ID);
                     }
 
-                    uint64_t l_userdata2;
-                    if (l_eepromRecordHeader.completeRecord.accessType ==
-                        EepromHwAccessMethodType::EEPROM_HW_ACCESS_METHOD_I2C)
-                    {
-                        l_userdata2 = TWO_UINT32_TO_UINT64(
-                            l_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.i2c_master_huid,
-                            TWO_UINT16_TO_UINT32(
-                              TWO_UINT8_TO_UINT16(l_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.port,
-                                                  l_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.engine),
-                              TWO_UINT8_TO_UINT16(l_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.devAddr,
-                                                  l_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.mux_select)));
-                    }
-                    else
-                    {
-                        l_userdata2 = TWO_UINT32_TO_UINT64(
-                            l_eepromRecordHeader.completeRecord.eepromAccess.spiAccess.spi_master_huid,
-                            TWO_UINT16_TO_UINT32(
-                              TWO_UINT8_TO_UINT16(0xFF,
-                                l_eepromRecordHeader.completeRecord.eepromAccess.spiAccess.engine),
-                                l_eepromRecordHeader.completeRecord.eepromAccess.spiAccess.offset_KB) );
-                    }
+                    uint64_t l_userdata2 = packEepromHdrIntoUint64(l_eepromRecordHeader);
 
                     /*@
                     * @errortype    ERRORLOG::ERRL_SEV_PREDICTIVE
@@ -319,9 +377,10 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
                                 EEPROM_NEW_DEVICE_DETECTED,
                                 TWO_UINT32_TO_UINT64(l_recordHeaderToUpdate->completeRecord.cache_copy_size ,
                                                      l_eepromRecordHeader.completeRecord.cache_copy_size),
-                                l_userdata2 );
+                                l_userdata2,
+                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                    l_errl->collectTrace(EEPROM_COMP_NAME, 256);
                     errlCommit(l_errl, EEPROM_COMP_ID);
-
                     #ifdef CONFIG_CONSOLE
                         CONSOLE::displayf(EEPROM_COMP_NAME,
                               "New EEPROM size detected for an existing part,"
@@ -385,19 +444,41 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
 
             if (i_present)
             {
-                l_isInSync = true;
-                l_errl = isEepromInSync(i_target, *l_recordHeaderToUpdate,
-                                        i_eepromType, l_isInSync);
-                if (l_errl != nullptr)
+                if(i_eepromBuffer == nullptr)
                 {
-                    break;
+                    l_isInSync = true;
+                    l_errl = isEepromInSync(i_target, *l_recordHeaderToUpdate,
+                                        i_eepromType, l_isInSync);
+                    if (l_errl != nullptr)
+                    {
+                        break;
+                    }
                 }
+                else
+                {
+                   auto l_eepromCacheAddr = lookupEepromCacheAddr(*l_recordHeaderToUpdate);
 
+                   // if we found a matching record header above this should never happen
+                   assert(l_eepromCacheAddr != 0, "unable to find cache address for *l_recordHeaderToUpdate");
+                   // if we were given a buffer do a memcmp
+                   // between the cached copy and the provided buffer
+                   if(memcmp(reinterpret_cast<void *>(l_eepromCacheAddr),
+                             i_eepromBuffer,
+                             i_eepromBuflen) == 0)
+                      {
+                        l_isInSync = true;
+                      }
+                }
                 if(l_isInSync)
                 {
                     TRACFCOMP(g_trac_eeprom, "cacheEeprom() - 0x%.8X target w/ %d eepromRole - eeprom is in-sync",
                           TARGETING::get_huid(i_target), i_eepromType);
                     l_updateContents = false;
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_eeprom, "cacheEeprom() - 0x%.8X target w/ %d eepromRole - eeprom is out of sync",
+                                TARGETING::get_huid(i_target), i_eepromType);
                 }
             }
             else
@@ -497,35 +578,51 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
             assert(l_recordHeaderToUpdateIndex != INVALID_EEPROM_INDEX,
                     "Exceeded the max %d records in PNOR EECACHE", MAX_EEPROMS_LATEST);
 
-            void * l_tmpBuffer;
-
-            l_tmpBuffer = malloc(l_eepromLen);
-
             void * l_internalSectionAddr =
                 reinterpret_cast<uint8_t *>(l_eecacheSectionHeaderPtr) +
                 l_eepromRecordHeader.completeRecord.internal_offset;
 
-            TRACFCOMP( g_trac_eeprom, "cacheEeprom() passing the following into deviceOp eeprom address : huid 0x%.08X   length 0x%.08X  vaddr %p" ,
-                      get_huid(i_target), l_eepromLen, l_internalSectionAddr );
-
-            // Copy vpd contents to cache
-            l_errl = deviceOp(DeviceFW::READ,
-                              i_target,
-                              l_tmpBuffer,
-                              l_eepromLen,
-                              DEVICE_EEPROM_ADDRESS(i_eepromType, 0, EEPROM::HARDWARE));
-
-            // If an error occurred during the eeprom read then free the tmp buffer and break out
-            if( l_errl)
+            if(i_eepromBuffer == nullptr)
             {
-                TRACFCOMP(g_trac_eeprom,ERR_MRK"cacheEeprom:  Error occured reading from EEPROM type %d for HUID 0x%.08X!",
-                          i_eepromType, get_huid(i_target));
-                free(l_tmpBuffer);
-                break;
-            }
+                std::unique_ptr<uint8_t, decltype(&free)>l_tmpBuffer(
+                                  static_cast<uint8_t*>(malloc(l_eepromLen)),
+                                  free);
 
-            // Copy from tmp buffer into vaddr of internal section offset
-            memcpy(l_internalSectionAddr, l_tmpBuffer,  l_eepromLen);
+                TRACFCOMP(g_trac_eeprom,
+                          "cacheEeprom() passing the following into deviceOp DEVICE_EEPROM_ADDRESS : huid 0x%.08X   length 0x%.08X  vaddr %p" ,
+                          get_huid(i_target), l_eepromLen, l_internalSectionAddr );
+                // Copy vpd contents to cache
+                l_errl = deviceOp(DeviceFW::READ,
+                                  i_target,
+                                  l_tmpBuffer.get(),
+                                  l_eepromLen,
+                                  DEVICE_EEPROM_ADDRESS(i_eepromType, 0, EEPROM::HARDWARE));
+
+                // If an error occurred during the eeprom read then break out
+                if( l_errl)
+                {
+                    TRACFCOMP(g_trac_eeprom,ERR_MRK"cacheEeprom:  Error occured reading from EEPROM type %d for HUID 0x%.08X!",
+                              i_eepromType, get_huid(i_target));
+                    break;
+                }
+                // Copy from tmp buffer into vaddr of internal section offset
+                memcpy(l_internalSectionAddr, l_tmpBuffer.get(),  l_eepromLen);
+            }
+            else
+            {
+               TRACFCOMP(g_trac_eeprom,
+                         "cacheEeprom() copying from buffer : huid 0x%.08X   length 0x%.08X  eecache vaddr %p" ,
+                         get_huid(i_target), i_eepromBuflen, l_internalSectionAddr );
+                // we will return an error log above this if the following assert is not true
+                // this assert is just double checking in case that check above gets moved
+                assert(i_eepromBuflen <= l_eepromLen, "eeprom buflen is <= eeprom length itself");
+                // copy in the new buffer
+                memcpy(l_internalSectionAddr, i_eepromBuffer ,  i_eepromBuflen);
+                // clear out the remaining space in the cache entry
+                memset(static_cast<uint8_t *>(l_internalSectionAddr) + i_eepromBuflen,
+                       0xFF,
+                       l_eepromLen - i_eepromBuflen);
+            }
 
             // Flush the page to make sure it gets to the PNOR
             int rc = mm_remove_pages( FLUSH, l_internalSectionAddr, l_eepromLen );
@@ -554,8 +651,7 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
                         l_eepromLen, get_huid(i_target), l_internalSectionAddr);
             }
 
-            // regardless of success always free tmp buffer we allocated
-            free(l_tmpBuffer);
+
 
             if(l_errl)
             {
@@ -634,41 +730,74 @@ errlHndl_t cacheEeprom(TARGETING::Target* i_target,
  * @param[in]   i_opType        Operation type, see DeviceFW::OperationType
  *                              in driverif.H
  * @param[in]   i_target        Target whose Eeprom we will try to cache
- * @param[in/out] io_buffer     Not used
- * @param[in/out] io_buflen     Not used
+ * @param[in/out] io_buffer     Ptr to a buffer containing data to load into EECACHE
+ *                              if nullptr, HW lookup for data will be attempted if
+ *                              target is present.
+ * @param[in/out] io_buflen     Length of io_buffer, if io_buffer is nullptr
+ *                              then this should be 0
  * @param[in]   i_accessType    DeviceFW::AccessType enum (userif.H)
  * @param[in]   i_args          This is an argument list for DD framework.
  *                              In this function, there are no arguments.
  * @return  errlHndl_t
  */
-errlHndl_t genericI2CEepromCache(DeviceFW::OperationType i_opType,
-                                          TARGETING::Target* i_target,
-                                          void* io_buffer,
-                                          size_t& io_buflen,
-                                          int64_t i_accessType,
-                                          va_list i_args)
+errlHndl_t genericEepromCache(DeviceFW::OperationType i_opType,
+                              TARGETING::Target* i_target,
+                              void* io_buffer,
+                              size_t& io_buflen,
+                              int64_t i_accessType,
+                              va_list i_args)
 {
     errlHndl_t l_errl = nullptr;
-
-    // First param is a uint64_t representing if the target is present or not
-    bool l_present = (bool)va_arg(i_args,uint64_t);
-
-    // second param is the type of EEPROM type we wish to cache (PRIMARY vs BACKUP etc)
-    EEPROM::EEPROM_ROLE l_eepromType = (EEPROM::EEPROM_ROLE)va_arg(i_args,uint64_t);
 
     TRACSSCOMP( g_trac_eeprom, ENTER_MRK"genericI2CEepromCache() "
             "Target HUID 0x%.08X Enter", TARGETING::get_huid(i_target));
 
-    do{
-        // Run the cache eeprom function on the target passed in
-        l_errl = cacheEeprom(i_target, l_present,  l_eepromType);
-        if(l_errl)
-        {
-            TRACFCOMP(g_trac_eeprom,
-                      ERR_MRK"cacheEeprom:  An error occured while attempting to cache eeprom for 0x%.08X",
-                      TARGETING::get_huid(i_target));
-            break;
-        }
+    do {
+
+    // First param is a uint64_t representing if the target is present or not
+    bool l_present = static_cast<bool>(va_arg(i_args,uint64_t));
+    // second param is the type of EEPROM type we wish to cache
+    // (PRIMARY vs BACKUP etc)
+    EEPROM::EEPROM_ROLE l_eepromType =
+        static_cast<EEPROM::EEPROM_ROLE>(va_arg(i_args,uint64_t));
+
+    if(io_buffer &&
+       io_buflen == 0)
+    {
+          TRACFCOMP(g_trac_eeprom,
+                    ERR_MRK"cacheEeprom: We were told to cache an empty buffer at %p for 0x%.08X role %d  ",
+                    io_buffer, TARGETING::get_huid(i_target), l_eepromType );
+          /*@
+          * @errortype    ERRORLOG::ERRL_SEV_PREDICTIVE
+          * @moduleid     EEPROM_GENERIC_CACHE
+          * @reasoncode   EEPROM_INVALID_LENGTH
+          * @userdata1        Target HUID
+          * @userdata2[0:31]  1 if target is present, 0 if not
+          * @userdata2[32:63] EEPROM::EEPROM_ROLE
+          * @devdesc      Attempting to cache empty buffer in EEACHE
+          * @custdesc     An error occurred during the FW boot
+          */
+          l_errl = new ERRORLOG::ErrlEntry(
+                          ERRORLOG::ERRL_SEV_PREDICTIVE,
+                          EEPROM_GENERIC_CACHE,
+                          EEPROM_INVALID_LENGTH,
+                          TO_UINT64(TARGETING::get_huid(i_target)),
+                          TWO_UINT32_TO_UINT64(TO_UINT32(l_present),
+                                               TO_UINT32(l_eepromType)),
+                          ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+          l_errl->collectTrace(EEPROM_COMP_NAME, 256);
+          break;
+    }
+
+    // Run the cache eeprom function on the target passed in
+    l_errl = cacheEeprom(i_target, l_present,  l_eepromType, io_buffer, io_buflen);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_eeprom,
+                  ERR_MRK"genericEepromCache:  An error occured while attempting to cache eeprom from buffer for 0x%.08X role %d",
+                  TARGETING::get_huid(i_target), l_eepromType);
+        break;
+    }
 
     }while(0);
 
@@ -682,17 +811,22 @@ errlHndl_t genericI2CEepromCache(DeviceFW::OperationType i_opType,
 DEVICE_REGISTER_ROUTE( DeviceFW::READ,
                        DeviceFW::EEPROM_CACHE,
                        TARGETING::TYPE_OCMB_CHIP,
-                       genericI2CEepromCache);
+                       genericEepromCache);
 
 DEVICE_REGISTER_ROUTE( DeviceFW::READ,
                        DeviceFW::EEPROM_CACHE,
                        TARGETING::TYPE_PROC,
-                       genericI2CEepromCache );
+                       genericEepromCache );
 
 DEVICE_REGISTER_ROUTE( DeviceFW::READ,
                        DeviceFW::EEPROM_CACHE,
                        TARGETING::TYPE_DIMM,
-                       genericI2CEepromCache );
+                       genericEepromCache );
+
+DEVICE_REGISTER_ROUTE( DeviceFW::READ,
+                       DeviceFW::EEPROM_CACHE,
+                       TARGETING::TYPE_NODE,
+                       genericEepromCache );
 
 errlHndl_t setIsValidCacheEntry(const TARGETING::Target * i_target,
                                 const EEPROM_ROLE &i_eepromRole,
@@ -1365,7 +1499,7 @@ errlHndl_t isEepromInSync(TARGETING::Target * i_target,
             (valid != i_eepromRecordHeader.completeRecord.cached_copy_valid))
         {
             TRACSSCOMP( g_trac_eeprom,
-              "cacheEeprom() Eeprom w/ Role %d is not in sync."
+              "isEepromInSync() Eeprom w/ Role %d is not in sync."
               " Master role %d/%d vs current role %d/%d (valid/changed)",
               i_eepromType, valid, changed,
               i_eepromRecordHeader.completeRecord.cached_copy_valid,

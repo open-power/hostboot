@@ -246,6 +246,27 @@ bool isNVDIMM( const TARGETING::Target * i_target )
     return false;
 }
 
+TARGETING::TargetHandle_t getTargetFromLocationCode(const std::vector<uint8_t>& i_location_code,
+                                                    const TARGETING::TYPE i_type)
+{
+    TARGETING::TargetHandle_t out_target = NULL;
+    // TODO RTC:208810 lookup target from location code / handle multiple instances
+    // for now hardcode lookup for node target
+    if(i_type == TARGETING::TYPE_NODE)
+    {
+        TARGETING::TargetHandleList l_nodeEncList;
+
+        getEncResources(l_nodeEncList, TARGETING::TYPE_NODE,
+                        TARGETING::UTIL_FILTER_ALL);
+
+        assert(l_nodeEncList.size() == 1);
+
+        out_target = l_nodeEncList[0];
+    }
+
+    return out_target;
+}
+
 
 TARGETING::TargetHandleList getProcNVDIMMs( TARGETING::Target * i_proc )
 {

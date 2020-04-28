@@ -1058,7 +1058,6 @@ void getEEPROMs( std::list<EepromInfo_t>& o_info )
 void cacheEepromVpd(TARGETING::Target * i_target, bool i_present)
 {
     errlHndl_t errl = nullptr;
-    size_t presentSize;
 
     TARGETING::EepromVpdPrimaryInfo eepromData;
     TARGETING::SpiEepromVpdPrimaryInfo spiEepromData;
@@ -1068,8 +1067,9 @@ void cacheEepromVpd(TARGETING::Target * i_target, bool i_present)
     {
         TRACFCOMP(g_trac_eeprom, "Reading EEPROMs for target 0x%.8X, eeprom cache = %d VPD_PRIMARY, target present = %d , eeprom type = %d",
                   TARGETING::get_huid(i_target), DEVICE_CACHE_EEPROM_ADDRESS(i_present, EEPROM::VPD_PRIMARY));
-        presentSize = sizeof(i_present);
-        errl = deviceRead(i_target, &i_present, presentSize,
+        void * empty_buffer = nullptr;
+        size_t empty_size = 0;
+        errl = deviceRead(i_target, empty_buffer, empty_size,
                         DEVICE_CACHE_EEPROM_ADDRESS(i_present, EEPROM::VPD_PRIMARY));
         if (errl != nullptr)
         {
@@ -1101,6 +1101,36 @@ void cacheEepromVpd(TARGETING::Target * i_target, bool i_present)
         }
     }
 #endif
+}
+
+errlHndl_t cacheEepromBuffer(TARGETING::Target * const i_target,
+                             const bool i_present,
+                             const std::vector<uint8_t>& i_eeprom_data)
+{
+    errlHndl_t errl = nullptr;
+
+    TARGETING::EepromVpdPrimaryInfo eepromData;
+    TARGETING::SpiEepromVpdPrimaryInfo spiEepromData;
+    if ( i_target->tryGetAttr<TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO>(eepromData) ||
+         i_target->tryGetAttr<TARGETING::ATTR_SPI_EEPROM_VPD_PRIMARY_INFO>
+          (spiEepromData) )
+    {
+        TRACFCOMP(g_trac_eeprom, "Reading EEPROMs for target 0x%.8X, eeprom cache = %d VPD_PRIMARY, target present = %d , eeprom type = %d",
+                  TARGETING::get_huid(i_target), DEVICE_CACHE_EEPROM_ADDRESS(i_present, EEPROM::VPD_PRIMARY));
+
+        size_t eeprom_data_size = i_eeprom_data.size();
+        errl = deviceRead(i_target,
+                          const_cast<uint8_t *>(i_eeprom_data.data()),
+                          eeprom_data_size,
+                          DEVICE_CACHE_EEPROM_ADDRESS(i_present,
+                                                      EEPROM::VPD_PRIMARY));
+    }
+
+    // Also try backup VPD
+    // TODO RTC: 206301 - backup VPD contains
+    // (might need a param to specify what the buffer is for)?
+
+    return errl;
 }
 
 

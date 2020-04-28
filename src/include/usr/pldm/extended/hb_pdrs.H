@@ -33,21 +33,10 @@
 
 #include <pldm/requests/pldm_pdr_requests.H>
 #include <targeting/common/target.H>
+#include <pldm/pldm_const.H>
 
 namespace PLDM
 {
-
-using terminus_id_t = uint16_t;
-
-// These are Entity Types used in Entity Association PDRs
-enum entity_type : uint8_t
-{
-    // These values are from Table 15 in DSP0249 v1.1.0
-    ENTITY_TYPE_BACKPLANE = 64,
-    ENTITY_TYPE_DIMM = 66,
-    ENTITY_TYPE_PROCESSOR_MODULE = 67
-};
-
 /*
  * This table contains info on how to add each target type's info to the
  * assocation tree.

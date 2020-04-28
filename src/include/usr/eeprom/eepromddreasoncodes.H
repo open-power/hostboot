@@ -62,6 +62,7 @@ enum eepromModuleId
     EEPROM_CACHE_INIT_RT                    = 0x0C,
     EEPROM_PERFORM_OP_HW                    = 0x0D,
     EEPROM_PERFORM_SPI_OP                   = 0x0E,
+    EEPROM_GENERIC_CACHE                    = 0x0F,
 };
 
 /**
@@ -101,6 +102,7 @@ enum eepromReasonCode
                                                                        // cache entries that had identical "unique" identifiers
                                                                        // (see structs defined in eeprom_const.H)
     EEPROM_INVALID_ACCESS_METHOD            = EEPROM_COMP_ID | 0x13,   // See EepromHwAccessMethodType in eeprom_const.H
+    EEPROM_INVALID_LENGTH                   = EEPROM_COMP_ID | 0x14,
 };
 
 enum UserDetailsTypes

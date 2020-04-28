@@ -25,6 +25,11 @@
 #ifndef __EEPROMIF_H
 #define __EEPROMIF_H
 
+/**
+ *  @file eepromif.H
+ *  @brief Header containing EEPROM interfaces for user space modules to use
+ */
+
 #include <list>
 #include <eeprom/eeprom_const.H>
 
@@ -115,10 +120,25 @@ void dumpEepromData(const eeprom_addr_t & i_i2cInfo);
 /**
  *
  * @brief A useful utility to cache the VPD for a given target
- *        These are master eeprom types that are used to see if eeprom changes
+ *        from a provided byte vector
  *
- * @param [in] i_target - target that may have mvpd to cache
- * @param [in] i_present - eeprom presence
+ * @param [in] i_target - Target which we would like to associate with
+ *                        eeprom data buffer in EECACHE
+ * @param [in] i_present - Target's presence (cannot rely on HWAS)
+ * @param [in] i_eeprom_data - data buffer that will be cached in EECACHE
+ *
+ */
+errlHndl_t cacheEepromBuffer(TARGETING::Target * i_target,
+                             bool i_present,
+                             const std::vector<uint8_t>& i_eeprom_data);
+
+/**
+ *
+ * @brief A useful utility to cache the VPD for a given target
+ *        from that target's HW
+ *
+ * @param [in] i_target - Target whose EEPROMs we would like to cache
+ * @param [in] i_present - Target's presence (cannot rely on HWAS)
  *
  */
 void cacheEepromVpd(TARGETING::Target * i_target, bool i_present);

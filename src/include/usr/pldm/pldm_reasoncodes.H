@@ -57,27 +57,33 @@ namespace PLDM
         MOD_PLDM_FRU_TO_IPZ           = 0x10, // generate_ipz_formatted_vpd
         MOD_GENERATE_VTOC_RECORD      = 0x11, // generate_vtoc_record
         MOD_GENERATE_PT_ENTRIES       = 0x12, // generate_pt_entries
+        MOD_CACHE_REMOTE_FRU_VPD      = 0x13, // get fru records and add to eecache
+        MOD_GET_LOCATION_CODE         = 0x14, // getRecordSetLocationCode
     };
 
     enum PLDMReasonCode
     {
-        RC_MSG_DECODE_FAIL      = PLDM_COMP_ID | 0x01,
-        RC_MSG_ENCODE_FAIL      = PLDM_COMP_ID | 0x02,
-        RC_UNSUPPORTED_VERSION  = PLDM_COMP_ID | 0x03,
-        RC_BAD_COMPLETION_CODE  = PLDM_COMP_ID | 0x04,
-        RC_INVALID_LENGTH       = PLDM_COMP_ID | 0x05,
-        RC_MCTP_FAIL            = PLDM_COMP_ID | 0x06,
-        RC_SENDRECV_FAIL        = PLDM_COMP_ID | 0x07,
-        RC_SEND_FAIL            = PLDM_COMP_ID | 0x08,
-        RC_INVALID_MSG_CATEGORY = PLDM_COMP_ID | 0x09,
-        RC_INVALID_COMMAND      = PLDM_COMP_ID | 0x0A,
-        RC_INVALID_MSG_TYPE     = PLDM_COMP_ID | 0x0B,
-        RC_INVALID_HEADER       = PLDM_COMP_ID | 0x0C,
-        RC_BAD_TRANSFER_FLAG    = PLDM_COMP_ID | 0x0D,
-        RC_UNSUPPORTED_TYPE     = PLDM_COMP_ID | 0x0E,
-        RC_INVALID_IPZ_FORMAT   = PLDM_COMP_ID | 0x0F,
-        RC_UNSUPPORTED_RECORD   = PLDM_COMP_ID | 0x10,
-        RC_UNSUPPORTED_FIELD    = PLDM_COMP_ID | 0x11,
+        RC_MSG_DECODE_FAIL       = PLDM_COMP_ID | 0x01,
+        RC_MSG_ENCODE_FAIL       = PLDM_COMP_ID | 0x02,
+        RC_UNSUPPORTED_VERSION   = PLDM_COMP_ID | 0x03,
+        RC_BAD_COMPLETION_CODE   = PLDM_COMP_ID | 0x04,
+        RC_INVALID_LENGTH        = PLDM_COMP_ID | 0x05,
+        RC_MCTP_FAIL             = PLDM_COMP_ID | 0x06,
+        RC_SENDRECV_FAIL         = PLDM_COMP_ID | 0x07,
+        RC_SEND_FAIL             = PLDM_COMP_ID | 0x08,
+        RC_INVALID_MSG_CATEGORY  = PLDM_COMP_ID | 0x09,
+        RC_INVALID_COMMAND       = PLDM_COMP_ID | 0x0A,
+        RC_INVALID_MSG_TYPE      = PLDM_COMP_ID | 0x0B,
+        RC_INVALID_HEADER        = PLDM_COMP_ID | 0x0C,
+        RC_BAD_TRANSFER_FLAG     = PLDM_COMP_ID | 0x0D,
+        RC_UNSUPPORTED_TYPE      = PLDM_COMP_ID | 0x0E,
+        RC_INVALID_IPZ_FORMAT    = PLDM_COMP_ID | 0x0F,
+        RC_INVALID_RSI_COUNT     = PLDM_COMP_ID | 0x10,
+        RC_UNSUPPORTED_RECORD    = PLDM_COMP_ID | 0x11,
+        RC_UNSUPPORTED_FIELD     = PLDM_COMP_ID | 0x12,
+        RC_INVALID_RECORD_COUNT  = PLDM_COMP_ID | 0x13,
+        RC_INVALID_LOCATION_CODE = PLDM_COMP_ID | 0x14,
+        RC_NO_LOCATION_CODE      = PLDM_COMP_ID | 0x15,
     };
 }
 #endif

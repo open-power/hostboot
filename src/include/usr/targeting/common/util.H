@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -183,6 +183,19 @@ uint8_t  is_fused_mode( );
  * @return bool - True if the given target is an NVDIMM
  */
 bool isNVDIMM( const TARGETING::Target * i_target );
+
+/**
+ * @brief Given a location code and a target type return a ptr to the
+ *        TARGETING::target Hostboot has associated with this information
+ *
+ * @param[in] i_location_code : Byte vector containing location code info
+ * @param[in] i_type : Target Type associated with this location code
+ *
+ * @return TARGETING::Target * that corresponds w/ the given location code and
+ *         target type
+ */
+TARGETING::TargetHandle_t getTargetFromLocationCode(const std::vector<uint8_t>& i_location_code,
+                                                    TARGETING::TYPE i_type);
 
 /**
  * @brief Grab list of NVDIMMs under the processor

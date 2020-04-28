@@ -37,6 +37,8 @@
 namespace PLDM
 {
 
+using fru_record_set_id = uint16_t;
+
 struct pldm_fru_record_table_metadata_t
 {
     // Major Version of Fru Record Table format
