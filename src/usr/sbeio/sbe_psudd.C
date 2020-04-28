@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -526,19 +526,16 @@ errlHndl_t SbePsu::handleInterrupt(PIR_t i_pir)
 
     do
     {
-        uint64_t l_intrGroupID = PIR_t::groupFromPir(i_pir.word);
-        uint64_t l_intrChipID  = PIR_t::chipFromPir(i_pir.word);
+        uint64_t l_intrTopoID = PIR_t::topologyIdFromPir(i_pir.word);
         // Find the chip that presented the interrupt
         TARGETING::Target* l_intrChip = nullptr;
         TARGETING::TargetHandleList l_procTargetList;
         getAllChips(l_procTargetList, TARGETING::TYPE_PROC, false);
         for (auto & l_chip: l_procTargetList)
         {
-            auto l_chipId =
-                (l_chip)->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
-            auto l_groupId =
-                (l_chip)->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
-            if( l_chipId == l_intrChipID && l_groupId == l_intrGroupID )
+            auto l_topoId =
+                (l_chip)->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
+            if(l_topoId == l_intrTopoID)
             {
                 l_intrChip = (l_chip);
                 break;

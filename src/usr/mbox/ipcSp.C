@@ -44,6 +44,7 @@
 #include <xscom/xscomif.H>
 #include <sys/misc.h>
 #include <kernel/misc.H>
+#include <arch/memorymap.H>
 
 namespace ISTEP_21
 {
@@ -282,10 +283,11 @@ void IpcSp::msgHandler()
                 for(auto l_proc : l_procChips)
                 {
                     //Get fabric info from proc
-                    uint8_t l_fabricChipId =
-                      l_proc->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
-                    uint8_t l_fabricGroupId =
-                      l_proc->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
+                    uint8_t l_fabricTopoId =
+                        l_proc->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
+                    uint8_t l_fabricChipId = 0;
+                    uint8_t l_fabricGroupId = 0;
+                    MEMMAP::extractGroupAndChip(l_fabricTopoId, l_fabricGroupId, l_fabricChipId);
                     //Calculate what bit position this will be
                     uint8_t l_bitPos = l_fabricChipId + (RUNTIME::MAX_PROCS_PER_NODE * l_fabricGroupId);
 

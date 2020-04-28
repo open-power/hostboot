@@ -153,21 +153,14 @@ bool compareAffinity(const TargetInfo t1, const TargetInfo t2)
 }
 
 /*
- * @brief  This function takes in proc target and returns group/chip id
- *         in the following bit format: GGGG CCC
- *         where G = Group Id and C = Chip Id
+ * @brief  This function takes in proc target and returns topology id
  *
  * @param[in] i_proc: proc target
- * @retval: chip info including group and chip id
+ * @return topology id
  */
-uint64_t getGroupChipIdInfo (TargetHandle_t i_proc)
+uint8_t getTopologyId (TargetHandle_t i_proc)
 {
-    auto l_grp_id  = i_proc->getAttr<ATTR_FABRIC_GROUP_ID>();
-    auto l_chip_id = i_proc->getAttr<ATTR_FABRIC_CHIP_ID>();
-
-    //Chip ID is three bits long, therefore, shift group id
-    //by 3 and OR it with chip id
-    return ((l_grp_id << 3) | l_chip_id);
+    return i_proc->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>();
 }
 
 /*
@@ -429,7 +422,7 @@ errlHndl_t check_for_missing_memory (const Target* i_node,
         std::sort(l_procs.begin(), l_procs.end(),
                 [] (TargetHandle_t a, TargetHandle_t b)
                 {
-                    return getGroupChipIdInfo(a) < getGroupChipIdInfo(b);
+                    return getTopologyId(a) < getTopologyId(b);
                 });
 
         uint8_t l_temp_proc_mem_to_use = io_proc_mem_to_use;
@@ -447,7 +440,7 @@ errlHndl_t check_for_missing_memory (const Target* i_node,
             //Pick the first proc we find with dimms
             if (l_funcDimms.size() > 0)
             {
-                l_temp_proc_mem_to_use = getGroupChipIdInfo(l_proc);
+                l_temp_proc_mem_to_use = getTopologyId(l_proc);
                 break;
             }
 

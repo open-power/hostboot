@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,10 +81,6 @@ namespace TARGETING
 
     /* Invalid Section Id - to initialize struct variable */
     static const uint8_t INVALID_SECTIONID  = 0xFF;
-
-    // Special "not found" fabric group ID is the data type with all bits set
-    static const ATTR_FABRIC_GROUP_ID_type FABRIC_GROUP_ID_NOT_FOUND =
-        INVALID_NODE;
 
     /**
      *  @brief Struct specifying different parameters required for section data

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,7 @@
 #include "hdatpcia.H"
 #include <targeting/common/util.H>
 #include <util/align.H>
+#include <arch/pirformat.H>
 
 using namespace TARGETING;
 
@@ -229,11 +230,8 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                 TARGETING::Target* l_pProcTarget = *l_filter;
                 uint32_t Procstatus = 0;
 
-                uint32_t l_procFabricId =
-                    l_pProcTarget->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
-
-                uint32_t l_procPosition =
-                    l_pProcTarget->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+                const uint8_t l_procTopologyId =
+                    l_pProcTarget->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
 
                 TARGETING::PredicateCTM l_corePredicate(TARGETING::CLASS_UNIT,
                                                     TARGETING::TYPE_CORE);
@@ -281,20 +279,18 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                         pciaThreadData[l_threadIndex].pciaPhysThreadId);
 
 
-                        /* Proc ID Reg for split core is NNNNCCC0PPPPPTT
-                           Where           NNNN  is node number
-                                                 left shift by 11 bits
-                                           CCC   is Chip
+                        /* Proc ID Reg for split core is TTTT0PPPPPYY
+                           Where           TTTT  is topology id
                                                  left shift by 8 bits
                                            PPPPP is the core number
                                                  left shift by 2 bits
-                                           TT    is thread id
+                                           YY    is thread id
                         */
                         // PIR generation for split core mode
-                        uint32_t     l_ThreadProcIdReg =  l_procFabricId << 11 |
-                                                          l_procPosition << 8  |
-                                                          l_coreNum << 2       |
-                                                          l_threadIndex;
+                        // A bit unsure about this as well
+                        const PIR_t pir(l_procTopologyId, l_coreNum,
+                                l_threadIndex);
+                        const uint8_t l_ThreadProcIdReg = pir.word;
 
                         hdatSetPciaHdrs(&this->iv_spPcia[index]);
                         this->iv_spPcia[index].hdatCoreData.pciaProcStatus
@@ -401,11 +397,8 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                 TARGETING::Target* l_pProcTarget = *l_filter;
                 uint32_t l_procStatus = HDAT_PROC_USABLE;
 
-                uint32_t l_procFabricId =
-                    l_pProcTarget->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
-
-                uint32_t l_procPosition =
-                    l_pProcTarget->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+                const uint8_t l_procTopologyId =
+                    l_pProcTarget->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
 
                 //Get the the EQ(Quad id) targets
                 TARGETING::TargetHandleList l_eqList;
@@ -488,24 +481,21 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                                 this->iv_spPcia[index].hdatThreadData.
                                 pciaThreadData[l_threadIndex].pciaPhysThreadId);
 
-                            /* Proc ID Reg for fused core is NNNNCCC0QQQPTTT
-                               Where           NNNN   is node number
-                                                      left shift by 11 bits
-                                               CCC    is Chip
+                            /* Proc ID Reg for fused core is TTTT0QQQPYYY
+                               Where           TTTT   is topology id
                                                       left shift by 8 bits
                                                QQQ    is Quad id
                                                       left shift by 4 bits
                                                P      is the core
                                                       left shift by 3 bits
                                                       chiplet pair number
-                                               TTT    is thread id
+                                               YYY    is thread id
                              */
                             uint32_t l_threadProcIdReg = 0;
                             // PIR generation for fused core mode
-                            l_threadProcIdReg =  l_procFabricId << 11 |
-                                                 l_procPosition << 8  |
-                                                 l_eqId << 4          |
-                                                 l_fcId << 3          |
+                            l_threadProcIdReg =  l_procTopologyId << 8 |
+                                                 l_eqId << 4           |
+                                                 l_fcId << 3           |
                                                  l_threadIndex;
 
                             this->iv_spPcia[index].hdatThreadData.
@@ -708,10 +698,13 @@ errlHndl_t HdatPcia::hdatSetCoreInfo(const uint32_t i_index,
 
         uint32_t l_nodeOrdId = l_pNodeTarget->getAttr<ATTR_ORDINAL_ID>();
 
-        uint32_t l_fabNodeId = i_pProcTarget->getAttr<ATTR_FABRIC_GROUP_ID>();
+        const uint8_t l_fabTopoId = i_pProcTarget->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>();
 
         //Set the Internal Drawer Node ID
-        iv_spPcia[i_index].hdatCoreData.pciaDrawerNodeID = l_fabNodeId;
+        uint8_t l_topoChipId = 0;
+        uint8_t l_topoGroupId = 0;
+        MEMMAP::extractGroupAndChip(l_fabTopoId, l_topoGroupId, l_topoChipId);
+        iv_spPcia[i_index].hdatCoreData.pciaDrawerNodeID = l_topoGroupId;
 
         //get the parent node id and set that
         this->iv_spPcia[i_index].hdatCoreData.pciaDBOBID = l_nodeOrdId;

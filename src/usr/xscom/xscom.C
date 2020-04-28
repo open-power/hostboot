@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,6 +50,7 @@
 #include <xscom/piberror.H>
 #include <scom/scomif.H>
 #include <arch/pirformat.H>
+#include <arch/memorymap.H>
 #include <lpc/lpcif.H>
 #include <sys/mm.h>
 #include <kernel/bltohbdatamgr.H>
@@ -258,16 +259,11 @@ errlHndl_t getTargetVirtualAddress(TARGETING::Target* i_target,
             // address
             if (o_virtAddr == NULL)
             {
-                uint64_t  xscomGroupId = 0;
-                uint64_t  xscomChipId = 0;
-
-                // Get the target Group Id
-                xscomGroupId =
-                  i_target->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
-
-                // Get the target Chip Id
-                xscomChipId =
-                  i_target->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+                uint8_t xscomTopoId =
+                    i_target->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
+                uint8_t xscomGroupId = 0;
+                uint8_t xscomChipId = 0;
+                MEMMAP::extractGroupAndChip(xscomTopoId, xscomGroupId, xscomChipId);
 
                 // Get assigned XSCOM base address
                 l_XSComBaseAddr =

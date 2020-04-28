@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,26 +50,6 @@ namespace TARGETING
 
 namespace INTR
 {
-    /**
-     * Make an XISR value
-     * @param[in] i_node  The PIR node id (0-7)
-     * @param[in] i_chip  The PIR chip id (0-7)
-     * @param[in] i_isn   The Interrupt Source Number (0-7)
-     * @return the XISR value
-     */
-    // TODO: For now leave this alone
-    inline
-      uint32_t makeXISR(PIR_t i_pir, uint32_t i_isn)
-    {
-        XISR_t r;
-        r.u32 = 0;
-        r.isn = i_isn;
-        r.chip = PIR_t::chipFromPir(i_pir.word);
-        r.node = PIR_t::groupFromPir(i_pir.word);
-        r.intrproc = 1;  // not interproc intr
-        return r.u32;
-    }
-
     /**
      * @brief Utility function to get the list of enabled threads
      * @return Bitstring of enabled threads

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,14 +99,9 @@ bool FakeProcTargetService::getAttribute(
 
         switch (i_attribute)
         {
-            case ATTR_FABRIC_GROUP_ID:
+            case ATTR_PROC_FABRIC_TOPOLOGY_ID:
 
-                o_val = 0;
-                break;
-
-            case ATTR_FABRIC_CHIP_ID:
-
-                o_val = distance(
+                o_val = 2 * distance(
                         iv_procs.begin(),
                         find(
                             iv_procs.begin(),

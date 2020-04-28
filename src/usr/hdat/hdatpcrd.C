@@ -32,6 +32,7 @@
 #include <util/align.H>
 #include <devicefw/driverif.H>
 #include <vpd/mvpdenums.H>
+#include <arch/memorymap.H>
 
 using namespace VPD;
 using namespace MVPD;
@@ -883,24 +884,26 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
 
         }
 
-        uint32_t l_procRealFabricGrpId =
-                    i_pProcTarget->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
+        const uint8_t l_procRealFabricTopoId =
+            i_pProcTarget->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
 
-        // Set fabric Groupid (NNN) and chip (CC) into Real fabric grp ID
-        uint32_t l_RealFabricChipId =
-                    i_pProcTarget->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+        uint8_t l_procRealFabricGrpId = 0;
+        uint8_t l_RealFabricChipId = 0;
+        MEMMAP::extractGroupAndChip(l_procRealFabricTopoId,
+                l_procRealFabricGrpId, l_RealFabricChipId);
 
-        iv_spPcrd->hdatChipData.hdatPcrdRealFabricGrpId = 
+        iv_spPcrd->hdatChipData.hdatPcrdRealFabricGrpId =
                         (l_RealFabricChipId | (l_procRealFabricGrpId << 3));
 
-        uint32_t l_procEffFabricGrpId =
-                    i_pProcTarget->getAttr<TARGETING::ATTR_PROC_EFF_FABRIC_GROUP_ID>();
+        const uint8_t l_procEffFabricTopoId =
+            i_pProcTarget->getAttr<TARGETING::ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>();
 
-        // Set Effective fabric Groupid (NNN) and chip (CC) into Effective fabric grp ID
-        uint32_t l_EffFabricChipId =
-                    i_pProcTarget->getAttr<TARGETING::ATTR_PROC_EFF_FABRIC_CHIP_ID>();
+        uint8_t l_procEffFabricGrpId = 0;
+        uint8_t l_EffFabricChipId = 0;
+        MEMMAP::extractGroupAndChip(l_procEffFabricTopoId,
+                l_procEffFabricGrpId, l_EffFabricChipId);
 
-        iv_spPcrd->hdatChipData.hdatPcrdEffFabricGrpId = 
+        iv_spPcrd->hdatChipData.hdatPcrdEffFabricGrpId =
                         (l_EffFabricChipId | (l_procEffFabricGrpId << 3));
 
 

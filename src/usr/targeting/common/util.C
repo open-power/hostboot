@@ -132,16 +132,10 @@ bool is_no_load(void)
 bool orderByNodeAndPosition(  Target* i_firstProc,
                               Target* i_secondProc)
 {
-    uint8_t groupId0 = i_firstProc->getAttr<ATTR_FABRIC_GROUP_ID>();
-    uint8_t groupId1 = i_secondProc->getAttr<ATTR_FABRIC_GROUP_ID>();
-    uint8_t fabpos0 = i_firstProc->getAttr<ATTR_FABRIC_CHIP_ID>();
-    uint8_t fabpos1 = i_secondProc->getAttr<ATTR_FABRIC_CHIP_ID>();
+    uint8_t topoId0 = i_firstProc->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>();
+    uint8_t topoId1 = i_secondProc->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>();
 
-    if (groupId0 == groupId1)
-    {
-        return fabpos0 < fabpos1;
-    }
-    return groupId0 < groupId1;
+    return topoId0 < topoId1;
 }
 
 uint8_t  is_fused_mode( )

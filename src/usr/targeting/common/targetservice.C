@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -859,16 +859,15 @@ errlHndl_t TargetService::queryMasterProcChipTargetHandle(
                 targetService().end(),
                 &actingMasterProcFilter);
 
-            TARGETING::ATTR_FABRIC_GROUP_ID_type minFabricGroupId =
-                TARGETING::FABRIC_GROUP_ID_NOT_FOUND;
+            uint8_t minFabricTopologyId = INVALID_NODE;
             for(; blueprintProcs; ++blueprintProcs)
             {
-                TARGETING::ATTR_FABRIC_GROUP_ID_type fabricGroupId =
+                uint8_t fabricTopologyId =
                     blueprintProcs->getAttr<
-                        TARGETING::ATTR_FABRIC_GROUP_ID>();
-                if(fabricGroupId < minFabricGroupId)
+                        TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
+                if(fabricTopologyId < minFabricTopologyId)
                 {
-                    minFabricGroupId = fabricGroupId;
+                    minFabricTopologyId = fabricTopologyId;
                     pMasterProc = *blueprintProcs;
                 }
             }
