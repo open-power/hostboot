@@ -222,14 +222,14 @@ uint32_t mssRestoreDramRepairs<TYPE_OCMB_CHIP>( TargetHandle_t i_target,
 
 
     fapi2::buffer<uint8_t> tmpRepairedRankMask, tmpBadDimmMask;
-    FAPI_INVOKE_HWP( errl, mss::restore_repairs,
+    FAPI_INVOKE_HWP( errl, exp_restore_repairs,
                      fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>( i_target ),
                      tmpRepairedRankMask, tmpBadDimmMask );
 
     if ( NULL != errl )
     {
         PRDF_ERR( "[PlatServices::mssRestoreDramRepairs] "
-                  "restore_repairs() failed. HUID: 0x%08x",
+                  "exp_restore_repairs() failed. HUID: 0x%08x",
                   getHuid(i_target) );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
