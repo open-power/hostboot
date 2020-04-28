@@ -44,7 +44,7 @@
     #include <exp_i2c_fields.H>
     #include <endian_utils.H>
     //Macro
-    #define MSSTARGID i_target.get
+    #define MSSTARGID i_target.get()
 #else
     #include <generic/memory/lib/utils/poll.H>
     #include <lib/i2c/exp_i2c_fields.H>

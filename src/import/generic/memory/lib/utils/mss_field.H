@@ -256,7 +256,7 @@ inline fapi2::ReturnCode set_field(const fapi2::Target<T>& i_target,
 fapi_try_exit:
     return fapi2::current_err;
 }
-
+#endif
 ///
 /// @brief byte field reader
 /// @tparam E endian type
@@ -308,7 +308,7 @@ inline fapi2::ReturnCode get_field( const fapi2::Target<T>& i_target,
 fapi_try_exit:
     return fapi2::current_err;
 }
-
+#ifndef __PPE__
 ///
 /// @brief byte field writer
 /// @tparam E endian type
