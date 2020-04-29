@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019
+# Contributors Listed Below - COPYRIGHT 2019,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -33,11 +33,6 @@
 # tries to read the source files via these relative paths, it can't
 # find the files. We correct this by converting all paths to source
 # and header files to absolute paths.
-
-if [ ! "$HOSTBOOT_PROFILE_ARTIFACT" ] ; then
-    echo "$@"
-    exit
-fi
 
 make_path_abs () {
     local ABSPATH
