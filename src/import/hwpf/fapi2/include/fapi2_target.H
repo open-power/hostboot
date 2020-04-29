@@ -320,6 +320,29 @@ class Target
         getChildren(const TargetFilter i_filter,
                     const TargetState i_state = TARGET_STATE_FUNCTIONAL) const;
 
+        ///
+        /// @brief Convert this target into a type that is a subset of K, with type checking
+        /// @tparam T The type of the expected output target
+        /// @param[out] o_target The converted target will be stored here
+        /// @return FAPI2_RC_SUCCESS if the target was compatible
+        ///         FAPI2_RC_INVALID_PARAMETER if not
+        ///
+        /// This method is supposed to be a way out of composite target hell.
+        /// If a HWP must accept a wide variety of potential targets, most target
+        /// transformations (like getParent, getChildren, getChipletNumber, ...) will
+        /// not work because the template type includes too many different types and the
+        /// result of those operations is not clearly defined.
+        ///
+        /// The idea is that the HWP will eventually be able to narrow down the set of
+        /// allowed types for its target depending on the code path it's taking, such as
+        /// "must be a PROC_CHIP" or "must be a chiplet target". It can then call this
+        /// method to transform the template type into the expected type (which may still
+        /// be composite). The method will fail if the target's _actual_ type (only known
+        /// to platform code) does not fit into the requested type.
+        ///
+        template< TargetType T>
+        inline ReturnCodes
+        reduceType(Target<T, M, V>& o_target) const;
 
         // No multicast support for Hostboot Bootloader
 #ifndef FAPI_PLAT_MULTICAST_NOT_SUPPORTED
@@ -477,6 +500,17 @@ class Target
             static_assert(!((K & TARGET_TYPE_MULTICAST) &&
                             (K != (T | TARGET_TYPE_MULTICAST))),
                           "improper child of fapi2::TARGET_TYPE_MULTICAST");
+        }
+
+        ///
+        /// @brief Static compile time checks for reduceType.
+        ///        Platform implementations are expected to call this.
+        /// @tparam T The requested new type
+        ///
+        template< TargetType T>
+        inline void check_reduceType() const
+        {
+            // just a placeholder for now
         }
 
         // No multicast support for Hostboot Bootloader
