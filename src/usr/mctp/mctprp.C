@@ -112,7 +112,7 @@ void MctpRP::poll_kcs_status(void)
         // If we found that the OBF bit is not set then just wait 100 ms and try poll again
         if(!(l_status & KCS_STATUS_OBF))
         {
-            nanosleep(0,100 * NS_PER_MSEC);
+            nanosleep(0,1 * NS_PER_MSEC);
             continue;
         }
 
