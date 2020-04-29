@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -164,6 +164,17 @@ enum TargetFilter : uint64_t;
 {
     return static_cast<TargetType>(static_cast<uint64_t>(x) |
                                    static_cast<uint64_t>(y));
+}
+
+constexpr TargetType operator&(TargetType x, TargetType y)
+{
+    return static_cast<TargetType>(static_cast<uint64_t>(x) &
+                                   static_cast<uint64_t>(y));
+}
+
+constexpr TargetType operator~(TargetType x)
+{
+    return static_cast<TargetType>(~static_cast<uint64_t>(x));
 }
 #endif
 
