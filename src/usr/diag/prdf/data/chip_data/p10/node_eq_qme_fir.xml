@@ -24,7 +24,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attn_node model_ec="P10_10" name="EQ_QME_FIR" reg_type="SCOM">
-    <local_fir config="" name="EQ_QME_FIR">
+    <register name="EQ_QME_FIR">
         <instance addr="0x200E0000" reg_inst="0"/>
         <instance addr="0x210E0000" reg_inst="1"/>
         <instance addr="0x220E0000" reg_inst="2"/>
@@ -33,9 +33,71 @@
         <instance addr="0x250E0000" reg_inst="5"/>
         <instance addr="0x260E0000" reg_inst="6"/>
         <instance addr="0x270E0000" reg_inst="7"/>
-        <action attn_type="CS" config="00"/>
-        <action attn_type="RE" config="01"/>
-    </local_fir>
+    </register>
+    <register name="EQ_QME_FIR_MASK">
+        <instance addr="0x200E0004" reg_inst="0"/>
+        <instance addr="0x210E0004" reg_inst="1"/>
+        <instance addr="0x220E0004" reg_inst="2"/>
+        <instance addr="0x230E0004" reg_inst="3"/>
+        <instance addr="0x240E0004" reg_inst="4"/>
+        <instance addr="0x250E0004" reg_inst="5"/>
+        <instance addr="0x260E0004" reg_inst="6"/>
+        <instance addr="0x270E0004" reg_inst="7"/>
+    </register>
+    <register name="EQ_QME_FIR_ACT0">
+        <instance addr="0x200E0008" reg_inst="0"/>
+        <instance addr="0x210E0008" reg_inst="1"/>
+        <instance addr="0x220E0008" reg_inst="2"/>
+        <instance addr="0x230E0008" reg_inst="3"/>
+        <instance addr="0x240E0008" reg_inst="4"/>
+        <instance addr="0x250E0008" reg_inst="5"/>
+        <instance addr="0x260E0008" reg_inst="6"/>
+        <instance addr="0x270E0008" reg_inst="7"/>
+    </register>
+    <register name="EQ_QME_FIR_ACT1">
+        <instance addr="0x200E000c" reg_inst="0"/>
+        <instance addr="0x210E000c" reg_inst="1"/>
+        <instance addr="0x220E000c" reg_inst="2"/>
+        <instance addr="0x230E000c" reg_inst="3"/>
+        <instance addr="0x240E000c" reg_inst="4"/>
+        <instance addr="0x250E000c" reg_inst="5"/>
+        <instance addr="0x260E000c" reg_inst="6"/>
+        <instance addr="0x270E000c" reg_inst="7"/>
+    </register>
+    <capture_group node_inst="0:7">
+        <capture_register reg_inst="0:7" reg_name="EQ_QME_FIR"/>
+        <capture_register reg_inst="0:7" reg_name="EQ_QME_FIR_MASK"/>
+        <capture_register reg_inst="0:7" reg_name="EQ_QME_FIR_ACT0"/>
+        <capture_register reg_inst="0:7" reg_name="EQ_QME_FIR_ACT1"/>
+    </capture_group>
+    <rule attn_type="CS" node_inst="0:7">
+        <!-- FIR & ~MASK & ~ACT0 & ~ACT1 -->
+        <expr type="and">
+            <expr type="reg" value1="EQ_QME_FIR"/>
+            <expr type="not">
+                <expr type="reg" value1="EQ_QME_FIR_MASK"/>
+            </expr>
+            <expr type="not">
+                <expr type="reg" value1="EQ_QME_FIR_ACT0"/>
+            </expr>
+            <expr type="not">
+                <expr type="reg" value1="EQ_QME_FIR_ACT1"/>
+            </expr>
+        </expr>
+    </rule>
+    <rule attn_type="RE" node_inst="0:7">
+        <!-- FIR & ~MASK & ~ACT0 & ACT1 -->
+        <expr type="and">
+            <expr type="reg" value1="EQ_QME_FIR"/>
+            <expr type="not">
+                <expr type="reg" value1="EQ_QME_FIR_MASK"/>
+            </expr>
+            <expr type="not">
+                <expr type="reg" value1="EQ_QME_FIR_ACT0"/>
+            </expr>
+            <expr type="reg" value1="EQ_QME_FIR_ACT1"/>
+        </expr>
+    </rule>
     <bit pos="0">PPE halted due to an error, which is an OR the 4 signals captured in ERR(0:3). This indication is intended to be reported to the OCC complex as an</bit>
     <bit pos="1">PPE asserted debug trigger. Connected to PPEDBG[FIR_TRIGGER].  May be used by QME hcode to indicate an error to PRD or to induce a checkstop for</bit>
     <bit pos="2">Used for TBD testing or workarounds</bit>

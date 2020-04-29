@@ -492,6 +492,35 @@ sub __special_case_EQ_CORE_FIR($$)
 
 #-------------------------------------------------------------------------------
 
+sub __special_case_EQ_QME_FIR($$)
+{
+    my ( $fir, $node ) = @_;
+
+    $fir->{acts} = { "00" => '"CS"       ', "01" => '"RE"',
+                     "10" => '"NO_ACTION"', "11" => '"NO_ACTION"', };
+
+    my $d = {};
+    $d->{i} = "0:7";
+    $d->{c} = "32:39";
+
+    my $a = 0x0E0000;
+    $d->{a} = [ $a,   $a+1,  $a+2,         # FIR, AND, OR
+                $a+4, $a+5,  $a+6,         # MASK, AND, OR
+                $a+8, $a+12, undef, undef, # ACT0, ACT1, WOF, ACT2
+              ];
+
+    # Convert the adddresses to hex strings.
+    for ( @{$d->{a}} )
+    {
+        next unless defined $_;
+        $_ = sprintf("0x%06x", $_);
+    }
+
+    push @{$fir->{addr}}, $d;
+}
+
+#-------------------------------------------------------------------------------
+
 sub normalizeXML($)
 {
     my ( $xml ) = @_;
@@ -530,6 +559,11 @@ sub normalizeXML($)
         elsif ( $n->{name} =~ /^EQ_CORE_FIR$/ )
         {
             __special_case_EQ_CORE_FIR($f,$n);
+        }
+        # SPECIAL CASE
+        elsif ( $n->{name} =~ /^EQ_QME_FIR$/ )
+        {
+            __special_case_EQ_QME_FIR($f,$n);
         }
         # Default case
         else

@@ -168,21 +168,21 @@ chip p10_eq
         name        "P10 chip EQ_QME_FIR";
         scomaddr    0x200e0000;
         reset       (&, 0x200e0001);
-        mask        (|, 0x200e0005);
+        mask        (|, 0x200e0006);
         capture     group default;
     };
 
     register EQ_QME_FIR_MASK
     {
         name        "P10 chip EQ_QME_FIR MASK";
-        scomaddr    0x200e0003;
+        scomaddr    0x200e0004;
         capture     group default;
     };
 
     register EQ_QME_FIR_ACT0
     {
         name        "P10 chip EQ_QME_FIR ACT0";
-        scomaddr    0x200e0006;
+        scomaddr    0x200e0008;
         capture     group default;
         capture     req nonzero("EQ_QME_FIR");
     };
@@ -190,7 +190,7 @@ chip p10_eq
     register EQ_QME_FIR_ACT1
     {
         name        "P10 chip EQ_QME_FIR ACT1";
-        scomaddr    0x200e0007;
+        scomaddr    0x200e000c;
         capture     group default;
         capture     req nonzero("EQ_QME_FIR");
     };
