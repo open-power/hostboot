@@ -1543,6 +1543,25 @@
   </attribute>
 
   <attribute>
+    <description>
+      Static portion of the absolute location code for the FRU associated with
+      this target.  In order to realize a complete absolute location code, the
+      dynamically determined chassis location code must be prefixed to this
+      value.  If the value is NULL, then the nearest parent target with a
+      non-NULL value of this attribute will hold the location code info.
+    </description>
+    <id>STATIC_ABS_LOCATION_CODE</id>
+    <simpleType>
+      <string>
+        <sizeInclNull>64</sizeInclNull>
+      </string>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <id>TPM_MODEL</id>
     <description>
         Indicates TPM Model (or family) for a TPM Target
