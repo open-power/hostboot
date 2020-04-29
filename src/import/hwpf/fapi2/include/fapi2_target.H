@@ -465,6 +465,8 @@ class Target
             // users are required to use getChildren if they want to map back to unicast.
             static_assert(!(((K ^ T) & TARGET_TYPE_MULTICAST) && ((T & TARGET_TYPE_CHIPLETS) != TARGET_TYPE_NONE)),
                           "Parent target for a multicast target must also be multicast or PROC_CHIP");
+            static_assert((T & TARGET_TYPE_MULTICAST) == 0 || (T & TARGET_TYPE_MULTICASTABLE) != 0,
+                          "Requested target type for multicast parents must be part of TARGET_TYPE_MULTICASTABLE");
         }
 
         ///
