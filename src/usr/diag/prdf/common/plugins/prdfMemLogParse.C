@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2863,7 +2863,7 @@ void initMemMruStrings( MemoryMruData::MemMruMeld i_mm, bool & o_addDramSite,
     }
     else if ( i_mm.s.isOcmb ) // OCMB
     {
-        compStr = "ocmb";
+        compStr = "omi";
     }
 
     // Build the header string.

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -245,7 +245,7 @@ TargetHandleList MemoryMru::getCalloutList() const
     }
     else
     {
-        if ( TARGETING::TYPE_MBA == getTargetType(iv_target) )
+        if ( TYPE_MBA == getTargetType(iv_target) )
         {
             if ( NO_SPECIAL_CALLOUT != iv_special )
             {
@@ -269,8 +269,8 @@ TargetHandleList MemoryMru::getCalloutList() const
 
                 // Add DIMM represented by symbol
                 if ( iv_memMruMeld.s.eccSpared ) ps = 1; // Adjust for ECC spare
-                TARGETING::TargetHandle_t l_dimm = getConnectedDimm( iv_target,
-                                                                 iv_rank, ps );
+                TargetHandle_t l_dimm = getConnectedDimm( iv_target, iv_rank,
+                                                          ps );
                 if (l_dimm != nullptr)
                 {
                   o_list.push_back(l_dimm);
@@ -278,13 +278,13 @@ TargetHandleList MemoryMru::getCalloutList() const
                 else
                 {
                   PRDF_ERR( PRDF_FUNC "getConnectedDimm(0x%08x, 0x%02X, %d) "
-                      "returned nullptr", getHuid(iv_target),
-                      iv_rank.getDimmSlct(), ps );
+                            "returned nullptr", getHuid(iv_target),
+                            iv_rank.getDimmSlct(), ps );
                 }
             }
         }
-        else if ( TARGETING::TYPE_MCA == getTargetType(iv_target) ||
-                  TARGETING::TYPE_OCMB_CHIP == getTargetType(iv_target) )
+        else if ( TYPE_MCA == getTargetType(iv_target) ||
+                  TYPE_OCMB_CHIP == getTargetType(iv_target) )
         {
             if ( CALLOUT_ALL_MEM == iv_special )
             {
@@ -295,8 +295,20 @@ TargetHandleList MemoryMru::getCalloutList() const
             {
                 // Rank callouts and symbol callouts both callout a single DIMM.
                 uint32_t ds = iv_rank.getDimmSlct();
-                TargetHandle_t dimm = getConnectedChild( iv_target,
-                                                         TYPE_DIMM, ds );
+                TargetHandle_t dimm = nullptr;
+                if ( TYPE_OCMB_CHIP == getTargetType(iv_target) )
+                {
+                    // TODO RTC 210072 - support for multiple ports
+                    TargetHandle_t memPort = getConnectedChild( iv_target,
+                        TYPE_MEM_PORT, 0 );
+                    dimm = getConnectedChild( memPort, TYPE_DIMM, ds );
+
+                }
+                else
+                {
+                    dimm = getConnectedChild( iv_target, TYPE_DIMM, ds );
+                }
+
                 if ( nullptr == dimm )
                 {
                     PRDF_ERR( PRDF_FUNC "getConnectedChild(0x%08x,%d) returned "
