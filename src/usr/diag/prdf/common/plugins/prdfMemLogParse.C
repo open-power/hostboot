@@ -172,7 +172,7 @@ void initMemMruStrings( MemoryMruData::MemMruMeld i_mm, bool & o_addDramSite,
 
     if ( i_mm.s.isOcmb ) // OCMB
     {
-        compStr = "ocmb";
+        compStr = "omi";
         chipPos = (i_mm.s.procPos << 3) | i_mm.s.chnlPos;
         compPos = i_mm.s.omiPos;
     }

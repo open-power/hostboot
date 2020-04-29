@@ -205,7 +205,7 @@ TargetHandleList MemoryMru::getCalloutList() const
     }
     else
     {
-        if ( TARGETING::TYPE_OCMB_CHIP == getTargetType(iv_target) )
+        if ( TYPE_OCMB_CHIP == getTargetType(iv_target) )
         {
             if ( CALLOUT_ALL_MEM == iv_special )
             {
@@ -216,8 +216,11 @@ TargetHandleList MemoryMru::getCalloutList() const
             {
                 // Rank callouts and symbol callouts both callout a single DIMM.
                 uint32_t ds = iv_rank.getDimmSlct();
-                TargetHandle_t dimm = getConnectedChild( iv_target,
-                                                         TYPE_DIMM, ds );
+                // TODO RTC 210072 - support for multiple ports
+                TargetHandle_t memPort = getConnectedChild( iv_target,
+                        TYPE_MEM_PORT, 0 );
+                TargetHandle_t dimm = getConnectedChild(memPort, TYPE_DIMM, ds);
+
                 if ( nullptr == dimm )
                 {
                     PRDF_ERR( PRDF_FUNC "getConnectedChild(0x%08x,%d) returned "
