@@ -139,7 +139,7 @@ errlHndl_t utilSetupPayloadTces(void)
     // Allocate TCEs for PAYLOAD to Temporary Space
     // -- Address must be HRMOR-specific
     uint64_t hrmorVal = cpu_spr_value(CPU_SPR_HRMOR);
-    addr = hrmorVal - VMM_HRMOR_OFFSET + MCL_TMP_ADDR;
+    addr = hrmorVal + VMM_HB_DATA_ABOVE_HRMOR +MCL_TMP_ADDR;
     size = MCL_TMP_SIZE;
     TRACUCOMP(g_trac_tce,"utilSetupPayloadTces(): addr=0x%.16llX, hrmor=0x%.16llX, size=0x%X", addr, hrmorVal, size);
 
@@ -182,7 +182,7 @@ errlHndl_t utilSetupPayloadTces(void)
 
     // Allocate TCEs for HDAT
     // -- Address must be HRMOR-specific
-    addr = hrmorVal - VMM_HRMOR_OFFSET + HDAT_TMP_ADDR;
+    addr = hrmorVal + VMM_HB_DATA_ABOVE_HRMOR + HDAT_TMP_ADDR;
     size = HDAT_TMP_SIZE;
 
     errl = utilAllocateTces(addr, size, token);
@@ -235,7 +235,7 @@ errlHndl_t utilClosePayloadTces(void)
     // -- addr is a constant for PAYLOAD
     // -- Address must be HRMOR-specific
     uint64_t hrmorVal = cpu_spr_value(CPU_SPR_HRMOR);
-    uint64_t addr = hrmorVal - VMM_HRMOR_OFFSET + MCL_TMP_ADDR;
+    uint64_t addr = hrmorVal + VMM_HB_DATA_ABOVE_HRMOR + MCL_TMP_ADDR;
     TRACUCOMP(g_trac_tce,"utilClosePayloadTces(): addr=0x%.16llX, hrmor=0x%.16llX", addr, hrmorVal);
 
     errl = SBEIO::closeUnsecureMemRegion(addr,
@@ -283,7 +283,7 @@ UtilTceMgr::UtilTceMgr(const uint64_t i_tableAddr, const size_t i_tableSize)
 
     // Need to set up TCE Table with HRMOR-specific Address
     uint64_t hrmorVal = cpu_spr_value(CPU_SPR_HRMOR);
-    iv_tceTablePhysAddr = hrmorVal - VMM_HRMOR_OFFSET + TCE_TABLE_ADDR;
+    iv_tceTablePhysAddr = hrmorVal + VMM_HB_DATA_ABOVE_HRMOR + TCE_TABLE_ADDR;
 
     // Table Address must be 4MB Aligned and default input is TCE_TABLE_ADDR
     static_assert( TCE_TABLE_ADDR % TCE_TABLE_ADDRESS_ALIGNMENT == 0,"TCE Table must align on 4 MB boundary");

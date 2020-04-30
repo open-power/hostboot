@@ -246,7 +246,8 @@ errlHndl_t verifyAndMovePayload(void)
     // Get Temporary Virtual Address To Payload
     // - Need to make Memory spaces HRMOR-relative
     uint64_t hrmorVal = cpu_spr_value(CPU_SPR_HRMOR);
-    uint64_t payload_tmp_phys_addr = hrmorVal - VMM_HRMOR_OFFSET + MCL_TMP_ADDR;
+    uint64_t payload_tmp_phys_addr = hrmorVal + VMM_HB_DATA_ABOVE_HRMOR +
+                                     MCL_TMP_ADDR;
     uint64_t payload_size          = MCL_TMP_SIZE;
 
     payload_tmp_virt_addr = mm_block_map(
@@ -382,7 +383,8 @@ errlHndl_t verifyAndMovePayload(void)
 
     // Move HDAT into its proper place after it was temporarily put into
     // HDAT_TMP_ADDR-relative-to-HRMOR (HDAT_TMP_SIZE) by the FSP via TCEs
-    uint64_t hdat_tmp_phys_addr = hrmorVal - VMM_HRMOR_OFFSET + HDAT_TMP_ADDR;
+    uint64_t hdat_tmp_phys_addr = hrmorVal + VMM_HB_DATA_ABOVE_HRMOR +
+                                  HDAT_TMP_ADDR;
 
     hdat_tmp_virt_addr = mm_block_map(
                             reinterpret_cast<void*>(hdat_tmp_phys_addr),

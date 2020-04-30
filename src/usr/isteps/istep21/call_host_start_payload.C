@@ -363,7 +363,8 @@ void* call_host_start_payload (void *io_pArgs)
         }
 
         // calculate lowest addressable memory location to be used as COMM base
-        uint64_t l_commBase = cpu_spr_value(CPU_SPR_HRMOR) - VMM_HRMOR_OFFSET;
+        uint64_t l_commBase = cpu_spr_value(CPU_SPR_HRMOR) +
+                              VMM_HB_DATA_ABOVE_HRMOR;
 
         //  - Call shutdown using payload base, and payload entry.
         //      - base/entry will be from system attributes
@@ -696,7 +697,8 @@ errlHndl_t broadcastShutdown ( uint64_t i_hbInstance )
 
         // calculate lowest addressable memory location from the master node
         // hrmor value and send to slave nodes
-        const uint64_t l_commBase = cpu_spr_value(CPU_SPR_HRMOR) - VMM_HRMOR_OFFSET;
+        const uint64_t l_commBase = cpu_spr_value(CPU_SPR_HRMOR) +
+                                    VMM_HB_DATA_ABOVE_HRMOR;
 
         // send message to all other existing hb instances except this one.
         for(uint64_t drawer = 0; drawer < sizeof(node_map); ++drawer)

@@ -130,6 +130,8 @@ enum BlockPriority
 /** Hostboot reserved memory */
 #define VMM_HRMOR_OFFSET ((4 * GIGABYTE) - (256*MEGABYTE))
 #define VMM_HB_RSV_MEM_SIZE (256*MEGABYTE)
+/**Memory above the HRMOR that is used during Hostboot IPL**/
+#define VMM_HB_DATA_ABOVE_HRMOR (128*MEGABYTE)
 
 /** PHYP ATTN AREA OFFSET */
 /** This offset is relative to the lowest address in a given node */
@@ -236,12 +238,14 @@ enum BlockPriority
  * Physical Memory Constants
  */
 
+
 /** Layout
- * 0MB-4MB: reserved/open
- * 4MB-87MB:    MCL_ADDR, MCL_TMP_ADDR, HDAT_TMP_ADDR
- * 88MB-120MB:  TCE Table (needs to be 4-byte aligned)
- * 120MB:       VMM_INTERNODE_PRESERVED_MEMORY_ADDR (see above)
- * 128MB-256MB: See HB_HRMOR info above (with HOMERs, OCC, etc)
+ * (HRMOR+128)-(HRMOR+132MB): reserved/open (4MB)
+ * (HRMOR+132MB)-(HRMOR+215MB): MCL_ADDR, MCL_TMP_ADDR, HDAT_TMP_ADDR (83MB)
+ * (HRMOR+216MB)-(HRMOR+248MB):  TCE Table (needs to be 4-byte aligned) (32MB)
+ * (HRMOR+248MB):       VMM_INTERNODE_PRESERVED_MEMORY_ADDR (see above) (8MB)
+ * (HRMOR+256MB)-(HRMOR+384MB): See HB_HRMOR info above (with HOMERs, OCC, etc)
+ *                              (128MB)
  */
 
 /** Two memory locations for MCL processing **/

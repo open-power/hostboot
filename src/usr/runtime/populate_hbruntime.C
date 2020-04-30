@@ -1077,12 +1077,21 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                 TARGETING::TYPE_PROC,
                 true);
 
+        ////////////////////////////////////////////////////////////////////
+        // HRMOR Calculation on OPAL and PhyP systems
+        // For PhyP and OPAL systems, HRMOR is set to 4GB-256MB, which is
+        // calculated following PowerISA Doc:
+        // "The supported HRMOR values are the non-negative multiples of
+        // 2 to the power of r, where r is an implementation-dependent value
+        // and 12 <= r <= 26."
+        // Setting r to 26 sets the offset granularity to 64MB.
+        // 64MB * 60 = 3840MB, which is equal to 4GB-256MB.
+        ////////////////////////////////////////////////////////////////////
+        uint64_t l_hbAddr = cpu_spr_value(CPU_SPR_HRMOR);
+
         TARGETING::ATTR_MIRROR_BASE_ADDRESS_type l_mirrorBase = 0;
         if(TARGETING::is_phyp_load())
         {
-            // First phyp entry is for the entire 256M HB space
-            uint64_t l_hbAddr = cpu_spr_value(CPU_SPR_HRMOR);
-
             // If mirroring enabled,
             // change address start to be at its mirrored address equivalent
             auto l_mirrored =
@@ -1103,45 +1112,23 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                 // the address we would normally use.
                 l_hbAddr += l_mirrorBase;
             }
-            l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_PRIMARY,
-                                          i_nodeId,
-                                          l_hbAddr,
-                                          VMM_HB_RSV_MEM_SIZE,
-                                          HBRT_RSVD_MEM__PRIMARY,
-                                          HDAT::RHB_READ_WRITE,
-                                          false);
-            if(l_elog != nullptr)
-            {
-                break;
-            }
         }
-        else if(TARGETING::is_sapphire_load())
+
+        l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_PRIMARY,
+                                      i_nodeId,
+                                      l_hbAddr,
+                                      VMM_HB_RSV_MEM_SIZE,
+                                      HBRT_RSVD_MEM__PRIMARY,
+                                      HDAT::RHB_READ_WRITE,
+                                      false);
+
+        if(l_elog != nullptr)
         {
-            // Reserve the HRMOR space if it not at zero offset.
-            ////////////////////////////////////////////////////////////////////
-            // HRMOR Calculation on OPAL Vs PhyP systems
-            // For PhyP and OPAL systems, HRMOR is set to 4GB-256MB, which is
-            // calculated following PowerISA Doc:
-            // "The supported HRMOR values are the non-negative multiples of
-            // 2 to the power of r, where r is an implementation-dependent value
-            // and 12 <= r <= 26."
-            // Setting r to 26 sets the offset granularity to 64MB.
-            // 64MB * 60 = 3840MB, which is equal to 4GB-256MB.
-            ////////////////////////////////////////////////////////////////////
-            uint64_t l_hbAddr = cpu_spr_value(CPU_SPR_HRMOR) - VMM_HRMOR_OFFSET;
+            break;
+        }
 
-            l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_PRIMARY,
-                    i_nodeId,
-                    l_hbAddr,
-                    VMM_HB_RSV_MEM_SIZE,
-                    HBRT_RSVD_MEM__PRIMARY,
-                    HDAT::RHB_READ_WRITE,
-                    false);
-            if(l_elog != nullptr)
-            {
-                break;
-            }
-
+        if(TARGETING::is_sapphire_load())
+        {
             // Opal data goes at top_of_mem
             l_topMemAddr = ISTEP::get_top_homer_mem_addr();
             assert (l_topMemAddr != 0,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -221,7 +221,7 @@ class UtilTceMgr
      *
      * @note  TCE_TABLE_ADDR and TCE_TABLE_SIZE are defined in vmmconst.h
      */
-    UtilTceMgr(uint64_t i_tableAddr = TCE_TABLE_ADDR,
+    UtilTceMgr(uint64_t i_tableAddr = TCE_TABLE_ADDR + VMM_HB_DATA_ABOVE_HRMOR,
                size_t   i_tableSize = TCE_TABLE_SIZE);
 
     /**

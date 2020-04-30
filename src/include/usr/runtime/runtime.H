@@ -411,8 +411,8 @@ errlHndl_t getPayloadAttnAreaAddr(uint64_t& o_payloadTiAddr);
 inline uint64_t calcSpAttnAreaStart()
 {
     auto hrmorVal = cpu_spr_value(CPU_SPR_HRMOR);
-    return  (hrmorVal - VMM_HRMOR_OFFSET + PHYP_ATTN_AREA_OFFSET)
-                                              | VmmManager::FORCE_PHYS_ADDR;
+    return  (hrmorVal + VMM_HB_DATA_ABOVE_HRMOR + PHYP_ATTN_AREA_OFFSET)
+            | VmmManager::FORCE_PHYS_ADDR;
 }
 
 
