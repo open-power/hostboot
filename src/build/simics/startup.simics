@@ -194,12 +194,6 @@ if($vpo_compile == "1") {
     set-class-attr $proc_type pvr 0x809100
 }
 
-# Workaround for EXPLR_CHIP_INFO_REG
-# RTC:250627 Remove simics workaround to init EXPLR_CHIP_INFO_REG
-foreach $dimm_uchip in (get-object-list -all substr = uchip_space) {
-    ($dimm_uchip).write 0x2134 0xd2000610
-}
-
 # Changing the base of HRMOR to 4GB - 256MB for all procs
 echo "Setting l3_base"
 foreach $proc in (get-all-procs) {
