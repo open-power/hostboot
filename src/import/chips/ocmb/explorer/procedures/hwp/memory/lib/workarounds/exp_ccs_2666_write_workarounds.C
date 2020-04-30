@@ -38,6 +38,7 @@
 #include <lib/dimm/exp_mrs_traits.H>
 #include <fapi2.H>
 #include <lib/workarounds/exp_ccs_2666_write_workarounds.H>
+#include <lib/workarounds/exp_mr_workarounds.H>
 #include <mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
@@ -108,88 +109,6 @@ fapi2::ReturnCode update_cwl(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i
 fapi_try_exit:
     return fapi2::current_err;
 }
-
-///
-/// @brief Helper that adds the MR2 commands
-/// @param[in] i_target port target on which to operate
-/// @param[out] o_instructions CCS instructions
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
-/// @note Unit test helper
-///
-fapi2::ReturnCode updates_mode_registers_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-        std::vector<ccs::instruction_t>& o_instructions)
-{
-    // The PHY puts us into self time refresh mode prior
-    // We need to exit self time refresh mode by holding the CKE high
-    // The time for this is tXPR = tRFC(min) + 10 ns
-    // This is 560ns -> 746 clocks. rounded up to 750 for saftey
-    constexpr uint16_t TXPR_SAFE_MARGIN = 750;
-
-    o_instructions.clear();
-
-    o_instructions.push_back(mss::ccs::des_command(TXPR_SAFE_MARGIN));
-
-    for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
-    {
-        fapi2::ReturnCode l_mrs_rc = fapi2::FAPI2_RC_SUCCESS;
-        mss::ddr4::mrs02_data<mss::mc_type::EXPLORER> l_data(l_dimm, l_mrs_rc);
-
-        std::vector<mss::rank::info<>> l_ranks;
-        FAPI_TRY(mss::rank::ranks_on_dimm(l_dimm, l_ranks));
-        FAPI_TRY(l_mrs_rc);
-
-        // Loops through all ranks on this DIMM and adds them to the CCS instructions to execute
-        for(const auto& l_rank_info : l_ranks)
-        {
-            FAPI_TRY(mss::mrs_engine( l_dimm,
-                                      l_data,
-                                      l_rank_info.get_port_rank(),
-                                      mrsTraits<mss::mc_type::EXPLORER>::mrs_tmod(i_target),
-                                      o_instructions ));
-        }
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Updates MR2 to have the proper CWL value if the workaround is needed
-/// @param[in] i_target port target on which to operate
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
-/// @note This is the second part of the CCS 2666 write workaround
-/// The CWL needs to be programmed into MR2
-/// This cannot be done with the Microchip FW as we do not have a parameter for CWL
-///
-fapi2::ReturnCode updates_mode_registers(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
-{
-    bool l_is_needed = false;
-
-    FAPI_TRY(is_ccs_2666_write_needed(i_target, l_is_needed));
-
-    // If the workaround is not needed, skip it
-    if(l_is_needed == false)
-    {
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
-
-    // Update the CWL to the workaround value
-    {
-        mss::ccs::program l_program;
-
-        // Adds the instructions
-        FAPI_TRY(updates_mode_registers_helper(i_target, l_program.iv_instructions));
-
-        // Executes the CCS commands
-        FAPI_TRY(mss::ccs::execute(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target),
-                                   l_program,
-                                   i_target));
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
 
 } // workarounds
 } // exp
