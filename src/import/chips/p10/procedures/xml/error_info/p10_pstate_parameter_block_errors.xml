@@ -574,4 +574,19 @@
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_UT_PSTATE0_FREQ_MISMATCH</rc>
+    <description>The computed system pstate0 frequency attribute does not match
+     with the UltraTurbo frequency for this par
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>UT_FREQ</ffdc>
+    <ffdc>PSTATE0_FREQ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+
 </hwpErrors>

@@ -160,6 +160,7 @@ typedef struct
     uint32_t attr_ext_vrm_step_size_mv[4];
     uint32_t attr_save_mode_nodds_uplift_mv[2]; //VDD,VCS
 
+    uint32_t attr_pstate0_freq;
 
 
     uint32_t freq_proc_refclock_khz;
@@ -284,6 +285,11 @@ class PlatPmPPB
         /// -----------------------------------------------------------------------
         void compute_PStateV_I_slope(GlobalPstateParmBlock_t* o_gppb);
 
+        /// -----------------------------------------------------------------------
+        /// @brief set pstate0 attribute/floor/ceil freq based on Fmax/UT/PSav value
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        fapi2::ReturnCode pm_set_frequency();
         /// -----------------------------------------------------------------------
         /// @brief Read #V data from module vpd
         /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
@@ -663,6 +669,11 @@ class PlatPmPPB
         SysPowerDistParms_t       iv_vdn_sysparam;
         SysPowerDistParms_t       iv_vio_sysparam;
         uint8_t                   iv_valid_pdv_points;
+
+        uint32_t                  iv_vddPsavFreq;
+        uint32_t                  iv_vddWofBaseFreq;
+        uint32_t                  iv_vddUTFreq;
+        uint32_t                  iv_vddFmaxFreq;
 };
 
 }

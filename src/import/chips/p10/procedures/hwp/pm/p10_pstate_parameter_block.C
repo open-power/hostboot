@@ -368,6 +368,11 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
         l_pmPPB->compute_vpd_pts();
 
         // ----------------
+        // Compute Fmax and update pstate0
+        // ----------------
+        l_pmPPB->pm_set_frequency();
+
+        // ----------------
         // Safe mode freq and volt init
         // ----------------
         FAPI_TRY(l_pmPPB->safe_mode_init());
@@ -974,7 +979,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         compute_dds_slopes(io_globalppb);
 
         io_globalppb->dpll_pstate0_value =
-            revle32(revle32(io_globalppb->reference_frequency_khz)  /
+            revle32(((iv_attrs.attr_pstate0_freq) * 1000)  /
                     revle32(io_globalppb->frequency_step_khz));
 
         FAPI_INF("l_globalppb.dpll_pstate0_value %X (%d)",
@@ -1092,8 +1097,10 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
 
         i_occppb->frequency_min_khz = revle32(i_occppb->frequency_min_khz);
 
-        // frequency_max_khz - Value from Ultra Turbo operating point after biases
-        i_occppb->frequency_max_khz = revle32(iv_reference_frequency_khz);
+        // frequency_max_khz - Value from max pstate0 
+        i_occppb->frequency_max_khz = iv_attrs.attr_pstate0_freq * 1000;
+        i_occppb->frequency_max_khz = revle32(i_occppb->frequency_max_khz);
+        FAPI_INF("frequency_max_khz %08x",i_occppb->frequency_max_khz);
 
         // frequency_step_khz
         i_occppb->frequency_step_khz = revle32(iv_frequency_step_khz);
@@ -1152,7 +1159,6 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
         i_occppb->vdd_vret_mv =  l_rvrm_rvid << 3;
 
         i_occppb->vdd_vret_mv = revle32(i_occppb->vdd_vret_mv);
-
 
     }while(0);
 
@@ -1406,6 +1412,7 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
 
     // Frequency Bias attributes
     DATABLOCK_GET_ATTR(ATTR_FREQ_BIAS, iv_procChip, attr_freq_bias);
+    DATABLOCK_GET_ATTR(ATTR_SYSTEM_PSTATE0_FREQ_MHZ, FAPI_SYSTEM, attr_pstate0_freq);
 
     // Voltage Bias attributes
     DATABLOCK_GET_ATTR(ATTR_RVRM_DEADZONE_MV, iv_procChip, attr_rvrm_deadzone_mv);
@@ -2116,11 +2123,19 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
             if (i == VPD_PV_CF7)
                 continue;
 
-            iv_attr_mvpd_poundV_raw[i].pstate = (iv_attr_mvpd_poundV_raw[CF6].frequency_mhz -
+            iv_attr_mvpd_poundV_raw[i].pstate = (iv_attr_mvpd_poundV_raw[CF6].frequency_mhz - 
             iv_attr_mvpd_poundV_raw[i].frequency_mhz) * 1000 / (iv_frequency_step_khz);
 
-            FAPI_INF("PSTATE %x %x %d",iv_attr_mvpd_poundV_raw[CF6].frequency_mhz,
-                     iv_attr_mvpd_poundV_raw[i].frequency_mhz,iv_attr_mvpd_poundV_raw[i].pstate);
+            iv_vddPsavFreq = (uint32_t)(revle16(iv_poundV_raw_data.other_info.VddPsavCoreFreq));
+
+            iv_vddWofBaseFreq = (uint32_t)(revle16(iv_poundV_raw_data.other_info.VddTdpWofCoreFreq));
+            iv_vddUTFreq = (uint32_t)(revle16(iv_poundV_raw_data.other_info.VddUTCoreFreq));
+            iv_vddFmaxFreq = (uint32_t)(revle16(iv_poundV_raw_data.other_info.VddFmxCoreFreq));
+
+            FAPI_INF("PSTATE %x %x %d PSAV %x WOF %x UT %x Fmax %x",iv_attr_mvpd_poundV_raw[CF6].frequency_mhz,
+                     iv_attr_mvpd_poundV_raw[i].frequency_mhz,iv_attr_mvpd_poundV_raw[i].pstate,
+                     iv_vddPsavFreq, iv_vddWofBaseFreq,
+                      iv_vddUTFreq, iv_vddFmaxFreq);
         }
 
         // Static Rails
@@ -4978,5 +4993,163 @@ fapi2::ReturnCode PlatPmPPB::set_global_feature_attributes()
 fapi_try_exit:
     return fapi2::current_err;
 }
+///////////////////////////////////////////////////////////
+////////  pm_set_frequency
+///////////////////////////////////////////////////////////
+fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
+{
+    FAPI_INF("PlatPmPPB::pm_set_frequency >>>>>");
 
+    voltageBucketData_t l_poundV_data;
+    uint16_t l_fmax_freq;
+    uint16_t l_ut_freq;
+    uint16_t l_psav_freq;
+    uint8_t l_sys_pdv_mode;
+    uint16_t l_tmp_psav_freq = 0;
+    uint16_t l_tmp_ceil_freq = 0;
+    fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_Type l_sys_freq_core_floor_mhz;
+    fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_Type l_sys_freq_core_ceil_mhz;
+    fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ_Type l_pstate0_freq_mhz;
+    fapi2::ATTR_FREQ_CORE_FLOOR_MHZ_Type l_floor_freq_mhz;
+    fapi2::ATTR_FREQ_CORE_CEILING_MHZ_Type l_ceil_freq_mhz;
+
+    do
+    {
+        auto sys_target = iv_procChip.getParent<fapi2::TARGET_TYPE_SYSTEM>();
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ, 
+                sys_target,l_sys_freq_core_floor_mhz));
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ, 
+                sys_target,l_sys_freq_core_ceil_mhz));
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ, 
+                sys_target,l_pstate0_freq_mhz));
+
+        //If pstate0 freq is set means, we have already computed other
+        //frequencies (floor and ceil) as well
+        if (l_pstate0_freq_mhz)
+        {
+            FAPI_INF("PSTATE0 FREQ is already set %08X",l_pstate0_freq_mhz);
+            break;
+        }
+
+
+        //We loop thru all the processor in the system and will figure out the
+        //max of PSAV, FMAX and UT in those list.
+        // - Max value of FMAX will be initialized to ATTR_SYSTEM_PSTATE0_FREQ_MHZ
+        //   and same value will be initialized to ATTR_FREQ_SYSTEM_CORE_CEIL_MHZ
+        // - Max value of PSAV will be initialized to ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ  
+
+        iv_attrs.attr_pstate0_freq = 0;
+        for (auto l_proc_target : sys_target.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
+        {
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ, 
+                l_proc_target,l_floor_freq_mhz));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_CEILING_MHZ, 
+                l_proc_target,l_ceil_freq_mhz));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PDV_VALIDATION_MODE, l_proc_target,l_sys_pdv_mode));
+            //Read #V data from each proc
+            FAPI_TRY(p10_pm_get_poundv_bucket(l_proc_target, l_poundV_data));
+
+            l_fmax_freq = revle16(l_poundV_data.other_info.VddFmxCoreFreq);
+            l_ut_freq   = revle16(l_poundV_data.other_info.VddUTCoreFreq);
+            l_psav_freq = revle16(l_poundV_data.other_info.VddPsavCoreFreq);
+
+            //Compute floor freq
+            if (!l_tmp_psav_freq)
+            {
+                l_tmp_psav_freq = l_psav_freq;
+            }
+            else
+            {
+                if (l_psav_freq >= l_tmp_psav_freq)
+                {
+                    l_tmp_psav_freq = l_psav_freq;
+                }
+                if ( l_floor_freq_mhz >= l_tmp_psav_freq)
+                {
+                    l_tmp_psav_freq = l_floor_freq_mhz;
+                }
+            }
+
+            FAPI_INF("l_fmax_freq %04x, l_ut_freq %04x l_psav_freq=%04x",(l_fmax_freq),(l_ut_freq), l_psav_freq);
+
+            //Compute FMAX and Ceil freq
+            if ( l_fmax_freq > iv_attrs.attr_pstate0_freq)
+            {
+                iv_attrs.attr_pstate0_freq = l_fmax_freq;
+            }
+            else if ( l_fmax_freq == 0)
+            {
+                if (l_ut_freq > iv_attrs.attr_pstate0_freq &&
+                        iv_attrs.attr_pstate0_freq == 0)
+                {
+                    iv_attrs.attr_pstate0_freq = l_ut_freq;
+                }
+                else
+                {
+                    if (l_ut_freq != iv_attrs.attr_pstate0_freq)
+                    {
+                        if (l_sys_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_INFO)
+                        {
+                            FAPI_ASSERT_NOEXIT(false,
+                                    fapi2::PSTATE_PB_UT_PSTATE0_FREQ_MISMATCH(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                    .set_CHIP_TARGET(iv_procChip)
+                                    .set_UT_FREQ(l_ut_freq)
+                                    .set_PSTATE0_FREQ(iv_attrs.attr_pstate0_freq),
+                                    "Pstate Parameter Block WOF Biased #V CF6 error being logged");
+                        }
+                        else if (l_sys_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_WARN)
+                        {
+                            FAPI_ERR("PSTATE0 freq %08x is not equal to UT Freq %08x",iv_attrs.attr_pstate0_freq,l_ut_freq);
+                        }
+                        else if (l_sys_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_FAIL)
+                        {
+                            FAPI_ASSERT(false,
+                                    fapi2::PSTATE_PB_UT_PSTATE0_FREQ_MISMATCH()
+                                    .set_CHIP_TARGET(iv_procChip)
+                                    .set_UT_FREQ(l_ut_freq)
+                                    .set_PSTATE0_FREQ(iv_attrs.attr_pstate0_freq),
+                                    "Pstate Parameter Block WOF Biased #V CF6 error being logged");
+                        }
+                    }
+                }
+            }
+
+            l_tmp_ceil_freq = l_ceil_freq_mhz;
+            if ( iv_attrs.attr_pstate0_freq > l_ceil_freq_mhz)
+            {
+               l_tmp_ceil_freq = iv_attrs.attr_pstate0_freq;
+            }
+        } //end of proc list
+
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ, sys_target,iv_attrs.attr_pstate0_freq));
+
+        l_floor_freq_mhz = l_tmp_psav_freq;
+        l_ceil_freq_mhz = l_tmp_ceil_freq;
+        //If the system core floor freq is greater then of psav(of all the
+        //procs) then need to update system core floor freq
+        if ( l_sys_freq_core_floor_mhz > l_floor_freq_mhz)
+        {
+            l_floor_freq_mhz = l_sys_freq_core_floor_mhz;
+        }
+
+        if ( l_sys_freq_core_ceil_mhz > l_ceil_freq_mhz)
+        {
+            l_ceil_freq_mhz = l_sys_freq_core_ceil_mhz;
+        }
+
+
+        for (auto l_proc_target : sys_target.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
+        {
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_CORE_CEILING_MHZ, l_proc_target,l_ceil_freq_mhz));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ, l_proc_target,l_floor_freq_mhz));
+        }
+    }
+    while(0);
+fapi_try_exit:
+
+    return fapi2::current_err;
+}
 // *INDENT-ON*
