@@ -63,9 +63,13 @@
   <entry>
            <name>ATTR_PROC_LCO_TARGETS_COUNT</name>
            <value>0x0</value>
+           <value>0x0</value>
+           <value>0x0</value>
   </entry>
   <entry>
            <name>ATTR_PROC_LCO_TARGETS_VECTOR</name>
+           <value>0x0</value>
+           <value>0x0</value>
            <value>0x0</value>
   </entry>
   <!-- needed from pm_hwp_attributes_xml for core/cache_scominit -->
