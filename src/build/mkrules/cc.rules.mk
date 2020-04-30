@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2019
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -43,11 +43,20 @@ ifdef HOSTBOOT_PROFILE_ARTIFACT
 SOURCE_FILE=$(shell readlink -f $<)
 INCLUDE_DIRS=$(shell $(ROOTPATH)/src/build/tools/cflags.sh $(INCFLAGS))
 INCLUDE_PWD=$(shell readlink -f .)
+PROFILE_LOG_CMD=
 else
+# If HOSTBOOT_PROFILE is set (i.e. a gcov build is being produced) but
+# HOSTBOOT_PROFILE_ARTIFACT is not set, then we want to log any files
+# that are compiled as being omitted from profiling.
+ifdef HOSTBOOT_PROFILE
+PROFILE_LOG_CMD=@echo $@ >>$(HOSTBOOT_PROFILE_NOCOV_LOG)
+endif
+
 SOURCE_FILE=$<
 INCLUDE_DIRS=$(INCFLAGS)
 INCLUDE_PWD=.
 endif
+
 
 # TODO RTC 215692
 # The following script is used to run the cppcheck tool when enabled. If one
@@ -87,6 +96,7 @@ $(OBJDIR)/%.o : %.C
 	@rm $@.trace
 	$(CXX_PRINT)
 	$(CXX_CPPCHECK_COMMAND)
+	$(PROFILE_LOG_CMD)
 
 # Compiling *.cc files
 $(OBJDIR)/%.o : %.cc
@@ -98,6 +108,7 @@ $(OBJDIR)/%.o : %.cc
 	@rm $@.trace
 	$(CXX_PRINT)
 	$(CXX_CPPCHECK_COMMAND)
+	$(PROFILE_LOG_CMD)
 
 $(OBJDIR)/%.o : %.c
 	@mkdir -p $(OBJDIR)
@@ -117,6 +128,7 @@ else
 	$(CXX_CPPCHECK_COMMAND)
 endif
 	$(C1)$(TRACE_HASHER) $@ $(TRACE_FLAGS)
+	$(PROFILE_LOG_CMD)
 	@rm $@.trace
 
 $(OBJDIR)/%.o : %.S

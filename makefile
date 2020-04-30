@@ -72,6 +72,7 @@ export HOSTBOOT_PROFILE
 
 .PHONY: gcov
 gcov:
+	@echo The following object files were not instrumented: >$(HOSTBOOT_PROFILE_NOCOV_LOG)
 	@echo Building Hostboot with profiling enabled.
 	$(MAKE)
 	@echo Run simics and execute the hb-Gcov command at the end of the simulation to extract gcov data.
@@ -79,7 +80,7 @@ gcov:
 
 .PHONY: lcov
 lcov: $(LCOV_TOOL) $(GENHTML_TOOL)
-	rm -f obj/lcov_data
+	rm -f obj/lcov_data obj/zero_lcov_data obj/real_lcov_data
 	# Write initial baseline (all-zero) coverage data
 	$(LCOV_TOOL) --initial -c --dir . -o obj/zero_lcov_data --gcov-tool $(GCOV)
 	# Collect real coverage data from the traces
@@ -88,6 +89,7 @@ lcov: $(LCOV_TOOL) $(GENHTML_TOOL)
 	$(LCOV_TOOL) --dir . -a obj/real_lcov_data -a obj/zero_lcov_data -o obj/lcov_data --gcov-tool $(GCOV)
 	rm -rf obj/gcov_report
 	$(GENHTML_TOOL) obj/lcov_data -o obj/gcov_report --ignore-errors source
+	cp $(HOSTBOOT_PROFILE_NOCOV_LOG) obj/gcov_report/
 	@echo Coverage report now available in obj/gcov_report
 
 .PHONY: cppcheck

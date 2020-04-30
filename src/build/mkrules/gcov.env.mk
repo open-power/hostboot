@@ -35,6 +35,8 @@ LCOV_DIR := $(ROOTPATH)/src/build/tools/extern/lcov
 LCOV_TOOL := $(LCOV_DIR)/bin/lcov
 GENHTML_TOOL := $(LCOV_DIR)/bin/genhtml
 
+HOSTBOOT_PROFILE_NOCOV_LOG := $(ROOTPATH)/obj/uninstrumented_objects.txt
+
 .PHONY: $(LCOV_TOOL) $(GENHTML_TOOL)
 $(LCOV_TOOL) $(GENHTML_TOOL):
 	git submodule update --init --checkout -- $(LCOV_DIR)
