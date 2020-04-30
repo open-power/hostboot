@@ -341,6 +341,7 @@ RUNTIME_MODULES += $(if $(CONFIG_HTMGT),htmgt_rt)   # ~/src/usr/htmgt/runtime/
 #RUNTIME_MODULES += $(if $(CONFIG_BMC_IPMI),ipmi_rt) # ~/src/usr/ipmiext/runtime/
 #RUNTIME_MODULES += $(if $(CONFIG_NVDIMM),nvdimm_rt)
 #RUNTIME_MODULES += p9_cpuWkup
+RUNTIME_MODULES += $(if $(CONFIG_MCTP)$(CONFIG_MCTP_TESTCASES),mctp_rt) # ~/src/usr/mctp/runtime/
 
 
 # This is exported so that gcov knows the list of runtime modules to
@@ -373,6 +374,7 @@ RUNTIME_TESTCASE_MODULES += testexpaccess_rt # ~/src/usr/expaccess/runtime/test/
 #RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_HBRT_PRD),testprdf_rt)
 #RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_HBRT_PRD),testattn_rt)
 #RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_BMC_IPMI),testipmi_rt)
+RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_MCTP)$(CONFIG_MCTP_TESTCASES),testmctp_rt) # ~/src/usr/mctp/runtime/
 endif
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic

@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/mctp/makefile $
+# $Source: src/usr/mctp/runtime/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2020
+# Contributors Listed Below - COPYRIGHT 2020
 # [+] International Business Machines Corp.
 #
 #
@@ -22,20 +22,11 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+HOSTBOOT_RUNTIME = 1
+MODULE = mctp_rt
 
-ROOTPATH = ../../..
+ROOTPATH = ../../../..
 
-MODULE = mctp
+SUBDIRS += test.d
 
-SUBDIRS += runtime.d
-
-OBJS += core.o
-OBJS += alloc.o
-OBJS += hostboot_mctp.o
-OBJS += hostlpc.o
-OBJS += log.o
-OBJS += mctprp.o
-
-VPATH += ./extern
-
-include ${ROOTPATH}/config.mk
+include $(ROOTPATH)/config.mk

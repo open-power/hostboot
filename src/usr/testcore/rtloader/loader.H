@@ -1172,6 +1172,33 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                       0x0000FFFF & l_resp_fw_msg->generic_msg.data,
                       retVal);
                }
+               else if (hostInterfaces::HBRT_FW_MSG_TYPE_MCTP_SEND
+                                                   == l_req_fw_msg->io_type)
+               {
+
+                  TRACFBIN(g_trac_hbrt,
+                      "rt_firmware_request (test) for  MCTP Send: ",
+                      l_req_fw_msg->mctp_send.send_data,
+                      i_reqLen);
+
+                  l_resp_fw_msg->io_type =
+                                 hostInterfaces::HBRT_FW_MSG_TYPE_RESP_GENERIC;
+
+                  // dummy return value for testing
+                  l_resp_fw_msg->resp_generic.o_status = 0;
+
+                  retVal = 0;  // just return 0 for testing
+               }
+               else if (hostInterfaces::HBRT_FW_MSG_TYPE_MCTP_RECEIVE
+                                                   == l_req_fw_msg->io_type)
+               {
+                  l_resp_fw_msg->io_type =
+                                 hostInterfaces::HBRT_FW_MSG_TYPE_MCTP_AVAILABLE;
+
+                  l_resp_fw_msg->mctp_receive.receive_data[0] = 0xFF;
+
+                  retVal = 0;  // just return 0 for testing
+               }
                else
                {
                   TRACFCOMP(g_trac_hbrt,

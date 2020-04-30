@@ -576,6 +576,9 @@ typedef struct hostInterfaces
        HBRT_FW_MSG_TYPE_NVDIMM_PROTECTION =  9, // struct nvdimm_protection_state
        HBRT_FW_MSG_TYPE_NVDIMM_OPERATION  = 10, // struct nvdimm_operation_t
        HBRT_FW_MSG_TYPE_GARD_EVENT        = 11, // struct gard_event_t
+       HBRT_FW_MSG_TYPE_MCTP_SEND         = 12, // struct mctp_send
+       HBRT_FW_MSG_TYPE_MCTP_RECEIVE      = 13, // struct mctp_receive
+       HBRT_FW_MSG_TYPE_MCTP_AVAILABLE    = 14, // struct mctp_available
     };
 
     // NVDIMM protection state enum
@@ -734,6 +737,21 @@ typedef struct hostInterfaces
           // This struct is sent from PHYP/OPAL to HBRT with
           // io_type set to HBRT_FW_MSG_TYPE_GARD_EVENT
           struct gard_event_t gard_event;
+
+
+          // This struct for HBRT_FW_MSG_TYPE_MCTP_SEND which
+          // goes to hypervisor from HBRT
+          struct
+          {
+            uint8_t   send_data[1];
+          } __attribute__ ((packed)) mctp_send;
+
+          // This struct for HBRT_FW_MSG_TYPE_MCTP_RECEIVE which
+          // is sent to the hypervisor from HBRT
+          struct
+          {
+            uint8_t   receive_data[1];
+          } __attribute__ ((packed)) mctp_receive;
 
           // This struct is sent from HBRT with
           // io_type set to HBRT_FW_MSG_HBRT_FSP_REQ or
