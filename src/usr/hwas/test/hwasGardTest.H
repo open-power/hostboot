@@ -40,6 +40,7 @@
 #include <errl/errlmanager.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/targplatutil.H> //assertGetToplevelTarget
 #include <hwas/common/hwas.H>
 #include <hwas/common/deconfigGard.H>
 #include <hwas/common/hwas_reasoncodes.H>
@@ -52,6 +53,7 @@
 #define DISABLE_MBA_UNIT_TESTS    1
 #define DISABLE_MEM_UNIT_TESTS    1
 #define DISABLE_FC_UNIT_TESTS     1
+#define DISABLE_VERS_UNIT_TESTS   1
 //$$#define DISABLE_UNIT_TESTS        0
 
 #define DISABLE_OMI_UNIT_TESTS    1
@@ -409,8 +411,15 @@ public:
             TYPE_MC, UTIL_FILTER_ALL);
 
         // Fake manual gard
+#ifndef CONFIG_GARD_VERSIONING
         DeconfigGard::GardRecord l_fakeGardRecord =
             {0, EntityPath(EntityPath::PATH_NA), 0, GARD_User_Manual, 0, 0};
+#else
+        DeconfigGard::GardRecord l_fakeGardRecord =
+            {0, EntityPath(EntityPath::PATH_NA), 0, GARD_User_Manual, 0, 0};
+        strcpy(reinterpret_cast<char *>(l_fakeGardRecord.uniqueId.ibm11S.serialNum), "FAKE_SN12345");
+        strcpy(reinterpret_cast<char *>(l_fakeGardRecord.uniqueId.ibm11S.partNum), "FAKE_PN");
+#endif
 
         // Apply fake gard to all MCs
         for (auto const& l_mc: l_mcList)
@@ -2580,8 +2589,7 @@ public:
      */
     void testGard1()
     {
-        TS_TRACE(INFO_MRK "testGard1: Started");
-        HWAS_INF("testGard1: Started");
+        TS_INFO("testGard1: Started");
 
         errlHndl_t l_pErr = nullptr;
         DeconfigGard::GardRecords_t l_records;
@@ -2595,7 +2603,7 @@ public:
         }
         else
         {
-            TS_TRACE(INFO_MRK "testGard1: get(nullptr) Success. %d records",
+            TS_INFO("testGard1: get(nullptr) Success. %d records",
                      l_records.size());
         }
     }
@@ -2606,7 +2614,7 @@ public:
      */
     void testGard4()
     {
-        TS_TRACE(INFO_MRK "testGard4: Started");
+        TS_INFO("testGard4: Started");
 #if DISABLE_FC_UNIT_TESTS
         // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
@@ -2616,10 +2624,8 @@ public:
         // tests are left in the code so that a developer can enable them
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
-        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testGard4: Skipped");
+        TS_INFO( "testGard4 - SKIPPING -- other tests could be adversly affected");
 #else
-        HWAS_INF("testGard4: Started");
 
         errlHndl_t l_pErr = nullptr;
         DeconfigGard::GardRecords_t l_records;
@@ -2656,7 +2662,7 @@ public:
 
             if (l_records.size() != 0)
             {
-                TS_TRACE(INFO_MRK "testGard4: target has %d existing Gard Records, skipping test",
+                TS_INFO("testGard4: target has %d existing Gard Records, skipping test",
                          l_records.size());
                 break;
             }
@@ -2721,7 +2727,7 @@ public:
                 break;
             }
 
-            TS_TRACE(INFO_MRK "testGard4: Success");
+            TS_INFO("testGard4: Success");
         }
         while (0);
 
@@ -2729,6 +2735,7 @@ public:
         {
             errlCommit(l_pErr,CXXTEST_COMP_ID);
         }
+        TS_INFO("testGard4: Ended");
 #endif
     }
 
@@ -2737,7 +2744,7 @@ public:
      */
     void testGard5()
     {
-        TS_TRACE(INFO_MRK "testGard5: Started");
+        TS_INFO("testGard5: Started");
 #if DISABLE_FC_UNIT_TESTS
         // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
@@ -2747,10 +2754,8 @@ public:
         // tests are left in the code so that a developer can enable them
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
-        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testGard5: Skipped");
+        TS_INFO( "testGard5 - SKIPPING -- other tests could be adversly affected");
 #else
-        HWAS_INF("testGard5: Started");
 
         errlHndl_t l_pErr = nullptr;
         DeconfigGard::GardRecords_t l_records;
@@ -2788,7 +2793,7 @@ public:
 
             if (l_records.size() != 0)
             {
-                TS_TRACE(INFO_MRK "testGard5: target has %d existing Gard Records, skipping test",
+                TS_INFO("testGard5: target has %d existing Gard Records, skipping test",
                          l_records.size());
                 break;
             }
@@ -2856,7 +2861,7 @@ public:
                 break;
             }
 
-            TS_TRACE(INFO_MRK "testGard5: Success");
+            TS_INFO("testGard5: Success");
         }
         while (0);
 
@@ -2864,6 +2869,7 @@ public:
         {
             errlCommit(l_pErr,CXXTEST_COMP_ID);
         }
+        TS_INFO("testGard5: Ended");
 #endif
     }
 
@@ -2872,7 +2878,7 @@ public:
      */
     void testGard6()
     {
-        TS_TRACE(INFO_MRK "testGard6: Started");
+        TS_INFO("testGard6: Started");
 #if DISABLE_FC_UNIT_TESTS
         // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
@@ -2882,10 +2888,8 @@ public:
         // tests are left in the code so that a developer can enable them
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
-        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testGard6: Skipped");
+        TS_INFO("testGard6 - SKIPPING -- other tests could be adversly affected");
 #else
-        HWAS_INF("testGard6: Started");
 
         errlHndl_t l_pErr = nullptr;
         DeconfigGard::GardRecords_t l_records;
@@ -3012,10 +3016,12 @@ public:
 
     /**
      *  @brief Test getting and clearing all GARD Records
+     *
+     *  Creates one gard record then clearGardRecords for all.
      */
     void testGard7()
     {
-        TS_TRACE(INFO_MRK "testGard7: Started");
+        TS_INFO("testGard7: Started");
 #if DISABLE_FC_UNIT_TESTS
         // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
@@ -3025,10 +3031,8 @@ public:
         // tests are left in the code so that a developer can enable them
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
-        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testGard7: Skipped");
+        TS_INFO("testGard7: - SKIPPING -- other tests could be adversly affected");
 #else
-        HWAS_INF("testGard7: Started");
 
         errlHndl_t l_pErr = nullptr;
         DeconfigGard::GardRecords_t l_records;
@@ -3126,7 +3130,7 @@ public:
      */
     void testGard8()
     {
-        TS_TRACE(INFO_MRK "testGard8: Started");
+        TS_INFO("testGard8: Started");
 #if DISABLE_FC_UNIT_TESTS
         // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
@@ -3136,10 +3140,8 @@ public:
         // tests are left in the code so that a developer can enable them
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
-        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testGard8: Skipped");
+        TS_INFO("testGard8: - SKIPPING -- other tests could be adversly affected");
 #else
-        HWAS_INF("testGard8: Started");
 
         errlHndl_t l_pErr = nullptr;
         DeconfigGard::GardRecords_t l_records;
@@ -3272,7 +3274,7 @@ public:
      */
     void testGard9()
     {
-        TS_TRACE(INFO_MRK "testGard9: Started");
+        TS_INFO("testGard9: Started");
 #if DISABLE_FC_UNIT_TESTS
         // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
@@ -3282,10 +3284,8 @@ public:
         // tests are left in the code so that a developer can enable them
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
-        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testGard9: Skipped");
+        TS_INFO( "testGard9: - SKIPPING -- other tests could be adversly affected");
 #else
-        HWAS_INF("testGard9: Started");
 
         errlHndl_t l_pErr = nullptr;
         DeconfigGard::GardRecords_t l_records;
@@ -3323,7 +3323,7 @@ public:
 
             if (l_records.size() != 0)
             {
-                TS_TRACE(INFO_MRK "testGard9: target has %d existing Gard Records, skipping test",
+                TS_INFO("testGard9: target has %d existing Gard Records, skipping test",
                          l_records.size());
                 break;
             }
@@ -3411,7 +3411,7 @@ public:
      */
     void testGard10()
     {
-        TS_TRACE(INFO_MRK "testGard10: Started");
+        TS_INFO("testGard10: Started");
 #if DISABLE_FC_UNIT_TESTS
         // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
@@ -3421,10 +3421,8 @@ public:
         // tests are left in the code so that a developer can enable them
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
-        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testGard10: Skipped");
+        TS_INFO( "testGard10 - SKIPPING -- other tests could be adversly affected");
 #else
-        HWAS_INF("testGard10: Started");
 
         errlHndl_t l_pErr = nullptr;
         DeconfigGard::GardRecords_t l_records;
@@ -3612,7 +3610,7 @@ public:
      */
     void testGard11()
     {
-        TS_TRACE(INFO_MRK "testGard11: Started");
+        TS_INFO("testGard11: Started");
 #if DISABLE_FC_UNIT_TESTS
         // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
@@ -3622,10 +3620,8 @@ public:
         // tests are left in the code so that a developer can enable them
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
-        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testGard11: Skipped");
+        TS_INFO( "testGard11 - SKIPPING -- other tests could be adversly affected");
 #else
-        HWAS_INF("testGard11: Started");
 
         errlHndl_t l_pErr = nullptr;
         DeconfigGard::GardRecords_t l_records;
@@ -3807,6 +3803,170 @@ public:
 #endif
     }
 
+
+    /**
+     *  @brief Test gard versioning
+     *
+     *  This needs revisted - RTC 215332
+     *  RTC 215332 will support ibm11s data in DDIMM
+     *
+     */
+    void testGardVersion()
+    {
+        TS_INFO("testGardVersion: Started");
+#if DISABLE_VERS_UNIT_TESTS
+        TS_INFO( "testGardVersion - SKIPPING -- other tests could be adversly affected");
+#else
+
+        const uint32_t DUMMY_EID = 0x12;
+        errlHndl_t l_pErr = nullptr;
+        DeconfigGard::GardRecords_t l_records;
+
+        do
+        {
+            Target* pSys = UTIL::assertGetToplevelTarget();
+            TargetHandleList fullList;
+            size_t number_processed = 0;
+
+            TARGETING::PredicateCTM predFc(TARGETING::CLASS_UNIT,
+                                                  TARGETING::TYPE_FC);
+            TARGETING::PredicateCTM dimms(TARGETING::CLASS_LOGICAL_CARD,
+                                   TARGETING::TYPE_DIMM,
+                                   TARGETING::MODEL_NA);
+
+            PredicateHwas predFunctional;
+            predFunctional.poweredOn(true).present(true).functional(true);
+            PredicatePostfixExpr checkExpr;
+            checkExpr.push(&predFc).push(&dimms).Or().push(&predFunctional).And();
+
+            targetService().getAssociated(fullList, pSys,
+                TargetService::CHILD, TargetService::ALL, &checkExpr );
+
+            TS_INFO("testGardVersion: number to process is fullList.size=%d", fullList.size());
+            if (fullList.empty())
+            {
+                TS_FAIL("testGardVersion: empty pFcList");
+                break;
+            }
+
+            for( auto j = fullList.begin(); j != fullList.end(); ++j )
+            {
+                TargetHandle_t l_pTarget = *j;
+
+                l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
+
+                if (l_pErr)
+                {
+                    TS_FAIL("testGardVersion: Error from getGardRecords");
+                    break;
+                }
+                if (l_records.size() != 0)
+                {
+                    TS_INFO("testGardVersion: target has %d existing Gard Records, skipping test",
+                             number_processed, l_records.size());
+                    break;
+                }
+
+                l_pErr = theDeconfigGard().
+                        platCreateGardRecord(l_pTarget, DUMMY_EID, GARD_Predictive);
+
+                if (l_pErr)
+                {
+                    TS_FAIL("testGardVersion: Error from platCreateGardRecord");
+                    break;
+                }
+
+                l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
+
+                if (l_pErr)
+                {
+                    TS_FAIL("testGardVersion: Error from getGardRecords (2)");
+                    break;
+                }
+
+                if (l_records.size() != 1)
+                {
+                    TS_FAIL("testGardVersion: %d records for target, expected 1",
+                            l_records.size());
+                    break;
+                }
+
+                if (l_records[0].iv_errorType != GARD_Predictive)
+                {
+                    TS_FAIL("testGardVersion: Record errorType %d, expected predictive",
+                            l_records[0].iv_errorType);
+                    break;
+                }
+
+                // test out dumping gard records
+                l_pErr = theDeconfigGard().dumpGardRecords(l_pTarget, l_records);
+
+                if (l_pErr)
+                {
+                    TS_FAIL("testGardVersion: Error from dumpGardRecords");
+                    break;
+                }
+
+                // Specifically pass nullptr to perform clear ALL to test paths
+                l_pErr = theDeconfigGard().clearGardRecords(nullptr);
+
+                if (l_pErr)
+                {
+                    TS_FAIL("testGardVersion: Error from clearGardRecords");
+                    break;
+                }
+
+                l_records.clear();
+
+                l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
+
+                if (l_pErr)
+                {
+                    TS_FAIL("testGardVersion: Error from getGardRecords (3)");
+                    break;
+                }
+
+                // test out dumping no gard records
+                l_pErr = theDeconfigGard().dumpGardRecords(l_pTarget, l_records);
+
+                if (l_pErr)
+                {
+                    TS_FAIL("testGardVersion: Error from dumpGardRecords - empty");
+                    break;
+                }
+
+                if (l_records.size() != 0)
+                {
+                    TS_FAIL("testGardVersion: %d records for target, expected 0",
+                            l_records.size());
+                    break;
+                }
+
+                number_processed++;
+                TS_INFO("testGardVersion: Success number_processed for item %d of %d total",
+                    number_processed, fullList.size());
+            } // end for
+
+            if (number_processed != fullList.size())
+            {
+                TS_FAIL("testGardVersion: Error total number_processed %d does -NOT- match fullList.size=%d",
+                    number_processed, fullList.size());
+            }
+            else
+            {
+                TS_INFO("testGardVersion: Success total number_processed %d matches fullList.size=%d",
+                    number_processed, fullList.size());
+            }
+        }
+        while (0);
+
+        if (l_pErr)
+        {
+            errlCommit(l_pErr,CXXTEST_COMP_ID);
+        }
+        TS_INFO("testGardVersion: Ended");
+#endif
+    }
 
     /**
      *  @brief Test Deconfigure Associated Proc1
@@ -7254,6 +7414,7 @@ public:
 #undef DISABLE_MEM_UNIT_TESTS
 #undef DISABLE_FC_UNIT_TESTS
 #undef DISABLE_OMI_UNIT_TESTS
+#undef DISABLE_VERS_UNIT_TESTS
 
 #undef ENABLE_OMI_UNIT_TEST_1
 #undef ENABLE_OMI_UNIT_TEST_2

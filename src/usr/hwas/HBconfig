@@ -20,3 +20,9 @@ config CLOCK_DECONFIGS_FATAL
     help
         Hostboot will terminate the boot on any clock error
 
+config GARD_VERSIONING
+    default y
+    help
+        Support for guard partition format that supports versioning and
+        part number/serial numbers.
+

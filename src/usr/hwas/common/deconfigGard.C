@@ -2840,6 +2840,49 @@ errlHndl_t DeconfigGard::clearGardRecords(
 }
 
 //******************************************************************************
+errlHndl_t DeconfigGard::dumpGardRecords(
+    const Target * const i_pTarget,
+    GardRecords_t & o_records)
+{
+    errlHndl_t l_pErr = nullptr;
+    char * tmp_str = nullptr;
+
+    do
+    {
+        l_pErr = platGetGardRecords(i_pTarget, o_records);
+        if (l_pErr)
+        {
+            HWAS_ERR("dumpGardRecords: dumpGardRecords had a problem calling platGetGardRecords");
+            break;
+        }
+
+        HWAS_INF("dumpGardRecords: o_records.size=0x%X GardRecord size=0x%X",
+            o_records.size(), sizeof(DeconfigGard::GardRecord));
+        if (o_records.size() == 0)
+        {
+            HWAS_INF("dumpGardRecords: found NO gard records to dump");
+            break;
+        }
+        for (const auto& record : o_records)
+        {
+            HWAS_INF("dumpGardRecords: o_records record.iv_recordId=0x%X", record.iv_recordId);
+            tmp_str = record.iv_targetId.toString();
+            HWAS_INF("dumpGardRecords: o_records record.iv_targetId.toString()=%s", tmp_str);
+            free(tmp_str);
+            tmp_str = nullptr;
+            HWAS_INF("dumpGardRecords: o_records record.iv_errlogEid=0x%X", record.iv_errlogEid);
+            HWAS_INF("dumpGardRecords: o_records record.iv_errorType=0x%X", record.iv_errorType);
+#ifdef CONFIG_GARD_VERSIONING
+            HWAS_INF_BIN("dumpGardRecords: o_records uniqueId", &record.uniqueId, sizeof(record.uniqueId));
+#endif
+        }
+    }
+    while (0);
+
+    return l_pErr;
+}
+
+//******************************************************************************
 errlHndl_t DeconfigGard::getGardRecords(
     const Target * const i_pTarget,
     GardRecords_t & o_records)

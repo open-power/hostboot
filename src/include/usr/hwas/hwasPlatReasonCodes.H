@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,6 +54,12 @@ namespace HWAS
         RC_RT_NULL_FIRMWARE_REQUEST_PTR     = HWAS_COMP_ID | 0x86,
         RC_RT_NULL_FIRMWARE_MSG_PTR         = HWAS_COMP_ID | 0x87,
         RC_HB_PROC_ONLY_NVDIMM              = HWAS_COMP_ID | 0x88,
+        RC_BAD_CLEAR_ALL_RESET_VERSION      = HWAS_COMP_ID | 0x89,
+        RC_NO_FRU_PART_NUM                  = HWAS_COMP_ID | 0x8A,
+        RC_NO_FRU_SERIAL_NUM                = HWAS_COMP_ID | 0x8B,
+        RC_NO_FRU_TARGET                    = HWAS_COMP_ID | 0x8C,
+        RC_NOT_CURRENT_GARD_VERSION         = HWAS_COMP_ID | 0x8D,
+        RC_CLEAN_GARD_RECORDS               = HWAS_COMP_ID | 0x8E,
     };
 
 };

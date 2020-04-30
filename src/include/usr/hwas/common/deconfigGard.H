@@ -244,6 +244,12 @@ public:
      *
      * Multiple GARD Records can exist for a specific Target
      */
+
+    // clear ALL gard records will reset to CURRENT
+    static const uint8_t PREVIOUS_GARD_VERSION_LAYOUT = 0x0;
+    static const uint8_t CURRENT_GARD_VERSION_LAYOUT = 0x1;
+
+#ifndef CONFIG_GARD_VERSIONING
     struct GardRecord
     {
         uint32_t              iv_recordId;
@@ -255,9 +261,61 @@ public:
     };
 
     typedef std::vector<GardRecord> GardRecords_t;
+    typedef struct GardRecord GardRecord;
+
     typedef std::vector<GardRecord>::iterator GardRecordsItr_t;
     typedef std::vector<GardRecord>::const_iterator GardRecordsCItr_t;
+
+#else
+
+    struct GardRecord
+    {
+        uint32_t              iv_recordId;       // all F's invalid gard record
+        TARGETING::EntityPath iv_targetId;       // 21 bytes - Physical path of gard target
+        uint32_t              iv_errlogEid;      // Gard initiator ID
+        GARD_ErrorType        iv_errorType : 8;  // from hwasCallout.H GARD_ErrorType
+        union {
+            uint8_t           raw[80];       // 80 bytes
+            struct                           // 19 bytes IBM 11S FRU Format
+            {
+                uint8_t       serialNum[12]; // Serial number of the containing FRU
+                uint8_t       partNum[7];    // Part number of the containing FRU
+            } PACKED ibm11S;
+            struct                           // 22 bytes JEDEC standard DDR3 DIMM
+            {
+                uint8_t       serialNum[4];  // Serial number of the containing FRU
+                uint8_t       partNum[18];   // Part number of the containing FRU
+            } PACKED isdimmDDR3;
+            struct                           // 24 bytes JEDEC standard DDR4 DIMM
+            {
+                uint8_t       serialNum[4];  // Serial number of the containing FRU
+                uint8_t       partNum[20];   // Part number of the containing FRU
+            } PACKED isdimmDDR4;
+            struct                           // 34 bytes DDR4 DDIMM
+            {
+                uint8_t       serialNum[4];  // Serial number of the containing FRU
+                uint8_t       partNum[30];   // Part number of the containing FRU
+            } PACKED isddimmDDR4;
+        } PACKED uniqueId;                   // 80 bytes
+        uint8_t               iv_padding[18];
+    } PACKED;                                // 128 bytes
+
+    typedef std::vector<GardRecord> GardRecords_t;
     typedef struct GardRecord GardRecord;
+
+    struct GardRecordsBinary
+    {
+        uint8_t               iv_magicNumber[8]; // magicNumber = GUARDREC
+        uint8_t               iv_version;        // Gard records version
+        uint8_t               iv_padding[7];
+        GardRecord            iv_gardRecords[0];  // 128 bytes each - List of gard records
+    } PACKED;
+
+    typedef std::vector<GardRecord>::iterator GardRecordsItr_t;
+    typedef std::vector<GardRecord>::const_iterator GardRecordsCItr_t;
+
+#endif
+
     /**
      * @struct DeconfigureRecord
      *
@@ -480,6 +538,24 @@ public:
      * @return errlHndl_t. Error log handle.
      */
     errlHndl_t platClearGardRecords(const TARGETING::Target * const i_pTarget);
+
+    /**
+     * @brief Dumps all GARD Records for the specified Target.
+     *
+     * Called by an administrator to view GARD Records.
+     *
+     * If no GARD Records exist for the Target then no error is returned. The
+     * only errors returned are usage errors and errors accessing the GARD
+     * Records.
+     *
+     * @param[in]  i_pTarget  Pointer to Sys or Node Target
+     * @param[out] o_records  Reference to vector of GardRecords that is cleared
+     *                        then filled in with records.
+     *
+     * @return errlHndl_t     nullptr on success, otherwise valid error log handle.
+     */
+    errlHndl_t dumpGardRecords(const TARGETING::Target * const i_pTarget,
+                              GardRecords_t & o_records);
 
     /**
      * @brief Gets all GARD Records for the specified Target.

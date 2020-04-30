@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,6 +66,7 @@ struct HBDeconfigGard
     uint32_t iv_nextGardRecordId;   // Next GARD Record ID to use
     uint32_t iv_maxGardRecords;     // Maximum number of GARD Records
     void *iv_pGardRecords;          // Pointer to the GARD Records in PNOR
+    uint8_t iv_GardVersion;         // Gard Version
 };
 
 /**

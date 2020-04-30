@@ -47,6 +47,10 @@
 #include <pnor/pnorif.H>
 #include <pm/pm_common.H>                  // HBPM::resetPMComplex
 
+#include <targeting/targplatutil.H> //assertGetToplevelTarget
+
+#include <errl/errlreasoncodes.H> // ERRL_UDT_NOFORMAT
+
 #ifdef __HOSTBOOT_RUNTIME
 #include <runtime/interface.h>             // g_hostInterfaces
 #include <runtime/hbrt_utilities.H>        // createGenericFspMsg
@@ -91,6 +95,7 @@ static bool getGardSectionInfoCalled;
 //******************************************************************************
 
 void _flush(void *i_addr);
+const TARGETING::Target * getFRU_Target(const TARGETING::Target * i_target);
 errlHndl_t _GardRecordIdSetup(void *&io_platDeconfigGard);
 
 errlHndl_t DeconfigGard::platLogEvent(
@@ -118,16 +123,21 @@ errlHndl_t DeconfigGard::platClearGardRecords(
     const Target * const i_pTarget)
 {
     errlHndl_t l_pErr = NULL;
+    char * tmp_str = nullptr;
 
     EntityPath l_targetId;
     if (!i_pTarget)
     {
-        HWAS_INF("Clear all GARD Records");
+        HWAS_INF("platClearGardRecords: Clear all GARD Records");
     }
     else
     {
         l_targetId = i_pTarget->getAttr<ATTR_PHYS_PATH>();
-        HWAS_INF("Clear GARD Records for %.8X", get_huid(i_pTarget));
+        tmp_str = l_targetId.toString();
+        HWAS_INF("platClearGardRecords: Clear GARD Records for %.8X %s",
+            get_huid(i_pTarget), tmp_str);
+        free(tmp_str);
+        tmp_str = nullptr;
     }
 
     HWAS_MUTEX_LOCK(iv_mutex);
@@ -135,6 +145,7 @@ errlHndl_t DeconfigGard::platClearGardRecords(
     if (!l_pErr && iv_platDeconfigGard)
     {
         uint32_t l_gardRecordsCleared = 0;
+        bool l_clearingAll = false;
         HBDeconfigGard *l_hbDeconfigGard =
                 (HBDeconfigGard *)iv_platDeconfigGard;
         DeconfigGard::GardRecord * l_pGardRecords =
@@ -150,7 +161,7 @@ errlHndl_t DeconfigGard::platClearGardRecords(
                     // if we have a match
                     if (l_pGardRecords[i].iv_targetId == l_targetId)
                     {
-                        HWAS_INF("Clearing GARD Record for %.8X",
+                        HWAS_INF("platClearGardRecords: Clearing GARD Record for %.8X",
                                 get_huid(i_pTarget));
                         l_pGardRecords[i].iv_recordId = EMPTY_GARD_RECORDID;
                         _flush(&l_pGardRecords[i]);
@@ -160,6 +171,7 @@ errlHndl_t DeconfigGard::platClearGardRecords(
                 }
                 else // Clear all records
                 {
+                    l_clearingAll = true;
                     l_pGardRecords[i].iv_recordId = EMPTY_GARD_RECORDID;
                     _flush(&l_pGardRecords[i]);
                     l_gardRecordsCleared++;
@@ -168,6 +180,67 @@ errlHndl_t DeconfigGard::platClearGardRecords(
         } // for
 
         HWAS_INF("GARD Records Cleared: %d", l_gardRecordsCleared);
+
+        if (l_clearingAll)
+        {
+            // if clearing ALL reset MEMORY and BINARY to CURRENT_GARD_VERSION_LAYOUT
+            // if we get here we've already cleared ALL records, so reset MEMORY version
+            // on chance we fail to update BINARY version header below, next time we boot
+            // it will sync up, next cycle we will handle the OLD format and proceed on
+            // to clear ALL and hope things go better
+            l_hbDeconfigGard->iv_GardVersion = HWAS::DeconfigGard::CURRENT_GARD_VERSION_LAYOUT;
+#ifdef CONFIG_GARD_VERSIONING
+            #ifdef __HOSTBOOT_RUNTIME
+            // Nothing today, may in future.
+            #else
+            PNOR::SectionInfo_t l_section;
+            l_pErr = getGardSectionInfo(l_section);
+            if (l_pErr)
+            {
+                HWAS_ERR("platClearGardRecords: PROBLEM getGardSectionInfo");
+                errlCommit(l_pErr, HWAS_COMP_ID);
+            }
+            else if (l_section.size != 0)
+            {
+                DeconfigGard::GardRecordsBinary *l_pGardRecordsBinary =
+                    reinterpret_cast<DeconfigGard::GardRecordsBinary *> (l_section.vaddr);
+                l_pGardRecordsBinary->iv_version = HWAS::DeconfigGard::CURRENT_GARD_VERSION_LAYOUT;
+                // _flush the iv_version
+                _flush(reinterpret_cast<void *>(&(l_pGardRecordsBinary->iv_version)));
+                HWAS_INF("platClearGardRecords: Clearing ALL Gard Records BINARY RESET "
+                         "to CURRENT_GARD_VERSION_LAYOUT l_pGardRecordsBinary->iv_version=0x%X",
+                         l_pGardRecordsBinary->iv_version);
+
+                HWAS_INF("platClearGardRecords: Clearing ALL Gard Records MEMORY RESET to "
+                         "CURRENT_GARD_VERSION_LAYOUT l_hbDeconfigGard->iv_GardVersion=0x%X",
+                         l_hbDeconfigGard->iv_GardVersion);
+            }
+            else
+            {
+                HWAS_INF("platClearGardRecords: PROBLEM in clearing ALL Gard Records and "
+                         "resetting GardRecordsBinary to CURRENT_GARD_VERSION_LAYOUT");
+                /*@
+                 * @errortype
+                 * @severity         ERRL_SEV_UNKNOWN
+                 * @moduleid         HWAS::MOD_PLAT_DECONFIG_GARD
+                 * @reasoncode       HWAS::RC_BAD_CLEAR_ALL_RESET_VERSION
+                 * @userdata1        none
+                 * @userdata2        none
+                 * @devdesc          Problem clearing and reset of version
+                 * @custdesc         An error occurred during the IPL of the system
+                 */
+                l_pErr= new ErrlEntry(ERRL_SEV_UNKNOWN,
+                                      HWAS::MOD_PLAT_DECONFIG_GARD,
+                                      HWAS::RC_BAD_CLEAR_ALL_RESET_VERSION,
+                                      0,
+                                      0,
+                                      ErrlEntry::ADD_SW_CALLOUT);
+                l_pErr->collectTrace("HWAS_I");
+                errlCommit(l_pErr, HWAS_COMP_ID);
+            }
+            #endif
+#endif
+        }
     }
 
     HWAS_MUTEX_UNLOCK(iv_mutex);
@@ -189,6 +262,8 @@ errlHndl_t DeconfigGard::platGetGardRecords(
     else
     {
         l_targetId = i_pTarget->getAttr<ATTR_PHYS_PATH>();
+        HWAS_INF("platGetGardRecords: Working with HUID %.8X",
+            get_huid(i_pTarget));
     }
 
     HWAS_MUTEX_LOCK(iv_mutex);
@@ -210,7 +285,7 @@ errlHndl_t DeconfigGard::platGetGardRecords(
                     // if we have a match
                     if (l_pGardRecords[i].iv_targetId == l_targetId)
                     {
-                        HWAS_INF("Getting GARD Record for %.8X",
+                        HWAS_INF("platGetGardRecords: Getting GARD Record for %.8X",
                                 get_huid(i_pTarget));
                         o_records.push_back(l_pGardRecords[i]);
                         break; // done - can only be 1 GARD record per target
@@ -219,13 +294,13 @@ errlHndl_t DeconfigGard::platGetGardRecords(
                 else // get all records
                 {
                     o_records.push_back(l_pGardRecords[i]);
+                    HWAS_INF("platGetGardRecords: pushing back for all records");
                 }
             }
         } // for
     }
 
     HWAS_MUTEX_UNLOCK(iv_mutex);
-    HWAS_INF("Get returning %d GARD Records", o_records.size());
     return l_pErr;
 }
 #endif //#ifndef __HOSTBOOT_RUNTIME
@@ -278,9 +353,95 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
             break;
         }
 
-        Target* pSys;
-        targetService().getTopLevelTarget(pSys);
-        HWAS_ASSERT(pSys, "HWAS platCreateGardRecord: no TopLevelTarget");
+        Target* pSys = UTIL::assertGetToplevelTarget();
+        const TARGETING::Target * l_fru_target = getFRU_Target(i_pTarget);
+        TARGETING::ATTR_PART_NUMBER_type l_PN = {'0'};
+        TARGETING::ATTR_SERIAL_NUMBER_type l_SN = {'0'};
+
+        // We do NOT have the attributes defined on FSP, so we will NOT perform
+        // attribute handling on FSP systems.
+        //
+        // We also are conditionally compiling the versioning support enablement.
+        //
+        if (!INITSERVICE::spBaseServicesEnabled())
+        {
+            if (l_fru_target)
+            {
+                if (!(l_fru_target->tryGetAttr<TARGETING::ATTR_PART_NUMBER>(l_PN)))
+                {
+                    HWAS_INF("platCreateGardRecord: Unable to get PART_NUMBER target %.8X",
+                        get_huid(l_fru_target));
+                    memcpy(l_PN, "NONE", 4);
+                    /*@
+                     * @errortype
+                     * @moduleid   MOD_PLAT_DECONFIG_GARD
+                     * @reasoncode RC_NO_FRU_PART_NUM
+                     * @devdesc    No PART NUMBER attribute found on the requested FRU target
+                     * @userdata1  HUID of original input target // GARD errlog EID
+                     * @userdata2  HUID of FRU target
+                     * @custdesc   An unexpected error occurred during IPL
+                     */
+                    const uint64_t userdata1 =
+                        (static_cast<uint64_t> (get_huid(i_pTarget)) << 32) |
+                        i_errlEid;
+                    const uint64_t userdata2 =
+                        static_cast<uint64_t>(get_huid(l_fru_target));
+
+                    l_pErr = hwasError(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        MOD_PLAT_DECONFIG_GARD,
+                        RC_NO_FRU_PART_NUM,userdata1,userdata2);
+                    errlCommit(l_pErr, HWAS_COMP_ID);
+                }
+
+                if (!(l_fru_target->tryGetAttr<TARGETING::ATTR_SERIAL_NUMBER>(l_SN)))
+                {
+                    HWAS_INF("platCreateGardRecord: Unable to get SERIAL_NUMBER target %.8X",
+                        get_huid(l_fru_target));
+                    memcpy(l_SN, "NONE", 4);
+                    /*@
+                     * @errortype
+                     * @moduleid   MOD_PLAT_DECONFIG_GARD
+                     * @reasoncode RC_NO_FRU_SERIAL_NUM
+                     * @devdesc    No SERIAL NUMBER attribute found on the requested FRU target
+                     * @userdata1  HUID of original input target // GARD errlog EID
+                     * @userdata2  HUID of FRU target
+                     * @custdesc   An unexpected error occurred during IPL
+                     */
+                    const uint64_t userdata1 =
+                        (static_cast<uint64_t> (get_huid(i_pTarget)) << 32) |
+                        i_errlEid;
+                    const uint64_t userdata2 =
+                        static_cast<uint64_t> (get_huid(l_fru_target));
+                    l_pErr = hwasError(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        MOD_PLAT_DECONFIG_GARD,
+                        RC_NO_FRU_SERIAL_NUM,userdata1,userdata2);
+                    errlCommit(l_pErr, HWAS_COMP_ID);
+                }
+            }
+            else
+            {
+                HWAS_INF("platCreateGardRecord: Unable to find a FRU target for PN/SN "
+                         "populating with NONE");
+                /*@
+                 * @errortype
+                 * @moduleid   MOD_PLAT_DECONFIG_GARD
+                 * @reasoncode RC_NO_FRU_TARGET
+                 * @devdesc    No FRU parent target found for PN or SN
+                 * @userdata1  HUID of original input target // GARD errlog EID
+                 * @custdesc   An unexpected error occurred during IPL
+                 */
+                const uint64_t userdata1 =
+                        (static_cast<uint64_t> (get_huid(i_pTarget)) << 32) |
+                        i_errlEid;
+                l_pErr = hwasError(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    MOD_PLAT_DECONFIG_GARD,
+                    HWAS::RC_NO_FRU_TARGET,userdata1,0);
+                errlCommit(l_pErr, HWAS_COMP_ID);
+                // at least stuff some default values
+                memcpy(l_PN, "NONE", 4);
+                memcpy(l_SN, "NONE", 4);
+            }
+        } // end not FSP
 
         // check for system CDM Policy
         const ATTR_CDM_POLICIES_type l_sys_policy =
@@ -392,16 +553,82 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
             break;
         }
 
-        l_pRecord->iv_recordId = l_hbDeconfigGard->iv_nextGardRecordId++;
-        l_pRecord->iv_targetId = l_targetId;
-        l_pRecord->iv_errlogEid = i_errlEid;
-        l_pRecord->iv_errorType = i_errorType;
-        l_pRecord->iv_padding[0] = 0;
-        l_pRecord->iv_padding[1] = 0;
-        l_pRecord->iv_padding[2] = 0;
-        l_pRecord->iv_padding[3] = 0;
-        l_pRecord->iv_padding[4] = 0;
-        l_pRecord->iv_padding[5] = 0;
+        HWAS_INF("platCreateGardRecord: iv_GardVersion=0x%X", l_hbDeconfigGard->iv_GardVersion);
+        if (l_hbDeconfigGard->iv_GardVersion != HWAS::DeconfigGard::CURRENT_GARD_VERSION_LAYOUT)
+        {
+            // do something in the future
+            HWAS_ERR("platCreateGardRecord: WRONG VERSION, skipping GARD CREATION, "
+                     "INVESTIGATE l_hbDeconfigGard->iv_GardVersion=0x%X",
+                     l_hbDeconfigGard->iv_GardVersion);
+            /*@
+             * @errortype
+             * @moduleid   MOD_PLAT_DECONFIG_GARD
+             * @reasoncode RC_NOT_CURRENT_GARD_VERSION
+             * @devdesc    Not the CURRENT GARD VERSION LAYOUT, NEED INVESTIGATION
+             * @userdata1  GARD errlog EID
+             * @custdesc   An unexpected error occurred during IPL
+             */
+            const uint64_t userdata1 =
+                static_cast<uint64_t>(i_errlEid);
+
+            l_pErr = hwasError(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                MOD_PLAT_DECONFIG_GARD,
+                HWAS::RC_NOT_CURRENT_GARD_VERSION,userdata1,0);
+            errlCommit(l_pErr, HWAS_COMP_ID);
+        }
+        else
+        {
+            l_pRecord->iv_recordId = l_hbDeconfigGard->iv_nextGardRecordId++;
+            l_pRecord->iv_targetId = l_targetId;
+            l_pRecord->iv_errlogEid = i_errlEid;
+            l_pRecord->iv_errorType = i_errorType;
+
+
+            #ifdef CONFIG_GARD_VERSIONING
+            if (!INITSERVICE::spBaseServicesEnabled())
+            {
+                switch (l_fru_target->getAttr<TARGETING::ATTR_TYPE>())
+                {
+                    // RTC 254396 - Support pluggable ISDIMMs
+                    case TARGETING::TYPE_DIMM:
+                        memcpy(l_pRecord->uniqueId.isddimmDDR4.serialNum, l_SN,
+                            sizeof(l_pRecord->uniqueId.isddimmDDR4.serialNum));
+                        memcpy(l_pRecord->uniqueId.isddimmDDR4.partNum, l_PN,
+                            sizeof(l_pRecord->uniqueId.isddimmDDR4.partNum));
+                        HWAS_INF("platCreateGardRecord: SN/PN isddimmDDR4 "
+                                 "sizeof(l_pRecord->uniqueId.isddimmDDR4.serialNum)=0x%X "
+                                 "sizeof(l_pRecord->uniqueId.isddimmDDR4.partNum)=0x%X",
+                                 sizeof(l_pRecord->uniqueId.isddimmDDR4.serialNum),
+                                 sizeof(l_pRecord->uniqueId.isddimmDDR4.partNum));
+                        break;
+                    default:
+                        memcpy(l_pRecord->uniqueId.ibm11S.serialNum, l_SN,
+                            sizeof(l_pRecord->uniqueId.ibm11S.serialNum));
+                        memcpy(l_pRecord->uniqueId.ibm11S.partNum, l_PN,
+                            sizeof(l_pRecord->uniqueId.ibm11S.partNum));
+                        HWAS_INF("platCreateGardRecord: SN/PN ibm11S "
+                                 "sizeof(l_pRecord->uniqueId.ibm11S.serialNum)=0x%X "
+                                 "sizeof(l_pRecord->uniqueId.ibm11S.partNum)=0x%X",
+                                 sizeof(l_pRecord->uniqueId.ibm11S.serialNum),
+                                 sizeof(l_pRecord->uniqueId.ibm11S.partNum));
+                        break;
+                }
+            }
+            #endif
+
+            #ifndef CONFIG_GARD_VERSIONING
+            // in OLD code so leave for now
+            l_pRecord->iv_padding[0] = 0;
+            l_pRecord->iv_padding[1] = 0;
+            l_pRecord->iv_padding[2] = 0;
+            l_pRecord->iv_padding[3] = 0;
+            l_pRecord->iv_padding[4] = 0;
+            l_pRecord->iv_padding[5] = 0;
+            #endif
+
+            HWAS_INF_BIN("platCreateGardRecord: Pre-CREATION (hex dump follows) l_pRecord",
+                l_pRecord, sizeof(DeconfigGard::GardRecord));
+        } // end versioning translation
 
         _flush((void *)l_pRecord);
 
@@ -410,7 +637,7 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
         // Call setNewGardRecord in initservice.
         #ifndef __HOSTBOOT_RUNTIME
         #ifdef CONFIG_BMC_IPMI
-        HWAS_INF("New gard record committed, call INITSERVICE "
+        HWAS_INF("platCreateGardRecord: New gard record committed, call INITSERVICE "
             "::setNewGardRecord()");
         INITSERVICE::setNewGardRecord();
         #endif
@@ -426,8 +653,7 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
 //******************************************************************************
 errlHndl_t _GardRecordIdSetup( void *&io_platDeconfigGard)
 {
-    HWAS_DBG("_GardRecordIdSetup: io_platDeconfigGard %p", io_platDeconfigGard);
-    errlHndl_t l_pErr = NULL;
+    errlHndl_t l_pErr = nullptr;
 
     do
     {
@@ -462,16 +688,25 @@ errlHndl_t _GardRecordIdSetup( void *&io_platDeconfigGard)
             HWAS_ERR("_GardRecordIdSetup: No guard section skipping function");
             break;
         }
+
 #endif
 
         // allocate our memory and set things up
         io_platDeconfigGard = malloc(sizeof(HBDeconfigGard));
         HBDeconfigGard *l_hbDeconfigGard =
                 (HBDeconfigGard *)io_platDeconfigGard;
+#ifdef CONFIG_GARD_VERSIONING
+        DeconfigGard::GardRecordsBinary *l_pGardRecordsBinary =
+            reinterpret_cast<DeconfigGard::GardRecordsBinary *> (l_section.vaddr);
 
         l_hbDeconfigGard->iv_pGardRecords =
+            reinterpret_cast<DeconfigGard::GardRecord *> (&l_pGardRecordsBinary->iv_gardRecords);
+#else
+        l_hbDeconfigGard->iv_pGardRecords =
             reinterpret_cast<DeconfigGard::GardRecord *> (l_section.vaddr);
-        HWAS_DBG("PNOR vaddr=%p size=%d", l_section.vaddr, l_section.size);
+
+#endif
+        HWAS_INF("_GardRecordIdSetup: PNOR vaddr=%p size=%d", l_section.vaddr, l_section.size);
 
         l_hbDeconfigGard->iv_maxGardRecords = l_section.size /
                 sizeof(DeconfigGard::GardRecord);
@@ -482,6 +717,7 @@ errlHndl_t _GardRecordIdSetup( void *&io_platDeconfigGard)
         const uint32_t l_maxGardRecords = l_hbDeconfigGard->iv_maxGardRecords;
         DeconfigGard::GardRecord *l_pGardRecords =
                 (DeconfigGard::GardRecord *)l_hbDeconfigGard->iv_pGardRecords;
+
         for (uint32_t i = 0; i < l_maxGardRecords; i++)
         {
             // if this gard record is already filled out
@@ -503,8 +739,76 @@ errlHndl_t _GardRecordIdSetup( void *&io_platDeconfigGard)
 
         // next record will start after the highest Id we found
         l_hbDeconfigGard->iv_nextGardRecordId++;
+        // if no MEMORY iv_GardVersion indicated set to CURRENT
+        // initialize MEMORY iv_GardVersion to CURRENT_GARD_VERSION_LAYOUT in case we don't setup below
+        l_hbDeconfigGard->iv_GardVersion = HWAS::DeconfigGard::CURRENT_GARD_VERSION_LAYOUT;
+        HWAS_INF("_GardRecordIdSetup: INITIAL SETUP MEMORY set to CURRENT l_hbDeconfigGard->iv_GardVersion=0x%X",
+            l_hbDeconfigGard->iv_GardVersion);
+#ifdef CONFIG_GARD_VERSIONING
+        HWAS_INF("_GardRecordIdSetup: INITIAL SETUP READ FROM BINARY l_pGardRecordsBinary->iv_version=0x%X",
+            l_pGardRecordsBinary->iv_version);
 
-        HWAS_INF("GARD setup. maxRecords %d nextID %d numRecords %d",
+        switch (l_pGardRecordsBinary->iv_version)
+        {
+            case HWAS::DeconfigGard::CURRENT_GARD_VERSION_LAYOUT:
+                l_hbDeconfigGard->iv_GardVersion = HWAS::DeconfigGard::CURRENT_GARD_VERSION_LAYOUT;
+                HWAS_INF("_GardRecordIdSetup: CASE CURRENT l_hbDeconfigGard->iv_GardVersion=0x%X",
+                    l_hbDeconfigGard->iv_GardVersion);
+                break;
+            default:
+                // initialize
+                const uint32_t gard_ffdc_len = 512; // just a good size to capture
+                // clean out any old format records
+                HWAS_INF("_GardRecordIdSetup: CLEANING OLD GARD RECORDS from BINARY");
+                errlHndl_t l_gardFFDC = nullptr;
+                /*@
+                 * @errortype
+                 * @moduleid   MOD_PLAT_DECONFIG_GARD
+                 * @reasoncode RC_CLEAN_GARD_RECORDS
+                 * @devdesc    Cleaning old gard records
+                 * @userdata1  iv_version read from BINARY
+                 * @userdata2  current iv_version expected
+                 * @custdesc   Hardware deconfiguration records cleared
+                 */
+                const uint64_t userdata1 =
+                    static_cast<uint64_t>(l_pGardRecordsBinary->iv_version);
+                const uint64_t userdata2 =
+                    static_cast<uint64_t>(HWAS::DeconfigGard::CURRENT_GARD_VERSION_LAYOUT);
+                l_gardFFDC = new ERRORLOG::ErrlEntry(
+                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                             MOD_PLAT_DECONFIG_GARD,
+                             RC_CLEAN_GARD_RECORDS,
+                             userdata1,userdata2);
+                l_gardFFDC->addFFDC(HWAS_COMP_ID,
+                                l_pGardRecordsBinary,
+                                gard_ffdc_len,
+                                0, // Version
+                                ERRL_UDT_NOFORMAT, // SubSect
+                                true); // merge
+                errlCommit(l_gardFFDC, HWAS_COMP_ID);
+
+                l_hbDeconfigGard->iv_GardVersion = HWAS::DeconfigGard::CURRENT_GARD_VERSION_LAYOUT;
+                l_pGardRecordsBinary->iv_version = HWAS::DeconfigGard::CURRENT_GARD_VERSION_LAYOUT;
+                memcpy(l_pGardRecordsBinary->iv_magicNumber, "GUARDREC",
+                    sizeof(l_pGardRecordsBinary->iv_magicNumber));
+                HWAS_INF("_GardRecordIdSetup: CASE DEFAULT l_hbDeconfigGard->iv_GardVersion=0x%X",
+                    l_hbDeconfigGard->iv_GardVersion);
+                // _flush iv_version
+                _flush((void *)&(l_pGardRecordsBinary->iv_version));
+                //  clear the MEMORY structure
+                for (uint32_t i = 0; i < l_maxGardRecords; i++)
+                {
+                    l_pGardRecords[i].iv_recordId = EMPTY_GARD_RECORDID;
+                    _flush(&l_pGardRecords[i]);
+                }
+                l_hbDeconfigGard->iv_nextGardRecordId = 1;
+                break;
+        }
+        HWAS_INF("_GardRecordIdSetup: SETUP BINARY set to l_pGardRecordsBinary->iv_version=0x%X",
+            l_pGardRecordsBinary->iv_version);
+#endif
+        HWAS_INF("_GardRecordIdSetup: GARD setup MEMORY iv_Gardversion 0x%X maxRecords %d nextID %d numRecords %d",
+                 l_hbDeconfigGard->iv_GardVersion,
                  l_hbDeconfigGard->iv_maxGardRecords,
                  l_hbDeconfigGard->iv_nextGardRecordId,
                  l_numGardRecords);
@@ -518,16 +822,16 @@ errlHndl_t _GardRecordIdSetup( void *&io_platDeconfigGard)
 void _flush(void *i_addr)
 {
 #ifndef __HOSTBOOT_RUNTIME
-    HWAS_DBG("flushing GARD in PNOR: addr=%p", i_addr);
+    HWAS_DBG("_flush: flushing GARD in PNOR: addr=%p sizeof(DeconfigGard::GardRecord)=0x%X", i_addr, sizeof(DeconfigGard::GardRecord));
     int l_rc = mm_remove_pages(FLUSH, i_addr,
                 sizeof(DeconfigGard::GardRecord));
     if (l_rc)
     {
-        HWAS_ERR("mm_remove_pages(FLUSH,%p,%d) returned %d",
+        HWAS_ERR("_flush: mm_remove_pages(FLUSH,%p,%d) returned %d",
                 i_addr, sizeof(DeconfigGard::GardRecord),l_rc);
     }
 #else
-    HWAS_DBG("flushing all GARD in PNOR due to addr=%p", i_addr);
+    HWAS_INF("_flush: TBD RTC 249470 flushing all GARD in PNOR due to addr=%p", i_addr);
     //@TODO-RTC:249470-PLDM support for GUARD file
 #endif
 }
@@ -732,6 +1036,56 @@ bool platSystemIsAtRuntime()
     HWAS_INF("HostBoot is NOT running so system is at runtime.");
     return true;
 #endif
+}
+
+const TARGETING::Target * getFRU_Target(const TARGETING::Target * i_target)
+{
+    TARGETING::ATTR_FRU_ID_type l_fruid = 0;  // set to invalid FRU ID
+    TARGETING::TargetHandleList l_parentList;
+    const TARGETING::Target * l_target = i_target;
+    uint16_t level = 0; // just a basic parent level counter
+    bool foundFru = i_target->tryGetAttr<TARGETING::ATTR_FRU_ID>(l_fruid);
+    while (!foundFru)
+    {
+        level++;
+
+        TARGETING::targetService().getAssociated(
+                                        l_parentList,
+                                        l_target,
+                                        TARGETING::TargetService::PARENT,
+                                        TARGETING::TargetService::IMMEDIATE);
+
+        if (l_parentList.size() != 1)
+        {
+            HWAS_INF("parent level=%d No Parent for HUID 0x%X target",
+                level, TARGETING::get_huid(l_target));
+            l_target = nullptr;
+            break;
+        }
+
+        l_target = l_parentList[0];
+        if (l_target->tryGetAttr<TARGETING::ATTR_FRU_ID>(l_fruid))
+        {
+            // Found 1st parent with a FRU ID
+            foundFru = true;
+        }
+
+        l_parentList.clear();  // clear out old entry
+
+    } // end while
+
+    if (foundFru)
+    {
+        HWAS_INF("getFRU_ID: ATTR_FRU_ID=0x%X parent level=%d found for l_target=0x%X target HUID 0x%X",
+            l_fruid, level, l_target, TARGETING::get_huid(l_target));
+    }
+    else
+    {
+        HWAS_INF("getFRU_ID: Failed to find a FRU ID for l_target=0x%X target HUID 0x%X. Looked at %d parent levels.",
+            l_target, TARGETING::get_huid(l_target), level);
+    }
+
+    return l_target;
 }
 
 //*****************************************************************************
