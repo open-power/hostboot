@@ -59,7 +59,8 @@
 #define SEEPROM_PAGE_SIZE 256
 
 //Base address and offset for various registers in the SPI Master
-const uint32_t SPIM_BASEADDRESS          = 0xc0000;
+const uint32_t SPIM_BASEADDRESS_PIB      = 0xc0000;
+const uint32_t SPIM_BASEADDRESS_FSI      = 0x70000;
 const uint32_t SPIM_ENGINEOFFSET         = 0x20;
 const uint32_t SPIM_COUNTERREG           = 1;
 const uint32_t SPIM_CONFIGREG1           = 2;
@@ -89,11 +90,15 @@ extern "C"
         public:
             SpiControlHandle (
                 const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
-                const uint8_t i_engine, const uint16_t i_slave = 1):
+                const uint8_t i_engine, const uint16_t i_slave = 1,
+                const bool i_pib_access = true):
                 target_chip(i_target_chip),
                 engine(i_engine),
                 slave(i_slave),
-                base_addr(SPIM_BASEADDRESS + this->engine * SPIM_ENGINEOFFSET)
+                base_addr(i_pib_access ?
+                          SPIM_BASEADDRESS_PIB + this->engine * SPIM_ENGINEOFFSET :
+                          SPIM_BASEADDRESS_FSI + this->engine * SPIM_ENGINEOFFSET )
+
             {
             }
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> target_chip;
