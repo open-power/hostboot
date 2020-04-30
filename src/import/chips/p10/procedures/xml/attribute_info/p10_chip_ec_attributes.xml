@@ -215,5 +215,22 @@
     </chipEcFeature>
   </attribute>
   <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW527698</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Fix scan flush value of L3 REFMOD3 timeout
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
 
 </attributes>
