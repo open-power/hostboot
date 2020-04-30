@@ -175,6 +175,44 @@ TARGETING::TargetHandle_t getTargetFromLocationCode(const std::vector<uint8_t>& 
  */
 TARGETING::TargetHandleList getProcNVDIMMs( TARGETING::Target * i_proc );
 
+// Shortened type name for convenience
+typedef TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID_type topoId_t;
+typedef TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_MODE_type topoMode_t;
+typedef uint8_t groupId_t;
+typedef uint8_t chipId_t;
+
+/**
+ * @brief bit definitions for 4-bit mode 0/1 topology ID
+ */
+typedef union
+{
+    struct // GGGC
+    {
+        uint8_t rsvd1:4; // 0:3
+        uint8_t group:3; // 4:6
+        uint8_t chip :1; // 7
+    } mode0;
+    struct // GGCC
+    {
+        uint8_t rsvd1:4; // 0:3
+        uint8_t group:2; // 4:5
+        uint8_t chip :2; // 6:7
+    } mode1;
+    topoId_t topoId;
+}topologyIdBits_t;
+
+/**
+ * @brief Extract the fabric group and chip ID's from a 4-bit topology ID
+ *
+ * @param[in] i_topologyMode The topology mode.
+ * @param[in] i_topologyId The topology ID (or effective topology ID)
+ * @param[out] o_group The group number
+ * @param[out] o_chip The chip number
+ *
+ */
+void extractGroupAndChip(const topoId_t i_topologyId,
+                         groupId_t& o_group,
+                         chipId_t& o_chip);
 } // TARGETING
 
 #endif // __TARGETING_COMMON_UTIL_H

@@ -695,7 +695,7 @@ errlHndl_t HdatPcia::hdatSetCoreInfo(const uint32_t i_index,
         //Set the Internal Drawer Node ID
         uint8_t l_topoChipId = 0;
         uint8_t l_topoGroupId = 0;
-        MEMMAP::extractGroupAndChip(l_fabTopoId, l_topoGroupId, l_topoChipId);
+        extractGroupAndChip(l_fabTopoId, l_topoGroupId, l_topoChipId);
         iv_spPcia[i_index].hdatCoreData.pciaDrawerNodeID = l_topoGroupId;
 
         //get the parent node id and set that

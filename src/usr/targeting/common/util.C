@@ -91,6 +91,30 @@ void update_hwas_changed_mask(Target * i_target)
             i_target->getAttr<ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK>());
 }
 
+void extractGroupAndChip(const topoId_t i_topologyId,
+                         groupId_t& o_group,
+                         chipId_t& o_chip)
+{
+    TARGETING::Target* l_sys = TARGETING::UTIL::assertGetToplevelTarget();
+
+    topoMode_t l_topologyMode = l_sys->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_MODE>();
+
+    // NOTE: mode 0 -> GGGC
+    //       mode 1 -> GGCC
+    topologyIdBits_t l_idBits;
+    l_idBits.topoId = i_topologyId;
+    if(l_topologyMode == TARGETING::PROC_FABRIC_TOPOLOGY_MODE_MODE0)
+    {
+        o_group = l_idBits.mode0.group;
+        o_chip = l_idBits.mode0.chip;
+    }
+    else
+    {
+        o_group = l_idBits.mode1.group;
+        o_chip = l_idBits.mode1.chip;
+    }
+};
+
 /**
  * @brief set HWAS Changed flag to specific bits
  *

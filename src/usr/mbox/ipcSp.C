@@ -287,7 +287,7 @@ void IpcSp::msgHandler()
                         l_proc->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
                     uint8_t l_fabricChipId = 0;
                     uint8_t l_fabricGroupId = 0;
-                    MEMMAP::extractGroupAndChip(l_fabricTopoId, l_fabricGroupId, l_fabricChipId);
+                    extractGroupAndChip(l_fabricTopoId, l_fabricGroupId, l_fabricChipId);
                     //Calculate what bit position this will be
                     uint8_t l_bitPos = l_fabricChipId + (RUNTIME::MAX_PROCS_PER_NODE * l_fabricGroupId);
 

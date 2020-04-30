@@ -69,7 +69,7 @@
 #include <util/utilrsvdmem.H>
 #include <kernel/bltohbdatamgr.H>
 #include <map>
-#include <arch/memorymap.H>
+#include <arch/pirformat.H>
 #include <lpc/lpcif.H>
 #include <xscom/xscomif.H>
 #include <bootloader/bootloaderif.H>
@@ -693,8 +693,8 @@ static void initializeAttributes(TargetService& i_targetService,
                         l_chip->getAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>();
 
                     // Extract the group ID from the topology ID
-                    groupId_t l_groupId;
-                    chipId_t l_chipId;
+                    uint8_t l_groupId = 0;
+                    uint8_t l_chipId = 0;
                     extractGroupAndChip(l_topoId,
                                         l_groupId,
                                         l_chipId);

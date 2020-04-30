@@ -50,7 +50,6 @@
 #include <xscom/piberror.H>
 #include <scom/scomif.H>
 #include <arch/pirformat.H>
-#include <arch/memorymap.H>
 #include <lpc/lpcif.H>
 #include <sys/mm.h>
 #include <kernel/bltohbdatamgr.H>
@@ -263,7 +262,7 @@ errlHndl_t getTargetVirtualAddress(TARGETING::Target* i_target,
                     i_target->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
                 uint8_t xscomGroupId = 0;
                 uint8_t xscomChipId = 0;
-                MEMMAP::extractGroupAndChip(xscomTopoId, xscomGroupId, xscomChipId);
+                extractGroupAndChip(xscomTopoId, xscomGroupId, xscomChipId);
 
                 // Get assigned XSCOM base address
                 l_XSComBaseAddr =

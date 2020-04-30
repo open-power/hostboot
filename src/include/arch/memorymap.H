@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,12 +37,6 @@ using namespace TARGETING;
 
 namespace MEMMAP
 {
-
-// Shortened type name for convenience
-using topoId_t = TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID_type;
-using topoMode_t = TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_MODE_type;
-using groupId_t = uint8_t;
-using chipId_t = uint8_t;
 
 /**
  * @brief bit definitions for 4-bit mode 0/1 topology ID
@@ -183,45 +177,6 @@ inline uint64_t computeMemoryMapOffset( const uint64_t i_baseAddr,
     l_addr.bits.topoIndex = i_topologyIndex;
     return l_addr.address;
 };
-
-#ifdef __HOSTBOOT_MODULE
-/**
- * @brief Extract the fabric group and chip ID's from a 4-bit topology ID
- *
- * @param[in] i_topologyMode The topology mode.
- * @param[in] i_topologyId The topology ID (or effective topology ID)
- * @param[out] o_group The group number
- * @param[out] o_chip The chip number
- *
- */
-inline void extractGroupAndChip(const topoId_t i_topologyId,
-                                groupId_t& o_group,
-                                chipId_t& o_chip)
-{
-    TARGETING::Target* l_sys = nullptr;
-    TARGETING::TargetService & l_tgtServ = TARGETING::targetService();
-    l_tgtServ.getTopLevelTarget(l_sys);
-
-    assert(nullptr != l_sys, "System target cannot be null");
-
-    topoMode_t l_topologyMode = l_sys->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_MODE>();
-
-    // NOTE: mode 0 -> GGGC
-    //       mode 1 -> GGCC
-    topologyIdBits_t l_idBits;
-    l_idBits.topoId = i_topologyId;
-    if(l_topologyMode == TARGETING::PROC_FABRIC_TOPOLOGY_MODE_MODE0)
-    {
-        o_group = l_idBits.mode0.group;
-        o_chip = l_idBits.mode0.chip;
-    }
-    else
-    {
-        o_group = l_idBits.mode1.group;
-        o_chip = l_idBits.mode1.chip;
-    }
-};
-#endif
 
 /**
  * @brief Make a 4-bit topology ID from a group and chip ID formatted with

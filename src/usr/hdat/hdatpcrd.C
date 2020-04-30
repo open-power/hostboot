@@ -900,8 +900,8 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
 
         uint8_t l_procRealFabricGrpId = 0;
         uint8_t l_RealFabricChipId = 0;
-        MEMMAP::extractGroupAndChip(l_procRealFabricTopoId,
-                l_procRealFabricGrpId, l_RealFabricChipId);
+        extractGroupAndChip(l_procRealFabricTopoId,
+            l_procRealFabricGrpId, l_RealFabricChipId);
 
         iv_spPcrd->hdatChipData.hdatPcrdRealFabricGrpId =
                         (l_RealFabricChipId | (l_procRealFabricGrpId << 3));
@@ -911,8 +911,8 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
 
         uint8_t l_procEffFabricGrpId = 0;
         uint8_t l_EffFabricChipId = 0;
-        MEMMAP::extractGroupAndChip(l_procEffFabricTopoId,
-                l_procEffFabricGrpId, l_EffFabricChipId);
+        extractGroupAndChip(l_procEffFabricTopoId,
+            l_procEffFabricGrpId, l_EffFabricChipId);
 
         iv_spPcrd->hdatChipData.hdatPcrdEffFabricGrpId =
                         (l_EffFabricChipId | (l_procEffFabricGrpId << 3));

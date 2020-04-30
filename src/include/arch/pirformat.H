@@ -33,6 +33,7 @@
 #include <arch/memorymap.H>
 #include <config.h>
 #include <stdio.h>
+#include <targeting/common/util.H>
 
 using namespace TARGETING;
 using namespace MEMMAP;

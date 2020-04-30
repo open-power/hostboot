@@ -38,6 +38,7 @@
 #include <hwas/common/deconfigGard.H>
 #include <hwas/common/hwas_reasoncodes.H>
 #include <hwas/common/vpdConstants.H>
+#include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
 
 #include <targeting/common/commontargeting.H>
@@ -72,57 +73,6 @@ using namespace TARGETING;
 //******************************************************************************
 // RUNTIME/NON-RUNTIME/HOSTBOOT/NON-HOSTBOOT methods
 //******************************************************************************
-
-// RTC 246937: Remove this function later when we circle back and commonize
-using topoId_t = TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID_type;
-using topoMode_t = TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_MODE_type;
-using groupId_t = uint8_t;
-using chipId_t = uint8_t;
-
-typedef union
-{
-    struct // GGGC
-    {
-        uint8_t rsvd1:4; // 0:3
-        uint8_t group:3; // 4:6
-        uint8_t chip :1; // 7
-    } mode0;
-    struct // GGCC
-    {
-        uint8_t rsvd1:4; // 0:3
-        uint8_t group:2; // 4:5
-        uint8_t chip :2; // 6:7
-    } mode1;
-    topoId_t topoId;
-}topologyIdBits_t;
-
-inline void extractGroupAndChip(const topoId_t i_topologyId,
-                                groupId_t& o_group,
-                                chipId_t& o_chip)
-{
-    TARGETING::Target* l_sys = nullptr;
-    TARGETING::TargetService & l_tgtServ = TARGETING::targetService();
-    l_tgtServ.getTopLevelTarget(l_sys);
-
-    HWAS_ASSERT(nullptr != l_sys, "System target cannot be null");
-
-    topoMode_t l_topologyMode = l_sys->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_MODE>();
-
-    // NOTE: mode 0 -> GGGC
-    //       mode 1 -> GGCC
-    topologyIdBits_t l_idBits;
-    l_idBits.topoId = i_topologyId;
-    if(l_topologyMode == TARGETING::PROC_FABRIC_TOPOLOGY_MODE_MODE0)
-    {
-        o_group = l_idBits.mode0.group;
-        o_chip = l_idBits.mode0.chip;
-    }
-    else
-    {
-        o_group = l_idBits.mode1.group;
-        o_chip = l_idBits.mode1.chip;
-    }
-}
 
 //******************************************************************************
 DeconfigGard & theDeconfigGard()
@@ -1021,8 +971,8 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(
                 (*l_procsIter)->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>();
             uint8_t procFabricGroup = 0;
             uint8_t procFabricChip = 0;
-            // RTC 246937: Update this call with the commonized version
             extractGroupAndChip(procFabricTopology, procFabricGroup, procFabricChip);
+
             // FABRIC_GROUP_ID
             l_ProcInfo.procFabricGroup = procFabricGroup;
             // FABRIC_CHIP_ID

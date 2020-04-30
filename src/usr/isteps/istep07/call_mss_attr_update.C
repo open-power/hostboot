@@ -315,11 +315,11 @@ void check_hrmor_within_range (ATTR_PROC_MEM_TO_USE_type i_proc_mem_to_use,
     for (auto & l_proc : l_procs)
     {
         auto l_proc_topo = l_proc->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>();
-        MEMMAP::groupId_t l_proc_grp = 0;
-        MEMMAP::chipId_t l_proc_chip = 0;
-        MEMMAP::extractGroupAndChip(l_proc_topo,
-                                    l_proc_grp,
-                                    l_proc_chip);
+        groupId_t l_proc_grp = 0;
+        chipId_t l_proc_chip = 0;
+        extractGroupAndChip(l_proc_topo,
+                            l_proc_grp,
+                            l_proc_chip);
 
         if ((l_proc_grp == l_grp) && (l_proc_chip == l_chip))
         {
