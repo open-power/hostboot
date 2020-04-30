@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,12 +36,20 @@ namespace FSISCOM
     //FSI addresses are byte offsets, so need to multiply by 4
     // since each register is 4 bytes long.
     // prefix with 0x10xx for FSI2PIB engine offset
-    DATA0_REG         = 0x1000,  /* SCOM Data Register 0 (0x00) */
-    DATA1_REG         = 0x1004,  /* SCOM Data Register 1 (0x01) */
-    COMMAND_REG       = 0x1008,  /* SCOM Command Register (0x02) */
-    ENGINE_RESET_REG  = 0x1018,  /* Engine Reset Register (0x06) */
-    STATUS_REG        = 0x101C,  /* STATUS Register (0x07) */
-    PIB_RESET_REG     = 0x101C,  /* PIB Reset Register (0x07) */
+    FSI2PIB_DATA0_REG         = 0x1000,  /* SCOM Data Register 0 (0x00) */
+    FSI2PIB_DATA1_REG         = 0x1004,  /* SCOM Data Register 1 (0x01) */
+    FSI2PIB_COMMAND_REG       = 0x1008,  /* SCOM Command Register (0x02) */
+    FSI2PIB_ENGINE_RESET_REG  = 0x1018,  /* Engine Reset Register (0x06) */
+    FSI2PIB_STATUS_REG        = 0x101C,  /* STATUS Register (0x07) */
+    FSI2PIB_PIB_RESET_REG     = 0x101C,  /* PIB Reset Register (0x07) */
+
+    // prefix with 0x1Cxx for FSI2SPI engine offset
+    FSI2SPI_DATA0_REG         = 0x1C00, /* FSI2SPI Data Register 0 (0x00) */
+    FSI2SPI_DATA1_REG         = 0x1C04, /* FSI2SPI Data Register 1 (0x01) */
+    FSI2SPI_COMMAND_REG       = 0x1C08, /* FSI2SPI SCOM Command Register (0x02) */
+    FSI2SPI_ENGINE_RESET_REG  = 0x1C18, /* FSI2SPI Engine Reset Register (0x06) */
+    FSI2SPI_STATUS_REG        = 0x1C1C, /* FSI2SPI STATUS Register (0x07) */
+    FSI2SPI_PIB_RESET_REG     = 0x1C1C, /* FSI2SPI PIB Reset Register (0x07) */
 
     PARITY_CHECK      = 0x04000000, /* 5= Parity check error */
     PROTECTION_CHECK  = 0x01000000, /* 7= Blocked due to secure mode */
@@ -81,9 +89,6 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                          size_t& io_buflen,
                          int64_t i_accessType,
                          va_list i_args);
-
-
-
 
 
 

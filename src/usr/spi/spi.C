@@ -48,6 +48,14 @@
 
 // SPI
 #include <spi/spi.H>
+#include "spidd.H"
+
+// FAPI2
+#include <fapi2/plat_hwp_invoker.H> // FAPI_INVOKE_HWP
+
+// SPI HWP
+#include <p10_spi_init_pib.H>
+#include <p10_spi_init_fsi.H>
 
 // Max node and proc constants from these headers
 #include <sys/internode.h>
@@ -487,5 +495,122 @@ void getSpiDeviceInfo(std::vector<spiSlaveDevice>& o_deviceInfo,
 
     assignUniqueIds(o_deviceInfo);
 }
+
+errlHndl_t spiSetAccessMode(TARGETING::Target * i_spiMasterProc,
+                            spiAccess_t i_type)
+{
+    errlHndl_t l_err = nullptr;
+    bool l_procLocked = false;
+
+    do {
+        l_err = spiLockProcessor(i_spiMasterProc, true);
+        if (l_err)
+        {
+            break;
+        }
+        l_procLocked = true;
+
+        TARGETING::SpiSwitches switches;
+        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> masterProc(i_spiMasterProc);
+
+        auto l_scom_switch = i_spiMasterProc->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
+
+        // Set the contents of root control register 8 which controls
+        // whether we're accessing over PIB or FSI.
+        if (i_type == PIB_ACCESS)
+        {
+            FAPI_INVOKE_HWP(l_err, p10_spi_init_pib, masterProc);
+            switches.usePibSPI  = 1;
+            switches.useFsiSPI  = 0;
+            l_scom_switch.useSpiFsiScom = 0;
+        }
+        else
+        {
+            FAPI_INVOKE_HWP(l_err, p10_spi_init_fsi, masterProc);
+            switches.usePibSPI  = 0;
+            switches.useFsiSPI  = 1;
+            l_scom_switch.useSpiFsiScom = 1;
+        }
+
+        if (l_err != nullptr)
+        {
+            TRACFCOMP(g_trac_spi, ERR_MRK"spiSetAccessMode(): "
+                     "An error occurred from %s HWP call, RC=0x%X",
+                     i_type==PIB_ACCESS?"p10_spi_init_pib":"p10_spi_init_fsi",
+                     ERRL_GETRC_SAFE(l_err));
+            l_err->collectTrace(SPI_COMP_NAME, KILOBYTE);
+            break;
+        }
+
+        // Update SCOM switch access
+        i_spiMasterProc->setAttr<TARGETING::ATTR_SCOM_SWITCHES>(l_scom_switch);
+
+
+        // Update SPI access attribute for master processor
+        i_spiMasterProc->setAttr<TARGETING::ATTR_SPI_SWITCHES>(switches);
+        TRACFCOMP( g_trac_spi, "spiSetAccessMode: tgt=0x%X SPI_SWITCHES updated: "
+                   "pib=%d, fsi=%d",
+                   TARGETING::get_huid(i_spiMasterProc),
+                   switches.usePibSPI, switches.useFsiSPI );
+    } while (0);
+
+    // Try to unlock the SPI locks, only if lock was successful
+    // If we fail to lock them in the first place and then (for some reason)
+    // we don't encounter the same failure when unlocking them then we'll run
+    // into undefined behavior by unlocking unlocked mutexes.
+    if (l_procLocked)
+    {
+        // unlock processor
+        errlHndl_t l_err2 = spiLockProcessor(i_spiMasterProc, false);
+        if (l_err && l_err2)
+        {
+            l_err2->plid(l_err->plid());
+            ERRORLOG::errlCommit(l_err2, SPI_COMP_ID);
+            l_err2 = nullptr;
+        }
+        else if (l_err2)
+        {
+            l_err = l_err2;
+        }
+    }
+
+    return l_err;
+}
+
+
+errlHndl_t spiLockProcessor(TARGETING::Target * i_processor, bool i_lock)
+{
+    errlHndl_t l_err = nullptr;
+    bool l_unlock;
+    const uint8_t MAX_SPI_ENGINE = 5;
+
+    for (uint8_t engine = 0; engine < MAX_SPI_ENGINE; ++engine)
+    {
+        l_unlock = !i_lock;
+        l_err = spiEngineLockOp(i_processor, engine, l_unlock);
+        if (l_err)
+        {
+            // Expect l_unlock value to switch for successful operations
+            // If l_unlock = true, The mutex was locked and should be unlocked.
+            // If l_unlock = false, The mutex was unlocked and should not be unlocked again.
+            if (l_unlock == !i_lock)
+            {
+                TRACFCOMP( g_trac_spi,
+                  ERR_MRK"spiLockProcessor: %s operation on processor 0x%08x, "
+                  "engine %d failed", i_lock?"lock":"unlock",
+                  TARGETING::get_huid(i_processor), engine );
+            }
+            break;
+        }
+        else
+        {
+            TRACFCOMP( g_trac_spi, "spiLockProcessor: %s operation on processor 0x%08x, "
+                  "engine %d succeeded", i_lock?"lock":"unlock",
+                  TARGETING::get_huid(i_processor), engine );
+        }
+    }
+    return l_err;
+}
+
 
 }

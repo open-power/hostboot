@@ -43,6 +43,7 @@
 #include <sbeio/sbe_retry_handler.H>
 #include <sbeio/sbeioif.H>
 #include <errl/errludtarget.H>
+#include <spi/spi.H> // for SPI lock support
 #include <p10_getecid.H>
 
 using namespace ISTEP;
@@ -192,7 +193,21 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
                   TARGETING::get_huid(l_cpu_target) );
 
 **/
-    }   // end of going through all processors
+        // Enable HB SPI operations to this slave processor after SBE boot
+        l_errl = SPI::spiLockProcessor(l_cpu_target, false);
+        if (l_errl)
+        {
+            // This would be a firmware bug that would be hard to
+            // find later so terminate with this failure
+            TRACFCOMP(g_trac_isteps_trace,
+                      "ERROR : SPI unlock failed to target %.8X"
+                      TRACE_ERR_FMT,
+                      get_huid(l_cpu_target),
+                      TRACE_ERR_ARGS(l_errl));
+            captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
+            break;
+        }
+    }   // end of going through all slave processors
 
     //  Once the sbes are up correctly, fetch all the proc ECIDs and
     //  store them in an attribute.

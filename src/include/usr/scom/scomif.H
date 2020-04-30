@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,6 +62,16 @@ errlHndl_t scomOpSanityCheck(const DeviceFW::OperationType i_opType,
                              const size_t i_buflen,
                              const uint64_t i_addr,
                              const size_t i_minbufsize);
+
+/**
+ * @brief Check if accessing a slave processor via FSI2SPI SCOM mode
+ *
+ * @param[in] i_target        Scom target
+ * @param[in] i_scom_address  Address for FSI scom
+ * @return true if accessing slave processor via FSI2SPI, else false
+ */
+bool scomCheckIfFsiSpiAddress( const TARGETING::Target * i_target,
+                               const uint64_t i_scom_address );
 
 #ifndef __HOSTBOOT_RUNTIME
 /**

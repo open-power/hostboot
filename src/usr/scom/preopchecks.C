@@ -160,4 +160,40 @@ errlHndl_t scomOpSanityCheck(const DeviceFW::OperationType i_opType,
     return l_err;
 }
 
+/**
+ * @brief Check if accessing a slave processor via FSI2SPI mode
+ * @param[in] i_target        Scom target
+ * @param[in] i_scom_address  Address for FSI scom
+ * @return true if accessing slave processor via FSI2SPI, else false
+ */
+bool scomCheckIfFsiSpiAddress(const TARGETING::Target * i_target,
+                              const uint64_t i_scom_address)
+{
+    bool isModeFSI2SPI = false;
+
+    // constants for FSI SPI operation range
+    // 0x70000 TP.TPVSB.FSI.W.FSI_SPIMC.SPI_PIB.SPIMST0.ERROR_INJECT_
+    // 0x70068 TP.TPVSB.FSI.W.FSI_SPIMC.SPI_PIB.SPIMST3.STATUS_REG
+    const uint64_t MIN_FSI_SPIMC_ADDRESS = 0x70000;
+    const uint64_t MAX_FSI_SPIMC_ADDRESS = 0x70068;
+
+    // Is scom address in FSI SPI operation range?
+    if (  i_scom_address >= MIN_FSI_SPIMC_ADDRESS &&
+          i_scom_address <= MAX_FSI_SPIMC_ADDRESS  )
+    {
+        if (i_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_PROC)
+        {
+            // Is slave processor?
+            TARGETING::Target * l_pMasterProcTarget = nullptr;
+            TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcTarget);
+            assert(l_pMasterProcTarget, "scomCheckIfFsiSpiAddress: unable to find valid master processor");
+            if (i_target != l_pMasterProcTarget)
+            {
+                isModeFSI2SPI = true;
+            }
+        }
+    }
+    return isModeFSI2SPI;
+}
+
 }  // end namespace SCOM

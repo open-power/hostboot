@@ -41,6 +41,8 @@
 #include <fapi2/plat_hwp_invoker.H>
 #include <intr/interrupt.H>
 
+#include <spi/spi.H>
+
 //@TODO RTC:150562 - Remove when BAR setting handled by INTRRP
 #include <devicefw/userif.H>
 #include <sys/misc.h>
@@ -181,6 +183,21 @@ void* call_proc_build_smp (void *io_pArgs)
 
             if (l_proc_target != l_masterProc)
             {
+                // Switch from FSI to PIB SPI access for slave processors
+                l_errl = SPI::spiSetAccessMode(l_proc_target, SPI::PIB_ACCESS);
+                if(l_errl)
+                {
+                    // Since this is a hard failure to detect later
+                    // (via SPI failures), error out here
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                      "call_proc_build_smp> Unable to switch SPI access to "
+                      "PIB_ACCESS for 0x%.8X",
+                      TARGETING::get_huid(l_proc_target) );
+                    l_StepError.addErrorDetails(l_errl);
+                    errlCommit( l_errl, HWPF_COMP_ID );
+                    break;
+                }
+
                 //Enable PSIHB Interrupts for slave proc -- moved from above
                 l_errl = INTR::enablePsiIntr(l_proc_target);
                 if(l_errl)

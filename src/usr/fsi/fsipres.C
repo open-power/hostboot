@@ -29,6 +29,7 @@
 #include <fsi/fsi_reasoncodes.H>
 #include <vpd/mvpdenums.H>
 #include <vpd/vpd_if.H>
+#include <spi/spi.H>
 #include <errl/errlmanager.H>
 #include <hwas/common/hwasCallout.H>
 #include <targeting/common/predicates/predicatectm.H>
@@ -70,162 +71,176 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
     errlHndl_t l_errl = NULL;
     uint32_t l_saved_plid = 0;
 
-    if (unlikely(io_buflen < sizeof(bool)))
-    {
-        TRACFCOMP(g_trac_fsi,
-                  ERR_MRK "FSI::procPresenceDetect> Invalid data length: %d",
-                  io_buflen);
-        /*@
-         * @errortype
-         * @moduleid     FSI::MOD_FSIPRES_PROCPRESENCEDETECT
-         * @reasoncode   FSI::RC_INVALID_LENGTH
-         * @userdata1    Data Length
-         * @devdesc      presenceDetect> Invalid data length (!= 1 bytes)
-         * @custdesc     FSI buffer length is not 1 byte when finding
-         *               processor
-         */
-        l_errl =
-                new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                        FSI::MOD_FSIPRES_PROCPRESENCEDETECT,
-                                        FSI::RC_INVALID_LENGTH,
-                                        TO_UINT64(io_buflen),
-                                        true /*SW error*/);
-        io_buflen = 0;
-        return l_errl;
-    }
+    do {
 
-    // First look for FSI presence bits
-    bool fsi_present = false;
-
-    TARGETING::Target* l_masterChip = NULL;
-    TARGETING::targetService().masterProcChipTargetHandle(l_masterChip);
-
-    if ((i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL) ||
-        (i_target == l_masterChip))
-    {
-        fsi_present = true;
-    }
-    else
-    {
-        fsi_present = isSlavePresent(i_target);
-        if (fsi_present)
+        if (unlikely(io_buflen < sizeof(bool)))
         {
-            //@FIXME-RTC:254475-Remove once this works everywhere
-            if( !Util::isMultiprocSupported() )
+            TRACFCOMP(g_trac_fsi,
+                      ERR_MRK "FSI::procPresenceDetect> Invalid data length: %d",
+                      io_buflen);
+            /*@
+             * @errortype
+             * @moduleid     FSI::MOD_FSIPRES_PROCPRESENCEDETECT
+             * @reasoncode   FSI::RC_INVALID_LENGTH
+             * @userdata1    Data Length
+             * @devdesc      presenceDetect> Invalid data length (!= 1 bytes)
+             * @custdesc     FSI buffer length is not 1 byte when finding
+             *               processor
+             */
+            l_errl =
+                    new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            FSI::MOD_FSIPRES_PROCPRESENCEDETECT,
+                                            FSI::RC_INVALID_LENGTH,
+                                            TO_UINT64(io_buflen),
+                                            true /*SW error*/);
+            io_buflen = 0;
+            break;
+        }
+
+        // First look for FSI presence bits
+        bool fsi_present = false;
+
+        TARGETING::Target* l_masterChip = NULL;
+        TARGETING::targetService().masterProcChipTargetHandle(l_masterChip);
+
+        if ((i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL) ||
+            (i_target == l_masterChip))
+        {
+            fsi_present = true;
+        }
+        else
+        {
+            fsi_present = isSlavePresent(i_target);
+            if (fsi_present)
             {
-                TRACFCOMP(g_trac_fsi, "Ignoring secondary procs" );
-                fsi_present = false;
-            }
-            else
-            {
-                TRACFCOMP(g_trac_fsi, "FSI::procPresenceDetect> 0x%.8X target present", TARGETING::get_huid(i_target) );
+                //@FIXME-RTC:254475-Remove once this works everywhere
+                if( !Util::isMultiprocSupported() )
+                {
+                    TRACFCOMP(g_trac_fsi, "Ignoring secondary procs" );
+                    fsi_present = false;
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_fsi, "FSI::procPresenceDetect> 0x%.8X target present", TARGETING::get_huid(i_target) );
+                    l_errl = SPI::spiSetAccessMode(i_target, SPI::FSI_ACCESS);
+                    if (l_errl)
+                    {
+                        // Since this is a hard failure to detect later,
+                        // error out here
+                        TRACFCOMP( g_trac_fsi, ERR_MRK "FSI::procPresenceDetect> "
+                            "Unable to switch to FSI_ACCESS for 0x%.8X",
+                            TARGETING::get_huid(i_target) );
+                        l_errl->collectTrace("FSI");
+                        break;
+                    }
+                }
             }
         }
-    }
 
-    // Next look for valid Module VPD
-    bool mvpd_present = false;
-    bool check_for_mvpd = true;
+        // Next look for valid Module VPD
+        bool mvpd_present = false;
+        bool check_for_mvpd = true;
 
 #ifdef CONFIG_MVPD_READ_FROM_HW
-    check_for_mvpd = fsi_present;
+        check_for_mvpd = fsi_present;
 #endif
 
-    if ((i_target != TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL) &&
-        (i_target != l_masterChip) &&
-        !Util::isMultiprocSupported() ) //@FIXME-RTC:254475
-    {
-        check_for_mvpd = false;
-    }
+        if ((i_target != TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL) &&
+            (i_target != l_masterChip) &&
+            !Util::isMultiprocSupported() ) //@FIXME-RTC:254475
+        {
+            check_for_mvpd = false;
+        }
 
-    if ( check_for_mvpd )
-    {
-         mvpd_present = VPD::mvpdPresent( i_target );
-    }
+        if ( check_for_mvpd )
+        {
+             mvpd_present = VPD::mvpdPresent( i_target );
+        }
 
 #if defined(CONFIG_MVPD_READ_FROM_HW) && defined(CONFIG_MVPD_READ_FROM_PNOR)
-    if( mvpd_present )
-    {
-        // Check if the VPD data in the PNOR matches the SEEPROM
-        l_errl = VPD::ensureCacheIsInSync( i_target );
-        if( l_errl )
+        if( mvpd_present )
         {
-            // Save this plid to use later
-            l_saved_plid = l_errl->plid();
-            mvpd_present = false;
+            // Check if the VPD data in the PNOR matches the SEEPROM
+            l_errl = VPD::ensureCacheIsInSync( i_target );
+            if( l_errl )
+            {
+                // Save this plid to use later
+                l_saved_plid = l_errl->plid();
+                mvpd_present = false;
 
-            TRACFCOMP(g_trac_fsi,ERR_MRK "FSI::procPresenceDetect> Error during ensureCacheIsInSync (MVPD)" );
-            errlCommit( l_errl, FSI_COMP_ID );
+                TRACFCOMP(g_trac_fsi,ERR_MRK "FSI::procPresenceDetect> Error during ensureCacheIsInSync (MVPD)" );
+                errlCommit( l_errl, FSI_COMP_ID );
+            }
         }
-    }
-    else
-    {
-        // Invalidate MVPD in the PNOR
-        l_errl = VPD::invalidatePnorCache(i_target);
-        if (l_errl)
+        else
         {
-            TRACFCOMP( g_trac_fsi, "Error invalidating MVPD in PNOR" );
-            errlCommit( l_errl, FSI_COMP_ID );
+            // Invalidate MVPD in the PNOR
+            l_errl = VPD::invalidatePnorCache(i_target);
+            if (l_errl)
+            {
+                TRACFCOMP( g_trac_fsi, "Error invalidating MVPD in PNOR" );
+                errlCommit( l_errl, FSI_COMP_ID );
+            }
         }
-    }
 #endif
 
-    // Finally compare the 2 methods
-    if( fsi_present != mvpd_present )
-    {
-        TRACFCOMP(g_trac_fsi, ERR_MRK "FSI::procPresenceDetect> "
-                  "FSI (=%d) and MVPD (=%d) do not agree for %.8X",
-                  fsi_present, mvpd_present, TARGETING::get_huid(i_target));
-        /*@
-         * @errortype
-         * @moduleid     FSI::MOD_FSIPRES_PROCPRESENCEDETECT
-         * @reasoncode   FSI::RC_FSI_MVPD_MISMATCH
-         * @userdata1    HUID of processor
-         * @userdata2[0:31]    FSI Presence
-         * @userdata2[32:63]   MVPD Presence
-         * @devdesc      presenceDetect> FSI and MVPD do not agree
-         * @custdesc     FSI and MVPD do not agree
-         */
-        l_errl =
-                new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                        FSI::MOD_FSIPRES_PROCPRESENCEDETECT,
-                                        FSI::RC_FSI_MVPD_MISMATCH,
-                                        TARGETING::get_huid(i_target),
-                                        TWO_UINT32_TO_UINT64(
-                                            fsi_present,
-                                            mvpd_present));
-
-        // Callout the processor
-        l_errl->addHwCallout( i_target,
-                              HWAS::SRCI_PRIORITY_LOW,
-                              HWAS::NO_DECONFIG,
-                              HWAS::GARD_NULL );
-
-
-        // If there is a saved PLID, apply it to this error log
-        if (l_saved_plid)
+        // Finally compare the 2 methods
+        if( fsi_present != mvpd_present )
         {
-            l_errl->plid(l_saved_plid);
+            TRACFCOMP(g_trac_fsi, ERR_MRK "FSI::procPresenceDetect> "
+                      "FSI (=%d) and MVPD (=%d) do not agree for %.8X",
+                      fsi_present, mvpd_present, TARGETING::get_huid(i_target));
+            /*@
+             * @errortype
+             * @moduleid     FSI::MOD_FSIPRES_PROCPRESENCEDETECT
+             * @reasoncode   FSI::RC_FSI_MVPD_MISMATCH
+             * @userdata1    HUID of processor
+             * @userdata2[0:31]    FSI Presence
+             * @userdata2[32:63]   MVPD Presence
+             * @devdesc      presenceDetect> FSI and MVPD do not agree
+             * @custdesc     FSI and MVPD do not agree
+             */
+            l_errl =
+                    new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            FSI::MOD_FSIPRES_PROCPRESENCEDETECT,
+                                            FSI::RC_FSI_MVPD_MISMATCH,
+                                            TARGETING::get_huid(i_target),
+                                            TWO_UINT32_TO_UINT64(
+                                                fsi_present,
+                                                mvpd_present));
+
+            // Callout the processor
+            l_errl->addHwCallout( i_target,
+                                  HWAS::SRCI_PRIORITY_LOW,
+                                  HWAS::NO_DECONFIG,
+                                  HWAS::GARD_NULL );
+
+
+            // If there is a saved PLID, apply it to this error log
+            if (l_saved_plid)
+            {
+                l_errl->plid(l_saved_plid);
+            }
+
+            // Add FFDC for the target to an error log
+            getFsiFFDC( FFDC_PRESENCE_FAIL, l_errl, i_target);
+
+            // Add FSI and VPD trace
+            l_errl->collectTrace("FSI");
+            l_errl->collectTrace("VPD");
+
+            // Commit this log and move on
+            errlCommit( l_errl,
+                        FSI_COMP_ID );
         }
 
-        // Add FFDC for the target to an error log
-        getFsiFFDC( FFDC_PRESENCE_FAIL, l_errl, i_target);
+        bool present = fsi_present && mvpd_present;
 
-        // Add FSI and VPD trace
-        l_errl->collectTrace("FSI");
-        l_errl->collectTrace("VPD");
+        memcpy(io_buffer, &present, sizeof(present));
+        io_buflen = sizeof(present);
+    } while (0);
 
-        // Commit this log and move on
-        errlCommit( l_errl,
-                    FSI_COMP_ID );
-    }
-
-    bool present = fsi_present && mvpd_present;
-
-    memcpy(io_buffer, &present, sizeof(present));
-    io_buflen = sizeof(present);
-
-    return NULL;
+    return l_errl;
 }
 
 // Register as the presence detect for processor and memory buffers.

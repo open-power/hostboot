@@ -36,17 +36,19 @@ EXTRAINCDIR += ${HWP_PATH}/../common/include/
 EXTRAINCDIR += ${HWP_PATH}/hwp/spi/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 
+VPATH += ${HWP_PATH}/hwp/spi/
+
 #include unique objects
 OBJS += spi.o
 OBJS += spidd.o
 OBJS += errlud_spi.o
+OBJS += ${HWP_PATH}/hwp/spi/p10_spi_init_pib.o
+OBJS += ${HWP_PATH}/hwp/spi/p10_spi_init_fsi.o
 
 SUBDIRS += test.d
 
-VPATH += ${HWP_PATH}/hwp/spi/
-
 include ${ROOTPATH}/procedure.rules.mk
 include ${HWP_PATH}/hwp/spi/p10_sbe_spi_cmd.mk
-include ${HWP_PATH}/hwp/spi/p10_spi_init_pib.mk
 OBJS += p10_sbe_spi_cmd_OLD.o
+
 include ${ROOTPATH}/config.mk

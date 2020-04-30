@@ -72,7 +72,7 @@ trace_desc_t* g_trac_spi = nullptr;
 TRAC_INIT(&g_trac_spi, SPI_COMP_NAME, KILOBYTE);
 
 #define TRACUCOMP(args...)    TRACFCOMP(args)
-//#define TRACUCOMP
+//#define TRACUCOMP(args...)
 
 namespace SPI
 {
@@ -81,8 +81,12 @@ namespace SPI
 const bool ALWAYS_INCLUDE_ECC = true;
 
 // Give this constant a more managable name.
-const uint64_t ROOT_CTRL_8 =
+const uint64_t ROOT_CTRL_8_PIB =
     static_cast<uint64_t>(scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL8_RW);
+
+const uint64_t ROOT_CTRL_8_FSI =
+    static_cast<uint64_t>(scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL8_FSI_BYTE);
+
 
 /**
  * _start() task entry procedure using the macro found in taskargs.H
@@ -97,13 +101,14 @@ void spiInit(errlHndl_t & io_rtaskRetErrl)
     TARGETING::targetService()
         .masterProcChipTargetHandle(masterTarget);
 
+    TARGETING::SpiSwitches switches;
+
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> masterProc(masterTarget);
-    fapi2::buffer<uint64_t> root_ctrl_buffer;
 
     do {
 
-        // Get the contents of root control register 8 which controls whether
-        // we're accessing over PIB or FSI.
+        // Set the contents of root control register 8 which controls
+        // whether we're accessing over PIB or FSI.
         FAPI_INVOKE_HWP(io_rtaskRetErrl,
                         p10_spi_init_pib,
                         masterProc);
@@ -116,6 +121,15 @@ void spiInit(errlHndl_t & io_rtaskRetErrl)
             io_rtaskRetErrl->collectTrace(SPI_COMP_NAME, KILOBYTE);
             break;
         }
+
+        // Update SPI access attribute for master processor
+        switches.usePibSPI  = 1;
+        switches.useFsiSPI  = 0;
+        masterTarget->setAttr<TARGETING::ATTR_SPI_SWITCHES>(switches);
+        TRACFCOMP( g_trac_spi, "spiInit: tgt=0x%X SPI_SWITCHES updated: "
+                   "pib=%d, fsi=%d",
+                   TARGETING::get_huid(masterTarget),
+                   switches.usePibSPI, switches.useFsiSPI );
 
     } while(0);
 
@@ -136,9 +150,9 @@ errlHndl_t spiPerformOp(DeviceFW::OperationType i_opType,
                         va_list                 i_args)
 {
     TRACUCOMP(g_trac_spi, ENTER_MRK"spiPerformOp() opType(%s), "
-              "i_target(0x%X), io_buffer(%p), io_buflen(%d),  "
-              "i_accessType(%d)",
-              i_opType == DeviceFW::READ ? "READ" : "WRITE",
+              "i_target(0x%X), io_buffer(%p), io_buflen(%d), "
+              "i_accessType(%ld)",
+              (i_opType == DeviceFW::READ) ? "READ" : "WRITE",
               TARGETING::get_huid(i_target),
               io_buffer,
               io_buflen,
@@ -791,16 +805,24 @@ void SpiOp::addStatusRegs(errlHndl_t& io_errl)
             (SPIM_STATUSREG      | handle.base_addr),
         };
 
-        fapi2::buffer<uint64_t> buffer = 0;
-
         for (auto reg : registerList)
         {
             registerUDSection.addData(DEVICE_SCOM_ADDRESS(reg));
         }
 
+        // Figure out if in FSI or PIB mode
+        auto spiSwitch = iv_target->getAttr<TARGETING::ATTR_SPI_SWITCHES>();
+
         // Add Root Control Register as well in case the PIB bit was set
         // improperly
-        registerUDSection.addData(DEVICE_SCOM_ADDRESS(ROOT_CTRL_8));
+        if (spiSwitch.usePibSPI)
+        {
+            registerUDSection.addData(DEVICE_SCOM_ADDRESS(ROOT_CTRL_8_PIB));
+        }
+        else
+        {
+            registerUDSection.addData(DEVICE_FSI_ADDRESS(ROOT_CTRL_8_FSI));
+        }
 
         registerUDSection.addToLog(io_errl);
 
@@ -874,7 +896,10 @@ SpiControlHandle SpiOp::getSpiHandle()
 {
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> chip_target(iv_target);
 
-    return SpiControlHandle(chip_target, iv_engine);
+    auto spiSwitch = iv_target->getAttr<TARGETING::ATTR_SPI_SWITCHES>();
+
+    // setup SPI handle based on spiSwitch attribute
+    return SpiControlHandle(chip_target, iv_engine, 1, spiSwitch.usePibSPI);
 }
 
 TARGETING::Target* SpiOp::getTarget()

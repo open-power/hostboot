@@ -40,6 +40,7 @@
 #include <istepHelperFuncs.H>     // captureError
 #include <fapi2/plat_hwp_invoker.H>
 #include <sbeio/sbeioif.H>
+#include <spi/spi.H> // for SPI lock support
 #include <p10_start_cbs.H>
 
 using namespace ISTEP;
@@ -78,6 +79,21 @@ void* call_host_cbs_start(void *io_pArgs)
     {
         if (l_cpu_target != l_pMasterProcTarget)
         {
+            // Prevent HB SPI operations to this slave processor during SBE boot
+            l_errl = SPI::spiLockProcessor(l_cpu_target, true);
+            if (l_errl)
+            {
+                // This would be a firmware bug that would be hard to
+                // find later so terminate with this failure
+                TRACFCOMP(g_trac_isteps_trace,
+                          "ERROR : SPI lock failed to target %.8X"
+                          TRACE_ERR_FMT,
+                          get_huid(l_cpu_target),
+                          TRACE_ERR_ARGS(l_errl));
+                captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
+                break;
+            }
+
             //Before starting the CBS (and thus the SBE) on slave procs
             //Make sure the SBE FIFO is clean by doing a full reset of
             //the fifo
@@ -109,6 +125,27 @@ void* call_host_cbs_start(void *io_pArgs)
                           get_huid(l_cpu_target),
                           TRACE_ERR_ARGS(l_errl));
                 captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
+            }
+        }
+    }
+
+    // For recovery, attempt to unlock all slave processor SPI engines
+    if (l_stepError.getErrorHandle() != nullptr)
+    {
+        // loop thru all processors, only call procedure on non-master processors
+        for (const auto & l_cpu_target: l_cpuTargetList)
+        {
+            if (l_cpu_target != l_pMasterProcTarget)
+            {
+                // Allow SPI operations again, as this step is failing
+                l_errl = SPI::spiLockProcessor(l_cpu_target, false);
+                if (l_errl)
+                {
+                    // unlock should never fail unless coding issue
+                    // since this is just a recovery attempt, delete error
+                    delete l_errl;
+                    l_errl = nullptr;
+                }
             }
         }
     }

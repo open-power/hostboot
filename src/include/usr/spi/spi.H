@@ -210,6 +210,46 @@ struct spiSlaveDevice
 void getSpiDeviceInfo(std::vector<spiSlaveDevice>& o_deviceInfo,
                       TARGETING::Target* i_spiMaster = nullptr);
 
+/**
+ * @brief spiAccess_t
+ *        SPI access can be either FSI/CFAM or PIB
+ */
+enum spiAccess_t : uint8_t
+{
+    FSI_ACCESS = 0,
+    PIB_ACCESS = 1
+};
+
+/**
+ * @brief spiSetAccessMode
+ *
+ *        Change the access method used by SPI for the given processor.
+ *        This will grab locks for the processor, update SPI ROOT_CTRL_8
+ *        register to new access method, update ATTR_SPI_SWITCHES,
+ *        and then unlock.
+ *        Subsequent SPI operations to this processor will use this
+ *        new access method
+ *
+ * @param[in] i_spiMasterProc   SPI master processor to associate access method
+ * @param[in] i_type  Access method type (FSI or PIB)
+ * @return  error if access change failed
+ */
+errlHndl_t spiSetAccessMode(TARGETING::Target * i_spiMasterProc,
+                            spiAccess_t i_type);
+
+
+/**
+ * @brief spiLockProcessor
+ *
+ *        Prevent Hostboot from using this target by grabbing lock.
+ *        Release the lock when it is safe to resume SPI operations.
+ *
+ * @param[in] i_processor   SPI processor to lock/unlock
+ * @param[in] i_lock        true = lock, false = unlock
+ * @return error if lock operation failed
+ */
+errlHndl_t spiLockProcessor(TARGETING::Target * i_processor, bool i_lock);
+
 }
 
 #endif

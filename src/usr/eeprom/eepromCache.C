@@ -1076,7 +1076,7 @@ errlHndl_t findEepromHeaderInPnorEecache(
                     "for target w/ HUID 0x%08X in EECACHE table of contents"
                     " at 0x%X internal address",
                     i_eepromType, TARGETING::get_huid(i_target),
-                    o_recordHeaderFromPnor.completeRecord.internal_offset);
+                    o_recordHeaderFromPnor->completeRecord.internal_offset);
             break;
         }
     }

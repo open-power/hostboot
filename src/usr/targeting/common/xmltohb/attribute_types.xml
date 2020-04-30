@@ -7346,7 +7346,15 @@
         <type>uint8_t</type>
       </field>
       <field>
-        <bits>3</bits>
+        <bits>1</bits>
+        <default>0</default>
+        <description>0b0: Do not use SPI FSI SCOM at this time.  0b1: Use SPI FSI
+            SCOM at this time</description>
+        <name>useSpiFsiScom</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>2</bits>
         <default>0</default>
         <description>Reserved for future expansion</description>
         <name>reserved</name>
@@ -8103,6 +8111,42 @@
     <persistency>non-volatile</persistency>
     <readable/>
     <no_export/>
+  </attribute>
+
+  <attribute>
+    <complexType>
+      <description>Structure which defines which SPI access method to use at
+        a point in time.  Only one bit (of the first two) can ever be set at any one time.
+        </description>
+      <field>
+        <bits>1</bits>
+        <default>0</default>
+        <description>0b0: Do not use FSI SPI at this time.  0b1: Use FSI
+            SPI at this time</description>
+        <name>useFsiSPI</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>1</bits>
+        <default>0</default>
+        <description>0b0: Do not use PIB SPI at this time.  0b1: Use
+            PIB SPI at this time</description>
+        <name>usePibSPI</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>6</bits>
+        <default>0</default>
+        <description>Reserved for future expansion</description>
+        <name>reserved</name>
+        <type>uint8_t</type>
+      </field>
+    </complexType>
+    <description>Attribute storing information about which SPI access method to use</description>
+    <id>SPI_SWITCHES</id>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
   </attribute>
 
   <attribute>

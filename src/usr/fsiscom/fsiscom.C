@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 #include <fsiscom/fsiscom_reasoncodes.H>
 #include <fsi/fsiif.H>
 #include <sys/time.h>
+#include <scom/scomif.H>
 #include "fsiscom.H"
 
 //Globals/Constants
@@ -143,7 +144,7 @@ void pib_error_handler( TARGETING::Target* i_target,
         i_errlog->addHwCallout( i_target,
                                 HWAS::SRCI_PRIORITY_HIGH,
                                 HWAS::DELAYED_DECONFIG,
-                                HWAS::GARD_NULL );        
+                                HWAS::GARD_NULL );
     }
 
     //Recovery sequence from Markus
@@ -155,11 +156,12 @@ void pib_error_handler( TARGETING::Target* i_target,
     //     then just perform unit reset (6) (wait not needed).
     uint32_t l_command = 0;
     size_t op_size = sizeof(uint32_t);
+    bool isSPImode = SCOM::scomCheckIfFsiSpiAddress(i_target, i_scomAddr);
     errlHndl_t l_err = DeviceFW::deviceOp( DeviceFW::WRITE,
                                        i_target,
                                        &l_command,
                                        op_size,
-                                       DEVICE_FSI_ADDRESS(ENGINE_RESET_REG));
+                                       DEVICE_FSI_ADDRESS(isSPImode?FSI2SPI_ENGINE_RESET_REG:FSI2PIB_ENGINE_RESET_REG));
     if(l_err)
     {
         TRACFCOMP( g_trac_fsiscom,
@@ -254,6 +256,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
             l_any_error_bits &= ~PROTECTION_CHECK;
         }
 
+        bool isSPImode = SCOM::scomCheckIfFsiSpiAddress(i_target, l_scomAddr);
 
         // use the chip-specific mutex attribute
         l_mutex = i_target->getHbMutexAttr<TARGETING::ATTR_FSI_SCOM_MUTEX>();
@@ -275,7 +278,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                                         i_target,
                                         &scratchData.data32_0,
                                         op_size,
-                                        DEVICE_FSI_ADDRESS(DATA0_REG));
+                                        DEVICE_FSI_ADDRESS(isSPImode?FSI2SPI_DATA0_REG:FSI2PIB_DATA0_REG));
             if(l_err)
             {
                 break;
@@ -286,7 +289,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                                         i_target,
                                         &scratchData.data32_1,
                                         op_size,
-                                        DEVICE_FSI_ADDRESS(DATA1_REG));
+                                        DEVICE_FSI_ADDRESS(isSPImode?FSI2SPI_DATA1_REG:FSI2PIB_DATA1_REG));
             if(l_err)
             {
                 break;
@@ -299,7 +302,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                                         i_target,
                                         &l_command,
                                         op_size,
-                                        DEVICE_FSI_ADDRESS(COMMAND_REG));
+                                        DEVICE_FSI_ADDRESS(isSPImode?FSI2SPI_COMMAND_REG:FSI2PIB_COMMAND_REG));
             if(l_err)
             {
                 break;
@@ -310,7 +313,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                                         i_target,
                                         &l_status,
                                         op_size,
-                                        DEVICE_FSI_ADDRESS(STATUS_REG));
+                                        DEVICE_FSI_ADDRESS(isSPImode?FSI2SPI_STATUS_REG:FSI2PIB_STATUS_REG));
             if(l_err)
             {
                 break;
@@ -365,7 +368,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                                         i_target,
                                         &l_command,
                                         op_size,
-                                        DEVICE_FSI_ADDRESS(COMMAND_REG));
+                                        DEVICE_FSI_ADDRESS(isSPImode?FSI2SPI_COMMAND_REG:FSI2PIB_COMMAND_REG));
             if(l_err)
             {
                 break;
@@ -376,7 +379,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                                         i_target,
                                         &l_status,
                                         op_size,
-                                        DEVICE_FSI_ADDRESS(STATUS_REG));
+                                        DEVICE_FSI_ADDRESS(isSPImode?FSI2SPI_STATUS_REG:FSI2PIB_STATUS_REG));
             if(l_err)
             {
                 break;
@@ -417,7 +420,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                                         i_target,
                                         &scratchData.data32_0,
                                         op_size,
-                                        DEVICE_FSI_ADDRESS(DATA0_REG));
+                                        DEVICE_FSI_ADDRESS(isSPImode?FSI2SPI_DATA0_REG:FSI2PIB_DATA0_REG));
             if(l_err)
             {
                 break;
@@ -428,7 +431,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                                         i_target,
                                         &scratchData.data32_1,
                                         op_size,
-                                        DEVICE_FSI_ADDRESS(DATA1_REG));
+                                        DEVICE_FSI_ADDRESS(isSPImode?FSI2SPI_DATA1_REG:FSI2PIB_DATA1_REG));
             if(l_err)
             {
                 break;
@@ -483,6 +486,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
     return l_err;
 
 }
+
 
 // Register SCom access functions to DD framework
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,

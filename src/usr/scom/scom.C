@@ -50,6 +50,7 @@
 #include <targeting/namedtarget.H>
 #include <targeting/common/mfgFlagAccessors.H>
 #include <fapi2/plat_hw_access.H>
+#include <scom/scomif.H>
 
 
 // Trace definition
@@ -961,6 +962,21 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
                 if( l_err ) { break; }
 
             }
+            else if(scomSetting.useSpiFsiScom && scomCheckIfFsiSpiAddress(i_target, i_addr))
+            {
+                // There is a potential case where both useSpiFsiScom and
+                // useSbeScom are set. In that case, this address check
+                // determines which one to run.  So we want it to fall through
+                // to the next else if case.
+
+                //do FSISCOM (using FSI2SPI scom addresses)
+                l_err = deviceOp(i_opType,
+                                 i_target,
+                                 io_buffer,
+                                 io_buflen,
+                                 DEVICE_FSISCOM_ADDRESS(i_addr));
+                if( l_err ) { break; }
+            }
             else if(scomSetting.useSbeScom)
             {   //do SBESCOM
                 l_err = deviceOp(i_opType,
@@ -992,7 +1008,8 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
             {
                 assert(0,"SCOM::scomPerformOp> ATTR_SCOM_SWITCHES does not "
                         "indicate Xscom, SBESCOM, or FSISCOM is "
-                        "supported. i_target=0x%.8x", get_huid(i_target));
+                        "supported. i_target=0x%.8x, addr 0x%.16X",
+                        get_huid(i_target), i_addr);
                 l_remainingAttempts = 0;
                 break;
             }
