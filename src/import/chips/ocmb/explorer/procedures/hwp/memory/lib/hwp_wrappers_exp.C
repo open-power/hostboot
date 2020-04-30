@@ -99,7 +99,10 @@ fapi2::ReturnCode exp_background_scrub( const fapi2::Target<fapi2::TARGET_TYPE_O
                                         const mss::mcbist::speed i_speed,
                                         const mss::mcbist::address& i_address )
 {
-    return mss::memdiags::background_scrub<mss::mc_type::EXPLORER>(i_target, i_stop, i_speed, i_address);
+    return mss::memdiags::mss_firmware_background_scrub_helper<mss::mc_type::EXPLORER>(i_target,
+            i_stop,
+            i_speed,
+            i_address);
 }
 
 ///

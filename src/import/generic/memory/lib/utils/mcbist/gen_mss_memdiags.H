@@ -1303,6 +1303,39 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Begin firmware background scrub helper
+/// @tparam MC the mc type of the T
+/// @tparam T fapi2::TargetType of the MCBIST engine
+/// @tparam TT the mcbistTraits associated with T
+/// @param[in] i_target MC
+/// @param[in] i_stop stop conditions
+/// @param[in] i_speed the speed to scrub
+/// @param[in] i_address mcbist::address representing the address from which to start
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+fapi2::ReturnCode mss_firmware_background_scrub_helper( const fapi2::Target<T>& i_target,
+        const stop_conditions<MC>& i_stop,
+        const speed i_speed,
+        const mss::mcbist::address& i_address )
+{
+    FAPI_INF("Start mss_firmware_background_scrub_helper on: %s", mss::c_str( i_target ));
+
+    // Start background scrub
+    FAPI_TRY ( mss::memdiags::background_scrub<MC>( i_target,
+               i_stop,
+               i_speed,
+               i_address) );
+
+    // Unmask firs after background scrub is started
+    FAPI_TRY ( mss::unmask::after_background_scrub<MC>( i_target ) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
 } // namespace memdiags
 
 } // namespace mss
