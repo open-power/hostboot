@@ -91,6 +91,10 @@ include ${HWP_PATH_1}/hwp/accessors/ddimm_get_efd.mk
 OBJS += error_info.o
 OBJS += ffdc.o
 OBJS += fapi2_utils.o
+OBJS += p10_pm_get_poundv_bucket.o
+OBJS += p10_pm_get_poundw_bucket.o
+OBJS += p10_pm_get_poundv_bucket_attr.o
+OBJS += p10_pm_get_poundw_bucket_attr.o
 #OBJS += p9_collect_some_ffdc.o
 #OBJS += p9_pib2pcb_mux_seq.o
 #OBJS += p9_collect_ppe_state.o
@@ -179,10 +183,6 @@ include ${ROOTPATH}/src/import/tools/build/common.dir/script.rules.mk
 include ${ROOTPATH}/src/import/hwpf/fapi2/tools/parseErrorInfo.mk
 include ${ROOTPATH}/src/import/hwpf/fapi2/tools/parseAttributeInfo.mk
 include ${ROOTPATH}/src/import/hwpf/fapi2/tools/createIfAttrService.mk
-#include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundv_bucket.mk
-#include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundv_bucket_attr.mk
-#include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundw_bucket.mk
-#include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundw_bucket_attr.mk
 include $(ROOTPATH)/src/import/chips/p10/procedures/hwp/initfiles/p10_int_scom.mk
 
 VPATH += ${HWP_PATH_1}/hwp/accessors

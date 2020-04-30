@@ -560,10 +560,8 @@ ReturnCode platGetPoundVBucketData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
     }
     else
     {
-/* FIXME RTC: 210975 p10_pm_get_poundv_bucket_attr takes a PROC target
-        fapi2::Target<TARGET_TYPE_EQ> l_fapiTarget( l_pTarget);
+        fapi2::Target<TARGET_TYPE_PROC_CHIP> l_fapiTarget( l_pTarget);
         rc = p10_pm_get_poundv_bucket_attr(l_fapiTarget,o_poundVData);
-*/
     }
 
     return rc;
@@ -591,10 +589,8 @@ ReturnCode platGetPoundWBucketData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
     }
     else
     {
-/* FIXME RTC: 210975 p10_pm_get_poundw_bucket_attr takes a PROC target
-        fapi2::Target<TARGET_TYPE_EQ> l_fapiTarget( l_pTarget);
+        fapi2::Target<TARGET_TYPE_PROC_CHIP> l_fapiTarget( l_pTarget);
         rc = p10_pm_get_poundw_bucket_attr(l_fapiTarget,o_poundWData);
-*/
     }
 
     return rc;

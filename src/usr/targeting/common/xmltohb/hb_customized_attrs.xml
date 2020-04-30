@@ -375,11 +375,9 @@
           <default>6</default>
      </attribute>
 
-    <!-- TODO RTC:244307 Revisit ATTR_POUND_V_STATIC_DATA_ENABLE
-         when #V data for MVPD available -->
     <attribute>
         <id>ATTR_POUND_V_STATIC_DATA_ENABLE</id>
-        <default>1</default>
+        <default>0</default>
     </attribute>
 
     <attribute>
