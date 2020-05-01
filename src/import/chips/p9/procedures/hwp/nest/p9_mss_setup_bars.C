@@ -2443,7 +2443,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
 template<fapi2::TargetType T>
-fapi2::ReturnCode unmaskMCFIR(const fapi2::Target<T> i_target)
+fapi2::ReturnCode unmaskMCFIR(const fapi2::Target<T> i_target, bool isAxone)
 {
     FAPI_DBG("Entering");
 
@@ -2454,16 +2454,17 @@ fapi2::ReturnCode unmaskMCFIR(const fapi2::Target<T> i_target)
     l_mcfiraction.setBit<MCS_MCFIR_MC_INTERNAL_RECOVERABLE_ERROR>();
     l_mcfiraction.setBit<MCS_MCFIR_COMMAND_LIST_TIMEOUT>();
 
-    if (T == fapi2::TARGET_TYPE_MI)
-    {
-        l_mcfiraction.setBit<MCS_MCFIR_MS_WAT_DEBUG_CONFIG_REG_ERROR>();
-    }
-
     // Setup FIR bits in MC Fault Isolation Mask Register buffer
     l_mcfirmask_and.flush<1>();
 
     if (T == fapi2::TARGET_TYPE_MI)
     {
+        if(!isAxone)
+        {
+            l_mcfiraction.setBit<MCS_MCFIR_MS_WAT_DEBUG_CONFIG_REG_ERROR>();
+            l_mcfirmask_and.clearBit<MCS_MCFIR_MS_WAT_DEBUG_CONFIG_REG_ERROR>();
+        }
+
         l_mcfirmask_and.clearBit<MCS_MCFIR_INBAND_BAR_HIT_WITH_INCORRECT_TTYPE>();
     }
 
@@ -2478,11 +2479,6 @@ fapi2::ReturnCode unmaskMCFIR(const fapi2::Target<T> i_target)
     }
 
     l_mcfirmask_and.clearBit<MCS_MCFIR_COMMAND_LIST_TIMEOUT>();
-
-    if (T == fapi2::TARGET_TYPE_MI)
-    {
-        l_mcfirmask_and.clearBit<MCS_MCFIR_MS_WAT_DEBUG_CONFIG_REG_ERROR>();
-    }
 
     // Defect HW451708, HW451711
     // Leave MCS_MCFIR_INVALID_SMF_ACCESS masked if MCD cl_probes are enabled
@@ -2516,11 +2512,12 @@ fapi2::ReturnCode unmaskMCFIR(
     const std::vector<std::pair<fapi2::Target<T>, mcBarData_t>>& i_mcBarDataPair)
 {
     FAPI_DBG("Entering");
+    bool isAxone  = false;
 
     for (auto l_pair : i_mcBarDataPair)
     {
         fapi2::Target<T> l_target = l_pair.first;
-        FAPI_TRY(unmaskMCFIR(l_target));
+        FAPI_TRY(unmaskMCFIR(l_target, isAxone));
 
     } // Data pair loop
 
@@ -2610,6 +2607,7 @@ fapi2::ReturnCode p9_mss_setup_bars(
     // Setup BAR for Axone
     else if (l_mccChiplets.size() > 0)
     {
+        bool isAxone = true;
         // Validate group data from attributes
         FAPI_TRY(validateGroupData(l_mccChiplets, true, l_groupData),
                  "validateGroupData() returns error, l_rc 0x%.8X",
@@ -2623,7 +2621,7 @@ fapi2::ReturnCode p9_mss_setup_bars(
         // Unmask MC FIRs
         for (auto l_target : l_miChiplets)
         {
-            FAPI_TRY(unmaskMCFIR(l_target),
+            FAPI_TRY(unmaskMCFIR(l_target, isAxone),
                      "unmaskMCFIR() returns error, l_rc 0x%.8X",
                      uint64_t(fapi2::current_err));
         }
