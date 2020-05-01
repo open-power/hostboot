@@ -83,14 +83,12 @@ VPATH += ${MSS_LIB}
 #######
 # Add the specific files we need for HBRT
 OBJS += c_str.o
-OBJS += axone_c_str.o
 OBJS += nimbus_c_str.o
 OBJS += mcbist.o
 OBJS += mcbist_workarounds.o
 OBJS += rank.o
 OBJS += memory_size.o
 OBJS += gen_mss_mcbist_patterns.o
-OBJS += axone_pos.o
 OBJS += nimbus_pos.o
 OBJS += unmask.o
 
