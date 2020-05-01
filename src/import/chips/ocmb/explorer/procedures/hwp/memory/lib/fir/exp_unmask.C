@@ -127,6 +127,7 @@ fapi2::ReturnCode after_draminit_mc<mss::mc_type::EXPLORER>( const fapi2::Target
     fapi2::ReturnCode l_rc1 = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ReturnCode l_rc2 = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ReturnCode l_rc3 = fapi2::FAPI2_RC_SUCCESS;
+    bool l_has_rcd = false;
 
     // Create registers and check success for MCBISTFIR and SRQFIR and RDFFIR
     mss::fir::reg<EXPLR_MCBIST_MCBISTFIRQ> l_exp_mcbist_reg(i_target, l_rc1);
@@ -137,12 +138,19 @@ fapi2::ReturnCode after_draminit_mc<mss::mc_type::EXPLORER>( const fapi2::Target
     FAPI_TRY(l_rc2, "unable to create fir::reg for EXPLR_SRQ_SRQFIRQ 0x%08X", EXPLR_SRQ_SRQFIRQ);
     FAPI_TRY(l_rc3, "unable to create fir::reg for EXPLR_RDF_FIR 0x%08X", EXPLR_RDF_FIR);
 
+    FAPI_TRY(mss::unmask::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
+
     // Write MCBISTFIR register per Explorer unmask spec
     FAPI_TRY(l_exp_mcbist_reg.attention<EXPLR_MCBIST_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE>()
              .write());
 
+    // Check if OCMB has an RCD
+    if (l_has_rcd)
+    {
+        l_exp_rdf_reg.recoverable_error<EXPLR_RDF_FIR_MAINTENANCE_RCD>();
+    }
+
     // Write RDF FIR register per Explorer unmask spec
-    // TK Need to set EXPLR_RDF_FIR_MAINTENANCE_RCD to recoverable for planar/ISDIMM
     FAPI_TRY(l_exp_rdf_reg.recoverable_error<EXPLR_RDF_FIR_MAINTENANCE_AUE>()
              .recoverable_error<EXPLR_RDF_FIR_MAINTENANCE_IAUE>()
              .recoverable_error<EXPLR_RDF_FIR_RDDATA_VALID_ERROR>()
@@ -440,7 +448,7 @@ fapi2::ReturnCode after_mc_omi_setup<mss::mc_type::EXPLORER>( const fapi2::Targe
     FAPI_DBG("Masking entire EXPLR_DLX_MC_OMI_FIR_MASK_REG on %s", mss::c_str(i_target));
     FAPI_TRY(fapi2::putScom(i_target, EXPLR_DLX_MC_OMI_FIR_MASK_REG, MASK_ALL));
     FAPI_TRY(l_exp_mc_omi_fir_reg.checkstop<EXPLR_DLX_MC_OMI_FIR_REG_DL0_FATAL_ERROR>()
-             .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_DATA_UE>()
+             .checkstop<EXPLR_DLX_MC_OMI_FIR_REG_DL0_DATA_UE>()
              .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_X4_MODE>()
              .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_TIMEOUT>()
              .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_ERROR_RETRAIN>()
@@ -498,7 +506,7 @@ fapi2::ReturnCode after_memdiags<mss::mc_type::EXPLORER>( const fapi2::Target<fa
     // If so set RCD fir to recoverable
     FAPI_TRY(mss::unmask::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
 
-    // Check if dimm is an ISDIMM with RCD
+    // Check if OCMB has an RCD
     if (l_has_rcd)
     {
         l_exp_rdf_fir_reg.recoverable_error<EXPLR_RDF_FIR_MAINLINE_RCD>();
