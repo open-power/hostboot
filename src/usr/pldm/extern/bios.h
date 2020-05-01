@@ -29,11 +29,7 @@
 extern "C" {
 #endif
 
-#ifndef __HOSTBOOT_MODULE
 #include <asm/byteorder.h>
-#else
-#include <endian.h>
-#endif
 #include <stddef.h>
 #include <stdint.h>
 

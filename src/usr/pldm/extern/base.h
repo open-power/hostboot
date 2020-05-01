@@ -29,11 +29,7 @@
 extern "C" {
 #endif
 
-#ifndef __HOSTBOOT_MODULE
 #include <asm/byteorder.h>
-#else
-#include <endian.h>
-#endif
 #include <stddef.h>
 #include <stdint.h>
 
@@ -115,22 +111,22 @@ typedef enum {
  * Structure representing PLDM message header fields
  */
 struct pldm_msg_hdr {
-#if __BYTE_ORDER == __LITTLE_ENDIAN
+#if defined(__LITTLE_ENDIAN_BITFIELD)
   uint8_t instance_id : 5; //!< Instance ID
   uint8_t reserved : 1;    //!< Reserved
   uint8_t datagram : 1;    //!< Datagram bit
   uint8_t request : 1;     //!< Request bit
-#elif __BYTE_ORDER == __BIG_ENDIAN
+#elif defined(__BIG_ENDIAN_BITFIELD)
   uint8_t request : 1;     //!< Request bit
   uint8_t datagram : 1;    //!< Datagram bit
   uint8_t reserved : 1;    //!< Reserved
   uint8_t instance_id : 5; //!< Instance ID
 #endif
 
-#if __BYTE_ORDER == __LITTLE_ENDIAN
+#if defined(__LITTLE_ENDIAN_BITFIELD)
   uint8_t type : 6;       //!< PLDM type
   uint8_t header_ver : 2; //!< Header version
-#elif __BYTE_ORDER == __BIG_ENDIAN
+#elif defined(__BIG_ENDIAN_BITFIELD)
   uint8_t header_ver : 2;  //!< Header version
   uint8_t type : 6;  //!< PLDM type
 #endif
