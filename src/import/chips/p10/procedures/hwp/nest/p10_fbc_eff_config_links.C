@@ -43,60 +43,6 @@
 //------------------------------------------------------------------------------
 
 ///
-/// @brief Determine fabric topology ID table configuration and write attributes
-///
-/// @param[in] i_loc_target    Reference to local chip target
-/// @param[in] i_rem_target    Reference to remote chip target if link is active
-/// @param[in] i_link_active   True if link is actively used for fabric operations
-/// @param[in] i_link_id       Local link ID to get from local chip to remote chip
-///
-/// @return fapi2::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
-///
-fapi2::ReturnCode p10_fbc_eff_config_links_fbc_topo_tables(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_loc_target,
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_rem_target,
-    const fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE_Type& i_link_active,
-    const fapi2::ATTR_CHIP_UNIT_POS_Type& i_link_id)
-{
-    FAPI_DBG("Start");
-
-    fapi2::ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE_Type l_topo_id_table;
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE, i_loc_target, l_topo_id_table),
-             "Error form FAPI_ATTR_GET (ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE)");
-
-    if(i_link_active)
-    {
-        uint8_t l_topo_index = 0;
-
-        // index into topology table is by the 5-bit topology id of remote chip
-        FAPI_TRY(topo::get_topology_idx(i_rem_target, EFF_TOPOLOGY_ID, l_topo_index),
-                 "Error from topo::get_topology_idx (remote target)");
-
-        // program the link id used to get from this chip to remote chip
-        l_topo_id_table[l_topo_index] = i_link_id;
-    }
-    else
-    {
-        // link is not enabled for fabric operations, we don't know the remote chip id
-        // so invalidate any entries in the topology table that references this link
-        for(uint8_t l_topo_index = 0; l_topo_index < (sizeof(l_topo_id_table) / sizeof(l_topo_id_table[0])); l_topo_index++)
-        {
-            if(l_topo_id_table[l_topo_index] == i_link_id)
-            {
-                l_topo_id_table[l_topo_index] = fapi2::ENUM_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE_INVALID;
-            }
-        }
-    }
-
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE, i_loc_target, l_topo_id_table),
-             "Error form FAPI_ATTR_SET (ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE)");
-
-fapi_try_exit:
-    FAPI_DBG("End");
-    return fapi2::current_err;
-}
-
-///
 /// @brief Determine fabric link enable state, given endpoint target
 ///
 /// @param[in]  i_target           Endpoint iohs target
@@ -307,14 +253,6 @@ fapi2::ReturnCode p10_fbc_eff_config_links_query_endp(
                     (fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_TRUE) : (fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_FALSE);
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE, i_loc_target, l_link_active),
              "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_LINK_ACTIVE");
-
-    // configure fabric link topology ID table for this link
-    FAPI_TRY(p10_fbc_eff_config_links_fbc_topo_tables(
-                 l_loc_proc_target,
-                 l_rem_proc_target,
-                 l_link_active,
-                 l_loc_link_id),
-             "Error from p10_fbc_eff_config_links_fbc_topo_tables");
 
 fapi_try_exit:
     FAPI_DBG("End");

@@ -662,6 +662,93 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Update link topology ID tables to represent all connections
+///
+/// @param[in] i_smp            Fully specified structure encapsulating SMP
+///
+/// @return fapi2::ReturnCode   FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode p10_build_smp_link_topo_tables(
+    p10_build_smp_system& i_smp)
+{
+    FAPI_DBG("Start");
+
+    for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end(); g_iter++)
+    {
+        for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); p_iter++)
+        {
+            fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_loc_target = *(p_iter->second.target);
+            fapi2::ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE_Type l_topo_id_table;
+            fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_Type l_x_cnfg;
+            fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_Type l_a_cnfg;
+            fapi2::ATTR_PROC_FABRIC_X_ADDR_DIS_Type l_x_addr_dis;
+            fapi2::ATTR_PROC_FABRIC_A_ADDR_DIS_Type l_a_addr_dis;
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE, l_loc_target, l_topo_id_table),
+                     "Error form FAPI_ATTR_GET (ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE)");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, l_loc_target, l_x_cnfg),
+                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG)");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG, l_loc_target, l_a_cnfg),
+                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG)");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ADDR_DIS, l_loc_target, l_x_addr_dis),
+                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ADDR_DIS)");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ADDR_DIS, l_loc_target, l_a_addr_dis),
+                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ADDR_DIS)");
+
+            for(auto l_loc_iohs_target : l_loc_target.getChildren<fapi2::TARGET_TYPE_IOHS>())
+            {
+                fapi2::Target<fapi2::TARGET_TYPE_IOHS> l_rem_iohs_target;
+                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_rem_target;
+                uint8_t l_topo_index = 0;
+
+                fapi2::ATTR_CHIP_UNIT_POS_Type l_loc_link_id;
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_loc_iohs_target, l_loc_link_id),
+                         "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+                bool l_link_en = (l_x_cnfg[l_loc_link_id] != fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE) ?
+                                 (l_x_cnfg[l_loc_link_id] != fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE) :
+                                 (l_a_cnfg[l_loc_link_id] != fapi2::ENUM_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_FALSE);
+                bool l_addr_en = (l_x_cnfg[l_loc_link_id] != fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE) ?
+                                 (l_x_addr_dis[l_loc_link_id] == fapi2::ENUM_ATTR_PROC_FABRIC_X_ADDR_DIS_OFF) :
+                                 (l_a_addr_dis[l_loc_link_id] == fapi2::ENUM_ATTR_PROC_FABRIC_A_ADDR_DIS_OFF);
+
+                if(l_link_en && l_addr_en)
+                {
+                    l_loc_iohs_target.getOtherEnd(l_rem_iohs_target);
+                    l_rem_target = l_rem_iohs_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+
+                    // index into topology table is by the 5-bit topology id of remote chip
+                    FAPI_TRY(topo::get_topology_idx(l_rem_target, EFF_TOPOLOGY_ID, l_topo_index),
+                             "Error from topo::get_topology_idx (remote target)");
+
+                    // program the link id used to get from this chip to remote chip
+                    l_topo_id_table[l_topo_index] = l_loc_link_id;
+                }
+                else
+                {
+                    // link is not enabled for fabric command operations, we don't know the remote chip id
+                    // so invalidate any entries in the topology table that references this link
+                    for(uint8_t l_topo_index = 0; l_topo_index < (sizeof(l_topo_id_table) / sizeof(l_topo_id_table[0])); l_topo_index++)
+                    {
+                        if(l_topo_id_table[l_topo_index] == l_loc_link_id)
+                        {
+                            l_topo_id_table[l_topo_index] = fapi2::ENUM_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE_INVALID;
+                        }
+                    }
+                }
+            }
+
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE, l_loc_target, l_topo_id_table),
+                     "Error form FAPI_ATTR_SET (ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE)");
+        }
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
 /// See doxygen comments in header file
 fapi2::ReturnCode p10_build_smp(
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>>& i_chips,
@@ -682,6 +769,10 @@ fapi2::ReturnCode p10_build_smp(
 
     // update topology id tables prior to activating new config
     FAPI_TRY(p10_build_smp_topo_tables(l_smp),
+             "Error from p10_build_smp_topo_tables");
+
+    // update link topology id tables prior to activating new config
+    FAPI_TRY(p10_build_smp_link_topo_tables(l_smp),
              "Error from p10_build_smp_topo_tables");
 
     // set fabric hotplug configuration registers (switch AB)
