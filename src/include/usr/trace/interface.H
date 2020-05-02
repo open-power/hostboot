@@ -58,7 +58,14 @@
 #define INFO_MRK  "I>"
 #define ARG_MRK   "A>"
 
+#if defined(COMPILETIME_TRACEHASH) && defined(TRACEHASH_FULL_STRINGS)
+// We change this to one character when we are replacing the filename at
+// compile-time (for hostboot runtime) because it's simpler to search for a
+// character than a full string.
+#define TRACE_FILENAME "\xFE"
+#else
 #define TRACE_FILENAME "TRACEPP_INSERT_FILENAME"
+#endif
 
 const uint32_t TRACE_DEBUG   = 1;       //Indicates trace is debug
 const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
@@ -86,6 +93,10 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
 #define __ALL_HASH(printf_string,num) trace_adal_hash(printf_string,num),printf_string
 #endif
 
+#ifdef COMPILETIME_TRACEHASH
+#include <trace/compiletime_tracehash.H>
+#else
+
 #define __TRACE_HASH_STRUCTURES(str) \
     static TRACE::traceCodeInfo __traceData_codeInfo \
         __attribute((used)) = \
@@ -96,6 +107,7 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
               sizeof(TRACE::traceParseInfo::file), 0, \
               str, __FILE__, &__traceData_codeInfo }
 
+#endif
 
 /******************************************************************************/
 // Macros

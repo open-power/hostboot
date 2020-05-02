@@ -91,9 +91,9 @@ $(OBJDIR)/%.o : %.C
 	@mkdir -p $(OBJDIR)
 	$(C2) "    CXX        $(notdir $<)"
 	$(C1)$(CXX) -c $(call FLAGS_FILTER, $(CXXFLAGS), $<) $(CLI_CXXFLAGS) $(SOURCE_FILE) \
-	            -o $@.trace $(INCLUDE_DIRS) -iquote $(INCLUDE_PWD)
+	            -o $(TRACEHASH_INPUT_NAME) $(INCLUDE_DIRS) -iquote $(INCLUDE_PWD)
 	$(C1)$(TRACE_HASHER) $@ $(TRACE_FLAGS)
-	@rm $@.trace
+	@$(TRACE_HASHER_CLEANUP)
 	$(CXX_PRINT)
 	$(CXX_CPPCHECK_COMMAND)
 	$(PROFILE_LOG_CMD)
@@ -102,10 +102,10 @@ $(OBJDIR)/%.o : %.C
 $(OBJDIR)/%.o : %.cc
 	@mkdir -p $(OBJDIR)
 	$(C2) "    CXX        $(notdir $<)"
-	$(C1)$(CXX) -c $(CXXFLAGS) $(CLI_CXXFLAGS) $(SOURCE_FILE) -o $@.trace \
+	$(C1)$(CXX) -c $(CXXFLAGS) $(CLI_CXXFLAGS) $(SOURCE_FILE) -o $(TRACEHASH_INPUT_NAME) \
 	               $(INCLUDE_DIRS) -iquote $(INCLUDE_PWD)
 	$(C1)$(TRACE_HASHER) $@ $(TRACE_FLAGS)
-	@rm $@.trace
+	@$(TRACE_HASHER_CLEANUP)
 	$(CXX_PRINT)
 	$(CXX_CPPCHECK_COMMAND)
 	$(PROFILE_LOG_CMD)
@@ -117,19 +117,19 @@ $(OBJDIR)/%.o : %.c
 ifndef CC_OVERRIDE
 	$(C2) "    CC         $(notdir $<)"
 	$(C1)$(CC) -c $(call FLAGS_FILTER, $(CFLAGS), $<) $(CLI_CFLAGS) $(SOURCE_FILE) \
-	           -o $@.trace $(INCLUDE_DIRS) -iquote $(INCLUDE_PWD)
+	           -o $(TRACEHASH_INPUT_NAME) $(INCLUDE_DIRS) -iquote $(INCLUDE_PWD)
 	$(CXX_PRINT)
 	$(C_CPPCHECK_COMMAND)
 else
 	$(C2) "    CXX        $(notdir $<)"
 	$(C1)$(CXX) -c $(call FLAGS_FILTER, $(CXXFLAGS), $<) $(CLI_CXXFLAGS) $(SOURCE_FILE) \
-	            -o $@.trace $(INCLUDE_DIRS) -iquote $(INCLUDE_PWD)
+	            -o $(TRACEHASH_INPUT_NAME) $(INCLUDE_DIRS) -iquote $(INCLUDE_PWD)
 	$(CXX_PRINT)
 	$(CXX_CPPCHECK_COMMAND)
 endif
 	$(C1)$(TRACE_HASHER) $@ $(TRACE_FLAGS)
+	@$(TRACE_HASHER_CLEANUP)
 	$(PROFILE_LOG_CMD)
-	@rm $@.trace
 
 $(OBJDIR)/%.o : %.S
 	@mkdir -p $(OBJDIR)

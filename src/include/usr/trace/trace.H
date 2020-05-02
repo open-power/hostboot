@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,6 +69,18 @@ namespace TRACE
         trace_hash_val hash;
     } __attribute__((packed));
 
+#ifdef COMPILETIME_TRACEHASH
+    struct traceParseInfo
+    {
+        uint32_t magic;
+        trace_hash_val hash;
+        uint16_t len_string;
+        uint16_t len_file;
+        uint32_t __padding;
+        const char string[768];
+        const char file[256];
+    } __attribute__((packed));
+#else
     struct traceParseInfo
     {
         uint16_t len_string;
@@ -78,6 +90,7 @@ namespace TRACE
         const char file[256];
         traceCodeInfo* code;
     };
+#endif
 
     /** @brief Buffer type that a component is directed to. */
     enum BUFFER_TYPES

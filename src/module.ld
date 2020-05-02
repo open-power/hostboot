@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -25,6 +25,12 @@
 /* IBM_PROLOG_END_TAG                                                     */
 SECTIONS
 {
+    /* Discard the trace strings when linking the libraries (they have
+     * been hashed prior to this) */
+    /DISCARD/ : {
+        *(*parseInfo__DISCARD*)
+    }
+
     .text : {
         *(.text)
         *(.text.*)

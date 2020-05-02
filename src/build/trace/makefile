@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2015
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -24,8 +24,8 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../..
 
-GEN_PASS_BODY += tracehash
-CLEAN_TARGETS += tracehash tracehash.o
+GEN_PASS_BODY += tracehash extracthash
+CLEAN_TARGETS += tracehash tracehash.o extracthash extracthash.o
 
 ifdef HOST_BINUTILS_DIR
 BFD_CFLAGS = -I$(HOST_BINUTILS_DIR)/bfd/ -I$(HOST_BINUTILS_DIR)/include/
@@ -37,7 +37,9 @@ endif
 
 include $(ROOTPATH)/config.mk
 
-tracehash: tracehash.c
+all: tracehash extracthash
+
+%hash: %hash.c
 	$(C2) "    CC         $(notdir $<)"
 	$(C1)$(CCACHE) $(HOST_PREFIX)gcc -std=c99 -O3 -g -c $< -o $@.o \
 					 $(BFD_CFLAGS)

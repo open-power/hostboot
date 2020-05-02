@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -44,7 +44,14 @@ GCOV = $(CROSS_PREFIX)gcov
 CUSTOM_LINKER_EXE = $(ROOTPATH)/src/build/linker/linker
 CUSTOM_LINKER = $(JAILCMD) $(CUSTOM_LINKER_EXE)
 
+ifdef COMPILETIME_TRACEHASH
+TRACEHASH_INPUT_NAME = $@
+TRACE_HASHER_CLEANUP =
+TRACE_HASHER_EXE = $(ROOTPATH)/src/build/trace/extracthash
+else
+TRACEHASH_INPUT_NAME = $@.trace
+TRACE_HASHER_CLEANUP = rm $@.trace
 TRACE_HASHER_EXE = $(ROOTPATH)/src/build/trace/tracehash
-#TRACE_HASHER = $(TRACE_HASHER_EXE)
-TRACE_HASHER = $(JAILCMD) $(TRACE_HASHER_EXE)
+endif
 
+TRACE_HASHER = $(JAILCMD) $(TRACE_HASHER_EXE)

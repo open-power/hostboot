@@ -103,4 +103,5 @@ if [ -e $TOOLSDIR/setupgithooks.sh ]; then
 fi
 fi
 
-
+# Enable temporary workaround for linker crashes related to tracehash
+export COMPILETIME_TRACEHASH=1
