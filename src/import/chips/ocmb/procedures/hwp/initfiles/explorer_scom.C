@@ -71,8 +71,6 @@ constexpr uint64_t literal_0b111 = 0b111;
 constexpr uint64_t literal_6 = 6;
 constexpr uint64_t literal_10 = 10;
 constexpr uint64_t literal_15 = 15;
-constexpr uint64_t literal_854 = 854;
-constexpr uint64_t literal_940 = 940;
 constexpr uint64_t literal_1024 = 1024;
 constexpr uint64_t literal_0b01011 = 0b01011;
 constexpr uint64_t literal_0b01100 = 0b01100;
@@ -824,11 +822,11 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
 
             if ((l_def_MEM_EFF_FREQ_EQ_2666 == literal_1))
             {
-                l_scom_buffer.insert<27, 11, 53, uint64_t>(literal_854 );
+                l_scom_buffer.insert<27, 11, 53, uint64_t>(literal_1024 );
             }
             else if ((l_def_MEM_EFF_FREQ_EQ_2933 == literal_1))
             {
-                l_scom_buffer.insert<27, 11, 53, uint64_t>(literal_940 );
+                l_scom_buffer.insert<27, 11, 53, uint64_t>(literal_1024 );
             }
             else if ((l_def_MEM_EFF_FREQ_EQ_3200 == literal_1))
             {
