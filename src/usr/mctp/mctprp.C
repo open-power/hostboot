@@ -93,14 +93,18 @@ void MctpRP::poll_kcs_status(void)
 
     while(1)
     {
-        // Perform an LPC read on the KCS status register to see if the BMC has sent us a message.
-        // We know that the BMC has sent a message if the OBF bit in the status reg is set.
-        l_errl = DeviceFW::deviceRead(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                                      &l_status,
-                                      l_size,
-                                      DEVICE_LPC_ADDRESS(LPC::TRANS_IO,
-                                                         LPC::KCS_STATUS_REG));
-        // If there was an error reading the status reg then something is wrong and we should exit
+        // Perform an LPC read on the KCS status register to see if the BMC has
+        // sent the Host a message. We know that the BMC has sent a message if
+        // the OBF bit in the status reg is set.
+        l_errl =
+            DeviceFW::deviceRead(
+                            TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                            &l_status,
+                            l_size,
+                            DEVICE_LPC_ADDRESS(LPC::TRANS_IO,
+                                               LPC::KCS_STATUS_REG));
+        // If there was an error reading the status reg then something is wrong
+        // and we should exit
         if(l_errl)
         {
             // TODO RTC: 249716
@@ -109,7 +113,8 @@ void MctpRP::poll_kcs_status(void)
             break;
         }
 
-        // If we found that the OBF bit is not set then just wait 100 ms and try poll again
+        // If we found that the OBF bit is not set then wait 1 ms and try
+        // poll again
         if(!(l_status & KCS_STATUS_OBF))
         {
             nanosleep(0,1 * NS_PER_MSEC);
@@ -117,12 +122,15 @@ void MctpRP::poll_kcs_status(void)
         }
 
         // otherwise read the ODR and send a message to the mctp_cmd_daemon
-        // when the host reads this register it will clear the OBF bit in the status register
-        l_errl = DeviceFW::deviceRead(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                                      &l_status,
-                                      l_size,
-                                      DEVICE_LPC_ADDRESS(LPC::TRANS_IO,
-                                                         LPC::KCS_DATA_REG));
+        // when the host reads this register it will clear the OBF bit in the
+        // status register
+        l_errl =
+            DeviceFW::deviceRead(
+                            TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                            &l_status,
+                            l_size,
+                            DEVICE_LPC_ADDRESS(LPC::TRANS_IO,
+                                               LPC::KCS_DATA_REG));
 
         if(l_errl)
         {
@@ -155,8 +163,9 @@ static void rx_message(uint8_t i_eid, void * i_data, void *i_msg, size_t i_len)
           // as where PLDM message begins. (see DSP0236 v1.3.0 figure 4)
           // Also update the len param to account for this offset
           errl = PLDM::routeInboundMsg(
-              (reinterpret_cast<uint8_t *>(i_msg) + sizeof(MCTP::MCTP_MSG_TYPE_PLDM)),
-              (i_len - sizeof(MCTP::MCTP_MSG_TYPE_PLDM)));
+                            ( reinterpret_cast<uint8_t *>(i_msg) +
+                              sizeof(MCTP::MCTP_MSG_TYPE_PLDM)),
+                            (i_len - sizeof(MCTP::MCTP_MSG_TYPE_PLDM)));
 
           if(errl)
           {
@@ -167,12 +176,14 @@ static void rx_message(uint8_t i_eid, void * i_data, void *i_msg, size_t i_len)
               errlCommit(errl, MCTP_COMP_ID);
           }
 
-          // i_msg buffer is managed by the mctp core logic so we do not need to worry about it
+          // i_msg buffer is managed by the mctp core logic so we do not need
+          // to worry about it
           break;
       }
       default :
       {
-          assert(0, "Recieved a MCTP message with a payload type we do not know how to handle");
+          assert(0,
+                "Recieved a MCTP message with a payload type we do not know how to handle");
           break;
       }
    }
@@ -214,10 +225,10 @@ void MctpRP::handle_inbound_messages(void)
               break;
           case MSG_DUMMY:
 
-              // The BMC will send us this message after writing the status register
-              // during the initization sequence to notify us they have filled out
-              // info in the config section of the lpc space and has activated the
-              // KCS interface
+              // The BMC will send us this message after writing the status
+              // register during the initization sequence to notify us they
+              // have filled out info in the config section of the lpc space
+              // and has activated the KCS interface
               l_errl = this->_mctp_process_version();
 
               if(l_errl)
@@ -282,9 +293,16 @@ void MctpRP::handle_outbound_messages(void)
               // The first byte of MCTP payload describes the contents
               // of the payload. Set first byte to be TYPE_PLDM (0x01)
               // so BMC knows to route the MCTP message to it's PLDM driver.
-              *reinterpret_cast<uint8_t *>(msg->extra_data) = MCTP_MSG_TYPE_PLDM;
-              TRACDBIN(g_trac_mctp, "pldm message : ", msg->extra_data , msg->data[0]);
-              int rc = mctp_message_tx(iv_mctp, BMC_EID, msg->extra_data, msg->data[0]);
+              *reinterpret_cast<uint8_t *>(msg->extra_data) =
+                                                          MCTP_MSG_TYPE_PLDM;
+              TRACDBIN(g_trac_mctp,
+                       "pldm message : ",
+                       msg->extra_data ,
+                       msg->data[0]);
+              int rc = mctp_message_tx(iv_mctp,
+                                       BMC_EID,
+                                       msg->extra_data,
+                                       msg->data[0]);
 
               if(rc != RC_MCTP_CORE_SUCCESS)
               {
@@ -320,14 +338,17 @@ void MctpRP::handle_outbound_messages(void)
                   errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                             HWAS::SRCI_PRIORITY_MED);
 
-                  // PLDM message msg originator must clean up original buffer in extra_data
+                  // PLDM message msg originator must clean up original buffer
+                  // in extra_data
                   msg->extra_data = errl;
                   errl = nullptr;
                   msg->data[1] = rc;
               }
 
               rc = msg_respond(iv_outboundMsgQ, msg);
-              assert(rc == 0, "Failed attempting to respond to MSG_SEND_PLDM message got rc %d", rc);
+              assert(rc == 0,
+                     "Failed attempting to respond to MSG_SEND_PLDM message got rc %d",
+                     rc);
               break;
           }
           default:
@@ -353,13 +374,14 @@ do
 {
     uint8_t l_status = 0;
     size_t l_size = sizeof(uint8_t);
-    // Perform an LPC read on the KCS status register to verify the channel is active
-    // and that the BMC has written the negotiated MCTP version
-    l_errl = DeviceFW::deviceRead(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                                  &l_status,
-                                  l_size,
-                                  DEVICE_LPC_ADDRESS(LPC::TRANS_IO,
-                                                      LPC::KCS_STATUS_REG));
+    // Perform an LPC read on the KCS status register to verify the channel is
+    // active and that the BMC has written the negotiated MCTP version
+    l_errl = DeviceFW::deviceRead(
+                              TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                              &l_status,
+                              l_size,
+                              DEVICE_LPC_ADDRESS(LPC::TRANS_IO,
+                                                 LPC::KCS_STATUS_REG));
 
     if(l_errl)
     {
@@ -369,7 +391,8 @@ do
     // Verify that the channel is active
     if(!(l_status & KCS_STATUS_CHANNEL_ACTIVE))
     {
-        TRACFCOMP(g_trac_mctp, "mctp_process_version: Error ! Channel is not active!" );
+        TRACFCOMP(g_trac_mctp,
+                  "mctp_process_version: Error ! Channel is not active!" );
         /*@errorlog
         * @errortype       ERRL_SEV_UNRECOVERABLE
         * @moduleid        MOD_MCTP_PROCESS_VER
@@ -378,7 +401,8 @@ do
         * @userdata2       mctp version
         *                  (should not have been set but might be useful)
         *
-        * @devdesc         Initialization of MCTP protocol between Host and BMC failed
+        * @devdesc         Initialization of MCTP protocol between Host and
+        *                  BMC failed
         * @custdesc        A problem occurred during the IPL of the system
         *
         */
@@ -392,10 +416,12 @@ do
     else
     {
         iv_channelActive = true;
-        // Read the negotiated version from the lpcmap hdr that the bmc should have
-        // set prior to setting the KCS_STATUS_CHANNEL_ACTIVE bit
+        // Read the negotiated version from the lpcmap hdr that the bmc should
+        // have set prior to setting the KCS_STATUS_CHANNEL_ACTIVE bit
         iv_mctpVersion = iv_hostlpc->lpc_hdr->negotiated_ver;
-        TRACFCOMP(g_trac_mctp, "mctp_process_version: Negotiated version is : %d", iv_mctpVersion);
+        TRACFCOMP(g_trac_mctp,
+                  "mctp_process_version: Negotiated version is : %d",
+                  iv_mctpVersion);
     }
 
 }while(0);
@@ -438,18 +464,21 @@ void MctpRP::_init(void)
     // Initialize the host-lpc binding for hostboot
     iv_hostlpc = mctp_hostlpc_init_hostboot(l_bar);
 
-    // Start cmd daemon first because we want it ready if poll daemon finds something right away
+    // Start cmd daemon first because we want it ready if poll daemon finds
+    // something right away
     task_create(handle_inbound_messages_task, NULL);
     task_create(handle_outbound_messages_task, NULL);
 
-    // Start the poll kcs status daemon which will read the KCS status reg every 100 ms and if
-    // we see that the OBF bit in the KCS status register is set we will read the OBR KCS data reg
-    // and send a message to the handle_obf_status daemon
+    // Start the poll kcs status daemon which will read the KCS status reg
+    // every 1 ms and if we see that the OBF bit in the KCS status register is
+    // set we will read the OBR KCS data reg and send a message to the
+    // handle_obf_status daemon
     task_create(poll_kcs_status_task, NULL);
 
-    // This ctx struct is a way to pass information we want into the mctp core logic
-    // the core logic will call the registered rx_message function with the ctx struct as
-    // a parm, this allows use to pass information about the context we are in to that func
+    // This ctx struct is a way to pass information we want into the mctp core
+    // logic the core logic will call the registered rx_message function with
+    // the ctx struct as a parm, this allows use to pass information about the
+    // context we are in to that func
     struct ctx *ctx, _ctx;
     ctx = &_ctx;
     ctx->local_eid = HOST_EID;
