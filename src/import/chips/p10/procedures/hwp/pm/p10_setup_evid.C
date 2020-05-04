@@ -110,6 +110,7 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     bool  l_dpll_lesser_value = false;
     fapi2::buffer<uint64_t> l_fmult_data(0);
     uint32_t l_safe_mode_dpll_value = 0;
+    uint32_t l_safe_mode_dpll_fmin_value = 0;
     //Instantiate PPB object
     PlatPmPPB l_pmPPB(i_target);
 
@@ -142,7 +143,8 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                                       attrs.proc_dpll_divider,
                                       l_dpll_lesser_value,
                                       l_fmult_data,
-                                      l_safe_mode_dpll_value),
+                                      l_safe_mode_dpll_value,
+                                      l_safe_mode_dpll_fmin_value),
                   "Error from p10_read_dpll_value function");
 
         //if DPLL is greater than safe mode freq then first set the dpll to safe
@@ -152,7 +154,8 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
 
             // Set the DPLL frequency values to safe mode values
             FAPI_TRY (p10_update_dpll_value(i_target,
-                                            l_safe_mode_dpll_value),
+                                            l_safe_mode_dpll_value,
+                                            l_safe_mode_dpll_fmin_value),
                       "Error from p10_update_dpll_value function");
         }
 
@@ -184,7 +187,8 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         {
             // Set the DPLL frequency values to safe mode values
             FAPI_TRY (p10_update_dpll_value(i_target,
-                                            l_safe_mode_dpll_value),
+                                            l_safe_mode_dpll_value,
+                                            l_safe_mode_dpll_fmin_value),
                       "Error from p10_update_dpll_value function");
         }
 
@@ -566,16 +570,21 @@ p10_read_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
                      const uint32_t i_proc_dpll_divider,
                      bool&  o_dpll_lesser_value,
                      fapi2::buffer<uint64_t>& o_fmult_data,
-                     uint32_t& o_safe_mode_dpll_value)
+                     uint32_t& o_safe_mode_dpll_value,
+                     uint32_t& o_safe_mode_dpll_fmin_value)
 
 {
     fapi2::buffer<uint64_t> l_data64;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ_Type l_attr_safe_mode_freq;
     fapi2::ATTR_SAFE_MODE_VOLTAGE_MV_Type l_attr_safe_mode_mv;
+    fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_Type l_sys_freq_core_floor_mhz;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ, i_target, l_attr_safe_mode_freq));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_VOLTAGE_MV, i_target, l_attr_safe_mode_mv));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ,
+                           FAPI_SYSTEM, l_sys_freq_core_floor_mhz));
 
     do
     {
@@ -601,8 +610,18 @@ p10_read_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
         o_safe_mode_dpll_value = ((l_attr_safe_mode_freq * 1000) * i_proc_dpll_divider) /
                                  i_freq_proc_refclock_khz;
 
-        FAPI_INF("NEST DPLL fmult 0x%08X safe_mode_dpll_value 0x%08X (%d)",
-                 o_fmult_data, o_safe_mode_dpll_value, o_safe_mode_dpll_value);
+        //TO support DPLL mode 4, need to update the max of min freq between
+        //safe mode and sys floor freq
+        if ( l_attr_safe_mode_freq < l_sys_freq_core_floor_mhz)
+        {
+            l_attr_safe_mode_freq = l_sys_freq_core_floor_mhz;
+        }
+
+        o_safe_mode_dpll_fmin_value = ((l_attr_safe_mode_freq * 1000) * i_proc_dpll_divider) /
+                                      i_freq_proc_refclock_khz;
+
+        FAPI_INF("NEST DPLL fmult 0x%08X safe_mode_dpll_value 0x%08X (%d) safe_mode_dpll_fmin 0x%08X (%d)",
+                 o_fmult_data, o_safe_mode_dpll_value, o_safe_mode_dpll_value, o_safe_mode_dpll_fmin_value);
 
         if (o_fmult_data >= o_safe_mode_dpll_value)
         {
@@ -665,7 +684,8 @@ fapi_try_exit:
 ////////////////////////////////////////////////////////////////
 fapi2::ReturnCode
 p10_update_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                       const uint32_t  i_safe_mode_dpll_value)
+                       const uint32_t  i_safe_mode_dpll_value,
+                       const uint32_t  i_safe_mode_dpll_fmin_value)
 
 {
     fapi2::buffer<uint64_t> l_data64;
@@ -677,7 +697,7 @@ p10_update_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targ
                                  NEST_DPLL_FREQ_FMAX_LEN>(i_safe_mode_dpll_value);
         //FMin
         l_data64.insertFromRight<NEST_DPLL_FREQ_FMIN,
-                                 NEST_DPLL_FREQ_FMIN_LEN>(i_safe_mode_dpll_value);
+                                 NEST_DPLL_FREQ_FMIN_LEN>(i_safe_mode_dpll_fmin_value);
         //FMult
         l_data64.insertFromRight<NEST_DPLL_FREQ_FMULT,
                                  NEST_DPLL_FREQ_FMULT_LEN>(i_safe_mode_dpll_value);

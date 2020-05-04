@@ -131,6 +131,7 @@ extern "C"
     //freq
     /// @param [out] o_fmult_data dpll freq data
     /// @param [out] o_safe_model_dpll_value safe mode dpll value
+    /// @param [out] o_safe_model_dpll_fmin_value safe mode dpll value for FMIN
     //@return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 
     fapi2::ReturnCode
@@ -139,15 +140,18 @@ extern "C"
                          const uint32_t i_proc_dpll_divider,
                          bool&  o_dpll_lesser_value,
                          fapi2::buffer<uint64_t>& o_fmult_data,
-                         uint32_t& o_safe_model_dpll_value);
+                         uint32_t& o_safe_model_dpll_value,
+                         uint32_t& o_safe_model_dpll_fmin_value);
 
     /// @brief Update DPLL freq value
     /// @param [in]  i_target TARGET_TYPE_PROC_CHIP
     /// @param [in]  i_safe_mode_dpll_value safe mode dpll value
+    /// @param [in]  i_safe_mode_dpll_fmin_value safe mode dpll value for FMIN
     //@return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
     fapi2::ReturnCode
     p10_update_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                           const uint32_t  i_safe_mode_dpll_value);
+                           const uint32_t  i_safe_mode_dpll_value,
+                           const uint32_t  i_safe_mode_dpll_fmin_value);
 
     /// @brief Read ext voltage from hw
     /// @param [in]  i_target TARGET_TYPE_PROC_CHIP
