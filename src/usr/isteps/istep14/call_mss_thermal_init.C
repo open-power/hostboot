@@ -108,10 +108,6 @@ void* call_mss_thermal_init (void*)
         run_proc_throttle_sync(l_iStepError);
     }
 
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-              EXIT_MRK"call_mss_thermal_init");
-
-
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                EXIT_MRK"call_mss_thermal_init, returning %s",
                (l_iStepError.isNull()? "success" : "failure") );
@@ -216,8 +212,7 @@ void run_proc_throttle_sync(IStepError & io_iStepError)
         fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                                            l_fapiProcTarget(l_procChip);
 
-        // Calling p10_throttle_sync HWP on Explorer chip,
-        // trace out stating so
+        // Calling p10_throttle_sync HWP on PROC chip, trace out stating so
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
                    "Running p10_throttle_sync HWP on PROC target HUID 0x%.8X",
                    TARGETING::get_huid(l_procChip) );

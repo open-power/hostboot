@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,31 +22,36 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include <errl/errlentry.H>
-#include <errl/errlmanager.H>
-#include <errl/errludtarget.H>
 
-#include <isteps/hwpisteperror.H>
-#include <initservice/isteps_trace.H>
-#include <initservice/initserviceif.H>
+/**
+ *  @file call_host_mpipl_service.C
+ *
+ *  @details Run MPIPL (Memory Preserving IPLs) Chip Cleanup on a set of targets
+ *
+ */
 
-//  targeting support
-#include <targeting/common/commontargeting.H>
-#include <targeting/common/util.H>
-#include <targeting/common/utilFilter.H>
-#include <targeting/targplatutil.H>
+/******************************************************************************/
+// Includes
+/******************************************************************************/
 
-#include <runtime/runtime.H>
+// Trace/Initservice
+#include <trace/interface.H>             // TRACFCOMP
+#include <initservice/isteps_trace.H>    // ISTEPS_TRACE::g_trac_isteps_trace
+#include <initservice/initserviceif.H>   // INITSERVICE::spBaseServicesEnabled
 
-/* FIXME RTC: 210975
-#include <p9_mpipl_chip_cleanup.H>
-#include <fapi2/plat_hwp_invoker.H>
-*/
+// Error logging
+#include <errl/errlentry.H>              // errlHndl_t
+#include <isteps/hwpisteperror.H>        // IStepError, getErrorHandle
 
-#include <vfs/vfs.H>
-#include <dump/dumpif.H>
+// Runtime Support
+#include <runtime/runtime.H>             // RUNTIME::useRelocatedPayloadAddr
 
+// Misc
+#include <dump/dumpif.H>                 // DUMP::copyArchitectedRegs
 
+/******************************************************************************/
+// namespace shortcuts
+/******************************************************************************/
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
@@ -54,175 +59,150 @@ using   namespace   TARGETING;
 
 namespace ISTEP_14
 {
-void* call_host_mpipl_service (void *io_pArgs)
+
+// Forward declare these methods
+void runDumpCalls();
+void sendDumpMboxMsg(const DUMP::DUMP_MSG_TYPE i_msgType);
+
+/**
+ * @brief Call DUMP methods
+ *
+ * @return return nullptr, currently no error is returned
+ */
+void* call_host_mpipl_service (void *)
 {
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               ENTER_MRK"call_host_mpipl_service" );
 
-    IStepError l_StepError;
+    runDumpCalls();
 
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-              "call_host_mpipl_service entry" );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               EXIT_MRK"call_host_mpipl_service, returning");
 
-    if (!TARGETING::UTIL::isCurrentMasterNode())
+    return nullptr;
+}  // call_host_mpipl_service
+
+/**
+ * @brief Wrapper to run the DUMP::doDumpCollect and associated code
+ *
+ * @details This method calls the DUMP::doDumpCollect method and informs the FSP
+ *          the start of this call and the ending of the call (success or fail).
+ *
+ * @note An error in this method does not need to be propagated up to caller.
+ *       Failure or success of this method has no consequence to the caller,
+ *       only need to log error via the errlCommit method.
+ */
+void runDumpCalls()
+{
+    errlHndl_t l_err(nullptr);
+    bool l_dumpCallFailed(false);
+
+    // Use relocated payload base to get MDST, MDDT, MDRT details
+    RUNTIME::useRelocatedPayloadAddr(true);
+
+    do
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-              "call_host_mpipl_service cannot run on slave node, skipping");
+        // In non-FSP based system SBE collects architected register
+        // data. Copy architected register data from Reserved Memory
+        // to hypervisor memory.
+        if ( !INITSERVICE::spBaseServicesEnabled() )
+        {
+            l_err = DUMP::copyArchitectedRegs();
+
+            if (l_err)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                           "ERROR: DUMP::copyArchitectedRegs failed"
+                           TRACE_ERR_FMT,
+                           TRACE_ERR_ARGS(l_err) );
+
+                l_dumpCallFailed = true;
+
+                // Commit the error and break
+                errlCommit( l_err, HWPF_COMP_ID );
+
+                break;
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                           "SUCCESS: DUMP::copyArchitectedRegs" );
+            }
+        }
+
+        // Send a Start Mbox Msg to FSP
+        sendDumpMboxMsg(DUMP::DUMP_MSG_START_MSG_TYPE);
+
+        // Call the dump collect, regardless the pass/fail status of Mbox Msg.
+        l_err = DUMP::doDumpCollect();
+
+        // Got a Dump Collect error. Commit the dumpCollect
+        // errorlog and then send an dump Error mbox message
+        // and FSP will decide what to do.
+        // We do not want dump Collect failures to terminate the
+        // istep.
+        if (l_err)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                       "ERROR: DUMP::doDumpCollect failed"
+                       TRACE_ERR_FMT,
+                       TRACE_ERR_ARGS(l_err) );
+
+            l_dumpCallFailed = true;
+
+            // Commit the error and break
+            errlCommit( l_err, HWPF_COMP_ID );
+
+            break;
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                       "SUCCESS: DUMP::doDumpCollect" );
+        }
+    } while(0);
+
+    // Send Mbox Msg based on the success/failure of dump call
+    if (!l_dumpCallFailed)
+    {
+        // Dump call succeeded: Send an End Mbox Msg to FSP
+        sendDumpMboxMsg(DUMP::DUMP_MSG_END_MSG_TYPE);
     }
     else
     {
-        errlHndl_t l_err = NULL;
-/* FIXME RTC: 210975
-        // call proc_mpipl_chip_cleanup.C
-        TARGETING::TargetHandleList l_procTargetList;
-        getAllChips(l_procTargetList, TYPE_PROC );
-
-        //  ---------------------------------------------------------------
-        //  run proc_mpipl_chip_cleanup.C on all proc chips
-        //  ---------------------------------------------------------------
-        for (const auto & l_pProcTarget : l_procTargetList)
-        {
-            //  write HUID of target
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "target HUID %.8X", TARGETING::get_huid(l_pProcTarget));
-
-            fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_pProcTarget((const_cast<TARGETING::Target*> (l_pProcTarget)) );
-
-            //  call the HWP with each fapi::Target
-            FAPI_INVOKE_HWP(l_err, p9_mpipl_chip_cleanup, l_fapi_pProcTarget );
-
-            if ( l_err )
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "ERROR : returned from p9_mpipl_chip_cleanup" );
-
-                // capture the target data in the elog
-                ERRORLOG::ErrlUserDetailsTarget(l_pProcTarget).addToLog(l_err);
-
-                // since we are doing an mpipl break out, the mpipl has failed
-                break;
-            }
-        }
-*/
-
-        // No error on the procedure.. proceed to collect the dump.
-        if (!l_err)
-        {
-
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "SUCCESS : proc_mpipl_ex_cleanup" );
-
-            // currently according to Adriana, the dump calls should only cause
-            // an istep failure when the dump collect portion of this step
-            // fails..  We will not fail the istep on any mbox message failures.
-            // instead we will simply commit the errorlog and continue.
-
-            errlHndl_t l_errMsg = NULL;
-
-            // Use relocated payload base to get MDST, MDDT, MDRT details
-            RUNTIME::useRelocatedPayloadAddr(true);
-
-            do
-            {
-                // In non-FSP based system SBE collects architected register
-                // data. Copy architected register data from Reserved Memory
-                // to hypervisor memory.
-                if ( !INITSERVICE::spBaseServicesEnabled() )
-                {
-                    l_err = DUMP::copyArchitectedRegs();
-                    if (l_err)
-                    {
-                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                           "ERROR : returned from DUMP::copyArchitectedRegs()");
-                        break;
-                    }
-                }
-
-                // send the start message
-                l_errMsg = DUMP::sendMboxMsg(DUMP::DUMP_MSG_START_MSG_TYPE);
-
-                // If error, commit and send error message.
-                if (l_errMsg)
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                   "ERROR : returned from DUMP::sendMboxMsg - dump start" );
-
-                    errlCommit( l_errMsg, HWPF_COMP_ID );
-
-                    // don't break in this case because we not want to fail
-                    // the istep on the dump collect so we will continue
-                    // after we log the errhandle that we can't send a
-                    // message.
-                }
-
-                // Call the dump collect
-                l_err = DUMP::doDumpCollect();
-
-                // Got a Dump Collect error.. Commit the dumpCollect
-                // errorlog and then send an dump Error mbox message
-                // and FSP will decide what to do.
-                // We do not want dump Collect failures to terminate the
-                // istep.
-                if (l_err)
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                         "ERROR : returned from DUMP::HbDumpCopySrcToDest");
-
-                    break;
-                }
-
-            } while(0);
-
-            DUMP::DUMP_MSG_TYPE msgType = DUMP::DUMP_MSG_END_MSG_TYPE;
-
-            // Send dumpCollect success trace
-            if (!l_err)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "SUCCESS : doDumpCollect" );
-            }
-            // got an error that we need to send a ERROR message to FSP
-            // and commit the errorlog from dumpCollect.
-            else
-            {
-                msgType = DUMP::DUMP_MSG_ERROR_MSG_TYPE;
-
-                // Commit the dumpCollect errorlog from above as
-                // we dont want dump collect to kill the istep
-                errlCommit( l_err, HWPF_COMP_ID );
-
-            }
-
-            // Send an Error mbox msg to FSP (either end or error)
-            l_errMsg = DUMP::sendMboxMsg(msgType);
-
-            if (l_errMsg)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR : returned from DUMP::sendMboxMsg" );
-
-                errlCommit( l_errMsg, HWPF_COMP_ID );
-            }
-
-             RUNTIME::useRelocatedPayloadAddr(false);
-             // Wipe out our cache of the NACA/SPIRA pointers
-             RUNTIME::rediscover_hdat();
-        }
-
-        // If got an error in the procedure or collection of the dump kill the
-        // istep
-        if( l_err )
-        {
-            // Create IStep error log and cross reference to error that occurred
-            l_StepError.addErrorDetails( l_err );
-
-            // Commit Error
-            errlCommit( l_err, HWPF_COMP_ID );
-        }
+        // Dump call failed: Send an Error Mbox Msg to FSP
+        sendDumpMboxMsg(DUMP::DUMP_MSG_ERROR_MSG_TYPE);
     }
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_mpipl_service exit" );
+    RUNTIME::useRelocatedPayloadAddr(false);
 
-    return l_StepError.getErrorHandle();
-}
+    // Wipe out our cache of the NACA/SPIRA pointers
+    RUNTIME::rediscover_hdat();
+} // runDumpCalls
 
-};
+/**
+ * @brief Helper function to send a DUMP message to FSP
+ *
+ * @note An error in this method does not need to be propagated up to caller.
+ *
+ * @param[in] i_msgType - DUMP type message to send to FSP
+ */
+void sendDumpMboxMsg(const DUMP::DUMP_MSG_TYPE i_msgType)
+{
+    errlHndl_t l_err = DUMP::sendMboxMsg(i_msgType);
+
+    if (l_err)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                   "ERROR: DUMP::sendMboxMsg(0x%.08x) failed"
+                    TRACE_ERR_FMT,
+                    i_msgType,
+                    TRACE_ERR_ARGS(l_err) );
+
+        // Commit error and continue on ...
+        errlCommit( l_err, HWPF_COMP_ID );
+    }
+} // sendDumpMboxMsg
+
+
+};  // end namespace ISTEP_14

@@ -35,10 +35,10 @@
  *       :  Mainstore Pattern Testing
  * 14.2  mss_thermal_init
  *       :  Initialize the thermal sensor
- * 14.3  proc_pcie_config
+ * 14.3  proc_load_iop_xram
+ *       :  Load PCIe IOP XRAM
+ * 14.4  proc_pcie_config
  *       :  Configure the PHBs
- * 14.4  mss_power_cleanup
- *       :  Clean up any MCS/Centaurs
  * 14.5  proc_setup_mmio_bars
  *       :  Program unit MMIO BARs
  * 14.6  proc_exit_cache_contained
@@ -101,16 +101,6 @@ void*    call_proc_pcie_config( void    *io_pArgs );
 void*   call_proc_load_iop_xram( void   *io_pArgs );
 
 /**
- *  @brief   mss_power_cleanup
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any errlogs to istep
- *
- */
-void*    call_mss_power_cleanup( void    *io_pArgs );
-
-/**
  *  @brief   proc_setup_mmio_bars
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
@@ -162,15 +152,13 @@ namespace   INITSERVICE
         },
         {
                 ISTEPNAME(14,01,"mss_memdiag"),
-                nullptr, //ISTEP_14::call_mss_memdiag,
-                //{ START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
+                ISTEP_14::call_mss_memdiag,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(14,02,"mss_thermal_init"),
-                nullptr, //ISTEP_14::call_mss_thermal_init,
-                //{ START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
+                ISTEP_14::call_mss_thermal_init,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(14,03,"proc_load_iop_xram"),
@@ -199,25 +187,22 @@ namespace   INITSERVICE
         },
         {
                 ISTEPNAME(14,08,"host_mpipl_service"),
-                nullptr, //ISTEP_14::call_host_mpipl_service,
-                //{ START_FN, EXT_IMAGE, MPIPL_OP, true }
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
+                ISTEP_14::call_host_mpipl_service,
+                { START_FN, EXT_IMAGE, MPIPL_OP, true }
         },
     };
 
 const DepModInfo g_istep14Dependancies = {
     {
         DEP_LIB(libistep14.so),
-        DEP_LIB(libpm.so),
-        DEP_LIB(libimageprocs.so),
-/*
         DEP_LIB(libdump.so),
-        DEP_LIB(libruntime.so),
+        DEP_LIB(libimageprocs.so),
         DEP_LIB(libisteps_mss.so),
         DEP_LIB(libpm.so),
-        DEP_LIB(libimageprocs.so),
-        DEP_LIB(libnestmemutils.so),
-**/
+        DEP_LIB(libruntime.so),
+// Once all the HWP calls are implemented and istep 14
+// is fully operational add this back in, if needed, else delete.
+//        DEP_LIB(libnestmemutils.so),
         nullptr
     }
 };

@@ -284,15 +284,13 @@ TESTCASE_MODULES += testspi
 TESTCASE_MODULES += testmmio
 TESTCASE_MODULES += $(if $(CONFIG_PLDM),testpldm_extended,)
 TESTCASE_MODULES += testeeprom
+TESTCASE_MODULES += testdump
 endif
-
 
 #******************************************************************
 #KNOWN ISSUES (I might let these run but there is something wrong)
 #All of these are tracked by a RTC story
 #******************************************************************
-
-#TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testdump)  @fixme-RTC:180751
 # @TODO DefecT: 1035550 Figure out why testattn is failing sometimes
 #TESTCASE_MODULES += testattn
 

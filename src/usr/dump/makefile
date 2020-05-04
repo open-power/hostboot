@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2019
+# Contributors Listed Below - COPYRIGHT 2012,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -22,12 +22,11 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
 ROOTPATH = ../../..
 MODULE = dump
 
-# FIXME RTC: 210975
-
-#OBJS += dumpCollect.o
+OBJS += dumpCollect.o
 
 SUBDIRS += test.d
 

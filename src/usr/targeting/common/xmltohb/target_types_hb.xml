@@ -290,6 +290,9 @@
       <id>MASTER_MBOX_SCRATCH</id>
     </attribute>
     <attribute>
+      <id>MPIPL_HB_MDRT_COUNT</id>
+    </attribute>
+    <attribute>
       <id>OCC_COMMON_AREA_PHYS_ADDR</id>
     </attribute>
     <attribute>
