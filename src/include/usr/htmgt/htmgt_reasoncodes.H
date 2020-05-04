@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,6 +63,7 @@ namespace HTMGT
         HTMGT_RC_OT_THROTTLE_INVALID_N = HTMGT_COMP_ID | 0x04,
         HTMGT_RC_OCC_NOT_READY         = HTMGT_COMP_ID | 0x05,
         HTMGT_RC_ATTRIBUTE_ERROR       = HTMGT_COMP_ID | 0x06,
+        HTMGT_RC_DUPLICATE_CHIP_ID     = HTMGT_COMP_ID | 0x0C,
         HTMGT_RC_OCC_EXCEPTION         = HTMGT_COMP_ID | 0x0E,
         HTMGT_RC_NO_SUPPORT            = HTMGT_COMP_ID | 0x0F,
         HTMGT_RC_OCC_RESET             = HTMGT_COMP_ID | 0x15,

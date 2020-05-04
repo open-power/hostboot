@@ -66,7 +66,7 @@ namespace HTMGT
         iv_homerValid(false),
         iv_target(i_target),
         iv_lastPollValid(false),
-        iv_occsPresent(1 << i_instance),
+        iv_occsPresent(0),
         iv_gpuCfg(0),
         iv_resetReason(OCC_RESET_REASON_NONE),
         iv_exceptionLogged(0),

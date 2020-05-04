@@ -262,6 +262,14 @@ namespace HTMGT
             static void clearResetCounts();
 
 
+            /**
+             * @brief Validate OCC present value is unique
+             *
+             */
+            static uint8_t validateOccsPresent(const uint8_t i_present,
+                                               const uint8_t i_instance);
+
+
         private:
 
             typedef std::vector<Occ*> occList_t;
@@ -375,6 +383,10 @@ namespace HTMGT
 
             /** See clearResetCounts() above */
             void _clearResetCounts();
+
+            /** See validateOccsPresent() above */
+            uint8_t _validateOccsPresent(const uint8_t i_present,
+                                         const uint8_t i_instance);
     };
 
     typedef Singleton<OccManager> occMgr;

@@ -1181,6 +1181,29 @@ namespace HTMGT
     }
 
 
+    uint8_t OccManager::_validateOccsPresent(const uint8_t i_present,
+                                             const uint8_t i_instance)
+    {
+        uint8_t l_dup_instance = 0xFF; // no duplicate found
+        for( const auto & occ : iv_occArray )
+        {
+            if ((occ->getInstance() != i_instance) &&
+                (occ->getPresentBits() != 0) &&
+                (occ->getPresentBits() == i_present))
+
+            {
+                l_dup_instance = occ->getInstance();
+                break;
+
+            }
+        }
+        return l_dup_instance;
+    }
+
+
+    // ---------- public interfaces ---------- //
+
+
     uint8_t  OccManager::getNumOccs()
     {
         return Singleton<OccManager>::instance()._getNumOccs();
@@ -1276,14 +1299,21 @@ namespace HTMGT
                                                               o_data);
     }
 
+    void OccManager::syncOccStates()
+    {
+        Singleton<OccManager>::instance()._syncOccStates();
+    }
+
     void OccManager::clearResetCounts()
     {
         Singleton<OccManager>::instance()._clearResetCounts();
     }
 
-    void OccManager::syncOccStates()
+    uint8_t OccManager::validateOccsPresent(const uint8_t i_present,
+                                            const uint8_t i_instance)
     {
-        Singleton<OccManager>::instance()._syncOccStates();
+        return Singleton<OccManager>::instance()._validateOccsPresent(i_present,
+                                                                    i_instance);
     }
 
 } // end namespace

@@ -313,6 +313,44 @@ namespace HTMGT
                 }
             }
 
+            if (pollRsp->occsPresent != iv_occsPresent)
+            {
+                TMGT_INF("pollRspHandler: OCC%d - present:0x%02X",
+                         iv_instance, pollRsp->occsPresent);
+                iv_occsPresent = pollRsp->occsPresent;
+                // ensure value is unique
+                uint8_t l_dup = OccManager::validateOccsPresent(iv_occsPresent,
+                                                                iv_instance);
+                if (l_dup != 0xFF)
+                {
+                    errlHndl_t l_err = nullptr;
+
+                    TMGT_ERR("pollRspHandler: occsPresent is NOT unique! "
+                             "(same as OCC%d)", l_dup);
+                    iv_needsReset = true;
+                    /*@
+                     * @errortype
+                     * @reasoncode HTMGT_RC_DUPLICATE_CHIP_ID
+                     * @moduleid  HTMGT_MOD_OCC_POLL
+                     * @userdata1[0-15] OCC instance
+                     * @userdata1[16-31] response OCC present
+                     * @userdata2[0-15] duplicate OCC instance
+                     * @userdata2[16-31] response status byte
+                     * @devdesc Invalid OCC present data in POLL response
+                     */
+                    bldErrLog(l_err, HTMGT_MOD_OCC_POLL,
+                              HTMGT_RC_DUPLICATE_CHIP_ID,
+                              iv_instance, iv_occsPresent,
+                              l_dup, pollRsp->status,
+                              ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                    ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                    if (iv_resetReason == OCC_RESET_REASON_NONE)
+                    {
+                        iv_resetReason = OCC_RESET_REASON_ERROR;
+                    }
+                }
+            }
+
             if ((OCC_STATE_ACTIVE == pollRsp->state) ||
                 (OCC_STATE_OBSERVATION == pollRsp->state) ||
                 (OCC_STATE_CHARACTERIZATION == pollRsp->state))
@@ -353,34 +391,6 @@ namespace HTMGT
                     break;
                 }
 
-                if (pollRsp->occsPresent != iv_occsPresent)
-                {
-                    TMGT_ERR("pollRspHandler: OCC%d present mismatch"
-                             " (expected 0x%02X, but received 0x%02X)",
-                             iv_instance, iv_occsPresent,
-                             pollRsp->occsPresent);
-                    iv_needsReset = true;
-                    /*@
-                     * @errortype
-                     * @reasoncode HTMGT_RC_INVALID_DATA
-                     * @moduleid  HTMGT_MOD_OCC_POLL
-                     * @userdata1[0-15] OCC instance
-                     * @userdata1[16-31] response OCC present
-                     * @userdata2[0-15] expected OCC present
-                     * @userdata2[16-31] response status byte
-                     * @devdesc Invalid OCC present data in POLL response
-                     */
-                    bldErrLog(l_err, HTMGT_MOD_OCC_POLL,
-                              HTMGT_RC_INVALID_DATA,
-                              iv_instance, pollRsp->occsPresent,
-                              iv_occsPresent, pollRsp->status,
-                              ERRORLOG::ERRL_SEV_INFORMATIONAL);
-                    ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
-                    if (iv_resetReason == OCC_RESET_REASON_NONE)
-                    {
-                        iv_resetReason = OCC_RESET_REASON_ERROR;
-                    }
-                }
             }
 
             if (pollRsp->requestedCfg != 0x00)
