@@ -339,15 +339,17 @@ fapi2::ReturnCode check_pmic(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmi
 fapi2::ReturnCode clear(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
 
 ///
-/// @brief Check the IDT specific status codes
+/// @brief Check an individual set of PMIC status codes
 ///
 /// @param[in] i_pmic_target PMIC target
+/// @param[in] i_error_type error type for the PMIC in question
 /// @param[in] i_statuses STATUS object to check
 /// @param[out] o_error At least one error bit was found to be set
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error in case of an I2C read error
 ///
 fapi2::ReturnCode check_fields(
     const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    const char* i_error_type,
     const std::vector<std::pair<uint8_t, std::vector<status_field>>>& i_statuses,
     bool& o_error);
 
