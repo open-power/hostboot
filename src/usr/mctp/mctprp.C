@@ -183,7 +183,7 @@ static void rx_message(uint8_t i_eid, void * i_data, void *i_msg, size_t i_len)
       default :
       {
           assert(0,
-                "Recieved a MCTP message with a payload type we do not know how to handle");
+                "Received a MCTP message with a payload type we do not know how to handle");
           break;
       }
    }
@@ -354,7 +354,7 @@ void MctpRP::handle_outbound_messages(void)
           default:
               // just mark a trace and move on with our lives
               TRACFCOMP(g_trac_mctp,
-                        "Recieved am outbound MCTP message with a payload type 0x%.02x we do not know how to handle",
+                        "Received am outbound MCTP message with a payload type 0x%.02x we do not know how to handle",
                         msg->type);
               break;
         }
