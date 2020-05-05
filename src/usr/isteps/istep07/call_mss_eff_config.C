@@ -56,6 +56,7 @@
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/common/util.H>
+#include    <targeting/targplatutil.H>
 
 // Fapi Support
 #include    <fapi2.H>
@@ -68,6 +69,7 @@
 
 // SMF Support
 #include    <secureboot/smf.H>
+
 
 #include    <nvram/nvram_interface.H>
 
@@ -136,10 +138,11 @@ void call_mss_eff_grouping(IStepError & io_istepErr)
  */
 void distributeSmfMemory()
 {
-#ifndef CONFIG_FSP_BUILD
     errlHndl_t l_err = nullptr;
-    const char* l_smfMemAmtStr = nullptr;
+
+#ifndef CONFIG_FSP_BUILD
     uint64_t l_smfMemAmt = 0;
+    const char* l_smfMemAmtStr = nullptr;
 
     l_err = NVRAM::nvramRead(NVRAM::SMF_MEM_AMT_KEY, l_smfMemAmtStr);
     if(l_err)
@@ -163,10 +166,11 @@ void distributeSmfMemory()
         }
     }
 
-    Target* l_sys = nullptr;
-    targetService().getTopLevelTarget(l_sys);
-    assert(l_sys, "distributeSmfMemory: top level target is nullptr!");
-    l_sys->setAttr<ATTR_SMF_MEM_AMT_REQUESTED>(l_smfMemAmt);
+    UTIL::assertGetToplevelTarget()->setAttr<ATTR_SMF_MEM_AMT_REQUESTED>(l_smfMemAmt);
+#endif
+
+    // The default for ATTR_SMF_MEM_AMT_REQUESTED is 0. For FSP, that means that
+    // the following call will disable SMF_CONFIG.
     l_err = SECUREBOOT::SMF::distributeSmfMem();
     if(l_err)
     {
@@ -174,7 +178,6 @@ void distributeSmfMemory()
         // not return unrecoverable errors.
         errlCommit(l_err, ISTEP_COMP_ID);
     }
-#endif
 }
 
 void* call_mss_eff_config (void *io_pArgs)
