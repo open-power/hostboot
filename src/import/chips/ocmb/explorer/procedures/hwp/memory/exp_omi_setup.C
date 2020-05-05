@@ -79,7 +79,9 @@ extern "C"
         FAPI_TRY(mss::exp::i2c::boot_config(i_target, l_boot_config_data));
 
         // Check FW status for success
-        l_rc = mss::exp::i2c::fw_status(i_target, mss::DELAY_1MS, 100);
+        // Note: Extended polling count from 100 to 1000 to account for longer Boot_config_0 sequence
+        // in Explorer FW CL-384401.
+        l_rc = mss::exp::i2c::fw_status(i_target, mss::DELAY_1MS, 1000);
 
         // Note: It's still under discussion whether FIRs will be lit if BOOT_CONFIG_0 fails, and if
         // the registers will be clocked so we can read them. Disabling FIR checking until this
