@@ -783,10 +783,11 @@ sub buildAffinity
             # Strip off the chip- part of the target type name
             $target_type =~ s/chip\-//g;
 
-            # Currently only UCD9090 and UCD90120A on FSP systems are supported.
-            # Skip over all other UCD types.
+            # Currently only UCD9090, UCD9090A and UCD90120A on FSP systems
+            # are supported. Skip over all other UCD types.
             if (($target_type ne "UCD9090")
-               && ($target_type ne "UCD90120A"))
+               && ($target_type ne "UCD90120A")
+               && ($target_type ne "UCD9090A"))
             {
                 next;
             }

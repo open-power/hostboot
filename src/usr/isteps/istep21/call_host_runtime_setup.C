@@ -680,6 +680,10 @@ void* call_host_runtime_setup (void *io_pArgs)
 
 #ifdef CONFIG_UCD_FLASH_UPDATES
         POWER_SEQUENCER::TI::UCD::call_update_ucd_flash();
+#else
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "Skipping call_update_ucd_flash() due to "
+                  "CONFIG_UCD_FLASH_UPDATES being disabled");
 #endif
 
         // Fill in Hostboot runtime data if there is a PAYLOAD
