@@ -2031,6 +2031,7 @@
     Disables the MMA power-off function within the QME.
 
     OFF: Enables the QME MMA power-off funtion as further controlled by
+    ATTR_SYSTEM_MMA_POWEROFF_DELAY_POWEROF2_MS.
 
     ON: Disables the dynamic MMA power-off function within the QME The MMA will
     be on if the core is powered on.
@@ -2059,7 +2060,7 @@
     that will NEVER have MMA based applications running so as to save the MMA
 
     OFF: Enables the QME MMA power-on funtion. This will have the MMA powered on
-    istep 16 and then controlled by ATTR_SYSTEM_MMA_POWEROFF_DISABLE and
+    in istep 16 and then controlled by ATTR_SYSTEM_MMA_POWEROFF_DISABLE and
     thereafter.
 
     ON: Disables the MMA power-on function and leaves the MMA permenantly off.
@@ -2352,6 +2353,25 @@
     <group>safe</group>
   </attribute>
 
+ <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_THROTTLE_PSTATE_NUMBER_LIMIT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Limits the number of Pstates below the frequency floor that can be used for
+    throttling.
+
+    Valid responsive values:  0 to 63.  Values above 63 will be capped to 63.
+
+    Consumer: p10_pstate_parameter_build ->
+              OCC Parameter Block
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <default>0xFF</default>
+    <group>throttle</group>
+  </attribute>
+
 <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_THROTTLE_TABLE_OVERRIDE</id>
@@ -2582,7 +2602,7 @@
     <id>ATTR_WOF_ALTITUDE_TEMP_ADJUSTMENT</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-    Temperature adjustment due to altitude in degrees Celcius/km*1000.
+    Temperature adjustment due to altitude in degrees Celsius/km*1000.
 
     Default: 8C/2100m = 8C/2.1Km = 3.809 C/kM;  Encode: 3.809 C/kM*1000 = 3809
     Producer:  Override
