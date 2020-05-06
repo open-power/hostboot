@@ -3327,13 +3327,34 @@ ReturnCode p10_ipl_customize (
     else // Apply runtime dynamic inits
     {
         fapi2::ATTR_SMF_CONFIG_Type l_attrSmfConfig;
+        fapi2::ATTR_SYSTEM_MMA_POWEROFF_DISABLE_Type l_attrSystemMmaPoweroffDisable;
 
         l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_SMF_CONFIG, FAPI_SYSTEM, l_attrSmfConfig);
+
+        FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
+                     fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
+                     set_CHIP_TARGET(i_procTarget).
+                     set_OCCURRENCE(8),
+                     "Failed to retrieve ATTR_SMF_CONFIG" );
 
         if(l_attrSmfConfig == fapi2::ENUM_ATTR_SMF_CONFIG_DISABLED)
         {
             FAPI_DBG("Applying Dynamic Init Runtime Feature: HV_INITS");
             featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_HV_INITS;
+        }
+
+        l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_MMA_POWEROFF_DISABLE, FAPI_SYSTEM, l_attrSystemMmaPoweroffDisable);
+
+        FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
+                     fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
+                     set_CHIP_TARGET(i_procTarget).
+                     set_OCCURRENCE(9),
+                     "Failed to retrieve ATTR_SYSTEM_MMA_POWEROFF_DISABLE" );
+
+        if(l_attrSystemMmaPoweroffDisable == fapi2::ENUM_ATTR_SYSTEM_MMA_POWEROFF_DISABLE_ON)
+        {
+            FAPI_DBG("Applying Dynamic Init Runtime Feature: HMMA_STATIC_POWEROFF");
+            featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_MMA_STATIC_POWEROFF;
         }
 
         // clear undesireable features

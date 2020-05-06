@@ -2064,7 +2064,7 @@
     thereafter.
 
     ON: Disables the MMA power-on function and leaves the MMA permenantly off.
-    core will hang on MMA instruction that are dispatched.
+    core will take illegal instruction interrupt on MMA instruction that are dispatched.
 
     Producer: Override
 

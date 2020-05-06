@@ -122,7 +122,8 @@
       FBC_ASYNC_MC2RT3_NOMINAL      = 0x0000000000008000,
       FBC_ASYNC_MC2RT3_SAFE         = 0x0000000000004000,
       RUNN_USE_QME_TB_SRC           = 0x0000000000002000,
-      HV_INITS                      = 0x0000000000001000
+      HV_INITS                      = 0x0000000000001000,
+      MMA_STATIC_POWEROFF           = 0x0000000000000800
     </enum>
   </attribute>
   <!-- ********************************************************************** -->
