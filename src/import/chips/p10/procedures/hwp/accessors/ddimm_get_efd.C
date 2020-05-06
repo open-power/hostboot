@@ -431,11 +431,11 @@ extern "C"
                      SPD_DDR4_TYPE);
 
         // Call the explicit code for a DDR4
-        FAPI_TRY(ddr4_get_efd( i_ocmbFapi2Target,
-                               io_vpdInfo,
-                               o_efdData,
-                               i_spdBuffer,
-                               i_spdBufferSize));
+        FAPI_TRY_NO_TRACE(ddr4_get_efd( i_ocmbFapi2Target,
+                                        io_vpdInfo,
+                                        o_efdData,
+                                        i_spdBuffer,
+                                        i_spdBufferSize));
 
     fapi_try_exit:
 
@@ -745,7 +745,7 @@ extern "C"
                      DDR4_FREQ_VAL_2, DDR4_FREQ_VAL_3, DDR4_FREQ_VAL_4,
                      DDR4_FREQ_VAL_5, DDR4_FREQ_VAL_6);
 
-            FAPI_TRY(fapi2::FAPI2_RC_FALSE);
+            FAPI_TRY_NO_TRACE(fapi2::FAPI2_RC_FALSE);
         }
 
         FAPI_DBG ("ddr4_get_efd: Caller supplied frequency = %d, "
@@ -785,7 +785,7 @@ extern "C"
                      static_cast<uint32_t>(DDR_MR_VAL_2),
                      static_cast<uint32_t>(DDR_MR_VAL_3) );
 
-            FAPI_TRY(fapi2::FAPI2_RC_FALSE);
+            FAPI_TRY_NO_TRACE(fapi2::FAPI2_RC_FALSE);
         }
 
         FAPI_DBG ("ddr4_get_efd: Caller supplied master rank = %d, "
@@ -988,14 +988,14 @@ extern "C"
 
             // If unable to collect FFDC and assert, at least trace out error
             // and exit with false
-            FAPI_ERR ("ddr4_get_efd: ALL EFDs have been exhausted.  NO match "
+            FAPI_INF ("ddr4_get_efd: ALL EFDs have been exhausted.  NO match "
                       "for frequency = %d (frequency bit mask = 0x%.4X) and "
                       "master rank = %d (master rank bit mask = 0x%.2X), or "
                       "there was a match but the block is not implemented.",
                       io_vpdInfo.iv_omi_freq_mhz, l_freqMask,
                       io_vpdInfo.iv_rank, l_rankMask);
 
-            FAPI_TRY(fapi2::FAPI2_RC_FALSE);
+            FAPI_TRY_NO_TRACE(fapi2::FAPI2_RC_FALSE);
         }
 
     fapi_try_exit:
