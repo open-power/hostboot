@@ -89,8 +89,7 @@ fapi2::ReturnCode pgpe_start(
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>      FAPI_SYSTEM;
     fapi2::ATTR_PGPE_BOOT_COPIER_IVPR_OFFSET_Type       l_ivpr_offset = 0;
     fapi2::ATTR_SYSTEM_PSTATES_MODE_Type                l_pstates_mode = 0;
-    std::vector<uint64_t> l_pgpe_base_addr;
-    l_pgpe_base_addr.push_back( PGPE_BASE_ADDRESS );
+    uint64_t l_pgpe_base_addr = PGPE_BASE_ADDRESS;
 
     FAPI_IMP(">> pgpe_start......");
 
@@ -194,7 +193,6 @@ fapi2::ReturnCode pgpe_start(
         FAPI_DBG("halt state: XSR/IAR: 0x%016lX condition: %d",
                  l_xsr_iar, l_xsr_halt_condition);
 
-
         // Check for a debug halt condition
         FAPI_ASSERT(!((l_xsr_iar.getBit<XSR_HALTED_STATE>() == 1) &&
                       ((l_xsr_halt_condition == XSR_DEBUG_HALT ||
@@ -285,8 +283,7 @@ fapi2::ReturnCode pgpe_halt(
 
     fapi2::buffer<uint64_t> l_data64;
     uint32_t                l_timeout_in_MS = 100;
-    std::vector<uint64_t> l_pgpe_base_addr;
-    l_pgpe_base_addr.push_back( PGPE_BASE_ADDRESS );
+    uint64_t l_pgpe_base_addr = PGPE_BASE_ADDRESS;
 
     auto l_eq_mc_or  =
         i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_OR >(fapi2::MCGROUP_GOOD_EQ);
@@ -348,7 +345,7 @@ fapi2::ReturnCode p10_pm_pgpe_init(
     FAPI_IMP("> p10_pm_pgpe_init");
 
     const char* PM_MODE_NAME_VAR; //Defines storage for PM_MODE_NAME
-    FAPI_INF("Executing p10_pm_pgpe_init in mode %s", PM_MODE_NAME(i_mode));
+    FAPI_IMP("Executing p10_pm_pgpe_init in mode %s", PM_MODE_NAME(i_mode));
 
     // Boot the PSTATE GPE
     if (i_mode == pm::PM_START)

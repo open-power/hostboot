@@ -69,7 +69,9 @@
 #include <multicast_group_defs.H>
 #include <p10_hcd_memmap_base.H>
 #include <p10_fbc_utils.H>
-#include <p10_tod_utils.H>
+#ifndef __PPE__
+    #include <p10_tod_utils.H>
+#endif
 
 // ----------------------------------------------------------------------
 // Constants
@@ -133,9 +135,8 @@ fapi2::ReturnCode p10_pm_qme_init(
     const pm::PM_FLOW_MODE i_mode)
 {
     FAPI_IMP(">> p10_pm_qme_init");
-
     const char* PM_MODE_NAME_VAR;  //Defines storage for PM_MODE_NAME
-    FAPI_INF(" Execution mode %s", PM_MODE_NAME(i_mode));
+    FAPI_IMP(" Execution mode %s", PM_MODE_NAME(i_mode));
     uint8_t                 fusedModeState = 0;
 
     // -------------------------------

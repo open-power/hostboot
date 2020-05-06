@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -237,7 +237,10 @@ fapi2::ReturnCode pba_slave_reset(
     uint32_t                l_pollCount;
 
     // Slave to be reset.  Note:  Slave 3 is not reset as it is owned by SBE
-    std::vector<uint32_t> v_slave_resets = {0, 1, 2};
+    std::vector<uint32_t> v_slave_resets;
+    v_slave_resets.push_back(0);
+    v_slave_resets.push_back(1);
+    v_slave_resets.push_back(2);
 
     for (auto sl : v_slave_resets)
     {
@@ -710,22 +713,20 @@ fapi2::ReturnCode pba_halt(
 
     using namespace scomt::proc;
 
-    std::vector<uint64_t> v_pba_reset_regs =
-    {
-        TP_TPBR_PBA_PBAO_BCDE_PBADR,
-        TP_TPBR_PBA_PBAO_BCDE_OCIBAR,
-        TP_TPBR_PBA_PBAO_BCUE_CTL,
-        TP_TPBR_PBA_PBAO_BCUE_SET,
-        TP_TPBR_PBA_PBAO_BCUE_PBADR,
-        TP_TPBR_PBA_PBAO_BCUE_OCIBAR,
-        TP_TPBR_PBA_PBAO_PBAXSHBR0,
-        TP_TPBR_PBA_PBAO_PBAXSHBR1,
-        TP_TPBR_PBA_PBAO_PBAXSHCS0,
-        TP_TPBR_PBA_PBAO_PBAXSHCS1,
-        TP_TPBR_PBA_PBAO_PBASLVCTL0,
-        TP_TPBR_PBA_PBAO_PBASLVCTL1,
-        TP_TPBR_PBA_PBAO_PBASLVCTL2
-    };
+    std::vector<uint64_t> v_pba_reset_regs;
+    v_pba_reset_regs.push_back(TP_TPBR_PBA_PBAO_BCDE_PBADR);
+    v_pba_reset_regs.push_back(TP_TPBR_PBA_PBAO_BCDE_OCIBAR);
+    v_pba_reset_regs.push_back(TP_TPBR_PBA_PBAO_BCUE_CTL);
+    v_pba_reset_regs.push_back(TP_TPBR_PBA_PBAO_BCUE_SET);
+    v_pba_reset_regs.push_back(TP_TPBR_PBA_PBAO_BCUE_PBADR);
+    v_pba_reset_regs.push_back(TP_TPBR_PBA_PBAO_BCUE_OCIBAR);
+    v_pba_reset_regs.push_back(TP_TPBR_PBA_PBAO_PBAXSHBR0);
+    v_pba_reset_regs.push_back(TP_TPBR_PBA_PBAO_PBAXSHBR1);
+    v_pba_reset_regs.push_back(TP_TPBR_PBA_PBAO_PBAXSHCS0);
+    v_pba_reset_regs.push_back(TP_TPBR_PBA_PBAO_PBAXSHCS1);
+    v_pba_reset_regs.push_back(TP_TPBR_PBA_PBAO_PBASLVCTL0);
+    v_pba_reset_regs.push_back(TP_TPBR_PBA_PBAO_PBASLVCTL1);
+    v_pba_reset_regs.push_back(TP_TPBR_PBA_PBAO_PBASLVCTL2);
 
     FAPI_IMP(">> pba_halt ...");
 

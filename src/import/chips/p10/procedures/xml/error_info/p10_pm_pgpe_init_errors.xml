@@ -83,6 +83,7 @@
     <description> Pstate GPE Protocol Auto Start timeout.  This is only
     used in lab test modes.
     </description>
+    <ffdc>CHIP</ffdc>
     <collectRegisterFfdc>
       <id>PGPE_FFDC_REGISTERS</id>
       <target>CHIP</target>

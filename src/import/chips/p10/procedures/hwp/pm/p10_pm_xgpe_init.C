@@ -89,8 +89,7 @@ fapi2::ReturnCode xgpe_start(
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>      FAPI_SYSTEM;
     fapi2::ATTR_XGPE_BOOT_COPIER_IVPR_OFFSET_Type       l_ivpr_offset = 0;
     fapi2::ATTR_SYSTEM_AUXILLARY_MODE_Type                l_aux_mode = 0;
-    std::vector<uint64_t> l_xgpe_base_addr;
-    l_xgpe_base_addr.push_back( XGPE_BASE_ADDRESS );
+    uint64_t  l_xgpe_base_addr = XGPE_BASE_ADDRESS;
 
     FAPI_IMP(">> xgpe_start......");
 
@@ -232,8 +231,7 @@ fapi2::ReturnCode xgpe_halt(
 
     fapi2::buffer<uint64_t> l_data64;
     uint32_t                l_timeout_in_MS = 100;
-    std::vector<uint64_t> l_xgpe_base_addr;
-    l_xgpe_base_addr.push_back( XGPE_BASE_ADDRESS );
+    uint64_t l_xgpe_base_addr = XGPE_BASE_ADDRESS;
 
     FAPI_IMP(">> xgpe_halt...");
 
@@ -282,9 +280,8 @@ fapi2::ReturnCode p10_pm_xgpe_init(
     const pm::PM_FLOW_MODE i_mode)
 {
     FAPI_IMP("> p10_pm_xgpe_init");
-
     const char* PM_MODE_NAME_VAR; //Defines storage for PM_MODE_NAME
-    FAPI_INF("Executing p10_pm_xgpe_init in mode %s", PM_MODE_NAME(i_mode));
+    FAPI_IMP("Executing p10_pm_xgpe_init in mode %s", PM_MODE_NAME(i_mode));
 
     // Boot the Auxillary GPE
     if (i_mode == pm::PM_START)

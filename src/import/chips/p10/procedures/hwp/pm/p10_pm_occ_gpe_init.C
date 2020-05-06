@@ -140,7 +140,7 @@ fapi2::ReturnCode pm_occ_gpe_reset(
     uint64_t l_intVecReg = 0;
     uint32_t l_pollCount = 10; // poll 10 times
     uint32_t l_timeout = 1; // in micro seconds;
-    std::vector<uint64_t> l_gpeBaseAddress;
+    uint64_t l_gpeBaseAddress = 0x0;
 
     do
     {
@@ -150,7 +150,7 @@ fapi2::ReturnCode pm_occ_gpe_reset(
             l_statusReg     =   scomt::proc::TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEXIXSR;
             l_instrAddrReg  =   scomt::proc::TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEXIDBGPRO;
             l_intVecReg     =   scomt::proc::TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEIVPR;
-            l_gpeBaseAddress.push_back( GPE0_BASE_ADDRESS );
+            l_gpeBaseAddress = GPE0_BASE_ADDRESS;
         }
         else if (i_engine == occgpe::GPE1)
         {
@@ -158,7 +158,7 @@ fapi2::ReturnCode pm_occ_gpe_reset(
             l_statusReg     =   scomt::proc::TP_TPCHIP_OCC_OCI_GPE1_OCB_GPEXIXSR;
             l_instrAddrReg  =   scomt::proc::TP_TPCHIP_OCC_OCI_GPE1_OCB_GPEXIDBGPRO;
             l_intVecReg     =   scomt::proc::TP_TPCHIP_OCC_OCI_GPE1_OCB_GPEIVPR;
-            l_gpeBaseAddress.push_back( GPE1_BASE_ADDRESS );
+            l_gpeBaseAddress = GPE1_BASE_ADDRESS;
         }
 
         // Halt the OCC GPE
@@ -186,7 +186,7 @@ fapi2::ReturnCode pm_occ_gpe_reset(
         if (i_engine == occgpe::GPE0)
         {
             FAPI_ASSERT_NOEXIT((l_pollCount != 0),
-                               fapi2::PM_OCC_GPE0_HALT_TIMEOUT(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                               fapi2::PM_OCC_GPE0_HALT_TIMEOUT()
                                .set_CHIP( i_target )
                                .set_GPE0_MODE( XCR_HALT )
                                .set_GPE0_BASE_ADDRESS( l_gpeBaseAddress ),
@@ -197,7 +197,7 @@ fapi2::ReturnCode pm_occ_gpe_reset(
         else if (i_engine == occgpe::GPE1)
         {
             FAPI_ASSERT_NOEXIT((l_pollCount != 0),
-                               fapi2::PM_OCC_GPE1_HALT_TIMEOUT(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                               fapi2::PM_OCC_GPE1_HALT_TIMEOUT()
                                .set_CHIP( i_target )
                                .set_GPE1_MODE( XCR_HALT )
                                .set_GPE1_BASE_ADDRESS( l_gpeBaseAddress ),
