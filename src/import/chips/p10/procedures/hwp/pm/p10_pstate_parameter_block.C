@@ -1154,7 +1154,7 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
             revle32(iv_attr_mvpd_poundV_other_info.fixed_freq_mhz);
 
         //pstate_max_throttle
-        i_occppb->pstate_max_throttle =  revle32(pstate_min + THROTTLE_PSTATES);
+        i_occppb->pstate_max_throttle =  revle32(pstate_min + iv_attrs.attr_throttle_pstate_number_limit);
 
         i_occppb->vdd_vret_mv =  l_rvrm_rvid << 3;
 
@@ -1442,7 +1442,6 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
     DATABLOCK_GET_ATTR_4(ATTR_PROC_VRM_VOFFSET_UV,  iv_procChip, attr_proc_vrm_voffset_uv);
     DATABLOCK_GET_ATTR(ATTR_BOOT_VOLTAGE_BIAS_0P5PCT,  iv_procChip, attr_boot_voltage_biase_0p5pct);
 
-
     // Frequency attributes
     DATABLOCK_GET_ATTR(ATTR_FREQ_PAU_MHZ,           FAPI_SYSTEM, attr_pau_frequency_mhz);
     DATABLOCK_GET_ATTR(ATTR_FREQ_CORE_CEILING_MHZ,  iv_procChip, attr_freq_core_ceiling_mhz);
@@ -1472,6 +1471,7 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
 
     DATABLOCK_GET_ATTR(ATTR_FREQ_DPLL_REFCLOCK_KHZ,   FAPI_SYSTEM, freq_proc_refclock_khz);
     DATABLOCK_GET_ATTR(ATTR_PROC_DPLL_DIVIDER,        iv_procChip, proc_dpll_divider);
+    DATABLOCK_GET_ATTR(ATTR_SYSTEM_THROTTLE_PSTATE_NUMBER_LIMIT, FAPI_SYSTEM, attr_throttle_pstate_number_limit);
     // AVSBus ... needed by p10_setup_evid
     //Get WOV attributes
     DATABLOCK_GET_ATTR(ATTR_SYSTEM_WOV_OVERV_DISABLE,        FAPI_SYSTEM,attr_wov_overv_disable);
@@ -1663,6 +1663,10 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
     FAPI_INF ("iv_frequency_step_khz %08X %08X", iv_frequency_step_khz, revle32(iv_frequency_step_khz));
 
     iv_occ_freq_mhz      = iv_attrs.attr_pau_frequency_mhz/4;
+
+    if (iv_attrs.attr_throttle_pstate_number_limit > THROTTLE_PSTATES) {
+        iv_attrs.attr_throttle_pstate_number_limit = THROTTLE_PSTATES;
+    }
 
 
 fapi_try_exit:
