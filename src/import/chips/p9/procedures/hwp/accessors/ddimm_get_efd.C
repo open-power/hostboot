@@ -425,11 +425,11 @@ extern "C"
                      SPD_DDR4_TYPE);
 
         // Call the explicit code for a DDR4
-        FAPI_TRY(ddr4_get_efd( i_ocmbFapi2Target,
-                               io_vpdInfo,
-                               o_efdData,
-                               i_spdBuffer,
-                               i_spdBufferSize));
+        FAPI_TRY_NO_TRACE(ddr4_get_efd( i_ocmbFapi2Target,
+                                        io_vpdInfo,
+                                        o_efdData,
+                                        i_spdBuffer,
+                                        i_spdBufferSize));
 
     fapi_try_exit:
 
@@ -740,7 +740,7 @@ extern "C"
                      DDR4_FREQ_VAL_2, DDR4_FREQ_VAL_3, DDR4_FREQ_VAL_4,
                      DDR4_FREQ_VAL_5, DDR4_FREQ_VAL_6);
 
-            FAPI_TRY(fapi2::FAPI2_RC_FALSE);
+            FAPI_TRY_NO_TRACE(fapi2::FAPI2_RC_FALSE);
         }
 
         FAPI_DBG ("ddr4_get_efd: Caller supplied frequency = %d, "
@@ -782,7 +782,7 @@ extern "C"
                      static_cast<uint32_t>(DDR_MR_VAL_2),
                      static_cast<uint32_t>(DDR_MR_VAL_3) );
 
-            FAPI_TRY(fapi2::FAPI2_RC_FALSE);
+            FAPI_TRY_NO_TRACE(fapi2::FAPI2_RC_FALSE);
         }
 
         FAPI_DBG ("ddr4_get_efd: Caller supplied master rank = %d, "
@@ -820,7 +820,7 @@ extern "C"
                       "supported mask = 0x%.4X)",
                       io_vpdInfo.iv_omi_freq_mhz, l_freqMask, l_supportedSpeeds);
 
-            FAPI_TRY(fapi2::FAPI2_RC_FALSE);
+            FAPI_TRY_NO_TRACE(fapi2::FAPI2_RC_FALSE);
         }
 
         // Point to the beginning of the EFD meta data, AKA EFD[0] meta data.
@@ -1006,7 +1006,7 @@ extern "C"
                       io_vpdInfo.iv_omi_freq_mhz, l_freqMask,
                       io_vpdInfo.iv_rank, l_rankMask);
 
-            FAPI_TRY(fapi2::FAPI2_RC_FALSE);
+            FAPI_TRY_NO_TRACE(fapi2::FAPI2_RC_FALSE);
         }
 
     fapi_try_exit:
