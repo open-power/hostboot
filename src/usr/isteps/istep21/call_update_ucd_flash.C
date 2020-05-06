@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,8 +71,8 @@ void call_update_ucd_flash(void)
             // previously bad power sequencers will be ignored, and
             // Hostboot will not generate new errors.
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,INFO_MRK
-                "call_update_ucd_flash: No functional UCD9090 or UCD90120A "
-                "power sequencers found to update");
+                "call_update_ucd_flash: No functional UCD9090, UCD9090A, or "
+                "UCD90120A power sequencers found to update");
 
             // Done with update flow, no error
             break;

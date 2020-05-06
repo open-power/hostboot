@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2019
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -41,7 +41,7 @@ use constant TOC_ALIGNMENT => 0x80;
 use constant TOC_ENTRY_SIZE => 0x40;
 use constant FLASH_IMAGES_OFFSET => 0x1000;
 use constant FLASH_IMAGE_ALIGNMENT => 0x1000;
-use constant TOC_MAJOR => 0x00000001;
+use constant TOC_MAJOR => 0x00000002;
 use constant TOC_MINOR => 0x00000000;
 
 my $TRAC_ERR = 0;
@@ -136,19 +136,19 @@ sub processInputFile
 
     # Enforce the input file naming convention
     if($name !~
-        /\AUCD[[:alnum:]]+\-data\-pu[0-3]_e[0-3]_p(0?[0-9]|1[0-2])_a[[:xdigit:]]{2}\.csv\Z/)
+        /\AUCD[[:alnum:]]+\-data\-pu[0-3]_e[0-3]_p(0?[0-9]|1[0-2])_a[[:xdigit:]]{2}\-bpv[0-1]\.csv\Z/)
     {
         die "Unexpected file name ($i_fileName); must be in the format: "
-            . "UCDV-data-puW_eX_pY_aZZ.csv, where V is a UCD device ID, "
+            . "UCDV-data-puW_eX_pY_aZZ-bpvK.csv, where V is a UCD device ID, "
             . "W=proc position (0-3), "
             . "X=engine # (0-3), Y=port (0-9 or 00-09 or 10-12), "
-            . "ZZ=hex address (00->FF)";
+            . "ZZ=hex address (00->FF), K=backplane version (0-1)";
     }
 
-    # Break the file name into the device ID. update type, i2c info, and the csv
-    # extension.  The extension will be discarded.
+    # Break the file name into the device ID, update type, i2c info,
+    # backplane version, and the csv extension. The extension will be discarded.
     my ($base,$csv) = split(/\./,$name);
-    my ($deviceId,$imageType,$i2cInfo) = split (/-/,$base );
+    my ($deviceId,$imageType,$i2cInfo,$bpv) = split (/-/,$base );
 
     if(length $deviceId > MAX_DEVICE_ID_ASCII )
     {
@@ -157,7 +157,8 @@ sub processInputFile
     }
 
     if(    $deviceId ne "UCD9090"
-       and $deviceId ne "UCD90120A")
+       and $deviceId ne "UCD90120A"
+       and $deviceId ne "UCD9090A")
     {
         die "Unsupported UCD device $deviceId";
     }
@@ -213,12 +214,16 @@ sub processInputFile
     $i2cPort =~s/\Ap//;
     $i2cAddress =~s/\Aa//;
 
+    # Strip the prefix off of backplane version
+    $bpv =~s/\Abpv//;
+
     $$i_flashImages{$i_fileName}{deviceId}      = $deviceId;
     $$i_flashImages{$i_fileName}{imageType}     = IMG_TYPE_DATA_FLASH;
     $$i_flashImages{$i_fileName}{i2cProc}       = $i2cProc;
     $$i_flashImages{$i_fileName}{i2cEngine}     = $i2cEngine;
     $$i_flashImages{$i_fileName}{i2cPort}       = $i2cPort;
     $$i_flashImages{$i_fileName}{i2cAddress}    = $i2cAddress;
+    $$i_flashImages{$i_fileName}{bpv}           = $bpv;
     $$i_flashImages{$i_fileName}{mfrRevision}   = $mfrRevision;
     $$i_flashImages{$i_fileName}{optimizedFile} = $optimizedFile;
 
@@ -272,8 +277,9 @@ sub genOutputImage
     #
     # TOC entry format:
     #
-    # char[32]  Device ID "UCD9090" or "UCD90120A" + NULL.  Max 31 non-null
-    #               chars left justified.  Others could be supported in future.
+    # char[32]  Device ID "UCD9090" or "UCD90120A" or "UCD9090A" + NULL.
+    #               Max 31 non-null chars left justified.
+    #               Others could be supported in future.
     # uint8_t   Flash image type (0=data flash image, others reserved)
     # uint8_t   Processor position (pu value of ECMD string)
     # uint8_t   I2C engine
@@ -331,8 +337,8 @@ sub genOutputImage
         $tocEntry .= pack('C', $$i_flashImages{$key}{i2cPort});
         $tocEntry .= pack('H*', $$i_flashImages{$key}{i2cAddress});
 
-        # Write single pad byte
-        $tocEntry .= pack('C1');
+        # Write Backplane Version (one byte)
+        $tocEntry .= pack('C1', $$i_flashImages{$key}{bpv});
 
         # Write MFR_REVISION
         $tocEntry .= pack('A2', $$i_flashImages{$key}{mfrRevision});

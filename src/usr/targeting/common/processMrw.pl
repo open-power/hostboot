@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -389,10 +389,11 @@ foreach my $target (@targets)
         # Strip off the chip- part of the target type name
         $target_type =~ s/chip\-//g;
 
-        # Currently only UCD9090 and UCD90120A on FSP systems are supported.
-        # All other UCD types are skipped.
+        # Currently only UCD9090, UCD9090A, and UCD90120A on FSP systems
+        # are supported. All other UCD types are skipped.
         if (($target_type eq "UCD9090")
-            || ($target_type eq "UCD90120A"))
+            || ($target_type eq "UCD90120A")
+            || ($target_type eq "UCD9090A"))
         {
             processUcd($targetObj, $target);
         }
