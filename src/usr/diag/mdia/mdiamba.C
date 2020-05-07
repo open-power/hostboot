@@ -416,8 +416,8 @@ TargetHandleList getMemTargetsForQueryOrClear(
 
             // add associated OMIC
             TargetHandleList omicList;
-            getParentAffinityTargets( omicList, omiList[0], CLASS_UNIT,
-                                      TYPE_OMIC );
+            getParentOmicTargetsByState( omicList, omiList[0], CLASS_NA,
+                                         TYPE_OMIC, UTIL_FILTER_FUNCTIONAL );
             if ( omicList.size() == 1 )
             {
                 o_list.push_back( omicList[0] );
