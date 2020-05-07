@@ -44,6 +44,7 @@
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/ccs/ccs_traits.H>
 #include <generic/memory/lib/ccs/ccs.H>
+#include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 
 namespace mss
 {
@@ -243,6 +244,7 @@ fapi2::ReturnCode mrs_engine( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_ta
     ccs::instruction_t l_inst_a_side = ccs::mrs_command(i_rank, i_data.iv_mrs);
     ccs::instruction_t l_inst_b_side;
     bool l_is_a17 = false;
+    bool l_has_rcd = false;
 
     // Thou shalt send 2 MRS, one for the a-side and the other inverted for the b-side.
     // If we're on an odd-rank then we need to mirror
@@ -275,12 +277,18 @@ fapi2::ReturnCode mrs_engine( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_ta
 
     FAPI_INF("MRS%02d (%d) 0x%016llx:0x%016llx %s:rank %d a-side", uint8_t(i_data.iv_mrs), i_delay_in_cycles,
              l_inst_a_side.arr0, l_inst_a_side.arr1, mss::c_str(i_target), i_rank);
-    FAPI_INF("MRS%02d (%d) 0x%016llx:0x%016llx %s:rank %d b-side", uint8_t(i_data.iv_mrs), i_delay_in_cycles,
-             l_inst_b_side.arr0, l_inst_b_side.arr1, mss::c_str(i_target), i_rank);
-
-    // Add both to the CCS program
     io_inst.push_back(l_inst_a_side);
-    io_inst.push_back(l_inst_b_side);
+
+
+    // Only issue b-side if we have an RCD
+    FAPI_TRY(mss::unmask::has_rcd<MC>( i_target, l_has_rcd ));
+
+    if(l_has_rcd)
+    {
+        FAPI_INF("MRS%02d (%d) 0x%016llx:0x%016llx %s:rank %d b-side", uint8_t(i_data.iv_mrs), i_delay_in_cycles,
+                 l_inst_b_side.arr0, l_inst_b_side.arr1, mss::c_str(i_target), i_rank);
+        io_inst.push_back(l_inst_b_side);
+    }
 
 fapi_try_exit:
     return fapi2::current_err;

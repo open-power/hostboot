@@ -51,6 +51,36 @@ namespace unmask
 {
 
 ///
+/// @brief Check if any dimms exist that have RCD enabled - explorer/DIMM specialization
+/// @param[in] i_target - the fapi2::Target we are starting from
+/// @param[out] o_has_rcd - true iff any DIMM with RCD detected
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode has_rcd<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        bool& o_has_rcd )
+{
+    // Assume RCD is not supported at beginning of check
+    o_has_rcd = false;
+
+    uint8_t l_dimm_type = 0;
+    uint8_t l_rcd_supported = 0;
+
+    FAPI_TRY(mss::attr::get_dimm_type(i_target, l_dimm_type));
+    FAPI_TRY(mss::attr::get_supported_rcd(i_target, l_rcd_supported));
+
+    // OR with tmp_rcd to maintain running true/false if RCD on *any* DIMM
+    o_has_rcd |= ((l_dimm_type == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_RDIMM) ||
+                  (l_dimm_type == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_LRDIMM));
+
+    o_has_rcd |= (l_rcd_supported == fapi2::ENUM_ATTR_MEM_EFF_SUPPORTED_RCD_RCD_PER_CHANNEL_1);
+
+fapi_try_exit:
+
+    return fapi2::current_err;
+}
+
+///
 /// @brief Check if any dimms exist that have RCD enabled - explorer/PORT specialization
 /// @param[in] i_target - the fapi2::Target we are starting from
 /// @param[out] o_has_rcd - true iff any DIMM with RCD detected
@@ -66,17 +96,9 @@ fapi2::ReturnCode has_rcd<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TA
     // Loop over all DIMM's and determine if we have an RCD
     for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {
-        uint8_t l_dimm_type = 0;
-        uint8_t l_rcd_supported = 0;
-
-        FAPI_TRY(mss::attr::get_dimm_type(l_dimm, l_dimm_type));
-        FAPI_TRY(mss::attr::get_supported_rcd(l_dimm, l_rcd_supported));
-
-        // OR with tmp_rcd to maintain running true/false if RCD on *any* DIMM
-        o_has_rcd |= ((l_dimm_type == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_RDIMM) ||
-                      (l_dimm_type == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_LRDIMM));
-
-        o_has_rcd |= (l_rcd_supported == fapi2::ENUM_ATTR_MEM_EFF_SUPPORTED_RCD_RCD_PER_CHANNEL_1);
+        bool l_current_dimm_rcd = false;
+        FAPI_TRY(has_rcd<mss::mc_type::EXPLORER>(l_dimm, l_current_dimm_rcd));
+        o_has_rcd |= l_current_dimm_rcd;
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
