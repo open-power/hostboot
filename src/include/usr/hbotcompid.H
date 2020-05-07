@@ -372,6 +372,14 @@ const compId_t SBEIO_COMP_ID = 0x2800;
 const char SBEIO_COMP_NAME[] = "sbeio";
 //@}
 
+// QME id 2900 matches QME id on FSP
+/** @name QME
+ * Power Managment HCODE
+ */
+const compId_t QME_COMP_ID = 0x2900;
+const char QME_COMP_NAME[] = "qme";
+//@}
+
 // OCCC id 2A00 matches OCCC id on FSP
 /** @name OCCC
  * On Chip Controller: Power & Thermal Management

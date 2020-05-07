@@ -105,6 +105,10 @@ namespace HTMGT
         {
             l_comp_id = XGPE_COMP_ID;
         }
+        else if (i_source == OCC_ERRSRC_QME)
+        {
+            l_comp_id = QME_COMP_ID;
+        }
         else if (i_source != OCC_ERRSRC_405)
         {
             TMGT_ERR("occProcessElog: Invalid elog source specified 0x%02X",
@@ -294,7 +298,7 @@ namespace HTMGT
                     }
                     else
                     {
-                        // Add Processor callout for PGPE/SGPE/XGPE
+                        // Add Processor callout for PGPE/XGPE/QME
                         TMGT_ERR("occProcessElog: Adding processor callout for"
                                  " OCC%d", iv_instance);
                         TARGETING::ConstTargetHandle_t l_proc_target =

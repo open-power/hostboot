@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -215,7 +215,8 @@ namespace HTMGT
     {
         OCC_ERRSRC_405  = 0x00,
         OCC_ERRSRC_PGPE = 0x10,
-        OCC_ERRSRC_XGPE = 0x20
+        OCC_ERRSRC_XGPE = 0x20,
+        OCC_ERRSRC_QME  = 0x40
     };
 
 
