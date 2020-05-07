@@ -2,3 +2,8 @@ config MCTP
   default y
     help
       If enabled Hostboot supports MCTP over LPC.
+
+config MCTP_TESTCASES
+  default n
+  help
+    If enabled, Hostboot supports MCTP testcases that do not require sending MCTP traffic

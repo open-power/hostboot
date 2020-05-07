@@ -93,7 +93,7 @@ const TaskInfo    g_taskinfolist[]   =   {
                         BASE_IMAGE,                 // Base Module
                 }
         },
-#ifdef CONFIG_MCTP
+#if defined(CONFIG_MCTP) || defined(CONFIG_MCTP_TESTCASES)
         /**
          * @brief   libmctp
          */
@@ -106,7 +106,7 @@ const TaskInfo    g_taskinfolist[]   =   {
                 }
         },
 #endif
-#ifdef CONFIG_PLDM
+#if defined(CONFIG_PLDM) || defined(CONFIG_PLDM_TESTCASES)
         /**
          * @brief   libpldm_base
          */

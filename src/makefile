@@ -152,8 +152,8 @@ BASE_MODULES += vfs
 BASE_MODULES += $(if $(CONFIG_AST2400) || $(CONFIG_AST2500), sio)
 BASE_MODULES += console
 ifndef VPO_COMPILE
-BASE_MODULES += $(if $(CONFIG_MCTP),mctp,)
-BASE_MODULES += $(if $(CONFIG_PLDM),pldm_base,)
+BASE_MODULES += $(if $(CONFIG_MCTP)$(CONFIG_MCTP_TESTCASES),mctp)
+BASE_MODULES += $(if $(CONFIG_PLDM)$(CONFIG_PLDM_TESTCASES),pldm_base)
 endif
 
 # This is exported so that gcov knows the list of base modules to
@@ -231,7 +231,7 @@ EXTENDED_MODULES += nestmemutils
 EXTENDED_MODULES += $(if $(CONFIG_ENABLE_HDAT_IN_HOSTBOOT),hdat)
 EXTENDED_MODULES += xz
 EXTENDED_MODULES += $(if $(CONFIG_CONSOLE_OUTPUT_ERRORDISPLAY),errldisplay)
-EXTENDED_MODULES += $(if $(CONFIG_PLDM),pldm_extended,)
+EXTENDED_MODULES += $(if $(CONFIG_PLDM)$(CONFIG_PLDM_TESTCASES),pldm_extended)
 endif
 
 #***************************************
@@ -282,9 +282,9 @@ TESTCASE_MODULES += testrtloader
 TESTCASE_MODULES += testexpupd
 TESTCASE_MODULES += testspi
 TESTCASE_MODULES += testmmio
-TESTCASE_MODULES += $(if $(CONFIG_PLDM),testpldm_extended,)
 TESTCASE_MODULES += testeeprom
 TESTCASE_MODULES += testdump
+TESTCASE_MODULES += $(if $(CONFIG_PLDM)$(CONFIG_PLDM_TESTCASES),testpldm_extended)
 endif
 
 #******************************************************************

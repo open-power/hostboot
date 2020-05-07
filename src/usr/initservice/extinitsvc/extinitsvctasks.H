@@ -86,7 +86,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
         },
 #endif
 #endif
-#ifdef CONFIG_PLDM
+#if defined(CONFIG_PLDM) || defined(CONFIG_PLDM_TESTCASES)
         /**
          * @brief   PLDM Extended
          */
