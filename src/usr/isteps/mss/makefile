@@ -208,6 +208,7 @@ OUTPATH = ${ROOTPATH}/obj/genfiles/chips/ocmb/common/procedures/hwp/pmic/lib/
 FILE_PREFIX = mss_pmic
 
 SOURCES += $(ROOTPATH)/chips/ocmb/common/procedures/xml/attribute_info/pmic_eff_attributes.xml
+SOURCES += $(ROOTPATH)/chips/ocmb/common/procedures/xml/attribute_info/pmic_attributes.xml
 
 CLEAN_TARGETS += ${OUTPATH}/mss_pmic_attribute_getters.H
 CLEAN_TARGETS += ${OUTPATH}/mss_pmic_attribute_setters.H

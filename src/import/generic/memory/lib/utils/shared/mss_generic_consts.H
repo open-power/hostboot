@@ -280,6 +280,10 @@ enum generic_ffdc_codes
     MRS02_GEN = 0x10A0,
     SET_MODULE_MFG_ID = 0x10A1,
     PDA_WR_VREF_LATCH_CONTAINER = 0x10A2,
+
+    // PMIC polling
+    POLL_INPUT_PORT_READY = 0x10A3,
+    POLL_FOR_PBULK_GOOD = 0x10A4,
 };
 
 ///

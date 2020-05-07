@@ -79,8 +79,9 @@ fapi2::ReturnCode poll_for_pbulk_good(
         // No ack, return false and continue polling
         return false;
     }),
-    fapi2::MSS_EXP_I2C_POLLING_TIMEOUT().
-    set_TARGET(i_pmic_target),
+    fapi2::MSS_PMIC_I2C_POLLING_TIMEOUT()
+    .set_TARGET(i_pmic_target)
+    .set_FUNCTION(mss::POLL_FOR_PBULK_GOOD),
     "I2C read from %s either did not ACK or VIN_BULK did not respond with PWR_GOOD status",
     mss::c_str(i_pmic_target) );
 

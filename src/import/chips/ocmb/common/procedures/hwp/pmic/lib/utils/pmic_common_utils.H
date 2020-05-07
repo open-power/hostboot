@@ -116,7 +116,7 @@ inline std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>> get_valid_pmics_for_i
 
     for (const auto& l_pmic : l_pmics)
     {
-        if (mss::index(l_pmic) % CONSTS::NUM_UNIQUE_PMICS == i_id)
+        if (mss::index(l_pmic) % CONSTS::NUM_PRIMARY_PMICS == i_id)
         {
             l_output_pmics.push_back(l_pmic);
         }
@@ -195,7 +195,7 @@ fapi2::ReturnCode calculate_voltage_bitmap_from_attr(
 inline mss::pmic::id get_relative_pmic_id(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target)
 {
     using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
-    return static_cast<mss::pmic::id>(mss::index(i_pmic_target) % CONSTS::NUM_UNIQUE_PMICS);
+    return static_cast<mss::pmic::id>(mss::index(i_pmic_target) % CONSTS::NUM_PRIMARY_PMICS);
 }
 
 namespace status
