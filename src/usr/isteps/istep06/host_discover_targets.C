@@ -473,6 +473,135 @@ errlHndl_t powerDownSlaveQuads()
     return l_err;
 }
 
+#ifdef CONFIG_PLDM
+
+/* @brief Perform the first half of the PDR exchange with the BMC (until and
+ *        including Hostboot notifying the BMC that it has added its own PDRs to
+ *        its repository).
+ * @return errlHndl_t Error if any, otherwise nullptr.
+ */
+static errlHndl_t exchange_pdrs()
+{
+    /* Perform part of the PDR exchange sequence with the BMC. We will get their
+     * PDRs first, then allow them to request our PDRs after we send them a PDR
+     * Repository Changed event. */
+
+    errlHndl_t l_err = nullptr;
+
+    do
+    {
+        PLDM::thePdrManager().resetPdrs();
+
+        /* Get the BMC's PDRs. */
+
+        l_err = PLDM::thePdrManager().addRemotePdrs();
+
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"Failed to add remote PDRs to PDR manager");
+            break;
+        }
+
+        const auto bmc_pdr_handles = PLDM::thePdrManager().getAllPdrHandles();
+
+        /* Add our own PDRs to our repository. */
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "Added %llu remote PDRs to PDR manager",
+                  PLDM::thePdrManager().pdrCount());
+
+        PLDM::thePdrManager().addLocalPdrs();
+
+        auto hb_pdr_handles = PLDM::thePdrManager().getAllPdrHandles();
+
+        // Remove the BMC handles from the HB PDR handle list
+        const auto bmc_pdrs
+            = std::remove_if(begin(hb_pdr_handles), end(hb_pdr_handles),
+                             [&bmc_pdr_handles](const uint32_t handle)
+                             {
+                                 return (std::find(cbegin(bmc_pdr_handles), cend(bmc_pdr_handles), handle)
+                                         != cend(bmc_pdr_handles));
+                             });
+
+        hb_pdr_handles.erase(bmc_pdrs, end(hb_pdr_handles));
+
+        /* Notify the BMC that our PDR repository has changed. */
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "Sending PDR notification to the BMC for %llu new Hostboot PDRs",
+                  hb_pdr_handles.size());
+
+        for (const auto handle : hb_pdr_handles)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "Sending PDR notification to the BMC for handle 0x%08x",
+                      handle);
+        }
+
+        l_err = PLDM::thePdrManager().sendPdrRepositoryChangeEvent(hb_pdr_handles);
+
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"Failed to send repository update event to BMC");
+            break;
+        }
+    } while (false);
+
+    return l_err;
+}
+
+#if 0 // @TODO RTC 249981: Enable this code when the BMC is sending this event
+/* @brief Finish the PDR exchange by waiting on the BMC to send a "PDR
+ *        Repository Changed" notification to us, and then refetching their PDR
+ *        repository.
+ * @return errlHndl_t  Error if any, otherwise nullptr.
+ */
+static errlHndl_t finish_pdr_exchange()
+{
+    /* Wait on the BMC to notify us that it is ready for us to request its
+     * new PDRs. */
+
+    errlHndl_t l_err = nullptr;
+
+    do
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "Awaiting PDR Repository Changed notification from the BMC");
+
+        l_err = PLDM::thePdrManager().awaitBmcPdrRepoChanged(PLDM::PdrManager::TIMEOUT_NONE);
+
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"Failed to wait on PDR repository update event from BMC");
+            break;
+        }
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "Received PDR Repository Changed notification from the BMC");
+
+        /* Re-fetch the normalized PDRs from the BMC. */
+
+        PLDM::thePdrManager().resetPdrs();
+
+        l_err = PLDM::thePdrManager().addRemotePdrs();
+
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"Failed to re-add remote PDRs to PDR manager");
+            break;
+        }
+    } while (false);
+
+    return l_err;
+}
+#endif // 0
+
+#endif // CONFIG_PLDM
+
 void* host_discover_targets( void *io_pArgs )
 {
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -485,6 +614,12 @@ void* host_discover_targets( void *io_pArgs )
     TARGETING::Target* l_pTopLevel = nullptr;
     TARGETING::targetService().getTopLevelTarget( l_pTopLevel );
     assert(l_pTopLevel, "host_discover_targets: no TopLevelTarget");
+
+#ifdef CONFIG_PLDM
+    // This flag guards later portions of the PDR exchange (we don't want to do
+    // subsequent steps if earlier steps failed).
+    bool pdr_exchange_failed = false;
+#endif
 
     if (l_pTopLevel->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
     {
@@ -541,6 +676,19 @@ void* host_discover_targets( void *io_pArgs )
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "host_discover_targets: Normal IPL mode");
+
+#ifdef CONFIG_PLDM
+        l_err = exchange_pdrs();
+
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"Failed to exchange PDRs with the BMC");
+
+            captureError(l_err, l_stepError, ISTEP_COMP_ID);
+            pdr_exchange_failed = true;
+        }
+#endif
 
 #if( defined(CONFIG_SUPPORT_EEPROM_CACHING) && !defined(CONFIG_SUPPORT_EEPROM_HWACCESS) )
         l_err = EEPROM::cacheEECACHEPartition();
@@ -613,73 +761,8 @@ void* host_discover_targets( void *io_pArgs )
 #endif
     }
 
-#ifdef CONFIG_PLDM
-
-    /* Perform part of the PDR exchange sequence with the BMC. We will get their
-     * PDRs first, then allow them to request our PDRs after we send them a PDR
-     * Repository Changed event. */
-
-    do
-    {
-        PLDM::thePdrManager().resetPdrs();
-
-        /* Get the BMC's PDRs. */
-
-        l_err = PLDM::thePdrManager().addRemotePdrs();
-
-        if (l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      ERR_MRK"Failed to add remote PDRs to PDR manager");
-
-            captureError(l_err, l_stepError, ISTEP_COMP_ID);
-            break;
-        }
-
-        const auto bmc_pdr_handles = PLDM::thePdrManager().getAllPdrHandles();
-
-        /* Add our own PDRs to our repository. */
-
-        PLDM::thePdrManager().addLocalPdrs();
-
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "Added %u PDRs to PDR manager",
-                  PLDM::thePdrManager().pdrCount());
-
-        auto hb_pdr_handles = PLDM::thePdrManager().getAllPdrHandles();
-
-        // Remove the BMC handles from the HB PDR handle list
-        const auto bmc_pdrs
-            = std::remove_if(begin(hb_pdr_handles), end(hb_pdr_handles),
-                             [&bmc_pdr_handles](const uint32_t handle)
-                             {
-                                 return (std::find(cbegin(bmc_pdr_handles), cend(bmc_pdr_handles), handle)
-                                         != cend(bmc_pdr_handles));
-                             });
-
-        hb_pdr_handles.erase(bmc_pdrs, end(hb_pdr_handles));
-
-        /* Notify the BMC that our PDR repository has changed. */
-
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "Sending PDR notification to the BMC for %llu PDRs",
-                  hb_pdr_handles.size());
-
-        l_err = PLDM::thePdrManager().sendPdrRepositoryChangeEvent(hb_pdr_handles);
-
-        if (l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      ERR_MRK"Failed to send repository update event to BMC");
-
-            captureError(l_err, l_stepError, ISTEP_COMP_ID);
-            break;
-        }
-    } while (false);
-
     // send DIMM/CORE/PROC sensor status to the BMC
     //SENSOR::updateBMCSensorStatus();
-#endif
 
     // Retrieve the master processor chip
     TARGETING::TargetHandle_t l_pMasterProcChip(nullptr);
@@ -712,43 +795,21 @@ void* host_discover_targets( void *io_pArgs )
         captureError(l_err, l_stepError, ISTEP_COMP_ID);
     }
 
-#if CONFIG_PLDM && 0 // @TODO RTC 249981: Enable this code when the BMC is sending this event
-    /* Wait on the BMC to notify us that it is ready for us to request its
-     * new PDRs. */
-
-    do
+#if CONFIG_PLDM
+    if (!pdr_exchange_failed)
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "Awaiting PDR Repository Changed notification from the BMC");
-
-        l_err = PLDM::thePdrManager().awaitBmcPdrRepoChanged(PLDM::PdrManager::TIMEOUT_NONE);
+#if 0 // @TODO RTC 249981: Enable this code when the BMC is sending this event
+        l_err = finish_pdr_exchange();
 
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      ERR_MRK"Failed to wait on PDR repository update event from BMC");
+                      ERR_MRK"PDR exchange failed");
             captureError(l_err, l_stepError, ISTEP_COMP_ID);
-            break;
         }
-
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "Received PDR Repository Changed notification from the BMC");
-
-        /* Re-fetch the normalized PDRs from the BMC. */
-
-        PLDM::thePdrManager().resetPdrs();
-
-        l_err = PLDM::thePdrManager().addRemotePdrs();
-
-        if (l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      ERR_MRK"Failed to re-add remote PDRs to PDR manager");
-            captureError(l_err, l_stepError, ISTEP_COMP_ID);
-            break;
-        }
-    } while (false);
-#endif
+#endif // 0
+    }
+#endif // CONFIG_PLDM
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "host_discover_targets exit" );
