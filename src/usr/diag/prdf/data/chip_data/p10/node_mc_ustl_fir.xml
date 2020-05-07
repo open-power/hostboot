@@ -78,8 +78,8 @@
     <bit pos="36">flit data pariry error from dl for chanb</bit>
     <bit pos="37">internal fifo parity error for chana</bit>
     <bit pos="38">internal fifo parity error for chanb</bit>
-    <bit pos="39">Unexpected read or write response received, chana</bit>
-    <bit pos="40">Unexpected read or write response received, chanb</bit>
+    <bit pos="39">Bad response detected from chana. See cerrrpts and USTLBADRESP reg for more info</bit>
+    <bit pos="40">Bad response detected from chanb. See cerrrpts and USTLBADRESP reg for more info</bit>
     <bit pos="41">Bad data set for data that is not valid chana</bit>
     <bit pos="42">Bad data set for data that is not valid chanb</bit>
     <bit pos="43">Memory read data returned in template 0, chana</bit>

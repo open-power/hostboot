@@ -75,7 +75,7 @@
     <bit pos="12">IMA received addr_err cresp.</bit>
     <bit pos="13">TLBIE/sync machine received addr_err cresp.</bit>
     <bit pos="14">PMISC received address error cresp.</bit>
-    <bit pos="15">Spare fir bits.</bit>
+    <bit pos="15">cHTM logic recieve an HTM/IMA packet that it wasn't setup for</bit>
     <bit pos="16">Spare fir bits.</bit>
     <bit pos="17">Spare fir bits.</bit>
     <bit pos="18">Spare fir bits.</bit>

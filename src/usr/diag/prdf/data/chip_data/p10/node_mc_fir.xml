@@ -40,7 +40,7 @@
     <bit pos="2">If '1', an PowerBus protocol error was detected. (for example, a HPC_WR is snooped when a HPC_WR to the same address is active).</bit>
     <bit pos="3">If '1', a command was issued to inband address space using a</bit>
     <bit pos="4">If '1', an address match on more that one Memory BAR was detected.</bit>
-    <bit pos="5">If set, the ECC syndrome for PowerBus write data is non-zero (for chan0/1 in pbi01, chann2/3 in pbi23)</bit>
+    <bit pos="5">Commandlist early hang trigger activated</bit>
     <bit pos="6">Reserved[6].</bit>
     <bit pos="7">Reserved[7].</bit>
     <bit pos="8">If '1', a command list state machine has timed out.</bit>
