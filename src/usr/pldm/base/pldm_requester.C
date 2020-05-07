@@ -78,7 +78,7 @@ void pldmRequester::handle_outbound_req_messages(void)
         msg_t* req = msg_wait(g_outboundPldmReqMsgQ);
 
         assert(req->extra_data != nullptr,
-               "handle_outbound_req_messages was send a msg_t with nothing in extra_data");
+               "handle_outbound_req_messages was sent a msg_t with nothing in extra_data");
 
         // Check if the initial request is aysnc or not
         bool l_asyncReq = msg_is_async(req);
@@ -91,13 +91,13 @@ void pldmRequester::handle_outbound_req_messages(void)
         // packet payload as where PLDM message begins. MCTP layer will set
         // this byte after we pass them the message.
         // (see DSP0236 v1.3.0 figure 4)
-        struct pldm_msg *l_pldm_msg =
+        struct pldm_msg *l_pldm_req_msg =
             reinterpret_cast<pldm_msg *>(
                 reinterpret_cast<uint8_t *>(req->extra_data) +
                 sizeof(MCTP::MCTP_MSG_TYPE_PLDM));
 
         // Update the instance ID and forward the message onto MCTP layer
-        l_pldm_msg->hdr.instance_id = instance_id;
+        l_pldm_req_msg->hdr.instance_id = instance_id;
 
         // Update the type of req to be MSG_SEND_PLDM so the mctp layer
         // knows its receiving a PLDM message. In the messages other than
@@ -124,8 +124,7 @@ void pldmRequester::handle_outbound_req_messages(void)
         // us if there was a problem or not sending the message to the MCTP layer
         else if(l_rc)
         {
-            const uint64_t request_hdr_data =
-              pldmHdrToUint64(*reinterpret_cast<pldm_msg*>(req->extra_data));
+            const uint64_t request_hdr_data = pldmHdrToUint64(*l_pldm_req_msg);
 
             /*
               * @errortype  ERRL_SEV_UNRECOVERABLE
@@ -152,15 +151,46 @@ void pldmRequester::handle_outbound_req_messages(void)
         // otherwise the PLDM request successfull went through
         else
         {
-            // The PLDM response to our reqeust will actually come back via
-            // the g_inboundPldmRspMsgQ
-            // TODO RTC:249701 add deadman timer
-            msg_t* rsp = msg_wait(g_inboundPldmRspMsgQ);
+            msg_t* rsp = nullptr;
+
+            while(1)
+            {
+                // The PLDM response to our reqeust will actually come back via
+                // the g_inboundPldmRspMsgQ
+                // TODO RTC:249701 add deadman timer
+                rsp = msg_wait(g_inboundPldmRspMsgQ);
+                assert(rsp != nullptr, "nullptr was sent to pldm_request by pldm_msg_router");
+
+                struct pldm_msg_hdr *hdr =
+                                    (struct pldm_msg_hdr *)rsp->extra_data;
+
+                // make sure this is the message we want
+                if((hdr->instance_id == l_pldm_req_msg->hdr.instance_id) &&
+                   (hdr->type == l_pldm_req_msg->hdr.type) &&
+                   (hdr->command == l_pldm_req_msg->hdr.command))
+                {
+                    break;
+                }
+
+                // If it's not a response to a request that we made, it's
+                // likely that the BMC is confused and sending us a response
+                // from a previous IPL. That or the BMC has potentially been
+                // compromised. Either way, free the msg and look for
+                // another one.
+                PLDM_ERR("Received a PLDM Response type: 0x%02x command 0x%02x instance_id %d to a PLDM request we did not send.",
+                          hdr->type, hdr->command, hdr->instance_id);
+                free(rsp->extra_data);
+                rsp->extra_data = 0;
+                msg_free(rsp);
+                rsp = nullptr;
+            }
 
             // original extra_data will need to be free'd by request func
             req->extra_data = rsp->extra_data;
             req->data[0] = rsp->data[0];
             rsp->extra_data = 0;
+            msg_free(rsp);
+            rsp = nullptr;
         }
 
 
