@@ -44,9 +44,6 @@
 
 #include <secureboot/service.H>
 
-#include <p10_sbe_spi_cmd.H>
-#include <p10_infrastruct_help.H>
-
 using namespace TARGETING;
 using namespace EEPROM;
 
@@ -242,21 +239,9 @@ class EEPROMTest: public CxxTest::TestSuite
          * @brief EEPROM Read/Write Test
          *      This test will test a variety of reads/writes and lengths
          *      across slave devices.
-         *
-         * @Note - Tests are not run on real hardware.
          */
         void testEEPROMReadWrite ( void )
         {
-
-            // Skipping EEPROM test altogether in VBU/VPO environment or in
-            // Secure mode
-            if( TARGETING::is_vpo() || SECUREBOOT::enabled() )
-            {
-                TS_INFO("testEEPROMReadWrite skipping EEPROM test altogether "
-                        "in VBU/VPO environment or in Secure mode");
-                return;
-            }
-
             errlHndl_t err = NULL;
             int fails = 0;
             int num_ops = 0;
@@ -273,117 +258,38 @@ class EEPROMTest: public CxxTest::TestSuite
             } testData[] =
 
             {
-
-                // GENERAL : Interesting boundary comments
-                // In general the methodology was to bounce around
-                // from PRIMARY to BACKUP and also to jump from low
-                // to high ranges to exercise the logical and physical
-                // aspects.  Using odd and even offsets to exercise
-                // math logic handling in the underlying layers as well.
-                //
-                // MVPD of processor - eeprom2 spi engine 2
+                // MVPD of processor - chip 0
                 // Read - Only
                 { 0x0000, VPD_PRIMARY, 0x000f17ba00000000, 4, true  },
-
-                // SBE Backup of processor - eeprom1 spi engine 1
-                // Write: interesting boundary 0x0009
-                { 0x0009, SBE_BACKUP, 0x1122334455660000, 6, false },
+/* // @todo RTC 208838
+                // SBE Primary of processor - chip 2
+                // Write: over 128-byte page boundary:
+                { 0x017F, SBE_PRIMARY, 0xaabb000000000000, 2, false },
                 // Read:
-                { 0x0009, SBE_BACKUP, 0x1122334455660000, 6, true  },
+                { 0x017F, SBE_PRIMARY, 0xaabb000000000000, 2, true  },
 
-                // SBE Primary of processor - eeprom0 spi engine 0
-                // Write: interesting boundary 0x0801 2049
-                { 0x0801, SBE_PRIMARY, 0xaabb000000000000, 2, false },
+                // SBE Backup of processor - chip 3
+                // Write: over 256-byte page boundary:
+                { 0x01FD, SBE_BACKUP, 0x1122334400000000, 4, false },
                 // Read:
-                { 0x0801, SBE_PRIMARY, 0xaabb000000000000, 2, true  },
+                { 0x01FD, SBE_BACKUP, 0x1122334400000000, 4, true  },
 
-                // SBE Primary of processor - eeprom0 spi engine 0
-                // Write: interesting boundary 0x0
-                { 0x0000, SBE_PRIMARY, 0xaa00000000000000, 1, false },
+                // SBE Backup of processor - chip 3
+                // Write: inside 128 page boundary:
+                { 0x005B, SBE_BACKUP, 0xbad5adcabf0b7000, 7, false },
                 // Read:
-                { 0x0000, SBE_PRIMARY, 0xaa00000000000000, 1, true  },
-
-                // SBE Backup of processor - eeprom1 spi engine 1
-                // Write: interesting boundary 0x07FF 2047
-                { 0x07FF, SBE_BACKUP, 0x1122334455660000, 6, false },
-                // Read:
-                { 0x07FF, SBE_BACKUP, 0x1122334455660000, 6, true  },
-
-                // SBE Primary of processor - eeprom0 spi engine 0
-                // Write: interesting boundary 0x0800 2048
-                { 0x0800, SBE_PRIMARY, 0xaabbcc0000000000, 3, false },
-                // Read:
-                { 0x0800, SBE_PRIMARY, 0xaabbcc0000000000, 3, true  },
-
-                // SBE Primary of processor - eeprom0 spi engine 0
-                // Write: interesting boundary 0x7F8
-                { MAX_LENGTH_TRNS-8, SBE_PRIMARY, 0xaabbcc0000000000, 3, false },
-                // Read:
-                { MAX_LENGTH_TRNS-8, SBE_PRIMARY, 0xaabbcc0000000000, 3, true  },
-
-                // SBE Backup of processor - eeprom1 spi engine 1
-                // Write: interesting boundary 0xF9
-                { SEEPROM_PAGE_SIZE-7, SBE_BACKUP, 0x1122334455000000, 5, false },
-                // Read:
-                { SEEPROM_PAGE_SIZE-7, SBE_BACKUP, 0x1122334455000000, 5, true  },
-
-                // SBE Backup of processor - eeprom1 spi engine 1
-                // Write: interesting boundary 0x0001
-                { 0x0001, SBE_BACKUP, 0x1122000000000000, 2, false },
-                // Read:
-                { 0x0001, SBE_BACKUP, 0x1122000000000000, 2, true  },
-
-                // SBE Backup of processor - eeprom1 spi engine 1
-                // Write: interesting boundary 0x2FD
-                { SEEPROM_PAGE_SIZE*3-3, SBE_BACKUP, 0x1122334400000000, 7, false },
-                // Read:
-                { SEEPROM_PAGE_SIZE*3-3, SBE_BACKUP, 0x1122334400000000, 7, true  },
-
-                // SBE Primary of processor - eeprom0 spi engine 0
-                // Write: interesting boundary 0x00FF 255
-                { 0x00FF, SBE_PRIMARY, 0xaabbccdd00000000, 4, false },
-                // Read:
-                { 0x00FF, SBE_PRIMARY, 0xaabbccdd00000000, 4, true  },
-
-                // SBE Backup of processor - eeprom 1 spi engine 1
-                // Write: interesting boundary 0x6FB
-                { SEEPROM_PAGE_SIZE*7-5, SBE_BACKUP, 0xbad5adcabf0b7000, 7, false },
-                // Read:
-                { SEEPROM_PAGE_SIZE*7-5, SBE_BACKUP, 0xbad5adcabf0b7000, 7, true  },
-
-                // SBE Primary of processor - eeprom0 spi engine 0
-                // Write: interesting boundary 0x0007
-                { 0x0007, SBE_PRIMARY, 0x1122334400000000, 4, false },
-                // Read:
-                { 0x0007, SBE_PRIMARY, 0x1122334400000000, 4, true  },
-
-                // SBE Backup of processor - eeprom1 spi engine 1
-                // Write: interesting boundary 0x0100 256
-                { 0x0100, SBE_BACKUP, 0x1122330000000000, 3, false },
-                // Read:
-                { 0x0100, SBE_BACKUP, 0x1122330000000000, 3, true  },
-
-                // SBE Primary of processor - eeprom0 spi engine 0
-                // Write: interesting boundary at end 0x7FFF8
-                { MAX_SBE_SEEPROM_SIZE-8, SBE_PRIMARY, 0x1122334455667788, 8, false },
-                // Read:
-                { MAX_SBE_SEEPROM_SIZE-8, SBE_PRIMARY, 0x1122334455667788, 8, true  },
-
-                // SBE Backup of processor - eeprom1 spi engine 1
-                // Write: interesting boundary 0x0008
-                { 0x0008, SBE_BACKUP, 0x1122330000000000, 3, false },
-                // Read:
-                { 0x0008, SBE_BACKUP, 0x1122330000000000, 3, true  },
-
-                // SBE Primary of processor - eeprom0 spi engine 0
-                // Write: interesting boundary 0x0101 257
-                { 0x0101, SBE_PRIMARY, 0xaabbccddeeff0000, 6, false },
-                // Read:
-                { 0x0101, SBE_PRIMARY, 0xaabbccddeeff0000, 6, true  },
-
+                { 0x005B, SBE_BACKUP, 0xbad5adcabf0b7000, 7, true  },
+*/
             };
 
             const uint32_t NUM_CMDS = sizeof(testData)/sizeof(testData[0]);
+
+            // Skipping EEPROM test altogether in VBU/VPO environment or in
+            // Secure mode
+            if( TARGETING::is_vpo() || SECUREBOOT::enabled() )
+            {
+                return;
+            }
 
             do
             {
@@ -458,7 +364,7 @@ class EEPROMTest: public CxxTest::TestSuite
 
                         if( err )
                         {
-                            TS_FAIL( "testEEPROMReadWrite - deviceOp fail on cmd i=%d out of %d",
+                            TS_FAIL( "testEEPROMReadWrite - fail on cmd %d out of %d",
                                      i, NUM_CMDS );
                             errlCommit( err,
                                         EEPROM_COMP_ID );
@@ -472,18 +378,12 @@ class EEPROMTest: public CxxTest::TestSuite
                         {
                             if( data != testData[i].data )
                             {
-                                TS_INFO("testEEPROMReadWrite Failure - cmd: i=%d/%d, "
-                                        "Data read: 0x%016llx, expected: 0x%016llx",
+                                TS_INFO("testEEPROMReadWrite - cmd: %d/%d, "
+                                        "Data read: %016llx, expected: %016llx",
                                         i, NUM_CMDS, data, testData[i].data );
                                 TS_FAIL( "testEEPROMReadWrite - Failure comparing read data!" );
                                 fails++;
                                 continue;
-                            }
-                            else
-                            {
-                                TS_INFO("testEEPROMReadWrite Success - cmd: i=%d/%d, "
-                                        "Data read: 0x%016llx, expected: 0x%016llx",
-                                        i, NUM_CMDS, data, testData[i].data );
                             }
                         }
                     }
@@ -497,39 +397,39 @@ class EEPROMTest: public CxxTest::TestSuite
 
         /**
          * @brief EEPROM Read/Write Large Test
-         *      This test will read and write arbitrary bytes of data to SBE Backup and
-         *      will attempt to restore the original data at the end of the test.
+         *      This test will read and write 603 bytes of data to SBE Backup
+         *      VPD.  It will attempt to restore the original data at
+         *      the end of the test.
          *
-         * @Note - Tests are not run on real hardware.
-         *
+         *      Note: 1st 768 bytes of SBE EEPROM data is currently blank, so
+         *            this test will read and write below that address space
          */
         void testEEPROMReadWriteLarge ( void )
         {
-            // Skipping EEPROM test altogether in VBU/VPO environment or in
-            // Secure mode
-            if( TARGETING::is_vpo() || SECUREBOOT::enabled() )
-            {
-                TS_INFO("testEEPROMReadWriteLarge skipping EEPROM test altogether "
-                        "in VBU/VPO environment or in Secure mode");
-                return;
-            }
-
             int fails = 0;
             int num_ops = 0;
+#if 0 // @todo RTC 208838
             errlHndl_t err = NULL;
             int cmds = 0;
 
-            size_t  testBufLen = 4096; // mixes up the offset handling
+            // Create 603-byte buffers
+            size_t  testBufLen = 603;
             uint8_t testBuffer[testBufLen];
             uint8_t new_data[testBufLen];
             uint8_t original_data[testBufLen];
 
             // Use small offset to force more complicated page-boundary testing
             uint8_t offset = 0x11;
-            constexpr size_t MAX_BIN_TRACE = 0x200;
 
 
             TS_INFO("testEEPROMReadWriteLarge - Start" );
+
+            // Skipping EEPROM test altogether in VBU/VPO environment or in
+            // Secure mode
+            if( TARGETING::is_vpo() || SECUREBOOT::enabled() )
+            {
+                return;
+            }
 
             do
             {
@@ -560,11 +460,10 @@ class EEPROMTest: public CxxTest::TestSuite
                                            pnorSectionInfo);
 
                 if ( err ||
-                     (pnorSectionInfo.size < HEADER_OFFSET + testBufLen + offset)
+                     (pnorSectionInfo.size < HEADER_OFFSET + testBufLen)
                    )
                 {
-                    TS_FAIL("testEEPROMReadWriteLarge: PNOR::getSectionInfo failed or size too small: pnorSize=0x%X HEADER_OFFSET=0x%X testBufLen=0x%X offset=0x%X",
-                        pnorSectionInfo.size, HEADER_OFFSET, testBufLen, offset);
+                    TS_FAIL("testEEPROMReadWriteLarge: PNOR::getSectionInfo failed or size too small: pnorSize=0x%X, HEADER_OFFSET=0x%X, testBufLen = 0x%X", pnorSectionInfo.size, HEADER_OFFSET, testBufLen);
                     errlCommit(err, EEPROM_COMP_ID);
                     delete err;
                     fails++;
@@ -585,7 +484,7 @@ class EEPROMTest: public CxxTest::TestSuite
 
                 }
 
-                //  Valid Buffer, so memcpy seed data
+                //  Valid Buffer, so memcpy the first 603 bytes
                 memcpy( new_data, tmp_ptr, testBufLen );
 
                 /************************************************************/
@@ -665,8 +564,8 @@ class EEPROMTest: public CxxTest::TestSuite
                         {
                             memcpy(original_data, testBuffer, testBufLen);
 
-                            TS_DEBUG("testEEPROMReadWriteLarge"
-                                      " saving original data i=%d, j=%d",
+                            TS_DEBUG("testEEPROMReadWriteLarge:"
+                                      " saving original data. i=%d, j=%d",
                                       i, j);
                         }
 
@@ -676,13 +575,13 @@ class EEPROMTest: public CxxTest::TestSuite
                             // Compare the data
                             if ( memcmp(testBuffer, new_data, testBufLen) )
                             {
-                                TS_INFO("testEEPROMReadWriteLarge MISCOMPARE"
-                                        " of new data len=0x%X", testBufLen);
+                                TS_INFO("testEEPROMReadWriteLarge: MISCOMPARE"
+                                        " of new data, len=0x%X", testBufLen);
 
                                 TRACFBIN( g_trac_eeprom, "testBuffer=",
-                                          testBuffer, std::min(testBufLen, MAX_BIN_TRACE));
+                                          testBuffer, testBufLen);
                                 TRACFBIN( g_trac_eeprom, "new_data=",
-                                          new_data, std::min(testBufLen, MAX_BIN_TRACE));
+                                          new_data, testBufLen);
                                 TS_FAIL( "testEEPROMReadWriteLarge - MISCOMPARE"
                                          " on writing new data");
                                 fails++;
@@ -693,7 +592,7 @@ class EEPROMTest: public CxxTest::TestSuite
                             else
                             {
                                 TS_DEBUG(
-                                          "testEEPROMReadWriteLarge New "
+                                          "testEEPROMReadWriteLarge: New "
                                           "Data R/W Successful i=%d,j=%d",
                                           i, j);
                             }
@@ -706,14 +605,14 @@ class EEPROMTest: public CxxTest::TestSuite
                             // Compare the data
                             if ( memcmp(testBuffer, original_data, testBufLen) )
                             {
-                                TS_INFO("testEEPROMReadWriteLarge MISCOMPARE"
-                                        " of original data len=0x%X",
+                                TS_INFO("testEEPROMReadWriteLarge: MISCOMPARE"
+                                        " of original data, len=0x%X",
                                         testBufLen);
 
                                 TRACFBIN( g_trac_eeprom, "testBuffer=",
-                                          testBuffer, std::min(testBufLen, MAX_BIN_TRACE));
+                                          testBuffer, testBufLen);
                                 TRACFBIN( g_trac_eeprom, "orig_data=",
-                                          original_data, std::min(testBufLen, MAX_BIN_TRACE));
+                                          original_data, testBufLen);
 
                                 TS_FAIL( "testEEPROMReadWriteLarge - MISCOMPARE"
                                          " on writing back original data");
@@ -735,6 +634,7 @@ class EEPROMTest: public CxxTest::TestSuite
                 }  // end of 'i' loop: target loop
 
             } while( 0 );
+#endif
 
             TS_INFO("testEEPROMReadWriteLarge - End: %d/%d fails", fails,
                     num_ops );

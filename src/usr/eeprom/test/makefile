@@ -29,12 +29,4 @@ MODULE = testeeprom
 TESTS += eepromddtest.H
 TESTS += $(if $(CONFIG_SUPPORT_EEPROM_CACHING), eecachetest.H, )
 
-EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/spi/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
-
 include ${ROOTPATH}/config.mk
