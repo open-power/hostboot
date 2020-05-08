@@ -163,7 +163,7 @@ uint32_t mssRestoreDramRepairs<TYPE_MCA>( TargetHandle_t i_target,
 
 
     fapi2::buffer<uint8_t> tmpRepairedRankMask, tmpBadDimmMask;
-    FAPI_INVOKE_HWP( errl, mss::restore_repairs,
+    FAPI_INVOKE_HWP( errl, nim_restore_repairs,
                      fapi2::Target<fapi2::TARGET_TYPE_MCA>( i_target ),
                      tmpRepairedRankMask, tmpBadDimmMask );
 
