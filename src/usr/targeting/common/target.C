@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -683,48 +683,60 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
             AttributeTraits<ATTR_CLASS>::Type & l_class =
                 *(reinterpret_cast<AttributeTraits<ATTR_CLASS>::Type *>(
                     l_pAttr));
-            if (l_class == TARGETING::CLASS_SYS)
+            switch( l_class )
             {
-                if ((o_pos != AttributeTank::ATTR_POS_NA) ||
-                    (o_unitPos != AttributeTank::ATTR_UNIT_POS_NA) ||
-                    (o_node != AttributeTank::ATTR_NODE_NA))
-                {
-                    targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
-                }
-            }
-            else if ((l_class == TARGETING::CLASS_CHIP) ||
-                     (l_class == TARGETING::CLASS_CARD) ||
-                     (l_class == TARGETING::CLASS_LOGICAL_CARD))
-            {
-                if ((o_pos == AttributeTank::ATTR_POS_NA) ||
-                    (o_unitPos != AttributeTank::ATTR_UNIT_POS_NA) ||
-                    (o_node == AttributeTank::ATTR_NODE_NA))
-                {
-                    targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
-                }
-            }
-            else if (l_class == TARGETING::CLASS_UNIT)
-            {
-                if ((o_pos == AttributeTank::ATTR_POS_NA) ||
-                    (o_unitPos == AttributeTank::ATTR_UNIT_POS_NA) ||
-                    (o_node == AttributeTank::ATTR_NODE_NA))
-                {
-                    TRACFCOMP(g_trac_targeting,"o_pos[%d], o_unitPos[%d] o_node[%d]", o_pos, o_unitPos, o_node);
-                    targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
-                }
-            }
-            else if (l_class == TARGETING::CLASS_ENC)
-            {
-                if ((o_pos != AttributeTank::ATTR_POS_NA) ||
-                    (o_unitPos != AttributeTank::ATTR_UNIT_POS_NA) ||
-                    (o_node == AttributeTank::ATTR_NODE_NA))
-                {
-                    targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
-                }
-            }
-            else
-            {
-                targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
+                    // Expects no position info
+                case(TARGETING::CLASS_SYS):
+                    if ((o_pos != AttributeTank::ATTR_POS_NA) ||
+                        (o_unitPos != AttributeTank::ATTR_UNIT_POS_NA) ||
+                        (o_node != AttributeTank::ATTR_NODE_NA))
+                    {
+                        targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
+                    }
+                    break;
+
+                    // Expects valid position+node
+                case(TARGETING::CLASS_CHIP):
+                case(TARGETING::CLASS_CARD):
+                case(TARGETING::CLASS_LOGICAL_CARD):
+                case(TARGETING::CLASS_DEV):
+                case(TARGETING::CLASS_BATTERY):
+                case(TARGETING::CLASS_LED):
+                case(TARGETING::CLASS_SP):
+                case(TARGETING::CLASS_ASIC):
+                    if ((o_pos == AttributeTank::ATTR_POS_NA) ||
+                        (o_unitPos != AttributeTank::ATTR_UNIT_POS_NA) ||
+                        (o_node == AttributeTank::ATTR_NODE_NA))
+                    {
+                        targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
+                    }
+                    break;
+
+                    // Expects valid position+node+unit
+                case(TARGETING::CLASS_UNIT):
+                    if ((o_pos == AttributeTank::ATTR_POS_NA) ||
+                        (o_unitPos == AttributeTank::ATTR_UNIT_POS_NA) ||
+                        (o_node == AttributeTank::ATTR_NODE_NA))
+                    {
+                        TRACFCOMP(g_trac_targeting,"o_pos[%d], o_unitPos[%d] o_node[%d]", o_pos, o_unitPos, o_node);
+                        targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
+                    }
+                    break;
+
+                    // Expects valid node
+                case(TARGETING::CLASS_ENC):
+                    if ((o_pos != AttributeTank::ATTR_POS_NA) ||
+                        (o_unitPos != AttributeTank::ATTR_UNIT_POS_NA) ||
+                        (o_node == AttributeTank::ATTR_NODE_NA))
+                    {
+                        targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
+                    }
+                    break;
+
+                    // Fail on nonsense values
+                case(TARGETING::CLASS_NA):
+                case(TARGETING::CLASS_MAX):
+                    targAssert(GET_ATTR_TANK_TARGET_POS_DATA, ATTR_CLASS);
             }
         }
         else
