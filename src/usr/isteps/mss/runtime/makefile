@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019
+# Contributors Listed Below - COPYRIGHT 2019,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -92,7 +92,7 @@ OBJS += memory_size.o
 OBJS += gen_mss_mcbist_patterns.o
 OBJS += axone_pos.o
 OBJS += nimbus_pos.o
-
+OBJS += unmask.o
 
 
 #HWP build tool
