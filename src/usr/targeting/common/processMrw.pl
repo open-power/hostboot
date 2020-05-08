@@ -2047,8 +2047,39 @@ sub setEepromAttributeForDdimm
             "connection for DDIMM ($target).\nError";
     }
 
-    # Get the first I2C connection
-    $i2cConn = $i2cConn->{CONN}[0];
+    my $connectionFound = 0;
+
+    # To get the correct i2c connection we must verify that we are getting the
+    # PIB connection type and not the CFAM connection. Rainier and Denali both
+    # use the PIB connection but Denali has a CFAM connection as well.
+    foreach my $connection (@{$i2cConn->{CONN}})
+    {
+        my $connectionType = $targetObj->getAttribute($connection->{SOURCE},
+                                                      "I2C_CONNECTION_TYPE");
+        if ($connectionType eq "PIB")
+        {
+            $i2cConn = $connection;
+            $connectionFound = 1;
+            last;
+        }
+    }
+
+    if ($connectionFound == 0)
+    {
+        print "\nsetEepromAttributeForDdimm: ERROR: Expected to find a ".
+            "PIB I2C connection for DIMM ($target).".
+            "\nPotential MRW I2C_CONNECTION_TYPE error.";
+        print"\n Connections for this DIMM:";
+        foreach my $connection (@{$i2cConn->{CONN}})
+        {
+            print "\n". Dumper($connection);
+            my $type = $targetObj->getAttribute($connection->{SOURCE},
+                                                "I2C_CONNECTION_TYPE");
+            print "\n Connection Type: ". $type ."\n";
+        }
+        select()->flush();
+        die;
+    }
 
     # Sanity check,  Make sure destination target is the same as given target
     my $destTarget = $targetObj->getTargetParent($i2cConn->{DEST_PARENT});
