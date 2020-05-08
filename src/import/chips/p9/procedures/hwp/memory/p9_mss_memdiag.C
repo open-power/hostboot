@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -122,7 +122,7 @@ extern "C"
             fapi2::buffer<uint8_t> l_repairs_exceeded;
             std::vector<uint64_t> l_ranks;
 
-            FAPI_TRY( mss::restore_repairs( l_mca, l_repairs_applied, l_repairs_exceeded) );
+            FAPI_TRY( mss::restore_repairs<mss::mc_type::NIMBUS>( l_mca, l_repairs_applied, l_repairs_exceeded) );
 
             // assert if we have exceeded the allowed repairs
             for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_mca))

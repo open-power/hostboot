@@ -647,7 +647,7 @@ fapi_try_exit:
 /// @param[in] i_dq the bad DQ bit
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 inline fapi2::ReturnCode place_symbol_mark(const fapi2::Target<T>& i_target,
         const uint64_t i_rank,
         const uint64_t i_dq)
@@ -687,7 +687,7 @@ fapi_try_exit:
 /// @param[in] i_dq one of the bad DQ bits in the bad nibble
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 inline fapi2::ReturnCode place_chip_mark(const fapi2::Target<T>& i_target,
         const uint64_t i_rank,
         const uint64_t i_dq)
@@ -713,16 +713,17 @@ fapi_try_exit:
 }
 
 // Forward declaration for use in repair_state classes
-template< fapi2::TargetType T >
+template< mss::mc_type MC, fapi2::TargetType T >
 class repair_state_machine;
 
 ///
 /// @class mss::repair_state
 /// @brief A class for keeping track of bad bit repair states in a repair_state_machine
+/// @tparam MC the memory controller type
 /// @tparam T, the fapi2 target type of the DIMM
 /// @note this is a base class
 ///
-template< fapi2::TargetType T >
+template< mss::mc_type MC, fapi2::TargetType T >
 class repair_state
 {
     public:
@@ -741,7 +742,7 @@ class repair_state
         /// @param[in,out] io_repairs_exceeded 2-bit mask, where a bit set means that DIMM had more bad bits than could be repaired
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
-        virtual fapi2::ReturnCode one_bad_dq(repair_state_machine<T>& io_machine,
+        virtual fapi2::ReturnCode one_bad_dq(repair_state_machine<MC, T>& io_machine,
                                              const fapi2::Target<T>& i_target,
                                              const uint64_t i_rank,
                                              const uint64_t i_dq,
@@ -758,7 +759,7 @@ class repair_state
         /// @param[in,out] io_repairs_exceeded 2-bit mask, where a bit set means that DIMM had more bad bits than could be repaired
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
-        virtual fapi2::ReturnCode multiple_bad_dq(repair_state_machine<T>& io_machine,
+        virtual fapi2::ReturnCode multiple_bad_dq(repair_state_machine<MC, T>& io_machine,
                 const fapi2::Target<T>& i_target,
                 const uint64_t i_rank,
                 const uint64_t i_dq,
@@ -771,7 +772,7 @@ class repair_state
         /// @param[in,out] io_machine the repair state machine
         /// @param[in] i_state pointer to the new state to set
         ///
-        inline void set_state(repair_state_machine<T>& io_machine, std::shared_ptr<repair_state<T>> i_state)
+        inline void set_state(repair_state_machine<MC, T>& io_machine, std::shared_ptr<repair_state<MC, T>> i_state)
         {
             io_machine.update_state(i_state);
         }
@@ -780,10 +781,11 @@ class repair_state
 ///
 /// @class mss::chip_and_symbol_mark
 /// @brief repair_state class for when both a chip mark and a symbol mark have been used
+/// @tparam MC the memory controller type
 /// @tparam T, the fapi2 target type of the DIMM
 ///
-template< fapi2::TargetType T >
-class chip_and_symbol_mark : public repair_state<T>
+template< mss::mc_type MC, fapi2::TargetType T >
+class chip_and_symbol_mark : public repair_state<MC, T>
 {
     public:
         /// @brief default contructor
@@ -801,7 +803,7 @@ class chip_and_symbol_mark : public repair_state<T>
         /// @param[in,out] io_repairs_exceeded 2-bit mask, where a bit set means that DIMM had more bad bits than could be repaired
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
-        fapi2::ReturnCode one_bad_dq(repair_state_machine<T>& io_machine,
+        fapi2::ReturnCode one_bad_dq(repair_state_machine<MC, T>& io_machine,
                                      const fapi2::Target<T>& i_target,
                                      const uint64_t i_rank,
                                      const uint64_t i_dq,
@@ -827,7 +829,7 @@ class chip_and_symbol_mark : public repair_state<T>
         /// @param[in,out] io_repairs_exceeded 2-bit mask, where a bit set means that DIMM had more bad bits than could be repaired
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
-        fapi2::ReturnCode multiple_bad_dq(repair_state_machine<T>& io_machine,
+        fapi2::ReturnCode multiple_bad_dq(repair_state_machine<MC, T>& io_machine,
                                           const fapi2::Target<T>& i_target,
                                           const uint64_t i_rank,
                                           const uint64_t i_dq,
@@ -847,10 +849,11 @@ class chip_and_symbol_mark : public repair_state<T>
 ///
 /// @class mss::symbol_mark_plus_unrepaired_dq
 /// @brief repair_state class for when only a symbol mark has been used, and one DQ bit remains unrepaired
+/// @tparam MC the memory controller type
 /// @tparam T, the fapi2 target type of the DIMM
 ///
-template< fapi2::TargetType T >
-class symbol_mark_plus_unrepaired_dq : public repair_state<T>
+template< mss::mc_type MC, fapi2::TargetType T >
+class symbol_mark_plus_unrepaired_dq : public repair_state<MC, T>
 {
     public:
         /// @brief default contructor
@@ -868,7 +871,7 @@ class symbol_mark_plus_unrepaired_dq : public repair_state<T>
         /// @param[in,out] io_repairs_exceeded 2-bit mask, where a bit set means that DIMM had more bad bits than could be repaired
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
-        fapi2::ReturnCode one_bad_dq(repair_state_machine<T>& io_machine,
+        fapi2::ReturnCode one_bad_dq(repair_state_machine<MC, T>& io_machine,
                                      const fapi2::Target<T>& i_target,
                                      const uint64_t i_rank,
                                      const uint64_t i_dq,
@@ -894,7 +897,7 @@ class symbol_mark_plus_unrepaired_dq : public repair_state<T>
         /// @param[in,out] io_repairs_exceeded 2-bit mask, where a bit set means that DIMM had more bad bits than could be repaired
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
-        fapi2::ReturnCode multiple_bad_dq(repair_state_machine<T>& io_machine,
+        fapi2::ReturnCode multiple_bad_dq(repair_state_machine<MC, T>& io_machine,
                                           const fapi2::Target<T>& i_target,
                                           const uint64_t i_rank,
                                           const uint64_t i_dq,
@@ -902,14 +905,14 @@ class symbol_mark_plus_unrepaired_dq : public repair_state<T>
                                           fapi2::buffer<uint8_t>& io_repairs_exceeded)
         {
             // place a chip mark, but also repairs exceeded
-            FAPI_TRY( place_chip_mark(i_target, i_rank, i_dq) );
+            FAPI_TRY( place_chip_mark<MC>(i_target, i_rank, i_dq) );
             FAPI_TRY( io_repairs_applied.setBit(i_rank) );
             FAPI_TRY( io_repairs_exceeded.setBit(mss::index(i_target)) );
             FAPI_INF("%s Repairs exceeded (symbol mark and unrepaired DQ exist, plus bad nibble) on rank:%d DQ:%d",
                      mss::c_str(i_target), i_rank, i_dq);
             {
-                const auto new_state = std::make_shared<chip_and_symbol_mark<fapi2::TARGET_TYPE_DIMM>>();
-                mss::repair_state<T>::set_state(io_machine, new_state);
+                const auto new_state = std::make_shared<chip_and_symbol_mark<MC, T>>();
+                mss::repair_state<MC, T>::set_state(io_machine, new_state);
             }
         fapi_try_exit:
             return fapi2::current_err;
@@ -920,10 +923,11 @@ class symbol_mark_plus_unrepaired_dq : public repair_state<T>
 ///
 /// @class mss::symbol_mark_only
 /// @brief repair_state class for when only a symbol mark has been used
+/// @tparam MC the memory controller type
 /// @tparam T, the fapi2 target type of the DIMM
 ///
-template< fapi2::TargetType T >
-class symbol_mark_only : public repair_state<T>
+template< mss::mc_type MC, fapi2::TargetType T >
+class symbol_mark_only : public repair_state<MC, T>
 {
     public:
         /// @brief default contructor
@@ -941,7 +945,7 @@ class symbol_mark_only : public repair_state<T>
         /// @param[in,out] io_repairs_exceeded 2-bit mask, where a bit set means that DIMM had more bad bits than could be repaired
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
-        fapi2::ReturnCode one_bad_dq(repair_state_machine<T>& io_machine,
+        fapi2::ReturnCode one_bad_dq(repair_state_machine<MC, T>& io_machine,
                                      const fapi2::Target<T>& i_target,
                                      const uint64_t i_rank,
                                      const uint64_t i_dq,
@@ -949,8 +953,8 @@ class symbol_mark_only : public repair_state<T>
                                      fapi2::buffer<uint8_t>& io_repairs_exceeded)
         {
             // leave an unrepaired DQ
-            const auto new_state = std::make_shared< symbol_mark_plus_unrepaired_dq<T> >();
-            mss::repair_state<T>::set_state(io_machine, new_state);
+            const auto new_state = std::make_shared< symbol_mark_plus_unrepaired_dq<MC, T> >();
+            mss::repair_state<MC, T>::set_state(io_machine, new_state);
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -964,7 +968,7 @@ class symbol_mark_only : public repair_state<T>
         /// @param[in,out] io_repairs_exceeded 2-bit mask, where a bit set means that DIMM had more bad bits than could be repaired
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
-        fapi2::ReturnCode multiple_bad_dq(repair_state_machine<T>& io_machine,
+        fapi2::ReturnCode multiple_bad_dq(repair_state_machine<MC, T>& io_machine,
                                           const fapi2::Target<T>& i_target,
                                           const uint64_t i_rank,
                                           const uint64_t i_dq,
@@ -972,11 +976,11 @@ class symbol_mark_only : public repair_state<T>
                                           fapi2::buffer<uint8_t>& io_repairs_exceeded)
         {
             // place a chip mark
-            FAPI_TRY( place_chip_mark(i_target, i_rank, i_dq) );
+            FAPI_TRY( place_chip_mark<MC>(i_target, i_rank, i_dq) );
             FAPI_TRY( io_repairs_applied.setBit(i_rank) );
             {
-                const auto new_state = std::make_shared< chip_and_symbol_mark<T> >();
-                mss::repair_state<T>::set_state(io_machine, new_state);
+                const auto new_state = std::make_shared< chip_and_symbol_mark<MC, T> >();
+                mss::repair_state<MC, T>::set_state(io_machine, new_state);
             }
         fapi_try_exit:
             return fapi2::current_err;
@@ -986,10 +990,11 @@ class symbol_mark_only : public repair_state<T>
 ///
 /// @class mss::chip_mark_only
 /// @brief repair_state class for when only a chip mark has been used
+/// @tparam MC the memory controller type
 /// @tparam T, the fapi2 target type of the DIMM
 ///
-template< fapi2::TargetType T >
-class chip_mark_only : public repair_state<T>
+template< mss::mc_type MC, fapi2::TargetType T >
+class chip_mark_only : public repair_state<MC, T>
 {
     public:
         /// @brief default contructor
@@ -1007,7 +1012,7 @@ class chip_mark_only : public repair_state<T>
         /// @param[in,out] io_repairs_exceeded 2-bit mask, where a bit set means that DIMM had more bad bits than could be repaired
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
-        fapi2::ReturnCode one_bad_dq(repair_state_machine<T>& io_machine,
+        fapi2::ReturnCode one_bad_dq(repair_state_machine<MC, T>& io_machine,
                                      const fapi2::Target<T>& i_target,
                                      const uint64_t i_rank,
                                      const uint64_t i_dq,
@@ -1015,11 +1020,11 @@ class chip_mark_only : public repair_state<T>
                                      fapi2::buffer<uint8_t>& io_repairs_exceeded)
         {
             // place a symbol mark
-            FAPI_TRY( place_symbol_mark(i_target, i_rank, i_dq) );
+            FAPI_TRY( place_symbol_mark<MC>(i_target, i_rank, i_dq) );
             FAPI_TRY( io_repairs_applied.setBit(i_rank) );
             {
-                const auto new_state = std::make_shared<chip_and_symbol_mark<fapi2::TARGET_TYPE_DIMM>>();
-                mss::repair_state<T>::set_state(io_machine, new_state);
+                const auto new_state = std::make_shared<chip_and_symbol_mark<MC, T>>();
+                mss::repair_state<MC, T>::set_state(io_machine, new_state);
             }
         fapi_try_exit:
             return fapi2::current_err;
@@ -1035,7 +1040,7 @@ class chip_mark_only : public repair_state<T>
         /// @param[in,out] io_repairs_exceeded 2-bit mask, where a bit set means that DIMM had more bad bits than could be repaired
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
-        fapi2::ReturnCode multiple_bad_dq(repair_state_machine<T>& io_machine,
+        fapi2::ReturnCode multiple_bad_dq(repair_state_machine<MC, T>& io_machine,
                                           const fapi2::Target<T>& i_target,
                                           const uint64_t i_rank,
                                           const uint64_t i_dq,
@@ -1055,10 +1060,11 @@ class chip_mark_only : public repair_state<T>
 ///
 /// @class mss::no_fails
 /// @brief repair_state class for no fails (no marks applied)
+/// @tparam MC the memory controller type
 /// @tparam T, the fapi2 target type of the DIMM
 ///
-template< fapi2::TargetType T >
-class no_fails : public repair_state<T>
+template< mss::mc_type MC, fapi2::TargetType T >
+class no_fails : public repair_state<MC, T>
 {
     public:
         /// @brief default contructor
@@ -1076,7 +1082,7 @@ class no_fails : public repair_state<T>
         /// @param[in,out] io_repairs_exceeded 2-bit mask, where a bit set means that DIMM had more bad bits than could be repaired
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
-        fapi2::ReturnCode one_bad_dq(repair_state_machine<T>& io_machine,
+        fapi2::ReturnCode one_bad_dq(repair_state_machine<MC, T>& io_machine,
                                      const fapi2::Target<T>& i_target,
                                      const uint64_t i_rank,
                                      const uint64_t i_dq,
@@ -1084,11 +1090,11 @@ class no_fails : public repair_state<T>
                                      fapi2::buffer<uint8_t>& io_repairs_exceeded)
         {
             // place a symbol mark
-            FAPI_TRY( place_symbol_mark(i_target, i_rank, i_dq) );
+            FAPI_TRY( place_symbol_mark<MC>(i_target, i_rank, i_dq) );
             FAPI_TRY( io_repairs_applied.setBit(i_rank) );
             {
-                const auto new_state = std::make_shared<symbol_mark_only<fapi2::TARGET_TYPE_DIMM>>();
-                mss::repair_state<T>::set_state(io_machine, new_state);
+                const auto new_state = std::make_shared<symbol_mark_only<MC, T>>();
+                mss::repair_state<MC, T>::set_state(io_machine, new_state);
             }
         fapi_try_exit:
             return fapi2::current_err;
@@ -1104,7 +1110,7 @@ class no_fails : public repair_state<T>
         /// @param[in,out] io_repairs_exceeded 2-bit mask, where a bit set means that DIMM had more bad bits than could be repaired
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
-        fapi2::ReturnCode multiple_bad_dq(repair_state_machine<T>& io_machine,
+        fapi2::ReturnCode multiple_bad_dq(repair_state_machine<MC, T>& io_machine,
                                           const fapi2::Target<T>& i_target,
                                           const uint64_t i_rank,
                                           const uint64_t i_dq,
@@ -1112,11 +1118,11 @@ class no_fails : public repair_state<T>
                                           fapi2::buffer<uint8_t>& io_repairs_exceeded)
         {
             // place a chip mark
-            FAPI_TRY( place_chip_mark(i_target, i_rank, i_dq) );
+            FAPI_TRY( place_chip_mark<MC>(i_target, i_rank, i_dq) );
             FAPI_TRY( io_repairs_applied.setBit(i_rank) );
             {
-                const auto new_state = std::make_shared<chip_mark_only<fapi2::TARGET_TYPE_DIMM>>();
-                mss::repair_state<T>::set_state(io_machine, new_state);
+                const auto new_state = std::make_shared<chip_mark_only<MC, T>>();
+                mss::repair_state<MC, T>::set_state(io_machine, new_state);
             }
         fapi_try_exit:
             return fapi2::current_err;
@@ -1126,15 +1132,16 @@ class no_fails : public repair_state<T>
 ///
 /// @class mss::repair_state_machine
 /// @brief state machine class used in restore_repairs_helper
+/// @tparam MC the memory controller type
 /// @tparam T, the fapi2 target type of the DIMM
 ///
-template< fapi2::TargetType T >
+template< mss::mc_type MC, fapi2::TargetType T >
 class repair_state_machine
 {
     public:
         /// @brief constructor
         repair_state_machine()
-            : iv_repair_state(std::make_shared<no_fails<T>>()) {}
+            : iv_repair_state(std::make_shared<no_fails<MC, T>>()) {}
 
         /// @brief default destructor
         ~repair_state_machine() = default;
@@ -1183,13 +1190,13 @@ class repair_state_machine
         /// @brief Update the state of the state machine
         /// @param[in] i_state shared pointer to the new state
         ///
-        void update_state(std::shared_ptr<repair_state<T>> i_state)
+        void update_state(std::shared_ptr<repair_state<MC, T>> i_state)
         {
             iv_repair_state = i_state;
         }
 
     private:
-        std::shared_ptr<repair_state<T>> iv_repair_state;
+        std::shared_ptr<repair_state<MC, T>> iv_repair_state;
 };
 
 /// @brief Get the attributes for the reorder queue setting
@@ -1270,7 +1277,7 @@ inline std::vector<uint64_t> bad_bit_helper(const uint8_t i_bad_bits, const size
 /// @param[in,out] io_repairs_exceeded 2-bit mask, where a bit set means that DIMM had more bad bits than could be repaired
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, uint64_t R, uint64_t B >
+template< mss::mc_type MC, fapi2::TargetType T, uint64_t R, uint64_t B >
 inline fapi2::ReturnCode restore_repairs_helper( const fapi2::Target<T>& i_target,
         const uint8_t i_bad_bits[R][B],
         fapi2::buffer<uint8_t>& io_repairs_applied,
@@ -1292,7 +1299,7 @@ inline fapi2::ReturnCode restore_repairs_helper( const fapi2::Target<T>& i_targe
     {
         const auto l_rank_idx = index(l_rank);
 
-        repair_state_machine<fapi2::TARGET_TYPE_DIMM> l_machine;
+        repair_state_machine<MC, fapi2::TARGET_TYPE_DIMM> l_machine;
 
         for (uint64_t l_byte = 0; l_byte < (MT::MAX_DQ_NIBBLES / mss::conversions::NIBBLES_PER_BYTE); ++l_byte)
         {
@@ -1340,7 +1347,7 @@ fapi_try_exit:
 /// @param[in,out] io_repairs_exceeded bit mask, where a bit set means a DIMM had more bad bits than could be repaired (bit0 = DIMM0 etc)
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
+template< mss::mc_type MC, fapi2::TargetType T >
 inline fapi2::ReturnCode restore_repairs( const fapi2::Target<T>& i_target,
         fapi2::buffer<uint8_t>& io_repairs_applied,
         fapi2::buffer<uint8_t>& io_repairs_exceeded)
