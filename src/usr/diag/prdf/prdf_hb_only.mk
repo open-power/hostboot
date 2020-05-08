@@ -281,6 +281,7 @@ prd_obj_no_sim += adr32s_workarounds.o
 prd_obj_no_sim += dcd.o
 prd_obj_no_sim += rdimm_raw_cards.o
 prd_obj_no_sim += lrdimm_raw_cards.o
+prd_obj_no_sim += exp_unmask.o
 
 ################################################################################
 # The following are hardware procedure utilities that we are pulling into the
