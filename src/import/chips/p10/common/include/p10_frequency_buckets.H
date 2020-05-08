@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,59 +26,81 @@
 #ifndef _P10_FREQUENCY_BUCKETS_H_
 #define _P10_FREQUENCY_BUCKETS_H_
 
-// constant defining number of MEM PLL frequency options ('buckets')
-// to be built into unsigned HW image
-const uint8_t MEM_PLL_FREQ_BUCKETS = 4;
 
-// MEM PLL frequency in MHz
-// index is bucket number
-const uint32_t MEM_PLL_FREQ_LIST[MEM_PLL_FREQ_BUCKETS] =
+//
+// REFCLOCKS
+//
+
+// internal/external reference clock frequencies
+// values represented in KHz
+enum p10_refclock_freq_t
 {
-    1333,
-    1466,
-    1600,
-    2000,
+    REFCLOCK_FREQ_100 = 100000,
+    REFCLOCK_FREQ_133 = 133333,
+    REFCLOCK_FREQ_156 = 156250,
 };
+
+
+//
+// MC
+//
+
+// constant defining number of MC PLL frequency options ('buckets')
+// to be built into unsigned HW image (currently used/max)
+const uint8_t P10_NUM_MC_PLL_BUCKETS = 4;
+const uint8_t P10_MAX_MC_PLL_BUCKETS = 8;
+
+// MC PLL bucket descriptor, defines bucket properties in terms of:
+// - required input referecnce clock freqeuncy (KHz)
+// - resultant output grid frequency (MHz)
+// - resultant output link frequency (MHz)
+struct p10_mc_pll_bucket_descriptor_t
+{
+    p10_refclock_freq_t refclock_freq_khz;  // PLL input frequency (KHz)
+    uint32_t            freq_grid_mhz;      // MC chiplet grid frequency (MHz)   ATTR_FREQ_MC_MHZ
+    uint32_t            freq_link_mhz;      // OMI link frequency (MHz)          ATTR_FREQ_OMI_MHZ
+};
+
+// array of bucket descriptors, index is bucket number
+const p10_mc_pll_bucket_descriptor_t P10_MC_PLL_BUCKETS[P10_NUM_MC_PLL_BUCKETS] =
+{
+    { REFCLOCK_FREQ_133, 1333, 21330 }, // DDR4-2667
+    { REFCLOCK_FREQ_133, 1467, 23460 }, // DDR4-2933
+    { REFCLOCK_FREQ_133, 1600, 25600 }, // DDR4-3200
+    { REFCLOCK_FREQ_133, 2000, 32000 }  // DDR5
+};
+
+
+//
+// IOHS
+//
 
 // constant definining number of IOHS PLL frequency options ('buckets')
-// to be built into unsigned HW image
-const uint8_t IOHS_PLL_FREQ_BUCKETS = 8;
+// to be built into unsigned HW image (currently used/max)
+const uint8_t P10_NUM_IOHS_PLL_BUCKETS = 6;
+const uint8_t P10_MAX_IOHS_PLL_BUCKETS = 8;
 
-// IOHS PLL frequency in MHz
-// index is bucket number
-const uint32_t IOHS_PLL_FREQ_LIST[IOHS_PLL_FREQ_BUCKETS] =
+// IOHS PLL bucket descriptor, defines bucket properties in terms of:
+// - required input reference clock frequency (KHz)
+// - resultant output grid frequency (MHz)
+// - resultant output link frequency (MHz)
+struct p10_iohs_pll_bucket_descriptor_t
 {
-    1250,
-    1563,
-    1611,
-    1992,
-    2000,
-    2067,
-    2070,
-    0
+    p10_refclock_freq_t  refclock_freq_khz;  // PLL input frequency (KHz)
+    uint32_t             freq_grid_mhz;      // IOHS chiplet grid frequency (MHz)  ATTR_FREQ_IOHS_MHZ
+    uint32_t             freq_link_mhz;      // IOHS link frequency (MHz)          ATTR_FREQ_IOHS_LINK_MHZ
 };
 
-// OMI bucket descriptor
-struct OmiBucketDescriptor_t
+// array of bucket descriptors, index is bucket number
+const p10_iohs_pll_bucket_descriptor_t P10_IOHS_PLL_BUCKETS[P10_NUM_IOHS_PLL_BUCKETS] =
 {
-    uint32_t omifreq; // OMI Frequency in MHz
-    uint32_t vco;     // VCO selector
-
-    uint32_t mcafreq; // MCA Frequency in MHz
+    { REFCLOCK_FREQ_156, 1611, 25781 },
+    { REFCLOCK_FREQ_156, 1992, 31875 },
+    { REFCLOCK_FREQ_133, 2000, 32000 },
+    { REFCLOCK_FREQ_156, 2031, 32500 },
+    { REFCLOCK_FREQ_133, 2067, 33067 },
+    { REFCLOCK_FREQ_156, 2109, 33750 }
 };
 
-//MC PLL frequency in MHz for Axone
-// index is bucket number
-// OMI -> ATTR_FREQ_OMI_MHZ
-// VCO -> ATTR_OMI_PLL_VCO
-// MCA -> ATTR_FREQ_MCA_MHZ
-const OmiBucketDescriptor_t OMI_PLL_FREQ_LIST[MEM_PLL_FREQ_BUCKETS] =
-{
-    //  OMI    VCO   MCA          Data rate
-    { 21330,   0,    1333 }, // ->DDR4-2667
-    { 23460,   0,    1466 }, // ->DDR4-2933
-    { 23460,   1,    1466 }, // ->DDR4-2933
-    { 25600,   1,    1600 }  // ->DDR4-3200
-};
 
 #endif // _P10_FREQUENCY_BUCKETS_H_

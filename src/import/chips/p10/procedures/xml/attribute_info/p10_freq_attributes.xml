@@ -148,6 +148,23 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_FREQ_OMI_MHZ</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    The frequency of the OMI channel.
+  </description>
+  <valueType>uint32</valueType>
+  <enum>
+    21330 = 21330,
+    23460 = 23460,
+    25600 = 25600,
+    32000 = 32000
+  </enum>
+  <platInit/>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_FREQ_IOHS_MHZ</id>
   <targetType>TARGET_TYPE_IOHS</targetType>
   <description>
@@ -156,13 +173,31 @@
   </description>
   <valueType>uint32</valueType>
   <enum>
-    1250 = 1250,
-    1563 = 1563,
     1611 = 1611,
     1992 = 1992,
     2000 = 2000,
+    2031 = 2031,
     2067 = 2067,
-    2070 = 2070
+    2109 = 2109
+  </enum>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_FREQ_IOHS_LINK_MHZ</id>
+  <targetType>TARGET_TYPE_IOHS</targetType>
+  <description>
+    The frequency of a processor's IOHS link clock, in MHz.
+    This can be set differently on a by-link basis.
+  </description>
+  <valueType>uint32</valueType>
+  <enum>
+    25781 = 25781,
+    31875 = 31875,
+    32000 = 32000,
+    32500 = 32500,
+    33067 = 33067,
+    33750 = 33750
   </enum>
   <platInit/>
 </attribute>
@@ -178,13 +213,12 @@
   <valueType>uint32</valueType>
   <array>8</array>
   <enum>
-    1250 = 1250,
-    1563 = 1563,
     1611 = 1611,
     1992 = 1992,
     2000 = 2000,
+    2031 = 2031,
     2067 = 2067,
-    2070 = 2070
+    2109 = 2109
   </enum>
   <writeable/>
 </attribute>

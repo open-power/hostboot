@@ -185,21 +185,20 @@
   <targetType>TARGET_TYPE_IOHS</targetType>
   <description>
     Per-link optics configuration
-    OPT0 = SMPA/SMPX/OCAPI/NV
+    OPT0 = SMPA/SMPX/OCAPI
     OPT1 = SMPA/SMPX
     OPT2 = SMPA/SMPX
-    OPT3 = SMPA/SMPX/OCAPI/NV
-    OPT4 = SMPA/SMPX/OCAPI/NV
-    OPT5 = SMPA/SMPX/OCAPI/NV
-    OPT6 = SMPA/SMPX/OCAPI/NV
-    OPT7 = SMPA/SMPX/OCAPI/NV
+    OPT3 = SMPA/SMPX/OCAPI
+    OPT4 = SMPA/SMPX/OCAPI
+    OPT5 = SMPA/SMPX/OCAPI
+    OPT6 = SMPA/SMPX/OCAPI
+    OPT7 = SMPA/SMPX/OCAPI
     Provided by the MRW.
   </description>
   <valueType>uint8</valueType>
   <enum>
     SMPX  = 0x0,
     SMPA  = 0x1,
-    NV    = 0x2,
     OCAPI = 0x3
   </enum>
   <platInit>mrw</platInit>
@@ -806,23 +805,6 @@
   <valueType>uint8</valueType>
   <writeable/>
   <initToZero/>
-</attribute>
-<!-- ********************************************************************** -->
-<attribute>
-  <id>ATTR_FREQ_OMI_MHZ</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>
-    The frequency of the OMI channel.
-  </description>
-  <valueType>uint32</valueType>
-  <enum>
-    19200 = 19200,
-    21330 = 21330,
-    23460 = 23460,
-    25600 = 25600
-  </enum>
-  <platInit/>
-  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 </attributes>

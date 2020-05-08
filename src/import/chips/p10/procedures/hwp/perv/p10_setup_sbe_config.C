@@ -186,9 +186,9 @@ p10_sbe_scratch_regs_get_mc_pll_bucket(
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mc_target, l_unit_num),
                  "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
 
-        for (auto l_bucket = 0; l_bucket < MEM_PLL_FREQ_BUCKETS; l_bucket++)
+        for (auto l_bucket = 0; l_bucket < P10_NUM_MC_PLL_BUCKETS; l_bucket++)
         {
-            if (l_attr_freq_mc_mhz == MEM_PLL_FREQ_LIST[l_bucket])
+            if (l_attr_freq_mc_mhz == P10_MC_PLL_BUCKETS[l_bucket].freq_grid_mhz)
             {
                 l_bucket_found = true;
                 o_attr_mc_pll_bucket[l_unit_num] = l_bucket;
@@ -237,9 +237,9 @@ p10_sbe_scratch_regs_get_iohs_pll_bucket(
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_iohs_target, l_unit_num),
                  "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
 
-        for (auto l_bucket = 0; l_bucket < IOHS_PLL_FREQ_BUCKETS; l_bucket++)
+        for (auto l_bucket = 0; l_bucket < P10_NUM_IOHS_PLL_BUCKETS; l_bucket++)
         {
-            if (l_attr_freq_iohs_mhz == IOHS_PLL_FREQ_LIST[l_bucket])
+            if (l_attr_freq_iohs_mhz == P10_IOHS_PLL_BUCKETS[l_bucket].freq_grid_mhz)
             {
                 l_bucket_found = true;
                 o_attr_iohs_pll_bucket[l_unit_num] = l_bucket;

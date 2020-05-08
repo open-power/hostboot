@@ -62,7 +62,6 @@ fapi2::ReturnCode p10_fbc_dlp_scom(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>&
         uint64_t l_def_FBC_ENABLED = ((l_TGT0_ATTR_IOHS_CONFIG_MODE == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX)
                                       || (l_TGT0_ATTR_IOHS_CONFIG_MODE == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPA));
         uint64_t l_def_OCAPI_ENABLED = (l_TGT0_ATTR_IOHS_CONFIG_MODE == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_OCAPI);
-        uint64_t l_def_NVLINK_ENABLED = (l_TGT0_ATTR_IOHS_CONFIG_MODE == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_NV);
         fapi2::ATTR_IS_SIMULATION_Type l_TGT2_ATTR_IS_SIMULATION;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, TGT2, l_TGT2_ATTR_IS_SIMULATION));
         uint64_t l_def_IS_SIM = (l_TGT2_ATTR_IS_SIMULATION == literal_1);
@@ -110,11 +109,6 @@ fapi2::ReturnCode p10_fbc_dlp_scom(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>&
             {
                 constexpr auto l_DLP0_DLP_CONFIG_DL_SELECT_DLO = 0x2;
                 l_scom_buffer.insert<62, 2, 62, uint64_t>(l_DLP0_DLP_CONFIG_DL_SELECT_DLO );
-            }
-            else if (l_def_NVLINK_ENABLED)
-            {
-                constexpr auto l_DLP0_DLP_CONFIG_DL_SELECT_DLN = 0x3;
-                l_scom_buffer.insert<62, 2, 62, uint64_t>(l_DLP0_DLP_CONFIG_DL_SELECT_DLN );
             }
 
             if (l_def_EVN_ENABLED)
