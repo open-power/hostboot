@@ -128,6 +128,7 @@ class mrep_dwl_result
             FAPI_ASSERT(i_buffer < MAX_LRDIMM_BUFFERS,
                         fapi2::MSS_INVALID_INDEX_PASSED()
                         .set_INDEX(i_buffer)
+                        .set_TARGET(i_target)
                         .set_FUNCTION((i_calibration == mss::cal_steps::MREP) ? MREP_CALL_OUT : DWL_CALL_OUT),
                         "%s Invalid buffer index passed to mrep_dwl_result::add_results(%d)",
                         mss::c_str(i_target), i_buffer);
