@@ -1034,7 +1034,9 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
                 // OCMB target
                 else if ( TYPE_OCMB_CHIP == trgtType )
                 {
+                    /* TODO - disabled for now until defects are debugged
                     rc = PRDF::restoreDramRepairs<TYPE_OCMB_CHIP>( target );
+                    */
                 }
                 else
                 {
