@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,191 +52,31 @@ namespace modal_symbol_count
 
 ///
 /// @brief Read modal symbol count (MBSSYMEC*Q) register
-/// @tparam N the register index (0-8)
 /// @tparam T fapi2 Target Type - derived from i_target's type
 /// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
 /// @param[in] i_target the fapi2 target of the mc
+/// @param[in] i_index the register index (0-9)
 /// @param[out] o_data the value of the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< uint64_t N, fapi2::TargetType T, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
-inline fapi2::ReturnCode read_index( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+template<fapi2::TargetType T, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+inline fapi2::ReturnCode read(
+    const fapi2::Target<T>& i_target,
+    const uint32_t i_index,
+    fapi2::buffer<uint64_t>& o_data )
 {
-    static_assert((N < TT::NUM_MBSSYM_REGS), "Modal symbol count reg index failed range check");
-    FAPI_TRY( mss::getScom(i_target, (TT::MODAL_SYM_COUNT0_REG + N), o_data) );
-    FAPI_INF("read_index<%d>: 0x%016lx", N, o_data);
-fapi_try_exit:
-    return fapi2::current_err;
-}
 
-///
-/// @brief Read modal symbol count (MBSSYMEC*Q) 0 register
-/// @tparam T fapi2 Target Type - derived from i_target's type
-/// @param[in] i_target the fapi2 target of the mc
-/// @param[out] o_data the value of the register
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-template< fapi2::TargetType T >
-inline fapi2::ReturnCode read_index0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
-{
-    return ( read_index<0>(i_target, o_data) );
-}
+    FAPI_ASSERT(i_index < TT::NUM_MBSSYM_REGS,
+                fapi2::MSS_INVALID_INDEX_PASSED()
+                .set_INDEX(i_index)
+                .set_TARGET(i_target)
+                .set_FUNCTION(SYMBOL_COUNT_READ),
+                "%s Invalid index passed to fwms::ecc::modal_symbol_count::read (%d)",
+                mss::c_str(i_target),
+                i_index);
 
-///
-/// @brief Read modal symbol count (MBSSYMEC*Q) 1 register
-/// @tparam T fapi2 Target Type - derived from i_target's type
-/// @param[in] i_target the fapi2 target of the mc
-/// @param[out] o_data the value of the register
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-template< fapi2::TargetType T >
-inline fapi2::ReturnCode read_index1( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
-{
-    return ( read_index<1>(i_target, o_data) );
-}
-
-///
-/// @brief Read modal symbol count (MBSSYMEC*Q) 2 register
-/// @tparam T fapi2 Target Type - derived from i_target's type
-/// @param[in] i_target the fapi2 target of the mc
-/// @param[out] o_data the value of the register
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-template< fapi2::TargetType T >
-inline fapi2::ReturnCode read_index2( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
-{
-    return ( read_index<2>(i_target, o_data) );
-}
-
-///
-/// @brief Read modal symbol count (MBSSYMEC*Q) 3 register
-/// @tparam T fapi2 Target Type - derived from i_target's type
-/// @param[in] i_target the fapi2 target of the mc
-/// @param[out] o_data the value of the register
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-template< fapi2::TargetType T >
-inline fapi2::ReturnCode read_index3( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
-{
-    return ( read_index<3>(i_target, o_data) );
-}
-
-///
-/// @brief Read modal symbol count (MBSSYMEC*Q) 4 register
-/// @tparam T fapi2 Target Type - derived from i_target's type
-/// @param[in] i_target the fapi2 target of the mc
-/// @param[out] o_data the value of the register
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-template< fapi2::TargetType T >
-inline fapi2::ReturnCode read_index4( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
-{
-    return ( read_index<4>(i_target, o_data) );
-}
-
-///
-/// @brief Read modal symbol count (MBSSYMEC*Q) 5 register
-/// @tparam T fapi2 Target Type - derived from i_target's type
-/// @param[in] i_target the fapi2 target of the mc
-/// @param[out] o_data the value of the register
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-template< fapi2::TargetType T >
-inline fapi2::ReturnCode read_index5( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
-{
-    return ( read_index<5>(i_target, o_data) );
-}
-
-///
-/// @brief Read modal symbol count (MBSSYMEC*Q) 6 register
-/// @tparam T fapi2 Target Type - derived from i_target's type
-/// @param[in] i_target the fapi2 target of the mc
-/// @param[out] o_data the value of the register
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-template< fapi2::TargetType T >
-inline fapi2::ReturnCode read_index6( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
-{
-    return ( read_index<6>(i_target, o_data) );
-}
-
-///
-/// @brief Read modal symbol count (MBSSYMEC*Q) 7 register
-/// @tparam T fapi2 Target Type - derived from i_target's type
-/// @param[in] i_target the fapi2 target of the mc
-/// @param[out] o_data the value of the register
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-template< fapi2::TargetType T >
-inline fapi2::ReturnCode read_index7( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
-{
-    return ( read_index<7>(i_target, o_data) );
-}
-
-///
-/// @brief Read modal symbol count (MBSSYMEC*Q) 8 register
-/// @tparam T fapi2 Target Type - derived from i_target's type
-/// @param[in] i_target the fapi2 target of the mc
-/// @param[out] o_data the value of the register
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-template< fapi2::TargetType T >
-inline fapi2::ReturnCode read_index8( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
-{
-    return ( read_index<8>(i_target, o_data) );
-}
-
-///
-/// @brief Read modal symbol count (MBSSYMEC*Q) register
-/// @tparam T fapi2 Target Type - derived from i_target's type
-/// @param[in] i_target the fapi2 target of the mc
-/// @param[in] i_index the register index
-/// @param[out] o_data the value of the register
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-template< fapi2::TargetType T >
-inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target,
-                               const uint64_t i_index,
-                               fapi2::buffer<uint64_t>& o_data )
-{
-    switch (i_index)
-    {
-        case(0):
-            return ( read_index0(i_target, o_data) );
-
-        case(1):
-            return ( read_index1(i_target, o_data) );
-
-        case(2):
-            return ( read_index2(i_target, o_data) );
-
-        case(3):
-            return ( read_index3(i_target, o_data) );
-
-        case(4):
-            return ( read_index4(i_target, o_data) );
-
-        case(5):
-            return ( read_index5(i_target, o_data) );
-
-        case(6):
-            return ( read_index6(i_target, o_data) );
-
-        case(7):
-            return ( read_index7(i_target, o_data) );
-
-        case(8):
-            return ( read_index8(i_target, o_data) );
-
-        default:
-            FAPI_ASSERT( false,
-                         fapi2::MSS_INVALID_INDEX_PASSED()
-                         .set_INDEX(i_index)
-                         .set_FUNCTION(SYMBOL_COUNT_READ),
-                         "%s Invalid index passed to fwms::ecc::modal_symbol_count::read (%d)",
-                         mss::c_str(i_target),
-                         i_index);
-    }
+    FAPI_TRY(mss::getScom(i_target, (TT::MODAL_SYM_COUNT0_REG + i_index), o_data));
+    FAPI_INF("%s read_index %lu: 0x%016lx", mss::c_str(i_target), i_index, o_data);
 
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
@@ -244,194 +84,31 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Write  modal symbol count (MBSSYMEC*Q) register
-/// @tparam N the register index (0-8)
+/// @brief Write modal symbol count (MBSSYMEC*Q) register
 /// @tparam T fapi2 Target Type - derived from i_target's type
 /// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
 /// @param[in] i_target the fapi2 target of the mc
+/// @param[in] i_index the register index (0-9)
 /// @param[in] i_data the value to write to the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< uint64_t N, fapi2::TargetType T, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
-inline fapi2::ReturnCode write_index( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+template<fapi2::TargetType T, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+inline fapi2::ReturnCode write(
+    const fapi2::Target<T>& i_target,
+    const uint32_t i_index,
+    const fapi2::buffer<uint64_t>& i_data )
 {
-    static_assert((N < TT::NUM_MBSSYM_REGS), "Modal symbol count reg index failed range check");
-    FAPI_TRY( mss::putScom(i_target, (TT::MODAL_SYM_COUNT0_REG + N), i_data) );
-    FAPI_INF("write_index<%d>: 0x%016lx", N, i_data);
-fapi_try_exit:
-    return fapi2::current_err;
-}
+    FAPI_ASSERT(i_index < TT::NUM_MBSSYM_REGS,
+                fapi2::MSS_INVALID_INDEX_PASSED()
+                .set_INDEX(i_index)
+                .set_TARGET(i_target)
+                .set_FUNCTION(SYMBOL_COUNT_WRITE),
+                "%s Invalid index passed to fwms::ecc::modal_symbol_count::write (%d)",
+                mss::c_str(i_target),
+                i_index);
 
-///
-/// @brief Write modal symbol count (MBSSYMEC*Q) 0 register
-/// @tparam T fapi2 Target Type - derived from i_target's type
-/// @param[in] i_target the fapi2 target of the mc
-/// @param[in] i_data the value to write to the register
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-template< fapi2::TargetType T >
-inline fapi2::ReturnCode write_index0( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
-{
-    return ( write_index<0>(i_target, i_data) );
-}
-
-///
-/// @brief Write modal symbol count (MBSSYMEC*Q) 1 register
-/// @tparam T fapi2 Target Type - derived from i_target's type
-/// @param[in] i_target the fapi2 target of the mc
-/// @param[in] i_data the value to write to the register
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-template< fapi2::TargetType T >
-inline fapi2::ReturnCode write_index1( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
-{
-    return ( write_index<1>(i_target, i_data) );
-}
-
-///
-/// @brief Write modal symbol count (MBSSYMEC*Q) 2 register
-/// @tparam T fapi2 Target Type - derived from i_target's type
-/// @param[in] i_target the fapi2 target of the mc
-/// @param[in] i_data the value to write to the register
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-template< fapi2::TargetType T >
-inline fapi2::ReturnCode write_index2( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
-{
-    return ( write_index<2>(i_target, i_data) );
-}
-
-///
-/// @brief Write modal symbol count (MBSSYMEC*Q) 3 register
-/// @tparam T fapi2 Target Type - derived from i_target's type
-/// @param[in] i_target the fapi2 target of the mc
-/// @param[in] i_data the value to write to the register
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-template< fapi2::TargetType T >
-inline fapi2::ReturnCode write_index3( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
-{
-    return ( write_index<3>(i_target, i_data) );
-}
-
-///
-/// @brief Write modal symbol count (MBSSYMEC*Q) 4 register
-/// @tparam T fapi2 Target Type - derived from i_target's type
-/// @param[in] i_target the fapi2 target of the mc
-/// @param[in] i_data the value to write to the register
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-template< fapi2::TargetType T >
-inline fapi2::ReturnCode write_index4( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
-{
-    return ( write_index<4>(i_target, i_data) );
-}
-
-///
-/// @brief Write modal symbol count (MBSSYMEC*Q) 5 register
-/// @tparam T fapi2 Target Type - derived from i_target's type
-/// @param[in] i_target the fapi2 target of the mc
-/// @param[in] i_data the value to write to the register
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-template< fapi2::TargetType T >
-inline fapi2::ReturnCode write_index5( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
-{
-    return ( write_index<5>(i_target, i_data) );
-}
-
-///
-/// @brief Write modal symbol count (MBSSYMEC*Q) 6 register
-/// @tparam T fapi2 Target Type - derived from i_target's type
-/// @param[in] i_target the fapi2 target of the mc
-/// @param[in] i_data the value to write to the register
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-template< fapi2::TargetType T >
-inline fapi2::ReturnCode write_index6( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
-{
-    return ( write_index<6>(i_target, i_data) );
-}
-
-///
-/// @brief Write modal symbol count (MBSSYMEC*Q) 7 register
-/// @tparam T fapi2 Target Type - derived from i_target's type
-/// @param[in] i_target the fapi2 target of the mc
-/// @param[in] i_data the value to write to the register
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-template< fapi2::TargetType T >
-inline fapi2::ReturnCode write_index7( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
-{
-    return ( write_index<7>(i_target, i_data) );
-}
-
-///
-/// @brief Write modal symbol count (MBSSYMEC*Q) 8 register
-/// @tparam T fapi2 Target Type - derived from i_target's type
-/// @param[in] i_target the fapi2 target of the mc
-/// @param[in] i_data the value to write to the register
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-template< fapi2::TargetType T >
-inline fapi2::ReturnCode write_index8( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
-{
-    return ( write_index<8>(i_target, i_data) );
-}
-
-///
-/// @brief Write Hardware Mark Store (HWMS) register
-/// @tparam T fapi2 Target Type - derived from i_target's type
-/// @param[in] i_target the fapi2 target of the mc
-/// @param[in] i_index the register index
-/// @param[in] i_data the value to write to the register
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-template< fapi2::TargetType T >
-inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target,
-                                const uint64_t i_index,
-                                const fapi2::buffer<uint64_t>& i_data )
-{
-    switch (i_index)
-    {
-        case(0):
-            return ( write_index0(i_target, i_data) );
-
-        case(1):
-            return ( write_index1(i_target, i_data) );
-
-        case(2):
-            return ( write_index2(i_target, i_data) );
-
-        case(3):
-            return ( write_index3(i_target, i_data) );
-
-        case(4):
-            return ( write_index4(i_target, i_data) );
-
-        case(5):
-            return ( write_index5(i_target, i_data) );
-
-        case(6):
-            return ( write_index6(i_target, i_data) );
-
-        case(7):
-            return ( write_index7(i_target, i_data) );
-
-        case(8):
-            return ( write_index8(i_target, i_data) );
-
-        default:
-            FAPI_ASSERT( false,
-                         fapi2::MSS_INVALID_INDEX_PASSED()
-                         .set_INDEX(i_index)
-                         .set_FUNCTION(SYMBOL_COUNT_WRITE),
-                         "%s Invalid index passed to fwms::ecc::modal_symbol_count::write (%d)",
-                         mss::c_str(i_target),
-                         i_index);
-    }
-
-    return fapi2::FAPI2_RC_SUCCESS;
+    FAPI_TRY( mss::putScom(i_target, (TT::MODAL_SYM_COUNT0_REG + i_index), i_data) );
+    FAPI_INF("%s write_index %lu: 0x%016lx", mss::c_str(i_target), i_index, i_data);
 fapi_try_exit:
     return fapi2::current_err;
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -285,7 +285,6 @@ class eccTraits<mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
             MODAL_SYMBOL_COUNTER_07 = EXPLR_MCBIST_MBSSYMEC0Q_MODAL_SYMBOL_COUNTER_07,
             MODAL_SYMBOL_COUNTER_07_LEN = EXPLR_MCBIST_MBSSYMEC0Q_MODAL_SYMBOL_COUNTER_07_LEN,
 
-            // FROM NIMBUS, UNSURE IF STILL ACCURATE OR NEEDED
             // and a couple constants
             NUM_MBSSYM_REGS = 10,
             MODAL_SYMBOL_COUNTERS_PER_REG = 8,

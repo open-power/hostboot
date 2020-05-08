@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -4659,6 +4659,7 @@ fapi2::ReturnCode check_rp_and_dram( const fapi2::Target<fapi2::TARGET_TYPE_MCA>
         FAPI_ASSERT(i_dram < MAX_NUM_DRAM,
                     fapi2::MSS_INVALID_INDEX_PASSED()
                     .set_INDEX(i_dram)
+                    .set_TARGET(i_target)
                     .set_FUNCTION(i_function),
                     "%s Invalid DRAM index passed to check_for_dram_disabled (%d)",
                     mss::c_str(i_target),
